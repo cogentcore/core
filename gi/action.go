@@ -7,12 +7,11 @@ package gi
 import (
 	"log"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/ki/v2"
 )
 
 // Action is a button widget that can display a text label and / or an icon
@@ -37,11 +36,9 @@ type Action struct {
 	Type ActionTypes `desc:"the type of action"`
 }
 
-var TypeAction = kit.Types.AddType(&Action{}, ActionProps)
-
 // ActionTypes is an enum representing
 // the different possible types of actions
-type ActionTypes int
+type ActionTypes int //enums:enum
 
 const (
 	// ActionStandalone is a default, standalone
@@ -60,16 +57,7 @@ const (
 	// ActionToolBar is an action contained
 	// within a toolbar
 	ActionToolBar
-
-	ActionTypesN
 )
-
-var TypeActionTypes = kit.Enums.AddEnumAltLower(ActionTypesN, kit.NotBitFlag, gist.StylePropProps, "Action")
-
-// AddNewAction adds a new action to given parent node, with given name.
-func AddNewAction(parent ki.Ki, name string) *Action {
-	return parent.AddNewChild(TypeAction, name).(*Action)
-}
 
 func (ac *Action) OnInit() {
 	ac.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -98,11 +86,11 @@ func (ac *Action) OnInit() {
 		case ActionMenuBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
-			ac.Indicator = icons.None
+			ac.Indicator = gicons.None
 		case ActionToolBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
-			ac.Indicator = icons.None
+			ac.Indicator = gicons.None
 		}
 		if w.IsHovered() {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
@@ -187,10 +175,6 @@ func (ac *Action) Disconnect() {
 	ac.ActionSig.DisconnectAll()
 }
 
-var ActionProps = ki.Props{
-	ki.EnumTypeFlag: TypeButtonFlags,
-}
-
 // ButtonWidget interface
 
 // Trigger triggers the action signal -- for external activation of action --
@@ -234,7 +218,7 @@ func (ac *Action) Init2D() {
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
-func (ac *Action) ConfigPartsAddShortcut(config *kit.TypeAndNameList) int {
+func (ac *Action) ConfigPartsAddShortcut(config *ki.TypeAndNameList) int {
 	config.Add(TypeStretch, "sc-stretch")
 	scIdx := len(*config)
 	config.Add(TypeLabel, "shortcut")
@@ -255,7 +239,7 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 
 // ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := ac.Parts.ConfigChildren(config)
@@ -268,7 +252,7 @@ func (ac *Action) ConfigPartsButton() {
 
 // ConfigPartsMenuItem sets the label, icon, etc for action menu item
 func (ac *Action) ConfigPartsMenuItem() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
@@ -296,7 +280,7 @@ func (ac *Action) ConfigParts() {
 	}
 	switch {
 	case ismbar:
-		ac.Indicator = icons.None // menu-bar specifically
+		ac.Indicator = gicons.None // menu-bar specifically
 		ac.Type = ActionMenuBar
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
@@ -314,7 +298,7 @@ func (ac *Action) ConfigParts() {
 			ac.Class = "menu-action"
 		}
 		if ac.Indicator == "" && ac.HasMenu() {
-			ac.Indicator = icons.KeyboardArrowRight
+			ac.Indicator = gicons.KeyboardArrowRight
 		}
 		ac.ConfigPartsMenuItem()
 	default:

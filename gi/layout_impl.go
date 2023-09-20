@@ -7,9 +7,9 @@ package gi
 import (
 	"fmt"
 
-	"goki.dev/gi/v2/gist"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
 )
 

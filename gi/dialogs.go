@@ -13,13 +13,12 @@ import (
 	"github.com/iancoleman/strcase"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // DialogsSepWindow determines if dialog windows open in a separate OS-level
@@ -83,8 +82,6 @@ type Dialog struct {
 	// [view: -] the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
-
-var TypeDialog = kit.Types.AddType(&Dialog{}, DialogProps)
 
 func (dlg *Dialog) OnInit() {
 	dlg.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -410,13 +407,13 @@ const (
 	NoCancel  = false
 )
 
-// StdButtonConfig returns a kit.TypeAndNameList for calling on ConfigChildren
+// StdButtonConfig returns a ki.TypeAndNameList for calling on ConfigChildren
 // of a button box, to create standard Ok, Cancel buttons (if true),
 // optionally starting with a Stretch element that will cause the buttons to
 // be arranged on the right -- a space element is added between buttons if
 // more than one
-func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
+func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.TypeAndNameList {
+	config := ki.TypeAndNameList{}
 	if stretch {
 		config.Add(TypeStretch, "stretch")
 	}
@@ -632,7 +629,7 @@ func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, 
 	AddNewLabel(trow, "t-label", "Type:    ")
 
 	typs := AddNewComboBox(trow, "types")
-	typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
+	// typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)

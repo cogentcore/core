@@ -8,8 +8,8 @@ import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/goosi"
+	"goki.dev/ki/v2"
 )
 
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles

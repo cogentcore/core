@@ -9,13 +9,12 @@ import (
 	"image/color"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -55,11 +54,9 @@ type Label struct {
 	CurBackgroundColor color.RGBA `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
-var TypeLabel = kit.Types.AddType(&Label{}, LabelProps)
-
 // LabelTypes is an enum containing the different
 // possible types of labels
-type LabelTypes int
+type LabelTypes int //enums:enum
 
 const (
 	// LabelDisplayLarge is a large, short, and important
@@ -111,18 +108,7 @@ const (
 	// LabelLabelSmall is a small label used for label text (like a caption
 	// or the text inside a button) with a default font size of 11px.
 	LabelLabelSmall
-
-	LabelTypesN
 )
-
-var TypeLabelTypes = kit.Enums.AddEnumAltLower(LabelTypesN, kit.NotBitFlag, gist.StylePropProps, "Label")
-
-// AddNewLabel adds a new label to given parent node, with given name and text.
-func AddNewLabel(parent ki.Ki, name string, text string) *Label {
-	lb := parent.AddNewChild(TypeLabel, name).(*Label)
-	lb.Text = text
-	return lb
-}
 
 func (lb *Label) OnInit() {
 	lb.Type = LabelLabelLarge
@@ -235,10 +221,6 @@ func (lb *Label) CopyFieldsFrom(frm any) {
 func (lb *Label) Disconnect() {
 	lb.WidgetBase.Disconnect()
 	lb.LinkSig.DisconnectAll()
-}
-
-var LabelProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // SetText sets the text and updates the rendered version.

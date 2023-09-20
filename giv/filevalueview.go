@@ -8,8 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -21,8 +20,6 @@ type FileValueView struct {
 	ValueViewBase
 }
 
-var TypeFileValueView = kit.Types.AddType(&FileValueView{}, nil)
-
 func (vv *FileValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -33,7 +30,7 @@ func (vv *FileValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
@@ -60,7 +57,7 @@ func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	if vv.IsInactive() {
 		return
 	}
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
 	desc, _ := vv.Tag("desc")
 	FileViewDialog(vp, cur, ext, DlgOpts{Title: vv.Name(), Prompt: desc}, nil,

@@ -10,8 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -56,13 +55,6 @@ type NodeBase struct {
 	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
 }
 
-var TypeNodeBase = kit.Types.AddType(&NodeBase{}, NodeBaseProps)
-
-var NodeBaseProps = ki.Props{
-	"base-type":     true, // excludes type from user selections
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 func (nb *NodeBase) AsGiNode() *NodeBase {
 	return nb
 }
@@ -77,9 +69,7 @@ func (nb *NodeBase) CopyFieldsFrom(frm any) {
 // NodeFlags define gi node bitflags for tracking common high-frequency GUI
 // state, mostly having to do with event processing -- use properties map for
 // less frequently used information -- uses ki Flags field (64 bit capacity)
-type NodeFlags int
-
-var TypeNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, NodeFlagsN, kit.BitFlag, nil)
+type NodeFlags ki.Flags //enums:bitflag
 
 const (
 	// NoLayout means that this node does not participate in the layout
@@ -162,9 +152,6 @@ const (
 	// start of dragging -- use this for controls that are small and are
 	// primarily about dragging (e.g., the Splitter handle)
 	InstaDrag
-
-	// can extend node flags from here
-	NodeFlagsN
 )
 
 // HasNoLayout checks if the current node is flagged as not needing layout

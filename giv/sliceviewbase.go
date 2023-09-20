@@ -16,18 +16,17 @@ import (
 	"sync"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )
@@ -235,13 +234,6 @@ type SliceViewBase struct {
 	CurIdx int `copy:"-" view:"-" json:"-" xml:"-" desc:"temp idx state for e.g., dnd"`
 }
 
-var TypeSliceViewBase = kit.Types.AddType(&SliceViewBase{}, nil)
-
-// AddNewSliceViewBase adds a new sliceview to given parent node, with given name.
-func AddNewSliceViewBase(parent ki.Ki, name string) *SliceViewBase {
-	return parent.AddNewChild(TypeSliceViewBase, name).(*SliceViewBase)
-}
-
 func (sv *SliceViewBase) OnInit() {
 	sv.SelectMode = false
 	sv.ShowIndex = true
@@ -305,7 +297,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
 func (sv *SliceViewBase) SetSlice(sl any) {
-	if kit.IfaceIsNil(sl) {
+	if laser.IfaceIsNil(sl) {
 		sv.Slice = nil
 		return
 	}
@@ -322,14 +314,14 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	updt := sv.UpdateStart()
 	sv.StartIdx = 0
 	sv.Slice = sl
-	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice))
-	sv.isArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice))
+	sv.isArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 	// make sure elements aren't nil to prevent later panics
 	for i := 0; i < sv.SliceNPVal.Len(); i++ {
 		val := sv.SliceNPVal.Index(i)
 		k := val.Kind()
 		if (k == reflect.Chan || k == reflect.Func || k == reflect.Interface || k == reflect.Map || k == reflect.Pointer || k == reflect.Slice) && val.IsNil() {
-			val.Set(reflect.New(kit.NonPtrType(val.Type())))
+			val.Set(reflect.New(laser.NonPtrType(val.Type())))
 		}
 	}
 	if !sv.IsDisabled() {
@@ -386,13 +378,13 @@ func (sv *SliceViewBase) UpdateValues() {
 
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) Config() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeLayout, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()
-	gconfig := kit.TypeAndNameList{}
+	gconfig := ki.TypeAndNameList{}
 	gconfig.Add(gi.TypeFrame, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
@@ -500,7 +492,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 
 	sg.DeleteChildren(ki.DestroyKids)
 
-	if kit.IfaceIsNil(sv.Slice) {
+	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
@@ -511,7 +503,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg.Kids = make(ki.Slice, nWidgPerRow)
 
 	// at this point, we make one dummy row to get size of widgets
-	val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(0)) // deal with pointer lists
+	val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(0)) // deal with pointer lists
 	vv := ToValueView(val.Interface(), "")
 	if vv == nil { // shouldn't happen
 		return
@@ -539,7 +531,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
 			sg.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(icons.Add)
+			addact.SetIcon(gicons.Add)
 		}
 		if !sv.NoDelete {
 			cidx++
@@ -547,7 +539,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			delact := gi.Action{}
 			sg.SetChild(&delact, cidx, delnm)
 
-			delact.SetIcon(icons.Delete)
+			delact.SetIcon(gicons.Delete)
 		}
 	}
 	sv.ConfigScroll()
@@ -636,7 +628,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if kit.IfaceIsNil(sv.Slice) {
+	if laser.IfaceIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
@@ -705,7 +697,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if kit.IfaceIsNil(sv.Slice) {
+	if laser.IfaceIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -736,7 +728,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		ridx := i * nWidgPerRow
 		si := sv.StartIdx + i // slice idx
 		issel := sv.IdxIsSelected(si)
-		val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+		val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 		var vv ValueView
 		if sv.Values[i] == nil {
 			vv = ToValueView(val.Interface(), "")
@@ -819,7 +811,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact := gi.Action{}
 						sg.SetChild(&addact, cidx, addnm)
 
-						addact.SetIcon(icons.Add)
+						addact.SetIcon(gicons.Add)
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
 						addact.Style.Template = "giv.SliceViewBase.AddAction"
@@ -836,7 +828,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact := gi.Action{}
 						sg.SetChild(&delact, cidx, delnm)
 
-						delact.SetIcon(icons.Delete)
+						delact.SetIcon(gicons.Delete)
 						delact.Tooltip = "delete this element"
 						delact.Data = i
 						delact.Style.Template = "giv.SliceViewBase.DelAction"
@@ -889,7 +881,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 
 	sv.SliceNewAtSel(idx)
 
-	sltyp := kit.SliceElType(sv.Slice) // has pointer if it is there
+	sltyp := laser.SliceElType(sv.Slice) // has pointer if it is there
 	iski := ki.IsKi(sltyp)
 	slptr := sltyp.Kind() == reflect.Ptr
 
@@ -922,7 +914,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 			}
 		}
 	} else {
-		nval := reflect.New(kit.NonPtrType(sltyp)) // make the concrete el
+		nval := reflect.New(laser.NonPtrType(sltyp)) // make the concrete el
 		if !slptr {
 			nval = nval.Elem() // use concrete value
 		}
@@ -937,7 +929,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		idx = sz
 	}
 
-	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	sv.This().(SliceViewer).UpdtSliceSize()
 
@@ -1011,7 +1003,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 	sv.SliceDeleteAtSel(idx)
 
-	kit.SliceDeleteAt(sv.Slice, idx)
+	laser.SliceDeleteAt(sv.Slice, idx)
 
 	sv.This().(SliceViewer).UpdtSliceSize()
 
@@ -1034,7 +1026,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 // ConfigToolbar configures the toolbar actions
 func (sv *SliceViewBase) ConfigToolbar() {
-	if kit.IfaceIsNil(sv.Slice) {
+	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
 	if sv.ToolbarSlice == sv.Slice {
@@ -1051,14 +1043,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)
@@ -1177,7 +1169,7 @@ func (sv *SliceViewBase) SliceVal(idx int) any {
 		fmt.Printf("giv.SliceViewBase: slice index out of range: %v\n", idx)
 		return nil
 	}
-	val := kit.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
+	val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(idx)) // deal with pointer lists
 	vali := val.Interface()
 	return vali
 }
@@ -1324,10 +1316,10 @@ func (sv *SliceViewBase) SelectVal(val string) bool {
 // SliceIdxByValue searches for first index that contains given value in slice
 // -- returns false if not found
 func SliceIdxByValue(slc any, fldVal any) (int, bool) {
-	svnp := kit.NonPtrValue(reflect.ValueOf(slc))
+	svnp := laser.NonPtrValue(reflect.ValueOf(slc))
 	sz := svnp.Len()
 	for idx := 0; idx < sz; idx++ {
-		rval := kit.NonPtrValue(svnp.Index(idx))
+		rval := laser.NonPtrValue(svnp.Index(idx))
 		if rval.Interface() == fldVal {
 			return idx, true
 		}
@@ -1889,7 +1881,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 		idx++
 	}
 
-	sv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
+	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice)) // need to update after changes
 
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()

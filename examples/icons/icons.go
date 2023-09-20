@@ -10,7 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/units"
 )
 
 func main() {

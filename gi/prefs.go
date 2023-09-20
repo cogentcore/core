@@ -15,13 +15,12 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/matcolor"
 	"goki.dev/pi/v2/langs/golang"
@@ -99,8 +98,6 @@ type Preferences struct {
 	// [view: -] flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
-
-var TypePreferences = kit.Types.AddType(&Preferences{}, PreferencesProps)
 
 // Prefs are the overall preferences
 var Prefs = Preferences{}
@@ -436,12 +433,12 @@ var PreferencesProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateAll", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
-			"icon": icons.Refresh,
+			"icon": gicons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
-			"icon": icons.Save,
+			"icon": gicons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*Preferences)
 				act.SetEnabledStateUpdt(pf.Changed)
@@ -450,15 +447,15 @@ var PreferencesProps = ki.Props{
 		{"sep-color", ki.BlankProp{}},
 		{"LightMode", ki.Props{
 			"desc": "Set color mode to Light mode as defined in ColorSchemes -- automatically does Save and UpdateAll ",
-			"icon": icons.LightMode,
+			"icon": gicons.LightMode,
 		}},
 		{"DarkMode", ki.Props{
 			"desc": "Set color mode to Dark mode as defined in ColorSchemes -- automatically does Save and UpdateAll",
-			"icon": icons.DarkMode,
+			"icon": gicons.DarkMode,
 		}},
 		{"sep-scrn", ki.BlankProp{}},
 		{"SaveZoom", ki.Props{
-			"icon": icons.ZoomIn,
+			"icon": gicons.ZoomIn,
 			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
 			"Args": ki.PropSlice{
 				{"For Current Screen Only?", ki.Props{
@@ -469,29 +466,29 @@ var PreferencesProps = ki.Props{
 		}},
 		{"ScreenInfo", ki.Props{
 			"desc":        "shows parameters about all the active screens",
-			"icon":        icons.Info,
+			"icon":        gicons.Info,
 			"show-return": true,
 		}},
 		{"VersionInfo", ki.Props{
 			"desc":        "shows current GoGi version information",
-			"icon":        icons.Info,
+			"icon":        gicons.Info,
 			"show-return": true,
 		}},
 		{"sep-key", ki.BlankProp{}},
 		{"EditKeyMaps", ki.Props{
-			"icon": icons.Keyboard,
+			"icon": gicons.Keyboard,
 			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
 		}},
 		{"EditHiStyles", ki.Props{
-			"icon": icons.InkHighlighter,
+			"icon": gicons.InkHighlighter,
 			"desc": "opens the HiStylesView editor of highlighting styles.",
 		}},
 		{"EditDetailed", ki.Props{
-			"icon": icons.Description,
+			"icon": gicons.Description,
 			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
 		}},
 		{"EditDebug", ki.Props{
-			"icon": icons.BugReport,
+			"icon": gicons.BugReport,
 			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
 		}},
 	},
@@ -499,7 +496,7 @@ var PreferencesProps = ki.Props{
 
 // Densities is an enum representing the different
 // density options in user preferences
-type Densities int
+type Densities int //enums:enum
 
 const (
 	// DensityCompact represents a compact density
@@ -511,11 +508,7 @@ const (
 	// DensitySpread represents a spread-out density
 	// with a lot of whitespace
 	DensitySpread
-
-	DensitiesN
 )
-
-var TypeDensities = kit.Enums.AddEnumAltLower(DensitiesN, kit.NotBitFlag, gist.StylePropProps, "Density")
 
 // DensityMul returns a multiplier centered
 // around 1 representing the density set in the preferences.
@@ -538,6 +531,8 @@ func (pf *Preferences) DensityMul() float32 {
 
 // ColorPrefs specify colors for all major categories of GUI elements, and are
 // used in the default styles.
+//
+//gti:add
 type ColorPrefs struct {
 
 	// text highilighting style / theme
@@ -570,8 +565,6 @@ type ColorPrefs struct {
 	// color for links in text etc
 	Link color.RGBA `desc:"color for links in text etc"`
 }
-
-var TypeColorPrefs = kit.Types.AddType(&ColorPrefs{}, ColorPrefsProps)
 
 func (pf *ColorPrefs) Defaults() {
 	pf.HiStyle = "emacs"
@@ -676,7 +669,7 @@ var ColorPrefsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
-			"icon":  icons.FileOpen,
+			"icon":  gicons.FileOpen,
 			"desc":  "open set of colors from a json-formatted file",
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
@@ -687,7 +680,7 @@ var ColorPrefsProps = ki.Props{
 		{"SaveJSON", ki.Props{
 			"label": "Save As...",
 			"desc":  "Saves colors to JSON formatted file.",
-			"icon":  icons.SaveAs,
+			"icon":  gicons.SaveAs,
 			"Args": ki.PropSlice{
 				{"Color File Name", ki.Props{
 					"ext": ".json",
@@ -696,7 +689,7 @@ var ColorPrefsProps = ki.Props{
 		}},
 		{"SetToPrefs", ki.Props{
 			"desc": "Sets this color scheme as the current active color scheme in Prefs.",
-			"icon": icons.Palette,
+			"icon": gicons.Palette,
 		}},
 	},
 }
@@ -765,6 +758,8 @@ type User struct {
 
 // EditorPrefs contains editor preferences.  It can also be set
 // from ki.Props style properties.
+//
+//gti:add
 type EditorPrefs struct {
 
 	// size of a tab, in chars -- also determines indent level for space indent
@@ -818,39 +813,39 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 		}
 		switch key {
 		case "tab-size":
-			if iv, ok := kit.ToInt(val); ok {
+			if iv, ok := laser.ToInt(val); ok {
 				pf.TabSize = int(iv)
 			}
 		case "space-indent":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.SpaceIndent = iv
 			}
 		case "word-wrap":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.WordWrap = iv
 			}
 		case "line-nos":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.LineNos = iv
 			}
 		case "completion":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.Completion = iv
 			}
 		case "spell-correct":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.SpellCorrect = iv
 			}
 		case "auto-indent":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.AutoIndent = iv
 			}
 		case "emacs-undo":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.EmacsUndo = iv
 			}
 		case "depth-color":
-			if iv, ok := kit.ToBool(val); ok {
+			if iv, ok := laser.ToBool(val); ok {
 				pf.DepthColor = iv
 			}
 		}
@@ -863,10 +858,12 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 // FavPathItem represents one item in a favorite path list, for display of
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
+//
+//gti:add
 type FavPathItem struct {
 
 	// icon for item
-	Ic icons.Icon `desc:"icon for item"`
+	Ic gicons.Icon `desc:"icon for item"`
 
 	// name of the favorite item
 	Name string `width:"20" desc:"name of the favorite item"`
@@ -901,11 +898,11 @@ func (pf *FavPaths) FindPath(path string) (int, bool) {
 
 // DefaultPaths are default favorite paths
 var DefaultPaths = FavPaths{
-	{icons.Home, "home", "~"},
-	{icons.DesktopMac, "Desktop", "~/Desktop"},
-	{icons.LabProfile, "Documents", "~/Documents"},
-	{icons.Download, "Downloads", "~/Downloads"},
-	{icons.Computer, "root", "/"},
+	{gicons.Home, "home", "~"},
+	{gicons.DesktopMac, "Desktop", "~/Desktop"},
+	{gicons.LabProfile, "Documents", "~/Documents"},
+	{gicons.Download, "Downloads", "~/Downloads"},
+	{gicons.Computer, "root", "/"},
 }
 
 //////////////////////////////////////////////////////////////////
@@ -1066,8 +1063,6 @@ type PrefsDetailed struct {
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
-var TypePrefsDetailed = kit.Types.AddType(&PrefsDetailed{}, PrefsDetailedProps)
-
 // PrefsDet are the overall detailed preferences
 var PrefsDet = PrefsDetailed{}
 
@@ -1184,12 +1179,12 @@ var PrefsDetailedProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Apply", ki.Props{
 			"desc": "Apply parameters to affect actual behavior.",
-			"icon": icons.Refresh,
+			"icon": gicons.Refresh,
 		}},
 		{"sep-file", ki.BlankProp{}},
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
-			"icon": icons.Save,
+			"icon": gicons.Save,
 			"updtfunc": func(pfi any, act *Action) {
 				pf := pfi.(*PrefsDetailed)
 				act.SetEnabledStateUpdt(pf.Changed)
@@ -1251,8 +1246,6 @@ type PrefsDebug struct {
 	Changed bool `view:"-" changeflag:"+" json:"-" xml:"-" desc:"flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc."`
 }
 
-var TypePrefsDebug = kit.Types.AddType(&PrefsDebug{}, PrefsDebugProps)
-
 // PrefsDbg are the overall debugging preferences
 var PrefsDbg = PrefsDebug{}
 
@@ -1261,7 +1254,7 @@ var PrefsDebugProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Profile", ki.Props{
 			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
-			"icon": icons.LabProfile,
+			"icon": gicons.LabProfile,
 		}},
 	},
 }

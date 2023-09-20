@@ -8,8 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -25,13 +24,6 @@ type SliceView struct {
 
 	// [view: -] optional styling function
 	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
-}
-
-var TypeSliceView = kit.Types.AddType(&SliceView{}, SliceViewProps)
-
-// AddNewSliceView adds a new sliceview to given parent node, with given name.
-func AddNewSliceView(parent ki.Ki, name string) *SliceView {
-	return parent.AddNewChild(TypeSliceView, name).(*SliceView)
 }
 
 // check for interface impl

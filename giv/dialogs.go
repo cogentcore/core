@@ -10,13 +10,13 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/ki/v2"
 )
 
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
@@ -114,7 +114,7 @@ func TextViewDialog(avp *gi.Viewport2D, text []byte, opts DlgOpts) *TextView {
 	}
 	cpb := gi.AddNewButton(bbox, "copy-to-clip")
 	cpb.SetText("Copy To Clipboard")
-	cpb.SetIcon(icons.ContentCopy)
+	cpb.SetIcon(gicons.ContentCopy)
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
@@ -454,7 +454,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(avp *gi.Viewport2D, curIc icons.Icon, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func IconChooserDialog(avp *gi.Viewport2D, curIc gicons.Icon, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	if opts.CSS == nil {
 		opts.CSS = ki.Props{
 			"icon": ki.Props{
@@ -468,7 +468,7 @@ func IconChooserDialog(avp *gi.Viewport2D, curIc icons.Icon, opts DlgOpts, recv 
 }
 
 func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView) {
-	ic, ok := slice.([]icons.Icon)
+	ic, ok := slice.([]gicons.Icon)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))
 		widg.SetProp("max-width", -1)

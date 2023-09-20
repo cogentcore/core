@@ -12,12 +12,12 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/goosi"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 

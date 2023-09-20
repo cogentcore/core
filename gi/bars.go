@@ -7,13 +7,12 @@ package gi
 import (
 	"image"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -29,13 +28,6 @@ type MenuBar struct {
 
 	// map of main menu items for callback from OS main menu (MacOS specific)
 	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
-}
-
-var TypeMenuBar = kit.Types.AddType(&MenuBar{}, MenuBarProps)
-
-// AddNewMenuBar adds a new menubar to given parent node, with given name.
-func AddNewMenuBar(parent ki.Ki, name string) *MenuBar {
-	return parent.AddNewChild(TypeMenuBar, name).(*MenuBar)
 }
 
 func (mb *MenuBar) OnInit() {
@@ -186,7 +178,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 		return
 	}
 	sz := len(menus)
-	tnl := make(kit.TypeAndNameList, sz+1)
+	tnl := make(ki.TypeAndNameList, sz+1)
 	typ := TypeAction // note: could pass in action type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ
@@ -320,13 +312,6 @@ type ToolBar struct {
 	Layout
 }
 
-var TypeToolBar = kit.Types.AddType(&ToolBar{}, ToolBarProps)
-
-// AddNewToolBar adds a new toolbar to given parent node, with given name.
-func AddNewToolBar(parent ki.Ki, name string) *ToolBar {
-	return parent.AddNewChild(TypeToolBar, name).(*ToolBar)
-}
-
 func (tb *ToolBar) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
@@ -358,7 +343,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	}
 	ac := AddNewAction(tb, nm)
 	ac.Text = opts.Label
-	ac.Icon = icons.Icon(opts.Icon)
+	ac.Icon = gicons.Icon(opts.Icon)
 	ac.Tooltip = opts.Tooltip
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {

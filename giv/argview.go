@@ -7,9 +7,8 @@ package giv
 import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -30,8 +29,6 @@ type ArgView struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
-
-var TypeArgView = kit.Types.AddType(&ArgView{}, ArgViewProps)
 
 func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
@@ -97,7 +94,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 
 // Config configures the view
 func (av *ArgView) Config() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "title")
 	config.Add(gi.TypeFrame, "args-grid")
 	mods, updt := av.ConfigChildren(config)
@@ -131,13 +128,13 @@ func (av *ArgView) SetTitle(title string) {
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
 func (av *ArgView) ConfigArgsGrid() {
-	if kit.IfaceIsNil(av.Args) {
+	if laser.IfaceIsNil(av.Args) {
 		return
 	}
 	sg := av.ArgsGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	for i := range av.Args {
 		ad := &av.Args[i]
 		if ad.HasValSet() {

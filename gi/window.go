@@ -21,17 +21,17 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/colormap"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/oswin/window"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/window"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -248,21 +248,13 @@ type Window struct {
 	Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
 }
 
-var TypeWindow = kit.Types.AddType(&Window{}, WindowProps)
-
-var WindowProps = ki.Props{
-	ki.EnumTypeFlag: TypeWinFlags,
-}
-
 // WinFlags extend NodeBase NodeFlags to hold Window state
-type WinFlags int
-
-var TypeWinFlags = kit.Enums.AddEnumExt(TypeNodeFlags, WinFlagsN, kit.BitFlag, nil)
+type WinFlags int //enums:bitflag
 
 const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
 	// sized it -- affects whether other default geom should be applied.
-	WinFlagHasGeomPrefs WinFlags = WinFlags(NodeFlagsN) + iota
+	WinFlagHasGeomPrefs WinFlags iota
 
 	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
 	WinFlagUpdating
@@ -298,8 +290,6 @@ const (
 
 	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
 	WinFlagSelectionMode
-
-	WinFlagsN
 )
 
 // HasGeomPrefs returns true if geometry prefs were set already

@@ -9,9 +9,8 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 )
 
 // StructViewInline represents a struct as a single line widget, for smaller
@@ -47,13 +46,6 @@ type StructViewInline struct {
 
 	// if true, some fields have viewif conditional view tags -- update after..
 	HasViewIfs bool `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
-}
-
-var TypeStructViewInline = kit.Types.AddType(&StructViewInline{}, StructViewInlineProps)
-
-// AddNewStructViewInline adds a new inline structview to given parent node, with given name.
-func AddNewStructViewInline(parent ki.Ki, name string) *StructViewInline {
-	return parent.AddNewChild(TypeStructViewInline, name).(*StructViewInline)
 }
 
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
@@ -99,14 +91,14 @@ var StructViewInlineProps = ki.Props{
 
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts() {
-	if kit.IfaceIsNil(sv.Struct) {
+	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
 	sv.Parts.Lay = gi.LayoutHoriz
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
-	kit.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
 		if vwtag == "-" {

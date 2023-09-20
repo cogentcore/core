@@ -8,10 +8,9 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 )
 
 // Frame is a Layout that renders a background according to the
@@ -21,15 +20,6 @@ type Frame struct {
 
 	// options for striped backgrounds -- rendered as darker bands relative to background color
 	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
-}
-
-var TypeFrame = kit.Types.AddType(&Frame{}, FrameProps)
-
-// AddNewFrame adds a new frame to given parent node, with given name and layout
-func AddNewFrame(parent ki.Ki, name string, layout Layouts) *Frame {
-	fr := parent.AddNewChild(TypeFrame, name).(*Frame)
-	fr.Lay = layout
-	return fr
 }
 
 func (fr *Frame) OnInit() {
@@ -51,24 +41,14 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 	fr.Stripes = cp.Stripes
 }
 
-var FrameProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // Stripes defines stripes options for elements that can render striped backgrounds
-type Stripes int32
+type Stripes int32 //enums:enum
 
 const (
 	NoStripes Stripes = iota
 	RowStripes
 	ColStripes
-	StripesN
 )
-
-var TypeStripes = kit.Enums.AddEnumAltLower(StripesN, kit.NotBitFlag, gist.StylePropProps, "Stripes")
-
-func (ev Stripes) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Stripes) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // FrameStdRender does the standard rendering of the frame itself
 func (fr *Frame) FrameStdRender() {

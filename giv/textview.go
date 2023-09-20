@@ -16,23 +16,23 @@ import (
 	"unicode"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/gi/v2/oswin"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi/cursor"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/indent"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
@@ -166,13 +166,6 @@ type TextView struct {
 	lastFilename   gi.FileName
 }
 
-var TypeTextView = kit.Types.AddType(&TextView{}, TextViewProps)
-
-// AddNewTextView adds a new textview to given parent node, with given name.
-func AddNewTextView(parent ki.Ki, name string) *TextView {
-	return parent.AddNewChild(TypeTextView, name).(*TextView)
-}
-
 // AddNewTextViewLayout adds a new layout with textview
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Textview should always have a parent Layout to manage
@@ -220,12 +213,8 @@ func (tv *TextView) Disconnect() {
 	tv.LinkSig.DisconnectAll()
 }
 
-var TextViewProps = ki.Props{
-	ki.EnumTypeFlag: TypeTextViewFlags,
-}
-
 // TextViewSignals are signals that text view can send
-type TextViewSignals int64
+type TextViewSignals int64 //enums:enum
 
 const (
 	// TextViewDone signal indicates return was pressed and an edit was completed -- data is the text
@@ -244,13 +233,10 @@ const (
 	// TextViewQReplace is emitted for every update of query-replace process -- see
 	// QReplace.* members for current state
 	TextViewQReplace
-
-	// TextViewSignalsN is the number of TextViewSignals
-	TextViewSignalsN
 )
 
 // TextViewStates are mutually-exclusive textfield states -- determines appearance
-type TextViewStates int32
+type TextViewStates int32 //enums:enum
 
 const (
 	// TextViewActive is the normal state -- there but not being interacted with
@@ -267,18 +253,13 @@ const (
 
 	// TextViewHighlight means the text region is highlighted
 	TextViewHighlight
-
-	// TextViewStatesN is the number of textview states
-	TextViewStatesN
 )
 
 // Style selector names for the different states
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // TextViewFlags extend NodeBase NodeFlags to hold TextView state
-type TextViewFlags int
-
-var TypeTextViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TextViewFlagsN, kit.BitFlag, nil)
+type TextViewFlags ki.Flags //enums:bitflag
 
 const (
 	// TextViewNeedsRefresh indicates when refresh is required
@@ -301,8 +282,6 @@ const (
 
 	// TextViewLastWasUndo indicates that last key was an undo
 	TextViewLastWasUndo
-
-	TextViewFlagsN
 )
 
 // IsFocusActive returns true if we have active focus for keyboard input
@@ -1487,7 +1466,7 @@ func (tv *TextView) JumpToLinePrompt() {
 			dlg := send.(*gi.Dialog)
 			if sig == int64(gi.DialogAccepted) {
 				val := gi.StringPromptDialogValue(dlg)
-				ln, ok := kit.ToInt(val)
+				ln, ok := laser.ToInt(val)
 				if ok {
 					tv.JumpToLine(int(ln))
 				}

@@ -6,10 +6,9 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
 )
 
@@ -39,8 +38,6 @@ type VCSLogView struct {
 	SetA bool `desc:"double-click will set the A revision -- else B"`
 }
 
-var TypeVCSLogView = kit.Types.AddType(&VCSLogView{}, VCSLogViewProps)
-
 func (lv *VCSLogView) OnInit() {
 	lv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.SetStretchMax()
@@ -65,7 +62,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	lv.File = file
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(TypeTableView, "log")
 	mods, updt := lv.ConfigChildren(config)
@@ -176,7 +173,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 			}
 		})
 		tb.AddSeparator("dsep")
-		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
+		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: gicons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data any) {
 				lvv := recv.Embed(TypeVCSLogView).(*VCSLogView)
 				DiffViewDialogFromRevs(lvv.ViewportSafe(), lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)

@@ -13,15 +13,14 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -61,13 +60,6 @@ type TableView struct {
 
 	// [view: -] number of visible fields
 	NVisFields int `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
-}
-
-var TypeTableView = kit.Types.AddType(&TableView{}, TableViewProps)
-
-// AddNewTableView adds a new tableview to given parent node, with given name.
-func AddNewTableView(parent ki.Ki, name string) *TableView {
-	return parent.AddNewChild(TypeTableView, name).(*TableView)
 }
 
 // check for interface impl
@@ -150,7 +142,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl any) {
-	if kit.IfaceIsNil(sl) {
+	if laser.IfaceIsNil(sl) {
 		tv.Slice = nil
 		return
 	}
@@ -174,7 +166,7 @@ func (tv *TableView) SetSlice(sl any) {
 		return
 	}
 	tv.Slice = sl
-	tv.SliceNPVal = kit.NonPtrValue(reflect.ValueOf(tv.Slice))
+	tv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(tv.Slice))
 	struTyp := tv.StructType()
 	if struTyp.Kind() != reflect.Struct {
 		log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
@@ -196,7 +188,7 @@ var TableViewProps = ki.Props{
 // StructType sets the StruType and returns the type of the struct within the
 // slice -- this is a non-ptr type even if slice has pointers to structs
 func (tv *TableView) StructType() reflect.Type {
-	tv.StruType = kit.NonPtrType(kit.SliceElType(tv.Slice))
+	tv.StruType = laser.NonPtrType(laser.SliceElType(tv.Slice))
 	return tv.StruType
 }
 
@@ -205,7 +197,7 @@ func (tv *TableView) StructType() reflect.Type {
 func (tv *TableView) CacheVisFields() {
 	styp := tv.StructType()
 	tv.VisFields = make([]reflect.StructField, 0, 20)
-	kit.FlatFieldsTypeFunc(styp, func(typ reflect.Type, fld reflect.StructField) bool {
+	laser.FlatFieldsTypeFunc(styp, func(typ reflect.Type, fld reflect.StructField) bool {
 		if !fld.IsExported() {
 			return true
 		}
@@ -255,7 +247,7 @@ func (tv *TableView) IsConfiged() bool {
 
 // Config configures the view
 func (tv *TableView) Config() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "frame")
 	mods, updt := tv.ConfigChildren(config)
@@ -336,7 +328,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		sgf.DeleteChildren(ki.DestroyKids)
 	}
 
-	if kit.IfaceIsNil(tv.Slice) {
+	if laser.IfaceIsNil(tv.Slice) {
 		return
 	}
 
@@ -349,7 +341,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
-	sgcfg := kit.TypeAndNameList{}
+	sgcfg := ki.TypeAndNameList{}
 	sgcfg.Add(gi.TypeToolBar, "header")
 	sgcfg.Add(gi.TypeLayout, "grid-lay")
 	sg.ConfigChildren(sgcfg)
@@ -357,7 +349,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgh := tv.SliceHeader()
 
 	gl := tv.GridLayout()
-	gconfig := kit.TypeAndNameList{}
+	gconfig := ki.TypeAndNameList{}
 	gconfig.Add(gi.TypeFrame, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
@@ -365,7 +357,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf = tv.This().(SliceViewer).SliceGrid()
 
 	// Configure Header
-	hcfg := kit.TypeAndNameList{}
+	hcfg := ki.TypeAndNameList{}
 	if tv.ShowIndex {
 		hcfg.Add(gi.TypeLabel, "head-idx")
 	}
@@ -402,9 +394,9 @@ func (tv *TableView) ConfigSliceGrid() {
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
-				hdr.SetIcon(icons.KeyboardArrowDown)
+				hdr.SetIcon(gicons.KeyboardArrowDown)
 			} else {
-				hdr.SetIcon(icons.KeyboardArrowUp)
+				hdr.SetIcon(gicons.KeyboardArrowUp)
 			}
 		}
 		hdr.Data = fli
@@ -420,7 +412,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			tvv.SortSliceAction(fldIdx)
 		})
 
-		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
+		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
 		stru := val.Interface()
 		fval := val.Elem().FieldByIndex(field.Index)
 		vv := ToValueView(fval.Interface(), "")
@@ -445,7 +437,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			addnm := "add-" + itxt
 			addact := gi.Action{}
 			sgf.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(icons.Add)
+			addact.SetIcon(gicons.Add)
 			cidx++
 		}
 		if !tv.NoDelete {
@@ -455,7 +447,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			delnm := "del-" + itxt
 			delact := gi.Action{}
 			sgf.SetChild(&delact, cidx, delnm)
-			delact.SetIcon(icons.Delete)
+			delact.SetIcon(gicons.Delete)
 			cidx++
 		}
 	}
@@ -477,7 +469,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if kit.IfaceIsNil(tv.Slice) {
+	if laser.IfaceIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
@@ -574,7 +566,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if kit.IfaceIsNil(tv.Slice) {
+	if laser.IfaceIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -608,7 +600,7 @@ func (tv *TableView) UpdateSliceGrid() {
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
 		issel := tv.IdxIsSelected(si)
-		val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
 		stru := val.Interface()
 
 		itxt := strconv.Itoa(i)
@@ -719,7 +711,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Action{}
 					sg.SetChild(&addact, cidx, addnm)
-					addact.SetIcon(icons.Add)
+					addact.SetIcon(gicons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
 					addact.Style.Template = "giv.TableView.AddAction"
@@ -736,7 +728,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Action{}
 					sg.SetChild(&delact, cidx, delnm)
-					delact.SetIcon(icons.Delete)
+					delact.SetIcon(gicons.Delete)
 					delact.Tooltip = "delete this element"
 					delact.Data = i
 					delact.Style.Template = "giv.TableView.DelAction"
@@ -776,7 +768,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	defer tv.UpdateEnd(updt)
 
 	tv.SliceNewAtSel(idx)
-	kit.SliceNewAt(tv.Slice, idx)
+	laser.SliceNewAt(tv.Slice, idx)
 	if idx < 0 {
 		idx = tv.SliceSize
 	}
@@ -809,7 +801,7 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 
 	tv.SliceDeleteAtSel(idx)
 
-	kit.SliceDeleteAt(tv.Slice, idx)
+	laser.SliceDeleteAt(tv.Slice, idx)
 
 	tv.This().(SliceViewer).UpdtSliceSize()
 
@@ -833,7 +825,7 @@ func (tv *TableView) SortSlice() {
 		return
 	}
 	rawIdx := tv.VisFields[tv.SortIdx].Index
-	kit.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
+	laser.StructSliceSort(tv.Slice, rawIdx, !tv.SortDesc)
 }
 
 // SortSliceAction sorts the slice for given field index -- toggles ascending
@@ -862,9 +854,9 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 				tv.SortDesc = false
 			}
 			if ascending {
-				hdr.SetIcon(icons.KeyboardArrowUp)
+				hdr.SetIcon(gicons.KeyboardArrowUp)
 			} else {
-				hdr.SetIcon(icons.KeyboardArrowDown)
+				hdr.SetIcon(gicons.KeyboardArrowDown)
 			}
 		} else {
 			hdr.SetIcon("none")
@@ -879,7 +871,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 // ConfigToolbar configures the toolbar actions
 func (tv *TableView) ConfigToolbar() {
-	if kit.IfaceIsNil(tv.Slice) {
+	if laser.IfaceIsNil(tv.Slice) {
 		return
 	}
 	if tv.ToolbarSlice == tv.Slice {
@@ -896,13 +888,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tvv := recv.Embed(TypeTableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					tvv := recv.Embed(TypeTableView).(*TableView)
 					tvv.SliceNewAt(-1)
@@ -1068,9 +1060,9 @@ func (tv *TableView) SelectFieldVal(fld, val string) bool {
 // StructSliceIdxByValue searches for first index that contains given value in field of
 // given name.
 func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, error) {
-	svnp := kit.NonPtrValue(reflect.ValueOf(struSlice))
+	svnp := laser.NonPtrValue(reflect.ValueOf(struSlice))
 	sz := svnp.Len()
-	struTyp := kit.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
+	struTyp := laser.NonPtrType(reflect.TypeOf(struSlice).Elem().Elem())
 	fld, ok := struTyp.FieldByName(fldName)
 	if !ok {
 		err := fmt.Errorf("gi.StructSliceRowByValue: field name: %v not found\n", fldName)
@@ -1079,7 +1071,7 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 	}
 	fldIdx := fld.Index
 	for idx := 0; idx < sz; idx++ {
-		rval := kit.OnePtrUnderlyingValue(svnp.Index(idx))
+		rval := laser.OnePtrUnderlyingValue(svnp.Index(idx))
 		fval := rval.Elem().FieldByIndex(fldIdx)
 		if !fval.IsValid() {
 			continue
@@ -1092,9 +1084,9 @@ func StructSliceIdxByValue(struSlice any, fldName string, fldVal any) (int, erro
 }
 
 func (tv *TableView) EditIdx(idx int) {
-	val := kit.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
+	val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(idx))
 	stru := val.Interface()
-	tynm := kit.NonPtrType(val.Type()).Name()
+	tynm := laser.NonPtrType(val.Type()).Name()
 	lbl := gi.ToLabel(stru)
 	if lbl != "" {
 		tynm += ": " + lbl

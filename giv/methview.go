@@ -13,12 +13,11 @@ import (
 	"github.com/fatih/camelcase"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
+	"goki.dev/gicons"
+	"goki.dev/goosi"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bitflag"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // these are special menus that we ignore
@@ -275,7 +274,7 @@ func MethViewCompileMeths(val any, vp *gi.Viewport2D) ki.Props {
 		}
 		MethViewCompileActions(cmp, val, vtyp, vp, "", tp)
 	}
-	kit.SetTypeProp(tpp, MethodViewCallMethsProp, cmp)
+	// kit.SetTypeProp(tpp, MethodViewCallMethsProp, cmp)
 	return cmp
 }
 
@@ -337,14 +336,14 @@ func MethViewErr(vtyp reflect.Type, msg string) {
 // MethViewTypeProps gets props, typ of val, returns false if not found or
 // other err
 func MethViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
-	if kit.IfaceIsNil(val) {
+	if laser.IfaceIsNil(val) {
 		return nil, nil, false
 	}
 	vtyp := reflect.TypeOf(val)
-	tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
-	if tpp == nil {
-		return nil, vtyp, false
-	}
+	// tpp := kit.Types.Properties(kit.NonPtrType(vtyp), false)
+	// if tpp == nil {
+	// 	return nil, vtyp, false
+	// }
 	return *tpp, vtyp, true
 }
 
@@ -367,8 +366,8 @@ func MethViewNoUpdateAfterProp(val any) bool {
 	if !ok {
 		return false
 	}
-	_, nua := kit.TypeProp(tpp, "MethViewNoUpdateAfter")
-	return nua
+	// _, nua := kit.TypeProp(tpp, "MethViewNoUpdateAfter")
+	// return nua
 }
 
 // This is the name of the property that holds cached map of compiled callable methods
@@ -442,7 +441,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 	}
 	valval := reflect.ValueOf(val)
 	methVal := valval.MethodByName(methNm)
-	if !nometh && (kit.ValueIsZero(methVal) || methVal.IsNil()) {
+	if !nometh && (laser.ValueIsZero(methVal) || methVal.IsNil()) {
 		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- method value not valid", methNm))
 		return false
 	}
@@ -465,7 +464,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 			if kf, ok := pv.(gi.KeyFuns); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
 			} else {
-				ac.Shortcut = key.Chord(kit.ToString(pv)).OSShortcut()
+				ac.Shortcut = key.Chord(laser.ToString(pv)).OSShortcut()
 			}
 		case "shortcut-func":
 			if sf, ok := pv.(ShortcutFunc); ok {
@@ -482,7 +481,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 				bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
 			}
 		case "label":
-			ac.Text = kit.ToString(pv)
+			ac.Text = laser.ToString(pv)
 		case "label-func":
 			if sf, ok := pv.(LabelFunc); ok {
 				str := sf(md.Val, ac)
@@ -493,9 +492,9 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport2D, ac *gi.Action, pr
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
 			}
 		case "icon":
-			ac.Icon = icons.Icon(kit.ToString(pv))
+			ac.Icon = gicons.Icon(laser.ToString(pv))
 		case "desc":
-			md.Desc = kit.ToString(pv)
+			md.Desc = laser.ToString(pv)
 			ac.Tooltip = md.Desc
 		case "confirm":
 			bitflag.Set32((*int32)(&md.Flags), int(MethViewConfirm))
@@ -591,7 +590,7 @@ func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Me
 //    Method Callbacks -- called when Action fires
 
 // MethViewFlags define bitflags for method view action options
-type MethViewFlags int32
+type MethViewFlags int32 //enums:bitflag
 
 const (
 	// MethViewConfirm confirms action before proceeding
@@ -613,11 +612,7 @@ const (
 
 	// MethViewKeyFun means this action's only function is to emit the key fun
 	MethViewKeyFun
-
-	MethViewFlagsN
 )
-
-var TypeMethViewFlags = kit.Enums.AddEnumAltLower(MethViewFlagsN, kit.BitFlag, nil, "MethView")
 
 // SubMenuFunc is a function that returns a string slice of submenu items
 // used in MethView submenu-func option
@@ -686,7 +681,7 @@ type MethViewData struct {
 }
 
 func (md *MethViewData) MethName() string {
-	typnm := kit.ShortTypeName(md.ValVal.Type())
+	typnm := laser.ShortTypeName(md.ValVal.Type())
 	methnm := typnm + ":" + md.Method
 	return methnm
 }
@@ -785,11 +780,11 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 
 // MethViewShowValue displays a value in a dialog window (e.g., for MethViewShowReturn)
 func MethViewShowValue(vp *gi.Viewport2D, val reflect.Value, title, prompt string) {
-	if kit.ValueIsZero(val) {
+	if laser.ValueIsZero(val) {
 		return
 	}
-	npv := kit.NonPtrValue(val)
-	if kit.ValueIsZero(npv) {
+	npv := laser.NonPtrValue(val)
+	if laser.ValueIsZero(npv) {
 		return
 	}
 	tk := npv.Type().Kind()
@@ -824,7 +819,7 @@ type ArgData struct {
 }
 
 // ArgDataFlags define bitflags for method view action options
-type ArgDataFlags int32
+type ArgDataFlags int32 //enums:bitflag
 
 const (
 	// ArgDataHasDef means that there was a Default value set
@@ -834,11 +829,7 @@ const (
 	// the config props and set in the Default, so it does not need to be
 	// prompted for
 	ArgDataValSet
-
-	ArgDataFlagsN
 )
-
-var TypeArgDataFlags = kit.Enums.AddEnumAltLower(ArgDataFlagsN, kit.BitFlag, nil, "ArgData")
 
 func (ad *ArgData) HasDef() bool {
 	return bitflag.Has32(int32(ad.Flags), int(ArgDataHasDef))
@@ -896,7 +887,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 			for pk, pv := range apv {
 				switch pk {
 				case "desc":
-					ad.Desc = kit.ToString(pv)
+					ad.Desc = laser.ToString(pv)
 					ad.View.SetTag("desc", ad.Desc)
 				case "default":
 					ad.Default = pv
@@ -913,7 +904,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 						ad.SetHasDef()
 					}
 				default:
-					ad.View.SetTag(pk, kit.ToString(pv))
+					ad.View.SetTag(pk, laser.ToString(pv))
 				}
 			}
 		}
@@ -963,7 +954,7 @@ func MethViewArgDefaultVal(md *MethViewData, ai int) (any, bool) {
 // MethViewFieldValue returns a reflect.Value for the given field name,
 // checking safely (false if not found)
 func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool) {
-	fv, ok := kit.FieldValueByPath(kit.NonPtrValue(vval).Interface(), field)
+	fv, ok := laser.FieldValueByPath(laser.NonPtrValue(vval).Interface(), field)
 	if !ok {
 		log.Printf("giv.MethViewFieldValue: Could not find field %v in type: %v\n", field, vval.Type().String())
 		return nil, false
@@ -997,7 +988,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	if smd == nil {
 		return
 	}
-	sltp := kit.NonPtrType(reflect.TypeOf(smd))
+	sltp := laser.NonPtrType(reflect.TypeOf(smd))
 	if sltp.Kind() != reflect.Slice && sltp.Kind() != reflect.Array {
 		log.Printf("giv.MethViewSubMenuFunc: submenu data must be a slice or array, not: %v\n", sltp.String())
 		return
@@ -1006,11 +997,11 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	def, gotDef := MethViewArgDefaultVal(md, 0) // assume first
 	defstr := ""
 	if gotDef {
-		defstr = kit.ToString(def)
+		defstr = laser.ToString(def)
 	}
 
 	mv := reflect.ValueOf(smd)
-	mvnp := kit.NonPtrValue(mv)
+	mvnp := laser.NonPtrValue(mv)
 	md.MakeMenuSliceValue(mvnp, m, false, defstr, gotDef)
 	md.Vp.Win.MainMenuUpdated()
 }
@@ -1029,7 +1020,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 				continue
 			}
 			s1 := val.Index(0)
-			nm := kit.ToString(s1)
+			nm := laser.ToString(s1)
 			nac := &gi.Action{}
 			nac.InitName(nac, nm)
 			nac.Text = nm
@@ -1042,13 +1033,13 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 	st := 0
 	subMenuName := ""
 	if isSub { // skip the first one -- used as a label for the higher-level menu
-		subMenuName = kit.ToString(mvnp.Index(0)) + ": "
+		subMenuName = laser.ToString(mvnp.Index(0)) + ": "
 		st = 1
 	}
 	for i := st; i < sz; i++ {
 		val := mvnp.Index(i)
 		vi := val.Interface()
-		nm := kit.ToString(val)
+		nm := laser.ToString(val)
 		if nm == gi.MenuTextSeparator {
 			sp := &gi.Separator{}
 			sp.InitName(sp, "sep")
@@ -1068,7 +1059,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 			nd.SubMenuVal = vi
 		}
 		if gotDef {
-			if kit.ToString(vi) == defstr {
+			if laser.ToString(vi) == defstr {
 				nac.SetSelected()
 			}
 		}

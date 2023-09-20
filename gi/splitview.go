@@ -9,15 +9,14 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -48,13 +47,6 @@ type SplitView struct {
 
 	// dimension along which to split the space
 	Dim mat32.Dims `desc:"dimension along which to split the space"`
-}
-
-var TypeSplitView = kit.Types.AddType(&SplitView{}, SplitViewProps)
-
-// AddNewSplitView adds a new splitview to given parent node, with given name.
-func AddNewSplitView(parent ki.Ki, name string) *SplitView {
-	return parent.AddNewChild(TypeSplitView, name).(*SplitView)
 }
 
 func (sv *SplitView) OnInit() {
@@ -274,9 +266,9 @@ func (sv *SplitView) ConfigSplitters() {
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	spicon := icons.DragHandle
+	spicon := gicons.DragHandle
 	if sv.Dim == mat32.X {
-		spicon = icons.DragIndicator
+		spicon = gicons.DragIndicator
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)
@@ -462,12 +454,6 @@ type Splitter struct {
 
 	// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
 	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
-}
-
-var TypeSplitter = kit.Types.AddType(&Splitter{}, SplitterProps)
-
-var SplitterProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sr *Splitter) OnInit() {

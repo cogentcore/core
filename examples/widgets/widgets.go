@@ -11,10 +11,10 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
@@ -145,7 +145,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
 
-	button1.SetIcon(icons.OpenInNew)
+	button1.SetIcon(gicons.OpenInNew)
 	button1.OnClicked(func() {
 		fmt.Printf("Button %s clicked\n", button1.Name())
 		gi.StringPromptDialog(vp, "", "Enter value here..",
@@ -242,7 +242,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	slider1.SetValue(0.5)
 	slider1.Snap = true
 	slider1.Tracking = true
-	slider1.Icon = icons.RadioButtonChecked
+	slider1.Icon = gicons.RadioButtonChecked
 
 	slider2 := gi.AddNewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y

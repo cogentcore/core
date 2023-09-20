@@ -10,11 +10,10 @@ import (
 	"strconv"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // SliceViewInline represents a slice as a single line widget, for smaller
@@ -51,8 +50,6 @@ type SliceViewInline struct {
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
 
-var TypeSliceViewInline = kit.Types.AddType(&SliceViewInline{}, SliceViewInlineProps)
-
 func (sv *SliceViewInline) OnInit() {
 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		s.MinWidth.SetCh(20)
@@ -79,7 +76,7 @@ func (sv *SliceViewInline) Disconnect() {
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl any) {
-	if kit.IfaceIsNil(sl) {
+	if laser.IfaceIsNil(sl) {
 		sv.Slice = nil
 		return
 	}
@@ -93,7 +90,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 	if newslc {
 		updt = sv.UpdateStart()
 		sv.Slice = sl
-		sv.IsArray = kit.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+		sv.IsArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		sv.IsFixedLen = false
 		if sv.SliceValView != nil {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
@@ -110,19 +107,19 @@ var SliceViewInlineProps = ki.Props{
 
 // ConfigParts configures Parts for the current slice
 func (sv *SliceViewInline) ConfigParts() {
-	if kit.IfaceIsNil(sv.Slice) {
+	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
 
 	mv := reflect.ValueOf(sv.Slice)
-	mvnp := kit.NonPtrValue(mv)
+	mvnp := laser.NonPtrValue(mv)
 
 	sz := ints.MinInt(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
-		val := kit.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
+		val := laser.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			fmt.Printf("nil value view!\n")
@@ -162,7 +159,7 @@ func (sv *SliceViewInline) ConfigParts() {
 		adack, err := sv.Parts.Children().ElemFromEndTry(1)
 		if err == nil {
 			adac := adack.(*gi.Action)
-			adac.SetIcon(icons.Add)
+			adac.SetIcon(gicons.Add)
 			adac.Tooltip = "add an element to the slice"
 			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
@@ -173,7 +170,7 @@ func (sv *SliceViewInline) ConfigParts() {
 	edack, err := sv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon(icons.Edit)
+		edac.SetIcon(gicons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
@@ -188,8 +185,8 @@ func (sv *SliceViewInline) ConfigParts() {
 				}
 				vpath = svv.ViewPath + "/" + newPath
 			} else {
-				elType := kit.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
-				title = "Slice of " + kit.NonPtrType(elType).Name()
+				elType := laser.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
+				title = "Slice of " + laser.NonPtrType(elType).Name()
 			}
 			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
 			svvvk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
@@ -225,7 +222,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
 	updt := sv.UpdateStart()
 	defer sv.UpdateEnd(updt)
 
-	kit.SliceNewAt(sv.Slice, idx)
+	laser.SliceNewAt(sv.Slice, idx)
 
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()

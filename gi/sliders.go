@@ -9,15 +9,15 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
@@ -75,7 +75,7 @@ type SliderBase struct {
 	Prec int `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 
 	// [view: show-name] optional icon for the dragging knob
-	Icon icons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
+	Icon gicons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
 
 	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
 	ValThumb bool `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
@@ -123,13 +123,6 @@ type SliderBase struct {
 
 	// [view: -] signal for slider -- see SliderSignals for the types
 	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
-}
-
-var TypeSliderBase = kit.Types.AddType(&SliderBase{}, SliderBaseProps)
-
-var SliderBaseProps = ki.Props{
-	"base-type":     true,
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
@@ -590,7 +583,7 @@ func (sb *SliderBase) Init2DSlider() {
 
 func (sb *SliderBase) ConfigParts() {
 	sb.Parts.Lay = LayoutNil
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
 	mods, updt := sb.Parts.ConfigChildren(config)
 	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)
@@ -708,13 +701,6 @@ func (sr *SliderBase) StyleSlider() {
 // Icon is set, it is used for the knob of the slider
 type Slider struct {
 	SliderBase
-}
-
-var TypeSlider = kit.Types.AddType(&Slider{}, SliderProps)
-
-// AddNewSlider adds a new slider to given parent node, with given name.
-func AddNewSlider(parent ki.Ki, name string) *Slider {
-	return parent.AddNewChild(TypeSlider, name).(*Slider)
 }
 
 func (sr *Slider) OnInit() {
@@ -909,13 +895,6 @@ type ScrollBar struct {
 	SliderBase
 }
 
-var TypeScrollBar = kit.Types.AddType(&ScrollBar{}, ScrollBarProps)
-
-// AddNewScrollBar adds a new scrollbar to given parent node, with given name.
-func AddNewScrollBar(parent ki.Ki, name string) *ScrollBar {
-	return parent.AddNewChild(TypeScrollBar, name).(*ScrollBar)
-}
-
 func (sb *ScrollBar) OnInit() {
 	sb.SliderBase.OnInit()
 	sb.ValThumb = true
@@ -1058,14 +1037,6 @@ type ProgressBar struct {
 
 	// mutex for updating progress
 	ProgMu sync.Mutex `desc:"mutex for updating progress"`
-}
-
-var TypeProgressBar = kit.Types.AddType(&ProgressBar{}, ProgressBarProps)
-
-// AddNewProgressBar adds a new progress bar to given parent node, with given name.
-func AddNewProgressBar(parent ki.Ki, name string) *ProgressBar {
-	pb := parent.AddNewChild(TypeProgressBar, name).(*ProgressBar)
-	return pb
 }
 
 func (pb *ProgressBar) OnInit() {

@@ -8,15 +8,15 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +26,6 @@ import (
 type KeyChordValueView struct {
 	ValueViewBase
 }
-
-var TypeKeyChordValueView = kit.Types.AddType(&KeyChordValueView{}, nil)
 
 func (vv *KeyChordValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = TypeKeyChordEdit
@@ -39,7 +37,7 @@ func (vv *KeyChordValueView) UpdateWidget() {
 		return
 	}
 	kc := vv.Widget.(*KeyChordEdit)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	kc.SetText(txt)
 }
 
@@ -77,8 +75,6 @@ type KeyChordEdit struct {
 	// [view: -] signal -- only one event, when chord is updated from key input
 	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
 }
-
-var TypeKeyChordEdit = kit.Types.AddType(&KeyChordEdit{}, KeyChordEditProps)
 
 func (kc *KeyChordEdit) OnInit() {
 	kc.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {

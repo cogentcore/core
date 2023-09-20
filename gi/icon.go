@@ -8,10 +8,9 @@ import (
 	"image"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -44,19 +43,10 @@ type Icon struct {
 	WidgetBase
 
 	// icon name that has been set -- optimizes to prevent reloading of icon
-	IconNm icons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
+	IconNm gicons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
 
 	// file name for the loaded icon, if loaded
 	Filename string `desc:"file name for the loaded icon, if loaded"`
-}
-
-var TypeIcon = kit.Types.AddType(&Icon{}, IconProps)
-
-// AddNewIcon adds a new icon to given parent node, with given name, and icon name.
-func AddNewIcon(parent ki.Ki, name string, icon icons.Icon) *Icon {
-	ic := parent.AddNewChild(TypeIcon, name).(*Icon)
-	ic.SetIcon(icon)
-	return ic
 }
 
 func (ic *Icon) OnInit() {
@@ -81,7 +71,7 @@ var IconProps = ki.Props{
 // message if not found etc, and returning true if a new icon was actually set
 // -- does nothing if IconNm is already == icon name and has children, and deletes
 // children if name is nil / none (both cases return false for new icon)
-func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
+func (ic *Icon) SetIcon(name gicons.Icon) (bool, error) {
 	if name.IsNil() {
 		ic.DeleteChildren(ki.DestroyKids)
 		return false, nil
@@ -164,21 +154,21 @@ func (ic *Icon) Render2D() {
 type IconMgr interface {
 	// IsValid checks if given icon name is a valid name for an available icon
 	// (also checks that the icon manager is non-nil and issues appropriate error)
-	IsValid(iconName icons.Icon) bool
+	IsValid(iconName gicons.Icon) bool
 
 	// SetIcon sets the icon by name into given Icon wrapper, returning error
 	// message if not found etc.  This is how gi.Icon is initialized from
 	// underlying svg.Icon items.
-	SetIcon(ic *Icon, iconName icons.Icon) error
+	SetIcon(ic *Icon, iconName gicons.Icon) error
 
 	// IconByName is main function to get icon by name -- looks in CurIconSet and
 	// falls back to DefaultIconSet if not found there -- returns error
 	// message if not found.  cast result to *svg.Icon
-	IconByName(name icons.Icon) (ki.Ki, error)
+	IconByName(name gicons.Icon) (ki.Ki, error)
 
 	// IconList returns the list of available icon names, optionally sorted
 	// alphabetically (otherwise in map-random order)
-	IconList(alphaSort bool) []icons.Icon
+	IconList(alphaSort bool) []gicons.Icon
 }
 
 // TheIconMgr is set by loading the gi/svg package -- all final users must
@@ -186,4 +176,4 @@ type IconMgr interface {
 var TheIconMgr IconMgr
 
 // CurIconList holds the current icon list, alpha sorted -- set at startup
-var CurIconList []icons.Icon
+var CurIconList []gicons.Icon

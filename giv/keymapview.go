@@ -9,11 +9,11 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // KeyMapsView opens a view of a key maps table
@@ -107,8 +107,6 @@ type KeyMapValueView struct {
 	ValueViewBase
 }
 
-var TypeKeyMapValueView = kit.Types.AddType(&KeyMapValueView{}, nil)
-
 func (vv *KeyMapValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -119,7 +117,7 @@ func (vv *KeyMapValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	ac.SetFullReRender()
 	ac.SetText(txt)
 }
@@ -144,7 +142,7 @@ func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki
 	if vv.IsInactive() {
 		return
 	}
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	_, curRow, _ := gi.AvailKeyMaps.MapByName(gi.KeyMapName(cur))
 	desc, _ := vv.Tag("desc")
 	TableViewSelectDialog(vp, &gi.AvailKeyMaps, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, curRow, nil,

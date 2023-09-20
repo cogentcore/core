@@ -8,10 +8,10 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -23,8 +23,6 @@ type FontValueView struct {
 	ValueViewBase
 }
 
-var TypeFontValueView = kit.Types.AddType(&FontValueView{}, nil)
-
 func (vv *FontValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -35,7 +33,7 @@ func (vv *FontValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	ac.SetProp("font-family", txt)
 	ac.SetText(txt)
 }
@@ -61,7 +59,7 @@ func (vv *FontValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	if vv.IsInactive() {
 		return
 	}
-	// cur := gi.FontName(kit.ToString(vvv.Value.Interface()))
+	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	FontChooserDialog(vp, DlgOpts{Title: "Select a Font", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

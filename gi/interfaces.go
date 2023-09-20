@@ -7,9 +7,9 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/kit"
 )
 

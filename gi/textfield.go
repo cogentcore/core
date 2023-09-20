@@ -14,18 +14,17 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -52,13 +51,13 @@ type TextField struct {
 	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 
 	// if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig
-	LeadingIcon icons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
+	LeadingIcon gicons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
 
 	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
 	LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
 
 	// if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig
-	TrailingIcon icons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
+	TrailingIcon gicons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
 
 	// [view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal
 	TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
@@ -140,13 +139,6 @@ type TextField struct {
 
 	// replace displayed characters with bullets to conceal text
 	NoEcho bool `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
-}
-
-var TypeTextField = kit.Types.AddType(&TextField{}, TextFieldProps)
-
-// AddNewTextField adds a new textfield to given parent node, with given name.
-func AddNewTextField(parent ki.Ki, name string) *TextField {
-	return parent.AddNewChild(TypeTextField, name).(*TextField)
 }
 
 func (tf *TextField) OnInit() {
@@ -243,13 +235,9 @@ func (tf *TextField) Disconnect() {
 	tf.TextFieldSig.DisconnectAll()
 }
 
-var TextFieldProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // TextFieldTypes is an enum containing the
 // different possible types of text fields
-type TextFieldTypes int
+type TextFieldTypes int //enums:enum
 
 const (
 	// TextFieldFilled represents a filled
@@ -260,14 +248,10 @@ const (
 	// TextField with a border on all sides
 	// and no background color
 	TextFieldOutlined
-
-	TextFieldTypesN
 )
 
-var TypeTextFieldTypes = kit.Enums.AddEnumAltLower(TextFieldTypesN, kit.NotBitFlag, gist.StylePropProps, "TextField")
-
 // TextFieldSignals are signals that that textfield can send
-type TextFieldSignals int64
+type TextFieldSignals int64 //enums:enum
 
 const (
 	// TextFieldDone is main signal -- return or tab was pressed and the edit was
@@ -298,8 +282,6 @@ const (
 
 	// TextFieldDelete is emitted when a character after cursor is deleted
 	TextFieldDelete
-
-	TextFieldSignalsN
 )
 
 // these extend NodeBase NodeFlags to hold TextField state
@@ -339,7 +321,7 @@ func (tf *TextField) SetText(txt string) {
 // AddClearAction adds a trailing icon action at the end
 // of the textfield that clears the text in the textfield when pressed
 func (tf *TextField) AddClearAction() {
-	tf.TrailingIcon = icons.Close
+	tf.TrailingIcon = gicons.Close
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
 		if tff != nil {
@@ -352,16 +334,16 @@ func (tf *TextField) AddClearAction() {
 // icon action at the end of the textfield that toggles [TextField.NoEcho]
 func (tf *TextField) SetTypePassword() {
 	tf.NoEcho = true
-	tf.TrailingIcon = icons.Visibility
+	tf.TrailingIcon = gicons.Visibility
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tff := recv.Embed(TypeTextField).(*TextField)
 		if tff != nil {
 			updt := tff.UpdateStart()
 			tff.NoEcho = !tff.NoEcho
 			if tff.NoEcho {
-				tf.TrailingIcon = icons.Visibility
+				tf.TrailingIcon = gicons.Visibility
 			} else {
-				tf.TrailingIcon = icons.VisibilityOff
+				tf.TrailingIcon = gicons.VisibilityOff
 			}
 			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
 				icon.SetIcon(tf.TrailingIcon)
@@ -1490,7 +1472,7 @@ func (tf *TextField) ConfigParts() {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	leadIconIdx, trailIconIdx := -1, -1
 	if !tf.LeadingIcon.IsNil() {
 		// config.Add(TypeStretch, "lead-icon-str")

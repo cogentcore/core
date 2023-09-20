@@ -10,13 +10,12 @@ import (
 	"log"
 	"reflect"
 
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/prof/v2"
 )
 
@@ -69,13 +68,6 @@ type Node2DBase struct {
 
 	// [view: -] our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock
 	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock"`
-}
-
-var TypeNode2DBase = kit.Types.AddType(&Node2DBase{}, Node2DBaseProps)
-
-var Node2DBaseProps = ki.Props{
-	"base-type":     true, // excludes type from user selections
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (nb *Node2DBase) CopyFieldsFrom(frm any) {

@@ -8,8 +8,8 @@ import (
 	"image"
 
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
 	"goki.dev/vgpu/v2/vgpu"

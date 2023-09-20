@@ -18,14 +18,13 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -78,8 +77,6 @@ type FileView struct {
 	// [view: -] Previous path that was processed via UpdateFiles
 	PrevPath string `view:"-" desc:"Previous path that was processed via UpdateFiles"`
 }
-
-var TypeFileView = kit.Types.AddType(&FileView{}, FileViewProps)
 
 func (fv *FileView) OnInit() {
 	fv.Lay = gi.LayoutVert
@@ -287,7 +284,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 
 // Config configures the view
 func (fv *FileView) Config() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.TypeLayout, "files-row")
 	config.Add(gi.TypeLayout, "sel-row")
@@ -309,7 +306,7 @@ func (fv *FileView) ConfigPathBar() {
 	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
 
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "path-lbl")
 	config.Add(gi.TypeComboBox, "path")
 	config.Add(gi.TypeAction, "path-up")
@@ -355,22 +352,22 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: gicons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: gicons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: gicons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
+	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: gicons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
 		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			fvv.NewFolder()
@@ -379,7 +376,7 @@ func (fv *FileView) ConfigPathBar() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(TypeTableView, "favs-view")
 	config.Add(TypeTableView, "files-view")
 	fr.ConfigChildren(config) // already covered by parent update
@@ -418,7 +415,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelRow()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "sel-lbl")
 	config.Add(gi.TypeTextField, "sel")
 	config.Add(gi.TypeLabel, "ext-lbl")

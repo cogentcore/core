@@ -13,58 +13,57 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 )
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gicons.Icon(""))), func() ValueView {
 		vv := &IconValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() ValueView {
 		vv := &FontValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() ValueView {
 		vv := &FileValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() ValueView {
 		vv := &KeyMapValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() ValueView {
 		vv := &ColorNameValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(key.Chord(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() ValueView {
 		vv := &KeyChordValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() ValueView {
 		vv := &HiStyleValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
 		vv := &TimeValueView{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(kit.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
 		vv := &TimeValueView{}
 		ki.InitNode(vv)
 		return vv
@@ -126,12 +125,12 @@ type ValueViewFunc func() ValueView
 // to use the ValueViewer interface (e.g., interface methods can only be
 // defined within the package that defines the type -- so we need this for
 // all types in gi which don't know about giv).
-// You must use kit.LongTypeName (full package name + "." . type name) for
+// You must use laser.LongTypeName (full package name + "." . type name) for
 // the type name, as that is how it will be looked up.
 var ValueViewMap map[string]ValueViewFunc
 
 // ValueViewMapAdd adds a ValueViewFunc for a given type name.
-// You must use kit.LongTypeName (full package name + "." . type name) for
+// You must use laser.LongTypeName (full package name + "." . type name) for
 // the type name, as that is how it will be looked up.
 func ValueViewMapAdd(typeNm string, fun ValueViewFunc) {
 	if ValueViewMap == nil {
@@ -170,7 +169,7 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	}
 	// try pointer version..
-	if vv, ok := kit.PtrInterface(it).(ValueViewer); ok {
+	if vv, ok := laser.PtrInterface(it).(ValueViewer); ok {
 		vvo := vv.ValueView()
 		if vvo != nil {
 			return vvo
@@ -178,11 +177,11 @@ func ToValueView(it any, tags string) ValueView {
 	}
 
 	typ := reflect.TypeOf(it)
-	nptyp := kit.NonPtrType(typ)
+	nptyp := laser.NonPtrType(typ)
 	vk := typ.Kind()
 	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
-	nptypnm := kit.LongTypeName(nptyp)
+	nptypnm := laser.LongTypeName(nptyp)
 	if vvf, has := ValueViewMap[nptypnm]; has {
 		vv := vvf()
 		return vv
@@ -191,15 +190,17 @@ func ToValueView(it any, tags string) ValueView {
 	forceInline := false
 	forceNoInline := false
 
-	tprops := kit.Types.Properties(typ, false) // don't make
-	if tprops != nil {
-		if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
-			forceInline, ok = kit.ToBool(inprop)
+	/*
+		tprops := kit.Types.Properties(typ, false) // don't make
+		if tprops != nil {
+			if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
+				forceInline, ok = kit.ToBool(inprop)
+			}
+			if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
+				forceNoInline, ok = kit.ToBool(inprop)
+			}
 		}
-		if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
-			forceNoInline, ok = kit.ToBool(inprop)
-		}
-	}
+	*/
 
 	if tags != "" {
 		stag := reflect.StructTag(tags)
@@ -215,17 +216,18 @@ func ToValueView(it any, tags string) ValueView {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		if kit.Enums.TypeRegistered(nptyp) {
-			if kit.Enums.IsBitFlag(nptyp) {
-				vv := &BitFlagView{}
-				ki.InitNode(vv)
-				return vv
-			} else {
-				vv := &EnumValueView{}
-				ki.InitNode(vv)
-				return vv
-			}
-		} else if _, ok := it.(fmt.Stringer); ok { // use stringer
+		// if kit.Enums.TypeRegistered(nptyp) {
+		// 	if kit.Enums.IsBitFlag(nptyp) {
+		// 		vv := &BitFlagView{}
+		// 		ki.InitNode(vv)
+		// 		return vv
+		// 	} else {
+		// 		vv := &EnumValueView{}
+		// 		ki.InitNode(vv)
+		// 		return vv
+		// 	}
+		// } else
+		if _, ok := it.(fmt.Stringer); ok { // use stringer
 			vv := &ValueViewBase{}
 			ki.InitNode(vv)
 			return vv
@@ -253,13 +255,13 @@ func ToValueView(it any, tags string) ValueView {
 			ki.InitNode(vv)
 			return vv
 		}
-		if kit.IfaceIsNil(it) {
+		if laser.IfaceIsNil(it) {
 			vv := &NilValueView{}
 			ki.InitNode(vv)
 			return vv
 		}
 		v := reflect.ValueOf(it)
-		if !kit.ValueIsZero(v) {
+		if !laser.ValueIsZero(v) {
 			// note: interfaces go here:
 			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValueView(v.Elem().Interface(), tags)
@@ -273,7 +275,7 @@ func ToValueView(it any, tags string) ValueView {
 	case vk == reflect.Slice:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
-		eltyp := kit.SliceElType(it)
+		eltyp := laser.SliceElType(it)
 		if _, ok := it.([]byte); ok {
 			vv := &ByteSliceValueView{}
 			ki.InitNode(vv)
@@ -284,7 +286,7 @@ func ToValueView(it any, tags string) ValueView {
 			ki.InitNode(vv)
 			return vv
 		}
-		isstru := (kit.NonPtrType(eltyp).Kind() == reflect.Struct)
+		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
 			vv := &SliceInlineValueView{}
 			ki.InitNode(vv)
@@ -297,7 +299,7 @@ func ToValueView(it any, tags string) ValueView {
 	case vk == reflect.Map:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
-		sz = kit.MapStructElsN(it)
+		sz = laser.MapStructElsN(it)
 		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
 			vv := &MapInlineValueView{}
 			ki.InitNode(vv)
@@ -309,12 +311,12 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == kit.TypeFor[color.RGBA]() {
+		if nptyp == laser.TypeFor[color.RGBA]() {
 			vv := &ColorValueView{}
 			ki.InitNode(vv)
 			return vv
 		}
-		nfld := kit.AllFieldsN(nptyp)
+		nfld := laser.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
 			vv := &StructInlineValueView{}
 			ki.InitNode(vv)
@@ -329,7 +331,7 @@ func ToValueView(it any, tags string) ValueView {
 		// apparently (because the non-ptr vk indirection does that I guess?)
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
 		switch {
-		case nptyp == kit.TypeFor[reflect.Type]():
+		case nptyp == laser.TypeFor[reflect.Type]():
 			vv := &TypeValueView{}
 			ki.InitNode(vv)
 			return vv
@@ -356,7 +358,7 @@ func FieldToValueView(it any, field string, fval any) ValueView {
 		}
 	}
 	// try pointer version..
-	if vv, ok := kit.PtrInterface(it).(FieldValueViewer); ok {
+	if vv, ok := laser.PtrInterface(it).(FieldValueViewer); ok {
 		vvo := vv.FieldValueView(field, fval)
 		if vvo != nil {
 			return vvo
@@ -364,22 +366,24 @@ func FieldToValueView(it any, field string, fval any) ValueView {
 	}
 
 	typ := reflect.TypeOf(it)
-	nptyp := kit.NonPtrType(typ)
+	nptyp := laser.NonPtrType(typ)
 
-	if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
-		et := pv.(reflect.Type)
-		if kit.Enums.IsBitFlag(et) {
-			vv := &BitFlagView{}
-			vv.AltType = et
-			ki.InitNode(vv)
-			return vv
-		} else {
-			vv := &EnumValueView{}
-			vv.AltType = et
-			ki.InitNode(vv)
-			return vv
+	/*
+		if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
+			et := pv.(reflect.Type)
+			if kit.Enums.IsBitFlag(et) {
+				vv := &BitFlagView{}
+				vv.AltType = et
+				ki.InitNode(vv)
+				return vv
+			} else {
+				vv := &EnumValueView{}
+				vv.AltType = et
+				ki.InitNode(vv)
+				return vv
+			}
 		}
-	}
+	*/
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {
@@ -462,7 +466,7 @@ type ValueView interface {
 	Val() reflect.Value
 
 	// SetValue assigns given value to this item (if not Inactive), using
-	// Ki.SetField for Ki types and kit.SetRobust otherwise -- emits a ViewSig
+	// Ki.SetField for Ki types and laser.SetRobust otherwise -- emits a ViewSig
 	// signal when set.
 	SetValue(val any) bool
 
@@ -553,12 +557,6 @@ type ValueViewBase struct {
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-var TypeValueViewBase = kit.Types.AddType(&ValueViewBase{}, ValueViewBaseProps)
-
-var ValueViewBaseProps = ki.Props{
-	"base-type": true,
-}
-
 func (vv *ValueViewBase) Disconnect() {
 	vv.Node.Disconnect()
 	vv.ViewSig.DisconnectAll()
@@ -584,7 +582,7 @@ func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner any, tmpSave ValueVi
 	vv.Value = key
 	vv.Owner = owner
 	vv.TmpSave = tmpSave
-	vv.SetName(kit.ToString(key.Interface()))
+	vv.SetName(laser.ToString(key.Interface()))
 }
 
 func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner any, key any, keyView ValueView, tmpSave ValueView, viewPath string) {
@@ -594,7 +592,7 @@ func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner any, key any, keyV
 	vv.Key = key
 	vv.KeyView = keyView
 	vv.TmpSave = tmpSave
-	keystr := kit.ToString(key)
+	keystr := laser.ToString(key)
 	vv.ViewPath = viewPath + "." + keystr
 	vv.SetName(keystr)
 }
@@ -647,8 +645,8 @@ func (vv *ValueViewBase) IsInactive() bool {
 			return true
 		}
 	}
-	npv := kit.NonPtrValue(vv.Value)
-	if npv.Kind() == reflect.Interface && kit.ValueIsZero(npv) {
+	npv := laser.NonPtrValue(vv.Value)
+	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
 		return true
 	}
 	return false
@@ -677,16 +675,16 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 				rval = (kiv.SetField(vv.Field.Name, val) == nil)
 
 			} else {
-				rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+				rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 			}
 		case reflect.Map:
-			ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
+			ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
 			if vv.IsMapKey {
-				nv := kit.NonPtrValue(reflect.ValueOf(val)) // new key value
-				kv := kit.NonPtrValue(vv.Value)
+				nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
+				kv := laser.NonPtrValue(vv.Value)
 				cv := ov.MapIndex(kv)    // get current value
 				curnv := ov.MapIndex(nv) // see if new value there already
-				if val != kv.Interface() && !kit.ValueIsZero(curnv) {
+				if val != kv.Interface() && !laser.ValueIsZero(curnv) {
 					var vp *gi.Viewport2D
 					if vv.Widget != nil {
 						widg := vv.Widget.AsNode2D()
@@ -721,24 +719,24 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 				vv.Value = nv                       // update value to new key
 				rval = true
 			} else {
-				vv.Value = kit.NonPtrValue(reflect.ValueOf(val))
+				vv.Value = laser.NonPtrValue(reflect.ValueOf(val))
 				if vv.KeyView != nil {
-					ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
-					kit.SetMapRobust(ov, ck, reflect.ValueOf(val))
+					ck := laser.NonPtrValue(vv.KeyView.Val()) // current key value
+					laser.SetMapRobust(ov, ck, reflect.ValueOf(val))
 				} else { // static, key not editable?
-					kit.SetMapRobust(ov, kit.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
+					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
 				}
 				rval = true
 			}
 		case reflect.Slice:
-			rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+			rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 		}
 		if updtr, ok := vv.Owner.(gi.Updater); ok {
 			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
-		rval = kit.SetRobust(kit.PtrValue(vv.Value).Interface(), val)
+		rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 	}
 	if rval {
 		vv.This().(ValueView).SaveTmp()
@@ -755,13 +753,13 @@ func (vv *ValueViewBase) SaveTmp() {
 	if vv.TmpSave == vv.This().(ValueView) {
 		// if we are a map value, of a struct value, we save our value
 		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.IsMapKey {
-			if kit.NonPtrValue(vv.Value).Kind() == reflect.Struct {
-				ov := kit.NonPtrValue(reflect.ValueOf(vv.Owner))
+			if laser.NonPtrValue(vv.Value).Kind() == reflect.Struct {
+				ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
 				if vv.KeyView != nil {
-					ck := kit.NonPtrValue(vv.KeyView.Val())
-					kit.SetMapRobust(ov, ck, kit.NonPtrValue(vv.Value))
+					ck := laser.NonPtrValue(vv.KeyView.Val())
+					laser.SetMapRobust(ov, ck, laser.NonPtrValue(vv.Value))
 				} else {
-					kit.SetMapRobust(ov, kit.NonPtrValue(reflect.ValueOf(vv.Key)), kit.NonPtrValue(vv.Value))
+					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), laser.NonPtrValue(vv.Value))
 					// fmt.Printf("save tmp of struct value in key: %v\n", vv.Key)
 				}
 			}
@@ -777,7 +775,7 @@ func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)
 		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
-		kit.SetRobust(vtp.Interface(), vv.Value.Interface())
+		laser.SetRobust(vtp.Interface(), vv.Value.Interface())
 		vv.Value = vtp // use this instead
 		return true
 	}
@@ -822,7 +820,7 @@ func (vv *ValueViewBase) AllTags() map[string]string {
 	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
 		return rvt
 	}
-	smap := kit.StructTags(vv.Field.Tag)
+	smap := laser.StructTags(vv.Field.Tag)
 	for key, val := range smap {
 		rvt[key] = val
 	}
@@ -845,14 +843,14 @@ func (vv *ValueViewBase) OwnerLabel() string {
 	case reflect.Map:
 		kystr := ""
 		if vv.IsMapKey {
-			kv := kit.NonPtrValue(vv.Value)
-			kystr = kit.ToString(kv.Interface())
+			kv := laser.NonPtrValue(vv.Value)
+			kystr = laser.ToString(kv.Interface())
 		} else {
 			if vv.KeyView != nil {
-				ck := kit.NonPtrValue(vv.KeyView.Val()) // current key value
-				kystr = kit.ToString(ck.Interface())
+				ck := laser.NonPtrValue(vv.KeyView.Val()) // current key value
+				kystr = laser.ToString(ck.Interface())
 			} else {
-				kystr = kit.ToString(vv.Key)
+				kystr = laser.ToString(vv.Key)
 			}
 		}
 		if kystr != "" {
@@ -879,12 +877,12 @@ func (vv *ValueViewBase) OwnerLabel() string {
 func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 	lbl := ""
 	var npt reflect.Type
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
-		npt = kit.NonPtrType(vv.Value.Type())
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
+		npt = laser.NonPtrType(vv.Value.Type())
 		isZero = true
 	} else {
-		opv := kit.OnePtrUnderlyingValue(vv.Value)
-		npt = kit.NonPtrType(opv.Type())
+		opv := laser.OnePtrUnderlyingValue(vv.Value)
+		npt = laser.NonPtrType(opv.Type())
 	}
 	lbl += npt.String()
 	newPath = lbl
@@ -911,12 +909,12 @@ func (vv *ValueViewBase) UpdateWidget() {
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	// fmt.Printf("vvb val: %v  type: %v  kind: %v\n", npv.Interface(), npv.Type().String(), npv.Kind())
-	if npv.Kind() == reflect.Interface && kit.ValueIsZero(npv) {
+	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
 		tf.SetText("nil")
 	} else {
-		txt := kit.ToString(vv.Value.Interface())
+		txt := laser.ToString(vv.Value.Interface())
 		tf.SetText(txt)
 	}
 }
@@ -940,7 +938,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 		in := []reflect.Value{reflect.ValueOf(tf)}
 		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
 		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
-		if kit.ValueIsZero(cmpfv) {
+		if laser.ValueIsZero(cmpfv) {
 			log.Printf("giv.ValueViewBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
 		} else {
 			cmpfv.Call(in)
@@ -964,25 +962,25 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
 	// STYTODO: get rid of this
 	nb := widg.AsNode2D()
 	if widthtag, ok := vv.Tag("width"); ok {
-		width, ok := kit.ToFloat32(widthtag)
+		width, ok := laser.ToFloat32(widthtag)
 		if ok {
 			nb.SetMinPrefWidth(units.Ch(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, ok := kit.ToFloat32(maxwidthtag)
+		width, ok := laser.ToFloat32(maxwidthtag)
 		if ok {
 			nb.SetProp("max-width", units.Ch(width))
 		}
 	}
 	if heighttag, ok := vv.Tag("height"); ok {
-		height, ok := kit.ToFloat32(heighttag)
+		height, ok := laser.ToFloat32(heighttag)
 		if ok {
 			nb.SetMinPrefHeight(units.Em(height))
 		}
 	}
 	if maxheighttag, ok := vv.Tag("max-height"); ok {
-		height, ok := kit.ToFloat32(maxheighttag)
+		height, ok := laser.ToFloat32(maxheighttag)
 		if ok {
 			nb.SetProp("max-height", units.Em(height))
 		}
@@ -1105,8 +1103,6 @@ type VersCtrlValueView struct {
 	ValueViewBase
 }
 
-var TypeVersCtrlValueView = kit.Types.AddType(&VersCtrlValueView{}, nil)
-
 func (vv *VersCtrlValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -1117,7 +1113,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
 	}
@@ -1143,7 +1139,7 @@ func (vv *VersCtrlValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc 
 	if vv.IsInactive() {
 		return
 	}
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	var recv gi.Node2D
 	if vv.Widget != nil {
 		recv = vv.Widget

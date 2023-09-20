@@ -9,9 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/spell"
 )
@@ -69,15 +68,13 @@ type Complete struct {
 	ShowMu     sync.Mutex
 }
 
-var TypeComplete = kit.Types.AddType(&Complete{}, nil)
-
 func (cm *Complete) Disconnect() {
 	cm.Node.Disconnect()
 	cm.CompleteSig.DisconnectAll()
 }
 
 // CompleteSignals are signals that are sent by Complete
-type CompleteSignals int64
+type CompleteSignals int64 //enums:enum
 
 const (
 	// CompleteSelect means the user chose one of the possible completions
@@ -178,7 +175,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt ima
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
+		m.AddAction(ActOpts{Icon: gicons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
 			c, func(recv, send ki.Ki, sig int64, data any) {
 				cc := recv.Embed(TypeComplete).(*Complete)
 				cc.Complete(data.(string))

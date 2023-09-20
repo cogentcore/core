@@ -15,12 +15,11 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bools"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -69,13 +68,6 @@ type StructView struct {
 
 	// extra tags by field name -- from type properties
 	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+" desc:"extra tags by field name -- from type properties"`
-}
-
-var TypeStructView = kit.Types.AddType(&StructView{}, StructViewProps)
-
-// AddNewStructView adds a new structview to given parent node, with given name.
-func AddNewStructView(parent ki.Ki, name string) *StructView {
-	return parent.AddNewChild(TypeStructView, name).(*StructView)
 }
 
 func (sv *StructView) OnInit() {
@@ -138,12 +130,12 @@ func (sv *StructView) SetStruct(st any) {
 			}
 		}
 		sv.Struct = st
-		tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
+		// tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
 		if tp != nil {
 			if sfp, has := ki.SubTypeProps(*tp, "StructViewFields"); has {
 				sv.TypeFieldTags = make(map[string]string)
 				for k, v := range sfp {
-					vs := kit.ToString(v)
+					vs := laser.ToString(v)
 					sv.TypeFieldTags[k] = vs
 				}
 			}
@@ -190,7 +182,7 @@ func (sv *StructView) Config() {
 			return
 		}
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
@@ -223,7 +215,7 @@ func (sv *StructView) ToolBar() *gi.ToolBar {
 // one has been defined for this struct type through its registered type
 // properties.
 func (sv *StructView) ConfigToolbar() {
-	if kit.IfaceIsNil(sv.Struct) {
+	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
 	if sv.ToolbarStru == sv.Struct {
@@ -234,10 +226,10 @@ func (sv *StructView) ConfigToolbar() {
 		return
 	}
 	tb := sv.ToolBar()
-	svtp := kit.NonPtrType(reflect.TypeOf(sv.Struct))
+	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFields()
@@ -274,14 +266,14 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 
 // ConfigStructGrid configures the StructGrid for the current struct
 func (sv *StructView) ConfigStructGrid() {
-	if kit.IfaceIsNil(sv.Struct) {
+	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
 	sg := sv.StructGrid()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
-	kit.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		ftags := sv.FieldTags(field)
 		_, got := ftags.Lookup("changeflag")
@@ -303,7 +295,7 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		if vwtag == "add-fields" && field.Type.Kind() == reflect.Struct {
 			fvalp := fieldVal.Addr().Interface()
-			kit.FlatFieldsValueFunc(fvalp, func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
+			laser.FlatFieldsValueFunc(fvalp, func(sfval any, styp reflect.Type, sfield reflect.StructField, sfieldVal reflect.Value) bool {
 				svwtag := sfield.Tag.Get("view")
 				if svwtag == "-" {
 					return true
@@ -378,7 +370,7 @@ func (sv *StructView) ConfigStructGrid() {
 					svv.ChangeFlag.SetBool(true)
 				}
 				vvv := send.(ValueView).AsValueViewBase()
-				if !kit.KindIsBasic(kit.NonPtrValue(vvv.Value).Kind()) {
+				if !laser.KindIsBasic(laser.NonPtrValue(vvv.Value).Kind()) {
 					if updtr, ok := svv.Struct.(gi.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
@@ -470,7 +462,7 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bo
 func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
 	if dtag, has := vv.Tag("def"); has {
 		hasDef = true
-		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), kit.NonPtrValue(vv.Val()).Kind())
+		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
 		if isDef {
 			lbl.CurBackgroundColor = gi.Prefs.Colors.Background
 		} else {
@@ -531,7 +523,7 @@ func StructFieldIsDef(defs string, valPtr any, kind reflect.Kind) (bool, string)
 			}
 		}
 	default:
-		val := kit.ToStringPrec(valPtr, 6)
+		val := laser.ToStringPrec(valPtr, 6)
 		if strings.HasPrefix(val, "&") {
 			val = val[1:]
 		}
@@ -679,12 +671,12 @@ type StructFieldVals struct {
 // of fields in given struct and starting path, and returns all
 // fields not at their default values.
 // See also StructNoDefFieldsStr for a string representation of this information.
-// Uses kit.FlatFieldsValueFunc to get all embedded fields.
+// Uses laser.FlatFieldsValueFunc to get all embedded fields.
 // Uses a recursive strategy -- any fields that are themselves structs are
 // expanded, and the field name represented by dots path separators.
 func StructNonDefFields(structPtr any, path string) []StructFieldVals {
 	var flds []StructFieldVals
-	kit.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
+	laser.FlatFieldsValueFunc(structPtr, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		vvp := fieldVal.Addr()
 		dtag, got := field.Tag.Lookup("def")
 		if field.Type.Kind() == reflect.Struct && (!got || dtag == "") {
@@ -726,7 +718,7 @@ func StructNonDefFieldsStr(structPtr any, path string) string {
 	for _, fld := range flds {
 		pth := fld.Path
 		fnm := fld.Field.Name
-		val := kit.ToStringPrec(fld.Val.Interface(), 6)
+		val := laser.ToStringPrec(fld.Val.Interface(), 6)
 		dfs := fld.Defs
 		if len(pth) > 0 {
 			fnm = pth + "." + fnm

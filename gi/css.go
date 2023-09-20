@@ -9,10 +9,7 @@ import (
 
 	"github.com/aymerick/douceur/css"
 	"github.com/aymerick/douceur/parser"
-
-	// 	"github.com/benbjohnson/css" // this was too low-level
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 )
 
 // StyleSheet is a Node2D node that contains a stylesheet -- property values
@@ -21,13 +18,6 @@ import (
 type StyleSheet struct {
 	Node2DBase
 	Sheet *css.Stylesheet
-}
-
-var TypeStyleSheet = kit.Types.AddType(&StyleSheet{}, nil)
-
-// AddNewStyleSheet adds a new CSS stylesheet to given parent node, with given name.
-func AddNewStyleSheet(parent ki.Ki, name string) *StyleSheet {
-	return parent.AddNewChild(TypeStyleSheet, name).(*StyleSheet)
 }
 
 func (ss *StyleSheet) CopyFieldsFrom(frm any) {

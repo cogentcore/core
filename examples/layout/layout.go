@@ -9,7 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
 

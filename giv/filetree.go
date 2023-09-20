@@ -23,19 +23,18 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
@@ -100,12 +99,6 @@ type FileTree struct {
 
 	// [view: -] Update mutex
 	UpdtMu sync.Mutex `view:"-" desc:"Update mutex"`
-}
-
-var TypeFileTree = kit.Types.AddType(&FileTree{}, FileTreeProps)
-
-var FileTreeProps = ki.Props{
-	ki.EnumTypeFlag: TypeFileNodeFlags,
 }
 
 func (ft *FileTree) CopyFieldsFrom(frm any) {
@@ -402,7 +395,7 @@ func (ft *FileTree) ExtFileNodeByPath(fpath string) (*FileNode, error) {
 func (ft *FileTree) UpdateExtFiles(efn *FileNode) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	efn.SetOpen()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	typ := ft.NodeType
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, DirAndFile(f))
@@ -454,8 +447,6 @@ type FileNode struct {
 	// version control system repository file status -- only valid during ReadDir
 	RepoFiles vci.Files `json:"-" xml:"-" copy:"-" desc:"version control system repository file status -- only valid during ReadDir"`
 }
-
-var TypeFileNode = kit.Types.AddType(&FileNode{}, FileNodeProps)
 
 func (fn *FileNode) CopyFieldsFrom(frm any) {
 	// note: not copying ki.Node as it doesn't have any copy fields
@@ -621,7 +612,7 @@ func (fn *FileNode) UpdateDir() {
 	hasExtFiles := false
 	if fn.This() == fn.FRoot.This() {
 		if len(fn.FRoot.ExtFiles) > 0 {
-			config = append([]kit.TypeAndName{{Type: fn.FRoot.NodeType, Name: FileTreeExtFilesName}}, config...)
+			config = append([]ki.TypeAndName{{Type: fn.FRoot.NodeType, Name: FileTreeExtFilesName}}, config...)
 			hasExtFiles = true
 		}
 	}
@@ -658,9 +649,9 @@ func (fn *FileNode) UpdateDir() {
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
-func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
-	config1 := kit.TypeAndNameList{}
-	config2 := kit.TypeAndNameList{}
+func (fn *FileNode) ConfigOfFiles(path string) ki.TypeAndNameList {
+	config1 := ki.TypeAndNameList{}
+	config2 := ki.TypeAndNameList{}
 	typ := fn.FRoot.NodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -701,7 +692,7 @@ func (fn *FileNode) ConfigOfFiles(path string) kit.TypeAndNameList {
 }
 
 // SortConfigByModTime sorts given config list by mod time
-func (fn *FileNode) SortConfigByModTime(confg kit.TypeAndNameList) {
+func (fn *FileNode) SortConfigByModTime(confg ki.TypeAndNameList) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))
@@ -1589,9 +1580,7 @@ var FileNodeProps = ki.Props{
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
 // and storage is an int64
-type FileNodeFlags int64
-
-var TypeFileNodeFlags = kit.Enums.AddEnumExt(ki.KiT_Flags, FileNodeFlagsN, kit.BitFlag, nil)
+type FileNodeFlags ki.Flags //enums:bitflag
 
 const (
 	// FileNodeOpen means file is open -- for directories, this means that
@@ -1602,8 +1591,6 @@ const (
 	// FileNodeSymLink indicates that file is a symbolic link -- file info is
 	// all for the target of the symlink
 	FileNodeSymLink
-
-	FileNodeFlagsN
 )
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1611,9 +1598,7 @@ const (
 
 // DirFlags are flags on directories: Open, SortBy etc
 // These flags are stored in the DirFlagMap for persistence.
-type DirFlags int32
-
-var TypeDirFlags = kit.Enums.AddEnum(DirFlagsN, kit.BitFlag, nil)
+type DirFlags int32 //enums:bitflag
 
 const (
 	// DirMark means directory is marked -- unmarked entries are deleted post-update
@@ -1628,8 +1613,6 @@ const (
 
 	// DirSortByModTime means sort the directory entries by modification time
 	DirSortByModTime
-
-	DirFlagsN
 )
 
 // DirFlagMap is a map for encoding directories that are open in the file
@@ -1747,17 +1730,9 @@ type FileTreeView struct {
 	TreeView
 }
 
-var TypeFileTreeView = kit.Types.AddType(&FileTreeView{}, nil)
-
-// AddNewFileTreeView adds a new filetreeview to given parent node, with given name.
-func AddNewFileTreeView(parent ki.Ki, name string) *FileTreeView {
-	tv := parent.AddNewChild(TypeFileTreeView, name).(*FileTreeView)
-	return tv
-}
-
 // exists for same reason as TreeView one (init cycle)
 func init() {
-	kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
+	// kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
 }
 
 func (ftv *FileTreeView) OnInit() {
@@ -1812,8 +1787,8 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "branch":
 			cb := child.(*gi.CheckBox)
-			cb.Icon = icons.FolderOpen
-			cb.IconOff = icons.Folder
+			cb.Icon = gicons.FolderOpen
+			cb.IconOff = gicons.Folder
 			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
@@ -1833,7 +1808,7 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "menu":
 			menu := child.(*gi.Button)
-			menu.Indicator = icons.None
+			menu.Indicator = gicons.None
 		}
 	}
 }
@@ -2838,13 +2813,13 @@ func (ft *FileTreeView) Style2D() {
 			if fn.HasChildren() {
 				ft.Icon = ""
 			} else {
-				ft.Icon = icons.Folder
+				ft.Icon = gicons.Folder
 			}
 			ft.AddClass("folder")
 		} else {
 			ft.Icon = fn.Info.Ic
 			if ft.Icon.IsNil() {
-				ft.Icon = icons.Blank
+				ft.Icon = gicons.Blank
 			}
 			if fn.IsExec() {
 				ft.AddClass("exec")

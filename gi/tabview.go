@@ -11,12 +11,11 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/ki/v2"
 )
 
 // TabView switches among child widgets via tabs.  The selected widget gets
@@ -46,13 +45,6 @@ type TabView struct {
 
 	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
-}
-
-var TypeTabView = kit.Types.AddType(&TabView{}, TabViewProps)
-
-// AddNewTabView adds a new tabview to given parent node, with given name.
-func AddNewTabView(parent ki.Ki, name string) *TabView {
-	return parent.AddNewChild(TypeTabView, name).(*TabView)
 }
 
 func (tv *TabView) OnInit() {
@@ -443,7 +435,7 @@ func (tv *TabView) ConfigNewTabButton() bool {
 		}
 		tab := tb.InsertNewChild(TypeAction, ntb, "new-tab").(*Action)
 		tab.Data = -1
-		tab.SetIcon(icons.Add)
+		tab.SetIcon(gicons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTabView).(*TabView)
 			tvv.SetFullReRender()
@@ -595,12 +587,6 @@ type TabButton struct {
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
-var TypeTabButton = kit.Types.AddType(&TabButton{}, TabButtonProps)
-
-var TabButtonProps = ki.Props{
-	ki.EnumTypeFlag: TypeButtonFlags,
-}
-
 func (tb *TabButton) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Cursor = cursor.HandPointing
@@ -702,7 +688,7 @@ func (tb *TabButton) ConfigParts() {
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(TypeStretch, "close-stretch")
 	clsIdx := len(config)
@@ -712,7 +698,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)
 		if tb.Indicator.IsNil() {
-			tb.Indicator = icons.Close
+			tb.Indicator = gicons.Close
 		}
 
 		icnm := tb.Indicator

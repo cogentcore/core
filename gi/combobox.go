@@ -11,14 +11,14 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/complete"
 )
@@ -26,7 +26,7 @@ import (
 // ComboBox is for selecting items from a dropdown list, with an optional
 // edit TextField for typing directly.
 // The items can be of any type, including enum values -- they are converted
-// to strings for the display.  If the items are [icons.Icon] type, then they
+// to strings for the display.  If the items are [gicons.Icon] type, then they
 // are displayed using icons instead.
 type ComboBox struct {
 	ButtonBase
@@ -62,11 +62,9 @@ type ComboBox struct {
 	MaxLength int `desc:"maximum label length (in runes)"`
 }
 
-var TypeComboBox = kit.Types.AddType(&ComboBox{}, ComboBoxProps)
-
 // ComboBoxTypes is an enum containing the
 // different possible types of combo boxes
-type ComboBoxTypes int
+type ComboBoxTypes int //enums:enum
 
 const (
 	// ComboBoxFilled represents a filled
@@ -77,16 +75,7 @@ const (
 	// ComboBox with a border on all sides
 	// and no background color
 	ComboBoxOutlined
-
-	ComboBoxTypesN
 )
-
-var TypeComboBoxTypes = kit.Enums.AddEnumAltLower(ComboBoxTypesN, kit.NotBitFlag, gist.StylePropProps, "ComboBox")
-
-// AddNewComboBox adds a new button to given parent node, with given name.
-func AddNewComboBox(parent ki.Ki, name string) *ComboBox {
-	return parent.AddNewChild(TypeComboBox, name).(*ComboBox)
-}
 
 func (cb *ComboBox) OnInit() {
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -194,10 +183,6 @@ func (cb *ComboBox) Disconnect() {
 	cb.ComboSig.DisconnectAll()
 }
 
-var ComboBoxProps = ki.Props{
-	ki.EnumTypeFlag: TypeButtonFlags,
-}
-
 // ButtonWidget interface
 
 func (cb *ComboBox) ButtonRelease() {
@@ -235,7 +220,7 @@ func (cb *ComboBox) ButtonRelease() {
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
-func (cb *ComboBox) ConfigPartsIconText(config *kit.TypeAndNameList, icnm icons.Icon) (icIdx, txIdx int) {
+func (cb *ComboBox) ConfigPartsIconText(config *ki.TypeAndNameList, icnm gicons.Icon) (icIdx, txIdx int) {
 	// todo: add some styles for button layout
 	icIdx = -1
 	txIdx = -1
@@ -261,8 +246,8 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 
 // ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
 // for editable combobox, where textfield then takes up the rest of the space
-func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *kit.TypeAndNameList, defOn bool) int {
-	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
+func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, defOn bool) int {
+	needInd := (bb.HasMenu() || defOn) && bb.Indicator != gicons.None
 	if !needInd {
 		return -1
 	}
@@ -291,7 +276,7 @@ func (cb *ComboBox) ConfigParts() {
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = kit.ToBool(eb)
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	var icIdx, lbIdx, txIdx, indIdx int
 	if cb.Editable {
 		lbIdx = -1
@@ -407,11 +392,11 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 	}
 }
 
-// ItemsFromIconList sets the Items list from a list of icons.Icon values -- if
+// ItemsFromIconList sets the Items list from a list of gicons.Icon values -- if
 // setFirst then set current item to the first item in the list, and maxLen if
 // > 0 auto-sets the width of the button to the contents, with the given upper
 // limit
-func (cb *ComboBox) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int) {
+func (cb *ComboBox) ItemsFromIconList(el []gicons.Icon, setFirst bool, maxLen int) {
 	sz := len(el)
 	if sz == 0 {
 		return
@@ -508,7 +493,7 @@ func (cb *ComboBox) SetCurIndex(idx int) any {
 // ShowCurVal updates the display to present the
 // currently-selected value (CurVal)
 func (cb *ComboBox) ShowCurVal() {
-	if icnm, isic := cb.CurVal.(icons.Icon); isic {
+	if icnm, isic := cb.CurVal.(gicons.Icon); isic {
 		cb.SetIcon(icnm)
 	} else {
 		cb.SetText(ToLabel(cb.CurVal))
@@ -550,7 +535,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 	if nitm == 0 {
 		return
 	}
-	_, ics := cb.Items[0].(icons.Icon) // if true, we render as icons
+	_, ics := cb.Items[0].(gicons.Icon) // if true, we render as icons
 	for i, it := range cb.Items {
 		var ac *Action
 		if sz > i {
@@ -563,7 +548,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 		nm := "Item_" + strconv.Itoa(i)
 		ac.SetName(nm)
 		if ics {
-			ac.Icon = it.(icons.Icon)
+			ac.Icon = it.(gicons.Icon)
 			ac.Tooltip = string(ac.Icon)
 		} else {
 			ac.Text = ToLabel(it)

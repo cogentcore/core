@@ -13,12 +13,10 @@ import (
 	"sort"
 	"strings"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 )
 
 // https://en.wikipedia.org/wiki/Table_of_keyboard_shortcuts
@@ -29,7 +27,7 @@ import (
 // seems possible to keep this flat and consistent across different contexts,
 // as long as the functions can be appropriately reinterpreted for each
 // context.
-type KeyFuns int32
+type KeyFuns int32 //enums:enum
 
 const (
 	KeyFunNil KeyFuns = iota
@@ -103,13 +101,7 @@ const (
 	KeyFunMenuSaveAlt   // another alt (e.g., alt)
 	KeyFunMenuCloseAlt1 // alternative version (e.g., shift)
 	KeyFunMenuCloseAlt2 // alternative version (e.g., alt)
-	KeyFunsN
 )
-
-var TypeKeyFuns = kit.Enums.AddEnumAltLower(KeyFunsN, kit.NotBitFlag, gist.StylePropProps, "KeyFun")
-
-func (kf KeyFuns) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(kf) }
-func (kf *KeyFuns) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(kf, b) }
 
 // KeyMap is a map between a key sequence (chord) and a specific KeyFun
 // function.  This mapping must be unique, in that each chord has unique
@@ -294,8 +286,6 @@ func (km KeyMapsItem) Label() string {
 // a custom one, just duplicate an existing map, rename, and customize
 type KeyMaps []KeyMapsItem
 
-var TypeKeyMaps = kit.Types.AddType(&KeyMaps{}, KeyMapsProps)
-
 // AvailKeyMaps is the current list of available keymaps for use -- can be
 // loaded / saved / edited with preferences.  This is set to StdKeyMaps at
 // startup.
@@ -436,7 +426,7 @@ var KeyMapsProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"SavePrefs", ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
-			"icon": icons.Save,
+			"icon": gicons.Save,
 			"updtfunc": func(kmi any, act *Action) {
 				act.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 			},
@@ -444,7 +434,7 @@ var KeyMapsProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  icons.FileOpen,
+			"icon":  gicons.FileOpen,
 			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -454,7 +444,7 @@ var KeyMapsProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  icons.SaveAs,
+			"icon":  gicons.SaveAs,
 			"desc":  "You can save and open key maps to / from files to share, experiment, transfer, etc",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -471,7 +461,7 @@ var KeyMapsProps = ki.Props{
 			},
 		}},
 		{"RevertToStd", ki.Props{
-			"icon":    icons.DeviceReset,
+			"icon":    gicons.DeviceReset,
 			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
 			"confirm": true,
 			"updtfunc": func(kmi any, act *Action) {

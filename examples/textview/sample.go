@@ -15,7 +15,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/units"
 )
 
 func main() {

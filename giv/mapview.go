@@ -8,11 +8,10 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -61,13 +60,6 @@ type MapView struct {
 
 	// the map that we successfully set a toolbar for
 	ToolbarMap any `desc:"the map that we successfully set a toolbar for"`
-}
-
-var TypeMapView = kit.Types.AddType(&MapView{}, MapViewProps)
-
-// AddNewMapView adds a new mapview to given parent node, with given name.
-func AddNewMapView(parent ki.Ki, name string) *MapView {
-	return parent.AddNewChild(TypeMapView, name).(*MapView)
 }
 
 func (mv *MapView) OnInit() {
@@ -144,7 +136,7 @@ func (mv *MapView) UpdateValues() {
 
 // Config configures the view
 func (mv *MapView) Config() {
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
@@ -189,19 +181,19 @@ func (mv *MapView) KiPropTag() string {
 
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	sg := mv.MapGrid()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := kit.NonPtrValue(mpv)
+	mpvnp := laser.NonPtrValue(mpv)
 
-	valtyp := kit.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
+	valtyp := laser.NonPtrType(reflect.TypeOf(mv.Map)).Elem()
 	ncol := 3
 	ifaceType := false
 	typeTag := ""
@@ -218,13 +210,13 @@ func (mv *MapView) ConfigMapGrid() {
 		// dialog.. a bit hacky and indirect..
 	}
 
-	valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
-	valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
-	valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
+	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
+	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
+	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
 
 	mv.NCols = ncol
 
-	keys := kit.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
+	keys := laser.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
 		kv := ToValueView(key.Interface(), "")
 		if kv == nil { // shouldn't happen
@@ -232,14 +224,14 @@ func (mv *MapView) ConfigMapGrid() {
 		}
 		kv.SetMapKey(key, mv.Map, mv.TmpSave)
 
-		val := kit.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
-		keytxt := kit.ToString(key.Interface())
+		keytxt := laser.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
 		delnm := "del-" + keytxt
@@ -287,7 +279,7 @@ func (mv *MapView) ConfigMapGrid() {
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
-			vtyp := kit.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
+			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {
 				vtyp = strtyp // default to string
 			}
@@ -302,7 +294,7 @@ func (mv *MapView) ConfigMapGrid() {
 			})
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
-		delact.SetIcon(icons.Delete)
+		delact.SetIcon(gicons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.Style.Template = "giv.MapView.DelAction"
@@ -328,25 +320,25 @@ func (mv *MapView) SetChanged() {
 // MapChangeValueType changes the type of the value for given map element at
 // idx -- for maps with any values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
 	keyv := mv.Keys[idx]
-	ck := kit.NonPtrValue(keyv.Val()) // current key value
+	ck := laser.NonPtrValue(keyv.Val()) // current key value
 	valv := mv.Values[idx]
-	cv := kit.NonPtrValue(valv.Val()) // current val value
+	cv := laser.NonPtrValue(valv.Val()) // current val value
 
 	// create a new item of selected type, and attempt to convert existing to it
 	var evn reflect.Value
-	if kit.ValueIsZero(cv) {
-		evn = kit.MakeOfType(typ)
+	if laser.ValueIsZero(cv) {
+		evn = laser.MakeOfType(typ)
 	} else {
-		evn = kit.CloneToType(typ, cv.Interface())
+		evn = laser.CloneToType(typ, cv.Interface())
 	}
-	ov := kit.NonPtrValue(reflect.ValueOf(mv.Map))
+	ov := laser.NonPtrValue(reflect.ValueOf(mv.Map))
 	valv.AsValueViewBase().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
 	if mv.TmpSave != nil {
@@ -364,13 +356,13 @@ func (mv *MapView) ToggleSort() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapView) MapAdd() {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	kit.MapAdd(mv.Map)
+	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
@@ -382,15 +374,15 @@ func (mv *MapView) MapAdd() {
 
 // MapDelete deletes a key-value from the map
 func (mv *MapView) MapDelete(key reflect.Value) {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	kvi := kit.NonPtrValue(key).Interface()
+	kvi := laser.NonPtrValue(key).Interface()
 
-	kit.MapDeleteValue(mv.Map, kit.NonPtrValue(key))
+	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
@@ -402,7 +394,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 
 // ConfigToolbar configures the toolbar actions
 func (mv *MapView) ConfigToolbar() {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
@@ -419,18 +411,18 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update the view to reflect current state of map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
+		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: gicons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the map"},
 				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvv := recv.Embed(TypeMapView).(*MapView)
 					mvv.MapAdd()

@@ -4,22 +4,23 @@
 
 package gi
 
+//go:generate enumgen
+
 import (
 	"fmt"
 	"image"
 	"log"
 	"sync"
 
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 )
@@ -56,13 +57,6 @@ type WidgetBase struct {
 
 	// [view: -] mutex protecting updates to the style
 	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
-}
-
-var TypeWidgetBase = kit.Types.AddType(&WidgetBase{}, WidgetBaseProps)
-
-var WidgetBaseProps = ki.Props{
-	"base-type":     true,
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // KiAsWidget returns the given Ki object
@@ -983,13 +977,6 @@ type PartsWidgetBase struct {
 	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 }
 
-var TypePartsWidgetBase = kit.Types.AddType(&PartsWidgetBase{}, PartsWidgetBaseProps)
-
-var PartsWidgetBaseProps = ki.Props{
-	"base-type":     true,
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 func (wb *PartsWidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*PartsWidgetBase)
 	if !ok {
@@ -1065,7 +1052,7 @@ func (wb *PartsWidgetBase) Disconnect() {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gicons.Icon, txt string) (icIdx, lbIdx int) {
 	if wb.Style.Template != "" {
 		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
@@ -1087,7 +1074,7 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *kit.TypeAndNameList, icn
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
+func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
 		if wb.Style.Template != "" {
@@ -1113,7 +1100,7 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, 
 }
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm icons.Icon, txt string) bool {
+func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm gicons.Icon, txt string) bool {
 	if TheIconMgr.IsValid(icnm) {
 		ick := wb.Parts.ChildByName("icon", 0)
 		if ick == nil {

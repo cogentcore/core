@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -24,8 +24,6 @@ type IconValueView struct {
 	ValueViewBase
 }
 
-var TypeIconValueView = kit.Types.AddType(&IconValueView{}, nil)
-
 func (vv *IconValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -36,11 +34,11 @@ func (vv *IconValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
-	if icons.Icon(txt).IsNil() {
+	txt := laser.ToString(vv.Value.Interface())
+	if gicons.Icon(txt).IsNil() {
 		ac.SetIcon("blank")
 	} else {
-		ac.SetIcon(icons.Icon(txt))
+		ac.SetIcon(gicons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
@@ -75,7 +73,7 @@ func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.R
 	if vv.IsInactive() {
 		return
 	}
-	cur := icons.Icon(kit.ToString(vv.Value.Interface()))
+	cur := gicons.Icon(laser.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

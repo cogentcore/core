@@ -8,9 +8,9 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/kit"
 )
 
@@ -44,8 +44,6 @@ type MapViewInline struct {
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
-
-var TypeMapViewInline = kit.Types.AddType(&MapViewInline{}, MapViewInlineProps)
 
 func (mv *MapViewInline) OnInit() {
 	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
@@ -85,19 +83,19 @@ func (mv *MapViewInline) SetMap(mp any) {
 
 // ConfigParts configures Parts for the current map
 func (mv *MapViewInline) ConfigParts() {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
-	mpvnp := kit.NonPtrValue(mpv)
+	mpvnp := laser.NonPtrValue(mpv)
 
 	keys := mpvnp.MapKeys() // this is a slice of reflect.Value
-	kit.ValueSliceSort(keys, true)
+	laser.ValueSliceSort(keys, true)
 	for i, key := range keys {
 		if i >= MapInlineLen {
 			break
@@ -108,14 +106,14 @@ func (mv *MapViewInline) ConfigParts() {
 		}
 		kv.SetMapKey(key, mv.Map, mv.TmpSave)
 
-		val := kit.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
+		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
 		vv := ToValueView(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
 		vv.SetMapValue(val, mv.Map, key.Interface(), kv, mv.TmpSave, mv.ViewPath) // needs key value view to track updates
 
-		keytxt := kit.ToString(key.Interface())
+		keytxt := laser.ToString(key.Interface())
 		keynm := "key-" + keytxt
 		valnm := "value-" + keytxt
 
@@ -149,7 +147,7 @@ func (mv *MapViewInline) ConfigParts() {
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)
 	if err == nil {
 		adac := adack.(*gi.Action)
-		adac.SetIcon(icons.Add)
+		adac.SetIcon(gicons.Add)
 		adac.Tooltip = "add an entry to the map"
 		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
@@ -159,7 +157,7 @@ func (mv *MapViewInline) ConfigParts() {
 	edack, err := mv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon(icons.Edit)
+		edac.SetIcon(gicons.Edit)
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
@@ -174,7 +172,7 @@ func (mv *MapViewInline) ConfigParts() {
 				}
 				vpath = mvv.ViewPath + "/" + newPath
 			} else {
-				tmptyp := kit.NonPtrType(reflect.TypeOf(mvv.Map))
+				tmptyp := laser.NonPtrType(reflect.TypeOf(mvv.Map))
 				title = "Map of " + tmptyp.String()
 				// if tynm == "" {
 				// 	tynm = tmptyp.String()
@@ -206,13 +204,13 @@ func (mv *MapViewInline) SetChanged() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapViewInline) MapAdd() {
-	if kit.IfaceIsNil(mv.Map) {
+	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	kit.MapAdd(mv.Map)
+	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()

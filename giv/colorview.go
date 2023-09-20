@@ -14,13 +14,13 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
 )
@@ -49,13 +49,6 @@ type ColorView struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-}
-
-var TypeColorView = kit.Types.AddType(&ColorView{}, ColorViewProps)
-
-// AddNewColorView adds a new colorview to given parent node, with given name.
-func AddNewColorView(parent ki.Ki, name string) *ColorView {
-	return parent.AddNewChild(TypeColorView, name).(*ColorView)
 }
 
 func (cv *ColorView) OnInit() {
@@ -176,7 +169,7 @@ func (cv *ColorView) Config() {
 	})
 
 	rgbacopy := gi.AddNewButton(rgbalay, "rgbacopy")
-	rgbacopy.Icon = icons.ContentCopy
+	rgbacopy.Icon = gicons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -216,7 +209,7 @@ func (cv *ColorView) Config() {
 	})
 
 	hslacopy := gi.AddNewButton(hslalay, "hslacopy")
-	hslacopy.Icon = icons.ContentCopy
+	hslacopy.Icon = gicons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -266,7 +259,7 @@ func (cv *ColorView) Config() {
 	})
 
 	hexcopy := gi.AddNewButton(hexlay, "hexcopy")
-	hexcopy.Icon = icons.ContentCopy
+	hexcopy.Icon = gicons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -569,13 +562,6 @@ type ColorValueView struct {
 	TmpColor color.RGBA
 }
 
-var TypeColorValueView = kit.Types.AddType(&ColorValueView{}, nil)
-
-// AddNewColorValueView adds a new color value view to given parent node, with given name.
-func AddNewColorValueView(parent ki.Ki, name string) *ColorValueView {
-	return parent.AddNewChild(TypeColorValueView, name).(*ColorValueView)
-}
-
 // Color returns a standardized color value from whatever value is represented
 // internally
 func (vv *ColorValueView) Color() (*color.RGBA, bool) {
@@ -648,7 +634,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 
 	ac.SetText("Edit Color")
-	ac.SetIcon(icons.Colors)
+	ac.SetIcon(gicons.Colors)
 	ac.Tooltip = "Open color picker dialog"
 	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv, _ := recv.Embed(gi.TypeAction).(*gi.Action)
@@ -670,7 +656,7 @@ func (vv *ColorValueView) HasAction() bool {
 }
 
 func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(kit.NonPtrValue(vv.Value)) {
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
 	if vv.IsInactive() {
@@ -705,8 +691,6 @@ type ColorNameValueView struct {
 	ValueViewBase
 }
 
-var TypeColorNameValueView = kit.Types.AddType(&ColorNameValueView{}, nil)
-
 func (vv *ColorNameValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -717,7 +701,7 @@ func (vv *ColorNameValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
@@ -747,7 +731,7 @@ func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc
 	if vv.IsInactive() {
 		return
 	}
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	sl := make([]struct {
 		Name  string
 		Color color.RGBA

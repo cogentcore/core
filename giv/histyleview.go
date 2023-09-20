@@ -9,12 +9,12 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -26,8 +26,6 @@ type HiStyleValueView struct {
 	ValueViewBase
 }
 
-var TypeHiStyleValueView = kit.Types.AddType(&HiStyleValueView{}, nil)
-
 func (vv *HiStyleValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -38,7 +36,7 @@ func (vv *HiStyleValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	ac.SetText(txt)
 }
 
@@ -63,7 +61,7 @@ func (vv *HiStyleValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc k
 	if vv.IsInactive() {
 		return
 	}
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(vp, &histyle.StyleNames, cur, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

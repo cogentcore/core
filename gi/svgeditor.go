@@ -10,16 +10,15 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
 // Editor supports editing of SVG elements
 type Editor struct {
-	SVG
+	WidgetBase
 
 	// view translation offset (from dragging)
 	Trans mat32.Vec2 `desc:"view translation offset (from dragging)"`
@@ -29,17 +28,6 @@ type Editor struct {
 
 	// [view: -] has dragging cursor been set yet?
 	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
-}
-
-var TypeEditor = kit.Types.AddType(&Editor{}, EditorProps)
-
-var EditorProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeVpFlags,
-}
-
-// AddNewEditor adds a new editor to given parent node, with given name.
-func AddNewEditor(parent ki.Ki, name string) *Editor {
-	return parent.AddNewChild(TypeEditor, name).(*Editor)
 }
 
 func (g *Editor) CopyFieldsFrom(frm any) {

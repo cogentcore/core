@@ -14,12 +14,11 @@ import (
 	"log"
 	"sync"
 
-	"goki.dev/gi/v2/girl"
-	"goki.dev/gi/v2/gist"
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -117,12 +116,6 @@ type Viewport2D struct {
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
-var TypeViewport2D = kit.Types.AddType(&Viewport2D{}, Viewport2DProps)
-
-var Viewport2DProps = ki.Props{
-	ki.EnumTypeFlag: TypeVpFlags,
-}
-
 func (vp *Viewport2D) OnInit() {
 	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.BackgroundColor.SetSolid(ColorScheme.Background)
@@ -175,8 +168,6 @@ func (vp *Viewport2D) Resize(nwsz image.Point) {
 // VpFlags extend NodeBase NodeFlags to hold viewport state
 type VpFlags int
 
-var TypeVpFlags = kit.Enums.AddEnumExt(TypeNodeFlags, VpFlagsN, kit.BitFlag, nil)
-
 const (
 	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
 	// parent bounds (otherwise does)
@@ -227,8 +218,6 @@ const (
 	// (for sizing window for example) -- affects layout size computation
 	// only for Over
 	VpFlagPrefSizing
-
-	VpFlagsN
 )
 
 func (vp *Viewport2D) IsPopup() bool {

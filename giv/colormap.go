@@ -9,11 +9,10 @@ import (
 
 	"goki.dev/gi/v2/colormap"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -36,15 +35,6 @@ type ColorMapView struct {
 
 	// [view: -] signal for color map -- triggers when new color map is set via chooser
 	ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
-}
-
-var TypeColorMapView = kit.Types.AddType(&ColorMapView{}, nil)
-
-// AddNewColorMapView adds a new colorview to given parent node, with given name.
-func AddNewColorMapView(parent ki.Ki, name string, cmap *colormap.Map) *ColorMapView {
-	cv := parent.AddNewChild(TypeColorMapView, name).(*ColorMapView)
-	cv.Map = cmap
-	return cv
 }
 
 func (cv *ColorMapView) Disconnect() {
@@ -182,8 +172,6 @@ type ColorMapValueView struct {
 	ValueViewBase
 }
 
-var TypeColorMapValueView = kit.Types.AddType(&ColorMapValueView{}, nil)
-
 func (vv *ColorMapValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -194,7 +182,7 @@ func (vv *ColorMapValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	txt := kit.ToString(vv.Value.Interface())
+	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
@@ -225,7 +213,7 @@ func (vv *ColorMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc 
 		return
 	}
 	sl := colormap.AvailMapsList()
-	cur := kit.ToString(vv.Value.Interface())
+	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(vp, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

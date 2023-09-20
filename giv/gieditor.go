@@ -10,13 +10,12 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/matcolor"
 )
@@ -36,13 +35,6 @@ type GiEditor struct {
 
 	// current filename for saving / loading
 	Filename gi.FileName `desc:"current filename for saving / loading"`
-}
-
-var TypeGiEditor = kit.Types.AddType(&GiEditor{}, GiEditorProps)
-
-// AddNewGiEditor adds a new gieditor to given parent node, with given name.
-func AddNewGiEditor(parent ki.Ki, name string) *GiEditor {
-	return parent.AddNewChild(TypeGiEditor, name).(*GiEditor)
 }
 
 func (ge *GiEditor) OnInit() {
@@ -218,7 +210,7 @@ func (ge *GiEditor) Config() {
 	}
 	ge.Lay = gi.LayoutVert
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "title")
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
@@ -330,7 +322,7 @@ var GiEditorProps = ki.Props{
 	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
-			"icon": icons.Refresh,
+			"icon": gicons.Refresh,
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
 				act.SetEnabledStateUpdt(ge.Changed)
@@ -338,7 +330,7 @@ var GiEditorProps = ki.Props{
 		}},
 		{"sep-sel", ki.BlankProp{}},
 		{"ToggleSelectionMode", ki.Props{
-			"icon": icons.ArrowSelectorTool,
+			"icon": gicons.ArrowSelectorTool,
 			"desc": "Select an element in the window to edit it",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
@@ -356,7 +348,7 @@ var GiEditorProps = ki.Props{
 		{"sep-file", ki.BlankProp{}},
 		{"Open", ki.Props{
 			"label": "Open",
-			"icon":  icons.FileOpen,
+			"icon":  gicons.FileOpen,
 			"desc":  "Open a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -366,7 +358,7 @@ var GiEditorProps = ki.Props{
 			},
 		}},
 		{"Save", ki.Props{
-			"icon": icons.Save,
+			"icon": gicons.Save,
 			"desc": "Save json-formatted Ki tree structure to existing filename",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
@@ -375,7 +367,7 @@ var GiEditorProps = ki.Props{
 		}},
 		{"SaveAs", ki.Props{
 			"label": "Save As...",
-			"icon":  icons.SaveAs,
+			"icon":  gicons.SaveAs,
 			"desc":  "Save as a json-formatted Ki tree structure",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -387,7 +379,7 @@ var GiEditorProps = ki.Props{
 		{"sep-color", ki.BlankProp{}},
 		{"EditColorScheme", ki.Props{
 			"label": "Edit Color Scheme",
-			"icon":  icons.Colors,
+			"icon":  gicons.Colors,
 			"desc":  "View and edit the current color scheme",
 		}},
 	},

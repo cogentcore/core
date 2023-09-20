@@ -8,14 +8,13 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 )
 
 // Menu is a slice list of Node2D actions, which can contain sub-actions
@@ -47,7 +46,7 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 type ActOpts struct {
 	Name        string
 	Label       string
-	Icon        icons.Icon
+	Icon        gicons.Icon
 	Tooltip     string
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
@@ -67,7 +66,7 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 	ac.InitName(ac, nm)
 	ac.Text = opts.Label
 	ac.Tooltip = opts.Tooltip
-	ac.Icon = icons.Icon(opts.Icon)
+	ac.Icon = gicons.Icon(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
 		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
@@ -636,15 +635,6 @@ type Separator struct {
 
 	// is this a horizontal separator -- otherwise vertical
 	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
-}
-
-var TypeSeparator = kit.Types.AddType(&Separator{}, SeparatorProps)
-
-// AddNewSeparator adds a new separator to given parent node, with given name and Horiz (else Vert).
-func AddNewSeparator(parent ki.Ki, name string, horiz bool) *Separator {
-	sp := parent.AddNewChild(TypeSeparator, name).(*Separator)
-	sp.Horiz = horiz
-	return sp
 }
 
 func (sp *Separator) OnInit() {

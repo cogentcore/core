@@ -12,9 +12,8 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/oswin"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/dirs"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/pi/v2/spell"
 )
 
@@ -132,15 +131,13 @@ type Spell struct {
 	Vp *Viewport2D `desc:"the viewport where the current popup menu is presented"`
 }
 
-var TypeSpell = kit.Types.AddType(&Spell{}, nil)
-
 func (sc *Spell) Disconnect() {
 	sc.Node.Disconnect()
 	sc.SpellSig.DisconnectAll()
 }
 
 // SpellSignals are signals that are sent by Spell
-type SpellSignals int64
+type SpellSignals int64 //enums:enum
 
 const (
 	// SpellSelect means the user chose one of the possible corrections

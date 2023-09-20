@@ -12,18 +12,18 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )
@@ -68,25 +68,16 @@ type TreeView struct {
 	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 
 	// [view: show-name] optional icon, displayed to the the left of the text label
-	Icon icons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+	Icon gicons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 
 	// cached root of the view
 	RootView *TreeView `json:"-" xml:"-" desc:"cached root of the view"`
 }
 
-var TypeTreeView = kit.Types.AddType(&TreeView{}, nil)
-
 // We do this instead of direct setting in TypeTreeView declaration
 // because TreeViewProps references TypeTreeView, causing an init cycle.
 func init() {
-	kit.Types.SetProps(TypeTreeView, TreeViewProps)
-}
-
-// AddNewTreeView adds a new treeview to given parent node, with given name.
-func AddNewTreeView(parent ki.Ki, name string) *TreeView {
-	tv := parent.AddNewChild(TypeTreeView, name).(*TreeView)
-	tv.OpenDepth = 4
-	return tv
+	// kit.Types.SetProps(TypeTreeView, TreeViewProps)
 }
 
 func (tv *TreeView) OnInit() {
@@ -120,8 +111,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "branch":
 			cb := child.(*gi.CheckBox)
-			cb.Icon = icons.KeyboardArrowDown
-			cb.IconOff = icons.KeyboardArrowRight
+			cb.Icon = gicons.KeyboardArrowDown
+			cb.IconOff = gicons.KeyboardArrowRight
 			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
@@ -141,7 +132,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "menu":
 			menu := child.(*gi.Button)
-			menu.Indicator = icons.None
+			menu.Indicator = gicons.None
 		}
 	}
 }
@@ -216,7 +207,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	}
 	vcprop := "view-closed"
 	skids := *sk.Children()
-	tnl := make(kit.TypeAndNameList, 0, len(skids))
+	tnl := make(ki.TypeAndNameList, 0, len(skids))
 	typ := ki.Type(tv.This()) // always make our type
 	flds := make([]ki.Ki, 0)
 	fldClosed := make([]bool, 0)
@@ -225,11 +216,11 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 		tnl.Add(typ, "tv_"+k.Name())
 		ft := ki.FieldTag(sk.This(), k.Name(), vcprop)
 		cls := false
-		if vc, ok := kit.ToBool(ft); ok && vc {
+		if vc, ok := laser.ToBool(ft); ok && vc {
 			cls = true
 		} else {
 			if vcp, ok := k.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
-				if vc, ok := kit.ToBool(vcp); vc && ok {
+				if vc, ok := laser.ToBool(vcp); vc && ok {
 					cls = true
 				}
 			}
@@ -262,7 +253,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 		vk.SetSrcNode(skid, tvIdx, init, depth+1)
 		if mods {
 			if vcp, ok := skid.PropInherit(vcprop, ki.NoInherit, ki.TypeProps); ok {
-				if vc, ok := kit.ToBool(vcp); vc && ok {
+				if vc, ok := laser.ToBool(vcp); vc && ok {
 					vk.SetClosed()
 				}
 			}
@@ -282,7 +273,8 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
 	if data != nil {
 		dflags := data.(int64)
 		if gi.Update2DTrace {
-			fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.Path(), ki.NodeSignals(sig), send.Path(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(send.Flags(), ki.FlagsN))
+			// todo: fixme
+			// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.Path(), ki.NodeSignals(sig), send.Path(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(send.Flags(), ki.FlagsN))
 		}
 		if tv.This() == tv.RootView.This() && tv.HasFlag(int(TreeViewFlagUpdtRoot)) {
 			tv.SetFullReRender() // re-render for any updates on root node
@@ -379,7 +371,7 @@ func (tv *TreeView) UpdateInactive() bool {
 		tv.SetDisabled()
 	} else {
 		if inact, err := tv.SrcNode.PropTry("inactive"); err == nil {
-			if bo, ok := kit.ToBool(inact); bo && ok {
+			if bo, ok := laser.ToBool(inact); bo && ok {
 				tv.SetDisabled()
 			}
 		}
@@ -403,7 +395,7 @@ func (tv *TreeView) RootIsInactive() bool {
 // TreeViewSignals are signals that treeview can send -- these are all sent
 // from the root tree view widget node, with data being the relevant node
 // widget
-type TreeViewSignals int64
+type TreeViewSignals int64 //enums:enum
 
 const (
 	// node was selected
@@ -435,14 +427,10 @@ const (
 
 	// a node was deleted from the tree (Cut, DND Move)
 	TreeViewDeleted
-
-	TreeViewSignalsN
 )
 
 // TreeViewFlags extend NodeBase NodeFlags to hold TreeView state
-type TreeViewFlags int
-
-var TypeTreeViewFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, TreeViewFlagsN, kit.BitFlag, nil)
+type TreeViewFlags ki.Flags //enums:bitflag
 
 const (
 	// TreeViewFlagClosed means node is toggled closed (children not visible)
@@ -463,12 +451,10 @@ const (
 	// of the updating and makes it easy to trigger a full update by updating the root
 	// node, but can be slower when not needed
 	TreeViewFlagUpdtRoot
-
-	TreeViewFlagsN
 )
 
 // TreeViewStates are mutually-exclusive tree view states -- determines appearance
-type TreeViewStates int32
+type TreeViewStates int32 //enums:enum
 
 const (
 	// TreeViewActive is normal state -- there but not being interacted with
@@ -483,8 +469,6 @@ const (
 	// TreeViewInactive is inactive -- if SrcNode is nil, or source has "inactive" property
 	// set, or treeview node has inactive property set directly
 	TreeViewInactive
-
-	TreeViewStatesN
 )
 
 // TreeViewSelectors are Style selector names for the different states:
@@ -1266,7 +1250,7 @@ func (tv *TreeView) SrcEdit() {
 		log.Printf("TreeView SrcEdit nil SrcNode in: %v\n", tv.Path())
 		return
 	}
-	tynm := kit.NonPtrType(ki.Type(tv.SrcNode)).Name()
+	tynm := laser.NonPtrType(ki.Type(tv.SrcNode)).Name()
 	StructViewDialog(tv.Viewport, tv.SrcNode, DlgOpts{Title: tynm}, nil, nil)
 }
 
@@ -1914,7 +1898,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 func (tv *TreeView) ConfigParts() {
 	tv.Parts.Lay = gi.LayoutHoriz
 	tv.Parts.Style.Template = "giv.TreeView.Parts"
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.TypeCheckBox, "branch")
 	}

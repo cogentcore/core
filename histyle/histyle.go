@@ -8,6 +8,8 @@
 // and cannot be imported there; is imported into goki/gi/giv.
 package histyle
 
+//go:generate goki generate -add-types
+
 import (
 	"encoding/json"
 	"image/color"
@@ -17,22 +19,19 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/token"
 )
 
 // Trilean value for StyleEntry value inheritance.
-type Trilean uint8
+type Trilean uint8 //enums:enum
 
 const (
 	Pass Trilean = iota
 	Yes
 	No
-
-	TrileanN
 )
 
 func (t Trilean) Prefix(s string) string {
@@ -43,13 +42,6 @@ func (t Trilean) Prefix(s string) string {
 	}
 	return ""
 }
-
-//go:generate stringer -output stringer.go -type=Trilean
-
-var TypeTrilean = kit.Enums.AddEnumAltLower(TrileanN, kit.NotBitFlag, nil, "")
-
-func (ev Trilean) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Trilean) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // StyleEntry is one value in the map of highlight style values
 type StyleEntry struct {
@@ -74,12 +66,6 @@ type StyleEntry struct {
 
 	// don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited
 	NoInherit bool `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
-}
-
-var TypeStyleEntry = kit.Types.AddType(&StyleEntry{}, StyleEntryProps)
-
-var StyleEntryProps = ki.Props{
-	"inline": true,
 }
 
 // // FromChroma copies styles from chroma
@@ -248,8 +234,6 @@ func (s StyleEntry) IsZero() bool {
 // Style is a full style map of styles for different token.Tokens tag values
 type Style map[token.Tokens]*StyleEntry
 
-var TypeStyle = kit.Types.AddType(&Style{}, StyleProps)
-
 // CopyFrom copies a style from source style
 func (hs *Style) CopyFrom(ss *Style) {
 	if ss == nil {
@@ -379,7 +363,7 @@ var StyleProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  icons.FileOpen,
+			"icon":  gicons.FileOpen,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -389,7 +373,7 @@ var StyleProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  icons.SaveAs,
+			"icon":  gicons.SaveAs,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{

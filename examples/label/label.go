@@ -7,8 +7,8 @@ package main
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
 )
 

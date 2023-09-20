@@ -12,10 +12,10 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
 )
@@ -204,30 +204,30 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 
 	menu := gi.Menu{}
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
+	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Icon: gicons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
-	mi2 := menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil, nil)
+	mi2 := menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Icon: gicons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil, nil)
 
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Icon: gicons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	menu.AddSeparator("sep1")
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
+	menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Icon: gicons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
-	ics := []icons.Icon{
-		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite,
-		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh,
-		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort,
-		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith,
+	ics := []gicons.Icon{
+		gicons.Search, gicons.Home, gicons.Close, gicons.Done, gicons.Favorite,
+		gicons.Add, gicons.Delete, gicons.ArrowBack, gicons.Info, gicons.Refresh,
+		gicons.Menu, gicons.Settings, gicons.AccountCircle, gicons.Download, gicons.Sort,
+		gicons.Undo, gicons.OpenInFull, gicons.IosShare, gicons.LibraryAdd, gicons.OpenWith,
 	}
 
 	for typ := gi.ButtonTypes(0); typ < gi.ButtonTypesN; typ++ {
@@ -324,13 +324,13 @@ func makeInputs(tv *gi.TabView) {
 	tffcs.Placeholder = "Filled Text Field"
 	tffcs.Type = gi.TextFieldFilled
 	tffcs.AddClearAction()
-	tffcs.LeadingIcon = icons.Search
+	tffcs.LeadingIcon = gicons.Search
 
 	tfocs := gi.AddNewTextField(inputs, "tfocs")
 	tfocs.Placeholder = "Outlined Text Field"
 	tfocs.Type = gi.TextFieldOutlined
 	tfocs.AddClearAction()
-	tfocs.LeadingIcon = icons.Search
+	tfocs.LeadingIcon = gicons.Search
 
 	tffp := gi.AddNewTextField(inputs, "tffp")
 	tffp.Placeholder = "Password Text Field"

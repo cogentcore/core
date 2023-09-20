@@ -16,7 +16,7 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 )
 
 var (

@@ -9,7 +9,7 @@ import (
 	"image"
 	"reflect"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/vdraw"

@@ -10,8 +10,8 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 )
 
 func main() {

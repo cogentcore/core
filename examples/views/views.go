@@ -11,8 +11,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/units"
 
 	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
@@ -30,7 +30,7 @@ func main() {
 type TableStruct struct {
 
 	// an icon
-	Icon icons.Icon `desc:"an icon"`
+	Icon gicons.Icon `desc:"an icon"`
 
 	// an integer field
 	IntField int `desc:"an integer field"`

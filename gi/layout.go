@@ -12,15 +12,15 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/units"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -201,19 +201,6 @@ type Layout struct {
 	ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
-var TypeLayout = kit.Types.AddType(&Layout{}, LayoutProps)
-
-var LayoutProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
-// AddNewLayout adds a new layout to given parent node, with given name and layout
-func AddNewLayout(parent ki.Ki, name string, layout Layouts) *Layout {
-	ly := parent.AddNewChild(TypeLayout, name).(*Layout)
-	ly.Lay = layout
-	return ly
-}
-
 func (ly *Layout) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Layout)
 	if !ok {
@@ -228,7 +215,7 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 }
 
 // Layouts are the different types of layouts
-type Layouts int32
+type Layouts int32 //enums:enum
 
 const (
 	// LayoutHoriz arranges items horizontally across a row
@@ -261,28 +248,15 @@ const (
 	// LayoutNil is a nil layout -- doesn't do anything -- for cases when a
 	// parent wants to take over the job of the layout
 	LayoutNil
-
-	LayoutsN
 )
 
-var TypeLayouts = kit.Enums.AddEnumAltLower(LayoutsN, kit.NotBitFlag, gist.StylePropProps, "Layout")
-
-func (ev Layouts) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *Layouts) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
-
 // row / col for grid data
-type RowCol int32
+type RowCol int32 //enums:enum
 
 const (
 	Row RowCol = iota
 	Col
-	RowColN
 )
-
-var TypeRowCol = kit.Enums.AddEnumAltLower(RowColN, kit.NotBitFlag, gist.StylePropProps, "")
-
-func (ev RowCol) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *RowCol) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }
 
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout
@@ -1153,7 +1127,7 @@ func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport2D) {
 			case Layouts:
 				ly.Lay = vt
 			default:
-				if iv, ok := kit.ToInt(val); ok {
+				if iv, ok := laser.ToInt(val); ok {
 					ly.Lay = Layouts(iv)
 				} else {
 					gist.StyleSetError(key, val)
@@ -1182,13 +1156,13 @@ func (ly *Layout) StyleLayout() {
 	if !hasTempl || saveTempl {
 		ly.Style2DWidget()
 	}
-	ly.StyleFromProps(ly.Props, ly.Viewport)           // does "lay" and "spacing", in layoutstyles.go
-	tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
-	if len(tprops) > 0 {
-		kit.TypesMu.RLock()
-		ly.StyleFromProps(tprops, ly.Viewport)
-		kit.TypesMu.RUnlock()
-	}
+	ly.StyleFromProps(ly.Props, ly.Viewport) // does "lay" and "spacing", in layoutstyles.go
+	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
+	// if len(tprops) > 0 {
+	// 	kit.TypesMu.RLock()
+	// 	ly.StyleFromProps(tprops, ly.Viewport)
+	// 	kit.TypesMu.RUnlock()
+	// }
 	ly.StyleToDots(&ly.Style.UnContext)
 	if hasTempl && saveTempl {
 		ly.Style.SaveTemplate()
@@ -1324,13 +1298,6 @@ type Stretch struct {
 	WidgetBase
 }
 
-var TypeStretch = kit.Types.AddType(&Stretch{}, StretchProps)
-
-// AddNewStretch adds a new stretch to given parent node, with given name.
-func AddNewStretch(parent ki.Ki, name string) *Stretch {
-	return parent.AddNewChild(TypeStretch, name).(*Stretch)
-}
-
 func (st *Stretch) OnInit() {
 	st.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
@@ -1341,10 +1308,6 @@ func (st *Stretch) OnInit() {
 func (st *Stretch) CopyFieldsFrom(frm any) {
 	fr := frm.(*Stretch)
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
-
-var StretchProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (st *Stretch) Style2D() {
@@ -1370,13 +1333,6 @@ func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
 // width / height property to change
 type Space struct {
 	WidgetBase
-}
-
-var TypeSpace = kit.Types.AddType(&Space{}, SpaceProps)
-
-// AddNewSpace adds a new space to given parent node, with given name.
-func AddNewSpace(parent ki.Ki, name string) *Space {
-	return parent.AddNewChild(TypeSpace, name).(*Space)
 }
 
 func (sp *Space) OnInit() {

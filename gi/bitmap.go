@@ -7,21 +7,17 @@ package gi
 import (
 	"fmt"
 	"image"
-	"image/jpeg"
 	"image/png"
 	"io/fs"
 	"log"
 	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
@@ -45,13 +41,6 @@ type Bitmap struct {
 
 	// [view: -] the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
-}
-
-var TypeBitmap = kit.Types.AddType(&Bitmap{}, BitmapProps)
-
-// AddNewBitmap adds a new bitmap to given parent node, with given name.
-func AddNewBitmap(parent ki.Ki, name string) *Bitmap {
-	return parent.AddNewChild(TypeBitmap, name).(*Bitmap)
 }
 
 func (bm *Bitmap) OnInit() {
@@ -87,7 +76,7 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
-	img, err := OpenImage(string(filename))
+	img, err := girl.OpenImage(string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -214,17 +203,6 @@ func GrabRenderFrom(nii Node2D) *image.RGBA {
 	return img
 }
 
-// OpenImage opens an image from given path filename -- format is inferred automatically.
-func OpenImage(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	im, _, err := image.Decode(file)
-	return im, err
-}
-
 // OpenImageFS opens an image from given path filename -- format is inferred automatically.
 func OpenImageFS(fsys fs.FS, fname string) (image.Image, error) {
 	file, err := fsys.Open(fname)
@@ -242,24 +220,6 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 		return rg
 	}
 	return clone.AsRGBA(img)
-}
-
-// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
-// supported by default.
-func SaveImage(path string, im image.Image) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext == ".png" {
-		return png.Encode(file, im)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
-	} else {
-		return fmt.Errorf("gi.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
-	}
 }
 
 // OpenPNG opens an image encoded in the PNG format
@@ -344,7 +304,7 @@ var BitmapProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": icons.FileOpen,
+			"icon": gicons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

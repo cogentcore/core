@@ -11,10 +11,9 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/ki/v2"
 )
 
 // basicviews contains all the ValueView's for basic builtin types
@@ -27,8 +26,6 @@ type StructValueView struct {
 	ValueViewBase
 }
 
-var TypeStructValueView = kit.Types.AddType(&StructValueView{}, nil)
-
 func (vv *StructValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -39,11 +36,11 @@ func (vv *StructValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	npv := kit.NonPtrValue(vv.Value)
-	if kit.ValueIsZero(vv.Value) || kit.ValueIsZero(npv) {
+	npv := laser.NonPtrValue(vv.Value)
+	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
 		ac.SetText("nil")
 	} else {
-		opv := kit.OnePtrUnderlyingValue(vv.Value)
+		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
 			ac.SetText(lbler.Label())
 		} else {
@@ -61,7 +58,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = icons.Edit
+	ac.Icon = gicons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
@@ -81,7 +78,7 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	opv := kit.OnePtrUnderlyingValue(vv.Value)
+	opv := laser.OnePtrUnderlyingValue(vv.Value)
 	desc, _ := vv.Tag("desc")
 	if desc == "list" { // todo: not sure where this comes from but it is uninformative
 		desc = ""
@@ -103,8 +100,6 @@ func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Re
 type StructInlineValueView struct {
 	ValueViewBase
 }
-
-var TypeStructInlineValueView = kit.Types.AddType(&StructInlineValueView{}, nil)
 
 func (vv *StructInlineValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = TypeStructViewInline
@@ -153,8 +148,6 @@ type SliceValueView struct {
 	ElIsStruct bool         // whether non-pointer element type is a struct or not
 }
 
-var TypeSliceValueView = kit.Types.AddType(&SliceValueView{}, nil)
-
 func (vv *SliceValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -165,7 +158,7 @@ func (vv *SliceValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
 		txt = fmt.Sprintf("Slice: %T", npv.Interface())
@@ -183,13 +176,13 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
-	vv.IsArray = kit.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
-	if slci != nil && !kit.IfaceIsNil(slci) {
-		vv.ElType = kit.SliceElType(slci)
-		vv.ElIsStruct = (kit.NonPtrType(vv.ElType).Kind() == reflect.Struct)
+	vv.IsArray = laser.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
+	if slci != nil && !laser.IfaceIsNil(slci) {
+		vv.ElType = laser.SliceElType(slci)
+		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = icons.Edit
+	ac.Icon = gicons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
@@ -210,7 +203,7 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
-	vvp := kit.OnePtrValue(vv.Value)
+	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
 		log.Printf("giv.SliceValueView: Cannot view slices with non-pointer struct elements\n")
 		return
@@ -251,8 +244,6 @@ func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.Rec
 type SliceInlineValueView struct {
 	ValueViewBase
 }
-
-var TypeSliceInlineValueView = kit.Types.AddType(&SliceInlineValueView{}, nil)
 
 func (vv *SliceInlineValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = TypeSliceViewInline
@@ -298,8 +289,6 @@ type MapValueView struct {
 	ValueViewBase
 }
 
-var TypeMapValueView = kit.Types.AddType(&MapValueView{}, nil)
-
 func (vv *MapValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeAction
 	return vv.WidgetTyp
@@ -310,13 +299,13 @@ func (vv *MapValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	mpi := vv.Value.Interface()
 	txt := ""
 	if npv.Kind() == reflect.Interface {
 		txt = fmt.Sprintf("Map: %T", npv.Interface())
 	} else {
-		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), kit.MapKeyType(mpi).String(), kit.MapValueType(mpi).String())
+		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), laser.MapKeyType(mpi).String(), laser.MapValueType(mpi).String())
 	}
 	ac.SetText(txt)
 }
@@ -325,7 +314,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = icons.Edit
+	ac.Icon = gicons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
@@ -368,8 +357,6 @@ func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvF
 type MapInlineValueView struct {
 	ValueViewBase
 }
-
-var TypeMapInlineValueView = kit.Types.AddType(&MapInlineValueView{}, nil)
 
 func (vv *MapInlineValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = TypeMapViewInline
@@ -414,8 +401,6 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
 type KiPtrValueView struct {
 	ValueViewBase
 }
-
-var TypeKiPtrValueView = kit.Types.AddType(&KiPtrValueView{}, nil)
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeButton
@@ -463,7 +448,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.Button)
-	mb.Indicator = icons.KeyboardArrowDown
+	mb.Indicator = gicons.KeyboardArrowDown
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
@@ -513,8 +498,6 @@ type BoolValueView struct {
 	ValueViewBase
 }
 
-var TypeBoolValueView = kit.Types.AddType(&BoolValueView{}, nil)
-
 func (vv *BoolValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeCheckBox
 	return vv.WidgetTyp
@@ -525,8 +508,8 @@ func (vv *BoolValueView) UpdateWidget() {
 		return
 	}
 	cb := vv.Widget.(*gi.CheckBox)
-	npv := kit.NonPtrValue(vv.Value)
-	bv, _ := kit.ToBool(npv.Interface())
+	npv := laser.NonPtrValue(vv.Value)
+	bv, _ := laser.ToBool(npv.Interface())
 	cb.SetChecked(bv)
 }
 
@@ -556,8 +539,6 @@ type IntValueView struct {
 	ValueViewBase
 }
 
-var TypeIntValueView = kit.Types.AddType(&IntValueView{}, nil)
-
 func (vv *IntValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeSpinBox
 	return vv.WidgetTyp
@@ -568,8 +549,8 @@ func (vv *IntValueView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.SpinBox)
-	npv := kit.NonPtrValue(vv.Value)
-	fv, ok := kit.ToFloat32(npv.Interface())
+	npv := laser.NonPtrValue(vv.Value)
+	fv, ok := laser.ToFloat32(npv.Interface())
 	if ok {
 		sb.SetValue(fv)
 	}
@@ -592,19 +573,19 @@ func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
 		sb.SetMin(0)
 	}
 	if mintag, ok := vv.Tag("min"); ok {
-		minv, ok := kit.ToFloat32(mintag)
+		minv, ok := laser.ToFloat32(mintag)
 		if ok {
 			sb.SetMin(minv)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, ok := kit.ToFloat32(maxtag)
+		maxv, ok := laser.ToFloat32(maxtag)
 		if ok {
 			sb.SetMax(maxv)
 		}
 	}
 	if steptag, ok := vv.Tag("step"); ok {
-		step, ok := kit.ToFloat32(steptag)
+		step, ok := laser.ToFloat32(steptag)
 		if ok {
 			sb.Step = step
 		}
@@ -630,8 +611,6 @@ type FloatValueView struct {
 	ValueViewBase
 }
 
-var TypeFloatValueView = kit.Types.AddType(&FloatValueView{}, nil)
-
 func (vv *FloatValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeSpinBox
 	return vv.WidgetTyp
@@ -642,8 +621,8 @@ func (vv *FloatValueView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.SpinBox)
-	npv := kit.NonPtrValue(vv.Value)
-	fv, ok := kit.ToFloat32(npv.Interface())
+	npv := laser.NonPtrValue(vv.Value)
+	fv, ok := laser.ToFloat32(npv.Interface())
 	if ok {
 		sb.SetValue(fv)
 	}
@@ -658,14 +637,14 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
-		minv, ok := kit.ToFloat32(mintag)
+		minv, ok := laser.ToFloat32(mintag)
 		if ok {
 			sb.HasMin = true
 			sb.Min = minv
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, ok := kit.ToFloat32(maxtag)
+		maxv, ok := laser.ToFloat32(maxtag)
 		if ok {
 			sb.HasMax = true
 			sb.Max = maxv
@@ -673,7 +652,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
 	}
 	sb.Step = .1 // smaller default
 	if steptag, ok := vv.Tag("step"); ok {
-		step, ok := kit.ToFloat32(steptag)
+		step, ok := laser.ToFloat32(steptag)
 		if ok {
 			sb.Step = step
 		}
@@ -701,8 +680,6 @@ type EnumValueView struct {
 	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-var TypeEnumValueView = kit.Types.AddType(&EnumValueView{}, nil)
-
 func (vv *EnumValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeComboBox
 	return vv.WidgetTyp
@@ -714,13 +691,13 @@ func (vv *EnumValueView) EnumType() reflect.Type {
 	}
 	// derive type indirectly from the interface instead of directly from the value
 	// because that works for any types as in property maps
-	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
+	typ := laser.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
 	return typ
 }
 
 func (vv *EnumValueView) SetEnumValueFromInt(ival int64) bool {
 	typ := vv.EnumType()
-	eval := kit.EnumIfaceFromInt64(ival, typ)
+	eval := laser.EnumIfaceFromInt64(ival, typ)
 	return vv.SetValue(eval)
 }
 
@@ -729,8 +706,8 @@ func (vv *EnumValueView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.ComboBox)
-	npv := kit.NonPtrValue(vv.Value)
-	iv, ok := kit.ToInt(npv.Interface())
+	npv := laser.NonPtrValue(vv.Value)
+	iv, ok := laser.ToInt(npv.Interface())
 	if ok {
 		sb.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
 	}
@@ -748,7 +725,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
 	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeEnumValueView).(*EnumValueView)
 		cbb := vvv.Widget.(*gi.ComboBox)
-		eval := cbb.CurVal.(kit.EnumValue)
+		eval := cbb.CurVal.(laser.EnumValue)
 		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
 			vvv.UpdateWidget()
 		}
@@ -765,8 +742,6 @@ type BitFlagView struct {
 	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-var TypeBitFlagView = kit.Types.AddType(&BitFlagView{}, nil)
-
 func (vv *BitFlagView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeButtonBox
 	return vv.WidgetTyp
@@ -778,13 +753,13 @@ func (vv *BitFlagView) EnumType() reflect.Type {
 	}
 	// derive type indirectly from the interface instead of directly from the value
 	// because that works for any types as in property maps
-	typ := kit.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
+	typ := laser.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
 	return typ
 }
 
 func (vv *BitFlagView) SetEnumValueFromInt(ival int64) bool {
 	typ := vv.EnumType()
-	eval := kit.EnumIfaceFromInt64(ival, typ)
+	eval := laser.EnumIfaceFromInt64(ival, typ)
 	return vv.SetValue(eval)
 }
 
@@ -793,8 +768,8 @@ func (vv *BitFlagView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.ButtonBox)
-	npv := kit.NonPtrValue(vv.Value)
-	iv, ok := kit.ToInt(npv.Interface())
+	npv := laser.NonPtrValue(vv.Value)
+	iv, ok := laser.ToInt(npv.Interface())
 	if ok {
 		typ := vv.EnumType()
 		sb.UpdateFromBitFlags(typ, int64(iv))
@@ -831,8 +806,6 @@ type TypeValueView struct {
 	ValueViewBase
 }
 
-var TypeTypeValueView = kit.Types.AddType(&TypeValueView{}, nil)
-
 func (vv *TypeValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeComboBox
 	return vv.WidgetTyp
@@ -843,7 +816,7 @@ func (vv *TypeValueView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.ComboBox)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	typ, ok := npv.Interface().(reflect.Type)
 	if ok {
 		sb.SetCurVal(typ)
@@ -866,13 +839,13 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
 		}
 	}
 	if tetag, ok := vv.Tag("type-embeds"); ok {
-		typ := kit.Types.Type(tetag)
+		typ := laser.Types.Type(tetag)
 		if typ != nil {
 			typEmbeds = typ
 		}
 	}
 
-	tl := kit.Types.AllEmbedsOf(typEmbeds, true, false)
+	tl := laser.Types.AllEmbedsOf(typEmbeds, true, false)
 	cb.ItemsFromTypes(tl, false, true, 50)
 
 	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -894,8 +867,6 @@ type ByteSliceValueView struct {
 	ValueViewBase
 }
 
-var TypeByteSliceValueView = kit.Types.AddType(&ByteSliceValueView{}, nil)
-
 func (vv *ByteSliceValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
@@ -906,7 +877,7 @@ func (vv *ByteSliceValueView) UpdateWidget() {
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	bv, ok := npv.Interface().([]byte)
 	if ok {
 		tf.SetText(string(bv))
@@ -945,8 +916,6 @@ type RuneSliceValueView struct {
 	ValueViewBase
 }
 
-var TypeRuneSliceValueView = kit.Types.AddType(&RuneSliceValueView{}, nil)
-
 func (vv *RuneSliceValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
@@ -957,7 +926,7 @@ func (vv *RuneSliceValueView) UpdateWidget() {
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	rv, ok := npv.Interface().([]rune)
 	if ok {
 		tf.SetText(string(rv))
@@ -995,8 +964,6 @@ type NilValueView struct {
 	ValueViewBase
 }
 
-var TypeNilValueView = kit.Types.AddType(&NilValueView{}, nil)
-
 func (vv *NilValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeLabel
 	return vv.WidgetTyp
@@ -1007,11 +974,11 @@ func (vv *NilValueView) UpdateWidget() {
 		return
 	}
 	sb := vv.Widget.(*gi.Label)
-	npv := kit.NonPtrValue(vv.Value)
+	npv := laser.NonPtrValue(vv.Value)
 	tstr := ""
-	if !kit.ValueIsZero(npv) {
+	if !laser.ValueIsZero(npv) {
 		tstr = npv.String() // npv.Type().String()
-	} else if !kit.ValueIsZero(vv.Value) {
+	} else if !laser.ValueIsZero(vv.Value) {
 		tstr = vv.Value.String() // vv.Value.Type().String()
 	}
 	sb.SetText("nil " + tstr)
@@ -1035,8 +1002,6 @@ type TimeValueView struct {
 	ValueViewBase
 }
 
-var TypeTimeValueView = kit.Types.AddType(&TimeValueView{}, nil)
-
 func (vv *TimeValueView) WidgetType() reflect.Type {
 	vv.WidgetTyp = gi.TypeTextField
 	return vv.WidgetTyp
@@ -1044,7 +1009,7 @@ func (vv *TimeValueView) WidgetType() reflect.Type {
 
 // TimeVal decodes Value into a *time.Time value -- also handles FileTime case
 func (vv *TimeValueView) TimeVal() *time.Time {
-	tmi := kit.PtrValue(vv.Value).Interface()
+	tmi := laser.PtrValue(vv.Value).Interface()
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v

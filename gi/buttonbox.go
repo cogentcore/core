@@ -9,12 +9,12 @@ import (
 	"image"
 	"reflect"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 	"goki.dev/ki/v2/bitflag"
 	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/ki/v2/sliceclone"
 )
@@ -37,13 +37,6 @@ type ButtonBox struct {
 
 	// [view: -] signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
-}
-
-var TypeButtonBox = kit.Types.AddType(&ButtonBox{}, ButtonBoxProps)
-
-// AddNewButtonBox adds a new button to given parent node, with given name.
-func AddNewButtonBox(parent ki.Ki, name string) *ButtonBox {
-	return parent.AddNewChild(TypeButtonBox, name).(*ButtonBox)
 }
 
 func (bb *ButtonBox) OnInit() {
@@ -203,8 +196,8 @@ func (bb *ButtonBox) ConfigItems() {
 			cb.Tooltip = bb.Tooltips[i]
 		}
 		if bb.Mutex {
-			cb.Icon = icons.RadioButtonChecked
-			cb.IconOff = icons.RadioButtonUnchecked
+			cb.Icon = gicons.RadioButtonChecked
+			cb.IconOff = gicons.RadioButtonUnchecked
 		}
 		cb.SetProp("index", i)
 		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -228,7 +221,7 @@ func (bb *ButtonBox) ConfigParts() {
 		bb.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	for _, lb := range bb.Items {
 		config.Add(TypeCheckBox, lb)
 	}

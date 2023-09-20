@@ -10,12 +10,12 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/gist"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/svg"
-	"goki.dev/gi/v2/units"
+	"goki.dev/gicons"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/ki/v2/ki"
+	"goki.dev/svg"
 )
 
 func main() {
@@ -98,7 +98,7 @@ func mainrun() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, win.This(),
+	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: gicons.FileOpen}, win.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
@@ -112,7 +112,7 @@ func mainrun() {
 	zmlb.SetProp("vertical-align", gist.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
-	zoomout := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
+	zoomout := tbar.AddAction(gi.ActOpts{Icon: gicons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
@@ -134,7 +134,7 @@ func mainrun() {
 		win.FullReRender()
 	})
 
-	zoomin := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
+	zoomin := tbar.AddAction(gi.ActOpts{Icon: gicons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()

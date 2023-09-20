@@ -6,10 +6,9 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -26,13 +25,6 @@ type TwinTextViews struct {
 
 	// textbuf for B
 	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"`
-}
-
-var TypeTwinTextViews = kit.Types.AddType(&TwinTextViews{}, TwinTextViewsProps)
-
-// AddNewTwinTextViews adds a new diffview to given parent node, with given name.
-func AddNewTwinTextViews(parent ki.Ki, name string) *TwinTextViews {
-	return parent.AddNewChild(TypeTwinTextViews, name).(*TwinTextViews)
 }
 
 func (tv *TwinTextViews) OnInit() {
@@ -85,7 +77,7 @@ func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
 
 func (tv *TwinTextViews) ConfigTexts() {
 	tv.MakeBufs()
-	config := kit.TypeAndNameList{}
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLayout, "text-a-lay")
 	config.Add(gi.TypeLayout, "text-b-lay")
 	mods, updt := tv.ConfigChildren(config)
