@@ -129,7 +129,7 @@ type Window interface {
 
 	// Flags returns the bit flags for this window's properties set according
 	// to WindowFlags bits.
-	Flags() int64
+	Flags() WindowFlags
 
 	// IsDialog returns true if this is a dialog window.
 	IsDialog() bool
