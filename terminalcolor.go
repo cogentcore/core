@@ -7,6 +7,8 @@ package goosi
 import (
 	"fmt"
 	"image/color"
+	"io"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -23,10 +25,15 @@ func TerminalColor() (color.RGBA, error) {
 	if err != nil {
 		return color.RGBA{}, fmt.Errorf("error running command to get terminal color: %w; output: %s", err, out)
 	}
+	si := ""
+	fmt.Println(io.ReadAll(os.Stdin))
+	fmt.Println("si", si)
+	fmt.Println(out)
 	s := string(out)
 	fmt.Printf("init %q\n", s)
 	s = strings.TrimPrefix(s, "\x1b]")
 	s = strings.TrimPrefix(s, "11;rgb:")
 	fmt.Printf("after %q\n", s)
+	fmt.Println(strings.Contains(s, "1818"))
 	return color.RGBA{}, nil
 }
