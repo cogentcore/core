@@ -19,7 +19,7 @@ func TestThemeIsDark(t *testing.T) {
 }
 
 func TestMonitorTheme(t *testing.T) {
-	// t.Skip("comment this out to monitor theme changes (which uses a function that will never return)")
+	// t.Skip("comment this out to monitor theme changes (which will last for 10 seconds)")
 	fmt.Println("monitoring IsDark for 10 seconds")
 	done := make(chan struct{})
 	ec, err := IsDarkMonitor(func(isDark bool) {
