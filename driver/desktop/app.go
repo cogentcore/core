@@ -19,11 +19,10 @@ import (
 	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/clip"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/window"
-	"goki.dev/ki/v2/bitflag"
+	"goki.dev/goosi"
+	"goki.dev/goosi/clip"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -249,7 +248,7 @@ func (app *appImpl) NewWindow(opts *oswin.NewWindowOptions) (oswin.Window, error
 		w.Draw.ConfigSurface(w.Surface, vgpu.MaxTexturesPerSet) // note: can expand
 	})
 
-	bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused
+	// bitflag.SetAtomic(&w.Flag, int(oswin.Focus)) // starts out focused
 
 	app.mu.Lock()
 	app.windows[glw] = w

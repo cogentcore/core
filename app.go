@@ -12,8 +12,8 @@ package goosi
 //go:generate enumgen
 
 import (
-	"goki.dev/gi/v2/oswin/clip"
-	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/goosi/clip"
+	"goki.dev/goosi/cursor"
 )
 
 // TheApp is the current oswin App -- only ever one in effect

@@ -3,7 +3,7 @@ package mobile
 import (
 	"sync"
 
-	"goki.dev/gi/v2/oswin/cursor"
+	"goki.dev/goosi/cursor"
 )
 
 /////////////////////////////////////////////////////////////////

@@ -10,7 +10,7 @@ import "C"
 
 import (
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/driver/mobile"
+	"goki.dev/goosi/driver/mobile"
 )
 
 func driverMain(f func(oswin.App)) {

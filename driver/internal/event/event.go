@@ -13,7 +13,7 @@ package event
 import (
 	"sync"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 )
 
 // Deque is an infinitely buffered double-ended queue of events. The zero value

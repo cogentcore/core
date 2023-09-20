@@ -13,8 +13,7 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/ki/v2/bitflag"
+	"goki.dev/girl/gist"
 	"goki.dev/vgpu/v2/vdraw"
 )
 
@@ -270,6 +269,7 @@ func (w *WindowBase) Flags() int64 {
 	return w.Flag
 }
 
+/*
 func (w *WindowBase) IsDialog() bool {
 	return bitflag.HasAtomic(&w.Flag, int(Dialog))
 }
@@ -293,6 +293,7 @@ func (w *WindowBase) IsMinimized() bool {
 func (w *WindowBase) IsFocus() bool {
 	return bitflag.HasAtomic(&w.Flag, int(Focus))
 }
+*/
 
 func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
 	w.DestroyGPUfunc = f
@@ -354,6 +355,7 @@ type NewWindowOptions struct {
 	Flags int64
 }
 
+/*
 func (o *NewWindowOptions) SetDialog() {
 	bitflag.Set(&o.Flags, int(Dialog))
 }
@@ -377,6 +379,7 @@ func WindowFlagsToBool(flags int64) (dialog, modal, tool, fullscreen bool) {
 	fullscreen = bitflag.Has(flags, int(Fullscreen))
 	return
 }
+*/
 
 // GetTitle returns a sanitized form of o.Title. In particular, its length will
 // not exceed 4096, and it may be further truncated so that it is valid UTF-8

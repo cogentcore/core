@@ -15,9 +15,9 @@ import (
 	"unsafe"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/goosi"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/mimedata"
 )
 
 /////////////////////////////////////////////////////////////////

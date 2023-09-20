@@ -12,11 +12,10 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/driver/internal/event"
-	"goki.dev/gi/v2/oswin/window"
-	"goki.dev/ki/v2/bitflag"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/internal/event"
+	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vdraw"
 )
 
@@ -313,10 +312,10 @@ func (w *windowImpl) focus(focused bool) {
 	log.Println("past mutex")
 	defer w.mu.Unlock()
 	if focused {
-		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
-		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.DeFocus)
 	}
 }

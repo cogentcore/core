@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/window"
+	"goki.dev/goosi/window"
 	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )

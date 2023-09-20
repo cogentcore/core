@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/dnd"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/mouse"
+	"goki.dev/goosi/dnd"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/mouse"
 )
 
 var (

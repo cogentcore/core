@@ -49,11 +49,11 @@ import (
 	"sync"
 	"unsafe"
 
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
-	"goki.dev/gi/v2/oswin/osevent"
+	"goki.dev/goosi"
+	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/goosi/osevent"
 	"goki.dev/pi/v2/filecat"
 )
 

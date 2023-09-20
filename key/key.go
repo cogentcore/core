@@ -22,7 +22,7 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/gi/v2/oswin"
+	"goki.dev/goosi"
 )
 
 // key.Event is a low-level immediately-generated key event, tracking press

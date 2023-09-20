@@ -16,11 +16,10 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/gi/v2/gist"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/driver/internal/event"
-	"goki.dev/gi/v2/oswin/window"
-	"goki.dev/ki/v2/bitflag"
+	"goki.dev/girl/gist"
+	"goki.dev/goosi"
+	"goki.dev/goosi/driver/internal/event"
+	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 
@@ -348,11 +347,11 @@ func (w *windowImpl) Raise() {
 		if w.glw == nil { // by time we got to main, could be diff
 			return
 		}
-		if bitflag.HasAtomic(&w.Flag, int(oswin.Minimized)) {
-			w.glw.Restore()
-		} else {
-			w.glw.Focus()
-		}
+		// if bitflag.HasAtomic(&w.Flag, int(oswin.Minimized)) {
+		// 	w.glw.Restore()
+		// } else {
+		// 	w.glw.Focus()
+		// }
 	})
 }
 
@@ -570,12 +569,12 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 		if w.mainMenu != nil {
 			w.mainMenu.SetMenu()
 		}
-		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
-		bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		// bitflag.SetAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Focus)
 	} else {
 		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(oswin.Focus)))
-		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 		lastMousePos = image.Point{-1, -1} // key for preventing random click to same location
 		w.sendWindowEvent(window.DeFocus)
 	}
@@ -583,11 +582,11 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 
 func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
-		bitflag.SetAtomic(&w.Flag, int(oswin.Minimized))
-		bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
+		// bitflag.SetAtomic(&w.Flag, int(oswin.Minimized))
+		// bitflag.ClearAtomic(&w.Flag, int(oswin.Focus))
 		w.sendWindowEvent(window.Minimize)
 	} else {
-		bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
+		// bitflag.ClearAtomic(&w.Flag, int(oswin.Minimized))
 		w.getScreen()
 		w.sendWindowEvent(window.Minimize)
 	}

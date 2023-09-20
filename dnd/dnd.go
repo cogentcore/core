@@ -14,9 +14,9 @@ import (
 	"image"
 	"time"
 
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mimedata"
+	"goki.dev/goosi"
+	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2/ki"
 )
 

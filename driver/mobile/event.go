@@ -11,9 +11,9 @@ import (
 	"log"
 
 	"goki.dev/gi/v2/oswin"
-	okey "goki.dev/gi/v2/oswin/key"
-	omouse "goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/gi/v2/oswin/window"
+	okey "goki.dev/goosi/key"
+	omouse "goki.dev/goosi/mouse"
+	"goki.dev/goosi/window"
 	mapp "goki.dev/mobile/app"
 	"goki.dev/mobile/event/key"
 	"goki.dev/mobile/event/lifecycle"
