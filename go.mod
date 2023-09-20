@@ -9,7 +9,9 @@ require (
 	goki.dev/enums v0.9.2
 	goki.dev/gi/v2 v2.0.0-dev0.0.1
 	goki.dev/girl v0.0.0-20230920065740-b794ce7e8755
+	goki.dev/glop v0.0.0-20230915181013-dbed4cfcd46c
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/laser v0.1.0
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0
 	goki.dev/mobile v0.5.0
 	goki.dev/pi/v2 v2.0.0-dev0.0.1
@@ -39,8 +41,6 @@ require (
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/cam v0.9.10 // indirect
 	goki.dev/colors v0.8.7 // indirect
-	goki.dev/glop v0.0.0-20230915181013-dbed4cfcd46c // indirect
-	goki.dev/laser v0.1.0 // indirect
 	goki.dev/matcolor v0.9.5 // indirect
 	goki.dev/ordmap v0.5.0 // indirect
 	goki.dev/prof/v2 v2.0.0-dev0.0.2 // indirect

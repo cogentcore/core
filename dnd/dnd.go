@@ -17,7 +17,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 )
 
 // dnd.Event represents the drag-and-drop event, specifically the drop

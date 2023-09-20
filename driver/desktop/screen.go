@@ -11,7 +11,7 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
 	"goki.dev/goosi/window"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -106,7 +106,7 @@ func (app *appImpl) GetScreens() {
 					sc.RefreshRate = 60
 					sc.UpdateLogicalDPI()
 					if monitorDebug {
-						log.Printf("MonitorDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, kit.StringJSON(sc))
+						log.Printf("MonitorDebug: getScreens: MacOS unknown display set to Built-in Retina Display %d:\n%s\n", i, laser.StringJSON(sc))
 					}
 					scNo++
 					continue
@@ -157,7 +157,7 @@ func (app *appImpl) GetScreens() {
 		sc.UpdateLogicalDPI()
 		sc.RefreshRate = float32(vm.RefreshRate)
 		if monitorDebug {
-			log.Printf("MonitorDebug: screen %d:\n%s\n", scNo, kit.StringJSON(sc))
+			log.Printf("MonitorDebug: screen %d:\n%s\n", scNo, laser.StringJSON(sc))
 		}
 		app.saveScreenInfo(sc)
 		scNo++
