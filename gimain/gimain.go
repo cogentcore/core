@@ -11,8 +11,8 @@ import (
 	"sync/atomic"
 
 	"goki.dev/gi/v2/gi"
-	_ "goki.dev/gi/v2/gi3d/io/obj"
 	"goki.dev/gi/v2/giv"
+	_ "goki.dev/gi3d/io/obj"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	"goki.dev/svg"
