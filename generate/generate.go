@@ -51,11 +51,13 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 //gti:add
 func Generate(cfg *config.Config) error {
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
-	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
-		AddTypes:  true,
-		Instance:  true,
-		TypeVar:   true,
-		Templates: []*template.Template{KiMethodsTmpl},
+	if cfg.Generate.AddKiTypes {
+		cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
+			AddTypes:  true,
+			Instance:  true,
+			TypeVar:   true,
+			Templates: []*template.Template{KiMethodsTmpl},
+		}
 	}
 	pkgs, err := ParsePackage(cfg)
 	if err != nil {

@@ -118,4 +118,7 @@ type Generate struct {
 
 	// [def: gokigen.go] the output file location relative to the package on which generate is being called
 	Output string `def:"gokigen.go" desc:"the output file location relative to the package on which generate is being called"`
+
+	// [def: true] whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)
+	AddKiTypes bool `def:"true" desc:"whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)"`
 }
