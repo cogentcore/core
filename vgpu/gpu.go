@@ -7,8 +7,7 @@
 
 package vgpu
 
-//go:generate enumgen
-// note: not working go:generate gtigen -add-types
+//go:generate goki generate
 
 import (
 	"bytes"

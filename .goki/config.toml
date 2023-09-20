@@ -27,6 +27,7 @@ Type = "TypeLibrary"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
+  AddKiTypes = false
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -48,4 +49,3 @@ Type = "TypeLibrary"
     AddFuncs = false
     Instance = false
     TypeVar = false
-
