@@ -10,11 +10,11 @@ import "text/template"
 // used by gtigen
 type Config struct {
 
-	// [def: .] the source directory to run enumgen on (can be set to multiple through paths like ./...)
-	Dir string `def:"." posarg:"0" required:"-" desc:"the source directory to run enumgen on (can be set to multiple through paths like ./...)"`
+	// [def: .] the source directory to run gtigen on (can be set to multiple through paths like ./...)
+	Dir string `def:"." posarg:"0" required:"-" desc:"the source directory to run gtigen on (can be set to multiple through paths like ./...)"`
 
-	// [def: gtigen.go] the output file location relative to the package on which enumgen is being called
-	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which enumgen is being called"`
+	// [def: gtigen.go] the output file location relative to the package on which gtigen is being called
+	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which gtigen is being called"`
 
 	// whether to add types to gtigen by default
 	AddTypes bool `desc:"whether to add types to gtigen by default"`

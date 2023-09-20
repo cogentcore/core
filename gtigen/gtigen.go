@@ -25,7 +25,7 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 	}
 	pkgs, err := gengo.Load(pcfg, cfg.Dir)
 	if err != nil {
-		return nil, fmt.Errorf("enumgen: Generate: error parsing package: %w", err)
+		return nil, fmt.Errorf("gtigen: Generate: error parsing package: %w", err)
 	}
 	return pkgs, err
 }
@@ -53,7 +53,7 @@ func Generate(cfg *Config) error {
 // the given configuration object and packages parsed
 // from the configuration source directory,
 // and writes the result to the config output file.
-// It is a simple entry point to enumgen that does all
+// It is a simple entry point to gtigen that does all
 // of the steps; for more specific functionality, create
 // a new [Generator] with [NewGenerator] and call methods on it.
 func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
@@ -63,7 +63,7 @@ func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
 		g.Buf.Reset()
 		err := g.Find()
 		if err != nil {
-			return fmt.Errorf("enumgen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
+			return fmt.Errorf("gtigen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
 		}
 		g.PrintHeader()
 		has, err := g.Generate()
@@ -71,11 +71,11 @@ func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
 			continue
 		}
 		if err != nil {
-			return fmt.Errorf("enumgen: Generate: error generating code for package %q: %w", pkg.Name, err)
+			return fmt.Errorf("gtigen: Generate: error generating code for package %q: %w", pkg.Name, err)
 		}
 		err = g.Write()
 		if err != nil {
-			return fmt.Errorf("enumgen: Generate: error writing code for package %q: %w", pkg.Name, err)
+			return fmt.Errorf("gtigen: Generate: error writing code for package %q: %w", pkg.Name, err)
 		}
 	}
 	return nil
