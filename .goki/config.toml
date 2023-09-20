@@ -28,3 +28,6 @@ Type = "TypeApp"
 [Release]
   VersionFile = "version.go"
   Package = "main"
+
+[Generate]
+  AddKiTypes = false

@@ -4,8 +4,6 @@
 
 package config
 
-//go:generate goki generate
-
 // Types is an enum with all
 // of the possible types of packages.
 type Types int //enums:enum

@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate goki generate ./...
+
 import (
 	"goki.dev/goki/config"
 	"goki.dev/goki/generate"
