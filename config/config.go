@@ -25,7 +25,7 @@ type Config struct {
 	Desc string `desc:"the description of the project"`
 
 	// [def: v0.0.0] the version of the project
-	Version string `def:"v0.0.0" desc:"the version of the project"`
+	Version string `cmd:"set-version" posarg:"0" def:"v0.0.0" desc:"the version of the project"`
 
 	// TODO: add def TypeApp for type once fix SetString
 
