@@ -1,7 +1,7 @@
 Name = "prof"
 Desc = ""
-Version = "v2.0.0-dev0.0.2"
-Type = "TypeLibrary"
+Version = "v2.0.0-dev0.0.3"
+Type = "Library"
 
 [Build]
   Package = "."
@@ -23,3 +23,29 @@ Type = "TypeLibrary"
 [Release]
   VersionFile = "version.go"
   Package = "prof"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  AddKiTypes = true
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = false
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
