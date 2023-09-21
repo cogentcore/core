@@ -4,6 +4,8 @@
 
 package vci
 
+//go:generate enumgen
+
 import (
 	"os"
 	"path/filepath"
