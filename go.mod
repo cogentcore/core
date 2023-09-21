@@ -5,13 +5,15 @@ go 1.21.0
 require (
 	github.com/aymerick/douceur v0.2.0
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-	goki.dev/colors v0.8.7
-	goki.dev/girl v0.0.0-20230919035939-2c18b6de7230
-	goki.dev/gti v0.0.0-20230917031855-f295056624d7
-	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/colors v0.8.8
+	goki.dev/enums v0.9.14
+	goki.dev/girl v0.0.0-20230920065740-b794ce7e8755
+	goki.dev/glop v0.1.0
+	goki.dev/gti v0.1.0
+	goki.dev/ki/v2 v2.0.0-dev0.0.4
 	goki.dev/laser v0.1.0
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0
-	goki.dev/ordmap v0.5.3
+	goki.dev/ordmap v0.5.4
 	golang.org/x/image v0.12.0
 	golang.org/x/net v0.15.0
 )
@@ -27,8 +29,6 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
-	goki.dev/cam v0.9.10 // indirect
-	goki.dev/enums v0.9.4 // indirect
-	goki.dev/glop v0.0.0-20230915181013-dbed4cfcd46c // indirect
+	goki.dev/cam v0.9.12 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
