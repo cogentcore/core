@@ -6,13 +6,14 @@ require (
 	github.com/anthonynsimon/bild v0.13.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/goki/vulkan v1.0.6
-	goki.dev/enums v0.9.13
-	goki.dev/glop v0.0.0-20230919212731-04f79732909d
+	goki.dev/enums v0.9.14
+	goki.dev/glop v0.1.0
+	goki.dev/gti v0.1.0
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/laser v0.1.0
 	goki.dev/mat32/v2 v2.0.0-dev0.0.0
 	goki.dev/mobile v0.5.0
-	goki.dev/ordmap v0.5.0
+	goki.dev/ordmap v0.5.3
 )
 
 require golang.org/x/image v0.12.0 // indirect

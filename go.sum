@@ -30,10 +30,12 @@ github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXf
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-goki.dev/enums v0.9.13 h1:bhQVdyW04KBpbvJfdmXP31hQd6dOfTvLMIXvOZIJFnM=
-goki.dev/enums v0.9.13/go.mod h1:QlXLA+1LTQmsQIn51+sg8eQ6pgiH+KLqMCydb/hmZbs=
-goki.dev/glop v0.0.0-20230919212731-04f79732909d h1:9E4EjmlklMsBie6LaFQh8V3HzNC6Oh4ZRfYIIbPjhkQ=
-goki.dev/glop v0.0.0-20230919212731-04f79732909d/go.mod h1:gxxXPhWLaqP9H/sudq5MHDbkbKdr5g0ziyPIuYAJczo=
+goki.dev/enums v0.9.14 h1:AmKW9uqyo0UvnBRs2O/7nssnZSiko58WLm0pTWgzNJo=
+goki.dev/enums v0.9.14/go.mod h1:S9OyjoKynBC3Gr67lrVLnw7ldlI/Z4xR/SQeBAOqiAA=
+goki.dev/glop v0.1.0 h1:4bD9nemLZvcTcpk4I6+cmTG20szw1wEI4TRC96eyxus=
+goki.dev/glop v0.1.0/go.mod h1:gxxXPhWLaqP9H/sudq5MHDbkbKdr5g0ziyPIuYAJczo=
+goki.dev/gti v0.1.0 h1:S+gYWbE8ehNz99ULkgPdXCCID3DCjByacRGlTSafMrI=
+goki.dev/gti v0.1.0/go.mod h1:x95+l32TLC1kpVsJ3Bdk/UBGCEtAFwUqqsL8aPE9Cnc=
 goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
 goki.dev/ki/v2 v2.0.0-dev0.0.3/go.mod h1:PQh0iX2Z3BFFcJrOtykJVfFmjM5h4qZLpCP9AKZboy0=
 goki.dev/laser v0.1.0 h1:4S7OsiUXNy1Zaraj4GACr090NQcDGrvl7jhPPysOwHo=
@@ -42,8 +44,8 @@ goki.dev/mat32/v2 v2.0.0-dev0.0.0 h1:7FOCMazItpTSwEyVjuwBGp9j1y1xOyiNHMXvUAXaOjs
 goki.dev/mat32/v2 v2.0.0-dev0.0.0/go.mod h1:AUbsBba0wfzN5XrHOuinIAv2D+n6CAPVW90pzrJY2ME=
 goki.dev/mobile v0.5.0 h1:K5v7EB4GjOmLzAZCFHZL1+PdzuVp4m1KbUZ61suwqs8=
 goki.dev/mobile v0.5.0/go.mod h1:eRmd2isDMfPNNWrHYzRr3eQT6x0a1dcFsmPYVPI43V8=
-goki.dev/ordmap v0.5.0 h1:mcJ+mZTqri636Q5fxq78vwleBC9+yCpKj5bH1ScHOf4=
-goki.dev/ordmap v0.5.0/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
+goki.dev/ordmap v0.5.3 h1:pCLftLqfAvBgEUYVdqubiSwjTLg6Yxpteq4B7r9I3D4=
+goki.dev/ordmap v0.5.3/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
