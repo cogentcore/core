@@ -4,12 +4,12 @@ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSAS
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/mattn/go-shellwords v1.0.12 h1:M2zGm7EW6UQJvDeQxo4T51eKPurbeFbe8WtebGE2xrk=
 github.com/mattn/go-shellwords v1.0.12/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
-goki.dev/gengo v0.3.1 h1:dwIKQyYRIo5lxXrDfP4+4Ghoe073Q2KoIePbpMgPCuk=
-goki.dev/gengo v0.3.1/go.mod h1:nEy829SVaIVNN1WBOZ8fyzO1CqiMtYoySqkMp+b+jrg=
+goki.dev/gengo v0.3.2 h1:Du7UO3iWAb9qbB7XpruzMBC+aHP45rPDKejgLgABYN0=
+goki.dev/gengo v0.3.2/go.mod h1:nEy829SVaIVNN1WBOZ8fyzO1CqiMtYoySqkMp+b+jrg=
 goki.dev/grease v0.8.8 h1:M4e2FX0ORw7NLR16a3wG3wXvMJyn8aCwGo9PhK1093E=
 goki.dev/grease v0.8.8/go.mod h1:Z0Kl813BvhHB+d/u8PU0cZNfuAl411QuCZim4bKXSyA=
-goki.dev/gti v0.0.0-20230916184410-1ab14cf7627a h1:PV6AufkQolUTFcyTBjLpGOMMSE4BG5INEV0d1qtBS/Y=
-goki.dev/gti v0.0.0-20230916184410-1ab14cf7627a/go.mod h1:opWz3sgWZVLeDjrHLtmtjm2Vhwu/lR8g7sjewYOoLgU=
+goki.dev/gti v0.0.0-20230920232919-a3ca85fb2d77 h1:p3M8TKfbROz3UiU26XpjC+mArGz9dWJDgvgvpL9nKjs=
+goki.dev/gti v0.0.0-20230920232919-a3ca85fb2d77/go.mod h1:opWz3sgWZVLeDjrHLtmtjm2Vhwu/lR8g7sjewYOoLgU=
 goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
 goki.dev/ki/v2 v2.0.0-dev0.0.3/go.mod h1:PQh0iX2Z3BFFcJrOtykJVfFmjM5h4qZLpCP9AKZboy0=
 goki.dev/ordmap v0.5.3 h1:pCLftLqfAvBgEUYVdqubiSwjTLg6Yxpteq4B7r9I3D4=
