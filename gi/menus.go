@@ -347,7 +347,7 @@ var MenuMaxHeight = 30
 // PopupMenu pops up a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
-func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	win := parVp.Win
 	mainVp := win.Viewport
 	if len(menu) == 0 {
@@ -357,7 +357,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 
 	menu.UpdateActions()
 
-	pvp := &Viewport2D{}
+	pvp := &Viewport{}
 	pvp.InitName(pvp, name+"Menu")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
@@ -379,8 +379,8 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 			}
 		}
 	}
-	frame.Init2DTree()
-	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.ConfigTree()
+	frame.SetStyleTree()                                   // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
@@ -405,7 +405,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D 
 // a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
-func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	win := parVp.Win
 	mainVp := win.Viewport
 	if len(menu) == 0 {
@@ -415,7 +415,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *View
 
 	menu.UpdateActions()
 
-	pvp, ok := win.CurPopup().(*Viewport2D)
+	pvp, ok := win.CurPopup().(*Viewport)
 	if !ok {
 		return PopupMenu(menu, x, y, parVp, name)
 	}
@@ -445,8 +445,8 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *View
 			}
 		}
 	}
-	frame.Init2DTree()
-	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.ConfigTree()
+	frame.SetStyleTree()                                   // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
@@ -473,7 +473,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport2D, name string) *View
 // item -- the name of the Action is the string value, and the data will be
 // the index in the slice.  A string equal to curSel will be marked as
 // selected.  Location is from the ContextMenuPos of recv node.
-func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport2D {
+func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport {
 	var menu Menu
 	for i, it := range strs {
 		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
@@ -483,7 +483,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 	pos := recv.ContextMenuPos()
 	vp := nb.ViewportSafe()
 	if vp == nil {
-		vp = recv.AsViewport2D()
+		vp = recv.AsViewport()
 	}
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
@@ -497,7 +497,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport2D {
+func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport {
 	var menu Menu
 	for si, ss := range strs {
 		sz := len(ss)
@@ -518,7 +518,7 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.
 	pos := recv.ContextMenuPos()
 	vp := nb.ViewportSafe()
 	if vp == nil {
-		vp = recv.AsViewport2D()
+		vp = recv.AsViewport()
 	}
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
@@ -667,8 +667,8 @@ var SeparatorProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sp *Separator) Style2D() {
-	sp.WidgetBase.Style2D()
+func (sp *Separator) SetStyle() {
+	sp.WidgetBase.SetStyle()
 }
 
 func (sp *Separator) RenderSeparator() {

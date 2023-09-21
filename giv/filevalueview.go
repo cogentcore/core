@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +54,7 @@ func (vv *FileValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FileValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *FileValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

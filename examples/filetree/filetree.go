@@ -492,7 +492,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 
 	win := gi.NewMainWindow(winm, winm, width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

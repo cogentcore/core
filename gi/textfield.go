@@ -1515,8 +1515,8 @@ func (tf *TextField) ConfigParts() {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (tf *TextField) Init2D() {
-	tf.Init2DWidget()
+func (tf *TextField) Config() {
+	tf.ConfigWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
 	tf.ConfigParts()
@@ -1527,13 +1527,13 @@ func (tf *TextField) StyleTextField() {
 	tf.StyMu.Lock()
 
 	tf.SetCanFocusIfActive()
-	tf.Style2DWidget()
+	tf.SetStyleWidget()
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
 	tf.ConfigParts()
 }
 
-func (tf *TextField) Style2D() {
+func (tf *TextField) SetStyle() {
 	tf.StyleTextField()
 	tf.StyMu.Lock()
 	tf.LayState.SetFromStyle(&tf.Style) // also does reset

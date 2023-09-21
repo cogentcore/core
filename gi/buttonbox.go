@@ -239,14 +239,14 @@ func (bb *ButtonBox) ConfigPartsIfNeeded() {
 	bb.ConfigParts()
 }
 
-func (bb *ButtonBox) Init2D() {
-	bb.Init2DWidget()
+func (bb *ButtonBox) Config() {
+	bb.ConfigWidget()
 	bb.ConfigParts()
 }
 
-func (bb *ButtonBox) Style2D() {
+func (bb *ButtonBox) SetStyle() {
 	bb.StyMu.Lock()
-	bb.Style2DWidget()
+	bb.SetStyleWidget()
 	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
 	bb.ConfigParts()

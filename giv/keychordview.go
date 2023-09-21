@@ -155,7 +155,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 	})
 }
 
-func (kc *KeyChordEdit) Style2D() {
+func (kc *KeyChordEdit) SetStyle() {
 	kc.SetCanFocusIfActive()
 	kc.Selectable = true
 	kc.Redrawable = true

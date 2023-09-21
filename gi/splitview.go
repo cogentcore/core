@@ -250,9 +250,9 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
 }
 
-func (sv *SplitView) Init2D() {
+func (sv *SplitView) Config() {
 	sv.Parts.Lay = LayoutNil
-	sv.Init2DWidget()
+	sv.ConfigWidget()
 	sv.UpdateSplits()
 	sv.ConfigSplitters()
 }
@@ -344,13 +344,13 @@ func (sv *SplitView) SplitViewEvents() {
 }
 
 func (sv *SplitView) StyleSplitView() {
-	sv.Style2DWidget()
+	sv.SetStyleWidget()
 	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
-func (sv *SplitView) Style2D() {
+func (sv *SplitView) SetStyle() {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView()
@@ -501,8 +501,8 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sr *Splitter) Init2D() {
-	sr.Init2DSlider()
+func (sr *Splitter) Config() {
+	sr.ConfigSlider()
 	sr.ConfigParts()
 }
 
@@ -533,7 +533,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	}
 }
 
-func (sr *Splitter) Style2D() {
+func (sr *Splitter) SetStyle() {
 	sr.ClearFlag(int(CanFocus))
 	sr.StyleSlider()
 	sr.StyMu.Lock()
@@ -695,7 +695,7 @@ func (sr *Splitter) Render() {
 			return
 		}
 		ic := ick.(*Icon)
-		icvp := ic.ChildByType(TypeViewport2D, ki.Embeds, 0)
+		icvp := ic.ChildByType(TypeViewport, ki.Embeds, 0)
 		if icvp == nil {
 			return
 		}

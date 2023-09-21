@@ -128,7 +128,7 @@ type Spell struct {
 	Correction string `desc:"the user's correction selection'"`
 
 	// the viewport where the current popup menu is presented
-	Vp *Viewport2D `desc:"the viewport where the current popup menu is presented"`
+	Vp *Viewport `desc:"the viewport where the current popup menu is presented"`
 }
 
 func (sc *Spell) Disconnect() {
@@ -165,7 +165,7 @@ func (sc *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sc *Spell) Show(text string, vp *Viewport2D, pt image.Point) {
+func (sc *Spell) Show(text string, vp *Viewport, pt image.Point) {
 	if vp == nil || vp.Win == nil {
 		return
 	}
@@ -177,7 +177,7 @@ func (sc *Spell) Show(text string, vp *Viewport2D, pt image.Point) {
 }
 
 // ShowNow actually builds the correction popup menu
-func (sc *Spell) ShowNow(word string, vp *Viewport2D, pt image.Point) {
+func (sc *Spell) ShowNow(word string, vp *Viewport, pt image.Point) {
 	if vp == nil || vp.Win == nil {
 		return
 	}

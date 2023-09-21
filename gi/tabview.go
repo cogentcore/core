@@ -531,9 +531,9 @@ func (tv *TabView) RenumberTabs() {
 	}
 }
 
-func (tv *TabView) Style2D() {
+func (tv *TabView) SetStyle() {
 	tv.Config()
-	tv.Layout.Style2D()
+	tv.Layout.SetStyle()
 }
 
 // RenderTabSeps renders the separators between tabs
@@ -720,7 +720,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 	}
 }
 
-func (tb *TabButton) Init2D() {
-	tb.Init2DWidget()
+func (tb *TabButton) Config() {
+	tb.ConfigWidget()
 	tb.ConfigParts()
 }

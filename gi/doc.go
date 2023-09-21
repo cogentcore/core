@@ -25,7 +25,7 @@ Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
 		win := gi.NewMainWindow("test-window", "Test Window", width, height)
-		vp := win.WinViewport2D()
+		vp := win.WinViewport()
 		updt := vp.UpdateStart()
 
 		vlay := win.SetMainVLay() // or SetMainFrame

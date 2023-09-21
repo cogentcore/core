@@ -442,12 +442,12 @@ func (mv *MapView) ConfigToolbar() {
 	mv.ToolbarMap = mv.Map
 }
 
-func (mv *MapView) Style2D() {
+func (mv *MapView) SetStyle() {
 	mvp := mv.ViewportSafe()
 	if mvp != nil && mvp.IsDoingFullRender() {
 		mv.Config()
 	}
-	mv.Frame.Style2D()
+	mv.Frame.SetStyle()
 }
 
 func (mv *MapView) Render() {

@@ -21,7 +21,7 @@ func mainrun() {
 	win := gi.NewMainWindow("gogi-basic", "Basic Test Window", width, height)
 	log.Println("new window", win)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

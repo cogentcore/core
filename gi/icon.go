@@ -90,11 +90,11 @@ func (ic *Icon) SetIcon(name gicons.Icon) (bool, error) {
 }
 
 // SVGIcon returns the child svg icon, or nil
-func (ic *Icon) SVGIcon() *Viewport2D {
+func (ic *Icon) SVGIcon() *Viewport {
 	if !ic.HasChildren() {
 		return nil
 	}
-	sic := ic.Child(0).Embed(TypeViewport2D).(*Viewport2D)
+	sic := ic.Child(0).Embed(TypeViewport).(*Viewport)
 	return sic
 }
 
@@ -109,11 +109,11 @@ func (ic *Icon) Size2D(iter int) {
 	}
 }
 
-func (ic *Icon) Style2D() {
+func (ic *Icon) SetStyle() {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
-	ic.Style2DWidget()
+	ic.SetStyleWidget()
 	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	sic := ic.SVGIcon()
 	if sic != nil {

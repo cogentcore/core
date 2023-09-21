@@ -383,14 +383,14 @@ func (sb *SpinBox) SpinBoxEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SpinBox) Init2D() {
-	sb.Init2DWidget()
+func (sb *SpinBox) Config() {
+	sb.ConfigWidget()
 	sb.ConfigParts()
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
 // doesn't support inherit or default
-func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport2D) {
+func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -445,10 +445,10 @@ func (sb *SpinBox) StyleSpinBox() {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	sb.Style2DWidget()
+	sb.SetStyleWidget()
 }
 
-func (sb *SpinBox) Style2D() {
+func (sb *SpinBox) SetStyle() {
 	sb.StyleSpinBox()
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset

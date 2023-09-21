@@ -69,7 +69,7 @@ func (vv *IconValueView) HasAction() bool {
 	return true
 }
 
-func (vv *IconValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *IconValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

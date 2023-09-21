@@ -16,7 +16,7 @@ import (
 	"goki.dev/svg"
 )
 
-var Vp *gi.Viewport2D
+var Vp *gi.Viewport
 var EqTable *giv.TableView
 var ParamsEdit *giv.StructView
 var SvgGraph *svg.SVG
@@ -45,7 +45,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("marbles", "Marbles", width, height)
 
-	Vp = win.WinViewport2D()
+	Vp = win.WinViewport()
 	updt := Vp.UpdateStart()
 
 	// style sheet

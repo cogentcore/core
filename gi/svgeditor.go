@@ -145,6 +145,6 @@ func (svg *Editor) Render() {
 		svg.PopBounds()
 		rs.PopXForm()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
-		svg.RenderViewport2D() // update our parent image
+		svg.RenderViewport() // update our parent image
 	}
 }

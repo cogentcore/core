@@ -43,7 +43,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-layout-test", "GoGi Layout Test", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

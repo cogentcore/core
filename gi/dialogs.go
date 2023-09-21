@@ -55,7 +55,7 @@ var StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 // Dialog supports dialog functionality -- based on a viewport that can either
 // be rendered in a separate window or on top of an existing one.
 type Dialog struct {
-	Viewport2D
+	Viewport
 
 	// title text displayed as the window title for the dialog
 	Title string `desc:"title text displayed as the window title for the dialog"`
@@ -140,13 +140,13 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 }
 
 func (dlg *Dialog) Disconnect() {
-	dlg.Viewport2D.Disconnect()
+	dlg.Viewport.Disconnect()
 	dlg.DialogSig.DisconnectAll()
 }
 
 // ValidViewport finds a non-nil viewport, either using the provided one, or
 // using the first main window's viewport
-func ValidViewport(avp *Viewport2D) *Viewport2D {
+func ValidViewport(avp *Viewport) *Viewport {
 	if avp != nil {
 		return avp
 	}
@@ -164,7 +164,7 @@ func ValidViewport(avp *Viewport2D) *Viewport2D {
 // from given viewport -- returns false if it fails for any reason.  optional
 // cvgFunc can perform additional configuration after the dialog window has
 // been created and dialog added to it -- some configs require the window.
-func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
+func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 	avp = ValidViewport(avp)
 	if avp == nil {
 		return false
@@ -185,7 +185,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport2D, cfgFunc func()) bool {
 		win = NewDialogWin(dlg.Nm, dlg.Title, 100, 100, dlg.Modal)
 		win.Data = dlg.Data
 		win.AddChild(dlg)
-		win.Viewport = &dlg.Viewport2D
+		win.Viewport = &dlg.Viewport
 		win.Viewport.Fill = true
 		win.MasterVLay = dlg.Frame().Embed(TypeLayout).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
@@ -527,8 +527,8 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 //////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (dlg *Dialog) Init2D() {
-	dlg.Viewport2D.Init2D()
+func (dlg *Dialog) Config() {
+	dlg.Viewport.Config()
 }
 
 func (dlg *Dialog) HasFocus2D() bool {
@@ -543,7 +543,7 @@ func (dlg *Dialog) HasFocus2D() bool {
 // to given signal receiving object and function for dialog signals (nil to
 // ignore).  Viewport is optional to properly contextualize dialog to given
 // master window.
-func PromptDialog(avp *Viewport2D, opts DlgOpts, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
+func PromptDialog(avp *Viewport, opts DlgOpts, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
 	dlg := NewStdDialog(opts, ok, cancel)
 	dlg.Modal = true
 	if recv != nil && fun != nil {
@@ -557,7 +557,7 @@ func PromptDialog(avp *Viewport2D, opts DlgOpts, ok, cancel bool, recv ki.Ki, fu
 // user to choose among -- the clicked button number (starting at 0) will be
 // sent to the receiving object and function for dialog signals.  Viewport is
 // optional to properly contextualize dialog to given master window.
-func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, fun ki.RecvFunc) {
+func ChoiceDialog(avp *Viewport, opts DlgOpts, choices []string, recv ki.Ki, fun ki.RecvFunc) {
 	dlg := NewStdDialog(opts, NoOk, NoCancel) // no buttons
 	dlg.Modal = true
 	if recv != nil && fun != nil {
@@ -602,7 +602,7 @@ func ChoiceDialog(avp *Viewport2D, opts DlgOpts, choices []string, recv ki.Ki, f
 // Use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
-func NewKiDialog(avp *Viewport2D, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func NewKiDialog(avp *Viewport, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
@@ -659,7 +659,7 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore).  Viewport is optional to properly contextualize dialog to
 // given master window.
-func StringPromptDialog(avp *Viewport2D, strval, placeholder string, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
+func StringPromptDialog(avp *Viewport, strval, placeholder string, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
 	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 

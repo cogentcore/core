@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"reflect"
 	"sync"
 
 	"goki.dev/gicons"
@@ -20,9 +21,150 @@ import (
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 )
+
+// Widget is the interface for all GoGi Widget Nodes
+type Widget interface {
+	ki.Node
+
+	// AsWidget returns the WidgetBase embedded field for any Widget node.
+	// The Widget interface defines only methods that can be overridden
+	// or need to be called on other nodes.  Everything else that is common
+	// to all Widgets is in the WidgetBase.
+	AsWidget() *WidgetBase
+
+	// Config configures the widget, primarily configuring its Parts.
+	// All configuration should be robust to multiple calls (use ConfigChildren),
+	// and should call SetStyle.
+	// The Viewport ConfigAll method calls all Config() in the tree,
+	// and is called on first Show for Window, or during FullReRender.
+	// Any other changes requiring reconfig should set the NeedsConfig
+	// flag which will trigger a reconfig.
+	Config(vp *Viewport)
+
+	// SetStyle:
+	SetStyle(vp *Viewport)
+
+	// Size2D: MeLast downward pass, each node first calls
+	// g.Layout.Reset(), then sets their LayoutSize according to their own
+	// intrinsic size parameters, and/or those of its children if it is a
+	// Layout.
+	Size2D(iter int)
+
+	// Layout2D: MeFirst downward pass (each node calls on its children at
+	// appropriate point) with relevant parent BBox that the children are
+	// constrained to render within -- they then intersect this BBox with
+	// their own BBox (from BBox2D) -- typically just call Layout2DBase for
+	// default behavior -- and add parent position to AllocPos, and then
+	// return call to Layout2DChildren. Layout does all its sizing and
+	// positioning of children in this pass, based on the Size2D data gathered
+	// bottom-up and constraints applied top-down from higher levels.
+	// Typically only a single iteration is required (iter = 0) but multiple
+	// are supported (needed for word-wrapped text or flow layouts) -- return
+	// = true indicates another iteration required (pass this up the chain).
+	Layout2D(parBBox image.Rectangle, iter int) bool
+
+	// Move2D: optional MeFirst downward pass to move all elements by given
+	// delta -- used for scrolling -- the layout pass assigns canonical
+	// positions, saved in AllocPosOrig and BBox, and this adds the given
+	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
+	// update its bounding box information given the new position.
+	Move2D(delta image.Point, parBBox image.Rectangle)
+
+	// BBox2D: compute the raw bounding box of this node relative to its
+	// parent viewport -- called during Layout2D to set node BBox field, which
+	// is then used in setting WinBBox and VpBBox.
+	BBox2D() image.Rectangle
+
+	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
+	// call ComputeBBox2DBase but viewports require special code -- called
+	// during Layout and Move.
+	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
+
+	// ChildrenBBox2D: compute the bbox available to my children (content),
+	// adjusting for margins, border, padding (BoxSpace) taken up by me --
+	// operates on the existing VpBBox for this node -- this is what is passed
+	// down as parBBox do the children's Layout2D.
+	ChildrenBBox2D() image.Rectangle
+
+	// Render: Final rendering pass, each node is fully responsible for
+	// calling Render on its own children, to provide maximum flexibility
+	// (see RenderChildren for default impl) -- bracket the render calls in
+	// PushBounds / PopBounds and a false from PushBounds indicates that
+	// VpBBox is empty and no rendering should occur.  Typically call
+	// ConnectEvents2D to set up connections to receive window events if
+	// visible, and disconnect if not.
+	Render()
+
+	// ConnectEvents2D: setup connections to window events -- called in
+	// Render if in bounds.  It can be useful to create modular methods for
+	// different event types that can then be mix-and-matched in any more
+	// specialized types.
+	ConnectEvents()
+
+	// FocusChanged2D is called on node for changes in focus -- see the
+	// FocusChanges values.
+	FocusChanged2D(change FocusChanges)
+
+	// HasFocus2D returns true if this node has keyboard focus and should
+	// receive keyboard events -- typically this just returns HasFocus based
+	// on the Window-managed HasFocus flag, but some types may want to monitor
+	// all keyboard activity for certain key keys..
+	HasFocus2D() bool
+
+	// FindNamedElement searches for given named element in this node or in
+	// parent nodes.  Used for url(#name) references.
+	FindNamedElement(name string) Node2D
+
+	// MakeContextMenu creates the context menu items (typically Action
+	// elements, but it can be anything) for a given widget, typically
+	// activated by the right mouse button or equivalent.  Widget has a
+	// function parameter that can be set to add context items (e.g., by Views
+	// or other complex widgets) to extend functionality.
+	MakeContextMenu(menu *Menu)
+
+	// ContextMenuPos returns the default position for popup menus --
+	// by default in the middle of the WinBBox, but can be adapted as
+	// appropriate for different widgets.
+	ContextMenuPos() image.Point
+
+	// ContextMenu displays the context menu of various actions to perform on
+	// a node -- returns immediately, and actions are all executed directly
+	// (later) via the action signals.  Calls MakeContextMenu and
+	// ContextMenuPos.
+	ContextMenu()
+
+	// IsVisible provides the definitive answer as to whether a given node
+	// is currently visible.  It is only entirely valid after a render pass
+	// for widgets in a visible window, but it checks the window and viewport
+	// for their visibility status as well, which is available always.
+	// This does *not* check for VpBBox level visibility, which is a further check.
+	// Non-visible nodes are automatically not rendered and not connected to
+	// window events.  The Invisible flag is one key element of the IsVisible
+	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
+	// set if a widget is entirely out of render range.  But again, use
+	// IsVisible as the main end-user method.
+	// For robustness, it recursively calls the parent -- this is typically
+	// a short path -- propagating the Invisible flag properly can be
+	// very challenging without mistakenly overwriting invisibility at various
+	// levels.
+	IsVisible() bool
+
+	// IsDirectWinUpload returns true if this is a node that does a direct window upload
+	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
+	IsDirectWinUpload() bool
+
+	// DirectWinUpload does a direct upload of contents to a window
+	// Drawer compositing image, which will then be used for drawing
+	// the window during a Publish() event (triggered by the window Update
+	// event).  This is called by the viewport in its Update signal processing
+	// routine on nodes that respond true to IsDirectWinUpload().
+	// The node is also free to update itself of its own accord at any point.
+	DirectWinUpload()
+}
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
 // managed by a containing Layout, and use all 5 rendering passes.  All
@@ -31,7 +173,31 @@ import (
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
-	Node2DBase
+	ki.Node
+
+	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
+	Class string `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
+
+	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
+	CSS ki.Props `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
+
+	// [view: no-inline] aggregated css properties from all higher nodes down to me
+	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
+
+	// raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
+
+	// full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
+	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
+
+	// 2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
+	VpBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+
+	// 2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
+	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+
+	// [view: -] mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread
+	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
 
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
@@ -42,8 +208,11 @@ type WidgetBase struct {
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
 
-	// styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetStyle2D during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	// styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
+	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+
+	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
+	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 
 	// all the layout state information for this item
 	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
@@ -58,35 +227,219 @@ type WidgetBase struct {
 	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
 }
 
-// KiAsWidget returns the given Ki object
-// as a widget base. It returns nil if it is not
-// derived from a widget base.
-func KiAsWidget(k ki.Ki) *WidgetBase {
-	if n, ok := k.(Node2D); ok {
-		return n.AsWidget()
+// AsWidget returns the given Ki object
+// as a Widget interface and a WidgetBase.
+func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
+	if w, ok := k.(Widget); ok {
+		return w, w.AsWidget()
 	}
-	return nil
+	return nil, nil
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier WidgetBase one\n", ki.Type(wb).Name())
-		ki.GenCopyFieldsFrom(wb.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined\n", wb.Type().Name())
 		return
 	}
-	wb.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	wb.Class = fr.Class
+	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
 	wb.Style.CopyFrom(&fr.Style)
 }
 
 func (wb *WidgetBase) Disconnect() {
-	wb.Node2DBase.Disconnect()
+	wb.Node.Disconnect()
 	wb.WidgetSig.DisconnectAll()
 }
 
 func (wb *WidgetBase) AsWidget() *WidgetBase {
 	return wb
+}
+
+func (wb *WidgetBase) BaseIface() reflect.Type {
+	return laser.TypeFor[Widget]()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// 	Widget impl for WidgetBase (nil)
+
+func (nb *WidgetBase) Config() {
+}
+
+func (nb *WidgetBase) SetStyle() {
+}
+
+func (nb *WidgetBase) Size2D(iter int) {
+}
+
+func (nb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+	return false
+}
+
+func (nb *WidgetBase) BBox2D() image.Rectangle {
+	return image.Rectangle{}
+}
+
+func (nb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+}
+
+func (nb *WidgetBase) ChildrenBBox2D() image.Rectangle {
+	return image.Rectangle{}
+}
+
+func (nb *WidgetBase) Render() {
+}
+
+// ConnectEvents2D is the default event connection function
+// for Widget objects. It calls [WidgetEvents], so any Widget
+// implementing a custom ConnectEvents2D function should
+// first call [WidgetEvents].
+func (nb *WidgetBase) ConnectEvents() {
+	nb.WidgetEvents()
+}
+
+// WidgetEvents connects the default events for Widget objects.
+// Any Widget implementing a custom ConnectEvents2D function
+// should first call this function.
+func (nb *WidgetBase) WidgetEvents() {
+	// TODO: figure out connect events situation not working
+	// nb.WidgetMouseEvent()
+	nb.WidgetMouseFocusEvent()
+}
+
+// WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
+func (nb *WidgetBase) WidgetMouseEvent() {
+	nb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if nb.IsDisabled() {
+			return
+		}
+
+		me := data.(*mouse.Event)
+		me.SetProcessed()
+
+		nb.WidgetOnMouseEvent(me)
+	})
+}
+
+// WidgetOnMouseEvent is the function called on Widget objects
+// when they get a mouse click event. If you are declaring a custom
+// mouse event function, you should call this function first.
+func (nb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
+	nb.SetActiveState(me.Action == mouse.Press)
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
+}
+
+// WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
+func (nb *WidgetBase) WidgetMouseFocusEvent() {
+	nb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if nb.IsDisabled() {
+			return
+		}
+
+		me := data.(*mouse.FocusEvent)
+		me.SetProcessed()
+
+		nb.WidgetOnMouseFocusEvent(me)
+	})
+}
+
+// WidgetOnMouseFocusEvent is the function called on Widget objects
+// when they get a mouse foucs event. If you are declaring a custom
+// mouse foucs event function, you should call this function first.
+func (nb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
+	enter := me.Action == mouse.Enter
+	nb.SetHoveredState(enter)
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
+	// TODO: trigger mouse focus exit after clicking down
+	// while leaving; then clear active here
+	// // if !enter {
+	// // 	nb.ClearActive()
+	// }
+}
+
+func (nb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+}
+
+// FocusChanged2D handles the default behavior for node focus changes
+// by calling [NodeBase.SetNeedsStyle] and sending an update signal.
+func (nb *WidgetBase) FocusChanged2D(change FocusChanges) {
+	nb.SetNeedsStyle()
+	nb.UpdateSig()
+}
+
+func (nb *WidgetBase) HasFocus2D() bool {
+	return nb.HasFocus()
+}
+
+// GrabFocus grabs the keyboard input focus on this item or the first item within it
+// that can be focused (if none, then goes ahead and sets focus to this object)
+func (nb *WidgetBase) GrabFocus() {
+	foc := nb.This()
+	if !nb.CanFocus() {
+		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+			_, ni := KiToWidget(k)
+			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
+				return ki.Break
+			}
+			if !ni.CanFocus() {
+				return ki.Continue
+			}
+			foc = k
+			return ki.Break // done
+		})
+	}
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.SetFocus(foc)
+	}
+}
+
+// FocusNext moves the focus onto the next item
+func (nb *WidgetBase) FocusNext() {
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.FocusNext(em.CurFocus())
+	}
+}
+
+// FocusPrev moves the focus onto the previous item
+func (nb *WidgetBase) FocusPrev() {
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.FocusPrev(em.CurFocus())
+	}
+}
+
+// StartFocus specifies this widget to give focus to when the window opens
+func (nb *WidgetBase) StartFocus() {
+	em := nb.EventMgr2D()
+	if em != nil {
+		em.SetStartFocus(nb.This())
+	}
+}
+
+// ContainsFocus returns true if this widget contains the current focus widget
+// as maintained in the Window
+func (nb *WidgetBase) ContainsFocus() bool {
+	em := nb.EventMgr2D()
+	if em == nil {
+		return false
+	}
+	cur := em.CurFocus()
+	if cur == nil {
+		return false
+	}
+	if cur == nb.This() {
+		return true
+	}
+	plev := cur.ParentLevel(nb.This())
+	if plev < 0 {
+		return false
+	}
+	return true
 }
 
 // ActiveStyle satisfies the ActiveStyler interface
@@ -113,9 +466,9 @@ func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 	return bs
 }
 
-// Init2DWidget handles basic node initialization -- Init2D can then do special things
-func (wb *WidgetBase) Init2DWidget() {
-	// fmt.Println("Init2DWidget", wb.Path())
+// ConfigWidget handles basic node initialization -- Config can then do special things
+func (wb *WidgetBase) ConfigWidget() {
+	// fmt.Println("ConfigWidget", wb.Path())
 	wb.BBoxMu.Lock()
 	wb.StyMu.Lock()
 	wb.Viewport = wb.ParentViewport()
@@ -126,8 +479,8 @@ func (wb *WidgetBase) Init2DWidget() {
 	wb.ConnectToViewport()
 }
 
-func (wb *WidgetBase) Init2D() {
-	wb.Init2DWidget()
+func (wb *WidgetBase) Config() {
+	wb.ConfigWidget()
 }
 
 // AddStyler adds the given styler to the
@@ -250,7 +603,7 @@ func (wb *WidgetBase) ConnectEvents() {
 // Any widget implementing a custom ConnectEvents2D function
 // should first call this function.
 func (wb *WidgetBase) WidgetEvents() {
-	wb.Node2DEvents()
+	wb.WidgetEvents()
 	wb.HoverTooltipEvent()
 }
 
@@ -322,21 +675,21 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 	})
 }
 
-// Style2DWidget styles the Style values from node properties and optional
+// SetStyleWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes.
 // must be called under a StyMu Lock
-func (wb *WidgetBase) Style2DWidget() {
-	pr := prof.Start("Style2DWidget")
+func (wb *WidgetBase) SetStyleWidget() {
+	pr := prof.Start("SetStyleWidget")
 	defer pr.End()
 
 	if wb.OverrideStyle {
 		return
 	}
 
-	pcsn := prof.Start("Style2DWidget-SetCurStyleNode")
+	pcsn := prof.Start("SetStyleWidget-SetCurStyleNode")
 
 	// STYTODO: there should be a better way to do this
-	gii, _ := wb.This().(Node2D)
+	gii, _ := wb.This().(Widget)
 	wb.Viewport.SetCurStyleNode(gii)
 	defer wb.Viewport.SetCurStyleNode(nil)
 
@@ -345,7 +698,7 @@ func (wb *WidgetBase) Style2DWidget() {
 	wb.Style = gist.Style{}
 	wb.Style.Defaults()
 
-	pin := prof.Start("Style2DWidget-Inherit")
+	pin := prof.Start("SetStyleWidget-Inherit")
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
@@ -353,18 +706,18 @@ func (wb *WidgetBase) Style2DWidget() {
 	}
 	pin.End()
 
-	prun := prof.Start("Style2DWidget-RunStyleFuncs")
+	prun := prof.Start("SetStyleWidget-RunStyleFuncs")
 
 	wb.RunStyleFuncs()
 
 	prun.End()
 
-	puc := prof.Start("Style2DWidget-SetUnitContext")
+	puc := prof.Start("SetStyleWidget-SetUnitContext")
 
 	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
-	psc := prof.Start("Style2DWidget-SetCurrentColor")
+	psc := prof.Start("SetStyleWidget-SetCurrentColor")
 
 	if wb.Style.Inactive { // inactive can only set, not clear
 		wb.SetDisabled()
@@ -383,18 +736,18 @@ func (wb *WidgetBase) RunStyleFuncs() {
 	}
 }
 
-func (wb *WidgetBase) Style2D() {
+func (wb *WidgetBase) SetStyle() {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 
-	wb.Style2DWidget()
+	wb.SetStyleWidget()
 	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
 // SetUnitContext sets the unit context based on size of viewport, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
-func SetUnitContext(st *gist.Style, vp *Viewport2D, el, par mat32.Vec2) {
+func SetUnitContext(st *gist.Style, vp *Viewport, el, par mat32.Vec2) {
 	if vp != nil {
 		if vp.Win != nil {
 			st.UnContext.DPI = vp.Win.LogicalDPI()
@@ -432,7 +785,7 @@ func (wb *WidgetBase) Size2D(iter int) {
 // finally cached out at this stage also returns the size of the parent for
 // setting units context relative to parent objects
 func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
-	if pni, _ := KiToNode2D(wb.Par); pni != nil {
+	if pni, _ := KiToWidget(wb.Par); pni != nil {
 		if pw := pni.AsWidget(); pw != nil {
 			if !wb.IsField() {
 				wb.LayState.Alloc.Pos = pw.LayState.Alloc.PosOrig.Add(wb.LayState.Alloc.PosRel)
@@ -458,14 +811,14 @@ func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 
 // Layout2DBase provides basic Layout2D functions -- good for most cases
 func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter int) {
-	nii, _ := wb.This().(Node2D)
+	nii, _ := wb.This().(Widget)
 	mvp := wb.ViewportSafe()
 	if mvp == nil { // robust
-		if nii.AsViewport2D() == nil {
+		if nii.AsViewport() == nil {
 			// todo: not so clear that this will do anything useful at this point
 			// but at least it gets the viewport
-			nii.Init2D()
-			nii.Style2D()
+			nii.Config()
+			nii.SetStyle()
 			nii.Size2D(0)
 			// fmt.Printf("node not init in Layout2DBase: %v\n", wb.Path())
 		}
@@ -511,7 +864,7 @@ func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 // Render
 func (wb *WidgetBase) FullReRenderIfNeeded() bool {
 	mvp := wb.ViewportSafe()
-	if wb.This().(Node2D).IsVisible() && wb.NeedsFullReRender() && !mvp.IsDoingFullRender() {
+	if wb.This().(Widget).IsVisible() && wb.NeedsFullReRender() && !mvp.IsDoingFullRender() {
 		if RenderTrace {
 			fmt.Printf("Render: NeedsFullReRender for %v at %v\n", wb.Path(), wb.VpBBox)
 		}
@@ -533,7 +886,7 @@ func (wb *WidgetBase) PushBounds() bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
-	if !wb.This().(Node2D).IsVisible() {
+	if !wb.This().(Widget).IsVisible() {
 		return false
 	}
 	if wb.VpBBox.Empty() {
@@ -570,9 +923,9 @@ func (wb *WidgetBase) Render() {
 		return
 	}
 	if wb.PushBounds() {
-		wb.This().(Node2D).ConnectEvents()
+		wb.This().(Widget).ConnectEvents()
 		if wb.NeedsStyle() {
-			wb.This().(Node2D).Style2D()
+			wb.This().(Widget).SetStyle()
 			wb.ClearNeedsStyle()
 		}
 		wb.RenderChildren()
@@ -586,7 +939,7 @@ func (wb *WidgetBase) Render() {
 // initialized and styled -- redoes the full stack
 func (wb *WidgetBase) ReRenderTree() {
 	parBBox := image.Rectangle{}
-	pni, _ := KiToNode2D(wb.Par)
+	pni, _ := KiToWidget(wb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
@@ -594,8 +947,8 @@ func (wb *WidgetBase) ReRenderTree() {
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig
 	ld := wb.LayState // save our current layout data
 	updt := wb.UpdateStart()
-	wb.Init2DTree()
-	wb.Style2DTree()
+	wb.ConfigTree()
+	wb.SetStyleTree()
 	wb.Size2DTree(0)
 	wb.LayState = ld // restore
 	wb.Layout2DTree()
@@ -609,7 +962,7 @@ func (wb *WidgetBase) ReRenderTree() {
 // Move2DBase does the basic move on this node
 func (wb *WidgetBase) Move2DBase(delta image.Point, parBBox image.Rectangle) {
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
-	wb.This().(Node2D).ComputeBBox2D(parBBox, delta)
+	wb.This().(Widget).ComputeBBox2D(parBBox, delta)
 }
 
 func (wb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
@@ -625,19 +978,19 @@ func (wb *WidgetBase) Move2DTree() {
 		return
 	}
 	parBBox := image.Rectangle{}
-	pnii, pn := KiToNode2D(wb.Par)
+	pnii, pn := KiToWidget(wb.Par)
 	if pn != nil {
 		parBBox = pnii.ChildrenBBox2D()
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
-	wb.This().(Node2D).Move2D(delta, parBBox) // important to use interface version to get interface!
+	wb.This().(Widget).Move2D(delta, parBBox) // important to use interface version to get interface!
 }
 
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
 	var parLy *Layout
 	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		nii, ok := k.(Node2D)
+		nii, ok := k.(Widget)
 		if !ok {
 			return ki.Break // don't keep going up
 		}
@@ -652,12 +1005,12 @@ func (wb *WidgetBase) ParentLayout() *Layout {
 }
 
 // CtxtMenuFunc is a function for creating a context menu for given node
-type CtxtMenuFunc func(g Node2D, m *Menu)
+type CtxtMenuFunc func(g Widget, m *Menu)
 
 func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	// derived types put native menu code here
 	if wb.CtxtMenuFunc != nil {
-		wb.CtxtMenuFunc(wb.This().(Node2D), m)
+		wb.CtxtMenuFunc(wb.This().(Widget), m)
 	}
 	mvp := wb.ViewportSafe()
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
@@ -678,10 +1031,10 @@ func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
-func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Viewport2D {
+func PopupTooltip(tooltip string, x, y int, parVp *Viewport, name string) *Viewport {
 	win := parVp.Win
 	mainVp := win.Viewport
-	pvp := Viewport2D{}
+	pvp := Viewport{}
 	pvp.InitName(&pvp, name+"Tooltip")
 	pvp.Win = win
 	updt := pvp.UpdateStart()
@@ -711,8 +1064,8 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport2D, name string) *Vie
 		s.MaxWidth.SetDot(mwdots)
 	})
 
-	frame.Init2DTree()
-	frame.Style2DTree()                                    // sufficient to get sizes
+	frame.ConfigTree()
+	frame.SetStyleTree()                                   // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
 	frame.Size2DTree(0)                                    // collect sizes
 	pvp.Win = nil
@@ -814,7 +1167,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 				me.SetProcessed()
 				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
 				wbb.EmitContextMenuSignal()
-				wbb.This().(Node2D).ContextMenu()
+				wbb.This().(Widget).ContextMenu()
 			}
 		}
 	})
@@ -964,29 +1317,6 @@ func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 	return wb.LayState.Alloc.Size.Sub(spc.Size())
 }
 
-///////////////////////////////////////////////////////////////////
-// PartsWidgetBase
-
-// PartsWidgetBase is the base type for all Widget Node2D elements that manage
-// a set of constituent parts
-type PartsWidgetBase struct {
-	WidgetBase
-
-	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-	Parts Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
-}
-
-func (wb *PartsWidgetBase) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*PartsWidgetBase)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier PartsWidgetBase one\n", wb.This().Name())
-		ki.GenCopyFieldsFrom(wb.This(), frm)
-		return
-	}
-	wb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	// wb.Parts.CopyFrom(&fr.Parts) // managed by widget -- we don't copy..
-}
-
 // standard FunDownMeFirst etc operate automatically on Field structs such as
 // Parts -- custom calls only needed for manually-recursive traversal in
 // Layout and Render
@@ -1011,7 +1341,7 @@ func (wb *PartsWidgetBase) Size2D(iter int) {
 
 func (wb *PartsWidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBox2DBase(parBBox, delta)
-	wb.Parts.This().(Node2D).ComputeBBox2D(parBBox, delta)
+	wb.Parts.This().(Widget).ComputeBBox2D(parBBox, delta)
 }
 
 func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
@@ -1037,7 +1367,7 @@ func (wb *PartsWidgetBase) RenderParts() {
 
 func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	wb.Move2DBase(delta, parBBox)
-	wb.Parts.This().(Node2D).Move2D(delta, parBBox)
+	wb.Parts.This().(Widget).Move2D(delta, parBBox)
 	wb.Move2DChildren(delta)
 }
 
@@ -1146,6 +1476,6 @@ func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
 		lbl.SetFullReRender()
 	}
 	wb.Parts.StyMu.Lock()
-	wb.Parts.Style2DWidget() // restyle parent so parts inherit
+	wb.Parts.SetStyleWidget() // restyle parent so parts inherit
 	wb.Parts.StyMu.Unlock()
 }

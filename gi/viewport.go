@@ -72,19 +72,18 @@ type Viewport interface {
 	VpUploadRegion(vpBBox, winBBox image.Rectangle)
 }
 
-// Viewport2D provides an image and a stack of Paint contexts for drawing onto the image
-// with a convenience forwarding of the Paint methods operating on the current Paint
-type Viewport2D struct {
-	WidgetBase
+// Viewport contains a Widget tree, rooted in a Frame layout,
+// which renders into its Pixels image.
+type Viewport struct {
 
 	// fill the viewport with background-color from style
 	Fill bool `desc:"fill the viewport with background-color from style"`
 
-	// Viewport-level viewbox within any parent Viewport2D
-	Geom Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport2D"`
+	// Viewport-level viewbox within any parent Viewport
+	Geom Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
 
 	// [view: -] render state for rendering
-	Render girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
@@ -114,25 +113,25 @@ type Viewport2D struct {
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
-func (vp *Viewport2D) OnInit() {
+func (vp *Viewport) OnInit() {
 	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.BackgroundColor.SetSolid(ColorScheme.Background)
 		s.Color = ColorScheme.OnBackground
 	})
 }
 
-func (vp *Viewport2D) CopyFieldsFrom(frm any) {
-	fr := frm.(*Viewport2D)
+func (vp *Viewport) CopyFieldsFrom(frm any) {
+	fr := frm.(*Viewport)
 	vp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	vp.Fill = fr.Fill
 	vp.Geom = fr.Geom
 }
 
-// NewViewport2D creates a new Pixels Image with the specified width and height,
+// NewViewport creates a new Pixels Image with the specified width and height,
 // and initializes the renderer etc
-func NewViewport2D(width, height int) *Viewport2D {
+func NewViewport(width, height int) *Viewport {
 	sz := image.Point{width, height}
-	vp := &Viewport2D{
+	vp := &Viewport{
 		Geom: Geom2DInt{Size: sz},
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
@@ -141,7 +140,7 @@ func NewViewport2D(width, height int) *Viewport2D {
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
-func (vp *Viewport2D) Resize(nwsz image.Point) {
+func (vp *Viewport) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
@@ -218,43 +217,43 @@ const (
 	VpFlagPrefSizing
 )
 
-func (vp *Viewport2D) IsPopup() bool {
+func (vp *Viewport) IsPopup() bool {
 	return vp.HasFlag(int(VpFlagPopup))
 }
 
-func (vp *Viewport2D) IsMenu() bool {
+func (vp *Viewport) IsMenu() bool {
 	return vp.HasFlag(int(VpFlagMenu))
 }
 
-func (vp *Viewport2D) IsCompleter() bool {
+func (vp *Viewport) IsCompleter() bool {
 	return vp.HasFlag(int(VpFlagCompleter))
 }
 
-func (vp *Viewport2D) IsCorrector() bool {
+func (vp *Viewport) IsCorrector() bool {
 	return vp.HasFlag(int(VpFlagCorrector))
 }
 
-func (vp *Viewport2D) IsTooltip() bool {
+func (vp *Viewport) IsTooltip() bool {
 	return vp.HasFlag(int(VpFlagTooltip))
 }
 
-func (vp *Viewport2D) IsSVG() bool {
+func (vp *Viewport) IsSVG() bool {
 	return vp.HasFlag(int(VpFlagSVG))
 }
 
-func (vp *Viewport2D) IsUpdatingNode() bool {
+func (vp *Viewport) IsUpdatingNode() bool {
 	return vp.HasFlag(int(VpFlagUpdatingNode))
 }
 
-func (vp *Viewport2D) NeedsFullRender() bool {
+func (vp *Viewport) NeedsFullRender() bool {
 	return vp.HasFlag(int(VpFlagNeedsFullRender))
 }
 
-func (vp *Viewport2D) IsDoingFullRender() bool {
+func (vp *Viewport) IsDoingFullRender() bool {
 	return vp.HasFlag(int(VpFlagDoingFullRender))
 }
 
-func (vp *Viewport2D) IsVisible() bool {
+func (vp *Viewport) IsVisible() bool {
 	if vp == nil || vp.This() == nil || vp.IsInvisible() {
 		return false
 	}
@@ -264,7 +263,7 @@ func (vp *Viewport2D) IsVisible() bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Viewport interface implementation
 
-func (vp *Viewport2D) VpTop() Viewport {
+func (vp *Viewport) VpTop() Viewport {
 	if vp.Win != nil {
 		return vp.Win.Viewport
 	}
@@ -278,21 +277,21 @@ func (vp *Viewport2D) VpTop() Viewport {
 	return vp.This().(Viewport)
 }
 
-func (vp *Viewport2D) VpTopNode() Node {
+func (vp *Viewport) VpTopNode() Node {
 	if vp.Win != nil {
 		return vp.Win
 	}
 	return nil
 }
 
-func (vp *Viewport2D) VpTopUpdateStart() bool {
+func (vp *Viewport) VpTopUpdateStart() bool {
 	if vp.Win != nil {
 		return vp.Win.UpdateStart()
 	}
 	return false
 }
 
-func (vp *Viewport2D) VpTopUpdateEnd(updt bool) {
+func (vp *Viewport) VpTopUpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
@@ -303,14 +302,14 @@ func (vp *Viewport2D) VpTopUpdateEnd(updt bool) {
 
 // note: if not a standard viewport in a window, this method must be redefined!
 
-func (vp *Viewport2D) VpEventMgr() *EventMgr {
+func (vp *Viewport) VpEventMgr() *EventMgr {
 	if vp.Win != nil {
 		return &vp.Win.EventMgr
 	}
 	return nil
 }
 
-func (vp *Viewport2D) VpIsVisible() bool {
+func (vp *Viewport) VpIsVisible() bool {
 	if vp == nil || vp.This() == nil || vp.Win == nil || vp.Pixels == nil {
 		return false
 	}
@@ -323,7 +322,7 @@ func (vp *Viewport2D) VpIsVisible() bool {
 // VpUploadAll is the update call for the main viewport for a window --
 // calls UploadAllViewports in parent window, which uploads the main viewport
 // and any active popups etc over the top of that
-func (vp *Viewport2D) VpUploadAll() {
+func (vp *Viewport) VpUploadAll() {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -332,7 +331,7 @@ func (vp *Viewport2D) VpUploadAll() {
 
 // VpUploadVp uploads our viewport image into the parent window -- e.g., called
 // by popups when updating separately
-func (vp *Viewport2D) VpUploadVp() {
+func (vp *Viewport) VpUploadVp() {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -342,7 +341,7 @@ func (vp *Viewport2D) VpUploadVp() {
 }
 
 // VpUploadRegion uploads node region of our viewport image
-func (vp *Viewport2D) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
+func (vp *Viewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -354,7 +353,7 @@ func (vp *Viewport2D) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
 }
 
 // set our window pointer to point to the current window we are under
-func (vp *Viewport2D) SetCurWin() {
+func (vp *Viewport) SetCurWin() {
 	pwin := vp.ParentWindow()
 	if pwin != nil { // only update if non-nil -- otherwise we could be setting
 		// temporarily to give access to DPI etc
@@ -364,7 +363,7 @@ func (vp *Viewport2D) SetCurWin() {
 
 // DrawIntoParent draws our viewport image into parent's image -- this is the
 // typical way that a sub-viewport renders (e.g., svg boxes, icons, etc -- not popups)
-func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
+func (vp *Viewport) DrawIntoParent(parVp *Viewport) {
 	if parVp.Pixels == nil || vp.Pixels == nil {
 		if RenderTrace {
 			fmt.Printf("Render: vp DrawIntoParent nil Pixels - no render!: %v parVp: %v\n", vp.Path(), parVp.Path())
@@ -393,7 +392,7 @@ func (vp *Viewport2D) DrawIntoParent(parVp *Viewport2D) {
 // the window texture using Window.UploadVpRegion call.
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
-func (vp *Viewport2D) ReRenderNode(gni Node2D) {
+func (vp *Viewport) ReRenderNode(gni Node2D) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -415,7 +414,7 @@ func (vp *Viewport2D) ReRenderNode(gni Node2D) {
 // uploads updated bits to the window texture using Window.UploadVpRegion call.
 // This should be covered by an outer UpdateStart / End bracket on Window to drive
 // publishing changes, with suitable grouping if multiple updates
-func (vp *Viewport2D) ReRenderAnchor(gni Node2D) {
+func (vp *Viewport) ReRenderAnchor(gni Node2D) {
 	if !vp.This().(Viewport).VpIsVisible() {
 		return
 	}
@@ -439,7 +438,7 @@ func (vp *Viewport2D) ReRenderAnchor(gni Node2D) {
 // events and parent is nil -- called by window when a popup is deleted -- it
 // destroys the vp and its main layout, see VpFlagPopupDestroyAll for whether
 // children are destroyed
-func (vp *Viewport2D) DeletePopup() {
+func (vp *Viewport) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	vp.Win = nil
 	vp.This().SetFlag(int(ki.NodeDeleted)) // prevent further access
@@ -459,27 +458,27 @@ func (vp *Viewport2D) DeletePopup() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (vp *Viewport2D) AsViewport2D() *Viewport2D {
+func (vp *Viewport) AsViewport() *Viewport {
 	return vp
 }
 
-func (vp *Viewport2D) Init2D() {
-	vp.Init2DWidget()
+func (vp *Viewport) Config() {
+	vp.ConfigWidget()
 	vp.SetCurWin()
 	// note: used to have a NodeSig update here but was redundant -- already handled.
 	// also note that SVG viewports require SetNeedsFullRender to repaint!
 }
 
-func (vp *Viewport2D) Style2D() {
+func (vp *Viewport) SetStyle() {
 	vp.StyMu.Lock()
 	defer vp.StyMu.Unlock()
 
 	vp.SetCurWin()
-	vp.Style2DWidget()
+	vp.SetStyleWidget()
 	vp.LayState.SetFromStyle(&vp.Style) // also does reset
 }
 
-func (vp *Viewport2D) Size2D(iter int) {
+func (vp *Viewport) Size2D(iter int) {
 	vp.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
 	pos := vp.Style.PosDots().ToPoint()
@@ -491,12 +490,12 @@ func (vp *Viewport2D) Size2D(iter int) {
 	}
 }
 
-func (vp *Viewport2D) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (vp *Viewport) Layout2D(parBBox image.Rectangle, iter int) bool {
 	vp.Layout2DBase(parBBox, true, iter)
 	return vp.Layout2DChildren(iter)
 }
 
-func (vp *Viewport2D) BBox2D() image.Rectangle {
+func (vp *Viewport) BBox2D() image.Rectangle {
 	if vp.Viewport == nil || vp.IsPopup() { // top level viewport
 		// viewport ignores any parent parent bbox info!
 		if vp.Pixels == nil || !vp.IsPopup() { // non-popups use allocated sizes via layout etc
@@ -523,7 +522,7 @@ func (vp *Viewport2D) BBox2D() image.Rectangle {
 	}
 }
 
-func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+func (vp *Viewport) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 	// vp.VpBBox = vp.Pixels.Bounds()
 	// vp.SetWinBBox()    // this adds all PARENT offsets
 	if vp.Viewport != nil {
@@ -543,7 +542,7 @@ func (vp *Viewport2D) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 	// fmt.Printf("Viewport: %v bbox: %v vpBBox: %v winBBox: %v\n", vp.Path(), vp.BBox, vp.VpBBox, vp.WinBBox)
 }
 
-func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
+func (vp *Viewport) ChildrenBBox2D() image.Rectangle {
 	if vp.Pixels == nil {
 		sz := vp.Geom.Size
 		if sz != (image.Point{}) {
@@ -554,9 +553,9 @@ func (vp *Viewport2D) ChildrenBBox2D() image.Rectangle {
 	return vp.Pixels.Bounds() // vp.VpBBox -- this is where we transition to new coordinates!
 }
 
-// RenderViewport2D is the render action for the viewport itself -- either
+// RenderViewport is the render action for the viewport itself -- either
 // uploads image to window or draws into parent viewport
-func (vp *Viewport2D) RenderViewport2D() {
+func (vp *Viewport) RenderViewport() {
 	if vp.IsPopup() { // popup has a parent that is the window
 		vp.SetCurWin()
 		if RenderTrace {
@@ -580,7 +579,7 @@ func (vp *Viewport2D) RenderViewport2D() {
 // re-render -- we set our flag when doing this so valueview elements (and
 // anyone else) can do a deep re-build that is typically not otherwise needed
 // (e.g., after non-signaling structs have updated)
-func (vp *Viewport2D) FullRenderTree() {
+func (vp *Viewport) FullRenderTree() {
 	if vp.IsUpdating() { // already in process!
 		return
 	}
@@ -593,7 +592,7 @@ func (vp *Viewport2D) FullRenderTree() {
 }
 
 // we use our own render for these -- Viewport member is our parent!
-func (vp *Viewport2D) PushBounds() bool {
+func (vp *Viewport) PushBounds() bool {
 	if vp.VpBBox.Empty() {
 		return false
 	}
@@ -621,12 +620,12 @@ func (vp *Viewport2D) PushBounds() bool {
 	return true
 }
 
-func (vp *Viewport2D) PopBounds() {
+func (vp *Viewport) PopBounds() {
 	rs := &vp.Render
 	rs.PopBounds()
 }
 
-func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (vp *Viewport) Move2D(delta image.Point, parBBox image.Rectangle) {
 	if vp == nil {
 		return
 	}
@@ -634,7 +633,7 @@ func (vp *Viewport2D) Move2D(delta image.Point, parBBox image.Rectangle) {
 	vp.Move2DChildren(image.Point{}) // reset delta here -- we absorb the delta in our placement relative to the parent
 }
 
-func (vp *Viewport2D) FillViewport() {
+func (vp *Viewport) FillViewport() {
 	vp.StyMu.RLock()
 	st := &vp.Style
 	rs := &vp.Render
@@ -644,7 +643,7 @@ func (vp *Viewport2D) FillViewport() {
 	vp.StyMu.RUnlock()
 }
 
-func (vp *Viewport2D) FullReRenderIfNeeded() bool {
+func (vp *Viewport) FullReRenderIfNeeded() bool {
 	vpDoing := false
 	if vp.Viewport != nil && vp.Viewport.IsDoingFullRender() {
 		vpDoing = true
@@ -660,7 +659,7 @@ func (vp *Viewport2D) FullReRenderIfNeeded() bool {
 	return false
 }
 
-func (vp *Viewport2D) Render() {
+func (vp *Viewport) Render() {
 	if vp.FullReRenderIfNeeded() {
 		return
 	}
@@ -668,8 +667,8 @@ func (vp *Viewport2D) Render() {
 		if vp.Fill {
 			vp.FillViewport()
 		}
-		vp.RenderChildren()   // we must do children first, then us!
-		vp.RenderViewport2D() // update our parent image
+		vp.RenderChildren() // we must do children first, then us!
+		vp.RenderViewport() // update our parent image
 		vp.PopBounds()
 	}
 }
@@ -677,10 +676,10 @@ func (vp *Viewport2D) Render() {
 // PrefSize computes the preferred size of the viewport based on current contents.
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
-func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
+func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
 	vp.SetFlag(int(VpFlagPrefSizing))
-	vp.Init2DTree()
-	vp.Style2DTree() // sufficient to get sizes
+	vp.ConfigTree()
+	vp.SetStyleTree() // sufficient to get sizes
 	vp.LayState.Alloc.Size.SetPoint(initSz)
 	vp.Size2DTree(0) // collect sizes
 	vp.ClearFlag(int(VpFlagPrefSizing))
@@ -698,15 +697,15 @@ func (vp *Viewport2D) PrefSize(initSz image.Point) image.Point {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Signal Handling
 
-// SignalViewport2D is called by each node in scenegraph through its NodeSig
+// SignalViewport is called by each node in scenegraph through its NodeSig
 // signal to notify its parent viewport whenever it changes, causing a
 // re-render.
-func SignalViewport2D(vpki, send ki.Ki, sig int64, data any) {
+func SignalViewport(vpki, send ki.Ki, sig int64, data any) {
 	vpni, ok := vpki.(Node2D)
 	if !ok {
 		return
 	}
-	vp := vpni.AsViewport2D()
+	vp := vpni.AsViewport()
 	if vp == nil { // should not happen -- should only be called on viewports
 		return
 	}
@@ -719,21 +718,21 @@ func SignalViewport2D(vpki, send ki.Ki, sig int64, data any) {
 	}
 	if ni.IsUpdating() {
 		if Update2DTrace { // this can happen during concurrent update situations
-			log.Printf("Update: SignalViewport2D updating node %v with Updating flag set\n", ni.Path())
+			log.Printf("Update: SignalViewport updating node %v with Updating flag set\n", ni.Path())
 		}
 		return
 	}
 
 	if Update2DTrace {
-		fmt.Printf("Update: Viewport2D: %v NodeUpdated due to signal: %v from node: %v\n", vp.Path(), ki.NodeSignals(sig), send.Path())
+		fmt.Printf("Update: Viewport: %v NodeUpdated due to signal: %v from node: %v\n", vp.Path(), ki.NodeSignals(sig), send.Path())
 	}
 
 	vp.NodeUpdated(nii, sig, data)
 }
 
-// NodeUpdated is called from SignalViewport2D when a valid node's NodeSig sent a signal
+// NodeUpdated is called from SignalViewport when a valid node's NodeSig sent a signal
 // usually after UpdateEnd.
-func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data any) {
+func (vp *Viewport) NodeUpdated(nii Node2D, sig int64, data any) {
 	if !vp.NeedsFullRender() {
 		vp.StackMu.Lock()
 		anchor, full := vp.UpdateLevel(nii, sig, data)
@@ -779,7 +778,7 @@ func (vp *Viewport2D) NodeUpdated(nii Node2D, sig int64, data any) {
 }
 
 // UpdateLevel deteremines what level of updating a node requires
-func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2D, full bool) {
+func (vp *Viewport) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2D, full bool) {
 	ni := nii.AsNode2D()
 	if sig == int64(ki.NodeSignalUpdated) {
 		dflags := data.(int64)
@@ -805,7 +804,7 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2
 	if full {
 		ni.ClearFullReRender()
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v FullRenderTree (structural changes) for node: %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport: %v FullRenderTree (structural changes) for node: %v\n", vp.Path(), nii.Path())
 		}
 		anchor = ni.ParentReRenderAnchor()
 		return anchor, full
@@ -816,7 +815,7 @@ func (vp *Viewport2D) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2
 // SetNeedsFullRender sets the flag indicating that a full render of the viewport is needed
 // it will do this immediately pending acquisition of the lock and through the standard
 // updating channels, unless already updating.
-func (vp *Viewport2D) SetNeedsFullRender() {
+func (vp *Viewport) SetNeedsFullRender() {
 	if !vp.NeedsFullRender() {
 		vp.StackMu.Lock()
 		vp.SetFlag(int(VpFlagNeedsFullRender))
@@ -833,21 +832,21 @@ func (vp *Viewport2D) SetNeedsFullRender() {
 // loop is running on.  This prevents an update from happening in the
 // middle of the construction process and thus attempting to render garbage.
 // Must call UnblockUpdates after construction is done.
-func (vp *Viewport2D) BlockUpdates() {
+func (vp *Viewport) BlockUpdates() {
 	vp.UpdtMu.Lock()
 	vp.SetFlag(int(VpFlagUpdatingNode))
 	vp.UpdtMu.Unlock()
 }
 
 // UnblockUpdates unblocks updating of this viewport -- see BlockUpdates()
-func (vp *Viewport2D) UnblockUpdates() {
+func (vp *Viewport) UnblockUpdates() {
 	vp.UpdtMu.Lock()
 	vp.ClearFlag(int(VpFlagUpdatingNode))
 	vp.UpdtMu.Unlock()
 }
 
 // UpdateNodes processes the current update signals and actually does the relevant updating
-func (vp *Viewport2D) UpdateNodes() {
+func (vp *Viewport) UpdateNodes() {
 	vp.UpdtMu.Lock()
 	vp.SetFlag(int(VpFlagUpdatingNode))
 	tn := vp.TopNode2D()
@@ -895,15 +894,15 @@ func (vp *Viewport2D) UpdateNodes() {
 }
 
 // UpdateNode is called under UpdtMu lock and does the actual steps to update a given node
-func (vp *Viewport2D) UpdateNode(nii Node2D) {
+func (vp *Viewport) UpdateNode(nii Node2D) {
 	if nii.IsDirectWinUpload() {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v calling DirectWinUpload on %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport: %v calling DirectWinUpload on %v\n", vp.Path(), nii.Path())
 		}
 		nii.DirectWinUpload()
 	} else {
 		if Update2DTrace {
-			fmt.Printf("Update: Viewport2D: %v ReRender on %v\n", vp.Path(), nii.Path())
+			fmt.Printf("Update: Viewport: %v ReRender on %v\n", vp.Path(), nii.Path())
 		}
 		vp.ReRenderNode(nii)
 	}
@@ -913,7 +912,7 @@ func (vp *Viewport2D) UpdateNode(nii Node2D) {
 //  Style state
 
 // SetCurStyleNode sets the current styling node to given node, and nil to clear
-func (vp *Viewport2D) SetCurStyleNode(node Node2D) {
+func (vp *Viewport) SetCurStyleNode(node Node2D) {
 	if vp == nil {
 		return
 	}
@@ -923,7 +922,7 @@ func (vp *Viewport2D) SetCurStyleNode(node Node2D) {
 }
 
 // SetCurrentColor sets the current color in concurrent-safe way
-func (vp *Viewport2D) SetCurrentColor(clr color.RGBA) {
+func (vp *Viewport) SetCurrentColor(clr color.RGBA) {
 	if vp == nil {
 		return
 	}
@@ -934,7 +933,7 @@ func (vp *Viewport2D) SetCurrentColor(clr color.RGBA) {
 
 // ContextColor gets the current color in concurrent-safe way.
 // Implements the gist.Context interface
-func (vp *Viewport2D) ContextColor() color.RGBA {
+func (vp *Viewport) ContextColor() color.RGBA {
 	if vp == nil {
 		return color.RGBA{}
 	}
@@ -947,24 +946,7 @@ func (vp *Viewport2D) ContextColor() color.RGBA {
 // ContextColorSpecByURL finds a Node by an element name (URL-like path), and
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
-func (vp *Viewport2D) ContextColorSpecByURL(url string) *gist.ColorSpec {
-	/*
-		if vp == nil {
-			return nil
-		}
-		vp.StyleMu.RLock()
-		defer vp.StyleMu.RUnlock()
-
-		if vp.CurStyleNode == nil {
-			return nil
-		}
-		val := url[4:]
-		val = strings.TrimPrefix(strings.TrimSuffix(val, ")"), "#")
-		ne := vp.CurStyleNode.FindNamedElement(val)
-		if grad, ok := ne.(*Gradient); ok {
-			return &grad.Grad
-		}
-	*/
+func (vp *Viewport) ContextColorSpecByURL(url string) *gist.ColorSpec {
 	return nil
 }
 
@@ -972,11 +954,11 @@ func (vp *Viewport2D) ContextColorSpecByURL(url string) *gist.ColorSpec {
 //  Image utilities
 
 // SavePNG encodes the image as a PNG and writes it to disk.
-func (vp *Viewport2D) SavePNG(path string) error {
+func (vp *Viewport) SavePNG(path string) error {
 	return SavePNG(path, vp.Pixels)
 }
 
 // EncodePNG encodes the image as a PNG and writes it to the provided io.Writer.
-func (vp *Viewport2D) EncodePNG(w io.Writer) error {
+func (vp *Viewport) EncodePNG(w io.Writer) error {
 	return png.Encode(w, vp.Pixels)
 }

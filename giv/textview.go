@@ -1908,7 +1908,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Viewport2D, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func QReplaceDialog(avp *gi.Viewport, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
 	dlg.Modal = true
 
@@ -4778,9 +4778,9 @@ func (tv *TextView) TextViewEvents() {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-// Init2D calls Init on widget
-func (tv *TextView) Init2D() {
-	tv.Init2DWidget()
+// Config calls Init on widget
+func (tv *TextView) Config() {
+	tv.ConfigWidget()
 }
 
 // StyleTextView sets the style of widget
@@ -4798,15 +4798,15 @@ func (tv *TextView) StyleTextView() {
 			win.DeleteSprite(spnm)
 		}
 	}
-	tv.Style2DWidget()
+	tv.SetStyleWidget()
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
 	if tv.Buf != nil {
 		tv.Buf.Opts.StyleFromProps(tv.Props)
 	}
 }
 
-// Style2D calls StyleTextView and sets the style
-func (tv *TextView) Style2D() {
+// SetStyle calls StyleTextView and sets the style
+func (tv *TextView) SetStyle() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 	tv.StyMu.Lock()

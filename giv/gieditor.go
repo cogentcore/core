@@ -114,7 +114,7 @@ func (ge *GiEditor) EditColorScheme() {
 		return
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -450,7 +450,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		}
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

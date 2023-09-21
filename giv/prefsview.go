@@ -24,7 +24,7 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -89,7 +89,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -154,7 +154,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

@@ -72,7 +72,7 @@ func (vv *StructValueView) HasAction() bool {
 	return true
 }
 
-func (vv *StructValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *StructValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -196,7 +196,7 @@ func (vv *SliceValueView) HasAction() bool {
 	return true
 }
 
-func (vv *SliceValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *SliceValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -328,7 +328,7 @@ func (vv *MapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *MapValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *MapValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -475,7 +475,7 @@ func (vv *KiPtrValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KiPtrValueView) Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KiPtrValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return

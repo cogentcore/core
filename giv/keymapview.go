@@ -26,7 +26,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		return
 	}
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -138,7 +138,7 @@ func (vv *KeyMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KeyMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KeyMapValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

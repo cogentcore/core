@@ -18,7 +18,7 @@ func mainrun() {
 	height := 768
 	win := gi.NewMainWindow("gogi-align", "Align Test Window", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

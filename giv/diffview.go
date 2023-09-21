@@ -49,7 +49,7 @@ func DiffFiles(afile, bfile string) (*DiffView, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(avp *gi.Viewport2D, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
+func DiffViewDialogFromRevs(avp *gi.Viewport, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {
@@ -80,7 +80,7 @@ func DiffViewDialogFromRevs(avp *gi.Viewport2D, repo vci.Repo, file string, fbuf
 }
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
-func DiffViewDialog(avp *gi.Viewport2D, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
+func DiffViewDialog(avp *gi.Viewport, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
 	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()

@@ -460,7 +460,7 @@ type ValueView interface {
 	// the relevant dialog, or a pass-on call thereof, including the
 	// DialogAccepted or Canceled signal, so that the caller can execute its
 	// own actions based on the user hitting Ok or Cancel.
-	Activate(vp *gi.Viewport2D, recv ki.Ki, dlgFunc ki.RecvFunc)
+	Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc)
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -656,7 +656,7 @@ func (vv *ValueViewBase) HasAction() bool {
 	return false
 }
 
-func (vv *ValueViewBase) Activate(vp *gi.Viewport2D, recv ki.Ki, fun ki.RecvFunc) {
+func (vv *ValueViewBase) Activate(vp *gi.Viewport, recv ki.Ki, fun ki.RecvFunc) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -685,7 +685,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 				cv := ov.MapIndex(kv)    // get current value
 				curnv := ov.MapIndex(nv) // see if new value there already
 				if val != kv.Interface() && !laser.ValueIsZero(curnv) {
-					var vp *gi.Viewport2D
+					var vp *gi.Viewport
 					if vv.Widget != nil {
 						widg := vv.Widget.AsNode2D()
 						vp = widg.Viewport
@@ -994,7 +994,7 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Viewport2D, menu *gi.Menu) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Viewport, menu *gi.Menu) bool {
 	return CtxtMenuView(val, inactive, vp, menu)
 }
 
@@ -1135,7 +1135,7 @@ func (vv *VersCtrlValueView) HasAction() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *VersCtrlValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

@@ -27,7 +27,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-colors-test", "GoGi Colors Test", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

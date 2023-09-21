@@ -211,9 +211,9 @@ func (ac *Action) ButtonRelease() {
 	ac.UpdateEnd(updt)
 }
 
-// Init2D calls functions to initialize widget and parts
-func (ac *Action) Init2D() {
-	ac.Init2DWidget()
+// Config calls functions to initialize widget and parts
+func (ac *Action) Config() {
+	ac.ConfigWidget()
 	ac.ConfigParts()
 }
 

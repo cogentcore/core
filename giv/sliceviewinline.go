@@ -246,9 +246,9 @@ func (sv *SliceViewInline) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *SliceViewInline) Style2D() {
+func (sv *SliceViewInline) SetStyle() {
 	sv.ConfigParts()
-	sv.PartsWidgetBase.Style2D()
+	sv.PartsWidgetBase.SetStyle()
 }
 
 func (sv *SliceViewInline) Render() {

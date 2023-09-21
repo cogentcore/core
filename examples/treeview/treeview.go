@@ -98,7 +98,7 @@ func mainrun() {
 	height := 768
 	win := gi.NewMainWindow("gogi-treeview-test", "TreeView Test", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

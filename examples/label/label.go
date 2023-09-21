@@ -27,7 +27,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-label-test", "GoGi Label Test", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	// style sheet

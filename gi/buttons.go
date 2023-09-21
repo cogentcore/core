@@ -77,12 +77,12 @@ func (bb *ButtonBase) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
-// ButtonFlags extend NodeBase NodeFlags to hold button state
-type ButtonFlags ki.Flags //enums:bitflag
+// ButtonFlags extend WidgetFlags to hold button state
+type ButtonFlags WidgetFlags //enums:bitflag
 
 const (
 	// button is checkable -- enables display of check control
-	ButtonFlagCheckable ButtonFlags = ButtonFlags(NodeFlagsN) + iota
+	ButtonFlagCheckable ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
 
 	// button is checked
 	ButtonFlagChecked
@@ -410,7 +410,7 @@ type ButtonWidget interface {
 	// actually differ in functionality.
 	ButtonRelease()
 
-	// StyleParts is called during Style2D to handle styling associated with
+	// StyleParts is called during SetStyle to handle styling associated with
 	// parts -- icons mainly.
 	StyleParts()
 
@@ -430,8 +430,8 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 	return bb
 }
 
-func (bb *ButtonBase) Init2D() {
-	bb.Init2DWidget()
+func (bb *ButtonBase) Config() {
+	bb.ConfigWidget()
 	// bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts()
 }
@@ -456,6 +456,7 @@ func (bb *ButtonBase) ConfigParts() {
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
+
 	mods, updt := bb.Parts.ConfigChildren(config)
 	bb.ConfigPartsSetIconLabel(bb.Icon, bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
@@ -476,7 +477,7 @@ func (bb *ButtonBase) StyleButton() {
 	bb.StyMu.Lock()
 	defer bb.StyMu.Unlock()
 
-	bb.Style2DWidget()
+	bb.SetStyleWidget()
 	bb.This().(ButtonWidget).StyleParts()
 	if nf, err := bb.PropTry("no-focus"); err == nil {
 		bb.SetFlagState(!bb.IsDisabled() && !nf.(bool), int(CanFocus))
@@ -485,7 +486,7 @@ func (bb *ButtonBase) StyleButton() {
 	}
 }
 
-func (bb *ButtonBase) Style2D() {
+func (bb *ButtonBase) SetStyle() {
 	bb.StyleButton()
 
 	bb.StyMu.Lock()
@@ -786,9 +787,9 @@ func (cb *CheckBox) SetIcons(icOn, icOff gicons.Icon) {
 	cb.UpdateEnd(updt)
 }
 
-func (cb *CheckBox) Init2D() {
+func (cb *CheckBox) Config() {
 	cb.SetCheckable(true)
-	cb.Init2DWidget()
+	cb.ConfigWidget()
 	cb.This().(ButtonWidget).ConfigParts()
 }
 

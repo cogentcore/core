@@ -78,29 +78,6 @@ var (
 	// variable.
 	LocalMainMenu = false
 
-	// WinEventTrace reports a trace of window events to stdout
-	// can be set in PrefsDebug from prefs gui
-	// excludes mouse move events
-	WinEventTrace = false
-
-	// WinPublishTrace reports the stack trace leading up to win publish events
-	// which are expensive -- wrap multiple updates in UpdateStart / End
-	// to prevent
-	// can be set in PrefsDebug from prefs gui
-	WinPublishTrace = false
-
-	// WinDrawTrace highlights the window regions that are drawn to update
-	// the window, using filled colored rectangles
-	WinDrawTrace = false
-
-	// KeyEventTrace reports a trace of keyboard events to stdout
-	// can be set in PrefsDebug from prefs gui
-	KeyEventTrace = false
-
-	// EventTrace reports a trace of event handing to stdout.
-	// can be set in PrefsDebug from prefs gui
-	EventTrace = false
-
 	// WinNewCloseTime records last time a new window was opened or another
 	// closed -- used to trigger updating of Window menus on each window.
 	WinNewCloseTime time.Time
@@ -147,12 +124,12 @@ const (
 
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
-// There is a master Viewport that contains the full bitmap image of the
-// window, onto which most widgets render.  For main windows (not dialogs or
-// other popups), there is a master vertical layout under the Viewport
-// (MasterVLay), whose first element is the MainMenu for the window (which can
-// be empty, in which case it is not displayed).  On MacOS, this main menu
-// updates the overall menubar, and also can show the local menu (on by default).
+// 
+// Window manages a stack of Viewports, each of which manage a separate bitmap
+// image, onto which Widgets render.  For main windows, the Viewport Frame
+// has a MainMenu for the window (which can be empty, in which case it is not
+// displayed).  On MacOS, this main menu updates the overall menubar,
+// and also can show the local menu (on by default).
 //
 // Widgets should always use methods to access / set state, and generally should
 // not do much directly with the window.  Almost everything here needs to be
@@ -163,15 +140,14 @@ const (
 // Rendering logic:
 //   - vdraw.Drawer manages all rendering to the window surface, provided via
 //     the OSWin window, using vulkan stored images (16 max)
-//   - Order is: Base Viewport2D (image 0), then direct uploads, popups, and sprites.
+//   - Order is: Base Viewport (image 0), then direct uploads, popups, and sprites.
 //   - DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
 //     (note: cannot upload directly to window as this prevents popups and overlays)
 //   - Popups (which have their own Viewports)
 //   - Sprites are managed as layered textures of the same size, to enable
 //     unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
-	NodeBase
-
+	
 	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
 	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 
@@ -185,7 +161,7 @@ type Window struct {
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 
 	// convenience pointer to window's master viewport child that handles the rendering
-	Viewport *Viewport2D `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	Viewport *Viewport `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
 
 	// main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)
 	MasterVLay *Layout `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
@@ -448,7 +424,7 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
-	vp := NewViewport2D(width, height)
+	vp := NewViewport(width, height)
 	vp.SetName("WinVp")
 	vp.Fill = true
 	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -744,14 +720,14 @@ func (w *Window) ZoomDPI(steps int) {
 	w.FullReRender()
 }
 
-// WinViewport2D returns the viewport directly under this window that serves
+// WinViewport returns the viewport directly under this window that serves
 // as the master viewport for the entire window.
-func (w *Window) WinViewport2D() *Viewport2D {
-	vpi := w.ChildByType(TypeViewport2D, ki.Embeds, 0)
+func (w *Window) WinViewport() *Viewport {
+	vpi := w.ChildByType(TypeViewport, ki.Embeds, 0)
 	if vpi == nil { // shouldn't happen
 		return nil
 	}
-	vp, _ := vpi.Embed(TypeViewport2D).(*Viewport2D)
+	vp, _ := vpi.Embed(TypeViewport).(*Viewport)
 	return vp
 }
 
@@ -1078,7 +1054,7 @@ func (w *Window) InitialFocus() {
 // vpBBox bounding box for the viewport, and winBBox bounding box for the
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
-func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle) {
+func (w *Window) UploadVpRegion(vp *Viewport, vpBBox, winBBox image.Rectangle) {
 	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
 	winrel := winBBox.Min.Sub(vpBBox.Min)
 	if !w.IsVisible() {
@@ -1131,7 +1107,7 @@ func (w *Window) UploadVpRegion(vp *Viewport2D, vpBBox, winBBox image.Rectangle)
 
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
-func (w *Window) UploadVp(vp *Viewport2D, offset image.Point) {
+func (w *Window) UploadVp(vp *Viewport, offset image.Point) {
 	vpr := vp.Pixels.Bounds()
 	winBBox := vpr.Add(offset)
 	if !w.IsVisible() {
@@ -1231,7 +1207,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 		for _, pop := range w.PopupStack {
 			gii, _ := KiToNode2D(pop)
 			if gii != nil {
-				vp := gii.AsViewport2D()
+				vp := gii.AsViewport()
 				r := vp.Geom.Bounds()
 				idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
 				drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
@@ -1244,7 +1220,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	if w.Popup != nil {
 		gii, _ := KiToNode2D(w.Popup)
 		if gii != nil {
-			vp := gii.AsViewport2D()
+			vp := gii.AsViewport()
 			r := vp.Geom.Bounds()
 			idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
 			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
@@ -2201,7 +2177,7 @@ func PopupIsMenu(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport2D()
+	vp := nii.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2220,7 +2196,7 @@ func PopupIsTooltip(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport2D()
+	vp := nii.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2239,7 +2215,7 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport2D()
+	vp := nii.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2258,7 +2234,7 @@ func PopupIsCorrector(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport2D()
+	vp := nii.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2383,7 +2359,7 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 func (w *Window) PopPopup(pop ki.Ki) bool {
 	nii, ok := pop.(Node2D)
 	if ok {
-		pvp := nii.AsViewport2D()
+		pvp := nii.AsViewport()
 		if pvp != nil {
 			pvp.DeletePopup()
 		}

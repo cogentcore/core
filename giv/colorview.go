@@ -655,7 +655,7 @@ func (vv *ColorValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -727,7 +727,7 @@ func (vv *ColorNameValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorNameValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

@@ -850,7 +850,7 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 }
 
 // ViewportFromView returns Viewport from textview, if avail
-func (tb *TextBuf) ViewportFromView() *gi.Viewport2D {
+func (tb *TextBuf) ViewportFromView() *gi.Viewport {
 	if len(tb.Views) > 0 {
 		return tb.Views[0].Viewport
 	}

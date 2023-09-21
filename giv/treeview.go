@@ -1911,7 +1911,7 @@ func (tv *TreeView) ConfigParts() {
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
 				wb.Style.Template = "giv.TreeView.Branch"
 				// STYTODO: do we really need this?
-				wb.Style2D() // this is key for getting styling to take effect on first try
+				wb.SetStyle() // this is key for getting styling to take effect on first try
 			}
 		}
 	}
@@ -2043,7 +2043,7 @@ var TreeViewProps = ki.Props{
 	},
 }
 
-func (tv *TreeView) Init2D() {
+func (tv *TreeView) Config() {
 	// // optimized init -- avoid tree walking
 	if tv.RootView != tv {
 		tv.Viewport = tv.RootView.Viewport
@@ -2076,7 +2076,7 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	// STYTODO: figure out better way to handle styling (we can't just cache with style funcs)
 	if !hasTempl || saveTempl {
-		tv.Style2DWidget()
+		tv.SetStyleWidget()
 	}
 	if hasTempl && saveTempl {
 		tv.Style.SaveTemplate()
@@ -2087,7 +2087,7 @@ func (tv *TreeView) StyleTreeView() {
 	tv.ConfigParts()
 }
 
-func (tv *TreeView) Style2D() {
+func (tv *TreeView) SetStyle() {
 	tv.StyleTreeView()
 	tv.LayState.SetFromStyle(&tv.Style) // also does reset
 }

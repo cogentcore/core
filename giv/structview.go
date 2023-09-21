@@ -389,12 +389,12 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.UpdateEnd(updt)
 }
 
-func (sv *StructView) Style2D() {
+func (sv *StructView) SetStyle() {
 	mvp := sv.ViewportSafe()
 	if mvp != nil && mvp.IsDoingFullRender() {
 		sv.Config()
 	}
-	sv.Frame.Style2D()
+	sv.Frame.SetStyle()
 }
 
 func (sv *StructView) UpdateFieldAction() {

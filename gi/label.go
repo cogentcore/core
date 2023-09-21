@@ -392,7 +392,7 @@ func (lb *Label) StyleLabel() {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	lb.Style2DWidget()
+	lb.SetStyleWidget()
 }
 
 func (lb *Label) LayoutLabel() {
@@ -409,7 +409,7 @@ func (lb *Label) LayoutLabel() {
 	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
-func (lb *Label) Style2D() {
+func (lb *Label) SetStyle() {
 	lb.StyleLabel()
 	lb.StyMu.Lock()
 	lb.LayState.SetFromStyle(&lb.Style) // also does reset

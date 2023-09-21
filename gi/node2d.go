@@ -7,243 +7,17 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
-	"reflect"
 
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
-	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/prof/v2"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// 2D  Nodes
-
-/*
-Base struct node for 2D rendering tree -- renders to a bitmap using Paint
-rendering functions operating on the girl.State in the parent Viewport
-
-For Widget / Layout nodes, rendering is done in 5 separate passes:
-
- 0. Init2D: In a MeFirst downward pass, Viewport pointer is set, styles are
-    initialized, and any other widget-specific init is done.
-
- 1. Style2D: In a MeFirst downward pass, all properties are cached out in
-    an inherited manner, and incorporating any css styles, into either the
-    Paint (SVG) or Style (Widget) object for each Node.  Only done once after
-    structural changes -- styles are not for dynamic changes.
-
- 2. Size2D: MeLast downward pass, each node first calls
-    g.Layout.Reset(), then sets their LayoutSize according to their own
-    intrinsic size parameters, and/or those of its children if it is a Layout.
-
- 3. Layout2D: MeFirst downward pass (each node calls on its children at
-    appropriate point) with relevant parent BBox that the children are
-    constrained to render within -- they then intersect this BBox with their
-    own BBox (from BBox2D) -- typically just call Layout2DBase for default
-    behavior -- and add parent position to AllocPos. Layout does all its
-    sizing and positioning of children in this pass, based on the Size2D data
-    gathered bottom-up and constraints applied top-down from higher levels.
-    Typically only a single iteration is required but multiple are supported
-    (needed for word-wrapped text or flow layouts).
-
- 4. Render: Final rendering pass, each node is fully responsible for
-    rendering its own children, to provide maximum flexibility (see
-    RenderChildren) -- bracket the render calls in PushBounds / PopBounds
-    and a false from PushBounds indicates that VpBBox is empty and no
-    rendering should occur.  Nodes typically connect / disconnect to receive
-    events from the window based on this visibility here.
-
-    * Move2D: optional pass invoked by scrollbars to move elements relative to
-    their previously-assigned positions.
-
-    * SVG nodes skip the Size and Layout passes, and render directly into
-    parent SVG viewport
-*/
-type Node2DBase struct {
-	NodeBase
-
-	// [view: -] our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock
-	Viewport *Viewport2D `copy:"-" json:"-" xml:"-" view:"-" desc:"our viewport -- set in Init2D (Base typically) and used thereafter -- use ViewportSafe() method to access under BBoxMu read lock"`
-}
-
-func (nb *Node2DBase) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*Node2DBase)
-	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Node2DBase one\n", ki.Type(nb).Name())
-		ki.GenCopyFieldsFrom(nb.This(), frm)
-		return
-	}
-	nb.NodeBase.CopyFieldsFrom(&fr.NodeBase)
-}
-
-// Update2DTrace reports a trace of updates that trigger re-rendering -- can be set in PrefsDebug from prefs gui
-var Update2DTrace bool = false
-
-// RenderTrace reports a trace of the nodes rendering
-// (just printfs to stdout) -- can be set in PrefsDebug from prefs gui
-var RenderTrace bool = false
-
-// Layout2DTrace reports a trace of all layouts (just
-// printfs to stdout) -- can be set in PrefsDebug from prefs gui
-var Layout2DTrace bool = false
-
-// Node2D is the interface for all 2D nodes -- defines the stages of building
-// and rendering the 2D scenegraph
-type Node2D interface {
-	Node
-
-	// AsNode2D returns a generic Node2DBase for our node -- gives generic
-	// access to all the base-level data structures without requiring
-	// interface methods.
-	AsNode2D() *Node2DBase
-
-	// AsViewport2D returns Viewport2D if this node is one (has its own
-	// bitmap, used for menus, dialogs, icons, etc), else nil.
-	AsViewport2D() *Viewport2D
-
-	// AsLayout2D returns Layout if this is a Layout-derived node, else nil
-	AsLayout2D() *Layout
-
-	// AsWidget returns WidgetBase if this is a WidgetBase-derived node, else nil.
-	AsWidget() *WidgetBase
-
-	// Init2D initializes a node -- grabs active Viewport etc -- must call
-	// InitNodeBase as first step set basic inits including setting Viewport
-	// -- all code here must be robust to being called repeatedly.
-	Init2D()
-
-	// Style2D: In a MeFirst downward pass, all properties are cached out in
-	// an inherited manner, and incorporating any css styles, into either the
-	// Paint or Style object for each Node, depending on the type of node (SVG
-	// does Paint, Widget does Style).  Only done once after structural
-	// changes -- styles are not for dynamic changes.
-	Style2D()
-
-	// Size2D: MeLast downward pass, each node first calls
-	// g.Layout.Reset(), then sets their LayoutSize according to their own
-	// intrinsic size parameters, and/or those of its children if it is a
-	// Layout.
-	Size2D(iter int)
-
-	// Layout2D: MeFirst downward pass (each node calls on its children at
-	// appropriate point) with relevant parent BBox that the children are
-	// constrained to render within -- they then intersect this BBox with
-	// their own BBox (from BBox2D) -- typically just call Layout2DBase for
-	// default behavior -- and add parent position to AllocPos, and then
-	// return call to Layout2DChildren. Layout does all its sizing and
-	// positioning of children in this pass, based on the Size2D data gathered
-	// bottom-up and constraints applied top-down from higher levels.
-	// Typically only a single iteration is required (iter = 0) but multiple
-	// are supported (needed for word-wrapped text or flow layouts) -- return
-	// = true indicates another iteration required (pass this up the chain).
-	Layout2D(parBBox image.Rectangle, iter int) bool
-
-	// Move2D: optional MeFirst downward pass to move all elements by given
-	// delta -- used for scrolling -- the layout pass assigns canonical
-	// positions, saved in AllocPosOrig and BBox, and this adds the given
-	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
-	// update its bounding box information given the new position.
-	Move2D(delta image.Point, parBBox image.Rectangle)
-
-	// BBox2D: compute the raw bounding box of this node relative to its
-	// parent viewport -- called during Layout2D to set node BBox field, which
-	// is then used in setting WinBBox and VpBBox.
-	BBox2D() image.Rectangle
-
-	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
-	// call ComputeBBox2DBase but viewports require special code -- called
-	// during Layout and Move.
-	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
-
-	// ChildrenBBox2D: compute the bbox available to my children (content),
-	// adjusting for margins, border, padding (BoxSpace) taken up by me --
-	// operates on the existing VpBBox for this node -- this is what is passed
-	// down as parBBox do the children's Layout2D.
-	ChildrenBBox2D() image.Rectangle
-
-	// Render: Final rendering pass, each node is fully responsible for
-	// calling Render on its own children, to provide maximum flexibility
-	// (see RenderChildren for default impl) -- bracket the render calls in
-	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// VpBBox is empty and no rendering should occur.  Typically call
-	// ConnectEvents2D to set up connections to receive window events if
-	// visible, and disconnect if not.
-	Render()
-
-	// ConnectEvents2D: setup connections to window events -- called in
-	// Render if in bounds.  It can be useful to create modular methods for
-	// different event types that can then be mix-and-matched in any more
-	// specialized types.
-	ConnectEvents()
-
-	// FocusChanged2D is called on node for changes in focus -- see the
-	// FocusChanges values.
-	FocusChanged2D(change FocusChanges)
-
-	// HasFocus2D returns true if this node has keyboard focus and should
-	// receive keyboard events -- typically this just returns HasFocus based
-	// on the Window-managed HasFocus flag, but some types may want to monitor
-	// all keyboard activity for certain key keys..
-	HasFocus2D() bool
-
-	// FindNamedElement searches for given named element in this node or in
-	// parent nodes.  Used for url(#name) references.
-	FindNamedElement(name string) Node2D
-
-	// MakeContextMenu creates the context menu items (typically Action
-	// elements, but it can be anything) for a given widget, typically
-	// activated by the right mouse button or equivalent.  Widget has a
-	// function parameter that can be set to add context items (e.g., by Views
-	// or other complex widgets) to extend functionality.
-	MakeContextMenu(menu *Menu)
-
-	// ContextMenuPos returns the default position for popup menus --
-	// by default in the middle of the WinBBox, but can be adapted as
-	// appropriate for different widgets.
-	ContextMenuPos() image.Point
-
-	// ContextMenu displays the context menu of various actions to perform on
-	// a node -- returns immediately, and actions are all executed directly
-	// (later) via the action signals.  Calls MakeContextMenu and
-	// ContextMenuPos.
-	ContextMenu()
-
-	// IsVisible provides the definitive answer as to whether a given node
-	// is currently visible.  It is only entirely valid after a render pass
-	// for widgets in a visible window, but it checks the window and viewport
-	// for their visibility status as well, which is available always.
-	// This does *not* check for VpBBox level visibility, which is a further check.
-	// Non-visible nodes are automatically not rendered and not connected to
-	// window events.  The Invisible flag is one key element of the IsVisible
-	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
-	// set if a widget is entirely out of render range.  But again, use
-	// IsVisible as the main end-user method.
-	// For robustness, it recursively calls the parent -- this is typically
-	// a short path -- propagating the Invisible flag properly can be
-	// very challenging without mistakenly overwriting invisibility at various
-	// levels.
-	IsVisible() bool
-
-	// IsDirectWinUpload returns true if this is a node that does a direct window upload
-	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
-	IsDirectWinUpload() bool
-
-	// DirectWinUpload does a direct upload of contents to a window
-	// Drawer compositing image, which will then be used for drawing
-	// the window during a Publish() event (triggered by the window Update
-	// event).  This is called by the viewport in its Update signal processing
-	// routine on nodes that respond true to IsDirectWinUpload().
-	// The node is also free to update itself of its own accord at any point.
-	DirectWinUpload()
-}
-
 // FocusChanges are the kinds of changes that can be reported via
 // FocusChanged2D method
-type FocusChanges int32
+type FocusChanges int32 //enums:enum
 
 const (
 	// FocusLost means that keyboard focus is on a different widget
@@ -265,230 +39,7 @@ const (
 	// FocusActive means that the user has moved the mouse back into the
 	// focused widget to resume active keyboard focus.
 	FocusActive
-
-	FocusChangesN
 )
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Node2D impl for Node2DBase (nil)
-
-func (nb *Node2DBase) PropTag() string {
-	return "style-prop" // everything that can be a style value is tagged with this
-}
-
-func (n *Node2DBase) BaseIface() reflect.Type {
-	return reflect.TypeOf((*Node2D)(nil)).Elem()
-}
-
-func (nb *Node2DBase) AsNode2D() *Node2DBase {
-	return nb
-}
-
-func (nb *Node2DBase) AsViewport2D() *Viewport2D {
-	return nil
-}
-
-func (nb *Node2DBase) AsLayout2D() *Layout {
-	return nil
-}
-
-func (nb *Node2DBase) AsWidget() *WidgetBase {
-	return nil
-}
-
-func (nb *Node2DBase) Init2D() {
-}
-
-func (nb *Node2DBase) Style2D() {
-}
-
-func (nb *Node2DBase) Size2D(iter int) {
-}
-
-func (nb *Node2DBase) Layout2D(parBBox image.Rectangle, iter int) bool {
-	return false
-}
-
-func (nb *Node2DBase) BBox2D() image.Rectangle {
-	return image.Rectangle{}
-}
-
-func (nb *Node2DBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-}
-
-func (nb *Node2DBase) ChildrenBBox2D() image.Rectangle {
-	return image.Rectangle{}
-}
-
-func (nb *Node2DBase) Render() {
-}
-
-// ConnectEvents2D is the default event connection function
-// for Node2D objects. It calls [Node2DEvents], so any Node2D
-// implementing a custom ConnectEvents2D function should
-// first call [Node2DEvents].
-func (nb *Node2DBase) ConnectEvents() {
-	nb.Node2DEvents()
-}
-
-// Node2DEvents connects the default events for Node2D objects.
-// Any Node2D implementing a custom ConnectEvents2D function
-// should first call this function.
-func (nb *Node2DBase) Node2DEvents() {
-	// TODO: figure out connect events situation not working
-	// nb.Node2DMouseEvent()
-	nb.Node2DMouseFocusEvent()
-}
-
-// Node2DMouseFocusEvent does the default handling for mouse click events for the Node2D
-func (nb *Node2DBase) Node2DMouseEvent() {
-	nb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if nb.IsDisabled() {
-			return
-		}
-
-		me := data.(*mouse.Event)
-		me.SetProcessed()
-
-		nb.Node2DOnMouseEvent(me)
-	})
-}
-
-// Node2DOnMouseEvent is the function called on Node2D objects
-// when they get a mouse click event. If you are declaring a custom
-// mouse event function, you should call this function first.
-func (nb *Node2DBase) Node2DOnMouseEvent(me *mouse.Event) {
-	nb.SetActiveState(me.Action == mouse.Press)
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
-}
-
-// Node2DMouseFocusEvent does the default handling for mouse focus events for the Node2D
-func (nb *Node2DBase) Node2DMouseFocusEvent() {
-	nb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if nb.IsDisabled() {
-			return
-		}
-
-		me := data.(*mouse.FocusEvent)
-		me.SetProcessed()
-
-		nb.Node2DOnMouseFocusEvent(me)
-	})
-}
-
-// Node2DOnMouseFocusEvent is the function called on Node2D objects
-// when they get a mouse foucs event. If you are declaring a custom
-// mouse foucs event function, you should call this function first.
-func (nb *Node2DBase) Node2DOnMouseFocusEvent(me *mouse.FocusEvent) {
-	enter := me.Action == mouse.Enter
-	nb.SetHoveredState(enter)
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
-	// TODO: trigger mouse focus exit after clicking down
-	// while leaving; then clear active here
-	// // if !enter {
-	// // 	nb.ClearActive()
-	// }
-}
-
-func (nb *Node2DBase) Move2D(delta image.Point, parBBox image.Rectangle) {
-}
-
-// FocusChanged2D handles the default behavior for node focus changes
-// by calling [NodeBase.SetNeedsStyle] and sending an update signal.
-func (nb *Node2DBase) FocusChanged2D(change FocusChanges) {
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
-}
-
-func (nb *Node2DBase) HasFocus2D() bool {
-	return nb.HasFocus()
-}
-
-// GrabFocus grabs the keyboard input focus on this item or the first item within it
-// that can be focused (if none, then goes ahead and sets focus to this object)
-func (nb *Node2DBase) GrabFocus() {
-	foc := nb.This()
-	if !nb.CanFocus() {
-		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
-			_, ni := KiToNode2D(k)
-			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
-				return ki.Break
-			}
-			if !ni.CanFocus() {
-				return ki.Continue
-			}
-			foc = k
-			return ki.Break // done
-		})
-	}
-	em := nb.EventMgr2D()
-	if em != nil {
-		em.SetFocus(foc)
-	}
-}
-
-// FocusNext moves the focus onto the next item
-func (nb *Node2DBase) FocusNext() {
-	em := nb.EventMgr2D()
-	if em != nil {
-		em.FocusNext(em.CurFocus())
-	}
-}
-
-// FocusPrev moves the focus onto the previous item
-func (nb *Node2DBase) FocusPrev() {
-	em := nb.EventMgr2D()
-	if em != nil {
-		em.FocusPrev(em.CurFocus())
-	}
-}
-
-// StartFocus specifies this widget to give focus to when the window opens
-func (nb *Node2DBase) StartFocus() {
-	em := nb.EventMgr2D()
-	if em != nil {
-		em.SetStartFocus(nb.This())
-	}
-}
-
-// ContainsFocus returns true if this widget contains the current focus widget
-// as maintained in the Window
-func (nb *Node2DBase) ContainsFocus() bool {
-	em := nb.EventMgr2D()
-	if em == nil {
-		return false
-	}
-	cur := em.CurFocus()
-	if cur == nil {
-		return false
-	}
-	if cur == nb.This() {
-		return true
-	}
-	plev := cur.ParentLevel(nb.This())
-	if plev < 0 {
-		return false
-	}
-	return true
-}
-
-func (nb *Node2DBase) FindNamedElement(name string) Node2D {
-	if nb.Nm == name {
-		return nb.This().(Node2D)
-	}
-	if nb.Par == nil {
-		return nil
-	}
-	if ce := nb.Par.ChildByName(name, -1); ce != nil {
-		return ce.(Node2D)
-	}
-	if pni, _ := KiToNode2D(nb.Par); pni != nil {
-		return pni.FindNamedElement(name)
-	}
-	return nil
-}
 
 func (nb *Node2DBase) MakeContextMenu(m *Menu) {
 }
@@ -536,14 +87,6 @@ func (nb *Node2DBase) DirectWinUpload() {
 ////////////////////////////////////////////////////////////////////////////////////////
 // 2D basic infrastructure code
 
-// ViewportSafe returns the viewport under BBoxMu read lock -- use this for
-// random access to Viewport field when not otherwise protected.
-func (nb *Node2DBase) ViewportSafe() *Viewport2D {
-	nb.BBoxMu.RLock()
-	defer nb.BBoxMu.RUnlock()
-	return nb.Viewport
-}
-
 // Render returns the girl.State from this node's Viewport, using safe lock access
 func (nb *Node2DBase) Render() *girl.State {
 	mvp := nb.ViewportSafe()
@@ -551,47 +94,6 @@ func (nb *Node2DBase) Render() *girl.State {
 		return nil
 	}
 	return &mvp.Render
-}
-
-// KiToNode2D converts Ki to a Node2D interface and a Node2DBase obj -- nil if not.
-func KiToNode2D(k ki.Ki) (Node2D, *Node2DBase) {
-	if k == nil || k.This() == nil { // this also checks for destroyed
-		return nil, nil
-	}
-	nii, ok := k.(Node2D)
-	if ok {
-		return nii, nii.AsNode2D()
-	}
-	return nil, nil
-}
-
-// KiToNode2DBase converts Ki to a *Node2DBase -- use when known to be at
-// least of this type, not-nil, etc
-func KiToNode2DBase(k ki.Ki) *Node2DBase {
-	return k.(Node2D).AsNode2D()
-}
-
-// TopNode2D() returns the top-level node of the 2D tree, which
-// can be either a Window or a Viewport typically.  This is used
-// for UpdateStart / End around multiple dispersed updates to
-// properly batch everything and prevent redundant updates.
-func (nb *Node2DBase) TopNode2D() Node {
-	mvp := nb.ViewportSafe()
-	if mvp == nil || mvp.This() == nil {
-		vp := nb.This().(Node2D).AsViewport2D()
-		if vp != nil {
-			top := vp.This().(Viewport).VpTop()
-			if top != nil {
-				return top.VpTopNode()
-			}
-		}
-		return nil
-	}
-	top := mvp.This().(Viewport).VpTop()
-	if top != nil {
-		return top.VpTopNode()
-	}
-	return nil
 }
 
 // EventMgr2D() returns the event manager for this node.
@@ -614,7 +116,7 @@ func (nb *Node2DBase) EventMgr2D() *EventMgr {
 func (nb *Node2DBase) TopUpdateStart() bool {
 	mvp := nb.ViewportSafe()
 	if mvp == nil || mvp.This() == nil {
-		vp := nb.This().(Node2D).AsViewport2D()
+		vp := nb.This().(Node2D).AsViewport()
 		if vp != nil && vp.This() != nil {
 			return vp.This().(Viewport).VpTopUpdateStart()
 		}
@@ -632,7 +134,7 @@ func (nb *Node2DBase) TopUpdateEnd(updt bool) {
 	}
 	mvp := nb.ViewportSafe()
 	if mvp == nil || mvp.This() == nil {
-		vp := nb.This().(Node2D).AsViewport2D()
+		vp := nb.This().(Node2D).AsViewport()
 		if vp != nil && vp.This() != nil {
 			vp.This().(Viewport).VpTopUpdateEnd(updt)
 		}
@@ -655,16 +157,16 @@ func (nb *Node2DBase) ParentWindow() *Window {
 	return wini.Embed(TypeWindow).(*Window)
 }
 
-// ParentViewport returns the parent viewport -- uses AsViewport2D() method on
+// ParentViewport returns the parent viewport -- uses AsViewport() method on
 // Node2D interface
-func (nb *Node2DBase) ParentViewport() *Viewport2D {
-	var parVp *Viewport2D
+func (nb *Node2DBase) ParentViewport() *Viewport {
+	var parVp *Viewport
 	nb.FuncUpParent(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ok := k.(Node2D)
 		if !ok {
 			return ki.Break // don't keep going up
 		}
-		vp := nii.AsViewport2D()
+		vp := nii.AsViewport()
 		if vp != nil {
 			parVp = vp
 			return ki.Break // done
@@ -721,7 +223,7 @@ func (nb *Node2DBase) DisconnectAllEvents(pri EventPris) {
 func (nb *Node2DBase) ConnectToViewport() {
 	mvp := nb.ViewportSafe()
 	if mvp != nil && mvp.This() != nil {
-		nb.NodeSig.Connect(mvp.This(), SignalViewport2D)
+		nb.NodeSig.Connect(mvp.This(), SignalViewport)
 	}
 }
 
@@ -762,15 +264,15 @@ func (nb *Node2DBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poi
 // Tree-walking code for the init, style, layout, render passes
 //  typically called by Viewport but can be called by others
 
-// FullInit2DTree does a full reinitialization of the tree *below this node*
+// FullConfigTree does a full reinitialization of the tree *below this node*
 // this should be called whenever the tree is dynamically updated and new
 // nodes are added below a given node -- e.g., loading a new SVG graph etc.
 // prepares everything to be rendered as usual.
-func (nb *Node2DBase) FullInit2DTree() {
+func (nb *Node2DBase) FullConfigTree() {
 	for i := range nb.Kids {
 		kd := nb.Kids[i].(Node2D).AsNode2D()
-		kd.Init2DTree()
-		kd.Style2DTree()
+		kd.ConfigTree()
+		kd.SetStyleTree()
 		kd.Size2DTree(0)
 		kd.Layout2DTree()
 	}
@@ -779,8 +281,8 @@ func (nb *Node2DBase) FullInit2DTree() {
 // FullRenderTree does a full render of the tree
 func (nb *Node2DBase) FullRenderTree() {
 	updt := nb.UpdateStart()
-	nb.Init2DTree()
-	nb.Style2DTree()
+	nb.ConfigTree()
+	nb.SetStyleTree()
 	nb.Size2DTree(0)
 	nb.Layout2DTree()
 	nb.RenderTree()
@@ -809,43 +311,43 @@ func (nb *Node2DBase) NeedsFullReRenderTree() bool {
 	return full
 }
 
-// Init2DTree initializes scene graph tree from node it is called on -- only
+// ConfigTree initializes scene graph tree from node it is called on -- only
 // needs to be done once but must be robust to repeated calls -- use a flag if
 // necessary -- needed after structural updates to ensure all nodes are
 // updated
-func (nb *Node2DBase) Init2DTree() {
+func (nb *Node2DBase) ConfigTree() {
 	if nb.This() == nil {
 		return
 	}
-	pr := prof.Start("Node2D.Init2DTree." + ki.Type(nb).Name())
+	pr := prof.Start("Node2D.ConfigTree." + ki.Type(nb).Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		// ppr := prof.Start("Init2DTree:" + nii.Type().Name())
-		nii.Init2D()
+		// ppr := prof.Start("ConfigTree:" + nii.Type().Name())
+		nii.Config()
 		// ppr.End()
 		return ki.Continue
 	})
 	pr.End()
 }
 
-// Style2DTree styles scene graph tree from node it is called on -- only needs
+// SetStyleTree styles scene graph tree from node it is called on -- only needs
 // to be done after a structural update in case inherited options changed
-func (nb *Node2DBase) Style2DTree() {
+func (nb *Node2DBase) SetStyleTree() {
 	if nb.This() == nil {
 		return
 	}
 	// fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
-	pr := prof.Start("Node2D.Style2DTree." + ki.Type(nb).Name())
+	pr := prof.Start("Node2D.SetStyleTree." + ki.Type(nb).Name())
 	nb.FuncDownMeFirst(0, nb.This(), func(k ki.Ki, level int, d any) bool {
 		nii, ni := KiToNode2D(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		// ppr := prof.Start("Style2DTree:" + nii.Type().Name())
-		nii.Style2D()
+		// ppr := prof.Start("SetStyleTree:" + nii.Type().Name())
+		nii.SetStyle()
 		// ppr.End()
 		return ki.Continue
 	})
@@ -1061,54 +563,4 @@ func (nb *Node2DBase) ScrollToMe() bool {
 		return false
 	}
 	return ly.ScrollToItem(nb.This().(Node2D))
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Props convenience methods
-
-// STYTODO: remove these
-
-// SetMinPrefWidth sets minimum and preferred width -- will get at least this
-// amount -- max unspecified
-func (nb *Node2DBase) SetMinPrefWidth(val units.Value) {
-	nb.SetProp("width", val)
-	nb.SetProp("min-width", val)
-}
-
-// SetMinPrefHeight sets minimum and preferred height -- will get at least this
-// amount -- max unspecified
-func (nb *Node2DBase) SetMinPrefHeight(val units.Value) {
-	nb.SetProp("height", val)
-	nb.SetProp("min-height", val)
-}
-
-// SetStretchMaxWidth sets stretchy max width (-1) -- can grow to take up avail room
-func (nb *Node2DBase) SetStretchMaxWidth() {
-	nb.SetProp("max-width", units.Px(-1))
-}
-
-// SetStretchMaxHeight sets stretchy max height (-1) -- can grow to take up avail room
-func (nb *Node2DBase) SetStretchMaxHeight() {
-	nb.SetProp("max-height", units.Px(-1))
-}
-
-// SetStretchMax sets stretchy max width and height (-1) -- can grow to take up avail room
-func (nb *Node2DBase) SetStretchMax() {
-	nb.SetStretchMaxWidth()
-	nb.SetStretchMaxHeight()
-}
-
-// SetFixedWidth sets all width options (width, min-width, max-width) to a fixed width value
-func (nb *Node2DBase) SetFixedWidth(val units.Value) {
-	nb.SetProp("width", val)
-	nb.SetProp("min-width", val)
-	nb.SetProp("max-width", val)
-}
-
-// SetFixedHeight sets all height options (height, min-height, max-height) to
-// a fixed height value
-func (nb *Node2DBase) SetFixedHeight(val units.Value) {
-	nb.SetProp("height", val)
-	nb.SetProp("min-height", val)
-	nb.SetProp("max-height", val)
 }

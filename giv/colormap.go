@@ -209,7 +209,7 @@ func (vv *ColorMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) Activate(vp *gi.Viewport2D, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorMapValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

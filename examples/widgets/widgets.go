@@ -46,7 +46,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	// vp.SetProps(ki.Props{

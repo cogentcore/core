@@ -140,7 +140,7 @@ func (bm *Bitmap) GrabRenderFrom(nii Node2D) {
 	}
 }
 
-func (bm *Bitmap) DrawIntoViewport(parVp *Viewport2D) {
+func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 	if bm.Pixels == nil {
 		return
 	}
@@ -182,7 +182,7 @@ func (bm *Bitmap) Render() {
 // if nil, then image could not be grabbed
 func GrabRenderFrom(nii Node2D) *image.RGBA {
 	ni := nii.AsNode2D()
-	nivp := nii.AsViewport2D()
+	nivp := nii.AsViewport()
 	if nivp != nil && nivp.Pixels != nil {
 		sz := nivp.Pixels.Bounds().Size()
 		img := image.NewRGBA(image.Rectangle{Max: sz})

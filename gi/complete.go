@@ -62,7 +62,7 @@ type Complete struct {
 	Completion string `desc:"the user's completion selection'"`
 
 	// the viewport where the current popup menu is presented
-	Vp         *Viewport2D `desc:"the viewport where the current popup menu is presented"`
+	Vp         *Viewport `desc:"the viewport where the current popup menu is presented"`
 	DelayTimer *time.Timer
 	DelayMu    sync.Mutex
 	ShowMu     sync.Mutex
@@ -105,7 +105,7 @@ func (c *Complete) IsAboutToShow() bool {
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
+func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -143,7 +143,7 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport2D, pt image.
 // completion popup menu. If keep is set to true, the previous completion popup
 // will be kept and reused (if it exists), which reduces flashing if there is no
 // delay between popups.
-func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool, keep bool) {
+func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool, keep bool) {
 	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}
@@ -230,7 +230,7 @@ func (c *Complete) Abort() bool {
 }
 
 // Lookup is the main call for doing lookups
-func (c *Complete) Lookup(text string, posLn, posCh int, vp *Viewport2D, pt image.Point, force bool) {
+func (c *Complete) Lookup(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool) {
 	if c.LookupFunc == nil || vp == nil || vp.Win == nil {
 		return
 	}

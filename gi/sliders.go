@@ -245,7 +245,7 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 	sb.Style = sb.StateStyles[state] // get relevant styles
 	if prev != state {
 		sb.StyMu.Lock()
-		sb.Style2DWidget()
+		sb.SetStyleWidget()
 		sb.StyMu.Unlock()
 		// sb.Viewport.SetNeedsFullRender()
 	}
@@ -572,8 +572,8 @@ func (sb *SliderBase) SliderEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SliderBase) Init2DSlider() {
-	sb.Init2DWidget()
+func (sb *SliderBase) ConfigSlider() {
+	sb.ConfigWidget()
 	sb.State = SliderActive
 	if sb.IsDisabled() {
 		sb.State = SliderInactive
@@ -616,7 +616,7 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 
 // StyleFromProps styles Slider-specific fields from ki.Prop properties
 // doesn't support inherit or default
-func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport2D) {
+func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -688,7 +688,7 @@ func (sr *SliderBase) StyleSlider() {
 	sr.StyMu.Lock()
 	defer sr.StyMu.Unlock()
 
-	sr.Style2DWidget()
+	sr.SetStyleWidget()
 	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
@@ -758,12 +758,12 @@ var SliderProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sr *Slider) Init2D() {
-	sr.Init2DSlider()
+func (sr *Slider) Config() {
+	sr.ConfigSlider()
 	sr.ConfigParts()
 }
 
-func (sr *Slider) Style2D() {
+func (sr *Slider) SetStyle() {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider()
 	sr.StyMu.Lock()
@@ -924,11 +924,11 @@ var ScrollBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sb *ScrollBar) Init2D() {
-	sb.Init2DSlider()
+func (sb *ScrollBar) Config() {
+	sb.ConfigSlider()
 }
 
-func (sb *ScrollBar) Style2D() {
+func (sb *ScrollBar) SetStyle() {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider()
 	sb.StyMu.Lock()
@@ -1098,6 +1098,6 @@ var ProgressBarProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (pb *ProgressBar) Init2D() {
-	pb.ScrollBar.Init2D()
+func (pb *ProgressBar) Config() {
+	pb.ScrollBar.Config()
 }

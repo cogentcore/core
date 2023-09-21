@@ -1070,8 +1070,8 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	sv.ToolbarSlice = sv.Slice
 }
 
-func (sv *SliceViewBase) Style2D() {
-	sv.Frame.Style2D()
+func (sv *SliceViewBase) SetStyle() {
+	sv.Frame.SetStyle()
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}

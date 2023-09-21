@@ -268,7 +268,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
 	parni, _ := KiToNode2D(ly.Par)
 	if parni != nil {
-		vp := parni.AsViewport2D()
+		vp := parni.AsViewport()
 		if vp != nil {
 			if vp.ViewportSafe() == nil {
 				// SidesTODO: might not be right
@@ -331,7 +331,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.InitName(sc, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sc, ly.This())
 		sc.Dim = d
-		sc.Init2D()
+		sc.Config()
 		sc.Tracking = true
 		sc.Min = 0.0
 	}
@@ -345,7 +345,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.SetFixedWidth(ly.Style.ScrollBarWidth)
 		sc.SetFixedHeight(units.Dot(avail.Dim(d)))
 	}
-	sc.Style2D()
+	sc.SetStyle()
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
@@ -1090,8 +1090,8 @@ func (ly *Layout) AsLayout2D() *Layout {
 	return ly
 }
 
-func (ly *Layout) Init2D() {
-	ly.Init2DWidget()
+func (ly *Layout) Config() {
+	ly.ConfigWidget()
 }
 
 func (ly *Layout) BBox2D() image.Rectangle {
@@ -1111,7 +1111,7 @@ func (ly *Layout) ChildrenBBox2D() image.Rectangle {
 
 // StyleFromProps styles Layout-specific fields from ki.Prop properties
 // doesn't support inherit or default
-func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport2D) {
+func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport) {
 	keys := []string{"lay", "spacing"}
 	for _, key := range keys {
 		val, has := props[key]
@@ -1153,7 +1153,7 @@ func (ly *Layout) StyleLayout() {
 
 	hasTempl, saveTempl := ly.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		ly.Style2DWidget()
+		ly.SetStyleWidget()
 	}
 	ly.StyleFromProps(ly.Props, ly.Viewport) // does "lay" and "spacing", in layoutstyles.go
 	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
@@ -1168,7 +1168,7 @@ func (ly *Layout) StyleLayout() {
 	}
 }
 
-func (ly *Layout) Style2D() {
+func (ly *Layout) SetStyle() {
 	ly.StyleLayout()
 	ly.StyMu.Lock()
 	ly.LayState.SetFromStyle(&ly.Style) // also does reset
@@ -1309,13 +1309,13 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (st *Stretch) Style2D() {
+func (st *Stretch) SetStyle() {
 	st.StyMu.Lock()
 	defer st.StyMu.Unlock()
 
 	hasTempl, saveTempl := st.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		st.Style2DWidget()
+		st.SetStyleWidget()
 	}
 	if hasTempl && saveTempl {
 		st.Style.SaveTemplate()
@@ -1350,13 +1350,13 @@ var SpaceProps = ki.Props{
 	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
-func (sp *Space) Style2D() {
+func (sp *Space) SetStyle() {
 	sp.StyMu.Lock()
 	defer sp.StyMu.Unlock()
 
 	hasTempl, saveTempl := sp.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		sp.Style2DWidget()
+		sp.SetStyleWidget()
 	}
 	if hasTempl && saveTempl {
 		sp.Style.SaveTemplate()

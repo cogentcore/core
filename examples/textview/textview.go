@@ -29,7 +29,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-textview-test", "GoGi TextView Test", width, height)
 
-	vp := win.WinViewport2D()
+	vp := win.WinViewport()
 	updt := vp.UpdateStart()
 
 	// // style sheet

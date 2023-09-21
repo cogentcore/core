@@ -57,7 +57,7 @@ See [Gide](https://goki.dev/gi/v2de) for a complete, complex application written
 
 There are three main types of 2D nodes:
 
-* `Viewport2D` nodes that manage their own `image.RGBA` bitmap and can upload that directly to the `goosi.Texture` (GPU based) that then uploads directly to the `goosi.Window`.  The parent `Window` has a master `Viewport2D` that backs the entire window, and is what most `Widget`'s render into.
+* `Viewport` nodes that manage their own `image.RGBA` bitmap and can upload that directly to the `goosi.Texture` (GPU based) that then uploads directly to the `goosi.Window`.  The parent `Window` has a master `Viewport` that backs the entire window, and is what most `Widget`'s render into.
     + Popup `Dialog` and `Menu`'s have their own viewports that are layered on top of the main window viewport.
     + `SVG` and its subclass `Icon` are containers for SVG-rendering nodes.
 
@@ -93,5 +93,82 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 * Please file [Issues](https://goki.dev/gi/v2/issues) for anything that does not work.
 
 * 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://goki.dev/gi/v2/tree/master/python/README.md) file there for more details.
+
+# Detailed Render Logic
+
+Rendering is done in 5 separate passes:
+
+0. Config: In a MeFirst downward pass, Viewport pointer is set, styles are
+   initialized, and any other widget-specific init is done.
+
+1. SetStyle: In a MeFirst downward pass, all properties are cached out in
+   an inherited manner, and incorporating any css styles, into either the
+   Paint (SVG) or Style (Widget) object for each Node.  Only done once after
+   structural changes -- styles are not for dynamic changes.
+
+2. Size2D: MeLast downward pass, each node first calls
+   g.Layout.Reset(), then sets their LayoutSize according to their own
+   intrinsic size parameters, and/or those of its children if it is a Layout.
+
+3. Layout2D: MeFirst downward pass (each node calls on its children at
+   appropriate point) with relevant parent BBox that the children are
+   constrained to render within -- they then intersect this BBox with their
+   own BBox (from BBox2D) -- typically just call Layout2DBase for default
+   behavior -- and add parent position to AllocPos. Layout does all its
+   sizing and positioning of children in this pass, based on the Size2D data
+   gathered bottom-up and constraints applied top-down from higher levels.
+   Typically only a single iteration is required but multiple are supported
+   (needed for word-wrapped text or flow layouts).
+
+4. Render: Final rendering pass, each node is fully responsible for
+   rendering its own children, to provide maximum flexibility (see
+   RenderChildren) -- bracket the render calls in PushBounds / PopBounds
+   and a false from PushBounds indicates that VpBBox is empty and no
+   rendering should occur.  Nodes typically connect / disconnect to receive
+   events from the window based on this visibility here.
+
+   * Move2D: optional pass invoked by scrollbars to move elements relative to
+   their previously-assigned positions.
+
+   * SVG nodes skip the Size and Layout passes, and render directly into
+   parent SVG viewport
+
+
+
+# v2 Rewrite TODO / Discussion
+
+## Window is not a Ki
+
+* contains a stack of Viewports, the first of which is the main window, rest are popups.
+
+## Viewport is not a Ki, is the base struct for each separate tree
+
+* Viewport represents: main window and each popup -> window, tooltip, dialog, etc.
+
+* Viewport has a Frame field which is the base of each tree
+
+* is passed as arg, not stored on obj: all methods take the viewport!
+* so much cleaner vs. mutexes, safe finding, etc.
+
+## Init2D -> Config
+
+* ConfigAll called during window Show, but otherwise not called!
+* manually call Config on individual elements if properties change.
+
+## SetStyle -> SetStyle
+
+* called automatically for any state change
+
+* Widget SetState method is called with bitflag to set: checks if state is not yet set: if so, sets flag, calls SetStyle() wrapped in UpdateStart / End.
+
+## Robust updating logic redo
+
+* Config calls SetStyle, within an overall Update Start / End block
+
+* ki.UpdateEnd() in Config or SetStyle calls SetRender method, which sets flag in node (all below it will be rendered) and a NeedsRender flag on the Viewport (need the viewport for this -- cache in Config, only use for setting this one flag!).
+
+* Window iterates through Viewports on a timer loop, and checks if any have VpNeedsRender flag set, and not VpIsRendering flag -- calls RenderAll on them, passing viewport down.  *first* step is to clear VpNeedsRender flag so any further updates can register need, and each node's NeedsRender flag is cleared after rendering *starts*.  Better to err on side of extra rendering.
+
+
 
 
