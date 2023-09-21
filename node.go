@@ -575,7 +575,7 @@ func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub string) (mods, upd
 	for sz > trgn {
 		if !mods {
 			mods = true
-			updt = n.UpdateStart()
+			updt = n.This().UpdateStart()
 		}
 		sz--
 		n.DeleteChildAtIndex(sz, true)
@@ -583,7 +583,7 @@ func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub string) (mods, upd
 	for sz < trgn {
 		if !mods {
 			mods = true
-			updt = n.UpdateStart()
+			updt = n.This().UpdateStart()
 		}
 		nm := fmt.Sprintf("%s%d", nameStub, sz)
 		n.InsertNewChild(typ, sz, nm)
@@ -619,7 +619,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 	if err != nil {
 		return err
 	}
-	updt := n.UpdateStart()
+	updt := n.This().UpdateStart()
 	n.SetFlag(true, ChildDeleted)
 	if child.Parent() == n.This() {
 		// only deleting if we are still parent -- change parent first to
@@ -636,7 +636,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 		DelMgr.Add(child)
 	}
 	UpdateReset(child) // it won't get the UpdateEnd from us anymore -- init fresh in any case
-	n.UpdateEnd(updt)
+	n.This().UpdateEnd(updt)
 	return nil
 }
 
@@ -671,7 +671,7 @@ func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 // remain intact but parent is nil -- could be inserted elsewhere, but you
 // better have kept a slice of them before calling this.
 func (n *Node) DeleteChildren(destroy bool) {
-	updt := n.UpdateStart()
+	updt := n.This().UpdateStart()
 	n.SetFlag(true, ChildrenDeleted)
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
@@ -687,7 +687,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 	if destroy {
 		DelMgr.Add(kids...)
 	}
-	n.UpdateEnd(updt)
+	n.This().UpdateEnd(updt)
 }
 
 // Delete deletes this node from its parent children list -- destroy will
@@ -1284,8 +1284,8 @@ func (n *Node) CopyFrom(frm Ki) error {
 	// 	log.Println(err)
 	// 	return err
 	// }
-	updt := n.UpdateStart()
-	defer n.UpdateEnd(updt)
+	updt := n.This().UpdateStart()
+	defer n.This().UpdateEnd(updt)
 	err := CopyFromRaw(n.This(), frm)
 	return err
 }
