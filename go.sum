@@ -1,6 +1,6 @@
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-goki.dev/cam v0.9.10 h1:99gpw2lqRyCnc9CAPs7WK6DUZvxETHz0kIET1WFb3Ig=
-goki.dev/cam v0.9.10/go.mod h1:lc+iHUmlktsA6FmHxU4JGVB6bZrqsw53DGOqfSRbC8A=
+goki.dev/cam v0.9.11 h1:yAKuosyYodd+pgszbADLYhy1ktumYcc7U3NgZ9/kYEU=
+goki.dev/cam v0.9.11/go.mod h1:mnFro6IyeFgJ7Tmrj2A/JrpxUzUUBCRPSpNBoffTl0Y=
 goki.dev/mat32/v2 v2.0.0-dev0.0.0 h1:7FOCMazItpTSwEyVjuwBGp9j1y1xOyiNHMXvUAXaOjs=
 goki.dev/mat32/v2 v2.0.0-dev0.0.0/go.mod h1:AUbsBba0wfzN5XrHOuinIAv2D+n6CAPVW90pzrJY2ME=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
