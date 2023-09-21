@@ -20,6 +20,10 @@ import (
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
 var ConfigFiles []string
 
+// Verbose is whether the user has passed a -v or -verbose flag to the command
+// that indicates for it to print more information.
+var Verbose bool
+
 // IMPORTANT: all changes to MetaConfig must be updated in metaConfigFields
 
 // MetaConfig contains meta configuration information specified
@@ -31,10 +35,10 @@ var ConfigFiles []string
 // and not by end-user code.
 type MetaConfig struct {
 	// Config is the file name of the config file to load
-	Config string `flag:"config,cfg"`
+	Config string `flag:"cfg,config"`
 
 	// Help is whether to display a help message
-	Help bool `flag:"help,h"`
+	Help bool `flag:"h,help"`
 
 	// HelpCmd is the name of the command to display
 	// help information for. It is only applicable to the
@@ -42,6 +46,10 @@ type MetaConfig struct {
 	// that it can consume all positional arguments to prevent
 	// errors about unused arguments.
 	HelpCmd string `posarg:"all"`
+
+	// Verbose is whether to run the command in verbose mode
+	// and print more information
+	Verbose bool `flag:"v,verbose"`
 }
 
 // metaConfigFields is the struct used for the implementation
@@ -51,9 +59,10 @@ type MetaConfig struct {
 // everything, so it easier to just add through a separate struct.
 // TODO: maybe improve the structure of this
 type metaConfigFields struct {
-	Config  string `flag:"config,cfg"`
-	Help    bool   `flag:"help,h"`
+	Config  string `flag:"cfg,config"`
+	Help    bool   `flag:"h,help"`
 	HelpCmd string
+	Verbose bool `flag:"v,verbose"`
 }
 
 // AddMetaConfigFields adds meta fields that control the config process

@@ -93,8 +93,9 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	b.WriteString(HeaderColor("\nFlags:\n") + Indent + InfoColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
 	b.WriteString(Indent + InfoColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
-	b.WriteString(Indent + CmdColor("-help") + ", " + CmdColor("-h") + SuccessColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
-	b.WriteString(Indent + CmdColor("-config") + ", " + CmdColor("-cfg") + SuccessColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
+	b.WriteString(Indent + CmdColor("-h") + ", " + CmdColor("-help") + SuccessColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
+	b.WriteString(Indent + CmdColor("-v") + ", " + CmdColor("-verbose") + SuccessColor(" bool") + "\n" + Indent + Indent + "run the command in verbose mode and print more information\n")
+	b.WriteString(Indent + CmdColor("-cfg") + ", " + CmdColor("-config") + SuccessColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
 	FlagUsage(fields, &b)
 	return b.String()
 }
@@ -152,7 +153,7 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(Indent + CmdColor("help") + "\n" + Indent + Indent + "help shows usage information for a command\n")
+		b.WriteString(Indent + CmdColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
