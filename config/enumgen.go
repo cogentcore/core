@@ -25,10 +25,10 @@ func _TypesNoOp() {
 }
 
 var _TypesNameToValueMap = map[string]Types{
-	`TypeApp`:     0,
-	`typeapp`:     0,
-	`TypeLibrary`: 1,
-	`typelibrary`: 1,
+	`App`:     0,
+	`app`:     0,
+	`Library`: 1,
+	`library`: 1,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -37,8 +37,8 @@ var _TypesDescMap = map[Types]string{
 }
 
 var _TypesMap = map[Types]string{
-	0: `TypeApp`,
-	1: `TypeLibrary`,
+	0: `App`,
+	1: `Library`,
 }
 
 // String returns the string representation

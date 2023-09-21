@@ -6,7 +6,7 @@ package config
 
 // Types is an enum with all
 // of the possible types of packages.
-type Types int //enums:enum
+type Types int //enums:enum -trim-prefix Type
 
 const (
 	// TypeApp is an executable app
