@@ -25,8 +25,8 @@ type Config struct {
 	// whether to add functions to gtigen by default
 	AddFuncs bool `desc:"whether to add functions to gtigen by default"`
 
-	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it
-	InterfaceConfigs map[string]*Config `desc:"a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it"`
+	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it (note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should)
+	InterfaceConfigs map[string]*Config `desc:"a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it (note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should)"`
 
 	// whether to generate an instance of the type(s)
 	Instance bool `desc:"whether to generate an instance of the type(s)"`

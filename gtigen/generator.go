@@ -174,7 +174,10 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				for in, ic := range cfg.InterfaceConfigs {
 					iface := g.Interfaces.ValByKey(in)
 					if iface == nil {
-						return false, fmt.Errorf("programmer error: internal error: missing interface object for interface %q", in)
+						if grease.Verbose {
+							fmt.Printf("warning: missing interface object for interface %q\n", in)
+						}
+						return true, nil
 					}
 					if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
 						continue
