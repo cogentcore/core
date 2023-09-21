@@ -232,7 +232,7 @@ func (mv *MapViewInline) SetStyle() {
 	mv.PartsWidgetBase.SetStyle()
 }
 
-func (mv *MapViewInline) Render() {
+func (mv *MapViewInline) Render(vp *Viewport) {
 	if mv.FullReRenderIfNeeded() {
 		return
 	}

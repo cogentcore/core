@@ -110,10 +110,10 @@ Rendering is done in 5 separate passes:
    g.Layout.Reset(), then sets their LayoutSize according to their own
    intrinsic size parameters, and/or those of its children if it is a Layout.
 
-3. Layout2D: MeFirst downward pass (each node calls on its children at
+3. DoLayout: MeFirst downward pass (each node calls on its children at
    appropriate point) with relevant parent BBox that the children are
    constrained to render within -- they then intersect this BBox with their
-   own BBox (from BBox2D) -- typically just call Layout2DBase for default
+   own BBox (from BBox2D) -- typically just call DoLayoutBase for default
    behavior -- and add parent position to AllocPos. Layout does all its
    sizing and positioning of children in this pass, based on the Size2D data
    gathered bottom-up and constraints applied top-down from higher levels.

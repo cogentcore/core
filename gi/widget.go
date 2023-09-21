@@ -52,20 +52,20 @@ type Widget interface {
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
 	// Layout.
-	Size2D(iter int)
+	GetSize(vp *Viewport, iter int)
 
-	// Layout2D: MeFirst downward pass (each node calls on its children at
+	// DoLayout: MeFirst downward pass (each node calls on its children at
 	// appropriate point) with relevant parent BBox that the children are
 	// constrained to render within -- they then intersect this BBox with
-	// their own BBox (from BBox2D) -- typically just call Layout2DBase for
+	// their own BBox (from BBox2D) -- typically just call DoLayoutBase for
 	// default behavior -- and add parent position to AllocPos, and then
-	// return call to Layout2DChildren. Layout does all its sizing and
+	// return call to DoLayoutChildren. Layout does all its sizing and
 	// positioning of children in this pass, based on the Size2D data gathered
 	// bottom-up and constraints applied top-down from higher levels.
 	// Typically only a single iteration is required (iter = 0) but multiple
 	// are supported (needed for word-wrapped text or flow layouts) -- return
 	// = true indicates another iteration required (pass this up the chain).
-	Layout2D(parBBox image.Rectangle, iter int) bool
+	DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool
 
 	// Move2D: optional MeFirst downward pass to move all elements by given
 	// delta -- used for scrolling -- the layout pass assigns canonical
@@ -75,7 +75,7 @@ type Widget interface {
 	Move2D(delta image.Point, parBBox image.Rectangle)
 
 	// BBox2D: compute the raw bounding box of this node relative to its
-	// parent viewport -- called during Layout2D to set node BBox field, which
+	// parent viewport -- called during DoLayout to set node BBox field, which
 	// is then used in setting WinBBox and VpBBox.
 	BBox2D() image.Rectangle
 
@@ -87,7 +87,7 @@ type Widget interface {
 	// ChildrenBBox2D: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
 	// operates on the existing VpBBox for this node -- this is what is passed
-	// down as parBBox do the children's Layout2D.
+	// down as parBBox do the children's DoLayout.
 	ChildrenBBox2D() image.Rectangle
 
 	// Render: Final rendering pass, each node is fully responsible for
@@ -97,7 +97,7 @@ type Widget interface {
 	// VpBBox is empty and no rendering should occur.  Typically call
 	// ConnectEvents2D to set up connections to receive window events if
 	// visible, and disconnect if not.
-	Render()
+	Render(vp *Viewport)
 
 	// ConnectEvents2D: setup connections to window events -- called in
 	// Render if in bounds.  It can be useful to create modular methods for
@@ -168,7 +168,7 @@ type Widget interface {
 
 // WidgetBase is the base type for all Widget Node2D elements, which are
 // managed by a containing Layout, and use all 5 rendering passes.  All
-// elemental widgets must support the Node Inactive and Selected states in a
+// elemental widgets must support the Inactive and Selected states in a
 // reasonable way (Selected only essential when also Inactive), so they can
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
@@ -264,95 +264,105 @@ func (wb *WidgetBase) BaseIface() reflect.Type {
 ////////////////////////////////////////////////////////////////////////////////////////
 // 	Widget impl for WidgetBase (nil)
 
-func (nb *WidgetBase) Config() {
+func (wb *WidgetBase) SetNeedsRender(vp *Viewport) {
+	wb.SetFlag(true, NeedsRender)
+	vp.SetFlag(true, VpNeedsRender)
 }
 
-func (nb *WidgetBase) SetStyle() {
+func (wb *WidgetBase) SetNeedsStyle(vp *Viewport) {
+	wb.SetFlag(true, NeedsStyle)
+	vp.SetFlag(true, VpNeedsStyle)
 }
 
-func (nb *WidgetBase) Size2D(iter int) {
+func (wb *WidgetBase) Config(vp *Viewport) {
 }
 
-func (nb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (wb *WidgetBase) SetStyle(vp *Viewport) {
+}
+
+func (wb *WidgetBase) GetSize(vp *Viewport, iter int) {
+}
+
+func (wb *WidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	return false
 }
 
-func (nb *WidgetBase) BBox2D() image.Rectangle {
+func (wb *WidgetBase) BBox2D() image.Rectangle {
 	return image.Rectangle{}
 }
 
-func (nb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 }
 
-func (nb *WidgetBase) ChildrenBBox2D() image.Rectangle {
+func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 	return image.Rectangle{}
 }
 
-func (nb *WidgetBase) Render() {
+func (wb *WidgetBase) Render(vp *Viewport) {
 }
 
 // ConnectEvents2D is the default event connection function
 // for Widget objects. It calls [WidgetEvents], so any Widget
 // implementing a custom ConnectEvents2D function should
 // first call [WidgetEvents].
-func (nb *WidgetBase) ConnectEvents() {
-	nb.WidgetEvents()
+func (wb *WidgetBase) ConnectEvents() {
+	wb.WidgetEvents()
 }
 
 // WidgetEvents connects the default events for Widget objects.
 // Any Widget implementing a custom ConnectEvents2D function
 // should first call this function.
-func (nb *WidgetBase) WidgetEvents() {
+func (wb *WidgetBase) WidgetEvents() {
 	// TODO: figure out connect events situation not working
 	// nb.WidgetMouseEvent()
-	nb.WidgetMouseFocusEvent()
+	wb.WidgetMouseFocusEvent()
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
-func (nb *WidgetBase) WidgetMouseEvent() {
-	nb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if nb.IsDisabled() {
+func (wb *WidgetBase) WidgetMouseEvent() {
+	wb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if wb.IsDisabled() {
 			return
 		}
 
 		me := data.(*mouse.Event)
 		me.SetProcessed()
 
-		nb.WidgetOnMouseEvent(me)
+		wb.WidgetOnMouseEvent(me)
 	})
 }
 
 // WidgetOnMouseEvent is the function called on Widget objects
 // when they get a mouse click event. If you are declaring a custom
 // mouse event function, you should call this function first.
-func (nb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
-	nb.SetActiveState(me.Action == mouse.Press)
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
+func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
+	wb.SetActiveState(me.Action == mouse.Press)
+	wb.SetNeedsStyle()
+	wb.UpdateSig()
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
-func (nb *WidgetBase) WidgetMouseFocusEvent() {
-	nb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if nb.IsDisabled() {
+func (wb *WidgetBase) WidgetMouseFocusEvent() {
+	wb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		if wb.IsDisabled() {
 			return
 		}
 
 		me := data.(*mouse.FocusEvent)
 		me.SetProcessed()
 
-		nb.WidgetOnMouseFocusEvent(me)
+		wb.WidgetOnMouseFocusEvent(me)
 	})
 }
 
 // WidgetOnMouseFocusEvent is the function called on Widget objects
 // when they get a mouse foucs event. If you are declaring a custom
 // mouse foucs event function, you should call this function first.
-func (nb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
+func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
 	enter := me.Action == mouse.Enter
-	nb.SetHoveredState(enter)
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
+	wb.SetHoveredState(enter)
+	wb.SetNeedsStyle()
+	wb.UpdateSig()
 	// TODO: trigger mouse focus exit after clicking down
 	// while leaving; then clear active here
 	// // if !enter {
@@ -360,26 +370,26 @@ func (nb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
 	// }
 }
 
-func (nb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (wb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 }
 
 // FocusChanged2D handles the default behavior for node focus changes
 // by calling [NodeBase.SetNeedsStyle] and sending an update signal.
-func (nb *WidgetBase) FocusChanged2D(change FocusChanges) {
-	nb.SetNeedsStyle()
-	nb.UpdateSig()
+func (wb *WidgetBase) FocusChanged2D(change FocusChanges) {
+	wb.SetNeedsStyle()
+	wb.UpdateSig()
 }
 
-func (nb *WidgetBase) HasFocus2D() bool {
-	return nb.HasFocus()
+func (wb *WidgetBase) HasFocus2D() bool {
+	return wb.HasFocus()
 }
 
 // GrabFocus grabs the keyboard input focus on this item or the first item within it
 // that can be focused (if none, then goes ahead and sets focus to this object)
-func (nb *WidgetBase) GrabFocus() {
-	foc := nb.This()
-	if !nb.CanFocus() {
-		nb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+func (wb *WidgetBase) GrabFocus() {
+	foc := wb.This()
+	if !wb.CanFocus() {
+		wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 			_, ni := KiToWidget(k)
 			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
@@ -391,40 +401,40 @@ func (nb *WidgetBase) GrabFocus() {
 			return ki.Break // done
 		})
 	}
-	em := nb.EventMgr2D()
+	em := wb.EventMgr2D()
 	if em != nil {
 		em.SetFocus(foc)
 	}
 }
 
 // FocusNext moves the focus onto the next item
-func (nb *WidgetBase) FocusNext() {
-	em := nb.EventMgr2D()
+func (wb *WidgetBase) FocusNext() {
+	em := wb.EventMgr2D()
 	if em != nil {
 		em.FocusNext(em.CurFocus())
 	}
 }
 
 // FocusPrev moves the focus onto the previous item
-func (nb *WidgetBase) FocusPrev() {
-	em := nb.EventMgr2D()
+func (wb *WidgetBase) FocusPrev() {
+	em := wb.EventMgr2D()
 	if em != nil {
 		em.FocusPrev(em.CurFocus())
 	}
 }
 
 // StartFocus specifies this widget to give focus to when the window opens
-func (nb *WidgetBase) StartFocus() {
-	em := nb.EventMgr2D()
+func (wb *WidgetBase) StartFocus() {
+	em := wb.EventMgr2D()
 	if em != nil {
-		em.SetStartFocus(nb.This())
+		em.SetStartFocus(wb.This())
 	}
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the Window
-func (nb *WidgetBase) ContainsFocus() bool {
-	em := nb.EventMgr2D()
+func (wb *WidgetBase) ContainsFocus() bool {
+	em := wb.EventMgr2D()
 	if em == nil {
 		return false
 	}
@@ -432,10 +442,10 @@ func (nb *WidgetBase) ContainsFocus() bool {
 	if cur == nil {
 		return false
 	}
-	if cur == nb.This() {
+	if cur == wb.This() {
 		return true
 	}
-	plev := cur.ParentLevel(nb.This())
+	plev := cur.ParentLevel(wb.This())
 	if plev < 0 {
 		return false
 	}
@@ -765,7 +775,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport, el, par mat32.Vec2) {
 	ptd.End()
 }
 
-func (wb *WidgetBase) InitLayout2D() bool {
+func (wb *WidgetBase) InitDoLayout(vp *Viewport) bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 	wb.LayState.SetFromStyle(&wb.Style)
@@ -773,10 +783,10 @@ func (wb *WidgetBase) InitLayout2D() bool {
 }
 
 func (wb *WidgetBase) Size2DBase(iter int) {
-	wb.InitLayout2D()
+	wb.InitDoLayout(vp * Viewport)
 }
 
-func (wb *WidgetBase) Size2D(iter int) {
+func (wb *WidgetBase) GetSize(vp *Viewport, iter int) {
 	wb.Size2DBase(iter)
 }
 
@@ -809,8 +819,8 @@ func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) 
 	wb.ComputeBBox2DBase(parBBox, delta)
 }
 
-// Layout2DBase provides basic Layout2D functions -- good for most cases
-func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter int) {
+// DoLayoutBase provides basic DoLayout functions -- good for most cases
+func (wb *WidgetBase) DoLayoutBase(parBBox image.Rectangle, initStyle bool, iter int) {
 	nii, _ := wb.This().(Widget)
 	mvp := wb.ViewportSafe()
 	if mvp == nil { // robust
@@ -819,8 +829,8 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 			// but at least it gets the viewport
 			nii.Config()
 			nii.SetStyle()
-			nii.Size2D(0)
-			// fmt.Printf("node not init in Layout2DBase: %v\n", wb.Path())
+			nii.GetSize(vp*Viewport, 0)
+			// fmt.Printf("node not init in DoLayoutBase: %v\n", wb.Path())
 		}
 	}
 	psize := wb.AddParentPos()
@@ -832,27 +842,27 @@ func (wb *WidgetBase) Layout2DBase(parBBox image.Rectangle, initStyle bool, iter
 	wb.BBox = nii.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	nii.ComputeBBox2D(parBBox, image.Point{}) // other bboxes from BBox
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
-	// typically Layout2DChildren must be called after this!
+	// typically DoLayoutChildren must be called after this!
 }
 
-func (wb *WidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
-	wb.Layout2DBase(parBBox, true, iter)
-	return wb.Layout2DChildren(iter)
+func (wb *WidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	wb.DoLayoutBase(parBBox, true, iter)
+	return wb.DoLayoutChildren(iter)
 }
 
 // ChildrenBBox2DWidget provides a basic widget box-model subtraction of
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (wb *WidgetBase) ChildrenBBox2DWidget() image.Rectangle {
-	nb := wb.VpBBox
+	wb := wb.VpBBox
 	spc := wb.BoxSpace()
-	nb.Min.X += int(spc.Left)
-	nb.Min.Y += int(spc.Top)
-	nb.Max.X -= int(spc.Right)
-	nb.Max.Y -= int(spc.Bottom)
-	return nb
+	wb.Min.X += int(spc.Left)
+	wb.Min.Y += int(spc.Top)
+	wb.Max.X -= int(spc.Right)
+	wb.Max.Y -= int(spc.Bottom)
+	return wb
 }
 
 func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
@@ -918,7 +928,7 @@ func (wb *WidgetBase) PopBounds() {
 	rs.PopBounds()
 }
 
-func (wb *WidgetBase) Render() {
+func (wb *WidgetBase) Render(vp *Viewport) {
 	if wb.FullReRenderIfNeeded() {
 		return
 	}
@@ -951,7 +961,7 @@ func (wb *WidgetBase) ReRenderTree() {
 	wb.SetStyleTree()
 	wb.Size2DTree(0)
 	wb.LayState = ld // restore
-	wb.Layout2DTree()
+	wb.DoLayoutTree()
 	if !delta.IsNil() {
 		wb.Move2D(delta.ToPointFloor(), parBBox)
 	}
@@ -994,7 +1004,7 @@ func (wb *WidgetBase) ParentLayout() *Layout {
 		if !ok {
 			return ki.Break // don't keep going up
 		}
-		ly := nii.AsLayout2D()
+		ly := nii.AsDoLayout(vp * Viewport)
 		if ly != nil {
 			parLy = ly
 			return ki.Break // done
@@ -1325,17 +1335,17 @@ func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 func (wb *PartsWidgetBase) SizeFromParts(iter int) {
 	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
 	wb.Size2DAddSpace()
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Size:   %v size from parts: %v, parts pref: %v\n", wb.Path(), wb.LayState.Alloc.Size, wb.Parts.LayState.Size.Pref)
 	}
 }
 
 func (wb *PartsWidgetBase) Size2DParts(iter int) {
-	wb.InitLayout2D()
+	wb.InitDoLayout(vp * Viewport)
 	wb.SizeFromParts(iter) // get our size from parts
 }
 
-func (wb *PartsWidgetBase) Size2D(iter int) {
+func (wb *PartsWidgetBase) GetSize(vp *Viewport, iter int) {
 	wb.Size2DParts(iter)
 }
 
@@ -1348,17 +1358,17 @@ func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Po
 	wb.ComputeBBox2DParts(parBBox, delta)
 }
 
-func (wb *PartsWidgetBase) Layout2DParts(parBBox image.Rectangle, iter int) {
+func (wb *PartsWidgetBase) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	spc := wb.BoxSpace()
 	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
 	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
-	wb.Parts.Layout2D(parBBox, iter)
+	wb.Parts.DoLayout(vp*Viewport, parBBox, iter)
 }
 
-func (wb *PartsWidgetBase) Layout2D(parBBox image.Rectangle, iter int) bool {
-	wb.Layout2DBase(parBBox, true, iter) // init style
-	wb.Layout2DParts(parBBox, iter)
-	return wb.Layout2DChildren(iter)
+func (wb *PartsWidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	wb.DoLayoutBase(parBBox, true, iter) // init style
+	wb.DoLayoutParts(parBBox, iter)
+	return wb.DoLayoutChildren(iter)
 }
 
 func (wb *PartsWidgetBase) RenderParts() {

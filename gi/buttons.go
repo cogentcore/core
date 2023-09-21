@@ -498,11 +498,11 @@ func (bb *ButtonBase) SetStyle() {
 	}
 }
 
-func (bb *ButtonBase) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (bb *ButtonBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
-	bb.Layout2DBase(parBBox, true, iter) // init style
-	bb.Layout2DParts(parBBox, iter)
-	return bb.Layout2DChildren(iter)
+	bb.DoLayoutBase(parBBox, true, iter) // init style
+	bb.DoLayoutParts(parBBox, iter)
+	return bb.DoLayoutChildren(iter)
 }
 
 func (bb *ButtonBase) RenderButton() {
@@ -511,7 +511,7 @@ func (bb *ButtonBase) RenderButton() {
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBase) Render() {
+func (bb *ButtonBase) Render(vp *Viewport) {
 	if bb.FullReRenderIfNeeded() {
 		return
 	}

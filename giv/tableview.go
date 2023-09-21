@@ -951,13 +951,13 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) Layout2D(parBBox image.Rectangle, iter int) bool {
-	redo := tv.Frame.Layout2D(parBBox, iter)
+func (tv *TableView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	redo := tv.Frame.DoLayout(vp*Viewport, parBBox, iter)
 	if !tv.IsConfiged() {
 		return redo
 	}
 	tv.LayoutHeader()
-	tv.SliceHeader().Layout2D(parBBox, iter)
+	tv.SliceHeader().DoLayout(vp*Viewport, parBBox, iter)
 	return redo
 }
 

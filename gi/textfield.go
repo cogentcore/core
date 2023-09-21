@@ -1551,7 +1551,7 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-func (tf *TextField) Size2D(iter int) {
+func (tf *TextField) GetSize(vp *Viewport, iter int) {
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1574,10 +1574,10 @@ func (tf *TextField) Size2D(iter int) {
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) Layout2D(parBBox image.Rectangle, iter int) bool {
-	tf.Layout2DBase(parBBox, true, iter) // init style
-	tf.Layout2DParts(parBBox, iter)
-	redo := tf.Layout2DChildren(iter)
+func (tf *TextField) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	tf.DoLayoutBase(parBBox, true, iter) // init style
+	tf.DoLayoutParts(parBBox, iter)
+	redo := tf.DoLayoutChildren(iter)
 	tf.SetEffPosAndSize()
 	return redo
 }
@@ -1627,7 +1627,7 @@ func (tf *TextField) RenderTextField() {
 	}
 }
 
-func (tf *TextField) Render() {
+func (tf *TextField) Render(vp *Viewport) {
 	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}

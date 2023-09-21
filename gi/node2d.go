@@ -88,7 +88,7 @@ func (nb *Node2DBase) DirectWinUpload() {
 // 2D basic infrastructure code
 
 // Render returns the girl.State from this node's Viewport, using safe lock access
-func (nb *Node2DBase) Render() *girl.State {
+func (nb *Node2DBase) Render(vp *Viewport *girl.State {
 	mvp := nb.ViewportSafe()
 	if mvp == nil {
 		return nil
@@ -274,7 +274,7 @@ func (nb *Node2DBase) FullConfigTree() {
 		kd.ConfigTree()
 		kd.SetStyleTree()
 		kd.Size2DTree(0)
-		kd.Layout2DTree()
+		kd.DoLayoutTree()
 	}
 }
 
@@ -284,7 +284,7 @@ func (nb *Node2DBase) FullRenderTree() {
 	nb.ConfigTree()
 	nb.SetStyleTree()
 	nb.Size2DTree(0)
-	nb.Layout2DTree()
+	nb.DoLayoutTree()
 	nb.RenderTree()
 	nb.UpdateEndNoSig(updt)
 }
@@ -376,29 +376,29 @@ func (nb *Node2DBase) Size2DTree(iter int) {
 			if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 				return ki.Break
 			}
-			nii.Size2D(iter)
+			nii.GetSize(vp*Viewport, iter)
 			return ki.Continue
 		})
 	pr.End()
 }
 
-// Layout2DTree does layout pass -- each node iterates over children for
+// DoLayoutTree does layout pass -- each node iterates over children for
 // maximum control -- this starts with parent VpBBox -- can be called de novo.
 // Handles multiple iterations if needed.
-func (nb *Node2DBase) Layout2DTree() {
+func (nb *Node2DBase) DoLayoutTree() {
 	if nb.This() == nil || nb.HasNoLayout() {
 		return
 	}
-	pr := prof.Start("Node2D.Layout2DTree." + ki.Type(nb).Name())
+	pr := prof.Start("Node2D.DoLayoutTree." + ki.Type(nb).Name())
 	parBBox := image.Rectangle{}
 	pni, _ := KiToNode2D(nb.Par)
 	if pni != nil {
 		parBBox = pni.ChildrenBBox2D()
 	}
 	nbi := nb.This().(Node2D)
-	redo := nbi.Layout2D(parBBox, 0) // important to use interface version to get interface!
+	redo := nbi.DoLayout(vp*Viewport, parBBox, 0) // important to use interface version to get interface!
 	if redo {
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", nbi.Path())
 		}
 		wb := nbi.AsWidget()
@@ -409,7 +409,7 @@ func (nb *Node2DBase) Layout2DTree() {
 		} else {
 			nb.Size2DTree(1)
 		}
-		nbi.Layout2D(parBBox, 1) // todo: multiple iters?
+		nbi.DoLayout(vp*Viewport, parBBox, 1) // todo: multiple iters?
 	}
 	pr.End()
 }
@@ -426,17 +426,17 @@ func (nb *Node2DBase) RenderTree() {
 	// pr.End()
 }
 
-// Layout2DChildren does layout on all of node's children, giving them the
-// ChildrenBBox2D -- default call at end of Layout2D.  Passes along whether
-// any of the children need a re-layout -- typically Layout2D just returns
+// DoLayoutChildren does layout on all of node's children, giving them the
+// ChildrenBBox2D -- default call at end of DoLayout.  Passes along whether
+// any of the children need a re-layout -- typically DoLayout just returns
 // this.
-func (nb *Node2DBase) Layout2DChildren(iter int) bool {
+func (nb *Node2DBase) DoLayoutChildren(iter int) bool {
 	redo := false
 	cbb := nb.This().(Node2D).ChildrenBBox2D()
 	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
 		if nii != nil {
-			if nii.Layout2D(cbb, iter) {
+			if nii.DoLayout(vp*Viewport, cbb, iter) {
 				redo = true
 			}
 		}
@@ -456,7 +456,7 @@ func (nb *Node2DBase) Move2DChildren(delta image.Point) {
 	}
 }
 
-// RenderChildren renders all of node's children -- default call at end of Render()
+// RenderChildren renders all of node's children -- default call at end of Render(vp *Viewport)
 func (nb *Node2DBase) RenderChildren() {
 	for _, kid := range nb.Kids {
 		nii, _ := KiToNode2D(kid)
@@ -564,3 +564,4 @@ func (nb *Node2DBase) ScrollToMe() bool {
 	}
 	return ly.ScrollToItem(nb.This().(Node2D))
 }
+

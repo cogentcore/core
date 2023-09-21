@@ -428,7 +428,7 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	}
 }
 
-func (fb *FileBrowse) Render() {
+func (fb *FileBrowse) Render(vp *Viewport) {
 	fb.ToolBar().UpdateActions()
 	if win := fb.ParentWindow(); win != nil {
 		if !win.IsResizing() {

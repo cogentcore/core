@@ -359,7 +359,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 			return
 		}
 		li, _ := KiToNode2D(recv)
-		ls := li.AsLayout2D()
+		ls := li.AsDoLayout(vp * Viewport)
 		wupdt := ls.TopUpdateStart()
 		ls.Move2DTree()
 		li.UpdateSig()
@@ -399,7 +399,7 @@ func (ly *Layout) LayoutScrolls() {
 		odim := mat32.OtherDim(d)
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
-			sc.Size2D(0)
+			sc.GetSize(vp*Viewport, 0)
 			sc.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
 			// SidesTODO: not sure about this
@@ -408,7 +408,7 @@ func (ly *Layout) LayoutScrolls() {
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}
 			sc.LayState.Alloc.Size.SetDim(odim, sbw)
-			sc.Layout2D(ly.VpBBox, 0) // this will add parent position to above rel pos
+			sc.DoLayout(vp*Viewport, ly.VpBBox, 0) // this will add parent position to above rel pos
 		} else {
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])
@@ -529,7 +529,7 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	}
 }
 
-func (ly *Layout) Layout2DChildren(iter int) bool {
+func (ly *Layout) DoLayoutChildren(iter int) bool {
 	cbb := ly.This().(Node2D).ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
@@ -537,12 +537,12 @@ func (ly *Layout) Layout2DChildren(iter int) bool {
 			return false
 		}
 		nii, _ := KiToNode2D(sn)
-		return nii.Layout2D(cbb, iter)
+		return nii.DoLayout(vp*Viewport, cbb, iter)
 	} else {
 		redo := false
 		for _, kid := range ly.Kids {
 			nii, _ := KiToNode2D(kid)
-			if nii.Layout2D(cbb, iter) {
+			if nii.DoLayout(vp*Viewport, cbb, iter) {
 				redo = true
 			}
 		}
@@ -1086,7 +1086,7 @@ func (ly *Layout) KeyChordEvent() {
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
-func (ly *Layout) AsLayout2D() *Layout {
+func (ly *Layout) AsDoLayout(vp *Viewport) *Layout {
 	return ly
 }
 
@@ -1175,8 +1175,8 @@ func (ly *Layout) SetStyle() {
 	ly.StyMu.Unlock()
 }
 
-func (ly *Layout) Size2D(iter int) {
-	ly.InitLayout2D()
+func (ly *Layout) GetSize(vp *Viewport, iter int) {
+	ly.InitDoLayout(vp * Viewport)
 	switch ly.Lay {
 	case LayoutHorizFlow, LayoutVertFlow:
 		GatherSizesFlow(ly, iter)
@@ -1187,14 +1187,14 @@ func (ly *Layout) Size2D(iter int) {
 	}
 }
 
-func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (ly *Layout) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	//if iter > 0 {
-	//	if Layout2DTrace {
+	//	if LayoutTrace {
 	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
 	//	}
 	//}
 	LayAllocFromParent(ly)               // in case we didn't get anything
-	ly.Layout2DBase(parBBox, true, iter) // init style
+	ly.DoLayoutBase(parBBox, true, iter) // init style
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
@@ -1222,7 +1222,7 @@ func (ly *Layout) Layout2D(parBBox image.Rectangle, iter int) bool {
 		return true
 	}
 	ly.ManageOverflow()
-	ly.NeedsRedo = ly.Layout2DChildren(iter) // layout done with canonical positions
+	ly.NeedsRedo = ly.DoLayoutChildren(iter) // layout done with canonical positions
 
 	if !ly.NeedsRedo || iter == 1 {
 		delta := ly.Move2DDelta((image.Point{}))
@@ -1254,7 +1254,7 @@ func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
 	ly.RenderScrolls()
 }
 
-func (ly *Layout) Render() {
+func (ly *Layout) Render(vp *Viewport) {
 	if ly.FullReRenderIfNeeded() {
 		return
 	}
@@ -1323,9 +1323,9 @@ func (st *Stretch) SetStyle() {
 	st.LayState.SetFromStyle(&st.Style) // also does reset
 }
 
-func (st *Stretch) Layout2D(parBBox image.Rectangle, iter int) bool {
-	st.Layout2DBase(parBBox, true, iter) // init style
-	return st.Layout2DChildren(iter)
+func (st *Stretch) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	st.DoLayoutBase(parBBox, true, iter) // init style
+	return st.DoLayoutChildren(iter)
 }
 
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
@@ -1364,7 +1364,7 @@ func (sp *Space) SetStyle() {
 	sp.LayState.SetFromStyle(&sp.Style) // also does reset
 }
 
-func (sp *Space) Layout2D(parBBox image.Rectangle, iter int) bool {
-	sp.Layout2DBase(parBBox, true, iter) // init style
-	return sp.Layout2DChildren(iter)
+func (sp *Space) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	sp.DoLayoutBase(parBBox, true, iter) // init style
+	return sp.DoLayoutChildren(iter)
 }

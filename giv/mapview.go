@@ -450,7 +450,7 @@ func (mv *MapView) SetStyle() {
 	mv.Frame.SetStyle()
 }
 
-func (mv *MapView) Render() {
+func (mv *MapView) Render(vp *Viewport) {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}

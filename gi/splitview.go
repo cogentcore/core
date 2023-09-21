@@ -361,10 +361,10 @@ func (sv *SplitView) SetStyle() {
 	sv.ConfigSplitters()
 }
 
-func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	sv.ConfigSplitters()
-	sv.Layout2DBase(parBBox, true, iter) // init style
-	sv.Layout2DParts(parBBox, iter)
+	sv.DoLayoutBase(parBBox, true, iter) // init style
+	sv.DoLayoutParts(parBBox, iter)
 	sv.UpdateSplits()
 
 	handsz := sv.HandleSize.Dots
@@ -405,10 +405,10 @@ func (sv *SplitView) Layout2D(parBBox image.Rectangle, iter int) bool {
 		}
 	}
 
-	return sv.Layout2DChildren(iter)
+	return sv.DoLayoutChildren(iter)
 }
 
-func (sv *SplitView) Render() {
+func (sv *SplitView) Render(vp *Viewport) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
@@ -529,7 +529,7 @@ func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
 	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.Pos().Dim(sr.Dim))))
 	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
 	if render {
-		ic.Layout2DTree()
+		ic.DoLayoutTree()
 	}
 }
 
@@ -542,14 +542,14 @@ func (sr *Splitter) SetStyle() {
 	sr.ConfigParts()
 }
 
-func (sr *Splitter) Size2D(iter int) {
-	sr.InitLayout2D()
+func (sr *Splitter) GetSize(vp *Viewport, iter int) {
+	sr.InitDoLayout(vp * Viewport)
 }
 
-func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	sr.ConfigPartsIfNeeded(false)
-	sr.Layout2DBase(parBBox, true, iter) // init style
-	sr.Layout2DParts(parBBox, iter)
+	sr.DoLayoutBase(parBBox, true, iter) // init style
+	sr.DoLayoutParts(parBBox, iter)
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue()
@@ -557,7 +557,7 @@ func (sr *Splitter) Layout2D(parBBox image.Rectangle, iter int) bool {
 	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.WinBBox
 	sr.BBoxMu.RUnlock()
-	return sr.Layout2DChildren(iter)
+	return sr.DoLayoutChildren(iter)
 }
 
 func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
@@ -685,7 +685,7 @@ func (sr *Splitter) ConnectEvents() {
 	sr.SplitterEvents()
 }
 
-func (sr *Splitter) Render() {
+func (sr *Splitter) Render(vp *Viewport) {
 	win := sr.ParentWindow()
 	sr.This().(Node2D).ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()

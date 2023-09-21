@@ -308,7 +308,7 @@ func (ge *GiEditor) SetChanged() {
 	ge.ToolBar().UpdateActions() // nil safe
 }
 
-func (ge *GiEditor) Render() {
+func (ge *GiEditor) Render(vp *Viewport) {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentWindow(); win != nil {
 		if !win.IsResizing() {

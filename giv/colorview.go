@@ -540,7 +540,7 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
-func (cv *ColorView) Render() {
+func (cv *ColorView) Render(vp *Viewport) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}

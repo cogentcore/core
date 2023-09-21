@@ -122,7 +122,7 @@ func mainrun() {
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
 	// gi.RenderTrace = true
-	// gi.Layout2DTrace = true
+	// gi.LayoutTrace = true
 
 	gi.SetAppName("views")
 	gi.SetAppAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)

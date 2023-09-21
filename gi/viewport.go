@@ -20,12 +20,84 @@ import (
 	"goki.dev/mat32/v2"
 )
 
+// VpFlags has critical state information signaling when rendering,
+// styling etc need to be done
+type VpFlags int64 //enums:bitflag
+
+const (
+	// VpNeedsRender means nodes have flagged that they need rendering
+	VpNeedsRender VpFlags = iota
+
+	// VpNeedsStyle means nodes have flagged that they need style updated
+	VpNeedsStyle
+
+	// VpIsRendering means viewport is in the process of rendering
+	// do not trigger another render at this point.
+	VpIsRendering
+
+	// VpIsStyling means viewport is in the process of styling
+	// do not trigger another style pass at this point
+	VpNeedsStyle
+
+	// todo: remove?
+
+	// VpPopupDestroyAll means that if this is a popup, then destroy all
+	// the children when it is deleted -- otherwise children below the main
+	// layout under the vp will not be destroyed -- it is up to the caller to
+	// manage those (typically these are reusable assets)
+	VpPopupDestroyAll
+
+	// VpNeedsFullRender means that this viewport needs to do a full
+	// render -- this is set during signal processing and will preempt
+	// other lower-level updates etc.
+	VpNeedsFullRender
+
+	// VpDoingFullRender means that this viewport is currently doing a
+	// full render -- can be used by elements to drive deep rebuild in case
+	// underlying data has changed.
+	VpDoingFullRender
+
+	// VpPrefSizing means that this viewport is currently doing a
+	// PrefSize computation to compute the size of the viewport
+	// (for sizing window for example) -- affects layout size computation
+	// only for Over
+	VpPrefSizing
+)
+
+// VpType indicates the type of viewport
+type VpType int //enums:enum
+
+const (
+	// VpMain means viewport is for a main window
+	VpMain VpType = iota
+
+	// VpDialog means viewport is a dialog
+	VpDialog
+
+	// VpMenu means viewport is a popup menu
+	VpMenu
+
+	// VpCompleter means viewport is a popup menu for completion
+	VpCompleter
+
+	// VpCorrector means viewport is a popup menu for spelling correction
+	VpCorrector
+
+	// VpTooltip means viewport is serving as a tooltip
+	VpTooltip
+
+	// VpPopup means viewport is a popup of some other type
+	VpPopup
+)
+
 // A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
 // rendering area even if it is itself a child of another Viewport.  This is
 // necessary for rendering onto the image that it provides.  This creates
 // challenges for managing the different geometries in a coherent way, e.g.,
 // events come through the Window in terms of the root VP coords.  Thus, nodes
 // require a  WinBBox for events and a VpBBox for their parent Viewport.
+
+/*
 
 // Viewport provides an interface for viewports,
 // supporting overall management functions that can be
@@ -71,10 +143,14 @@ type Viewport interface {
 	// VpUploadRegion uploads node region of our viewport image
 	VpUploadRegion(vpBBox, winBBox image.Rectangle)
 }
+*/
 
 // Viewport contains a Widget tree, rooted in a Frame layout,
 // which renders into its Pixels image.
 type Viewport struct {
+
+	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport
+	Flags Vps `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
 	// fill the viewport with background-color from style
 	Fill bool `desc:"fill the viewport with background-color from style"`
@@ -92,19 +168,13 @@ type Viewport struct {
 	Win *Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
 	// [view: -] CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass
-	CurStyleNode Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
+	// CurStyleNode Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 
-	// [view: -] CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access
-	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"CurColor is automatically updated from the Color setting of a Style and accessible as a color name in any other style as currentcolor use accessor routines for concurrent-safe access"`
+	// Root of the scenegraph for this viewport
+	Frame Frame `desc:"Root of the scenegraph for this viewport"`
 
 	// [view: -] UpdtMu is mutex for viewport updates
 	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
-
-	// [view: -] stack of nodes requring basic updating
-	UpdtStack []Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requring basic updating"`
-
-	// [view: -] stack of nodes requiring a ReRender (i.e., anchors)
-	ReStack []Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"stack of nodes requiring a ReRender (i.e., anchors)"`
 
 	// [view: -] StackMu is mutex for adding to UpdtStack
 	StackMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`
@@ -114,17 +184,8 @@ type Viewport struct {
 }
 
 func (vp *Viewport) OnInit() {
-	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetSolid(ColorScheme.Background)
-		s.Color = ColorScheme.OnBackground
-	})
-}
-
-func (vp *Viewport) CopyFieldsFrom(frm any) {
-	fr := frm.(*Viewport)
-	vp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	vp.Fill = fr.Fill
-	vp.Geom = fr.Geom
+	vp.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
+	vp.Frame.Style.Color = ColorScheme.OnBackground
 }
 
 // NewViewport creates a new Pixels Image with the specified width and height,
@@ -135,7 +196,7 @@ func NewViewport(width, height int) *Viewport {
 		Geom: Geom2DInt{Size: sz},
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	vp.Render.Init(width, height, vp.Pixels)
+	vp.RenderState.Init(width, height, vp.Pixels)
 	return vp
 }
 
@@ -147,10 +208,8 @@ func (vp *Viewport) Resize(nwsz image.Point) {
 	if vp.Pixels != nil {
 		ib := vp.Pixels.Bounds().Size()
 		if ib == nwsz {
-			vp.BBoxMu.Lock()
 			vp.Geom.Size = nwsz // make sure
-			vp.BBoxMu.Unlock()
-			return // already good
+			return              // already good
 		}
 	}
 	if vp.Pixels != nil {
@@ -162,95 +221,40 @@ func (vp *Viewport) Resize(nwsz image.Point) {
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
-// VpFlags extend NodeBase NodeFlags to hold viewport state
-type VpFlags int
-
-const (
-	// VpFlagPopup means viewport is a popup (menu or dialog) -- does not obey
-	// parent bounds (otherwise does)
-	VpFlagPopup VpFlags = VpFlags(NodeFlagsN) + iota
-
-	// VpFlagMenu means viewport is serving as a popup menu -- affects how window
-	// processes clicks
-	VpFlagMenu
-
-	// VpFlagCompleter means viewport is serving as a popup menu for code completion --
-	// only applies if the VpFlagMenu is also set
-	VpFlagCompleter
-
-	// VpFlagCorrector means viewport is serving as a popup menu for spelling correction --
-	// only applies if the VpFlagMenu is also set
-	VpFlagCorrector
-
-	// VpFlagTooltip means viewport is serving as a tooltip
-	VpFlagTooltip
-
-	// VpFlagPopupDestroyAll means that if this is a popup, then destroy all
-	// the children when it is deleted -- otherwise children below the main
-	// layout under the vp will not be destroyed -- it is up to the caller to
-	// manage those (typically these are reusable assets)
-	VpFlagPopupDestroyAll
-
-	// VpFlagSVG means that this viewport is an SVG viewport -- SVG elements
-	// look for this for re-rendering
-	VpFlagSVG
-
-	// VpFlagUpdatingNode means that this viewport is currently handling the
-	// update of a node, and is under the UpdtMu mutex lock.
-	// This can be checked to see about whether to add another update or not.
-	VpFlagUpdatingNode
-
-	// VpFlagNeedsFullRender means that this viewport needs to do a full
-	// render -- this is set during signal processing and will preempt
-	// other lower-level updates etc.
-	VpFlagNeedsFullRender
-
-	// VpFlagDoingFullRender means that this viewport is currently doing a
-	// full render -- can be used by elements to drive deep rebuild in case
-	// underlying data has changed.
-	VpFlagDoingFullRender
-
-	// VpFlagPrefSizing means that this viewport is currently doing a
-	// PrefSize computation to compute the size of the viewport
-	// (for sizing window for example) -- affects layout size computation
-	// only for Over
-	VpFlagPrefSizing
-)
-
 func (vp *Viewport) IsPopup() bool {
-	return vp.HasFlag(int(VpFlagPopup))
+	return vp.HasFlag(int(VpPopup))
 }
 
 func (vp *Viewport) IsMenu() bool {
-	return vp.HasFlag(int(VpFlagMenu))
+	return vp.HasFlag(int(VpMenu))
 }
 
 func (vp *Viewport) IsCompleter() bool {
-	return vp.HasFlag(int(VpFlagCompleter))
+	return vp.HasFlag(int(VpCompleter))
 }
 
 func (vp *Viewport) IsCorrector() bool {
-	return vp.HasFlag(int(VpFlagCorrector))
+	return vp.HasFlag(int(VpCorrector))
 }
 
 func (vp *Viewport) IsTooltip() bool {
-	return vp.HasFlag(int(VpFlagTooltip))
+	return vp.HasFlag(int(VpTooltip))
 }
 
 func (vp *Viewport) IsSVG() bool {
-	return vp.HasFlag(int(VpFlagSVG))
+	return vp.HasFlag(int(VpSVG))
 }
 
 func (vp *Viewport) IsUpdatingNode() bool {
-	return vp.HasFlag(int(VpFlagUpdatingNode))
+	return vp.HasFlag(int(VpUpdatingNode))
 }
 
 func (vp *Viewport) NeedsFullRender() bool {
-	return vp.HasFlag(int(VpFlagNeedsFullRender))
+	return vp.HasFlag(int(VpNeedsFullRender))
 }
 
 func (vp *Viewport) IsDoingFullRender() bool {
-	return vp.HasFlag(int(VpFlagDoingFullRender))
+	return vp.HasFlag(int(VpDoingFullRender))
 }
 
 func (vp *Viewport) IsVisible() bool {
@@ -436,17 +440,17 @@ func (vp *Viewport) ReRenderAnchor(gni Node2D) {
 
 // Delete this popup viewport -- has already been disconnected from window
 // events and parent is nil -- called by window when a popup is deleted -- it
-// destroys the vp and its main layout, see VpFlagPopupDestroyAll for whether
+// destroys the vp and its main layout, see VpPopupDestroyAll for whether
 // children are destroyed
 func (vp *Viewport) DeletePopup() {
 	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	vp.Win = nil
 	vp.This().SetFlag(int(ki.NodeDeleted)) // prevent further access
-	if !vp.HasFlag(int(VpFlagPopupDestroyAll)) {
+	if !vp.HasFlag(int(VpPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
 			cli, _ := KiToNode2D(vp.Child(0))
-			ly := cli.AsLayout2D()
+			ly := cli.AsDoLayout(vp * Viewport)
 			if ly != nil {
 				ly.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
 			}
@@ -478,8 +482,8 @@ func (vp *Viewport) SetStyle() {
 	vp.LayState.SetFromStyle(&vp.Style) // also does reset
 }
 
-func (vp *Viewport) Size2D(iter int) {
-	vp.InitLayout2D()
+func (vp *Viewport) GetSize(vp *Viewport, iter int) {
+	vp.InitDoLayout(vp * Viewport)
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
 	pos := vp.Style.PosDots().ToPoint()
 	if pos != (image.Point{}) {
@@ -490,9 +494,9 @@ func (vp *Viewport) Size2D(iter int) {
 	}
 }
 
-func (vp *Viewport) Layout2D(parBBox image.Rectangle, iter int) bool {
-	vp.Layout2DBase(parBBox, true, iter)
-	return vp.Layout2DChildren(iter)
+func (vp *Viewport) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	vp.DoLayoutBase(parBBox, true, iter)
+	return vp.DoLayoutChildren(iter)
 }
 
 func (vp *Viewport) BBox2D() image.Rectangle {
@@ -583,12 +587,12 @@ func (vp *Viewport) FullRenderTree() {
 	if vp.IsUpdating() { // already in process!
 		return
 	}
-	vp.SetFlag(int(VpFlagDoingFullRender))
+	vp.SetFlag(int(VpDoingFullRender))
 	if RenderTrace {
 		fmt.Printf("Render: %v doing full render\n", vp.Path())
 	}
 	vp.WidgetBase.FullRenderTree()
-	vp.ClearFlag(int(VpFlagDoingFullRender))
+	vp.ClearFlag(int(VpDoingFullRender))
 }
 
 // we use our own render for these -- Viewport member is our parent!
@@ -659,7 +663,7 @@ func (vp *Viewport) FullReRenderIfNeeded() bool {
 	return false
 }
 
-func (vp *Viewport) Render() {
+func (vp *Viewport) Render(vp *Viewport) {
 	if vp.FullReRenderIfNeeded() {
 		return
 	}
@@ -677,12 +681,12 @@ func (vp *Viewport) Render() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
-	vp.SetFlag(int(VpFlagPrefSizing))
+	vp.SetFlag(int(VpPrefSizing))
 	vp.ConfigTree()
 	vp.SetStyleTree() // sufficient to get sizes
 	vp.LayState.Alloc.Size.SetPoint(initSz)
 	vp.Size2DTree(0) // collect sizes
-	vp.ClearFlag(int(VpFlagPrefSizing))
+	vp.ClearFlag(int(VpPrefSizing))
 	ch := vp.ChildByType(TypeLayout, ki.Embeds, 0).Embed(TypeLayout).(*Layout)
 	vpsz := ch.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
@@ -748,7 +752,7 @@ func (vp *Viewport) NodeUpdated(nii Node2D, sig int64, data any) {
 				vp.ReStack = append(vp.ReStack, anchor)
 			}
 		} else if full {
-			vp.SetFlag(int(VpFlagNeedsFullRender))
+			vp.SetFlag(int(VpNeedsFullRender))
 		} else {
 			already := false
 			for _, n := range vp.UpdtStack {
@@ -818,7 +822,7 @@ func (vp *Viewport) UpdateLevel(nii Node2D, sig int64, data any) (anchor Node2D,
 func (vp *Viewport) SetNeedsFullRender() {
 	if !vp.NeedsFullRender() {
 		vp.StackMu.Lock()
-		vp.SetFlag(int(VpFlagNeedsFullRender))
+		vp.SetFlag(int(VpNeedsFullRender))
 		vp.StackMu.Unlock()
 	}
 	if !vp.IsUpdatingNode() {
@@ -834,21 +838,21 @@ func (vp *Viewport) SetNeedsFullRender() {
 // Must call UnblockUpdates after construction is done.
 func (vp *Viewport) BlockUpdates() {
 	vp.UpdtMu.Lock()
-	vp.SetFlag(int(VpFlagUpdatingNode))
+	vp.SetFlag(int(VpUpdatingNode))
 	vp.UpdtMu.Unlock()
 }
 
 // UnblockUpdates unblocks updating of this viewport -- see BlockUpdates()
 func (vp *Viewport) UnblockUpdates() {
 	vp.UpdtMu.Lock()
-	vp.ClearFlag(int(VpFlagUpdatingNode))
+	vp.ClearFlag(int(VpUpdatingNode))
 	vp.UpdtMu.Unlock()
 }
 
 // UpdateNodes processes the current update signals and actually does the relevant updating
 func (vp *Viewport) UpdateNodes() {
 	vp.UpdtMu.Lock()
-	vp.SetFlag(int(VpFlagUpdatingNode))
+	vp.SetFlag(int(VpUpdatingNode))
 	tn := vp.TopNode2D()
 	if tn != nil && tn != vp.This().(Node) {
 		wupdt := tn.UpdateStart()
@@ -859,7 +863,7 @@ func (vp *Viewport) UpdateNodes() {
 			vp.StackMu.Lock()
 			vp.ReStack = nil
 			vp.UpdtStack = nil
-			vp.ClearFlag(int(VpFlagNeedsFullRender))
+			vp.ClearFlag(int(VpNeedsFullRender))
 			vp.StackMu.Unlock()
 			if vp.Viewport == nil { // top level
 				vp.FullRenderTree()
@@ -889,7 +893,7 @@ func (vp *Viewport) UpdateNodes() {
 		}
 	}
 
-	vp.ClearFlag(int(VpFlagUpdatingNode))
+	vp.ClearFlag(int(VpUpdatingNode))
 	vp.UpdtMu.Unlock()
 }
 

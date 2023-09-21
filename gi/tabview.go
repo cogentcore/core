@@ -560,7 +560,7 @@ func (tv *TabView) RenderTabSeps() {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) Render() {
+func (tv *TabView) Render(vp *Viewport) {
 	if tv.FullReRenderIfNeeded() {
 		return
 	}

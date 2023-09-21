@@ -2095,8 +2095,8 @@ func (tv *TreeView) SetStyle() {
 // TreeView is tricky for alloc because it is both a layout of its children but has to
 // maintain its own bbox for its own widget.
 
-func (tv *TreeView) Size2D(iter int) {
-	tv.InitLayout2D()
+func (tv *TreeView) GetSize(vp *Viewport, iter int) {
+	tv.InitDoLayout(vp * Viewport)
 	if tv.HasClosedParent() {
 		return // nothing
 	}
@@ -2120,15 +2120,15 @@ func (tv *TreeView) Size2D(iter int) {
 	tv.WidgetSize.X = w // stretch
 }
 
-func (tv *TreeView) Layout2DParts(parBBox image.Rectangle, iter int) {
+func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	spc := tv.Style.BoxSpace()
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
-	tv.Parts.Layout2D(parBBox, iter)
+	tv.Parts.DoLayout(vp*Viewport, parBBox, iter)
 }
 
-func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (tv *TreeView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
@@ -2149,12 +2149,12 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
 	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.Point{})
 
-	if gi.Layout2DTrace {
+	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.VpBBox, tv.WinBBox)
 	}
 
-	tv.Layout2DParts(parBBox, iter) // use OUR version
+	tv.DoLayoutParts(parBBox, iter) // use OUR version
 	h := mat32.Ceil(tv.WidgetSize.Y)
 	if !tv.IsClosed() {
 		for _, kid := range tv.Kids {
@@ -2170,7 +2170,7 @@ func (tv *TreeView) Layout2D(parBBox image.Rectangle, iter int) bool {
 			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
 		}
 	}
-	return tv.Layout2DChildren(iter)
+	return tv.DoLayoutChildren(iter)
 }
 
 func (tv *TreeView) BBox2D() image.Rectangle {
@@ -2228,7 +2228,7 @@ func (tv *TreeView) PushBounds() bool {
 	return true
 }
 
-func (tv *TreeView) Render() {
+func (tv *TreeView) Render(vp *Viewport) {
 	if tv.HasClosedParent() {
 		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing

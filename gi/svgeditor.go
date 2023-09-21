@@ -130,7 +130,7 @@ func (svg *Editor) SetTransform() {
 	svg.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", svg.Trans.X, svg.Trans.Y, svg.Scale, svg.Scale))
 }
 
-func (svg *Editor) Render() {
+func (svg *Editor) Render(vp *Viewport) {
 	if svg.PushBounds() {
 		rs := &svg.Render
 		svg.This().(gi.Node2D).ConnectEvents()

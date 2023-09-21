@@ -178,7 +178,7 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructViewInline) Render() {
+func (sv *StructViewInline) Render(vp *Viewport) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}

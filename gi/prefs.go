@@ -1211,7 +1211,7 @@ type PrefsDebug struct {
 	RenderTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
 
 	// reports trace of all layouts (printfs to stdout)
-	Layout2DTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"`
+	LayoutTrace *bool `desc:"reports trace of all layouts (printfs to stdout)"`
 
 	// reports trace of window events (printfs to stdout)
 	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
@@ -1264,7 +1264,7 @@ var PrefsDebugProps = ki.Props{
 func (pf *PrefsDebug) Connect() {
 	pf.Update2DTrace = &Update2DTrace
 	pf.RenderTrace = &RenderTrace
-	pf.Layout2DTrace = &Layout2DTrace
+	pf.LayoutTrace = &LayoutTrace
 	pf.WinEventTrace = &WinEventTrace
 	pf.WinPublishTrace = &WinPublishTrace
 	pf.WinDrawTrace = &WinDrawTrace

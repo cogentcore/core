@@ -515,7 +515,7 @@ func (tv *TextView) ParentLayout() *gi.Layout {
 		return nil
 	}
 	pari, _ := gi.KiToNode2D(tv.Par)
-	return pari.AsLayout2D()
+	return pari.AsDoLayout(vp * Viewport)
 }
 
 // RenderSize is the size we should pass to text rendering, based on alloc
@@ -684,7 +684,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	if ly != nil {
 		tv.SetFlag(int(TextViewInReLayout))
 		gi.GatherSizes(ly) // can't call Size2D b/c that resets layout
-		ly.Layout2DTree()
+		ly.DoLayoutTree()
 		tv.SetFlag(int(TextViewRenderScrolls))
 		tv.ClearFlag(int(TextViewInReLayout))
 		// fmt.Printf("resized: %v\n", tv.LayState.Alloc.Size)
@@ -4815,11 +4815,11 @@ func (tv *TextView) SetStyle() {
 }
 
 // Size2D
-func (tv *TextView) Size2D(iter int) {
+func (tv *TextView) GetSize(vp *Viewport, iter int) {
 	if iter > 0 {
 		return
 	}
-	tv.InitLayout2D()
+	tv.InitDoLayout(vp * Viewport)
 	if tv.LinesSize == (image.Point{}) {
 		tv.LayoutAllLines(true)
 	} else {
@@ -4827,13 +4827,13 @@ func (tv *TextView) Size2D(iter int) {
 	}
 }
 
-// Layout2Dn
-func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
-	tv.Layout2DBase(parBBox, true, iter) // init style
+// DoLayoutn
+func (tv *TextView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	tv.DoLayoutBase(parBBox, true, iter) // init style
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
-	tv.Layout2DChildren(iter)
+	tv.DoLayoutChildren(iter)
 	if tv.ParentWindow() != nil &&
 		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
@@ -4845,7 +4845,7 @@ func (tv *TextView) Layout2D(parBBox image.Rectangle, iter int) bool {
 }
 
 // Render does some preliminary work and then calls render on children
-func (tv *TextView) Render() {
+func (tv *TextView) Render(vp *Viewport) {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.NeedsFullReRender() {
 		tv.SetNeedsRefresh()

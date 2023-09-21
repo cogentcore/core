@@ -692,7 +692,7 @@ func (sp *Separator) RenderSeparator() {
 	pc.FillStrokeClear(rs)
 }
 
-func (sp *Separator) Render() {
+func (sp *Separator) Render(vp *Viewport) {
 	if sp.PushBounds() {
 		sp.RenderSeparator()
 		sp.RenderChildren()

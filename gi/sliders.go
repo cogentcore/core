@@ -608,7 +608,7 @@ func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
 			ic.LayState.Alloc.Size.X = sb.ThSize
 			ic.LayState.Alloc.Size.Y = sb.ThSize
 			if render {
-				ic.Layout2DTree()
+				ic.DoLayoutTree()
 			}
 		}
 	}
@@ -772,8 +772,8 @@ func (sr *Slider) SetStyle() {
 	sr.ConfigParts()
 }
 
-func (sr *Slider) Size2D(iter int) {
-	sr.InitLayout2D()
+func (sr *Slider) GetSize(vp *Viewport, iter int) {
+	sr.InitDoLayout(vp * Viewport)
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
@@ -781,22 +781,22 @@ func (sr *Slider) Size2D(iter int) {
 	sr.LayState.Alloc.Size.SetDim(odim, sz)
 }
 
-func (sr *Slider) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (sr *Slider) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	sr.ConfigPartsIfNeeded(false)
-	sr.Layout2DBase(parBBox, true, iter) // init style
-	sr.Layout2DParts(parBBox, iter)
+	sr.DoLayoutBase(parBBox, true, iter) // init style
+	sr.DoLayoutParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sr.StateStyles[i].CopyUnitContext(&sr.Style.UnContext)
 	}
 	sr.SizeFromAlloc()
-	return sr.Layout2DChildren(iter)
+	return sr.DoLayoutChildren(iter)
 }
 
 func (sr *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sr.SliderBase.Move2D(delta, parBBox)
 }
 
-func (sr *Slider) Render() {
+func (sr *Slider) Render(vp *Viewport) {
 	if sr.FullReRenderIfNeeded() {
 		return
 	}
@@ -937,25 +937,25 @@ func (sb *ScrollBar) SetStyle() {
 	sb.ConfigParts()
 }
 
-func (sb *ScrollBar) Size2D(iter int) {
-	sb.InitLayout2D()
+func (sb *ScrollBar) GetSize(vp *Viewport, iter int) {
+	sb.InitDoLayout(vp * Viewport)
 }
 
-func (sb *ScrollBar) Layout2D(parBBox image.Rectangle, iter int) bool {
-	sb.Layout2DBase(parBBox, true, iter) // init style
-	sb.Layout2DParts(parBBox, iter)
+func (sb *ScrollBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	sb.DoLayoutBase(parBBox, true, iter) // init style
+	sb.DoLayoutParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)
 	}
 	sb.SizeFromAlloc()
-	return sb.Layout2DChildren(iter)
+	return sb.DoLayoutChildren(iter)
 }
 
 func (sb *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
 	sb.SliderBase.Move2D(delta, parBBox)
 }
 
-func (sb *ScrollBar) Render() {
+func (sb *ScrollBar) Render(vp *Viewport) {
 	if sb.FullReRenderIfNeeded() {
 		return
 	}

@@ -110,7 +110,7 @@ func (fr *Frame) RenderStripes() {
 	}
 }
 
-func (fr *Frame) Render() {
+func (fr *Frame) Render(vp *Viewport) {
 	if fr.FullReRenderIfNeeded() {
 		return
 	}

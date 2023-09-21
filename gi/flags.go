@@ -15,9 +15,11 @@ import (
 type WidgetFlags ki.Flags //enums:bitflag
 
 const (
-	// NoLayout means that this node does not participate in the layout
-	// process (Size, Layout, Move) -- set by e.g., SVG nodes
-	NoLayout NodeFlags = NodeFlags(ki.FlagsN) + iota
+	// NeedsRender needs to be rendered on next render itration
+	NeedsRender WidgetFlags = NodeFlags(ki.FlagsN) + iota
+
+	// NeedsStyle needs to be styled again before being rendered.
+	NeedsStyle
 
 	// EventsConnected: this node has been connected to receive events from
 	// the window -- to optimize event processing, connections are typically
@@ -34,14 +36,6 @@ const (
 	// events?  use tab / alt tab and clicking events to update focus -- see
 	// interface on Window
 	HasFocus
-
-	// FullReRender indicates that a full re-render is required due to nature
-	// of update event -- otherwise default is local re-render -- used
-	// internally for nodes to determine what to do on the ReRender step
-	FullReRender
-
-	// NeedsStyle indicates that a node needs to be styled again before being rendered.
-	NeedsStyle
 
 	// ReRenderAnchor: this node has a static size, and repaints its
 	// background -- any children under it that need to dynamically resize on

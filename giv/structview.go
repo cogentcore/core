@@ -414,7 +414,7 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructView) Render() {
+func (sv *StructView) Render(vp *Viewport) {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateActions()
 	}

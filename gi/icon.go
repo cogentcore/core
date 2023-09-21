@@ -98,7 +98,7 @@ func (ic *Icon) SVGIcon() *Viewport {
 	return sic
 }
 
-func (ic *Icon) Size2D(iter int) {
+func (ic *Icon) GetSize(vp *Viewport, iter int) {
 	if iter > 0 {
 		return
 	}
@@ -126,17 +126,17 @@ func (ic *Icon) SetStyle() {
 	}
 }
 
-func (ic *Icon) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (ic *Icon) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	sic := ic.SVGIcon()
-	ic.Layout2DBase(parBBox, true, iter)
+	ic.DoLayoutBase(parBBox, true, iter)
 	if sic != nil {
 		sic.LayState = ic.LayState
 		sic.LayState.Alloc.PosRel = mat32.Vec2Zero
 	}
-	return ic.Layout2DChildren(iter)
+	return ic.DoLayoutChildren(iter)
 }
 
-func (ic *Icon) Render() {
+func (ic *Icon) Render(vp *Viewport) {
 	if ic.FullReRenderIfNeeded() {
 		return
 	}

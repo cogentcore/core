@@ -143,7 +143,7 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render() {
+func (cv *ColorMapView) Render(vp *Viewport) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}

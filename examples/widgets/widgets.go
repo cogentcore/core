@@ -31,7 +31,7 @@ func mainrun() {
 	// turn these on to see a traces of various stages of processing..
 	// gi.Update2DTrace = true
 	// gi.RenderTrace = true
-	// gi.Layout2DTrace = true
+	// gi.LayoutTrace = true
 	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
 	// gi.EventTrace = true

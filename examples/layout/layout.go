@@ -22,7 +22,7 @@ func mainrun() {
 	height := 768
 
 	// turn on tracing in preferences, Debug
-	// gi.Layout2DTrace = true
+	// gi.LayoutTrace = true
 
 	frsz := [5]mat32.Vec2{
 		{20, 100},

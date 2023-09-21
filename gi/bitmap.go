@@ -162,7 +162,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 	draw.Draw(parVp.Pixels, r, bm.Pixels, sp, draw.Over)
 }
 
-func (bm *Bitmap) Render() {
+func (bm *Bitmap) Render(vp *Viewport) {
 	if bm.FullReRenderIfNeeded() {
 		return
 	}

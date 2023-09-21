@@ -39,7 +39,7 @@ func LaySummedDim(ly Layouts) mat32.Dims {
 // we focus on Need: Max(Min, AllocSize), and Want: Max(Pref, AllocSize) -- Max is
 // only used if we need to fill space, during final allocation
 //
-// second me-first Layout2D pass: each layout allocates AllocSize for its
+// second me-first DoLayout pass: each layout allocates AllocSize for its
 // children based on aggregated size data, and so on down the tree
 
 // GatherSizesSumMax gets basic sum and max data across all kiddos
@@ -79,7 +79,7 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		maxNeed = maxNeed.Max(ni.LayState.Size.Need)
 		maxPref = maxPref.Max(ni.LayState.Size.Pref)
 
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, ni.LayState.Size.Need.Dim(LaySummedDim(ly.Lay)), ni.LayState.Size.Pref.Dim(LaySummedDim(ly.Lay)))
 		}
 	}
@@ -112,7 +112,7 @@ func GatherSizes(ly *Layout) {
 				ly.LayState.Size.Pref.SetMaxDim(d, maxPref.Dim(d))
 			}
 		} else { // use target size from style
-			if Layout2DTrace {
+			if LayoutTrace {
 				fmt.Printf("Size:   %v pref nonzero, setting as need: %v\n", ly.Path(), pref)
 			}
 			ly.LayState.Size.Need.SetDim(d, pref)
@@ -137,7 +137,7 @@ func GatherSizes(ly *Layout) {
 	}
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
@@ -170,7 +170,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 		ly.LayState.Size.Pref = prv
 		ly.LayState.Alloc.Size = prv
 		ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Size:   %v iter 1 fix size: %v\n", ly.Path(), prv)
 		}
 		return
@@ -193,7 +193,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 		pref = 200 // final backstop
 	}
 
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Size:   %v flow pref start: %v\n", ly.Path(), pref)
 	}
 
@@ -244,7 +244,7 @@ func GatherSizesFlow(ly *Layout, iter int) {
 	}
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Size:   %v gather sizes need: %v, pref: %v, elspc: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref, elspc)
 	}
 }
@@ -438,7 +438,7 @@ func GatherSizesGrid(ly *Layout) {
 	ly.LayState.Size.Pref.Y += float32(rows-1) * ly.Spacing.Dots
 
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
 	}
 }
@@ -456,7 +456,7 @@ func LayAllocFromParent(ly *Layout) {
 		return
 	}
 	pni, _ := KiToNode2D(ly.Par)
-	lyp := pni.AsLayout2D()
+	lyp := pni.AsDoLayout(vp * Viewport)
 	if lyp == nil {
 		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d any) bool {
 			pni, _ := KiToNode2D(k)
@@ -469,7 +469,7 @@ func LayAllocFromParent(ly *Layout) {
 			}
 			if !pg.LayState.Alloc.Size.IsNil() {
 				ly.LayState.Alloc.Size = pg.LayState.Alloc.Size
-				if Layout2DTrace {
+				if LayoutTrace {
 					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.Path(), ly.LayState.Alloc.Size, pg.Path())
 				}
 				return ki.Break
@@ -524,7 +524,7 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.Si
 		}
 	}
 
-	// if Layout2DTrace {
+	// if LayoutTrace {
 	// 	fmt.Printf("ly %v avail: %v targ: %v, extra %v, strMax: %v, strNeed: %v, pos: %v size: %v spc: %v\n", ly.Nm, avail, targ, extra, stretchMax, stretchNeed, pos, size, spc)
 	// }
 
@@ -641,7 +641,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 		pos += extra
 	}
 
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Layout: %v Along dim %v, avail: %v elspc: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, elspc, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 	}
 
@@ -673,7 +673,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 
 		ni.LayState.Alloc.Size.SetDim(dim, size)
 		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
@@ -713,7 +713,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 		}
 		ni.LayState.Alloc.Size.SetDim(dim, size)
 		ni.LayState.Alloc.PosRel.SetDim(dim, pos)
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Layout: %v Child: %v, pos: %v, size: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, pos, size, ni.LayState.Size.Need.Dim(dim), ni.LayState.Size.Pref.Dim(dim))
 		}
 		pos += size + ly.Spacing.Dots
@@ -755,7 +755,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 	}
 	ly.LayState.Size.Need = nsz
 	ly.LayState.Size.Pref = nsz
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Layout: %v Flow final size: %v\n", ly.Path(), nsz)
 	}
 	// if nrows == 1 {
@@ -833,7 +833,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 		pos += extra
 	}
 
-	if Layout2DTrace {
+	if LayoutTrace {
 		fmt.Printf("Layout Grid Dim: %v All on dim %v, avail: %v need: %v pref: %v targ: %v, extra %v, strMax: %v, strNeed: %v, nstr %v, strTot %v\n", ly.Path(), dim, avail, need, pref, targ, extra, stretchMax, stretchNeed, nstretch, stretchTot)
 	}
 
@@ -859,7 +859,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 
 		gd.AllocSize = size
 		gd.AllocPosRel = pos
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Grid %v pos: %v, size: %v\n", rowcol, pos, size)
 		}
 		pos += size + ly.Spacing.Dots
@@ -930,7 +930,7 @@ func LayoutGridLay(ly *Layout) {
 			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}
 
-		if Layout2DTrace {
+		if LayoutTrace {
 			fmt.Printf("Layout: %v grid col: %v row: %v pos: %v size: %v\n", ly.Path(), col, row, ni.LayState.Alloc.PosRel, ni.LayState.Alloc.Size)
 		}
 

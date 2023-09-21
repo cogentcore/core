@@ -69,21 +69,21 @@ func (mb *MenuBar) ShowMenuBar() bool {
 	return true
 }
 
-func (mb *MenuBar) Size2D(iter int) {
+func (mb *MenuBar) GetSize(vp *Viewport, iter int) {
 	if !mb.ShowMenuBar() {
 		return
 	}
-	mb.Layout.Size2D(iter)
+	mb.Layout.GetSize(vp*Viewport, iter)
 }
 
-func (mb *MenuBar) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (mb *MenuBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	if !mb.ShowMenuBar() {
 		return false
 	}
-	return mb.Layout.Layout2D(parBBox, iter)
+	return mb.Layout.DoLayout(vp*Viewport, parBBox, iter)
 }
 
-func (mb *MenuBar) Render() {
+func (mb *MenuBar) Render(vp *Viewport) {
 	if !mb.ShowMenuBar() {
 		return
 	}
@@ -382,7 +382,7 @@ func (tb *ToolBar) ToolBarStdRender() {
 	tb.RenderUnlock(rs)
 }
 
-func (tb *ToolBar) Render() {
+func (tb *ToolBar) Render(vp *Viewport) {
 	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
 		return
 	}

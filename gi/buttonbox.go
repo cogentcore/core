@@ -252,11 +252,11 @@ func (bb *ButtonBox) SetStyle() {
 	bb.ConfigParts()
 }
 
-func (bb *ButtonBox) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (bb *ButtonBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	bb.ConfigPartsIfNeeded()
-	bb.Layout2DBase(parBBox, true, iter) // init style
-	bb.Layout2DParts(parBBox, iter)
-	return bb.Layout2DChildren(iter)
+	bb.DoLayoutBase(parBBox, true, iter) // init style
+	bb.DoLayoutParts(parBBox, iter)
+	return bb.DoLayoutChildren(iter)
 }
 
 func (bb *ButtonBox) RenderButtonBox() {
@@ -265,7 +265,7 @@ func (bb *ButtonBox) RenderButtonBox() {
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBox) Render() {
+func (bb *ButtonBox) Render(vp *Viewport) {
 	if bb.FullReRenderIfNeeded() {
 		return
 	}

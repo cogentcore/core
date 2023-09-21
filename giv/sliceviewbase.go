@@ -1089,7 +1089,7 @@ func (sv *SliceViewBase) SetStyle() {
 	// sg.StartFocus() // need to call this when window is actually active
 }
 
-func (sv *SliceViewBase) Render() {
+func (sv *SliceViewBase) Render(vp *Viewport) {
 	if win := sv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
@@ -1109,7 +1109,7 @@ func (sv *SliceViewBase) Render() {
 	}
 	if sv.PushBounds() {
 		if !sv.InFullRebuild && sv.SliceGridNeedsLayout() {
-			// note: we are outside of slice grid and thus cannot do proper layout during Layout2D
+			// note: we are outside of slice grid and thus cannot do proper layout during DoLayout
 			// as we don't yet know the size of grid -- so we catch it here at next step and just
 			// rebuild as needed.
 			sv.RenderedRows = sv.DispRows

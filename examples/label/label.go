@@ -20,7 +20,7 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	// gi.Layout2DTrace = true
+	// gi.LayoutTrace = true
 
 	gi.SetAppName("label")
 	gi.SetAppAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)

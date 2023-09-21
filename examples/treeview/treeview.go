@@ -88,7 +88,7 @@ func mainrun() {
 
 	// turn this on to see a trace of the rendering
 	// gi.RenderTrace = true
-	// gi.Layout2DTrace = true
+	// gi.LayoutTrace = true
 
 	gi.SetAppName("treeview")
 	gi.SetAppAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>

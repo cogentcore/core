@@ -456,18 +456,18 @@ func (sb *SpinBox) SetStyle() {
 	sb.ConfigParts()
 }
 
-func (sb *SpinBox) Size2D(iter int) {
+func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
 	sb.Size2DParts(iter)
 }
 
-func (sb *SpinBox) Layout2D(parBBox image.Rectangle, iter int) bool {
+func (sb *SpinBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	sb.ConfigPartsIfNeeded()
-	sb.Layout2DBase(parBBox, true, iter) // init style
-	sb.Layout2DParts(parBBox, iter)
-	return sb.Layout2DChildren(iter)
+	sb.DoLayoutBase(parBBox, true, iter) // init style
+	sb.DoLayoutParts(parBBox, iter)
+	return sb.DoLayoutChildren(iter)
 }
 
-func (sb *SpinBox) Render() {
+func (sb *SpinBox) Render(vp *Viewport) {
 	if sb.FullReRenderIfNeeded() {
 		return
 	}

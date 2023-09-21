@@ -417,20 +417,20 @@ func (lb *Label) SetStyle() {
 	lb.LayoutLabel()
 }
 
-func (lb *Label) Size2D(iter int) {
+func (lb *Label) GetSize(vp *Viewport, iter int) {
 	if iter > 0 && lb.Style.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
-		lb.InitLayout2D()
+		lb.InitDoLayout(vp * Viewport)
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.Render.Size)
 		lb.Size2DFromWH(sz.X, sz.Y)
 	}
 }
 
-func (lb *Label) Layout2D(parBBox image.Rectangle, iter int) bool {
-	lb.Layout2DBase(parBBox, true, iter)
-	lb.Layout2DChildren(iter) // todo: maybe shouldn't call this on known terminals?
+func (lb *Label) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+	lb.DoLayoutBase(parBBox, true, iter)
+	lb.DoLayoutChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.Size2DSubSpace()
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
@@ -461,7 +461,7 @@ func (lb *Label) RenderLabel() {
 	lb.Render.Render(rs, lb.RenderPos)
 }
 
-func (lb *Label) Render() {
+func (lb *Label) Render(vp *Viewport) {
 	if lb.FullReRenderIfNeeded() {
 		return
 	}

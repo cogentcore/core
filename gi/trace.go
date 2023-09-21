@@ -14,10 +14,10 @@ var (
 	// Can be set in PrefsDebug from prefs gui
 	RenderTrace bool
 
-	// Layout2DTrace reports a trace of all layouts (just
+	// LayoutTrace reports a trace of all layouts (just
 	// printfs to stdout)
 	// Can be set in PrefsDebug from prefs gui
-	Layout2DTrace bool
+	LayoutTrace bool
 
 	// WinEventTrace reports a trace of window events to stdout
 	// can be set in PrefsDebug from prefs gui

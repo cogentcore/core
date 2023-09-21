@@ -251,7 +251,7 @@ func (sv *SliceViewInline) SetStyle() {
 	sv.PartsWidgetBase.SetStyle()
 }
 
-func (sv *SliceViewInline) Render() {
+func (sv *SliceViewInline) Render(vp *Viewport) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}
