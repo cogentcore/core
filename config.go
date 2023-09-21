@@ -18,7 +18,7 @@ import (
 
 // ConfigFile is the name of the config file actually loaded, specified by the
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
-var ConfigFile string
+var ConfigFiles []string
 
 // MetaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
@@ -106,7 +106,6 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 
 	var cfgFiles []string
 	if mc.Config != "" {
-		ConfigFile = mc.Config
 		_, err := dirs.FindFileOnPaths(opts.IncludePaths, mc.Config)
 		if err == nil {
 			cfgFiles = append(cfgFiles, mc.Config)
@@ -142,6 +141,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		return "", err
 	}
 
+	ConfigFiles = cfgFiles
 	for _, fn := range cfgFiles {
 		err = OpenWithIncludes(opts, cfg, fn)
 		if err != nil {
