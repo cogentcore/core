@@ -1,6 +1,6 @@
 Name = "svg"
 Desc = ""
-Version = "v0.1.0"
+Version = "v0.1.1"
 Type = "App"
 
 [Build]
@@ -22,7 +22,7 @@ Type = "App"
 
 [Release]
   VersionFile = "version.go"
-  Package = "main"
+  Package = "svg"
 
 [Generate]
   Dir = "."
