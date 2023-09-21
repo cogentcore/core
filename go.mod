@@ -10,7 +10,6 @@ require (
 	goki.dev/glop v0.0.0-20230919212731-04f79732909d
 	goki.dev/grows v0.3.0
 	goki.dev/gti v0.0.0-20230910050553-9577e693612d
-	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/laser v0.1.0
 	goki.dev/ordmap v0.5.0
 )

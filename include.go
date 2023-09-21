@@ -11,7 +11,8 @@ import (
 	"errors"
 	"reflect"
 
-	"goki.dev/ki/v2/toml"
+	"goki.dev/glop/dirs"
+	"goki.dev/grows/tomls"
 	"goki.dev/laser"
 )
 
@@ -50,7 +51,7 @@ func includeStackImpl(opts *Options, clone Includer, includes []string) ([]strin
 	var errs []error
 	for _, inc := range incs {
 		*clone.IncludesPtr() = nil
-		err := toml.OpenFromPaths(clone, inc, opts.IncludePaths)
+		err := tomls.OpenFiles(clone, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
 		if err == nil {
 			includes, err = includeStackImpl(opts, clone, includes)
 			if err != nil {

@@ -15,7 +15,7 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/ki/v2/toml"
+	"goki.dev/grows/tomls"
 	"goki.dev/laser"
 )
 
@@ -340,7 +340,7 @@ func SetFieldValue(f *Field, value string) error {
 	switch {
 	case vk == reflect.Map:
 		mval := make(map[string]any)
-		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
+		err := tomls.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
 			return err
 		}
@@ -350,7 +350,7 @@ func SetFieldValue(f *Field, value string) error {
 		}
 	case vk == reflect.Slice:
 		mval := make(map[string]any)
-		err := toml.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
+		err := tomls.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
 		if err != nil {
 			return err
 		}
