@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"goki.dev/grease/testdata"
+	"goki.dev/grows/tomls"
 )
 
 // TestSubConfig is a sub-struct with special params
@@ -351,7 +352,7 @@ func TestSave(t *testing.T) {
 	opts.IncludePaths = []string{".", "testdata"}
 	cfg := &TestConfig{}
 	OpenWithIncludes(opts, cfg, "testcfg.toml")
-	Save(cfg, "testdata/testwrite.toml")
+	tomls.Save(cfg, "testdata/testwrite.toml")
 }
 
 func TestConfigOpen(t *testing.T) {

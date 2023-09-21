@@ -13,6 +13,10 @@ github.com/mattn/go-shellwords v1.0.12 h1:M2zGm7EW6UQJvDeQxo4T51eKPurbeFbe8WtebG
 github.com/mattn/go-shellwords v1.0.12/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
 goki.dev/enums v0.9.13 h1:bhQVdyW04KBpbvJfdmXP31hQd6dOfTvLMIXvOZIJFnM=
 goki.dev/enums v0.9.13/go.mod h1:QlXLA+1LTQmsQIn51+sg8eQ6pgiH+KLqMCydb/hmZbs=
+goki.dev/glop v0.0.0-20230919212731-04f79732909d h1:9E4EjmlklMsBie6LaFQh8V3HzNC6Oh4ZRfYIIbPjhkQ=
+goki.dev/glop v0.0.0-20230919212731-04f79732909d/go.mod h1:gxxXPhWLaqP9H/sudq5MHDbkbKdr5g0ziyPIuYAJczo=
+goki.dev/grows v0.3.0 h1:s2AIPblXBkrp0jFzlLxAg5G787b4yko0ehMRTgFp72E=
+goki.dev/grows v0.3.0/go.mod h1:r8DM6VFaqzXjt95BsjOgZShfT+qUXdVtrtVXAEY2mAY=
 goki.dev/gti v0.0.0-20230910050553-9577e693612d h1:DwrDwSJGDfIy95wDUQX00oOS1WXWcLdNpGEf2SRzIj8=
 goki.dev/gti v0.0.0-20230910050553-9577e693612d/go.mod h1:zBLZkvGDh3lafBTd0cpDILdJ+jy12S2tHXYP9gkLQSA=
 goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=

@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"io/fs"
 
-	"goki.dev/ki/v2/toml"
+	"goki.dev/glop/dirs"
+	"goki.dev/grows/tomls"
 )
 
 // TODO: use glop/dirs and grows for these things
@@ -20,7 +21,7 @@ import (
 // Is equivalent to Open if there are no Includes. It returns an error if
 // any of the include files cannot be found on [Options.IncludePaths].
 func OpenWithIncludes(opts *Options, cfg any, file string) error {
-	err := toml.OpenFromPaths(cfg, file, opts.IncludePaths)
+	err := tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
 	if err != nil {
 		return err
 	}
@@ -35,24 +36,32 @@ func OpenWithIncludes(opts *Options, cfg any, file string) error {
 	}
 	for i := ni - 1; i >= 0; i-- {
 		inc := incs[i]
-		err = toml.OpenFromPaths(cfg, inc, opts.IncludePaths)
+		err = tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, inc))
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 	// reopen original
-	toml.OpenFromPaths(cfg, file, opts.IncludePaths)
+	err = tomls.OpenFiles(cfg, dirs.FindFilesOnPaths(opts.IncludePaths, file))
+	if err != nil {
+		return err
+	}
 	*incfg.IncludesPtr() = incs
 	return err
 }
 
-// OpenFS reads config from given TOML file,
-// using the fs.FS filesystem (e.g., for embed files).
-func OpenFS(cfg any, fsys fs.FS, file string) error {
-	return toml.OpenFS(cfg, fsys, file)
+// OpenFS reads the given config object from the given file.
+func Open(cfg any, file string) error {
+	return tomls.Open(cfg, file)
 }
 
-// Save writes TOML for the given config to the given file.
+// OpenFS reads the given config object from given file, using
+// the given [fs.FS] filesystem (e.g., for embed files).
+func OpenFS(cfg any, fsys fs.FS, file string) error {
+	return tomls.OpenFS(cfg, fsys, file)
+}
+
+// Save writes the given config object to the given file.
 func Save(cfg any, file string) error {
-	return toml.Save(cfg, file)
+	return tomls.Save(cfg, file)
 }
