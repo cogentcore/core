@@ -172,8 +172,8 @@ type Layout struct {
 	// scroll bars -- we fully manage them as needed
 	Scrolls [2]*ScrollBar `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
 
-	// computed size of a grid layout based on all the constraints -- computed during Size2D pass
-	GridSize image.Point `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during Size2D pass"`
+	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
+	GridSize image.Point `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during GetSize pass"`
 
 	// grid data for rows in [0] and cols in [1]
 	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
@@ -819,7 +819,7 @@ func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 // current window focus item, or contains that focus item (along with its
 // index) -- nil, -1 if none.
 func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
-	em := ly.EventMgr2D()
+	em := ly.EventMgr()
 	if em == nil {
 		return nil, -1
 	}
@@ -849,7 +849,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	if foc == nil {
 		return false
 	}
-	em := ly.EventMgr2D()
+	em := ly.EventMgr()
 	cur := em.CurFocus()
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
@@ -878,7 +878,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	if foc == nil {
 		return false
 	}
-	em := ly.EventMgr2D()
+	em := ly.EventMgr()
 	cur := em.CurFocus()
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
@@ -999,7 +999,7 @@ func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel, found := ChildByLabelStartsCanFocus(ly, ly.FocusName, ly.FocusNameLast)
 	if found {
-		em := ly.EventMgr2D()
+		em := ly.EventMgr()
 		if em != nil {
 			em.SetFocus(focel) // this will also scroll by default!
 		}
@@ -1176,7 +1176,7 @@ func (ly *Layout) SetStyle() {
 }
 
 func (ly *Layout) GetSize(vp *Viewport, iter int) {
-	ly.InitDoLayout(vp * Viewport)
+	ly.InitLayout(vp * Viewport)
 	switch ly.Lay {
 	case LayoutHorizFlow, LayoutVertFlow:
 		GatherSizesFlow(ly, iter)
@@ -1280,7 +1280,7 @@ func (ly *Layout) ConnectEvents() {
 	ly.KeyChordEvent()
 }
 
-func (ly *Layout) HasFocus2D() bool {
+func (ly *Layout) HasFocus() bool {
 	if ly.IsDisabled() {
 		return false
 	}

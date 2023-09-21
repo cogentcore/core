@@ -1146,7 +1146,7 @@ func (sv *SliceViewBase) ConnectEvents() {
 	sv.SliceViewBaseEvents()
 }
 
-func (sv *SliceViewBase) HasFocus2D() bool {
+func (sv *SliceViewBase) HasFocus() bool {
 	if !sv.ContainsFocus() {
 		return false
 	}
@@ -1480,7 +1480,7 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
 		selMode := mouse.SelectOne
-		em := sv.EventMgr2D()
+		em := sv.EventMgr()
 		if em != nil {
 			selMode = em.LastSelMode
 		}
@@ -2110,7 +2110,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if len(men) > 0 {
 		pos := sv.IdxPos(idx)
 		if pos == (image.Point{}) {
-			em := sv.EventMgr2D()
+			em := sv.EventMgr()
 			if em != nil {
 				pos = em.LastMousePos
 			}

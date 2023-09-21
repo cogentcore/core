@@ -6,9 +6,28 @@ package gi
 
 import (
 	"goki.dev/colors"
+	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/cursor"
+	"goki.dev/mat32/v2"
+	"goki.dev/prof/v2"
 )
+
+// Styling logic:
+//
+// see render.go for rendering logic
+//
+// Style funcs require pervasive access to (distant) parent styles
+// while are themselves modifying their own styles.
+// Styles are used in rendering and layout.
+//
+// Therefore, there is significant risk of read / write race errors.
+//
+// However, the render update logic should mitigate most of these:
+//
+// During normal event or anim-triggered updates, there is an
+// UpdateStart at the start of any changes that
 
 // CustomConfigStyles is the custom, global style configuration function
 // that is called on all widgets to configure their style functions.
@@ -28,6 +47,290 @@ var CustomConfigStyles func(w *WidgetBase)
 // method. We use stylers for styling because they give you complete
 // control and full programming logic without any CSS-selector magic.
 type Styler func(w *WidgetBase, s *gist.Style)
+
+// todo: when?
+func (vp *Viewport) SetMyStyle() {
+	vp.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
+	vp.Frame.Style.Color = ColorScheme.OnBackground
+}
+
+////////////////////////////////////////////////////////////////////
+// 	Widget Styling functions
+
+// AddStyler adds the given styler to the
+// widget's stylers, initializing them if necessary.
+// This function can be called by both internal
+// and end-user code.
+// It should only be done before showing the viewport
+// during initial configuration -- otherwise requries
+// a StyMu mutex lock.
+func (wb *WidgetBase) AddStyler(s Styler) {
+	if wb.Stylers == nil {
+		wb.Stylers = []Styler{}
+	}
+	wb.Stylers = append(wb.Stylers, s)
+}
+
+// STYTODO: figure out what to do with this
+// // AddChildStyler is a helper function that adds the
+// // given styler to the child of the given name
+// // if it exists, starting searching at the given start index.
+// func (wb *WidgetBase) AddChildStyler(childName string, startIdx int, s Styler) {
+// 	child := wb.ChildByName(childName, startIdx)
+// 	if child != nil {
+// 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
+// 		if ok {
+// 			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+// 				f(wb)
+// 			})
+// 		}
+// 	}
+// }
+
+// ActiveStyle satisfies the ActiveStyler interface
+// and returns the active style of the widget
+func (wb *WidgetBase) ActiveStyle() *gist.Style {
+	return &wb.Style
+}
+
+// StyleRLock does a read-lock for reading the style
+func (wb *WidgetBase) StyleRLock() {
+	wb.StyMu.RLock()
+}
+
+// StyleRUnlock unlocks the read-lock
+func (wb *WidgetBase) StyleRUnlock() {
+	wb.StyMu.RUnlock()
+}
+
+// BoxSpace returns the style BoxSpace value under read lock
+func (wb *WidgetBase) BoxSpace() gist.SideFloats {
+	wb.StyMu.RLock()
+	bs := wb.Style.BoxSpace()
+	wb.StyMu.RUnlock()
+	return bs
+}
+
+// ParentActiveStyle returns parent's active style or nil if not avail.
+// Calls StyleRLock so must call ParentStyleRUnlock when done.
+func (wb *WidgetBase) ParentActiveStyle() *gist.Style {
+	if wb.Par == nil {
+		return nil
+	}
+	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+		st := ps.ActiveStyle()
+		ps.StyleRLock()
+		return st
+	}
+	return nil
+}
+
+// ParentStyleRUnlock unlocks the parent's style
+func (wb *WidgetBase) ParentStyleRUnlock() {
+	if wb.Par == nil {
+		return
+	}
+	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+		ps.StyleRUnlock()
+	}
+}
+
+// SetStyleWidget styles the Style values from node properties and optional
+// base-level defaults -- for Widget-style nodes.
+// must be called under a StyMu Lock
+func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
+	pr := prof.Start("SetStyleWidget")
+	defer pr.End()
+
+	if wb.OverrideStyle {
+		return
+	}
+
+	// todo: remove all these prof steps -- should be much less now..
+	pcsn := prof.Start("SetStyleWidget-SetCurStyleNode")
+
+	// STYTODO: there should be a better way to do this
+	wi, _ := wb.This().(Widget)
+	vp.SetCurStyleNode(wi)
+	defer wb.Viewport.SetCurStyleNode(nil)
+
+	pcsn.End()
+
+	wb.Style = gist.Style{}
+	wb.Style.Defaults()
+
+	pin := prof.Start("SetStyleWidget-Inherit")
+
+	if parSty := wb.ParentActiveStyle(); parSty != nil {
+		wb.Style.InheritFields(parSty)
+		wb.ParentStyleRUnlock()
+	}
+	pin.End()
+
+	prun := prof.Start("SetStyleWidget-RunStyleFuncs")
+
+	wb.RunStyleFuncs()
+
+	prun.End()
+
+	puc := prof.Start("SetStyleWidget-SetUnitContext")
+
+	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2{}, mat32.Vec2{})
+	puc.End()
+
+	psc := prof.Start("SetStyleWidget-SetCurrentColor")
+
+	if wb.Style.Inactive { // inactive can only set, not clear
+		wb.SetDisabled()
+	}
+
+	vp.SetCurrentColor(wb.Style.Color)
+
+	psc.End()
+}
+
+// RunStyleFuncs runs the style functions specified in
+// the StyleFuncs field in sequential ascending order.
+func (wb *WidgetBase) RunStyleFuncs() {
+	for _, s := range wb.Stylers {
+		s(wb, &wb.Style)
+	}
+}
+
+func (wb *WidgetBase) SetStyle() {
+	wb.StyMu.Lock()
+	defer wb.StyMu.Unlock()
+
+	wb.SetStyleWidget()
+	wb.LayState.SetFromStyle(&wb.Style) // also does reset
+}
+
+// SetUnitContext sets the unit context based on size of viewport, element, and parent
+// element (from bbox) and then caches everything out in terms of raw pixel
+// dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
+func SetUnitContext(st *gist.Style, vp *Viewport, el, par mat32.Vec2) {
+	if vp != nil {
+		if vp.Win != nil {
+			st.UnContext.DPI = vp.Win.LogicalDPI()
+		}
+		if vp.Render.Image != nil {
+			sz := vp.Geom.Size // Render.Image.Bounds().Size()
+			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
+		}
+	}
+	pr := prof.Start("SetUnitContext-OpenFont")
+	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+	pr.End()
+	ptd := prof.Start("SetUnitContext-ToDots")
+	st.ToDots()
+	ptd.End()
+}
+
+// ParentBackgroundColor returns the background color
+// of the nearest widget parent of the widget that
+// has a defined background color. If no such parent is found,
+// it returns a new [gist.ColorSpec] with a solid
+// color of [ColorScheme.Background].
+func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
+	// todo: this style reading requires a mutex!
+	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+		return !p.Style.BackgroundColor.IsNil()
+	})
+	if pwb == nil {
+		cs := gist.ColorSpec{}
+		cs.SetColor(ColorScheme.Background)
+		return cs
+	}
+	return pwb.Style.BackgroundColor
+}
+
+// ParentCursor returns the cursor of the nearest
+// widget parent of the widget that has a a non-default
+// cursor. If no such parent is found, it returns the given
+// cursor. This function can be used for elements like labels
+// that have a default cursor ([cursor.IBeam]) but should
+// not override the cursor of a parent.
+func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
+	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+		return p.Style.Cursor != cursor.Arrow
+	})
+	if pwb == nil {
+		return cur
+	}
+	return pwb.Style.Cursor
+}
+
+/////////////////////////////////////////////////////////////////
+// Style helper methods
+
+// SetMinPrefWidth sets minimum and preferred width;
+// will get at least this amount; max unspecified.
+// This adds a styler that calls [gist.Style.SetMinPrefWidth].
+func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetMinPrefWidth(val)
+	})
+}
+
+// SetMinPrefHeight sets minimum and preferred height;
+// will get at least this amount; max unspecified.
+// This adds a styler that calls [gist.Style.SetMinPrefHeight].
+func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetMinPrefHeight(val)
+	})
+}
+
+// SetStretchMaxWidth sets stretchy max width (-1);
+// can grow to take up avail room.
+// This adds a styler that calls [gist.Style.SetStretchMaxWidth].
+func (wb *WidgetBase) SetStretchMaxWidth() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetStretchMaxWidth()
+	})
+}
+
+// SetStretchMaxHeight sets stretchy max height (-1);
+// can grow to take up avail room.
+// This adds a styler that calls [gist.Style.SetStretchMaxHeight].
+func (wb *WidgetBase) SetStretchMaxHeight() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetStretchMaxHeight()
+	})
+}
+
+// SetStretchMax sets stretchy max width and height (-1);
+// can grow to take up avail room.
+// This adds a styler that calls [gist.Style.SetStretchMax].
+func (wb *WidgetBase) SetStretchMax() {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetStretchMaxWidth()
+		s.SetStretchMaxHeight()
+	})
+}
+
+// SetFixedWidth sets all width style options
+// (Width, MinWidth, and MaxWidth) to
+// the given fixed width unit value.
+// This adds a styler that calls [gist.Style.SetFixedWidth].
+func (wb *WidgetBase) SetFixedWidth(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetFixedWidth(val)
+	})
+}
+
+// SetFixedHeight sets all height style options
+// (Height, MinHeight, and MaxHeight) to
+// the given fixed height unit value.
+// This adds a styler that calls [gist.Style.SetFixedHeight].
+func (wb *WidgetBase) SetFixedHeight(val units.Value) {
+	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		s.SetFixedHeight(val)
+	})
+}
+
+////////////////////////////////////////////////////////////////////
+// 	Default Style Vars
 
 // Pre-configured box shadow values, based on
 // those in Material 3. They are in gi because

@@ -421,24 +421,24 @@ func (lb *Label) GetSize(vp *Viewport, iter int) {
 	if iter > 0 && lb.Style.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
-		lb.InitDoLayout(vp * Viewport)
+		lb.InitLayout(vp * Viewport)
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.Render.Size)
-		lb.Size2DFromWH(sz.X, sz.Y)
+		lb.GetSizeFromWH(sz.X, sz.Y)
 	}
 }
 
 func (lb *Label) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	lb.DoLayoutBase(parBBox, true, iter)
 	lb.DoLayoutChildren(iter) // todo: maybe shouldn't call this on known terminals?
-	sz := lb.Size2DSubSpace()
+	sz := lb.GetSizeSubSpace()
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
 		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			lb.LayState.SetFromStyle(&lb.Style)
-			lb.Size2DFromWH(lb.Render.Size.X, lb.Render.Size.Y)
+			lb.GetSizeFromWH(lb.Render.Size.X, lb.Render.Size.Y)
 			return true // needs a redo!
 		}
 	}

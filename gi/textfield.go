@@ -82,8 +82,8 @@ type TextField struct {
 	// the live text string being edited, with latest modifications -- encoded as runes
 	EditTxt []rune `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
 
-	// maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
-	MaxWidthReq int `desc:"maximum width that field will request, in characters, during Size2D process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
+	MaxWidthReq int `desc:"maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
 
 	// effective position with any leading icon space added
 	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective position with any leading icon space added"`
@@ -1336,7 +1336,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		tf.CancelComplete()
 		tf.Revert()
-		tf.FocusChanged2D(FocusInactive)
+		tf.FocusChanged(FocusInactive)
 	case KeyFunBackspace:
 		kt.SetProcessed()
 		tf.CursorBackspace(1)
@@ -1570,7 +1570,7 @@ func (tf *TextField) GetSize(vp *Viewport, iter int) {
 	w := tf.TextWidth(tf.StartPos, tf.EndPos)
 	w += 2.0 // give some extra buffer
 	// fmt.Printf("fontheight: %v width: %v\n", tf.FontHeight, w)
-	tf.Size2DFromWH(w, tf.FontHeight)
+	tf.GetSizeFromWH(w, tf.FontHeight)
 	tf.EditTxt = tmptxt
 }
 
@@ -1661,7 +1661,7 @@ func (tf *TextField) ConnectEvents() {
 	tf.TextFieldEvents()
 }
 
-func (tf *TextField) FocusChanged2D(change FocusChanges) {
+func (tf *TextField) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
 		tf.ClearFlag(int(TextFieldFocusActive))

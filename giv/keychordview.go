@@ -172,7 +172,7 @@ func (kc *KeyChordEdit) ConnectEvents() {
 	kc.KeyChordEvent()
 }
 
-func (kc *KeyChordEdit) FocusChanged2D(change gi.FocusChanges) {
+func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
 		kc.FocusActive = false

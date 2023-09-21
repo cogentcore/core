@@ -435,7 +435,7 @@ func (sv *SplitView) ConnectEvents() {
 	sv.SplitViewEvents()
 }
 
-func (sv *SplitView) HasFocus2D() bool {
+func (sv *SplitView) HasFocus() bool {
 	return sv.ContainsFocus() // anyone within us gives us focus..
 }
 
@@ -543,7 +543,7 @@ func (sr *Splitter) SetStyle() {
 }
 
 func (sr *Splitter) GetSize(vp *Viewport, iter int) {
-	sr.InitDoLayout(vp * Viewport)
+	sr.InitLayout(vp * Viewport)
 }
 
 func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
@@ -749,7 +749,7 @@ func (sr *Splitter) RenderSplitter() {
 	// }
 }
 
-func (sr *Splitter) FocusChanged2D(change FocusChanges) {
+func (sr *Splitter) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
 		sr.SetSliderState(SliderActive) // lose any hover state but whatever..

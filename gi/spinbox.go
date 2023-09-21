@@ -328,7 +328,7 @@ func (sb *SpinBox) ConfigPartsIfNeeded() {
 func (sb *SpinBox) MouseScrollEvent() {
 	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
-		if sbb.IsDisabled() || !sbb.HasFocus2D() {
+		if sbb.IsDisabled() || !sbb.HasFocus() {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
@@ -457,7 +457,7 @@ func (sb *SpinBox) SetStyle() {
 }
 
 func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
-	sb.Size2DParts(iter)
+	sb.GetSizeParts(vp, iter)
 }
 
 func (sb *SpinBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
@@ -488,7 +488,7 @@ func (sb *SpinBox) ConnectEvents() {
 	sb.SpinBoxEvents()
 }
 
-func (sb *SpinBox) HasFocus2D() bool {
+func (sb *SpinBox) HasFocus() bool {
 	if sb.IsDisabled() {
 		return false
 	}

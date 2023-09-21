@@ -326,7 +326,7 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}}},
 		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}}},
 		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*ScrollBar", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}}},
-		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during Size2D pass", Directives: gti.Directives{}}},
+		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}}},
 		{"GridData", &gti.Field{Name: "GridData", Type: "[RowColN][]GridData", Doc: "grid data for rows in [0] and cols in [1]", Directives: gti.Directives{}}},
 		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}}},
 		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}}},

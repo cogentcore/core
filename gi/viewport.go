@@ -17,18 +17,21 @@ import (
 	"goki.dev/ki/v2"
 )
 
+// see render.go for viewport-based rendering code.
+
 // VpFlags has critical state information signaling when rendering,
 // styling etc need to be done
 type VpFlags int64 //enums:bitflag
 
 const (
 	// VpIsUpdating means viewport is in the process of updating:
+	// set for any kind of tree-level update.
 	// skip any further update passes until it goes off.
 	VpIsUpdating VpFlags = iota
 
-	// VpNeedsUpdate means nodes have flagged that they need a Render
-	// and / or SetStyle update
-	VpNeedsUpdate
+	// VpNeedsRender means nodes have flagged that they need a Render
+	// update.
+	VpNeedsRender
 
 	// VpNeedsLayout means that this viewport needs DoLayout stack:
 	// GetSize, DoLayout, then Render.  This is true after any Config.
@@ -147,11 +150,11 @@ type Viewport struct {
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport
 	Flags VpFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
-	// fill the viewport with background-color from style
-	Fill bool `desc:"fill the viewport with background-color from style"`
-
 	// Viewport-level viewbox within any parent Viewport
 	Geom girl.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
+
+	// Root of the scenegraph for this viewport
+	Frame Frame `desc:"Root of the scenegraph for this viewport"`
 
 	// [view: -] render state for rendering
 	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
@@ -162,11 +165,14 @@ type Viewport struct {
 	// our parent window that we render into
 	Win *Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
-	// [view: -] CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass
-	// CurStyleNode Node2D `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode2D is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
+	// background color for filling viewport -- defaults to transparent so that popups can have rounded corners
+	BgColor color.RGBA `desc:"background color for filling viewport -- defaults to transparent so that popups can have rounded corners"`
 
-	// Root of the scenegraph for this viewport
-	Frame Frame `desc:"Root of the scenegraph for this viewport"`
+	// [view: -] Current color in styling -- used for relative color names
+	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
+
+	// [view: -] CurStyleNode is always set to the current node that is being styled used for finding url references -- only active during a Style pass
+	// CurStyleNode WidgetD `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
 
 	// [view: -] UpdtMu is mutex for viewport updates
 	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for viewport updates"`
@@ -187,6 +193,7 @@ func NewViewport(width, height int) *Viewport {
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	vp.RenderState.Init(width, height, vp.Pixels)
+	vp.BgColor = color.Transparent
 	return vp
 }
 
@@ -238,8 +245,7 @@ func (vp *Viewport) VpIsVisible() bool {
 	return vp.Win.IsVisible()
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  Main Rendering code
+// todo: remove
 
 // VpUploadRegion uploads node region of our viewport image
 // func (vp *Viewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
@@ -274,15 +280,15 @@ func (vp *Viewport) DeletePopup() {
 	vp.This().Destroy() // nuke everything else in us
 }
 
-// SetCurStyleNode sets the current styling node to given node, and nil to clear
-func (vp *Viewport) SetCurStyleNode(node Node2D) {
-	if vp == nil {
-		return
-	}
-	vp.StyleMu.Lock()
-	vp.CurStyleNode = node
-	vp.StyleMu.Unlock()
-}
+// // SetCurStyleNode sets the current styling node to given node, and nil to clear
+// func (vp *Viewport) SetCurStyleNode(node Node2D) {
+// 	if vp == nil {
+// 		return
+// 	}
+// 	vp.StyleMu.Lock()
+// 	vp.CurStyleNode = node
+// 	vp.StyleMu.Unlock()
+// }
 
 // SetCurrentColor sets the current color in concurrent-safe way
 func (vp *Viewport) SetCurrentColor(clr color.RGBA) {
@@ -310,6 +316,7 @@ func (vp *Viewport) ContextColor() color.RGBA {
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
 func (vp *Viewport) ContextColorSpecByURL(url string) *gist.ColorSpec {
+	// todo: not currently supported -- see if needed for html / glide
 	return nil
 }
 

@@ -569,7 +569,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 	}
 }
 
-func (cb *ComboBox) HasFocus2D() bool {
+func (cb *ComboBox) HasFocus() bool {
 	if cb.IsDisabled() {
 		return false
 	}

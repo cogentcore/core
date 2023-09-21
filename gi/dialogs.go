@@ -531,7 +531,7 @@ func (dlg *Dialog) Config() {
 	dlg.Viewport.Config()
 }
 
-func (dlg *Dialog) HasFocus2D() bool {
+func (dlg *Dialog) HasFocus() bool {
 	return true // dialog ALWAYS gets all the events!
 }
 

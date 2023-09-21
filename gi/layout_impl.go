@@ -35,7 +35,7 @@ func LaySummedDim(ly Layouts) mat32.Dims {
 ////////////////////////////////////////////////////////////////////////////////////////
 //     Gather Sizes
 
-// first depth-first Size2D pass: terminal concrete items compute their AllocSize
+// first depth-first GetSize pass: terminal concrete items compute their AllocSize
 // we focus on Need: Max(Min, AllocSize), and Want: Max(Pref, AllocSize) -- Max is
 // only used if we need to fill space, during final allocation
 //

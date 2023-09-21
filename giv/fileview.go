@@ -849,7 +849,7 @@ func (fv *FileView) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-func (fv *FileView) HasFocus2D() bool {
+func (fv *FileView) HasFocus() bool {
 	return true // always.. we're typically a dialog anyway
 }
 

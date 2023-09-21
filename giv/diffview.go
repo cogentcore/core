@@ -867,7 +867,7 @@ func (tv *DiffTextView) TextViewEvents() {
 	})
 }
 
-// ConnectEvents2D indirectly sets connections between mouse and key events and actions
+// ConnectEvents indirectly sets connections between mouse and key events and actions
 func (tv *DiffTextView) ConnectEvents() {
 	tv.TextViewEvents()
 }

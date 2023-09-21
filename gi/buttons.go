@@ -534,7 +534,7 @@ func (bb *ButtonBase) ConnectEvents() {
 	bb.ButtonEvents()
 }
 
-func (bb *ButtonBase) FocusChanged2D(change FocusChanges) {
+func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
 		bb.SetNeedsStyle()

@@ -773,7 +773,7 @@ func (sr *Slider) SetStyle() {
 }
 
 func (sr *Slider) GetSize(vp *Viewport, iter int) {
-	sr.InitDoLayout(vp * Viewport)
+	sr.InitLayout(vp * Viewport)
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
@@ -871,7 +871,7 @@ func (sr *Slider) ConnectEvents() {
 	sr.SliderEvents()
 }
 
-func (sr *Slider) FocusChanged2D(change FocusChanges) {
+func (sr *Slider) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
 		sr.SetSliderState(SliderActive) // lose any hover state but whatever..
@@ -938,7 +938,7 @@ func (sb *ScrollBar) SetStyle() {
 }
 
 func (sb *ScrollBar) GetSize(vp *Viewport, iter int) {
-	sb.InitDoLayout(vp * Viewport)
+	sb.InitLayout(vp * Viewport)
 }
 
 func (sb *ScrollBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
@@ -1001,7 +1001,7 @@ func (sb *ScrollBar) ConnectEvents() {
 	sb.SliderEvents()
 }
 
-func (sb *ScrollBar) FocusChanged2D(change FocusChanges) {
+func (sb *ScrollBar) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
 		sb.SetSliderState(SliderActive) // lose any hover state but whatever..

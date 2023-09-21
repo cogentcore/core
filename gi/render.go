@@ -41,21 +41,27 @@ import (
 //   (could contain at RenderAnchor nodes).
 // * Render: just draws with current config, layout.
 //
-// SetStyle is always called after Config, and triggered after any
-// current state of the Widget changes (e.g., a Hover started),
-// by calling SetNeedsStyle(vp, updt) which sets the node NeedsStyle
-// and VpNeedsUpdate flags, to drive the styling and rendering update
-// at next DoUpdate call.
-// If only rendering update is needed, call SetNeedsRender(vp, updt).
+// SetStyle is always called after Config, and after any
+// current state of the Widget changes via events, animations, etc
+// (e.g., a Hover started or a Button is pushed down).
+// These changes should be protected by UpdateStart / End,
+// such that SetStyle is only ever called within that scope.
+// After the UpdateEnd(updt), call SetNeedsRender(vp, updt)
+// which sets the node NeedsRender and VpNeedsRender flags,
+// to drive the rendering update at next DoNeedsRender call.
+//
+// Because Render checks for IsUpdating() flag, and doesn't render
+// if so, it should never be the case that a node is being modified
+// and rendered at the same time, avoiding need for mutexes.
 //
 // For nodes with dynamic content that doesn't require styling or config
-// a simple NeedsRender flag will drive re-rendering. UpdateSig does this.
+// a simple SetNeedsRender call will drive re-rendering. UpdateSig does this.
 //
 // Updating is _always_ driven top-down by Window at FPS sampling rate,
 // in the DoUpdate() call on the Viewport.
 // Three types of updates can be triggered, in order of least impact
 // and highest frequency first:
-// * VpNeedsUpdate: does all NeedsStyle, NeedsRender on nodes.
+// * VpNeedsRender: does NeedsRender on nodes.
 // * VpNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
 // * VpNeedsRebuild: Config, Layout with DoRebuild flag set -- for a full
 //   rebuild of the viewport (e.g., after global style changes, zooming, etc)
@@ -71,10 +77,12 @@ import (
 // because they are read by the event manager (and potentially inside
 // event handler code) which does not have any flag protection,
 // and are also read in rendering and written in Layout.
+//
+// ki Signals in general should not be used
 
 // UpdateSig just sets NeedsRender flag, in addition to sending
 // the standard Ki update signal.  This will drive updating of
-// the node on the next DoUpdate pass.
+// the node on the next DoNUpdate pass.
 func (wb *WidgetBase) UpdateSig() {
 	// note: we do not have the viewport here!!
 	// this means we need to cache it..
@@ -82,7 +90,7 @@ func (wb *WidgetBase) UpdateSig() {
 	wb.Node.UpdateSig()
 }
 
-// SetNeedsStyle sets the NeedsStyle and Viewport NeedsUpdate flags,
+// SetNeedsStyle sets the NeedsStyle and Viewport NeedsRender flags,
 // if updt is true.
 // This should be called after widget state changes,
 // e.g., in event handlers or other update code,
@@ -93,10 +101,10 @@ func (wb *WidgetBase) SetNeedsStyle(vp *Viewport, updt bool) {
 		return
 	}
 	wb.SetFlag(true, NeedsStyle)
-	vp.SetFlag(true, VpNeedsUpdate)
+	vp.SetFlag(true, VpNeedsRender)
 }
 
-// SetNeedsRender sets the NeedsRender and Viewport NeedsUpdate flags,
+// SetNeedsRender sets the NeedsRender and Viewport NeedsRender flags,
 // if updt is true.
 // This should be called after widget state changes that don't need styling,
 // e.g., in event handlers or other update code,
@@ -107,7 +115,19 @@ func (wb *WidgetBase) SetNeedsRender(vp *Viewport, updt bool) {
 		return
 	}
 	wb.SetFlag(true, NeedsStyle)
-	vp.SetFlag(true, VpNeedsUpdate)
+	vp.SetFlag(true, VpNeedsRender)
+}
+
+// SetNeedsLayout sets the VpNeedsLayout flag if updt is true.
+// This should be called after widget Config call
+// _after_ calling UpdateEnd(updt) and passing
+// that same updt flag from UpdateStart.
+func (wb *WidgetBase) SetNeedsLayout(vp *Viewport, updt bool) {
+	if !updt {
+		return
+	}
+	wb.SetFlag(true, NeedsStyle)
+	vp.SetFlag(true, VpNeedsRender)
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
@@ -210,23 +230,17 @@ func (wb *WidgetBase) LayoutRenderTree(vp *Viewport) {
 	wb.Render(vp)
 }
 
-// DoUpdateTree calls SetStyle and / or Render on tree from me
-// with NeedsStyle or NeedsRender flags set
-func (wb *WidgetBase) DoUpdate(vp *Viewport) {
+// DoNeedsRender calls Render on tree from me for nodes
+// with NeedsRender flags set
+func (wb *WidgetBase) DoNeedsRender(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.DoUpdate." + wb.Type().Name())
+	pr := prof.Start("Widget.DoNeedsRender." + wb.Type().Name())
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
-		}
-		if w.HasFlag(NeedsStyle) && !w.IsUpdating() {
-			w.SetFlag(false, NeedsStyle, NeedsRender)
-			wi.SetStyleTree(vp) // everybody under me needs restyled
-			wi.Render(vp)
-			return ki.Break // done
 		}
 		if w.HasFlag(NeedsRender) && !w.IsUpdating() {
 			w.SetFlag(false, NeedsRender)
@@ -238,61 +252,30 @@ func (wb *WidgetBase) DoUpdate(vp *Viewport) {
 	pr.End()
 }
 
-// todo: move should just update bboxes with offset from parent
-// passed down
-
-// Move2DChildren moves all of node's children, giving them the ChildrenBBox2D
-// -- default call at end of Move2D
-func (wb *WidgetBase) Move2DChildren(delta image.Point) {
-	cbb := wb.This().(Node2D).ChildrenBBox2D()
-	for _, kid := range wb.Kids {
-		nii, _ := KiToNode2D(kid)
-		if nii != nil {
-			nii.Move2D(delta, cbb)
-		}
-	}
-}
-
-// RenderChildren renders all of node's children,
-// This is the default call at end of Render()
-func (wb *WidgetBase) RenderChildren(vp *Viewport) {
-	for _, kid := range wb.Kids {
-		wi, _ := AsWidget(kid)
-		if wi != nil {
-			wi.Render(vp)
-		}
-	}
-}
-
 //////////////////////////////////////////////////////////////////
 //		Viewport
-
-// todo: when?
-func (vp *Viewport) SetMyStyle() {
-	vp.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
-	vp.Frame.Style.Color = ColorScheme.OnBackground
-}
 
 // DoUpdate checks viewport Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the Window at FPS frequency.
 func (vp *Viewport) DoUpdate() bool {
 	if vp.HasFlag(VpIsUpdating) {
-		return
+		return false
 	}
 	vp.SetFlag(true, VpIsUpdating) // prevent rendering
 	defer vp.SetFlag(false, VpIsUpdating)
 
 	switch {
 	case vp.HasFlag(VpNeedsRebuild):
-		vp.SetFlag(false, VpNeedsLayout, VpNeedsUpdate, VpNeedsRebuild)
+		vp.SetFlag(false, VpNeedsLayout, VpNeedsRender, VpNeedsRebuild)
 		vp.DoRebuild()
 	case vp.HasFlag(VpNeedsLayout):
-		vp.SetFlag(false, VpNeedsLayout, VpNeedsUpdate)
+		vp.SetFlag(false, VpNeedsLayout, VpNeedsRender)
+		vp.Fill() // full redraw
 		vp.Frame.LayoutRenderTree(vp)
-	case vp.HasFlag(VpNeedsUpdate):
-		vp.SetFlag(false, VpNeedsUpdate)
-		vp.Frame.DoUpdate(vp)
+	case vp.HasFlag(VpNeedsRender):
+		vp.SetFlag(false, VpNeedsRender)
+		vp.Frame.DoNeedsRender(vp)
 	}
 	return true
 }
@@ -306,15 +289,25 @@ func (vp *Viewport) Config() {
 	vp.Frame.ConfigTree(vp)
 }
 
-// todo: Probably don't want this anymore - Frame should handle
-func (vp *Viewport) FillViewport() {
-	vp.StyMu.RLock()
-	st := &vp.Style
-	rs := &vp.Render
+// DoRebuild implements the VpNeedsRebuild case
+// Typically not called otherwise, and assumes VpIsUpdating already set.
+func (vp *Viewport) DoRebuild() {
+	vp.Fill() // full redraw
+	vp.SetFlag(true, VpRebuild)
+	vp.Frame.ConfigTree(vp)
+	vp.Frame.LayoutRenderTree(vp)
+	vp.SetFlag(false, VpRebuild)
+}
+
+// Fill fills the viewport with BgColor (default transparent)
+// which is the starting base level for rendering.
+// Typically the root Frame fills its background with color
+// but it can e.g., leave corners transparent for popups etc.
+func (vp *Viewport) Fill() {
+	rs := &vp.RenderState
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &st.BackgroundColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), vp.BgColor)
 	rs.Unlock()
-	vp.StyMu.RUnlock()
 }
 
 // PrefSize computes the preferred size of the viewport based on current contents.
@@ -341,4 +334,215 @@ func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
 	vpsz.X = max(vpsz.X, stw)
 	vpsz.Y = max(vpsz.Y, sth)
 	return vpsz
+}
+
+//////////////////////////////////////////////////////////////////
+//		Widget local rendering
+
+// PushBounds pushes our bounding-box bounds onto the bounds stack if non-empty
+// -- this limits our drawing to our own bounding box, automatically -- must
+// be called as first step in Render returns whether the new bounds are
+// empty or not -- if empty then don't render!
+func (wb *WidgetBase) PushBounds(vp *Viewport) bool {
+	if wb == nil || wb.This() == nil {
+		return false
+	}
+	if !wb.This().(Widget).IsVisible() {
+		return false
+	}
+	if wb.VpBBox.Empty() {
+		return false
+	}
+	rs := &vp.RenderState
+	rs.PushBounds(wb.VpBBox)
+	if RenderTrace {
+		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.VpBBox)
+	}
+	return true
+}
+
+// PopBounds pops our bounding-box bounds -- last step in Render after
+// rendering children
+func (wb *WidgetBase) PopBounds(vp *Viewport) {
+	wb.ClearFullReRender()
+	if wb.IsDeleted() || wb.IsDestroyed() || wb.This() == nil {
+		return
+	}
+	rs := &vp.RenderState
+	rs.PopBounds()
+}
+
+func (wb *WidgetBase) Render(vp *Viewport) {
+	wi := wb.This().(Widget)
+	if wb.PushBounds(vp) {
+		wi.ConnectEvents(vp)
+		wb.RenderParts(vp)
+		wb.RenderChildren(vp)
+		wb.PopBounds(vp)
+	} else {
+		wb.DisconnectAllEvents(RegPri)
+	}
+}
+
+func (wb *WidgetBase) RenderParts(vp *Viewport) {
+	if wb.Parts == nil {
+		return
+	}
+	wb.Parts.Render(vp) // is a layout, will do all
+}
+
+// RenderChildren renders all of node's children,
+// This is the default call at end of Render()
+func (wb *WidgetBase) RenderChildren(vp *Viewport) {
+	for _, kid := range wb.Kids {
+		wi, w := AsWidget(kid)
+		if w == nil || w.IsDeleted() || w.IsDestroyed() || w.IsUpdating() {
+			continue
+		}
+		wi.Render(vp)
+	}
+}
+
+/* todo: anything needed here?
+
+// ReRenderTree does a re-render of the tree -- after it has already been
+// initialized and styled -- redoes the full stack
+func (wb *WidgetBase) ReRenderTree() {
+	parBBox := image.Rectangle{}
+	pni, _ := KiToWidget(wb.Par)
+	if pni != nil {
+		parBBox = pni.ChildrenBBox2D()
+	}
+	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig)
+	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig
+	ld := wb.LayState // save our current layout data
+	updt := wb.UpdateStart()
+	wb.ConfigTree()
+	wb.SetStyleTree()
+	wb.GetSizeTree(0)
+	wb.LayState = ld // restore
+	wb.DoLayoutTree()
+	if !delta.IsNil() {
+		wb.Move2D(delta.ToPointFloor(), parBBox)
+	}
+	wb.RenderTree()
+	wb.UpdateEndNoSig(updt)
+}
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+//  Standard Box Model rendering
+
+// RenderLock returns the locked girl.State, Paint, and Style with StyMu locked.
+// This should be called at start of widget-level rendering.
+func (wb *WidgetBase) RenderLock() (*girl.State, *girl.Paint, *gist.Style) {
+	wb.StyMu.RLock()
+	rs := &wb.Viewport.Render
+	rs.Lock()
+	return rs, &rs.Paint, &wb.Style
+}
+
+// RenderUnlock unlocks girl.State and style
+func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
+	rs.Unlock()
+	wb.StyMu.RUnlock()
+}
+
+// RenderBoxImpl implements the standard box model rendering -- assumes all
+// paint params have already been set
+func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
+	rs := &wb.Viewport.Render
+	pc := &rs.Paint
+	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
+}
+
+// RenderStdBox draws standard box using given style.
+// girl.State and Style must already be locked at this point (RenderLock)
+func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
+	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
+	wb.StyMu.RLock()
+	defer wb.StyMu.RUnlock()
+
+	rs := &wb.Viewport.Render
+	pc := &rs.Paint
+
+	// TODO: maybe implement some version of this to render background color
+	// in margin if the parent element doesn't render for us
+	// if pwb, ok := wb.Parent().(*WidgetBase); ok {
+	// 	if pwb.Embed(TypeLayout) != nil && pwb.Embed(TypeFrame) == nil {
+	// 		pc.FillBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &st.BackgroundColor)
+	// 	}
+	// }
+
+	pos := wb.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
+	sz := wb.LayState.Alloc.Size.Sub(st.EffMargin().Size())
+	rad := st.Border.Radius.Dots()
+
+	// the background color we actually use
+	bg := st.BackgroundColor
+	// the surrounding background color
+	sbg := wb.ParentBackgroundColor()
+	if bg.IsNil() {
+		// we need to do this to prevent
+		// elements from rendering over themselves
+		// (see https://goki.dev/gi/v2/issues/565)
+		bg = sbg
+	}
+
+	// We need to fill the whole box where the
+	// box shadows / element can go to prevent growing
+	// box shadows and borders. We couldn't just
+	// do this when there are box shadows, as they
+	// may be removed and then need to be covered up.
+	// This also fixes https://goki.dev/gi/v2/issues/579.
+	// This isn't an ideal solution because of performance,
+	// so TODO: maybe come up with a better solution for this.
+	// We need to use raw LayState data because we need to clear
+	// any box shadow that may have gone in margin.
+	mspos, mssz := st.BoxShadowPosSize(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
+	pc.FillBox(rs, mspos, mssz, &sbg)
+
+	// first do any shadow
+	if st.HasBoxShadow() {
+		for _, shadow := range st.BoxShadow {
+			pc.StrokeStyle.SetColor(nil)
+			pc.FillStyle.SetColor(shadow.Color)
+
+			// TODO: better handling of opacity?
+			prevOpacity := pc.FillStyle.Opacity
+			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
+			// we only want radius for border, no actual border
+			wb.RenderBoxImpl(shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
+			// pc.FillStyle.Opacity = 1.0
+			if shadow.Blur.Dots != 0 {
+				// must divide by 2 like CSS
+				pc.BlurBox(rs, shadow.Pos(pos), shadow.Size(sz), shadow.Blur.Dots/2)
+			}
+			pc.FillStyle.Opacity = prevOpacity
+		}
+	}
+
+	// then draw the box over top of that.
+	// need to set clipping to box first.. (?)
+	// we need to draw things twice here because we need to clear
+	// the whole area with the background color first so the border
+	// doesn't render weirdly
+	if rad.IsZero() {
+		pc.FillBox(rs, pos, sz, &bg)
+	} else {
+		pc.FillStyle.SetColorSpec(&bg)
+		// no border -- fill only
+		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
+		pc.Fill(rs)
+	}
+
+	// pc.StrokeStyle.SetColor(&st.Border.Color)
+	// pc.StrokeStyle.Width = st.Border.Width
+	// pc.FillStyle.SetColorSpec(&st.BackgroundColor)
+	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
+	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
+	pc.FillStyle.SetColor(nil)
+	// now that we have drawn background color
+	// above, we can draw the border
+	wb.RenderBoxImpl(pos, sz, st.Border)
 }

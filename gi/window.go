@@ -2501,7 +2501,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 		if ni.PosInWinBBox(e.Pos()) {
 			if !w.HasFlag(int(WinFlagFocusActive)) {
 				w.SetFlag(int(WinFlagFocusActive))
-				nii.FocusChanged2D(FocusActive)
+				nii.FocusChanged(FocusActive)
 			}
 		} else {
 			if w.MainMenu != nil {
@@ -2511,7 +2511,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 			}
 			if w.HasFlag(int(WinFlagFocusActive)) {
 				w.ClearFlag(int(WinFlagFocusActive))
-				nii.FocusChanged2D(FocusInactive)
+				nii.FocusChanged(FocusInactive)
 			}
 		}
 	}
@@ -2526,7 +2526,7 @@ func (w *Window) FocusInactivate() {
 	nii, ni := KiToNode2D(cfoc)
 	if ni != nil && ni.This() != nil {
 		w.ClearFlag(int(WinFlagFocusActive))
-		nii.FocusChanged2D(FocusInactive)
+		nii.FocusChanged(FocusInactive)
 	}
 }
 

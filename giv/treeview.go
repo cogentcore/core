@@ -2096,11 +2096,11 @@ func (tv *TreeView) SetStyle() {
 // maintain its own bbox for its own widget.
 
 func (tv *TreeView) GetSize(vp *Viewport, iter int) {
-	tv.InitDoLayout(vp * Viewport)
+	tv.InitLayout(vp * Viewport)
 	if tv.HasClosedParent() {
 		return // nothing
 	}
-	tv.SizeFromParts(iter) // get our size from parts
+	tv.GetSizeParts(vp, iter) // get our size from parts
 	tv.WidgetSize = tv.LayState.Alloc.Size
 	h := mat32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
@@ -2286,7 +2286,7 @@ func (tv *TreeView) ConnectEvents() {
 	tv.TreeViewEvents()
 }
 
-func (tv *TreeView) FocusChanged2D(change gi.FocusChanges) {
+func (tv *TreeView) FocusChanged(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
 		tv.UpdateSig()

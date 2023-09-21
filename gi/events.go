@@ -297,7 +297,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 	nii, ni := KiToNode2D(recv)
 	if ni != nil {
 		if evi.OnFocus() {
-			if !nii.HasFocus2D() { // note: HasFocus2D is a separate interface method, containers also set to true
+			if !nii.HasFocus() { // note: HasFocus is a separate interface method, containers also set to true
 				return ki.Continue
 			}
 			if EventTrace && recv == em.CurFocus() {
@@ -933,7 +933,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 		if ni != nil && ni.This() != nil {
 			ni.SetFocusState(false)
 			// fmt.Printf("clear foc: %v\n", ni.Path())
-			nii.FocusChanged2D(FocusLost)
+			nii.FocusChanged(FocusLost)
 		}
 	}
 	em.setFocusPtr(k)
@@ -949,7 +949,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	em.Master.SetFocusActiveState(true)
 	// fmt.Printf("set foc: %v\n", ni.Path())
 	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
-	nii.FocusChanged2D(FocusGot)
+	nii.FocusChanged(FocusGot)
 	return true
 }
 
@@ -1122,7 +1122,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 				updt = em.Master.EventTopUpdateStart()
 			}
 			ni.ClearFlag(int(HasFocus))
-			nii.FocusChanged2D(FocusLost)
+			nii.FocusChanged(FocusLost)
 		}
 		return ki.Continue
 	})

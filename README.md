@@ -106,7 +106,7 @@ Rendering is done in 5 separate passes:
    Paint (SVG) or Style (Widget) object for each Node.  Only done once after
    structural changes -- styles are not for dynamic changes.
 
-2. Size2D: MeLast downward pass, each node first calls
+2. GetSize: MeLast downward pass, each node first calls
    g.Layout.Reset(), then sets their LayoutSize according to their own
    intrinsic size parameters, and/or those of its children if it is a Layout.
 
@@ -115,7 +115,7 @@ Rendering is done in 5 separate passes:
    constrained to render within -- they then intersect this BBox with their
    own BBox (from BBox2D) -- typically just call DoLayoutBase for default
    behavior -- and add parent position to AllocPos. Layout does all its
-   sizing and positioning of children in this pass, based on the Size2D data
+   sizing and positioning of children in this pass, based on the GetSize data
    gathered bottom-up and constraints applied top-down from higher levels.
    Typically only a single iteration is required but multiple are supported
    (needed for word-wrapped text or flow layouts).

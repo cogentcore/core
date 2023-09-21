@@ -20,7 +20,7 @@ This is from the ra25 emergent leabra demo, pulling up the slice of verticies fo
       Node2D.SetStyleTree:	Tot:	     2149.90	Avg:	      429.98	N:	     5	Pct:	32.74
      Node2D.DoLayoutTree:	Tot:	      883.03	Avg:	      220.76	N:	     4	Pct:	13.45
        StyleFields.Style:	Tot:	      568.96	Avg:	        0.00	N:	443625	Pct:	 8.66
-       Node2D.Size2DTree:	Tot:	      282.20	Avg:	       47.03	N:	     6	Pct:	 4.30
+       Node2D.GetSizeTree:	Tot:	      282.20	Avg:	       47.03	N:	     6	Pct:	 4.30
       StyleFields.ToDots:	Tot:	      259.09	Avg:	        0.00	N:	795073	Pct:	 3.95
        TextField.SetStyle:	Tot:	      113.57	Avg:	        0.02	N:	  5760	Pct:	 1.73
              win.Publish:	Tot:	       75.45	Avg:	        7.54	N:	    10	Pct:	 1.15
@@ -41,7 +41,7 @@ I mistakenly thought the issue was styling because style2d seems to be taking so
       Node2D.SetStyleTree:	Tot:	     2011.75	Avg:	      335.29	N:	     6	Pct:	31.07
      Node2D.DoLayoutTree:	Tot:	      934.22	Avg:	      133.46	N:	     7	Pct:	14.43
           StyleFromProps:	Tot:	      452.55	Avg:	        0.00	N:	553079	Pct:	 6.99
-       Node2D.Size2DTree:	Tot:	      276.71	Avg:	       27.67	N:	    10	Pct:	 4.27
+       Node2D.GetSizeTree:	Tot:	      276.71	Avg:	       27.67	N:	    10	Pct:	 4.27
       StyleFields.ToDots:	Tot:	      261.39	Avg:	        0.00	N:	795132	Pct:	 4.04
              win.Publish:	Tot:	      137.09	Avg:	        5.71	N:	    24	Pct:	 2.12
        TextField.SetStyle:	Tot:	      107.41	Avg:	        0.02	N:	  5760	Pct:	 1.66
@@ -72,7 +72,7 @@ Something remains in style that we need to find..
      Node2D.DoLayoutTree:	Tot:	      793.05	Avg:	       88.12	N:	     9	Pct:	14.88
           StyleFromProps:	Tot:	      488.79	Avg:	        0.00	N:	553092	Pct:	 9.17
       StyleFields.ToDots:	Tot:	      258.28	Avg:	        0.00	N:	795138	Pct:	 4.85
-       Node2D.Size2DTree:	Tot:	      182.03	Avg:	       14.00	N:	    13	Pct:	 3.42
+       Node2D.GetSizeTree:	Tot:	      182.03	Avg:	       14.00	N:	    13	Pct:	 3.42
        TextField.SetStyle:	Tot:	      113.92	Avg:	        0.02	N:	  5760	Pct:	 2.14
              win.Publish:	Tot:	       75.81	Avg:	        3.99	N:	    19	Pct:	 1.42
      Node2D.RenderTree:	Tot:	       38.23	Avg:	        3.48	N:	    11	Pct:	 0.72
@@ -139,7 +139,7 @@ Time for 50 Re-Renders:         2.62 s
             Paint.stroke:	Tot:	      149.53	Avg:	        0.01	N:	 12550	Pct:	 3.67
       StyleFields.ToDots:	Tot:	      115.16	Avg:	        0.00	N:	433650	Pct:	 2.83
         TextRenderLayout:	Tot:	       94.39	Avg:	        0.00	N:	 21950	Pct:	 2.32
-       Node2D.Size2DTree:	Tot:	       79.23	Avg:	        1.58	N:	    50	Pct:	 1.95
+       Node2D.GetSizeTree:	Tot:	       79.23	Avg:	        1.58	N:	    50	Pct:	 1.95
      win.Publish.Publish:	Tot:	       58.19	Avg:	        1.16	N:	    50	Pct:	 1.43
               RenderText:	Tot:	       34.78	Avg:	        0.01	N:	  5850	Pct:	 0.85
   win.UploadAllViewports:	Tot:	       30.32	Avg:	        0.61	N:	    50	Pct:	 0.74
@@ -153,7 +153,7 @@ Time for 50 Re-Renders:         2.62 s
 Starting Targeted Profiling, window has 26689 nodes
 Time for 50 Re-Renders:        25.31 s
       Node2D.SetStyleTree:	Tot:	    11570.93	Avg:	      231.42	N:	    50	Pct:	35.28
-       Node2D.Size2DTree:	Tot:	     6565.28	Avg:	      131.31	N:	    50	Pct:	20.02
+       Node2D.GetSizeTree:	Tot:	     6565.28	Avg:	      131.31	N:	    50	Pct:	20.02
        StyleFields.Style:	Tot:	     4341.58	Avg:	        0.00	N:	5994450	Pct:	13.24
      Node2D.DoLayoutTree:	Tot:	     2899.77	Avg:	       58.00	N:	    50	Pct:	 8.84
       StyleFields.ToDots:	Tot:	     2795.35	Avg:	        0.00	N:	9410950	Pct:	 8.52
@@ -186,7 +186,7 @@ Time for 50 Re-Renders:         3.66 s
             Paint.stroke:	Tot:	      145.89	Avg:	        0.01	N:	 12550	Pct:	 2.28
 Style.FromProps.SetRobust:	Tot:	      103.65	Avg:	        0.00	N:	524000	Pct:	 1.62
         TextRenderLayout:	Tot:	       89.17	Avg:	        0.00	N:	 21950	Pct:	 1.39
-       Node2D.Size2DTree:	Tot:	       74.50	Avg:	        1.49	N:	    50	Pct:	 1.17
+       Node2D.GetSizeTree:	Tot:	       74.50	Avg:	        1.49	N:	    50	Pct:	 1.17
      win.Publish.Publish:	Tot:	       62.95	Avg:	        1.26	N:	    50	Pct:	 0.98
               RenderText:	Tot:	       33.17	Avg:	        0.01	N:	  5850	Pct:	 0.52
   win.UploadAllViewports:	Tot:	       29.04	Avg:	        0.58	N:	    50	Pct:	 0.45
@@ -209,7 +209,7 @@ Time for 50 Re-Renders:         4.28 s
      Node2D.DoLayoutTree:	Tot:	      318.65	Avg:	        3.19	N:	   100	Pct:	 4.38
       StyleFields.ToDots:	Tot:	      294.34	Avg:	        0.00	N:	729600	Pct:	 4.04
             Paint.stroke:	Tot:	      135.76	Avg:	        0.02	N:	  7000	Pct:	 1.87
-       Node2D.Size2DTree:	Tot:	      127.64	Avg:	        2.55	N:	    50	Pct:	 1.75
+       Node2D.GetSizeTree:	Tot:	      127.64	Avg:	        2.55	N:	    50	Pct:	 1.75
        StyleFields.Style:	Tot:	      106.39	Avg:	        0.00	N:	179300	Pct:	 1.46
      Paint.MeasureString:	Tot:	       73.46	Avg:	        0.00	N:	 22100	Pct:	 1.01
      win.Publish.Publish:	Tot:	       27.49	Avg:	        0.55	N:	    50	Pct:	 0.38
@@ -249,7 +249,7 @@ Time for 50 Re-Renders:         5.47 s
      Node2D.DoLayoutTree:	Tot:	      293.09	Avg:	        2.93	N:	   100	Pct:	 3.01
       StyleFields.ToDots:	Tot:	      272.50	Avg:	        0.00	N:	729600	Pct:	 2.80
             Paint.stroke:	Tot:	      182.86	Avg:	        0.03	N:	  7000	Pct:	 1.88
-       Node2D.Size2DTree:	Tot:	      120.24	Avg:	        2.40	N:	    50	Pct:	 1.23
+       Node2D.GetSizeTree:	Tot:	      120.24	Avg:	        2.40	N:	    50	Pct:	 1.23
        StyleFields.Style:	Tot:	       96.65	Avg:	        0.00	N:	179300	Pct:	 0.99
      Paint.MeasureString:	Tot:	       68.24	Avg:	        0.00	N:	 22100	Pct:	 0.70
           win.FullUpdate:	Tot:	       25.30	Avg:	        0.51	N:	    50	Pct:	 0.26

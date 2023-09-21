@@ -382,7 +382,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	frame.ConfigTree()
 	frame.SetStyleTree()                                   // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
-	frame.Size2DTree(0)                                    // collect sizes
+	frame.GetSizeTree(0)                                   // collect sizes
 	pvp.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
@@ -448,7 +448,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 	frame.ConfigTree()
 	frame.SetStyleTree()                                   // sufficient to get sizes
 	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
-	frame.Size2DTree(0)                                    // collect sizes
+	frame.GetSizeTree(0)                                   // collect sizes
 	pvp.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..

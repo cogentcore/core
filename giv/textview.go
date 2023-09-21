@@ -650,14 +650,14 @@ func (tv *TextView) SetSize() bool {
 	cursz := tv.LayState.Alloc.Size.Sub(spc.Size())
 	if cursz.X < 10 || cursz.Y < 10 {
 		nwsz := netsz.Max(rndsz)
-		tv.Size2DFromWH(nwsz.X, nwsz.Y)
+		tv.GetSizeFromWH(nwsz.X, nwsz.Y)
 		tv.LayState.Size.Need = tv.LayState.Alloc.Size
 		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
 		return true
 	}
 	nwsz := netsz.Max(rndsz)
 	alloc := tv.LayState.Alloc.Size
-	tv.Size2DFromWH(nwsz.X, nwsz.Y)
+	tv.GetSizeFromWH(nwsz.X, nwsz.Y)
 	if alloc != tv.LayState.Alloc.Size {
 		tv.LayState.Size.Need = tv.LayState.Alloc.Size
 		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
@@ -683,7 +683,7 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	ly := tv.ParentLayout()
 	if ly != nil {
 		tv.SetFlag(int(TextViewInReLayout))
-		gi.GatherSizes(ly) // can't call Size2D b/c that resets layout
+		gi.GatherSizes(ly) // can't call GetSize b/c that resets layout
 		ly.DoLayoutTree()
 		tv.SetFlag(int(TextViewRenderScrolls))
 		tv.ClearFlag(int(TextViewInReLayout))
@@ -2619,7 +2619,7 @@ func (tv *TextView) ContextMenu() {
 
 // ContextMenuPos returns the position of the context menu
 func (tv *TextView) ContextMenuPos() (pos image.Point) {
-	em := tv.EventMgr2D()
+	em := tv.EventMgr()
 	if em != nil {
 		return em.LastMousePos
 	}
@@ -4814,12 +4814,12 @@ func (tv *TextView) SetStyle() {
 	tv.StyMu.Unlock()
 }
 
-// Size2D
+// GetSize
 func (tv *TextView) GetSize(vp *Viewport, iter int) {
 	if iter > 0 {
 		return
 	}
-	tv.InitDoLayout(vp * Viewport)
+	tv.InitLayout(vp * Viewport)
 	if tv.LinesSize == (image.Point{}) {
 		tv.LayoutAllLines(true)
 	} else {
@@ -4909,13 +4909,13 @@ func (tv *TextView) Render(vp *Viewport) {
 	}
 }
 
-// ConnectEvents2D indirectly sets connections between mouse and key events and actions
+// ConnectEvents indirectly sets connections between mouse and key events and actions
 func (tv *TextView) ConnectEvents() {
 	tv.TextViewEvents()
 }
 
-// FocusChanged2D appropriate actions for various types of focus changes
-func (tv *TextView) FocusChanged2D(change gi.FocusChanges) {
+// FocusChanged appropriate actions for various types of focus changes
+func (tv *TextView) FocusChanged(change gi.FocusChanges) {
 	switch change {
 	case gi.FocusLost:
 		tv.ClearFlag(int(TextViewFocusActive))
