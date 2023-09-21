@@ -16,7 +16,7 @@ import (
 func TestSignalConnect(t *testing.T) {
 	parent := testdata.TestNode{}
 	parent.InitName(&parent, "par1")
-	typ := parent.Type()
+	typ := parent.KiType()
 	child1 := parent.NewChild(typ, "child1")
 	// child2 := parent.NewChild(nil, "child2")
 

@@ -13,7 +13,7 @@ var testTree *Node
 
 func init() {
 	testTree = &Node{}
-	typ := testTree.Type()
+	typ := testTree.KiType()
 	testTree.InitName(testTree, "root")
 	// child1 :=
 	testTree.NewChild(typ, "child0")

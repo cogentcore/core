@@ -162,9 +162,9 @@ func (sl *Slice) IndexByName(name string, startIdx int) (int, bool) {
 // that type, false if not found. See IndexOf for info on startIdx.
 func (sl *Slice) IndexByType(t *gti.Type, embeds bool, startIdx int) (int, bool) {
 	if embeds {
-		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type().HasEmbed(t) })
+		return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.KiType().HasEmbed(t) })
 	}
-	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.Type() == t })
+	return sl.IndexByFunc(startIdx, func(ch Ki) bool { return ch.KiType() == t })
 }
 
 // ElemByName returns first element that has given name, nil if not found.
@@ -323,7 +323,7 @@ func (sl *Slice) Config(n Ki, config TypeAndNameList) (mods, updt bool) {
 		ti, ok := nm[knm]
 		if !ok {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
-		} else if kid.Type() != config[ti].Type {
+		} else if kid.KiType() != config[ti].Type {
 			sl.configDeleteKid(kid, i, n, &mods, &updt)
 		}
 	}
@@ -397,7 +397,7 @@ func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 	if sz > 0 || n == nil {
 		cfg := make(TypeAndNameList, sz)
 		for i, kid := range frm {
-			cfg[i].Type = kid.Type()
+			cfg[i].Type = kid.KiType()
 			cfg[i].Name = kid.Name()
 		}
 		mods, updt := sl.Config(n, cfg)

@@ -213,11 +213,11 @@ func (n *Node) ParentByType(t *gti.Type, embeds bool) Ki {
 		return nil
 	}
 	if embeds {
-		if n.Par.Type().HasEmbed(t) {
+		if n.Par.KiType().HasEmbed(t) {
 			return n.Par
 		}
 	} else {
-		if n.Par.Type() == t {
+		if n.Par.KiType() == t {
 			return n.Par
 		}
 	}

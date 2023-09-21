@@ -31,7 +31,7 @@ func NewTestNode(par ki.Ki, name string) *TestNode {
 }
 
 // Type returns the [*gti.Type] of [TestNode]
-func (t *TestNode) Type() *gti.Type {
+func (t *TestNode) KiType() *gti.Type {
 	return TestNodeType
 }
 
@@ -65,7 +65,7 @@ func NewNodeEmbed(par ki.Ki, name string) *NodeEmbed {
 }
 
 // Type returns the [*gti.Type] of [NodeEmbed]
-func (t *NodeEmbed) Type() *gti.Type {
+func (t *NodeEmbed) KiType() *gti.Type {
 	return NodeEmbedType
 }
 
@@ -96,7 +96,7 @@ func NewNodeField(par ki.Ki, name string) *NodeField {
 }
 
 // Type returns the [*gti.Type] of [NodeField]
-func (t *NodeField) Type() *gti.Type {
+func (t *NodeField) KiType() *gti.Type {
 	return NodeFieldType
 }
 
@@ -127,7 +127,7 @@ func NewNodeField2(par ki.Ki, name string) *NodeField2 {
 }
 
 // Type returns the [*gti.Type] of [NodeField2]
-func (t *NodeField2) Type() *gti.Type {
+func (t *NodeField2) KiType() *gti.Type {
 	return NodeField2Type
 }
 

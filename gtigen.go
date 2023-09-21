@@ -36,7 +36,7 @@ func NewNode(par Ki, name string) *Node {
 }
 
 // Type returns the [*gti.Type] of [Node]
-func (t *Node) Type() *gti.Type {
+func (t *Node) KiType() *gti.Type {
 	return NodeType
 }
 
