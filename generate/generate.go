@@ -32,8 +32,8 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 		return par.NewChild({{.Name}}Type, name).(*{{.Name}})
 	}
 
-	// Type returns the [*gti.Type] of [{{.Name}}]
-	func (t *{{.Name}}) Type() *gti.Type {
+	// KiType returns the [*gti.Type] of [{{.Name}}]
+	func (t *{{.Name}}) KiType() *gti.Type {
 		return {{.Name}}Type
 	}
 
