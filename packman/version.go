@@ -21,7 +21,8 @@ import (
 //gti:add
 func SetVersion(c *config.Config) error {
 	// we need to update the config file with the new version
-	err := grease.Save(c, grease.ConfigFile)
+	// TODO: determine correct config file instead of just first one
+	err := grease.Save(c, grease.ConfigFiles[0])
 	if err != nil {
 		return fmt.Errorf("error saving new version to config file: %w", err)
 	}
