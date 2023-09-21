@@ -1,6 +1,6 @@
 Name = "gengo"
 Desc = ""
-Version = "v0.3.2"
+Version = "v0.3.3"
 Type = "TypeLibrary"
 
 [Build]
@@ -27,6 +27,7 @@ Type = "TypeLibrary"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
+  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
@@ -40,4 +41,11 @@ Type = "TypeLibrary"
     YAML = false
     SQL = false
     GQL = false
-    Comment = ""
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
