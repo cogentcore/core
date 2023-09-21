@@ -147,7 +147,7 @@ func TestRun(t *testing.T) {
 
 func TestConfigFunc(t *testing.T) {
 	cfg := &TestConfig{}
-	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-PAT_PARAMS_SPARSENESS=4"}
+	os.Args = []string{"myapp", "-no-net-data", "build", "-gpu", "../main", "-Note", "Hello, World", "-v", "-PAT_PARAMS_SPARSENESS=4"}
 	cmd, err := Config(DefaultOptions("myapp", "My App", "My App is an awesome app"), cfg, &Cmd[*TestConfig]{
 		Func: func(tc *TestConfig) error { return nil },
 		Name: "build",
@@ -161,6 +161,9 @@ func TestConfigFunc(t *testing.T) {
 	}
 	if cfg.NetData || !cfg.GPU || cfg.Note != "Hello, World" || cfg.PatParams.Sparseness != 4 || !reflect.DeepEqual(cfg.StrSlice, []string{"../main"}) {
 		t.Errorf("error setting configuration info (config: %#v)", cfg)
+	}
+	if !Verbose {
+		t.Errorf("expected to be verbose but not")
 	}
 }
 

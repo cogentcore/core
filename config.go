@@ -123,6 +123,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
+	Verbose = mc.Verbose
 
 	// both flag and command trigger help
 	if mc.Help || cmd == "help" {
