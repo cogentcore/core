@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/gi/v2 v2.0.0-dev0.0.1
-	goki.dev/grease v0.8.9
+	goki.dev/grease v0.8.11
 	goki.dev/gti v0.1.0
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
 	goki.dev/ordmap v0.5.3
