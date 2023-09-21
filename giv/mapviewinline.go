@@ -16,7 +16,7 @@ import (
 // and those explicitly marked inline -- constructs widgets in Parts to show
 // the key names and editor vals for each value.
 type MapViewInline struct {
-	gi.PartsWidgetBase
+	gi.WidgetBase
 
 	// the map that we are a view onto
 	Map any `desc:"the map that we are a view onto"`
@@ -63,7 +63,7 @@ func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
 }
 
 func (mv *MapViewInline) Disconnect() {
-	mv.PartsWidgetBase.Disconnect()
+	mv.WidgetBase.Disconnect()
 	mv.ViewSig.DisconnectAll()
 }
 
@@ -229,7 +229,7 @@ func (mv *MapViewInline) UpdateValues() {
 
 func (mv *MapViewInline) SetStyle() {
 	mv.ConfigParts()
-	mv.PartsWidgetBase.SetStyle()
+	mv.WidgetBase.SetStyle()
 }
 
 func (mv *MapViewInline) Render(vp *Viewport) {

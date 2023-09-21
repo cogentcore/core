@@ -16,7 +16,6 @@ import (
 	"sync"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -26,7 +25,6 @@ import (
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )

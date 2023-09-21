@@ -38,7 +38,7 @@ type SliderPositioner interface {
 // that represents a value, as in a scrollbar, and the scrolling range is size
 // - thumbsize
 type SliderBase struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// current value
 	Value float32 `xml:"value" desc:"current value"`
@@ -126,7 +126,7 @@ type SliderBase struct {
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	fr := frm.(*SliderBase)
-	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sb.Value = fr.Value
 	sb.Min = fr.Min
 	sb.Max = fr.Max

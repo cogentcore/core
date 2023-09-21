@@ -26,7 +26,7 @@ import (
 // ButtonBase has common button functionality for all buttons, including
 // Button, Action, MenuButton, CheckBox, etc
 type ButtonBase struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// label for the button -- if blank then no label is presented
 	Text string `xml:"text" desc:"label for the button -- if blank then no label is presented"`
@@ -64,7 +64,7 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 		ki.GenCopyFieldsFrom(bb.This(), frm)
 		return
 	}
-	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	bb.Text = fr.Text
 	bb.Icon = fr.Icon
 	bb.Indicator = fr.Indicator
@@ -73,7 +73,7 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 }
 
 func (bb *ButtonBase) Disconnect() {
-	bb.PartsWidgetBase.Disconnect()
+	bb.WidgetBase.Disconnect()
 	bb.ButtonSig.DisconnectAll()
 }
 

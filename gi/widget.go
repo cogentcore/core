@@ -4,7 +4,7 @@
 
 package gi
 
-//go:generate enumgen
+//go:generate goki generate
 
 import (
 	"fmt"
@@ -114,10 +114,6 @@ type Widget interface {
 	// on the Window-managed HasFocus flag, but some types may want to monitor
 	// all keyboard activity for certain key keys..
 	HasFocus2D() bool
-
-	// FindNamedElement searches for given named element in this node or in
-	// parent nodes.  Used for url(#name) references.
-	FindNamedElement(name string) Node2D
 
 	// MakeContextMenu creates the context menu items (typically Action
 	// elements, but it can be anything) for a given widget, typically
@@ -275,9 +271,15 @@ func (wb *WidgetBase) SetNeedsStyle(vp *Viewport) {
 }
 
 func (wb *WidgetBase) Config(vp *Viewport) {
+	wb.ConfigWidget()
+	// configures parts
+	wb.SetStyle(vp)
+	wb.SetNeedsRender(vp)
 }
 
 func (wb *WidgetBase) SetStyle(vp *Viewport) {
+	// do styling
+	wb.SetNeedsRender(vp)
 }
 
 func (wb *WidgetBase) GetSize(vp *Viewport, iter int) {
@@ -480,17 +482,9 @@ func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 func (wb *WidgetBase) ConfigWidget() {
 	// fmt.Println("ConfigWidget", wb.Path())
 	wb.BBoxMu.Lock()
-	wb.StyMu.Lock()
-	wb.Viewport = wb.ParentViewport()
 	wb.Style.Defaults()
-	wb.StyMu.Unlock()
 	wb.LayState.Defaults() // doesn't overwrite
 	wb.BBoxMu.Unlock()
-	wb.ConnectToViewport()
-}
-
-func (wb *WidgetBase) Config() {
-	wb.ConfigWidget()
 }
 
 // AddStyler adds the given styler to the
@@ -683,6 +677,30 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetFixedHeight(val)
 	})
+}
+
+// ParentActiveStyle returns parent's active style or nil if not avail.
+// Calls StyleRLock so must call ParentStyleRUnlock when done.
+func (wb *WidgetBase) ParentActiveStyle() *gist.Style {
+	if wb.Par == nil {
+		return nil
+	}
+	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+		st := ps.ActiveStyle()
+		ps.StyleRLock()
+		return st
+	}
+	return nil
+}
+
+// ParentStyleRUnlock unlocks the parent's style
+func (wb *WidgetBase) ParentStyleRUnlock() {
+	if wb.Par == nil {
+		return
+	}
+	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+		ps.StyleRUnlock()
+	}
 }
 
 // SetStyleWidget styles the Style values from node properties and optional
@@ -1332,7 +1350,7 @@ func (wb *WidgetBase) Size2DSubSpace() mat32.Vec2 {
 // Layout and Render
 
 // SizeFromParts sets our size from those of our parts -- default..
-func (wb *PartsWidgetBase) SizeFromParts(iter int) {
+func (wb *WidgetBase) SizeFromParts(iter int) {
 	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
 	wb.Size2DAddSpace()
 	if LayoutTrace {
@@ -1340,48 +1358,48 @@ func (wb *PartsWidgetBase) SizeFromParts(iter int) {
 	}
 }
 
-func (wb *PartsWidgetBase) Size2DParts(iter int) {
+func (wb *WidgetBase) Size2DParts(iter int) {
 	wb.InitDoLayout(vp * Viewport)
 	wb.SizeFromParts(iter) // get our size from parts
 }
 
-func (wb *PartsWidgetBase) GetSize(vp *Viewport, iter int) {
+func (wb *WidgetBase) GetSize(vp *Viewport, iter int) {
 	wb.Size2DParts(iter)
 }
 
-func (wb *PartsWidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
+func (wb *WidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBox2DBase(parBBox, delta)
 	wb.Parts.This().(Widget).ComputeBBox2D(parBBox, delta)
 }
 
-func (wb *PartsWidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
+func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBox2DParts(parBBox, delta)
 }
 
-func (wb *PartsWidgetBase) DoLayoutParts(parBBox image.Rectangle, iter int) {
+func (wb *WidgetBase) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	spc := wb.BoxSpace()
 	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
 	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
 	wb.Parts.DoLayout(vp*Viewport, parBBox, iter)
 }
 
-func (wb *PartsWidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+func (wb *WidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	wb.DoLayoutBase(parBBox, true, iter) // init style
 	wb.DoLayoutParts(parBBox, iter)
 	return wb.DoLayoutChildren(iter)
 }
 
-func (wb *PartsWidgetBase) RenderParts() {
+func (wb *WidgetBase) RenderParts() {
 	wb.Parts.RenderTree()
 }
 
-func (wb *PartsWidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (wb *WidgetBase) Move2D(delta image.Point, parBBox image.Rectangle) {
 	wb.Move2DBase(delta, parBBox)
 	wb.Parts.This().(Widget).Move2D(delta, parBBox)
 	wb.Move2DChildren(delta)
 }
 
-func (wb *PartsWidgetBase) Disconnect() {
+func (wb *WidgetBase) Disconnect() {
 	wb.WidgetBase.Disconnect()
 	wb.Parts.DisconnectAll()
 }
@@ -1391,7 +1409,7 @@ func (wb *PartsWidgetBase) Disconnect() {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gicons.Icon, txt string) (icIdx, lbIdx int) {
+func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gicons.Icon, txt string) (icIdx, lbIdx int) {
 	if wb.Style.Template != "" {
 		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
@@ -1413,7 +1431,7 @@ func (wb *PartsWidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icIdx, lbIdx int) {
+func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
 		if wb.Style.Template != "" {
@@ -1439,7 +1457,7 @@ func (wb *PartsWidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string,
 }
 
 // PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm gicons.Icon, txt string) bool {
+func (wb *WidgetBase) PartsNeedUpdateIconLabel(icnm gicons.Icon, txt string) bool {
 	if TheIconMgr.IsValid(icnm) {
 		ick := wb.Parts.ChildByName("icon", 0)
 		if ick == nil {
@@ -1476,7 +1494,7 @@ func (wb *PartsWidgetBase) PartsNeedUpdateIconLabel(icnm gicons.Icon, txt string
 
 // SetFullReRenderIconLabel sets the icon and label to be re-rendered, needed
 // when styles change
-func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
+func (wb *WidgetBase) SetFullReRenderIconLabel() {
 	if ick := wb.Parts.ChildByName("icon", 0); ick != nil {
 		ic := ick.(*Icon)
 		ic.SetFullReRender()
@@ -1488,4 +1506,114 @@ func (wb *PartsWidgetBase) SetFullReRenderIconLabel() {
 	wb.Parts.StyMu.Lock()
 	wb.Parts.SetStyleWidget() // restyle parent so parts inherit
 	wb.Parts.StyMu.Unlock()
+}
+
+func (wb *WidgetBase) MakeContextMenu(m *Menu) {
+}
+
+func (wb *WidgetBase) ContextMenuPos() (pos image.Point) {
+	wb.BBoxMu.RLock()
+	pos.X = (wb.WinBBox.Min.X + wb.WinBBox.Max.X) / 2
+	pos.Y = (wb.WinBBox.Min.Y + wb.WinBBox.Max.Y) / 2
+	wb.BBoxMu.RUnlock()
+	return
+}
+
+func (wb *WidgetBase) ContextMenu() {
+	var men Menu
+	wb.This().(Node2D).MakeContextMenu(&men)
+	if len(men) == 0 {
+		return
+	}
+	pos := wb.This().(Node2D).ContextMenuPos()
+	mvp := wb.ViewportSafe()
+	PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
+}
+
+func (wb *WidgetBase) IsVisible() bool {
+	if wb == nil || wb.This() == nil || wb.IsInvisible() {
+		return false
+	}
+	if wb.Par == nil || wb.Par.This() == nil {
+		return false
+	}
+	return wb.Par.This().(Node2D).IsVisible()
+}
+
+func (wb *WidgetBase) IsDirectWinUpload() bool {
+	return false
+}
+
+func (wb *WidgetBase) DirectWinUpload() {
+}
+
+// ConnectEvent connects this node to receive a given type of GUI event
+// signal from the parent window -- typically connect only visible nodes, and
+// disconnect when not visible
+func (wb *WidgetBase) ConnectEvent(et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
+	em := wb.EventMgr2D()
+	if em != nil {
+		em.ConnectEvent(wb.This(), et, pri, fun)
+	}
+}
+
+// DisconnectEvent disconnects this receiver from receiving given event
+// type -- pri is priority -- pass AllPris for all priorities -- see also
+// DisconnectAllEvents
+func (wb *WidgetBase) DisconnectEvent(et goosi.EventType, pri EventPris) {
+	em := wb.EventMgr2D()
+	if em != nil {
+		em.DisconnectEvent(wb.This(), et, pri)
+	}
+}
+
+// DisconnectAllEvents disconnects node from all window events -- typically
+// disconnect when not visible -- pri is priority -- pass AllPris for all priorities.
+// This goes down the entire tree from this node on down, as typically everything under
+// will not get an explicit disconnect call because no further updating will happen
+func (wb *WidgetBase) DisconnectAllEvents(pri EventPris) {
+	em := wb.EventMgr2D()
+	if em == nil {
+		return
+	}
+	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+		_, ni := KiToNode2D(k)
+		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+			return ki.Break // going into a different type of thing, bail
+		}
+		em.DisconnectAllEvents(ni.This(), pri)
+		return ki.Continue
+	})
+}
+
+// ParentLayout returns the parent layout
+func (wb *WidgetBase) ParentLayout() *Layout {
+	ly := wb.ParentByType(TypeLayout, ki.Embeds)
+	if ly == nil {
+		return nil
+	}
+	return ly.Embed(TypeLayout).(*Layout)
+}
+
+// ParentScrollLayout returns the parent layout that has active scrollbars
+func (wb *WidgetBase) ParentScrollLayout() *Layout {
+	lyk := wb.ParentByType(TypeLayout, ki.Embeds)
+	if lyk == nil {
+		return nil
+	}
+	ly := lyk.Embed(TypeLayout).(*Layout)
+	if ly.HasAnyScroll() {
+		return ly
+	}
+	return ly.ParentScrollLayout()
+}
+
+// ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
+// this widget in view -- returns true if scrolled
+func (wb *WidgetBase) ScrollToMe() bool {
+	ly := wb.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	return ly.ScrollToItem(wb.This().(Node2D))
 }

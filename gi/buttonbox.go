@@ -8,11 +8,9 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/sliceclone"
 )
 
 // ButtonBox is a widget for containing a set of CheckBox buttons.
@@ -20,7 +18,7 @@ import (
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
 type ButtonBox struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// the list of items (checbox button labels)
 	Items []string `desc:"the list of items (checbox button labels)"`
@@ -49,12 +47,12 @@ func (bb *ButtonBox) OnInit() {
 
 func (bb *ButtonBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ButtonBox)
-	bb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
-	bb.Items = sliceclone.String(fr.Items)
+	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	bb.Items = slice.Clone(fr.Items)
 }
 
 func (bb *ButtonBox) Disconnect() {
-	bb.PartsWidgetBase.Disconnect()
+	bb.WidgetBase.Disconnect()
 	bb.ButtonSig.DisconnectAll()
 }
 

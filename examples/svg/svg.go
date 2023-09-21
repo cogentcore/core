@@ -14,7 +14,7 @@ import (
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/svg"
 )
 

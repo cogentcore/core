@@ -26,7 +26,7 @@ import (
 // SpinBox combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 type SpinBox struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// current value
 	Value float32 `xml:"value" desc:"current value"`
@@ -104,7 +104,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*SpinBox)
-	sb.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sb.Value = fr.Value
 	sb.HasMin = fr.HasMin
 	sb.Min = fr.Min
@@ -118,7 +118,7 @@ func (sb *SpinBox) CopyFieldsFrom(frm any) {
 }
 
 func (sb *SpinBox) Disconnect() {
-	sb.PartsWidgetBase.Disconnect()
+	sb.WidgetBase.Disconnect()
 	sb.SpinBoxSig.DisconnectAll()
 }
 

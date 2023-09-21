@@ -18,8 +18,7 @@ import (
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -267,8 +266,8 @@ func (fb *FileBrowse) Defaults() {
 
 // StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StdFrameConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
+func (fb *FileBrowse) StdFrameConfig() ki.TypeAndNameList {
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "title")
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
@@ -351,8 +350,8 @@ func (fb *FileBrowse) ConfigToolbar() {
 }
 
 // SplitViewConfig returns a TypeAndNameList for configuring the SplitView
-func (fb *FileBrowse) SplitViewConfig() kit.TypeAndNameList {
-	config := kit.TypeAndNameList{}
+func (fb *FileBrowse) SplitViewConfig() ki.TypeAndNameList {
+	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeFrame, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
 		config.Add(gi.TypeLayout, fmt.Sprintf("textview-lay-%v", i))

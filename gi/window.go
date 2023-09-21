@@ -22,6 +22,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/colormap"
 	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/dnd"
@@ -29,7 +30,6 @@ import (
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/goosi/window"
-	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -124,7 +124,7 @@ const (
 
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
-// 
+//
 // Window manages a stack of Viewports, each of which manage a separate bitmap
 // image, onto which Widgets render.  For main windows, the Viewport Frame
 // has a MainMenu for the window (which can be empty, in which case it is not
@@ -147,7 +147,7 @@ const (
 //   - Sprites are managed as layered textures of the same size, to enable
 //     unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
-	
+
 	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
 	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
 
@@ -228,7 +228,7 @@ type WinFlags int64 //enums:bitflag
 const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
 	// sized it -- affects whether other default geom should be applied.
-	WinFlagHasGeomPrefs WinFlags iota
+	WinFlagHasGeomPrefs WinFlags = iota
 
 	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
 	WinFlagUpdating
@@ -2019,20 +2019,20 @@ func (w *Window) HiPriorityEvents(evi goosi.Event) bool {
 	case *mouse.MoveEvent:
 		// todo:
 		// if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
-			if w.HasFlag(int(WinFlagDoFullRender)) {
-				w.ClearFlag(int(WinFlagDoFullRender))
-				// if we are getting mouse input, and still haven't done this, do it..
-				// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-				if w.Viewport.Geom.Size != w.OSWin.Size() {
-					w.Resized(w.OSWin.Size())
-				} else {
-					w.FullReRender()
-				}
-				w.SendShowEvent() // happens AFTER full render
+		if w.HasFlag(int(WinFlagDoFullRender)) {
+			w.ClearFlag(int(WinFlagDoFullRender))
+			// if we are getting mouse input, and still haven't done this, do it..
+			// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
+			if w.Viewport.Geom.Size != w.OSWin.Size() {
+				w.Resized(w.OSWin.Size())
+			} else {
+				w.FullReRender()
 			}
-			// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
-			w.EventMgr.ActivateStartFocus()
-			// }
+			w.SendShowEvent() // happens AFTER full render
+		}
+		// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
+		w.EventMgr.ActivateStartFocus()
+		// }
 		// }
 	case *dnd.Event:
 		if e.Action == dnd.External {

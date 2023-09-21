@@ -10,17 +10,15 @@ import (
 	"strconv"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/ints"
 )
 
 // SliceViewInline represents a slice as a single line widget, for smaller
 // slices and those explicitly marked inline -- constructs widgets in Parts to
 // show the key names and editor vals for each value.
 type SliceViewInline struct {
-	gi.PartsWidgetBase
+	gi.WidgetBase
 
 	// the slice that we are a view onto
 	Slice any `desc:"the slice that we are a view onto"`
@@ -70,7 +68,7 @@ func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
 }
 
 func (sv *SliceViewInline) Disconnect() {
-	sv.PartsWidgetBase.Disconnect()
+	sv.WidgetBase.Disconnect()
 	sv.ViewSig.DisconnectAll()
 }
 
@@ -248,7 +246,7 @@ func (sv *SliceViewInline) UpdateValues() {
 
 func (sv *SliceViewInline) SetStyle() {
 	sv.ConfigParts()
-	sv.PartsWidgetBase.SetStyle()
+	sv.WidgetBase.SetStyle()
 }
 
 func (sv *SliceViewInline) Render(vp *Viewport) {

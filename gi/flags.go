@@ -16,7 +16,7 @@ type WidgetFlags ki.Flags //enums:bitflag
 
 const (
 	// NeedsRender needs to be rendered on next render itration
-	NeedsRender WidgetFlags = NodeFlags(ki.FlagsN) + iota
+	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
 	// NeedsStyle needs to be styled again before being rendered.
 	NeedsStyle
@@ -92,11 +92,6 @@ const (
 )
 
 /*
-// HasNoLayout checks if the current node is flagged as not needing layout
-func (wb *WidgetBase) HasNoLayout() bool {
-	return wb.HasFlag(int(NoLayout))
-}
-
 // CanFocus checks if this node can receive keyboard focus
 func (wb *WidgetBase) CanFocus() bool {
 	return wb.HasFlag(int(CanFocus))

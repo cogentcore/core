@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/dirs"
 	"goki.dev/pi/v2/spell"
 )
 

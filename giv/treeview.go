@@ -39,7 +39,7 @@ import (
 //     not used to optimize rendering speed.  Set this for nodes that have
 //     styling applied differentially to individual nodes (e.g., FileNode).
 type TreeView struct {
-	gi.PartsWidgetBase
+	gi.WidgetBase
 
 	// Ki Node that this widget is viewing in the tree -- the source
 	SrcNode ki.Ki `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
@@ -136,7 +136,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 }
 
 func (tv *TreeView) Disconnect() {
-	tv.PartsWidgetBase.Disconnect()
+	tv.WidgetBase.Disconnect()
 	tv.TreeViewSig.DisconnectAll()
 }
 

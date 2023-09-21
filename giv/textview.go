@@ -27,11 +27,11 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
+	"goki.dev/glop/indent"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/indent"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"

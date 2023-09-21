@@ -7,7 +7,6 @@ package textbuf
 import (
 	"time"
 
-	"goki.dev/ki/v2/sliceclone"
 	"goki.dev/pi/v2/lex"
 )
 
@@ -95,7 +94,7 @@ func (te *Edit) CopyFrom(cp *Edit) {
 	}
 	te.Text = make([][]rune, nln)
 	for i, r := range cp.Text {
-		te.Text[i] = sliceclone.Rune(r)
+		te.Text[i] = slice.Clone(r)
 	}
 }
 

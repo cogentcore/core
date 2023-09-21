@@ -18,7 +18,7 @@ import (
 // properties -- constructs widgets in Parts to show the field names and
 // editor fields for each field
 type StructViewInline struct {
-	gi.PartsWidgetBase
+	gi.WidgetBase
 
 	// the struct that we are a view onto
 	Struct any `desc:"the struct that we are a view onto"`
@@ -61,7 +61,7 @@ func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 }
 
 func (sv *StructViewInline) Disconnect() {
-	sv.PartsWidgetBase.Disconnect()
+	sv.WidgetBase.Disconnect()
 	sv.ViewSig.DisconnectAll()
 }
 

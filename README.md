@@ -155,7 +155,7 @@ Rendering is done in 5 separate passes:
 * ConfigAll called during window Show, but otherwise not called!
 * manually call Config on individual elements if properties change.
 
-## SetStyle -> SetStyle
+## Style2D -> SetStyle
 
 * called automatically for any state change
 
@@ -169,6 +169,7 @@ Rendering is done in 5 separate passes:
 
 * Window iterates through Viewports on a timer loop, and checks if any have VpNeedsRender flag set, and not VpIsRendering flag -- calls RenderAll on them, passing viewport down.  *first* step is to clear VpNeedsRender flag so any further updates can register need, and each node's NeedsRender flag is cleared after rendering *starts*.  Better to err on side of extra rendering.
 
+* If Config modifies the tree, then FullRender is needed: GetSize, DoLayout, then Render
 
-
+* If State changes, Style then Render needs to be called..
 

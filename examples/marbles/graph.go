@@ -17,7 +17,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/svg"
 )

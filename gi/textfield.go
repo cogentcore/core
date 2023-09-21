@@ -41,7 +41,7 @@ var CursorBlinkMSec = 500
 
 // TextField is a widget for editing a line of text
 type TextField struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// the last saved value of the text string being edited
 	Txt string `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
@@ -219,7 +219,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 
 func (tf *TextField) CopyFieldsFrom(frm any) {
 	fr := frm.(*TextField)
-	tf.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	tf.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	tf.Txt = fr.Txt
 	tf.Placeholder = fr.Placeholder
 	tf.LeadingIcon = fr.LeadingIcon
@@ -230,7 +230,7 @@ func (tf *TextField) CopyFieldsFrom(frm any) {
 }
 
 func (tf *TextField) Disconnect() {
-	tf.PartsWidgetBase.Disconnect()
+	tf.WidgetBase.Disconnect()
 	tf.TextFieldSig.DisconnectAll()
 }
 

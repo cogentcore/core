@@ -303,7 +303,7 @@ type WindowDrawers struct {
 	FlipY bool `desc:"set to true to flip Y axis in drawing these images"`
 
 	// ordered map of nodes with window bounding box
-	Nodes *ordmap.Map[*NodeBase, image.Rectangle] `desc:"ordered map of nodes with window bounding box"`
+	Nodes *ordmap.Map[*WidgetBase, image.Rectangle] `desc:"ordered map of nodes with window bounding box"`
 }
 
 // SetIdxRange sets the index range based on starting index and n

@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package svg
+package gi
 
 import (
 	"fmt"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
@@ -32,7 +30,7 @@ type Editor struct {
 
 func (g *Editor) CopyFieldsFrom(frm any) {
 	fr := frm.(*Editor)
-	g.SVG.CopyFieldsFrom(&fr.SVG)
+	// g.SVG.CopyFieldsFrom(&fr.SVG)
 	g.Trans = fr.Trans
 	g.Scale = fr.Scale
 	g.SetDragCursor = fr.SetDragCursor
@@ -63,7 +61,7 @@ func (svg *Editor) EditorEvents() {
 		}
 
 	})
-	svg.ConnectEvent(goosi.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(TypeEditor).(*Editor)
@@ -80,7 +78,7 @@ func (svg *Editor) EditorEvents() {
 		ssvg.SetFullReRender()
 		ssvg.UpdateSig()
 	})
-	svg.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		ssvg := recv.Embed(TypeEditor).(*Editor)
 		if ssvg.SetDragCursor {
@@ -90,12 +88,12 @@ func (svg *Editor) EditorEvents() {
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
-			if obj != nil {
-				giv.StructViewDialog(ssvg.Viewport, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
-			}
+			// if obj != nil {
+			// 	giv.StructViewDialog(ssvg.Viewport, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
+			// }
 		}
 	})
-	svg.ConnectEvent(goosi.MouseHoverEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svg.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := recv.Embed(TypeEditor).(*Editor)
@@ -103,7 +101,7 @@ func (svg *Editor) EditorEvents() {
 		if obj != nil {
 			pos := me.Where
 			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-			gi.PopupTooltip(obj.Name(), pos.X, pos.Y, svg.ViewportSafe(), ttxt)
+			PopupTooltip(obj.Name(), pos.X, pos.Y, svg.ViewportSafe(), ttxt)
 		}
 	})
 }
@@ -133,7 +131,7 @@ func (svg *Editor) SetTransform() {
 func (svg *Editor) Render(vp *Viewport) {
 	if svg.PushBounds() {
 		rs := &svg.Render
-		svg.This().(gi.Node2D).ConnectEvents()
+		svg.This().(Widget).ConnectEvents()
 		if svg.Fill {
 			svg.FillViewport()
 		}

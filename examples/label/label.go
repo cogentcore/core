@@ -9,7 +9,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 )
 
 func main() {

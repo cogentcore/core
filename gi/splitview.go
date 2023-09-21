@@ -33,7 +33,7 @@ import (
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
 type SplitView struct {
-	PartsWidgetBase
+	WidgetBase
 
 	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
 	HandleSize units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"`
@@ -67,7 +67,7 @@ func (sv *SplitView) OnChildAdded(child ki.Ki) {
 
 func (sv *SplitView) CopyFieldsFrom(frm any) {
 	fr := frm.(*SplitView)
-	sv.PartsWidgetBase.CopyFieldsFrom(&fr.PartsWidgetBase)
+	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sv.HandleSize = fr.HandleSize
 	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
 	mat32.CopyFloat32s(&sv.SavedSplits, fr.SavedSplits)
