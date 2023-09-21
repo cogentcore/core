@@ -28,51 +28,51 @@ func (d *Decoder) Decode(v any) error {
 // NewDecoder returns a new [Decoder]
 func NewDecoder(r io.Reader) grows.Decoder { return &Decoder{toml.NewDecoder(r)} }
 
-// Open reads object from the given filename using TOML encoding
+// Open reads the given object from the given filename using TOML encoding
 func Open(v any, filename string) error {
 	return grows.Open(v, filename, NewDecoder)
 }
 
-// OpenFiles reads object from the given filenames using TOML encoding
+// OpenFiles reads the given object from the given filenames using TOML encoding
 func OpenFiles(v any, filenames []string) error {
 	return grows.OpenFiles(v, filenames, NewDecoder)
 }
 
-// OpenFS reads object from the given filename using TOML encoding,
-// using the fs.FS filesystem (e.g., for embed files)
+// OpenFS reads the given object from the given filename using TOML encoding,
+// using the given [fs.FS] filesystem (e.g., for embed files)
 func OpenFS(v any, fsys fs.FS, filename string) error {
 	return grows.OpenFS(v, fsys, filename, NewDecoder)
 }
 
-// OpenFilesFS reads object from the given filenames using TOML encoding,
-// using the fs.FS filesystem (e.g., for embed files)
+// OpenFilesFS reads the given object from the given filenames using TOML encoding,
+// using the given [fs.FS] filesystem (e.g., for embed files)
 func OpenFilesFS(v any, fsys fs.FS, filenames []string) error {
 	return grows.OpenFilesFS(v, fsys, filenames, NewDecoder)
 }
 
-// Read reads object encoding from the given reader,
+// Read reads the given object from the given reader,
 // using TOML encoding
 func Read(v any, reader io.Reader) error {
 	return grows.Read(v, reader, NewDecoder)
 }
 
-// ReadBytes reads object encoding from the given bytes,
+// ReadBytes reads the given object from the given bytes,
 // using TOML encoding
 func ReadBytes(v any, data []byte) error {
 	return grows.ReadBytes(v, data, NewDecoder)
 }
 
-// Save writes object to the given filename using TOML encoding
+// Save writes the given object to the given filename using TOML encoding
 func Save(v any, filename string) error {
 	return grows.Save(v, filename, grows.NewEncoderFunc(toml.NewEncoder))
 }
 
-// Write writes object encoding using TOML encoding
+// Write writes the given object using TOML encoding
 func Write(v any, writer io.Writer) error {
 	return grows.Write(v, writer, grows.NewEncoderFunc(toml.NewEncoder))
 }
 
-// WriteBytes writes object, returning bytes of the encoding,
+// WriteBytes writes the given object, returning bytes of the encoding,
 // using TOML encoding
 func WriteBytes(v any) ([]byte, error) {
 	return grows.WriteBytes(v, grows.NewEncoderFunc(toml.NewEncoder))

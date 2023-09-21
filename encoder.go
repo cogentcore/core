@@ -25,7 +25,7 @@ func NewEncoderFunc[T Encoder](f func(w io.Writer) T) EncoderFunc {
 	return func(w io.Writer) Encoder { return f(w) }
 }
 
-// Save writes object to the given filename using the given [EncoderFunc]
+// Save writes the given object to the given filename using the given [EncoderFunc]
 func Save(v any, filename string, f EncoderFunc) error {
 	fp, err := os.Create(filename)
 	defer fp.Close()
@@ -40,13 +40,13 @@ func Save(v any, filename string, f EncoderFunc) error {
 	return bw.Flush()
 }
 
-// Write writes object encoding using the given [EncoderFunc]
+// Write writes the given object using the given [EncoderFunc]
 func Write(v any, writer io.Writer, f EncoderFunc) error {
 	e := f(writer)
 	return e.Encode(v)
 }
 
-// WriteBytes writes object, returning bytes of the encoding,
+// WriteBytes writes the given object, returning bytes of the encoding,
 // using the given [EncoderFunc]
 func WriteBytes(v any, f EncoderFunc) ([]byte, error) {
 	var b bytes.Buffer
