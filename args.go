@@ -176,7 +176,7 @@ func ParseArgs[T any](cfg T, args []string, flags map[string]string, cmds ...*Cm
 	}
 
 	allFields := &Fields{}
-	CommandFields(allFields)
+	AddMetaConfigFields(allFields)
 	AddFields(cfg, allFields, newCmd)
 
 	allFlags = &Fields{}
@@ -464,42 +464,4 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 		}
 	}
 	return leftovers, nil
-}
-
-// CommandFields adds meta fields that control the config process
-// to the given map of fields. These fields have no actual effect and
-// map to a placeholder value because they are handled elsewhere, but
-// they must be set to prevent errors about missing flags. The flags
-// that it adds are the [MetaConfig.Help] and [MetaConfig.Config] fields.
-func CommandFields(allFields *Fields) {
-	// NOTE: we could do this through AddFields, but that
-	// causes problems with the HelpCmd field capturing
-	// everything, so it easier to just add manually.
-	// TODO: maybe improve the structure of this
-
-	mc := reflect.TypeOf(&MetaConfig{}).Elem()
-
-	hf, ok := mc.FieldByName("Help")
-	if !ok {
-		panic("programmer error: Help field not found in MetaConfig")
-	}
-	hv := false
-	allFields.Add("MetaConfig.Help", &Field{
-		Field: hf,
-		Value: reflect.ValueOf(&hv),
-		Name:  "MetaConfig.Help",
-		Names: []string{"help", "h"},
-	})
-
-	cf, ok := mc.FieldByName("Config")
-	if !ok {
-		panic("programmer error: Config field not found in MetaConfig")
-	}
-	cv := ""
-	allFields.Add("MetaConfig.Config", &Field{
-		Field: cf,
-		Value: reflect.ValueOf(&cv),
-		Name:  "MetaConfig.Config",
-		Names: []string{"config", "cfg"},
-	})
 }

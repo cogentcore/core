@@ -20,6 +20,8 @@ import (
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
 var ConfigFiles []string
 
+// IMPORTANT: all changes to MetaConfig must be updated in metaConfigFields
+
 // MetaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
 // of grease for all apps before anything else is loaded. Its
@@ -40,6 +42,27 @@ type MetaConfig struct {
 	// that it can consume all positional arguments to prevent
 	// errors about unused arguments.
 	HelpCmd string `posarg:"all"`
+}
+
+// metaConfigFields is the struct used for the implementation
+// of [AddMetaConfigFields].
+// NOTE: we could do this through [MetaConfig], but that
+// causes problems with the HelpCmd field capturing
+// everything, so it easier to just add through a separate struct.
+// TODO: maybe improve the structure of this
+type metaConfigFields struct {
+	Config  string `flag:"config,cfg"`
+	Help    bool   `flag:"help,h"`
+	HelpCmd string
+}
+
+// AddMetaConfigFields adds meta fields that control the config process
+// to the given map of fields. These fields have no actual effect and
+// map to a placeholder value because they are handled elsewhere, but
+// they must be set to prevent errors about missing flags. The flags
+// that it adds are those in [MetaConfig].
+func AddMetaConfigFields(allFields *Fields) {
+	AddFields(&metaConfigFields{}, allFields, "")
 }
 
 // MetaCmds is a set of commands based on [MetaConfig] that
