@@ -171,6 +171,8 @@ type Widget interface {
 type WidgetBase struct {
 	ki.Node
 
+	// todo: remove CSS stuff from here??
+
 	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
 	Class string `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
 
@@ -192,9 +194,6 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
 	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 
-	// [view: -] mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread
-	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread"`
-
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
@@ -210,8 +209,8 @@ type WidgetBase struct {
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 
-	// all the layout state information for this item
-	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this item"`
+	// all the layout state information for this widget
+	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
 
 	// [view: -] general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets
 	WidgetSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
@@ -219,8 +218,14 @@ type WidgetBase struct {
 	// [view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 
-	// [view: -] mutex protecting updates to the style
-	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting updates to the style"`
+	// parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
+	Vp *Viewport `copy:"-" json:"-" xml:"-" desc:"parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
+
+	// [view: -] mutex protecting the Style field
+	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the Style field"`
+
+	// [view: -] mutex protecting the BBox fields
+	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the BBox fields"`
 }
 
 // AsWidget returns the given Ki object

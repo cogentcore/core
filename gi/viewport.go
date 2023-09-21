@@ -22,17 +22,22 @@ import (
 type VpFlags int64 //enums:bitflag
 
 const (
-	// VpNeedsRender means nodes have flagged that they need a Render
+	// VpIsUpdating means viewport is in the process of updating:
+	// skip any further update passes until it goes off.
+	VpIsUpdating VpFlags = iota
+
+	// VpNeedsUpdate means nodes have flagged that they need a Render
 	// and / or SetStyle update
-	VpNeedsRender VpFlags = iota
+	VpNeedsUpdate
 
-	// VpNeedsFullRender means that this viewport needs to do a full
-	// render: SetStyle, GetSize, DoLayout, then Render
-	VpNeedsFullRender
+	// VpNeedsLayout means that this viewport needs DoLayout stack:
+	// GetSize, DoLayout, then Render.  This is true after any Config.
+	VpNeedsLayout
 
-	// VpIsRendering means viewport is in the process of rendering,
-	// (or any other updating) -- do not trigger another render at this point.
-	VpIsRendering
+	// VpNeedsRebuild means that this viewport needs full Rebuild:
+	// Config, Layout, Render with DoRebuild flag set
+	// (e.g., after global style changes, zooming, etc)
+	VpNeedsRebuild
 
 	// todo: remove below:?
 
@@ -42,9 +47,10 @@ const (
 	// manage those (typically these are reusable assets)
 	VpPopupDestroyAll
 
-	// VpDoRebuild triggers extra rebuilding of elements during
-	// Config and FullRender.
-	VpDoRebuild
+	// VpRebuild triggers extra rebuilding of all elements during
+	// Config, including all icons, sprites, cursors, etc.
+	// Set by DoRebuild call.
+	VpRebuild
 
 	// VpPrefSizing means that this viewport is currently doing a
 	// PrefSize computation to compute the size of the viewport

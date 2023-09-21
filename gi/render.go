@@ -9,10 +9,108 @@ import (
 	"image"
 
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 )
 
-// ConfigTree calls Config on every Widget in the tree from this node down.
+// Rendering logic:
+//
+// Key principles:
+//
+// * Async updates (animation, mouse events, etc) change state, _set only flags_
+//   using thread-safe atomic bitflag operations.  Actually rendering async (in V1)
+//   is really hard to get right, and requires tons of mutexes etc.
+// * Synchronous, full-tree render updates do the layout, rendering,
+//   at regular FPS (frames-per-second) rate -- nop unless flag set.
+// * Ki UpdateStart / End ensures that _only the highest changed node is flagged_,
+//   while each individual state update uses the same Update wrapper calls locally,
+//   so that rendering updates automatically happen at this highest common node.
+// * UpdateStart starts naturally on the highest node driving a change, causing
+//   a cascade of other UpdateStart on lower nodes, but the IsUpdating flag signals
+//   that they are not the highest.  Only the highest calls UpdateEnd with true,
+//   which is the point at which the change is flagged for render updating.
+// * Thus, rendering updates skip any nodes with IsUpdating set, and are only
+//   triggered at the highest UpdateEnd, so there shouldn't be conflicts
+//   unless a node starts updating again before the next render hits.
+//
+// Three main steps:
+// * Config: (re)configures widgets based on current params
+//   typically by making Parts.  Always calls SetStyle.
+// * Layout: does GetSize, DoLayout on tree, arranging widgets.
+//   Needed for whole tree after any Config changes anywhere
+//   (could contain at RenderAnchor nodes).
+// * Render: just draws with current config, layout.
+//
+// SetStyle is always called after Config, and triggered after any
+// current state of the Widget changes (e.g., a Hover started),
+// by calling SetNeedsStyle(vp, updt) which sets the node NeedsStyle
+// and VpNeedsUpdate flags, to drive the styling and rendering update
+// at next DoUpdate call.
+// If only rendering update is needed, call SetNeedsRender(vp, updt).
+//
+// For nodes with dynamic content that doesn't require styling or config
+// a simple NeedsRender flag will drive re-rendering. UpdateSig does this.
+//
+// Updating is _always_ driven top-down by Window at FPS sampling rate,
+// in the DoUpdate() call on the Viewport.
+// Three types of updates can be triggered, in order of least impact
+// and highest frequency first:
+// * VpNeedsUpdate: does all NeedsStyle, NeedsRender on nodes.
+// * VpNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
+// * VpNeedsRebuild: Config, Layout with DoRebuild flag set -- for a full
+//   rebuild of the viewport (e.g., after global style changes, zooming, etc)
+//
+// Event handling, styling, etc updates should:
+// * Wrap with UpdateStart / End
+// * End with: SetNeedsStyle(vp, updt) if needs style updates needed based
+//   on state change, or SetNeedsRender(vp, updt)
+// * Or, if Config-level changes are needed, the Config(vp) must call
+//   SetNeedsLayout(vp, updt) to trigger vp Layout step after.
+//
+// The one mutex that is still needed is a RWMutex on the BBbox fields
+// because they are read by the event manager (and potentially inside
+// event handler code) which does not have any flag protection,
+// and are also read in rendering and written in Layout.
+
+// UpdateSig just sets NeedsRender flag, in addition to sending
+// the standard Ki update signal.  This will drive updating of
+// the node on the next DoUpdate pass.
+func (wb *WidgetBase) UpdateSig() {
+	// note: we do not have the viewport here!!
+	// this means we need to cache it..
+	wb.SetNeedsRender(wb.Vp, true)
+	wb.Node.UpdateSig()
+}
+
+// SetNeedsStyle sets the NeedsStyle and Viewport NeedsUpdate flags,
+// if updt is true.
+// This should be called after widget state changes,
+// e.g., in event handlers or other update code,
+// _after_ calling UpdateEnd(updt) and passing
+// that same updt flag from UpdateStart.
+func (wb *WidgetBase) SetNeedsStyle(vp *Viewport, updt bool) {
+	if !updt {
+		return
+	}
+	wb.SetFlag(true, NeedsStyle)
+	vp.SetFlag(true, VpNeedsUpdate)
+}
+
+// SetNeedsRender sets the NeedsRender and Viewport NeedsUpdate flags,
+// if updt is true.
+// This should be called after widget state changes that don't need styling,
+// e.g., in event handlers or other update code,
+// _after_ calling UpdateEnd(updt) and passing
+// that same updt flag from UpdateStart.
+func (wb *WidgetBase) SetNeedsRender(vp *Viewport, updt bool) {
+	if !updt {
+		return
+	}
+	wb.SetFlag(true, NeedsStyle)
+	vp.SetFlag(true, VpNeedsUpdate)
+}
+
+// ConfigTree calls Config on every Widget in the tree from me.
 // Config automatically calls SetStyle.
 func (wb *WidgetBase) ConfigTree(vp *Viewport) {
 	if wb.This() == nil {
@@ -30,7 +128,7 @@ func (wb *WidgetBase) ConfigTree(vp *Viewport) {
 	pr.End()
 }
 
-// SetStyleTree calls SetStyle on every Widget in the tree from this node down.
+// SetStyleTree calls SetStyle on every Widget in the tree from me.
 // Called during FullRender
 func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
 	if wb.This() == nil {
@@ -48,7 +146,8 @@ func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
 	pr.End()
 }
 
-// GetSizeTree does the sizing as a depth-first pass
+// GetSizeTree does the sizing as a depth-first pass from me,
+// needed for Layout stack.
 func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
 	if wb.This() == nil {
 		return
@@ -73,8 +172,9 @@ func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
 	pr.End()
 }
 
-// DoLayoutTree does layout pass -- each node iterates over children for
-// maximum control -- this starts with parent VpBBox -- can be called de novo.
+// DoLayoutTree does layout pass for tree from me.
+// Each node iterates over children for maximum control,
+// Starting with parent VpBBox.
 // Handles multiple iterations if needed.
 func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
 	if wb.This() == nil {
@@ -85,12 +185,14 @@ func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
 	pwi, _ := AsWidget(wb.Par)
 	if pwi != nil {
 		parBBox = pwi.ChildrenBBox2D()
+	} else {
+		parBBox = vp.Pixels.Bounds()
 	}
 	wi := wb.This().(Widget)
 	redo := wi.DoLayout(vp, parBBox, 0) // important to use interface version to get interface!
 	if redo {
 		if LayoutTrace {
-			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", nbi.Path())
+			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", wi.Path())
 		}
 		la := wb.LayState.Alloc
 		wb.GetSizeTree(vp, 1)
@@ -100,37 +202,36 @@ func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
 	pr.End()
 }
 
-// FullRenderTree does a full render of the tree:
-// SetStyle, GetSize, DoLayout, Render
-func (wb *WidgetBase) FullRenderTree(vp *Viewport) {
-	wb.SetStyleTree(vp)
-	wb.GetSizeDTree(vp, 0)
+// LayoutRenderTree does a layout and render of the tree from me:
+// GetSize, DoLayout, Render.  Needed after Config.
+func (wb *WidgetBase) LayoutRenderTree(vp *Viewport) {
+	wb.GetSizeTree(vp, 0)
 	wb.DoLayoutTree(vp)
 	wb.Render(vp)
 }
 
-// RenderUpdate calls Style and / or Render on nodes
-// with NeedsRender flag set
-func (wb *WidgetBase) RenderUpdate(vp *Viewport) {
+// DoUpdateTree calls SetStyle and / or Render on tree from me
+// with NeedsStyle or NeedsRender flags set
+func (wb *WidgetBase) DoUpdate(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.RenderUpdate." + wb.Type().Name())
+	pr := prof.Start("Widget.DoUpdate." + wb.Type().Name())
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
 		}
-		if w.HasFlag(NeedsStyle) {
+		if w.HasFlag(NeedsStyle) && !w.IsUpdating() {
 			w.SetFlag(false, NeedsStyle, NeedsRender)
-			wi.SetStyle(vp)
+			wi.SetStyleTree(vp) // everybody under me needs restyled
 			wi.Render(vp)
-			return ki.Continue
+			return ki.Break // done
 		}
-		if w.HasFlag(NeedsRender) {
+		if w.HasFlag(NeedsRender) && !w.IsUpdating() {
 			w.SetFlag(false, NeedsRender)
 			wi.Render(vp)
-			return ki.Continue
+			return ki.Break // done
 		}
 		return ki.Continue
 	})
@@ -166,45 +267,46 @@ func (wb *WidgetBase) RenderChildren(vp *Viewport) {
 //////////////////////////////////////////////////////////////////
 //		Viewport
 
-func (vp *Viewport) Style() {
+// todo: when?
+func (vp *Viewport) SetMyStyle() {
 	vp.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
 	vp.Frame.Style.Color = ColorScheme.OnBackground
 }
 
-// DoRenderUpdate checks flags to do whatever updating is required
-func (vp *Viewport) DoRenderUpdate() {
-	vp.SetFlag(true, VpIsRendering) // prevent rendering
-	defer vp.SetFlag(false, VpIsRendering)
+// DoUpdate checks viewport Needs flags to do whatever updating is required.
+// returns false if already updating.
+// This is the main update call made by the Window at FPS frequency.
+func (vp *Viewport) DoUpdate() bool {
+	if vp.HasFlag(VpIsUpdating) {
+		return
+	}
+	vp.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer vp.SetFlag(false, VpIsUpdating)
 
 	switch {
-	case vp.HasFlag(VpNeedsFullRender):
-		vp.SetFlag(false, VpNeedsFullRender, VpNeedsRender)
-		vp.Frame.FullRenderTree(vp)
-	case vp.HasFlag(VpNeedsRender):
-		vp.SetFlag(false, VpNeedsRender)
-		vp.Frame.RenderUpdate(vp)
+	case vp.HasFlag(VpNeedsRebuild):
+		vp.SetFlag(false, VpNeedsLayout, VpNeedsUpdate, VpNeedsRebuild)
+		vp.DoRebuild()
+	case vp.HasFlag(VpNeedsLayout):
+		vp.SetFlag(false, VpNeedsLayout, VpNeedsUpdate)
+		vp.Frame.LayoutRenderTree(vp)
+	case vp.HasFlag(VpNeedsUpdate):
+		vp.SetFlag(false, VpNeedsUpdate)
+		vp.Frame.DoUpdate(vp)
 	}
+	return true
 }
 
-// Config does configuration on the tree,
-// and sets VpNeedsFullRender to drive subsequent rendering.
+// Config calls Config on all nodes in the tree,
+// which will set NeedsLayout to drive subsequent layout and render.
+// This is a top-level call, typically only done in a Show function.
 func (vp *Viewport) Config() {
-	vp.SetFlag(true, VpIsRendering) // prevent rendering
-	defer vp.SetFlag(false, VpIsRendering)
-
+	vp.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer vp.SetFlag(false, VpIsUpdating)
 	vp.Frame.ConfigTree(vp)
-	vp.SetFlag(true, VpNeedsFullRender)
 }
 
-// FullRender does full render
-func (vp *Viewport) FullRender() {
-	vp.SetFlag(true, VpIsRendering) // prevent rendering
-	defer vp.SetFlag(false, VpIsRendering)
-
-	vp.SetFlag(false, VpNeedsFullRender, VpNeedsRender)
-	vp.Frame.FullRenderTree(vp)
-}
-
+// todo: Probably don't want this anymore - Frame should handle
 func (vp *Viewport) FillViewport() {
 	vp.StyMu.RLock()
 	st := &vp.Style
@@ -219,8 +321,8 @@ func (vp *Viewport) FillViewport() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
-	vp.SetFlag(true, VpIsRendering) // prevent rendering
-	defer vp.SetFlag(false, VpIsRendering)
+	vp.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer vp.SetFlag(false, VpIsUpdating)
 
 	vp.SetFlag(true, VpPrefSizing)
 	vp.Config()
@@ -229,7 +331,7 @@ func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
 	vp.LayState.Alloc.Size.SetPoint(initSz)
 	vp.Frame.GetSizeTree(vp, 0) // collect sizes
 
-	vp.ClearFlag(int(VpPrefSizing))
+	vp.SetFlag(false, VpPrefSizing)
 
 	vpsz := vp.Frame.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref

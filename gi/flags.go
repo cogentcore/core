@@ -19,6 +19,7 @@ const (
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
 	// NeedsStyle needs to be styled again before being rendered.
+	// This is set by StateChanged.
 	NeedsStyle
 
 	// EventsConnected: this node has been connected to receive events from
