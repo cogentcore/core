@@ -71,8 +71,8 @@ func NewAst(par ki.Ki, name string) *Ast {
 	return par.NewChild(AstType, name).(*Ast)
 }
 
-// Type returns the [*gti.Type] of [Ast]
-func (t *Ast) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Ast]
+func (t *Ast) KiType() *gti.Type {
 	return AstType
 }
 
@@ -116,8 +116,8 @@ func NewRule(par ki.Ki, name string) *Rule {
 	return par.NewChild(RuleType, name).(*Rule)
 }
 
-// Type returns the [*gti.Type] of [Rule]
-func (t *Rule) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Rule]
+func (t *Rule) KiType() *gti.Type {
 	return RuleType
 }
 
