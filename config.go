@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/ki/v2/dirs"
+	"goki.dev/glop/dirs"
 )
 
 // TODO: can we get rid of ConfigFile somehow? we need it in greasi and probably other places too
@@ -106,12 +106,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 
 	var cfgFiles []string
 	if mc.Config != "" {
-		_, err := dirs.FindFileOnPaths(opts.IncludePaths, mc.Config)
-		if err == nil {
-			cfgFiles = append(cfgFiles, mc.Config)
-		} else {
-			return "", fmt.Errorf("error opening command line config file: %w", err)
-		}
+		cfgFiles = append(cfgFiles, dirs.FindFilesOnPaths(opts.IncludePaths, mc.Config)...)
 	} else {
 		if opts.SearchUp {
 			wd, err := os.Getwd()
@@ -129,10 +124,7 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 			}
 		}
 		for _, fn := range opts.DefaultFiles {
-			_, err := dirs.FindFileOnPaths(opts.IncludePaths, fn)
-			if err == nil {
-				cfgFiles = append(cfgFiles, fn)
-			}
+			cfgFiles = append(cfgFiles, dirs.FindFilesOnPaths(opts.IncludePaths, fn)...)
 		}
 	}
 
