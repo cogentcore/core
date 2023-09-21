@@ -1,7 +1,7 @@
 Name = "grows"
 Desc = ""
-Version = "v0.3.1"
-Type = "TypeLibrary"
+Version = "v0.3.2"
+Type = "Library"
 
 [Build]
   Package = "."
