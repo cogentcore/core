@@ -44,10 +44,6 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 	mb.MainMenu = fr.MainMenu
 }
 
-var MenuBarProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // MenuBarStdRender does the standard rendering of the bar
 func (mb *MenuBar) MenuBarStdRender() {
 	rs, pc, st := mb.RenderLock()
@@ -322,10 +318,6 @@ func (tb *ToolBar) OnInit() {
 func (tb *ToolBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ToolBar)
 	tb.Layout.CopyFieldsFrom(&fr.Layout)
-}
-
-var ToolBarProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // AddAction adds an action to the toolbar using given options, and connects

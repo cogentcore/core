@@ -246,7 +246,7 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "grid-lay": // grid layout
 			gl := child.(*gi.Layout)

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -647,7 +648,7 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -727,7 +728,7 @@ func (cb *CheckBox) OnInit() {
 }
 
 func (cb *CheckBox) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon0", "icon1":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

@@ -87,7 +87,7 @@ func (fv *FileView) OnInit() {
 }
 
 func (fv *FileView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "files-row":
 			fr := child.(*gi.Layout)

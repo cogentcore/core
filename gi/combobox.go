@@ -121,7 +121,7 @@ func (cb *ComboBox) OnInit() {
 }
 
 func (cb *ComboBox) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

@@ -73,7 +73,7 @@ func (sb *SpinBox) OnInit() {
 }
 
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -120,10 +120,6 @@ func (sb *SpinBox) CopyFieldsFrom(frm any) {
 func (sb *SpinBox) Disconnect() {
 	sb.WidgetBase.Disconnect()
 	sb.SpinBoxSig.DisconnectAll()
-}
-
-var SpinBoxProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 // SetMin sets the min limits on the value

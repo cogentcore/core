@@ -473,18 +473,15 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 // item -- the name of the Action is the string value, and the data will be
 // the index in the slice.  A string equal to curSel will be marked as
 // selected.  Location is from the ContextMenuPos of recv node.
-func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport {
+func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvFunc) *Viewport {
 	var menu Menu
 	for i, it := range strs {
 		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
 		ac.SetSelectedState(it == curSel)
 	}
-	nb := recv.AsNode2D()
+	wb := recv.AsWidget()
 	pos := recv.ContextMenuPos()
-	vp := nb.ViewportSafe()
-	if vp == nil {
-		vp = recv.AsViewport()
-	}
+	vp := wb.Vp
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
 
@@ -497,7 +494,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Node2D, fun ki.RecvF
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.RecvFunc) *Viewport {
+func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.RecvFunc) *Viewport {
 	var menu Menu
 	for si, ss := range strs {
 		sz := len(ss)
@@ -514,12 +511,9 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Node2D, fun ki.
 			ac.SetSelectedState(cnm == curSel)
 		}
 	}
-	nb := recv.AsNode2D()
+	wb := recv.AsWidget()
 	pos := recv.ContextMenuPos()
-	vp := nb.ViewportSafe()
-	if vp == nil {
-		vp = recv.AsViewport()
-	}
+	vp := wb.Vp
 	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
 }
 
@@ -661,10 +655,6 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	fr := frm.(*Separator)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sp.Horiz = fr.Horiz
-}
-
-var SeparatorProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sp *Separator) SetStyle() {

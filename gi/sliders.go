@@ -736,7 +736,7 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -752,10 +752,6 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 func (sr *Slider) CopyFieldsFrom(frm any) {
 	fr := frm.(*Slider)
 	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
-}
-
-var SliderProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sr *Slider) Config() {
@@ -918,10 +914,6 @@ func (sb *ScrollBar) OnInit() {
 func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ScrollBar)
 	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
-}
-
-var ScrollBarProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sb *ScrollBar) Config() {
@@ -1092,10 +1084,6 @@ func (pb *ProgressBar) ProgStep() {
 		pb.UpdtBar()
 	}
 	pb.ProgMu.Unlock()
-}
-
-var ProgressBarProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (pb *ProgressBar) Config() {

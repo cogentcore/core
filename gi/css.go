@@ -16,17 +16,16 @@ import (
 // contained in this sheet can be transformed into ki.Props and set in CSS
 // field of appropriate node
 type StyleSheet struct {
-	Node2DBase
+	WidgetBase
 	Sheet *css.Stylesheet
 }
 
 func (ss *StyleSheet) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*StyleSheet)
 	if !ok {
-		ki.GenCopyFieldsFrom(ss.This(), frm)
 		return
 	}
-	ss.Node2DBase.CopyFieldsFrom(&fr.Node2DBase)
+	ss.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	// probably don't copy Sheet pointer..
 }
 

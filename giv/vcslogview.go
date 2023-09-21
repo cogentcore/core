@@ -45,7 +45,7 @@ func (lv *VCSLogView) OnInit() {
 }
 
 func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "a-tf", "b-tf":
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {

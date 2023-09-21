@@ -62,7 +62,7 @@ func (tv *TabView) OnInit() {
 }
 
 func (tv *TabView) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "tabs":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -104,10 +104,6 @@ func (tv *TabView) Disconnect() {
 	tv.TabViewSig.DisconnectAll()
 }
 
-var TabViewProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // NTabs returns number of tabs
 func (tv *TabView) NTabs() int {
 	fr := tv.Frame()
@@ -118,7 +114,7 @@ func (tv *TabView) NTabs() int {
 }
 
 // CurTab returns currently-selected tab, and its index -- returns false none
-func (tv *TabView) CurTab() (Node2D, int, bool) {
+func (tv *TabView) CurTab() (Widget, int, bool) {
 	if tv.NTabs() == 0 {
 		return nil, -1, false
 	}
@@ -128,13 +124,13 @@ func (tv *TabView) CurTab() (Node2D, int, bool) {
 	if fr.StackTop < 0 {
 		return nil, -1, false
 	}
-	widg := fr.Child(fr.StackTop).(Node2D)
+	widg := fr.Child(fr.StackTop).(Widget)
 	return widg, fr.StackTop, true
 }
 
 // AddTab adds a widget as a new tab, with given tab label, and returns the
 // index of that tab
-func (tv *TabView) AddTab(widg Node2D, label string) int {
+func (tv *TabView) AddTab(widg Widget, label string) int {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	tv.InsertTab(widg, label, idx)
@@ -144,7 +140,7 @@ func (tv *TabView) AddTab(widg Node2D, label string) int {
 // InsertTabOnlyAt inserts just the tab at given index -- after panel has
 // already been added to frame -- assumed to be wrapped in update.  Generally
 // for internal use.
-func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
+func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 	tb := tv.Tabs()
 	tb.SetChildAdded()
 	tab := tb.InsertNewChild(TypeTabButton, idx, label).(*TabButton)
@@ -163,12 +159,12 @@ func (tv *TabView) InsertTabOnlyAt(widg Node2D, label string, idx int) {
 		fr.StackTop = 0
 		tab.SetSelectedState(true)
 	} else {
-		widg.AsNode2D().SetInvisible() // new tab is invisible until selected
+		widg.AsWidget().SetInvisible() // new tab is invisible until selected
 	}
 }
 
 // InsertTab inserts a widget into given index position within list of tabs
-func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
+func (tv *TabView) InsertTab(widg Widget, label string, idx int) {
 	tv.Mu.Lock()
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
@@ -182,7 +178,7 @@ func (tv *TabView) InsertTab(widg Node2D, label string, idx int) {
 
 // NewTab adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget
-func (tv *TabView) NewTab(typ reflect.Type, label string) Node2D {
+func (tv *TabView) NewTab(typ reflect.Type, label string) Widget {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	widg := tv.InsertNewTab(typ, label, idx)
@@ -193,10 +189,10 @@ func (tv *TabView) NewTab(typ reflect.Type, label string) Node2D {
 // with given tab label, and returns the new widget.
 // A Layout is added first and the widget is added to that layout.
 // The Layout has "-lay" suffix added to name.
-func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Node2D, *Layout) {
+func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Widget, *Layout) {
 	ly := tv.NewTab(TypeLayout, label).(*Layout)
 	ly.SetName(label + "-lay")
-	widg := ly.NewChild(typ, label).(Node2D)
+	widg := ly.NewChild(typ, label).(Widget)
 	return widg, ly
 }
 
@@ -204,16 +200,16 @@ func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Node2D, *Layout
 // with given tab label, and returns the new widget.
 // A Frame is added first and the widget is added to that Frame.
 // The Frame has "-frame" suffix added to name.
-func (tv *TabView) NewTabFrame(typ reflect.Type, label string) (Node2D, *Frame) {
+func (tv *TabView) NewTabFrame(typ reflect.Type, label string) (Widget, *Frame) {
 	fr := tv.NewTab(TypeFrame, label).(*Frame)
 	fr.SetName(label + "-frame")
-	widg := fr.NewChild(typ, label).(Node2D)
+	widg := fr.NewChild(typ, label).(Widget)
 	return widg, fr
 }
 
 // NewTabAction adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget -- emits TabAdded signal
-func (tv *TabView) NewTabAction(typ reflect.Type, label string) Node2D {
+func (tv *TabView) NewTabAction(typ reflect.Type, label string) Widget {
 	widg := tv.NewTab(typ, label)
 	fr := tv.Frame()
 	idx := len(*fr.Children()) - 1
@@ -223,12 +219,12 @@ func (tv *TabView) NewTabAction(typ reflect.Type, label string) Node2D {
 
 // InsertNewTab inserts a new widget of given type into given index position
 // within list of tabs, and returns that new widget
-func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D {
+func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Widget {
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	fr.SetChildAdded()
-	widg := fr.InsertNewChild(typ, idx, label).(Node2D)
+	widg := fr.InsertNewChild(typ, idx, label).(Widget)
 	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.UpdateEnd(updt)
 	return widg
@@ -236,7 +232,7 @@ func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Node2D 
 
 // TabAtIndex returns content widget and tab button at given index, false if
 // index out of range (emits log message)
-func (tv *TabView) TabAtIndex(idx int) (Node2D, *TabButton, bool) {
+func (tv *TabView) TabAtIndex(idx int) (Widget, *TabButton, bool) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -248,13 +244,13 @@ func (tv *TabView) TabAtIndex(idx int) (Node2D, *TabButton, bool) {
 		return nil, nil, false
 	}
 	tab := tb.Child(idx).Embed(TypeTabButton).(*TabButton)
-	widg := fr.Child(idx).(Node2D)
+	widg := fr.Child(idx).(Widget)
 	return widg, tab, true
 }
 
 // SelectTabIndex selects tab at given index, returning it -- returns false if
 // index is invalid
-func (tv *TabView) SelectTabIndex(idx int) (Node2D, bool) {
+func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
 	widg, tab, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, false
@@ -287,13 +283,13 @@ func (tv *TabView) SelectTabIndexAction(idx int) {
 }
 
 // TabByName returns tab with given name (nil if not found -- see TabByNameTry)
-func (tv *TabView) TabByName(label string) Node2D {
+func (tv *TabView) TabByName(label string) Widget {
 	t, _ := tv.TabByNameTry(label)
 	return t
 }
 
 // TabByNameTry returns tab with given name, and an error if not found.
-func (tv *TabView) TabByNameTry(label string) (Node2D, error) {
+func (tv *TabView) TabByNameTry(label string) (Widget, error) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -303,7 +299,7 @@ func (tv *TabView) TabByNameTry(label string) (Node2D, error) {
 		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.Path())
 	}
 	fr := tv.Frame()
-	widg := fr.Child(idx).(Node2D)
+	widg := fr.Child(idx).(Widget)
 	return widg, nil
 }
 
@@ -334,23 +330,23 @@ func (tv *TabView) TabName(idx int) string {
 }
 
 // SelectTabByName selects tab by name, returning it.
-func (tv *TabView) SelectTabByName(label string) Node2D {
+func (tv *TabView) SelectTabByName(label string) Widget {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
 		fr := tv.Frame()
-		return fr.Child(idx).(Node2D)
+		return fr.Child(idx).(Widget)
 	}
 	return nil
 }
 
 // SelectTabByNameTry selects tab by name, returning it.  Returns error if not found.
-func (tv *TabView) SelectTabByNameTry(label string) (Node2D, error) {
+func (tv *TabView) SelectTabByNameTry(label string) (Widget, error) {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
 		fr := tv.Frame()
-		return fr.Child(idx).(Node2D), nil
+		return fr.Child(idx).(Widget), nil
 	}
 	return nil, err
 }
@@ -358,7 +354,7 @@ func (tv *TabView) SelectTabByNameTry(label string) (Node2D, error) {
 // RecycleTab returns a tab with given name, first by looking for an existing one,
 // and if not found, making a new one with widget of given type.
 // If sel, then select it.  returns widget for tab.
-func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Node2D {
+func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Widget {
 	widg, err := tv.TabByNameTry(label)
 	if err == nil {
 		if sel {
@@ -375,7 +371,7 @@ func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Node2D {
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
 // tab contents -- returns widget if destroy == false, tab name, and bool success
-func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Node2D, string, bool) {
+func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) {
 	widg, _, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, "", false
@@ -550,7 +546,7 @@ func (tv *TabView) RenderTabSeps() {
 	tbs := tv.Tabs()
 	sz := len(tbs.Kids)
 	for i := 1; i < sz; i++ {
-		tb := tbs.Child(i).(Node2D)
+		tb := tbs.Child(i).(Widget)
 		ni := tb.AsWidget()
 
 		pos := ni.LayState.Alloc.Pos
@@ -565,7 +561,7 @@ func (tv *TabView) Render(vp *Viewport) {
 		return
 	}
 	if tv.PushBounds() {
-		tv.This().(Node2D).ConnectEvents()
+		tv.This().(Widget).ConnectEvents()
 		tv.RenderScrolls()
 		tv.RenderChildren()
 		tv.RenderTabSeps()
@@ -624,7 +620,7 @@ func (tb *TabButton) OnInit() {
 }
 
 func (tb *TabButton) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {

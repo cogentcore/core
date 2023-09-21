@@ -74,8 +74,8 @@ func (sp *Sprite) SetBottomPos(pos image.Point) {
 }
 
 // GrabRenderFrom grabs the rendered image from given node
-func (sp *Sprite) GrabRenderFrom(nii Node2D) {
-	img := GrabRenderFrom(nii) // in bitmap.go
+func (sp *Sprite) GrabRenderFrom(wi Widget) {
+	img := GrabRenderFrom(wi) // in bitmap.go
 	if img != nil {
 		sp.Pixels = img
 		sp.Geom.Size = sp.Pixels.Bounds().Size()

@@ -1126,7 +1126,7 @@ func (w *Window) UploadVp(vp *Viewport, offset image.Point) {
 		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
 	} else {
 		// pr := prof.Start("win.UploadVp")
-		gii, _ := KiToNode2D(vp.This())
+		gii, _ := AsWidget(vp.This())
 		if gii != nil {
 			idx, _ = w.PopDraws.Add(gii, winBBox)
 			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
@@ -1205,7 +1205,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
-			gii, _ := KiToNode2D(pop)
+			gii, _ := AsWidget(pop)
 			if gii != nil {
 				vp := gii.AsViewport()
 				r := vp.Geom.Bounds()
@@ -1218,7 +1218,7 @@ func (w *Window) ResetUpdateRegionsImpl() {
 		}
 	}
 	if w.Popup != nil {
-		gii, _ := KiToNode2D(w.Popup)
+		gii, _ := AsWidget(w.Popup)
 		if gii != nil {
 			vp := gii.AsViewport()
 			r := vp.Geom.Bounds()
@@ -1355,7 +1355,7 @@ func SignalWindowPublish(winki, node ki.Ki, sig int64, data any) {
 // AddDirectUploader adds given node to those that have a DirectWinUpload method
 // and directly render to the Drawer Texture via their own method.
 // This is for gi3d.Scene for example.  Returns the index of the image to upload to.
-func (w *Window) AddDirectUploader(node Node2D) int {
+func (w *Window) AddDirectUploader(node Widget) int {
 	w.UpMu.Lock()
 	idx, _ := w.DirDraws.Add(node, image.Rectangle{})
 	w.UpMu.Unlock()
@@ -1363,7 +1363,7 @@ func (w *Window) AddDirectUploader(node Node2D) int {
 }
 
 // DeleteDirectUploader removes given node to those that have a DirectWinUpload method.
-func (w *Window) DeleteDirectUploader(node Node2D) {
+func (w *Window) DeleteDirectUploader(node Widget) {
 	w.UpMu.Lock()
 	w.DirDraws.Nodes.DeleteKey(node.AsGiNode())
 	w.UpMu.Unlock()
@@ -1792,21 +1792,21 @@ func (w *Window) SetCursor(me *mouse.MoveEvent) {
 	maxLevelCursor := cursor.Arrow
 
 	fun := func(k ki.Ki, level int, data any) bool {
-		_, ni := KiToNode2D(k)
-		if ni == nil {
+		_, wb := AsWidget(k)
+		if wb == nil {
 			// could have nodes further down (eg with menu which is ki.Slice), so continue
 			return ki.Continue
 		}
-		if !ni.PosInWinBBox(me.Pos()) {
+		if !wb.PosInWinBBox(me.Pos()) {
 			// however, if we are out of bbox, there is no way to get back in
 			return ki.Break
 		}
-		if !ni.IsVisible() || level < maxLevel {
+		if !wb.IsVisible() || level < maxLevel {
 			// could have visible or higher level ones further down
 			return ki.Continue
 		}
 
-		wb, ok := ni.This().Embed(TypeWidgetBase).(*WidgetBase)
+		wb, ok := wb.This().Embed(TypeWidgetBase).(*WidgetBase)
 		if !ok {
 			// same logic as with Node2D
 			return ki.Continue
@@ -1828,7 +1828,7 @@ func (w *Window) SetCursor(me *mouse.MoveEvent) {
 		// if no popup, just do on window
 		w.FuncDownMeFirst(0, nil, fun)
 	} else {
-		_, popni := KiToNode2D(pop)
+		_, popni := AsWidget(pop)
 		if popni == nil || !popni.PosInWinBBox(me.Pos()) || PopupIsTooltip(pop) {
 			// if not in popup (or it is a tooltip), do on window
 			w.FuncDownMeFirst(0, nil, fun)
@@ -2083,16 +2083,16 @@ func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 	if k.This() == cpop {
 		return popup
 	}
-	_, ni := KiToNode2D(k)
-	if ni == nil {
+	_, wb := AsWidget(k)
+	if wb == nil {
 		np := k.ParentByType(TypeNode2DBase, ki.Embeds)
 		if np != nil {
-			ni = np.Embed(TypeNode2DBase).(*Node2DBase)
+			wb = np.Embed(TypeNode2DBase).(*Node2DBase)
 		} else {
 			return false
 		}
 	}
-	mvp := ni.ViewportSafe()
+	mvp := wb.ViewportSafe()
 	if mvp == nil {
 		return false
 	}
@@ -2173,11 +2173,11 @@ func PopupIsMenu(pop ki.Ki) bool {
 	if pop == nil {
 		return false
 	}
-	nii, ni := KiToNode2D(pop)
-	if ni == nil {
+	wi, wb := AsWidget(pop)
+	if wb == nil {
 		return false
 	}
-	vp := nii.AsViewport()
+	vp := wi.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2192,11 +2192,11 @@ func PopupIsTooltip(pop ki.Ki) bool {
 	if pop == nil {
 		return false
 	}
-	nii, ni := KiToNode2D(pop)
+	wi, ni := AsWidget(pop)
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport()
+	vp := wi.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2211,11 +2211,11 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
-	nii, ni := KiToNode2D(pop)
+	wi, ni := AsWidget(pop)
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport()
+	vp := wi.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2230,11 +2230,11 @@ func PopupIsCorrector(pop ki.Ki) bool {
 	if !PopupIsMenu(pop) {
 		return false
 	}
-	nii, ni := KiToNode2D(pop)
+	wi, ni := AsWidget(pop)
 	if ni == nil {
 		return false
 	}
-	vp := nii.AsViewport()
+	vp := wi.AsViewport()
 	if vp == nil {
 		return false
 	}
@@ -2311,7 +2311,7 @@ func (w *Window) PushPopup(pop ki.Ki) {
 	ki.SetParent(pop, w.This()) // popup has parent as window -- draws directly in to assoc vp
 	w.PopupStack = append(w.PopupStack, w.Popup)
 	w.Popup = pop
-	_, ni := KiToNode2D(pop)
+	_, ni := AsWidget(pop)
 	pfoc := w.PopupFocus
 	w.PopupFocus = nil
 	w.PopMu.Unlock()
@@ -2357,9 +2357,9 @@ func (w *Window) ClosePopup(pop ki.Ki) bool {
 // PopPopup pops current popup off the popup stack and set to current popup.
 // returns true if was actually popped.  MUST be called within PopMu.Lock scope!
 func (w *Window) PopPopup(pop ki.Ki) bool {
-	nii, ok := pop.(Node2D)
+	wi, ok := pop.(Node2D)
 	if ok {
-		pvp := nii.AsViewport()
+		pvp := wi.AsViewport()
 		if pvp != nil {
 			pvp.DeletePopup()
 		}
@@ -2496,12 +2496,12 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 	if cpop != nil { // no updating on popups
 		return
 	}
-	nii, ni := KiToNode2D(cfoc)
-	if ni != nil && ni.This() != nil {
-		if ni.PosInWinBBox(e.Pos()) {
+	wi, wb := AsWidget(cfoc)
+	if wb != nil && wb.This() != nil {
+		if wb.PosInWinBBox(e.Pos()) {
 			if !w.HasFlag(int(WinFlagFocusActive)) {
 				w.SetFlag(int(WinFlagFocusActive))
-				nii.FocusChanged(FocusActive)
+				wi.FocusChanged(FocusActive)
 			}
 		} else {
 			if w.MainMenu != nil {
@@ -2511,7 +2511,7 @@ func (w *Window) FocusActiveClick(e *mouse.Event) {
 			}
 			if w.HasFlag(int(WinFlagFocusActive)) {
 				w.ClearFlag(int(WinFlagFocusActive))
-				nii.FocusChanged(FocusInactive)
+				wi.FocusChanged(FocusInactive)
 			}
 		}
 	}
@@ -2523,10 +2523,10 @@ func (w *Window) FocusInactivate() {
 	if cfoc == nil || !w.HasFlag(int(WinFlagFocusActive)) {
 		return
 	}
-	nii, ni := KiToNode2D(cfoc)
-	if ni != nil && ni.This() != nil {
+	wi, wb := AsWidget(cfoc)
+	if wb != nil && wb.This() != nil {
 		w.ClearFlag(int(WinFlagFocusActive))
-		nii.FocusChanged(FocusInactive)
+		wi.FocusChanged(FocusInactive)
 	}
 }
 
@@ -2557,10 +2557,8 @@ const DNDSpriteName = "gi.Window:DNDSprite"
 // representation of the node.
 func (w *Window) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
-	if _, sni := KiToNode2D(src); sni != nil { // 2d case
-		if sw := sni.AsWidget(); sw != nil {
-			sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPoint())
-		}
+	if _, sw := AsWidget(src); sw != nil {
+		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPoint())
 	}
 	w.DeleteSprite(DNDSpriteName)
 	sp.Name = DNDSpriteName

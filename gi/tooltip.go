@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+package gi
+
 // TooltipConfigStyles configures the default styles
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
@@ -82,5 +84,3 @@ func (wb *WidgetBase) HoverTooltipEvent() {
 		}
 	})
 }
-
-

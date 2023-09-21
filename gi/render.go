@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"image"
 
+	"goki.dev/girl/girl"
+	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
@@ -545,4 +547,22 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// now that we have drawn background color
 	// above, we can draw the border
 	wb.RenderBoxImpl(pos, sz, st.Border)
+}
+
+// ParentReRenderAnchor returns parent (including this node)
+// that is a ReRenderAnchor -- for optimized re-rendering
+func (wb *WidgetBase) ParentReRenderAnchor() Widget {
+	var par Widget
+	nb.FuncUp(0, nb.This(), func(k ki.Ki, level int, d any) bool {
+		wi, w := AsWidget(k)
+		if w == nil {
+			return ki.Break // don't keep going up
+		}
+		if w.IsReRenderAnchor() {
+			par = wi
+			return ki.Break
+		}
+		return ki.Continue
+	})
+	return par
 }

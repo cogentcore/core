@@ -50,7 +50,7 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)

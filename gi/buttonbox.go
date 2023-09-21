@@ -56,10 +56,6 @@ func (bb *ButtonBox) Disconnect() {
 	bb.ButtonSig.DisconnectAll()
 }
 
-var ButtonBoxProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.
 // See SelectItemAction for signal emitting version.
 // returns error if index is out of range.

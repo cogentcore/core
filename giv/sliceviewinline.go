@@ -55,7 +55,7 @@ func (sv *SliceViewInline) OnInit() {
 }
 
 func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)

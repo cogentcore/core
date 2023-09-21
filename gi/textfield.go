@@ -193,7 +193,7 @@ func (tf *TextField) OnInit() {
 }
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "lead-icon":
 			lead := child.(*Action)
@@ -283,10 +283,12 @@ const (
 	TextFieldDelete
 )
 
+type TextFieldFlags WidgetFlags //enums:bitflag
+
 // these extend NodeBase NodeFlags to hold TextField state
 const (
 	// TextFieldFocusActive indicates that the focus is active in this field
-	TextFieldFocusActive NodeFlags = NodeFlagsN + iota
+	TextFieldFocusActive TextFieldFlags = TextFieldFlags(WidgetFlagsN) + iota
 )
 
 // IsFocusActive returns true if we have active focus for keyboard input

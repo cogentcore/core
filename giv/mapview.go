@@ -72,7 +72,7 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "map-grid":
 			mg := child.(*gi.Frame)

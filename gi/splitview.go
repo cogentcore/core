@@ -74,10 +74,6 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 	sv.Dim = fr.Dim
 }
 
-var SplitViewProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
-}
-
 // UpdateSplits updates the splits to be same length as number of children,
 // and normalized
 func (sv *SplitView) UpdateSplits() {
@@ -485,7 +481,7 @@ func (sr *Splitter) OnInit() {
 }
 
 func (sr *Splitter) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
 			// w.AddStyler(func(w *WidgetBase, s *gist.Style) {

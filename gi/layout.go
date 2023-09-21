@@ -719,8 +719,8 @@ func (ly *Layout) ScrollToBox(box image.Rectangle) bool {
 
 // ScrollToItem scrolls the layout to ensure that given item is in view --
 // returns true if scrolling was needed
-func (ly *Layout) ScrollToItem(ni Node2D) bool {
-	return ly.ScrollToBox(ni.AsNode2D().ObjBBox)
+func (ly *Layout) ScrollToItem(wi Widget) bool {
+	return ly.ScrollToBox(wi.AsWidget().ObjBBox)
 }
 
 // ScrollDimToStart scrolls to put the given child coordinate position (eg.,
@@ -1344,10 +1344,6 @@ func (sp *Space) OnInit() {
 func (sp *Space) CopyFieldsFrom(frm any) {
 	fr := frm.(*Space)
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-}
-
-var SpaceProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 }
 
 func (sp *Space) SetStyle() {

@@ -153,7 +153,7 @@ func (dv *DiffView) OnInit() {
 }
 
 func (dv *DiffView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "text-a-lay", "text-b-lay":
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {

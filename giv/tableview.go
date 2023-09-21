@@ -78,7 +78,7 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "frame": // slice frame
 			sf := child.(*gi.Frame)

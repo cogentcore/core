@@ -79,7 +79,7 @@ func (sv *StructView) OnInit() {
 }
 
 func (sv *StructView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "toolbar":
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {

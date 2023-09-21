@@ -92,7 +92,7 @@ func (dlg *Dialog) OnInit() {
 }
 
 func (dlg *Dialog) OnChildAdded(child ki.Ki) {
-	if w := KiAsWidget(child); w != nil {
+	if w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "frame":
 			frame := child.(*Frame)
@@ -315,10 +315,6 @@ func (dlg *Dialog) Cancel() {
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Configuration functions construct standard types of dialogs but anything can be done
-
-var DialogProps = ki.Props{
-	ki.EnumTypeFlag: TypeVpFlags,
-}
 
 // SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
 func (dlg *Dialog) SetFrame() *Frame {

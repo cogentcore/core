@@ -59,7 +59,7 @@ func (cv *ColorView) OnInit() {
 }
 
 func (cv *ColorView) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "value":
 			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {

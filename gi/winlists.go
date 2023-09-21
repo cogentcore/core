@@ -326,7 +326,7 @@ func (wu *WindowDrawers) Reset() {
 
 // Add adds a new node, returning index to store for given winBBox
 // (could be existing), and bool = true if new index exceeds max range
-func (wu *WindowDrawers) Add(node Node, winBBox image.Rectangle) (int, bool) {
+func (wu *WindowDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool) {
 	nb := node.AsGiNode()
 	wu.Init()
 	idx, has := wu.Nodes.IdxByKeyTry(nb)
@@ -343,7 +343,7 @@ func (wu *WindowDrawers) Add(node Node, winBBox image.Rectangle) (int, bool) {
 }
 
 // Delete removes given node from list of drawers
-func (wu *WindowDrawers) Delete(node Node) {
+func (wu *WindowDrawers) Delete(node Widget) {
 	nb := node.AsGiNode()
 	wu.Nodes.DeleteKey(nb)
 }

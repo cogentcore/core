@@ -78,13 +78,11 @@ func (wb *WidgetBase) BBox2D() image.Rectangle {
 	return wb.BBoxFromAlloc()
 }
 
-func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	wb.ComputeBBox2DBase(parBBox, delta)
-}
-
 func (wb *WidgetBase) ComputeBBox2DParts(parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBox2DBase(parBBox, delta)
-	wb.Parts.This().(Widget).ComputeBBox2D(parBBox, delta)
+	if wb.Parts != nil {
+		wb.Parts.This().(Widget).ComputeBBox2D(parBBox, delta)
+	}
 }
 
 func (wb *WidgetBase) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
@@ -210,24 +208,6 @@ func (wb *WidgetBase) ChildrenBBox2D() image.Rectangle {
 	return wb.ChildrenBBox2DWidget()
 }
 
-// ParentLayout returns the parent layout
-func (wb *WidgetBase) ParentLayout() *Layout {
-	var parLy *Layout
-	wb.FuncUpParent(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		nii, ok := k.(Widget)
-		if !ok {
-			return ki.Break // don't keep going up
-		}
-		ly := nii.AsDoLayout(vp * Viewport)
-		if ly != nil {
-			parLy = ly
-			return ki.Break // done
-		}
-		return ki.Continue
-	})
-	return parLy
-}
-
 //////////////////////////////////////////////////////////////////
 //		Move2D scrolling
 
@@ -274,4 +254,36 @@ func (wb *WidgetBase) Move2DChildren(delta image.Point) {
 			nii.Move2D(delta, cbb)
 		}
 	}
+}
+
+// ParentLayout returns the parent layout
+func (wb *WidgetBase) ParentLayout() *Layout {
+	ly := wb.ParentByType(TypeLayout, ki.Embeds)
+	if ly == nil {
+		return nil
+	}
+	return ly.Embed(TypeLayout).(*Layout) // todo: do this manually
+}
+
+// ParentScrollLayout returns the parent layout that has active scrollbars
+func (wb *WidgetBase) ParentScrollLayout() *Layout {
+	lyk := wb.ParentByType(TypeLayout, ki.Embeds)
+	if lyk == nil {
+		return nil
+	}
+	ly := lyk.Embed(TypeLayout).(*Layout)
+	if ly.HasAnyScroll() {
+		return ly
+	}
+	return ly.ParentScrollLayout()
+}
+
+// ScrollToMe tells my parent layout (that has scroll bars) to scroll to keep
+// this widget in view -- returns true if scrolled
+func (wb *WidgetBase) ScrollToMe() bool {
+	ly := wb.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	return ly.ScrollToItem(wb.This().(Node2D))
 }

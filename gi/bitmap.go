@@ -132,8 +132,8 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 }
 
 // GrabRenderFrom grabs the rendered image from given node
-func (bm *Bitmap) GrabRenderFrom(nii Node2D) {
-	img := GrabRenderFrom(nii)
+func (bm *Bitmap) GrabRenderFrom(wi Widget) {
+	img := GrabRenderFrom(wi)
 	if img != nil {
 		bm.Pixels = img
 		bm.Size = bm.Pixels.Bounds().Size()
@@ -180,26 +180,19 @@ func (bm *Bitmap) Render(vp *Viewport) {
 
 // GrabRenderFrom grabs the rendered image from given node
 // if nil, then image could not be grabbed
-func GrabRenderFrom(nii Node2D) *image.RGBA {
-	ni := nii.AsNode2D()
-	nivp := nii.AsViewport()
-	if nivp != nil && nivp.Pixels != nil {
-		sz := nivp.Pixels.Bounds().Size()
-		img := image.NewRGBA(image.Rectangle{Max: sz})
-		draw.Draw(img, img.Bounds(), nivp.Pixels, image.Point{}, draw.Src)
-		return img
-	}
-	nivp = ni.Viewport
-	if nivp == nil || nivp.Pixels == nil {
-		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", ni.Path())
+func GrabRenderFrom(wi Widget) *image.RGBA {
+	wb := wi.AsWidget()
+	vp = wb.Vp
+	if vp == nil || vp.Pixels == nil {
+		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", wb.Path())
 		return nil
 	}
-	if ni.VpBBox.Empty() {
+	if wb.VpBBox.Empty() {
 		return nil // offscreen -- can happen -- no warning -- just check rval
 	}
-	sz := ni.VpBBox.Size()
+	sz := wb.VpBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), nivp.Pixels, ni.VpBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), vp.Pixels, wb.VpBBox.Min, draw.Src)
 	return img
 }
 
@@ -300,7 +293,6 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //  Props
 
 var BitmapProps = ki.Props{
-	ki.EnumTypeFlag: TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",

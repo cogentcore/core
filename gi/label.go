@@ -45,7 +45,7 @@ type Label struct {
 	LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// render data for text label
-	Render girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+	TextRender girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
 
 	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
 	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
@@ -246,9 +246,9 @@ func (lb *Label) SetText(txt string) {
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
-		lb.Render.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.TextRender.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	} else {
-		lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	}
 	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
@@ -258,7 +258,7 @@ func (lb *Label) SetText(txt string) {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
+	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 }
@@ -287,12 +287,12 @@ func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		llb := recv.Embed(TypeLabel).(*Label)
-		hasLinks := len(lb.Render.Links) > 0
+		hasLinks := len(lb.TextRender.Links) > 0
 		if hasLinks {
 			pos := llb.RenderPos
-			for ti := range llb.Render.Links {
-				tl := &llb.Render.Links[ti]
-				tlb := tl.Bounds(&llb.Render, pos)
+			for ti := range llb.TextRender.Links {
+				tl := &llb.TextRender.Links[ti]
+				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
 					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Viewport, llb.Nm)
 					me.SetProcessed()
@@ -315,12 +315,12 @@ func (lb *Label) MouseEvent() {
 	lb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		llb := recv.Embed(TypeLabel).(*Label)
-		hasLinks := len(llb.Render.Links) > 0
+		hasLinks := len(llb.TextRender.Links) > 0
 		pos := llb.RenderPos
 		if me.Action == mouse.Press && me.Button == mouse.Left && hasLinks {
-			for ti := range llb.Render.Links {
-				tl := &llb.Render.Links[ti]
-				tlb := tl.Bounds(&llb.Render, pos)
+			for ti := range llb.TextRender.Links {
+				tl := &llb.TextRender.Links[ti]
+				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
 					llb.OpenLink(tl)
 					me.SetProcessed()
@@ -343,7 +343,7 @@ func (lb *Label) MouseEvent() {
 }
 
 func (lb *Label) MouseMoveEvent() {
-	hasLinks := len(lb.Render.Links) > 0
+	hasLinks := len(lb.TextRender.Links) > 0
 	if !hasLinks {
 		return
 	}
@@ -353,8 +353,8 @@ func (lb *Label) MouseMoveEvent() {
 		llb := recv.Embed(TypeLabel).(*Label)
 		pos := llb.RenderPos
 		inLink := false
-		for _, tl := range llb.Render.Links {
-			tlb := tl.Bounds(&llb.Render, pos)
+		for _, tl := range llb.TextRender.Links {
+			tlb := tl.Bounds(&llb.TextRender, pos)
 			if me.Where.In(tlb) {
 				inLink = true
 				break
@@ -400,13 +400,13 @@ func (lb *Label) LayoutLabel() {
 	defer lb.StyMu.RUnlock()
 
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
+	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
 func (lb *Label) SetStyle() {
@@ -423,7 +423,7 @@ func (lb *Label) GetSize(vp *Viewport, iter int) {
 	} else {
 		lb.InitLayout(vp * Viewport)
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
-		sz = sz.Max(lb.Render.Size)
+		sz = sz.Max(lb.TextRender.Size)
 		lb.GetSizeFromWH(sz.X, sz.Y)
 	}
 }
@@ -433,12 +433,12 @@ func (lb *Label) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool 
 	lb.DoLayoutChildren(iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
-	lb.Render.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
-	lb.Render.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
+	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
-		if lb.Render.Size.Y < (sz.Y - 1) { // allow for numerical issues
+		if lb.TextRender.Size.Y < (sz.Y - 1) { // allow for numerical issues
 			lb.LayState.SetFromStyle(&lb.Style)
-			lb.GetSizeFromWH(lb.Render.Size.X, lb.Render.Size.Y)
+			lb.GetSizeFromWH(lb.TextRender.Size.X, lb.TextRender.Size.Y)
 			return true // needs a redo!
 		}
 	}
@@ -458,7 +458,7 @@ func (lb *Label) RenderLabel() {
 	defer lb.RenderUnlock(rs)
 	lb.RenderPos = lb.TextPos()
 	lb.RenderStdBox(st)
-	lb.Render.Render(rs, lb.RenderPos)
+	lb.TextRender.Render(rs, lb.RenderPos)
 }
 
 func (lb *Label) Render(vp *Viewport) {

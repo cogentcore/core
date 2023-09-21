@@ -49,7 +49,7 @@ type StructViewInline struct {
 }
 
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.KiAsWidget(child); w != nil {
+	if w := gi.AsWidget(child); w != nil {
 		if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
 			label := child.(*gi.Label)
 			label.Redrawable = true
