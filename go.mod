@@ -8,10 +8,11 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/goki/ki v1.1.16
 	github.com/h2non/filetype v1.1.3
-	goki.dev/enums v0.9.13
-	goki.dev/glop v0.0.0-20230919212731-04f79732909d
-	goki.dev/gti v0.0.0-20230920001938-3d8e2f41b6ed
+	goki.dev/enums v0.9.14
+	goki.dev/glop v0.1.0
+	goki.dev/gti v0.0.0-20230920232919-a3ca85fb2d77
 	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/laser v0.1.1
 	goki.dev/ordmap v0.5.3
 	goki.dev/prof/v2 v2.0.0-dev0.0.2
 	golang.org/x/tools v0.13.0

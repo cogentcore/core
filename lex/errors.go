@@ -16,8 +16,8 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // In an ErrorList, an error is represented by an *Error.
@@ -67,7 +67,7 @@ func (e Error) Report(basepath string, showSrc, showRule bool) string {
 		}
 	}
 	str := fnm + ":" + e.Pos.String() + ": " + e.Msg
-	if showRule && !kit.IfaceIsNil(e.Rule) {
+	if showRule && !laser.AnyIsNil(e.Rule) {
 		str += fmt.Sprintf(" (rule: %v)", e.Rule.Name())
 	}
 	ssz := len(e.Src)
