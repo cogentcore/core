@@ -349,7 +349,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 // StyleCSS applies css style properties to given SVG node
 // parsing out type, .class, and #name selectors
 func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
-	tyn := strings.ToLower(g.Type().Name) // type is most general, first
+	tyn := strings.ToLower(g.KiType().Name) // type is most general, first
 	g.ApplyCSS(sv, tyn, css)
 	cln := "." + strings.ToLower(g.Class) // then class
 	g.ApplyCSS(sv, cln, css)

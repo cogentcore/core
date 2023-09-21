@@ -30,8 +30,8 @@ func NewCircle(par ki.Ki, name string) *Circle {
 	return par.NewChild(CircleType, name).(*Circle)
 }
 
-// Type returns the [*gti.Type] of [Circle]
-func (t *Circle) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Circle]
+func (t *Circle) KiType() *gti.Type {
 	return CircleType
 }
 
@@ -59,8 +59,8 @@ func NewClipPath(par ki.Ki, name string) *ClipPath {
 	return par.NewChild(ClipPathType, name).(*ClipPath)
 }
 
-// Type returns the [*gti.Type] of [ClipPath]
-func (t *ClipPath) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ClipPath]
+func (t *ClipPath) KiType() *gti.Type {
 	return ClipPathType
 }
 
@@ -90,8 +90,8 @@ func NewStyleSheet(par ki.Ki, name string) *StyleSheet {
 	return par.NewChild(StyleSheetType, name).(*StyleSheet)
 }
 
-// Type returns the [*gti.Type] of [StyleSheet]
-func (t *StyleSheet) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [StyleSheet]
+func (t *StyleSheet) KiType() *gti.Type {
 	return StyleSheetType
 }
 
@@ -121,8 +121,8 @@ func NewMetaData(par ki.Ki, name string) *MetaData {
 	return par.NewChild(MetaDataType, name).(*MetaData)
 }
 
-// Type returns the [*gti.Type] of [MetaData]
-func (t *MetaData) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [MetaData]
+func (t *MetaData) KiType() *gti.Type {
 	return MetaDataType
 }
 
@@ -153,8 +153,8 @@ func NewEllipse(par ki.Ki, name string) *Ellipse {
 	return par.NewChild(EllipseType, name).(*Ellipse)
 }
 
-// Type returns the [*gti.Type] of [Ellipse]
-func (t *Ellipse) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Ellipse]
+func (t *Ellipse) KiType() *gti.Type {
 	return EllipseType
 }
 
@@ -184,8 +184,8 @@ func NewFilter(par ki.Ki, name string) *Filter {
 	return par.NewChild(FilterType, name).(*Filter)
 }
 
-// Type returns the [*gti.Type] of [Filter]
-func (t *Filter) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Filter]
+func (t *Filter) KiType() *gti.Type {
 	return FilterType
 }
 
@@ -215,8 +215,8 @@ func NewFlow(par ki.Ki, name string) *Flow {
 	return par.NewChild(FlowType, name).(*Flow)
 }
 
-// Type returns the [*gti.Type] of [Flow]
-func (t *Flow) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Flow]
+func (t *Flow) KiType() *gti.Type {
 	return FlowType
 }
 
@@ -247,8 +247,8 @@ func NewGradient(par ki.Ki, name string) *Gradient {
 	return par.NewChild(GradientType, name).(*Gradient)
 }
 
-// Type returns the [*gti.Type] of [Gradient]
-func (t *Gradient) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Gradient]
+func (t *Gradient) KiType() *gti.Type {
 	return GradientType
 }
 
@@ -276,8 +276,8 @@ func NewGroup(par ki.Ki, name string) *Group {
 	return par.NewChild(GroupType, name).(*Group)
 }
 
-// Type returns the [*gti.Type] of [Group]
-func (t *Group) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Group]
+func (t *Group) KiType() *gti.Type {
 	return GroupType
 }
 
@@ -311,8 +311,8 @@ func NewImage(par ki.Ki, name string) *Image {
 	return par.NewChild(ImageType, name).(*Image)
 }
 
-// Type returns the [*gti.Type] of [Image]
-func (t *Image) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Image]
+func (t *Image) KiType() *gti.Type {
 	return ImageType
 }
 
@@ -343,8 +343,8 @@ func NewLine(par ki.Ki, name string) *Line {
 	return par.NewChild(LineType, name).(*Line)
 }
 
-// Type returns the [*gti.Type] of [Line]
-func (t *Line) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Line]
+func (t *Line) KiType() *gti.Type {
 	return LineType
 }
 
@@ -383,8 +383,8 @@ func NewMarker(par ki.Ki, name string) *Marker {
 	return par.NewChild(MarkerType, name).(*Marker)
 }
 
-// Type returns the [*gti.Type] of [Marker]
-func (t *Marker) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Marker]
+func (t *Marker) KiType() *gti.Type {
 	return MarkerType
 }
 
@@ -419,8 +419,8 @@ func NewNodeBase(par ki.Ki, name string) *NodeBase {
 	return par.NewChild(NodeBaseType, name).(*NodeBase)
 }
 
-// Type returns the [*gti.Type] of [NodeBase]
-func (t *NodeBase) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [NodeBase]
+func (t *NodeBase) KiType() *gti.Type {
 	return NodeBaseType
 }
 
@@ -451,8 +451,8 @@ func NewPath(par ki.Ki, name string) *Path {
 	return par.NewChild(PathType, name).(*Path)
 }
 
-// Type returns the [*gti.Type] of [Path]
-func (t *Path) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Path]
+func (t *Path) KiType() *gti.Type {
 	return PathType
 }
 
@@ -480,8 +480,8 @@ func NewPolygon(par ki.Ki, name string) *Polygon {
 	return par.NewChild(PolygonType, name).(*Polygon)
 }
 
-// Type returns the [*gti.Type] of [Polygon]
-func (t *Polygon) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Polygon]
+func (t *Polygon) KiType() *gti.Type {
 	return PolygonType
 }
 
@@ -511,8 +511,8 @@ func NewPolyline(par ki.Ki, name string) *Polyline {
 	return par.NewChild(PolylineType, name).(*Polyline)
 }
 
-// Type returns the [*gti.Type] of [Polyline]
-func (t *Polyline) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Polyline]
+func (t *Polyline) KiType() *gti.Type {
 	return PolylineType
 }
 
@@ -544,8 +544,8 @@ func NewRect(par ki.Ki, name string) *Rect {
 	return par.NewChild(RectType, name).(*Rect)
 }
 
-// Type returns the [*gti.Type] of [Rect]
-func (t *Rect) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Rect]
+func (t *Rect) KiType() *gti.Type {
 	return RectType
 }
 
@@ -575,8 +575,8 @@ func NewSVGNode(par ki.Ki, name string) *SVGNode {
 	return par.NewChild(SVGNodeType, name).(*SVGNode)
 }
 
-// Type returns the [*gti.Type] of [SVGNode]
-func (t *SVGNode) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [SVGNode]
+func (t *SVGNode) KiType() *gti.Type {
 	return SVGNodeType
 }
 
@@ -618,8 +618,8 @@ func NewText(par ki.Ki, name string) *Text {
 	return par.NewChild(TextType, name).(*Text)
 }
 
-// Type returns the [*gti.Type] of [Text]
-func (t *Text) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Text]
+func (t *Text) KiType() *gti.Type {
 	return TextType
 }
 

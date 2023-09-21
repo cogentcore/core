@@ -38,7 +38,7 @@ type SVG struct {
 	BgColor gist.ColorSpec `desc:"color to fill background if Fill set"`
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
-	Geom girl.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
+	Geom gist.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
