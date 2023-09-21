@@ -1,6 +1,6 @@
 Name = "grows"
 Desc = ""
-Version = "v0.3.0"
+Version = "v0.3.1"
 Type = "TypeLibrary"
 
 [Build]
@@ -27,16 +27,25 @@ Type = "TypeLibrary"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
+  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
-    SQL = false
-    Text = true
-    JSON = false
-    YAML = false
-    GQL = false
     Transform = ""
     TrimPrefix = ""
     AddPrefix = ""
     LineComment = false
-    Comment = ""
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
