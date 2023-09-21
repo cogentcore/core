@@ -26,45 +26,48 @@ func NewDecoderFunc[T Decoder](f func(r io.Reader) T) DecoderFunc {
 	return func(r io.Reader) Decoder { return f(r) }
 }
 
-/*
-// OpenFromPaths reads object from given TOML file,
-// looking on paths for the file.
-func OpenFromPaths(obj any, file string, paths []string) error {
-	filename, err := dirs.FindFileOnPaths(paths, file)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	// _, err = toml.DecodeFile(fp, obj)
-	fp, err := os.Open(filename)
-	defer fp.Close()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	return Read(obj, bufio.NewReader(fp))
-}
-*/
-
 // Open reads object from the given filename using the given [DecoderFunc]
 func Open(v any, filename string, f DecoderFunc) error {
 	fp, err := os.Open(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	return Read(v, bufio.NewReader(fp), f)
+}
+
+// OpenFiles reads object from the given filenames using the given [DecoderFunc]
+func OpenFiles(v any, filenames []string, f DecoderFunc) error {
+	for _, file := range filenames {
+		err := Open(v, file, f)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // OpenFS reads object from the given filename using the given [DecoderFunc],
 // using the fs.FS filesystem (e.g., for embed files)
 func OpenFS(v any, fsys fs.FS, filename string, f DecoderFunc) error {
 	fp, err := fsys.Open(filename)
-	defer fp.Close()
 	if err != nil {
 		return err
 	}
+	defer fp.Close()
 	return Read(v, bufio.NewReader(fp), f)
+}
+
+// OpenFilesFS reads object from the given filenames using the given [DecoderFunc],
+// using the fs.FS filesystem (e.g., for embed files)
+func OpenFilesFS(v any, fsys fs.FS, filenames []string, f DecoderFunc) error {
+	for _, file := range filenames {
+		err := OpenFS(v, fsys, file, f)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Read reads object encoding from the given reader,
