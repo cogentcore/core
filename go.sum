@@ -1,6 +1,6 @@
-github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Masterminds/vcs v1.13.3 h1:IIA2aBdXvfbIM+yl/eTnL4hb1XwdpvuQLglAix1gweE=
 github.com/Masterminds/vcs v1.13.3/go.mod h1:TiE7xuEjl1N4j016moRd6vezp6e6Lz23gypeXfzXeW8=
-github.com/jinzhu/copier v0.4.0/go.mod h1:DfbEm0FYsaqBcKcFuvmOZb218JkPGtvSHsKg8S8hyyg=
-goki.dev/ki/v2 v2.0.0-dev0.0.3 h1:kKjKGimERUmSKTprPaU0B1uU0QkHJ87vKlEY5JchhZw=
-goki.dev/ki/v2 v2.0.0-dev0.0.3/go.mod h1:PQh0iX2Z3BFFcJrOtykJVfFmjM5h4qZLpCP9AKZboy0=
+goki.dev/enums v0.9.14 h1:AmKW9uqyo0UvnBRs2O/7nssnZSiko58WLm0pTWgzNJo=
+goki.dev/enums v0.9.14/go.mod h1:S9OyjoKynBC3Gr67lrVLnw7ldlI/Z4xR/SQeBAOqiAA=
+goki.dev/glop v0.1.0 h1:4bD9nemLZvcTcpk4I6+cmTG20szw1wEI4TRC96eyxus=
+goki.dev/glop v0.1.0/go.mod h1:gxxXPhWLaqP9H/sudq5MHDbkbKdr5g0ziyPIuYAJczo=

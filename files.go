@@ -7,8 +7,6 @@ package vci
 import (
 	"os"
 	"path/filepath"
-
-	"goki.dev/ki/v2/kit"
 )
 
 // Files is a map used for storing files in a repository along with their status
@@ -41,7 +39,7 @@ func AllFiles(path string) ([]string, error) {
 }
 
 // FileStatus indicates the status of files in the repository
-type FileStatus int32
+type FileStatus int32 //enums:enum
 
 const (
 	// Untracked means file is not under VCS control
@@ -64,13 +62,4 @@ const (
 
 	// Updated means file has been updated in the remote but not locally
 	Updated
-
-	FileStatusN
 )
-
-//go:generate stringer -type=FileStatus
-
-var KiT_FileStatus = kit.Enums.AddEnum(FileStatusN, kit.NotBitFlag, nil)
-
-func (ev FileStatus) MarshalJSON() ([]byte, error)  { return kit.EnumMarshalJSON(ev) }
-func (ev *FileStatus) UnmarshalJSON(b []byte) error { return kit.EnumUnmarshalJSON(ev, b) }

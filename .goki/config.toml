@@ -1,7 +1,7 @@
 Name = "vci"
 Desc = ""
 Version = "v2.0.0-dev0.0.0"
-Type = "TypeLibrary"
+Type = "Library"
 
 [Build]
   Package = "."
@@ -23,3 +23,6 @@ Type = "TypeLibrary"
 [Release]
   VersionFile = "version.go"
   Package = "vci"
+
+[Generate]
+  AddKiTypes = false

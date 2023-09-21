@@ -1,8 +1,9 @@
 module goki.dev/vci/v2
 
-go 1.13
+go 1.21.0
 
 require (
 	github.com/Masterminds/vcs v1.13.3
-	goki.dev/ki/v2 v2.0.0-dev0.0.3
+	goki.dev/enums v0.9.14
+	goki.dev/glop v0.1.0
 )

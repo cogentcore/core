@@ -4,13 +4,15 @@
 
 package vci
 
+//go:generate goki generate
+
 import (
 	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/Masterminds/vcs"
-	"goki.dev/ki/v2/dirs"
+	"goki.dev/glop/dirs"
 )
 
 var (
