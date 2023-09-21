@@ -17,10 +17,21 @@ func Open(v any, filename string) error {
 	return grows.Open(v, filename, grows.NewDecoderFunc(xml.NewDecoder))
 }
 
+// OpenFiles reads object from the given filenames using XML encoding
+func OpenFiles(v any, filenames []string) error {
+	return grows.OpenFiles(v, filenames, grows.NewDecoderFunc(xml.NewDecoder))
+}
+
 // OpenFS reads object from the given filename using XML encoding,
 // using the fs.FS filesystem (e.g., for embed files)
 func OpenFS(v any, fsys fs.FS, filename string) error {
 	return grows.OpenFS(v, fsys, filename, grows.NewDecoderFunc(xml.NewDecoder))
+}
+
+// OpenFilesFS reads object from the given filenames using XML encoding,
+// using the fs.FS filesystem (e.g., for embed files)
+func OpenFilesFS(v any, fsys fs.FS, filenames []string) error {
+	return grows.OpenFilesFS(v, fsys, filenames, grows.NewDecoderFunc(xml.NewDecoder))
 }
 
 // Read reads object encoding from the given reader,
