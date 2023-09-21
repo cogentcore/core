@@ -15,7 +15,7 @@ import (
 type Config struct {
 
 	// the name of the user
-	Name string `grease:"name,nm,n" desc:"the name of the user"`
+	Name string `flag:"name,nm,n" desc:"the name of the user"`
 
 	// the age of the user
 	Age int `desc:"the age of the user"`
@@ -35,7 +35,7 @@ type Config struct {
 type BuildConfig struct {
 
 	// the target platform to build for
-	Target string `grease:"target,build-target" posarg:"0" desc:"the target platform to build for"`
+	Target string `flag:"target,build-target" posarg:"0" desc:"the target platform to build for"`
 
 	// the platform to build the executable for
 	Platform string `posarg:"1" required:"-" desc:"the platform to build the executable for"`

@@ -76,8 +76,8 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 		f := typ.Field(i)
 		fv := val.Field(i)
 		pval := laser.PtrValue(fv)
-		cmdtag, hct := f.Tag.Lookup("cmd")
-		if hct && cmdtag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
+		cmdTag, hct := f.Tag.Lookup("cmd")
+		if hct && cmdTag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
 			continue
 		}
 		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
@@ -110,11 +110,11 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 			names = append(names, cmdPath+"."+f.Name)
 		}
 
-		greasetag, ok := f.Tag.Lookup("grease")
+		flagTag, ok := f.Tag.Lookup("flag")
 		if ok {
-			names = strings.Split(greasetag, ",")
+			names = strings.Split(flagTag, ",")
 			if len(names) == 0 {
-				fmt.Println(ErrorColor("warning: programmer error:") + " expected at least one name in grease struct tag, but got none")
+				fmt.Println(ErrorColor("warning: programmer error:") + " expected at least one name in flag struct tag, but got none")
 			}
 		}
 

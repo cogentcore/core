@@ -29,10 +29,10 @@ var ConfigFile string
 // and not by end-user code.
 type MetaConfig struct {
 	// Config is the file name of the config file to load
-	Config string `grease:"config,cfg"`
+	Config string `flag:"config,cfg"`
 
 	// Help is whether to display a help message
-	Help bool `grease:"help,h"`
+	Help bool `flag:"help,h"`
 
 	// HelpCmd is the name of the command to display
 	// help information for. It is only applicable to the
