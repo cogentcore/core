@@ -30,7 +30,7 @@ func NewTestNode(par ki.Ki, name string) *TestNode {
 	return par.NewChild(TestNodeType, name).(*TestNode)
 }
 
-// Type returns the [*gti.Type] of [TestNode]
+// KiType returns the [*gti.Type] of [TestNode]
 func (t *TestNode) KiType() *gti.Type {
 	return TestNodeType
 }
@@ -64,7 +64,7 @@ func NewNodeEmbed(par ki.Ki, name string) *NodeEmbed {
 	return par.NewChild(NodeEmbedType, name).(*NodeEmbed)
 }
 
-// Type returns the [*gti.Type] of [NodeEmbed]
+// KiType returns the [*gti.Type] of [NodeEmbed]
 func (t *NodeEmbed) KiType() *gti.Type {
 	return NodeEmbedType
 }
@@ -95,7 +95,7 @@ func NewNodeField(par ki.Ki, name string) *NodeField {
 	return par.NewChild(NodeFieldType, name).(*NodeField)
 }
 
-// Type returns the [*gti.Type] of [NodeField]
+// KiType returns the [*gti.Type] of [NodeField]
 func (t *NodeField) KiType() *gti.Type {
 	return NodeFieldType
 }
@@ -126,7 +126,7 @@ func NewNodeField2(par ki.Ki, name string) *NodeField2 {
 	return par.NewChild(NodeField2Type, name).(*NodeField2)
 }
 
-// Type returns the [*gti.Type] of [NodeField2]
+// KiType returns the [*gti.Type] of [NodeField2]
 func (t *NodeField2) KiType() *gti.Type {
 	return NodeField2Type
 }

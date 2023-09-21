@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:generate goki generate
-
 package ki
+
+//go:generate goki generate
 
 import (
 	"errors"

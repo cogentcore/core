@@ -4,8 +4,6 @@
 
 package ki
 
-//go:generate enumgen
-
 // Flags are bit flags for efficient core state of nodes -- see bitflag
 // package for using these ordinal values to manipulate bit flag field.
 type Flags int64 //enums:bitflag
