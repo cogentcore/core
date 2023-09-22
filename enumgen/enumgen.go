@@ -15,8 +15,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// ParsePackage parses the package(s) located in the configuration source directory.
-func ParsePackage(cfg *Config) ([]*packages.Package, error) {
+// ParsePackages parses the package(s) located in the configuration source directory.
+func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
 		Mode: PackageModes(),
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
@@ -42,7 +42,7 @@ func ParsePackage(cfg *Config) ([]*packages.Package, error) {
 //gti:add
 //grease:cmd -root
 func Generate(cfg *Config) error {
-	pkgs, err := ParsePackage(cfg)
+	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		return err
 	}
