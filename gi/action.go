@@ -10,9 +10,19 @@ import (
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/cursor"
 	"goki.dev/ki/v2"
 )
+
+type ActionEmbedder interface {
+	AsAction() *Action
+}
+
+func AsAction(k ki.Ki) *Action {
+	if ac, ok := k.(ActionEmbedder); ok {
+		return ac.AsAction()
+	}
+	return nil
+}
 
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
@@ -59,9 +69,11 @@ const (
 	ActionToolBar
 )
 
+func (ac *Action) AsAction() *Action { return ac }
+
 func (ac *Action) OnInit() {
 	ac.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Text.Align = gist.AlignCenter
 		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
@@ -92,7 +104,7 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			ac.Indicator = gicons.None
 		}
-		if w.IsHovered() {
+		if w.HasFlag(Hovered) {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		}
 		if w.HasFocus() {
@@ -117,7 +129,7 @@ func (ac *Action) OnInit() {
 }
 
 func (ac *Action) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
+	if _, w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
 			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -180,7 +192,7 @@ func (ac *Action) Disconnect() {
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
 func (ac *Action) Trigger() {
-	if ac.IsDisabled() {
+	if ac.HasFlag(Disabled) {
 		return
 	}
 	ac.ActionSig.Emit(ac.This(), 0, ac.Data)
@@ -188,7 +200,7 @@ func (ac *Action) Trigger() {
 
 // ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {
-	if ac.IsDisabled() {
+	if ac.HasFlag(Disabled) {
 		// fmt.Printf("action: %v inactive\n", ac.Nm)
 		return
 	}
@@ -202,26 +214,25 @@ func (ac *Action) ButtonRelease() {
 		// } else {
 		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)
 	}
-	if !menOpen && ac.IsMenu() && ac.Viewport != nil {
+	if !menOpen && ac.IsMenu() && ac.Vp != nil {
 		win := ac.ParentWindow()
 		if win != nil {
-			win.ClosePopup(ac.Viewport) // in case we are a menu popup -- no harm if not
+			win.ClosePopup(ac.Vp) // in case we are a menu popup -- no harm if not
 		}
 	}
 	ac.UpdateEnd(updt)
 }
 
 // Config calls functions to initialize widget and parts
-func (ac *Action) Config() {
-	ac.ConfigWidget()
-	ac.ConfigParts()
+func (ac *Action) ConfigWidget(vp *Viewport) {
+	ac.ConfigParts(vp)
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
 func (ac *Action) ConfigPartsAddShortcut(config *ki.TypeAndNameList) int {
-	config.Add(TypeStretch, "sc-stretch")
+	config.Add(StretchType, "sc-stretch")
 	scIdx := len(*config)
-	config.Add(TypeLabel, "shortcut")
+	config.Add(LabelType, "shortcut")
 	return scIdx
 }
 
@@ -271,7 +282,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 }
 
 // ConfigParts switches on part type on calls specific config
-func (ac *Action) ConfigParts() {
+func (ac *Action) ConfigParts(vp *Viewport) {
 	ismbar := false
 	istbar := false
 	if ac.Par != nil {

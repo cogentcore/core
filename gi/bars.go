@@ -69,26 +69,27 @@ func (mb *MenuBar) GetSize(vp *Viewport, iter int) {
 	if !mb.ShowMenuBar() {
 		return
 	}
-	mb.Layout.GetSize(vp*Viewport, iter)
+	mb.Layout.GetSize(vp, iter)
 }
 
 func (mb *MenuBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	if !mb.ShowMenuBar() {
 		return false
 	}
-	return mb.Layout.DoLayout(vp*Viewport, parBBox, iter)
+	return mb.Layout.DoLayout(vp, parBBox, iter)
 }
 
 func (mb *MenuBar) Render(vp *Viewport) {
+	wi := mb.This().(Widget)
 	if !mb.ShowMenuBar() {
 		return
 	}
-	if mb.PushBounds() {
+	if mb.PushBounds(vp) {
 		mb.MenuBarStdRender()
-		mb.This().(Node2D).ConnectEvents()
+		wi.ConnectEvents()
 		mb.RenderScrolls()
 		mb.RenderChildren()
-		mb.PopBounds()
+		mb.PopBounds(vp)
 	} else {
 		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
@@ -101,8 +102,8 @@ func (mb *MenuBar) UpdateActions() {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			ac.UpdateActions()
 		}
 	}
@@ -115,9 +116,9 @@ func (mb *MenuBar) SetShortcuts() {
 	if win == nil {
 		return
 	}
-	for _, k := range mb.Kids {
-		if ki.TypeEmbeds(k, TypeAction) {
-			ac := k.Embed(TypeAction).(*Action)
+	for _, mi := range mb.Kids {
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -134,9 +135,9 @@ func (mb *MenuBar) DeleteShortcuts() {
 	if win == nil {
 		return
 	}
-	for _, k := range mb.Kids {
-		if ki.TypeEmbeds(k, TypeAction) {
-			ac := k.Embed(TypeAction).(*Action)
+	for _, mi := range mb.Kids {
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -151,8 +152,8 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 		return nil, false
 	}
 	for _, mi := range m.Kids {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			if ac.Name() == name {
 				return ac, true
 			}
@@ -175,18 +176,18 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	}
 	sz := len(menus)
 	tnl := make(ki.TypeAndNameList, sz+1)
-	typ := TypeAction // note: could pass in action type to make it more flexible, but..
+	typ := ActionType // note: could pass in action type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ
 		tnl[i].Name = m
 	}
-	tnl[sz].Type = TypeStretch
+	tnl[sz].Type = StretchType
 	tnl[sz].Name = "menstr"
 	_, updt := mb.ConfigChildren(tnl)
 	for i, m := range menus {
 		mi := mb.Kids[i]
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			ac.SetText(m)
 			ac.SetAsMenu()
 		}
@@ -230,8 +231,8 @@ func (mb *MenuBar) UpdateMainMenu(win *Window) {
 	osmm.Reset(mm)
 	mb.OSMainMenus = make(map[string]*Action, 100)
 	for _, mi := range mb.Kids {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			subm := osmm.AddSubMenu(mm, ac.Text)
 			mb.SetMainMenuSub(osmm, subm, ac)
 		}
@@ -260,13 +261,13 @@ func (mb *MenuBar) SetMainMenu(win *Window) {
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
 func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Action) {
 	for i, mi := range am.Menu {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			if len(ac.Menu) > 0 {
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ac)
 			} else {
-				mid := osmm.AddItem(subm, ac.Text, string(ac.Shortcut), i, ac.IsEnabled())
+				mid := osmm.AddItem(subm, ac.Text, string(ac.Shortcut), i, !ac.IsDisabled())
 				mb.OSMainMenus[ac.Text] = ac
 				ac.SetProp("__OSMainMenuItemID", mid)
 			}
@@ -295,7 +296,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 		if err != nil {
 			continue
 		}
-		osmm.SetItemActive(mid.(goosi.MenuItem), ma.IsEnabled()) // assuming this is threadsafe
+		osmm.SetItemActive(mid.(goosi.MenuItem), !ma.IsDisabled()) // assuming this is threadsafe
 	}
 }
 
@@ -352,7 +353,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 // AddSeparator adds a new separator to the toolbar -- automatically sets orientation
 // depending on layout.  All nodes need a name identifier.
 func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
-	sp := NewSeparator(tb, sepnm, false)
+	sp := NewSeparator(tb, sepnm)
 	if tb.Lay == LayoutHoriz {
 		sp.Horiz = false
 	} else {
@@ -378,15 +379,13 @@ func (tb *ToolBar) Render(vp *Viewport) {
 	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
 		return
 	}
-	if tb.FullReRenderIfNeeded() {
-		return
-	}
-	if tb.PushBounds() {
+	wi := tb.This().(Widget)
+	if tb.PushBounds(vp) {
 		tb.ToolBarStdRender()
-		tb.This().(Node2D).ConnectEvents()
+		wi.ConnectEvents()
 		tb.RenderScrolls()
 		tb.RenderChildren()
-		tb.PopBounds()
+		tb.PopBounds(vp)
 	} else {
 		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
@@ -396,7 +395,7 @@ func (tb *ToolBar) MouseFocusEvent() {
 	tb.ConnectEvent(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
-			tbb := recv.Embed(TypeToolBar).(*ToolBar)
+			tbb := recv.Embed(ToolBarType).(*ToolBar)
 			tbb.UpdateActions()
 			// do NOT mark as processed -- HiPri and not mutex
 		}
@@ -416,9 +415,9 @@ func (tb *ToolBar) SetShortcuts() {
 	if win == nil {
 		return
 	}
-	for _, k := range tb.Kids {
-		if ki.TypeEmbeds(k, TypeAction) {
-			ac := k.Embed(TypeAction).(*Action)
+	for _, mi := range tb.Kids {
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -435,9 +434,9 @@ func (tb *ToolBar) DeleteShortcuts() {
 	if win == nil {
 		return
 	}
-	for _, k := range tb.Kids {
-		if ki.TypeEmbeds(k, TypeAction) {
-			ac := k.Embed(TypeAction).(*Action)
+	for _, mi := range tb.Kids {
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -449,13 +448,11 @@ func (tb *ToolBar) UpdateActions() {
 	if tb == nil {
 		return
 	}
-	if tb.ParentWindow() != nil {
-		wupdt := tb.TopUpdateStart()
-		defer tb.TopUpdateEnd(wupdt)
-	}
+	updt := tb.UpdateStart()
+	defer tb.UpdateEnd(updt)
 	for _, mi := range tb.Kids {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			ac.UpdateActions()
 		}
 	}
@@ -467,8 +464,8 @@ func (tb *ToolBar) UpdateActions() {
 // is empty)) -- returns false if not found
 func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range tb.Kids {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if mi.KiType().HasEmbed(ActionType) {
+			ac := AsAction(mi)
 			if ac.Name() == name {
 				return ac, true
 			}

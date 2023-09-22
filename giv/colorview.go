@@ -134,7 +134,7 @@ func (cv *ColorView) SetColor(clr color.Color) {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) Config() {
+func (cv *ColorView) ConfigWidget(vp *Viewport) {
 	if cv.HasChildren() {
 		return
 	}
@@ -638,7 +638,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	ac.Tooltip = "Open color picker dialog"
 	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv, _ := recv.Embed(gi.TypeAction).(*gi.Action)
-		vv.Activate(svv.ViewportSafe(), nil, nil)
+		vv.Activate(svv.Vp, nil, nil)
 	})
 	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		clr, _ := vv.Color()
@@ -718,7 +718,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.ViewportSafe(), nil, nil)
+		vvv.Activate(ac.Vp, nil, nil)
 	})
 	vv.UpdateWidget()
 }

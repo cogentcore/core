@@ -14,7 +14,7 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	if wb.CtxtMenuFunc != nil {
 		wb.CtxtMenuFunc(wb.This().(Widget), m)
 	}
-	mvp := wb.ViewportSafe()
+	mvp := wb.Vp
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
@@ -33,6 +33,6 @@ func (wb *WidgetBase) ContextMenu() {
 		return
 	}
 	pos := wb.This().(Node2D).ContextMenuPos()
-	mvp := wb.ViewportSafe()
+	mvp := wb.Vp
 	PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
 }

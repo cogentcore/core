@@ -96,7 +96,7 @@ func GatherSizes(ly *Layout) {
 	sumPref, sumNeed, maxPref, maxNeed := GatherSizesSumMax(ly)
 
 	prefSizing := false
-	mvp := ly.ViewportSafe()
+	mvp := ly.Vp
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
@@ -376,7 +376,7 @@ func GatherSizesGrid(ly *Layout) {
 	}
 
 	prefSizing := false
-	mvp := ly.ViewportSafe()
+	mvp := ly.Vp
 	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
@@ -446,7 +446,7 @@ func GatherSizesGrid(ly *Layout) {
 // LayAllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func LayAllocFromParent(ly *Layout) {
-	mvp := ly.ViewportSafe()
+	mvp := ly.Vp
 	if ly.Par == nil || mvp == nil || !ly.LayState.Alloc.Size.IsNil() {
 		return
 	}
@@ -455,11 +455,11 @@ func LayAllocFromParent(ly *Layout) {
 		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
 		return
 	}
-	pni, _ := KiToNode2D(ly.Par)
+	pni, _ := AsWidget(ly.Par)
 	lyp := pni.AsDoLayout(vp * Viewport)
 	if lyp == nil {
 		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d any) bool {
-			pni, _ := KiToNode2D(k)
+			pni, _ := AsWidget(k)
 			if pni == nil {
 				return ki.Break
 			}

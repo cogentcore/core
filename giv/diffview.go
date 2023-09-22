@@ -597,7 +597,7 @@ func (dv *DiffView) UndoDiff(ab int) {
 	dv.UpdateToolBar()
 }
 
-func (dv *DiffView) Config() {
+func (dv *DiffView) ConfigWidget(vp *Viewport) {
 	dv.Lay = gi.LayoutVert
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")

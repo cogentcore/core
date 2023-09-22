@@ -7,7 +7,9 @@ package gi
 import (
 	"fmt"
 	"image"
+	"slices"
 
+	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
@@ -48,7 +50,7 @@ func (bb *ButtonBox) OnInit() {
 func (bb *ButtonBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ButtonBox)
 	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	bb.Items = slice.Clone(fr.Items)
+	bb.Items = slices.Clone(fr.Items)
 }
 
 func (bb *ButtonBox) Disconnect() {
@@ -198,7 +200,7 @@ func (bb *ButtonBox) ConfigItems() {
 			if sig != int64(ButtonToggled) {
 				return
 			}
-			bbb, _ := recv.Embed(TypeButtonBox).(*ButtonBox)
+			bbb, _ := recv.Embed(ButtonBoxType).(*ButtonBox)
 			cbb := send.(*CheckBox)
 			idx := cbb.Prop("index").(int)
 			ischk := cbb.IsChecked()
@@ -210,14 +212,14 @@ func (bb *ButtonBox) ConfigItems() {
 	}
 }
 
-func (bb *ButtonBox) ConfigParts() {
+func (bb *ButtonBox) ConfigParts(vp *Viewport) {
 	if len(bb.Items) == 0 {
 		bb.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := ki.TypeAndNameList{}
 	for _, lb := range bb.Items {
-		config.Add(TypeCheckBox, lb)
+		config.Add(CheckBoxType, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
@@ -226,49 +228,38 @@ func (bb *ButtonBox) ConfigParts() {
 	}
 }
 
-func (bb *ButtonBox) ConfigPartsIfNeeded() {
-	if bb.NumChildren() == len(bb.Items) {
-		return
-	}
-	bb.ConfigParts()
+func (bb *ButtonBox) ConfigWidget(vp *Viewport) {
+	bb.ConfigParts(vp)
 }
 
-func (bb *ButtonBox) Config() {
-	bb.ConfigWidget()
-	bb.ConfigParts()
-}
-
-func (bb *ButtonBox) SetStyle() {
+func (bb *ButtonBox) SetStyle(vp *Viewport) {
 	bb.StyMu.Lock()
-	bb.SetStyleWidget()
+	bb.SetStyleWidget(vp)
 	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
-	bb.ConfigParts()
+	bb.ConfigParts(vp)
 }
 
 func (bb *ButtonBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.ConfigPartsIfNeeded()
 	bb.DoLayoutBase(parBBox, true, iter) // init style
-	bb.DoLayoutParts(parBBox, iter)
+	bb.DoLayoutParts(vp, parBBox, iter)
 	return bb.DoLayoutChildren(iter)
 }
 
-func (bb *ButtonBox) RenderButtonBox() {
+func (bb *ButtonBox) RenderButtonBox(vp *Viewport) {
 	rs, _, st := bb.RenderLock()
 	bb.RenderStdBox(st)
 	bb.RenderUnlock(rs)
 }
 
 func (bb *ButtonBox) Render(vp *Viewport) {
-	if bb.FullReRenderIfNeeded() {
-		return
-	}
-	if bb.PushBounds() {
-		bb.This().(Node2D).ConnectEvents()
-		bb.RenderButtonBox()
-		bb.RenderParts()
-		bb.RenderChildren()
-		bb.PopBounds()
+	wi := bb.This().(Widget)
+	if bb.PushBounds(vp) {
+		wi.ConnectEvents()
+		bb.RenderButtonBox(vp)
+		bb.RenderParts(vp)
+		bb.RenderChildren(vp)
+		bb.PopBounds(vp)
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}

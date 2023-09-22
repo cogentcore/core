@@ -283,7 +283,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 }
 
 // Config configures the view
-func (fv *FileView) Config() {
+func (fv *FileView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.TypeLayout, "files-row")
@@ -320,7 +320,7 @@ func (fv *FileView) ConfigPathBar() {
 	pf.Editable = true
 	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
-	pf.ConfigParts()
+	pf.ConfigParts(vp)
 	pft, found := pf.TextField()
 	if found {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)

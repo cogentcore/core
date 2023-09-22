@@ -294,7 +294,7 @@ func (lb *Label) HoverEvent() {
 				tl := &llb.TextRender.Links[ti]
 				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
-					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Viewport, llb.Nm)
+					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Vp, llb.Nm)
 					me.SetProcessed()
 					return
 				}
@@ -306,7 +306,7 @@ func (lb *Label) HoverEvent() {
 			pos := llb.WinBBox.Max
 			llb.BBoxMu.RUnlock()
 			pos.X -= 20
-			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Viewport, llb.Nm)
+			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Vp, llb.Nm)
 		}
 	})
 }
@@ -330,7 +330,7 @@ func (lb *Label) MouseEvent() {
 		}
 		if me.Action == mouse.DoubleClick && me.Button == mouse.Left && llb.Selectable {
 			updt := llb.UpdateStart()
-			llb.SetSelectedState(!llb.IsSelected())
+			llb.SetSelected(!llb.IsSelected())
 			llb.EmitSelectedSignal()
 			llb.UpdateEnd(updt)
 		}
@@ -376,7 +376,7 @@ func (lb *Label) LabelEvents() {
 }
 
 func (lb *Label) GrabCurBackgroundColor() {
-	if lb.Viewport == nil || lb.IsSelected() {
+	if lb.Vp == nil || lb.IsSelected() {
 		return
 	}
 	if !gist.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {

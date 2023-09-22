@@ -85,11 +85,11 @@ import (
 // UpdateSig just sets NeedsRender flag, in addition to sending
 // the standard Ki update signal.  This will drive updating of
 // the node on the next DoNUpdate pass.
-func (wb *WidgetBase) UpdateSig() {
+func (wb *WidgetBase) UpdateSig() bool {
 	// note: we do not have the viewport here!!
 	// this means we need to cache it..
 	wb.SetNeedsRender(wb.Vp, true)
-	wb.Node.UpdateSig()
+	return wb.Node.UpdateSig()
 }
 
 // SetNeedsStyle sets the NeedsStyle and Viewport NeedsRender flags,

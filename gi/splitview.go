@@ -139,7 +139,7 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 // child entirely -- does full rebuild at level of viewport
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	sv.SetSplits(splits...)
-	sv.ViewportSafe().SetNeedsFullRender()
+	sv.Vp.SetNeedsFullRender()
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -177,7 +177,7 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
+	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
 }
 
@@ -191,7 +191,7 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
+	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
 	sv.UpdateEnd(updt)
 }
 
@@ -243,10 +243,10 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
 	sv.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.ViewportSafe().SetNeedsFullRender() // splits typically require full rebuild
+	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
 }
 
-func (sv *SplitView) Config() {
+func (sv *SplitView) ConfigWidget(vp *Viewport) {
 	sv.Parts.Lay = LayoutNil
 	sv.ConfigWidget()
 	sv.UpdateSplits()
@@ -411,7 +411,7 @@ func (sv *SplitView) Render(vp *Viewport) {
 	if sv.PushBounds() {
 		sv.This().(Node2D).ConnectEvents()
 		for i, kid := range sv.Kids {
-			nii, ni := KiToNode2D(kid)
+			nii, ni := AsWidget(kid)
 			if nii != nil {
 				sp := sv.Splits[i]
 				if sp <= 0.01 {
@@ -497,36 +497,9 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sr *Splitter) Config() {
+func (sr *Splitter) ConfigWidget(vp *Viewport) {
 	sr.ConfigSlider()
-	sr.ConfigParts()
-}
-
-func (sr *Splitter) ConfigPartsIfNeeded(render bool) {
-	if sr.PartsNeedUpdateIconLabel(sr.Icon, "") {
-		sr.ConfigParts()
-	}
-	if !TheIconMgr.IsValid(sr.Icon) || !sr.Parts.HasChildren() {
-		return
-	}
-	ick := sr.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
-	if ick == nil {
-		return
-	}
-	ic := ick.(*Icon)
-	handsz := sr.ThumbSize.Dots
-	spc := sr.BoxSpace()
-	odim := mat32.OtherDim(sr.Dim)
-	sr.LayState.Alloc.Size.SetDim(odim, 2*(handsz+spc.Size().Dim(odim)))
-	sr.LayState.Alloc.SizeOrig = sr.LayState.Alloc.Size
-
-	ic.LayState.Alloc.Size.SetDim(odim, 2*handsz)
-	ic.LayState.Alloc.Size.SetDim(sr.Dim, handsz)
-	ic.LayState.Alloc.PosRel.SetDim(sr.Dim, sr.Pos-(0.5*(handsz+spc.Pos().Dim(sr.Dim))))
-	ic.LayState.Alloc.PosRel.SetDim(odim, 0)
-	if render {
-		ic.DoLayoutTree()
-	}
+	sr.ConfigParts(vp)
 }
 
 func (sr *Splitter) SetStyle() {
@@ -535,7 +508,7 @@ func (sr *Splitter) SetStyle() {
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
-	sr.ConfigParts()
+	sr.ConfigParts(vp)
 }
 
 func (sr *Splitter) GetSize(vp *Viewport, iter int) {
@@ -543,7 +516,6 @@ func (sr *Splitter) GetSize(vp *Viewport, iter int) {
 }
 
 func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.ConfigPartsIfNeeded(false)
 	sr.DoLayoutBase(parBBox, true, iter) // init style
 	sr.DoLayoutParts(parBBox, iter)
 	// sr.SizeFromAlloc()
@@ -618,7 +590,7 @@ func (sr *Splitter) MouseEvent() {
 		srr := recv.Embed(TypeSplitter).(*Splitter)
 		if srr.IsDisabled() {
 			me.SetProcessed()
-			srr.SetSelectedState(!srr.IsSelected())
+			srr.SetSelected(!srr.IsSelected())
 			srr.EmitSelectedSignal()
 			srr.UpdateSig()
 		} else {
@@ -723,7 +695,6 @@ func (sr *Splitter) Render(vp *Viewport) {
 // RenderSplitter does the default splitter rendering
 func (sr *Splitter) RenderSplitter() {
 	sr.UpdateSplitterPos()
-	sr.ConfigPartsIfNeeded(true)
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.Parts.RenderTree()

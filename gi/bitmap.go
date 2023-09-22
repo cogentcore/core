@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
+	"goki.dev/svg"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
@@ -76,7 +77,7 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
-	img, err := girl.OpenImage(string(filename))
+	img, err := svg.OpenImage(string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -149,7 +150,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 	r := image.Rectangle{Min: pos, Max: max}
 	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
-		pni, _ := KiToNode2D(bm.Par)
+		pni, _ := AsWidget(bm.Par)
 		pbb := pni.ChildrenBBox2D()
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
@@ -163,13 +164,11 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 }
 
 func (bm *Bitmap) Render(vp *Viewport) {
-	if bm.FullReRenderIfNeeded() {
-		return
-	}
-	if bm.PushBounds() {
-		bm.This().(Node2D).ConnectEvents()
-		bm.DrawIntoViewport(bm.Viewport)
-		bm.PopBounds()
+	wi := bm.This().(Widget)
+	if bm.PushBounds(vp) {
+		wi.ConnectEvents()
+		// bm.DrawIntoViewport(bm.Viewport)
+		bm.PopBounds(vp)
 	} else {
 		bm.DisconnectAllEvents(AllPris)
 	}
@@ -182,7 +181,7 @@ func (bm *Bitmap) Render(vp *Viewport) {
 // if nil, then image could not be grabbed
 func GrabRenderFrom(wi Widget) *image.RGBA {
 	wb := wi.AsWidget()
-	vp = wb.Vp
+	vp := wb.Vp
 	if vp == nil || vp.Pixels == nil {
 		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", wb.Path())
 		return nil

@@ -375,7 +375,7 @@ func (sv *SliceViewBase) UpdateValues() {
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) Config() {
+func (sv *SliceViewBase) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeLayout, "grid-lay")
@@ -566,7 +566,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 		wupdt := sv.TopUpdateStart()
 		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
-		svv.ViewportSafe().ReRenderNode(svv.This().(gi.Node2D))
+		svv.Vp.ReRenderNode(svv.This().(gi.Node2D))
 		svv.TopUpdateEnd(wupdt)
 	})
 }
@@ -649,7 +649,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
-	mvp := sv.ViewportSafe()
+	mvp := sv.Vp
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
 		sv.VisRows = gi.LayoutPrefMaxRows
 		sv.LayoutHeight = float32(sv.VisRows) * sv.RowHeight
@@ -763,7 +763,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				})
 			}
 			idxlab.SetText(sitxt)
-			idxlab.SetSelectedState(issel)
+			idxlab.SetSelected(issel)
 		}
 
 		var widg gi.Node2D
@@ -773,7 +773,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			if sv.IsDisabled() {
 				widg.AsNode2D().SetDisabled()
 			}
-			widg.AsNode2D().SetSelectedState(issel)
+			widg.AsNode2D().SetSelected(issel)
 		} else {
 			widg = ki.NewOfType(vtyp).(gi.Node2D)
 			sg.SetChild(widg, ridx+idxOff, valnm)
@@ -892,7 +892,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueViewBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				gi.NewKiDialog(sv.ViewportSafe(), ownki.BaseIface(),
+				gi.NewKiDialog(sv.Vp, ownki.BaseIface(),
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
 					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.DialogAccepted) {
@@ -1073,7 +1073,7 @@ func (sv *SliceViewBase) SetStyle() {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
-	mvp := sv.ViewportSafe()
+	mvp := sv.Vp
 	if mvp != nil && sv.This().(gi.Node2D).IsVisible() &&
 		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.VpFlagPrefSizing))) {
 		if sv.This().(SliceViewer).LayoutSliceGrid() {
@@ -1438,13 +1438,13 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	if sv.ShowIndex {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
 			widg := sg.Child(rowidx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
+			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
 		widg := sg.Child(rowidx + idxOff).(gi.Node2D).AsNode2D()
-		widg.SetSelectedState(sel)
+		widg.SetSelected(sel)
 		widg.UpdateSig()
 	}
 	sv.TopUpdateEnd(wupdt)
@@ -1836,7 +1836,7 @@ func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	var men gi.Menu
 	sv.MakePasteMenu(&men, md, idx)
 	pos := sv.IdxPos(idx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.ViewportSafe(), "svPasteMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, "svPasteMenu")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this idx
@@ -1982,7 +1982,7 @@ func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
 	sv.MakeDropMenu(&men, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.ViewportSafe(), "svDropMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, "svDropMenu")
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -2099,7 +2099,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	var men gi.Menu
 
-	if CtxtMenuView(val, sv.IsDisabled(), sv.ViewportSafe(), &men) {
+	if CtxtMenuView(val, sv.IsDisabled(), sv.Vp, &men) {
 		if sv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-svmenu")
 			sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
@@ -2115,7 +2115,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 				pos = em.LastMousePos
 			}
 		}
-		gi.PopupMenu(men, pos.X, pos.Y, sv.ViewportSafe(), sv.Nm+"-menu")
+		gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, sv.Nm+"-menu")
 	}
 }
 

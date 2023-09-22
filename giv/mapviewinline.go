@@ -80,7 +80,7 @@ func (mv *MapViewInline) SetMap(mp any) {
 }
 
 // ConfigParts configures Parts for the current map
-func (mv *MapViewInline) ConfigParts() {
+func (mv *MapViewInline) ConfigParts(vp *Viewport) {
 	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
@@ -219,16 +219,16 @@ func (mv *MapViewInline) MapAdd() {
 }
 
 func (mv *MapViewInline) UpdateFromMap() {
-	mv.ConfigParts()
+	mv.ConfigParts(vp)
 }
 
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
-	mv.ConfigParts()
+	mv.ConfigParts(vp)
 }
 
 func (mv *MapViewInline) SetStyle() {
-	mv.ConfigParts()
+	mv.ConfigParts(vp)
 	mv.WidgetBase.SetStyle()
 }
 

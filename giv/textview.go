@@ -514,7 +514,7 @@ func (tv *TextView) ParentLayout() *gi.Layout {
 	if tv.Par == nil {
 		return nil
 	}
-	pari, _ := gi.KiToNode2D(tv.Par)
+	pari, _ := gi.AsWidget(tv.Par)
 	return pari.AsDoLayout(vp * Viewport)
 }
 
@@ -1459,7 +1459,7 @@ func (tv *TextView) CursorTransposeWord() {
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (tv *TextView) JumpToLinePrompt() {
-	gi.StringPromptDialog(tv.Viewport, "", "Line no..",
+	gi.StringPromptDialog(tv.Vp, "", "Line no..",
 		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dlg := send.(*gi.Dialog)
@@ -1918,7 +1918,7 @@ func QReplaceDialog(avp *gi.Viewport, find string, lexitems bool, opts gi.DlgOpt
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
-	tff.ConfigParts()
+	tff.ConfigParts(vp)
 	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
@@ -1928,7 +1928,7 @@ func QReplaceDialog(avp *gi.Viewport, find string, lexitems bool, opts gi.DlgOpt
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.ConfigParts()
+	tfr.ConfigParts(vp)
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
 	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.CheckBox)
@@ -4779,7 +4779,7 @@ func (tv *TextView) TextViewEvents() {
 //  Node2D Interface
 
 // Config calls Init on widget
-func (tv *TextView) Config() {
+func (tv *TextView) ConfigWidget(vp *Viewport) {
 	tv.ConfigWidget()
 }
 

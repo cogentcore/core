@@ -93,7 +93,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 }
 
 // Config configures the view
-func (av *ArgView) Config() {
+func (av *ArgView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeLabel, "title")
 	config.Add(gi.TypeFrame, "args-grid")

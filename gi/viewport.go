@@ -151,7 +151,7 @@ type Viewport struct {
 	Flags VpFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
 	// Viewport-level viewbox within any parent Viewport
-	Geom girl.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
+	Geom gist.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
 
 	// Root of the scenegraph for this viewport
 	Frame Frame `desc:"Root of the scenegraph for this viewport"`
@@ -270,7 +270,7 @@ func (vp *Viewport) DeletePopup() {
 	if !vp.HasFlag(int(VpPopupDestroyAll)) {
 		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
 		if len(vp.Kids) == 1 {
-			cli, _ := KiToNode2D(vp.Child(0))
+			cli, _ := AsWidget(vp.Child(0))
 			ly := cli.AsDoLayout(vp * Viewport)
 			if ly != nil {
 				ly.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them

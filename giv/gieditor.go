@@ -204,7 +204,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // }
 
 // Config configures the widget
-func (ge *GiEditor) Config() {
+func (ge *GiEditor) ConfigWidget(vp *Viewport) {
 	if ge.KiRoot == nil {
 		return
 	}

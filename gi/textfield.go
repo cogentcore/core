@@ -831,7 +831,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
-	tf.Complete.Show(s, 0, tf.CursorPos, tf.ViewportSafe(), cpos, forceComplete)
+	tf.Complete.Show(s, 0, tf.CursorPos, tf.Vp, cpos, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -898,7 +898,7 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	spc := st.BoxSpace()
 	pos := tf.EffPos.Add(spc.Pos())
 	if wincoords {
-		mvp := tf.ViewportSafe()
+		mvp := tf.Vp
 		mvp.BBoxMu.RLock()
 		pos = pos.Add(mat32.NewVec2FmPoint(mvp.WinBBox.Min))
 		mvp.BBoxMu.RUnlock()
@@ -1389,7 +1389,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	case mouse.Left:
 		if me.Action == mouse.Press {
 			if tf.IsDisabled() {
-				tf.SetSelectedState(!tf.IsSelected())
+				tf.SetSelected(!tf.IsSelected())
 				tf.EmitSelectedSignal()
 				tf.UpdateSig()
 			} else {
@@ -1467,7 +1467,7 @@ func (tf *TextField) TextFieldEvents() {
 	tf.KeyChordEvent()
 }
 
-func (tf *TextField) ConfigParts() {
+func (tf *TextField) ConfigParts(vp *Viewport) {
 	tf.Parts.Lay = LayoutHoriz
 	if tf.IsDisabled() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		tf.Parts.DeleteChildren(ki.DestroyKids)
@@ -1517,11 +1517,11 @@ func (tf *TextField) ConfigParts() {
 ////////////////////////////////////////////////////
 //  Node2D Interface
 
-func (tf *TextField) Config() {
+func (tf *TextField) ConfigWidget(vp *Viewport) {
 	tf.ConfigWidget()
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
-	tf.ConfigParts()
+	tf.ConfigParts(vp)
 }
 
 // StyleTextField does text field styling -- sets StyMu Lock
@@ -1532,7 +1532,7 @@ func (tf *TextField) StyleTextField() {
 	tf.SetStyleWidget()
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
-	tf.ConfigParts()
+	tf.ConfigParts(vp)
 }
 
 func (tf *TextField) SetStyle() {
@@ -1643,7 +1643,7 @@ func (tf *TextField) Render(vp *Viewport) {
 			tf.ClearNeedsStyle()
 		}
 		tf.RenderTextField()
-		if tf.IsEnabled() {
+		if tf.HasFlag(Enabled) {
 			if tf.HasFocus() && tf.IsFocusActive() {
 				tf.StartCursor()
 			} else {

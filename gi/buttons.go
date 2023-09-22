@@ -54,15 +54,10 @@ type ButtonBase struct {
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
-var ButtonBaseProps = ki.Props{
-	"base-type": true, // excludes type from user selections
-}
-
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", ki.Type(bb).Name())
-		ki.GenCopyFieldsFrom(bb.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", bb.KiType().Name)
 		return
 	}
 	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -117,25 +112,25 @@ const (
 // IsCheckable returns if is this button checkable -- the Checked state is
 // independent of the generic widget selection state
 func (bb *ButtonBase) IsCheckable() bool {
-	return bb.HasFlag(int(ButtonFlagCheckable))
+	return bb.HasFlag(ButtonFlagCheckable)
 }
 
 // SetCheckable sets whether this button is checkable -- emits ButtonToggled
 // signals if so -- the Checked state is independent of the generic widget
 // selection state
 func (bb *ButtonBase) SetCheckable(checkable bool) {
-	bb.SetFlagState(checkable, int(ButtonFlagCheckable))
+	bb.SetFlag(checkable, ButtonFlagCheckable)
 }
 
 // IsChecked checks if button is checked
 func (bb *ButtonBase) IsChecked() bool {
-	return bb.HasFlag(int(ButtonFlagChecked))
+	return bb.HasFlag(ButtonFlagChecked)
 }
 
 // SetChecked sets the checked state of this button -- does not emit signal or
 // update
 func (bb *ButtonBase) SetChecked(chk bool) {
-	bb.SetFlagState(chk, int(ButtonFlagChecked))
+	bb.SetFlag(chk, ButtonFlagChecked)
 }
 
 // ToggleChecked toggles the checked state of this button -- does not emit
@@ -146,55 +141,51 @@ func (bb *ButtonBase) ToggleChecked() {
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
 func (bb *ButtonBase) SetAsMenu() {
-	bb.SetFlag(int(ButtonFlagMenu))
+	bb.SetFlag(true, ButtonFlagMenu)
 }
 
 // SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
 // or a menu function then it will still behave as a menu
 func (bb *ButtonBase) SetAsButton() {
-	bb.ClearFlag(int(ButtonFlagMenu))
+	bb.SetFlag(false, ButtonFlagMenu)
 }
 
-// SetText sets the text and updates the button
+// SetText sets the text and updates the button.
+// Use this for optimized auto-updating based on nature of changes made.
+// Otherwise, can set Text directly followed by ReConfig()
 func (bb *ButtonBase) SetText(txt string) {
-	if bb.This() == nil {
+	if !bb.HasVp() {
 		return
 	}
 	updt := bb.UpdateStart()
-	bb.StyMu.RLock()
-	needSty := bb.Style.Font.Size.Val == 0
-	bb.StyMu.RUnlock()
-	if needSty {
-		bb.StyleButton()
+	if bb.Text == txt {
+		return
 	}
-	if bb.Text != txt {
-		bb.SetFullReRender() // needed for resize
-		bb.Text = txt
+	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
+	bb.Text = txt
+	if recfg {
+		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
 	}
-	bb.This().(ButtonWidget).ConfigParts()
 	bb.UpdateEnd(updt)
+	bb.SetNeedsLayout(bb.Vp, updt)
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
-// updates the button
+// updates the button.
+// Use this for optimized auto-updating based on nature of changes made.
+// Otherwise, can set Icon directly followed by ReConfig()
 func (bb *ButtonBase) SetIcon(iconName gicons.Icon) {
-	updt := bb.UpdateStart()
-	defer bb.UpdateEnd(updt)
-	if !bb.IsVisible() {
-		bb.Icon = iconName
+	if !bb.HasVp() {
 		return
 	}
-	bb.StyMu.RLock()
-	needSty := bb.Style.Font.Size.Val == 0
-	bb.StyMu.RUnlock()
-	if needSty {
-		bb.StyleButton()
-	}
-	if bb.Icon != iconName {
-		bb.SetFullReRender()
-	}
+	updt := bb.UpdateStart()
+	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
-	bb.This().(ButtonWidget).ConfigParts()
+	if recfg {
+		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
+	}
+	bb.UpdateEnd(updt)
+	bb.SetNeedsLayout(bb.Vp, updt)
 }
 
 // OnClicked calls the given function when the button is clicked,
@@ -214,7 +205,7 @@ func (bb *ButtonBase) ButtonPress() {
 	updt := bb.UpdateStart()
 	if bb.IsDisabled() {
 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
-			bb.SetSelectedState(!bb.IsSelected())
+			bb.SetSelected(!bb.IsSelected())
 			bb.EmitSelectedSignal()
 			bb.UpdateSig()
 		}
@@ -249,7 +240,7 @@ func (bb *ButtonBase) BaseButtonRelease() {
 
 // IsMenu returns true this button is on a menu -- it is a menu item
 func (bb *ButtonBase) IsMenu() bool {
-	return bb.HasFlag(int(ButtonFlagMenu))
+	return bb.HasFlag(ButtonFlagMenu)
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
@@ -272,11 +263,11 @@ func (bb *ButtonBase) OpenMenu() bool {
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = bb.ObjBBox.Max
 	}
-	indic := bb.Parts.ChildByName("indicator", 3)
+	indic := AsWidgetBase(bb.Parts.ChildByName("indicator", 3))
 	if indic != nil {
-		pos = KiToNode2DBase(indic).WinBBox.Min
+		pos = indic.WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
-			pos = KiToNode2DBase(indic).ObjBBox.Min
+			pos = indic.ObjBBox.Min
 		}
 	} else {
 		pos.X = bb.WinBBox.Min.X
@@ -285,8 +276,8 @@ func (bb *ButtonBase) OpenMenu() bool {
 		}
 	}
 	bb.BBoxMu.RUnlock()
-	if bb.Viewport != nil {
-		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Viewport, bb.Text)
+	if bb.Vp != nil {
+		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Vp, bb.Text)
 		return true
 	}
 	return false
@@ -308,9 +299,9 @@ func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.TypeAndNameList, defOn 
 		return -1
 	}
 	indIdx := -1
-	config.Add(TypeStretch, "ind-stretch")
+	config.Add(StretchType, "ind-stretch")
 	indIdx = len(*config)
-	config.Add(TypeIcon, "indicator")
+	config.Add(IconType, "indicator")
 	return indIdx
 }
 
@@ -385,7 +376,7 @@ func (bb *ButtonBase) HoverTooltipEvent() {
 			pos := wbb.WinBBox.Max
 			bb.BBoxMu.RUnlock()
 			pos.X -= 20
-			PopupTooltip(tt, pos.X, pos.Y, wbb.Viewport, wbb.Nm)
+			PopupTooltip(tt, pos.X, pos.Y, wbb.Vp, wbb.Nm)
 		}
 	})
 }
@@ -413,15 +404,11 @@ type ButtonWidget interface {
 
 	// StyleParts is called during SetStyle to handle styling associated with
 	// parts -- icons mainly.
-	StyleParts()
+	StyleParts(vp *Viewport)
 
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
-	ConfigParts()
-
-	// ConfigPartsIfNeeded configures the parts of the button, only if needed
-	// -- called during layout and render
-	ConfigPartsIfNeeded()
+	ConfigParts(vp *Viewport)
 }
 
 ///////////////////////////////////////////////////////////
@@ -431,10 +418,9 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 	return bb
 }
 
-func (bb *ButtonBase) Config() {
-	bb.ConfigWidget()
+func (bb *ButtonBase) ConfigWidget(vp *Viewport) {
 	// bb.State = ButtonActive
-	bb.This().(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts(vp)
 }
 
 func (bb *ButtonBase) ButtonRelease() {
@@ -452,7 +438,7 @@ func (bb *ButtonBase) StyleParts() {
 	}
 }
 
-func (bb *ButtonBase) ConfigParts() {
+func (bb *ButtonBase) ConfigParts(vp *Viewport) {
 	bb.Parts.Lay = LayoutHoriz
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
@@ -464,13 +450,6 @@ func (bb *ButtonBase) ConfigParts() {
 	if mods {
 		bb.UpdateEnd(updt)
 	}
-}
-
-func (bb *ButtonBase) ConfigPartsIfNeeded() {
-	if !bb.PartsNeedUpdateIconLabel(bb.Icon, bb.Text) {
-		return
-	}
-	bb.This().(ButtonWidget).ConfigParts()
 }
 
 // StyleButton does button styling -- it sets the StyMu Lock
@@ -493,14 +472,13 @@ func (bb *ButtonBase) SetStyle() {
 	bb.StyMu.Lock()
 	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
-	bb.This().(ButtonWidget).ConfigParts()
+	bb.This().(ButtonWidget).ConfigParts(vp)
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
 	}
 }
 
 func (bb *ButtonBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.This().(ButtonWidget).ConfigPartsIfNeeded()
 	bb.DoLayoutBase(parBBox, true, iter) // init style
 	bb.DoLayoutParts(parBBox, iter)
 	return bb.DoLayoutChildren(iter)
@@ -784,17 +762,17 @@ func (cb *CheckBox) SetIcons(icOn, icOff gicons.Icon) {
 	updt := cb.UpdateStart()
 	cb.Icon = icOn
 	cb.IconOff = icOff
-	cb.This().(ButtonWidget).ConfigParts()
+	cb.This().(ButtonWidget).ConfigParts(vp)
 	cb.UpdateEnd(updt)
 }
 
-func (cb *CheckBox) Config() {
+func (cb *CheckBox) ConfigWidget(vp *Viewport) {
 	cb.SetCheckable(true)
 	cb.ConfigWidget()
-	cb.This().(ButtonWidget).ConfigParts()
+	cb.This().(ButtonWidget).ConfigParts(vp)
 }
 
-func (cb *CheckBox) ConfigParts() {
+func (cb *CheckBox) ConfigParts(vp *Viewport) {
 	cb.SetCheckable(true)
 	if !TheIconMgr.IsValid(cb.Icon) {
 		cb.Icon = gicons.CheckBox // fallback
@@ -834,30 +812,5 @@ func (cb *CheckBox) ConfigParts() {
 	}
 	if mods {
 		cb.UpdateEnd(updt)
-	}
-}
-
-func (cb *CheckBox) ConfigPartsIfNeeded() {
-	if !cb.Parts.HasChildren() {
-		cb.This().(ButtonWidget).ConfigParts()
-	}
-	icIdx := 0 // always there
-	ist := cb.Parts.Child(icIdx).(*Layout)
-	if TheIconMgr.IsValid(cb.Icon) {
-		icon := ist.Child(0).(*Icon)
-		if !icon.HasChildren() || icon.Nm != string(cb.Icon) || cb.NeedsFullReRender() {
-			icon.SetIcon(cb.Icon)
-		}
-	}
-	if TheIconMgr.IsValid(cb.IconOff) {
-		icoff := ist.Child(1).(*Icon)
-		if !icoff.HasChildren() || icoff.Nm != string(cb.IconOff) || cb.NeedsFullReRender() {
-			icoff.SetIcon(cb.IconOff)
-		}
-	}
-	if cb.IsChecked() {
-		ist.StackTop = 0
-	} else {
-		ist.StackTop = 1
 	}
 }

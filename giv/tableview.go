@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -244,7 +245,7 @@ func (tv *TableView) IsConfiged() bool {
 }
 
 // Config configures the view
-func (tv *TableView) Config() {
+func (tv *TableView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "frame")
@@ -490,7 +491,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	}
 	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
-	mvp := tv.ViewportSafe()
+	mvp := tv.Vp
 	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
 		tv.VisRows = min(gi.LayoutPrefMaxRows, tv.SliceSize)
 		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
@@ -624,7 +625,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					}
 				})
 			}
-			idxlab.SetSelectedState(issel)
+			idxlab.SetSelected(issel)
 			idxlab.SetText(sitxt)
 		}
 
@@ -666,7 +667,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				if tv.IsDisabled() {
 					widg.AsNode2D().SetDisabled()
 				}
-				widg.AsNode2D().SetSelectedState(issel)
+				widg.AsNode2D().SetSelected(issel)
 			} else {
 				widg = ki.NewOfType(vtyp).(gi.Node2D)
 				sg.SetChild(widg, cidx, valnm)
@@ -906,7 +907,7 @@ func (tv *TableView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(tv.Slice) {
-		ToolBarView(tv.Slice, tv.ViewportSafe(), tb)
+		ToolBarView(tv.Slice, tv.Vp, tb)
 		tb.SetFullReRender()
 	}
 	tv.ToolbarSlice = tv.Slice
@@ -950,12 +951,12 @@ func (tv *TableView) SetSortFieldName(nm string) {
 }
 
 func (tv *TableView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	redo := tv.Frame.DoLayout(vp*Viewport, parBBox, iter)
+	redo := tv.Frame.DoLayout(vp, parBBox, iter)
 	if !tv.IsConfiged() {
 		return redo
 	}
 	tv.LayoutHeader()
-	tv.SliceHeader().DoLayout(vp*Viewport, parBBox, iter)
+	tv.SliceHeader().DoLayout(vp, parBBox, iter)
 	return redo
 }
 
@@ -1025,14 +1026,14 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 		seldx := ridx + idxOff + fli
 		if sg.Kids.IsValidIndex(seldx) == nil {
 			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
+			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}
 	}
 	if tv.ShowIndex {
 		if sg.Kids.IsValidIndex(ridx) == nil {
 			widg := sg.Child(ridx).(gi.Node2D).AsNode2D()
-			widg.SetSelectedState(sel)
+			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}
 	}

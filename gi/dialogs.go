@@ -523,7 +523,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 //////////////////////////////////////////////////////////////////////////
 // Node2D interface
 
-func (dlg *Dialog) Config() {
+func (dlg *Dialog) ConfigWidget(vp *Viewport) {
 	dlg.Viewport.Config()
 }
 

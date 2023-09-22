@@ -294,7 +294,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 	if !em.Master.IsInScope(recv, popup) {
 		return ki.Continue
 	}
-	nii, ni := KiToNode2D(recv)
+	nii, ni := AsWidget(recv)
 	if ni != nil {
 		if evi.OnFocus() {
 			if !nii.HasFocus() { // note: HasFocus is a separate interface method, containers also set to true
@@ -605,7 +605,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 			if !em.Master.IsInScope(k, popup) {
 				return ki.Break
 			}
-			_, ni := KiToNode2D(k)
+			_, ni := AsWidget(k)
 			if ni != nil {
 				in := ni.PosInWinBBox(pos)
 				if in {
@@ -659,7 +659,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 			if !em.Master.IsInScope(recv, popup) {
 				return ki.Continue
 			}
-			_, ni := KiToNode2D(recv)
+			_, ni := AsWidget(recv)
 			if ni != nil {
 				pos := me.Pos()
 				if ni.PosInWinBBox(pos) {
@@ -824,7 +824,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 			if !em.Master.IsInScope(recv, popup) {
 				return ki.Continue
 			}
-			_, ni := KiToNode2D(recv)
+			_, ni := AsWidget(recv)
 			if ni != nil {
 				in := ni.PosInWinBBox(pos)
 				if in {
@@ -917,7 +917,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	cfoc := em.CurFocus()
 	if cfoc == k {
 		if k != nil {
-			_, ni := KiToNode2D(k)
+			_, ni := AsWidget(k)
 			if ni != nil && ni.This() != nil {
 				ni.SetFocusState(true) // ensure focus flag always set
 			}
@@ -929,7 +929,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	defer em.Master.EventTopUpdateEnd(updt)
 
 	if cfoc != nil {
-		nii, ni := KiToNode2D(cfoc)
+		nii, ni := AsWidget(cfoc)
 		if ni != nil && ni.This() != nil {
 			ni.SetFocusState(false)
 			// fmt.Printf("clear foc: %v\n", ni.Path())
@@ -940,7 +940,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	if k == nil {
 		return true
 	}
-	nii, ni := KiToNode2D(k)
+	nii, ni := AsWidget(k)
 	if ni == nil || ni.This() == nil { // only 2d for now
 		em.setFocusPtr(nil)
 		return false
@@ -970,7 +970,7 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 			if gotFocus {
 				return ki.Break
 			}
-			_, ni := KiToNode2D(k)
+			_, ni := AsWidget(k)
 			if ni == nil || ni.This() == nil {
 				return ki.Continue
 			}
@@ -1003,7 +1003,7 @@ func (em *EventMgr) FocusOnOrNext(foc ki.Ki) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, ni := KiToNode2D(foc)
+	_, ni := AsWidget(foc)
 	if ni == nil || ni.This() == nil {
 		return false
 	}
@@ -1021,7 +1021,7 @@ func (em *EventMgr) FocusOnOrPrev(foc ki.Ki) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, ni := KiToNode2D(foc)
+	_, ni := AsWidget(foc)
 	if ni == nil || ni.This() == nil {
 		return false
 	}
@@ -1048,7 +1048,7 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 		if gotFocus {
 			return ki.Break
 		}
-		_, ni := KiToNode2D(k)
+		_, ni := AsWidget(k)
 		if ni == nil || ni.This() == nil {
 			return ki.Continue
 		}
@@ -1078,7 +1078,7 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot := em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
-		_, ni := KiToNode2D(k)
+		_, ni := AsWidget(k)
 		if ni == nil || ni.This() == nil {
 			return ki.Continue
 		}
@@ -1106,7 +1106,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		if k == focRoot { // skip top-level
 			return ki.Continue
 		}
-		nii, ni := KiToNode2D(k)
+		nii, ni := AsWidget(k)
 		if ni == nil || ni.This() == nil {
 			return ki.Continue
 		}
@@ -1153,7 +1153,7 @@ func (em *EventMgr) PopFocus() {
 	sz := len(em.FocusStack)
 	em.Focus = nil
 	nxtf := em.FocusStack[sz-1]
-	_, ni := KiToNode2D(nxtf)
+	_, ni := AsWidget(nxtf)
 	if ni != nil && ni.This() != nil {
 		em.FocusMu.Unlock()
 		em.SetFocus(nxtf)

@@ -205,16 +205,16 @@ func (cb *ComboBox) ButtonRelease() {
 	}
 	indic := cb.Parts.ChildByName("indicator", 3)
 	if indic != nil {
-		pos = KiToNode2DBase(indic).WinBBox.Min
+		pos = AsWidget(indic).WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
-			pos = KiToNode2DBase(indic).ObjBBox.Min
+			pos = AsWidget(indic).ObjBBox.Min
 		}
 	} else {
 		pos.Y -= 10
 		pos.X -= 10
 	}
 	cb.BBoxMu.RUnlock()
-	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Viewport, cb.Text)
+	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Vp, cb.Text)
 }
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
@@ -257,21 +257,7 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, d
 	return indIdx
 }
 
-func (cb *ComboBox) ConfigPartsIfNeeded() {
-	if cb.Editable {
-		cn := cb.Parts.ChildByName("text", 2)
-		if !cb.PartsNeedUpdateIconLabel(cb.Icon, "") && cn != nil {
-			return
-		}
-	} else {
-		if !cb.PartsNeedUpdateIconLabel(cb.Icon, cb.Text) {
-			return
-		}
-	}
-	cb.This().(ButtonWidget).ConfigParts()
-}
-
-func (cb *ComboBox) ConfigParts() {
+func (cb *ComboBox) ConfigParts(vp *Viewport) {
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = laser.ToBool(eb)
 	}
@@ -559,7 +545,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 			}
 		}
 		ac.Data = i // index is the data
-		ac.SetSelectedState(i == cb.CurIndex)
+		ac.SetSelected(i == cb.CurIndex)
 		ac.SetAsMenu()
 		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			idx := data.(int)

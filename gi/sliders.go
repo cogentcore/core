@@ -497,7 +497,7 @@ func (sb *SliderBase) MouseEvent() {
 		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
 		if sbb.IsDisabled() {
 			me.SetProcessed()
-			sbb.SetSelectedState(!sbb.IsSelected())
+			sbb.SetSelected(!sbb.IsSelected())
 			sbb.EmitSelectedSignal()
 			sbb.UpdateSig()
 		} else {
@@ -580,7 +580,7 @@ func (sb *SliderBase) ConfigSlider() {
 	}
 }
 
-func (sb *SliderBase) ConfigParts() {
+func (sb *SliderBase) ConfigParts(vp *Viewport) {
 	sb.Parts.Lay = LayoutNil
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
@@ -588,29 +588,6 @@ func (sb *SliderBase) ConfigParts() {
 	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)
-	}
-}
-
-func (sb *SliderBase) ConfigPartsIfNeeded(render bool) {
-	if sb.PartsNeedUpdateIconLabel(sb.Icon, "") {
-		sb.ConfigParts()
-	}
-	if TheIconMgr.IsValid(sb.Icon) && sb.Parts.HasChildren() {
-		ick := sb.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
-		if ick != nil {
-			ic := ick.(*Icon)
-			mrg := sb.Style.EffMargin()
-			pad := sb.Style.Padding.Dots()
-			odim := mat32.OtherDim(sb.Dim)
-			spc := mrg.Pos().Dim(odim) + pad.Pos().Dim(odim)
-			ic.LayState.Alloc.PosRel.SetDim(sb.Dim, sb.Pos+spc-0.5*sb.ThSize)
-			ic.LayState.Alloc.PosRel.SetDim(odim, -pad.Pos().Dim(odim))
-			ic.LayState.Alloc.Size.X = sb.ThSize
-			ic.LayState.Alloc.Size.Y = sb.ThSize
-			if render {
-				ic.DoLayoutTree()
-			}
-		}
 	}
 }
 
@@ -754,9 +731,9 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
-func (sr *Slider) Config() {
+func (sr *Slider) ConfigWidget(vp *Viewport) {
 	sr.ConfigSlider()
-	sr.ConfigParts()
+	sr.ConfigParts(vp)
 }
 
 func (sr *Slider) SetStyle() {
@@ -765,7 +742,7 @@ func (sr *Slider) SetStyle() {
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
-	sr.ConfigParts()
+	sr.ConfigParts(vp)
 }
 
 func (sr *Slider) GetSize(vp *Viewport, iter int) {
@@ -778,7 +755,6 @@ func (sr *Slider) GetSize(vp *Viewport, iter int) {
 }
 
 func (sr *Slider) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.ConfigPartsIfNeeded(false)
 	sr.DoLayoutBase(parBBox, true, iter) // init style
 	sr.DoLayoutParts(parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
@@ -809,8 +785,6 @@ func (sr *Slider) Render(vp *Viewport) {
 // render using a default style if not otherwise styled
 func (sr *Slider) RenderDefaultStyle() {
 	rs, pc, st := sr.RenderLock()
-
-	sr.ConfigPartsIfNeeded(true)
 
 	// overall fill box
 	sr.RenderStdBox(&sr.StyleBox)
@@ -916,7 +890,7 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
-func (sb *ScrollBar) Config() {
+func (sb *ScrollBar) ConfigWidget(vp *Viewport) {
 	sb.ConfigSlider()
 }
 
@@ -926,7 +900,7 @@ func (sb *ScrollBar) SetStyle() {
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
-	sb.ConfigParts()
+	sb.ConfigParts(vp)
 }
 
 func (sb *ScrollBar) GetSize(vp *Viewport, iter int) {
@@ -1086,6 +1060,6 @@ func (pb *ProgressBar) ProgStep() {
 	pb.ProgMu.Unlock()
 }
 
-func (pb *ProgressBar) Config() {
+func (pb *ProgressBar) ConfigWidget(vp *Viewport) {
 	pb.ScrollBar.Config()
 }

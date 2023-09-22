@@ -46,7 +46,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeFontValueView).(*FontValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.ViewportSafe(), nil, nil)
+		vvv.Activate(ac.Vp, nil, nil)
 	})
 	vv.UpdateWidget()
 }

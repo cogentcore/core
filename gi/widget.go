@@ -233,10 +233,20 @@ type WidgetBase struct {
 // AsWidget returns the given Ki object
 // as a Widget interface and a WidgetBase.
 func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
+	if k == nil || k.This() == nil {
+		return nil, nil
+	}
 	if w, ok := k.(Widget); ok {
 		return w, w.AsWidget()
 	}
 	return nil, nil
+}
+
+// AsWidgetBase returns the given Ki object as a WidgetBase, or nil.
+// for direct use of the return value in cases where that is needed.
+func AsWidgetBase(k ki.Ki) *WidgetBase {
+	_, wb := AsWidget(k)
+	return wb
 }
 
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
@@ -306,8 +316,15 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	}
 }
 
+func (wb *WidgetBase) ParentWindow() *Window {
+	if wb.Vp == nil {
+		return nil
+	}
+	return wb.Win
+}
+
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.IsInvisible() {
+	if wb == nil || wb.This() == nil || wb.HasFlag(Invisible) {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {

@@ -8,6 +8,40 @@ import (
 	"goki.dev/ordmap"
 )
 
+// ActionType is the [gti.Type] for [Action]
+var ActionType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Action",
+	Doc:        "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "[view: -] optional data that is sent with the ActionSig when it is emitted", Directives: gti.Directives{}}},
+		{"ActionSig", &gti.Field{Name: "ActionSig", Type: "ki.Signal", Doc: "[view: -] signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action", Directives: gti.Directives{}}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(act *Action)", Doc: "[view: -] optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "ActionTypes", Doc: "the type of action", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Action{},
+})
+
+// NewAction adds a new [Action] with
+// the given name to the given parent.
+func NewAction(par ki.Ki, name string) *Action {
+	return par.NewChild(ActionType, name).(*Action)
+}
+
+// KiType returns the [*gti.Type] of [Action]
+func (t *Action) KiType() *gti.Type {
+	return ActionType
+}
+
+// New returns a new [*Action] value
+func (t *Action) New() ki.Ki {
+	return &Action{}
+}
+
 // MenuBarType is the [gti.Type] for [MenuBar]
 var MenuBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.MenuBar",
@@ -30,8 +64,8 @@ func NewMenuBar(par ki.Ki, name string) *MenuBar {
 	return par.NewChild(MenuBarType, name).(*MenuBar)
 }
 
-// Type returns the [*gti.Type] of [MenuBar]
-func (t *MenuBar) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [MenuBar]
+func (t *MenuBar) KiType() *gti.Type {
 	return MenuBarType
 }
 
@@ -59,8 +93,8 @@ func NewToolBar(par ki.Ki, name string) *ToolBar {
 	return par.NewChild(ToolBarType, name).(*ToolBar)
 }
 
-// Type returns the [*gti.Type] of [ToolBar]
-func (t *ToolBar) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ToolBar]
+func (t *ToolBar) KiType() *gti.Type {
 	return ToolBarType
 }
 
@@ -92,8 +126,8 @@ func NewBitmap(par ki.Ki, name string) *Bitmap {
 	return par.NewChild(BitmapType, name).(*Bitmap)
 }
 
-// Type returns the [*gti.Type] of [Bitmap]
-func (t *Bitmap) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Bitmap]
+func (t *Bitmap) KiType() *gti.Type {
 	return BitmapType
 }
 
@@ -126,8 +160,8 @@ func NewButtonBox(par ki.Ki, name string) *ButtonBox {
 	return par.NewChild(ButtonBoxType, name).(*ButtonBox)
 }
 
-// Type returns the [*gti.Type] of [ButtonBox]
-func (t *ButtonBox) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ButtonBox]
+func (t *ButtonBox) KiType() *gti.Type {
 	return ButtonBoxType
 }
 
@@ -164,14 +198,45 @@ func NewButtonBase(par ki.Ki, name string) *ButtonBase {
 	return par.NewChild(ButtonBaseType, name).(*ButtonBase)
 }
 
-// Type returns the [*gti.Type] of [ButtonBase]
-func (t *ButtonBase) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ButtonBase]
+func (t *ButtonBase) KiType() *gti.Type {
 	return ButtonBaseType
 }
 
 // New returns a new [*ButtonBase] value
 func (t *ButtonBase) New() ki.Ki {
 	return &ButtonBase{}
+}
+
+// ButtonType is the [gti.Type] for [Button]
+var ButtonType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Button",
+	Doc:        "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button (default, primary, secondary, etc)", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Button{},
+})
+
+// NewButton adds a new [Button] with
+// the given name to the given parent.
+func NewButton(par ki.Ki, name string) *Button {
+	return par.NewChild(ButtonType, name).(*Button)
+}
+
+// KiType returns the [*gti.Type] of [Button]
+func (t *Button) KiType() *gti.Type {
+	return ButtonType
+}
+
+// New returns a new [*Button] value
+func (t *Button) New() ki.Ki {
+	return &Button{}
 }
 
 // CheckBoxType is the [gti.Type] for [CheckBox]
@@ -195,14 +260,54 @@ func NewCheckBox(par ki.Ki, name string) *CheckBox {
 	return par.NewChild(CheckBoxType, name).(*CheckBox)
 }
 
-// Type returns the [*gti.Type] of [CheckBox]
-func (t *CheckBox) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [CheckBox]
+func (t *CheckBox) KiType() *gti.Type {
 	return CheckBoxType
 }
 
 // New returns a new [*CheckBox] value
 func (t *CheckBox) New() ki.Ki {
 	return &CheckBox{}
+}
+
+// ComboBoxType is the [gti.Type] for [ComboBox]
+var ComboBoxType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.ComboBox",
+	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [gicons.Icon] type, then they\nare displayed using icons instead.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Editable", &gti.Field{Name: "Editable", Type: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}}},
+		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", Doc: "current selected value", Directives: gti.Directives{}}},
+		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}}},
+		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
+		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
+		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
+		{"ItemsMenu", &gti.Field{Name: "ItemsMenu", Type: "Menu", Doc: "the menu of actions for selecting items -- automatically generated from Items", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
+		{"ComboSig", &gti.Field{Name: "ComboSig", Type: "ki.Signal", Doc: "[view: -] signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value", Directives: gti.Directives{}}},
+		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &ComboBox{},
+})
+
+// NewComboBox adds a new [ComboBox] with
+// the given name to the given parent.
+func NewComboBox(par ki.Ki, name string) *ComboBox {
+	return par.NewChild(ComboBoxType, name).(*ComboBox)
+}
+
+// KiType returns the [*gti.Type] of [ComboBox]
+func (t *ComboBox) KiType() *gti.Type {
+	return ComboBoxType
+}
+
+// New returns a new [*ComboBox] value
+func (t *ComboBox) New() ki.Ki {
+	return &ComboBox{}
 }
 
 // CompleteType is the [gti.Type] for [Complete]
@@ -239,14 +344,45 @@ func NewComplete(par ki.Ki, name string) *Complete {
 	return par.NewChild(CompleteType, name).(*Complete)
 }
 
-// Type returns the [*gti.Type] of [Complete]
-func (t *Complete) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Complete]
+func (t *Complete) KiType() *gti.Type {
 	return CompleteType
 }
 
 // New returns a new [*Complete] value
 func (t *Complete) New() ki.Ki {
 	return &Complete{}
+}
+
+// StyleSheetType is the [gti.Type] for [StyleSheet]
+var StyleSheetType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.StyleSheet",
+	Doc:        "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Sheet", &gti.Field{Name: "Sheet", Type: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &StyleSheet{},
+})
+
+// NewStyleSheet adds a new [StyleSheet] with
+// the given name to the given parent.
+func NewStyleSheet(par ki.Ki, name string) *StyleSheet {
+	return par.NewChild(StyleSheetType, name).(*StyleSheet)
+}
+
+// KiType returns the [*gti.Type] of [StyleSheet]
+func (t *StyleSheet) KiType() *gti.Type {
+	return StyleSheetType
+}
+
+// New returns a new [*StyleSheet] value
+func (t *StyleSheet) New() ki.Ki {
+	return &StyleSheet{}
 }
 
 // FrameType is the [gti.Type] for [Frame]
@@ -270,8 +406,8 @@ func NewFrame(par ki.Ki, name string) *Frame {
 	return par.NewChild(FrameType, name).(*Frame)
 }
 
-// Type returns the [*gti.Type] of [Frame]
-func (t *Frame) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Frame]
+func (t *Frame) KiType() *gti.Type {
 	return FrameType
 }
 
@@ -302,14 +438,52 @@ func NewIcon(par ki.Ki, name string) *Icon {
 	return par.NewChild(IconType, name).(*Icon)
 }
 
-// Type returns the [*gti.Type] of [Icon]
-func (t *Icon) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Icon]
+func (t *Icon) KiType() *gti.Type {
 	return IconType
 }
 
 // New returns a new [*Icon] value
 func (t *Icon) New() ki.Ki {
 	return &Icon{}
+}
+
+// LabelType is the [gti.Type] for [Label]
+var LabelType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Label",
+	Doc:        "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label to display", Directives: gti.Directives{}}},
+		{"Selectable", &gti.Field{Name: "Selectable", Type: "bool", Doc: "is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks", Directives: gti.Directives{}}},
+		{"Redrawable", &gti.Field{Name: "Redrawable", Type: "bool", Doc: "is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}}},
+		{"LinkSig", &gti.Field{Name: "LinkSig", Type: "ki.Signal", Doc: "[view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler", Directives: gti.Directives{}}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "girl.Text", Doc: "render data for text label", Directives: gti.Directives{}}},
+		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}}},
+		{"CurBackgroundColor", &gti.Field{Name: "CurBackgroundColor", Type: "color.RGBA", Doc: "current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Label{},
+})
+
+// NewLabel adds a new [Label] with
+// the given name to the given parent.
+func NewLabel(par ki.Ki, name string) *Label {
+	return par.NewChild(LabelType, name).(*Label)
+}
+
+// KiType returns the [*gti.Type] of [Label]
+func (t *Label) KiType() *gti.Type {
+	return LabelType
+}
+
+// New returns a new [*Label] value
+func (t *Label) New() ki.Ki {
+	return &Label{}
 }
 
 // LayoutType is the [gti.Type] for [Layout]
@@ -349,8 +523,8 @@ func NewLayout(par ki.Ki, name string) *Layout {
 	return par.NewChild(LayoutType, name).(*Layout)
 }
 
-// Type returns the [*gti.Type] of [Layout]
-func (t *Layout) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Layout]
+func (t *Layout) KiType() *gti.Type {
 	return LayoutType
 }
 
@@ -378,8 +552,8 @@ func NewStretch(par ki.Ki, name string) *Stretch {
 	return par.NewChild(StretchType, name).(*Stretch)
 }
 
-// Type returns the [*gti.Type] of [Stretch]
-func (t *Stretch) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Stretch]
+func (t *Stretch) KiType() *gti.Type {
 	return StretchType
 }
 
@@ -407,8 +581,8 @@ func NewSpace(par ki.Ki, name string) *Space {
 	return par.NewChild(SpaceType, name).(*Space)
 }
 
-// Type returns the [*gti.Type] of [Space]
-func (t *Space) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Space]
+func (t *Space) KiType() *gti.Type {
 	return SpaceType
 }
 
@@ -438,8 +612,8 @@ func NewSeparator(par ki.Ki, name string) *Separator {
 	return par.NewChild(SeparatorType, name).(*Separator)
 }
 
-// Type returns the [*gti.Type] of [Separator]
-func (t *Separator) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Separator]
+func (t *Separator) KiType() *gti.Type {
 	return SeparatorType
 }
 
@@ -553,8 +727,8 @@ func NewSliderBase(par ki.Ki, name string) *SliderBase {
 	return par.NewChild(SliderBaseType, name).(*SliderBase)
 }
 
-// Type returns the [*gti.Type] of [SliderBase]
-func (t *SliderBase) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [SliderBase]
+func (t *SliderBase) KiType() *gti.Type {
 	return SliderBaseType
 }
 
@@ -582,8 +756,8 @@ func NewSlider(par ki.Ki, name string) *Slider {
 	return par.NewChild(SliderType, name).(*Slider)
 }
 
-// Type returns the [*gti.Type] of [Slider]
-func (t *Slider) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Slider]
+func (t *Slider) KiType() *gti.Type {
 	return SliderType
 }
 
@@ -611,8 +785,8 @@ func NewScrollBar(par ki.Ki, name string) *ScrollBar {
 	return par.NewChild(ScrollBarType, name).(*ScrollBar)
 }
 
-// Type returns the [*gti.Type] of [ScrollBar]
-func (t *ScrollBar) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ScrollBar]
+func (t *ScrollBar) KiType() *gti.Type {
 	return ScrollBarType
 }
 
@@ -645,8 +819,8 @@ func NewProgressBar(par ki.Ki, name string) *ProgressBar {
 	return par.NewChild(ProgressBarType, name).(*ProgressBar)
 }
 
-// Type returns the [*gti.Type] of [ProgressBar]
-func (t *ProgressBar) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [ProgressBar]
+func (t *ProgressBar) KiType() *gti.Type {
 	return ProgressBarType
 }
 
@@ -683,8 +857,8 @@ func NewSpell(par ki.Ki, name string) *Spell {
 	return par.NewChild(SpellType, name).(*Spell)
 }
 
-// Type returns the [*gti.Type] of [Spell]
-func (t *Spell) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Spell]
+func (t *Spell) KiType() *gti.Type {
 	return SpellType
 }
 
@@ -725,8 +899,8 @@ func NewSpinBox(par ki.Ki, name string) *SpinBox {
 	return par.NewChild(SpinBoxType, name).(*SpinBox)
 }
 
-// Type returns the [*gti.Type] of [SpinBox]
-func (t *SpinBox) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [SpinBox]
+func (t *SpinBox) KiType() *gti.Type {
 	return SpinBoxType
 }
 
@@ -759,8 +933,8 @@ func NewSplitView(par ki.Ki, name string) *SplitView {
 	return par.NewChild(SplitViewType, name).(*SplitView)
 }
 
-// Type returns the [*gti.Type] of [SplitView]
-func (t *SplitView) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [SplitView]
+func (t *SplitView) KiType() *gti.Type {
 	return SplitViewType
 }
 
@@ -791,8 +965,8 @@ func NewSplitter(par ki.Ki, name string) *Splitter {
 	return par.NewChild(SplitterType, name).(*Splitter)
 }
 
-// Type returns the [*gti.Type] of [Splitter]
-func (t *Splitter) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Splitter]
+func (t *Splitter) KiType() *gti.Type {
 	return SplitterType
 }
 
@@ -824,8 +998,8 @@ func NewEditor(par ki.Ki, name string) *Editor {
 	return par.NewChild(EditorType, name).(*Editor)
 }
 
-// Type returns the [*gti.Type] of [Editor]
-func (t *Editor) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [Editor]
+func (t *Editor) KiType() *gti.Type {
 	return EditorType
 }
 
@@ -860,14 +1034,107 @@ func NewTabView(par ki.Ki, name string) *TabView {
 	return par.NewChild(TabViewType, name).(*TabView)
 }
 
-// Type returns the [*gti.Type] of [TabView]
-func (t *TabView) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [TabView]
+func (t *TabView) KiType() *gti.Type {
 	return TabViewType
 }
 
 // New returns a new [*TabView] value
 func (t *TabView) New() ki.Ki {
 	return &TabView{}
+}
+
+// TabButtonType is the [gti.Type] for [TabButton]
+var TabButtonType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.TabButton",
+	Doc:        "TabButton is a larger select action and a small close action. Indicator\nicon is used for close icon.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Action", &gti.Field{Name: "Action", Type: "Action", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TabButton{},
+})
+
+// NewTabButton adds a new [TabButton] with
+// the given name to the given parent.
+func NewTabButton(par ki.Ki, name string) *TabButton {
+	return par.NewChild(TabButtonType, name).(*TabButton)
+}
+
+// KiType returns the [*gti.Type] of [TabButton]
+func (t *TabButton) KiType() *gti.Type {
+	return TabButtonType
+}
+
+// New returns a new [*TabButton] value
+func (t *TabButton) New() ki.Ki {
+	return &TabButton{}
+}
+
+// TextFieldType is the [gti.Type] for [TextField]
+var TextFieldType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.TextField",
+	Doc:        "TextField is a widget for editing a line of text",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Txt", &gti.Field{Name: "Txt", Type: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}}},
+		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
+		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "gicons.Icon", Doc: "if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig", Directives: gti.Directives{}}},
+		{"LeadingIconSig", &gti.Field{Name: "LeadingIconSig", Type: "ki.Signal", Doc: "[view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal", Directives: gti.Directives{}}},
+		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "gicons.Icon", Doc: "if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig", Directives: gti.Directives{}}},
+		{"TrailingIconSig", &gti.Field{Name: "TrailingIconSig", Type: "ki.Signal", Doc: "[view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal", Directives: gti.Directives{}}},
+		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}}},
+		{"PlaceholderColor", &gti.Field{Name: "PlaceholderColor", Type: "color.RGBA", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color", Directives: gti.Directives{}}},
+		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "gist.ColorSpec", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
+		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "gist.ColorSpec", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
+		{"Edited", &gti.Field{Name: "Edited", Type: "bool", Doc: "true if the text has been edited relative to the original", Directives: gti.Directives{}}},
+		{"EditTxt", &gti.Field{Name: "EditTxt", Type: "[]rune", Doc: "the live text string being edited, with latest modifications -- encoded as runes", Directives: gti.Directives{}}},
+		{"MaxWidthReq", &gti.Field{Name: "MaxWidthReq", Type: "int", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override", Directives: gti.Directives{}}},
+		{"EffPos", &gti.Field{Name: "EffPos", Type: "mat32.Vec2", Doc: "effective position with any leading icon space added", Directives: gti.Directives{}}},
+		{"EffSize", &gti.Field{Name: "EffSize", Type: "mat32.Vec2", Doc: "effective size, subtracting any leading and trailing icon space", Directives: gti.Directives{}}},
+		{"StartPos", &gti.Field{Name: "StartPos", Type: "int", Doc: "starting display position in the string", Directives: gti.Directives{}}},
+		{"EndPos", &gti.Field{Name: "EndPos", Type: "int", Doc: "ending display position in the string", Directives: gti.Directives{}}},
+		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "int", Doc: "current cursor position", Directives: gti.Directives{}}},
+		{"CharWidth", &gti.Field{Name: "CharWidth", Type: "int", Doc: "approximate number of chars that can be displayed at any time -- computed from font size etc", Directives: gti.Directives{}}},
+		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "int", Doc: "starting position of selection in the string", Directives: gti.Directives{}}},
+		{"SelectEnd", &gti.Field{Name: "SelectEnd", Type: "int", Doc: "ending position of selection in the string", Directives: gti.Directives{}}},
+		{"SelectInit", &gti.Field{Name: "SelectInit", Type: "int", Doc: "initial selection position -- where it started", Directives: gti.Directives{}}},
+		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}}},
+		{"TextFieldSig", &gti.Field{Name: "TextFieldSig", Type: "ki.Signal", Doc: "[view: -] signal for line edit -- see TextFieldSignals for the types", Directives: gti.Directives{}}},
+		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "girl.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}}},
+		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "girl.Text", Doc: "render version of just visible text", Directives: gti.Directives{}}},
+		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}}},
+		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}}},
+		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", Doc: "[view: -] mutex for updating cursor between blinker and field", Directives: gti.Directives{}}},
+		{"Complete", &gti.Field{Name: "Complete", Type: "*Complete", Doc: "functions and data for textfield completion", Directives: gti.Directives{}}},
+		{"NoEcho", &gti.Field{Name: "NoEcho", Type: "bool", Doc: "replace displayed characters with bullets to conceal text", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TextField{},
+})
+
+// NewTextField adds a new [TextField] with
+// the given name to the given parent.
+func NewTextField(par ki.Ki, name string) *TextField {
+	return par.NewChild(TextFieldType, name).(*TextField)
+}
+
+// KiType returns the [*gti.Type] of [TextField]
+func (t *TextField) KiType() *gti.Type {
+	return TextFieldType
+}
+
+// New returns a new [*TextField] value
+func (t *TextField) New() ki.Ki {
+	return &TextField{}
 }
 
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
@@ -883,16 +1150,17 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", Doc: "full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}}},
 		{"VpBBox", &gti.Field{Name: "VpBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping", Directives: gti.Directives{}}},
 		{"WinBBox", &gti.Field{Name: "WinBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window", Directives: gti.Directives{}}},
-		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", Doc: "[view: -] mutex protecting access to the WinBBox, which is used for event delegation and could also be updated in another thread", Directives: gti.Directives{}}},
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}}},
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]Styler", Doc: "a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code", Directives: gti.Directives{}}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}}},
 		{"Style", &gti.Field{Name: "Style", Type: "gist.Style", Doc: "styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}}},
-		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this item", Directives: gti.Directives{}}},
+		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}}},
 		{"WidgetSig", &gti.Field{Name: "WidgetSig", Type: "ki.Signal", Doc: "[view: -] general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets", Directives: gti.Directives{}}},
 		{"CtxtMenuFunc", &gti.Field{Name: "CtxtMenuFunc", Type: "CtxtMenuFunc", Doc: "[view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate", Directives: gti.Directives{}}},
-		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", Doc: "[view: -] mutex protecting updates to the style", Directives: gti.Directives{}}},
+		{"Vp", &gti.Field{Name: "Vp", Type: "*Viewport", Doc: "parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}}},
+		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", Doc: "[view: -] mutex protecting the Style field", Directives: gti.Directives{}}},
+		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", Doc: "[view: -] mutex protecting the BBox fields", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
@@ -907,8 +1175,8 @@ func NewWidgetBase(par ki.Ki, name string) *WidgetBase {
 	return par.NewChild(WidgetBaseType, name).(*WidgetBase)
 }
 
-// Type returns the [*gti.Type] of [WidgetBase]
-func (t *WidgetBase) Type() *gti.Type {
+// KiType returns the [*gti.Type] of [WidgetBase]
+func (t *WidgetBase) KiType() *gti.Type {
 	return WidgetBaseType
 }
 

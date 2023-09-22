@@ -135,7 +135,7 @@ func (mv *MapView) UpdateValues() {
 }
 
 // Config configures the view
-func (mv *MapView) Config() {
+func (mv *MapView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeFrame, "map-grid")
@@ -443,7 +443,7 @@ func (mv *MapView) ConfigToolbar() {
 }
 
 func (mv *MapView) SetStyle() {
-	mvp := mv.ViewportSafe()
+	mvp := mv.Vp
 	if mvp != nil && mvp.IsDoingFullRender() {
 		mv.Config()
 	}

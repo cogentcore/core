@@ -157,7 +157,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 	fr := tv.Frame()
 	if len(fr.Kids) == 1 {
 		fr.StackTop = 0
-		tab.SetSelectedState(true)
+		tab.SetSelected(true)
 	} else {
 		widg.AsWidget().SetInvisible() // new tab is invisible until selected
 	}
@@ -263,7 +263,7 @@ func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
 	// tv.Viewport.BlockUpdates() // not needed for this apparently
 	updt := tv.UpdateStart()
 	tv.UnselectOtherTabs(idx)
-	tab.SetSelectedState(true)
+	tab.SetSelected(true)
 	fr.StackTop = idx
 	fr.SetFullReRender()
 	// tv.Viewport.UnblockUpdates()
@@ -465,7 +465,7 @@ const (
 )
 
 // Config initializes the tab widget children if it hasn't been done yet
-func (tv *TabView) Config() {
+func (tv *TabView) ConfigWidget(vp *Viewport) {
 	if len(tv.Kids) != 0 {
 		return
 	}
@@ -512,7 +512,7 @@ func (tv *TabView) UnselectOtherTabs(idx int) {
 		}
 		tb := tbs.Child(i).Embed(TypeTabButton).(*TabButton)
 		if tb.IsSelected() {
-			tb.SetSelectedState(false)
+			tb.SetSelected(false)
 		}
 	}
 }
@@ -675,12 +675,12 @@ func (tb *TabButton) TabView() *TabView {
 	return tv.Embed(TypeTabView).(*TabView)
 }
 
-func (tb *TabButton) ConfigParts() {
+func (tb *TabButton) ConfigParts(vp *Viewport) {
 	if !tb.NoDelete {
 		tb.ConfigPartsDeleteButton()
 		return
 	}
-	tb.Action.ConfigParts() // regular
+	tb.Action.ConfigParts(vp) // regular
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton() {
@@ -716,7 +716,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 	}
 }
 
-func (tb *TabButton) Config() {
+func (tb *TabButton) ConfigWidget(vp *Viewport) {
 	tb.ConfigWidget()
-	tb.ConfigParts()
+	tb.ConfigParts(vp)
 }

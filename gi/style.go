@@ -329,6 +329,29 @@ func (wb *WidgetBase) SetFixedHeight(val units.Value) {
 	})
 }
 
+// IsNthChild returns whether the node is nth-child of its parent
+func (wb *WidgetBase) IsNthChild(n int) bool {
+	idx, ok := wb.IndexInParent()
+	return ok && idx == n
+}
+
+// IsFirstChild returns whether the node is the first child of its parent
+func (wb *WidgetBase) IsFirstChild() bool {
+	idx, ok := wb.IndexInParent()
+	return ok && idx == 0
+}
+
+// IsLastChild returns whether the node is the last child of its parent
+func (wb *WidgetBase) IsLastChild() bool {
+	idx, ok := wb.IndexInParent()
+	return ok && idx == wb.Par.NumChildren()-1
+}
+
+// IsOnlyChild returns whether the node is the only child of its parent
+func (wb *WidgetBase) IsOnlyChild() bool {
+	return wb.Par != nil && wb.Par.NumChildren() == 1
+}
+
 ////////////////////////////////////////////////////////////////////
 // 	Default Style Vars
 

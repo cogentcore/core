@@ -1942,10 +1942,10 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.DuplicateFiles()
 			kt.SetProcessed()
 		case gi.KeyFunInsert: // New File
-			CallMethod(ftv, "NewFile", ftv.ViewportSafe())
+			CallMethod(ftv, "NewFile", ftv.Vp)
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
-			CallMethod(ftv, "NewFolder", ftv.ViewportSafe())
+			CallMethod(ftv, "NewFolder", ftv.Vp)
 			kt.SetProcessed()
 		}
 	}
@@ -1962,7 +1962,7 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		fftv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			StructViewDialog(ftv.ViewportSafe(), &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
+			StructViewDialog(ftv.Vp, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
 		}
 	}
 }
@@ -1989,7 +1989,7 @@ func (ftv *FileTreeView) OpenFileWith() {
 		fftv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			CallMethod(fn, "OpenFileWith", ftv.ViewportSafe())
+			CallMethod(fn, "OpenFileWith", ftv.Vp)
 		}
 	}
 }
@@ -2047,7 +2047,7 @@ func (ftv *FileTreeView) DeleteFilesImpl() {
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
-	gi.ChoiceDialog(ftv.ViewportSafe(), gi.DlgOpts{Title: "Delete Files?",
+	gi.ChoiceDialog(ftv.Vp, gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
 		[]string{"Delete Files", "Cancel"},
 		ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -2071,7 +2071,7 @@ func (ftv *FileTreeView) RenameFiles() {
 			if fn.IsExternal() {
 				continue
 			}
-			CallMethod(fn, "RenameFile", ftv.ViewportSafe())
+			CallMethod(fn, "RenameFile", ftv.Vp)
 		}
 	}
 }
@@ -2198,7 +2198,7 @@ func (ftv *FileTreeView) CommitToVcs() {
 	ftvv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		CallMethod(fn, "CommitToVcs", ftv.ViewportSafe())
+		CallMethod(fn, "CommitToVcs", ftv.Vp)
 	}
 }
 
@@ -2334,7 +2334,7 @@ func (ftv *FileTreeView) Cut() {
 	}
 	ftv.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(ftv.ViewportSafe(), gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
+	gi.PromptDialog(ftv.Vp, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
 }
 
 // Paste pastes clipboard at given node

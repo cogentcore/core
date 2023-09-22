@@ -5,9 +5,34 @@
 package gi
 
 import (
+	"log"
+
 	"goki.dev/gicons"
 	"goki.dev/ki/v2"
 )
+
+// HasVp checks that the Vp Viewport has been set.
+// Called prior to using -- logs an error if not.
+// todo: need slog Debug mode for this kind of thing.
+func (wb *WidgetBase) HasVp() bool {
+	if wb.This() == nil || wb.Vp == nil {
+		log.Printf("gi.WidgetBase.ReConfig: object or viewport is nil\n") // todo: slog.Debug
+		return false
+	}
+	return true
+}
+
+// ReConfig is a convenience method for reconfiguring a widget after changes
+// have been made.  In general it is more efficient to call Set* methods that
+// automatically determine if Config is needed.
+// The plain Config method is used during initial configuration,
+// called by the Viewport and caches the Vp pointer.
+func (wb *WidgetBase) ReConfig() {
+	if !wb.HasVp() {
+		return
+	}
+	wb.This().(Widget).Config(vp)
+}
 
 func (wb *WidgetBase) Config(vp *Viewport) {
 	if wb.This() == nil {
@@ -15,6 +40,7 @@ func (wb *WidgetBase) Config(vp *Viewport) {
 	}
 	wi := wb.This().(Widget)
 	updt := wi.UpdateStart()
+	wb.Vp = vp
 	wb.Style.Defaults()    // reset
 	wb.LayState.Defaults() // doesn't overwrite
 	wi.ConfigWidget(vp)    // where everything actually happens
@@ -70,42 +96,6 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icId
 			// lbl.SetText(txt)
 		}
 	}
-}
-
-// PartsNeedUpdateIconLabel check if parts need to be updated -- for ConfigPartsIfNeeded
-func (wb *WidgetBase) PartsNeedUpdateIconLabel(icnm gicons.Icon, txt string) bool {
-	if TheIconMgr.IsValid(icnm) {
-		ick := wb.Parts.ChildByName("icon", 0)
-		if ick == nil {
-			return true
-		}
-		ic := ick.(*Icon)
-		if !ic.HasChildren() || ic.IconNm != icnm || wb.NeedsFullReRender() {
-			return true
-		}
-	} else {
-		cn := wb.Parts.ChildByName("icon", 0)
-		if cn != nil { // need to remove it
-			return true
-		}
-	}
-	if txt != "" {
-		lblk := wb.Parts.ChildByName("label", 2)
-		if lblk == nil {
-			return true
-		}
-		lbl := lblk.(*Label)
-		lbl.Style.Color = wb.Style.Color
-		if lbl.Text != txt {
-			return true
-		}
-	} else {
-		cn := wb.Parts.ChildByName("label", 2)
-		if cn != nil {
-			return true
-		}
-	}
-	return false
 }
 
 // SetFullReRenderIconLabel sets the icon and label to be re-rendered, needed

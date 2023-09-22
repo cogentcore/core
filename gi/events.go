@@ -102,7 +102,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				me.SetProcessed()
 				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
-				wbb.SetSelectedState(!wbb.IsSelected())
+				wbb.SetSelected(!wbb.IsSelected())
 				wbb.EmitSelectedSignal()
 				wbb.UpdateSig()
 			}
@@ -148,7 +148,7 @@ func (wb *WidgetBase) DisconnectAllEvents(pri EventPris) {
 		return
 	}
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		_, ni := KiToNode2D(k)
+		_, ni := AsWidget(k)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break // going into a different type of thing, bail
 		}

@@ -104,7 +104,7 @@ var SliceViewInlineProps = ki.Props{
 }
 
 // ConfigParts configures Parts for the current slice
-func (sv *SliceViewInline) ConfigParts() {
+func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
 	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
@@ -233,7 +233,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
 }
 
 func (sv *SliceViewInline) UpdateFromSlice() {
-	sv.ConfigParts()
+	sv.ConfigParts(vp)
 }
 
 func (sv *SliceViewInline) UpdateValues() {
@@ -245,7 +245,7 @@ func (sv *SliceViewInline) UpdateValues() {
 }
 
 func (sv *SliceViewInline) SetStyle() {
-	sv.ConfigParts()
+	sv.ConfigParts(vp)
 	sv.WidgetBase.SetStyle()
 }
 
@@ -254,7 +254,7 @@ func (sv *SliceViewInline) Render(vp *Viewport) {
 		return
 	}
 	if sv.PushBounds() {
-		sv.ConfigParts()
+		sv.ConfigParts(vp)
 		sv.RenderParts()
 		sv.RenderChildren()
 		sv.PopBounds()

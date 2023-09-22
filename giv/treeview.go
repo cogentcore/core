@@ -277,18 +277,18 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
 		if tv.This() == tv.RootView.This() && tv.HasFlag(int(TreeViewFlagUpdtRoot)) {
 			tv.SetFullReRender() // re-render for any updates on root node
 		}
-		if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
-			if tv.This() == tv.RootView.This() {
-				tv.SetFullReRender() // re-render for struct updates on root node
-			}
-			tvIdx := tv.ViewIdx
-			if gi.Update2DTrace {
-				fmt.Printf("treeview: structupdate for node, idx: %v  %v", tvIdx, tv.Path())
-			}
-			tv.SyncToSrc(&tvIdx, false, 0)
-		} else {
-			tv.UpdateSig()
-		}
+		// if bitflag.HasAnyMask(dflags, int64(ki.StruUpdateFlagsMask)) {
+		// 	if tv.This() == tv.RootView.This() {
+		// 		tv.SetFullReRender() // re-render for struct updates on root node
+		// 	}
+		// 	tvIdx := tv.ViewIdx
+		// 	if gi.Update2DTrace {
+		// 		fmt.Printf("treeview: structupdate for node, idx: %v  %v", tvIdx, tv.Path())
+		// 	}
+		// 	tv.SyncToSrc(&tvIdx, false, 0)
+		// } else {
+		tv.UpdateSig()
+		// }
 	}
 }
 
@@ -334,7 +334,7 @@ func (tv *TreeView) SetChanged() {
 func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
 	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		_, pg := gi.KiToNode2D(k)
+		_, pg := gi.AsWidget(k)
 		if pg == nil {
 			return ki.Break
 		}
@@ -1691,7 +1691,7 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 func (tv *TreeView) RootTreeView() *TreeView {
 	rn := tv
 	tv.FuncUp(0, tv.This(), func(k ki.Ki, level int, d any) bool {
-		_, pg := gi.KiToNode2D(k)
+		_, pg := gi.AsWidget(k)
 		if pg == nil {
 			return false
 		}
@@ -1893,7 +1893,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts() {
+func (tv *TreeView) ConfigParts(vp *Viewport) {
 	tv.Parts.Lay = gi.LayoutHoriz
 	tv.Parts.Style.Template = "giv.TreeView.Parts"
 	config := ki.TypeAndNameList{}
@@ -1933,28 +1933,6 @@ func (tv *TreeView) ConfigParts() {
 		lbl.SetText(tv.Label())
 	}
 	tv.Parts.UpdateEnd(updt)
-}
-
-func (tv *TreeView) ConfigPartsIfNeeded() {
-	if !tv.Parts.HasChildren() {
-		tv.ConfigParts()
-	}
-	if gi.TheIconMgr.IsValid(tv.Icon) {
-		if ic, ok := tv.IconPart(); ok {
-			ic.SetIcon(tv.Icon)
-		}
-	}
-	if lbl, ok := tv.LabelPart(); ok {
-		ltxt := tv.Label()
-		if lbl.Text != ltxt {
-			lbl.SetText(ltxt)
-		}
-	}
-	if tv.HasChildren() {
-		if wb, ok := tv.BranchPart(); ok {
-			wb.SetChecked(!tv.IsClosed())
-		}
-	}
 }
 
 var TreeViewProps = ki.Props{
@@ -2043,7 +2021,7 @@ var TreeViewProps = ki.Props{
 	},
 }
 
-func (tv *TreeView) Config() {
+func (tv *TreeView) ConfigWidget(vp *Viewport) {
 	// // optimized init -- avoid tree walking
 	if tv.RootView != tv {
 		tv.Viewport = tv.RootView.Viewport
@@ -2053,7 +2031,7 @@ func (tv *TreeView) Config() {
 	tv.Style.Defaults()
 	tv.Style.Template = "giv.TreeView." + ki.Type(tv).Name()
 	tv.LayState.Defaults() // doesn't overwrite
-	tv.ConfigParts()
+	tv.ConfigParts(vp)
 	// tv.ConnectToViewport()
 }
 
@@ -2084,7 +2062,7 @@ func (tv *TreeView) StyleTreeView() {
 	tv.Indent.ToDots(&tv.Style.UnContext)
 	tv.Parts.Style.InheritFields(&tv.Style)
 	tv.StyMu.Unlock()
-	tv.ConfigParts()
+	tv.ConfigParts(vp)
 }
 
 func (tv *TreeView) SetStyle() {
@@ -2125,14 +2103,13 @@ func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
-	tv.Parts.DoLayout(vp*Viewport, parBBox, iter)
+	tv.Parts.DoLayout(vp, parBBox, iter)
 }
 
 func (tv *TreeView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
-	tv.ConfigPartsIfNeeded()
 
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 
@@ -2183,7 +2160,7 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
-		pni, _ := gi.KiToNode2D(tv.Par)
+		pni, _ := gi.AsWidget(tv.Par)
 		ar = ar.Intersect(pni.ChildrenBBox2D())
 	}
 	return ar
@@ -2202,7 +2179,7 @@ func (tv *TreeView) IsVisible() bool {
 	if tv.This() == tv.RootView.This() { // root is ALWAYS visible so updates there work
 		return true
 	}
-	if tv.IsInvisible() {
+	if tv.HasFlag(Invisible) {
 		return false
 	}
 	return tv.RootView.Par.This().(gi.Node2D).IsVisible()
@@ -2237,7 +2214,7 @@ func (tv *TreeView) Render(vp *Viewport) {
 	// if tv.HasFlag(int(TreeViewFlagNoTemplate)) && (tv.NeedsFullReRender() || tv.RootView.NeedsFullReRender()) {
 	// 	fmt.Printf("restyle: %v\n", tv.Nm)
 	// 	tv.StyleTreeView()
-	// 	tv.ConfigParts()
+	// 	tv.ConfigParts(vp)
 	// }
 	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
@@ -2252,7 +2229,6 @@ func (tv *TreeView) Render(vp *Viewport) {
 			} else {
 				tv.Style = tv.StateStyles[TreeViewActive]
 			}
-			tv.ConfigPartsIfNeeded()
 			tv.This().(gi.Node2D).ConnectEvents()
 
 			// note: this is std except using WidgetSize instead of AllocSize

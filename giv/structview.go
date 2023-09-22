@@ -175,7 +175,7 @@ func (sv *StructView) UpdateField(field string) {
 }
 
 // Config configures the view
-func (sv *StructView) Config() {
+func (sv *StructView) ConfigWidget(vp *Viewport) {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks.IsDeleted() || ks.IsDestroyed() {
 			return
@@ -389,7 +389,7 @@ func (sv *StructView) ConfigStructGrid() {
 }
 
 func (sv *StructView) SetStyle() {
-	mvp := sv.ViewportSafe()
+	mvp := sv.Vp
 	if mvp != nil && mvp.IsDoingFullRender() {
 		sv.Config()
 	}

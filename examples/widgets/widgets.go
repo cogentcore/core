@@ -16,7 +16,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/pi/v2/complete"
 )
 
 func main() {
@@ -308,7 +307,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	edit1.SetProp("min-width", "20em")
-	edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
+	// edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
 	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		estr := ""
 		if rn, ok := data.([]rune); ok {
@@ -426,6 +425,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	fmt.Printf("main loop ended\n")
 }
 
+/*
 func Complete(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {
@@ -520,3 +520,5 @@ var words = []string{"a", "able", "about", "above", "act", "add", "afraid", "aft
 	"will", "win", "wind", "window", "wing", "winter", "wire", "wish", "with", "woman", "women", "won't", "wonder", "wood",
 	"word", "work", "world", "would", "write", "written", "wrong", "wrote", "yard", "year", "yellow", "yes", "yet", "you",
 	"young", "your"}
+
+*/

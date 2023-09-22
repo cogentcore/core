@@ -786,7 +786,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
 
 	typ := vv.EnumType()
 	cb.ItemsFromEnum(typ)
-	cb.ConfigParts()
+	cb.ConfigParts(vp)
 	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
 		cbb := vvv.Widget.(*gi.ButtonBox)

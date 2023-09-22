@@ -1273,7 +1273,7 @@ func (w *Window) Publish() {
 
 	drw := w.OSWin.Drawer()
 	vpv := drw.GetImageVal(0).Texture
-	if !vpv.IsActive() {
+	if !vpv.HasFlag(Active) {
 		if w.Viewport.Pixels == nil {
 			if Update2DTrace {
 				fmt.Printf("Win %s didn't have active image, viewport is nil\n", w.Nm)
@@ -2092,7 +2092,7 @@ func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 			return false
 		}
 	}
-	mvp := wb.ViewportSafe()
+	mvp := wb.Vp
 	if mvp == nil {
 		return false
 	}

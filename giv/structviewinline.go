@@ -81,7 +81,7 @@ func (sv *StructViewInline) SetStruct(st any) {
 			})
 		}
 	}
-	sv.ConfigParts()
+	sv.ConfigParts(vp)
 	sv.UpdateEnd(updt)
 }
 
@@ -90,7 +90,7 @@ var StructViewInlineProps = ki.Props{
 }
 
 // ConfigParts configures Parts for the current struct
-func (sv *StructViewInline) ConfigParts() {
+func (sv *StructViewInline) ConfigParts(vp *Viewport) {
 	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
@@ -166,7 +166,7 @@ func (sv *StructViewInline) UpdateFields() {
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
-		sv.ConfigParts()
+		sv.ConfigParts(vp)
 	} else if sv.HasDefs {
 		updt := sv.UpdateStart()
 		sv.SetFullReRender() // key to regen

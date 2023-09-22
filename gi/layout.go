@@ -266,11 +266,11 @@ var LayoutDefault Layout
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.BoxSpace()
 	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
-	parni, _ := KiToNode2D(ly.Par)
+	parni, _ := AsWidget(ly.Par)
 	if parni != nil {
 		vp := parni.AsViewport()
 		if vp != nil {
-			if vp.ViewportSafe() == nil {
+			if vp.Vp == nil {
 				// SidesTODO: might not be right
 				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
 				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
@@ -358,7 +358,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		if sig != int64(SliderValueChanged) {
 			return
 		}
-		li, _ := KiToNode2D(recv)
+		li, _ := AsWidget(recv)
 		ls := li.AsDoLayout(vp * Viewport)
 		wupdt := ls.TopUpdateStart()
 		ls.Move2DTree()
@@ -399,7 +399,7 @@ func (ly *Layout) LayoutScrolls() {
 		odim := mat32.OtherDim(d)
 		if ly.HasScroll[d] {
 			sc := ly.Scrolls[d]
-			sc.GetSize(vp*Viewport, 0)
+			sc.GetSize(vp, 0)
 			sc.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 			sc.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
 			// SidesTODO: not sure about this
@@ -408,7 +408,7 @@ func (ly *Layout) LayoutScrolls() {
 				sc.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}
 			sc.LayState.Alloc.Size.SetDim(odim, sbw)
-			sc.DoLayout(vp*Viewport, ly.VpBBox, 0) // this will add parent position to above rel pos
+			sc.DoLayout(vp, ly.VpBBox, 0) // this will add parent position to above rel pos
 		} else {
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])
@@ -536,13 +536,13 @@ func (ly *Layout) DoLayoutChildren(iter int) bool {
 		if err != nil {
 			return false
 		}
-		nii, _ := KiToNode2D(sn)
-		return nii.DoLayout(vp*Viewport, cbb, iter)
+		nii, _ := AsWidget(sn)
+		return nii.DoLayout(vp, cbb, iter)
 	} else {
 		redo := false
 		for _, kid := range ly.Kids {
-			nii, _ := KiToNode2D(kid)
-			if nii.DoLayout(vp*Viewport, cbb, iter) {
+			nii, _ := AsWidget(kid)
+			if nii.DoLayout(vp, cbb, iter) {
 				redo = true
 			}
 		}
@@ -554,7 +554,7 @@ func (ly *Layout) DoLayoutChildren(iter int) bool {
 func (ly *Layout) RenderChildren() {
 	if ly.Lay == LayoutStacked {
 		for i, kid := range ly.Kids {
-			if _, ni := KiToNode2D(kid); ni != nil {
+			if _, ni := AsWidget(kid); ni != nil {
 				if i == ly.StackTop {
 					ni.ClearInvisible()
 				} else {
@@ -568,7 +568,7 @@ func (ly *Layout) RenderChildren() {
 		if kid == nil {
 			continue
 		}
-		nii, _ := KiToNode2D(kid)
+		nii, _ := AsWidget(kid)
 		if nii != nil {
 			nii.Render()
 		}
@@ -582,11 +582,11 @@ func (ly *Layout) Move2DChildren(delta image.Point) {
 		if err != nil {
 			return
 		}
-		nii, _ := KiToNode2D(sn)
+		nii, _ := AsWidget(sn)
 		nii.Move2D(delta, cbb)
 	} else {
 		for _, kid := range ly.Kids {
-			nii, _ := KiToNode2D(kid)
+			nii, _ := AsWidget(kid)
 			if nii != nil {
 				nii.Move2D(delta, cbb)
 			}
@@ -827,7 +827,7 @@ func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
 		if k == nil {
 			continue
 		}
-		_, ni := KiToNode2D(k)
+		_, ni := AsWidget(k)
 		if ni == nil {
 			continue
 		}
@@ -1026,7 +1026,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 		if k == ly.This() { // skip us
 			return ki.Continue
 		}
-		_, ni := KiToNode2D(k)
+		_, ni := AsWidget(k)
 		if ni != nil && !ni.CanFocus() { // don't go any further
 			return ki.Break
 		}
@@ -1067,7 +1067,7 @@ func (ly *Layout) LayoutScrollEvents() {
 	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		li := recv.Embed(TypeLayout).(*Layout)
-		if li.ViewportSafe().IsMenu() {
+		if li.Vp.IsMenu() {
 			li.AutoScroll(me.Pos())
 		}
 	})
@@ -1090,7 +1090,7 @@ func (ly *Layout) AsDoLayout(vp *Viewport) *Layout {
 	return ly
 }
 
-func (ly *Layout) Config() {
+func (ly *Layout) ConfigWidget(vp *Viewport) {
 	ly.ConfigWidget()
 }
 
@@ -1155,11 +1155,11 @@ func (ly *Layout) StyleLayout() {
 	if !hasTempl || saveTempl {
 		ly.SetStyleWidget()
 	}
-	ly.StyleFromProps(ly.Props, ly.Viewport) // does "lay" and "spacing", in layoutstyles.go
+	ly.StyleFromProps(ly.Props, ly.Vp) // does "lay" and "spacing", in layoutstyles.go
 	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
 	// if len(tprops) > 0 {
 	// 	kit.TypesMu.RLock()
-	// 	ly.StyleFromProps(tprops, ly.Viewport)
+	// 	ly.StyleFromProps(tprops, ly.Vp)
 	// 	kit.TypesMu.RUnlock()
 	// }
 	ly.StyleToDots(&ly.Style.UnContext)

@@ -3,7 +3,13 @@
 package gi
 
 import (
+	"errors"
+	"strconv"
+	"strings"
+	"sync/atomic"
+
 	"goki.dev/enums"
+	"goki.dev/ki/v2"
 )
 
 var _ActionTypesValues = []ActionTypes{0, 1, 2, 3, 4}
@@ -127,40 +133,40 @@ func (i *ActionTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ButtonFlagsValues = []ButtonFlags{0, 1, 2}
+var _ButtonFlagsValues = []ButtonFlags{24, 25, 26}
 
 // ButtonFlagsN is the highest valid value
 // for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 3
+const ButtonFlagsN ButtonFlags = 27
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ButtonFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ButtonFlagCheckable-(0)]
-	_ = x[ButtonFlagChecked-(1)]
-	_ = x[ButtonFlagMenu-(2)]
+	_ = x[ButtonFlagCheckable-(24)]
+	_ = x[ButtonFlagChecked-(25)]
+	_ = x[ButtonFlagMenu-(26)]
 }
 
 var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagCheckable`: 0,
-	`buttonflagcheckable`: 0,
-	`ButtonFlagChecked`:   1,
-	`buttonflagchecked`:   1,
-	`ButtonFlagMenu`:      2,
-	`buttonflagmenu`:      2,
+	`ButtonFlagCheckable`: 24,
+	`buttonflagcheckable`: 24,
+	`ButtonFlagChecked`:   25,
+	`buttonflagchecked`:   25,
+	`ButtonFlagMenu`:      26,
+	`buttonflagmenu`:      26,
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	0: `button is checkable -- enables display of check control`,
-	1: `button is checked`,
-	2: `Menu flag means that the button is a menu item`,
+	24: `button is checkable -- enables display of check control`,
+	25: `button is checked`,
+	26: `Menu flag means that the button is a menu item`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
-	0: `ButtonFlagCheckable`,
-	1: `ButtonFlagChecked`,
-	2: `ButtonFlagMenu`,
+	24: `ButtonFlagCheckable`,
+	25: `ButtonFlagChecked`,
+	26: `ButtonFlagMenu`,
 }
 
 // String returns the string representation
@@ -768,100 +774,95 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23}
+var _WidgetFlagsValues = []WidgetFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 24
+const WidgetFlagsN WidgetFlags = 23
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(9)]
-	_ = x[NeedsStyle-(10)]
-	_ = x[EventsConnected-(11)]
-	_ = x[CanFocus-(12)]
-	_ = x[HasFocus-(13)]
-	_ = x[ReRenderAnchor-(14)]
-	_ = x[Invisible-(15)]
-	_ = x[Disabled-(16)]
-	_ = x[Selected-(17)]
-	_ = x[Hovered-(18)]
-	_ = x[Active-(19)]
-	_ = x[MouseHasEntered-(20)]
-	_ = x[DNDHasEntered-(21)]
-	_ = x[NodeDragging-(22)]
-	_ = x[InstaDrag-(23)]
+	_ = x[EventsConnected-(10)]
+	_ = x[CanFocus-(11)]
+	_ = x[HasFocus-(12)]
+	_ = x[ReRenderAnchor-(13)]
+	_ = x[Invisible-(14)]
+	_ = x[Disabled-(15)]
+	_ = x[Selected-(16)]
+	_ = x[Hovered-(17)]
+	_ = x[Active-(18)]
+	_ = x[MouseHasEntered-(19)]
+	_ = x[DNDHasEntered-(20)]
+	_ = x[NodeDragging-(21)]
+	_ = x[InstaDrag-(22)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`NeedsRender`:     9,
 	`needsrender`:     9,
-	`NeedsStyle`:      10,
-	`needsstyle`:      10,
-	`EventsConnected`: 11,
-	`eventsconnected`: 11,
-	`CanFocus`:        12,
-	`canfocus`:        12,
-	`HasFocus`:        13,
-	`hasfocus`:        13,
-	`ReRenderAnchor`:  14,
-	`rerenderanchor`:  14,
-	`Invisible`:       15,
-	`invisible`:       15,
-	`Disabled`:        16,
-	`disabled`:        16,
-	`Selected`:        17,
-	`selected`:        17,
-	`Hovered`:         18,
-	`hovered`:         18,
-	`Active`:          19,
-	`active`:          19,
-	`MouseHasEntered`: 20,
-	`mousehasentered`: 20,
-	`DNDHasEntered`:   21,
-	`dndhasentered`:   21,
-	`NodeDragging`:    22,
-	`nodedragging`:    22,
-	`InstaDrag`:       23,
-	`instadrag`:       23,
+	`EventsConnected`: 10,
+	`eventsconnected`: 10,
+	`CanFocus`:        11,
+	`canfocus`:        11,
+	`HasFocus`:        12,
+	`hasfocus`:        12,
+	`ReRenderAnchor`:  13,
+	`rerenderanchor`:  13,
+	`Invisible`:       14,
+	`invisible`:       14,
+	`Disabled`:        15,
+	`disabled`:        15,
+	`Selected`:        16,
+	`selected`:        16,
+	`Hovered`:         17,
+	`hovered`:         17,
+	`Active`:          18,
+	`active`:          18,
+	`MouseHasEntered`: 19,
+	`mousehasentered`: 19,
+	`DNDHasEntered`:   20,
+	`dndhasentered`:   20,
+	`NodeDragging`:    21,
+	`nodedragging`:    21,
+	`InstaDrag`:       22,
+	`instadrag`:       22,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	9:  `NeedsRender needs to be rendered on next render itration`,
-	10: `NeedsStyle needs to be styled again before being rendered.`,
-	11: `EventsConnected: this node has been connected to receive events from the window -- to optimize event processing, connections are typically only established for visible nodes during render, and disconnected when not visible`,
-	12: `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
-	13: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on Window`,
-	14: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
-	15: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	16: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
-	17: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
-	18: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
-	19: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
-	20: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	21: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	22: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	23: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	10: `EventsConnected: this node has been connected to receive events from the window -- to optimize event processing, connections are typically only established for visible nodes during render, and disconnected when not visible`,
+	11: `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
+	12: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on Window`,
+	13: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
+	14: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
+	15: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
+	16: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
+	17: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
+	18: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
+	19: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
+	20: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
+	21: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
+	22: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
 	9:  `NeedsRender`,
-	10: `NeedsStyle`,
-	11: `EventsConnected`,
-	12: `CanFocus`,
-	13: `HasFocus`,
-	14: `ReRenderAnchor`,
-	15: `Invisible`,
-	16: `Disabled`,
-	17: `Selected`,
-	18: `Hovered`,
-	19: `Active`,
-	20: `MouseHasEntered`,
-	21: `DNDHasEntered`,
-	22: `NodeDragging`,
-	23: `InstaDrag`,
+	10: `EventsConnected`,
+	11: `CanFocus`,
+	12: `HasFocus`,
+	13: `ReRenderAnchor`,
+	14: `Invisible`,
+	15: `Disabled`,
+	16: `Selected`,
+	17: `Hovered`,
+	18: `Active`,
+	19: `MouseHasEntered`,
+	20: `DNDHasEntered`,
+	21: `NodeDragging`,
+	22: `InstaDrag`,
 }
 
 // String returns the string representation
@@ -2535,55 +2536,242 @@ func (i *TextFieldSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _VpFlagsValues = []VpFlags{0, 1, 2, 3, 4, 5}
+var _TextFieldFlagsValues = []TextFieldFlags{24}
+
+// TextFieldFlagsN is the highest valid value
+// for type TextFieldFlags, plus one.
+const TextFieldFlagsN TextFieldFlags = 25
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _TextFieldFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[TextFieldFocusActive-(24)]
+}
+
+var _TextFieldFlagsNameToValueMap = map[string]TextFieldFlags{
+	`TextFieldFocusActive`: 24,
+	`textfieldfocusactive`: 24,
+}
+
+var _TextFieldFlagsDescMap = map[TextFieldFlags]string{
+	24: `TextFieldFocusActive indicates that the focus is active in this field`,
+}
+
+var _TextFieldFlagsMap = map[TextFieldFlags]string{
+	24: `TextFieldFocusActive`,
+}
+
+// String returns the string representation
+// of this TextFieldFlags value.
+func (i TextFieldFlags) String() string {
+	str := ""
+	for _, ie := range WidgetFlagsValues() {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	for _, ie := range _TextFieldFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this TextFieldFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i TextFieldFlags) BitIndexString() string {
+	if str, ok := _TextFieldFlagsMap[i]; ok {
+		return str
+	}
+	return WidgetFlags(i).BitIndexString()
+}
+
+// SetString sets the TextFieldFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *TextFieldFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the TextFieldFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *TextFieldFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _TextFieldFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _TextFieldFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			err := (*WidgetFlags)(i).SetStringOr(flg)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Int64 returns the TextFieldFlags value as an int64.
+func (i TextFieldFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the TextFieldFlags value from an int64.
+func (i *TextFieldFlags) SetInt64(in int64) {
+	*i = TextFieldFlags(in)
+}
+
+// Desc returns the description of the TextFieldFlags value.
+func (i TextFieldFlags) Desc() string {
+	if str, ok := _TextFieldFlagsDescMap[i]; ok {
+		return str
+	}
+	return WidgetFlags(i).Desc()
+}
+
+// TextFieldFlagsValues returns all possible values
+// for the type TextFieldFlags.
+func TextFieldFlagsValues() []TextFieldFlags {
+	es := WidgetFlagsValues()
+	res := make([]TextFieldFlags, len(es))
+	for i, e := range es {
+		res[i] = TextFieldFlags(e)
+	}
+	res = append(res, _TextFieldFlagsValues...)
+	return res
+}
+
+// Values returns all possible values
+// for the type TextFieldFlags.
+func (i TextFieldFlags) Values() []enums.Enum {
+	es := WidgetFlagsValues()
+	les := len(es)
+	res := make([]enums.Enum, les+len(_TextFieldFlagsValues))
+	for i, d := range es {
+		res[i] = d
+	}
+	for i, d := range _TextFieldFlagsValues {
+		res[i+les] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type TextFieldFlags.
+func (i TextFieldFlags) IsValid() bool {
+	_, ok := _TextFieldFlagsMap[i]
+	if !ok {
+		return WidgetFlags(i).IsValid()
+	}
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i TextFieldFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *TextFieldFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i TextFieldFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *TextFieldFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _VpFlagsValues = []VpFlags{0, 1, 2, 3, 4, 5, 6}
 
 // VpFlagsN is the highest valid value
 // for type VpFlags, plus one.
-const VpFlagsN VpFlags = 6
+const VpFlagsN VpFlags = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _VpFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[VpNeedsRender-(0)]
-	_ = x[VpNeedsFullRender-(1)]
-	_ = x[VpIsRendering-(2)]
-	_ = x[VpPopupDestroyAll-(3)]
-	_ = x[VpDoRebuild-(4)]
-	_ = x[VpPrefSizing-(5)]
+	_ = x[VpIsUpdating-(0)]
+	_ = x[VpNeedsRender-(1)]
+	_ = x[VpNeedsLayout-(2)]
+	_ = x[VpNeedsRebuild-(3)]
+	_ = x[VpPopupDestroyAll-(4)]
+	_ = x[VpRebuild-(5)]
+	_ = x[VpPrefSizing-(6)]
 }
 
 var _VpFlagsNameToValueMap = map[string]VpFlags{
-	`VpNeedsRender`:     0,
-	`vpneedsrender`:     0,
-	`VpNeedsFullRender`: 1,
-	`vpneedsfullrender`: 1,
-	`VpIsRendering`:     2,
-	`vpisrendering`:     2,
-	`VpPopupDestroyAll`: 3,
-	`vppopupdestroyall`: 3,
-	`VpDoRebuild`:       4,
-	`vpdorebuild`:       4,
-	`VpPrefSizing`:      5,
-	`vpprefsizing`:      5,
+	`VpIsUpdating`:      0,
+	`vpisupdating`:      0,
+	`VpNeedsRender`:     1,
+	`vpneedsrender`:     1,
+	`VpNeedsLayout`:     2,
+	`vpneedslayout`:     2,
+	`VpNeedsRebuild`:    3,
+	`vpneedsrebuild`:    3,
+	`VpPopupDestroyAll`: 4,
+	`vppopupdestroyall`: 4,
+	`VpRebuild`:         5,
+	`vprebuild`:         5,
+	`VpPrefSizing`:      6,
+	`vpprefsizing`:      6,
 }
 
 var _VpFlagsDescMap = map[VpFlags]string{
-	0: `VpNeedsRender means nodes have flagged that they need a Render and / or SetStyle update`,
-	1: `VpNeedsFullRender means that this viewport needs to do a full render: SetStyle, GetSize, DoLayout, then Render`,
-	2: `VpIsRendering means viewport is in the process of rendering, (or any other updating) -- do not trigger another render at this point.`,
-	3: `VpPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
-	4: `VpDoRebuild triggers extra rebuilding of elements during Config and FullRender.`,
-	5: `VpPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
+	0: `VpIsUpdating means viewport is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	1: `VpNeedsRender means nodes have flagged that they need a Render update.`,
+	2: `VpNeedsLayout means that this viewport needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
+	3: `VpNeedsRebuild means that this viewport needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
+	4: `VpPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
+	5: `VpRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
+	6: `VpPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
 }
 
 var _VpFlagsMap = map[VpFlags]string{
-	0: `VpNeedsRender`,
-	1: `VpNeedsFullRender`,
-	2: `VpIsRendering`,
-	3: `VpPopupDestroyAll`,
-	4: `VpDoRebuild`,
-	5: `VpPrefSizing`,
+	0: `VpIsUpdating`,
+	1: `VpNeedsRender`,
+	2: `VpNeedsLayout`,
+	3: `VpNeedsRebuild`,
+	4: `VpPopupDestroyAll`,
+	5: `VpRebuild`,
+	6: `VpPrefSizing`,
 }
 
 // String returns the string representation

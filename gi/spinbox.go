@@ -185,7 +185,7 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 	sb.SetValueAction(val)
 }
 
-func (sb *SpinBox) ConfigParts() {
+func (sb *SpinBox) ConfigParts(vp *Viewport) {
 	if sb.UpIcon.IsNil() {
 		sb.UpIcon = gicons.KeyboardArrowUp
 	}
@@ -310,17 +310,6 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sb *SpinBox) ConfigPartsIfNeeded() {
-	if !sb.Parts.HasChildren() {
-		sb.ConfigParts()
-	}
-	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	txt := sb.ValToString(sb.Value)
-	if tf.Txt != txt {
-		tf.SetText(txt)
-	}
-}
-
 func (sb *SpinBox) MouseScrollEvent() {
 	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
@@ -338,7 +327,7 @@ func (sb *SpinBox) TextFieldEvent() {
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
 		if sig == int64(WidgetSelected) {
-			sbb.SetSelectedState(!sbb.IsSelected())
+			sbb.SetSelected(!sbb.IsSelected())
 		}
 		sbb.WidgetSig.Emit(sbb.This(), sig, data) // passthrough
 	})
@@ -379,9 +368,9 @@ func (sb *SpinBox) SpinBoxEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SpinBox) Config() {
+func (sb *SpinBox) ConfigWidget(vp *Viewport) {
 	sb.ConfigWidget()
-	sb.ConfigParts()
+	sb.ConfigParts(vp)
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
@@ -449,7 +438,7 @@ func (sb *SpinBox) SetStyle() {
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
-	sb.ConfigParts()
+	sb.ConfigParts(vp)
 }
 
 func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
@@ -457,7 +446,6 @@ func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
 }
 
 func (sb *SpinBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sb.ConfigPartsIfNeeded()
 	sb.DoLayoutBase(parBBox, true, iter) // init style
 	sb.DoLayoutParts(parBBox, iter)
 	return sb.DoLayoutChildren(iter)
@@ -470,8 +458,7 @@ func (sb *SpinBox) Render(vp *Viewport) {
 	if sb.PushBounds() {
 		sb.This().(Node2D).ConnectEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
-		tf.SetSelectedState(sb.IsSelected())
-		sb.ConfigPartsIfNeeded()
+		tf.SetSelected(sb.IsSelected())
 		sb.RenderChildren()
 		sb.RenderParts()
 		sb.PopBounds()

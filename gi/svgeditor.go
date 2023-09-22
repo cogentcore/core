@@ -101,7 +101,7 @@ func (svg *Editor) EditorEvents() {
 		if obj != nil {
 			pos := me.Where
 			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-			PopupTooltip(obj.Name(), pos.X, pos.Y, svg.ViewportSafe(), ttxt)
+			PopupTooltip(obj.Name(), pos.X, pos.Y, svg.Vp, ttxt)
 		}
 	})
 }
@@ -113,7 +113,7 @@ func (svg *Editor) ConnectEvents() {
 // InitScale ensures that Scale is initialized and non-zero
 func (svg *Editor) InitScale() {
 	if svg.Scale == 0 {
-		mvp := svg.ViewportSafe()
+		mvp := svg.Vp
 		if mvp != nil {
 			svg.Scale = svg.ParentWindow().LogicalDPI() / 96.0
 		} else {

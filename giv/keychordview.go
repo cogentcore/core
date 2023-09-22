@@ -126,7 +126,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 		if me.Action == mouse.Press && me.Button == mouse.Left {
 			if kcc.Selectable {
 				me.SetProcessed()
-				kcc.SetSelectedState(!kcc.IsSelected())
+				kcc.SetSelected(!kcc.IsSelected())
 				if kcc.IsSelected() {
 					kcc.GrabFocus()
 				}
@@ -181,7 +181,7 @@ func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
 		kc.UpdateSig()
 	case gi.FocusGot:
 		kc.FocusActive = true
-		kc.SetSelected()
+		kc.SetSelected(true)
 		kc.ScrollToMe()
 		kc.EmitFocusedSignal()
 		kc.UpdateSig()

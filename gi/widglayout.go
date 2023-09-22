@@ -43,7 +43,7 @@ func (wb *WidgetBase) ComputeBBox2DBase(parBBox image.Rectangle, delta image.Poi
 func (wb *WidgetBase) BBoxReport() string {
 	rpt := ""
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		nii, ni := KiToNode2D(k)
+		nii, ni := AsWidget(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
@@ -166,21 +166,21 @@ func (wb *WidgetBase) InitLayout(vp *Viewport) bool {
 // DoLayoutBase provides basic DoLayout functions -- good for most cases
 func (wb *WidgetBase) DoLayoutBase(parBBox image.Rectangle, initStyle bool, iter int) {
 	nii, _ := wb.This().(Widget)
-	mvp := wb.ViewportSafe()
+	mvp := wb.Vp
 	if mvp == nil { // robust
 		if nii.AsViewport() == nil {
 			// todo: not so clear that this will do anything useful at this point
 			// but at least it gets the viewport
 			nii.Config()
 			nii.SetStyle()
-			nii.GetSize(vp*Viewport, 0)
+			nii.GetSize(vp, 0)
 			// fmt.Printf("node not init in DoLayoutBase: %v\n", wb.Path())
 		}
 	}
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
-		mvp := wb.ViewportSafe()
+		mvp := wb.Vp
 		SetUnitContext(&wb.Style, mvp, wb.NodeSize(), psize) // update units with final layout
 	}
 	wb.BBox = nii.BBox2D() // only compute once, at this point
@@ -249,7 +249,7 @@ func (wb *WidgetBase) Move2DTree() {
 func (wb *WidgetBase) Move2DChildren(delta image.Point) {
 	cbb := wb.This().(Node2D).ChildrenBBox2D()
 	for _, kid := range wb.Kids {
-		nii, _ := KiToNode2D(kid)
+		nii, _ := AsWidget(kid)
 		if nii != nil {
 			nii.Move2D(delta, cbb)
 		}

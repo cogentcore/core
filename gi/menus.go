@@ -371,7 +371,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
 	var focus ki.Ki
 	for _, ac := range menu {
-		acn, ac := KiToNode2D(ac)
+		acn, ac := AsWidget(ac)
 		if acn != nil {
 			frame.AddChild(acn)
 			if ac.IsSelected() {
@@ -437,7 +437,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 	var focus ki.Ki
 	_ = focus
 	for _, ac := range menu {
-		acn, ac := KiToNode2D(ac)
+		acn, ac := AsWidget(ac)
 		if acn != nil {
 			frame.AddChild(acn)
 			if ac.IsSelected() {
@@ -477,7 +477,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvF
 	var menu Menu
 	for i, it := range strs {
 		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
-		ac.SetSelectedState(it == curSel)
+		ac.SetSelected(it == curSel)
 	}
 	wb := recv.AsWidget()
 	pos := recv.ContextMenuPos()
@@ -508,7 +508,7 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.
 			it := ss[i]
 			cnm := s1 + ": " + it
 			ac := sm.Menu.AddAction(ActOpts{Label: it, Data: []int{si, i}}, recv, fun)
-			ac.SetSelectedState(cnm == curSel)
+			ac.SetSelected(cnm == curSel)
 		}
 	}
 	wb := recv.AsWidget()
