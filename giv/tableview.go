@@ -342,7 +342,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	sgcfg := ki.TypeAndNameList{}
 	sgcfg.Add(gi.TypeToolBar, "header")
-	sgcfg.Add(gi.TypeLayout, "grid-lay")
+	sgcfg.Add(gi.LayoutType, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 
 	sgh := tv.SliceHeader()
@@ -358,7 +358,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	// Configure Header
 	hcfg := ki.TypeAndNameList{}
 	if tv.ShowIndex {
-		hcfg.Add(gi.TypeLabel, "head-idx")
+		hcfg.Add(gi.LabelType, "head-idx")
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
@@ -366,8 +366,8 @@ func (tv *TableView) ConfigSliceGrid() {
 		hcfg.Add(gi.TypeAction, labnm)
 	}
 	if !tv.IsDisabled() {
-		hcfg.Add(gi.TypeLabel, "head-add")
-		hcfg.Add(gi.TypeLabel, "head-del")
+		hcfg.Add(gi.LabelType, "head-add")
+		hcfg.Add(gi.LabelType, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
 

@@ -170,7 +170,7 @@ type TextView struct {
 // Textview should always have a parent Layout to manage
 // the scrollbars.
 func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
-	ly := parent.NewChild(gi.TypeLayout, name+"-lay").(*gi.Layout)
+	ly := parent.NewChild(gi.LayoutType, name+"-lay").(*gi.Layout)
 	tv := NewTextView(ly, name)
 	return tv, ly
 }

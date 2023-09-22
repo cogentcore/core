@@ -471,7 +471,7 @@ func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
 	// TODO: maybe implement some version of this to render background color
 	// in margin if the parent element doesn't render for us
 	// if pwb, ok := wb.Parent().(*WidgetBase); ok {
-	// 	if pwb.Embed(TypeLayout) != nil && pwb.Embed(TypeFrame) == nil {
+	// 	if pwb.Embed(LayoutType) != nil && pwb.Embed(TypeFrame) == nil {
 	// 		pc.FillBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &st.BackgroundColor)
 	// 	}
 	// }

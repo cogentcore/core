@@ -15,6 +15,17 @@ import (
 	"goki.dev/ki/v2"
 )
 
+type ButtonBoxEmbedder interface {
+	AsButtonBox() *ButtonBox
+}
+
+func AsButtonBox(k ki.Ki) *ButtonBox {
+	if ac, ok := k.(ButtonBoxEmbedder); ok {
+		return ac.AsButtonBox()
+	}
+	return nil
+}
+
 // ButtonBox is a widget for containing a set of CheckBox buttons.
 // It can optionally enforce mutual excusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
@@ -200,7 +211,7 @@ func (bb *ButtonBox) ConfigItems() {
 			if sig != int64(ButtonToggled) {
 				return
 			}
-			bbb, _ := recv.Embed(ButtonBoxType).(*ButtonBox)
+			bbb := AsButtonBox(recv)
 			cbb := send.(*CheckBox)
 			idx := cbb.Prop("index").(int)
 			ischk := cbb.IsChecked()
@@ -241,9 +252,9 @@ func (bb *ButtonBox) SetStyle(vp *Viewport) {
 }
 
 func (bb *ButtonBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(parBBox, true, iter) // init style
+	bb.DoLayoutBase(vp, parBBox, true, iter) // init style
 	bb.DoLayoutParts(vp, parBBox, iter)
-	return bb.DoLayoutChildren(iter)
+	return bb.DoLayoutChildren(vp, iter)
 }
 
 func (bb *ButtonBox) RenderButtonBox(vp *Viewport) {

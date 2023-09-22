@@ -1055,18 +1055,18 @@ func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
-		li := recv.Embed(TypeLayout).(*Layout)
+		li := recv.Embed(LayoutType).(*Layout)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	ly.ConnectEvent(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
-		li := recv.Embed(TypeLayout).(*Layout)
+		li := recv.Embed(LayoutType).(*Layout)
 		li.AutoScroll(me.Pos())
 	})
 	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
-		li := recv.Embed(TypeLayout).(*Layout)
+		li := recv.Embed(LayoutType).(*Layout)
 		if li.Vp.IsMenu() {
 			li.AutoScroll(me.Pos())
 		}
@@ -1077,7 +1077,7 @@ func (ly *Layout) LayoutScrollEvents() {
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		li := recv.Embed(TypeLayout).(*Layout)
+		li := recv.Embed(LayoutType).(*Layout)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
 	})

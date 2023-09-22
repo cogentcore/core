@@ -324,7 +324,7 @@ func (tf *TextField) SetText(txt string) {
 func (tf *TextField) AddClearAction() {
 	tf.TrailingIcon = gicons.Close
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff := recv.Embed(TypeTextField).(*TextField)
+		tff := recv.Embed(TextFieldType).(*TextField)
 		if tff != nil {
 			tff.Clear()
 		}
@@ -337,7 +337,7 @@ func (tf *TextField) SetTypePassword() {
 	tf.NoEcho = true
 	tf.TrailingIcon = gicons.Visibility
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff := recv.Embed(TypeTextField).(*TextField)
+		tff := recv.Embed(TextFieldType).(*TextField)
 		if tff != nil {
 			updt := tff.UpdateStart()
 			tff.NoEcho = !tff.NoEcho
@@ -770,7 +770,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff := recv.Embed(TypeTextField).(*TextField)
+			tff := recv.Embed(TextFieldType).(*TextField)
 			tff.This().(Clipper).Copy(true)
 		})
 	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
@@ -779,13 +779,13 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := recv.Embed(TypeTextField).(*TextField)
+				tff := recv.Embed(TextFieldType).(*TextField)
 				tff.This().(Clipper).Cut()
 			})
 		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
 		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
 			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := recv.Embed(TypeTextField).(*TextField)
+				tff := recv.Embed(TextFieldType).(*TextField)
 				tff.This().(Clipper).Paste()
 			})
 		ac.SetDisabledState(goosi.TheApp.ClipBoard(tf.ParentWindow().OSWin).IsEmpty())
@@ -813,7 +813,7 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
 	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff, _ := recv.Embed(TypeTextField).(*TextField)
+		tff, _ := recv.Embed(TextFieldType).(*TextField)
 		if sig == int64(CompleteSelect) {
 			tff.CompleteText(data.(string)) // always use data
 		} else if sig == int64(CompleteExtend) {
@@ -1428,7 +1428,7 @@ func (tf *TextField) MouseDragEvent() {
 	tf.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
-		tff := recv.Embed(TypeTextField).(*TextField)
+		tff := recv.Embed(TextFieldType).(*TextField)
 		if !tff.SelectMode {
 			tff.SelectModeToggle()
 		}
@@ -1439,7 +1439,7 @@ func (tf *TextField) MouseDragEvent() {
 
 func (tf *TextField) MouseEvent() {
 	tf.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(TypeTextField).(*TextField)
+		tff := recv.Embed(TextFieldType).(*TextField)
 		me := d.(*mouse.Event)
 		tff.HandleMouseEvent(me)
 	})
@@ -1447,13 +1447,13 @@ func (tf *TextField) MouseEvent() {
 
 func (tf *TextField) KeyChordEvent() {
 	tf.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := recv.Embed(TypeTextField).(*TextField)
+		tff := recv.Embed(TextFieldType).(*TextField)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
 	if dlg, ok := tf.Viewport.This().(*Dialog); ok {
 		dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff, _ := recv.Embed(TypeTextField).(*TextField)
+			tff, _ := recv.Embed(TextFieldType).(*TextField)
 			if sig == int64(DialogAccepted) {
 				tff.EditDone()
 			}
@@ -1476,12 +1476,12 @@ func (tf *TextField) ConfigParts(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	leadIconIdx, trailIconIdx := -1, -1
 	if !tf.LeadingIcon.IsNil() {
-		// config.Add(TypeStretch, "lead-icon-str")
+		// config.Add(StretchType, "lead-icon-str")
 		config.Add(TypeAction, "lead-icon")
 		leadIconIdx = 0
 	}
 	if !tf.TrailingIcon.IsNil() {
-		config.Add(TypeStretch, "trail-icon-str")
+		config.Add(StretchType, "trail-icon-str")
 		config.Add(TypeAction, "trail-icon")
 		if leadIconIdx == -1 {
 			trailIconIdx = 1
@@ -1668,15 +1668,13 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusLost:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDone()
-		tf.SetNeedsStyle()
-		tf.UpdateSig()
+		tf.SetStyleUpdate(tf.Vp)
 	case FocusGot:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
-		tf.SetNeedsStyle()
-		tf.UpdateSig()
+		tf.SetStyleUpdate(tf.Vp)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
@@ -1685,14 +1683,12 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusInactive:
 		tf.ClearFlag(int(TextFieldFocusActive))
 		tf.EditDeFocused()
-		tf.SetNeedsStyle()
-		tf.UpdateSig()
+		tf.SetStyleUpdate(tf.Vp)
 		goosi.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(int(TextFieldFocusActive))
 		tf.ScrollToMe()
-		tf.SetNeedsStyle()
-		tf.UpdateSig()
+		tf.SetStyleUpdate(tf.Vp)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {

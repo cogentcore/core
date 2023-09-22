@@ -42,11 +42,11 @@ func mainrun() {
 
 	mfr := win.SetMainFrame()
 
-	trow := mfr.NewChild(gi.TypeLayout, "trow").(*gi.Layout)
+	trow := mfr.NewChild(gi.LayoutType, "trow").(*gi.Layout)
 	trow.Lay = gi.LayoutHoriz
 	trow.SetStretchMaxWidth()
 
-	title := trow.NewChild(gi.TypeLabel, "title").(*gi.Label)
+	title := trow.NewChild(gi.LabelType, "title").(*gi.Label)
 	hdrText := `This is a <b>test</b> of the TextView`
 	title.Text = hdrText
 	title.SetProp("text-align", gist.AlignCenter)
@@ -62,7 +62,7 @@ func mainrun() {
 	splt.SetProp("line-height", 1.1)
 
 	// generally need to put text view within its own layout for scrolling
-	txly1 := splt.NewChild(gi.TypeLayout, "view-layout-1").(*gi.Layout)
+	txly1 := splt.NewChild(gi.LayoutType, "view-layout-1").(*gi.Layout)
 	txly1.SetStretchMaxWidth()
 	txly1.SetStretchMaxHeight()
 	txly1.SetMinPrefWidth(units.Ch(20))
@@ -72,7 +72,7 @@ func mainrun() {
 	txed1.Viewport = vp
 
 	// generally need to put text view within its own layout for scrolling
-	txly2 := splt.NewChild(gi.TypeLayout, "view-layout-2").(*gi.Layout)
+	txly2 := splt.NewChild(gi.LayoutType, "view-layout-2").(*gi.Layout)
 	txly2.SetStretchMaxWidth()
 	txly2.SetStretchMaxHeight()
 	txly2.SetMinPrefWidth(units.Ch(20))

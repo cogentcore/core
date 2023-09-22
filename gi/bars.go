@@ -303,6 +303,20 @@ func (mb *MenuBar) MainMenuUpdateActives(win *Window) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
+type ToolBarEmbedder interface {
+	AsToolBar() *ToolBar
+}
+
+func AsToolBar(k ki.Ki) *ToolBar {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(ToolBarEmbedder); ok {
+		return ac.AsToolBar()
+	}
+	return nil
+}
+
 // ToolBar is a Layout (typically LayoutHoriz) that renders a gradient
 // background and is useful for holding Actions that do things
 type ToolBar struct {
@@ -395,8 +409,10 @@ func (tb *ToolBar) MouseFocusEvent() {
 	tb.ConnectEvent(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
-			tbb := recv.Embed(ToolBarType).(*ToolBar)
-			tbb.UpdateActions()
+			tbb := AsToolBar(recv)
+			if tbb != nil {
+				tbb.UpdateActions()
+			}
 			// do NOT mark as processed -- HiPri and not mutex
 		}
 	})

@@ -18,6 +18,9 @@ type ActionEmbedder interface {
 }
 
 func AsAction(k ki.Ki) *Action {
+	if k == nil || k.This() == nil {
+		return nil
+	}
 	if ac, ok := k.(ActionEmbedder); ok {
 		return ac.AsAction()
 	}

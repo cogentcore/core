@@ -601,7 +601,7 @@ func (dv *DiffView) ConfigWidget(vp *Viewport) {
 	dv.Lay = gi.LayoutVert
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeLayout, "diff-lay")
+	config.Add(gi.LayoutType, "diff-lay")
 	mods, updt := dv.ConfigChildren(config)
 	if !mods {
 		updt = dv.UpdateStart()
@@ -754,8 +754,8 @@ func (dv *DiffView) ConfigTexts() {
 	dv.BufB.Opts.LineNos = true
 	dv.BufB.Stat() // update markup
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeLayout, "text-a-lay")
-	config.Add(gi.TypeLayout, "text-b-lay")
+	config.Add(gi.LayoutType, "text-a-lay")
+	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := lay.ConfigChildren(config)
 	al, bl := dv.TextViewLays()
 	if !mods {

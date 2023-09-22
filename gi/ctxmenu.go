@@ -28,11 +28,12 @@ func (wb *WidgetBase) ContextMenuPos() (pos image.Point) {
 
 func (wb *WidgetBase) ContextMenu() {
 	var men Menu
-	wb.This().(Node2D).MakeContextMenu(&men)
+	wi := wb.This().(Widget)
+	wi.MakeContextMenu(&men)
 	if len(men) == 0 {
 		return
 	}
-	pos := wb.This().(Node2D).ContextMenuPos()
+	pos := wi.ContextMenuPos()
 	mvp := wb.Vp
 	PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
 }

@@ -150,6 +150,9 @@ type Viewport struct {
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport
 	Flags VpFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
+	// type of Viewport
+	Type VpType `desc:"type of Viewport"`
+
 	// Viewport-level viewbox within any parent Viewport
 	Geom gist.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
 

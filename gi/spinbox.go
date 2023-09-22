@@ -197,10 +197,10 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
 	}
 	config := ki.TypeAndNameList{}
-	config.Add(TypeTextField, "text-field")
+	config.Add(TextFieldType, "text-field")
 	if !sb.IsDisabled() {
-		config.Add(TypeSpace, "space")
-		config.Add(TypeLayout, "buttons")
+		config.Add(SpaceType, "space")
+		config.Add(LayoutType, "buttons")
 	}
 	mods, updt := sb.Parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {

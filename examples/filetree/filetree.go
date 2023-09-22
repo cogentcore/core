@@ -268,7 +268,7 @@ func (fb *FileBrowse) Defaults() {
 // -- can modify as desired before calling ConfigChildren on Frame using this
 func (fb *FileBrowse) StdFrameConfig() ki.TypeAndNameList {
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.LabelType, "title")
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
 	return config
@@ -354,7 +354,7 @@ func (fb *FileBrowse) SplitViewConfig() ki.TypeAndNameList {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeFrame, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
-		config.Add(gi.TypeLayout, fmt.Sprintf("textview-lay-%v", i))
+		config.Add(gi.LayoutType, fmt.Sprintf("textview-lay-%v", i))
 	}
 	// todo: tab view
 	return config

@@ -95,7 +95,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 // Config configures the view
 func (av *ArgView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.LabelType, "title")
 	config.Add(gi.TypeFrame, "args-grid")
 	mods, updt := av.ConfigChildren(config)
 	av.ConfigArgsGrid()
@@ -144,7 +144,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		knm := strcase.ToKebab(ad.Name)
 		labnm := "label-" + knm
 		valnm := "value-" + knm
-		config.Add(gi.TypeLabel, labnm)
+		config.Add(gi.LabelType, labnm)
 		config.Add(vtyp, valnm)
 	}
 	mods, updt := sg.ConfigChildren(config) // not sure if always unique?

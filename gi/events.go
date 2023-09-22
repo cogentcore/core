@@ -49,8 +49,7 @@ func (wb *WidgetBase) WidgetMouseEvent() {
 // mouse event function, you should call this function first.
 func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
 	wb.SetActiveState(me.Action == mouse.Press)
-	wb.SetNeedsStyle()
-	wb.UpdateSig()
+	wb.SetStyleUpdate(wb.Vp)
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
@@ -73,8 +72,7 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
 	enter := me.Action == mouse.Enter
 	wb.SetHoveredState(enter)
-	wb.SetNeedsStyle()
-	wb.UpdateSig()
+	wb.SetStyleUpdate(wb.Vp)
 	// TODO: trigger mouse focus exit after clicking down
 	// while leaving; then clear active here
 	// // if !enter {

@@ -121,7 +121,7 @@ func (sv *StructViewInline) ConfigParts(vp *Viewport) {
 		// todo: other things with view tag..
 		labnm := "label-" + field.Name
 		valnm := "value-" + field.Name
-		config.Add(gi.TypeLabel, labnm)
+		config.Add(gi.LabelType, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true

@@ -378,7 +378,7 @@ func (sv *SliceViewBase) UpdateValues() {
 func (sv *SliceViewBase) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeLayout, "grid-lay")
+	config.Add(gi.LayoutType, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()

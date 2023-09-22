@@ -58,7 +58,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeIconValueView).(*IconValueView)
+		vvv, _ := recv.Embed(IconTypeValueView).(*IconValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Vp, nil, nil)
 	})

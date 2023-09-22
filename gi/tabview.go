@@ -190,7 +190,7 @@ func (tv *TabView) NewTab(typ reflect.Type, label string) Widget {
 // A Layout is added first and the widget is added to that layout.
 // The Layout has "-lay" suffix added to name.
 func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Widget, *Layout) {
-	ly := tv.NewTab(TypeLayout, label).(*Layout)
+	ly := tv.NewTab(LayoutType, label).(*Layout)
 	ly.SetName(label + "-lay")
 	widg := ly.NewChild(typ, label).(Widget)
 	return widg, ly
@@ -608,7 +608,7 @@ func (tb *TabButton) OnInit() {
 		// 	s.Border.Color.Bottom = ColorScheme.Primary
 		// }
 
-		if tb.IsHovered() {
+		if tb.HasFlag(Hovered) {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
 		}
 		if w.HasFocus() {
@@ -686,7 +686,7 @@ func (tb *TabButton) ConfigParts(vp *Viewport) {
 func (tb *TabButton) ConfigPartsDeleteButton() {
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
-	config.Add(TypeStretch, "close-stretch")
+	config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)
 	config.Add(TypeAction, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)

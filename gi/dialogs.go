@@ -187,7 +187,7 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 		win.AddChild(dlg)
 		win.Viewport = &dlg.Viewport
 		win.Viewport.Fill = true
-		win.MasterVLay = dlg.Frame().Embed(TypeLayout).(*Layout)
+		win.MasterVLay = dlg.Frame().Embed(LayoutType).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
 
@@ -410,13 +410,13 @@ const (
 func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.TypeAndNameList {
 	config := ki.TypeAndNameList{}
 	if stretch {
-		config.Add(TypeStretch, "stretch")
+		config.Add(StretchType, "stretch")
 	}
 	if cancel {
-		config.Add(TypeButton, "cancel")
+		config.Add(ButtonType, "cancel")
 	}
 	if ok {
-		config.Add(TypeButton, "ok")
+		config.Add(ButtonType, "ok")
 	}
 	return config
 }
@@ -425,7 +425,7 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.TypeAndNameList 
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.ChildByName("ok", 0).Embed(TypeButton).(*Button)
+		okb := bb.ChildByName("ok", 0).Embed(ButtonType).(*Button)
 		okb.SetText("Ok")
 		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
@@ -435,7 +435,7 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 		})
 	}
 	if cancel {
-		canb := bb.ChildByName("cancel", 0).Embed(TypeButton).(*Button)
+		canb := bb.ChildByName("cancel", 0).Embed(ButtonType).(*Button)
 		canb.SetText("Cancel")
 		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
@@ -571,7 +571,7 @@ func ChoiceDialog(avp *Viewport, opts DlgOpts, choices []string, recv ki.Ki, fun
 		if chnm == "cancel" {
 			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(TypeButton).(*Button)
+					tb := send.Embed(ButtonType).(*Button)
 					dlg := recv.Embed(TypeDialog).(*Dialog)
 					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Cancel()
@@ -580,7 +580,7 @@ func ChoiceDialog(avp *Viewport, opts DlgOpts, choices []string, recv ki.Ki, fun
 		} else {
 			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(TypeButton).(*Button)
+					tb := send.Embed(ButtonType).(*Button)
 					dlg := recv.Embed(TypeDialog).(*Dialog)
 					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
 					dlg.Accept()
@@ -605,7 +605,7 @@ func NewKiDialog(avp *Viewport, iface reflect.Type, opts DlgOpts, recv ki.Ki, fu
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
 
-	nrow := frame.InsertNewChild(TypeLayout, prIdx+2, "n-row").(*Layout)
+	nrow := frame.InsertNewChild(LayoutType, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
 	NewLabel(nrow, "n-label", "Number:  ")
@@ -615,10 +615,10 @@ func NewKiDialog(avp *Viewport, iface reflect.Type, opts DlgOpts, recv ki.Ki, fu
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := frame.InsertNewChild(TypeSpace, prIdx+3, "type-space").(*Space)
+	tspc := frame.InsertNewChild(SpaceType, prIdx+3, "type-space").(*Space)
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := frame.InsertNewChild(TypeLayout, prIdx+4, "t-row").(*Layout)
+	trow := frame.InsertNewChild(LayoutType, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
 	NewLabel(trow, "t-label", "Type:    ")
@@ -661,7 +661,7 @@ func StringPromptDialog(avp *Viewport, strval, placeholder string, opts DlgOpts,
 
 	frame := dlg.Frame()
 	_, prIdx := dlg.PromptWidget(frame)
-	tf := frame.InsertNewChild(TypeTextField, prIdx+1, "str-field").(*TextField)
+	tf := frame.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()

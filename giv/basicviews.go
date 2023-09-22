@@ -403,7 +403,7 @@ type KiPtrValueView struct {
 }
 
 func (vv *KiPtrValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeButton
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -743,7 +743,7 @@ type BitFlagView struct {
 }
 
 func (vv *BitFlagView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeButtonBox
+	vv.WidgetTyp = gi.ButtonTypeBox
 	return vv.WidgetTyp
 }
 
@@ -868,7 +868,7 @@ type ByteSliceValueView struct {
 }
 
 func (vv *ByteSliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeTextField
+	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
 
@@ -917,7 +917,7 @@ type RuneSliceValueView struct {
 }
 
 func (vv *RuneSliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeTextField
+	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
 
@@ -965,7 +965,7 @@ type NilValueView struct {
 }
 
 func (vv *NilValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeLabel
+	vv.WidgetTyp = gi.LabelType
 	return vv.WidgetTyp
 }
 
@@ -1003,7 +1003,7 @@ type TimeValueView struct {
 }
 
 func (vv *TimeValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeTextField
+	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
 

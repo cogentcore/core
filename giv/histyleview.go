@@ -99,7 +99,7 @@ func HiStylesView(st *histyle.Styles) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
-	title := mfr.NewChild(gi.TypeLabel, "title").(*gi.Label)
+	title := mfr.NewChild(gi.LabelType, "title").(*gi.Label)
 	title.SetText("Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards.")
 	title.SetProp("width", units.Ch(30)) // need for wrap
 	title.SetStretchMaxWidth()

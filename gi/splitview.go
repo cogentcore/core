@@ -658,7 +658,7 @@ func (sr *Splitter) Render(vp *Viewport) {
 	sr.This().(Node2D).ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()
 	if sr.IsDragging() {
-		ick := sr.Parts.ChildByType(TypeIcon, ki.Embeds, 0)
+		ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)
 		if ick == nil {
 			return
 		}

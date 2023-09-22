@@ -15,11 +15,9 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
@@ -323,7 +321,7 @@ func (bb *ButtonBase) MouseEvent() {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
-		bbb.Node2DOnMouseEvent(me)
+		bbb.WidgetOnMouseEvent(me)
 		if me.Button == mouse.Left {
 			switch me.Action {
 			case mouse.DoubleClick: // we just count as a regular click
@@ -353,7 +351,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
-			if !(kt.Rune == ' ' && bbb.Viewport.IsCompleter()) {
+			if !(kt.Rune == ' ' && bbb.Vp.Type == VpCompleter) {
 				kt.SetProcessed()
 				bbb.ButtonPress()
 				bw.ButtonRelease()
@@ -365,7 +363,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 func (bb *ButtonBase) HoverTooltipEvent() {
 	bb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		wbb := recv.Embed(TypeButtonBase).(*ButtonBase)
+		wbb := AsButtonBase(recv)
 		tt := wbb.Tooltip
 		if wbb.Shortcut != "" {
 			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
@@ -402,10 +400,6 @@ type ButtonWidget interface {
 	// actually differ in functionality.
 	ButtonRelease()
 
-	// StyleParts is called during SetStyle to handle styling associated with
-	// parts -- icons mainly.
-	StyleParts(vp *Viewport)
-
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
 	ConfigParts(vp *Viewport)
@@ -413,6 +407,13 @@ type ButtonWidget interface {
 
 ///////////////////////////////////////////////////////////
 // ButtonBase Node2D and ButtonwWidget interface
+
+func AsButtonBase(k ki.Ki) *ButtonBase {
+	if ac, ok := k.(ButtonWidget); ok {
+		return ac.AsButtonBase()
+	}
+	return nil
+}
 
 func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 	return bb
@@ -425,17 +426,6 @@ func (bb *ButtonBase) ConfigWidget(vp *Viewport) {
 
 func (bb *ButtonBase) ButtonRelease() {
 	bb.BaseButtonRelease() // do base
-}
-
-func (bb *ButtonBase) StyleParts() {
-	if pv, ok := bb.PropInherit("indicator", ki.NoInherit, ki.TypeProps); ok {
-		pvs := laser.ToString(pv)
-		bb.Indicator = gicons.Icon(pvs)
-	}
-	if pv, ok := bb.PropInherit("icon", ki.NoInherit, ki.TypeProps); ok {
-		pvs := laser.ToString(pv)
-		bb.Icon = gicons.Icon(pvs)
-	}
 }
 
 func (bb *ButtonBase) ConfigParts(vp *Viewport) {
@@ -452,58 +442,33 @@ func (bb *ButtonBase) ConfigParts(vp *Viewport) {
 	}
 }
 
-// StyleButton does button styling -- it sets the StyMu Lock
-func (bb *ButtonBase) StyleButton() {
-	bb.StyMu.Lock()
-	defer bb.StyMu.Unlock()
-
-	bb.SetStyleWidget()
-	bb.This().(ButtonWidget).StyleParts()
-	if nf, err := bb.PropTry("no-focus"); err == nil {
-		bb.SetFlagState(!bb.IsDisabled() && !nf.(bool), int(CanFocus))
-	} else {
-		bb.SetFlagState(!bb.IsDisabled(), int(CanFocus))
-	}
-}
-
-func (bb *ButtonBase) SetStyle() {
-	bb.StyleButton()
-
-	bb.StyMu.Lock()
-	bb.LayState.SetFromStyle(&bb.Style) // also does reset
-	bb.StyMu.Unlock()
-	bb.This().(ButtonWidget).ConfigParts(vp)
+func (bb *ButtonBase) SetStyle(vp *Viewport) {
+	bb.SetStyleWidget(vp)
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
 	}
 }
 
 func (bb *ButtonBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(parBBox, true, iter) // init style
-	bb.DoLayoutParts(parBBox, iter)
-	return bb.DoLayoutChildren(iter)
+	bb.DoLayoutBase(vp, parBBox, true, iter) // init style
+	bb.DoLayoutParts(vp, parBBox, iter)
+	return bb.DoLayoutChildren(vp, iter)
 }
 
-func (bb *ButtonBase) RenderButton() {
+func (bb *ButtonBase) RenderButton(vp *Viewport) {
 	rs, _, st := bb.RenderLock()
 	bb.RenderStdBox(st)
 	bb.RenderUnlock(rs)
 }
 
 func (bb *ButtonBase) Render(vp *Viewport) {
-	if bb.FullReRenderIfNeeded() {
-		return
-	}
-	if bb.PushBounds() {
-		bb.This().(Node2D).ConnectEvents()
-		if bb.NeedsStyle() {
-			bb.StyleButton()
-			bb.ClearNeedsStyle()
-		}
-		bb.RenderButton()
-		bb.RenderParts()
-		bb.RenderChildren()
-		bb.PopBounds()
+	wi := bb.This().(Widget)
+	if bb.PushBounds(vp) {
+		wi.ConnectEvents()
+		bb.RenderButton(vp)
+		bb.RenderParts(vp)
+		bb.RenderChildren(vp)
+		bb.PopBounds(vp)
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
@@ -516,13 +481,11 @@ func (bb *ButtonBase) ConnectEvents() {
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		bb.SetNeedsStyle()
-		bb.UpdateSig()
+		bb.SetStyleUpdate(bb.Vp)
 	case FocusGot:
 		bb.ScrollToMe()
 		bb.EmitFocusedSignal()
-		bb.SetNeedsStyle()
-		bb.UpdateSig()
+		bb.SetStyleUpdate(bb.Vp)
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
@@ -582,7 +545,7 @@ const (
 
 func (bt *Button) OnInit() {
 	bt.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
 		s.Margin = gist.BoxShadowMargin(BoxShadow1).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
@@ -614,7 +577,7 @@ func (bt *Button) OnInit() {
 		case ButtonText:
 			s.Color = ColorScheme.Primary
 		}
-		if bt.IsHovered() {
+		if bt.HasFlag(Hovered) {
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
 			} else {
@@ -626,22 +589,22 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1.125)
 				s.Height.SetEm(1.125)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "space":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(0.5)
 				s.MinWidth.SetEm(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				// need to override so label's default color
 				// doesn't take control on state changes
 				s.Color = bt.Style.Color
@@ -650,11 +613,11 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 				s.AlignV = gist.AlignMiddle
 			})
 		case "ind-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(0.5)
 			})
 		case "indicator":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1.125)
 				s.Height.SetEm(1.125)
 				s.Margin.Set()
@@ -683,7 +646,7 @@ type CheckBox struct {
 
 func (cb *CheckBox) OnInit() {
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
 		s.Color = ColorScheme.OnBackground
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
@@ -706,10 +669,10 @@ func (cb *CheckBox) OnInit() {
 }
 
 func (cb *CheckBox) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "icon0", "icon1":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
@@ -717,11 +680,11 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "label":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = gist.AlignMiddle
@@ -762,13 +725,14 @@ func (cb *CheckBox) SetIcons(icOn, icOff gicons.Icon) {
 	updt := cb.UpdateStart()
 	cb.Icon = icOn
 	cb.IconOff = icOff
-	cb.This().(ButtonWidget).ConfigParts(vp)
+	cb.This().(ButtonWidget).ConfigParts(cb.Vp)
+	// todo: better config logic -- do layout
 	cb.UpdateEnd(updt)
 }
 
 func (cb *CheckBox) ConfigWidget(vp *Viewport) {
 	cb.SetCheckable(true)
-	cb.ConfigWidget()
+	cb.ConfigWidget(vp)
 	cb.This().(ButtonWidget).ConfigParts(vp)
 }
 
@@ -783,17 +747,17 @@ func (cb *CheckBox) ConfigParts(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	icIdx := 0 // always there
 	lbIdx := -1
-	config.Add(TypeLayout, "stack")
+	config.Add(LayoutType, "stack")
 	if cb.Text != "" {
-		config.Add(TypeSpace, "space")
+		config.Add(SpaceType, "space")
 		lbIdx = len(config)
-		config.Add(TypeLabel, "label")
+		config.Add(LabelType, "label")
 	}
 	mods, updt := cb.Parts.ConfigChildren(config)
 	ist := cb.Parts.Child(icIdx).(*Layout)
 	if mods || gist.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
-		ist.SetNChildren(2, TypeIcon, "icon") // covered by above config update
+		ist.SetNChildren(2, IconType, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(cb.Icon)
 		icoff := ist.Child(1).(*Icon)

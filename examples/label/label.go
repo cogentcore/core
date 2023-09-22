@@ -75,7 +75,7 @@ func mainrun() {
 It appears that the <b>end</b> of one paragraph implies the start of a new one, even if you do <i>not</i> insert a <code>p</code> tag.
 `
 
-	// mfr.NewChild(gi.TypeSpace, "aspc")
+	// mfr.NewChild(gi.SpaceType, "aspc")
 
 	gi.NewLabel(mfr, "etxt", "this is to test bottom after word wrapped text")
 

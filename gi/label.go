@@ -207,7 +207,7 @@ func (lb *Label) OnInit() {
 }
 
 func (lb *Label) OnAdd() {
-	lb.Selectable = lb.ParentByType(TypeButtonBase, ki.Embeds) == nil
+	lb.Selectable = lb.ParentByType(ButtonTypeBase, ki.Embeds) == nil
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {
@@ -286,7 +286,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		llb := recv.Embed(TypeLabel).(*Label)
+		llb := recv.Embed(LabelType).(*Label)
 		hasLinks := len(lb.TextRender.Links) > 0
 		if hasLinks {
 			pos := llb.RenderPos
@@ -314,7 +314,7 @@ func (lb *Label) HoverEvent() {
 func (lb *Label) MouseEvent() {
 	lb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		llb := recv.Embed(TypeLabel).(*Label)
+		llb := recv.Embed(LabelType).(*Label)
 		hasLinks := len(llb.TextRender.Links) > 0
 		pos := llb.RenderPos
 		if me.Action == mouse.Press && me.Button == mouse.Left && hasLinks {
@@ -350,7 +350,7 @@ func (lb *Label) MouseMoveEvent() {
 	lb.ConnectEvent(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		llb := recv.Embed(TypeLabel).(*Label)
+		llb := recv.Embed(LabelType).(*Label)
 		pos := llb.RenderPos
 		inLink := false
 		for _, tl := range llb.TextRender.Links {

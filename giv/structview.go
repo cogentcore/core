@@ -319,7 +319,7 @@ func (sv *StructView) ConfigStructGrid() {
 				svv.SetTag("label", fnm)
 				labnm := fmt.Sprintf("label-%v", fnm)
 				valnm := fmt.Sprintf("value-%v", fnm)
-				config.Add(gi.TypeLabel, labnm)
+				config.Add(gi.LabelType, labnm)
 				config.Add(svtyp, valnm) // todo: extend to diff types using interface..
 				sv.FieldViews = append(sv.FieldViews, svv)
 				return true
@@ -336,7 +336,7 @@ func (sv *StructView) ConfigStructGrid() {
 		// todo: other things with view tag..
 		labnm := fmt.Sprintf("label-%v", field.Name)
 		valnm := fmt.Sprintf("value-%v", field.Name)
-		config.Add(gi.TypeLabel, labnm)
+		config.Add(gi.LabelType, labnm)
 		config.Add(vtyp, valnm) // todo: extend to diff types using interface..
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true

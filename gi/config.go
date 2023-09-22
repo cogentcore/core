@@ -31,7 +31,8 @@ func (wb *WidgetBase) ReConfig() {
 	if !wb.HasVp() {
 		return
 	}
-	wb.This().(Widget).Config(vp)
+	wi := wb.This().(Widget)
+	wi.Config(wb.Vp)
 }
 
 func (wb *WidgetBase) Config(vp *Viewport) {
@@ -59,14 +60,14 @@ func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gico
 	lbIdx = -1
 	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
-		config.Add(TypeIcon, "icon")
+		config.Add(IconType, "icon")
 		if txt != "" {
-			config.Add(TypeSpace, "space")
+			config.Add(SpaceType, "space")
 		}
 	}
 	if txt != "" {
 		lbIdx = len(*config)
-		config.Add(TypeLabel, "label")
+		config.Add(LabelType, "label")
 	}
 	return
 }
@@ -96,20 +97,4 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icId
 			// lbl.SetText(txt)
 		}
 	}
-}
-
-// SetFullReRenderIconLabel sets the icon and label to be re-rendered, needed
-// when styles change
-func (wb *WidgetBase) SetFullReRenderIconLabel() {
-	if ick := wb.Parts.ChildByName("icon", 0); ick != nil {
-		ic := ick.(*Icon)
-		ic.SetFullReRender()
-	}
-	if lblk := wb.Parts.ChildByName("label", 2); lblk != nil {
-		lbl := lblk.(*Label)
-		lbl.SetFullReRender()
-	}
-	wb.Parts.StyMu.Lock()
-	wb.Parts.SetStyleWidget() // restyle parent so parts inherit
-	wb.Parts.StyMu.Unlock()
 }

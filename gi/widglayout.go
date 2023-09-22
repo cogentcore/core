@@ -163,33 +163,41 @@ func (wb *WidgetBase) InitLayout(vp *Viewport) bool {
 	return false
 }
 
+// todo: wtf with initStyle ??
+
 // DoLayoutBase provides basic DoLayout functions -- good for most cases
-func (wb *WidgetBase) DoLayoutBase(parBBox image.Rectangle, initStyle bool, iter int) {
-	nii, _ := wb.This().(Widget)
-	mvp := wb.Vp
-	if mvp == nil { // robust
-		if nii.AsViewport() == nil {
-			// todo: not so clear that this will do anything useful at this point
-			// but at least it gets the viewport
-			nii.Config()
-			nii.SetStyle()
-			nii.GetSize(vp, 0)
-			// fmt.Printf("node not init in DoLayoutBase: %v\n", wb.Path())
-		}
-	}
+func (wb *WidgetBase) DoLayoutBase(vp *Viewport, parBBox image.Rectangle, initStyle bool, iter int) {
+	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
-		mvp := wb.Vp
 		SetUnitContext(&wb.Style, mvp, wb.NodeSize(), psize) // update units with final layout
 	}
-	wb.BBox = nii.BBox2D() // only compute once, at this point
+	wb.BBox = wi.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	nii.ComputeBBox2D(parBBox, image.Point{}) // other bboxes from BBox
+	wi.ComputeBBox2D(parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
 	// typically DoLayoutChildren must be called after this!
+}
+
+// DoLayoutChildren does layout on all of node's children, giving them the
+// ChildrenBBox -- default call at end of DoLayout.  Passes along whether
+// any of the children need a re-layout -- typically DoLayout just returns
+// this.
+func (wb *WidgetBase) DoLayoutChildren(vp *Viewport, iter int) bool {
+	redo := false
+	cbb := wb.This().(Widget).ChildrenBBox2D()
+	for _, kid := range nb.Kids {
+		wi, _ := AsWidget(kid)
+		if wi != nil {
+			if wi.DoLayout(vp, cbb, iter) {
+				redo = true
+			}
+		}
+	}
+	return redo
 }
 
 // ChildrenBBox2DWidget provides a basic widget box-model subtraction of
@@ -249,29 +257,29 @@ func (wb *WidgetBase) Move2DTree() {
 func (wb *WidgetBase) Move2DChildren(delta image.Point) {
 	cbb := wb.This().(Node2D).ChildrenBBox2D()
 	for _, kid := range wb.Kids {
-		nii, _ := AsWidget(kid)
-		if nii != nil {
-			nii.Move2D(delta, cbb)
+		wi, _ := AsWidget(kid)
+		if wi != nil {
+			wi.Move2D(delta, cbb)
 		}
 	}
 }
 
 // ParentLayout returns the parent layout
 func (wb *WidgetBase) ParentLayout() *Layout {
-	ly := wb.ParentByType(TypeLayout, ki.Embeds)
+	ly := wb.ParentByType(LayoutType, ki.Embeds)
 	if ly == nil {
 		return nil
 	}
-	return ly.Embed(TypeLayout).(*Layout) // todo: do this manually
+	return ly.Embed(LayoutType).(*Layout) // todo: do this manually
 }
 
 // ParentScrollLayout returns the parent layout that has active scrollbars
 func (wb *WidgetBase) ParentScrollLayout() *Layout {
-	lyk := wb.ParentByType(TypeLayout, ki.Embeds)
+	lyk := wb.ParentByType(LayoutType, ki.Embeds)
 	if lyk == nil {
 		return nil
 	}
-	ly := lyk.Embed(TypeLayout).(*Layout)
+	ly := lyk.Embed(LayoutType).(*Layout)
 	if ly.HasAnyScroll() {
 		return ly
 	}

@@ -187,6 +187,8 @@ func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
 	vp.SetCurrentColor(wb.Style.Color)
 
 	psc.End()
+
+	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
 // RunStyleFuncs runs the style functions specified in
@@ -197,12 +199,19 @@ func (wb *WidgetBase) RunStyleFuncs() {
 	}
 }
 
-func (wb *WidgetBase) SetStyle() {
-	wb.StyMu.Lock()
-	defer wb.StyMu.Unlock()
+func (wb *WidgetBase) SetStyleUpdate(vp *Viewport) {
+	wi := wb.This().(Widget)
+	updt := wb.UpdateStart()
+	wi.SetStyle(vp)
+	wb.UpdateEnd(updt)
+	wb.SetNeedsRender(vp, updt)
+}
 
-	wb.SetStyleWidget()
-	wb.LayState.SetFromStyle(&wb.Style) // also does reset
+func (wb *WidgetBase) SetStyle(vp *Viewport) {
+	// wb.StyMu.Lock() // todo: needed??  maybe not.
+	// defer wb.StyMu.Unlock()
+
+	wb.SetStyleWidget(vp)
 }
 
 // SetUnitContext sets the unit context based on size of viewport, element, and parent

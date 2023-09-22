@@ -492,7 +492,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
 			if sig == int64(gi.ButtonPressed) {
-				but := send.Embed(gi.TypeButton).(*gi.Button)
+				but := send.Embed(gi.ButtonType).(*gi.Button)
 				cvv.Color = colors.LogFromName(but.Nm)
 				cvv.ColorHSLA = hsl.FromColor(cvv.Color)
 				cvv.ColorHSLA.Round()

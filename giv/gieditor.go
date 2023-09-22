@@ -211,7 +211,7 @@ func (ge *GiEditor) ConfigWidget(vp *Viewport) {
 	ge.Lay = gi.LayoutVert
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeLabel, "title")
+	config.Add(gi.LabelType, "title")
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
 	mods, updt := ge.ConfigChildren(config)

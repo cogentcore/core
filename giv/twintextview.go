@@ -78,8 +78,8 @@ func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
 func (tv *TwinTextViews) ConfigTexts() {
 	tv.MakeBufs()
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeLayout, "text-a-lay")
-	config.Add(gi.TypeLayout, "text-b-lay")
+	config.Add(gi.LayoutType, "text-a-lay")
+	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := tv.ConfigChildren(config)
 	al, bl := tv.TextViewLays()
 	if !mods {

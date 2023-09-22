@@ -15,7 +15,6 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -78,7 +77,7 @@ const (
 
 func (cb *ComboBox) OnInit() {
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignCenter
 		if cb.Editable {
 			s.Padding.Set()
@@ -99,7 +98,7 @@ func (cb *ComboBox) OnInit() {
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
 				s.Border.Radius = gist.BorderRadiusExtraSmallTop
-				if cb.HasFocusWithin() {
+				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Bottom = units.Px(2)
 					s.Border.Color.Bottom = ColorScheme.Primary
 				}
@@ -111,7 +110,7 @@ func (cb *ComboBox) OnInit() {
 			s.Border.Color.Set(ColorScheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = gist.BorderRadiusExtraSmall
-				if cb.HasFocusWithin() {
+				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Set(units.Px(2))
 					s.Border.Color.Set(ColorScheme.Primary)
 				}
@@ -121,15 +120,15 @@ func (cb *ComboBox) OnInit() {
 }
 
 func (cb *ComboBox) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "label":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = gist.AlignMiddle
@@ -150,7 +149,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "ind-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				if cb.Editable {
 					s.Width.SetPx(0)
 				} else {
@@ -158,7 +157,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "indicator":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Font.Size.SetEm(1.5)
 				s.AlignV = gist.AlignMiddle
 			})
@@ -203,11 +202,11 @@ func (cb *ComboBox) ButtonRelease() {
 	if pos.X == 0 && pos.Y == 0 { // offscreen
 		pos = cb.ObjBBox.Max
 	}
-	indic := cb.Parts.ChildByName("indicator", 3)
+	indic := AsWidgetBase(cb.Parts.ChildByName("indicator", 3))
 	if indic != nil {
-		pos = AsWidget(indic).WinBBox.Min
+		pos = indic.WinBBox.Min
 		if pos.X == 0 && pos.Y == 0 {
-			pos = AsWidget(indic).ObjBBox.Min
+			pos = indic.ObjBBox.Min
 		}
 	} else {
 		pos.Y -= 10
@@ -225,11 +224,11 @@ func (cb *ComboBox) ConfigPartsIconText(config *ki.TypeAndNameList, icnm gicons.
 	txIdx = -1
 	if TheIconMgr.IsValid(icnm) {
 		icIdx = len(*config)
-		config.Add(TypeIcon, "icon")
-		config.Add(TypeSpace, "space")
+		config.Add(IconType, "icon")
+		config.Add(SpaceType, "space")
 	}
 	txIdx = len(*config)
-	config.Add(TypeTextField, "text")
+	config.Add(TextFieldType, "text")
 	return
 }
 
@@ -251,9 +250,9 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, d
 		return -1
 	}
 	indIdx := -1
-	config.Add(TypeSpace, "ind-stretch")
+	config.Add(SpaceType, "ind-stretch")
 	indIdx = len(*config)
-	config.Add(TypeIcon, "indicator")
+	config.Add(IconType, "indicator")
 	return indIdx
 }
 
@@ -531,7 +530,7 @@ func (cb *ComboBox) MakeItemsMenu() {
 		} else {
 			ac = &Action{}
 			ki.InitNode(ac)
-			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Node2D))
+			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Widget))
 		}
 		nm := "Item_" + strconv.Itoa(i)
 		ac.SetName(nm)
@@ -616,7 +615,7 @@ func (cb *ComboBox) KeyChordEvent() {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
-			if !(kt.Rune == ' ' && cbb.Viewport.IsCompleter()) {
+			if !(kt.Rune == ' ' && cbb.Vp.Type == VpCompleter) {
 				kt.SetProcessed()
 				cbb.ButtonPress()
 				cbb.ButtonRelease()

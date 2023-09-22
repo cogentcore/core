@@ -1901,9 +1901,9 @@ func (tv *TreeView) ConfigParts(vp *Viewport) {
 		config.Add(gi.TypeCheckBox, "branch")
 	}
 	if gi.TheIconMgr.IsValid(tv.Icon) {
-		config.Add(gi.TypeIcon, "icon")
+		config.Add(gi.IconType, "icon")
 	}
-	config.Add(gi.TypeLabel, "label")
+	config.Add(gi.LabelType, "label")
 	_, updt := tv.Parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {

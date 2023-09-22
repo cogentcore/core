@@ -520,9 +520,9 @@ func (w *Window) ConfigVLay() {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		vp.NewChild(TypeLayout, "main-vlay")
+		vp.NewChild(LayoutType, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(TypeLayout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(LayoutType).(*Layout)
 	if !w.MasterVLay.HasChildren() {
 		w.MasterVLay.NewChild(TypeMenuBar, "main-menu")
 	}
@@ -558,9 +558,9 @@ func (w *Window) AddMainMenu() *MenuBar {
 	updt := vp.UpdateStart()
 	defer vp.UpdateEnd(updt)
 	if !vp.HasChildren() {
-		vp.NewChild(TypeLayout, "main-vlay")
+		vp.NewChild(LayoutType, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(TypeLayout).(*Layout)
+	w.MasterVLay = vp.Child(0).Embed(LayoutType).(*Layout)
 	if !w.MasterVLay.HasChildren() {
 		w.MainMenu = w.MasterVLay.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
 	} else {
@@ -635,7 +635,7 @@ func (w *Window) MainFrame() (*Frame, error) {
 // SetMainLayout sets the main widget of this window as a Layout, with a default
 // column-wise vertical layout and max stretch sizing, and returns it.
 func (w *Window) SetMainLayout() *Layout {
-	fr := w.SetMainWidgetType(TypeLayout, "main-lay").(*Layout)
+	fr := w.SetMainWidgetType(LayoutType, "main-lay").(*Layout)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr

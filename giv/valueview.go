@@ -900,7 +900,7 @@ func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 //   Base Widget Functions -- these are typically redefined in ValueView subtypes
 
 func (vv *ValueViewBase) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeTextField
+	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
 

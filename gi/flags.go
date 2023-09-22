@@ -7,6 +7,7 @@ package gi
 import (
 	"strings"
 
+	"goki.dev/enums"
 	"goki.dev/ki/v2"
 )
 
@@ -109,35 +110,26 @@ func (wb *WidgetBase) IsDisabled() bool {
 	return wb.HasFlag(Disabled)
 }
 
-/*
-
-// CanFocusWithin returns whether the current node or any
-// of its children can accept keyboard focus
-func (wb *WidgetBase) CanFocusWithin() bool {
-	return wb.HasFlagWithin(int(CanFocus))
-}
-
-// HasFocusWithin returns whether the current node or any
-// of its children are flagged as having keyboard focus
-func (wb *WidgetBase) HasFocusWithin() bool {
-	return wb.HasFlagWithin(int(HasFocus))
-}
-
 // HasFlagWithin returns whether the current node or any
 // of its children have the given flag.
-func (wb *WidgetBase) HasFlagWithin(flag int) bool {
+func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
 	wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
-		if cnb, ok := k.Embed(TypeWidgetBase).(*WidgetBase); ok {
-			if cnb.HasFlag(flag) {
-				got = true
-				return ki.Break
-			}
+		wi, _ := AsWidget(k)
+		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+			return ki.Break
+		}
+		if wi.HasFlag(flag) {
+			got = true
+			return ki.Break
 		}
 		return ki.Continue
 	})
 	return got
 }
+
+/*
+
 
 // IsDragging tests if the current node is currently flagged as receiving
 // dragging events -- flag set by window
@@ -148,21 +140,6 @@ func (wb *WidgetBase) IsDragging() bool {
 // IsInstaDrag tests if the current node has InstaDrag property set
 func (wb *WidgetBase) IsInstaDrag() bool {
 	return wb.HasFlag(int(InstaDrag))
-}
-
-// IsHovered returns whether this node is flagged as [Hovered]
-func (wb *WidgetBase) IsHovered() bool {
-	return wb.HasFlag(int(Hovered))
-}
-
-// NeedsFullReRender checks if node has said it needs full re-render
-func (wb *WidgetBase) NeedsFullReRender() bool {
-	return wb.HasFlag(int(FullReRender))
-}
-
-// IsReRenderAnchor returns whethers the current node is a ReRenderAnchor
-func (wb *WidgetBase) IsReRenderAnchor() bool {
-	return wb.HasFlag(int(ReRenderAnchor))
 }
 
 */

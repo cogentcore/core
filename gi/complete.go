@@ -177,7 +177,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image
 		icon := cmp.Icon
 		m.AddAction(ActOpts{Icon: gicons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
 			c, func(recv, send ki.Ki, sig int64, data any) {
-				cc := recv.Embed(TypeComplete).(*Complete)
+				cc := recv.(*Complete)
 				cc.Complete(data.(string))
 			})
 	}
@@ -191,9 +191,10 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image
 	// 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
 	// } else {
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	pvp.SetFlag(int(VpFlagCompleter))
-	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
+	pvp.Type = VpCompleter
+	// todo:
+	// pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	vp.Win.OSWin.SendEmptyEvent() // needs an extra event to show popup
 	// }
 	c.Vp = vp
 }
