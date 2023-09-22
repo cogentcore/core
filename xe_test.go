@@ -7,7 +7,7 @@ package xe
 import "testing"
 
 func TestRun(t *testing.T) {
-	cfg := DefaultConfig()
+	cfg := FatalConfig()
 	RunSh(cfg, "go version")
 	RunSh(cfg, "git version")
 	RunSh(cfg, "echo hello")

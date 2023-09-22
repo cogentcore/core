@@ -41,8 +41,58 @@ type Config struct {
 	ErrColor func(format string, a ...any) string
 }
 
-// DefaultConfig returns the default [Config] object.
-func DefaultConfig() *Config {
+// VerboseConfig returns a default verbose [Config] object.
+// It prints everything to [os.Stdout] or [os.Stderr].
+func VerboseConfig() *Config {
+	return &Config{
+		Stdout:   os.Stdout,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Commands: os.Stdout,
+		Errors:   os.Stderr,
+		Fatal:    false,
+		Env:      map[string]string{},
+		CmdColor: color.New(color.FgCyan, color.Bold).Sprintf,
+		ErrColor: color.New(color.FgRed).Sprintf,
+	}
+}
+
+// ErrorConfig returns a default error [Config] object.
+// It prints errors to [os.Stderr] and prints nothing else.
+func ErrorConfig() *Config {
+	return &Config{
+		Stdout:   nil,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Commands: nil,
+		Errors:   os.Stderr,
+		Fatal:    false,
+		Env:      map[string]string{},
+		CmdColor: color.New(color.FgCyan, color.Bold).Sprintf,
+		ErrColor: color.New(color.FgRed).Sprintf,
+	}
+}
+
+// SilentConfig returns a default silent [Config] object.
+// it prints nothing, not even errors.
+func SilentConfig() *Config {
+	return &Config{
+		Stdout:   nil,
+		Stderr:   nil,
+		Stdin:    os.Stdin,
+		Commands: nil,
+		Errors:   nil,
+		Fatal:    false,
+		Env:      map[string]string{},
+		CmdColor: color.New(color.FgCyan, color.Bold).Sprintf,
+		ErrColor: color.New(color.FgRed).Sprintf,
+	}
+}
+
+// FatalConfig returns a default fatal [Config] object.
+// It prints everything to [os.Stdout] or [os.Stderr],
+// and fatally exits on any error.
+func FatalConfig() *Config {
 	return &Config{
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
