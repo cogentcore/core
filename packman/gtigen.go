@@ -79,6 +79,20 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/goki/packman.GetVersion",
+	Doc:  "GetVersion prints the version of the project.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Type: "*config.Config", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
+	}),
+})
+
+var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.SetVersion",
 	Doc:  "SetVersion updates the config and version file of the config project based\non the config version and commits and pushes the changes.",
 	Directives: gti.Directives{

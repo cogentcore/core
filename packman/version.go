@@ -15,6 +15,14 @@ import (
 	"goki.dev/grease"
 )
 
+// GetVersion prints the version of the project.
+//
+//gti:add
+func GetVersion(c *config.Config) error {
+	fmt.Println(c.Version)
+	return nil
+}
+
 // SetVersion updates the config and version file of the config project based
 // on the config version and commits and pushes the changes.
 //
