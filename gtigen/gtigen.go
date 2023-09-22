@@ -19,7 +19,7 @@ import (
 func ParsePackages(cfg *Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
 		Mode: PackageModes(cfg),
-		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
+		// TODO: Need to think about types and functions in test files. Maybe write gtigen_test.go
 		// in a separate pass? For later.
 		Tests: false,
 	}
