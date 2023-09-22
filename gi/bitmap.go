@@ -141,7 +141,7 @@ func (bm *Bitmap) GrabRenderFrom(wi Widget) {
 	}
 }
 
-func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
+func (bm *Bitmap) DrawIntoViewport(vp *Viewport) {
 	if bm.Pixels == nil {
 		return
 	}
@@ -160,15 +160,15 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 		}
 		r = nr
 	}
-	draw.Draw(parVp.Pixels, r, bm.Pixels, sp, draw.Over)
+	draw.Draw(vp.Pixels, r, bm.Pixels, sp, draw.Over)
 }
 
 func (bm *Bitmap) Render(vp *Viewport) {
 	wi := bm.This().(Widget)
 	if bm.PushBounds(vp) {
 		wi.ConnectEvents()
-		// todo: draw bitmap
-		// bm.DrawIntoViewport(bm.Viewport)
+		bm.RenderChildren(vp)
+		bm.DrawIntoViewport(bm.Vp)
 		bm.PopBounds(vp)
 	} else {
 		bm.DisconnectAllEvents(AllPris)

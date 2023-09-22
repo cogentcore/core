@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/colors"
@@ -12,6 +13,7 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
 	"goki.dev/svg"
+	"golang.org/x/image/draw"
 )
 
 // // SetIcon sets the icon by name into given Icon wrapper, returning error
@@ -108,12 +110,36 @@ func (ic *Icon) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
 	return ic.DoLayoutChildren(vp, iter)
 }
 
+func (ic *Icon) DrawIntoViewport(vp *Viewport) {
+	if ic.SVG.Pixels == nil {
+		return
+	}
+	pos := ic.LayState.Alloc.Pos.ToPointCeil()
+	max := pos.Add(ic.LayState.Alloc.Size.ToPointCeil())
+	r := image.Rectangle{Min: pos, Max: max}
+	sp := image.Point{}
+	if ic.Par != nil { // use parents children bbox to determine where we can draw
+		pni, _ := AsWidget(ic.Par)
+		pbb := pni.ChildrenBBox2D(vp)
+		nr := r.Intersect(pbb)
+		sp = nr.Min.Sub(r.Min)
+		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
+			fmt.Printf("aberrant sp: %v\n", sp)
+			return
+		}
+		r = nr
+	}
+	draw.Draw(vp.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+}
+
 func (ic *Icon) Render(vp *Viewport) {
 	// todo: cache rendered size, update render if diff size..
 
+	wi := ic.This().(Widget)
 	if ic.PushBounds(vp) {
+		wi.ConnectEvents()
 		ic.RenderChildren(vp)
-		// ic.DrawIntoViewport(ic.SVG.Pixels)
+		ic.DrawIntoViewport(vp)
 		ic.PopBounds(vp)
 	}
 }
