@@ -19,8 +19,26 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-//    SplitView
+type SplitViewEmbedder interface {
+	AsSplitView() *SplitView
+}
+
+func AsSplitView(k ki.Ki) *SplitView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(SplitViewEmbedder); ok {
+		return ac.AsSplitView()
+	}
+	return nil
+}
+
+func (ac *SplitView) AsSplitView() *SplitView {
+	return ac
+}
+
+// Config notes: only needs config when number of kids changes
+// otherwise just needs new layout
 
 // SplitView allocates a fixed proportion of space to each child, along given
 // dimension, always using only the available space given to it by its parent
@@ -101,6 +119,7 @@ func (sv *SplitView) UpdateSplits() {
 
 // EvenSplits splits space evenly across all panels
 func (sv *SplitView) EvenSplits() {
+	updt := sv.UpdateStart()
 	sz := len(sv.Kids)
 	if sz == 0 {
 		return
@@ -109,13 +128,12 @@ func (sv *SplitView) EvenSplits() {
 	for i := range sv.Splits {
 		sv.Splits[i] = even
 	}
+	sv.UpdateEndLayout(updt)
 }
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
-// child entirely -- just does the basic local update start / end
-// use SetSplitsAction to trigger full rebuild which is typically required
+// child entirely.
 func (sv *SplitView) SetSplits(splits ...float32) {
-	updt := sv.UpdateStart()
 	sv.UpdateSplits()
 	sz := len(sv.Kids)
 	mx := min(sz, len(splits))
@@ -123,7 +141,6 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 		sv.Splits[i] = splits[i]
 	}
 	sv.UpdateSplits()
-	sv.UpdateEnd(updt)
 }
 
 // SetSplitsList sets the split proportions using a list (slice) argument,
@@ -138,8 +155,9 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of viewport
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
+	updt := sv.UpdateStart()
 	sv.SetSplits(splits...)
-	sv.Vp.SetNeedsFullRender()
+	sv.UpdateEndLayout(updt)
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
@@ -177,8 +195,7 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
-	sv.UpdateEnd(updt)
+	sv.UpdateEndLayout(updt)
 }
 
 // RestoreChild restores given child(ren) -- does an Update
@@ -191,8 +208,7 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 		}
 	}
 	sv.UpdateSplits()
-	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
-	sv.UpdateEnd(updt)
+	sv.UpdateEndLayout(updt)
 }
 
 // IsCollapsed returns true if given split number is collapsed
@@ -209,6 +225,7 @@ func (sv *SplitView) IsCollapsed(idx int) bool {
 // positions up to that point.  Splitters are updated to ensure that selected
 // position is achieved, while dividing remainder appropriately.
 func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
+	updt := sv.UpdateStart()
 	sz := len(sv.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
@@ -243,19 +260,18 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
 	sv.UpdateSplits()
 	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.Vp.SetNeedsFullRender() // splits typically require full rebuild
+	sv.UpdateEndRender(updt)
 }
 
 func (sv *SplitView) ConfigWidget(vp *Viewport) {
-	sv.Parts.Lay = LayoutNil
-	sv.ConfigWidget()
+	sv.NewParts(LayoutNil)
 	sv.UpdateSplits()
-	sv.ConfigSplitters()
+	sv.ConfigSplitters(vp)
 }
 
-func (sv *SplitView) ConfigSplitters() {
+func (sv *SplitView) ConfigSplitters(vp *Viewport) {
 	sz := len(sv.Kids)
-	mods, updt := sv.Parts.SetNChildren(sz-1, TypeSplitter, "Splitter")
+	mods, updt := sv.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
 	spc := sv.BoxSpace()
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
@@ -283,7 +299,7 @@ func (sv *SplitView) ConfigSplitters() {
 		if mods {
 			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(SliderReleased) {
-					spr, _ := recv.Embed(TypeSplitView).(*SplitView)
+					spr := AsSplitView(recv)
 					spl := send.(*Splitter)
 					spr.SetSplitAction(spl.SplitterNo, spl.Value)
 				}
@@ -313,24 +329,21 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 	kn := int(knc)
 	// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
 	if kn == 0 {
-		sv.EvenSplits()
-		sv.SetFullReRender()
-		sv.UpdateSig()
 		kt.SetProcessed()
+		sv.EvenSplits()
 	} else if kn <= len(sv.Kids) {
-		sv.SetFullReRender()
+		kt.SetProcessed()
 		if sv.Splits[kn-1] <= 0.01 {
 			sv.RestoreChild(kn - 1)
 		} else {
 			sv.CollapseChild(true, kn-1)
 		}
-		kt.SetProcessed()
 	}
 }
 
 func (sv *SplitView) KeyChordEvent() {
 	sv.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		svv := recv.Embed(TypeSplitView).(*SplitView)
+		svv := AsSplitView(recv)
 		svv.KeyInput(d.(*key.ChordEvent))
 	})
 }
@@ -339,28 +352,28 @@ func (sv *SplitView) SplitViewEvents() {
 	sv.KeyChordEvent()
 }
 
-func (sv *SplitView) StyleSplitView() {
-	sv.SetStyleWidget()
+func (sv *SplitView) StyleSplitView(vp *Viewport) {
+	sv.SetStyleWidget(vp)
 	sv.LayState.SetFromStyle(&sv.Style) // also does reset
-	sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
-	sv.HandleSize.ToDots(&sv.Style.UnContext)
+	// todo: props?
+	// sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
+	// sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
-func (sv *SplitView) SetStyle() {
+func (sv *SplitView) SetStyle(vp *Viewport) {
 	sv.StyMu.Lock()
 
-	sv.StyleSplitView()
+	sv.StyleSplitView(vp)
 	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.UpdateSplits()
 	sv.StyMu.Unlock()
 
-	sv.ConfigSplitters()
+	sv.ConfigSplitters(vp)
 }
 
 func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sv.ConfigSplitters()
-	sv.DoLayoutBase(parBBox, true, iter) // init style
-	sv.DoLayoutParts(parBBox, iter)
+	sv.DoLayoutBase(vp, parBBox, true, iter) // init style
+	sv.DoLayoutParts(vp, parBBox, iter)
 	sv.UpdateSplits()
 
 	handsz := sv.HandleSize.Dots
@@ -376,20 +389,20 @@ func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) b
 
 	spsum := float32(0)
 	for i, sp := range sv.Splits {
-		gis := sv.Kids[i].(Node2D).AsWidget()
-		if gis == nil {
+		_, wb := AsWidget(sv.Kids[i])
+		if wb == nil {
 			continue
 		}
-		if ki.TypeEmbeds(gis, TypeFrame) {
-			gis.SetReRenderAnchor()
+		if wb.KiType().HasEmbed(FrameType) {
+			wb.SetFlag(true, ReRenderAnchor)
 		}
 		isz := sp * avail
-		gis.LayState.Alloc.Size.SetDim(sv.Dim, isz)
-		gis.LayState.Alloc.Size.SetDim(odim, osz)
-		gis.LayState.Alloc.SizeOrig = gis.LayState.Alloc.Size
-		gis.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
-		gis.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
-		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, gis.LayState.Alloc.SizeOrig, gis.LayState.Alloc.PosRel)
+		wb.LayState.Alloc.Size.SetDim(sv.Dim, isz)
+		wb.LayState.Alloc.Size.SetDim(odim, osz)
+		wb.LayState.Alloc.SizeOrig = wb.LayState.Alloc.Size
+		wb.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
+		wb.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
+		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, wb.LayState.Alloc.SizeOrig, wb.LayState.Alloc.PosRel)
 
 		pos += isz + handsz
 
@@ -401,29 +414,28 @@ func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) b
 		}
 	}
 
-	return sv.DoLayoutChildren(iter)
+	return sv.DoLayoutChildren(vp, iter)
 }
 
 func (sv *SplitView) Render(vp *Viewport) {
-	if sv.FullReRenderIfNeeded() {
-		return
-	}
-	if sv.PushBounds() {
-		sv.This().(Node2D).ConnectEvents()
+	wi := sv.This().(Widget)
+	if sv.PushBounds(vp) {
+		wi.ConnectEvents()
 		for i, kid := range sv.Kids {
-			nii, ni := AsWidget(kid)
-			if nii != nil {
-				sp := sv.Splits[i]
-				if sp <= 0.01 {
-					ni.SetInvisible()
-				} else {
-					ni.ClearInvisible()
-				}
-				nii.Render() // needs to disconnect using invisible
+			wi, wb := AsWidget(kid)
+			if wb == nil {
+				continue
 			}
+			sp := sv.Splits[i]
+			if sp <= 0.01 {
+				wb.SetFlag(true, Invisible)
+			} else {
+				wb.SetFlag(false, Invisible)
+			}
+			wi.Render(vp) // needs to disconnect using invisible
 		}
-		sv.Parts.RenderTree()
-		sv.PopBounds()
+		sv.Parts.Render(vp)
+		sv.PopBounds(vp)
 	}
 }
 
@@ -460,7 +472,7 @@ func (sr *Splitter) OnInit() {
 	sr.Max = 1.0
 	sr.Snap = false
 	sr.Prec = 4
-	sr.SetFlag(int(InstaDrag))
+	sr.SetFlag(true, InstaDrag)
 
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Margin.Set()
@@ -481,8 +493,8 @@ func (sr *Splitter) OnInit() {
 }
 
 func (sr *Splitter) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "icon":
 			// w.AddStyler(func(w *WidgetBase, s *gist.Style) {
 			// 	s.MaxWidth.SetEm(1)
@@ -498,26 +510,25 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 }
 
 func (sr *Splitter) ConfigWidget(vp *Viewport) {
-	sr.ConfigSlider()
+	sr.ConfigSlider(vp)
 	sr.ConfigParts(vp)
 }
 
-func (sr *Splitter) SetStyle() {
-	sr.ClearFlag(int(CanFocus))
-	sr.StyleSlider()
+func (sr *Splitter) SetStyle(vp *Viewport) {
+	sr.SetFlag(false, CanFocus)
+	sr.StyleSlider(vp)
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
-	sr.ConfigParts(vp)
 }
 
 func (sr *Splitter) GetSize(vp *Viewport, iter int) {
-	sr.InitLayout(vp * Viewport)
+	sr.InitLayout(vp)
 }
 
 func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(parBBox, true, iter) // init style
-	sr.DoLayoutParts(parBBox, iter)
+	sr.DoLayoutBase(vp, parBBox, true, iter) // init style
+	sr.DoLayoutParts(vp, parBBox, iter)
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue()
@@ -525,7 +536,7 @@ func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bo
 	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.WinBBox
 	sr.BBoxMu.RUnlock()
-	return sr.DoLayoutChildren(iter)
+	return sr.DoLayoutChildren(vp, iter)
 }
 
 func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
@@ -543,7 +554,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 		off = sr.OrigWinBBox.Min.Y
 	}
 	sz := handsz
-	if !sr.IsDragging() {
+	if !sr.HasFlag(NodeDragging) {
 		sz += spc.Size().Dim(sr.Dim)
 	}
 	pos := off + int(sr.Pos-0.5*sz)
@@ -551,7 +562,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 
 	// SidesTODO: this is all sketchy
 
-	if sr.IsDragging() {
+	if sr.HasFlag(NodeDragging) {
 		win := sr.ParentWindow()
 		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
@@ -577,17 +588,17 @@ func (sr *Splitter) SplitView() *SplitView {
 	if sr.Par == nil || sr.Par.Parent() == nil {
 		return nil
 	}
-	svi := sr.Par.Parent().Embed(TypeSplitView)
+	svi := AsSplitView(sr.Par.Parent())
 	if svi == nil {
 		return nil
 	}
-	return svi.(*SplitView)
+	return svi
 }
 
 func (sr *Splitter) MouseEvent() {
 	sr.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		srr := recv.Embed(TypeSplitter).(*Splitter)
+		srr := sr
 		if srr.IsDisabled() {
 			me.SetProcessed()
 			srr.SetSelected(!srr.IsSelected())
@@ -655,22 +666,19 @@ func (sr *Splitter) ConnectEvents() {
 
 func (sr *Splitter) Render(vp *Viewport) {
 	win := sr.ParentWindow()
-	sr.This().(Node2D).ConnectEvents()
+	wi := sr.This().(Widget)
+	wi.ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()
-	if sr.IsDragging() {
+	if sr.HasFlag(NodeDragging) {
 		ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)
 		if ick == nil {
 			return
 		}
 		ic := ick.(*Icon)
-		icvp := ic.ChildByType(TypeViewport, ki.Embeds, 0)
-		if icvp == nil {
-			return
-		}
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
 			spr = NewSprite(spnm, image.Point{}, sr.VpBBox.Min)
-			spr.GrabRenderFrom(icvp.(Node2D))
+			spr.GrabRenderFrom(ic)
 			win.AddSprite(spr)
 			win.ActivateSprite(spnm)
 		}
@@ -681,23 +689,20 @@ func (sr *Splitter) Render(vp *Viewport) {
 			win.UpdateSig()
 		}
 		sr.UpdateSplitterPos()
-		if sr.FullReRenderIfNeeded() {
-			return
-		}
-		if sr.PushBounds() {
-			sr.RenderSplitter()
-			sr.RenderChildren()
-			sr.PopBounds()
+		if sr.PushBounds(vp) {
+			sr.RenderSplitter(vp)
+			sr.RenderChildren(vp)
+			sr.PopBounds(vp)
 		}
 	}
 }
 
 // RenderSplitter does the default splitter rendering
-func (sr *Splitter) RenderSplitter() {
+func (sr *Splitter) RenderSplitter(vp *Viewport) {
 	sr.UpdateSplitterPos()
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
-		sr.Parts.RenderTree()
+		sr.Parts.Render(vp)
 	}
 	// else {
 	rs, pc, st := sr.RenderLock(vp)
@@ -710,7 +715,7 @@ func (sr *Splitter) RenderSplitter() {
 	// sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
 	// sr.RenderBoxImpl(pos, sz, st.Border)
 
-	sr.RenderStdBox(st)
+	sr.RenderStdBox(vp, st)
 
 	sr.RenderUnlock(rs)
 	// }

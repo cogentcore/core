@@ -46,8 +46,12 @@ func (wb *WidgetBase) Config(vp *Viewport) {
 	wb.LayState.Defaults() // doesn't overwrite
 	wi.ConfigWidget(vp)    // where everything actually happens
 	wi.SetStyle(vp)
-	wi.UpdateEnd(updt)
+	wb.UpdateEnd(updt)
 	wb.SetNeedsLayout(vp, updt)
+}
+
+func (wb *WidgetBase) ConfigWidget(vp *Viewport) {
+	// this must be defined for each widget type
 }
 
 // ConfigPartsIconLabel adds to config to create parts, of icon

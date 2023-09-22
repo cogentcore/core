@@ -27,7 +27,7 @@ type StructValueView struct {
 }
 
 func (vv *StructValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 
@@ -149,7 +149,7 @@ type SliceValueView struct {
 }
 
 func (vv *SliceValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 
@@ -290,7 +290,7 @@ type MapValueView struct {
 }
 
 func (vv *MapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

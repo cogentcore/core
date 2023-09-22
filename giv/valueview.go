@@ -1104,7 +1104,7 @@ type VersCtrlValueView struct {
 }
 
 func (vv *VersCtrlValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

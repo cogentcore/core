@@ -120,8 +120,8 @@ func (mv *MapViewInline) ConfigParts(vp *Viewport) {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(gi.TypeAction, "add-action")
-	config.Add(gi.TypeAction, "edit-action")
+	config.Add(gi.ActionType, "add-action")
+	config.Add(gi.ActionType, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = mv.Parts.UpdateStart()

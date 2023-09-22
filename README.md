@@ -137,6 +137,20 @@ Rendering is done in 5 separate passes:
 
 # v2 Rewrite TODO / Discussion
 
+## TODO
+
+* search for Cursor and fix everywhere with new cursors
+
+* Get rid of extra UpdateStart / End in Config* calls -- all are wrapped in outer Config so unnec.
+
+* get rid of all the extra Config calls in SetStyle and Render!
+
+* fix all `Set..`, `...Action` state-changing methods to detect whether Config, layout, or just render is needed. 
+
+* in general, "SetNeedsFullReRender" -> SetNeedsLayout(vp, updt) or true
+
+* TextField:KeyChord -- need dialog!  should have a better mech for this.
+
 ## Window is not a Ki
 
 * contains a stack of Viewports, the first of which is the main window, rest are popups.
@@ -162,6 +176,8 @@ Rendering is done in 5 separate passes:
 * Widget SetState method is called with bitflag to set: checks if state is not yet set: if so, sets flag, calls SetStyle() wrapped in UpdateStart / End.
 
 ## Robust updating logic redo
+
+See [render.go](gi/render.go) for updated version:
 
 * Config calls SetStyle, within an overall Update Start / End block
 

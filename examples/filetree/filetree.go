@@ -352,7 +352,7 @@ func (fb *FileBrowse) ConfigToolbar() {
 // SplitViewConfig returns a TypeAndNameList for configuring the SplitView
 func (fb *FileBrowse) SplitViewConfig() ki.TypeAndNameList {
 	config := ki.TypeAndNameList{}
-	config.Add(gi.TypeFrame, "filetree-fr")
+	config.Add(gi.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
 		config.Add(gi.LayoutType, fmt.Sprintf("textview-lay-%v", i))
 	}

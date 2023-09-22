@@ -36,6 +36,10 @@ import (
 	"goki.dev/vgpu/v2/vphong"
 )
 
+func (w *Window) UpdateSig() {
+	// todo: fixme
+}
+
 var (
 	// EventSkipLagMSec is the number of milliseconds of lag between the time the
 	// event was sent to the time it is being processed, above which a repeated
@@ -612,7 +616,7 @@ func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 // SetMainFrame sets the main widget of this window as a Frame, with a default
 // column-wise vertical layout and max stretch sizing, and returns that frame.
 func (w *Window) SetMainFrame() *Frame {
-	fr := w.SetMainWidgetType(TypeFrame, "main-frame").(*Frame)
+	fr := w.SetMainWidgetType(FrameType, "main-frame").(*Frame)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr

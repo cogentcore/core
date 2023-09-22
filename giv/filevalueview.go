@@ -22,7 +22,7 @@ type FileValueView struct {
 }
 
 func (vv *FileValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

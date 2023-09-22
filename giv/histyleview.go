@@ -27,7 +27,7 @@ type HiStyleValueView struct {
 }
 
 func (vv *HiStyleValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

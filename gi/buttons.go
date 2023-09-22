@@ -155,17 +155,16 @@ func (bb *ButtonBase) SetText(txt string) {
 	if !bb.HasVp() {
 		return
 	}
-	updt := bb.UpdateStart()
 	if bb.Text == txt {
 		return
 	}
+	updt := bb.UpdateStart()
 	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
 	bb.Text = txt
 	if recfg {
 		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
 	}
-	bb.UpdateEnd(updt)
-	bb.SetNeedsLayout(bb.Vp, updt)
+	bb.UpdateEndLayout(updt)
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
@@ -176,14 +175,16 @@ func (bb *ButtonBase) SetIcon(iconName gicons.Icon) {
 	if !bb.HasVp() {
 		return
 	}
+	if bb.Icon == iconName {
+		return
+	}
 	updt := bb.UpdateStart()
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
 	if recfg {
 		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
 	}
-	bb.UpdateEnd(updt)
-	bb.SetNeedsLayout(bb.Vp, updt)
+	bb.UpdateEndLayout(updt)
 }
 
 // OnClicked calls the given function when the button is clicked,
@@ -429,16 +430,17 @@ func (bb *ButtonBase) ButtonRelease() {
 }
 
 func (bb *ButtonBase) ConfigParts(vp *Viewport) {
-	bb.Parts.Lay = LayoutHoriz
+	parts := bb.NewParts(LayoutHoriz)
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
 
-	mods, updt := bb.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	bb.ConfigPartsSetIconLabel(bb.Icon, bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
 		bb.UpdateEnd(updt)
+		bb.SetNeedsLayout(vp, updt)
 	}
 }
 

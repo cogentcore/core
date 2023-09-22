@@ -94,7 +94,7 @@ func (sv *StructViewInline) ConfigParts(vp *Viewport) {
 	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
-	sv.Parts.Lay = gi.LayoutHoriz
+	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.TypeAndNameList{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
@@ -127,18 +127,18 @@ func (sv *StructViewInline) ConfigParts(vp *Viewport) {
 		return true
 	})
 	if sv.AddAction {
-		config.Add(gi.TypeAction, "edit-action")
+		config.Add(gi.ActionType, "edit-action")
 	}
-	mods, updt := sv.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	if !mods {
-		updt = sv.Parts.UpdateStart()
+		updt = parts.UpdateStart()
 	}
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
-		lbl := sv.Parts.Child(i * 2).(*gi.Label)
+		lbl := parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
-		widg := sv.Parts.Child((i * 2) + 1).(gi.Node2D)
+		widg := parts.Child((i * 2) + 1).(gi.Node2D)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
@@ -153,7 +153,7 @@ func (sv *StructViewInline) ConfigParts(vp *Viewport) {
 			})
 		}
 	}
-	sv.Parts.UpdateEnd(updt)
+	parts.UpdateEnd(updt)
 }
 
 func (sv *StructViewInline) UpdateFields() {

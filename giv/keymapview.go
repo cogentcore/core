@@ -108,7 +108,7 @@ type KeyMapValueView struct {
 }
 
 func (vv *KeyMapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

@@ -437,8 +437,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 			bb.UpdateEnd(updt)
 		}
 	}
-	// todo:
-	// dlg.SetFlag(VpFlagPopupDestroyAll) // std is disposable
+	dlg.SetFlag(true, VpPopupDestroyAll) // std is disposable
 }
 
 // DlgOpts are the basic dialog options accepted by all dialog methods --

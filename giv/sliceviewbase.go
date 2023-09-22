@@ -383,7 +383,7 @@ func (sv *SliceViewBase) ConfigWidget(vp *Viewport) {
 
 	gl := sv.GridLayout()
 	gconfig := ki.TypeAndNameList{}
-	gconfig.Add(gi.TypeFrame, "grid")
+	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
@@ -2305,7 +2305,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		if sg != nil {
 			sg.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				de := d.(*dnd.FocusEvent)
-				sgg := recv.Embed(gi.TypeFrame).(*gi.Frame)
+				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
 				switch de.Action {
 				case dnd.Enter:
 					sgg.ParentWindow().DNDSetCursor(de.Mod)

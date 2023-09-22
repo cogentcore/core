@@ -4,10 +4,21 @@
 
 package gi
 
+import (
+	"image"
+
+	"goki.dev/girl/gist"
+	"goki.dev/girl/units"
+	"goki.dev/goosi"
+	"goki.dev/goosi/mouse"
+	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
+)
+
 // TooltipConfigStyles configures the default styles
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
-func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
+func TooltipConfigStyles(tooltip *Frame) {
 	tooltip.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
@@ -22,51 +33,50 @@ func TooltipConfigStyles(par *WidgetBase, tooltip *Frame) {
 func PopupTooltip(tooltip string, x, y int, parVp *Viewport, name string) *Viewport {
 	win := parVp.Win
 	mainVp := win.Viewport
-	pvp := Viewport{}
-	pvp.InitName(&pvp, name+"Tooltip")
+	pvp := &Viewport{}
+	pvp.Name = name + "Tooltip"
 	pvp.Win = win
-	updt := pvp.UpdateStart()
-	pvp.Fill = true
-	pvp.SetFlag(int(VpFlagPopup))
-	pvp.SetFlag(int(VpFlagTooltip))
-	pvp.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	pvp.Type = VpTooltip
+
+	pvp.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
-
 		s.Border.Radius = gist.BorderRadiusExtraSmall
-		s.BackgroundColor = pvp.ParentBackgroundColor()
+		s.BackgroundColor = pvp.Frame.ParentBackgroundColor()
 	})
 
 	pvp.Geom.Pos = image.Point{x, y}
-	pvp.SetFlag(int(VpFlagPopupDestroyAll)) // nuke it all
-	frame := NewFrame(&pvp, "Frame", LayoutVert)
-	lbl := NewLabel(frame, "ttlbl", tooltip)
+	pvp.SetFlag(true, VpPopupDestroyAll) // nuke it all
+
+	frame := &pvp.Frame
+	lbl := NewLabel(frame, "ttlbl")
+	lbl.Text = tooltip
 	lbl.Type = LabelBodyMedium
 
-	TooltipConfigStyles(&pvp.WidgetBase, frame)
+	TooltipConfigStyles(frame)
 
 	lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		mwdots := parVp.Style.UnContext.ToDots(40, units.UnitEm)
+		mwdots := parVp.Frame.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
 
 		s.MaxWidth.SetDot(mwdots)
 	})
 
-	frame.ConfigTree()
-	frame.SetStyleTree()                                   // sufficient to get sizes
-	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
-	frame.GetSizeTree(0)                                   // collect sizes
+	frame.ConfigTree(pvp)
+	frame.SetStyleTree(pvp) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
+	frame.GetSizeTree(pvp, 0)          // collect sizes
 	pvp.Win = nil
-	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size).ToPoint()
+	vpsz := frame.LayState.Size.Pref.Min(mainSz).ToPoint()
 
 	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
 	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
-	pvp.UpdateEndNoSig(updt)
 
-	win.PushPopup(pvp.This())
-	return &pvp
+	// win.PushPopup(pvp)
+	return pvp
 }
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
@@ -74,7 +84,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport, name string) *Viewp
 func (wb *WidgetBase) HoverTooltipEvent() {
 	wb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
+		wbb := AsWidgetBase(recv)
 		if wbb.Tooltip != "" {
 			me.SetProcessed()
 			pos := wbb.WinBBox.Max

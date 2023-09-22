@@ -174,7 +174,7 @@ type ColorMapValueView struct {
 }
 
 func (vv *ColorMapValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

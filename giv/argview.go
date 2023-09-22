@@ -96,7 +96,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 func (av *ArgView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.TypeFrame, "args-grid")
+	config.Add(gi.FrameType, "args-grid")
 	mods, updt := av.ConfigChildren(config)
 	av.ConfigArgsGrid()
 	if mods {

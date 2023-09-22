@@ -614,7 +614,7 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 }
 
 func (vv *ColorValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 
@@ -637,7 +637,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	ac.SetIcon(gicons.Colors)
 	ac.Tooltip = "Open color picker dialog"
 	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv, _ := recv.Embed(gi.TypeAction).(*gi.Action)
+		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)
 		vv.Activate(svv.Vp, nil, nil)
 	})
 	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
@@ -692,7 +692,7 @@ type ColorNameValueView struct {
 }
 
 func (vv *ColorNameValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

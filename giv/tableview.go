@@ -248,7 +248,7 @@ func (tv *TableView) IsConfiged() bool {
 func (tv *TableView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeFrame, "frame")
+	config.Add(gi.FrameType, "frame")
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
@@ -349,7 +349,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	gl := tv.GridLayout()
 	gconfig := ki.TypeAndNameList{}
-	gconfig.Add(gi.TypeFrame, "grid")
+	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
@@ -363,7 +363,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := "head-" + fld.Name
-		hcfg.Add(gi.TypeAction, labnm)
+		hcfg.Add(gi.ActionType, labnm)
 	}
 	if !tv.IsDisabled() {
 		hcfg.Add(gi.LabelType, "head-add")

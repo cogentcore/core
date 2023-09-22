@@ -54,7 +54,7 @@ func mainrun() {
 }
 
 func makeHome(tv *gi.TabView) {
-	home := tv.NewTab(gi.TypeFrame, "Home").(*gi.Frame)
+	home := tv.NewTab(gi.FrameType, "Home").(*gi.Frame)
 	home.Lay = gi.LayoutVert
 	home.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		home.Spacing.SetEx(1)
@@ -117,7 +117,7 @@ func makeHome(tv *gi.TabView) {
 }
 
 func makeText(tv *gi.TabView) {
-	text := tv.NewTab(gi.TypeFrame, "Text").(*gi.Frame)
+	text := tv.NewTab(gi.FrameType, "Text").(*gi.Frame)
 	text.Lay = gi.LayoutVert
 	text.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		text.Spacing.SetEx(1)
@@ -143,7 +143,7 @@ func makeText(tv *gi.TabView) {
 }
 
 func makeButtons(win *gi.Window, tv *gi.TabView) {
-	buttons := tv.NewTab(gi.TypeFrame, "Buttons").(*gi.Frame)
+	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		buttons.Spacing.SetEx(1)
@@ -285,7 +285,7 @@ func makeButtons(win *gi.Window, tv *gi.TabView) {
 }
 
 func makeInputs(tv *gi.TabView) {
-	inputs := tv.NewTab(gi.TypeFrame, "Inputs").(*gi.Frame)
+	inputs := tv.NewTab(gi.FrameType, "Inputs").(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
 	inputs.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		inputs.Spacing.SetEx(1)
@@ -444,7 +444,7 @@ func makeInputs(tv *gi.TabView) {
 }
 
 func makeLayouts(tv *gi.TabView) {
-	layouts := tv.NewTab(gi.TypeFrame, "Layouts").(*gi.Frame)
+	layouts := tv.NewTab(gi.FrameType, "Layouts").(*gi.Frame)
 	layouts.Lay = gi.LayoutVert
 	layouts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		layouts.Spacing.SetEx(1)
@@ -483,7 +483,7 @@ func makeLayouts(tv *gi.TabView) {
 }
 
 func makeFileTree(tv *gi.TabView) {
-	filetree := tv.NewTab(gi.TypeFrame, "File Tree").(*gi.Frame)
+	filetree := tv.NewTab(gi.FrameType, "File Tree").(*gi.Frame)
 	filetree.Lay = gi.LayoutVert
 }
 

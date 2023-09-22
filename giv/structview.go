@@ -183,7 +183,7 @@ func (sv *StructView) ConfigWidget(vp *Viewport) {
 	}
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeFrame, "struct-grid")
+	config.Add(gi.FrameType, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
 	sv.ConfigStructGrid()
 	sv.ConfigToolbar()

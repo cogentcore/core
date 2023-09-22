@@ -138,7 +138,7 @@ func (mv *MapView) UpdateValues() {
 func (mv *MapView) ConfigWidget(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeFrame, "map-grid")
+	config.Add(gi.FrameType, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
 	mv.ConfigMapGrid()
 	mv.ConfigToolbar()
@@ -242,7 +242,7 @@ func (mv *MapView) ConfigMapGrid() {
 			typnm := "type-" + keytxt
 			config.Add(gi.TypeComboBox, typnm)
 		}
-		config.Add(gi.TypeAction, delnm)
+		config.Add(gi.ActionType, delnm)
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}

@@ -84,13 +84,13 @@ type Widget interface {
 	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
 	// call ComputeBBox2DBase but viewports require special code -- called
 	// during Layout and Move.
-	ComputeBBox2D(parBBox image.Rectangle, delta image.Point)
+	ComputeBBox2D(vp *Viewport, parBBox image.Rectangle, delta image.Point)
 
 	// ChildrenBBox2D: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
 	// operates on the existing VpBBox for this node -- this is what is passed
 	// down as parBBox do the children's DoLayout.
-	ChildrenBBox2D() image.Rectangle
+	ChildrenBBox2D(vp *Viewport) image.Rectangle
 
 	// Render: Final rendering pass, each node is fully responsible for
 	// calling Render on its own children, to provide maximum flexibility
@@ -252,7 +252,7 @@ func AsWidgetBase(k ki.Ki) *WidgetBase {
 func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*WidgetBase)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined\n", wb.Type().Name())
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined\n", wb.KiType().Name)
 		return
 	}
 	wb.Class = fr.Class
@@ -277,6 +277,20 @@ func (wb *WidgetBase) BaseIface() reflect.Type {
 	return laser.TypeFor[Widget]()
 }
 
+// NewParts makes the Parts layout if not already there,
+// with given layout orientation
+func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
+	if wb.Parts != nil {
+		return wb.Parts
+	}
+	parts := &Layout{}
+	parts.InitName(parts, "parts")
+	parts.Lay = lay
+	ki.SetParent(parts, wb)
+	parts.SetFlag(true, ki.IsField)
+	return parts
+}
+
 // ParentWidget returns the parent as a (Widget, *WidgetBase)
 // or nil if this is the root and has no parent.
 func (wb *WidgetBase) ParentWidget() (Widget, *WidgetBase) {
@@ -293,7 +307,7 @@ func (wb *WidgetBase) ParentWidget() (Widget, *WidgetBase) {
 // see [ParentWidgetIfTry] for a version with an error.
 func (wb *WidgetBase) ParentWidgetIf(fun func(p *WidgetBase) bool) (Widget, *WidgetBase) {
 	pwi, pwb, _ := wb.ParentWidgetIfTry(fun)
-	return par
+	return pwi, pwb
 }
 
 // ParentWidgetIfTry returns the nearest widget parent
@@ -305,7 +319,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	for {
 		par := cur.Par
 		if par == nil {
-			return nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: widget %v is the root", wb)
+			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: widget %v is the root", wb)
 		}
 		pwi := wb.Par.(Widget)
 		pwb := pwi.AsWidget()
@@ -314,13 +328,14 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 		}
 		cur = pwb
 	}
+	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
 func (wb *WidgetBase) ParentWindow() *Window {
 	if wb.Vp == nil {
 		return nil
 	}
-	return wb.Win
+	return wb.Vp.Win
 }
 
 func (wb *WidgetBase) IsVisible() bool {
@@ -330,7 +345,7 @@ func (wb *WidgetBase) IsVisible() bool {
 	if wb.Par == nil || wb.Par.This() == nil {
 		return false
 	}
-	return wb.Par.This().(Node2D).IsVisible()
+	return wb.Par.This().(Widget).IsVisible()
 }
 
 func (wb *WidgetBase) IsDirectWinUpload() bool {

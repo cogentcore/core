@@ -151,7 +151,7 @@ func (bm *Bitmap) DrawIntoViewport(parVp *Viewport) {
 	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(bm.Par)
-		pbb := pni.ChildrenBBox2D()
+		pbb := pni.ChildrenBBox2D(vp)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {

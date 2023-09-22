@@ -131,9 +131,9 @@ func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		config.Add(gi.TypeAction, "add-action")
+		config.Add(gi.ActionType, "add-action")
 	}
-	config.Add(gi.TypeAction, "edit-action")
+	config.Add(gi.ActionType, "edit-action")
 	mods, updt := sv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = sv.Parts.UpdateStart()

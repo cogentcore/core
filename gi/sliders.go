@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
@@ -31,6 +30,24 @@ type SliderPositioner interface {
 	// PointToRelPos translates a point in global pixel coords into relative
 	// position within node
 	PointToRelPos(pt image.Point) image.Point
+}
+
+type SliderBaseEmbedder interface {
+	AsSliderBase() *SliderBase
+}
+
+func AsSliderBase(k ki.Ki) *SliderBase {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(SliderBaseEmbedder); ok {
+		return ac.AsSliderBase()
+	}
+	return nil
+}
+
+func (ac *SliderBase) AsSliderBase() *SliderBase {
+	return ac
 }
 
 // SliderBase has common slider functionality -- two major modes: ValThumb =
@@ -245,7 +262,7 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 	sb.Style = sb.StateStyles[state] // get relevant styles
 	if prev != state {
 		sb.StyMu.Lock()
-		sb.SetStyleWidget()
+		sb.SetStyleWidget(sb.Vp)
 		sb.StyMu.Unlock()
 		// sb.Viewport.SetNeedsFullRender()
 	}
@@ -476,7 +493,7 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 func (sb *SliderBase) MouseDragEvent() {
 	sb.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
-		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
+		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
 		}
@@ -494,7 +511,7 @@ func (sb *SliderBase) MouseDragEvent() {
 func (sb *SliderBase) MouseEvent() {
 	sb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
+		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			me.SetProcessed()
 			sbb.SetSelected(!sbb.IsSelected())
@@ -523,7 +540,7 @@ func (sb *SliderBase) MouseEvent() {
 
 func (sb *SliderBase) MouseFocusEvent() {
 	sb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
+		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
 		}
@@ -539,7 +556,7 @@ func (sb *SliderBase) MouseFocusEvent() {
 
 func (sb *SliderBase) MouseScrollEvent() {
 	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
+		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
 		}
@@ -556,7 +573,7 @@ func (sb *SliderBase) MouseScrollEvent() {
 
 func (sb *SliderBase) KeyChordEvent() {
 	sb.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(TypeSliderBase).(*SliderBase)
+		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
 		}
@@ -572,19 +589,23 @@ func (sb *SliderBase) SliderEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SliderBase) ConfigSlider() {
-	sb.ConfigWidget()
+func (sb *SliderBase) ConfigWidget(vp *Viewport) {
+	sb.ConfigSlider(vp)
+}
+
+func (sb *SliderBase) ConfigSlider(vp *Viewport) {
 	sb.State = SliderActive
 	if sb.IsDisabled() {
 		sb.State = SliderInactive
 	}
+	sb.ConfigParts(vp)
 }
 
 func (sb *SliderBase) ConfigParts(vp *Viewport) {
-	sb.Parts.Lay = LayoutNil
+	parts := sb.NewParts(LayoutNil)
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
-	mods, updt := sb.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)
 	if mods {
 		sb.UpdateEnd(updt)
@@ -661,11 +682,11 @@ func (sr *SliderBase) StyleToDots(uc *units.Context) {
 	sr.ThumbSize.ToDots(uc)
 }
 
-func (sr *SliderBase) StyleSlider() {
+func (sr *SliderBase) StyleSlider(vp *Viewport) {
 	sr.StyMu.Lock()
 	defer sr.StyMu.Unlock()
 
-	sr.SetStyleWidget()
+	sr.SetStyleWidget(vp)
 	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
@@ -695,7 +716,7 @@ func (sr *Slider) OnInit() {
 
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull
 		s.Padding.Set(units.Px(8))
@@ -713,10 +734,10 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -732,21 +753,20 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 }
 
 func (sr *Slider) ConfigWidget(vp *Viewport) {
-	sr.ConfigSlider()
+	sr.ConfigSlider(vp)
 	sr.ConfigParts(vp)
 }
 
-func (sr *Slider) SetStyle() {
+func (sr *Slider) SetStyle(vp *Viewport) {
 	sr.SetCanFocusIfActive()
-	sr.StyleSlider()
+	sr.StyleSlider(vp)
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
-	sr.ConfigParts(vp)
 }
 
 func (sr *Slider) GetSize(vp *Viewport, iter int) {
-	sr.InitLayout(vp * Viewport)
+	sr.InitLayout(vp)
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
@@ -755,39 +775,30 @@ func (sr *Slider) GetSize(vp *Viewport, iter int) {
 }
 
 func (sr *Slider) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(parBBox, true, iter) // init style
-	sr.DoLayoutParts(parBBox, iter)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sr.StateStyles[i].CopyUnitContext(&sr.Style.UnContext)
-	}
+	sr.DoLayoutBase(vp, parBBox, true, iter) // init style
+	sr.DoLayoutParts(vp, parBBox, iter)
 	sr.SizeFromAlloc()
-	return sr.DoLayoutChildren(iter)
-}
-
-func (sr *Slider) Move2D(delta image.Point, parBBox image.Rectangle) {
-	sr.SliderBase.Move2D(delta, parBBox)
+	return sr.DoLayoutChildren(vp, iter)
 }
 
 func (sr *Slider) Render(vp *Viewport) {
-	if sr.FullReRenderIfNeeded() {
-		return
-	}
-	if !sr.Off && sr.PushBounds() {
-		sr.This().(Node2D).ConnectEvents()
-		sr.RenderDefaultStyle()
-		sr.RenderChildren()
-		sr.PopBounds()
+	wi := sr.This().(Widget)
+	if !sr.Off && sr.PushBounds(vp) {
+		wi.ConnectEvents()
+		sr.RenderDefaultStyle(vp)
+		sr.RenderChildren(vp)
+		sr.PopBounds(vp)
 	} else {
 		sr.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (sr *Slider) RenderDefaultStyle() {
+func (sr *Slider) RenderDefaultStyle(vp *Viewport) {
 	rs, pc, st := sr.RenderLock(vp)
 
 	// overall fill box
-	sr.RenderStdBox(&sr.StyleBox)
+	sr.RenderStdBox(vp, &sr.StyleBox)
 
 	// SidesTODO: look here if slider borders break
 
@@ -817,11 +828,11 @@ func (sr *Slider) RenderDefaultStyle() {
 	bsz.SetSubDim(odim, spc.Size().Dim(odim))
 	bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
 	bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
-	sr.RenderBoxImpl(bpos, bsz, st.Border)
+	sr.RenderBoxImpl(vp, bpos, bsz, st.Border)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
 	pc.FillStyle.SetColorSpec(&sr.ValueColor)
-	sr.RenderBoxImpl(bpos, bsz, st.Border)
+	sr.RenderBoxImpl(vp, bpos, bsz, st.Border)
 
 	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
@@ -829,7 +840,7 @@ func (sr *Slider) RenderDefaultStyle() {
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
-		sr.Parts.RenderTree()
+		sr.Parts.Render(vp)
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
@@ -891,12 +902,12 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 }
 
 func (sb *ScrollBar) ConfigWidget(vp *Viewport) {
-	sb.ConfigSlider()
+	sb.ConfigSlider(vp)
 }
 
-func (sb *ScrollBar) SetStyle() {
+func (sb *ScrollBar) SetStyle(vp *Viewport) {
 	sb.SetCanFocusIfActive()
-	sb.StyleSlider()
+	sb.StyleSlider(vp)
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
@@ -904,44 +915,38 @@ func (sb *ScrollBar) SetStyle() {
 }
 
 func (sb *ScrollBar) GetSize(vp *Viewport, iter int) {
-	sb.InitLayout(vp * Viewport)
+	sb.InitLayout(vp)
 }
 
 func (sb *ScrollBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(parBBox, true, iter) // init style
-	sb.DoLayoutParts(parBBox, iter)
+	sb.DoLayoutBase(vp, parBBox, true, iter) // init style
+	sb.DoLayoutParts(vp, parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)
 	}
 	sb.SizeFromAlloc()
-	return sb.DoLayoutChildren(iter)
-}
-
-func (sb *ScrollBar) Move2D(delta image.Point, parBBox image.Rectangle) {
-	sb.SliderBase.Move2D(delta, parBBox)
+	return sb.DoLayoutChildren(vp, iter)
 }
 
 func (sb *ScrollBar) Render(vp *Viewport) {
-	if sb.FullReRenderIfNeeded() {
-		return
-	}
-	if !sb.Off && sb.PushBounds() {
-		sb.This().(Node2D).ConnectEvents()
-		sb.RenderDefaultStyle()
-		sb.RenderChildren()
-		sb.PopBounds()
+	wi := sb.This().(Widget)
+	if !sb.Off && sb.PushBounds(vp) {
+		wi.ConnectEvents()
+		sb.RenderDefaultStyle(vp)
+		sb.RenderChildren(vp)
+		sb.PopBounds(vp)
 	} else {
 		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (sb *ScrollBar) RenderDefaultStyle() {
+func (sb *ScrollBar) RenderDefaultStyle(vp *Viewport) {
 	rs, pc, st := sb.RenderLock(vp)
 	defer sb.RenderUnlock(rs)
 
 	// overall fill box
-	sb.RenderStdBox(&sb.StyleBox)
+	sb.RenderStdBox(vp, &sb.StyleBox)
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
@@ -956,11 +961,11 @@ func (sb *ScrollBar) RenderDefaultStyle() {
 	pos := sb.LayState.Alloc.Pos.Add(spc.Pos())
 	sz := sb.LayState.Alloc.Size.Sub(spc.Size())
 
-	sb.RenderBoxImpl(pos, sz, st.Border) // surround box
-	pos.SetAddDim(sb.Dim, sb.Pos)        // start of thumb
+	sb.RenderBoxImpl(vp, pos, sz, st.Border) // surround box
+	pos.SetAddDim(sb.Dim, sb.Pos)            // start of thumb
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetColorSpec(&sb.ValueColor)
-	sb.RenderBoxImpl(pos, sz, st.Border)
+	sb.RenderBoxImpl(vp, pos, sz, st.Border)
 }
 
 func (sb *ScrollBar) ConnectEvents() {
@@ -1015,7 +1020,7 @@ func (pb *ProgressBar) OnInit() {
 	pb.PageStep = 0.2
 	pb.Max = 1.0
 	pb.Prec = 9
-	pb.SetDisabled() // TODO: this shouldn't be disabled, just read only
+	pb.SetFlag(true, Disabled) // TODO: this shouldn't be disabled, just read only
 }
 
 func (pb *ProgressBar) CopyFieldsFrom(frm any) {
@@ -1035,10 +1040,10 @@ func ProgressDefaultInc(max int) int {
 	return 1
 }
 
-func (pb *ProgressBar) Start(max int) {
-	pb.ProgMax = max - 1
+func (pb *ProgressBar) Start(mx int) {
+	pb.ProgMax = mx - 1
 	pb.ProgMax = max(1, pb.ProgMax)
-	pb.ProgInc = ProgressDefaultInc(max)
+	pb.ProgInc = ProgressDefaultInc(mx)
 	pb.ProgCur = 0
 	pb.UpdtBar()
 }
@@ -1058,8 +1063,4 @@ func (pb *ProgressBar) ProgStep() {
 		pb.UpdtBar()
 	}
 	pb.ProgMu.Unlock()
-}
-
-func (pb *ProgressBar) ConfigWidget(vp *Viewport) {
-	pb.ScrollBar.Config()
 }

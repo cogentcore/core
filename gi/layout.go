@@ -466,10 +466,10 @@ func (ly *Layout) SetScrollsOff() {
 // Move2DScrolls moves scrollbars based on scrolling taking place in parent
 // layouts -- critical to call this BEFORE we add our own delta, which is
 // generated from these very same scrollbars.
-func (ly *Layout) Move2DScrolls(delta image.Point, parBBox image.Rectangle) {
+func (ly *Layout) Move2DScrolls(vp *Viewport, delta image.Point, parBBox image.Rectangle) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.Scrolls[d].Move2D(delta, parBBox)
+			ly.Scrolls[d].Move2D(vp, delta, parBBox)
 		}
 	}
 }
@@ -546,7 +546,7 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 
 func (ly *Layout) DoLayoutChildren(vp *Viewport, iter int) bool {
 	wi := ly.This().(Widget)
-	cbb := wi.ChildrenBBox2D()
+	cbb := wi.ChildrenBBox2D(vp)
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
@@ -593,7 +593,7 @@ func (ly *Layout) RenderChildren(vp *Viewport) {
 
 func (ly *Layout) Move2DChildren(vp *Viewport, delta image.Point) {
 	wi := ly.This().(Widget)
-	cbb := wi.ChildrenBBox2D()
+	cbb := wi.ChildrenBBox2D(vp)
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
@@ -1103,20 +1103,16 @@ func (ly *Layout) KeyChordEvent() {
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
-func (ly *Layout) AsDoLayout(vp *Viewport) *Layout {
-	return ly
-}
-
 func (ly *Layout) BBox2D() image.Rectangle {
 	return ly.BBoxFromAlloc()
 }
 
-func (ly *Layout) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	ly.ComputeBBox2DBase(parBBox, delta)
+func (ly *Layout) ComputeBBox2D(vp *Viewport, parBBox image.Rectangle, delta image.Point) {
+	ly.ComputeBBox2DBase(vp, parBBox, delta)
 }
 
-func (ly *Layout) ChildrenBBox2D() image.Rectangle {
-	nb := ly.ChildrenBBox2DWidget()
+func (ly *Layout) ChildrenBBox2D(vp *Viewport) image.Rectangle {
+	nb := ly.ChildrenBBox2DWidget(vp)
 	nb.Max.X -= int(ly.ExtraSize.X)
 	nb.Max.Y -= int(ly.ExtraSize.Y)
 	return nb
@@ -1260,9 +1256,9 @@ func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
 }
 
 func (ly *Layout) Move2D(vp *Viewport, delta image.Point, parBBox image.Rectangle) {
-	ly.Move2DBase(delta, parBBox)
-	ly.Move2DScrolls(delta, parBBox) // move scrolls BEFORE adding our own!
-	delta = ly.Move2DDelta(delta)    // add our offset
+	ly.Move2DBase(vp, delta, parBBox)
+	ly.Move2DScrolls(vp, delta, parBBox) // move scrolls BEFORE adding our own!
+	delta = ly.Move2DDelta(delta)        // add our offset
 	ly.Move2DChildren(vp, delta)
 	ly.RenderScrolls(vp)
 }

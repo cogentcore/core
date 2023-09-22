@@ -24,7 +24,7 @@ type FontValueView struct {
 }
 
 func (vv *FontValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

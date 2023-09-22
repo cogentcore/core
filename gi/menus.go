@@ -14,6 +14,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // Menu is a slice list of Node2D actions, which can contain sub-actions
@@ -299,7 +300,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 	for _, w := range MainWindows {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
-				w, func(recv, send ki.Ki, sig int64, data any) {
+				nil, func(recv, send ki.Ki, sig int64, data any) {
 					w.OSWin.Raise()
 				})
 		}
@@ -323,7 +324,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 // MenuFrameConfigStyles configures the default styles
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
-func MenuFrameConfigStyles(par *WidgetBase, frame *Frame) {
+func MenuFrameConfigStyles(frame *Frame) {
 	frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
@@ -350,17 +351,13 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	menu.UpdateActions()
 
 	pvp := &Viewport{}
-	pvp.InitName(pvp, name+"Menu")
+	pvp.Name = name + "Menu"
 	pvp.Win = win
-	updt := pvp.UpdateStart()
-	pvp.Fill = true
-	pvp.SetFlag(int(VpFlagPopup))
-	pvp.SetFlag(int(VpFlagMenu))
+	pvp.Type = VpMenu
 
 	pvp.Geom.Pos = image.Point{x, y}
-	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
-	frame := NewFrame(pvp, "Frame", LayoutVert)
-	MenuFrameConfigStyles(&parVp.WidgetBase, frame)
+	frame := &pvp.Frame
+	MenuFrameConfigStyles(frame)
 	var focus ki.Ki
 	for _, ac := range menu {
 		acn, ac := AsWidget(ac)
@@ -371,14 +368,15 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 			}
 		}
 	}
-	frame.ConfigTree()
-	frame.SetStyleTree()                                   // sufficient to get sizes
-	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
-	frame.GetSizeTree(0)                                   // collect sizes
+	frame.ConfigTree(pvp)
+	frame.SetStyleTree(pvp) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
+	frame.GetSizeTree(pvp, 0)          // collect sizes
 	pvp.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
+	vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
 	vpsz.Y = min(maxht, vpsz.Y)
 	x = max(0, x)
@@ -387,8 +385,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
-	pvp.UpdateEndNoSig(updt)
-	win.SetNextPopup(pvp.This(), focus)
+	win.SetNextPopup(pvp, focus)
 	return pvp
 }
 
@@ -407,23 +404,17 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 
 	menu.UpdateActions()
 
-	pvp, ok := win.CurPopup().(*Viewport)
+	pvp, ok := win.CurPopup()
 	if !ok {
 		return PopupMenu(menu, x, y, parVp, name)
 	}
 	// pvp.InitName(pvp, name+"Menu")
 	pvp.Win = win
-	updt := pvp.UpdateStart()
-	pvp.Fill = true
-	pvp.SetFlag(int(VpFlagPopup))
-	pvp.SetFlag(int(VpFlagMenu))
+	pvp.Type = VpMenu
 
 	pvp.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
-	frame, ok := pvp.ChildByName("Frame", 0).(*Frame)
-	if !ok {
-		return PopupMenu(menu, x, y, parVp, name)
-	}
+	frame := &pvp.Frame
 	frame.DeleteChildren(ki.NoDestroyKids)
 	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
 	var focus ki.Ki
@@ -437,14 +428,15 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 			}
 		}
 	}
-	frame.ConfigTree()
-	frame.SetStyleTree()                                   // sufficient to get sizes
-	frame.LayState.Alloc.Size = mainVp.LayState.Alloc.Size // give it the whole vp initially
-	frame.GetSizeTree(0)                                   // collect sizes
+	frame.ConfigTree(pvp)
+	frame.SetStyleTree(pvp) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
+	frame.GetSizeTree(pvp, 0)          // collect sizes
 	pvp.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
-	vpsz := frame.LayState.Size.Pref.Min(mainVp.LayState.Alloc.Size.MulScalar(2)).ToPoint()
+	vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
 	maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
 	vpsz.Y = min(maxht, vpsz.Y)
 	x = max(0, x)
@@ -454,8 +446,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 	pvp.Resize(vpsz)
 	pvp.Geom.Pos = image.Point{x, y}
 	pvp.SetFullReRender()
-	pvp.UpdateEnd(updt)
-	win.SetNextPopup(pvp.This(), focus)
+	win.SetNextPopup(pvp, focus)
 	return pvp
 }
 
@@ -649,11 +640,7 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
-func (sp *Separator) SetStyle() {
-	sp.WidgetBase.SetStyle()
-}
-
-func (sp *Separator) RenderSeparator() {
+func (sp *Separator) RenderSeparator(vp *Viewport) {
 	rs, pc, st := sp.RenderLock(vp)
 	defer sp.RenderUnlock(rs)
 
@@ -675,9 +662,9 @@ func (sp *Separator) RenderSeparator() {
 }
 
 func (sp *Separator) Render(vp *Viewport) {
-	if sp.PushBounds() {
-		sp.RenderSeparator()
-		sp.RenderChildren()
-		sp.PopBounds()
+	if sp.PushBounds(vp) {
+		sp.RenderSeparator(vp)
+		sp.RenderChildren(vp)
+		sp.PopBounds(vp)
 	}
 }

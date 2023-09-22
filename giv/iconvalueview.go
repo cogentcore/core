@@ -25,7 +25,7 @@ type IconValueView struct {
 }
 
 func (vv *IconValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeAction
+	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
 

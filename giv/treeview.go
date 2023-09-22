@@ -1894,8 +1894,8 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 }
 
 func (tv *TreeView) ConfigParts(vp *Viewport) {
-	tv.Parts.Lay = gi.LayoutHoriz
-	tv.Parts.Style.Template = "giv.TreeView.Parts"
+	parts := tv.NewParts(gi.LayoutHoriz)
+	parts.Style.Template = "giv.TreeView.Parts"
 	config := ki.TypeAndNameList{}
 	if tv.HasChildren() {
 		config.Add(gi.TypeCheckBox, "branch")
@@ -1904,7 +1904,7 @@ func (tv *TreeView) ConfigParts(vp *Viewport) {
 		config.Add(gi.IconType, "icon")
 	}
 	config.Add(gi.LabelType, "label")
-	_, updt := tv.Parts.ConfigChildren(config)
+	_, updt := parts.ConfigChildren(config)
 	if tv.HasChildren() {
 		if wb, ok := tv.BranchPart(); ok {
 			if wb.Style.Template != "giv.TreeView.Branch" {
@@ -1932,7 +1932,7 @@ func (tv *TreeView) ConfigParts(vp *Viewport) {
 		tv.Style.Font.CopyNonDefaultProps(lbl.This()) // copy our properties to label
 		lbl.SetText(tv.Label())
 	}
-	tv.Parts.UpdateEnd(updt)
+	parts.UpdateEnd(updt)
 }
 
 var TreeViewProps = ki.Props{
@@ -2124,7 +2124,7 @@ func (tv *TreeView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bo
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
-	tv.This().(gi.Node2D).ComputeBBox2D(parBBox, image.Point{})
+	tv.This().(gi.Node2D).ComputeBBox2D(vp, parBBox, image.Point{})
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
@@ -2157,11 +2157,11 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (tv *TreeView) ChildrenBBox2D() image.Rectangle {
+func (tv *TreeView) ChildrenBBox2D(vp *Viewport) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
-		pni, _ := gi.AsWidget(tv.Par)
-		ar = ar.Intersect(pni.ChildrenBBox2D())
+		pwi, _ := gi.AsWidget(tv.Par)
+		ar = ar.Intersect(pwi.ChildrenBBox2D(vp))
 	}
 	return ar
 }

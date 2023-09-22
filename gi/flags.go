@@ -104,6 +104,12 @@ func (wb *WidgetBase) CanFocus() bool {
 	return wb.HasFlag(CanFocus)
 }
 
+// SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
+// nodes don't need focus typically)
+func (wb *WidgetBase) SetCanFocusIfActive() {
+	wb.SetFlag(wb.HasFlag(Active), CanFocus)
+}
+
 // SetFocusState sets the HasFocus flag
 func (wb *WidgetBase) SetFocusState(focus bool) {
 	wb.SetFlag(focus, HasFocus)
@@ -143,33 +149,6 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	})
 	return got
 }
-
-/*
-
-
-// IsDragging tests if the current node is currently flagged as receiving
-// dragging events -- flag set by window
-func (wb *WidgetBase) IsDragging() bool {
-	return wb.HasFlag(int(NodeDragging))
-}
-
-// IsInstaDrag tests if the current node has InstaDrag property set
-func (wb *WidgetBase) IsInstaDrag() bool {
-	return wb.HasFlag(int(InstaDrag))
-}
-
-*/
-
-/*
-// PointToRelPos translates a point in global pixel coords
-// into relative position within node
-func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
-	return pt.Sub(wb.WinBBox.Min)
-}
-
-*/
 
 // AddClass adds a CSS class name -- does proper space separation
 func (wb *WidgetBase) AddClass(cls string) {

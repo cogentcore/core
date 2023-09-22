@@ -20,8 +20,23 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// SpinBox
+type SpinBoxEmbedder interface {
+	AsSpinBox() *SpinBox
+}
+
+func AsSpinBox(k ki.Ki) *SpinBox {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(SpinBoxEmbedder); ok {
+		return ac.AsSpinBox()
+	}
+	return nil
+}
+
+func (ac *SpinBox) AsSpinBox() *SpinBox {
+	return ac
+}
 
 // SpinBox combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
@@ -73,22 +88,22 @@ func (sb *SpinBox) OnInit() {
 }
 
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "Parts":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.AlignV = gist.AlignMiddle
 			})
 		case "text-field":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.MinWidth.SetEm(6)
 			})
 		case "space":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "buttons":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.AlignV = gist.AlignMiddle
 			})
 		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
@@ -186,15 +201,16 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 }
 
 func (sb *SpinBox) ConfigParts(vp *Viewport) {
+	parts := sb.NewParts(LayoutHoriz)
+
 	if sb.UpIcon.IsNil() {
 		sb.UpIcon = gicons.KeyboardArrowUp
 	}
 	if sb.DownIcon.IsNil() {
 		sb.DownIcon = gicons.KeyboardArrowDown
 	}
-	sb.Parts.Lay = LayoutHoriz
 	if sb.Style.Template != "" {
-		sb.Parts.Style.Template = sb.Style.Template + ".Parts"
+		parts.Style.Template = sb.Style.Template + ".Parts"
 	}
 	config := ki.TypeAndNameList{}
 	config.Add(TextFieldType, "text-field")
@@ -202,13 +218,13 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 		config.Add(SpaceType, "space")
 		config.Add(LayoutType, "buttons")
 	}
-	mods, updt := sb.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	if mods || gist.RebuildDefaultStyles {
 		if !sb.IsDisabled() {
 			// STYTODO: maybe do some of this config in OnChildAdded?
-			buts := sb.Parts.ChildByName("buttons", 1).(*Layout)
+			buts := parts.ChildByName("buttons", 1).(*Layout)
 			buts.Lay = LayoutVert
-			buts.SetNChildren(2, TypeAction, "but")
+			buts.SetNChildren(2, ActionType, "but")
 			// up
 			up := buts.Child(0).(*Action)
 			up.SetName("up")
@@ -220,7 +236,7 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 				up.Style.Template = sb.Style.Template + ".up"
 			}
 			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := recv.Embed(TypeSpinBox).(*SpinBox)
+				sbb := AsSpinBox(recv)
 				sbb.IncrValue(1.0)
 			})
 			// dn
@@ -233,18 +249,18 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 				dn.Style.Template = sb.Style.Template + ".dn"
 			}
 			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := recv.Embed(TypeSpinBox).(*SpinBox)
+				sbb := AsSpinBox(recv)
 				sbb.IncrValue(-1.0)
 			})
 			// space
-			sp := sb.Parts.ChildByName("space", 2).(*Space)
+			sp := parts.ChildByName("space", 2).(*Space)
 			if sb.Style.Template != "" {
 				sp.Style.Template = sb.Style.Template + ".space"
 			}
 		}
 		// text-field
-		tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-		tf.SetFlagState(sb.IsDisabled(), int(Disabled))
+		tf := parts.ChildByName("text-field", 0).(*TextField)
+		tf.SetFlag(sb.IsDisabled(), Disabled)
 		// todo: see TreeView for extra steps needed to generally support styling of parts..
 		// doing it manually for now..
 		if sb.Style.Template != "" {
@@ -254,7 +270,7 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 		if !sb.IsDisabled() {
 			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
-					sbb := recv.Embed(TypeSpinBox).(*SpinBox)
+					sbb := AsSpinBox(recv)
 					tf := send.(*TextField)
 					vl, err := sb.StringToVal(tf.Text())
 					if err == nil {
@@ -312,7 +328,7 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 
 func (sb *SpinBox) MouseScrollEvent() {
 	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
+		sbb := AsSpinBox(recv)
 		if sbb.IsDisabled() || !sbb.HasFocus() {
 			return
 		}
@@ -325,7 +341,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 func (sb *SpinBox) TextFieldEvent() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		sbb := recv.Embed(TypeSpinBox).(*SpinBox)
+		sbb := AsSpinBox(recv)
 		if sig == int64(WidgetSelected) {
 			sbb.SetSelected(!sbb.IsSelected())
 		}
@@ -369,7 +385,6 @@ func (sb *SpinBox) SpinBoxEvents() {
 }
 
 func (sb *SpinBox) ConfigWidget(vp *Viewport) {
-	sb.ConfigWidget()
 	sb.ConfigParts(vp)
 }
 
@@ -426,15 +441,15 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport) {
 }
 
 // StyleSpinBox does spinbox styling -- sets StyMu Lock
-func (sb *SpinBox) StyleSpinBox() {
+func (sb *SpinBox) StyleSpinBox(vp *Viewport) {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	sb.SetStyleWidget()
+	sb.SetStyleWidget(vp)
 }
 
-func (sb *SpinBox) SetStyle() {
-	sb.StyleSpinBox()
+func (sb *SpinBox) SetStyle(vp *Viewport) {
+	sb.StyleSpinBox(vp)
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
@@ -446,22 +461,20 @@ func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
 }
 
 func (sb *SpinBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(parBBox, true, iter) // init style
-	sb.DoLayoutParts(parBBox, iter)
-	return sb.DoLayoutChildren(iter)
+	sb.DoLayoutBase(vp, parBBox, true, iter) // init style
+	sb.DoLayoutParts(vp, parBBox, iter)
+	return sb.DoLayoutChildren(vp, iter)
 }
 
 func (sb *SpinBox) Render(vp *Viewport) {
-	if sb.FullReRenderIfNeeded() {
-		return
-	}
-	if sb.PushBounds() {
-		sb.This().(Node2D).ConnectEvents()
+	wi := sb.This().(Widget)
+	if sb.PushBounds(vp) {
+		wi.ConnectEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelected(sb.IsSelected())
-		sb.RenderChildren()
-		sb.RenderParts()
-		sb.PopBounds()
+		sb.RenderChildren(vp)
+		sb.RenderParts(vp)
+		sb.PopBounds(vp)
 	} else {
 		sb.DisconnectAllEvents(RegPri)
 	}

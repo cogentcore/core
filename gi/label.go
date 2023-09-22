@@ -251,12 +251,6 @@ func (lb *Label) SetText(txt string) {
 	// }
 
 	lb.StyMu.RLock()
-	needSty := lb.Style.Font.Size.Val == 0
-	lb.StyMu.RUnlock()
-	if needSty {
-		lb.StyleLabel(lb.Vp)
-	}
-	lb.StyMu.RLock()
 	lb.Text = txt
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs

@@ -92,22 +92,8 @@ func (wb *WidgetBase) UpdateSig() bool {
 	return wb.Node.UpdateSig()
 }
 
-// SetNeedsStyle sets the NeedsStyle and Viewport NeedsRender flags,
-// if updt is true.
-// This should be called after widget state changes,
-// e.g., in event handlers or other update code,
-// _after_ calling UpdateEnd(updt) and passing
-// that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsStyle(vp *Viewport, updt bool) {
-	if !updt {
-		return
-	}
-	wb.SetFlag(true, NeedsStyle)
-	vp.SetFlag(true, VpNeedsRender)
-}
-
 // SetNeedsRender sets the NeedsRender and Viewport NeedsRender flags,
-// if updt is true.
+// if updt is true.  See UpdateEndRender for convenience method.
 // This should be called after widget state changes that don't need styling,
 // e.g., in event handlers or other update code,
 // _after_ calling UpdateEnd(updt) and passing
@@ -116,11 +102,26 @@ func (wb *WidgetBase) SetNeedsRender(vp *Viewport, updt bool) {
 	if !updt {
 		return
 	}
-	wb.SetFlag(true, NeedsStyle)
+	wb.SetFlag(true, NeedsRender)
 	vp.SetFlag(true, VpNeedsRender)
 }
 
+// UpdateEndRender should be called instead of UpdateEnd
+// for any UpdateStart / UpdateEnd block that needs a re-render
+// at the end.  Just does SetNeedsRender after UpdateEnd,
+// and uses the cached wb.Vp pointer.
+func (wb *WidgetBase) UpdateEndRender(updt bool) {
+	if !updt {
+		return
+	}
+	wb.UpdateEnd(updt)
+	wb.SetNeedsRender(wb.Vp, updt)
+}
+
+// note: this is replacement for "SetNeedsFullReRender()" call:
+
 // SetNeedsLayout sets the VpNeedsLayout flag if updt is true.
+// See UpdateEndLayout for convenience method.
 // This should be called after widget Config call
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
@@ -128,8 +129,19 @@ func (wb *WidgetBase) SetNeedsLayout(vp *Viewport, updt bool) {
 	if !updt {
 		return
 	}
-	wb.SetFlag(true, NeedsStyle)
-	vp.SetFlag(true, VpNeedsRender)
+	vp.SetFlag(true, VpNeedsLayout)
+}
+
+// UpdateEndLayout should be called instead of UpdateEnd
+// for any UpdateStart / UpdateEnd block that needs a re-layout
+// at the end.  Just does SetNeedsLayout after UpdateEnd,
+// and uses the cached wb.Vp pointer.
+func (wb *WidgetBase) UpdateEndLayout(updt bool) {
+	if !updt {
+		return
+	}
+	wb.UpdateEnd(updt)
+	wb.SetNeedsLayout(wb.Vp, updt)
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
@@ -138,7 +150,7 @@ func (wb *WidgetBase) ConfigTree(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.ConfigTree." + wb.Type().Name())
+	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
@@ -156,7 +168,7 @@ func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.SetStyleTree." + wb.Type().Name())
+	pr := prof.Start("Widget.SetStyleTree." + wb.KiType().Name)
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
@@ -174,10 +186,10 @@ func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.GetSizeTree." + wb.Type().Name())
+	pr := prof.Start("Widget.GetSizeTree." + wb.KiType().Name)
 	wb.FuncDownMeLast(0, wb.This(),
 		func(k ki.Ki, level int, d any) bool { // tests whether to process node
-			wi, w := AsWidget(k)
+			_, w := AsWidget(k)
 			if w == nil || w.IsDeleted() || w.IsDestroyed() {
 				return ki.Break
 			}
@@ -202,11 +214,11 @@ func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("WidgetBase.DoLayoutTree." + wb.Type().Name())
+	pr := prof.Start("WidgetBase.DoLayoutTree." + wb.KiType().Name)
 	parBBox := image.Rectangle{}
 	pwi, _ := AsWidget(wb.Par)
 	if pwi != nil {
-		parBBox = pwi.ChildrenBBox2D()
+		parBBox = pwi.ChildrenBBox2D(vp)
 	} else {
 		parBBox = vp.Pixels.Bounds()
 	}
@@ -238,7 +250,7 @@ func (wb *WidgetBase) DoNeedsRender(vp *Viewport) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.DoNeedsRender." + wb.Type().Name())
+	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
@@ -308,7 +320,7 @@ func (vp *Viewport) DoRebuild() {
 func (vp *Viewport) Fill() {
 	rs := &vp.RenderState
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), vp.BgColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &vp.BgColor)
 	rs.Unlock()
 }
 
@@ -322,16 +334,17 @@ func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
 	vp.SetFlag(true, VpPrefSizing)
 	vp.Config()
 
-	vp.Frame.SetStyleTree(vp) // sufficient to get sizes
-	vp.LayState.Alloc.Size.SetPoint(initSz)
-	vp.Frame.GetSizeTree(vp, 0) // collect sizes
+	frame := &vp.Frame
+	frame.SetStyleTree(vp) // sufficient to get sizes
+	frame.LayState.Alloc.Size.SetPoint(initSz)
+	frame.GetSizeTree(vp, 0) // collect sizes
 
 	vp.SetFlag(false, VpPrefSizing)
 
-	vpsz := vp.Frame.LayState.Size.Pref.ToPoint()
+	vpsz := frame.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(vp.Style.MinWidth.Dots)
-	sth := int(vp.Style.MinHeight.Dots)
+	stw := int(frame.Style.MinWidth.Dots)
+	sth := int(frame.Style.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = max(vpsz.X, stw)
 	vpsz.Y = max(vpsz.Y, sth)
@@ -366,7 +379,6 @@ func (wb *WidgetBase) PushBounds(vp *Viewport) bool {
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds(vp *Viewport) {
-	wb.ClearFullReRender()
 	if wb.IsDeleted() || wb.IsDestroyed() || wb.This() == nil {
 		return
 	}
@@ -377,7 +389,7 @@ func (wb *WidgetBase) PopBounds(vp *Viewport) {
 func (wb *WidgetBase) Render(vp *Viewport) {
 	wi := wb.This().(Widget)
 	if wb.PushBounds(vp) {
-		wi.ConnectEvents(vp)
+		wi.ConnectEvents()
 		wb.RenderParts(vp)
 		wb.RenderChildren(vp)
 		wb.PopBounds(vp)
@@ -413,7 +425,7 @@ func (wb *WidgetBase) ReRenderTree() {
 	parBBox := image.Rectangle{}
 	pni, _ := KiToWidget(wb.Par)
 	if pni != nil {
-		parBBox = pni.ChildrenBBox2D()
+		parBBox = pni.ChildrenBBox2D(vp)
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig)
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig
@@ -471,7 +483,7 @@ func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 	// TODO: maybe implement some version of this to render background color
 	// in margin if the parent element doesn't render for us
 	// if pwb, ok := wb.Parent().(*WidgetBase); ok {
-	// 	if pwb.Embed(LayoutType) != nil && pwb.Embed(TypeFrame) == nil {
+	// 	if pwb.Embed(LayoutType) != nil && pwb.Embed(FrameType) == nil {
 	// 		pc.FillBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &st.BackgroundColor)
 	// 	}
 	// }
@@ -514,7 +526,7 @@ func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
 			// we only want radius for border, no actual border
-			wb.RenderBoxImpl(shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
+			wb.RenderBoxImpl(vp, shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
 				// must divide by 2 like CSS
@@ -546,19 +558,19 @@ func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 	pc.FillStyle.SetColor(nil)
 	// now that we have drawn background color
 	// above, we can draw the border
-	wb.RenderBoxImpl(pos, sz, st.Border)
+	wb.RenderBoxImpl(vp, pos, sz, st.Border)
 }
 
 // ParentReRenderAnchor returns parent (including this node)
 // that is a ReRenderAnchor -- for optimized re-rendering
 func (wb *WidgetBase) ParentReRenderAnchor() Widget {
 	var par Widget
-	nb.FuncUp(0, nb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.FuncUp(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil {
 			return ki.Break // don't keep going up
 		}
-		if w.IsReRenderAnchor() {
+		if w.HasFlag(ReRenderAnchor) {
 			par = wi
 			return ki.Break
 		}

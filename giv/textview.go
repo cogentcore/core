@@ -508,14 +508,13 @@ func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 ///////////////////////////////////////////////////////////////////////////////
 //  Text formatting and rendering
 
-// ParentLayout returns our parent layout -- we ensure this is our immediate parent which is necessary
-// for textview
+// ParentLayout returns our parent layout.
+// we ensure this is our immediate parent which is necessary for textview
 func (tv *TextView) ParentLayout() *gi.Layout {
 	if tv.Par == nil {
 		return nil
 	}
-	pari, _ := gi.AsWidget(tv.Par)
-	return pari.AsDoLayout(vp * Viewport)
+	return AsLayout(tv.Par)
 }
 
 // RenderSize is the size we should pass to text rendering, based on alloc
@@ -529,7 +528,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", ki.Type(tv.Par), tv.Path())
 		return mat32.Vec2Zero
 	}
-	parw.SetReRenderAnchor()
+	parw.SetFlag(true, ReRenderAnchor)
 	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
@@ -4779,9 +4778,9 @@ func (tv *TextView) TextViewEvents() {
 //  Node2D Interface
 
 // Config calls Init on widget
-func (tv *TextView) ConfigWidget(vp *Viewport) {
-	tv.ConfigWidget()
-}
+// func (tv *TextView) ConfigWidget(vp *Viewport) {
+//
+// }
 
 // StyleTextView sets the style of widget
 func (tv *TextView) StyleTextView() {

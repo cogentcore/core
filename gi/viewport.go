@@ -172,7 +172,7 @@ type Viewport struct {
 	Win *Window `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
 	// background color for filling viewport -- defaults to transparent so that popups can have rounded corners
-	BgColor color.RGBA `desc:"background color for filling viewport -- defaults to transparent so that popups can have rounded corners"`
+	BgColor gist.ColorSpec `desc:"background color for filling viewport -- defaults to transparent so that popups can have rounded corners"`
 
 	// [view: -] Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
@@ -195,11 +195,11 @@ type Viewport struct {
 func NewViewport(width, height int) *Viewport {
 	sz := image.Point{width, height}
 	vp := &Viewport{
-		Geom: Geom2DInt{Size: sz},
+		Geom: gist.Geom2DInt{Size: sz},
 	}
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	vp.RenderState.Init(width, height, vp.Pixels)
-	vp.BgColor = color.Transparent
+	vp.BgColor.SetColor(color.Transparent)
 	vp.Frame.Lay = LayoutVert
 	return vp
 }
@@ -271,31 +271,15 @@ func (vp *Viewport) VpIsVisible() bool {
 // destroys the vp and its main layout, see VpPopupDestroyAll for whether
 // children are destroyed
 func (vp *Viewport) DeletePopup() {
-	vp.Par = nil // disconnect from window -- it never actually owned us as a child
 	vp.Win = nil
-	vp.This().SetFlag(int(ki.NodeDeleted)) // prevent further access
-	if !vp.HasFlag(int(VpPopupDestroyAll)) {
-		// delete children of main layout prior to deleting the popup (e.g., menu items) so they don't get destroyed
-		if len(vp.Kids) == 1 {
-			cli, _ := AsWidget(vp.Child(0))
-			ly := cli.AsDoLayout(vp * Viewport)
-			if ly != nil {
-				ly.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
-			}
-		}
+	if vp.HasFlag(VpPopupDestroyAll) {
+		vp.Frame.DeleteChildren(ki.DestroyKids)
+	} else {
+		// delete children of main layout prior to deleting the popup
+		// (e.g., menu items) so they don't get destroyed
+		vp.Frame.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
 	}
-	vp.This().Destroy() // nuke everything else in us
 }
-
-// // SetCurStyleNode sets the current styling node to given node, and nil to clear
-// func (vp *Viewport) SetCurStyleNode(node Node2D) {
-// 	if vp == nil {
-// 		return
-// 	}
-// 	vp.StyleMu.Lock()
-// 	vp.CurStyleNode = node
-// 	vp.StyleMu.Unlock()
-// }
 
 // SetCurrentColor sets the current color in concurrent-safe way
 func (vp *Viewport) SetCurrentColor(clr color.RGBA) {

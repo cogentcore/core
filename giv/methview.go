@@ -143,7 +143,7 @@ func ToolBarView(val any, vp *gi.Viewport, tb *gi.ToolBar) bool {
 			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
-			ac = tb.NewChild(gi.TypeAction, te.Name).(*gi.Action)
+			ac = tb.NewChild(gi.ActionType, te.Name).(*gi.Action)
 		}
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {

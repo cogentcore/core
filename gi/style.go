@@ -146,19 +146,10 @@ func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
 		return
 	}
 
-	// todo: remove all these prof steps -- should be much less now..
-	pcsn := prof.Start("SetStyleWidget-SetCurStyleNode")
-
-	// STYTODO: there should be a better way to do this
-	wi, _ := wb.This().(Widget)
-	vp.SetCurStyleNode(wi)
-	defer wb.Viewport.SetCurStyleNode(nil)
-
-	pcsn.End()
-
 	wb.Style = gist.Style{}
 	wb.Style.Defaults()
 
+	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("SetStyleWidget-Inherit")
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
@@ -168,24 +159,18 @@ func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
 	pin.End()
 
 	prun := prof.Start("SetStyleWidget-RunStyleFuncs")
-
 	wb.RunStyleFuncs()
-
 	prun.End()
 
 	puc := prof.Start("SetStyleWidget-SetUnitContext")
-
-	SetUnitContext(&wb.Style, wb.Viewport, mat32.Vec2{}, mat32.Vec2{})
+	SetUnitContext(&wb.Style, wb.Vp, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
 	psc := prof.Start("SetStyleWidget-SetCurrentColor")
-
 	if wb.Style.Inactive { // inactive can only set, not clear
-		wb.SetDisabled()
+		wb.SetFlag(true, Disabled)
 	}
-
 	vp.SetCurrentColor(wb.Style.Color)
-
 	psc.End()
 
 	wb.LayState.SetFromStyle(&wb.Style) // also does reset
@@ -208,8 +193,8 @@ func (wb *WidgetBase) SetStyleUpdate(vp *Viewport) {
 }
 
 func (wb *WidgetBase) SetStyle(vp *Viewport) {
-	// wb.StyMu.Lock() // todo: needed??  maybe not.
-	// defer wb.StyMu.Unlock()
+	wb.StyMu.Lock() // todo: needed??  maybe not.
+	defer wb.StyMu.Unlock()
 
 	wb.SetStyleWidget(vp)
 }
@@ -222,7 +207,7 @@ func SetUnitContext(st *gist.Style, vp *Viewport, el, par mat32.Vec2) {
 		if vp.Win != nil {
 			st.UnContext.DPI = vp.Win.LogicalDPI()
 		}
-		if vp.Render.Image != nil {
+		if vp.RenderState.Image != nil {
 			sz := vp.Geom.Size // Render.Image.Bounds().Size()
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		}
@@ -261,12 +246,14 @@ func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 // not override the cursor of a parent.
 func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		return p.Style.Cursor != cursor.Arrow
+		// return p.Style.Cursor != cursor.Arrow
+		return true
 	})
 	if pwb == nil {
 		return cur
 	}
-	return pwb.Style.Cursor
+	// return pwb.Style.Cursor
+	return cursor.Arrow
 }
 
 /////////////////////////////////////////////////////////////////
@@ -541,12 +528,6 @@ func (nb *NodeBase) ParentCSSAgg() *ki.Props {
 		return nil
 	}
 	return &pn.(*NodeBase).CSSAgg
-}
-
-// ElementAndParentSize returns the size
-// of this node as a [mat32.Vec2] object.
-func (nb *NodeBase) NodeSize() mat32.Vec2 {
-	return mat32.NewVec2FmPoint(nb.BBox.Size())
 }
 
 */

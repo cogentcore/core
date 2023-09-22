@@ -192,8 +192,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport, pt image.Point) {
 		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(TypeSpell).(*Spell)
-				scf.UnLearnLast()
+				sc.UnLearnLast()
 			})
 	} else {
 		count := len(sc.Suggest)
@@ -210,8 +209,7 @@ func (sc *Spell) ShowNow(word string, vp *Viewport, pt image.Point) {
 				text = sc.Suggest[i]
 				m.AddAction(ActOpts{Label: text, Data: text},
 					sc, func(recv, send ki.Ki, sig int64, data any) {
-						scf := recv.Embed(TypeSpell).(*Spell)
-						scf.Spell(data.(string))
+						sc.Spell(data.(string))
 					})
 			}
 		}
@@ -219,20 +217,18 @@ func (sc *Spell) ShowNow(word string, vp *Viewport, pt image.Point) {
 		text = "learn"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(TypeSpell).(*Spell)
-				scf.LearnWord()
+				sc.LearnWord()
 			})
 		text = "ignore"
 		m.AddAction(ActOpts{Label: text, Data: text},
 			sc, func(recv, send ki.Ki, sig int64, data any) {
-				scf := recv.Embed(TypeSpell).(*Spell)
-				scf.IgnoreWord()
+				sc.IgnoreWord()
 			})
 	}
 	sc.Vp = vp
 	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
-	pvp.SetFlag(int(VpFlagCorrector))
-	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	pvp.Type = VpCorrector
+	// pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 
 // Spell emits a signal to let subscribers know that the user has made a

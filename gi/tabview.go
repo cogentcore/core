@@ -7,16 +7,33 @@ package gi
 import (
 	"fmt"
 	"log"
-	"reflect"
 	"sync"
 
 	"goki.dev/colors"
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/cursor"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 )
+
+type TabViewEmbedder interface {
+	AsTabView() *TabView
+}
+
+func AsTabView(k ki.Ki) *TabView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(TabViewEmbedder); ok {
+		return ac.AsTabView()
+	}
+	return nil
+}
+
+func (ac *TabView) AsTabView() *TabView {
+	return ac
+}
 
 // TabView switches among child widgets via tabs.  The selected widget gets
 // the full allocated space avail after the tabs are accounted for.  The
@@ -41,7 +58,7 @@ type TabView struct {
 	NoDeleteTabs bool `desc:"if true, tabs are not user-deleteable"`
 
 	// type of widget to create in a new tab via new tab button -- Frame by default
-	NewTabType reflect.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
+	NewTabType *gti.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
 
 	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
@@ -62,10 +79,10 @@ func (tv *TabView) OnInit() {
 }
 
 func (tv *TabView) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "tabs":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.SetStretchMaxWidth()
 				s.Height.SetEm(1.8)
 				s.Overflow = gist.OverflowHidden // no scrollbars!
@@ -82,7 +99,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 		case "frame":
 			frame := child.(*Frame)
 			frame.StackTopOnly = true // key for allowing each tab to have its own size
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.SetMinPrefWidth(units.Em(10))
 				s.SetMinPrefHeight(units.Em(6))
 				s.SetStretchMax()
@@ -143,14 +160,14 @@ func (tv *TabView) AddTab(widg Widget, label string) int {
 func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 	tb := tv.Tabs()
 	tb.SetChildAdded()
-	tab := tb.InsertNewChild(TypeTabButton, idx, label).(*TabButton)
+	tab := tb.InsertNewChild(TabButtonType, idx, label).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
 	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := recv.Embed(TypeTabView).(*TabView)
-		act := send.Embed(TypeTabButton).(*TabButton)
+		tvv := AsTabView(recv)
+		act := send.(*TabButton)
 		tabIdx := act.Data.(int)
 		tvv.SelectTabIndexAction(tabIdx)
 	})
@@ -159,7 +176,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 		fr.StackTop = 0
 		tab.SetSelected(true)
 	} else {
-		widg.AsWidget().SetInvisible() // new tab is invisible until selected
+		widg.SetFlag(true, Invisible) // new tab is invisible until selected
 	}
 }
 
@@ -168,17 +185,16 @@ func (tv *TabView) InsertTab(widg Widget, label string, idx int) {
 	tv.Mu.Lock()
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
-	tv.SetFullReRender()
 	fr.SetChildAdded()
 	fr.InsertChild(widg, idx)
 	tv.InsertTabOnlyAt(widg, label, idx)
 	tv.Mu.Unlock()
-	tv.UpdateEnd(updt)
+	tv.UpdateEndLayout(updt)
 }
 
 // NewTab adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget
-func (tv *TabView) NewTab(typ reflect.Type, label string) Widget {
+func (tv *TabView) NewTab(typ *gti.Type, label string) Widget {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	widg := tv.InsertNewTab(typ, label, idx)
@@ -189,7 +205,7 @@ func (tv *TabView) NewTab(typ reflect.Type, label string) Widget {
 // with given tab label, and returns the new widget.
 // A Layout is added first and the widget is added to that layout.
 // The Layout has "-lay" suffix added to name.
-func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Widget, *Layout) {
+func (tv *TabView) NewTabLayout(typ *gti.Type, label string) (Widget, *Layout) {
 	ly := tv.NewTab(LayoutType, label).(*Layout)
 	ly.SetName(label + "-lay")
 	widg := ly.NewChild(typ, label).(Widget)
@@ -200,8 +216,8 @@ func (tv *TabView) NewTabLayout(typ reflect.Type, label string) (Widget, *Layout
 // with given tab label, and returns the new widget.
 // A Frame is added first and the widget is added to that Frame.
 // The Frame has "-frame" suffix added to name.
-func (tv *TabView) NewTabFrame(typ reflect.Type, label string) (Widget, *Frame) {
-	fr := tv.NewTab(TypeFrame, label).(*Frame)
+func (tv *TabView) NewTabFrame(typ *gti.Type, label string) (Widget, *Frame) {
+	fr := tv.NewTab(FrameType, label).(*Frame)
 	fr.SetName(label + "-frame")
 	widg := fr.NewChild(typ, label).(Widget)
 	return widg, fr
@@ -209,24 +225,25 @@ func (tv *TabView) NewTabFrame(typ reflect.Type, label string) (Widget, *Frame) 
 
 // NewTabAction adds a new widget as a new tab of given widget type, with given
 // tab label, and returns the new widget -- emits TabAdded signal
-func (tv *TabView) NewTabAction(typ reflect.Type, label string) Widget {
+func (tv *TabView) NewTabAction(typ *gti.Type, label string) Widget {
+	updt := tv.UpdateStart()
 	widg := tv.NewTab(typ, label)
 	fr := tv.Frame()
 	idx := len(*fr.Children()) - 1
 	tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
+	tv.UpdateEndLayout(updt)
 	return widg
 }
 
 // InsertNewTab inserts a new widget of given type into given index position
 // within list of tabs, and returns that new widget
-func (tv *TabView) InsertNewTab(typ reflect.Type, label string, idx int) Widget {
-	fr := tv.Frame()
+func (tv *TabView) InsertNewTab(typ *gti.Type, label string, idx int) Widget {
 	updt := tv.UpdateStart()
-	tv.SetFullReRender()
+	fr := tv.Frame()
 	fr.SetChildAdded()
 	widg := fr.InsertNewChild(typ, idx, label).(Widget)
 	tv.InsertTabOnlyAt(widg, label, idx)
-	tv.UpdateEnd(updt)
+	tv.UpdateEndLayout(updt)
 	return widg
 }
 
@@ -243,7 +260,7 @@ func (tv *TabView) TabAtIndex(idx int) (Widget, *TabButton, bool) {
 		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
 		return nil, nil, false
 	}
-	tab := tb.Child(idx).Embed(TypeTabButton).(*TabButton)
+	tab := tb.Child(idx).(*TabButton)
 	widg := fr.Child(idx).(Widget)
 	return widg, tab, true
 }
@@ -260,15 +277,12 @@ func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
 		return widg, true
 	}
 	tv.Mu.Lock()
-	// tv.Viewport.BlockUpdates() // not needed for this apparently
 	updt := tv.UpdateStart()
 	tv.UnselectOtherTabs(idx)
 	tab.SetSelected(true)
 	fr.StackTop = idx
-	fr.SetFullReRender()
-	// tv.Viewport.UnblockUpdates()
 	tv.Mu.Unlock()
-	tv.UpdateEnd(updt)
+	tv.UpdateEndLayout(updt)
 	return widg, true
 }
 
@@ -354,7 +368,7 @@ func (tv *TabView) SelectTabByNameTry(label string) (Widget, error) {
 // RecycleTab returns a tab with given name, first by looking for an existing one,
 // and if not found, making a new one with widget of given type.
 // If sel, then select it.  returns widget for tab.
-func (tv *TabView) RecycleTab(label string, typ reflect.Type, sel bool) Widget {
+func (tv *TabView) RecycleTab(label string, typ *gti.Type, sel bool) Widget {
 	widg, err := tv.TabByNameTry(label)
 	if err == nil {
 		if sel {
@@ -383,7 +397,6 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) 
 	sz := len(*fr.Children())
 	tb := tv.Tabs()
 	updt := tv.UpdateStart()
-	tv.SetFullReRender()
 	nxtidx := -1
 	if fr.StackTop == idx {
 		if idx > 0 {
@@ -399,7 +412,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) 
 	if nxtidx >= 0 {
 		tv.SelectTabIndex(nxtidx)
 	}
-	tv.UpdateEnd(updt)
+	tv.UpdateEndLayout(updt)
 	if destroy {
 		return nil, tnm, true
 	} else {
@@ -418,7 +431,7 @@ func (tv *TabView) DeleteTabIndexAction(idx int) {
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
-func (tv *TabView) ConfigNewTabButton() bool {
+func (tv *TabView) ConfigNewTabButton(vp *Viewport) bool {
 	sz := tv.NTabs()
 	tb := tv.Tabs()
 	ntb := len(tb.Kids)
@@ -427,14 +440,13 @@ func (tv *TabView) ConfigNewTabButton() bool {
 			return false
 		}
 		if tv.NewTabType == nil {
-			tv.NewTabType = TypeFrame
+			tv.NewTabType = FrameType
 		}
-		tab := tb.InsertNewChild(TypeAction, ntb, "new-tab").(*Action)
+		tab := tb.InsertNewChild(ActionType, ntb, "new-tab").(*Action)
 		tab.Data = -1
 		tab.SetIcon(gicons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(TypeTabView).(*TabView)
-			tvv.SetFullReRender()
+			tvv := AsTabView(recv)
 			tvv.NewTabAction(tvv.NewTabType, "New Tab")
 			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
 		})
@@ -464,41 +476,33 @@ const (
 	TabViewSignalsN
 )
 
-// Config initializes the tab widget children if it hasn't been done yet
+// ConfigWidget initializes the tab widget children if it hasn't been done yet.
+// only the 2 primary children (Frames) need to be configured.
+// no re-config needed when adding / deleting tabs -- just new layout.
 func (tv *TabView) ConfigWidget(vp *Viewport) {
 	if len(tv.Kids) != 0 {
 		return
 	}
-	tv.StyMu.RLock()
-	needSty := tv.Style.Font.Size.Val == 0
-	tv.StyMu.RUnlock()
-	if needSty {
-		tv.StyleLayout()
-	}
-
-	updt := tv.UpdateStart()
 	tv.Lay = LayoutVert
-	tv.SetReRenderAnchor()
+	tv.SetFlag(true, ReRenderAnchor)
 
-	NewFrame(tv, "tabs", LayoutHorizFlow)
+	frame := NewFrame(tv, "tabs")
+	frame.Lay = LayoutHorizFlow
 
-	frame := NewFrame(tv, "frame", LayoutStacked)
-	frame.SetReRenderAnchor()
+	frame = NewFrame(tv, "frame")
+	frame.Lay = LayoutStacked
+	frame.SetFlag(true, ReRenderAnchor)
 
-	tv.ConfigNewTabButton()
-
-	tv.UpdateEnd(updt)
+	tv.ConfigNewTabButton(vp)
 }
 
 // Tabs returns the layout containing the tabs -- the first element within us
 func (tv *TabView) Tabs() *Frame {
-	tv.Config()
 	return tv.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout -- the second element
 func (tv *TabView) Frame() *Frame {
-	tv.Config()
 	return tv.Child(1).(*Frame)
 }
 
@@ -510,7 +514,7 @@ func (tv *TabView) UnselectOtherTabs(idx int) {
 		if i == idx {
 			continue
 		}
-		tb := tbs.Child(i).Embed(TypeTabButton).(*TabButton)
+		tb := tbs.Child(i).(*TabButton)
 		if tb.IsSelected() {
 			tb.SetSelected(false)
 		}
@@ -522,18 +526,13 @@ func (tv *TabView) RenumberTabs() {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tbs.Child(i).Embed(TypeTabButton).(*TabButton)
+		tb := tbs.Child(i).(*TabButton)
 		tb.Data = i
 	}
 }
 
-func (tv *TabView) SetStyle() {
-	tv.Config()
-	tv.Layout.SetStyle()
-}
-
 // RenderTabSeps renders the separators between tabs
-func (tv *TabView) RenderTabSeps() {
+func (tv *TabView) RenderTabSeps(vp *Viewport) {
 	rs, pc, st := tv.RenderLock(vp)
 	defer tv.RenderUnlock(rs)
 
@@ -557,15 +556,13 @@ func (tv *TabView) RenderTabSeps() {
 }
 
 func (tv *TabView) Render(vp *Viewport) {
-	if tv.FullReRenderIfNeeded() {
-		return
-	}
-	if tv.PushBounds() {
-		tv.This().(Widget).ConnectEvents()
-		tv.RenderScrolls()
-		tv.RenderChildren()
-		tv.RenderTabSeps()
-		tv.PopBounds()
+	wi := tv.This().(Widget)
+	if tv.PushBounds(vp) {
+		wi.ConnectEvents()
+		tv.RenderScrolls(vp)
+		tv.RenderChildren(vp)
+		tv.RenderTabSeps(vp)
+		tv.PopBounds(vp)
 	} else {
 		tv.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
@@ -585,7 +582,7 @@ type TabButton struct {
 
 func (tb *TabButton) OnInit() {
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = cursor.HandPointing
+		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetPx(500)
 		s.MinHeight.SetEm(1.6)
@@ -620,14 +617,14 @@ func (tb *TabButton) OnInit() {
 }
 
 func (tb *TabButton) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "Parts":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Overflow = gist.OverflowHidden // no scrollbars!
 			})
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -636,16 +633,16 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		case "label":
 			label := child.(*Label)
 			label.Type = LabelTitleSmall
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "close-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetCh(1)
 			})
 		case "close":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Width.SetEx(0.5)
 				s.Height.SetEx(0.5)
 				s.Margin.Set()
@@ -655,11 +652,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "sc-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		case "shortcut":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
@@ -668,27 +665,27 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 }
 
 func (tb *TabButton) TabView() *TabView {
-	tv := tb.ParentByType(TypeTabView, ki.Embeds)
+	tv := tb.ParentByType(TabViewType, ki.Embeds)
 	if tv == nil {
 		return nil
 	}
-	return tv.Embed(TypeTabView).(*TabView)
+	return AsTabView(tv)
 }
 
 func (tb *TabButton) ConfigParts(vp *Viewport) {
 	if !tb.NoDelete {
-		tb.ConfigPartsDeleteButton()
+		tb.ConfigPartsDeleteButton(vp)
 		return
 	}
 	tb.Action.ConfigParts(vp) // regular
 }
 
-func (tb *TabButton) ConfigPartsDeleteButton() {
+func (tb *TabButton) ConfigPartsDeleteButton(vp *Viewport) {
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)
-	config.Add(TypeAction, "close")
+	config.Add(ActionType, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
@@ -701,7 +698,7 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
 		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tbb := recv.Embed(TypeTabButton).(*TabButton)
+			tbb := tb
 			tabIdx := tbb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {
@@ -717,6 +714,5 @@ func (tb *TabButton) ConfigPartsDeleteButton() {
 }
 
 func (tb *TabButton) ConfigWidget(vp *Viewport) {
-	tb.ConfigWidget()
 	tb.ConfigParts(vp)
 }
