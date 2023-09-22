@@ -55,8 +55,12 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	c.Stderr = cfg.Stderr
 	c.Stdout = cfg.Stdout
 	c.Stdin = cfg.Stdin
+	c.Dir = cfg.Dir
 
 	if cfg.Commands != nil {
+		if c.Dir != "" {
+			cfg.Commands.Write([]byte(cfg.SuccessColor(c.Dir) + ": "))
+		}
 		cfg.Commands.Write([]byte(cfg.CmdColor(cmd + " " + strings.Join(args, " ") + "\n")))
 	}
 	err = c.Run()
