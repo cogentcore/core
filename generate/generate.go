@@ -59,7 +59,7 @@ func Generate(cfg *config.Config) error {
 			Templates: []*template.Template{KiMethodsTmpl},
 		}
 	}
-	pkgs, err := ParsePackage(cfg)
+	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)
 	}
@@ -75,8 +75,8 @@ func Generate(cfg *config.Config) error {
 	return nil
 }
 
-// ParsePackage parses the package(s) based on the given config info.
-func ParsePackage(cfg *config.Config) ([]*packages.Package, error) {
+// ParsePackages parses the package(s) based on the given config info.
+func ParsePackages(cfg *config.Config) ([]*packages.Package, error) {
 	pcfg := &packages.Config{
 		Mode: enumgen.PackageModes() | gtigen.PackageModes(&cfg.Generate.Gtigen), // need superset of both
 		// TODO: Need to think about constants in test files. Maybe write type_string_test.go
