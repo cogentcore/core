@@ -56,7 +56,9 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	c.Stdout = cfg.Stdout
 	c.Stdin = cfg.Stdin
 
-	cfg.Commands.Write([]byte(cfg.CmdColor(cmd + " " + strings.Join(args, " ") + "\n")))
+	if cfg.Commands != nil {
+		cfg.Commands.Write([]byte(cfg.CmdColor(cmd + " " + strings.Join(args, " ") + "\n")))
+	}
 	err = c.Run()
 	return CmdRan(err), ExitStatus(err), err
 }

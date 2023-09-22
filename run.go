@@ -22,7 +22,9 @@ import (
 func Args(cfg *Config, str string) []string {
 	args, err := shellwords.Parse(str)
 	if err != nil {
-		cfg.Errors.Write([]byte(err.Error())) // note: we want to use the results inline, so no error return
+		if cfg.Errors != nil {
+			cfg.Errors.Write([]byte(err.Error())) // note: we want to use the results inline, so no error return
+		}
 		if cfg.Fatal {
 			os.Exit(1)
 		}
@@ -72,7 +74,9 @@ func RunSh(cfg *Config, cstr string) error {
 	}
 	if len(args) == 0 {
 		err := fmt.Errorf("command %q was not parsed correctly into content", cstr)
-		cfg.Errors.Write([]byte(cfg.ErrColor(err.Error())))
+		if cfg.Errors != nil {
+			cfg.Errors.Write([]byte(cfg.ErrColor(err.Error())))
+		}
 		if cfg.Fatal {
 			os.Exit(1)
 		}
@@ -95,10 +99,13 @@ func Run(cfg *Config, cmd string, args ...string) error {
 // Output runs the command and returns the text from stdout.
 func Output(cfg *Config, cmd string, args ...string) (string, error) {
 	oldStdout := cfg.Stdout
+	// need to use buf to capture output
 	buf := &bytes.Buffer{}
 	cfg.Stdout = buf
 	_, err := Exec(cfg, cmd, args...)
 	cfg.Stdout = oldStdout
-	cfg.Stdout.Write(buf.Bytes())
+	if cfg.Stdout != nil {
+		cfg.Stdout.Write(buf.Bytes())
+	}
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }
