@@ -2232,7 +2232,7 @@ func (tv *TreeView) Render(vp *Viewport) {
 			tv.This().(gi.Node2D).ConnectEvents()
 
 			// note: this is std except using WidgetSize instead of AllocSize
-			rs, pc, st := tv.RenderLock()
+			rs, pc, st := tv.RenderLock(vp)
 			pc.FontStyle = *st.FontRender()
 			// SidesTODO: look here if tree view borders break
 			// pc.StrokeStyle.SetColor(&st.Border.Color)

@@ -10,7 +10,28 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
+
+func (wb *WidgetBase) EventMgr() *EventMgr {
+	return wb.Vp.VpEventMgr()
+}
+
+// PosInWinBBox returns true if given position is within
+// this node's win bbox (under read lock)
+func (wb *WidgetBase) PosInWinBBox(pos image.Point) bool {
+	wb.BBoxMu.RLock()
+	defer wb.BBoxMu.RUnlock()
+	return pos.In(wb.WinBBox)
+}
+
+// WinBBoxInBBox returns true if our BBox is contained within
+// given BBox (under read lock)
+func (wb *WidgetBase) WinBBoxInBBox(bbox image.Rectangle) bool {
+	wb.BBoxMu.RLock()
+	defer wb.BBoxMu.RUnlock()
+	return mat32.RectInNotEmpty(wb.WinBBox, bbox)
+}
 
 // ConnectEvents is the default event connection function
 // for Widget objects. It calls [WidgetEvents], so any Widget
@@ -48,7 +69,7 @@ func (wb *WidgetBase) WidgetMouseEvent() {
 // when they get a mouse click event. If you are declaring a custom
 // mouse event function, you should call this function first.
 func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
-	wb.SetActiveState(me.Action == mouse.Press)
+	wb.SetFlag(me.Action == mouse.Press, Active)
 	wb.SetStyleUpdate(wb.Vp)
 }
 
@@ -58,10 +79,8 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 		if wb.IsDisabled() {
 			return
 		}
-
 		me := data.(*mouse.FocusEvent)
 		me.SetProcessed()
-
 		wb.WidgetOnMouseFocusEvent(me)
 	})
 }
@@ -71,7 +90,7 @@ func (wb *WidgetBase) WidgetMouseFocusEvent() {
 // mouse foucs event function, you should call this function first.
 func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
 	enter := me.Action == mouse.Enter
-	wb.SetHoveredState(enter)
+	wb.SetFlag(enter, Hovered)
 	wb.SetStyleUpdate(wb.Vp)
 	// TODO: trigger mouse focus exit after clicking down
 	// while leaving; then clear active here
@@ -99,18 +118,18 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				me.SetProcessed()
-				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
+				_, wbb := AsWidget(recv)
 				wbb.SetSelected(!wbb.IsSelected())
 				wbb.EmitSelectedSignal()
-				wbb.UpdateSig()
+				wbb.SetStyleUpdate(wbb.Vp)
 			}
 		}
 		if ctxtMenu {
 			if me.Action == mouse.Release && me.Button == mouse.Right {
 				me.SetProcessed()
-				wbb := recv.Embed(TypeWidgetBase).(*WidgetBase)
+				wi, wbb := AsWidget(recv)
 				wbb.EmitContextMenuSignal()
-				wbb.This().(Widget).ContextMenu()
+				wi.ContextMenu()
 			}
 		}
 	})

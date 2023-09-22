@@ -700,7 +700,7 @@ func (sr *Splitter) RenderSplitter() {
 		sr.Parts.RenderTree()
 	}
 	// else {
-	rs, pc, st := sr.RenderLock()
+	rs, pc, st := sr.RenderLock(vp)
 
 	pc.StrokeStyle.SetColor(nil)
 	pc.FillStyle.SetColorSpec(&st.BackgroundColor)

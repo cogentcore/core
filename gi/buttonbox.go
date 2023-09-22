@@ -26,6 +26,10 @@ func AsButtonBox(k ki.Ki) *ButtonBox {
 	return nil
 }
 
+func (bb *ButtonBox) AsButtonBox() *ButtonBox {
+	return bb
+}
+
 // ButtonBox is a widget for containing a set of CheckBox buttons.
 // It can optionally enforce mutual excusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
@@ -258,8 +262,8 @@ func (bb *ButtonBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) b
 }
 
 func (bb *ButtonBox) RenderButtonBox(vp *Viewport) {
-	rs, _, st := bb.RenderLock()
-	bb.RenderStdBox(st)
+	rs, _, st := bb.RenderLock(vp)
+	bb.RenderStdBox(vp, st)
 	bb.RenderUnlock(rs)
 }
 

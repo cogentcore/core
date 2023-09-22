@@ -147,6 +147,9 @@ type Viewport interface {
 // which renders into its Pixels image.
 type Viewport struct {
 
+	// name of viewport
+	Name string `desc:"name of viewport"`
+
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport
 	Flags VpFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
@@ -197,6 +200,7 @@ func NewViewport(width, height int) *Viewport {
 	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
 	vp.RenderState.Init(width, height, vp.Pixels)
 	vp.BgColor = color.Transparent
+	vp.Frame.Lay = LayoutVert
 	return vp
 }
 

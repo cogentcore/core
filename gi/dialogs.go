@@ -82,29 +82,29 @@ type Dialog struct {
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 }
 
-func (dlg *Dialog) OnInit() {
-	dlg.AddStyler(func(w *WidgetBase, s *gist.Style) {
+func (dlg *Dialog) StyleFrame() {
+	dlg.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 		s.Color = ColorScheme.OnSurface
 		s.Border.Radius = gist.BorderRadiusExtraLarge
+
+		dlg.Frame.Spacing = StdDialogVSpaceUnits
+		s.Border.Style.Set(gist.BorderNone)
+		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
+		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Color)
+		if !DialogsSepWindow {
+			s.BoxShadow = BoxShadow3
+		}
+
 	})
 }
 
+// todo: need to do this on frame
+
 func (dlg *Dialog) OnChildAdded(child ki.Ki) {
-	if w := AsWidget(child); w != nil {
-		switch w.Name() {
-		case "frame":
-			frame := child.(*Frame)
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				frame.Spacing = StdDialogVSpaceUnits
-				s.Border.Style.Set(gist.BorderNone)
-				s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
-				s.BackgroundColor.SetSolid(dlg.Style.BackgroundColor.Color)
-				if !DialogsSepWindow {
-					s.BoxShadow = BoxShadow3
-				}
-			})
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
 		case "title":
 			title := child.(*Label)
 			title.Type = LabelHeadlineSmall
@@ -139,11 +139,6 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (dlg *Dialog) Disconnect() {
-	dlg.Viewport.Disconnect()
-	dlg.DialogSig.DisconnectAll()
-}
-
 // ValidViewport finds a non-nil viewport, either using the provided one, or
 // using the first main window's viewport
 func ValidViewport(avp *Viewport) *Viewport {
@@ -174,20 +169,20 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 		return false
 	}
 
-	updt := dlg.UpdateStart()
 	if dlg.Modal {
 		dlg.State = DialogOpenModal
 	} else {
 		dlg.State = DialogOpenModeless
 	}
+	dlg.Frame.Lay = LayoutVert
 
 	if DialogsSepWindow {
-		win = NewDialogWin(dlg.Nm, dlg.Title, 100, 100, dlg.Modal)
+		win = NewDialogWin(dlg.Name, dlg.Title, 100, 100, dlg.Modal)
 		win.Data = dlg.Data
-		win.AddChild(dlg)
-		win.Viewport = &dlg.Viewport
-		win.Viewport.Fill = true
-		win.MasterVLay = dlg.Frame().Embed(LayoutType).(*Layout)
+		// todo: win.Viewport
+		// win.AddChild(dlg)
+		// win.Viewport = &dlg.Viewport
+		// win.MasterVLay = dlg.Frame.Embed(LayoutType).(*Layout)
 		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
 	}
 
@@ -201,40 +196,38 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 	if dlg.DefSize == (image.Point{}) {
 		vpsz = dlg.PrefSize(win.OSWin.Screen().PixSize)
 		if !DialogsSepWindow {
-			vpsz = dlg.LayState.Size.Pref.Min(win.Viewport.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
+			// vpsz = dlg.Frame.LayState.Size.Pref.Min(win.Viewport.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
 		}
 	}
 	dlg.Win = nil
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.EventMgr.ConnectEvent(dlg.This(), goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	win.EventMgr.ConnectEvent(dlg.Frame.This(), goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", ddlg.Path())
+			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", dlg.Name)
 		}
 		kf := KeyFun(kt.Chord())
 		switch kf {
 		case KeyFunAbort:
-			ddlg.Cancel()
+			dlg.Cancel()
 			kt.SetProcessed()
 		}
 	})
-	win.EventMgr.ConnectEvent(dlg.This(), goosi.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	win.EventMgr.ConnectEvent(dlg.Frame.This(), goosi.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		kt := d.(*key.ChordEvent)
-		ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", ddlg.Path())
+			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", dlg.Name)
 		}
 		kf := KeyFun(kt.Chord())
 		switch kf {
 		case KeyFunAccept:
-			ddlg.Accept()
+			dlg.Accept()
 			kt.SetProcessed()
 		}
 	})
 	// this is not a good idea
-	// win.ConnectEvent(dlg.This(), goosi.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	// win.ConnectEvent(dlg.Frame.This(), goosi.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
@@ -244,7 +237,6 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 	// })
 
 	if DialogsSepWindow {
-		dlg.UpdateEndNoSig(updt)
 		if !win.HasGeomPrefs() {
 			// fmt.Printf("setsz: %v\n", vpsz)
 			win.SetSize(vpsz)
@@ -261,18 +253,17 @@ func (dlg *Dialog) Open(x, y int, avp *Viewport, cfgFunc func()) bool {
 		}
 		x = min(x, win.Viewport.Geom.Size.X-vpsz.X) // fit
 		y = min(y, win.Viewport.Geom.Size.Y-vpsz.Y) // fit
-		dlg.SetFlag(int(VpFlagPopup))
+		dlg.Type = VpDialog                         // VpPopup
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
-		dlg.UpdateEndNoSig(updt)
-		win.SetNextPopup(dlg.This(), nil)
+		win.SetNextPopup(&dlg.Viewport, nil)
 	}
 	return true
 }
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
-	if dlg == nil || dlg.This() == nil || dlg.IsDestroyed() || dlg.IsDeleted() {
+	if dlg == nil || dlg.Frame.This() == nil || dlg.Frame.IsDestroyed() || dlg.Frame.IsDeleted() {
 		return
 	}
 	win := dlg.Win
@@ -280,7 +271,7 @@ func (dlg *Dialog) Close() {
 		if DialogsSepWindow {
 			win.Close()
 		} else {
-			win.ClosePopup(dlg.This())
+			win.ClosePopup(&dlg.Viewport)
 		}
 	}
 }
@@ -292,9 +283,9 @@ func (dlg *Dialog) Accept() {
 	}
 	dlg.State = DialogAccepted
 	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.This(), dlg.SigVal, nil)
+		dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
 	} else {
-		dlg.DialogSig.Emit(dlg.This(), int64(dlg.State), nil)
+		dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
 	}
 	dlg.Close()
 }
@@ -306,9 +297,9 @@ func (dlg *Dialog) Cancel() {
 	}
 	dlg.State = DialogCanceled
 	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.This(), dlg.SigVal, nil)
+		dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
 	} else {
-		dlg.DialogSig.Emit(dlg.This(), int64(dlg.State), nil)
+		dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
 	}
 	dlg.Close()
 }
@@ -316,82 +307,65 @@ func (dlg *Dialog) Cancel() {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  Configuration functions construct standard types of dialogs but anything can be done
 
-// SetFrame creates a standard vertical column frame layout as first element of the dialog, named "frame"
-func (dlg *Dialog) SetFrame() *Frame {
-	frame := NewFrame(dlg, "frame", LayoutVert)
-	return frame
-}
-
-// Frame returns the main frame for the dialog, assumed to be the first element in the dialog
-func (dlg *Dialog) Frame() *Frame {
-	return dlg.Child(0).(*Frame)
-}
-
 // SetTitle sets the title and adds a Label named "title" to the given frame layout if passed
-func (dlg *Dialog) SetTitle(title string, frame *Frame) *Label {
+func (dlg *Dialog) SetTitle(title string) *Label {
 	dlg.Title = title
-	if frame != nil {
-		lab := NewLabel(frame, "title", title)
-		return lab
-	}
-	return nil
+	lab := NewLabel(dlg.Frame.This(), "title")
+	lab.Text = title
+	return lab
 }
 
 // Title returns the title label widget, and its index, within frame -- nil, -1 if not found
-func (dlg *Dialog) TitleWidget(frame *Frame) (*Label, int) {
-	idx, ok := frame.Children().IndexByName("title", 0)
+func (dlg *Dialog) TitleWidget() (*Label, int) {
+	idx, ok := dlg.Frame.Children().IndexByName("title", 0)
 	if !ok {
 		return nil, -1
 	}
-	return frame.Child(idx).(*Label), idx
+	return dlg.Frame.Child(idx).(*Label), idx
 }
 
 // SetPrompt sets the prompt and adds a Label named "prompt" to the given
 // frame layout if passed
-func (dlg *Dialog) SetPrompt(prompt string, frame *Frame) *Label {
+func (dlg *Dialog) SetPrompt(prompt string) *Label {
 	dlg.Prompt = prompt
-	if frame != nil {
-		lab := NewLabel(frame, "prompt", prompt)
-		return lab
-	}
-	return nil
+	lab := NewLabel(dlg.Frame.This(), "prompt")
+	lab.Text = prompt
+	return lab
 }
 
 // PromptWidget returns the prompt label widget, and its index, within frame -- if
 // nil returns the title widget (flexible if prompt is nil)
-func (dlg *Dialog) PromptWidget(frame *Frame) (*Label, int) {
-	idx, ok := frame.Children().IndexByName("prompt", 0)
+func (dlg *Dialog) PromptWidget() (*Label, int) {
+	idx, ok := dlg.Frame.Children().IndexByName("prompt", 0)
 	if !ok {
-		return dlg.TitleWidget(frame)
+		return dlg.TitleWidget()
 	}
-	return frame.Child(idx).(*Label), idx
+	return dlg.Frame.Child(idx).(*Label), idx
 }
 
 // PromptWidgetIdx returns the prompt label widget index only
 // for use in Python with only one return value.
-func (dlg *Dialog) PromptWidgetIdx(frame *Frame) int {
-	_, idx := dlg.PromptWidget(frame)
+func (dlg *Dialog) PromptWidgetIdx() int {
+	_, idx := dlg.PromptWidget()
 	return idx
 }
 
 // AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
 // with an extra space above it
-func (dlg *Dialog) AddButtonBox(frame *Frame) *Layout {
-	if frame == nil {
-		return nil
-	}
-	NewSpace(frame, "button-space")
-	bb := NewLayout(frame, "buttons", LayoutHoriz)
+func (dlg *Dialog) AddButtonBox() *Layout {
+	NewSpace(&dlg.Frame, "button-space")
+	bb := NewLayout(&dlg.Frame, "buttons")
+	bb.Lay = LayoutHoriz
 	return bb
 }
 
 // ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (dlg *Dialog) ButtonBox(frame *Frame) (*Layout, int) {
-	idx, ok := frame.Children().IndexByName("buttons", 0)
+func (dlg *Dialog) ButtonBox() (*Layout, int) {
+	idx, ok := dlg.Frame.Children().IndexByName("buttons", 0)
 	if !ok {
 		return nil, -1
 	}
-	return frame.Child(idx).(*Layout), idx
+	return dlg.Frame.Child(idx).(*Layout), idx
 }
 
 // Dialog Ok, Cancel options
@@ -425,21 +399,19 @@ func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.TypeAndNameList 
 // Accept / Cancel actions
 func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 	if ok {
-		okb := bb.ChildByName("ok", 0).Embed(ButtonType).(*Button)
+		okb := AsButton(bb.ChildByName("ok", 0))
 		okb.SetText("Ok")
-		okb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+		okb.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.Embed(TypeDialog).(*Dialog)
 				dlg.Accept()
 			}
 		})
 	}
 	if cancel {
-		canb := bb.ChildByName("cancel", 0).Embed(ButtonType).(*Button)
+		canb := AsButton(bb.ChildByName("cancel", 0))
 		canb.SetText("Cancel")
-		canb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+		canb.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(ButtonClicked) {
-				dlg := recv.Embed(TypeDialog).(*Dialog)
 				dlg.Cancel()
 			}
 		})
@@ -450,15 +422,14 @@ func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
 // cancel buttons -- any empty text will not be added
 func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 	dlg.SigVal = -1
-	frame := dlg.SetFrame()
 	if title != "" {
-		dlg.SetTitle(title, frame)
+		dlg.SetTitle(title)
 	}
 	if prompt != "" {
-		dlg.SetPrompt(prompt, frame)
+		dlg.SetPrompt(prompt)
 	}
 	if ok || cancel {
-		bb := dlg.AddButtonBox(frame)
+		bb := dlg.AddButtonBox()
 		bbc := dlg.StdButtonConfig(true, ok, cancel)
 		mods, updt := bb.ConfigChildren(bbc)
 		dlg.StdButtonConnect(ok, cancel, bb)
@@ -466,7 +437,8 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 			bb.UpdateEnd(updt)
 		}
 	}
-	dlg.SetFlag(int(VpFlagPopupDestroyAll)) // std is disposable
+	// todo:
+	// dlg.SetFlag(VpFlagPopupDestroyAll) // std is disposable
 }
 
 // DlgOpts are the basic dialog options accepted by all dialog methods --
@@ -485,8 +457,7 @@ type DlgOpts struct {
 
 // NewStdDialog returns a basic standard dialog with given options (title,
 // prompt, CSS styling) and whether ok, cancel buttons should be shown -- any
-// empty text will not be added -- returns with UpdateStart started but NOT
-// ended -- must call UpdateEnd(true) once done configuring!
+// empty text will not be added.
 // Use AddOk / NoOk, AddCancel / NoCancel for bool args.
 func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
 	title := opts.Title
@@ -495,9 +466,8 @@ func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
 		nm = "unnamed-dialog"
 	}
 	dlg := Dialog{}
-	dlg.InitName(&dlg, nm)
-	dlg.UpdateStart() // guaranteed to be true
-	dlg.CSS = opts.CSS
+	dlg.Name = nm
+	dlg.Frame.CSS = opts.CSS
 	dlg.StdDialog(opts.Title, opts.Prompt, ok, cancel)
 	return &dlg
 }
@@ -510,10 +480,10 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 		return NewStdDialog(opts, ok, cancel), false
 	}
 	ew, has := DialogWindows.FindData(data)
-	if has && ew.NumChildren() > 0 {
+	if has && ew.Viewport.Frame.NumChildren() > 0 {
 		ew.OSWin.Raise()
-		dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
-		return dlg, true
+		// dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
+		// return dlg, true
 	}
 	dlg := NewStdDialog(opts, ok, cancel)
 	dlg.Data = data
@@ -545,7 +515,6 @@ func PromptDialog(avp *Viewport, opts DlgOpts, ok, cancel bool, recv ki.Ki, fun 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
 }
 
@@ -560,8 +529,7 @@ func ChoiceDialog(avp *Viewport, opts DlgOpts, choices []string, recv ki.Ki, fun
 		dlg.DialogSig.Connect(recv, fun)
 	}
 
-	frame := dlg.Frame()
-	bb := dlg.AddButtonBox(frame) // not otherwise made because no buttons above
+	bb := dlg.AddButtonBox() // not otherwise made because no buttons above
 	NewStretch(bb, "stretch")
 	for i, ch := range choices {
 		chnm := strcase.ToKebab(ch)
@@ -569,27 +537,22 @@ func ChoiceDialog(avp *Viewport, opts DlgOpts, choices []string, recv ki.Ki, fun
 		b.SetProp("__cdSigVal", int64(i))
 		b.SetText(ch)
 		if chnm == "cancel" {
-			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+			b.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(ButtonType).(*Button)
-					dlg := recv.Embed(TypeDialog).(*Dialog)
-					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
+					dlg.SigVal = b.Prop("__cdSigVal").(int64)
 					dlg.Cancel()
 				}
 			})
 		} else {
-			b.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+			b.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(ButtonClicked) {
-					tb := send.Embed(ButtonType).(*Button)
-					dlg := recv.Embed(TypeDialog).(*Dialog)
-					dlg.SigVal = tb.Prop("__cdSigVal").(int64)
+					dlg.SigVal = b.Prop("__cdSigVal").(int64)
 					dlg.Accept()
 				}
 			})
 		}
 	}
 
-	dlg.UpdateEndNoSig(true) // going to be shown
 	dlg.Open(0, 0, avp, nil)
 }
 
@@ -602,45 +565,46 @@ func NewKiDialog(avp *Viewport, iface reflect.Type, opts DlgOpts, recv ki.Ki, fu
 	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	_, prIdx := dlg.PromptWidget()
 
-	nrow := frame.InsertNewChild(LayoutType, prIdx+2, "n-row").(*Layout)
+	nrow := dlg.Frame.InsertNewChild(LayoutType, prIdx+2, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
-	NewLabel(nrow, "n-label", "Number:  ")
+	lbl := NewLabel(nrow, "n-label")
+	lbl.Text = "Number:  "
 
 	nsb := NewSpinBox(nrow, "n-field")
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := frame.InsertNewChild(SpaceType, prIdx+3, "type-space").(*Space)
+	tspc := dlg.Frame.InsertNewChild(SpaceType, prIdx+3, "type-space").(*Space)
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := frame.InsertNewChild(LayoutType, prIdx+4, "t-row").(*Layout)
+	trow := dlg.Frame.InsertNewChild(LayoutType, prIdx+4, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
-	NewLabel(trow, "t-label", "Type:    ")
+	lbl = NewLabel(trow, "t-label")
+	lbl.Text = "Type:    "
 
 	typs := NewComboBox(trow, "types")
+	_ = typs
+	// todo: fix
 	// typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
 
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
 // NewKiDialogValues gets the user-set values from a NewKiDialog.
 func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
-	frame := dlg.Frame()
-	nrow := frame.ChildByName("n-row", 0).(*Layout)
+	nrow := dlg.Frame.ChildByName("n-row", 0).(*Layout)
 	ntf := nrow.ChildByName("n-field", 0).(*SpinBox)
 	n := int(ntf.Value)
-	trow := frame.ChildByName("t-row", 0).(*Layout)
+	trow := dlg.Frame.ChildByName("t-row", 0).(*Layout)
 	typs := trow.ChildByName("types", 0).(*ComboBox)
 	var typ reflect.Type
 	if typs.CurVal != nil {
@@ -659,9 +623,8 @@ func StringPromptDialog(avp *Viewport, strval, placeholder string, opts DlgOpts,
 	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
-	tf := frame.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
+	_, prIdx := dlg.PromptWidget()
+	tf := dlg.Frame.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
 	tf.Placeholder = placeholder
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
@@ -670,14 +633,12 @@ func StringPromptDialog(avp *Viewport, strval, placeholder string, opts DlgOpts,
 	if recv != nil && fun != nil {
 		dlg.DialogSig.Connect(recv, fun)
 	}
-	dlg.UpdateEndNoSig(true)
 	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
 // StringPromptDialogValue gets the string value the user set.
 func StringPromptDialogValue(dlg *Dialog) string {
-	frame := dlg.Frame()
-	tf := frame.ChildByName("str-field", 0).(*TextField)
+	tf := dlg.Frame.ChildByName("str-field", 0).(*TextField)
 	return tf.Text()
 }

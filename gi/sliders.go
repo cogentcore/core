@@ -784,7 +784,7 @@ func (sr *Slider) Render(vp *Viewport) {
 
 // render using a default style if not otherwise styled
 func (sr *Slider) RenderDefaultStyle() {
-	rs, pc, st := sr.RenderLock()
+	rs, pc, st := sr.RenderLock(vp)
 
 	// overall fill box
 	sr.RenderStdBox(&sr.StyleBox)
@@ -937,7 +937,7 @@ func (sb *ScrollBar) Render(vp *Viewport) {
 
 // render using a default style if not otherwise styled
 func (sb *ScrollBar) RenderDefaultStyle() {
-	rs, pc, st := sb.RenderLock()
+	rs, pc, st := sb.RenderLock(vp)
 	defer sb.RenderUnlock(rs)
 
 	// overall fill box

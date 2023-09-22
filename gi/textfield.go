@@ -1602,7 +1602,7 @@ func (tf *TextField) SetEffPosAndSize() {
 }
 
 func (tf *TextField) RenderTextField() {
-	rs, _, _ := tf.RenderLock()
+	rs, _, _ := tf.RenderLock(vp)
 	defer tf.RenderUnlock(rs)
 
 	tf.SetEffPosAndSize()

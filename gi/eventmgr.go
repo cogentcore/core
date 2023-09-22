@@ -256,7 +256,7 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 			switch evi.(type) {
 			case *mouse.DragEvent:
 				if em.Dragging == nil {
-					rr.Recv.SetFlag(int(NodeDragging)) // PROVISIONAL!
+					rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
 				}
 			}
 			em.EventMu.Unlock()
@@ -267,7 +267,7 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 				case *mouse.DragEvent:
 					if em.Dragging == nil {
 						em.Dragging = rr.Recv
-						rr.Recv.SetFlag(int(NodeDragging))
+						rr.Recv.SetFlag(true, NodeDragging)
 					}
 				case *mouse.ScrollEvent:
 					if em.Scrolling == nil {
@@ -279,7 +279,7 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 				switch evi.(type) {
 				case *mouse.DragEvent:
 					if em.Dragging == nil {
-						rr.Recv.ClearFlag(int(NodeDragging)) // clear provisional
+						rr.Recv.SetFlag(false, NodeDragging) // clear provisional
 					}
 				}
 			}
@@ -308,20 +308,19 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 				if EventTrace {
 					fmt.Printf("Event: set focus active, was not: %v\n", ni.Path())
 				}
-				nii.FocusChanged2D(FocusActive)
+				nii.FocusChanged(FocusActive)
 			}
 		}
 	}
 	top := em.Master.EventTopNode()
 	// remainder is done using generic node interface, for 2D and 3D
-	gni := recv.(Node)
-	gn := gni.AsGiNode()
+	_, wb := AsWidget(recv)
 	if evi.HasPos() {
 		pos := evi.Pos()
 		switch evi.(type) {
 		case *mouse.DragEvent:
 			if em.Dragging != nil {
-				if em.Dragging == gn.This() {
+				if em.Dragging == wb.This() {
 					if EventTrace {
 						fmt.Printf("Event: dragging top pri: %v\n", recv.Path())
 					}
@@ -331,7 +330,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 					return ki.Continue
 				}
 			} else {
-				if gn.PosInWinBBox(pos) {
+				if wb.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return ki.Break
 				}
@@ -339,7 +338,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 			}
 		case *mouse.ScrollEvent:
 			if em.Scrolling != nil {
-				if em.Scrolling == gn.This() {
+				if em.Scrolling == wb.This() {
 					if EventTrace {
 						fmt.Printf("Event: scrolling top pri: %v\n", recv.Path())
 					}
@@ -348,21 +347,21 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 					return ki.Continue
 				}
 			} else {
-				if gn.PosInWinBBox(pos) {
+				if wb.PosInWinBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return ki.Break
 				}
 				return ki.Continue
 			}
 		default:
-			if em.Dragging == gn.This() { // dragger always gets it
+			if em.Dragging == wb.This() { // dragger always gets it
 				if EventTrace {
 					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.Path())
 				}
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 				return ki.Break
 			}
-			if !gn.PosInWinBBox(pos) {
+			if !wb.PosInWinBBox(pos) {
 				return ki.Continue
 			}
 		}
@@ -415,7 +414,7 @@ func (em *EventMgr) MouseEvents(evi goosi.Event) {
 func (em *EventMgr) MouseEventReset(evi goosi.Event) {
 	et := evi.Type()
 	if em.Dragging != nil && et != goosi.MouseDragEvent {
-		em.Dragging.ClearFlag(int(NodeDragging))
+		em.Dragging.SetFlag(false, NodeDragging)
 		em.Dragging = nil
 	}
 	if em.Scrolling != nil && et != goosi.MouseScrollEvent {
@@ -609,9 +608,9 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 			if ni != nil {
 				in := ni.PosInWinBBox(pos)
 				if in {
-					if !ni.HasFlag(int(MouseHasEntered)) {
+					if !ni.HasFlag(MouseHasEntered) {
 						fe.Action = mouse.Enter
-						ni.SetFlag(int(MouseHasEntered))
+						ni.SetFlag(true, MouseHasEntered)
 						if !updated {
 							updt = em.Master.EventTopUpdateStart()
 							updated = true
@@ -621,9 +620,9 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 						return ki.Break // already in
 					}
 				} else { // mouse not in object
-					if ni.HasFlag(int(MouseHasEntered)) {
+					if ni.HasFlag(MouseHasEntered) {
 						fe.Action = mouse.Exit
-						ni.ClearFlag(int(MouseHasEntered))
+						ni.SetFlag(false, MouseHasEntered)
 						if !updated {
 							updt = em.Master.EventTopUpdateStart()
 							updated = true
@@ -659,13 +658,13 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 			if !em.Master.IsInScope(recv, popup) {
 				return ki.Continue
 			}
-			_, ni := AsWidget(recv)
-			if ni != nil {
+			_, wb := AsWidget(recv)
+			if wb != nil {
 				pos := me.Pos()
-				if ni.PosInWinBBox(pos) {
-					if ni.IsInstaDrag() {
-						em.Dragging = ni.This()
-						ni.SetFlag(int(NodeDragging))
+				if wb.PosInWinBBox(pos) {
+					if wb.HasFlag(InstaDrag) {
+						em.Dragging = wb.This()
+						wb.SetFlag(true, NodeDragging)
 						gotOne = true
 						return ki.Break
 					}
@@ -776,7 +775,7 @@ func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) bool {
 	de.Action = dnd.DropOnTarget
 	de.Data = em.DNDData
 	de.Source = em.DNDSource
-	em.DNDSource.ClearFlag(int(NodeDragging))
+	em.DNDSource.SetFlag(false, NodeDragging)
 	em.Dragging = nil
 	em.DNDFinalEvent = &de
 	em.DNDDropMod = de.Mod
@@ -824,17 +823,17 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 			if !em.Master.IsInScope(recv, popup) {
 				return ki.Continue
 			}
-			_, ni := AsWidget(recv)
-			if ni != nil {
-				in := ni.PosInWinBBox(pos)
+			_, wb := AsWidget(recv)
+			if wb != nil {
+				in := wb.PosInWinBBox(pos)
 				if in {
-					if !ni.HasFlag(int(DNDHasEntered)) {
-						ni.SetFlag(int(DNDHasEntered))
+					if !wb.HasFlag(DNDHasEntered) {
+						wb.SetFlag(true, DNDHasEntered)
 						ins.Add(recv, fun, 0)
 					}
 				} else { // mouse not in object
-					if ni.HasFlag(int(DNDHasEntered)) {
-						ni.ClearFlag(int(DNDHasEntered))
+					if wb.HasFlag(DNDHasEntered) {
+						wb.SetFlag(false, DNDHasEntered)
 						outs.Add(recv, fun, 0)
 					}
 				}
@@ -917,9 +916,9 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	cfoc := em.CurFocus()
 	if cfoc == k {
 		if k != nil {
-			_, ni := AsWidget(k)
-			if ni != nil && ni.This() != nil {
-				ni.SetFocusState(true) // ensure focus flag always set
+			_, wb := AsWidget(k)
+			if wb != nil && wb.This() != nil {
+				wb.SetFocusState(true) // ensure focus flag always set
 			}
 		}
 		return false
@@ -929,9 +928,9 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	defer em.Master.EventTopUpdateEnd(updt)
 
 	if cfoc != nil {
-		nii, ni := AsWidget(cfoc)
-		if ni != nil && ni.This() != nil {
-			ni.SetFocusState(false)
+		nii, wb := AsWidget(cfoc)
+		if wb != nil && wb.This() != nil {
+			wb.SetFocusState(false)
 			// fmt.Printf("clear foc: %v\n", ni.Path())
 			nii.FocusChanged(FocusLost)
 		}
@@ -940,12 +939,12 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 	if k == nil {
 		return true
 	}
-	nii, ni := AsWidget(k)
-	if ni == nil || ni.This() == nil { // only 2d for now
+	nii, wb := AsWidget(k)
+	if wb == nil || wb.This() == nil { // only 2d for now
 		em.setFocusPtr(nil)
 		return false
 	}
-	ni.SetFocusState(true)
+	wb.SetFocusState(true)
 	em.Master.SetFocusActiveState(true)
 	// fmt.Printf("set foc: %v\n", ni.Path())
 	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
@@ -970,8 +969,8 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 			if gotFocus {
 				return ki.Break
 			}
-			_, ni := AsWidget(k)
-			if ni == nil || ni.This() == nil {
+			_, wb := AsWidget(k)
+			if wb == nil || wb.This() == nil {
 				return ki.Continue
 			}
 			if foc == k { // current focus can be a non-can-focus item
@@ -981,7 +980,7 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 			if !focusNext {
 				return ki.Continue
 			}
-			if !ni.CanFocus() {
+			if !wb.CanFocus() {
 				return ki.Continue
 			}
 			em.SetFocus(k)
@@ -1003,11 +1002,11 @@ func (em *EventMgr) FocusOnOrNext(foc ki.Ki) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, ni := AsWidget(foc)
-	if ni == nil || ni.This() == nil {
+	_, wb := AsWidget(foc)
+	if wb == nil || wb.This() == nil {
 		return false
 	}
-	if ni.CanFocus() {
+	if wb.CanFocus() {
 		em.SetFocus(foc)
 		return true
 	}
@@ -1021,11 +1020,11 @@ func (em *EventMgr) FocusOnOrPrev(foc ki.Ki) bool {
 	if cfoc == foc {
 		return true
 	}
-	_, ni := AsWidget(foc)
-	if ni == nil || ni.This() == nil {
+	_, wb := AsWidget(foc)
+	if wb == nil || wb.This() == nil {
 		return false
 	}
-	if ni.CanFocus() {
+	if wb.CanFocus() {
 		em.SetFocus(foc)
 		return true
 	}
@@ -1048,15 +1047,15 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 		if gotFocus {
 			return ki.Break
 		}
-		_, ni := AsWidget(k)
-		if ni == nil || ni.This() == nil {
+		_, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
 		if foc == k {
 			gotFocus = true
 			return ki.Break
 		}
-		if !ni.CanFocus() {
+		if !wb.CanFocus() {
 			return ki.Continue
 		}
 		prevItem = k
@@ -1078,11 +1077,11 @@ func (em *EventMgr) FocusLast() bool {
 	focRoot := em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
-		_, ni := AsWidget(k)
-		if ni == nil || ni.This() == nil {
+		_, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
-		if !ni.CanFocus() {
+		if !wb.CanFocus() {
 			return ki.Continue
 		}
 		lastItem = k
@@ -1106,22 +1105,22 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		if k == focRoot { // skip top-level
 			return ki.Continue
 		}
-		nii, ni := AsWidget(k)
-		if ni == nil || ni.This() == nil {
+		nii, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
 		if foc == k {
 			return ki.Continue
 		}
-		if ni.HasFocus() {
+		if wb.HasFocus() {
 			if EventTrace {
-				fmt.Printf("ClearNonFocus: had focus: %v\n", ni.Path())
+				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}
 			if !updated {
 				updated = true
 				updt = em.Master.EventTopUpdateStart()
 			}
-			ni.ClearFlag(int(HasFocus))
+			wb.SetFlag(false, HasFocus)
 			nii.FocusChanged(FocusLost)
 		}
 		return ki.Continue
@@ -1153,8 +1152,8 @@ func (em *EventMgr) PopFocus() {
 	sz := len(em.FocusStack)
 	em.Focus = nil
 	nxtf := em.FocusStack[sz-1]
-	_, ni := AsWidget(nxtf)
-	if ni != nil && ni.This() != nil {
+	_, wb := AsWidget(nxtf)
+	if wb != nil && wb.This() != nil {
 		em.FocusMu.Unlock()
 		em.SetFocus(nxtf)
 		em.FocusMu.Lock()

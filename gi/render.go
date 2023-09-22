@@ -437,9 +437,9 @@ func (wb *WidgetBase) ReRenderTree() {
 
 // RenderLock returns the locked girl.State, Paint, and Style with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock() (*girl.State, *girl.Paint, *gist.Style) {
+func (wb *WidgetBase) RenderLock(vp *Viewport) (*girl.State, *girl.Paint, *gist.Style) {
 	wb.StyMu.RLock()
-	rs := &wb.Viewport.Render
+	rs := &vp.RenderState
 	rs.Lock()
 	return rs, &rs.Paint, &wb.Style
 }
@@ -452,20 +452,20 @@ func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
-	rs := &wb.Viewport.Render
+func (wb *WidgetBase) RenderBoxImpl(vp *Viewport, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
+	rs := &vp.RenderState
 	pc := &rs.Paint
 	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStdBox draws standard box using given style.
 // girl.State and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(st *gist.Style) {
+func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
-	rs := &wb.Viewport.Render
+	rs := &vp.RenderState
 	pc := &rs.Paint
 
 	// TODO: maybe implement some version of this to render background color

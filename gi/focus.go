@@ -52,11 +52,11 @@ func (wb *WidgetBase) GrabFocus() {
 	foc := wb.This()
 	if !wb.CanFocus() {
 		wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
-			_, ni := KiToWidget(k)
-			if ni == nil || ni.This() == nil || ni.IsDeleted() || ni.IsDestroyed() {
+			_, wb := AsWidget(k)
+			if wb == nil || wb.This() == nil || wb.IsDeleted() || wb.IsDestroyed() {
 				return ki.Break
 			}
-			if !ni.CanFocus() {
+			if !wb.CanFocus() {
 				return ki.Continue
 			}
 			foc = k

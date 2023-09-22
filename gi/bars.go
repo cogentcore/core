@@ -45,8 +45,8 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 // MenuBarStdRender does the standard rendering of the bar
-func (mb *MenuBar) MenuBarStdRender() {
-	rs, pc, st := mb.RenderLock()
+func (mb *MenuBar) MenuBarStdRender(vp *Viewport) {
+	rs, pc, st := mb.RenderLock(vp)
 	pos := mb.LayState.Alloc.Pos
 	sz := mb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
@@ -85,10 +85,10 @@ func (mb *MenuBar) Render(vp *Viewport) {
 		return
 	}
 	if mb.PushBounds(vp) {
-		mb.MenuBarStdRender()
+		mb.MenuBarStdRender(vp)
 		wi.ConnectEvents()
-		mb.RenderScrolls()
-		mb.RenderChildren()
+		mb.RenderScrolls(vp)
+		mb.RenderChildren(vp)
 		mb.PopBounds(vp)
 	} else {
 		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
@@ -317,6 +317,10 @@ func AsToolBar(k ki.Ki) *ToolBar {
 	return nil
 }
 
+func (tb *ToolBar) AsToolBar() *ToolBar {
+	return tb
+}
+
 // ToolBar is a Layout (typically LayoutHoriz) that renders a gradient
 // background and is useful for holding Actions that do things
 type ToolBar struct {
@@ -377,8 +381,8 @@ func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
 }
 
 // ToolBarStdRender does the standard rendering of the bar
-func (tb *ToolBar) ToolBarStdRender() {
-	rs, pc, st := tb.RenderLock()
+func (tb *ToolBar) ToolBarStdRender(vp *Viewport) {
+	rs, pc, st := tb.RenderLock(vp)
 	pos := tb.LayState.Alloc.Pos
 	sz := tb.LayState.Alloc.Size
 	bg := st.BackgroundColor
@@ -395,10 +399,10 @@ func (tb *ToolBar) Render(vp *Viewport) {
 	}
 	wi := tb.This().(Widget)
 	if tb.PushBounds(vp) {
-		tb.ToolBarStdRender()
+		tb.ToolBarStdRender(vp)
 		wi.ConnectEvents()
-		tb.RenderScrolls()
-		tb.RenderChildren()
+		tb.RenderScrolls(vp)
+		tb.RenderChildren(vp)
 		tb.PopBounds(vp)
 	} else {
 		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi

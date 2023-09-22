@@ -2267,7 +2267,11 @@ func (w *Window) DeleteTooltip() {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *Window) SetNextPopup(pop, focus ki.Ki) {
+func (w *Window) SetNextPopup(pop *Viewport, focus ki.Ki) {
+}
+
+// SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
+func (w *Window) SetNextPopupImpl(pop, focus ki.Ki) {
 	w.PopMu.Lock()
 	w.NextPopup = pop
 	w.PopupFocus = focus
@@ -2332,8 +2336,12 @@ func (w *Window) DisconnectPopup(pop ki.Ki) {
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 
+func (w *Window) ClosePopup(vp *Viewport) bool {
+	return false
+}
+
 // ClosePopup close given popup -- must be the current one -- returns false if not.
-func (w *Window) ClosePopup(pop ki.Ki) bool {
+func (w *Window) ClosePopupImpl(pop ki.Ki) bool {
 	if pop != w.CurPopup() {
 		return false
 	}

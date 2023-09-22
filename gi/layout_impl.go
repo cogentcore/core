@@ -54,7 +54,7 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		if err != nil {
 			return
 		}
-		ni := sn.(Node2D).AsWidget()
+		ni := sn.(Widget).AsWidget()
 		if ni == nil {
 			return
 		}
@@ -69,7 +69,7 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -97,7 +97,7 @@ func GatherSizes(ly *Layout) {
 
 	prefSizing := false
 	mvp := ly.Vp
-	if mvp != nil && mvp.HasFlag(int(VpFlagPrefSizing)) {
+	if mvp != nil && mvp.HasFlag(VpFlagPrefSizing) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
 
@@ -148,7 +148,7 @@ func (ly *Layout) ChildrenUpdateSizes() {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -267,7 +267,7 @@ func GatherSizesGrid(ly *Layout) {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -319,7 +319,7 @@ func GatherSizesGrid(ly *Layout) {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -450,13 +450,13 @@ func LayAllocFromParent(ly *Layout) {
 	if ly.Par == nil || mvp == nil || !ly.LayState.Alloc.Size.IsNil() {
 		return
 	}
-	if ly.Par != mvp.This() {
-		// note: zero alloc size happens all the time with non-visible tabs!
-		// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
-		return
-	}
+	// if ly.Par != mvp.This() {
+	// note: zero alloc size happens all the time with non-visible tabs!
+	// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
+	// return
+	//}
 	pni, _ := AsWidget(ly.Par)
-	lyp := pni.AsDoLayout(vp * Viewport)
+	lyp := AsLayout(pni)
 	if lyp == nil {
 		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d any) bool {
 			pni, _ := AsWidget(k)
@@ -540,7 +540,7 @@ func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -595,7 +595,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 			if c == nil {
 				continue
 			}
-			ni := c.(Node2D).AsWidget()
+			ni := c.(Widget).AsWidget()
 			if ni == nil {
 				continue
 			}
@@ -612,7 +612,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 			if c == nil {
 				continue
 			}
-			ni := c.(Node2D).AsWidget()
+			ni := c.(Widget).AsWidget()
 			if ni == nil {
 				continue
 			}
@@ -649,7 +649,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -702,7 +702,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -733,7 +733,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 			if c == nil {
 				continue
 			}
-			ni := c.(Node2D).AsWidget()
+			ni := c.(Widget).AsWidget()
 			if ni == nil {
 				continue
 			}
@@ -889,7 +889,7 @@ func LayoutGridLay(ly *Layout) {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}
@@ -954,7 +954,7 @@ func (ly *Layout) FinalizeLayout() {
 		if err != nil {
 			return
 		}
-		ni := sn.(Node2D).AsWidget()
+		ni := sn.(Widget).AsWidget()
 		if ni == nil {
 			return
 		}
@@ -966,7 +966,7 @@ func (ly *Layout) FinalizeLayout() {
 		if c == nil {
 			continue
 		}
-		ni := c.(Node2D).AsWidget()
+		ni := c.(Widget).AsWidget()
 		if ni == nil {
 			continue
 		}

@@ -18,8 +18,23 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-// Label
+type LabelEmbedder interface {
+	AsLabel() *Label
+}
+
+func AsLabel(k ki.Ki) *Label {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ac, ok := k.(LabelEmbedder); ok {
+		return ac.AsLabel()
+	}
+	return nil
+}
+
+func (lb *Label) AsLabel() *Label {
+	return lb
+}
 
 // Label is a widget for rendering text labels -- supports full widget model
 // including box rendering, and full HTML styling, including links -- LinkSig
@@ -113,7 +128,7 @@ const (
 func (lb *Label) OnInit() {
 	lb.Type = LabelLabelLarge
 	lb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Cursor = lb.ParentCursor(cursor.IBeam)
+		// s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = gist.WhiteSpaceNormal
 		s.AlignV = gist.AlignMiddle
 		s.BackgroundColor.SetSolid(colors.Transparent)
@@ -207,7 +222,7 @@ func (lb *Label) OnInit() {
 }
 
 func (lb *Label) OnAdd() {
-	lb.Selectable = lb.ParentByType(ButtonTypeBase, ki.Embeds) == nil
+	lb.Selectable = lb.ParentByType(ButtonBaseType, ki.Embeds) == nil
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {
@@ -239,7 +254,7 @@ func (lb *Label) SetText(txt string) {
 	needSty := lb.Style.Font.Size.Val == 0
 	lb.StyMu.RUnlock()
 	if needSty {
-		lb.StyleLabel()
+		lb.StyleLabel(lb.Vp)
 	}
 	lb.StyMu.RLock()
 	lb.Text = txt
@@ -268,7 +283,7 @@ func (lb *Label) SetText(txt string) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *girl.TextLink) {
-	tl.Widget = lb.This()
+	// tl.Widget = lb.This() // todo: needs this
 	if len(lb.LinkSig.Cons) == 0 {
 		if girl.TextLinkHandler != nil {
 			if girl.TextLinkHandler(*tl) {
@@ -286,7 +301,7 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 func (lb *Label) HoverEvent() {
 	lb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
-		llb := recv.Embed(LabelType).(*Label)
+		llb := AsLabel(recv)
 		hasLinks := len(lb.TextRender.Links) > 0
 		if hasLinks {
 			pos := llb.RenderPos
@@ -314,7 +329,7 @@ func (lb *Label) HoverEvent() {
 func (lb *Label) MouseEvent() {
 	lb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		llb := recv.Embed(LabelType).(*Label)
+		llb := AsLabel(recv)
 		hasLinks := len(llb.TextRender.Links) > 0
 		pos := llb.RenderPos
 		if me.Action == mouse.Press && me.Button == mouse.Left && hasLinks {
@@ -337,7 +352,7 @@ func (lb *Label) MouseEvent() {
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
 			llb.EmitContextMenuSignal()
-			llb.This().(Node2D).ContextMenu()
+			llb.This().(Widget).ContextMenu()
 		}
 	})
 }
@@ -350,7 +365,7 @@ func (lb *Label) MouseMoveEvent() {
 	lb.ConnectEvent(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		llb := recv.Embed(LabelType).(*Label)
+		llb := AsLabel(recv)
 		pos := llb.RenderPos
 		inLink := false
 		for _, tl := range llb.TextRender.Links {
@@ -383,19 +398,19 @@ func (lb *Label) GrabCurBackgroundColor() {
 		return
 	}
 	pos := lb.ContextMenuPos()
-	clr := lb.Viewport.Pixels.At(pos.X, pos.Y)
+	clr := lb.Vp.Pixels.At(pos.X, pos.Y)
 	lb.CurBackgroundColor = colors.AsRGBA(clr)
 }
 
 // StyleLabel does label styling -- it sets the StyMu Lock
-func (lb *Label) StyleLabel() {
+func (lb *Label) StyleLabel(vp *Viewport) {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	lb.SetStyleWidget()
+	lb.SetStyleWidget(vp)
 }
 
-func (lb *Label) LayoutLabel() {
+func (lb *Label) LayoutLabel(vp *Viewport) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -409,19 +424,19 @@ func (lb *Label) LayoutLabel() {
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
-func (lb *Label) SetStyle() {
-	lb.StyleLabel()
+func (lb *Label) SetStyle(vp *Viewport) {
+	lb.StyleLabel(vp)
 	lb.StyMu.Lock()
 	lb.LayState.SetFromStyle(&lb.Style) // also does reset
 	lb.StyMu.Unlock()
-	lb.LayoutLabel()
+	lb.LayoutLabel(vp)
 }
 
 func (lb *Label) GetSize(vp *Viewport, iter int) {
 	if iter > 0 && lb.Style.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
-		lb.InitLayout(vp * Viewport)
+		lb.InitLayout(vp)
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.TextRender.Size)
 		lb.GetSizeFromWH(sz.X, sz.Y)
@@ -429,8 +444,8 @@ func (lb *Label) GetSize(vp *Viewport, iter int) {
 }
 
 func (lb *Label) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	lb.DoLayoutBase(parBBox, true, iter)
-	lb.DoLayoutChildren(iter) // todo: maybe shouldn't call this on known terminals?
+	lb.DoLayoutBase(vp, parBBox, true, iter)
+	lb.DoLayoutChildren(vp, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
@@ -452,24 +467,22 @@ func (lb *Label) TextPos() mat32.Vec2 {
 	return pos
 }
 
-func (lb *Label) RenderLabel() {
+func (lb *Label) RenderLabel(vp *Viewport) {
 	lb.GrabCurBackgroundColor()
-	rs, _, st := lb.RenderLock()
+	rs, _, st := lb.RenderLock(vp)
 	defer lb.RenderUnlock(rs)
 	lb.RenderPos = lb.TextPos()
-	lb.RenderStdBox(st)
+	lb.RenderStdBox(vp, st)
 	lb.TextRender.Render(rs, lb.RenderPos)
 }
 
 func (lb *Label) Render(vp *Viewport) {
-	if lb.FullReRenderIfNeeded() {
-		return
-	}
-	if lb.PushBounds() {
-		lb.This().(Node2D).ConnectEvents()
-		lb.RenderLabel()
-		lb.RenderChildren()
-		lb.PopBounds()
+	wi := lb.This().(Widget)
+	if lb.PushBounds(vp) {
+		wi.ConnectEvents()
+		lb.RenderLabel(vp)
+		lb.RenderChildren(vp)
+		lb.PopBounds(vp)
 	} else {
 		lb.DisconnectAllEvents(RegPri)
 	}

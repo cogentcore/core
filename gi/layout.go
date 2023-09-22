@@ -129,6 +129,24 @@ var LayoutFocusNameTimeoutMSec = 500
 // event to allow tab to focus on next element with same name.
 var LayoutFocusNameTabMSec = 2000
 
+type LayoutEmbedder interface {
+	AsLayout() *Layout
+}
+
+func AsLayout(k ki.Ki) *Layout {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if ly, ok := k.(LayoutEmbedder); ok {
+		return ly.AsLayout()
+	}
+	return nil
+}
+
+func (ly *Layout) AsLayout() *Layout {
+	return ly
+}
+
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background color will have no effect.
@@ -203,8 +221,7 @@ type Layout struct {
 func (ly *Layout) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Layout)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ki.Type(ly).Name())
-		ki.GenCopyFieldsFrom(ly.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Layout one\n", ly.KiType().Name)
 		return
 	}
 	ly.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -268,14 +285,11 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
 	parni, _ := AsWidget(ly.Par)
 	if parni != nil {
-		vp := parni.AsViewport()
-		if vp != nil {
-			if vp.Vp == nil {
-				// SidesTODO: might not be right
-				avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
-				// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
-			}
-		}
+		// if vp.Vp == nil {
+		// 	// SidesTODO: might not be right
+		// 	avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
+		// 	// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
+		// }
 	}
 	return avail
 }
@@ -284,7 +298,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 //     Overflow: Scrolling mainly
 
 // ManageOverflow processes any overflow according to overflow settings.
-func (ly *Layout) ManageOverflow() {
+func (ly *Layout) ManageOverflow(vp *Viewport) {
 	// wasscof := ly.ScrollsOff
 	ly.ScrollsOff = false
 	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
@@ -311,10 +325,10 @@ func (ly *Layout) ManageOverflow() {
 		}
 		for d := mat32.X; d <= mat32.Y; d++ {
 			if ly.HasScroll[d] {
-				ly.SetScroll(d)
+				ly.SetScroll(vp, d)
 			}
 		}
-		ly.LayoutScrolls()
+		ly.LayoutScrolls(vp)
 	}
 }
 
@@ -324,14 +338,14 @@ func (ly *Layout) HasAnyScroll() bool {
 }
 
 // SetScroll sets a scrollbar along given dimension
-func (ly *Layout) SetScroll(d mat32.Dims) {
+func (ly *Layout) SetScroll(vp *Viewport, d mat32.Dims) {
 	if ly.Scrolls[d] == nil {
 		ly.Scrolls[d] = &ScrollBar{}
 		sc := ly.Scrolls[d]
 		sc.InitName(sc, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sc, ly.This())
 		sc.Dim = d
-		sc.Config()
+		sc.Config(vp)
 		sc.Tracking = true
 		sc.Min = 0.0
 	}
@@ -345,7 +359,7 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 		sc.SetFixedWidth(ly.Style.ScrollBarWidth)
 		sc.SetFixedHeight(units.Dot(avail.Dim(d)))
 	}
-	sc.SetStyle()
+	sc.SetStyle(vp)
 	sc.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sc.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sc.PageStep = 10.0 * sc.Step                       // todo: more dynamic
@@ -359,11 +373,12 @@ func (ly *Layout) SetScroll(d mat32.Dims) {
 			return
 		}
 		li, _ := AsWidget(recv)
-		ls := li.AsDoLayout(vp * Viewport)
-		wupdt := ls.TopUpdateStart()
-		ls.Move2DTree()
-		li.UpdateSig()
-		ls.TopUpdateEnd(wupdt)
+		ls := AsLayout(li)
+		_ = ls
+		// wupdt := ls.TopUpdateStart()
+		// ls.Move2DTree()
+		// li.UpdateSig()
+		// ls.TopUpdateEnd(wupdt)
 	})
 }
 
@@ -390,7 +405,7 @@ func (ly *Layout) DeactivateScroll(sc *ScrollBar) {
 }
 
 // LayoutScrolls arranges scrollbars
-func (ly *Layout) LayoutScrolls() {
+func (ly *Layout) LayoutScrolls(vp *Viewport) {
 	sbw := ly.Style.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
@@ -418,19 +433,19 @@ func (ly *Layout) LayoutScrolls() {
 }
 
 // RenderScrolls draws the scrollbars
-func (ly *Layout) RenderScrolls() {
+func (ly *Layout) RenderScrolls(vp *Viewport) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.Scrolls[d].Render()
+			ly.Scrolls[d].Render(vp)
 		}
 	}
 }
 
 // ReRenderScrolls re-draws the scrollbars de-novo -- can be called ad-hoc by others
-func (ly *Layout) ReRenderScrolls() {
-	if ly.PushBounds() {
-		ly.RenderScrolls()
-		ly.PopBounds()
+func (ly *Layout) ReRenderScrolls(vp *Viewport) {
+	if ly.PushBounds(vp) {
+		ly.RenderScrolls(vp)
+		ly.PopBounds(vp)
 	}
 }
 
@@ -529,8 +544,9 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	}
 }
 
-func (ly *Layout) DoLayoutChildren(iter int) bool {
-	cbb := ly.This().(Node2D).ChildrenBBox2D()
+func (ly *Layout) DoLayoutChildren(vp *Viewport, iter int) bool {
+	wi := ly.This().(Widget)
+	cbb := wi.ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
@@ -551,14 +567,14 @@ func (ly *Layout) DoLayoutChildren(iter int) bool {
 }
 
 // render the children
-func (ly *Layout) RenderChildren() {
+func (ly *Layout) RenderChildren(vp *Viewport) {
 	if ly.Lay == LayoutStacked {
 		for i, kid := range ly.Kids {
 			if _, ni := AsWidget(kid); ni != nil {
 				if i == ly.StackTop {
-					ni.ClearInvisible()
+					ni.SetFlag(false, Invisible)
 				} else {
-					ni.SetInvisible()
+					ni.SetFlag(true, Invisible)
 				}
 			}
 		}
@@ -568,27 +584,28 @@ func (ly *Layout) RenderChildren() {
 		if kid == nil {
 			continue
 		}
-		nii, _ := AsWidget(kid)
-		if nii != nil {
-			nii.Render()
+		wi, _ := AsWidget(kid)
+		if wi != nil {
+			wi.Render(vp)
 		}
 	}
 }
 
-func (ly *Layout) Move2DChildren(delta image.Point) {
-	cbb := ly.This().(Node2D).ChildrenBBox2D()
+func (ly *Layout) Move2DChildren(vp *Viewport, delta image.Point) {
+	wi := ly.This().(Widget)
+	cbb := wi.ChildrenBBox2D()
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
 			return
 		}
 		nii, _ := AsWidget(sn)
-		nii.Move2D(delta, cbb)
+		nii.Move2D(vp, delta, cbb)
 	} else {
 		for _, kid := range ly.Kids {
 			nii, _ := AsWidget(kid)
 			if nii != nil {
-				nii.Move2D(delta, cbb)
+				nii.Move2D(vp, delta, cbb)
 			}
 		}
 	}
@@ -1055,19 +1072,19 @@ func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
-		li := recv.Embed(LayoutType).(*Layout)
+		li := AsLayout(recv)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	ly.ConnectEvent(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
-		li := recv.Embed(LayoutType).(*Layout)
+		li := AsLayout(recv)
 		li.AutoScroll(me.Pos())
 	})
 	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
-		li := recv.Embed(LayoutType).(*Layout)
-		if li.Vp.IsMenu() {
+		li := AsLayout(recv)
+		if li.Vp.Type == VpMenu {
 			li.AutoScroll(me.Pos())
 		}
 	})
@@ -1077,7 +1094,7 @@ func (ly *Layout) LayoutScrollEvents() {
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	ly.ConnectEvent(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		li := recv.Embed(LayoutType).(*Layout)
+		li := AsLayout(recv)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
 	})
@@ -1088,10 +1105,6 @@ func (ly *Layout) KeyChordEvent() {
 
 func (ly *Layout) AsDoLayout(vp *Viewport) *Layout {
 	return ly
-}
-
-func (ly *Layout) ConfigWidget(vp *Viewport) {
-	ly.ConfigWidget()
 }
 
 func (ly *Layout) BBox2D() image.Rectangle {
@@ -1122,7 +1135,7 @@ func (ly *Layout) StyleFromProps(props ki.Props, vp *Viewport) {
 		case "lay":
 			switch vt := val.(type) {
 			case string:
-				ly.Lay.FromString(vt)
+				ly.Lay.SetString(vt)
 			case Layouts:
 				ly.Lay = vt
 			default:
@@ -1144,7 +1157,7 @@ func (ly *Layout) StyleToDots(uc *units.Context) {
 }
 
 // StyleLayout does layout styling -- it sets the StyMu Lock
-func (ly *Layout) StyleLayout() {
+func (ly *Layout) StyleLayout(vp *Viewport) {
 	ly.StyMu.Lock()
 	defer ly.StyMu.Unlock()
 
@@ -1153,7 +1166,7 @@ func (ly *Layout) StyleLayout() {
 
 	hasTempl, saveTempl := ly.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		ly.SetStyleWidget()
+		ly.SetStyleWidget(vp)
 	}
 	ly.StyleFromProps(ly.Props, ly.Vp) // does "lay" and "spacing", in layoutstyles.go
 	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
@@ -1168,15 +1181,15 @@ func (ly *Layout) StyleLayout() {
 	}
 }
 
-func (ly *Layout) SetStyle() {
-	ly.StyleLayout()
+func (ly *Layout) SetStyle(vp *Viewport) {
+	ly.StyleLayout(vp)
 	ly.StyMu.Lock()
 	ly.LayState.SetFromStyle(&ly.Style) // also does reset
 	ly.StyMu.Unlock()
 }
 
 func (ly *Layout) GetSize(vp *Viewport, iter int) {
-	ly.InitLayout(vp * Viewport)
+	ly.InitLayout(vp)
 	switch ly.Lay {
 	case LayoutHorizFlow, LayoutVertFlow:
 		GatherSizesFlow(ly, iter)
@@ -1193,8 +1206,8 @@ func (ly *Layout) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool
 	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
 	//	}
 	//}
-	LayAllocFromParent(ly)               // in case we didn't get anything
-	ly.DoLayoutBase(parBBox, true, iter) // init style
+	LayAllocFromParent(ly)                   // in case we didn't get anything
+	ly.DoLayoutBase(vp, parBBox, true, iter) // init style
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
@@ -1221,13 +1234,13 @@ func (ly *Layout) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool
 		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
 		return true
 	}
-	ly.ManageOverflow()
-	ly.NeedsRedo = ly.DoLayoutChildren(iter) // layout done with canonical positions
+	ly.ManageOverflow(vp)
+	ly.NeedsRedo = ly.DoLayoutChildren(vp, iter) // layout done with canonical positions
 
 	if !ly.NeedsRedo || iter == 1 {
 		delta := ly.Move2DDelta((image.Point{}))
 		if delta != (image.Point{}) {
-			ly.Move2DChildren(delta) // move is a separate step
+			ly.Move2DChildren(vp, delta) // move is a separate step
 		}
 	}
 	return ly.NeedsRedo
@@ -1246,26 +1259,24 @@ func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
 	return delta
 }
 
-func (ly *Layout) Move2D(delta image.Point, parBBox image.Rectangle) {
+func (ly *Layout) Move2D(vp *Viewport, delta image.Point, parBBox image.Rectangle) {
 	ly.Move2DBase(delta, parBBox)
 	ly.Move2DScrolls(delta, parBBox) // move scrolls BEFORE adding our own!
 	delta = ly.Move2DDelta(delta)    // add our offset
-	ly.Move2DChildren(delta)
-	ly.RenderScrolls()
+	ly.Move2DChildren(vp, delta)
+	ly.RenderScrolls(vp)
 }
 
 func (ly *Layout) Render(vp *Viewport) {
-	if ly.FullReRenderIfNeeded() {
-		return
-	}
-	if ly.PushBounds() {
-		ly.This().(Node2D).ConnectEvents()
+	wi := ly.This().(Widget)
+	if ly.PushBounds(vp) {
+		wi.ConnectEvents()
 		if ly.ScrollsOff {
-			ly.ManageOverflow()
+			ly.ManageOverflow(vp)
 		}
-		ly.RenderScrolls()
-		ly.RenderChildren()
-		ly.PopBounds()
+		ly.RenderScrolls(vp)
+		ly.RenderChildren(vp)
+		ly.PopBounds(vp)
 	} else {
 		ly.SetScrollsOff()
 		ly.DisconnectAllEvents(AllPris) // uses both Low and Hi
@@ -1309,13 +1320,13 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (st *Stretch) SetStyle() {
+func (st *Stretch) SetStyle(vp *Viewport) {
 	st.StyMu.Lock()
 	defer st.StyMu.Unlock()
 
 	hasTempl, saveTempl := st.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		st.SetStyleWidget()
+		st.SetStyleWidget(vp)
 	}
 	if hasTempl && saveTempl {
 		st.Style.SaveTemplate()
@@ -1324,8 +1335,8 @@ func (st *Stretch) SetStyle() {
 }
 
 func (st *Stretch) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	st.DoLayoutBase(parBBox, true, iter) // init style
-	return st.DoLayoutChildren(iter)
+	st.DoLayoutBase(vp, parBBox, true, iter) // init style
+	return st.DoLayoutChildren(vp, iter)
 }
 
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
@@ -1346,13 +1357,13 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (sp *Space) SetStyle() {
+func (sp *Space) SetStyle(vp *Viewport) {
 	sp.StyMu.Lock()
 	defer sp.StyMu.Unlock()
 
 	hasTempl, saveTempl := sp.Style.FromTemplate()
 	if !hasTempl || saveTempl {
-		sp.SetStyleWidget()
+		sp.SetStyleWidget(vp)
 	}
 	if hasTempl && saveTempl {
 		sp.Style.SaveTemplate()
@@ -1361,6 +1372,6 @@ func (sp *Space) SetStyle() {
 }
 
 func (sp *Space) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sp.DoLayoutBase(parBBox, true, iter) // init style
-	return sp.DoLayoutChildren(iter)
+	sp.DoLayoutBase(vp, parBBox, true, iter) // init style
+	return sp.DoLayoutChildren(vp, iter)
 }

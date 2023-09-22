@@ -133,40 +133,40 @@ func (i *ActionTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ButtonFlagsValues = []ButtonFlags{24, 25, 26}
+var _ButtonFlagsValues = []ButtonFlags{23, 24, 25}
 
 // ButtonFlagsN is the highest valid value
 // for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 27
+const ButtonFlagsN ButtonFlags = 26
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ButtonFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ButtonFlagCheckable-(24)]
-	_ = x[ButtonFlagChecked-(25)]
-	_ = x[ButtonFlagMenu-(26)]
+	_ = x[ButtonFlagCheckable-(23)]
+	_ = x[ButtonFlagChecked-(24)]
+	_ = x[ButtonFlagMenu-(25)]
 }
 
 var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagCheckable`: 24,
-	`buttonflagcheckable`: 24,
-	`ButtonFlagChecked`:   25,
-	`buttonflagchecked`:   25,
-	`ButtonFlagMenu`:      26,
-	`buttonflagmenu`:      26,
+	`ButtonFlagCheckable`: 23,
+	`buttonflagcheckable`: 23,
+	`ButtonFlagChecked`:   24,
+	`buttonflagchecked`:   24,
+	`ButtonFlagMenu`:      25,
+	`buttonflagmenu`:      25,
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	24: `button is checkable -- enables display of check control`,
-	25: `button is checked`,
-	26: `Menu flag means that the button is a menu item`,
+	23: `button is checkable -- enables display of check control`,
+	24: `button is checked`,
+	25: `Menu flag means that the button is a menu item`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
-	24: `ButtonFlagCheckable`,
-	25: `ButtonFlagChecked`,
-	26: `ButtonFlagMenu`,
+	23: `ButtonFlagCheckable`,
+	24: `ButtonFlagChecked`,
+	25: `ButtonFlagMenu`,
 }
 
 // String returns the string representation
@@ -2536,30 +2536,30 @@ func (i *TextFieldSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextFieldFlagsValues = []TextFieldFlags{24}
+var _TextFieldFlagsValues = []TextFieldFlags{23}
 
 // TextFieldFlagsN is the highest valid value
 // for type TextFieldFlags, plus one.
-const TextFieldFlagsN TextFieldFlags = 25
+const TextFieldFlagsN TextFieldFlags = 24
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TextFieldFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TextFieldFocusActive-(24)]
+	_ = x[TextFieldFocusActive-(23)]
 }
 
 var _TextFieldFlagsNameToValueMap = map[string]TextFieldFlags{
-	`TextFieldFocusActive`: 24,
-	`textfieldfocusactive`: 24,
+	`TextFieldFocusActive`: 23,
+	`textfieldfocusactive`: 23,
 }
 
 var _TextFieldFlagsDescMap = map[TextFieldFlags]string{
-	24: `TextFieldFocusActive indicates that the focus is active in this field`,
+	23: `TextFieldFocusActive indicates that the focus is active in this field`,
 }
 
 var _TextFieldFlagsMap = map[TextFieldFlags]string{
-	24: `TextFieldFocusActive`,
+	23: `TextFieldFocusActive`,
 }
 
 // String returns the string representation

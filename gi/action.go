@@ -27,6 +27,10 @@ func AsAction(k ki.Ki) *Action {
 	return nil
 }
 
+func (ac *Action) AsAction() *Action {
+	return ac
+}
+
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
 // toolbars, and also for any standalone simple action.  The default styling
@@ -71,8 +75,6 @@ const (
 	// within a toolbar
 	ActionToolBar
 )
-
-func (ac *Action) AsAction() *Action { return ac }
 
 func (ac *Action) OnInit() {
 	ac.AddStyler(func(w *WidgetBase, s *gist.Style) {

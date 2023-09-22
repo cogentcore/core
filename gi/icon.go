@@ -11,7 +11,7 @@ import (
 	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
+	"goki.dev/svg"
 )
 
 // // SetIcon sets the icon by name into given Icon wrapper, returning error
@@ -34,11 +34,8 @@ import (
 // 	return TheIconMgr.IsValid(string(inm))
 // }
 
-// Icon is a wrapper around a child svg.Icon SVG element.  SVG should contain no
-// color information -- it should just be a filled shape where the fill and
-// stroke colors come from the surrounding context / paint settings.  The
-// rendered version is cached for a given size. Icons are always copied from
-// an original source icon and then can be customized from there.
+// Icon contains a svg.SVG element.
+// The rendered version is cached for a given size.
 type Icon struct {
 	WidgetBase
 
@@ -47,6 +44,9 @@ type Icon struct {
 
 	// file name for the loaded icon, if loaded
 	Filename string `desc:"file name for the loaded icon, if loaded"`
+
+	// SVG drawing
+	SVG svg.SVG `desc:"SVG drawing"`
 }
 
 func (ic *Icon) OnInit() {
@@ -60,6 +60,7 @@ func (ic *Icon) OnInit() {
 func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	ic.IconNm = fr.IconNm
 	ic.Filename = fr.Filename
 }
 
@@ -69,7 +70,7 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 // children if name is nil / none (both cases return false for new icon)
 func (ic *Icon) SetIcon(name gicons.Icon) (bool, error) {
 	if name.IsNil() {
-		ic.DeleteChildren(ki.DestroyKids)
+		ic.SVG.DeleteAll()
 		return false, nil
 	}
 	if ic.HasChildren() && ic.IconNm == name {
@@ -85,60 +86,35 @@ func (ic *Icon) SetIcon(name gicons.Icon) (bool, error) {
 	return false, err
 }
 
-// SVGIcon returns the child svg icon, or nil
-func (ic *Icon) SVGIcon() *Viewport {
-	if !ic.HasChildren() {
-		return nil
-	}
-	sic := ic.Child(0).Embed(TypeViewport).(*Viewport)
-	return sic
-}
-
 func (ic *Icon) GetSize(vp *Viewport, iter int) {
 	if iter > 0 {
 		return
 	}
-	sic := ic.SVGIcon()
-	if sic != nil {
-		sic.Nm = ic.Nm
-		ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
-	}
+	// ic.SVG.Nm = ic.Nm
+	// ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
 }
 
-func (ic *Icon) SetStyle() {
+func (ic *Icon) SetStyle(vp *Viewport) {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
-	ic.SetStyleWidget()
+	ic.SetStyleWidget(vp)
 	ic.LayState.SetFromStyle(&ic.Style) // also does reset
-	sic := ic.SVGIcon()
-	if sic != nil {
-		sic.Nm = ic.Nm
-		sic.Style = ic.Style
-		// sic.DefStyle = ic.DefStyle
-		if ic.NeedsFullReRender() {
-			sic.SetFullReRender()
-		}
-	}
+	// todo: set ic.SVG style
 }
 
 func (ic *Icon) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sic := ic.SVGIcon()
-	ic.DoLayoutBase(parBBox, true, iter)
-	if sic != nil {
-		sic.LayState = ic.LayState
-		sic.LayState.Alloc.PosRel = mat32.Vec2Zero
-	}
-	return ic.DoLayoutChildren(iter)
+	ic.DoLayoutBase(vp, parBBox, true, iter)
+	return ic.DoLayoutChildren(vp, iter)
 }
 
 func (ic *Icon) Render(vp *Viewport) {
-	if ic.FullReRenderIfNeeded() {
-		return
-	}
-	if ic.PushBounds() {
-		ic.RenderChildren()
-		ic.PopBounds()
+	// todo: cache rendered size, update render if diff size..
+
+	if ic.PushBounds(vp) {
+		ic.RenderChildren(vp)
+		// ic.DrawIntoViewport(ic.SVG.Pixels)
+		ic.PopBounds(vp)
 	}
 }
 

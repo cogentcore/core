@@ -167,6 +167,7 @@ func (bm *Bitmap) Render(vp *Viewport) {
 	wi := bm.This().(Widget)
 	if bm.PushBounds(vp) {
 		wi.ConnectEvents()
+		// todo: draw bitmap
 		// bm.DrawIntoViewport(bm.Viewport)
 		bm.PopBounds(vp)
 	} else {

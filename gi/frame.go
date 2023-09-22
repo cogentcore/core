@@ -10,7 +10,6 @@ import (
 
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
 )
 
 // Frame is a Layout that renders a background according to the
@@ -33,8 +32,7 @@ func (fr *Frame) OnInit() {
 func (fr *Frame) CopyFieldsFrom(frm any) {
 	cp, ok := frm.(*Frame)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", ki.Type(fr).Name())
-		ki.GenCopyFieldsFrom(fr.This(), frm)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Frame one\n", fr.KiType().Name)
 		return
 	}
 	fr.Layout.CopyFieldsFrom(&cp.Layout)
@@ -51,20 +49,20 @@ const (
 )
 
 // FrameStdRender does the standard rendering of the frame itself
-func (fr *Frame) FrameStdRender() {
-	rs, _, st := fr.RenderLock()
+func (fr *Frame) FrameStdRender(vp *Viewport) {
+	rs, _, st := fr.RenderLock(vp)
 	defer fr.RenderUnlock(rs)
 
-	fr.RenderStdBox(st)
+	fr.RenderStdBox(vp, st)
 
 	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
-		fr.RenderStripes()
+		fr.RenderStripes(vp)
 	}
 }
 
-func (fr *Frame) RenderStripes() {
+func (fr *Frame) RenderStripes(vp *Viewport) {
 	st := &fr.Style
-	rs := &fr.Viewport.Render
+	rs := &vp.RenderState
 	pc := &rs.Paint
 
 	pos := fr.LayState.Alloc.Pos
@@ -111,15 +109,13 @@ func (fr *Frame) RenderStripes() {
 }
 
 func (fr *Frame) Render(vp *Viewport) {
-	if fr.FullReRenderIfNeeded() {
-		return
-	}
-	if fr.PushBounds() {
-		fr.FrameStdRender()
-		fr.This().(Node2D).ConnectEvents()
-		fr.RenderScrolls()
-		fr.RenderChildren()
-		fr.PopBounds()
+	wi := fr.This().(Widget)
+	if fr.PushBounds(vp) {
+		fr.FrameStdRender(vp)
+		wi.ConnectEvents()
+		fr.RenderScrolls(vp)
+		fr.RenderChildren(vp)
+		fr.PopBounds(vp)
 	} else {
 		fr.SetScrollsOff()
 		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi

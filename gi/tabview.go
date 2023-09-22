@@ -534,7 +534,7 @@ func (tv *TabView) SetStyle() {
 
 // RenderTabSeps renders the separators between tabs
 func (tv *TabView) RenderTabSeps() {
-	rs, pc, st := tv.RenderLock()
+	rs, pc, st := tv.RenderLock(vp)
 	defer tv.RenderUnlock(rs)
 
 	// just like with standard separator, use top width like CSS

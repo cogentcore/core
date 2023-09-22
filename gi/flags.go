@@ -104,6 +104,22 @@ func (wb *WidgetBase) CanFocus() bool {
 	return wb.HasFlag(CanFocus)
 }
 
+// SetFocusState sets the HasFocus flag
+func (wb *WidgetBase) SetFocusState(focus bool) {
+	wb.SetFlag(focus, HasFocus)
+}
+
+// SetEnabledState sets the Disabled flag
+func (wb *WidgetBase) SetEnabledState(enabled bool) {
+	wb.SetFlag(!enabled, Disabled)
+}
+
+// SetEnabledStateUpdt sets the Disabled flag
+func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
+	wb.SetFlag(!enabled, Disabled)
+	wb.SetStyleUpdate(wb.Vp)
+}
+
 // IsDisabled tests if this node is flagged as [Disabled].
 // If so, behave and style appropriately.
 func (wb *WidgetBase) IsDisabled() bool {
@@ -115,11 +131,11 @@ func (wb *WidgetBase) IsDisabled() bool {
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
 	wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
-		wi, _ := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+		_, wb := AsWidget(k)
+		if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
 			return ki.Break
 		}
-		if wi.HasFlag(flag) {
+		if wb.HasFlag(flag) {
 			got = true
 			return ki.Break
 		}
@@ -153,21 +169,6 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(wb.WinBBox.Min)
 }
 
-// PosInWinBBox returns true if given position is within
-// this node's win bbox (under read lock)
-func (wb *WidgetBase) PosInWinBBox(pos image.Point) bool {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
-	return pos.In(wb.WinBBox)
-}
-
-// WinBBoxInBBox returns true if our BBox is contained within
-// given BBox (under read lock)
-func (wb *WidgetBase) WinBBoxInBBox(bbox image.Rectangle) bool {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
-	return mat32.RectInNotEmpty(wb.WinBBox, bbox)
-}
 */
 
 // AddClass adds a CSS class name -- does proper space separation

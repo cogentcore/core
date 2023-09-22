@@ -72,7 +72,7 @@ type Widget interface {
 	// positions, saved in AllocPosOrig and BBox, and this adds the given
 	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
 	// update its bounding box information given the new position.
-	Move2D(delta image.Point, parBBox image.Rectangle)
+	Move2D(vp *Viewport, delta image.Point, parBBox image.Rectangle)
 
 	// todo: fix bbox stuff!  BBoxes is a good overall name
 

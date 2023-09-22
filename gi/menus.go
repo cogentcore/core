@@ -24,12 +24,16 @@ type Menu ki.Slice
 
 func (m Menu) MarshalJSON() ([]byte, error) {
 	ks := (ki.Slice)(m)
-	return ks.MarshalJSON()
+	_ = ks
+	// return ks.MarshalJSON()
+	return nil, nil
 }
 
 func (m *Menu) UnmarshalJSON(b []byte) error {
 	ks := (*ki.Slice)(m)
-	return ks.UnmarshalJSON(b)
+	_ = ks
+	// return ks.UnmarshalJSON(b)
+	return nil
 }
 
 func (m *Menu) CopyFrom(men *Menu) {
@@ -90,7 +94,7 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	}
 	ac := &Action{}
 	m.SetAction(ac, opts, sigTo, fun)
-	*m = append(*m, ac.This().(Node2D))
+	*m = append(*m, ac.This().(Widget))
 	return ac
 }
 
@@ -142,7 +146,7 @@ func (m *Menu) AddSeparator(name string) *Separator {
 	}
 	sp.InitName(sp, name)
 	sp.Horiz = true
-	*m = append(*m, sp.This().(Node2D))
+	*m = append(*m, sp.This().(Widget))
 	return sp
 }
 
@@ -154,7 +158,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 	lb := &Label{}
 	lb.InitName(lb, lbl)
 	lb.SetText(lbl)
-	*m = append(*m, lb.This().(Node2D))
+	*m = append(*m, lb.This().(Widget))
 	return lb
 }
 
@@ -165,8 +169,7 @@ func (m *Menu) SetShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if ac := AsAction(mi); ac != nil {
 			win.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -178,8 +181,7 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 		return
 	}
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if ac := AsAction(mi); ac != nil {
 			win.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -189,8 +191,7 @@ func (m *Menu) DeleteShortcuts(win *Window) {
 // of their sub-actions
 func (m *Menu) UpdateActions() {
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if ac := AsAction(mi); ac != nil {
 			ac.UpdateActions()
 		}
 	}
@@ -202,8 +203,7 @@ func (m *Menu) UpdateActions() {
 // is empty)) -- returns false if not found
 func (m *Menu) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range *m {
-		if ki.TypeEmbeds(mi, TypeAction) {
-			ac := mi.Embed(TypeAction).(*Action)
+		if ac := AsAction(mi); ac != nil {
 			if ac.Name() == name {
 				return ac, true
 			}
@@ -225,21 +225,18 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // clipboard having something in it.
 func (m *Menu) AddCopyCutPaste(win *Window) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
-		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(TypeWindow).(*Window)
-			ww.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
+		nil, func(recv, send ki.Ki, sig int64, data any) {
+			win.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Cut", ShortcutKey: KeyFunCut},
-		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(TypeWindow).(*Window)
-			ww.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
+		nil, func(recv, send ki.Ki, sig int64, data any) {
+			win.EventMgr.SendKeyFunEvent(KeyFunCut, false) // false = ignore popups -- don't send to menu
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
-			ac.SetDisabledState(goosi.TheApp.ClipBoard(win.OSWin).IsEmpty())
-		}}, win, func(recv, send ki.Ki, sig int64, data any) {
-		ww := recv.Embed(TypeWindow).(*Window)
-		ww.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
+			ac.SetEnabledState(!goosi.TheApp.ClipBoard(win.OSWin).IsEmpty())
+		}}, nil, func(recv, send ki.Ki, sig int64, data any) {
+		win.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
 }
 
@@ -250,9 +247,8 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 	m.AddCopyCutPaste(win)
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
-		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(TypeWindow).(*Window)
-			ww.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
+		nil, func(recv, send ki.Ki, sig int64, data any) {
+			win.EventMgr.SendKeyFunEvent(KeyFunDuplicate, false) // false = ignore popups -- don't send to menu
 		})
 }
 
@@ -274,17 +270,16 @@ func (m *Menu) AddAppMenu(win *Window) {
 func (m *Menu) AddStdAppMenu(win *Window) {
 	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
-		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(TypeWindow).(*Window)
-			PromptDialog(ww.Viewport, DlgOpts{Title: aboutitle, Prompt: goosi.TheApp.About()}, AddOk, NoCancel, nil, nil)
+		nil, func(recv, send ki.Ki, sig int64, data any) {
+			PromptDialog(win.Viewport, DlgOpts{Title: aboutitle, Prompt: goosi.TheApp.About()}, AddOk, NoCancel, nil, nil)
 		})
 	m.AddAction(ActOpts{Label: "GoGi Preferences...", Shortcut: "Command+P"},
-		win, func(recv, send ki.Ki, sig int64, data any) {
+		nil, func(recv, send ki.Ki, sig int64, data any) {
 			TheViewIFace.PrefsView(&Prefs)
 		})
 	m.AddSeparator("sepq")
 	m.AddAction(ActOpts{Label: "Quit", Shortcut: "Command+Q"},
-		win, func(recv, send ki.Ki, sig int64, data any) {
+		nil, func(recv, send ki.Ki, sig int64, data any) {
 			goosi.TheApp.QuitReq()
 		})
 }
@@ -293,12 +288,11 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 // must be called under WindowGlobalMu mutex lock!
 func (m *Menu) AddWindowsMenu(win *Window) {
 	m.AddAction(ActOpts{Label: "Minimize"},
-		win, func(recv, send ki.Ki, sig int64, data any) {
-			ww := recv.Embed(TypeWindow).(*Window)
-			ww.OSWin.Minimize()
+		nil, func(recv, send ki.Ki, sig int64, data any) {
+			win.OSWin.Minimize()
 		})
 	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
-		win, func(recv, send ki.Ki, sig int64, data any) {
+		nil, func(recv, send ki.Ki, sig int64, data any) {
 			AllWindows.FocusNext()
 		})
 	m.AddSeparator("sepa")
@@ -306,8 +300,7 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
 				w, func(recv, send ki.Ki, sig int64, data any) {
-					ww := recv.Embed(TypeWindow).(*Window)
-					ww.OSWin.Raise()
+					w.OSWin.Raise()
 				})
 		}
 	}
@@ -316,9 +309,8 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 		for _, w := range DialogWindows {
 			if w != nil {
 				m.AddAction(ActOpts{Label: w.Title},
-					w, func(recv, send ki.Ki, sig int64, data any) {
-						ww := recv.Embed(TypeWindow).(*Window)
-						ww.OSWin.Raise()
+					nil, func(recv, send ki.Ki, sig int64, data any) {
+						w.OSWin.Raise()
 					})
 			}
 		}
@@ -662,7 +654,7 @@ func (sp *Separator) SetStyle() {
 }
 
 func (sp *Separator) RenderSeparator() {
-	rs, pc, st := sp.RenderLock()
+	rs, pc, st := sp.RenderLock(vp)
 	defer sp.RenderUnlock(rs)
 
 	pos := sp.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
