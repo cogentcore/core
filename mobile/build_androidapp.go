@@ -27,7 +27,7 @@ import (
 
 const (
 	MinAndroidSDK           = 23
-	defaultAndroidTargetSDK = 29
+	DefaultAndroidTargetSDK = 29
 )
 
 // GoAndroidBuild builds the given package for the given Android targets.
