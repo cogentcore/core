@@ -14,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"text/template"
+
+	"goki.dev/goki/config"
 )
 
 var gopath string
@@ -28,19 +30,20 @@ func TestInit(t *testing.T) {
 	}
 	buf := new(bytes.Buffer)
 	gopathorig := os.Getenv("GOPATH")
+	c := &config.Config{}
 	defer func() {
 		Xout = os.Stderr
-		buildN = false
-		buildX = false
+		c.Build.PrintOnly = false
+		c.Build.Print = false
 		os.Setenv("GOPATH", gopathorig)
 	}()
 	Xout = buf
-	buildN = true
-	buildX = true
+	c.Build.PrintOnly = true
+	c.Build.Print = true
 
 	// Test that first GOPATH element is chosen correctly.
 	var err error
-	gopath, err = ioutil.TempDir("", "gomobile-test")
+	gopath, err = os.MkdirTemp("", "gomobile-test")
 	if err != nil {
 		t.Fatal(err)
 	}
