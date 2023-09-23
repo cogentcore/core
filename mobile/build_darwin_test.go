@@ -10,26 +10,31 @@ import (
 	"path/filepath"
 	"testing"
 	"text/template"
+
+	"goki.dev/goki/config"
+	"goki.dev/grease"
 )
 
 func TestAppleBuild(t *testing.T) {
 	if !xcodeAvailable() {
 		t.Skip("Xcode is missing")
 	}
+	c := &config.Config{}
+	grease.SetFromDefaults(c)
 	defer func() {
 		Xout = os.Stderr
-		buildN = false
-		buildX = false
+		c.Build.PrintOnly = false
+		c.Build.Print = false
 	}()
-	buildN = true
-	buildX = true
-	buildTarget = "ios"
-	buildBundleID = "org.golang.todo"
+	c.Build.PrintOnly = true
+	c.Build.Print = true
+	c.Build.Target = []config.Platform{config.Platform{OS: "ios", Arch: "arm64"}}
+	c.Build.BundleID = "org.golang.todo"
 	gopath = filepath.SplitList(goEnv("GOPATH"))[0]
-	oldTags := buildTags
-	buildTags = []string{"tag1"}
+	oldTags := c.Build.Tags
+	c.Build.Tags = []string{"tag1"}
 	defer func() {
-		buildTags = oldTags
+		c.Build.Tags = oldTags
 	}()
 	tests := []struct {
 		pkg  string
@@ -43,14 +48,14 @@ func TestAppleBuild(t *testing.T) {
 		Xout = buf
 		var tmpl *template.Template
 		if test.main {
-			buildO = "basic.app"
+			c.Build.Output = "basic.app"
 			tmpl = appleMainBuildTmpl
 		} else {
-			buildO = ""
+			c.Build.Output = ""
 			tmpl = appleOtherBuildTmpl
 		}
-		cmdBuild.flag.Parse([]string{test.pkg})
-		err := Build(cmdBuild)
+		c.Build.Package = test.pkg
+		err := Build(c)
 		if err != nil {
 			t.Log(buf.String())
 			t.Fatal(err)
@@ -77,7 +82,7 @@ func TestAppleBuild(t *testing.T) {
 			TeamID:     teamID,
 			Pkg:        test.pkg,
 			Main:       test.main,
-			BuildO:     buildO,
+			BuildO:     c.Build.Output,
 		}
 
 		got := filepath.ToSlash(buf.String())
