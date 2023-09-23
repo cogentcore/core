@@ -4,6 +4,8 @@
 
 package main
 
+// TODO: do we need this writer stuff?
+
 // APK is the archival format used for Android apps. It is a ZIP archive with
 // three extra files:
 //

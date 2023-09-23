@@ -159,6 +159,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		return nil
 	}
 
+	// TODO: do we need this writer stuff?
 	w, err := apkwCreate("classes.dex")
 	if err != nil {
 		return nil, err
