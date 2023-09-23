@@ -1,6 +1,6 @@
 Name = "ordmap"
 Desc = ""
-Version = "v0.5.4"
+Version = "v0.5.5"
 Type = "Library"
 
 [Build]
