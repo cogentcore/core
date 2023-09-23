@@ -79,7 +79,6 @@ func mainrun(a goosi.App) {
 
 	for {
 		evi := w.NextEvent()
-		fmt.Println("got event", evi)
 		switch ev := evi.(type) {
 		case *window.Event:
 			switch ev.Action {
