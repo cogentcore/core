@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"goki.dev/ki/v2/ints"
+	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
@@ -40,9 +40,9 @@ func main() {
 	n := 64
 
 	threads := 64
-	nInt := ints.IntMultiple(n, threads)
-	n = nInt               // enforce optimal n's -- otherwise requires range checking
-	nGps := nInt / threads // dispatch n
+	nInt := mat32.IntMultiple(float32(n), float32(threads))
+	n = int(nInt)       // enforce optimal n's -- otherwise requires range checking
+	nGps := n / threads // dispatch n
 
 	maxBuff := (gp.GPUProps.Limits.MaxStorageBufferRange - 16) / 4
 	mem2g := ((1 << 31) - 1) / 4
