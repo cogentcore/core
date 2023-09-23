@@ -34,7 +34,7 @@ type Widget interface {
 	// This config calls UpdateStart / End, SetStyle, and SetNeedsLayout,
 	// and calls ConfigWidget to do the actual configuration,
 	// so it does not need to manage this housekeeping.
-	Config(vp *Viewport)
+	Config(sc *Scene)
 
 	// ConfigWidget does the actual configuration of the widget,
 	// primarily configuring its Parts.
@@ -42,17 +42,17 @@ type Widget interface {
 	// (i.e., use Parts.ConfigChildren with TypeAndNameList).
 	// Outer Config call handles all the other infrastructure,
 	// so this call just does the core configuration.
-	ConfigWidget(vp *Viewport)
+	ConfigWidget(sc *Scene)
 
 	// SetStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
-	SetStyle(vp *Viewport)
+	SetStyle(sc *Scene)
 
 	// GetSize: MeLast downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
 	// intrinsic size parameters, and/or those of its children if it is a
 	// Layout.
-	GetSize(vp *Viewport, iter int)
+	GetSize(sc *Scene, iter int)
 
 	// DoLayout: MeFirst downward pass (each node calls on its children at
 	// appropriate point) with relevant parent BBox that the children are
@@ -65,14 +65,14 @@ type Widget interface {
 	// Typically only a single iteration is required (iter = 0) but multiple
 	// are supported (needed for word-wrapped text or flow layouts) -- return
 	// = true indicates another iteration required (pass this up the chain).
-	DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool
+	DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 
 	// Move2D: optional MeFirst downward pass to move all elements by given
 	// delta -- used for scrolling -- the layout pass assigns canonical
 	// positions, saved in AllocPosOrig and BBox, and this adds the given
 	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
 	// update its bounding box information given the new position.
-	Move2D(vp *Viewport, delta image.Point, parBBox image.Rectangle)
+	Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle)
 
 	// todo: fix bbox stuff!  BBoxes is a good overall name
 
@@ -84,13 +84,13 @@ type Widget interface {
 	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
 	// call ComputeBBox2DBase but viewports require special code -- called
 	// during Layout and Move.
-	ComputeBBox2D(vp *Viewport, parBBox image.Rectangle, delta image.Point)
+	ComputeBBox2D(sc *Scene, parBBox image.Rectangle, delta image.Point)
 
 	// ChildrenBBox2D: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
 	// operates on the existing VpBBox for this node -- this is what is passed
 	// down as parBBox do the children's DoLayout.
-	ChildrenBBox2D(vp *Viewport) image.Rectangle
+	ChildrenBBox2D(sc *Scene) image.Rectangle
 
 	// Render: Final rendering pass, each node is fully responsible for
 	// calling Render on its own children, to provide maximum flexibility
@@ -99,7 +99,7 @@ type Widget interface {
 	// VpBBox is empty and no rendering should occur.  Typically call
 	// ConnectEvents to set up connections to receive window events if
 	// visible, and disconnect if not.
-	Render(vp *Viewport)
+	Render(sc *Scene)
 
 	// ConnectEvents: setup connections to window events -- called in
 	// Render if in bounds.  It can be useful to create modular methods for
@@ -190,8 +190,8 @@ type WidgetBase struct {
 	// full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
 	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
 
-	// 2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
-	VpBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Viewport object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
+	VpBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
 
 	// 2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
 	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
@@ -221,7 +221,7 @@ type WidgetBase struct {
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 
 	// parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
-	Vp *Viewport `copy:"-" json:"-" xml:"-" desc:"parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
+	Sc *Scene `copy:"-" json:"-" xml:"-" desc:"parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
 
 	// [view: -] mutex protecting the Style field
 	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the Style field"`
@@ -332,10 +332,10 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 }
 
 func (wb *WidgetBase) ParentWindow() *Window {
-	if wb.Vp == nil {
+	if wb.Sc == nil {
 		return nil
 	}
-	return wb.Vp.Win
+	return wb.Sc.Win
 }
 
 func (wb *WidgetBase) IsVisible() bool {

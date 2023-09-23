@@ -26,7 +26,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		return
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -44,7 +44,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	})
 
 	tv := mfr.NewChild(TypeTableView, "tv").(*TableView)
-	tv.Viewport = vp
+	tv.Scene = vp
 	tv.SetSlice(km)
 	tv.SetStretchMax()
 
@@ -138,7 +138,7 @@ func (vv *KeyMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KeyMapValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KeyMapValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

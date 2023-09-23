@@ -29,7 +29,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-textview-test", "GoGi TextView Test", width, height)
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	// // style sheet
@@ -69,7 +69,7 @@ func mainrun() {
 	txly1.SetMinPrefHeight(units.Ch(10))
 
 	txed1 := txly1.NewChild(giv.TypeTextView, "textview-1").(*giv.TextView)
-	txed1.Viewport = vp
+	txed1.Scene = vp
 
 	// generally need to put text view within its own layout for scrolling
 	txly2 := splt.NewChild(gi.LayoutType, "view-layout-2").(*gi.Layout)
@@ -79,7 +79,7 @@ func mainrun() {
 	txly2.SetMinPrefHeight(units.Ch(10))
 
 	txed2 := txly2.NewChild(giv.TypeTextView, "textview-2").(*giv.TextView)
-	txed2.Viewport = vp
+	txed2.Scene = vp
 
 	txbuf := giv.NewTextBuf()
 	txed1.SetBuf(txbuf)

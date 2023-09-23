@@ -213,7 +213,7 @@ func (cb *ComboBox) ButtonRelease() {
 		pos.X -= 10
 	}
 	cb.BBoxMu.RUnlock()
-	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Vp, cb.Text)
+	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Sc, cb.Text)
 }
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
@@ -256,7 +256,7 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, d
 	return indIdx
 }
 
-func (cb *ComboBox) ConfigParts(vp *Viewport) {
+func (cb *ComboBox) ConfigParts(sc *Scene) {
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = laser.ToBool(eb)
 	}
@@ -615,7 +615,7 @@ func (cb *ComboBox) KeyChordEvent() {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
-			if !(kt.Rune == ' ' && cbb.Vp.Type == VpCompleter) {
+			if !(kt.Rune == ' ' && cbb.Sc.Type == VpCompleter) {
 				kt.SetProcessed()
 				cbb.ButtonPress()
 				cbb.ButtonRelease()

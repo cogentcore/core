@@ -303,7 +303,7 @@ func (lb *Label) HoverEvent() {
 				tl := &llb.TextRender.Links[ti]
 				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
-					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Vp, llb.Nm)
+					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
 					me.SetProcessed()
 					return
 				}
@@ -315,7 +315,7 @@ func (lb *Label) HoverEvent() {
 			pos := llb.WinBBox.Max
 			llb.BBoxMu.RUnlock()
 			pos.X -= 20
-			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Vp, llb.Nm)
+			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Sc, llb.Nm)
 		}
 	})
 }
@@ -385,26 +385,26 @@ func (lb *Label) LabelEvents() {
 }
 
 func (lb *Label) GrabCurBackgroundColor() {
-	if lb.Vp == nil || lb.IsSelected() {
+	if lb.Sc == nil || lb.IsSelected() {
 		return
 	}
 	if !gist.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {
 		return
 	}
 	pos := lb.ContextMenuPos()
-	clr := lb.Vp.Pixels.At(pos.X, pos.Y)
+	clr := lb.Sc.Pixels.At(pos.X, pos.Y)
 	lb.CurBackgroundColor = colors.AsRGBA(clr)
 }
 
 // StyleLabel does label styling -- it sets the StyMu Lock
-func (lb *Label) StyleLabel(vp *Viewport) {
+func (lb *Label) StyleLabel(sc *Scene) {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	lb.SetStyleWidget(vp)
+	lb.SetStyleWidget(sc)
 }
 
-func (lb *Label) LayoutLabel(vp *Viewport) {
+func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
@@ -418,28 +418,28 @@ func (lb *Label) LayoutLabel(vp *Viewport) {
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
-func (lb *Label) SetStyle(vp *Viewport) {
-	lb.StyleLabel(vp)
+func (lb *Label) SetStyle(sc *Scene) {
+	lb.StyleLabel(sc)
 	lb.StyMu.Lock()
 	lb.LayState.SetFromStyle(&lb.Style) // also does reset
 	lb.StyMu.Unlock()
-	lb.LayoutLabel(vp)
+	lb.LayoutLabel(sc)
 }
 
-func (lb *Label) GetSize(vp *Viewport, iter int) {
+func (lb *Label) GetSize(sc *Scene, iter int) {
 	if iter > 0 && lb.Style.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
-		lb.InitLayout(vp)
+		lb.InitLayout(sc)
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.TextRender.Size)
 		lb.GetSizeFromWH(sz.X, sz.Y)
 	}
 }
 
-func (lb *Label) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	lb.DoLayoutBase(vp, parBBox, true, iter)
-	lb.DoLayoutChildren(vp, iter) // todo: maybe shouldn't call this on known terminals?
+func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	lb.DoLayoutBase(sc, parBBox, true, iter)
+	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
 	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
@@ -461,22 +461,22 @@ func (lb *Label) TextPos() mat32.Vec2 {
 	return pos
 }
 
-func (lb *Label) RenderLabel(vp *Viewport) {
+func (lb *Label) RenderLabel(sc *Scene) {
 	lb.GrabCurBackgroundColor()
-	rs, _, st := lb.RenderLock(vp)
+	rs, _, st := lb.RenderLock(sc)
 	defer lb.RenderUnlock(rs)
 	lb.RenderPos = lb.TextPos()
-	lb.RenderStdBox(vp, st)
+	lb.RenderStdBox(sc, st)
 	lb.TextRender.Render(rs, lb.RenderPos)
 }
 
-func (lb *Label) Render(vp *Viewport) {
+func (lb *Label) Render(sc *Scene) {
 	wi := lb.This().(Widget)
-	if lb.PushBounds(vp) {
+	if lb.PushBounds(sc) {
 		wi.ConnectEvents()
-		lb.RenderLabel(vp)
-		lb.RenderChildren(vp)
-		lb.PopBounds(vp)
+		lb.RenderLabel(sc)
+		lb.RenderChildren(sc)
+		lb.PopBounds(sc)
 	} else {
 		lb.DisconnectAllEvents(RegPri)
 	}

@@ -88,24 +88,24 @@ const (
 	VpPopup
 )
 
-// A Viewport ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
-// rendering area even if it is itself a child of another Viewport.  This is
+// A Scene ALWAYS presents its children with a 0,0 - (Size.X, Size.Y)
+// rendering area even if it is itself a child of another Scene.  This is
 // necessary for rendering onto the image that it provides.  This creates
 // challenges for managing the different geometries in a coherent way, e.g.,
 // events come through the Window in terms of the root VP coords.  Thus, nodes
-// require a  WinBBox for events and a VpBBox for their parent Viewport.
+// require a  WinBBox for events and a VpBBox for their parent Scene.
 
 /*
 
-// Viewport provides an interface for viewports,
+// Scene provides an interface for viewports,
 // supporting overall management functions that can be
 // provided by more embedded viewports for example.
-type Viewport interface {
-	// VpTop returns the top-level Viewport, which could be this one
+type Scene interface {
+	// VpTop returns the top-level Scene, which could be this one
 	// or a higher one.  VpTopNode and VpEventMgr should be called on
-	// on the Viewport returned by this method.  For popups
+	// on the Scene returned by this method.  For popups
 	// this *not* the popup viewport but rather the window top viewport.
-	VpTop() Viewport
+	VpTop() Scene
 
 	// VpTopNode returns the top node for this viewport.
 	// must be called on VpTop()
@@ -130,7 +130,7 @@ type Viewport interface {
 	VpIsVisible() bool
 
 	// VpUploadAll is the update call for the main viewport for a window --
-	// calls UploadAllViewports in parent window, which uploads the main viewport
+	// calls UploadAllScenes in parent window, which uploads the main viewport
 	// and any active popups etc over the top of that
 	VpUploadAll()
 
@@ -143,9 +143,9 @@ type Viewport interface {
 }
 */
 
-// Viewport contains a Widget tree, rooted in a Frame layout,
+// Scene contains a Widget tree, rooted in a Frame layout,
 // which renders into its Pixels image.
-type Viewport struct {
+type Scene struct {
 
 	// name of viewport
 	Name string `desc:"name of viewport"`
@@ -153,11 +153,11 @@ type Viewport struct {
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport
 	Flags VpFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of viewport"`
 
-	// type of Viewport
-	Type VpType `desc:"type of Viewport"`
+	// type of Scene
+	Type VpType `desc:"type of Scene"`
 
-	// Viewport-level viewbox within any parent Viewport
-	Geom gist.Geom2DInt `desc:"Viewport-level viewbox within any parent Viewport"`
+	// Scene-level viewbox within any parent Scene
+	Geom gist.Geom2DInt `desc:"Scene-level viewbox within any parent Scene"`
 
 	// Root of the scenegraph for this viewport
 	Frame Frame `desc:"Root of the scenegraph for this viewport"`
@@ -190,73 +190,73 @@ type Viewport struct {
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
-// NewViewport creates a new Pixels Image with the specified width and height,
+// NewScene creates a new Pixels Image with the specified width and height,
 // and initializes the renderer etc
-func NewViewport(width, height int) *Viewport {
+func NewScene(width, height int) *Scene {
 	sz := image.Point{width, height}
-	vp := &Viewport{
+	sc := &Scene{
 		Geom: gist.Geom2DInt{Size: sz},
 	}
-	vp.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	vp.RenderState.Init(width, height, vp.Pixels)
-	vp.BgColor.SetColor(color.Transparent)
-	vp.Frame.Lay = LayoutVert
-	return vp
+	sc.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
+	sc.RenderState.Init(width, height, sc.Pixels)
+	sc.BgColor.SetColor(color.Transparent)
+	sc.Frame.Lay = LayoutVert
+	return sc
 }
 
 // Resize resizes the viewport, creating a new image -- updates Geom Size
-func (vp *Viewport) Resize(nwsz image.Point) {
+func (sc *Scene) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	if vp.Pixels != nil {
-		ib := vp.Pixels.Bounds().Size()
+	if sc.Pixels != nil {
+		ib := sc.Pixels.Bounds().Size()
 		if ib == nwsz {
-			vp.Geom.Size = nwsz // make sure
+			sc.Geom.Size = nwsz // make sure
 			return              // already good
 		}
 	}
-	if vp.Pixels != nil {
-		vp.Pixels = nil
+	if sc.Pixels != nil {
+		sc.Pixels = nil
 	}
-	vp.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-	vp.RenderState.Init(nwsz.X, nwsz.Y, vp.Pixels)
-	vp.Geom.Size = nwsz // make sure
+	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	sc.RenderState.Init(nwsz.X, nwsz.Y, sc.Pixels)
+	sc.Geom.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
 // HasFlag checks if flag is set
 // using atomic, safe for concurrent access
-func (vp *Viewport) HasFlag(f enums.BitFlag) bool {
-	return vp.Flags.HasFlag(f)
+func (sc *Scene) HasFlag(f enums.BitFlag) bool {
+	return sc.Flags.HasFlag(f)
 }
 
 // SetFlag sets the given flag(s) to given state
 // using atomic, safe for concurrent access
-func (vp *Viewport) SetFlag(on bool, f ...enums.BitFlag) {
-	vp.Flags.SetFlag(on, f...)
+func (sc *Scene) SetFlag(on bool, f ...enums.BitFlag) {
+	sc.Flags.SetFlag(on, f...)
 }
 
 // note: if not a standard viewport in a window, this method must be redefined!
-func (vp *Viewport) VpEventMgr() *EventMgr {
-	if vp.Win != nil {
-		return &vp.Win.EventMgr
+func (sc *Scene) VpEventMgr() *EventMgr {
+	if sc.Win != nil {
+		return &sc.Win.EventMgr
 	}
 	return nil
 }
 
-func (vp *Viewport) VpIsVisible() bool {
-	if vp.Win == nil || vp.Pixels == nil {
+func (sc *Scene) VpIsVisible() bool {
+	if sc.Win == nil || sc.Pixels == nil {
 		return false
 	}
-	return vp.Win.IsVisible()
+	return sc.Win.IsVisible()
 }
 
 // todo: remove
 
 // VpUploadRegion uploads node region of our viewport image
-// func (vp *Viewport) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
-// 	if !vp.This().(Viewport).VpIsVisible() {
+// func (vp *Scene) VpUploadRegion(vpBBox, winBBox image.Rectangle) {
+// 	if !vp.This().(Scene).VpIsVisible() {
 // 		return
 // 	}
 // 	vpin := vpBBox.Intersect(vp.Pixels.Bounds())
@@ -270,43 +270,43 @@ func (vp *Viewport) VpIsVisible() bool {
 // events and parent is nil -- called by window when a popup is deleted -- it
 // destroys the vp and its main layout, see VpPopupDestroyAll for whether
 // children are destroyed
-func (vp *Viewport) DeletePopup() {
-	vp.Win = nil
-	if vp.HasFlag(VpPopupDestroyAll) {
-		vp.Frame.DeleteChildren(ki.DestroyKids)
+func (sc *Scene) DeletePopup() {
+	sc.Win = nil
+	if sc.HasFlag(VpPopupDestroyAll) {
+		sc.Frame.DeleteChildren(ki.DestroyKids)
 	} else {
 		// delete children of main layout prior to deleting the popup
 		// (e.g., menu items) so they don't get destroyed
-		vp.Frame.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
+		sc.Frame.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
 	}
 }
 
 // SetCurrentColor sets the current color in concurrent-safe way
-func (vp *Viewport) SetCurrentColor(clr color.RGBA) {
-	if vp == nil {
+func (sc *Scene) SetCurrentColor(clr color.RGBA) {
+	if sc == nil {
 		return
 	}
-	vp.StyleMu.Lock()
-	vp.CurColor = clr
-	vp.StyleMu.Unlock()
+	sc.StyleMu.Lock()
+	sc.CurColor = clr
+	sc.StyleMu.Unlock()
 }
 
 // ContextColor gets the current color in concurrent-safe way.
 // Implements the gist.Context interface
-func (vp *Viewport) ContextColor() color.RGBA {
-	if vp == nil {
+func (sc *Scene) ContextColor() color.RGBA {
+	if sc == nil {
 		return color.RGBA{}
 	}
-	vp.StyleMu.RLock()
-	clr := vp.CurColor
-	vp.StyleMu.RUnlock()
+	sc.StyleMu.RLock()
+	clr := sc.CurColor
+	sc.StyleMu.RUnlock()
 	return clr
 }
 
 // ContextColorSpecByURL finds a Node by an element name (URL-like path), and
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
-func (vp *Viewport) ContextColorSpecByURL(url string) *gist.ColorSpec {
+func (sc *Scene) ContextColorSpecByURL(url string) *gist.ColorSpec {
 	// todo: not currently supported -- see if needed for html / glide
 	return nil
 }
@@ -315,11 +315,11 @@ func (vp *Viewport) ContextColorSpecByURL(url string) *gist.ColorSpec {
 //  Image utilities
 
 // SavePNG encodes the image as a PNG and writes it to disk.
-func (vp *Viewport) SavePNG(path string) error {
-	return SavePNG(path, vp.Pixels)
+func (sc *Scene) SavePNG(path string) error {
+	return SavePNG(path, sc.Pixels)
 }
 
 // EncodePNG encodes the image as a PNG and writes it to the provided io.Writer.
-func (vp *Viewport) EncodePNG(w io.Writer) error {
-	return png.Encode(w, vp.Pixels)
+func (sc *Scene) EncodePNG(w io.Writer) error {
+	return png.Encode(w, sc.Pixels)
 }

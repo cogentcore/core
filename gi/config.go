@@ -11,11 +11,11 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// HasVp checks that the Vp Viewport has been set.
+// HasVp checks that the Vp Scene has been set.
 // Called prior to using -- logs an error if not.
 // todo: need slog Debug mode for this kind of thing.
 func (wb *WidgetBase) HasVp() bool {
-	if wb.This() == nil || wb.Vp == nil {
+	if wb.This() == nil || wb.Sc == nil {
 		log.Printf("gi.WidgetBase.ReConfig: object or viewport is nil\n") // todo: slog.Debug
 		return false
 	}
@@ -26,31 +26,31 @@ func (wb *WidgetBase) HasVp() bool {
 // have been made.  In general it is more efficient to call Set* methods that
 // automatically determine if Config is needed.
 // The plain Config method is used during initial configuration,
-// called by the Viewport and caches the Vp pointer.
+// called by the Scene and caches the Vp pointer.
 func (wb *WidgetBase) ReConfig() {
 	if !wb.HasVp() {
 		return
 	}
 	wi := wb.This().(Widget)
-	wi.Config(wb.Vp)
+	wi.Config(wb.Sc)
 }
 
-func (wb *WidgetBase) Config(vp *Viewport) {
+func (wb *WidgetBase) Config(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
 	wi := wb.This().(Widget)
 	updt := wi.UpdateStart()
-	wb.Vp = vp
+	wb.Sc = sc
 	wb.Style.Defaults()    // reset
 	wb.LayState.Defaults() // doesn't overwrite
-	wi.ConfigWidget(vp)    // where everything actually happens
-	wi.SetStyle(vp)
+	wi.ConfigWidget(sc)    // where everything actually happens
+	wi.SetStyle(sc)
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(vp, updt)
+	wb.SetNeedsLayout(sc, updt)
 }
 
-func (wb *WidgetBase) ConfigWidget(vp *Viewport) {
+func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 	// this must be defined for each widget type
 }
 

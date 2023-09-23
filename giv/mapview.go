@@ -135,7 +135,7 @@ func (mv *MapView) UpdateValues() {
 }
 
 // Config configures the view
-func (mv *MapView) ConfigWidget(vp *Viewport) {
+func (mv *MapView) ConfigWidget(vp *Scene) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
@@ -436,7 +436,7 @@ func (mv *MapView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(mv.Map) {
-		ToolBarView(mv.Map, mv.Viewport, tb)
+		ToolBarView(mv.Map, mv.Scene, tb)
 		tb.SetFullReRender()
 	}
 	mv.ToolbarMap = mv.Map
@@ -450,7 +450,7 @@ func (mv *MapView) SetStyle() {
 	mv.Frame.SetStyle()
 }
 
-func (mv *MapView) Render(vp *Viewport) {
+func (mv *MapView) Render(vp *Scene) {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}

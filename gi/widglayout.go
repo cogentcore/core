@@ -18,11 +18,11 @@ import (
 //
 
 // set our window-level BBox from vp and our bbox
-func (wb *WidgetBase) SetWinBBox(vp *Viewport) {
+func (wb *WidgetBase) SetWinBBox(sc *Scene) {
 	wb.BBoxMu.Lock()
 	defer wb.BBoxMu.Unlock()
-	if vp != nil {
-		wb.WinBBox = wb.VpBBox.Add(vp.Geom.Pos)
+	if sc != nil {
+		wb.WinBBox = wb.VpBBox.Add(sc.Geom.Pos)
 	} else {
 		wb.WinBBox = wb.VpBBox
 	}
@@ -30,13 +30,13 @@ func (wb *WidgetBase) SetWinBBox(vp *Viewport) {
 
 // ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
 // whatever delta may be in effect
-func (wb *WidgetBase) ComputeBBox2DBase(vp *Viewport, parBBox image.Rectangle, delta image.Point) {
+func (wb *WidgetBase) ComputeBBox2DBase(sc *Scene, parBBox image.Rectangle, delta image.Point) {
 	wb.BBoxMu.Lock()
 	wb.ObjBBox = wb.BBox.Add(delta)
 	wb.VpBBox = parBBox.Intersect(wb.ObjBBox)
 	wb.SetFlag(wb.VpBBox == image.Rectangle{}, Invisible)
 	wb.BBoxMu.Unlock()
-	wb.SetWinBBox(vp)
+	wb.SetWinBBox(sc)
 }
 
 // BBoxReport reports on all the bboxes for everything in the tree
@@ -76,15 +76,15 @@ func (wb *WidgetBase) BBox2D() image.Rectangle {
 	return wb.BBoxFromAlloc()
 }
 
-func (wb *WidgetBase) ComputeBBox2DParts(vp *Viewport, parBBox image.Rectangle, delta image.Point) {
-	wb.ComputeBBox2DBase(vp, parBBox, delta)
+func (wb *WidgetBase) ComputeBBox2DParts(sc *Scene, parBBox image.Rectangle, delta image.Point) {
+	wb.ComputeBBox2DBase(sc, parBBox, delta)
 	if wb.Parts != nil {
-		wb.Parts.This().(Widget).ComputeBBox2D(vp, parBBox, delta)
+		wb.Parts.This().(Widget).ComputeBBox2D(sc, parBBox, delta)
 	}
 }
 
-func (wb *WidgetBase) ComputeBBox2D(vp *Viewport, parBBox image.Rectangle, delta image.Point) {
-	wb.ComputeBBox2DParts(vp, parBBox, delta)
+func (wb *WidgetBase) ComputeBBox2D(sc *Scene, parBBox image.Rectangle, delta image.Point) {
+	wb.ComputeBBox2DParts(sc, parBBox, delta)
 }
 
 // PointToRelPos translates a point in global pixel coords
@@ -126,12 +126,12 @@ func (wb *WidgetBase) GetSizeSubSpace() mat32.Vec2 {
 }
 
 // GetSizeParts sets our size from those of our parts -- default..
-func (wb *WidgetBase) GetSizeParts(vp *Viewport, iter int) {
-	wb.InitLayout(vp)
+func (wb *WidgetBase) GetSizeParts(sc *Scene, iter int) {
+	wb.InitLayout(sc)
 	if wb.Parts == nil {
 		return
 	}
-	wb.Parts.GetSizeTree(vp, iter)
+	wb.Parts.GetSizeTree(sc, iter)
 	wb.LayState.Alloc.Size = wb.Parts.LayState.Size.Pref // get from parts
 	wb.GetSizeAddSpace()
 	if LayoutTrace {
@@ -139,8 +139,8 @@ func (wb *WidgetBase) GetSizeParts(vp *Viewport, iter int) {
 	}
 }
 
-func (wb *WidgetBase) GetSize(vp *Viewport, iter int) {
-	wb.GetSizeParts(vp, iter)
+func (wb *WidgetBase) GetSize(sc *Scene, iter int) {
+	wb.GetSizeParts(sc, iter)
 }
 
 // NodeSize returns the size as a [mat32.Vec2] object.
@@ -151,23 +151,23 @@ func (wb *WidgetBase) NodeSize() mat32.Vec2 {
 ////////////////////////////////////////////////////////////////////
 // 	DoLayout
 
-func (wb *WidgetBase) DoLayoutParts(vp *Viewport, parBBox image.Rectangle, iter int) {
+func (wb *WidgetBase) DoLayoutParts(sc *Scene, parBBox image.Rectangle, iter int) {
 	if wb.Parts == nil {
 		return
 	}
 	spc := wb.BoxSpace()
 	wb.Parts.LayState.Alloc.Pos = wb.LayState.Alloc.Pos.Add(spc.Pos())
 	wb.Parts.LayState.Alloc.Size = wb.LayState.Alloc.Size.Sub(spc.Size())
-	wb.Parts.DoLayout(vp, parBBox, iter)
+	wb.Parts.DoLayout(sc, parBBox, iter)
 }
 
-func (wb *WidgetBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	wb.DoLayoutBase(vp, parBBox, true, iter) // init style
-	wb.DoLayoutParts(vp, parBBox, iter)
-	return wb.DoLayoutChildren(vp, iter)
+func (wb *WidgetBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	wb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	wb.DoLayoutParts(sc, parBBox, iter)
+	return wb.DoLayoutChildren(sc, iter)
 }
 
-func (wb *WidgetBase) InitLayout(vp *Viewport) bool {
+func (wb *WidgetBase) InitLayout(sc *Scene) bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
 	wb.LayState.SetFromStyle(&wb.Style)
@@ -177,16 +177,16 @@ func (wb *WidgetBase) InitLayout(vp *Viewport) bool {
 // todo: wtf with initStyle ??
 
 // DoLayoutBase provides basic DoLayout functions -- good for most cases
-func (wb *WidgetBase) DoLayoutBase(vp *Viewport, parBBox image.Rectangle, initStyle bool, iter int) {
+func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, initStyle bool, iter int) {
 	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	if initStyle {
-		SetUnitContext(&wb.Style, vp, wb.NodeSize(), psize) // update units with final layout
+		SetUnitContext(&wb.Style, sc, wb.NodeSize(), psize) // update units with final layout
 	}
 	wb.BBox = wi.BBox2D() // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
-	wi.ComputeBBox2D(vp, parBBox, image.Point{}) // other bboxes from BBox
+	wi.ComputeBBox2D(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
 		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
 	}
@@ -197,13 +197,13 @@ func (wb *WidgetBase) DoLayoutBase(vp *Viewport, parBBox image.Rectangle, initSt
 // ChildrenBBox -- default call at end of DoLayout.  Passes along whether
 // any of the children need a re-layout -- typically DoLayout just returns
 // this.
-func (wb *WidgetBase) DoLayoutChildren(vp *Viewport, iter int) bool {
+func (wb *WidgetBase) DoLayoutChildren(sc *Scene, iter int) bool {
 	redo := false
-	cbb := wb.This().(Widget).ChildrenBBox2D(vp)
+	cbb := wb.This().(Widget).ChildrenBBox2D(sc)
 	for _, kid := range wb.Kids {
 		wi, _ := AsWidget(kid)
 		if wi != nil {
-			if wi.DoLayout(vp, cbb, iter) {
+			if wi.DoLayout(sc, cbb, iter) {
 				redo = true
 			}
 		}
@@ -213,7 +213,7 @@ func (wb *WidgetBase) DoLayoutChildren(vp *Viewport, iter int) bool {
 
 // ChildrenBBox2DWidget provides a basic widget box-model subtraction of
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
-func (wb *WidgetBase) ChildrenBBox2DWidget(vp *Viewport) image.Rectangle {
+func (wb *WidgetBase) ChildrenBBox2DWidget(sc *Scene) image.Rectangle {
 	bb := wb.VpBBox
 	spc := wb.BoxSpace()
 	bb.Min.X += int(spc.Left)
@@ -223,38 +223,38 @@ func (wb *WidgetBase) ChildrenBBox2DWidget(vp *Viewport) image.Rectangle {
 	return bb
 }
 
-func (wb *WidgetBase) ChildrenBBox2D(vp *Viewport) image.Rectangle {
-	return wb.ChildrenBBox2DWidget(vp)
+func (wb *WidgetBase) ChildrenBBox2D(sc *Scene) image.Rectangle {
+	return wb.ChildrenBBox2DWidget(sc)
 }
 
 //////////////////////////////////////////////////////////////////
 //		Move2D scrolling
 
-func (wb *WidgetBase) Move2D(vp *Viewport, delta image.Point, parBBox image.Rectangle) {
-	wb.Move2DBase(vp, delta, parBBox)
+func (wb *WidgetBase) Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle) {
+	wb.Move2DBase(sc, delta, parBBox)
 	if wb.Parts != nil {
-		wb.Parts.This().(Widget).Move2D(vp, delta, parBBox)
+		wb.Parts.This().(Widget).Move2D(sc, delta, parBBox)
 	}
-	wb.Move2DChildren(vp, delta)
+	wb.Move2DChildren(sc, delta)
 }
 
 // Move2DBase does the basic move on this node
-func (wb *WidgetBase) Move2DBase(vp *Viewport, delta image.Point, parBBox image.Rectangle) {
+func (wb *WidgetBase) Move2DBase(sc *Scene, delta image.Point, parBBox image.Rectangle) {
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
-	wb.This().(Widget).ComputeBBox2D(vp, parBBox, delta)
+	wb.This().(Widget).ComputeBBox2D(sc, parBBox, delta)
 }
 
 // Move2DTree does move2d pass -- each node iterates over children for maximum
 // control -- this starts with parent ChildrenBBox and current delta -- can be
 // called de novo
-func (wb *WidgetBase) Move2DTree(vp *Viewport) {
+func (wb *WidgetBase) Move2DTree(sc *Scene) {
 	parBBox := image.Rectangle{}
 	pwi, pwb := AsWidget(wb.Par)
 	if pwb != nil {
-		parBBox = pwi.ChildrenBBox2D(vp)
+		parBBox = pwi.ChildrenBBox2D(sc)
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
-	wb.This().(Widget).Move2D(vp, delta, parBBox) // important to use interface version to get interface!
+	wb.This().(Widget).Move2D(sc, delta, parBBox) // important to use interface version to get interface!
 }
 
 // todo: move should just update bboxes with offset from parent
@@ -262,12 +262,12 @@ func (wb *WidgetBase) Move2DTree(vp *Viewport) {
 
 // Move2DChildren moves all of node's children, giving them the ChildrenBBox2D
 // -- default call at end of Move2D
-func (wb *WidgetBase) Move2DChildren(vp *Viewport, delta image.Point) {
-	cbb := wb.This().(Widget).ChildrenBBox2D(vp)
+func (wb *WidgetBase) Move2DChildren(sc *Scene, delta image.Point) {
+	cbb := wb.This().(Widget).ChildrenBBox2D(sc)
 	for _, kid := range wb.Kids {
 		cwi, _ := AsWidget(kid)
 		if cwi != nil {
-			cwi.Move2D(vp, delta, cbb)
+			cwi.Move2D(sc, delta, cbb)
 		}
 	}
 }

@@ -62,7 +62,7 @@ type Complete struct {
 	Completion string `desc:"the user's completion selection'"`
 
 	// the viewport where the current popup menu is presented
-	Vp         *Viewport `desc:"the viewport where the current popup menu is presented"`
+	Sc         *Scene `desc:"the viewport where the current popup menu is presented"`
 	DelayTimer *time.Timer
 	DelayMu    sync.Mutex
 	ShowMu     sync.Mutex
@@ -105,11 +105,11 @@ func (c *Complete) IsAboutToShow() bool {
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool) {
-	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
+func (c *Complete) Show(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
+	if c.MatchFunc == nil || sc == nil || sc.Win == nil {
 		return
 	}
-	cpop := vp.Win.CurPopup()
+	cpop := sc.Win.CurPopup()
 	// TODO: maybe preserve popup and just move it
 	// onif there is no delay set in CompleteWaitMSec
 	// (should reduce annoying flashing)
@@ -118,7 +118,7 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport, pt image.Po
 		waitMSec = 0
 	}
 	if PopupIsCompleter(cpop) {
-		vp.Win.SetDelPopup(cpop)
+		sc.Win.SetDelPopup(cpop)
 	}
 	c.DelayMu.Lock()
 	if c.DelayTimer != nil {
@@ -132,7 +132,7 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport, pt image.Po
 	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
 		func() {
 			c.DelayMu.Lock()
-			c.ShowNow(text, posLn, posCh, vp, pt, force, waitMSec == 0)
+			c.ShowNow(text, posLn, posCh, sc, pt, force, waitMSec == 0)
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
 		})
@@ -143,17 +143,17 @@ func (c *Complete) Show(text string, posLn, posCh int, vp *Viewport, pt image.Po
 // completion popup menu. If keep is set to true, the previous completion popup
 // will be kept and reused (if it exists), which reduces flashing if there is no
 // delay between popups.
-func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool, keep bool) {
-	if c.MatchFunc == nil || vp == nil || vp.Win == nil {
+func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool, keep bool) {
+	if c.MatchFunc == nil || sc == nil || sc.Win == nil {
 		return
 	}
-	cpop := vp.Win.CurPopup()
-	if PopupIsCompleter(cpop) && (!keep || vp.Win.CurPopup() == nil) {
-		vp.Win.SetDelPopup(cpop)
+	cpop := sc.Win.CurPopup()
+	if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
+		sc.Win.SetDelPopup(cpop)
 	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
-	c.Vp = nil
+	c.Sc = nil
 	md := c.MatchFunc(c.Context, text, posLn, posCh)
 	c.Completions = md.Matches
 	c.Seed = md.Seed
@@ -185,18 +185,18 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image
 	// fmt.Println(keep, vp == c.Vp, vp, c.Vp)
 	// if keep && vp.Win.CurPopup() != nil {
 	// 	fmt.Println("updating through keep")
-	// 	pvp := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	// 	pvp.SetFlag(int(VpFlagCompleter))
-	// 	pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+	// 	psc.SetFlag(int(VpFlagCompleter))
+	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	// 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
 	// } else {
-	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	pvp.Type = VpCompleter
+	psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
+	psc.Type = VpCompleter
 	// todo:
-	// pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	vp.Win.OSWin.SendEmptyEvent() // needs an extra event to show popup
+	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	sc.Win.OSWin.SendEmptyEvent() // needs an extra event to show popup
 	// }
-	c.Vp = vp
+	c.Sc = sc
 }
 
 // Cancel cancels any existing *or* pending completion.
@@ -204,10 +204,10 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, vp *Viewport, pt image
 // Returns true if canceled.
 func (c *Complete) Cancel() bool {
 	did := false
-	if c.Vp != nil && c.Vp.Win != nil {
-		cpop := c.Vp.Win.CurPopup()
+	if c.Sc != nil && c.Sc.Win != nil {
+		cpop := c.Sc.Win.CurPopup()
 		if PopupIsCompleter(cpop) {
-			c.Vp.Win.SetDelPopup(cpop)
+			c.Sc.Win.SetDelPopup(cpop)
 			did = true
 		}
 	}
@@ -219,7 +219,7 @@ func (c *Complete) Cancel() bool {
 // Returns true if aborted.
 func (c *Complete) Abort() bool {
 	c.DelayMu.Lock()
-	c.Vp = nil
+	c.Sc = nil
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 		c.DelayTimer = nil
@@ -231,11 +231,11 @@ func (c *Complete) Abort() bool {
 }
 
 // Lookup is the main call for doing lookups
-func (c *Complete) Lookup(text string, posLn, posCh int, vp *Viewport, pt image.Point, force bool) {
-	if c.LookupFunc == nil || vp == nil || vp.Win == nil {
+func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
+	if c.LookupFunc == nil || sc == nil || sc.Win == nil {
 		return
 	}
-	c.Vp = nil
+	c.Sc = nil
 	c.LookupFunc(c.Context, text, posLn, posCh) // this processes result directly
 }
 

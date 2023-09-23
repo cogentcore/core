@@ -375,7 +375,7 @@ func (sv *SliceViewBase) UpdateValues() {
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) ConfigWidget(vp *Viewport) {
+func (sv *SliceViewBase) ConfigWidget(vp *Scene) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
@@ -1062,7 +1062,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(sv.Slice) {
-		ToolBarView(sv.Slice, sv.Viewport, tb)
+		ToolBarView(sv.Slice, sv.Scene, tb)
 		tb.SetFullReRender()
 	}
 	sv.ToolbarSlice = sv.Slice
@@ -1087,7 +1087,7 @@ func (sv *SliceViewBase) SetStyle() {
 	// sg.StartFocus() // need to call this when window is actually active
 }
 
-func (sv *SliceViewBase) Render(vp *Viewport) {
+func (sv *SliceViewBase) Render(vp *Scene) {
 	if win := sv.ParentWindow(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()

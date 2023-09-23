@@ -49,20 +49,20 @@ const (
 )
 
 // FrameStdRender does the standard rendering of the frame itself
-func (fr *Frame) FrameStdRender(vp *Viewport) {
-	rs, _, st := fr.RenderLock(vp)
+func (fr *Frame) FrameStdRender(sc *Scene) {
+	rs, _, st := fr.RenderLock(sc)
 	defer fr.RenderUnlock(rs)
 
-	fr.RenderStdBox(vp, st)
+	fr.RenderStdBox(sc, st)
 
 	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
-		fr.RenderStripes(vp)
+		fr.RenderStripes(sc)
 	}
 }
 
-func (fr *Frame) RenderStripes(vp *Viewport) {
+func (fr *Frame) RenderStripes(sc *Scene) {
 	st := &fr.Style
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	pc := &rs.Paint
 
 	pos := fr.LayState.Alloc.Pos
@@ -108,14 +108,14 @@ func (fr *Frame) RenderStripes(vp *Viewport) {
 	}
 }
 
-func (fr *Frame) Render(vp *Viewport) {
+func (fr *Frame) Render(sc *Scene) {
 	wi := fr.This().(Widget)
-	if fr.PushBounds(vp) {
-		fr.FrameStdRender(vp)
+	if fr.PushBounds(sc) {
+		fr.FrameStdRender(sc)
 		wi.ConnectEvents()
-		fr.RenderScrolls(vp)
-		fr.RenderChildren(vp)
-		fr.PopBounds(vp)
+		fr.RenderScrolls(sc)
+		fr.RenderChildren(sc)
+		fr.PopBounds(sc)
 	} else {
 		fr.SetScrollsOff()
 		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi

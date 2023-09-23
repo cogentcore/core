@@ -1425,7 +1425,7 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 
 // BlameDialog opens a dialog for displaying VCS blame data using TwinTextViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(avp *gi.Viewport, fname string, blame, fbytes []byte) *TwinTextViews {
+func BlameDialog(avp *gi.Scene, fname string, blame, fbytes []byte) *TwinTextViews {
 	title := "VCS Blame: " + DirAndFile(fname)
 	dlg := gi.NewStdDialog(gi.DlgOpts{Title: title}, gi.AddOk, gi.NoCancel)
 

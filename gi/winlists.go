@@ -192,7 +192,7 @@ type WindowUpdates struct {
 	BeforeDir []int `desc:"updates that must be drawn before direct uploads because they fully occlude them"`
 
 	// ordered map of updates -- order (indx) is the image
-	Updates *ordmap.Map[image.Rectangle, *Viewport] `desc:"ordered map of updates -- order (indx) is the image"`
+	Updates *ordmap.Map[image.Rectangle, *Scene] `desc:"ordered map of updates -- order (indx) is the image"`
 }
 
 // SetIdxRange sets the index range based on starting index and n
@@ -204,7 +204,7 @@ func (wu *WindowUpdates) SetIdxRange(st, n int) {
 // Init checks if ordered map needs to be allocated
 func (wu *WindowUpdates) Init() {
 	if wu.Updates == nil {
-		wu.Updates = ordmap.New[image.Rectangle, *Viewport]()
+		wu.Updates = ordmap.New[image.Rectangle, *Scene]()
 	}
 }
 
@@ -223,7 +223,7 @@ func regPixCnt(r image.Rectangle) int {
 // Add adds a new update, returning index to store for given winBBox
 // (could be existing), and bool = true if new index exceeds max range.
 // If it is an exact match for an existing bbox, then that is returned.
-func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport) (int, bool) {
+func (wu *WindowUpdates) Add(winBBox image.Rectangle, sc *Scene) (int, bool) {
 	wu.Init()
 	idx, has := wu.Updates.IdxByKeyTry(winBBox)
 	if has {
@@ -234,7 +234,7 @@ func (wu *WindowUpdates) Add(winBBox image.Rectangle, vp *Viewport) (int, bool) 
 	if wu.Idx(idx) >= wu.MaxIdx {
 		return idx, true
 	}
-	wu.Updates.Add(winBBox, vp)
+	wu.Updates.Add(winBBox, sc)
 	wu.Order = append(wu.Order, idx)
 	return wu.Idx(idx), false
 }

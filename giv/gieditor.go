@@ -114,7 +114,7 @@ func (ge *GiEditor) EditColorScheme() {
 		return
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -132,7 +132,7 @@ func (ge *GiEditor) EditColorScheme() {
 	schemes := matcolor.NewSchemes(p)
 
 	kv := NewStructView(mfr, "kv")
-	kv.Viewport = vp
+	kv.Scene = vp
 	kv.SetStruct(&key)
 	kv.SetStretchMax()
 
@@ -140,12 +140,12 @@ func (ge *GiEditor) EditColorScheme() {
 	split.Dim = mat32.X
 
 	svl := NewStructView(split, "svl")
-	svl.Viewport = vp
+	svl.Scene = vp
 	svl.SetStruct(&schemes.Light)
 	svl.SetStretchMax()
 
 	svd := NewStructView(split, "svd")
-	svd.Viewport = vp
+	svd.Scene = vp
 	svd.SetStruct(&schemes.Dark)
 	svd.SetStretchMax()
 
@@ -204,7 +204,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // }
 
 // Config configures the widget
-func (ge *GiEditor) ConfigWidget(vp *Viewport) {
+func (ge *GiEditor) ConfigWidget(vp *Scene) {
 	if ge.KiRoot == nil {
 		return
 	}
@@ -261,7 +261,7 @@ func (ge *GiEditor) ConfigToolbar() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	ToolBarView(ge, ge.Viewport, tb)
+	ToolBarView(ge, ge.Scene, tb)
 }
 
 // ConfigSplitView configures the SplitView.
@@ -308,7 +308,7 @@ func (ge *GiEditor) SetChanged() {
 	ge.ToolBar().UpdateActions() // nil safe
 }
 
-func (ge *GiEditor) Render(vp *Viewport) {
+func (ge *GiEditor) Render(vp *Scene) {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentWindow(); win != nil {
 		if !win.IsResizing() {
@@ -450,14 +450,14 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		}
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
 	ge := NewGiEditor(mfr, "editor")
-	ge.Viewport = vp
+	ge.Scene = vp
 	ge.SetRoot(obj)
 
 	mmen := win.MainMenu

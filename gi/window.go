@@ -129,8 +129,8 @@ const (
 // Window provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
 //
-// Window manages a stack of Viewports, each of which manage a separate bitmap
-// image, onto which Widgets render.  For main windows, the Viewport Frame
+// Window manages a stack of Scenes, each of which manage a separate bitmap
+// image, onto which Widgets render.  For main windows, the Scene Frame
 // has a MainMenu for the window (which can be empty, in which case it is not
 // displayed).  On MacOS, this main menu updates the overall menubar,
 // and also can show the local menu (on by default).
@@ -144,10 +144,10 @@ const (
 // Rendering logic:
 //   - vdraw.Drawer manages all rendering to the window surface, provided via
 //     the OSWin window, using vulkan stored images (16 max)
-//   - Order is: Base Viewport (image 0), then direct uploads, popups, and sprites.
+//   - Order is: Base Scene (image 0), then direct uploads, popups, and sprites.
 //   - DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
 //     (note: cannot upload directly to window as this prevents popups and overlays)
-//   - Popups (which have their own Viewports)
+//   - Popups (which have their own Scenes)
 //   - Sprites are managed as layered textures of the same size, to enable
 //     unlimited number packed into a few descriptors for standard sizes.
 type Window struct {
@@ -165,13 +165,13 @@ type Window struct {
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 
 	// the window's base viewport holding the primary contents of the window
-	Viewport *Viewport `json:"-" xml:"-" desc:"the window's base viewport holding the primary contents of the window"`
+	Scene *Scene `json:"-" xml:"-" desc:"the window's base viewport holding the primary contents of the window"`
 
 	// stack of popups
 	PopupStack []ki.Ki `json:"-" xml:"-" desc:"stack of popups"`
 
-	// main menu -- is first element of Viewport.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
-	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Viewport.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	// main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
+	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 
 	// sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
@@ -425,17 +425,17 @@ func NewMainWindow(name, title string, width, height int) *Window {
 	}
 	AllWindows.Add(win)
 	MainWindows.Add(win)
-	vp := NewViewport(width, height)
-	vp.SetName("WinVp")
-	vp.Fill = true
-	vp.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		vp.Style.BackgroundColor.SetSolid(ColorScheme.Background)
-		vp.Style.Color = ColorScheme.OnBackground // everything inherits this
+	sc := NewScene(width, height)
+	sc.SetName("WinVp")
+	sc.Fill = true
+	sc.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		sc.Style.BackgroundColor.SetSolid(ColorScheme.Background)
+		sc.Style.Color = ColorScheme.OnBackground // everything inherits this
 	})
 
-	win.AddChild(vp)
-	win.Viewport = vp
-	vp.Win = win
+	win.AddChild(sc)
+	win.Scene = sc
+	sc.Win = win
 	win.ConfigVLay()
 	WinNewCloseStamp()
 	return win
@@ -463,7 +463,7 @@ func RecycleMainWindow(data any, name, title string, width, height int) (*Window
 
 // NewDialogWin creates a new dialog window with given internal handle name,
 // display name, and sizing (assumed to be in raw dots), without setting its
-// main viewport -- user should do win.AddChild(vp); win.Viewport = vp to set
+// main viewport -- user should do win.AddChild(vp); win.Scene = vp to set
 // their own viewport.
 func NewDialogWin(name, title string, width, height int, modal bool) *Window {
 	opts := &goosi.NewWindowOptions{
@@ -515,20 +515,20 @@ func RecycleDialogWin(data any, name, title string, width, height int, modal boo
 }
 
 // ConfigVLay creates and configures the vertical layout as first child of
-// Viewport, and installs MainMenu as first element of layout.
+// Scene, and installs MainMenu as first element of layout.
 func (w *Window) ConfigVLay() {
-	vp := w.Viewport
-	updt := vp.UpdateStart()
-	defer vp.UpdateEnd(updt)
-	if !vp.HasChildren() {
-		vp.NewChild(LayoutType, "main-vlay")
+	sc := w.Scene
+	updt := sc.UpdateStart()
+	defer sc.UpdateEnd(updt)
+	if !sc.HasChildren() {
+		sc.NewChild(LayoutType, "main-vlay")
 	}
-	w.Viewport.Frame = vp.Child(0).Embed(LayoutType).(*Layout)
-	if !w.Viewport.Frame.HasChildren() {
-		w.Viewport.Frame.NewChild(TypeMenuBar, "main-menu")
+	w.Scene.Frame = sc.Child(0).Embed(LayoutType).(*Layout)
+	if !w.Scene.Frame.HasChildren() {
+		w.Scene.Frame.NewChild(TypeMenuBar, "main-menu")
 	}
-	w.Viewport.Frame.Lay = LayoutVert
-	w.MainMenu = w.Viewport.Frame.Child(0).(*MenuBar)
+	w.Scene.Frame.Lay = LayoutVert
+	w.MainMenu = w.Scene.Frame.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 }
@@ -536,7 +536,7 @@ func (w *Window) ConfigVLay() {
 // ConfigInsets updates the padding on the main layout of the window
 // to the inset values provided by the OSWin window.
 func (w *Window) ConfigInsets() {
-	mainVlay, ok := w.Viewport.ChildByName("main-vlay", 0).(*Layout)
+	mainVlay, ok := w.Scene.ChildByName("main-vlay", 0).(*Layout)
 	if ok {
 		insets := w.OSWin.Insets()
 		mainVlay.AddStyler(func(w *WidgetBase, s *gist.Style) {
@@ -555,57 +555,57 @@ func (w *Window) ConfigInsets() {
 // used for dialogs that don't always have a main menu -- returns
 // menubar -- safe to call even if there is a menubar
 func (w *Window) AddMainMenu() *MenuBar {
-	vp := w.Viewport
-	updt := vp.UpdateStart()
-	defer vp.UpdateEnd(updt)
-	if !vp.HasChildren() {
-		vp.NewChild(LayoutType, "main-vlay")
+	sc := w.Scene
+	updt := sc.UpdateStart()
+	defer sc.UpdateEnd(updt)
+	if !sc.HasChildren() {
+		sc.NewChild(LayoutType, "main-vlay")
 	}
-	w.Viewport.Frame = vp.Child(0).Embed(LayoutType).(*Layout)
-	if !w.Viewport.Frame.HasChildren() {
-		w.MainMenu = w.Viewport.Frame.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
+	w.Scene.Frame = sc.Child(0).Embed(LayoutType).(*Layout)
+	if !w.Scene.Frame.HasChildren() {
+		w.MainMenu = w.Scene.Frame.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
 	} else {
-		mmi := w.Viewport.Frame.ChildByName("main-menu", 0)
+		mmi := w.Scene.Frame.ChildByName("main-menu", 0)
 		if mmi != nil {
 			mm := mmi.(*MenuBar)
 			w.MainMenu = mm
 			return mm
 		}
 	}
-	w.MainMenu = w.Viewport.Frame.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
+	w.MainMenu = w.Scene.Frame.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 	return w.MainMenu
 }
 
 // SetMainWidget sets given widget as the main widget for the window -- adds
-// into Viewport.Frame after main menu -- if a main widget has already been set then
+// into Scene.Frame after main menu -- if a main widget has already been set then
 // it is deleted and this one replaces it.  Use this method to ensure future
 // compatibility.
 func (w *Window) SetMainWidget(mw ki.Ki) {
-	if len(w.Viewport.Frame.Kids) == 1 {
-		w.Viewport.Frame.AddChild(mw)
+	if len(w.Scene.Frame.Kids) == 1 {
+		w.Scene.Frame.AddChild(mw)
 		return
 	}
-	cmw := w.Viewport.Frame.Child(1)
+	cmw := w.Scene.Frame.Child(1)
 	if cmw != mw {
-		w.Viewport.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
-		w.Viewport.Frame.InsertChild(mw, 1)
+		w.Scene.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
+		w.Scene.Frame.InsertChild(mw, 1)
 	}
 }
 
 // SetMainWidgetType sets the main widget of this window to given type
-// (typically a Layout or Frame), and returns it.  Adds into Viewport.Frame after
+// (typically a Layout or Frame), and returns it.  Adds into Scene.Frame after
 // main menu -- if a main widget has already been set then it is deleted and
 // this one replaces it.  Use this method to ensure future compatibility.
 func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
-	if len(w.Viewport.Frame.Kids) == 1 {
-		return w.Viewport.Frame.NewChild(typ, name)
+	if len(w.Scene.Frame.Kids) == 1 {
+		return w.Scene.Frame.NewChild(typ, name)
 	}
-	cmw := w.Viewport.Frame.Child(1)
+	cmw := w.Scene.Frame.Child(1)
 	if ki.Type(cmw) != typ {
-		w.Viewport.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
-		return w.Viewport.Frame.InsertNewChild(typ, 1, name)
+		w.Scene.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
+		return w.Scene.Frame.InsertNewChild(typ, 1, name)
 	}
 	return cmw
 }
@@ -684,9 +684,9 @@ func (w *Window) SetTitle(name string) {
 }
 
 // MainWidget returns the main widget for this window -- 2nd element in
-// Viewport.Frame -- returns error if not yet set.
+// Scene.Frame -- returns error if not yet set.
 func (w *Window) MainWidget() (ki.Ki, error) {
-	return w.Viewport.Frame.ChildTry(1)
+	return w.Scene.Frame.ChildTry(1)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
@@ -721,15 +721,15 @@ func (w *Window) ZoomDPI(steps int) {
 	w.FullReRender()
 }
 
-// WinViewport returns the viewport directly under this window that serves
+// WinScene returns the viewport directly under this window that serves
 // as the master viewport for the entire window.
-func (w *Window) WinViewport() *Viewport {
-	vpi := w.ChildByType(TypeViewport, ki.Embeds, 0)
+func (w *Window) WinScene() *Scene {
+	vpi := w.ChildByType(TypeScene, ki.Embeds, 0)
 	if vpi == nil { // shouldn't happen
 		return nil
 	}
-	vp, _ := vpi.Embed(TypeViewport).(*Viewport)
-	return vp
+	sc, _ := vpi.Embed(TypeScene).(*Scene)
+	return sc
 }
 
 // SetWinSize requests that the window be resized to the given size
@@ -772,7 +772,7 @@ func (w *Window) Resized(sz image.Point) {
 	if !w.IsVisible() {
 		return
 	}
-	curSz := w.Viewport.Geom.Size
+	curSz := w.Scene.Geom.Size
 
 	if curSz == sz {
 		if WinEventTrace {
@@ -800,7 +800,7 @@ func (w *Window) Resized(sz image.Point) {
 	if curSz == (image.Point{}) { // first open
 		StringsInsertFirstUnique(&FocusWindows, w.Nm, 10)
 	}
-	w.Viewport.Resize(sz)
+	w.Scene.Resize(sz)
 	w.ConfigInsets()
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
@@ -892,7 +892,7 @@ func (w *Window) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *Window) IsClosed() bool {
-	if w.IsDisabled() || w.Viewport == nil {
+	if w.IsDisabled() || w.Scene == nil {
 		return true
 	}
 	return false
@@ -1027,16 +1027,16 @@ func (w *Window) SendWinFocusEvent(act window.Actions) {
 
 // FullReRender performs a full re-render of the window -- each node renders
 // into its viewport, aggregating into the main window viewport, which will
-// drive an UploadAllViewports call after all the rendering is done, and
+// drive an UploadAllScenes call after all the rendering is done, and
 // signal the publishing of the window after that
 func (w *Window) FullReRender() {
 	if !w.IsVisible() {
 		return
 	}
 	if WinEventTrace {
-		fmt.Printf("Win: %v FullReRender (w.Viewport.SetNeedsFullRender)\n", w.Nm)
+		fmt.Printf("Win: %v FullReRender (w.Scene.SetNeedsFullRender)\n", w.Nm)
 	}
-	w.Viewport.SetNeedsFullRender()
+	w.Scene.SetNeedsFullRender()
 	w.InitialFocus()
 }
 
@@ -1055,13 +1055,13 @@ func (w *Window) InitialFocus() {
 // vpBBox bounding box for the viewport, and winBBox bounding box for the
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall viewport image
-func (w *Window) UploadVpRegion(vp *Viewport, vpBBox, winBBox image.Rectangle) {
+func (w *Window) UploadVpRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
 	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
 	winrel := winBBox.Min.Sub(vpBBox.Min)
 	if !w.IsVisible() {
 		return
 	}
-	vpPixBB := vp.Pixels.Rect
+	vpPixBB := sc.Pixels.Rect
 	inBB := vpBBox.Intersect(vpPixBB)
 	if inBB.Empty() {
 		return
@@ -1076,19 +1076,19 @@ func (w *Window) UploadVpRegion(vp *Viewport, vpBBox, winBBox image.Rectangle) {
 	w.SetWinUpdating()
 	// pr := prof.Start("win.UploadVpRegion")
 
-	idx, over := w.UpdtRegs.Add(winBBox, vp)
+	idx, over := w.UpdtRegs.Add(winBBox, sc)
 	if over {
 		w.ResetUpdateRegionsImpl()
 		if RenderTrace || WinEventTrace {
-			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), vp.Path(), winBBox)
+			fmt.Printf("Win: %v region Vp %v, winbbox: %v reset updates\n", w.Path(), sc.Path(), winBBox)
 		}
 	} else {
 		drw := w.OSWin.Drawer()
-		vp.Pixels.Rect = vpBBox
-		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
-		vp.Pixels.Rect = vpPixBB
+		sc.Pixels.Rect = vpBBox
+		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
+		sc.Pixels.Rect = vpPixBB
 		if RenderTrace || WinEventTrace {
-			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
+			fmt.Printf("Win: %v uploaded region Vp %v, winbbox: %v to index: %d\n", w.Path(), sc.Path(), winBBox, idx)
 		}
 
 		if w.DirDraws.Nodes != nil {
@@ -1108,8 +1108,8 @@ func (w *Window) UploadVpRegion(vp *Viewport, vpBBox, winBBox image.Rectangle) {
 
 // UploadVp uploads entire viewport image for given viewport -- e.g., for
 // popups etc updating separately
-func (w *Window) UploadVp(vp *Viewport, offset image.Point) {
-	vpr := vp.Pixels.Bounds()
+func (w *Window) UploadVp(sc *Scene, offset image.Point) {
+	vpr := sc.Pixels.Bounds()
 	winBBox := vpr.Add(offset)
 	if !w.IsVisible() {
 		return
@@ -1123,28 +1123,28 @@ func (w *Window) UploadVp(vp *Viewport, offset image.Point) {
 	updt := w.UpdateStart()
 	idx := 0
 	drw := w.OSWin.Drawer()
-	if vp == w.Viewport {
-		drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+	if sc == w.Scene {
+		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 	} else {
 		// pr := prof.Start("win.UploadVp")
-		gii, _ := AsWidget(vp.This())
+		gii, _ := AsWidget(sc.This())
 		if gii != nil {
 			idx, _ = w.PopDraws.Add(gii, winBBox)
-			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+			drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 		}
 	}
 	if RenderTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), vp.Path(), winBBox, idx)
+		fmt.Printf("Win: %v uploaded entire Vp %v, winbbox: %v to index: %d\n", w.Path(), sc.Path(), winBBox, idx)
 	}
 	w.ClearWinUpdating()
 	w.UpMu.Unlock()
 	w.UpdateEnd(updt) // drives publish
 }
 
-// UploadAllViewports does a complete upload of all active viewports, in the
+// UploadAllScenes does a complete upload of all active viewports, in the
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
-func (w *Window) UploadAllViewports() {
+func (w *Window) UploadAllScenes() {
 	if !w.IsVisible() {
 		return
 	}
@@ -1154,10 +1154,10 @@ func (w *Window) UploadAllViewports() {
 		return
 	}
 	w.SetWinUpdating()
-	// pr := prof.Start("win.UploadAllViewports")
+	// pr := prof.Start("win.UploadAllScenes")
 	updt := w.UpdateStart()
 	if RenderTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Viewport.Pixels.Bounds(), updt)
+		fmt.Printf("Win: %v uploading full Vp, image bound: %v, updt: %v\n", w.Path(), w.Scene.Pixels.Bounds(), updt)
 	}
 	w.PopMu.Lock()
 	w.ResetUpdateRegionsImpl()
@@ -1201,19 +1201,19 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	w.UpdtRegs.Reset()
 	w.PopDraws.Reset()
 	drw := w.OSWin.Drawer()
-	drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
+	drw.SetGoImage(0, 0, w.Scene.Pixels, vgpu.NoFlipY)
 	// then all the current popups
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
 	if w.PopupStack != nil {
 		for _, pop := range w.PopupStack {
 			gii, _ := AsWidget(pop)
 			if gii != nil {
-				vp := gii.AsViewport()
-				r := vp.Geom.Bounds()
-				idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
-				drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+				sc := gii.AsScene()
+				r := sc.Geom.Bounds()
+				idx, _ := w.PopDraws.Add(gii, sc.WinBBox)
+				drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 				if RenderTrace {
-					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
+					fmt.Printf("Win: %v uploading popup stack Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), sc.Path(), r.Min, sc.Pixels.Bounds(), idx)
 				}
 			}
 		}
@@ -1221,12 +1221,12 @@ func (w *Window) ResetUpdateRegionsImpl() {
 	if w.Popup != nil {
 		gii, _ := AsWidget(w.Popup)
 		if gii != nil {
-			vp := gii.AsViewport()
-			r := vp.Geom.Bounds()
-			idx, _ := w.PopDraws.Add(gii, vp.WinBBox)
-			drw.SetGoImage(idx, 0, vp.Pixels, vgpu.NoFlipY)
+			sc := gii.AsScene()
+			r := sc.Geom.Bounds()
+			idx, _ := w.PopDraws.Add(gii, sc.WinBBox)
+			drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 			if RenderTrace || WinEventTrace {
-				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), vp.Path(), r.Min, vp.Pixels.Bounds(), idx)
+				fmt.Printf("Win: %v uploading top popup Vp %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Path(), sc.Path(), r.Min, sc.Pixels.Bounds(), idx)
 			}
 		}
 	}
@@ -1275,7 +1275,7 @@ func (w *Window) Publish() {
 	drw := w.OSWin.Drawer()
 	vpv := drw.GetImageVal(0).Texture
 	if !vpv.HasFlag(Active) {
-		if w.Viewport.Pixels == nil {
+		if w.Scene.Pixels == nil {
 			if Update2DTrace {
 				fmt.Printf("Win %s didn't have active image, viewport is nil\n", w.Nm)
 			}
@@ -1284,9 +1284,9 @@ func (w *Window) Publish() {
 			return
 		} else {
 			if Update2DTrace {
-				fmt.Printf("Win %s didn't have active image, setting to: %v\n", w.Nm, w.Viewport.Pixels.Bounds())
+				fmt.Printf("Win %s didn't have active image, setting to: %v\n", w.Nm, w.Scene.Pixels.Bounds())
 			}
-			drw.SetGoImage(0, 0, w.Viewport.Pixels, vgpu.NoFlipY)
+			drw.SetGoImage(0, 0, w.Scene.Pixels, vgpu.NoFlipY)
 		}
 	}
 	drw.SyncImages()
@@ -1658,9 +1658,9 @@ func (w *Window) ProcessEvent(evi goosi.Event) {
 	w.lastEt = et
 
 	if w.skippedResize != nil {
-		w.Viewport.BBoxMu.RLock()
-		vpsz := w.Viewport.Geom.Size
-		w.Viewport.BBoxMu.RUnlock()
+		w.Scene.BBoxMu.RLock()
+		vpsz := w.Scene.Geom.Size
+		w.Scene.BBoxMu.RUnlock()
 		if vpsz != w.OSWin.Size() {
 			w.SetFlag(int(WinFlagIsResizing))
 			w.Resized(w.OSWin.Size())
@@ -1929,15 +1929,15 @@ func (w *Window) HiPriorityEvents(evi goosi.Event) bool {
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			if goosi.TheApp.Platform().IsMobile() {
-				w.Viewport.Geom.Size = image.Point{}
+				w.Scene.Geom.Size = image.Point{}
 			}
 		case window.Paint:
 			// fmt.Printf("got paint event for window %v \n", w.Nm)
 			w.SetFlag(int(WinFlagGotPaint))
 			if w.HasFlag(int(WinFlagDoFullRender)) {
 				w.ClearFlag(int(WinFlagDoFullRender))
-				// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-				if w.Viewport.Geom.Size != w.OSWin.Size() {
+				// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
+				if w.Scene.Geom.Size != w.OSWin.Size() {
 					w.Resized(w.OSWin.Size())
 				} else {
 					w.FullReRender() // note: this is currently needed for focus to actually
@@ -2023,8 +2023,8 @@ func (w *Window) HiPriorityEvents(evi goosi.Event) bool {
 		if w.HasFlag(int(WinFlagDoFullRender)) {
 			w.ClearFlag(int(WinFlagDoFullRender))
 			// if we are getting mouse input, and still haven't done this, do it..
-			// fmt.Printf("Doing full render at size: %v\n", w.Viewport.Geom.Size)
-			if w.Viewport.Geom.Size != w.OSWin.Size() {
+			// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
+			if w.Scene.Geom.Size != w.OSWin.Size() {
 				w.Resized(w.OSWin.Size())
 			} else {
 				w.FullReRender()
@@ -2062,7 +2062,7 @@ func (w *Window) FocusTopNode() ki.Ki {
 	if cpop != nil {
 		return cpop
 	}
-	return w.Viewport.This()
+	return w.Scene.This()
 }
 
 func (w *Window) EventTopUpdateStart() bool {
@@ -2093,7 +2093,7 @@ func (w *Window) IsInScope(k ki.Ki, popup bool) bool {
 			return false
 		}
 	}
-	mvp := wb.Vp
+	mvp := wb.Sc
 	if mvp == nil {
 		return false
 	}
@@ -2178,11 +2178,11 @@ func PopupIsMenu(pop ki.Ki) bool {
 	if wb == nil {
 		return false
 	}
-	vp := wi.AsViewport()
-	if vp == nil {
+	sc := wi.AsScene()
+	if sc == nil {
 		return false
 	}
-	if vp.IsMenu() {
+	if sc.IsMenu() {
 		return true
 	}
 	return false
@@ -2197,11 +2197,11 @@ func PopupIsTooltip(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := wi.AsViewport()
-	if vp == nil {
+	sc := wi.AsScene()
+	if sc == nil {
 		return false
 	}
-	if vp.IsTooltip() {
+	if sc.IsTooltip() {
 		return true
 	}
 	return false
@@ -2216,11 +2216,11 @@ func PopupIsCompleter(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := wi.AsViewport()
-	if vp == nil {
+	sc := wi.AsScene()
+	if sc == nil {
 		return false
 	}
-	if vp.IsCompleter() {
+	if sc.IsCompleter() {
 		return true
 	}
 	return false
@@ -2235,11 +2235,11 @@ func PopupIsCorrector(pop ki.Ki) bool {
 	if ni == nil {
 		return false
 	}
-	vp := wi.AsViewport()
-	if vp == nil {
+	sc := wi.AsScene()
+	if sc == nil {
 		return false
 	}
-	if vp.IsCorrector() {
+	if sc.IsCorrector() {
 		return true
 	}
 	return false
@@ -2268,7 +2268,7 @@ func (w *Window) DeleteTooltip() {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *Window) SetNextPopup(pop *Viewport, focus ki.Ki) {
+func (w *Window) SetNextPopup(pop *Scene, focus ki.Ki) {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
@@ -2337,7 +2337,7 @@ func (w *Window) DisconnectPopup(pop ki.Ki) {
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 
-func (w *Window) ClosePopup(vp *Viewport) bool {
+func (w *Window) ClosePopup(sc *Scene) bool {
 	return false
 }
 
@@ -2359,7 +2359,7 @@ func (w *Window) ClosePopupImpl(pop ki.Ki) bool {
 	if popped {
 		w.EventMgr.PopFocus()
 	}
-	w.UploadAllViewports()
+	w.UploadAllScenes()
 	return true
 }
 
@@ -2368,9 +2368,9 @@ func (w *Window) ClosePopupImpl(pop ki.Ki) bool {
 func (w *Window) PopPopup(pop ki.Ki) bool {
 	wi, ok := pop.(Node2D)
 	if ok {
-		pvp := wi.AsViewport()
-		if pvp != nil {
-			pvp.DeletePopup()
+		psc := wi.AsScene()
+		if psc != nil {
+			psc.DeletePopup()
 		}
 	}
 	sz := len(w.PopupStack)
@@ -2453,7 +2453,7 @@ func (w *Window) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + w.Nm + "_" + dstr + ".png")
-		SaveImage(fnm, w.Viewport.Pixels)
+		SaveImage(fnm, w.Scene.Pixels)
 		fmt.Printf("Saved Window Image to: %s\n", fnm)
 		e.SetProcessed()
 	case KeyFunZoomIn:
@@ -2747,7 +2747,7 @@ func (w *Window) BenchmarkFullRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		w.Viewport.FullRenderTree()
+		w.Scene.FullRenderTree()
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
@@ -2765,7 +2765,7 @@ func (w *Window) BenchmarkReRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		w.Viewport.RenderTree()
+		w.Scene.RenderTree()
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))

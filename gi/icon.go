@@ -88,7 +88,7 @@ func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 	return false, err
 }
 
-func (ic *Icon) GetSize(vp *Viewport, iter int) {
+func (ic *Icon) GetSize(sc *Scene, iter int) {
 	if iter > 0 {
 		return
 	}
@@ -96,21 +96,21 @@ func (ic *Icon) GetSize(vp *Viewport, iter int) {
 	// ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
 }
 
-func (ic *Icon) SetStyle(vp *Viewport) {
+func (ic *Icon) SetStyle(sc *Scene) {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
-	ic.SetStyleWidget(vp)
+	ic.SetStyleWidget(sc)
 	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	// todo: set ic.SVG style
 }
 
-func (ic *Icon) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	ic.DoLayoutBase(vp, parBBox, true, iter)
-	return ic.DoLayoutChildren(vp, iter)
+func (ic *Icon) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	ic.DoLayoutBase(sc, parBBox, true, iter)
+	return ic.DoLayoutChildren(sc, iter)
 }
 
-func (ic *Icon) DrawIntoViewport(vp *Viewport) {
+func (ic *Icon) DrawIntoScene(sc *Scene) {
 	if ic.SVG.Pixels == nil {
 		return
 	}
@@ -120,7 +120,7 @@ func (ic *Icon) DrawIntoViewport(vp *Viewport) {
 	sp := image.Point{}
 	if ic.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(ic.Par)
-		pbb := pni.ChildrenBBox2D(vp)
+		pbb := pni.ChildrenBBox2D(sc)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -129,18 +129,18 @@ func (ic *Icon) DrawIntoViewport(vp *Viewport) {
 		}
 		r = nr
 	}
-	draw.Draw(vp.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
+	draw.Draw(sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 
-func (ic *Icon) Render(vp *Viewport) {
+func (ic *Icon) Render(sc *Scene) {
 	// todo: cache rendered size, update render if diff size..
 
 	wi := ic.This().(Widget)
-	if ic.PushBounds(vp) {
+	if ic.PushBounds(sc) {
 		wi.ConnectEvents()
-		ic.RenderChildren(vp)
-		ic.DrawIntoViewport(vp)
-		ic.PopBounds(vp)
+		ic.RenderChildren(sc)
+		ic.DrawIntoScene(sc)
+		ic.PopBounds(sc)
 	}
 }
 

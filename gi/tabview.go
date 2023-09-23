@@ -431,7 +431,7 @@ func (tv *TabView) DeleteTabIndexAction(idx int) {
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
-func (tv *TabView) ConfigNewTabButton(vp *Viewport) bool {
+func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 	sz := tv.NTabs()
 	tb := tv.Tabs()
 	ntb := len(tb.Kids)
@@ -479,7 +479,7 @@ const (
 // ConfigWidget initializes the tab widget children if it hasn't been done yet.
 // only the 2 primary children (Frames) need to be configured.
 // no re-config needed when adding / deleting tabs -- just new layout.
-func (tv *TabView) ConfigWidget(vp *Viewport) {
+func (tv *TabView) ConfigWidget(sc *Scene) {
 	if len(tv.Kids) != 0 {
 		return
 	}
@@ -493,7 +493,7 @@ func (tv *TabView) ConfigWidget(vp *Viewport) {
 	frame.Lay = LayoutStacked
 	frame.SetFlag(true, ReRenderAnchor)
 
-	tv.ConfigNewTabButton(vp)
+	tv.ConfigNewTabButton(sc)
 }
 
 // Tabs returns the layout containing the tabs -- the first element within us
@@ -532,8 +532,8 @@ func (tv *TabView) RenumberTabs() {
 }
 
 // RenderTabSeps renders the separators between tabs
-func (tv *TabView) RenderTabSeps(vp *Viewport) {
-	rs, pc, st := tv.RenderLock(vp)
+func (tv *TabView) RenderTabSeps(sc *Scene) {
+	rs, pc, st := tv.RenderLock(sc)
 	defer tv.RenderUnlock(rs)
 
 	// just like with standard separator, use top width like CSS
@@ -555,14 +555,14 @@ func (tv *TabView) RenderTabSeps(vp *Viewport) {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) Render(vp *Viewport) {
+func (tv *TabView) Render(sc *Scene) {
 	wi := tv.This().(Widget)
-	if tv.PushBounds(vp) {
+	if tv.PushBounds(sc) {
 		wi.ConnectEvents()
-		tv.RenderScrolls(vp)
-		tv.RenderChildren(vp)
-		tv.RenderTabSeps(vp)
-		tv.PopBounds(vp)
+		tv.RenderScrolls(sc)
+		tv.RenderChildren(sc)
+		tv.RenderTabSeps(sc)
+		tv.PopBounds(sc)
 	} else {
 		tv.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
@@ -672,15 +672,15 @@ func (tb *TabButton) TabView() *TabView {
 	return AsTabView(tv)
 }
 
-func (tb *TabButton) ConfigParts(vp *Viewport) {
+func (tb *TabButton) ConfigParts(sc *Scene) {
 	if !tb.NoDelete {
-		tb.ConfigPartsDeleteButton(vp)
+		tb.ConfigPartsDeleteButton(sc)
 		return
 	}
-	tb.Action.ConfigParts(vp) // regular
+	tb.Action.ConfigParts(sc) // regular
 }
 
-func (tb *TabButton) ConfigPartsDeleteButton(vp *Viewport) {
+func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
@@ -713,6 +713,6 @@ func (tb *TabButton) ConfigPartsDeleteButton(vp *Viewport) {
 	}
 }
 
-func (tb *TabButton) ConfigWidget(vp *Viewport) {
-	tb.ConfigParts(vp)
+func (tb *TabButton) ConfigWidget(sc *Scene) {
+	tb.ConfigParts(sc)
 }

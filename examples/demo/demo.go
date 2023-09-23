@@ -32,7 +32,7 @@ func mainrun() {
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
 	win := gi.NewMainWindow("gogi-demo", "The GoGi Demo", 1024, 768)
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -487,7 +487,7 @@ func makeFileTree(tv *gi.TabView) {
 	filetree.Lay = gi.LayoutVert
 }
 
-func doWindowSetup(win *gi.Window, vp *gi.Viewport) {
+func doWindowSetup(win *gi.Window, vp *gi.Scene) {
 	// Main Menu
 
 	appnm := gi.AppName()

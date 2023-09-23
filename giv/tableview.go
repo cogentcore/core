@@ -245,7 +245,7 @@ func (tv *TableView) IsConfiged() bool {
 }
 
 // Config configures the view
-func (tv *TableView) ConfigWidget(vp *Viewport) {
+func (tv *TableView) ConfigWidget(vp *Scene) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "frame")
@@ -950,7 +950,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+func (tv *TableView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
 	redo := tv.Frame.DoLayout(vp, parBBox, iter)
 	if !tv.IsConfiged() {
 		return redo
@@ -1090,7 +1090,7 @@ func (tv *TableView) EditIdx(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	StructViewDialog(tv.Viewport, stru, DlgOpts{Title: tynm}, nil, nil)
+	StructViewDialog(tv.Scene, stru, DlgOpts{Title: tynm}, nil, nil)
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {

@@ -263,13 +263,13 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	sv.UpdateEndRender(updt)
 }
 
-func (sv *SplitView) ConfigWidget(vp *Viewport) {
+func (sv *SplitView) ConfigWidget(sc *Scene) {
 	sv.NewParts(LayoutNil)
 	sv.UpdateSplits()
-	sv.ConfigSplitters(vp)
+	sv.ConfigSplitters(sc)
 }
 
-func (sv *SplitView) ConfigSplitters(vp *Viewport) {
+func (sv *SplitView) ConfigSplitters(sc *Scene) {
 	sz := len(sv.Kids)
 	mods, updt := sv.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
@@ -352,28 +352,28 @@ func (sv *SplitView) SplitViewEvents() {
 	sv.KeyChordEvent()
 }
 
-func (sv *SplitView) StyleSplitView(vp *Viewport) {
-	sv.SetStyleWidget(vp)
+func (sv *SplitView) StyleSplitView(sc *Scene) {
+	sv.SetStyleWidget(sc)
 	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	// todo: props?
 	// sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	// sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
-func (sv *SplitView) SetStyle(vp *Viewport) {
+func (sv *SplitView) SetStyle(sc *Scene) {
 	sv.StyMu.Lock()
 
-	sv.StyleSplitView(vp)
+	sv.StyleSplitView(sc)
 	sv.LayState.SetFromStyle(&sv.Style) // also does reset
 	sv.UpdateSplits()
 	sv.StyMu.Unlock()
 
-	sv.ConfigSplitters(vp)
+	sv.ConfigSplitters(sc)
 }
 
-func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sv.DoLayoutBase(vp, parBBox, true, iter) // init style
-	sv.DoLayoutParts(vp, parBBox, iter)
+func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sv.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sv.DoLayoutParts(sc, parBBox, iter)
 	sv.UpdateSplits()
 
 	handsz := sv.HandleSize.Dots
@@ -414,12 +414,12 @@ func (sv *SplitView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) b
 		}
 	}
 
-	return sv.DoLayoutChildren(vp, iter)
+	return sv.DoLayoutChildren(sc, iter)
 }
 
-func (sv *SplitView) Render(vp *Viewport) {
+func (sv *SplitView) Render(sc *Scene) {
 	wi := sv.This().(Widget)
-	if sv.PushBounds(vp) {
+	if sv.PushBounds(sc) {
 		wi.ConnectEvents()
 		for i, kid := range sv.Kids {
 			wi, wb := AsWidget(kid)
@@ -432,10 +432,10 @@ func (sv *SplitView) Render(vp *Viewport) {
 			} else {
 				wb.SetFlag(false, Invisible)
 			}
-			wi.Render(vp) // needs to disconnect using invisible
+			wi.Render(sc) // needs to disconnect using invisible
 		}
-		sv.Parts.Render(vp)
-		sv.PopBounds(vp)
+		sv.Parts.Render(sc)
+		sv.PopBounds(sc)
 	}
 }
 
@@ -509,26 +509,26 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sr *Splitter) ConfigWidget(vp *Viewport) {
-	sr.ConfigSlider(vp)
-	sr.ConfigParts(vp)
+func (sr *Splitter) ConfigWidget(sc *Scene) {
+	sr.ConfigSlider(sc)
+	sr.ConfigParts(sc)
 }
 
-func (sr *Splitter) SetStyle(vp *Viewport) {
+func (sr *Splitter) SetStyle(sc *Scene) {
 	sr.SetFlag(false, CanFocus)
-	sr.StyleSlider(vp)
+	sr.StyleSlider(sc)
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
 }
 
-func (sr *Splitter) GetSize(vp *Viewport, iter int) {
-	sr.InitLayout(vp)
+func (sr *Splitter) GetSize(sc *Scene, iter int) {
+	sr.InitLayout(sc)
 }
 
-func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(vp, parBBox, true, iter) // init style
-	sr.DoLayoutParts(vp, parBBox, iter)
+func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sr.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sr.DoLayoutParts(sc, parBBox, iter)
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue()
@@ -536,7 +536,7 @@ func (sr *Splitter) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bo
 	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.WinBBox
 	sr.BBoxMu.RUnlock()
-	return sr.DoLayoutChildren(vp, iter)
+	return sr.DoLayoutChildren(sc, iter)
 }
 
 func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
@@ -664,7 +664,7 @@ func (sr *Splitter) ConnectEvents() {
 	sr.SplitterEvents()
 }
 
-func (sr *Splitter) Render(vp *Viewport) {
+func (sr *Splitter) Render(sc *Scene) {
 	win := sr.ParentWindow()
 	wi := sr.This().(Widget)
 	wi.ConnectEvents()
@@ -689,23 +689,23 @@ func (sr *Splitter) Render(vp *Viewport) {
 			win.UpdateSig()
 		}
 		sr.UpdateSplitterPos()
-		if sr.PushBounds(vp) {
-			sr.RenderSplitter(vp)
-			sr.RenderChildren(vp)
-			sr.PopBounds(vp)
+		if sr.PushBounds(sc) {
+			sr.RenderSplitter(sc)
+			sr.RenderChildren(sc)
+			sr.PopBounds(sc)
 		}
 	}
 }
 
 // RenderSplitter does the default splitter rendering
-func (sr *Splitter) RenderSplitter(vp *Viewport) {
+func (sr *Splitter) RenderSplitter(sc *Scene) {
 	sr.UpdateSplitterPos()
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
-		sr.Parts.Render(vp)
+		sr.Parts.Render(sc)
 	}
 	// else {
-	rs, pc, st := sr.RenderLock(vp)
+	rs, pc, st := sr.RenderLock(sc)
 
 	pc.StrokeStyle.SetColor(nil)
 	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
@@ -715,7 +715,7 @@ func (sr *Splitter) RenderSplitter(vp *Viewport) {
 	// sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
 	// sr.RenderBoxImpl(pos, sz, st.Border)
 
-	sr.RenderStdBox(vp, st)
+	sr.RenderStdBox(sc, st)
 
 	sr.RenderUnlock(rs)
 	// }

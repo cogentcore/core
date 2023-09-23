@@ -123,7 +123,7 @@ func (wb *WidgetBase) SetEnabledState(enabled bool) {
 // SetEnabledStateUpdt sets the Disabled flag
 func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
 	wb.SetFlag(!enabled, Disabled)
-	wb.SetStyleUpdate(wb.Vp)
+	wb.SetStyleUpdate(wb.Sc)
 }
 
 // IsDisabled tests if this node is flagged as [Disabled].

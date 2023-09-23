@@ -46,18 +46,6 @@ func (m *Menu) CopyFrom(men *Menu) {
 // calling this function (typically an Action or Button) and the menu
 type MakeMenuFunc func(obj ki.Ki, m *Menu)
 
-// ActOpts provides named and partial parameters for AddAction method
-type ActOpts struct {
-	Name        string
-	Label       string
-	Icon        icons.Icon
-	Tooltip     string
-	Shortcut    key.Chord
-	ShortcutKey KeyFuns
-	Data        any
-	UpdateFunc  func(act *Action)
-}
-
 // SetAction sets properties of given action
 func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
 	nm := opts.Name
@@ -272,7 +260,7 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			PromptDialog(win.Viewport, DlgOpts{Title: aboutitle, Prompt: goosi.TheApp.About()}, AddOk, NoCancel, nil, nil)
+			PromptDialog(win.Scene, DlgOpts{Title: aboutitle, Prompt: goosi.TheApp.About()}, AddOk, NoCancel, nil, nil)
 		})
 	m.AddAction(ActOpts{Label: "GoGi Preferences...", Shortcut: "Command+P"},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -340,9 +328,9 @@ var MenuMaxHeight = 30
 // PopupMenu pops up a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
-func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
+func PopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
 	win := parVp.Win
-	mainVp := win.Viewport
+	mainSc := win.Scene
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
@@ -350,13 +338,13 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 
 	menu.UpdateActions()
 
-	pvp := &Viewport{}
-	pvp.Name = name + "Menu"
-	pvp.Win = win
-	pvp.Type = VpMenu
+	psc := &Scene{}
+	psc.Name = name + "Menu"
+	psc.Win = win
+	psc.Type = VpMenu
 
-	pvp.Geom.Pos = image.Point{x, y}
-	frame := &pvp.Frame
+	psc.Geom.Pos = image.Point{x, y}
+	frame := &psc.Frame
 	MenuFrameConfigStyles(frame)
 	var focus ki.Ki
 	for _, ac := range menu {
@@ -368,12 +356,12 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 			}
 		}
 	}
-	frame.ConfigTree(pvp)
-	frame.SetStyleTree(pvp) // sufficient to get sizes
-	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.ConfigTree(psc)
+	frame.SetStyleTree(psc) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
 	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-	frame.GetSizeTree(pvp, 0)          // collect sizes
-	pvp.Win = nil
+	frame.GetSizeTree(psc, 0)          // collect sizes
+	psc.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
@@ -381,12 +369,12 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 	vpsz.Y = min(maxht, vpsz.Y)
 	x = max(0, x)
 	y = max(0, y)
-	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
-	pvp.Resize(vpsz)
-	pvp.Geom.Pos = image.Point{x, y}
-	win.SetNextPopup(pvp, focus)
-	return pvp
+	x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
+	psc.Resize(vpsz)
+	psc.Geom.Pos = image.Point{x, y}
+	win.SetNextPopup(psc, focus)
+	return psc
 }
 
 // TODO: not working; need to get working.
@@ -394,9 +382,9 @@ func PopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
 // a viewport with a layout that draws the supplied actions
 // positions are relative to given viewport -- name is relevant base name to
 // which Menu is appended
-func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewport {
+func RecyclePopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
 	win := parVp.Win
-	mainVp := win.Viewport
+	mainSc := win.Scene
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
 		return nil
@@ -404,17 +392,17 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 
 	menu.UpdateActions()
 
-	pvp, ok := win.CurPopup()
+	psc, ok := win.CurPopup()
 	if !ok {
 		return PopupMenu(menu, x, y, parVp, name)
 	}
-	// pvp.InitName(pvp, name+"Menu")
-	pvp.Win = win
-	pvp.Type = VpMenu
+	// psc.InitName(psc, name+"Menu")
+	psc.Win = win
+	psc.Type = VpMenu
 
-	pvp.Geom.Pos = image.Point{x, y}
+	psc.Geom.Pos = image.Point{x, y}
 	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
-	frame := &pvp.Frame
+	frame := &psc.Frame
 	frame.DeleteChildren(ki.NoDestroyKids)
 	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
 	var focus ki.Ki
@@ -428,12 +416,12 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 			}
 		}
 	}
-	frame.ConfigTree(pvp)
-	frame.SetStyleTree(pvp) // sufficient to get sizes
-	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.ConfigTree(psc)
+	frame.SetStyleTree(psc) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
 	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-	frame.GetSizeTree(pvp, 0)          // collect sizes
-	pvp.Win = nil
+	frame.GetSizeTree(psc, 0)          // collect sizes
+	psc.Win = nil
 	scextra := frame.Style.ScrollBarWidth.Dots
 	frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
 	vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
@@ -441,13 +429,13 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 	vpsz.Y = min(maxht, vpsz.Y)
 	x = max(0, x)
 	y = max(0, y)
-	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
-	pvp.Resize(vpsz)
-	pvp.Geom.Pos = image.Point{x, y}
-	pvp.SetFullReRender()
-	win.SetNextPopup(pvp, focus)
-	return pvp
+	x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
+	psc.Resize(vpsz)
+	psc.Geom.Pos = image.Point{x, y}
+	psc.SetFullReRender()
+	win.SetNextPopup(psc, focus)
+	return psc
 }
 
 // StringsChooserPopup creates a menu of the strings in the given string
@@ -456,7 +444,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Viewport, name string) *Viewpo
 // item -- the name of the Action is the string value, and the data will be
 // the index in the slice.  A string equal to curSel will be marked as
 // selected.  Location is from the ContextMenuPos of recv node.
-func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvFunc) *Viewport {
+func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
 	var menu Menu
 	for i, it := range strs {
 		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
@@ -464,8 +452,8 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvF
 	}
 	wb := recv.AsWidget()
 	pos := recv.ContextMenuPos()
-	vp := wb.Vp
-	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
+	sc := wb.Sc
+	return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
 }
 
 // SubStringsChooserPopup creates a menu of the sub-strings in the given
@@ -477,7 +465,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvF
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.RecvFunc) *Viewport {
+func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
 	var menu Menu
 	for si, ss := range strs {
 		sz := len(ss)
@@ -496,8 +484,8 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.
 	}
 	wb := recv.AsWidget()
 	pos := recv.ContextMenuPos()
-	vp := wb.Vp
-	return PopupMenu(menu, pos.X, pos.Y, vp, recv.Name())
+	sc := wb.Sc
+	return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
 }
 
 // StringsInsertFirst inserts the given string at start of a string slice,
@@ -640,8 +628,8 @@ func (sp *Separator) CopyFieldsFrom(frm any) {
 	sp.Horiz = fr.Horiz
 }
 
-func (sp *Separator) RenderSeparator(vp *Viewport) {
-	rs, pc, st := sp.RenderLock(vp)
+func (sp *Separator) RenderSeparator(sc *Scene) {
+	rs, pc, st := sp.RenderLock(sc)
 	defer sp.RenderUnlock(rs)
 
 	pos := sp.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
@@ -661,10 +649,10 @@ func (sp *Separator) RenderSeparator(vp *Viewport) {
 	pc.FillStrokeClear(rs)
 }
 
-func (sp *Separator) Render(vp *Viewport) {
-	if sp.PushBounds(vp) {
-		sp.RenderSeparator(vp)
-		sp.RenderChildren(vp)
-		sp.PopBounds(vp)
+func (sp *Separator) Render(sc *Scene) {
+	if sp.PushBounds(sc) {
+		sp.RenderSeparator(sc)
+		sp.RenderChildren(sc)
+		sp.PopBounds(sc)
 	}
 }

@@ -580,7 +580,7 @@ func (tv *TreeView) Unselect() {
 
 // UnselectAll unselects all selected items in the view
 func (tv *TreeView) UnselectAll() {
-	if tv.Viewport == nil {
+	if tv.Scene == nil {
 		return
 	}
 	wupdt := tv.TopUpdateStart()
@@ -596,7 +596,7 @@ func (tv *TreeView) UnselectAll() {
 
 // SelectAll all items in view
 func (tv *TreeView) SelectAll() {
-	if tv.Viewport == nil {
+	if tv.Scene == nil {
 		return
 	}
 	wupdt := tv.TopUpdateStart()
@@ -1046,13 +1046,13 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 		tv.CtxtMenuFunc(tv.This().(gi.Node2D), m)
 	}
 	// note: root inactivity is relevant factor here..
-	if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Viewport, m) { // our viewed obj's menu
+	if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
 		if tv.ShowViewCtxtMenu {
 			m.AddSeparator("sep-tvmenu")
-			CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Viewport, m)
+			CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
 		}
 	} else {
-		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Viewport, m)
+		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
 	}
 }
 
@@ -1069,13 +1069,13 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 	}
 	if sk.IsField() {
 		if op != "" {
-			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, gi.AddOk, gi.NoCancel, nil, nil)
+			gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, gi.AddOk, gi.NoCancel, nil, nil)
 		}
 		return true
 	}
 	if tv.This() == tv.RootView.This() {
 		if op != "" {
-			gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, gi.AddOk, gi.NoCancel, nil, nil)
+			gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, gi.AddOk, gi.NoCancel, nil, nil)
 		}
 		return true
 	}
@@ -1110,7 +1110,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 		return
 	}
 	myidx += rel
-	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
+	gi.NewKiDialog(tv.Scene, sk.BaseIface(),
 		gi.DlgOpts{Title: actNm, Prompt: "Number and Type of Items to Insert:"},
 		tv.Par.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
@@ -1150,7 +1150,7 @@ func (tv *TreeView) SrcAddChild() {
 		log.Printf("TreeView %v nil SrcNode in: %v\n", ttl, tv.Path())
 		return
 	}
-	gi.NewKiDialog(tv.Viewport, sk.BaseIface(),
+	gi.NewKiDialog(tv.Scene, sk.BaseIface(),
 		gi.DlgOpts{Title: ttl, Prompt: "Number and Type of Items to Add:"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
@@ -1249,7 +1249,7 @@ func (tv *TreeView) SrcEdit() {
 		return
 	}
 	tynm := laser.NonPtrType(ki.Type(tv.SrcNode)).Name()
-	StructViewDialog(tv.Viewport, tv.SrcNode, DlgOpts{Title: tynm}, nil, nil)
+	StructViewDialog(tv.Scene, tv.SrcNode, DlgOpts{Title: tynm}, nil, nil)
 }
 
 // SrcGoGiEditor pulls up a new GoGiEditor window on the source object viewed by this node
@@ -1384,7 +1384,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	var men gi.Menu
 	tv.MakePasteMenu(&men, md)
 	pos := tv.ContextMenuPos()
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvPasteMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Scene, "tvPasteMenu")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1436,7 +1436,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	}
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Viewport, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()
@@ -1543,7 +1543,7 @@ func (tv *TreeView) DragNDropExternal(de *dnd.Event) {
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore
 func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
-	if tv.Viewport == nil {
+	if tv.Scene == nil {
 		return
 	}
 	tv.UnselectAll()
@@ -1633,7 +1633,7 @@ func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod)
 	pos := tv.ContextMenuPos()
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Viewport, "tvDropMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, tv.Scene, "tvDropMenu")
 }
 
 // DropExternal is not handled by base case but could be in derived
@@ -1893,7 +1893,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts(vp *Viewport) {
+func (tv *TreeView) ConfigParts(vp *Scene) {
 	parts := tv.NewParts(gi.LayoutHoriz)
 	parts.Style.Template = "giv.TreeView.Parts"
 	config := ki.TypeAndNameList{}
@@ -2021,18 +2021,18 @@ var TreeViewProps = ki.Props{
 	},
 }
 
-func (tv *TreeView) ConfigWidget(vp *Viewport) {
+func (tv *TreeView) ConfigWidget(vp *Scene) {
 	// // optimized init -- avoid tree walking
 	if tv.RootView != tv {
-		tv.Viewport = tv.RootView.Viewport
+		tv.Scene = tv.RootView.Scene
 	} else {
-		tv.Viewport = tv.ParentViewport()
+		tv.Scene = tv.ParentScene()
 	}
 	tv.Style.Defaults()
 	tv.Style.Template = "giv.TreeView." + ki.Type(tv).Name()
 	tv.LayState.Defaults() // doesn't overwrite
 	tv.ConfigParts(vp)
-	// tv.ConnectToViewport()
+	// tv.ConnectToScene()
 }
 
 func (tv *TreeView) StyleTreeView() {
@@ -2073,8 +2073,8 @@ func (tv *TreeView) SetStyle() {
 // TreeView is tricky for alloc because it is both a layout of its children but has to
 // maintain its own bbox for its own widget.
 
-func (tv *TreeView) GetSize(vp *Viewport, iter int) {
-	tv.InitLayout(vp * Viewport)
+func (tv *TreeView) GetSize(vp *Scene, iter int) {
+	tv.InitLayout(vp * Scene)
 	if tv.HasClosedParent() {
 		return // nothing
 	}
@@ -2106,7 +2106,7 @@ func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	tv.Parts.DoLayout(vp, parBBox, iter)
 }
 
-func (tv *TreeView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
@@ -2119,7 +2119,7 @@ func (tv *TreeView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bo
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.Style, tv.Viewport, tv.NodeSize(), psize) // update units with final layout
+	gi.SetUnitContext(&tv.Style, tv.Scene, tv.NodeSize(), psize) // update units with final layout
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
@@ -2157,7 +2157,7 @@ func (tv *TreeView) BBox2D() image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (tv *TreeView) ChildrenBBox2D(vp *Viewport) image.Rectangle {
+func (tv *TreeView) ChildrenBBox2D(vp *Scene) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
 		pwi, _ := gi.AsWidget(tv.Par)
@@ -2167,7 +2167,7 @@ func (tv *TreeView) ChildrenBBox2D(vp *Viewport) image.Rectangle {
 }
 
 func (tv *TreeView) IsVisible() bool {
-	if tv == nil || tv.This() == nil || tv.Viewport == nil {
+	if tv == nil || tv.This() == nil || tv.Scene == nil {
 		return false
 	}
 	if tv.RootView == nil || tv.RootView.This() == nil {
@@ -2198,14 +2198,14 @@ func (tv *TreeView) PushBounds() bool {
 	}
 	rs := tv.Render()
 	rs.PushBounds(tv.VpBBox)
-	tv.ConnectToViewport()
+	tv.ConnectToScene()
 	if gi.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", tv.Path(), tv.VpBBox)
 	}
 	return true
 }
 
-func (tv *TreeView) Render(vp *Viewport) {
+func (tv *TreeView) Render(vp *Scene) {
 	if tv.HasClosedParent() {
 		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing

@@ -200,7 +200,7 @@ func (sb *SpinBox) PageIncrValue(steps float32) {
 	sb.SetValueAction(val)
 }
 
-func (sb *SpinBox) ConfigParts(vp *Viewport) {
+func (sb *SpinBox) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutHoriz)
 
 	if sb.UpIcon.IsNil() {
@@ -384,13 +384,13 @@ func (sb *SpinBox) SpinBoxEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SpinBox) ConfigWidget(vp *Viewport) {
-	sb.ConfigParts(vp)
+func (sb *SpinBox) ConfigWidget(sc *Scene) {
+	sb.ConfigParts(sc)
 }
 
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
 // doesn't support inherit or default
-func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport) {
+func (sb *SpinBox) StyleFromProps(props ki.Props, sc *Scene) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -441,40 +441,40 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, vp *Viewport) {
 }
 
 // StyleSpinBox does spinbox styling -- sets StyMu Lock
-func (sb *SpinBox) StyleSpinBox(vp *Viewport) {
+func (sb *SpinBox) StyleSpinBox(sc *Scene) {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	sb.SetStyleWidget(vp)
+	sb.SetStyleWidget(sc)
 }
 
-func (sb *SpinBox) SetStyle(vp *Viewport) {
-	sb.StyleSpinBox(vp)
+func (sb *SpinBox) SetStyle(sc *Scene) {
+	sb.StyleSpinBox(sc)
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
-	sb.ConfigParts(vp)
+	sb.ConfigParts(sc)
 }
 
-func (sb *SpinBox) GetSize(vp *Viewport, iter int) {
-	sb.GetSizeParts(vp, iter)
+func (sb *SpinBox) GetSize(sc *Scene, iter int) {
+	sb.GetSizeParts(sc, iter)
 }
 
-func (sb *SpinBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(vp, parBBox, true, iter) // init style
-	sb.DoLayoutParts(vp, parBBox, iter)
-	return sb.DoLayoutChildren(vp, iter)
+func (sb *SpinBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sb.DoLayoutParts(sc, parBBox, iter)
+	return sb.DoLayoutChildren(sc, iter)
 }
 
-func (sb *SpinBox) Render(vp *Viewport) {
+func (sb *SpinBox) Render(sc *Scene) {
 	wi := sb.This().(Widget)
-	if sb.PushBounds(vp) {
+	if sb.PushBounds(sc) {
 		wi.ConnectEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelected(sb.IsSelected())
-		sb.RenderChildren(vp)
-		sb.RenderParts(vp)
-		sb.PopBounds(vp)
+		sb.RenderChildren(sc)
+		sb.RenderParts(sc)
+		sb.PopBounds(sc)
 	} else {
 		sb.DisconnectAllEvents(RegPri)
 	}

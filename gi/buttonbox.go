@@ -227,7 +227,7 @@ func (bb *ButtonBox) ConfigItems() {
 	}
 }
 
-func (bb *ButtonBox) ConfigParts(vp *Viewport) {
+func (bb *ButtonBox) ConfigParts(sc *Scene) {
 	if len(bb.Items) == 0 {
 		bb.Parts.DeleteChildren(ki.DestroyKids)
 		return
@@ -243,38 +243,38 @@ func (bb *ButtonBox) ConfigParts(vp *Viewport) {
 	}
 }
 
-func (bb *ButtonBox) ConfigWidget(vp *Viewport) {
-	bb.ConfigParts(vp)
+func (bb *ButtonBox) ConfigWidget(sc *Scene) {
+	bb.ConfigParts(sc)
 }
 
-func (bb *ButtonBox) SetStyle(vp *Viewport) {
+func (bb *ButtonBox) SetStyle(sc *Scene) {
 	bb.StyMu.Lock()
-	bb.SetStyleWidget(vp)
+	bb.SetStyleWidget(sc)
 	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
-	bb.ConfigParts(vp)
+	bb.ConfigParts(sc)
 }
 
-func (bb *ButtonBox) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(vp, parBBox, true, iter) // init style
-	bb.DoLayoutParts(vp, parBBox, iter)
-	return bb.DoLayoutChildren(vp, iter)
+func (bb *ButtonBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	bb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	bb.DoLayoutParts(sc, parBBox, iter)
+	return bb.DoLayoutChildren(sc, iter)
 }
 
-func (bb *ButtonBox) RenderButtonBox(vp *Viewport) {
-	rs, _, st := bb.RenderLock(vp)
-	bb.RenderStdBox(vp, st)
+func (bb *ButtonBox) RenderButtonBox(sc *Scene) {
+	rs, _, st := bb.RenderLock(sc)
+	bb.RenderStdBox(sc, st)
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBox) Render(vp *Viewport) {
+func (bb *ButtonBox) Render(sc *Scene) {
 	wi := bb.This().(Widget)
-	if bb.PushBounds(vp) {
+	if bb.PushBounds(sc) {
 		wi.ConnectEvents()
-		bb.RenderButtonBox(vp)
-		bb.RenderParts(vp)
-		bb.RenderChildren(vp)
-		bb.PopBounds(vp)
+		bb.RenderButtonBox(sc)
+		bb.RenderParts(sc)
+		bb.RenderChildren(sc)
+		bb.PopBounds(sc)
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}

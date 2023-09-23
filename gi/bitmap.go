@@ -141,7 +141,7 @@ func (bm *Bitmap) GrabRenderFrom(wi Widget) {
 	}
 }
 
-func (bm *Bitmap) DrawIntoViewport(vp *Viewport) {
+func (bm *Bitmap) DrawIntoScene(sc *Scene) {
 	if bm.Pixels == nil {
 		return
 	}
@@ -151,7 +151,7 @@ func (bm *Bitmap) DrawIntoViewport(vp *Viewport) {
 	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(bm.Par)
-		pbb := pni.ChildrenBBox2D(vp)
+		pbb := pni.ChildrenBBox2D(sc)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -160,16 +160,16 @@ func (bm *Bitmap) DrawIntoViewport(vp *Viewport) {
 		}
 		r = nr
 	}
-	draw.Draw(vp.Pixels, r, bm.Pixels, sp, draw.Over)
+	draw.Draw(sc.Pixels, r, bm.Pixels, sp, draw.Over)
 }
 
-func (bm *Bitmap) Render(vp *Viewport) {
+func (bm *Bitmap) Render(sc *Scene) {
 	wi := bm.This().(Widget)
-	if bm.PushBounds(vp) {
+	if bm.PushBounds(sc) {
 		wi.ConnectEvents()
-		bm.RenderChildren(vp)
-		bm.DrawIntoViewport(bm.Vp)
-		bm.PopBounds(vp)
+		bm.RenderChildren(sc)
+		bm.DrawIntoScene(bm.Sc)
+		bm.PopBounds(sc)
 	} else {
 		bm.DisconnectAllEvents(AllPris)
 	}
@@ -182,8 +182,8 @@ func (bm *Bitmap) Render(vp *Viewport) {
 // if nil, then image could not be grabbed
 func GrabRenderFrom(wi Widget) *image.RGBA {
 	wb := wi.AsWidget()
-	vp := wb.Vp
-	if vp == nil || vp.Pixels == nil {
+	sc := wb.Sc
+	if sc == nil || sc.Pixels == nil {
 		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", wb.Path())
 		return nil
 	}
@@ -192,7 +192,7 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 	}
 	sz := wb.VpBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), vp.Pixels, wb.VpBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), sc.Pixels, wb.VpBBox.Min, draw.Src)
 	return img
 }
 

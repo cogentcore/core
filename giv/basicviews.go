@@ -63,7 +63,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -72,7 +72,7 @@ func (vv *StructValueView) HasAction() bool {
 	return true
 }
 
-func (vv *StructValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *StructValueView) Activate(vp *gi.Scene, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -187,7 +187,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -196,7 +196,7 @@ func (vv *SliceValueView) HasAction() bool {
 	return true
 }
 
-func (vv *SliceValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *SliceValueView) Activate(vp *gi.Scene, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -319,7 +319,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -328,7 +328,7 @@ func (vv *MapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *MapValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *MapValueView) Activate(vp *gi.Scene, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -457,7 +457,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 			k := vvv.KiStruct()
 			if k != nil {
 				mb := vvv.Widget.(*gi.Button)
-				vvv.Activate(mb.Viewport, nil, nil)
+				vvv.Activate(mb.Scene, nil, nil)
 			}
 		})
 	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"},
@@ -475,7 +475,7 @@ func (vv *KiPtrValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KiPtrValueView) Activate(vp *gi.Viewport, recv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KiPtrValueView) Activate(vp *gi.Scene, recv ki.Ki, dlgFunc ki.RecvFunc) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return

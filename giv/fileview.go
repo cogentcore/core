@@ -283,7 +283,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 }
 
 // Config configures the view
-func (fv *FileView) ConfigWidget(vp *Viewport) {
+func (fv *FileView) ConfigWidget(vp *Scene) {
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
@@ -554,7 +554,7 @@ func (fv *FileView) UpdateFiles() {
 	var owin goosi.Window
 	win := fv.ParentWindow()
 	if win != nil {
-		owin = fv.Viewport.Win.OSWin
+		owin = fv.Scene.Win.OSWin
 	} else {
 		owin = goosi.TheApp.WindowInFocus()
 	}
@@ -589,8 +589,8 @@ func (fv *FileView) UpdateFiles() {
 	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
-			// if fv.Viewport != nil {
-			// 	gi.PromptDialog(fv.Viewport, "FileView UpdateFiles", emsg, gi.AddOk, gi.NoCancel, nil, nil)
+			// if fv.Scene != nil {
+			// 	gi.PromptDialog(fv.Scene, "FileView UpdateFiles", emsg, gi.AddOk, gi.NoCancel, nil, nil)
 			// } else {
 			log.Printf("gi.FileView error: %v\n", emsg)
 			// }
@@ -671,7 +671,7 @@ func (fv *FileView) AddPathToFavs() {
 		fnm = dp
 	}
 	if _, found := gi.Prefs.FavPaths.FindPath(dp); found {
-		gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp)}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(fv.Scene, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp)}, gi.AddOk, gi.NoCancel, nil, nil)
 		return
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
@@ -713,7 +713,7 @@ func (fv *FileView) NewFolder() {
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
-		gi.PromptDialog(fv.Viewport, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(fv.Scene, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, gi.AddOk, gi.NoCancel, nil, nil)
 	}
 	fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
@@ -934,7 +934,7 @@ func (fv *FileView) EditPaths() {
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
 	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, NoAdd: true}
-	SliceViewDialog(fv.Viewport, &tmp, opts,
+	SliceViewDialog(fv.Scene, &tmp, opts,
 		nil, fv, func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				gi.SavedPaths = nil

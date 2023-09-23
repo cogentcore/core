@@ -96,7 +96,7 @@ func GatherSizes(ly *Layout) {
 	sumPref, sumNeed, maxPref, maxNeed := GatherSizesSumMax(ly)
 
 	prefSizing := false
-	mvp := ly.Vp
+	mvp := ly.Sc
 	if mvp != nil && mvp.HasFlag(VpPrefSizing) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
@@ -376,7 +376,7 @@ func GatherSizesGrid(ly *Layout) {
 	}
 
 	prefSizing := false
-	mvp := ly.Vp
+	mvp := ly.Sc
 	if mvp != nil && mvp.HasFlag(VpPrefSizing) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
@@ -446,7 +446,7 @@ func GatherSizesGrid(ly *Layout) {
 // LayAllocFromParent: if we are not a child of a layout, then get allocation
 // from a parent obj that has a layout size
 func LayAllocFromParent(ly *Layout) {
-	mvp := ly.Vp
+	mvp := ly.Sc
 	if ly.Par == nil || mvp == nil || !ly.LayState.Alloc.Size.IsNil() {
 		return
 	}

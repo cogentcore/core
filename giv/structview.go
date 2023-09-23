@@ -175,7 +175,7 @@ func (sv *StructView) UpdateField(field string) {
 }
 
 // Config configures the view
-func (sv *StructView) ConfigWidget(vp *Viewport) {
+func (sv *StructView) ConfigWidget(vp *Scene) {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks.IsDeleted() || ks.IsDestroyed() {
 			return
@@ -245,7 +245,7 @@ func (sv *StructView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(sv.Struct) {
-		ToolBarView(sv.Struct, sv.Viewport, tb)
+		ToolBarView(sv.Struct, sv.Scene, tb)
 		tb.SetFullReRender()
 	}
 	sv.ToolbarStru = sv.Struct
@@ -413,7 +413,7 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructView) Render(vp *Viewport) {
+func (sv *StructView) Render(vp *Scene) {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateActions()
 	}

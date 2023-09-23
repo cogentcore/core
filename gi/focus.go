@@ -35,7 +35,7 @@ const (
 // FocusChanged handles the default behavior for node focus changes
 // by calling [NodeBase.SetNeedsStyle] and sending an update signal.
 func (wb *WidgetBase) FocusChanged(change FocusChanges) {
-	wb.SetStyleUpdate(wb.Vp)
+	wb.SetStyleUpdate(wb.Sc)
 }
 
 // HasFocus returns true if this node has keyboard focus and should

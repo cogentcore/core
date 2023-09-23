@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -29,6 +30,18 @@ func AsAction(k ki.Ki) *Action {
 
 func (ac *Action) AsAction() *Action {
 	return ac
+}
+
+// ActOpts provides named and partial parameters for AddAction method
+type ActOpts struct {
+	Name        string
+	Label       string
+	Icon        icons.Icon
+	Tooltip     string
+	Shortcut    key.Chord
+	ShortcutKey KeyFuns
+	Data        any
+	UpdateFunc  func(act *Action)
 }
 
 // Action is a button widget that can display a text label and / or an icon
@@ -219,18 +232,18 @@ func (ac *Action) ButtonRelease() {
 		// } else {
 		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)
 	}
-	if !menOpen && ac.IsMenu() && ac.Vp != nil {
+	if !menOpen && ac.IsMenu() && ac.Sc != nil {
 		win := ac.ParentWindow()
 		if win != nil {
-			win.ClosePopup(ac.Vp) // in case we are a menu popup -- no harm if not
+			win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
 		}
 	}
 	ac.UpdateEnd(updt)
 }
 
 // Config calls functions to initialize widget and parts
-func (ac *Action) ConfigWidget(vp *Viewport) {
-	ac.ConfigParts(vp)
+func (ac *Action) ConfigWidget(sc *Scene) {
+	ac.ConfigParts(sc)
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
@@ -287,7 +300,7 @@ func (ac *Action) ConfigPartsMenuItem() {
 }
 
 // ConfigParts switches on part type on calls specific config
-func (ac *Action) ConfigParts(vp *Viewport) {
+func (ac *Action) ConfigParts(sc *Scene) {
 	ismbar := false
 	istbar := false
 	if ac.Par != nil {

@@ -49,9 +49,9 @@ var CustomConfigStyles func(w *WidgetBase)
 type Styler func(w *WidgetBase, s *gist.Style)
 
 // todo: when?
-func (vp *Viewport) SetMyStyle() {
-	vp.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
-	vp.Frame.Style.Color = ColorScheme.OnBackground
+func (sc *Scene) SetMyStyle() {
+	sc.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
+	sc.Frame.Style.Color = ColorScheme.OnBackground
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ func (wb *WidgetBase) ParentStyleRUnlock() {
 // SetStyleWidget styles the Style values from node properties and optional
 // base-level defaults -- for Widget-style nodes.
 // must be called under a StyMu Lock
-func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
+func (wb *WidgetBase) SetStyleWidget(sc *Scene) {
 	pr := prof.Start("SetStyleWidget")
 	defer pr.End()
 
@@ -163,14 +163,14 @@ func (wb *WidgetBase) SetStyleWidget(vp *Viewport) {
 	prun.End()
 
 	puc := prof.Start("SetStyleWidget-SetUnitContext")
-	SetUnitContext(&wb.Style, wb.Vp, mat32.Vec2{}, mat32.Vec2{})
+	SetUnitContext(&wb.Style, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
 	psc := prof.Start("SetStyleWidget-SetCurrentColor")
 	if wb.Style.Inactive { // inactive can only set, not clear
 		wb.SetFlag(true, Disabled)
 	}
-	vp.SetCurrentColor(wb.Style.Color)
+	sc.SetCurrentColor(wb.Style.Color)
 	psc.End()
 
 	wb.LayState.SetFromStyle(&wb.Style) // also does reset
@@ -184,31 +184,31 @@ func (wb *WidgetBase) RunStyleFuncs() {
 	}
 }
 
-func (wb *WidgetBase) SetStyleUpdate(vp *Viewport) {
+func (wb *WidgetBase) SetStyleUpdate(sc *Scene) {
 	wi := wb.This().(Widget)
 	updt := wb.UpdateStart()
-	wi.SetStyle(vp)
+	wi.SetStyle(sc)
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRender(vp, updt)
+	wb.SetNeedsRender(sc, updt)
 }
 
-func (wb *WidgetBase) SetStyle(vp *Viewport) {
+func (wb *WidgetBase) SetStyle(sc *Scene) {
 	wb.StyMu.Lock() // todo: needed??  maybe not.
 	defer wb.StyMu.Unlock()
 
-	wb.SetStyleWidget(vp)
+	wb.SetStyleWidget(sc)
 }
 
 // SetUnitContext sets the unit context based on size of viewport, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
-func SetUnitContext(st *gist.Style, vp *Viewport, el, par mat32.Vec2) {
-	if vp != nil {
-		if vp.Win != nil {
-			st.UnContext.DPI = vp.Win.LogicalDPI()
+func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
+	if sc != nil {
+		if sc.Win != nil {
+			st.UnContext.DPI = sc.Win.LogicalDPI()
 		}
-		if vp.RenderState.Image != nil {
-			sz := vp.Geom.Size // Render.Image.Bounds().Size()
+		if sc.RenderState.Image != nil {
+			sz := sc.Geom.Size // Render.Image.Bounds().Size()
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		}
 	}

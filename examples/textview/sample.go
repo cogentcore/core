@@ -33,7 +33,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-textedit-test", "GoGi TextEdit Test", width, height)
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	// // style sheet

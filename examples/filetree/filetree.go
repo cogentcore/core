@@ -346,7 +346,7 @@ func (fb *FileBrowse) ConfigToolbar() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	giv.ToolBarView(fb, fb.Viewport, tb)
+	giv.ToolBarView(fb, fb.Scene, tb)
 }
 
 // SplitViewConfig returns a TypeAndNameList for configuring the SplitView
@@ -379,7 +379,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			txly := split.Child(1 + i).(*gi.Layout)
 
 			txed := giv.NewTextView(txly, "textview-"+strconv.Itoa(i))
-			txed.Viewport = fb.Viewport
+			txed.Scene = fb.Scene
 		}
 
 		ft.TreeViewSig.Connect(fb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -427,7 +427,7 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 	}
 }
 
-func (fb *FileBrowse) Render(vp *Viewport) {
+func (fb *FileBrowse) Render(vp *Scene) {
 	fb.ToolBar().UpdateActions()
 	if win := fb.ParentWindow(); win != nil {
 		if !win.IsResizing() {
@@ -491,13 +491,13 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 
 	win := gi.NewMainWindow(winm, winm, width, height)
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 
 	fb := NewFileBrowse(mfr, "browser")
-	fb.Viewport = vp
+	fb.Scene = vp
 
 	fb.OpenPath(gi.FileName(path))
 

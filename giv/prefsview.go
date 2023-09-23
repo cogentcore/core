@@ -24,14 +24,14 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
 	sv := NewStructView(mfr, "sv")
-	sv.Viewport = vp
+	sv.Scene = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
@@ -89,14 +89,14 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
 	sv := NewStructView(mfr, "sv")
-	sv.Viewport = vp
+	sv.Scene = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 
@@ -154,14 +154,14 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
 		return win
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 
 	sv := NewStructView(mfr, "sv")
-	sv.Viewport = vp
+	sv.Scene = vp
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 

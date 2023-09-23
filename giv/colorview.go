@@ -134,7 +134,7 @@ func (cv *ColorView) SetColor(clr color.Color) {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget(vp *Viewport) {
+func (cv *ColorView) ConfigWidget(vp *Scene) {
 	if cv.HasChildren() {
 		return
 	}
@@ -540,7 +540,7 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
-func (cv *ColorView) Render(vp *Viewport) {
+func (cv *ColorView) Render(vp *Scene) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
@@ -655,7 +655,7 @@ func (vv *ColorValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -727,7 +727,7 @@ func (vv *ColorNameValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorNameValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

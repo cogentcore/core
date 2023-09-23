@@ -54,7 +54,7 @@ func (vv *FileValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FileValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *FileValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

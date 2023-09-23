@@ -14,7 +14,7 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	if wb.CtxtMenuFunc != nil {
 		wb.CtxtMenuFunc(wb.This().(Widget), m)
 	}
-	mvp := wb.Vp
+	mvp := wb.Sc
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
@@ -34,6 +34,6 @@ func (wb *WidgetBase) ContextMenu() {
 		return
 	}
 	pos := wi.ContextMenuPos()
-	mvp := wb.Vp
+	mvp := wb.Sc
 	PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
 }

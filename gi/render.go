@@ -60,7 +60,7 @@ import (
 // a simple SetNeedsRender call will drive re-rendering. UpdateSig does this.
 //
 // Updating is _always_ driven top-down by Window at FPS sampling rate,
-// in the DoUpdate() call on the Viewport.
+// in the DoUpdate() call on the Scene.
 // Three types of updates can be triggered, in order of least impact
 // and highest frequency first:
 // * VpNeedsRender: does NeedsRender on nodes.
@@ -88,22 +88,22 @@ import (
 func (wb *WidgetBase) UpdateSig() bool {
 	// note: we do not have the viewport here!!
 	// this means we need to cache it..
-	wb.SetNeedsRender(wb.Vp, true)
+	wb.SetNeedsRender(wb.Sc, true)
 	return wb.Node.UpdateSig()
 }
 
-// SetNeedsRender sets the NeedsRender and Viewport NeedsRender flags,
+// SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
 // if updt is true.  See UpdateEndRender for convenience method.
 // This should be called after widget state changes that don't need styling,
 // e.g., in event handlers or other update code,
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsRender(vp *Viewport, updt bool) {
+func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
 	if !updt {
 		return
 	}
 	wb.SetFlag(true, NeedsRender)
-	vp.SetFlag(true, VpNeedsRender)
+	sc.SetFlag(true, VpNeedsRender)
 }
 
 // UpdateEndRender should be called instead of UpdateEnd
@@ -115,7 +115,7 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRender(wb.Vp, updt)
+	wb.SetNeedsRender(wb.Sc, updt)
 }
 
 // note: this is replacement for "SetNeedsFullReRender()" call:
@@ -125,11 +125,11 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 // This should be called after widget Config call
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsLayout(vp *Viewport, updt bool) {
+func (wb *WidgetBase) SetNeedsLayout(sc *Scene, updt bool) {
 	if !updt {
 		return
 	}
-	vp.SetFlag(true, VpNeedsLayout)
+	sc.SetFlag(true, VpNeedsLayout)
 }
 
 // UpdateEndLayout should be called instead of UpdateEnd
@@ -141,12 +141,12 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(wb.Vp, updt)
+	wb.SetNeedsLayout(wb.Sc, updt)
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
 // Config automatically calls SetStyle.
-func (wb *WidgetBase) ConfigTree(vp *Viewport) {
+func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
@@ -156,7 +156,7 @@ func (wb *WidgetBase) ConfigTree(vp *Viewport) {
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
 		}
-		wi.Config(vp)
+		wi.Config(sc)
 		return ki.Continue
 	})
 	pr.End()
@@ -164,7 +164,7 @@ func (wb *WidgetBase) ConfigTree(vp *Viewport) {
 
 // SetStyleTree calls SetStyle on every Widget in the tree from me.
 // Called during FullRender
-func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
+func (wb *WidgetBase) SetStyleTree(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
@@ -174,7 +174,7 @@ func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
 		}
-		wi.SetStyle(vp)
+		wi.SetStyle(sc)
 		return ki.Continue
 	})
 	pr.End()
@@ -182,7 +182,7 @@ func (wb *WidgetBase) SetStyleTree(vp *Viewport) {
 
 // GetSizeTree does the sizing as a depth-first pass from me,
 // needed for Layout stack.
-func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
+func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 	if wb.This() == nil {
 		return
 	}
@@ -200,7 +200,7 @@ func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
 			if w == nil || w.IsDeleted() || w.IsDestroyed() {
 				return ki.Break
 			}
-			wi.GetSize(vp, iter)
+			wi.GetSize(sc, iter)
 			return ki.Continue
 		})
 	pr.End()
@@ -210,7 +210,7 @@ func (wb *WidgetBase) GetSizeTree(vp *Viewport, iter int) {
 // Each node iterates over children for maximum control,
 // Starting with parent VpBBox.
 // Handles multiple iterations if needed.
-func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
+func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
@@ -218,35 +218,35 @@ func (wb *WidgetBase) DoLayoutTree(vp *Viewport) {
 	parBBox := image.Rectangle{}
 	pwi, _ := AsWidget(wb.Par)
 	if pwi != nil {
-		parBBox = pwi.ChildrenBBox2D(vp)
+		parBBox = pwi.ChildrenBBox2D(sc)
 	} else {
-		parBBox = vp.Pixels.Bounds()
+		parBBox = sc.Pixels.Bounds()
 	}
 	wi := wb.This().(Widget)
-	redo := wi.DoLayout(vp, parBBox, 0) // important to use interface version to get interface!
+	redo := wi.DoLayout(sc, parBBox, 0) // important to use interface version to get interface!
 	if redo {
 		if LayoutTrace {
 			fmt.Printf("Layout: ----------  Redo: %v ----------- \n", wi.Path())
 		}
 		la := wb.LayState.Alloc
-		wb.GetSizeTree(vp, 1)
+		wb.GetSizeTree(sc, 1)
 		wb.LayState.Alloc = la
-		wi.DoLayout(vp, parBBox, 1) // todo: multiple iters?
+		wi.DoLayout(sc, parBBox, 1) // todo: multiple iters?
 	}
 	pr.End()
 }
 
 // LayoutRenderTree does a layout and render of the tree from me:
 // GetSize, DoLayout, Render.  Needed after Config.
-func (wb *WidgetBase) LayoutRenderTree(vp *Viewport) {
-	wb.GetSizeTree(vp, 0)
-	wb.DoLayoutTree(vp)
-	wb.Render(vp)
+func (wb *WidgetBase) LayoutRenderTree(sc *Scene) {
+	wb.GetSizeTree(sc, 0)
+	wb.DoLayoutTree(sc)
+	wb.Render(sc)
 }
 
 // DoNeedsRender calls Render on tree from me for nodes
 // with NeedsRender flags set
-func (wb *WidgetBase) DoNeedsRender(vp *Viewport) {
+func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
@@ -258,7 +258,7 @@ func (wb *WidgetBase) DoNeedsRender(vp *Viewport) {
 		}
 		if w.HasFlag(NeedsRender) && !w.IsUpdating() {
 			w.SetFlag(false, NeedsRender)
-			wi.Render(vp)
+			wi.Render(sc)
 			return ki.Break // done
 		}
 		return ki.Continue
@@ -267,29 +267,29 @@ func (wb *WidgetBase) DoNeedsRender(vp *Viewport) {
 }
 
 //////////////////////////////////////////////////////////////////
-//		Viewport
+//		Scene
 
 // DoUpdate checks viewport Needs flags to do whatever updating is required.
 // returns false if already updating.
 // This is the main update call made by the Window at FPS frequency.
-func (vp *Viewport) DoUpdate() bool {
-	if vp.HasFlag(VpIsUpdating) {
+func (sc *Scene) DoUpdate() bool {
+	if sc.HasFlag(VpIsUpdating) {
 		return false
 	}
-	vp.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer vp.SetFlag(false, VpIsUpdating)
+	sc.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, VpIsUpdating)
 
 	switch {
-	case vp.HasFlag(VpNeedsRebuild):
-		vp.SetFlag(false, VpNeedsLayout, VpNeedsRender, VpNeedsRebuild)
-		vp.DoRebuild()
-	case vp.HasFlag(VpNeedsLayout):
-		vp.SetFlag(false, VpNeedsLayout, VpNeedsRender)
-		vp.Fill() // full redraw
-		vp.Frame.LayoutRenderTree(vp)
-	case vp.HasFlag(VpNeedsRender):
-		vp.SetFlag(false, VpNeedsRender)
-		vp.Frame.DoNeedsRender(vp)
+	case sc.HasFlag(VpNeedsRebuild):
+		sc.SetFlag(false, VpNeedsLayout, VpNeedsRender, VpNeedsRebuild)
+		sc.DoRebuild()
+	case sc.HasFlag(VpNeedsLayout):
+		sc.SetFlag(false, VpNeedsLayout, VpNeedsRender)
+		sc.Fill() // full redraw
+		sc.Frame.LayoutRenderTree(sc)
+	case sc.HasFlag(VpNeedsRender):
+		sc.SetFlag(false, VpNeedsRender)
+		sc.Frame.DoNeedsRender(sc)
 	}
 	return true
 }
@@ -297,49 +297,49 @@ func (vp *Viewport) DoUpdate() bool {
 // Config calls Config on all nodes in the tree,
 // which will set NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done in a Show function.
-func (vp *Viewport) Config() {
-	vp.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer vp.SetFlag(false, VpIsUpdating)
-	vp.Frame.ConfigTree(vp)
+func (sc *Scene) Config() {
+	sc.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, VpIsUpdating)
+	sc.Frame.ConfigTree(sc)
 }
 
 // DoRebuild implements the VpNeedsRebuild case
 // Typically not called otherwise, and assumes VpIsUpdating already set.
-func (vp *Viewport) DoRebuild() {
-	vp.Fill() // full redraw
-	vp.SetFlag(true, VpRebuild)
-	vp.Frame.ConfigTree(vp)
-	vp.Frame.LayoutRenderTree(vp)
-	vp.SetFlag(false, VpRebuild)
+func (sc *Scene) DoRebuild() {
+	sc.Fill() // full redraw
+	sc.SetFlag(true, VpRebuild)
+	sc.Frame.ConfigTree(sc)
+	sc.Frame.LayoutRenderTree(sc)
+	sc.SetFlag(false, VpRebuild)
 }
 
 // Fill fills the viewport with BgColor (default transparent)
 // which is the starting base level for rendering.
 // Typically the root Frame fills its background with color
 // but it can e.g., leave corners transparent for popups etc.
-func (vp *Viewport) Fill() {
-	rs := &vp.RenderState
+func (sc *Scene) Fill() {
+	rs := &sc.RenderState
 	rs.Lock()
-	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(vp.Geom.Size), &vp.BgColor)
+	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sc.Geom.Size), &sc.BgColor)
 	rs.Unlock()
 }
 
 // PrefSize computes the preferred size of the viewport based on current contents.
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
-func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
-	vp.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer vp.SetFlag(false, VpIsUpdating)
+func (sc *Scene) PrefSize(initSz image.Point) image.Point {
+	sc.SetFlag(true, VpIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, VpIsUpdating)
 
-	vp.SetFlag(true, VpPrefSizing)
-	vp.Config()
+	sc.SetFlag(true, VpPrefSizing)
+	sc.Config()
 
-	frame := &vp.Frame
-	frame.SetStyleTree(vp) // sufficient to get sizes
+	frame := &sc.Frame
+	frame.SetStyleTree(sc) // sufficient to get sizes
 	frame.LayState.Alloc.Size.SetPoint(initSz)
-	frame.GetSizeTree(vp, 0) // collect sizes
+	frame.GetSizeTree(sc, 0) // collect sizes
 
-	vp.SetFlag(false, VpPrefSizing)
+	sc.SetFlag(false, VpPrefSizing)
 
 	vpsz := frame.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
@@ -358,7 +358,7 @@ func (vp *Viewport) PrefSize(initSz image.Point) image.Point {
 // -- this limits our drawing to our own bounding box, automatically -- must
 // be called as first step in Render returns whether the new bounds are
 // empty or not -- if empty then don't render!
-func (wb *WidgetBase) PushBounds(vp *Viewport) bool {
+func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
@@ -368,7 +368,7 @@ func (wb *WidgetBase) PushBounds(vp *Viewport) bool {
 	if wb.VpBBox.Empty() {
 		return false
 	}
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	rs.PushBounds(wb.VpBBox)
 	if RenderTrace {
 		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.VpBBox)
@@ -378,42 +378,42 @@ func (wb *WidgetBase) PushBounds(vp *Viewport) bool {
 
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
-func (wb *WidgetBase) PopBounds(vp *Viewport) {
+func (wb *WidgetBase) PopBounds(sc *Scene) {
 	if wb.IsDeleted() || wb.IsDestroyed() || wb.This() == nil {
 		return
 	}
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	rs.PopBounds()
 }
 
-func (wb *WidgetBase) Render(vp *Viewport) {
+func (wb *WidgetBase) Render(sc *Scene) {
 	wi := wb.This().(Widget)
-	if wb.PushBounds(vp) {
+	if wb.PushBounds(sc) {
 		wi.ConnectEvents()
-		wb.RenderParts(vp)
-		wb.RenderChildren(vp)
-		wb.PopBounds(vp)
+		wb.RenderParts(sc)
+		wb.RenderChildren(sc)
+		wb.PopBounds(sc)
 	} else {
 		wb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (wb *WidgetBase) RenderParts(vp *Viewport) {
+func (wb *WidgetBase) RenderParts(sc *Scene) {
 	if wb.Parts == nil {
 		return
 	}
-	wb.Parts.Render(vp) // is a layout, will do all
+	wb.Parts.Render(sc) // is a layout, will do all
 }
 
 // RenderChildren renders all of node's children,
 // This is the default call at end of Render()
-func (wb *WidgetBase) RenderChildren(vp *Viewport) {
+func (wb *WidgetBase) RenderChildren(sc *Scene) {
 	for _, kid := range wb.Kids {
 		wi, w := AsWidget(kid)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() || w.IsUpdating() {
 			continue
 		}
-		wi.Render(vp)
+		wi.Render(sc)
 	}
 }
 
@@ -449,9 +449,9 @@ func (wb *WidgetBase) ReRenderTree() {
 
 // RenderLock returns the locked girl.State, Paint, and Style with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock(vp *Viewport) (*girl.State, *girl.Paint, *gist.Style) {
+func (wb *WidgetBase) RenderLock(sc *Scene) (*girl.State, *girl.Paint, *gist.Style) {
 	wb.StyMu.RLock()
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	rs.Lock()
 	return rs, &rs.Paint, &wb.Style
 }
@@ -464,20 +464,20 @@ func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(vp *Viewport, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
-	rs := &vp.RenderState
+func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
+	rs := &sc.RenderState
 	pc := &rs.Paint
 	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // RenderStdBox draws standard box using given style.
 // girl.State and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
+func (wb *WidgetBase) RenderStdBox(sc *Scene, st *gist.Style) {
 	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
 
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	pc := &rs.Paint
 
 	// TODO: maybe implement some version of this to render background color
@@ -526,7 +526,7 @@ func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
 			// we only want radius for border, no actual border
-			wb.RenderBoxImpl(vp, shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
+			wb.RenderBoxImpl(sc, shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
 				// must divide by 2 like CSS
@@ -558,7 +558,7 @@ func (wb *WidgetBase) RenderStdBox(vp *Viewport, st *gist.Style) {
 	pc.FillStyle.SetColor(nil)
 	// now that we have drawn background color
 	// above, we can draw the border
-	wb.RenderBoxImpl(vp, pos, sz, st.Border)
+	wb.RenderBoxImpl(sc, pos, sz, st.Border)
 }
 
 // ParentReRenderAnchor returns parent (including this node)

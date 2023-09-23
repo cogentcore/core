@@ -80,7 +80,7 @@ func (mv *MapViewInline) SetMap(mp any) {
 }
 
 // ConfigParts configures Parts for the current map
-func (mv *MapViewInline) ConfigParts(vp *Viewport) {
+func (mv *MapViewInline) ConfigParts(vp *Scene) {
 	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
@@ -176,7 +176,7 @@ func (mv *MapViewInline) ConfigParts(vp *Viewport) {
 				// 	tynm = tmptyp.String()
 				// }
 			}
-			dlg := MapViewDialog(mvv.Viewport, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
+			dlg := MapViewDialog(mvv.Scene, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
 			mvvvk := dlg.Frame().ChildByType(TypeMapView, ki.Embeds, 2)
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
@@ -232,7 +232,7 @@ func (mv *MapViewInline) SetStyle() {
 	mv.WidgetBase.SetStyle()
 }
 
-func (mv *MapViewInline) Render(vp *Viewport) {
+func (mv *MapViewInline) Render(vp *Scene) {
 	if mv.FullReRenderIfNeeded() {
 		return
 	}

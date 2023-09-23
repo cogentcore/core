@@ -30,7 +30,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-icons-demo", "GoGi Icons", width, height)
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

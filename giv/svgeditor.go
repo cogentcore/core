@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package giv
 
 import (
 	"fmt"
@@ -92,7 +92,7 @@ func (sve *Editor) EditorEvents() {
 		if me.Action == mouse.Release && me.Button == mouse.Right {
 			me.SetProcessed()
 			// if obj != nil {
-			// 	giv.StructViewDialog(ssvg.Viewport, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
+			// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
 			// }
 		}
 	})
@@ -104,7 +104,7 @@ func (sve *Editor) EditorEvents() {
 		if obj != nil {
 			pos := me.Where
 			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-			PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Vp, ttxt)
+			PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Sc, ttxt)
 		}
 	})
 }
@@ -116,7 +116,7 @@ func (sve *Editor) ConnectEvents() {
 // InitScale ensures that Scale is initialized and non-zero
 func (sve *Editor) InitScale() {
 	if sve.Scale == 0 {
-		mvp := sve.Vp
+		mvp := sve.Sc
 		if mvp != nil {
 			sve.Scale = sve.ParentWindow().LogicalDPI() / 96.0
 		} else {
@@ -131,20 +131,20 @@ func (sve *Editor) SetTransform() {
 	sve.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
 }
 
-func (sve *Editor) Render(vp *Viewport) {
+func (sve *Editor) Render(sc *Scene) {
 	wi := sve.This().(Widget)
-	if sve.PushBounds(vp) {
+	if sve.PushBounds(sc) {
 		// rs := &sve.Render
 		wi.ConnectEvents()
 		// if sve.Fill {
-		// 	sve.FillViewport()
+		// 	sve.FillScene()
 		// }
 		// if sve.Norm {
 		// 	sve.SetNormXForm()
 		// }
 		// rs.PushXForm(sve.Pnt.XForm)
-		sve.RenderChildren(vp) // we must do children first, then us!
-		sve.PopBounds(vp)
+		sve.RenderChildren(sc) // we must do children first, then us!
+		sve.PopBounds(sc)
 		// rs.PopXForm()
 		// fmt.Printf("geom.bounds: %v  geom: %v\n", svg.Geom.Bounds(), svg.Geom)
 	}

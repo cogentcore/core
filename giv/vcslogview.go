@@ -218,7 +218,7 @@ func VCSLogViewDialog(repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog 
 	_, prIdx := dlg.PromptWidget(frame)
 
 	lv := frame.InsertNewChild(TypeVCSLogView, prIdx+1, "vcslog").(*VCSLogView)
-	lv.Viewport = dlg.Embed(gi.TypeViewport).(*gi.Viewport)
+	lv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	lv.Config(repo, lg, file, since)
 
 	dlg.UpdateEndNoSig(true)

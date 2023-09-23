@@ -817,7 +817,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
-	tf.Complete.Show(s, 0, tf.CursorPos, tf.Vp, cpos, forceComplete)
+	tf.Complete.Show(s, 0, tf.CursorPos, tf.Sc, cpos, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -884,7 +884,7 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	spc := st.BoxSpace()
 	pos := tf.EffPos.Add(spc.Pos())
 	if wincoords {
-		mvp := tf.Vp
+		mvp := tf.Sc
 		pos = pos.Add(mat32.NewVec2FmPoint(mvp.Geom.Pos))
 	}
 	cpos := tf.TextWidth(tf.StartPos, charidx)
@@ -925,7 +925,7 @@ func TextFieldBlink() {
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Vp == nil || !tf.HasFocus() || !tf.IsFocusActive() || !tf.This().(Widget).IsVisible() {
+		if tf.Sc == nil || !tf.HasFocus() || !tf.IsFocusActive() || !tf.This().(Widget).IsVisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
@@ -1056,7 +1056,7 @@ func (tf *TextField) CursorSprite() *Sprite {
 }
 
 // RenderSelect renders the selected region, if any, underneath the text
-func (tf *TextField) RenderSelect(vp *Viewport) {
+func (tf *TextField) RenderSelect(sc *Scene) {
 	if !tf.HasSelection() {
 		return
 	}
@@ -1074,7 +1074,7 @@ func (tf *TextField) RenderSelect(vp *Viewport) {
 
 	spos := tf.CharStartPos(effst, false)
 
-	rs := &vp.RenderState
+	rs := &sc.RenderState
 	pc := &rs.Paint
 	// st := &tf.StateStyles[TextFieldSel]
 	// tf.State = TextFieldSel
@@ -1433,7 +1433,7 @@ func (tf *TextField) KeyChordEvent() {
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
-	if tf.Vp.Type == VpDialog {
+	if tf.Sc.Type == VpDialog {
 		// todo: need dialogsig!
 		// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	tff := AsTextField(recv)
@@ -1450,7 +1450,7 @@ func (tf *TextField) TextFieldEvents() {
 	tf.KeyChordEvent()
 }
 
-func (tf *TextField) ConfigParts(vp *Viewport) {
+func (tf *TextField) ConfigParts(sc *Scene) {
 	parts := tf.NewParts(LayoutHoriz)
 	if tf.IsDisabled() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		parts.DeleteChildren(ki.DestroyKids)
@@ -1500,23 +1500,23 @@ func (tf *TextField) ConfigParts(vp *Viewport) {
 ////////////////////////////////////////////////////
 //  Widget Interface
 
-func (tf *TextField) ConfigWidget(vp *Viewport) {
+func (tf *TextField) ConfigWidget(sc *Scene) {
 	tf.EditTxt = []rune(tf.Txt)
 	tf.Edited = false
-	tf.ConfigParts(vp)
+	tf.ConfigParts(sc)
 }
 
 // StyleTextField does text field styling -- sets StyMu Lock
-func (tf *TextField) StyleTextField(vp *Viewport) {
+func (tf *TextField) StyleTextField(sc *Scene) {
 	tf.StyMu.Lock()
 	tf.SetCanFocusIfActive()
-	tf.SetStyleWidget(vp)
+	tf.SetStyleWidget(sc)
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
 }
 
-func (tf *TextField) SetStyle(vp *Viewport) {
-	tf.StyleTextField(vp)
+func (tf *TextField) SetStyle(sc *Scene) {
+	tf.StyleTextField(sc)
 	tf.StyMu.Lock()
 	tf.LayState.SetFromStyle(&tf.Style) // also does reset
 	tf.StyMu.Unlock()
@@ -1533,7 +1533,7 @@ func (tf *TextField) UpdateRenderAll() bool {
 	return true
 }
 
-func (tf *TextField) GetSize(vp *Viewport, iter int) {
+func (tf *TextField) GetSize(sc *Scene, iter int) {
 	tmptxt := tf.EditTxt
 	if len(tf.Txt) == 0 && len(tf.Placeholder) > 0 {
 		tf.EditTxt = []rune(tf.Placeholder)
@@ -1556,10 +1556,10 @@ func (tf *TextField) GetSize(vp *Viewport, iter int) {
 	tf.EditTxt = tmptxt
 }
 
-func (tf *TextField) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	tf.DoLayoutBase(vp, parBBox, true, iter) // init style
-	tf.DoLayoutParts(vp, parBBox, iter)
-	redo := tf.DoLayoutChildren(vp, iter)
+func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	tf.DoLayoutBase(sc, parBBox, true, iter) // init style
+	tf.DoLayoutParts(sc, parBBox, iter)
+	redo := tf.DoLayoutChildren(sc, iter)
 	tf.SetEffPosAndSize()
 	return redo
 }
@@ -1581,8 +1581,8 @@ func (tf *TextField) SetEffPosAndSize() {
 	tf.EffPos = pos
 }
 
-func (tf *TextField) RenderTextField(vp *Viewport) {
-	rs, _, _ := tf.RenderLock(vp)
+func (tf *TextField) RenderTextField(sc *Scene) {
+	rs, _, _ := tf.RenderLock(sc)
 	defer tf.RenderUnlock(rs)
 
 	tf.SetEffPosAndSize()
@@ -1590,9 +1590,9 @@ func (tf *TextField) RenderTextField(vp *Viewport) {
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Style
 	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
-	tf.RenderStdBox(vp, st)
+	tf.RenderStdBox(sc, st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
-	tf.RenderSelect(vp)
+	tf.RenderSelect(sc)
 	pos := tf.EffPos.Add(st.BoxSpace().Pos())
 	if len(tf.EditTxt) == 0 && len(tf.Placeholder) > 0 {
 		prevColor := st.Color
@@ -1609,14 +1609,14 @@ func (tf *TextField) RenderTextField(vp *Viewport) {
 	}
 }
 
-func (tf *TextField) Render(vp *Viewport) {
+func (tf *TextField) Render(sc *Scene) {
 	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
 	wi := tf.This().(Widget)
-	if tf.PushBounds(vp) {
+	if tf.PushBounds(sc) {
 		wi.ConnectEvents()
-		tf.RenderTextField(vp)
+		tf.RenderTextField(sc)
 		if !tf.HasFlag(Disabled) {
 			if tf.HasFocus() && tf.IsFocusActive() {
 				tf.StartCursor()
@@ -1624,9 +1624,9 @@ func (tf *TextField) Render(vp *Viewport) {
 				tf.StopCursor()
 			}
 		}
-		tf.RenderParts(vp)
-		tf.RenderChildren(vp)
-		tf.PopBounds(vp)
+		tf.RenderParts(sc)
+		tf.RenderChildren(sc)
+		tf.PopBounds(sc)
 	} else {
 		tf.DisconnectAllEvents(RegPri)
 	}
@@ -1642,13 +1642,13 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusLost:
 		tf.SetFlag(false, TextFieldFocusActive)
 		tf.EditDone()
-		tf.SetStyleUpdate(tf.Vp)
+		tf.SetStyleUpdate(tf.Sc)
 	case FocusGot:
 		tf.SetFlag(true, TextFieldFocusActive)
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
-		tf.SetStyleUpdate(tf.Vp)
+		tf.SetStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
@@ -1657,12 +1657,12 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusInactive:
 		tf.SetFlag(false, TextFieldFocusActive)
 		tf.EditDeFocused()
-		tf.SetStyleUpdate(tf.Vp)
+		tf.SetStyleUpdate(tf.Sc)
 		goosi.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(true, TextFieldFocusActive)
 		tf.ScrollToMe()
-		tf.SetStyleUpdate(tf.Vp)
+		tf.SetStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {

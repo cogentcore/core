@@ -55,7 +55,7 @@ func (vv *FontValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FontValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *FontValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

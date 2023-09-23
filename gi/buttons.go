@@ -162,7 +162,7 @@ func (bb *ButtonBase) SetText(txt string) {
 	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
 	bb.Text = txt
 	if recfg {
-		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
+		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
 }
@@ -182,7 +182,7 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
 	if recfg {
-		bb.This().(ButtonWidget).ConfigParts(bb.Vp)
+		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
 }
@@ -275,8 +275,8 @@ func (bb *ButtonBase) OpenMenu() bool {
 		}
 	}
 	bb.BBoxMu.RUnlock()
-	if bb.Vp != nil {
-		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Vp, bb.Text)
+	if bb.Sc != nil {
+		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Sc, bb.Text)
 		return true
 	}
 	return false
@@ -352,7 +352,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
-			if !(kt.Rune == ' ' && bbb.Vp.Type == VpCompleter) {
+			if !(kt.Rune == ' ' && bbb.Sc.Type == VpCompleter) {
 				kt.SetProcessed()
 				bbb.ButtonPress()
 				bw.ButtonRelease()
@@ -375,7 +375,7 @@ func (bb *ButtonBase) HoverTooltipEvent() {
 			pos := wbb.WinBBox.Max
 			bb.BBoxMu.RUnlock()
 			pos.X -= 20
-			PopupTooltip(tt, pos.X, pos.Y, wbb.Vp, wbb.Nm)
+			PopupTooltip(tt, pos.X, pos.Y, wbb.Sc, wbb.Nm)
 		}
 	})
 }
@@ -403,7 +403,7 @@ type ButtonWidget interface {
 
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
-	ConfigParts(vp *Viewport)
+	ConfigParts(sc *Scene)
 }
 
 ///////////////////////////////////////////////////////////
@@ -420,16 +420,16 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 	return bb
 }
 
-func (bb *ButtonBase) ConfigWidget(vp *Viewport) {
+func (bb *ButtonBase) ConfigWidget(sc *Scene) {
 	// bb.State = ButtonActive
-	bb.This().(ButtonWidget).ConfigParts(vp)
+	bb.This().(ButtonWidget).ConfigParts(sc)
 }
 
 func (bb *ButtonBase) ButtonRelease() {
 	bb.BaseButtonRelease() // do base
 }
 
-func (bb *ButtonBase) ConfigParts(vp *Viewport) {
+func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	parts := bb.NewParts(LayoutHoriz)
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
@@ -440,37 +440,37 @@ func (bb *ButtonBase) ConfigParts(vp *Viewport) {
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
 		bb.UpdateEnd(updt)
-		bb.SetNeedsLayout(vp, updt)
+		bb.SetNeedsLayout(sc, updt)
 	}
 }
 
-func (bb *ButtonBase) SetStyle(vp *Viewport) {
-	bb.SetStyleWidget(vp)
+func (bb *ButtonBase) SetStyle(sc *Scene) {
+	bb.SetStyleWidget(sc)
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentWindow())
 	}
 }
 
-func (bb *ButtonBase) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(vp, parBBox, true, iter) // init style
-	bb.DoLayoutParts(vp, parBBox, iter)
-	return bb.DoLayoutChildren(vp, iter)
+func (bb *ButtonBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	bb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	bb.DoLayoutParts(sc, parBBox, iter)
+	return bb.DoLayoutChildren(sc, iter)
 }
 
-func (bb *ButtonBase) RenderButton(vp *Viewport) {
-	rs, _, st := bb.RenderLock(vp)
-	bb.RenderStdBox(vp, st)
+func (bb *ButtonBase) RenderButton(sc *Scene) {
+	rs, _, st := bb.RenderLock(sc)
+	bb.RenderStdBox(sc, st)
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBase) Render(vp *Viewport) {
+func (bb *ButtonBase) Render(sc *Scene) {
 	wi := bb.This().(Widget)
-	if bb.PushBounds(vp) {
+	if bb.PushBounds(sc) {
 		wi.ConnectEvents()
-		bb.RenderButton(vp)
-		bb.RenderParts(vp)
-		bb.RenderChildren(vp)
-		bb.PopBounds(vp)
+		bb.RenderButton(sc)
+		bb.RenderParts(sc)
+		bb.RenderChildren(sc)
+		bb.PopBounds(sc)
 	} else {
 		bb.DisconnectAllEvents(RegPri)
 	}
@@ -483,11 +483,11 @@ func (bb *ButtonBase) ConnectEvents() {
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		bb.SetStyleUpdate(bb.Vp)
+		bb.SetStyleUpdate(bb.Sc)
 	case FocusGot:
 		bb.ScrollToMe()
 		bb.EmitFocusedSignal()
-		bb.SetStyleUpdate(bb.Vp)
+		bb.SetStyleUpdate(bb.Sc)
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
@@ -745,18 +745,18 @@ func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 	updt := cb.UpdateStart()
 	cb.Icon = icOn
 	cb.IconOff = icOff
-	cb.This().(ButtonWidget).ConfigParts(cb.Vp)
+	cb.This().(ButtonWidget).ConfigParts(cb.Sc)
 	// todo: better config logic -- do layout
 	cb.UpdateEnd(updt)
 }
 
-func (cb *CheckBox) ConfigWidget(vp *Viewport) {
+func (cb *CheckBox) ConfigWidget(sc *Scene) {
 	cb.SetCheckable(true)
-	cb.ConfigWidget(vp)
-	cb.This().(ButtonWidget).ConfigParts(vp)
+	cb.ConfigWidget(sc)
+	cb.This().(ButtonWidget).ConfigParts(sc)
 }
 
-func (cb *CheckBox) ConfigParts(vp *Viewport) {
+func (cb *CheckBox) ConfigParts(sc *Scene) {
 	cb.SetCheckable(true)
 	if !TheIconMgr.IsValid(cb.Icon) {
 		cb.Icon = icons.CheckBox // fallback

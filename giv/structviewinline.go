@@ -90,7 +90,7 @@ var StructViewInlineProps = ki.Props{
 }
 
 // ConfigParts configures Parts for the current struct
-func (sv *StructViewInline) ConfigParts(vp *Viewport) {
+func (sv *StructViewInline) ConfigParts(vp *Scene) {
 	if laser.IfaceIsNil(sv.Struct) {
 		return
 	}
@@ -178,7 +178,7 @@ func (sv *StructViewInline) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructViewInline) Render(vp *Viewport) {
+func (sv *StructViewInline) Render(vp *Scene) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}

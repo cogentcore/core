@@ -1313,12 +1313,12 @@ type EventMaster interface {
 
 	// EventTopUpdateStart does an UpdateStart on top-level node, for batch updates.
 	// This may not be identical to EventTopNode().UpdateStart() for
-	// embedded case where Viewport is the EventTopNode.
+	// embedded case where Scene is the EventTopNode.
 	EventTopUpdateStart() bool
 
 	// EventTopUpdateEnd does an UpdateEnd on top-level node, for batch updates.
 	// This may not be identical to EventTopNode().UpdateEnd() for
-	// embedded case where Viewport is the EventTopNode.
+	// embedded case where Scene is the EventTopNode.
 	EventTopUpdateEnd(updt bool)
 
 	// IsInScope returns whether given node is in scope for receiving events

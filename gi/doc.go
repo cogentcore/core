@@ -6,15 +6,15 @@
 Package Gi (GoGi) provides a Graphical Interface based on GoKi Tree Node structs
 
 2D and 3D (in gi3d) scenegraphs supported, each rendering to respective
-Viewport or Scene.  Scene is a 2D element that embeds the 3D scene, and
-a 2D Viewport can in turn be embedded within the 3D scene.
+Scene or Scene.  Scene is a 2D element that embeds the 3D scene, and
+a 2D Scene can in turn be embedded within the 3D scene.
 
 The 2D scenegraph supports:
 
   - Widget nodes for GUI actions (Buttons, Menus etc) -- render directly via GiRl
   - Layouts for placing widgets, which are also container nodes
   - CSS-based styling, directly on Node Props (properties), and CSS StyleSheet
-  - svg sub-package with SVG Viewport and shapes, paths, etc -- full SVG support
+  - svg sub-package with SVG Scene and shapes, paths, etc -- full SVG support
   - Icon is a wrapper around an SVG -- any SVG icon can be used
 
 # Layout Logic
@@ -25,7 +25,7 @@ Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
 		win := gi.NewMainWindow("test-window", "Test Window", width, height)
-		vp := win.WinViewport()
+		vp := win.WinScene()
 		updt := vp.UpdateStart()
 
 		vlay := win.SetMainVLay() // or SetMainFrame

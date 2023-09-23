@@ -54,7 +54,7 @@ func OpenSVG(fnm string) {
 	TheSVG.UpdateEnd(updt)
 }
 
-func FileViewOpenSVG(vp *gi.Viewport) {
+func FileViewOpenSVG(vp *gi.Scene) {
 	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Open SVG"}, nil,
 		vp.Win, func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
@@ -74,7 +74,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("gogi-svg-viewer", "GoGi SVG Viewer", width, height)
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()

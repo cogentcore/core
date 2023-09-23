@@ -30,25 +30,25 @@ func TooltipConfigStyles(tooltip *Frame) {
 }
 
 // PopupTooltip pops up a viewport displaying the tooltip text
-func PopupTooltip(tooltip string, x, y int, parVp *Viewport, name string) *Viewport {
+func PopupTooltip(tooltip string, x, y int, parVp *Scene, name string) *Scene {
 	win := parVp.Win
-	mainVp := win.Viewport
-	pvp := &Viewport{}
-	pvp.Name = name + "Tooltip"
-	pvp.Win = win
-	pvp.Type = VpTooltip
+	mainSc := win.Scene
+	psc := &Scene{}
+	psc.Name = name + "Tooltip"
+	psc.Win = win
+	psc.Type = VpTooltip
 
-	pvp.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	psc.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// TOOD: get border radius actually working
 		// without having parent background color workaround
 		s.Border.Radius = gist.BorderRadiusExtraSmall
-		s.BackgroundColor = pvp.Frame.ParentBackgroundColor()
+		s.BackgroundColor = psc.Frame.ParentBackgroundColor()
 	})
 
-	pvp.Geom.Pos = image.Point{x, y}
-	pvp.SetFlag(true, VpPopupDestroyAll) // nuke it all
+	psc.Geom.Pos = image.Point{x, y}
+	psc.SetFlag(true, VpPopupDestroyAll) // nuke it all
 
-	frame := &pvp.Frame
+	frame := &psc.Frame
 	lbl := NewLabel(frame, "ttlbl")
 	lbl.Text = tooltip
 	lbl.Type = LabelBodyMedium
@@ -57,26 +57,26 @@ func PopupTooltip(tooltip string, x, y int, parVp *Viewport, name string) *Viewp
 
 	lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		mwdots := parVp.Frame.Style.UnContext.ToDots(40, units.UnitEm)
-		mwdots = mat32.Min(mwdots, float32(mainVp.Geom.Size.X-20))
+		mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
 
 		s.MaxWidth.SetDot(mwdots)
 	})
 
-	frame.ConfigTree(pvp)
-	frame.SetStyleTree(pvp) // sufficient to get sizes
-	mainSz := mat32.NewVec2FmPoint(mainVp.Geom.Size)
+	frame.ConfigTree(psc)
+	frame.SetStyleTree(psc) // sufficient to get sizes
+	mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
 	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-	frame.GetSizeTree(pvp, 0)          // collect sizes
-	pvp.Win = nil
+	frame.GetSizeTree(psc, 0)          // collect sizes
+	psc.Win = nil
 	vpsz := frame.LayState.Size.Pref.Min(mainSz).ToPoint()
 
-	x = min(x, mainVp.Geom.Size.X-vpsz.X) // fit
-	y = min(y, mainVp.Geom.Size.Y-vpsz.Y) // fit
-	pvp.Resize(vpsz)
-	pvp.Geom.Pos = image.Point{x, y}
+	x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
+	y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
+	psc.Resize(vpsz)
+	psc.Geom.Pos = image.Point{x, y}
 
-	// win.PushPopup(pvp)
-	return pvp
+	// win.PushPopup(psc)
+	return psc
 }
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
@@ -89,7 +89,7 @@ func (wb *WidgetBase) HoverTooltipEvent() {
 			me.SetProcessed()
 			pos := wbb.WinBBox.Max
 			pos.X -= 20
-			mvp := wbb.Vp
+			mvp := wbb.Sc
 			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
 		}
 	})

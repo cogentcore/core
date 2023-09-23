@@ -262,9 +262,9 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 	sb.Style = sb.StateStyles[state] // get relevant styles
 	if prev != state {
 		sb.StyMu.Lock()
-		sb.SetStyleWidget(sb.Vp)
+		sb.SetStyleWidget(sb.Sc)
 		sb.StyMu.Unlock()
-		// sb.Viewport.SetNeedsFullRender()
+		// sb.Scene.SetNeedsFullRender()
 	}
 }
 
@@ -589,19 +589,19 @@ func (sb *SliderBase) SliderEvents() {
 	sb.KeyChordEvent()
 }
 
-func (sb *SliderBase) ConfigWidget(vp *Viewport) {
-	sb.ConfigSlider(vp)
+func (sb *SliderBase) ConfigWidget(sc *Scene) {
+	sb.ConfigSlider(sc)
 }
 
-func (sb *SliderBase) ConfigSlider(vp *Viewport) {
+func (sb *SliderBase) ConfigSlider(sc *Scene) {
 	sb.State = SliderActive
 	if sb.IsDisabled() {
 		sb.State = SliderInactive
 	}
-	sb.ConfigParts(vp)
+	sb.ConfigParts(sc)
 }
 
-func (sb *SliderBase) ConfigParts(vp *Viewport) {
+func (sb *SliderBase) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutNil)
 	config := ki.TypeAndNameList{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
@@ -614,7 +614,7 @@ func (sb *SliderBase) ConfigParts(vp *Viewport) {
 
 // StyleFromProps styles Slider-specific fields from ki.Prop properties
 // doesn't support inherit or default
-func (sr *SliderBase) StyleFromProps(props ki.Props, vp *Viewport) {
+func (sr *SliderBase) StyleFromProps(props ki.Props, sc *Scene) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -682,11 +682,11 @@ func (sr *SliderBase) StyleToDots(uc *units.Context) {
 	sr.ThumbSize.ToDots(uc)
 }
 
-func (sr *SliderBase) StyleSlider(vp *Viewport) {
+func (sr *SliderBase) StyleSlider(sc *Scene) {
 	sr.StyMu.Lock()
 	defer sr.StyMu.Unlock()
 
-	sr.SetStyleWidget(vp)
+	sr.SetStyleWidget(sc)
 	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
@@ -752,21 +752,21 @@ func (sr *Slider) CopyFieldsFrom(frm any) {
 	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
-func (sr *Slider) ConfigWidget(vp *Viewport) {
-	sr.ConfigSlider(vp)
-	sr.ConfigParts(vp)
+func (sr *Slider) ConfigWidget(sc *Scene) {
+	sr.ConfigSlider(sc)
+	sr.ConfigParts(sc)
 }
 
-func (sr *Slider) SetStyle(vp *Viewport) {
+func (sr *Slider) SetStyle(sc *Scene) {
 	sr.SetCanFocusIfActive()
-	sr.StyleSlider(vp)
+	sr.StyleSlider(sc)
 	sr.StyMu.Lock()
 	sr.LayState.SetFromStyle(&sr.Style) // also does reset
 	sr.StyMu.Unlock()
 }
 
-func (sr *Slider) GetSize(vp *Viewport, iter int) {
-	sr.InitLayout(vp)
+func (sr *Slider) GetSize(sc *Scene, iter int) {
+	sr.InitLayout(sc)
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
@@ -774,31 +774,31 @@ func (sr *Slider) GetSize(vp *Viewport, iter int) {
 	sr.LayState.Alloc.Size.SetDim(odim, sz)
 }
 
-func (sr *Slider) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(vp, parBBox, true, iter) // init style
-	sr.DoLayoutParts(vp, parBBox, iter)
+func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sr.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sr.DoLayoutParts(sc, parBBox, iter)
 	sr.SizeFromAlloc()
-	return sr.DoLayoutChildren(vp, iter)
+	return sr.DoLayoutChildren(sc, iter)
 }
 
-func (sr *Slider) Render(vp *Viewport) {
+func (sr *Slider) Render(sc *Scene) {
 	wi := sr.This().(Widget)
-	if !sr.Off && sr.PushBounds(vp) {
+	if !sr.Off && sr.PushBounds(sc) {
 		wi.ConnectEvents()
-		sr.RenderDefaultStyle(vp)
-		sr.RenderChildren(vp)
-		sr.PopBounds(vp)
+		sr.RenderDefaultStyle(sc)
+		sr.RenderChildren(sc)
+		sr.PopBounds(sc)
 	} else {
 		sr.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (sr *Slider) RenderDefaultStyle(vp *Viewport) {
-	rs, pc, st := sr.RenderLock(vp)
+func (sr *Slider) RenderDefaultStyle(sc *Scene) {
+	rs, pc, st := sr.RenderLock(sc)
 
 	// overall fill box
-	sr.RenderStdBox(vp, &sr.StyleBox)
+	sr.RenderStdBox(sc, &sr.StyleBox)
 
 	// SidesTODO: look here if slider borders break
 
@@ -828,11 +828,11 @@ func (sr *Slider) RenderDefaultStyle(vp *Viewport) {
 	bsz.SetSubDim(odim, spc.Size().Dim(odim))
 	bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
 	bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
-	sr.RenderBoxImpl(vp, bpos, bsz, st.Border)
+	sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
 
 	bsz.SetDim(sr.Dim, sr.Pos)
 	pc.FillStyle.SetColorSpec(&sr.ValueColor)
-	sr.RenderBoxImpl(vp, bpos, bsz, st.Border)
+	sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
 
 	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
@@ -840,7 +840,7 @@ func (sr *Slider) RenderDefaultStyle(vp *Viewport) {
 
 	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
-		sr.Parts.Render(vp)
+		sr.Parts.Render(sc)
 	} else {
 		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
 		pc.FillStrokeClear(rs)
@@ -901,52 +901,52 @@ func (sb *ScrollBar) CopyFieldsFrom(frm any) {
 	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
-func (sb *ScrollBar) ConfigWidget(vp *Viewport) {
-	sb.ConfigSlider(vp)
+func (sb *ScrollBar) ConfigWidget(sc *Scene) {
+	sb.ConfigSlider(sc)
 }
 
-func (sb *ScrollBar) SetStyle(vp *Viewport) {
+func (sb *ScrollBar) SetStyle(sc *Scene) {
 	sb.SetCanFocusIfActive()
-	sb.StyleSlider(vp)
+	sb.StyleSlider(sc)
 	sb.StyMu.Lock()
 	sb.LayState.SetFromStyle(&sb.Style) // also does reset
 	sb.StyMu.Unlock()
-	sb.ConfigParts(vp)
+	sb.ConfigParts(sc)
 }
 
-func (sb *ScrollBar) GetSize(vp *Viewport, iter int) {
-	sb.InitLayout(vp)
+func (sb *ScrollBar) GetSize(sc *Scene, iter int) {
+	sb.InitLayout(sc)
 }
 
-func (sb *ScrollBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(vp, parBBox, true, iter) // init style
-	sb.DoLayoutParts(vp, parBBox, iter)
+func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sb.DoLayoutParts(sc, parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)
 	}
 	sb.SizeFromAlloc()
-	return sb.DoLayoutChildren(vp, iter)
+	return sb.DoLayoutChildren(sc, iter)
 }
 
-func (sb *ScrollBar) Render(vp *Viewport) {
+func (sb *ScrollBar) Render(sc *Scene) {
 	wi := sb.This().(Widget)
-	if !sb.Off && sb.PushBounds(vp) {
+	if !sb.Off && sb.PushBounds(sc) {
 		wi.ConnectEvents()
-		sb.RenderDefaultStyle(vp)
-		sb.RenderChildren(vp)
-		sb.PopBounds(vp)
+		sb.RenderDefaultStyle(sc)
+		sb.RenderChildren(sc)
+		sb.PopBounds(sc)
 	} else {
 		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
 // render using a default style if not otherwise styled
-func (sb *ScrollBar) RenderDefaultStyle(vp *Viewport) {
-	rs, pc, st := sb.RenderLock(vp)
+func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
+	rs, pc, st := sb.RenderLock(sc)
 	defer sb.RenderUnlock(rs)
 
 	// overall fill box
-	sb.RenderStdBox(vp, &sb.StyleBox)
+	sb.RenderStdBox(sc, &sb.StyleBox)
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
@@ -961,11 +961,11 @@ func (sb *ScrollBar) RenderDefaultStyle(vp *Viewport) {
 	pos := sb.LayState.Alloc.Pos.Add(spc.Pos())
 	sz := sb.LayState.Alloc.Size.Sub(spc.Size())
 
-	sb.RenderBoxImpl(vp, pos, sz, st.Border) // surround box
+	sb.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
 	pos.SetAddDim(sb.Dim, sb.Pos)            // start of thumb
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetColorSpec(&sb.ValueColor)
-	sb.RenderBoxImpl(vp, pos, sz, st.Border)
+	sb.RenderBoxImpl(sc, pos, sz, st.Border)
 }
 
 func (sb *ScrollBar) ConnectEvents() {

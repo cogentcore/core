@@ -45,8 +45,8 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 // MenuBarStdRender does the standard rendering of the bar
-func (mb *MenuBar) MenuBarStdRender(vp *Viewport) {
-	rs, pc, st := mb.RenderLock(vp)
+func (mb *MenuBar) MenuBarStdRender(sc *Scene) {
+	rs, pc, st := mb.RenderLock(sc)
 	pos := mb.LayState.Alloc.Pos
 	sz := mb.LayState.Alloc.Size
 	pc.FillBox(rs, pos, sz, &st.BackgroundColor)
@@ -65,31 +65,31 @@ func (mb *MenuBar) ShowMenuBar() bool {
 	return true
 }
 
-func (mb *MenuBar) GetSize(vp *Viewport, iter int) {
+func (mb *MenuBar) GetSize(sc *Scene, iter int) {
 	if !mb.ShowMenuBar() {
 		return
 	}
-	mb.Layout.GetSize(vp, iter)
+	mb.Layout.GetSize(sc, iter)
 }
 
-func (mb *MenuBar) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+func (mb *MenuBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	if !mb.ShowMenuBar() {
 		return false
 	}
-	return mb.Layout.DoLayout(vp, parBBox, iter)
+	return mb.Layout.DoLayout(sc, parBBox, iter)
 }
 
-func (mb *MenuBar) Render(vp *Viewport) {
+func (mb *MenuBar) Render(sc *Scene) {
 	wi := mb.This().(Widget)
 	if !mb.ShowMenuBar() {
 		return
 	}
-	if mb.PushBounds(vp) {
-		mb.MenuBarStdRender(vp)
+	if mb.PushBounds(sc) {
+		mb.MenuBarStdRender(sc)
 		wi.ConnectEvents()
-		mb.RenderScrolls(vp)
-		mb.RenderChildren(vp)
-		mb.PopBounds(vp)
+		mb.RenderScrolls(sc)
+		mb.RenderChildren(sc)
+		mb.PopBounds(sc)
 	} else {
 		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
@@ -381,8 +381,8 @@ func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
 }
 
 // ToolBarStdRender does the standard rendering of the bar
-func (tb *ToolBar) ToolBarStdRender(vp *Viewport) {
-	rs, pc, st := tb.RenderLock(vp)
+func (tb *ToolBar) ToolBarStdRender(sc *Scene) {
+	rs, pc, st := tb.RenderLock(sc)
 	pos := tb.LayState.Alloc.Pos
 	sz := tb.LayState.Alloc.Size
 	bg := st.BackgroundColor
@@ -393,17 +393,17 @@ func (tb *ToolBar) ToolBarStdRender(vp *Viewport) {
 	tb.RenderUnlock(rs)
 }
 
-func (tb *ToolBar) Render(vp *Viewport) {
+func (tb *ToolBar) Render(sc *Scene) {
 	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
 		return
 	}
 	wi := tb.This().(Widget)
-	if tb.PushBounds(vp) {
-		tb.ToolBarStdRender(vp)
+	if tb.PushBounds(sc) {
+		tb.ToolBarStdRender(sc)
 		wi.ConnectEvents()
-		tb.RenderScrolls(vp)
-		tb.RenderChildren(vp)
-		tb.PopBounds(vp)
+		tb.RenderScrolls(sc)
+		tb.RenderChildren(sc)
+		tb.PopBounds(sc)
 	} else {
 		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}

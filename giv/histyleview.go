@@ -57,7 +57,7 @@ func (vv *HiStyleValueView) HasAction() bool {
 	return true
 }
 
-func (vv *HiStyleValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *HiStyleValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}
@@ -93,7 +93,7 @@ func HiStylesView(st *histyle.Styles) {
 		return
 	}
 
-	vp := win.WinViewport()
+	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
 	mfr := win.SetMainFrame()
@@ -106,7 +106,7 @@ func HiStylesView(st *histyle.Styles) {
 	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
 
 	tv := mfr.NewChild(TypeMapView, "tv").(*MapView)
-	tv.Viewport = vp
+	tv.Scene = vp
 	tv.SetMap(st)
 	tv.SetStretchMax()
 

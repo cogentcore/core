@@ -64,7 +64,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 	if cv.Map != nil {
 		cur = cv.Map.Name
 	}
-	SliceViewSelectDialog(cv.Viewport, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, nil,
+	SliceViewSelectDialog(cv.Scene, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, nil,
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
@@ -143,7 +143,7 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render(vp *Viewport) {
+func (cv *ColorMapView) Render(vp *Scene) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
@@ -200,7 +200,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorMapValueView).(*ColorMapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Viewport, nil, nil)
+		vvv.Activate(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -209,7 +209,7 @@ func (vv *ColorMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorMapValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
 	if vv.IsInactive() {
 		return
 	}

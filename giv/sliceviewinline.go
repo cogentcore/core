@@ -104,7 +104,7 @@ var SliceViewInlineProps = ki.Props{
 }
 
 // ConfigParts configures Parts for the current slice
-func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
+func (sv *SliceViewInline) ConfigParts(vp *Scene) {
 	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
@@ -186,7 +186,7 @@ func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
 				elType := laser.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
 				title = "Slice of " + laser.NonPtrType(elType).Name()
 			}
-			dlg := SliceViewDialog(svv.Viewport, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
+			dlg := SliceViewDialog(svv.Scene, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
 			svvvk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
@@ -249,7 +249,7 @@ func (sv *SliceViewInline) SetStyle() {
 	sv.WidgetBase.SetStyle()
 }
 
-func (sv *SliceViewInline) Render(vp *Viewport) {
+func (sv *SliceViewInline) Render(vp *Scene) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}

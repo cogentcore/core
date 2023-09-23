@@ -16,7 +16,7 @@ import (
 	"goki.dev/svg"
 )
 
-var Vp *gi.Viewport
+var Vp *gi.Scene
 var EqTable *giv.TableView
 var ParamsEdit *giv.StructView
 var SvgGraph *svg.SVG
@@ -45,7 +45,7 @@ func mainrun() {
 
 	win := gi.NewMainWindow("marbles", "Marbles", width, height)
 
-	Vp = win.WinViewport()
+	Vp = win.WinScene()
 	updt := Vp.UpdateStart()
 
 	// style sheet
@@ -70,13 +70,13 @@ func mainrun() {
 
 	// the StructView will also show the Graph Toolbar which is main actions..
 	gstru := giv.NewStructView(mfr, "gstru")
-	gstru.Viewport = Vp // needs vp early for toolbar
+	gstru.Scene = Vp // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr)
 	ParamsEdit = gstru
 
 	lns := giv.NewTableView(mfr, "lns")
-	lns.Viewport = Vp
+	lns.Scene = Vp
 	lns.SetSlice(&Gr.Lines)
 	EqTable = lns
 

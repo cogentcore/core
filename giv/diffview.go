@@ -49,7 +49,7 @@ func DiffFiles(afile, bfile string) (*DiffView, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(avp *gi.Viewport, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
+func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {
@@ -80,7 +80,7 @@ func DiffViewDialogFromRevs(avp *gi.Viewport, repo vci.Repo, file string, fbuf *
 }
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
-func DiffViewDialog(avp *gi.Viewport, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
+func DiffViewDialog(avp *gi.Scene, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
 	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
 	frame := dlg.Frame()
@@ -597,7 +597,7 @@ func (dv *DiffView) UndoDiff(ab int) {
 	dv.UpdateToolBar()
 }
 
-func (dv *DiffView) ConfigWidget(vp *Viewport) {
+func (dv *DiffView) ConfigWidget(vp *Scene) {
 	dv.Lay = gi.LayoutVert
 	config := ki.TypeAndNameList{}
 	config.Add(gi.TypeToolBar, "toolbar")
@@ -657,7 +657,7 @@ func (dv *DiffView) ConfigToolBar() {
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			CallMethod(dvv, "SaveFileA", dv.Viewport)
+			CallMethod(dvv, "SaveFileA", dv.Scene)
 		})
 	gi.NewStretch(tb, "str")
 
@@ -690,7 +690,7 @@ func (dv *DiffView) ConfigToolBar() {
 	tb.AddAction(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			CallMethod(dvv, "SaveFileB", dv.Viewport)
+			CallMethod(dvv, "SaveFileB", dv.Scene)
 		})
 }
 

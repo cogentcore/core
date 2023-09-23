@@ -440,7 +440,7 @@ func (tb *TextBuf) FileModCheck() bool {
 		return false
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
 			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
 			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
@@ -463,7 +463,7 @@ func (tb *TextBuf) FileModCheck() bool {
 func (tb *TextBuf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 		log.Println(err)
 		return err
@@ -506,7 +506,7 @@ func (tb *TextBuf) Revert() bool {
 		ob.InitName(ob, "revert-tmp")
 		err := ob.OpenFile(tb.Filename)
 		if err != nil {
-			vp := tb.ViewportFromView()
+			vp := tb.SceneFromView()
 			if vp != nil { // only if viewing
 				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
 			}
@@ -544,7 +544,7 @@ func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool
 			afterFunc(false)
 		}
 	} else {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
@@ -592,7 +592,7 @@ func (tb *TextBuf) Save() error {
 	tb.EditDone()
 	info, err := os.Stat(string(tb.Filename))
 	if err == nil && info.ModTime() != time.Time(tb.Info.ModTime) {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
@@ -614,7 +614,7 @@ func (tb *TextBuf) Save() error {
 // if afterFun is non-nil, then it is called with the status of the user action
 func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 	if tb.IsChanged() {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		if tb.Filename != "" {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
@@ -849,10 +849,10 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 	tb.TextBufSig.Disconnect(vw.This())
 }
 
-// ViewportFromView returns Viewport from textview, if avail
-func (tb *TextBuf) ViewportFromView() *gi.Viewport {
+// SceneFromView returns Scene from textview, if avail
+func (tb *TextBuf) SceneFromView() *gi.Scene {
 	if len(tb.Views) > 0 {
-		return tb.Views[0].Viewport
+		return tb.Views[0].Scene
 	}
 	return nil
 }
@@ -886,7 +886,7 @@ func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
 	bufUpdt = tb.UpdateStart()
 	autoSave = tb.AutoSaveOff()
 	winUpdt = false
-	vp := tb.ViewportFromView()
+	vp := tb.SceneFromView()
 	if vp == nil {
 		return
 	}
@@ -898,7 +898,7 @@ func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
 func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
 	if winUpdt {
-		vp := tb.ViewportFromView()
+		vp := tb.SceneFromView()
 		if vp != nil {
 			vp.TopUpdateEnd(winUpdt)
 		}
@@ -1649,7 +1649,7 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 		tb.MarkupDelayTimer.Stop()
 		tb.MarkupDelayTimer = nil
 	}
-	vp := tb.ViewportFromView()
+	vp := tb.SceneFromView()
 	if vp != nil {
 		cpop := vp.Win.CurPopup()
 		if gi.PopupIsCompleter(cpop) {

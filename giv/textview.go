@@ -531,7 +531,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	parw.SetFlag(true, ReRenderAnchor)
 	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
-		// fmt.Printf("paloc: %v, pvp: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
+		// fmt.Printf("paloc: %v, psc: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).Sub(spc.Size())
 		// SidesTODO: this is sketchy
 		tv.RenderSz.X -= spc.Size().X / 2 // extra space
@@ -798,7 +798,7 @@ func (tv *TextView) SetCursor(pos lex.Pos) {
 		tv.RenderLineNo(cpln, true, true) // render bg, and do vpupload
 		tv.RenderLineNo(tv.CursorPos.Ln, true, true)
 		rs.Unlock()
-		tv.Viewport.Render.PopBounds()
+		tv.Scene.Render.PopBounds()
 	}
 	tv.Buf.MarkupLine(tv.CursorPos.Ln)
 	tv.CursorMovedSig()
@@ -1907,7 +1907,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Viewport, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
 	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
 	dlg.Modal = true
 
@@ -1967,7 +1967,7 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Viewport, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	QReplaceDialog(tv.Scene, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		dlg := send.(*gi.Dialog)
 		if sig == int64(gi.DialogAccepted) {
 			find, repl, lexItems := QReplaceDialogValues(dlg)
@@ -2688,7 +2688,7 @@ func (tv *TextView) OfferComplete() {
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Buf.CurView = tv
-	tv.Buf.Complete.Show(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Viewport, cpos, tv.ForceComplete)
+	tv.Buf.Complete.Show(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Scene, cpos, tv.ForceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -2747,7 +2747,7 @@ func (tv *TextView) Lookup() {
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Buf.CurView = tv
-	tv.Buf.Complete.Lookup(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Viewport, cpos, tv.ForceComplete)
+	tv.Buf.Complete.Lookup(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Scene, cpos, tv.ForceComplete)
 }
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
@@ -2901,7 +2901,7 @@ func (tv *TextView) OfferCorrect() bool {
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.CurView = tv
-	tv.Buf.Spell.Show(wb, tv.Viewport, cpos)
+	tv.Buf.Spell.Show(wb, tv.Scene, cpos)
 	return true
 }
 
@@ -3178,7 +3178,7 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Viewport == nil || !tv.HasFocus() || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
+		if tv.Scene == nil || !tv.HasFocus() || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
 			tv.RenderCursor(false)
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
@@ -3574,7 +3574,7 @@ func (tv *TextView) RenderAllLines() {
 	wupdt := tv.TopUpdateStart()
 	tv.RenderAllLinesInBounds()
 	tv.PopBounds()
-	tv.Viewport.This().(gi.Viewport).VpUploadRegion(tv.VpBBox, tv.WinBBox)
+	tv.Scene.This().(gi.Scene).VpUploadRegion(tv.VpBBox, tv.WinBBox)
 	tv.RenderScrolls()
 	tv.TopUpdateEnd(wupdt)
 }
@@ -3689,7 +3689,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 		return
 	}
 
-	vp := tv.Viewport
+	vp := tv.Scene
 	sty := &tv.Style
 	spc := sty.BoxSpace()
 	fst := sty.FontRender()
@@ -3740,7 +3740,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// if icnm, ok := tv.Buf.LineIcons[ln]; ok {
 	// 	ic := tv.Buf.Icons[icnm]
 	// 	ic.Par = tv
-	// 	ic.Viewport = tv.Viewport
+	// 	ic.Scene = tv.Scene
 	// 	// pos.X += 20 // todo
 	// 	sic := ic.SVGIcon()
 	// 	sic.Resize(image.Point{20, 20})
@@ -3751,14 +3751,14 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// 	ist.X = ied.X - 20
 	// 	r := image.Rectangle{Min: ist, Max: ied}
 	// 	sic.Sty.BackgroundColor.SetName("black")
-	// 	sic.FillViewport()
-	// 	draw.Draw(tv.Viewport.Pixels, r, sic.Pixels, image.Point{}, draw.Over)
+	// 	sic.FillScene()
+	// 	draw.Draw(tv.Scene.Pixels, r, sic.Pixels, image.Point{}, draw.Over)
 	// }
 	if vpUpload {
 		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
 		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
 		tWinBBox := tBBox.Add(winoff)
-		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
+		vp.This().(gi.Scene).VpUploadRegion(tBBox, tWinBBox)
 	}
 }
 
@@ -3791,7 +3791,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	if st > ed {
 		return false
 	}
-	vp := tv.Viewport
+	vp := tv.Scene
 	wupdt := tv.TopUpdateStart()
 	sty := &tv.Style
 	rs := &vp.Render
@@ -3860,7 +3860,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
 		tWinBBox := tBBox.Add(winoff)
 		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
-		vp.This().(gi.Viewport).VpUploadRegion(tBBox, tWinBBox)
+		vp.This().(gi.Scene).VpUploadRegion(tBBox, tWinBBox)
 	}
 	tv.PopBounds()
 	tv.RenderScrolls()
@@ -4764,7 +4764,7 @@ func (tv *TextView) TextViewEvents() {
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
-	if dlg, ok := tv.Viewport.This().(*gi.Dialog); ok {
+	if dlg, ok := tv.Scene.This().(*gi.Dialog); ok {
 		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			txf, _ := recv.Embed(TypeTextView).(*TextView)
 			if sig == int64(gi.DialogAccepted) {
@@ -4778,7 +4778,7 @@ func (tv *TextView) TextViewEvents() {
 //  Node2D Interface
 
 // Config calls Init on widget
-// func (tv *TextView) ConfigWidget(vp *Viewport) {
+// func (tv *TextView) ConfigWidget(vp *Scene) {
 //
 // }
 
@@ -4814,11 +4814,11 @@ func (tv *TextView) SetStyle() {
 }
 
 // GetSize
-func (tv *TextView) GetSize(vp *Viewport, iter int) {
+func (tv *TextView) GetSize(vp *Scene, iter int) {
 	if iter > 0 {
 		return
 	}
-	tv.InitLayout(vp * Viewport)
+	tv.InitLayout(vp * Scene)
 	if tv.LinesSize == (image.Point{}) {
 		tv.LayoutAllLines(true)
 	} else {
@@ -4827,14 +4827,14 @@ func (tv *TextView) GetSize(vp *Viewport, iter int) {
 }
 
 // DoLayoutn
-func (tv *TextView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bool {
+func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
 	tv.DoLayoutBase(parBBox, true, iter) // init style
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.DoLayoutChildren(iter)
 	if tv.ParentWindow() != nil &&
-		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Viewport.IsDoingFullRender() || tv.NeedsRefresh() ||
+		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
@@ -4844,7 +4844,7 @@ func (tv *TextView) DoLayout(vp *Viewport, parBBox image.Rectangle, iter int) bo
 }
 
 // Render does some preliminary work and then calls render on children
-func (tv *TextView) Render(vp *Viewport) {
+func (tv *TextView) Render(vp *Scene) {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	if tv.NeedsFullReRender() {
 		tv.SetNeedsRefresh()

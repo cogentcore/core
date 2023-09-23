@@ -128,12 +128,12 @@ type Spell struct {
 	Correction string `desc:"the user's correction selection'"`
 
 	// the viewport where the current popup menu is presented
-	Vp *Viewport `desc:"the viewport where the current popup menu is presented"`
+	Sc *Scene `desc:"the viewport where the current popup menu is presented"`
 }
 
-func (sc *Spell) Disconnect() {
-	sc.Node.Disconnect()
-	sc.SpellSig.DisconnectAll()
+func (sp *Spell) Disconnect() {
+	sp.Node.Disconnect()
+	sp.SpellSig.DisconnectAll()
 }
 
 // SpellSignals are signals that are sent by Spell
@@ -149,98 +149,97 @@ const (
 
 // CheckWord checks the model to determine if the word is known.
 // automatically checks the Ignore list first.
-func (sc *Spell) CheckWord(word string) ([]string, bool) {
+func (sp *Spell) CheckWord(word string) ([]string, bool) {
 	return spell.CheckWord(word)
 }
 
 // SetWord sets the word to spell and other associated info
-func (sc *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
-	sc.Word = word
-	sc.Suggest = sugs
-	sc.SrcLn = srcLn
-	sc.SrcCh = srcCh
+func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
+	sp.Word = word
+	sp.Suggest = sugs
+	sp.SrcLn = srcLn
+	sp.SrcCh = srcCh
 }
 
 // Show is the main call for listing spelling corrections.
 // Calls ShowNow which builds the correction popup menu
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
-func (sc *Spell) Show(text string, vp *Viewport, pt image.Point) {
-	if vp == nil || vp.Win == nil {
+func (sp *Spell) Show(text string, sc *Scene, pt image.Point) {
+	if sc == nil || sc.Win == nil {
 		return
 	}
-	cpop := vp.Win.CurPopup()
+	cpop := sc.Win.CurPopup()
 	if PopupIsCorrector(cpop) {
-		vp.Win.SetDelPopup(cpop)
+		sc.Win.SetDelPopup(cpop)
 	}
-	sc.ShowNow(text, vp, pt)
+	sp.ShowNow(text, sc, pt)
 }
 
 // ShowNow actually builds the correction popup menu
-func (sc *Spell) ShowNow(word string, vp *Viewport, pt image.Point) {
-	if vp == nil || vp.Win == nil {
+func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
+	if sc == nil || sc.Win == nil {
 		return
 	}
-	cpop := vp.Win.CurPopup()
+	cpop := sc.Win.CurPopup()
 	if PopupIsCorrector(cpop) {
-		vp.Win.SetDelPopup(cpop)
+		sc.Win.SetDelPopup(cpop)
 	}
 
 	var m Menu
 	var text string
-	if sc.IsLastLearned(word) {
+	if sp.IsLastLearned(word) {
 		text = "unlearn"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data any) {
-				sc.UnLearnLast()
+			sp, func(recv, send ki.Ki, sig int64, data any) {
+				sp.UnLearnLast()
 			})
 	} else {
-		count := len(sc.Suggest)
-		if count == 1 && sc.Suggest[0] == word {
+		count := len(sp.Suggest)
+		if count == 1 && sp.Suggest[0] == word {
 			return
 		}
 		if count == 0 {
 			text = "no suggestion"
 			m.AddAction(ActOpts{Label: text, Data: text},
-				sc, func(recv, send ki.Ki, sig int64, data any) {
+				sp, func(recv, send ki.Ki, sig int64, data any) {
 				})
 		} else {
 			for i := 0; i < count; i++ {
-				text = sc.Suggest[i]
+				text = sp.Suggest[i]
 				m.AddAction(ActOpts{Label: text, Data: text},
-					sc, func(recv, send ki.Ki, sig int64, data any) {
-						sc.Spell(data.(string))
+					sp, func(recv, send ki.Ki, sig int64, data any) {
+						sp.Spell(data.(string))
 					})
 			}
 		}
 		m.AddSeparator("")
 		text = "learn"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data any) {
-				sc.LearnWord()
+			sp, func(recv, send ki.Ki, sig int64, data any) {
+				sp.LearnWord()
 			})
 		text = "ignore"
 		m.AddAction(ActOpts{Label: text, Data: text},
-			sc, func(recv, send ki.Ki, sig int64, data any) {
-				sc.IgnoreWord()
+			sp, func(recv, send ki.Ki, sig int64, data any) {
+				sp.IgnoreWord()
 			})
 	}
-	sc.Vp = vp
-	pvp := PopupMenu(m, pt.X, pt.Y, vp, "tf-spellcheck-menu")
-	pvp.Type = VpCorrector
-	// pvp.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
+	scp.Type = VpCorrector
+	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 
 // Spell emits a signal to let subscribers know that the user has made a
 // selection from the list of possible corrections
-func (sc *Spell) Spell(s string) {
-	sc.Cancel()
-	sc.Correction = s
-	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), s)
+func (sp *Spell) Spell(s string) {
+	sp.Cancel()
+	sp.Correction = s
+	sp.SpellSig.Emit(sp.This(), int64(SpellSelect), s)
 }
 
 // KeyInput is the opportunity for the spelling correction popup to act on specific key inputs
-func (sc *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key processed
+func (sp *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key processed
 	switch kf {
 	case KeyFunMoveDown:
 		return true
@@ -251,47 +250,47 @@ func (sc *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key pro
 }
 
 // LearnWord gets the misspelled/unknown word and passes to LearnWord
-func (sc *Spell) LearnWord() {
-	sc.LastLearned = strings.ToLower(sc.Word)
-	spell.LearnWord(sc.Word)
-	sc.SpellSig.Emit(sc.This(), int64(SpellSelect), sc.Word)
+func (sp *Spell) LearnWord() {
+	sp.LastLearned = strings.ToLower(sp.Word)
+	spell.LearnWord(sp.Word)
+	sp.SpellSig.Emit(sp.This(), int64(SpellSelect), sp.Word)
 }
 
 // IsLastLearned returns true if given word was the last one learned
-func (sc *Spell) IsLastLearned(wrd string) bool {
+func (sp *Spell) IsLastLearned(wrd string) bool {
 	lword := strings.ToLower(wrd)
-	return lword == sc.LastLearned
+	return lword == sp.LastLearned
 }
 
 // UnLearnLast unlearns the last learned word -- in case accidental
-func (sc *Spell) UnLearnLast() {
-	if sc.LastLearned == "" {
+func (sp *Spell) UnLearnLast() {
+	if sp.LastLearned == "" {
 		log.Println("spell.UnLearnLast: no last learned word")
 		return
 	}
-	lword := sc.LastLearned
-	sc.LastLearned = ""
+	lword := sp.LastLearned
+	sp.LastLearned = ""
 	spell.UnLearnWord(lword)
 }
 
 // IgnoreWord adds the word to the ignore list
-func (sc *Spell) IgnoreWord() {
-	spell.IgnoreWord(sc.Word)
-	sc.SpellSig.Emit(sc.This(), int64(SpellIgnore), sc.Word)
+func (sp *Spell) IgnoreWord() {
+	spell.IgnoreWord(sp.Word)
+	sp.SpellSig.Emit(sp.This(), int64(SpellIgnore), sp.Word)
 }
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction
 // returns true if canceled
-func (sc *Spell) Cancel() bool {
-	if sc.Vp == nil || sc.Vp.Win == nil {
+func (sp *Spell) Cancel() bool {
+	if sp.Sc == nil || sp.Sc.Win == nil {
 		return false
 	}
-	cpop := sc.Vp.Win.CurPopup()
+	cpop := sp.Sc.Win.CurPopup()
 	did := false
 	if PopupIsCorrector(cpop) {
 		did = true
-		sc.Vp.Win.SetDelPopup(cpop)
+		sp.Sc.Win.SetDelPopup(cpop)
 	}
-	sc.Vp = nil
+	sp.Sc = nil
 	return did
 }
