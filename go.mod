@@ -3,9 +3,9 @@ module goki.dev/gti
 go 1.21.0
 
 require (
-	goki.dev/gengo v0.3.4
+	goki.dev/gengo v0.3.5
 	goki.dev/grease v0.8.11
-	goki.dev/ordmap v0.5.4
+	goki.dev/ordmap v0.5.5
 	golang.org/x/tools v0.13.0
 )
 
@@ -17,8 +17,8 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	goki.dev/enums v0.9.14 // indirect
-	goki.dev/glop v0.1.1 // indirect
-	goki.dev/grows v0.3.2 // indirect
+	goki.dev/glop v0.1.2 // indirect
+	goki.dev/grows v0.3.3 // indirect
 	goki.dev/laser v0.1.1 // indirect
 	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
