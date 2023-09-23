@@ -260,7 +260,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 	}
 	cmd.Env = env
 	cmd.Dir = at
-	return RunCmd(cmd)
+	return RunCmd(c, cmd)
 }
 
 func GoModTidyAt(c *config.Config, at string, env []string) error {
@@ -278,7 +278,7 @@ func GoModTidyAt(c *config.Config, at string, env []string) error {
 	}
 	cmd.Env = env
 	cmd.Dir = at
-	return RunCmd(cmd)
+	return RunCmd(c, cmd)
 }
 
 func GoModCachePath() (string, error) {

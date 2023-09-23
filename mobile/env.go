@@ -126,7 +126,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 			fmt.Printf("WORK=%s\n", tmpdir)
 			return
 		}
-		RemoveAll(tmpdir)
+		RemoveAll(c, tmpdir)
 	}
 	if c.Build.PrintOnly {
 		tmpdir = "$WORK"
@@ -477,7 +477,7 @@ func Environ(kv []string) []string {
 			new = append(new, ev)
 			continue
 		}
-		if goos == "windows" {
+		if GOOS == "windows" {
 			elem[0] = strings.ToUpper(elem[0])
 		}
 		envs[elem[0]] = elem[1]
@@ -487,7 +487,7 @@ func Environ(kv []string) []string {
 		if len(elem) != 2 || elem[0] == "" {
 			panic(fmt.Sprintf("malformed env var %q from input", ev))
 		}
-		if goos == "windows" {
+		if GOOS == "windows" {
 			elem[0] = strings.ToUpper(elem[0])
 		}
 		envs[elem[0]] = elem[1]

@@ -87,7 +87,7 @@ func TestAndroidBuild(t *testing.T) {
 	c.Build.Output = "basic.apk"
 	c.Build.Target = []config.Platform{{OS: "android", Arch: "arm"}}
 	gopath = filepath.ToSlash(filepath.SplitList(GoEnv("GOPATH"))[0])
-	if goos == "windows" {
+	if GOOS == "windows" {
 		os.Setenv("HOMEDRIVE", "C:")
 	}
 	c.Build.Package = "goki.dev/mobile/example/basic"

@@ -21,5 +21,5 @@ func Clean(c *config.Config) (err error) {
 	if c.Build.Print {
 		fmt.Fprintln(Xout, "GOMOBILE="+GoMobilePath)
 	}
-	return RemoveAll(GoMobilePath)
+	return RemoveAll(c, GoMobilePath)
 }

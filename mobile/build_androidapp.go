@@ -79,7 +79,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		toolchain := NDK.Toolchain(t.Arch)
 		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(tmpdir, libPath)
-		if err := Mkdir(filepath.Dir(libAbsPath)); err != nil {
+		if err := Mkdir(c, filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
 		err = GoBuild(
