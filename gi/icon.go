@@ -9,8 +9,8 @@ import (
 	"image"
 
 	"goki.dev/colors"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/svg"
 	"golang.org/x/image/draw"
@@ -42,7 +42,7 @@ type Icon struct {
 	WidgetBase
 
 	// icon name that has been set -- optimizes to prevent reloading of icon
-	IconNm gicons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
+	IconNm icons.Icon `desc:"icon name that has been set -- optimizes to prevent reloading of icon"`
 
 	// file name for the loaded icon, if loaded
 	Filename string `desc:"file name for the loaded icon, if loaded"`
@@ -70,7 +70,7 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 // message if not found etc, and returning true if a new icon was actually set
 // -- does nothing if IconNm is already == icon name and has children, and deletes
 // children if name is nil / none (both cases return false for new icon)
-func (ic *Icon) SetIcon(name gicons.Icon) (bool, error) {
+func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 	if name.IsNil() {
 		ic.SVG.DeleteAll()
 		return false, nil
@@ -152,21 +152,21 @@ func (ic *Icon) Render(vp *Viewport) {
 type IconMgr interface {
 	// IsValid checks if given icon name is a valid name for an available icon
 	// (also checks that the icon manager is non-nil and issues appropriate error)
-	IsValid(iconName gicons.Icon) bool
+	IsValid(iconName icons.Icon) bool
 
 	// SetIcon sets the icon by name into given Icon wrapper, returning error
 	// message if not found etc.  This is how gi.Icon is initialized from
 	// underlying svg.Icon items.
-	SetIcon(ic *Icon, iconName gicons.Icon) error
+	SetIcon(ic *Icon, iconName icons.Icon) error
 
 	// IconByName is main function to get icon by name -- looks in CurIconSet and
 	// falls back to DefaultIconSet if not found there -- returns error
 	// message if not found.  cast result to *svg.Icon
-	IconByName(name gicons.Icon) (ki.Ki, error)
+	IconByName(name icons.Icon) (ki.Ki, error)
 
 	// IconList returns the list of available icon names, optionally sorted
 	// alphabetically (otherwise in map-random order)
-	IconList(alphaSort bool) []gicons.Icon
+	IconList(alphaSort bool) []icons.Icon
 }
 
 // TheIconMgr is set by loading the gi/svg package -- all final users must
@@ -174,4 +174,4 @@ type IconMgr interface {
 var TheIconMgr IconMgr
 
 // CurIconList holds the current icon list, alpha sorted -- set at startup
-var CurIconList []gicons.Icon
+var CurIconList []icons.Icon

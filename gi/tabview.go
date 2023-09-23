@@ -10,10 +10,10 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -444,7 +444,7 @@ func (tv *TabView) ConfigNewTabButton(vp *Viewport) bool {
 		}
 		tab := tb.InsertNewChild(ActionType, ntb, "new-tab").(*Action)
 		tab.Data = -1
-		tab.SetIcon(gicons.Add)
+		tab.SetIcon(icons.Add)
 		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := AsTabView(recv)
 			tvv.NewTabAction(tvv.NewTabType, "New Tab")
@@ -691,7 +691,7 @@ func (tb *TabButton) ConfigPartsDeleteButton(vp *Viewport) {
 	if mods {
 		cls := tb.Parts.Child(clsIdx).(*Action)
 		if tb.Indicator.IsNil() {
-			tb.Indicator = gicons.Close
+			tb.Indicator = icons.Close
 		}
 
 		icnm := tb.Indicator

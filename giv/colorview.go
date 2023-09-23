@@ -14,11 +14,11 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -169,7 +169,7 @@ func (cv *ColorView) ConfigWidget(vp *Viewport) {
 	})
 
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
-	rgbacopy.Icon = gicons.ContentCopy
+	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -209,7 +209,7 @@ func (cv *ColorView) ConfigWidget(vp *Viewport) {
 	})
 
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
-	hslacopy.Icon = gicons.ContentCopy
+	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -259,7 +259,7 @@ func (cv *ColorView) ConfigWidget(vp *Viewport) {
 	})
 
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
-	hexcopy.Icon = gicons.ContentCopy
+	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -634,7 +634,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 
 	ac.SetText("Edit Color")
-	ac.SetIcon(gicons.Colors)
+	ac.SetIcon(icons.Colors)
 	ac.Tooltip = "Open color picker dialog"
 	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)

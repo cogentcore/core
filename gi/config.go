@@ -7,7 +7,7 @@ package gi
 import (
 	"log"
 
-	"goki.dev/gicons"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -56,7 +56,7 @@ func (wb *WidgetBase) ConfigWidget(vp *Viewport) {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gicons.Icon, txt string) (icIdx, lbIdx int) {
+func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
 	if wb.Style.Template != "" {
 		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
 	}
@@ -78,7 +78,7 @@ func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm gico
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm gicons.Icon, txt string, icIdx, lbIdx int) {
+func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
 		if wb.Style.Template != "" {

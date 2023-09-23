@@ -18,12 +18,12 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/key"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 )
@@ -352,22 +352,22 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: gicons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: gicons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: gicons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fvv, _ := recv.Embed(TypeFileView).(*FileView)
 		fvv.AddPathToFavs()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: gicons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
+	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
 		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fvv, _ := recv.Embed(TypeFileView).(*FileView)
 			fvv.NewFolder()

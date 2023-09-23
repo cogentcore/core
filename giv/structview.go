@@ -228,7 +228,7 @@ func (sv *StructView) ConfigToolbar() {
 	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: ttip},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFields()

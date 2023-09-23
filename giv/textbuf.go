@@ -19,10 +19,10 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/glop/indent"
 	"goki.dev/glop/runes"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -87,13 +87,13 @@ type TextBuf struct {
 	NLines int `json:"-" xml:"-" desc:"number of lines"`
 
 	// icons for given lines -- use SetLineIcon and DeleteLineIcon
-	LineIcons map[int]gicons.Icon `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
+	LineIcons map[int]icons.Icon `desc:"icons for given lines -- use SetLineIcon and DeleteLineIcon"`
 
 	// special line number colors given lines -- use SetLineColor and DeleteLineColor
 	LineColors map[int]color.RGBA `desc:"special line number colors given lines -- use SetLineColor and DeleteLineColor"`
 
 	// icons for each LineIcons being used
-	Icons map[gicons.Icon]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
+	Icons map[icons.Icon]*gi.Icon `json:"-" xml:"-" desc:"icons for each LineIcons being used"`
 
 	// the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!
 	Lines [][]rune `json:"-" xml:"-" desc:"the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!"`
@@ -2143,12 +2143,12 @@ func (tb *TextBuf) InTokenCode(pos lex.Pos) bool {
 //   LineIcons / Colors
 
 // SetLineIcon sets given icon at given line (0 starting)
-func (tb *TextBuf) SetLineIcon(ln int, icon gicons.Icon) {
+func (tb *TextBuf) SetLineIcon(ln int, icon icons.Icon) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()
 	if tb.LineIcons == nil {
-		tb.LineIcons = make(map[int]gicons.Icon)
-		tb.Icons = make(map[gicons.Icon]*gi.Icon)
+		tb.LineIcons = make(map[int]icons.Icon)
+		tb.Icons = make(map[icons.Icon]*gi.Icon)
 	}
 	tb.LineIcons[ln] = icon
 	ic, has := tb.Icons[icon]
@@ -2165,7 +2165,7 @@ func (tb *TextBuf) SetLineIcon(ln int, icon gicons.Icon) {
 }
 
 // DeleteLineIcon deletes any icon at given line (0 starting)
-// if ln = -1 then delete all line gicons.
+// if ln = -1 then delete all line icons.
 func (tb *TextBuf) DeleteLineIcon(ln int) {
 	tb.LinesMu.Lock()
 	defer tb.LinesMu.Unlock()

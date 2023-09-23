@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -277,9 +277,9 @@ func (sv *SplitView) ConfigSplitters(vp *Viewport) {
 	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
 	handsz := sv.HandleSize.Dots
 	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
-	spicon := gicons.DragHandle
+	spicon := icons.DragHandle
 	if sv.Dim == mat32.X {
-		spicon = gicons.DragIndicator
+		spicon = icons.DragIndicator
 	}
 	for i, spk := range *sv.Parts.Children() {
 		sp := spk.(*Splitter)

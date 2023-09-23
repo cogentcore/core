@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -35,10 +35,10 @@ func (vv *IconValueView) UpdateWidget() {
 	}
 	ac := vv.Widget.(*gi.Action)
 	txt := laser.ToString(vv.Value.Interface())
-	if gicons.Icon(txt).IsNil() {
+	if icons.Icon(txt).IsNil() {
 		ac.SetIcon("blank")
 	} else {
-		ac.SetIcon(gicons.Icon(txt))
+		ac.SetIcon(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
@@ -73,7 +73,7 @@ func (vv *IconValueView) Activate(vp *gi.Viewport, dlgRecv ki.Ki, dlgFunc ki.Rec
 	if vv.IsInactive() {
 		return
 	}
-	cur := gicons.Icon(laser.ToString(vv.Value.Interface()))
+	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
 	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {

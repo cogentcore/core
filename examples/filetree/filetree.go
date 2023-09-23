@@ -15,9 +15,9 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -441,15 +441,15 @@ var FileBrowseProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{
 			"shortcut": "Command+U",
-			"icon":     gicons.Refresh,
+			"icon":     icons.Refresh,
 		}},
 		{"SaveActiveView", ki.Props{
 			"label": "Save",
-			"icon":  gicons.Save,
+			"icon":  icons.Save,
 		}},
 		{"SaveActiveViewAs", ki.Props{
 			"label": "Save As...",
-			"icon":  gicons.SaveAs,
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "ActiveFilename",

@@ -14,16 +14,16 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gicons.Icon(""))), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() ValueView {
 		vv := &IconValueView{}
 		ki.InitNode(vv)
 		return vv

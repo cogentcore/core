@@ -177,8 +177,8 @@ var ButtonBaseType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "gicons.Icon", Doc: "[view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
-		{"Indicator", &gti.Field{Name: "Indicator", Type: "gicons.Icon", Doc: "[view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
+		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "[view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
 		{"WasPressed", &gti.Field{Name: "WasPressed", Type: "bool", Doc: "whether the button has been pressed (typically accessed in an ButtonRelease event)", Directives: gti.Directives{}}},
 		{"ButtonSig", &gti.Field{Name: "ButtonSig", Type: "ki.Signal", Doc: "[view: -] signal for button -- see ButtonSignals for the types", Directives: gti.Directives{}}},
@@ -245,7 +245,7 @@ var CheckBoxType = gti.AddType(&gti.Type{
 	Doc:        "CheckBox toggles between a checked and unchecked state",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconOff", &gti.Field{Name: "IconOff", Type: "gicons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property", Directives: gti.Directives{}}},
+		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
@@ -273,7 +273,7 @@ func (t *CheckBox) New() ki.Ki {
 // ComboBoxType is the [gti.Type] for [ComboBox]
 var ComboBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ComboBox",
-	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [gicons.Icon] type, then they\nare displayed using icons instead.",
+	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [icons.Icon] type, then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}}},
@@ -422,7 +422,7 @@ var IconType = gti.AddType(&gti.Type{
 	Doc:        "Icon is a wrapper around a child svg.Icon SVG element.  SVG should contain no\ncolor information -- it should just be a filled shape where the fill and\nstroke colors come from the surrounding context / paint settings.  The\nrendered version is cached for a given size. Icons are always copied from\nan original source icon and then can be customized from there.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconNm", &gti.Field{Name: "IconNm", Type: "gicons.Icon", Doc: "icon name that has been set -- optimizes to prevent reloading of icon", Directives: gti.Directives{}}},
+		{"IconNm", &gti.Field{Name: "IconNm", Type: "icons.Icon", Doc: "icon name that has been set -- optimizes to prevent reloading of icon", Directives: gti.Directives{}}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -672,7 +672,7 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Ic", &gti.Field{Name: "Ic", Type: "gicons.Icon", Doc: "icon for item", Directives: gti.Directives{}}},
+		{"Ic", &gti.Field{Name: "Ic", Type: "icons.Icon", Doc: "icon for item", Directives: gti.Directives{}}},
 		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "name of the favorite item", Directives: gti.Directives{}}},
 		{"Path", &gti.Field{Name: "Path", Type: "string", Doc: "[tableview: -select]", Directives: gti.Directives{}}},
 	}),
@@ -697,7 +697,7 @@ var SliderBaseType = gti.AddType(&gti.Type{
 		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}}},
 		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "units.Value", Doc: "styled fixed size of the thumb", Directives: gti.Directives{}}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "gicons.Icon", Doc: "[view: show-name] optional icon for the dragging knob", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon for the dragging knob", Directives: gti.Directives{}}},
 		{"ValThumb", &gti.Field{Name: "ValThumb", Type: "bool", Doc: "if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed", Directives: gti.Directives{}}},
 		{"ThumbVal", &gti.Field{Name: "ThumbVal", Type: "float32", Doc: "value that the thumb represents, in the same units", Directives: gti.Directives{}}},
 		{"Pos", &gti.Field{Name: "Pos", Type: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}}},
@@ -882,8 +882,8 @@ var SpinBoxType = gti.AddType(&gti.Type{
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}}},
 		{"Format", &gti.Field{Name: "Format", Type: "string", Doc: "prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing", Directives: gti.Directives{}}},
-		{"UpIcon", &gti.Field{Name: "UpIcon", Type: "gicons.Icon", Doc: "[view: show-name] icon to use for up button -- defaults to gicons.KeyboardArrowUp", Directives: gti.Directives{}}},
-		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "gicons.Icon", Doc: "[view: show-name] icon to use for down button -- defaults to gicons.KeyboardArrowDown", Directives: gti.Directives{}}},
+		{"UpIcon", &gti.Field{Name: "UpIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for up button -- defaults to icons.KeyboardArrowUp", Directives: gti.Directives{}}},
+		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown", Directives: gti.Directives{}}},
 		{"SpinBoxSig", &gti.Field{Name: "SpinBoxSig", Type: "ki.Signal", Doc: "[view: -] signal for spin box -- has no signal types, just emitted when the value changes", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1083,9 +1083,9 @@ var TextFieldType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Txt", &gti.Field{Name: "Txt", Type: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
-		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "gicons.Icon", Doc: "if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig", Directives: gti.Directives{}}},
+		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "icons.Icon", Doc: "if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig", Directives: gti.Directives{}}},
 		{"LeadingIconSig", &gti.Field{Name: "LeadingIconSig", Type: "ki.Signal", Doc: "[view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal", Directives: gti.Directives{}}},
-		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "gicons.Icon", Doc: "if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig", Directives: gti.Directives{}}},
+		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "icons.Icon", Doc: "if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig", Directives: gti.Directives{}}},
 		{"TrailingIconSig", &gti.Field{Name: "TrailingIconSig", Type: "ki.Signal", Doc: "[view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal", Directives: gti.Directives{}}},
 		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}}},

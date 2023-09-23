@@ -6,8 +6,8 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
 )
@@ -173,7 +173,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 			}
 		})
 		tb.AddSeparator("dsep")
-		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: gicons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
+		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data any) {
 				lvv := recv.Embed(TypeVCSLogView).(*VCSLogView)
 				DiffViewDialogFromRevs(lvv.Vp, lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)

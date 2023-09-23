@@ -15,8 +15,8 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/svg"
@@ -296,7 +296,7 @@ var BitmapProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
-			"icon": gicons.FileOpen,
+			"icon": icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"default-field": "Filename",

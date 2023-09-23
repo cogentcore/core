@@ -8,11 +8,11 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -50,7 +50,7 @@ type MakeMenuFunc func(obj ki.Ki, m *Menu)
 type ActOpts struct {
 	Name        string
 	Label       string
-	Icon        gicons.Icon
+	Icon        icons.Icon
 	Tooltip     string
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
@@ -70,7 +70,7 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 	ac.InitName(ac, nm)
 	ac.Text = opts.Label
 	ac.Tooltip = opts.Tooltip
-	ac.Icon = gicons.Icon(opts.Icon)
+	ac.Icon = icons.Icon(opts.Icon)
 	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
 		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)

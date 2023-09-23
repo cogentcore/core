@@ -14,7 +14,6 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -22,6 +21,7 @@ import (
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
@@ -64,13 +64,13 @@ type TextField struct {
 	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 
 	// if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig
-	LeadingIcon gicons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
+	LeadingIcon icons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
 
 	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
 	LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
 
 	// if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig
-	TrailingIcon gicons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
+	TrailingIcon icons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
 
 	// [view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal
 	TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
@@ -330,7 +330,7 @@ func (tf *TextField) SetText(txt string) {
 // AddClearAction adds a trailing icon action at the end
 // of the textfield that clears the text in the textfield when pressed
 func (tf *TextField) AddClearAction() {
-	tf.TrailingIcon = gicons.Close
+	tf.TrailingIcon = icons.Close
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tff := AsTextField(recv)
 		if tff != nil {
@@ -343,16 +343,16 @@ func (tf *TextField) AddClearAction() {
 // icon action at the end of the textfield that toggles [TextField.NoEcho]
 func (tf *TextField) SetTypePassword() {
 	tf.NoEcho = true
-	tf.TrailingIcon = gicons.Visibility
+	tf.TrailingIcon = icons.Visibility
 	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tff := AsTextField(recv)
 		if tff != nil {
 			updt := tff.UpdateStart()
 			tff.NoEcho = !tff.NoEcho
 			if tff.NoEcho {
-				tf.TrailingIcon = gicons.Visibility
+				tf.TrailingIcon = icons.Visibility
 			} else {
-				tf.TrailingIcon = gicons.VisibilityOff
+				tf.TrailingIcon = icons.VisibilityOff
 			}
 			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
 				icon.SetIcon(tf.TrailingIcon)

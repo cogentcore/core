@@ -11,12 +11,12 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -31,10 +31,10 @@ type ButtonBase struct {
 	Text string `xml:"text" desc:"label for the button -- if blank then no label is presented"`
 
 	// [view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
-	Icon gicons.Icon `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	Icon icons.Icon `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
 
 	// [view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
-	Indicator gicons.Icon `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	Indicator icons.Icon `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 
 	// optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
@@ -171,7 +171,7 @@ func (bb *ButtonBase) SetText(txt string) {
 // updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
-func (bb *ButtonBase) SetIcon(iconName gicons.Icon) {
+func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 	if !bb.HasVp() {
 		return
 	}
@@ -289,11 +289,11 @@ func (bb *ButtonBase) ResetMenu() {
 
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
 // if defOn is true, an indicator is added even if the Indicator field is unset
-// (as long as it is not explicitly set to [gicons.None]);
+// (as long as it is not explicitly set to [icons.None]);
 // returns the index in Parts of the indicator object, which is named "indicator";
 // an "ind-stretch" is added as well to put on the right by default.
 func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.TypeAndNameList, defOn bool) int {
-	needInd := !bb.Indicator.IsNil() || (defOn && bb.Indicator != gicons.None)
+	needInd := !bb.Indicator.IsNil() || (defOn && bb.Indicator != icons.None)
 	if !needInd {
 		return -1
 	}
@@ -311,7 +311,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	ic := bb.Parts.Child(indIdx).(*Icon)
 	icnm := bb.Indicator
 	if icnm.IsNil() {
-		icnm = gicons.KeyboardArrowDown
+		icnm = icons.KeyboardArrowDown
 	}
 	ic.SetIcon(icnm)
 }
@@ -661,7 +661,7 @@ type CheckBox struct {
 	ButtonBase
 
 	// [view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
-	IconOff gicons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
+	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
 func (cb *CheckBox) OnInit() {
@@ -741,7 +741,7 @@ func (cb *CheckBox) ButtonRelease() {
 
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
 // states, and updates button
-func (cb *CheckBox) SetIcons(icOn, icOff gicons.Icon) {
+func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 	updt := cb.UpdateStart()
 	cb.Icon = icOn
 	cb.IconOff = icOff
@@ -759,10 +759,10 @@ func (cb *CheckBox) ConfigWidget(vp *Viewport) {
 func (cb *CheckBox) ConfigParts(vp *Viewport) {
 	cb.SetCheckable(true)
 	if !TheIconMgr.IsValid(cb.Icon) {
-		cb.Icon = gicons.CheckBox // fallback
+		cb.Icon = icons.CheckBox // fallback
 	}
 	if !TheIconMgr.IsValid(cb.IconOff) {
-		cb.IconOff = gicons.CheckBoxOutlineBlank
+		cb.IconOff = icons.CheckBoxOutlineBlank
 	}
 	config := ki.TypeAndNameList{}
 	icIdx := 0 // always there

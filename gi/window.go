@@ -164,14 +164,14 @@ type Window struct {
 	// event manager that handles dispersing events to nodes
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
 
-	// convenience pointer to window's master viewport child that handles the rendering
-	Viewport *Viewport `json:"-" xml:"-" desc:"convenience pointer to window's master viewport child that handles the rendering"`
+	// the window's base viewport holding the primary contents of the window
+	Viewport *Viewport `json:"-" xml:"-" desc:"the window's base viewport holding the primary contents of the window"`
 
-	// main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)
-	MasterVLay *Layout `json:"-" xml:"-" desc:"main vertical layout under Viewport -- first element is MainMenu (always -- leave empty to not render)"`
+	// stack of popups
+	PopupStack []ki.Ki `json:"-" xml:"-" desc:"stack of popups"`
 
-	// main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu
-	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of MasterVLay always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	// main menu -- is first element of Viewport.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
+	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Viewport.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 
 	// sprites are named images that are rendered last overlaying everything else.
 	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
@@ -187,9 +187,6 @@ type Window struct {
 
 	// Current popup viewport that gets all events
 	Popup ki.Ki `json:"-" xml:"-" desc:"Current popup viewport that gets all events"`
-
-	// stack of popups
-	PopupStack []ki.Ki `json:"-" xml:"-" desc:"stack of popups"`
 
 	// this popup will be pushed at the end of the current event cycle -- use SetNextPopup
 	NextPopup ki.Ki `json:"-" xml:"-" desc:"this popup will be pushed at the end of the current event cycle -- use SetNextPopup"`
@@ -526,12 +523,12 @@ func (w *Window) ConfigVLay() {
 	if !vp.HasChildren() {
 		vp.NewChild(LayoutType, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(LayoutType).(*Layout)
-	if !w.MasterVLay.HasChildren() {
-		w.MasterVLay.NewChild(TypeMenuBar, "main-menu")
+	w.Viewport.Frame = vp.Child(0).Embed(LayoutType).(*Layout)
+	if !w.Viewport.Frame.HasChildren() {
+		w.Viewport.Frame.NewChild(TypeMenuBar, "main-menu")
 	}
-	w.MasterVLay.Lay = LayoutVert
-	w.MainMenu = w.MasterVLay.Child(0).(*MenuBar)
+	w.Viewport.Frame.Lay = LayoutVert
+	w.MainMenu = w.Viewport.Frame.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 }
@@ -564,51 +561,51 @@ func (w *Window) AddMainMenu() *MenuBar {
 	if !vp.HasChildren() {
 		vp.NewChild(LayoutType, "main-vlay")
 	}
-	w.MasterVLay = vp.Child(0).Embed(LayoutType).(*Layout)
-	if !w.MasterVLay.HasChildren() {
-		w.MainMenu = w.MasterVLay.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
+	w.Viewport.Frame = vp.Child(0).Embed(LayoutType).(*Layout)
+	if !w.Viewport.Frame.HasChildren() {
+		w.MainMenu = w.Viewport.Frame.NewChild(TypeMenuBar, "main-menu").(*MenuBar)
 	} else {
-		mmi := w.MasterVLay.ChildByName("main-menu", 0)
+		mmi := w.Viewport.Frame.ChildByName("main-menu", 0)
 		if mmi != nil {
 			mm := mmi.(*MenuBar)
 			w.MainMenu = mm
 			return mm
 		}
 	}
-	w.MainMenu = w.MasterVLay.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
+	w.MainMenu = w.Viewport.Frame.InsertNewChild(TypeMenuBar, 0, "main-menu").(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
 	return w.MainMenu
 }
 
 // SetMainWidget sets given widget as the main widget for the window -- adds
-// into MasterVLay after main menu -- if a main widget has already been set then
+// into Viewport.Frame after main menu -- if a main widget has already been set then
 // it is deleted and this one replaces it.  Use this method to ensure future
 // compatibility.
 func (w *Window) SetMainWidget(mw ki.Ki) {
-	if len(w.MasterVLay.Kids) == 1 {
-		w.MasterVLay.AddChild(mw)
+	if len(w.Viewport.Frame.Kids) == 1 {
+		w.Viewport.Frame.AddChild(mw)
 		return
 	}
-	cmw := w.MasterVLay.Child(1)
+	cmw := w.Viewport.Frame.Child(1)
 	if cmw != mw {
-		w.MasterVLay.DeleteChildAtIndex(1, ki.DestroyKids)
-		w.MasterVLay.InsertChild(mw, 1)
+		w.Viewport.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
+		w.Viewport.Frame.InsertChild(mw, 1)
 	}
 }
 
 // SetMainWidgetType sets the main widget of this window to given type
-// (typically a Layout or Frame), and returns it.  Adds into MasterVLay after
+// (typically a Layout or Frame), and returns it.  Adds into Viewport.Frame after
 // main menu -- if a main widget has already been set then it is deleted and
 // this one replaces it.  Use this method to ensure future compatibility.
 func (w *Window) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
-	if len(w.MasterVLay.Kids) == 1 {
-		return w.MasterVLay.NewChild(typ, name)
+	if len(w.Viewport.Frame.Kids) == 1 {
+		return w.Viewport.Frame.NewChild(typ, name)
 	}
-	cmw := w.MasterVLay.Child(1)
+	cmw := w.Viewport.Frame.Child(1)
 	if ki.Type(cmw) != typ {
-		w.MasterVLay.DeleteChildAtIndex(1, ki.DestroyKids)
-		return w.MasterVLay.InsertNewChild(typ, 1, name)
+		w.Viewport.Frame.DeleteChildAtIndex(1, ki.DestroyKids)
+		return w.Viewport.Frame.InsertNewChild(typ, 1, name)
 	}
 	return cmw
 }
@@ -687,9 +684,9 @@ func (w *Window) SetTitle(name string) {
 }
 
 // MainWidget returns the main widget for this window -- 2nd element in
-// MasterVLay -- returns error if not yet set.
+// Viewport.Frame -- returns error if not yet set.
 func (w *Window) MainWidget() (ki.Ki, error) {
-	return w.MasterVLay.ChildTry(1)
+	return w.Viewport.Frame.ChildTry(1)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the

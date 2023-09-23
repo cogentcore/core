@@ -529,7 +529,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addact := gi.Action{}
 			sg.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(gicons.Add)
+			addact.SetIcon(icons.Add)
 		}
 		if !sv.NoDelete {
 			cidx++
@@ -537,7 +537,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			delact := gi.Action{}
 			sg.SetChild(&delact, cidx, delnm)
 
-			delact.SetIcon(gicons.Delete)
+			delact.SetIcon(icons.Delete)
 		}
 	}
 	sv.ConfigScroll()
@@ -809,7 +809,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact := gi.Action{}
 						sg.SetChild(&addact, cidx, addnm)
 
-						addact.SetIcon(gicons.Add)
+						addact.SetIcon(icons.Add)
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
 						addact.Style.Template = "giv.SliceViewBase.AddAction"
@@ -826,7 +826,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact := gi.Action{}
 						sg.SetChild(&delact, cidx, delnm)
 
-						delact.SetIcon(gicons.Delete)
+						delact.SetIcon(icons.Delete)
 						delact.Tooltip = "delete this element"
 						delact.Data = i
 						delact.Style.Template = "giv.SliceViewBase.DelAction"
@@ -1041,14 +1041,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the slice"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)

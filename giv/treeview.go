@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -20,6 +19,7 @@ import (
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -66,7 +66,7 @@ type TreeView struct {
 	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 
 	// [view: show-name] optional icon, displayed to the the left of the text label
-	Icon gicons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+	Icon icons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
 
 	// cached root of the view
 	RootView *TreeView `json:"-" xml:"-" desc:"cached root of the view"`
@@ -109,8 +109,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "branch":
 			cb := child.(*gi.CheckBox)
-			cb.Icon = gicons.KeyboardArrowDown
-			cb.IconOff = gicons.KeyboardArrowRight
+			cb.Icon = icons.KeyboardArrowDown
+			cb.IconOff = icons.KeyboardArrowRight
 			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
@@ -130,7 +130,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "menu":
 			menu := child.(*gi.Button)
-			menu.Indicator = gicons.None
+			menu.Indicator = icons.None
 		}
 	}
 }

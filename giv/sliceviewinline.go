@@ -157,7 +157,7 @@ func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
 		adack, err := sv.Parts.Children().ElemFromEndTry(1)
 		if err == nil {
 			adac := adack.(*gi.Action)
-			adac.SetIcon(gicons.Add)
+			adac.SetIcon(icons.Add)
 			adac.Tooltip = "add an element to the slice"
 			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
@@ -168,7 +168,7 @@ func (sv *SliceViewInline) ConfigParts(vp *Viewport) {
 	edack, err := sv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Action)
-		edac.SetIcon(gicons.Edit)
+		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)

@@ -25,13 +25,13 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
@@ -1785,8 +1785,8 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "branch":
 			cb := child.(*gi.CheckBox)
-			cb.Icon = gicons.FolderOpen
-			cb.IconOff = gicons.Folder
+			cb.Icon = icons.FolderOpen
+			cb.IconOff = icons.Folder
 			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
@@ -1806,7 +1806,7 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			})
 		case "menu":
 			menu := child.(*gi.Button)
-			menu.Indicator = gicons.None
+			menu.Indicator = icons.None
 		}
 	}
 }
@@ -2811,13 +2811,13 @@ func (ft *FileTreeView) SetStyle() {
 			if fn.HasChildren() {
 				ft.Icon = ""
 			} else {
-				ft.Icon = gicons.Folder
+				ft.Icon = icons.Folder
 			}
 			ft.AddClass("folder")
 		} else {
 			ft.Icon = fn.Info.Ic
 			if ft.Icon.IsNil() {
-				ft.Icon = gicons.Blank
+				ft.Icon = icons.Blank
 			}
 			if fn.IsExec() {
 				ft.AddClass("exec")

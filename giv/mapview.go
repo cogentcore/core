@@ -8,9 +8,9 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -294,7 +294,7 @@ func (mv *MapView) ConfigMapGrid() {
 			})
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
-		delact.SetIcon(gicons.Delete)
+		delact.SetIcon(icons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.Style.Template = "giv.MapView.DelAction"
@@ -411,18 +411,18 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update the view to reflect current state of map"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.UpdateValues()
 			})
-		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: gicons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
+		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
 			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				mvv := recv.Embed(TypeMapView).(*MapView)
 				mvv.ToggleSort()
 			})
 		if ndef > 2 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the map"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
 				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					mvv := recv.Embed(TypeMapView).(*MapView)
 					mvv.MapAdd()

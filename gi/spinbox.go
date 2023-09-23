@@ -10,11 +10,11 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -70,11 +70,11 @@ type SpinBox struct {
 	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 	Format string `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
 
-	// [view: show-name] icon to use for up button -- defaults to gicons.KeyboardArrowUp
-	UpIcon gicons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to gicons.KeyboardArrowUp"`
+	// [view: show-name] icon to use for up button -- defaults to icons.KeyboardArrowUp
+	UpIcon icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
 
-	// [view: show-name] icon to use for down button -- defaults to gicons.KeyboardArrowDown
-	DownIcon gicons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to gicons.KeyboardArrowDown"`
+	// [view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown
+	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
 
 	// [view: -] signal for spin box -- has no signal types, just emitted when the value changes
 	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
@@ -204,10 +204,10 @@ func (sb *SpinBox) ConfigParts(vp *Viewport) {
 	parts := sb.NewParts(LayoutHoriz)
 
 	if sb.UpIcon.IsNil() {
-		sb.UpIcon = gicons.KeyboardArrowUp
+		sb.UpIcon = icons.KeyboardArrowUp
 	}
 	if sb.DownIcon.IsNil() {
-		sb.DownIcon = gicons.KeyboardArrowDown
+		sb.DownIcon = icons.KeyboardArrowDown
 	}
 	if sb.Style.Template != "" {
 		parts.Style.Template = sb.Style.Template + ".Parts"

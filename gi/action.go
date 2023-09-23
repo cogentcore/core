@@ -7,9 +7,9 @@ package gi
 import (
 	"log"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -103,11 +103,11 @@ func (ac *Action) OnInit() {
 		case ActionMenuBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
-			ac.Indicator = gicons.None
+			ac.Indicator = icons.None
 		case ActionToolBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
-			ac.Indicator = gicons.None
+			ac.Indicator = icons.None
 		}
 		if w.HasFlag(Hovered) {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
@@ -296,7 +296,7 @@ func (ac *Action) ConfigParts(vp *Viewport) {
 	}
 	switch {
 	case ismbar:
-		ac.Indicator = gicons.None // menu-bar specifically
+		ac.Indicator = icons.None // menu-bar specifically
 		ac.Type = ActionMenuBar
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
@@ -314,7 +314,7 @@ func (ac *Action) ConfigParts(vp *Viewport) {
 			ac.Class = "menu-action"
 		}
 		if ac.Indicator == "" && ac.HasMenu() {
-			ac.Indicator = gicons.KeyboardArrowRight
+			ac.Indicator = icons.KeyboardArrowRight
 		}
 		ac.ConfigPartsMenuItem()
 	default:

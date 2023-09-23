@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -58,7 +58,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = gicons.Edit
+	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
@@ -182,7 +182,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
 		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = gicons.Edit
+	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
@@ -314,7 +314,7 @@ func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.Icon = gicons.Edit
+	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
@@ -448,7 +448,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.Button)
-	mb.Indicator = gicons.KeyboardArrowDown
+	mb.Indicator = icons.KeyboardArrowDown
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.ResetMenu()
 	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},

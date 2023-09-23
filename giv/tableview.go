@@ -13,12 +13,12 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -393,9 +393,9 @@ func (tv *TableView) ConfigSliceGrid() {
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
-				hdr.SetIcon(gicons.KeyboardArrowDown)
+				hdr.SetIcon(icons.KeyboardArrowDown)
 			} else {
-				hdr.SetIcon(gicons.KeyboardArrowUp)
+				hdr.SetIcon(icons.KeyboardArrowUp)
 			}
 		}
 		hdr.Data = fli
@@ -436,7 +436,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			addnm := "add-" + itxt
 			addact := gi.Action{}
 			sgf.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(gicons.Add)
+			addact.SetIcon(icons.Add)
 			cidx++
 		}
 		if !tv.NoDelete {
@@ -446,7 +446,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			delnm := "del-" + itxt
 			delact := gi.Action{}
 			sgf.SetChild(&delact, cidx, delnm)
-			delact.SetIcon(gicons.Delete)
+			delact.SetIcon(icons.Delete)
 			cidx++
 		}
 	}
@@ -710,7 +710,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Action{}
 					sg.SetChild(&addact, cidx, addnm)
-					addact.SetIcon(gicons.Add)
+					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
 					addact.Style.Template = "giv.TableView.AddAction"
@@ -727,7 +727,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Action{}
 					sg.SetChild(&delact, cidx, delnm)
-					delact.SetIcon(gicons.Delete)
+					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
 					delact.Data = i
 					delact.Style.Template = "giv.TableView.DelAction"
@@ -853,9 +853,9 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 				tv.SortDesc = false
 			}
 			if ascending {
-				hdr.SetIcon(gicons.KeyboardArrowUp)
+				hdr.SetIcon(icons.KeyboardArrowUp)
 			} else {
-				hdr.SetIcon(gicons.KeyboardArrowDown)
+				hdr.SetIcon(icons.KeyboardArrowDown)
 			}
 		} else {
 			hdr.SetIcon("none")
@@ -887,13 +887,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: gicons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
+		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tvv := recv.Embed(TypeTableView).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: gicons.Add, Tooltip: "add a new element to the table"},
+			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					tvv := recv.Embed(TypeTableView).(*TableView)
 					tvv.SliceNewAt(-1)

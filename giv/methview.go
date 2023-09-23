@@ -13,9 +13,9 @@ import (
 	"github.com/fatih/camelcase"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -491,7 +491,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Viewport, ac *gi.Action, prop
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
 			}
 		case "icon":
-			ac.Icon = gicons.Icon(laser.ToString(pv))
+			ac.Icon = icons.Icon(laser.ToString(pv))
 		case "desc":
 			md.Desc = laser.ToString(pv)
 			ac.Tooltip = md.Desc

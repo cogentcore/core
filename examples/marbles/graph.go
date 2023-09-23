@@ -45,7 +45,7 @@ var GraphProps = ki.Props{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
 			"desc":  "Opens line equations and params from a .json file.",
-			"icon":  gicons.FileOpen,
+			"icon":  icons.FileOpen,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".json",
@@ -55,7 +55,7 @@ var GraphProps = ki.Props{
 		{"SaveJSON", ki.Props{
 			"label": "Save As...",
 			"desc":  "Saves line equations and params to a .json file.",
-			"icon":  gicons.SaveAs,
+			"icon":  icons.SaveAs,
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
 					"ext": ".json",
@@ -65,26 +65,26 @@ var GraphProps = ki.Props{
 		{"sep-ctrl", ki.BlankProp{}},
 		{"Graph", ki.Props{
 			"desc": "updates graph for current equations",
-			"icon": gicons.Image,
+			"icon": icons.Image,
 		}},
 		{"Run", ki.Props{
 			"desc":            "runs the marbles for NSteps",
-			"icon":            gicons.PlayCircle,
+			"icon":            icons.PlayCircle,
 			"no-update-after": true,
 		}},
 		{"Stop", ki.Props{
 			"desc":            "runs the marbles for NSteps",
-			"icon":            gicons.Stop,
+			"icon":            icons.Stop,
 			"no-update-after": true,
 		}},
 		{"Step", ki.Props{
 			"desc":            "steps the marbles for one step",
-			"icon":            gicons.KeyboardArrowRight,
+			"icon":            icons.KeyboardArrowRight,
 			"no-update-after": true,
 		}},
 		{"Reset", ki.Props{
 			"desc": "resets marbles to their initial starting positions",
-			"icon": gicons.DeviceReset,
+			"icon": icons.DeviceReset,
 		}},
 	},
 }

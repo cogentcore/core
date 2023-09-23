@@ -19,8 +19,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/token"
 )
@@ -363,7 +363,7 @@ var StyleProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
-			"icon":  gicons.FileOpen,
+			"icon":  icons.FileOpen,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{
@@ -373,7 +373,7 @@ var StyleProps = ki.Props{
 		}},
 		{"SaveJSON", ki.Props{
 			"label": "Save to file",
-			"icon":  gicons.SaveAs,
+			"icon":  icons.SaveAs,
 			"desc":  "You can save and open styles to / from files to share, experiment, transfer, etc -- save from standard ones and load into custom ones for example",
 			"Args": ki.PropSlice{
 				{"File Name", ki.Props{

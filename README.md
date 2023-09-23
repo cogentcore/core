@@ -189,3 +189,11 @@ See [render.go](gi/render.go) for updated version:
 
 * If State changes, Style then Render needs to be called..
 
+## Window logic
+
+* Mobile is basically a single window app.  Desktop can have multiple separate windows.  Need an intermediate abstraction for a separate "sheet" or "surface" of content that can either be within a separate window, or arranged in various ways within the same window.
+
+* Viewport organizes the rendering tree, but doesn't contain the further logic associated with a dialog, menu, etc.  Currently, we're wrapping all that logic into Window which has special cases for each thing.  It would be better to make this more encapsulated.
+
+* A menu, tooltip, completer, or snackbar (popups) are associated with the logical flow of their parent sheet, and all the focus and logic of these should be managed separately for each.  Probably also the event manager should be separate for each -- first pass the window figures out where the event is going at the "sheet" level, then hands it off to the sheet to manage from there.  Basically, the outer window is just like a window manager: it handles distributing events, optionally resizing and positioning handles, and distributing events, and everything else is handled therein.
+

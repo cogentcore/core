@@ -9,9 +9,9 @@ import (
 	"image"
 	"slices"
 
-	"goki.dev/gicons"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -207,8 +207,8 @@ func (bb *ButtonBox) ConfigItems() {
 			cb.Tooltip = bb.Tooltips[i]
 		}
 		if bb.Mutex {
-			cb.Icon = gicons.RadioButtonChecked
-			cb.IconOff = gicons.RadioButtonUnchecked
+			cb.Icon = icons.RadioButtonChecked
+			cb.IconOff = icons.RadioButtonUnchecked
 		}
 		cb.SetProp("index", i)
 		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
