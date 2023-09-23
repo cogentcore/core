@@ -130,7 +130,7 @@ func mainrun(a goosi.App) {
 	stTime := time.Now()
 
 	renderFrame := func() {
-		fmt.Printf("frame: %d\n", frameCount)
+		// fmt.Printf("frame: %d\n", frameCount)
 		// rt := time.Now()
 		camo.Model.SetRotationY(.1 * float32(frameCount))
 		cam.CopyFromBytes(unsafe.Pointer(&camo)) // sets mod
@@ -164,21 +164,21 @@ func mainrun(a goosi.App) {
 	fpsDelay := time.Second / 60
 	fpsTicker := time.NewTicker(fpsDelay)
 	// separate fps-based loop for animation
-	go func() {
-		for {
-			select {
-			case <-exitC:
-				fpsTicker.Stop()
-				return
-			case <-fpsTicker.C:
-				fmt.Println("fps frame")
-				// w.SendEmptyEvent()
-				// renderFrame()
-				// w.SendEmptyEvent()
-				w.Send(&window.Event{Action: window.Paint})
-			}
+	// go func() {
+	for {
+		select {
+		case <-exitC:
+			fpsTicker.Stop()
+			return
+		case <-fpsTicker.C:
+			// fmt.Println("fps frame")
+			w.SendEmptyEvent()
+			renderFrame()
+			w.SendEmptyEvent()
+			// w.Send(&window.Event{Action: window.Paint})
 		}
-	}()
+	}
+	// }()
 
 	for {
 		evi := w.NextEvent()
