@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package driver
+package main
 
 import (
 	"fmt"
 	"image"
-	"testing"
 	"time"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/driver"
 	"goki.dev/goosi/mouse"
 	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
-func TestMain(t *testing.T) {
-	Main(func(a goosi.App) {
+func main() {
+	driver.Main(func(a goosi.App) {
 		opts := &goosi.NewWindowOptions{
 			Size:      image.Pt(1024, 768),
 			StdPixels: true,
@@ -25,7 +25,7 @@ func TestMain(t *testing.T) {
 		}
 		w, err := goosi.TheApp.NewWindow(opts)
 		if err != nil {
-			t.Error(err)
+			panic(err)
 		}
 
 		sy := w.Drawer().Sys
@@ -35,8 +35,8 @@ func TestMain(t *testing.T) {
 		sy.ConfigRender(&sf.Format, vgpu.UndefType)
 		sf.SetRender(&sy.Render)
 
-		pl.AddShaderFile("trianglelit", vgpu.VertexShader, "testdata/trianglelit.spv")
-		pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "testdata/vtxcolor.spv")
+		pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
+		pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
 		sy.Config()
 
