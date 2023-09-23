@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
@@ -75,24 +77,19 @@ func TestMain(t *testing.T) {
 		}
 
 		for {
-			exitC := make(chan struct{}, 2)
-
-			fpsDelay := time.Second / 600
-			fpsTicker := time.NewTicker(fpsDelay)
-			for {
-				select {
-				case <-exitC:
-					fpsTicker.Stop()
+			evi := w.NextEvent()
+			fmt.Println("got event", evi)
+			switch ev := evi.(type) {
+			case *window.Event:
+				switch ev.Action {
+				case window.Close:
 					destroy()
 					return
-				case <-fpsTicker.C:
-					// if w.ShouldClose() {
-					// 	exitC <- struct{}{}
-					// 	continue
-					// }
-					// glfw.PollEvents()
+				case window.Paint:
 					renderFrame()
 				}
+			case *mouse.Event:
+				fmt.Println("got mouse event at pos", ev.Pos())
 			}
 		}
 	})
