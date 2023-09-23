@@ -38,7 +38,7 @@ type iconData struct {
 var iconTmpl = template.Must(template.New("icon").Parse(
 	`
 	// {{.Camel}} is the "{{.Snake}}" icon from Material Design Symbols,
-	// defined at https://goki.dev/gi/v2/blob/master/icons/{{.Dir}}{{.Snake}}.svg
+	// defined at https://github.com/goki/icons/blob/main/{{.Dir}}{{.Snake}}.svg
 	{{.Camel}} Icon = "{{.Snake}}"
 `,
 ))
