@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -17,13 +16,14 @@ import (
 	"strings"
 	"text/template"
 
+	"goki.dev/goki/config"
 	"golang.org/x/tools/go/packages"
 )
 
 // GoAppleBuild builds the given package with the given bundle ID for the given iOS targets.
-func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) (map[string]bool, error) {
+func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targets []config.Platform) (map[string]bool, error) {
 	src := pkg.PkgPath
-	if buildO != "" && !strings.HasSuffix(buildO, ".app") {
+	if c.Build.Output != "" && !strings.HasSuffix(c.Build.Output, ".app") {
 		return nil, fmt.Errorf("-o must have an .app for -target=ios")
 	}
 
@@ -66,11 +66,11 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 		if err := mkdir(filepath.Dir(file.name)); err != nil {
 			return nil, err
 		}
-		if buildX {
+		if c.Build.Print {
 			PrintCmd("echo \"%s\" > %s", file.contents, file.name)
 		}
-		if !buildN {
-			if err := ioutil.WriteFile(file.name, file.contents, 0644); err != nil {
+		if !c.Build.PrintOnly {
+			if err := os.WriteFile(file.name, file.contents, 0644); err != nil {
 				return nil, err
 			}
 		}
@@ -88,20 +88,20 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	for _, t := range targets {
 		// Only one binary per arch allowed
 		// e.g. ios/arm64 + iossimulator/amd64
-		if builtArch[t.arch] {
+		if builtArch[t.Arch] {
 			continue
 		}
-		builtArch[t.arch] = true
+		builtArch[t.Arch] = true
 
-		path := filepath.Join(tmpdir, t.platform, t.arch)
+		path := filepath.Join(tmpdir, t.OS, t.Arch)
 
 		// Disable DWARF; see golang.org/issues/25148.
-		if err := GoBuild(src, appleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
+		if err := GoBuild(c, src, appleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {
 			var err error
-			nmpkgs, err = ExtractPkgs(appleNM, path)
+			nmpkgs, err = ExtractPkgs(c, appleNM, path)
 			if err != nil {
 				return nil, err
 			}
@@ -115,7 +115,7 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	}
 
 	// TODO(jbd): Set the launcher icon.
-	if err := appleCopyAssets(pkg, tmpdir); err != nil {
+	if err := AppleCopyAssets(c, pkg, tmpdir); err != nil {
 		return nil, err
 	}
 
@@ -134,7 +134,7 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	}
 
 	// TODO(jbd): Fallback to copying if renaming fails.
-	if buildO == "" {
+	if c.Build.Output == "" {
 		n := pkg.PkgPath
 		if n == "." {
 			// use cwd name
@@ -145,17 +145,17 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 			n = cwd
 		}
 		n = path.Base(n)
-		buildO = n + ".app"
+		c.Build.Output = n + ".app"
 	}
-	if buildX {
-		PrintCmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", buildO)
+	if c.Build.Print {
+		PrintCmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", c.Build.Output)
 	}
-	if !buildN {
+	if !c.Build.PrintOnly {
 		// if output already exists, remove.
-		if err := os.RemoveAll(buildO); err != nil {
+		if err := os.RemoveAll(c.Build.Output); err != nil {
 			return nil, err
 		}
-		if err := os.Rename(tmpdir+"/build/Release-iphoneos/main.app", buildO); err != nil {
+		if err := os.Rename(tmpdir+"/build/Release-iphoneos/main.app", c.Build.Output); err != nil {
 			return nil, err
 		}
 	}
@@ -196,7 +196,7 @@ func DetectTeamID() (string, error) {
 	return cert.Subject.OrganizationalUnit[0], nil
 }
 
-func appleCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
+func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
 	if err := mkdir(dstAssets); err != nil {
 		return err
@@ -234,7 +234,7 @@ func appleCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 			return nil
 		}
 		dst := dstAssets + "/" + path[len(srcAssets)+1:]
-		return CopyFile(dst, path)
+		return CopyFile(c, dst, path)
 	})
 }
 
