@@ -169,7 +169,7 @@ func EnvInit(c *config.Config) (err error) {
 				for _, tool := range tools {
 					_, err = os.Stat(tool)
 					if err != nil {
-						return fmt.Errorf("No compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it.", arch, tool)
+						return fmt.Errorf("no compiler for %s was found in the NDK (tried %s). Make sure your NDK version is >= r19c. Use `sdkmanager --update` to update it", arch, tool)
 					}
 				}
 			}
@@ -202,16 +202,13 @@ func EnvInit(c *config.Config) (err error) {
 				goos = "ios"
 				sdk = "iphoneos"
 				clang, cflags, err = EnvClang(c, sdk)
-				// cflags += " -miphoneos-version-min=" + buildIOSVersion
 				cflags += " -mios-version-min=" + c.Build.IOSVersion
 				fmt.Printf("added ios cflags: %s\n", cflags)
-				// cflags += " =false"
 			case "iossimulator":
 				goos = "ios"
 				sdk = "iphonesimulator"
 				clang, cflags, err = EnvClang(c, sdk)
 				cflags += " -mios-simulator-version-min=" + c.Build.IOSVersion
-				// cflags += " =false"
 			case "maccatalyst":
 				// Mac Catalyst is a subset of iOS APIs made available on macOS
 				// designed to ease porting apps developed for iPad to macOS.
@@ -240,15 +237,11 @@ func EnvInit(c *config.Config) (err error) {
 					cflags += " -target x86_64-apple-ios" + c.Build.IOSVersion + "-macabi"
 				case "arm64":
 					cflags += " -target arm64-apple-ios" + c.Build.IOSVersion + "-macabi"
-					// cflags += " "
 				}
 			case "macos":
 				goos = "darwin"
 				sdk = "macosx" // Note: the SDK is called "macosx", not "macos"
 				clang, cflags, err = EnvClang(c, sdk)
-				if arch == "arm64" {
-					// cflags += " "
-				}
 			default:
 				panic(fmt.Errorf("unknown Apple target: %s/%s", platform, arch))
 			}

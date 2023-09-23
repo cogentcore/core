@@ -28,7 +28,7 @@ func TestAppleBuild(t *testing.T) {
 	}()
 	c.Build.PrintOnly = true
 	c.Build.Print = true
-	c.Build.Target = []config.Platform{config.Platform{OS: "ios", Arch: "arm64"}}
+	c.Build.Target = []config.Platform{{OS: "ios", Arch: "arm64"}}
 	c.Build.BundleID = "org.golang.todo"
 	gopath = filepath.SplitList(GoEnv("GOPATH"))[0]
 	oldTags := c.Build.Tags

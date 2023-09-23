@@ -183,7 +183,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 			dst := "lib/" + toolchain.ABI + "/libopenal.so"
 			src := filepath.Join(GoMobilePath, dst)
 			if _, err := os.Stat(src); err != nil {
-				return nil, errors.New("the Android requires the golang.org/x/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal flag pointing to an OpenAL source directory.")
+				return nil, errors.New("the Android requires the golang.org/x/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal flag pointing to an OpenAL source directory")
 			}
 			if err := apkwWriteFile(dst, src); err != nil {
 				return nil, err
