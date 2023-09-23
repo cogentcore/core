@@ -63,7 +63,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	for _, file := range files {
-		if err := mkdir(filepath.Dir(file.name)); err != nil {
+		if err := Mkdir(filepath.Dir(file.name)); err != nil {
 			return nil, err
 		}
 		if c.Build.Print {
@@ -110,7 +110,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 
 	}
 
-	if err := runCmd(cmd); err != nil {
+	if err := RunCmd(cmd); err != nil {
 		return nil, err
 	}
 
@@ -129,7 +129,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	cmd = exec.Command("xcrun", cmdStrings...)
-	if err := runCmd(cmd); err != nil {
+	if err := RunCmd(cmd); err != nil {
 		return nil, err
 	}
 
@@ -198,7 +198,7 @@ func DetectTeamID() (string, error) {
 
 func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
-	if err := mkdir(dstAssets); err != nil {
+	if err := Mkdir(dstAssets); err != nil {
 		return err
 	}
 

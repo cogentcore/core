@@ -103,7 +103,7 @@ func PlatformTags(platform string) []string {
 
 func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 	// Find gomobilepath.
-	gopath := goEnv("GOPATH")
+	gopath := GoEnv("GOPATH")
 	for _, p := range filepath.SplitList(gopath) {
 		GoMobilePath = filepath.Join(p, "pkg", "gomobile")
 		if _, err := os.Stat(GoMobilePath); c.Build.PrintOnly || err == nil {
@@ -126,7 +126,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 			fmt.Printf("WORK=%s\n", tmpdir)
 			return
 		}
-		removeAll(tmpdir)
+		RemoveAll(tmpdir)
 	}
 	if c.Build.PrintOnly {
 		tmpdir = "$WORK"

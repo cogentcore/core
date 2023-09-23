@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -19,6 +20,11 @@ import (
 	"goki.dev/grease"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
+)
+
+var (
+	GOOS   = runtime.GOOS
+	GOARCH = runtime.GOARCH
 )
 
 func CopyFile(c *config.Config, dst, src string) error {
@@ -47,7 +53,7 @@ func WriteFile(c *config.Config, filename string, generate func(io.Writer) error
 		fmt.Fprintf(os.Stderr, "write %s\n", filename)
 	}
 
-	if err := mkdir(filepath.Dir(filename)); err != nil {
+	if err := Mkdir(c, filepath.Dir(filename)); err != nil {
 		return err
 	}
 
@@ -187,4 +193,149 @@ func AreGoModulesUsed() (bool, error) {
 		AreGoModulesUsedResult.used = outstr != ""
 	})
 	return AreGoModulesUsedResult.used, AreGoModulesUsedResult.err
+}
+
+func Mkdir(c *config.Config, dir string) error {
+	if c.Build.Print || c.Build.PrintOnly {
+		PrintCmd("mkdir -p %s", dir)
+	}
+	if c.Build.PrintOnly {
+		return nil
+	}
+	return os.MkdirAll(dir, 0755)
+}
+
+func Symlink(c *config.Config, src, dst string) error {
+	if c.Build.Print || c.Build.PrintOnly {
+		PrintCmd("ln -s %s %s", src, dst)
+	}
+	if c.Build.PrintOnly {
+		return nil
+	}
+	if GOOS == "windows" {
+		return DoCopyAll(dst, src)
+	}
+	return os.Symlink(src, dst)
+}
+
+func DoCopyAll(dst, src string) error {
+	return filepath.Walk(src, func(path string, info os.FileInfo, errin error) (err error) {
+		if errin != nil {
+			return errin
+		}
+		prefixLen := len(src)
+		if len(path) > prefixLen {
+			prefixLen++ // file separator
+		}
+		outpath := filepath.Join(dst, path[prefixLen:])
+		if info.IsDir() {
+			return os.Mkdir(outpath, 0755)
+		}
+		in, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+		out, err := os.OpenFile(outpath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, info.Mode())
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if errc := out.Close(); err == nil {
+				err = errc
+			}
+		}()
+		_, err = io.Copy(out, in)
+		return err
+	})
+}
+
+func RemoveAll(c *config.Config, path string) error {
+	if c.Build.Print || c.Build.PrintOnly {
+		PrintCmd(`rm -r -f "%s"`, path)
+	}
+	if c.Build.PrintOnly {
+		return nil
+	}
+
+	// os.RemoveAll behaves differently in windows.
+	// http://golang.org/issues/9606
+	if GOOS == "windows" {
+		ResetReadOnlyFlagAll(path)
+	}
+
+	return os.RemoveAll(path)
+}
+
+func ResetReadOnlyFlagAll(path string) error {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+	if !fi.IsDir() {
+		return os.Chmod(path, 0666)
+	}
+	fd, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+
+	names, _ := fd.Readdirnames(-1)
+	for _, name := range names {
+		ResetReadOnlyFlagAll(path + string(filepath.Separator) + name)
+	}
+	return nil
+}
+
+func GoEnv(name string) string {
+	if val := os.Getenv(name); val != "" {
+		return val
+	}
+	val, err := exec.Command("go", "env", name).Output()
+	if err != nil {
+		panic(err) // the Go tool was tested to work earlier
+	}
+	return strings.TrimSpace(string(val))
+}
+
+func RunCmd(c *config.Config, cmd *exec.Cmd) error {
+	if c.Build.Print || c.Build.PrintOnly {
+		dir := ""
+		if cmd.Dir != "" {
+			dir = "PWD=" + cmd.Dir + " "
+		}
+		env := strings.Join(cmd.Env, " ")
+		if env != "" {
+			env += " "
+		}
+		PrintCmd("%s%s%s", dir, env, strings.Join(cmd.Args, " "))
+	}
+
+	buf := new(bytes.Buffer)
+	buf.WriteByte('\n')
+	if grease.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	} else {
+		cmd.Stdout = buf
+		cmd.Stderr = buf
+	}
+
+	if c.Build.Work {
+		if GOOS == "windows" {
+			cmd.Env = append(cmd.Env, `TEMP=`+tmpdir)
+			cmd.Env = append(cmd.Env, `TMP=`+tmpdir)
+		} else {
+			cmd.Env = append(cmd.Env, `TMPDIR=`+tmpdir)
+		}
+	}
+
+	if !c.Build.PrintOnly {
+		cmd.Env = Environ(cmd.Env)
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("%s failed: %v%s", strings.Join(cmd.Args, " "), err, buf)
+		}
+	}
+	return nil
 }

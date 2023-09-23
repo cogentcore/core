@@ -196,7 +196,7 @@ func PrintCmd(format string, args ...any) {
 	if GoMobilePath != "" {
 		cmd = strings.Replace(cmd, GoMobilePath, "$GOMOBILE", -1)
 	}
-	if gopath := goEnv("GOPATH"); gopath != "" {
+	if gopath := GoEnv("GOPATH"); gopath != "" {
 		cmd = strings.Replace(cmd, gopath, "$GOPATH", -1)
 	}
 	if env := os.Getenv("HOMEPATH"); env != "" {
@@ -260,7 +260,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 	}
 	cmd.Env = env
 	cmd.Dir = at
-	return runCmd(cmd)
+	return RunCmd(cmd)
 }
 
 func GoModTidyAt(c *config.Config, at string, env []string) error {
@@ -278,7 +278,7 @@ func GoModTidyAt(c *config.Config, at string, env []string) error {
 	}
 	cmd.Env = env
 	cmd.Dir = at
-	return runCmd(cmd)
+	return RunCmd(cmd)
 }
 
 func GoModCachePath() (string, error) {

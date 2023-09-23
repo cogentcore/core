@@ -13,7 +13,7 @@ import (
 
 // Clean removes object files and cached NDK files downloaded by gomobile init
 func Clean(c *config.Config) (err error) {
-	gopaths := filepath.SplitList(goEnv("GOPATH"))
+	gopaths := filepath.SplitList(GoEnv("GOPATH"))
 	if len(gopaths) == 0 {
 		return fmt.Errorf("GOPATH is not set")
 	}
@@ -21,5 +21,5 @@ func Clean(c *config.Config) (err error) {
 	if c.Build.Print {
 		fmt.Fprintln(Xout, "GOMOBILE="+GoMobilePath)
 	}
-	return removeAll(GoMobilePath)
+	return RemoveAll(GoMobilePath)
 }
