@@ -29,13 +29,14 @@ const (
 	defaultAndroidTargetSDK = 29
 )
 
-func goAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]bool, error) {
+// GoAndroidBuild builds the given package for the given Android targets.
+func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot(targets...)
 	if err != nil {
 		return nil, err
 	}
 	appName := path.Base(pkg.PkgPath)
-	libName := androidPkgName(appName)
+	libName := AndroidPkgName(appName)
 
 	// TODO(hajimehoshi): This works only with Go tools that assume all source files are in one directory.
 	// Fix this to work with other Go tools.
@@ -96,7 +97,7 @@ func goAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		libFiles = append(libFiles, libPath)
 	}
 
-	block, _ := pem.Decode([]byte(debugCert))
+	block, _ := pem.Decode([]byte(DebugCert))
 	if block == nil {
 		return nil, errors.New("no debug cert")
 	}
@@ -106,7 +107,7 @@ func goAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	}
 
 	if buildO == "" {
-		buildO = androidPkgName(path.Base(pkg.PkgPath)) + ".apk"
+		buildO = AndroidPkgName(path.Base(pkg.PkgPath)) + ".apk"
 	}
 	if !strings.HasSuffix(buildO, ".apk") {
 		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)
@@ -290,12 +291,12 @@ func goAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	return nmpkgs[targets[0].arch], nil
 }
 
-// androidPkgName sanitizes the go package name to be acceptable as a android
+// AndroidPkgName sanitizes the go package name to be acceptable as a android
 // package name part. The android package name convention is similar to the
 // java package name convention described in
 // https://docs.oracle.com/javase/specs/jls/se8/html/jls-6.html#jls-6.5.3.1
 // but not exactly same.
-func androidPkgName(name string) string {
+func AndroidPkgName(name string) string {
 	var res []rune
 	for _, r := range name {
 		switch {
@@ -332,7 +333,7 @@ func androidPkgName(name string) string {
 
 // A random uninteresting private key.
 // Must be consistent across builds so newer app versions can be installed.
-const debugCert = `
+const DebugCert = `
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAy6ItnWZJ8DpX9R5FdWbS9Kr1U8Z7mKgqNByGU7No99JUnmyu
 NQ6Uy6Nj0Gz3o3c0BXESECblOC13WdzjsH1Pi7/L9QV8jXOXX8cvkG5SJAyj6hcO

@@ -36,7 +36,7 @@ func TestRFC1034Label(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		if got := rfc1034Label(tc.in); got != tc.want {
+		if got := RFC1034Label(tc.in); got != tc.want {
 			t.Errorf("rfc1034Label(%q) = %q, want %q", tc.in, got, tc.want)
 		}
 	}
@@ -63,7 +63,7 @@ func TestAndroidPkgName(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		if got := androidPkgName(tc.in); got != tc.want {
+		if got := AndroidPkgName(tc.in); got != tc.want {
 			t.Errorf("len %d", len(tc.in))
 			t.Errorf("androidPkgName(%q) = %q, want %q", tc.in, got, tc.want)
 		}

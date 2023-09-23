@@ -20,19 +20,20 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func goAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) (map[string]bool, error) {
+// GoAppleBuild builds the given package with the given bundle ID for the given iOS targets.
+func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) (map[string]bool, error) {
 	src := pkg.PkgPath
 	if buildO != "" && !strings.HasSuffix(buildO, ".app") {
 		return nil, fmt.Errorf("-o must have an .app for -target=ios")
 	}
 
-	productName := rfc1034Label(path.Base(pkg.PkgPath))
+	productName := RFC1034Label(path.Base(pkg.PkgPath))
 	if productName == "" {
 		productName = "ProductName" // like xcode.
 	}
 
 	infoplist := new(bytes.Buffer)
-	if err := infoplistTmpl.Execute(infoplist, infoplistTmplData{
+	if err := InfoplistTmpl.Execute(infoplist, InfoplistTmplData{
 		BundleID: bundleID + "." + productName,
 		Name:     strings.Title(path.Base(pkg.PkgPath)),
 	}); err != nil {
@@ -40,13 +41,13 @@ func goAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	}
 
 	// Detect the team ID
-	teamID, err := detectTeamID()
+	teamID, err := DetectTeamID()
 	if err != nil {
 		return nil, err
 	}
 
 	projPbxproj := new(bytes.Buffer)
-	if err := projPbxprojTmpl.Execute(projPbxproj, projPbxprojTmplData{
+	if err := ProjPbxprojTmpl.Execute(projPbxproj, ProjPbxprojTmplData{
 		TeamID: teamID,
 	}); err != nil {
 		return nil, err
@@ -58,7 +59,7 @@ func goAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	}{
 		{tmpdir + "/main.xcodeproj/project.pbxproj", projPbxproj.Bytes()},
 		{tmpdir + "/main/Info.plist", infoplist.Bytes()},
-		{tmpdir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(contentsJSON)},
+		{tmpdir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(ContentsJSON)},
 	}
 
 	for _, file := range files {
@@ -161,7 +162,8 @@ func goAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 	return nmpkgs, nil
 }
 
-func detectTeamID() (string, error) {
+// DetectTeamID determines the Apple Development Team ID on the system.
+func DetectTeamID() (string, error) {
 	// Grabs the first certificate for "Apple Development"; will not work if there
 	// are multiple certificates and the first is not desired.
 	cmd := exec.Command(
@@ -236,12 +238,12 @@ func appleCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 	})
 }
 
-type infoplistTmplData struct {
+type InfoplistTmplData struct {
 	BundleID string
 	Name     string
 }
 
-var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
+var InfoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -288,11 +290,11 @@ var infoplistTmpl = template.Must(template.New("infoplist").Parse(`<?xml version
 </plist>
 `))
 
-type projPbxprojTmplData struct {
+type ProjPbxprojTmplData struct {
 	TeamID string
 }
 
-var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
+var ProjPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF8*$!
 {
   archiveVersion = 1;
   classes = {
@@ -490,7 +492,7 @@ var projPbxprojTmpl = template.Must(template.New("projPbxproj").Parse(`// !$*UTF
 }
 `))
 
-const contentsJSON = `{
+const ContentsJSON = `{
   "images" : [
     {
       "idiom" : "iphone",
@@ -560,10 +562,10 @@ const contentsJSON = `{
 }
 `
 
-// rfc1034Label sanitizes the name to be usable in a uniform type identifier.
+// RFC1034Label sanitizes the name to be usable in a uniform type identifier.
 // The sanitization is similar to xcode's rfc1034identifier macro that
 // replaces illegal characters (not conforming the rfc1034 label rule) with '-'.
-func rfc1034Label(name string) string {
+func RFC1034Label(name string) string {
 	// * Uniform type identifier:
 	//
 	// According to

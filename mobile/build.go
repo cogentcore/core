@@ -141,7 +141,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = goAndroidBuild(pkg, targets)
+		nmpkgs, err = GoAndroidBuild(pkg, targets)
 		if err != nil {
 			return nil, err
 		}
@@ -165,7 +165,7 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 		if buildBundleID == "" {
 			return nil, fmt.Errorf("-target=ios requires -bundleid set")
 		}
-		nmpkgs, err = goAppleBuild(pkg, buildBundleID, targets)
+		nmpkgs, err = GoAppleBuild(pkg, buildBundleID, targets)
 		if err != nil {
 			return nil, err
 		}

@@ -19,7 +19,7 @@ func TestWriter(t *testing.T) {
 		t.Skip("skipping on linux-amd64-androidemu builder; see golang.org/issue/40290")
 	}
 
-	block, _ := pem.Decode([]byte(debugCert))
+	block, _ := pem.Decode([]byte(DebugCert))
 	if block == nil {
 		t.Fatal("no cert")
 	}

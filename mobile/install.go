@@ -43,7 +43,7 @@ func runInstall(cmd *command) error {
 		`adb`,
 		`install`,
 		`-r`,
-		androidPkgName(path.Base(pkg.PkgPath))+`.apk`,
+		AndroidPkgName(path.Base(pkg.PkgPath))+`.apk`,
 	)
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
