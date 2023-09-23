@@ -1,0 +1,51 @@
+Name = "girl"
+Desc = ""
+Version = "v0.0.0"
+Type = "Library"
+
+[Build]
+  Package = "."
+
+[Colorgen]
+  Source = "colors.xml"
+  Output = "colorgen.go"
+  Package = "main"
+  Comment = ""
+
+[Install]
+  Package = "."
+
+[Log]
+  Target = "android"
+  Keep = false
+  All = "F"
+
+[Release]
+  VersionFile = "girl/version.go"
+  Package = "girl"
+
+[Generate]
+  Dir = "."
+  Output = "gokigen.go"
+  AddKiTypes = true
+  [Generate.Enumgen]
+    Dir = "."
+    Output = "enumgen.go"
+    Transform = ""
+    TrimPrefix = ""
+    AddPrefix = ""
+    LineComment = false
+    AcceptLower = true
+    Text = true
+    JSON = false
+    YAML = false
+    SQL = false
+    GQL = false
+  [Generate.Gtigen]
+    Dir = "."
+    Output = "gtigen.go"
+    AddTypes = false
+    AddMethods = false
+    AddFuncs = false
+    Instance = false
+    TypeVar = false
