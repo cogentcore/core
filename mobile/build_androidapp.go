@@ -26,13 +26,13 @@ import (
 )
 
 const (
-	minAndroidSDK           = 23
+	MinAndroidSDK           = 23
 	defaultAndroidTargetSDK = 29
 )
 
 // GoAndroidBuild builds the given package for the given Android targets.
 func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
-	ndkRoot, err := ndkRoot(targets...)
+	ndkRoot, err := NDKRoot(targets...)
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +76,8 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
 
 	for _, t := range targets {
-		toolchain := ndk.Toolchain(t.Arch)
-		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
+		toolchain := NDK.Toolchain(t.Arch)
+		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(tmpdir, libPath)
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
@@ -85,7 +85,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		err = GoBuild(
 			c,
 			pkg.PkgPath,
-			androidEnv[t.Arch],
+			AndroidEnv[t.Arch],
 			"-buildmode=c-shared",
 			"-o", libAbsPath,
 		)
@@ -178,10 +178,10 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 
 	for _, t := range targets {
-		toolchain := ndk.Toolchain(t.Arch)
+		toolchain := NDK.Toolchain(t.Arch)
 		if nmpkgs[t.Arch]["goki.dev/mobile/exp/audio/al"] {
-			dst := "lib/" + toolchain.abi + "/libopenal.so"
-			src := filepath.Join(gomobilepath, dst)
+			dst := "lib/" + toolchain.ABI + "/libopenal.so"
+			src := filepath.Join(GoMobilePath, dst)
 			if _, err := os.Stat(src); err != nil {
 				return nil, errors.New("the Android requires the golang.org/x/mobile/exp/audio/al, but the OpenAL libraries was not found. Please run gomobile init with the -openal flag pointing to an OpenAL source directory.")
 			}

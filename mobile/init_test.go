@@ -160,7 +160,7 @@ func defaultOutputData(teamID string) (outputData, error) {
 		GOOS:      goos,
 		GOARCH:    goarch,
 		GOPATH:    gopath,
-		NDKARCH:   archNDK(),
+		NDKARCH:   ArchNDK(),
 		Xproj:     projPbxproj.String(),
 		Xcontents: ContentsJSON,
 		Xinfo:     InfoplistTmplData{BundleID: "org.golang.todo.basic", Name: "Basic"},

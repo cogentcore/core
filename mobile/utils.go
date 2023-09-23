@@ -71,8 +71,8 @@ func WriteFile(c *config.Config, filename string, generate func(io.Writer) error
 func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 	config := &packages.Config{}
 	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
-	config.Env = append(os.Environ(), "GOARCH="+t.Arch, "GOOS="+platformOS(t.OS), "CGO_ENABLED=1")
-	tags := append(c.Build.Tags[:], platformTags(t.OS)...)
+	config.Env = append(os.Environ(), "GOARCH="+t.Arch, "GOOS="+PlatformOS(t.OS), "CGO_ENABLED=1")
+	tags := append(c.Build.Tags[:], PlatformTags(t.OS)...)
 
 	if len(tags) > 0 {
 		config.BuildFlags = []string{"-tags=" + strings.Join(tags, ",")}
@@ -83,9 +83,9 @@ func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 // GetModuleVersions returns a module information at the directory src.
 func GetModuleVersions(c *config.Config, targetPlatform string, targetArch string, src string) (*modfile.File, error) {
 	cmd := exec.Command("go", "list")
-	cmd.Env = append(os.Environ(), "GOOS="+platformOS(targetPlatform), "GOARCH="+targetArch)
+	cmd.Env = append(os.Environ(), "GOOS="+PlatformOS(targetPlatform), "GOARCH="+targetArch)
 
-	tags := append(c.Build.Tags[:], platformTags(targetPlatform)...)
+	tags := append(c.Build.Tags[:], PlatformTags(targetPlatform)...)
 
 	// TODO(hyangah): probably we don't need to add all the dependencies.
 	cmd.Args = append(cmd.Args, "-m", "-json", "-tags="+strings.Join(tags, ","), "all")

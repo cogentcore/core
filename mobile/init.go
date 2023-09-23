@@ -48,22 +48,22 @@ func runInit(cmd *command) error {
 	if len(gopaths) == 0 {
 		return fmt.Errorf("GOPATH is not set")
 	}
-	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
+	GoMobilePath = filepath.Join(gopaths[0], "pkg/gomobile")
 
 	if buildX || buildN {
-		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
+		fmt.Fprintln(Xout, "GOMOBILE="+GoMobilePath)
 	}
-	removeAll(gomobilepath)
+	removeAll(GoMobilePath)
 
-	if err := mkdir(gomobilepath); err != nil {
+	if err := mkdir(GoMobilePath); err != nil {
 		return err
 	}
 
 	if buildN {
-		tmpdir = filepath.Join(gomobilepath, "work")
+		tmpdir = filepath.Join(GoMobilePath, "work")
 	} else {
 		var err error
-		tmpdir, err = ioutil.TempDir(gomobilepath, "work-")
+		tmpdir, err = ioutil.TempDir(GoMobilePath, "work-")
 		if err != nil {
 			return err
 		}
@@ -94,13 +94,13 @@ func runInit(cmd *command) error {
 			}
 		}
 	}
-	if err := envInit(); err != nil {
+	if err := EnvInit(); err != nil {
 		return err
 	}
 
 	start := time.Now()
 
-	if err := installOpenAL(gomobilepath); err != nil {
+	if err := installOpenAL(GoMobilePath); err != nil {
 		return err
 	}
 
@@ -115,7 +115,7 @@ func installOpenAL(gomobilepath string) error {
 	if initOpenAL == "" {
 		return nil
 	}
-	ndkRoot, err := ndkRoot()
+	ndkRoot, err := NDKRoot()
 	if err != nil {
 		return err
 	}
@@ -168,13 +168,13 @@ func installOpenAL(gomobilepath string) error {
 		}
 	}
 
-	for _, arch := range platformArchs("android") {
-		t := ndk[arch]
-		abi := t.arch
+	for _, arch := range PlatformArchs("android") {
+		t := NDK[arch]
+		abi := t.Arch
 		if abi == "arm" {
 			abi = "armeabi"
 		}
-		make := filepath.Join(ndkRoot, "prebuilt", archNDK(), "bin", "make")
+		make := filepath.Join(ndkRoot, "prebuilt", ArchNDK(), "bin", "make")
 		// Split android-XX to get the api version.
 		buildDir := alTmpDir + "/build/" + abi
 		if err := mkdir(buildDir); err != nil {
@@ -185,7 +185,7 @@ func installOpenAL(gomobilepath string) error {
 			"-DCMAKE_TOOLCHAIN_FILE="+initOpenAL+"/XCompile-Android.txt",
 			"-DHOST="+t.ClangPrefix())
 		cmd.Dir = buildDir
-		tcPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", archNDK(), "bin")
+		tcPath := filepath.Join(ndkRoot, "toolchains", "llvm", "prebuilt", ArchNDK(), "bin")
 		if !buildN {
 			orgPath := os.Getenv("PATH")
 			cmd.Env = []string{"PATH=" + tcPath + string(os.PathListSeparator) + orgPath}
@@ -200,7 +200,7 @@ func installOpenAL(gomobilepath string) error {
 			return err
 		}
 
-		dst := filepath.Join(gomobilepath, "lib", t.abi, "libopenal.so")
+		dst := filepath.Join(gomobilepath, "lib", t.ABI, "libopenal.so")
 		src := filepath.Join(alTmpDir, "build", abi, "libopenal.so")
 		if err := CopyFile(dst, src); err != nil {
 			return err
@@ -346,7 +346,7 @@ func runCmd(cmd *exec.Cmd) error {
 	}
 
 	if !buildN {
-		cmd.Env = environ(cmd.Env)
+		cmd.Env = Environ(cmd.Env)
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("%s failed: %v%s", strings.Join(cmd.Args, " "), err, buf)
 		}

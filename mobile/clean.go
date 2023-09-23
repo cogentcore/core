@@ -17,9 +17,9 @@ func Clean(c *config.Config) (err error) {
 	if len(gopaths) == 0 {
 		return fmt.Errorf("GOPATH is not set")
 	}
-	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
+	GoMobilePath = filepath.Join(gopaths[0], "pkg/gomobile")
 	if c.Build.Print {
-		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
+		fmt.Fprintln(Xout, "GOMOBILE="+GoMobilePath)
 	}
-	return removeAll(gomobilepath)
+	return removeAll(GoMobilePath)
 }

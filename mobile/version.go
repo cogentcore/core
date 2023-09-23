@@ -54,8 +54,8 @@ func runVersion(cmd *command) (err error) {
 
 	// Supported platforms
 	platforms := "android"
-	if xcodeAvailable() {
-		platforms += "," + strings.Join(applePlatforms, ",")
+	if XCodeAvailable() {
+		platforms += "," + strings.Join(ApplePlatforms, ",")
 	}
 
 	androidapi, _ := sdkpath.AndroidAPIPath(buildAndroidMinSDK)

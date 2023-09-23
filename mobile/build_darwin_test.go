@@ -16,7 +16,7 @@ import (
 )
 
 func TestAppleBuild(t *testing.T) {
-	if !xcodeAvailable() {
+	if !XCodeAvailable() {
 		t.Skip("Xcode is missing")
 	}
 	c := &config.Config{}

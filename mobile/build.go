@@ -62,7 +62,7 @@ func Build(c *config.Config) error {
 // BuildImpl builds a package for mobiles based on the given config info.
 // BuildImpl returns a built package information and an error if exists.
 func BuildImpl(c *config.Config) (*packages.Package, error) {
-	cleanup, err := buildEnvInit()
+	cleanup, err := BuildEnvInit()
 	if err != nil {
 		return nil, err
 	}
@@ -97,10 +97,10 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 
 	var nmpkgs map[string]bool
 	switch {
-	case isAndroidPlatform(c.Build.Target[0].OS):
+	case IsAndroidPlatform(c.Build.Target[0].OS):
 		if pkg.Name != "main" {
 			for _, t := range c.Build.Target {
-				if err := GoBuild(c, pkg.PkgPath, androidEnv[t.Arch]); err != nil {
+				if err := GoBuild(c, pkg.PkgPath, AndroidEnv[t.Arch]); err != nil {
 					return nil, err
 				}
 			}
@@ -110,8 +110,8 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 		if err != nil {
 			return nil, err
 		}
-	case isApplePlatform(c.Build.Target[0].OS):
-		if !xcodeAvailable() {
+	case IsApplePlatform(c.Build.Target[0].OS):
+		if !XCodeAvailable() {
 			return nil, fmt.Errorf("-target=%s requires XCode", c.Build.Target)
 		}
 		if pkg.Name != "main" {
@@ -121,7 +121,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 				if t.OS == "maccatalyst" && v < 13.0 {
 					return nil, errors.New("catalyst requires -iosversion=13 or higher")
 				}
-				if err := GoBuild(c, pkg.PkgPath, appleEnv[t.String()]); err != nil {
+				if err := GoBuild(c, pkg.PkgPath, AppleEnv[t.String()]); err != nil {
 					return nil, err
 				}
 			}
@@ -193,8 +193,8 @@ func PrintCmd(format string, args ...any) {
 	if androidHome, err := sdkpath.AndroidHome(); err == nil {
 		cmd = strings.Replace(cmd, androidHome, "$ANDROID_HOME", -1)
 	}
-	if gomobilepath != "" {
-		cmd = strings.Replace(cmd, gomobilepath, "$GOMOBILE", -1)
+	if GoMobilePath != "" {
+		cmd = strings.Replace(cmd, GoMobilePath, "$GOMOBILE", -1)
 	}
 	if gopath := goEnv("GOPATH"); gopath != "" {
 		cmd = strings.Replace(cmd, gopath, "$GOPATH", -1)
