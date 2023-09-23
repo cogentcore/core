@@ -21,10 +21,10 @@ The 2D scenegraph supports:
 
 All 2D scenegraphs are controlled by the Layout, which provides the logic for
 organizing widgets / elements within the constraints of the display.
-Typically start with a vertical LayoutVert in the viewport, with LayoutHoriz's
+Typically start with a vertical LayoutVert in the scene, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
-		win := gi.NewMainWindow("test-window", "Test Window", width, height)
+		win := gi.NewMainOSWin("test-window", "Test OSWin", width, height)
 		vp := win.WinScene()
 		updt := vp.UpdateStart()
 
@@ -99,7 +99,7 @@ examples/svg for an svg viewer, and examples/marbles for an svg animation.
 
 # Overlays and Sprites
 
-The gi.Window can render Sprite images to an OverTex overlay texture, which is
+The gi.OSWin can render Sprite images to an OverTex overlay texture, which is
 cleared to be transparent prior to rendering any active sprites.  This is used
 for cursors (e.g., TextField, giv.TextView cursors), Drag-n-Drop, etc.
 */

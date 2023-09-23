@@ -49,7 +49,7 @@ import (
 // These changes should be protected by UpdateStart / End,
 // such that SetStyle is only ever called within that scope.
 // After the UpdateEnd(updt), call SetNeedsRender(vp, updt)
-// which sets the node NeedsRender and VpNeedsRender flags,
+// which sets the node NeedsRender and ScNeedsRender flags,
 // to drive the rendering update at next DoNeedsRender call.
 //
 // Because Render checks for IsUpdating() flag, and doesn't render
@@ -59,14 +59,14 @@ import (
 // For nodes with dynamic content that doesn't require styling or config
 // a simple SetNeedsRender call will drive re-rendering. UpdateSig does this.
 //
-// Updating is _always_ driven top-down by Window at FPS sampling rate,
+// Updating is _always_ driven top-down by OSWin at FPS sampling rate,
 // in the DoUpdate() call on the Scene.
 // Three types of updates can be triggered, in order of least impact
 // and highest frequency first:
-// * VpNeedsRender: does NeedsRender on nodes.
-// * VpNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
-// * VpNeedsRebuild: Config, Layout with DoRebuild flag set -- for a full
-//   rebuild of the viewport (e.g., after global style changes, zooming, etc)
+// * ScNeedsRender: does NeedsRender on nodes.
+// * ScNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
+// * ScNeedsRebuild: Config, Layout with DoRebuild flag set -- for a full
+//   rebuild of the scene (e.g., after global style changes, zooming, etc)
 //
 // Event handling, styling, etc updates should:
 // * Wrap with UpdateStart / End
@@ -86,7 +86,7 @@ import (
 // the standard Ki update signal.  This will drive updating of
 // the node on the next DoNUpdate pass.
 func (wb *WidgetBase) UpdateSig() bool {
-	// note: we do not have the viewport here!!
+	// note: we do not have the scene here!!
 	// this means we need to cache it..
 	wb.SetNeedsRender(wb.Sc, true)
 	return wb.Node.UpdateSig()
@@ -103,13 +103,13 @@ func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
 		return
 	}
 	wb.SetFlag(true, NeedsRender)
-	sc.SetFlag(true, VpNeedsRender)
+	sc.SetFlag(true, ScNeedsRender)
 }
 
 // UpdateEndRender should be called instead of UpdateEnd
 // for any UpdateStart / UpdateEnd block that needs a re-render
 // at the end.  Just does SetNeedsRender after UpdateEnd,
-// and uses the cached wb.Vp pointer.
+// and uses the cached wb.Sc pointer.
 func (wb *WidgetBase) UpdateEndRender(updt bool) {
 	if !updt {
 		return
@@ -120,7 +120,7 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 
 // note: this is replacement for "SetNeedsFullReRender()" call:
 
-// SetNeedsLayout sets the VpNeedsLayout flag if updt is true.
+// SetNeedsLayout sets the ScNeedsLayout flag if updt is true.
 // See UpdateEndLayout for convenience method.
 // This should be called after widget Config call
 // _after_ calling UpdateEnd(updt) and passing
@@ -129,13 +129,13 @@ func (wb *WidgetBase) SetNeedsLayout(sc *Scene, updt bool) {
 	if !updt {
 		return
 	}
-	sc.SetFlag(true, VpNeedsLayout)
+	sc.SetFlag(true, ScNeedsLayout)
 }
 
 // UpdateEndLayout should be called instead of UpdateEnd
 // for any UpdateStart / UpdateEnd block that needs a re-layout
 // at the end.  Just does SetNeedsLayout after UpdateEnd,
-// and uses the cached wb.Vp pointer.
+// and uses the cached wb.Sc pointer.
 func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 	if !updt {
 		return
@@ -208,7 +208,7 @@ func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 
 // DoLayoutTree does layout pass for tree from me.
 // Each node iterates over children for maximum control,
-// Starting with parent VpBBox.
+// Starting with parent ScBBox.
 // Handles multiple iterations if needed.
 func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	if wb.This() == nil {
@@ -269,26 +269,26 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 //////////////////////////////////////////////////////////////////
 //		Scene
 
-// DoUpdate checks viewport Needs flags to do whatever updating is required.
+// DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
-// This is the main update call made by the Window at FPS frequency.
+// This is the main update call made by the OSWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.HasFlag(VpIsUpdating) {
+	if sc.HasFlag(ScIsUpdating) {
 		return false
 	}
-	sc.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, VpIsUpdating)
+	sc.SetFlag(true, ScIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScIsUpdating)
 
 	switch {
-	case sc.HasFlag(VpNeedsRebuild):
-		sc.SetFlag(false, VpNeedsLayout, VpNeedsRender, VpNeedsRebuild)
+	case sc.HasFlag(ScNeedsRebuild):
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
-	case sc.HasFlag(VpNeedsLayout):
-		sc.SetFlag(false, VpNeedsLayout, VpNeedsRender)
+	case sc.HasFlag(ScNeedsLayout):
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.Frame.LayoutRenderTree(sc)
-	case sc.HasFlag(VpNeedsRender):
-		sc.SetFlag(false, VpNeedsRender)
+	case sc.HasFlag(ScNeedsRender):
+		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
 	}
 	return true
@@ -298,22 +298,22 @@ func (sc *Scene) DoUpdate() bool {
 // which will set NeedsLayout to drive subsequent layout and render.
 // This is a top-level call, typically only done in a Show function.
 func (sc *Scene) Config() {
-	sc.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, VpIsUpdating)
+	sc.SetFlag(true, ScIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScIsUpdating)
 	sc.Frame.ConfigTree(sc)
 }
 
-// DoRebuild implements the VpNeedsRebuild case
-// Typically not called otherwise, and assumes VpIsUpdating already set.
+// DoRebuild implements the ScNeedsRebuild case
+// Typically not called otherwise, and assumes ScIsUpdating already set.
 func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
-	sc.SetFlag(true, VpRebuild)
+	sc.SetFlag(true, ScRebuild)
 	sc.Frame.ConfigTree(sc)
 	sc.Frame.LayoutRenderTree(sc)
-	sc.SetFlag(false, VpRebuild)
+	sc.SetFlag(false, ScRebuild)
 }
 
-// Fill fills the viewport with BgColor (default transparent)
+// Fill fills the scene with BgColor (default transparent)
 // which is the starting base level for rendering.
 // Typically the root Frame fills its background with color
 // but it can e.g., leave corners transparent for popups etc.
@@ -324,14 +324,14 @@ func (sc *Scene) Fill() {
 	rs.Unlock()
 }
 
-// PrefSize computes the preferred size of the viewport based on current contents.
+// PrefSize computes the preferred size of the scene based on current contents.
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) PrefSize(initSz image.Point) image.Point {
-	sc.SetFlag(true, VpIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, VpIsUpdating)
+	sc.SetFlag(true, ScIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScIsUpdating)
 
-	sc.SetFlag(true, VpPrefSizing)
+	sc.SetFlag(true, ScPrefSizing)
 	sc.Config()
 
 	frame := &sc.Frame
@@ -339,7 +339,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	frame.LayState.Alloc.Size.SetPoint(initSz)
 	frame.GetSizeTree(sc, 0) // collect sizes
 
-	sc.SetFlag(false, VpPrefSizing)
+	sc.SetFlag(false, ScPrefSizing)
 
 	vpsz := frame.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
@@ -365,13 +365,13 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 	if !wb.This().(Widget).IsVisible() {
 		return false
 	}
-	if wb.VpBBox.Empty() {
+	if wb.ScBBox.Empty() {
 		return false
 	}
 	rs := &sc.RenderState
-	rs.PushBounds(wb.VpBBox)
+	rs.PushBounds(wb.ScBBox)
 	if RenderTrace {
-		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.VpBBox)
+		fmt.Printf("Render: %v at %v\n", wb.Path(), wb.ScBBox)
 	}
 	return true
 }

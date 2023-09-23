@@ -20,10 +20,10 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// DialogsSepWindow determines if dialog windows open in a separate OS-level
+// DialogsSepOSWin determines if dialog windows open in a separate OS-level
 // window, or do they open within the same parent window.  If only within
 // parent window, then they are always effectively modal.
-var DialogsSepWindow = true
+var DialogsSepOSWin = true
 
 // DialogState indicates the state of the dialog.
 type DialogState int64
@@ -52,7 +52,7 @@ const (
 var StdDialogVSpace = float32(1)
 var StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 
-// Dialog supports dialog functionality -- based on a viewport that can either
+// Dialog supports dialog functionality -- based on a scene that can either
 // be rendered in a separate window or on top of an existing one.
 type Dialog struct {
 	Scene
@@ -93,7 +93,7 @@ func (dlg *Dialog) StyleFrame() {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Color)
-		if !DialogsSepWindow {
+		if !DialogsSepOSWin {
 			s.BoxShadow = BoxShadow3
 		}
 
@@ -139,24 +139,24 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// ValidScene finds a non-nil viewport, either using the provided one, or
-// using the first main window's viewport
+// ValidScene finds a non-nil scene, either using the provided one, or
+// using the first main window's scene
 func ValidScene(avp *Scene) *Scene {
 	if avp != nil {
 		return avp
 	}
-	if fwin, _ := AllWindows.Focused(); fwin != nil {
+	if fwin, _ := AllOSWins.Focused(); fwin != nil {
 		return fwin.Scene
 	}
-	if fwin := AllWindows.Win(0); fwin != nil {
+	if fwin := AllOSWins.Win(0); fwin != nil {
 		return fwin.Scene
 	}
-	log.Printf("gi.ValidScene: No gi.AllWindows to get viewport from!\n")
+	log.Printf("gi.ValidScene: No gi.AllOSWins to get scene from!\n")
 	return nil
 }
 
 // Open this dialog, in given location (0 = middle of window), finding window
-// from given viewport -- returns false if it fails for any reason.  optional
+// from given scene -- returns false if it fails for any reason.  optional
 // cvgFunc can perform additional configuration after the dialog window has
 // been created and dialog added to it -- some configs require the window.
 func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
@@ -176,7 +176,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	}
 	dlg.Frame.Lay = LayoutVert
 
-	if DialogsSepWindow {
+	if DialogsSepOSWin {
 		win = NewDialogWin(dlg.Name, dlg.Title, 100, 100, dlg.Modal)
 		win.Data = dlg.Data
 		// todo: win.Scene
@@ -195,7 +195,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	vpsz := dlg.DefSize
 	if dlg.DefSize == (image.Point{}) {
 		vpsz = dlg.PrefSize(win.OSWin.Screen().PixSize)
-		if !DialogsSepWindow {
+		if !DialogsSepOSWin {
 			// vpsz = dlg.Frame.LayState.Size.Pref.Min(win.Scene.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
 		}
 	}
@@ -236,7 +236,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	// 	}
 	// })
 
-	if DialogsSepWindow {
+	if DialogsSepOSWin {
 		if !win.HasGeomPrefs() {
 			// fmt.Printf("setsz: %v\n", vpsz)
 			win.SetSize(vpsz)
@@ -253,7 +253,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 		}
 		x = min(x, win.Scene.Geom.Size.X-vpsz.X) // fit
 		y = min(y, win.Scene.Geom.Size.Y-vpsz.Y) // fit
-		dlg.Type = VpDialog                      // VpPopup
+		dlg.Type = ScDialog                      // ScPopup
 		dlg.Resize(vpsz)
 		dlg.Geom.Pos = image.Point{x, y}
 		win.SetNextPopup(&dlg.Scene, nil)
@@ -268,7 +268,7 @@ func (dlg *Dialog) Close() {
 	}
 	win := dlg.Win
 	if win != nil {
-		if DialogsSepWindow {
+		if DialogsSepOSWin {
 			win.Close()
 		} else {
 			win.ClosePopup(&dlg.Scene)
@@ -437,7 +437,7 @@ func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
 			bb.UpdateEnd(updt)
 		}
 	}
-	dlg.SetFlag(true, VpPopupDestroyAll) // std is disposable
+	dlg.SetFlag(true, ScPopupDestroyAll) // std is disposable
 }
 
 // DlgOpts are the basic dialog options accepted by all dialog methods --
@@ -478,7 +478,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 	if data == nil {
 		return NewStdDialog(opts, ok, cancel), false
 	}
-	ew, has := DialogWindows.FindData(data)
+	ew, has := DialogOSWins.FindData(data)
 	if has && ew.Scene.Frame.NumChildren() > 0 {
 		ew.OSWin.Raise()
 		// dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)

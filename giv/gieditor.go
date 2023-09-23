@@ -109,7 +109,7 @@ func (ge *GiEditor) EditColorScheme() {
 	winm := "gogi-color-scheme"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainWindow(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
+	win, recyc := gi.RecycleMainOSWin(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
 	if recyc {
 		return
 	}
@@ -169,7 +169,7 @@ func (ge *GiEditor) EditColorScheme() {
 
 // ToggleSelectionMode toggles the editor between selection mode or not
 func (ge *GiEditor) ToggleSelectionMode() {
-	if win, ok := ge.KiRoot.(*gi.Window); ok {
+	if win, ok := ge.KiRoot.(*gi.OSWin); ok {
 		if !win.IsInSelectionMode() && win.SelectedWidgetChan == nil {
 			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 		}
@@ -310,7 +310,7 @@ func (ge *GiEditor) SetChanged() {
 
 func (ge *GiEditor) Render(vp *Scene) {
 	ge.ToolBar().UpdateActions()
-	if win := ge.ParentWindow(); win != nil {
+	if win := ge.ParentOSWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
@@ -334,7 +334,7 @@ var GiEditorProps = ki.Props{
 			"desc": "Select an element in the window to edit it",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
 				ge := gei.(*GiEditor)
-				win, ok := ge.KiRoot.(*gi.Window)
+				win, ok := ge.KiRoot.(*gi.OSWin)
 				act.SetEnabledStateUpdt(ok)
 				if ok {
 					if win.IsInSelectionMode() {
@@ -423,10 +423,10 @@ var GiEditorProps = ki.Props{
 				},
 			}},
 			{"sep-close", ki.BlankProp{}},
-			{"Close Window", ki.BlankProp{}},
+			{"Close OSWin", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste Dupe"},
-		{"Window", "Windows"},
+		{"OSWin", "OSWins"},
 	},
 }
 
@@ -442,7 +442,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		wti += ": " + obj.Name()
 	}
 
-	win, recyc := gi.RecycleMainWindow(obj, wnm, wti, width, height)
+	win, recyc := gi.RecycleMainOSWin(obj, wnm, wti, width, height)
 	if recyc {
 		mfr, err := win.MainFrame()
 		if err == nil {
@@ -469,7 +469,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	ge.SelectionLoop()
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
 		if !ge.Changed {
 			win.Close()
 			return
@@ -497,10 +497,10 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	return ge
 }
 
-// SelectionLoop, if [KiRoot] is a [gi.Window], runs a loop in a separate goroutine
-// that listens to the [Window.SelectedWidgetChan] channel and selects selected elements.
+// SelectionLoop, if [KiRoot] is a [gi.OSWin], runs a loop in a separate goroutine
+// that listens to the [OSWin.SelectedWidgetChan] channel and selects selected elements.
 func (ge *GiEditor) SelectionLoop() {
-	if win, ok := ge.KiRoot.(*gi.Window); ok {
+	if win, ok := ge.KiRoot.(*gi.OSWin); ok {
 		go func() {
 			if win.SelectedWidgetChan == nil {
 				win.SelectedWidgetChan = make(chan *gi.WidgetBase)

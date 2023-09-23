@@ -1085,21 +1085,21 @@ func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
 //    File ops
 
 // OSOpenCommand returns the generic file 'open' command to open file with default app
-// open on Mac, xdg-open on Linux, and start on Windows
+// open on Mac, xdg-open on Linux, and start on OSWins
 func OSOpenCommand() string {
 	switch goosi.TheApp.Platform() {
 	case goosi.MacOS:
 		return "open"
 	case goosi.LinuxX11:
 		return "xdg-open"
-	case goosi.Windows:
+	case goosi.OSWins:
 		return "start"
 	}
 	return "open"
 }
 
 // OpenFileDefault opens file with default app for that file type (os defined)
-// runs open on Mac, xdg-open on Linux, and start on Windows
+// runs open on Mac, xdg-open on Linux, and start on OSWins
 func (fn *FileNode) OpenFileDefault() error {
 	cstr := OSOpenCommand()
 	cmd := exec.Command(cstr, string(fn.FPath))
@@ -1868,9 +1868,9 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
 		case dnd.Enter:
-			tvv.ParentWindow().DNDSetCursor(de.Mod)
+			tvv.ParentOSWin().DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			tvv.ParentWindow().DNDNotCursor()
+			tvv.ParentOSWin().DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}
@@ -1942,10 +1942,10 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 			ftv.DuplicateFiles()
 			kt.SetProcessed()
 		case gi.KeyFunInsert: // New File
-			CallMethod(ftv, "NewFile", ftv.Vp)
+			CallMethod(ftv, "NewFile", ftv.Sc)
 			kt.SetProcessed()
 		case gi.KeyFunInsertAfter: // New Folder
-			CallMethod(ftv, "NewFolder", ftv.Vp)
+			CallMethod(ftv, "NewFolder", ftv.Sc)
 			kt.SetProcessed()
 		}
 	}
@@ -1962,13 +1962,13 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		fftv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			StructViewDialog(ftv.Vp, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
+			StructViewDialog(ftv.Sc, &fn.Info, DlgOpts{Title: "File Info", Inactive: true}, nil, nil)
 		}
 	}
 }
 
 // OpenFileDefault opens file with default app for that file type (os defined)
-// runs open on Mac, xdg-open on Linux, and start on Windows
+// runs open on Mac, xdg-open on Linux, and start on OSWins
 func (ftv *FileTreeView) OpenFileDefault() {
 	sels := ftv.SelectedViews()
 	for i := len(sels) - 1; i >= 0; i-- {
@@ -1989,7 +1989,7 @@ func (ftv *FileTreeView) OpenFileWith() {
 		fftv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 		fn := fftv.FileNode()
 		if fn != nil {
-			CallMethod(fn, "OpenFileWith", ftv.Vp)
+			CallMethod(fn, "OpenFileWith", ftv.Sc)
 		}
 	}
 }
@@ -2047,7 +2047,7 @@ func (ftv *FileTreeView) DeleteFilesImpl() {
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
-	gi.ChoiceDialog(ftv.Vp, gi.DlgOpts{Title: "Delete Files?",
+	gi.ChoiceDialog(ftv.Sc, gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
 		[]string{"Delete Files", "Cancel"},
 		ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -2071,7 +2071,7 @@ func (ftv *FileTreeView) RenameFiles() {
 			if fn.IsExternal() {
 				continue
 			}
-			CallMethod(fn, "RenameFile", ftv.Vp)
+			CallMethod(fn, "RenameFile", ftv.Sc)
 		}
 	}
 }
@@ -2198,7 +2198,7 @@ func (ftv *FileTreeView) CommitToVcs() {
 	ftvv := sn.Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftvv.FileNode()
 	if fn != nil {
-		CallMethod(fn, "CommitToVcs", ftv.Vp)
+		CallMethod(fn, "CommitToVcs", ftv.Sc)
 	}
 }
 
@@ -2334,13 +2334,13 @@ func (ftv *FileTreeView) Cut() {
 	}
 	ftv.Copy(false)
 	// todo: in the future, move files somewhere temporary, then use those temps for paste..
-	gi.PromptDialog(ftv.Vp, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
+	gi.PromptDialog(ftv.Sc, gi.DlgOpts{Title: "Cut Not Supported", Prompt: "File names were copied to clipboard and can be pasted to copy elsewhere, but files are not deleted because contents of files are not placed on the clipboard and thus cannot be pasted as such.  Use Delete to delete files."}, gi.AddOk, gi.NoCancel, nil, nil)
 }
 
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Paste() {
-	md := goosi.TheApp.ClipBoard(ftv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
+	md := goosi.TheApp.ClipBoard(ftv.ParentOSWin().OSWin).Read([]string{filecat.TextPlain})
 	if md != nil {
 		ftv.PasteMime(md)
 	}
@@ -2366,7 +2366,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 	if tfn != nil {
 		tpath = string(tfn.FPath)
 	}
-	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentOSWin().EventMgr.DNDIsInternalSrc()
 	nf := len(md)
 	if intl {
 		nf /= 3
@@ -2404,7 +2404,7 @@ func (ftv *FileTreeView) PasteCheckExisting(tfn *FileNode, md mimedata.Mimes) ([
 // PasteCopyFiles copies files in given data into given target directory
 func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 	sroot := ftv.RootView.SrcNode
-	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentOSWin().EventMgr.DNDIsInternalSrc()
 	nf := len(md)
 	if intl {
 		nf /= 3
@@ -2486,7 +2486,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	}
 	// single file dropped onto a single target file
 	srcpath := ""
-	intl := ftv.ParentWindow().EventMgr.DNDIsInternalSrc()
+	intl := ftv.ParentOSWin().EventMgr.DNDIsInternalSrc()
 	if intl {
 		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
 	} else {

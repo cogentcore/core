@@ -32,7 +32,7 @@ const (
 
 	// HasFocus: does this node currently have the focus for keyboard input
 	// events?  use tab / alt tab and clicking events to update focus -- see
-	// interface on Window
+	// interface on OSWin
 	HasFocus
 
 	// ReRenderAnchor: this node has a static size, and repaints its

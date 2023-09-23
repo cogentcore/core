@@ -551,12 +551,12 @@ func (fv *FileView) UpdateFiles() {
 
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
-	var owin goosi.Window
-	win := fv.ParentWindow()
+	var owin goosi.OSWin
+	win := fv.ParentOSWin()
 	if win != nil {
 		owin = fv.Scene.Win.OSWin
 	} else {
-		owin = goosi.TheApp.WindowInFocus()
+		owin = goosi.TheApp.OSWinInFocus()
 	}
 
 	fv.UpdatePath()

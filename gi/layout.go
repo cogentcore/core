@@ -24,11 +24,11 @@ import (
 )
 
 // LayoutPrefMaxRows is maximum number of rows to use in a grid layout
-// when computing the preferred size (VpFlagPrefSizing)
+// when computing the preferred size (ScFlagPrefSizing)
 var LayoutPrefMaxRows = 20
 
 // LayoutPrefMaxCols is maximum number of columns to use in a grid layout
-// when computing the preferred size (VpFlagPrefSizing)
+// when computing the preferred size (ScFlagPrefSizing)
 var LayoutPrefMaxCols = 20
 
 // LayoutAllocs contains all the the layout allocations: size, position.
@@ -278,16 +278,16 @@ const (
 var LayoutDefault Layout
 
 // AvailSize returns the total size avail to this layout -- typically
-// AllocSize except for top-level layout which uses VpBBox in case less is
+// AllocSize except for top-level layout which uses ScBBox in case less is
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.BoxSpace()
 	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
 	parni, _ := AsWidget(ly.Par)
 	if parni != nil {
-		// if vp.Vp == nil {
+		// if vp.Sc == nil {
 		// 	// SidesTODO: might not be right
-		// 	avail = mat32.NewVec2FmPoint(ly.VpBBox.Size()).SubScalar(spc.Right)
+		// 	avail = mat32.NewVec2FmPoint(ly.ScBBox.Size()).SubScalar(spc.Right)
 		// 	// fmt.Printf("non-nil par ly: %v vp: %v %v\n", ly.Path(), vp.Path(), avail)
 		// }
 	}
@@ -400,7 +400,7 @@ func (ly *Layout) DeactivateScroll(sb *ScrollBar) {
 	defer sb.BBoxMu.Unlock()
 	sb.LayState.Alloc.Pos = mat32.Vec2Zero
 	sb.LayState.Alloc.Size = mat32.Vec2Zero
-	sb.VpBBox = image.Rectangle{}
+	sb.ScBBox = image.Rectangle{}
 	sb.WinBBox = image.Rectangle{}
 }
 
@@ -423,7 +423,7 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 				sb.LayState.Alloc.Size.SetSubDim(d, sbw)
 			}
 			sb.LayState.Alloc.Size.SetDim(odim, sbw)
-			sb.DoLayout(sc, ly.VpBBox, 0) // this will add parent position to above rel pos
+			sb.DoLayout(sc, ly.ScBBox, 0) // this will add parent position to above rel pos
 		} else {
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])
@@ -684,9 +684,9 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.VpBBox.Min.X
+	vpMin := ly.ScBBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.VpBBox.Min.Y
+		vpMin = ly.ScBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
@@ -747,9 +747,9 @@ func (ly *Layout) ScrollDimToStart(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.VpBBox.Min.X
+	vpMin := ly.ScBBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.VpBBox.Min.Y
+		vpMin = ly.ScBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	if pos == vpMin { // already at min
@@ -777,9 +777,9 @@ func (ly *Layout) ScrollDimToEnd(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.VpBBox.Min.X
+	vpMin := ly.ScBBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.VpBBox.Min.Y
+		vpMin = ly.ScBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal                // amount that can be scrolled
@@ -808,9 +808,9 @@ func (ly *Layout) ScrollDimToCenter(dim mat32.Dims, pos int) bool {
 	if !ly.HasScroll[dim] {
 		return false
 	}
-	vpMin := ly.VpBBox.Min.X
+	vpMin := ly.ScBBox.Min.X
 	if dim == mat32.Y {
-		vpMin = ly.VpBBox.Min.Y
+		vpMin = ly.ScBBox.Min.Y
 	}
 	sc := ly.Scrolls[dim]
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
@@ -1084,7 +1084,7 @@ func (ly *Layout) LayoutScrollEvents() {
 	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		li := AsLayout(recv)
-		if li.Sc.Type == VpMenu {
+		if li.Sc.Type == ScMenu {
 			li.AutoScroll(me.Pos())
 		}
 	})
@@ -1168,7 +1168,7 @@ func (ly *Layout) StyleLayout(sc *Scene) {
 	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
 	// if len(tprops) > 0 {
 	// 	kit.TypesMu.RLock()
-	// 	ly.StyleFromProps(tprops, ly.Vp)
+	// 	ly.StyleFromProps(tprops, ly.Sc)
 	// 	kit.TypesMu.RUnlock()
 	// }
 	ly.StyleToDots(&ly.Style.UnContext)

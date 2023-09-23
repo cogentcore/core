@@ -443,7 +443,7 @@ func (mv *MapView) ConfigToolbar() {
 }
 
 func (mv *MapView) SetStyle() {
-	mvp := mv.Vp
+	mvp := mv.Sc
 	if mvp != nil && mvp.IsDoingFullRender() {
 		mv.Config()
 	}
@@ -454,7 +454,7 @@ func (mv *MapView) Render(vp *Scene) {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}
-	if win := mv.ParentWindow(); win != nil {
+	if win := mv.ParentOSWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}

@@ -31,7 +31,7 @@ func mainrun() {
 	rec := ki.Node{}          // receiver for events
 	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
 
-	win := gi.NewMainWindow("gogi-demo", "The GoGi Demo", 1024, 768)
+	win := gi.NewMainOSWin("gogi-demo", "The GoGi Demo", 1024, 768)
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
 
@@ -47,7 +47,7 @@ func mainrun() {
 	makeInputs(tv)
 	makeLayouts(tv)
 	makeFileTree(tv)
-	doWindowSetup(win, vp)
+	doOSWinSetup(win, vp)
 
 	vp.UpdateEndNoSig(updt)
 	win.StartEventLoop()
@@ -142,7 +142,7 @@ func makeText(tv *gi.TabView) {
 
 }
 
-func makeButtons(win *gi.Window, tv *gi.TabView) {
+func makeButtons(win *gi.OSWin, tv *gi.TabView) {
 	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
@@ -487,12 +487,12 @@ func makeFileTree(tv *gi.TabView) {
 	filetree.Lay = gi.LayoutVert
 }
 
-func doWindowSetup(win *gi.Window, vp *gi.Scene) {
+func doOSWinSetup(win *gi.OSWin, vp *gi.Scene) {
 	// Main Menu
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu.AddAppMenu(win)
@@ -515,7 +515,7 @@ func doWindowSetup(win *gi.Window, vp *gi.Scene) {
 			fmt.Println("File:SaveAs menu action triggered")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close OSWin", ShortcutKey: gi.KeyFunWinClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.CloseReq()
 		})
@@ -545,12 +545,12 @@ func doWindowSetup(win *gi.Window, vp *gi.Scene) {
 	})
 
 	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.Window) {
+	win.SetCloseReqFunc(func(w *gi.OSWin) {
 		if inClosePrompt {
 			return
 		}
 		inClosePrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close OSWin?",
 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, gi.AddOk, gi.AddCancel,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
@@ -561,7 +561,7 @@ func doWindowSetup(win *gi.Window, vp *gi.Scene) {
 			})
 	})
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
 		fmt.Printf("Doing final Close cleanup here..\n")
 	})
 

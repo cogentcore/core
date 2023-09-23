@@ -491,8 +491,8 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	}
 	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
-	mvp := tv.Vp
-	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
+	mvp := tv.Sc
+	if mvp != nil && mvp.HasFlag(int(gi.ScFlagPrefSizing)) {
 		tv.VisRows = min(gi.LayoutPrefMaxRows, tv.SliceSize)
 		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
 	} else {
@@ -830,8 +830,8 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	goosi.TheApp.Cursor(tv.ParentWindow().OSWin).Push(cursor.Wait)
-	defer goosi.TheApp.Cursor(tv.ParentWindow().OSWin).Pop()
+	goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).Push(cursor.Wait)
+	defer goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).Pop()
 
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
@@ -907,7 +907,7 @@ func (tv *TableView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(tv.Slice) {
-		ToolBarView(tv.Slice, tv.Vp, tb)
+		ToolBarView(tv.Slice, tv.Sc, tb)
 		tb.SetFullReRender()
 	}
 	tv.ToolbarSlice = tv.Slice
@@ -969,13 +969,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
 	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
-	if widg.VpBBox != (image.Rectangle{}) {
+	if widg.ScBBox != (image.Rectangle{}) {
 		return widg, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
-		if widg.VpBBox != (image.Rectangle{}) {
+		if widg.ScBBox != (image.Rectangle{}) {
 			return widg, true
 		}
 	}

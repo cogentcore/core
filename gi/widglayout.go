@@ -22,19 +22,19 @@ func (wb *WidgetBase) SetWinBBox(sc *Scene) {
 	wb.BBoxMu.Lock()
 	defer wb.BBoxMu.Unlock()
 	if sc != nil {
-		wb.WinBBox = wb.VpBBox.Add(sc.Geom.Pos)
+		wb.WinBBox = wb.ScBBox.Add(sc.Geom.Pos)
 	} else {
-		wb.WinBBox = wb.VpBBox
+		wb.WinBBox = wb.ScBBox
 	}
 }
 
-// ComputeBBox2DBase -- computes the VpBBox and WinBBox from BBox, with
+// ComputeBBox2DBase -- computes the ScBBox and WinBBox from BBox, with
 // whatever delta may be in effect
 func (wb *WidgetBase) ComputeBBox2DBase(sc *Scene, parBBox image.Rectangle, delta image.Point) {
 	wb.BBoxMu.Lock()
 	wb.ObjBBox = wb.BBox.Add(delta)
-	wb.VpBBox = parBBox.Intersect(wb.ObjBBox)
-	wb.SetFlag(wb.VpBBox == image.Rectangle{}, Invisible)
+	wb.ScBBox = parBBox.Intersect(wb.ObjBBox)
+	wb.SetFlag(wb.ScBBox == image.Rectangle{}, Invisible)
 	wb.BBoxMu.Unlock()
 	wb.SetWinBBox(sc)
 }
@@ -47,7 +47,7 @@ func (wb *WidgetBase) BBoxReport() string {
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.VpBBox, ni.WinBBox)
+		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.ScBBox, ni.WinBBox)
 		return ki.Continue
 	})
 	return rpt
@@ -188,7 +188,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, initStyle
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBox2D(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.VpBBox, wb.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox, wb.WinBBox)
 	}
 	// typically DoLayoutChildren must be called after this!
 }
@@ -214,7 +214,7 @@ func (wb *WidgetBase) DoLayoutChildren(sc *Scene, iter int) bool {
 // ChildrenBBox2DWidget provides a basic widget box-model subtraction of
 // margin and padding to children -- call in ChildrenBBox2D for most widgets
 func (wb *WidgetBase) ChildrenBBox2DWidget(sc *Scene) image.Rectangle {
-	bb := wb.VpBBox
+	bb := wb.ScBBox
 	spc := wb.BoxSpace()
 	bb.Min.X += int(spc.Left)
 	bb.Min.Y += int(spc.Top)

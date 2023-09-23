@@ -531,7 +531,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	parw.SetFlag(true, ReRenderAnchor)
 	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
-		// fmt.Printf("paloc: %v, psc: %v  lineonoff: %v\n", paloc, parw.VpBBox, tv.LineNoOff)
+		// fmt.Printf("paloc: %v, psc: %v  lineonoff: %v\n", paloc, parw.ScBBox, tv.LineNoOff)
 		tv.RenderSz = paloc.Sub(parw.ExtraSize).Sub(spc.Size())
 		// SidesTODO: this is sketchy
 		tv.RenderSz.X -= spc.Size().X / 2 // extra space
@@ -793,7 +793,7 @@ func (tv *TextView) SetCursor(pos lex.Pos) {
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	if cpln != tv.CursorPos.Ln && tv.HasLineNos() { // update cursor position highlight
 		rs := tv.Render()
-		rs.PushBounds(tv.VpBBox)
+		rs.PushBounds(tv.ScBBox)
 		rs.Lock()
 		tv.RenderLineNo(cpln, true, true) // render bg, and do vpupload
 		tv.RenderLineNo(tv.CursorPos.Ln, true, true)
@@ -1458,7 +1458,7 @@ func (tv *TextView) CursorTransposeWord() {
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (tv *TextView) JumpToLinePrompt() {
-	gi.StringPromptDialog(tv.Vp, "", "Line no..",
+	gi.StringPromptDialog(tv.Sc, "", "Line no..",
 		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dlg := send.(*gi.Dialog)
@@ -2448,7 +2448,7 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			wupdt := tv.TopUpdateStart()
 			defer tv.TopUpdateEnd(wupdt)
-			goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(clip))
+			goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2466,7 +2466,7 @@ func (tv *TextView) Cut() *textbuf.Edit {
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2493,7 +2493,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2505,7 +2505,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 func (tv *TextView) Paste() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	data := goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2552,7 +2552,7 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
 	tv.SetCursorShow(npos)
@@ -2570,7 +2570,7 @@ func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
-	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
 	TextViewClipRect = tbe
 	if reset {
 		tv.SelectReset()
@@ -2645,7 +2645,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).IsEmpty())
+		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -2959,10 +2959,10 @@ func (tv *TextView) AutoScroll(pos image.Point) bool {
 func (tv *TextView) ScrollCursorToCenterIfHidden() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	did := false
-	if (curBBox.Min.Y-int(tv.LineHeight)) < tv.VpBBox.Min.Y || (curBBox.Max.Y+int(tv.LineHeight)) > tv.VpBBox.Max.Y {
+	if (curBBox.Min.Y-int(tv.LineHeight)) < tv.ScBBox.Min.Y || (curBBox.Max.Y+int(tv.LineHeight)) > tv.ScBBox.Max.Y {
 		did = tv.ScrollCursorToVertCenter()
 	}
-	if curBBox.Max.X < tv.VpBBox.Min.X || curBBox.Min.X > tv.VpBBox.Max.X {
+	if curBBox.Max.X < tv.ScBBox.Min.X || curBBox.Min.X > tv.ScBBox.Max.X {
 		did = did || tv.ScrollCursorToHorizCenter()
 	}
 	return did
@@ -3184,8 +3184,8 @@ func TextViewBlink() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
-		win := tv.ParentWindow()
-		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsWindowInFocus() {
+		win := tv.ParentOSWin()
+		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsOSWinInFocus() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
@@ -3218,7 +3218,7 @@ func (tv *TextView) StartCursor() {
 		go TextViewBlink()
 	}
 	tv.BlinkOn = true
-	win := tv.ParentWindow()
+	win := tv.ParentOSWin()
 	if win != nil && !win.IsResizing() {
 		tv.RenderCursor(true)
 	}
@@ -3267,7 +3267,7 @@ func (tv *TextView) RenderCursor(on bool) {
 	tv.CursorMu.Lock()
 	defer tv.CursorMu.Unlock()
 
-	win := tv.ParentWindow()
+	win := tv.ParentOSWin()
 	sp := tv.CursorSprite()
 	if on {
 		win.ActivateSprite(sp.Name)
@@ -3288,7 +3288,7 @@ func (tv *TextView) CursorSpriteName() string {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
 func (tv *TextView) CursorSprite() *gi.Sprite {
-	win := tv.ParentWindow()
+	win := tv.ParentOSWin()
 	if win == nil {
 		return nil
 	}
@@ -3341,10 +3341,10 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	for ln := stln; ln <= edln; ln++ {
 		lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
+		if int(mat32.Ceil(led)) < tv.ScBBox.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.ScBBox.Max.Y {
 			continue
 		}
 		if ln >= len(tv.Buf.HiTags) { // may be out of sync
@@ -3462,7 +3462,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 	spos := tv.CharStartPos(st)
 	epos := tv.CharStartPos(ed)
 	epos.Y += tv.LineHeight
-	if int(mat32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+	if int(mat32.Ceil(epos.Y)) < tv.ScBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.ScBBox.Max.Y {
 		return
 	}
 
@@ -3472,7 +3472,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 
 	rst := tv.RenderStartPos()
 	// SidesTODO: this is sketchy
-	ex := float32(tv.VpBBox.Max.X) - spc.Right
+	ex := float32(tv.ScBBox.Max.X) - spc.Right
 	sx := rst.X + tv.LineNoOff
 
 	// fmt.Printf("select: %v -- %v\n", st, ed)
@@ -3507,8 +3507,8 @@ func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *gist.C
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight
-	epos.X = float32(tv.VpBBox.Max.X)
-	if int(mat32.Ceil(epos.Y)) < tv.VpBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.VpBBox.Max.Y {
+	epos.X = float32(tv.ScBBox.Max.X)
+	if int(mat32.Ceil(epos.Y)) < tv.ScBBox.Min.Y || int(mat32.Floor(spos.Y)) > tv.ScBBox.Max.Y {
 		return
 	}
 
@@ -3536,7 +3536,7 @@ func (tv *TextView) VisSizes() {
 	sty.Font = girl.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = sty.Text.EffLineHeight(tv.FontHeight)
-	sz := tv.VpBBox.Size()
+	sz := tv.ScBBox.Size()
 	if sz == (image.Point{}) {
 		tv.VisSize.Y = 40
 		tv.VisSize.X = 80
@@ -3570,11 +3570,11 @@ func (tv *TextView) RenderAllLines() {
 		return
 	}
 	rs := tv.Render()
-	rs.PushBounds(tv.VpBBox)
+	rs.PushBounds(tv.ScBBox)
 	wupdt := tv.TopUpdateStart()
 	tv.RenderAllLinesInBounds()
 	tv.PopBounds()
-	tv.Scene.This().(gi.Scene).VpUploadRegion(tv.VpBBox, tv.WinBBox)
+	tv.Scene.This().(gi.Scene).ScUploadRegion(tv.ScBBox, tv.WinBBox)
 	tv.RenderScrolls()
 	tv.TopUpdateEnd(wupdt)
 }
@@ -3588,8 +3588,8 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	pc := &rs.Paint
 	sty := &tv.Style
 	tv.VisSizes()
-	pos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
-	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
+	pos := mat32.NewVec2FmPoint(tv.ScBBox.Min)
+	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
 	pos = tv.RenderStartPos()
 	stln := -1
@@ -3597,10 +3597,10 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	for ln := 0; ln < tv.NLines; ln++ {
 		lst := pos.Y + tv.Offs[ln]
 		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
+		if int(mat32.Ceil(led)) < tv.ScBBox.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.ScBBox.Max.Y {
 			continue
 		}
 		if stln < 0 {
@@ -3626,7 +3626,7 @@ func (tv *TextView) RenderAllLinesInBounds() {
 	tv.RenderScopelights(stln, edln)
 	tv.RenderSelect()
 	if tv.HasLineNos() {
-		tbb := tv.VpBBox
+		tbb := tv.ScBBox
 		tbb.Min.X += int(tv.LineNoOff)
 		rs.Unlock()
 		rs.PushBounds(tbb)
@@ -3654,8 +3654,8 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	spos := mat32.NewVec2FmPoint(tv.VpBBox.Min)
-	epos := mat32.NewVec2FmPoint(tv.VpBBox.Max)
+	spos := mat32.NewVec2FmPoint(tv.ScBBox.Min)
+	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
 	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Color)
@@ -3671,7 +3671,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	sty := &tv.Style
 	spc := sty.BoxSpace()
 	spos := tv.CharStartPos(lex.Pos{Ln: st})
-	spos.X = float32(tv.VpBBox.Min.X)
+	spos.X = float32(tv.ScBBox.Min.X)
 	epos := tv.CharEndPos(lex.Pos{Ln: ed + 1})
 	epos.Y -= tv.LineHeight
 	// SidesTODO: this is sketchy
@@ -3682,7 +3682,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 
 // RenderLineNo renders given line number -- called within context of other render
 // if defFill is true, it fills box color for default background color (use false for batch mode)
-// and if vpUpload is true it uploads the rendered region to viewport directly
+// and if vpUpload is true it uploads the rendered region to scene directly
 // (only if totally separate from other updates)
 func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if !tv.HasLineNos() || tv.Buf == nil {
@@ -3698,7 +3698,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 
 	// render fillbox
 	sbox := tv.CharStartPos(lex.Pos{Ln: ln})
-	sbox.X = float32(tv.VpBBox.Min.X)
+	sbox.X = float32(tv.ScBBox.Min.X)
 	ebox := tv.CharEndPos(lex.Pos{Ln: ln + 1})
 	if ln < tv.NLines-1 {
 		ebox.Y -= tv.LineHeight
@@ -3732,7 +3732,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	pos := mat32.Vec2{}
 	lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 	pos.Y = lst + mat32.FromFixed(sty.Font.Face.Face.Metrics().Ascent) - mat32.FromFixed(sty.Font.Face.Face.Metrics().Descent)
-	pos.X = float32(tv.VpBBox.Min.X) + spc.Pos().X
+	pos.X = float32(tv.ScBBox.Min.X) + spc.Pos().X
 
 	tv.LineNoRender.Render(rs, pos)
 	// todo: need an SvgRender interface that just takes an svg file or object
@@ -3756,9 +3756,9 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// }
 	if vpUpload {
 		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
-		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
+		winoff := tv.WinBBox.Min.Sub(tv.ScBBox.Min)
 		tWinBBox := tBBox.Add(winoff)
-		vp.This().(gi.Scene).VpUploadRegion(tBBox, tWinBBox)
+		vp.This().(gi.Scene).ScUploadRegion(tBBox, tWinBBox)
 	}
 }
 
@@ -3798,17 +3798,17 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	pc := &rs.Paint
 	pos := tv.RenderStartPos()
 	var boxMin, boxMax mat32.Vec2
-	rs.PushBounds(tv.VpBBox)
+	rs.PushBounds(tv.ScBBox)
 	// first get the box to fill
 	visSt := -1
 	visEd := -1
 	for ln := st; ln <= ed; ln++ {
 		lst := tv.CharStartPos(lex.Pos{Ln: ln}).Y // note: charstart pos includes descent
 		led := lst + mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		if int(mat32.Ceil(led)) < tv.VpBBox.Min.Y {
+		if int(mat32.Ceil(led)) < tv.ScBBox.Min.Y {
 			continue
 		}
-		if int(mat32.Floor(lst)) > tv.VpBBox.Max.Y {
+		if int(mat32.Floor(lst)) > tv.ScBBox.Max.Y {
 			continue
 		}
 		lp := pos
@@ -3823,8 +3823,8 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	}
 	if !(visSt < 0 && visEd < 0) {
 		rs.Lock()
-		boxMin.X = float32(tv.VpBBox.Min.X) // go all the way
-		boxMax.X = float32(tv.VpBBox.Max.X) // go all the way
+		boxMin.X = float32(tv.ScBBox.Min.X) // go all the way
+		boxMax.X = float32(tv.ScBBox.Max.X) // go all the way
 		pc.FillBox(rs, boxMin, boxMax.Sub(boxMin), &sty.BackgroundColor)
 		// fmt.Printf("lns: st: %v ed: %v vis st: %v ed %v box: min %v max: %v\n", st, ed, visSt, visEd, boxMin, boxMax)
 
@@ -3838,7 +3838,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 			for ln := visSt; ln <= visEd; ln++ {
 				tv.RenderLineNo(ln, true, false)
 			}
-			tbb := tv.VpBBox
+			tbb := tv.ScBBox
 			tbb.Min.X += int(tv.LineNoOff)
 			rs.Unlock()
 			rs.PushBounds(tbb)
@@ -3857,10 +3857,10 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		}
 
 		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-		winoff := tv.WinBBox.Min.Sub(tv.VpBBox.Min)
+		winoff := tv.WinBBox.Min.Sub(tv.ScBBox.Min)
 		tWinBBox := tBBox.Add(winoff)
 		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
-		vp.This().(gi.Scene).VpUploadRegion(tBBox, tWinBBox)
+		vp.This().(gi.Scene).ScUploadRegion(tBBox, tWinBBox)
 	}
 	tv.PopBounds()
 	tv.RenderScrolls()
@@ -3877,13 +3877,13 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 func (tv *TextView) FirstVisibleLine(stln int) int {
 	if stln == 0 {
 		perln := float32(tv.LinesSize.Y) / float32(tv.NLines)
-		stln = int(float32(tv.VpBBox.Min.Y-tv.ObjBBox.Min.Y)/perln) - 1
+		stln = int(float32(tv.ScBBox.Min.Y-tv.ObjBBox.Min.Y)/perln) - 1
 		if stln < 0 {
 			stln = 0
 		}
 		for ln := stln; ln < tv.NLines; ln++ {
 			cpos := tv.CharStartPos(lex.Pos{Ln: ln})
-			if int(mat32.Floor(cpos.Y)) >= tv.VpBBox.Min.Y { // top definitely on screen
+			if int(mat32.Floor(cpos.Y)) >= tv.ScBBox.Min.Y { // top definitely on screen
 				stln = ln
 				break
 			}
@@ -3892,7 +3892,7 @@ func (tv *TextView) FirstVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln - 1; ln >= 0; ln-- {
 		cpos := tv.CharStartPos(lex.Pos{Ln: ln})
-		if int(mat32.Ceil(cpos.Y)) < tv.VpBBox.Min.Y { // top just offscreen
+		if int(mat32.Ceil(cpos.Y)) < tv.ScBBox.Min.Y { // top just offscreen
 			break
 		}
 		lastln = ln
@@ -3907,7 +3907,7 @@ func (tv *TextView) LastVisibleLine(stln int) int {
 	for ln := stln + 1; ln < tv.NLines; ln++ {
 		pos := lex.Pos{Ln: ln}
 		cpos := tv.CharStartPos(pos)
-		if int(mat32.Floor(cpos.Y)) > tv.VpBBox.Max.Y { // just offscreen
+		if int(mat32.Floor(cpos.Y)) > tv.ScBBox.Max.Y { // just offscreen
 			break
 		}
 		lastln = ln
@@ -4118,7 +4118,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
-	win := tv.ParentWindow()
+	win := tv.ParentOSWin()
 	tv.ClearScopelights()
 
 	tv.RefreshIfNeeded()
@@ -4713,9 +4713,9 @@ func (tv *TextView) MouseMoveEvent() {
 		}
 		// TODO: figure out how to handle links with new cursor setup
 		if inLink {
-			goosi.TheApp.Cursor(tv.ParentWindow().OSWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).PushIfNot(cursor.HandPointing)
 		} else {
-			goosi.TheApp.Cursor(tv.ParentWindow().OSWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).PopIf(cursor.HandPointing)
 		}
 
 	})
@@ -4791,7 +4791,7 @@ func (tv *TextView) StyleTextView() {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
-		win := tv.ParentWindow()
+		win := tv.ParentOSWin()
 		if win != nil {
 			spnm := tv.CursorSpriteName()
 			win.DeleteSprite(spnm)
@@ -4833,7 +4833,7 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.DoLayoutChildren(iter)
-	if tv.ParentWindow() != nil &&
+	if tv.ParentOSWin() != nil &&
 		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
@@ -4864,7 +4864,7 @@ func (tv *TextView) Render(vp *Scene) {
 	if tv.NLines == 0 {
 		ply := tv.ParentLayout()
 		if ply != nil {
-			tv.VpBBox = ply.VpBBox
+			tv.ScBBox = ply.ScBBox
 			tv.WinBBox = ply.WinBBox
 		}
 	}

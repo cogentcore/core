@@ -184,15 +184,15 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 	wb := wi.AsWidget()
 	sc := wb.Sc
 	if sc == nil || sc.Pixels == nil {
-		log.Printf("gi.GrabRenderFrom could not grab from node, viewport or pixels nil: %v\n", wb.Path())
+		log.Printf("gi.GrabRenderFrom could not grab from node, scene or pixels nil: %v\n", wb.Path())
 		return nil
 	}
-	if wb.VpBBox.Empty() {
+	if wb.ScBBox.Empty() {
 		return nil // offscreen -- can happen -- no warning -- just check rval
 	}
-	sz := wb.VpBBox.Size()
+	sz := wb.ScBBox.Size()
 	img := image.NewRGBA(image.Rectangle{Max: sz})
-	draw.Draw(img, img.Bounds(), sc.Pixels, wb.VpBBox.Min, draw.Src)
+	draw.Draw(img, img.Bounds(), sc.Pixels, wb.ScBBox.Min, draw.Src)
 	return img
 }
 

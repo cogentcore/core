@@ -61,8 +61,8 @@ type Complete struct {
 	// the user's completion selection'
 	Completion string `desc:"the user's completion selection'"`
 
-	// the viewport where the current popup menu is presented
-	Sc         *Scene `desc:"the viewport where the current popup menu is presented"`
+	// the scene where the current popup menu is presented
+	Sc         *Scene `desc:"the scene where the current popup menu is presented"`
 	DelayTimer *time.Timer
 	DelayMu    sync.Mutex
 	ShowMu     sync.Mutex
@@ -182,16 +182,16 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Po
 			})
 	}
 	// TODO: maybe get this working with RecyclePopup
-	// fmt.Println(keep, vp == c.Vp, vp, c.Vp)
+	// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
 	// if keep && vp.Win.CurPopup() != nil {
 	// 	fmt.Println("updating through keep")
 	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	// 	psc.SetFlag(int(VpFlagCompleter))
+	// 	psc.SetFlag(int(ScFlagCompleter))
 	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	// 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
 	// } else {
 	psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
-	psc.Type = VpCompleter
+	psc.Type = ScCompleter
 	// todo:
 	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 	sc.Win.OSWin.SendEmptyEvent() // needs an extra event to show popup

@@ -25,7 +25,7 @@ func mainrun() {
 	gi.SetAppName("label")
 	gi.SetAppAbout(`This is a demo of the text rendering using labels in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewMainWindow("gogi-label-test", "GoGi Label Test", width, height)
+	win := gi.NewMainOSWin("gogi-label-test", "GoGi Label Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -87,7 +87,7 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -97,7 +97,7 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
 		go gi.Quit() // once main window is closed, quit
 	})
 

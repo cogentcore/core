@@ -31,7 +31,7 @@ func mainrun() {
 	goosi.TheApp.SetName("text")
 	goosi.TheApp.SetAbout(`This is a demo of the TextEdit in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewMainWindow("gogi-textedit-test", "GoGi TextEdit Test", width, height)
+	win := gi.NewMainOSWin("gogi-textedit-test", "GoGi TextEdit Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -78,7 +78,7 @@ func mainrun() {
 	// main menu
 	appnm := goosi.TheApp.Name()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -88,7 +88,7 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.OSWin.SetCloseCleanFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseCleanFunc(func(w goosi.OSWin) {
 		go goosi.TheApp.Quit() // once main window is closed, quit
 	})
 

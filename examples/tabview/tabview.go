@@ -19,7 +19,7 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	win := gi.NewMainWindow("gogi-tabview-test", "GoGi TabView Test", width, height)
+	win := gi.NewMainOSWin("gogi-tabview-test", "GoGi TabView Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -50,7 +50,7 @@ func mainrun() {
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -60,7 +60,7 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
 		go gi.Quit() // once main window is closed, quit
 	})
 

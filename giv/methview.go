@@ -21,7 +21,7 @@ import (
 
 // these are special menus that we ignore
 var specialMenus = map[string]struct{}{
-	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "Windows": {},
+	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "OSWins": {},
 }
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
@@ -31,7 +31,7 @@ var specialMenus = map[string]struct{}{
 // there is no main menu defined for this type, or on errors (which are
 // programmer errors sent to log).
 // gopy:interface=handle
-func MainMenuView(val any, win *gi.Window, mbar *gi.MenuBar) bool {
+func MainMenuView(val any, win *gi.OSWin, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -76,12 +76,12 @@ func MainMenuView(val any, win *gi.Window, mbar *gi.MenuBar) bool {
 				continue
 			}
 		}
-		if mm.Name == "Window" {
+		if mm.Name == "OSWin" {
 			if ms, ok := mm.Value.(string); ok {
-				if ms == "Windows" {
+				if ms == "OSWins" {
 					// automatic
 				} else {
-					MethViewErr(vtyp, fmt.Sprintf("Unrecognized Window menu special string: %v -- `Windows` is standard", ms))
+					MethViewErr(vtyp, fmt.Sprintf("Unrecognized OSWin menu special string: %v -- `OSWins` is standard", ms))
 				}
 				continue
 			}
@@ -125,7 +125,7 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 	if vp == nil {
 		vp = tb.ParentScene()
 		if vp == nil {
-			MethViewErr(vtyp, "Scene is nil in ToolBarView config -- must set viewport in widget prior to calling this method!")
+			MethViewErr(vtyp, "Scene is nil in ToolBarView config -- must set scene in widget prior to calling this method!")
 		}
 		return false
 	}
@@ -182,7 +182,7 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	}
 
 	if vp == nil {
-		MethViewErr(vtyp, "Scene is nil in CtxtMenuView config -- must set viewport in widget prior to calling this method!")
+		MethViewErr(vtyp, "Scene is nil in CtxtMenuView config -- must set scene in widget prior to calling this method!")
 		return false
 	}
 
@@ -238,7 +238,7 @@ func CallMethod(val any, method string, vp *gi.Scene) bool {
 }
 
 // MethViewSetActionData sets the MethViewData associated with the given action
-// with values updated from the given val and viewport
+// with values updated from the given val and scene
 func MethViewSetActionData(ac *gi.Action, val any, vp *gi.Scene) {
 	if ac.Data == nil {
 		fmt.Printf("giv.MethView no MethViewData on action: %v\n", ac.Nm)
@@ -247,7 +247,7 @@ func MethViewSetActionData(ac *gi.Action, val any, vp *gi.Scene) {
 	md := ac.Data.(*MethViewData)
 	md.Val = val
 	md.ValVal = reflect.ValueOf(val)
-	md.Vp = vp
+	md.Sc = vp
 	md.MethVal = md.ValVal.MethodByName(md.Method)
 	if len(ac.ActionSig.Cons) == 0 {
 		fmt.Printf("giv.MethView CallMethod had no connections: %v\n", ac.Nm)
@@ -415,7 +415,7 @@ func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any
 func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props ki.Props) bool {
 	// special action names
 	switch ac.Nm {
-	case "Close Window":
+	case "Close OSWin":
 		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunWinClose)
 		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			vp.Win.CloseReq()
@@ -446,7 +446,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props k
 	}
 
 	rval := true
-	md := &MethViewData{Val: val, ValVal: valval, Vp: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
+	md := &MethViewData{Val: val, ValVal: valval, Sc: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
 	ac.Data = md
 
 	if MethViewNoUpdateAfterProp(val) {
@@ -642,7 +642,7 @@ type ActionUpdateFunc func(it any, act *gi.Action)
 type MethViewData struct {
 	Val     any
 	ValVal  reflect.Value
-	Vp      *gi.Scene
+	Sc      *gi.Scene
 	Method  string
 	MethVal reflect.Value
 	MethTyp reflect.Method
@@ -714,7 +714,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 			ad.View.SetTag("desc", ad.Desc)
 		}
 		if ad.View.HasAction() {
-			ad.View.Activate(md.Vp, ad.View, func(recv, send ki.Ki, sig int64, data any) {
+			ad.View.Activate(md.Sc, ad.View, func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)
 				}
@@ -723,8 +723,8 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 		}
 	}
 
-	ArgViewDialog(md.Vp, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
-		md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
+	ArgViewDialog(md.Sc, ads, DlgOpts{Title: ac.Text, Prompt: md.Desc},
+		md.Sc.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				// ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				MethViewCallMeth(md, args)
@@ -737,14 +737,14 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 // or otherwise directly calls method
 func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
 	// if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
-	// 	if md.Vp != nil && md.Vp.Win != nil {
-	// 		md.Vp.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
+	// 	if md.Sc != nil && md.Sc.Win != nil {
+	// 		md.Sc.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
 	// 	}
 	// 	return
 	// }
 	// if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-	// 	gi.PromptDialog(md.Vp, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
-	// 		md.Vp.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	gi.PromptDialog(md.Sc, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
+	// 		md.Sc.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 			if sig == int64(gi.DialogAccepted) {
 	// 				MethViewCallMeth(md, args)
 	// 			}
@@ -768,11 +768,11 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 	}
 
 	// if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
-	// 	md.Vp.SetNeedsFullRender() // always update after all methods -- almost always want that
+	// 	md.Sc.SetNeedsFullRender() // always update after all methods -- almost always want that
 	// }
 	// if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
 	// 	if len(rv) >= 1 {
-	// 		MethViewShowValue(md.Vp, rv[0], md.Method+" Result", "")
+	// 		MethViewShowValue(md.Sc, rv[0], md.Method+" Result", "")
 	// 	}
 	// }
 }
@@ -976,9 +976,9 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	md := ac.Data.(*MethViewData)
 	smd := md.SubMenuSlice
 	if md.SubMenuFunc != nil {
-		smd = md.SubMenuFunc(md.Val, md.Vp)
+		smd = md.SubMenuFunc(md.Val, md.Sc)
 	} else if md.SubSubMenuFunc != nil {
-		smd = md.SubSubMenuFunc(md.Val, md.Vp)
+		smd = md.SubSubMenuFunc(md.Val, md.Sc)
 	} else if md.SubMenuField != "" {
 		if flv, ok := MethViewFieldValue(md.ValVal, md.SubMenuField); ok {
 			smd = flv.Interface()
@@ -1002,7 +1002,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	mv := reflect.ValueOf(smd)
 	mvnp := laser.NonPtrValue(mv)
 	md.MakeMenuSliceValue(mvnp, m, false, defstr, gotDef)
-	md.Vp.Win.MainMenuUpdated()
+	md.Sc.Win.MainMenuUpdated()
 }
 
 func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
@@ -1050,7 +1050,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 		nac.InitName(nac, nm)
 		nac.Text = nm
 		nac.SetAsMenu()
-		nac.ActionSig.Connect(md.Vp.This(), MethViewCall)
+		nac.ActionSig.Connect(md.Sc.This(), MethViewCall)
 		nd := *md // copy
 		if isSub {
 			nd.SubMenuVal = subMenuName + nm // qualified name

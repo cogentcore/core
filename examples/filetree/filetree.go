@@ -120,7 +120,7 @@ func (fb *FileBrowse) OpenPath(path gi.FileName) {
 		fb.ProjRoot = gi.FileName(root)
 		fb.SetName(pnm)
 		fb.UpdateProj()
-		win := fb.ParentWindow()
+		win := fb.ParentOSWin()
 		if win != nil {
 			winm := "browser-" + pnm
 			win.SetName(winm)
@@ -429,7 +429,7 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 
 func (fb *FileBrowse) Render(vp *Scene) {
 	fb.ToolBar().UpdateActions()
-	if win := fb.ParentWindow(); win != nil {
+	if win := fb.ParentOSWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
@@ -470,10 +470,10 @@ var FileBrowseProps = ki.Props{
 				},
 			}},
 			{"sep-close", ki.BlankProp{}},
-			{"Close Window", ki.BlankProp{}},
+			{"Close OSWin", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
-		{"Window", "Windows"},
+		{"OSWin", "OSWins"},
 	},
 }
 
@@ -482,14 +482,14 @@ var FileBrowseProps = ki.Props{
 
 // NewFileBrowser creates a new FileBrowse window with a new FileBrowse project for given
 // path, returning the window and the path
-func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
+func NewFileBrowser(path string) (*gi.OSWin, *FileBrowse) {
 	_, projnm, _, _ := ProjPathParse(path)
 	winm := "browser-" + projnm
 
 	width := 1280
 	height := 720
 
-	win := gi.NewMainWindow(winm, winm, width, height)
+	win := gi.NewMainOSWin(winm, winm, width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -505,7 +505,7 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 	giv.MainMenuView(fb, win, mmen)
 
 	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.Window) {
+	win.SetCloseReqFunc(func(w *gi.OSWin) {
 		if !inClosePrompt {
 			inClosePrompt = true
 			// if fb.Changed {
@@ -542,12 +542,12 @@ func NewFileBrowser(path string) (*gi.Window, *FileBrowse) {
 		}
 	})
 
-	// win.SetCloseCleanFunc(func(w *gi.Window) {
+	// win.SetCloseCleanFunc(func(w *gi.OSWin) {
 	// 	fmt.Printf("Doing final Close cleanup here..\n")
 	// })
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
-		if gi.MainWindows.Len() <= 1 {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
+		if gi.MainOSWins.Len() <= 1 {
 			go gi.Quit() // once main window is closed, quit
 		}
 	})

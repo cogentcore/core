@@ -233,7 +233,7 @@ func (ac *Action) ButtonRelease() {
 		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)
 	}
 	if !menOpen && ac.IsMenu() && ac.Sc != nil {
-		win := ac.ParentWindow()
+		win := ac.ParentOSWin()
 		if win != nil {
 			win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
 		}

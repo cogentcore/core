@@ -389,7 +389,7 @@ func (sv *StructView) ConfigStructGrid() {
 }
 
 func (sv *StructView) SetStyle() {
-	mvp := sv.Vp
+	mvp := sv.Sc
 	if mvp != nil && mvp.IsDoingFullRender() {
 		sv.Config()
 	}
@@ -417,7 +417,7 @@ func (sv *StructView) Render(vp *Scene) {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateActions()
 	}
-	if win := sv.ParentWindow(); win != nil {
+	if win := sv.ParentOSWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}

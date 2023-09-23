@@ -48,7 +48,7 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeHiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Vp, nil, nil)
+		vvv.Activate(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -88,7 +88,7 @@ func HiStylesView(st *histyle.Styles) {
 	winm := "hi-styles"
 	width := 1280
 	height := 800
-	win, recyc := gi.RecycleMainWindow(st, winm, "Syntax Hilighting Styles", width, height)
+	win, recyc := gi.RecycleMainOSWin(st, winm, "Syntax Hilighting Styles", width, height)
 	if recyc {
 		return
 	}
@@ -119,7 +119,7 @@ func HiStylesView(st *histyle.Styles) {
 	MainMenuView(st, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
 		if !histyle.StylesChanged || st != &histyle.CustomStyles { // only for main avail map..
 			win.Close()
 			return

@@ -14,7 +14,7 @@ import (
 )
 
 func (wb *WidgetBase) EventMgr() *EventMgr {
-	return wb.Sc.VpEventMgr()
+	return wb.Sc.ScEventMgr()
 }
 
 // PosInWinBBox returns true if given position is within

@@ -152,7 +152,7 @@ func (bb *ButtonBase) SetAsButton() {
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
 func (bb *ButtonBase) SetText(txt string) {
-	if !bb.HasVp() {
+	if !bb.HasSc() {
 		return
 	}
 	if bb.Text == txt {
@@ -172,7 +172,7 @@ func (bb *ButtonBase) SetText(txt string) {
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
 func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
-	if !bb.HasVp() {
+	if !bb.HasSc() {
 		return
 	}
 	if bb.Icon == iconName {
@@ -352,7 +352,7 @@ func (bb *ButtonBase) KeyChordEvent() {
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
-			if !(kt.Rune == ' ' && bbb.Sc.Type == VpCompleter) {
+			if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
 				kt.SetProcessed()
 				bbb.ButtonPress()
 				bw.ButtonRelease()
@@ -447,7 +447,7 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 func (bb *ButtonBase) SetStyle(sc *Scene) {
 	bb.SetStyleWidget(sc)
 	if bb.Menu != nil {
-		bb.Menu.SetShortcuts(bb.ParentWindow())
+		bb.Menu.SetShortcuts(bb.ParentOSWin())
 	}
 }
 
@@ -495,7 +495,7 @@ func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 
 func (bb *ButtonBase) Destroy() {
 	if bb.Menu != nil {
-		bb.Menu.DeleteShortcuts(bb.ParentWindow())
+		bb.Menu.DeleteShortcuts(bb.ParentOSWin())
 	}
 }
 

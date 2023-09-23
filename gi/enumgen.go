@@ -835,7 +835,7 @@ var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	9:  `NeedsRender needs to be rendered on next render itration`,
 	10: `EventsConnected: this node has been connected to receive events from the window -- to optimize event processing, connections are typically only established for visible nodes during render, and disconnected when not visible`,
 	11: `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
-	12: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on Window`,
+	12: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on OSWin`,
 	13: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
 	14: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
 	15: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
@@ -2718,67 +2718,67 @@ func (i *TextFieldFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _VpFlagsValues = []VpFlags{0, 1, 2, 3, 4, 5, 6}
+var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
 
-// VpFlagsN is the highest valid value
-// for type VpFlags, plus one.
-const VpFlagsN VpFlags = 7
+// ScFlagsN is the highest valid value
+// for type ScFlags, plus one.
+const ScFlagsN ScFlags = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _VpFlagsNoOp() {
+func _ScFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[VpIsUpdating-(0)]
-	_ = x[VpNeedsRender-(1)]
-	_ = x[VpNeedsLayout-(2)]
-	_ = x[VpNeedsRebuild-(3)]
-	_ = x[VpPopupDestroyAll-(4)]
-	_ = x[VpRebuild-(5)]
-	_ = x[VpPrefSizing-(6)]
+	_ = x[ScIsUpdating-(0)]
+	_ = x[ScNeedsRender-(1)]
+	_ = x[ScNeedsLayout-(2)]
+	_ = x[ScNeedsRebuild-(3)]
+	_ = x[ScPopupDestroyAll-(4)]
+	_ = x[ScRebuild-(5)]
+	_ = x[ScPrefSizing-(6)]
 }
 
-var _VpFlagsNameToValueMap = map[string]VpFlags{
-	`VpIsUpdating`:      0,
+var _ScFlagsNameToValueMap = map[string]ScFlags{
+	`ScIsUpdating`:      0,
 	`vpisupdating`:      0,
-	`VpNeedsRender`:     1,
+	`ScNeedsRender`:     1,
 	`vpneedsrender`:     1,
-	`VpNeedsLayout`:     2,
+	`ScNeedsLayout`:     2,
 	`vpneedslayout`:     2,
-	`VpNeedsRebuild`:    3,
+	`ScNeedsRebuild`:    3,
 	`vpneedsrebuild`:    3,
-	`VpPopupDestroyAll`: 4,
+	`ScPopupDestroyAll`: 4,
 	`vppopupdestroyall`: 4,
-	`VpRebuild`:         5,
+	`ScRebuild`:         5,
 	`vprebuild`:         5,
-	`VpPrefSizing`:      6,
+	`ScPrefSizing`:      6,
 	`vpprefsizing`:      6,
 }
 
-var _VpFlagsDescMap = map[VpFlags]string{
-	0: `VpIsUpdating means viewport is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	1: `VpNeedsRender means nodes have flagged that they need a Render update.`,
-	2: `VpNeedsLayout means that this viewport needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
-	3: `VpNeedsRebuild means that this viewport needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	4: `VpPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
-	5: `VpRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
-	6: `VpPrefSizing means that this viewport is currently doing a PrefSize computation to compute the size of the viewport (for sizing window for example) -- affects layout size computation only for Over`,
+var _ScFlagsDescMap = map[ScFlags]string{
+	0: `ScIsUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	1: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
+	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
+	4: `ScPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
+	5: `ScRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
+	6: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
 }
 
-var _VpFlagsMap = map[VpFlags]string{
-	0: `VpIsUpdating`,
-	1: `VpNeedsRender`,
-	2: `VpNeedsLayout`,
-	3: `VpNeedsRebuild`,
-	4: `VpPopupDestroyAll`,
-	5: `VpRebuild`,
-	6: `VpPrefSizing`,
+var _ScFlagsMap = map[ScFlags]string{
+	0: `ScIsUpdating`,
+	1: `ScNeedsRender`,
+	2: `ScNeedsLayout`,
+	3: `ScNeedsRebuild`,
+	4: `ScPopupDestroyAll`,
+	5: `ScRebuild`,
+	6: `ScPrefSizing`,
 }
 
 // String returns the string representation
-// of this VpFlags value.
-func (i VpFlags) String() string {
+// of this ScFlags value.
+func (i ScFlags) String() string {
 	str := ""
-	for _, ie := range _VpFlagsValues {
+	for _, ie := range _ScFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -2792,93 +2792,93 @@ func (i VpFlags) String() string {
 }
 
 // BitIndexString returns the string
-// representation of this VpFlags value
+// representation of this ScFlags value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.
-func (i VpFlags) BitIndexString() string {
-	if str, ok := _VpFlagsMap[i]; ok {
+func (i ScFlags) BitIndexString() string {
+	if str, ok := _ScFlagsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the VpFlags value from its
+// SetString sets the ScFlags value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *VpFlags) SetString(s string) error {
+func (i *ScFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the VpFlags value from its
+// SetStringOr sets the ScFlags value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *VpFlags) SetStringOr(s string) error {
+func (i *ScFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _VpFlagsNameToValueMap[flg]; ok {
+		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _VpFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type VpFlags")
+			return errors.New(flg + " is not a valid value for type ScFlags")
 		}
 	}
 	return nil
 }
 
-// Int64 returns the VpFlags value as an int64.
-func (i VpFlags) Int64() int64 {
+// Int64 returns the ScFlags value as an int64.
+func (i ScFlags) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the VpFlags value from an int64.
-func (i *VpFlags) SetInt64(in int64) {
-	*i = VpFlags(in)
+// SetInt64 sets the ScFlags value from an int64.
+func (i *ScFlags) SetInt64(in int64) {
+	*i = ScFlags(in)
 }
 
-// Desc returns the description of the VpFlags value.
-func (i VpFlags) Desc() string {
-	if str, ok := _VpFlagsDescMap[i]; ok {
+// Desc returns the description of the ScFlags value.
+func (i ScFlags) Desc() string {
+	if str, ok := _ScFlagsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// VpFlagsValues returns all possible values
-// for the type VpFlags.
-func VpFlagsValues() []VpFlags {
-	return _VpFlagsValues
+// ScFlagsValues returns all possible values
+// for the type ScFlags.
+func ScFlagsValues() []ScFlags {
+	return _ScFlagsValues
 }
 
 // Values returns all possible values
-// for the type VpFlags.
-func (i VpFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_VpFlagsValues))
-	for i, d := range _VpFlagsValues {
+// for the type ScFlags.
+func (i ScFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ScFlagsValues))
+	for i, d := range _ScFlagsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type VpFlags.
-func (i VpFlags) IsValid() bool {
-	_, ok := _VpFlagsMap[i]
+// valid option for type ScFlags.
+func (i ScFlags) IsValid() bool {
+	_, ok := _ScFlagsMap[i]
 	return ok
 }
 
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i VpFlags) HasFlag(f enums.BitFlag) bool {
+func (i ScFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *VpFlags) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -2894,143 +2894,143 @@ func (i *VpFlags) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i VpFlags) MarshalText() ([]byte, error) {
+func (i ScFlags) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *VpFlags) UnmarshalText(text []byte) error {
+func (i *ScFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _VpTypeValues = []VpType{0, 1, 2, 3, 4, 5, 6}
+var _ScTypeValues = []ScType{0, 1, 2, 3, 4, 5, 6}
 
-// VpTypeN is the highest valid value
-// for type VpType, plus one.
-const VpTypeN VpType = 7
+// ScTypeN is the highest valid value
+// for type ScType, plus one.
+const ScTypeN ScType = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _VpTypeNoOp() {
+func _ScTypeNoOp() {
 	var x [1]struct{}
-	_ = x[VpMain-(0)]
-	_ = x[VpDialog-(1)]
-	_ = x[VpMenu-(2)]
-	_ = x[VpCompleter-(3)]
-	_ = x[VpCorrector-(4)]
-	_ = x[VpTooltip-(5)]
-	_ = x[VpPopup-(6)]
+	_ = x[ScMain-(0)]
+	_ = x[ScDialog-(1)]
+	_ = x[ScMenu-(2)]
+	_ = x[ScCompleter-(3)]
+	_ = x[ScCorrector-(4)]
+	_ = x[ScTooltip-(5)]
+	_ = x[ScPopup-(6)]
 }
 
-var _VpTypeNameToValueMap = map[string]VpType{
-	`VpMain`:      0,
+var _ScTypeNameToValueMap = map[string]ScType{
+	`ScMain`:      0,
 	`vpmain`:      0,
-	`VpDialog`:    1,
+	`ScDialog`:    1,
 	`vpdialog`:    1,
-	`VpMenu`:      2,
+	`ScMenu`:      2,
 	`vpmenu`:      2,
-	`VpCompleter`: 3,
+	`ScCompleter`: 3,
 	`vpcompleter`: 3,
-	`VpCorrector`: 4,
+	`ScCorrector`: 4,
 	`vpcorrector`: 4,
-	`VpTooltip`:   5,
+	`ScTooltip`:   5,
 	`vptooltip`:   5,
-	`VpPopup`:     6,
+	`ScPopup`:     6,
 	`vppopup`:     6,
 }
 
-var _VpTypeDescMap = map[VpType]string{
-	0: `VpMain means viewport is for a main window`,
-	1: `VpDialog means viewport is a dialog`,
-	2: `VpMenu means viewport is a popup menu`,
-	3: `VpCompleter means viewport is a popup menu for completion`,
-	4: `VpCorrector means viewport is a popup menu for spelling correction`,
-	5: `VpTooltip means viewport is serving as a tooltip`,
-	6: `VpPopup means viewport is a popup of some other type`,
+var _ScTypeDescMap = map[ScType]string{
+	0: `ScMain means scene is for a main window`,
+	1: `ScDialog means scene is a dialog`,
+	2: `ScMenu means scene is a popup menu`,
+	3: `ScCompleter means scene is a popup menu for completion`,
+	4: `ScCorrector means scene is a popup menu for spelling correction`,
+	5: `ScTooltip means scene is serving as a tooltip`,
+	6: `ScPopup means scene is a popup of some other type`,
 }
 
-var _VpTypeMap = map[VpType]string{
-	0: `VpMain`,
-	1: `VpDialog`,
-	2: `VpMenu`,
-	3: `VpCompleter`,
-	4: `VpCorrector`,
-	5: `VpTooltip`,
-	6: `VpPopup`,
+var _ScTypeMap = map[ScType]string{
+	0: `ScMain`,
+	1: `ScDialog`,
+	2: `ScMenu`,
+	3: `ScCompleter`,
+	4: `ScCorrector`,
+	5: `ScTooltip`,
+	6: `ScPopup`,
 }
 
 // String returns the string representation
-// of this VpType value.
-func (i VpType) String() string {
-	if str, ok := _VpTypeMap[i]; ok {
+// of this ScType value.
+func (i ScType) String() string {
+	if str, ok := _ScTypeMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the VpType value from its
+// SetString sets the ScType value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *VpType) SetString(s string) error {
-	if val, ok := _VpTypeNameToValueMap[s]; ok {
+func (i *ScType) SetString(s string) error {
+	if val, ok := _ScTypeNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _VpTypeNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ScTypeNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type VpType")
+	return errors.New(s + " is not a valid value for type ScType")
 }
 
-// Int64 returns the VpType value as an int64.
-func (i VpType) Int64() int64 {
+// Int64 returns the ScType value as an int64.
+func (i ScType) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the VpType value from an int64.
-func (i *VpType) SetInt64(in int64) {
-	*i = VpType(in)
+// SetInt64 sets the ScType value from an int64.
+func (i *ScType) SetInt64(in int64) {
+	*i = ScType(in)
 }
 
-// Desc returns the description of the VpType value.
-func (i VpType) Desc() string {
-	if str, ok := _VpTypeDescMap[i]; ok {
+// Desc returns the description of the ScType value.
+func (i ScType) Desc() string {
+	if str, ok := _ScTypeDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// VpTypeValues returns all possible values
-// for the type VpType.
-func VpTypeValues() []VpType {
-	return _VpTypeValues
+// ScTypeValues returns all possible values
+// for the type ScType.
+func ScTypeValues() []ScType {
+	return _ScTypeValues
 }
 
 // Values returns all possible values
-// for the type VpType.
-func (i VpType) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_VpTypeValues))
-	for i, d := range _VpTypeValues {
+// for the type ScType.
+func (i ScType) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ScTypeValues))
+	for i, d := range _ScTypeValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type VpType.
-func (i VpType) IsValid() bool {
-	_, ok := _VpTypeMap[i]
+// valid option for type ScType.
+func (i ScType) IsValid() bool {
+	_, ok := _ScTypeMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i VpType) MarshalText() ([]byte, error) {
+func (i ScType) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *VpType) UnmarshalText(text []byte) error {
+func (i *ScType) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

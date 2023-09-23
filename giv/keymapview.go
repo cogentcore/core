@@ -21,7 +21,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	winm := "gogi-key-maps"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainWindow(km, winm, "GoGi Key Maps", width, height)
+	win, recyc := gi.RecycleMainOSWin(km, winm, "GoGi Key Maps", width, height)
 	if recyc {
 		return
 	}
@@ -57,7 +57,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	MainMenuView(km, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
 		if !gi.AvailKeyMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
 			win.Close()
 			return
@@ -129,7 +129,7 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeKeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Vp, nil, nil)
+		vvv.Activate(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }

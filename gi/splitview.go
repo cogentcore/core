@@ -153,7 +153,7 @@ func (sv *SplitView) SetSplitsList(splits []float32) {
 }
 
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
-// child entirely -- does full rebuild at level of viewport
+// child entirely -- does full rebuild at level of scene
 func (sv *SplitView) SetSplitsAction(splits ...float32) {
 	updt := sv.UpdateStart()
 	sv.SetSplits(splits...)
@@ -563,7 +563,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	// SidesTODO: this is all sketchy
 
 	if sr.HasFlag(NodeDragging) {
-		win := sr.ParentWindow()
+		win := sr.ParentOSWin()
 		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
@@ -573,10 +573,10 @@ func (sr *Splitter) UpdateSplitterPos() {
 		sr.BBoxMu.Lock()
 
 		if sr.Dim == mat32.X {
-			sr.VpBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+			sr.ScBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
 			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
 		} else {
-			sr.VpBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+			sr.ScBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
 			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
 		}
 		sr.BBoxMu.Unlock()
@@ -665,7 +665,7 @@ func (sr *Splitter) ConnectEvents() {
 }
 
 func (sr *Splitter) Render(sc *Scene) {
-	win := sr.ParentWindow()
+	win := sr.ParentOSWin()
 	wi := sr.This().(Widget)
 	wi.ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()
@@ -677,7 +677,7 @@ func (sr *Splitter) Render(sc *Scene) {
 		ic := ick.(*Icon)
 		spr, ok := win.SpriteByName(spnm)
 		if !ok {
-			spr = NewSprite(spnm, image.Point{}, sr.VpBBox.Min)
+			spr = NewSprite(spnm, image.Point{}, sr.ScBBox.Min)
 			spr.GrabRenderFrom(ic)
 			win.AddSprite(spr)
 			win.ActivateSprite(spnm)
@@ -710,9 +710,9 @@ func (sr *Splitter) RenderSplitter(sc *Scene) {
 	pc.StrokeStyle.SetColor(nil)
 	pc.FillStyle.SetColorSpec(&st.BackgroundColor)
 
-	// pos := mat32.NewVec2FmPoint(sr.VpBBox.Min)
+	// pos := mat32.NewVec2FmPoint(sr.ScBBox.Min)
 	// pos.SetSubDim(mat32.OtherDim(sr.Dim), 10.0)
-	// sz := mat32.NewVec2FmPoint(sr.VpBBox.Size())
+	// sz := mat32.NewVec2FmPoint(sr.ScBBox.Size())
 	// sr.RenderBoxImpl(pos, sz, st.Border)
 
 	sr.RenderStdBox(sc, st)

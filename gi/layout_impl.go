@@ -97,7 +97,7 @@ func GatherSizes(ly *Layout) {
 
 	prefSizing := false
 	mvp := ly.Sc
-	if mvp != nil && mvp.HasFlag(VpPrefSizing) {
+	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
 
@@ -377,7 +377,7 @@ func GatherSizesGrid(ly *Layout) {
 
 	prefSizing := false
 	mvp := ly.Sc
-	if mvp != nil && mvp.HasFlag(VpPrefSizing) {
+	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
 		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
 	}
 
@@ -452,7 +452,7 @@ func LayAllocFromParent(ly *Layout) {
 	}
 	// if ly.Par != mvp.This() {
 	// note: zero alloc size happens all the time with non-visible tabs!
-	// fmt.Printf("Layout: %v has zero allocation but is not a direct child of viewport -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
+	// fmt.Printf("Layout: %v has zero allocation but is not a direct child of scene -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
 	// return
 	//}
 	pni, _ := AsWidget(ly.Par)

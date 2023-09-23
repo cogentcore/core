@@ -127,8 +127,8 @@ type Spell struct {
 	// the user's correction selection'
 	Correction string `desc:"the user's correction selection'"`
 
-	// the viewport where the current popup menu is presented
-	Sc *Scene `desc:"the viewport where the current popup menu is presented"`
+	// the scene where the current popup menu is presented
+	Sc *Scene `desc:"the scene where the current popup menu is presented"`
 }
 
 func (sp *Spell) Disconnect() {
@@ -226,7 +226,7 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 			})
 	}
 	scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
-	scp.Type = VpCorrector
+	scp.Type = ScCorrector
 	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 

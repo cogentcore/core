@@ -77,18 +77,18 @@ type Widget interface {
 	// todo: fix bbox stuff!  BBoxes is a good overall name
 
 	// BBox2D: compute the raw bounding box of this node relative to its
-	// parent viewport -- called during DoLayout to set node BBox field, which
-	// is then used in setting WinBBox and VpBBox.
+	// parent scene -- called during DoLayout to set node BBox field, which
+	// is then used in setting WinBBox and ScBBox.
 	BBox2D() image.Rectangle
 
-	// Compute VpBBox and WinBBox from BBox, given parent VpBBox -- most nodes
-	// call ComputeBBox2DBase but viewports require special code -- called
+	// Compute ScBBox and WinBBox from BBox, given parent ScBBox -- most nodes
+	// call ComputeBBox2DBase but scenes require special code -- called
 	// during Layout and Move.
 	ComputeBBox2D(sc *Scene, parBBox image.Rectangle, delta image.Point)
 
 	// ChildrenBBox2D: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
-	// operates on the existing VpBBox for this node -- this is what is passed
+	// operates on the existing ScBBox for this node -- this is what is passed
 	// down as parBBox do the children's DoLayout.
 	ChildrenBBox2D(sc *Scene) image.Rectangle
 
@@ -96,7 +96,7 @@ type Widget interface {
 	// calling Render on its own children, to provide maximum flexibility
 	// (see RenderChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// VpBBox is empty and no rendering should occur.  Typically call
+	// ScBBox is empty and no rendering should occur.  Typically call
 	// ConnectEvents to set up connections to receive window events if
 	// visible, and disconnect if not.
 	Render(sc *Scene)
@@ -113,7 +113,7 @@ type Widget interface {
 
 	// HasFocus returns true if this node has keyboard focus and should
 	// receive keyboard events -- typically this just returns HasFocus based
-	// on the Window-managed HasFocus flag, but some types may want to monitor
+	// on the OSWin-managed HasFocus flag, but some types may want to monitor
 	// all keyboard activity for certain key keys..
 	HasFocus() bool
 
@@ -137,9 +137,9 @@ type Widget interface {
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass
-	// for widgets in a visible window, but it checks the window and viewport
+	// for widgets in a visible window, but it checks the window and scene
 	// for their visibility status as well, which is available always.
-	// This does *not* check for VpBBox level visibility, which is a further check.
+	// This does *not* check for ScBBox level visibility, which is a further check.
 	// Non-visible nodes are automatically not rendered and not connected to
 	// window events.  The Invisible flag is one key element of the IsVisible
 	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
@@ -158,7 +158,7 @@ type Widget interface {
 	// DirectWinUpload does a direct upload of contents to a window
 	// Drawer compositing image, which will then be used for drawing
 	// the window during a Publish() event (triggered by the window Update
-	// event).  This is called by the viewport in its Update signal processing
+	// event).  This is called by the scene in its Update signal processing
 	// routine on nodes that respond true to IsDirectWinUpload().
 	// The node is also free to update itself of its own accord at any point.
 	DirectWinUpload()
@@ -184,17 +184,17 @@ type WidgetBase struct {
 	// [view: no-inline] aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
 
-	// raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent viewport -- used for computing VpBBox and WinBBox -- this is not updated by Move2D, whereas VpBBox etc are"`
+	// raw original 2D bounding box for the object within its parent scene -- used for computing ScBBox and WinBBox -- this is not updated by Move2D, whereas ScBBox etc are
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent scene -- used for computing ScBBox and WinBBox -- this is not updated by Move2D, whereas ScBBox etc are"`
 
 	// full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
 	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
 
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
-	VpBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
 
-	// 2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
-	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent Window object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
+	// 2D bounding box for region occupied within parent OSWin object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
+	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent OSWin object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
 
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
@@ -220,8 +220,8 @@ type WidgetBase struct {
 	// [view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
 
-	// parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
-	Sc *Scene `copy:"-" json:"-" xml:"-" desc:"parent viewport.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
+	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
+	Sc *Scene `copy:"-" json:"-" xml:"-" desc:"parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
 
 	// [view: -] mutex protecting the Style field
 	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the Style field"`
@@ -331,7 +331,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
-func (wb *WidgetBase) ParentWindow() *Window {
+func (wb *WidgetBase) ParentOSWin() *OSWin {
 	if wb.Sc == nil {
 		return nil
 	}

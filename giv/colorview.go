@@ -175,25 +175,25 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGBA(r, g, b, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("rgb(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 
 	hslalay := gi.NewLayout(nl, "nums-hsla-lay", gi.LayoutHoriz)
@@ -215,25 +215,25 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSLA(h, s, l, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("gist.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("hsl(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 
 	hexlay := gi.NewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
@@ -267,26 +267,26 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 			hs := colors.AsHex(cvv.Color)
 			// get rid of transparency because this is just RRGGBB
 			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, hs[:len(hs)-2])
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBBAA")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			hs := colors.AsHex(cvv.Color)
 			text := hs[:len(hs)-2]
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			text := colors.AsHex(cvv.Color)
-			goosi.TheApp.ClipBoard(cv.ParentWindow().OSWin).Write(mimedata.NewText(text))
+			goosi.TheApp.ClipBoard(cv.ParentOSWin().OSWin).Write(mimedata.NewText(text))
 		})
 
 	gi.NewFrame(vl, "value", gi.LayoutHoriz)
@@ -638,7 +638,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 	ac.Tooltip = "Open color picker dialog"
 	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)
-		vv.Activate(svv.Vp, nil, nil)
+		vv.Activate(svv.Sc, nil, nil)
 	})
 	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		clr, _ := vv.Color()
@@ -718,7 +718,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Vp, nil, nil)
+		vvv.Activate(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }

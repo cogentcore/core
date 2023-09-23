@@ -15,11 +15,11 @@ import (
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles
 
 // PrefsView opens a view of user preferences
-func PrefsView(pf *gi.Preferences) *gi.Window {
+func PrefsView(pf *gi.Preferences) *gi.OSWin {
 	winm := "gogi-prefs"
 	width := 1280
 	height := 500
-	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Preferences", width, height)
+	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -39,7 +39,7 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -80,11 +80,11 @@ func PrefsView(pf *gi.Preferences) *gi.Window {
 }
 
 // PrefsDetView opens a view of user detailed preferences
-func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
+func PrefsDetView(pf *gi.PrefsDetailed) *gi.OSWin {
 	winm := "gogi-prefs-det"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Detailed Preferences", width, height)
+	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Detailed Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -104,7 +104,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.Window) {
+	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -145,11 +145,11 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.Window {
 }
 
 // PrefsDbgView opens a view of user debugging preferences
-func PrefsDbgView(pf *gi.PrefsDebug) *gi.Window {
+func PrefsDbgView(pf *gi.PrefsDebug) *gi.OSWin {
 	winm := "gogi-prefs-dbg"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainWindow(pf, winm, "GoGi Debugging Preferences", width, height)
+	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Debugging Preferences", width, height)
 	if recyc {
 		return win
 	}

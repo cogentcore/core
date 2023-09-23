@@ -149,7 +149,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 			kt := d.(*key.ChordEvent)
 			kt.SetProcessed()
 			kcc.SetText(string(kt.Chord())) // that's easy!
-			goosi.TheApp.ClipBoard(kc.ParentWindow().OSWin).Write(mimedata.NewText(string(kt.Chord())))
+			goosi.TheApp.ClipBoard(kc.ParentOSWin().OSWin).Write(mimedata.NewText(string(kt.Chord())))
 			kcc.ChordUpdated()
 		}
 	})

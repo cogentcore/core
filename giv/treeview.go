@@ -1315,7 +1315,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Write(md)
+	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1339,7 +1339,7 @@ func (tv *TreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
-	md := goosi.TheApp.ClipBoard(tv.ParentWindow().OSWin).Read([]string{filecat.DataJson})
+	md := goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1516,7 +1516,7 @@ func (tv *TreeView) DragNDropStart() {
 	sp := &gi.Sprite{}
 	sp.GrabRenderFrom(tv) // todo: show number of items?
 	gi.ImageClearer(sp.Pixels, 50.0)
-	tv.ParentWindow().StartDragNDrop(tv.This(), md, sp)
+	tv.ParentOSWin().StartDragNDrop(tv.This(), md, sp)
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node
@@ -1547,13 +1547,13 @@ func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
 		return
 	}
 	tv.UnselectAll()
-	tv.ParentWindow().FinalizeDragNDrop(mod)
+	tv.ParentOSWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
 // performing target actions -- uses default drop mod in place when event was dropped.
 func (tv *TreeView) DragNDropFinalizeDefMod() {
-	win := tv.ParentWindow()
+	win := tv.ParentOSWin()
 	if win == nil {
 		return
 	}
@@ -1816,9 +1816,9 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Enter:
-			tvv.ParentWindow().DNDSetCursor(de.Mod)
+			tvv.ParentOSWin().DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			tvv.ParentWindow().DNDNotCursor()
+			tvv.ParentOSWin().DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}
@@ -2128,7 +2128,7 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.VpBBox, tv.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.ScBBox, tv.WinBBox)
 	}
 
 	tv.DoLayoutParts(parBBox, iter) // use OUR version
@@ -2192,15 +2192,15 @@ func (tv *TreeView) PushBounds() bool {
 	if !tv.This().(gi.Node2D).IsVisible() {
 		return false
 	}
-	if tv.VpBBox.Empty() && tv.This() != tv.RootView.This() { // root must always connect!
+	if tv.ScBBox.Empty() && tv.This() != tv.RootView.This() { // root must always connect!
 		tv.ClearFullReRender()
 		return false
 	}
 	rs := tv.Render()
-	rs.PushBounds(tv.VpBBox)
+	rs.PushBounds(tv.ScBBox)
 	tv.ConnectToScene()
 	if gi.RenderTrace {
-		fmt.Printf("Render: %v at %v\n", tv.Path(), tv.VpBBox)
+		fmt.Printf("Render: %v at %v\n", tv.Path(), tv.ScBBox)
 	}
 	return true
 }
@@ -2218,7 +2218,7 @@ func (tv *TreeView) Render(vp *Scene) {
 	// }
 	// fmt.Printf("tv rend: %v\n", tv.Nm)
 	if tv.PushBounds() {
-		if !tv.VpBBox.Empty() { // we are root and just here for the connections :)
+		if !tv.ScBBox.Empty() { // we are root and just here for the connections :)
 			tv.UpdateInactive()
 			if tv.IsSelected() {
 				tv.Style = tv.StateStyles[TreeViewSel]

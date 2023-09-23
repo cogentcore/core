@@ -29,14 +29,14 @@ func TooltipConfigStyles(tooltip *Frame) {
 	})
 }
 
-// PopupTooltip pops up a viewport displaying the tooltip text
-func PopupTooltip(tooltip string, x, y int, parVp *Scene, name string) *Scene {
-	win := parVp.Win
+// PopupTooltip pops up a scene displaying the tooltip text
+func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
+	win := parSc.Win
 	mainSc := win.Scene
 	psc := &Scene{}
 	psc.Name = name + "Tooltip"
 	psc.Win = win
-	psc.Type = VpTooltip
+	psc.Type = ScTooltip
 
 	psc.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// TOOD: get border radius actually working
@@ -46,7 +46,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Scene, name string) *Scene {
 	})
 
 	psc.Geom.Pos = image.Point{x, y}
-	psc.SetFlag(true, VpPopupDestroyAll) // nuke it all
+	psc.SetFlag(true, ScPopupDestroyAll) // nuke it all
 
 	frame := &psc.Frame
 	lbl := NewLabel(frame, "ttlbl")
@@ -56,7 +56,7 @@ func PopupTooltip(tooltip string, x, y int, parVp *Scene, name string) *Scene {
 	TooltipConfigStyles(frame)
 
 	lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		mwdots := parVp.Frame.Style.UnContext.ToDots(40, units.UnitEm)
+		mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
 		mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
 
 		s.MaxWidth.SetDot(mwdots)

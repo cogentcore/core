@@ -31,7 +31,7 @@ var (
 
 // WinGeomPrefs is the data structure for recording the window geometry
 // by window name, screen name.
-type WinGeomPrefs map[string]map[string]WindowGeom
+type WinGeomPrefs map[string]map[string]OSWinGeom
 
 // WinGeomPrefsMgr is the manager of window geometry preferences.
 // Records window geometry in a persistent file, used when opening new windows.
@@ -158,7 +158,7 @@ func (mgr *WinGeomPrefsMgr) SaveLastSave() {
 	ioutil.WriteFile(pnm, b, 0644)
 }
 
-// Open Window Geom preferences from GoGi standard prefs directory
+// Open OSWin Geom preferences from GoGi standard prefs directory
 // called under mutex or at start
 func (mgr *WinGeomPrefsMgr) Open() error {
 	mgr.Init()
@@ -191,7 +191,7 @@ func (mgr *WinGeomPrefsMgr) Open() error {
 	return err
 }
 
-// Save Window Geom Preferences to GoGi standard prefs directory
+// Save OSWin Geom Preferences to GoGi standard prefs directory
 // assumed to be under mutex and lock still
 func (mgr *WinGeomPrefsMgr) Save() error {
 	if mgr.Geoms == nil {
@@ -239,7 +239,7 @@ func (mgr *WinGeomPrefsMgr) SettingEnd() {
 }
 
 // RecordPref records current state of window as preference
-func (mgr *WinGeomPrefsMgr) RecordPref(win *Window) {
+func (mgr *WinGeomPrefsMgr) RecordPref(win *OSWin) {
 	if !win.IsVisible() {
 		return
 	}
@@ -269,12 +269,12 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *Window) {
 
 	winName := mgr.WinName(win.Nm)
 	sc := win.OSWin.Screen()
-	wgr := WindowGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
+	wgr := OSWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
 
 	if mgr.Cache[winName] == nil {
-		mgr.Cache[winName] = make(map[string]WindowGeom)
+		mgr.Cache[winName] = make(map[string]OSWinGeom)
 	}
 	mgr.Cache[winName][sc.Name] = wgr
 	if mgr.saveTimer == nil {
@@ -325,7 +325,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 				continue
 			}
 			if mgr.Geoms[winName] == nil {
-				mgr.Geoms[winName] = make(map[string]WindowGeom)
+				mgr.Geoms[winName] = make(map[string]OSWinGeom)
 			}
 			mgr.Geoms[winName][sc.Name] = wgr
 			if WinGeomTrace {
@@ -341,7 +341,7 @@ func (mgr *WinGeomPrefsMgr) SaveCached() {
 // Pref returns an existing preference for given window name, for given screen.
 // if the window name has a colon, only the part prior to the colon is used.
 // if no saved pref is available for that screen, nil is returned.
-func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *WindowGeom {
+func (mgr *WinGeomPrefsMgr) Pref(winName string, scrn *goosi.Screen) *OSWinGeom {
 	mgr.Mu.RLock()
 	defer mgr.Mu.RUnlock()
 
@@ -390,13 +390,13 @@ func (mgr *WinGeomPrefsMgr) DeleteAll() {
 // RestoreAll restores size and position of all windows, for current screen.
 // Called when screen changes.
 func (mgr *WinGeomPrefsMgr) RestoreAll() {
-	WindowGlobalMu.Lock()
-	defer WindowGlobalMu.Unlock()
+	OSWinGlobalMu.Lock()
+	defer OSWinGlobalMu.Unlock()
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: RestoreAll: starting\n")
 	}
 	mgr.SettingStart()
-	for _, w := range AllWindows {
+	for _, w := range AllOSWins {
 		wgp := mgr.Pref(w.Name(), w.OSWin.Screen())
 		if wgp != nil {
 			if WinGeomTrace {
@@ -412,10 +412,10 @@ func (mgr *WinGeomPrefsMgr) RestoreAll() {
 }
 
 /////////////////////////////////////////////////////////////////////
-// WindowGeom
+// OSWinGeom
 
-// WindowGeom records the geometry settings used for a given window
-type WindowGeom struct {
+// OSWinGeom records the geometry settings used for a given window
+type OSWinGeom struct {
 	DPI float32
 	DPR float32
 	SX  int
@@ -424,26 +424,26 @@ type WindowGeom struct {
 	PY  int
 }
 
-func (wg *WindowGeom) Size() image.Point {
+func (wg *OSWinGeom) Size() image.Point {
 	return image.Point{wg.SX, wg.SY}
 }
 
-func (wg *WindowGeom) SetSize(sz image.Point) {
+func (wg *OSWinGeom) SetSize(sz image.Point) {
 	wg.SX = sz.X
 	wg.SY = sz.Y
 }
 
-func (wg *WindowGeom) Pos() image.Point {
+func (wg *OSWinGeom) Pos() image.Point {
 	return image.Point{wg.PX, wg.PY}
 }
 
-func (wg *WindowGeom) SetPos(ps image.Point) {
+func (wg *OSWinGeom) SetPos(ps image.Point) {
 	wg.PX = ps.X
 	wg.PY = ps.Y
 }
 
 // ConstrainGeom constrains geometry based on screen params
-func (wg *WindowGeom) ConstrainGeom(sc *goosi.Screen) {
+func (wg *OSWinGeom) ConstrainGeom(sc *goosi.Screen) {
 	sz, pos := sc.ConstrainWinGeom(image.Point{wg.SX, wg.SY}, image.Point{wg.PX, wg.PY})
 	wg.SX = sz.X
 	wg.SY = sz.Y

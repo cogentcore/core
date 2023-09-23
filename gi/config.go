@@ -11,12 +11,12 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// HasVp checks that the Vp Scene has been set.
+// HasSc checks that the Sc Scene has been set.
 // Called prior to using -- logs an error if not.
 // todo: need slog Debug mode for this kind of thing.
-func (wb *WidgetBase) HasVp() bool {
+func (wb *WidgetBase) HasSc() bool {
 	if wb.This() == nil || wb.Sc == nil {
-		log.Printf("gi.WidgetBase.ReConfig: object or viewport is nil\n") // todo: slog.Debug
+		log.Printf("gi.WidgetBase.ReConfig: object or scene is nil\n") // todo: slog.Debug
 		return false
 	}
 	return true
@@ -26,9 +26,9 @@ func (wb *WidgetBase) HasVp() bool {
 // have been made.  In general it is more efficient to call Set* methods that
 // automatically determine if Config is needed.
 // The plain Config method is used during initial configuration,
-// called by the Scene and caches the Vp pointer.
+// called by the Scene and caches the Sc pointer.
 func (wb *WidgetBase) ReConfig() {
-	if !wb.HasVp() {
+	if !wb.HasSc() {
 		return
 	}
 	wi := wb.This().(Widget)

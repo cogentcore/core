@@ -46,7 +46,7 @@ func (sve *Editor) EditorEvents() {
 		ssvg := sve
 		if ssvg.HasFlag(NodeDragging) {
 			if !ssvg.SetDragCursor {
-				goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Push(cursor.HandOpen)
+				goosi.TheApp.Cursor(ssvg.ParentOSWin().OSWin).Push(cursor.HandOpen)
 				ssvg.SetDragCursor = true
 			}
 			del := me.Where.Sub(me.From)
@@ -57,7 +57,7 @@ func (sve *Editor) EditorEvents() {
 			// ssvg.UpdateSig()
 		} else {
 			if ssvg.SetDragCursor {
-				goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+				goosi.TheApp.Cursor(ssvg.ParentOSWin().OSWin).Pop()
 				ssvg.SetDragCursor = false
 			}
 		}
@@ -68,7 +68,7 @@ func (sve *Editor) EditorEvents() {
 		me.SetProcessed()
 		ssvg := sve
 		if ssvg.SetDragCursor {
-			goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+			goosi.TheApp.Cursor(ssvg.ParentOSWin().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		ssvg.InitScale()
@@ -84,7 +84,7 @@ func (sve *Editor) EditorEvents() {
 		me := d.(*mouse.Event)
 		ssvg := sve
 		if ssvg.SetDragCursor {
-			goosi.TheApp.Cursor(ssvg.ParentWindow().OSWin).Pop()
+			goosi.TheApp.Cursor(ssvg.ParentOSWin().OSWin).Pop()
 			ssvg.SetDragCursor = false
 		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)
@@ -118,7 +118,7 @@ func (sve *Editor) InitScale() {
 	if sve.Scale == 0 {
 		mvp := sve.Sc
 		if mvp != nil {
-			sve.Scale = sve.ParentWindow().LogicalDPI() / 96.0
+			sve.Scale = sve.ParentOSWin().LogicalDPI() / 96.0
 		} else {
 			sve.Scale = 1
 		}

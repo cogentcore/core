@@ -5,17 +5,11 @@
 package gi
 
 import (
-	"image"
-	"log"
-
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
+
+/*
 
 // Menu is a slice list of Node2D actions, which can contain sub-actions
 // (though it can contain anything -- it is just added to a column layout and
@@ -153,7 +147,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 
 // SetShortcuts sets the shortcuts to given window -- call when the menu has
 // been attached to a window
-func (m *Menu) SetShortcuts(win *Window) {
+func (m *Menu) SetShortcuts(win *OSWin) {
 	if win == nil {
 		return
 	}
@@ -165,7 +159,7 @@ func (m *Menu) SetShortcuts(win *Window) {
 }
 
 // DeleteShortcuts deletes the shortcuts in given window
-func (m *Menu) DeleteShortcuts(win *Window) {
+func (m *Menu) DeleteShortcuts(win *OSWin) {
 	if win == nil {
 		return
 	}
@@ -212,7 +206,7 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // AddCopyCutPaste adds a Copy, Cut, Paste actions that just emit the
 // corresponding keyboard shortcut.  Paste is automatically enabled by
 // clipboard having something in it.
-func (m *Menu) AddCopyCutPaste(win *Window) {
+func (m *Menu) AddCopyCutPaste(win *OSWin) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
@@ -232,7 +226,7 @@ func (m *Menu) AddCopyCutPaste(win *Window) {
 // AddCopyCutPasteDupe adds a Copy, Cut, Paste, and Duplicate actions that
 // just emit the corresponding keyboard shortcut.  Paste is automatically
 // enabled by clipboard having something in it.
-func (m *Menu) AddCopyCutPasteDupe(win *Window) {
+func (m *Menu) AddCopyCutPasteDupe(win *OSWin) {
 	m.AddCopyCutPaste(win)
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
@@ -244,11 +238,11 @@ func (m *Menu) AddCopyCutPasteDupe(win *Window) {
 // CustomAppMenuFunc is a function called by AddAppMenu after the
 // AddStdAppMenu is called -- apps can set this function to add / modify / etc
 // the menu
-var CustomAppMenuFunc = (func(m *Menu, win *Window))(nil)
+var CustomAppMenuFunc = (func(m *Menu, win *OSWin))(nil)
 
 // AddAppMenu adds an "app" menu to the menu -- calls AddStdAppMenu and then
 // CustomAppMenuFunc if non-nil
-func (m *Menu) AddAppMenu(win *Window) {
+func (m *Menu) AddAppMenu(win *OSWin) {
 	m.AddStdAppMenu(win)
 	if CustomAppMenuFunc != nil {
 		CustomAppMenuFunc(m, win)
@@ -256,7 +250,7 @@ func (m *Menu) AddAppMenu(win *Window) {
 }
 
 // AddStdAppMenu adds a standard set of menu items for application-level control.
-func (m *Menu) AddStdAppMenu(win *Window) {
+func (m *Menu) AddStdAppMenu(win *OSWin) {
 	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -273,19 +267,19 @@ func (m *Menu) AddStdAppMenu(win *Window) {
 		})
 }
 
-// AddWindowsMenu adds menu items for current main and dialog windows.
-// must be called under WindowGlobalMu mutex lock!
-func (m *Menu) AddWindowsMenu(win *Window) {
+// AddOSWinsMenu adds menu items for current main and dialog windows.
+// must be called under OSWinGlobalMu mutex lock!
+func (m *Menu) AddOSWinsMenu(win *OSWin) {
 	m.AddAction(ActOpts{Label: "Minimize"},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.OSWin.Minimize()
 		})
 	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			AllWindows.FocusNext()
+			AllOSWins.FocusNext()
 		})
 	m.AddSeparator("sepa")
-	for _, w := range MainWindows {
+	for _, w := range MainOSWins {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
 				nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -293,9 +287,9 @@ func (m *Menu) AddWindowsMenu(win *Window) {
 				})
 		}
 	}
-	if len(DialogWindows) > 0 {
+	if len(DialogOSWins) > 0 {
 		m.AddSeparator("sepw")
-		for _, w := range DialogWindows {
+		for _, w := range DialogOSWins {
 			if w != nil {
 				m.AddAction(ActOpts{Label: w.Title},
 					nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -325,11 +319,11 @@ func MenuFrameConfigStyles(frame *Frame) {
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
 
-// PopupMenu pops up a viewport with a layout that draws the supplied actions
-// positions are relative to given viewport -- name is relevant base name to
+// PopupMenu pops up a scene with a layout that draws the supplied actions
+// positions are relative to given scene -- name is relevant base name to
 // which Menu is appended
-func PopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
-	win := parVp.Win
+func PopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
+	win := parSc.Win
 	mainSc := win.Scene
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
@@ -341,7 +335,7 @@ func PopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
 	psc := &Scene{}
 	psc.Name = name + "Menu"
 	psc.Win = win
-	psc.Type = VpMenu
+	psc.Type = ScMenu
 
 	psc.Geom.Pos = image.Point{x, y}
 	frame := &psc.Frame
@@ -379,11 +373,11 @@ func PopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
 
 // TODO: not working; need to get working.
 // RecyclePopupMenu reuses the already existing popup to display
-// a viewport with a layout that draws the supplied actions
-// positions are relative to given viewport -- name is relevant base name to
+// a scene with a layout that draws the supplied actions
+// positions are relative to given scene -- name is relevant base name to
 // which Menu is appended
-func RecyclePopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
-	win := parVp.Win
+func RecyclePopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
+	win := parSc.Win
 	mainSc := win.Scene
 	if len(menu) == 0 {
 		log.Printf("GoGi PopupMenu: empty menu given\n")
@@ -394,14 +388,14 @@ func RecyclePopupMenu(menu Menu, x, y int, parVp *Scene, name string) *Scene {
 
 	psc, ok := win.CurPopup()
 	if !ok {
-		return PopupMenu(menu, x, y, parVp, name)
+		return PopupMenu(menu, x, y, parSc, name)
 	}
 	// psc.InitName(psc, name+"Menu")
 	psc.Win = win
-	psc.Type = VpMenu
+	psc.Type = ScMenu
 
 	psc.Geom.Pos = image.Point{x, y}
-	// note: not setting VpFlagPopupDestroyAll -- we keep the menu list intact
+	// note: not setting ScFlagPopupDestroyAll -- we keep the menu list intact
 	frame := &psc.Frame
 	frame.DeleteChildren(ki.NoDestroyKids)
 	// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
@@ -586,6 +580,8 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 		*items = (*items)[:i]
 	}
 }
+
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Separator

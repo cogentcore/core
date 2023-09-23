@@ -21,12 +21,16 @@ func mainrun() {
 	but.OnClicked(func() {
 		gi.RunStage(dialog, &gi.StageOpts{Type: gi.Dialog, Modal: true, Movable: true, Closeable: true, Back: true})
 		gi.RunStage(dialog, gi.StageType(gi.Dialog), gi.StageModal(), gi.StageMovable(), gi.StageClosable(), gi.StageBack())
-		gi.NewDialog(dialog).Modal().Movable().Closable().Back().Run() // <- winner!
+		gi.NewDialog(dialog).SetModal().SetMovable().SetClosable().SetBack().Run() // <- winner!
 
 		gi.RunStage(dialog, &gi.StageOpts{Type: gi.BottomSheet, Modal: true})
 		// gi.OpenDialog(gi.SceneLib("dialog"))
-		// gi.RunStage(&gi.Stage{Scene: dialog, Type: gi.Dialog, Modal: true, Window: true})
+		// gi.RunStage(&gi.Stage{Scene: dialog, Type: gi.Dialog, Modal: true, OSWin: true})
 	})
 
-	gi.NewWindow(scene).Name("hello").Title("Hello World!").Width(512).Height(384).Run()
+	// note: on Desktop, default is for Window to open in a new OSWin
+	// on Mobile it opens in the one window if the first one.
+	// SetOwnWin() explicitly puts separate window
+
+	win := gi.NewWindow(scene).SetName("hello").SetTitle("Hello World!").SetWidth(512).SetHeight(384).Run()
 }

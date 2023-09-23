@@ -49,7 +49,7 @@ func OpenSVG(fnm string) {
 	TheSVG.SetFullReRender()
 	fmt.Printf("Opening: %v\n", CurFilename)
 	TheSVG.OpenXML(gi.FileName(CurFilename))
-	SetZoom(TheSVG.ParentWindow().LogicalDPI() / 96.0)
+	SetZoom(TheSVG.ParentOSWin().LogicalDPI() / 96.0)
 	SetTrans(0, 0)
 	TheSVG.UpdateEnd(updt)
 }
@@ -72,7 +72,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the SVG rendering (and start on editing) in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
 <p>You can drag the image around and use the scroll wheel to zoom.</p>`)
 
-	win := gi.NewMainWindow("gogi-svg-viewer", "GoGi SVG Viewer", width, height)
+	win := gi.NewMainOSWin("gogi-svg-viewer", "GoGi SVG Viewer", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -188,7 +188,7 @@ func mainrun() {
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -199,7 +199,7 @@ func mainrun() {
 	emen.Menu.AddCopyCutPaste(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
-	// Linux, Windows or Meta for MacOS
+	// Linux, OSWins or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu = make(gi.Menu, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
@@ -207,12 +207,12 @@ func mainrun() {
 			FileViewOpenSVG(vp)
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", Shortcut: "Command+W"},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close OSWin", Shortcut: "Command+W"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.OSWin.Close()
 		})
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
 		go gi.Quit() // once main window is closed, quit
 	})
 

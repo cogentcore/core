@@ -615,7 +615,7 @@ func (cb *ComboBox) KeyChordEvent() {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
-			if !(kt.Rune == ' ' && cbb.Sc.Type == VpCompleter) {
+			if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
 				kt.SetProcessed()
 				cbb.ButtonPress()
 				cbb.ButtonRelease()

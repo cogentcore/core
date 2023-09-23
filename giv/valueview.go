@@ -455,7 +455,7 @@ type ValueView interface {
 	// Activate triggers any action associated with this value, such as
 	// pulling up a dialog or chooser for this value.  This is called by
 	// default for single-argument methods that have value representations
-	// with actions.  The viewport provides a context for opening other
+	// with actions.  The scene provides a context for opening other
 	// windows, and the receiver and dlgFunc should receive the DialogSig for
 	// the relevant dialog, or a pass-on call thereof, including the
 	// DialogAccepted or Canceled signal, so that the caller can execute its

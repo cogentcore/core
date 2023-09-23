@@ -566,7 +566,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 		wupdt := sv.TopUpdateStart()
 		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
-		svv.Vp.ReRenderNode(svv.This().(gi.Node2D))
+		svv.Sc.ReRenderNode(svv.This().(gi.Node2D))
 		svv.TopUpdateEnd(wupdt)
 	})
 }
@@ -649,8 +649,8 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
-	mvp := sv.Vp
-	if mvp != nil && mvp.HasFlag(int(gi.VpFlagPrefSizing)) {
+	mvp := sv.Sc
+	if mvp != nil && mvp.HasFlag(int(gi.ScFlagPrefSizing)) {
 		sv.VisRows = gi.LayoutPrefMaxRows
 		sv.LayoutHeight = float32(sv.VisRows) * sv.RowHeight
 	} else {
@@ -892,7 +892,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueViewBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				gi.NewKiDialog(sv.Vp, ownki.BaseIface(),
+				gi.NewKiDialog(sv.Sc, ownki.BaseIface(),
 					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
 					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.DialogAccepted) {
@@ -1073,9 +1073,9 @@ func (sv *SliceViewBase) SetStyle() {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
-	mvp := sv.Vp
+	mvp := sv.Sc
 	if mvp != nil && sv.This().(gi.Node2D).IsVisible() &&
-		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.VpFlagPrefSizing))) {
+		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.ScFlagPrefSizing))) {
 		if sv.This().(SliceViewer).LayoutSliceGrid() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
 		}
@@ -1088,7 +1088,7 @@ func (sv *SliceViewBase) SetStyle() {
 }
 
 func (sv *SliceViewBase) Render(vp *Scene) {
-	if win := sv.ParentWindow(); win != nil {
+	if win := sv.ParentOSWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
@@ -1721,7 +1721,7 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	if md != nil {
-		goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Write(md)
+		goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Write(md)
 	}
 	if reset {
 		sv.UnselectAllIdxs()
@@ -1792,7 +1792,7 @@ func (sv *SliceViewBase) CutIdxs() {
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.CurIdx)
 	}
@@ -1836,7 +1836,7 @@ func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	var men gi.Menu
 	sv.MakePasteMenu(&men, md, idx)
 	pos := sv.IdxPos(idx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, "svPasteMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, "svPasteMenu")
 }
 
 // PasteAssign assigns mime data (only the first one!) to this idx
@@ -1902,7 +1902,7 @@ func (sv *SliceViewBase) Duplicate() int {
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentWindow().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
@@ -1923,7 +1923,7 @@ func (sv *SliceViewBase) DragNDropStart() {
 		sp := &gi.Sprite{}
 		sp.GrabRenderFrom(widg)
 		gi.ImageClearer(sp.Pixels, 50.0)
-		sv.ParentWindow().StartDragNDrop(sv.This(), md, sp)
+		sv.ParentOSWin().StartDragNDrop(sv.This(), md, sp)
 	}
 }
 
@@ -1982,7 +1982,7 @@ func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 	var men gi.Menu
 	sv.MakeDropMenu(&men, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, "svDropMenu")
+	gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, "svDropMenu")
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -1997,7 +1997,7 @@ func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
 // target, including ignore -- ends up calling DragNDropSource if us..
 func (sv *SliceViewBase) DragNDropFinalize(mod dnd.DropMods) {
 	sv.UnselectAllIdxs()
-	sv.ParentWindow().FinalizeDragNDrop(mod)
+	sv.ParentOSWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropSource is called after target accepts the drop -- we just remove
@@ -2099,7 +2099,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	var men gi.Menu
 
-	if CtxtMenuView(val, sv.IsDisabled(), sv.Vp, &men) {
+	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &men) {
 		if sv.ShowViewCtxtMenu {
 			men.AddSeparator("sep-svmenu")
 			sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
@@ -2115,7 +2115,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 				pos = em.LastMousePos
 			}
 		}
-		gi.PopupMenu(men, pos.X, pos.Y, sv.Vp, sv.Nm+"-menu")
+		gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, sv.Nm+"-menu")
 	}
 }
 
@@ -2308,9 +2308,9 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
 				switch de.Action {
 				case dnd.Enter:
-					sgg.ParentWindow().DNDSetCursor(de.Mod)
+					sgg.ParentOSWin().DNDSetCursor(de.Mod)
 				case dnd.Exit:
-					sgg.ParentWindow().DNDNotCursor()
+					sgg.ParentOSWin().DNDNotCursor()
 				case dnd.Hover:
 					// nothing here?
 				}

@@ -16,7 +16,7 @@ import (
 	"goki.dev/svg"
 )
 
-var Vp *gi.Scene
+var Sc *gi.Scene
 var EqTable *giv.TableView
 var ParamsEdit *giv.StructView
 var SvgGraph *svg.SVG
@@ -43,10 +43,10 @@ func mainrun() {
 	gi.SetAppName("marbles")
 	gi.SetAppAbout("marbles allows you to enter equations, which are graphed, and then marbles are dropped down on the resulting lines, and bounce around in very entertaining ways!")
 
-	win := gi.NewMainWindow("marbles", "Marbles", width, height)
+	win := gi.NewMainOSWin("marbles", "Marbles", width, height)
 
-	Vp = win.WinScene()
-	updt := Vp.UpdateStart()
+	Sc = win.WinScene()
+	updt := Sc.UpdateStart()
 
 	// style sheet
 	var css = ki.Props{
@@ -63,20 +63,20 @@ func mainrun() {
 			"color": "blue",
 		},
 	}
-	// Vp.CSS = css
+	// Sc.CSS = css
 	_ = css
 
 	mfr := win.SetMainFrame()
 
 	// the StructView will also show the Graph Toolbar which is main actions..
 	gstru := giv.NewStructView(mfr, "gstru")
-	gstru.Scene = Vp // needs vp early for toolbar
+	gstru.Scene = Sc // needs vp early for toolbar
 	gstru.SetProp("height", "4.5em")
 	gstru.SetStruct(&Gr)
 	ParamsEdit = gstru
 
 	lns := giv.NewTableView(mfr, "lns")
-	lns.Scene = Vp
+	lns.Scene = Sc
 	lns.SetSlice(&Gr.Lines)
 	EqTable = lns
 
@@ -114,7 +114,7 @@ func mainrun() {
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -125,6 +125,6 @@ func mainrun() {
 	emen.Menu.AddCopyCutPaste(win)
 
 	win.MainMenuUpdated()
-	Vp.UpdateEndNoSig(updt)
+	Sc.UpdateEndNoSig(updt)
 	win.StartEventLoop()
 }

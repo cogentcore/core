@@ -43,7 +43,7 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	win := gi.NewMainWindow("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
+	win := gi.NewMainOSWin("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -196,7 +196,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}
 	})
 
-	// note: receiver for menu items with shortcuts must be a Node2D or Window
+	// note: receiver for menu items with shortcuts must be a Node2D or OSWin
 	mb1 := gi.NewButton(brow, "menubutton1")
 	mb1.SetText("Menu Button")
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
@@ -339,14 +339,14 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+	mmen.ConfigMenus([]string{appnm, "File", "Edit", "OSWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu.AddAppMenu(win)
 
 	// note: use KeyFunMenu* for standard shortcuts
 	// Command in shortcuts is automatically translated into Control for
-	// Linux, Windows or Meta for MacOS
+	// Linux, OSWins or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -365,7 +365,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			fmt.Printf("File:SaveAs menu action triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
+	fmen.Menu.AddAction(gi.ActOpts{Label: "Close OSWin", ShortcutKey: gi.KeyFunWinClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.CloseReq()
 		})
@@ -395,12 +395,12 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.Window) {
+	win.SetCloseReqFunc(func(w *gi.OSWin) {
 		if inClosePrompt {
 			return
 		}
 		inClosePrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close Window?",
+		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close OSWin?",
 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, gi.AddOk, gi.AddCancel,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
@@ -411,7 +411,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			})
 	})
 
-	win.SetCloseCleanFunc(func(w *gi.Window) {
+	win.SetCloseCleanFunc(func(w *gi.OSWin) {
 		fmt.Printf("Doing final Close cleanup here..\n")
 	})
 

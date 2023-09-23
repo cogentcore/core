@@ -61,7 +61,7 @@ func (sc *Scene) SetMyStyle() {
 // widget's stylers, initializing them if necessary.
 // This function can be called by both internal
 // and end-user code.
-// It should only be done before showing the viewport
+// It should only be done before showing the scene
 // during initial configuration -- otherwise requries
 // a StyMu mutex lock.
 func (wb *WidgetBase) AddStyler(s Styler) {
@@ -199,7 +199,7 @@ func (wb *WidgetBase) SetStyle(sc *Scene) {
 	wb.SetStyleWidget(sc)
 }
 
-// SetUnitContext sets the unit context based on size of viewport, element, and parent
+// SetUnitContext sets the unit context based on size of scene, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
 func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
