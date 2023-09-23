@@ -63,12 +63,13 @@ const (
 	// receiving input.
 	DeFocus
 
-	// Paint indicates a request to repaint the window.
-	// This is sent right after the window is opened.
+	// Paint events are sent to drive updating of the window at
+	// regular FPS frames per second intervals.
 	Paint
 
-	// Show is for the WindowShow event -- sent by the system 500 msec
-	// after the window has opened, to trigger one-time actions such as
+	// Show is for the WindowShow event -- sent by the system 1 second
+	// after the window has opened, to ensure that full rendering
+	// is completed with the proper size, and to trigger one-time actions such as
 	// configuring the main menu after the window has opened.
 	Show
 

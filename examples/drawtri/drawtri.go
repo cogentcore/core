@@ -29,8 +29,15 @@ func mainrun(a goosi.App) {
 		panic(err)
 	}
 
-	sy := w.Drawer().Sys
+	// note: drawer is always created and ready to go
+	// we are creating an additional rendering system here.
 	sf := w.Drawer().Surf
+	sy := sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
+
+	destroy := func() {
+		sy.Destroy()
+	}
+	w.SetDestroyGPUResourcesFunc(destroy)
 
 	pl := sy.NewPipeline("drawtri")
 	sy.ConfigRender(&sf.Format, vgpu.UndefType)
@@ -40,12 +47,6 @@ func mainrun(a goosi.App) {
 	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
 
 	sy.Config()
-
-	destroy := func() {
-		sy.Destroy()
-		sf.Destroy()
-		vgpu.Terminate()
-	}
 
 	frameCount := 0
 	stTime := time.Now()
@@ -83,7 +84,6 @@ func mainrun(a goosi.App) {
 		case *window.Event:
 			switch ev.Action {
 			case window.Close:
-				destroy()
 				return
 			case window.Paint:
 				renderFrame()

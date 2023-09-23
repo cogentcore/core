@@ -235,6 +235,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		WindowBase: goosi.WindowBase{
 			Titl: opts.GetTitle(),
 			Flag: opts.Flags,
+			FPS:  60,
 		},
 	}
 

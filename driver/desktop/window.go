@@ -156,11 +156,16 @@ func (w *windowImpl) NextEvent() goosi.Event {
 
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
-	winShow := time.NewTimer(time.Second)
+	winShow := time.NewTimer(time.Second) // this is a backup to ensure shown eventually..
+	winPaint := time.NewTicker(time.Second / time.Duration(w.FPS))
+	hasShown := false
 outer:
 	for {
 		select {
 		case <-w.winClose:
+			winShow.Stop() // todo: close channel too??
+			winPaint.Stop()
+			hasShown = false
 			break outer
 		case f := <-w.runQueue:
 			if w.glw == nil {
@@ -175,6 +180,14 @@ outer:
 				break outer
 			}
 			w.sendWindowEvent(window.Show)
+			hasShown = true
+		case <-winPaint.C:
+			if w.glw == nil {
+				break outer
+			}
+			if hasShown {
+				w.sendWindowEvent(window.Paint)
+			}
 		}
 	}
 }

@@ -222,6 +222,10 @@ type Window interface {
 	// to destroying the drawer and surface.
 	SetDestroyGPUResourcesFunc(f func())
 
+	// SetFPS sets the frames per second for Paint events that drive
+	// updating of the window at regular intervals.  60 is default.
+	SetFPS(fps int)
+
 	EventDeque
 }
 
@@ -238,6 +242,7 @@ type WindowBase struct {
 	LogDPI      float32
 	Par         any
 	Flag        WindowFlags
+	FPS         int
 	// set this to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
 	// and the surface -- otherwise it is difficult to
@@ -291,6 +296,10 @@ func (w *WindowBase) IsMinimized() bool {
 
 func (w *WindowBase) IsFocus() bool {
 	return w.Flag.HasFlag(Focus)
+}
+
+func (w *WindowBase) SetFPS(fps int) {
+	w.FPS = fps
 }
 
 func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {

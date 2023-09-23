@@ -38,17 +38,17 @@ func mainrun(a goosi.App) {
 	if err != nil {
 		panic(err)
 	}
+	// w.SetFPS(20) // 60 default
 
-	sy := w.Drawer().Sys
+	// note: drawer is always created and ready to go
+	// we are creating an additional rendering system here.
 	sf := w.Drawer().Surf
-
-	sy.Config()
+	sy := sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
 
 	destroy := func() {
 		sy.Destroy()
-		sf.Destroy()
-		vgpu.Terminate()
 	}
+	w.SetDestroyGPUResourcesFunc(destroy)
 
 	pl := sy.NewPipeline("drawidx")
 	// sf.Format.SetMultisample(1)
@@ -159,38 +159,15 @@ func mainrun(a goosi.App) {
 		}
 	}
 
-	exitC := make(chan struct{}, 2)
-
-	fpsDelay := time.Second / 60
-	fpsTicker := time.NewTicker(fpsDelay)
-	// separate fps-based loop for animation
-	// go func() {
-	for {
-		select {
-		case <-exitC:
-			fpsTicker.Stop()
-			return
-		case <-fpsTicker.C:
-			// fmt.Println("fps frame")
-			w.SendEmptyEvent()
-			renderFrame()
-			w.SendEmptyEvent()
-			// w.Send(&window.Event{Action: window.Paint})
-		}
-	}
-	// }()
-
 	for {
 		evi := w.NextEvent()
 		switch ev := evi.(type) {
 		case *window.Event:
 			switch ev.Action {
 			case window.Close:
-				destroy()
 				return
 			case window.Paint:
-				fmt.Println("paint")
-				w.SendEmptyEvent()
+				// fmt.Println("paint")
 				renderFrame()
 			}
 		case *mouse.Event:
