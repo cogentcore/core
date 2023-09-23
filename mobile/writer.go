@@ -190,7 +190,7 @@ func (w *Writer) Close() error {
 		return err
 	}
 
-	rsa, err := signPKCS7(rand.Reader, w.priv, cert.Bytes())
+	rsa, err := SignPKCS7(rand.Reader, w.priv, cert.Bytes())
 	if err != nil {
 		return fmt.Errorf("apk: %v", err)
 	}

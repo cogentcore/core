@@ -26,7 +26,7 @@ func TestSignPKCS7(t *testing.T) {
 	}
 
 	content := "Hello world,\nThis is signed."
-	cert, err := signPKCS7(rand.Reader, privKey, []byte(content))
+	cert, err := SignPKCS7(rand.Reader, privKey, []byte(content))
 	if err != nil {
 		t.Fatal(err)
 	}
