@@ -79,7 +79,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 
 	// TODO(ydnar): this should work, unless build tags affect loading a single package.
 	// Should we try to import packages with different build tags per platform?
-	pkgs, err := packages.Load(PackagesConfig(targets[0]), c.Build.Package)
+	pkgs, err := packages.Load(PackagesConfig(c, &c.Build.Target[0]), c.Build.Package)
 	if err != nil {
 		return nil, err
 	}
@@ -97,31 +97,31 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 
 	var nmpkgs map[string]bool
 	switch {
-	case isAndroidPlatform(targets[0].platform):
+	case isAndroidPlatform(c.Build.Target[0].OS):
 		if pkg.Name != "main" {
-			for _, t := range targets {
-				if err := GoBuild(pkg.PkgPath, androidEnv[t.arch]); err != nil {
+			for _, t := range c.Build.Target {
+				if err := GoBuild(c, pkg.PkgPath, androidEnv[t.Arch]); err != nil {
 					return nil, err
 				}
 			}
 			return pkg, nil
 		}
-		nmpkgs, err = GoAndroidBuild(pkg, targets)
+		nmpkgs, err = GoAndroidBuild(pkg, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
-	case isApplePlatform(targets[0].platform):
+	case isApplePlatform(c.Build.Target[0].OS):
 		if !xcodeAvailable() {
 			return nil, fmt.Errorf("-target=%s requires XCode", c.Build.Target)
 		}
 		if pkg.Name != "main" {
-			for _, t := range targets {
+			for _, t := range c.Build.Target {
 				// Catalyst support requires iOS 13+
 				v, _ := strconv.ParseFloat(c.Build.IOSVersion, 64)
-				if t.platform == "maccatalyst" && v < 13.0 {
+				if t.OS == "maccatalyst" && v < 13.0 {
 					return nil, errors.New("catalyst requires -iosversion=13 or higher")
 				}
-				if err := GoBuild(pkg.PkgPath, appleEnv[t.String()]); err != nil {
+				if err := GoBuild(c, pkg.PkgPath, appleEnv[t.String()]); err != nil {
 					return nil, err
 				}
 			}
@@ -130,7 +130,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 		if c.Build.BundleID == "" {
 			return nil, fmt.Errorf("-target=ios requires -bundleid set")
 		}
-		nmpkgs, err = GoAppleBuild(pkg, c.Build.BundleID, targets)
+		nmpkgs, err = GoAppleBuild(pkg, c.Build.BundleID, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}
@@ -183,9 +183,9 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 	return nmpkgs, nil
 }
 
-var xout io.Writer = os.Stderr
+var Xout io.Writer = os.Stderr
 
-func printcmd(format string, args ...interface{}) {
+func PrintCmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
 	if tmpdir != "" {
 		cmd = strings.Replace(cmd, tmpdir, "$WORK", -1)
@@ -202,7 +202,7 @@ func printcmd(format string, args ...interface{}) {
 	if env := os.Getenv("HOMEPATH"); env != "" {
 		cmd = strings.Replace(cmd, env, "$HOMEPATH", -1)
 	}
-	fmt.Fprint(xout, cmd)
+	fmt.Fprint(Xout, cmd)
 }
 
 func GoBuild(c *config.Config, src string, env []string, args ...string) error {

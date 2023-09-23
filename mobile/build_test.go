@@ -76,11 +76,11 @@ func TestAndroidBuild(t *testing.T) {
 	}
 	buf := new(bytes.Buffer)
 	defer func() {
-		xout = os.Stderr
+		Xout = os.Stderr
 		buildN = false
 		buildX = false
 	}()
-	xout = buf
+	Xout = buf
 	buildN = true
 	buildX = true
 	buildO = "basic.apk"

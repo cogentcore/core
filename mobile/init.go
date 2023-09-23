@@ -51,7 +51,7 @@ func runInit(cmd *command) error {
 	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
 
 	if buildX || buildN {
-		fmt.Fprintln(xout, "GOMOBILE="+gomobilepath)
+		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
 	}
 	removeAll(gomobilepath)
 
@@ -69,7 +69,7 @@ func runInit(cmd *command) error {
 		}
 	}
 	if buildX || buildN {
-		fmt.Fprintln(xout, "WORK="+tmpdir)
+		fmt.Fprintln(Xout, "WORK="+tmpdir)
 	}
 	defer func() {
 		if buildWork {
@@ -211,7 +211,7 @@ func installOpenAL(gomobilepath string) error {
 
 func mkdir(dir string) error {
 	if buildX || buildN {
-		printcmd("mkdir -p %s", dir)
+		PrintCmd("mkdir -p %s", dir)
 	}
 	if buildN {
 		return nil
@@ -221,7 +221,7 @@ func mkdir(dir string) error {
 
 func symlink(src, dst string) error {
 	if buildX || buildN {
-		printcmd("ln -s %s %s", src, dst)
+		PrintCmd("ln -s %s %s", src, dst)
 	}
 	if buildN {
 		return nil
@@ -266,7 +266,7 @@ func doCopyAll(dst, src string) error {
 
 func removeAll(path string) error {
 	if buildX || buildN {
-		printcmd(`rm -r -f "%s"`, path)
+		PrintCmd(`rm -r -f "%s"`, path)
 	}
 	if buildN {
 		return nil
@@ -323,7 +323,7 @@ func runCmd(cmd *exec.Cmd) error {
 		if env != "" {
 			env += " "
 		}
-		printcmd("%s%s%s", dir, env, strings.Join(cmd.Args, " "))
+		PrintCmd("%s%s%s", dir, env, strings.Join(cmd.Args, " "))
 	}
 
 	buf := new(bytes.Buffer)

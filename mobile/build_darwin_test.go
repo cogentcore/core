@@ -17,7 +17,7 @@ func TestAppleBuild(t *testing.T) {
 		t.Skip("Xcode is missing")
 	}
 	defer func() {
-		xout = os.Stderr
+		Xout = os.Stderr
 		buildN = false
 		buildX = false
 	}()
@@ -40,7 +40,7 @@ func TestAppleBuild(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		xout = buf
+		Xout = buf
 		var tmpl *template.Template
 		if test.main {
 			buildO = "basic.app"

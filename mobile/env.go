@@ -118,7 +118,7 @@ func buildEnvInit() (cleanup func(), err error) {
 	}
 
 	if buildX {
-		fmt.Fprintln(xout, "GOMOBILE="+gomobilepath)
+		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
 	}
 
 	// Check the toolchain is in a good state.
@@ -144,7 +144,7 @@ func buildEnvInit() (cleanup func(), err error) {
 		}
 	}
 	if buildX {
-		fmt.Fprintln(xout, "WORK="+tmpdir)
+		fmt.Fprintln(Xout, "WORK="+tmpdir)
 	}
 
 	if err := envInit(); err != nil {

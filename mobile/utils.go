@@ -23,7 +23,7 @@ import (
 
 func CopyFile(c *config.Config, dst, src string) error {
 	if c.Build.Print {
-		printcmd("cp %s %s", src, dst)
+		PrintCmd("cp %s %s", src, dst)
 	}
 	return WriteFile(c, dst, func(w io.Writer) error {
 		if c.Build.PrintOnly {

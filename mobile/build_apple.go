@@ -67,7 +67,7 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 			return nil, err
 		}
 		if buildX {
-			printcmd("echo \"%s\" > %s", file.contents, file.name)
+			PrintCmd("echo \"%s\" > %s", file.contents, file.name)
 		}
 		if !buildN {
 			if err := ioutil.WriteFile(file.name, file.contents, 0644); err != nil {
@@ -148,7 +148,7 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 		buildO = n + ".app"
 	}
 	if buildX {
-		printcmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", buildO)
+		PrintCmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", buildO)
 	}
 	if !buildN {
 		// if output already exists, remove.

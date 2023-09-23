@@ -17,6 +17,11 @@ type Platform struct {
 	Arch string
 }
 
+// String returns the platform as a string in the form "os/arch"
+func (p Platform) String() string {
+	return p.OS + "/" + p.Arch
+}
+
 // OSSupported determines whether the given operating system is supported by GoKi. If it is, it returns nil.
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {

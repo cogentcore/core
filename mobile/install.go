@@ -48,7 +48,7 @@ func runInstall(cmd *command) error {
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 	if buildX || buildN {
-		printcmd("%s", strings.Join(c.Args, " "))
+		PrintCmd("%s", strings.Join(c.Args, " "))
 	}
 	if buildN {
 		return nil

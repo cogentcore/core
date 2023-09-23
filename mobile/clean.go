@@ -26,7 +26,7 @@ func runClean(cmd *command) (err error) {
 	}
 	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
 	if buildX {
-		fmt.Fprintln(xout, "GOMOBILE="+gomobilepath)
+		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
 	}
 	return removeAll(gomobilepath)
 }

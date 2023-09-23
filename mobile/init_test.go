@@ -29,12 +29,12 @@ func TestInit(t *testing.T) {
 	buf := new(bytes.Buffer)
 	gopathorig := os.Getenv("GOPATH")
 	defer func() {
-		xout = os.Stderr
+		Xout = os.Stderr
 		buildN = false
 		buildX = false
 		os.Setenv("GOPATH", gopathorig)
 	}()
-	xout = buf
+	Xout = buf
 	buildN = true
 	buildX = true
 
