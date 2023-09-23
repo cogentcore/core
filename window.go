@@ -224,6 +224,8 @@ type Window interface {
 
 	// SetFPS sets the frames per second for Paint events that drive
 	// updating of the window at regular intervals.  60 is default.
+	// 0 disables -- no regular Paint events are sent.
+	// This only takes effect prior to opening a new window.
 	SetFPS(fps int)
 
 	EventDeque

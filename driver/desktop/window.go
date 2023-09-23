@@ -156,8 +156,13 @@ func (w *windowImpl) NextEvent() goosi.Event {
 
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
-	winShow := time.NewTimer(time.Second) // this is a backup to ensure shown eventually..
-	winPaint := time.NewTicker(time.Second / time.Duration(w.FPS))
+	winShow := time.NewTimer(time.Second / 2) // this is a backup to ensure shown eventually..
+	var winPaint *time.Ticker
+	if w.FPS > 0 {
+		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
+	} else {
+		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
+	}
 	hasShown := false
 outer:
 	for {
