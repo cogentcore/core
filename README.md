@@ -1,6 +1,6 @@
-# gicons
+# icons
 
-Gicons provides Go constant names for material design symbols as SVG files.
+Icons provides Go constant names for Material Design Symbols as SVG files.
 
 These icons are from [Material Design Symbols](https://fonts.google.com/icons), sourced through [marella/material-symbols](https://github.com/marella/material-symbols).
 

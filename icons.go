@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gicons
+// Package icons provides Go constant names for Material Design Symbols as SVG files.
+package icons
 
 import (
 	"embed"
 	"strings"
+
+	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (generator uses it)
 )
 
 //go:generate go run gen.go
