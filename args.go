@@ -15,7 +15,6 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
-	"goki.dev/grows/tomls"
 	"goki.dev/laser"
 )
 
@@ -335,34 +334,9 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 // SetFieldValue sets the value of the given configuration field
 // to the given string argument value.
 func SetFieldValue(f *Field, value string) error {
-	nptyp := laser.NonPtrType(f.Value.Type())
-	vk := nptyp.Kind()
-	switch {
-	case vk == reflect.Map:
-		mval := make(map[string]any)
-		err := tomls.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
-		if err != nil {
-			return err
-		}
-		err = laser.CopyMapRobust(f.Value.Interface(), mval["tmp"])
-		if err != nil {
-			return fmt.Errorf("not able to set map field %q from flag value %q: %w", f.Name, value, err)
-		}
-	case vk == reflect.Slice:
-		mval := make(map[string]any)
-		err := tomls.ReadBytes(&mval, []byte("tmp="+value)) // use toml decoder
-		if err != nil {
-			return err
-		}
-		err = laser.CopySliceRobust(f.Value.Interface(), mval["tmp"])
-		if err != nil {
-			return fmt.Errorf("not able to set slice field %q from flag value %q: %w", f.Name, value, err)
-		}
-	default:
-		ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
-		if !ok {
-			return fmt.Errorf("not able to set field %q from flag value %q", f.Name, value)
-		}
+	ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
+	if !ok {
+		return fmt.Errorf("not able to set field %q from flag value %q", f.Name, value)
 	}
 	return nil
 }
