@@ -1,6 +1,6 @@
 Name = "mat32"
 Desc = ""
-Version = "v2.0.0-dev0.0.4"
+Version = "v2.0.0-dev0.0.5"
 Type = "Library"
 
 [Build]
