@@ -58,6 +58,45 @@ type Build struct {
 
 	// the target platforms to build executables for
 	Platform []Platform `desc:"the target platforms to build executables for"`
+
+	// the output file name; if not specified, it depends on the package being built
+	Output string `flag:"o,output" desc:"the output file name; if not specified, it depends on the package being built"`
+
+	// force rebuilding of packages that are already up-to-date
+	Rebuild bool `flag:"a,rebuild" desc:"force rebuilding of packages that are already up-to-date"`
+
+	// print the commands but do not run them
+	PrintOnly bool `flag:"n,print-only" desc:"print the commands but do not run them"`
+
+	// print the commands
+	Print bool `flag:"x,print" desc:"print the commands"`
+
+	// arguments to pass on each go tool compile invocation
+	GCFlags []string `desc:"arguments to pass on each go tool compile invocation"`
+
+	// arguments to pass on each go tool link invocation
+	LDFlags []string `desc:"arguments to pass on each go tool link invocation"`
+
+	// a comma-separated list of additional build tags to consider satisfied during the build
+	Tags []string `desc:"a comma-separated list of additional build tags to consider satisfied during the build"`
+
+	// remove all file system paths from the resulting executable. Instead of absolute file system paths, the recorded file names will begin either a module path@version (when using modules), or a plain import path (when using the standard library, or GOPATH).
+	Trimpath bool `desc:"remove all file system paths from the resulting executable. Instead of absolute file system paths, the recorded file names will begin either a module path@version (when using modules), or a plain import path (when using the standard library, or GOPATH)."`
+
+	// print the name of the temporary work directory and do not delete it when exiting
+	Work bool `desc:"print the name of the temporary work directory and do not delete it when exiting"`
+
+	// [def: 13.0] the minimal version of the iOS SDK to compile against
+	IOSVersion string `def:"13.0" desc:"the minimal version of the iOS SDK to compile against"`
+
+	// [def: 23] [min: 23] the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)
+	AndroidMinSDK int `def:"23" min:"23" desc:"the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)"`
+
+	// [def: 29] the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
+	AndroidTargetSDK int `def:"29" desc:"the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)"`
+
+	// the bundle ID to use with the app (required for target iOS and N/A otherwise)
+	BundleID string `desc:"the bundle ID to use with the app (required for target iOS and N/A otherwise)"`
 }
 
 type Colorgen struct {
