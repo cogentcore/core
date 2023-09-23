@@ -12,7 +12,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
 )
@@ -289,7 +288,7 @@ func (sm *SymMap) WriteDoc(out io.Writer, depth int) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 	noCase := true
-	if kit.HasUpperCase(seed) {
+	if lex.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {
@@ -311,7 +310,7 @@ func (sm *SymMap) FindNamePrefix(seed string, matches *SymMap) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
 	noCase := true
-	if kit.HasUpperCase(seed) {
+	if lex.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {
@@ -337,7 +336,7 @@ func (sm *SymMap) FindNamePrefixRecursive(seed string, matches *SymMap) {
 // adds to given matches map (which can be nil), for more efficient recursive use
 func (sm *SymMap) FindNamePrefixScoped(seed string, matches *SymMap) {
 	noCase := true
-	if kit.HasUpperCase(seed) {
+	if lex.HasUpperCase(seed) {
 		noCase = false
 	}
 	for _, sy := range *sm {

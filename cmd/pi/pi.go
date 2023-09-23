@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/ki/v2/dirs"
+	"goki.dev/glop/dirs"
 	"goki.dev/pi/v2/filecat"
 	_ "goki.dev/pi/v2/langs"
 	"goki.dev/pi/v2/pi"

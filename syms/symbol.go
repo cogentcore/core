@@ -35,7 +35,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/goki/ki/kit"
 	"goki.dev/glop/indent"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/lex"
@@ -84,8 +83,6 @@ type Symbol struct {
 	// Ast node that created this symbol -- only valid during parsing
 	Ast ki.Ki `json:"-" xml:"-" desc:"Ast node that created this symbol -- only valid during parsing"`
 }
-
-var KiT_Symbol = kit.Types.AddType(&Symbol{}, nil)
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region
 func NewSymbol(name string, kind token.Tokens, fname string, reg lex.Reg) *Symbol {
