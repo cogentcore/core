@@ -8,9 +8,9 @@
 package app
 
 import (
+	_ "goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/mobile/event/lifecycle"
 	"goki.dev/mobile/event/size"
-	_ "goki.dev/mobile/internal/mobileinit"
 )
 
 // BaseApp is the base app struct that specific mobile platforms extend.

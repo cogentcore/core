@@ -17,7 +17,6 @@ import (
 	"sync"
 
 	vk "github.com/goki/vulkan"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
@@ -69,7 +68,8 @@ var mainCallback func(goosi.App)
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
 	log.Println("in Main")
-	gi.DialogsSepWindow = false
+	// commented out to get rid of import
+	// gi.DialogsSepWindow = false
 	mainCallback = f
 	theApp.initVk()
 	goosi.TheApp = theApp
