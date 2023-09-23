@@ -9,7 +9,7 @@ import (
 	"embed"
 	"strings"
 
-	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (generator uses it)
+	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
 )
 
 //go:generate go run gen.go
