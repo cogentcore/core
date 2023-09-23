@@ -189,11 +189,42 @@ See [render.go](gi/render.go) for updated version:
 
 * If State changes, Style then Render needs to be called..
 
-## Window logic
+## Large Scale Organization
+
+In flutter, everything is a widget, and multiple windows are not supported:  https://github.com/orgs/flutter/projects/39/views/1.  Everything is basically a widget, and "stateless widget" is basically a container for other widgets (i.e., a layout).  Not much of a strong taxonomy.   An explicit "ModalBarrier" widget is inserted to set off a foreground widget from stuff in the background.  A "Route" connects widgets -- e.g., a button can route to another, and then route back..  popups can be modal or not, etc.   Anyway, the Widget is always the unit of organization (no specific distinction or name for a coherent collection thereof) and they kinda live wherever and are drawn when needed somehow.
+
+GoGi is based around the principle that Layout is automatic and requires coordinating a coherent collection of Widgets, which have a given chunk of space to render into.  This collection is the contents of a window, a dialog, a popup, etc: A Viewport in the current naming.  But Viewport is not a particularly great name for a coherent collection of widgets.  In Qt and other graphics contexts, it is more of a 3D construct, or is involved in scrolling (a window onto a larger scene).
+
+Entities:
+
+* `Scene` is a good name for a coherent collection of Widgets.  Viewport -> Scene.  Scene is the basic unit of content, and has its own Image that it renders onto.  It can handle the distribution of events, and translate the events into local coordinates instead of requiring everyone to have all the bboxes mapped out to window level.  Basically, window routes events into Scene, which subtracts its relative pos and takes it from there.  It has its own logic for managing focus transitions among widgets.  Layout manages the layout of widgets within the scene, as now, and Scene manages the rendering and layout updates as now implemented.
+
+* Could have a collection of Scenes lying around, or make them on the fly.  They can be manged with a name map and it should be easy to grab one and use it as needed, in a SceneLibrary -- can select one by name to show as a main window content, and e.g., have the back arrow decoration to get back.
+
+* `Stage` is a "physical" place where a `Scene` can play out.  Like the overall metaphor but not the confusion with "stage" as a step in a sequence or progression.   It has a `*Scene` pointer and logic for managing its specific kind of presentation.  It is trivial to move a Scene to a different Stage as needed.
+
+There are many different types of Stages:
+* `WindowStage` has a basic `Stage` for showing its main content.  Different Scenes can take over this stage, or layer on top of each other..
+* `Menu` is a modal popup stage for menu items, like `Tooltip`, `Completer`, etc.
+* `ModalDialog` is a modal dialog popup within the current window: it throws a scrim over anything below it, and blocks all events.
+* `ModelessDialog` is a modeless dialog popup, with window move and close handles (options with defaults).
+* `BottomSheet` pops up from the bottom with a handle, and scrims out others
+
+* Probably just have a StageBase with various general parameters (modal, scrim, position relative to window, etc), and types that embed and implement specific cases.
+
+* Stage manages additional popups within a stage, and Window has a stack of ActiveStages for all the Dialogs and SnackBars etc.
+
+* Window needs to provide an overall context in terms of DPI and size, and can optionally resize to new stage content.  In general a Scene or Stage should not be overly dependent on window, and vice-versa.
+
+Idea for progressive structview dialogs each pulling up a diff window in current code: instead have them form a stack in a Window with "back" arrow to go back (and forward!)
+
+### earlier notes
 
 * Mobile is basically a single window app.  Desktop can have multiple separate windows.  Need an intermediate abstraction for a separate "sheet" or "surface" of content that can either be within a separate window, or arranged in various ways within the same window.
 
 * Viewport organizes the rendering tree, but doesn't contain the further logic associated with a dialog, menu, etc.  Currently, we're wrapping all that logic into Window which has special cases for each thing.  It would be better to make this more encapsulated.
 
 * A menu, tooltip, completer, or snackbar (popups) are associated with the logical flow of their parent sheet, and all the focus and logic of these should be managed separately for each.  Probably also the event manager should be separate for each -- first pass the window figures out where the event is going at the "sheet" level, then hands it off to the sheet to manage from there.  Basically, the outer window is just like a window manager: it handles distributing events, optionally resizing and positioning handles, and distributing events, and everything else is handled therein.
+
+
 
