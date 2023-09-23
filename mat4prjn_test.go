@@ -9,7 +9,7 @@ import (
 )
 
 func TestMat4Prjn(t *testing.T) {
-	pts := []Vec3{Vec3{0.0, 0.0, 0.0}, Vec3X, Vec3Y, Vec3Z, Vec3{0.5, 0.5, 0.5}, Vec3{-0.5, -0.5, -0.5}, Vec3{1, 1, 1}, Vec3{-1, -1, -1}}
+	pts := []Vec3{{0.0, 0.0, 0.0}, Vec3X, Vec3Y, Vec3Z, {0.5, 0.5, 0.5}, {-0.5, -0.5, -0.5}, {1, 1, 1}, {-1, -1, -1}}
 
 	campos := Vec3{0, 0, 10}
 	target := Vec3{0, 0, 0}
