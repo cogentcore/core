@@ -4,7 +4,7 @@
 
 //go:generate go run gendex.go -o dex.go
 
-package main
+package mobile
 
 import (
 	"bufio"

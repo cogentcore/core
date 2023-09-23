@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 
 	"goki.dev/goki/config"
+	"goki.dev/goki/mobile"
 )
 
 // Build builds an executable for the package
@@ -56,7 +57,8 @@ func Build(c *config.Config) error {
 		}
 	}
 	if len(androidArchs) != 0 {
-		return buildMobile(c.Build.Package, "android", androidArchs)
+		return mobile.Build(c)
+		// return buildMobile(c.Build.Package, "android", androidArchs)
 	}
 	return nil
 }
