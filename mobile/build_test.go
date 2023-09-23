@@ -95,7 +95,7 @@ func TestAndroidBuild(t *testing.T) {
 	defer func() {
 		buildTags = oldTags
 	}()
-	err := runBuild(cmdBuild)
+	err := Build(cmdBuild)
 	if err != nil {
 		t.Log(buf.String())
 		t.Fatal(err)

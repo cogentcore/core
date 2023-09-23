@@ -33,7 +33,7 @@ func runInstall(cmd *command) error {
 	if !strings.HasPrefix(buildTarget, "android") {
 		return fmt.Errorf("install is not supported for -target=%s", buildTarget)
 	}
-	pkg, err := runBuildImpl(cmd)
+	pkg, err := BuildImpl(cmd)
 	if err != nil {
 		return err
 	}

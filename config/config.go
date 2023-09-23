@@ -57,13 +57,16 @@ type Build struct {
 	Package string `def:"." desc:"the path of the package to build"`
 
 	// the target platforms to build executables for
-	Platform []Platform `desc:"the target platforms to build executables for"`
+	Target []Platform `desc:"the target platforms to build executables for"`
 
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output" desc:"the output file name; if not specified, it depends on the package being built"`
 
 	// force rebuilding of packages that are already up-to-date
 	Rebuild bool `flag:"a,rebuild" desc:"force rebuilding of packages that are already up-to-date"`
+
+	// install the generated executable
+	Install bool `flag:"i,install" desc:"install the generated executable"`
 
 	// print the commands but do not run them
 	PrintOnly bool `flag:"n,print-only" desc:"print the commands but do not run them"`

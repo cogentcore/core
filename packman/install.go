@@ -103,7 +103,7 @@ func installLocalMobile(c *config.Config, osName string) error {
 	if osName == "ios" {
 		return errors.New("ios is not yet supported")
 	}
-	c.Build.Platform = []config.Platform{{osName, runtime.GOARCH}}
+	c.Build.Target = []config.Platform{{osName, runtime.GOARCH}}
 	err := Build(c)
 	if err != nil {
 		return fmt.Errorf("install: %w", err)

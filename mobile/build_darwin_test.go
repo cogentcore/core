@@ -50,7 +50,7 @@ func TestAppleBuild(t *testing.T) {
 			tmpl = appleOtherBuildTmpl
 		}
 		cmdBuild.flag.Parse([]string{test.pkg})
-		err := runBuild(cmdBuild)
+		err := Build(cmdBuild)
 		if err != nil {
 			t.Log(buf.String())
 			t.Fatal(err)

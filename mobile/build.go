@@ -14,119 +14,79 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
+	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/sdkpath"
+	"goki.dev/grease"
 	"golang.org/x/tools/go/packages"
 )
 
 var tmpdir string
 
-var cmdBuild = &command{
-	run:   runBuild,
-	Name:  "build",
-	Usage: "[-target android|" + strings.Join(applePlatforms, "|") + "] [-o output] [-bundleid bundleID] [build flags] [package]",
-	Short: "compile android APK and iOS app",
-	Long: `
-Build compiles and encodes the app named by the import path.
+// Build compiles and encodes the app named by the import path.
 
-The named package must define a main function.
+// The named package must define a main function.
 
-The -target flag takes either android (the default), or one or more
-comma-delimited Apple platforms (` + strings.Join(applePlatforms, ", ") + `).
+// The -target flag takes either android (the default), or one or more
+// comma-delimited Apple platforms (TODO: apple platforms list).
 
-For -target android, if an AndroidManifest.xml is defined in the
-package directory, it is added to the APK output. Otherwise, a default
-manifest is generated. By default, this builds a fat APK for all supported
-instruction sets (arm, 386, amd64, arm64). A subset of instruction sets can
-be selected by specifying target type with the architecture name. E.g.
--target=android/arm,android/386.
+// For -target android, if an AndroidManifest.xml is defined in the
+// package directory, it is added to the APK output. Otherwise, a default
+// manifest is generated. By default, this builds a fat APK for all supported
+// instruction sets (arm, 386, amd64, arm64). A subset of instruction sets can
+// be selected by specifying target type with the architecture name. E.g.
+// -target=android/arm,android/386.
 
-For Apple -target platforms, gomobile must be run on an OS X machine with
-Xcode installed.
+// For Apple -target platforms, gomobile must be run on an OS X machine with
+// Xcode installed.
 
-By default, -target ios will generate an XCFramework for both ios
-and iossimulator. Multiple Apple targets can be specified, creating a "fat"
-XCFramework with each slice. To generate a fat XCFramework that supports
-iOS, macOS, and macCatalyst for all supportec architectures (amd64 and arm64),
-specify -target ios,macos,maccatalyst. A subset of instruction sets can be
-selectged by specifying the platform with an architecture name. E.g.
--target=ios/arm64,maccatalyst/arm64.
+// By default, -target ios will generate an XCFramework for both ios
+// and iossimulator. Multiple Apple targets can be specified, creating a "fat"
+// XCFramework with each slice. To generate a fat XCFramework that supports
+// iOS, macOS, and macCatalyst for all supportec architectures (amd64 and arm64),
+// specify -target ios,macos,maccatalyst. A subset of instruction sets can be
+// selectged by specifying the platform with an architecture name. E.g.
+// -target=ios/arm64,maccatalyst/arm64.
 
-If the package directory contains an assets subdirectory, its contents
-are copied into the output.
-
-Flag -iosversion sets the minimal version of the iOS SDK to compile against.
-The default version is 13.0.
-
-Flag -androidMinSDK sets the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml).
-The default and minimum is 23.
-
-Flag -androidTargetSDK sets the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml).
-The default is 29.
-
-The -bundleid flag is required for -target ios and sets the bundle ID to use
-with the app.
-
-The -o flag specifies the output file name. If not specified, the
-output file name depends on the package built.
-
-The -v flag provides verbose output, including the list of packages built.
-
-The build flags -a, -i, -n, -x, -gcflags, -ldflags, -tags, -trimpath, and -work are
-shared with the build command. For documentation, see 'go help build'.
-`,
+// If the package directory contains an assets subdirectory, its contents
+// are copied into the output.
+func Build(c *config.Config) error {
+	_, err := BuildImpl(c)
+	return err
 }
 
-func runBuild(cmd *command) (err error) {
-	_, err = runBuildImpl(cmd)
-	return
-}
-
-// runBuildImpl builds a package for mobiles based on the given commands.
-// runBuildImpl returns a built package information and an error if exists.
-func runBuildImpl(cmd *command) (*packages.Package, error) {
+// BuildImpl builds a package for mobiles based on the given config info.
+// BuildImpl returns a built package information and an error if exists.
+func BuildImpl(c *config.Config) (*packages.Package, error) {
 	cleanup, err := buildEnvInit()
 	if err != nil {
 		return nil, err
 	}
 	defer cleanup()
 
-	args := cmd.flag.Args()
-
-	targets, err := parseBuildTarget(buildTarget)
+	targets, err := parseBuildTarget(c.Build.Target) // TODO: do this better (shouldn't need this helper function)
 	if err != nil {
-		return nil, fmt.Errorf(`invalid -target=%q: %v`, buildTarget, err)
-	}
-
-	var buildPath string
-	switch len(args) {
-	case 0:
-		buildPath = "."
-	case 1:
-		buildPath = args[0]
-	default:
-		cmd.usage()
-		os.Exit(1)
+		return nil, fmt.Errorf(`invalid -target=%q: %v`, c.Build.Target, err)
 	}
 
 	// TODO(ydnar): this should work, unless build tags affect loading a single package.
 	// Should we try to import packages with different build tags per platform?
-	pkgs, err := packages.Load(packagesConfig(targets[0]), buildPath)
+	pkgs, err := packages.Load(packagesConfig(targets[0]), c.Build.Package)
 	if err != nil {
 		return nil, err
 	}
 
 	// len(pkgs) can be more than 1 e.g., when the specified path includes `...`.
 	if len(pkgs) != 1 {
-		cmd.usage()
-		os.Exit(1)
+		return nil, fmt.Errorf("expected 1 package but got %d", len(pkgs))
 	}
 
 	pkg := pkgs[0]
 
-	if pkg.Name != "main" && buildO != "" {
+	if pkg.Name != "main" && c.Build.Output != "" {
 		return nil, fmt.Errorf("cannot set -o when building non-main package")
 	}
 
@@ -147,12 +107,12 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 		}
 	case isApplePlatform(targets[0].platform):
 		if !xcodeAvailable() {
-			return nil, fmt.Errorf("-target=%s requires XCode", buildTarget)
+			return nil, fmt.Errorf("-target=%s requires XCode", c.Build.Target)
 		}
 		if pkg.Name != "main" {
 			for _, t := range targets {
 				// Catalyst support requires iOS 13+
-				v, _ := strconv.ParseFloat(buildIOSVersion, 64)
+				v, _ := strconv.ParseFloat(c.Build.IOSVersion, 64)
 				if t.platform == "maccatalyst" && v < 13.0 {
 					return nil, errors.New("catalyst requires -iosversion=13 or higher")
 				}
@@ -162,10 +122,10 @@ func runBuildImpl(cmd *command) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		if buildBundleID == "" {
+		if c.Build.BundleID == "" {
 			return nil, fmt.Errorf("-target=ios requires -bundleid set")
 		}
-		nmpkgs, err = GoAppleBuild(pkg, buildBundleID, targets)
+		nmpkgs, err = GoAppleBuild(pkg, c.Build.BundleID, targets)
 		if err != nil {
 			return nil, err
 		}
@@ -240,64 +200,6 @@ func printcmd(format string, args ...interface{}) {
 	fmt.Fprint(xout, cmd)
 }
 
-// "Build flags", used by multiple commands.
-var (
-	buildA                bool        // -a
-	buildI                bool        // -i
-	buildN                bool        // -n
-	buildV                bool        // -v
-	buildX                bool        // -x
-	buildO                string      // -o
-	buildGcflags          string      // -gcflags
-	buildLdflags          string      // -ldflags
-	buildTarget           string      // -target
-	buildTrimpath         bool        // -trimpath
-	buildWork             bool        // -work
-	buildBundleID         string      // -bundleid
-	buildIOSVersion       string      // -iosversion
-	buildAndroidMinSDK    int         // -androidMinSDK
-	buildAndroidTargetSDK int         // -androidTargetSDK
-	buildTags             stringsFlag // -tags
-)
-
-func addBuildFlags(cmd *command) {
-	cmd.flag.StringVar(&buildO, "o", "", "")
-	cmd.flag.StringVar(&buildGcflags, "gcflags", "", "")
-	cmd.flag.StringVar(&buildLdflags, "ldflags", "", "")
-	cmd.flag.StringVar(&buildTarget, "target", "android", "")
-	cmd.flag.StringVar(&buildBundleID, "bundleid", "", "")
-	cmd.flag.StringVar(&buildIOSVersion, "iosversion", "13.0", "")
-	cmd.flag.IntVar(&buildAndroidMinSDK, "androidMinSDK", minAndroidSDK, "")
-	cmd.flag.IntVar(&buildAndroidTargetSDK, "androidTargetSDK", defaultAndroidTargetSDK, "")
-
-	cmd.flag.BoolVar(&buildA, "a", false, "")
-	cmd.flag.BoolVar(&buildI, "i", false, "")
-	cmd.flag.BoolVar(&buildTrimpath, "trimpath", false, "")
-	cmd.flag.Var(&buildTags, "tags", "")
-}
-
-func addBuildFlagsNVXWork(cmd *command) {
-	cmd.flag.BoolVar(&buildN, "n", false, "")
-	cmd.flag.BoolVar(&buildV, "v", false, "")
-	cmd.flag.BoolVar(&buildX, "x", false, "")
-	cmd.flag.BoolVar(&buildWork, "work", false, "")
-}
-
-func init() {
-	addBuildFlags(cmdBuild)
-	addBuildFlagsNVXWork(cmdBuild)
-
-	addBuildFlags(cmdInstall)
-	addBuildFlagsNVXWork(cmdInstall)
-
-	addBuildFlagsNVXWork(cmdInit)
-
-	addBuildFlags(cmdBind)
-	addBuildFlagsNVXWork(cmdBind)
-
-	addBuildFlagsNVXWork(cmdClean)
-}
-
 func goBuild(src string, env []string, args ...string) error {
 	return goCmd("build", []string{src}, env, args...)
 }
@@ -314,31 +216,31 @@ func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
 	return goCmdAt("", subcmd, srcs, env, args...)
 }
 
-func goCmdAt(at string, subcmd string, srcs []string, env []string, args ...string) error {
+func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []string, args ...string) error {
 	cmd := exec.Command("go", subcmd)
-	tags := buildTags
+	tags := c.Build.Tags
 	if len(tags) > 0 {
 		cmd.Args = append(cmd.Args, "-tags", strings.Join(tags, ","))
 	}
-	if buildV {
+	if grease.Verbose {
 		cmd.Args = append(cmd.Args, "-v")
 	}
-	if subcmd != "install" && buildI {
+	if subcmd != "install" && c.Build.Install {
 		cmd.Args = append(cmd.Args, "-i")
 	}
-	if buildX {
+	if c.Build.Print {
 		cmd.Args = append(cmd.Args, "-x")
 	}
-	if buildGcflags != "" {
-		cmd.Args = append(cmd.Args, "-gcflags", buildGcflags)
+	if len(c.Build.GCFlags) != 0 {
+		cmd.Args = append(cmd.Args, "-gcflags", strings.Join(c.Build.GCFlags, ","))
 	}
-	if buildLdflags != "" {
-		cmd.Args = append(cmd.Args, "-ldflags", buildLdflags)
+	if len(c.Build.LDFlags) != 0 {
+		cmd.Args = append(cmd.Args, "-ldflags", strings.Join(c.Build.LDFlags, ","))
 	}
-	if buildTrimpath {
+	if c.Build.Trimpath {
 		cmd.Args = append(cmd.Args, "-trimpath")
 	}
-	if buildWork {
+	if c.Build.Work {
 		cmd.Args = append(cmd.Args, "-work")
 	}
 	cmd.Args = append(cmd.Args, args...)
@@ -382,9 +284,9 @@ func goModTidyAt(at string, env []string) error {
 //	android/arm64,android/386,android/amd64
 //	ios,iossimulator,maccatalyst
 //	macos/amd64
-func parseBuildTarget(buildTarget string) ([]targetInfo, error) {
-	if buildTarget == "" {
-		return nil, fmt.Errorf(`invalid target ""`)
+func parseBuildTarget(buildTarget []config.Platform) ([]targetInfo, error) {
+	if buildTarget == nil {
+		return nil, fmt.Errorf(`invalid target <nil>`)
 	}
 
 	targets := []targetInfo{}
@@ -406,35 +308,30 @@ func parseBuildTarget(buildTarget string) ([]targetInfo, error) {
 	}
 
 	var isAndroid, isApple bool
-	for _, target := range strings.Split(buildTarget, ",") {
-		tuple := strings.SplitN(target, "/", 2)
-		platform := tuple[0]
-		hasArch := len(tuple) == 2
-
-		if isAndroidPlatform(platform) {
+	for _, target := range buildTarget {
+		if isAndroidPlatform(target.OS) {
 			isAndroid = true
-		} else if isApplePlatform(platform) {
+		} else if isApplePlatform(target.OS) {
 			isApple = true
 		} else {
-			return nil, fmt.Errorf("unsupported platform: %q", platform)
+			return nil, fmt.Errorf("unsupported platform: %q", target.OS)
 		}
 		if isAndroid && isApple {
 			return nil, fmt.Errorf(`cannot mix android and Apple platforms`)
 		}
 
-		if hasArch {
-			arch := tuple[1]
-			if !isSupportedArch(platform, arch) {
+		if target.Arch != "" {
+			if !isSupportedArch(target.OS, target.Arch) {
 				return nil, fmt.Errorf(`unsupported platform/arch: %q`, target)
 			}
-			addTarget(platform, arch)
+			addTarget(target.OS, target.Arch)
 		} else {
-			addPlatform(platform)
+			addPlatform(target.OS)
 		}
 	}
 
 	// Special case to build iossimulator if -target=ios
-	if buildTarget == "ios" {
+	if slices.ContainsFunc(buildTarget, func(p config.Platform) bool { return p.OS == "ios" }) {
 		addPlatform("iossimulator")
 	}
 

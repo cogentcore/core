@@ -19,7 +19,7 @@ import (
 //
 //gti:add
 func Build(c *config.Config) error {
-	if len(c.Build.Platform) == 0 {
+	if len(c.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
 	err := os.MkdirAll(filepath.Join(".", "bin", "build"), 0700)
@@ -27,7 +27,7 @@ func Build(c *config.Config) error {
 		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
 	}
 	androidArchs := []string{}
-	for _, platform := range c.Build.Platform {
+	for _, platform := range c.Build.Target {
 		err := config.OSSupported(platform.OS)
 		if err != nil {
 			return err
