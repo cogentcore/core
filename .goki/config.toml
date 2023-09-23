@@ -1,6 +1,6 @@
 Name = "gengo"
 Desc = ""
-Version = "v0.3.4"
+Version = "v0.3.5"
 Type = "Library"
 
 [Build]
