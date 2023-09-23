@@ -96,12 +96,12 @@ func GoAppleBuild(pkg *packages.Package, bundleID string, targets []targetInfo) 
 		path := filepath.Join(tmpdir, t.platform, t.arch)
 
 		// Disable DWARF; see golang.org/issues/25148.
-		if err := goBuild(src, appleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
+		if err := GoBuild(src, appleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
 			return nil, err
 		}
 		if nmpkgs == nil {
 			var err error
-			nmpkgs, err = extractPkgs(appleNM, path)
+			nmpkgs, err = ExtractPkgs(appleNM, path)
 			if err != nil {
 				return nil, err
 			}
@@ -234,7 +234,7 @@ func appleCopyAssets(pkg *packages.Package, xcodeProjDir string) error {
 			return nil
 		}
 		dst := dstAssets + "/" + path[len(srcAssets)+1:]
-		return copyFile(dst, path)
+		return CopyFile(dst, path)
 	})
 }
 

@@ -14,9 +14,10 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
+
+	"slices"
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/sdkpath"
@@ -67,14 +68,18 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	}
 	defer cleanup()
 
-	targets, err := parseBuildTarget(c.Build.Target) // TODO: do this better (shouldn't need this helper function)
-	if err != nil {
-		return nil, fmt.Errorf(`invalid -target=%q: %v`, c.Build.Target, err)
+	// Special case to add iossimulator if we don't already have it and we have ios
+	hasIOSSimulator := slices.ContainsFunc(c.Build.Target,
+		func(p config.Platform) bool { return p.OS == "iossimulator" })
+	hasIOS := slices.ContainsFunc(c.Build.Target,
+		func(p config.Platform) bool { return p.OS == "ios" })
+	if !hasIOSSimulator && hasIOS {
+		c.Build.Target = append(c.Build.Target, config.Platform{OS: "iossimulator", Arch: "arm64"}) // TODO: set arch better here
 	}
 
 	// TODO(ydnar): this should work, unless build tags affect loading a single package.
 	// Should we try to import packages with different build tags per platform?
-	pkgs, err := packages.Load(packagesConfig(targets[0]), c.Build.Package)
+	pkgs, err := packages.Load(PackagesConfig(targets[0]), c.Build.Package)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +100,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	case isAndroidPlatform(targets[0].platform):
 		if pkg.Name != "main" {
 			for _, t := range targets {
-				if err := goBuild(pkg.PkgPath, androidEnv[t.arch]); err != nil {
+				if err := GoBuild(pkg.PkgPath, androidEnv[t.arch]); err != nil {
 					return nil, err
 				}
 			}
@@ -116,7 +121,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 				if t.platform == "maccatalyst" && v < 13.0 {
 					return nil, errors.New("catalyst requires -iosversion=13 or higher")
 				}
-				if err := goBuild(pkg.PkgPath, appleEnv[t.String()]); err != nil {
+				if err := GoBuild(pkg.PkgPath, appleEnv[t.String()]); err != nil {
 					return nil, err
 				}
 			}
@@ -144,11 +149,11 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	return pkg, nil
 }
 
-var nmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
+var NmRE = regexp.MustCompile(`[0-9a-f]{8} t _?(?:.*/vendor/)?(golang.org/x.*/[^.]*)`)
 
-func extractPkgs(nm string, path string) (map[string]bool, error) {
-	if buildN {
-		return map[string]bool{"goki.dev/mobile/app": true}, nil
+func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, error) {
+	if c.Build.PrintOnly {
+		return map[string]bool{"goki.dev/mobile/app": true}, nil // TODO: fix import paths
 	}
 	r, w := io.Pipe()
 	cmd := exec.Command(nm, path)
@@ -160,7 +165,7 @@ func extractPkgs(nm string, path string) (map[string]bool, error) {
 	go func() {
 		s := bufio.NewScanner(r)
 		for s.Scan() {
-			if res := nmRE.FindStringSubmatch(s.Text()); res != nil {
+			if res := NmRE.FindStringSubmatch(s.Text()); res != nil {
 				nmpkgs[res[1]] = true
 			}
 		}
@@ -200,23 +205,23 @@ func printcmd(format string, args ...interface{}) {
 	fmt.Fprint(xout, cmd)
 }
 
-func goBuild(src string, env []string, args ...string) error {
-	return goCmd("build", []string{src}, env, args...)
+func GoBuild(c *config.Config, src string, env []string, args ...string) error {
+	return GoCmd(c, "build", []string{src}, env, args...)
 }
 
-func goBuildAt(at string, src string, env []string, args ...string) error {
-	return goCmdAt(at, "build", []string{src}, env, args...)
+func GoBuildAt(c *config.Config, at string, src string, env []string, args ...string) error {
+	return GoCmdAt(c, at, "build", []string{src}, env, args...)
 }
 
-func goInstall(srcs []string, env []string, args ...string) error {
-	return goCmd("install", srcs, env, args...)
+func GoInstall(c *config.Config, srcs []string, env []string, args ...string) error {
+	return GoCmd(c, "install", srcs, env, args...)
 }
 
-func goCmd(subcmd string, srcs []string, env []string, args ...string) error {
-	return goCmdAt("", subcmd, srcs, env, args...)
+func GoCmd(c *config.Config, subcmd string, srcs []string, env []string, args ...string) error {
+	return GoCmdAt(c, "", subcmd, srcs, env, args...)
 }
 
-func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []string, args ...string) error {
+func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []string, args ...string) error {
 	cmd := exec.Command("go", subcmd)
 	tags := c.Build.Tags
 	if len(tags) > 0 {
@@ -248,7 +253,7 @@ func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
-	if gmc, err := goModCachePath(); err == nil {
+	if gmc, err := GoModCachePath(); err == nil {
 		env = append([]string{"GOMODCACHE=" + gmc}, env...)
 	} else {
 		env = append([]string{}, env...)
@@ -258,15 +263,15 @@ func goCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 	return runCmd(cmd)
 }
 
-func goModTidyAt(at string, env []string) error {
+func GoModTidyAt(c *config.Config, at string, env []string) error {
 	cmd := exec.Command("go", "mod", "tidy")
-	if buildV {
+	if grease.Verbose {
 		cmd.Args = append(cmd.Args, "-v")
 	}
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
-	if gmc, err := goModCachePath(); err == nil {
+	if gmc, err := GoModCachePath(); err == nil {
 		env = append([]string{"GOMODCACHE=" + gmc}, env...)
 	} else {
 		env = append([]string{}, env...)
@@ -276,78 +281,7 @@ func goModTidyAt(at string, env []string) error {
 	return runCmd(cmd)
 }
 
-// parseBuildTarget parses buildTarget into 1 or more platforms and architectures.
-// Returns an error if buildTarget contains invalid input.
-// Example valid target strings:
-//
-//	android
-//	android/arm64,android/386,android/amd64
-//	ios,iossimulator,maccatalyst
-//	macos/amd64
-func parseBuildTarget(buildTarget []config.Platform) ([]targetInfo, error) {
-	if buildTarget == nil {
-		return nil, fmt.Errorf(`invalid target <nil>`)
-	}
-
-	targets := []targetInfo{}
-	targetsAdded := make(map[targetInfo]bool)
-
-	addTarget := func(platform, arch string) {
-		t := targetInfo{platform, arch}
-		if targetsAdded[t] {
-			return
-		}
-		targets = append(targets, t)
-		targetsAdded[t] = true
-	}
-
-	addPlatform := func(platform string) {
-		for _, arch := range platformArchs(platform) {
-			addTarget(platform, arch)
-		}
-	}
-
-	var isAndroid, isApple bool
-	for _, target := range buildTarget {
-		if isAndroidPlatform(target.OS) {
-			isAndroid = true
-		} else if isApplePlatform(target.OS) {
-			isApple = true
-		} else {
-			return nil, fmt.Errorf("unsupported platform: %q", target.OS)
-		}
-		if isAndroid && isApple {
-			return nil, fmt.Errorf(`cannot mix android and Apple platforms`)
-		}
-
-		if target.Arch != "" {
-			if !isSupportedArch(target.OS, target.Arch) {
-				return nil, fmt.Errorf(`unsupported platform/arch: %q`, target)
-			}
-			addTarget(target.OS, target.Arch)
-		} else {
-			addPlatform(target.OS)
-		}
-	}
-
-	// Special case to build iossimulator if -target=ios
-	if slices.ContainsFunc(buildTarget, func(p config.Platform) bool { return p.OS == "ios" }) {
-		addPlatform("iossimulator")
-	}
-
-	return targets, nil
-}
-
-type targetInfo struct {
-	platform string
-	arch     string
-}
-
-func (t targetInfo) String() string {
-	return t.platform + "/" + t.arch
-}
-
-func goModCachePath() (string, error) {
+func GoModCachePath() (string, error) {
 	out, err := exec.Command("go", "env", "GOMODCACHE").Output()
 	if err != nil {
 		return "", err

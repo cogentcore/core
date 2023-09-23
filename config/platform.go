@@ -43,6 +43,8 @@ func ArchSupported(arch string) error {
 	return nil
 }
 
+// TODO: get all archs correctly when parsing platform
+
 // ParsePlatform parses the given platform string of format os[/arch]
 func ParsePlatform(platform string) (Platform, error) {
 	before, after, found := strings.Cut(platform, "/")

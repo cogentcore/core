@@ -81,7 +81,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
-		err = goBuild(
+		err = GoBuild(
 			pkg.PkgPath,
 			androidEnv[t.arch],
 			"-buildmode=c-shared",
@@ -90,7 +90,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		if err != nil {
 			return nil, err
 		}
-		nmpkgs[t.arch], err = extractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
+		nmpkgs[t.arch], err = ExtractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
 		if err != nil {
 			return nil, err
 		}

@@ -157,7 +157,7 @@ func TestParseBuildTarget(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.in, func(t *testing.T) {
-			targets, err := parseBuildTarget(tc.in)
+			targets, err := ParseBuildTarget(tc.in)
 			var s []string
 			for _, t := range targets {
 				s = append(s, t.String())
@@ -191,7 +191,7 @@ func TestRegexImportGolangXPackage(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		res := nmRE.FindStringSubmatch(tc.in)
+		res := NmRE.FindStringSubmatch(tc.in)
 		if len(res) != tc.wantLen {
 			t.Errorf("nmRE returned unexpected result for %q: want len(res) = %d, got %d",
 				tc.in, tc.wantLen, len(res))

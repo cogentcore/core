@@ -80,7 +80,7 @@ func runInit(cmd *command) error {
 	}()
 
 	// Make sure gobind is up to date.
-	if err := goInstall([]string{"goki.dev/mobile/cmd/gobind@latest"}, nil); err != nil {
+	if err := GoInstall([]string{"goki.dev/mobile/cmd/gobind@latest"}, nil); err != nil {
 		return err
 	}
 
@@ -163,7 +163,7 @@ func installOpenAL(gomobilepath string) error {
 	for _, f := range []string{"include/AL/al.h", "include/AL/alc.h"} {
 		dst := filepath.Join(gomobilepath, f)
 		src := filepath.Join(initOpenAL, f)
-		if err := copyFile(dst, src); err != nil {
+		if err := CopyFile(dst, src); err != nil {
 			return err
 		}
 	}
@@ -202,7 +202,7 @@ func installOpenAL(gomobilepath string) error {
 
 		dst := filepath.Join(gomobilepath, "lib", t.abi, "libopenal.so")
 		src := filepath.Join(alTmpDir, "build", abi, "libopenal.so")
-		if err := copyFile(dst, src); err != nil {
+		if err := CopyFile(dst, src); err != nil {
 			return err
 		}
 	}

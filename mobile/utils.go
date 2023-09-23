@@ -9,23 +9,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"goki.dev/goki/config"
+	"goki.dev/grease"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
 
-func copyFile(dst, src string) error {
-	if buildX {
+func CopyFile(c *config.Config, dst, src string) error {
+	if c.Build.Print {
 		printcmd("cp %s %s", src, dst)
 	}
-	return writeFile(dst, func(w io.Writer) error {
-		if buildN {
+	return WriteFile(c, dst, func(w io.Writer) error {
+		if c.Build.PrintOnly {
 			return nil
 		}
 		f, err := os.Open(src)
@@ -41,8 +42,8 @@ func copyFile(dst, src string) error {
 	})
 }
 
-func writeFile(filename string, generate func(io.Writer) error) error {
-	if buildV {
+func WriteFile(c *config.Config, filename string, generate func(io.Writer) error) error {
+	if grease.Verbose {
 		fmt.Fprintf(os.Stderr, "write %s\n", filename)
 	}
 
@@ -50,8 +51,8 @@ func writeFile(filename string, generate func(io.Writer) error) error {
 		return err
 	}
 
-	if buildN {
-		return generate(ioutil.Discard)
+	if c.Build.PrintOnly {
+		return generate(io.Discard)
 	}
 
 	f, err := os.Create(filename)
@@ -67,11 +68,11 @@ func writeFile(filename string, generate func(io.Writer) error) error {
 	return generate(f)
 }
 
-func packagesConfig(t targetInfo) *packages.Config {
+func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 	config := &packages.Config{}
 	// Add CGO_ENABLED=1 explicitly since Cgo is disabled when GOOS is different from host OS.
-	config.Env = append(os.Environ(), "GOARCH="+t.arch, "GOOS="+platformOS(t.platform), "CGO_ENABLED=1")
-	tags := append(buildTags[:], platformTags(t.platform)...)
+	config.Env = append(os.Environ(), "GOARCH="+t.Arch, "GOOS="+platformOS(t.OS), "CGO_ENABLED=1")
+	tags := append(c.Build.Tags[:], platformTags(t.OS)...)
 
 	if len(tags) > 0 {
 		config.BuildFlags = []string{"-tags=" + strings.Join(tags, ",")}
@@ -79,12 +80,12 @@ func packagesConfig(t targetInfo) *packages.Config {
 	return config
 }
 
-// getModuleVersions returns a module information at the directory src.
-func getModuleVersions(targetPlatform string, targetArch string, src string) (*modfile.File, error) {
+// GetModuleVersions returns a module information at the directory src.
+func GetModuleVersions(c *config.Config, targetPlatform string, targetArch string, src string) (*modfile.File, error) {
 	cmd := exec.Command("go", "list")
 	cmd.Env = append(os.Environ(), "GOOS="+platformOS(targetPlatform), "GOARCH="+targetArch)
 
-	tags := append(buildTags[:], platformTags(targetPlatform)...)
+	tags := append(c.Build.Tags[:], platformTags(targetPlatform)...)
 
 	// TODO(hyangah): probably we don't need to add all the dependencies.
 	cmd.Args = append(cmd.Args, "-m", "-json", "-tags="+strings.Join(tags, ","), "all")
@@ -137,9 +138,9 @@ func getModuleVersions(targetPlatform string, targetArch string, src string) (*m
 	return f, nil
 }
 
-// writeGoMod writes go.mod file at dir when Go modules are used.
-func writeGoMod(dir, targetPlatform, targetArch string) error {
-	m, err := areGoModulesUsed()
+// WriteGoMod writes go.mod file at dir when Go modules are used.
+func WriteGoMod(c *config.Config, dir, targetPlatform, targetArch string) error {
+	m, err := AreGoModulesUsed()
 	if err != nil {
 		return err
 	}
@@ -148,8 +149,8 @@ func writeGoMod(dir, targetPlatform, targetArch string) error {
 		return nil
 	}
 
-	return writeFile(filepath.Join(dir, "go.mod"), func(w io.Writer) error {
-		f, err := getModuleVersions(targetPlatform, targetArch, ".")
+	return WriteFile(c, filepath.Join(dir, "go.mod"), func(w io.Writer) error {
+		f, err := GetModuleVersions(c, targetPlatform, targetArch, ".")
 		if err != nil {
 			return err
 		}
@@ -168,22 +169,22 @@ func writeGoMod(dir, targetPlatform, targetArch string) error {
 }
 
 var (
-	areGoModulesUsedResult struct {
+	AreGoModulesUsedResult struct {
 		used bool
 		err  error
 	}
-	areGoModulesUsedOnce sync.Once
+	AreGoModulesUsedOnce sync.Once
 )
 
-func areGoModulesUsed() (bool, error) {
-	areGoModulesUsedOnce.Do(func() {
+func AreGoModulesUsed() (bool, error) {
+	AreGoModulesUsedOnce.Do(func() {
 		out, err := exec.Command("go", "env", "GOMOD").Output()
 		if err != nil {
-			areGoModulesUsedResult.err = err
+			AreGoModulesUsedResult.err = err
 			return
 		}
 		outstr := strings.TrimSpace(string(out))
-		areGoModulesUsedResult.used = outstr != ""
+		AreGoModulesUsedResult.used = outstr != ""
 	})
-	return areGoModulesUsedResult.used, areGoModulesUsedResult.err
+	return AreGoModulesUsedResult.used, AreGoModulesUsedResult.err
 }
