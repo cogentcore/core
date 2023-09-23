@@ -28,22 +28,22 @@ import (
 var tmpdir string
 
 // Build compiles and encodes the app named by the import path.
-
+//
 // The named package must define a main function.
-
+//
 // The -target flag takes either android (the default), or one or more
 // comma-delimited Apple platforms (TODO: apple platforms list).
-
+//
 // For -target android, if an AndroidManifest.xml is defined in the
 // package directory, it is added to the APK output. Otherwise, a default
 // manifest is generated. By default, this builds a fat APK for all supported
 // instruction sets (arm, 386, amd64, arm64). A subset of instruction sets can
 // be selected by specifying target type with the architecture name. E.g.
 // -target=android/arm,android/386.
-
+//
 // For Apple -target platforms, gomobile must be run on an OS X machine with
 // Xcode installed.
-
+//
 // By default, -target ios will generate an XCFramework for both ios
 // and iossimulator. Multiple Apple targets can be specified, creating a "fat"
 // XCFramework with each slice. To generate a fat XCFramework that supports
@@ -51,7 +51,7 @@ var tmpdir string
 // specify -target ios,macos,maccatalyst. A subset of instruction sets can be
 // selectged by specifying the platform with an architecture name. E.g.
 // -target=ios/arm64,maccatalyst/arm64.
-
+//
 // If the package directory contains an assets subdirectory, its contents
 // are copied into the output.
 func Build(c *config.Config) error {
