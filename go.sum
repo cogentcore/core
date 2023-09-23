@@ -2,5 +2,5 @@ goki.dev/enums v0.9.14 h1:AmKW9uqyo0UvnBRs2O/7nssnZSiko58WLm0pTWgzNJo=
 goki.dev/enums v0.9.14/go.mod h1:S9OyjoKynBC3Gr67lrVLnw7ldlI/Z4xR/SQeBAOqiAA=
 goki.dev/gti v0.1.0 h1:S+gYWbE8ehNz99ULkgPdXCCID3DCjByacRGlTSafMrI=
 goki.dev/gti v0.1.0/go.mod h1:x95+l32TLC1kpVsJ3Bdk/UBGCEtAFwUqqsL8aPE9Cnc=
-goki.dev/ordmap v0.5.4 h1:DF2yRJ622wTeN0+PtD2EeXZKzivQDdsqGbnt0MjXaVI=
-goki.dev/ordmap v0.5.4/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
+goki.dev/ordmap v0.5.5 h1:jHboNr7bDI7POifOcnJ5BpIoGeTA0sVfdlD+l7enbj0=
+goki.dev/ordmap v0.5.5/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=

@@ -7,4 +7,4 @@ require (
 	goki.dev/gti v0.1.0
 )
 
-require goki.dev/ordmap v0.5.4
+require goki.dev/ordmap v0.5.5
