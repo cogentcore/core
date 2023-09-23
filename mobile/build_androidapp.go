@@ -31,7 +31,7 @@ const (
 )
 
 // GoAndroidBuild builds the given package for the given Android targets.
-func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []*config.Platform) (map[string]bool, error) {
+func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot(targets...)
 	if err != nil {
 		return nil, err
