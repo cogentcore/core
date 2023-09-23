@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"goki.dev/goki/config"
-	"goki.dev/ki/v2/toml"
+	"goki.dev/grows/tomls"
 )
 
 // Init initializes the ".goki" directory
@@ -33,7 +33,7 @@ func Init(c *config.Config) error {
 		base := filepath.Base(cdir)
 		c.Name = base
 	}
-	err = os.WriteFile(".goki/config.toml", toml.WriteBytes(c), 0666)
+	err = tomls.Save(c, ".goki/config.toml")
 	if err != nil {
 		return fmt.Errorf("error writing to configuration file: %w", err)
 	}
