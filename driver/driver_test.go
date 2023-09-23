@@ -6,6 +6,7 @@ package driver
 
 import (
 	"fmt"
+	"image"
 	"testing"
 
 	"goki.dev/goosi"
@@ -13,6 +14,19 @@ import (
 
 func TestMain(t *testing.T) {
 	Main(func(a goosi.App) {
-		fmt.Println(goosi.TheApp.Name())
+		opts := &goosi.NewWindowOptions{
+			Size:      image.Pt(1024, 768),
+			StdPixels: true,
+			Title:     "Goosi Test Window",
+		}
+		w, err := goosi.TheApp.NewWindow(opts)
+		if err != nil {
+			t.Error(err)
+		}
+		fmt.Println(w.Name())
+		for {
+			evi := w.NextEvent()
+			fmt.Println(evi)
+		}
 	})
 }
