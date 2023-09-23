@@ -203,7 +203,6 @@ func EnvInit(c *config.Config) (err error) {
 				sdk = "iphoneos"
 				clang, cflags, err = EnvClang(c, sdk)
 				cflags += " -mios-version-min=" + c.Build.IOSVersion
-				fmt.Printf("added ios cflags: %s\n", cflags)
 			case "iossimulator":
 				goos = "ios"
 				sdk = "iphonesimulator"

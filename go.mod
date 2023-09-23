@@ -10,6 +10,7 @@ require (
 	goki.dev/grows v0.3.3
 	goki.dev/gti v0.1.4
 	goki.dev/ordmap v0.5.5
+	golang.org/x/mod v0.12.0
 	golang.org/x/tools v0.13.0
 )
 
@@ -21,6 +22,5 @@ require (
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	goki.dev/glop v0.1.2 // indirect
 	goki.dev/laser v0.1.5 // indirect
-	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 )
