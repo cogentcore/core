@@ -24,6 +24,11 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+const (
+	minAndroidSDK           = 23
+	defaultAndroidTargetSDK = 29
+)
+
 func goAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot(targets...)
 	if err != nil {
