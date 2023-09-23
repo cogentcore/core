@@ -7,25 +7,18 @@ package main
 import (
 	"fmt"
 	"path/filepath"
+
+	"goki.dev/goki/config"
 )
 
-var cmdClean = &command{
-	run:   runClean,
-	Name:  "clean",
-	Usage: "",
-	Short: "remove object files and cached gomobile files",
-	Long: `
-Clean removes object files and cached NDK files downloaded by gomobile init
-`,
-}
-
-func runClean(cmd *command) (err error) {
+// Clean removes object files and cached NDK files downloaded by gomobile init
+func Clean(c *config.Config) (err error) {
 	gopaths := filepath.SplitList(goEnv("GOPATH"))
 	if len(gopaths) == 0 {
 		return fmt.Errorf("GOPATH is not set")
 	}
 	gomobilepath = filepath.Join(gopaths[0], "pkg/gomobile")
-	if buildX {
+	if c.Build.Print {
 		fmt.Fprintln(Xout, "GOMOBILE="+gomobilepath)
 	}
 	return removeAll(gomobilepath)
