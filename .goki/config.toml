@@ -1,6 +1,6 @@
 Name = "pi"
 Desc = ""
-Version = "v2.0.0-dev0.0.1"
+Version = "v2.0.0-dev0.0.2"
 Type = "Library"
 
 [Build]
@@ -27,6 +27,7 @@ Type = "Library"
 [Generate]
   Dir = "."
   Output = "gokigen.go"
+  AddKiTypes = true
   [Generate.Enumgen]
     Dir = "."
     Output = "enumgen.go"
