@@ -32,7 +32,7 @@ const (
 
 // GoAndroidBuild builds the given package for the given Android targets.
 func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Platform) (map[string]bool, error) {
-	ndkRoot, err := NDKRoot(targets...)
+	ndkRoot, err := NDKRoot(c, targets...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		if err != nil {
 			return nil, err
 		}
-		nmpkgs[t.Arch], err = ExtractPkgs(c, toolchain.Path(ndkRoot, "nm"), libAbsPath)
+		nmpkgs[t.Arch], err = ExtractPkgs(c, toolchain.Path(c, ndkRoot, "nm"), libAbsPath)
 		if err != nil {
 			return nil, err
 		}

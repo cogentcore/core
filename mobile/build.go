@@ -62,7 +62,7 @@ func Build(c *config.Config) error {
 // BuildImpl builds a package for mobiles based on the given config info.
 // BuildImpl returns a built package information and an error if exists.
 func BuildImpl(c *config.Config) (*packages.Package, error) {
-	cleanup, err := BuildEnvInit()
+	cleanup, err := BuildEnvInit(c)
 	if err != nil {
 		return nil, err
 	}
