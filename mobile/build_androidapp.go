@@ -13,14 +13,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/binres"
+	"goki.dev/grease"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -30,7 +31,7 @@ const (
 )
 
 // GoAndroidBuild builds the given package for the given Android targets.
-func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]bool, error) {
+func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []*config.Platform) (map[string]bool, error) {
 	ndkRoot, err := ndkRoot(targets...)
 	if err != nil {
 		return nil, err
@@ -43,7 +44,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	dir := filepath.Dir(pkg.GoFiles[0])
 
 	manifestPath := filepath.Join(dir, "AndroidManifest.xml")
-	manifestData, err := ioutil.ReadFile(manifestPath)
+	manifestData, err := os.ReadFile(manifestPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
 			return nil, err
@@ -61,7 +62,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 			return nil, err
 		}
 		manifestData = buf.Bytes()
-		if buildV {
+		if grease.Verbose {
 			fmt.Fprintf(os.Stderr, "generated AndroidManifest.xml:\n%s\n", manifestData)
 		}
 	} else {
@@ -75,22 +76,23 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	nmpkgs := make(map[string]map[string]bool) // map: arch -> extractPkgs' output
 
 	for _, t := range targets {
-		toolchain := ndk.Toolchain(t.arch)
+		toolchain := ndk.Toolchain(t.Arch)
 		libPath := "lib/" + toolchain.abi + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(tmpdir, libPath)
 		if err := mkdir(filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
 		err = GoBuild(
+			c,
 			pkg.PkgPath,
-			androidEnv[t.arch],
+			androidEnv[t.Arch],
 			"-buildmode=c-shared",
 			"-o", libAbsPath,
 		)
 		if err != nil {
 			return nil, err
 		}
-		nmpkgs[t.arch], err = ExtractPkgs(toolchain.Path(ndkRoot, "nm"), libAbsPath)
+		nmpkgs[t.Arch], err = ExtractPkgs(c, toolchain.Path(ndkRoot, "nm"), libAbsPath)
 		if err != nil {
 			return nil, err
 		}
@@ -106,15 +108,15 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		return nil, err
 	}
 
-	if buildO == "" {
-		buildO = AndroidPkgName(path.Base(pkg.PkgPath)) + ".apk"
+	if c.Build.Output == "" {
+		c.Build.Output = AndroidPkgName(path.Base(pkg.PkgPath)) + ".apk"
 	}
-	if !strings.HasSuffix(buildO, ".apk") {
-		return nil, fmt.Errorf("output file name %q does not end in '.apk'", buildO)
+	if !strings.HasSuffix(c.Build.Output, ".apk") {
+		return nil, fmt.Errorf("output file name %q does not end in '.apk'", c.Build.Output)
 	}
 	var out io.Writer
-	if !buildN {
-		f, err := os.Create(buildO)
+	if !c.Build.PrintOnly {
+		f, err := os.Create(c.Build.Output)
 		if err != nil {
 			return nil, err
 		}
@@ -127,15 +129,15 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	}
 
 	var apkw *Writer
-	if !buildN {
+	if !c.Build.PrintOnly {
 		apkw = NewWriter(out, privKey)
 	}
 	apkwCreate := func(name string) (io.Writer, error) {
-		if buildV {
+		if grease.Verbose {
 			fmt.Fprintf(os.Stderr, "apk: %s\n", name)
 		}
-		if buildN {
-			return ioutil.Discard, nil
+		if c.Build.PrintOnly {
+			return io.Discard, nil
 		}
 		return apkw.Create(name)
 	}
@@ -144,7 +146,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		if err != nil {
 			return err
 		}
-		if !buildN {
+		if !c.Build.PrintOnly {
 			f, err := os.Open(src)
 			if err != nil {
 				return err
@@ -176,8 +178,8 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 	}
 
 	for _, t := range targets {
-		toolchain := ndk.Toolchain(t.arch)
-		if nmpkgs[t.arch]["goki.dev/mobile/exp/audio/al"] {
+		toolchain := ndk.Toolchain(t.Arch)
+		if nmpkgs[t.Arch]["goki.dev/mobile/exp/audio/al"] {
 			dst := "lib/" + toolchain.abi + "/libopenal.so"
 			src := filepath.Join(gomobilepath, dst)
 			if _, err := os.Stat(src); err != nil {
@@ -239,7 +241,7 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 		}
 	}
 
-	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", buildAndroidMinSDK, buildAndroidTargetSDK)
+	bxml, err := binres.UnmarshalXML(bytes.NewReader(manifestData), arsc.iconPath != "", c.Build.AndroidMinSDK, c.Build.AndroidTargetSDK)
 	if err != nil {
 		return nil, err
 	}
@@ -281,14 +283,14 @@ func GoAndroidBuild(pkg *packages.Package, targets []targetInfo) (map[string]boo
 
 	// TODO: add gdbserver to apk?
 
-	if !buildN {
+	if !c.Build.PrintOnly {
 		if err := apkw.Close(); err != nil {
 			return nil, err
 		}
 	}
 
 	// TODO: return nmpkgs
-	return nmpkgs[targets[0].arch], nil
+	return nmpkgs[targets[0].Arch], nil
 }
 
 // AndroidPkgName sanitizes the go package name to be acceptable as a android
