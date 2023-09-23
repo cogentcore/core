@@ -7,11 +7,11 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mattn/go-shellwords v1.0.12
 	goki.dev/enums v0.9.14
-	goki.dev/glop v0.1.1
-	goki.dev/grows v0.3.2
+	goki.dev/glop v0.1.2
+	goki.dev/grows v0.3.3
 	goki.dev/gti v0.1.0
 	goki.dev/laser v0.1.1
-	goki.dev/ordmap v0.5.4
+	goki.dev/ordmap v0.5.5
 )
 
 require (
