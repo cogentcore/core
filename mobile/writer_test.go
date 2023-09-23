@@ -28,7 +28,7 @@ func TestWriter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	f, err := ioutil.TempFile("", "testapk-")
+	f, err := os.CreateTemp("", "testapk-")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -52,7 +52,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
-		err := manifestTmpl.Execute(buf, manifestTmplData{
+		err := ManifestTmpl.Execute(buf, ManifestTmplData{
 			// TODO(crawshaw): a better package path.
 			JavaPkgPath: "org.golang.todo." + libName,
 			Name:        strings.Title(appName),
@@ -66,7 +66,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 			fmt.Fprintf(os.Stderr, "generated AndroidManifest.xml:\n%s\n", manifestData)
 		}
 	} else {
-		libName, err = manifestLibName(manifestData)
+		libName, err = ManifestLibName(manifestData)
 		if err != nil {
 			return nil, fmt.Errorf("error parsing %s: %v", manifestPath, err)
 		}
