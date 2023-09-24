@@ -19,6 +19,7 @@ import (
 )
 
 // Handler is a [slog.Handler] whose output resembles that of [log.Logger].
+// Use [NewHandler] to make a new [Handler] from a writer and options.
 type Handler struct {
 	Opts      slog.HandlerOptions
 	Prefix    string // preformatted group names followed by a dot
@@ -28,8 +29,8 @@ type Handler struct {
 	W  io.Writer
 }
 
-// New makes a new [Handler] for the given writer with the given options.
-func New(w io.Writer, opts *slog.HandlerOptions) *Handler {
+// NewHandler makes a new [Handler] for the given writer with the given options.
+func NewHandler(w io.Writer, opts *slog.HandlerOptions) *Handler {
 	h := &Handler{W: w}
 	if opts != nil {
 		h.Opts = *opts
