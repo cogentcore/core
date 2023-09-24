@@ -10,7 +10,6 @@ package osevent
 
 import (
 	"fmt"
-	"image"
 
 	"goki.dev/goosi"
 )
@@ -37,14 +36,6 @@ const (
 
 func (ev *Event) Type() goosi.EventType {
 	return goosi.OSEvent
-}
-
-func (ev *Event) HasPos() bool {
-	return false
-}
-
-func (ev *Event) Pos() image.Point {
-	return image.Point{}
 }
 
 func (ev *Event) OnWinFocus() bool { // os events generally not focus-specific

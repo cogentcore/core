@@ -57,10 +57,6 @@ type Event struct {
 	// generate different Codes (but the same Rune).
 	Code Codes
 
-	// Modifiers is bitflags representing a set of modifier keys: ModShift,
-	// ModAlt, etc. -- bit positions are key.Modifiers
-	Modifiers int32
-
 	// Action is the key action taken: Press, Release, or None (for key repeats).
 	Action Actions
 
@@ -77,51 +73,9 @@ type ChordEvent struct {
 
 func (ev *Event) String() string {
 	if ev.Rune >= 0 {
-		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Rune: %d hex: %X  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ev.Rune, ev.Rune, ModsString(ev.Modifiers), ev.Time())
+		return fmt.Sprintf("Type: %v  Action: %v  Chord: %v  Rune: %d hex: %X  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Chord(), ev.Rune, ev.Rune, goosi.ModsString(ev.Mods), ev.Time())
 	}
-	return fmt.Sprintf("Type: %v  Action: %v  Code: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Code, ModsString(ev.Modifiers), ev.Time())
-}
-
-// SetModifierBits sets the bitflags based on a list of key.Modifiers
-func SetModifierBits(modBits *int32, mods ...Modifiers) {
-	for _, m := range mods {
-		*modBits |= (1 << uint32(m))
-	}
-}
-
-// HasAnyModifierBits tests whether any of given modifier(s) bits were set
-func HasAnyModifierBits(modBits int32, mods ...Modifiers) bool {
-	for _, m := range mods {
-		if modBits&(1<<uint32(m)) != 0 {
-			return true
-		}
-	}
-	return false
-}
-
-// HasAllModifiersBits tests whether all of given modifier(s) bits were set
-func HasAllModifierBits(modBits int32, mods ...Modifiers) bool {
-	for _, m := range mods {
-		if modBits&(1<<uint32(m)) == 0 {
-			return false
-		}
-	}
-	return true
-}
-
-// SetModifiers sets the bitflags based on a list of key.Modifiers
-func (e *Event) SetModifiers(mods ...Modifiers) {
-	SetModifierBits(&e.Modifiers, mods...)
-}
-
-// HasAnyModifier tests whether any of given modifier(s) were set
-func (e *Event) HasAnyModifier(mods ...Modifiers) bool {
-	return HasAnyModifierBits(e.Modifiers, mods...)
-}
-
-// HasAllModifiers tests whether all of given modifier(s) were set
-func (e *Event) HasAllModifier(mods ...Modifiers) bool {
-	return HasAllModifierBits(e.Modifiers, mods...)
+	return fmt.Sprintf("Type: %v  Action: %v  Code: %v  Mods: %v  Time: %v", ev.Type(), ev.Action, ev.Code, goosi.ModsString(ev.Mods), ev.Time())
 }
 
 // key.Chord represents the key chord associated with a given key function -- it
@@ -134,7 +88,7 @@ type Chord string
 // non-printable ones are converted to their corresponding code names without
 // the "Code" prefix.
 func (e *Event) Chord() Chord {
-	modstr := ModsString(e.Modifiers)
+	modstr := goosi.ModsString(e.Mods)
 	if modstr != "" && e.Code == CodeSpacebar { // modified space is not regular space
 		return Chord(modstr + "Spacebar")
 	}
@@ -151,9 +105,9 @@ func (e *Event) Chord() Chord {
 }
 
 // Decode decodes a chord string into rune and modifiers (set as bit flags)
-func (ch Chord) Decode() (r rune, mods int32, err error) {
+func (ch Chord) Decode() (r rune, mods goosi.Modifiers, err error) {
 	cs := string(ch)
-	mods, cs = ModsFmString(cs)
+	mods, cs = goosi.ModsFmString(cs)
 	rs := ([]rune)(cs)
 	if len(rs) == 1 {
 		r = rs[0]
@@ -209,42 +163,6 @@ const (
 	Press
 	Release
 )
-
-// Modifiers are used as bitflags representing a set of modifier keys -- see
-// SetModifiers method
-type Modifiers int32 //enums:enum
-
-const (
-	Shift Modifiers = iota
-	Control
-	Alt
-	Meta // called "Command" on OS X
-)
-
-// ModsString returns the string representation of the modifiers
-func ModsString(mods int32) string {
-	modstr := ""
-	for m := Shift; m < ModifiersN; m++ {
-		if mods&(1<<uint32(m)) != 0 {
-			modstr += any(m).(fmt.Stringer).String() + "+"
-		}
-	}
-	return modstr
-}
-
-// ModsFmString returns the modifiers corresponding to given string
-// and the remainder of the string after modifiers have been stripped
-func ModsFmString(cs string) (int32, string) {
-	var mods int32
-	for m := Shift; m < ModifiersN; m++ {
-		mstr := any(m).(fmt.Stringer).String() + "+"
-		if strings.HasPrefix(cs, mstr) {
-			mods |= (1 << uint32(m))
-			cs = strings.TrimPrefix(cs, mstr)
-		}
-	}
-	return mods, cs
-}
 
 // Codes is the identity of a key relative to a notional "standard" keyboard.
 type Codes uint32

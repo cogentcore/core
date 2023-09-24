@@ -11,11 +11,7 @@ package dnd
 //go:generate enumgen
 
 import (
-	"image"
-	"time"
-
 	"goki.dev/goosi"
-	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
 )
@@ -24,15 +20,8 @@ import (
 type Event struct {
 	goosi.EventBase
 
-	// Where is the mouse location, in raw display dots (raw, actual pixels)
-	Where image.Point
-
 	// Action associated with the specific drag event: Start, Drop*, Move, Enter, Exit
 	Action Actions
-
-	// Modifiers is a bitmask representing a set of modifier keys:
-	// key.ModShift, key.ModAlt, etc. -- bit positions are key.Modifiers
-	Modifiers int32
 
 	// When event is received by target, Mod indicates the suggested modifier
 	// action associated with the drop (affected by holding down modifier
@@ -58,24 +47,14 @@ type Event struct {
 	Target ki.Ki
 }
 
-// HasAnyModifier tests whether any of given modifier(s) were set
-func (e *Event) HasAnyModifier(mods ...key.Modifiers) bool {
-	return key.HasAnyModifierBits(e.Modifiers, mods...)
-}
-
-// HasAllModifiers tests whether all of given modifier(s) were set
-func (e *Event) HasAllModifiers(mods ...key.Modifiers) bool {
-	return key.HasAllModifierBits(e.Modifiers, mods...)
-}
-
 // DefaultModBits returns the default DropMod modifier action based on modifier keys
-func DefaultModBits(modBits int32) DropMods {
+func DefaultModBits(modBits goosi.Modifiers) DropMods {
 	switch {
-	case key.HasAnyModifierBits(modBits, key.Control):
+	case goosi.HasAnyModifier(modBits, goosi.Control):
 		return DropCopy
-	case key.HasAnyModifierBits(modBits, key.Shift, key.Meta):
+	case goosi.HasAnyModifier(modBits, goosi.Shift, goosi.Meta):
 		return DropMove
-	case key.HasAnyModifierBits(modBits, key.Alt):
+	case goosi.HasAnyModifier(modBits, goosi.Alt):
 		return DropLink
 	default:
 		return DropCopy
@@ -84,7 +63,7 @@ func DefaultModBits(modBits int32) DropMods {
 
 // DefaultMod sets the default DropMod modifier action based on modifier keys
 func (e *Event) DefaultMod() {
-	e.Mod = DefaultModBits(e.Modifiers)
+	e.Mod = DefaultModBits(e.Mods)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -92,12 +71,10 @@ func (e *Event) DefaultMod() {
 // dnd.MoveEvent is emitted when dnd is moved
 type MoveEvent struct {
 	Event
+}
 
-	// From is the previous location of the mouse
-	From image.Point
-
-	// LastTime is the time of the previous event
-	LastTime time.Time
+func (ev MoveEvent) HasPrev() bool {
+	return true
 }
 
 /////////////////////////////////////////////////////////////////
@@ -183,10 +160,6 @@ func (ev *Event) Type() goosi.EventType {
 
 func (ev *Event) HasPos() bool {
 	return true
-}
-
-func (ev *Event) Pos() image.Point {
-	return ev.Where
 }
 
 func (ev *Event) OnFocus() bool {

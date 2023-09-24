@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"goki.dev/enums"
 	"goki.dev/glop/nptime"
 )
 
@@ -20,7 +21,7 @@ import (
 // marking events as processed, which is critical for simplifying logic and
 // preventing unintended multiple effects
 //
-// OSWin deals exclusively in raw "dot" pixel integer coordinates (as in
+// Goosi deals exclusively in raw "dot" pixel integer coordinates (as in
 // go.wde) -- abstraction to different DPI etc takes place higher up in the
 // system
 
@@ -49,7 +50,7 @@ import (
 // event type in signals -- critical to break up different event types into
 // the right categories needed for different types of widgets -- e.g., most do
 // not need move or scroll events, so those are separated.
-type EventType int64 //enums:enum
+type EventType int32 //enums:enum
 
 const (
 	// MouseEvent includes all mouse button actions, but not move or drag
@@ -139,8 +140,42 @@ type Event interface {
 	// HasPos returns true if the event has a window position where it takes place
 	HasPos() bool
 
-	// Pos returns the position in raw display dots (pixels) where event took place -- needed for sending events to the right place
+	// Pos returns the original window-based position in raw display dots
+	// (pixels) where event took place.
 	Pos() image.Point
+
+	// SetLocalOff sets the offset subtracted from window-based positions
+	// to compute Local versions of positions, which are updated.
+	SetLocalOff(off image.Point)
+
+	// LocalOff returns the offset subtracted from window-based positions
+	// to compute Local versions of positions.
+	LocalOff() image.Point
+
+	// LocalPos returns the local position, which can be adjusted from the window pos
+	// via SubLocalOffset based on a local top-left coordinate for a region within
+	// the window.
+	LocalPos() image.Point
+
+	// HasStart returns true if the event has a starting window position
+	// (e.g., starting position of a Drag)
+	HasStart() bool
+
+	// StartPos returns the original starting window-based position.
+	StartPos() image.Point
+
+	// LocalStartPos returns the local starting position
+	LocalStartPos() image.Point
+
+	// HasPrev returns true if the event has a previous window position
+	// (e.g., previous position of a Drag)
+	HasPrev() bool
+
+	// PrevPos returns the original previous window-based position.
+	PrevPos() image.Point
+
+	// LocalPrevPos returns the local previous position
+	LocalPrevPos() image.Point
 
 	// OnFocus returns true if the event operates only on focus item (e.g., keyboard events)
 	OnFocus() bool
@@ -150,6 +185,14 @@ type Event interface {
 
 	// Time returns the time at which the event was generated, in UnixNano nanosecond units
 	Time() time.Time
+
+	// StartTime returns time of StartPos, or other starting time of relevance to the event,
+	// in UnixNano nanosecond units.
+	StartTime() time.Time
+
+	// PrevTime returns time of PrevPos, or other earlier time of relevance to the event,
+	// in UnixNano nanosecond units.
+	PrevTime() time.Time
 
 	// IsProcessed returns whether this event has already been processed
 	IsProcessed() bool
@@ -178,6 +221,42 @@ type EventBase struct {
 	// and thus should no longer be processed by other possible receivers.
 	// Atomic operations are used to encode a 0 or 1, so it is an int32.
 	Processed int32
+
+	// Key Modifiers present when event occurred: for Key, Mouse, Touch events
+	Mods Modifiers
+
+	// Where is the window-based position in raw display dots
+	// (pixels) where event took place.
+	Where image.Point
+
+	// Start is the window-based starting position in raw display dots
+	// (pixels) where event started.
+	Start image.Point
+
+	// Prev is the window-based previous position in raw display dots
+	// (pixels) -- e.g., for mouse dragging.
+	Prev image.Point
+
+	// StTime is the starting time, using more efficient nptime struct
+	StTime nptime.Time
+
+	// PrvTime is the time of the previous event, using more efficient nptime struct
+	PrvTime nptime.Time
+
+	// LocalOffset is the offset subtracted from original window coordinates
+	// to compute the local coordinates.
+	LocalOffset image.Point
+
+	// WhereLocal is the local position, which can be adjusted from the window pos
+	// via SubLocalOffset based on a local top-left coordinate for a region within
+	// the window.
+	WhereLocal image.Point
+
+	// StartLocal is the local starting position
+	StartLocal image.Point
+
+	// PrevLocal is the local previous position
+	PrevLocal image.Point
 }
 
 // SetTime sets the event time to Now
@@ -187,10 +266,19 @@ func (ev *EventBase) SetTime() {
 
 func (ev *EventBase) Init() {
 	ev.SetTime()
+	ev.SetLocalOff(image.Point{}) // ensure local is copied
 }
 
 func (ev EventBase) Time() time.Time {
 	return ev.GenTime.Time()
+}
+
+func (ev EventBase) StartTime() time.Time {
+	return ev.StTime.Time()
+}
+
+func (ev EventBase) PrevTime() time.Time {
+	return ev.PrvTime.Time()
 }
 
 func (ev EventBase) IsProcessed() bool {
@@ -213,6 +301,67 @@ func (ev EventBase) OnWinFocus() bool {
 	return true
 }
 
+// SetModifiers sets the bitflags based on a list of key.Modifiers
+func (ev *EventBase) SetModifiers(mods ...enums.BitFlag) {
+	ev.Mods.SetFlag(true, mods...)
+}
+
+// HasAllModifiers tests whether all of given modifier(s) were set
+func (ev EventBase) HasAllModifiers(mods ...enums.BitFlag) bool {
+	return HasAnyModifier(ev.Mods, mods...)
+}
+
+func (ev EventBase) HasAnyModifier(mods ...enums.BitFlag) bool {
+	return HasAnyModifier(ev.Mods, mods...)
+}
+
+func (ev EventBase) HasPos() bool {
+	return false
+}
+
+func (ev EventBase) HasStart() bool {
+	return false
+}
+
+func (ev EventBase) HasPrev() bool {
+	return false
+}
+
+func (ev EventBase) Pos() image.Point {
+	return ev.Where
+}
+
+func (ev EventBase) StartPos() image.Point {
+	return ev.Start
+}
+
+func (ev EventBase) PrevPos() image.Point {
+	return ev.Prev
+}
+
+func (ev *EventBase) SetLocalOff(off image.Point) {
+	ev.LocalOffset = off
+	ev.WhereLocal = ev.Where.Sub(off)
+	ev.StartLocal = ev.Start.Sub(off)
+	ev.PrevLocal = ev.Prev.Sub(off)
+}
+
+func (ev EventBase) LocalOff() image.Point {
+	return ev.LocalOffset
+}
+
+func (ev EventBase) LocalPos() image.Point {
+	return ev.WhereLocal
+}
+
+func (ev EventBase) LocalStartPos() image.Point {
+	return ev.StartLocal
+}
+
+func (ev EventBase) LocalPrevPos() image.Point {
+	return ev.PrevLocal
+}
+
 //////////////////////////////////////////////////////////////////////
 // CustomEvent
 
@@ -221,13 +370,11 @@ func (ev EventBase) OnWinFocus() bool {
 // optional position and focus parameters
 type CustomEvent struct {
 	EventBase
+
 	Data any
 
 	// set to true if position is available
 	PosAvail bool `desc:"set to true if position is available"`
-
-	// position info if relevant -- set PosAvail
-	Where image.Point `desc:"position info if relevant -- set PosAvail"`
 
 	// set to true if this event should be sent to widget in focus
 	Focus bool `desc:"set to true if this event should be sent to widget in focus"`

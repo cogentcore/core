@@ -19,17 +19,12 @@ package touch
 // https://developer.apple.com/library/ios/documentation/EventHandling/Conceptual/EventHandlingiPhoneOS
 
 import (
-	"image"
-
 	"goki.dev/goosi"
 )
 
 // touch.Event is a touch event.
 type Event struct {
 	goosi.EventBase
-
-	// Where is the touch location, in raw display dots (raw, actual pixels)
-	Where image.Point
 
 	// Sequence is the sequence number. The same number is shared by all events
 	// in a sequence. A sequence begins with a single Begin, is followed by
@@ -78,10 +73,6 @@ func (ev *Event) Type() goosi.EventType {
 
 func (ev *Event) HasPos() bool {
 	return true
-}
-
-func (ev *Event) Pos() image.Point {
-	return ev.Where
 }
 
 func (ev *Event) OnFocus() bool {

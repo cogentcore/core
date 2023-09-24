@@ -19,10 +19,8 @@ package mouse
 import (
 	"fmt"
 	"image"
-	"time"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/key"
 )
 
 // DoubleClickMSec is the maximum time interval in msec between button press
@@ -49,9 +47,6 @@ var ScrollWheelSpeed = float32(20)
 type Event struct {
 	goosi.EventBase
 
-	// Where is the mouse location, in raw display dots (raw, actual pixels)
-	Where image.Point
-
 	// Button is the mouse button being pressed or released. Its value may be
 	// ButtonNone (zero), for a mouse move with no button
 	Button Buttons
@@ -62,34 +57,15 @@ type Event struct {
 	// TODO: have a field to hold what other buttons are down, for detecting
 	// drags or button-chords.
 
-	// Modifiers is a bitmask representing a set of modifier keys:
-	// key.ModShift, key.ModAlt, etc. -- bit positions are key.Modifiers
-	Modifiers int32
-
 	// TODO: add a Device ID, for multiple input devices?
 }
 
-// SetModifiers sets the bitflags based on a list of key.Modifiers
-func (e *Event) SetModifiers(mods ...key.Modifiers) {
-	key.SetModifierBits(&e.Modifiers, mods...)
-}
-
-// HasAnyModifier tests whether any of given modifier(s) were set
-func (e *Event) HasAnyModifier(mods ...key.Modifiers) bool {
-	return key.HasAnyModifierBits(e.Modifiers, mods...)
-}
-
-// HasAllModifiers tests whether all of given modifier(s) were set
-func (e *Event) HasAllModifier(mods ...key.Modifiers) bool {
-	return key.HasAllModifierBits(e.Modifiers, mods...)
-}
-
 // SelectModeBits returns the selection mode based on given modifiers bitflags
-func SelectModeBits(modBits int32) SelectModes {
-	if key.HasAnyModifierBits(modBits, key.Shift) {
+func SelectModeBits(modBits goosi.Modifiers) SelectModes {
+	if goosi.HasAnyModifier(modBits, goosi.Shift) {
 		return ExtendContinuous
 	}
-	if key.HasAnyModifierBits(modBits, key.Meta) {
+	if goosi.HasAnyModifier(modBits, goosi.Meta) {
 		return ExtendOne
 	}
 	return SelectOne
@@ -97,24 +73,32 @@ func SelectModeBits(modBits int32) SelectModes {
 
 // SelectMode returns the selection mode based on given modifiers on event
 func (e *Event) SelectMode() SelectModes {
-	return SelectModeBits(e.Modifiers)
+	return SelectModeBits(e.Mods)
 }
 
 func (ev *Event) String() string {
-	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, key.ModsString(ev.Modifiers), ev.Time())
+	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, goosi.ModsString(ev.Mods), ev.Time())
+}
+
+func (e Event) HasPos() bool {
+	return true
 }
 
 /////////////////////////////////////////////////////////////////
 
-// mouse.MoveEvent is for mouse movement, without button down -- action is Move
+// mouse.MoveEvent is for mouse movement, without button down
+// action is Move.  has PrevPos
 type MoveEvent struct {
 	Event
+}
 
-	// From is the previous location of the mouse
-	From image.Point
+func (e MoveEvent) HasPrev() bool {
+	return true
+}
 
-	// LastTime is the time of the previous event
-	LastTime time.Time
+// Delta returns the amount of mouse movement (Where - Prev)
+func (e MoveEvent) Delta() image.Point {
+	return e.Where.Sub(e.Prev)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -130,9 +114,8 @@ type DragEvent struct {
 	Start image.Point
 }
 
-// Delta returns the amount of mouse movement (Where - From)
-func (e MoveEvent) Delta() image.Point {
-	return e.Where.Sub(e.From)
+func (e DragEvent) HasStart() bool {
+	return true
 }
 
 /////////////////////////////////////////////////////////////////
@@ -244,14 +227,6 @@ const (
 
 func (ev *Event) Type() goosi.EventType {
 	return goosi.MouseEvent
-}
-
-func (ev *Event) HasPos() bool {
-	return true
-}
-
-func (ev *Event) Pos() image.Point {
-	return ev.Where
 }
 
 func (ev *Event) OnFocus() bool {

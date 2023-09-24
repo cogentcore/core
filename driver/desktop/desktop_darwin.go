@@ -370,10 +370,10 @@ func (mm *mainMenuImpl) AddItem(men goosi.Menu, titles string, shortcut string, 
 		if err == nil {
 			sc = strings.ToLower(string(r))
 		}
-		scShift = (mods&(1<<uint32(key.Shift)) != 0)
-		scControl = (mods&(1<<uint32(key.Control)) != 0)
-		scAlt = (mods&(1<<uint32(key.Alt)) != 0)
-		scCommand = (mods&(1<<uint32(key.Meta)) != 0)
+		scShift = mods.HasFlag(goosi.Shift)
+		scControl = mods.HasFlag(goosi.Control)
+		scAlt = mods.HasFlag(goosi.Alt)
+		scCommand = mods.HasFlag(goosi.Meta)
 	}
 
 	scs := C.CString(sc)

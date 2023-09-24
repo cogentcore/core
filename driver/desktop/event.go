@@ -22,23 +22,23 @@ var (
 	lastMouseButton    mouse.Buttons
 	lastMouseButtonPos image.Point
 	lastMouseAction    mouse.Actions
-	lastMods           int32
+	lastMods           goosi.Modifiers
 	lastKey            key.Codes
 )
 
-func glfwMods(mod glfw.ModifierKey) int32 {
-	m := int32(0)
+func glfwMods(mod glfw.ModifierKey) goosi.Modifiers {
+	var m goosi.Modifiers
 	if mod&glfw.ModShift != 0 {
-		m |= 1 << uint32(key.Shift)
+		m.SetFlag(true, goosi.Shift)
 	}
 	if mod&glfw.ModControl != 0 {
-		m |= 1 << uint32(key.Control)
+		m.SetFlag(true, goosi.Control)
 	}
 	if mod&glfw.ModAlt != 0 {
-		m |= 1 << uint32(key.Alt)
+		m.SetFlag(true, goosi.Alt)
 	}
 	if mod&glfw.ModSuper != 0 {
-		m |= 1 << uint32(key.Meta)
+		m.SetFlag(true, goosi.Meta)
 	}
 	return m
 }
@@ -68,17 +68,18 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	}
 
 	event := &key.Event{
-		Code:      ec,
-		Rune:      rn,
-		Modifiers: em,
-		Action:    act,
+		Code:   ec,
+		Rune:   rn,
+		Action: act,
 	}
+	event.Mods = em
+
 	event.Init()
 	fw.Send(event)
 	glfw.PostEmptyEvent()
 
 	if act == key.Press && ec < key.CodeLeftControl &&
-		(key.HasAnyModifierBits(em, key.Control, key.Meta) || // don't include alt here
+		(goosi.HasAnyModifier(em, goosi.Control, goosi.Meta) || // don't include alt here
 			!mapped || ec == key.CodeTab) {
 		// if key.HasAllModifierBits(em, key.Control) && ec == key.CodeY {
 		// 	fmt.Printf("Ctrl-Y win: %v\n", w.Nm)
@@ -86,12 +87,12 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 		// fmt.Printf("chord ky	: %v ec	: %v   mapped: %v\n", ky, ec, mapped)
 		che := &key.ChordEvent{
 			Event: key.Event{
-				Code:      ec,
-				Rune:      rn,
-				Modifiers: em,
-				Action:    act,
+				Code:   ec,
+				Rune:   rn,
+				Action: act,
 			},
 		}
+		che.Mods = em
 		fw.Send(che)
 		glfw.PostEmptyEvent()
 	}
@@ -103,11 +104,11 @@ func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey
 	act := key.Press
 	che := &key.ChordEvent{
 		Event: key.Event{
-			Rune:      char,
-			Modifiers: em,
-			Action:    act,
+			Rune:   char,
+			Action: act,
 		},
 	}
+	che.Mods = em
 	// fmt.Printf("che: %v\n", che)
 	fw := theApp.WindowInFocus()
 	if w != fw {
@@ -155,11 +156,11 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 		lastMouseButtonPos = where
 	}
 	event := &mouse.Event{
-		Where:     where,
-		Button:    but,
-		Action:    act,
-		Modifiers: mods,
+		Button: but,
+		Action: act,
 	}
+	event.Where = where
+	event.Mods = mods
 	event.Init()
 	if act == mouse.Press {
 		lastMouseClickTime = event.Time()
@@ -178,14 +179,11 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 		yoff *= 4 * float64(mouse.ScrollWheelSpeed)
 	}
 	where := w.curMousePosPoint(gw)
-	event := &mouse.ScrollEvent{
-		Event: mouse.Event{
-			Where:     where,
-			Action:    mouse.Scroll,
-			Modifiers: mods,
-		},
-		Delta: image.Point{int(-xoff), int(-yoff)},
-	}
+	event := &mouse.ScrollEvent{}
+	event.Delta = image.Point{int(-xoff), int(-yoff)}
+	event.Action = mouse.Scroll
+	event.Where = where
+	event.Mods = mods
 	event.Init()
 	w.Send(event)
 	glfw.PostEmptyEvent()
@@ -224,31 +222,23 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 		lastMousePos = where
 	}
 	if lastMouseAction == mouse.Press {
-		event := &mouse.DragEvent{
-			MoveEvent: mouse.MoveEvent{
-				Event: mouse.Event{
-					Where:     where,
-					Button:    lastMouseButton,
-					Action:    mouse.Drag,
-					Modifiers: lastMods,
-				},
-				From: from,
-			},
-			Start: lastMouseButtonPos,
-		}
+		event := &mouse.DragEvent{}
+		event.Where = where
+		event.Button = lastMouseButton
+		event.Action = mouse.Drag
+		event.Mods = lastMods
+		event.Prev = from
+		event.Start = lastMouseButtonPos
 		event.Init()
 		w.Send(event)
 		glfw.PostEmptyEvent()
 	} else {
-		event := &mouse.MoveEvent{
-			Event: mouse.Event{
-				Where:     where,
-				Button:    mouse.NoButton,
-				Action:    mouse.Move,
-				Modifiers: lastMods,
-			},
-			From: from,
-		}
+		event := &mouse.MoveEvent{}
+		event.Where = where
+		event.Button = mouse.NoButton
+		event.Action = mouse.Move
+		event.Mods = lastMods
+		event.Prev = from
 		event.Init()
 		w.Send(event)
 		glfw.PostEmptyEvent()
@@ -268,12 +258,11 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 		md[i] = mimedata.NewTextData(s)
 	}
 	where := w.curMousePosPoint(gw)
-	event := &dnd.Event{
-		Action:    dnd.External,
-		Where:     where,
-		Modifiers: lastMods,
-		Data:      md,
-	}
+	event := &dnd.Event{}
+	event.Action = dnd.External
+	event.Where = where
+	event.Mods = lastMods
+	event.Data = md
 	event.DefaultMod()
 	event.Init()
 	w.Send(event)

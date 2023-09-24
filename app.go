@@ -171,7 +171,7 @@ type App interface {
 	HideVirtualKeyboard()
 }
 
-// Platforms are all the supported platforms for OSWin
+// Platforms are all the supported platforms for Goosi
 type Platforms int32 //enums:enum
 
 const (
