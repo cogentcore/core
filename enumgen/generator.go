@@ -282,14 +282,14 @@ func (g *Generator) GenDecl(node ast.Node, file *ast.File, typ *Type) ([]Value, 
 			if !isInt && !isUint {
 				return nil, false, errors.New("internal error: value of " + n.String() + " is not an integer: " + value.String())
 			}
-			if !isInt {
-				u64 = uint64(i64)
+			if !isUint {
+				i64 = int64(u64)
 			}
 			v := Value{
 				OriginalName: n.Name,
 				Name:         n.Name,
 				Desc:         html.EscapeString(strings.Join(strings.Fields(vspec.Doc.Text()), " ")), // need to collapse whitespace and escape
-				Value:        u64,
+				Value:        i64,
 				Signed:       info&types.IsUnsigned == 0,
 				Str:          value.String(),
 			}

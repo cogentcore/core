@@ -28,7 +28,7 @@ type Type struct {
 	Type       *ast.TypeSpec // The standard AST type value
 	IsBitFlag  bool          // Whether the type is a bit flag type
 	Extends    string        // The type that this type extends, if any ("" if it doesn't extend)
-	MaxValueP1 uint64        // the highest defined value for the type, plus one
+	MaxValueP1 int64         // the highest defined value for the type, plus one
 	Config     *Config       // Configuration information set in the comment directive for the type; is initialized to generator config info first
 }
 
@@ -42,7 +42,7 @@ type Value struct {
 	// this matters is when sorting.
 	// Much of the time the str field is all we need; it is printed
 	// by Value.String.
-	Value  uint64 // Will be converted to int64 when needed.
+	Value  int64
 	Signed bool   // Whether the constant is a signed type.
 	Str    string // The string representation given by the "go/constant" package.
 }

@@ -168,7 +168,7 @@ func (i {{.Name}}) IsValid() bool {
 func (g *Generator) BuildBasicMethods(values []Value, typ *Type) {
 
 	// Print the slice of values
-	max := uint64(0)
+	max := int64(0)
 	g.Printf("\nvar _%sValues = []%s{", typ.Name, typ.Name)
 	for _, value := range values {
 		g.Printf("\t%s, ", &value)
