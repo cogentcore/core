@@ -9,7 +9,8 @@ package vgpu
 
 import (
 	"fmt"
-	"runtime"
+	"log"
+	"runtime/debug"
 
 	vk "github.com/goki/vulkan"
 )
@@ -20,14 +21,12 @@ func IsError(ret vk.Result) bool {
 
 func NewError(ret vk.Result) error {
 	if ret != vk.Success {
-		pc, _, _, ok := runtime.Caller(0)
-		if !ok {
-			return fmt.Errorf("vulkan error: %s (%d)",
-				vk.Error(ret).Error(), ret)
+		err := fmt.Errorf("vulkan error: %s (%d)", vk.Error(ret).Error(), ret)
+		if Debug {
+			log.Println(err)
+			debug.PrintStack()
 		}
-		frame := newStackFrame(pc)
-		return fmt.Errorf("vulkan error: %s (%d) on %s",
-			vk.Error(ret).Error(), ret, frame.String())
+		return err
 	}
 	return nil
 }

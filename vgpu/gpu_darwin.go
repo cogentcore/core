@@ -18,7 +18,7 @@ func PlatformDefaults(gp *GPU) {
 	gp.InstanceExts = append(gp.InstanceExts, vk.KhrGetPhysicalDeviceProperties2ExtensionName)
 	gp.InstanceExts = append(gp.InstanceExts, vk.KhrPortabilityEnumerationExtensionName)
 
-	gp.PlatformDeviceNext = unsafe.Pointer(&vk.PhysicalDevicePortabilitySubsetFeatures{
+	portFeatures := unsafe.Pointer(&vk.PhysicalDevicePortabilitySubsetFeatures{
 		SType:                                  vk.StructureTypePhysicalDevicePortabilitySubsetFeatures,
 		ConstantAlphaColorBlendFactors:         vk.True,
 		Events:                                 vk.True,
@@ -36,4 +36,14 @@ func PlatformDefaults(gp *GPU) {
 		TriangleFans:                           vk.False,
 		VertexAttributeAccessBeyondStride:      vk.True,
 	})
+
+	gp.DeviceFeaturesNeeded = &vk.PhysicalDeviceVulkan12Features{
+		SType:                                        vk.StructureTypePhysicalDeviceVulkan12Features,
+		DescriptorBindingVariableDescriptorCount:     vk.True,
+		DescriptorBindingPartiallyBound:              vk.True,
+		RuntimeDescriptorArray:                       vk.True,
+		DescriptorIndexing:                           vk.True, // might not be needed?  not for phong or vdraw
+		DescriptorBindingSampledImageUpdateAfterBind: vk.True, // might not be needed?  not for phong or vdraw
+		PNext: portFeatures,
+	}
 }
