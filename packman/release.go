@@ -6,9 +6,9 @@ package packman
 
 import (
 	"fmt"
-	"os/exec"
 
 	"goki.dev/goki/config"
+	"goki.dev/xe"
 )
 
 // Release releases the config project
@@ -42,17 +42,14 @@ func ReleaseLibrary(c *config.Config) error {
 // adds a version tag, and pushes the code and tags
 // based on the given config info.
 func PushGitRelease(c *config.Config) error {
-	tc := exec.Command("git", "tag", "-a", c.Version, "-m", c.Version+" release")
-	_, err := RunCmd(tc)
+	vc := xe.VerboseConfig()
+	err := xe.Run(vc, "git", "tag", "-a", c.Version, "-m", c.Version+" release")
 	if err != nil {
 		return fmt.Errorf("error tagging release: %w", err)
 	}
-
-	ptc := exec.Command("git", "push", "origin", "--tags")
-	_, err = RunCmd(ptc)
+	err = xe.Run(vc, "git", "push", "origin", "--tags")
 	if err != nil {
 		return fmt.Errorf("error pushing tags: %w", err)
 	}
-
 	return nil
 }
