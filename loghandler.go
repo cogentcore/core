@@ -16,6 +16,9 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
+
+	"github.com/muesli/termenv"
+	"goki.dev/matcolor"
 )
 
 // Handler is a [slog.Handler] whose output resembles that of [log.Logger].
@@ -39,6 +42,18 @@ func SetDefaultLogger() {
 	slog.SetDefault(slog.New(NewHandler(os.Stderr, &slog.HandlerOptions{
 		Level: lvar,
 	})))
+	if UseColor {
+		restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
+		if err != nil {
+			panic(err)
+		}
+		_ = restoreConsole
+		if termenv.HasDarkBackground() {
+			matcolor.TheScheme = &matcolor.TheSchemes.Dark
+		} else {
+			matcolor.TheScheme = &matcolor.TheSchemes.Light
+		}
+	}
 }
 
 // NewHandler makes a new [Handler] for the given writer with the given options.
@@ -110,6 +125,10 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 	buf = append(buf, '\n')
 	h.Mu.Lock()
 	defer h.Mu.Unlock()
+	if UseColor {
+		_, err := h.W.Write([]byte(termenv.String(string(buf)).Foreground(colorProfile.FromColor(matcolor.TheScheme.Primary)).String()))
+		return err
+	}
 	_, err := h.W.Write(buf)
 	return err
 }
