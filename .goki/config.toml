@@ -30,7 +30,7 @@ Type = "App"
 [Log]
   Target = "android"
   Keep = false
-  All = ""
+  All = "F"
 
 [Release]
   VersionFile = "version.go"

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	"goki.dev/goki/config"
 	"goki.dev/grease"
 	"goki.dev/xe"
@@ -48,6 +49,36 @@ func SetVersion(c *config.Config) error {
 		return fmt.Errorf("error pushing version file to Git: %w", err)
 	}
 	return nil
+}
+
+// UpdateVersion updates the version of the project by one patch version.
+//
+//gti:add
+func UpdateVersion(c *config.Config) error {
+	ver, err := semver.NewVersion(c.Version)
+	if err != nil {
+		return fmt.Errorf("error getting semver version from version %q: %w", c.Version, err)
+	}
+
+	if !strings.HasPrefix(ver.Prerelease(), "dev") { // if no dev pre-release, we can just do standard increment
+		*ver = ver.IncPatch()
+	} else { // otherwise, we have to increment pre-release version instead
+		pvn := strings.TrimPrefix(ver.Prerelease(), "dev")
+		pver, err := semver.NewVersion(pvn)
+		if err != nil {
+			return fmt.Errorf("error parsing dev version %q from version %q: %w", pvn, c.Version, err)
+		}
+		*pver = pver.IncPatch()
+		// apply incremented pre-release version to main version
+		nv, err := ver.SetPrerelease("dev" + pver.String())
+		if err != nil {
+			return fmt.Errorf("error setting pre-release of new version to %q from repository version %q: %w", "dev"+pver.String(), c.Version, err)
+		}
+		*ver = nv
+	}
+
+	c.Version = "v" + ver.String()
+	return SetVersion(c) // now we can set to newly calculated version
 }
 
 // VersionFileString returns the version file string

@@ -28,7 +28,7 @@ func Log(c *config.Config) error {
 	}
 	err := xe.Run(xe.VerboseConfig(), "adb", "logcat", "*:"+c.Log.All, "Go:I", "GoLog:I")
 	if err != nil {
-		fmt.Errorf("erroring getting logs: %w", err)
+		return fmt.Errorf("erroring getting logs: %w", err)
 	}
 	return nil
 }

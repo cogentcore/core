@@ -3,6 +3,7 @@ module goki.dev/goki
 go 1.21.0
 
 require (
+	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/enums v0.9.19
 	goki.dev/gengo v0.3.5
