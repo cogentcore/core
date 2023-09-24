@@ -1,6 +1,6 @@
 Name = "goki"
 Desc = "Command line and GUI tools for developing apps and libraries using the GoKi framework."
-Version = "v0.1.19"
+Version = "v0.1.20"
 Type = "App"
 
 [Build]
