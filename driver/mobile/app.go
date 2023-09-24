@@ -13,10 +13,6 @@ import (
 	"goki.dev/mobile/event/size"
 )
 
-// BaseApp is the base app struct that specific mobile platforms extend.
-type BaseApp struct {
-}
-
 // Main is called by the main.main function to run the mobile application.
 //
 // It calls f on the App, in a separate goroutine, as some OS-specific
