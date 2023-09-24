@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"os"
 	"runtime"
 	"strconv"
 	"sync"
@@ -27,6 +28,18 @@ type Handler struct {
 
 	Mu sync.Mutex
 	W  io.Writer
+}
+
+var _ slog.Handler = &Handler{}
+
+// SetDefaultLogger sets the default logger to be a [Handler] with the
+// level set to [UserLevel].
+func SetDefaultLogger() {
+	lvar := &slog.LevelVar{}
+	lvar.Set(slog.Level(UserLevel))
+	slog.SetDefault(slog.New(NewHandler(os.Stderr, &slog.HandlerOptions{
+		Level: lvar,
+	})))
 }
 
 // NewHandler makes a new [Handler] for the given writer with the given options.
