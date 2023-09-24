@@ -10,4 +10,4 @@ import "github.com/muesli/termenv"
 // It is on by default.
 var UseColor = true
 
-var colorProfile = termenv.ColorProfile()
+var colorProfile termenv.Profile

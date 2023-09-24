@@ -16,4 +16,5 @@ func TestDefaultLogger(t *testing.T) {
 	slog.Debug("this is debug")
 	slog.Info("this is info")
 	slog.Warn("this is warn")
+	slog.Error("this is error")
 }
