@@ -33,6 +33,7 @@ type windowImpl struct {
 	glw            *glfw.Window
 	Surface        *vgpu.Surface
 	Draw           vdraw.Drawer
+	EventMgr       eventmgr.Mgr
 	scrnName       string // last known screen name
 	runQueue       chan funcRun
 	publish        chan struct{}

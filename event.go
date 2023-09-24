@@ -45,11 +45,9 @@ import (
    limitations under the License.
 */
 
-// EventType determines which type of GUI event is being sent -- need this for
-// indexing into different event signalers based on event type, and sending
-// event type in signals -- critical to break up different event types into
-// the right categories needed for different types of widgets -- e.g., most do
-// not need move or scroll events, so those are separated.
+// EventType determines the type of GUI event.
+// Most events use the same EventBase type and only need
+// to set relevant fields and the type.
 type EventType int32 //enums:enum
 
 const (
@@ -157,19 +155,11 @@ type Event interface {
 	// the window.
 	LocalPos() image.Point
 
-	// HasStart returns true if the event has a starting window position
-	// (e.g., starting position of a Drag)
-	HasStart() bool
-
 	// StartPos returns the original starting window-based position.
 	StartPos() image.Point
 
 	// LocalStartPos returns the local starting position
 	LocalStartPos() image.Point
-
-	// HasPrev returns true if the event has a previous window position
-	// (e.g., previous position of a Drag)
-	HasPrev() bool
 
 	// PrevPos returns the original previous window-based position.
 	PrevPos() image.Point
@@ -210,9 +200,13 @@ type Event interface {
 //////////////////////////////////////////////////////////////////////
 // EventBase
 
-// EventBase is the base type for events -- records time and whether event has
-// been processed by a receiver of the event -- in which case it is skipped
+// EventBase is the base type for events.
+// It is designed to support most event types so no further subtypes
+// are needed.
 type EventBase struct {
+	// Typ is the type of event, returned as Type()
+	Typ EventType
+
 	// GenTime records the time when the event was first generated, using more
 	// efficient nptime struct
 	GenTime nptime.Time
@@ -269,6 +263,10 @@ func (ev *EventBase) Init() {
 	ev.SetLocalOff(image.Point{}) // ensure local is copied
 }
 
+func (ev EventBase) Type() EventType {
+	return ev.Typ
+}
+
 func (ev EventBase) Time() time.Time {
 	return ev.GenTime.Time()
 }
@@ -319,14 +317,6 @@ func (ev EventBase) HasPos() bool {
 	return false
 }
 
-func (ev EventBase) HasStart() bool {
-	return false
-}
-
-func (ev EventBase) HasPrev() bool {
-	return false
-}
-
 func (ev EventBase) Pos() image.Point {
 	return ev.Where
 }
@@ -337,6 +327,11 @@ func (ev EventBase) StartPos() image.Point {
 
 func (ev EventBase) PrevPos() image.Point {
 	return ev.Prev
+}
+
+// Delta returns the amount of mouse movement (Where - Prev)
+func (ev EventBase) Delta() image.Point {
+	return ev.Where.Sub(ev.Prev)
 }
 
 func (ev *EventBase) SetLocalOff(off image.Point) {

@@ -18,7 +18,6 @@ package key
 
 import (
 	"fmt"
-	"image"
 	"strings"
 	"unicode"
 
@@ -63,12 +62,32 @@ type Event struct {
 	// TODO: add a Device ID, for multiple input devices?
 }
 
-// key.ChordEvent reports events that are generated only on keyboard release,
-// and that include the full chord information about all the modifier keys
-// that were present when a non-modifier key was released -- these are
-// generally appropriate for most uses
-type ChordEvent struct {
-	Event
+func NewEvent(rn rune, code Codes, act Actions, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.KeyEvent
+	ev.Rune = rn
+	ev.Code = code
+	ev.Action = act
+	ev.Mods = mods
+	return ev
+}
+
+func NewChordEvent(rn rune, code Codes, act Actions, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.KeyChordEvent
+	ev.Rune = rn
+	ev.Code = code
+	ev.Action = act
+	ev.Mods = mods
+	return ev
+}
+
+func (ev *Event) HasPos() bool {
+	return false
+}
+
+func (ev *Event) OnFocus() bool {
+	return true
 }
 
 func (ev *Event) String() string {
@@ -324,28 +343,8 @@ const (
 // key.Event with %v gives not very readable output like:
 //	{100 7 key.Modifiers() Press}
 
-func (ev *Event) Type() goosi.EventType {
-	return goosi.KeyEvent
-}
-
-func (ev *Event) HasPos() bool {
-	return false
-}
-
-func (ev *Event) Pos() image.Point {
-	return image.Point{}
-}
-
-func (ev *Event) OnFocus() bool {
-	return true
-}
-
 // check for interface implementation
 var _ goosi.Event = &Event{}
-
-func (ev *ChordEvent) Type() goosi.EventType {
-	return goosi.KeyChordEvent
-}
 
 var CodeRuneMap = map[Codes]rune{
 	CodeA: 'A',

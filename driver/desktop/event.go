@@ -16,16 +16,6 @@ import (
 	"goki.dev/goosi/mouse"
 )
 
-var (
-	lastMouseClickTime time.Time
-	lastMousePos       image.Point
-	lastMouseButton    mouse.Buttons
-	lastMouseButtonPos image.Point
-	lastMouseAction    mouse.Actions
-	lastMods           goosi.Modifiers
-	lastKey            key.Codes
-)
-
 func glfwMods(mod glfw.ModifierKey) goosi.Modifiers {
 	var m goosi.Modifiers
 	if mod&glfw.ModShift != 0 {
@@ -43,12 +33,20 @@ func glfwMods(mod glfw.ModifierKey) goosi.Modifiers {
 	return m
 }
 
+func (w *windowImpl) focusWindow() *windowImpl {
+	fw := theApp.WindowInFocus()
+	if w != fw {
+		if fw == nil {
+			fw = w
+		}
+	}
+	return fw
+}
+
 // physical key
 func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
 	em := glfwMods(mod)
-	lastMods = em
 	ec := glfwKeyCode(ky)
-	lastKey = ec
 	rn, mapped := key.CodeRuneMap[ec]
 	act := key.Press
 	if action == glfw.Release {
@@ -56,77 +54,20 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	} else if action == glfw.Repeat {
 		act = key.Press
 	}
-
-	fw := theApp.WindowInFocus()
-	if w != fw {
-		if fw == nil {
-			// fmt.Printf("vkos key event focus window is nil!  window: %v\n", w.Nm)
-			fw = w
-			// } else {
-			// fmt.Printf("vkos key event window: %v != focus window: %v\n", w.Nm, fw.Name())
-		}
-	}
-
-	event := &key.Event{
-		Code:   ec,
-		Rune:   rn,
-		Action: act,
-	}
-	event.Mods = em
-
-	event.Init()
-	fw.Send(event)
-	glfw.PostEmptyEvent()
-
-	if act == key.Press && ec < key.CodeLeftControl &&
-		(goosi.HasAnyModifier(em, goosi.Control, goosi.Meta) || // don't include alt here
-			!mapped || ec == key.CodeTab) {
-		// if key.HasAllModifierBits(em, key.Control) && ec == key.CodeY {
-		// 	fmt.Printf("Ctrl-Y win: %v\n", w.Nm)
-		// }
-		// fmt.Printf("chord ky	: %v ec	: %v   mapped: %v\n", ky, ec, mapped)
-		che := &key.ChordEvent{
-			Event: key.Event{
-				Code:   ec,
-				Rune:   rn,
-				Action: act,
-			},
-		}
-		che.Mods = em
-		fw.Send(che)
-		glfw.PostEmptyEvent()
-	}
+	fw.EventMgr.Key(w.focusWindow(), key.NewEvent(rn, ec, act, em))
+	glfw.PostEmptyEvent() // todo: why??
 }
 
 // char input
 func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey) {
 	em := glfwMods(mods)
 	act := key.Press
-	che := &key.ChordEvent{
-		Event: key.Event{
-			Rune:   char,
-			Action: act,
-		},
-	}
-	che.Mods = em
-	// fmt.Printf("che: %v\n", che)
-	fw := theApp.WindowInFocus()
-	if w != fw {
-		if fw == nil {
-			// fmt.Printf("vkos char event focus window is nil!  window: %v\n", w.Nm)
-			fw = w
-		} else {
-			// fmt.Printf("vkos char event window: %v != focus window: %v\n", w.Nm, fw.Name())
-			w = fw.(*windowImpl)
-		}
-	}
-	fw.Send(che)
-	glfw.PostEmptyEvent()
+	fw.EventMgr.KeyChord(w.focusWindow(), key.NewChordEvent(char, key.CodeUnknown, act, em))
+	glfw.PostEmptyEvent() // todo: why?
 }
 
 func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
-	lastMods = mods
 	but := mouse.Left
 	switch button {
 	case glfw.MouseButtonMiddle:
@@ -139,22 +80,10 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	if action == glfw.Release {
 		act = mouse.Release
 	}
-	if action == glfw.Press {
-		interval := time.Now().Sub(lastMouseClickTime)
-		// fmt.Printf("interval: %v\n", interval)
-		if (interval / time.Millisecond) < time.Duration(mouse.DoubleClickMSec) {
-			act = mouse.DoubleClick
-		}
-	}
 	if mod&glfw.ModControl != 0 {
 		but = mouse.Right
 	}
-	lastMouseButton = but
-	lastMouseAction = act
 	where := w.curMousePosPoint(gw)
-	if act == mouse.Press {
-		lastMouseButtonPos = where
-	}
 	event := &mouse.Event{
 		Button: but,
 		Action: act,
@@ -162,15 +91,13 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 	event.Where = where
 	event.Mods = mods
 	event.Init()
-	if act == mouse.Press {
-		lastMouseClickTime = event.Time()
-	}
+
 	w.Send(event)
 	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
-	mods := lastMods
+	mods := w.EventMgr.LastMods
 	if theApp.Platform() == goosi.MacOS {
 		xoff *= float64(mouse.ScrollWheelSpeed)
 		yoff *= float64(mouse.ScrollWheelSpeed)
@@ -208,27 +135,27 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	if w.resettingPos {
 		return
 	}
-	from := lastMousePos
+	from := w.EventMgr.LastMousePos
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
 		w.resettingPos = true
 		if theApp.Platform() == goosi.MacOS {
-			w.glw.SetCursorPos(float64(lastMousePos.X)/float64(w.DevPixRatio), float64(lastMousePos.Y)/float64(w.DevPixRatio))
+			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X)/float64(w.DevPixRatio), float64(w.EventMgr.LastMousePos.Y)/float64(w.DevPixRatio))
 		} else {
-			w.glw.SetCursorPos(float64(lastMousePos.X), float64(lastMousePos.Y))
+			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X), float64(w.EventMgr.LastMousePos.Y))
 		}
 		w.resettingPos = false
 	} else {
-		lastMousePos = where
+		w.EventMgr.LastMousePos = where
 	}
-	if lastMouseAction == mouse.Press {
+	if w.EventMgr.LastMouseAction == mouse.Press {
 		event := &mouse.DragEvent{}
 		event.Where = where
-		event.Button = lastMouseButton
+		event.Button = w.EventMgr.LastMouseButton
 		event.Action = mouse.Drag
-		event.Mods = lastMods
+		event.Mods = w.EventMgr.LastMods
 		event.Prev = from
-		event.Start = lastMouseButtonPos
+		event.Start = w.EventMgr.LastMouseButtonPos
 		event.Init()
 		w.Send(event)
 		glfw.PostEmptyEvent()
@@ -237,7 +164,7 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 		event.Where = where
 		event.Button = mouse.NoButton
 		event.Action = mouse.Move
-		event.Mods = lastMods
+		event.Mods = w.EventMgr.LastMods
 		event.Prev = from
 		event.Init()
 		w.Send(event)
@@ -261,7 +188,7 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 	event := &dnd.Event{}
 	event.Action = dnd.External
 	event.Where = where
-	event.Mods = lastMods
+	event.Mods = w.EventMgr.LastMods
 	event.Data = md
 	event.DefaultMod()
 	event.Init()
@@ -514,7 +441,7 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 	case glfw.KeyRightSuper:
 		return key.CodeRightMeta
 	case glfw.KeyLast:
-		return lastKey
+		return w.EventMgr.LastKey
 	default:
 		return key.CodeUnknown
 	}
