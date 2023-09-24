@@ -28,8 +28,6 @@ import (
 	"goki.dev/vgpu/v2/vgpu"
 )
 
-// TODO: actually implement things for mobile app
-
 var theApp = &appImpl{
 	screens:      make([]*goosi.Screen, 0),
 	name:         "GoGi",
@@ -67,19 +65,14 @@ var mainCallback func(goosi.App)
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
-	log.Println("in Main")
-	// commented out to get rid of import
-	// gi.DialogsSepWindow = false
 	mainCallback = f
 	theApp.initVk()
 	goosi.TheApp = theApp
 	go func() {
 		mainCallback(theApp)
-		log.Println("main callback done")
 		theApp.stopMain()
 	}()
 	theApp.eventLoop()
-	log.Println("main loop done")
 }
 
 type funcRun struct {
@@ -124,34 +117,8 @@ func (app *appImpl) PollEventsOnMain() {
 func (app *appImpl) PollEvents() {
 }
 
-// MainLoop starts running event loop on main thread (must be called
-// from the main thread).
-// func (app *appImpl) mainLoop() {
-// 	app.mainQueue = make(chan funcRun)
-// 	app.mainDone = make(chan struct{})
-// 	// SetThreadPri(1)
-// 	// time.Sleep(100 * time.Millisecond)
-// 	for {
-// 		log.Println("app main loop iteration")
-// 		select {
-// 		case <-app.mainDone:
-// 			app.destroyVk()
-// 			return
-// 		case f := <-app.mainQueue:
-// 			f.f()
-// 			if f.done != nil {
-// 				f.done <- true
-// 			}
-// 			// default:
-// 			// 	glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
-// 		}
-// 	}
-// }
-
 // stopMain stops the main loop and thus terminates the app
 func (app *appImpl) stopMain() {
-	// log.Println("in stop main")
-	// app.RunOnMain(app.destroyVk)
 	app.mainDone <- struct{}{}
 }
 
@@ -169,16 +136,13 @@ func (app *appImpl) initVk() {
 	}
 
 	winext := vk.GetRequiredInstanceExtensions()
-	log.Printf("required exts: %#v\n", winext)
 	app.gpu = vgpu.NewGPU()
 	app.gpu.AddInstanceExt(winext...)
 	app.gpu.Config(app.name)
-	log.Println("done vkinit")
 }
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
 func (app *appImpl) destroyVk() {
-	log.Println("destroying vk")
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	vk.DeviceWaitIdle(app.Surface.Device.Device)
@@ -189,7 +153,6 @@ func (app *appImpl) destroyVk() {
 
 // fullDestroyVk destroys all vulkan things for when the app is fully quit
 func (app *appImpl) fullDestroyVk() {
-	log.Println("full destroying vk")
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	app.windows = nil
@@ -239,7 +202,6 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		win.LogDPI = app.screens[0].LogicalDPI
 		win.sendWindowEvent(window.ScreenUpdate)
 	}
-	log.Println("returning window in NewWindow", win)
 	return win, nil
 }
 
@@ -251,15 +213,11 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	var sf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	log.Println("in NewWindow", app.gpu.Instance, winPtr, &sf)
 	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
-		log.Println("oswin/driver/mobile new window: vulkan error:", err)
 		return err
 	}
 	app.Surface = vgpu.NewSurface(app.gpu, sf)
-
-	log.Printf("format: %s\n", app.Surface.Format.String())
 
 	app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
 	app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
@@ -289,9 +247,9 @@ func (app *appImpl) setScreen(sc *goosi.Screen) {
 }
 
 func (app *appImpl) getScreen() {
-	physX, physY := units.NewPt(float32(app.sizeEvent.WidthPt)), units.NewPt(float32(app.sizeEvent.HeightPt))
-	physX.Convert(units.Mm, &units.Context{})
-	physY.Convert(units.Mm, &units.Context{})
+	physX, physY := units.Pt(float32(app.sizeEvent.WidthPt)), units.Pt(float32(app.sizeEvent.HeightPt))
+	physX.Convert(units.UnitMm, &units.Context{})
+	physY.Convert(units.UnitMm, &units.Context{})
 	fmt.Println("pixels per pt", app.sizeEvent.PixelsPerPt)
 	sc := &goosi.Screen{
 		ScreenNumber: 0,
@@ -508,7 +466,6 @@ func (app *appImpl) QuitClean() {
 }
 
 func (app *appImpl) Quit() {
-	log.Println("IN QUIT")
 	if app.quitting {
 		return
 	}
