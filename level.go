@@ -16,13 +16,14 @@ const (
 	// Debug indicates that a message is a debugging message,
 	// or to show all messages in the context of debugging.
 	// It can be set by the end user as the value of [UserLevel]
-	// through the "-vv" (very verbose) flag in xe.
+	// through the "vv" (very verbose) flag in [LevelFromFlags]
+	// and xe.
 	Debug Level = -4
 
 	// Info indicates that a message is an informational message,
 	// or to show all messages at or above the info level.
 	// It can be set by the end user as the value of [UserLevel]
-	// through the "-v" (verbose) flag in xe.
+	// through the "v" (verbose) flag in [LevelFromFlags] and xe.
 	Info Level = 0
 
 	// Warn indicates that a message is a warning message,
@@ -32,8 +33,8 @@ const (
 
 	// Error indicates that a message is an error message,
 	// or to only show error messages. It can be set by the
-	// end user as the value of [UserLevel] through the "-q"
-	// (quiet) flag in xe.
+	// end user as the value of [UserLevel] through the "q"
+	// (quiet) flag in [LevelFromFlags] and xe.
 	Error Level = 8
 )
 
@@ -43,3 +44,25 @@ const (
 // be set through xe to the end user's preference. The default user
 // verbosity level is [Warn].
 var UserLevel Level = Warn
+
+// LevelFromFlags returns the level object corresponding to the given
+// user flag options. The flags correspond to the following values:
+//   - vv: [Debug]
+//   - v: [Info]
+//   - q: [Error]
+//   - (default: [Warn])
+//
+// The flags are evaluated in that order, so, for example, if both
+// vv and q are specified, it will still return [Debug].
+func LevelFromFlags(vv, v, q bool) Level {
+	switch {
+	case vv:
+		return Debug
+	case v:
+		return Info
+	case q:
+		return Error
+	default:
+		return Warn
+	}
+}
