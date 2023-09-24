@@ -163,7 +163,7 @@ type OSWin struct {
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	OSWin goosi.OSWin `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	OSWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 
 	// event manager that handles dispersing events to nodes
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`

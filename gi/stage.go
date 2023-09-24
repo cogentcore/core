@@ -92,6 +92,9 @@ type Stage struct {
 	// if true, opens a Window or Dialog in its own separate operating system window (OSWin).  This is by default true for Window on Desktop, otherwise false.
 	OwnWin bool `desc:"if true, opens a Window or Dialog in its own separate operating system window (OSWin).  This is by default true for Window on Desktop, otherwise false."`
 
+	// for Windows: add a back button
+	Back bool `desc:"for Windows: add a back button"`
+
 	// for Dialogs: adds a handle titlebar Decor for moving
 	Movable bool `desc:"for Dialogs: adds a handle titlebar Decor for moving"`
 
@@ -282,6 +285,11 @@ func (st *Stage) SetSharedWin() *Stage {
 	return st
 }
 
+func (st *Stage) SetBack() *Stage {
+	st.Back = true
+	return st
+}
+
 func (st *Stage) SetMovable() *Stage {
 	st.Movable = true
 	return st
@@ -309,7 +317,7 @@ func (st *Stage) Run() *Stage {
 		return st.RunDialog()
 	case Sheet:
 		return st.Sheet()
-	default
+	default:
 		return st.RunPopup()
 	}
 	return st
@@ -323,6 +331,7 @@ func (st *Stage) RunWindow() *Stage {
 		return st
 	}
 	if CurOSWin == nil {
+		st.AddWindowDecor()
 		CurOSWin = RunNewOSWin(st.Name, st.Title, st)
 		st.OSWin = CurOSWin
 		return st
@@ -342,6 +351,7 @@ func (st *Stage) RunDialog() *Stage {
 		// todo: fail!
 		return st
 	}
+	st.AddDialogDecor()
 	CurOSWin.AddDialog(st)
 	return st
 }
@@ -353,6 +363,7 @@ func (st *Stage) RunSheet() *Stage {
 		// todo: fail!
 		return st
 	}
+	st.AddSheetDecor()
 	CurOSWin.AddSheet(st)
 	return st
 }
@@ -364,7 +375,26 @@ func (st *Stage) RunPopup() *Stage {
 		// todo: fail!
 		return st
 	}
+	// maybe Snackbar decor?
 	CurOSWin.AddPopup(st)
 	return st
 }
 
+/////////////////////////////////////////////////////
+//		Decorate
+
+// only called when !OwnWin
+func (st *Stage) AddWindowDecor() *Stage {
+	if st.Back {
+		but := NewButton(st.Scene.Decor, "win-back")
+		// todo: do more button config
+	}
+}
+
+func (st *Stage) AddDialogDecor() *Stage {
+	// todo: moveable, resizable
+}
+
+func (st *Stage) AddSheetDecor() *Stage {
+	// todo: handle based on side
+}
