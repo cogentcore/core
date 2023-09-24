@@ -1,14 +1,21 @@
 Name = "goki"
 Desc = "Command line and GUI tools for developing apps and libraries using the GoKi framework."
-Version = "v0.1.18"
+Version = "v0.1.19"
 Type = "App"
 
 [Build]
   Package = "."
-
-  [[Build.Platform]]
-    OS = ""
-    Arch = ""
+  Output = ""
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
+  BundleID = ""
 
 [Colorgen]
   Source = "colors.xml"
