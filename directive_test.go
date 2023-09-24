@@ -11,73 +11,63 @@ import (
 
 type test struct {
 	Dir    *Directive // the expected/input directive
-	Source string     // the input source string (defaults to test.Dir.Source if unset)
-	String string     // the expected output string representation
+	Source string     // the input source string
+	String string     // the expected output string representation (defaults to [test.Source] if unset)
 }
 
 var tests = []test{
 	{
 		Dir: &Directive{
-			Source:    "//tool:directive arg0 key0=value0 arg1 key1=value1",
 			Tool:      "tool",
 			Directive: "directive",
-			Args:      []string{"arg0", "arg1"},
-			NameValue: map[string]string{"key0": "value0", "key1": "value1"},
+			Args:      []string{"arg0", "-key0=value0", "arg1", "-key1", "value1"},
 		},
-		String: "//tool:directive arg0 arg1 key0=value0 key1=value1",
+		Source: "//tool:directive arg0 -key0=value0 arg1 -key1 value1",
 	},
 	{
 		Dir: &Directive{
-			Source:    "//enums:enum trimprefix=Button",
 			Tool:      "enums",
 			Directive: "enum",
-			Args:      []string{},
-			NameValue: map[string]string{"trimprefix": "Button"},
+			Args:      []string{"-trimprefix=Button"},
 		},
-		String: "//enums:enum trimprefix=Button",
+		Source: "//enums:enum -trimprefix=Button",
 	},
 	{
 		Dir: &Directive{
-			Source:    "//enums:structflag field=Flag NodeFlags",
 			Tool:      "enums",
 			Directive: "structflag",
-			Args:      []string{"NodeFlags"},
-			NameValue: map[string]string{"field": "Flag"},
+			Args:      []string{"-field", "Flag", "NodeFlags"},
 		},
-		String: "//enums:structflag NodeFlags field=Flag",
+		Source: "//enums:structflag -field Flag NodeFlags",
 	},
 	{
 		Dir: &Directive{
-			Source:    "//goki:ki",
 			Tool:      "goki",
 			Directive: "ki",
 			Args:      []string{},
-			NameValue: map[string]string{},
 		},
-		String: "//goki:ki",
+		Source: "//goki:ki",
 	},
 	{
 		Dir: &Directive{
-			Source:    "//goki:ki noNew",
 			Tool:      "goki",
 			Directive: "ki",
-			Args:      []string{"noNew"},
-			NameValue: map[string]string{},
+			Args:      []string{"-noNew"},
 		},
-		String: "//goki:ki noNew",
+		Source: "//goki:ki -noNew",
 	},
 	{
 		Dir: &Directive{
-			Source:    "goki:ki embeds=false",
 			Tool:      "goki",
 			Directive: "ki",
-			Args:      []string{},
-			NameValue: map[string]string{"embeds": "false"},
+			Args:      []string{"-embeds=false"},
 		},
-		String: "//goki:ki embeds=false",
+		Source: "goki:ki -embeds=false",
+		String: "//goki:ki -embeds=false",
 	},
 	{
 		Dir:    nil,
+		Source: "",
 		String: "<nil>",
 	},
 	{
@@ -89,10 +79,10 @@ var tests = []test{
 
 func TestParse(t *testing.T) {
 	for _, test := range tests {
-		if test.Source == "" && test.Dir != nil {
-			test.Source = test.Dir.Source
+		have, err := Parse(test.Source)
+		if err != nil {
+			t.Errorf("error parsing directive %q: %v", test.Source, err)
 		}
-		have := Parse(test.Source)
 		if !reflect.DeepEqual(have, test.Dir) {
 			t.Errorf("expected directive for \n%q \n\tto be \n%#v \n\tbut got \n%#v \n\tinstead", test.Source, test.Dir, have)
 		}
@@ -101,6 +91,9 @@ func TestParse(t *testing.T) {
 
 func TestString(t *testing.T) {
 	for _, test := range tests {
+		if test.String == "" {
+			test.String = test.Source
+		}
 		str := test.Dir.String()
 		if str != test.String {
 			t.Errorf("expected formatted string for \n%#v \n\tto be\n%q \n\tbut got \n%q \n\tinstead", test.Dir, test.String, str)
