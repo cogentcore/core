@@ -16,7 +16,6 @@ import (
 	"runtime"
 	"strconv"
 	"sync"
-	"time"
 )
 
 // Handler is a [slog.Handler] whose output resembles that of [log.Logger].
@@ -89,7 +88,7 @@ func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
 func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 	var buf []byte
 	if !r.Time.IsZero() {
-		buf = r.Time.AppendFormat(buf, time.RFC3339)
+		buf = r.Time.AppendFormat(buf, "2006/01/02 15:04:05")
 		buf = append(buf, ' ')
 	}
 	buf = append(buf, r.Level.String()...)
