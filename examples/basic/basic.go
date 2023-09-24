@@ -29,5 +29,7 @@ func main() {
 		matcolor.TheScheme = &matcolor.TheSchemes.Light
 	}
 
-	fmt.Print(termenv.String("Hello, World").Foreground(p.FromColor(matcolor.TheScheme.Primary)))
+	fmt.Println(termenv.String("Primary").Foreground(p.FromColor(matcolor.TheScheme.Primary)))
+	fmt.Println(termenv.String("Secondary").Foreground(p.FromColor(matcolor.TheScheme.Secondary)))
+	fmt.Println(termenv.String("Tertiary").Foreground(p.FromColor(matcolor.TheScheme.Tertiary)))
 }
