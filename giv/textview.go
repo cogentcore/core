@@ -4092,7 +4092,7 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode m
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
 func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
-	hasShift := kt.HasAnyModifier(key.Shift)
+	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		if tv.SelectReg == textbuf.RegionNil {
 			tv.SelectStart = tv.CursorPos
@@ -4105,7 +4105,7 @@ func (tv *TextView) ShiftSelect(kt *key.ChordEvent) {
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
 func (tv *TextView) ShiftSelectExtend(kt *key.ChordEvent) {
-	hasShift := kt.HasAnyModifier(key.Shift)
+	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
 	}

@@ -9,15 +9,12 @@ func main() { gimain.Main(mainrun) }
 
 func mainrun() {
 	scene := gi.NewScene("hello")
-	label := gi.NewLabel(scene, "label")
-	label.Text = "Hello, World!"
+	label := gi.NewLabel(scene, "label").SetText("Hello, World!")
 
 	dialog := gi.NewScene("dialog")
-	label = gi.NewLabel(dialog, "dialog")
-	label.Text = "Dialog!"
+	label = gi.NewLabel(dialog, "dialog").SetText("Dialog!")
 
-	but := gi.NewButton(scene, "open-dialog")
-	but.Text = "Open Dialog"
+	but := gi.NewButton(scene, "open-dialog").SetText("Open Dialog")
 	but.OnClicked(func() {
 		gi.RunStage(dialog, &gi.StageOpts{Type: gi.Dialog, Modal: true, Movable: true, Closeable: true, Back: true})
 		gi.RunStage(dialog, gi.StageType(gi.Dialog), gi.StageModal(), gi.StageMovable(), gi.StageClosable(), gi.StageBack())

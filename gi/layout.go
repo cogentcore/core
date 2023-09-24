@@ -507,7 +507,7 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
-	hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
+	hasShift := me.HasAnyModifier(goosi.Shift, key.Alt) // shift or alt says: use vert for other dimension
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
 			me.SetProcessed()
