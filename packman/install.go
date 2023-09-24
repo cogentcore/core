@@ -5,15 +5,13 @@
 package packman
 
 import (
-	"errors"
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 
 	"goki.dev/goki/config"
+	"goki.dev/goki/mobile"
+	"goki.dev/xe"
 )
 
 // Install installs the package the config ID
@@ -45,14 +43,11 @@ func InstallPackage(pkg Package) error {
 		return fmt.Errorf("error: the requested package (%s) does not support your operating system (%s)", pkg.Name, runtime.GOOS)
 	}
 	for _, command := range commands {
-		cmd := exec.Command(command.Name, command.Args...)
-		b, err := RunCmd(cmd)
+		err := xe.Run(xe.VerboseConfig(), command.Name, command.Args...)
 		if err != nil {
 			return fmt.Errorf("error installing %s: %w", pkg.Name, err)
 		}
-		fmt.Println(string(b))
 	}
-	fmt.Println("Successfully installed", pkg.Name)
 	return nil
 }
 
@@ -65,7 +60,7 @@ func InstallLocal(c *config.Config) error {
 			return fmt.Errorf("install: %w", err)
 		}
 		if os == "android" || os == "ios" {
-			err := installLocalMobile(c, os)
+			err := mobile.Install(c)
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
@@ -75,7 +70,7 @@ func InstallLocal(c *config.Config) error {
 			// TODO: implement js
 			continue
 		}
-		err = installLocalDesktop(c.Install.Package, os)
+		err = InstallLocalDesktop(c.Install.Package, os)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}
@@ -83,37 +78,15 @@ func InstallLocal(c *config.Config) error {
 	return nil
 }
 
-// installLocalDesktop builds and installs an executable for the package at the given path for the given desktop platform.
-// installLocalDesktop does not check whether operating systems are valid, so it should be called through Install in almost all cases.
-func installLocalDesktop(pkgPath string, osName string) error {
-	cmd := exec.Command("go", "install", pkgPath)
-	cmd.Env = append(os.Environ(), "GOOS="+osName, "GOARCH="+runtime.GOARCH)
-	fmt.Println(CmdString(cmd))
-	output, err := RunCmd(cmd)
+// InstallLocalDesktop builds and installs an executable for the package at the given path for the given desktop platform.
+// InstallLocalDesktop does not check whether operating systems are valid, so it should be called through Install in almost all cases.
+func InstallLocalDesktop(pkgPath string, osName string) error {
+	vc := xe.VerboseConfig()
+	vc.Env["GOOS"] = osName
+	vc.Env["GOARCH"] = runtime.GOARCH
+	err := xe.Run(vc, "go", "install", pkgPath)
 	if err != nil {
 		return fmt.Errorf("error installing on platform %s/%s: %w", osName, runtime.GOARCH, err)
 	}
-	fmt.Println(string(output))
-	return nil
-}
-
-// buildMobile builds and installs an executable for the package at the given path for the given mobile operating system.
-// buildMobile does not check whether operating systems are valid, so it should be called through Install in almost all cases.
-func installLocalMobile(c *config.Config, osName string) error {
-	if osName == "ios" {
-		return errors.New("ios is not yet supported")
-	}
-	c.Build.Target = []config.Platform{{osName, runtime.GOARCH}}
-	err := Build(c)
-	if err != nil {
-		return fmt.Errorf("install: %w", err)
-	}
-	cmd := exec.Command("adb", "install", filepath.Join(BuildPath(c.Install.Package), AppName(c.Install.Package)+".apk"))
-	fmt.Println(CmdString(cmd))
-	output, err := RunCmd(cmd)
-	if err != nil {
-		return fmt.Errorf("error installing on platform %s: %w", osName, err)
-	}
-	fmt.Println(string(output))
 	return nil
 }

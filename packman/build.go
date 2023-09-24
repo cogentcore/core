@@ -8,11 +8,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile"
+	"goki.dev/xe"
 )
 
 // Build builds an executable for the package
@@ -51,48 +51,26 @@ func Build(c *config.Config) error {
 			// TODO: implement js
 			continue
 		}
-		err = buildDesktop(c.Build.Package, platform)
+		err = BuildDesktop(c.Build.Package, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
 	}
 	if len(androidArchs) != 0 {
 		return mobile.Build(c)
-		// return buildMobile(c.Build.Package, "android", androidArchs)
 	}
 	return nil
 }
 
-// buildDesktop builds an executable for the package at the given path for the given desktop platform.
-// buildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
-func buildDesktop(pkgPath string, platform config.Platform) error {
-	cmd := exec.Command("go", "build", "-o", BuildPath(pkgPath), pkgPath)
-	cmd.Env = append(os.Environ(), "GOOS="+platform.OS, "GOARCH="+platform.Arch)
-	fmt.Println(CmdString(cmd))
-	output, err := RunCmd(cmd)
+// BuildDesktop builds an executable for the package at the given path for the given desktop platform.
+// BuildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
+func BuildDesktop(pkgPath string, platform config.Platform) error {
+	vc := xe.VerboseConfig()
+	vc.Env["GOOS"] = platform.OS
+	vc.Env["GOARCH"] = platform.Arch
+	err := xe.Run(vc, "go", "build", "-o", BuildPath(pkgPath), pkgPath)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
-	fmt.Println(string(output))
-	return nil
-}
-
-// buildMobile builds an executable for the package at the given path for the given mobile operating system and architectures.
-// buildMobile does not check whether operating systems and architectures are valid, so it should be called through Build in almost all cases.
-func buildMobile(pkgPath string, osName string, archs []string) error {
-	target := ""
-	for i, arch := range archs {
-		target += osName + "/" + arch
-		if i != len(archs)-1 {
-			target += ","
-		}
-	}
-	cmd := exec.Command("gomobile", "build", "-o", filepath.Join(BuildPath(pkgPath), AppName(pkgPath)+".apk"), "-target", target, pkgPath)
-	fmt.Println(CmdString(cmd))
-	output, err := RunCmd(cmd)
-	if err != nil {
-		return fmt.Errorf("error building for platform %s/%v: %w", osName, archs, err)
-	}
-	fmt.Println(string(output))
 	return nil
 }

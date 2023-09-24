@@ -10,6 +10,7 @@ require (
 	goki.dev/grows v0.3.3
 	goki.dev/gti v0.1.4
 	goki.dev/ordmap v0.5.5
+	goki.dev/xe v0.0.1
 	golang.org/x/mod v0.12.0
 	golang.org/x/tools v0.13.0
 )
