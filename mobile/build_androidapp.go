@@ -78,7 +78,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	for _, t := range targets {
 		toolchain := NDK.Toolchain(t.Arch)
 		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
-		libAbsPath := filepath.Join(tmpdir, libPath)
+		libAbsPath := filepath.Join(TmpDir, libPath)
 		if err := Mkdir(c, filepath.Dir(libAbsPath)); err != nil {
 			return nil, err
 		}
@@ -173,7 +173,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 
 	for _, libFile := range libFiles {
-		if err := apkwWriteFile(libFile, filepath.Join(tmpdir, libFile)); err != nil {
+		if err := apkwWriteFile(libFile, filepath.Join(TmpDir, libFile)); err != nil {
 			return nil, err
 		}
 	}

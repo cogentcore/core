@@ -25,7 +25,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var tmpdir string
+var TmpDir string
 
 // Build compiles and encodes the app named by the import path.
 //
@@ -187,8 +187,8 @@ var Xout io.Writer = os.Stderr
 
 func PrintCmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
-	if tmpdir != "" {
-		cmd = strings.Replace(cmd, tmpdir, "$WORK", -1)
+	if TmpDir != "" {
+		cmd = strings.Replace(cmd, TmpDir, "$WORK", -1)
 	}
 	if androidHome, err := sdkpath.AndroidHome(); err == nil {
 		cmd = strings.Replace(cmd, androidHome, "$ANDROID_HOME", -1)

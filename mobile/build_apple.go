@@ -57,9 +57,9 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 		name     string
 		contents []byte
 	}{
-		{tmpdir + "/main.xcodeproj/project.pbxproj", projPbxproj.Bytes()},
-		{tmpdir + "/main/Info.plist", infoplist.Bytes()},
-		{tmpdir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(ContentsJSON)},
+		{TmpDir + "/main.xcodeproj/project.pbxproj", projPbxproj.Bytes()},
+		{TmpDir + "/main/Info.plist", infoplist.Bytes()},
+		{TmpDir + "/main/Images.xcassets/AppIcon.appiconset/Contents.json", []byte(ContentsJSON)},
 	}
 
 	for _, file := range files {
@@ -79,7 +79,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	// We are using lipo tool to build multiarchitecture binaries.
 	cmd := exec.Command(
 		"xcrun", "lipo",
-		"-o", filepath.Join(tmpdir, "main/main"),
+		"-o", filepath.Join(TmpDir, "main/main"),
 		"-create",
 	)
 
@@ -93,7 +93,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 		}
 		builtArch[t.Arch] = true
 
-		path := filepath.Join(tmpdir, t.OS, t.Arch)
+		path := filepath.Join(TmpDir, t.OS, t.Arch)
 
 		// Disable DWARF; see golang.org/issues/25148.
 		if err := GoBuild(c, src, AppleEnv[t.String()], "-ldflags=-w", "-o="+path); err != nil {
@@ -115,7 +115,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	// TODO(jbd): Set the launcher icon.
-	if err := AppleCopyAssets(c, pkg, tmpdir); err != nil {
+	if err := AppleCopyAssets(c, pkg, TmpDir); err != nil {
 		return nil, err
 	}
 
@@ -123,7 +123,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	cmdStrings := []string{
 		"xcodebuild",
 		"-configuration", "Release",
-		"-project", tmpdir + "/main.xcodeproj",
+		"-project", TmpDir + "/main.xcodeproj",
 		"-allowProvisioningUpdates",
 		"DEVELOPMENT_TEAM=" + teamID,
 	}
@@ -148,14 +148,14 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 		c.Build.Output = n + ".app"
 	}
 	if c.Build.Print {
-		PrintCmd("mv %s %s", tmpdir+"/build/Release-iphoneos/main.app", c.Build.Output)
+		PrintCmd("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output)
 	}
 	if !c.Build.PrintOnly {
 		// if output already exists, remove.
 		if err := os.RemoveAll(c.Build.Output); err != nil {
 			return nil, err
 		}
-		if err := os.Rename(tmpdir+"/build/Release-iphoneos/main.app", c.Build.Output); err != nil {
+		if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output); err != nil {
 			return nil, err
 		}
 	}

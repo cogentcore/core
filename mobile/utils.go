@@ -324,10 +324,10 @@ func RunCmd(c *config.Config, cmd *exec.Cmd) error {
 
 	if c.Build.Work {
 		if GOOS == "windows" {
-			cmd.Env = append(cmd.Env, `TEMP=`+tmpdir)
-			cmd.Env = append(cmd.Env, `TMP=`+tmpdir)
+			cmd.Env = append(cmd.Env, `TEMP=`+TmpDir)
+			cmd.Env = append(cmd.Env, `TMP=`+TmpDir)
 		} else {
-			cmd.Env = append(cmd.Env, `TMPDIR=`+tmpdir)
+			cmd.Env = append(cmd.Env, `TMPDIR=`+TmpDir)
 		}
 	}
 

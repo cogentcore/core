@@ -123,22 +123,22 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 
 	cleanupFn := func() {
 		if c.Build.Work {
-			fmt.Printf("WORK=%s\n", tmpdir)
+			fmt.Printf("WORK=%s\n", TmpDir)
 			return
 		}
-		RemoveAll(c, tmpdir)
+		RemoveAll(c, TmpDir)
 	}
 	if c.Build.PrintOnly {
-		tmpdir = "$WORK"
+		TmpDir = "$WORK"
 		cleanupFn = func() {}
 	} else {
-		tmpdir, err = os.MkdirTemp("", "gomobile-work-")
+		TmpDir, err = os.MkdirTemp("", "gomobile-work-")
 		if err != nil {
 			return nil, err
 		}
 	}
 	if c.Build.Print {
-		fmt.Fprintln(Xout, "WORK="+tmpdir)
+		fmt.Fprintln(Xout, "WORK="+TmpDir)
 	}
 
 	if err := EnvInit(c); err != nil {

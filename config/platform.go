@@ -26,11 +26,11 @@ func (p Platform) String() string {
 // If it isn't, it returns an error detailing the issue with the operating system (not found or not supported).
 func OSSupported(os string) error {
 	supported, ok := SupportedOS[os]
-	if !supported {
-		return fmt.Errorf("operating system %s exists but is not supported by GoKi", os)
-	}
 	if !ok {
 		return fmt.Errorf("could not find operating system %s; please check that you spelled it correctly", os)
+	}
+	if !supported {
+		return fmt.Errorf("operating system %s exists but is not supported by GoKi", os)
 	}
 	return nil
 }
@@ -39,11 +39,11 @@ func OSSupported(os string) error {
 // If it isn't, it also returns an error detailing the issue with the architecture (not found or not supported).
 func ArchSupported(arch string) error {
 	supported, ok := SupportedArch[arch]
-	if !supported {
-		return fmt.Errorf("architecture %s exists but is not supported by GoKi", arch)
-	}
 	if !ok {
 		return fmt.Errorf("could not find architecture %s; please check that you spelled it correctly", arch)
+	}
+	if !supported {
+		return fmt.Errorf("architecture %s exists but is not supported by GoKi", arch)
 	}
 	return nil
 }
