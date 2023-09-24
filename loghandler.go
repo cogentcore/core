@@ -48,7 +48,7 @@ func SetDefaultLogger() {
 		if err != nil {
 			panic(err)
 		}
-		_ = restoreConsole
+		_ = restoreConsole // TODO: figure out how to call this at the end of the program
 		colorProfile = termenv.ColorProfile()
 		if termenv.HasDarkBackground() {
 			matcolor.TheScheme = &matcolor.TheSchemes.Dark
