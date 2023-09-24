@@ -36,3 +36,10 @@ const (
 	// (quiet) flag in xe.
 	Error Level = 8
 )
+
+// UserLevel is the verbosity [Level] that the user has selected for
+// what logging and printing messages should be shown. Messages at
+// levels at or above this level will be shown. It should typically
+// be set through xe to the end user's preference. The default user
+// verbosity level is [Warn].
+var UserLevel Level = Warn
