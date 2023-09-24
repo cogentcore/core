@@ -10,7 +10,6 @@ package grog
 import (
 	"context"
 	"fmt"
-	"image/color"
 	"io"
 	"log/slog"
 	"os"
@@ -128,18 +127,7 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 	h.Mu.Lock()
 	defer h.Mu.Unlock()
 	if UseColor {
-		var clr color.RGBA
-		switch r.Level {
-		case slog.LevelDebug:
-			clr = matcolor.TheScheme.Secondary
-		case slog.LevelInfo:
-			clr = matcolor.TheScheme.Primary
-		case slog.LevelWarn:
-			clr = matcolor.TheScheme.Tertiary
-		case slog.LevelError:
-			clr = matcolor.TheScheme.Error
-		}
-		_, err := h.W.Write([]byte(termenv.String(string(buf)).Foreground(colorProfile.FromColor(clr)).String()))
+		_, err := h.W.Write([]byte(ApplyColor(r.Level, string(buf))))
 		return err
 	}
 	_, err := h.W.Write(buf)
