@@ -47,14 +47,11 @@ func onStart(a app.App) {
 	var sf vk.Surface
 	log.Println("in onStart", gpu.Instance, window, &sf)
 	ret := vk.CreateWindowSurface(gpu.Instance, window, nil, &sf)
-	log.Println("created window surface")
 	if err := vk.Error(ret); err != nil {
 		log.Println("vulkan error:", err)
 		return
 	}
-	log.Println("before new surface; surface:", sf, "\ngpu:", gpu)
 	surface = vgpu.NewSurface(gpu, sf)
-	log.Println("after new surface")
 
 	log.Printf("format: %s\n", surface.Format.String())
 

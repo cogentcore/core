@@ -10,7 +10,6 @@ package vgpu
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	vk "github.com/goki/vulkan"
 )
@@ -61,7 +60,6 @@ type Surface struct {
 func NewSurface(gp *GPU, vsurf vk.Surface) *Surface {
 	sf := &Surface{}
 	sf.Defaults()
-	log.Println("set surface defaults")
 	sf.Init(gp, vsurf)
 	return sf
 }
@@ -87,16 +85,12 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 	sf.Surface = vs
 	// Get queue family properties
 	var queueCount uint32
-	log.Println("in init")
 	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.GPU, &queueCount, nil)
-	log.Println("got first properties")
 	queueProperties := make([]vk.QueueFamilyProperties, queueCount)
 	vk.GetPhysicalDeviceQueueFamilyProperties(sf.GPU.GPU, &queueCount, queueProperties)
 	if queueCount == 0 { // probably should try another GPU
 		return errors.New("vulkan error: no queue families found on GPU 0")
 	}
-
-	log.Println("got properties")
 
 	// Find a suitable queue family for the target Vulkan mode
 	// note: this differs from generic Device.FindQueue in
@@ -116,12 +110,8 @@ func (sf *Surface) Init(gp *GPU, vs vk.Surface) error {
 		return err
 	}
 
-	log.Println("got surface support")
-
 	sf.Device.MakeDevice(gp)
-	log.Println("made device")
 	sf.ConfigSwapchain()
-	log.Println("configured swapchain")
 	return nil
 }
 
