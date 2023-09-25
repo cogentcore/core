@@ -17,10 +17,12 @@ func TestDefaultLogger(t *testing.T) {
 	slog.Debug("this is debug")
 	slog.Info("this is info")
 	slog.Warn("this is warn")
-	slog.Error("this is error")
+	slog.Error("this is error\n")
 
 	log.Println("this is standard log")
 
-	Printf(slog.LevelError, "this is %q", "Printf")
-	Println(slog.LevelWarn, "this is Println")
+	PrintDebug("\nthis is PrintDebug\n")
+	PrintlnInfo("this is PrintlnInfo")
+	PrintlnWarn("this is PrintlnWarn")
+	PrintfError("this is %q", "PrintfError")
 }
