@@ -7,8 +7,6 @@ package xe
 import (
 	"io"
 	"os"
-
-	"github.com/fatih/color"
 )
 
 // Config contains the configuration information that
@@ -38,29 +36,19 @@ type Config struct {
 	Dir string
 	// Env contains any additional environment variables specified.
 	Env map[string]string
-	// CmdColor is the color formatting function used on commands.
-	CmdColor func(format string, a ...any) string
-	// SuccessColor is the color formatting function used on success
-	// messages and directory names.
-	SuccessColor func(format string, a ...any) string
-	// ErrColor is the color formatting function used on errors.
-	ErrColor func(format string, a ...any) string
 }
 
 // VerboseConfig returns a default verbose [Config] object.
 // It prints everything to [os.Stdout] or [os.Stderr].
 func VerboseConfig() *Config {
 	return &Config{
-		Stdout:       os.Stdout,
-		Stderr:       os.Stderr,
-		Stdin:        os.Stdin,
-		Commands:     os.Stdout,
-		Errors:       os.Stderr,
-		Fatal:        false,
-		Env:          map[string]string{},
-		CmdColor:     color.New(color.FgCyan, color.Bold).Sprintf,
-		SuccessColor: color.New(color.FgGreen, color.Bold).Sprintf,
-		ErrColor:     color.New(color.FgRed).Sprintf,
+		Stdout:   os.Stdout,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Commands: os.Stdout,
+		Errors:   os.Stderr,
+		Fatal:    false,
+		Env:      map[string]string{},
 	}
 }
 
@@ -68,16 +56,13 @@ func VerboseConfig() *Config {
 // It prints errors to [os.Stderr] and prints nothing else.
 func ErrorConfig() *Config {
 	return &Config{
-		Stdout:       nil,
-		Stderr:       os.Stderr,
-		Stdin:        os.Stdin,
-		Commands:     nil,
-		Errors:       os.Stderr,
-		Fatal:        false,
-		Env:          map[string]string{},
-		CmdColor:     color.New(color.FgCyan, color.Bold).Sprintf,
-		SuccessColor: color.New(color.FgGreen, color.Bold).Sprintf,
-		ErrColor:     color.New(color.FgRed).Sprintf,
+		Stdout:   nil,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Commands: nil,
+		Errors:   os.Stderr,
+		Fatal:    false,
+		Env:      map[string]string{},
 	}
 }
 
@@ -85,16 +70,13 @@ func ErrorConfig() *Config {
 // it prints nothing, not even errors.
 func SilentConfig() *Config {
 	return &Config{
-		Stdout:       nil,
-		Stderr:       nil,
-		Stdin:        os.Stdin,
-		Commands:     nil,
-		Errors:       nil,
-		Fatal:        false,
-		Env:          map[string]string{},
-		CmdColor:     color.New(color.FgCyan, color.Bold).Sprintf,
-		SuccessColor: color.New(color.FgGreen, color.Bold).Sprintf,
-		ErrColor:     color.New(color.FgRed).Sprintf,
+		Stdout:   nil,
+		Stderr:   nil,
+		Stdin:    os.Stdin,
+		Commands: nil,
+		Errors:   nil,
+		Fatal:    false,
+		Env:      map[string]string{},
 	}
 }
 
@@ -103,15 +85,12 @@ func SilentConfig() *Config {
 // and fatally exits on any error.
 func FatalConfig() *Config {
 	return &Config{
-		Stdout:       os.Stdout,
-		Stderr:       os.Stderr,
-		Stdin:        os.Stdin,
-		Commands:     os.Stdout,
-		Errors:       os.Stderr,
-		Fatal:        true,
-		Env:          map[string]string{},
-		CmdColor:     color.New(color.FgCyan, color.Bold).Sprintf,
-		SuccessColor: color.New(color.FgGreen, color.Bold).Sprintf,
-		ErrColor:     color.New(color.FgRed).Sprintf,
+		Stdout:   os.Stdout,
+		Stderr:   os.Stderr,
+		Stdin:    os.Stdin,
+		Commands: os.Stdout,
+		Errors:   os.Stderr,
+		Fatal:    true,
+		Env:      map[string]string{},
 	}
 }
