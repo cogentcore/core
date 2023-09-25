@@ -30,7 +30,11 @@ type MenuBar struct {
 	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
 }
 
+// event functions for this type
+var MenuBarEventFuncs WidgetEvents
+
 func (mb *MenuBar) OnInit() {
+	mb.AddEvents(&MenuBarEventFuncs)
 	mb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
@@ -85,13 +89,11 @@ func (mb *MenuBar) Render(sc *Scene) {
 		return
 	}
 	if mb.PushBounds(sc) {
+		wi.FilterEvents()
 		mb.MenuBarStdRender(sc)
-		wi.ConnectEvents()
 		mb.RenderScrolls(sc)
 		mb.RenderChildren(sc)
 		mb.PopBounds(sc)
-	} else {
-		mb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
 
@@ -110,7 +112,7 @@ func (mb *MenuBar) UpdateActions() {
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-// Called in ConnectEvents()
+// Called in AddEvents()
 func (mb *MenuBar) SetShortcuts() {
 	win := mb.ParentRenderWin()
 	if win == nil {
@@ -323,11 +325,15 @@ func (tb *ToolBar) AsToolBar() *ToolBar {
 
 // ToolBar is a Layout (typically LayoutHoriz) that renders a gradient
 // background and is useful for holding Actions that do things
-type ToolBar struct {
+type ToolBar struct { //goki:embedder
 	Layout
 }
 
+// event functions for this type
+var ToolBarEventFuncs WidgetEvents
+
 func (tb *ToolBar) OnInit() {
+	tb.AddEvents(&ToolBarEventFuncs)
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.Border.Radius = gist.BorderRadiusFull
@@ -399,18 +405,16 @@ func (tb *ToolBar) Render(sc *Scene) {
 	}
 	wi := tb.This().(Widget)
 	if tb.PushBounds(sc) {
+		wi.FilterEvents()
 		tb.ToolBarStdRender(sc)
-		wi.ConnectEvents()
 		tb.RenderScrolls(sc)
 		tb.RenderChildren(sc)
 		tb.PopBounds(sc)
-	} else {
-		tb.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
 
 func (tb *ToolBar) MouseFocusEvent() {
-	tb.ConnectEvent(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	tbwe.AddFunc(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.FocusEvent)
 		if me.Action == mouse.Enter {
 			tbb := AsToolBar(recv)
@@ -422,14 +426,20 @@ func (tb *ToolBar) MouseFocusEvent() {
 	})
 }
 
-func (tb *ToolBar) ConnectEvents() {
-	tb.Layout.ConnectEvents()
-	tb.MouseFocusEvent()
+func (tb *ToolBar) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	tb.Layout.AddEvents(we)
+	tb.MouseFocusEvent(we)
+}
+
+func (tb *ToolBar) FilterEvents() {
 	tb.SetShortcuts()
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-// Called in ConnectEvents()
+// Called in AddEvents()
 func (tb *ToolBar) SetShortcuts() {
 	win := tb.ParentRenderWin()
 	if win == nil {

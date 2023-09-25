@@ -21,7 +21,11 @@ type Frame struct {
 	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
 }
 
+// event functions for this type
+var FrameEventFuncs WidgetEvents
+
 func (fr *Frame) OnInit() {
+	fr.AddEvents(&FrameEventFuncs)
 	fr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set()
@@ -37,6 +41,10 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 	}
 	fr.Layout.CopyFieldsFrom(&cp.Layout)
 	fr.Stripes = cp.Stripes
+}
+
+func (fr *Frame) FilterEvents() {
+	fr.Events.CopyFrom(FrameEventFuncs)
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds
@@ -111,13 +119,12 @@ func (fr *Frame) RenderStripes(sc *Scene) {
 func (fr *Frame) Render(sc *Scene) {
 	wi := fr.This().(Widget)
 	if fr.PushBounds(sc) {
+		wi.FilterEvents()
 		fr.FrameStdRender(sc)
-		wi.ConnectEvents()
 		fr.RenderScrolls(sc)
 		fr.RenderChildren(sc)
 		fr.PopBounds(sc)
 	} else {
 		fr.SetScrollsOff()
-		fr.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }

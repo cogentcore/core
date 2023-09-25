@@ -120,7 +120,7 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 }
 
 func (kc *KeyChordEdit) MouseEvent() {
-	kc.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kcwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {
@@ -143,7 +143,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 }
 
 func (kc *KeyChordEdit) KeyChordEvent() {
-	kc.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kcwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if kcc.HasFocus() && kcc.FocusActive {
 			kt := d.(*key.ChordEvent)
@@ -166,7 +166,7 @@ func (kc *KeyChordEdit) SetStyle() {
 	kc.LayoutLabel()
 }
 
-func (kc *KeyChordEdit) ConnectEvents() {
+func (kc *KeyChordEdit) AddEvents() {
 	kc.HoverEvent()
 	kc.MouseEvent()
 	kc.KeyChordEvent()

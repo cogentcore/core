@@ -51,7 +51,11 @@ type Icon struct {
 	SVG svg.SVG `desc:"SVG drawing"`
 }
 
+// event functions for this type
+var IconEventFuncs WidgetEvents
+
 func (ic *Icon) OnInit() {
+	ic.AddEvents(&IconEventFuncs)
 	ic.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
@@ -120,7 +124,7 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 	sp := image.Point{}
 	if ic.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(ic.Par)
-		pbb := pni.ChildrenBBox2D(sc)
+		pbb := pni.ChildrenBBoxes(sc)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -132,12 +136,16 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 	draw.Draw(sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 
+func (ic *Icon) FilterEvents() {
+	ic.Events.CopyFrom(IconEventFuncs)
+}
+
 func (ic *Icon) Render(sc *Scene) {
 	// todo: cache rendered size, update render if diff size..
 
 	wi := ic.This().(Widget)
 	if ic.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.AddEvents()
 		ic.RenderChildren(sc)
 		ic.DrawIntoScene(sc)
 		ic.PopBounds(sc)

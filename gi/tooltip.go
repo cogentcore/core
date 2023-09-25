@@ -82,7 +82,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
 func (wb *WidgetBase) HoverTooltipEvent() {
-	wb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	wbwe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		wbb := AsWidgetBase(recv)
 		if wbb.Tooltip != "" {

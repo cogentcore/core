@@ -89,7 +89,11 @@ const (
 	ActionToolBar
 )
 
+// event functions for this type
+var ActionEventFuncs WidgetEvents
+
 func (ac *Action) OnInit() {
+	ac.AddEvents(&ActionEventFuncs)
 	ac.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)

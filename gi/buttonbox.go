@@ -50,7 +50,11 @@ type ButtonBox struct {
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
 
+// event functions for this type
+var ButtonBoxEventFuncs WidgetEvents
+
 func (bb *ButtonBox) OnInit() {
+	bb.AddEvents(&ButtonBoxEventFuncs)
 	bb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
@@ -270,12 +274,10 @@ func (bb *ButtonBox) RenderButtonBox(sc *Scene) {
 func (bb *ButtonBox) Render(sc *Scene) {
 	wi := bb.This().(Widget)
 	if bb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.filterEvents()
 		bb.RenderButtonBox(sc)
 		bb.RenderParts(sc)
 		bb.RenderChildren(sc)
 		bb.PopBounds(sc)
-	} else {
-		bb.DisconnectAllEvents(RegPri)
 	}
 }

@@ -40,7 +40,7 @@ func (sve *Editor) CopyFieldsFrom(frm any) {
 
 // EditorEvents handles svg editing events
 func (sve *Editor) EditorEvents() {
-	sve.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svewe.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		ssvg := sve
@@ -63,7 +63,7 @@ func (sve *Editor) EditorEvents() {
 		}
 
 	})
-	sve.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svewe.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
 		ssvg := sve
@@ -80,7 +80,7 @@ func (sve *Editor) EditorEvents() {
 		// ssvg.SetFullReRender()
 		// ssvg.UpdateSig()
 	})
-	sve.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svewe.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		ssvg := sve
 		if ssvg.SetDragCursor {
@@ -96,7 +96,7 @@ func (sve *Editor) EditorEvents() {
 			// }
 		}
 	})
-	sve.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svewe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.HoverEvent)
 		me.SetProcessed()
 		ssvg := sve
@@ -109,7 +109,7 @@ func (sve *Editor) EditorEvents() {
 	})
 }
 
-func (sve *Editor) ConnectEvents() {
+func (sve *Editor) AddEvents() {
 	sve.EditorEvents()
 }
 
@@ -135,7 +135,7 @@ func (sve *Editor) Render(sc *Scene) {
 	wi := sve.This().(Widget)
 	if sve.PushBounds(sc) {
 		// rs := &sve.Render
-		wi.ConnectEvents()
+		wi.AddEvents()
 		// if sve.Fill {
 		// 	sve.FillScene()
 		// }

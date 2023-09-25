@@ -218,7 +218,7 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	parBBox := image.Rectangle{}
 	pwi, _ := AsWidget(wb.Par)
 	if pwi != nil {
-		parBBox = pwi.ChildrenBBox2D(sc)
+		parBBox = pwi.ChildrenBBoxes(sc)
 	} else {
 		parBBox = sc.Pixels.Bounds()
 	}
@@ -389,12 +389,10 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 func (wb *WidgetBase) Render(sc *Scene) {
 	wi := wb.This().(Widget)
 	if wb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		wb.RenderParts(sc)
 		wb.RenderChildren(sc)
 		wb.PopBounds(sc)
-	} else {
-		wb.DisconnectAllEvents(RegPri)
 	}
 }
 
@@ -425,7 +423,7 @@ func (wb *WidgetBase) ReRenderTree() {
 	parBBox := image.Rectangle{}
 	pni, _ := KiToWidget(wb.Par)
 	if pni != nil {
-		parBBox = pni.ChildrenBBox2D(vp)
+		parBBox = pni.ChildrenBBoxes(vp)
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig)
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig

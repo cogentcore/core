@@ -57,7 +57,7 @@ type Widget interface {
 	// DoLayout: MeFirst downward pass (each node calls on its children at
 	// appropriate point) with relevant parent BBox that the children are
 	// constrained to render within -- they then intersect this BBox with
-	// their own BBox (from BBox2D) -- typically just call DoLayoutBase for
+	// their own BBox (from BBoxes) -- typically just call DoLayoutBase for
 	// default behavior -- and add parent position to AllocPos, and then
 	// return call to DoLayoutChildren. Layout does all its sizing and
 	// positioning of children in this pass, based on the GetSize data gathered
@@ -70,42 +70,47 @@ type Widget interface {
 	// Move2D: optional MeFirst downward pass to move all elements by given
 	// delta -- used for scrolling -- the layout pass assigns canonical
 	// positions, saved in AllocPosOrig and BBox, and this adds the given
-	// delta to that AllocPosOrig -- each node must call ComputeBBox2D to
+	// delta to that AllocPosOrig -- each node must call ComputeBBoxes to
 	// update its bounding box information given the new position.
 	Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle)
 
-	// todo: fix bbox stuff!  BBoxes is a good overall name
-
-	// BBox2D: compute the raw bounding box of this node relative to its
+	// BBoxes: compute the raw bounding box of this node relative to its
 	// parent scene -- called during DoLayout to set node BBox field, which
-	// is then used in setting WinBBox and ScBBox.
-	BBox2D() image.Rectangle
+	// is then used in setting ScBBox.
+	BBoxes() image.Rectangle
 
 	// Compute ScBBox and WinBBox from BBox, given parent ScBBox -- most nodes
-	// call ComputeBBox2DBase but scenes require special code -- called
+	// call ComputeBBoxesBase but scenes require special code -- called
 	// during Layout and Move.
-	ComputeBBox2D(sc *Scene, parBBox image.Rectangle, delta image.Point)
+	ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point)
 
-	// ChildrenBBox2D: compute the bbox available to my children (content),
+	// ChildrenBBoxes: compute the bbox available to my children (content),
 	// adjusting for margins, border, padding (BoxSpace) taken up by me --
 	// operates on the existing ScBBox for this node -- this is what is passed
 	// down as parBBox do the children's DoLayout.
-	ChildrenBBox2D(sc *Scene) image.Rectangle
+	ChildrenBBoxes(sc *Scene) image.Rectangle
 
 	// Render: Final rendering pass, each node is fully responsible for
 	// calling Render on its own children, to provide maximum flexibility
 	// (see RenderChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
 	// ScBBox is empty and no rendering should occur.  Typically call
-	// ConnectEvents to set up connections to receive window events if
+	// AddEvents to set up connections to receive window events if
 	// visible, and disconnect if not.
 	Render(sc *Scene)
 
-	// ConnectEvents: setup connections to window events -- called in
-	// Render if in bounds.  It can be useful to create modular methods for
-	// different event types that can then be mix-and-matched in any more
-	// specialized types.
-	ConnectEvents()
+	// AddEvents: Adds all event processing functions for this type.
+	// Start with: if we.HasFuncs() { return }.
+	// Call in OnInit with the TypeEventFuncs type-specific var
+	// to ensure that all the event funcs are registered.
+	AddEvents(we *WidgetEvents)
+
+	// FilterEvents: Initialize Event processing filter to determine
+	// which events this widget receives, called at start of Render.
+	// First method is: xx.Events.CopyFrom(TypeEventFuncs)
+	// then Ex exclude any events that should be ignored.
+	// Events are automatically excluded for invisible widgets.
+	FilterEvents()
 
 	// FocusChanged is called on node for changes in focus -- see the
 	// FocusChanges values.
@@ -125,7 +130,7 @@ type Widget interface {
 	MakeContextMenu(menu *Menu)
 
 	// ContextMenuPos returns the default position for popup menus --
-	// by default in the middle of the WinBBox, but can be adapted as
+	// by default in the middle of the Stage, but can be adapted as
 	// appropriate for different widgets.
 	ContextMenuPos() image.Point
 
@@ -140,7 +145,7 @@ type Widget interface {
 	// for widgets in a visible window, but it checks the window and scene
 	// for their visibility status as well, which is available always.
 	// This does *not* check for ScBBox level visibility, which is a further check.
-	// Non-visible nodes are automatically not rendered and not connected to
+	// Non-visible nodes are automatically not rendered and do not get
 	// window events.  The Invisible flag is one key element of the IsVisible
 	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
 	// set if a widget is entirely out of render range.  But again, use
@@ -150,6 +155,10 @@ type Widget interface {
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
+
+	// todo: revisit this -- in general anything with a largish image (including svg,
+	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just
+	// directly uploads its image.
 
 	// IsDirectWinUpload returns true if this is a node that does a direct window upload
 	// e.g., for gi3d.Scene which renders directly to the window texture for maximum efficiency
@@ -184,8 +193,10 @@ type WidgetBase struct {
 	// [view: no-inline] aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
 
-	// raw original 2D bounding box for the object within its parent scene -- used for computing ScBBox and WinBBox -- this is not updated by Move2D, whereas ScBBox etc are
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original 2D bounding box for the object within its parent scene -- used for computing ScBBox and WinBBox -- this is not updated by Move2D, whereas ScBBox etc are"`
+	// todo: need to fully revisit scrolling logic!
+
+	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by Move2D, whereas ScBBox is
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by Move2D, whereas ScBBox is"`
 
 	// full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
 	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
@@ -208,6 +219,9 @@ type WidgetBase struct {
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 
+	// filter and map of event processing functions that determine which events and how they are processed for this widget
+	Events WidgetEvents `desc:"filter and map of event processing functions that determine which events and how they are processed for this widget"`
+
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
 
@@ -227,6 +241,13 @@ type WidgetBase struct {
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the BBox fields"`
 }
 
+// event functions for this type
+var WidgetEventFuncs WidgetEvents
+
+func (wb *WidgetBase) OnInit() {
+	wb.AddEvents(&WidgetEventFuncs)
+}
+
 // AsWidget returns the given Ki object
 // as a Widget interface and a WidgetBase.
 func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
@@ -237,6 +258,10 @@ func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
 		return w, w.AsWidget()
 	}
 	return nil, nil
+}
+
+func (wb *WidgetBase) AsWidget() *WidgetBase {
+	return wb
 }
 
 // AsWidgetBase returns the given Ki object as a WidgetBase, or nil.
@@ -264,10 +289,6 @@ func (wb *WidgetBase) Disconnect() {
 	if wb.Parts != nil {
 		wb.Parts.DisconnectAll()
 	}
-}
-
-func (wb *WidgetBase) AsWidget() *WidgetBase {
-	return wb
 }
 
 func (wb *WidgetBase) BaseIface() reflect.Type {

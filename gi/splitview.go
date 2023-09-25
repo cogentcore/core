@@ -66,7 +66,11 @@ type SplitView struct {
 	Dim mat32.Dims `desc:"dimension along which to split the space"`
 }
 
+// event functions for this type
+var SplitViewEventFuncs WidgetEvents
+
 func (sv *SplitView) OnInit() {
+	sv.AddEvents(&SplitViewEventFuncs)
 	sv.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sv.HandleSize.SetPx(10)
 
@@ -341,15 +345,26 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 	}
 }
 
-func (sv *SplitView) KeyChordEvent() {
-	sv.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sv *SplitView) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		svv := AsSplitView(recv)
 		svv.KeyInput(d.(*key.ChordEvent))
 	})
 }
 
-func (sv *SplitView) SplitViewEvents() {
-	sv.KeyChordEvent()
+func (sv *SplitView) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	sv.SplitViewEvents(we)
+}
+
+func (sv *SplitView) FilterEvents() {
+	sv.Events.CopyFrom(SplitViewEventFuncs)
+}
+
+func (sv *SplitView) SplitViewEvents(we *WidgetEvents) {
+	sv.KeyChordEvent(we)
 }
 
 func (sv *SplitView) StyleSplitView(sc *Scene) {
@@ -420,7 +435,7 @@ func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 func (sv *SplitView) Render(sc *Scene) {
 	wi := sv.This().(Widget)
 	if sv.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		for i, kid := range sv.Kids {
 			wi, wb := AsWidget(kid)
 			if wb == nil {
@@ -437,10 +452,6 @@ func (sv *SplitView) Render(sc *Scene) {
 		sv.Parts.Render(sc)
 		sv.PopBounds(sc)
 	}
-}
-
-func (sv *SplitView) ConnectEvents() {
-	sv.SplitViewEvents()
 }
 
 func (sv *SplitView) HasFocus() bool {
@@ -463,7 +474,12 @@ type Splitter struct {
 	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
 }
 
+// event functions for this type
+var SplitterEventFuncs WidgetEvents
+
 func (sr *Splitter) OnInit() {
+	sr.AddEvents(&SplitterEventFuncs)
+
 	// STYTODO: fix splitter styles
 	sr.ValThumb = false
 	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
@@ -595,8 +611,8 @@ func (sr *Splitter) SplitView() *SplitView {
 	return svi
 }
 
-func (sr *Splitter) MouseEvent() {
-	sr.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sr *Splitter) MouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		srr := sr
 		if srr.IsDisabled() {
@@ -634,9 +650,9 @@ func (sr *Splitter) MouseEvent() {
 	})
 }
 
-func (sr *Splitter) MouseScrollEvent() {
+func (sr *Splitter) MouseScrollEvent(we *WidgetEvents) {
 	// todo: just disabling at this point to prevent bad side-effects
-	// sr.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// srwe.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	srr := recv.Embed(TypeSliderBase).(*SliderBase)
 	// 	if srr.IsInactive() {
 	// 		return
@@ -652,22 +668,29 @@ func (sr *Splitter) MouseScrollEvent() {
 	// })
 }
 
-func (sr *Splitter) SplitterEvents() {
-	sr.MouseDragEvent()
-	sr.MouseEvent()
-	sr.MouseFocusEvent()
-	sr.MouseScrollEvent()
-	sr.KeyChordEvent()
+func (sr *Splitter) SplitterEvents(we *WidgetEvents) {
+	sr.MouseDragEvent(we)
+	sr.MouseEvent(we)
+	sr.MouseFocusEvent(we)
+	sr.MouseScrollEvent(we)
+	sr.KeyChordEvent(we)
 }
 
-func (sr *Splitter) ConnectEvents() {
-	sr.SplitterEvents()
+func (sr *Splitter) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	sr.SplitterEvents(we)
+}
+
+func (sr *Splitter) FilterEvents() {
+	sr.Events.CopyFrom(SplitterEventFuncs)
 }
 
 func (sr *Splitter) Render(sc *Scene) {
 	win := sr.ParentRenderWin()
 	wi := sr.This().(Widget)
-	wi.ConnectEvents()
+	wi.FilterEvents()
 	spnm := "gi.Splitter:" + sr.Name()
 	if sr.HasFlag(NodeDragging) {
 		ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)

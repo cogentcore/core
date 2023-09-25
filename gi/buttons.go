@@ -52,6 +52,13 @@ type ButtonBase struct {
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
+// event functions for this type
+var ButtonBaseEventFuncs WidgetEvents
+
+func (bb *ButtonBase) OnInit() {
+	bb.AddEvents(&ButtonBaseEventFuncs)
+}
+
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
@@ -317,8 +324,8 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 }
 
 // MouseEvents handles button MouseEvent
-func (bb *ButtonBase) MouseEvent() {
-	bb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (bb *ButtonBase) MouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
@@ -339,8 +346,8 @@ func (bb *ButtonBase) MouseEvent() {
 }
 
 // KeyChordEvent handles button KeyChord events
-func (bb *ButtonBase) KeyChordEvent() {
-	bb.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (bb *ButtonBase) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
 		if bbb.IsDisabled() {
@@ -361,9 +368,9 @@ func (bb *ButtonBase) KeyChordEvent() {
 	})
 }
 
-func (bb *ButtonBase) HoverTooltipEvent() {
-	bb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.HoverEvent)
+func (bb *ButtonBase) HoverTooltipEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*mouse.Event)
 		wbb := AsButtonBase(recv)
 		tt := wbb.Tooltip
 		if wbb.Shortcut != "" {
@@ -380,11 +387,11 @@ func (bb *ButtonBase) HoverTooltipEvent() {
 	})
 }
 
-func (bb *ButtonBase) ButtonEvents() {
-	bb.WidgetEvents()
-	bb.HoverTooltipEvent()
-	bb.MouseEvent()
-	bb.KeyChordEvent()
+func (bb *ButtonBase) ButtonEvents(we *WidgetEvents) {
+	bb.WidgetEvents(we)
+	bb.HoverTooltipEvent(we)
+	bb.MouseEvent(we)
+	bb.KeyChordEvent(we)
 }
 
 ///////////////////////////////////////////////////////////
@@ -466,18 +473,23 @@ func (bb *ButtonBase) RenderButton(sc *Scene) {
 func (bb *ButtonBase) Render(sc *Scene) {
 	wi := bb.This().(Widget)
 	if bb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		bb.RenderButton(sc)
 		bb.RenderParts(sc)
 		bb.RenderChildren(sc)
 		bb.PopBounds(sc)
-	} else {
-		bb.DisconnectAllEvents(RegPri)
 	}
 }
 
-func (bb *ButtonBase) ConnectEvents() {
-	bb.ButtonEvents()
+func (bb *ButtonBase) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	bb.ButtonEvents(we)
+}
+
+func (bb *ButtonBase) FilterEvents() {
+	bb.Events.CopyFrom(ButtonBaseEventFuncs)
 }
 
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
@@ -563,7 +575,11 @@ const (
 	ButtonText
 )
 
+// event functions for this type
+var ButtonEventFuncs WidgetEvents
+
 func (bt *Button) OnInit() {
+	bt.AddEvents(&ButtonEventFuncs)
 	bt.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = gist.BorderRadiusFull
@@ -653,6 +669,10 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
+func (bb *Button) FilterEvents() {
+	bb.Events.CopyFrom(ButtonEventFuncs)
+}
+
 ///////////////////////////////////////////////////////////
 // CheckBox
 
@@ -664,7 +684,11 @@ type CheckBox struct {
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
+// event functions for this type
+var CheckBoxEventFuncs WidgetEvents
+
 func (cb *CheckBox) OnInit() {
+	cb.AddEvents(&CheckBoxEventFuncs)
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
@@ -723,6 +747,10 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 
 func (cb *CheckBox) AsButtonBase() *ButtonBase {
 	return &(cb.ButtonBase)
+}
+
+func (cb *CheckBox) FilterEvents() {
+	cb.Events.CopyFrom(CheckBoxEventFuncs)
 }
 
 // OnClicked calls the given function when the button is clicked,

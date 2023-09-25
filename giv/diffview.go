@@ -854,20 +854,20 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeDiffTextView).(*DiffTextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me) // gets our new one
 	})
 	tv.MouseFocusEvent()
-	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
 }
 
-// ConnectEvents indirectly sets connections between mouse and key events and actions
-func (tv *DiffTextView) ConnectEvents() {
+// AddEvents indirectly sets connections between mouse and key events and actions
+func (tv *DiffTextView) AddEvents() {
 	tv.TextViewEvents()
 }

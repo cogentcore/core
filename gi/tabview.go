@@ -64,7 +64,11 @@ type TabView struct {
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
+// event functions for this type
+var TabViewEventFuncs WidgetEvents
+
 func (tv *TabView) OnInit() {
+	tv.AddEvents(&TabViewEventFuncs)
 	tv.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -555,16 +559,18 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
+func (tv *TabView) FilterEvents() {
+	tv.Events.CopyFrom(TabViewEventFuncs)
+}
+
 func (tv *TabView) Render(sc *Scene) {
 	wi := tv.This().(Widget)
 	if tv.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		tv.RenderScrolls(sc)
 		tv.RenderChildren(sc)
 		tv.RenderTabSeps(sc)
 		tv.PopBounds(sc)
-	} else {
-		tv.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
 
@@ -580,7 +586,11 @@ type TabButton struct {
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
+// event functions for this type
+var TabButtonEventFuncs WidgetEvents
+
 func (tb *TabButton) OnInit() {
+	tb.AddEvents(&TabButtonEventFuncs)
 	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
@@ -670,6 +680,10 @@ func (tb *TabButton) TabView() *TabView {
 		return nil
 	}
 	return AsTabView(tv)
+}
+
+func (tb *TabButton) FilterEvents() {
+	tb.Events.CopyFrom(TabButtonEventFuncs)
 }
 
 func (tb *TabButton) ConfigParts(sc *Scene) {

@@ -75,7 +75,11 @@ const (
 	ComboBoxOutlined
 )
 
+// event functions for this type
+var ComboBoxEventFuncs WidgetEvents
+
 func (cb *ComboBox) OnInit() {
+	cb.AddEvents(&ComboBoxEventFuncs)
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignCenter
@@ -561,14 +565,21 @@ func (cb *ComboBox) HasFocus() bool {
 	return cb.ContainsFocus() // needed for getting key events
 }
 
-func (cb *ComboBox) ConnectEvents() {
-	cb.ButtonEvents()
-	cb.KeyChordEvent()
+func (cb *ComboBox) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	cb.ButtonEvents(we)
+	cb.KeyChordEvent(we)
 }
 
-func (cb *ComboBox) KeyChordEvent() {
-	cb.ConnectEvent(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		cbb := recv.(*ComboBox)
+func (cb *ComboBox) FilterEvents() {
+	cb.Events.CopyFrom(ComboBoxEventFuncs)
+}
+
+func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		cbb := recv.(*ComboBox) // todo: embed!
 		if cbb.IsDisabled() {
 			return
 		}

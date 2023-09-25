@@ -10,11 +10,10 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 func (wb *WidgetBase) EventMgr() *EventMgr {
-	return wb.Sc.ScEventMgr()
+	return &wb.Sc.EventMgr
 }
 
 // PosInBBox returns true if given position is within
@@ -25,43 +24,36 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	return pos.In(wb.WinBBox)
 }
 
-// WinBBoxInBBox returns true if our BBox is contained within
-// given BBox (under read lock)
-func (wb *WidgetBase) WinBBoxInBBox(bbox image.Rectangle) bool {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
-	return mat32.RectInNotEmpty(wb.WinBBox, bbox)
-}
-
-// ConnectEvents is the default event connection function
+// AddEvents adds the default event functions
 // for Widget objects. It calls [WidgetEvents], so any Widget
-// implementing a custom ConnectEvents function should
+// implementing a custom AddEvents function should
 // first call [WidgetEvents].
-func (wb *WidgetBase) ConnectEvents() {
-	wb.WidgetEvents()
+func (wb *WidgetBase) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	wb.WidgetEvents(we)
 }
 
-// WidgetEvents connects the default events for Widget objects.
-// Any Widget implementing a custom ConnectEvents function
+// AddWidgetEvents adds the default events for Widget objects.
+// Any Widget implementing a custom AddEvents function
 // should first call this function.
-func (wb *WidgetBase) WidgetEvents() {
-	// TODO: figure out connect events situation not working
-	// nb.WidgetMouseEvent()
-	wb.WidgetMouseFocusEvent()
-	wb.HoverTooltipEvent()
+func (wb *WidgetBase) AddWidgetEvents(we *WidgetEvents) {
+	// nb.WidgetMouseEvent() ??
+	wb.WidgetMouseFocusEvent(we)
+	wb.HoverTooltipEvent(we)
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
-func (wb *WidgetBase) WidgetMouseEvent() {
-	wb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if wb.IsDisabled() {
+func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		wbb := AsWidgetBase(recv)
+		if wbb.IsDisabled() {
 			return
 		}
-
 		me := data.(*mouse.Event)
 		me.SetProcessed()
-
-		wb.WidgetOnMouseEvent(me)
+		wbb.WidgetOnMouseEvent(me)
 	})
 }
 
@@ -74,21 +66,22 @@ func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
-func (wb *WidgetBase) WidgetMouseFocusEvent() {
-	wb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		if wb.IsDisabled() {
+func (wb *WidgetBase) WidgetMouseFocusEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+		wbb := AsWidgetBase(recv)
+		if wbb.IsDisabled() {
 			return
 		}
-		me := data.(*mouse.FocusEvent)
+		me := data.(*mouse.Event)
 		me.SetProcessed()
-		wb.WidgetOnMouseFocusEvent(me)
+		wbb.WidgetOnMouseFocusEvent(me)
 	})
 }
 
 // WidgetOnMouseFocusEvent is the function called on Widget objects
 // when they get a mouse foucs event. If you are declaring a custom
 // mouse foucs event function, you should call this function first.
-func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.FocusEvent) {
+func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.Event) {
 	enter := me.Action == mouse.Enter
 	wb.SetFlag(enter, Hovered)
 	wb.SetStyleUpdate(wb.Sc)
@@ -113,7 +106,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	wb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	wbwe.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
@@ -132,45 +125,6 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 				wi.ContextMenu()
 			}
 		}
-	})
-}
-
-// ConnectEvent connects this node to receive a given type of GUI event
-// signal from the parent window -- typically connect only visible nodes, and
-// disconnect when not visible
-func (wb *WidgetBase) ConnectEvent(et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
-	em := wb.EventMgr()
-	if em != nil {
-		em.ConnectEvent(wb.This(), et, pri, fun)
-	}
-}
-
-// DisconnectEvent disconnects this receiver from receiving given event
-// type -- pri is priority -- pass AllPris for all priorities -- see also
-// DisconnectAllEvents
-func (wb *WidgetBase) DisconnectEvent(et goosi.EventType, pri EventPris) {
-	em := wb.EventMgr()
-	if em != nil {
-		em.DisconnectEvent(wb.This(), et, pri)
-	}
-}
-
-// DisconnectAllEvents disconnects node from all window events -- typically
-// disconnect when not visible -- pri is priority -- pass AllPris for all priorities.
-// This goes down the entire tree from this node on down, as typically everything under
-// will not get an explicit disconnect call because no further updating will happen
-func (wb *WidgetBase) DisconnectAllEvents(pri EventPris) {
-	em := wb.EventMgr()
-	if em == nil {
-		return
-	}
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		_, ni := AsWidget(k)
-		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
-			return ki.Break // going into a different type of thing, bail
-		}
-		em.DisconnectAllEvents(ni.This(), pri)
-		return ki.Continue
 	})
 }
 
@@ -234,31 +188,6 @@ func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.K
 		if w.PosInBBox(pt) {
 			rval = w.This()
 			return ki.Break
-		}
-		return ki.Continue
-	})
-	return rval
-}
-
-// AllWithinBBox returns a list of all nodes whose WinBBox is fully contained
-// within the given BBox. If leavesOnly is set then only nodes that have no
-// nodes (leaves, terminal nodes) will be considered.
-func (wb *WidgetBase) AllWithinBBox(bbox image.Rectangle, leavesOnly bool) ki.Slice {
-	var rval ki.Slice
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
-		if k == wb.This() {
-			return ki.Continue
-		}
-		if leavesOnly && k.HasChildren() {
-			return ki.Continue
-		}
-		_, w := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
-			// 3D?
-			return ki.Break
-		}
-		if w.WinBBoxInBBox(bbox) {
-			rval = append(rval, w.This())
 		}
 		return ki.Continue
 	})

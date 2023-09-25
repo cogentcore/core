@@ -21,6 +21,13 @@ import (
 
 // Scene contains a Widget tree, rooted in a Frame layout,
 // which renders into its Pixels image.
+// The Scene is set in a Stage, which sets the Stage pointer to itself.
+// Stage has a StageMgr manager for controlling things like Popups
+// (Menus and Dialogs, etc).
+//
+// Each Scene and Widget tree contains state specific to its particular usage
+// within a given Stage and overall rendering context (e.g., bounding boxes
+// and pointer to current parent Stage), so
 type Scene struct {
 
 	// name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.
@@ -47,16 +54,14 @@ type Scene struct {
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 
-	// todo: remove below:
+	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
+	BgColor gist.ColorSpec `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
 
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
 
-	// our parent window that we render into
-	Win *RenderWin `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
-
-	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
-	BgColor gist.ColorSpec `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
+	// current stage in which this Scene is set
+	Stage *Stage `copy:"-" json:"-" xml:"-" desc:"current stage in which this Scene is set"`
 
 	// [view: -] Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
@@ -123,10 +128,10 @@ func (sc *Scene) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 func (sc *Scene) ScIsVisible() bool {
-	if sc.Win == nil || sc.Pixels == nil {
+	if sc.RenderCtx == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.Win.IsVisible()
+	return sc.RenderCtx.Visible
 }
 
 // todo: remove

@@ -154,7 +154,12 @@ type TextField struct {
 	NoEcho bool `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
+// event functions for this type
+var TextFieldEventFuncs WidgetEvents
+
 func (tf *TextField) OnInit() {
+	tf.AddEvents(&TextFieldEventFuncs)
+
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		tf.CursorWidth.SetPx(1)
@@ -1244,6 +1249,27 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
+func (tf *TextField) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	tf.WidgetEvents(we)
+	tf.TextFieldEvents(we)
+}
+
+func (tf *TextField) FilterEvents() {
+	tf.Events.CopyFrom(TextFieldEventFuncs)
+	// if tf.Sc.Type == ScDialog {
+	// todo: need dialogsig!
+	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	tff := AsTextField(recv)
+	// 	if sig == int64(DialogAccepted) {
+	// 		tff.EditDone()
+	// 	}
+	// })
+	// }
+}
+
 // KeyInput handles keyboard input into the text field and from the completion menu
 func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	if KeyEventTrace {
@@ -1406,8 +1432,8 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	}
 }
 
-func (tf *TextField) MouseDragEvent() {
-	tf.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tf *TextField) MouseDragEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		tff := AsTextField(recv)
@@ -1419,35 +1445,26 @@ func (tf *TextField) MouseDragEvent() {
 	})
 }
 
-func (tf *TextField) MouseEvent() {
-	tf.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tf *TextField) MouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := AsTextField(recv)
 		me := d.(*mouse.Event)
 		tff.HandleMouseEvent(me)
 	})
 }
 
-func (tf *TextField) KeyChordEvent() {
-	tf.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tf *TextField) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := AsTextField(recv)
 		kt := d.(*key.ChordEvent)
 		tff.KeyInput(kt)
 	})
-	if tf.Sc.Type == ScDialog {
-		// todo: need dialogsig!
-		// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	tff := AsTextField(recv)
-		// 	if sig == int64(DialogAccepted) {
-		// 		tff.EditDone()
-		// 	}
-		// })
-	}
 }
 
-func (tf *TextField) TextFieldEvents() {
-	tf.MouseDragEvent()
-	tf.MouseEvent()
-	tf.KeyChordEvent()
+func (tf *TextField) TextFieldEvents(we *WidgetEvents) {
+	tf.MouseDragEvent(we)
+	tf.MouseEvent(we)
+	tf.KeyChordEvent(we)
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {
@@ -1615,7 +1632,7 @@ func (tf *TextField) Render(sc *Scene) {
 	}
 	wi := tf.This().(Widget)
 	if tf.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		tf.RenderTextField(sc)
 		if !tf.HasFlag(Disabled) {
 			if tf.HasFocus() && tf.IsFocusActive() {
@@ -1627,14 +1644,7 @@ func (tf *TextField) Render(sc *Scene) {
 		tf.RenderParts(sc)
 		tf.RenderChildren(sc)
 		tf.PopBounds(sc)
-	} else {
-		tf.DisconnectAllEvents(RegPri)
 	}
-}
-
-func (tf *TextField) ConnectEvents() {
-	tf.WidgetEvents()
-	tf.TextFieldEvents()
 }
 
 func (tf *TextField) FocusChanged(change FocusChanges) {

@@ -44,7 +44,11 @@ type Bitmap struct {
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 
+// event functions for this type
+var BitmapEventFuncs WidgetEvents
+
 func (bm *Bitmap) OnInit() {
+	bm.AddEvents(&BitmapEventFuncs)
 	bm.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MinWidth.SetPx(float32(bm.Size.X))
 		s.MinHeight.SetPx(float32(bm.Size.Y))
@@ -151,7 +155,7 @@ func (bm *Bitmap) DrawIntoScene(sc *Scene) {
 	sp := image.Point{}
 	if bm.Par != nil { // use parents children bbox to determine where we can draw
 		pni, _ := AsWidget(bm.Par)
-		pbb := pni.ChildrenBBox2D(sc)
+		pbb := pni.ChildrenBBoxes(sc)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
 		if sp.X < 0 || sp.Y < 0 || sp.X > 10000 || sp.Y > 10000 {
@@ -166,12 +170,10 @@ func (bm *Bitmap) DrawIntoScene(sc *Scene) {
 func (bm *Bitmap) Render(sc *Scene) {
 	wi := bm.This().(Widget)
 	if bm.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		bm.RenderChildren(sc)
 		bm.DrawIntoScene(bm.Sc)
 		bm.PopBounds(sc)
-	} else {
-		bm.DisconnectAllEvents(AllPris)
 	}
 }
 

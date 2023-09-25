@@ -36,15 +36,23 @@ import (
 	"goki.dev/vgpu/v2/vphong"
 )
 
-// RenderWin -> RenderMgr for handling all the rendering stuff.
-// RenderWin -> OuterWindow?? something like that..
-
 // CurRenderWin is the current RenderWin window
 // On mobile, this is the _only_ window.
 var CurRenderWin *RenderWin
 
-func (w *RenderWin) UpdateSig() {
-	// todo: fixme
+// RenderContext provides rendering context from outer RenderWin
+// window to Stage and Scene elements to inform styling, layout
+// and rendering.
+type RenderContext struct {
+	// LogicalDPI is the current logical dots-per-inch resolution of the
+	// window, which should be used for most conversion of standard units.
+	LogicalDPI float32
+
+	// Size of the rendering window, in actual "dot" pixels used for rendering.
+	Size image.Point
+
+	// Visible is true if window is visible and should be rendered to
+	Visible bool
 }
 
 var (
@@ -166,7 +174,7 @@ type RenderWin struct {
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	RenderWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	GoosiWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 
 	// event manager that handles dispersing events to nodes
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
@@ -210,7 +218,7 @@ type RenderWin struct {
 	// below are internal vars used during the event loop
 	delPop        bool
 	skippedResize *window.Event
-	lastEt        goosi.EventType
+	lastEt        goosi.EventTypes
 
 	// the currently selected widget through the inspect editor selection mode
 	SelectedWidget *WidgetBase `desc:"the currently selected widget through the inspect editor selection mode"`
@@ -374,15 +382,15 @@ func NewRenderWin(name, title string, opts *goosi.NewRenderWinOptions) *RenderWi
 	win.Title = title
 	win.SetOnlySelfUpdate() // has its own PublishImage update logic
 	var err error
-	win.RenderWin, err = goosi.TheApp.NewRenderWin(opts)
+	win.GoosiWin, err = goosi.TheApp.NewRenderWin(opts)
 	if err != nil {
 		fmt.Printf("GoGi NewRenderWin error: %v \n", err)
 		return nil
 	}
-	win.RenderWin.SetName(title)
-	win.RenderWin.SetParent(win.This())
+	win.GoosiWin.SetName(title)
+	win.GoosiWin.SetParent(win.This())
 	win.NodeSig.Connect(win.This(), SignalRenderWinPublish)
-	drw := win.RenderWin.Drawer()
+	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 
 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
@@ -390,7 +398,7 @@ func NewRenderWin(name, title string, opts *goosi.NewRenderWinOptions) *RenderWi
 	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 	win.UpdtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 
-	win.RenderWin.SetDestroyGPUResourcesFunc(func() {
+	win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 		for _, ph := range win.Phongs {
 			ph.Destroy()
 		}
@@ -1001,7 +1009,7 @@ func (w *RenderWin) StopEventLoop() {
 }
 
 // SendCustomEvent sends a custom event with given data to this window -- widgets can connect
-// to receive CustomEventType events to receive them.  Sometimes it is useful
+// to receive CustomEventTypes events to receive them.  Sometimes it is useful
 // to send a custom event just to trigger a pass through the event loop, even
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
@@ -1635,8 +1643,8 @@ func (w *RenderWin) EventLoop() {
 func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 	et := evi.Type()
 	// log.Printf("Got event: %v\n", et)
-	w.delPop = false                     // if true, delete this popup after event loop
-	if et > goosi.EventTypeN || et < 0 { // we don't handle other types of events here
+	w.delPop = false                      // if true, delete this popup after event loop
+	if et > goosi.EventTypesN || et < 0 { // we don't handle other types of events here
 		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Nm, et)
 		return
 	}
@@ -2340,7 +2348,6 @@ func (w *RenderWin) PushPopup(pop ki.Ki) {
 // DisconnectPopup disconnects given popup -- typically the current one.
 func (w *RenderWin) DisconnectPopup(pop ki.Ki) {
 	w.PopDraws.Delete(pop.(Node))
-	w.EventMgr.DisconnectAllEvents(pop, AllPris)
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 

@@ -80,7 +80,11 @@ type SpinBox struct {
 	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
+// event functions for this type
+var SpinBoxEventFuncs WidgetEvents
+
 func (sb *SpinBox) OnInit() {
+	sb.AddEvents(&SpinBoxEventFuncs)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -326,8 +330,26 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sb *SpinBox) MouseScrollEvent() {
-	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SpinBox) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	sb.SpinBoxEvents(we)
+}
+
+func (sb *SpinBox) FilterEvents() {
+	sb.Events.CopyFrom(SpinBoxEventFuncs)
+}
+
+func (sb *SpinBox) SpinBoxEvents(we *WidgetEvents) {
+	sb.HoverTooltipEvent(we)
+	sb.MouseScrollEvent(we)
+	// sb.TextFieldEvent(we)
+	sb.KeyChordEvent(we)
+}
+
+func (sb *SpinBox) MouseScrollEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSpinBox(recv)
 		if sbb.IsDisabled() || !sbb.HasFocus() {
 			return
@@ -338,6 +360,7 @@ func (sb *SpinBox) MouseScrollEvent() {
 	})
 }
 
+// todo: how to deal with this??
 func (sb *SpinBox) TextFieldEvent() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -349,8 +372,8 @@ func (sb *SpinBox) TextFieldEvent() {
 	})
 }
 
-func (sb *SpinBox) KeyChordEvent() {
-	sb.ConnectEvent(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SpinBox) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.(*SpinBox)
 		if sbb.IsDisabled() {
 			return
@@ -375,13 +398,6 @@ func (sb *SpinBox) KeyChordEvent() {
 			sb.PageIncrValue(-1)
 		}
 	})
-}
-
-func (sb *SpinBox) SpinBoxEvents() {
-	sb.HoverTooltipEvent()
-	sb.MouseScrollEvent()
-	sb.TextFieldEvent()
-	sb.KeyChordEvent()
 }
 
 func (sb *SpinBox) ConfigWidget(sc *Scene) {
@@ -469,19 +485,13 @@ func (sb *SpinBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 func (sb *SpinBox) Render(sc *Scene) {
 	wi := sb.This().(Widget)
 	if sb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelected(sb.IsSelected())
 		sb.RenderChildren(sc)
 		sb.RenderParts(sc)
 		sb.PopBounds(sc)
-	} else {
-		sb.DisconnectAllEvents(RegPri)
 	}
-}
-
-func (sb *SpinBox) ConnectEvents() {
-	sb.SpinBoxEvents()
 }
 
 func (sb *SpinBox) HasFocus() bool {

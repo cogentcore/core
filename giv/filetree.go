@@ -1831,17 +1831,17 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	}
 }
 
-func (ftv *FileTreeView) ConnectEvents() {
+func (ftv *FileTreeView) AddEvents() {
 	ftv.FileTreeViewEvents()
 }
 
 func (ftv *FileTreeView) FileTreeViewEvents() {
-	ftv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeFileTreeView).(*FileTreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	ftv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.Event)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
@@ -1859,7 +1859,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 			tvv.DragNDropExternal(de)
 		}
 	})
-	ftv.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftvwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		de := d.(*dnd.FocusEvent)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
@@ -1887,7 +1887,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 	if lbl, ok := ftv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lbl.ConnectEvent(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lblwe.AddFunc(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			ftvvi := lb.Parent().Parent()
 			if ftvvi == nil || ftvvi.This() == nil { // deleted

@@ -125,7 +125,11 @@ const (
 	LabelLabelSmall
 )
 
+// event functions for this type
+var LabelEventFuncs WidgetEvents
+
 func (lb *Label) OnInit() {
+	lb.AddEvents(&LabelEventFuncs)
 	lb.Type = LabelLabelLarge
 	lb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
@@ -244,7 +248,7 @@ func (lb *Label) Disconnect() {
 // illegibly overlay on top of the old one.
 // Set Redrawable = true to fix this issue (it will redraw
 // the background -- sampling from actual if none is set).
-func (lb *Label) SetText(txt string) {
+func (lb *Label) SetText(txt string) *Label {
 	updt := lb.UpdateStart()
 	// if lb.Text != "" { // not good to automate this -- better to use docs -- bg can be bad
 	// 	lb.Redrawable = true
@@ -270,6 +274,7 @@ func (lb *Label) SetText(txt string) {
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
+	return lb
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are
@@ -292,9 +297,31 @@ func (lb *Label) OpenLink(tl *girl.TextLink) {
 	lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-func (lb *Label) HoverEvent() {
-	lb.ConnectEvent(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.HoverEvent)
+func (lb *Label) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	lb.WidgetEvents(we)
+	lb.LabelEvents(we)
+}
+
+func (lb *Label) FilterEvents() {
+	lb.Events.CopyFrom(LabelEventFuncs)
+	hasLinks := len(lb.TextRender.Links) > 0
+	if !hasLinks {
+		lb.Events.Ex(goosi.MouseMoveEvent)
+	}
+}
+
+func (lb *Label) LabelEvents(we *WidgetEvents) {
+	lb.HoverEvent(we)
+	lb.MouseEvent(we)
+	lb.MouseMoveEvent(we)
+}
+
+func (lb *Label) HoverEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*mouse.Event)
 		llb := AsLabel(recv)
 		hasLinks := len(lb.TextRender.Links) > 0
 		if hasLinks {
@@ -320,8 +347,8 @@ func (lb *Label) HoverEvent() {
 	})
 }
 
-func (lb *Label) MouseEvent() {
-	lb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (lb *Label) MouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		llb := AsLabel(recv)
 		hasLinks := len(llb.TextRender.Links) > 0
@@ -351,13 +378,9 @@ func (lb *Label) MouseEvent() {
 	})
 }
 
-func (lb *Label) MouseMoveEvent() {
-	hasLinks := len(lb.TextRender.Links) > 0
-	if !hasLinks {
-		return
-	}
-	lb.ConnectEvent(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.MoveEvent)
+func (lb *Label) MouseMoveEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*mouse.Event)
 		me.SetProcessed()
 		llb := AsLabel(recv)
 		pos := llb.RenderPos
@@ -376,12 +399,6 @@ func (lb *Label) MouseMoveEvent() {
 			goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
 		}
 	})
-}
-
-func (lb *Label) LabelEvents() {
-	lb.HoverEvent()
-	lb.MouseEvent()
-	lb.MouseMoveEvent()
 }
 
 func (lb *Label) GrabCurBackgroundColor() {
@@ -473,16 +490,9 @@ func (lb *Label) RenderLabel(sc *Scene) {
 func (lb *Label) Render(sc *Scene) {
 	wi := lb.This().(Widget)
 	if lb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		lb.RenderLabel(sc)
 		lb.RenderChildren(sc)
 		lb.PopBounds(sc)
-	} else {
-		lb.DisconnectAllEvents(RegPri)
 	}
-}
-
-func (lb *Label) ConnectEvents() {
-	lb.WidgetEvents()
-	lb.LabelEvents()
 }

@@ -1786,12 +1786,12 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 }
 
 func (tv *TreeView) TreeViewEvents() {
-	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		kt := d.(*key.ChordEvent)
 		tvv.KeyInput(kt)
 	})
-	tv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		if recv == nil {
 			return
 		}
@@ -1808,7 +1808,7 @@ func (tv *TreeView) TreeViewEvents() {
 			tvv.DragNDropExternal(de)
 		}
 	})
-	tv.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		if recv == nil {
 			return
 		}
@@ -1835,7 +1835,7 @@ func (tv *TreeView) TreeViewEvents() {
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lbl.ConnectEvent(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lblwe.AddFunc(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			tvvi := lb.Parent().Parent()
 			if tvvi == nil || tvvi.This() == nil { // deleted
@@ -2123,8 +2123,8 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
-	tv.BBox = tv.This().(gi.Node2D).BBox2D() // only compute once, at this point
-	tv.This().(gi.Node2D).ComputeBBox2D(vp, parBBox, image.Point{})
+	tv.BBox = tv.This().(gi.Node2D).BBoxes() // only compute once, at this point
+	tv.This().(gi.Node2D).ComputeBBoxes(vp, parBBox, image.Point{})
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
@@ -2150,18 +2150,18 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 	return tv.DoLayoutChildren(iter)
 }
 
-func (tv *TreeView) BBox2D() image.Rectangle {
+func (tv *TreeView) BBoxes() image.Rectangle {
 	// we have unusual situation of bbox != alloc
 	tp := tv.LayState.Alloc.PosOrig.ToPointFloor()
 	ts := tv.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (tv *TreeView) ChildrenBBox2D(vp *Scene) image.Rectangle {
+func (tv *TreeView) ChildrenBBoxes(vp *Scene) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
 		pwi, _ := gi.AsWidget(tv.Par)
-		ar = ar.Intersect(pwi.ChildrenBBox2D(vp))
+		ar = ar.Intersect(pwi.ChildrenBBoxes(vp))
 	}
 	return ar
 }
@@ -2207,7 +2207,6 @@ func (tv *TreeView) PushBounds() bool {
 
 func (tv *TreeView) Render(vp *Scene) {
 	if tv.HasClosedParent() {
-		tv.DisconnectAllEvents(gi.AllPris)
 		return // nothing
 	}
 	// restyle on re-render -- this is not actually necessary
@@ -2229,7 +2228,7 @@ func (tv *TreeView) Render(vp *Scene) {
 			} else {
 				tv.Style = tv.StateStyles[TreeViewActive]
 			}
-			tv.This().(gi.Node2D).ConnectEvents()
+			tv.This().(gi.Node2D).AddEvents()
 
 			// note: this is std except using WidgetSize instead of AllocSize
 			rs, pc, st := tv.RenderLock(vp)
@@ -2250,15 +2249,13 @@ func (tv *TreeView) Render(vp *Scene) {
 			tv.RenderParts()
 		}
 		tv.PopBounds()
-	} else {
-		tv.DisconnectAllEvents(gi.AllPris)
 	}
 	// we always have to render our kids b/c we could be out of scope but they could be in!
 	tv.RenderChildren()
 	tv.ClearFullReRender()
 }
 
-func (tv *TreeView) ConnectEvents() {
+func (tv *TreeView) AddEvents() {
 	tv.TreeViewEvents()
 }
 

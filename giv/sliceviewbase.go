@@ -1088,53 +1088,17 @@ func (sv *SliceViewBase) SetStyle() {
 }
 
 func (sv *SliceViewBase) Render(vp *Scene) {
-	if win := sv.ParentRenderWin(); win != nil {
-		if !win.IsResizing() {
-			win.MainMenuUpdateActives()
-		}
-	}
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
 	sv.ToolBar().UpdateActions()
-	if !sv.SliceGridNeedsLayout() {
-		if sv.NeedsFullReRender() && sv.This().(gi.Node2D).IsVisible() {
-			sv.This().(SliceViewer).UpdateSliceGrid()
-			if sv.FullReRenderIfNeeded() {
-				return
-			}
-		}
-	}
+	wi := sv.This().(Widget)
 	if sv.PushBounds() {
-		if !sv.InFullRebuild && sv.SliceGridNeedsLayout() {
-			// note: we are outside of slice grid and thus cannot do proper layout during DoLayout
-			// as we don't yet know the size of grid -- so we catch it here at next step and just
-			// rebuild as needed.
-			sv.RenderedRows = sv.DispRows
-			sv.This().(SliceViewer).LayoutSliceGrid()
-			if sv.SelectedIdx > -1 {
-				sv.ScrollToIdxNoUpdt(sv.SelectedIdx)
-			}
-			sv.This().(SliceViewer).UpdateSliceGrid() // enabling this is key for index, +/- rendering, as they are created here and need to be in place before the rerender tree
-			sv.InFullRebuild = true
-			sv.ReRenderTree()
-			if sv.This().(SliceViewer).NeedsDoubleReRender() {
-				sv.ReRenderTree()
-			}
-			sv.InFullRebuild = false
-			sv.PopBounds()
-			return
-		} else if sv.This().(SliceViewer).SliceGridNeedsUpdate() {
-			sv.This().(SliceViewer).UpdateSliceGrid()
-			sv.ReRenderTree() // key for rendering updated widgets
-		}
+		wi.FilterEvents()
 		sv.FrameStdRender() // this just renders widgets that have already been created
-		sv.This().(gi.Node2D).ConnectEvents()
 		sv.RenderScrolls()
 		sv.RenderChildren()
 		sv.PopBounds()
-	} else {
-		sv.DisconnectAllEvents(gi.AllPris)
 	}
 }
 
@@ -1142,7 +1106,7 @@ func (sv *SliceViewBase) NeedsDoubleReRender() bool {
 	return false
 }
 
-func (sv *SliceViewBase) ConnectEvents() {
+func (sv *SliceViewBase) AddEvents() {
 	sv.SliceViewBaseEvents()
 }
 
@@ -2249,7 +2213,7 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 
 func (sv *SliceViewBase) SliceViewBaseEvents() {
 	// LowPri to allow other focal widgets to capture
-	sv.ConnectEvent(goosi.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	svwe.AddFunc(goosi.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		me.SetProcessed()
@@ -2257,7 +2221,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
-	sv.ConnectEvent(goosi.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	svwe.AddFunc(goosi.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		// if !svv.HasFocus() {
@@ -2277,19 +2241,19 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	})
 	if sv.IsDisabled() {
 		if sv.InactKeyNav {
-			sv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			svwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				kt := d.(*key.ChordEvent)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
-		sv.ConnectEvent(goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		svwe.AddFunc(goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			kt := d.(*key.ChordEvent)
 			svv.KeyInputActive(kt)
 		})
-		sv.ConnectEvent(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			de := d.(*dnd.Event)
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			switch de.Action {
@@ -2303,7 +2267,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		})
 		sg := sv.This().(SliceViewer).SliceGrid()
 		if sg != nil {
-			sg.ConnectEvent(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				de := d.(*dnd.FocusEvent)
 				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
 				switch de.Action {

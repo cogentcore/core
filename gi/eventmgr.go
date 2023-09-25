@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
 	"sort"
 	"sync"
 	"time"
@@ -60,9 +59,6 @@ type EventMgr struct {
 
 	// master of this event mangager -- handles broader scope issues
 	Master EventMaster `desc:"master of this event mangager -- handles broader scope issues"`
-
-	// signals for communicating each type of event, organized by priority
-	EventSigs [goosi.EventTypeN][EventPrisN]ki.Signal `desc:"signals for communicating each type of event, organized by priority"`
 
 	// mutex that protects event sending
 	EventMu sync.Mutex `desc:"mutex that protects event sending"`
@@ -165,48 +161,6 @@ func (wl *WinEventRecvList) AddDepth(recv Widget, fun ki.RecvFunc, par Widget) {
 	wl.Add(recv, fun, recv.ParentLevel(par))
 }
 
-// ConnectEvent adds a Signal connection for given event type and
-// priority to given receiver
-func (em *EventMgr) ConnectEvent(recv Widget, et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
-	if et >= goosi.EventTypeN {
-		log.Printf("EventMgr ConnectEvent type: %v is not a known event type\n", et)
-		return
-	}
-	em.EventSigs[et][pri].Connect(recv, fun)
-}
-
-// DisconnectEvent removes Signal connection for given event type to given
-// receiver -- pri is priority -- pass AllPris for all priorities
-func (em *EventMgr) DisconnectEvent(recv Widget, et goosi.EventType, pri EventPris) {
-	if et >= goosi.EventTypeN {
-		log.Printf("EventMgr DisconnectEvent type: %v is not a known event type\n", et)
-		return
-	}
-	if pri == AllPris {
-		for p := HiPri; p < EventPrisN; p++ {
-			em.EventSigs[et][p].Disconnect(recv)
-		}
-	} else {
-		em.EventSigs[et][pri].Disconnect(recv)
-	}
-}
-
-// DisconnectAllEvents disconnect node from all event signals -- pri is
-// priority -- pass AllPris for all priorities
-func (em *EventMgr) DisconnectAllEvents(recv Widget, pri EventPris) {
-	if pri == AllPris {
-		for et := goosi.EventType(0); et < goosi.EventTypeN; et++ {
-			for p := HiPri; p < EventPrisN; p++ {
-				em.EventSigs[et][p].Disconnect(recv)
-			}
-		}
-	} else {
-		for et := goosi.EventType(0); et < goosi.EventTypeN; et++ {
-			em.EventSigs[et][pri].Disconnect(recv)
-		}
-	}
-}
-
 // SendEventSignal sends given event signal to all receivers that want it --
 // note that because there is a different EventSig for each event type, we are
 // ONLY looking at nodes that have registered to receive that type of event --
@@ -216,7 +170,7 @@ func (em *EventMgr) DisconnectAllEvents(recv Widget, pri EventPris) {
 // (if no popup, everything is in scope).
 func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 	et := evi.Type()
-	if et > goosi.EventTypeN || et < 0 {
+	if et > goosi.EventTypesN || et < 0 {
 		return // can't handle other types of events here due to EventSigs[et] size
 	}
 

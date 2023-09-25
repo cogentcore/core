@@ -218,6 +218,13 @@ type Layout struct {
 	ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
+// event functions for this type
+var LayoutEventFuncs WidgetEvents
+
+func (ly *Layout) OnInit() {
+	ly.AddEvents(&LayoutEventFuncs)
+}
+
 func (ly *Layout) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Layout)
 	if !ok {
@@ -389,7 +396,6 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 		return
 	}
 	sb := ly.Scrolls[d]
-	sb.DisconnectAllEvents(AllPris)
 	sb.This().Destroy()
 	ly.Scrolls[d] = nil
 }
@@ -546,7 +552,7 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 
 func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	wi := ly.This().(Widget)
-	cbb := wi.ChildrenBBox2D(sc)
+	cbb := wi.ChildrenBBoxes(sc)
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
@@ -593,7 +599,7 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 
 func (ly *Layout) Move2DChildren(sc *Scene, delta image.Point) {
 	wi := ly.This().(Widget)
-	cbb := wi.ChildrenBBox2D(sc)
+	cbb := wi.ChildrenBBoxes(sc)
 	if ly.Lay == LayoutStacked {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
@@ -1070,18 +1076,18 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	lywe.AddFunc(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		li := AsLayout(recv)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	ly.ConnectEvent(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	lywe.AddFunc(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.MoveEvent)
 		li := AsLayout(recv)
 		li.AutoScroll(me.Pos())
 	})
-	ly.ConnectEvent(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	lywe.AddFunc(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		li := AsLayout(recv)
 		if li.Sc.Type == ScMenu {
@@ -1093,7 +1099,7 @@ func (ly *Layout) LayoutScrollEvents() {
 // KeyChordEvent processes (lowpri) layout key events
 func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
-	ly.ConnectEvent(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	lywe.AddFunc(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := AsLayout(recv)
 		kt := d.(*key.ChordEvent)
 		li.LayoutKeys(kt)
@@ -1103,16 +1109,16 @@ func (ly *Layout) KeyChordEvent() {
 ///////////////////////////////////////////////////
 //   Standard Node2D interface
 
-func (ly *Layout) BBox2D() image.Rectangle {
+func (ly *Layout) BBoxes() image.Rectangle {
 	return ly.BBoxFromAlloc()
 }
 
-func (ly *Layout) ComputeBBox2D(sc *Scene, parBBox image.Rectangle, delta image.Point) {
-	ly.ComputeBBox2DBase(sc, parBBox, delta)
+func (ly *Layout) ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point) {
+	ly.ComputeBBoxesBase(sc, parBBox, delta)
 }
 
-func (ly *Layout) ChildrenBBox2D(sc *Scene) image.Rectangle {
-	nb := ly.ChildrenBBox2DWidget(sc)
+func (ly *Layout) ChildrenBBoxes(sc *Scene) image.Rectangle {
+	nb := ly.ChildrenBBoxesWidget(sc)
 	nb.Max.X -= int(ly.ExtraSize.X)
 	nb.Max.Y -= int(ly.ExtraSize.Y)
 	return nb
@@ -1266,7 +1272,7 @@ func (ly *Layout) Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle) 
 func (ly *Layout) Render(sc *Scene) {
 	wi := ly.This().(Widget)
 	if ly.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		if ly.ScrollsOff {
 			ly.ManageOverflow(sc)
 		}
@@ -1275,16 +1281,23 @@ func (ly *Layout) Render(sc *Scene) {
 		ly.PopBounds(sc)
 	} else {
 		ly.SetScrollsOff()
-		ly.DisconnectAllEvents(AllPris) // uses both Low and Hi
 	}
 }
 
-func (ly *Layout) ConnectEvents() {
-	ly.WidgetEvents()
-	if ly.HasAnyScroll() {
-		ly.LayoutScrollEvents()
+func (ly *Layout) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
 	}
-	ly.KeyChordEvent()
+	ly.WidgetEvents(we)
+	ly.LayoutScrollEvents(we)
+	ly.KeyChordEvent(we)
+}
+
+func (ly *Layout) FilterEvents() {
+	ly.Events.CopyFrom(LayoutEventFuncs)
+	if !ly.HasAnyScroll() {
+		ly.Events.Ex(goosi.MouseScrollEvent, goosi.DNDMoveEvent, goosi.MouseMoveEvent)
+	}
 }
 
 func (ly *Layout) HasFocus() bool {

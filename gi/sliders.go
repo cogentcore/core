@@ -227,7 +227,11 @@ const (
 // SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}
 
+// event functions for this type
+var SliderBaseEventFuncs WidgetEvents
+
 func (sb *SliderBase) OnInit() {
+	sb.AddEvents(&SliderBaseEventFuncs)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -490,8 +494,8 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(sb.WinBBox.Min)
 }
 
-func (sb *SliderBase) MouseDragEvent() {
-	sb.ConnectEvent(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SliderBase) MouseDragEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
@@ -508,8 +512,8 @@ func (sb *SliderBase) MouseDragEvent() {
 	})
 }
 
-func (sb *SliderBase) MouseEvent() {
-	sb.ConnectEvent(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SliderBase) MouseEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
@@ -538,8 +542,8 @@ func (sb *SliderBase) MouseEvent() {
 	})
 }
 
-func (sb *SliderBase) MouseFocusEvent() {
-	sb.ConnectEvent(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SliderBase) MouseFocusEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
@@ -554,8 +558,8 @@ func (sb *SliderBase) MouseFocusEvent() {
 	})
 }
 
-func (sb *SliderBase) MouseScrollEvent() {
-	sb.ConnectEvent(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SliderBase) MouseScrollEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
@@ -571,8 +575,8 @@ func (sb *SliderBase) MouseScrollEvent() {
 	})
 }
 
-func (sb *SliderBase) KeyChordEvent() {
-	sb.ConnectEvent(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SliderBase) KeyChordEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
@@ -581,12 +585,12 @@ func (sb *SliderBase) KeyChordEvent() {
 	})
 }
 
-func (sb *SliderBase) SliderEvents() {
-	sb.MouseDragEvent()
-	sb.MouseEvent()
-	sb.MouseFocusEvent()
-	sb.MouseScrollEvent()
-	sb.KeyChordEvent()
+func (sb *SliderBase) SliderEvents(we *WidgetEvents) {
+	sb.MouseDragEvent(we)
+	sb.MouseEvent(we)
+	sb.MouseFocusEvent(we)
+	sb.MouseScrollEvent(we)
+	sb.KeyChordEvent(we)
 }
 
 func (sb *SliderBase) ConfigWidget(sc *Scene) {
@@ -700,7 +704,11 @@ type Slider struct {
 	SliderBase
 }
 
+// event functions for this type
+var SliderEventFuncs WidgetEvents
+
 func (sr *Slider) OnInit() {
+	sr.AddEvents(&SliderEventFuncs)
 	sr.ThumbSize = units.Em(1.5)
 	sr.ThSize = 25.0
 	sr.ThSizeReal = sr.ThSize
@@ -784,12 +792,10 @@ func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 func (sr *Slider) Render(sc *Scene) {
 	wi := sr.This().(Widget)
 	if !sr.Off && sr.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		sr.RenderDefaultStyle(sc)
 		sr.RenderChildren(sc)
 		sr.PopBounds(sc)
-	} else {
-		sr.DisconnectAllEvents(RegPri)
 	}
 }
 
@@ -848,8 +854,15 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	}
 }
 
-func (sr *Slider) ConnectEvents() {
-	sr.SliderEvents()
+func (sr *Slider) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	sr.SliderEvents(we)
+}
+
+func (sr *Slider) FilterEvents() {
+	sr.Events.CopyFrom(SliderEventFuncs)
 }
 
 func (sr *Slider) FocusChanged(change FocusChanges) {
@@ -875,7 +888,11 @@ type ScrollBar struct {
 	SliderBase
 }
 
+// event functions for this type
+var ScrollBarEventFuncs WidgetEvents
+
 func (sb *ScrollBar) OnInit() {
+	sb.AddEvents(&ScrollBarEventFuncs)
 	sb.SliderBase.OnInit()
 	sb.ValThumb = true
 	sb.ThumbSize = units.Ex(1)
@@ -931,12 +948,10 @@ func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 func (sb *ScrollBar) Render(sc *Scene) {
 	wi := sb.This().(Widget)
 	if !sb.Off && sb.PushBounds(sc) {
-		wi.ConnectEvents()
+		wi.FilterEvents()
 		sb.RenderDefaultStyle(sc)
 		sb.RenderChildren(sc)
 		sb.PopBounds(sc)
-	} else {
-		sb.DisconnectAllEvents(RegPri)
 	}
 }
 
@@ -968,8 +983,15 @@ func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
 	sb.RenderBoxImpl(sc, pos, sz, st.Border)
 }
 
-func (sb *ScrollBar) ConnectEvents() {
-	sb.SliderEvents()
+func (sb *ScrollBar) AddEvents(we *WidgetEvents) {
+	if we.HasFuncs() {
+		return
+	}
+	sb.SliderEvents(we)
+}
+
+func (sb *ScrollBar) FilterEvents() {
+	sb.Events.CopyFrom(ScrollBarEventFuncs)
 }
 
 func (sb *ScrollBar) FocusChanged(change FocusChanges) {
@@ -1009,7 +1031,11 @@ type ProgressBar struct {
 	ProgMu sync.Mutex `desc:"mutex for updating progress"`
 }
 
+// event functions for this type
+var ProgressBarEventFuncs WidgetEvents
+
 func (pb *ProgressBar) OnInit() {
+	pb.AddEvents(&ProgressBarEventFuncs)
 	pb.ScrollBar.OnInit()
 	pb.Dim = mat32.X
 	pb.ValThumb = true

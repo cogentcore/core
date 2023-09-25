@@ -812,12 +812,12 @@ func (fv *FileView) SetStyle() {
 	sf.StartFocus() // need to call this when window is actually active
 }
 
-func (fv *FileView) ConnectEvents() {
+func (fv *FileView) AddEvents() {
 	fv.FileViewEvents()
 }
 
 func (fv *FileView) FileViewEvents() {
-	fv.ConnectEvent(goosi.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	fvwe.AddFunc(goosi.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		fvv := recv.Embed(TypeFileView).(*FileView)
 		kt := d.(*key.ChordEvent)
 		fvv.KeyInput(kt)

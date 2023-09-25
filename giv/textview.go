@@ -165,6 +165,9 @@ type TextView struct {
 	lastFilename   gi.FileName
 }
 
+// event functions for this type
+var TextViewEventFuncs WidgetEvents
+
 // NewTextViewLayout adds a new layout with textview
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Textview should always have a parent Layout to manage
@@ -176,6 +179,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 }
 
 func (tv *TextView) OnInit() {
+	tv.AddEvents(&TextViewEventFuncs)
 	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		tv.CursorWidth.SetPx(1)
 		tv.LineNumberColor.SetSolid(gi.ColorScheme.SurfaceContainerHighest)
@@ -4685,12 +4689,14 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	}
 }
 
+// todo: needs this in event filtering update!
+// if !tv.HasLinks {
+// 	return
+// }
+
 // MouseMoveEvent
-func (tv *TextView) MouseMoveEvent() {
-	if !tv.HasLinks {
-		return
-	}
-	tv.ConnectEvent(goosi.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tv *TextView) MouseMoveEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		tvv := recv.Embed(TypeTextView).(*TextView)
@@ -4721,8 +4727,8 @@ func (tv *TextView) MouseMoveEvent() {
 	})
 }
 
-func (tv *TextView) MouseDragEvent() {
-	tv.ConnectEvent(goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tv *TextView) MouseDragEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.DragEvent)
 		me.SetProcessed()
 		txf := recv.Embed(TypeTextView).(*TextView)
@@ -4735,8 +4741,8 @@ func (tv *TextView) MouseDragEvent() {
 	})
 }
 
-func (tv *TextView) MouseFocusEvent() {
-	tv.ConnectEvent(goosi.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tv *TextView) MouseFocusEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		if txf.IsDisabled() {
 			return
@@ -4749,21 +4755,23 @@ func (tv *TextView) MouseFocusEvent() {
 }
 
 // TextViewEvents sets connections between mouse and key events and actions
-func (tv *TextView) TextViewEvents() {
-	tv.HoverTooltipEvent()
-	tv.MouseMoveEvent()
-	tv.MouseDragEvent()
-	tv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tv *TextView) TextViewEvents(we *WidgetEvents) {
+	tv.HoverTooltipEvent(we)
+	tv.MouseMoveEvent(we)
+	tv.MouseDragEvent(we)
+	we.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
 	})
-	tv.MouseFocusEvent()
-	tv.ConnectEvent(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tv.MouseFocusEvent(we)
+	we.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*key.ChordEvent)
 		txf.KeyInput(kt)
 	})
+
+	// todo: need to handle this separately!!
 	if dlg, ok := tv.Scene.This().(*gi.Dialog); ok {
 		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			txf, _ := recv.Embed(TypeTextView).(*TextView)
@@ -4801,6 +4809,21 @@ func (tv *TextView) StyleTextView() {
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
 	if tv.Buf != nil {
 		tv.Buf.Opts.StyleFromProps(tv.Props)
+	}
+	if tv.IsDisabled() {
+		if tv.IsSelected() {
+			tv.Style = tv.StateStyles[TextViewSel]
+		} else {
+			tv.Style = tv.StateStyles[TextViewInactive]
+		}
+	} else if tv.NLines == 0 {
+		tv.Style = tv.StateStyles[TextViewInactive]
+	} else if tv.HasFocus() {
+		tv.Style = tv.StateStyles[TextViewFocus]
+	} else if tv.IsSelected() {
+		tv.Style = tv.StateStyles[TextViewSel]
+	} else {
+		tv.Style = tv.StateStyles[TextViewActive]
 	}
 }
 
@@ -4846,19 +4869,19 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 // Render does some preliminary work and then calls render on children
 func (tv *TextView) Render(vp *Scene) {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
-	if tv.NeedsFullReRender() {
-		tv.SetNeedsRefresh()
-	}
-	if tv.FullReRenderIfNeeded() {
-		return
-	}
-
-	if tv.Buf != nil && (tv.NLines != tv.Buf.NumLines() || tv.NeedsRefresh()) {
-		tv.LayoutAllLines(false)
-		if tv.NeedsRefresh() {
-			tv.ClearNeedsRefresh()
-		}
-	}
+	// if tv.NeedsFullReRender() {
+	// 	tv.SetNeedsRefresh()
+	// }
+	// if tv.FullReRenderIfNeeded() {
+	// 	return
+	// }
+	//
+	// if tv.Buf != nil && (tv.NLines != tv.Buf.NumLines() || tv.NeedsRefresh()) {
+	// 	tv.LayoutAllLines(false)
+	// 	if tv.NeedsRefresh() {
+	// 		tv.ClearNeedsRefresh()
+	// 	}
+	// }
 
 	tv.VisSizes()
 	if tv.NLines == 0 {
@@ -4868,24 +4891,11 @@ func (tv *TextView) Render(vp *Scene) {
 			tv.WinBBox = ply.WinBBox
 		}
 	}
-	if tv.PushBounds() {
-		tv.This().(gi.Node2D).ConnectEvents()
-		if tv.IsDisabled() {
-			if tv.IsSelected() {
-				tv.Style = tv.StateStyles[TextViewSel]
-			} else {
-				tv.Style = tv.StateStyles[TextViewInactive]
-			}
-		} else if tv.NLines == 0 {
-			tv.Style = tv.StateStyles[TextViewInactive]
-		} else if tv.HasFocus() {
-			tv.Style = tv.StateStyles[TextViewFocus]
-		} else if tv.IsSelected() {
-			tv.Style = tv.StateStyles[TextViewSel]
-		} else {
-			tv.Style = tv.StateStyles[TextViewActive]
-		}
 
+	wi := tv.This().(Widget)
+
+	if tv.PushBounds() {
+		wi.FilterEvents()
 		tv.RenderAllLinesInBounds()
 		if tv.ScrollToCursorOnRender {
 			tv.ScrollToCursorOnRender = false
@@ -4904,12 +4914,11 @@ func (tv *TextView) Render(vp *Scene) {
 	} else {
 		// fmt.Printf("tv render: %v  not vis stop cursor\n", tv.Nm)
 		tv.StopCursor()
-		tv.DisconnectAllEvents(gi.RegPri)
 	}
 }
 
-// ConnectEvents indirectly sets connections between mouse and key events and actions
-func (tv *TextView) ConnectEvents() {
+// AddEvents indirectly sets connections between mouse and key events and actions
+func (tv *TextView) AddEvents() {
 	tv.TextViewEvents()
 }
 

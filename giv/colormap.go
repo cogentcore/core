@@ -81,7 +81,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 // MouseEvent handles button MouseEvent
 func (cv *ColorMapView) MouseEvent() {
-	cv.ConnectEvent(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	cvwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		cvv := recv.(*ColorMapView)
 		if me.Button == mouse.Left {
@@ -96,7 +96,7 @@ func (cv *ColorMapView) MouseEvent() {
 	})
 }
 
-func (cv *ColorMapView) ConnectEvents() {
+func (cv *ColorMapView) AddEvents() {
 	cv.MouseEvent()
 	cv.HoverTooltipEvent()
 }
@@ -147,13 +147,12 @@ func (cv *ColorMapView) Render(vp *Scene) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
+	wi := cv.This().(Widget)
 	if cv.PushBounds() {
-		cv.This().(gi.Node2D).ConnectEvents()
+		wi.FilterEvents()
 		cv.RenderColorMap()
 		cv.RenderChildren()
 		cv.PopBounds()
-	} else {
-		cv.DisconnectAllEvents(gi.RegPri)
 	}
 }
 
