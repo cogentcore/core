@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"goki.dev/glop/dirs"
+	"goki.dev/grog"
 )
 
 // TODO: can we get rid of ConfigFile somehow? we need it in greasi and probably other places too
@@ -20,11 +21,7 @@ import (
 // -config or -cfg command-line arg or the default file given in [Options.DefaultFiles]
 var ConfigFiles []string
 
-// Verbose is whether the user has passed a -v or -verbose flag to the command
-// that indicates for it to print more information.
-var Verbose bool
-
-// IMPORTANT: all changes to MetaConfig must be updated in metaConfigFields
+// IMPORTANT: all changes to [MetaConfig] must be updated in [metaConfigFields]
 
 // MetaConfig contains meta configuration information specified
 // via command line arguments that controls the initial behavior
@@ -50,19 +47,30 @@ type MetaConfig struct {
 	// Verbose is whether to run the command in verbose mode
 	// and print more information
 	Verbose bool `flag:"v,verbose"`
+
+	// Verbose is whether to run the command in very verbose mode
+	// and print as much information as possible
+	VeryVerbose bool `flag:"vv,very-verbose"`
+
+	// Quiet is whether to run the command in quiet mode
+	// and print less information
+	Quiet bool `flag:"q,quiet"`
 }
 
 // metaConfigFields is the struct used for the implementation
-// of [AddMetaConfigFields].
+// of [AddMetaConfigFields], and for the usage information for
+// meta configuration options in [Usage].
 // NOTE: we could do this through [MetaConfig], but that
 // causes problems with the HelpCmd field capturing
 // everything, so it easier to just add through a separate struct.
 // TODO: maybe improve the structure of this
 type metaConfigFields struct {
-	Config  string `flag:"cfg,config"`
-	Help    bool   `flag:"h,help"`
-	HelpCmd string
-	Verbose bool `flag:"v,verbose"`
+	Help        bool   `flag:"h,help"`
+	HelpCmd     string `cmd:"help" posarg:"all"` // TODO: can we get this to display correctly in usage?
+	Config      string `flag:"cfg,config"`
+	Verbose     bool   `flag:"v,verbose"`
+	VeryVerbose bool   `flag:"vv,very-verbose"`
+	Quiet       bool   `flag:"q,quiet"`
 }
 
 // AddMetaConfigFields adds meta fields that control the config process
@@ -123,7 +131,8 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		// if we can't do first set for meta flags, we return immediately (we only do AllErrors for more specific errors)
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
-	Verbose = mc.Verbose
+	grog.UserLevel = grog.LevelFromFlags(mc.VeryVerbose, mc.Verbose, mc.Quiet)
+	grog.SetDefaultLogger()
 
 	// both flag and command trigger help
 	if mc.Help || cmd == "help" {

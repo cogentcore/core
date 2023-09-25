@@ -95,9 +95,11 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	b.WriteString(grog.WarnColor("\nFlags:\n") + Indent + grog.WarnColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
 	b.WriteString(Indent + grog.WarnColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
-	b.WriteString(Indent + grog.InfoColor("-h") + ", " + grog.InfoColor("-help") + grog.DebugColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
-	b.WriteString(Indent + grog.InfoColor("-v") + ", " + grog.InfoColor("-verbose") + grog.DebugColor(" bool") + "\n" + Indent + Indent + "run the command in verbose mode and print more information\n")
-	b.WriteString(Indent + grog.InfoColor("-cfg") + ", " + grog.InfoColor("-config") + grog.DebugColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
+	// add meta ones (help, config, verbose, etc) first
+	mcfields := &Fields{}
+	AddMetaConfigFields(mcfields)
+	FlagUsage(mcfields, &b)
+
 	FlagUsage(fields, &b)
 	return b.String()
 }
