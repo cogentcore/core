@@ -37,7 +37,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
 		if opts.Fatal {
-			grog.PrintlnError("error:", err)
+			grog.PrintlnError("error: ", err)
 			os.Exit(1)
 		}
 		return err
