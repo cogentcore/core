@@ -48,7 +48,10 @@ import (
 // EventType determines the type of GUI event.
 // Most events use the same EventBase type and only need
 // to set relevant fields and the type.
-type EventType int32 //enums:enum
+// EventType is used both as a mutually-exclusive event type ID,
+// (like a standard enum, in its BitIndex role), and as a
+// bitflag for filtering events of interest.
+type EventType int64 //enums:bitflag
 
 const (
 	// MouseEvent includes all mouse button actions, but not move or drag
