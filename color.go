@@ -37,11 +37,11 @@ func LevelColor(level slog.Level, str string) string {
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:
-		clr = matcolor.TheScheme.Secondary
+		clr = matcolor.TheScheme.Tertiary
 	case slog.LevelInfo:
 		clr = matcolor.TheScheme.Primary
 	case slog.LevelWarn:
-		clr = matcolor.TheScheme.Tertiary
+		clr = matcolor.TheScheme.Secondary
 	case slog.LevelError:
 		clr = matcolor.TheScheme.Error
 	}
@@ -52,7 +52,7 @@ func LevelColor(level slog.Level, str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func DebugColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Secondary, str)
+	return ApplyColor(matcolor.TheScheme.Tertiary, str)
 }
 
 // InfoColor applies the color associated with the info level to
@@ -66,7 +66,7 @@ func InfoColor(str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func WarnColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Tertiary, str)
+	return ApplyColor(matcolor.TheScheme.Secondary, str)
 }
 
 // ErrorColor applies the color associated with the error level to
