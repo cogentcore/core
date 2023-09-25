@@ -1,6 +1,6 @@
-goki.dev/enums v0.9.19 h1:BI1t2TK6aubNNbKUcrNSvyx5PI4Z/xVYoVpwGefbtNs=
-goki.dev/enums v0.9.19/go.mod h1:QY5uOc5M4745XrZBkHrREDNS/5A8VNXduJfUjWcnqVw=
-goki.dev/gti v0.1.4 h1:IbhQLW7tu6d65qrhLRU4iECjTbtQOuHftD3u7flZV14=
-goki.dev/gti v0.1.4/go.mod h1:ZMCDdX4koDfv5MYtZKUdTAVnVEvBzqQSA1plHp/71W8=
+goki.dev/enums v0.9.20 h1:k60HgUu3PxKaNxkmIxfa6Z0k8tb4gI5WmBIq8b9ACyk=
+goki.dev/enums v0.9.20/go.mod h1:ZBA+/NAWSTCrU2XAW9zKVbr/RCXrrueti4vRwLarijA=
+goki.dev/gti v0.1.5 h1:hye/fJUau8/jWqV9Tq8v01z6h6ruAE89Zk2YEzUl9ag=
+goki.dev/gti v0.1.5/go.mod h1:1M6oGcS4j/Yq/yLAfmpsSSJV4xI2DcCwANnAmzJyH7k=
 goki.dev/ordmap v0.5.5 h1:jHboNr7bDI7POifOcnJ5BpIoGeTA0sVfdlD+l7enbj0=
 goki.dev/ordmap v0.5.5/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
