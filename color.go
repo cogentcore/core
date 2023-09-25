@@ -22,7 +22,7 @@ var colorProfile termenv.Profile
 
 // ApplyColor applies the given color to the given string
 // and returns the resulting string. If [UseColor] is set
-// to false, ApplyColor just returns the string it was passed.
+// to false, it just returns the string it was passed.
 func ApplyColor(clr color.RGBA, str string) string {
 	if !UseColor {
 		return str
@@ -32,7 +32,7 @@ func ApplyColor(clr color.RGBA, str string) string {
 
 // ApplyLevelColor applies the color associated with the given level to the
 // given string and returns the resulting string. If [UseColor] is set
-// to false, ApplyLevelColor just returns the string it was passed.
+// to false, it just returns the string it was passed.
 func ApplyLevelColor(level slog.Level, str string) string {
 	var clr color.RGBA
 	switch level {
@@ -46,4 +46,32 @@ func ApplyLevelColor(level slog.Level, str string) string {
 		clr = matcolor.TheScheme.Error
 	}
 	return ApplyColor(clr, str)
+}
+
+// ApplyDebugColor applies the color associated with the debug level to
+// the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func ApplyDebugColor(str string) string {
+	return ApplyColor(matcolor.TheScheme.Secondary, str)
+}
+
+// ApplyInfoColor applies the color associated with the info level to
+// the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func ApplyInfoColor(str string) string {
+	return ApplyColor(matcolor.TheScheme.Primary, str)
+}
+
+// ApplyWarnColor applies the color associated with the warn level to
+// the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func ApplyWarnColor(str string) string {
+	return ApplyColor(matcolor.TheScheme.Tertiary, str)
+}
+
+// ApplyErrorColor applies the color associated with the error level to
+// the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func ApplyErrorColor(str string) string {
+	return ApplyColor(matcolor.TheScheme.Error, str)
 }
