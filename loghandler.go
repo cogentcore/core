@@ -127,7 +127,7 @@ func (h *Handler) Handle(ctx context.Context, r slog.Record) error {
 	h.Mu.Lock()
 	defer h.Mu.Unlock()
 	if UseColor {
-		_, err := h.W.Write([]byte(ApplyColor(r.Level, string(buf))))
+		_, err := h.W.Write([]byte(ApplyLevelColor(r.Level, string(buf))))
 		return err
 	}
 	_, err := h.W.Write(buf)

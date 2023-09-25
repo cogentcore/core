@@ -11,7 +11,7 @@ import (
 
 // Print is equivalent to [fmt.Print], but with color based on the given level.
 func Print(level slog.Level, a ...any) (n int, err error) {
-	return fmt.Print(ApplyColor(level, fmt.Sprint(a...)))
+	return fmt.Print(ApplyLevelColor(level, fmt.Sprint(a...)))
 }
 
 // PrintDebug is equivalent to [Print] with level [slog.LevelDebug].
@@ -36,7 +36,7 @@ func PrintError(a ...any) (n int, err error) {
 
 // Println is equivalent to [fmt.Println], but with color based on the given level.
 func Println(level slog.Level, a ...any) (n int, err error) {
-	return fmt.Println(ApplyColor(level, fmt.Sprint(a...)))
+	return fmt.Println(ApplyLevelColor(level, fmt.Sprint(a...)))
 }
 
 // PrintlnDebug is equivalent to [Println] with level [slog.LevelDebug].
@@ -61,7 +61,7 @@ func PrintlnError(a ...any) (n int, err error) {
 
 // Printf is equivalent to [fmt.Printf], but with color based on the given level.
 func Printf(level slog.Level, format string, a ...any) (n int, err error) {
-	return fmt.Println(ApplyColor(level, fmt.Sprintf(format, a...)))
+	return fmt.Println(ApplyLevelColor(level, fmt.Sprintf(format, a...)))
 }
 
 // PrintfDebug is equivalent to [Printf] with level [slog.LevelDebug].

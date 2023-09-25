@@ -20,13 +20,20 @@ var UseColor = true
 // It is set by [SetDefaultLogger] to [termenv.ColorProfile] if [UseColor] is true.
 var colorProfile termenv.Profile
 
-// ApplyColor applies the color associated with the given level to the
-// given string and returns the resulting string. If [UseColor] is set
+// ApplyColor applies the given color to the given string
+// and returns the resulting string. If [UseColor] is set
 // to false, ApplyColor just returns the string it was passed.
-func ApplyColor(level slog.Level, str string) string {
+func ApplyColor(clr color.RGBA, str string) string {
 	if !UseColor {
 		return str
 	}
+	return termenv.String(str).Foreground(colorProfile.FromColor(clr)).String()
+}
+
+// ApplyLevelColor applies the color associated with the given level to the
+// given string and returns the resulting string. If [UseColor] is set
+// to false, ApplyLevelColor just returns the string it was passed.
+func ApplyLevelColor(level slog.Level, str string) string {
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:
@@ -38,5 +45,5 @@ func ApplyColor(level slog.Level, str string) string {
 	case slog.LevelError:
 		clr = matcolor.TheScheme.Error
 	}
-	return termenv.String(str).Foreground(colorProfile.FromColor(clr)).String()
+	return ApplyColor(clr, str)
 }
