@@ -10,9 +10,9 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
 	goki.dev/colors v0.8.12
-	goki.dev/enums v0.9.19
+	goki.dev/enums v0.9.20
 	goki.dev/glop v0.1.2
-	goki.dev/laser v0.1.5
+	goki.dev/laser v0.1.6
 	goki.dev/mat32/v2 v2.0.0-dev0.0.6
 	golang.org/x/image v0.12.0
 	golang.org/x/net v0.15.0
@@ -25,6 +25,6 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
-	goki.dev/cam v0.9.16 // indirect
+	goki.dev/cam v0.9.17 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
