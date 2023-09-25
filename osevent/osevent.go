@@ -18,8 +18,8 @@ import (
 type Event struct {
 	goosi.EventBase
 
-	// Action taken on the osevent -- what has changed.  Osevent state fields
-	// have current values.
+	// Action taken on the osevent -- what has changed.
+	// Osevent state fields have current values.
 	Action Actions
 }
 
@@ -31,11 +31,10 @@ const (
 	OpenFiles Actions = iota
 )
 
-/////////////////////////////
-// goosi.Event interface
-
-func (ev *Event) Type() goosi.EventType {
-	return goosi.OSEvent
+func NewEvent() *Event {
+	ev := &Event{}
+	ev.Typ = goosi.OSEvent
+	return ev
 }
 
 func (ev *Event) OnWinFocus() bool { // os events generally not focus-specific
@@ -58,6 +57,10 @@ type OpenFilesEvent struct {
 	Files []string
 }
 
-func (ev *OpenFilesEvent) Type() goosi.EventType {
-	return goosi.OSOpenFilesEvent
+func NewOpenFilesEvent(files []string) *OpenFilesEvent {
+	ev := &OpenFilesEvent{}
+	ev.Typ = goosi.OSOpenFilesEvent
+	ev.Action = OpenFiles
+	ev.Files = files
+	return ev
 }

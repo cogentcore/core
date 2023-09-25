@@ -17,21 +17,67 @@ package window
 
 import (
 	"fmt"
-	"image"
 
 	"goki.dev/goosi"
 )
 
-// window.Event reports on actions taken on a window.  The goosi.Window Flags
-// and other state information will always be updated prior to this event
-// being sent, so those should be consulted directly for the new current
-// state.
+// window.Event reports on actions taken on a window.
+// The goosi.Window Flags and other state information
+// will always be updated prior to this event being sent,
+// so those should be consulted directly for the new current state.
 type Event struct {
 	goosi.EventBase
 
 	// Action taken on the window -- what has changed.  Window state fields
 	// have current values.
 	Action Actions
+}
+
+func NewEvent(act Actions) *Event {
+	ev := &Event{}
+	ev.Action = act
+	ev.Typ = goosi.WindowEvent
+	return ev
+}
+
+func NewResizeEvent() *Event {
+	ev := &Event{}
+	ev.Action = Resize
+	ev.Typ = goosi.WindowResizeEvent
+	return ev
+}
+
+func NewPaintEvent() *Event {
+	ev := &Event{}
+	ev.Action = Paint
+	ev.Typ = goosi.WindowPaintEvent
+	return ev
+}
+
+func NewShowEvent() *Event {
+	ev := &Event{}
+	ev.Action = Show
+	ev.Typ = goosi.WindowShowEvent
+	return ev
+}
+
+func NewFocusEvent() *Event {
+	ev := &Event{}
+	ev.Action = Show
+	ev.Typ = goosi.WindowFocusEvent
+	return ev
+}
+
+func (ev *Event) HasPos() bool {
+	return false
+}
+
+func (ev *Event) OnFocus() bool {
+	return false
+}
+
+func (ev *Event) String() string {
+	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
 }
 
 // Actions is the action taken on the window by the user.
@@ -78,54 +124,3 @@ const (
 	// and it should then perform any necessary updating
 	ScreenUpdate
 )
-
-/////////////////////////////
-// goosi.Event interface
-
-func (ev *Event) Type() goosi.EventType {
-	if ev.Action == Resize {
-		return goosi.WindowResizeEvent
-	} else if ev.Action == Paint {
-		return goosi.WindowPaintEvent
-	} else {
-		return goosi.WindowEvent
-	}
-}
-
-func (ev *Event) HasPos() bool {
-	return false
-}
-
-func (ev *Event) Pos() image.Point {
-	return image.Point{}
-}
-
-func (ev *Event) OnFocus() bool {
-	return false
-}
-
-func (ev *Event) String() string {
-	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
-}
-
-// window.ShowEvent is for synthetic window show event that is sent to widget consumers
-// sent only once when window is first created.
-// all other window events go from OS to window consumer but are not forwarded.
-type ShowEvent struct {
-	Event
-}
-
-func (ev *ShowEvent) Type() goosi.EventType {
-	return goosi.WindowShowEvent
-}
-
-// window.FocusEvent is for synthetic window focus event that is sent to widget consumers
-// sent when user focus on window changes (action is Focus or DeFocus)
-// all other window events go from OS to window consumer but are not forwarded.
-type FocusEvent struct {
-	Event
-}
-
-func (ev *FocusEvent) Type() goosi.EventType {
-	return goosi.WindowFocusEvent
-}

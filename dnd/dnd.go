@@ -11,9 +11,10 @@ package dnd
 //go:generate enumgen
 
 import (
+	"image"
+
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/ki/v2"
 )
 
 // dnd.Event represents the drag-and-drop event, specifically the drop
@@ -40,51 +41,44 @@ type Event struct {
 	Data mimedata.Mimes
 
 	// Source of the drop -- only available for internal DND actions
-	Source ki.Ki
+	Source any
 
 	// Target of the drop -- receiver of an accepted drop should set this to
 	// itself, so Source (if internal) can see who got it
-	Target ki.Ki
+	Target any
 }
 
-// DefaultModBits returns the default DropMod modifier action based on modifier keys
-func DefaultModBits(modBits goosi.Modifiers) DropMods {
-	switch {
-	case goosi.HasAnyModifier(modBits, goosi.Control):
-		return DropCopy
-	case goosi.HasAnyModifier(modBits, goosi.Shift, goosi.Meta):
-		return DropMove
-	case goosi.HasAnyModifier(modBits, goosi.Alt):
-		return DropLink
-	default:
-		return DropCopy
-	}
+func NewEvent(act Actions, where image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.DNDEvent
+	ev.Action = act
+	ev.Where = where
+	ev.Mods = mods
+	ev.DefaultMod()
+	return ev
 }
 
-// DefaultMod sets the default DropMod modifier action based on modifier keys
-func (e *Event) DefaultMod() {
-	e.Mod = DefaultModBits(e.Mods)
+func NewMoveEvent() *Event {
+	ev := &Event{}
+	ev.Typ = goosi.DNDMoveEvent
+	return ev
 }
 
-/////////////////////////////////////////////////////////////////
-
-// dnd.MoveEvent is emitted when dnd is moved
-type MoveEvent struct {
-	Event
+func NewFocusEvent() *Event {
+	ev := &Event{}
+	ev.Typ = goosi.DNDFocusEvent
+	return ev
 }
 
-func (ev MoveEvent) HasPrev() bool {
+func (ev *Event) HasPos() bool {
 	return true
 }
 
-/////////////////////////////////////////////////////////////////
-
-// dnd.FocusEvent records actions of Enter and Exit of DND into a given widget
-// bounding box -- generated in gi.Window, which knows about widget bounding
-// boxes
-type FocusEvent struct {
-	Event
+func (ev *Event) OnFocus() bool {
+	return false
 }
+
+/////////////////////////////////////////////////////////////////
 
 // Actions associated with the DND event -- this is the nature of the event.
 type Actions int32 //enums:enum
@@ -151,25 +145,21 @@ const (
 	DropIgnore
 )
 
-/////////////////////////////
-// goosi.Event interface
-
-func (ev *Event) Type() goosi.EventType {
-	return goosi.DNDEvent
+// DefaultModBits returns the default DropMod modifier action based on modifier keys
+func DefaultModBits(modBits goosi.Modifiers) DropMods {
+	switch {
+	case goosi.HasAnyModifier(modBits, goosi.Control):
+		return DropCopy
+	case goosi.HasAnyModifier(modBits, goosi.Shift, goosi.Meta):
+		return DropMove
+	case goosi.HasAnyModifier(modBits, goosi.Alt):
+		return DropLink
+	default:
+		return DropCopy
+	}
 }
 
-func (ev *Event) HasPos() bool {
-	return true
-}
-
-func (ev *Event) OnFocus() bool {
-	return false
-}
-
-func (ev *MoveEvent) Type() goosi.EventType {
-	return goosi.DNDMoveEvent
-}
-
-func (ev *FocusEvent) Type() goosi.EventType {
-	return goosi.DNDFocusEvent
+// DefaultMod sets the default DropMod modifier action based on modifier keys
+func (e *Event) DefaultMod() {
+	e.Mod = DefaultModBits(e.Mods)
 }

@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
 )
 
@@ -106,5 +108,12 @@ func (em *Mgr) MouseMove(where image.Point) {
 	if em.Win.IsCursorEnabled() {
 		em.LastMousePos = where
 	}
+	em.Win.Send(ev)
+}
+
+func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
+	ev := dnd.NewEvent(act, where, em.LastMods)
+	ev.Data = data
+	ev.Init()
 	em.Win.Send(ev)
 }

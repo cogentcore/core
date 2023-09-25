@@ -148,14 +148,7 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 		md[i] = mimedata.NewTextData(s)
 	}
 	where := w.curMousePosPoint(gw)
-	event := &dnd.Event{}
-	event.Action = dnd.External
-	event.Where = where
-	event.Mods = w.EventMgr.LastMods
-	event.Data = md
-	event.DefaultMod()
-	event.Init()
-	w.Send(event)
+	w.EventMgr.DND(dnd.External, where, md)
 }
 
 func glfwKeyCode(kcode glfw.Key) key.Codes {

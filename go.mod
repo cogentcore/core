@@ -9,7 +9,6 @@ require (
 	goki.dev/enums v0.9.19
 	goki.dev/girl v0.0.3
 	goki.dev/glop v0.1.2
-	goki.dev/ki/v2 v2.0.0-dev0.0.8
 	goki.dev/laser v0.1.5
 	goki.dev/mat32/v2 v2.0.0-dev0.0.6
 	goki.dev/mobile v0.5.3

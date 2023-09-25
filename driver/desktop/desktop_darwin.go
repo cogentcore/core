@@ -429,11 +429,8 @@ func macOpenFile(fname *C.char, flen C.int) {
 		theApp.openFiles = append(theApp.openFiles, ofn)
 	} else {
 		win := theApp.Window(0)
-		osev := &osevent.OpenFilesEvent{
-			Files: []string{ofn},
-		}
+		osev := osevent.NewOpenFilesEvent([]string{ofn})
 		osev.Init()
-		osev.Action = osevent.OpenFiles
 		win.Send(osev)
 	}
 }
