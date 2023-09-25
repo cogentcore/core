@@ -8,24 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fatih/color"
-)
-
-// The color functions that grease uses internally;
-// they can be used and modified externally to
-// achieve and maintain a good and consistent color scheme.
-var (
-	// ErrorColor is the color printer function for errors
-	ErrorColor = color.New(color.FgRed).SprintfFunc()
-	// SuccessColor is the color printer function for success messages,
-	// optional arguments, and types
-	SuccessColor = color.New(color.FgGreen, color.Bold).SprintfFunc()
-	// CmdColor is the color printer function for commands, arguments, and flags
-	CmdColor = color.New(color.FgCyan, color.Bold).SprintfFunc()
-	// InfoColor is the color printer function for special usage information
-	InfoColor = color.New(color.Italic).SprintfFunc()
-	// HeaderColor is the color printer function for section headers
-	HeaderColor = color.New(color.Bold).SprintfFunc()
+	"goki.dev/grog"
 )
 
 // Run runs an app with the given options, configuration struct,
@@ -41,11 +24,12 @@ var (
 // If [Options.Fatal] is set to true, the error result of Run does
 // not need to be handled. Run uses [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
+	grog.SetDefaultLogger()
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
 		err := fmt.Errorf("internal/programmer error: error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			fmt.Println(ErrorColor("%v", err))
+			grog.PrintError(err)
 			os.Exit(1)
 		}
 		return err
@@ -53,7 +37,7 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	cmd, err := Config(opts, cfg, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(ErrorColor("error: %v", err))
+			grog.PrintlnError("error:", err)
 			os.Exit(1)
 		}
 		return err
@@ -61,13 +45,13 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(CmdColor(cmdString(opts, cmd)) + ErrorColor(" failed: %v", err))
+			fmt.Println(grog.InfoColor(cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
 	if opts.PrintSuccess {
-		fmt.Println(CmdColor(cmdString(opts, cmd)) + SuccessColor(" succeeded"))
+		fmt.Println(grog.InfoColor(cmdString(opts, cmd)) + grog.DebugColor(" succeeded"))
 	}
 	return nil
 }

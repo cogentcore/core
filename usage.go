@@ -6,12 +6,14 @@ package grease
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"goki.dev/grog"
 )
 
 // Indent is the value used for indentation in [Usage].
@@ -41,7 +43,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(CmdColor(opts.AppName+" help") + ErrorColor(" failed: command %q not found", cmd))
+			fmt.Println(grog.InfoColor(opts.AppName+" help") + grog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
 			os.Exit(1)
 		}
 	}
@@ -53,7 +55,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString(HeaderColor("Usage:\n") + Indent + CmdColor(cmdName+" "))
+	b.WriteString(grog.WarnColor("Usage:\n") + Indent + grog.InfoColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -65,7 +67,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 		if ok {
 			ui, err := strconv.ParseUint(posArgTag, 10, 64)
 			if err != nil {
-				fmt.Printf(ErrorColor("programmer error:")+" invalid value %q for posarg struct tag on field %q: %v\n", posArgTag, f.Name, err)
+				slog.Error(fmt.Sprintf("programmer error: invalid value %q for posarg struct tag on field %q: %v\n", posArgTag, f.Name, err))
 			}
 			// if the slice isn't big enough, grow it to fit this posarg
 			if ui >= uint64(len(posArgStrs)) {
@@ -75,9 +77,9 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			nm := strcase.ToKebab(v.Names[0])
 			req, has := f.Tag.Lookup("required")
 			if req == "+" || req == "true" || !has { // default is required, so !has => required
-				posArgStrs[ui] = CmdColor("<" + nm + ">")
+				posArgStrs[ui] = grog.InfoColor("<" + nm + ">")
 			} else {
-				posArgStrs[ui] = SuccessColor("[" + nm + "]")
+				posArgStrs[ui] = grog.DebugColor("[" + nm + "]")
 			}
 
 		}
@@ -86,16 +88,16 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString(SuccessColor("[flags]\n"))
+	b.WriteString(grog.DebugColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString(HeaderColor("\nFlags:\n") + Indent + InfoColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(Indent + InfoColor("or CamelCase, and can have one or two leading dashes.\n\n"))
+	b.WriteString(grog.WarnColor("\nFlags:\n") + Indent + grog.WarnColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(Indent + grog.WarnColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
-	b.WriteString(Indent + CmdColor("-h") + ", " + CmdColor("-help") + SuccessColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
-	b.WriteString(Indent + CmdColor("-v") + ", " + CmdColor("-verbose") + SuccessColor(" bool") + "\n" + Indent + Indent + "run the command in verbose mode and print more information\n")
-	b.WriteString(Indent + CmdColor("-cfg") + ", " + CmdColor("-config") + SuccessColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
+	b.WriteString(Indent + grog.InfoColor("-h") + ", " + grog.InfoColor("-help") + grog.DebugColor(" bool") + "\n" + Indent + Indent + "show usage information for a command\n")
+	b.WriteString(Indent + grog.InfoColor("-v") + ", " + grog.InfoColor("-verbose") + grog.DebugColor(" bool") + "\n" + Indent + Indent + "run the command in verbose mode and print more information\n")
+	b.WriteString(Indent + grog.InfoColor("-cfg") + ", " + grog.InfoColor("-config") + grog.DebugColor(" filename") + "\n" + Indent + Indent + "the filename to load configuration options from\n")
 	FlagUsage(fields, &b)
 	return b.String()
 }
@@ -137,27 +139,27 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString(Indent + CmdColor(cmdName+" <subcommand> ") + SuccessColor("[flags]\n"))
+		b.WriteString(Indent + grog.InfoColor(cmdName+" <subcommand> ") + grog.DebugColor("[flags]\n"))
 	}
 
 	if rcmd != nil {
-		b.WriteString(HeaderColor("\nDefault command:\n"))
-		b.WriteString(Indent + CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
+		b.WriteString(grog.WarnColor("\nDefault command:\n"))
+		b.WriteString(Indent + grog.InfoColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
 		return
 	}
 
-	b.WriteString(HeaderColor("\nSubcommands:\n"))
+	b.WriteString(grog.WarnColor("\nSubcommands:\n"))
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(Indent + CmdColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
+		b.WriteString(Indent + grog.InfoColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString(Indent + CmdColor(c.Name))
+		b.WriteString(Indent + grog.InfoColor(c.Name))
 		if c.Doc != "" {
 			// we only want the first paragraph of text for subcommand usage; after that is where more specific details can go
 			doc, _, _ := strings.Cut(c.Doc, "\n\n")
@@ -175,12 +177,12 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		f := kv.Val
 		b.WriteString(Indent)
 		for i, name := range f.Names {
-			b.WriteString(CmdColor("-" + strcase.ToKebab(name)))
+			b.WriteString(grog.InfoColor("-" + strcase.ToKebab(name)))
 			if i != len(f.Names)-1 {
 				b.WriteString(", ")
 			}
 		}
-		b.WriteString(" " + SuccessColor(f.Field.Type.String()))
+		b.WriteString(" " + grog.DebugColor(f.Field.Type.String()))
 		b.WriteString("\n")
 		desc, hast := f.Field.Tag.Lookup("desc")
 		if hast && desc != "" {
