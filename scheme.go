@@ -6,40 +6,6 @@ package colors
 
 import "image/color"
 
-// Accent contains the 4 variations of a given Base color
-type Accent struct {
-
-	// Primary is the base primary color applied to important elements
-	Base color.RGBA `desc:"Primary is the base primary color applied to important elements"`
-
-	// OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary.
-	On color.RGBA `desc:"OnPrimary is the color applied to content on top of Primary. It defaults to the contrast color of Primary."`
-
-	// PrimaryContainer is the color applied to elements with less emphasis than Primary
-	Container color.RGBA `desc:"PrimaryContainer is the color applied to elements with less emphasis than Primary"`
-
-	// OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer.
-	OnContainer color.RGBA `desc:"OnPrimaryContainer is the color applied to content on top of PrimaryContainer. It defaults to the contrast color of PrimaryContainer."`
-}
-
-func NewAccentLight(tones Tones) Accent {
-	return Accent{
-		Base:        tones.Tone(40),
-		On:          tones.Tone(100),
-		Container:   tones.Tone(90),
-		OnContainer: tones.Tone(10),
-	}
-}
-
-func NewAccentDark(tones Tones) Accent {
-	return Accent{
-		Base:        tones.Tone(80),
-		On:          tones.Tone(20),
-		Container:   tones.Tone(30),
-		OnContainer: tones.Tone(90),
-	}
-}
-
 // Scheme contains the colors for one color scheme (ex: light or dark).
 // To generate a scheme, use [NewScheme].
 type Scheme struct {
