@@ -9,8 +9,8 @@ import "image/color"
 // Schemes contains multiple color schemes
 // (light, dark, and any custom ones).
 type Schemes struct {
-	Light Scheme
-	Dark  Scheme
+	Light MatScheme
+	Dark  MatScheme
 	// TODO: maybe custom schemes?
 }
 

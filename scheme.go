@@ -6,9 +6,9 @@ package colors
 
 import "image/color"
 
-// Scheme contains the colors for one color scheme (ex: light or dark).
-// To generate a scheme, use [NewScheme].
-type Scheme struct {
+// MatScheme contains the colors for one Material Design 3 color scheme
+// (ie: light or dark). The main scheme is stored in [Scheme].
+type MatScheme struct {
 
 	// Primary is the primary color applied to important elements
 	Primary Accent `desc:"Primary is the primary color applied to important elements"`
@@ -122,13 +122,17 @@ type Scheme struct {
 	// OnTertiaryFixedVariant color.RGBA `desc:"OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed"`
 }
 
-// TheScheme is the currently active global color scheme.
-var TheScheme *Scheme
+// Scheme is the main currently active global Material Design 3
+// color scheme. It is the main way that end-user code should
+// access the color scheme; ideally, almost all color values should
+// be set to something in here. For more specific tones of colors,
+// see [Palette].
+var Scheme *MatScheme
 
-// NewLightScheme returns a new light-themed [Scheme]
-// based on the given [Palette].
-func NewLightScheme(p *MatPalette) Scheme {
-	return Scheme{
+// NewLightScheme returns a new light-themed [MatScheme]
+// based on the given [MatPalette].
+func NewLightScheme(p *MatPalette) MatScheme {
+	return MatScheme{
 		Primary:   NewAccentLight(p.Primary),
 		Secondary: NewAccentLight(p.Secondary),
 		Tertiary:  NewAccentLight(p.Tertiary),
@@ -165,10 +169,10 @@ func NewLightScheme(p *MatPalette) Scheme {
 	// TODO: custom and fixed colors
 }
 
-// NewDarkScheme returns a new dark-themed [Scheme]
-// based on the given [Palette].
-func NewDarkScheme(p *MatPalette) Scheme {
-	return Scheme{
+// NewDarkScheme returns a new dark-themed [MatScheme]
+// based on the given [MatPalette].
+func NewDarkScheme(p *MatPalette) MatScheme {
+	return MatScheme{
 		Primary:   NewAccentDark(p.Primary),
 		Secondary: NewAccentDark(p.Secondary),
 		Tertiary:  NewAccentDark(p.Tertiary),
