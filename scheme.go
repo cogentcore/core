@@ -161,7 +161,7 @@ var TheScheme *Scheme
 
 // NewLightScheme returns a new light-themed [Scheme]
 // based on the given [Palette].
-func NewLightScheme(p *Palette) Scheme {
+func NewLightScheme(p *MatPalette) Scheme {
 	return Scheme{
 		Primary:   NewAccentLight(p.Primary),
 		Secondary: NewAccentLight(p.Secondary),
@@ -201,7 +201,7 @@ func NewLightScheme(p *Palette) Scheme {
 
 // NewDarkScheme returns a new dark-themed [Scheme]
 // based on the given [Palette].
-func NewDarkScheme(p *Palette) Scheme {
+func NewDarkScheme(p *MatPalette) Scheme {
 	return Scheme{
 		Primary:   NewAccentDark(p.Primary),
 		Secondary: NewAccentDark(p.Secondary),

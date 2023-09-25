@@ -19,7 +19,7 @@ var TheSchemes = NewSchemes(NewPalette(KeyFromPrimary(color.RGBA{66, 133, 244, 2
 
 // NewSchemes returns new [Schemes] for the given
 // [Palette] containing both light and dark schemes.
-func NewSchemes(p *Palette) *Schemes {
+func NewSchemes(p *MatPalette) *Schemes {
 	return &Schemes{
 		Light: NewLightScheme(p),
 		Dark:  NewDarkScheme(p),
