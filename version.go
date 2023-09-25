@@ -4,9 +4,9 @@ package directive
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.0.2"
+	Version = "v0.0.1"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "654c550"
+	GitCommit = "640019a"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-09-24 20:33"
+	VersionDate = "2023-09-25 01:56"
 )
