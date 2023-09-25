@@ -16,7 +16,7 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-// TheApp is the current oswin App -- only ever one in effect
+// TheApp is the current goosi App -- only ever one in effect
 var TheApp App
 
 // App represents the overall OS GUI hardware, and creates Images, Textures

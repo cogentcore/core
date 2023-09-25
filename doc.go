@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -8,7 +8,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Package oswin provides interfaces for OS-specific GUI hardware for portable
+// Package goosi provides interfaces for OS-specific GUI hardware for portable
 // two-dimensional graphics and input events.
 //
 // The App interface provides a top-level, single-instance struct that knows
@@ -16,7 +16,7 @@
 // objects that are hardware-specific and provide the primary GUI interface.
 // It is always available as goosi.TheApp.
 //
-// Events are communicated through the Window -- see EventType and Event in
+// Events are communicated through the Window -- see EventTypes and Event in
 // event.go for all the different types.
 //
 // The driver package creates the App, via its Main function, which is
@@ -30,7 +30,7 @@
 // 3D rendering system in gi and gi3d.
 //
 // package gi/gimain provides the Main method used to initialize the
-// oswin driver that implements the oswin interfaces, and start the
+// oswin driver that implements the goosi interfaces, and start the
 // main event processing loop.
 //
 // See examples in gi/examples directory for current example code.

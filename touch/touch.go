@@ -67,7 +67,7 @@ const (
 /////////////////////////////
 // goosi.Event interface
 
-func (ev *Event) Type() goosi.EventType {
+func (ev *Event) Type() goosi.EventTypes {
 	return goosi.TouchEvent
 }
 
@@ -90,8 +90,8 @@ var _ goosi.Event = &Event{}
 // 	Magnification float64 // the multiplicative scale factor
 // }
 
-// func (ev *MagnifyEvent) EventType() EventType {
-// 	return MagnifyEventType
+// func (ev *MagnifyEvent) EventTypes() EventTypes {
+// 	return MagnifyEventTypes
 // }
 
 // // check for interface implementation
@@ -105,8 +105,8 @@ var _ goosi.Event = &Event{}
 // 	Rotation float64 // measured in degrees; positive == clockwise
 // }
 
-// func (ev *RotateEvent) EventType() EventType {
-// 	return RotateEventType
+// func (ev *RotateEvent) EventTypes() EventTypes {
+// 	return RotateEventTypes
 // }
 
 // // check for interface implementation
@@ -118,8 +118,8 @@ var _ goosi.Event = &Event{}
 // 	Delta image.Point
 // }
 
-// func (ev *ScrollEvent) EventType() EventType {
-// 	return ScrollEventType
+// func (ev *ScrollEvent) EventTypes() EventTypes {
+// 	return ScrollEventTypes
 // }
 
 // // check for interface implementation

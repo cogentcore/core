@@ -243,15 +243,15 @@ func (i *VirtualKeyboardTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _EventTypeValues = []EventType{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
+var _EventTypesValues = []EventTypes{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21}
 
-// EventTypeN is the highest valid value
-// for type EventType, plus one.
-const EventTypeN EventType = 22
+// EventTypesN is the highest valid value
+// for type EventTypes, plus one.
+const EventTypesN EventTypes = 22
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _EventTypeNoOp() {
+func _EventTypesNoOp() {
 	var x [1]struct{}
 	_ = x[MouseEvent-(0)]
 	_ = x[MouseMoveEvent-(1)]
@@ -274,10 +274,10 @@ func _EventTypeNoOp() {
 	_ = x[DNDFocusEvent-(18)]
 	_ = x[OSEvent-(19)]
 	_ = x[OSOpenFilesEvent-(20)]
-	_ = x[CustomEventType-(21)]
+	_ = x[CustomEventTypes-(21)]
 }
 
-var _EventTypeNameToValueMap = map[string]EventType{
+var _EventTypesNameToValueMap = map[string]EventTypes{
 	`MouseEvent`:        0,
 	`mouseevent`:        0,
 	`MouseMoveEvent`:    1,
@@ -320,11 +320,11 @@ var _EventTypeNameToValueMap = map[string]EventType{
 	`osevent`:           19,
 	`OSOpenFilesEvent`:  20,
 	`osopenfilesevent`:  20,
-	`CustomEventType`:   21,
-	`customeventtype`:   21,
+	`CustomEventTypes`:  21,
+	`customeventtypes`:  21,
 }
 
-var _EventTypeDescMap = map[EventType]string{
+var _EventTypesDescMap = map[EventTypes]string{
 	0:  `MouseEvent includes all mouse button actions, but not move or drag`,
 	1:  `MouseMoveEvent is when the mouse is moving but no button is down`,
 	2:  `MouseDragEvent is when the mouse is moving and there is a button down`,
@@ -346,10 +346,10 @@ var _EventTypeDescMap = map[EventType]string{
 	18: `DNDFocusEvent is for Enter / Exit events of the DND into / out of a given widget`,
 	19: `OSEvent is an operating system generated event (app level typically)`,
 	20: `OSOpenFilesEvent is an event telling app to open given files`,
-	21: `CustomEventType is a user-defined event with a data any field`,
+	21: `CustomEventTypes is a user-defined event with a data any field`,
 }
 
-var _EventTypeMap = map[EventType]string{
+var _EventTypesMap = map[EventTypes]string{
 	0:  `MouseEvent`,
 	1:  `MouseMoveEvent`,
 	2:  `MouseDragEvent`,
@@ -371,14 +371,14 @@ var _EventTypeMap = map[EventType]string{
 	18: `DNDFocusEvent`,
 	19: `OSEvent`,
 	20: `OSOpenFilesEvent`,
-	21: `CustomEventType`,
+	21: `CustomEventTypes`,
 }
 
 // String returns the string representation
-// of this EventType value.
-func (i EventType) String() string {
+// of this EventTypes value.
+func (i EventTypes) String() string {
 	str := ""
-	for _, ie := range _EventTypeValues {
+	for _, ie := range _EventTypesValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -392,93 +392,93 @@ func (i EventType) String() string {
 }
 
 // BitIndexString returns the string
-// representation of this EventType value
+// representation of this EventTypes value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.
-func (i EventType) BitIndexString() string {
-	if str, ok := _EventTypeMap[i]; ok {
+func (i EventTypes) BitIndexString() string {
+	if str, ok := _EventTypesMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the EventType value from its
+// SetString sets the EventTypes value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *EventType) SetString(s string) error {
+func (i *EventTypes) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the EventType value from its
+// SetStringOr sets the EventTypes value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *EventType) SetStringOr(s string) error {
+func (i *EventTypes) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _EventTypeNameToValueMap[flg]; ok {
+		if val, ok := _EventTypesNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _EventTypeNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _EventTypesNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type EventType")
+			return errors.New(flg + " is not a valid value for type EventTypes")
 		}
 	}
 	return nil
 }
 
-// Int64 returns the EventType value as an int64.
-func (i EventType) Int64() int64 {
+// Int64 returns the EventTypes value as an int64.
+func (i EventTypes) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the EventType value from an int64.
-func (i *EventType) SetInt64(in int64) {
-	*i = EventType(in)
+// SetInt64 sets the EventTypes value from an int64.
+func (i *EventTypes) SetInt64(in int64) {
+	*i = EventTypes(in)
 }
 
-// Desc returns the description of the EventType value.
-func (i EventType) Desc() string {
-	if str, ok := _EventTypeDescMap[i]; ok {
+// Desc returns the description of the EventTypes value.
+func (i EventTypes) Desc() string {
+	if str, ok := _EventTypesDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// EventTypeValues returns all possible values
-// for the type EventType.
-func EventTypeValues() []EventType {
-	return _EventTypeValues
+// EventTypesValues returns all possible values
+// for the type EventTypes.
+func EventTypesValues() []EventTypes {
+	return _EventTypesValues
 }
 
 // Values returns all possible values
-// for the type EventType.
-func (i EventType) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_EventTypeValues))
-	for i, d := range _EventTypeValues {
+// for the type EventTypes.
+func (i EventTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_EventTypesValues))
+	for i, d := range _EventTypesValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type EventType.
-func (i EventType) IsValid() bool {
-	_, ok := _EventTypeMap[i]
+// valid option for type EventTypes.
+func (i EventTypes) IsValid() bool {
+	_, ok := _EventTypesMap[i]
 	return ok
 }
 
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i EventType) HasFlag(f enums.BitFlag) bool {
+func (i EventTypes) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *EventType) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *EventTypes) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -494,12 +494,12 @@ func (i *EventType) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i EventType) MarshalText() ([]byte, error) {
+func (i EventTypes) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *EventType) UnmarshalText(text []byte) error {
+func (i *EventTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

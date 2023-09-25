@@ -45,17 +45,17 @@ import (
    limitations under the License.
 */
 
-// EventType determines the type of GUI event.
+// EventTypes determines the type of GUI event.
 // Most events use the same EventBase type and only need
 // to set relevant fields and the type.
-// EventType is used both as a mutually-exclusive event type ID,
+// EventTypes is used both as a mutually-exclusive event type ID,
 // (like a standard enum, in its BitIndex role), and as a
 // bitflag for filtering events of interest.
-type EventType int64 //enums:bitflag
+type EventTypes int64 //enums:bitflag
 
 const (
 	// MouseEvent includes all mouse button actions, but not move or drag
-	MouseEvent EventType = iota
+	MouseEvent EventTypes = iota
 
 	// MouseMoveEvent is when the mouse is moving but no button is down
 	MouseMoveEvent
@@ -126,17 +126,17 @@ const (
 	// OSOpenFilesEvent is an event telling app to open given files
 	OSOpenFilesEvent
 
-	// CustomEventType is a user-defined event with a data any field
-	CustomEventType
+	// CustomEventTypes is a user-defined event with a data any field
+	CustomEventTypes
 )
 
-// Event is the interface for oswin GUI events.  also includes Stringer
+// Event is the interface for goosi GUI events.  also includes Stringer
 // to get a string description of the event
 type Event interface {
 	fmt.Stringer
 
 	// Type returns the type of event associated with given event
-	Type() EventType
+	Type() EventTypes
 
 	// HasPos returns true if the event has a window position where it takes place
 	HasPos() bool
@@ -208,7 +208,7 @@ type Event interface {
 // are needed.
 type EventBase struct {
 	// Typ is the type of event, returned as Type()
-	Typ EventType
+	Typ EventTypes
 
 	// GenTime records the time when the event was first generated, using more
 	// efficient nptime struct
@@ -266,7 +266,7 @@ func (ev *EventBase) Init() {
 	ev.SetLocalOff(image.Point{}) // ensure local is copied
 }
 
-func (ev EventBase) Type() EventType {
+func (ev EventBase) Type() EventTypes {
 	return ev.Typ
 }
 
@@ -378,8 +378,8 @@ type CustomEvent struct {
 	Focus bool `desc:"set to true if this event should be sent to widget in focus"`
 }
 
-func (ce CustomEvent) Type() EventType {
-	return CustomEventType
+func (ce CustomEvent) Type() EventTypes {
+	return CustomEventTypes
 }
 
 func (ce CustomEvent) String() string {
