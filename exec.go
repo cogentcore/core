@@ -11,7 +11,6 @@ package xe
 import (
 	"bytes"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -64,15 +63,29 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	c.Stdin = cfg.Stdin
 	c.Dir = cfg.Dir
 
-	if cfg.Commands != nil {
-		if c.Dir != "" {
-			cfg.Commands.Write([]byte(grog.ApplyLevelColor(slog.LevelInfo, c.Dir) + ": "))
-		}
-		cfg.Commands.Write([]byte(grog.ApplyLevelColor(slog.LevelInfo, cmd+" "+strings.Join(args, " ")+"\n")))
-	}
 	err = c.Run()
-	cfg.Stdout.Write(obuf.Bytes())
-	cfg.Stderr.Write([]byte(grog.ApplyLevelColor(slog.LevelError, ebuf.String())))
+
+	// if we have an error, we print the commands and stdout regardless of the config info
+	sout := cfg.Stdout
+	if sout == nil && err != nil {
+		sout = cfg.Stderr
+	}
+
+	cmds := cfg.Commands
+	if cmds == nil && err != nil {
+		cmds = sout
+	}
+	if cmds != nil {
+		if c.Dir != "" {
+			cmds.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+		}
+		cmds.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
+	}
+
+	if sout != nil {
+		sout.Write(obuf.Bytes())
+	}
+	cfg.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
 	return CmdRan(err), ExitStatus(err), err
 }
 

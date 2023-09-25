@@ -11,7 +11,7 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	grog.UserLevel = grog.Info
+	grog.UserLevel = grog.Warn
 	grog.SetDefaultLogger()
 	m := Main()
 	err := RunSh(m, "go version")

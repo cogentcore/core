@@ -14,8 +14,6 @@ import (
 	"os"
 	"strings"
 
-	"log/slog"
-
 	"github.com/mattn/go-shellwords"
 	"goki.dev/grog"
 )
@@ -78,7 +76,7 @@ func RunSh(cfg *Config, cstr string) error {
 	if len(args) == 0 {
 		err := fmt.Errorf("command %q was not parsed correctly into content", cstr)
 		if cfg.Errors != nil {
-			cfg.Errors.Write([]byte(grog.ApplyLevelColor(slog.LevelError, err.Error())))
+			cfg.Errors.Write([]byte(grog.ErrorColor(err.Error())))
 		}
 		if cfg.Fatal {
 			os.Exit(1)
