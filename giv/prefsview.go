@@ -15,11 +15,11 @@ import (
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles
 
 // PrefsView opens a view of user preferences
-func PrefsView(pf *gi.Preferences) *gi.OSWin {
+func PrefsView(pf *gi.Preferences) *gi.RenderWin {
 	winm := "gogi-prefs"
 	width := 1280
 	height := 500
-	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Preferences", width, height)
+	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -39,7 +39,7 @@ func PrefsView(pf *gi.Preferences) *gi.OSWin {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
+	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -70,7 +70,7 @@ func PrefsView(pf *gi.Preferences) *gi.OSWin {
 	win.MainMenuUpdated()
 
 	if !win.HasGeomPrefs() { // resize to contents
-		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
 
@@ -80,11 +80,11 @@ func PrefsView(pf *gi.Preferences) *gi.OSWin {
 }
 
 // PrefsDetView opens a view of user detailed preferences
-func PrefsDetView(pf *gi.PrefsDetailed) *gi.OSWin {
+func PrefsDetView(pf *gi.PrefsDetailed) *gi.RenderWin {
 	winm := "gogi-prefs-det"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Detailed Preferences", width, height)
+	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Detailed Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -104,7 +104,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.OSWin {
 	MainMenuView(pf, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
+	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
 		if !pf.Changed {
 			win.Close()
 			return
@@ -135,7 +135,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.OSWin {
 	win.MainMenuUpdated()
 
 	if !win.HasGeomPrefs() { // resize to contents
-		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
 
@@ -145,11 +145,11 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.OSWin {
 }
 
 // PrefsDbgView opens a view of user debugging preferences
-func PrefsDbgView(pf *gi.PrefsDebug) *gi.OSWin {
+func PrefsDbgView(pf *gi.PrefsDebug) *gi.RenderWin {
 	winm := "gogi-prefs-dbg"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainOSWin(pf, winm, "GoGi Debugging Preferences", width, height)
+	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Debugging Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -170,7 +170,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.OSWin {
 	// win.MainMenuUpdated()
 
 	if !win.HasGeomPrefs() { // resize to contents
-		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
 

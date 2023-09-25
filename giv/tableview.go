@@ -830,8 +830,8 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).Push(cursor.Wait)
-	defer goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).Pop()
+	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).Push(cursor.Wait)
+	defer goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).Pop()
 
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)

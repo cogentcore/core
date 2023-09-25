@@ -21,7 +21,7 @@ import (
 
 // these are special menus that we ignore
 var specialMenus = map[string]struct{}{
-	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "OSWins": {},
+	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "RenderWins": {},
 }
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
@@ -31,7 +31,7 @@ var specialMenus = map[string]struct{}{
 // there is no main menu defined for this type, or on errors (which are
 // programmer errors sent to log).
 // gopy:interface=handle
-func MainMenuView(val any, win *gi.OSWin, mbar *gi.MenuBar) bool {
+func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -76,12 +76,12 @@ func MainMenuView(val any, win *gi.OSWin, mbar *gi.MenuBar) bool {
 				continue
 			}
 		}
-		if mm.Name == "OSWin" {
+		if mm.Name == "RenderWin" {
 			if ms, ok := mm.Value.(string); ok {
-				if ms == "OSWins" {
+				if ms == "RenderWins" {
 					// automatic
 				} else {
-					MethViewErr(vtyp, fmt.Sprintf("Unrecognized OSWin menu special string: %v -- `OSWins` is standard", ms))
+					MethViewErr(vtyp, fmt.Sprintf("Unrecognized RenderWin menu special string: %v -- `RenderWins` is standard", ms))
 				}
 				continue
 			}
@@ -415,7 +415,7 @@ func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any
 func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props ki.Props) bool {
 	// special action names
 	switch ac.Nm {
-	case "Close OSWin":
+	case "Close RenderWin":
 		ac.Shortcut = gi.ShortcutForFun(gi.KeyFunWinClose)
 		ac.ActionSig.Connect(vp.Win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			vp.Win.CloseReq()

@@ -17,20 +17,20 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// OSWinList is a list of windows.
-type OSWinList []*OSWin
+// RenderWinList is a list of windows.
+type RenderWinList []*RenderWin
 
 // Add adds a window to the list.
-func (wl *OSWinList) Add(w *OSWin) {
-	OSWinGlobalMu.Lock()
+func (wl *RenderWinList) Add(w *RenderWin) {
+	RenderWinGlobalMu.Lock()
 	*wl = append(*wl, w)
-	OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Unlock()
 }
 
 // Delete removes a window from the list -- returns true if deleted.
-func (wl *OSWinList) Delete(w *OSWin) bool {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) Delete(w *RenderWin) bool {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	sz := len(*wl)
 	got := false
 	for i := sz - 1; i >= 0; i-- {
@@ -48,9 +48,9 @@ func (wl *OSWinList) Delete(w *OSWin) bool {
 
 // FindName finds window with given name on list (case sensitive) -- returns
 // window and true if found, nil, false otherwise.
-func (wl *OSWinList) FindName(name string) (*OSWin, bool) {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) FindName(name string) (*RenderWin, bool) {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.Nm == name {
 			return wi, true
@@ -62,7 +62,7 @@ func (wl *OSWinList) FindName(name string) (*OSWin, bool) {
 // FindData finds window with given Data on list -- returns
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
-func (wl *OSWinList) FindData(data any) (*OSWin, bool) {
+func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
 	if laser.IfaceIsNil(data) {
 		return nil, false
 	}
@@ -70,8 +70,8 @@ func (wl *OSWinList) FindData(data any) (*OSWin, bool) {
 	if !typ.Comparable() {
 		return nil, false
 	}
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
 		if wi.Data == data {
 			return wi, true
@@ -80,13 +80,13 @@ func (wl *OSWinList) FindData(data any) (*OSWin, bool) {
 	return nil, false
 }
 
-// FindOSWin finds window with given goosi.OSWin on list -- returns
+// FindRenderWin finds window with given goosi.RenderWin on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *OSWinList) FindOSWin(osw goosi.OSWin) (*OSWin, bool) {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) FindRenderWin(osw goosi.RenderWin) (*RenderWin, bool) {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
-		if wi.OSWin == osw {
+		if wi.RenderWin == osw {
 			return wi, true
 		}
 	}
@@ -94,16 +94,16 @@ func (wl *OSWinList) FindOSWin(osw goosi.OSWin) (*OSWin, bool) {
 }
 
 // Len returns the length of the list, concurrent-safe
-func (wl *OSWinList) Len() int {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) Len() int {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	return len(*wl)
 }
 
 // Win gets window at given index, concurrent-safe
-func (wl *OSWinList) Win(idx int) *OSWin {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) Win(idx int) *RenderWin {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	if idx >= len(*wl) || idx < 0 {
 		return nil
 	}
@@ -112,9 +112,9 @@ func (wl *OSWinList) Win(idx int) *OSWin {
 
 // Focused returns the (first) window in this list that has the WinFlagGotFocus flag set
 // and the index in the list (nil, -1 if not present)
-func (wl *OSWinList) Focused() (*OSWin, int) {
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+func (wl *RenderWinList) Focused() (*RenderWin, int) {
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 
 	for i, fw := range *wl {
 		if fw.HasFlag(int(WinFlagGotFocus)) {
@@ -126,13 +126,13 @@ func (wl *OSWinList) Focused() (*OSWin, int) {
 
 // FocusNext focuses on the next window in the list, after the current Focused() one
 // skips minimized windows
-func (wl *OSWinList) FocusNext() (*OSWin, int) {
+func (wl *RenderWinList) FocusNext() (*RenderWin, int) {
 	fw, i := wl.Focused()
 	if fw == nil {
 		return nil, -1
 	}
-	OSWinGlobalMu.Lock()
-	defer OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Lock()
+	defer RenderWinGlobalMu.Unlock()
 	sz := len(*wl)
 	if sz == 1 {
 		return nil, -1
@@ -145,39 +145,39 @@ func (wl *OSWinList) FocusNext() (*OSWin, int) {
 			i++
 		}
 		fw = (*wl)[i]
-		if !fw.OSWin.IsMinimized() {
-			fw.OSWin.Raise()
+		if !fw.RenderWin.IsMinimized() {
+			fw.RenderWin.Raise()
 			break
 		}
 	}
 	return fw, i
 }
 
-// AllOSWins is the list of all windows that have been created (dialogs, main
+// AllRenderWins is the list of all windows that have been created (dialogs, main
 // windows, etc).
-var AllOSWins OSWinList
+var AllRenderWins RenderWinList
 
-// DialogOSWins is the list of only dialog windows that have been created.
-var DialogOSWins OSWinList
+// DialogRenderWins is the list of only dialog windows that have been created.
+var DialogRenderWins RenderWinList
 
-// MainOSWins is the list of main windows (non-dialogs) that have been
+// MainRenderWins is the list of main windows (non-dialogs) that have been
 // created.
-var MainOSWins OSWinList
+var MainRenderWins RenderWinList
 
-// FocusOSWins is a "recents" stack of window names that have focus
+// FocusRenderWins is a "recents" stack of window names that have focus
 // when a window gets focus, it pops to the top of this list
 // when a window is closed, it is removed from the list, and the top item
 // on the list gets focused.
-var FocusOSWins []string
+var FocusRenderWins []string
 
 //////////////////////////////////////////////////////////////////////
-//  OSWin region updates
+//  RenderWin region updates
 
-// OSWinUpdates are a list of window update regions -- manages
+// RenderWinUpdates are a list of window update regions -- manages
 // the index for a window bounding box region, which corresponds to
 // the vdraw image index holding this image.
 // Automatically handles range issues.
-type OSWinUpdates struct {
+type RenderWinUpdates struct {
 
 	// starting index for this set of regions
 	StartIdx int `desc:"starting index for this set of regions"`
@@ -196,20 +196,20 @@ type OSWinUpdates struct {
 }
 
 // SetIdxRange sets the index range based on starting index and n
-func (wu *OSWinUpdates) SetIdxRange(st, n int) {
+func (wu *RenderWinUpdates) SetIdxRange(st, n int) {
 	wu.StartIdx = st
 	wu.MaxIdx = st + n
 }
 
 // Init checks if ordered map needs to be allocated
-func (wu *OSWinUpdates) Init() {
+func (wu *RenderWinUpdates) Init() {
 	if wu.Updates == nil {
 		wu.Updates = ordmap.New[image.Rectangle, *Scene]()
 	}
 }
 
 // Reset resets the ordered map
-func (wu *OSWinUpdates) Reset() {
+func (wu *RenderWinUpdates) Reset() {
 	wu.Updates = nil
 	wu.Order = nil
 	wu.BeforeDir = nil
@@ -223,7 +223,7 @@ func regPixCnt(r image.Rectangle) int {
 // Add adds a new update, returning index to store for given winBBox
 // (could be existing), and bool = true if new index exceeds max range.
 // If it is an exact match for an existing bbox, then that is returned.
-func (wu *OSWinUpdates) Add(winBBox image.Rectangle, sc *Scene) (int, bool) {
+func (wu *RenderWinUpdates) Add(winBBox image.Rectangle, sc *Scene) (int, bool) {
 	wu.Init()
 	idx, has := wu.Updates.IdxByKeyTry(winBBox)
 	if has {
@@ -240,7 +240,7 @@ func (wu *OSWinUpdates) Add(winBBox image.Rectangle, sc *Scene) (int, bool) {
 }
 
 // MoveIdxToTop moves the given index to top of the order
-func (wu *OSWinUpdates) MoveIdxToTop(idx int) {
+func (wu *RenderWinUpdates) MoveIdxToTop(idx int) {
 	for i, ii := range wu.Order {
 		if ii == idx {
 			wu.Order = slices.Delete(wu.Order, i, i+1)
@@ -251,7 +251,7 @@ func (wu *OSWinUpdates) MoveIdxToTop(idx int) {
 }
 
 // MoveIdxToBeforeDir moves the given index to the BeforeDir list
-func (wu *OSWinUpdates) MoveIdxToBeforeDir(idx int) {
+func (wu *RenderWinUpdates) MoveIdxToBeforeDir(idx int) {
 	for i, ii := range wu.Order {
 		if ii == idx {
 			wu.Order = slices.Delete(wu.Order, i, i+1)
@@ -262,14 +262,14 @@ func (wu *OSWinUpdates) MoveIdxToBeforeDir(idx int) {
 }
 
 // Idx returns the given 0-based index plus StartIdx
-func (wu *OSWinUpdates) Idx(idx int) int {
+func (wu *RenderWinUpdates) Idx(idx int) int {
 	return wu.StartIdx + idx
 }
 
 // DrawImages iterates over regions and calls Copy on given
 // vdraw.Drawer for each region.  beforeDir calls items on the
 // BeforeDir list, else regular Order.
-func (wu *OSWinUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
+func (wu *RenderWinUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
 	if wu.Updates == nil {
 		return
 	}
@@ -286,12 +286,12 @@ func (wu *OSWinUpdates) DrawImages(drw *vdraw.Drawer, beforeDir bool) {
 }
 
 //////////////////////////////////////////////////////////////////////
-//  OSWinDrawers
+//  RenderWinDrawers
 
-// OSWinDrawers are a list of gi.Node objects that draw
+// RenderWinDrawers are a list of gi.Node objects that draw
 // directly to the window.  This list manages the index for
 // the vdraw image index holding this image.
-type OSWinDrawers struct {
+type RenderWinDrawers struct {
 
 	// starting index for this set of Nodes
 	StartIdx int `desc:"starting index for this set of Nodes"`
@@ -307,26 +307,26 @@ type OSWinDrawers struct {
 }
 
 // SetIdxRange sets the index range based on starting index and n
-func (wu *OSWinDrawers) SetIdxRange(st, n int) {
+func (wu *RenderWinDrawers) SetIdxRange(st, n int) {
 	wu.StartIdx = st
 	wu.MaxIdx = st + n
 }
 
 // Init checks if ordered map needs to be allocated
-func (wu *OSWinDrawers) Init() {
+func (wu *RenderWinDrawers) Init() {
 	if wu.Nodes == nil {
 		wu.Nodes = ordmap.New[*NodeBase, image.Rectangle]()
 	}
 }
 
 // Reset resets the ordered map
-func (wu *OSWinDrawers) Reset() {
+func (wu *RenderWinDrawers) Reset() {
 	wu.Nodes = nil
 }
 
 // Add adds a new node, returning index to store for given winBBox
 // (could be existing), and bool = true if new index exceeds max range
-func (wu *OSWinDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool) {
+func (wu *RenderWinDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool) {
 	nb := node.AsGiNode()
 	wu.Init()
 	idx, has := wu.Nodes.IdxByKeyTry(nb)
@@ -336,33 +336,33 @@ func (wu *OSWinDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool) {
 	wu.Nodes.Add(nb, winBBox)
 	idx = wu.Idx(wu.Nodes.Len() - 1)
 	if idx >= wu.MaxIdx {
-		fmt.Printf("gi.OSWinDrawers: ERROR too many nodes of type\n")
+		fmt.Printf("gi.RenderWinDrawers: ERROR too many nodes of type\n")
 		return idx, true
 	}
 	return idx, false
 }
 
 // Delete removes given node from list of drawers
-func (wu *OSWinDrawers) Delete(node Widget) {
+func (wu *RenderWinDrawers) Delete(node Widget) {
 	nb := node.AsGiNode()
 	wu.Nodes.DeleteKey(nb)
 }
 
 // Idx returns the given 0-based index plus StartIdx
-func (wu *OSWinDrawers) Idx(idx int) int {
+func (wu *RenderWinDrawers) Idx(idx int) int {
 	return wu.StartIdx + idx
 }
 
 // SetWinBBox sets the window BBox for given element, indexed
 // by its allocated index relative to StartIdx
-func (wu *OSWinDrawers) SetWinBBox(idx int, bbox image.Rectangle) {
+func (wu *RenderWinDrawers) SetWinBBox(idx int, bbox image.Rectangle) {
 	ei := idx - wu.StartIdx
 	wu.Nodes.Order[ei].Val = bbox
 }
 
 // DrawImages iterates over regions and calls Copy on given
 // vdraw.Drawer for each region
-func (wu *OSWinDrawers) DrawImages(drw *vdraw.Drawer) {
+func (wu *RenderWinDrawers) DrawImages(drw *vdraw.Drawer) {
 	if wu.Nodes == nil {
 		return
 	}

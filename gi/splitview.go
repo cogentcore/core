@@ -563,7 +563,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	// SidesTODO: this is all sketchy
 
 	if sr.HasFlag(NodeDragging) {
-		win := sr.ParentOSWin()
+		win := sr.ParentRenderWin()
 		spnm := "gi.Splitter:" + sr.Name()
 		spr, ok := win.SpriteByName(spnm)
 		if ok {
@@ -665,7 +665,7 @@ func (sr *Splitter) ConnectEvents() {
 }
 
 func (sr *Splitter) Render(sc *Scene) {
-	win := sr.ParentOSWin()
+	win := sr.ParentRenderWin()
 	wi := sr.This().(Widget)
 	wi.ConnectEvents()
 	spnm := "gi.Splitter:" + sr.Name()

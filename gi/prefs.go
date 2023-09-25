@@ -270,8 +270,8 @@ func (pf *Preferences) ApplyDPI() {
 		}
 		sc.UpdateLogicalDPI()
 	}
-	for _, w := range AllOSWins {
-		w.OSWin.SetLogicalDPI(w.OSWin.Screen().LogicalDPI)
+	for _, w := range AllRenderWins {
+		w.RenderWin.SetLogicalDPI(w.RenderWin.Screen().LogicalDPI)
 	}
 }
 
@@ -284,16 +284,16 @@ func (pf *Preferences) UpdateAll() {
 	gist.RebuildDefaultStyles = true
 	gist.ColorSpecCache = nil
 	gist.StyleTemplates = nil
-	// for _, w := range AllOSWins {  // no need and just messes stuff up!
-	// 	w.SetSize(w.OSWin.Size())
+	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
+	// 	w.SetSize(w.RenderWin.Size())
 	// }
 	// needs another pass through to get it right..
-	for _, w := range AllOSWins {
+	for _, w := range AllRenderWins {
 		w.FullReRender()
 	}
 	gist.RebuildDefaultStyles = false
 	// and another without rebuilding?  yep all are required
-	for _, w := range AllOSWins {
+	for _, w := range AllRenderWins {
 		w.FullReRender()
 	}
 }
@@ -338,10 +338,10 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	pf.Save()
 }
 
-// DeleteSavedOSWinGeoms deletes the file that saves the position and size of
+// DeleteSavedRenderWinGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache.  You shouldn't
 // need to use this but sometimes useful for testing.
-func (pf *Preferences) DeleteSavedOSWinGeoms() {
+func (pf *Preferences) DeleteSavedRenderWinGeoms() {
 	WinGeomMgr.DeleteAll()
 }
 
@@ -421,15 +421,15 @@ var PreferencesProps = ki.Props{
 					}},
 				},
 			}},
-			{"DeleteSavedOSWinGeoms", ki.Props{
+			{"DeleteSavedRenderWinGeoms", ki.Props{
 				"confirm": true,
 				"desc":    "Are you <i>sure</i>?  This deletes the file that saves the position and size of each window, by screen, and clear current in-memory cache.  You shouldn't generally need to do this but sometimes it is useful for testing or windows are showing up in bad places that you can't recover from.",
 			}},
 			{"sep-close", ki.BlankProp{}},
-			{"Close OSWin", ki.BlankProp{}},
+			{"Close RenderWin", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
-		{"OSWin", "OSWins"},
+		{"RenderWin", "RenderWins"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"UpdateAll", ki.Props{
@@ -1034,7 +1034,7 @@ type PrefsDetailed struct {
 	LayoutFocusNameTabMSec int `def:"2000" min:"10" max:"10000" step:"100" desc:"the number of milliseconds since last focus name event to allow tab to focus on next element with same name."`
 
 	// [def: true] open dialogs in separate windows -- else do as popups in main window
-	DialogsSepOSWin bool `def:"true" desc:"open dialogs in separate windows -- else do as popups in main window"`
+	DialogsSepRenderWin bool `def:"true" desc:"open dialogs in separate windows -- else do as popups in main window"`
 
 	// [def: 100] [min: 0] [max: 1000] [step: 5] Maximum amount of clipboard history to retain
 	TextViewClipHistMax int `def:"100" min:"0" max:"1000" step:"5" desc:"Maximum amount of clipboard history to retain"`
@@ -1120,7 +1120,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
 	pf.MenuMaxHeight = MenuMaxHeight
-	pf.DialogsSepOSWin = DialogsSepOSWin
+	pf.DialogsSepRenderWin = DialogsSepRenderWin
 	TheViewIFace.PrefsDetDefaults(pf)
 	// in giv:
 	// TextViewClipHistMax
@@ -1146,7 +1146,7 @@ func (pf *PrefsDetailed) Apply() {
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight
-	DialogsSepOSWin = pf.DialogsSepOSWin
+	DialogsSepRenderWin = pf.DialogsSepRenderWin
 	TheViewIFace.PrefsDetApply(pf)
 	// in giv:
 	// TextViewClipHistMax = pf.TextViewClipHistMax
@@ -1172,10 +1172,10 @@ var PrefsDetailedProps = ki.Props{
 					act.SetEnabledState(pf.Changed)
 				},
 			}},
-			{"Close OSWin", ki.BlankProp{}},
+			{"Close RenderWin", ki.BlankProp{}},
 		}},
 		{"Edit", "Copy Cut Paste"},
-		{"OSWin", "OSWins"},
+		{"RenderWin", "RenderWins"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"Apply", ki.Props{

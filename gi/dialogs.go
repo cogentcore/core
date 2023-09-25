@@ -20,10 +20,10 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// DialogsSepOSWin determines if dialog windows open in a separate OS-level
+// DialogsSepRenderWin determines if dialog windows open in a separate OS-level
 // window, or do they open within the same parent window.  If only within
 // parent window, then they are always effectively modal.
-var DialogsSepOSWin = true
+var DialogsSepRenderWin = true
 
 // DialogState indicates the state of the dialog.
 type DialogState int64
@@ -93,7 +93,7 @@ func (dlg *Dialog) StyleFrame() {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Color)
-		if !DialogsSepOSWin {
+		if !DialogsSepRenderWin {
 			s.BoxShadow = BoxShadow3
 		}
 
@@ -145,13 +145,13 @@ func ValidScene(avp *Scene) *Scene {
 	if avp != nil {
 		return avp
 	}
-	if fwin, _ := AllOSWins.Focused(); fwin != nil {
+	if fwin, _ := AllRenderWins.Focused(); fwin != nil {
 		return fwin.Scene
 	}
-	if fwin := AllOSWins.Win(0); fwin != nil {
+	if fwin := AllRenderWins.Win(0); fwin != nil {
 		return fwin.Scene
 	}
-	log.Printf("gi.ValidScene: No gi.AllOSWins to get scene from!\n")
+	log.Printf("gi.ValidScene: No gi.AllRenderWins to get scene from!\n")
 	return nil
 }
 
@@ -176,7 +176,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	}
 	dlg.Frame.Lay = LayoutVert
 
-	if DialogsSepOSWin {
+	if DialogsSepRenderWin {
 		win = NewDialogWin(dlg.Name, dlg.Title, 100, 100, dlg.Modal)
 		win.Data = dlg.Data
 		// todo: win.Scene
@@ -194,8 +194,8 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 
 	vpsz := dlg.DefSize
 	if dlg.DefSize == (image.Point{}) {
-		vpsz = dlg.PrefSize(win.OSWin.Screen().PixSize)
-		if !DialogsSepOSWin {
+		vpsz = dlg.PrefSize(win.RenderWin.Screen().PixSize)
+		if !DialogsSepRenderWin {
 			// vpsz = dlg.Frame.LayState.Size.Pref.Min(win.Scene.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
 		}
 	}
@@ -236,7 +236,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	// 	}
 	// })
 
-	if DialogsSepOSWin {
+	if DialogsSepRenderWin {
 		if !win.HasGeomPrefs() {
 			// fmt.Printf("setsz: %v\n", vpsz)
 			win.SetSize(vpsz)
@@ -268,7 +268,7 @@ func (dlg *Dialog) Close() {
 	}
 	win := dlg.Win
 	if win != nil {
-		if DialogsSepOSWin {
+		if DialogsSepRenderWin {
 			win.Close()
 		} else {
 			win.ClosePopup(&dlg.Scene)
@@ -478,9 +478,9 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 	if data == nil {
 		return NewStdDialog(opts, ok, cancel), false
 	}
-	ew, has := DialogOSWins.FindData(data)
+	ew, has := DialogRenderWins.FindData(data)
 	if has && ew.Scene.Frame.NumChildren() > 0 {
-		ew.OSWin.Raise()
+		ew.RenderWin.Raise()
 		// dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
 		// return dlg, true
 	}

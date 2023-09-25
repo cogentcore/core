@@ -227,7 +227,7 @@ var StylesProps = ki.Props{
 			}},
 		}},
 		{"Edit", "Copy Cut Paste Dupe"},
-		{"OSWin", "OSWins"},
+		{"RenderWin", "RenderWins"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"Add", ki.Props{ // note: overrides default Add

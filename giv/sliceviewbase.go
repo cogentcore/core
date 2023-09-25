@@ -1088,7 +1088,7 @@ func (sv *SliceViewBase) SetStyle() {
 }
 
 func (sv *SliceViewBase) Render(vp *Scene) {
-	if win := sv.ParentOSWin(); win != nil {
+	if win := sv.ParentRenderWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}
@@ -1721,7 +1721,7 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	if md != nil {
-		goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Write(md)
+		goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Write(md)
 	}
 	if reset {
 		sv.UnselectAllIdxs()
@@ -1792,7 +1792,7 @@ func (sv *SliceViewBase) CutIdxs() {
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.CurIdx)
 	}
@@ -1902,7 +1902,7 @@ func (sv *SliceViewBase) Duplicate() int {
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentOSWin().OSWin).Read([]string{dt})
+	md := goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
@@ -1923,7 +1923,7 @@ func (sv *SliceViewBase) DragNDropStart() {
 		sp := &gi.Sprite{}
 		sp.GrabRenderFrom(widg)
 		gi.ImageClearer(sp.Pixels, 50.0)
-		sv.ParentOSWin().StartDragNDrop(sv.This(), md, sp)
+		sv.ParentRenderWin().StartDragNDrop(sv.This(), md, sp)
 	}
 }
 
@@ -1997,7 +1997,7 @@ func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
 // target, including ignore -- ends up calling DragNDropSource if us..
 func (sv *SliceViewBase) DragNDropFinalize(mod dnd.DropMods) {
 	sv.UnselectAllIdxs()
-	sv.ParentOSWin().FinalizeDragNDrop(mod)
+	sv.ParentRenderWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropSource is called after target accepts the drop -- we just remove
@@ -2308,9 +2308,9 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
 				switch de.Action {
 				case dnd.Enter:
-					sgg.ParentOSWin().DNDSetCursor(de.Mod)
+					sgg.ParentRenderWin().DNDSetCursor(de.Mod)
 				case dnd.Exit:
-					sgg.ParentOSWin().DNDNotCursor()
+					sgg.ParentRenderWin().DNDNotCursor()
 				case dnd.Hover:
 					// nothing here?
 				}

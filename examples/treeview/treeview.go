@@ -96,7 +96,7 @@ func mainrun() {
 
 	width := 1024
 	height := 768
-	win := gi.NewMainOSWin("gogi-treeview-test", "TreeView Test", width, height)
+	win := gi.NewMainRenderWin("gogi-treeview-test", "TreeView Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -147,7 +147,7 @@ func mainrun() {
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
@@ -157,7 +157,7 @@ func mainrun() {
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.SetCloseCleanFunc(func(w *gi.OSWin) {
+	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
 		go gi.Quit() // once main window is closed, quit
 	})
 

@@ -447,7 +447,7 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 func (bb *ButtonBase) SetStyle(sc *Scene) {
 	bb.SetStyleWidget(sc)
 	if bb.Menu != nil {
-		bb.Menu.SetShortcuts(bb.ParentOSWin())
+		bb.Menu.SetShortcuts(bb.ParentRenderWin())
 	}
 }
 
@@ -495,7 +495,7 @@ func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 
 func (bb *ButtonBase) Destroy() {
 	if bb.Menu != nil {
-		bb.Menu.DeleteShortcuts(bb.ParentOSWin())
+		bb.Menu.DeleteShortcuts(bb.ParentRenderWin())
 	}
 }
 

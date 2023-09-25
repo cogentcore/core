@@ -2448,7 +2448,7 @@ func (tv *TextView) PasteHist() {
 		if clip != nil {
 			wupdt := tv.TopUpdateStart()
 			defer tv.TopUpdateEnd(wupdt)
-			goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(clip))
+			goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2466,7 +2466,7 @@ func (tv *TextView) Cut() *textbuf.Edit {
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2493,7 +2493,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2505,7 +2505,7 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 func (tv *TextView) Paste() {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
-	data := goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2552,7 +2552,7 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
+		goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
 	tv.SetCursorShow(npos)
@@ -2570,7 +2570,7 @@ func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 	cb := tbe.ToBytes()
-	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(mimedata.NewTextBytes(cb))
+	goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
 	TextViewClipRect = tbe
 	if reset {
 		tv.SelectReset()
@@ -2645,7 +2645,7 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 				txf := recv.Embed(TypeTextView).(*TextView)
 				txf.Paste()
 			})
-		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).IsEmpty())
+		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).IsEmpty())
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -3184,8 +3184,8 @@ func TextViewBlink() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
-		win := tv.ParentOSWin()
-		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsOSWinInFocus() {
+		win := tv.ParentRenderWin()
+		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsRenderWinInFocus() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
@@ -3218,7 +3218,7 @@ func (tv *TextView) StartCursor() {
 		go TextViewBlink()
 	}
 	tv.BlinkOn = true
-	win := tv.ParentOSWin()
+	win := tv.ParentRenderWin()
 	if win != nil && !win.IsResizing() {
 		tv.RenderCursor(true)
 	}
@@ -3267,7 +3267,7 @@ func (tv *TextView) RenderCursor(on bool) {
 	tv.CursorMu.Lock()
 	defer tv.CursorMu.Unlock()
 
-	win := tv.ParentOSWin()
+	win := tv.ParentRenderWin()
 	sp := tv.CursorSprite()
 	if on {
 		win.ActivateSprite(sp.Name)
@@ -3288,7 +3288,7 @@ func (tv *TextView) CursorSpriteName() string {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
 func (tv *TextView) CursorSprite() *gi.Sprite {
-	win := tv.ParentOSWin()
+	win := tv.ParentRenderWin()
 	if win == nil {
 		return nil
 	}
@@ -4118,7 +4118,7 @@ func (tv *TextView) KeyInput(kt *key.ChordEvent) {
 		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
-	win := tv.ParentOSWin()
+	win := tv.ParentRenderWin()
 	tv.ClearScopelights()
 
 	tv.RefreshIfNeeded()
@@ -4713,9 +4713,9 @@ func (tv *TextView) MouseMoveEvent() {
 		}
 		// TODO: figure out how to handle links with new cursor setup
 		if inLink {
-			goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
 		} else {
-			goosi.TheApp.Cursor(tv.ParentOSWin().OSWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
 		}
 
 	})
@@ -4791,7 +4791,7 @@ func (tv *TextView) StyleTextView() {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
-		win := tv.ParentOSWin()
+		win := tv.ParentRenderWin()
 		if win != nil {
 			spnm := tv.CursorSpriteName()
 			win.DeleteSprite(spnm)
@@ -4833,7 +4833,7 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.DoLayoutChildren(iter)
-	if tv.ParentOSWin() != nil &&
+	if tv.ParentRenderWin() != nil &&
 		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..

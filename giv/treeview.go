@@ -1315,7 +1315,7 @@ func (tv *TreeView) Copy(reset bool) {
 			}
 		}
 	}
-	goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(md)
+	goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(md)
 	if reset {
 		tv.UnselectAll()
 	}
@@ -1339,7 +1339,7 @@ func (tv *TreeView) Cut() {
 // Paste pastes clipboard at given node
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (tv *TreeView) Paste() {
-	md := goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Read([]string{filecat.DataJson})
+	md := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{filecat.DataJson})
 	if md != nil {
 		tv.PasteMenu(md)
 	}
@@ -1516,7 +1516,7 @@ func (tv *TreeView) DragNDropStart() {
 	sp := &gi.Sprite{}
 	sp.GrabRenderFrom(tv) // todo: show number of items?
 	gi.ImageClearer(sp.Pixels, 50.0)
-	tv.ParentOSWin().StartDragNDrop(tv.This(), md, sp)
+	tv.ParentRenderWin().StartDragNDrop(tv.This(), md, sp)
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node
@@ -1547,13 +1547,13 @@ func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
 		return
 	}
 	tv.UnselectAll()
-	tv.ParentOSWin().FinalizeDragNDrop(mod)
+	tv.ParentRenderWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropFinalizeDefMod is called to finalize actions on the Source node prior to
 // performing target actions -- uses default drop mod in place when event was dropped.
 func (tv *TreeView) DragNDropFinalizeDefMod() {
-	win := tv.ParentOSWin()
+	win := tv.ParentRenderWin()
 	if win == nil {
 		return
 	}
@@ -1816,9 +1816,9 @@ func (tv *TreeView) TreeViewEvents() {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
 		case dnd.Enter:
-			tvv.ParentOSWin().DNDSetCursor(de.Mod)
+			tvv.ParentRenderWin().DNDSetCursor(de.Mod)
 		case dnd.Exit:
-			tvv.ParentOSWin().DNDNotCursor()
+			tvv.ParentRenderWin().DNDNotCursor()
 		case dnd.Hover:
 			tvv.Open()
 		}

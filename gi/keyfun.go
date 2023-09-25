@@ -421,7 +421,7 @@ var KeyMapsProps = ki.Props{
 			}},
 		}},
 		{"Edit", "Copy Cut Paste Dupe"},
-		{"OSWin", "OSWins"},
+		{"RenderWin", "RenderWins"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"SavePrefs", ki.Props{
@@ -948,7 +948,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
-	{"OSWinsStd", "Standard OSWins KeyMap", KeyMap{
+	{"RenderWinsStd", "Standard RenderWins KeyMap", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
 		"Shift+UpArrow":           KeyFunMoveUp,
 		"DownArrow":               KeyFunMoveDown,

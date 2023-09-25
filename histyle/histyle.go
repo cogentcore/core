@@ -358,7 +358,7 @@ var StyleProps = ki.Props{
 			}},
 		}},
 		{"Edit", "Copy Cut Paste Dupe"},
-		{"OSWin", "OSWins"},
+		{"RenderWin", "RenderWins"},
 	},
 	"ToolBar": ki.PropSlice{
 		{"OpenJSON", ki.Props{

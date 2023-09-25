@@ -40,7 +40,7 @@ func (wb *WidgetBase) FocusChanged(change FocusChanges) {
 
 // HasFocus returns true if this node has keyboard focus and should
 // receive keyboard events -- typically this just returns HasFocus based
-// on the OSWin-managed HasFocus flag, but some types may want to monitor
+// on the RenderWin-managed HasFocus flag, but some types may want to monitor
 // all keyboard activity for certain key keys..
 func (wb *WidgetBase) HasFocus() bool {
 	return wb.HasFlag(HasFocus)
@@ -94,7 +94,7 @@ func (wb *WidgetBase) StartFocus() {
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget
-// as maintained in the OSWin
+// as maintained in the RenderWin
 func (wb *WidgetBase) ContainsFocus() bool {
 	em := wb.EventMgr()
 	if em == nil {

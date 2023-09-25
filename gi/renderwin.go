@@ -36,14 +36,14 @@ import (
 	"goki.dev/vgpu/v2/vphong"
 )
 
-// OSWin -> RenderMgr for handling all the rendering stuff.
-// OSWin -> OuterWindow?? something like that..
+// RenderWin -> RenderMgr for handling all the rendering stuff.
+// RenderWin -> OuterWindow?? something like that..
 
-// CurOSWin is the current OSWin window
+// CurRenderWin is the current RenderWin window
 // On mobile, this is the _only_ window.
-var CurOSWin *OSWin
+var CurRenderWin *RenderWin
 
-func (w *OSWin) UpdateSig() {
+func (w *RenderWin) UpdateSig() {
 	// todo: fixme
 }
 
@@ -90,16 +90,16 @@ var (
 	LocalMainMenu = false
 
 	// WinNewCloseTime records last time a new window was opened or another
-	// closed -- used to trigger updating of OSWin menus on each window.
+	// closed -- used to trigger updating of RenderWin menus on each window.
 	WinNewCloseTime time.Time
 
-	// OSWinGlobalMu is a mutex for any global state associated with windows
-	OSWinGlobalMu sync.Mutex
+	// RenderWinGlobalMu is a mutex for any global state associated with windows
+	RenderWinGlobalMu sync.Mutex
 
-	// OSWinOpenTimer is used for profiling the open time of windows
+	// RenderWinOpenTimer is used for profiling the open time of windows
 	// if doing profiling, it will report the time elapsed in msec
 	// to point of establishing initial focus in the window.
-	OSWinOpenTimer time.Time
+	RenderWinOpenTimer time.Time
 )
 
 // These constants define use of Texture images in vdraw.Drawer
@@ -133,10 +133,10 @@ const (
 	MaxSpritesPerTexture = 128
 )
 
-// OSWin provides an OS-specific window and all the associated event
+// RenderWin provides an OS-specific window and all the associated event
 // handling.  Widgets connect to event signals to receive relevant GUI events.
 //
-// OSWin manages a stack of Scenes, each of which manage a separate bitmap
+// RenderWin manages a stack of Scenes, each of which manage a separate bitmap
 // image, onto which Widgets render.  For main windows, the Scene Frame
 // has a MainMenu for the window (which can be empty, in which case it is not
 // displayed).  On MacOS, this main menu updates the overall menubar,
@@ -150,14 +150,14 @@ const (
 //
 // Rendering logic:
 //   - vdraw.Drawer manages all rendering to the window surface, provided via
-//     the OSWin window, using vulkan stored images (16 max)
+//     the RenderWin window, using vulkan stored images (16 max)
 //   - Order is: Base Scene (image 0), then direct uploads, popups, and sprites.
 //   - DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
 //     (note: cannot upload directly to window as this prevents popups and overlays)
 //   - Popups (which have their own Scenes)
 //   - Sprites are managed as layered textures of the same size, to enable
 //     unlimited number packed into a few descriptors for standard sizes.
-type OSWin struct {
+type RenderWin struct {
 
 	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
 	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
@@ -166,7 +166,7 @@ type OSWin struct {
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	OSWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	RenderWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 
 	// event manager that handles dispersing events to nodes
 	EventMgr EventMgr `json:"-" xml:"-" desc:"event manager that handles dispersing events to nodes"`
@@ -219,9 +219,9 @@ type OSWin struct {
 	SelectedWidgetChan chan *WidgetBase `desc:"the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting"`
 
 	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
-	DirDraws OSWinDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
-	PopDraws OSWinDrawers // popup regions
-	UpdtRegs OSWinUpdates // misc vp update regions
+	DirDraws RenderWinDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
+	PopDraws RenderWinDrawers // popup regions
+	UpdtRegs RenderWinUpdates // misc vp update regions
 
 	// the phongs for the window
 	Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
@@ -230,7 +230,7 @@ type OSWin struct {
 	Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
 }
 
-// WinFlags extend NodeBase NodeFlags to hold OSWin state
+// WinFlags extend NodeBase NodeFlags to hold RenderWin state
 type WinFlags int64 //enums:bitflag
 
 const (
@@ -251,7 +251,7 @@ const (
 	// ignore other window events before this point
 	WinFlagGotPaint
 
-	// WinFlagGotFocus indicates that have we received OSWin focus
+	// WinFlagGotFocus indicates that have we received RenderWin focus
 	WinFlagGotFocus
 
 	// WinFlagSentShow have we sent the show event yet?  Only ever sent ONCE
@@ -275,33 +275,33 @@ const (
 )
 
 // HasGeomPrefs returns true if geometry prefs were set already
-func (w *OSWin) HasGeomPrefs() bool {
+func (w *RenderWin) HasGeomPrefs() bool {
 	return w.HasFlag(int(WinFlagHasGeomPrefs))
 }
 
 // IsClosing returns true if window has requested to close -- don't
 // attempt to update it any further
-func (w *OSWin) IsClosing() bool {
+func (w *RenderWin) IsClosing() bool {
 	return w.HasFlag(int(WinFlagIsClosing))
 }
 
 // IsFocusActive returns true if window has focus active flag set
-func (w *OSWin) IsFocusActive() bool {
+func (w *RenderWin) IsFocusActive() bool {
 	return w.HasFlag(int(WinFlagFocusActive))
 }
 
 // SetFocusActiveState sets focus active flag to given state
-func (w *OSWin) SetFocusActiveState(active bool) {
+func (w *RenderWin) SetFocusActiveState(active bool) {
 	w.SetFlagState(active, int(WinFlagFocusActive))
 }
 
 // IsInSelectionMode returns true if window has selection mode set
-func (w *OSWin) IsInSelectionMode() bool {
+func (w *RenderWin) IsInSelectionMode() bool {
 	return w.HasFlag(int(WinFlagSelectionMode))
 }
 
 // SetSelectionModeState sets selection mode to given state
-func (w *OSWin) SetSelectionModeState(selmode bool) {
+func (w *RenderWin) SetSelectionModeState(selmode bool) {
 	w.SetFlagState(selmode, int(WinFlagSelectionMode))
 }
 
@@ -362,27 +362,27 @@ func OpenURL(url string) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//                   New OSWins and Init
+//                   New RenderWins and Init
 
-// NewOSWin creates a new window with given internal name handle, display
+// NewRenderWin creates a new window with given internal name handle, display
 // name, and options.
-func NewOSWin(name, title string, opts *goosi.NewOSWinOptions) *OSWin {
+func NewRenderWin(name, title string, opts *goosi.NewRenderWinOptions) *RenderWin {
 	Init() // overall gogi system initialization
-	win := &OSWin{}
+	win := &RenderWin{}
 	win.InitName(win, name)
 	win.EventMgr.Master = win
 	win.Title = title
 	win.SetOnlySelfUpdate() // has its own PublishImage update logic
 	var err error
-	win.OSWin, err = goosi.TheApp.NewOSWin(opts)
+	win.RenderWin, err = goosi.TheApp.NewRenderWin(opts)
 	if err != nil {
-		fmt.Printf("GoGi NewOSWin error: %v \n", err)
+		fmt.Printf("GoGi NewRenderWin error: %v \n", err)
 		return nil
 	}
-	win.OSWin.SetName(title)
-	win.OSWin.SetParent(win.This())
-	win.NodeSig.Connect(win.This(), SignalOSWinPublish)
-	drw := win.OSWin.Drawer()
+	win.RenderWin.SetName(title)
+	win.RenderWin.SetParent(win.This())
+	win.NodeSig.Connect(win.This(), SignalRenderWinPublish)
+	drw := win.RenderWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 
 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
@@ -390,7 +390,7 @@ func NewOSWin(name, title string, opts *goosi.NewOSWinOptions) *OSWin {
 	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 	win.UpdtRegs.SetIdxRange(RegionUpdateStart, MaxRegionUpdates)
 
-	win.OSWin.SetDestroyGPUResourcesFunc(func() {
+	win.RenderWin.SetDestroyGPUResourcesFunc(func() {
 		for _, ph := range win.Phongs {
 			ph.Destroy()
 		}
@@ -401,13 +401,13 @@ func NewOSWin(name, title string, opts *goosi.NewOSWinOptions) *OSWin {
 	return win
 }
 
-// NewMainOSWin creates a new standard main window with given internal handle
+// NewMainRenderWin creates a new standard main window with given internal handle
 // name, display name, and sizing, with default positioning, and initializes a
 // scene within it. The width and height are in standardized "pixel" units
 // (96 per inch), not the actual underlying raw display dot pixels
-func NewMainOSWin(name, title string, width, height int) *OSWin {
+func NewMainRenderWin(name, title string, width, height int) *RenderWin {
 	Init() // overall gogi system initialization, at latest possible moment
-	opts := &goosi.NewOSWinOptions{
+	opts := &goosi.NewRenderWinOptions{
 		Title: title, Size: image.Point{width, height}, StdPixels: true,
 	}
 	wgp := WinGeomMgr.Pref(name, nil)
@@ -417,12 +417,12 @@ func NewMainOSWin(name, title string, width, height int) *OSWin {
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 		// fmt.Printf("got prefs for %v: size: %v pos: %v\n", name, opts.Size, opts.Pos)
-		if _, found := AllOSWins.FindName(name); found { // offset from existing
+		if _, found := AllRenderWins.FindName(name); found { // offset from existing
 			opts.Pos.X += 20
 			opts.Pos.Y += 20
 		}
 	}
-	win := NewOSWin(name, title, opts)
+	win := NewRenderWin(name, title, opts)
 	WinGeomMgr.SettingEnd()
 	if win == nil {
 		return nil
@@ -430,8 +430,8 @@ func NewMainOSWin(name, title string, width, height int) *OSWin {
 	if wgp != nil {
 		win.SetFlag(int(WinFlagHasGeomPrefs))
 	}
-	AllOSWins.Add(win)
-	MainOSWins.Add(win)
+	AllRenderWins.Add(win)
+	MainRenderWins.Add(win)
 	sc := NewScene(width, height)
 	sc.SetName("WinSc")
 	sc.Fill = true
@@ -448,22 +448,22 @@ func NewMainOSWin(name, title string, width, height int) *OSWin {
 	return win
 }
 
-// RecycleMainOSWin looks for existing window with same Data --
+// RecycleMainRenderWin looks for existing window with same Data --
 // if found brings that to the front, returns true for bool.
 // else (and if data is nil) calls NewDialogWin, and returns false.
-func RecycleMainOSWin(data any, name, title string, width, height int) (*OSWin, bool) {
+func RecycleMainRenderWin(data any, name, title string, width, height int) (*RenderWin, bool) {
 	if data == nil {
-		return NewMainOSWin(name, title, width, height), false
+		return NewMainRenderWin(name, title, width, height), false
 	}
-	ew, has := MainOSWins.FindData(data)
+	ew, has := MainRenderWins.FindData(data)
 	if has {
 		if WinEventTrace {
 			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
 		}
-		ew.OSWin.Raise()
+		ew.RenderWin.Raise()
 		return ew, true
 	}
-	nw := NewMainOSWin(name, title, width, height)
+	nw := NewMainRenderWin(name, title, width, height)
 	nw.Data = data
 	return nw, false
 }
@@ -472,8 +472,8 @@ func RecycleMainOSWin(data any, name, title string, width, height int) (*OSWin, 
 // display name, and sizing (assumed to be in raw dots), without setting its
 // main scene -- user should do win.AddChild(vp); win.Scene = vp to set
 // their own scene.
-func NewDialogWin(name, title string, width, height int, modal bool) *OSWin {
-	opts := &goosi.NewOSWinOptions{
+func NewDialogWin(name, title string, width, height int, modal bool) *RenderWin {
+	opts := &goosi.NewRenderWinOptions{
 		Title: title, Size: image.Point{width, height}, StdPixels: false,
 	}
 	opts.SetDialog()
@@ -487,7 +487,7 @@ func NewDialogWin(name, title string, width, height int, modal bool) *OSWin {
 		opts.Pos = wgp.Pos()
 		opts.StdPixels = false
 	}
-	win := NewOSWin(name, title, opts)
+	win := NewRenderWin(name, title, opts)
 	WinGeomMgr.SettingEnd()
 	if win == nil {
 		return nil
@@ -495,8 +495,8 @@ func NewDialogWin(name, title string, width, height int, modal bool) *OSWin {
 	if wgp != nil {
 		win.SetFlag(int(WinFlagHasGeomPrefs))
 	}
-	AllOSWins.Add(win)
-	DialogOSWins.Add(win)
+	AllRenderWins.Add(win)
+	DialogRenderWins.Add(win)
 	WinNewCloseStamp()
 	return win
 }
@@ -504,16 +504,16 @@ func NewDialogWin(name, title string, width, height int, modal bool) *OSWin {
 // RecycleDialogWin looks for existing window with same Data --
 // if found brings that to the front, returns true for bool.
 // else (and if data is nil) calls [NewDialogWin], and returns false.
-func RecycleDialogWin(data any, name, title string, width, height int, modal bool) (*OSWin, bool) {
+func RecycleDialogWin(data any, name, title string, width, height int, modal bool) (*RenderWin, bool) {
 	if data == nil {
 		return NewDialogWin(name, title, width, height, modal), false
 	}
-	ew, has := DialogOSWins.FindData(data)
+	ew, has := DialogRenderWins.FindData(data)
 	if has {
 		if WinEventTrace {
 			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
 		}
-		ew.OSWin.Raise()
+		ew.RenderWin.Raise()
 		return ew, true
 	}
 	nw := NewDialogWin(name, title, width, height, modal)
@@ -523,7 +523,7 @@ func RecycleDialogWin(data any, name, title string, width, height int, modal boo
 
 // ConfigVLay creates and configures the vertical layout as first child of
 // Scene, and installs MainMenu as first element of layout.
-func (w *OSWin) ConfigVLay() {
+func (w *RenderWin) ConfigVLay() {
 	sc := w.Scene
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
@@ -541,11 +541,11 @@ func (w *OSWin) ConfigVLay() {
 }
 
 // ConfigInsets updates the padding on the main layout of the window
-// to the inset values provided by the OSWin window.
-func (w *OSWin) ConfigInsets() {
+// to the inset values provided by the RenderWin window.
+func (w *RenderWin) ConfigInsets() {
 	mainVlay, ok := w.Scene.ChildByName("main-vlay", 0).(*Layout)
 	if ok {
-		insets := w.OSWin.Insets()
+		insets := w.RenderWin.Insets()
 		mainVlay.AddStyler(func(w *WidgetBase, s *gist.Style) {
 			mainVlay.Style.Padding.Set(
 				units.Dot(insets.Top),
@@ -561,7 +561,7 @@ func (w *OSWin) ConfigInsets() {
 // AddMainMenu installs MainMenu as first element of main layout
 // used for dialogs that don't always have a main menu -- returns
 // menubar -- safe to call even if there is a menubar
-func (w *OSWin) AddMainMenu() *MenuBar {
+func (w *RenderWin) AddMainMenu() *MenuBar {
 	sc := w.Scene
 	updt := sc.UpdateStart()
 	defer sc.UpdateEnd(updt)
@@ -589,7 +589,7 @@ func (w *OSWin) AddMainMenu() *MenuBar {
 // into Scene.Frame after main menu -- if a main widget has already been set then
 // it is deleted and this one replaces it.  Use this method to ensure future
 // compatibility.
-func (w *OSWin) SetMainWidget(mw ki.Ki) {
+func (w *RenderWin) SetMainWidget(mw ki.Ki) {
 	if len(w.Scene.Frame.Kids) == 1 {
 		w.Scene.Frame.AddChild(mw)
 		return
@@ -605,7 +605,7 @@ func (w *OSWin) SetMainWidget(mw ki.Ki) {
 // (typically a Layout or Frame), and returns it.  Adds into Scene.Frame after
 // main menu -- if a main widget has already been set then it is deleted and
 // this one replaces it.  Use this method to ensure future compatibility.
-func (w *OSWin) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
+func (w *RenderWin) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 	if len(w.Scene.Frame.Kids) == 1 {
 		return w.Scene.Frame.NewChild(typ, name)
 	}
@@ -619,7 +619,7 @@ func (w *OSWin) SetMainWidgetType(typ reflect.Type, name string) ki.Ki {
 
 // SetMainFrame sets the main widget of this window as a Frame, with a default
 // column-wise vertical layout and max stretch sizing, and returns that frame.
-func (w *OSWin) SetMainFrame() *Frame {
+func (w *RenderWin) SetMainFrame() *Frame {
 	fr := w.SetMainWidgetType(FrameType, "main-frame").(*Frame)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
@@ -628,7 +628,7 @@ func (w *OSWin) SetMainFrame() *Frame {
 
 // MainFrame returns the main widget for this window as a Frame
 // returns error if not there, or not a frame.
-func (w *OSWin) MainFrame() (*Frame, error) {
+func (w *RenderWin) MainFrame() (*Frame, error) {
 	kw, err := w.MainWidget()
 	if err != nil {
 		return nil, err
@@ -637,43 +637,43 @@ func (w *OSWin) MainFrame() (*Frame, error) {
 	if ok {
 		return mf, nil
 	}
-	return nil, fmt.Errorf("Main Widget is not a Frame for OSWin: %s", w.Nm)
+	return nil, fmt.Errorf("Main Widget is not a Frame for RenderWin: %s", w.Nm)
 }
 
 // SetMainLayout sets the main widget of this window as a Layout, with a default
 // column-wise vertical layout and max stretch sizing, and returns it.
-func (w *OSWin) SetMainLayout() *Layout {
+func (w *RenderWin) SetMainLayout() *Layout {
 	fr := w.SetMainWidgetType(LayoutType, "main-lay").(*Layout)
 	fr.Lay = LayoutVert
 	fr.SetStretchMax()
 	return fr
 }
 
-// SetName sets name of this window and also the OSWin, and applies any window
+// SetName sets name of this window and also the RenderWin, and applies any window
 // geometry settings associated with the new name if it is different from before
-func (w *OSWin) SetName(name string) {
+func (w *RenderWin) SetName(name string) {
 	curnm := w.Name()
 	isdif := curnm != name
 	w.NodeBase.SetName(name)
-	if w.OSWin != nil {
-		w.OSWin.SetName(name)
+	if w.RenderWin != nil {
+		w.RenderWin.SetName(name)
 	}
 	if isdif {
-		for i, fw := range FocusOSWins { // rename focus windows so we get focus later..
+		for i, fw := range FocusRenderWins { // rename focus windows so we get focus later..
 			if fw == curnm {
-				FocusOSWins[i] = name
+				FocusRenderWins[i] = name
 			}
 		}
 	}
-	if isdif && w.OSWin != nil {
-		wgp := WinGeomMgr.Pref(name, w.OSWin.Screen())
+	if isdif && w.RenderWin != nil {
+		wgp := WinGeomMgr.Pref(name, w.RenderWin.Screen())
 		if wgp != nil {
 			WinGeomMgr.SettingStart()
-			if w.OSWin.Size() != wgp.Size() || w.OSWin.Position() != wgp.Pos() {
+			if w.RenderWin.Size() != wgp.Size() || w.RenderWin.Position() != wgp.Pos() {
 				if WinGeomTrace {
 					log.Printf("WinGeomPrefs: SetName setting geom for window: %v pos: %v size: %v\n", w.Name(), wgp.Pos(), wgp.Size())
 				}
-				w.OSWin.SetGeom(wgp.Pos(), wgp.Size())
+				w.RenderWin.SetGeom(wgp.Pos(), wgp.Size())
 				goosi.TheApp.SendEmptyEvent()
 			}
 			WinGeomMgr.SettingEnd()
@@ -681,36 +681,36 @@ func (w *OSWin) SetName(name string) {
 	}
 }
 
-// SetTitle sets title of this window and also the OSWin
-func (w *OSWin) SetTitle(name string) {
+// SetTitle sets title of this window and also the RenderWin
+func (w *RenderWin) SetTitle(name string) {
 	w.Title = name
-	if w.OSWin != nil {
-		w.OSWin.SetTitle(name)
+	if w.RenderWin != nil {
+		w.RenderWin.SetTitle(name)
 	}
 	WinNewCloseStamp()
 }
 
 // MainWidget returns the main widget for this window -- 2nd element in
 // Scene.Frame -- returns error if not yet set.
-func (w *OSWin) MainWidget() (ki.Ki, error) {
+func (w *RenderWin) MainWidget() (ki.Ki, error) {
 	return w.Scene.Frame.ChildTry(1)
 }
 
 // LogicalDPI returns the current logical dots-per-inch resolution of the
 // window, which should be used for most conversion of standard units --
 // physical DPI can be found in the Screen
-func (w *OSWin) LogicalDPI() float32 {
-	if w.OSWin == nil {
+func (w *RenderWin) LogicalDPI() float32 {
+	if w.RenderWin == nil {
 		return 96.0 // null default
 	}
-	return w.OSWin.LogicalDPI()
+	return w.RenderWin.LogicalDPI()
 }
 
 // ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
 // in increments of 6 dots to keep fonts rendering clearly.
-func (w *OSWin) ZoomDPI(steps int) {
+func (w *RenderWin) ZoomDPI(steps int) {
 	w.InactivateAllSprites()
-	sc := w.OSWin.Screen()
+	sc := w.RenderWin.Screen()
 	if sc == nil {
 		sc = goosi.TheApp.Screen(0)
 	}
@@ -730,7 +730,7 @@ func (w *OSWin) ZoomDPI(steps int) {
 
 // WinScene returns the scene directly under this window that serves
 // as the master scene for the entire window.
-func (w *OSWin) WinScene() *Scene {
+func (w *RenderWin) WinScene() *Scene {
 	vpi := w.ChildByType(TypeScene, ki.Embeds, 0)
 	if vpi == nil { // shouldn't happen
 		return nil
@@ -744,20 +744,20 @@ func (w *OSWin) WinScene() *Scene {
 // from the underlying pixel-level resolution of the window.
 // This will trigger a resize event and be processed
 // that way when it occurs.
-func (w *OSWin) SetWinSize(sz image.Point) {
-	w.OSWin.SetWinSize(sz)
+func (w *RenderWin) SetWinSize(sz image.Point) {
+	w.RenderWin.SetWinSize(sz)
 }
 
 // SetSize requests that the window be resized to the given size
 // in underlying pixel coordinates, which means that the requested
 // size is divided by the screen's DevicePixelRatio
-func (w *OSWin) SetSize(sz image.Point) {
-	w.OSWin.SetSize(sz)
+func (w *RenderWin) SetSize(sz image.Point) {
+	w.RenderWin.SetSize(sz)
 }
 
 // IsResizing means the window is actively being resized by user -- don't try
 // to update otherwise
-func (w *OSWin) IsResizing() bool {
+func (w *RenderWin) IsResizing() bool {
 	return w.HasFlag(int(WinFlagIsResizing))
 }
 
@@ -775,7 +775,7 @@ func StackAll() []byte {
 }
 
 // Resized updates internal buffers after a window has been resized.
-func (w *OSWin) Resized(sz image.Point) {
+func (w *RenderWin) Resized(sz image.Point) {
 	if !w.IsVisible() {
 		return
 	}
@@ -787,7 +787,7 @@ func (w *OSWin) Resized(sz image.Point) {
 		}
 		return
 	}
-	drw := w.OSWin.Drawer()
+	drw := w.RenderWin.Drawer()
 	if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
 		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 	}
@@ -805,7 +805,7 @@ func (w *OSWin) Resized(sz image.Point) {
 		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Nm, curSz, sz)
 	}
 	if curSz == (image.Point{}) { // first open
-		StringsInsertFirstUnique(&FocusOSWins, w.Nm, 10)
+		StringsInsertFirstUnique(&FocusRenderWins, w.Nm, 10)
 	}
 	w.Scene.Resize(sz)
 	w.ConfigInsets()
@@ -815,8 +815,8 @@ func (w *OSWin) Resized(sz image.Point) {
 	WinGeomMgr.RecordPref(w)
 	w.UpMu.Unlock()
 	w.FullReRender()
-	// we need a second full re-render for fullscreen and snap resizes on OSWins
-	if goosi.TheApp.Platform() == goosi.OSWins {
+	// we need a second full re-render for fullscreen and snap resizes on RenderWins
+	if goosi.TheApp.Platform() == goosi.RenderWins {
 		w.FullReRender()
 	}
 }
@@ -824,19 +824,19 @@ func (w *OSWin) Resized(sz image.Point) {
 // Raise requests that the window be at the top of the stack of windows,
 // and receive focus.  If it is iconified, it will be de-iconified.  This
 // is the only supported mechanism for de-iconifying.
-func (w *OSWin) Raise() {
-	w.OSWin.Raise()
+func (w *RenderWin) Raise() {
+	w.RenderWin.Raise()
 }
 
 // Minimize requests that the window be iconified, making it no longer
 // visible or active -- rendering should not occur for minimized windows.
-func (w *OSWin) Minimize() {
-	w.OSWin.Minimize()
+func (w *RenderWin) Minimize() {
+	w.RenderWin.Minimize()
 }
 
 // Close closes the window -- this is not a request -- it means:
 // definitely close it -- flags window as such -- check IsClosing()
-func (w *OSWin) Close() {
+func (w *RenderWin) Close() {
 	if w.IsClosing() {
 		return
 	}
@@ -844,23 +844,23 @@ func (w *OSWin) Close() {
 	// w.UpMu.Lock() // allow other stuff to finish
 	w.SetFlag(int(WinFlagIsClosing))
 	// w.UpMu.Unlock()
-	w.OSWin.Close()
+	w.RenderWin.Close()
 }
 
 // CloseReq requests that the window be closed -- could be rejected
-func (w *OSWin) CloseReq() {
-	w.OSWin.CloseReq()
+func (w *RenderWin) CloseReq() {
+	w.RenderWin.CloseReq()
 }
 
 // Closed frees any resources after the window has been closed.
-func (w *OSWin) Closed() {
+func (w *RenderWin) Closed() {
 	w.UpMu.Lock()
-	AllOSWins.Delete(w)
-	MainOSWins.Delete(w)
-	DialogOSWins.Delete(w)
-	OSWinGlobalMu.Lock()
-	StringsDelete(&FocusOSWins, w.Name())
-	OSWinGlobalMu.Unlock()
+	AllRenderWins.Delete(w)
+	MainRenderWins.Delete(w)
+	DialogRenderWins.Delete(w)
+	RenderWinGlobalMu.Lock()
+	StringsDelete(&FocusRenderWins, w.Name())
+	RenderWinGlobalMu.Unlock()
 	WinNewCloseStamp()
 	if WinEventTrace {
 		fmt.Printf("Win: %v Closed\n", w.Nm)
@@ -874,23 +874,23 @@ func (w *OSWin) Closed() {
 	}
 	w.SetDisabled() // marks as closed
 	w.FocusInactivate()
-	OSWinGlobalMu.Lock()
-	if len(FocusOSWins) > 0 {
-		pf := FocusOSWins[0]
-		OSWinGlobalMu.Unlock()
-		pfw, has := AllOSWins.FindName(pf)
+	RenderWinGlobalMu.Lock()
+	if len(FocusRenderWins) > 0 {
+		pf := FocusRenderWins[0]
+		RenderWinGlobalMu.Unlock()
+		pfw, has := AllRenderWins.FindName(pf)
 		if has {
 			if WinEventTrace {
 				fmt.Printf("Win: %v getting restored focus after: %v closed\n", pfw.Nm, w.Nm)
 			}
-			pfw.OSWin.Raise()
+			pfw.RenderWin.Raise()
 		} else {
 			if WinEventTrace {
 				fmt.Printf("Win: %v not found to restored focus: %v closed\n", pf, w.Nm)
 			}
 		}
 	} else {
-		OSWinGlobalMu.Unlock()
+		RenderWinGlobalMu.Unlock()
 	}
 	// these are managed by the window itself
 	w.Sprites.Reset()
@@ -898,7 +898,7 @@ func (w *OSWin) Closed() {
 }
 
 // IsClosed reports if the window has been closed
-func (w *OSWin) IsClosed() bool {
+func (w *RenderWin) IsClosed() bool {
 	if w.IsDisabled() || w.Scene == nil {
 		return true
 	}
@@ -908,8 +908,8 @@ func (w *OSWin) IsClosed() bool {
 // SetCloseReqFunc sets the function that is called whenever there is a
 // request to close the window (via a OS or a call to CloseReq() method).  That
 // function can then adjudicate whether and when to actually call Close.
-func (w *OSWin) SetCloseReqFunc(fun func(win *OSWin)) {
-	w.OSWin.SetCloseReqFunc(func(owin goosi.OSWin) {
+func (w *RenderWin) SetCloseReqFunc(fun func(win *RenderWin)) {
+	w.RenderWin.SetCloseReqFunc(func(owin goosi.RenderWin) {
 		fun(w)
 	})
 }
@@ -917,15 +917,15 @@ func (w *OSWin) SetCloseReqFunc(fun func(win *OSWin)) {
 // SetCloseCleanFunc sets the function that is called whenever window is
 // actually about to close (irrevocably) -- can do any necessary
 // last-minute cleanup here.
-func (w *OSWin) SetCloseCleanFunc(fun func(win *OSWin)) {
-	w.OSWin.SetCloseCleanFunc(func(owin goosi.OSWin) {
+func (w *RenderWin) SetCloseCleanFunc(fun func(win *RenderWin)) {
+	w.RenderWin.SetCloseCleanFunc(func(owin goosi.RenderWin) {
 		fun(w)
 	})
 }
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
-func (w *OSWin) IsVisible() bool {
-	if w == nil || w.This() == nil || w.OSWin == nil || w.IsClosed() || w.IsClosing() || !w.OSWin.IsVisible() {
+func (w *RenderWin) IsVisible() bool {
+	if w == nil || w.This() == nil || w.RenderWin == nil || w.IsClosed() || w.IsClosing() || !w.RenderWin.IsVisible() {
 		return false
 	}
 	return true
@@ -933,20 +933,20 @@ func (w *OSWin) IsVisible() bool {
 
 // WinNewCloseStamp updates the global WinNewCloseTime timestamp for updating windows menus
 func WinNewCloseStamp() {
-	OSWinGlobalMu.Lock()
+	RenderWinGlobalMu.Lock()
 	WinNewCloseTime = time.Now()
-	OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Unlock()
 }
 
 // NeedWinMenuUpdate returns true if our lastWinMenuUpdate is != WinNewCloseTime
-func (w *OSWin) NeedWinMenuUpdate() bool {
-	OSWinGlobalMu.Lock()
+func (w *RenderWin) NeedWinMenuUpdate() bool {
+	RenderWinGlobalMu.Lock()
 	updt := false
 	if w.lastWinMenuUpdate != WinNewCloseTime {
 		w.lastWinMenuUpdate = WinNewCloseTime
 		updt = true
 	}
-	OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Unlock()
 	return updt
 }
 
@@ -981,7 +981,7 @@ var WinWait sync.WaitGroup
 // starts the event loop in this same goroutine, and does not return until the
 // window is closed -- see GoStartEventLoop for a version that starts in a
 // separate goroutine and returns immediately.
-func (w *OSWin) StartEventLoop() {
+func (w *RenderWin) StartEventLoop() {
 	w.SetFlag(int(WinFlagDoFullRender))
 	w.EventLoop()
 }
@@ -989,14 +989,14 @@ func (w *OSWin) StartEventLoop() {
 // GoStartEventLoop starts the event processing loop for this window in a new
 // goroutine, and returns immediately.  Adds to WinWait waitgroup so a main
 // thread can wait on that for all windows to close.
-func (w *OSWin) GoStartEventLoop() {
+func (w *RenderWin) GoStartEventLoop() {
 	WinWait.Add(1)
 	w.SetFlag(int(WinFlagDoFullRender), int(WinFlagGoLoop))
 	go w.EventLoop()
 }
 
 // StopEventLoop tells the event loop to stop running when the next event arrives.
-func (w *OSWin) StopEventLoop() {
+func (w *RenderWin) StopEventLoop() {
 	w.SetFlag(int(WinFlagStopEventLoop))
 }
 
@@ -1005,15 +1005,15 @@ func (w *OSWin) StopEventLoop() {
 // to send a custom event just to trigger a pass through the event loop, even
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
-func (w *OSWin) SendCustomEvent(data any) {
-	goosi.SendCustomEvent(w.OSWin, data)
+func (w *RenderWin) SendCustomEvent(data any) {
+	goosi.SendCustomEvent(w.RenderWin, data)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Rendering
 
-// SendShowEvent sends the OSWinShowEvent to anyone listening -- only sent once..
-func (w *OSWin) SendShowEvent() {
+// SendShowEvent sends the RenderWinShowEvent to anyone listening -- only sent once..
+func (w *RenderWin) SendShowEvent() {
 	if w.HasFlag(int(WinFlagSentShow)) {
 		return
 	}
@@ -1024,8 +1024,8 @@ func (w *OSWin) SendShowEvent() {
 	w.EventMgr.SendEventSignal(&se, Popups)
 }
 
-// SendWinFocusEvent sends the OSWinFocusEvent to widgets
-func (w *OSWin) SendWinFocusEvent(act window.Actions) {
+// SendWinFocusEvent sends the RenderWinFocusEvent to widgets
+func (w *RenderWin) SendWinFocusEvent(act window.Actions) {
 	se := window.FocusEvent{}
 	se.Action = act
 	se.Init()
@@ -1036,7 +1036,7 @@ func (w *OSWin) SendWinFocusEvent(act window.Actions) {
 // into its scene, aggregating into the main window scene, which will
 // drive an UploadAllScenes call after all the rendering is done, and
 // signal the publishing of the window after that
-func (w *OSWin) FullReRender() {
+func (w *RenderWin) FullReRender() {
 	if !w.IsVisible() {
 		return
 	}
@@ -1049,11 +1049,11 @@ func (w *OSWin) FullReRender() {
 
 // InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
-func (w *OSWin) InitialFocus() {
+func (w *RenderWin) InitialFocus() {
 	w.EventMgr.InitialFocus()
 	if prof.Profiling {
 		now := time.Now()
-		opent := now.Sub(OSWinOpenTimer)
+		opent := now.Sub(RenderWinOpenTimer)
 		fmt.Printf("Win: %v took: %v to open\n", w.Nm, opent)
 	}
 }
@@ -1062,7 +1062,7 @@ func (w *OSWin) InitialFocus() {
 // vpBBox bounding box for the scene, and winBBox bounding box for the
 // window -- called after re-rendering specific nodes to update only the
 // relevant part of the overall scene image
-func (w *OSWin) UploadScRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
+func (w *RenderWin) UploadScRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
 	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
 	winrel := winBBox.Min.Sub(vpBBox.Min)
 	if !w.IsVisible() {
@@ -1090,7 +1090,7 @@ func (w *OSWin) UploadScRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
 			fmt.Printf("Win: %v region Sc %v, winbbox: %v reset updates\n", w.Path(), sc.Path(), winBBox)
 		}
 	} else {
-		drw := w.OSWin.Drawer()
+		drw := w.RenderWin.Drawer()
 		sc.Pixels.Rect = vpBBox
 		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 		sc.Pixels.Rect = vpPixBB
@@ -1115,7 +1115,7 @@ func (w *OSWin) UploadScRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
 
 // UploadSc uploads entire scene image for given scene -- e.g., for
 // popups etc updating separately
-func (w *OSWin) UploadSc(sc *Scene, offset image.Point) {
+func (w *RenderWin) UploadSc(sc *Scene, offset image.Point) {
 	vpr := sc.Pixels.Bounds()
 	winBBox := vpr.Add(offset)
 	if !w.IsVisible() {
@@ -1129,7 +1129,7 @@ func (w *OSWin) UploadSc(sc *Scene, offset image.Point) {
 	w.SetWinUpdating()
 	updt := w.UpdateStart()
 	idx := 0
-	drw := w.OSWin.Drawer()
+	drw := w.RenderWin.Drawer()
 	if sc == w.Scene {
 		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
 	} else {
@@ -1151,7 +1151,7 @@ func (w *OSWin) UploadSc(sc *Scene, offset image.Point) {
 // UploadAllScenes does a complete upload of all active scenes, in the
 // proper order, so as to completely refresh the window texture based on
 // everything rendered
-func (w *OSWin) UploadAllScenes() {
+func (w *RenderWin) UploadAllScenes() {
 	if !w.IsVisible() {
 		return
 	}
@@ -1178,17 +1178,17 @@ func (w *OSWin) UploadAllScenes() {
 }
 
 // IsWinUpdating checks if we are already updating window
-func (w *OSWin) IsWinUpdating() bool {
+func (w *RenderWin) IsWinUpdating() bool {
 	return w.HasFlag(int(WinFlagUpdating))
 }
 
 // SetWinUpdating sets the window updating state to true if not already updating
-func (w *OSWin) SetWinUpdating() {
+func (w *RenderWin) SetWinUpdating() {
 	w.SetFlag(int(WinFlagUpdating))
 }
 
 // ClearWinUpdating sets the window updating state to false if not already updating
-func (w *OSWin) ClearWinUpdating() {
+func (w *RenderWin) ClearWinUpdating() {
 	w.ClearFlag(int(WinFlagUpdating))
 }
 
@@ -1196,7 +1196,7 @@ func (w *OSWin) ClearWinUpdating() {
 // grabs the current state of the window scene for subsequent rendering.
 // This is protected by update mutex and suitable for random calls eg.,
 // when a window is scrolling and positions are then invalid.
-func (w *OSWin) ResetUpdateRegions() {
+func (w *RenderWin) ResetUpdateRegions() {
 	w.UpMu.Lock() // block all updates while we publish
 	w.ResetUpdateRegionsImpl()
 	w.UpMu.Unlock()
@@ -1204,10 +1204,10 @@ func (w *OSWin) ResetUpdateRegions() {
 
 // ResetUpdateRegionsImpl resets any existing window update regions and
 // grabs the current state of the window and popup scenes for subsequent rendering.
-func (w *OSWin) ResetUpdateRegionsImpl() {
+func (w *RenderWin) ResetUpdateRegionsImpl() {
 	w.UpdtRegs.Reset()
 	w.PopDraws.Reset()
-	drw := w.OSWin.Drawer()
+	drw := w.RenderWin.Drawer()
 	drw.SetGoImage(0, 0, w.Scene.Pixels, vgpu.NoFlipY)
 	// then all the current popups
 	// fmt.Printf("upload all views pop locked: %v\n", w.Nm)
@@ -1241,8 +1241,8 @@ func (w *OSWin) ResetUpdateRegionsImpl() {
 
 // Publish does the final step of updating of the window based on the current
 // texture (and overlay texture if active)
-func (w *OSWin) Publish() {
-	if !w.IsVisible() || w.OSWin.IsMinimized() {
+func (w *RenderWin) Publish() {
+	if !w.IsVisible() || w.RenderWin.IsMinimized() {
 		if WinEventTrace {
 			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Nm)
 		}
@@ -1270,7 +1270,7 @@ func (w *OSWin) Publish() {
 
 	// note: vulkan complains about different threads for rendering but should be ok.
 	// can't use RunOnWin method because it locks for main thread windows.
-	// w.OSWin.RunOnWin(func() {})
+	// w.RenderWin.RunOnWin(func() {})
 	// and using RunOnMain makes the thing hella slow -- like opengl -- that was the issue there!
 	// goosi.TheApp.RunOnMain(func() {
 
@@ -1279,7 +1279,7 @@ func (w *OSWin) Publish() {
 		w.Sprites.Modified = false
 	}
 
-	drw := w.OSWin.Drawer()
+	drw := w.RenderWin.Drawer()
 	vpv := drw.GetImageVal(0).Texture
 	if !vpv.HasFlag(Active) {
 		if w.Scene.Pixels == nil {
@@ -1344,10 +1344,10 @@ func (w *OSWin) Publish() {
 	w.UpMu.Unlock()
 }
 
-// SignalOSWinPublish is the signal receiver function that publishes the
+// SignalRenderWinPublish is the signal receiver function that publishes the
 // window updates when the window update signal (UpdateEnd) occurs
-func SignalOSWinPublish(winki, node ki.Ki, sig int64, data any) {
-	win := winki.Embed(TypeOSWin).(*OSWin)
+func SignalRenderWinPublish(winki, node ki.Ki, sig int64, data any) {
+	win := winki.Embed(TypeRenderWin).(*RenderWin)
 	if WinEventTrace || RenderTrace {
 		fmt.Printf("Win: %v publishing image due to signal: %v from node: %v\n", win.Path(), ki.NodeSignals(sig), node.Path())
 	}
@@ -1363,7 +1363,7 @@ func SignalOSWinPublish(winki, node ki.Ki, sig int64, data any) {
 // AddDirectUploader adds given node to those that have a DirectWinUpload method
 // and directly render to the Drawer Texture via their own method.
 // This is for gi3d.Scene for example.  Returns the index of the image to upload to.
-func (w *OSWin) AddDirectUploader(node Widget) int {
+func (w *RenderWin) AddDirectUploader(node Widget) int {
 	w.UpMu.Lock()
 	idx, _ := w.DirDraws.Add(node, image.Rectangle{})
 	w.UpMu.Unlock()
@@ -1371,7 +1371,7 @@ func (w *OSWin) AddDirectUploader(node Widget) int {
 }
 
 // DeleteDirectUploader removes given node to those that have a DirectWinUpload method.
-func (w *OSWin) DeleteDirectUploader(node Widget) {
+func (w *RenderWin) DeleteDirectUploader(node Widget) {
 	w.UpMu.Lock()
 	w.DirDraws.Nodes.DeleteKey(node.AsGiNode())
 	w.UpMu.Unlock()
@@ -1381,7 +1381,7 @@ func (w *OSWin) DeleteDirectUploader(node Widget) {
 //                   Sprites
 
 // SpriteByName returns a sprite by name -- false if not created yet
-func (w *OSWin) SpriteByName(nm string) (*Sprite, bool) {
+func (w *RenderWin) SpriteByName(nm string) (*Sprite, bool) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 	return w.Sprites.SpriteByName(nm)
@@ -1389,7 +1389,7 @@ func (w *OSWin) SpriteByName(nm string) (*Sprite, bool) {
 
 // AddSprite adds an existing sprite to list of sprites, using the sprite.Name
 // as the unique name key.
-func (w *OSWin) AddSprite(sp *Sprite) {
+func (w *RenderWin) AddSprite(sp *Sprite) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 	w.Sprites.Add(sp)
@@ -1401,7 +1401,7 @@ func (w *OSWin) AddSprite(sp *Sprite) {
 // ActivateSprite flags the sprite as active, and increments
 // number of Active Sprites, so that it will actually be rendered.
 // it is assumed that the image has not changed.
-func (w *OSWin) ActivateSprite(nm string) {
+func (w *RenderWin) ActivateSprite(nm string) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
@@ -1417,7 +1417,7 @@ func (w *OSWin) ActivateSprite(nm string) {
 
 // InactivateSprite flags the sprite as inactive, and decrements
 // number of Active Sprites, so that it will not be rendered.
-func (w *OSWin) InactivateSprite(nm string) {
+func (w *RenderWin) InactivateSprite(nm string) {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
@@ -1432,7 +1432,7 @@ func (w *OSWin) InactivateSprite(nm string) {
 }
 
 // InactivateAllSprites inactivates all sprites
-func (w *OSWin) InactivateAllSprites() {
+func (w *RenderWin) InactivateAllSprites() {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
@@ -1446,7 +1446,7 @@ func (w *OSWin) InactivateAllSprites() {
 
 // DeleteSprite deletes given sprite, returns true if actually deleted.
 // requires updating other sprites of same size -- use Inactivate if any chance of re-use.
-func (w *OSWin) DeleteSprite(nm string) bool {
+func (w *RenderWin) DeleteSprite(nm string) bool {
 	w.UpMu.Lock()
 	defer w.UpMu.Unlock()
 
@@ -1460,7 +1460,7 @@ func (w *OSWin) DeleteSprite(nm string) bool {
 }
 
 // SpriteEvent processes given event for any active sprites
-func (w *OSWin) SelSpriteEvent(evi goosi.Event) {
+func (w *RenderWin) SelSpriteEvent(evi goosi.Event) {
 	// w.UpMu.Lock()
 	// defer w.UpMu.Unlock()
 
@@ -1491,8 +1491,8 @@ func (w *OSWin) SelSpriteEvent(evi goosi.Event) {
 
 // ConfigSprites updates the Drawer configuration of sprites.
 // Does a new SzAlloc, and sets corresponding images.
-func (w *OSWin) ConfigSprites() {
-	drw := w.OSWin.Drawer()
+func (w *RenderWin) ConfigSprites() {
+	drw := w.RenderWin.Drawer()
 	w.Sprites.AllocSizes()
 	sa := &w.Sprites.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
@@ -1511,8 +1511,8 @@ func (w *OSWin) ConfigSprites() {
 }
 
 // DrawSprites draws sprites
-func (w *OSWin) DrawSprites() {
-	drw := w.OSWin.Drawer()
+func (w *RenderWin) DrawSprites() {
+	drw := w.RenderWin.Drawer()
 	sa := &w.Sprites.SzAlloc
 	for gpi, ga := range sa.GpAllocs {
 		imgidx := SpriteStart + gpi
@@ -1534,7 +1534,7 @@ func (w *OSWin) DrawSprites() {
 
 // MainMenuUpdated needs to be called whenever the main menu for this window
 // is updated in terms of items added or removed.
-func (w *OSWin) MainMenuUpdated() {
+func (w *RenderWin) MainMenuUpdated() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
@@ -1549,7 +1549,7 @@ func (w *OSWin) MainMenuUpdated() {
 
 // MainMenuUpdateActives needs to be called whenever items on the main menu
 // for this window have their IsActive status updated.
-func (w *OSWin) MainMenuUpdateActives() {
+func (w *RenderWin) MainMenuUpdateActives() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
@@ -1562,8 +1562,8 @@ func (w *OSWin) MainMenuUpdateActives() {
 	w.UpMu.Unlock()
 }
 
-// MainMenuUpdateOSWins updates a OSWin menu with a list of active menus.
-func (w *OSWin) MainMenuUpdateOSWins() {
+// MainMenuUpdateRenderWins updates a RenderWin menu with a list of active menus.
+func (w *RenderWin) MainMenuUpdateRenderWins() {
 	if w == nil || w.MainMenu == nil || !w.IsVisible() {
 		return
 	}
@@ -1572,18 +1572,18 @@ func (w *OSWin) MainMenuUpdateOSWins() {
 		w.UpMu.Unlock()
 		return
 	}
-	OSWinGlobalMu.Lock()
-	wmeni := w.MainMenu.ChildByName("OSWin", 3)
+	RenderWinGlobalMu.Lock()
+	wmeni := w.MainMenu.ChildByName("RenderWin", 3)
 	if wmeni == nil {
-		OSWinGlobalMu.Unlock()
+		RenderWinGlobalMu.Unlock()
 		w.UpMu.Unlock()
 		return
 	}
 	wmen := wmeni.(*Action)
-	men := make(Menu, 0, len(AllOSWins))
-	men.AddOSWinsMenu(w)
+	men := make(Menu, 0, len(AllRenderWins))
+	men.AddRenderWinsMenu(w)
 	wmen.Menu = men
-	OSWinGlobalMu.Unlock()
+	RenderWinGlobalMu.Unlock()
 	w.UpMu.Unlock()
 	w.MainMenuUpdated()
 }
@@ -1592,12 +1592,12 @@ func (w *OSWin) MainMenuUpdateOSWins() {
 //                   Main Method: EventLoop
 
 // PollEvents first tells the main event loop to check for any gui events now
-// and then it runs the event processing loop for the OSWin as long
+// and then it runs the event processing loop for the RenderWin as long
 // as there are events to be processed, and then returns.
-func (w *OSWin) PollEvents() {
+func (w *RenderWin) PollEvents() {
 	goosi.TheApp.PollEvents()
 	for {
-		evi, has := w.OSWin.PollEvent()
+		evi, has := w.RenderWin.PollEvent()
 		if !has {
 			break
 		}
@@ -1605,16 +1605,16 @@ func (w *OSWin) PollEvents() {
 	}
 }
 
-// EventLoop runs the event processing loop for the OSWin -- grabs oswin
+// EventLoop runs the event processing loop for the RenderWin -- grabs oswin
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
-func (w *OSWin) EventLoop() {
+func (w *RenderWin) EventLoop() {
 	for {
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
 		}
-		evi := w.OSWin.NextEvent()
+		evi := w.RenderWin.NextEvent()
 		if w.HasFlag(int(WinFlagStopEventLoop)) {
 			w.ClearFlag(int(WinFlagStopEventLoop))
 			break
@@ -1632,7 +1632,7 @@ func (w *OSWin) EventLoop() {
 }
 
 // ProcessEvent processes given goosi.Event
-func (w *OSWin) ProcessEvent(evi goosi.Event) {
+func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 	et := evi.Type()
 	// log.Printf("Got event: %v\n", et)
 	w.delPop = false                     // if true, delete this popup after event loop
@@ -1668,14 +1668,14 @@ func (w *OSWin) ProcessEvent(evi goosi.Event) {
 		w.Scene.BBoxMu.RLock()
 		vpsz := w.Scene.Geom.Size
 		w.Scene.BBoxMu.RUnlock()
-		if vpsz != w.OSWin.Size() {
+		if vpsz != w.RenderWin.Size() {
 			w.SetFlag(int(WinFlagIsResizing))
-			w.Resized(w.OSWin.Size())
+			w.Resized(w.RenderWin.Size())
 			w.skippedResize = nil
 		}
 	}
 
-	if et != goosi.OSWinResizeEvent && et != goosi.OSWinPaintEvent {
+	if et != goosi.RenderWinResizeEvent && et != goosi.RenderWinPaintEvent {
 		w.ClearFlag(int(WinFlagIsResizing))
 	}
 
@@ -1703,7 +1703,7 @@ func (w *OSWin) ProcessEvent(evi goosi.Event) {
 	if me, ok := evi.(*mouse.Event); w.IsInSelectionMode() && ok {
 		me.SetProcessed()
 		w.SetSelectionModeState(false)
-		w.DeleteSprite(OSWinSelectionSpriteName)
+		w.DeleteSprite(RenderWinSelectionSpriteName)
 		w.SelectedWidgetChan <- w.SelectedWidget
 	}
 
@@ -1791,7 +1791,7 @@ func (w *OSWin) ProcessEvent(evi goosi.Event) {
 
 // SetCursor sets the cursor based on the given mouse event.
 // Also handles sending widget selection events.
-func (w *OSWin) SetCursor(me *mouse.MoveEvent) {
+func (w *RenderWin) SetCursor(me *mouse.MoveEvent) {
 	if w.IsClosing() {
 		return
 	}
@@ -1851,37 +1851,37 @@ func (w *OSWin) SetCursor(me *mouse.MoveEvent) {
 		me.SetProcessed()
 		w.SelectionSprite(maxLevelWidget)
 		w.SelectedWidget = maxLevelWidget
-		goosi.TheApp.Cursor(w.OSWin).Set(cursor.Arrow) // always arrow in selection mode
+		goosi.TheApp.Cursor(w.RenderWin).Set(cursor.Arrow) // always arrow in selection mode
 	} else {
 		// only set cursor if not in selection mode
-		goosi.TheApp.Cursor(w.OSWin).Set(maxLevelCursor)
+		goosi.TheApp.Cursor(w.RenderWin).Set(maxLevelCursor)
 	}
 }
 
-// OSWinSelectionSpriteName is the sprite name used for the semi-transparent
+// RenderWinSelectionSpriteName is the sprite name used for the semi-transparent
 // blue box rendered above elements selected in selection mode
-var OSWinSelectionSpriteName = "gi.OSWin.SelectionBox"
+var RenderWinSelectionSpriteName = "gi.RenderWin.SelectionBox"
 
 // SelectionSprite deletes any existing selection box sprite
 // and returns a new one for the given widget base. This should
 // only be used in inspect editor Selection Mode.
-func (w *OSWin) SelectionSprite(wb *WidgetBase) *Sprite {
-	w.DeleteSprite(OSWinSelectionSpriteName)
-	sp := NewSprite(OSWinSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
+func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
+	w.DeleteSprite(RenderWinSelectionSpriteName)
+	sp := NewSprite(RenderWinSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
 	draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{colors.SetAF32(ColorScheme.Primary, 0.5)}, image.Point{}, draw.Src)
 	sp.Geom.Pos = wb.WinBBox.Min
 	w.AddSprite(sp)
-	w.ActivateSprite(OSWinSelectionSpriteName)
+	w.ActivateSprite(RenderWinSelectionSpriteName)
 	w.UpdateSig()
 	return sp
 }
 
 // FilterEvent filters repeated laggy events -- key for responsive resize, scroll, etc
 // returns false if event should not be processed further, and true if it should.
-func (w *OSWin) FilterEvent(evi goosi.Event) bool {
+func (w *RenderWin) FilterEvent(evi goosi.Event) bool {
 	et := evi.Type()
 
-	if w.HasFlag(int(WinFlagGotPaint)) && et == goosi.OSWinPaintEvent && w.lastEt == goosi.OSWinResizeEvent {
+	if w.HasFlag(int(WinFlagGotPaint)) && et == goosi.RenderWinPaintEvent && w.lastEt == goosi.RenderWinResizeEvent {
 		if WinEventTrace {
 			fmt.Printf("Win: %v skipping paint after resize\n", w.Nm)
 		}
@@ -1890,11 +1890,11 @@ func (w *OSWin) FilterEvent(evi goosi.Event) bool {
 		return false // X11 always sends a paint after a resize -- we just use resize
 	}
 
-	if et != w.lastEt && w.lastEt != goosi.OSWinResizeEvent {
+	if et != w.lastEt && w.lastEt != goosi.RenderWinResizeEvent {
 		return true // non-repeat
 	}
 
-	if et == goosi.OSWinResizeEvent {
+	if et == goosi.RenderWinResizeEvent {
 		now := time.Now()
 		lag := now.Sub(evi.Time())
 		lagMs := int(lag / time.Millisecond)
@@ -1903,14 +1903,14 @@ func (w *OSWin) FilterEvent(evi goosi.Event) bool {
 		// fmt.Printf("resize\n")
 		if lagMs > EventSkipLagMSec {
 			if WinEventTrace {
-				fmt.Printf("Win: %v skipped et %v lag %v size: %v\n", w.Nm, et, lag, w.OSWin.Size())
+				fmt.Printf("Win: %v skipped et %v lag %v size: %v\n", w.Nm, et, lag, w.RenderWin.Size())
 			}
 			w.EventMgr.LagLastSkipped = true
 			w.skippedResize = we
 			return false
 		} else {
 			we.SetProcessed()
-			w.Resized(w.OSWin.Size())
+			w.Resized(w.RenderWin.Size())
 			w.EventMgr.LagLastSkipped = false
 			w.skippedResize = nil
 			return false
@@ -1919,10 +1919,10 @@ func (w *OSWin) FilterEvent(evi goosi.Event) bool {
 	return w.EventMgr.FilterLaggyEvents(evi)
 }
 
-// HiProrityEvents processes High-priority events for OSWin.
-// OSWin gets first crack at these events, and handles window-specific ones
+// HiProrityEvents processes High-priority events for RenderWin.
+// RenderWin gets first crack at these events, and handles window-specific ones
 // returns true if processing should continue and false if was handled
-func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
+func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 	switch e := evi.(type) {
 	case *window.Event:
 		switch e.Action {
@@ -1944,8 +1944,8 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 			if w.HasFlag(int(WinFlagDoFullRender)) {
 				w.ClearFlag(int(WinFlagDoFullRender))
 				// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
-				if w.Scene.Geom.Size != w.OSWin.Size() {
-					w.Resized(w.OSWin.Size())
+				if w.Scene.Geom.Size != w.RenderWin.Size() {
+					w.Resized(w.RenderWin.Size())
 				} else {
 					w.FullReRender() // note: this is currently needed for focus to actually
 					// take effect in a popup, and also ensures dynamically sized elements are
@@ -1961,20 +1961,20 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 				fmt.Printf("Win: %v got show event\n", w.Nm)
 			}
 			if w.NeedWinMenuUpdate() {
-				w.MainMenuUpdateOSWins()
+				w.MainMenuUpdateRenderWins()
 			}
 			w.SendShowEvent() // happens AFTER full render
 		case window.Move:
 			e.SetProcessed()
 			if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
-				// fmt.Printf("win move: %v\n", w.OSWin.Position())
+				// fmt.Printf("win move: %v\n", w.RenderWin.Position())
 				if WinGeomTrace {
 					log.Printf("WinGeomPrefs: recording from Move\n")
 				}
 				WinGeomMgr.RecordPref(w)
 			}
 		case window.Focus:
-			StringsInsertFirstUnique(&FocusOSWins, w.Nm, 10)
+			StringsInsertFirstUnique(&FocusRenderWins, w.Nm, 10)
 			if !w.HasFlag(int(WinFlagGotFocus)) {
 				w.SetFlag(int(WinFlagGotFocus))
 				w.SendWinFocusEvent(window.Focus)
@@ -1982,7 +1982,7 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 					fmt.Printf("Win: %v got focus\n", w.Nm)
 				}
 				if w.NeedWinMenuUpdate() {
-					w.MainMenuUpdateOSWins()
+					w.MainMenuUpdateRenderWins()
 				}
 			} else {
 				if WinEventTrace {
@@ -1996,7 +1996,7 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 			w.ClearFlag(int(WinFlagGotFocus))
 			w.SendWinFocusEvent(window.DeFocus)
 		case window.ScreenUpdate:
-			w.Resized(w.OSWin.Size())
+			w.Resized(w.RenderWin.Size())
 			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
 			// WinGeomMgr.AbortSave() // anything just prior to this is sus
@@ -2022,7 +2022,7 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 		w.FocusActiveClick(e)
 		w.SelSpriteEvent(evi)
 		if w.NeedWinMenuUpdate() {
-			w.MainMenuUpdateOSWins()
+			w.MainMenuUpdateRenderWins()
 		}
 	case *mouse.MoveEvent:
 		// todo:
@@ -2031,8 +2031,8 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 			w.ClearFlag(int(WinFlagDoFullRender))
 			// if we are getting mouse input, and still haven't done this, do it..
 			// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
-			if w.Scene.Geom.Size != w.OSWin.Size() {
-				w.Resized(w.OSWin.Size())
+			if w.Scene.Geom.Size != w.RenderWin.Size() {
+				w.Resized(w.RenderWin.Size())
 			} else {
 				w.FullReRender()
 			}
@@ -2060,11 +2060,11 @@ func (w *OSWin) HiPriorityEvents(evi goosi.Event) bool {
 
 // Most of event stuff is in events.go, controlled by EventMgr
 
-func (w *OSWin) EventTopNode() ki.Ki {
+func (w *RenderWin) EventTopNode() ki.Ki {
 	return w.This()
 }
 
-func (w *OSWin) FocusTopNode() ki.Ki {
+func (w *RenderWin) FocusTopNode() ki.Ki {
 	cpop := w.CurPopup()
 	if cpop != nil {
 		return cpop
@@ -2072,18 +2072,18 @@ func (w *OSWin) FocusTopNode() ki.Ki {
 	return w.Scene.This()
 }
 
-func (w *OSWin) EventTopUpdateStart() bool {
+func (w *RenderWin) EventTopUpdateStart() bool {
 	return w.UpdateStart()
 }
 
-func (w *OSWin) EventTopUpdateEnd(updt bool) {
+func (w *RenderWin) EventTopUpdateEnd(updt bool) {
 	w.UpdateEnd(updt)
 }
 
 // IsInScope returns true if the given object is in scope for receiving events.
 // If popup is true, then only items on popup are in scope, otherwise
 // items NOT on popup are in scope (if no popup, everything is in scope).
-func (w *OSWin) IsInScope(k ki.Ki, popup bool) bool {
+func (w *RenderWin) IsInScope(k ki.Ki, popup bool) bool {
 	cpop := w.CurPopup()
 	if cpop == nil {
 		return true
@@ -2111,7 +2111,7 @@ func (w *OSWin) IsInScope(k ki.Ki, popup bool) bool {
 }
 
 // AddShortcut adds given shortcut to given action.
-func (w *OSWin) AddShortcut(chord key.Chord, act *Action) {
+func (w *RenderWin) AddShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
 	}
@@ -2121,14 +2121,14 @@ func (w *OSWin) AddShortcut(chord key.Chord, act *Action) {
 	sa, exists := w.Shortcuts[chord]
 	if exists && sa != act && sa.Text != act.Text {
 		if KeyEventTrace {
-			log.Printf("gi.OSWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
+			log.Printf("gi.RenderWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
 		}
 	}
 	w.Shortcuts[chord] = act
 }
 
 // DeleteShortcut deletes given shortcut
-func (w *OSWin) DeleteShortcut(chord key.Chord, act *Action) {
+func (w *RenderWin) DeleteShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
 	}
@@ -2144,7 +2144,7 @@ func (w *OSWin) DeleteShortcut(chord key.Chord, act *Action) {
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
-func (w *OSWin) TriggerShortcut(chord key.Chord) bool {
+func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
 	}
@@ -2253,7 +2253,7 @@ func PopupIsCorrector(pop ki.Ki) bool {
 }
 
 // CurPopup returns the current popup, protected with read mutex
-func (w *OSWin) CurPopup() ki.Ki {
+func (w *RenderWin) CurPopup() ki.Ki {
 	w.PopMu.RLock()
 	cpop := w.Popup
 	w.PopMu.RUnlock()
@@ -2261,12 +2261,12 @@ func (w *OSWin) CurPopup() ki.Ki {
 }
 
 // CurPopupIsTooltip returns true if current popup is a tooltip
-func (w *OSWin) CurPopupIsTooltip() bool {
+func (w *RenderWin) CurPopupIsTooltip() bool {
 	return PopupIsTooltip(w.CurPopup())
 }
 
 // DeleteTooltip deletes any tooltip popup (called when hover ends)
-func (w *OSWin) DeleteTooltip() {
+func (w *RenderWin) DeleteTooltip() {
 	w.PopMu.RLock()
 	if w.CurPopupIsTooltip() {
 		w.delPop = true
@@ -2275,11 +2275,11 @@ func (w *OSWin) DeleteTooltip() {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *OSWin) SetNextPopup(pop *Scene, focus ki.Ki) {
+func (w *RenderWin) SetNextPopup(pop *Scene, focus ki.Ki) {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *OSWin) SetNextPopupImpl(pop, focus ki.Ki) {
+func (w *RenderWin) SetNextPopupImpl(pop, focus ki.Ki) {
 	w.PopMu.Lock()
 	w.NextPopup = pop
 	w.PopupFocus = focus
@@ -2287,14 +2287,14 @@ func (w *OSWin) SetNextPopupImpl(pop, focus ki.Ki) {
 }
 
 // SetDelPopup sets the popup to delete next time through event loop
-func (w *OSWin) SetDelPopup(pop ki.Ki) {
+func (w *RenderWin) SetDelPopup(pop ki.Ki) {
 	w.PopMu.Lock()
 	w.DelPopup = pop
 	w.PopMu.Unlock()
 }
 
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
-func (w *OSWin) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
+func (w *RenderWin) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 	// if we have a dialog open, close it if we didn't click in it
 	if dlg, ok := pop.(*Dialog); ok {
 		log.Println("pos", me.Pos(), "bbox", dlg.WinBBox)
@@ -2313,7 +2313,7 @@ func (w *OSWin) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
 }
 
 // PushPopup pushes current popup onto stack and set new popup.
-func (w *OSWin) PushPopup(pop ki.Ki) {
+func (w *RenderWin) PushPopup(pop ki.Ki) {
 	w.PopMu.Lock()
 	w.ResetUpdateRegions()
 	w.NextPopup = nil
@@ -2338,18 +2338,18 @@ func (w *OSWin) PushPopup(pop ki.Ki) {
 }
 
 // DisconnectPopup disconnects given popup -- typically the current one.
-func (w *OSWin) DisconnectPopup(pop ki.Ki) {
+func (w *RenderWin) DisconnectPopup(pop ki.Ki) {
 	w.PopDraws.Delete(pop.(Node))
 	w.EventMgr.DisconnectAllEvents(pop, AllPris)
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 
-func (w *OSWin) ClosePopup(sc *Scene) bool {
+func (w *RenderWin) ClosePopup(sc *Scene) bool {
 	return false
 }
 
 // ClosePopup close given popup -- must be the current one -- returns false if not.
-func (w *OSWin) ClosePopupImpl(pop ki.Ki) bool {
+func (w *RenderWin) ClosePopupImpl(pop ki.Ki) bool {
 	if pop != w.CurPopup() {
 		return false
 	}
@@ -2372,7 +2372,7 @@ func (w *OSWin) ClosePopupImpl(pop ki.Ki) bool {
 
 // PopPopup pops current popup off the popup stack and set to current popup.
 // returns true if was actually popped.  MUST be called within PopMu.Lock scope!
-func (w *OSWin) PopPopup(pop ki.Ki) bool {
+func (w *RenderWin) PopPopup(pop ki.Ki) bool {
 	wi, ok := pop.(Node2D)
 	if ok {
 		psc := wi.AsScene()
@@ -2403,14 +2403,14 @@ func (w *OSWin) PopPopup(pop ki.Ki) bool {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//                   Key Events Handled by OSWin
+//                   Key Events Handled by RenderWin
 
 // KeyChordEventHiPri handles all the high-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *OSWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
+func (w *RenderWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	delPop := false
 	if KeyEventTrace {
-		fmt.Printf("OSWin HiPri KeyInput: %v event: %v\n", w.Path(), e.String())
+		fmt.Printf("RenderWin HiPri KeyInput: %v event: %v\n", w.Path(), e.String())
 	}
 	if e.IsProcessed() {
 		return false
@@ -2445,7 +2445,7 @@ func (w *OSWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
 
 // KeyChordEventLowPri handles all the lower-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *OSWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
+func (w *RenderWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 	if e.IsProcessed() {
 		return false
 	}
@@ -2461,7 +2461,7 @@ func (w *OSWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + w.Nm + "_" + dstr + ".png")
 		SaveImage(fnm, w.Scene.Pixels)
-		fmt.Printf("Saved OSWin Image to: %s\n", fnm)
+		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetProcessed()
 	case KeyFunZoomIn:
 		w.ZoomDPI(1)
@@ -2477,11 +2477,11 @@ func (w *OSWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		WinGeomMgr.RestoreAll()
 		// w.FocusInactivate()
 		// w.FullReRender()
-		// sz := w.OSWin.Size()
+		// sz := w.RenderWin.Size()
 		// w.SetSize(sz)
 	case KeyFunWinFocusNext:
 		e.SetProcessed()
-		AllOSWins.FocusNext()
+		AllRenderWins.FocusNext()
 	}
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
@@ -2503,7 +2503,7 @@ func (w *OSWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 
 // FocusActiveClick updates the FocusActive status based on mouse clicks in
 // or out of the focused item
-func (w *OSWin) FocusActiveClick(e *mouse.Event) {
+func (w *RenderWin) FocusActiveClick(e *mouse.Event) {
 	cfoc := w.EventMgr.CurFocus()
 	if cfoc == nil || e.Button != mouse.Left || e.Action != mouse.Press {
 		return
@@ -2534,7 +2534,7 @@ func (w *OSWin) FocusActiveClick(e *mouse.Event) {
 }
 
 // FocusInactivate inactivates the current focus element
-func (w *OSWin) FocusInactivate() {
+func (w *RenderWin) FocusInactivate() {
 	cfoc := w.EventMgr.CurFocus()
 	if cfoc == nil || !w.HasFlag(int(WinFlagFocusActive)) {
 		return
@@ -2546,32 +2546,32 @@ func (w *OSWin) FocusInactivate() {
 	}
 }
 
-// IsOSWinInFocus returns true if this window is the one currently in focus
-func (w *OSWin) IsOSWinInFocus() bool {
-	fwin := goosi.TheApp.OSWinInFocus()
-	if w.OSWin == fwin {
+// IsRenderWinInFocus returns true if this window is the one currently in focus
+func (w *RenderWin) IsRenderWinInFocus() bool {
+	fwin := goosi.TheApp.RenderWinInFocus()
+	if w.RenderWin == fwin {
 		return true
 	}
 	return false
 }
 
-// OSWinInFocus returns the window in focus according to goosi.
+// RenderWinInFocus returns the window in focus according to goosi.
 // There is a small chance it could be nil.
-func OSWinInFocus() *OSWin {
-	fwin := goosi.TheApp.OSWinInFocus()
-	fw, _ := AllOSWins.FindOSWin(fwin)
+func RenderWinInFocus() *RenderWin {
+	fwin := goosi.TheApp.RenderWinInFocus()
+	fw, _ := AllRenderWins.FindRenderWin(fwin)
 	return fw
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //                   DND: Drag-n-Drop
 
-const DNDSpriteName = "gi.OSWin:DNDSprite"
+const DNDSpriteName = "gi.RenderWin:DNDSprite"
 
 // StartDragNDrop is called by a node to start a drag-n-drop operation on
 // given source node, which is responsible for providing the data and Sprite
 // representation of the node.
-func (w *OSWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
+func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 	w.EventMgr.DNDStart(src, data)
 	if _, sw := AsWidget(src); sw != nil {
 		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPoint())
@@ -2585,7 +2585,7 @@ func (w *OSWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
-func (w *OSWin) DNDMoveEvent(e *mouse.DragEvent) {
+func (w *RenderWin) DNDMoveEvent(e *mouse.DragEvent) {
 	sp, ok := w.SpriteByName(DNDSpriteName)
 	if ok {
 		sp.SetBottomPos(e.Where)
@@ -2597,7 +2597,7 @@ func (w *OSWin) DNDMoveEvent(e *mouse.DragEvent) {
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).
-func (w *OSWin) DNDDropEvent(e *mouse.Event) {
+func (w *RenderWin) DNDDropEvent(e *mouse.Event) {
 	proc := w.EventMgr.SendDNDDropEvent(e)
 	if !proc {
 		w.ClearDragNDrop()
@@ -2607,7 +2607,7 @@ func (w *OSWin) DNDDropEvent(e *mouse.Event) {
 // FinalizeDragNDrop is called by a node to finalize the drag-n-drop
 // operation, after given action has been performed on the target -- allows
 // target to cancel, by sending dnd.DropIgnore.
-func (w *OSWin) FinalizeDragNDrop(action dnd.DropMods) {
+func (w *RenderWin) FinalizeDragNDrop(action dnd.DropMods) {
 	if w.EventMgr.DNDStage != DNDDropped {
 		w.ClearDragNDrop()
 		return
@@ -2627,7 +2627,7 @@ func (w *OSWin) FinalizeDragNDrop(action dnd.DropMods) {
 }
 
 // ClearDragNDrop clears any existing DND values.
-func (w *OSWin) ClearDragNDrop() {
+func (w *RenderWin) ClearDragNDrop() {
 	w.EventMgr.ClearDND()
 	w.DeleteSprite(DNDSpriteName)
 	w.DNDClearCursor()
@@ -2649,21 +2649,21 @@ func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
 
 // DNDSetCursor sets the cursor based on the DND event mod -- does a
 // "PushIfNot" so safe for multiple calls.
-func (w *OSWin) DNDSetCursor(dmod dnd.DropMods) {
+func (w *RenderWin) DNDSetCursor(dmod dnd.DropMods) {
 	dndc := DNDModCursor(dmod)
-	goosi.TheApp.Cursor(w.OSWin).PushIfNot(dndc)
+	goosi.TheApp.Cursor(w.RenderWin).PushIfNot(dndc)
 }
 
 // DNDNotCursor sets the cursor to Not = can't accept a drop
-func (w *OSWin) DNDNotCursor() {
-	goosi.TheApp.Cursor(w.OSWin).PushIfNot(cursor.Not)
+func (w *RenderWin) DNDNotCursor() {
+	goosi.TheApp.Cursor(w.RenderWin).PushIfNot(cursor.Not)
 }
 
 // DNDUpdateCursor updates the cursor based on the current DND event mod if
 // different from current (but no update if Not)
-func (w *OSWin) DNDUpdateCursor(dmod dnd.DropMods) bool {
+func (w *RenderWin) DNDUpdateCursor(dmod dnd.DropMods) bool {
 	dndc := DNDModCursor(dmod)
-	curs := goosi.TheApp.Cursor(w.OSWin)
+	curs := goosi.TheApp.Cursor(w.RenderWin)
 	if !curs.IsDrag() || curs.Current() == dndc {
 		return false
 	}
@@ -2672,8 +2672,8 @@ func (w *OSWin) DNDUpdateCursor(dmod dnd.DropMods) bool {
 }
 
 // DNDClearCursor clears any existing DND cursor that might have been set.
-func (w *OSWin) DNDClearCursor() {
-	curs := goosi.TheApp.Cursor(w.OSWin)
+func (w *RenderWin) DNDClearCursor() {
+	curs := goosi.TheApp.Cursor(w.RenderWin)
 	for curs.IsDrag() || curs.Current() == cursor.Not {
 		curs.Pop()
 	}
@@ -2734,7 +2734,7 @@ func EndTargProfile() {
 }
 
 // ReportWinNodes reports the number of nodes in this window
-func (w *OSWin) ReportWinNodes() {
+func (w *RenderWin) ReportWinNodes() {
 	nn := 0
 	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
 		nn++
@@ -2746,7 +2746,7 @@ func (w *OSWin) ReportWinNodes() {
 // BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
 // and everything), reporting targeted profile results and generating standard
 // Go cpu.prof and mem.prof outputs.
-func (w *OSWin) BenchmarkFullRender() {
+func (w *RenderWin) BenchmarkFullRender() {
 	fmt.Println("Starting BenchmarkFullRender")
 	w.ReportWinNodes()
 	StartCPUMemProfile()
@@ -2765,7 +2765,7 @@ func (w *OSWin) BenchmarkFullRender() {
 // BenchmarkReRender runs benchmark of 50 re-render-only updates of display
 // (just the raw rendering, no styling or layout), reporting targeted profile
 // results and generating standard Go cpu.prof and mem.prof outputs.
-func (w *OSWin) BenchmarkReRender() {
+func (w *RenderWin) BenchmarkReRender() {
 	fmt.Println("Starting BenchmarkReRender")
 	w.ReportWinNodes()
 	StartTargProfile()

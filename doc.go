@@ -14,7 +14,7 @@ All of the code is in the sub-packages within this repository:
 
 * girl: rendering library, can be used standalone, SVG compliant
 
-* gi: the main 2D GUI Node, Widgets, and OSWin
+* gi: the main 2D GUI Node, Widgets, and RenderWin
 
 * giv: more complex Views of Go data structures, supporting Model-View paradigm.
 

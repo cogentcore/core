@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"strings"
 	"time"
 
 	"goki.dev/goosi"
@@ -89,8 +90,8 @@ type Stage struct {
 	// if non-zero, requested height in standardized 96 DPI Pixel units.  otherwise automatically resizes.
 	Height int `desc:"if non-zero, requested height in standardized 96 DPI Pixel units.  otherwise automatically resizes."`
 
-	// if true, opens a Window or Dialog in its own separate operating system window (OSWin).  This is by default true for Window on Desktop, otherwise false.
-	OwnWin bool `desc:"if true, opens a Window or Dialog in its own separate operating system window (OSWin).  This is by default true for Window on Desktop, otherwise false."`
+	// if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
+	OwnWin bool `desc:"if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false."`
 
 	// for Windows: add a back button
 	Back bool `desc:"for Windows: add a back button"`
@@ -105,7 +106,7 @@ type Stage struct {
 	Side StageSides `desc:"Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from"`
 
 	// the operating-specific window that we are running on
-	OSWin *OSWin `desc:"the operating-specific window that we are running on"`
+	RenderWin *RenderWin `desc:"the operating-specific window that we are running on"`
 }
 
 // NewStage returns a new stage with given type and scene contents.
@@ -204,7 +205,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 		if !goosi.TheApp.IsMobile() {
 			st.OwnWin = true
 		}
-		st.Modal = true // note: there is no global modal option between OSWin windows
+		st.Modal = true // note: there is no global modal option between RenderWin windows
 	case Dialog:
 		st.Modal = true
 		st.Scrim = true
@@ -324,59 +325,59 @@ func (st *Stage) Run() *Stage {
 }
 
 // RunWindow runs a Window with current settings.
-// OSWin field will be set to the parent OSWin window.
+// RenderWin field will be set to the parent RenderWin window.
 func (st *Stage) RunWindow() *Stage {
 	if st.OwnWin {
-		st.OSWin = RunNewOSWin(st.Name, st.Title, st)
+		st.RenderWin = RunNewRenderWin(st.Name, st.Title, st)
 		return st
 	}
-	if CurOSWin == nil {
+	if CurRenderWin == nil {
 		st.AddWindowDecor()
-		CurOSWin = RunNewOSWin(st.Name, st.Title, st)
-		st.OSWin = CurOSWin
+		CurRenderWin = RunNewRenderWin(st.Name, st.Title, st)
+		st.RenderWin = CurRenderWin
 		return st
 	}
-	CurOSWin.AddWindow(st)
+	CurRenderWin.AddWindow(st)
 	return st
 }
 
 // RunDialog runs a Dialog with current settings.
-// OSWin field will be set to the parent OSWin window.
+// RenderWin field will be set to the parent RenderWin window.
 func (st *Stage) RunDialog() *Stage {
 	if st.OwnWin {
-		st.OSWin = RunNewOSWin(st.Name, st.Title, st)
+		st.RenderWin = RunNewRenderWin(st.Name, st.Title, st)
 		return st
 	}
-	if CurOSWin == nil {
+	if CurRenderWin == nil {
 		// todo: fail!
 		return st
 	}
 	st.AddDialogDecor()
-	CurOSWin.AddDialog(st)
+	CurRenderWin.AddDialog(st)
 	return st
 }
 
 // RunSheet runs a Sheet with current settings.
-// OSWin field will be set to the parent OSWin window.
+// RenderWin field will be set to the parent RenderWin window.
 func (st *Stage) RunSheet() *Stage {
-	if CurOSWin == nil {
+	if CurRenderWin == nil {
 		// todo: fail!
 		return st
 	}
 	st.AddSheetDecor()
-	CurOSWin.AddSheet(st)
+	CurRenderWin.AddSheet(st)
 	return st
 }
 
 // RunPopup runs a popup-style Stage on top of current
-// active stage in current active OSWin.
+// active stage in current active RenderWin.
 func (st *Stage) RunPopup() *Stage {
-	if CurOSWin == nil {
+	if CurRenderWin == nil {
 		// todo: fail!
 		return st
 	}
 	// maybe Snackbar decor?
-	CurOSWin.AddPopup(st)
+	CurRenderWin.AddPopup(st)
 	return st
 }
 

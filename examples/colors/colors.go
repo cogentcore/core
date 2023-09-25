@@ -25,7 +25,7 @@ func mainrun() {
 	gi.SetAppName("colors")
 	gi.SetAppAbout(`This is a demo of the color space functions in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	win := gi.NewMainOSWin("gogi-colors-test", "GoGi Colors Test", width, height)
+	win := gi.NewMainRenderWin("gogi-colors-test", "GoGi Colors Test", width, height)
 
 	vp := win.WinScene()
 	updt := vp.UpdateStart()
@@ -101,20 +101,20 @@ func mainrun() {
 	// main menu
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
-	// Linux, OSWins or Meta for MacOS
+	// Linux, RenderWins or Meta for MacOS
 
 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
 	emen.Menu = make(gi.Menu, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
-	win.SetCloseCleanFunc(func(w *gi.OSWin) {
+	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
 		go gi.Quit() // once main window is closed, quit
 	})
 

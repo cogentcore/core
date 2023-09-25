@@ -83,7 +83,7 @@ type Clipper interface {
 	MimeData(md *mimedata.Mimes)
 
 	// Copy copies item to the clipboard
-	// e.g., use goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Write(md)
+	// e.g., use goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(md)
 	// where md is mime-encoded data for the object
 	Copy(reset bool)
 
@@ -92,7 +92,7 @@ type Clipper interface {
 	Cut()
 
 	// Paste pastes from clipboard to item, e.g.,
-	// md := goosi.TheApp.ClipBoard(tv.ParentOSWin().OSWin).Read([]string{filecat.DataJson})
+	// md := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{filecat.DataJson})
 	// reads mime-encoded data from the clipboard, in this case in the JSON format
 	Paste()
 }
@@ -104,7 +104,7 @@ type DragNDropper interface {
 	// Drop is called when something is dropped on this item
 	// the mod is either dnd.DropCopy for a copy-like operation (the default)
 	// or dnd.Move for a move-like operation (with Shift key held down)
-	// drop must call OSWin.FinalizeDragNDrop with the mod actually used
+	// drop must call RenderWin.FinalizeDragNDrop with the mod actually used
 	// to have the source update itself
 	Drop(md mimedata.Mimes, mod dnd.DropMods)
 
@@ -115,7 +115,7 @@ type DragNDropper interface {
 	// an external source (not within same app).
 	// the mod is either dnd.DropCopy for a copy-like operation (the default)
 	// or dnd.Move for a move-like operation (with Shift key held down)
-	// drop DOES NOT need to call OSWin.FinalizeDragNDrop with the mod actually used
+	// drop DOES NOT need to call RenderWin.FinalizeDragNDrop with the mod actually used
 	// to have the source update itself -- no harm if it does however, as the source
 	// will be nil.
 	DropExternal(md mimedata.Mimes, mod dnd.DropMods)

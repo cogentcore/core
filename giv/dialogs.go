@@ -118,7 +118,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonClicked) {
 			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			goosi.TheApp.ClipBoard(ddlg.Win.OSWin).Write(mimedata.NewTextBytes(text))
+			goosi.TheApp.ClipBoard(ddlg.Win.RenderWin).Write(mimedata.NewTextBytes(text))
 		}
 	})
 

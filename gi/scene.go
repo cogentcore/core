@@ -53,7 +53,7 @@ type Scene struct {
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
 
 	// our parent window that we render into
-	Win *OSWin `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
+	Win *RenderWin `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
 	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
 	BgColor gist.ColorSpec `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`

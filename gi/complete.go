@@ -188,13 +188,13 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Po
 	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
 	// 	psc.SetFlag(int(ScFlagCompleter))
 	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	// 	vp.Win.OSWin.SendEmptyEvent()               // needs an extra event to show popup
+	// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
 	// } else {
 	psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
 	psc.Type = ScCompleter
 	// todo:
 	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	sc.Win.OSWin.SendEmptyEvent() // needs an extra event to show popup
+	sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
 	// }
 	c.Sc = sc
 }

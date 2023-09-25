@@ -59,7 +59,7 @@ import (
 // For nodes with dynamic content that doesn't require styling or config
 // a simple SetNeedsRender call will drive re-rendering. UpdateSig does this.
 //
-// Updating is _always_ driven top-down by OSWin at FPS sampling rate,
+// Updating is _always_ driven top-down by RenderWin at FPS sampling rate,
 // in the DoUpdate() call on the Scene.
 // Three types of updates can be triggered, in order of least impact
 // and highest frequency first:
@@ -271,7 +271,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 
 // DoUpdate checks scene Needs flags to do whatever updating is required.
 // returns false if already updating.
-// This is the main update call made by the OSWin at FPS frequency.
+// This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.HasFlag(ScIsUpdating) {
 		return false
@@ -467,7 +467,7 @@ func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
 func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
 	rs := &sc.RenderState
 	pc := &rs.Paint
-	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
+	pc.DrawBox(rs, pos, sz, bs)
 }
 
 // RenderStdBox draws standard box using given style.
@@ -480,85 +480,7 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *gist.Style) {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 
-	// TODO: maybe implement some version of this to render background color
-	// in margin if the parent element doesn't render for us
-	// if pwb, ok := wb.Parent().(*WidgetBase); ok {
-	// 	if pwb.Embed(LayoutType) != nil && pwb.Embed(FrameType) == nil {
-	// 		pc.FillBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &st.BackgroundColor)
-	// 	}
-	// }
-
-	pos := wb.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
-	sz := wb.LayState.Alloc.Size.Sub(st.EffMargin().Size())
-	rad := st.Border.Radius.Dots()
-
-	// the background color we actually use
-	bg := st.BackgroundColor
-	// the surrounding background color
-	sbg := wb.ParentBackgroundColor()
-	if bg.IsNil() {
-		// we need to do this to prevent
-		// elements from rendering over themselves
-		// (see https://goki.dev/gi/v2/issues/565)
-		bg = sbg
-	}
-
-	// We need to fill the whole box where the
-	// box shadows / element can go to prevent growing
-	// box shadows and borders. We couldn't just
-	// do this when there are box shadows, as they
-	// may be removed and then need to be covered up.
-	// This also fixes https://goki.dev/gi/v2/issues/579.
-	// This isn't an ideal solution because of performance,
-	// so TODO: maybe come up with a better solution for this.
-	// We need to use raw LayState data because we need to clear
-	// any box shadow that may have gone in margin.
-	mspos, mssz := st.BoxShadowPosSize(wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size)
-	pc.FillBox(rs, mspos, mssz, &sbg)
-
-	// first do any shadow
-	if st.HasBoxShadow() {
-		for _, shadow := range st.BoxShadow {
-			pc.StrokeStyle.SetColor(nil)
-			pc.FillStyle.SetColor(shadow.Color)
-
-			// TODO: better handling of opacity?
-			prevOpacity := pc.FillStyle.Opacity
-			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
-			// we only want radius for border, no actual border
-			wb.RenderBoxImpl(sc, shadow.BasePos(pos), shadow.BaseSize(sz), gist.Border{Radius: st.Border.Radius})
-			// pc.FillStyle.Opacity = 1.0
-			if shadow.Blur.Dots != 0 {
-				// must divide by 2 like CSS
-				pc.BlurBox(rs, shadow.Pos(pos), shadow.Size(sz), shadow.Blur.Dots/2)
-			}
-			pc.FillStyle.Opacity = prevOpacity
-		}
-	}
-
-	// then draw the box over top of that.
-	// need to set clipping to box first.. (?)
-	// we need to draw things twice here because we need to clear
-	// the whole area with the background color first so the border
-	// doesn't render weirdly
-	if rad.IsZero() {
-		pc.FillBox(rs, pos, sz, &bg)
-	} else {
-		pc.FillStyle.SetColorSpec(&bg)
-		// no border -- fill only
-		pc.DrawRoundedRectangle(rs, pos.X, pos.Y, sz.X, sz.Y, rad)
-		pc.Fill(rs)
-	}
-
-	// pc.StrokeStyle.SetColor(&st.Border.Color)
-	// pc.StrokeStyle.Width = st.Border.Width
-	// pc.FillStyle.SetColorSpec(&st.BackgroundColor)
-	pos.SetAdd(st.Border.Width.Dots().Pos().MulScalar(0.5))
-	sz.SetSub(st.Border.Width.Dots().Size().MulScalar(0.5))
-	pc.FillStyle.SetColor(nil)
-	// now that we have drawn background color
-	// above, we can draw the border
-	wb.RenderBoxImpl(sc, pos, sz, st.Border)
+	pc.DrawStdBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ParentBackgroundColor())
 }
 
 // ParentReRenderAnchor returns parent (including this node)

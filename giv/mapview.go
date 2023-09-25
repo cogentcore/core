@@ -454,7 +454,7 @@ func (mv *MapView) Render(vp *Scene) {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}
-	if win := mv.ParentOSWin(); win != nil {
+	if win := mv.ParentRenderWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}

@@ -417,7 +417,7 @@ func (sv *StructView) Render(vp *Scene) {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateActions()
 	}
-	if win := sv.ParentOSWin(); win != nil {
+	if win := sv.ParentRenderWin(); win != nil {
 		if !win.IsResizing() {
 			win.MainMenuUpdateActives()
 		}

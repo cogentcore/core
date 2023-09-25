@@ -24,7 +24,7 @@ organizing widgets / elements within the constraints of the display.
 Typically start with a vertical LayoutVert in the scene, with LayoutHoriz's
 within that, or a LayoutGrid for more complex layouts:
 
-		win := gi.NewMainOSWin("test-window", "Test OSWin", width, height)
+		win := gi.NewMainRenderWin("test-window", "Test RenderWin", width, height)
 		vp := win.WinScene()
 		updt := vp.UpdateStart()
 
@@ -99,7 +99,7 @@ examples/svg for an svg viewer, and examples/marbles for an svg animation.
 
 # Overlays and Sprites
 
-The gi.OSWin can render Sprite images to an OverTex overlay texture, which is
+The gi.RenderWin can render Sprite images to an OverTex overlay texture, which is
 cleared to be transparent prior to rendering any active sprites.  This is used
 for cursors (e.g., TextField, giv.TextView cursors), Drag-n-Drop, etc.
 */

@@ -667,7 +667,7 @@ func (tf *TextField) Cut() {
 	}
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		goosi.TheApp.ClipBoard(tf.ParentOSWin().OSWin).Write(mimedata.NewText(cut))
+		goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Write(mimedata.NewText(cut))
 	}
 }
 
@@ -714,7 +714,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	goosi.TheApp.ClipBoard(tf.ParentOSWin().OSWin).Write(md)
+	goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -724,7 +724,7 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := goosi.TheApp.ClipBoard(tf.ParentOSWin().OSWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -774,7 +774,7 @@ func (tf *TextField) MakeContextMenu(m *Menu) {
 				tff := AsTextField(recv)
 				tff.This().(Clipper).Paste()
 			})
-		ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentOSWin().OSWin).IsEmpty(), Disabled)
+		ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).IsEmpty(), Disabled)
 	}
 }
 
@@ -930,8 +930,8 @@ func TextFieldBlink() {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
-		win := tf.ParentOSWin()
-		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsOSWinInFocus() {
+		win := tf.ParentRenderWin()
+		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsRenderWinInFocus() {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
@@ -964,7 +964,7 @@ func (tf *TextField) StartCursor() {
 		go TextFieldBlink()
 	}
 	tf.BlinkOn = true
-	win := tf.ParentOSWin()
+	win := tf.ParentRenderWin()
 	if win != nil && !win.IsResizing() {
 		tf.RenderCursor(true)
 	}
@@ -1008,7 +1008,7 @@ func (tf *TextField) RenderCursor(on bool) {
 	tf.CursorMu.Lock()
 	defer tf.CursorMu.Unlock()
 
-	win := tf.ParentOSWin()
+	win := tf.ParentRenderWin()
 	sp := tf.CursorSprite()
 	if on {
 		win.ActivateSprite(sp.Name)
@@ -1035,7 +1035,7 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status)
 func (tf *TextField) CursorSprite() *Sprite {
-	win := tf.ParentOSWin()
+	win := tf.ParentRenderWin()
 	if win == nil {
 		return nil
 	}
@@ -1218,7 +1218,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
-	if tf.ParentOSWin() == nil {
+	if tf.ParentRenderWin() == nil {
 		return
 	}
 	updt := tf.UpdateStart()
@@ -1250,7 +1250,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 	}
 	kf := KeyFun(kt.Chord())
-	win := tf.ParentOSWin()
+	win := tf.ParentRenderWin()
 
 	if tf.Complete != nil {
 		cpop := win.CurPopup()
@@ -1360,7 +1360,7 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 
 // HandleMouseEvent handles the mouse.Event
 func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
-	if tf.ParentOSWin() == nil {
+	if tf.ParentRenderWin() == nil {
 		return
 	}
 	if !tf.IsDisabled() && !tf.HasFocus() {

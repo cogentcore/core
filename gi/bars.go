@@ -112,7 +112,7 @@ func (mb *MenuBar) UpdateActions() {
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 // Called in ConnectEvents()
 func (mb *MenuBar) SetShortcuts() {
-	win := mb.ParentOSWin()
+	win := mb.ParentRenderWin()
 	if win == nil {
 		return
 	}
@@ -131,7 +131,7 @@ func (mb *MenuBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (mb *MenuBar) DeleteShortcuts() {
-	win := mb.ParentOSWin()
+	win := mb.ParentRenderWin()
 	if win == nil {
 		return
 	}
@@ -196,8 +196,8 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 }
 
 // MainMenuFunc is the callback function for OS-generated menu actions.
-func MainMenuFunc(owin goosi.OSWin, title string, tag int) {
-	win, ok := owin.Parent().(*OSWin)
+func MainMenuFunc(owin goosi.RenderWin, title string, tag int) {
+	win, ok := owin.Parent().(*RenderWin)
 	if !ok {
 		return
 	}
@@ -217,9 +217,9 @@ func MainMenuFunc(owin goosi.OSWin, title string, tag int) {
 }
 
 // UpdateMainMenu updates the OS-specific, separate main menu of given window based
-// on this MenuBar -- called by OSWin.MainMenuUpdated.
-func (mb *MenuBar) UpdateMainMenu(win *OSWin) {
-	osmm := win.OSWin.MainMenu()
+// on this MenuBar -- called by RenderWin.MainMenuUpdated.
+func (mb *MenuBar) UpdateMainMenu(win *RenderWin) {
+	osmm := win.RenderWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -243,8 +243,8 @@ func (mb *MenuBar) UpdateMainMenu(win *OSWin) {
 // SetMainMenu sets this menu as the current OS-specific, separate main menu
 // for given window -- only should be called in window.Focus event.
 // Does nothing if menu is empty.
-func (mb *MenuBar) SetMainMenu(win *OSWin) {
-	osmm := win.OSWin.MainMenu()
+func (mb *MenuBar) SetMainMenu(win *RenderWin) {
+	osmm := win.RenderWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -280,9 +280,9 @@ func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Acti
 // MainMenuUpdateActives updates the active state of all menu items, based on
 // active state of corresponding Actions (action self-update functions are
 // called via UpdateActions) -- can be called by method of same name on
-// OSWin.
-func (mb *MenuBar) MainMenuUpdateActives(win *OSWin) {
-	osmm := win.OSWin.MainMenu()
+// RenderWin.
+func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
+	osmm := win.RenderWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -431,7 +431,7 @@ func (tb *ToolBar) ConnectEvents() {
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 // Called in ConnectEvents()
 func (tb *ToolBar) SetShortcuts() {
-	win := tb.ParentOSWin()
+	win := tb.ParentRenderWin()
 	if win == nil {
 		return
 	}
@@ -450,7 +450,7 @@ func (tb *ToolBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (tb *ToolBar) DeleteShortcuts() {
-	win := tb.ParentOSWin()
+	win := tb.ParentRenderWin()
 	if win == nil {
 		return
 	}

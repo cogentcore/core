@@ -58,7 +58,7 @@ var TextBufMarkupDelayMSec = 1000
 // saving buffers to files.  Unlike GUI Widgets, its methods are generally
 // signaling, without an explicit Action suffix.  Internally, the buffer
 // represents new lines using \n = LF, but saving and loading can deal with
-// OSWins/DOS CRLF format.
+// RenderWins/DOS CRLF format.
 type TextBuf struct {
 	ki.Node
 

@@ -113,7 +113,7 @@ type Widget interface {
 
 	// HasFocus returns true if this node has keyboard focus and should
 	// receive keyboard events -- typically this just returns HasFocus based
-	// on the OSWin-managed HasFocus flag, but some types may want to monitor
+	// on the RenderWin-managed HasFocus flag, but some types may want to monitor
 	// all keyboard activity for certain key keys..
 	HasFocus() bool
 
@@ -328,7 +328,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
-func (wb *WidgetBase) ParentOSWin() *OSWin {
+func (wb *WidgetBase) ParentRenderWin() *RenderWin {
 	if wb.Sc == nil {
 		return nil
 	}

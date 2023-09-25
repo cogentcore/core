@@ -147,7 +147,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 
 // SetShortcuts sets the shortcuts to given window -- call when the menu has
 // been attached to a window
-func (m *Menu) SetShortcuts(win *OSWin) {
+func (m *Menu) SetShortcuts(win *RenderWin) {
 	if win == nil {
 		return
 	}
@@ -159,7 +159,7 @@ func (m *Menu) SetShortcuts(win *OSWin) {
 }
 
 // DeleteShortcuts deletes the shortcuts in given window
-func (m *Menu) DeleteShortcuts(win *OSWin) {
+func (m *Menu) DeleteShortcuts(win *RenderWin) {
 	if win == nil {
 		return
 	}
@@ -206,7 +206,7 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // AddCopyCutPaste adds a Copy, Cut, Paste actions that just emit the
 // corresponding keyboard shortcut.  Paste is automatically enabled by
 // clipboard having something in it.
-func (m *Menu) AddCopyCutPaste(win *OSWin) {
+func (m *Menu) AddCopyCutPaste(win *RenderWin) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
@@ -217,7 +217,7 @@ func (m *Menu) AddCopyCutPaste(win *OSWin) {
 		})
 	m.AddAction(ActOpts{Label: "Paste", ShortcutKey: KeyFunPaste,
 		UpdateFunc: func(ac *Action) {
-			ac.SetEnabledState(!goosi.TheApp.ClipBoard(win.OSWin).IsEmpty())
+			ac.SetEnabledState(!goosi.TheApp.ClipBoard(win.RenderWin).IsEmpty())
 		}}, nil, func(recv, send ki.Ki, sig int64, data any) {
 		win.EventMgr.SendKeyFunEvent(KeyFunPaste, false) // false = ignore popups -- don't send to menu
 	})
@@ -226,7 +226,7 @@ func (m *Menu) AddCopyCutPaste(win *OSWin) {
 // AddCopyCutPasteDupe adds a Copy, Cut, Paste, and Duplicate actions that
 // just emit the corresponding keyboard shortcut.  Paste is automatically
 // enabled by clipboard having something in it.
-func (m *Menu) AddCopyCutPasteDupe(win *OSWin) {
+func (m *Menu) AddCopyCutPasteDupe(win *RenderWin) {
 	m.AddCopyCutPaste(win)
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
@@ -238,11 +238,11 @@ func (m *Menu) AddCopyCutPasteDupe(win *OSWin) {
 // CustomAppMenuFunc is a function called by AddAppMenu after the
 // AddStdAppMenu is called -- apps can set this function to add / modify / etc
 // the menu
-var CustomAppMenuFunc = (func(m *Menu, win *OSWin))(nil)
+var CustomAppMenuFunc = (func(m *Menu, win *RenderWin))(nil)
 
 // AddAppMenu adds an "app" menu to the menu -- calls AddStdAppMenu and then
 // CustomAppMenuFunc if non-nil
-func (m *Menu) AddAppMenu(win *OSWin) {
+func (m *Menu) AddAppMenu(win *RenderWin) {
 	m.AddStdAppMenu(win)
 	if CustomAppMenuFunc != nil {
 		CustomAppMenuFunc(m, win)
@@ -250,7 +250,7 @@ func (m *Menu) AddAppMenu(win *OSWin) {
 }
 
 // AddStdAppMenu adds a standard set of menu items for application-level control.
-func (m *Menu) AddStdAppMenu(win *OSWin) {
+func (m *Menu) AddStdAppMenu(win *RenderWin) {
 	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -267,33 +267,33 @@ func (m *Menu) AddStdAppMenu(win *OSWin) {
 		})
 }
 
-// AddOSWinsMenu adds menu items for current main and dialog windows.
-// must be called under OSWinGlobalMu mutex lock!
-func (m *Menu) AddOSWinsMenu(win *OSWin) {
+// AddRenderWinsMenu adds menu items for current main and dialog windows.
+// must be called under RenderWinGlobalMu mutex lock!
+func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
 	m.AddAction(ActOpts{Label: "Minimize"},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			win.OSWin.Minimize()
+			win.RenderWin.Minimize()
 		})
 	m.AddAction(ActOpts{Label: "Focus Next", ShortcutKey: KeyFunWinFocusNext},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
-			AllOSWins.FocusNext()
+			AllRenderWins.FocusNext()
 		})
 	m.AddSeparator("sepa")
-	for _, w := range MainOSWins {
+	for _, w := range MainRenderWins {
 		if w != nil {
 			m.AddAction(ActOpts{Label: w.Title},
 				nil, func(recv, send ki.Ki, sig int64, data any) {
-					w.OSWin.Raise()
+					w.RenderWin.Raise()
 				})
 		}
 	}
-	if len(DialogOSWins) > 0 {
+	if len(DialogRenderWins) > 0 {
 		m.AddSeparator("sepw")
-		for _, w := range DialogOSWins {
+		for _, w := range DialogRenderWins {
 			if w != nil {
 				m.AddAction(ActOpts{Label: w.Title},
 					nil, func(recv, send ki.Ki, sig int64, data any) {
-						w.OSWin.Raise()
+						w.RenderWin.Raise()
 					})
 			}
 		}

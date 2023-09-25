@@ -21,7 +21,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	winm := "gogi-key-maps"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainOSWin(km, winm, "GoGi Key Maps", width, height)
+	win, recyc := gi.RecycleMainRenderWin(km, winm, "GoGi Key Maps", width, height)
 	if recyc {
 		return
 	}
@@ -57,7 +57,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	MainMenuView(km, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
+	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
 		if !gi.AvailKeyMapsChanged || km != &gi.AvailKeyMaps { // only for main avail map..
 			win.Close()
 			return
@@ -90,7 +90,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	win.MainMenuUpdated()
 
 	if !win.HasGeomPrefs() { // resize to contents
-		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
 

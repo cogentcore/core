@@ -43,7 +43,7 @@ func mainrun() {
 	gi.SetAppName("marbles")
 	gi.SetAppAbout("marbles allows you to enter equations, which are graphed, and then marbles are dropped down on the resulting lines, and bounce around in very entertaining ways!")
 
-	win := gi.NewMainOSWin("marbles", "Marbles", width, height)
+	win := gi.NewMainRenderWin("marbles", "Marbles", width, height)
 
 	Sc = win.WinScene()
 	updt := Sc.UpdateStart()
@@ -114,7 +114,7 @@ func mainrun() {
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "OSWin"})
+	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
 	amen.Menu = make(gi.Menu, 0, 10)

@@ -371,9 +371,9 @@ func (lb *Label) MouseMoveEvent() {
 		}
 		// TODO: figure out how to get links to work with new cursor setup
 		if inLink {
-			goosi.TheApp.Cursor(lb.ParentOSWin().OSWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
 		} else {
-			goosi.TheApp.Cursor(lb.ParentOSWin().OSWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
 		}
 	})
 }

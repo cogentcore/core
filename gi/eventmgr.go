@@ -767,7 +767,7 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.DragEvent) *dnd.MoveEvent {
 }
 
 // SendDNDDropEvent sends DND drop event -- returns false if drop event was not processed
-// in which case the event should be cleared (by the OSWin)
+// in which case the event should be cleared (by the RenderWin)
 func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) bool {
 	de := dnd.Event{EventBase: e.EventBase, Where: e.Where, Modifiers: e.Modifiers}
 	de.ClearProcessed()
@@ -1305,7 +1305,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e *key.ChordEvent) {
 type EventMaster interface {
 	// EventTopNode returns the top-level node for this event scope.
 	// This is also the node that serves as the event sender.
-	// By default it is the OSWin.
+	// By default it is the RenderWin.
 	EventTopNode() Widget
 
 	// FocusTopNode returns the top-level node for key event focusing.

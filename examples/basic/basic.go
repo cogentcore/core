@@ -22,10 +22,10 @@ func mainrun() {
 
 		gi.RunStage(dialog, &gi.StageOpts{Type: gi.BottomSheet, Modal: true})
 		// gi.OpenDialog(gi.SceneLib("dialog"))
-		// gi.RunStage(&gi.Stage{Scene: dialog, Type: gi.Dialog, Modal: true, OSWin: true})
+		// gi.RunStage(&gi.Stage{Scene: dialog, Type: gi.Dialog, Modal: true, RenderWin: true})
 	})
 
-	// note: on Desktop, default is for Window to open in a new OSWin
+	// note: on Desktop, default is for Window to open in a new RenderWin
 	// on Mobile it opens in the one window if the first one.
 	// SetOwnWin() explicitly puts separate window
 

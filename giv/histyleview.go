@@ -88,7 +88,7 @@ func HiStylesView(st *histyle.Styles) {
 	winm := "hi-styles"
 	width := 1280
 	height := 800
-	win, recyc := gi.RecycleMainOSWin(st, winm, "Syntax Hilighting Styles", width, height)
+	win, recyc := gi.RecycleMainRenderWin(st, winm, "Syntax Hilighting Styles", width, height)
 	if recyc {
 		return
 	}
@@ -119,7 +119,7 @@ func HiStylesView(st *histyle.Styles) {
 	MainMenuView(st, win, mmen)
 
 	inClosePrompt := false
-	win.OSWin.SetCloseReqFunc(func(w goosi.OSWin) {
+	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
 		if !histyle.StylesChanged || st != &histyle.CustomStyles { // only for main avail map..
 			win.Close()
 			return
@@ -150,7 +150,7 @@ func HiStylesView(st *histyle.Styles) {
 	win.MainMenuUpdated()
 
 	if !win.HasGeomPrefs() { // resize to contents
-		vpsz := vp.PrefSize(win.OSWin.Screen().PixSize)
+		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
 
