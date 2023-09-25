@@ -78,7 +78,8 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 		fv := val.Field(i)
 		pval := laser.PtrValue(fv)
 		cmdTag, hct := f.Tag.Lookup("cmd")
-		if hct && cmdTag != cmd && cmd != AddAllFields { // if we are associated with a different command, skip
+		cmds := strings.Split(cmdTag, ",")
+		if hct && !slices.Contains(cmds, cmd) && !slices.Contains(cmds, AddAllFields) { // if we are associated with a different command, skip
 			continue
 		}
 		if laser.NonPtrType(f.Type).Kind() == reflect.Struct {
