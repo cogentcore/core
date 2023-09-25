@@ -7,6 +7,8 @@ package xe
 import (
 	"io"
 	"os"
+
+	"goki.dev/grog"
 )
 
 // Config contains the configuration information that
@@ -38,59 +40,44 @@ type Config struct {
 	Env map[string]string
 }
 
-// VerboseConfig returns a default verbose [Config] object.
-// It prints everything to [os.Stdout] or [os.Stderr].
-func VerboseConfig() *Config {
+// Main returns the default [Config] object for a main command,
+// based on [grog.UserLevel].
+func Main() *Config {
+	if grog.UserLevel > grog.Info {
+		return &Config{
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+			Errors: os.Stderr,
+			Env:    map[string]string{},
+		}
+	}
 	return &Config{
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Stdin:    os.Stdin,
 		Commands: os.Stdout,
 		Errors:   os.Stderr,
-		Fatal:    false,
 		Env:      map[string]string{},
 	}
 }
 
-// ErrorConfig returns a default error [Config] object.
-// It prints errors to [os.Stderr] and prints nothing else.
-func ErrorConfig() *Config {
-	return &Config{
-		Stdout:   nil,
-		Stderr:   os.Stderr,
-		Stdin:    os.Stdin,
-		Commands: nil,
-		Errors:   os.Stderr,
-		Fatal:    false,
-		Env:      map[string]string{},
+// Minor returns the default [Config] object for a minor command,
+// based on [grog.UserLevel].
+func Minor() *Config {
+	if grog.UserLevel > grog.Debug {
+		return &Config{
+			Stderr: os.Stderr,
+			Stdin:  os.Stdin,
+			Errors: os.Stderr,
+			Env:    map[string]string{},
+		}
 	}
-}
-
-// SilentConfig returns a default silent [Config] object.
-// it prints nothing, not even errors.
-func SilentConfig() *Config {
-	return &Config{
-		Stdout:   nil,
-		Stderr:   nil,
-		Stdin:    os.Stdin,
-		Commands: nil,
-		Errors:   nil,
-		Fatal:    false,
-		Env:      map[string]string{},
-	}
-}
-
-// FatalConfig returns a default fatal [Config] object.
-// It prints everything to [os.Stdout] or [os.Stderr],
-// and fatally exits on any error.
-func FatalConfig() *Config {
 	return &Config{
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Stdin:    os.Stdin,
 		Commands: os.Stdout,
 		Errors:   os.Stderr,
-		Fatal:    true,
 		Env:      map[string]string{},
 	}
 }

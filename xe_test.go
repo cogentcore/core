@@ -4,11 +4,26 @@
 
 package xe
 
-import "testing"
+import (
+	"testing"
+
+	"goki.dev/grog"
+)
 
 func TestRun(t *testing.T) {
-	cfg := FatalConfig()
-	RunSh(cfg, "go version")
-	RunSh(cfg, "git version")
-	RunSh(cfg, "echo hello")
+	grog.UserLevel = grog.Info
+	grog.SetDefaultLogger()
+	m := Main()
+	err := RunSh(m, "go version")
+	if err != nil {
+		t.Error(err)
+	}
+	err = RunSh(m, "git version")
+	if err != nil {
+		t.Error(err)
+	}
+	err = RunSh(m, "echo hello")
+	if err != nil {
+		t.Error(err)
+	}
 }

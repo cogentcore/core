@@ -10,9 +10,12 @@ package xe
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
+
+	"goki.dev/grog"
 )
 
 // Exec executes the command, piping its stdout and stderr to the given
@@ -59,9 +62,9 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 
 	if cfg.Commands != nil {
 		if c.Dir != "" {
-			cfg.Commands.Write([]byte(cfg.SuccessColor(c.Dir) + ": "))
+			cfg.Commands.Write([]byte(grog.ApplyLevelColor(slog.LevelInfo, c.Dir) + ": "))
 		}
-		cfg.Commands.Write([]byte(cfg.CmdColor(cmd + " " + strings.Join(args, " ") + "\n")))
+		cfg.Commands.Write([]byte(grog.ApplyLevelColor(slog.LevelInfo, cmd+" "+strings.Join(args, " ")+"\n")))
 	}
 	err = c.Run()
 	return CmdRan(err), ExitStatus(err), err
