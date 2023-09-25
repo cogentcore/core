@@ -9,6 +9,7 @@
 package xe
 
 import (
+	"bytes"
 	"fmt"
 	"log/slog"
 	"os"
@@ -55,8 +56,11 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	for k, v := range cfg.Env {
 		c.Env = append(c.Env, k+"="+v)
 	}
-	c.Stderr = cfg.Stderr
-	c.Stdout = cfg.Stdout
+	// need to store in buffer so we can color and print command
+	ebuf := &bytes.Buffer{}
+	obuf := &bytes.Buffer{}
+	c.Stderr = ebuf
+	c.Stdout = obuf
 	c.Stdin = cfg.Stdin
 	c.Dir = cfg.Dir
 
@@ -67,6 +71,8 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 		cfg.Commands.Write([]byte(grog.ApplyLevelColor(slog.LevelInfo, cmd+" "+strings.Join(args, " ")+"\n")))
 	}
 	err = c.Run()
+	cfg.Stdout.Write(obuf.Bytes())
+	cfg.Stderr.Write([]byte(grog.ApplyLevelColor(slog.LevelError, ebuf.String())))
 	return CmdRan(err), ExitStatus(err), err
 }
 

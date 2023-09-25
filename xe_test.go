@@ -26,4 +26,8 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	err = RunSh(m, "go bild")
+	if err == nil { // we want it to fail
+		t.Error("expected error but got none")
+	}
 }
