@@ -10,7 +10,7 @@ require (
 	goki.dev/grog v0.0.0-20230925012547-a930c3343470
 	goki.dev/grows v0.3.3
 	goki.dev/gti v0.1.4
-	goki.dev/laser v0.1.5
+	goki.dev/laser v0.1.6
 	goki.dev/ordmap v0.5.5
 )
 
@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	goki.dev/cam v0.9.16 // indirect
+	goki.dev/cam v0.9.17 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.6 // indirect
 	goki.dev/matcolor v0.9.10 // indirect
 	golang.org/x/image v0.12.0 // indirect
