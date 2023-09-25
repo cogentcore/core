@@ -238,6 +238,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 			FPS:  60,
 		},
 	}
+	w.EventMgr.Win = w
 
 	app.RunOnMain(func() {
 		surfPtr, err := glw.CreateWindowSurface(app.gpu.Instance, nil)

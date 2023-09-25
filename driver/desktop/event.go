@@ -6,7 +6,6 @@ package desktop
 
 import (
 	"image"
-	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
@@ -40,80 +39,32 @@ func (w *windowImpl) focusWindow() *windowImpl {
 			fw = w
 		}
 	}
-	return fw
+	return fw.(*windowImpl)
 }
 
 // physical key
 func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action glfw.Action, mod glfw.ModifierKey) {
-	em := glfwMods(mod)
+	mods := glfwMods(mod)
 	ec := glfwKeyCode(ky)
-	rn, mapped := key.CodeRuneMap[ec]
+	rn, _ := key.CodeRuneMap[ec]
 	act := key.Press
 	if action == glfw.Release {
 		act = key.Release
 	} else if action == glfw.Repeat {
 		act = key.Press
 	}
-	fw.EventMgr.Key(w.focusWindow(), key.NewEvent(rn, ec, act, em))
+	fw := w.focusWindow()
+	fw.EventMgr.Key(rn, ec, act, mods)
 	glfw.PostEmptyEvent() // todo: why??
 }
 
 // char input
-func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mods glfw.ModifierKey) {
-	em := glfwMods(mods)
-	act := key.Press
-	fw.EventMgr.KeyChord(w.focusWindow(), key.NewChordEvent(char, key.CodeUnknown, act, em))
-	glfw.PostEmptyEvent() // todo: why?
-}
-
-func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
-	but := mouse.Left
-	switch button {
-	case glfw.MouseButtonMiddle:
-		but = mouse.Middle
-	case glfw.MouseButtonRight:
-		but = mouse.Right
-
-	}
-	act := mouse.Press
-	if action == glfw.Release {
-		act = mouse.Release
-	}
-	if mod&glfw.ModControl != 0 {
-		but = mouse.Right
-	}
-	where := w.curMousePosPoint(gw)
-	event := &mouse.Event{
-		Button: but,
-		Action: act,
-	}
-	event.Where = where
-	event.Mods = mods
-	event.Init()
-
-	w.Send(event)
-	glfw.PostEmptyEvent()
-}
-
-func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
-	mods := w.EventMgr.LastMods
-	if theApp.Platform() == goosi.MacOS {
-		xoff *= float64(mouse.ScrollWheelSpeed)
-		yoff *= float64(mouse.ScrollWheelSpeed)
-	} else { // others have lower multipliers in general
-		xoff *= 4 * float64(mouse.ScrollWheelSpeed)
-		yoff *= 4 * float64(mouse.ScrollWheelSpeed)
-	}
-	where := w.curMousePosPoint(gw)
-	event := &mouse.ScrollEvent{}
-	event.Delta = image.Point{int(-xoff), int(-yoff)}
-	event.Action = mouse.Scroll
-	event.Where = where
-	event.Mods = mods
-	event.Init()
-	w.Send(event)
-	glfw.PostEmptyEvent()
+	act := key.Press
+	fw := w.focusWindow()
+	fw.EventMgr.KeyChord(char, key.CodeUnknown, act, mods)
+	glfw.PostEmptyEvent() // todo: why?
 }
 
 func (w *windowImpl) curMousePosPoint(gw *glfw.Window) image.Point {
@@ -131,45 +82,57 @@ func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
 	return where
 }
 
+func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
+	mods := glfwMods(mod)
+	but := mouse.Left
+	switch button {
+	case glfw.MouseButtonMiddle:
+		but = mouse.Middle
+	case glfw.MouseButtonRight:
+		but = mouse.Right
+	}
+	act := mouse.Press
+	if action == glfw.Release {
+		act = mouse.Release
+	}
+	if mod&glfw.ModControl != 0 { // special case: control always = RMB  can undo this downstream..
+		but = mouse.Right
+	}
+	where := w.curMousePosPoint(gw)
+	w.EventMgr.MouseButton(but, act, where, mods)
+	glfw.PostEmptyEvent() // why?
+}
+
+func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
+	if theApp.Platform() == goosi.MacOS {
+		xoff *= float64(mouse.ScrollWheelSpeed)
+		yoff *= float64(mouse.ScrollWheelSpeed)
+	} else { // others have lower multipliers in general
+		xoff *= 4 * float64(mouse.ScrollWheelSpeed)
+		yoff *= 4 * float64(mouse.ScrollWheelSpeed)
+	}
+	delta := image.Point{int(-xoff), int(-yoff)}
+	where := w.curMousePosPoint(gw)
+	w.EventMgr.MouseScroll(where, delta)
+	glfw.PostEmptyEvent()
+}
+
 func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
-	if w.resettingPos {
+	if w.EventMgr.ResettingPos {
 		return
 	}
-	from := w.EventMgr.LastMousePos
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
-		w.resettingPos = true
+		w.EventMgr.ResettingPos = true
 		if theApp.Platform() == goosi.MacOS {
 			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X)/float64(w.DevPixRatio), float64(w.EventMgr.LastMousePos.Y)/float64(w.DevPixRatio))
 		} else {
 			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X), float64(w.EventMgr.LastMousePos.Y))
 		}
-		w.resettingPos = false
-	} else {
-		w.EventMgr.LastMousePos = where
+		w.EventMgr.ResettingPos = false
 	}
-	if w.EventMgr.LastMouseAction == mouse.Press {
-		event := &mouse.DragEvent{}
-		event.Where = where
-		event.Button = w.EventMgr.LastMouseButton
-		event.Action = mouse.Drag
-		event.Mods = w.EventMgr.LastMods
-		event.Prev = from
-		event.Start = w.EventMgr.LastMouseButtonPos
-		event.Init()
-		w.Send(event)
-		glfw.PostEmptyEvent()
-	} else {
-		event := &mouse.MoveEvent{}
-		event.Where = where
-		event.Button = mouse.NoButton
-		event.Action = mouse.Move
-		event.Mods = w.EventMgr.LastMods
-		event.Prev = from
-		event.Init()
-		w.Send(event)
-		glfw.PostEmptyEvent()
-	}
+	w.EventMgr.MouseMove(where)
+	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) cursorEnterEvent(gw *glfw.Window, entered bool) {
@@ -440,8 +403,6 @@ func glfwKeyCode(kcode glfw.Key) key.Codes {
 		return key.CodeRightAlt
 	case glfw.KeyRightSuper:
 		return key.CodeRightMeta
-	case glfw.KeyLast:
-		return w.EventMgr.LastKey
 	default:
 		return key.CodeUnknown
 	}

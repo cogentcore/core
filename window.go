@@ -213,6 +213,9 @@ type Window interface {
 	// which can provide better control in a game environment (not avail on Mac).
 	SetCursorEnabled(enabled, raw bool)
 
+	// IsCursorEnabled returns true or false if cursor is enabled
+	IsCursorEnabled() bool
+
 	// Drawer returns the drawing system attached to this window surface.
 	// This is typically used for high-performance rendering to the surface.
 	Drawer() *vdraw.Drawer

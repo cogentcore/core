@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver/internal/event"
+	"goki.dev/goosi/eventmgr"
 	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -44,7 +45,6 @@ type windowImpl struct {
 	closeReqFunc   func(win goosi.Window)
 	closeCleanFunc func(win goosi.Window)
 	mouseDisabled  bool
-	resettingPos   bool
 }
 
 var _ goosi.Window = &windowImpl{}
@@ -464,6 +464,10 @@ func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
 	}
 }
 
+func (w *windowImpl) IsCursorEnabled() bool {
+	return !w.mouseDisabled
+}
+
 /////////////////////////////////////////////////////////
 //  Window Callbacks
 
@@ -594,7 +598,7 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 	} else {
 		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
-		lastMousePos = image.Point{-1, -1} // key for preventing random click to same location
+		w.EventMgr.LastMousePos = image.Point{-1, -1} // key for preventing random click to same location
 		w.sendWindowEvent(window.DeFocus)
 	}
 }

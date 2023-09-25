@@ -19,14 +19,15 @@ package mouse
 import (
 	"fmt"
 	"image"
+	"time"
 
 	"goki.dev/goosi"
 )
 
-// DoubleClickMSec is the maximum time interval in msec between button press
-// events to count as a double-click -- can set this global variable to change.
-// This is also in gi.Prefs and updated from there
-var DoubleClickMSec = 500
+// DoubleClickInterval is the maximum time interval between button press
+// events to count as a double-click.
+// This is also in gi.Prefs and updated from there.
+var DoubleClickInterval = 500 * time.Millisecond
 
 // TODO: implement DoubleClickWait
 
@@ -43,7 +44,7 @@ var DoubleClickWait = false
 // This is also in gi.Prefs and updated from there
 var ScrollWheelSpeed = float32(20)
 
-// mouse.Event is a basic mouse event for button presses, but not motion or scrolling
+// mouse.Event is a basic mouse event for all mouse events except Scroll
 type Event struct {
 	goosi.EventBase
 
@@ -60,28 +61,18 @@ type Event struct {
 	// TODO: add a Device ID, for multiple input devices?
 }
 
-// SelectModeBits returns the selection mode based on given modifiers bitflags
-func SelectModeBits(modBits goosi.Modifiers) SelectModes {
-	if goosi.HasAnyModifier(modBits, goosi.Shift) {
-		return ExtendContinuous
-	}
-	if goosi.HasAnyModifier(modBits, goosi.Meta) {
-		return ExtendOne
-	}
-	return SelectOne
-}
-
-// SelectMode returns the selection mode based on given modifiers on event
-func (ev *Event) SelectMode() SelectModes {
-	return SelectModeBits(ev.Mods)
+func NewEvent(but Buttons, act Actions, where image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.MouseEvent
+	ev.Button = but
+	ev.Action = act
+	ev.Where = where
+	ev.Mods = mods
+	return ev
 }
 
 func (ev *Event) String() string {
 	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, goosi.ModsString(ev.Mods), ev.Time())
-}
-
-func (ev *Event) Type() goosi.EventType {
-	return goosi.MouseEvent
 }
 
 func (ev *Event) OnFocus() bool {
@@ -90,6 +81,59 @@ func (ev *Event) OnFocus() bool {
 
 func (ev Event) HasPos() bool {
 	return true
+}
+
+func NewMoveEvent(but Buttons, where, prev image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.MouseMoveEvent
+	ev.Button = but
+	ev.Action = Move
+	ev.Where = where
+	ev.Prev = prev
+	ev.Mods = mods
+	return ev
+}
+
+func NewDragEvent(but Buttons, where, prev, start image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.MouseDragEvent
+	ev.Button = but
+	ev.Action = Drag
+	ev.Where = where
+	ev.Prev = prev
+	ev.Start = start
+	ev.Mods = mods
+	return ev
+}
+
+func NewScrollEvent(where, delta image.Point, mods goosi.Modifiers) *ScrollEvent {
+	ev := &ScrollEvent{}
+	ev.Typ = goosi.MouseScrollEvent
+	ev.Action = Scroll
+	ev.Where = where
+	ev.Delta = delta
+	ev.Mods = mods
+	return ev
+}
+
+// Focus event must be generated inside higher-level GUI.  Actions are Enter / Leave
+func NewFocusEvent(act Actions, where image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.MouseFocusEvent
+	ev.Action = act
+	ev.Where = where
+	ev.Mods = mods
+	return ev
+}
+
+// Hover event must be generated inside higher-level GUI.
+func NewHoverEvent(where image.Point, mods goosi.Modifiers) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.MouseHoverEvent
+	ev.Action = Hover
+	ev.Where = where
+	ev.Mods = mods
+	return ev
 }
 
 /////////////////////////////////////////////////////////////////
@@ -112,6 +156,22 @@ func (ev ScrollEvent) NonZeroDelta(prefX bool) int {
 		return ev.Delta.X
 	}
 	return ev.Delta.Y
+}
+
+// SelectModeBits returns the selection mode based on given modifiers bitflags
+func SelectModeBits(modBits goosi.Modifiers) SelectModes {
+	if goosi.HasAnyModifier(modBits, goosi.Shift) {
+		return ExtendContinuous
+	}
+	if goosi.HasAnyModifier(modBits, goosi.Meta) {
+		return ExtendOne
+	}
+	return SelectOne
+}
+
+// SelectMode returns the selection mode based on given modifiers on event
+func (ev *Event) SelectMode() SelectModes {
+	return SelectModeBits(ev.Mods)
 }
 
 // Buttons is a mouse button.
@@ -180,23 +240,3 @@ const (
 	// bulk updates with a final update at the end -- used programmatically
 	UnselectQuiet
 )
-
-// func (ev *MoveEvent) Type() goosi.EventType {
-// 	return goosi.MouseMoveEvent
-// }
-//
-// func (ev *DragEvent) Type() goosi.EventType {
-// 	return goosi.MouseDragEvent
-// }
-//
-// func (ev *ScrollEvent) Type() goosi.EventType {
-// 	return goosi.MouseScrollEvent
-// }
-//
-// func (ev *FocusEvent) Type() goosi.EventType {
-// 	return goosi.MouseFocusEvent
-// }
-//
-// func (ev *HoverEvent) Type() goosi.EventType {
-// 	return goosi.MouseHoverEvent
-// }
