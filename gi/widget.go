@@ -193,9 +193,6 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
 
-	// 2D bounding box for region occupied within parent OSWin object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window
-	WinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within parent OSWin object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window"`
-
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 

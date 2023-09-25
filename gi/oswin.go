@@ -36,6 +36,9 @@ import (
 	"goki.dev/vgpu/v2/vphong"
 )
 
+// OSWin -> RenderMgr for handling all the rendering stuff.
+// OSWin -> OuterWindow?? something like that..
+
 // CurOSWin is the current OSWin window
 // On mobile, this is the _only_ window.
 var CurOSWin *OSWin
@@ -1802,7 +1805,7 @@ func (w *OSWin) SetCursor(me *mouse.MoveEvent) {
 			// could have nodes further down (eg with menu which is ki.Slice), so continue
 			return ki.Continue
 		}
-		if !wb.PosInWinBBox(me.Pos()) {
+		if !wb.PosInBBox(me.Pos()) {
 			// however, if we are out of bbox, there is no way to get back in
 			return ki.Break
 		}
@@ -1834,7 +1837,7 @@ func (w *OSWin) SetCursor(me *mouse.MoveEvent) {
 		w.FuncDownMeFirst(0, nil, fun)
 	} else {
 		_, popni := AsWidget(pop)
-		if popni == nil || !popni.PosInWinBBox(me.Pos()) || PopupIsTooltip(pop) {
+		if popni == nil || !popni.PosInBBox(me.Pos()) || PopupIsTooltip(pop) {
 			// if not in popup (or it is a tooltip), do on window
 			w.FuncDownMeFirst(0, nil, fun)
 		} else {
@@ -2511,14 +2514,14 @@ func (w *OSWin) FocusActiveClick(e *mouse.Event) {
 	}
 	wi, wb := AsWidget(cfoc)
 	if wb != nil && wb.This() != nil {
-		if wb.PosInWinBBox(e.Pos()) {
+		if wb.PosInBBox(e.Pos()) {
 			if !w.HasFlag(int(WinFlagFocusActive)) {
 				w.SetFlag(int(WinFlagFocusActive))
 				wi.FocusChanged(FocusActive)
 			}
 		} else {
 			if w.MainMenu != nil {
-				if w.MainMenu.PosInWinBBox(e.Pos()) { // main menu is not inactivating!
+				if w.MainMenu.PosInBBox(e.Pos()) { // main menu is not inactivating!
 					return
 				}
 			}

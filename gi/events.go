@@ -17,9 +17,9 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 	return wb.Sc.ScEventMgr()
 }
 
-// PosInWinBBox returns true if given position is within
+// PosInBBox returns true if given position is within
 // this node's win bbox (under read lock)
-func (wb *WidgetBase) PosInWinBBox(pos image.Point) bool {
+func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
 	return pos.In(wb.WinBBox)
@@ -231,7 +231,7 @@ func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.K
 			// 3D?
 			return ki.Break
 		}
-		if w.PosInWinBBox(pt) {
+		if w.PosInBBox(pt) {
 			rval = w.This()
 			return ki.Break
 		}

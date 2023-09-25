@@ -71,10 +71,10 @@ type EventMgr struct {
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
 
 	// node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same
-	Dragging ki.Ki `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	Dragging Widget `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
 
 	// node receiving mouse scrolling events -- anchor to same
-	Scrolling ki.Ki `desc:"node receiving mouse scrolling events -- anchor to same"`
+	Scrolling Widget `desc:"node receiving mouse scrolling events -- anchor to same"`
 
 	// stage of DND process
 	DNDStage DNDStages `desc:"stage of DND process"`
@@ -83,7 +83,7 @@ type EventMgr struct {
 	DNDData mimedata.Mimes `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
 
 	// drag-n-drop source node
-	DNDSource ki.Ki `desc:"drag-n-drop source node"`
+	DNDSource Widget `desc:"drag-n-drop source node"`
 
 	// final event for DND which is sent if a finalize is received
 	DNDFinalEvent *dnd.Event `desc:"final event for DND which is sent if a finalize is received"`
@@ -92,16 +92,16 @@ type EventMgr struct {
 	DNDDropMod dnd.DropMods `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
 
 	// node receiving keyboard events -- use SetFocus, CurFocus
-	Focus ki.Ki `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 
 	// mutex that protects focus updating
 	FocusMu sync.RWMutex `desc:"mutex that protects focus updating"`
 
 	// stack of focus
-	FocusStack []ki.Ki `desc:"stack of focus"`
+	FocusStack []Widget `desc:"stack of focus"`
 
 	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
-	StartFocus ki.Ki `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
 
 	// Last modifier key bits from most recent Mouse, Keyboard events
 	LastModBits int32 `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
@@ -117,16 +117,16 @@ type EventMgr struct {
 
 	// true if last event was skipped due to lag
 	LagLastSkipped  bool `desc:"true if last event was skipped due to lag"`
-	startDrag       *mouse.DragEvent
+	startDrag       *mouse.Event
 	dragStarted     bool
-	startDND        *mouse.DragEvent
+	startDND        *mouse.Event
 	dndStarted      bool
-	startHover      *mouse.MoveEvent
-	curHover        *mouse.HoverEvent
+	startHover      *mouse.Event
+	curHover        *mouse.Event
 	hoverStarted    bool
 	hoverTimer      *time.Timer
-	startDNDHover   *mouse.DragEvent
-	curDNDHover     *mouse.DragEvent
+	startDNDHover   *mouse.Event
+	curDNDHover     *mouse.Event
 	dndHoverStarted bool
 	dndHoverTimer   *time.Timer
 }
@@ -134,20 +134,20 @@ type EventMgr struct {
 // WinEventRecv is used to hold info about widgets receiving event signals to
 // given function, used for sorting and delayed sending.
 type WinEventRecv struct {
-	Recv ki.Ki
+	Recv Widget
 	Func ki.RecvFunc
 	Data int
 }
 
 // Set sets the recv and fun
-func (we *WinEventRecv) Set(r ki.Ki, f ki.RecvFunc, data int) {
+func (we *WinEventRecv) Set(r Widget, f ki.RecvFunc, data int) {
 	we.Recv = r
 	we.Func = f
 	we.Data = data
 }
 
 // Call calls the function on the recv with the args
-func (we *WinEventRecv) Call(send ki.Ki, sig int64, data any) {
+func (we *WinEventRecv) Call(send Widget, sig int64, data any) {
 	if EventTrace {
 		fmt.Printf("calling event: %v method on: %v\n", data, we.Recv.Path())
 	}
@@ -156,18 +156,18 @@ func (we *WinEventRecv) Call(send ki.Ki, sig int64, data any) {
 
 type WinEventRecvList []WinEventRecv
 
-func (wl *WinEventRecvList) Add(recv ki.Ki, fun ki.RecvFunc, data int) {
+func (wl *WinEventRecvList) Add(recv Widget, fun ki.RecvFunc, data int) {
 	rr := WinEventRecv{recv, fun, data}
 	*wl = append(*wl, rr)
 }
 
-func (wl *WinEventRecvList) AddDepth(recv ki.Ki, fun ki.RecvFunc, par ki.Ki) {
+func (wl *WinEventRecvList) AddDepth(recv Widget, fun ki.RecvFunc, par Widget) {
 	wl.Add(recv, fun, recv.ParentLevel(par))
 }
 
 // ConnectEvent adds a Signal connection for given event type and
 // priority to given receiver
-func (em *EventMgr) ConnectEvent(recv ki.Ki, et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
+func (em *EventMgr) ConnectEvent(recv Widget, et goosi.EventType, pri EventPris, fun ki.RecvFunc) {
 	if et >= goosi.EventTypeN {
 		log.Printf("EventMgr ConnectEvent type: %v is not a known event type\n", et)
 		return
@@ -177,7 +177,7 @@ func (em *EventMgr) ConnectEvent(recv ki.Ki, et goosi.EventType, pri EventPris, 
 
 // DisconnectEvent removes Signal connection for given event type to given
 // receiver -- pri is priority -- pass AllPris for all priorities
-func (em *EventMgr) DisconnectEvent(recv ki.Ki, et goosi.EventType, pri EventPris) {
+func (em *EventMgr) DisconnectEvent(recv Widget, et goosi.EventType, pri EventPris) {
 	if et >= goosi.EventTypeN {
 		log.Printf("EventMgr DisconnectEvent type: %v is not a known event type\n", et)
 		return
@@ -193,7 +193,7 @@ func (em *EventMgr) DisconnectEvent(recv ki.Ki, et goosi.EventType, pri EventPri
 
 // DisconnectAllEvents disconnect node from all event signals -- pri is
 // priority -- pass AllPris for all priorities
-func (em *EventMgr) DisconnectAllEvents(recv ki.Ki, pri EventPris) {
+func (em *EventMgr) DisconnectAllEvents(recv Widget, pri EventPris) {
 	if pri == AllPris {
 		for et := goosi.EventType(0); et < goosi.EventTypeN; et++ {
 			for p := HiPri; p < EventPrisN; p++ {
@@ -235,7 +235,7 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 		rvs := make(WinEventRecvList, 0, 10)
 
 		esig := &em.EventSigs[et][pri]
-		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
+		esig.ConsFunc(func(recv Widget, fun ki.RecvFunc) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
@@ -253,8 +253,8 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 		})
 
 		for _, rr := range rvs {
-			switch evi.(type) {
-			case *mouse.DragEvent:
+			switch evi.Type() {
+			case goosi.MouseDragEvent:
 				if em.Dragging == nil {
 					rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
 				}
@@ -263,21 +263,21 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 			rr.Call(send, int64(et), evi) // could call further event loops..
 			em.EventMu.Lock()
 			if pri != LowRawPri && evi.IsProcessed() { // someone took care of it
-				switch evi.(type) { // only grab events if processed
-				case *mouse.DragEvent:
+				switch evi.Type() { // only grab events if processed
+				case goosi.MouseDragEvent:
 					if em.Dragging == nil {
 						em.Dragging = rr.Recv
 						rr.Recv.SetFlag(true, NodeDragging)
 					}
-				case *mouse.ScrollEvent:
+				case goosi.MouseScrollEvent:
 					if em.Scrolling == nil {
 						em.Scrolling = rr.Recv
 					}
 				}
 				break
 			} else {
-				switch evi.(type) {
-				case *mouse.DragEvent:
+				switch evi.Type() {
+				case goosi.MouseDragEvent:
 					if em.Dragging == nil {
 						rr.Recv.SetFlag(false, NodeDragging) // clear provisional
 					}
@@ -290,7 +290,7 @@ func (em *EventMgr) SendEventSignal(evi goosi.Event, popup bool) {
 
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
 // map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv ki.Ki, fun ki.RecvFunc) bool {
+func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun ki.RecvFunc) bool {
 	if !em.Master.IsInScope(recv, popup) {
 		return ki.Continue
 	}
@@ -316,9 +316,9 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 	// remainder is done using generic node interface, for 2D and 3D
 	_, wb := AsWidget(recv)
 	if evi.HasPos() {
-		pos := evi.Pos()
-		switch evi.(type) {
-		case *mouse.DragEvent:
+		pos := evi.LocalPos()
+		switch evi.Type() {
+		case goosi.MouseDragEvent:
 			if em.Dragging != nil {
 				if em.Dragging == wb.This() {
 					if EventTrace {
@@ -330,13 +330,13 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 					return ki.Continue
 				}
 			} else {
-				if wb.PosInWinBBox(pos) {
+				if wb.PosInBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return ki.Break
 				}
 				return ki.Continue
 			}
-		case *mouse.ScrollEvent:
+		case goosi.MouseScrollEvent:
 			if em.Scrolling != nil {
 				if em.Scrolling == wb.This() {
 					if EventTrace {
@@ -347,7 +347,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 					return ki.Continue
 				}
 			} else {
-				if wb.PosInWinBBox(pos) {
+				if wb.PosInBBox(pos) {
 					rvs.AddDepth(recv, fun, top)
 					return ki.Break
 				}
@@ -361,7 +361,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
 				return ki.Break
 			}
-			if !wb.PosInWinBBox(pos) {
+			if !wb.PosInBBox(pos) {
 				return ki.Continue
 			}
 		}
@@ -372,7 +372,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 
 // SendSig directly calls SendSig from given recv, sender for given event
 // across all priorities.
-func (em *EventMgr) SendSig(recv, sender ki.Ki, evi goosi.Event) {
+func (em *EventMgr) SendSig(recv, sender Widget, evi goosi.Event) {
 	et := evi.Type()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		em.EventSigs[et][pri].SendSig(recv, sender, int64(et), evi)
@@ -399,12 +399,12 @@ func (em *EventMgr) MouseEvents(evi goosi.Event) {
 
 	if et == goosi.MouseEvent {
 		me := evi.(*mouse.Event)
-		em.LastModBits = me.Modifiers
+		em.LastModBits = me.Modifiers()
 		em.LastSelMode = me.SelectMode()
 		em.LastMousePos = me.Pos()
 	}
 	if et == goosi.KeyChordEvent {
-		ke := evi.(*key.ChordEvent)
+		ke := evi.(*key.Event)
 		em.LastModBits = ke.Modifiers
 		em.LastSelMode = mouse.SelectModeBits(ke.Modifiers)
 	}
@@ -426,7 +426,7 @@ func (em *EventMgr) MouseEventReset(evi goosi.Event) {
 // These require timing and delays, e.g., due to minor wiggles when pressing
 // the mouse button
 func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
-	me := evi.(*mouse.DragEvent)
+	me := evi.(*mouse.Event)
 	em.LastModBits = me.Modifiers
 	em.LastSelMode = me.SelectMode()
 	em.LastMousePos = me.Pos()
@@ -591,13 +591,13 @@ func (em *EventMgr) ResetMouseMove() {
 // scope (if no popup, everything is in scope).
 func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 	fe := mouse.FocusEvent{Event: mev.Event}
-	pos := mev.Pos()
+	pos := mev.LocalPos()
 	ftyp := goosi.MouseFocusEvent
 	updated := false
 	updt := false
 	send := em.Master.EventTopNode()
 	for pri := HiPri; pri < EventPrisN; pri++ {
-		em.EventSigs[ftyp][pri].EmitFiltered(send, int64(ftyp), &fe, func(k ki.Ki) bool {
+		em.EventSigs[ftyp][pri].EmitFiltered(send, int64(ftyp), &fe, func(k Widget) bool {
 			if k.IsDeleted() { // destroyed is filtered upstream
 				return ki.Break
 			}
@@ -606,7 +606,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.MoveEvent, popup bool) bool {
 			}
 			_, ni := AsWidget(k)
 			if ni != nil {
-				in := ni.PosInWinBBox(pos)
+				in := ni.PosInBBox(pos)
 				if in {
 					if !ni.HasFlag(MouseHasEntered) {
 						fe.Action = mouse.Enter
@@ -651,7 +651,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[et][pri]
 		gotOne := false
-		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
+		esig.ConsFunc(func(recv Widget, fun ki.RecvFunc) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
@@ -660,8 +660,8 @@ func (em *EventMgr) DoInstaDrag(me *mouse.DragEvent, popup bool) bool {
 			}
 			_, wb := AsWidget(recv)
 			if wb != nil {
-				pos := me.Pos()
-				if wb.PosInWinBBox(pos) {
+				pos := me.LocalPos()
+				if wb.PosInBBox(pos) {
 					if wb.HasFlag(InstaDrag) {
 						em.Dragging = wb.This()
 						wb.SetFlag(true, NodeDragging)
@@ -727,7 +727,7 @@ func (em *EventMgr) DNDStartEvent(e *mouse.DragEvent) {
 }
 
 // DNDStart is driven by node responding to start event, actually starts DND
-func (em *EventMgr) DNDStart(src ki.Ki, data mimedata.Mimes) {
+func (em *EventMgr) DNDStart(src Widget, data mimedata.Mimes) {
 	em.DNDStage = DNDStarted
 	em.DNDSource = src
 	em.DNDData = data
@@ -807,7 +807,7 @@ func (em *EventMgr) ClearDND() {
 // that Exit from prior widget is always sent before Enter to next one.
 func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 	fe := dnd.FocusEvent{Event: mev.Event}
-	pos := mev.Pos()
+	pos := mev.LocalPos()
 	ftyp := goosi.DNDFocusEvent
 
 	// first pass is just to get all the ins and outs
@@ -816,7 +816,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 	send := em.Master.EventTopNode()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[ftyp][pri]
-		esig.ConsFunc(func(recv ki.Ki, fun ki.RecvFunc) bool {
+		esig.ConsFunc(func(recv Widget, fun ki.RecvFunc) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
@@ -825,7 +825,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.MoveEvent, popup bool) bool {
 			}
 			_, wb := AsWidget(recv)
 			if wb != nil {
-				in := wb.PosInWinBBox(pos)
+				in := wb.PosInBBox(pos)
 				if in {
 					if !wb.HasFlag(DNDHasEntered) {
 						wb.SetFlag(true, DNDHasEntered)
@@ -896,7 +896,7 @@ func (em *EventMgr) SendKeyFunEvent(kf KeyFuns, popup bool) {
 }
 
 // CurFocus gets the current focus node under mutex protection
-func (em *EventMgr) CurFocus() ki.Ki {
+func (em *EventMgr) CurFocus() Widget {
 	em.FocusMu.RLock()
 	defer em.FocusMu.RUnlock()
 	return em.Focus
@@ -904,7 +904,7 @@ func (em *EventMgr) CurFocus() ki.Ki {
 
 // setFocusPtr JUST sets the focus pointer under mutex protection --
 // use SetFocus for end-user setting of focus
-func (em *EventMgr) setFocusPtr(k ki.Ki) {
+func (em *EventMgr) setFocusPtr(k Widget) {
 	em.FocusMu.Lock()
 	em.Focus = k
 	em.FocusMu.Unlock()
@@ -912,7 +912,7 @@ func (em *EventMgr) setFocusPtr(k ki.Ki) {
 
 // SetFocus sets focus to given item -- returns true if focus changed.
 // If item is nil, then nothing has focus.
-func (em *EventMgr) SetFocus(k ki.Ki) bool {
+func (em *EventMgr) SetFocus(k Widget) bool {
 	cfoc := em.CurFocus()
 	if cfoc == k {
 		if k != nil {
@@ -955,7 +955,7 @@ func (em *EventMgr) SetFocus(k ki.Ki) bool {
 //	FocusNext sets the focus on the next item that can accept focus after the
 //
 // given item (can be nil) -- returns true if a focus item found.
-func (em *EventMgr) FocusNext(foc ki.Ki) bool {
+func (em *EventMgr) FocusNext(foc Widget) bool {
 	gotFocus := false
 	focusNext := false // get the next guy
 	if foc == nil {
@@ -969,11 +969,11 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 			if gotFocus {
 				return ki.Break
 			}
-			_, wb := AsWidget(k)
+			wi, wb := AsWidget(k)
 			if wb == nil || wb.This() == nil {
 				return ki.Continue
 			}
-			if foc == k { // current focus can be a non-can-focus item
+			if foc == wi { // current focus can be a non-can-focus item
 				focusNext = true
 				return ki.Continue
 			}
@@ -983,7 +983,7 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 			if !wb.CanFocus() {
 				return ki.Continue
 			}
-			em.SetFocus(k)
+			em.SetFocus(wi)
 			gotFocus = true
 			return ki.Break // done
 		})
@@ -997,7 +997,7 @@ func (em *EventMgr) FocusNext(foc ki.Ki) bool {
 
 // FocusOnOrNext sets the focus on the given item, or the next one that can
 // accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrNext(foc ki.Ki) bool {
+func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 	cfoc := em.CurFocus()
 	if cfoc == foc {
 		return true
@@ -1015,7 +1015,7 @@ func (em *EventMgr) FocusOnOrNext(foc ki.Ki) bool {
 
 // FocusOnOrPrev sets the focus on the given item, or the previous one that can
 // accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrPrev(foc ki.Ki) bool {
+func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 	cfoc := em.CurFocus()
 	if cfoc == foc {
 		return true
@@ -1032,14 +1032,14 @@ func (em *EventMgr) FocusOnOrPrev(foc ki.Ki) bool {
 }
 
 // FocusPrev sets the focus on the previous item before the given item (can be nil)
-func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
+func (em *EventMgr) FocusPrev(foc Widget) bool {
 	if foc == nil { // must have a current item here
 		em.FocusLast()
 		return false
 	}
 
 	gotFocus := false
-	var prevItem ki.Ki
+	var prevItem Widget
 
 	focRoot := em.Master.FocusTopNode()
 
@@ -1047,18 +1047,18 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 		if gotFocus {
 			return ki.Break
 		}
-		_, wb := AsWidget(k)
+		wi, wb := AsWidget(k)
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
-		if foc == k {
+		if foc == wi {
 			gotFocus = true
 			return ki.Break
 		}
 		if !wb.CanFocus() {
 			return ki.Continue
 		}
-		prevItem = k
+		prevItem = wi
 		return ki.Continue
 	})
 	if gotFocus && prevItem != nil {
@@ -1072,19 +1072,19 @@ func (em *EventMgr) FocusPrev(foc ki.Ki) bool {
 // FocusLast sets the focus on the last item in the tree -- returns true if a
 // focusable item was found
 func (em *EventMgr) FocusLast() bool {
-	var lastItem ki.Ki
+	var lastItem Widget
 
 	focRoot := em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
-		_, wb := AsWidget(k)
+		wi, wb := AsWidget(k)
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
 		if !wb.CanFocus() {
 			return ki.Continue
 		}
-		lastItem = k
+		lastItem = wi
 		return ki.Continue
 	})
 	em.SetFocus(lastItem)
@@ -1095,7 +1095,7 @@ func (em *EventMgr) FocusLast() bool {
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
-func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
+func (em *EventMgr) ClearNonFocus(foc Widget) {
 	focRoot := em.Master.FocusTopNode()
 
 	updated := false
@@ -1105,7 +1105,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 		if k == focRoot { // skip top-level
 			return ki.Continue
 		}
-		nii, wb := AsWidget(k)
+		wi, wb := AsWidget(k)
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
@@ -1121,7 +1121,7 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 				updt = em.Master.EventTopUpdateStart()
 			}
 			wb.SetFlag(false, HasFocus)
-			nii.FocusChanged(FocusLost)
+			wi.FocusChanged(FocusLost)
 		}
 		return ki.Continue
 	})
@@ -1131,10 +1131,10 @@ func (em *EventMgr) ClearNonFocus(foc ki.Ki) {
 }
 
 // PushFocus pushes current focus onto stack and sets new focus.
-func (em *EventMgr) PushFocus(p ki.Ki) {
+func (em *EventMgr) PushFocus(p Widget) {
 	em.FocusMu.Lock()
 	if em.FocusStack == nil {
-		em.FocusStack = make([]ki.Ki, 0, 50)
+		em.FocusStack = make([]Widget, 0, 50)
 	}
 	em.FocusStack = append(em.FocusStack, em.Focus)
 	em.Focus = nil // don't un-focus on prior item when pushing
@@ -1163,7 +1163,7 @@ func (em *EventMgr) PopFocus() {
 }
 
 // SetStartFocus sets the given item to be first focus when window opens.
-func (em *EventMgr) SetStartFocus(k ki.Ki) {
+func (em *EventMgr) SetStartFocus(k Widget) {
 	em.FocusMu.Lock()
 	em.StartFocus = k
 	em.FocusMu.Unlock()
@@ -1306,10 +1306,10 @@ type EventMaster interface {
 	// EventTopNode returns the top-level node for this event scope.
 	// This is also the node that serves as the event sender.
 	// By default it is the OSWin.
-	EventTopNode() ki.Ki
+	EventTopNode() Widget
 
 	// FocusTopNode returns the top-level node for key event focusing.
-	FocusTopNode() ki.Ki
+	FocusTopNode() Widget
 
 	// EventTopUpdateStart does an UpdateStart on top-level node, for batch updates.
 	// This may not be identical to EventTopNode().UpdateStart() for
@@ -1322,7 +1322,7 @@ type EventMaster interface {
 	EventTopUpdateEnd(updt bool)
 
 	// IsInScope returns whether given node is in scope for receiving events
-	IsInScope(node ki.Ki, popup bool) bool
+	IsInScope(node Widget, popup bool) bool
 
 	// CurPopupIsTooltip returns true if current popup is a tooltip
 	CurPopupIsTooltip() bool

@@ -49,6 +49,9 @@ type Scene struct {
 
 	// todo: remove below:
 
+	// event manager for this scene
+	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
+
 	// our parent window that we render into
 	Win *OSWin `copy:"-" json:"-" xml:"-" desc:"our parent window that we render into"`
 
@@ -117,14 +120,6 @@ func (sc *Scene) HasFlag(f enums.BitFlag) bool {
 // using atomic, safe for concurrent access
 func (sc *Scene) SetFlag(on bool, f ...enums.BitFlag) {
 	sc.Flags.SetFlag(on, f...)
-}
-
-// note: if not a standard scene in a window, this method must be redefined!
-func (sc *Scene) ScEventMgr() *EventMgr {
-	if sc.Win != nil {
-		return &sc.Win.EventMgr
-	}
-	return nil
 }
 
 func (sc *Scene) ScIsVisible() bool {
