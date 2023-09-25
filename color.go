@@ -21,8 +21,12 @@ var UseColor = true
 var colorProfile termenv.Profile
 
 // ApplyColor applies the color associated with the given level to the
-// given string and returns the resulting string.
+// given string and returns the resulting string. If [UseColor] is set
+// to false, ApplyColor just returns the string it was passed.
 func ApplyColor(level slog.Level, str string) string {
+	if !UseColor {
+		return str
+	}
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:

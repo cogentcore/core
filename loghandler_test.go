@@ -5,6 +5,7 @@
 package grog
 
 import (
+	"log"
 	"log/slog"
 	"testing"
 )
@@ -17,4 +18,9 @@ func TestDefaultLogger(t *testing.T) {
 	slog.Info("this is info")
 	slog.Warn("this is warn")
 	slog.Error("this is error")
+
+	log.Println("this is standard log")
+
+	Printf(slog.LevelError, "this is %q", "Printf")
+	Println(slog.LevelWarn, "this is Println")
 }
