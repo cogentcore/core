@@ -6,6 +6,13 @@ package colors
 
 import "image/color"
 
+// Palette contains the main, global [MatPalette]. It can
+// be used by end-user code for accessing tonal palette values,
+// although [Scheme] is a more typical way to access the color
+// scheme values. It defaults to a palette based around a
+// primary color of Google Blue (#4285f4)
+var Palette = NewPalette(KeyFromPrimary(color.RGBA{66, 133, 244, 255}))
+
 // MatPalette contains a Material Design 3 tonal palette
 // with tonal values for each of the standard colors and
 // any custom colors. The main palette is stored in [Palette].
@@ -32,13 +39,6 @@ type MatPalette struct {
 	// an optional map of tones for custom accent key colors
 	Custom map[string]Tones `desc:"an optional map of tones for custom accent key colors"`
 }
-
-// Palette contains the main, global [MatPalette]. It can
-// be used by end-user code for accessing tonal palette values,
-// although [Scheme] is a more typical way to access the color
-// scheme values. It defaults to a palette based around a
-// primary color of Google Blue (#4285f4)
-var Palette = NewPalette(KeyFromPrimary(color.RGBA{66, 133, 244, 255})) // primary: #4285f4 (Google Blue)
 
 // NewPalette creates a new [MatPalette] from the given key colors.
 func NewPalette(key *Key) *MatPalette {

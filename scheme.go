@@ -6,6 +6,13 @@ package colors
 
 import "image/color"
 
+// Scheme is the main currently active global Material Design 3
+// color scheme. It is the main way that end-user code should
+// access the color scheme; ideally, almost all color values should
+// be set to something in here. For more specific tones of colors,
+// see [Palette].
+var Scheme *MatScheme
+
 // MatScheme contains the colors for one Material Design 3 color scheme
 // (ie: light or dark). The main scheme is stored in [Scheme].
 type MatScheme struct {
@@ -121,13 +128,6 @@ type MatScheme struct {
 	// // OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed
 	// OnTertiaryFixedVariant color.RGBA `desc:"OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed"`
 }
-
-// Scheme is the main currently active global Material Design 3
-// color scheme. It is the main way that end-user code should
-// access the color scheme; ideally, almost all color values should
-// be set to something in here. For more specific tones of colors,
-// see [Palette].
-var Scheme *MatScheme
 
 // NewLightScheme returns a new light-themed [MatScheme]
 // based on the given [MatPalette].
