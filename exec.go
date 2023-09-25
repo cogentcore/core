@@ -55,37 +55,52 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	for k, v := range cfg.Env {
 		c.Env = append(c.Env, k+"="+v)
 	}
-	// need to store in buffer so we can color and print command
+	// need to store in buffer so we can color and print commands and stdout correctly
+	// (need to declare regardless even if we aren't using so that it is accessible)
 	ebuf := &bytes.Buffer{}
 	obuf := &bytes.Buffer{}
-	c.Stderr = ebuf
-	c.Stdout = obuf
+	if cfg.Buffer {
+		c.Stderr = ebuf
+		c.Stdout = obuf
+	} else {
+		c.Stderr = cfg.Stderr
+		c.Stdout = cfg.Stdout
+		// need to do now because we aren't buffering
+		if cfg.Commands != nil {
+			if c.Dir != "" {
+				cfg.Commands.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+			}
+			cfg.Commands.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
+		}
+	}
 	c.Stdin = cfg.Stdin
 	c.Dir = cfg.Dir
 
 	err = c.Run()
 
-	// if we have an error, we print the commands and stdout regardless of the config info
-	sout := cfg.Stdout
-	if sout == nil && err != nil {
-		sout = cfg.Stderr
-	}
-
-	cmds := cfg.Commands
-	if cmds == nil && err != nil {
-		cmds = sout
-	}
-	if cmds != nil {
-		if c.Dir != "" {
-			cmds.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+	if cfg.Buffer {
+		// if we have an error, we print the commands and stdout regardless of the config info
+		sout := cfg.Stdout
+		if sout == nil && err != nil {
+			sout = cfg.Stderr
 		}
-		cmds.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
-	}
 
-	if sout != nil {
-		sout.Write(obuf.Bytes())
+		cmds := cfg.Commands
+		if cmds == nil && err != nil {
+			cmds = sout
+		}
+		if cmds != nil {
+			if c.Dir != "" {
+				cmds.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+			}
+			cmds.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
+		}
+
+		if sout != nil {
+			sout.Write(obuf.Bytes())
+		}
+		cfg.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
 	}
-	cfg.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
 	return CmdRan(err), ExitStatus(err), err
 }
 

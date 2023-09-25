@@ -16,6 +16,22 @@ import (
 // high-level functions, and a default version of it
 // can be easily constructed using [DefaultConfig].
 type Config struct {
+	// Buffer is whether to buffer the output of Stdout and Stderr,
+	// which is necessary for the correct printing of commands and output
+	// when there is an error with a command, and for correct coloring
+	// on Windows. Therefore, it should be kept at the default value of
+	// true in most cases, except for when a command will run for a log
+	// time and print output throughout (eg: a log command).
+	Buffer bool
+	// Fatal is whether to fatally exit programs with [os.Exit] and an
+	// exit code of 1 when there is an error running a program.
+	Fatal bool
+	// The directory to execute commands in. If it is unset,
+	// commands are run in the current directory.
+	Dir string
+	// Env contains any additional environment variables specified.
+	Env map[string]string
+
 	// Stdout is the writer to write the standard output of called commands to.
 	// It can be set to nil to disable the writing of the standard output.
 	Stdout io.Writer
@@ -30,14 +46,6 @@ type Config struct {
 	// Errors is the writer to write program errors to.
 	// It can be set to nil to disable the writing of program errors.
 	Errors io.Writer
-	// Fatal is whether to fatally exit programs with [os.Exit] and an
-	// exit code of 1 when there is an error running a program.
-	Fatal bool
-	// The directory to execute commands in. If it is unset,
-	// commands are run in the current directory.
-	Dir string
-	// Env contains any additional environment variables specified.
-	Env map[string]string
 }
 
 // Main returns the default [Config] object for a main command,
@@ -45,19 +53,21 @@ type Config struct {
 func Main() *Config {
 	if grog.UserLevel > grog.Info {
 		return &Config{
+			Buffer: true,
+			Env:    map[string]string{},
 			Stderr: os.Stderr,
 			Stdin:  os.Stdin,
 			Errors: os.Stderr,
-			Env:    map[string]string{},
 		}
 	}
 	return &Config{
+		Buffer:   true,
+		Env:      map[string]string{},
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Stdin:    os.Stdin,
 		Commands: os.Stdout,
 		Errors:   os.Stderr,
-		Env:      map[string]string{},
 	}
 }
 
@@ -66,18 +76,20 @@ func Main() *Config {
 func Minor() *Config {
 	if grog.UserLevel > grog.Debug {
 		return &Config{
+			Buffer: true,
+			Env:    map[string]string{},
 			Stderr: os.Stderr,
 			Stdin:  os.Stdin,
 			Errors: os.Stderr,
-			Env:    map[string]string{},
 		}
 	}
 	return &Config{
+		Buffer:   true,
+		Env:      map[string]string{},
 		Stdout:   os.Stdout,
 		Stderr:   os.Stderr,
 		Stdin:    os.Stdin,
 		Commands: os.Stdout,
 		Errors:   os.Stderr,
-		Env:      map[string]string{},
 	}
 }
