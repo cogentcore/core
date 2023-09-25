@@ -574,8 +574,8 @@ func ToFloat32(v any) (float32, bool) {
 // (e.g., for enums), and then falls back on strconv calls for numeric types.
 // If everything else fails, it uses Sprintf("%v") which always works,
 // so there is no need for a bool = false return.
-// * returns "nil" for any nil pointers
-// * byte is converted as string(byte) not the decimal representation
+//   - returns "nil" for any nil pointers
+//   - byte is converted as string(byte) not the decimal representation
 //
 //gopy:interface=handle
 func ToString(v any) string {
