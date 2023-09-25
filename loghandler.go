@@ -45,7 +45,7 @@ func SetDefaultLogger() {
 	if UseColor {
 		restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
 		if err != nil {
-			panic(err)
+			slog.Warn("error enabling virtual terminal processing for colored output on Windows: %w", err)
 		}
 		_ = restoreConsole // TODO: figure out how to call this at the end of the program
 		colorProfile = termenv.ColorProfile()
