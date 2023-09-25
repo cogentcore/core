@@ -1,10 +1,21 @@
 Name = "svg"
 Desc = ""
-Version = "v0.1.4"
+Version = "v0.1.5"
 Type = "App"
 
 [Build]
   Package = "."
+  Output = ""
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
+  BundleID = ""
 
 [Colorgen]
   Source = "colors.xml"
