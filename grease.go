@@ -6,6 +6,7 @@ package grease
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"goki.dev/grog"
@@ -49,7 +50,8 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
-	if opts.PrintSuccess {
+	// if the user sets level to error (via -q), we don't show the success message
+	if opts.PrintSuccess && grog.UserLevel <= slog.LevelWarn {
 		fmt.Println(grog.CmdColor(cmdString(opts, cmd)) + grog.SuccessColor(" succeeded"))
 	}
 	return nil

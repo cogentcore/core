@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"goki.dev/grease"
+	"goki.dev/grog"
 )
 
 //go:generate gtigen -add-funcs
@@ -75,7 +76,7 @@ func Build(c *Config) error {
 
 // Run runs the app for the given user.
 func Run(c *Config) error {
-	fmt.Println("Running for user", c.Name, "- likes go:", c.LikesGo)
+	fmt.Println("Running for user", c.Name, "- likes go:", c.LikesGo, "- user level:", grog.UserLevel)
 	return nil
 }
 

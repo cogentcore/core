@@ -24,7 +24,9 @@ type Options struct {
 	Fatal bool
 
 	// PrintSuccess is whether to print a message indicating
-	// that a command was successful after it is run.
+	// that a command was successful after it is run, unless
+	// the user passes -q or -quiet to the command, in which
+	// case the success message will always not be printed.
 	PrintSuccess bool
 
 	// DefaultEncoding is the default encoding format for config files.
