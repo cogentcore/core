@@ -71,6 +71,13 @@ func NewEvent(but Buttons, act Actions, where image.Point, mods goosi.Modifiers)
 	return ev
 }
 
+func NewEventCopy(typ goosi.EventTypes, cp *Event) *Event {
+	ev := &Event{}
+	*ev = *cp
+	ev.Typ = typ
+	return ev
+}
+
 func (ev *Event) String() string {
 	return fmt.Sprintf("Type: %v Button: %v Action: %v  Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Action, ev.Where, goosi.ModsString(ev.Mods), ev.Time())
 }

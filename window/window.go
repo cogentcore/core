@@ -61,9 +61,9 @@ func NewShowEvent() *Event {
 	return ev
 }
 
-func NewFocusEvent() *Event {
+func NewFocusEvent(act Actions) *Event {
 	ev := &Event{}
-	ev.Action = Show
+	ev.Action = act
 	ev.Typ = goosi.WindowFocusEvent
 	return ev
 }

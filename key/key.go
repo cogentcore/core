@@ -26,7 +26,7 @@ import (
 
 // key.Event is a low-level immediately-generated key event, tracking press
 // and release of keys -- suitable for fine-grained tracking of key events --
-// see also key.ChordEvent for events that are generated only on key press,
+// see also key.Event for events that are generated only on key press,
 // and that include the full chord information about all the modifier keys
 // that were present when a non-modifier key was released
 type Event struct {
