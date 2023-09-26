@@ -23,7 +23,7 @@ var colorProfile termenv.Profile
 // ApplyColor applies the given color to the given string
 // and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
-func ApplyColor(clr color.RGBA, str string) string {
+func ApplyColor(clr color.Color, str string) string {
 	if !UseColor {
 		return str
 	}
