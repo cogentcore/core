@@ -24,15 +24,35 @@ type Gradient struct {
 	// source of color (solid, linear gradient, radial gradient)
 	Source GradientSources `desc:"source of color (solid, linear gradient, radial gradient)"`
 
-	// the solid color if [Gradient.Source] is set to [Solid]
-	Color color.RGBA `desc:"the solid color if [Gradient.Source] is set to [Solid]"`
+	// the solid color for solid gradients
+	Color color.RGBA `desc:"the solid color for solid gradients"`
 
-	Points [5]float32
-	Stops  []GradientStop
-	Bounds mat32.Box2
-	Matrix mat32.Mat2
-	Spread SpreadMethods
-	Units  GradientUnits
+	// the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)
+	Points mat32.Box2 `desc:"the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)"`
+
+	// the center point for radial gradients (cx and cy in SVG)
+	Center mat32.Vec2 `desc:"the center point for radial gradients (cx and cy in SVG)"`
+
+	// the focal point for radial gradients (fx and fy in SVG)
+	Focal mat32.Vec2 `desc:"the focal point for radial gradients (fx and fy in SVG)"`
+
+	// the radius for radial gradients (r in SVG)
+	Radius float32 `desc:"the radius for radial gradients (r in SVG)"`
+
+	// the stops of the gradient
+	Stops []GradientStop `desc:"the stops of the gradient"`
+
+	// the bounds of the gradient
+	Bounds mat32.Box2 `desc:"the bounds of the gradient"`
+
+	// the matrix for the gradient
+	Matrix mat32.Mat2 `desc:"the matrix for the gradient"`
+
+	// the spread methods for the gradient
+	Spread SpreadMethods `desc:"the spread methods for the gradient"`
+
+	// the units for the gradient
+	Units GradientUnits `desc:"the units for the gradient"`
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
@@ -52,16 +72,6 @@ const (
 	LinearGradient
 	// RadialGradient indicates a radial gradient.
 	RadialGradient
-)
-
-// GradientPoints defines points within a gradient
-type GradientPoints int32 //enums:enum
-
-const (
-	GpX1 GradientPoints = iota
-	GpY1
-	GpX2
-	GpY2
 )
 
 // SpreadMethods are the methods used when a gradient reaches
