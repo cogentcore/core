@@ -187,11 +187,11 @@ type Event interface {
 	// in UnixNano nanosecond units.
 	PrevTime() time.Time
 
-	// IsProcessed returns whether this event has already been processed
-	IsProcessed() bool
+	// IsHandled returns whether this event has already been processed
+	IsHandled() bool
 
-	// SetProcessed marks the event as having been processed
-	SetProcessed()
+	// SetHandled marks the event as having been processed
+	SetHandled()
 
 	// Init sets the time to now, and any other init -- done just prior to event delivery
 	Init()
@@ -214,10 +214,10 @@ type EventBase struct {
 	// efficient nptime struct
 	GenTime nptime.Time
 
-	// Processed indicates if the event has been processed by an end receiver,
+	// Handled indicates if the event has been processed by an end receiver,
 	// and thus should no longer be processed by other possible receivers.
 	// Atomic operations are used to encode a 0 or 1, so it is an int32.
-	Processed int32
+	Handled int32
 
 	// Key Modifiers present when event occurred: for Key, Mouse, Touch events
 	Mods Modifiers
@@ -282,16 +282,16 @@ func (ev EventBase) PrevTime() time.Time {
 	return ev.PrvTime.Time()
 }
 
-func (ev EventBase) IsProcessed() bool {
-	return atomic.LoadInt32(&ev.Processed) != 0
+func (ev EventBase) IsHandled() bool {
+	return atomic.LoadInt32(&ev.Handled) != 0
 }
 
-func (ev *EventBase) SetProcessed() {
-	atomic.StoreInt32(&ev.Processed, int32(1))
+func (ev *EventBase) SetHandled() {
+	atomic.StoreInt32(&ev.Handled, int32(1))
 }
 
-func (ev *EventBase) ClearProcessed() {
-	atomic.StoreInt32(&ev.Processed, int32(0))
+func (ev *EventBase) ClearHandled() {
+	atomic.StoreInt32(&ev.Handled, int32(0))
 }
 
 func (ev EventBase) String() string {
