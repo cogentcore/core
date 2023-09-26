@@ -43,7 +43,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			}
 		}
 		if !gotCmd {
-			fmt.Println(grog.InfoColor(opts.AppName+" help") + grog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
+			fmt.Println(grog.CmdColor(opts.AppName+" help") + grog.ErrorColor(fmt.Sprintf(" failed: command %q not found", cmd)))
 			os.Exit(1)
 		}
 	}
@@ -55,7 +55,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString(grog.WarnColor("Usage:\n") + Indent + grog.InfoColor(cmdName+" "))
+	b.WriteString(grog.WarnColor("Usage:\n") + Indent + grog.CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -77,9 +77,9 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 			nm := strcase.ToKebab(v.Names[0])
 			req, has := f.Tag.Lookup("required")
 			if req == "+" || req == "true" || !has { // default is required, so !has => required
-				posArgStrs[ui] = grog.InfoColor("<" + nm + ">")
+				posArgStrs[ui] = grog.CmdColor("<" + nm + ">")
 			} else {
-				posArgStrs[ui] = grog.DebugColor("[" + nm + "]")
+				posArgStrs[ui] = grog.SuccessColor("[" + nm + "]")
 			}
 
 		}
@@ -88,7 +88,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if len(posArgStrs) > 0 {
 		b.WriteString(" ")
 	}
-	b.WriteString(grog.DebugColor("[flags]\n"))
+	b.WriteString(grog.SuccessColor("[flags]\n"))
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
@@ -141,12 +141,12 @@ outer:
 	}
 
 	if len(acmds) != 0 {
-		b.WriteString(Indent + grog.InfoColor(cmdName+" <subcommand> ") + grog.DebugColor("[flags]\n"))
+		b.WriteString(Indent + grog.CmdColor(cmdName+" <subcommand> ") + grog.SuccessColor("[flags]\n"))
 	}
 
 	if rcmd != nil {
 		b.WriteString(grog.WarnColor("\nDefault command:\n"))
-		b.WriteString(Indent + grog.InfoColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
+		b.WriteString(Indent + grog.CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
 	if len(acmds) == 0 && cmd != "" { // nothing to do
@@ -157,11 +157,11 @@ outer:
 
 	// if we are in root, we also add help
 	if cmd == "" {
-		b.WriteString(Indent + grog.InfoColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
+		b.WriteString(Indent + grog.CmdColor("help") + "\n" + Indent + Indent + "Help shows usage information for a command\n")
 	}
 
 	for _, c := range acmds {
-		b.WriteString(Indent + grog.InfoColor(c.Name))
+		b.WriteString(Indent + grog.CmdColor(c.Name))
 		if c.Doc != "" {
 			// we only want the first paragraph of text for subcommand usage; after that is where more specific details can go
 			doc, _, _ := strings.Cut(c.Doc, "\n\n")
@@ -179,12 +179,12 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		f := kv.Val
 		b.WriteString(Indent)
 		for i, name := range f.Names {
-			b.WriteString(grog.InfoColor("-" + strcase.ToKebab(name)))
+			b.WriteString(grog.CmdColor("-" + strcase.ToKebab(name)))
 			if i != len(f.Names)-1 {
 				b.WriteString(", ")
 			}
 		}
-		b.WriteString(" " + grog.DebugColor(f.Field.Type.String()))
+		b.WriteString(" " + grog.SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
 		desc, hast := f.Field.Tag.Lookup("desc")
 		if hast && desc != "" {

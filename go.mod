@@ -5,7 +5,6 @@ go 1.21.0
 require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mattn/go-shellwords v1.0.12
-	goki.dev/colors v0.8.12
 	goki.dev/enums v0.9.19
 	goki.dev/glop v0.1.2
 	goki.dev/grog v0.0.0-20230925012547-a930c3343470
