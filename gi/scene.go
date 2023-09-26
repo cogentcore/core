@@ -85,7 +85,9 @@ func NewScene(name string) *Scene {
 	sc := &Scene{}
 	sc.Name = name
 	sc.BgColor.SetColor(color.Transparent)
+	sc.Frame.InitName(&sc.Frame, "frame")
 	sc.Frame.Lay = LayoutVert
+	sc.Decor.InitName(&sc.Decor, "decor")
 	sc.Decor.Lay = LayoutNil
 	return sc
 }

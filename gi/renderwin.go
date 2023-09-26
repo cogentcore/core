@@ -24,6 +24,18 @@ import (
 	"goki.dev/vgpu/v2/vgpu"
 )
 
+// WinWait is a wait group for waiting for all the open window event
+// loops to finish -- this can be used for cases where the initial main run
+// uses a GoStartEventLoop for example.  It is incremented by GoStartEventLoop
+// and decremented when the event loop terminates.
+var WinWait sync.WaitGroup
+
+// Wait waits for all windows to close -- put this at the end of
+// a main function that opens multiple windows.
+func Wait() {
+	WinWait.Wait()
+}
+
 // CurRenderWin is the current RenderWin window
 // On mobile, this is the _only_ window.
 var CurRenderWin *RenderWin
@@ -724,12 +736,6 @@ func (w *RenderWin) NeedWinMenuUpdate() bool {
 
 /////////////////////////////////////////////////////////////////////////////
 //                   Event Loop
-
-// WinWait is a wait group for waiting for all the open window event
-// loops to finish -- this can be used for cases where the initial main run
-// uses a GoStartEventLoop for example.  It is incremented by GoStartEventLoop
-// and decremented when the event loop terminates.
-var WinWait sync.WaitGroup
 
 // StartEventLoop is the main startup method to call after the initial window
 // configuration is setup -- does any necessary final initialization and then

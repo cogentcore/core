@@ -67,6 +67,7 @@ func (st *PopupStage) HandleEvent(evi goosi.Event) {
 // Use Run call at the end to start the Stage running.
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	st := &PopupStage{}
+	st.Stage = st
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.CtxWidget = ctx

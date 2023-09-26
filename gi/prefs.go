@@ -39,7 +39,7 @@ func Init() {
 		Prefs.Open()
 		Prefs.Apply()
 		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
-		TheViewIFace.HiStyleInit()
+		// TheViewIFace.HiStyleInit()
 		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 		WinGeomMgr.Open()
 	}
@@ -256,7 +256,7 @@ func (pf *Preferences) Apply() {
 		}
 	*/
 
-	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
+	// TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
 	mouse.DoubleClickInterval = pf.Params.DoubleClickInterval
 	mouse.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
@@ -1141,7 +1141,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
 	pf.MenuMaxHeight = MenuMaxHeight
 	pf.DialogsSepRenderWin = DialogsSepRenderWin
-	TheViewIFace.PrefsDetDefaults(pf)
+	// TheViewIFace.PrefsDetDefaults(pf) // todo:
 	// in giv:
 	// TextViewClipHistMax
 	// TextBuf*

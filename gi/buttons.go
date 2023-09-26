@@ -158,12 +158,12 @@ func (bb *ButtonBase) SetAsButton() {
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
-func (bb *ButtonBase) SetText(txt string) *ButtonBase {
+func (bb *ButtonBase) SetText(txt string) ButtonWidget {
 	if !bb.HasSc() {
-		return nil
+		return bb.This().(ButtonWidget)
 	}
 	if bb.Text == txt {
-		return bb
+		return bb.This().(ButtonWidget)
 	}
 	updt := bb.UpdateStart()
 	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
@@ -172,19 +172,19 @@ func (bb *ButtonBase) SetText(txt string) *ButtonBase {
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
-	return bb
+	return bb.This().(ButtonWidget)
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
-func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
+func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	if !bb.HasSc() {
-		return
+		return bb.This().(ButtonWidget)
 	}
 	if bb.Icon == iconName {
-		return
+		return bb.This().(ButtonWidget)
 	}
 	updt := bb.UpdateStart()
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
@@ -193,16 +193,18 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) {
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
+	return bb.This().(ButtonWidget)
 }
 
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
-func (bb *ButtonBase) OnClicked(fun func()) {
+func (bb *ButtonBase) OnClicked(fun func()) ButtonWidget {
 	bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(ButtonClicked) {
 			fun()
 		}
 	})
+	return bb.This().(ButtonWidget)
 }
 
 // ButtonPress sets the button in the down state -- mouse clicked down but
@@ -405,6 +407,8 @@ func (bb *ButtonBase) ButtonEvents(we *WidgetEvents) {
 // ButtonWidget is an interface for button widgets allowing ButtonBase
 // defaults to handle most cases.
 type ButtonWidget interface {
+	Widget
+
 	// AsButtonBase gets the button base for most basic functions -- reduces
 	// interface size.
 	AsButtonBase() *ButtonBase
@@ -416,6 +420,21 @@ type ButtonWidget interface {
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
 	ConfigParts(sc *Scene)
+
+	// SetText sets the text and updates the button.
+	// Use this for optimized auto-updating based on nature of changes made.
+	// Otherwise, can set Text directly followed by ReConfig()
+	SetText(txt string) ButtonWidget
+
+	// SetIcon sets the Icon to given icon name (could be empty or 'none') and
+	// updates the button.
+	// Use this for optimized auto-updating based on nature of changes made.
+	// Otherwise, can set Icon directly followed by ReConfig()
+	SetIcon(iconName icons.Icon) ButtonWidget
+
+	// OnClicked calls the given function when the button is clicked,
+	// which is the default / standard way of activating the button
+	OnClicked(fun func()) ButtonWidget
 }
 
 ///////////////////////////////////////////////////////////

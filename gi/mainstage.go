@@ -56,6 +56,7 @@ func (st *MainStage) RenderCtx() *RenderContext {
 // Use an appropriate Run call at the end to start the Stage running.
 func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 	st := &MainStage{}
+	st.Stage = st
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.CtxWidget = ctx

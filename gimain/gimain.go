@@ -28,8 +28,8 @@ var dummSvg svg.Line
 // and call given function as the effective "main" function.
 func Main(mainrun func()) {
 	DebugEnumSizes()
-	gi.Init()
 	driver.Main(func(app goosi.App) {
+		gi.Init()
 		mainrun()
 	})
 }
