@@ -4,18 +4,7 @@
 
 package gi
 
-import (
-	"image"
-	"log"
-	"os"
-	"path/filepath"
-	"strings"
-
-	"goki.dev/glop/dirs"
-	"goki.dev/goosi"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/spell"
-)
+/*
 
 // InitSpell tries to load the saved fuzzy.spell model.
 // If unsuccessful tries to create a new model from a text file used as input
@@ -294,3 +283,5 @@ func (sp *Spell) Cancel() bool {
 	sp.Sc = nil
 	return did
 }
+
+*/

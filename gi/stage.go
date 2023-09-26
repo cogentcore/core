@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"goki.dev/girl/gist"
-	"goki.dev/goosi"
 )
 
 var (
@@ -63,58 +62,65 @@ const (
 type Stage struct {
 
 	// Scene contents of this Stage -- what it displays
-	Scene *Scene `desc:"Scene contents of this Stage -- what it displays"`
+	Scene *Scene
 
 	// type of Stage: determines behavior and Styling
-	Type StageTypes `desc:"type of Stage: determines behavior and Styling"`
+	Type StageTypes
 
 	// name of the Stage -- generally auto-set based on Scene Name
-	Name string `desc:"name of the Stage -- generally auto-set based on Scene Name"`
+	Name string
 
-	// position and size within the parent Render context
-	Geom gist.Geom2DInt `desc:"position and size within the parent Render context"`
+	// [view: -] the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows
+	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows"`
+
+	// position and size within the parent Render context.
+	// Position is absolute offset relative to top left corner of render context.
+	Geom gist.Geom2DInt
 
 	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
-	Title string `desc:"title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types"`
+	Title string
 
 	// if true, blocks input to all other stages.
-	Modal bool `desc:"if true, blocks input to all other stages.  "`
+	Modal bool
 
 	// if true, places a darkening scrim over other stages, if not a full window
-	Scrim bool `desc:"if true, places a darkening scrim over other stages, if not a full window"`
+	Scrim bool
 
 	// if true dismisses the Stage if user clicks anywhere off the Stage
-	ClickOff bool `desc:"if true dismisses the Stage if user clicks anywhere off the Stage"`
+	ClickOff bool
 
 	// if > 0, disappears after a timeout duration
-	Timeout time.Duration `desc:"if > 0, disappears after a timeout duration"`
+	Timeout time.Duration
 
 	// if non-zero, requested width in standardized 96 DPI Pixel units.  otherwise automatically resizes.
-	Width int `desc:"if non-zero, requested width in standardized 96 DPI Pixel units.  otherwise automatically resizes."`
+	Width int
 
 	// if non-zero, requested height in standardized 96 DPI Pixel units.  otherwise automatically resizes.
-	Height int `desc:"if non-zero, requested height in standardized 96 DPI Pixel units.  otherwise automatically resizes."`
+	Height int
 
 	// if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
-	OwnWin bool `desc:"if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false."`
+	OwnWin bool
 
 	// for Windows: add a back button
-	Back bool `desc:"for Windows: add a back button"`
+	Back bool
 
 	// for Dialogs: adds a handle titlebar Decor for moving
-	Movable bool `desc:"for Dialogs: adds a handle titlebar Decor for moving"`
+	Movable bool
 
 	// for Dialogs: adds a resize handle Decor for resizing
-	Resizable bool `desc:"for Dialogs: adds a resize handle Decor for resizing"`
+	Resizable bool
 
 	// Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from
-	Side StageSides `desc:"Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from"`
+	Side StageSides
 
 	// manager for the popups in this stage
-	PopupMgr PopupMgr `desc:"manager for the popups in this stage"`
+	PopupMgr PopupMgr
 
 	// the parent stage manager for this stage
-	StageMgr *StageMgrBase `desc:"the parent stage manager for this stage"`
+	StageMgr *StageMgrBase
+
+	// event manager for this stage
+	EventMgr EventMgr
 }
 
 func (st *Stage) RenderCtx() *RenderContext {
@@ -129,6 +135,7 @@ func (st *Stage) RenderCtx() *RenderContext {
 // can be chained directly after the NewStage call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewStage(typ StageTypes, sc *Scene) *Stage {
+	st := &Stage{}
 	st.SetType(typ)
 	st.SetScene(sc)
 	return st
@@ -197,9 +204,10 @@ func NewChooser(sc *Scene) *Stage {
 // SetNameFromString sets the name of this Stage based on existing
 // Scene and Type settings.
 func (st *Stage) SetNameFromScene() *Stage {
-	if sc == nil {
-		return
+	if st.Scene == nil {
+		return nil
 	}
+	sc := st.Scene
 	st.Name = sc.Name + "-" + strings.ToLower(st.Type.String())
 	st.Title = sc.Title
 	return st
@@ -217,9 +225,9 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 	st.Type = typ
 	switch st.Type {
 	case Window:
-		if !goosi.TheApp.IsMobile() {
-			st.OwnWin = true
-		}
+		// if !goosi.TheApp.IsMobile() {
+		// 	st.OwnWin = true
+		// }
 		st.Modal = true // note: there is no global modal option between RenderWin windows
 	case Dialog:
 		st.Modal = true
@@ -286,7 +294,7 @@ func (st *Stage) SetWidth(width int) *Stage {
 }
 
 func (st *Stage) SetHeight(height int) *Stage {
-	st.Height = int
+	st.Height = height
 	return st
 }
 
@@ -343,7 +351,8 @@ func (st *Stage) Run() *Stage {
 // RenderWin field will be set to the parent RenderWin window.
 func (st *Stage) RunWindow() *Stage {
 	if st.OwnWin {
-		st.RenderWin = RunNewRenderWin(st.Name, st.Title, st)
+		st.RenderWin = st.NewRenderWin()
+		st.RenderWin.GoStartEventLoop()
 		return st
 	}
 	if CurRenderWin == nil {

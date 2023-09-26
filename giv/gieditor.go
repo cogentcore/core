@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -17,7 +18,6 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/matcolor"
 )
 
 // GiEditor represents a struct, creating a property editor of the fields --

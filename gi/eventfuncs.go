@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"goki.dev/enums"
 	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 )
@@ -52,8 +53,8 @@ func (we *WidgetEvents) HasFuncs() bool {
 // AddFunc is the primary call for adding an event processing function.
 // It sets the All flag in addition to adding to the map of funcs.
 func (we *WidgetEvents) AddFunc(et goosi.EventTypes, pri EventPris, fun ki.RecvFunc) *WidgetEvents {
-	if we.Funs == nil {
-		we.Funcs = make(map[goosi.EventType]*EventFunc)
+	if we.Funcs == nil {
+		we.Funcs = make(map[goosi.EventTypes]*EventFunc)
 	}
 	ef := &EventFunc{Type: et, Pri: pri, Func: fun}
 	we.Funcs[et] = ef
@@ -64,7 +65,7 @@ func (we *WidgetEvents) AddFunc(et goosi.EventTypes, pri EventPris, fun ki.RecvF
 // CopyFrom copies from other WidgetEvents -- typically the type general one.
 // Also ensures that Filter = All (i.e., RecvAll)
 // This is the first call in FilterEvents function per widget
-func (we *WidgetEvents) CopyFrom(cp *WidgetEvents) {
+func (we *WidgetEvents) CopyFrom(cp *WidgetEvents) *WidgetEvents {
 	*we = *cp
 	we.Filter = we.All
 	return we
@@ -77,7 +78,7 @@ func (we *WidgetEvents) RecvAll() *WidgetEvents {
 }
 
 // Ex excludes given event from Filter
-func (we *WidgetEvents) Ex(et ...goosi.EventTypes) *WidgetEvents {
+func (we *WidgetEvents) Ex(et ...enums.BitFlag) *WidgetEvents {
 	we.Filter.SetFlag(false, et...)
 	return we
 }

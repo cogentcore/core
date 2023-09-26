@@ -12,7 +12,6 @@ import (
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -219,8 +218,8 @@ func (lb *Label) OnInit() {
 			s.Font.Opacity = 0.7
 		}
 		if w.IsSelected() {
-			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
-			s.Color = ColorScheme.OnTertiaryContainer
+			s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
+			s.Color = ColorScheme.Tertiary.OnContainer
 		}
 	})
 }
@@ -306,7 +305,7 @@ func (lb *Label) AddEvents(we *WidgetEvents) {
 }
 
 func (lb *Label) FilterEvents() {
-	lb.Events.CopyFrom(LabelEventFuncs)
+	lb.Events.CopyFrom(&LabelEventFuncs)
 	hasLinks := len(lb.TextRender.Links) > 0
 	if !hasLinks {
 		lb.Events.Ex(goosi.MouseMoveEvent)
@@ -336,14 +335,17 @@ func (lb *Label) HoverEvent(we *WidgetEvents) {
 				}
 			}
 		}
-		if llb.Tooltip != "" {
-			me.SetHandled()
-			llb.BBoxMu.RLock()
-			pos := llb.WinBBox.Max
-			llb.BBoxMu.RUnlock()
-			pos.X -= 20
-			PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Sc, llb.Nm)
-		}
+		/*
+			todo:
+			if llb.Tooltip != "" {
+				me.SetHandled()
+				llb.BBoxMu.RLock()
+				pos := llb.WinBBox.Max
+				llb.BBoxMu.RUnlock()
+				pos.X -= 20
+				PopupTooltip(llb.Tooltip, pos.X, pos.Y, llb.Sc, llb.Nm)
+			}
+		*/
 	})
 }
 
@@ -392,12 +394,15 @@ func (lb *Label) MouseMoveEvent(we *WidgetEvents) {
 				break
 			}
 		}
-		// TODO: figure out how to get links to work with new cursor setup
-		if inLink {
-			goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
-		} else {
-			goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
-		}
+		_ = inLink
+		/*
+			// TODO: figure out how to get links to work with new cursor setup
+			if inLink {
+				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
+			} else {
+				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
+			}
+		*/
 	})
 }
 

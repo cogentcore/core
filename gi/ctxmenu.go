@@ -19,21 +19,21 @@ func (wb *WidgetBase) MakeContextMenu(m *MenuActions) {
 }
 
 func (wb *WidgetBase) ContextMenuPos() (pos image.Point) {
-	wb.BBoxMu.RLock()
-	pos.X = (wb.WinBBox.Min.X + wb.WinBBox.Max.X) / 2
-	pos.Y = (wb.WinBBox.Min.Y + wb.WinBBox.Max.Y) / 2
-	wb.BBoxMu.RUnlock()
+	// wb.BBoxMu.RLock()
+	// pos.X = (wb.WinBBox.Min.X + wb.WinBBox.Max.X) / 2
+	// pos.Y = (wb.WinBBox.Min.Y + wb.WinBBox.Max.Y) / 2
+	// wb.BBoxMu.RUnlock()
 	return
 }
 
 func (wb *WidgetBase) ContextMenu() {
-	var men Menu
-	wi := wb.This().(Widget)
-	wi.MakeContextMenu(&men)
-	if len(men) == 0 {
-		return
-	}
-	pos := wi.ContextMenuPos()
-	mvp := wb.Sc
-	PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
+	// var men Menu
+	// wi := wb.This().(Widget)
+	// wi.MakeContextMenu(&men)
+	// if len(men) == 0 {
+	// 	return
+	// }
+	// pos := wi.ContextMenuPos()
+	// mvp := wb.Sc
+	// PopupMenu(men, pos.X, pos.Y, mvp, wb.Nm+"-menu")
 }

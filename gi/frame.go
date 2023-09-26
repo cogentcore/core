@@ -44,7 +44,7 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 }
 
 func (fr *Frame) FilterEvents() {
-	fr.Events.CopyFrom(FrameEventFuncs)
+	fr.Events.CopyFrom(&FrameEventFuncs)
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds

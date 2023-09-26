@@ -39,8 +39,8 @@ type Scene struct {
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene
 	Flags ScFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene"`
 
-	// Scene-level viewbox within any parent Scene
-	Geom gist.Geom2DInt `desc:"Scene-level viewbox within any parent Scene"`
+	// Size and position relative to overall rendering context.
+	Geom gist.Geom2DInt
 
 	// Root of the scenegraph for this scene
 	Frame Frame `desc:"Root of the scenegraph for this scene"`
@@ -95,17 +95,17 @@ func NewScene(width, height int) *Scene {
 }
 
 func (sc *Scene) RenderCtx() *RenderContext {
-	if sc.Scene.Stage == nil { // todo: error msg?
+	if sc.Stage == nil { // todo: error msg?
 		return nil
 	}
-	return sc.Scene.Stage.RenderCtx
+	return sc.Stage.RenderCtx()
 }
 
-func (sc *Scene) StageMgr() *StageMgr {
-	if sc.Scene.Stage == nil { // todo: error msg?
+func (sc *Scene) StageMgr() *StageMgrBase {
+	if sc.Stage == nil { // todo: error msg?
 		return nil
 	}
-	return sc.Scene.Stage.StageMgr
+	return sc.Stage.StageMgr
 }
 
 // Resize resizes the scene, creating a new image -- updates Geom Size
@@ -145,7 +145,7 @@ func (sc *Scene) ScIsVisible() bool {
 	if sc.RenderCtx == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderCtx.Visible
+	return sc.RenderCtx().Visible
 }
 
 // todo: remove

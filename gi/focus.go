@@ -65,7 +65,7 @@ func (wb *WidgetBase) GrabFocus() {
 	}
 	em := wb.EventMgr()
 	if em != nil {
-		em.SetFocus(foc)
+		em.SetFocus(foc.(Widget))
 	}
 }
 
@@ -89,7 +89,7 @@ func (wb *WidgetBase) FocusPrev() {
 func (wb *WidgetBase) StartFocus() {
 	em := wb.EventMgr()
 	if em != nil {
-		em.SetStartFocus(wb.This())
+		em.SetStartFocus(wb.This().(Widget))
 	}
 }
 

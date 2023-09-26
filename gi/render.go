@@ -478,7 +478,8 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *gist.Style) {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 
-	pc.DrawStdBox(rs, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ParentBackgroundColor())
+	csp := wb.ParentBackgroundColor()
+	pc.DrawStdBox(rs, st, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &csp)
 }
 
 // ParentReRenderAnchor returns parent (including this node)

@@ -3,7 +3,13 @@
 package gi
 
 import (
+	"errors"
+	"strconv"
+	"strings"
+	"sync/atomic"
+
 	"goki.dev/enums"
+	"goki.dev/ki/v2"
 )
 
 var _ActionTypesValues = []ActionTypes{0, 1, 2, 3, 4}
@@ -2579,112 +2585,6 @@ func (i ScFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ScFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _SpellSignalsValues = []SpellSignals{0, 1}
-
-// SpellSignalsN is the highest valid value
-// for type SpellSignals, plus one.
-const SpellSignalsN SpellSignals = 2
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _SpellSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[SpellSelect-(0)]
-	_ = x[SpellIgnore-(1)]
-}
-
-var _SpellSignalsNameToValueMap = map[string]SpellSignals{
-	`SpellSelect`: 0,
-	`spellselect`: 0,
-	`SpellIgnore`: 1,
-	`spellignore`: 1,
-}
-
-var _SpellSignalsDescMap = map[SpellSignals]string{
-	0: `SpellSelect means the user chose one of the possible corrections`,
-	1: `SpellIgnore signals the user chose ignore so clear the tag`,
-}
-
-var _SpellSignalsMap = map[SpellSignals]string{
-	0: `SpellSelect`,
-	1: `SpellIgnore`,
-}
-
-// String returns the string representation
-// of this SpellSignals value.
-func (i SpellSignals) String() string {
-	if str, ok := _SpellSignalsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the SpellSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *SpellSignals) SetString(s string) error {
-	if val, ok := _SpellSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _SpellSignalsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type SpellSignals")
-}
-
-// Int64 returns the SpellSignals value as an int64.
-func (i SpellSignals) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the SpellSignals value from an int64.
-func (i *SpellSignals) SetInt64(in int64) {
-	*i = SpellSignals(in)
-}
-
-// Desc returns the description of the SpellSignals value.
-func (i SpellSignals) Desc() string {
-	if str, ok := _SpellSignalsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// SpellSignalsValues returns all possible values
-// for the type SpellSignals.
-func SpellSignalsValues() []SpellSignals {
-	return _SpellSignalsValues
-}
-
-// Values returns all possible values
-// for the type SpellSignals.
-func (i SpellSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_SpellSignalsValues))
-	for i, d := range _SpellSignalsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type SpellSignals.
-func (i SpellSignals) IsValid() bool {
-	_, ok := _SpellSignalsMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i SpellSignals) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *SpellSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

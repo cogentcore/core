@@ -830,44 +830,6 @@ func (t *ProgressBar) New() ki.Ki {
 	return &ProgressBar{}
 }
 
-// SpellType is the [gti.Type] for [Spell]
-var SpellType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Spell",
-	Doc:        "Spell",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SrcLn", &gti.Field{Name: "SrcLn", Type: "int", Doc: "line number in source that spelling is operating on, if relevant", Directives: gti.Directives{}}},
-		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", Doc: "character position in source that spelling is operating on (start of word to be corrected)", Directives: gti.Directives{}}},
-		{"Suggest", &gti.Field{Name: "Suggest", Type: "[]string", Doc: "list of suggested corrections", Directives: gti.Directives{}}},
-		{"Word", &gti.Field{Name: "Word", Type: "string", Doc: "word being checked", Directives: gti.Directives{}}},
-		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}}},
-		{"SpellSig", &gti.Field{Name: "SpellSig", Type: "ki.Signal", Doc: "[view: -] signal for Spell -- see SpellSignals for the types", Directives: gti.Directives{}}},
-		{"Correction", &gti.Field{Name: "Correction", Type: "string", Doc: "the user's correction selection'", Directives: gti.Directives{}}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Spell{},
-})
-
-// NewSpell adds a new [Spell] with
-// the given name to the given parent.
-func NewSpell(par ki.Ki, name string) *Spell {
-	return par.NewChild(SpellType, name).(*Spell)
-}
-
-// KiType returns the [*gti.Type] of [Spell]
-func (t *Spell) KiType() *gti.Type {
-	return SpellType
-}
-
-// New returns a new [*Spell] value
-func (t *Spell) New() ki.Ki {
-	return &Spell{}
-}
-
 // SpinBoxType is the [gti.Type] for [SpinBox]
 var SpinBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SpinBox",

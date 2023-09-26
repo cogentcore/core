@@ -197,6 +197,10 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	mb.UpdateEnd(updt)
 }
 
+/*
+
+todo:
+
 // MainMenuFunc is the callback function for OS-generated menu actions.
 func MainMenuFunc(owin goosi.Window, title string, tag int) {
 	win, ok := owin.Parent().(*RenderWin)
@@ -221,7 +225,7 @@ func MainMenuFunc(owin goosi.Window, title string, tag int) {
 // UpdateMainMenu updates the OS-specific, separate main menu of given window based
 // on this MenuBar -- called by RenderWin.MainMenuUpdated.
 func (mb *MenuBar) UpdateMainMenu(win *RenderWin) {
-	osmm := win.RenderWin.MainMenu()
+	osmm := win.GoosiWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -246,7 +250,7 @@ func (mb *MenuBar) UpdateMainMenu(win *RenderWin) {
 // for given window -- only should be called in window.Focus event.
 // Does nothing if menu is empty.
 func (mb *MenuBar) SetMainMenu(win *RenderWin) {
-	osmm := win.RenderWin.MainMenu()
+	osmm := win.GoosiWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -284,7 +288,7 @@ func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Acti
 // called via UpdateActions) -- can be called by method of same name on
 // RenderWin.
 func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
-	osmm := win.RenderWin.MainMenu()
+	osmm := win.GoosiWin.MainMenu()
 	if osmm == nil { // no OS main menu
 		return
 	}
@@ -301,6 +305,8 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 		osmm.SetItemActive(mid.(goosi.MenuItem), !ma.IsDisabled()) // assuming this is threadsafe
 	}
 }
+
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar

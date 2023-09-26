@@ -82,11 +82,11 @@ func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
 
 // FindRenderWin finds window with given goosi.RenderWin on list -- returns
 // window and true if found, nil, false otherwise.
-func (wl *RenderWinList) FindRenderWin(osw goosi.RenderWin) (*RenderWin, bool) {
+func (wl *RenderWinList) FindRenderWin(osw goosi.Window) (*RenderWin, bool) {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
-		if wi.RenderWin == osw {
+		if wi.GoosiWin == osw {
 			return wi, true
 		}
 	}

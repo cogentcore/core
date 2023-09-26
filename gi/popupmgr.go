@@ -15,9 +15,10 @@ type PopupMgr struct {
 	StageMgrBase
 }
 
-// Event processes Popup events.  Only gets OnFocus events if in focus.
+// HandleEvent processes Popup events.
+// Only gets OnFocus events if in focus.
 // requires outer RenderContext mutex!
-func (pm *PopupMgr) Event(evi goosi.Event) {
+func (pm *PopupMgr) HandleEvent(evi goosi.Event) {
 	top := pm.Top()
 	if top == nil {
 		return
@@ -25,18 +26,21 @@ func (pm *PopupMgr) Event(evi goosi.Event) {
 	if evi.HasPos() {
 		pos := evi.Pos()
 		if top.IsPtIn(pos) { // stage handles
-			st.Event(evi) // either will be handled or not..
+			top.HandleEvent(evi) // either will be handled or not..
 			return
 		}
-		if st.ClickOff {
+		if top.ClickOff {
 			if evi.Type() == goosi.MouseEvent {
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
 			}
 		}
-		// not Handled, will pass on
+		if top.Modal { // absorb any other events!
+			evi.SetHandled()
+		}
+		// else not Handled, will pass on
 	} else { // either focus or other, send it down
-		st.Event(evi) // either will be handled or not..
+		pm.HandleEvent(evi) // either will be handled or not..
 	}
 }
 

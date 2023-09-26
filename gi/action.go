@@ -236,12 +236,14 @@ func (ac *Action) ButtonRelease() {
 		// } else {
 		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)
 	}
-	if !menOpen && ac.IsMenu() && ac.Sc != nil {
-		win := ac.ParentRenderWin()
-		if win != nil {
-			win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
-		}
-	}
+	_ = menOpen
+	// todo:
+	// if !menOpen && ac.IsMenu() && ac.Sc != nil {
+	// 	win := ac.ParentRenderWin()
+	// 	if win != nil {
+	// 		win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
+	// 	}
+	// }
 	ac.UpdateEnd(updt)
 }
 

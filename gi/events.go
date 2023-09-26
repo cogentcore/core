@@ -12,6 +12,14 @@ import (
 	"goki.dev/ki/v2"
 )
 
+func (st *Stage) HandleEvent(evi goosi.Event) {
+	if st.Scene == nil {
+		return
+	}
+	evi.SetLocalOff(st.Scene.Geom.Pos)
+	st.EventMgr.HandleEvent(st.Scene, evi)
+}
+
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
 }
@@ -21,7 +29,7 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
-	return pos.In(wb.WinBBox)
+	return pos.In(wb.ScBBox)
 }
 
 // AddEvents adds the default event functions
@@ -35,10 +43,10 @@ func (wb *WidgetBase) AddEvents(we *WidgetEvents) {
 	wb.WidgetEvents(we)
 }
 
-// AddWidgetEvents adds the default events for Widget objects.
+// WidgetEvents adds the default events for Widget objects.
 // Any Widget implementing a custom AddEvents function
 // should first call this function.
-func (wb *WidgetBase) AddWidgetEvents(we *WidgetEvents) {
+func (wb *WidgetBase) WidgetEvents(we *WidgetEvents) {
 	// nb.WidgetMouseEvent() ??
 	wb.WidgetMouseFocusEvent(we)
 	wb.HoverTooltipEvent(we)
@@ -102,6 +110,7 @@ func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.Event) {
 // -- signal can be used to change state prior to generating context menu,
 // including setting a CtxtMenuFunc that removes all items and thus negates
 // the presentation of any menu
+/*
 func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
@@ -127,6 +136,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		}
 	})
 }
+*/
 
 // WidgetSignals are general signals that all widgets can send, via WidgetSig
 // signal

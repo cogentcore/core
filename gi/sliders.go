@@ -491,7 +491,7 @@ func (sb *SliderBase) KeyInput(kt *key.Event) {
 func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	sb.BBoxMu.RLock()
 	defer sb.BBoxMu.RUnlock()
-	return pt.Sub(sb.WinBBox.Min)
+	return pt.Sub(sb.ScBBox.Min)
 }
 
 func (sb *SliderBase) MouseDragEvent(we *WidgetEvents) {
@@ -502,7 +502,7 @@ func (sb *SliderBase) MouseDragEvent(we *WidgetEvents) {
 			return
 		}
 		me.SetHandled()
-		st := sbb.This().(SliderPositioner).PointToRelPos(me.From)
+		st := sbb.This().(SliderPositioner).PointToRelPos(me.Start)
 		ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 		if sbb.Dim == mat32.X {
 			sbb.SliderMove(float32(st.X), float32(ed.X))
@@ -719,8 +719,8 @@ func (sr *Slider) OnInit() {
 
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sr.ThumbSize = units.Px(20)
-		sr.ValueColor.SetColor(ColorScheme.Primary)
-		sr.ThumbColor.SetColor(ColorScheme.Primary)
+		sr.ValueColor.SetColor(ColorScheme.Primary.Base)
+		sr.ThumbColor.SetColor(ColorScheme.Primary.Base)
 
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
@@ -736,7 +736,7 @@ func (sr *Slider) OnInit() {
 			s.Width.SetPx(4)
 		}
 		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
-		s.Color = ColorScheme.OnPrimary
+		s.Color = ColorScheme.Primary.On
 		// STYTODO: state styles
 	})
 }
@@ -862,7 +862,7 @@ func (sr *Slider) AddEvents(we *WidgetEvents) {
 }
 
 func (sr *Slider) FilterEvents() {
-	sr.Events.CopyFrom(SliderEventFuncs)
+	sr.Events.CopyFrom(&SliderEventFuncs)
 }
 
 func (sr *Slider) FocusChanged(change FocusChanges) {
@@ -991,7 +991,7 @@ func (sb *ScrollBar) AddEvents(we *WidgetEvents) {
 }
 
 func (sb *ScrollBar) FilterEvents() {
-	sb.Events.CopyFrom(ScrollBarEventFuncs)
+	sb.Events.CopyFrom(&ScrollBarEventFuncs)
 }
 
 func (sb *ScrollBar) FocusChanged(change FocusChanges) {

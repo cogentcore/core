@@ -7,6 +7,7 @@ package gi
 import (
 	"sync"
 
+	"goki.dev/girl/gist"
 	"goki.dev/ordmap"
 )
 
@@ -14,6 +15,9 @@ import (
 // extended by PopupMgr and StageMgr.
 // Manages a stack of Stage elements.
 type StageMgrBase struct {
+	// position and size within the parent Render context.
+	// Position is absolute offset relative to top left corner of render context.
+	Geom gist.Geom2DInt
 
 	// stack of stages
 	Stack ordmap.Map[string, *Stage] `desc:"stack of stages"`
@@ -21,8 +25,8 @@ type StageMgrBase struct {
 	// rendering context for the Stages here
 	RenderCtx *RenderContext `desc:"rendering context for the Stages here"`
 
-	// [view: -] mutex protecting access
-	Mu sync.RWMutex `view:"-" desc:"mutex protecting access"`
+	// [view: -] mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
+	Mu sync.RWMutex `view:"-" desc:"mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read"`
 }
 
 // Top returns the top-most Stage in the Stack
@@ -43,6 +47,7 @@ func (sm *StageMgrBase) Push(st *Stage) {
 	defer sm.Mu.Unlock()
 
 	st.StageMgr = sm
+	st.PopupMgr.Geom = sm.Geom
 	sm.Stack.Add(st.Name, st)
 
 	// if pfoc != nil {
@@ -92,13 +97,7 @@ func (sm *StageMgrBase) CloseAll() {
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// 	StageMgr proper
-
-// StageMgr is the outer Stage manager for Window, Dialog, Sheet
-type StageMgr struct {
-	StageMgrBase
-
-	// growing stack of history of all stages.
-	History []*Stage
+func (sm *StageMgrBase) NewRenderCtx(dpi float32) *RenderContext {
+	ctx := &RenderContext{LogicalDPI: dpi, Visible: false}
+	sm.RenderCtx = ctx
 }

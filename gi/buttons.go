@@ -258,6 +258,7 @@ func (bb *ButtonBase) HasMenu() bool {
 // OpenMenu will open any menu associated with this element -- returns true if
 // menu opened, false if not
 func (bb *ButtonBase) OpenMenu() bool {
+	/* todo:
 	if !bb.HasMenu() {
 		return false
 	}
@@ -286,12 +287,13 @@ func (bb *ButtonBase) OpenMenu() bool {
 		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Sc, bb.Text)
 		return true
 	}
+	*/
 	return false
 }
 
 // ResetMenu removes all items in the menu
 func (bb *ButtonBase) ResetMenu() {
-	bb.Menu = make(Menu, 0, 10)
+	bb.Menu = make(MenuActions, 0, 10)
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
@@ -359,11 +361,11 @@ func (bb *ButtonBase) KeyChordEvent(we *WidgetEvents) {
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
-			if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-				kt.SetHandled()
-				bbb.ButtonPress()
-				bw.ButtonRelease()
-			}
+			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
+			kt.SetHandled()
+			bbb.ButtonPress()
+			bw.ButtonRelease()
+			// }
 		}
 	})
 }
@@ -376,14 +378,16 @@ func (bb *ButtonBase) HoverTooltipEvent(we *WidgetEvents) {
 		if wbb.Shortcut != "" {
 			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
 		}
-		if tt != "" {
-			me.SetHandled()
-			bb.BBoxMu.RLock()
-			pos := wbb.WinBBox.Max
-			bb.BBoxMu.RUnlock()
-			pos.X -= 20
-			PopupTooltip(tt, pos.X, pos.Y, wbb.Sc, wbb.Nm)
-		}
+		_ = me
+		// todo:
+		// if tt != "" {
+		// 	me.SetHandled()
+		// 	bb.BBoxMu.RLock()
+		// 	pos := wbb.WinBBox.Max
+		// 	bb.BBoxMu.RUnlock()
+		// 	pos.X -= 20
+		// 	PopupTooltip(tt, pos.X, pos.Y, wbb.Sc, wbb.Nm)
+		// }
 	})
 }
 
@@ -489,7 +493,7 @@ func (bb *ButtonBase) AddEvents(we *WidgetEvents) {
 }
 
 func (bb *ButtonBase) FilterEvents() {
-	bb.Events.CopyFrom(ButtonBaseEventFuncs)
+	bb.Events.CopyFrom(&ButtonBaseEventFuncs)
 }
 
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
@@ -594,24 +598,24 @@ func (bt *Button) OnInit() {
 		s.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
-			s.BackgroundColor.SetSolid(ColorScheme.Primary)
-			s.Color = ColorScheme.OnPrimary
+			s.BackgroundColor.SetSolid(ColorScheme.Primary.Base)
+			s.Color = ColorScheme.Primary.On
 		case ButtonTonal:
-			s.BackgroundColor.SetSolid(ColorScheme.SecondaryContainer)
-			s.Color = ColorScheme.OnSecondaryContainer
+			s.BackgroundColor.SetSolid(ColorScheme.Secondary.Container)
+			s.Color = ColorScheme.Secondary.OnContainer
 		case ButtonElevated:
 			s.Margin = gist.BoxShadowMargin(BoxShadow2).ToValues()
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
-			s.Color = ColorScheme.Primary
+			s.Color = ColorScheme.Primary.Base
 			s.BoxShadow = BoxShadow1
 		case ButtonOutlined:
 			s.BackgroundColor.SetSolid(ColorScheme.Surface)
-			s.Color = ColorScheme.Primary
+			s.Color = ColorScheme.Primary.Base
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Color.Set(ColorScheme.Outline)
 			s.Border.Width.Set(units.Px(1))
 		case ButtonText:
-			s.Color = ColorScheme.Primary
+			s.Color = ColorScheme.Primary.Base
 		}
 		if bt.HasFlag(Hovered) {
 			if bt.Type == ButtonElevated {
@@ -670,7 +674,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 }
 
 func (bb *Button) FilterEvents() {
-	bb.Events.CopyFrom(ButtonEventFuncs)
+	bb.Events.CopyFrom(&ButtonEventFuncs)
 }
 
 ///////////////////////////////////////////////////////////
@@ -750,7 +754,7 @@ func (cb *CheckBox) AsButtonBase() *ButtonBase {
 }
 
 func (cb *CheckBox) FilterEvents() {
-	cb.Events.CopyFrom(CheckBoxEventFuncs)
+	cb.Events.CopyFrom(&CheckBoxEventFuncs)
 }
 
 // OnClicked calls the given function when the button is clicked,

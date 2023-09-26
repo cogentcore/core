@@ -338,7 +338,7 @@ func (sb *SpinBox) AddEvents(we *WidgetEvents) {
 }
 
 func (sb *SpinBox) FilterEvents() {
-	sb.Events.CopyFrom(SpinBoxEventFuncs)
+	sb.Events.CopyFrom(&SpinBoxEventFuncs)
 }
 
 func (sb *SpinBox) SpinBoxEvents(we *WidgetEvents) {

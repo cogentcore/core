@@ -16,13 +16,7 @@ func mainrun() {
 
 	but := gi.NewButton(scene, "open-dialog").SetText("Open Dialog")
 	but.OnClicked(func() {
-		gi.RunStage(dialog, &gi.StageOpts{Type: gi.Dialog, Modal: true, Movable: true, Closeable: true, Back: true})
-		gi.RunStage(dialog, gi.StageType(gi.Dialog), gi.StageModal(), gi.StageMovable(), gi.StageClosable(), gi.StageBack())
 		gi.NewDialog(dialog).SetModal().SetMovable().SetClosable().SetBack().Run() // <- winner!
-
-		gi.RunStage(dialog, &gi.StageOpts{Type: gi.BottomSheet, Modal: true})
-		// gi.OpenDialog(gi.SceneLib("dialog"))
-		// gi.RunStage(&gi.Stage{Scene: dialog, Type: gi.Dialog, Modal: true, RenderWin: true})
 	})
 
 	// note: on Desktop, default is for Window to open in a new RenderWin
@@ -30,4 +24,7 @@ func mainrun() {
 	// SetOwnWin() explicitly puts separate window
 
 	win := gi.NewWindow(scene).SetName("hello").SetTitle("Hello World!").SetWidth(512).SetHeight(384).Run()
+
+	// todo: could provide a wrapper
+	gi.WinWait.Wait() // wait for windows to close
 }

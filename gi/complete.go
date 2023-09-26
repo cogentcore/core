@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/spell"
@@ -106,37 +105,39 @@ func (c *Complete) IsAboutToShow() bool {
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
 func (c *Complete) Show(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
-	if c.MatchFunc == nil || sc == nil || sc.Win == nil {
-		return
-	}
-	cpop := sc.Win.CurPopup()
-	// TODO: maybe preserve popup and just move it
-	// onif there is no delay set in CompleteWaitMSec
-	// (should reduce annoying flashing)
-	waitMSec := CompleteWaitMSec
-	if force {
-		waitMSec = 0
-	}
-	if PopupIsCompleter(cpop) {
-		sc.Win.SetDelPopup(cpop)
-	}
-	c.DelayMu.Lock()
-	if c.DelayTimer != nil {
-		c.DelayTimer.Stop()
-	}
-	if text == "" {
-		c.DelayMu.Unlock()
-		return
-	}
-
-	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
-		func() {
-			c.DelayMu.Lock()
-			c.ShowNow(text, posLn, posCh, sc, pt, force, waitMSec == 0)
-			c.DelayTimer = nil
+	/*
+		if c.MatchFunc == nil || sc == nil {
+			return
+		}
+		cpop := sc.Win.CurPopup()
+		// TODO: maybe preserve popup and just move it
+		// onif there is no delay set in CompleteWaitMSec
+		// (should reduce annoying flashing)
+		waitMSec := CompleteWaitMSec
+		if force {
+			waitMSec = 0
+		}
+		if PopupIsCompleter(cpop) {
+			sc.Win.SetDelPopup(cpop)
+		}
+		c.DelayMu.Lock()
+		if c.DelayTimer != nil {
+			c.DelayTimer.Stop()
+		}
+		if text == "" {
 			c.DelayMu.Unlock()
-		})
-	c.DelayMu.Unlock()
+			return
+		}
+
+		c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
+			func() {
+				c.DelayMu.Lock()
+				c.ShowNow(text, posLn, posCh, sc, pt, force, waitMSec == 0)
+				c.DelayTimer = nil
+				c.DelayMu.Unlock()
+			})
+		c.DelayMu.Unlock()
+	*/
 }
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
@@ -144,75 +145,80 @@ func (c *Complete) Show(text string, posLn, posCh int, sc *Scene, pt image.Point
 // will be kept and reused (if it exists), which reduces flashing if there is no
 // delay between popups.
 func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool, keep bool) {
-	if c.MatchFunc == nil || sc == nil || sc.Win == nil {
-		return
-	}
-	cpop := sc.Win.CurPopup()
-	if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
-		sc.Win.SetDelPopup(cpop)
-	}
-	c.ShowMu.Lock()
-	defer c.ShowMu.Unlock()
-	c.Sc = nil
-	md := c.MatchFunc(c.Context, text, posLn, posCh)
-	c.Completions = md.Matches
-	c.Seed = md.Seed
-	count := len(c.Completions)
-	if count == 0 {
-		return
-	}
-	if !force {
-		if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
+	/*
+		if c.MatchFunc == nil || sc == nil || sc.Win == nil {
 			return
 		}
-	}
-
-	var m Menu
-	for i := 0; i < count; i++ {
-		cmp := &c.Completions[i]
-		text := cmp.Text
-		if cmp.Label != "" {
-			text = cmp.Label
+		cpop := sc.Win.CurPopup()
+		if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
+			sc.Win.SetDelPopup(cpop)
 		}
-		icon := cmp.Icon
-		m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
-			c, func(recv, send ki.Ki, sig int64, data any) {
-				cc := recv.(*Complete)
-				cc.Complete(data.(string))
-			})
-	}
-	// TODO: maybe get this working with RecyclePopup
-	// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
-	// if keep && vp.Win.CurPopup() != nil {
-	// 	fmt.Println("updating through keep")
-	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	// 	psc.SetFlag(int(ScFlagCompleter))
-	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
-	// } else {
-	psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
-	psc.Type = ScCompleter
-	// todo:
-	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
-	// }
-	c.Sc = sc
+		c.ShowMu.Lock()
+		defer c.ShowMu.Unlock()
+		c.Sc = nil
+		md := c.MatchFunc(c.Context, text, posLn, posCh)
+		c.Completions = md.Matches
+		c.Seed = md.Seed
+		count := len(c.Completions)
+		if count == 0 {
+			return
+		}
+		if !force {
+			if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
+				return
+			}
+		}
+
+		var m Menu
+		for i := 0; i < count; i++ {
+			cmp := &c.Completions[i]
+			text := cmp.Text
+			if cmp.Label != "" {
+				text = cmp.Label
+			}
+			icon := cmp.Icon
+			m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
+				c, func(recv, send ki.Ki, sig int64, data any) {
+					cc := recv.(*Complete)
+					cc.Complete(data.(string))
+				})
+		}
+		// TODO: maybe get this working with RecyclePopup
+		// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
+		// if keep && vp.Win.CurPopup() != nil {
+		// 	fmt.Println("updating through keep")
+		// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+		// 	psc.SetFlag(int(ScFlagCompleter))
+		// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+		// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
+		// } else {
+		psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
+		psc.Type = ScCompleter
+		// todo:
+		// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+		sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
+		// }
+		c.Sc = sc
+	*/
 }
 
 // Cancel cancels any existing *or* pending completion.
 // Call when new events nullify prior completions.
 // Returns true if canceled.
 func (c *Complete) Cancel() bool {
-	did := false
-	if c.Sc != nil && c.Sc.Win != nil {
-		cpop := c.Sc.Win.CurPopup()
-		if PopupIsCompleter(cpop) {
-			c.Sc.Win.SetDelPopup(cpop)
-			did = true
+	return false
+	/*
+		did := false
+		if c.Sc != nil && c.Sc.Win != nil {
+			cpop := c.Sc.Win.CurPopup()
+			if PopupIsCompleter(cpop) {
+				c.Sc.Win.SetDelPopup(cpop)
+				did = true
+			}
 		}
-	}
-	ab := c.Abort()
-	return did || ab
+		ab := c.Abort()
+		return did || ab
+	*/
 }
 
 // Abort aborts *only* pending completions, but does not close existing window.
@@ -232,7 +238,7 @@ func (c *Complete) Abort() bool {
 
 // Lookup is the main call for doing lookups
 func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
-	if c.LookupFunc == nil || sc == nil || sc.Win == nil {
+	if c.LookupFunc == nil || sc == nil {
 		return
 	}
 	c.Sc = nil

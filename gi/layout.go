@@ -407,7 +407,6 @@ func (ly *Layout) DeactivateScroll(sb *ScrollBar) {
 	sb.LayState.Alloc.Pos = mat32.Vec2Zero
 	sb.LayState.Alloc.Size = mat32.Vec2Zero
 	sb.ScBBox = image.Rectangle{}
-	sb.WinBBox = image.Rectangle{}
 }
 
 // LayoutScrolls arranges scrollbars
@@ -513,7 +512,7 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 // remainder.
 func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	del := me.Delta
-	hasShift := me.HasAnyModifier(goosi.Shift, key.Alt) // shift or alt says: use vert for other dimension
+	hasShift := me.HasAnyModifier(goosi.Shift, goosi.Alt) // shift or alt says: use vert for other dimension
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
 			me.SetHandled()
@@ -667,7 +666,7 @@ func (ly *Layout) AutoScroll(pos image.Point) bool {
 		return false
 	}
 	ly.BBoxMu.RLock()
-	wbb := ly.WinBBox
+	wbb := ly.ScBBox
 	ly.BBoxMu.RUnlock()
 	did := false
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
@@ -880,9 +879,9 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	}
 	did := false
 	if nxti < sz {
-		did = em.FocusOnOrNext(ly.Child(nxti))
+		did = em.FocusOnOrNext(ly.Child(nxti).(Widget))
 	} else {
-		did = em.FocusOnOrNext(ly.Child(0))
+		did = em.FocusOnOrNext(ly.Child(0).(Widget))
 	}
 	if !did || em.CurFocus() == cur {
 		return false
@@ -909,9 +908,9 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	}
 	did := false
 	if nxti >= 0 {
-		did = em.FocusOnOrPrev(ly.Child(nxti))
+		did = em.FocusOnOrPrev(ly.Child(nxti).(Widget))
 	} else {
-		did = em.FocusOnOrPrev(ly.Child(sz - 1))
+		did = em.FocusOnOrPrev(ly.Child(sz - 1).(Widget))
 	}
 	if !did || em.CurFocus() == cur {
 		return false
@@ -1007,7 +1006,7 @@ func (ly *Layout) FocusOnName(kt *key.Event) bool {
 		if delayMs > LayoutFocusNameTimeoutMSec {
 			ly.FocusName = ""
 		}
-		if !unicode.IsPrint(kt.Rune) || kt.Modifiers != 0 {
+		if !unicode.IsPrint(kt.Rune) || kt.Mods != 0 {
 			return false
 		}
 		sr := string(kt.Rune)
@@ -1024,7 +1023,7 @@ func (ly *Layout) FocusOnName(kt *key.Event) bool {
 	if found {
 		em := ly.EventMgr()
 		if em != nil {
-			em.SetFocus(focel) // this will also scroll by default!
+			em.SetFocus(focel.(Widget)) // this will also scroll by default!
 		}
 		ly.FocusNameLast = focel
 		return true
@@ -1074,32 +1073,32 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 
 // LayoutScrollEvents registers scrolling-related mouse events processed by
 // Layout -- most subclasses of Layout will want these..
-func (ly *Layout) LayoutScrollEvents() {
+func (ly *Layout) LayoutScrollEvents(we *WidgetEvents) {
 	// LowPri to allow other focal widgets to capture
-	lywe.AddFunc(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		li := AsLayout(recv)
 		li.ScrollDelta(me)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
-	lywe.AddFunc(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*dnd.Event)
 		li := AsLayout(recv)
 		li.AutoScroll(me.Pos())
 	})
-	lywe.AddFunc(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
-		li := AsLayout(recv)
-		if li.Sc.Type == ScMenu {
-			li.AutoScroll(me.Pos())
-		}
-	})
+	// we.AddFunc(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	me := d.(*mouse.Event)
+	// 	li := AsLayout(recv)
+	// 	if li.Sc.Type == ScMenu {
+	// 		li.AutoScroll(me.Pos())
+	// 	}
+	// })
 }
 
 // KeyChordEvent processes (lowpri) layout key events
-func (ly *Layout) KeyChordEvent() {
+func (ly *Layout) KeyChordEvent(we *WidgetEvents) {
 	// LowPri to allow other focal widgets to capture
-	lywe.AddFunc(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := AsLayout(recv)
 		kt := d.(*key.Event)
 		li.LayoutKeys(kt)
@@ -1294,7 +1293,7 @@ func (ly *Layout) AddEvents(we *WidgetEvents) {
 }
 
 func (ly *Layout) FilterEvents() {
-	ly.Events.CopyFrom(LayoutEventFuncs)
+	ly.Events.CopyFrom(&LayoutEventFuncs)
 	if !ly.HasAnyScroll() {
 		ly.Events.Ex(goosi.MouseScrollEvent, goosi.DNDMoveEvent, goosi.MouseMoveEvent)
 	}

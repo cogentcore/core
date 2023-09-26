@@ -360,7 +360,7 @@ func (sv *SplitView) AddEvents(we *WidgetEvents) {
 }
 
 func (sv *SplitView) FilterEvents() {
-	sv.Events.CopyFrom(SplitViewEventFuncs)
+	sv.Events.CopyFrom(&SplitViewEventFuncs)
 }
 
 func (sv *SplitView) SplitViewEvents(we *WidgetEvents) {
@@ -493,7 +493,7 @@ func (sr *Splitter) OnInit() {
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
+		s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
 		s.Color = ColorScheme.OnBackground
 		if sr.Dim == mat32.X {
 			s.MinWidth.SetPx(2)
@@ -550,7 +550,7 @@ func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool 
 	sr.UpdatePosFromValue()
 	sr.DragPos = sr.Pos
 	sr.BBoxMu.RLock()
-	sr.OrigWinBBox = sr.WinBBox
+	sr.OrigWinBBox = sr.ScBBox
 	sr.BBoxMu.RUnlock()
 	return sr.DoLayoutChildren(sc, iter)
 }
@@ -561,42 +561,44 @@ func (sr *Splitter) PointToRelPos(pt image.Point) image.Point {
 }
 
 func (sr *Splitter) UpdateSplitterPos() {
-	spc := sr.BoxSpace()
-	handsz := sr.ThumbSize.Dots
-	off := 0
-	if sr.Dim == mat32.X {
-		off = sr.OrigWinBBox.Min.X
-	} else {
-		off = sr.OrigWinBBox.Min.Y
-	}
-	sz := handsz
-	if !sr.HasFlag(NodeDragging) {
-		sz += spc.Size().Dim(sr.Dim)
-	}
-	pos := off + int(sr.Pos-0.5*sz)
-	mxpos := off + int(sr.Pos+0.5*sz)
-
-	// SidesTODO: this is all sketchy
-
-	if sr.HasFlag(NodeDragging) {
-		win := sr.ParentRenderWin()
-		spnm := "gi.Splitter:" + sr.Name()
-		spr, ok := win.SpriteByName(spnm)
-		if ok {
-			spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + int(spc.Top)}
-		}
-	} else {
-		sr.BBoxMu.Lock()
-
+	/*
+		spc := sr.BoxSpace()
+		handsz := sr.ThumbSize.Dots
+		off := 0
 		if sr.Dim == mat32.X {
-			sr.ScBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
-			sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+			off = sr.OrigWinBBox.Min.X
 		} else {
-			sr.ScBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
-			sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+			off = sr.OrigWinBBox.Min.Y
 		}
-		sr.BBoxMu.Unlock()
-	}
+		sz := handsz
+		if !sr.HasFlag(NodeDragging) {
+			sz += spc.Size().Dim(sr.Dim)
+		}
+		pos := off + int(sr.Pos-0.5*sz)
+		mxpos := off + int(sr.Pos+0.5*sz)
+
+		// SidesTODO: this is all sketchy
+
+		if sr.HasFlag(NodeDragging) {
+			win := sr.ParentRenderWin()
+			spnm := "gi.Splitter:" + sr.Name()
+			spr, ok := win.SpriteByName(spnm)
+			if ok {
+				spr.Geom.Pos = image.Point{pos, sr.ObjBBox.Min.Y + int(spc.Top)}
+			}
+		} else {
+			sr.BBoxMu.Lock()
+
+			if sr.Dim == mat32.X {
+				sr.ScBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+				sr.WinBBox = image.Rect(pos, sr.ObjBBox.Min.Y+int(spc.Top), mxpos, sr.ObjBBox.Max.Y+int(spc.Bottom))
+			} else {
+				sr.ScBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+				sr.WinBBox = image.Rect(sr.ObjBBox.Min.X+int(spc.Left), pos, sr.ObjBBox.Max.X+int(spc.Right), mxpos)
+			}
+			sr.BBoxMu.Unlock()
+		}
+	*/
 }
 
 // SplitView returns our parent split view
@@ -684,40 +686,42 @@ func (sr *Splitter) AddEvents(we *WidgetEvents) {
 }
 
 func (sr *Splitter) FilterEvents() {
-	sr.Events.CopyFrom(SplitterEventFuncs)
+	sr.Events.CopyFrom(&SplitterEventFuncs)
 }
 
 func (sr *Splitter) Render(sc *Scene) {
-	win := sr.ParentRenderWin()
-	wi := sr.This().(Widget)
-	wi.FilterEvents()
-	spnm := "gi.Splitter:" + sr.Name()
-	if sr.HasFlag(NodeDragging) {
-		ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)
-		if ick == nil {
-			return
-		}
-		ic := ick.(*Icon)
-		spr, ok := win.SpriteByName(spnm)
-		if !ok {
-			spr = NewSprite(spnm, image.Point{}, sr.ScBBox.Min)
-			spr.GrabRenderFrom(ic)
-			win.AddSprite(spr)
-			win.ActivateSprite(spnm)
-		}
-		sr.UpdateSplitterPos()
-		win.UpdateSig()
-	} else {
-		if win.DeleteSprite(spnm) {
+	/*
+		win := sr.ParentRenderWin()
+		wi := sr.This().(Widget)
+		wi.FilterEvents()
+		spnm := "gi.Splitter:" + sr.Name()
+		if sr.HasFlag(NodeDragging) {
+			ick := sr.Parts.ChildByType(IconType, ki.Embeds, 0)
+			if ick == nil {
+				return
+			}
+			ic := ick.(*Icon)
+			spr, ok := win.SpriteByName(spnm)
+			if !ok {
+				// spr = NewSprite(spnm, image.Point{}, sr.ScBBox.Min)
+				// spr.GrabRenderFrom(ic)
+				// win.AddSprite(spr)
+				// win.ActivateSprite(spnm)
+			}
+			sr.UpdateSplitterPos()
 			win.UpdateSig()
+		} else {
+			if win.DeleteSprite(spnm) {
+				win.UpdateSig()
+			}
+			sr.UpdateSplitterPos()
+			if sr.PushBounds(sc) {
+				sr.RenderSplitter(sc)
+				sr.RenderChildren(sc)
+				sr.PopBounds(sc)
+			}
 		}
-		sr.UpdateSplitterPos()
-		if sr.PushBounds(sc) {
-			sr.RenderSplitter(sc)
-			sr.RenderChildren(sc)
-			sr.PopBounds(sc)
-		}
-	}
+	*/
 }
 
 // RenderSplitter does the default splitter rendering

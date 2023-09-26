@@ -104,7 +104,7 @@ func (cb *ComboBox) OnInit() {
 				s.Border.Radius = gist.BorderRadiusExtraSmallTop
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Bottom = units.Px(2)
-					s.Border.Color.Bottom = ColorScheme.Primary
+					s.Border.Color.Bottom = ColorScheme.Primary.Base
 				}
 
 			}
@@ -116,7 +116,7 @@ func (cb *ComboBox) OnInit() {
 				s.Border.Radius = gist.BorderRadiusExtraSmall
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Set(units.Px(2))
-					s.Border.Color.Set(ColorScheme.Primary)
+					s.Border.Color.Set(ColorScheme.Primary.Base)
 				}
 			}
 		}
@@ -201,23 +201,25 @@ func (cb *ComboBox) ButtonRelease() {
 		cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
 	}
 	cb.UpdateEnd(updt)
-	cb.BBoxMu.RLock()
-	pos := cb.WinBBox.Max
-	if pos.X == 0 && pos.Y == 0 { // offscreen
-		pos = cb.ObjBBox.Max
-	}
-	indic := AsWidgetBase(cb.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
-		if pos.X == 0 && pos.Y == 0 {
-			pos = indic.ObjBBox.Min
+	/*
+		cb.BBoxMu.RLock()
+		pos := cb.WinBBox.Max
+		if pos.X == 0 && pos.Y == 0 { // offscreen
+			pos = cb.ObjBBox.Max
 		}
-	} else {
-		pos.Y -= 10
-		pos.X -= 10
-	}
-	cb.BBoxMu.RUnlock()
-	PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Sc, cb.Text)
+		indic := AsWidgetBase(cb.Parts.ChildByName("indicator", 3))
+		if indic != nil {
+			pos = indic.WinBBox.Min
+			if pos.X == 0 && pos.Y == 0 {
+				pos = indic.ObjBBox.Min
+			}
+		} else {
+			pos.Y -= 10
+			pos.X -= 10
+		}
+		cb.BBoxMu.RUnlock()
+		PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Sc, cb.Text)
+	*/
 }
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
@@ -517,7 +519,7 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 func (cb *ComboBox) MakeItemsMenu() {
 	nitm := len(cb.Items)
 	if cb.ItemsMenu == nil {
-		cb.ItemsMenu = make(Menu, 0, nitm)
+		cb.ItemsMenu = make(MenuActions, 0, nitm)
 	}
 	sz := len(cb.ItemsMenu)
 	if nitm < sz {
@@ -574,7 +576,7 @@ func (cb *ComboBox) AddEvents(we *WidgetEvents) {
 }
 
 func (cb *ComboBox) FilterEvents() {
-	cb.Events.CopyFrom(ComboBoxEventFuncs)
+	cb.Events.CopyFrom(&ComboBoxEventFuncs)
 }
 
 func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
@@ -626,11 +628,11 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
-			if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
-				kt.SetHandled()
-				cbb.ButtonPress()
-				cbb.ButtonRelease()
-			}
+			// if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
+			kt.SetHandled()
+			cbb.ButtonPress()
+			cbb.ButtonRelease()
+			// }
 		}
 	})
 }

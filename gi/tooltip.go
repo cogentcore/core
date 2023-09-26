@@ -9,9 +9,6 @@ import (
 
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -81,16 +78,18 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
-func (wb *WidgetBase) HoverTooltipEvent() {
-	wbwe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
-		wbb := AsWidgetBase(recv)
-		if wbb.Tooltip != "" {
-			me.SetHandled()
-			pos := wbb.WinBBox.Max
-			pos.X -= 20
-			mvp := wbb.Sc
-			PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
-		}
-	})
+func (wb *WidgetBase) HoverTooltipEvent(we *WidgetEvents) {
+	/*
+		we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			me := d.(*mouse.Event)
+			wbb := AsWidgetBase(recv)
+			if wbb.Tooltip != "" {
+				me.SetHandled()
+				pos := wbb.WinBBox.Max
+				pos.X -= 20
+				mvp := wbb.Sc
+				PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
+			}
+		})
+	*/
 }

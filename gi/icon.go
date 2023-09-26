@@ -137,7 +137,7 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 }
 
 func (ic *Icon) FilterEvents() {
-	ic.Events.CopyFrom(IconEventFuncs)
+	ic.Events.CopyFrom(&IconEventFuncs)
 }
 
 func (ic *Icon) Render(sc *Scene) {
@@ -145,7 +145,7 @@ func (ic *Icon) Render(sc *Scene) {
 
 	wi := ic.This().(Widget)
 	if ic.PushBounds(sc) {
-		wi.AddEvents()
+		wi.FilterEvents()
 		ic.RenderChildren(sc)
 		ic.DrawIntoScene(sc)
 		ic.PopBounds(sc)

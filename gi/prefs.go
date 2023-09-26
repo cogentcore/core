@@ -13,8 +13,10 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
@@ -23,9 +25,25 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
-	"goki.dev/matcolor"
 	"goki.dev/pi/v2/langs/golang"
 )
+
+// Init performs overall initialization of the gogi system: loading prefs, etc
+// -- automatically called when new window opened, but can be called before
+// then if pref info needed.
+func Init() {
+	if Prefs.LogicalDPIScale == 0 {
+		Prefs.Defaults()
+		PrefsDet.Defaults()
+		PrefsDbg.Connect()
+		Prefs.Open()
+		Prefs.Apply()
+		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
+		TheViewIFace.HiStyleInit()
+		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
+		WinGeomMgr.Open()
+	}
+}
 
 // Preferences are the overall user preferences for GoGi, providing some basic
 // customization -- in addition, most gui settings can be styled using
@@ -230,14 +248,16 @@ func (pf *Preferences) Apply() {
 	if pf.ColorSchemes["Dark"].HiStyle == "" {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
 	}
-	if pf.ColorSchemeType == gist.ColorSchemeLight {
-		ColorScheme = ColorSchemes.Light
-	} else {
-		ColorScheme = ColorSchemes.Dark
-	}
+	/*
+		if pf.ColorSchemeType == gist.ColorSchemeLight {
+			ColorScheme = ColorSchemes.Light
+		} else {
+			ColorScheme = ColorSchemes.Dark
+		}
+	*/
 
 	TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
-	mouse.DoubleClickMSec = pf.Params.DoubleClickMSec
+	mouse.DoubleClickInterval = pf.Params.DoubleClickInterval
 	mouse.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
 
@@ -271,7 +291,7 @@ func (pf *Preferences) ApplyDPI() {
 		sc.UpdateLogicalDPI()
 	}
 	for _, w := range AllRenderWins {
-		w.RenderWin.SetLogicalDPI(w.RenderWin.Screen().LogicalDPI)
+		w.GoosiWin.SetLogicalDPI(w.GoosiWin.Screen().LogicalDPI)
 	}
 }
 
@@ -288,14 +308,14 @@ func (pf *Preferences) UpdateAll() {
 	// 	w.SetSize(w.RenderWin.Size())
 	// }
 	// needs another pass through to get it right..
-	for _, w := range AllRenderWins {
-		w.FullReRender()
-	}
+	// for _, w := range AllRenderWins {
+	// 	w.FullReRender()
+	// }
 	gist.RebuildDefaultStyles = false
 	// and another without rebuilding?  yep all are required
-	for _, w := range AllRenderWins {
-		w.FullReRender()
-	}
+	// for _, w := range AllRenderWins {
+	// 	w.FullReRender()
+	// }
 }
 
 // ScreenInfo returns screen info for all screens on the console.
@@ -636,7 +656,7 @@ func (pf *ColorPrefs) PrefColor(clrName string) *color.RGBA {
 func (pf *ColorPrefs) OpenJSON(filename FileName) error {
 	b, err := ioutil.ReadFile(string(filename))
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
+		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
 		log.Println(err)
 		return err
 	}
@@ -652,7 +672,7 @@ func (pf *ColorPrefs) SaveJSON(filename FileName) error {
 	}
 	err = ioutil.WriteFile(string(filename), b, 0644)
 	if err != nil {
-		PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
+		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
 		log.Println(err)
 	}
 	return err
@@ -711,7 +731,7 @@ type ScreenPrefs struct {
 type ParamPrefs struct {
 
 	// [min: 100] [step: 50] the maximum time interval in msec between button press events to count as a double-click
-	DoubleClickMSec int `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
+	DoubleClickInterval time.Duration `min:"100" step:"50" desc:"the maximum time interval in msec between button press events to count as a double-click"`
 
 	// [min: 0.01] [step: 1] how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
 	ScrollWheelSpeed float32 `min:"0.01" step:"1" desc:"how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here."`
@@ -736,7 +756,7 @@ type ParamPrefs struct {
 }
 
 func (pf *ParamPrefs) Defaults() {
-	pf.DoubleClickMSec = 500
+	pf.DoubleClickInterval = 500
 	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
 	pf.OnlyCloseActiveTab = false
@@ -1279,5 +1299,5 @@ func (pf *PrefsDebug) Connect() {
 
 // Profile toggles profiling on / off
 func (pf *PrefsDebug) Profile() {
-	ProfileToggle()
+	// ProfileToggle()
 }

@@ -274,7 +274,7 @@ func (bb *ButtonBox) RenderButtonBox(sc *Scene) {
 func (bb *ButtonBox) Render(sc *Scene) {
 	wi := bb.This().(Widget)
 	if bb.PushBounds(sc) {
-		wi.filterEvents()
+		wi.FilterEvents()
 		bb.RenderButtonBox(sc)
 		bb.RenderParts(sc)
 		bb.RenderChildren(sc)
