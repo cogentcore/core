@@ -114,28 +114,46 @@ func (h *HCT) SetToNil() {
 // SetHue sets the hue of this color. Chroma may decrease because chroma has a
 // different maximum for any given hue and tone.
 // 0 <= hue < 360; invalid values are corrected.
-func (h *HCT) SetHue(hue float32) *HCT {
+func (h *HCT) SetHue(hue float32) {
 	r, g, b := SolveToRGB(hue, h.Chroma, h.Tone)
 	*h = SRGBToHCT(r, g, b)
-	return h
+}
+
+// WithHue is like [SetHue] except it returns a new color
+// instead of setting the existing one.
+func (h HCT) WithHue(hue float32) HCT {
+	r, g, b := SolveToRGB(hue, h.Chroma, h.Tone)
+	return SRGBToHCT(r, g, b)
 }
 
 // SetChroma sets the chroma of this color (0 to max that depends on other params),
 // while keeping the sRGB representation within its gamut,
 // which may cause the chroma to decrease until it is inside the gamut.
-func (h *HCT) SetChroma(chroma float32) *HCT {
+func (h *HCT) SetChroma(chroma float32) {
 	r, g, b := SolveToRGB(h.Hue, chroma, h.Tone)
 	*h = SRGBToHCT(r, g, b)
-	return h
+}
+
+// WithChroma is like [SetChroma] except it returns a new color
+// instead of setting the existing one.
+func (h HCT) WithChroma(chroma float32) HCT {
+	r, g, b := SolveToRGB(h.Hue, chroma, h.Tone)
+	return SRGBToHCT(r, g, b)
 }
 
 // SetTone sets the tone of this color (0 < tone < 100),
 // while keeping the sRGB representation within its gamut,
 // which may cause the chroma to decrease until it is inside the gamut.
-func (h *HCT) SetTone(tone float32) *HCT {
+func (h *HCT) SetTone(tone float32) {
 	r, g, b := SolveToRGB(h.Hue, h.Chroma, tone)
 	*h = SRGBToHCT(r, g, b)
-	return h
+}
+
+// WithTone is like [SetTone] except it returns a new color
+// instead of setting the existing one.
+func (h HCT) WithTone(tone float32) HCT {
+	r, g, b := SolveToRGB(h.Hue, h.Chroma, tone)
+	return SRGBToHCT(r, g, b)
 }
 
 // SRGBToHCT returns an HCT from given SRGB color coordinates,
