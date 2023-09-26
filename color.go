@@ -90,3 +90,10 @@ func SuccessColor(str string) string {
 func CmdColor(str string) string {
 	return ApplyColor(colors.Scheme.Primary.Base, str)
 }
+
+// TitleColor applies the color associated with titles and section headers
+// to the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func TitleColor(str string) string {
+	return ApplyColor(colors.Scheme.Warn.Base, str)
+}
