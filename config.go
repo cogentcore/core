@@ -28,6 +28,11 @@ type Config struct {
 	// Fatal is whether to fatally exit programs with [os.Exit] and an
 	// exit code of 1 when there is an error running a program.
 	Fatal bool
+	// PrintOnly is whether to only print commands that would be run and
+	// not actually run them. It can be used, for example, for safely testing
+	// an app.
+	PrintOnly bool
+
 	// The directory to execute commands in. If it is unset,
 	// commands are run in the current directory.
 	Dir string
@@ -104,4 +109,23 @@ func Minor() *Config {
 		Stdin:  os.Stdin,
 		Errors: os.Stderr,
 	}
+}
+func (c *Config) SetBuffer(buffer bool) *Config {
+	c.Buffer = buffer
+	return c
+}
+
+func (c *Config) SetFatal(fatal bool) *Config {
+	c.Fatal = fatal
+	return c
+}
+
+func (c *Config) SetPrintOnly(printOnly bool) *Config {
+	c.PrintOnly = printOnly
+	return c
+}
+
+func (c *Config) SetDir(dir string) *Config {
+	c.Dir = dir
+	return c
 }
