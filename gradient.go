@@ -106,14 +106,17 @@ const (
 
 // IsNil returns whether the gradient is effectively nil (has no color).
 func (g *Gradient) IsNil() bool {
+	if g == nil {
+		return true
+	}
 	if g.Source == Solid {
 		return IsNil(g.Color)
 	}
-	return g.Gradient == nil
+	return g.Stops == nil
 }
 
 // ColorOrNil returns the solid color if non-nil, or nil otherwise;
-// it is for consumers that handle nil colors
+// it is for consumers that handle nil colors.
 func (g *Gradient) ColorOrNil() color.Color {
 	if IsNil(g.Color) {
 		return nil
@@ -123,60 +126,59 @@ func (g *Gradient) ColorOrNil() color.Color {
 
 // SetSolid sets the gradient to the given solid color
 func (g *Gradient) SetSolid(cl color.RGBA) {
-	g.Color = cl
-	g.Source = Solid
-	g.Gradient = nil
+	*g = Gradient{
+		Color:  cl,
+		Source: Solid,
+	}
 }
 
 // SetColor sets the gradient to the given solid standard [color.Color]
 func (g *Gradient) SetColor(cl color.Color) {
-	g.Color = AsRGBA(cl)
-	g.Source = Solid
-	g.Gradient = nil
+	*g = Gradient{
+		Color:  AsRGBA(cl),
+		Source: Solid,
+	}
 }
 
 // SetName sets the gradient to the solid color with the given name
 func (g *Gradient) SetName(name string) {
-	g.Color = LogFromName(name)
-	g.Source = Solid
-	g.Gradient = nil
+	*g = Gradient{
+		Color:  LogFromName(name),
+		Source: Solid,
+	}
 }
 
 // CopyFrom copies from the given gradient, making new copies
 // of the stops instead of re-using pointers
 func (g *Gradient) CopyFrom(cp *Gradient) {
 	*g = *cp
-	if cp.Gradient != nil {
-		g.Gradient = &rasterx.Gradient{}
-		*g.Gradient = *cp.Gradient
-		sn := len(cp.Gradient.Stops)
-		g.Gradient.Stops = make([]rasterx.GradStop, sn)
-		copy(g.Gradient.Stops, cp.Gradient.Stops)
+	if cp.Stops != nil {
+		g.Stops = make([]GradientStop, len(cp.Stops))
+		copy(g.Stops, cp.Stops)
 	}
 }
 
 // CopyStopsFrom copies the gradient stops from the given gradient,
 // if both have gradient stops
 func (g *Gradient) CopyStopsFrom(cp *Gradient) {
-	if cp.Gradient == nil || g.Gradient == nil {
+	if len(g.Stops) == 0 || len(cp.Stops) == 0 {
 		return
 	}
-	sn := len(cp.Gradient.Stops)
-	if sn == 0 {
-		return
+	if len(g.Stops) != len(cp.Stops) {
+		g.Stops = make([]GradientStop, len(cp.Stops))
 	}
-	if len(g.Gradient.Stops) != sn {
-		g.Gradient.Stops = make([]rasterx.GradStop, sn)
-	}
-	copy(g.Gradient.Stops, cp.Gradient.Stops)
+	copy(g.Stops, cp.Stops)
 }
 
 // NewLinearGradient sets the gradient to a new linear gradient.
 func (g *Gradient) NewLinearGradient() {
-	g.Source = LinearGradient
-	g.Gradient = &rasterx.Gradient{IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
-	g.Gradient.Bounds.W = 1
-	g.Gradient.Bounds.H = 1
+	*g = Gradient{
+		Source: LinearGradient,
+		Spread: SpreadPad,
+		Matrix: mat32.Identity2D(),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+	}
+
 }
 
 // NewRadialGradient sets the gradient to a new radial gradient.
