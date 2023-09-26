@@ -23,7 +23,6 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 	wb.ScBBox = parBBox.Intersect(wb.ObjBBox)
 	wb.SetFlag(wb.ScBBox == image.Rectangle{}, Invisible)
 	wb.BBoxMu.Unlock()
-	wb.SetWinBBox(sc)
 }
 
 // BBoxReport reports on all the bboxes for everything in the tree
@@ -34,7 +33,7 @@ func (wb *WidgetBase) BBoxReport() string {
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
 		}
-		rpt += fmt.Sprintf("%v: vp: %v, win: %v\n", ni.Nm, ni.ScBBox, ni.WinBBox)
+		rpt += fmt.Sprintf("%v: vp: %v\n", ni.Nm, ni.ScBBox)
 		return ki.Continue
 	})
 	return rpt
@@ -74,12 +73,12 @@ func (wb *WidgetBase) ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta im
 	wb.ComputeBBoxesParts(sc, parBBox, delta)
 }
 
-// PointToRelPos translates a point in global pixel coords
+// PointToRelPos translates a point in Scene pixel coords
 // into relative position within node
 func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
-	return pt.Sub(wb.WinBBox.Min)
+	return pt.Sub(wb.ScBBox.Min)
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -175,7 +174,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, initStyle
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox, wb.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox)
 	}
 	// typically DoLayoutChildren must be called after this!
 }

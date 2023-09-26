@@ -5,32 +5,37 @@
 package gi
 
 import (
+	"image"
 	"sync"
 
-	"goki.dev/girl/gist"
+	"goki.dev/goosi"
 	"goki.dev/ordmap"
 )
 
+// StageMgr is the stage manager interface
+type StageMgr interface {
+
+	// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
+	AsMainMgr() *MainStageMgr
+
+	// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
+	AsPopupMgr() *PopupStageMgr
+}
+
 // StageMgrBase provides base impl for stage management,
-// extended by PopupMgr and StageMgr.
+// extended by PopupStageMgr and MainStageMgr.
 // Manages a stack of Stage elements.
 type StageMgrBase struct {
-	// position and size within the parent Render context.
-	// Position is absolute offset relative to top left corner of render context.
-	Geom gist.Geom2DInt
 
 	// stack of stages
-	Stack ordmap.Map[string, *Stage] `desc:"stack of stages"`
-
-	// rendering context for the Stages here
-	RenderCtx *RenderContext `desc:"rendering context for the Stages here"`
+	Stack ordmap.Map[string, Stage] `desc:"stack of stages"`
 
 	// [view: -] mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
 	Mu sync.RWMutex `view:"-" desc:"mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read"`
 }
 
 // Top returns the top-most Stage in the Stack
-func (sm *StageMgrBase) Top() *Stage {
+func (sm *StageMgrBase) Top() Stage {
 	sm.Mu.RLock()
 	defer sm.Mu.RUnlock()
 
@@ -42,23 +47,16 @@ func (sm *StageMgrBase) Top() *Stage {
 }
 
 // Push pushes a new Stage to top
-func (sm *StageMgrBase) Push(st *Stage) {
+func (sm *StageMgrBase) Push(st Stage) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
-	st.StageMgr = sm
-	st.PopupMgr.Geom = sm.Geom
-	sm.Stack.Add(st.Name, st)
-
-	// if pfoc != nil {
-	// 	sm.EventMgr.PushFocus(pfoc)
-	// } else {
-	// 	sm.EventMgr.PushFocus(st)
-	// }
+	sm.Stack.Add(st.AsBase().Name, st)
+	st.StageAdded(sm)
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none
-func (sm *StageMgrBase) Pop() *Stage {
+func (sm *StageMgrBase) Pop() Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
@@ -75,7 +73,7 @@ func (sm *StageMgrBase) Pop() *Stage {
 func (sm *StageMgrBase) PopDelete() {
 	st := sm.Pop()
 	if st != nil {
-		st.Delete
+		st.Delete()
 	}
 }
 
@@ -88,7 +86,7 @@ func (sm *StageMgrBase) CloseAll() {
 
 	sz := sm.Stack.Len()
 	if sz == 0 {
-		return nil
+		return
 	}
 	for i := sz - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
@@ -97,7 +95,63 @@ func (sm *StageMgrBase) CloseAll() {
 	}
 }
 
-func (sm *StageMgrBase) NewRenderCtx(dpi float32) *RenderContext {
-	ctx := &RenderContext{LogicalDPI: dpi, Visible: false}
-	sm.RenderCtx = ctx
+// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
+func (sm *StageMgrBase) AsMainMgr() *MainStageMgr {
+	return nil
+}
+
+// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
+func (sm *StageMgrBase) AsPopupMgr() *PopupStageMgr {
+	return nil
+}
+
+//////////////////////////////////////////////////////////////
+//		MainStageMgr
+
+// MainStageMgr is the MainStage manager for MainStage types:
+// Window, Dialog, Sheet.
+// This lives in a RenderWin rendering window, and manages
+// all the content for the window.
+type MainStageMgr struct {
+	StageMgrBase
+
+	// rendering context for the Stages here
+	RenderCtx *RenderContext
+
+	// render window -- only set for stage manager within such a window.
+	// rely on the RenderCtx wherever possible.
+	RenderWin *RenderWin
+
+	// growing stack of viewing history of all stages.
+	History []*MainStage
+
+	// sprites are named images that are rendered last overlaying everything else.
+	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
+
+	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
+	SpriteDragging string `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
+}
+
+// AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
+func (sm *MainStageMgr) AsMainMgr() *MainStageMgr {
+	return sm
+}
+
+// Init is called when owning RenderWin is created.
+// Initializes data structures
+func (sm *MainStageMgr) Init(win *RenderWin) {
+	sm.RenderWin = win
+	sm.RenderCtx = &RenderContext{LogicalDPI: 96, Visible: false}
+}
+
+// resize resizes all main stages
+func (sm *MainStageMgr) Resize(sz image.Point) {
+	for _, kv := range sm.Stack.Order {
+		st := kv.Val.AsMain()
+		st.Resize(sz)
+	}
+}
+
+func (sm *MainStageMgr) HandleEvent(evi goosi.Event) {
+
 }

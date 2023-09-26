@@ -5,11 +5,8 @@
 package gi
 
 import (
-	"image"
-
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
 )
 
 // TooltipConfigStyles configures the default styles
@@ -28,52 +25,55 @@ func TooltipConfigStyles(tooltip *Frame) {
 
 // PopupTooltip pops up a scene displaying the tooltip text
 func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
-	win := parSc.Win
-	mainSc := win.Scene
-	psc := &Scene{}
-	psc.Name = name + "Tooltip"
-	psc.Win = win
-	psc.Type = ScTooltip
+	/*
+		win := parSc.Win
+		mainSc := win.Scene
+		psc := &Scene{}
+		psc.Name = name + "Tooltip"
+		psc.Win = win
+		psc.Type = ScTooltip
 
-	psc.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		// TOOD: get border radius actually working
-		// without having parent background color workaround
-		s.Border.Radius = gist.BorderRadiusExtraSmall
-		s.BackgroundColor = psc.Frame.ParentBackgroundColor()
-	})
+		psc.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			// TOOD: get border radius actually working
+			// without having parent background color workaround
+			s.Border.Radius = gist.BorderRadiusExtraSmall
+			s.BackgroundColor = psc.Frame.ParentBackgroundColor()
+		})
 
-	psc.Geom.Pos = image.Point{x, y}
-	psc.SetFlag(true, ScPopupDestroyAll) // nuke it all
+		psc.Geom.Pos = image.Point{x, y}
+		psc.SetFlag(true, ScPopupDestroyAll) // nuke it all
 
-	frame := &psc.Frame
-	lbl := NewLabel(frame, "ttlbl")
-	lbl.Text = tooltip
-	lbl.Type = LabelBodyMedium
+		frame := &psc.Frame
+		lbl := NewLabel(frame, "ttlbl")
+		lbl.Text = tooltip
+		lbl.Type = LabelBodyMedium
 
-	TooltipConfigStyles(frame)
+		TooltipConfigStyles(frame)
 
-	lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
-		mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
+		lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
+			mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
 
-		s.MaxWidth.SetDot(mwdots)
-	})
+			s.MaxWidth.SetDot(mwdots)
+		})
 
-	frame.ConfigTree(psc)
-	frame.SetStyleTree(psc) // sufficient to get sizes
-	mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
-	frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-	frame.GetSizeTree(psc, 0)          // collect sizes
-	psc.Win = nil
-	vpsz := frame.LayState.Size.Pref.Min(mainSz).ToPoint()
+		frame.ConfigTree(psc)
+		frame.SetStyleTree(psc) // sufficient to get sizes
+		mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
+		frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
+		frame.GetSizeTree(psc, 0)          // collect sizes
+		psc.Win = nil
+		vpsz := frame.LayState.Size.Pref.Min(mainSz).ToPoint()
 
-	x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
-	y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
-	psc.Resize(vpsz)
-	psc.Geom.Pos = image.Point{x, y}
+		x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
+		y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
+		psc.Resize(vpsz)
+		psc.Geom.Pos = image.Point{x, y}
 
-	// win.PushPopup(psc)
-	return psc
+		// win.PushPopup(psc)
+		return psc
+	*/
+	return nil
 }
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most

@@ -322,7 +322,7 @@ func MenuFrameConfigStyles(frame *Frame) {
 	})
 }
 
-func (pm *PopupMgr) AddMenu(sc *Scene) {
+func (pm *PopupStageMgr) AddMenu(sc *Scene) {
 	// mn := NewMenu(sc)
 }
 

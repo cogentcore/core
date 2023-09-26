@@ -243,32 +243,32 @@ func (mgr *WinGeomPrefsMgr) RecordPref(win *RenderWin) {
 	if !win.IsVisible() {
 		return
 	}
-	wsz := win.RenderWin.Size()
+	wsz := win.GoosiWin.Size()
 	if wsz == (image.Point{}) {
 		if WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: NOT storing null size for win: %v\n", win.Nm)
+			log.Printf("WinGeomPrefs: RecordPref: NOT storing null size for win: %v\n", win.Name)
 		}
 		return
 	}
-	pos := win.RenderWin.Position()
+	pos := win.GoosiWin.Position()
 	if pos.X == -32000 || pos.Y == -32000 { // windows badness
 		if WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Nm)
+			log.Printf("WinGeomPrefs: RecordPref: NOT storing very negative pos: %v for win: %v\n", pos, win.Name)
 		}
 		return
 	}
 	mgr.Mu.Lock()
 	if mgr.SettingNoSave {
 		if WinGeomTrace {
-			log.Printf("WinGeomPrefs: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Nm)
+			log.Printf("WinGeomPrefs: RecordPref: SettingNoSave so NOT storing for win: %v\n", win.Name)
 		}
 		mgr.Mu.Unlock()
 		return
 	}
 	mgr.Init()
 
-	winName := mgr.WinName(win.Nm)
-	sc := win.RenderWin.Screen()
+	winName := mgr.WinName(win.Name)
+	sc := win.GoosiWin.Screen()
 	wgr := RenderWinGeom{DPI: win.LogicalDPI(), DPR: sc.DevicePixelRatio}
 	wgr.SetPos(pos)
 	wgr.SetSize(wsz)
@@ -397,12 +397,12 @@ func (mgr *WinGeomPrefsMgr) RestoreAll() {
 	}
 	mgr.SettingStart()
 	for _, w := range AllRenderWins {
-		wgp := mgr.Pref(w.Name(), w.RenderWin.Screen())
+		wgp := mgr.Pref(w.Name, w.GoosiWin.Screen())
 		if wgp != nil {
 			if WinGeomTrace {
-				log.Printf("WinGeomPrefs: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name(), wgp.Pos(), wgp.Size())
+				log.Printf("WinGeomPrefs: RestoreAll: restoring geom for window: %v pos: %v size: %v\n", w.Name, wgp.Pos(), wgp.Size())
 			}
-			w.RenderWin.SetGeom(wgp.Pos(), wgp.Size())
+			w.GoosiWin.SetGeom(wgp.Pos(), wgp.Size())
 		}
 	}
 	mgr.SettingEnd()

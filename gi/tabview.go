@@ -560,7 +560,7 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 }
 
 func (tv *TabView) FilterEvents() {
-	tv.Events.CopyFrom(TabViewEventFuncs)
+	tv.Events.CopyFrom(&TabViewEventFuncs)
 }
 
 func (tv *TabView) Render(sc *Scene) {
@@ -683,7 +683,7 @@ func (tb *TabButton) TabView() *TabView {
 }
 
 func (tb *TabButton) FilterEvents() {
-	tb.Events.CopyFrom(TabButtonEventFuncs)
+	tb.Events.CopyFrom(&TabButtonEventFuncs)
 }
 
 func (tb *TabButton) ConfigParts(sc *Scene) {

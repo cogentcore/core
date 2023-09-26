@@ -11,7 +11,7 @@ import (
 	"sync/atomic"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
+	// "goki.dev/gi/v2/giv"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	"goki.dev/svg"
@@ -19,9 +19,10 @@ import (
 )
 
 // these dummy variables force inclusion of relevant packages
-var dummyGi gi.Node
+var dummyGi gi.Widget
 var dummSvg svg.Line
-var dummyVV giv.ValueViewBase
+
+// var dummyVV giv.ValueViewBase
 
 // Main is run in a main package to start the GUI driver / event loop,
 // and call given function as the effective "main" function.

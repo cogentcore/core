@@ -170,9 +170,9 @@ type RenderWin struct {
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
 	GoosiWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
 
-	// StageMgr controlling what is represented in this window.
+	// MainStageMgr controlling the MainStage elements in this window.
 	// The Render Context in this manager is the original source for all Stages
-	StageMgr StageMgr
+	StageMgr MainStageMgr
 
 	// main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
 	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
@@ -373,7 +373,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
 	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 
-	win.StageMgr.NewRenderCtx(win.LogicalDPI())
+	win.StageMgr.Init(win)
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -543,47 +543,53 @@ func StackAll() []byte {
 
 // Resized updates internal buffers after a window has been resized.
 func (w *RenderWin) Resized(sz image.Point) {
+	rctx := w.StageMgr.RenderCtx
 	if !w.IsVisible() {
+		rctx.Visible = false
 		return
 	}
-	/*
-		// curSz := w.Scene.Geom.Size
-		// if curSz == sz {
-		// 	if WinEventTrace {
-		// 		fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Nm, curSz)
-		// 	}
-		// 	return
-		// }
-		drw := w.GoosiWin.Drawer()
-		if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
-			drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
-		}
-		w.FocusInactivate()
-		w.InactivateAllSprites()
-		if !w.IsVisible() {
-			if WinEventTrace {
-				fmt.Printf("Win: %v Resized already closed\n", w.Name)
-			}
-			return
-		}
+	rctx.Mu.RLock()
+	defer rctx.Mu.RUnlock()
+
+	curSz := rctx.Size
+	if curSz == sz {
 		if WinEventTrace {
-			fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curSz, sz)
+			fmt.Printf("Win: %v skipped same-size Resized: %v\n", w.Name, curSz)
 		}
-		if curSz == (image.Point{}) { // first open
-			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+		return
+	}
+	drw := w.GoosiWin.Drawer()
+	if drw.Impl.MaxTextures != vgpu.MaxTexturesPerSet*3 { // this is essential after hibernate
+		drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
+	}
+	// w.FocusInactivate()
+	// w.InactivateAllSprites()
+	if !w.IsVisible() {
+		rctx.Visible = false
+		if WinEventTrace {
+			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
-		// w.Scene.Resize(sz)
-		w.ConfigInsets()
-		if WinGeomTrace {
-			log.Printf("WinGeomPrefs: recording from Resize\n")
-		}
-		WinGeomMgr.RecordPref(w)
-		// w.FullReRender()
-		// we need a second full re-render for fullscreen and snap resizes on RenderWins
-		// if goosi.TheApp.Platform() == goosi.RenderWins {
-		// 	w.FullReRender()
-		// }
-	*/
+		return
+	}
+	if WinEventTrace {
+		fmt.Printf("Win: %v Resized from: %v to: %v\n", w.Name, curSz, sz)
+	}
+	if curSz == (image.Point{}) { // first open
+		StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+	}
+	rctx.Size = sz
+	rctx.Visible = true
+	w.StageMgr.Resize(sz)
+	// w.ConfigInsets()
+	if WinGeomTrace {
+		log.Printf("WinGeomPrefs: recording from Resize\n")
+	}
+	WinGeomMgr.RecordPref(w)
+	// w.FullReRender()
+	// we need a second full re-render for fullscreen and snap resizes on RenderWins
+	// if goosi.TheApp.Platform() == goosi.RenderWins {
+	// 	w.FullReRender()
+	// }
 
 }
 

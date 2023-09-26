@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"goki.dev/girl/gist"
+	"goki.dev/goosi"
 )
 
 var (
@@ -17,32 +18,57 @@ var (
 	SnackbarTimeout = 5 * time.Second // todo: put in prefs
 )
 
-// StageTypes are the types of Stage containers
+// StageTypes are the types of Stage containers.
+// There are two main categories: MainStage and PopupStage.
+// MainStage are Window, Dialog, Sheet: large and potentially
+// complex Scenes that persist until dismissed, and can have
+// Decor widgets that control display.
+// PopupStage are Menu, Tooltip, Snakbar, Chooser that are transitory
+// and simple, without additional decor.
+// MainStages live in a StageMgr associated with a RenderWin window,
+// and manage their own set of PopupStages via a PopupStageMgr.
 type StageTypes int32 //enums:enum
 
 const (
-	// Window displays Scene in a full window
+	// Window is a MainStage that displays a Scene in a full window.
+	// One of these must be created first, as the primary App contents,
+	// and it typically persists throughout.  It fills the RenderWin window.
+	// Additional Windows can be created either within the same RenderWin
+	// (Mobile) or in separate RenderWin windows (Desktop, OwnWin).
 	Window StageTypes = iota
 
-	// Dialog displays Scene in a smaller dialog window
-	// above the Window (can alternatively be in its own OS Window)
+	// Dialog is a MainStage that displays Scene in a smaller dialog window
+	// on top of a Window, or in its own RenderWin (on Desktop only).
+	// It can be Modal or not.
 	Dialog
 
-	// Sheet displays Scene as a partially overlapping panel
-	// coming up from the Bottom or LeftSide
+	// Sheet is a MainStage that displays Scene as a
+	// partially overlapping panel coming up from the
+	// Bottom or LeftSide of the RenderWin main window.
+	// It can be Modal or not.
 	Sheet
 
-	// Menu displays Scene as a panel on top of window
+	// Menu is a PopupStage that displays a Scene with Action Widgets
+	// overlaid on a MainStage.
+	// It is typically Modal and ClickOff, and closes when
+	// an Action is selected.
 	Menu
 
-	// Tooltip displays Scene as a tooltip
+	// Tooltip is a PopupStage that displays a Scene with extra info
+	// overlaid on a MainStage.
+	// It is typically ClickOff and not Modal.
 	Tooltip
 
-	// Snackbar displays Scene as a Snackbar
+	// Snackbar is a PopupStage displays a Scene with info and typically
+	// an additional optional Action, usually displayed at the bottom.
+	// It is typically not ClickOff or Modal, but has a timeout.
 	Snackbar
 
-	// Chooser displays Scene as a dynamic chooser for completing
-	// or correcting text
+	// Chooser is a PopupStage that displays a Scene with text completions,
+	// spelling corrections, or other such dynamic info.
+	// It is typically ClickOff, not Modal, dynamically updating,
+	// and closes when something is selected or typing renders
+	// it no longer relevant.
 	Chooser
 )
 
@@ -57,15 +83,23 @@ const (
 	LeftSide
 )
 
-// Stage is a container and manager for displaying a Scene
-// in different functional ways, defined by StageTypes
-type Stage struct {
+// StageBase is a container and manager for displaying a Scene
+// in different functional ways, defined by StageTypes.
+// MainStage extends to implement support for Main types
+// (Window, Dialog, Sheet) and PopupStage supports
+// Popup types (Menu, Tooltip, Snakbar, Chooser).
+// MainStage has an EventMgr for managing events including for Popups.
+type StageBase struct {
+
+	// type of Stage: determines behavior and Styling
+	Type StageTypes
 
 	// Scene contents of this Stage -- what it displays
 	Scene *Scene
 
-	// type of Stage: determines behavior and Styling
-	Type StageTypes
+	// widget in another scene that requested this stage to be created
+	// and provides context (stage)
+	CtxWidget Widget
 
 	// name of the Stage -- generally auto-set based on Scene Name
 	Name string
@@ -77,7 +111,8 @@ type Stage struct {
 	// Position is absolute offset relative to top left corner of render context.
 	Geom gist.Geom2DInt
 
-	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
+	// Title of the Stage -- generally auto-set based on Scene Title.
+	// Used for title of Window and Dialog types.
 	Title string
 
 	// if true, blocks input to all other stages.
@@ -112,90 +147,115 @@ type Stage struct {
 
 	// Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from
 	Side StageSides
-
-	// manager for the popups in this stage
-	PopupMgr PopupMgr
-
-	// the parent stage manager for this stage
-	StageMgr *StageMgrBase
-
-	// event manager for this stage
-	EventMgr EventMgr
 }
 
-func (st *Stage) RenderCtx() *RenderContext {
-	if st.StageMgr == nil {
-		return nil
-	}
-	return st.StageMgr.RenderCtx
+// Stage interface provides methods for setting values on Stages.
+// Convert to *MainStage or *PopupStage via As methods.
+type Stage interface {
+
+	// AsBase returns this stage as a StageBase for accessing base fields.
+	AsBase() *StageBase
+
+	// AsMain returns this stage as a MainStage (for Main Window, Dialog, Sheet) types.
+	// returns nil for PopupStage types.
+	AsMain() *MainStage
+
+	// AsPopup returns this stage as a PopupStage (for Popup types)
+	// returns nil for MainStage types.
+	AsPopup() *PopupStage
+
+	// SetNameFromString sets the name of this Stage based on existing
+	// Scene and Type settings.
+	SetNameFromScene() Stage
+
+	SetScene(sc *Scene) Stage
+
+	SetType(typ StageTypes) Stage
+
+	SetName(name string) Stage
+
+	SetTitle(title string) Stage
+
+	SetModal() Stage
+
+	SetScrim() Stage
+
+	SetClickOff() Stage
+
+	SetTimeout(dur time.Duration) Stage
+
+	SetWidth(width int) Stage
+
+	SetHeight(height int) Stage
+
+	SetOwnWin() Stage
+
+	// SetSharedWin sets OwnWin off to override default OwnWin for Desktop Window
+	SetSharedWin() Stage
+
+	SetBack() Stage
+
+	SetMovable() Stage
+
+	SetResizable() Stage
+
+	SetSide(side StageSides) Stage
+
+	// Run does the default run behavior based on the type of stage
+	Run() Stage
+
+	// MainMgr returns the MainStageMgr for this Stage.
+	// This is the owning manager for a MainStage and the controlling
+	// manager for a Popup.
+	MainMgr() *MainStageMgr
+
+	// RenderCtx returns the rendering context for this stage,
+	// via a stage manager -- could be nil if not available.
+	RenderCtx() *RenderContext
+
+	// StageAdded is called when a stage is added to its manager
+	StageAdded(sm StageMgr)
+
+	// HandleEvent handles given event within this stage
+	HandleEvent(evi goosi.Event)
+
+	// Delete closes and frees resources for everything in the stage
+	// Scenes have their own Delete method that allows them to Preserve
+	// themselves for re-use, but stages are always struck when done.
+	Delete()
+
+	// IsPtIn returns true if given point is inside the Geom Bounds
+	// of this Stage.
+	IsPtIn(pt image.Point) bool
 }
 
-// NewStage returns a new stage with given type and scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the NewStage call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewStage(typ StageTypes, sc *Scene) *Stage {
-	st := &Stage{}
-	st.SetType(typ)
-	st.SetScene(sc)
+func (st *StageBase) AsBase() *StageBase {
 	return st
 }
 
-// NewWindow returns a new Window stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewWindow(sc *Scene) *Stage {
-	return NewStage(Window, sc)
+func (st *StageBase) AsMain() *MainStage {
+	return nil
 }
 
-// NewDialog returns a new Dialog stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewDialog(sc *Scene) *Stage {
-	return NewStage(Dialog, sc)
+func (st *StageBase) AsPopup() *PopupStage {
+	return nil
 }
 
-// NewSheet returns a new Sheet stage with given scene contents,
-// for given side (e.g., Bottom or LeftSide).
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewSheet(sc *Scene, side StageSides) *Stage {
-	return NewStage(Sheet, sc).SetSide(side)
+func (st *StageBase) MainMgr() *MainStageMgr {
+	return nil
 }
 
-// NewMenu returns a new Menu stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewMenu(sc *Scene) *Stage {
-	return NewStage(Menu, sc)
+func (st *StageBase) StageAdded(sm StageMgr) {
 }
 
-// NewTooltip returns a new Tooltip stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewTooltip(sc *Scene) *Stage {
-	return NewStage(Tooltip, sc)
+func (st *StageBase) RenderCtx() *RenderContext {
+	return nil
 }
 
-// NewSnackbar returns a new Snackbar stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewSnackbar(sc *Scene) *Stage {
-	return NewStage(Snackbar, sc)
+func (st *StageBase) HandleEvent(evi goosi.Event) {
 }
 
-// NewChooser returns a new Chooser stage with given scene contents.
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewChooser(sc *Scene) *Stage {
-	return NewStage(Chooser, sc)
+func (st *StageBase) Delete() {
 }
 
 // Note: Set* methods are designed to be called in sequence to efficiently set
@@ -203,7 +263,7 @@ func NewChooser(sc *Scene) *Stage {
 
 // SetNameFromString sets the name of this Stage based on existing
 // Scene and Type settings.
-func (st *Stage) SetNameFromScene() *Stage {
+func (st *StageBase) SetNameFromScene() Stage {
 	if st.Scene == nil {
 		return nil
 	}
@@ -213,7 +273,7 @@ func (st *Stage) SetNameFromScene() *Stage {
 	return st
 }
 
-func (st *Stage) SetScene(sc *Scene) *Stage {
+func (st *StageBase) SetScene(sc *Scene) Stage {
 	st.Scene = sc
 	if sc != nil {
 		st.SetNameFromScene()
@@ -221,7 +281,7 @@ func (st *Stage) SetScene(sc *Scene) *Stage {
 	return st
 }
 
-func (st *Stage) SetType(typ StageTypes) *Stage {
+func (st *StageBase) SetType(typ StageTypes) Stage {
 	st.Type = typ
 	switch st.Type {
 	case Window:
@@ -258,170 +318,90 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 	return st
 }
 
-func (st *Stage) SetName(name string) *Stage {
+func (st *StageBase) SetName(name string) Stage {
 	st.Name = name
 	return st
 }
 
-func (st *Stage) SetTitle(title string) *Stage {
+func (st *StageBase) SetTitle(title string) Stage {
 	st.Title = title
 	return st
 }
 
-func (st *Stage) SetModal() *Stage {
+func (st *StageBase) SetModal() Stage {
 	st.Modal = true
 	return st
 }
 
-func (st *Stage) SetScrim() *Stage {
+func (st *StageBase) SetScrim() Stage {
 	st.Scrim = true
 	return st
 }
 
-func (st *Stage) SetClickOff() *Stage {
+func (st *StageBase) SetClickOff() Stage {
 	st.ClickOff = true
 	return st
 }
 
-func (st *Stage) SetTimeout(dur time.Duration) *Stage {
+func (st *StageBase) SetTimeout(dur time.Duration) Stage {
 	st.Timeout = dur
 	return st
 }
 
-func (st *Stage) SetWidth(width int) *Stage {
+func (st *StageBase) SetWidth(width int) Stage {
 	st.Width = width
 	return st
 }
 
-func (st *Stage) SetHeight(height int) *Stage {
+func (st *StageBase) SetHeight(height int) Stage {
 	st.Height = height
 	return st
 }
 
-func (st *Stage) SetOwnWin() *Stage {
+func (st *StageBase) SetOwnWin() Stage {
 	st.OwnWin = true
 	return st
 }
 
 // SetSharedWin sets OwnWin off to override default OwnWin for Desktop Window
-func (st *Stage) SetSharedWin() *Stage {
+func (st *StageBase) SetSharedWin() Stage {
 	st.OwnWin = false
 	return st
 }
 
-func (st *Stage) SetBack() *Stage {
+func (st *StageBase) SetBack() Stage {
 	st.Back = true
 	return st
 }
 
-func (st *Stage) SetMovable() *Stage {
+func (st *StageBase) SetMovable() Stage {
 	st.Movable = true
 	return st
 }
 
-func (st *Stage) SetResizable() *Stage {
+func (st *StageBase) SetResizable() Stage {
 	st.Resizable = true
 	return st
 }
 
-func (st *Stage) SetSide(side StageSides) *Stage {
+func (st *StageBase) SetSide(side StageSides) Stage {
 	st.Side = side
 	return st
 }
 
-/////////////////////////////////////////////////////
-//		Run
-
 // Run does the default run behavior based on the type of stage
-func (st *Stage) Run() *Stage {
+func (st *StageBase) Run() Stage {
 	switch st.Type {
 	case Window:
-		return st.RunWindow()
+		return st.AsMain().RunWindow()
 	case Dialog:
-		return st.RunDialog()
+		return st.AsMain().RunDialog()
 	case Sheet:
-		return st.Sheet()
+		return st.AsMain().RunSheet()
 	default:
-		return st.RunPopup()
+		return st.AsPopup().RunPopup()
 	}
 	return st
-}
-
-// RunWindow runs a Window with current settings.
-// RenderWin field will be set to the parent RenderWin window.
-func (st *Stage) RunWindow() *Stage {
-	if st.OwnWin {
-		st.RenderWin = st.NewRenderWin()
-		st.RenderWin.GoStartEventLoop()
-		return st
-	}
-	if CurRenderWin == nil {
-		st.AddWindowDecor()
-		CurRenderWin = RunNewRenderWin(st.Name, st.Title, st)
-		st.RenderWin = CurRenderWin
-		return st
-	}
-	CurRenderWin.AddWindow(st)
-	return st
-}
-
-// RunDialog runs a Dialog with current settings.
-// RenderWin field will be set to the parent RenderWin window.
-func (st *Stage) RunDialog() *Stage {
-	if st.OwnWin {
-		st.RenderWin = RunNewRenderWin(st.Name, st.Title, st)
-		return st
-	}
-	if CurRenderWin == nil {
-		// todo: fail!
-		return st
-	}
-	st.AddDialogDecor()
-	CurRenderWin.AddDialog(st)
-	return st
-}
-
-// RunSheet runs a Sheet with current settings.
-// RenderWin field will be set to the parent RenderWin window.
-func (st *Stage) RunSheet() *Stage {
-	if CurRenderWin == nil {
-		// todo: fail!
-		return st
-	}
-	st.AddSheetDecor()
-	CurRenderWin.AddSheet(st)
-	return st
-}
-
-// RunPopup runs a popup-style Stage on top of current
-// active stage in current active RenderWin.
-func (st *Stage) RunPopup() *Stage {
-	if CurRenderWin == nil {
-		// todo: fail!
-		return st
-	}
-	// maybe Snackbar decor?
-	CurRenderWin.AddPopup(st)
-	return st
-}
-
-/////////////////////////////////////////////////////
-//		Decorate
-
-// only called when !OwnWin
-func (st *Stage) AddWindowDecor() *Stage {
-	if st.Back {
-		but := NewButton(st.Scene.Decor, "win-back")
-		// todo: do more button config
-	}
-}
-
-func (st *Stage) AddDialogDecor() *Stage {
-	// todo: moveable, resizable
-}
-
-func (st *Stage) AddSheetDecor() *Stage {
-	// todo: handle based on side
 }
 
 ///////////////////////////////////////////////////
@@ -429,15 +409,6 @@ func (st *Stage) AddSheetDecor() *Stage {
 
 // IsPtIn returns true if given point is inside the Geom Bounds
 // of this Stage.
-func (st *Stage) IsPtIn(pt image.Point) bool {
+func (st *StageBase) IsPtIn(pt image.Point) bool {
 	return pt.In(st.Geom.Bounds())
-}
-
-func (st *Stage) Delete() {
-	st.PopupMgr.CloseAll()
-	if st.Scene != nil {
-		st.Scene.Delete()
-	}
-	st.Scene = nil
-	st.StageMgr = nil
 }

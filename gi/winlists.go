@@ -10,6 +10,7 @@ import (
 	"reflect"
 
 	"goki.dev/goosi"
+	"goki.dev/laser"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -52,7 +53,7 @@ func (wl *RenderWinList) FindName(name string) (*RenderWin, bool) {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
 	for _, wi := range *wl {
-		if wi.Nm == name {
+		if wi.Name == name {
 			return wi, true
 		}
 	}
@@ -63,7 +64,7 @@ func (wl *RenderWinList) FindName(name string) (*RenderWin, bool) {
 // window and true if found, nil, false otherwise.
 // data of type string works fine -- does equality comparison on string contents.
 func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
-	if laser.IfaceIsNil(data) {
+	if laser.AnyIsNil(data) {
 		return nil, false
 	}
 	typ := reflect.TypeOf(data)
@@ -72,11 +73,11 @@ func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
 	}
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
-	for _, wi := range *wl {
-		if wi.Data == data {
-			return wi, true
-		}
-	}
+	// for _, wi := range *wl {
+	// if wi.Data == data { // todo: now inside the stage
+	// 	return wi, true
+	// }
+	// }
 	return nil, false
 }
 
@@ -117,7 +118,7 @@ func (wl *RenderWinList) Focused() (*RenderWin, int) {
 	defer RenderWinGlobalMu.Unlock()
 
 	for i, fw := range *wl {
-		if fw.HasFlag(int(WinFlagGotFocus)) {
+		if fw.HasFlag(WinFlagGotFocus) {
 			return fw, i
 		}
 	}
@@ -145,8 +146,8 @@ func (wl *RenderWinList) FocusNext() (*RenderWin, int) {
 			i++
 		}
 		fw = (*wl)[i]
-		if !fw.RenderWin.IsMinimized() {
-			fw.RenderWin.Raise()
+		if !fw.GoosiWin.IsMinimized() {
+			fw.GoosiWin.Raise()
 			break
 		}
 	}
@@ -315,7 +316,7 @@ func (wu *RenderWinDrawers) SetIdxRange(st, n int) {
 // Init checks if ordered map needs to be allocated
 func (wu *RenderWinDrawers) Init() {
 	if wu.Nodes == nil {
-		wu.Nodes = ordmap.New[*NodeBase, image.Rectangle]()
+		wu.Nodes = ordmap.New[*WidgetBase, image.Rectangle]()
 	}
 }
 
@@ -327,7 +328,7 @@ func (wu *RenderWinDrawers) Reset() {
 // Add adds a new node, returning index to store for given winBBox
 // (could be existing), and bool = true if new index exceeds max range
 func (wu *RenderWinDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool) {
-	nb := node.AsGiNode()
+	nb := node.AsWidget()
 	wu.Init()
 	idx, has := wu.Nodes.IdxByKeyTry(nb)
 	if has {
@@ -344,7 +345,7 @@ func (wu *RenderWinDrawers) Add(node Widget, winBBox image.Rectangle) (int, bool
 
 // Delete removes given node from list of drawers
 func (wu *RenderWinDrawers) Delete(node Widget) {
-	nb := node.AsGiNode()
+	nb := node.AsWidget()
 	wu.Nodes.DeleteKey(nb)
 }
 
@@ -371,7 +372,7 @@ func (wu *RenderWinDrawers) DrawImages(drw *vdraw.Drawer) {
 		if nb.This() == nil {
 			continue
 		}
-		if !nb.This().(Node2D).IsVisible() {
+		if !nb.This().(Widget).IsVisible() {
 			continue
 		}
 		winBBox := kv.Val

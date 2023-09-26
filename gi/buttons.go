@@ -158,12 +158,12 @@ func (bb *ButtonBase) SetAsButton() {
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
-func (bb *ButtonBase) SetText(txt string) {
+func (bb *ButtonBase) SetText(txt string) *ButtonBase {
 	if !bb.HasSc() {
-		return
+		return nil
 	}
 	if bb.Text == txt {
-		return
+		return bb
 	}
 	updt := bb.UpdateStart()
 	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
@@ -172,6 +172,7 @@ func (bb *ButtonBase) SetText(txt string) {
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
+	return bb
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and

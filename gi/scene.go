@@ -61,7 +61,7 @@ type Scene struct {
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
 
 	// current stage in which this Scene is set
-	Stage *Stage `copy:"-" json:"-" xml:"-" desc:"current stage in which this Scene is set"`
+	Stage Stage `copy:"-" json:"-" xml:"-" desc:"current stage in which this Scene is set"`
 
 	// [view: -] Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
@@ -81,13 +81,9 @@ type Scene struct {
 
 // NewScene creates a new Scene with Pixels Image
 // of the specified width and height.
-func NewScene(width, height int) *Scene {
-	sz := image.Point{width, height}
-	sc := &Scene{
-		Geom: gist.Geom2DInt{Size: sz},
-	}
-	sc.Pixels = image.NewRGBA(image.Rectangle{Max: sz})
-	sc.RenderState.Init(width, height, sc.Pixels)
+func NewScene(name string) *Scene {
+	sc := &Scene{}
+	sc.Name = name
 	sc.BgColor.SetColor(color.Transparent)
 	sc.Frame.Lay = LayoutVert
 	sc.Decor.Lay = LayoutNil
@@ -101,11 +97,11 @@ func (sc *Scene) RenderCtx() *RenderContext {
 	return sc.Stage.RenderCtx()
 }
 
-func (sc *Scene) StageMgr() *StageMgrBase {
+func (sc *Scene) StageMgr() *MainStageMgr {
 	if sc.Stage == nil { // todo: error msg?
 		return nil
 	}
-	return sc.Stage.StageMgr
+	return sc.Stage.MainMgr()
 }
 
 // Resize resizes the scene, creating a new image -- updates Geom Size

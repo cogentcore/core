@@ -12,14 +12,6 @@ import (
 	"goki.dev/ki/v2"
 )
 
-func (st *Stage) HandleEvent(evi goosi.Event) {
-	if st.Scene == nil {
-		return
-	}
-	evi.SetLocalOff(st.Scene.Geom.Pos)
-	st.EventMgr.HandleEvent(st.Scene, evi)
-}
-
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
 }

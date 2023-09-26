@@ -52,9 +52,16 @@ const (
 	NoPopups = false
 )
 
-// EventMgr is an event manager that handles distributing events to nodes.
-// It relies on the EventMaster for a few things outside of its scope.
+// EventMgr is an event manager that handles incoming events for a
+// MainStage object (Window, Dialog, Sheet).  It distributes events
+// to a Scene based on position or focus, and deals with more complex
+// cases such as dragging, drag-n-drop, and hovering.
 type EventMgr struct {
+
+	// Stage is the owning MainStage that we manage events for
+	Main *MainStage
+
+	// todo: remove master, eventmu -- should be protected by global render mu?
 
 	// master of this event mangager -- handles broader scope issues
 	Master EventMaster `desc:"master of this event mangager -- handles broader scope issues"`

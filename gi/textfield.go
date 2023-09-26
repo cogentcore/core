@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 	"strings"
 	"sync"
 	"time"
@@ -163,9 +162,9 @@ func (tf *TextField) OnInit() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		tf.CursorWidth.SetPx(1)
-		tf.SelectColor.SetColor(ColorScheme.TertiaryContainer)
+		tf.SelectColor.SetColor(ColorScheme.Tertiary.Container)
 		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
-		tf.CursorColor.SetSolid(ColorScheme.Primary)
+		tf.CursorColor.SetSolid(ColorScheme.Primary.Base)
 
 		// s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
@@ -189,7 +188,7 @@ func (tf *TextField) OnInit() {
 			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
 			if tf.IsFocusActive() {
 				s.Border.Width.Bottom = units.Px(2)
-				s.Border.Color.Bottom = ColorScheme.Primary
+				s.Border.Color.Bottom = ColorScheme.Primary.Base
 			} else {
 				s.Border.Width.Bottom = units.Px(1)
 				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
@@ -199,14 +198,14 @@ func (tf *TextField) OnInit() {
 			s.Border.Radius = gist.BorderRadiusExtraSmall
 			if tf.IsFocusActive() {
 				s.Border.Width.Set(units.Px(2))
-				s.Border.Color.Set(ColorScheme.Primary)
+				s.Border.Color.Set(ColorScheme.Primary.Base)
 			} else {
 				s.Border.Width.Set(units.Px(1))
 				s.Border.Color.Set(ColorScheme.Outline)
 			}
 		}
 		if tf.IsSelected() {
-			s.BackgroundColor.SetSolid(ColorScheme.TertiaryContainer)
+			s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
 		}
 	})
 }
@@ -672,7 +671,7 @@ func (tf *TextField) Cut() {
 	}
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Write(mimedata.NewText(cut))
+		goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(mimedata.NewText(cut))
 	}
 }
 
@@ -719,7 +718,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Write(md)
+	goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -729,7 +728,7 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).Read([]string{filecat.TextPlain})
+	data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Read([]string{filecat.TextPlain})
 	if data != nil {
 		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.DeleteSelection()
@@ -779,7 +778,7 @@ func (tf *TextField) MakeContextMenu(m *MenuActions) {
 				tff := AsTextField(recv)
 				tff.This().(Clipper).Paste()
 			})
-		ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().RenderWin).IsEmpty(), Disabled)
+		ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).IsEmpty(), Disabled)
 	}
 }
 
@@ -936,7 +935,7 @@ func TextFieldBlink() {
 			continue
 		}
 		win := tf.ParentRenderWin()
-		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsRenderWinInFocus() {
+		if win == nil || win.IsResizing() || win.IsClosed() /*|| !win.IsRenderWinInFocus() */ {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
@@ -1013,15 +1012,16 @@ func (tf *TextField) RenderCursor(on bool) {
 	tf.CursorMu.Lock()
 	defer tf.CursorMu.Unlock()
 
-	win := tf.ParentRenderWin()
-	sp := tf.CursorSprite()
-	if on {
-		win.ActivateSprite(sp.Name)
-	} else {
-		win.InactivateSprite(sp.Name)
-	}
-	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
-	win.UpdateSig()
+	// todo:
+	// win := tf.ParentRenderWin()
+	// sp := tf.CursorSprite()
+	// if on {
+	// 	win.ActivateSprite(sp.Name)
+	// } else {
+	// 	win.InactivateSprite(sp.Name)
+	// }
+	// sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
+	// win.UpdateSig()
 }
 
 // ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
@@ -1040,6 +1040,8 @@ func (tf *TextField) ScrollLayoutToCursor() bool {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status)
 func (tf *TextField) CursorSprite() *Sprite {
+	return nil
+	/* todo:
 	win := tf.ParentRenderWin()
 	if win == nil {
 		return nil
@@ -1058,6 +1060,7 @@ func (tf *TextField) CursorSprite() *Sprite {
 		win.AddSprite(sp)
 	}
 	return sp
+	*/
 }
 
 // RenderSelect renders the selected region, if any, underneath the text
@@ -1258,7 +1261,7 @@ func (tf *TextField) AddEvents(we *WidgetEvents) {
 }
 
 func (tf *TextField) FilterEvents() {
-	tf.Events.CopyFrom(TextFieldEventFuncs)
+	tf.Events.CopyFrom(&TextFieldEventFuncs)
 	// if tf.Sc.Type == ScDialog {
 	// todo: need dialogsig!
 	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1276,14 +1279,14 @@ func (tf *TextField) KeyInput(kt *key.Event) {
 		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 	}
 	kf := KeyFun(kt.Chord())
-	win := tf.ParentRenderWin()
-
-	if tf.Complete != nil {
-		cpop := win.CurPopup()
-		if PopupIsCompleter(cpop) {
-			tf.Complete.KeyInput(kf)
-		}
-	}
+	// todo:
+	// win := tf.ParentRenderWin()
+	// if tf.Complete != nil {
+	// 	cpop := win.CurPopup()
+	// 	if PopupIsCompleter(cpop) {
+	// 		tf.Complete.KeyInput(kf)
+	// 	}
+	// }
 
 	if !tf.IsFocusActive() && kf == KeyFunAbort {
 		return
@@ -1371,7 +1374,7 @@ func (tf *TextField) KeyInput(kt *key.Event) {
 		tf.OfferComplete(force)
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
-			if !kt.HasAnyModifier(key.Control, key.Meta) {
+			if !kt.HasAnyModifier(goosi.Control, goosi.Meta) {
 				kt.SetHandled()
 				tf.InsertAtCursor(string(kt.Rune))
 				if kt.Rune == ' ' {

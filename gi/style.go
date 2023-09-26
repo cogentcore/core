@@ -205,7 +205,7 @@ func (wb *WidgetBase) SetStyle(sc *Scene) {
 func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
 	if sc != nil {
 		if sc.RenderCtx != nil {
-			st.UnContext.DPI = sc.RenderCtx.LogicalDPI
+			st.UnContext.DPI = sc.RenderCtx().LogicalDPI
 		}
 		if sc.RenderState.Image != nil {
 			sz := sc.Geom.Size // Render.Image.Bounds().Size()

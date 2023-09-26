@@ -349,11 +349,13 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
+// todo: remove!
 func (wb *WidgetBase) ParentRenderWin() *RenderWin {
 	if wb.Sc == nil {
 		return nil
 	}
-	return wb.Sc.Win
+	// return wb.Sc.Win
+	return nil
 }
 
 func (wb *WidgetBase) IsVisible() bool {

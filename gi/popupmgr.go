@@ -8,34 +8,43 @@ import (
 	"goki.dev/goosi"
 )
 
-// PopupMgr manages popup Stages within a main Stage element (Window, etc).
+// PopupStageMgr manages popup Stages within a main Stage element (Window, etc).
 // Handles all the logic about stacks of Stage elements
 // and routing of events to them.
-type PopupMgr struct {
+type PopupStageMgr struct {
 	StageMgrBase
+
+	// Main is the MainStage that manages us
+	Main *MainStage
+}
+
+// AsPopupMgr returns underlying PopupStageMgr or nil if a MainStageMgr
+func (pm *PopupStageMgr) AsPopupMgr() *PopupStageMgr {
+	return pm
 }
 
 // HandleEvent processes Popup events.
 // Only gets OnFocus events if in focus.
 // requires outer RenderContext mutex!
-func (pm *PopupMgr) HandleEvent(evi goosi.Event) {
+func (pm *PopupStageMgr) HandleEvent(evi goosi.Event) {
 	top := pm.Top()
 	if top == nil {
 		return
 	}
+	tb := top.AsBase()
 	if evi.HasPos() {
 		pos := evi.Pos()
 		if top.IsPtIn(pos) { // stage handles
 			top.HandleEvent(evi) // either will be handled or not..
 			return
 		}
-		if top.ClickOff {
+		if tb.ClickOff {
 			if evi.Type() == goosi.MouseEvent {
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
 			}
 		}
-		if top.Modal { // absorb any other events!
+		if tb.Modal { // absorb any other events!
 			evi.SetHandled()
 		}
 		// else not Handled, will pass on
@@ -46,12 +55,12 @@ func (pm *PopupMgr) HandleEvent(evi goosi.Event) {
 
 /*
 // CurPopupIsTooltip returns true if current popup is a tooltip
-func (pm *PopupMgr) CurPopupIsTooltip() bool {
+func (pm *PopupStageMgr) CurPopupIsTooltip() bool {
 	return PopupIsTooltip(pm.CurPopup())
 }
 
 // DeleteTooltip deletes any tooltip popup (called when hover ends)
-func (pm *PopupMgr) DeleteTooltip() {
+func (pm *PopupStageMgr) DeleteTooltip() {
 	pm.Mu.RLock()
 	if pm.CurPopupIsTooltip() {
 		pm.delPop = true
@@ -60,11 +69,11 @@ func (pm *PopupMgr) DeleteTooltip() {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (pm *PopupMgr) SetNextPopup(pop *Scene, focus *Stage) {
+func (pm *PopupStageMgr) SetNextPopup(pop *Scene, focus *Stage) {
 }
 
 // SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (pm *PopupMgr) SetNextPopupImpl(pop, focus *Stage) {
+func (pm *PopupStageMgr) SetNextPopupImpl(pop, focus *Stage) {
 	pm.Mu.Lock()
 	pm.NextPopup = pop
 	pm.PopupFocus = focus
@@ -72,14 +81,14 @@ func (pm *PopupMgr) SetNextPopupImpl(pop, focus *Stage) {
 }
 
 // SetDelPopup sets the popup to delete next time through event loop
-func (pm *PopupMgr) SetDelPopup(pop *Stage) {
+func (pm *PopupStageMgr) SetDelPopup(pop *Stage) {
 	pm.Mu.Lock()
 	pm.DelPopup = pop
 	pm.Mu.Unlock()
 }
 
 // ShouldDeletePopupMenu returns true if the given popup item should be deleted
-func (pm *PopupMgr) ShouldDeletePopupMenu(pop *Stage, me *mouse.Event) bool {
+func (pm *PopupStageMgr) ShouldDeletePopupMenu(pop *Stage, me *mouse.Event) bool {
 	// if we have a dialog open, close it if we didn't click in it
 	if dlg, ok := pop.(*Dialog); ok {
 		log.Println("pos", me.Pos(), "bbox", dlg.WinBBox)
@@ -98,17 +107,17 @@ func (pm *PopupMgr) ShouldDeletePopupMenu(pop *Stage, me *mouse.Event) bool {
 }
 
 // DisconnectPopup disconnects given popup -- typically the current one.
-func (pm *PopupMgr) DisconnectPopup(pop *Stage) {
+func (pm *PopupStageMgr) DisconnectPopup(pop *Stage) {
 	pm.PopDraws.Delete(pop.(Node))
 	ki.SetParent(pop, nil) // don't redraw the popup anymore
 }
 
-func (pm *PopupMgr) ClosePopup(sc *Scene) bool {
+func (pm *PopupStageMgr) ClosePopup(sc *Scene) bool {
 	return false
 }
 
 // ClosePopup close given popup -- must be the current one -- returns false if not.
-func (pm *PopupMgr) ClosePopupImpl(pop *Stage) bool {
+func (pm *PopupStageMgr) ClosePopupImpl(pop *Stage) bool {
 	if pop != pm.CurPopup() {
 		return false
 	}
