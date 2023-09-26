@@ -9,7 +9,6 @@
 package colors
 
 import (
-	"fmt"
 	"image"
 
 	"image/color"
@@ -170,76 +169,62 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 	copy(g.Stops, cp.Stops)
 }
 
-// NewLinearGradient sets the gradient to a new linear gradient.
-func (g *Gradient) NewLinearGradient() {
-	*g = Gradient{
+// NewLinearGradient returns a new linear gradient
+func NewLinearGradient() *Gradient {
+	return &Gradient{
 		Source: LinearGradient,
 		Spread: SpreadPad,
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
-
 }
 
-// NewRadialGradient sets the gradient to a new radial gradient.
-func (g *Gradient) NewRadialGradient() {
-	g.Source = RadialGradient
-	g.Gradient = &rasterx.Gradient{IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
-	g.Gradient.Bounds.W = 1
-	g.Gradient.Bounds.H = 1
+// NewRadialGradient returns a new radial gradient
+func NewRadialGradient() *Gradient {
+	return &Gradient{
+		Source: RadialGradient,
+		Spread: SpreadPad,
+		Matrix: mat32.Identity2D(),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+	}
 }
 
 // SetGradientPoints sets UserSpaceOnUse points for gradient based on given bounding box
 func (g *Gradient) SetGradientPoints(bbox mat32.Box2) {
-	if g.Gradient == nil {
-		return
-	}
-	g.Gradient.Units = rasterx.UserSpaceOnUse
-	if g.Gradient.IsRadial {
-		ctr := bbox.Min.Add(bbox.Max).MulScalar(.5)
-		rad := 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
-		g.Gradient.Points = [5]float64{float64(ctr.X), float64(ctr.Y), float64(ctr.X), float64(ctr.Y), float64(rad)}
+	g.Units = UserSpaceOnUse
+	if g.Source == RadialGradient {
+		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
+		g.Focal = g.Center
+		g.Radius = 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
 	} else {
-		g.Gradient.Points = [5]float64{float64(bbox.Min.X), float64(bbox.Min.Y), float64(bbox.Max.X), float64(bbox.Min.Y), 0} // linear R-L
+		g.Bounds = bbox
+		g.Bounds.Max.Y = g.Bounds.Min.Y // linear R-L
 	}
 }
 
-// SetShadowGradient sets a linear gradient starting at given color and going
-// down to transparent based on given color and direction spec (defaults to
-// "to down")
-func (g *Gradient) SetShadowGradient(cl color.Color, dir string) {
-	g.Color = AsRGBA(cl)
-	if dir == "" {
-		dir = "to down"
-	}
-	g.SetString(fmt.Sprintf("linear-gradient(%v, lighter-0, transparent)", dir), nil)
-	g.Source = LinearGradient
-}
-
-// SetGradientBounds sets bounds of the gradient
-func SetGradientBounds(grad *rasterx.Gradient, bounds image.Rectangle) {
-	grad.Bounds.X = float64(bounds.Min.X)
-	grad.Bounds.Y = float64(bounds.Min.Y)
-	sz := bounds.Size()
-	grad.Bounds.W = float64(sz.X)
-	grad.Bounds.H = float64(sz.Y)
-}
-
-// CopyGradient copies a gradient, making new copies of the stops instead of
-// re-using pointers
-func CopyGradient(dst, src *rasterx.Gradient) {
-	*dst = *src
-	sn := len(src.Stops)
-	dst.Stops = make([]rasterx.GradStop, sn)
-	copy(dst.Stops, src.Stops)
-}
-
+// MatToRasterx converts the given [mat32.Mat2] to a [rasterx.Matrix2D]
 func MatToRasterx(mat *mat32.Mat2) rasterx.Matrix2D {
 	return rasterx.Matrix2D{float64(mat.XX), float64(mat.YX), float64(mat.XY), float64(mat.YY), float64(mat.X0), float64(mat.Y0)}
 }
 
+// RasterxToMat converts the given [rasterx.Matrix2D] to a [mat32.Mat2]
 func RasterxToMat(mat *rasterx.Matrix2D) mat32.Mat2 {
 	return mat32.Mat2{float32(mat.A), float32(mat.B), float32(mat.C), float32(mat.D), float32(mat.E), float32(mat.F)}
+}
+
+// Rasterx returns the gradient stop as a [rasterx.GradStop]
+func (g *GradientStop) Rasterx() rasterx.GradStop {
+	return rasterx.GradStop{
+		StopColor: g.Color,
+		Offset:    float64(g.Offset),
+		Opacity:   float64(g.Opacity),
+	}
+}
+
+// Rasterx returns the gradient as a [rasterx.Gradient]
+func (g *Gradient) Rasterx() *rasterx.Gradient {
+	return &rasterx.Gradient{}
+
 }
 
 // RenderColor gets the color for rendering, applying opacity and bounds for
