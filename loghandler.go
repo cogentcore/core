@@ -35,12 +35,12 @@ type Handler struct {
 var _ slog.Handler = &Handler{}
 
 // SetDefaultLogger sets the default logger to be a [Handler] with the
-// level set to [UserLevel].
+// level set to track [UserLevel]. It is called on program start
+// automatically, so it should not need to be called by end user code
+// in almost all circumstances.
 func SetDefaultLogger() {
-	lvar := &slog.LevelVar{}
-	lvar.Set(slog.Level(UserLevel))
 	slog.SetDefault(slog.New(NewHandler(os.Stderr, &slog.HandlerOptions{
-		Level: lvar,
+		Level: &UserLevel,
 	})))
 	if UseColor {
 		restoreConsole, err := termenv.EnableVirtualTerminalProcessing(termenv.DefaultOutput())
@@ -51,6 +51,10 @@ func SetDefaultLogger() {
 		colorProfile = termenv.ColorProfile()
 		colors.SetScheme(termenv.HasDarkBackground())
 	}
+}
+
+func init() {
+	SetDefaultLogger()
 }
 
 // NewHandler makes a new [Handler] for the given writer with the given options.

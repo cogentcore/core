@@ -12,7 +12,6 @@ import (
 
 func TestDefaultLogger(t *testing.T) {
 	UserLevel = slog.LevelDebug
-	SetDefaultLogger()
 
 	slog.Debug("this is debug")
 	slog.Info("this is info")

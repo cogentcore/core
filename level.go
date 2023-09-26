@@ -6,11 +6,13 @@ package grog
 
 import "log/slog"
 
-// UserLevel is the verbosity [Level] that the user has selected for
+// UserLevel is the verbosity [slog.Level] that the user has selected for
 // what logging and printing messages should be shown. Messages at
 // levels at or above this level will be shown. It should typically
 // be set through xe to the end user's preference. The default user
-// verbosity level is [slog.LevelWarn].
+// verbosity level is [slog.LevelWarn]. Any updates to this value
+// will be automatically reflected in the behavior of the grog default
+// logger.
 var UserLevel = slog.LevelWarn
 
 // LevelFromFlags returns the [slog.Level] object corresponding to the given
