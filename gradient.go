@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Note: this is based on https://github.com/srwiley/rasterx
+// Copyright 2018 All rights reserved.
+// Created: 5/12/2018 by S.R.Wiley
+
 package colors
 
 import (
@@ -27,6 +31,13 @@ type Gradient struct {
 	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
 }
 
+// GradientStop represents a gradient stop in the SVG 2.0 gradient specification
+type GradientStop struct {
+	Color   color.RGBA // the color of the stop
+	Offset  float64    // the offset of the stop
+	Opacity float64    // the opacity of the stop
+}
+
 // GradientSources represent the ways in which a [Gradient] can be specified.
 type GradientSources int32 //enums:enum
 
@@ -47,6 +58,25 @@ const (
 	GpY1
 	GpX2
 	GpY2
+)
+
+// SpreadMethods are the methods used for SVG spreading
+type SpreadMethods int32 //enums:enum
+
+// SVG spread parameter values
+const (
+	PadSpread SpreadMethods = iota
+	ReflectSpread
+	RepeatSpread
+)
+
+// GradientUnits are the types of SVG gradient units
+type GradientUnits int32 //enums:enum
+
+// SVG gradient units values
+const (
+	ObjectBoundingBox GradientUnits = iota
+	UserSpaceOnUse
 )
 
 // IsNil returns whether the gradient is effectively nil (has no color).
