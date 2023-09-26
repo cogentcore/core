@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 
+	"log/slog"
+
 	"goki.dev/grease/testdata"
 	"goki.dev/grog"
 	"goki.dev/grows/tomls"
@@ -163,8 +165,8 @@ func TestConfigFunc(t *testing.T) {
 	if cfg.NetData || !cfg.GPU || cfg.Note != "Hello, World" || cfg.PatParams.Sparseness != 4 || !reflect.DeepEqual(cfg.StrSlice, []string{"../main"}) {
 		t.Errorf("error setting configuration info (config: %#v)", cfg)
 	}
-	if grog.UserLevel != grog.Info {
-		t.Errorf("expected grog user level to be Info but it is %v", grog.UserLevel)
+	if grog.UserLevel != slog.LevelInfo {
+		t.Errorf("expected grog user level to be info but it is %v", grog.UserLevel)
 	}
 }
 
