@@ -77,7 +77,9 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 	c.Stdin = cfg.Stdin
 	c.Dir = cfg.Dir
 
-	err = c.Run()
+	if !cfg.PrintOnly {
+		err = c.Run()
+	}
 
 	if cfg.Buffer {
 		// if we have an error, we print the commands and stdout regardless of the config info
