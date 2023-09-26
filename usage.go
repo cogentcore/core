@@ -55,7 +55,7 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 	if cmd != "" {
 		cmdName += " " + cmd
 	}
-	b.WriteString(grog.WarnColor("Usage:\n") + Indent + grog.CmdColor(cmdName+" "))
+	b.WriteString(grog.TitleColor("Usage:\n") + Indent + grog.CmdColor(cmdName+" "))
 
 	posArgStrs := []string{}
 
@@ -92,8 +92,8 @@ func Usage[T any](opts *Options, cfg T, cmd string, cmds ...*Cmd[T]) string {
 
 	CommandUsage(&b, cmdName, cmd, cmds...)
 
-	b.WriteString(grog.WarnColor("\nFlags:\n") + Indent + grog.WarnColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
-	b.WriteString(Indent + grog.WarnColor("or CamelCase, and can have one or two leading dashes.\n\n"))
+	b.WriteString(grog.TitleColor("\nFlags:\n") + Indent + grog.TitleColor("Flags are case-insensitive, can be in kebab-case, snake_case,\n"))
+	b.WriteString(Indent + grog.TitleColor("or CamelCase, and can have one or two leading dashes.\n\n"))
 
 	// add meta ones (help, config, verbose, etc) first
 	mcfields := &Fields{}
@@ -145,7 +145,7 @@ outer:
 	}
 
 	if rcmd != nil {
-		b.WriteString(grog.WarnColor("\nDefault command:\n"))
+		b.WriteString(grog.TitleColor("\nDefault command:\n"))
 		b.WriteString(Indent + grog.CmdColor(rcmd.Name) + "\n" + Indent + Indent + strings.ReplaceAll(rcmd.Doc, "\n", "\n"+Indent+Indent) + "\n") // need to put two indents on every newline for formatting
 	}
 
@@ -153,7 +153,7 @@ outer:
 		return
 	}
 
-	b.WriteString(grog.WarnColor("\nSubcommands:\n"))
+	b.WriteString(grog.TitleColor("\nSubcommands:\n"))
 
 	// if we are in root, we also add help
 	if cmd == "" {
