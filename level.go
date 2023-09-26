@@ -4,65 +4,33 @@
 
 package grog
 
-//go:generate enumgen
-
-// Level represents a level of logging or printing verbosity.
-// It can be used by both users and developers to determine
-// the level of verbosity when running commands and logging.
-// The user preference verbosity level is stored in [UserLevel].
-type Level int //enums:enum
-
-const (
-	// Debug indicates that a message is a debugging message,
-	// or to show all messages in the context of debugging.
-	// It can be set by the end user as the value of [UserLevel]
-	// through the "vv" (very verbose) flag in [LevelFromFlags]
-	// and xe.
-	Debug Level = -4
-
-	// Info indicates that a message is an informational message,
-	// or to show all messages at or above the info level.
-	// It can be set by the end user as the value of [UserLevel]
-	// through the "v" (verbose) flag in [LevelFromFlags] and xe.
-	Info Level = 0
-
-	// Warn indicates that a message is a warning message,
-	// or to show all messages at or above the warning level.
-	// It is the default value for [UserLevel].
-	Warn Level = 4
-
-	// Error indicates that a message is an error message,
-	// or to only show error messages. It can be set by the
-	// end user as the value of [UserLevel] through the "q"
-	// (quiet) flag in [LevelFromFlags] and xe.
-	Error Level = 8
-)
+import "log/slog"
 
 // UserLevel is the verbosity [Level] that the user has selected for
 // what logging and printing messages should be shown. Messages at
 // levels at or above this level will be shown. It should typically
 // be set through xe to the end user's preference. The default user
-// verbosity level is [Warn].
-var UserLevel Level = Warn
+// verbosity level is [slog.LevelWarn].
+var UserLevel = slog.LevelWarn
 
-// LevelFromFlags returns the level object corresponding to the given
+// LevelFromFlags returns the [slog.Level] object corresponding to the given
 // user flag options. The flags correspond to the following values:
-//   - vv: [Debug]
-//   - v: [Info]
-//   - q: [Error]
-//   - (default: [Warn])
+//   - vv: [slog.LevelDebug]
+//   - v: [slog.LevelInfo]
+//   - q: [slog.LevelError]
+//   - (default: [slog.LevelWarn])
 //
 // The flags are evaluated in that order, so, for example, if both
 // vv and q are specified, it will still return [Debug].
-func LevelFromFlags(vv, v, q bool) Level {
+func LevelFromFlags(vv, v, q bool) slog.Level {
 	switch {
 	case vv:
-		return Debug
+		return slog.LevelDebug
 	case v:
-		return Info
+		return slog.LevelInfo
 	case q:
-		return Error
+		return slog.LevelError
 	default:
-		return Warn
+		return slog.LevelWarn
 	}
 }

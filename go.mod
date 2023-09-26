@@ -5,7 +5,6 @@ go 1.21.0
 require (
 	github.com/muesli/termenv v0.15.2
 	goki.dev/colors v0.8.12
-	goki.dev/enums v0.9.20
 )
 
 require (

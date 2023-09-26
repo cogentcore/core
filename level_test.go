@@ -4,23 +4,26 @@
 
 package grog
 
-import "testing"
+import (
+	"log/slog"
+	"testing"
+)
 
 func TestLevelFromFlags(t *testing.T) {
 	l := LevelFromFlags(true, false, false)
-	if l != Debug {
-		t.Errorf("expected LevelFromFlags(true, false, false) = %v, but got %v", Debug, l)
+	if l != slog.LevelDebug {
+		t.Errorf("expected LevelFromFlags(true, false, false) = %v, but got %v", slog.LevelDebug, l)
 	}
 	l = LevelFromFlags(false, true, true)
-	if l != Info {
-		t.Errorf("expected LevelFromFlags(false, true, true) = %v, but got %v", Info, l)
+	if l != slog.LevelInfo {
+		t.Errorf("expected LevelFromFlags(false, true, true) = %v, but got %v", slog.LevelInfo, l)
 	}
 	l = LevelFromFlags(false, false, true)
-	if l != Error {
-		t.Errorf("expected LevelFromFlags(false, false, true) = %v, but got %v", Error, l)
+	if l != slog.LevelError {
+		t.Errorf("expected LevelFromFlags(false, false, true) = %v, but got %v", slog.LevelError, l)
 	}
 	l = LevelFromFlags(false, false, false)
-	if l != Warn {
-		t.Errorf("expected LevelFromFlags(false, false, false) = %v, but got %v", Warn, l)
+	if l != slog.LevelWarn {
+		t.Errorf("expected LevelFromFlags(false, false, false) = %v, but got %v", slog.LevelWarn, l)
 	}
 }
