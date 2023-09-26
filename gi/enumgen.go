@@ -3,13 +3,7 @@
 package gi
 
 import (
-	"errors"
-	"strconv"
-	"strings"
-	"sync/atomic"
-
 	"goki.dev/enums"
-	"goki.dev/ki/v2"
 )
 
 var _ActionTypesValues = []ActionTypes{0, 1, 2, 3, 4}
@@ -2193,6 +2187,401 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+
+// WinFlagsN is the highest valid value
+// for type WinFlags, plus one.
+const WinFlagsN WinFlags = 12
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _WinFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[WinFlagHasGeomPrefs-(0)]
+	_ = x[WinFlagUpdating-(1)]
+	_ = x[WinFlagIsClosing-(2)]
+	_ = x[WinFlagIsResizing-(3)]
+	_ = x[WinFlagGotPaint-(4)]
+	_ = x[WinFlagGotFocus-(5)]
+	_ = x[WinFlagSentShow-(6)]
+	_ = x[WinFlagGoLoop-(7)]
+	_ = x[WinFlagStopEventLoop-(8)]
+	_ = x[WinFlagDoFullRender-(9)]
+	_ = x[WinFlagFocusActive-(10)]
+	_ = x[WinFlagSelectionMode-(11)]
+}
+
+var _WinFlagsNameToValueMap = map[string]WinFlags{
+	`WinFlagHasGeomPrefs`:  0,
+	`winflaghasgeomprefs`:  0,
+	`WinFlagUpdating`:      1,
+	`winflagupdating`:      1,
+	`WinFlagIsClosing`:     2,
+	`winflagisclosing`:     2,
+	`WinFlagIsResizing`:    3,
+	`winflagisresizing`:    3,
+	`WinFlagGotPaint`:      4,
+	`winflaggotpaint`:      4,
+	`WinFlagGotFocus`:      5,
+	`winflaggotfocus`:      5,
+	`WinFlagSentShow`:      6,
+	`winflagsentshow`:      6,
+	`WinFlagGoLoop`:        7,
+	`winflaggoloop`:        7,
+	`WinFlagStopEventLoop`: 8,
+	`winflagstopeventloop`: 8,
+	`WinFlagDoFullRender`:  9,
+	`winflagdofullrender`:  9,
+	`WinFlagFocusActive`:   10,
+	`winflagfocusactive`:   10,
+	`WinFlagSelectionMode`: 11,
+	`winflagselectionmode`: 11,
+}
+
+var _WinFlagsDescMap = map[WinFlags]string{
+	0:  `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
+	1:  `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
+	2:  `WinFlagIsClosing is atomic flag indicating window is closing`,
+	3:  `WinFlagIsResizing is atomic flag indicating window is resizing`,
+	4:  `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
+	5:  `WinFlagGotFocus indicates that have we received RenderWin focus`,
+	6:  `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
+	7:  `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	8:  `WinFlagStopEventLoop is set when event loop stop is requested`,
+	9:  `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
+	10: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
+	11: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+}
+
+var _WinFlagsMap = map[WinFlags]string{
+	0:  `WinFlagHasGeomPrefs`,
+	1:  `WinFlagUpdating`,
+	2:  `WinFlagIsClosing`,
+	3:  `WinFlagIsResizing`,
+	4:  `WinFlagGotPaint`,
+	5:  `WinFlagGotFocus`,
+	6:  `WinFlagSentShow`,
+	7:  `WinFlagGoLoop`,
+	8:  `WinFlagStopEventLoop`,
+	9:  `WinFlagDoFullRender`,
+	10: `WinFlagFocusActive`,
+	11: `WinFlagSelectionMode`,
+}
+
+// String returns the string representation
+// of this WinFlags value.
+func (i WinFlags) String() string {
+	str := ""
+	for _, ie := range _WinFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this WinFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i WinFlags) BitIndexString() string {
+	if str, ok := _WinFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the WinFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *WinFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the WinFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *WinFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _WinFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _WinFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type WinFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the WinFlags value as an int64.
+func (i WinFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the WinFlags value from an int64.
+func (i *WinFlags) SetInt64(in int64) {
+	*i = WinFlags(in)
+}
+
+// Desc returns the description of the WinFlags value.
+func (i WinFlags) Desc() string {
+	if str, ok := _WinFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// WinFlagsValues returns all possible values
+// for the type WinFlags.
+func WinFlagsValues() []WinFlags {
+	return _WinFlagsValues
+}
+
+// Values returns all possible values
+// for the type WinFlags.
+func (i WinFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_WinFlagsValues))
+	for i, d := range _WinFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type WinFlags.
+func (i WinFlags) IsValid() bool {
+	_, ok := _WinFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i WinFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i WinFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *WinFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
+
+// ScFlagsN is the highest valid value
+// for type ScFlags, plus one.
+const ScFlagsN ScFlags = 7
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ScFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[ScIsUpdating-(0)]
+	_ = x[ScNeedsRender-(1)]
+	_ = x[ScNeedsLayout-(2)]
+	_ = x[ScNeedsRebuild-(3)]
+	_ = x[ScRebuild-(4)]
+	_ = x[ScPrefSizing-(5)]
+	_ = x[ScPreserve-(6)]
+}
+
+var _ScFlagsNameToValueMap = map[string]ScFlags{
+	`ScIsUpdating`:   0,
+	`scisupdating`:   0,
+	`ScNeedsRender`:  1,
+	`scneedsrender`:  1,
+	`ScNeedsLayout`:  2,
+	`scneedslayout`:  2,
+	`ScNeedsRebuild`: 3,
+	`scneedsrebuild`: 3,
+	`ScRebuild`:      4,
+	`screbuild`:      4,
+	`ScPrefSizing`:   5,
+	`scprefsizing`:   5,
+	`ScPreserve`:     6,
+	`scpreserve`:     6,
+}
+
+var _ScFlagsDescMap = map[ScFlags]string{
+	0: `ScIsUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	1: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
+	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
+	4: `ScRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
+	5: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
+	6: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+}
+
+var _ScFlagsMap = map[ScFlags]string{
+	0: `ScIsUpdating`,
+	1: `ScNeedsRender`,
+	2: `ScNeedsLayout`,
+	3: `ScNeedsRebuild`,
+	4: `ScRebuild`,
+	5: `ScPrefSizing`,
+	6: `ScPreserve`,
+}
+
+// String returns the string representation
+// of this ScFlags value.
+func (i ScFlags) String() string {
+	str := ""
+	for _, ie := range _ScFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this ScFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i ScFlags) BitIndexString() string {
+	if str, ok := _ScFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ScFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ScFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the ScFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *ScFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type ScFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the ScFlags value as an int64.
+func (i ScFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ScFlags value from an int64.
+func (i *ScFlags) SetInt64(in int64) {
+	*i = ScFlags(in)
+}
+
+// Desc returns the description of the ScFlags value.
+func (i ScFlags) Desc() string {
+	if str, ok := _ScFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ScFlagsValues returns all possible values
+// for the type ScFlags.
+func ScFlagsValues() []ScFlags {
+	return _ScFlagsValues
+}
+
+// Values returns all possible values
+// for the type ScFlags.
+func (i ScFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ScFlagsValues))
+	for i, d := range _ScFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ScFlags.
+func (i ScFlags) IsValid() bool {
+	_, ok := _ScFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i ScFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ScFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ScFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _SpellSignalsValues = []SpellSignals{0, 1}
 
 // SpellSignalsN is the highest valid value
@@ -2296,6 +2685,243 @@ func (i SpellSignals) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *SpellSignals) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5, 6}
+
+// StageTypesN is the highest valid value
+// for type StageTypes, plus one.
+const StageTypesN StageTypes = 7
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _StageTypesNoOp() {
+	var x [1]struct{}
+	_ = x[Window-(0)]
+	_ = x[Dialog-(1)]
+	_ = x[Sheet-(2)]
+	_ = x[Menu-(3)]
+	_ = x[Tooltip-(4)]
+	_ = x[Snackbar-(5)]
+	_ = x[Chooser-(6)]
+}
+
+var _StageTypesNameToValueMap = map[string]StageTypes{
+	`Window`:   0,
+	`window`:   0,
+	`Dialog`:   1,
+	`dialog`:   1,
+	`Sheet`:    2,
+	`sheet`:    2,
+	`Menu`:     3,
+	`menu`:     3,
+	`Tooltip`:  4,
+	`tooltip`:  4,
+	`Snackbar`: 5,
+	`snackbar`: 5,
+	`Chooser`:  6,
+	`chooser`:  6,
+}
+
+var _StageTypesDescMap = map[StageTypes]string{
+	0: `Window displays Scene in a full window`,
+	1: `Dialog displays Scene in a smaller dialog window above the Window (can alternatively be in its own OS Window)`,
+	2: `Sheet displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide`,
+	3: `Menu displays Scene as a panel on top of window`,
+	4: `Tooltip displays Scene as a tooltip`,
+	5: `Snackbar displays Scene as a Snackbar`,
+	6: `Chooser displays Scene as a dynamic chooser for completing or correcting text`,
+}
+
+var _StageTypesMap = map[StageTypes]string{
+	0: `Window`,
+	1: `Dialog`,
+	2: `Sheet`,
+	3: `Menu`,
+	4: `Tooltip`,
+	5: `Snackbar`,
+	6: `Chooser`,
+}
+
+// String returns the string representation
+// of this StageTypes value.
+func (i StageTypes) String() string {
+	if str, ok := _StageTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the StageTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *StageTypes) SetString(s string) error {
+	if val, ok := _StageTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _StageTypesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type StageTypes")
+}
+
+// Int64 returns the StageTypes value as an int64.
+func (i StageTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the StageTypes value from an int64.
+func (i *StageTypes) SetInt64(in int64) {
+	*i = StageTypes(in)
+}
+
+// Desc returns the description of the StageTypes value.
+func (i StageTypes) Desc() string {
+	if str, ok := _StageTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// StageTypesValues returns all possible values
+// for the type StageTypes.
+func StageTypesValues() []StageTypes {
+	return _StageTypesValues
+}
+
+// Values returns all possible values
+// for the type StageTypes.
+func (i StageTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_StageTypesValues))
+	for i, d := range _StageTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type StageTypes.
+func (i StageTypes) IsValid() bool {
+	_, ok := _StageTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i StageTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *StageTypes) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _StageSidesValues = []StageSides{0, 1}
+
+// StageSidesN is the highest valid value
+// for type StageSides, plus one.
+const StageSidesN StageSides = 2
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _StageSidesNoOp() {
+	var x [1]struct{}
+	_ = x[Bottom-(0)]
+	_ = x[LeftSide-(1)]
+}
+
+var _StageSidesNameToValueMap = map[string]StageSides{
+	`Bottom`:   0,
+	`bottom`:   0,
+	`LeftSide`: 1,
+	`leftside`: 1,
+}
+
+var _StageSidesDescMap = map[StageSides]string{
+	0: `Bottom anchors Sheet to the bottom of the window, with handle on the top`,
+	1: `LeftSide anchors Sheet to the left side of the window, with handle on the top`,
+}
+
+var _StageSidesMap = map[StageSides]string{
+	0: `Bottom`,
+	1: `LeftSide`,
+}
+
+// String returns the string representation
+// of this StageSides value.
+func (i StageSides) String() string {
+	if str, ok := _StageSidesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the StageSides value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *StageSides) SetString(s string) error {
+	if val, ok := _StageSidesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _StageSidesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type StageSides")
+}
+
+// Int64 returns the StageSides value as an int64.
+func (i StageSides) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the StageSides value from an int64.
+func (i *StageSides) SetInt64(in int64) {
+	*i = StageSides(in)
+}
+
+// Desc returns the description of the StageSides value.
+func (i StageSides) Desc() string {
+	if str, ok := _StageSidesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// StageSidesValues returns all possible values
+// for the type StageSides.
+func StageSidesValues() []StageSides {
+	return _StageSidesValues
+}
+
+// Values returns all possible values
+// for the type StageSides.
+func (i StageSides) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_StageSidesValues))
+	for i, d := range _StageSidesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type StageSides.
+func (i StageSides) IsValid() bool {
+	_, ok := _StageSidesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i StageSides) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *StageSides) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
@@ -2715,531 +3341,5 @@ func (i TextFieldFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
-
-// ScFlagsN is the highest valid value
-// for type ScFlags, plus one.
-const ScFlagsN ScFlags = 7
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ScFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[ScIsUpdating-(0)]
-	_ = x[ScNeedsRender-(1)]
-	_ = x[ScNeedsLayout-(2)]
-	_ = x[ScNeedsRebuild-(3)]
-	_ = x[ScPopupDestroyAll-(4)]
-	_ = x[ScRebuild-(5)]
-	_ = x[ScPrefSizing-(6)]
-}
-
-var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`ScIsUpdating`:      0,
-	`vpisupdating`:      0,
-	`ScNeedsRender`:     1,
-	`vpneedsrender`:     1,
-	`ScNeedsLayout`:     2,
-	`vpneedslayout`:     2,
-	`ScNeedsRebuild`:    3,
-	`vpneedsrebuild`:    3,
-	`ScPopupDestroyAll`: 4,
-	`vppopupdestroyall`: 4,
-	`ScRebuild`:         5,
-	`vprebuild`:         5,
-	`ScPrefSizing`:      6,
-	`vpprefsizing`:      6,
-}
-
-var _ScFlagsDescMap = map[ScFlags]string{
-	0: `ScIsUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	1: `ScNeedsRender means nodes have flagged that they need a Render update.`,
-	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
-	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	4: `ScPopupDestroyAll means that if this is a popup, then destroy all the children when it is deleted -- otherwise children below the main layout under the vp will not be destroyed -- it is up to the caller to manage those (typically these are reusable assets)`,
-	5: `ScRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
-	6: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-}
-
-var _ScFlagsMap = map[ScFlags]string{
-	0: `ScIsUpdating`,
-	1: `ScNeedsRender`,
-	2: `ScNeedsLayout`,
-	3: `ScNeedsRebuild`,
-	4: `ScPopupDestroyAll`,
-	5: `ScRebuild`,
-	6: `ScPrefSizing`,
-}
-
-// String returns the string representation
-// of this ScFlags value.
-func (i ScFlags) String() string {
-	str := ""
-	for _, ie := range _ScFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-
-// BitIndexString returns the string
-// representation of this ScFlags value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i ScFlags) BitIndexString() string {
-	if str, ok := _ScFlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the ScFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ScFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
-
-// SetStringOr sets the ScFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
-// error if the string is invalid.
-func (i *ScFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _ScFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ScFlagsNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			return errors.New(flg + " is not a valid value for type ScFlags")
-		}
-	}
-	return nil
-}
-
-// Int64 returns the ScFlags value as an int64.
-func (i ScFlags) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ScFlags value from an int64.
-func (i *ScFlags) SetInt64(in int64) {
-	*i = ScFlags(in)
-}
-
-// Desc returns the description of the ScFlags value.
-func (i ScFlags) Desc() string {
-	if str, ok := _ScFlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// ScFlagsValues returns all possible values
-// for the type ScFlags.
-func ScFlagsValues() []ScFlags {
-	return _ScFlagsValues
-}
-
-// Values returns all possible values
-// for the type ScFlags.
-func (i ScFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ScFlagsValues))
-	for i, d := range _ScFlagsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ScFlags.
-func (i ScFlags) IsValid() bool {
-	_, ok := _ScFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
-func (i ScFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
-
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
-func (i *ScFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ScFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ScFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _ScTypeValues = []ScType{0, 1, 2, 3, 4, 5, 6}
-
-// ScTypeN is the highest valid value
-// for type ScType, plus one.
-const ScTypeN ScType = 7
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ScTypeNoOp() {
-	var x [1]struct{}
-	_ = x[ScMain-(0)]
-	_ = x[ScDialog-(1)]
-	_ = x[ScMenu-(2)]
-	_ = x[ScCompleter-(3)]
-	_ = x[ScCorrector-(4)]
-	_ = x[ScTooltip-(5)]
-	_ = x[ScPopup-(6)]
-}
-
-var _ScTypeNameToValueMap = map[string]ScType{
-	`ScMain`:      0,
-	`vpmain`:      0,
-	`ScDialog`:    1,
-	`vpdialog`:    1,
-	`ScMenu`:      2,
-	`vpmenu`:      2,
-	`ScCompleter`: 3,
-	`vpcompleter`: 3,
-	`ScCorrector`: 4,
-	`vpcorrector`: 4,
-	`ScTooltip`:   5,
-	`vptooltip`:   5,
-	`ScPopup`:     6,
-	`vppopup`:     6,
-}
-
-var _ScTypeDescMap = map[ScType]string{
-	0: `ScMain means scene is for a main window`,
-	1: `ScDialog means scene is a dialog`,
-	2: `ScMenu means scene is a popup menu`,
-	3: `ScCompleter means scene is a popup menu for completion`,
-	4: `ScCorrector means scene is a popup menu for spelling correction`,
-	5: `ScTooltip means scene is serving as a tooltip`,
-	6: `ScPopup means scene is a popup of some other type`,
-}
-
-var _ScTypeMap = map[ScType]string{
-	0: `ScMain`,
-	1: `ScDialog`,
-	2: `ScMenu`,
-	3: `ScCompleter`,
-	4: `ScCorrector`,
-	5: `ScTooltip`,
-	6: `ScPopup`,
-}
-
-// String returns the string representation
-// of this ScType value.
-func (i ScType) String() string {
-	if str, ok := _ScTypeMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the ScType value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ScType) SetString(s string) error {
-	if val, ok := _ScTypeNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ScTypeNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ScType")
-}
-
-// Int64 returns the ScType value as an int64.
-func (i ScType) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ScType value from an int64.
-func (i *ScType) SetInt64(in int64) {
-	*i = ScType(in)
-}
-
-// Desc returns the description of the ScType value.
-func (i ScType) Desc() string {
-	if str, ok := _ScTypeDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// ScTypeValues returns all possible values
-// for the type ScType.
-func ScTypeValues() []ScType {
-	return _ScTypeValues
-}
-
-// Values returns all possible values
-// for the type ScType.
-func (i ScType) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ScTypeValues))
-	for i, d := range _ScTypeValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ScType.
-func (i ScType) IsValid() bool {
-	_, ok := _ScTypeMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ScType) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ScType) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-
-// WinFlagsN is the highest valid value
-// for type WinFlags, plus one.
-const WinFlagsN WinFlags = 12
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _WinFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[WinFlagHasGeomPrefs-(0)]
-	_ = x[WinFlagUpdating-(1)]
-	_ = x[WinFlagIsClosing-(2)]
-	_ = x[WinFlagIsResizing-(3)]
-	_ = x[WinFlagGotPaint-(4)]
-	_ = x[WinFlagGotFocus-(5)]
-	_ = x[WinFlagSentShow-(6)]
-	_ = x[WinFlagGoLoop-(7)]
-	_ = x[WinFlagStopEventLoop-(8)]
-	_ = x[WinFlagDoFullRender-(9)]
-	_ = x[WinFlagFocusActive-(10)]
-	_ = x[WinFlagSelectionMode-(11)]
-}
-
-var _WinFlagsNameToValueMap = map[string]WinFlags{
-	`WinFlagHasGeomPrefs`:  0,
-	`winflaghasgeomprefs`:  0,
-	`WinFlagUpdating`:      1,
-	`winflagupdating`:      1,
-	`WinFlagIsClosing`:     2,
-	`winflagisclosing`:     2,
-	`WinFlagIsResizing`:    3,
-	`winflagisresizing`:    3,
-	`WinFlagGotPaint`:      4,
-	`winflaggotpaint`:      4,
-	`WinFlagGotFocus`:      5,
-	`winflaggotfocus`:      5,
-	`WinFlagSentShow`:      6,
-	`winflagsentshow`:      6,
-	`WinFlagGoLoop`:        7,
-	`winflaggoloop`:        7,
-	`WinFlagStopEventLoop`: 8,
-	`winflagstopeventloop`: 8,
-	`WinFlagDoFullRender`:  9,
-	`winflagdofullrender`:  9,
-	`WinFlagFocusActive`:   10,
-	`winflagfocusactive`:   10,
-	`WinFlagSelectionMode`: 11,
-	`winflagselectionmode`: 11,
-}
-
-var _WinFlagsDescMap = map[WinFlags]string{
-	0:  `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	1:  `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
-	2:  `WinFlagIsClosing is atomic flag indicating window is closing`,
-	3:  `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	4:  `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
-	5:  `WinFlagGotFocus indicates that have we received RenderWin focus`,
-	6:  `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	7:  `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	8:  `WinFlagStopEventLoop is set when event loop stop is requested`,
-	9:  `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
-	10: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	11: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
-}
-
-var _WinFlagsMap = map[WinFlags]string{
-	0:  `WinFlagHasGeomPrefs`,
-	1:  `WinFlagUpdating`,
-	2:  `WinFlagIsClosing`,
-	3:  `WinFlagIsResizing`,
-	4:  `WinFlagGotPaint`,
-	5:  `WinFlagGotFocus`,
-	6:  `WinFlagSentShow`,
-	7:  `WinFlagGoLoop`,
-	8:  `WinFlagStopEventLoop`,
-	9:  `WinFlagDoFullRender`,
-	10: `WinFlagFocusActive`,
-	11: `WinFlagSelectionMode`,
-}
-
-// String returns the string representation
-// of this WinFlags value.
-func (i WinFlags) String() string {
-	str := ""
-	for _, ie := range _WinFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-
-// BitIndexString returns the string
-// representation of this WinFlags value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i WinFlags) BitIndexString() string {
-	if str, ok := _WinFlagsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the WinFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *WinFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
-
-// SetStringOr sets the WinFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
-// error if the string is invalid.
-func (i *WinFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _WinFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _WinFlagsNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			return errors.New(flg + " is not a valid value for type WinFlags")
-		}
-	}
-	return nil
-}
-
-// Int64 returns the WinFlags value as an int64.
-func (i WinFlags) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the WinFlags value from an int64.
-func (i *WinFlags) SetInt64(in int64) {
-	*i = WinFlags(in)
-}
-
-// Desc returns the description of the WinFlags value.
-func (i WinFlags) Desc() string {
-	if str, ok := _WinFlagsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// WinFlagsValues returns all possible values
-// for the type WinFlags.
-func WinFlagsValues() []WinFlags {
-	return _WinFlagsValues
-}
-
-// Values returns all possible values
-// for the type WinFlags.
-func (i WinFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_WinFlagsValues))
-	for i, d := range _WinFlagsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type WinFlags.
-func (i WinFlags) IsValid() bool {
-	_, ok := _WinFlagsMap[i]
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
-func (i WinFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
-
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
-func (i *WinFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i WinFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

@@ -53,6 +53,9 @@ type RenderContext struct {
 
 	// Visible is true if window is visible and should be rendered to
 	Visible bool
+
+	// Mu is mutex for locking out rendering
+	Mu sync.Mutex
 }
 
 var (
@@ -374,7 +377,7 @@ func OpenURL(url string) {
 
 // NewRenderWin creates a new window with given internal name handle, display
 // name, and options.
-func NewRenderWin(name, title string, opts *goosi.NewRenderWinOptions) *RenderWin {
+func NewRenderWin(name, title string, opts *goosi.NewWinOptions) *RenderWin {
 	Init() // overall gogi system initialization
 	win := &RenderWin{}
 	win.InitName(win, name)
@@ -1703,23 +1706,23 @@ func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 		}
 		hasFocus = true // doesn't need focus!
 	}
-	if me, ok := evi.(*mouse.MoveEvent); ok {
+	if me, ok := evi.(*mouse.Event); ok {
 		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
 		w.SetCursor(me) // always set cursor on mouse move
 	}
 	// if someone clicks while in selection mode, stop selection mode and stop the event
 	if me, ok := evi.(*mouse.Event); w.IsInSelectionMode() && ok {
-		me.SetProcessed()
+		me.SetHandled()
 		w.SetSelectionModeState(false)
 		w.DeleteSprite(RenderWinSelectionSpriteName)
 		w.SelectedWidgetChan <- w.SelectedWidget
 	}
 
-	if (hasFocus || !evi.OnWinFocus()) && !evi.IsProcessed() {
+	if (hasFocus || !evi.OnWinFocus()) && !evi.IsHandled() {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
-		if !w.delPop && et == goosi.MouseMoveEvent && !evi.IsProcessed() {
-			didFocus := w.EventMgr.GenMouseFocusEvents(evi.(*mouse.MoveEvent), evToPopup)
+		if !w.delPop && et == goosi.MouseMoveEvent && !evi.IsHandled() {
+			didFocus := w.EventMgr.GenMouseFocusEvents(evi.(*mouse.Event), evToPopup)
 			if didFocus && w.CurPopupIsTooltip() {
 				w.delPop = true
 			}
@@ -1729,17 +1732,17 @@ func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 	////////////////////////////////////////////////////////////////////////////
 	// Low priority windows events
 
-	if !evi.IsProcessed() && et == goosi.KeyChordEvent {
-		ke := evi.(*key.ChordEvent)
+	if !evi.IsHandled() && et == goosi.KeyChordEvent {
+		ke := evi.(*key.Event)
 		kc := ke.Chord()
 		if w.TriggerShortcut(kc) {
-			evi.SetProcessed()
+			evi.SetHandled()
 		}
 	}
 
-	if !evi.IsProcessed() {
+	if !evi.IsHandled() {
 		switch e := evi.(type) {
-		case *key.ChordEvent:
+		case *key.Event:
 			keyDelPop := w.KeyChordEventLowPri(e)
 			if keyDelPop {
 				w.delPop = true
@@ -1799,7 +1802,7 @@ func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 
 // SetCursor sets the cursor based on the given mouse event.
 // Also handles sending widget selection events.
-func (w *RenderWin) SetCursor(me *mouse.MoveEvent) {
+func (w *RenderWin) SetCursor(me *mouse.Event) {
 	if w.IsClosing() {
 		return
 	}
@@ -1856,7 +1859,7 @@ func (w *RenderWin) SetCursor(me *mouse.MoveEvent) {
 	}
 
 	if w.IsInSelectionMode() && maxLevelWidget != nil {
-		me.SetProcessed()
+		me.SetHandled()
 		w.SelectionSprite(maxLevelWidget)
 		w.SelectedWidget = maxLevelWidget
 		goosi.TheApp.Cursor(w.RenderWin).Set(cursor.Arrow) // always arrow in selection mode
@@ -1917,7 +1920,7 @@ func (w *RenderWin) FilterEvent(evi goosi.Event) bool {
 			w.skippedResize = we
 			return false
 		} else {
-			we.SetProcessed()
+			we.SetHandled()
 			w.Resized(w.RenderWin.Size())
 			w.EventMgr.LagLastSkipped = false
 			w.skippedResize = nil
@@ -1973,7 +1976,7 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 			}
 			w.SendShowEvent() // happens AFTER full render
 		case window.Move:
-			e.SetProcessed()
+			e.SetHandled()
 			if w.HasFlag(int(WinFlagGotPaint)) { // moves before paint are not accurate on X11
 				// fmt.Printf("win move: %v\n", w.RenderWin.Position())
 				if WinGeomTrace {
@@ -2014,13 +2017,13 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 			// }
 		}
 		return false // don't do anything else!
-	case *mouse.DragEvent:
+	case *mouse.Event:
 		if w.EventMgr.DNDStage == DNDStarted {
 			w.DNDMoveEvent(e)
 		} else {
 			w.SelSpriteEvent(evi)
 			if !w.EventMgr.dragStarted {
-				e.SetProcessed() // ignore
+				e.SetHandled() // ignore
 			}
 		}
 	case *mouse.Event:
@@ -2032,7 +2035,7 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		if w.NeedWinMenuUpdate() {
 			w.MainMenuUpdateRenderWins()
 		}
-	case *mouse.MoveEvent:
+	case *mouse.Event:
 		// todo:
 		// if bitflag.HasAllAtomic(&w.Flag, int(WinFlagGotPaint), int(WinFlagGotFocus)) {
 		if w.HasFlag(int(WinFlagDoFullRender)) {
@@ -2054,7 +2057,7 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		if e.Action == dnd.External {
 			w.EventMgr.DNDDropMod = e.Mod
 		}
-	case *key.ChordEvent:
+	case *key.Event:
 		keyDelPop := w.KeyChordEventHiPri(e)
 		if keyDelPop {
 			w.delPop = true
@@ -2182,244 +2185,16 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//                   Popups
-
-// PopupIsMenu returns true if the given popup item is a menu
-func PopupIsMenu(pop ki.Ki) bool {
-	if pop == nil {
-		return false
-	}
-	wi, wb := AsWidget(pop)
-	if wb == nil {
-		return false
-	}
-	sc := wi.AsScene()
-	if sc == nil {
-		return false
-	}
-	if sc.IsMenu() {
-		return true
-	}
-	return false
-}
-
-// PopupIsTooltip returns true if the given popup item is a tooltip
-func PopupIsTooltip(pop ki.Ki) bool {
-	if pop == nil {
-		return false
-	}
-	wi, ni := AsWidget(pop)
-	if ni == nil {
-		return false
-	}
-	sc := wi.AsScene()
-	if sc == nil {
-		return false
-	}
-	if sc.IsTooltip() {
-		return true
-	}
-	return false
-}
-
-// PopupIsCompleter returns true if the given popup item is a menu and a completer
-func PopupIsCompleter(pop ki.Ki) bool {
-	if !PopupIsMenu(pop) {
-		return false
-	}
-	wi, ni := AsWidget(pop)
-	if ni == nil {
-		return false
-	}
-	sc := wi.AsScene()
-	if sc == nil {
-		return false
-	}
-	if sc.IsCompleter() {
-		return true
-	}
-	return false
-}
-
-// PopupIsCorrector returns true if the given popup item is a menu and a spell corrector
-func PopupIsCorrector(pop ki.Ki) bool {
-	if !PopupIsMenu(pop) {
-		return false
-	}
-	wi, ni := AsWidget(pop)
-	if ni == nil {
-		return false
-	}
-	sc := wi.AsScene()
-	if sc == nil {
-		return false
-	}
-	if sc.IsCorrector() {
-		return true
-	}
-	return false
-}
-
-// CurPopup returns the current popup, protected with read mutex
-func (w *RenderWin) CurPopup() ki.Ki {
-	w.PopMu.RLock()
-	cpop := w.Popup
-	w.PopMu.RUnlock()
-	return cpop
-}
-
-// CurPopupIsTooltip returns true if current popup is a tooltip
-func (w *RenderWin) CurPopupIsTooltip() bool {
-	return PopupIsTooltip(w.CurPopup())
-}
-
-// DeleteTooltip deletes any tooltip popup (called when hover ends)
-func (w *RenderWin) DeleteTooltip() {
-	w.PopMu.RLock()
-	if w.CurPopupIsTooltip() {
-		w.delPop = true
-	}
-	w.PopMu.RUnlock()
-}
-
-// SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *RenderWin) SetNextPopup(pop *Scene, focus ki.Ki) {
-}
-
-// SetNextPopup sets the next popup, and what to focus on in that popup if non-nil
-func (w *RenderWin) SetNextPopupImpl(pop, focus ki.Ki) {
-	w.PopMu.Lock()
-	w.NextPopup = pop
-	w.PopupFocus = focus
-	w.PopMu.Unlock()
-}
-
-// SetDelPopup sets the popup to delete next time through event loop
-func (w *RenderWin) SetDelPopup(pop ki.Ki) {
-	w.PopMu.Lock()
-	w.DelPopup = pop
-	w.PopMu.Unlock()
-}
-
-// ShouldDeletePopupMenu returns true if the given popup item should be deleted
-func (w *RenderWin) ShouldDeletePopupMenu(pop ki.Ki, me *mouse.Event) bool {
-	// if we have a dialog open, close it if we didn't click in it
-	if dlg, ok := pop.(*Dialog); ok {
-		log.Println("pos", me.Pos(), "bbox", dlg.WinBBox)
-		return !me.Pos().In(dlg.WinBBox)
-	}
-	if !PopupIsMenu(pop) {
-		return false
-	}
-	if w.NextPopup != nil && PopupIsMenu(w.NextPopup) { // popping up another menu
-		return false
-	}
-	if me.Button != mouse.Left && w.EventMgr.Dragging == nil { // probably menu activation in first place
-		return false
-	}
-	return true
-}
-
-// PushPopup pushes current popup onto stack and set new popup.
-func (w *RenderWin) PushPopup(pop ki.Ki) {
-	w.PopMu.Lock()
-	w.ResetUpdateRegions()
-	w.NextPopup = nil
-	if w.PopupStack == nil {
-		w.PopupStack = make([]ki.Ki, 0, 50)
-	}
-	ki.SetParent(pop, w.This()) // popup has parent as window -- draws directly in to assoc vp
-	w.PopupStack = append(w.PopupStack, w.Popup)
-	w.Popup = pop
-	_, ni := AsWidget(pop)
-	pfoc := w.PopupFocus
-	w.PopupFocus = nil
-	w.PopMu.Unlock()
-	if ni != nil {
-		ni.FullRenderTree() // this locks scene -- do it after unlocking popup
-	}
-	if pfoc != nil {
-		w.EventMgr.PushFocus(pfoc)
-	} else {
-		w.EventMgr.PushFocus(pop)
-	}
-}
-
-// DisconnectPopup disconnects given popup -- typically the current one.
-func (w *RenderWin) DisconnectPopup(pop ki.Ki) {
-	w.PopDraws.Delete(pop.(Node))
-	ki.SetParent(pop, nil) // don't redraw the popup anymore
-}
-
-func (w *RenderWin) ClosePopup(sc *Scene) bool {
-	return false
-}
-
-// ClosePopup close given popup -- must be the current one -- returns false if not.
-func (w *RenderWin) ClosePopupImpl(pop ki.Ki) bool {
-	if pop != w.CurPopup() {
-		return false
-	}
-	w.PopMu.Lock()
-	w.ResetUpdateRegions()
-	if w.Popup == w.DelPopup {
-		w.DelPopup = nil
-	}
-	w.UpMu.Lock()
-	w.DisconnectPopup(pop)
-	w.UpMu.Unlock()
-	popped := w.PopPopup(pop)
-	w.PopMu.Unlock()
-	if popped {
-		w.EventMgr.PopFocus()
-	}
-	w.UploadAllScenes()
-	return true
-}
-
-// PopPopup pops current popup off the popup stack and set to current popup.
-// returns true if was actually popped.  MUST be called within PopMu.Lock scope!
-func (w *RenderWin) PopPopup(pop ki.Ki) bool {
-	wi, ok := pop.(Node2D)
-	if ok {
-		psc := wi.AsScene()
-		if psc != nil {
-			psc.DeletePopup()
-		}
-	}
-	sz := len(w.PopupStack)
-	if w.Popup == pop {
-		if w.PopupStack == nil || sz == 0 {
-			w.Popup = nil
-		} else {
-			w.Popup = w.PopupStack[sz-1]
-			w.PopupStack = w.PopupStack[:sz-1]
-		}
-		return true
-	} else {
-		for i := sz - 1; i >= 0; i-- {
-			pp := w.PopupStack[i]
-			if pp == pop {
-				w.PopupStack = w.PopupStack[:i+copy(w.PopupStack[i:], w.PopupStack[i+1:])]
-				break
-			}
-		}
-		// do nothing
-	}
-	return false
-}
-
-/////////////////////////////////////////////////////////////////////////////
 //                   Key Events Handled by RenderWin
 
 // KeyChordEventHiPri handles all the high-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
+func (w *RenderWin) KeyChordEventHiPri(e *key.Event) bool {
 	delPop := false
 	if KeyEventTrace {
 		fmt.Printf("RenderWin HiPri KeyInput: %v event: %v\n", w.Path(), e.String())
 	}
-	if e.IsProcessed() {
+	if e.IsHandled() {
 		return false
 	}
 	cs := e.Chord()
@@ -2428,16 +2203,16 @@ func (w *RenderWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
 	switch kf {
 	case KeyFunWinClose:
 		w.CloseReq()
-		e.SetProcessed()
+		e.SetHandled()
 	case KeyFunMenu:
 		if w.MainMenu != nil {
 			w.MainMenu.GrabFocus()
-			e.SetProcessed()
+			e.SetHandled()
 		}
 	case KeyFunAbort:
 		if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
 			delPop = true
-			e.SetProcessed()
+			e.SetHandled()
 		} else if w.EventMgr.DNDStage > DNDNotStarted {
 			w.ClearDragNDrop()
 		}
@@ -2452,12 +2227,12 @@ func (w *RenderWin) KeyChordEventHiPri(e *key.ChordEvent) bool {
 
 // KeyChordEventLowPri handles all the lower-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
-	if e.IsProcessed() {
+func (w *RenderWin) KeyChordEventLowPri(e *key.Event) bool {
+	if e.IsHandled() {
 		return false
 	}
 	w.EventMgr.ManagerKeyChordEvents(e)
-	if e.IsProcessed() {
+	if e.IsHandled() {
 		return false
 	}
 	cs := e.Chord()
@@ -2469,15 +2244,15 @@ func (w *RenderWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		fnm, _ := filepath.Abs("./GrabOf_" + w.Nm + "_" + dstr + ".png")
 		SaveImage(fnm, w.Scene.Pixels)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
-		e.SetProcessed()
+		e.SetHandled()
 	case KeyFunZoomIn:
 		w.ZoomDPI(1)
-		e.SetProcessed()
+		e.SetHandled()
 	case KeyFunZoomOut:
 		w.ZoomDPI(-1)
-		e.SetProcessed()
+		e.SetHandled()
 	case KeyFunRefresh:
-		e.SetProcessed()
+		e.SetHandled()
 		fmt.Printf("Win: %v display refreshed\n", w.Nm)
 		goosi.TheApp.GetScreens()
 		Prefs.UpdateAll()
@@ -2487,19 +2262,19 @@ func (w *RenderWin) KeyChordEventLowPri(e *key.ChordEvent) bool {
 		// sz := w.RenderWin.Size()
 		// w.SetSize(sz)
 	case KeyFunWinFocusNext:
-		e.SetProcessed()
+		e.SetHandled()
 		AllRenderWins.FocusNext()
 	}
 	switch cs { // some other random special codes, during dev..
 	case "Control+Alt+R":
 		ProfileToggle()
-		e.SetProcessed()
+		e.SetHandled()
 	case "Control+Alt+F":
 		w.BenchmarkFullRender()
-		e.SetProcessed()
+		e.SetHandled()
 	case "Control+Alt+H":
 		w.BenchmarkReRender()
-		e.SetProcessed()
+		e.SetHandled()
 	}
 	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
 	return delPop
@@ -2592,7 +2367,7 @@ func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
-func (w *RenderWin) DNDMoveEvent(e *mouse.DragEvent) {
+func (w *RenderWin) DNDMoveEvent(e *mouse.Event) {
 	sp, ok := w.SpriteByName(DNDSpriteName)
 	if ok {
 		sp.SetBottomPos(e.Where)
@@ -2600,7 +2375,7 @@ func (w *RenderWin) DNDMoveEvent(e *mouse.DragEvent) {
 	de := w.EventMgr.SendDNDMoveEvent(e)
 	w.DNDUpdateCursor(de.Mod)
 	w.UpdateSig()
-	e.SetProcessed()
+	e.SetHandled()
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).
@@ -2624,7 +2399,7 @@ func (w *RenderWin) FinalizeDragNDrop(action dnd.DropMods) {
 		return
 	}
 	de := w.EventMgr.DNDFinalEvent
-	de.ClearProcessed()
+	de.ClearHandled()
 	de.Mod = action
 	if de.Source != nil {
 		de.Action = dnd.DropFmSource

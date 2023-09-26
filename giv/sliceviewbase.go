@@ -1899,7 +1899,7 @@ func (sv *SliceViewBase) DragNDropTarget(de *dnd.Event) {
 	}
 	idx, ok := sv.IdxFromPos(de.Where.Y)
 	if ok {
-		de.SetProcessed()
+		de.SetHandled()
 		sv.CurIdx = idx
 		if dpr, ok := sv.This().(gi.DragNDropper); ok {
 			dpr.Drop(de.Data, de.Mod)
@@ -2084,7 +2084,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 }
 
 // KeyInputNav supports multiple selection navigation keys
-func (sv *SliceViewBase) KeyInputNav(kt *key.ChordEvent) {
+func (sv *SliceViewBase) KeyInputNav(kt *key.Event) {
 	kf := gi.KeyFun(kt.Chord())
 	selMode := mouse.SelectModeBits(kt.Modifiers)
 	if selMode == mouse.SelectOne {
@@ -2096,35 +2096,35 @@ func (sv *SliceViewBase) KeyInputNav(kt *key.ChordEvent) {
 	case gi.KeyFunCancelSelect:
 		sv.UnselectAllIdxs()
 		sv.SelectMode = false
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveDown:
 		sv.MoveDownAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveUp:
 		sv.MoveUpAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunPageDown:
 		sv.MovePageDownAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunPageUp:
 		sv.MovePageUpAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunSelectMode:
 		sv.SelectMode = !sv.SelectMode
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunSelectAll:
 		sv.SelectAllIdxs()
 		sv.SelectMode = false
-		kt.SetProcessed()
+		kt.SetHandled()
 	}
 }
 
-func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
+func (sv *SliceViewBase) KeyInputActive(kt *key.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
 	sv.KeyInputNav(kt)
-	if kt.IsProcessed() {
+	if kt.IsHandled() {
 		return
 	}
 	idx := sv.SelectedIdx
@@ -2134,47 +2134,47 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.ChordEvent) {
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx, true)
 	// 	sv.SelectMode = false
 	// 	sv.SelectIdxAction(idx, mouse.SelectOne)
-	// 	kt.SetProcessed()
+	// 	kt.SetHandled()
 	case gi.KeyFunDuplicate:
 		nidx := sv.Duplicate()
 		sv.SelectMode = false
 		if nidx >= 0 {
 			sv.SelectIdxAction(nidx, mouse.SelectOne)
 		}
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunInsert:
 		sv.This().(SliceViewer).SliceNewAt(idx)
 		sv.SelectMode = false
 		sv.SelectIdxAction(idx+1, mouse.SelectOne) // todo: somehow nidx not working
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunInsertAfter:
 		sv.This().(SliceViewer).SliceNewAt(idx + 1)
 		sv.SelectMode = false
 		sv.SelectIdxAction(idx+1, mouse.SelectOne)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunCopy:
 		sv.CopyIdxs(true)
 		sv.SelectMode = false
 		sv.SelectIdxAction(idx, mouse.SelectOne)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunCut:
 		sv.CutIdxs()
 		sv.SelectMode = false
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunPaste:
 		sv.PasteIdx(sv.SelectedIdx)
 		sv.SelectMode = false
-		kt.SetProcessed()
+		kt.SetHandled()
 	}
 }
 
-func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
+func (sv *SliceViewBase) KeyInputInactive(kt *key.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
 	}
 	if sv.InactMultiSel {
 		sv.KeyInputNav(kt)
-		if kt.IsProcessed() {
+		if kt.IsHandled() {
 			return
 		}
 	}
@@ -2186,28 +2186,28 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.ChordEvent) {
 		if ni < sv.SliceSize {
 			sv.ScrollToIdx(ni)
 			sv.UpdateSelectIdx(ni, true)
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	case kf == gi.KeyFunMoveUp:
 		ni := idx - 1
 		if ni >= 0 {
 			sv.ScrollToIdx(ni)
 			sv.UpdateSelectIdx(ni, true)
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	case kf == gi.KeyFunPageDown:
 		ni := min(idx+sv.VisRows-1, sv.SliceSize-1)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case kf == gi.KeyFunPageUp:
 		ni := max(idx-(sv.VisRows-1), 0)
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
 		sv.SliceViewSig.Emit(sv.This(), int64(SliceViewDoubleClicked), sv.SelectedIdx)
-		kt.SetProcessed()
+		kt.SetHandled()
 	}
 }
 
@@ -2216,7 +2216,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	svwe.AddFunc(goosi.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		me.SetProcessed()
+		me.SetHandled()
 		sbb := svv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
@@ -2232,25 +2232,25 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 			svv.UnselectAllIdxs()
 			svv.SelectIdx(si)
 			svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
-			me.SetProcessed()
+			me.SetHandled()
 		}
 		if me.Button == mouse.Right && me.Action == mouse.Release {
 			svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
-			me.SetProcessed()
+			me.SetHandled()
 		}
 	})
 	if sv.IsDisabled() {
 		if sv.InactKeyNav {
 			svwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-				kt := d.(*key.ChordEvent)
+				kt := d.(*key.Event)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
 		svwe.AddFunc(goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			kt := d.(*key.ChordEvent)
+			kt := d.(*key.Event)
 			svv.KeyInputActive(kt)
 		})
 		svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {

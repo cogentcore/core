@@ -48,7 +48,7 @@ type ComboBox struct {
 	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
 
 	// the menu of actions for selecting items -- automatically generated from Items
-	ItemsMenu Menu `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
+	ItemsMenu MenuActions `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
 
 	// the type of combo box
 	Type ComboBoxTypes `desc:"the type of combo box"`
@@ -583,14 +583,14 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 		if cbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("ComboBox KeyChordEvent: %v\n", cbb.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		switch {
 		case kf == KeyFunMoveUp:
-			kt.SetProcessed()
+			kt.SetHandled()
 			if len(cbb.Items) > 0 {
 				idx := cbb.CurIndex - 1
 				if idx < 0 {
@@ -599,7 +599,7 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunMoveDown:
-			kt.SetProcessed()
+			kt.SetHandled()
 			if len(cbb.Items) > 0 {
 				idx := cbb.CurIndex + 1
 				if idx >= len(cbb.Items) {
@@ -608,7 +608,7 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunPageUp:
-			kt.SetProcessed()
+			kt.SetHandled()
 			if len(cbb.Items) > 10 {
 				idx := cbb.CurIndex - 10
 				for idx < 0 {
@@ -617,7 +617,7 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 				cbb.SelectItemAction(idx)
 			}
 		case kf == KeyFunPageDown:
-			kt.SetProcessed()
+			kt.SetHandled()
 			if len(cbb.Items) > 10 {
 				idx := cbb.CurIndex + 10
 				for idx >= len(cbb.Items) {
@@ -627,7 +627,7 @@ func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
 			}
 		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
 			if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
-				kt.SetProcessed()
+				kt.SetHandled()
 				cbb.ButtonPress()
 				cbb.ButtonRelease()
 			}

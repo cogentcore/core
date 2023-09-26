@@ -5,43 +5,49 @@
 package gi
 
 import (
+	"image"
+	"log"
+
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
+	"goki.dev/goosi/key"
+	"goki.dev/icons"
+	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
+// MenuActions is a slice list of Actions (or other Widgets)
+// that are used for generating a Menu.
+type MenuActions ki.Slice
+
 /*
-
-// Menu is a slice list of Node2D actions, which can contain sub-actions
-// (though it can contain anything -- it is just added to a column layout and
-// displayed in a popup) -- don't use stretchy sizes in general for these
-// items!
-type Menu ki.Slice
-
-func (m Menu) MarshalJSON() ([]byte, error) {
+func (m MenuActions) MarshalJSON() ([]byte, error) {
 	ks := (ki.Slice)(m)
 	_ = ks
 	// return ks.MarshalJSON()
 	return nil, nil
 }
 
-func (m *Menu) UnmarshalJSON(b []byte) error {
+func (m *MenuActions) UnmarshalJSON(b []byte) error {
 	ks := (*ki.Slice)(m)
 	_ = ks
 	// return ks.UnmarshalJSON(b)
 	return nil
 }
+*/
 
-func (m *Menu) CopyFrom(men *Menu) {
+func (m *MenuActions) CopyFrom(men *MenuActions) {
 	ks := (*ki.Slice)(m)
 	ks.CopyFrom((ki.Slice)(*men))
 }
 
 // MakeMenuFunc is a callback for making a menu on demand, receives the object
 // calling this function (typically an Action or Button) and the menu
-type MakeMenuFunc func(obj ki.Ki, m *Menu)
+type MakeMenuFunc func(obj ki.Ki, m *MenuActions)
 
 // SetAction sets properties of given action
-func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
+func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -71,9 +77,9 @@ func (m *Menu) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc)
 // which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	if m == nil {
-		*m = make(Menu, 0, 10)
+		*m = make(MenuActions, 0, 10)
 	}
 	ac := &Action{}
 	m.SetAction(ac, opts, sigTo, fun)
@@ -87,7 +93,7 @@ func (m *Menu) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *Menu) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
 		ac := &Action{}
@@ -105,7 +111,7 @@ func (m *Menu) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun 
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *Menu) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
 		ac := &Action{}
@@ -119,9 +125,9 @@ func (m *Menu) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki
 
 // AddSeparator adds a separator at the next point in the menu (name is just
 // internal label of element, defaults to 'sep' if empty)
-func (m *Menu) AddSeparator(name string) *Separator {
+func (m *MenuActions) AddSeparator(name string) *Separator {
 	if m == nil {
-		*m = make(Menu, 0, 10)
+		*m = make(MenuActions, 0, 10)
 	}
 	sp := &Separator{}
 	if name == "" {
@@ -134,9 +140,9 @@ func (m *Menu) AddSeparator(name string) *Separator {
 }
 
 // AddLabel adds a label to the menu
-func (m *Menu) AddLabel(lbl string) *Label {
+func (m *MenuActions) AddLabel(lbl string) *Label {
 	if m == nil {
-		*m = make(Menu, 0, 10)
+		*m = make(MenuActions, 0, 10)
 	}
 	lb := &Label{}
 	lb.InitName(lb, lbl)
@@ -147,7 +153,7 @@ func (m *Menu) AddLabel(lbl string) *Label {
 
 // SetShortcuts sets the shortcuts to given window -- call when the menu has
 // been attached to a window
-func (m *Menu) SetShortcuts(win *RenderWin) {
+func (m *MenuActions) SetShortcuts(win *RenderWin) {
 	if win == nil {
 		return
 	}
@@ -159,7 +165,7 @@ func (m *Menu) SetShortcuts(win *RenderWin) {
 }
 
 // DeleteShortcuts deletes the shortcuts in given window
-func (m *Menu) DeleteShortcuts(win *RenderWin) {
+func (m *MenuActions) DeleteShortcuts(win *RenderWin) {
 	if win == nil {
 		return
 	}
@@ -172,7 +178,7 @@ func (m *Menu) DeleteShortcuts(win *RenderWin) {
 
 // UpdateActions calls update function on all the actions in the menu, and any
 // of their sub-actions
-func (m *Menu) UpdateActions() {
+func (m *MenuActions) UpdateActions() {
 	for _, mi := range *m {
 		if ac := AsAction(mi); ac != nil {
 			ac.UpdateActions()
@@ -184,14 +190,14 @@ func (m *Menu) UpdateActions() {
 // name (exact match) -- this is not the Text label but the Name of the
 // element (for AddAction items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
-func (m *Menu) FindActionByName(name string) (*Action, bool) {
+func (m *MenuActions) FindActionByName(name string) (*Action, bool) {
 	for _, mi := range *m {
 		if ac := AsAction(mi); ac != nil {
 			if ac.Name() == name {
 				return ac, true
 			}
-			if ac.Menu != nil {
-				if sac, ok := ac.Menu.FindActionByName(name); ok {
+			if ac.MenuActions != nil {
+				if sac, ok := ac.MenuActions.FindActionByName(name); ok {
 					return sac, ok
 				}
 			}
@@ -206,7 +212,7 @@ func (m *Menu) FindActionByName(name string) (*Action, bool) {
 // AddCopyCutPaste adds a Copy, Cut, Paste actions that just emit the
 // corresponding keyboard shortcut.  Paste is automatically enabled by
 // clipboard having something in it.
-func (m *Menu) AddCopyCutPaste(win *RenderWin) {
+func (m *MenuActions) AddCopyCutPaste(win *RenderWin) {
 	m.AddAction(ActOpts{Label: "Copy", ShortcutKey: KeyFunCopy},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.EventMgr.SendKeyFunEvent(KeyFunCopy, false) // false = ignore popups -- don't send to menu
@@ -226,7 +232,7 @@ func (m *Menu) AddCopyCutPaste(win *RenderWin) {
 // AddCopyCutPasteDupe adds a Copy, Cut, Paste, and Duplicate actions that
 // just emit the corresponding keyboard shortcut.  Paste is automatically
 // enabled by clipboard having something in it.
-func (m *Menu) AddCopyCutPasteDupe(win *RenderWin) {
+func (m *MenuActions) AddCopyCutPasteDupe(win *RenderWin) {
 	m.AddCopyCutPaste(win)
 	dpsc := ActiveKeyMap.ChordForFun(KeyFunDuplicate)
 	m.AddAction(ActOpts{Label: "Duplicate", Shortcut: dpsc},
@@ -238,11 +244,11 @@ func (m *Menu) AddCopyCutPasteDupe(win *RenderWin) {
 // CustomAppMenuFunc is a function called by AddAppMenu after the
 // AddStdAppMenu is called -- apps can set this function to add / modify / etc
 // the menu
-var CustomAppMenuFunc = (func(m *Menu, win *RenderWin))(nil)
+var CustomAppMenuFunc = (func(m *MenuActions, win *RenderWin))(nil)
 
 // AddAppMenu adds an "app" menu to the menu -- calls AddStdAppMenu and then
 // CustomAppMenuFunc if non-nil
-func (m *Menu) AddAppMenu(win *RenderWin) {
+func (m *MenuActions) AddAppMenu(win *RenderWin) {
 	m.AddStdAppMenu(win)
 	if CustomAppMenuFunc != nil {
 		CustomAppMenuFunc(m, win)
@@ -250,7 +256,7 @@ func (m *Menu) AddAppMenu(win *RenderWin) {
 }
 
 // AddStdAppMenu adds a standard set of menu items for application-level control.
-func (m *Menu) AddStdAppMenu(win *RenderWin) {
+func (m *MenuActions) AddStdAppMenu(win *RenderWin) {
 	aboutitle := "About " + goosi.TheApp.Name()
 	m.AddAction(ActOpts{Label: aboutitle},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
@@ -269,7 +275,7 @@ func (m *Menu) AddStdAppMenu(win *RenderWin) {
 
 // AddRenderWinsMenu adds menu items for current main and dialog windows.
 // must be called under RenderWinGlobalMu mutex lock!
-func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
+func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 	m.AddAction(ActOpts{Label: "Minimize"},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.RenderWin.Minimize()
@@ -315,6 +321,11 @@ func MenuFrameConfigStyles(frame *Frame) {
 	})
 }
 
+func (pm *PopupMgr) AddMenu(sc *Scene) {
+	mn := NewMenu(sc)
+
+}
+
 // MenuMaxHeight is the maximum height of any menu popup panel in units of font height
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
@@ -322,7 +333,7 @@ var MenuMaxHeight = 30
 // PopupMenu pops up a scene with a layout that draws the supplied actions
 // positions are relative to given scene -- name is relevant base name to
 // which Menu is appended
-func PopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
+func PopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Scene {
 	win := parSc.Win
 	mainSc := win.Scene
 	if len(menu) == 0 {
@@ -376,7 +387,7 @@ func PopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
 // a scene with a layout that draws the supplied actions
 // positions are relative to given scene -- name is relevant base name to
 // which Menu is appended
-func RecyclePopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
+func RecyclePopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Scene {
 	win := parSc.Win
 	mainSc := win.Scene
 	if len(menu) == 0 {
@@ -439,7 +450,7 @@ func RecyclePopupMenu(menu Menu, x, y int, parSc *Scene, name string) *Scene {
 // the index in the slice.  A string equal to curSel will be marked as
 // selected.  Location is from the ContextMenuPos of recv node.
 func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
-	var menu Menu
+	var menu MenuActions
 	for i, it := range strs {
 		ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
 		ac.SetSelected(it == curSel)
@@ -460,7 +471,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvF
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
 func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
-	var menu Menu
+	var menu MenuActions
 	for si, ss := range strs {
 		sz := len(ss)
 		if sz < 2 {
@@ -472,7 +483,7 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.
 		for i := 1; i < sz; i++ {
 			it := ss[i]
 			cnm := s1 + ": " + it
-			ac := sm.Menu.AddAction(ActOpts{Label: it, Data: []int{si, i}}, recv, fun)
+			ac := sm.MenuActions.AddAction(ActOpts{Label: it, Data: []int{si, i}}, recv, fun)
 			ac.SetSelected(cnm == curSel)
 		}
 	}
@@ -580,8 +591,6 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 		*items = (*items)[:i]
 	}
 }
-
-*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Separator

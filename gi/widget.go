@@ -127,7 +127,7 @@ type Widget interface {
 	// activated by the right mouse button or equivalent.  Widget has a
 	// function parameter that can be set to add context items (e.g., by Views
 	// or other complex widgets) to extend functionality.
-	MakeContextMenu(menu *Menu)
+	MakeContextMenu(menu *MenuActions)
 
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle of the Stage, but can be adapted as

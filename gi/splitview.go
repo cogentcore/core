@@ -315,7 +315,7 @@ func (sv *SplitView) ConfigSplitters(sc *Scene) {
 	}
 }
 
-func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
+func (sv *SplitView) KeyInput(kt *key.Event) {
 	kc := string(kt.Chord())
 	mod := "Control+"
 	if goosi.TheApp.Platform() == goosi.MacOS {
@@ -333,10 +333,10 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 	kn := int(knc)
 	// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
 	if kn == 0 {
-		kt.SetProcessed()
+		kt.SetHandled()
 		sv.EvenSplits()
 	} else if kn <= len(sv.Kids) {
-		kt.SetProcessed()
+		kt.SetHandled()
 		if sv.Splits[kn-1] <= 0.01 {
 			sv.RestoreChild(kn - 1)
 		} else {
@@ -348,7 +348,7 @@ func (sv *SplitView) KeyInput(kt *key.ChordEvent) {
 func (sv *SplitView) KeyChordEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		svv := AsSplitView(recv)
-		svv.KeyInput(d.(*key.ChordEvent))
+		svv.KeyInput(d.(*key.Event))
 	})
 }
 
@@ -616,13 +616,13 @@ func (sr *Splitter) MouseEvent(we *WidgetEvents) {
 		me := d.(*mouse.Event)
 		srr := sr
 		if srr.IsDisabled() {
-			me.SetProcessed()
+			me.SetHandled()
 			srr.SetSelected(!srr.IsSelected())
 			srr.EmitSelectedSignal()
 			srr.UpdateSig()
 		} else {
 			if me.Button == mouse.Left {
-				me.SetProcessed()
+				me.SetHandled()
 				if me.Action == mouse.Press {
 					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &srr.Style
@@ -658,7 +658,7 @@ func (sr *Splitter) MouseScrollEvent(we *WidgetEvents) {
 	// 		return
 	// 	}
 	// 	me := d.(*mouse.ScrollEvent)
-	// 	me.SetProcessed()
+	// 	me.SetHandled()
 	// 	cur := float32(srr.Pos)
 	// 	if srr.Dim == mat32.X {
 	// 		srr.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX

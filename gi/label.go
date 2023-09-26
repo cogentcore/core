@@ -331,13 +331,13 @@ func (lb *Label) HoverEvent(we *WidgetEvents) {
 				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
 					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
-					me.SetProcessed()
+					me.SetHandled()
 					return
 				}
 			}
 		}
 		if llb.Tooltip != "" {
-			me.SetProcessed()
+			me.SetHandled()
 			llb.BBoxMu.RLock()
 			pos := llb.WinBBox.Max
 			llb.BBoxMu.RUnlock()
@@ -359,7 +359,7 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 				tlb := tl.Bounds(&llb.TextRender, pos)
 				if me.Where.In(tlb) {
 					llb.OpenLink(tl)
-					me.SetProcessed()
+					me.SetHandled()
 					return
 				}
 			}
@@ -371,7 +371,7 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 			llb.UpdateEnd(updt)
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
-			me.SetProcessed()
+			me.SetHandled()
 			llb.EmitContextMenuSignal()
 			llb.This().(Widget).ContextMenu()
 		}
@@ -381,7 +381,7 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 func (lb *Label) MouseMoveEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
-		me.SetProcessed()
+		me.SetHandled()
 		llb := AsLabel(recv)
 		pos := llb.RenderPos
 		inLink := false

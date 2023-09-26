@@ -83,10 +83,10 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 // widgets should call this as part of their event connection method
 func (wb *WidgetBase) HoverTooltipEvent() {
 	wbwe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.HoverEvent)
+		me := d.(*mouse.Event)
 		wbb := AsWidgetBase(recv)
 		if wbb.Tooltip != "" {
-			me.SetProcessed()
+			me.SetHandled()
 			pos := wbb.WinBBox.Max
 			pos.X -= 20
 			mvp := wbb.Sc

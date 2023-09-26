@@ -6,12 +6,6 @@ Type = "Library"
 [Build]
   Package = "."
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "main"
-  Comment = ""
-
 [Install]
   Package = "."
 

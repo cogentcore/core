@@ -1838,7 +1838,7 @@ func (ftv *FileTreeView) AddEvents() {
 func (ftv *FileTreeView) FileTreeViewEvents() {
 	ftvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeFileTreeView).(*FileTreeView)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		tvv.KeyInput(kt)
 	})
 	ftvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -1900,14 +1900,14 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 				switch me.Action {
 				case mouse.DoubleClick:
 					ftvv.ToggleClose()
-					me.SetProcessed()
+					me.SetHandled()
 				case mouse.Release:
 					ftvv.SelectAction(me.SelectMode())
-					me.SetProcessed()
+					me.SetHandled()
 				}
 			case mouse.Right:
 				if me.Action == mouse.Release {
-					me.SetProcessed()
+					me.SetHandled()
 					ftvv.This().(gi.Node2D).ContextMenu()
 				}
 			}
@@ -1915,7 +1915,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 }
 
-func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
+func (ftv *FileTreeView) KeyInput(kt *key.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", ftv.Path())
 	}
@@ -1929,27 +1929,27 @@ func (ftv *FileTreeView) KeyInput(kt *key.ChordEvent) {
 	}
 
 	// first all the keys that work for inactive and active
-	if !ftv.IsDisabled() && !kt.IsProcessed() {
+	if !ftv.IsDisabled() && !kt.IsHandled() {
 		switch kf {
 		case gi.KeyFunDelete:
 			ftv.DeleteFiles()
-			kt.SetProcessed()
+			kt.SetHandled()
 			// todo: remove when gi issue 237 is resolved
 		case gi.KeyFunBackspace:
 			ftv.DeleteFiles()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunDuplicate:
 			ftv.DuplicateFiles()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunInsert: // New File
 			CallMethod(ftv, "NewFile", ftv.Sc)
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunInsertAfter: // New Folder
 			CallMethod(ftv, "NewFolder", ftv.Sc)
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	}
-	if !kt.IsProcessed() {
+	if !kt.IsHandled() {
 		ftv.TreeView.KeyInput(kt)
 	}
 }

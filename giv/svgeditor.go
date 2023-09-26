@@ -41,8 +41,8 @@ func (sve *Editor) CopyFieldsFrom(frm any) {
 // EditorEvents handles svg editing events
 func (sve *Editor) EditorEvents() {
 	svewe.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
+		me := d.(*mouse.Event)
+		me.SetHandled()
 		ssvg := sve
 		if ssvg.HasFlag(NodeDragging) {
 			if !ssvg.SetDragCursor {
@@ -65,7 +65,7 @@ func (sve *Editor) EditorEvents() {
 	})
 	svewe.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
+		me.SetHandled()
 		ssvg := sve
 		if ssvg.SetDragCursor {
 			goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
@@ -90,15 +90,15 @@ func (sve *Editor) EditorEvents() {
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		_ = obj
 		if me.Action == mouse.Release && me.Button == mouse.Right {
-			me.SetProcessed()
+			me.SetHandled()
 			// if obj != nil {
 			// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
 			// }
 		}
 	})
 	svewe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.HoverEvent)
-		me.SetProcessed()
+		me := d.(*mouse.Event)
+		me.SetHandled()
 		ssvg := sve
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		if obj != nil {

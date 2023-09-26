@@ -757,7 +757,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
 }
 
-func (tf *TextField) MakeContextMenu(m *Menu) {
+func (tf *TextField) MakeContextMenu(m *MenuActions) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
 		tf.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1271,7 +1271,7 @@ func (tf *TextField) FilterEvents() {
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tf *TextField) KeyInput(kt *key.ChordEvent) {
+func (tf *TextField) KeyInput(kt *key.Event) {
 	if KeyEventTrace {
 		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 	}
@@ -1292,39 +1292,39 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	// first all the keys that work for both inactive and active
 	switch kf {
 	case KeyFunMoveRight:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CursorForward(1)
 		tf.OfferComplete(dontForce)
 	case KeyFunMoveLeft:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CursorBackward(1)
 		tf.OfferComplete(dontForce)
 	case KeyFunHome:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.CursorStart()
 	case KeyFunEnd:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.CursorEnd()
 	case KeyFunSelectMode:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.SelectModeToggle()
 	case KeyFunCancelSelect:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.SelectReset()
 	case KeyFunSelectAll:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.SelectAll()
 	case KeyFunCopy:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.This().(Clipper).Copy(true) // reset
 	}
-	if tf.IsDisabled() || kt.IsProcessed() {
+	if tf.IsDisabled() || kt.IsHandled() {
 		return
 	}
 	switch kf {
@@ -1333,46 +1333,46 @@ func (tf *TextField) KeyInput(kt *key.ChordEvent) {
 	case KeyFunFocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
 		fallthrough
 	case KeyFunAccept: // ctrl+enter
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.EditDone()
 		tf.FocusNext()
 	case KeyFunFocusPrev:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.EditDone()
 		tf.FocusPrev()
 	case KeyFunAbort: // esc
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.Revert()
 		tf.FocusChanged(FocusInactive)
 	case KeyFunBackspace:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CursorBackspace(1)
 		tf.OfferComplete(dontForce)
 	case KeyFunKill:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.CursorKill()
 	case KeyFunDelete:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CursorDelete(1)
 	case KeyFunCut:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.This().(Clipper).Cut()
 	case KeyFunPaste:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.CancelComplete()
 		tf.This().(Clipper).Paste()
 	case KeyFunComplete:
-		kt.SetProcessed()
+		kt.SetHandled()
 		tf.OfferComplete(force)
 	case KeyFunNil:
 		if unicode.IsPrint(kt.Rune) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
-				kt.SetProcessed()
+				kt.SetHandled()
 				tf.InsertAtCursor(string(kt.Rune))
 				if kt.Rune == ' ' {
 					tf.CancelComplete()
@@ -1392,7 +1392,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	if !tf.IsDisabled() && !tf.HasFocus() {
 		tf.GrabFocus()
 	}
-	me.SetProcessed()
+	me.SetHandled()
 	switch me.Button {
 	case mouse.Left:
 		if me.Action == mouse.Press {
@@ -1405,7 +1405,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 				tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			}
 		} else if me.Action == mouse.DoubleClick {
-			me.SetProcessed()
+			me.SetHandled()
 			if tf.HasSelection() {
 				if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
 					tf.SelectReset()
@@ -1418,14 +1418,14 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 		}
 	case mouse.Middle:
 		if !tf.IsDisabled() && me.Action == mouse.Press {
-			me.SetProcessed()
+			me.SetHandled()
 			pt := tf.PointToRelPos(me.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			tf.Paste()
 		}
 	case mouse.Right:
 		if me.Action == mouse.Press {
-			me.SetProcessed()
+			me.SetHandled()
 			tf.EmitContextMenuSignal()
 			tf.This().(Widget).ContextMenu()
 		}
@@ -1434,8 +1434,8 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 
 func (tf *TextField) MouseDragEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.DragEvent)
-		me.SetProcessed()
+		me := d.(*mouse.Event)
+		me.SetHandled()
 		tff := AsTextField(recv)
 		if !tff.SelectMode {
 			tff.SelectModeToggle()
@@ -1456,7 +1456,7 @@ func (tf *TextField) MouseEvent(we *WidgetEvents) {
 func (tf *TextField) KeyChordEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := AsTextField(recv)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		tff.KeyInput(kt)
 	})
 }

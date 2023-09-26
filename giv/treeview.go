@@ -1525,7 +1525,7 @@ func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
 	if de.Mod == dnd.DropLink {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
-	de.SetProcessed()
+	de.SetHandled()
 	tv.This().(gi.DragNDropper).Drop(de.Data, de.Mod)
 }
 
@@ -1535,7 +1535,7 @@ func (tv *TreeView) DragNDropExternal(de *dnd.Event) {
 	if de.Mod == dnd.DropLink {
 		de.Mod = dnd.DropCopy // link not supported -- revert to copy
 	}
-	de.SetProcessed()
+	de.SetHandled()
 	tv.This().(gi.DragNDropper).DropExternal(de.Data, de.Mod)
 }
 
@@ -1705,7 +1705,7 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
-func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
+func (tv *TreeView) KeyInput(kt *key.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 	}
@@ -1723,64 +1723,64 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 	case gi.KeyFunCancelSelect:
 		tv.UnselectAll()
 		tv.SetSelectMode(false)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveRight:
 		tv.Open()
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveLeft:
 		tv.Close()
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveDown:
 		tv.MoveDownAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunMoveUp:
 		tv.MoveUpAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunPageUp:
 		tv.MovePageUpAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunPageDown:
 		tv.MovePageDownAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunHome:
 		tv.MoveHomeAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunEnd:
 		tv.MoveEndAction(selMode)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunSelectMode:
 		tv.SelectModeToggle()
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunSelectAll:
 		tv.SelectAll()
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunEnter:
 		tv.ToggleClose()
-		kt.SetProcessed()
+		kt.SetHandled()
 	case gi.KeyFunCopy:
 		tv.This().(gi.Clipper).Copy(true)
-		kt.SetProcessed()
+		kt.SetHandled()
 	}
-	if !tv.RootIsInactive() && !kt.IsProcessed() {
+	if !tv.RootIsInactive() && !kt.IsHandled() {
 		switch kf {
 		case gi.KeyFunDelete:
 			tv.SrcDelete()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunDuplicate:
 			tv.SrcDuplicate()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunInsert:
 			tv.SrcInsertBefore()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunInsertAfter:
 			tv.SrcInsertAfter()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunCut:
 			tv.This().(gi.Clipper).Cut()
-			kt.SetProcessed()
+			kt.SetHandled()
 		case gi.KeyFunPaste:
 			tv.This().(gi.Clipper).Paste()
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	}
 }
@@ -1788,7 +1788,7 @@ func (tv *TreeView) KeyInput(kt *key.ChordEvent) {
 func (tv *TreeView) TreeViewEvents() {
 	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		tvv.KeyInput(kt)
 	})
 	tvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -1848,14 +1848,14 @@ func (tv *TreeView) TreeViewEvents() {
 				switch me.Action {
 				case mouse.DoubleClick:
 					tvv.ToggleClose()
-					me.SetProcessed()
+					me.SetHandled()
 				case mouse.Release:
 					tvv.SelectAction(me.SelectMode())
-					me.SetProcessed()
+					me.SetHandled()
 				}
 			case mouse.Right:
 				if me.Action == mouse.Release {
-					me.SetProcessed()
+					me.SetHandled()
 					tvv.This().(gi.Node2D).ContextMenu()
 				}
 			}

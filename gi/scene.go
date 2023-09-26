@@ -94,6 +94,20 @@ func NewScene(width, height int) *Scene {
 	return sc
 }
 
+func (sc *Scene) RenderCtx() *RenderContext {
+	if sc.Scene.Stage == nil { // todo: error msg?
+		return nil
+	}
+	return sc.Scene.Stage.RenderCtx
+}
+
+func (sc *Scene) StageMgr() *StageMgr {
+	if sc.Scene.Stage == nil { // todo: error msg?
+		return nil
+	}
+	return sc.Scene.Stage.StageMgr
+}
+
 // Resize resizes the scene, creating a new image -- updates Geom Size
 func (sc *Scene) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
@@ -148,19 +162,22 @@ func (sc *Scene) ScIsVisible() bool {
 // 	vp.Win.UploadScRegion(vp, vpin, winBBox)
 // }
 
-// Delete this popup scene -- has already been disconnected from window
-// events and parent is nil -- called by window when a popup is deleted -- it
-// destroys the vp and its main layout, see ScPopupDestroyAll for whether
-// children are destroyed
-func (sc *Scene) DeletePopup() {
-	sc.Win = nil
-	if sc.HasFlag(ScPopupDestroyAll) {
-		sc.Frame.DeleteChildren(ki.DestroyKids)
-	} else {
-		// delete children of main layout prior to deleting the popup
-		// (e.g., menu items) so they don't get destroyed
-		sc.Frame.DeleteChildren(ki.NoDestroyKids) // do NOT destroy children -- just delete them
+// Delete this Scene if not Flagged for preservation.
+// Removes Decor and Frame Widgets
+func (sc *Scene) Delete() {
+	if sc.Flags.HasFlag(ScPreserve) {
+		return
 	}
+	sc.DeleteImpl()
+}
+
+// DeleteImpl does the deletion, removing Decor and Frame Widgets.
+func (sc *Scene) DeleteImpl() {
+	sc.UpdtMu.Lock()
+	defer sc.UpdtMu.Unlock()
+
+	sc.Decor.DeleteChildren(ki.DestroyKids)
+	sc.Frame.DeleteChildren(ki.DestroyKids)
 }
 
 // SetCurrentColor sets the current color in concurrent-safe way
@@ -242,11 +259,8 @@ const (
 	// only for Over
 	ScPrefSizing
 
-	// todo: remove below:?
-
-	// ScPopupDestroyAll means that if this is a popup, then destroy all
-	// the children when it is deleted -- otherwise children below the main
-	// layout under the vp will not be destroyed -- it is up to the caller to
-	// manage those (typically these are reusable assets)
-	ScPopupDestroyAll
+	// ScPreserve keeps this scene around instead of deleting
+	// when it is no longer needed.
+	// Set if added to SceneLibrary for example.
+	ScPreserve
 )

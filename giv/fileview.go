@@ -819,31 +819,31 @@ func (fv *FileView) AddEvents() {
 func (fv *FileView) FileViewEvents() {
 	fvwe.AddFunc(goosi.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		fvv := recv.Embed(TypeFileView).(*FileView)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		fvv.KeyInput(kt)
 	})
 }
 
-func (fv *FileView) KeyInput(kt *key.ChordEvent) {
+func (fv *FileView) KeyInput(kt *key.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
 	kf := gi.KeyFun(kt.Chord())
 	switch kf {
 	case gi.KeyFunJump, gi.KeyFunWordLeft:
-		kt.SetProcessed()
+		kt.SetHandled()
 		fv.DirPathUp()
 	case gi.KeyFunHistPrev:
-		kt.SetProcessed()
+		kt.SetHandled()
 		fv.PathFieldHistPrev()
 	case gi.KeyFunHistNext:
-		kt.SetProcessed()
+		kt.SetHandled()
 		fv.PathFieldHistNext()
 	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen, gi.KeyFunSelectMode:
-		kt.SetProcessed()
+		kt.SetHandled()
 		fv.SelectFile()
 	case gi.KeyFunSearch:
-		kt.SetProcessed()
+		kt.SetHandled()
 		sf := fv.SelField()
 		sf.GrabFocus()
 	}

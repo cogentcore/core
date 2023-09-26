@@ -46,7 +46,7 @@ type ButtonBase struct {
 	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 
 	// the menu items for this menu -- typically add Action elements for menus, along with separators
-	Menu Menu `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	Menu MenuActions `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 
 	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
@@ -335,10 +335,10 @@ func (bb *ButtonBase) MouseEvent(we *WidgetEvents) {
 			case mouse.DoubleClick: // we just count as a regular click
 				fallthrough
 			case mouse.Press:
-				me.SetProcessed()
+				me.SetHandled()
 				bbb.ButtonPress()
 			case mouse.Release:
-				me.SetProcessed()
+				me.SetHandled()
 				bw.ButtonRelease()
 			}
 		}
@@ -353,14 +353,14 @@ func (bb *ButtonBase) KeyChordEvent(we *WidgetEvents) {
 		if bbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("Button KeyChordEvent: %v\n", bbb.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		if kf == KeyFunEnter || kt.Rune == ' ' {
 			if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-				kt.SetProcessed()
+				kt.SetHandled()
 				bbb.ButtonPress()
 				bw.ButtonRelease()
 			}
@@ -377,7 +377,7 @@ func (bb *ButtonBase) HoverTooltipEvent(we *WidgetEvents) {
 			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
 		}
 		if tt != "" {
-			me.SetProcessed()
+			me.SetHandled()
 			bb.BBoxMu.RLock()
 			pos := wbb.WinBBox.Max
 			bb.BBoxMu.RUnlock()

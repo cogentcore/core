@@ -5,9 +5,11 @@
 package gi
 
 import (
+	"image"
 	"strings"
 	"time"
 
+	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 )
 
@@ -40,9 +42,9 @@ const (
 	// Snackbar displays Scene as a Snackbar
 	Snackbar
 
-	// Completer displays Scene as a dynamic chooser for completing
+	// Chooser displays Scene as a dynamic chooser for completing
 	// or correcting text
-	Completer
+	Chooser
 )
 
 // StageSides are the Sides for Sheet Stages
@@ -68,6 +70,9 @@ type Stage struct {
 
 	// name of the Stage -- generally auto-set based on Scene Name
 	Name string `desc:"name of the Stage -- generally auto-set based on Scene Name"`
+
+	// position and size within the parent Render context
+	Geom gist.Geom2DInt `desc:"position and size within the parent Render context"`
 
 	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
 	Title string `desc:"title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types"`
@@ -105,8 +110,18 @@ type Stage struct {
 	// Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from
 	Side StageSides `desc:"Side for Stages that can operate on different sides, e.g., for Sheets: which side does the sheet come out from"`
 
-	// the operating-specific window that we are running on
-	RenderWin *RenderWin `desc:"the operating-specific window that we are running on"`
+	// manager for the popups in this stage
+	PopupMgr PopupMgr `desc:"manager for the popups in this stage"`
+
+	// the parent stage manager for this stage
+	StageMgr *StageMgrBase `desc:"the parent stage manager for this stage"`
+}
+
+func (st *Stage) RenderCtx() *RenderContext {
+	if st.StageMgr == nil {
+		return nil
+	}
+	return st.StageMgr.RenderCtx
 }
 
 // NewStage returns a new stage with given type and scene contents.
@@ -168,12 +183,12 @@ func NewSnackbar(sc *Scene) *Stage {
 	return NewStage(Snackbar, sc)
 }
 
-// NewCompleter returns a new Completer stage with given scene contents.
+// NewChooser returns a new Chooser stage with given scene contents.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewCompleter(sc *Scene) *Stage {
-	return NewStage(Completer, sc)
+func NewChooser(sc *Scene) *Stage {
+	return NewStage(Chooser, sc)
 }
 
 // Note: Set* methods are designed to be called in sequence to efficiently set
@@ -227,7 +242,7 @@ func (st *Stage) SetType(typ StageTypes) *Stage {
 	case Snackbar:
 		st.Modal = true
 		st.Timeout = SnackbarTimeout
-	case Completer:
+	case Chooser:
 		st.Modal = false
 		st.Scrim = false
 		st.ClickOff = true
@@ -398,4 +413,22 @@ func (st *Stage) AddDialogDecor() *Stage {
 
 func (st *Stage) AddSheetDecor() *Stage {
 	// todo: handle based on side
+}
+
+///////////////////////////////////////////////////
+//  	Events
+
+// IsPtIn returns true if given point is inside the Geom Bounds
+// of this Stage.
+func (st *Stage) IsPtIn(pt image.Point) bool {
+	return pt.In(st.Geom.Bounds())
+}
+
+func (st *Stage) Delete() {
+	st.PopupMgr.CloseAll()
+	if st.Scene != nil {
+		st.Scene.Delete()
+	}
+	st.Scene = nil
+	st.StageMgr = nil
 }

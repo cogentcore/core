@@ -182,7 +182,7 @@ var ButtonBaseType = gti.AddType(&gti.Type{
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
 		{"WasPressed", &gti.Field{Name: "WasPressed", Type: "bool", Doc: "whether the button has been pressed (typically accessed in an ButtonRelease event)", Directives: gti.Directives{}}},
 		{"ButtonSig", &gti.Field{Name: "ButtonSig", Type: "ki.Signal", Doc: "[view: -] signal for button -- see ButtonSignals for the types", Directives: gti.Directives{}}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "Menu", Doc: "the menu items for this menu -- typically add Action elements for menus, along with separators", Directives: gti.Directives{}}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "MenuActions", Doc: "the menu items for this menu -- typically add Action elements for menus, along with separators", Directives: gti.Directives{}}},
 		{"MakeMenuFunc", &gti.Field{Name: "MakeMenuFunc", Type: "MakeMenuFunc", Doc: "[view: -] set this to make a menu on demand -- if set then this button acts like a menu button", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -282,7 +282,7 @@ var ComboBoxType = gti.AddType(&gti.Type{
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
-		{"ItemsMenu", &gti.Field{Name: "ItemsMenu", Type: "Menu", Doc: "the menu of actions for selecting items -- automatically generated from Items", Directives: gti.Directives{}}},
+		{"ItemsMenu", &gti.Field{Name: "ItemsMenu", Type: "MenuActions", Doc: "the menu of actions for selecting items -- automatically generated from Items", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
 		{"ComboSig", &gti.Field{Name: "ComboSig", Type: "ki.Signal", Doc: "[view: -] signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value", Directives: gti.Directives{}}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
@@ -419,11 +419,12 @@ func (t *Frame) New() ki.Ki {
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
-	Doc:        "Icon is a wrapper around a child svg.Icon SVG element.  SVG should contain no\ncolor information -- it should just be a filled shape where the fill and\nstroke colors come from the surrounding context / paint settings.  The\nrendered version is cached for a given size. Icons are always copied from\nan original source icon and then can be customized from there.",
+	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"IconNm", &gti.Field{Name: "IconNm", Type: "icons.Icon", Doc: "icon name that has been set -- optimizes to prevent reloading of icon", Directives: gti.Directives{}}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -975,39 +976,6 @@ func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
 }
 
-// EditorType is the [gti.Type] for [Editor]
-var EditorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Editor",
-	Doc:        "Editor supports editing of SVG elements",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Trans", &gti.Field{Name: "Trans", Type: "mat32.Vec2", Doc: "view translation offset (from dragging)", Directives: gti.Directives{}}},
-		{"Scale", &gti.Field{Name: "Scale", Type: "float32", Doc: "view scaling (from zooming)", Directives: gti.Directives{}}},
-		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", Doc: "[view: -] has dragging cursor been set yet?", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Editor{},
-})
-
-// NewEditor adds a new [Editor] with
-// the given name to the given parent.
-func NewEditor(par ki.Ki, name string) *Editor {
-	return par.NewChild(EditorType, name).(*Editor)
-}
-
-// KiType returns the [*gti.Type] of [Editor]
-func (t *Editor) KiType() *gti.Type {
-	return EditorType
-}
-
-// New returns a new [*Editor] value
-func (t *Editor) New() ki.Ki {
-	return &Editor{}
-}
-
 // TabViewType is the [gti.Type] for [TabView]
 var TabViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.TabView",
@@ -1018,7 +986,7 @@ var TabViewType = gti.AddType(&gti.Type{
 		{"TabViewSig", &gti.Field{Name: "TabViewSig", Type: "ki.Signal", Doc: "signal for tab widget -- see TabViewSignals for the types", Directives: gti.Directives{}}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}}},
 		{"NoDeleteTabs", &gti.Field{Name: "NoDeleteTabs", Type: "bool", Doc: "if true, tabs are not user-deleteable", Directives: gti.Directives{}}},
-		{"NewTabType", &gti.Field{Name: "NewTabType", Type: "reflect.Type", Doc: "type of widget to create in a new tab via new tab button -- Frame by default", Directives: gti.Directives{}}},
+		{"NewTabType", &gti.Field{Name: "NewTabType", Type: "*gti.Type", Doc: "type of widget to create in a new tab via new tab button -- Frame by default", Directives: gti.Directives{}}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", Doc: "[view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1146,15 +1114,15 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Class", &gti.Field{Name: "Class", Type: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}}},
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "ki.Props", Doc: "[view: no-inline] aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", Doc: "raw original 2D bounding box for the object within its parent scene -- used for computing ScBBox and WinBBox -- this is not updated by Move2D, whereas ScBBox etc are", Directives: gti.Directives{}}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by Move2D, whereas ScBBox is", Directives: gti.Directives{}}},
 		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", Doc: "full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}}},
 		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping", Directives: gti.Directives{}}},
-		{"WinBBox", &gti.Field{Name: "WinBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within parent RenderWin object, projected all the way up to that -- these are the coordinates where we receive events, relative to the window", Directives: gti.Directives{}}},
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}}},
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]Styler", Doc: "a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code", Directives: gti.Directives{}}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}}},
 		{"Style", &gti.Field{Name: "Style", Type: "gist.Style", Doc: "styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}}},
+		{"Events", &gti.Field{Name: "Events", Type: "WidgetEvents", Doc: "filter and map of event processing functions that determine which events and how they are processed for this widget", Directives: gti.Directives{}}},
 		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}}},
 		{"WidgetSig", &gti.Field{Name: "WidgetSig", Type: "ki.Signal", Doc: "[view: -] general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets", Directives: gti.Directives{}}},
 		{"CtxtMenuFunc", &gti.Field{Name: "CtxtMenuFunc", Type: "CtxtMenuFunc", Doc: "[view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate", Directives: gti.Directives{}}},

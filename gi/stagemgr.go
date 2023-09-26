@@ -4,8 +4,101 @@
 
 package gi
 
-// StageMgr is the Stage manager.
-// Handles all the logic about stacks of Stage elements
-// and routing of events to them.
+import (
+	"sync"
+
+	"goki.dev/ordmap"
+)
+
+// StageMgrBase provides base impl for stage management,
+// extended by PopupMgr and StageMgr.
+// Manages a stack of Stage elements.
+type StageMgrBase struct {
+
+	// stack of stages
+	Stack ordmap.Map[string, *Stage] `desc:"stack of stages"`
+
+	// rendering context for the Stages here
+	RenderCtx *RenderContext `desc:"rendering context for the Stages here"`
+
+	// [view: -] mutex protecting access
+	Mu sync.RWMutex `view:"-" desc:"mutex protecting access"`
+}
+
+// Top returns the top-most Stage in the Stack
+func (sm *StageMgrBase) Top() *Stage {
+	sm.Mu.RLock()
+	defer sm.Mu.RUnlock()
+
+	sz := sm.Stack.Len()
+	if sz == 0 {
+		return nil
+	}
+	return sm.Stack.ValByIdx(sz - 1)
+}
+
+// Push pushes a new Stage to top
+func (sm *StageMgrBase) Push(st *Stage) {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	st.StageMgr = sm
+	sm.Stack.Add(st.Name, st)
+
+	// if pfoc != nil {
+	// 	sm.EventMgr.PushFocus(pfoc)
+	// } else {
+	// 	sm.EventMgr.PushFocus(st)
+	// }
+}
+
+// Pop pops current Stage off the stack, returning it or nil if none
+func (sm *StageMgrBase) Pop() *Stage {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	sz := sm.Stack.Len()
+	if sz == 0 {
+		return nil
+	}
+	st := sm.Stack.ValByIdx(sz - 1)
+	sm.Stack.DeleteIdx(sz-1, sz)
+	return st
+}
+
+// PopDelete pops current Stage off the stack and calls Delete on it.
+func (sm *StageMgrBase) PopDelete() {
+	st := sm.Pop()
+	if st != nil {
+		st.Delete
+	}
+}
+
+// CloseAll closes all of the stages, calling Delete on each of them.
+// When Stage with Popups is Deleted, or when a RenderWindow is closed.
+// requires outer RenderContext mutex!
+func (sm *StageMgrBase) CloseAll() {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	sz := sm.Stack.Len()
+	if sz == 0 {
+		return nil
+	}
+	for i := sz - 1; i >= 0; i-- {
+		st := sm.Stack.ValByIdx(i)
+		st.Delete()
+		sm.Stack.DeleteIdx(i, i+1)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////
+// 	StageMgr proper
+
+// StageMgr is the outer Stage manager for Window, Dialog, Sheet
 type StageMgr struct {
+	StageMgrBase
+
+	// growing stack of history of all stages.
+	History []*Stage
 }

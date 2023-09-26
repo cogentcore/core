@@ -516,11 +516,11 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 	hasShift := me.HasAnyModifier(goosi.Shift, key.Alt) // shift or alt says: use vert for other dimension
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
-			me.SetProcessed()
+			me.SetHandled()
 			return
 		}
 		ly.ScrollActionDelta(mat32.X, float32(del.Y))
-		me.SetProcessed()
+		me.SetHandled()
 		return
 	}
 
@@ -528,14 +528,14 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
 		ly.ScrollActionDelta(mat32.X, float32(del.X))
-		me.SetProcessed()
+		me.SetHandled()
 	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
 		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
 		if del.X != 0 {
 			me.Delta.Y = 0
 		} else {
-			me.SetProcessed()
+			me.SetHandled()
 		}
 	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
@@ -544,7 +544,7 @@ func (ly *Layout) ScrollDelta(me *mouse.ScrollEvent) {
 			if del.Y != 0 {
 				me.Delta.X = 0
 			} else {
-				me.SetProcessed()
+				me.SetHandled()
 			}
 		}
 	}
@@ -924,7 +924,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 var LayoutPageSteps = 10
 
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
-func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
+func (ly *Layout) LayoutKeys(kt *key.Event) {
 	if KeyEventTrace {
 		fmt.Printf("Layout KeyInput: %v\n", ly.Path())
 	}
@@ -933,12 +933,12 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 		switch kf {
 		case KeyFunMoveRight:
 			if ly.FocusNextChild(false) { // allow higher layers to try..
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		case KeyFunMoveLeft:
 			if ly.FocusPrevChild(false) {
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		}
@@ -947,12 +947,12 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 		switch kf {
 		case KeyFunMoveDown:
 			if ly.FocusNextChild(true) {
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		case KeyFunMoveUp:
 			if ly.FocusPrevChild(true) {
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		case KeyFunPageDown:
@@ -964,7 +964,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 				proc = true
 			}
 			if proc {
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		case KeyFunPageUp:
@@ -976,7 +976,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 				proc = true
 			}
 			if proc {
-				kt.SetProcessed()
+				kt.SetHandled()
 			}
 			return
 		}
@@ -990,7 +990,7 @@ func (ly *Layout) LayoutKeys(kt *key.ChordEvent) {
 }
 
 // FocusOnName processes key events to look for an element starting with given name
-func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
+func (ly *Layout) FocusOnName(kt *key.Event) bool {
 	if KeyEventTrace {
 		fmt.Printf("Layout FocusOnName: %v\n", ly.Path())
 	}
@@ -1018,7 +1018,7 @@ func (ly *Layout) FocusOnName(kt *key.ChordEvent) bool {
 			ly.FocusNameLast = nil // only use last if tabbing
 		}
 	}
-	kt.SetProcessed()
+	kt.SetHandled()
 	// fmt.Printf("searching for: %v  last: %v\n", ly.FocusName, ly.FocusNameLast)
 	focel, found := ChildByLabelStartsCanFocus(ly, ly.FocusName, ly.FocusNameLast)
 	if found {
@@ -1083,12 +1083,12 @@ func (ly *Layout) LayoutScrollEvents() {
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	lywe.AddFunc(goosi.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*dnd.MoveEvent)
+		me := d.(*dnd.Event)
 		li := AsLayout(recv)
 		li.AutoScroll(me.Pos())
 	})
 	lywe.AddFunc(goosi.MouseMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.MoveEvent)
+		me := d.(*mouse.Event)
 		li := AsLayout(recv)
 		if li.Sc.Type == ScMenu {
 			li.AutoScroll(me.Pos())
@@ -1101,7 +1101,7 @@ func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	lywe.AddFunc(goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := AsLayout(recv)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		li.LayoutKeys(kt)
 	})
 }

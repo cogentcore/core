@@ -89,7 +89,7 @@ func (cv *ColorMapView) MouseEvent() {
 			case mouse.DoubleClick: // we just count as a regular click
 				fallthrough
 			case mouse.Press:
-				me.SetProcessed()
+				me.SetHandled()
 				cvv.ChooseColorMap()
 			}
 		}

@@ -843,7 +843,7 @@ func (tv *DiffTextView) MouseEvent(me *mouse.Event) {
 			}
 		}
 		tv.RenderLines(ln, ln)
-		me.SetProcessed()
+		me.SetHandled()
 		return
 	}
 	tv.TextView.MouseEvent(me)
@@ -862,7 +862,7 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.MouseFocusEvent()
 	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		txf.KeyInput(kt)
 	})
 }

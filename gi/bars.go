@@ -198,7 +198,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 }
 
 // MainMenuFunc is the callback function for OS-generated menu actions.
-func MainMenuFunc(owin goosi.RenderWin, title string, tag int) {
+func MainMenuFunc(owin goosi.Window, title string, tag int) {
 	win, ok := owin.Parent().(*RenderWin)
 	if !ok {
 		return
@@ -413,9 +413,9 @@ func (tb *ToolBar) Render(sc *Scene) {
 	}
 }
 
-func (tb *ToolBar) MouseFocusEvent() {
-	tbwe.AddFunc(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.FocusEvent)
+func (tb *ToolBar) MouseFocusEvent(we *WidgetEvents) {
+	we.AddFunc(goosi.MouseFocusEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*mouse.Event)
 		if me.Action == mouse.Enter {
 			tbb := AsToolBar(recv)
 			if tbb != nil {

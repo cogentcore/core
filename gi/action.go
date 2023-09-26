@@ -105,8 +105,8 @@ func (ac *Action) OnInit() {
 			s.Border.Radius = gist.BorderRadiusFull
 			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			s.BackgroundColor.SetSolid(ColorScheme.SecondaryContainer)
-			s.Color = ColorScheme.OnSecondaryContainer
+			s.BackgroundColor.SetSolid(ColorScheme.Secondary.Container)
+			s.Color = ColorScheme.Secondary.OnContainer
 		case ActionParts:
 			s.Border.Radius.Set()
 			s.BackgroundColor = w.ParentBackgroundColor()

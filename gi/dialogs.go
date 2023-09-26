@@ -5,19 +5,7 @@
 package gi
 
 import (
-	"fmt"
-	"image"
-	"log"
-	"reflect"
-
-	"github.com/iancoleman/strcase"
-
-	"goki.dev/colors"
-	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
-	"goki.dev/ki/v2"
 )
 
 // DialogsSepRenderWin determines if dialog windows open in a separate OS-level
@@ -52,6 +40,7 @@ const (
 var StdDialogVSpace = float32(1)
 var StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 
+/*
 // Dialog supports dialog functionality -- based on a scene that can either
 // be rendered in a separate window or on top of an existing one.
 type Dialog struct {
@@ -203,7 +192,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 
 	// note: LowPri allows all other events to be processed before dialog
 	win.EventMgrwe.AddFunc(dlg.Frame.This(), goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", dlg.Name)
 		}
@@ -211,11 +200,11 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 		switch kf {
 		case KeyFunAbort:
 			dlg.Cancel()
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	})
 	win.EventMgrwe.AddFunc(dlg.Frame.This(), goosi.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", dlg.Name)
 		}
@@ -223,7 +212,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 		switch kf {
 		case KeyFunAccept:
 			dlg.Accept()
-			kt.SetProcessed()
+			kt.SetHandled()
 		}
 	})
 	// this is not a good idea
@@ -232,7 +221,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
 	// 		ddlg.Accept()
-	// 		me.SetProcessed()
+	// 		me.SetHandled()
 	// 	}
 	// })
 
@@ -641,3 +630,4 @@ func StringPromptDialogValue(dlg *Dialog) string {
 	tf := dlg.Frame.ChildByName("str-field", 0).(*TextField)
 	return tf.Text()
 }
+*/

@@ -7,9 +7,9 @@ package gi
 import "image"
 
 // CtxtMenuFunc is a function for creating a context menu for given node
-type CtxtMenuFunc func(g Widget, m *Menu)
+type CtxtMenuFunc func(g Widget, m *MenuActions)
 
-func (wb *WidgetBase) MakeContextMenu(m *Menu) {
+func (wb *WidgetBase) MakeContextMenu(m *MenuActions) {
 	// derived types put native menu code here
 	if wb.CtxtMenuFunc != nil {
 		wb.CtxtMenuFunc(wb.This().(Widget), m)

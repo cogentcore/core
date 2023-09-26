@@ -125,7 +125,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {
 			if kcc.Selectable {
-				me.SetProcessed()
+				me.SetHandled()
 				kcc.SetSelected(!kcc.IsSelected())
 				if kcc.IsSelected() {
 					kcc.GrabFocus()
@@ -135,7 +135,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 			}
 		}
 		if me.Action == mouse.Release && me.Button == mouse.Right {
-			me.SetProcessed()
+			me.SetHandled()
 			kcc.EmitContextMenuSignal()
 			kcc.This().(gi.Node2D).ContextMenu()
 		}
@@ -146,8 +146,8 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 	kcwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if kcc.HasFocus() && kcc.FocusActive {
-			kt := d.(*key.ChordEvent)
-			kt.SetProcessed()
+			kt := d.(*key.Event)
+			kt.SetHandled()
 			kcc.SetText(string(kt.Chord())) // that's easy!
 			goosi.TheApp.ClipBoard(kc.ParentRenderWin().RenderWin).Write(mimedata.NewText(string(kt.Chord())))
 			kcc.ChordUpdated()

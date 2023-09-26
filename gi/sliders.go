@@ -447,7 +447,7 @@ func (sb *SliderBase) UpdateThumbValSize() {
 	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
 }
 
-func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
+func (sb *SliderBase) KeyInput(kt *key.Event) {
 	if KeyEventTrace {
 		fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
 	}
@@ -455,34 +455,34 @@ func (sb *SliderBase) KeyInput(kt *key.ChordEvent) {
 	switch kf {
 	case KeyFunMoveUp:
 		sb.SetValueAction(sb.Value - sb.Step)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case KeyFunMoveLeft:
 		sb.SetValueAction(sb.Value - sb.Step)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case KeyFunMoveDown:
 		sb.SetValueAction(sb.Value + sb.Step)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case KeyFunMoveRight:
 		sb.SetValueAction(sb.Value + sb.Step)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case KeyFunPageUp:
 		sb.SetValueAction(sb.Value - sb.PageStep)
-		kt.SetProcessed()
+		kt.SetHandled()
 	// case KeyFunPageLeft:
 	// 	sb.SetValueAction(sb.Value - sb.PageStep)
-	// 	kt.SetProcessed()
+	// 	kt.SetHandled()
 	case KeyFunPageDown:
 		sb.SetValueAction(sb.Value + sb.PageStep)
-		kt.SetProcessed()
+		kt.SetHandled()
 	// case KeyFunPageRight:
 	// 	sb.SetValueAction(sb.Value + sb.PageStep)
-	// 	kt.SetProcessed()
+	// 	kt.SetHandled()
 	case KeyFunHome:
 		sb.SetValueAction(sb.Min)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case KeyFunEnd:
 		sb.SetValueAction(sb.Max)
-		kt.SetProcessed()
+		kt.SetHandled()
 	}
 }
 
@@ -496,12 +496,12 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 
 func (sb *SliderBase) MouseDragEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.DragEvent)
+		me := d.(*mouse.Event)
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			return
 		}
-		me.SetProcessed()
+		me.SetHandled()
 		st := sbb.This().(SliderPositioner).PointToRelPos(me.From)
 		ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 		if sbb.Dim == mat32.X {
@@ -517,13 +517,13 @@ func (sb *SliderBase) MouseEvent(we *WidgetEvents) {
 		me := d.(*mouse.Event)
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
-			me.SetProcessed()
+			me.SetHandled()
 			sbb.SetSelected(!sbb.IsSelected())
 			sbb.EmitSelectedSignal()
 			sbb.UpdateSig()
 		} else {
 			if me.Button == mouse.Left {
-				me.SetProcessed()
+				me.SetHandled()
 				if me.Action == mouse.Press {
 					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
 					st := &sbb.Style
@@ -548,8 +548,8 @@ func (sb *SliderBase) MouseFocusEvent(we *WidgetEvents) {
 		if sbb.IsDisabled() {
 			return
 		}
-		me := d.(*mouse.FocusEvent)
-		me.SetProcessed()
+		me := d.(*mouse.Event)
+		me.SetHandled()
 		if me.Action == mouse.Enter {
 			sbb.SliderEnterHover()
 		} else {
@@ -565,7 +565,7 @@ func (sb *SliderBase) MouseScrollEvent(we *WidgetEvents) {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
+		me.SetHandled()
 		cur := float32(sbb.Pos)
 		if sbb.Dim == mat32.X {
 			sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX
@@ -581,7 +581,7 @@ func (sb *SliderBase) KeyChordEvent(we *WidgetEvents) {
 		if sbb.IsDisabled() {
 			return
 		}
-		sbb.KeyInput(d.(*key.ChordEvent))
+		sbb.KeyInput(d.(*key.Event))
 	})
 }
 

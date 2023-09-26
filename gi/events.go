@@ -52,7 +52,7 @@ func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
 			return
 		}
 		me := data.(*mouse.Event)
-		me.SetProcessed()
+		me.SetHandled()
 		wbb.WidgetOnMouseEvent(me)
 	})
 }
@@ -73,7 +73,7 @@ func (wb *WidgetBase) WidgetMouseFocusEvent(we *WidgetEvents) {
 			return
 		}
 		me := data.(*mouse.Event)
-		me.SetProcessed()
+		me.SetHandled()
 		wbb.WidgetOnMouseFocusEvent(me)
 	})
 }
@@ -110,7 +110,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
-				me.SetProcessed()
+				me.SetHandled()
 				_, wbb := AsWidget(recv)
 				wbb.SetSelected(!wbb.IsSelected())
 				wbb.EmitSelectedSignal()
@@ -119,7 +119,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 		}
 		if ctxtMenu {
 			if me.Action == mouse.Release && me.Button == mouse.Right {
-				me.SetProcessed()
+				me.SetHandled()
 				wi, wbb := AsWidget(recv)
 				wbb.EmitContextMenuSignal()
 				wi.ContextMenu()

@@ -355,7 +355,7 @@ func (sb *SpinBox) MouseScrollEvent(we *WidgetEvents) {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
+		me.SetHandled()
 		sbb.IncrValue(float32(me.NonZeroDelta(false)))
 	})
 }
@@ -378,23 +378,23 @@ func (sb *SpinBox) KeyChordEvent(we *WidgetEvents) {
 		if sbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.ChordEvent)
+		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("SpinBox KeyChordEvent: %v\n", sbb.Path())
 		}
 		kf := KeyFun(kt.Chord())
 		switch {
 		case kf == KeyFunMoveUp:
-			kt.SetProcessed()
+			kt.SetHandled()
 			sb.IncrValue(1)
 		case kf == KeyFunMoveDown:
-			kt.SetProcessed()
+			kt.SetHandled()
 			sb.IncrValue(-1)
 		case kf == KeyFunPageUp:
-			kt.SetProcessed()
+			kt.SetHandled()
 			sb.PageIncrValue(1)
 		case kf == KeyFunPageDown:
-			kt.SetProcessed()
+			kt.SetHandled()
 			sb.PageIncrValue(-1)
 		}
 	})
