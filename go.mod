@@ -6,7 +6,6 @@ require (
 	github.com/muesli/termenv v0.15.2
 	goki.dev/colors v0.8.12
 	goki.dev/enums v0.9.20
-	goki.dev/matcolor v0.9.11
 )
 
 require (
