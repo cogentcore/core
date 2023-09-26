@@ -22,6 +22,12 @@ type Scheme struct {
 	// Error is the error color applied to elements that indicate an error or danger
 	Error Accent `desc:"Error is the error color applied to elements that indicate an error or danger"`
 
+	// Success is the color applied to elements that indicate success
+	Success Accent `desc:"Success is the color applied to elements that indicate success"`
+
+	// Warn is the color applied to elements that indicate a warning
+	Warn Accent `desc:"Warn is the color applied to elements that indicate a warning"`
+
 	// SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)
 	SurfaceDim color.RGBA `desc:"SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)"`
 
@@ -130,6 +136,8 @@ func NewLightScheme(p *Palette) Scheme {
 		Secondary: NewAccentLight(p.Secondary),
 		Tertiary:  NewAccentLight(p.Tertiary),
 		Error:     NewAccentLight(p.Error),
+		Success:   NewAccentLight(p.Success),
+		Warn:      NewAccentLight(p.Warn),
 
 		SurfaceDim:    p.Neutral.Tone(87),
 		Surface:       p.Neutral.Tone(98),
@@ -170,6 +178,8 @@ func NewDarkScheme(p *Palette) Scheme {
 		Secondary: NewAccentDark(p.Secondary),
 		Tertiary:  NewAccentDark(p.Tertiary),
 		Error:     NewAccentDark(p.Error),
+		Success:   NewAccentDark(p.Success),
+		Warn:      NewAccentDark(p.Warn),
 
 		SurfaceDim:    p.Neutral.Tone(6),
 		Surface:       p.Neutral.Tone(6),

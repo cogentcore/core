@@ -41,6 +41,12 @@ type Key struct {
 	// the error accent key color
 	Error color.RGBA `desc:"the error accent key color"`
 
+	// the success accent key color
+	Success color.RGBA `desc:"the success accent key color"`
+
+	// the warn accent key color
+	Warn color.RGBA `desc:"the warn accent key color"`
+
 	// the neutral key color used to generate surface and surface container colors
 	Neutral color.RGBA `desc:"the neutral key color used to generate surface and surface container colors"`
 

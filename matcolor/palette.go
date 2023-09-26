@@ -21,6 +21,12 @@ type Palette struct {
 	// the tones for the error key color
 	Error Tones `desc:"the tones for the error key color"`
 
+	// the tones for the success key color
+	Success Tones `desc:"the tones for the success key color"`
+
+	// the tones for the warn key color
+	Warn Tones `desc:"the tones for the warn key color"`
+
 	// the tones for the neutral key color
 	Neutral Tones `desc:"the tones for the neutral key color"`
 
@@ -38,6 +44,8 @@ func NewPalette(key *Key) *Palette {
 		Secondary:      NewTones(key.Secondary),
 		Tertiary:       NewTones(key.Tertiary),
 		Error:          NewTones(key.Error),
+		Success:        NewTones(key.Success),
+		Warn:           NewTones(key.Warn),
 		Neutral:        NewTones(key.Neutral),
 		NeutralVariant: NewTones(key.NeutralVariant),
 	}
