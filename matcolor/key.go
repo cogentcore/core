@@ -57,13 +57,13 @@ func KeyFromPrimary(primary color.RGBA) *Key {
 	p := hct.FromColor(primary)
 	p.SetTone(40)
 
-	k.Primary = p.SetChroma(max(p.Chroma, 48)).AsRGBA()
-	k.Secondary = p.SetChroma(16).AsRGBA()
+	k.Primary = p.WithChroma(max(p.Chroma, 48)).AsRGBA()
+	k.Secondary = p.WithChroma(16).AsRGBA()
 	// Material adds 60, but we subtract 60 to get green instead of pink when specifying
 	// blue (TODO: is this a good idea, or should we just follow Material?)
-	k.Tertiary = p.SetHue(p.Hue - 60).SetChroma(24).AsRGBA()
+	k.Tertiary = p.WithHue(p.Hue - 60).WithChroma(24).AsRGBA()
 	k.Error = color.RGBA{179, 38, 30, 255} // #B3261E (Material default error color)
-	k.Neutral = p.SetChroma(4).AsRGBA()
-	k.NeutralVariant = p.SetChroma(8).AsRGBA()
+	k.Neutral = p.WithChroma(4).AsRGBA()
+	k.NeutralVariant = p.WithChroma(8).AsRGBA()
 	return k
 }
