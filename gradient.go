@@ -27,15 +27,19 @@ type Gradient struct {
 	// the solid color if [Gradient.Source] is set to [Solid]
 	Color color.RGBA `desc:"the solid color if [Gradient.Source] is set to [Solid]"`
 
-	// gradient parameters for gradient color source
-	Gradient *rasterx.Gradient `desc:"gradient parameters for gradient color source"`
+	Points [5]float32
+	Stops  []GradientStop
+	Bounds mat32.Box2
+	Matrix mat32.Mat2
+	Spread SpreadMethods
+	Units  GradientUnits
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
 type GradientStop struct {
 	Color   color.RGBA // the color of the stop
-	Offset  float64    // the offset of the stop
-	Opacity float64    // the opacity of the stop
+	Offset  float32    // the offset (position) of the stop (0-1)
+	Opacity float32    // the opacity of the stop (0-1)
 }
 
 // GradientSources represent the ways in which a [Gradient] can be specified.
@@ -60,22 +64,33 @@ const (
 	GpY2
 )
 
-// SpreadMethods are the methods used for SVG spreading
+// SpreadMethods are the methods used when a gradient reaches
+// its end but the object isn't fully filled.
 type SpreadMethods int32 //enums:enum
 
-// SVG spread parameter values
 const (
-	PadSpread SpreadMethods = iota
-	ReflectSpread
-	RepeatSpread
+	// SpreadPad indicates to have the final color of the gradient fill
+	// the object beyond the end of the gradient.
+	SpreadPad SpreadMethods = iota
+	// SpreadReflect indicates to have a gradient repeat in reverse order
+	// (offset 1 to 0) to fully fill an object beyond the end of the gradient.
+	SpreadReflect
+	// SpreadRepeat indicates to have a gradient continue in its original order
+	// (offset 0 to 1) by jumping back to the start to fully fill an object beyond
+	// the end of the gradient.
+	SpreadRepeat
 )
 
 // GradientUnits are the types of SVG gradient units
 type GradientUnits int32 //enums:enum
 
-// SVG gradient units values
 const (
+	// ObjectBoundingBox indicates that coordinate values are scaled
+	// relative to the size of the object and are specified in the range
+	// of 0 to 1.
 	ObjectBoundingBox GradientUnits = iota
+	// UserSpaceOnUse indicates that coordinate values are specified
+	// in the current user coordinate system when the gradient is used.
 	UserSpaceOnUse
 )
 
