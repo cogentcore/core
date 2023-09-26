@@ -69,6 +69,8 @@ func KeyFromPrimary(primary color.RGBA) *Key {
 	// blue (TODO: is this a good idea, or should we just follow Material?)
 	k.Tertiary = p.WithHue(p.Hue - 60).WithChroma(24).AsRGBA()
 	k.Error = color.RGBA{179, 38, 30, 255} // #B3261E (Material default error color)
+	k.Success = color.RGBA{0, 255, 0, 255}
+	k.Warn = color.RGBA{255, 255, 0, 255}
 	k.Neutral = p.WithChroma(4).AsRGBA()
 	k.NeutralVariant = p.WithChroma(8).AsRGBA()
 	return k
