@@ -30,3 +30,14 @@ var Schemes = matcolor.NewSchemes(Palette)
 // see [Palette]. For setting the color scheme of your app, see
 // [Schemes].
 var Scheme = &Schemes.Light
+
+// SetScheme sets the value of [Scheme] to either [Schemes.Dark]
+// or [Schemes.Light], based on the given value of whether the
+// color scheme should be dark.
+func SetScheme(isDark bool) {
+	if isDark {
+		Scheme = &Schemes.Dark
+	} else {
+		Scheme = &Schemes.Light
+	}
+}
