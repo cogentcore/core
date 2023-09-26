@@ -76,3 +76,17 @@ func WarnColor(str string) string {
 func ErrorColor(str string) string {
 	return ApplyColor(colors.Scheme.Error.Base, str)
 }
+
+// SuccessColor applies the color associated with success to the
+// given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func SuccessColor(str string) string {
+	return ApplyColor(colors.Scheme.Success.Base, str)
+}
+
+// CmdColor applies the color associated with terminal commands and arguments
+// to the given string and returns the resulting string. If [UseColor] is set
+// to false, it just returns the string it was passed.
+func CmdColor(str string) string {
+	return ApplyColor(colors.Scheme.Primary.Base, str)
+}
