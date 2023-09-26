@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 
+	"goki.dev/colors"
 	"goki.dev/grog"
 )
 
@@ -24,7 +25,6 @@ import (
 // If [Options.Fatal] is set to true, the error result of Run does
 // not need to be handled. Run uses [os.Args] for its arguments.
 func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
-	grog.SetDefaultLogger()
 	cs, err := CmdsFromCmdOrFuncs[T, C](cmds)
 	if err != nil {
 		err := fmt.Errorf("internal/programmer error: error getting commands from given commands: %w", err)
@@ -45,13 +45,13 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(grog.InfoColor(cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
+			fmt.Println(grog.ApplyColor(colors.Scheme.Primary.Base, cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
 	if opts.PrintSuccess {
-		fmt.Println(grog.InfoColor(cmdString(opts, cmd)) + grog.DebugColor(" succeeded"))
+		fmt.Println(grog.ApplyColor(colors.Scheme.Primary.Base, cmdString(opts, cmd)) + grog.ApplyColor(colors.Scheme.Success.Base, " succeeded"))
 	}
 	return nil
 }

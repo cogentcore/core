@@ -20,6 +20,8 @@ github.com/rivo/uniseg v0.4.4/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUc
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 goki.dev/cam v0.9.17 h1:p/TLOGdY2c1Ycnhfk0UkRfCxR86+rFtZTMPEg+WhUPU=
 goki.dev/cam v0.9.17/go.mod h1:bJ7YdTPKbTOGrwq0BfYr70B2eGxVS/PI9XSMreFKd0o=
+goki.dev/colors v0.8.12 h1:EsT5CN5JBYhOjgZh8kJB4nn6tlxQxPar7kV+eGRJxOk=
+goki.dev/colors v0.8.12/go.mod h1:lPhB3huBgGAqdDWITL1mxxGO2jNFQv32qR09/kB7pTw=
 goki.dev/enums v0.9.19 h1:BI1t2TK6aubNNbKUcrNSvyx5PI4Z/xVYoVpwGefbtNs=
 goki.dev/enums v0.9.19/go.mod h1:QY5uOc5M4745XrZBkHrREDNS/5A8VNXduJfUjWcnqVw=
 goki.dev/glop v0.1.2 h1:CEwjaz+eULn3FA7EaWpfWOHQs3y7C5hm4wZMFOADiJE=

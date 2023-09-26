@@ -132,7 +132,6 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		return cmd, fmt.Errorf("error doing meta configuration: %w", err)
 	}
 	grog.UserLevel = grog.LevelFromFlags(mc.VeryVerbose, mc.Verbose, mc.Quiet)
-	grog.SetDefaultLogger()
 
 	// both flag and command trigger help
 	if mc.Help || cmd == "help" {
