@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"maps"
+
 	"github.com/iancoleman/strcase"
 	"goki.dev/laser"
 )
@@ -40,7 +42,16 @@ const (
 // It is recommended that the [ErrNotFound] and [NoErrNotFound]
 // constants be used for the value of errNotFound for clearer code.
 func SetFromArgs[T any](cfg T, args []string, errNotFound bool, cmds ...*Cmd[T]) (string, error) {
-	nfargs, flags, err := GetArgs(args, BoolFlags(cfg))
+	bf := BoolFlags(cfg)
+	// if we are not already a meta config object, we have to add
+	// all of the bool flags of the meta config object so that we
+	// correctly handle the short (no value) versions of things like
+	// verbose and quiet.
+	if _, ok := any(cfg).(*MetaConfig); !ok {
+		mcf := BoolFlags(&metaConfigFields{})
+		maps.Copy(bf, mcf)
+	}
+	nfargs, flags, err := GetArgs(args, bf)
 	if err != nil {
 		return "", err
 	}
