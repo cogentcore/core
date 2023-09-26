@@ -50,48 +50,58 @@ type Config struct {
 	Errors io.Writer
 }
 
-// Main returns the default [Config] object for a main command,
-// based on [grog.UserLevel].
-func Main() *Config {
-	if grog.UserLevel > slog.LevelInfo {
+// Major returns the default [Config] object for a major command,
+// based on [grog.UserLevel]. It should be used for commands that
+// are central to an app's logic and are more important for the user
+// to know about and be able to see the output of. It results in
+// commands and output being printed with a [grog.UserLevel] of
+// [slog.LevelInfo] or below, whereas [Minor] results in that when
+// it is [slog.LevelDebug] or below.
+func Major() *Config {
+	if grog.UserLevel <= slog.LevelInfo {
 		return &Config{
-			Buffer: true,
-			Env:    map[string]string{},
-			Stderr: os.Stderr,
-			Stdin:  os.Stdin,
-			Errors: os.Stderr,
+			Buffer:   true,
+			Env:      map[string]string{},
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
+			Commands: os.Stdout,
+			Errors:   os.Stderr,
 		}
 	}
 	return &Config{
-		Buffer:   true,
-		Env:      map[string]string{},
-		Stdout:   os.Stdout,
-		Stderr:   os.Stderr,
-		Stdin:    os.Stdin,
-		Commands: os.Stdout,
-		Errors:   os.Stderr,
+		Buffer: true,
+		Env:    map[string]string{},
+		Stderr: os.Stderr,
+		Stdin:  os.Stdin,
+		Errors: os.Stderr,
 	}
 }
 
 // Minor returns the default [Config] object for a minor command,
-// based on [grog.UserLevel].
+// based on [grog.UserLevel]. It should be used for commands that
+// support an app behind the scenes and are less important for the
+// user to know about and be able to see the output of. It results in
+// commands and output being printed with a [grog.UserLevel] of
+// [slog.LevelDebug] or below, whereas [Major] results in that when
+// it is [slog.LevelInfo] or below.
 func Minor() *Config {
-	if grog.UserLevel > slog.LevelDebug {
+	if grog.UserLevel <= slog.LevelDebug {
 		return &Config{
-			Buffer: true,
-			Env:    map[string]string{},
-			Stderr: os.Stderr,
-			Stdin:  os.Stdin,
-			Errors: os.Stderr,
+			Buffer:   true,
+			Env:      map[string]string{},
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
+			Commands: os.Stdout,
+			Errors:   os.Stderr,
 		}
 	}
 	return &Config{
-		Buffer:   true,
-		Env:      map[string]string{},
-		Stdout:   os.Stdout,
-		Stderr:   os.Stderr,
-		Stdin:    os.Stdin,
-		Commands: os.Stdout,
-		Errors:   os.Stderr,
+		Buffer: true,
+		Env:    map[string]string{},
+		Stderr: os.Stderr,
+		Stdin:  os.Stdin,
+		Errors: os.Stderr,
 	}
 }

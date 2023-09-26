@@ -13,7 +13,7 @@ import (
 
 func TestRun(t *testing.T) {
 	grog.UserLevel = slog.LevelWarn
-	m := Main()
+	m := Major()
 	err := RunSh(m, "go version")
 	if err != nil {
 		t.Error(err)
