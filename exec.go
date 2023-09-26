@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/grog"
 )
 
@@ -68,9 +69,9 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 		// need to do now because we aren't buffering
 		if cfg.Commands != nil {
 			if c.Dir != "" {
-				cfg.Commands.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+				cfg.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, c.Dir) + ": "))
 			}
-			cfg.Commands.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
+			cfg.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
 		}
 	}
 	c.Stdin = cfg.Stdin
@@ -91,9 +92,9 @@ func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error
 		}
 		if cmds != nil {
 			if c.Dir != "" {
-				cmds.Write([]byte(grog.InfoColor(c.Dir) + ": "))
+				cmds.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, c.Dir) + ": "))
 			}
-			cmds.Write([]byte(grog.InfoColor(cmd + " " + strings.Join(args, " ") + "\n")))
+			cmds.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
 		}
 
 		if sout != nil {
