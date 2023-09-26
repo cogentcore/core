@@ -14,6 +14,8 @@ import (
 	"strings"
 	"text/template"
 
+	"log/slog"
+
 	"goki.dev/gengo"
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -174,9 +176,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				for in, ic := range cfg.InterfaceConfigs {
 					iface := g.Interfaces.ValByKey(in)
 					if iface == nil {
-						if grease.Verbose {
-							fmt.Printf("warning: missing interface object for interface %q\n", in)
-						}
+						slog.Info("missing interface object", "interface", in)
 						return true, nil
 					}
 					if !types.Implements(typ, iface) && !types.Implements(types.NewPointer(typ), iface) { // either base type or pointer can implement
