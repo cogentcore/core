@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"os"
 
-	"goki.dev/colors"
 	"goki.dev/grog"
 )
 
@@ -45,13 +44,13 @@ func Run[T any, C CmdOrFunc[T]](opts *Options, cfg T, cmds ...C) error {
 	err = RunCmd(opts, cfg, cmd, cs...)
 	if err != nil {
 		if opts.Fatal {
-			fmt.Println(grog.ApplyColor(colors.Scheme.Primary.Base, cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
+			fmt.Println(grog.CmdColor(cmdString(opts, cmd)) + grog.ErrorColor(" failed: "+err.Error()))
 			os.Exit(1)
 		}
 		return fmt.Errorf("%s failed: %w", opts.AppName+" "+cmd, err)
 	}
 	if opts.PrintSuccess {
-		fmt.Println(grog.ApplyColor(colors.Scheme.Primary.Base, cmdString(opts, cmd)) + grog.ApplyColor(colors.Scheme.Success.Base, " succeeded"))
+		fmt.Println(grog.CmdColor(cmdString(opts, cmd)) + grog.SuccessColor(" succeeded"))
 	}
 	return nil
 }
