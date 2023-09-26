@@ -56,10 +56,11 @@ func DebugColor(str string) string {
 }
 
 // InfoColor applies the color associated with the info level to
-// the given string and returns the resulting string. If [UseColor] is set
-// to false, it just returns the string it was passed.
+// the given string and returns the resulting string. Because the
+// color associated with the info level is just white/black, it just
+// returns the given string, but it exists for API consistency.
 func InfoColor(str string) string {
-	return ApplyColor(colors.Scheme.Primary.Base, str)
+	return str
 }
 
 // WarnColor applies the color associated with the warn level to
