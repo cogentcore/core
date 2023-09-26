@@ -28,6 +28,9 @@ type Scheme struct {
 	// Warn is the color applied to elements that indicate a warning
 	Warn Accent `desc:"Warn is the color applied to elements that indicate a warning"`
 
+	// an optional map of custom accent colors
+	Custom map[string]Accent `desc:"an optional map of custom accent colors"`
+
 	// SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)
 	SurfaceDim color.RGBA `desc:"SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)"`
 
@@ -131,13 +134,14 @@ type Scheme struct {
 // NewLightScheme returns a new light-themed [Scheme]
 // based on the given [Palette].
 func NewLightScheme(p *Palette) Scheme {
-	return Scheme{
+	s := Scheme{
 		Primary:   NewAccentLight(p.Primary),
 		Secondary: NewAccentLight(p.Secondary),
 		Tertiary:  NewAccentLight(p.Tertiary),
 		Error:     NewAccentLight(p.Error),
 		Success:   NewAccentLight(p.Success),
 		Warn:      NewAccentLight(p.Warn),
+		Custom:    map[string]Accent{},
 
 		SurfaceDim:    p.Neutral.Tone(87),
 		Surface:       p.Neutral.Tone(98),
@@ -167,19 +171,24 @@ func NewLightScheme(p *Palette) Scheme {
 		SurfaceTint: p.Primary.Tone(40),
 		Scrim:       p.Neutral.Tone(0),
 	}
-	// TODO: custom and fixed colors
+	for nm, c := range p.Custom {
+		s.Custom[nm] = NewAccentLight(c)
+	}
+	return s
+	// TODO: maybe fixed colors
 }
 
 // NewDarkScheme returns a new dark-themed [Scheme]
 // based on the given [Palette].
 func NewDarkScheme(p *Palette) Scheme {
-	return Scheme{
+	s := Scheme{
 		Primary:   NewAccentDark(p.Primary),
 		Secondary: NewAccentDark(p.Secondary),
 		Tertiary:  NewAccentDark(p.Tertiary),
 		Error:     NewAccentDark(p.Error),
 		Success:   NewAccentDark(p.Success),
 		Warn:      NewAccentDark(p.Warn),
+		Custom:    map[string]Accent{},
 
 		SurfaceDim:    p.Neutral.Tone(6),
 		Surface:       p.Neutral.Tone(6),
@@ -209,5 +218,9 @@ func NewDarkScheme(p *Palette) Scheme {
 		SurfaceTint: p.Primary.Tone(80),
 		Scrim:       p.Neutral.Tone(0),
 	}
+	for nm, c := range p.Custom {
+		s.Custom[nm] = NewAccentDark(c)
+	}
+	return s
 	// TODO: custom and fixed colors
 }
