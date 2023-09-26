@@ -43,3 +43,13 @@ func (t *Tones) Tone(tone int) color.RGBA {
 	t.Tones[tone] = r
 	return r
 }
+
+// RelTone returns the color at the given tone, relative to the "0" tone
+// for the current color scheme (0 for light-themed schemes and 100 for
+// dark-themed schemes).
+func (t *Tones) RelTone(tone int) color.RGBA {
+	if SchemeIsDark {
+		return t.Tone(100 - tone)
+	}
+	return t.Tone(tone)
+}

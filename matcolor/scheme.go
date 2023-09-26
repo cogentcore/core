@@ -224,3 +224,9 @@ func NewDarkScheme(p *Palette) Scheme {
 	return s
 	// TODO: custom and fixed colors
 }
+
+// SchemeIsDark is whether the currently active color scheme
+// is a dark-themed or light-themed color scheme. In almost
+// all cases, it should be set via [goki.dev/colors.SetScheme],
+// not directly.
+var SchemeIsDark = false

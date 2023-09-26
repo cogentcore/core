@@ -32,16 +32,12 @@ var Schemes = matcolor.NewSchemes(Palette)
 // see [SetScheme].
 var Scheme = &Schemes.Light
 
-// SchemeIsDark is whether [Scheme] is a dark-themed or light-themed
-// color scheme. In almost all cases, it should be set via [SetScheme],
-// not directly.
-var SchemeIsDark = false
-
 // SetScheme sets the value of [Scheme] to either [Schemes.Dark]
 // or [Schemes.Light], based on the given value of whether the
-// color scheme should be dark.
+// color scheme should be dark. It also sets the value of
+// [matcolor.SchemeIsDark].
 func SetScheme(isDark bool) {
-	SchemeIsDark = isDark
+	matcolor.SchemeIsDark = isDark
 	if isDark {
 		Scheme = &Schemes.Dark
 	} else {
