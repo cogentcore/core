@@ -18,7 +18,7 @@ import (
 	"sync"
 
 	"github.com/muesli/termenv"
-	"goki.dev/matcolor"
+	"goki.dev/colors"
 )
 
 // Handler is a [slog.Handler] whose output resembles that of [log.Logger].
@@ -49,11 +49,7 @@ func SetDefaultLogger() {
 		}
 		_ = restoreConsole // TODO: figure out how to call this at the end of the program
 		colorProfile = termenv.ColorProfile()
-		if termenv.HasDarkBackground() {
-			matcolor.TheScheme = &matcolor.TheSchemes.Dark
-		} else {
-			matcolor.TheScheme = &matcolor.TheSchemes.Light
-		}
+		colors.SetScheme(termenv.HasDarkBackground())
 	}
 }
 

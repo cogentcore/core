@@ -9,7 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/muesli/termenv"
-	"goki.dev/matcolor"
+	"goki.dev/colors"
 )
 
 // UseColor is whether to use color in log messages.
@@ -37,13 +37,13 @@ func LevelColor(level slog.Level, str string) string {
 	var clr color.RGBA
 	switch level {
 	case slog.LevelDebug:
-		clr = matcolor.TheScheme.Tertiary
+		return DebugColor(str)
 	case slog.LevelInfo:
-		clr = matcolor.TheScheme.Primary
+		return InfoColor(str)
 	case slog.LevelWarn:
-		clr = matcolor.TheScheme.Secondary
+		return WarnColor(str)
 	case slog.LevelError:
-		clr = matcolor.TheScheme.Error
+		return ErrorColor(str)
 	}
 	return ApplyColor(clr, str)
 }
@@ -52,26 +52,26 @@ func LevelColor(level slog.Level, str string) string {
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func DebugColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Tertiary, str)
+	return ApplyColor(colors.Scheme.Tertiary.Base, str)
 }
 
 // InfoColor applies the color associated with the info level to
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func InfoColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Primary, str)
+	return ApplyColor(colors.Scheme.Primary.Base, str)
 }
 
 // WarnColor applies the color associated with the warn level to
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func WarnColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Secondary, str)
+	return ApplyColor(colors.Scheme.Warn.Base, str)
 }
 
 // ErrorColor applies the color associated with the error level to
 // the given string and returns the resulting string. If [UseColor] is set
 // to false, it just returns the string it was passed.
 func ErrorColor(str string) string {
-	return ApplyColor(matcolor.TheScheme.Error, str)
+	return ApplyColor(colors.Scheme.Error.Base, str)
 }

@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"goki.dev/colors"
-	"goki.dev/matcolor"
 
 	"github.com/muesli/termenv"
 )
@@ -20,16 +19,10 @@ func main() {
 	}
 	defer restoreConsole()
 
-	matcolor.TheSchemes = matcolor.NewSchemes(matcolor.NewPalette(matcolor.KeyFromPrimary(colors.MustFromHex("#4285F4"))))
-
 	p := termenv.ColorProfile()
-	if termenv.HasDarkBackground() {
-		matcolor.TheScheme = &matcolor.TheSchemes.Dark
-	} else {
-		matcolor.TheScheme = &matcolor.TheSchemes.Light
-	}
+	colors.SetScheme(termenv.HasDarkBackground())
 
-	fmt.Println(termenv.String("Primary").Foreground(p.FromColor(matcolor.TheScheme.Primary)))
-	fmt.Println(termenv.String("Secondary").Foreground(p.FromColor(matcolor.TheScheme.Secondary)))
-	fmt.Println(termenv.String("Tertiary").Foreground(p.FromColor(matcolor.TheScheme.Tertiary)))
+	fmt.Println(termenv.String("Primary").Foreground(p.FromColor(colors.Scheme.Primary.Base)))
+	fmt.Println(termenv.String("Secondary").Foreground(p.FromColor(colors.Scheme.Secondary.Base)))
+	fmt.Println(termenv.String("Tertiary").Foreground(p.FromColor(colors.Scheme.Tertiary.Base)))
 }
