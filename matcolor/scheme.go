@@ -122,9 +122,6 @@ type Scheme struct {
 	// OnTertiaryFixedVariant color.RGBA `desc:"OnTertiaryFixedVariant is the color applied to low-emphasis content on top of TertiaryFixed"`
 }
 
-// TheScheme is the currently active global color scheme.
-var TheScheme *Scheme
-
 // NewLightScheme returns a new light-themed [Scheme]
 // based on the given [Palette].
 func NewLightScheme(p *Palette) Scheme {
