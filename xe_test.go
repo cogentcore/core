@@ -5,14 +5,14 @@
 package xe
 
 import (
+	"log/slog"
 	"testing"
 
 	"goki.dev/grog"
 )
 
 func TestRun(t *testing.T) {
-	grog.UserLevel = grog.Warn
-	grog.SetDefaultLogger()
+	grog.UserLevel = slog.LevelWarn
 	m := Main()
 	err := RunSh(m, "go version")
 	if err != nil {

@@ -8,6 +8,8 @@ import (
 	"io"
 	"os"
 
+	"log/slog"
+
 	"goki.dev/grog"
 )
 
@@ -51,7 +53,7 @@ type Config struct {
 // Main returns the default [Config] object for a main command,
 // based on [grog.UserLevel].
 func Main() *Config {
-	if grog.UserLevel > grog.Info {
+	if grog.UserLevel > slog.LevelInfo {
 		return &Config{
 			Buffer: true,
 			Env:    map[string]string{},
@@ -74,7 +76,7 @@ func Main() *Config {
 // Minor returns the default [Config] object for a minor command,
 // based on [grog.UserLevel].
 func Minor() *Config {
-	if grog.UserLevel > grog.Debug {
+	if grog.UserLevel > slog.LevelDebug {
 		return &Config{
 			Buffer: true,
 			Env:    map[string]string{},
