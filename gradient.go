@@ -204,20 +204,14 @@ func (g *GradientStop) Rasterx() rasterx.GradStop {
 	}
 }
 
-// RenderColor gets the color for rendering, applying opacity and bounds for
-// gradients
+// RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
+// the given opacity and bounds.
 func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
-	if g.Source == Solid || g.Gradient == nil {
-		return rasterx.ApplyOpacity(g.Color, float64(opacity))
-	} else {
-		if g.Source == RadialGradient {
-			g.Gradient.IsRadial = true
-		} else {
-			g.Gradient.IsRadial = false
-		}
-		SetGradientBounds(g.Gradient, bounds)
-		return g.Gradient.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
-	}
+	box := mat32.Box2{}
+	box.SetFromRect(bounds)
+	g.SetBounds(box)
+	r := g.Rasterx()
+	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
 }
 
 // SetIFace sets the color spec from given interface value, e.g., for map[string]any

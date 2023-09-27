@@ -5,7 +5,11 @@
 package colors
 
 import (
+	"image"
 	"image/color"
+
+	"github.com/srwiley/rasterx"
+	"goki.dev/mat32/v2"
 )
 
 // Full represents a fully specified color that can either be a solid color or
@@ -51,4 +55,13 @@ func (f *Full) SetColor(clr color.Color) {
 func (f *Full) SetName(name string) {
 	f.Solid = LogFromName(name)
 	f.Gradient = nil
+}
+
+// RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
+// the given opacity and bounds.
+func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
+	if f.Gradient == nil {
+		return rasterx.ApplyOpacity(f.Solid, float64(opacity))
+	}
+	return f.Gradient.RenderColor(opacity, bounds, xform)
 }
