@@ -10,7 +10,11 @@ import (
 )
 
 // Print is equivalent to [fmt.Print], but with color based on the given level.
+// Also, if [UserLevel] is above the given level, it does not print anything.
 func Print(level slog.Level, a ...any) (n int, err error) {
+	if UserLevel > level {
+		return 0, nil
+	}
 	return fmt.Print(LevelColor(level, fmt.Sprint(a...)))
 }
 
@@ -35,7 +39,11 @@ func PrintError(a ...any) (n int, err error) {
 }
 
 // Println is equivalent to [fmt.Println], but with color based on the given level.
+// Also, if [UserLevel] is above the given level, it does not print anything.
 func Println(level slog.Level, a ...any) (n int, err error) {
+	if UserLevel > level {
+		return 0, nil
+	}
 	return fmt.Println(LevelColor(level, fmt.Sprint(a...)))
 }
 
@@ -60,7 +68,11 @@ func PrintlnError(a ...any) (n int, err error) {
 }
 
 // Printf is equivalent to [fmt.Printf], but with color based on the given level.
+// Also, if [UserLevel] is above the given level, it does not print anything.
 func Printf(level slog.Level, format string, a ...any) (n int, err error) {
+	if UserLevel > level {
+		return 0, nil
+	}
 	return fmt.Println(LevelColor(level, fmt.Sprintf(format, a...)))
 }
 
