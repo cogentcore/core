@@ -84,8 +84,11 @@ func (ev *Event) OnFocus() bool {
 }
 
 func (ev Event) IsSame(oth goosi.Event) bool {
+	if ev.Typ != oth.Type() {
+		return false
+	}
 	oact := oth.(*Event).Action
-	return ev.Typ == oth.Type() && ev.Action == oact
+	return ev.Action == oact
 }
 
 // check for interface implementation

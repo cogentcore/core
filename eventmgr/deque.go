@@ -94,7 +94,13 @@ func (q *Deque) Send(ev goosi.Event) {
 		lev := q.Back[n-1]
 		if ev.IsSame(lev) {
 			q.Back[n-1] = ev // replace
-			if ev.Type() == goosi.MouseScrollEvent {
+			switch ev.Type() {
+			case goosi.MouseMoveEvent, goosi.MouseDragEvent:
+				me := ev.(*mouse.Event)
+				le := lev.(*mouse.Event)
+				me.Prev = le.Prev
+				me.PrvTime = le.PrvTime
+			case goosi.MouseScrollEvent:
 				me := ev.(*mouse.ScrollEvent)
 				le := lev.(*mouse.ScrollEvent)
 				me.Delta = me.Delta.Add(le.Delta)

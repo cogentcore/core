@@ -94,8 +94,11 @@ func (ev *Event) OnFocus() bool {
 
 // note: not relevant b/c always unique!
 func (ev Event) IsSame(oth goosi.Event) bool {
+	if ev.Typ != oth.Type() {
+		return false
+	}
 	oact := oth.(*Event).Action
-	return ev.Typ == oth.Type() && ev.Action == oact
+	return ev.Action == oact
 }
 
 func (ev *Event) String() string {

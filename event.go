@@ -61,11 +61,12 @@ const (
 
 	// MouseMoveEvent is when the mouse is moving but no button is down.
 	// Typically these are ignored except to determine hover conditions,
-	// and mouse Focus events.
+	// and mouse Focus events.  Not unique and Prev is updated during compression.
 	MouseMoveEvent
 
 	// MouseDragEvent is when the mouse is moving and there is a button down.
 	// The start pos indicates where (and when) button first was pressed.
+	// Not unique and Prev is updated during compression.
 	MouseDragEvent
 
 	// MouseScrollEvent is for mouse scroll wheel events.
