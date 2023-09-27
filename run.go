@@ -52,33 +52,33 @@ func Args(cfg *Config, str string) []string {
 //	var goInstall = sh.RunCmd("go", "install") goInstall("github.com/gohugo/hugo")
 //
 // RunCmd uses Exec underneath, so see those docs for more details.
-func RunCmd(cfg *Config, cmd string, args ...string) func(args ...string) error {
+func (c *Config) RunCmd(cmd string, args ...string) func(args ...string) error {
 	return func(args2 ...string) error {
-		return Run(cfg, cmd, append(args, args2...)...)
+		return c.Run(cmd, append(args, args2...)...)
 	}
 }
 
 // OutCmd is like RunCmd except the command returns the output of the
 // command.
-func OutCmd(cfg *Config, cmd string, args ...string) func(args ...string) (string, error) {
+func (c *Config) OutCmd(cmd string, args ...string) func(args ...string) (string, error) {
 	return func(args2 ...string) (string, error) {
-		return Output(cfg, cmd, append(args, args2...)...)
+		return c.Output(cmd, append(args, args2...)...)
 	}
 }
 
 // RunSh runs given full command string with args formatted
 // as in a standard shell command
-func RunSh(cfg *Config, cstr string) error {
+func (c *Config) RunSh(cstr string) error {
 	args, err := shellwords.Parse(cstr)
 	if err != nil {
 		return err
 	}
 	if len(args) == 0 {
 		err := fmt.Errorf("command %q was not parsed correctly into content", cstr)
-		if cfg.Errors != nil {
-			cfg.Errors.Write([]byte(grog.ErrorColor(err.Error())))
+		if c.Errors != nil {
+			c.Errors.Write([]byte(grog.ErrorColor(err.Error())))
 		}
-		if cfg.Fatal {
+		if c.Fatal {
 			os.Exit(1)
 		}
 		return err
@@ -88,25 +88,25 @@ func RunSh(cfg *Config, cstr string) error {
 	if len(args) > 1 {
 		rmdr = args[1:]
 	}
-	return Run(cfg, cmd, rmdr...)
+	return c.Run(cmd, rmdr...)
 }
 
 // Run runs the given command using the given configuration information and arguments.
-func Run(cfg *Config, cmd string, args ...string) error {
-	_, err := Exec(cfg, cmd, args...)
+func (c *Config) Run(cmd string, args ...string) error {
+	_, err := c.Exec(cmd, args...)
 	return err
 }
 
 // Output runs the command and returns the text from stdout.
-func Output(cfg *Config, cmd string, args ...string) (string, error) {
-	oldStdout := cfg.Stdout
+func (c *Config) Output(cmd string, args ...string) (string, error) {
+	oldStdout := c.Stdout
 	// need to use buf to capture output
 	buf := &bytes.Buffer{}
-	cfg.Stdout = buf
-	_, err := Exec(cfg, cmd, args...)
-	cfg.Stdout = oldStdout
-	if cfg.Stdout != nil {
-		cfg.Stdout.Write(buf.Bytes())
+	c.Stdout = buf
+	_, err := c.Exec(cmd, args...)
+	c.Stdout = oldStdout
+	if c.Stdout != nil {
+		c.Stdout.Write(buf.Bytes())
 	}
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }

@@ -19,20 +19,18 @@ import (
 	"goki.dev/grog"
 )
 
-// Exec executes the command, piping its stdout and stderr to the given
+// Exec executes the command, piping its stdout and stderr to the config
 // writers. If the command fails, it will return an error with the command output.
-// Env is a list of environment variables to set when running the command,
-// which override the current environment variables set
-// (which are also passed to the command). cmd and args may include references
+// The given cmd and args may include references
 // to environment variables in $FOO format, in which case these will be
 // expanded before the command is run.
 //
 // Ran reports if the command ran (rather than was not found or not executable).
 // Code reports the exit code the command returned if it ran. If err == nil, ran
 // is always true and code is always 0.
-func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
+func (c *Config) Exec(cmd string, args ...string) (ran bool, err error) {
 	expand := func(s string) string {
-		s2, ok := cfg.Env[s]
+		s2, ok := c.Env[s]
 		if ok {
 			return s2
 		}
@@ -42,7 +40,7 @@ func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
 	for i := range args {
 		args[i] = os.Expand(args[i], expand)
 	}
-	ran, code, err := run(cfg, cmd, args...)
+	ran, code, err := c.run(cmd, args...)
 	_ = code
 	if err == nil {
 		return true, nil
@@ -50,59 +48,45 @@ func Exec(cfg *Config, cmd string, args ...string) (ran bool, err error) {
 	return ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
 }
 
-func run(cfg *Config, cmd string, args ...string) (ran bool, code int, err error) {
-	c := exec.Command(cmd, args...)
-	c.Env = os.Environ()
-	for k, v := range cfg.Env {
-		c.Env = append(c.Env, k+"="+v)
+func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error) {
+	cm := exec.Command(cmd, args...)
+	cm.Env = os.Environ()
+	for k, v := range c.Env {
+		cm.Env = append(cm.Env, k+"="+v)
 	}
 	// need to store in buffer so we can color and print commands and stdout correctly
 	// (need to declare regardless even if we aren't using so that it is accessible)
 	ebuf := &bytes.Buffer{}
 	obuf := &bytes.Buffer{}
-	if cfg.Buffer {
-		c.Stderr = ebuf
-		c.Stdout = obuf
+	if c.Buffer {
+		cm.Stderr = ebuf
+		cm.Stdout = obuf
 	} else {
-		c.Stderr = cfg.Stderr
-		c.Stdout = cfg.Stdout
+		cm.Stderr = c.Stderr
+		cm.Stdout = c.Stdout
 		// need to do now because we aren't buffering
-		if cfg.Commands != nil {
-			if c.Dir != "" {
-				cfg.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, c.Dir) + ": "))
+		if c.Commands != nil {
+			if cm.Dir != "" {
+				c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, cm.Dir) + ": "))
 			}
-			cfg.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
+			c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
 		}
 	}
-	c.Stdin = cfg.Stdin
-	c.Dir = cfg.Dir
+	cm.Stdin = c.Stdin
+	cm.Dir = c.Dir
 
-	if !cfg.PrintOnly {
-		err = c.Run()
+	if !c.PrintOnly {
+		err = cm.Run()
 	}
 
-	if cfg.Buffer {
+	if c.Buffer {
 		// if we have an error, we print the commands and stdout regardless of the config info
-		sout := cfg.Stdout
-		if sout == nil && err != nil {
-			sout = cfg.Stderr
-		}
-
-		cmds := cfg.Commands
-		if cmds == nil && err != nil {
-			cmds = sout
-		}
-		if cmds != nil {
-			if c.Dir != "" {
-				cmds.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, c.Dir) + ": "))
-			}
-			cmds.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
-		}
-
+		c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
+		sout := c.GetWriter(c.Stdout, err)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
 		}
-		cfg.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
+		c.Stderr.Write([]byte(grog.ErrorColor(ebuf.String())))
 	}
 	return CmdRan(err), ExitStatus(err), err
 }

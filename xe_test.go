@@ -13,20 +13,12 @@ import (
 
 func TestRun(t *testing.T) {
 	grog.UserLevel = slog.LevelWarn
-	m := Major()
-	err := RunSh(m, "go version")
-	if err != nil {
-		t.Error(err)
-	}
-	err = RunSh(m, "git version")
-	if err != nil {
-		t.Error(err)
-	}
-	err = RunSh(m, "echo hello")
-	if err != nil {
-		t.Error(err)
-	}
-	err = RunSh(m, "go bild")
+	xc := Major().SetFatal(true)
+	xc.RunSh("go version")
+	xc.RunSh("git version")
+	xc.RunSh("echo hello")
+
+	err := Major().RunSh("go bild")
 	if err == nil { // we want it to fail
 		t.Error("expected error but got none")
 	}

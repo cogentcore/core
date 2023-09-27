@@ -37,6 +37,9 @@ type Config struct {
 	// commands are run in the current directory.
 	Dir string
 	// Env contains any additional environment variables specified.
+	// The current environment variables will also be passed to the
+	// command, but they will be overridden by any variables here
+	// if there are conflicts.
 	Env map[string]string
 
 	// Stdout is the writer to write the standard output of called commands to.
@@ -129,6 +132,9 @@ func (c *Config) GetWriter(w io.Writer, err error) io.Writer {
 func (c *Config) PrintCmd(cmd string, err error) {
 	cmds := c.GetWriter(c.Commands, err)
 	if cmds != nil {
+		if c.Dir != "" {
+			cmds.Write([]byte(grog.SuccessColor(c.Dir) + ": "))
+		}
 		cmds.Write([]byte(grog.CmdColor(cmd) + "\n"))
 	}
 }
