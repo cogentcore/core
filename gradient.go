@@ -85,6 +85,27 @@ const (
 	UserSpaceOnUse
 )
 
+// LinearGradient returns a new linear gradient
+func LinearGradient() *Gradient {
+	return &Gradient{
+		Spread: PadSpread,
+		Matrix: mat32.Identity2D(),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
+	}
+}
+
+// RadialGradient returns a new radial gradient
+func RadialGradient() *Gradient {
+	return &Gradient{
+		Radial: true,
+		Spread: PadSpread,
+		Matrix: mat32.Identity2D(),
+		Center: mat32.Vec2{0.5, 0.5},
+		Focal:  mat32.Vec2{0.5, 0.5},
+		Radius: 0.5,
+	}
+}
+
 func (g *Gradient) SetRadial() *Gradient {
 	g.Radial = true
 	return g
@@ -155,27 +176,6 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 		g.Stops = make([]GradientStop, len(cp.Stops))
 	}
 	copy(g.Stops, cp.Stops)
-}
-
-// LinearGradient returns a new linear gradient
-func LinearGradient() *Gradient {
-	return &Gradient{
-		Spread: PadSpread,
-		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
-	}
-}
-
-// RadialGradient returns a new radial gradient
-func RadialGradient() *Gradient {
-	return &Gradient{
-		Radial: true,
-		Spread: PadSpread,
-		Matrix: mat32.Identity2D(),
-		Center: mat32.Vec2{},
-		Focal:  mat32.Vec2{},
-		Radius: 1,
-	}
 }
 
 // SetGradientPoints sets the bounds of the gradient based on the given bounding

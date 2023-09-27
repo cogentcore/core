@@ -65,8 +65,7 @@ func (f *Full) SetString(str string, base color.Color) bool {
 		}
 		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", str)
 		f.Gradient = nil
-		f.Source = SolidColor
-		f.Color = colors.Black
+		f.Solid = Black
 		return false
 	}
 	str = strings.ToLower(str)
@@ -87,26 +86,22 @@ func (f *Full) SetString(str string, base color.Color) bool {
 			f.Gradient = LinearGradient().SetSpread(RepeatSpread)
 			f.parseLinearGrad(pars)
 		case "linear":
-			f.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
-			f.Source = LinearGradient
+			f.Gradient = LinearGradient()
 			f.parseLinearGrad(pars)
 		case "repeating-radial":
-			f.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.RepeatSpread}
-			f.Source = RadialGradient
+			f.Gradient = RadialGradient().SetSpread(RepeatSpread)
 			f.parseRadialGrad(pars)
 		case "radial":
-			f.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}, IsRadial: true, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
-			f.Source = RadialGradient
+			f.Gradient = RadialGradient()
 			f.parseRadialGrad(pars)
 		}
 		FixGradientStops(f.Gradient)
-		svcs := &ColorSpec{} // critical to save a copy..
+		svcs := &Full{} // critical to save a copy..
 		svcs.CopyFrom(f)
 		FullCache[fullnm] = svcs
 	} else {
 		f.Gradient = nil
-		f.Source = SolidColor
-		f.Color = colors.LogFromString(str, nil)
+		f.Solid = colors.LogFromString(str, nil)
 	}
 	return true
 }
@@ -131,9 +126,9 @@ var GradientDegToSides = map[string]string{
 	"-45deg":  "top left",
 }
 
-func (cs *ColorSpec) parseLinearGrad(pars string) bool {
+func (f *Full) parseLinearGrad(pars string) bool {
 	plist := strings.Split(pars, ", ")
-	var prevColor color.Color
+	var prevColor color.RGBA
 	stopIdx := 0
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
@@ -150,50 +145,50 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 			fallthrough
 		case strings.HasPrefix(par, "to "):
 			sides := strings.Split(par[3:], " ")
-			cs.Gradient.Points = [5]float64{0, 0, 0, 0, 0}
+			f.Gradient.Bounds = mat32.Box2{}
 			for _, side := range sides {
 				switch side {
 				case "bottom":
-					cs.Gradient.Points[GpY1] = 0
-					cs.Gradient.Points[GpY2] = 1
+					f.Gradient.Bounds.Min.Y = 0
+					f.Gradient.Bounds.Max.Y = 1
 				case "top":
-					cs.Gradient.Points[GpY1] = 1
-					cs.Gradient.Points[GpY2] = 0
+					f.Gradient.Bounds.Min.Y = 1
+					f.Gradient.Bounds.Max.Y = 0
 				case "right":
-					cs.Gradient.Points[GpX1] = 0
-					cs.Gradient.Points[GpX2] = 1
+					f.Gradient.Bounds.Min.X = 0
+					f.Gradient.Bounds.Max.X = 1
 				case "left":
-					cs.Gradient.Points[GpX1] = 1
-					cs.Gradient.Points[GpX2] = 0
+					f.Gradient.Bounds.Min.X = 1
+					f.Gradient.Bounds.Max.X = 0
 				}
 			}
 		case strings.HasPrefix(par, ")"):
 			break
 		default: // must be a color stop
-			var stop *rasterx.GradStop
-			if len(cs.Gradient.Stops) > stopIdx {
-				stop = &(cs.Gradient.Stops[stopIdx])
+			var stop *GradientStop
+			if len(f.Gradient.Stops) > stopIdx {
+				stop = &(f.Gradient.Stops[stopIdx])
 			} else {
-				stop = &rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
+				stop = &GradientStop{Opacity: 1.0, Color: Black}
 			}
 			if stopIdx == 0 {
-				prevColor = cs.Color // base color
+				prevColor = f.Solid // base color
 				// fmt.Printf("starting prev color: %v\n", prevColor)
 			}
 			if parseColorStop(stop, prevColor, par) {
-				if len(cs.Gradient.Stops) <= stopIdx {
-					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
+				if len(f.Gradient.Stops) <= stopIdx {
+					f.Gradient.Stops = append(f.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					cs.Color = colors.AsRGBA(stop.StopColor) // keep first one
+					f.Solid = colors.AsRGBA(stop.Color) // keep first one
 				}
-				prevColor = stop.StopColor
+				prevColor = stop.Color
 				stopIdx++
 			}
 		}
 	}
-	if len(cs.Gradient.Stops) > stopIdx {
-		cs.Gradient.Stops = cs.Gradient.Stops[:stopIdx]
+	if len(f.Gradient.Stops) > stopIdx {
+		f.Gradient.Stops = f.Gradient.Stops[:stopIdx]
 	}
 	return true
 }
@@ -201,65 +196,71 @@ func (cs *ColorSpec) parseLinearGrad(pars string) bool {
 // todo: this is complex:
 // https://www.w3.org/TR/css3-images/#radial-gradients
 
-func (cs *ColorSpec) parseRadialGrad(pars string) bool {
+func (f *Full) parseRadialGrad(pars string) bool {
 	plist := strings.Split(pars, ", ")
-	var prevColor color.Color
+	var prevColor color.RGBA
 	stopIdx := 0
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		// origPar := par
 		switch {
 		case strings.Contains(par, "circle"):
-			cs.Gradient.Points = [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}
+			f.Gradient.Center.SetScalar(0.5)
+			f.Gradient.Focal.SetScalar(0.5)
+			f.Gradient.Radius = 0.5
 		case strings.Contains(par, "ellipse"):
-			cs.Gradient.Points = [5]float64{0.5, 0.5, 0.5, 0.5, 0.5}
+			f.Gradient.Center.SetScalar(0.5)
+			f.Gradient.Focal.SetScalar(0.5)
+			f.Gradient.Radius = 0.5
 		case strings.HasPrefix(par, "at "):
 			sides := strings.Split(par[3:], " ")
-			cs.Gradient.Points = [5]float64{0, 0, 0, 0, 0}
+			f.Gradient.Center = mat32.Vec2{}
+			f.Gradient.Focal = mat32.Vec2{}
+			f.Gradient.Radius = 0
 			for _, side := range sides {
 				switch side {
 				case "bottom":
-					cs.Gradient.Points[GpY1] = 0
+					f.Gradient.Bounds.Min.Y = 0
 				case "top":
-					cs.Gradient.Points[GpY1] = 1
+					f.Gradient.Bounds.Min.Y = 1
 				case "right":
-					cs.Gradient.Points[GpX1] = 0
+					f.Gradient.Bounds.Min.X = 0
 				case "left":
-					cs.Gradient.Points[GpX1] = 1
+					f.Gradient.Bounds.Min.X = 1
 				}
 			}
 		case strings.HasPrefix(par, ")"):
 			break
 		default: // must be a color stop
-			var stop *rasterx.GradStop
-			if len(cs.Gradient.Stops) > stopIdx {
-				stop = &(cs.Gradient.Stops[stopIdx])
+			var stop *GradientStop
+			if len(f.Gradient.Stops) > stopIdx {
+				stop = &(f.Gradient.Stops[stopIdx])
 			} else {
-				stop = &rasterx.GradStop{Opacity: 1.0, StopColor: color.Black}
+				stop = &GradientStop{Opacity: 1.0, Color: Black}
 			}
 			if stopIdx == 0 {
-				prevColor = cs.Color // base color
+				prevColor = f.Solid // base color
 				// fmt.Printf("starting prev color: %v\n", prevColor)
 			}
 			if parseColorStop(stop, prevColor, par) {
-				if len(cs.Gradient.Stops) <= stopIdx {
-					cs.Gradient.Stops = append(cs.Gradient.Stops, *stop)
+				if len(f.Gradient.Stops) <= stopIdx {
+					f.Gradient.Stops = append(f.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					cs.Color = colors.AsRGBA(stop.StopColor) // keep first one
+					f.Solid = colors.AsRGBA(stop.Color) // keep first one
 				}
-				prevColor = stop.StopColor
+				prevColor = stop.Color
 				stopIdx++
 			}
 		}
 	}
-	if len(cs.Gradient.Stops) > stopIdx {
-		cs.Gradient.Stops = cs.Gradient.Stops[:stopIdx]
+	if len(f.Gradient.Stops) > stopIdx {
+		f.Gradient.Stops = f.Gradient.Stops[:stopIdx]
 	}
 	return true
 }
 
-func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) bool {
+func parseColorStop(stop *GradientStop, prevColor color.RGBA, par string) bool {
 	cnm := par
 	if spcidx := strings.Index(par, " "); spcidx > 0 {
 		cnm = par[:spcidx]
@@ -272,21 +273,21 @@ func parseColorStop(stop *rasterx.GradStop, prevColor color.Color, par string) b
 		stop.Offset = off
 	}
 	// color blending doesn't work well in pre-multiplied alpha RGB space!
-	if prevColor != nil && strings.HasPrefix(cnm, "clearer-") {
+	if IsNil(prevColor) && strings.HasPrefix(cnm, "clearer-") {
 		pcts := strings.TrimPrefix(cnm, "clearer-")
 		pct, _ := laser.ToFloat(pcts)
-		stop.Opacity = (100.0 - pct) / 100.0
-		stop.StopColor = prevColor
-	} else if prevColor != nil && cnm == "transparent" {
+		stop.Opacity = (100.0 - float32(pct)) / 100.0
+		stop.Color = prevColor
+	} else if IsNil(prevColor) && cnm == "transparent" {
 		stop.Opacity = 0
-		stop.StopColor = prevColor
+		stop.Color = prevColor
 	} else {
 		clr, err := colors.FromString(cnm, prevColor)
 		if err != nil {
 			log.Printf("gi.ColorSpec.Parse invalid color string: %v\n", err)
 			return false
 		}
-		stop.StopColor = clr
+		stop.Color = clr
 	}
 	// fmt.Printf("color: %v from: %v\n", stop.StopColor, par)
 	return true
@@ -467,22 +468,22 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 	return nil
 }
 
-func readFraction(v string) (f float64, err error) {
+func readFraction(v string) (f float32, err error) {
 	v = strings.TrimSpace(v)
 	d := 1.0
 	if strings.HasSuffix(v, "%") {
 		d = 100
 		v = strings.TrimSuffix(v, "%")
 	}
-	f, err = strconv.ParseFloat(v, 64)
-	f /= d
+	f64, err := strconv.ParseFloat(v, 64)
+	f64 /= d
 	// if f > 1 {
 	// 	f = 1
 	// } else
 	if f < 0 {
 		f = 0
 	}
-	return
+	return float32(f64), err
 }
 
 // func ReadGradUrl(v string) (grad *rasterx.Gradient, err error) {
