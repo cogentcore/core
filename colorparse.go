@@ -42,14 +42,14 @@ var FullCache map[string]*Full
 // SetString sets the color spec from a standard CSS-formatted string.
 // SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
 // See [Full.UnmarshalXML] for an XML-based version.
-func (f *Full) SetString(str string, ctx Context) bool {
+func (f *Full) SetString(str string, ctx Context) error {
 	if FullCache == nil {
 		FullCache = make(map[string]*Full)
 	}
 	fullnm := AsHex(f.Solid) + str
 	if ccg, ok := FullCache[fullnm]; ok {
 		f.CopyFrom(ccg)
-		return true
+		return nil
 	}
 
 	str = strings.TrimSpace(str)
@@ -59,13 +59,12 @@ func (f *Full) SetString(str string, ctx Context) bool {
 			full := ctx.FullByURL(str)
 			if full != nil {
 				*f = *full
-				return true
+				return nil
 			}
 		}
-		fmt.Printf("gi.Color Warning: Not able to find url: %v\n", str)
 		f.Gradient = nil
 		f.Solid = Black
-		return false
+		return fmt.Errorf("unable to find url %q", str)
 	}
 	str = strings.ToLower(str)
 	grad := "-gradient"
@@ -74,8 +73,7 @@ func (f *Full) SetString(str string, ctx Context) bool {
 		rmdr := str[gidx+len(grad):]
 		pidx := strings.IndexByte(rmdr, '(')
 		if pidx < 0 {
-			log.Printf("gi.ColorSpec.Parse gradient parameters not found\n")
-			return false
+			return fmt.Errorf("gradient specified but parameters not found in string %q", str)
 		}
 		pars := rmdr[pidx+1:]
 		pars = strings.TrimSuffix(pars, ");")
@@ -100,9 +98,13 @@ func (f *Full) SetString(str string, ctx Context) bool {
 		FullCache[fullnm] = svcs
 	} else {
 		f.Gradient = nil
-		f.Solid = LogFromString(str, nil)
+		s, err := FromString(str, nil)
+		if err != nil {
+			return err
+		}
+		f.Solid = s
 	}
-	return true
+	return nil
 }
 
 // GradientDegToSides maps gradient degree notation to side notation

@@ -52,9 +52,14 @@ func (f *Full) SetColor(clr color.Color) {
 
 // SetSolid sets the color to the solid color with the given name,
 // also setting the gradient to nil.
-func (f *Full) SetName(name string) {
-	f.Solid = LogFromName(name)
+func (f *Full) SetName(name string) error {
+	s, err := FromName(name)
+	if err != nil {
+		return err
+	}
+	f.Solid = s
 	f.Gradient = nil
+	return nil
 }
 
 // CopyFrom copies from the given full color, making new copies
