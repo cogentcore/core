@@ -42,7 +42,7 @@ var FullCache map[string]*Full
 // SetString sets the color spec from a standard CSS-formatted string.
 // SetString is based on https://www.w3schools.com/css/css3_gradients.asp.
 // See [Full.UnmarshalXML] for an XML-based version.
-func (f *Full) SetString(str string, base color.Color) bool {
+func (f *Full) SetString(str string, ctx Context) bool {
 	if FullCache == nil {
 		FullCache = make(map[string]*Full)
 	}
@@ -55,10 +55,10 @@ func (f *Full) SetString(str string, base color.Color) bool {
 	str = strings.TrimSpace(str)
 	// TODO: handle url values
 	if strings.HasPrefix(str, "url(") {
-		if ctxt != nil {
-			cspec := ctxt.ContextColorSpecByURL(str)
-			if cspec != nil {
-				*f = *cspec
+		if ctx != nil {
+			full := ctx.FullByURL(str)
+			if full != nil {
+				*f = *full
 				return true
 			}
 		}
