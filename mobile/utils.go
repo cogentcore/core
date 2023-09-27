@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -29,14 +28,12 @@ var (
 )
 
 func CopyFile(c *config.Config, dst, src string) error {
-	if c.Build.Print {
-		PrintCmd("cp %s %s", src, dst)
-	}
 	return WriteFile(c, dst, func(w io.Writer) error {
 		if c.Build.PrintOnly {
 			return nil
 		}
 		f, err := os.Open(src)
+		xe.PrintCmd(fmt.Sprintf("cp %s %s", src, dst), err)
 		if err != nil {
 			return err
 		}
@@ -52,7 +49,7 @@ func CopyFile(c *config.Config, dst, src string) error {
 func WriteFile(c *config.Config, filename string, generate func(io.Writer) error) error {
 	grog.PrintlnInfo("write", filename)
 
-	if err := Mkdir(c, filepath.Dir(filename)); err != nil {
+	if err := xe.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return err
 	}
 
@@ -87,16 +84,12 @@ func PackagesConfig(c *config.Config, t *config.Platform) *packages.Config {
 
 // GetModuleVersions returns a module information at the directory src.
 func GetModuleVersions(c *config.Config, targetPlatform string, targetArch string, src string) (*modfile.File, error) {
-	cmd := exec.Command("go", "list")
-	cmd.Env = append(os.Environ(), "GOOS="+PlatformOS(targetPlatform), "GOARCH="+targetArch)
+	xc := xe.Minor().SetDir(src).SetEnv("GOOS", PlatformOS(targetPlatform)).SetEnv("GOARCH", targetArch)
 
 	tags := append(c.Build.Tags[:], PlatformTags(targetPlatform)...)
 
 	// TODO(hyangah): probably we don't need to add all the dependencies.
-	cmd.Args = append(cmd.Args, "-m", "-json", "-tags="+strings.Join(tags, ","), "all")
-	cmd.Dir = src
-
-	output, err := cmd.Output()
+	output, err := xc.Output("go", "list", "-m", "-json", "-tags="+strings.Join(tags, ","), "all")
 	if err != nil {
 		// Module information is not available at src.
 		return nil, nil
@@ -112,7 +105,7 @@ func GetModuleVersions(c *config.Config, targetPlatform string, targetArch strin
 
 	f := &modfile.File{}
 	f.AddModuleStmt("gobind")
-	e := json.NewDecoder(bytes.NewReader(output))
+	e := json.NewDecoder(bytes.NewReader([]byte(output)))
 	for {
 		var mod *Module
 		err := e.Decode(&mod)
