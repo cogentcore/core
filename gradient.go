@@ -51,8 +51,8 @@ type Gradient struct {
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification
 type GradientStop struct {
 	Color   color.RGBA // the color of the stop
-	Offset  float32    // the offset (position) of the stop (0-1)
-	Opacity float32    // the opacity of the stop (0-1)
+	Offset  float32    // the offset (position) of the stop
+	Opacity float32    // the opacity of the stop
 }
 
 // SpreadMethods are the methods used when a gradient reaches
@@ -85,6 +85,56 @@ const (
 	UserSpaceOnUse
 )
 
+func (g *Gradient) SetRadial() *Gradient {
+	g.Radial = true
+	return g
+}
+
+func (g *Gradient) SetLinear() *Gradient {
+	g.Radial = false
+	return g
+}
+
+func (g *Gradient) SetBounds(bounds mat32.Box2) *Gradient {
+	g.Bounds = bounds
+	return g
+}
+
+func (g *Gradient) SetCenter(center mat32.Vec2) *Gradient {
+	g.Center = center
+	return g
+}
+
+func (g *Gradient) SetFocal(focal mat32.Vec2) *Gradient {
+	g.Focal = focal
+	return g
+}
+
+func (g *Gradient) SetRadius(radius float32) *Gradient {
+	g.Radius = radius
+	return g
+}
+
+func (g *Gradient) AddStop(color color.RGBA, offset, opacity float32) *Gradient {
+	g.Stops = append(g.Stops, GradientStop{Color: color, Offset: offset, Opacity: opacity})
+	return g
+}
+
+func (g *Gradient) SetMatrix(matrix mat32.Mat2) *Gradient {
+	g.Matrix = matrix
+	return g
+}
+
+func (g *Gradient) SetSpread(spread SpreadMethods) *Gradient {
+	g.Spread = spread
+	return g
+}
+
+func (g *Gradient) SetUnits(units GradientUnits) *Gradient {
+	g.Units = units
+	return g
+}
+
 // CopyFrom copies from the given gradient, making new copies
 // of the stops instead of re-using pointers
 func (g *Gradient) CopyFrom(cp *Gradient) {
@@ -112,7 +162,7 @@ func LinearGradient() *Gradient {
 	return &Gradient{
 		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{0, 1}),
 	}
 }
 
@@ -122,7 +172,9 @@ func RadialGradient() *Gradient {
 		Radial: true,
 		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
-		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
+		Center: mat32.Vec2{},
+		Focal:  mat32.Vec2{},
+		Radius: 1,
 	}
 }
 

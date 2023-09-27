@@ -84,8 +84,7 @@ func (f *Full) SetString(str string, base color.Color) bool {
 		pars = strings.TrimSuffix(pars, ")")
 		switch gtyp {
 		case "repeating-linear":
-			f.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.RepeatSpread}
-			f.Source = LinearGradient
+			f.Gradient = LinearGradient().SetSpread(RepeatSpread)
 			f.parseLinearGrad(pars)
 		case "linear":
 			f.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 0, 1, 0}, IsRadial: false, Matrix: rasterx.Identity, Spread: rasterx.PadSpread}
