@@ -183,6 +183,7 @@ func (g *Gradient) Rasterx() *rasterx.Gradient {
 	for i, stop := range g.Stops {
 		r.Stops[i] = stop.Rasterx()
 	}
+	return r
 }
 
 // MatToRasterx converts the given [mat32.Mat2] to a [rasterx.Matrix2D]
@@ -214,53 +215,32 @@ func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, xform ma
 	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
 }
 
-// ApplyXForm transforms the points for a UserSpaceOnUse gradient
+// ApplyXForm transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given xform matrix.
 func (g *Gradient) ApplyXForm(xf mat32.Mat2) {
-	if g.Gradient == nil {
+	if g.Units == ObjectBoundingBox {
 		return
 	}
-	if g.Gradient.Units == rasterx.ObjectBoundingBox {
-		return
-	}
-	mat := RasterxToMat(&g.Gradient.Matrix)
 	rot := xf.ExtractRot()
-	if g.Gradient.IsRadial || rot != 0 || !mat.IsIdentity() { // radial uses transform instead of points
-		mat = mat.Mul(xf)
-		g.Gradient.Matrix = MatToRasterx(&mat)
+	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+		g.Matrix = g.Matrix.Mul(xf)
 	} else {
-		p1 := mat32.Vec2{float32(g.Gradient.Points[0]), float32(g.Gradient.Points[1])}
-		p1 = xf.MulVec2AsPt(p1)
-		p2 := mat32.Vec2{float32(g.Gradient.Points[2]), float32(g.Gradient.Points[3])}
-		p2 = xf.MulVec2AsPt(p2)
-		g.Gradient.Points[0] = float64(p1.X)
-		g.Gradient.Points[1] = float64(p1.Y)
-		g.Gradient.Points[2] = float64(p2.X)
-		g.Gradient.Points[3] = float64(p2.Y)
+		g.Bounds.Min = xf.MulVec2AsPt(g.Bounds.Min)
+		g.Bounds.Max = xf.MulVec2AsPt(g.Bounds.Max)
 	}
 }
 
-// ApplyXFormPt transforms the points for a UserSpaceOnUse gradient
-// relative to a given center point
+// ApplyXFormPt transforms the points for the gradient if it has
+// [UserSpaceOnUse] units, using the given xform matrix and center point.
 func (g *Gradient) ApplyXFormPt(xf mat32.Mat2, pt mat32.Vec2) {
-	if g.Gradient == nil {
+	if g.Units == ObjectBoundingBox {
 		return
 	}
-	if g.Gradient.Units == rasterx.ObjectBoundingBox {
-		return
-	}
-	mat := RasterxToMat(&g.Gradient.Matrix)
 	rot := xf.ExtractRot()
-	if g.Gradient.IsRadial || rot != 0 || !mat.IsIdentity() { // radial uses transform instead of points
-		mat = mat.MulCtr(xf, pt)
-		g.Gradient.Matrix = MatToRasterx(&mat)
+	if g.Radial || rot != 0 || !g.Matrix.IsIdentity() { // radial uses transform instead of points
+		g.Matrix = g.Matrix.MulCtr(xf, pt)
 	} else {
-		p1 := mat32.Vec2{float32(g.Gradient.Points[0]), float32(g.Gradient.Points[1])}
-		p1 = xf.MulVec2AsPtCtr(p1, pt)
-		p2 := mat32.Vec2{float32(g.Gradient.Points[2]), float32(g.Gradient.Points[3])}
-		p2 = xf.MulVec2AsPtCtr(p2, pt)
-		g.Gradient.Points[0] = float64(p1.X)
-		g.Gradient.Points[1] = float64(p1.Y)
-		g.Gradient.Points[2] = float64(p2.X)
-		g.Gradient.Points[3] = float64(p2.Y)
+		g.Bounds.Min = xf.MulVec2AsPtCtr(g.Bounds.Min, pt)
+		g.Bounds.Max = xf.MulVec2AsPtCtr(g.Bounds.Max, pt)
 	}
 }
