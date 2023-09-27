@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
+	"goki.dev/glop/dirs"
 )
 
 //go:generate go run gen.go
@@ -49,6 +50,16 @@ func (i Icon) IsFilled() bool {
 // [None], or "nil"; those indicate not to use an icon.
 func (i Icon) IsNil() bool {
 	return i == "" || i == None || i == "nil"
+}
+
+// IsValid returns whether the icon name corresponds to
+// a valid existing icon.
+func (i Icon) IsValid() bool {
+	if i.IsNil() {
+		return false
+	}
+	ex, _ := dirs.FileExistsFS(Icons, string(i))
+	return ex
 }
 
 // None is an icon that indicates to not use an icon.
