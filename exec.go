@@ -48,6 +48,11 @@ func (c *Config) Exec(cmd string, args ...string) (ran bool, err error) {
 	return ran, fmt.Errorf(`failed to run "%s %s: %v"`, cmd, strings.Join(args, " "), err)
 }
 
+// Exec calls [Config.Exec] on [Major]
+func Exec(cmd string, args ...string) (ran bool, err error) {
+	return Major().Exec(cmd, args...)
+}
+
 func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error) {
 	cm := exec.Command(cmd, args...)
 	cm.Env = os.Environ()

@@ -110,3 +110,18 @@ func (c *Config) Output(cmd string, args ...string) (string, error) {
 	}
 	return strings.TrimSuffix(buf.String(), "\n"), err
 }
+
+// RunSh calls [Config.RunSh] on [Major]
+func RunSh(cstr string) error {
+	return Major().RunSh(cstr)
+}
+
+// Run calls [Config.Run] on [Major]
+func Run(cmd string, args ...string) error {
+	return Major().Run(cmd, args...)
+}
+
+// Output calls [Config.Output] on [Major]
+func Output(cmd string, args ...string) (string, error) {
+	return Major().Output(cmd, args...)
+}

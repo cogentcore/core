@@ -64,7 +64,9 @@ type Config struct {
 // to know about and be able to see the output of. It results in
 // commands and output being printed with a [grog.UserLevel] of
 // [slog.LevelInfo] or below, whereas [Minor] results in that when
-// it is [slog.LevelDebug] or below.
+// it is [slog.LevelDebug] or below. Most commands in a typical use
+// case should be Major, which is why the global helper functions
+// operate on it.
 func Major() *Config {
 	if grog.UserLevel <= slog.LevelInfo {
 		return &Config{
