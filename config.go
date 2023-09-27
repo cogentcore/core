@@ -110,6 +110,19 @@ func Minor() *Config {
 		Errors: os.Stderr,
 	}
 }
+
+// GetWriter takes a writer and an error and returns the appropriate writer to use.
+// If the given error is non-nil, the returned writer is guaranteed to be non-nil,
+// with [Config.Stderr] used as a backup. Otherwise, the returned writer will only
+// be non-nil if the passed one is.
+func (c *Config) GetWriter(w io.Writer, err error) io.Writer {
+	res := w
+	if res == nil && err != nil {
+		res = c.Stderr
+	}
+	return res
+}
+
 func (c *Config) SetBuffer(buffer bool) *Config {
 	c.Buffer = buffer
 	return c

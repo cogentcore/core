@@ -13,10 +13,7 @@ import (
 // after printing an equivalent command to [Config.Commands].
 func (c *Config) RemoveAll(path string) error {
 	err := os.RemoveAll(path)
-	cmds := c.Commands
-	if cmds == nil && err != nil {
-		cmds = c.Stderr
-	}
+	cmds := c.GetWriter(c.Commands, err)
 	if cmds != nil {
 		fmt.Fprintf(cmds, "rm -rf %q\n", path)
 	}
