@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"strings"
@@ -60,6 +61,16 @@ func (sv *SVG) OpenXML(fname string) error {
 		log.Println(err)
 		return err
 	}
+	return sv.ReadXML(bufio.NewReader(fp))
+}
+
+// OpenFS Opens XML-formatted SVG input from given file, filesystem FS
+func (sv *SVG) OpenFS(fsys fs.FS, fname string) error {
+	fp, err := fsys.Open(fname)
+	if err != nil {
+		return err
+	}
+	defer fp.Close()
 	return sv.ReadXML(bufio.NewReader(fp))
 }
 

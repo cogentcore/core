@@ -24,6 +24,8 @@ import (
 // corresponding to the svg tag in html.
 // It provides its own Pixels bitmap for drawing into.
 type SVG struct {
+	// Name is the name of the SVG -- e.g., the filename if loaded
+	Name string
 
 	// the title of the svg
 	Title string `xml:"title" desc:"the title of the svg"`
@@ -98,6 +100,10 @@ func (sv *SVG) Resize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
+	if sv.Root.Ths == nil {
+		sv.Config(nwsz.X, nwsz.Y)
+		return
+	}
 	if sv.Pixels != nil {
 		ib := sv.Pixels.Bounds().Size()
 		if ib == nwsz {
@@ -129,9 +135,11 @@ func (sv *SVG) CopyFrom(fr *SVG) {
 // DeleteAll deletes any existing elements in this svg
 func (sv *SVG) DeleteAll() {
 	updt := sv.Root.UpdateStart() // don't really need update logic here
+	sv.Pixels = nil
 	sv.Root.Paint.Defaults()
 	sv.Root.DeleteChildren(ki.DestroyKids)
 	sv.Defs.DeleteChildren(ki.DestroyKids)
+	sv.Name = ""
 	sv.Title = ""
 	sv.Desc = ""
 	sv.Root.UpdateEnd(updt)
