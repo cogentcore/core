@@ -65,10 +65,10 @@ func Build(c *config.Config) error {
 // BuildDesktop builds an executable for the package at the given path for the given desktop platform.
 // BuildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
 func BuildDesktop(pkgPath string, platform config.Platform) error {
-	vc := xe.VerboseConfig()
-	vc.Env["GOOS"] = platform.OS
-	vc.Env["GOARCH"] = platform.Arch
-	err := xe.Run(vc, "go", "build", "-o", BuildPath(pkgPath), pkgPath)
+	m := xe.Major()
+	m.Env["GOOS"] = platform.OS
+	m.Env["GOARCH"] = platform.Arch
+	err := xe.Run(m, "go", "build", "-o", BuildPath(pkgPath), pkgPath)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}

@@ -7,7 +7,6 @@ package packman
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -91,13 +90,12 @@ func VersionFileString(c *config.Config) (string, error) {
 	b.WriteString("\t// Version is the version of this package being used\n")
 	b.WriteString("\tVersion = \"" + c.Version + "\"\n")
 
-	gc := exec.Command("git", "rev-parse", "--short", "HEAD")
-	res, err := gc.CombinedOutput()
+	out, err := xe.Output(xe.Minor(), "git", "rev-parse", "--short", "HEAD")
 	if err != nil {
-		return "", fmt.Errorf("error getting previous git commit: %w (%s)", err, res)
+		return "", fmt.Errorf("error getting previous git commit: %w", err)
 	}
 	b.WriteString("\t// GitCommit is the commit just before the latest version commit\n")
-	b.WriteString("\tGitCommit = \"" + strings.TrimSuffix(string(res), "\n") + "\"\n")
+	b.WriteString("\tGitCommit = \"" + strings.TrimSuffix(out, "\n") + "\"\n")
 
 	date := time.Now().UTC().Format("2006-01-02 15:04")
 	b.WriteString("\t// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')\n")
@@ -113,16 +111,16 @@ func VersionFileString(c *config.Config) (string, error) {
 // changes that should have already been made by
 // [UpdateVersion].
 func PushVersionFileGit(c *config.Config) error {
-	vc := xe.VerboseConfig()
-	err := xe.Run(vc, "git", "add", c.Release.VersionFile)
+	m := xe.Major()
+	err := xe.Run(m, "git", "add", c.Release.VersionFile)
 	if err != nil {
 		return fmt.Errorf("error adding version file: %w", err)
 	}
-	err = xe.Run(vc, "git", "commit", "-am", "updated version to "+c.Version)
+	err = xe.Run(m, "git", "commit", "-am", "updated version to "+c.Version)
 	if err != nil {
 		return fmt.Errorf("error commiting release commit: %w", err)
 	}
-	err = xe.Run(vc, "git", "push")
+	err = xe.Run(m, "git", "push")
 	if err != nil {
 		return fmt.Errorf("error pushing commit: %w", err)
 	}

@@ -21,12 +21,12 @@ func Log(c *config.Config) error {
 		return errors.New("ios not supported yet")
 	}
 	if !c.Log.Keep {
-		err := xe.Run(xe.VerboseConfig(), "adb", "logcat", "-c")
+		err := xe.Run(xe.Major(), "adb", "logcat", "-c")
 		if err != nil {
 			return fmt.Errorf("error clearing logs: %w", err)
 		}
 	}
-	err := xe.Run(xe.VerboseConfig(), "adb", "logcat", "*:"+c.Log.All, "Go:I", "GoLog:I")
+	err := xe.Run(xe.Major(), "adb", "logcat", "*:"+c.Log.All, "Go:I", "GoLog:I")
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
 	}
