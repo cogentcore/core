@@ -19,9 +19,11 @@ import (
 
 	"slices"
 
+	"log/slog"
+
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/sdkpath"
-	"goki.dev/grease"
+	"goki.dev/grog"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -227,7 +229,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 	if len(tags) > 0 {
 		cmd.Args = append(cmd.Args, "-tags", strings.Join(tags, ","))
 	}
-	if grease.Verbose {
+	if grog.UserLevel <= slog.LevelInfo {
 		cmd.Args = append(cmd.Args, "-v")
 	}
 	if subcmd != "install" && c.Build.Install {
@@ -265,7 +267,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []st
 
 func GoModTidyAt(c *config.Config, at string, env []string) error {
 	cmd := exec.Command("go", "mod", "tidy")
-	if grease.Verbose {
+	if grog.UserLevel <= slog.LevelInfo {
 		cmd.Args = append(cmd.Args, "-v")
 	}
 

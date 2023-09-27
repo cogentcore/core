@@ -21,7 +21,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/binres"
-	"goki.dev/grease"
+	"goki.dev/grog"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -62,9 +62,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 			return nil, err
 		}
 		manifestData = buf.Bytes()
-		if grease.Verbose {
-			fmt.Fprintf(os.Stderr, "generated AndroidManifest.xml:\n%s\n", manifestData)
-		}
+		grog.PrintfDebug("generated AndroidManifest.xml:\n%s\n", manifestData)
 	} else {
 		libName, err = ManifestLibName(manifestData)
 		if err != nil {
@@ -133,9 +131,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		apkw = NewWriter(out, privKey)
 	}
 	apkwCreate := func(name string) (io.Writer, error) {
-		if grease.Verbose {
-			fmt.Fprintf(os.Stderr, "apk: %s\n", name)
-		}
+		grog.PrintfInfo("apk: %s\n", name)
 		if c.Build.PrintOnly {
 			return io.Discard, nil
 		}

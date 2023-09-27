@@ -18,6 +18,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/grease"
+	"goki.dev/grog"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -49,9 +50,7 @@ func CopyFile(c *config.Config, dst, src string) error {
 }
 
 func WriteFile(c *config.Config, filename string, generate func(io.Writer) error) error {
-	if grease.Verbose {
-		fmt.Fprintf(os.Stderr, "write %s\n", filename)
-	}
+	grog.PrintlnInfo("write", filename)
 
 	if err := Mkdir(c, filepath.Dir(filename)); err != nil {
 		return err
