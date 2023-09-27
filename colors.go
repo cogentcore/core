@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/mat32/v2"
 	"goki.dev/cam/hct"
 	"goki.dev/cam/hsl"
+	"goki.dev/mat32/v2"
 )
 
 // IsNil returns whether the color is the nil initial default color
@@ -101,13 +101,14 @@ func LogFromName(name string) color.RGBA {
 // standard color names, "none" or "off", or
 // any of the following transformations (which
 // use the base color as the starting point):
-// * currentcolor = base color
-// * inverse = inverse of base color
-// * lighten-VAL or darken-VAL: VAL is amount to lighten or darken (using HCT), e.g., lighter-10 is 10 higher tone
-// * saturate-VAL or desaturate-VAL: manipulates the chroma level in HCT by VAL
-// * spin-VAL: manipulates the hue level in HCT by VAL
-// * clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
-// * blend-VAL-color: blends given percent of given color name relative to base
+//
+//   - currentcolor = base color
+//   - inverse = inverse of base color
+//   - lighten-VAL or darken-VAL: VAL is amount to lighten or darken (using HCT), e.g., lighter-10 is 10 higher tone
+//   - saturate-VAL or desaturate-VAL: manipulates the chroma level in HCT by VAL
+//   - spin-VAL: manipulates the hue level in HCT by VAL
+//   - clearer-VAL or opaquer-VAL: manipulates the alpha level by VAL
+//   - blend-VAL-color: blends given percent of given color name relative to base
 func FromString(str string, base color.Color) (color.RGBA, error) {
 	if len(str) == 0 { // consider it null
 		return color.RGBA{}, nil
@@ -244,7 +245,7 @@ func FromAny(val any, base color.Color) (color.RGBA, error) {
 	}
 }
 
-// MustFromAny returns a color value from the given value.
+// MustFromAny returns a color value from the given value
 // of any type. It panics on any resulting error; see [FromAny]
 // for more information and a version that returns an error.
 func MustFromAny(val any, base color.Color) color.RGBA {
@@ -255,7 +256,7 @@ func MustFromAny(val any, base color.Color) color.RGBA {
 	return c
 }
 
-// LogFromAny returns a color value from the given value.
+// LogFromAny returns a color value from the given value
 // of any type. It logs any resulting error; see [FromAny]
 // for more information and a version that returns an error.
 func LogFromAny(val any, base color.Color) color.RGBA {

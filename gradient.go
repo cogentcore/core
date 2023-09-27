@@ -214,22 +214,6 @@ func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, xform ma
 	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
 }
 
-// SetIFace sets the color spec from given interface value, e.g., for map[string]any
-// key is an optional property key for error -- always logs errors
-func (g *Gradient) SetAny(val any, ctxt Context, key string) error {
-	switch valv := val.(type) {
-	case string:
-		g.SetString(valv, ctxt)
-	case *color.RGBA:
-		g.SetColor(*valv)
-	case *Gradient:
-		*g = *valv
-	case color.Color:
-		g.SetColor(valv)
-	}
-	return nil
-}
-
 // ApplyXForm transforms the points for a UserSpaceOnUse gradient
 func (g *Gradient) ApplyXForm(xf mat32.Mat2) {
 	if g.Gradient == nil {
