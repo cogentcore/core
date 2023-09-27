@@ -162,3 +162,8 @@ func (c *Config) SetDir(dir string) *Config {
 	c.Dir = dir
 	return c
 }
+
+func (c *Config) SetEnv(key, val string) *Config {
+	c.Env[key] = val
+	return c
+}
