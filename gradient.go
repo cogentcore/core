@@ -17,14 +17,11 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Gradient represents a linear gradient, radial gradient, or solid color.
+// Gradient represents a linear or radial gradient.
 type Gradient struct {
 
-	// source of color (solid, linear gradient, radial gradient)
-	Source GradientSources `desc:"source of color (solid, linear gradient, radial gradient)"`
-
-	// the solid color for solid gradients
-	Color color.RGBA `desc:"the solid color for solid gradients"`
+	// whether the gradient is a radial gradient (as opposed to a linear one)
+	Radial bool `desc:"whether the gradient is a radial gradient (as opposed to a linear one)"`
 
 	// the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)
 	Points mat32.Box2 `desc:"the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)"`
@@ -61,18 +58,6 @@ type GradientStop struct {
 	Opacity float32    // the opacity of the stop (0-1)
 }
 
-// GradientSources represent the ways in which a [Gradient] can be specified.
-type GradientSources int32 //enums:enum
-
-const (
-	// Solid indicates a solid color.
-	Solid GradientSources = iota
-	// LinearGradient indicates a linear gradient.
-	LinearGradient
-	// RadialGradient indicates a radial gradient.
-	RadialGradient
-)
-
 // SpreadMethods are the methods used when a gradient reaches
 // its end but the object isn't fully filled.
 type SpreadMethods int32 //enums:enum
@@ -103,50 +88,6 @@ const (
 	UserSpaceOnUse
 )
 
-// IsNil returns whether the gradient is effectively nil (has no color).
-func (g *Gradient) IsNil() bool {
-	if g == nil {
-		return true
-	}
-	if g.Source == Solid {
-		return IsNil(g.Color)
-	}
-	return g.Stops == nil
-}
-
-// ColorOrNil returns the solid color if non-nil, or nil otherwise;
-// it is for consumers that handle nil colors.
-func (g *Gradient) ColorOrNil() color.Color {
-	if IsNil(g.Color) {
-		return nil
-	}
-	return g.Color
-}
-
-// SetSolid sets the gradient to the given solid color
-func (g *Gradient) SetSolid(cl color.RGBA) {
-	*g = Gradient{
-		Color:  cl,
-		Source: Solid,
-	}
-}
-
-// SetColor sets the gradient to the given solid standard [color.Color]
-func (g *Gradient) SetColor(cl color.Color) {
-	*g = Gradient{
-		Color:  AsRGBA(cl),
-		Source: Solid,
-	}
-}
-
-// SetName sets the gradient to the solid color with the given name
-func (g *Gradient) SetName(name string) {
-	*g = Gradient{
-		Color:  LogFromName(name),
-		Source: Solid,
-	}
-}
-
 // CopyFrom copies from the given gradient, making new copies
 // of the stops instead of re-using pointers
 func (g *Gradient) CopyFrom(cp *Gradient) {
@@ -169,20 +110,19 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 	copy(g.Stops, cp.Stops)
 }
 
-// NewLinearGradient returns a new linear gradient
-func NewLinearGradient() *Gradient {
+// LinearGradient returns a new linear gradient
+func LinearGradient() *Gradient {
 	return &Gradient{
-		Source: LinearGradient,
 		Spread: SpreadPad,
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
-// NewRadialGradient returns a new radial gradient
-func NewRadialGradient() *Gradient {
+// RadialGradient returns a new radial gradient
+func RadialGradient() *Gradient {
 	return &Gradient{
-		Source: RadialGradient,
+		Radial: true,
 		Spread: SpreadPad,
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
@@ -192,7 +132,7 @@ func NewRadialGradient() *Gradient {
 // SetGradientPoints sets UserSpaceOnUse points for gradient based on given bounding box
 func (g *Gradient) SetGradientPoints(bbox mat32.Box2) {
 	g.Units = UserSpaceOnUse
-	if g.Source == RadialGradient {
+	if g.Radial {
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
 		g.Focal = g.Center
 		g.Radius = 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
