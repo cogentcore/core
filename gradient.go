@@ -159,8 +159,22 @@ func (g *Gradient) Points() [5]float64 {
 // Rasterx returns the gradient as a [rasterx.Gradient]
 func (g *Gradient) Rasterx() *rasterx.Gradient {
 	r := &rasterx.Gradient{
-		Points:   g.Points(),
-		Stops:    make([]rasterx.GradStop, len(g.Stops)),
+		Points: g.Points(),
+		Stops:  make([]rasterx.GradStop, len(g.Stops)),
+		// one might call this ridiculous, and they would be absolutely correct,
+		// but we don't have control over the rasterx source code, and
+		// https://github.com/golang/go/issues/12854 hasn't been approved
+		Bounds: struct {
+			X float64
+			Y float64
+			W float64
+			H float64
+		}{
+			X: float64(g.Bounds.Min.X),
+			Y: float64(g.Bounds.Min.Y),
+			W: float64(g.Bounds.Size().X),
+			H: float64(g.Bounds.Size().Y),
+		},
 		Matrix:   MatToRasterx(&g.Matrix),
 		Spread:   rasterx.SpreadMethod(g.Spread), // we have the same constant values, so this is okay
 		Units:    rasterx.GradientUnits(g.Units), // we have the same constant values, so this is okay
