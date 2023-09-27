@@ -190,19 +190,19 @@ var Xout io.Writer = os.Stderr
 func PrintCmd(format string, args ...any) {
 	cmd := fmt.Sprintf(format+"\n", args...)
 	if TmpDir != "" {
-		cmd = strings.Replace(cmd, TmpDir, "$WORK", -1)
+		cmd = strings.ReplaceAll(cmd, TmpDir, "$WORK")
 	}
 	if androidHome, err := sdkpath.AndroidHome(); err == nil {
-		cmd = strings.Replace(cmd, androidHome, "$ANDROID_HOME", -1)
+		cmd = strings.ReplaceAll(cmd, androidHome, "$ANDROID_HOME")
 	}
 	if GoMobilePath != "" {
-		cmd = strings.Replace(cmd, GoMobilePath, "$GOMOBILE", -1)
+		cmd = strings.ReplaceAll(cmd, GoMobilePath, "$GOMOBILE")
 	}
 	if gopath := GoEnv("GOPATH"); gopath != "" {
-		cmd = strings.Replace(cmd, gopath, "$GOPATH", -1)
+		cmd = strings.ReplaceAll(cmd, gopath, "$GOPATH")
 	}
 	if env := os.Getenv("HOMEPATH"); env != "" {
-		cmd = strings.Replace(cmd, env, "$HOMEPATH", -1)
+		cmd = strings.ReplaceAll(cmd, env, "$HOMEPATH")
 	}
 	fmt.Fprint(Xout, cmd)
 }

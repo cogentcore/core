@@ -17,7 +17,6 @@ import (
 	"sync"
 
 	"goki.dev/goki/config"
-	"goki.dev/grease"
 	"goki.dev/grog"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
