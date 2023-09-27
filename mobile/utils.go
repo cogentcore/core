@@ -18,6 +18,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/grog"
+	"goki.dev/xe"
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -182,7 +183,7 @@ var (
 
 func AreGoModulesUsed() (bool, error) {
 	AreGoModulesUsedOnce.Do(func() {
-		out, err := exec.Command("go", "env", "GOMOD").Output()
+		out, err := xe.Minor().Output("go", "env", "GOMOD")
 		if err != nil {
 			AreGoModulesUsedResult.err = err
 			return
@@ -191,16 +192,6 @@ func AreGoModulesUsed() (bool, error) {
 		AreGoModulesUsedResult.used = outstr != ""
 	})
 	return AreGoModulesUsedResult.used, AreGoModulesUsedResult.err
-}
-
-func Mkdir(c *config.Config, dir string) error {
-	if c.Build.Print || c.Build.PrintOnly {
-		PrintCmd("mkdir -p %s", dir)
-	}
-	if c.Build.PrintOnly {
-		return nil
-	}
-	return os.MkdirAll(dir, 0755)
 }
 
 func Symlink(c *config.Config, src, dst string) error {
@@ -248,92 +239,27 @@ func DoCopyAll(dst, src string) error {
 	})
 }
 
-func RemoveAll(c *config.Config, path string) error {
-	if c.Build.Print || c.Build.PrintOnly {
-		PrintCmd(`rm -r -f "%s"`, path)
-	}
-	if c.Build.PrintOnly {
-		return nil
-	}
-
-	// os.RemoveAll behaves differently in windows.
-	// http://golang.org/issues/9606
-	if GOOS == "windows" {
-		ResetReadOnlyFlagAll(path)
-	}
-
-	return os.RemoveAll(path)
-}
-
-func ResetReadOnlyFlagAll(path string) error {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if !fi.IsDir() {
-		return os.Chmod(path, 0666)
-	}
-	fd, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer fd.Close()
-
-	names, _ := fd.Readdirnames(-1)
-	for _, name := range names {
-		ResetReadOnlyFlagAll(path + string(filepath.Separator) + name)
-	}
-	return nil
-}
-
 func GoEnv(name string) string {
 	if val := os.Getenv(name); val != "" {
 		return val
 	}
-	val, err := exec.Command("go", "env", name).Output()
+	val, err := xe.Minor().Output("go", "env", name)
 	if err != nil {
 		panic(err) // the Go tool was tested to work earlier
 	}
 	return strings.TrimSpace(string(val))
 }
 
-func RunCmd(c *config.Config, cmd *exec.Cmd) error {
-	if c.Build.Print || c.Build.PrintOnly {
-		dir := ""
-		if cmd.Dir != "" {
-			dir = "PWD=" + cmd.Dir + " "
-		}
-		env := strings.Join(cmd.Env, " ")
-		if env != "" {
-			env += " "
-		}
-		PrintCmd("%s%s%s", dir, env, strings.Join(cmd.Args, " "))
-	}
-
-	buf := new(bytes.Buffer)
-	buf.WriteByte('\n')
-	if grease.Verbose {
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-	} else {
-		cmd.Stdout = buf
-		cmd.Stderr = buf
-	}
-
+// Major is a replacement for [xe.Major] that also sets the TMP environment
+// variables based on the config options, operating system, and [TmpDir].
+func Major(c *config.Config) *xe.Config {
+	xc := xe.Major()
 	if c.Build.Work {
 		if GOOS == "windows" {
-			cmd.Env = append(cmd.Env, `TEMP=`+TmpDir)
-			cmd.Env = append(cmd.Env, `TMP=`+TmpDir)
+			xc.SetEnv("TEMP", TmpDir).SetEnv("TMP", TmpDir)
 		} else {
-			cmd.Env = append(cmd.Env, `TMPDIR=`+TmpDir)
+			xc.SetEnv("TMPDIR", TmpDir)
 		}
 	}
-
-	if !c.Build.PrintOnly {
-		cmd.Env = Environ(cmd.Env)
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("%s failed: %v%s", strings.Join(cmd.Args, " "), err, buf)
-		}
-	}
-	return nil
+	return xc
 }

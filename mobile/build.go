@@ -22,7 +22,6 @@ import (
 	"log/slog"
 
 	"goki.dev/goki/config"
-	"goki.dev/goki/mobile/sdkpath"
 	"goki.dev/grog"
 	"golang.org/x/tools/go/packages"
 )
@@ -183,28 +182,6 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 		return nil, fmt.Errorf("%s %s: %v", nm, path, err)
 	}
 	return nmpkgs, nil
-}
-
-var Xout io.Writer = os.Stderr
-
-func PrintCmd(format string, args ...any) {
-	cmd := fmt.Sprintf(format+"\n", args...)
-	if TmpDir != "" {
-		cmd = strings.ReplaceAll(cmd, TmpDir, "$WORK")
-	}
-	if androidHome, err := sdkpath.AndroidHome(); err == nil {
-		cmd = strings.ReplaceAll(cmd, androidHome, "$ANDROID_HOME")
-	}
-	if GoMobilePath != "" {
-		cmd = strings.ReplaceAll(cmd, GoMobilePath, "$GOMOBILE")
-	}
-	if gopath := GoEnv("GOPATH"); gopath != "" {
-		cmd = strings.ReplaceAll(cmd, gopath, "$GOPATH")
-	}
-	if env := os.Getenv("HOMEPATH"); env != "" {
-		cmd = strings.ReplaceAll(cmd, env, "$HOMEPATH")
-	}
-	fmt.Fprint(Xout, cmd)
 }
 
 func GoBuild(c *config.Config, src string, env []string, args ...string) error {
