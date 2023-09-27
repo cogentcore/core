@@ -9,13 +9,9 @@ import (
 	"os"
 )
 
-// RemoveAll is a simple helper function that calls [os.RemoveAll]
-// after printing an equivalent command to [Config.Commands].
+// RemoveAll is a simple helper function that calls [os.RemoveAll] and [Config.PrintCmd].
 func (c *Config) RemoveAll(path string) error {
 	err := os.RemoveAll(path)
-	cmds := c.GetWriter(c.Commands, err)
-	if cmds != nil {
-		fmt.Fprintf(cmds, "rm -rf %q\n", path)
-	}
+	c.PrintCmd(fmt.Sprintf("rm -rf %q", path), err)
 	return err
 }

@@ -111,7 +111,7 @@ func Minor() *Config {
 	}
 }
 
-// GetWriter takes a writer and an error and returns the appropriate writer to use.
+// GetWriter returns the appropriate writer to use based on the given writer and error.
 // If the given error is non-nil, the returned writer is guaranteed to be non-nil,
 // with [Config.Stderr] used as a backup. Otherwise, the returned writer will only
 // be non-nil if the passed one is.
@@ -121,6 +121,16 @@ func (c *Config) GetWriter(w io.Writer, err error) io.Writer {
 		res = c.Stderr
 	}
 	return res
+}
+
+// PrintCmd uses [GetWriter] to print the given command to [Config.Commands]
+// or [Config.Stderr], based on the given error and the config settings.
+// A newline is automatically inserted.
+func (c *Config) PrintCmd(cmd string, err error) {
+	cmds := c.GetWriter(c.Commands, err)
+	if cmds != nil {
+		cmds.Write([]byte(grog.CmdColor(cmd) + "\n"))
+	}
 }
 
 func (c *Config) SetBuffer(buffer bool) *Config {
