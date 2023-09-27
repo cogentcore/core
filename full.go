@@ -58,6 +58,23 @@ func (f *Full) SetName(name string) {
 	f.Gradient = nil
 }
 
+// CopyFrom copies from the given full color, making new copies
+// of the gradient stops instead of re-using pointers
+func (f *Full) CopyFrom(cp *Full) {
+	f.Solid = cp.Solid
+	if f.Gradient == nil && cp.Gradient == nil {
+		return
+	}
+	if cp.Gradient == nil {
+		f.Gradient = nil
+		return
+	}
+	if f.Gradient == nil {
+		f.Gradient = &Gradient{}
+	}
+	f.Gradient.CopyFrom(cp.Gradient)
+}
+
 // RenderColor returns the color or [rasterx.ColorFunc] for rendering, applying
 // the given opacity and bounds.
 func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
