@@ -26,7 +26,9 @@ type Config struct {
 	// time and print output throughout (eg: a log command).
 	Buffer bool
 	// Fatal is whether to fatally exit programs with [os.Exit] and an
-	// exit code of 1 when there is an error running a program.
+	// exit code of 1 when there is an error running a command. It should
+	// only be used by end-user apps, not libraries, which should use more
+	// robust and idiomatic error handling.
 	Fatal bool
 	// PrintOnly is whether to only print commands that would be run and
 	// not actually run them. It can be used, for example, for safely testing
