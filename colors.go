@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
-	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -89,7 +89,7 @@ func MustFromName(name string) color.RGBA {
 func LogFromName(name string) color.RGBA {
 	c, err := FromName(name)
 	if err != nil {
-		log.Println("error: colors.LogFromName: " + err.Error())
+		slog.Error("colors.LogFromName: " + err.Error())
 	}
 	return c
 }
@@ -225,7 +225,7 @@ func MustFromString(str string, base color.Color) color.RGBA {
 func LogFromString(str string, base color.Color) color.RGBA {
 	c, err := FromString(str, base)
 	if err != nil {
-		log.Println("error: colors.LogFromString: " + err.Error())
+		slog.Error("colors.LogFromString: " + err.Error())
 	}
 	return c
 }
@@ -262,7 +262,7 @@ func MustFromAny(val any, base color.Color) color.RGBA {
 func LogFromAny(val any, base color.Color) color.RGBA {
 	c, err := FromAny(val, base)
 	if err != nil {
-		log.Println("error: colors.LogFromAny: " + err.Error())
+		slog.Error("colors.LogFromAny: " + err.Error())
 	}
 	return c
 }
@@ -312,7 +312,7 @@ func MustFromHex(hex string) color.RGBA {
 func LogFromHex(hex string) color.RGBA {
 	c, err := FromHex(hex)
 	if err != nil {
-		log.Println("error: colors.LogFromHex: " + err.Error())
+		slog.Error("colors.LogFromHex: " + err.Error())
 	}
 	return c
 }
