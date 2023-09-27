@@ -59,8 +59,8 @@ var _ActionsDescMap = map[Actions]string{
 	3: `Move means that the window was moved but NOT resized or changed in any other way -- does not require a redraw, but anything tracking positions will want to update.`,
 	4: `Focus indicates that the window has been activated for receiving user input.`,
 	5: `DeFocus indicates that the window is no longer activated for receiving input.`,
-	6: `Paint indicates a request to repaint the window. This is sent right after the window is opened.`,
-	7: `Show is for the WindowShow event -- sent by the system 500 msec after the window has opened, to trigger one-time actions such as configuring the main menu after the window has opened.`,
+	6: `Paint events are sent to drive updating of the window at regular FPS frames per second intervals.`,
+	7: `Show is for the WindowShow event -- sent by the system 1 second after the window has opened, to ensure that full rendering is completed with the proper size, and to trigger one-time actions such as configuring the main menu after the window has opened.`,
 	8: `ScreenUpdate occurs when any of the screen information is updated This event is sent to the first window on the list of active windows and it should then perform any necessary updating`,
 }
 

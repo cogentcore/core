@@ -139,15 +139,6 @@ func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, 
 	return win, err
 }
 
-// for sending window.Event's
-func (w *windowImpl) sendWindowEvent(act window.Actions) {
-	winEv := window.Event{
-		Action: act,
-	}
-	winEv.Init()
-	w.Send(&winEv)
-}
-
 // NextEvent implements the goosi.EventDeque interface.
 func (w *windowImpl) NextEvent() goosi.Event {
 	e := w.Deque.NextEvent()
@@ -184,14 +175,14 @@ outer:
 			if w.glw == nil {
 				break outer
 			}
-			w.sendWindowEvent(window.Show)
+			w.EventMgr.Window(window.Show)
 			hasShown = true
 		case <-winPaint.C:
 			if w.glw == nil {
 				break outer
 			}
 			if hasShown {
-				w.sendWindowEvent(window.Paint)
+				w.EventMgr.WindowPaint()
 			}
 		}
 	}
@@ -421,7 +412,7 @@ func (w *windowImpl) Close() {
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	w.sendWindowEvent(window.Close)
+	w.EventMgr.Window(window.Close)
 	theApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
 		vk.DeviceWaitIdle(w.Surface.Device.Device)
@@ -535,7 +526,7 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.getScreen()
-	w.sendWindowEvent(window.Move)
+	w.EventMgr.Window(window.Move)
 }
 
 func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
@@ -567,7 +558,7 @@ func (w *windowImpl) updtGeom() {
 			log.Printf("vkos window: %v updtGeom() -- got new screen: %v (was: %v)\n", w.Nm, w.scrnName, cursc)
 		}
 	}
-	w.sendWindowEvent(window.Resize) // this will not get processed until the end
+	w.EventMgr.WindowResize()
 }
 
 func (w *windowImpl) fbResized(gw *glfw.Window, width, height int) {
@@ -593,12 +584,12 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 		}
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
-		w.sendWindowEvent(window.Focus)
+		w.EventMgr.Window(window.Focus)
 	} else {
 		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.EventMgr.LastMousePos = image.Point{-1, -1} // key for preventing random click to same location
-		w.sendWindowEvent(window.DeFocus)
+		w.EventMgr.Window(window.DeFocus)
 	}
 }
 
@@ -606,10 +597,10 @@ func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
-		w.sendWindowEvent(window.Minimize)
+		w.EventMgr.Window(window.Minimize)
 	} else {
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		w.getScreen()
-		w.sendWindowEvent(window.Minimize)
+		w.EventMgr.Window(window.Minimize)
 	}
 }

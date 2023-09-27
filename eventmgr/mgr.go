@@ -13,6 +13,7 @@ import (
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/window"
 )
 
 // Mgr manages the event construction and sending process,
@@ -114,6 +115,24 @@ func (em *Mgr) MouseMove(where image.Point) {
 func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
 	ev := dnd.NewEvent(act, where, em.LastMods)
 	ev.Data = data
+	ev.Init()
+	em.Win.Send(ev)
+}
+
+func (em *Mgr) Window(act window.Actions) {
+	ev := window.NewEvent(act)
+	ev.Init()
+	em.Win.Send(ev)
+}
+
+func (em *Mgr) WindowPaint() {
+	ev := window.NewPaintEvent()
+	ev.Init()
+	em.Win.Send(ev)
+}
+
+func (em *Mgr) WindowResize() {
+	ev := window.NewResizeEvent()
 	ev.Init()
 	em.Win.Send(ev)
 }

@@ -42,7 +42,7 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: sending screen update\n")
 		}
-		fw.sendWindowEvent(window.ScreenUpdate)
+		fw.EventMgr.Window(window.ScreenUpdate)
 	} else {
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: no windows, NOT sending screen update\n")

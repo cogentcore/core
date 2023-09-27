@@ -22,7 +22,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
-	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vgpu"
 
 	vk "github.com/goki/vulkan"
@@ -280,9 +279,6 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	})
 
 	go w.winLoop() // start window's own dedicated publish update loop
-
-	w.sendWindowEvent(window.Paint)
-	// w.sendWindowEvent(window.Paint)
 
 	return w, nil
 }
