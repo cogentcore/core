@@ -181,7 +181,7 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 // SetGradientPoints sets the bounds of the gradient based on the given bounding
 // box, taking into account radial gradients and a standard linear left-to-right
 // gradient direction. It also sets the type of units to [UserSpaceOnUse].
-func (g *Gradient) SetBounds(bbox mat32.Box2) {
+func (g *Gradient) SetUserBounds(bbox mat32.Box2) {
 	g.Units = UserSpaceOnUse
 	if g.Radial {
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
@@ -262,7 +262,7 @@ func (g *GradientStop) Rasterx() rasterx.GradStop {
 func (g *Gradient) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.Mat2) any {
 	box := mat32.Box2{}
 	box.SetFromRect(bounds)
-	g.SetBounds(box)
+	g.SetUserBounds(box)
 	r := g.Rasterx()
 	return r.GetColorFunctionUS(float64(opacity), MatToRasterx(&xform))
 }

@@ -19,11 +19,9 @@ import (
 	"strconv"
 	"strings"
 
-	"goki.dev/colors"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 
-	"github.com/srwiley/rasterx"
 	"golang.org/x/net/html/charset"
 )
 
@@ -48,13 +46,14 @@ func (f *Full) SetString(str string, base color.Color) bool {
 	if FullCache == nil {
 		FullCache = make(map[string]*Full)
 	}
-	fullnm := colors.AsHex(f.Solid) + str
+	fullnm := AsHex(f.Solid) + str
 	if ccg, ok := FullCache[fullnm]; ok {
 		f.CopyFrom(ccg)
 		return true
 	}
 
 	str = strings.TrimSpace(str)
+	// TODO: handle url values
 	if strings.HasPrefix(str, "url(") {
 		if ctxt != nil {
 			cspec := ctxt.ContextColorSpecByURL(str)
@@ -101,7 +100,7 @@ func (f *Full) SetString(str string, base color.Color) bool {
 		FullCache[fullnm] = svcs
 	} else {
 		f.Gradient = nil
-		f.Solid = colors.LogFromString(str, nil)
+		f.Solid = LogFromString(str, nil)
 	}
 	return true
 }
@@ -180,7 +179,7 @@ func (f *Full) parseLinearGrad(pars string) bool {
 					f.Gradient.Stops = append(f.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					f.Solid = colors.AsRGBA(stop.Color) // keep first one
+					f.Solid = AsRGBA(stop.Color) // keep first one
 				}
 				prevColor = stop.Color
 				stopIdx++
@@ -247,7 +246,7 @@ func (f *Full) parseRadialGrad(pars string) bool {
 					f.Gradient.Stops = append(f.Gradient.Stops, *stop)
 				}
 				if stopIdx == 0 {
-					f.Solid = colors.AsRGBA(stop.Color) // keep first one
+					f.Solid = AsRGBA(stop.Color) // keep first one
 				}
 				prevColor = stop.Color
 				stopIdx++
@@ -282,7 +281,7 @@ func parseColorStop(stop *GradientStop, prevColor color.RGBA, par string) bool {
 		stop.Opacity = 0
 		stop.Color = prevColor
 	} else {
-		clr, err := colors.FromString(cnm, prevColor)
+		clr, err := FromString(cnm, prevColor)
 		if err != nil {
 			log.Printf("gi.ColorSpec.Parse invalid color string: %v\n", err)
 			return false
@@ -293,8 +292,8 @@ func parseColorStop(stop *GradientStop, prevColor color.RGBA, par string) bool {
 	return true
 }
 
-// ReadXML reads XML-formatted ColorSpec from io.Reader
-func (cs *ColorSpec) ReadXML(reader io.Reader) error {
+// ReadXML reads a XML-formatted [Full] from the given io.Reader
+func (f *Full) ReadXML(reader io.Reader) error {
 	decoder := xml.NewDecoder(reader)
 	decoder.CharsetReader = charset.NewReaderLabel
 	for {
@@ -303,12 +302,12 @@ func (cs *ColorSpec) ReadXML(reader io.Reader) error {
 			if err == io.EOF {
 				break
 			}
-			log.Printf("gi.ColorSpec parsing error: %v\n", err)
+			log.Printf("colors.Full.ReadXML parsing error: %v\n", err)
 			return err
 		}
 		switch se := t.(type) {
 		case xml.StartElement:
-			return cs.UnmarshalXML(decoder, se)
+			return f.UnmarshalXML(decoder, se)
 			// todo: ignore rest?
 		}
 	}
@@ -317,7 +316,7 @@ func (cs *ColorSpec) ReadXML(reader io.Reader) error {
 
 // UnmarshalXML parses the given XML-formatted string to set the color
 // specification
-func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
+func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 	start := &se
 
 	for {
@@ -340,75 +339,72 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "linearGradient":
-				if cs.Gradient == nil {
-					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0, 0, 1, 0, 0},
-						IsRadial: false, Matrix: rasterx.Identity}
+				if f.Gradient == nil {
+					f.Gradient = LinearGradient()
+					f.Gradient.Bounds.Max = mat32.Vec2{1, 0} // SVG is LTR by default
 				} else {
-					cs.Gradient.IsRadial = false
+					f.Gradient.Radial = false
 				}
-				cs.Source = LinearGradient
 				// fmt.Printf("lingrad %v\n", cs.Gradient)
 				for _, attr := range se.Attr {
 					// fmt.Printf("attr: %v val: %v\n", attr.Name.Local, attr.Value)
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "x1":
-						cs.Gradient.Points[0], err = readFraction(attr.Value)
+						f.Gradient.Bounds.Min.X, err = readFraction(attr.Value)
 					case "y1":
-						cs.Gradient.Points[1], err = readFraction(attr.Value)
+						f.Gradient.Bounds.Min.Y, err = readFraction(attr.Value)
 					case "x2":
-						cs.Gradient.Points[2], err = readFraction(attr.Value)
+						f.Gradient.Bounds.Max.X, err = readFraction(attr.Value)
 					case "y2":
-						cs.Gradient.Points[3], err = readFraction(attr.Value)
+						f.Gradient.Bounds.Max.Y, err = readFraction(attr.Value)
 					default:
-						err = cs.ReadGradAttr(attr)
+						err = f.ReadGradAttr(attr)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.UnmarshalXML linear gradient parsing error: %v\n", err)
+						log.Printf("colors.Full.UnmarshalXML linear gradient parsing error: %v\n", err)
 						return err
 					}
 				}
 			case "radialGradient":
-				if cs.Gradient == nil {
-					cs.Gradient = &rasterx.Gradient{Points: [5]float64{0.5, 0.5, 0.5, 0.5, 0.5},
-						IsRadial: true, Matrix: rasterx.Identity}
+				if f.Gradient == nil {
+					f.Gradient = RadialGradient()
 				} else {
-					cs.Gradient.IsRadial = true
+					f.Gradient.Radial = true
 				}
-				cs.Source = RadialGradient
 				var setFx, setFy bool
 				for _, attr := range se.Attr {
 					// fmt.Printf("stop attr: %v val: %v\n", attr.Name.Local, attr.Value)
 					switch attr.Name.Local {
 					// note: id not processed here - must be done externally
 					case "r":
-						cs.Gradient.Points[4], err = readFraction(attr.Value)
+						f.Gradient.Radius, err = readFraction(attr.Value)
 					case "cx":
-						cs.Gradient.Points[0], err = readFraction(attr.Value)
+						f.Gradient.Center.X, err = readFraction(attr.Value)
 					case "cy":
-						cs.Gradient.Points[1], err = readFraction(attr.Value)
+						f.Gradient.Center.Y, err = readFraction(attr.Value)
 					case "fx":
 						setFx = true
-						cs.Gradient.Points[2], err = readFraction(attr.Value)
+						f.Gradient.Focal.X, err = readFraction(attr.Value)
 					case "fy":
 						setFy = true
-						cs.Gradient.Points[3], err = readFraction(attr.Value)
+						f.Gradient.Focal.Y, err = readFraction(attr.Value)
 					default:
-						err = cs.ReadGradAttr(attr)
+						err = f.ReadGradAttr(attr)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.UnmarshalXML radial gradient parsing error: %v\n", err)
+						log.Printf("colors.Full.UnmarshalXML radial gradient parsing error: %v\n", err)
 						return err
 					}
 				}
 				if setFx == false { // set fx to cx by default
-					cs.Gradient.Points[2] = cs.Gradient.Points[0]
+					f.Gradient.Focal.X = f.Gradient.Center.X
 				}
 				if setFy == false { // set fy to cy by default
-					cs.Gradient.Points[3] = cs.Gradient.Points[1]
+					f.Gradient.Focal.Y = f.Gradient.Center.Y
 				}
 			case "stop":
-				stop := rasterx.GradStop{Opacity: 1.0, StopColor: colors.Black}
+				stop := GradientStop{Opacity: 1, Color: Black}
 				ats := se.Attr
 				sty := XMLAttr("style", ats)
 				if sty != "" {
@@ -430,28 +426,30 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 					case "offset":
 						stop.Offset, err = readFraction(attr.Value)
 					case "stop-color":
-						clr, err := colors.FromString(attr.Value, nil)
+						clr, err := FromString(attr.Value, nil)
 						if err != nil {
-							log.Printf("gi.ColorSpec.UnmarshalXML invalid color string: %v\n", err)
+							log.Printf("colors.Full.UnmarshalXML invalid color string: %v\n", err)
 							return err
 						}
-						stop.StopColor = clr
+						stop.Color = clr
 					case "stop-opacity":
-						stop.Opacity, err = strconv.ParseFloat(attr.Value, 64)
+						var o64 float64
+						o64, err = strconv.ParseFloat(attr.Value, 32)
+						stop.Opacity = float32(o64)
 						// fmt.Printf("got opacity: %v\n", stop.Opacity)
 					}
 					if err != nil {
-						log.Printf("gi.ColorSpec.UnmarshalXML color stop parsing error: %v\n", err)
+						log.Printf("colors.Full.UnmarshalXML color stop parsing error: %v\n", err)
 						return err
 					}
 				}
-				if cs.Gradient == nil {
-					fmt.Printf("no gradient but stops in: %v stop: %v\n", cs, stop)
+				if f.Gradient == nil {
+					fmt.Printf("no gradient but stops in: %v stop: %v\n", f, stop)
 				} else {
-					cs.Gradient.Stops = append(cs.Gradient.Stops, stop)
+					f.Gradient.Stops = append(f.Gradient.Stops, stop)
 				}
 			default:
-				errStr := "gi.ColorSpec Cannot process svg element " + se.Name.Local
+				errStr := "colors.Full.UnmarshalXML Cannot process svg element " + se.Name.Local
 				log.Println(errStr)
 			}
 		case xml.EndElement:
@@ -460,7 +458,7 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 				return nil
 			}
 			if se.Name.Local != "stop" {
-				fmt.Printf("gi.ColorSpec got unexpected end element: %v\n", se.Name.Local)
+				fmt.Printf("colors.Full.UnmarshalXML got unexpected end element: %v\n", se.Name.Local)
 			}
 		case xml.CharData:
 		}
@@ -470,20 +468,21 @@ func (cs *ColorSpec) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) err
 
 func readFraction(v string) (f float32, err error) {
 	v = strings.TrimSpace(v)
-	d := 1.0
+	d := float32(1)
 	if strings.HasSuffix(v, "%") {
 		d = 100
 		v = strings.TrimSuffix(v, "%")
 	}
-	f64, err := strconv.ParseFloat(v, 64)
-	f64 /= d
+	f64, err := strconv.ParseFloat(v, 32)
+	f = float32(f64)
+	f /= d
 	// if f > 1 {
 	// 	f = 1
 	// } else
 	if f < 0 {
 		f = 0
 	}
-	return float32(f64), err
+	return
 }
 
 // func ReadGradUrl(v string) (grad *rasterx.Gradient, err error) {
@@ -502,40 +501,40 @@ func readFraction(v string) (f float32, err error) {
 // 	return nil, nil // not a gradient url, and not an error
 // }
 
-func (cs *ColorSpec) ReadGradAttr(attr xml.Attr) (err error) {
+func (f *Full) ReadGradAttr(attr xml.Attr) (err error) {
 	switch attr.Name.Local {
 	case "gradientTransform":
 		tx := mat32.Identity2D()
 		tx.SetString(attr.Value)
-		cs.Gradient.Matrix = MatToRasterx(&tx)
+		f.Gradient.Matrix = tx
 	case "gradientUnits":
 		switch strings.TrimSpace(attr.Value) {
 		case "userSpaceOnUse":
-			cs.Gradient.Units = rasterx.UserSpaceOnUse
+			f.Gradient.Units = UserSpaceOnUse
 		case "objectBoundingBox":
-			cs.Gradient.Units = rasterx.ObjectBoundingBox
+			f.Gradient.Units = ObjectBoundingBox
 		}
 	case "spreadMethod":
 		switch strings.TrimSpace(attr.Value) {
 		case "pad":
-			cs.Gradient.Spread = rasterx.PadSpread
+			f.Gradient.Spread = PadSpread
 		case "reflect":
-			cs.Gradient.Spread = rasterx.ReflectSpread
+			f.Gradient.Spread = ReflectSpread
 		case "repeat":
-			cs.Gradient.Spread = rasterx.RepeatSpread
+			f.Gradient.Spread = RepeatSpread
 		}
 	}
 	return nil
 }
 
 // FixGradientStops applies the CSS rules to regularize the gradient stops: https://www.w3.org/TR/css3-images/#color-stop-syntax
-func FixGradientStops(grad *rasterx.Gradient) {
+func FixGradientStops(grad *Gradient) {
 	sz := len(grad.Stops)
 	if sz == 0 {
 		return
 	}
 	splitSt := -1
-	last := 0.0
+	last := float32(0)
 	for i := 0; i < sz; i++ {
 		st := &(grad.Stops[i])
 		if i == sz-1 && st.Offset == 0 {
@@ -553,7 +552,7 @@ func FixGradientStops(grad *rasterx.Gradient) {
 		if splitSt > 0 {
 			start := grad.Stops[splitSt].Offset
 			end := st.Offset
-			per := (end - start) / float64(1+(i-splitSt))
+			per := (end - start) / float32(1+(i-splitSt))
 			cur := start + per
 			for j := splitSt; j < i; j++ {
 				grad.Stops[j].Offset = cur
