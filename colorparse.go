@@ -129,6 +129,7 @@ func (f *Full) parseLinearGrad(pars string) bool {
 	plist := strings.Split(pars, ", ")
 	var prevColor color.RGBA
 	stopIdx := 0
+outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		origPar := par
@@ -162,7 +163,7 @@ func (f *Full) parseLinearGrad(pars string) bool {
 				}
 			}
 		case strings.HasPrefix(par, ")"):
-			break
+			break outer
 		default: // must be a color stop
 			var stop *GradientStop
 			if len(f.Gradient.Stops) > stopIdx {
@@ -199,6 +200,7 @@ func (f *Full) parseRadialGrad(pars string) bool {
 	plist := strings.Split(pars, ", ")
 	var prevColor color.RGBA
 	stopIdx := 0
+outer:
 	for pidx := 0; pidx < len(plist); pidx++ {
 		par := strings.TrimRight(strings.TrimSpace(plist[pidx]), ",")
 		// origPar := par
@@ -229,7 +231,7 @@ func (f *Full) parseRadialGrad(pars string) bool {
 				}
 			}
 		case strings.HasPrefix(par, ")"):
-			break
+			break outer
 		default: // must be a color stop
 			var stop *GradientStop
 			if len(f.Gradient.Stops) > stopIdx {
@@ -397,10 +399,10 @@ func (f *Full) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 						return err
 					}
 				}
-				if setFx == false { // set fx to cx by default
+				if !setFx { // set fx to cx by default
 					f.Gradient.Focal.X = f.Gradient.Center.X
 				}
-				if setFy == false { // set fy to cy by default
+				if !setFy { // set fy to cy by default
 					f.Gradient.Focal.Y = f.Gradient.Center.Y
 				}
 			case "stop":

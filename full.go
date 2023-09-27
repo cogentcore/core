@@ -7,7 +7,6 @@ package colors
 import (
 	"image"
 	"image/color"
-	"log/slog"
 
 	"github.com/srwiley/rasterx"
 	"goki.dev/mat32/v2"
@@ -86,36 +85,15 @@ func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.
 
 // SetAny sets the color from the given value of any type.
 // It handles values of types [color.Color], [*Gradient],
-// and string. It returns any error; see [MustFromAny] and
-// [LogFromAny] for versions that do not return an error.
-func (f *Full) SetAny(val any, base color.Color) error {
+// and string.
+func (f *Full) SetAny(val any, ctx Context) error {
 	switch valv := val.(type) {
 	case color.Color:
 		f.Solid = AsRGBA(valv)
 	case *Gradient:
 		*f.Gradient = *valv
 	case string:
-		f.SetString(valv, base)
+		f.SetString(valv, ctx)
 	}
 	return nil
-}
-
-// MustSetAny sets the color from the given value of any type.
-// It panics on any resulting error; see [Full.SetAny]
-// for more information and a version that returns an error.
-func (f *Full) MustSetAny(val any, base color.Color) {
-	err := f.SetAny(val, base)
-	if err != nil {
-		panic("colors.Full.MustSetAny: " + err.Error())
-	}
-}
-
-// LogSetAny sets the color value from the given value of any type.
-// It logs any resulting error; see [Full.SetAny]
-// for more information and a version that returns an error.
-func (f *Full) LogSetAny(val any, base color.Color) {
-	err := f.SetAny(val, base)
-	if err != nil {
-		slog.Error("colors.Full.LogSetAny: " + err.Error())
-	}
 }

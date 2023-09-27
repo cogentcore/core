@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"image/color"
-	"log/slog"
 	"strconv"
 	"strings"
 
@@ -59,9 +58,7 @@ func AsString(c color.Color) string {
 }
 
 // FromName returns the color value specified
-// by the given CSS standard color name. It returns
-// an error if the name is not found; see [MustFromName]
-// and [LogFromName] for versions that do not return an error.
+// by the given CSS standard color name.
 func FromName(name string) (color.RGBA, error) {
 	c, ok := Map[name]
 	if !ok {
@@ -70,33 +67,7 @@ func FromName(name string) (color.RGBA, error) {
 	return c, nil
 }
 
-// MustFromName returns the color value specified
-// by the given CSS standard color name. It panics
-// if the name is not found; see [FromName]
-// for a version that returns an error.
-func MustFromName(name string) color.RGBA {
-	c, err := FromName(name)
-	if err != nil {
-		panic("colors.MustFromName: " + err.Error())
-	}
-	return c
-}
-
-// LogFromName returns the color value specified
-// by the given CSS standard color name. It logs an error
-// if the name is not found; see [FromName]
-// for a version that returns an error.
-func LogFromName(name string) color.RGBA {
-	c, err := FromName(name)
-	if err != nil {
-		slog.Error("colors.LogFromName: " + err.Error())
-	}
-	return c
-}
-
 // FromString returns a color value from the given string.
-// It returns any resulting error; see [MustFromString] and
-// [LogFromString] for versions that do not return an error.
 // FromString accepts the following types of strings: hex values,
 // standard color names, "none" or "off", or
 // any of the following transformations (which
@@ -208,32 +179,8 @@ func FromString(str string, base color.Color) (color.RGBA, error) {
 	}
 }
 
-// MustFromString returns a color value from the given string.
-// It panics on any resulting error; see [FromString] for
-// more information and a version that returns an error.
-func MustFromString(str string, base color.Color) color.RGBA {
-	c, err := FromString(str, base)
-	if err != nil {
-		panic("colors.MustFromString: " + err.Error())
-	}
-	return c
-}
-
-// LogFromString returns a color value from the given string.
-// It logs any resulting error; see [FromString] for
-// more information and a version that returns an error.
-func LogFromString(str string, base color.Color) color.RGBA {
-	c, err := FromString(str, base)
-	if err != nil {
-		slog.Error("colors.LogFromString: " + err.Error())
-	}
-	return c
-}
-
 // FromAny returns a color from the given value of any type.
 // It handles values of types string and [color.Color].
-// It returns any error; see [MustFromAny] and [LogFromAny]
-// for versions that do not return an error.
 func FromAny(val any, base color.Color) (color.RGBA, error) {
 	switch valv := val.(type) {
 	case string:
@@ -245,32 +192,8 @@ func FromAny(val any, base color.Color) (color.RGBA, error) {
 	}
 }
 
-// MustFromAny returns a color value from the given value
-// of any type. It panics on any resulting error; see [FromAny]
-// for more information and a version that returns an error.
-func MustFromAny(val any, base color.Color) color.RGBA {
-	c, err := FromAny(val, base)
-	if err != nil {
-		panic("colors.MustFromAny: " + err.Error())
-	}
-	return c
-}
-
-// LogFromAny returns a color value from the given value
-// of any type. It logs any resulting error; see [FromAny]
-// for more information and a version that returns an error.
-func LogFromAny(val any, base color.Color) color.RGBA {
-	c, err := FromAny(val, base)
-	if err != nil {
-		slog.Error("colors.LogFromAny: " + err.Error())
-	}
-	return c
-}
-
 // FromHex parses the given hex color string
-// and returns the resulting color. It returns any
-// resulting error; see [MustFromHex] for a
-// version that does not return an error.
+// and returns the resulting color.
 func FromHex(hex string) (color.RGBA, error) {
 	hex = strings.TrimPrefix(hex, "#")
 	var r, g, b, a int
@@ -291,30 +214,6 @@ func FromHex(hex string) (color.RGBA, error) {
 		return color.RGBA{}, errors.New("colors.FromHex: could not process: " + hex)
 	}
 	return color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}, nil
-}
-
-// MustFromHex parses the given hex color string
-// and returns the resulting color. It panics on any
-// resulting error; see [FromHex] for a version
-// that returns an error.
-func MustFromHex(hex string) color.RGBA {
-	c, err := FromHex(hex)
-	if err != nil {
-		panic("colors.MustFromHex: " + err.Error())
-	}
-	return c
-}
-
-// LogFromHex parses the given hex color string
-// and returns the resulting color. It logs any
-// resulting error; see [FromHex] for a version
-// that returns an error.
-func LogFromHex(hex string) color.RGBA {
-	c, err := FromHex(hex)
-	if err != nil {
-		slog.Error("colors.LogFromHex: " + err.Error())
-	}
-	return c
 }
 
 // AsHex returns the color as a standard
