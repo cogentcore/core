@@ -13,6 +13,7 @@ import (
 	"time"
 	"unicode"
 
+	"goki.dev/colors"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -162,9 +163,9 @@ func (tf *TextField) OnInit() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		tf.CursorWidth.SetPx(1)
-		tf.SelectColor.SetColor(ColorScheme.Tertiary.Container)
-		tf.PlaceholderColor = ColorScheme.OnSurfaceVariant
-		tf.CursorColor.SetSolid(ColorScheme.Primary.Base)
+		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
+		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
+		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
 		// s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
@@ -177,7 +178,7 @@ func (tf *TextField) OnInit() {
 			s.Padding.Right.SetPx(12)
 		}
 		s.Text.Align = gist.AlignLeft
-		s.Color = ColorScheme.OnSurface
+		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
 			s.Border.Style.Set(gist.BorderNone)
@@ -185,27 +186,27 @@ func (tf *TextField) OnInit() {
 			s.Border.Width.Set()
 			s.Border.Color.Set()
 			s.Border.Radius = gist.BorderRadiusExtraSmallTop
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 			if tf.IsFocusActive() {
 				s.Border.Width.Bottom = units.Px(2)
-				s.Border.Color.Bottom = ColorScheme.Primary.Base
+				s.Border.Color.Bottom = colors.Scheme.Primary.Base
 			} else {
 				s.Border.Width.Bottom = units.Px(1)
-				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 			}
 		case TextFieldOutlined:
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Radius = gist.BorderRadiusExtraSmall
 			if tf.IsFocusActive() {
 				s.Border.Width.Set(units.Px(2))
-				s.Border.Color.Set(ColorScheme.Primary.Base)
+				s.Border.Color.Set(colors.Scheme.Primary.Base)
 			} else {
 				s.Border.Width.Set(units.Px(1))
-				s.Border.Color.Set(ColorScheme.Outline)
+				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		}
 		if tf.IsSelected() {
-			s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 		}
 	})
 }
@@ -219,7 +220,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Right.SetPx(16 * Prefs.DensityMul())
-				s.Color = ColorScheme.OnSurfaceVariant
+				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = gist.AlignMiddle
 			})
 		case "trail-icon":
@@ -228,7 +229,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Left.SetPx(16 * Prefs.DensityMul())
-				s.Color = ColorScheme.OnSurfaceVariant
+				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = gist.AlignMiddle
 			})
 		}

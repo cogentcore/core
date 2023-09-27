@@ -618,24 +618,24 @@ func (bt *Button) OnInit() {
 		s.Text.Align = gist.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
-			s.BackgroundColor.SetSolid(ColorScheme.Primary.Base)
-			s.Color = ColorScheme.Primary.On
+			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.On
 		case ButtonTonal:
-			s.BackgroundColor.SetSolid(ColorScheme.Secondary.Container)
-			s.Color = ColorScheme.Secondary.OnContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Color = colors.Scheme.Secondary.OnContainer
 		case ButtonElevated:
 			s.Margin = gist.BoxShadowMargin(BoxShadow2).ToValues()
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
-			s.Color = ColorScheme.Primary.Base
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			s.Color = colors.Scheme.Primary.Base
 			s.BoxShadow = BoxShadow1
 		case ButtonOutlined:
-			s.BackgroundColor.SetSolid(ColorScheme.Surface)
-			s.Color = ColorScheme.Primary.Base
+			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+			s.Color = colors.Scheme.Primary.Base
 			s.Border.Style.Set(gist.BorderSolid)
-			s.Border.Color.Set(ColorScheme.Outline)
+			s.Border.Color.Set(colors.Scheme.Outline)
 			s.Border.Width.Set(units.Px(1))
 		case ButtonText:
-			s.Color = ColorScheme.Primary.Base
+			s.Color = colors.Scheme.Primary.Base
 		}
 		if bt.HasFlag(Hovered) {
 			if bt.Type == ButtonElevated {
@@ -716,22 +716,22 @@ func (cb *CheckBox) OnInit() {
 	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = gist.AlignLeft
-		s.Color = ColorScheme.OnBackground
+		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(gist.BorderNone)
 		// switch cb.State {
 		// case ButtonActive:
-		// 	s.BackgroundColor.SetSolid(ColorScheme.Background)
+		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		// case ButtonInactive:
-		// 	s.BackgroundColor.SetSolid(ColorScheme.Background)
-		// 	s.Color.SetColor(ColorScheme.OnBackground.Highlight(30))
+		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		// 	s.Color.SetColor(colors.Scheme.OnBackground.Highlight(30))
 		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(10))
+		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(10))
 		// case ButtonHover:
-		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(15))
+		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(15))
 		// case ButtonDown:
-		// 	s.BackgroundColor.SetSolid(ColorScheme.Background.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(20))
 		// }
 	})
 }
@@ -810,10 +810,10 @@ func (cb *CheckBox) ConfigWidget(sc *Scene) {
 
 func (cb *CheckBox) ConfigParts(sc *Scene) {
 	cb.SetCheckable(true)
-	if !TheIconMgr.IsValid(cb.Icon) {
+	if !cb.Icon.IsValid() {
 		cb.Icon = icons.CheckBox // fallback
 	}
-	if !TheIconMgr.IsValid(cb.IconOff) {
+	if !cb.IconOff.IsValid() {
 		cb.IconOff = icons.CheckBoxOutlineBlank
 	}
 	config := ki.TypeAndNameList{}

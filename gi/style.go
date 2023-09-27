@@ -50,8 +50,8 @@ type Styler func(w *WidgetBase, s *gist.Style)
 
 // todo: when?
 func (sc *Scene) SetMyStyle() {
-	sc.Frame.Style.BackgroundColor.SetSolid(ColorScheme.Background)
-	sc.Frame.Style.Color = ColorScheme.OnBackground
+	sc.Frame.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
+	sc.Frame.Style.Color = colors.Scheme.OnBackground
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -225,7 +225,7 @@ func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
 // of the nearest widget parent of the widget that
 // has a defined background color. If no such parent is found,
 // it returns a new [gist.ColorSpec] with a solid
-// color of [ColorScheme.Background].
+// color of [colors.Scheme.Background].
 func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
@@ -233,7 +233,7 @@ func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 	})
 	if pwb == nil {
 		cs := gist.ColorSpec{}
-		cs.SetColor(ColorScheme.Background)
+		cs.SetColor(colors.Scheme.Background)
 		return cs
 	}
 	return pwb.Style.BackgroundColor
@@ -369,21 +369,21 @@ var (
 			VOffset: units.Px(3),
 			Blur:    units.Px(1),
 			Spread:  units.Px(-2),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(2),
 			Blur:    units.Px(2),
 			Spread:  units.Px(0),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.14),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(1),
 			Blur:    units.Px(5),
 			Spread:  units.Px(0),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.12),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 	// BoxShadow2 contains the shadows
@@ -394,21 +394,21 @@ var (
 			VOffset: units.Px(2),
 			Blur:    units.Px(4),
 			Spread:  units.Px(-1),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(4),
 			Blur:    units.Px(5),
 			Spread:  units.Px(0),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.14),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(1),
 			Blur:    units.Px(10),
 			Spread:  units.Px(0),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.12),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 	// TODO: figure out why 3 and 4 are the same
@@ -421,21 +421,21 @@ var (
 			VOffset: units.Px(5),
 			Blur:    units.Px(5),
 			Spread:  units.Px(-3),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(8),
 			Blur:    units.Px(10),
 			Spread:  units.Px(1),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.14),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(3),
 			Blur:    units.Px(14),
 			Spread:  units.Px(2),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.12),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 	// BoxShadow4 contains the shadows
@@ -446,21 +446,21 @@ var (
 			VOffset: units.Px(5),
 			Blur:    units.Px(5),
 			Spread:  units.Px(-3),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(8),
 			Blur:    units.Px(10),
 			Spread:  units.Px(1),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.14),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(3),
 			Blur:    units.Px(14),
 			Spread:  units.Px(2),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.12),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 	// BoxShadow5 contains the shadows
@@ -471,21 +471,21 @@ var (
 			VOffset: units.Px(8),
 			Blur:    units.Px(10),
 			Spread:  units.Px(-6),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(16),
 			Blur:    units.Px(24),
 			Spread:  units.Px(2),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.14),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
 		},
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(6),
 			Blur:    units.Px(30),
 			Spread:  units.Px(5),
-			Color:   colors.SetAF32(ColorScheme.Shadow, 0.12),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
 		},
 	}
 )

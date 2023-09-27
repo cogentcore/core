@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -37,8 +38,8 @@ func (mb *MenuBar) OnInit() {
 	mb.AddEvents(&MenuBarEventFuncs)
 	mb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.MaxWidth.SetPx(-1)
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
-		s.Color = ColorScheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+		s.Color = colors.Scheme.OnSurface
 	})
 }
 

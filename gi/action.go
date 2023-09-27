@@ -7,6 +7,7 @@ package gi
 import (
 	"log"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
@@ -98,15 +99,15 @@ func (ac *Action) OnInit() {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(gist.BorderNone)
 		s.Text.Align = gist.AlignCenter
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
-		s.Color = ColorScheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+		s.Color = colors.Scheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
 			s.Border.Radius = gist.BorderRadiusFull
 			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			s.BackgroundColor.SetSolid(ColorScheme.Secondary.Container)
-			s.Color = ColorScheme.Secondary.OnContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Color = colors.Scheme.Secondary.OnContainer
 		case ActionParts:
 			s.Border.Radius.Set()
 			s.BackgroundColor = w.ParentBackgroundColor()
@@ -116,7 +117,7 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			s.MaxWidth.SetPx(-1)
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		case ActionMenuBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
@@ -127,19 +128,19 @@ func (ac *Action) OnInit() {
 			ac.Indicator = icons.None
 		}
 		if w.HasFlag(Hovered) {
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
 		if w.HasFocus() {
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Width.Set(units.Px(2))
-			s.Border.Color.Set(ColorScheme.Outline)
+			s.Border.Color.Set(colors.Scheme.Outline)
 		}
 		// switch ac.State {
 		// case ButtonActive:
 		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(7))
 		// case ButtonInactive:
 		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(20))
-		// 	s.Color = ColorScheme.OnBackground.Highlight(20)
+		// 	s.Color = colors.Scheme.OnBackground.Highlight(20)
 		// case ButtonFocus, ButtonSelected:
 		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(15))
 		// case ButtonHover:

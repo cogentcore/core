@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -90,33 +91,33 @@ func (cb *ComboBox) OnInit() {
 			s.Border.Radius = gist.BorderRadiusExtraSmall
 			s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
 		}
-		s.Color = ColorScheme.OnSurface
+		s.Color = colors.Scheme.OnSurface
 		switch cb.Type {
 		case ComboBoxFilled:
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 			if cb.Editable {
 				s.Border.Style.Set(gist.BorderNone)
 				s.Border.Style.Bottom = gist.BorderSolid
 				s.Border.Width.Set()
 				s.Border.Width.Bottom = units.Px(1)
 				s.Border.Color.Set()
-				s.Border.Color.Bottom = ColorScheme.OnSurfaceVariant
+				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 				s.Border.Radius = gist.BorderRadiusExtraSmallTop
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Bottom = units.Px(2)
-					s.Border.Color.Bottom = ColorScheme.Primary.Base
+					s.Border.Color.Bottom = colors.Scheme.Primary.Base
 				}
 
 			}
 		case ComboBoxOutlined:
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Width.Set(units.Px(1))
-			s.Border.Color.Set(ColorScheme.OnSurfaceVariant)
+			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = gist.BorderRadiusExtraSmall
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Set(units.Px(2))
-					s.Border.Color.Set(ColorScheme.Primary.Base)
+					s.Border.Color.Set(colors.Scheme.Primary.Base)
 				}
 			}
 		}
@@ -228,7 +229,7 @@ func (cb *ComboBox) ConfigPartsIconText(config *ki.TypeAndNameList, icnm icons.I
 	// todo: add some styles for button layout
 	icIdx = -1
 	txIdx = -1
-	if TheIconMgr.IsValid(icnm) {
+	if icnm.IsValid() {
 		icIdx = len(*config)
 		config.Add(IconType, "icon")
 		config.Add(SpaceType, "space")

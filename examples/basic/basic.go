@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 )
@@ -8,6 +11,9 @@ import (
 func main() { gimain.Main(mainrun) }
 
 func mainrun() {
+	gi.WinEventTrace = true
+	gi.EventTrace = true
+
 	scene := gi.NewScene("hello")
 	gi.NewLabel(&scene.Frame, "label").SetText("Hello, World!")
 
@@ -17,6 +23,8 @@ func mainrun() {
 		gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
 		gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
 	})
+
+	fmt.Println(colors.Scheme)
 
 	gi.NewWindow(scene).
 		SetName("hello").

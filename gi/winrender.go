@@ -80,9 +80,6 @@ func (rc *RenderContext) ReadUnlock() {
 	rc.Mu.RUnlock()
 }
 
-// Full set of region updates in set = 1
-//const MaxRegionUpdates = 16
-
 //////////////////////////////////////////////////////////////////////
 //  RenderScenes
 
@@ -170,18 +167,21 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
+	fmt.Printf("start render\n")
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
 
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
 	if !stageMods && !sceneMods {                  // nothing to do!
+		fmt.Printf("no mods\n")
 		return
 	}
 
 	if stageMods {
-		// update RenderScenes
+		w.GatherScenes()
 	}
 	w.DrawScenes()
+	fmt.Printf("done render\n")
 }
 
 // DrawScenes does the drawing of RenderScenes to the window.
@@ -212,4 +212,46 @@ func (w *RenderWin) DrawScenes() {
 	drw.EndDraw()
 
 	// pr.End()
+}
+
+// GatherScenes finds all the Scene elements that drive rendering
+// into the RenderScenes list.
+func (w *RenderWin) GatherScenes() {
+	rs := &w.RenderScenes
+	rs.Reset()
+
+	sm := &w.StageMgr
+	sz := sm.Stack.Len()
+	if sz == 0 {
+		return // shouldn't happen!
+	}
+
+	// first, find the top-level window:
+	winIdx := 0
+	for i := sz - 1; i >= 0; i-- {
+		st := sm.Stack.ValByIdx(i).AsMain()
+		if st.Type == Window {
+			rs.Add(st.Scene)
+			winIdx = i
+			break
+		}
+	}
+
+	// then add everyone above that
+	for i := winIdx; i < sz; i++ {
+		st := sm.Stack.ValByIdx(i).AsMain()
+		rs.Add(st.Scene)
+	}
+
+	top := sm.Stack.ValByIdx(sz - 1).AsMain()
+
+	// then add the popups for the top main stage
+	for _, kv := range top.PopupMgr.Stack.Order {
+		st := kv.Val.AsBase()
+		rs.Add(st.Scene)
+	}
+
+	if WinEventTrace {
+		fmt.Printf("n scenes: %d\n", len(rs.Scenes))
+	}
 }

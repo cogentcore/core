@@ -34,8 +34,8 @@ func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
 	av.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
-		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
-		s.Color = gi.ColorScheme.OnBackground
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 	})

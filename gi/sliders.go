@@ -9,6 +9,7 @@ import (
 	"image"
 	"sync"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -719,8 +720,8 @@ func (sr *Slider) OnInit() {
 
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sr.ThumbSize = units.Px(20)
-		sr.ValueColor.SetColor(ColorScheme.Primary.Base)
-		sr.ThumbColor.SetColor(ColorScheme.Primary.Base)
+		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
+		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
 
 		sr.StyleBox.Border.Style.Set(gist.BorderNone)
 
@@ -735,8 +736,8 @@ func (sr *Slider) OnInit() {
 			s.Height.SetEm(20)
 			s.Width.SetPx(4)
 		}
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
-		s.Color = ColorScheme.Primary.On
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		s.Color = colors.Scheme.Primary.On
 		// STYTODO: state styles
 	})
 }
@@ -844,7 +845,7 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetColorSpec(&sr.ThumbColor)
 
-	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
+	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
 		sr.Parts.Render(sc)
 	} else {
@@ -904,8 +905,8 @@ func (sb *ScrollBar) OnInit() {
 	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		sb.StyleBox.Border.Style.Set(gist.BorderNone)
 
-		sb.ValueColor.SetSolid(ColorScheme.OutlineVariant)
-		sb.ThumbColor.SetSolid(ColorScheme.OutlineVariant)
+		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
+		sb.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
 
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusFull

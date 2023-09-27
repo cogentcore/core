@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
@@ -317,7 +318,7 @@ func MenuFrameConfigStyles(frame *Frame) {
 	frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = BoxShadow2
 	})
 }
@@ -623,8 +624,8 @@ func (sp *Separator) OnInit() {
 		s.AlignH = gist.AlignCenter
 		s.Border.Style.Set(gist.BorderSolid)
 		s.Border.Width.Set(units.Px(1))
-		s.Border.Color.Set(ColorScheme.OutlineVariant)
-		s.BackgroundColor.SetSolid(ColorScheme.OutlineVariant)
+		s.Border.Color.Set(colors.Scheme.OutlineVariant)
+		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		if sp.Horiz {
 			s.MaxWidth.SetPx(-1)
 			s.MinHeight.SetPx(1)

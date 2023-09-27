@@ -74,8 +74,8 @@ type Dialog struct {
 func (dlg *Dialog) StyleFrame() {
 	dlg.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainer)
-		s.Color = ColorScheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Color = colors.Scheme.OnSurface
 		s.Border.Radius = gist.BorderRadiusExtraLarge
 
 		dlg.Frame.Spacing = StdDialogVSpaceUnits
@@ -112,7 +112,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 				s.Width.SetCh(30)
 				s.Text.Align = gist.AlignLeft
 				s.AlignV = gist.AlignTop
-				s.Color = ColorScheme.OnSurfaceVariant
+				s.Color = colors.Scheme.OnSurfaceVariant
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "buttons":

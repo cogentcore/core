@@ -1745,7 +1745,7 @@ func (ftv *FileTreeView) OnInit() {
 		s.Text.Align = gist.AlignLeft
 		s.AlignV = gist.AlignTop
 		if w.IsSelected() {
-			s.BackgroundColor.SetColor(gi.ColorScheme.TertiaryContainer)
+			s.BackgroundColor.SetColor(colors.Scheme.TertiaryContainer)
 		}
 		switch w.Class {
 		case "exec":

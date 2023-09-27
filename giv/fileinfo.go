@@ -286,31 +286,31 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	}
 	if fi.Sup != filecat.NoSupport {
 		snm := strings.ToLower(fi.Sup.String())
-		if icn := icons.Icon(snm); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon(snm); gi.IconNameIsValid(icn) {
 			return icn, true
 		}
-		if icn := icons.Icon("file-" + snm); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon("file-" + snm); icn.IsValid() {
 			return icn, true
 		}
 	}
 	subt := strings.ToLower(filecat.MimeSub(fi.Mime))
 	if subt != "" {
-		if icn := icons.Icon(subt); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon(subt); icn.IsValid() {
 			return icn, true
 		}
 	}
 	if fi.Cat != filecat.Unknown {
 		cat := strings.ToLower(fi.Cat.String())
-		if icn := icons.Icon(cat); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon(cat); gi.IconNameIsValid(icn) {
 			return icn, true
 		}
-		if icn := icons.Icon("file-" + cat); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon("file-" + cat); icn.IsValid() {
 			return icn, true
 		}
 	}
 	ext := filepath.Ext(fi.Name)
 	if ext != "" {
-		if icn := icons.Icon(ext[1:]); gi.TheIconMgr.IsValid(icn) {
+		if icn := icons.Icon(ext[1:]); icn.IsValid() {
 			return icn, true
 		}
 	}

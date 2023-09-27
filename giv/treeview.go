@@ -87,7 +87,7 @@ func (tv *TreeView) OnInit() {
 		s.Text.Align = gist.AlignLeft
 		s.AlignV = gist.AlignTop
 		if w.IsSelected() {
-			s.BackgroundColor.SetSolid(gi.ColorScheme.TertiaryContainer)
+			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)
 		}
 	})
 }
@@ -1900,7 +1900,7 @@ func (tv *TreeView) ConfigParts(vp *Scene) {
 	if tv.HasChildren() {
 		config.Add(gi.TypeCheckBox, "branch")
 	}
-	if gi.TheIconMgr.IsValid(tv.Icon) {
+	if tv.Icon.IsValid() {
 		config.Add(gi.IconType, "icon")
 	}
 	config.Add(gi.LabelType, "label")
@@ -1915,7 +1915,7 @@ func (tv *TreeView) ConfigParts(vp *Scene) {
 			}
 		}
 	}
-	if gi.TheIconMgr.IsValid(tv.Icon) {
+	if tv.Icon.IsValid() {
 		if ic, ok := tv.IconPart(); ok {
 			// this only works after a second redraw..
 			// ic.Sty.Template = "giv.TreeView.Icon"

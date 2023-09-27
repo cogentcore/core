@@ -218,8 +218,8 @@ func (lb *Label) OnInit() {
 			s.Font.Opacity = 0.7
 		}
 		if w.IsSelected() {
-			s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
-			s.Color = ColorScheme.Tertiary.OnContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.Color = colors.Scheme.Tertiary.OnContainer
 		}
 	})
 }

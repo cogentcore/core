@@ -86,12 +86,12 @@ func (kc *KeyChordEdit) OnInit() {
 		s.Padding.Set(units.Px(8 * gi.Prefs.DensityMul()))
 		s.SetStretchMaxWidth()
 		if w.IsSelected() {
-			s.BackgroundColor.SetSolid(gi.ColorScheme.TertiaryContainer)
-			s.Color = gi.ColorScheme.OnTertiaryContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)
+			s.Color = colors.Scheme.OnTertiaryContainer
 		} else {
 			// STYTODO: get state styles working
-			s.BackgroundColor.SetSolid(gi.ColorScheme.SecondaryContainer)
-			s.Color = gi.ColorScheme.OnSecondaryContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.SecondaryContainer)
+			s.Color = colors.Scheme.OnSecondaryContainer
 		}
 	})
 }

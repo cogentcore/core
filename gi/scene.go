@@ -124,6 +124,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	sc.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 	sc.RenderState.Init(nwsz.X, nwsz.Y, sc.Pixels)
 	sc.Geom.Size = nwsz // make sure
+	sc.SetFlag(true, ScNeedsLayout)
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 

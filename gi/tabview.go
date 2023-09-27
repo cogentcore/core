@@ -74,9 +74,9 @@ func (tv *TabView) OnInit() {
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(gist.BorderSolid)
 		s.Border.Width.Set(units.Px(1))
-		s.Border.Color.Set(ColorScheme.OutlineVariant)
-		s.BackgroundColor.SetSolid(ColorScheme.Background)
-		s.Color = ColorScheme.OnBackground
+		s.Border.Color.Set(colors.Scheme.OutlineVariant)
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 	})
@@ -93,12 +93,12 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 				s.Margin.Set()
 				s.Padding.Set()
 				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
-				s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
+				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 
 				// s.Border.Style.Set(gist.BorderNone)
 				// s.Border.Style.Bottom = gist.BorderSolid
 				// s.Border.Width.Bottom.SetPx(1)
-				// s.Border.Color.Bottom = ColorScheme.OutlineVariant
+				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
 			})
 		case "frame":
 			frame := child.(*Frame)
@@ -600,8 +600,8 @@ func (tb *TabButton) OnInit() {
 		// s.Border.Style.Right = gist.BorderSolid
 		// s.Border.Width.Right.SetPx(1)
 
-		s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerLow)
-		s.Color = ColorScheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+		s.Color = colors.Scheme.OnSurface
 
 		s.Border.Radius.Set()
 		s.Text.Align = gist.AlignCenter
@@ -612,16 +612,16 @@ func (tb *TabButton) OnInit() {
 		// if tb.IsSelected() {
 		// 	s.Border.Style.Bottom = gist.BorderSolid
 		// 	s.Border.Width.Bottom.SetPx(2)
-		// 	s.Border.Color.Bottom = ColorScheme.Primary
+		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
 
 		if tb.HasFlag(Hovered) {
-			s.BackgroundColor.SetSolid(ColorScheme.SurfaceContainerHighest)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
 		if w.HasFocus() {
 			s.Border.Style.Set(gist.BorderSolid)
 			s.Border.Width.Set(units.Px(2))
-			s.Border.Color.Set(ColorScheme.Outline)
+			s.Border.Color.Set(colors.Scheme.Outline)
 		}
 	})
 }

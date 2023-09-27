@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -493,8 +494,8 @@ func (sr *Splitter) OnInit() {
 	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(ColorScheme.Tertiary.Container)
-		s.Color = ColorScheme.OnBackground
+		s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		s.Color = colors.Scheme.OnBackground
 		if sr.Dim == mat32.X {
 			s.MinWidth.SetPx(2)
 			s.MinHeight.SetPx(100)
@@ -728,7 +729,7 @@ func (sr *Splitter) Render(sc *Scene) {
 func (sr *Splitter) RenderSplitter(sc *Scene) {
 	sr.UpdateSplitterPos()
 
-	if TheIconMgr.IsValid(sr.Icon) && sr.Parts.HasChildren() {
+	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 		sr.Parts.Render(sc)
 	}
 	// else {

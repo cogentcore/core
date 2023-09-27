@@ -182,10 +182,10 @@ func (tv *TextView) OnInit() {
 	tv.AddEvents(&TextViewEventFuncs)
 	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
 		tv.CursorWidth.SetPx(1)
-		tv.LineNumberColor.SetSolid(gi.ColorScheme.SurfaceContainerHighest)
-		tv.SelectColor.SetSolid(gi.ColorScheme.TertiaryContainer)
+		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)
 		tv.HighlightColor.SetSolid(colors.Orange)
-		tv.CursorColor.SetSolid(gi.ColorScheme.OnSurface)
+		tv.CursorColor.SetSolid(colors.Scheme.OnSurface)
 
 		s.Cursor = cursor.IBeam
 		if gi.Prefs.Editor.WordWrap {
@@ -200,12 +200,12 @@ func (tv *TextView) OnInit() {
 		s.AlignV = gist.AlignTop
 		s.Text.Align = gist.AlignLeft
 		s.Text.TabSize = 4
-		s.Color = gi.ColorScheme.OnSurface
+		s.Color = colors.Scheme.OnSurface
 
 		if w.HasFocus() {
-			s.BackgroundColor.SetSolid(gi.ColorScheme.Surface)
+			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		} else {
-			s.BackgroundColor.SetSolid(gi.ColorScheme.SurfaceContainerHigh)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
 		}
 	})
 }

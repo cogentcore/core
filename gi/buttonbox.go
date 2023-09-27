@@ -9,6 +9,7 @@ import (
 	"image"
 	"slices"
 
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
@@ -61,8 +62,8 @@ func (bb *ButtonBox) OnInit() {
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 		s.Text.Align = gist.AlignCenter
-		s.BackgroundColor.SetSolid(ColorScheme.Surface)
-		s.Color = ColorScheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+		s.Color = colors.Scheme.OnSurface
 	})
 }
 

@@ -62,7 +62,7 @@ func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm icon
 	}
 	icIdx = -1
 	lbIdx = -1
-	if TheIconMgr.IsValid(icnm) {
+	if icnm.IsValid() {
 		icIdx = len(*config)
 		config.Add(IconType, "icon")
 		if txt != "" {

@@ -129,10 +129,6 @@ type RenderWin struct {
 
 	lastWinMenuUpdate time.Time
 
-	skippedResize *window.Event
-
-	lastEt goosi.EventTypes
-
 	// todo: these are bad:
 
 	// the currently selected widget through the inspect editor selection mode
@@ -141,11 +137,7 @@ type RenderWin struct {
 	// the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting
 	SelectedWidgetChan chan *WidgetBase `desc:"the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting"`
 
-	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
-	// DirDraws RenderWinDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
-	// PopDraws RenderWinDrawers // popup regions
-	// UpdtRegs RenderWinUpdates // misc vp update regions
-
+	// todo: need some other way of freeing GPU resources -- this is not clean:
 	// // the phongs for the window
 	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
 	//
@@ -300,8 +292,10 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	}
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetParent(win)
+	win.GoosiWin.SetFPS(1) // todo: debug mode!
 	drw := win.GoosiWin.Drawer()
-	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
+	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
+	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites
 
 	// 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
 	// 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
@@ -519,12 +513,6 @@ func (w *RenderWin) Resized(sz image.Point) {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}
 	WinGeomMgr.RecordPref(w)
-	// w.FullReRender()
-	// we need a second full re-render for fullscreen and snap resizes on RenderWins
-	// if goosi.TheApp.Platform() == goosi.RenderWins {
-	// 	w.FullReRender()
-	// }
-
 }
 
 // Raise requests that the window be at the top of the stack of windows,
@@ -762,8 +750,8 @@ func (w *RenderWin) HandleEvent(evi goosi.Event) {
 	defer w.RenderCtx().ReadUnlock()
 
 	et := evi.Type()
-	if et != goosi.WindowPaintEvent {
-		log.Printf("Got event: %v\n", et.String())
+	if EventTrace && et != goosi.WindowPaintEvent {
+		log.Printf("Got event: %s\n", et.BitIndexString())
 	}
 	if et >= goosi.WindowEvent && et <= goosi.WindowPaintEvent {
 		w.HandleWindowEvents(evi)
@@ -778,14 +766,16 @@ func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
 	switch et {
 	case goosi.WindowPaintEvent:
 		evi.SetHandled()
+		w.RenderCtx().ReadUnlock() // one case where we need to break lock
 		w.RenderWindow()
+		w.RenderCtx().ReadLock()
 	case goosi.WindowResizeEvent:
 		evi.SetHandled()
 		w.Resized(w.GoosiWin.Size())
 	case goosi.WindowEvent:
 		switch ev.Action {
 		case window.Close:
-			// fmt.Printf("got close event for window %v \n", w.Name)
+			fmt.Printf("got close event for window %v \n", w.Name)
 			evi.SetHandled()
 			w.Closed()
 			w.SetFlag(true, WinFlagStopEventLoop)
@@ -1098,20 +1088,6 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 			}
 		}
 	}
-	w.EventMgr.LagLastSkipped = false
-	w.lastEt = et
-
-	if w.skippedResize != nil {
-		w.Scene.BBoxMu.RLock()
-		vpsz := w.Scene.Geom.Size
-		w.Scene.BBoxMu.RUnlock()
-		if vpsz != w.GoosiWin.Size() {
-			w.SetFlag(true, WinFlagIsResizing)
-			w.Resized(w.GoosiWin.Size())
-			w.skippedResize = nil
-		}
-	}
-
 	if et != goosi.WindowResizeEvent && et != goosi.WindowPaintEvent {
 		w.SetFlag(false, WinFlagIsResizing)
 	}
@@ -1310,7 +1286,7 @@ func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
 	/*
 		w.DeleteSprite(RenderWinSelectionSpriteName)
 		sp := NewSprite(RenderWinSelectionSpriteName, wb.WinBBox.Size(), image.Point{})
-		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{colors.SetAF32(ColorScheme.Primary, 0.5)}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, sp.Pixels.Bounds(), &image.Uniform{colors.SetAF32(colors.Scheme.Primary, 0.5)}, image.Point{}, draw.Src)
 		sp.Geom.Pos = wb.WinBBox.Min
 		w.AddSprite(sp)
 		w.ActivateSprite(RenderWinSelectionSpriteName)

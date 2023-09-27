@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 )
@@ -17,8 +18,8 @@ func TooltipConfigStyles(tooltip *Frame) {
 		s.Border.Style.Set(gist.BorderNone)
 		s.Border.Radius = gist.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(ColorScheme.InverseSurface)
-		s.Color = ColorScheme.InverseOnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
+		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = BoxShadow1 // STYTODO: not sure whether we should have this
 	})
 }

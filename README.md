@@ -145,11 +145,13 @@ Rendering is done in 5 separate passes:
 
 * get rid of all the extra Config calls in SetStyle and Render!
 
-* fix all `Set..`, `...Action` state-changing methods to detect whether Config, layout, or just render is needed. 
+* fix all `Set..`, `...Action` state-changing methods to detect whether Config, layout, or just render is needed.  Also add return val so chain-based setting works.
 
 * in general, "SetNeedsFullReRender" -> SetNeedsLayout(vp, updt) or true
 
 * TextField:KeyChord -- need dialog!  should have a better mech for this.
+
+* does StageMgr need ordmap or could just use slices?  do we ever actually lookup by name??
 
 ## Window is not a Ki
 

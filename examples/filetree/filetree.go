@@ -52,8 +52,8 @@ type FileBrowse struct {
 
 func (fb *FileBrowse) OnInit() {
 	fb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetColor(gi.ColorScheme.Background)
-		s.Color = gi.ColorScheme.OnBackground
+		s.BackgroundColor.SetColor(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
 	})

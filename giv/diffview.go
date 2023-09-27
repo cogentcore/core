@@ -146,8 +146,8 @@ type DiffView struct {
 
 func (dv *DiffView) OnInit() {
 	dv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.BackgroundColor.SetSolid(gi.ColorScheme.Background)
-		s.Color = gi.ColorScheme.OnBackground
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 	})
 }
