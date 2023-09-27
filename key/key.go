@@ -65,6 +65,7 @@ type Event struct {
 func NewEvent(rn rune, code Codes, act Actions, mods goosi.Modifiers) *Event {
 	ev := &Event{}
 	ev.Typ = goosi.KeyEvent
+	ev.SetUnique()
 	ev.Rune = rn
 	ev.Code = code
 	ev.Action = act
@@ -75,6 +76,7 @@ func NewEvent(rn rune, code Codes, act Actions, mods goosi.Modifiers) *Event {
 func NewChordEvent(rn rune, code Codes, act Actions, mods goosi.Modifiers) *Event {
 	ev := &Event{}
 	ev.Typ = goosi.KeyChordEvent
+	ev.SetUnique()
 	ev.Rune = rn
 	ev.Code = code
 	ev.Action = act
@@ -88,6 +90,12 @@ func (ev *Event) HasPos() bool {
 
 func (ev *Event) OnFocus() bool {
 	return true
+}
+
+// note: not relevant b/c always unique!
+func (ev Event) IsSame(oth goosi.Event) bool {
+	oact := oth.(*Event).Action
+	return ev.Typ == oth.Type() && ev.Action == oact
 }
 
 func (ev *Event) String() string {

@@ -61,9 +61,10 @@ type Event struct {
 	// TODO: add a Device ID, for multiple input devices?
 }
 
-func NewEvent(but Buttons, act Actions, where image.Point, mods goosi.Modifiers) *Event {
+func NewButtonEvent(but Buttons, act Actions, where image.Point, mods goosi.Modifiers) *Event {
 	ev := &Event{}
-	ev.Typ = goosi.MouseEvent
+	ev.Typ = goosi.MouseButtonEvent
+	ev.SetUnique()
 	ev.Button = but
 	ev.Action = act
 	ev.Where = where
@@ -71,10 +72,13 @@ func NewEvent(but Buttons, act Actions, where image.Point, mods goosi.Modifiers)
 	return ev
 }
 
+// NewEventCopy makes a new copy of an existing event.
+// it resets the Handled flag.
 func NewEventCopy(typ goosi.EventTypes, cp *Event) *Event {
 	ev := &Event{}
 	*ev = *cp
 	ev.Typ = typ
+	ev.ClearHandled()
 	return ev
 }
 
@@ -90,9 +94,15 @@ func (ev Event) HasPos() bool {
 	return true
 }
 
+func (ev Event) IsSame(oth goosi.Event) bool {
+	oact := oth.(*Event).Action
+	return ev.Typ == oth.Type() && ev.Action == oact
+}
+
 func NewMoveEvent(but Buttons, where, prev image.Point, mods goosi.Modifiers) *Event {
 	ev := &Event{}
 	ev.Typ = goosi.MouseMoveEvent
+	// not unique
 	ev.Button = but
 	ev.Action = Move
 	ev.Where = where
@@ -104,6 +114,7 @@ func NewMoveEvent(but Buttons, where, prev image.Point, mods goosi.Modifiers) *E
 func NewDragEvent(but Buttons, where, prev, start image.Point, mods goosi.Modifiers) *Event {
 	ev := &Event{}
 	ev.Typ = goosi.MouseDragEvent
+	// not unique
 	ev.Button = but
 	ev.Action = Drag
 	ev.Where = where
@@ -116,6 +127,7 @@ func NewDragEvent(but Buttons, where, prev, start image.Point, mods goosi.Modifi
 func NewScrollEvent(where, delta image.Point, mods goosi.Modifiers) *ScrollEvent {
 	ev := &ScrollEvent{}
 	ev.Typ = goosi.MouseScrollEvent
+	// not unique, but delta integrated!
 	ev.Action = Scroll
 	ev.Where = where
 	ev.Delta = delta

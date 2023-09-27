@@ -51,6 +51,7 @@ type Event struct {
 func NewEvent(act Actions, where image.Point, mods goosi.Modifiers) *Event {
 	ev := &Event{}
 	ev.Typ = goosi.DNDEvent
+	ev.SetUnique() // base event is unique
 	ev.Action = act
 	ev.Where = where
 	ev.Mods = mods
@@ -61,6 +62,7 @@ func NewEvent(act Actions, where image.Point, mods goosi.Modifiers) *Event {
 func NewMoveEvent() *Event {
 	ev := &Event{}
 	ev.Typ = goosi.DNDMoveEvent
+	// not unique
 	return ev
 }
 
@@ -76,6 +78,11 @@ func (ev *Event) HasPos() bool {
 
 func (ev *Event) OnFocus() bool {
 	return false
+}
+
+func (ev Event) IsSame(oth goosi.Event) bool {
+	oact := oth.(*Event).Action
+	return ev.Typ == oth.Type() && ev.Action == oact
 }
 
 /////////////////////////////////////////////////////////////////

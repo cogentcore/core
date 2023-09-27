@@ -64,11 +64,15 @@ const (
 	End
 )
 
-/////////////////////////////
-// goosi.Event interface
+// todo: this is half-baked -- need real case.  should have position.
 
-func (ev *Event) Type() goosi.EventTypes {
-	return goosi.TouchEvent
+func NewEvent(seq Sequence, act Actions) *Event {
+	ev := &Event{}
+	ev.Typ = goosi.TouchEvent
+	ev.SetUnique()
+	ev.Sequence = seq
+	ev.Action = act
+	return ev
 }
 
 func (ev *Event) HasPos() bool {
@@ -77,6 +81,11 @@ func (ev *Event) HasPos() bool {
 
 func (ev *Event) OnFocus() bool {
 	return false
+}
+
+func (ev Event) IsSame(oth goosi.Event) bool {
+	oact := oth.(*Event).Action
+	return ev.Typ == oth.Type() && ev.Action == oact
 }
 
 // check for interface implementation

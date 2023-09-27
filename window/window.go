@@ -28,8 +28,8 @@ import (
 type Event struct {
 	goosi.EventBase
 
-	// Action taken on the window -- what has changed.  Window state fields
-	// have current values.
+	// Action taken on the window -- what has changed.
+	// Window state fields have current values.
 	Action Actions
 }
 
@@ -37,6 +37,7 @@ func NewEvent(act Actions) *Event {
 	ev := &Event{}
 	ev.Action = act
 	ev.Typ = goosi.WindowEvent
+	ev.SetUnique()
 	return ev
 }
 
@@ -44,6 +45,7 @@ func NewResizeEvent() *Event {
 	ev := &Event{}
 	ev.Action = Resize
 	ev.Typ = goosi.WindowResizeEvent
+	// not unique
 	return ev
 }
 
@@ -51,20 +53,7 @@ func NewPaintEvent() *Event {
 	ev := &Event{}
 	ev.Action = Paint
 	ev.Typ = goosi.WindowPaintEvent
-	return ev
-}
-
-func NewShowEvent() *Event {
-	ev := &Event{}
-	ev.Action = Show
-	ev.Typ = goosi.WindowShowEvent
-	return ev
-}
-
-func NewFocusEvent(act Actions) *Event {
-	ev := &Event{}
-	ev.Action = act
-	ev.Typ = goosi.WindowFocusEvent
+	// not unique
 	return ev
 }
 
@@ -74,6 +63,11 @@ func (ev *Event) HasPos() bool {
 
 func (ev *Event) OnFocus() bool {
 	return false
+}
+
+func (ev Event) IsSame(oth goosi.Event) bool {
+	oact := oth.(*Event).Action
+	return ev.Typ == oth.Type() && ev.Action == oact
 }
 
 func (ev *Event) String() string {

@@ -18,7 +18,6 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/girl/gist"
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver/internal/event"
 	"goki.dev/goosi/eventmgr"
 	"goki.dev/goosi/window"
 	"goki.dev/vgpu/v2/vdraw"
@@ -29,7 +28,7 @@ import (
 
 type windowImpl struct {
 	goosi.WindowBase
-	event.Deque
+	eventmgr.Deque
 	app            *appImpl
 	glw            *glfw.Window
 	Surface        *vgpu.Surface

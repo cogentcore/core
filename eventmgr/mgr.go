@@ -62,7 +62,7 @@ func (em *Mgr) KeyChord(rn rune, code key.Codes, act key.Actions, mods goosi.Mod
 
 // MouseButton creates and sends a mouse button event with given values
 func (em *Mgr) MouseButton(but mouse.Buttons, act mouse.Actions, where image.Point, mods goosi.Modifiers) {
-	ev := mouse.NewEvent(but, act, where, mods)
+	ev := mouse.NewButtonEvent(but, act, where, mods)
 	em.LastMods = mods
 	em.LastMouseButton = but
 	em.LastMouseAction = act
