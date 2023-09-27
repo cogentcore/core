@@ -231,6 +231,12 @@ type Stage interface {
 	// HandleEvent handles given event within this stage
 	HandleEvent(evi goosi.Event)
 
+	// DoUpdate calls DoUpdate on the Scene,
+	// performing any Widget-level updates and rendering.
+	// returns stageMods = true if any Stages have been modified
+	// and sceneMods = true if any Scenes have been modified.
+	DoUpdate() (stageMods, sceneMods bool)
+
 	// Delete closes and frees resources for everything in the stage
 	// Scenes have their own Delete method that allows them to Preserve
 	// themselves for re-use, but stages are always struck when done.
@@ -426,6 +432,17 @@ func (st *StageBase) Run() Stage {
 func (st *StageBase) Wait() Stage {
 	Wait()
 	return st.Stage
+}
+
+// DoUpdate for base just calls DoUpdate on scene
+// returns stageMods = true if any Stages have been modified
+// and sceneMods = true if any Scenes have been modified.
+func (st *StageBase) DoUpdate() (stageMods, sceneMods bool) {
+	if st.Scene == nil {
+		return
+	}
+	sceneMods = st.Scene.DoUpdate()
+	return
 }
 
 ///////////////////////////////////////////////////

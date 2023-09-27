@@ -249,6 +249,12 @@ const (
 	// Set by DoRebuild call.
 	ScRebuild
 
+	// ScImageUpdated indicates that the Scene's image has been updated
+	// e.g., due to a render or a resize.  This is reset by the
+	// global RenderWin rendering pass, so it knows whether it needs to
+	// copy the image up to the GPU or not.
+	ScImageUpdated
+
 	// todo: rename below:
 
 	// ScPrefSizing means that this scene is currently doing a

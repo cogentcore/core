@@ -2193,80 +2193,70 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 // WinFlagsN is the highest valid value
 // for type WinFlags, plus one.
-const WinFlagsN WinFlags = 11
+const WinFlagsN WinFlags = 9
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WinFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[WinFlagHasGeomPrefs-(0)]
-	_ = x[WinFlagUpdating-(1)]
-	_ = x[WinFlagIsClosing-(2)]
-	_ = x[WinFlagIsResizing-(3)]
-	_ = x[WinFlagGotFocus-(4)]
-	_ = x[WinFlagSentShow-(5)]
-	_ = x[WinFlagGoLoop-(6)]
-	_ = x[WinFlagStopEventLoop-(7)]
-	_ = x[WinFlagDoFullRender-(8)]
-	_ = x[WinFlagFocusActive-(9)]
-	_ = x[WinFlagSelectionMode-(10)]
+	_ = x[WinFlagIsClosing-(1)]
+	_ = x[WinFlagIsResizing-(2)]
+	_ = x[WinFlagGotFocus-(3)]
+	_ = x[WinFlagSentShow-(4)]
+	_ = x[WinFlagGoLoop-(5)]
+	_ = x[WinFlagStopEventLoop-(6)]
+	_ = x[WinFlagFocusActive-(7)]
+	_ = x[WinFlagSelectionMode-(8)]
 }
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
 	`WinFlagHasGeomPrefs`:  0,
 	`winflaghasgeomprefs`:  0,
-	`WinFlagUpdating`:      1,
-	`winflagupdating`:      1,
-	`WinFlagIsClosing`:     2,
-	`winflagisclosing`:     2,
-	`WinFlagIsResizing`:    3,
-	`winflagisresizing`:    3,
-	`WinFlagGotFocus`:      4,
-	`winflaggotfocus`:      4,
-	`WinFlagSentShow`:      5,
-	`winflagsentshow`:      5,
-	`WinFlagGoLoop`:        6,
-	`winflaggoloop`:        6,
-	`WinFlagStopEventLoop`: 7,
-	`winflagstopeventloop`: 7,
-	`WinFlagDoFullRender`:  8,
-	`winflagdofullrender`:  8,
-	`WinFlagFocusActive`:   9,
-	`winflagfocusactive`:   9,
-	`WinFlagSelectionMode`: 10,
-	`winflagselectionmode`: 10,
+	`WinFlagIsClosing`:     1,
+	`winflagisclosing`:     1,
+	`WinFlagIsResizing`:    2,
+	`winflagisresizing`:    2,
+	`WinFlagGotFocus`:      3,
+	`winflaggotfocus`:      3,
+	`WinFlagSentShow`:      4,
+	`winflagsentshow`:      4,
+	`WinFlagGoLoop`:        5,
+	`winflaggoloop`:        5,
+	`WinFlagStopEventLoop`: 6,
+	`winflagstopeventloop`: 6,
+	`WinFlagFocusActive`:   7,
+	`winflagfocusactive`:   7,
+	`WinFlagSelectionMode`: 8,
+	`winflagselectionmode`: 8,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
-	0:  `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	1:  `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
-	2:  `WinFlagIsClosing is atomic flag indicating window is closing`,
-	3:  `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	4:  `WinFlagGotFocus indicates that have we received RenderWin focus`,
-	5:  `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	6:  `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	7:  `WinFlagStopEventLoop is set when event loop stop is requested`,
-	8:  `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
-	9:  `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	10: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	0: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
+	1: `WinFlagIsClosing is atomic flag indicating window is closing`,
+	2: `WinFlagIsResizing is atomic flag indicating window is resizing`,
+	3: `WinFlagGotFocus indicates that have we received RenderWin focus`,
+	4: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
+	5: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	6: `WinFlagStopEventLoop is set when event loop stop is requested`,
+	7: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
+	8: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{
-	0:  `WinFlagHasGeomPrefs`,
-	1:  `WinFlagUpdating`,
-	2:  `WinFlagIsClosing`,
-	3:  `WinFlagIsResizing`,
-	4:  `WinFlagGotFocus`,
-	5:  `WinFlagSentShow`,
-	6:  `WinFlagGoLoop`,
-	7:  `WinFlagStopEventLoop`,
-	8:  `WinFlagDoFullRender`,
-	9:  `WinFlagFocusActive`,
-	10: `WinFlagSelectionMode`,
+	0: `WinFlagHasGeomPrefs`,
+	1: `WinFlagIsClosing`,
+	2: `WinFlagIsResizing`,
+	3: `WinFlagGotFocus`,
+	4: `WinFlagSentShow`,
+	5: `WinFlagGoLoop`,
+	6: `WinFlagStopEventLoop`,
+	7: `WinFlagFocusActive`,
+	8: `WinFlagSelectionMode`,
 }
 
 // String returns the string representation
@@ -2398,11 +2388,11 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
+var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 7
+const ScFlagsN ScFlags = 8
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -2413,8 +2403,9 @@ func _ScFlagsNoOp() {
 	_ = x[ScNeedsLayout-(2)]
 	_ = x[ScNeedsRebuild-(3)]
 	_ = x[ScRebuild-(4)]
-	_ = x[ScPrefSizing-(5)]
-	_ = x[ScPreserve-(6)]
+	_ = x[ScImageUpdated-(5)]
+	_ = x[ScPrefSizing-(6)]
+	_ = x[ScPreserve-(7)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
@@ -2428,10 +2419,12 @@ var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`scneedsrebuild`: 3,
 	`ScRebuild`:      4,
 	`screbuild`:      4,
-	`ScPrefSizing`:   5,
-	`scprefsizing`:   5,
-	`ScPreserve`:     6,
-	`scpreserve`:     6,
+	`ScImageUpdated`: 5,
+	`scimageupdated`: 5,
+	`ScPrefSizing`:   6,
+	`scprefsizing`:   6,
+	`ScPreserve`:     7,
+	`scpreserve`:     7,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -2440,8 +2433,9 @@ var _ScFlagsDescMap = map[ScFlags]string{
 	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
 	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
 	4: `ScRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
-	5: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-	6: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+	5: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
+	6: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
+	7: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
@@ -2450,8 +2444,9 @@ var _ScFlagsMap = map[ScFlags]string{
 	2: `ScNeedsLayout`,
 	3: `ScNeedsRebuild`,
 	4: `ScRebuild`,
-	5: `ScPrefSizing`,
-	6: `ScPreserve`,
+	5: `ScImageUpdated`,
+	6: `ScPrefSizing`,
+	7: `ScPreserve`,
 }
 
 // String returns the string representation

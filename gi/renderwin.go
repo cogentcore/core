@@ -40,27 +40,6 @@ func Wait() {
 // On mobile, this is the _only_ window.
 var CurRenderWin *RenderWin
 
-// RenderContext provides rendering context from outer RenderWin
-// window to Stage and Scene elements to inform styling, layout
-// and rendering.
-type RenderContext struct {
-	// LogicalDPI is the current logical dots-per-inch resolution of the
-	// window, which should be used for most conversion of standard units.
-	LogicalDPI float32
-
-	// Size of the rendering window, in actual "dot" pixels used for rendering.
-	Size image.Point
-
-	// Visible is true if window is visible and should be rendered to
-	Visible bool
-
-	// Mu is mutex for locking out rendering and any destructive updates.
-	// it is Write locked during rendering to provide exclusive blocking
-	// of any other updates, which are Read locked so that you don't
-	// get caught in deadlocks among all the different Read locks.
-	Mu sync.RWMutex
-}
-
 var (
 	// DragStartMSec is the number of milliseconds to wait before initiating a
 	// regular mouse drag event (as opposed to a basic mouse.Press)
@@ -107,59 +86,18 @@ var (
 	RenderWinOpenTimer time.Time
 )
 
-// These constants define use of Texture images in vdraw.Drawer
-// for updating the window efficiently.  They are allocated in
-// sets of 16:
-// Set 0: 0 = main scene, DirectUploads, Popups
-// Set 1: 16 region update images
-// Set 2: 16 sprite arrays with 128 allocated per size
-const (
-	// MaxDirectUploads are direct GPU texture transfer sources
-	MaxDirectUploads = 7
-
-	// MaxPopups is the maximum number of scene regions
-	// updated directly from popups
-	MaxPopups = 8
-
-	// Where region updates start (start of Set 1) -- 16
-	RegionUpdateStart = 1 + MaxDirectUploads + MaxPopups
-
-	// Full set of region updates in set = 1
-	MaxRegionUpdates = 16
-
-	// Sprites are stored as arrays of same-sized textures,
-	// allocated by size in Set 2, starting at 32
-	SpriteStart = RegionUpdateStart + MaxRegionUpdates
-
-	// Full set of sprite textures in set = 2
-	MaxSpriteTextures = 16
-
-	// Allocate 128 layers within each sprite size
-	MaxSpritesPerTexture = 128
-)
-
-// RenderWin provides an OS-specific window and all the associated event
-// handling.  Widgets connect to event signals to receive relevant GUI events.
+// RenderWin provides an outer "actual" window where everything is rendered,
+// and is the point of entry for all events coming in from user actions.
 //
-// RenderWin manages a stack of Scenes, each of which manage a separate bitmap
-// image, onto which Widgets render.  For main windows, the Scene Frame
-// has a MainMenu for the window (which can be empty, in which case it is not
-// displayed).  On MacOS, this main menu updates the overall menubar,
-// and also can show the local menu (on by default).
+// RenderWin contents are all managed by the StageMgr (MainStageMgr) that
+// handles MainStage elements such as Window, Dialog, and Sheet, which in
+// turn manage their own stack of PopupStage elements such as Menu, Tooltip, etc.
+// The contents of each Stage is provided by a Scene, containing Widgets,
+// and the Stage Pixels image is drawn to the RenderWin in the RenderWindow method.
 //
-// Widgets should always use methods to access / set state, and generally should
-// not do much directly with the window.  Almost everything here needs to be
-// guarded by various mutexes.  Leaving everything accessible so expert outside
-// access is still possible in a pinch, but again don't use it unless you know
-// what you're doing (and it might change over time too..)
-//
-// Rendering logic:
-//   - vdraw.Drawer manages all rendering to the window surface, provided via
-//     the RenderWin window, using vulkan stored images (16 max)
-//   - Order is: Base Scene (image 0), then direct uploads, popups, and sprites.
-//   - DirectUps (e.g., gi3d.Scene) directly upload their own texture to a Draw image
-//     (note: cannot upload directly to window as this prevents popups and overlays)
-//   - Popups (which have their own Scenes)
+// Rendering is handled by the vdraw.Drawer from the vgpu package, which is provided
+// by the goosi framework.  It is akin to a window manager overlaying Go image bitmaps
+// on top of each other in the proper order, based on the StageMgr stacking order.
 //   - Sprites are managed as layered textures of the same size, to enable
 //     unlimited number packed into a few descriptors for standard sizes.
 type RenderWin struct {
@@ -176,6 +114,10 @@ type RenderWin struct {
 	// MainStageMgr controlling the MainStage elements in this window.
 	// The Render Context in this manager is the original source for all Stages
 	StageMgr MainStageMgr
+
+	// RenderScenes are the Scene elements that draw directly to the window,
+	// arranged in order.  See winrender.go for all rendering code.
+	RenderScenes RenderScenes
 
 	// main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
 	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
@@ -200,9 +142,9 @@ type RenderWin struct {
 	SelectedWidgetChan chan *WidgetBase `desc:"the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting"`
 
 	// dir draws are direct upload regions -- direct uploaders upload their images directly to an image here
-	DirDraws RenderWinDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
-	PopDraws RenderWinDrawers // popup regions
-	UpdtRegs RenderWinUpdates // misc vp update regions
+	// DirDraws RenderWinDrawers `desc:"dir draws are direct upload regions -- direct uploaders upload their images directly to an image here"`
+	// PopDraws RenderWinDrawers // popup regions
+	// UpdtRegs RenderWinUpdates // misc vp update regions
 
 	// // the phongs for the window
 	// Phongs []*vphong.Phong ` json:"-" xml:"-" desc:"the phongs for the window"`
@@ -218,9 +160,6 @@ const (
 	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
 	// sized it -- affects whether other default geom should be applied.
 	WinFlagHasGeomPrefs WinFlags = iota
-
-	// WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail
-	WinFlagUpdating
 
 	// WinFlagIsClosing is atomic flag indicating window is closing
 	WinFlagIsClosing
@@ -239,10 +178,6 @@ const (
 
 	// WinFlagStopEventLoop is set when event loop stop is requested
 	WinFlagStopEventLoop
-
-	// WinFlagDoFullRender is set at event loop startup to trigger a full render once the window
-	// is properly shown
-	WinFlagDoFullRender
 
 	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
 	WinFlagFocusActive
@@ -368,9 +303,9 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3) // use 3 sets
 
-	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
-	// win.DirDraws.FlipY = true // drawing is flipped in general here.
-	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
+	// 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
+	// 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
+	// 	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
 
 	win.StageMgr.Init(win)
 
@@ -730,7 +665,6 @@ func (w *RenderWin) NeedWinMenuUpdate() bool {
 // window is closed -- see GoStartEventLoop for a version that starts in a
 // separate goroutine and returns immediately.
 func (w *RenderWin) StartEventLoop() {
-	w.SetFlag(true, WinFlagDoFullRender)
 	w.EventLoop()
 }
 
@@ -739,7 +673,7 @@ func (w *RenderWin) StartEventLoop() {
 // thread can wait on that for all windows to close.
 func (w *RenderWin) GoStartEventLoop() {
 	WinWait.Add(1)
-	w.SetFlag(true, WinFlagDoFullRender, WinFlagGoLoop)
+	w.SetFlag(true, WinFlagGoLoop)
 	go w.EventLoop()
 }
 
@@ -817,8 +751,16 @@ func (w *RenderWin) EventLoop() {
 	// our last act must be self destruction!
 }
 
-// HandleEvent processes given goosi.Event
+// HandleEvent processes given goosi.Event.
+// All event processing operates under a RenderCtx.ReadLock
+// so that no rendering update can occur during event-driven updates.
+// Because rendering itself is event driven, this extra level of safety
+// is redundant in this case, but other non-event-driven updates require
+// the lock protection.
 func (w *RenderWin) HandleEvent(evi goosi.Event) {
+	w.RenderCtx().ReadLock()
+	defer w.RenderCtx().ReadUnlock()
+
 	et := evi.Type()
 	if et != goosi.WindowPaintEvent {
 		log.Printf("Got event: %v\n", et.String())
@@ -906,9 +848,6 @@ func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Rendering
-
 // InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (w *RenderWin) InitialFocus() {
@@ -918,314 +857,6 @@ func (w *RenderWin) InitialFocus() {
 		opent := now.Sub(RenderWinOpenTimer)
 		fmt.Printf("Win: %v took: %v to open\n", w.Name, opent)
 	}
-}
-
-func (w *RenderWin) RenderWindow() {
-
-}
-
-/*
-
-// UploadScRegion uploads image for one scene region on the screen, using
-// vpBBox bounding box for the scene, and winBBox bounding box for the
-// window -- called after re-rendering specific nodes to update only the
-// relevant part of the overall scene image
-func (w *RenderWin) UploadScRegion(sc *Scene, vpBBox, winBBox image.Rectangle) {
-	// fmt.Printf("win upload vpbox: %v  winbox: %v\n", vpBBox, winBBox)
-	winrel := winBBox.Min.Sub(vpBBox.Min)
-	if !w.IsVisible() {
-		return
-	}
-	vpPixBB := sc.Pixels.Rect
-	inBB := vpBBox.Intersect(vpPixBB)
-	if inBB.Empty() {
-		return
-	}
-	vpBBox = inBB
-	winBBox = vpBBox.Add(winrel) // fix again
-	w.StageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	w.SetWinUpdating()
-	// pr := prof.Start("win.UploadScRegion")
-
-	idx, over := w.UpdtRegs.Add(winBBox, sc)
-	if over {
-		w.ResetUpdateRegionsImpl()
-		if RenderTrace || WinEventTrace {
-			fmt.Printf("Win: %v region Sc %v, winbbox: %v reset updates\n", w.Name, sc.Path(), winBBox)
-		}
-	} else {
-		drw := w.GoosiWin.Drawer()
-		sc.Pixels.Rect = vpBBox
-		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
-		sc.Pixels.Rect = vpPixBB
-		if RenderTrace || WinEventTrace {
-			fmt.Printf("Win: %v uploaded region Sc %v, winbbox: %v to index: %d\n", w.Name, sc.Path(), winBBox, idx)
-		}
-
-		if w.DirDraws.Nodes != nil {
-			for _, dkv := range w.DirDraws.Nodes.Order {
-				dbb := dkv.Val
-				if dbb.In(winBBox) {
-					oridx := idx - w.UpdtRegs.StartIdx
-					w.UpdtRegs.MoveIdxToBeforeDir(oridx)
-				}
-			}
-		}
-	}
-	// pr.End()
-	w.ClearWinUpdating()
-	w.StageMgr.RenderCtx.Mu.Unlock()
-}
-
-// UploadSc uploads entire scene image for given scene -- e.g., for
-// popups etc updating separately
-func (w *RenderWin) UploadSc(sc *Scene, offset image.Point) {
-	vpr := sc.Pixels.Bounds()
-	winBBox := vpr.Add(offset)
-	if !w.IsVisible() {
-		return
-	}
-	w.StageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	w.SetWinUpdating()
-	idx := 0
-	drw := w.GoosiWin.Drawer()
-	if sc == w.Scene {
-		drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
-	} else {
-		// pr := prof.Start("win.UploadSc")
-		gii, _ := AsWidget(sc.This())
-		if gii != nil {
-			idx, _ = w.PopDraws.Add(gii, winBBox)
-			drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
-		}
-	}
-	if RenderTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploaded entire Sc, winbbox: %v to index: %d\n", w.Name, winBBox, idx)
-	}
-	w.ClearWinUpdating()
-	w.StageMgr.RenderCtx.Mu.Unlock()
-}
-
-// UploadAllScenes does a complete upload of all active scenes, in the
-// proper order, so as to completely refresh the window texture based on
-// everything rendered
-func (w *RenderWin) UploadAllScenes() {
-	if !w.IsVisible() {
-		return
-	}
-	w.StageMgr.RenderCtx.Mu.Lock()
-	if !w.IsVisible() { // could have closed while we waited for lock
-		w.StageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-	w.SetWinUpdating()
-	// pr := prof.Start("win.UploadAllScenes")
-	if RenderTrace || WinEventTrace {
-		fmt.Printf("Win: %v uploading full Sc, image bound: %v, updt: %v\n", w.Name, w.Scene.Pixels.Bounds(), updt)
-	}
-	w.ResetUpdateRegionsImpl()
-
-	// fmt.Printf("upload all views pop unlocked: %v\n", w.Name)
-	// pr.End()
-	w.ClearWinUpdating()
-	w.StageMgr.RenderCtx.Mu.Unlock() // need to unlock before publish
-}
-
-*/
-
-// IsWinUpdating checks if we are already updating window
-func (w *RenderWin) IsWinUpdating() bool {
-	return w.HasFlag(WinFlagUpdating)
-}
-
-// SetWinUpdating sets the window updating state to true if not already updating
-func (w *RenderWin) SetWinUpdating() {
-	w.SetFlag(true, WinFlagUpdating)
-}
-
-// ClearWinUpdating sets the window updating state to false if not already updating
-func (w *RenderWin) ClearWinUpdating() {
-	w.SetFlag(false, WinFlagUpdating)
-}
-
-/*
-// ResetUpdateRegions resets any existing window update regions and
-// grabs the current state of the window scene for subsequent rendering.
-// This is protected by update mutex and suitable for random calls eg.,
-// when a window is scrolling and positions are then invalid.
-func (w *RenderWin) ResetUpdateRegions() {
-	w.StageMgr.RenderCtx.Mu.Lock() // block all updates while we publish
-	w.ResetUpdateRegionsImpl()
-	w.StageMgr.RenderCtx.Mu.Unlock()
-}
-
-// ResetUpdateRegionsImpl resets any existing window update regions and
-// grabs the current state of the window and popup scenes for subsequent rendering.
-func (w *RenderWin) ResetUpdateRegionsImpl() {
-	w.UpdtRegs.Reset()
-	w.PopDraws.Reset()
-	drw := w.GoosiWin.Drawer()
-	drw.SetGoImage(0, 0, w.Scene.Pixels, vgpu.NoFlipY)
-	// then all the current popups
-	// fmt.Printf("upload all views pop locked: %v\n", w.Name)
-	if w.PopupStack != nil {
-		for _, pop := range w.PopupStack {
-			gii, _ := AsWidget(pop)
-			if gii != nil {
-				sc := gii.AsScene()
-				r := sc.Geom.Bounds()
-				idx, _ := w.PopDraws.Add(gii, sc.WinBBox)
-				drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
-				if RenderTrace {
-					fmt.Printf("Win: %v uploading popup stack Sc %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Name, sc.Path(), r.Min, sc.Pixels.Bounds(), idx)
-				}
-			}
-		}
-	}
-	if w.Popup != nil {
-		gii, _ := AsWidget(w.Popup)
-		if gii != nil {
-			sc := gii.AsScene()
-			r := sc.Geom.Bounds()
-			idx, _ := w.PopDraws.Add(gii, sc.WinBBox)
-			drw.SetGoImage(idx, 0, sc.Pixels, vgpu.NoFlipY)
-			if RenderTrace || WinEventTrace {
-				fmt.Printf("Win: %v uploading top popup Sc %v, win pos: %v, vp bounds: %v  idx: %d\n", w.Name, sc.Path(), r.Min, sc.Pixels.Bounds(), idx)
-			}
-		}
-	}
-}
-
-// Publish does the final step of updating of the window based on the current
-// texture (and overlay texture if active)
-func (w *RenderWin) Publish() {
-	if !w.IsVisible() || w.GoosiWin.IsMinimized() {
-		if WinEventTrace {
-			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Name)
-		}
-		return
-	}
-	w.StageMgr.RenderCtx.Mu.Lock() // block all updates while we publish
-	if !w.IsVisible() {            // could have closed while we waited for lock
-		if WinEventTrace {
-			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Name)
-		}
-		w.StageMgr.RenderCtx.Mu.Unlock()
-		return
-	}
-
-	// note: this is key for finding redundant updates!
-	if WinPublishTrace {
-		fmt.Printf("\n\n###################################\n%v\n", string(debug.Stack()))
-	}
-
-	w.SetWinUpdating()
-	if Update2DTrace || WinEventTrace {
-		fmt.Printf("Win %v doing publish\n", w.Name)
-	}
-	// pr := prof.Start("win.Publish")
-
-	// note: vulkan complains about different threads for rendering but should be ok.
-	// can't use RunOnWin method because it locks for main thread windows.
-	// w.GoosiWin.RunOnWin(func() {})
-	// and using RunOnMain makes the thing hella slow -- like opengl -- that was the issue there!
-	// goosi.TheApp.RunOnMain(func() {
-
-	// if w.Sprites.Modified || w.Sprites.HasSizeChanged() {
-	// 	w.ConfigSprites()
-	// 	w.Sprites.Modified = false
-	// }
-
-	drw := w.GoosiWin.Drawer()
-	vpv := drw.GetImageVal(0).Texture
-	if !vpv.HasFlag(Active) {
-		if w.Scene.Pixels == nil {
-			if Update2DTrace {
-				fmt.Printf("Win %s didn't have active image, scene is nil\n", w.Name)
-			}
-			w.ClearWinUpdating()
-			w.StageMgr.RenderCtx.Mu.Unlock()
-			return
-		} else {
-			if Update2DTrace {
-				fmt.Printf("Win %s didn't have active image, setting to: %v\n", w.Name, w.Scene.Pixels.Bounds())
-			}
-			drw.SetGoImage(0, 0, w.Scene.Pixels, vgpu.NoFlipY)
-		}
-	}
-	drw.SyncImages()
-	drw.StartDraw(0)
-	drw.UseTextureSet(0)
-	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
-	if len(w.UpdtRegs.BeforeDir) > 0 {
-		drw.UseTextureSet(1)
-		w.UpdtRegs.DrawImages(drw, true) // before direct
-		drw.UseTextureSet(0)
-	}
-	w.DirDraws.DrawImages(drw)
-	w.PopDraws.DrawImages(drw)
-
-	drw.UseTextureSet(1)
-	w.UpdtRegs.DrawImages(drw, false) // after direct
-
-	drw.UseTextureSet(2)
-	w.DrawSprites()
-
-	drw.EndDraw()
-
-	if WinDrawTrace { // debugging color overlay
-		var clrs [16]color.RGBA
-		cmap := colormap.AvailMaps["ROYGBIV"]
-		for i := 0; i < 16; i++ {
-			clrs[i] = cmap.Map(float64(i) / 16.0)
-			clrs[i].A = 16
-		}
-		wu := &w.UpdtRegs
-		if wu.Updates != nil {
-			drw.StartFill()
-			for i, kv := range wu.Updates.Order {
-				winBBox := kv.Key
-				drw.FillRect(clrs[i], winBBox, draw.Over)
-			}
-			drw.EndFill()
-		}
-	}
-	// })
-
-	// 	if RenderTrace {
-	// 		fmt.Printf("Win %v did publish\n", w.Name)
-	// 	}
-	// pr.End()
-
-	w.ClearWinUpdating()
-	w.StageMgr.RenderCtx.Mu.Unlock()
-}
-
-*/
-
-// AddDirectUploader adds given node to those that have a DirectWinUpload method
-// and directly render to the Drawer Texture via their own method.
-// This is for gi3d.Scene for example.  Returns the index of the image to upload to.
-func (w *RenderWin) AddDirectUploader(node Widget) int {
-	w.StageMgr.RenderCtx.Mu.Lock()
-	idx, _ := w.DirDraws.Add(node, image.Rectangle{})
-	w.StageMgr.RenderCtx.Mu.Unlock()
-	return idx
-}
-
-// DeleteDirectUploader removes given node to those that have a DirectWinUpload method.
-func (w *RenderWin) DeleteDirectUploader(node Widget) {
-	w.StageMgr.RenderCtx.Mu.Lock()
-	// w.DirDraws.Nodes.DeleteKey(node.AsWidget())
-	w.StageMgr.RenderCtx.Mu.Unlock()
 }
 
 /*
@@ -1714,17 +1345,15 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		// case *mouse.Event:
 		// todo:
 		// if bitflag.HasAllAtomic(&w.Flag, WinFlagGotPaint), WinFlagGotFocus)) {
-		if w.HasFlag(WinFlagDoFullRender) {
-			w.SetFlag(false, WinFlagDoFullRender)
-			// if we are getting mouse input, and still haven't done this, do it..
-			// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
-			// if w.Scene.Geom.Size != w.GoosiWin.Size() {
-			// 	w.Resized(w.GoosiWin.Size())
-			// } else {
-			// 	w.FullReRender()
-			// }
-			w.SendShowEvent() // happens AFTER full render
-		}
+		// if we are getting mouse input, and still haven't done this, do it..
+		// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
+		// if w.Scene.Geom.Size != w.GoosiWin.Size() {
+		// 	w.Resized(w.GoosiWin.Size())
+		// } else {
+		// 	w.FullReRender()
+		// }
+		// w.SendShowEvent() // happens AFTER full render
+		// }
 		// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
 		// w.EventMgr.ActivateStartFocus()
 		// }

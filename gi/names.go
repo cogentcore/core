@@ -20,11 +20,6 @@ type FontName string
 // automatic method calling.
 type FileName string
 
-// // IconName is used to specify an icon -- currently just the unique name of
-// // the icon -- automatically provides a chooser menu for icons using ValueView
-// // system
-// type IconName string
-
 // KeyMapName has an associated ValueView for selecting from the list of
 // available key map names, for use in preferences etc.
 type KeyMapName string

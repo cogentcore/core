@@ -218,6 +218,19 @@ func (st *MainStage) Resize(sz image.Point) {
 	}
 }
 
+// DoUpdate calls DoUpdate on our Scene and UpdateAll on our Popups
+// returns stageMods = true if any Popup Stages have been modified
+// and sceneMods = true if any Scenes have been modified.
+func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
+	if st.Scene == nil {
+		return
+	}
+	stageMods, sceneMods = st.PopupMgr.UpdateAll()
+	scMod := st.Scene.DoUpdate()
+	sceneMods = sceneMods || scMod
+	return
+}
+
 func (st *MainStage) StageAdded(smi StageMgr) {
 	st.StageMgr = smi.AsMainMgr()
 	// todo: ?

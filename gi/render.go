@@ -283,13 +283,16 @@ func (sc *Scene) DoUpdate() bool {
 	case sc.HasFlag(ScNeedsRebuild):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
+		sc.SetFlag(true, ScImageUpdated)
 	case sc.HasFlag(ScNeedsLayout):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.Frame.LayoutRenderTree(sc)
+		sc.SetFlag(true, ScImageUpdated)
 	case sc.HasFlag(ScNeedsRender):
 		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
+		sc.SetFlag(true, ScImageUpdated)
 	}
 	return true
 }

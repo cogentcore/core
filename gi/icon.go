@@ -16,26 +16,6 @@ import (
 	"golang.org/x/image/draw"
 )
 
-// // SetIcon sets the icon by name into given Icon wrapper, returning error
-// // message if not found etc, and returning true if a new icon was actually set
-// // -- does nothing if IconNm is already == icon name and has children, and deletes
-// // children if name is nil / none (both cases return false for new icon)
-// func (inm IconName) SetIcon(ic *Icon) (bool, error) {
-// 	return ic.SetIcon(string(inm))
-// }
-
-// // IsNil tests whether the icon name is empty, 'none' or 'nil' -- indicates to
-// // not use a icon
-// func (inm IconName) IsNil() bool {
-// 	return inm == "" || inm == "none" || inm == "nil"
-// }
-
-// // IsValid tests whether the icon name is valid -- represents a non-nil icon
-// // available in the current or default icon set
-// func (inm IconName) IsValid() bool {
-// 	return TheIconMgr.IsValid(string(inm))
-// }
-
 // Icon contains a svg.SVG element.
 // The rendered version is cached for a given size.
 type Icon struct {
