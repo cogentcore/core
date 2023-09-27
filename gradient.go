@@ -23,8 +23,8 @@ type Gradient struct {
 	// whether the gradient is a radial gradient (as opposed to a linear one)
 	Radial bool `desc:"whether the gradient is a radial gradient (as opposed to a linear one)"`
 
-	// the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)
-	Points mat32.Box2 `desc:"the high and low points for linear gradients (x1, x2, y1, and y2 in SVG)"`
+	// the bounds for linear gradients (x1, y1, x2, and y2 in SVG)
+	Bounds mat32.Box2 `desc:"the bounds for linear gradients (x1, y1, x2, and y2 in SVG)"`
 
 	// the center point for radial gradients (cx and cy in SVG)
 	Center mat32.Vec2 `desc:"the center point for radial gradients (cx and cy in SVG)"`
@@ -37,9 +37,6 @@ type Gradient struct {
 
 	// the stops of the gradient
 	Stops []GradientStop `desc:"the stops of the gradient"`
-
-	// the bounds of the gradient
-	Bounds mat32.Box2 `desc:"the bounds of the gradient"`
 
 	// the matrix for the gradient
 	Matrix mat32.Mat2 `desc:"the matrix for the gradient"`
@@ -63,16 +60,16 @@ type GradientStop struct {
 type SpreadMethods int32 //enums:enum
 
 const (
-	// SpreadPad indicates to have the final color of the gradient fill
+	// PadSpread indicates to have the final color of the gradient fill
 	// the object beyond the end of the gradient.
-	SpreadPad SpreadMethods = iota
-	// SpreadReflect indicates to have a gradient repeat in reverse order
+	PadSpread SpreadMethods = iota
+	// ReflectSpread indicates to have a gradient repeat in reverse order
 	// (offset 1 to 0) to fully fill an object beyond the end of the gradient.
-	SpreadReflect
-	// SpreadRepeat indicates to have a gradient continue in its original order
+	ReflectSpread
+	// RepeatSpread indicates to have a gradient continue in its original order
 	// (offset 0 to 1) by jumping back to the start to fully fill an object beyond
 	// the end of the gradient.
-	SpreadRepeat
+	RepeatSpread
 )
 
 // GradientUnits are the types of SVG gradient units
@@ -113,7 +110,7 @@ func (g *Gradient) CopyStopsFrom(cp *Gradient) {
 // LinearGradient returns a new linear gradient
 func LinearGradient() *Gradient {
 	return &Gradient{
-		Spread: SpreadPad,
+		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
@@ -123,14 +120,16 @@ func LinearGradient() *Gradient {
 func RadialGradient() *Gradient {
 	return &Gradient{
 		Radial: true,
-		Spread: SpreadPad,
+		Spread: PadSpread,
 		Matrix: mat32.Identity2D(),
 		Bounds: mat32.NewBox2(mat32.Vec2{}, mat32.Vec2{1, 1}),
 	}
 }
 
-// SetGradientPoints sets UserSpaceOnUse points for gradient based on given bounding box
-func (g *Gradient) SetGradientPoints(bbox mat32.Box2) {
+// SetGradientPoints sets the bounds of the gradient based on the given bounding
+// box, taking into account radial gradients and a standard linear left-to-right
+// gradient direction. It also sets the type of units to [UserSpaceOnUse].
+func (g *Gradient) SetBounds(bbox mat32.Box2) {
 	g.Units = UserSpaceOnUse
 	if g.Radial {
 		g.Center = bbox.Min.Add(bbox.Max).MulScalar(.5)
@@ -138,7 +137,37 @@ func (g *Gradient) SetGradientPoints(bbox mat32.Box2) {
 		g.Radius = 0.5 * mat32.Max(bbox.Max.X-bbox.Min.X, bbox.Max.Y-bbox.Min.Y)
 	} else {
 		g.Bounds = bbox
-		g.Bounds.Max.Y = g.Bounds.Min.Y // linear R-L
+		g.Bounds.Max.Y = g.Bounds.Min.Y // linear L-R
+	}
+}
+
+// Points returns the points of the gradient as an array of 5 floats.
+// If the gradient is radial, the points are of the form:
+//
+//	[cx, cy, fx, fy, r]
+//
+// If the gradient is linear, the points are of the form:
+//
+//	[x1, y1, x2, y2, 0]
+func (g *Gradient) Points() [5]float64 {
+	if g.Radial {
+		return [5]float64{float64(g.Center.X), float64(g.Center.Y), float64(g.Focal.X), float64(g.Focal.Y), float64(g.Radius)}
+	}
+	return [5]float64{float64(g.Bounds.Min.X), float64(g.Bounds.Min.Y), float64(g.Bounds.Max.X), float64(g.Bounds.Max.Y), 0}
+}
+
+// Rasterx returns the gradient as a [rasterx.Gradient]
+func (g *Gradient) Rasterx() *rasterx.Gradient {
+	r := &rasterx.Gradient{
+		Points:   g.Points(),
+		Stops:    make([]rasterx.GradStop, len(g.Stops)),
+		Matrix:   MatToRasterx(&g.Matrix),
+		Spread:   rasterx.SpreadMethod(g.Spread), // we have the same constant values, so this is okay
+		Units:    rasterx.GradientUnits(g.Units), // we have the same constant values, so this is okay
+		IsRadial: g.Radial,
+	}
+	for i, stop := range g.Stops {
+		r.Stops[i] = stop.Rasterx()
 	}
 }
 
@@ -159,12 +188,6 @@ func (g *GradientStop) Rasterx() rasterx.GradStop {
 		Offset:    float64(g.Offset),
 		Opacity:   float64(g.Opacity),
 	}
-}
-
-// Rasterx returns the gradient as a [rasterx.Gradient]
-func (g *Gradient) Rasterx() *rasterx.Gradient {
-	return &rasterx.Gradient{}
-
 }
 
 // RenderColor gets the color for rendering, applying opacity and bounds for
