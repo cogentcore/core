@@ -90,7 +90,7 @@ func VersionFileString(c *config.Config) (string, error) {
 	b.WriteString("\t// Version is the version of this package being used\n")
 	b.WriteString("\tVersion = \"" + c.Version + "\"\n")
 
-	out, err := xe.Output(xe.Minor(), "git", "rev-parse", "--short", "HEAD")
+	out, err := xe.Minor().Output("git", "rev-parse", "--short", "HEAD")
 	if err != nil {
 		return "", fmt.Errorf("error getting previous git commit: %w", err)
 	}
@@ -111,16 +111,15 @@ func VersionFileString(c *config.Config) (string, error) {
 // changes that should have already been made by
 // [UpdateVersion].
 func PushVersionFileGit(c *config.Config) error {
-	m := xe.Major()
-	err := xe.Run(m, "git", "add", c.Release.VersionFile)
+	err := xe.Run("git", "add", c.Release.VersionFile)
 	if err != nil {
 		return fmt.Errorf("error adding version file: %w", err)
 	}
-	err = xe.Run(m, "git", "commit", "-am", "updated version to "+c.Version)
+	err = xe.Run("git", "commit", "-am", "updated version to "+c.Version)
 	if err != nil {
 		return fmt.Errorf("error commiting release commit: %w", err)
 	}
-	err = xe.Run(m, "git", "push")
+	err = xe.Run("git", "push")
 	if err != nil {
 		return fmt.Errorf("error pushing commit: %w", err)
 	}

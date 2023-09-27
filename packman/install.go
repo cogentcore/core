@@ -43,7 +43,7 @@ func InstallPackage(pkg Package) error {
 		return fmt.Errorf("error: the requested package (%s) does not support your operating system (%s)", pkg.Name, runtime.GOOS)
 	}
 	for _, command := range commands {
-		err := xe.Run(xe.Major(), command.Name, command.Args...)
+		err := xe.Run(command.Name, command.Args...)
 		if err != nil {
 			return fmt.Errorf("error installing %s: %w", pkg.Name, err)
 		}
@@ -81,10 +81,10 @@ func InstallLocal(c *config.Config) error {
 // InstallLocalDesktop builds and installs an executable for the package at the given path for the given desktop platform.
 // InstallLocalDesktop does not check whether operating systems are valid, so it should be called through Install in almost all cases.
 func InstallLocalDesktop(pkgPath string, osName string) error {
-	m := xe.Major()
-	m.Env["GOOS"] = osName
-	m.Env["GOARCH"] = runtime.GOARCH
-	err := xe.Run(m, "go", "install", pkgPath)
+	xc := xe.Major()
+	xc.Env["GOOS"] = osName
+	xc.Env["GOARCH"] = runtime.GOARCH
+	err := xc.Run("go", "install", pkgPath)
 	if err != nil {
 		return fmt.Errorf("error installing on platform %s/%s: %w", osName, runtime.GOARCH, err)
 	}
