@@ -39,7 +39,7 @@ func (pm *PopupStageMgr) HandleEvent(evi goosi.Event) {
 			return
 		}
 		if tb.ClickOff {
-			if evi.Type() == goosi.MouseEvent {
+			if evi.Type() == goosi.MouseButtonEvent {
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
 			}

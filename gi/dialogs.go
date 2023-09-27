@@ -216,7 +216,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 		}
 	})
 	// this is not a good idea
-	// winwe.AddFunc(dlg.Frame.This(), goosi.MouseEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	// winwe.AddFunc(dlg.Frame.This(), goosi.MouseButtonEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {

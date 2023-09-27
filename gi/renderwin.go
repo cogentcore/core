@@ -62,15 +62,6 @@ type RenderContext struct {
 }
 
 var (
-	// EventSkipLagMSec is the number of milliseconds of lag between the time the
-	// event was sent to the time it is being processed, above which a repeated
-	// event type (scroll, drag, resize) is skipped
-	EventSkipLagMSec = 50
-
-	// FilterLaggyKeyEvents -- set to true to apply laggy filter to KeyEvents
-	// (normally excluded)
-	FilterLaggyKeyEvents = false
-
 	// DragStartMSec is the number of milliseconds to wait before initiating a
 	// regular mouse drag event (as opposed to a basic mouse.Press)
 	DragStartMSec = 50
@@ -236,10 +227,6 @@ const (
 
 	// WinFlagIsResizing is atomic flag indicating window is resizing
 	WinFlagIsResizing
-
-	// WinFlagGotPaint have we received our first paint event yet?
-	// ignore other window events before this point
-	WinFlagGotPaint
 
 	// WinFlagGotFocus indicates that have we received RenderWin focus
 	WinFlagGotFocus
@@ -770,41 +757,157 @@ func (w *RenderWin) SendCustomEvent(data any) {
 	goosi.SendCustomEvent(w.GoosiWin, data)
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Rendering
-
 // SendShowEvent sends the WinShowEvent to anyone listening -- only sent once..
 func (w *RenderWin) SendShowEvent() {
 	if w.HasFlag(WinFlagSentShow) {
 		return
 	}
 	w.SetFlag(true, WinFlagSentShow)
-	se := window.NewShowEvent()
+	se := window.NewEvent(window.Show)
 	se.Init()
 	w.StageMgr.HandleEvent(se)
 }
 
 // SendWinFocusEvent sends the RenderWinFocusEvent to widgets
 func (w *RenderWin) SendWinFocusEvent(act window.Actions) {
-	se := window.NewFocusEvent(act)
+	se := window.NewEvent(act)
 	se.Init()
 	w.StageMgr.HandleEvent(se)
 }
 
-// // FullReRender performs a full re-render of the window -- each node renders
-// // into its scene, aggregating into the main window scene, which will
-// // drive an UploadAllScenes call after all the rendering is done, and
-// // signal the publishing of the window after that
-// func (w *RenderWin) FullReRender() {
-// 	if !w.IsVisible() {
-// 		return
-// 	}
-// 	if WinEventTrace {
-// 		fmt.Printf("Win: %v FullReRender (w.Scene.SetNeedsFullRender)\n", w.Name)
-// 	}
-// 	w.Scene.SetNeedsFullRender()
-// 	w.InitialFocus()
-// }
+/////////////////////////////////////////////////////////////////////////////
+//                   Main Method: EventLoop
+
+// PollEvents first tells the main event loop to check for any gui events now
+// and then it runs the event processing loop for the RenderWin as long
+// as there are events to be processed, and then returns.
+func (w *RenderWin) PollEvents() {
+	goosi.TheApp.PollEvents()
+	for {
+		evi, has := w.GoosiWin.PollEvent()
+		if !has {
+			break
+		}
+		w.HandleEvent(evi)
+	}
+}
+
+// EventLoop runs the event processing loop for the RenderWin -- grabs oswin
+// events for the window and dispatches them to receiving nodes, and manages
+// other state etc (popups, etc).
+func (w *RenderWin) EventLoop() {
+	for {
+		if w.HasFlag(WinFlagStopEventLoop) {
+			w.SetFlag(false, WinFlagStopEventLoop)
+			break
+		}
+		evi := w.GoosiWin.NextEvent()
+		if w.HasFlag(WinFlagStopEventLoop) {
+			w.SetFlag(false, WinFlagStopEventLoop)
+			break
+		}
+		w.HandleEvent(evi)
+	}
+	if WinEventTrace {
+		fmt.Printf("Win: %v out of event loop\n", w.Name)
+	}
+	if w.HasFlag(WinFlagGoLoop) {
+		WinWait.Done()
+	}
+	// our last act must be self destruction!
+}
+
+// HandleEvent processes given goosi.Event
+func (w *RenderWin) HandleEvent(evi goosi.Event) {
+	et := evi.Type()
+	if et != goosi.WindowPaintEvent {
+		log.Printf("Got event: %v\n", et.String())
+	}
+	if et >= goosi.WindowEvent && et <= goosi.WindowPaintEvent {
+		w.HandleWindowEvents(evi)
+		return
+	}
+	w.StageMgr.HandleEvent(evi)
+}
+
+func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
+	ev := evi.(*window.Event)
+	et := evi.Type()
+	switch et {
+	case goosi.WindowPaintEvent:
+		evi.SetHandled()
+		w.RenderWindow()
+	case goosi.WindowResizeEvent:
+		evi.SetHandled()
+		w.Resized(w.GoosiWin.Size())
+	case goosi.WindowEvent:
+		switch ev.Action {
+		case window.Close:
+			// fmt.Printf("got close event for window %v \n", w.Name)
+			evi.SetHandled()
+			w.Closed()
+			w.SetFlag(true, WinFlagStopEventLoop)
+		case window.Minimize:
+			evi.SetHandled()
+			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
+			// and lets the size event go through when we come back later
+			// if goosi.TheApp.Platform().IsMobile() {
+			// 	w.Scene.Geom.Size = image.Point{}
+			// }
+		case window.Show:
+			evi.SetHandled()
+			// note that this is sent delayed by driver
+			if WinEventTrace {
+				fmt.Printf("Win: %v got show event\n", w.Name)
+			}
+			// if w.NeedWinMenuUpdate() {
+			// 	w.MainMenuUpdateRenderWins()
+			// }
+			w.SendShowEvent() // happens AFTER full render
+		case window.Move:
+			evi.SetHandled()
+			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
+			if WinGeomTrace {
+				log.Printf("WinGeomPrefs: recording from Move\n")
+			}
+			WinGeomMgr.RecordPref(w)
+		case window.Focus:
+			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+			if !w.HasFlag(WinFlagGotFocus) {
+				w.SetFlag(true, WinFlagGotFocus)
+				w.SendWinFocusEvent(window.Focus)
+				if WinEventTrace {
+					fmt.Printf("Win: %v got focus\n", w.Name)
+				}
+				// if w.NeedWinMenuUpdate() {
+				// 	w.MainMenuUpdateRenderWins()
+				// }
+			} else {
+				if WinEventTrace {
+					fmt.Printf("Win: %v got extra focus\n", w.Name)
+				}
+			}
+		case window.DeFocus:
+			if WinEventTrace {
+				fmt.Printf("Win: %v lost focus\n", w.Name)
+			}
+			w.SetFlag(false, WinFlagGotFocus)
+			w.SendWinFocusEvent(window.DeFocus)
+		case window.ScreenUpdate:
+			w.Resized(w.GoosiWin.Size())
+			// TODO: figure out how to restore this stuff without breaking window size on mobile
+
+			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// if !goosi.TheApp.NoScreens() {
+			// 	Prefs.UpdateAll()
+			// 	WinGeomMgr.RestoreAll()
+			// }
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//                   Rendering
 
 // InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
@@ -815,6 +918,10 @@ func (w *RenderWin) InitialFocus() {
 		opent := now.Sub(RenderWinOpenTimer)
 		fmt.Printf("Win: %v took: %v to open\n", w.Name, opent)
 	}
+}
+
+func (w *RenderWin) RenderWindow() {
+
 }
 
 /*
@@ -1336,55 +1443,6 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 }
 */
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Main Method: EventLoop
-
-// PollEvents first tells the main event loop to check for any gui events now
-// and then it runs the event processing loop for the RenderWin as long
-// as there are events to be processed, and then returns.
-func (w *RenderWin) PollEvents() {
-	goosi.TheApp.PollEvents()
-	for {
-		evi, has := w.GoosiWin.PollEvent()
-		if !has {
-			break
-		}
-		w.ProcessEvent(evi)
-	}
-}
-
-// EventLoop runs the event processing loop for the RenderWin -- grabs oswin
-// events for the window and dispatches them to receiving nodes, and manages
-// other state etc (popups, etc).
-func (w *RenderWin) EventLoop() {
-	for {
-		if w.HasFlag(WinFlagStopEventLoop) {
-			w.SetFlag(false, WinFlagStopEventLoop)
-			break
-		}
-		evi := w.GoosiWin.NextEvent()
-		if w.HasFlag(WinFlagStopEventLoop) {
-			w.SetFlag(false, WinFlagStopEventLoop)
-			break
-		}
-		w.ProcessEvent(evi)
-	}
-	if WinEventTrace {
-		fmt.Printf("Win: %v out of event loop\n", w.Name)
-	}
-	if w.HasFlag(WinFlagGoLoop) {
-		WinWait.Done()
-	}
-	// our last act must be self destruction!
-}
-
-// ProcessEvent processes given goosi.Event
-func (w *RenderWin) ProcessEvent(evi goosi.Event) {
-	et := evi.Type()
-	log.Printf("Got event: %v\n", et)
-	w.StageMgr.HandleEvent(evi)
-}
-
 /*
 
 
@@ -1407,11 +1465,6 @@ func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 					fmt.Printf("zombie popup: %v  cur: %v\n", dpop.Name(), cpop.Name())
 				}
 			}
-		}
-	}
-	if FilterLaggyKeyEvents || et != goosi.KeyEvent { // don't filter key events
-		if !w.FilterEvent(evi) {
-			return
 		}
 	}
 	w.EventMgr.LagLastSkipped = false
@@ -1493,7 +1546,7 @@ func (w *RenderWin) ProcessEvent(evi goosi.Event) {
 	}
 
 	w.EventMgr.MouseEventReset(evi)
-	if evi.Type() == goosi.MouseEvent {
+	if evi.Type() == goosi.MouseButtonEvent {
 		me := evi.(*mouse.Event)
 		if me.Action == mouse.Release {
 			w.SpriteDragging = ""
@@ -1635,138 +1688,11 @@ func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
 	return nil
 }
 
-// FilterEvent filters repeated laggy events -- key for responsive resize, scroll, etc
-// returns false if event should not be processed further, and true if it should.
-func (w *RenderWin) FilterEvent(evi goosi.Event) bool {
-	return false
-	/*
-		et := evi.Type()
-		if w.HasFlag(WinFlagGotPaint) && et == goosi.WindowPaintEvent && w.lastEt == goosi.WindowResizeEvent {
-			if WinEventTrace {
-				fmt.Printf("Win: %v skipping paint after resize\n", w.Name)
-			}
-			// w.Publish() // this is essential on mac for any paint event
-			w.SetFlag(true, WinFlagGotPaint)
-			return false // X11 always sends a paint after a resize -- we just use resize
-		}
-
-		if et != w.lastEt && w.lastEt != goosi.WindowResizeEvent {
-			return true // non-repeat
-		}
-
-		if et == goosi.WindowResizeEvent {
-			now := time.Now()
-			lag := now.Sub(evi.Time())
-			lagMs := lag / time.Millisecond
-			w.SetFlag(true, WinFlagIsResizing)
-			we := evi.(*window.Event)
-			// fmt.Printf("resize\n")
-			if lagMs > EventSkipLagMSec {
-				if WinEventTrace {
-					fmt.Printf("Win: %v skipped et %v lag %v size: %v\n", w.Name, et, lag, w.GoosiWin.Size())
-				}
-				w.EventMgr.LagLastSkipped = true
-				w.skippedResize = we
-				return false
-			} else {
-				we.SetHandled()
-				w.Resized(w.GoosiWin.Size())
-				w.EventMgr.LagLastSkipped = false
-				w.skippedResize = nil
-				return false
-			}
-		}
-		return w.EventMgr.FilterLaggyEvents(evi)
-	*/
-}
-
 // HiProrityEvents processes High-priority events for RenderWin.
 // RenderWin gets first crack at these events, and handles window-specific ones
 // returns true if processing should continue and false if was handled
 func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
-	switch e := evi.(type) {
-	case *window.Event:
-		switch e.Action {
-		// case window.Resize: // note: already handled earlier in lag process
-		case window.Close:
-			// fmt.Printf("got close event for window %v \n", w.Name)
-			w.Closed()
-			w.SetFlag(true, WinFlagStopEventLoop)
-			return false
-		case window.Minimize:
-			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
-			// and lets the size event go through when we come back later
-			// if goosi.TheApp.Platform().IsMobile() {
-			// 	w.Scene.Geom.Size = image.Point{}
-			// }
-		case window.Paint:
-			// fmt.Printf("got paint event for window %v \n", w.Name)
-			w.SetFlag(true, WinFlagGotPaint)
-			if w.HasFlag(WinFlagDoFullRender) {
-				w.SetFlag(false, WinFlagDoFullRender)
-				// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
-				// if w.Scene.Geom.Size != w.GoosiWin.Size() {
-				// 	w.Resized(w.GoosiWin.Size())
-				// } else {
-				// 	w.FullReRender() // note: this is currently needed for focus to actually
-				// 	// take effect in a popup, and also ensures dynamically sized elements are
-				// 	// properly sized.  It adds a bit of cost but really not that much and
-				// 	// probably worth it overall, even if we can fix the initial focus issue
-				// 	// w.InitialFocus()
-				// }
-			}
-			// w.Publish()
-		case window.Show:
-			// note that this is sent delayed by vkos
-			if WinEventTrace {
-				fmt.Printf("Win: %v got show event\n", w.Name)
-			}
-			// if w.NeedWinMenuUpdate() {
-			// 	w.MainMenuUpdateRenderWins()
-			// }
-			w.SendShowEvent() // happens AFTER full render
-		case window.Move:
-			e.SetHandled()
-			if w.HasFlag(WinFlagGotPaint) { // moves before paint are not accurate on X11
-				// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
-				if WinGeomTrace {
-					log.Printf("WinGeomPrefs: recording from Move\n")
-				}
-				WinGeomMgr.RecordPref(w)
-			}
-		case window.Focus:
-			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
-			if !w.HasFlag(WinFlagGotFocus) {
-				w.SetFlag(true, WinFlagGotFocus)
-				w.SendWinFocusEvent(window.Focus)
-				if WinEventTrace {
-					fmt.Printf("Win: %v got focus\n", w.Name)
-				}
-				// if w.NeedWinMenuUpdate() {
-				// 	w.MainMenuUpdateRenderWins()
-				// }
-			} else {
-				if WinEventTrace {
-					fmt.Printf("Win: %v got extra focus\n", w.Name)
-				}
-			}
-		case window.DeFocus:
-			if WinEventTrace {
-				fmt.Printf("Win: %v lost focus\n", w.Name)
-			}
-			w.SetFlag(false, WinFlagGotFocus)
-			w.SendWinFocusEvent(window.DeFocus)
-		case window.ScreenUpdate:
-			w.Resized(w.GoosiWin.Size())
-			// TODO: figure out how to restore this stuff without breaking window size on mobile
-
-			// WinGeomMgr.AbortSave() // anything just prior to this is sus
-			// if !goosi.TheApp.NoScreens() {
-			// 	Prefs.UpdateAll()
-			// 	WinGeomMgr.RestoreAll()
-			// }
-		}
-		return false // don't do anything else!
+	switch evi.(type) {
 	case *mouse.Event:
 		// if w.EventMgr.DNDStage == DNDStarted {
 		// 	w.DNDMoveEvent(e)

@@ -2221,7 +2221,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
-	svwe.AddFunc(goosi.MouseEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	svwe.AddFunc(goosi.MouseButtonEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		// if !svv.HasFocus() {

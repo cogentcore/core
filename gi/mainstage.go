@@ -118,6 +118,7 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 // RunWindow runs a Window with current settings.
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
+	st.Scene.Config()
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
@@ -227,6 +228,7 @@ func (st *MainStage) StageAdded(smi StageMgr) {
 	// }
 }
 
+// HandleEvent handles all the non-Window events
 func (st *MainStage) HandleEvent(evi goosi.Event) {
 	if st.Scene == nil {
 		return

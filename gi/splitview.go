@@ -614,7 +614,7 @@ func (sr *Splitter) SplitView() *SplitView {
 }
 
 func (sr *Splitter) MouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		srr := sr
 		if srr.IsDisabled() {

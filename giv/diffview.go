@@ -854,7 +854,7 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tvwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeDiffTextView).(*DiffTextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me) // gets our new one

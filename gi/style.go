@@ -204,8 +204,9 @@ func (wb *WidgetBase) SetStyle(sc *Scene) {
 // dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
 func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
 	if sc != nil {
-		if sc.RenderCtx != nil {
-			st.UnContext.DPI = sc.RenderCtx().LogicalDPI
+		rc := sc.RenderCtx()
+		if rc != nil {
+			st.UnContext.DPI = rc.LogicalDPI
 		}
 		if sc.RenderState.Image != nil {
 			sz := sc.Geom.Size // Render.Image.Bounds().Size()

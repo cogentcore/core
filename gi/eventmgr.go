@@ -390,7 +390,7 @@ func (em *EventMgr) MouseEvents(evi goosi.Event) {
 		em.ResetMouseMove()
 	}
 
-	if et == goosi.MouseEvent {
+	if et == goosi.MouseButtonEvent {
 		me := evi.(*mouse.Event)
 		em.LastModBits = me.Mods
 		em.LastSelMode = me.SelectMode()
@@ -1183,79 +1183,6 @@ func (em *EventMgr) InitialFocus() {
 			em.FocusNext(em.CurFocus())
 		}
 	}
-}
-
-///////////////////////////////////////////////////////////////////
-//   Filter Laggy Events
-
-// FilterLaggyEvents filters repeated laggy events -- key for responsive resize, scroll, etc
-// returns false if event should not be processed further, and true if it should.
-// Should only be called when the current event is the same type as last time.
-// Accumulates mouse deltas in LagSkipDeltaPos.
-func (em *EventMgr) FilterLaggyEvents(evi goosi.Event) bool {
-	et := evi.Type()
-	now := time.Now()
-	lag := now.Sub(evi.Time())
-	lagMs := int(lag / time.Millisecond)
-
-	switch et {
-	case goosi.MouseScrollEvent:
-		me := evi.(*mouse.ScrollEvent)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !em.LagLastSkipped {
-				em.LagSkipDeltaPos = me.Delta
-			} else {
-				em.LagSkipDeltaPos = em.LagSkipDeltaPos.Add(me.Delta)
-			}
-			em.LagLastSkipped = true
-			return false
-		} else {
-			if em.LagLastSkipped {
-				me.Delta = em.LagSkipDeltaPos.Add(me.Delta)
-			}
-			em.LagLastSkipped = false
-		}
-	case goosi.MouseDragEvent:
-		me := evi.(*mouse.Event)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !em.LagLastSkipped {
-				em.LagSkipDeltaPos = me.Start
-			}
-			em.LagLastSkipped = true
-			return false
-		} else {
-			if em.LagLastSkipped {
-				me.Start = em.LagSkipDeltaPos
-			}
-			em.LagLastSkipped = false
-		}
-	case goosi.MouseMoveEvent:
-		me := evi.(*mouse.Event)
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			if !em.LagLastSkipped {
-				em.LagSkipDeltaPos = me.Start
-			}
-			em.LagLastSkipped = true
-			return false
-		} else {
-			if em.LagLastSkipped {
-				me.Start = em.LagSkipDeltaPos
-			}
-			em.LagLastSkipped = false
-		}
-	case goosi.KeyEvent:
-		if lagMs > EventSkipLagMSec {
-			// fmt.Printf("skipped et %v lag %v\n", et, lag)
-			em.LagLastSkipped = true
-			return false
-		} else {
-			em.LagLastSkipped = false
-		}
-	}
-	return true
 }
 
 ///////////////////////////////////////////////////////////////////

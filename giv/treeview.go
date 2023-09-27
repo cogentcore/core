@@ -1835,7 +1835,7 @@ func (tv *TreeView) TreeViewEvents() {
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lblwe.AddFunc(goosi.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lblwe.AddFunc(goosi.MouseButtonEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			tvvi := lb.Parent().Parent()
 			if tvvi == nil || tvvi.This() == nil { // deleted

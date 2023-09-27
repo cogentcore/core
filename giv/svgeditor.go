@@ -80,7 +80,7 @@ func (sve *Editor) EditorEvents() {
 		// ssvg.SetFullReRender()
 		// ssvg.UpdateSig()
 	})
-	svewe.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	svewe.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		ssvg := sve
 		if ssvg.SetDragCursor {

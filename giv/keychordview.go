@@ -120,7 +120,7 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 }
 
 func (kc *KeyChordEdit) MouseEvent() {
-	kcwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kcwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == mouse.Press && me.Button == mouse.Left {

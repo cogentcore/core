@@ -350,7 +350,7 @@ func (lb *Label) HoverEvent(we *WidgetEvents) {
 }
 
 func (lb *Label) MouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		llb := AsLabel(recv)
 		hasLinks := len(llb.TextRender.Links) > 0

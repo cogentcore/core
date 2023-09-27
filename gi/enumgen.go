@@ -2193,11 +2193,11 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 // WinFlagsN is the highest valid value
 // for type WinFlags, plus one.
-const WinFlagsN WinFlags = 12
+const WinFlagsN WinFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -2207,14 +2207,13 @@ func _WinFlagsNoOp() {
 	_ = x[WinFlagUpdating-(1)]
 	_ = x[WinFlagIsClosing-(2)]
 	_ = x[WinFlagIsResizing-(3)]
-	_ = x[WinFlagGotPaint-(4)]
-	_ = x[WinFlagGotFocus-(5)]
-	_ = x[WinFlagSentShow-(6)]
-	_ = x[WinFlagGoLoop-(7)]
-	_ = x[WinFlagStopEventLoop-(8)]
-	_ = x[WinFlagDoFullRender-(9)]
-	_ = x[WinFlagFocusActive-(10)]
-	_ = x[WinFlagSelectionMode-(11)]
+	_ = x[WinFlagGotFocus-(4)]
+	_ = x[WinFlagSentShow-(5)]
+	_ = x[WinFlagGoLoop-(6)]
+	_ = x[WinFlagStopEventLoop-(7)]
+	_ = x[WinFlagDoFullRender-(8)]
+	_ = x[WinFlagFocusActive-(9)]
+	_ = x[WinFlagSelectionMode-(10)]
 }
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
@@ -2226,22 +2225,20 @@ var _WinFlagsNameToValueMap = map[string]WinFlags{
 	`winflagisclosing`:     2,
 	`WinFlagIsResizing`:    3,
 	`winflagisresizing`:    3,
-	`WinFlagGotPaint`:      4,
-	`winflaggotpaint`:      4,
-	`WinFlagGotFocus`:      5,
-	`winflaggotfocus`:      5,
-	`WinFlagSentShow`:      6,
-	`winflagsentshow`:      6,
-	`WinFlagGoLoop`:        7,
-	`winflaggoloop`:        7,
-	`WinFlagStopEventLoop`: 8,
-	`winflagstopeventloop`: 8,
-	`WinFlagDoFullRender`:  9,
-	`winflagdofullrender`:  9,
-	`WinFlagFocusActive`:   10,
-	`winflagfocusactive`:   10,
-	`WinFlagSelectionMode`: 11,
-	`winflagselectionmode`: 11,
+	`WinFlagGotFocus`:      4,
+	`winflaggotfocus`:      4,
+	`WinFlagSentShow`:      5,
+	`winflagsentshow`:      5,
+	`WinFlagGoLoop`:        6,
+	`winflaggoloop`:        6,
+	`WinFlagStopEventLoop`: 7,
+	`winflagstopeventloop`: 7,
+	`WinFlagDoFullRender`:  8,
+	`winflagdofullrender`:  8,
+	`WinFlagFocusActive`:   9,
+	`winflagfocusactive`:   9,
+	`WinFlagSelectionMode`: 10,
+	`winflagselectionmode`: 10,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
@@ -2249,14 +2246,13 @@ var _WinFlagsDescMap = map[WinFlags]string{
 	1:  `WinFlagUpdating is atomic flag around global updating -- routines can check IsWinUpdating and bail`,
 	2:  `WinFlagIsClosing is atomic flag indicating window is closing`,
 	3:  `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	4:  `WinFlagGotPaint have we received our first paint event yet? ignore other window events before this point`,
-	5:  `WinFlagGotFocus indicates that have we received RenderWin focus`,
-	6:  `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	7:  `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	8:  `WinFlagStopEventLoop is set when event loop stop is requested`,
-	9:  `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
-	10: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	11: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	4:  `WinFlagGotFocus indicates that have we received RenderWin focus`,
+	5:  `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
+	6:  `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	7:  `WinFlagStopEventLoop is set when event loop stop is requested`,
+	8:  `WinFlagDoFullRender is set at event loop startup to trigger a full render once the window is properly shown`,
+	9:  `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
+	10: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{
@@ -2264,14 +2260,13 @@ var _WinFlagsMap = map[WinFlags]string{
 	1:  `WinFlagUpdating`,
 	2:  `WinFlagIsClosing`,
 	3:  `WinFlagIsResizing`,
-	4:  `WinFlagGotPaint`,
-	5:  `WinFlagGotFocus`,
-	6:  `WinFlagSentShow`,
-	7:  `WinFlagGoLoop`,
-	8:  `WinFlagStopEventLoop`,
-	9:  `WinFlagDoFullRender`,
-	10: `WinFlagFocusActive`,
-	11: `WinFlagSelectionMode`,
+	4:  `WinFlagGotFocus`,
+	5:  `WinFlagSentShow`,
+	6:  `WinFlagGoLoop`,
+	7:  `WinFlagStopEventLoop`,
+	8:  `WinFlagDoFullRender`,
+	9:  `WinFlagFocusActive`,
+	10: `WinFlagSelectionMode`,
 }
 
 // String returns the string representation
@@ -2625,13 +2620,13 @@ var _StageTypesNameToValueMap = map[string]StageTypes{
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
-	0: `Window displays Scene in a full window`,
-	1: `Dialog displays Scene in a smaller dialog window above the Window (can alternatively be in its own OS Window)`,
-	2: `Sheet displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide`,
-	3: `Menu displays Scene as a panel on top of window`,
-	4: `Tooltip displays Scene as a tooltip`,
-	5: `Snackbar displays Scene as a Snackbar`,
-	6: `Chooser displays Scene as a dynamic chooser for completing or correcting text`,
+	0: `Window is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, OwnWin).`,
+	1: `Dialog is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
+	2: `Sheet is a MainStage that displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide of the RenderWin main window. It can be Modal or not.`,
+	3: `Menu is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
+	4: `Tooltip is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
+	5: `Snackbar is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
+	6: `Chooser is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
 }
 
 var _StageTypesMap = map[StageTypes]string{

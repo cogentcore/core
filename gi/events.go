@@ -46,7 +46,7 @@ func (wb *WidgetBase) WidgetEvents(we *WidgetEvents) {
 
 // WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
 func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		wbb := AsWidgetBase(recv)
 		if wbb.IsDisabled() {
 			return
@@ -107,7 +107,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	wbwe.AddFunc(goosi.MouseEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	wbwe.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		if sel {
 			if me.Action == mouse.Press && me.Button == mouse.Left {

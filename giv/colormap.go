@@ -81,7 +81,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 // MouseEvent handles button MouseEvent
 func (cv *ColorMapView) MouseEvent() {
-	cvwe.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	cvwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		cvv := recv.(*ColorMapView)
 		if me.Button == mouse.Left {

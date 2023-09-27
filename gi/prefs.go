@@ -1008,12 +1008,6 @@ type PrefsDetailed struct {
 	// [def: 30] [min: 5] [step: 1] the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
 
-	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped
-	EventSkipLagMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds of lag between the time the event was sent to the time it is being processed, above which a repeated event type (scroll, drag, resize) is skipped"`
-
-	// [def: false] set to true to apply laggy filter to KeyEvents (normally excluded)
-	FilterLaggyKeyEvents bool `def:"false" desc:"set to true to apply laggy filter to KeyEvents (normally excluded)"`
-
 	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
 	DragStartMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
 
@@ -1125,7 +1119,6 @@ func (pf *PrefsDetailed) Save() error {
 // defaults
 func (pf *PrefsDetailed) Defaults() {
 	pf.MenuMaxHeight = MenuMaxHeight
-	pf.EventSkipLagMSec = EventSkipLagMSec
 	pf.DragStartMSec = DragStartMSec
 	pf.DragStartPix = DragStartPix
 	pf.DNDStartMSec = DNDStartMSec
@@ -1153,7 +1146,6 @@ func (pf *PrefsDetailed) Defaults() {
 // Apply detailed preferences to all the relevant settings.
 func (pf *PrefsDetailed) Apply() {
 	MenuMaxHeight = pf.MenuMaxHeight
-	EventSkipLagMSec = pf.EventSkipLagMSec
 	DragStartMSec = pf.DragStartMSec
 	DragStartPix = pf.DragStartPix
 	DNDStartMSec = pf.DNDStartMSec

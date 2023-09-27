@@ -4759,7 +4759,7 @@ func (tv *TextView) TextViewEvents(we *WidgetEvents) {
 	tv.HoverTooltipEvent(we)
 	tv.MouseMoveEvent(we)
 	tv.MouseDragEvent(we)
-	we.AddFunc(goosi.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		me := d.(*mouse.Event)
 		txf.MouseEvent(me)
