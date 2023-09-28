@@ -7,6 +7,7 @@ package icons
 
 import (
 	"embed"
+	"path/filepath"
 	"strings"
 
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
@@ -52,13 +53,17 @@ func (i Icon) IsNil() bool {
 	return i == "" || i == None || i == "nil"
 }
 
+func (i Icon) Filename() string {
+	return filepath.Join("svg", string(i)) + ".svg"
+}
+
 // IsValid returns whether the icon name corresponds to
 // a valid existing icon.
 func (i Icon) IsValid() bool {
 	if i.IsNil() {
 		return false
 	}
-	ex, _ := dirs.FileExistsFS(Icons, string(i))
+	ex, _ := dirs.FileExistsFS(Icons, i.Filename())
 	return ex
 }
 
