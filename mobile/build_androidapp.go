@@ -22,6 +22,7 @@ import (
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/binres"
 	"goki.dev/grog"
+	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -77,7 +78,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		toolchain := NDK.Toolchain(t.Arch)
 		libPath := "lib/" + toolchain.ABI + "/lib" + libName + ".so"
 		libAbsPath := filepath.Join(TmpDir, libPath)
-		if err := Mkdir(c, filepath.Dir(libAbsPath)); err != nil {
+		if err := xe.MkdirAll(filepath.Dir(libAbsPath), 0755); err != nil {
 			return nil, err
 		}
 		err = GoBuild(
@@ -162,7 +163,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 	}
 	dexData, err := base64.StdEncoding.DecodeString(dexStr)
 	if err != nil {
-		log.Fatalf("internal error bad dexStr: %v", err)
+		log.Fatalf("internal error: bad dexStr: %v", err)
 	}
 	if _, err := w.Write(dexData); err != nil {
 		return nil, err
