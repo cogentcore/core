@@ -145,17 +145,17 @@ func (sv *SVG) DeleteAll() {
 	sv.Root.UpdateEnd(updt)
 }
 
-// ContextColor returns the current Color activated in the context.
+// Base returns the current Color activated in the context.
 // Color has support for special color names that are relative to
 // this current color.
-func (sv *SVG) ContextColor() color.RGBA {
+func (sv *SVG) Base() color.RGBA {
 	return sv.BgColor.Color
 }
 
-// ContextColorSpecByURL finds a Node by an element name (URL-like path), and
+// FullByURL finds a Node by an element name (URL-like path), and
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
-func (sv *SVG) ContextColorSpecByURL(url string) *gist.ColorSpec {
+func (sv *SVG) FullByURL(url string) *colors.Full {
 	if sv == nil {
 		return nil
 	}

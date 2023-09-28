@@ -615,7 +615,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 				mrk.RefPos.Set(rx, ry)
 				mrk.Size.Set(szx, szy)
 			case nm == "use":
-				link := gist.XMLAttr("href", se.Attr)
+				link := colors.XMLAttr("href", se.Attr)
 				itm := sv.FindNamedElement(link)
 				if itm != nil {
 					cln := itm.Clone().(Node)

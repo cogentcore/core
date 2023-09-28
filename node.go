@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
@@ -288,7 +289,7 @@ func (g *NodeBase) Init() {
 func (g *NodeBase) Style(sv *SVG) {
 	pc := &g.Paint
 	pc.Defaults()
-	ctxt := any(sv).(gist.Context)
+	ctxt := colors.Context(sv)
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg ki.Props
@@ -360,7 +361,6 @@ func (g *NodeBase) StyleCSS(sv *SVG, css ki.Props) {
 // IsDefs returns true if is in the Defs of parent SVG
 func (g *NodeBase) IsDefs() bool {
 	return g.Flags.HasFlag(IsDef)
-	return false
 }
 
 // LocalBBoxToWin converts a local bounding box to SVG coordinates
