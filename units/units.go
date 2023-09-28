@@ -18,8 +18,6 @@ Also supporting dp = density-independent pixel = 1/160 in
 */
 package units
 
-//go:generate enumgen generate
-
 // borrows from golang.org/x/exp/shiny/unit/ but extends with full range of
 // css-based viewport-dependent factors
 

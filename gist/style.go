@@ -4,8 +4,6 @@
 
 package gist
 
-//go:generate enumgen generate
-
 import (
 	"fmt"
 	"image/color"
