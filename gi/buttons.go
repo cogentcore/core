@@ -184,6 +184,7 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
 	if recfg {
+		fmt.Println("set icon:", bb.Icon)
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)

@@ -5,12 +5,13 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/icons"
 )
 
 func main() { gimain.Main(mainrun) }
 
 func mainrun() {
-	gi.WinEventTrace = true
+	// gi.WinEventTrace = true
 	// gi.EventTrace = true
 	// gi.LayoutTrace = true
 	// gi.RenderTrace = true
@@ -18,7 +19,10 @@ func mainrun() {
 	scene := gi.NewScene("hello")
 	gi.NewLabel(&scene.Frame, "label").SetText("Hello, World!")
 
-	but := gi.NewButton(&scene.Frame, "open-dialog").SetText("Open Dialog")
+	but := gi.NewButton(&scene.Frame, "open-dialog").
+		SetText("Open Dialog").
+		SetIcon(icons.OpenInNew)
+
 	but.OnClicked(func() {
 		fmt.Println("button clicked")
 		dialog := gi.NewScene("dialog")

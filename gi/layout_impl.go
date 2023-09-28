@@ -68,18 +68,23 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		if c == nil {
 			continue
 		}
-		ni := c.(Widget).AsWidget()
-		if ni == nil {
+		wi, ok := c.(Widget)
+		if !ok {
+			fmt.Printf("c is %+v\n", c)
 			continue
 		}
-		ni.LayState.UpdateSizes()
-		sumNeed = sumNeed.Add(ni.LayState.Size.Need)
-		sumPref = sumPref.Add(ni.LayState.Size.Pref)
-		maxNeed = maxNeed.Max(ni.LayState.Size.Need)
-		maxPref = maxPref.Max(ni.LayState.Size.Pref)
+		wb := wi.AsWidget()
+		if wb == nil {
+			continue
+		}
+		wb.LayState.UpdateSizes()
+		sumNeed = sumNeed.Add(wb.LayState.Size.Need)
+		sumPref = sumPref.Add(wb.LayState.Size.Pref)
+		maxNeed = maxNeed.Max(wb.LayState.Size.Need)
+		maxPref = maxPref.Max(wb.LayState.Size.Pref)
 
 		if LayoutTrace {
-			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), ni.Nm, ni.LayState.Size.Need.Dim(LaySummedDim(ly.Lay)), ni.LayState.Size.Pref.Dim(LaySummedDim(ly.Lay)))
+			fmt.Printf("Size:   %v Child: %v, need: %v, pref: %v\n", ly.Path(), wb.Nm, wb.LayState.Size.Need.Dim(LaySummedDim(ly.Lay)), wb.LayState.Size.Pref.Dim(LaySummedDim(ly.Lay)))
 		}
 	}
 	return

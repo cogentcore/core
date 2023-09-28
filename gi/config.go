@@ -85,6 +85,7 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx
 			ic.Style.Template = wb.Style.Template + ".icon"
 		}
 		ic.SetIcon(icnm)
+		ic.Config(wb.Sc)
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)

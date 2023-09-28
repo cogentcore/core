@@ -292,7 +292,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	}
 	win.GoosiWin.SetName(title)
 	win.GoosiWin.SetParent(win)
-	win.GoosiWin.SetFPS(1) // todo: debug mode!
+	// win.GoosiWin.SetFPS(1) // todo: debug mode!
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites

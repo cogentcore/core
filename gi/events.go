@@ -35,6 +35,9 @@ func (wb *WidgetBase) AddEvents(we *WidgetEvents) {
 	wb.WidgetEvents(we)
 }
 
+func (wb *WidgetBase) FilterEvents() {
+}
+
 // WidgetEvents adds the default events for Widget objects.
 // Any Widget implementing a custom AddEvents function
 // should first call this function.

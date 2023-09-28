@@ -1353,6 +1353,9 @@ type Space struct {
 	WidgetBase
 }
 
+// check for interface impl
+var _ Widget = (*Space)(nil)
+
 func (sp *Space) OnInit() {
 	sp.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.Width.SetCh(1)

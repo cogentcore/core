@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"goki.dev/colors"
 	"goki.dev/girl/gist"
@@ -64,10 +65,15 @@ func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 		ic.SVG.DeleteAll()
 		return false, nil
 	}
-	if ic.HasChildren() && ic.IconName == name {
+	if ic.SVG.Root.HasChildren() && ic.IconName == name {
 		return false, nil
 	}
-	err := ic.SVG.OpenFS(icons.Icons, string(ic.IconName))
+	fnm := name.Filename()
+	ic.SVG.Config(2, 2)
+	err := ic.SVG.OpenFS(icons.Icons, fnm)
+	if err != nil {
+		log.Println("error opening icon named:", fnm, err)
+	}
 	// pr := prof.Start("IconSetIcon")
 	// pr.End()
 	// err := TheIconMgr.SetIcon(ic, name)
@@ -82,6 +88,7 @@ func (ic *Icon) GetSize(sc *Scene, iter int) {
 	if iter > 0 {
 		return
 	}
+	ic.GetSizeFromWH(2, 2)
 	// todo: ?
 	// ic.SVG.Nm = ic.Nm
 	// ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
@@ -91,6 +98,8 @@ func (ic *Icon) SetStyle(sc *Scene) {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
+	ic.SVG.Norm = true
+	// ic.SVG.Fill = true
 	ic.SetStyleWidget(sc)
 	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	// todo: set ic.SVG style
@@ -147,6 +156,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	sv.Render()
 	ic.RendSize = sz
 	sv.Name = string(ic.IconName)
+	fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
 }
 
 func (ic *Icon) Render(sc *Scene) {
