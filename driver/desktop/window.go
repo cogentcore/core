@@ -416,7 +416,9 @@ func (w *windowImpl) Close() {
 	theApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
 		vk.DeviceWaitIdle(w.Surface.Device.Device)
-		w.DestroyGPUfunc()
+		if w.DestroyGPUfunc != nil {
+			w.DestroyGPUfunc()
+		}
 		w.Draw.Destroy()
 		w.Surface.Destroy()
 		w.glw.Destroy()
