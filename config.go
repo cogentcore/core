@@ -95,6 +95,13 @@ var MetaCmds = []*Cmd[*MetaConfig]{
 	},
 }
 
+// OnConfigurer represents a configuration object that specifies a method to
+// be called at the end of the [Config] function, with the command that has
+// been parsed as an argument.
+type OnConfigurer interface {
+	OnConfig(cmd string)
+}
+
 // Config is the main, high-level configuration setting function,
 // processing config files and command-line arguments in the following order:
 //   - Apply any `def:` field tag default values.
@@ -185,6 +192,9 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 	cmd, err = SetFromArgs(cfg, args, ErrNotFound, cmds...)
 	if err != nil {
 		errs = append(errs, err)
+	}
+	if cfer, ok := any(cfg).(OnConfigurer); ok {
+		cfer.OnConfig(cmd)
 	}
 	return cmd, errors.Join(errs...)
 }
