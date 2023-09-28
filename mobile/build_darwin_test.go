@@ -6,13 +6,13 @@ package mobile
 
 import (
 	"bytes"
-	"os"
 	"path/filepath"
 	"testing"
 	"text/template"
 
 	"goki.dev/goki/config"
 	"goki.dev/grease"
+	"goki.dev/xe"
 )
 
 func TestAppleBuild(t *testing.T) {
@@ -22,7 +22,7 @@ func TestAppleBuild(t *testing.T) {
 	c := &config.Config{}
 	grease.SetFromDefaults(c)
 	defer func() {
-		Xout = os.Stderr
+		xe.SetMajor(nil)
 		c.Build.PrintOnly = false
 		c.Build.Print = false
 	}()
@@ -45,7 +45,7 @@ func TestAppleBuild(t *testing.T) {
 	}
 	for _, test := range tests {
 		buf := new(bytes.Buffer)
-		Xout = buf
+		xe.SetMajor(xe.Major().SetStdout(buf).SetStderr(buf))
 		var tmpl *template.Template
 		if test.main {
 			c.Build.Output = "basic.app"
