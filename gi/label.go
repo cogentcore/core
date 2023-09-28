@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 
@@ -485,7 +484,6 @@ func (lb *Label) TextPos() mat32.Vec2 {
 }
 
 func (lb *Label) RenderLabel(sc *Scene) {
-	fmt.Println("label render in")
 	lb.GrabCurBackgroundColor()
 	rs, _, st := lb.RenderLock(sc)
 	defer lb.RenderUnlock(rs)
@@ -495,7 +493,6 @@ func (lb *Label) RenderLabel(sc *Scene) {
 }
 
 func (lb *Label) Render(sc *Scene) {
-	fmt.Println("label render")
 	wi := lb.This().(Widget)
 	if lb.PushBounds(sc) {
 		wi.FilterEvents()

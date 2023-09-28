@@ -65,6 +65,8 @@ func (wb *WidgetBase) BBoxes() image.Rectangle {
 func (wb *WidgetBase) ComputeBBoxesParts(sc *Scene, parBBox image.Rectangle, delta image.Point) {
 	wb.ComputeBBoxesBase(sc, parBBox, delta)
 	if wb.Parts != nil {
+		// this is happening before parts has done its own layout.
+		// set a breakpoint here -- probably do layout first then this
 		wb.Parts.This().(Widget).ComputeBBoxes(sc, parBBox, delta)
 	}
 }

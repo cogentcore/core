@@ -99,6 +99,7 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx
 			// any bugs show up. TODO: figure out a good long-term solution for this.
 			lbl.Text = txt
 			// lbl.SetText(txt)
+			lbl.Config(wb.Sc) // this is essential
 		}
 	}
 }

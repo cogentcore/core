@@ -1109,7 +1109,8 @@ func (ly *Layout) KeyChordEvent(we *WidgetEvents) {
 //   Standard Node2D interface
 
 func (ly *Layout) BBoxes() image.Rectangle {
-	return ly.BBoxFromAlloc()
+	bb := ly.BBoxFromAlloc()
+	return bb
 }
 
 func (ly *Layout) ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point) {

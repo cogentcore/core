@@ -159,9 +159,6 @@ func (bb *ButtonBase) SetAsButton() {
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
 func (bb *ButtonBase) SetText(txt string) ButtonWidget {
-	if !bb.HasSc() {
-		return bb.This().(ButtonWidget)
-	}
 	if bb.Text == txt {
 		return bb.This().(ButtonWidget)
 	}
@@ -180,9 +177,6 @@ func (bb *ButtonBase) SetText(txt string) ButtonWidget {
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
 func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
-	if !bb.HasSc() {
-		return bb.This().(ButtonWidget)
-	}
 	if bb.Icon == iconName {
 		return bb.This().(ButtonWidget)
 	}

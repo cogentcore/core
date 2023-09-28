@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 )
@@ -18,6 +20,7 @@ func mainrun() {
 
 	but := gi.NewButton(&scene.Frame, "open-dialog").SetText("Open Dialog")
 	but.OnClicked(func() {
+		fmt.Println("button clicked")
 		dialog := gi.NewScene("dialog")
 		gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
 		gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()

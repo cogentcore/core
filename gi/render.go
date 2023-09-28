@@ -126,7 +126,7 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
 func (wb *WidgetBase) SetNeedsLayout(sc *Scene, updt bool) {
-	if !updt {
+	if !updt || sc == nil {
 		return
 	}
 	sc.SetFlag(true, ScNeedsLayout)
@@ -283,11 +283,9 @@ func (sc *Scene) DoUpdate() bool {
 
 	switch {
 	case sc.HasFlag(ScNeedsRebuild):
-		fmt.Println("scene rebuild start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
-		fmt.Println("scene rebuild done")
 	case sc.HasFlag(ScNeedsLayout):
 		fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)

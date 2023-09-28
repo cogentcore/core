@@ -238,7 +238,7 @@ func (w *RenderWin) GatherScenes() {
 	}
 
 	// then add everyone above that
-	for i := winIdx; i < sz; i++ {
+	for i := winIdx + 1; i < sz; i++ {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		rs.Add(st.Scene)
 	}

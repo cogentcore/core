@@ -306,6 +306,7 @@ func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
 	parts.Lay = lay
 	ki.SetParent(parts, wb)
 	parts.SetFlag(true, ki.IsField)
+	wb.Parts = parts
 	return parts
 }
 
@@ -337,9 +338,12 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	for {
 		par := cur.Par
 		if par == nil {
-			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: widget %v is the root", wb)
+			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: got to root: %v without finding", cur)
 		}
-		pwi := wb.Par.(Widget)
+		pwi, ok := par.(Widget)
+		if !ok {
+			return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: parent is not a widget: %v", par)
+		}
 		pwb := pwi.AsWidget()
 		if fun(pwb) {
 			return pwi, pwb, nil
