@@ -188,14 +188,12 @@ func AreGoModulesUsed() (bool, error) {
 }
 
 func Symlink(c *config.Config, src, dst string) error {
-	if c.Build.Print || c.Build.PrintOnly {
-		PrintCmd("ln -s %s %s", src, dst)
-	}
+	xe.PrintCmd(fmt.Sprintf("ln -s %s %s", src, dst), nil)
 	if c.Build.PrintOnly {
 		return nil
 	}
 	if GOOS == "windows" {
-		return DoCopyAll(dst, src)
+		return DoCopyAll(dst, src) // TODO: do we need to do this?
 	}
 	return os.Symlink(src, dst)
 }
