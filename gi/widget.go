@@ -363,7 +363,7 @@ func (wb *WidgetBase) IsVisible() bool {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {
-		return false
+		return true
 	}
 	return wb.Par.This().(Widget).IsVisible()
 }

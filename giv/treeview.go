@@ -11,6 +11,7 @@ import (
 	"log"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -2128,7 +2129,7 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.ScBBox, tv.WinBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.ScBBox, tv.WinBBox)
 	}
 
 	tv.DoLayoutParts(parBBox, iter) // use OUR version

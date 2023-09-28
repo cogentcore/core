@@ -236,12 +236,13 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	pr.End()
 }
 
-// LayoutRenderTree does a layout and render of the tree from me:
+// LayoutRenderTree does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
-func (wb *WidgetBase) LayoutRenderTree(sc *Scene) {
-	wb.GetSizeTree(sc, 0)
-	wb.DoLayoutTree(sc)
-	wb.Render(sc)
+func (sc *Scene) LayoutRenderTree() {
+	sc.Frame.GetSizeTree(sc, 0)
+	sc.Frame.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
+	sc.Frame.DoLayoutTree(sc)
+	sc.Frame.Render(sc)
 }
 
 // DoNeedsRender calls Render on tree from me for nodes
@@ -274,6 +275,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
 	if sc.HasFlag(ScIsUpdating) {
+		fmt.Println("scene bail on updt")
 		return false
 	}
 	sc.SetFlag(true, ScIsUpdating) // prevent rendering
@@ -281,18 +283,24 @@ func (sc *Scene) DoUpdate() bool {
 
 	switch {
 	case sc.HasFlag(ScNeedsRebuild):
+		fmt.Println("scene rebuild start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
+		fmt.Println("scene rebuild done")
 	case sc.HasFlag(ScNeedsLayout):
+		fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
-		sc.Frame.LayoutRenderTree(sc)
+		sc.LayoutRenderTree()
 		sc.SetFlag(true, ScImageUpdated)
+		fmt.Println("scene layout done")
 	case sc.HasFlag(ScNeedsRender):
+		fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
 		sc.SetFlag(true, ScImageUpdated)
+		fmt.Println("scene render done")
 	}
 	return true
 }
@@ -312,7 +320,7 @@ func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
 	sc.SetFlag(true, ScRebuild)
 	sc.Frame.ConfigTree(sc)
-	sc.Frame.LayoutRenderTree(sc)
+	sc.LayoutRenderTree()
 	sc.SetFlag(false, ScRebuild)
 }
 

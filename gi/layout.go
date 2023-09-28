@@ -1207,7 +1207,6 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
 	//	}
 	//}
-	LayAllocFromParent(ly)                   // in case we didn't get anything
 	ly.DoLayoutBase(sc, parBBox, true, iter) // init style
 	redo := false
 	switch ly.Lay {

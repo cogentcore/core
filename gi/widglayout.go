@@ -174,7 +174,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, initStyle
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {
-		fmt.Printf("Layout: %v alloc pos: %v size: %v vpbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v scbb: %v\n", wb.Path(), wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, wb.ScBBox)
 	}
 	// typically DoLayoutChildren must be called after this!
 }

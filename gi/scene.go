@@ -89,6 +89,7 @@ func NewScene(name string) *Scene {
 	sc.Frame.Lay = LayoutVert
 	sc.Decor.InitName(&sc.Decor, "decor")
 	sc.Decor.Lay = LayoutNil
+	sc.SetDefaultStyle()
 	return sc
 }
 

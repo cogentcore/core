@@ -48,8 +48,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // control and full programming logic without any CSS-selector magic.
 type Styler func(w *WidgetBase, s *gist.Style)
 
-// todo: when?
-func (sc *Scene) SetMyStyle() {
+func (sc *Scene) SetDefaultStyle() {
 	sc.Frame.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
 	sc.Frame.Style.Color = colors.Scheme.OnBackground
 }

@@ -167,7 +167,7 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
-	fmt.Printf("start render\n")
+	// fmt.Println("start render")
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
 
@@ -181,7 +181,7 @@ func (w *RenderWin) RenderWindow() {
 		w.GatherScenes()
 	}
 	w.DrawScenes()
-	fmt.Printf("done render\n")
+	// fmt.Println("done render")
 }
 
 // DrawScenes does the drawing of RenderScenes to the window.

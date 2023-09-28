@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"goki.dev/girl/gist"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -440,42 +439,6 @@ func GatherSizesGrid(ly *Layout) {
 	ly.LayState.UpdateSizes() // enforce max and normal ordering, etc
 	if LayoutTrace {
 		fmt.Printf("Size:   %v gather sizes grid need: %v, pref: %v\n", ly.Path(), ly.LayState.Size.Need, ly.LayState.Size.Pref)
-	}
-}
-
-// LayAllocFromParent: if we are not a child of a layout, then get allocation
-// from a parent obj that has a layout size
-func LayAllocFromParent(ly *Layout) {
-	mvp := ly.Sc
-	if ly.Par == nil || mvp == nil || !ly.LayState.Alloc.Size.IsNil() {
-		return
-	}
-	// if ly.Par != mvp.This() {
-	// note: zero alloc size happens all the time with non-visible tabs!
-	// fmt.Printf("Layout: %v has zero allocation but is not a direct child of scene -- this is an error -- every level must provide layout for the next! laydata:\n%+v\n", ly.Path(), ly.LayState)
-	// return
-	//}
-	pni, _ := AsWidget(ly.Par)
-	lyp := AsLayout(pni)
-	if lyp == nil {
-		ly.FuncUpParent(0, ly.This(), func(k ki.Ki, level int, d any) bool {
-			pni, _ := AsWidget(k)
-			if pni == nil {
-				return ki.Break
-			}
-			pg := pni.AsWidget()
-			if pg == nil {
-				return ki.Break
-			}
-			if !pg.LayState.Alloc.Size.IsNil() {
-				ly.LayState.Alloc.Size = pg.LayState.Alloc.Size
-				if LayoutTrace {
-					fmt.Printf("Layout: %v got parent alloc: %v from %v\n", ly.Path(), ly.LayState.Alloc.Size, pg.Path())
-				}
-				return ki.Break
-			}
-			return ki.Continue
-		})
 	}
 }
 
