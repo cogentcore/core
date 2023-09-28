@@ -23,6 +23,8 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/grog"
+	"goki.dev/xe"
+	"golang.org/x/exp/maps"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -184,62 +186,62 @@ func ExtractPkgs(c *config.Config, nm string, path string) (map[string]bool, err
 	return nmpkgs, nil
 }
 
-func GoBuild(c *config.Config, src string, env []string, args ...string) error {
+func GoBuild(c *config.Config, src string, env map[string]string, args ...string) error {
 	return GoCmd(c, "build", []string{src}, env, args...)
 }
 
-func GoBuildAt(c *config.Config, at string, src string, env []string, args ...string) error {
+func GoBuildAt(c *config.Config, at string, src string, env map[string]string, args ...string) error {
 	return GoCmdAt(c, at, "build", []string{src}, env, args...)
 }
 
-func GoInstall(c *config.Config, srcs []string, env []string, args ...string) error {
+func GoInstall(c *config.Config, srcs []string, env map[string]string, args ...string) error {
 	return GoCmd(c, "install", srcs, env, args...)
 }
 
-func GoCmd(c *config.Config, subcmd string, srcs []string, env []string, args ...string) error {
+func GoCmd(c *config.Config, subcmd string, srcs []string, env map[string]string, args ...string) error {
 	return GoCmdAt(c, "", subcmd, srcs, env, args...)
 }
 
-func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env []string, args ...string) error {
-	cmd := exec.Command("go", subcmd)
+func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[string]string, args ...string) error {
+	cargs := []string{subcmd}
+	// cmd := exec.Command("go", subcmd)
 	tags := c.Build.Tags
 	if len(tags) > 0 {
-		cmd.Args = append(cmd.Args, "-tags", strings.Join(tags, ","))
+		cargs = append(cargs, "-tags", strings.Join(tags, ","))
 	}
 	if grog.UserLevel <= slog.LevelInfo {
-		cmd.Args = append(cmd.Args, "-v")
+		cargs = append(cargs, "-v")
 	}
 	if subcmd != "install" && c.Build.Install {
-		cmd.Args = append(cmd.Args, "-i")
+		cargs = append(cargs, "-i")
 	}
 	if c.Build.Print {
-		cmd.Args = append(cmd.Args, "-x")
+		cargs = append(cargs, "-x")
 	}
 	if len(c.Build.GCFlags) != 0 {
-		cmd.Args = append(cmd.Args, "-gcflags", strings.Join(c.Build.GCFlags, ","))
+		cargs = append(cargs, "-gcflags", strings.Join(c.Build.GCFlags, ","))
 	}
 	if len(c.Build.LDFlags) != 0 {
-		cmd.Args = append(cmd.Args, "-ldflags", strings.Join(c.Build.LDFlags, ","))
+		cargs = append(cargs, "-ldflags", strings.Join(c.Build.LDFlags, ","))
 	}
 	if c.Build.Trimpath {
-		cmd.Args = append(cmd.Args, "-trimpath")
+		cargs = append(cargs, "-trimpath")
 	}
 	if c.Build.Work {
-		cmd.Args = append(cmd.Args, "-work")
+		cargs = append(cargs, "-work")
 	}
-	cmd.Args = append(cmd.Args, args...)
-	cmd.Args = append(cmd.Args, srcs...)
+	cargs = append(cargs, args...)
+	cargs = append(cargs, srcs...)
+
+	xc := xe.Major().SetDir(at)
+	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
 	if gmc, err := GoModCachePath(); err == nil {
-		env = append([]string{"GOMODCACHE=" + gmc}, env...)
-	} else {
-		env = append([]string{}, env...)
+		xc.SetEnv("GOMODCACHE=", gmc)
 	}
-	cmd.Env = env
-	cmd.Dir = at
-	return RunCmd(c, cmd)
+	return xc.Run("go", cargs...)
 }
 
 func GoModTidyAt(c *config.Config, at string, env []string) error {
