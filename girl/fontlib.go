@@ -155,7 +155,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*gist.FontFace, error) {
 		return face, nil
 	}
 	loadFontMu.RUnlock()
-	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v\n", fontnm, fl.FontPaths)
+	return nil, fmt.Errorf("gi.FontLib: Font named: %v not found in list of available fonts, try adding to FontPaths in gi.FontLibrary, searched paths: %v", fontnm, fl.FontPaths)
 }
 
 // DeleteFont removes given font from list of available fonts -- if not supported etc
@@ -362,7 +362,7 @@ var GoFonts = map[string]GoFontInfo{
 func OpenGoFont(name, path string, size int, strokeWidth int) (*gist.FontFace, error) {
 	gf, ok := GoFonts[path]
 	if !ok {
-		return nil, fmt.Errorf("Go Font Path not found: %v", path)
+		return nil, fmt.Errorf("font path for the Go font not found: %v", path)
 	}
 	f, _ := truetype.Parse(gf.ttf)
 	face := truetype.NewFace(f, &truetype.Options{

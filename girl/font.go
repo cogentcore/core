@@ -40,7 +40,7 @@ func OpenFont(fs *gist.FontRender, ctxt *units.Context) gist.Font {
 	if err != nil {
 		log.Printf("%v\n", err)
 		if fs.Face == nil {
-			face, err = FontLibrary.Font("Go", intDots) // guaranteed to exist
+			face, _ = FontLibrary.Font("Go", intDots) // guaranteed to exist
 			fs.Face = face
 		}
 	} else {

@@ -508,7 +508,6 @@ func (sr *Span) FindWrapPosLR(trgSize, curSize float32) int {
 			if nsz > trgSize {
 				break
 			}
-			csz = nsz
 			idx++
 		}
 	}

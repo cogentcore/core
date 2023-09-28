@@ -36,7 +36,7 @@ var testStys = []gist.FontStyles{gist.FontNormal, gist.FontItalic, gist.FontObli
 var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
 
 func TestFontFaceName(t *testing.T) {
-	return // skip as very verbose
+	t.Skip("skip as very verbose")
 	for _, nm := range testNms {
 		for _, str := range testStrs {
 			for _, wt := range testWts {
