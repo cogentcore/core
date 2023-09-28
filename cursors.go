@@ -16,7 +16,7 @@ var Cursors embed.FS
 type Cursor int32 //enums:enum
 
 // Cursor constants, with names based on CSS (see https://developer.mozilla.org/en-US/docs/Web/CSS/cursor)
-// TODO: maybe add NoDrop, AllScroll,
+// TODO: maybe add NoDrop and AllScroll
 const (
 	// Default is a default arrow cursor
 	Default Cursor = iota
@@ -56,6 +56,14 @@ const (
 	ResizeCol
 	// ResizeRow indicates that something can be resized in the vertical direction
 	ResizeRow
+	// ResizeUp indicates that something can be resized in the upper direction
+	ResizeUp
+	// ResizeRight indicates that something can be resized in the right direction
+	ResizeRight
+	// ResizeDown indicates that something can be resized in the downward direction
+	ResizeDown
+	// ResizeLeft indicates that something can be resized in the left direction
+	ResizeLeft
 	// ResizeN indicates that something can be resized in the upper direction
 	ResizeN
 	// ResizeE indicates that something can be resized in the right direction
