@@ -17,6 +17,8 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/sdkpath"
+	"goki.dev/grog"
+	"goki.dev/xe"
 )
 
 // General mobile build environment. Initialized by envInit.
@@ -111,9 +113,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 		}
 	}
 
-	if c.Build.Print {
-		fmt.Fprintln(Xout, "GOMOBILE="+GoMobilePath)
-	}
+	grog.PrintlnInfo("GOMOBILE=" + GoMobilePath)
 
 	// Check the toolchain is in a good state.
 	// Pick a temporary directory for assembling an apk/app.
@@ -126,7 +126,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 			fmt.Printf("WORK=%s\n", TmpDir)
 			return
 		}
-		RemoveAll(c, TmpDir)
+		xe.RemoveAll(TmpDir)
 	}
 	if c.Build.PrintOnly {
 		TmpDir = "$WORK"
@@ -137,9 +137,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 			return nil, err
 		}
 	}
-	if c.Build.Print {
-		fmt.Fprintln(Xout, "WORK="+TmpDir)
-	}
+	grog.PrintlnInfo("WORK=" + TmpDir)
 
 	if err := EnvInit(c); err != nil {
 		return nil, err

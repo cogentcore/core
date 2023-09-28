@@ -6,12 +6,10 @@ package mobile
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path"
-	"strings"
 
 	"goki.dev/goki/config"
+	"goki.dev/xe"
 )
 
 // Install compiles and installs the app named by the import path on the
@@ -28,20 +26,5 @@ func Install(c *config.Config) error {
 		return err
 	}
 
-	// Don't use runCmd as adb does not return a useful exit code.
-	cmd := exec.Command(
-		`adb`,
-		`install`,
-		`-r`,
-		AndroidPkgName(path.Base(pkg.PkgPath))+`.apk`,
-	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if c.Build.Print || c.Build.PrintOnly {
-		PrintCmd("%s", strings.Join(cmd.Args, " "))
-	}
-	if c.Build.PrintOnly {
-		return nil
-	}
-	return cmd.Run()
+	return xe.Run("adb", "install", "-r", AndroidPkgName(path.Base(pkg.PkgPath))+".apk")
 }
