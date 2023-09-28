@@ -93,6 +93,11 @@ func NewScene(name string) *Scene {
 	return sc
 }
 
+func (sc *Scene) SetTitle(title string) *Scene {
+	sc.Title = title
+	return sc
+}
+
 func (sc *Scene) RenderCtx() *RenderContext {
 	if sc.Stage == nil { // todo: error msg?
 		return nil

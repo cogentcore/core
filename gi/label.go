@@ -276,6 +276,11 @@ func (lb *Label) SetText(txt string) *Label {
 	return lb
 }
 
+func (lb *Label) SetSelectable() *Label {
+	lb.Selectable = true
+	return lb
+}
+
 // OpenLink opens given link, either by sending LinkSig signal if there are
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via

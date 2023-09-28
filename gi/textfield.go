@@ -1589,6 +1589,9 @@ func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 // the textfield based on its base position and size
 // and its icons or lack thereof
 func (tf *TextField) SetEffPosAndSize() {
+	if tf.Parts == nil {
+		tf.ConfigParts(tf.Sc)
+	}
 	sz := tf.LayState.Alloc.Size
 	pos := tf.LayState.Alloc.Pos
 	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Action); ok {

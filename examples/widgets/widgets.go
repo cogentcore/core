@@ -7,10 +7,8 @@ package main
 import (
 	"fmt"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
@@ -18,10 +16,7 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-func main() {
-	// vkos.VkOsDebug = true  // vulkan debugging
-	gimain.Main(mainrun)
-}
+func main() { gimain.Main(mainrun) }
 
 func mainrun() {
 	width := 1024
@@ -43,132 +38,73 @@ func mainrun() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	win := gi.NewMainRenderWin("gogi-widgets-demo", "GoGi Widgets Demo", width, height)
+	scene := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
+	frame := &scene.Frame // todo: scene will be the frame
 
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	// vp.SetProps(ki.Props{
-	// 	"margin":           units.NewPx(44),
-	// 	"background-color": "red",
-	// })
-
-	// style sheet
-	var css = ki.Props{
-		"button": ki.Props{
-			"background-color": gi.Prefs.Colors.Control, // gist.Color{255, 240, 240, 255},
-		},
-		// "#label": ki.Props{ // affects all button labels
-		// 	"font-size": "x-large",
-		// },
-		"#combo": ki.Props{
-			"background-color": colors.FromRGB(240, 255, 240),
-		},
-		".hslides": ki.Props{
-			"background-color": colors.FromRGB(240, 225, 255),
-		},
-		"kbd": ki.Props{
-			"color": "blue",
-		},
-	}
-	vp.CSS = css
-
-	mfr := win.SetMainFrame()
-	mfr.SetProp("spacing", units.Ex(1))
-
-	// mfr.ClassStyleFuncs = map[string]func(w *gi.WidgetBase){}
-	// mfr.ClassStyleFuncs["big"] = func(w *gi.WidgetBase) {
-	// 	w.Style.Width = units.Pct(50)
-	// }
-
-	// mfr.ElementStyleFuncs = map[string]func(w *gi.WidgetBase){}
-	// mfr.ElementStyleFuncs["button"] = func(w *gi.WidgetBase) {
-	// 	w.Style.BackgroundColor.SetSolid(colors.Orange)
-	// 	w.Style.Color.SetColor(colors.Blue)
-	// }
-	// mfr.ElementStyleFuncs["slider"] = func(w *gi.WidgetBase) {
-	// 	w.Style.BackgroundColor.SetSolid(colors.Maroon.Darker(40))
-	// }
-	// mfr.ElementStyleFuncs["textfield"] = func(w *gi.WidgetBase) {
-	// 	w.Style.Padding.Set(units.Px(10), units.Px(5))
-	// 	w.Style.Border.Radius.Set(units.Px(5))
-	// }
-
-	// mfr.SetProp("background-color", "linear-gradient(to top, red, lighter-80)")
-	// mfr.SetProp("background-color", "linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)")
-	// mfr.SetProp("background-color", "linear-gradient(to right, rgba(255,0,0,0), rgba(255,0,0,1))")
-	// mfr.SetProp("background-color", "radial-gradient(red, lighter-80)")
-
-	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
-	trow.SetStretchMaxWidth()
+	trow := gi.NewLayout(frame, "trow").
+		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
 	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
 	prsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPrefs)
 
-	title := gi.NewLabel(trow, "title", `This is a <b>demonstration</b> of the
+	gi.NewLabel(trow, "title").SetText(
+		`This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <a href="https://goki.dev/gi/v2">GoGi</a> <i>Widgets</i><br>
-<large>Shortcuts: <kbd>`+string(prsc)+`</kbd> = Preferences,
-<kbd>`+string(giedsc)+`</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
-See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`)
-	// title.SetProp("white-space", gi.WhiteSpaceNormal) // wrap
-	title.SetProp("white-space", "normal")        // wrap
-	title.SetProp("text-align", gist.AlignCenter) // see align example for more details on how to use aligns
-	title.SetProp("vertical-align", gist.AlignCenter)
-	title.SetProp("font-family", "Times New Roman, serif")
-	title.SetProp("font-size", "x-large")
-	// title.SetProp("font-size", "24pt")
-	// title.SetProp("letter-spacing", 2)
-	title.SetProp("line-height", 1.5)
-	title.SetStretchMax()
+<large>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
+<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
+		SetStretchMax().
+		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+			s.Text.WhiteSpace = gist.WhiteSpaceNormal
+			s.Text.Align = gist.AlignCenter
+			s.Text.AlignV = gist.AlignCenter
+			s.Font.Family = "Times New Roman, serif"
+			s.Font.Size = units.Pt(24) // todo: "x-large"?
+			// s.Font.SetSize(gist.XLarge)
+			s.Text.LineHeight = units.Em(1.5)
+		})
 
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(mfr, "blspc")
-	blrow := gi.NewLayout(mfr, "blrow", gi.LayoutHoriz)
-	blab := gi.NewLabel(blrow, "blab", "Buttons:")
-	blab.Selectable = true
+	gi.NewSpace(frame, "blspc")
+	gi.NewLabel(gi.NewLayout(frame, "blrow").SetLayout(gi.LayoutHoriz), "blab").
+		SetText("Buttons:").SetSelectable()
 
-	brow := gi.NewLayout(mfr, "brow", gi.LayoutHoriz)
-	// brow.SetProp("spacing", units.Ex(2))
-	// brow.SetProp("horizontal-align", gist.AlignLeft)
-	// brow.SetProp("horizontal-align", gi.AlignJustify)
-	// brow.SetStretchMaxWidth()
+	brow := gi.NewLayout(frame, "brow").SetLayout(gi.LayoutHoriz)
 
-	button1 := gi.NewButton(brow, "button1")
-	button1.SetProp("#icon", ki.Props{ // note: must come before SetIcon
-		"width":  units.Em(1.5),
-		"height": units.Em(1.5),
-	})
-	button1.Tooltip = "press this <i>button</i> to pop up a dialog box"
+	gi.NewButton(brow, "button1").
+		SetIcon(icons.OpenInNew).
+		SetTooltip("press this <i>button</i> to pop up a dialog box").
+		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+			s.Width = units.Em(1.5)
+			s.Height = units.Em(1.5)
+		}).(*gi.Button).
+		OnClicked(func() {
+			fmt.Printf("Button1 clicked\n")
+			// gi.StringPromptDialog(vp, "", "Enter value here..",
+			// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
+			// 	rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+			// 		dlg := send.(*gi.Dialog)
+			// 		if sig == int64(gi.DialogAccepted) {
+			// 			val := gi.StringPromptDialogValue(dlg)
+			// 			fmt.Printf("got string value: %v\n", val)
+			// 		}
+			// 	})
+		})
 
-	button1.SetIcon(icons.OpenInNew)
-	button1.OnClicked(func() {
-		fmt.Printf("Button %s clicked\n", button1.Name())
-		gi.StringPromptDialog(vp, "", "Enter value here..",
-			gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
-			rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-				dlg := send.(*gi.Dialog)
-				if sig == int64(gi.DialogAccepted) {
-					val := gi.StringPromptDialogValue(dlg)
-					fmt.Printf("got string value: %v\n", val)
-				}
-			})
-	})
-	button1.Class = "big"
+	button2 := gi.NewButton(brow, "button2").
+		SetText("Open GoGiEditor").
+		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things").(*gi.Button)
 
-	button2 := gi.NewButton(brow, "button2")
-	// button2.SetProp("font-size", "x-large")
-	button2.SetText("Open GoGiEditor")
-	// button2.SetProp("background-color", "#EDF")
-	button2.Tooltip = "This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things"
 	// this is the "full strength" general purpose signaling framework
 	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 		if sig == int64(gi.ButtonClicked) {
-			giv.GoGiEditorDialog(win)
+			// giv.GoGiEditorDialog(win)
 		}
 	})
+
 	// button2.StyleFunc = func() {
 	// 	fmt.Println(button2.State)
 	// 	switch button2.State {
@@ -188,8 +124,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// button2.SetProp("border-width", "2px 4px 6px 8px")
 	// button2.SetProp("border-radius", "0 2 6 10")
 
-	checkbox := gi.NewCheckBox(brow, "checkbox")
-	checkbox.Text = "Toggle"
+	checkbox := gi.NewCheckBox(brow, "checkbox").
+		SetText("Toggle").(*gi.CheckBox)
+
+	// todo: need convenient OnToggled
 	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
 			fmt.Printf("Checkbox toggled: %v\n", checkbox.IsChecked())
@@ -197,42 +135,44 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	// note: receiver for menu items with shortcuts must be a Node2D or RenderWin
-	mb1 := gi.NewButton(brow, "menubutton1")
-	mb1.SetText("Menu Button")
+	mb1 := gi.NewButton(brow, "menubutton1").
+		SetText("Menu Button").(*gi.Button)
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
 
 	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	mb1.Menu.AddSeparator("sep1")
 
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
 		})
 
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(mfr, "slspc")
-	slrow := gi.NewLayout(mfr, "slrow", gi.LayoutHoriz)
-	gi.NewLabel(slrow, "slab", "Sliders:")
+	gi.NewSpace(frame, "slspc")
+	gi.NewLabel(gi.NewLayout(frame, "slrow").SetLayout(gi.LayoutHoriz), "slab").
+		SetText("Sliders:")
 
-	srow := gi.NewLayout(mfr, "srow", gi.LayoutHoriz)
-	srow.SetProp("spacing", units.Ex(2))
-	srow.SetProp("horizontal-align", "left")
-	srow.SetStretchMaxWidth()
+	srow := gi.NewLayout(frame, "srow").SetLayout(gi.LayoutHoriz).
+		SetSpacing(units.Ex(2)).
+		SetStretchMaxWidth().
+		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+			s.AlignH = gist.AlignLeft
+		})
 
+	// todo: need Slider interface with Set methods
 	slider1 := gi.NewSlider(srow, "slider1")
 	slider1.Dim = mat32.X
-	// slider1.Class = "hslides"
 	slider1.SetProp(":value", ki.Props{"background-color": "red"})
 	slider1.SetMinPrefWidth(units.Em(20))
 	slider1.SetMinPrefHeight(units.Em(2))
@@ -295,19 +235,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewSpace(mfr, "tlspc")
-	txlrow := gi.NewLayout(mfr, "txlrow", gi.LayoutHoriz)
-	gi.NewLabel(txlrow, "txlab", "Text Widgets:")
-	txrow := gi.NewLayout(mfr, "txrow", gi.LayoutHoriz)
-	txrow.SetProp("spacing", units.Ex(2))
-	// txrow.SetProp("horizontal-align", gi.AlignJustify)
-	txrow.SetStretchMaxWidth()
+	gi.NewSpace(frame, "tlspc")
+	gi.NewLabel(gi.NewLayout(frame, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
+		SetText("Text Widgets:")
+
+	txrow := gi.NewLayout(frame, "txrow").SetLayout(gi.LayoutHoriz).
+		SetSpacing(units.Ex(2)).
+		SetStretchMaxWidth()
 
 	edit1 := gi.NewTextField(txrow, "edit1")
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
-	edit1.SetProp("min-width", "20em")
-	// edit1.SetCompleter(edit1, Complete, CompleteEdit) // gets us word demo completion
+	// edit1.SetProp("min-width", "20em")
 	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		estr := ""
 		if rn, ok := data.([]rune); ok {
@@ -336,6 +275,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	//////////////////////////////////////////
 	//      Main Menu
+
+	/*  todo:
 
 	appnm := gi.AppName()
 	mmen := win.MainMenu
@@ -416,109 +357,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	win.MainMenuUpdated()
-	vp.UpdateEndNoSig(updt)
-	win.StartEventLoop()
+	*/
 
-	// note: may eventually get down here on a well-behaved quit, but better
-	// to handle cleanup above using QuitCleanFunc, which happens before all
-	// windows are closed etc
-	fmt.Printf("main loop ended\n")
+	gi.NewWindow(scene).
+		SetWidth(width).SetHeight(height).
+		Run().Wait()
 }
-
-/*
-func Complete(data any, text string, posLn, posCh int) (md complete.Matches) {
-	md.Seed = complete.SeedWhiteSpace(text)
-	if md.Seed == "" {
-		return md
-	}
-	possibles := complete.MatchSeedString(words, md.Seed)
-	for _, p := range possibles {
-		m := complete.Completion{Text: p, Icon: ""}
-		md.Matches = append(md.Matches, m)
-	}
-	return md
-}
-
-func CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
-	ed = complete.EditWord(text, cursorPos, completion.Text, seed)
-	return ed
-}
-
-var words = []string{"a", "able", "about", "above", "act", "add", "afraid", "after", "again", "against", "age", "ago", "agree", "air", "all",
-	"allow", "also", "always", "am", "among", "an", "and", "anger", "animal", "answer", "any", "appear", "apple", "are",
-	"area", "arm", "arrange", "arrive", "art", "as", "ask", "at", "atom", "baby", "back", "bad", "ball", "band", "bank",
-	"bar", "base", "basic", "bat", "be", "bear", "beat", "beauty", "bed", "been", "before", "began", "begin", "behind",
-	"believe", "bell", "best", "better", "between", "big", "bird", "bit", "black", "block", "blood", "blow", "blue",
-	"board", "boat", "body", "bone", "book", "born", "both", "bottom", "bought", "box", "boy", "branch", "bread", "break",
-	"bright", "bring", "broad", "broke", "brother", "brought", "brown", "build", "burn", "busy", "but", "buy", "by", "call",
-	"came", "camp", "can", "capital", "captain", "car", "card", "care", "carry", "case", "cat", "catch", "caught", "cause",
-	"cell", "cent", "center", "century", "certain", "chair", "chance", "change", "character", "charge", "chart", "check",
-	"chick", "chief", "child", "children", "choose", "chord", "circle", "city", "claim", "class", "clean", "clear", "climb",
-	"clock", "close", "clothe", "cloud", "coast", "coat", "cold", "collect", "colony", "color", "column", "come", "common",
-	"company", "compare", "complete", "condition", "connect", "consider", "consonant", "contain", "continent", "continue",
-	"control", "cook", "cool", "copy", "corn", "corner", "correct", "cost", "cotton", "could", "count", "country", "course",
-	"cover", "cow", "crease", "create", "crop", "cross", "crowd", "cry", "current", "cut", "dad", "dance", "danger", "dark",
-	"day", "dead", "deal", "dear", "death", "decide", "decimal", "deep", "degree", "depend", "describe", "desert", "design",
-	"determine", "develop", "dictionary", "did", "die", "differ", "difficult", "direct", "discuss", "distant", "divide",
-	"division", "do", "doctor", "does", "dog", "dollar", "don't", "done", "door", "double", "down", "draw", "dream",
-	"dress", "drink", "drive", "drop", "dry", "duck", "during", "each", "ear", "early", "earth", "ease", "east", "eat",
-	"edge", "effect", "egg", "eight", "either", "electric", "element", "else", "end", "enemy", "energy", "engine", "enough",
-	"enter", "equal", "equate", "especially", "even", "evening", "event", "ever", "every", "exact", "example", "except",
-	"excite", "exercise", "expect", "experience", "experiment", "eye", "face", "fact", "fair", "fall", "family", "famous",
-	"far", "farm", "fast", "fat", "father", "favor", "fear", "feed", "feel", "feet", "fell", "felt", "few", "field", "fig",
-	"fight", "figure", "fill", "final", "find", "fine", "finger", "finish", "fire", "first", "fish", "fit", "five", "flat",
-	"floor", "flow", "flower", "fly", "follow", "food", "foot", "for", "force", "forest", "form", "forward", "found",
-	"four", "fraction", "free", "fresh", "friend", "from", "front", "fruit", "full", "fun", "game", "garden", "gas",
-	"gather", "gave", "general", "gentle", "get", "girl", "give", "glad", "glass", "go", "gold", "gone", "good", "got",
-	"govern", "grand", "grass", "gray", "great", "green", "grew", "ground", "group", "grow", "guess", "guide", "gun", "had",
-	"hair", "half", "hand", "happen", "happy", "hard", "has", "hat", "have", "he", "head", "hear", "heard", "heart", "heat",
-	"heavy", "held", "help", "her", "here", "high", "hill", "him", "his", "history", "hit", "hold", "hole", "home", "hope",
-	"horse", "hot", "hot", "hour", "house", "how", "huge", "human", "hundred", "hunt", "hurry", "I", "ice", "idea", "if",
-	"imagine", "in", "inch", "include", "indicate", "industry", "insect", "instant", "instrument", "interest", "invent",
-	"iron", "is", "island", "it", "job", "join", "joy", "jump", "just", "keep", "kept", "key", "kill", "kind", "king",
-	"knew", "know", "lady", "lake", "land", "language", "large", "last", "late", "laugh", "law", "lay", "lead", "learn",
-	"least", "leave", "led", "left", "leg", "length", "less", "let", "letter", "level", "lie", "life", "lift", "light",
-	"like", "line", "liquid", "list", "listen", "little", "live", "locate", "log", "lone", "long", "look", "lost", "lot",
-	"loud", "love", "low", "machine", "made", "magnet", "main", "major", "make", "man", "many", "map", "mark", "market",
-	"mass", "master", "match", "material", "matter", "may", "me", "mean", "meant", "measure", "meat", "meet", "melody",
-	"men", "metal", "method", "middle", "might", "mile", "milk", "million", "mind", "mine", "minute", "miss", "mix",
-	"modern", "molecule", "moment", "money", "month", "moon", "more", "morning", "most", "mother", "motion", "mount",
-	"mountain", "mouth", "move", "much", "multiply", "music", "must", "my", "name", "nation", "natural", "nature", "near",
-	"necessary", "neck", "need", "neighbor", "never", "new", "next", "night", "nine", "no", "noise", "noon", "nor", "north",
-	"nose", "note", "nothing", "notice", "noun", "now", "number", "numeral", "object", "observe", "occur", "ocean", "of",
-	"off", "offer", "office", "often", "oh", "oil", "old", "on", "once", "one", "only", "open", "operate", "opposite", "or",
-	"order", "organ", "original", "other", "our", "out", "over", "own", "oxygen", "page", "paint", "pair", "paper",
-	"paragraph", "parent", "part", "particular", "party", "pass", "past", "path", "pattern", "pay", "people", "perhaps",
-	"period", "person", "phrase", "pick", "picture", "piece", "pitch", "place", "plain", "plan", "plane", "planet", "plant",
-	"play", "please", "plural", "poem", "point", "poor", "populate", "port", "pose", "position", "possible", "post",
-	"pound", "power", "practice", "prepare", "present", "press", "pretty", "print", "probable", "problem", "process",
-	"produce", "product", "proper", "property", "protect", "prove", "provide", "pull", "push", "put", "quart", "question",
-	"quick", "quiet", "quite", "quotient", "race", "radio", "rail", "rain", "raise", "ran", "range", "rather", "reach",
-	"read", "ready", "real", "reason", "receive", "record", "red", "region", "remember", "repeat", "reply", "represent",
-	"require", "rest", "result", "rich", "ride", "right", "ring", "rise", "river", "road", "rock", "roll", "room", "root",
-	"rope", "rose", "round", "row", "rub", "rule", "run", "safe", "said", "sail", "salt", "same", "sand", "sat", "save",
-	"saw", "say", "scale", "school", "science", "score", "sea", "search", "season", "seat", "second", "section", "see",
-	"seed", "seem", "segment", "select", "self", "sell", "send", "sense", "sent", "sentence", "separate", "serve", "set",
-	"settle", "seven", "several", "shall", "shape", "share", "sharp", "she", "sheet", "shell", "shine", "ship", "shoe",
-	"shop", "shore", "short", "should", "shoulder", "shout", "show", "side", "sight", "sign", "silent", "silver", "similar",
-	"simple", "since", "sing", "single", "sister", "sit", "six", "size", "skill", "skin", "sky", "slave", "sleep", "slip",
-	"slow", "small", "smell", "smile", "snow", "so", "soft", "soil", "soldier", "solution", "solve", "some", "son", "song",
-	"soon", "sound", "south", "space", "speak", "special", "speech", "speed", "spell", "spend", "spoke", "spot", "spread",
-	"spring", "square", "stand", "star", "start", "state", "station", "stay", "stead", "steam", "steel", "step", "stick",
-	"still", "stone", "stood", "stop", "store", "story", "straight", "strange", "stream", "street", "stretch", "string",
-	"strong", "student", "study", "subject", "substance", "subtract", "success", "such", "sudden", "suffix", "sugar",
-	"suggest", "suit", "summer", "sun", "supply", "support", "sure", "surface", "surprise", "swim", "syllable", "symbol",
-	"system", "table", "tail", "take", "talk", "tall", "teach", "team", "teeth", "tell", "temperature", "ten", "term",
-	"test", "than", "thank", "that", "the", "their", "them", "then", "there", "these", "they", "thick", "thin", "thing",
-	"think", "third", "this", "those", "though", "thought", "thousand", "three", "through", "throw", "thus", "tie", "time",
-	"tiny", "tire", "to", "together", "told", "tone", "too", "took", "tool", "top", "total", "touch", "toward", "town",
-	"track", "trade", "train", "travel", "tree", "triangle", "trip", "trouble", "truck", "true", "try", "tube", "turn",
-	"twenty", "two", "type", "under", "unit", "until", "up", "us", "use", "usual", "valley", "value", "vary", "verb",
-	"very", "view", "village", "visit", "voice", "vowel", "wait", "walk", "wall", "want", "war", "warm", "was", "wash",
-	"watch", "water", "wave", "way", "we", "wear", "weather", "week", "weight", "well", "went", "were", "west", "what",
-	"wheel", "when", "where", "whether", "which", "while", "white", "who", "whole", "whose", "why", "wide", "wife", "wild",
-	"will", "win", "wind", "window", "wing", "winter", "wire", "wish", "with", "woman", "women", "won't", "wonder", "wood",
-	"word", "work", "world", "would", "write", "written", "wrong", "wrote", "yard", "year", "yellow", "yes", "yet", "you",
-	"young", "your"}
-
-*/

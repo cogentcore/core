@@ -184,7 +184,6 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
 	if recfg {
-		fmt.Println("set icon:", bb.Icon)
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
 	}
 	bb.UpdateEndLayout(updt)
@@ -774,12 +773,13 @@ func (cb *CheckBox) FilterEvents() {
 
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
-func (cb *CheckBox) OnClicked(fun func()) {
+func (cb *CheckBox) OnClicked(fun func()) ButtonWidget {
 	cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(ButtonToggled) {
 			fun()
 		}
 	})
+	return cb.This().(ButtonWidget)
 }
 
 func (cb *CheckBox) ButtonRelease() {
@@ -799,11 +799,11 @@ func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 
 func (cb *CheckBox) ConfigWidget(sc *Scene) {
 	cb.SetCheckable(true)
-	cb.ConfigWidget(sc)
 	cb.This().(ButtonWidget).ConfigParts(sc)
 }
 
 func (cb *CheckBox) ConfigParts(sc *Scene) {
+	parts := cb.NewParts(LayoutHoriz)
 	cb.SetCheckable(true)
 	if !cb.Icon.IsValid() {
 		cb.Icon = icons.CheckBox // fallback
@@ -820,8 +820,8 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 		lbIdx = len(config)
 		config.Add(LabelType, "label")
 	}
-	mods, updt := cb.Parts.ConfigChildren(config)
-	ist := cb.Parts.Child(icIdx).(*Layout)
+	mods, updt := parts.ConfigChildren(config)
+	ist := parts.Child(icIdx).(*Layout)
 	if mods || gist.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, IconType, "icon") // covered by above config update
@@ -836,7 +836,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 		ist.StackTop = 1
 	}
 	if lbIdx >= 0 {
-		lbl := cb.Parts.Child(lbIdx).(*Label)
+		lbl := parts.Child(lbIdx).(*Label)
 		if lbl.Text != cb.Text {
 			lbl.SetText(cb.Text)
 		}

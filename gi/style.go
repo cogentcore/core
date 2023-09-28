@@ -70,6 +70,15 @@ func (wb *WidgetBase) AddStyler(s Styler) {
 	wb.Stylers = append(wb.Stylers, s)
 }
 
+// todo: should reserve SetStyle for user and rename existing to something
+// more internal.
+// note: cannot Change AddStyler signature to return Widget, so need a new method
+
+func (wb *WidgetBase) SetStyling(s Styler) Widget {
+	wb.AddStyler(s)
+	return wb.This().(Widget)
+}
+
 // STYTODO: figure out what to do with this
 // // AddChildStyler is a helper function that adds the
 // // given styler to the child of the given name
@@ -262,67 +271,74 @@ func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
 // SetMinPrefWidth sets minimum and preferred width;
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [gist.Style.SetMinPrefWidth].
-func (wb *WidgetBase) SetMinPrefWidth(val units.Value) {
+func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetMinPrefWidth(val)
 	})
+	return wb.This().(Widget)
 }
 
 // SetMinPrefHeight sets minimum and preferred height;
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [gist.Style.SetMinPrefHeight].
-func (wb *WidgetBase) SetMinPrefHeight(val units.Value) {
+func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetMinPrefHeight(val)
 	})
+	return wb.This().(Widget)
 }
 
 // SetStretchMaxWidth sets stretchy max width (-1);
 // can grow to take up avail room.
 // This adds a styler that calls [gist.Style.SetStretchMaxWidth].
-func (wb *WidgetBase) SetStretchMaxWidth() {
+func (wb *WidgetBase) SetStretchMaxWidth() Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetStretchMaxWidth()
 	})
+	return wb.This().(Widget)
 }
 
 // SetStretchMaxHeight sets stretchy max height (-1);
 // can grow to take up avail room.
 // This adds a styler that calls [gist.Style.SetStretchMaxHeight].
-func (wb *WidgetBase) SetStretchMaxHeight() {
+func (wb *WidgetBase) SetStretchMaxHeight() Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetStretchMaxHeight()
 	})
+	return wb.This().(Widget)
 }
 
 // SetStretchMax sets stretchy max width and height (-1);
 // can grow to take up avail room.
 // This adds a styler that calls [gist.Style.SetStretchMax].
-func (wb *WidgetBase) SetStretchMax() {
+func (wb *WidgetBase) SetStretchMax() Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
 	})
+	return wb.This().(Widget)
 }
 
 // SetFixedWidth sets all width style options
 // (Width, MinWidth, and MaxWidth) to
 // the given fixed width unit value.
 // This adds a styler that calls [gist.Style.SetFixedWidth].
-func (wb *WidgetBase) SetFixedWidth(val units.Value) {
+func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetFixedWidth(val)
 	})
+	return wb.This().(Widget)
 }
 
 // SetFixedHeight sets all height style options
 // (Height, MinHeight, and MaxHeight) to
 // the given fixed height unit value.
 // This adds a styler that calls [gist.Style.SetFixedHeight].
-func (wb *WidgetBase) SetFixedHeight(val units.Value) {
+func (wb *WidgetBase) SetFixedHeight(val units.Value) Widget {
 	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
 		s.SetFixedHeight(val)
 	})
+	return wb.This().(Widget)
 }
 
 // IsNthChild returns whether the node is nth-child of its parent

@@ -22,6 +22,12 @@ import (
 type Widget interface {
 	ki.Ki
 
+	// SetStyling sets the styling of the widget by adding a Styler function
+	SetStyling(s Styler) Widget
+
+	// SetTooltip sets the Tooltip message when hovering over the widget
+	SetTooltip(tt string) Widget
+
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
 	// or need to be called on other nodes.  Everything else that is common
@@ -293,6 +299,11 @@ func (wb *WidgetBase) Disconnect() {
 
 func (wb *WidgetBase) BaseIface() reflect.Type {
 	return laser.TypeFor[Widget]()
+}
+
+func (wb *WidgetBase) SetTooltip(tt string) Widget {
+	wb.Tooltip = tt
+	return wb.This().(Widget)
 }
 
 // NewParts makes the Parts layout if not already there,

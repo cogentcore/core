@@ -264,6 +264,7 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, d
 }
 
 func (cb *ComboBox) ConfigParts(sc *Scene) {
+	parts := cb.NewParts(LayoutHoriz)
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = laser.ToBool(eb)
 	}
@@ -279,14 +280,14 @@ func (cb *ComboBox) ConfigParts(sc *Scene) {
 		icIdx, lbIdx = cb.ConfigPartsIconLabel(&config, cb.Icon, cb.Text)
 		indIdx = cb.ConfigPartsAddIndicator(&config, true) // default on
 	}
-	mods, updt := cb.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	cb.ConfigPartsSetIconLabel(cb.Icon, cb.Text, icIdx, lbIdx)
 	cb.ConfigPartsIndicator(indIdx)
 	if txIdx >= 0 {
 		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
 	}
 	if cb.MaxLength > 0 && lbIdx >= 0 {
-		lbl := cb.Parts.Child(lbIdx).(*Label)
+		lbl := parts.Child(lbIdx).(*Label)
 		lbl.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
 	}
 	if mods {

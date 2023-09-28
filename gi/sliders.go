@@ -51,6 +51,9 @@ func (ac *SliderBase) AsSliderBase() *SliderBase {
 	return ac
 }
 
+// todo: need a Slider interface with all the Set* methods
+// returning Slider
+
 // SliderBase has common slider functionality -- two major modes: ValThumb =
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size

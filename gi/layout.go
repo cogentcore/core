@@ -284,6 +284,26 @@ const (
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout
 
+////////////////////////////////////////////////////////////////////////////////////////
+//     Setters
+
+func (ly *Layout) SetLayout(lay Layouts) *Layout {
+	updt := ly.UpdateStart()
+	ly.Lay = lay
+	ly.UpdateEndLayout(updt)
+	return ly
+}
+
+func (ly *Layout) SetSpacing(spc units.Value) *Layout {
+	updt := ly.UpdateStart()
+	ly.Spacing = spc
+	ly.UpdateEndLayout(updt)
+	return ly
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//     Overflow: Scrolling mainly
+
 // AvailSize returns the total size avail to this layout -- typically
 // AllocSize except for top-level layout which uses ScBBox in case less is
 // avail
@@ -300,9 +320,6 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 	}
 	return avail
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-//     Overflow: Scrolling mainly
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow(sc *Scene) {
