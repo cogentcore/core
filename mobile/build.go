@@ -21,10 +21,11 @@ import (
 
 	"log/slog"
 
+	"maps"
+
 	"goki.dev/goki/config"
 	"goki.dev/grog"
 	"goki.dev/xe"
-	"golang.org/x/exp/maps"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -244,26 +245,24 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	return xc.Run("go", cargs...)
 }
 
-func GoModTidyAt(c *config.Config, at string, env []string) error {
-	cmd := exec.Command("go", "mod", "tidy")
+func GoModTidyAt(c *config.Config, at string, env map[string]string) error {
+	args := []string{"mod", "tidy"}
 	if grog.UserLevel <= slog.LevelInfo {
-		cmd.Args = append(cmd.Args, "-v")
+		args = append(args, "-v")
 	}
+	xc := xe.Major().SetDir(at)
+	maps.Copy(xc.Env, env)
 
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
 	if gmc, err := GoModCachePath(); err == nil {
-		env = append([]string{"GOMODCACHE=" + gmc}, env...)
-	} else {
-		env = append([]string{}, env...)
+		xc.SetEnv("GOMODCACHE", gmc)
 	}
-	cmd.Env = env
-	cmd.Dir = at
-	return RunCmd(c, cmd)
+	return xe.Run("go", args...)
 }
 
 func GoModCachePath() (string, error) {
-	out, err := exec.Command("go", "env", "GOMODCACHE").Output()
+	out, err := xe.Output("go", "env", "GOMODCACHE")
 	if err != nil {
 		return "", err
 	}
