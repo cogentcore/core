@@ -23,9 +23,9 @@ import (
 
 // General mobile build environment. Initialized by envInit.
 var (
-	GoMobilePath string              // $GOPATH/pkg/gomobile
-	AndroidEnv   map[string][]string // android arch -> []string
-	AppleEnv     map[string][]string
+	GoMobilePath string                       // $GOPATH/pkg/gomobile
+	AndroidEnv   map[string]map[string]string // android arch -> map[string]string
+	AppleEnv     map[string]map[string]string // platform/arch -> map[string]string
 	AppleNM      string
 )
 
@@ -149,7 +149,7 @@ func BuildEnvInit(c *config.Config) (cleanup func(), err error) {
 func EnvInit(c *config.Config) (err error) {
 	// Setup the cross-compiler environments.
 	if ndkRoot, err := NDKRoot(c); err == nil {
-		AndroidEnv = make(map[string][]string)
+		AndroidEnv = make(map[string]map[string]string)
 		if c.Build.AndroidMinSDK < MinAndroidSDK {
 			return fmt.Errorf("gomobile requires Android API level >= %d", MinAndroidSDK)
 		}
@@ -171,15 +171,15 @@ func EnvInit(c *config.Config) (err error) {
 					}
 				}
 			}
-			AndroidEnv[arch] = []string{
-				"GOOS=android",
-				"GOARCH=" + arch,
-				"CC=" + clang,
-				"CXX=" + clangpp,
-				"CGO_ENABLED=1",
+			AndroidEnv[arch] = map[string]string{
+				"GOOS":        "android",
+				"GOARCH":      arch,
+				"CC":          clang,
+				"CXX":         clangpp,
+				"CGO_ENABLED": "1",
 			}
 			if arch == "arm" {
-				AndroidEnv[arch] = append(AndroidEnv[arch], "GOARM=7")
+				AndroidEnv[arch]["GOARM"] = "7"
 			}
 		}
 	}
@@ -189,10 +189,9 @@ func EnvInit(c *config.Config) (err error) {
 	}
 
 	AppleNM = "nm"
-	AppleEnv = make(map[string][]string)
+	AppleEnv = make(map[string]map[string]string)
 	for _, platform := range ApplePlatforms {
 		for _, arch := range PlatformArchs(platform) {
-			var env []string
 			var goos, sdk, clang, cflags string
 			var err error
 			switch platform {
@@ -247,19 +246,18 @@ func EnvInit(c *config.Config) (err error) {
 				return err
 			}
 
-			env = append(env,
-				"GOOS="+goos,
-				"GOARCH="+arch,
-				"GOFLAGS="+"-tags="+strings.Join(PlatformTags(platform), ","),
-				"CC="+clang,
-				"CXX="+clang+"++",
-				"CGO_CFLAGS="+cflags+" -arch "+ArchClang(arch),
-				"CGO_CXXFLAGS="+cflags+" -arch "+ArchClang(arch),
-				"CGO_LDFLAGS="+cflags+" -arch "+ArchClang(arch),
-				"CGO_ENABLED=1",
-				"DARWIN_SDK="+sdk,
-			)
-			AppleEnv[platform+"/"+arch] = env
+			AppleEnv[platform+"/"+arch] = map[string]string{
+				"GOOS":         goos,
+				"GOARCH":       arch,
+				"GOFLAGS":      "-tags=" + strings.Join(PlatformTags(platform), ","),
+				"CC":           clang,
+				"CXX":          clang + "++",
+				"CGO_CFLAGS":   cflags + " -arch " + ArchClang(arch),
+				"CGO_CXXFLAGS": cflags + " -arch " + ArchClang(arch),
+				"CGO_LDFLAGS":  cflags + " -arch " + ArchClang(arch),
+				"CGO_ENABLED":  "1",
+				"DARWIN_SDK":   sdk,
+			}
 		}
 	}
 
@@ -421,15 +419,13 @@ func EnvClang(c *config.Config, sdkName string) (clang, cflags string, err error
 	if c.Build.PrintOnly {
 		return sdkName + "-clang", "-isysroot " + sdkName, nil
 	}
-	cmd := exec.Command("xcrun", "--sdk", sdkName, "--find", "clang")
-	out, err := cmd.CombinedOutput()
+	out, err := xe.Minor().Output("xcrun", "--sdk", sdkName, "--find", "clang")
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --find: %v\n%s", err, out)
 	}
 	clang = strings.TrimSpace(string(out))
 
-	cmd = exec.Command("xcrun", "--sdk", sdkName, "--show-sdk-path")
-	out, err = cmd.CombinedOutput()
+	out, err = xe.Minor().Output("xcrun", "--sdk", sdkName, "--show-sdk-path")
 	if err != nil {
 		return "", "", fmt.Errorf("xcrun --show-sdk-path: %v\n%s", err, out)
 	}
