@@ -60,6 +60,9 @@ type Config struct {
 	Errors io.Writer
 }
 
+// major is the config object for [Major] specified through [SetMajor]
+var major *Config
+
 // Major returns the default [Config] object for a major command,
 // based on [grog.UserLevel]. It should be used for commands that
 // are central to an app's logic and are more important for the user
@@ -70,6 +73,9 @@ type Config struct {
 // case should be Major, which is why the global helper functions
 // operate on it.
 func Major() *Config {
+	if major != nil {
+		return major
+	}
 	if grog.UserLevel <= slog.LevelInfo {
 		return &Config{
 			Buffer:   true,
@@ -90,6 +96,16 @@ func Major() *Config {
 	}
 }
 
+// SetMajor sets the config object that [Major] returns. It should
+// be used sparingly, and only in cases where there is a clear property
+// that should be set for all commands.
+func SetMajor(c *Config) {
+	major = c
+}
+
+// minor is the config object for [Minor] specified through [SetMinor]
+var minor *Config
+
 // Minor returns the default [Config] object for a minor command,
 // based on [grog.UserLevel]. It should be used for commands that
 // support an app behind the scenes and are less important for the
@@ -98,6 +114,9 @@ func Major() *Config {
 // [slog.LevelDebug] or below, whereas [Major] results in that when
 // it is [slog.LevelInfo] or below.
 func Minor() *Config {
+	if minor != nil {
+		return minor
+	}
 	if grog.UserLevel <= slog.LevelDebug {
 		return &Config{
 			Buffer:   true,
@@ -116,6 +135,13 @@ func Minor() *Config {
 		Stdin:  os.Stdin,
 		Errors: os.Stderr,
 	}
+}
+
+// SetMinor sets the config object that [Minor] returns. It should
+// be used sparingly, and only in cases where there is a clear property
+// that should be set for all commands.
+func SetMinor(c *Config) {
+	minor = c
 }
 
 // GetWriter returns the appropriate writer to use based on the given writer and error.
