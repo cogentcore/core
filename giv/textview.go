@@ -4831,9 +4831,6 @@ func (tv *TextView) StyleTextView() {
 func (tv *TextView) SetStyle() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
-	tv.StyMu.Lock()
-	tv.LayState.SetFromStyle(&tv.Style) // also does reset
-	tv.StyMu.Unlock()
 }
 
 // GetSize

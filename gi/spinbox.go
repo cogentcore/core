@@ -223,68 +223,70 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		config.Add(LayoutType, "buttons")
 	}
 	mods, updt := parts.ConfigChildren(config)
-	if mods || gist.RebuildDefaultStyles {
-		if !sb.IsDisabled() {
-			// STYTODO: maybe do some of this config in OnChildAdded?
-			buts := parts.ChildByName("buttons", 1).(*Layout)
-			buts.Lay = LayoutVert
-			buts.SetNChildren(2, ActionType, "but")
-			// up
-			up := buts.Child(0).(*Action)
-			up.SetName("up")
-			up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
-			// not compiled into style prop
-			// up.SetFlagState(sb.IsInactive(), int(Inactive))
-			up.Icon = sb.UpIcon
-			if sb.Style.Template != "" {
-				up.Style.Template = sb.Style.Template + ".up"
-			}
-			up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := AsSpinBox(recv)
-				sbb.IncrValue(1.0)
-			})
-			// dn
-			dn := buts.Child(1).(*Action)
-			// dn.SetFlagState(sb.IsInactive(), int(Inactive))
-			dn.SetName("down")
-			dn.SetProp("no-focus", true)
-			dn.Icon = sb.DownIcon
-			if sb.Style.Template != "" {
-				dn.Style.Template = sb.Style.Template + ".dn"
-			}
-			dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				sbb := AsSpinBox(recv)
-				sbb.IncrValue(-1.0)
-			})
-			// space
-			sp := parts.ChildByName("space", 2).(*Space)
-			if sb.Style.Template != "" {
-				sp.Style.Template = sb.Style.Template + ".space"
-			}
-		}
-		// text-field
-		tf := parts.ChildByName("text-field", 0).(*TextField)
-		tf.SetFlag(sb.IsDisabled(), Disabled)
-		// todo: see TreeView for extra steps needed to generally support styling of parts..
-		// doing it manually for now..
-		if sb.Style.Template != "" {
-			tf.Style.Template = sb.Style.Template + ".text"
-		}
-		tf.Txt = sb.ValToString(sb.Value)
-		if !sb.IsDisabled() {
-			tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
-					sbb := AsSpinBox(recv)
-					tf := send.(*TextField)
-					vl, err := sb.StringToVal(tf.Text())
-					if err == nil {
-						sbb.SetValueAction(vl)
-					}
-				}
-			})
-		}
-		sb.UpdateEnd(updt)
+	if !mods && !gist.RebuildDefaultStyles {
+		return
 	}
+	if !sb.IsDisabled() {
+		// STYTODO: maybe do some of this config in OnChildAdded?
+		buts := parts.ChildByName("buttons", 1).(*Layout)
+		buts.Lay = LayoutVert
+		buts.SetNChildren(2, ActionType, "but")
+		// up
+		up := buts.Child(0).(*Action)
+		up.SetName("up")
+		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
+		// not compiled into style prop
+		// up.SetFlagState(sb.IsInactive(), int(Inactive))
+		up.SetIcon(sb.UpIcon)
+		if sb.Style.Template != "" {
+			up.Style.Template = sb.Style.Template + ".up"
+		}
+		up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
+			sbb := AsSpinBox(recv)
+			sbb.IncrValue(1.0)
+		})
+		// dn
+		dn := buts.Child(1).(*Action)
+		// dn.SetFlagState(sb.IsInactive(), int(Inactive))
+		dn.SetName("down")
+		dn.SetProp("no-focus", true)
+		dn.Icon = sb.DownIcon
+		if sb.Style.Template != "" {
+			dn.Style.Template = sb.Style.Template + ".dn"
+		}
+		dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
+			sbb := AsSpinBox(recv)
+			sbb.IncrValue(-1.0)
+		})
+		// space
+		sp := parts.ChildByName("space", 2).(*Space)
+		if sb.Style.Template != "" {
+			sp.Style.Template = sb.Style.Template + ".space"
+		}
+	}
+	// text-field
+	tf := parts.ChildByName("text-field", 0).(*TextField)
+	tf.SetFlag(sb.IsDisabled(), Disabled)
+	// todo: see TreeView for extra steps needed to generally support styling of parts..
+	// doing it manually for now..
+	if sb.Style.Template != "" {
+		tf.Style.Template = sb.Style.Template + ".text"
+	}
+	tf.Txt = sb.ValToString(sb.Value)
+	if !sb.IsDisabled() {
+		tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
+			if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
+				sbb := AsSpinBox(recv)
+				tf := send.(*TextField)
+				vl, err := sb.StringToVal(tf.Text())
+				if err == nil {
+					sbb.SetValueAction(vl)
+				}
+			}
+		})
+	}
+	sb.UpdateEnd(updt)
+
 }
 
 // FormatIsInt returns true if the format string requires an integer value
@@ -466,9 +468,6 @@ func (sb *SpinBox) StyleSpinBox(sc *Scene) {
 
 func (sb *SpinBox) SetStyle(sc *Scene) {
 	sb.StyleSpinBox(sc)
-	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Style) // also does reset
-	sb.StyMu.Unlock()
 	sb.ConfigParts(sc)
 }
 

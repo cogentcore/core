@@ -255,9 +255,8 @@ func (bb *ButtonBox) ConfigWidget(sc *Scene) {
 func (bb *ButtonBox) SetStyle(sc *Scene) {
 	bb.StyMu.Lock()
 	bb.SetStyleWidget(sc)
-	bb.LayState.SetFromStyle(&bb.Style) // also does reset
 	bb.StyMu.Unlock()
-	bb.ConfigParts(sc)
+	// bb.ConfigParts(sc) // todo: no config in styling!?
 }
 
 func (bb *ButtonBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {

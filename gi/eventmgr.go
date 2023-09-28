@@ -184,10 +184,14 @@ func (em *EventMgr) HandleOtherEvent(sc *Scene, evi goosi.Event) {
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi goosi.Event) {
 	et := evi.Type()
-	foc := em.CurFocus().AsWidget()
-	wants := foc.Events.Filter.HasFlag(et)
+	foc := em.CurFocus()
+	if foc == nil {
+		return
+	}
+	fw := foc.AsWidget()
+	wants := fw.Events.Filter.HasFlag(et)
 	if wants {
-		foc.Events.Funcs[et].Func(foc.This(), nil, int64(et), evi)
+		fw.Events.Funcs[et].Func(foc.This(), nil, int64(et), evi)
 	}
 }
 

@@ -71,7 +71,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewLabel(gi.NewLayout(frame, "blrow").SetLayout(gi.LayoutHoriz), "blab").
 		SetText("Buttons:").SetSelectable()
 
-	brow := gi.NewLayout(frame, "brow").SetLayout(gi.LayoutHoriz)
+	brow := gi.NewLayout(frame, "brow").
+		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
 	gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).

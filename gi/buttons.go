@@ -216,7 +216,8 @@ func (bb *ButtonBase) ButtonPress() {
 		bb.WasPressed = true
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
 	}
-	bb.UpdateEnd(updt)
+	bb.SetStyle(bb.Sc)
+	bb.UpdateEndRender(updt)
 }
 
 // BaseButtonRelease action: the button has just been released -- sends a released
@@ -230,6 +231,7 @@ func (bb *ButtonBase) BaseButtonRelease() {
 
 	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if bb.WasPressed {
+		bb.WasPressed = false
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
 		bb.OpenMenu()
 
@@ -238,7 +240,8 @@ func (bb *ButtonBase) BaseButtonRelease() {
 			bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 		}
 	}
-	bb.UpdateEnd(updt)
+	bb.SetStyle(bb.Sc)
+	bb.UpdateEndRender(updt)
 }
 
 // IsMenu returns true this button is on a menu -- it is a menu item
@@ -631,7 +634,13 @@ func (bt *Button) OnInit() {
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		}
-		if bt.HasFlag(Hovered) {
+		// state styling -- probably want this as sub-case in each one above
+		switch {
+		case bt.WasPressed:
+			// todo: just picking something at random to make it visible:
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.Color = colors.Scheme.Primary.Base
+		case bt.HasFlag(Hovered):
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
 			} else {

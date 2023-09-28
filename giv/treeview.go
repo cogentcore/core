@@ -2068,7 +2068,6 @@ func (tv *TreeView) StyleTreeView() {
 
 func (tv *TreeView) SetStyle() {
 	tv.StyleTreeView()
-	tv.LayState.SetFromStyle(&tv.Style) // also does reset
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to

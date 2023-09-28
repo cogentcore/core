@@ -772,9 +772,6 @@ func (sr *Slider) ConfigWidget(sc *Scene) {
 func (sr *Slider) SetStyle(sc *Scene) {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider(sc)
-	sr.StyMu.Lock()
-	sr.LayState.SetFromStyle(&sr.Style) // also does reset
-	sr.StyMu.Unlock()
 }
 
 func (sr *Slider) GetSize(sc *Scene, iter int) {
@@ -929,9 +926,6 @@ func (sb *ScrollBar) ConfigWidget(sc *Scene) {
 func (sb *ScrollBar) SetStyle(sc *Scene) {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider(sc)
-	sb.StyMu.Lock()
-	sb.LayState.SetFromStyle(&sb.Style) // also does reset
-	sb.StyMu.Unlock()
 	sb.ConfigParts(sc)
 }
 

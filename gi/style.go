@@ -180,8 +180,6 @@ func (wb *WidgetBase) SetStyleWidget(sc *Scene) {
 	}
 	sc.SetCurrentColor(wb.Style.Color)
 	psc.End()
-
-	wb.LayState.SetFromStyle(&wb.Style) // also does reset
 }
 
 // RunStyleFuncs runs the style functions specified in

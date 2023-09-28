@@ -1202,9 +1202,6 @@ func (ly *Layout) StyleLayout(sc *Scene) {
 
 func (ly *Layout) SetStyle(sc *Scene) {
 	ly.StyleLayout(sc)
-	ly.StyMu.Lock()
-	ly.LayState.SetFromStyle(&ly.Style) // also does reset
-	ly.StyMu.Unlock()
 }
 
 func (ly *Layout) GetSize(sc *Scene, iter int) {
@@ -1356,7 +1353,6 @@ func (st *Stretch) SetStyle(sc *Scene) {
 	if hasTempl && saveTempl {
 		st.Style.SaveTemplate()
 	}
-	st.LayState.SetFromStyle(&st.Style) // also does reset
 }
 
 func (st *Stretch) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -1396,7 +1392,6 @@ func (sp *Space) SetStyle(sc *Scene) {
 	if hasTempl && saveTempl {
 		sp.Style.SaveTemplate()
 	}
-	sp.LayState.SetFromStyle(&sp.Style) // also does reset
 }
 
 func (sp *Space) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {

@@ -2843,7 +2843,6 @@ func (ft *FileTreeView) SetStyle() {
 			}
 		}
 		ft.StyleTreeView()
-		ft.LayState.SetFromStyle(&ft.Style) // also does reset
 	}
 }
 

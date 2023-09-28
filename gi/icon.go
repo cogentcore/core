@@ -63,6 +63,7 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 	if name.IsNil() {
 		ic.SVG.DeleteAll()
+		ic.Config(ic.Sc)
 		return false, nil
 	}
 	if ic.SVG.Root.HasChildren() && ic.IconName == name {
@@ -79,8 +80,10 @@ func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 	// err := TheIconMgr.SetIcon(ic, name)
 	if err == nil {
 		ic.IconName = name
+		ic.Config(ic.Sc)
 		return true, nil
 	}
+	ic.Config(ic.Sc)
 	return false, err
 }
 
@@ -101,7 +104,6 @@ func (ic *Icon) SetStyle(sc *Scene) {
 	ic.SVG.Norm = true
 	// ic.SVG.Fill = true
 	ic.SetStyleWidget(sc)
-	ic.LayState.SetFromStyle(&ic.Style) // also does reset
 	// todo: set ic.SVG style
 }
 

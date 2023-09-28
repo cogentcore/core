@@ -7,6 +7,8 @@ package gi
 import (
 	"log"
 
+	"goki.dev/colors"
+	"goki.dev/girl/gist"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -85,7 +87,6 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx
 			ic.Style.Template = wb.Style.Template + ".icon"
 		}
 		ic.SetIcon(icnm)
-		ic.Config(wb.Sc)
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
@@ -99,6 +100,10 @@ func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx
 			// been a reason for calling SetText, so we will see if
 			// any bugs show up. TODO: figure out a good long-term solution for this.
 			lbl.Text = txt
+			// todo: this is not being done anywhere -- needs it!
+			lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
+				s.Color = colors.Black // whatever
+			})
 			// lbl.SetText(txt)
 			lbl.Config(wb.Sc) // this is essential
 		}

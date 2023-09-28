@@ -447,9 +447,6 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 
 func (lb *Label) SetStyle(sc *Scene) {
 	lb.StyleLabel(sc)
-	lb.StyMu.Lock()
-	lb.LayState.SetFromStyle(&lb.Style) // also does reset
-	lb.StyMu.Unlock()
 	lb.LayoutLabel(sc)
 }
 
@@ -473,7 +470,7 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
 		if lb.TextRender.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			lb.LayState.SetFromStyle(&lb.Style)
+			lb.LayState.SetFromStyle(&lb.Style) // todo: revisit!!
 			lb.GetSizeFromWH(lb.TextRender.Size.X, lb.TextRender.Size.Y)
 			return true // needs a redo!
 		}

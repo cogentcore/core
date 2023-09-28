@@ -1538,9 +1538,6 @@ func (tf *TextField) StyleTextField(sc *Scene) {
 
 func (tf *TextField) SetStyle(sc *Scene) {
 	tf.StyleTextField(sc)
-	tf.StyMu.Lock()
-	tf.LayState.SetFromStyle(&tf.Style) // also does reset
-	tf.StyMu.Unlock()
 }
 
 func (tf *TextField) UpdateRenderAll() bool {

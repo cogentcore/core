@@ -7,6 +7,7 @@ package giv
 import (
 	"reflect"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -160,9 +161,6 @@ func (kc *KeyChordEdit) SetStyle() {
 	kc.Selectable = true
 	kc.Redrawable = true
 	kc.StyleLabel()
-	kc.StyMu.Lock()
-	kc.LayState.SetFromStyle(&kc.Style) // also does reset
-	kc.StyMu.Unlock()
 	kc.LayoutLabel()
 }
 

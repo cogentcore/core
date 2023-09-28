@@ -548,7 +548,9 @@ func (w *RenderWin) CloseReq() {
 
 // Closed frees any resources after the window has been closed.
 func (w *RenderWin) Closed() {
-	// w.StageMgr.RenderCtx.Mu.Lock()
+	w.RenderCtx().WriteLock()
+	defer w.RenderCtx().WriteUnlock()
+
 	AllRenderWins.Delete(w)
 	MainRenderWins.Delete(w)
 	DialogRenderWins.Delete(w)
@@ -563,7 +565,6 @@ func (w *RenderWin) Closed() {
 		if WinEventTrace {
 			fmt.Printf("Win: %v Already Closed\n", w.Name)
 		}
-		// w.StageMgr.RenderCtx.Mu.Unlock()
 		return
 	}
 	// w.SetDisabled() // marks as closed
@@ -588,7 +589,9 @@ func (w *RenderWin) Closed() {
 	}
 	// these are managed by the window itself
 	// w.Sprites.Reset()
-	// w.StageMgr.RenderCtx.Mu.Unlock()
+
+	w.RenderScenes.Reset()
+	// todo: delete the contents of the window here??
 }
 
 // IsClosed reports if the window has been closed
@@ -778,8 +781,10 @@ func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
 		case window.Close:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			evi.SetHandled()
-			w.Closed()
 			w.SetFlag(true, WinFlagStopEventLoop)
+			w.RenderCtx().ReadUnlock() // one case where we need to break lock
+			w.Closed()
+			w.RenderCtx().ReadLock()
 		case window.Minimize:
 			evi.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
