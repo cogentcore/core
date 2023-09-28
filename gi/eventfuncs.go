@@ -43,6 +43,15 @@ type WidgetEvents struct {
 	Funcs map[goosi.EventTypes]*EventFunc `desc:"map of event functions -- shared by all widgets of the same type -- cannot modify after initial configuration!"`
 }
 
+// Matches returns true if it matches given event type and priority
+func (we *WidgetEvents) Matches(et goosi.EventTypes, pri EventPris) bool {
+	if !we.Filter.HasFlag(et) {
+		return false
+	}
+	ef := we.Funcs[et]
+	return pri == ef.Pri
+}
+
 // HasFuncs returns true if funcs map already initialized.
 // First step of AddEvents is to return if type's event funcs
 // have already been added

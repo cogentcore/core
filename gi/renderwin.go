@@ -757,6 +757,7 @@ func (w *RenderWin) HandleEvent(evi goosi.Event) {
 		w.HandleWindowEvents(evi)
 		return
 	}
+	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.StageMgr.HandleEvent(evi)
 }
 
@@ -775,7 +776,7 @@ func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
 	case goosi.WindowEvent:
 		switch ev.Action {
 		case window.Close:
-			fmt.Printf("got close event for window %v \n", w.Name)
+			// fmt.Printf("got close event for window %v \n", w.Name)
 			evi.SetHandled()
 			w.Closed()
 			w.SetFlag(true, WinFlagStopEventLoop)

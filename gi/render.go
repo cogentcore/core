@@ -287,18 +287,18 @@ func (sc *Scene) DoUpdate() bool {
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.HasFlag(ScNeedsLayout):
-		fmt.Println("scene layout start")
+		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderTree()
 		sc.SetFlag(true, ScImageUpdated)
-		fmt.Println("scene layout done")
+		// fmt.Println("scene layout done")
 	case sc.HasFlag(ScNeedsRender):
-		fmt.Println("scene render start")
+		// fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
 		sc.SetFlag(true, ScImageUpdated)
-		fmt.Println("scene render done")
+		// fmt.Println("scene render done")
 	}
 	return true
 }

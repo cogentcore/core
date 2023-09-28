@@ -422,9 +422,10 @@ var IconType = gti.AddType(&gti.Type{
 	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconName", &gti.Field{Name: "IconName", Type: "icons.Icon", Doc: "icon name that has been set -- optimizes to prevent reloading of icon", Directives: gti.Directives{}}},
+		{"IconName", &gti.Field{Name: "IconName", Type: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}}},
 		{"SVG", &gti.Field{Name: "SVG", Type: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}}},
+		{"RendSize", &gti.Field{Name: "RendSize", Type: "image.Point", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used.", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},

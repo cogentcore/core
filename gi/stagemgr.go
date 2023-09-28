@@ -192,5 +192,12 @@ func (sm *MainStageMgr) Resize(sz image.Point) {
 }
 
 func (sm *MainStageMgr) HandleEvent(evi goosi.Event) {
-
+	sz := sm.Stack.Len()
+	for i := sz - 1; i >= 0; i-- {
+		st := sm.Stack.ValByIdx(i).AsMain()
+		st.HandleEvent(evi)
+		if evi.IsHandled() || st.Modal || st.Type == Window {
+			return
+		}
+	}
 }

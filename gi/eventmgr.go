@@ -20,7 +20,7 @@ import (
 )
 
 // EventPris for different queues of event signals, processed in priority order
-type EventPris int32
+type EventPris int32 //enums:enum
 
 const (
 	// HiPri = high priority -- event receivers processed first -- can be used
@@ -37,11 +37,6 @@ const (
 	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
 	// was already processed.
 	LowRawPri
-
-	EventPrisN
-
-	// AllPris = -1 = all priorities (for delete cases only)
-	AllPris EventPris = -1
 )
 
 const (
@@ -172,7 +167,7 @@ func (em *EventMgr) HandleEvent(sc *Scene, evi goosi.Event) {
 	if et > goosi.EventTypesN || et < 0 {
 		return // can't handle other types of events here
 	}
-	fmt.Printf("got event type: %v: %v\n", et, evi)
+	// fmt.Printf("got event type: %v: %v\n", et, evi)
 
 	switch {
 	case evi.HasPos():
@@ -200,10 +195,6 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 	pos := evi.LocalPos()
 	et := evi.Type()
 
-	// we take control of signal process to sort elements by depth, and
-	// dispatch to inner-most one first
-	rvs := make(WinEventRecvList, 0, 10)
-
 	// todo: all the stuff about dragging here
 	// todo: sc.Decor needs to be processed too!  do that first!
 
@@ -215,6 +206,10 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 			continue
 		}
 
+		// we take control of signal process to sort elements by depth, and
+		// dispatch to inner-most one first
+		rvs := make(WinEventRecvList, 0, 10)
+
 		sc.Frame.FuncDownMeFirst(0, sc.Frame.This(), func(k ki.Ki, level int, d any) bool {
 			wi, wb := AsWidget(k)
 			if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
@@ -223,8 +218,9 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 			if !wb.PosInBBox(pos) {
 				return ki.Break
 			}
-			wants := wb.Events.Filter.HasFlag(et)
+			wants := wb.Events.Matches(et, pri)
 			if wants {
+				// fmt.Printf("pri: %s  et: %s   wb: %s\n", pri.String(), et.BitIndexString(), wb.Path())
 				rvs.Add(wi, wb.Events.Funcs[et].Func, level)
 			}
 			return ki.Continue
@@ -251,6 +247,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 				}
 			}
 
+			// fmt.Printf("proc event type: %v: %v %v\n", et.BitIndexString(), evi, rr.Recv.Path())
 			// actually call the thing!
 			rr.Call(send, int64(et), evi)
 

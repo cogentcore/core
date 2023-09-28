@@ -248,7 +248,7 @@ func (st *MainStage) HandleEvent(evi goosi.Event) {
 	}
 	// todo: probably want to pre-filter here and have the event manager
 	// deal with all of this, not just going to the popup right away
-	st.PopupMgr.HandleEvent(evi)
+	// st.PopupMgr.HandleEvent(evi)
 	if evi.IsHandled() {
 		return
 	}

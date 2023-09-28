@@ -774,6 +774,122 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _EventPrisValues = []EventPris{0, 1, 2, 3}
+
+// EventPrisN is the highest valid value
+// for type EventPris, plus one.
+const EventPrisN EventPris = 4
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _EventPrisNoOp() {
+	var x [1]struct{}
+	_ = x[HiPri-(0)]
+	_ = x[RegPri-(1)]
+	_ = x[LowPri-(2)]
+	_ = x[LowRawPri-(3)]
+}
+
+var _EventPrisNameToValueMap = map[string]EventPris{
+	`HiPri`:     0,
+	`hipri`:     0,
+	`RegPri`:    1,
+	`regpri`:    1,
+	`LowPri`:    2,
+	`lowpri`:    2,
+	`LowRawPri`: 3,
+	`lowrawpri`: 3,
+}
+
+var _EventPrisDescMap = map[EventPris]string{
+	0: `HiPri = high priority -- event receivers processed first -- can be used to override default behavior`,
+	1: `RegPri = default regular priority -- most should be here`,
+	2: `LowPri = low priority -- processed last -- typically for containers / dialogs etc`,
+	3: `LowRawPri = unfiltered (raw) low priority -- ignores whether the event was already processed.`,
+}
+
+var _EventPrisMap = map[EventPris]string{
+	0: `HiPri`,
+	1: `RegPri`,
+	2: `LowPri`,
+	3: `LowRawPri`,
+}
+
+// String returns the string representation
+// of this EventPris value.
+func (i EventPris) String() string {
+	if str, ok := _EventPrisMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the EventPris value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *EventPris) SetString(s string) error {
+	if val, ok := _EventPrisNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _EventPrisNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type EventPris")
+}
+
+// Int64 returns the EventPris value as an int64.
+func (i EventPris) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the EventPris value from an int64.
+func (i *EventPris) SetInt64(in int64) {
+	*i = EventPris(in)
+}
+
+// Desc returns the description of the EventPris value.
+func (i EventPris) Desc() string {
+	if str, ok := _EventPrisDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// EventPrisValues returns all possible values
+// for the type EventPris.
+func EventPrisValues() []EventPris {
+	return _EventPrisValues
+}
+
+// Values returns all possible values
+// for the type EventPris.
+func (i EventPris) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_EventPrisValues))
+	for i, d := range _EventPrisValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type EventPris.
+func (i EventPris) IsValid() bool {
+	_, ok := _EventPrisMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i EventPris) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *EventPris) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _WidgetFlagsValues = []WidgetFlags{9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}
 
 // WidgetFlagsN is the highest valid value

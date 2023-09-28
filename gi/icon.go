@@ -156,7 +156,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	sv.Render()
 	ic.RendSize = sz
 	sv.Name = string(ic.IconName)
-	fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
+	// fmt.Println("re-rendered icon:", sv.Name, "size:", sz)
 }
 
 func (ic *Icon) Render(sc *Scene) {

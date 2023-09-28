@@ -25,9 +25,9 @@ func mainrun() {
 
 	but.OnClicked(func() {
 		fmt.Println("button clicked")
-		dialog := gi.NewScene("dialog")
-		gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
-		gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
+		// dialog := gi.NewScene("dialog")
+		// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")
+		// gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
 	})
 
 	gi.NewWindow(scene).
