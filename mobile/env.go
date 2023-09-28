@@ -448,52 +448,6 @@ func ArchClang(goarch string) string {
 	}
 }
 
-// Environ merges os.Environ and the given "key=value" pairs.
-// If a key is in both os.Environ and kv, kv takes precedence.
-func Environ(kv []string) []string {
-	cur := os.Environ()
-	new := make([]string, 0, len(cur)+len(kv))
-
-	envs := make(map[string]string, len(cur))
-	for _, ev := range cur {
-		elem := strings.SplitN(ev, "=", 2)
-		if len(elem) != 2 || elem[0] == "" {
-			// pass the env var of unusual form untouched.
-			// e.g. Windows may have env var names starting with "=".
-			new = append(new, ev)
-			continue
-		}
-		if GOOS == "windows" {
-			elem[0] = strings.ToUpper(elem[0])
-		}
-		envs[elem[0]] = elem[1]
-	}
-	for _, ev := range kv {
-		elem := strings.SplitN(ev, "=", 2)
-		if len(elem) != 2 || elem[0] == "" {
-			panic(fmt.Sprintf("malformed env var %q from input", ev))
-		}
-		if GOOS == "windows" {
-			elem[0] = strings.ToUpper(elem[0])
-		}
-		envs[elem[0]] = elem[1]
-	}
-	for k, v := range envs {
-		new = append(new, k+"="+v)
-	}
-	return new
-}
-
-func Getenv(env []string, key string) string {
-	prefix := key + "="
-	for _, kv := range env {
-		if strings.HasPrefix(kv, prefix) {
-			return kv[len(prefix):]
-		}
-	}
-	return ""
-}
-
 func ArchNDK() string {
 	if runtime.GOOS == "windows" && runtime.GOARCH == "386" {
 		return "windows"
