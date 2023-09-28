@@ -143,6 +143,11 @@ func (c *Config) PrintCmd(cmd string, err error) {
 	}
 }
 
+// PrintCmd calls [Config.PrintCmd] on [Major]
+func PrintCmd(cmd string, err error) {
+	Major().PrintCmd(cmd, err)
+}
+
 func (c *Config) SetBuffer(buffer bool) *Config {
 	c.Buffer = buffer
 	return c
