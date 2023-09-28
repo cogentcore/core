@@ -5,6 +5,7 @@
 package girl
 
 import (
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/mat32/v2"
 )
@@ -17,7 +18,7 @@ func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs gist.Borde
 
 // DrawStdBox draws the CSS "standard box" model using given style.
 // This is used for rendering widgets such as buttons, textfields, etc in a GUI.
-func (pc *Paint) DrawStdBox(rs *State, st *gist.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *gist.ColorSpec) {
+func (pc *Paint) DrawStdBox(rs *State, st *gist.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full) {
 	mpos := pos.Add(st.EffMargin().Pos())
 	msz := sz.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()

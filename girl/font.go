@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/goki/freetype/truetype"
+	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
 	"golang.org/x/image/font/opentype"
@@ -94,7 +95,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt gist.Context) bool {
+func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt colors.Context) bool {
 	if cssAgg == nil {
 		return false
 	}

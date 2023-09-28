@@ -18,9 +18,6 @@ import (
 )
 
 func main() {
-	prefs := &gist.Prefs{}
-	prefs.Defaults()
-	gist.ThePrefs = prefs // text rendering depends on this
 	girl.FontLibrary.InitFontPaths(girl.FontPaths...)
 
 	imgsz := image.Point{320, 240}

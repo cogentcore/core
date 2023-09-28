@@ -7,11 +7,8 @@ package girl
 import (
 	"fmt"
 	"image"
-	"image/color"
 	"image/png"
-	"log"
 	"os"
-	"strings"
 	"testing"
 
 	"goki.dev/colors"
@@ -20,102 +17,8 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// TestPrefs are needed for setting gist.ThePrefs, for any text-based
-// rendering, as it relies on these prefs
-type TestPrefs struct {
-
-	// font family name
-	FontFamily string `desc:"font family name"`
-
-	// default font / pen color
-	Font color.RGBA `desc:"default font / pen color"`
-
-	// default background color
-	Background color.RGBA `desc:"default background color"`
-
-	// color for shadows -- should generally be a darker shade of the background color
-	Shadow color.RGBA `desc:"color for shadows -- should generally be a darker shade of the background color"`
-
-	// default border color, for button, frame borders, etc
-	Border color.RGBA `desc:"default border color, for button, frame borders, etc"`
-
-	// default main color for controls: buttons, etc
-	Control color.RGBA `desc:"default main color for controls: buttons, etc"`
-
-	// color for icons or other solidly-colored, small elements
-	Icon color.RGBA `desc:"color for icons or other solidly-colored, small elements"`
-
-	// color for selected elements
-	Select color.RGBA `desc:"color for selected elements"`
-
-	// color for highlight background
-	Highlight color.RGBA `desc:"color for highlight background"`
-
-	// color for links in text etc
-	Link color.RGBA `desc:"color for links in text etc"`
-}
-
-func (pf *TestPrefs) Defaults() {
-	pf.FontFamily = "Go"
-	pf.Font = colors.Black
-	pf.Border = colors.MustFromHex("#666")
-	pf.Background = colors.White
-	pf.Shadow = colors.MustFromString("darken-10", &pf.Background)
-	pf.Control = colors.MustFromHex("#F8F8F8")
-	pf.Icon = colors.MustFromString("highlight-30", pf.Control)
-	pf.Select = colors.MustFromHex("#CFC")
-	pf.Highlight = colors.MustFromHex("#FFA")
-	pf.Link = colors.MustFromHex("#00F")
-}
-
-// PrefColor returns preference color of given name (case insensitive)
-// std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *TestPrefs) PrefColor(clrName string) *color.RGBA {
-	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
-	switch lc {
-	case "font":
-		return &pf.Font
-	case "background":
-		return &pf.Background
-	case "shadow":
-		return &pf.Shadow
-	case "border":
-		return &pf.Border
-	case "control":
-		return &pf.Control
-	case "icon":
-		return &pf.Icon
-	case "select":
-		return &pf.Select
-	case "highlight":
-		return &pf.Highlight
-	case "link":
-		return &pf.Link
-	}
-	log.Printf("Preference color %v (simplified to: %v) not found\n", clrName, lc)
-	return nil
-}
-
-// PrefFontFamily returns the default FontFamily
-func (pf *TestPrefs) PrefFontFamily() string {
-	return pf.FontFamily
-}
-
 func TestRender(t *testing.T) {
-	prefs := &TestPrefs{}
-	prefs.Defaults()
-	gist.ThePrefs = prefs
-
-	// in GoGi, oswin.TheApp gives you default font paths per-platform.
-	// here, we usually auto-test on linux so leave that one in place
-	// but if interactively testing e.g., on mac then use that..
-
-	// mac:
-	// FontLibrary.InitFontPaths("/System/Library/Fonts", "/Library/Fonts")
-	// linux:
-	FontLibrary.InitFontPaths("/usr/share/fonts/truetype")
-	// windows
-	// FontLibrary.InitFontPaths("C:\\Windows\\Fonts")
+	FontLibrary.InitFontPaths(FontPaths...)
 
 	imgsz := image.Point{320, 240}
 	szrec := image.Rectangle{Max: imgsz}

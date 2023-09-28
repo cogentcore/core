@@ -195,7 +195,7 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 		return
 	}
 
-	bgc := (color.Color)(&sty.BackgroundColor.Color)
+	bgc := color.Color(&sty.BackgroundColor.Solid)
 	if noBG {
 		bgc = nil
 	}

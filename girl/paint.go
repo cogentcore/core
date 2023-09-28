@@ -305,11 +305,7 @@ func (pc *Paint) fill(rs *State) {
 	// fmt.Printf("node: %v fbox: %v\n", g.Nm, fbox)
 	rs.LastRenderBBox = image.Rectangle{Min: image.Point{fbox.Min.X.Floor(), fbox.Min.Y.Floor()},
 		Max: image.Point{fbox.Max.X.Ceil(), fbox.Max.Y.Ceil()}}
-	if pc.FillStyle.Color.Source == gist.RadialGradient {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
-	} else {
-		rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
-	}
+	rf.SetColor(pc.FillStyle.Color.RenderColor(pc.FontStyle.Opacity*pc.FillStyle.Opacity, rs.LastRenderBBox, rs.XForm))
 	rf.Draw()
 	rf.Clear()
 
@@ -350,10 +346,10 @@ func (pc *Paint) Fill(rs *State) {
 
 // FillBox is an optimized fill of a square region with a uniform color if
 // the given color spec is a solid color
-func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *gist.ColorSpec) {
-	if clr.Source == gist.SolidColor {
+func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *colors.Full) {
+	if clr.Gradient == nil {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
-		draw.Draw(rs.Image, b, &image.Uniform{clr.Color}, image.Point{}, draw.Src)
+		draw.Draw(rs.Image, b, &image.Uniform{clr.Solid}, image.Point{}, draw.Src)
 	} else {
 		pc.FillStyle.SetColorSpec(clr)
 		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
@@ -433,13 +429,13 @@ func (pc *Paint) ResetClip(rs *State) {
 
 // Clear fills the entire image with the current fill color.
 func (pc *Paint) Clear(rs *State) {
-	src := image.NewUniform(&pc.FillStyle.Color.Color)
+	src := image.NewUniform(&pc.FillStyle.Color.Solid)
 	draw.Draw(rs.Image, rs.Image.Bounds(), src, image.Point{}, draw.Src)
 }
 
 // SetPixel sets the color of the specified pixel using the current stroke color.
 func (pc *Paint) SetPixel(rs *State, x, y int) {
-	rs.Image.Set(x, y, &pc.StrokeStyle.Color.Color)
+	rs.Image.Set(x, y, &pc.StrokeStyle.Color.Solid)
 }
 
 func (pc *Paint) DrawLine(rs *State, x1, y1, x2, y2 float32) {
@@ -502,7 +498,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and the stroke style is not on and set to the correct color
-		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color) {
+		if !colors.IsNil(bs.Color.Top) && (!pc.StrokeStyle.On || pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid) {
 			pc.StrokeStyle.SetColor(bs.Color.Top)
 		}
 		pc.StrokeStyle.Width = bs.Width.Top
@@ -548,7 +544,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 	pc.MoveTo(rs, xtli, ytl)
 
 	// set the color if it is not the same as the already set color
-	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+	if pc.StrokeStyle.Color.Gradient != nil || bs.Color.Top != pc.StrokeStyle.Color.Solid {
 		pc.StrokeStyle.SetColor(bs.Color.Top)
 	}
 	pc.StrokeStyle.Width = bs.Width.Top
@@ -563,7 +559,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 		pc.MoveTo(rs, xtr, ytri)
 	}
 
-	if bs.Color.Right != pc.StrokeStyle.Color.Color {
+	if bs.Color.Right != pc.StrokeStyle.Color.Solid {
 		pc.StrokeStyle.SetColor(bs.Color.Right)
 	}
 	pc.StrokeStyle.Width = bs.Width.Right
@@ -577,7 +573,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 		pc.MoveTo(rs, xbri, ybr)
 	}
 
-	if bs.Color.Bottom != pc.StrokeStyle.Color.Color {
+	if bs.Color.Bottom != pc.StrokeStyle.Color.Solid {
 		pc.StrokeStyle.SetColor(bs.Color.Bottom)
 	}
 	pc.StrokeStyle.Width = bs.Width.Bottom
@@ -591,7 +587,7 @@ func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
 		pc.MoveTo(rs, xbl, ybli)
 	}
 
-	if bs.Color.Left != pc.StrokeStyle.Color.Color {
+	if bs.Color.Left != pc.StrokeStyle.Color.Solid {
 		pc.StrokeStyle.SetColor(bs.Color.Left)
 	}
 	pc.StrokeStyle.Width = bs.Width.Left

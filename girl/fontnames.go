@@ -23,7 +23,7 @@ var (
 // family(ies) (comma separated) and modifier parameters
 func FontFaceName(fam string, str gist.FontStretch, wt gist.FontWeights, sty gist.FontStyles) string {
 	if fam == "" {
-		fam = string(gist.ThePrefs.PrefFontFamily())
+		fam = gist.PrefFontFamily
 	}
 
 	cacheNm := fam + "|" + str.String() + "|" + wt.String() + "|" + sty.String()
@@ -155,7 +155,7 @@ func FontSerifMonoGuess(fns []string) (serif, mono bool) {
 func FontAlts(fams string) (fns []string, serif, mono bool) {
 	nms := strings.Split(fams, ",")
 	if len(nms) == 0 {
-		fn := gist.ThePrefs.PrefFontFamily()
+		fn := gist.PrefFontFamily
 		if fn == "" {
 			fns = []string{"Go"}
 			return
