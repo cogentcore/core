@@ -98,7 +98,8 @@ func Major() *Config {
 
 // SetMajor sets the config object that [Major] returns. It should
 // be used sparingly, and only in cases where there is a clear property
-// that should be set for all commands.
+// that should be set for all commands. If the given config object is
+// nil, [Major] will go back to returning its default value.
 func SetMajor(c *Config) {
 	major = c
 }
@@ -139,7 +140,8 @@ func Minor() *Config {
 
 // SetMinor sets the config object that [Minor] returns. It should
 // be used sparingly, and only in cases where there is a clear property
-// that should be set for all commands.
+// that should be set for all commands. If the given config object is
+// nil, [Minor] will go back to returning its default value.
 func SetMinor(c *Config) {
 	minor = c
 }
@@ -196,5 +198,30 @@ func (c *Config) SetDir(dir string) *Config {
 
 func (c *Config) SetEnv(key, val string) *Config {
 	c.Env[key] = val
+	return c
+}
+
+func (c *Config) SetStdout(stdout io.Writer) *Config {
+	c.Stdout = stdout
+	return c
+}
+
+func (c *Config) SetStderr(stderr io.Writer) *Config {
+	c.Stderr = stderr
+	return c
+}
+
+func (c *Config) SetStdin(stdin io.Reader) *Config {
+	c.Stdin = stdin
+	return c
+}
+
+func (c *Config) SetCommands(commands io.Writer) *Config {
+	c.Commands = commands
+	return c
+}
+
+func (c *Config) SetErrors(errors io.Writer) *Config {
+	c.Errors = errors
 	return c
 }
