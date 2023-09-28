@@ -323,7 +323,7 @@ func (ps *Stroke) SetColor(cl color.Color) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.SetColor(cl)
+		ps.Color.SetColor(cl)
 	}
 }
 

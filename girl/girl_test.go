@@ -78,7 +78,7 @@ func TestRender(t *testing.T) {
 	tsty.Align = gist.AlignCenter
 
 	txt := &Text{}
-	txt.SetHTML("This is <b>HTML</b> formatted <i>text</i>", fsty, tsty, &pc.UnContext, nil)
+	txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)
 
 	// the last, size arg provides constraints for layout to fit within -- uses width mainly
 	tsz := txt.LayoutStdLR(tsty, fsty, &pc.UnContext, mat32.Vec2{100, 40})
