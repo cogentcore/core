@@ -71,10 +71,13 @@ var major *Config
 // [slog.LevelInfo] or below, whereas [Minor] results in that when
 // it is [slog.LevelDebug] or below. Most commands in a typical use
 // case should be Major, which is why the global helper functions
-// operate on it.
+// operate on it. The object return by Major is guaranteed to be
+// unique, so it can be modified directly.
 func Major() *Config {
 	if major != nil {
-		return major
+		// need to make a new copy so people can't modify the underlying
+		res := *major
+		return &res
 	}
 	if grog.UserLevel <= slog.LevelInfo {
 		return &Config{
@@ -113,10 +116,13 @@ var minor *Config
 // user to know about and be able to see the output of. It results in
 // commands and output being printed with a [grog.UserLevel] of
 // [slog.LevelDebug] or below, whereas [Major] results in that when
-// it is [slog.LevelInfo] or below.
+// it is [slog.LevelInfo] or below. The object return by Minor is
+// guaranteed to be unique, so it can be modified directly.
 func Minor() *Config {
 	if minor != nil {
-		return minor
+		// need to make a new copy so people can't modify the underlying
+		res := *minor
+		return &res
 	}
 	if grog.UserLevel <= slog.LevelDebug {
 		return &Config{
