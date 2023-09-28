@@ -15,12 +15,12 @@ import (
 
 //go:generate go run gen.go
 
-// TheIcons contains all of the default embedded svg icons
+// Icons contains all of the default embedded svg icons
 //
 //go:embed svg/*.svg
 var Icons embed.FS
 
-// An Icon contains the name of an icon
+// Icon contains the name of an icon
 type Icon string
 
 // Fill returns the icon as a filled icon.
