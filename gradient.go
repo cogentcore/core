@@ -116,6 +116,9 @@ func (g *Gradient) SetLinear() *Gradient {
 	return g
 }
 
+// SetBounds sets the bounds to the given value. It is just
+// a simple method that sets the value, and should not be confused
+// with [Gradient.SetUserBounds].
 func (g *Gradient) SetBounds(bounds mat32.Box2) *Gradient {
 	g.Bounds = bounds
 	return g
