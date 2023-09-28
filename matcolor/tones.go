@@ -30,10 +30,11 @@ func NewTones(c color.RGBA) Tones {
 	}
 }
 
-// Tone returns the color at the given tone.
-// It uses the cached value if it exists, and
-// it caches the value if it is not already.
-func (t *Tones) Tone(tone int) color.RGBA {
+// AbsTone returns the color at the given absolute
+// tone on a scale of 0 to 100. It uses the cached
+// value if it exists, and it caches the value if
+// it is not already.
+func (t *Tones) AbsTone(tone int) color.RGBA {
 	if c, ok := t.Tones[tone]; ok {
 		return c
 	}
@@ -44,12 +45,12 @@ func (t *Tones) Tone(tone int) color.RGBA {
 	return r
 }
 
-// RelTone returns the color at the given tone, relative to the "0" tone
+// Tone returns the color at the given tone, relative to the "0" tone
 // for the current color scheme (0 for light-themed schemes and 100 for
 // dark-themed schemes).
-func (t *Tones) RelTone(tone int) color.RGBA {
+func (t *Tones) Tone(tone int) color.RGBA {
 	if SchemeIsDark {
-		return t.Tone(100 - tone)
+		return t.AbsTone(100 - tone)
 	}
-	return t.Tone(tone)
+	return t.AbsTone(tone)
 }
