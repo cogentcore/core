@@ -17,6 +17,7 @@ import (
 	"text/template"
 
 	"goki.dev/goki/config"
+	"goki.dev/xe"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -63,12 +64,10 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	for _, file := range files {
-		if err := Mkdir(c, filepath.Dir(file.name)); err != nil {
+		if err := xe.MkdirAll(filepath.Dir(file.name), 0755); err != nil {
 			return nil, err
 		}
-		if c.Build.Print {
-			PrintCmd("echo \"%s\" > %s", file.contents, file.name)
-		}
+		xe.PrintCmd(fmt.Sprintf("echo \"%s\" > %s", file.contents, file.name), nil)
 		if !c.Build.PrintOnly {
 			if err := os.WriteFile(file.name, file.contents, 0644); err != nil {
 				return nil, err
@@ -77,11 +76,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	// We are using lipo tool to build multiarchitecture binaries.
-	cmd := exec.Command(
-		"xcrun", "lipo",
-		"-o", filepath.Join(TmpDir, "main/main"),
-		"-create",
-	)
+	args := []string{"lipo", "-o", filepath.Join(TmpDir, "main/main"), "-create"}
 
 	var nmpkgs map[string]bool
 	builtArch := map[string]bool{}
@@ -106,11 +101,11 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 				return nil, err
 			}
 		}
-		cmd.Args = append(cmd.Args, path)
+		args = append(args, path)
 
 	}
 
-	if err := RunCmd(c, cmd); err != nil {
+	if err := xe.Run("xcrun", args...); err != nil {
 		return nil, err
 	}
 
@@ -120,16 +115,12 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	}
 
 	// Build and move the release build to the output directory.
-	cmdStrings := []string{
-		"xcodebuild",
+	err = xe.Run("xcrun", "xcodebuild",
 		"-configuration", "Release",
-		"-project", TmpDir + "/main.xcodeproj",
+		"-project", TmpDir+"/main.xcodeproj",
 		"-allowProvisioningUpdates",
-		"DEVELOPMENT_TEAM=" + teamID,
-	}
-
-	cmd = exec.Command("xcrun", cmdStrings...)
-	if err := RunCmd(c, cmd); err != nil {
+		"DEVELOPMENT_TEAM="+teamID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -147,9 +138,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 		n = path.Base(n)
 		c.Build.Output = n + ".app"
 	}
-	if c.Build.Print {
-		PrintCmd("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output)
-	}
+	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output), nil)
 	if !c.Build.PrintOnly {
 		// if output already exists, remove.
 		if err := os.RemoveAll(c.Build.Output); err != nil {
@@ -198,7 +187,7 @@ func DetectTeamID() (string, error) {
 
 func AppleCopyAssets(c *config.Config, pkg *packages.Package, xcodeProjDir string) error {
 	dstAssets := xcodeProjDir + "/main/assets"
-	if err := Mkdir(c, dstAssets); err != nil {
+	if err := xe.MkdirAll(dstAssets, 0755); err != nil {
 		return err
 	}
 

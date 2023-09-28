@@ -74,14 +74,13 @@ func TestAndroidBuild(t *testing.T) {
 	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		t.Skipf("not available on %s", runtime.GOOS)
 	}
+	// TODO: capture in buf correctly
 	buf := new(bytes.Buffer)
 	c := &config.Config{}
 	defer func() {
-		Xout = os.Stderr
 		c.Build.PrintOnly = false
 		c.Build.Print = false
 	}()
-	Xout = buf
 	c.Build.PrintOnly = true
 	c.Build.Print = true
 	c.Build.Output = "basic.apk"
