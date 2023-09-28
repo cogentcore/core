@@ -370,7 +370,7 @@ func NewSideColorsTry(vals ...color.RGBA) (SideColors, error) {
 }
 
 // SetAny sets the sides/corners from the given value of any type
-func (s *SideColors) SetAny(a any, ctxt Context) error {
+func (s *SideColors) SetAny(a any, base color.Color) error {
 	switch val := a.(type) {
 	case Sides[color.RGBA]:
 		s.Sides = val
@@ -385,19 +385,19 @@ func (s *SideColors) SetAny(a any, ctxt Context) error {
 	case *[]color.RGBA:
 		s.Set(*val...)
 	case string:
-		return s.SetString(val, ctxt)
+		return s.SetString(val, base)
 	default:
-		return s.SetString(fmt.Sprint(val), ctxt)
+		return s.SetString(fmt.Sprint(val), base)
 	}
 	return nil
 }
 
 // SetString sets the sides/corners from the given string value
-func (s *SideColors) SetString(str string, ctxt Context) error {
+func (s *SideColors) SetString(str string, base color.Color) error {
 	fields := strings.Fields(str)
 	vals := make([]color.RGBA, len(fields))
 	for i, field := range fields {
-		clr, err := colors.FromString(field, ctxt.ContextColor())
+		clr, err := colors.FromString(field, base)
 		if err != nil {
 			nerr := fmt.Errorf("(SideColors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
 			log.Println(nerr)

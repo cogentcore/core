@@ -117,7 +117,7 @@ type Style struct {
 	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 
 	// border around the box element
 	Border Border `xml:"border" desc:"border around the box element"`

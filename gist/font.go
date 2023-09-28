@@ -92,7 +92,7 @@ func (fs *Font) SetUnitContext(ctxt *units.Context) {
 	}
 }
 
-func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt Context) {
+func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt colors.Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -109,7 +109,7 @@ func (fs *Font) StyleFromProps(par *Font, props map[string]any, ctxt Context) {
 // SetStyleProps sets font style values based on given property map (name:
 // value pairs), inheriting elements as appropriate from parent, and also
 // having a default style for the "initial" setting.
-func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt Context) {
+func (fs *Font) SetStyleProps(parent *Font, props map[string]any, ctxt colors.Context) {
 	// direct font styling is used only for special cases -- don't do this:
 	// if !fs.StyleSet && parent != nil { // first time
 	// 	fs.InheritFields(parent)
@@ -163,6 +163,8 @@ func (fs *Font) CopyNonDefaultProps(node ki.Ki) {
 
 //////////////////////////////////////////////////////////////////////////////////
 // Font Style enums
+
+// TODO: should we keep FontSizePoints?
 
 // FontSizePoints maps standard font names to standard point sizes -- we use
 // dpi zoom scaling instead of rescaling "medium" font size, so generally use
@@ -432,7 +434,7 @@ type FontRender struct {
 	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor ColorSpec `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 }
 
 // FontRender returns the font-rendering-related

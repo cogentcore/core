@@ -17,11 +17,11 @@ import (
 type TestContext struct {
 }
 
-func (tc *TestContext) ContextColor() color.RGBA {
+func (tc *TestContext) Base() color.Color {
 	return colors.White
 }
 
-func (tc *TestContext) ContextColorSpecByURL(url string) *ColorSpec {
+func (tc *TestContext) FullByURL(url string) *colors.Full {
 	return nil
 }
 

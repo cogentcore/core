@@ -12,6 +12,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/enums"
 	"goki.dev/girl/units"
+	"goki.dev/grr"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
@@ -21,7 +22,7 @@ import (
 //     see style_props.go for master version
 
 // StyleFromProps sets style field values based on map[string]any properties
-func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt Context) {
+func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt colors.Context) {
 	for key, val := range props {
 		if len(key) == 0 {
 			continue
@@ -101,7 +102,7 @@ func (pc *Paint) StyleFromProps(par *Paint, props map[string]any, ctxt Context) 
 
 // StyleStrokeFuncs are functions for styling the Stroke object
 var StyleStrokeFuncs = map[string]StyleFunc{
-	"stroke": func(obj any, key string, val any, par any, ctxt Context) {
+	"stroke": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -111,7 +112,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color.SetIFace(val, ctxt, key)
+		grr.Log0(fs.Color.SetAny(val, ctxt))
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
@@ -119,7 +120,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
 	"stroke-min-width": StyleFuncUnits(units.Px(1),
 		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
-	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt Context) {
+	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Stroke)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -151,7 +152,7 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 
 // StyleFillFuncs are functions for styling the Fill object
 var StyleFillFuncs = map[string]StyleFunc{
-	"fill": func(obj any, key string, val any, par any, ctxt Context) {
+	"fill": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Fill)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -161,7 +162,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color.SetIFace(val, ctxt, key)
+		grr.Log0(fs.Color.SetAny(val, ctxt))
 	},
 	"fill-opacity": StyleFuncFloat(float32(1),
 		func(obj *Fill) *float32 { return &(obj.Opacity) }),
@@ -176,7 +177,7 @@ var StyleFillFuncs = map[string]StyleFunc{
 var StylePaintFuncs = map[string]StyleFunc{
 	"vector-effect": StyleFuncEnum(VecEffNone,
 		func(obj *Paint) enums.EnumSetter { return &(obj.VecEff) }),
-	"transform": func(obj any, key string, val any, par any, ctxt Context) {
+	"transform": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		pc := obj.(*Paint)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -217,7 +218,7 @@ func ParseDashesString(str string) []float64 {
 
 // StyleFontRenderFuncs are functions for styling the FontStyle fields beyond Font
 var StyleFontRenderFuncs = map[string]StyleFunc{
-	"color": func(obj any, key string, val any, par any, ctxt Context) {
+	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*FontRender)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -227,18 +228,18 @@ var StyleFontRenderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = colors.LogFromAny(val, ctxt.ContextColor())
+		fs.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
 	},
-	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
+	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*FontRender)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
 				fs.BackgroundColor = par.(*FontRender).BackgroundColor
 			} else if init {
-				fs.BackgroundColor = ColorSpec{}
+				fs.BackgroundColor = colors.Full{}
 			}
 			return
 		}
-		fs.BackgroundColor.SetIFace(val, ctxt, key)
+		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
 	},
 }

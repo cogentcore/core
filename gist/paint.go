@@ -85,7 +85,7 @@ func (pc *Paint) InheritFields(par *Paint) {
 // SetStyleProps sets paint values based on given property map (name: value
 // pairs), inheriting elements as appropriate from parent, and also having a
 // default style for the "initial" setting
-func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt Context) {
+func (pc *Paint) SetStyleProps(par *Paint, props map[string]any, ctxt colors.Context) {
 	if !pc.StyleSet && par != nil { // first time
 		pc.InheritFields(par)
 	}
@@ -182,7 +182,7 @@ type Fill struct {
 	On bool `desc:"is fill active -- if property is none then false"`
 
 	// prop: fill = fill color specification
-	Color ColorSpec `xml:"fill" desc:"prop: fill = fill color specification"`
+	Color colors.Full `xml:"fill" desc:"prop: fill = fill color specification"`
 
 	// prop: fill-opacity = global alpha opacity / transparency factor
 	Opacity float32 `xml:"fill-opacity" desc:"prop: fill-opacity = global alpha opacity / transparency factor"`
@@ -214,13 +214,14 @@ func (pf *Fill) SetColor(cl color.Color) {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color.Color = colors.AsRGBA(cl)
-		pf.Color.Source = SolidColor
+		pf.Color.SetColor(cl)
 	}
 }
 
+//COLORTODO(kai): rename this to SetFull (and the other SetColorSpec below)
+
 // SetColorSpec sets full color spec from source
-func (pf *Fill) SetColorSpec(cl *ColorSpec) {
+func (pf *Fill) SetColorSpec(cl *colors.Full) {
 	if cl == nil {
 		pf.On = false
 	} else {
@@ -271,7 +272,7 @@ type Stroke struct {
 	On bool `desc:"is stroke active -- if property is none then false"`
 
 	// prop: stroke = stroke color specification
-	Color ColorSpec `xml:"stroke" desc:"prop: stroke = stroke color specification"`
+	Color colors.Full `xml:"stroke" desc:"prop: stroke = stroke color specification"`
 
 	// prop: stroke-opacity = global alpha opacity / transparency factor
 	Opacity float32 `xml:"stroke-opacity" desc:"prop: stroke-opacity = global alpha opacity / transparency factor"`
@@ -322,13 +323,12 @@ func (ps *Stroke) SetColor(cl color.Color) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color.Color = colors.AsRGBA(cl)
-		ps.Color.Source = SolidColor
+		ps.SetColor(cl)
 	}
 }
 
 // SetColorSpec sets full color spec from source
-func (ps *Stroke) SetColorSpec(cl *ColorSpec) {
+func (ps *Stroke) SetColorSpec(cl *colors.Full) {
 	if cl == nil {
 		ps.On = false
 	} else {

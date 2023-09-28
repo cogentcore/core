@@ -11,6 +11,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/units"
 	"goki.dev/glop/num"
+	"goki.dev/grr"
 	"goki.dev/laser"
 )
 
@@ -32,7 +33,7 @@ func StyleInhInit(val, par any) (inh, init bool) {
 
 // StyleFuncInt returns a style function for any numerical value
 func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) StyleFunc {
-	return func(obj any, key string, val any, par any, ctxt Context) {
+	return func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -49,7 +50,7 @@ func StyleFuncInt[T any, F num.Integer](initVal F, getField func(obj *T) *F) Sty
 
 // StyleFuncFloat returns a style function for any numerical value
 func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) StyleFunc {
-	return func(obj any, key string, val any, par any, ctxt Context) {
+	return func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -66,7 +67,7 @@ func StyleFuncFloat[T any, F num.Float](initVal F, getField func(obj *T) *F) Sty
 
 // StyleFuncBool returns a style function for a bool value
 func StyleFuncBool[T any](initVal bool, getField func(obj *T) *bool) StyleFunc {
-	return func(obj any, key string, val any, par any, ctxt Context) {
+	return func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -83,7 +84,7 @@ func StyleFuncBool[T any](initVal bool, getField func(obj *T) *bool) StyleFunc {
 
 // StyleFuncUnits returns a style function for units.Value
 func StyleFuncUnits[T any](initVal units.Value, getField func(obj *T) *units.Value) StyleFunc {
-	return func(obj any, key string, val any, par any, ctxt Context) {
+	return func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -99,7 +100,7 @@ func StyleFuncUnits[T any](initVal units.Value, getField func(obj *T) *units.Val
 
 // StyleFuncEnum returns a style function for any enum value
 func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSetter) StyleFunc {
-	return func(obj any, key string, val any, par any, ctxt Context) {
+	return func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fp := getField(obj.(*T))
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -138,10 +139,10 @@ func StyleSetError(key string, val any) {
 	log.Printf("gist.Style error: cannot set key: %s from value: %v\n", key, val)
 }
 
-type StyleFunc func(obj any, key string, val any, par any, ctxt Context)
+type StyleFunc func(obj any, key string, val any, par any, ctxt colors.Context)
 
 // StyleFromProps sets style field values based on map[string]any properties
-func (s *Style) StyleFromProps(par *Style, props map[string]any, ctxt Context) {
+func (s *Style) StyleFromProps(par *Style, props map[string]any, ctxt colors.Context) {
 	// pr := prof.Start("StyleFromProps")
 	// defer pr.End()
 	for key, val := range props {
@@ -212,7 +213,7 @@ func (s *Style) StyleFromProps(par *Style, props map[string]any, ctxt Context) {
 
 // StyleStyleFuncs are functions for styling the Style object itself
 var StyleStyleFuncs = map[string]StyleFunc{
-	"display": func(obj any, key string, val any, par any, ctxt Context) {
+	"display": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -236,7 +237,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 		func(obj *Style) *bool { return &(obj.Inactive) }),
 	"pointer-events": StyleFuncBool(false,
 		func(obj *Style) *bool { return &(obj.PointerEvents) }),
-	"color": func(obj any, key string, val any, par any, ctxt Context) {
+	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -246,19 +247,19 @@ var StyleStyleFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		fs.Color = colors.LogFromAny(val, ctxt.ContextColor())
+		fs.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
 	},
-	"background-color": func(obj any, key string, val any, par any, ctxt Context) {
+	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
 				fs.BackgroundColor = par.(*Style).BackgroundColor
 			} else if init {
-				fs.BackgroundColor = ColorSpec{}
+				fs.BackgroundColor = colors.Full{}
 			}
 			return
 		}
-		fs.BackgroundColor.SetIFace(val, ctxt, key)
+		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
 	},
 }
 
@@ -291,7 +292,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		func(obj *Style) *units.Value { return &(obj.MinWidth) }),
 	"min-height": StyleFuncUnits(units.Px(2),
 		func(obj *Style) *units.Value { return &(obj.MinHeight) }),
-	"margin": func(obj any, key string, val any, par any, ctxt Context) {
+	"margin": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -303,7 +304,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		}
 		s.Margin.SetAny(val)
 	},
-	"padding": func(obj any, key string, val any, par any, ctxt Context) {
+	"padding": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		s := obj.(*Style)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -338,7 +339,7 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 var StyleFontFuncs = map[string]StyleFunc{
 	"opacity": StyleFuncFloat(float32(1),
 		func(obj *Font) *float32 { return &(obj.Opacity) }),
-	"font-size": func(obj any, key string, val any, par any, ctxt Context) {
+	"font-size": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -359,7 +360,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 			fs.Size.SetIFace(val, key)
 		}
 	},
-	"font-family": func(obj any, key string, val any, par any, ctxt Context) {
+	"font-family": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -381,7 +382,7 @@ var StyleFontFuncs = map[string]StyleFunc{
 		func(obj *Font) enums.EnumSetter { return &(obj.Variant) }),
 	"baseline-shift": StyleFuncEnum(ShiftBaseline,
 		func(obj *Font) enums.EnumSetter { return &(obj.Shift) }),
-	"text-decoration": func(obj any, key string, val any, par any, ctxt Context) {
+	"text-decoration": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -454,7 +455,7 @@ var StyleTextFuncs = map[string]StyleFunc{
 var StyleBorderFuncs = map[string]StyleFunc{
 	// SidesTODO: need to figure out how to get key and context information for side SetAny calls
 	// with padding, margin, border, etc
-	"border-style": func(obj any, key string, val any, par any, ctxt Context) {
+	"border-style": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -479,7 +480,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"border-width": func(obj any, key string, val any, par any, ctxt Context) {
+	"border-width": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -491,7 +492,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		}
 		bs.Width.SetAny(val)
 	},
-	"border-radius": func(obj any, key string, val any, par any, ctxt Context) {
+	"border-radius": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -503,7 +504,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		}
 		bs.Radius.SetAny(val)
 	},
-	"border-color": func(obj any, key string, val any, par any, ctxt Context) {
+	"border-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -513,7 +514,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		bs.Color.SetAny(val, ctxt)
+		grr.Log0(bs.Color.SetAny(val, ctxt.Base()))
 	},
 }
 
@@ -522,7 +523,7 @@ var StyleBorderFuncs = map[string]StyleFunc{
 
 // StyleOutlineFuncs are functions for styling the OutlineStyle object
 var StyleOutlineFuncs = map[string]StyleFunc{
-	"outline-style": func(obj any, key string, val any, par any, ctxt Context) {
+	"outline-style": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -547,7 +548,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			}
 		}
 	},
-	"outline-width": func(obj any, key string, val any, par any, ctxt Context) {
+	"outline-width": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -559,7 +560,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		}
 		bs.Width.SetAny(val)
 	},
-	"outline-radius": func(obj any, key string, val any, par any, ctxt Context) {
+	"outline-radius": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -571,7 +572,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		}
 		bs.Radius.SetAny(val)
 	},
-	"outline-color": func(obj any, key string, val any, par any, ctxt Context) {
+	"outline-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		bs := obj.(*Border)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -581,7 +582,7 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		bs.Color.SetAny(val, ctxt)
+		grr.Log0(bs.Color.SetAny(val, ctxt.Base()))
 	},
 }
 
@@ -598,7 +599,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 		func(obj *Shadow) *units.Value { return &(obj.Blur) }),
 	"box-shadow.spread": StyleFuncUnits(units.Value{},
 		func(obj *Shadow) *units.Value { return &(obj.Spread) }),
-	"box-shadow.color": func(obj any, key string, val any, par any, ctxt Context) {
+	"box-shadow.color": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		ss := obj.(*Shadow)
 		if inh, init := StyleInhInit(val, par); inh || init {
 			if inh {
@@ -608,7 +609,7 @@ var StyleShadowFuncs = map[string]StyleFunc{
 			}
 			return
 		}
-		ss.Color = colors.LogFromAny(val, ctxt.ContextColor())
+		ss.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
 	},
 	"box-shadow.inset": StyleFuncBool(false,
 		func(obj *Shadow) *bool { return &(obj.Inset) }),
