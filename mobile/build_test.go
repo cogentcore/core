@@ -16,6 +16,7 @@ import (
 
 	"goki.dev/goki/config"
 	"goki.dev/goki/mobile/sdkpath"
+	"goki.dev/xe"
 )
 
 func TestRFC1034Label(t *testing.T) {
@@ -76,8 +77,11 @@ func TestAndroidBuild(t *testing.T) {
 	}
 	// TODO: capture in buf correctly
 	buf := new(bytes.Buffer)
+
+	xe.SetMajor(xe.Major().SetStdout(buf).SetStderr(buf))
 	c := &config.Config{}
 	defer func() {
+		xe.SetMajor(nil)
 		c.Build.PrintOnly = false
 		c.Build.Print = false
 	}()

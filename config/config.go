@@ -9,6 +9,7 @@ package config
 import (
 	"goki.dev/enums/enumgen"
 	"goki.dev/gti/gtigen"
+	"goki.dev/xe"
 )
 
 // TODO: make all of the target fields enums
@@ -163,4 +164,8 @@ type Generate struct {
 
 	// [def: true] whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)
 	AddKiTypes bool `def:"true" desc:"whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)"`
+}
+
+func (c *Config) OnConfig(cmd string) {
+	xe.SetMajor(xe.Major().SetPrintOnly(c.Build.PrintOnly))
 }
