@@ -56,14 +56,6 @@ type EventMgr struct {
 	// Stage is the owning MainStage that we manage events for
 	Main *MainStage
 
-	// todo: remove master, eventmu -- should be protected by global render mu?
-
-	// master of this event mangager -- handles broader scope issues
-	Master EventMaster `desc:"master of this event mangager -- handles broader scope issues"`
-
-	// mutex that protects event sending
-	EventMu sync.Mutex `desc:"mutex that protects event sending"`
-
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
 
@@ -162,6 +154,26 @@ func (wl *WinEventRecvList) AddDepth(recv Widget, fun ki.RecvFunc, par Widget) {
 	wl.Add(recv, fun, recv.ParentLevel(par))
 }
 
+// MainStageMgr returns the MainStageMgr for our Main Stage
+func (em *EventMgr) MainStageMgr() *MainStageMgr {
+	if em.Main == nil {
+		return nil
+	}
+	return em.Main.StageMgr
+}
+
+// RenderWin returns the overall render window, if possible.
+func (em *EventMgr) RenderWin() *RenderWin {
+	mgr := em.MainStageMgr()
+	if mgr == nil {
+		return nil
+	}
+	return mgr.RenderWin
+}
+
+///////////////////////////////////////////////////////////////////////
+// 	HandleEvent
+
 func (em *EventMgr) HandleEvent(sc *Scene, evi goosi.Event) {
 	et := evi.Type()
 	if et > goosi.EventTypesN || et < 0 {
@@ -179,6 +191,14 @@ func (em *EventMgr) HandleEvent(sc *Scene, evi goosi.Event) {
 	}
 }
 
+func (em *EventMgr) SetRenderWinFocusActive(active bool) {
+	win := em.RenderWin()
+	if win == nil {
+		return
+	}
+	win.SetFocusActive(active)
+}
+
 func (em *EventMgr) HandleOtherEvent(sc *Scene, evi goosi.Event) {
 }
 
@@ -189,6 +209,15 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi goosi.Event) {
 		return
 	}
 	fw := foc.AsWidget()
+	if win := em.RenderWin(); win != nil {
+		if !win.IsFocusActive() { // reactivate on keyboard input
+			win.SetFocusActive(true)
+			if EventTrace {
+				fmt.Printf("Event: set focus active, was not: %v\n", fw.Path())
+			}
+			foc.FocusChanged(FocusActive)
+		}
+	}
 	wants := fw.Events.Filter.HasFlag(et)
 	if wants {
 		fw.Events.Funcs[et].Func(foc.This(), nil, int64(et), evi)
@@ -290,19 +319,6 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 	nii, ni := AsWidget(recv)
 	if ni != nil {
 		if evi.OnFocus() {
-			if !nii.HasFocus() { // note: HasFocus is a separate interface method, containers also set to true
-				return ki.Continue
-			}
-			if EventTrace && recv == em.CurFocus() {
-				fmt.Printf("Event: cur focus: %v\n", recv.Path())
-			}
-			if !em.Master.IsFocusActive() { // reactivate on keyboard input
-				em.Master.SetFocusActiveState(true)
-				if EventTrace {
-					fmt.Printf("Event: set focus active, was not: %v\n", ni.Path())
-				}
-				nii.FocusChanged(FocusActive)
-			}
 		}
 	}
 	top := em.Master.EventTopNode()
@@ -429,7 +445,7 @@ func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
 		if em.startDrag == nil {
 			em.startDrag = me
 		} else {
-			if em.DoInstaDrag(em.startDrag, !em.Master.CurPopupIsTooltip()) {
+			if em.DoInstaDrag(em.startDrag, false) { // !em.Master.CurPopupIsTooltip()) {
 				em.dragStarted = true
 				em.startDrag = nil
 			} else {
@@ -547,7 +563,7 @@ func (em *EventMgr) MouseMoveEvents(evi goosi.Event) {
 		dst := int(mat32.Hypot(float32(em.startHover.Where.X-me.Pos().X), float32(em.startHover.Where.Y-me.Pos().Y)))
 		if dst > HoverMaxPix {
 			em.hoverTimer.Stop()
-			em.Master.DeleteTooltip()
+			// em.Master.DeleteTooltip()
 			em.startHover = nil
 			em.hoverTimer = nil
 			em.hoverStarted = false
@@ -935,7 +951,7 @@ func (em *EventMgr) SetFocus(k Widget) bool {
 		return false
 	}
 	wb.SetFocusState(true)
-	em.Master.SetFocusActiveState(true)
+	em.SetRenderWinFocusActive(true)
 	// fmt.Printf("set foc: %v\n", ni.Path())
 	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
 	wi.FocusChanged(FocusGot)
@@ -952,7 +968,7 @@ func (em *EventMgr) FocusNext(foc Widget) bool {
 		focusNext = true
 	}
 
-	focRoot := em.Master.FocusTopNode()
+	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
 	for i := 0; i < 2; i++ {
 		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
@@ -1031,7 +1047,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 	gotFocus := false
 	var prevItem Widget
 
-	focRoot := em.Master.FocusTopNode()
+	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		if gotFocus {
@@ -1064,7 +1080,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 func (em *EventMgr) FocusLast() bool {
 	var lastItem Widget
 
-	focRoot := em.Master.FocusTopNode()
+	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		wi, wb := AsWidget(k)
@@ -1086,10 +1102,7 @@ func (em *EventMgr) FocusLast() bool {
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
 func (em *EventMgr) ClearNonFocus(foc Widget) {
-	focRoot := em.Master.FocusTopNode()
-
-	updated := false
-	updt := false
+	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
 	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
 		if k == focRoot { // skip top-level
@@ -1106,18 +1119,11 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 			if EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}
-			if !updated {
-				updated = true
-				updt = em.Master.EventTopUpdateStart()
-			}
 			wb.SetFlag(false, HasFocus)
 			wi.FocusChanged(FocusLost)
 		}
 		return ki.Continue
 	})
-	if updated {
-		em.Master.EventTopUpdateEnd(updt)
-	}
 }
 
 // PushFocus pushes current focus onto stack and sets new focus.
@@ -1206,50 +1212,11 @@ func (em *EventMgr) ManagerKeyChordEvents(e *key.Event) {
 		em.FocusPrev(em.CurFocus())
 		e.SetHandled()
 	case KeyFunGoGiEditor:
-		TheViewIFace.GoGiEditor(em.Master.EventTopNode())
+		// todo:
+		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())
 		e.SetHandled()
 	case KeyFunPrefs:
 		TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
 	}
-}
-
-///////////////////////////////////////////////////////////////////
-//   Master interface
-
-// EventMaster provides additional control methods for the
-// event manager, for things beyond its immediate scope
-type EventMaster interface {
-	// EventTopNode returns the top-level node for this event scope.
-	// This is also the node that serves as the event sender.
-	// By default it is the RenderWin.
-	EventTopNode() Widget
-
-	// FocusTopNode returns the top-level node for key event focusing.
-	FocusTopNode() Widget
-
-	// EventTopUpdateStart does an UpdateStart on top-level node, for batch updates.
-	// This may not be identical to EventTopNode().UpdateStart() for
-	// embedded case where Scene is the EventTopNode.
-	EventTopUpdateStart() bool
-
-	// EventTopUpdateEnd does an UpdateEnd on top-level node, for batch updates.
-	// This may not be identical to EventTopNode().UpdateEnd() for
-	// embedded case where Scene is the EventTopNode.
-	EventTopUpdateEnd(updt bool)
-
-	// IsInScope returns whether given node is in scope for receiving events
-	IsInScope(node Widget, popup bool) bool
-
-	// CurPopupIsTooltip returns true if current popup is a tooltip
-	CurPopupIsTooltip() bool
-
-	// DeleteTooltip deletes any tooltip popup (called when hover ends)
-	DeleteTooltip()
-
-	// IsFocusActive returns true if focus is active in this master
-	IsFocusActive() bool
-
-	// SetFocusActiveState sets focus active state
-	SetFocusActiveState(active bool)
 }

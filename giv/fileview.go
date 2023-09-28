@@ -806,8 +806,8 @@ func (fv *FileView) SaveSortPrefs() {
 	gi.Prefs.Save()
 }
 
-func (fv *FileView) SetStyle() {
-	fv.Frame.SetStyle()
+func (fv *FileView) ApplyStyle() {
+	fv.Frame.ApplyStyle()
 	sf := fv.SelField()
 	sf.StartFocus() // need to call this when window is actually active
 }

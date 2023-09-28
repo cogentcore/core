@@ -54,7 +54,7 @@ func mainrun() {
 <kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetStretchMax().
-		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
 			s.Text.WhiteSpace = gist.WhiteSpaceNormal
 			s.Text.Align = gist.AlignCenter
 			s.Text.AlignV = gist.AlignCenter
@@ -77,7 +77,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).
 		SetTooltip("press this <i>button</i> to pop up a dialog box").
-		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
 		}).(*gi.Button).
@@ -167,7 +167,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	srow := gi.NewLayout(frame, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
-		SetStyling(func(w *gi.WidgetBase, s *gist.Style) {
+		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
 			s.AlignH = gist.AlignLeft
 		})
 

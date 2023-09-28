@@ -213,9 +213,6 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	if sb.DownIcon.IsNil() {
 		sb.DownIcon = icons.KeyboardArrowDown
 	}
-	if sb.Style.Template != "" {
-		parts.Style.Template = sb.Style.Template + ".Parts"
-	}
 	config := ki.TypeAndNameList{}
 	config.Add(TextFieldType, "text-field")
 	if !sb.IsDisabled() {
@@ -238,9 +235,6 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		// not compiled into style prop
 		// up.SetFlagState(sb.IsInactive(), int(Inactive))
 		up.SetIcon(sb.UpIcon)
-		if sb.Style.Template != "" {
-			up.Style.Template = sb.Style.Template + ".up"
-		}
 		up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			sbb := AsSpinBox(recv)
 			sbb.IncrValue(1.0)
@@ -251,27 +245,16 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		dn.SetName("down")
 		dn.SetProp("no-focus", true)
 		dn.Icon = sb.DownIcon
-		if sb.Style.Template != "" {
-			dn.Style.Template = sb.Style.Template + ".dn"
-		}
 		dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 			sbb := AsSpinBox(recv)
 			sbb.IncrValue(-1.0)
 		})
 		// space
-		sp := parts.ChildByName("space", 2).(*Space)
-		if sb.Style.Template != "" {
-			sp.Style.Template = sb.Style.Template + ".space"
-		}
+		// sp := parts.ChildByName("space", 2).(*Space)
 	}
 	// text-field
 	tf := parts.ChildByName("text-field", 0).(*TextField)
 	tf.SetFlag(sb.IsDisabled(), Disabled)
-	// todo: see TreeView for extra steps needed to generally support styling of parts..
-	// doing it manually for now..
-	if sb.Style.Template != "" {
-		tf.Style.Template = sb.Style.Template + ".text"
-	}
 	tf.Txt = sb.ValToString(sb.Value)
 	if !sb.IsDisabled() {
 		tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -463,10 +446,10 @@ func (sb *SpinBox) StyleSpinBox(sc *Scene) {
 	sb.StyMu.Lock()
 	defer sb.StyMu.Unlock()
 
-	sb.SetStyleWidget(sc)
+	sb.ApplyStyleWidget(sc)
 }
 
-func (sb *SpinBox) SetStyle(sc *Scene) {
+func (sb *SpinBox) ApplyStyle(sc *Scene) {
 	sb.StyleSpinBox(sc)
 	sb.ConfigParts(sc)
 }

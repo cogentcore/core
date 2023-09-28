@@ -22,8 +22,8 @@ import (
 type Widget interface {
 	ki.Ki
 
-	// SetStyling sets the styling of the widget by adding a Styler function
-	SetStyling(s Styler) Widget
+	// SetStyle sets the styling of the widget by adding a Styler function
+	SetStyle(s Styler) Widget
 
 	// SetTooltip sets the Tooltip message when hovering over the widget
 	SetTooltip(tt string) Widget
@@ -37,7 +37,7 @@ type Widget interface {
 	// Config configures the widget, primarily configuring its Parts.
 	// it does _not_ call Config on children, just self.
 	// ConfigTree handles full tree configuration.
-	// This config calls UpdateStart / End, SetStyle, and SetNeedsLayout,
+	// This config calls UpdateStart / End, ApplyStyle, and SetNeedsLayout,
 	// and calls ConfigWidget to do the actual configuration,
 	// so it does not need to manage this housekeeping.
 	Config(sc *Scene)
@@ -50,9 +50,9 @@ type Widget interface {
 	// so this call just does the core configuration.
 	ConfigWidget(sc *Scene)
 
-	// SetStyle applies style functions to the widget based on current state.
+	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
-	SetStyle(sc *Scene)
+	ApplyStyle(sc *Scene)
 
 	// GetSize: MeLast downward pass, each node first calls
 	// g.Layout.Reset(), then sets their LayoutSize according to their own
@@ -219,8 +219,8 @@ type WidgetBase struct {
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
 
-	// styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetSetStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
+	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`

@@ -252,9 +252,9 @@ func (bb *ButtonBox) ConfigWidget(sc *Scene) {
 	bb.ConfigParts(sc)
 }
 
-func (bb *ButtonBox) SetStyle(sc *Scene) {
+func (bb *ButtonBox) ApplyStyle(sc *Scene) {
 	bb.StyMu.Lock()
-	bb.SetStyleWidget(sc)
+	bb.ApplyStyleWidget(sc)
 	bb.StyMu.Unlock()
 	// bb.ConfigParts(sc) // todo: no config in styling!?
 }

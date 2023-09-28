@@ -1087,7 +1087,7 @@ func (tf *TextField) RenderSelect(sc *Scene) {
 	pc := &rs.Paint
 	// st := &tf.StateStyles[TextFieldSel]
 	// tf.State = TextFieldSel
-	// tf.RunStyleFuncs()
+	// tf.RunStylers()
 	tsz := tf.TextWidth(effst, effed)
 	pc.FillBox(rs, spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
 }
@@ -1531,12 +1531,12 @@ func (tf *TextField) ConfigWidget(sc *Scene) {
 func (tf *TextField) StyleTextField(sc *Scene) {
 	tf.StyMu.Lock()
 	tf.SetCanFocusIfActive()
-	tf.SetStyleWidget(sc)
+	tf.ApplyStyleWidget(sc)
 	tf.CursorWidth.ToDots(&tf.Style.UnContext)
 	tf.StyMu.Unlock()
 }
 
-func (tf *TextField) SetStyle(sc *Scene) {
+func (tf *TextField) ApplyStyle(sc *Scene) {
 	tf.StyleTextField(sc)
 }
 
@@ -1656,13 +1656,13 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusLost:
 		tf.SetFlag(false, TextFieldFocusActive)
 		tf.EditDone()
-		tf.SetStyleUpdate(tf.Sc)
+		tf.ApplyStyleUpdate(tf.Sc)
 	case FocusGot:
 		tf.SetFlag(true, TextFieldFocusActive)
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		tf.EmitFocusedSignal()
-		tf.SetStyleUpdate(tf.Sc)
+		tf.ApplyStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
@@ -1671,12 +1671,12 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 	case FocusInactive:
 		tf.SetFlag(false, TextFieldFocusActive)
 		tf.EditDeFocused()
-		tf.SetStyleUpdate(tf.Sc)
+		tf.ApplyStyleUpdate(tf.Sc)
 		goosi.TheApp.HideVirtualKeyboard()
 	case FocusActive:
 		tf.SetFlag(true, TextFieldFocusActive)
 		tf.ScrollToMe()
-		tf.SetStyleUpdate(tf.Sc)
+		tf.ApplyStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {

@@ -4805,7 +4805,7 @@ func (tv *TextView) StyleTextView() {
 			win.DeleteSprite(spnm)
 		}
 	}
-	tv.SetStyleWidget()
+	tv.ApplyStyleWidget()
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
 	if tv.Buf != nil {
 		tv.Buf.Opts.StyleFromProps(tv.Props)
@@ -4827,8 +4827,8 @@ func (tv *TextView) StyleTextView() {
 	}
 }
 
-// SetStyle calls StyleTextView and sets the style
-func (tv *TextView) SetStyle() {
+// ApplyStyle calls StyleTextView and sets the style
+func (tv *TextView) ApplyStyle() {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 }

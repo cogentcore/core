@@ -7,8 +7,6 @@ package gi
 import (
 	"log"
 
-	"goki.dev/colors"
-	"goki.dev/girl/gist"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -47,7 +45,7 @@ func (wb *WidgetBase) Config(sc *Scene) {
 	wb.Style.Defaults()    // reset
 	wb.LayState.Defaults() // doesn't overwrite
 	wi.ConfigWidget(sc)    // where everything actually happens
-	wi.SetStyle(sc)
+	wi.ApplyStyle(sc)
 	wb.UpdateEnd(updt)
 	wb.SetNeedsLayout(sc, updt)
 }
@@ -59,9 +57,6 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
 func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
-	if wb.Style.Template != "" {
-		wb.Parts.Style.Template = wb.Style.Template + ".Parts"
-	}
 	icIdx = -1
 	lbIdx = -1
 	if icnm.IsValid() {
@@ -83,28 +78,12 @@ func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm icon
 func (wb *WidgetBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := wb.Parts.Child(icIdx).(*Icon)
-		if wb.Style.Template != "" {
-			ic.Style.Template = wb.Style.Template + ".icon"
-		}
 		ic.SetIcon(icnm)
 	}
 	if lbIdx >= 0 {
 		lbl := wb.Parts.Child(lbIdx).(*Label)
-		if wb.Style.Template != "" {
-			lbl.Style.Template = wb.Style.Template + ".icon"
-		}
 		if lbl.Text != txt {
-			// avoiding SetText here makes it so label default
-			// styles don't end up first, which is needed for
-			// parent styles to override. However, there might have
-			// been a reason for calling SetText, so we will see if
-			// any bugs show up. TODO: figure out a good long-term solution for this.
-			lbl.Text = txt
-			// todo: this is not being done anywhere -- needs it!
-			lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Color = colors.Black // whatever
-			})
-			// lbl.SetText(txt)
+			lbl.SetText(txt)
 			lbl.Config(wb.Sc) // this is essential
 		}
 	}

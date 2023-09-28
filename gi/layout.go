@@ -383,7 +383,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sb.SetFixedWidth(ly.Style.ScrollBarWidth)
 		sb.SetFixedHeight(units.Dot(avail.Dim(d)))
 	}
-	sb.SetStyle(sc)
+	sb.ApplyStyle(sc)
 	sb.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sb.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
@@ -1180,27 +1180,11 @@ func (ly *Layout) StyleLayout(sc *Scene) {
 	ly.StyMu.Lock()
 	defer ly.StyMu.Unlock()
 
-	// pr := prof.Start("StyleLayout")
-	// defer pr.End()
-
-	hasTempl, saveTempl := ly.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		ly.SetStyleWidget(sc)
-	}
-	ly.StyleFromProps(ly.Props, ly.Sc) // does "lay" and "spacing", in layoutstyles.go
-	// tprops := *kit.Types.Properties(ki.Type(ly), true) // true = makeNew
-	// if len(tprops) > 0 {
-	// 	kit.TypesMu.RLock()
-	// 	ly.StyleFromProps(tprops, ly.Sc)
-	// 	kit.TypesMu.RUnlock()
-	// }
+	ly.ApplyStyleWidget(sc)
 	ly.StyleToDots(&ly.Style.UnContext)
-	if hasTempl && saveTempl {
-		ly.Style.SaveTemplate()
-	}
 }
 
-func (ly *Layout) SetStyle(sc *Scene) {
+func (ly *Layout) ApplyStyle(sc *Scene) {
 	ly.StyleLayout(sc)
 }
 
@@ -1342,17 +1326,11 @@ func (st *Stretch) CopyFieldsFrom(frm any) {
 	st.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (st *Stretch) SetStyle(sc *Scene) {
+func (st *Stretch) ApplyStyle(sc *Scene) {
 	st.StyMu.Lock()
 	defer st.StyMu.Unlock()
 
-	hasTempl, saveTempl := st.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		st.SetStyleWidget(sc)
-	}
-	if hasTempl && saveTempl {
-		st.Style.SaveTemplate()
-	}
+	st.ApplyStyleWidget(sc)
 }
 
 func (st *Stretch) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -1381,17 +1359,11 @@ func (sp *Space) CopyFieldsFrom(frm any) {
 	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 }
 
-func (sp *Space) SetStyle(sc *Scene) {
+func (sp *Space) ApplyStyle(sc *Scene) {
 	sp.StyMu.Lock()
 	defer sp.StyMu.Unlock()
 
-	hasTempl, saveTempl := sp.Style.FromTemplate()
-	if !hasTempl || saveTempl {
-		sp.SetStyleWidget(sc)
-	}
-	if hasTempl && saveTempl {
-		sp.Style.SaveTemplate()
-	}
+	sp.ApplyStyleWidget(sc)
 }
 
 func (sp *Space) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {

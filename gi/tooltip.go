@@ -59,7 +59,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 		})
 
 		frame.ConfigTree(psc)
-		frame.SetStyleTree(psc) // sufficient to get sizes
+		frame.ApplyStyleTree(psc) // sufficient to get sizes
 		mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
 		frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
 		frame.GetSizeTree(psc, 0)          // collect sizes

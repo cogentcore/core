@@ -216,7 +216,7 @@ func (bb *ButtonBase) ButtonPress() {
 		bb.WasPressed = true
 		bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
 	}
-	bb.SetStyle(bb.Sc)
+	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
 }
 
@@ -240,7 +240,7 @@ func (bb *ButtonBase) BaseButtonRelease() {
 			bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 		}
 	}
-	bb.SetStyle(bb.Sc)
+	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
 }
 
@@ -472,8 +472,8 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	}
 }
 
-func (bb *ButtonBase) SetStyle(sc *Scene) {
-	bb.SetStyleWidget(sc)
+func (bb *ButtonBase) ApplyStyle(sc *Scene) {
+	bb.ApplyStyleWidget(sc)
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.ParentRenderWin())
 	}
@@ -516,11 +516,11 @@ func (bb *ButtonBase) FilterEvents() {
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		bb.SetStyleUpdate(bb.Sc)
+		bb.ApplyStyleUpdate(bb.Sc)
 	case FocusGot:
 		bb.ScrollToMe()
 		bb.EmitFocusedSignal()
-		bb.SetStyleUpdate(bb.Sc)
+		bb.ApplyStyleUpdate(bb.Sc)
 	case FocusInactive: // don't care..
 	case FocusActive:
 	}
@@ -638,8 +638,8 @@ func (bt *Button) OnInit() {
 		switch {
 		case bt.WasPressed:
 			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
-			s.Color = colors.Scheme.Primary.Base
+			s.BackgroundColor.SetSolid(colors.Palette.Primary.RelTone(50))
+			s.Color = colors.Scheme.Primary.On
 		case bt.HasFlag(Hovered):
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
@@ -652,42 +652,38 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Width.SetEm(1.125)
-				s.Height.SetEm(1.125)
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "space":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Width.SetEm(0.5)
-				s.MinWidth.SetEm(0.5)
-			})
-		case "label":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				// need to override so label's default color
-				// doesn't take control on state changes
-				s.Color = bt.Style.Color
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = gist.AlignMiddle
-			})
-		case "ind-stretch":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Width.SetEm(0.5)
-			})
-		case "indicator":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Width.SetEm(1.125)
-				s.Height.SetEm(1.125)
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = gist.AlignBottom
-			})
-		}
+	_, wb := AsWidget(child)
+	switch wb.Name() {
+	case "icon":
+		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "space":
+		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			s.Width.SetEm(0.5)
+			s.MinWidth.SetEm(0.5)
+		})
+	case "label":
+		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignMiddle
+		})
+	case "ind-stretch":
+		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			s.Width.SetEm(0.5)
+		})
+	case "indicator":
+		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = gist.AlignBottom
+		})
 	}
 }
 

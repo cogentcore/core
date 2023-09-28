@@ -37,17 +37,17 @@ import (
 //
 // Three main steps:
 // * Config: (re)configures widgets based on current params
-//   typically by making Parts.  Always calls SetStyle.
+//   typically by making Parts.  Always calls ApplyStyle.
 // * Layout: does GetSize, DoLayout on tree, arranging widgets.
 //   Needed for whole tree after any Config changes anywhere
 //   (could contain at RenderAnchor nodes).
 // * Render: just draws with current config, layout.
 //
-// SetStyle is always called after Config, and after any
+// ApplyStyle is always called after Config, and after any
 // current state of the Widget changes via events, animations, etc
 // (e.g., a Hover started or a Button is pushed down).
 // These changes should be protected by UpdateStart / End,
-// such that SetStyle is only ever called within that scope.
+// such that ApplyStyle is only ever called within that scope.
 // After the UpdateEnd(updt), call SetNeedsRender(vp, updt)
 // which sets the node NeedsRender and ScNeedsRender flags,
 // to drive the rendering update at next DoNeedsRender call.
@@ -145,7 +145,7 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 }
 
 // ConfigTree calls Config on every Widget in the tree from me.
-// Config automatically calls SetStyle.
+// Config automatically calls ApplyStyle.
 func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	if wb.This() == nil {
 		return
@@ -162,19 +162,19 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	pr.End()
 }
 
-// SetStyleTree calls SetStyle on every Widget in the tree from me.
+// ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
 // Called during FullRender
-func (wb *WidgetBase) SetStyleTree(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
-	pr := prof.Start("Widget.SetStyleTree." + wb.KiType().Name)
+	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
 	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
 		}
-		wi.SetStyle(sc)
+		wi.ApplyStyle(sc)
 		return ki.Continue
 	})
 	pr.End()
@@ -344,7 +344,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	sc.Config()
 
 	frame := &sc.Frame
-	frame.SetStyleTree(sc) // sufficient to get sizes
+	frame.ApplyStyleTree(sc) // sufficient to get sizes
 	frame.LayState.Alloc.Size.SetPoint(initSz)
 	frame.GetSizeTree(sc, 0) // collect sizes
 
@@ -439,7 +439,7 @@ func (wb *WidgetBase) ReRenderTree() {
 	ld := wb.LayState // save our current layout data
 	updt := wb.UpdateStart()
 	wb.ConfigTree()
-	wb.SetStyleTree()
+	wb.ApplyStyleTree()
 	wb.GetSizeTree(0)
 	wb.LayState = ld // restore
 	wb.DoLayoutTree()

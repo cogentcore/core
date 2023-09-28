@@ -204,8 +204,8 @@ func (w *RenderWin) IsFocusActive() bool {
 	return w.HasFlag(WinFlagFocusActive)
 }
 
-// SetFocusActiveState sets focus active flag to given state
-func (w *RenderWin) SetFocusActiveState(active bool) {
+// SetFocusActive sets focus active flag to given state
+func (w *RenderWin) SetFocusActive(active bool) {
 	w.SetFlag(active, WinFlagFocusActive)
 }
 
@@ -214,8 +214,8 @@ func (w *RenderWin) IsInSelectionMode() bool {
 	return w.HasFlag(WinFlagSelectionMode)
 }
 
-// SetSelectionModeState sets selection mode to given state
-func (w *RenderWin) SetSelectionModeState(selmode bool) {
+// SetSelectionMode sets selection mode to given state
+func (w *RenderWin) SetSelectionMode(selmode bool) {
 	w.SetFlag(selmode, WinFlagSelectionMode)
 }
 

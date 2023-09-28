@@ -369,13 +369,13 @@ func (sv *SplitView) SplitViewEvents(we *WidgetEvents) {
 }
 
 func (sv *SplitView) StyleSplitView(sc *Scene) {
-	sv.SetStyleWidget(sc)
+	sv.ApplyStyleWidget(sc)
 	// todo: props?
 	// sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	// sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
-func (sv *SplitView) SetStyle(sc *Scene) {
+func (sv *SplitView) ApplyStyle(sc *Scene) {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView(sc)
@@ -529,7 +529,7 @@ func (sr *Splitter) ConfigWidget(sc *Scene) {
 	sr.ConfigParts(sc)
 }
 
-func (sr *Splitter) SetStyle(sc *Scene) {
+func (sr *Splitter) ApplyStyle(sc *Scene) {
 	sr.SetFlag(false, CanFocus)
 	sr.StyleSlider(sc)
 	sr.StyMu.Lock()

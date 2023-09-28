@@ -2803,7 +2803,7 @@ var FileTreeViewProps = ki.Props{
 	},
 }
 
-func (ft *FileTreeView) SetStyle() {
+func (ft *FileTreeView) ApplyStyle() {
 	fn := ft.FileNode()
 	ft.Class = ""
 	if fn != nil {

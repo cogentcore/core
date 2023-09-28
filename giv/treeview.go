@@ -1912,7 +1912,7 @@ func (tv *TreeView) ConfigParts(vp *Scene) {
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
 				wb.Style.Template = "giv.TreeView.Branch"
 				// STYTODO: do we really need this?
-				wb.SetStyle() // this is key for getting styling to take effect on first try
+				wb.ApplyStyle() // this is key for getting styling to take effect on first try
 			}
 		}
 	}
@@ -2055,7 +2055,7 @@ func (tv *TreeView) StyleTreeView() {
 	}
 	// STYTODO: figure out better way to handle styling (we can't just cache with style funcs)
 	if !hasTempl || saveTempl {
-		tv.SetStyleWidget()
+		tv.ApplyStyleWidget()
 	}
 	if hasTempl && saveTempl {
 		tv.Style.SaveTemplate()
@@ -2066,7 +2066,7 @@ func (tv *TreeView) StyleTreeView() {
 	tv.ConfigParts(vp)
 }
 
-func (tv *TreeView) SetStyle() {
+func (tv *TreeView) ApplyStyle() {
 	tv.StyleTreeView()
 }
 

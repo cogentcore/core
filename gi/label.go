@@ -428,7 +428,7 @@ func (lb *Label) StyleLabel(sc *Scene) {
 	lb.StyMu.Lock()
 	defer lb.StyMu.Unlock()
 
-	lb.SetStyleWidget(sc)
+	lb.ApplyStyleWidget(sc)
 }
 
 func (lb *Label) LayoutLabel(sc *Scene) {
@@ -445,7 +445,7 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 }
 
-func (lb *Label) SetStyle(sc *Scene) {
+func (lb *Label) ApplyStyle(sc *Scene) {
 	lb.StyleLabel(sc)
 	lb.LayoutLabel(sc)
 }

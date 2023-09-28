@@ -97,13 +97,13 @@ func (ic *Icon) GetSize(sc *Scene, iter int) {
 	// ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
 }
 
-func (ic *Icon) SetStyle(sc *Scene) {
+func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.StyMu.Lock()
 	defer ic.StyMu.Unlock()
 
 	ic.SVG.Norm = true
 	// ic.SVG.Fill = true
-	ic.SetStyleWidget(sc)
+	ic.ApplyStyleWidget(sc)
 	// todo: set ic.SVG style
 }
 

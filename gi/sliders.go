@@ -270,9 +270,8 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 	sb.Style = sb.StateStyles[state] // get relevant styles
 	if prev != state {
 		sb.StyMu.Lock()
-		sb.SetStyleWidget(sb.Sc)
+		sb.ApplyStyleWidget(sb.Sc)
 		sb.StyMu.Unlock()
-		// sb.Scene.SetNeedsFullRender()
 	}
 }
 
@@ -694,7 +693,7 @@ func (sr *SliderBase) StyleSlider(sc *Scene) {
 	sr.StyMu.Lock()
 	defer sr.StyMu.Unlock()
 
-	sr.SetStyleWidget(sc)
+	sr.ApplyStyleWidget(sc)
 	sr.StyleToDots(&sr.Style.UnContext)
 	sr.ThSize = sr.ThumbSize.Dots
 }
@@ -769,7 +768,7 @@ func (sr *Slider) ConfigWidget(sc *Scene) {
 	sr.ConfigParts(sc)
 }
 
-func (sr *Slider) SetStyle(sc *Scene) {
+func (sr *Slider) ApplyStyle(sc *Scene) {
 	sr.SetCanFocusIfActive()
 	sr.StyleSlider(sc)
 }
@@ -923,7 +922,7 @@ func (sb *ScrollBar) ConfigWidget(sc *Scene) {
 	sb.ConfigSlider(sc)
 }
 
-func (sb *ScrollBar) SetStyle(sc *Scene) {
+func (sb *ScrollBar) ApplyStyle(sc *Scene) {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider(sc)
 	sb.ConfigParts(sc)

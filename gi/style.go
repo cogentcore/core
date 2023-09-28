@@ -63,18 +63,19 @@ func (sc *Scene) SetDefaultStyle() {
 // It should only be done before showing the scene
 // during initial configuration -- otherwise requries
 // a StyMu mutex lock.
-func (wb *WidgetBase) AddStyler(s Styler) {
+func (wb *WidgetBase) AddStyler(s Styler) Widget {
 	if wb.Stylers == nil {
 		wb.Stylers = []Styler{}
 	}
 	wb.Stylers = append(wb.Stylers, s)
+	return wb.This().(Widget)
 }
 
-// todo: should reserve SetStyle for user and rename existing to something
+// todo: should reserve ApplyStyle for user and rename existing to something
 // more internal.
 // note: cannot Change AddStyler signature to return Widget, so need a new method
 
-func (wb *WidgetBase) SetStyling(s Styler) Widget {
+func (wb *WidgetBase) SetStyle(s Styler) Widget {
 	wb.AddStyler(s)
 	return wb.This().(Widget)
 }
@@ -143,11 +144,20 @@ func (wb *WidgetBase) ParentStyleRUnlock() {
 	}
 }
 
-// SetStyleWidget styles the Style values from node properties and optional
-// base-level defaults -- for Widget-style nodes.
-// must be called under a StyMu Lock
-func (wb *WidgetBase) SetStyleWidget(sc *Scene) {
-	pr := prof.Start("SetStyleWidget")
+// ApplyStyleParts styles the parts.
+// Automatically called by the default ApplyStyleWidget function.
+func (wb *WidgetBase) ApplyStyleParts(sc *Scene) {
+	if wb.Parts == nil {
+		return
+	}
+	wb.Parts.ApplyStyleTree(sc)
+}
+
+// ApplyStyleWidget is the primary styling function for all Widgets.
+// Handles inheritance and runs the Styler functions.
+// Must be called under a StyMu Lock
+func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
+	pr := prof.Start("ApplyStyleWidget")
 	defer pr.End()
 
 	if wb.OverrideStyle {
@@ -158,7 +168,7 @@ func (wb *WidgetBase) SetStyleWidget(sc *Scene) {
 	wb.Style.Defaults()
 
 	// todo: remove all these prof steps -- should be much less now..
-	pin := prof.Start("SetStyleWidget-Inherit")
+	pin := prof.Start("ApplyStyleWidget-Inherit")
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
@@ -166,43 +176,46 @@ func (wb *WidgetBase) SetStyleWidget(sc *Scene) {
 	}
 	pin.End()
 
-	prun := prof.Start("SetStyleWidget-RunStyleFuncs")
-	wb.RunStyleFuncs()
+	prun := prof.Start("ApplyStyleWidget-RunStylers")
+	wb.RunStylers()
 	prun.End()
 
-	puc := prof.Start("SetStyleWidget-SetUnitContext")
+	puc := prof.Start("ApplyStyleWidget-SetUnitContext")
 	SetUnitContext(&wb.Style, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
-	psc := prof.Start("SetStyleWidget-SetCurrentColor")
+	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
 	if wb.Style.Inactive { // inactive can only set, not clear
 		wb.SetFlag(true, Disabled)
 	}
 	sc.SetCurrentColor(wb.Style.Color)
+
+	wb.ApplyStyleParts(sc)
+
 	psc.End()
 }
 
-// RunStyleFuncs runs the style functions specified in
+// RunStylers runs the style functions specified in
 // the StyleFuncs field in sequential ascending order.
-func (wb *WidgetBase) RunStyleFuncs() {
+func (wb *WidgetBase) RunStylers() {
 	for _, s := range wb.Stylers {
 		s(wb, &wb.Style)
 	}
 }
 
-func (wb *WidgetBase) SetStyleUpdate(sc *Scene) {
+func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
 	wi := wb.This().(Widget)
 	updt := wb.UpdateStart()
-	wi.SetStyle(sc)
+	wi.ApplyStyle(sc)
 	wb.UpdateEnd(updt)
 	wb.SetNeedsRender(sc, updt)
 }
 
-func (wb *WidgetBase) SetStyle(sc *Scene) {
+func (wb *WidgetBase) ApplyStyle(sc *Scene) {
 	wb.StyMu.Lock() // todo: needed??  maybe not.
 	defer wb.StyMu.Unlock()
 
-	wb.SetStyleWidget(sc)
+	wb.ApplyStyleWidget(sc)
 }
 
 // SetUnitContext sets the unit context based on size of scene, element, and parent

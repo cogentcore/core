@@ -65,7 +65,7 @@ func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
 // mouse event function, you should call this function first.
 func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
 	wb.SetFlag(me.Action == mouse.Press, Active)
-	wb.SetStyleUpdate(wb.Sc)
+	wb.ApplyStyleUpdate(wb.Sc)
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
@@ -87,7 +87,7 @@ func (wb *WidgetBase) WidgetMouseFocusEvent(we *WidgetEvents) {
 func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.Event) {
 	enter := me.Action == mouse.Enter
 	wb.SetFlag(enter, Hovered)
-	wb.SetStyleUpdate(wb.Sc)
+	wb.ApplyStyleUpdate(wb.Sc)
 	// TODO: trigger mouse focus exit after clicking down
 	// while leaving; then clear active here
 	// // if !enter {
@@ -118,7 +118,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 				_, wbb := AsWidget(recv)
 				wbb.SetSelected(!wbb.IsSelected())
 				wbb.EmitSelectedSignal()
-				wbb.SetStyleUpdate(wbb.Sc)
+				wbb.ApplyStyleUpdate(wbb.Sc)
 			}
 		}
 		if ctxtMenu {
