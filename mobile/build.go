@@ -240,7 +240,7 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	// Specify GOMODCACHE explicitly. The default cache path is GOPATH[0]/pkg/mod,
 	// but the path varies when GOPATH is specified at env, which results in cold cache.
 	if gmc, err := GoModCachePath(); err == nil {
-		xc.SetEnv("GOMODCACHE=", gmc)
+		xc.SetEnv("GOMODCACHE", gmc)
 	}
 	return xc.Run("go", cargs...)
 }
