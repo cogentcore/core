@@ -8,8 +8,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/srwiley/rasterx"
-	"goki.dev/girl/gist"
+	"goki.dev/colors"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -23,7 +22,7 @@ type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad gist.ColorSpec `desc:"the color gradient"`
+	Grad colors.Gradient `desc:"the color gradient"`
 
 	// name of another gradient to get stops from
 	StopsName string `desc:"name of another gradient to get stops from"`
@@ -38,7 +37,7 @@ func (gr *Gradient) CopyFieldsFrom(frm any) {
 
 // GradientTypeName returns the SVG-style type name of gradient: linearGradient or radialGradient
 func (gr *Gradient) GradientTypeName() string {
-	if gr.Grad.Gradient != nil && gr.Grad.Gradient.IsRadial {
+	if gr.Grad.Radial {
 		return "radialGradient"
 	}
 	return "linearGradient"
@@ -104,23 +103,25 @@ func (g *NodeBase) GradientApplyXFormPt(sv *SVG, xf mat32.Mat2, pt mat32.Vec2) {
 
 // GradientWritePoints writes the UserSpaceOnUse gradient points to
 // a slice of floating point numbers, appending to end of slice.
-func GradientWritePts(gr *gist.ColorSpec, dat *[]float32) {
-	if gr.Gradient == nil {
+func GradientWritePts(gr *colors.Gradient, dat *[]float32) {
+	// TODO: do we want this, and is this the right way to structure it?
+	if gr == nil {
 		return
 	}
-	if gr.Gradient.Units == rasterx.ObjectBoundingBox {
+	if gr.Units == colors.ObjectBoundingBox {
 		return
 	}
-	*dat = append(*dat, float32(gr.Gradient.Matrix.A))
-	*dat = append(*dat, float32(gr.Gradient.Matrix.B))
-	*dat = append(*dat, float32(gr.Gradient.Matrix.C))
-	*dat = append(*dat, float32(gr.Gradient.Matrix.D))
-	*dat = append(*dat, float32(gr.Gradient.Matrix.E))
-	*dat = append(*dat, float32(gr.Gradient.Matrix.F))
-	if !gr.Gradient.IsRadial {
-		for i := 0; i < 4; i++ {
-			*dat = append(*dat, float32(gr.Gradient.Points[i]))
-		}
+	*dat = append(*dat, gr.Matrix.XX)
+	*dat = append(*dat, gr.Matrix.YX)
+	*dat = append(*dat, gr.Matrix.XY)
+	*dat = append(*dat, gr.Matrix.YY)
+	*dat = append(*dat, gr.Matrix.X0)
+	*dat = append(*dat, gr.Matrix.Y0)
+	if !gr.Radial {
+		*dat = append(*dat, gr.Bounds.Min.X)
+		*dat = append(*dat, gr.Bounds.Min.Y)
+		*dat = append(*dat, gr.Bounds.Max.X)
+		*dat = append(*dat, gr.Bounds.Max.Y)
 	}
 }
 
@@ -145,27 +146,28 @@ func (g *NodeBase) GradientWritePts(sv *SVG, dat *[]float32) {
 
 // GradientReadPoints reads the UserSpaceOnUse gradient points from
 // a slice of floating point numbers, reading from the end.
-func GradientReadPts(gr *gist.ColorSpec, dat []float32) {
-	if gr.Gradient == nil {
+func GradientReadPts(gr *colors.Gradient, dat []float32) {
+	if gr == nil {
 		return
 	}
-	if gr.Gradient.Units == rasterx.ObjectBoundingBox {
+	if gr.Units == colors.ObjectBoundingBox {
 		return
 	}
 	sz := len(dat)
 	n := 6
-	if !gr.Gradient.IsRadial {
+	if !gr.Radial {
 		n = 10
-		for i := 0; i < 4; i++ {
-			gr.Gradient.Points[i] = float64(dat[(sz-4)+i])
-		}
+		gr.Bounds.Min.X = dat[sz-4]
+		gr.Bounds.Min.Y = dat[sz-3]
+		gr.Bounds.Max.X = dat[sz-2]
+		gr.Bounds.Max.Y = dat[sz-1]
 	}
-	gr.Gradient.Matrix.A = float64(dat[(sz-n)+0])
-	gr.Gradient.Matrix.B = float64(dat[(sz-n)+1])
-	gr.Gradient.Matrix.C = float64(dat[(sz-n)+2])
-	gr.Gradient.Matrix.D = float64(dat[(sz-n)+3])
-	gr.Gradient.Matrix.E = float64(dat[(sz-n)+4])
-	gr.Gradient.Matrix.F = float64(dat[(sz-n)+5])
+	gr.Matrix.XX = dat[(sz-n)+0]
+	gr.Matrix.YX = dat[(sz-n)+1]
+	gr.Matrix.XY = dat[(sz-n)+2]
+	gr.Matrix.YY = dat[(sz-n)+3]
+	gr.Matrix.X0 = dat[(sz-n)+4]
+	gr.Matrix.Y0 = dat[(sz-n)+5]
 }
 
 // GradientReadPts reads the geometry of the gradients for this node
@@ -222,7 +224,7 @@ func (sv *SVG) GradientNewForNode(gi Node, radial bool, stops string) (*Gradient
 	gr, url := sv.GradientNew(radial)
 	gr.StopsName = stops
 	bbox := gi.(Node).LocalBBox()
-	gr.Grad.SetGradientPoints(bbox)
+	gr.Grad.SetUserBounds(bbox)
 	sv.GradientUpdateStops(gr)
 	return gr, url
 }
@@ -241,9 +243,9 @@ func (sv *SVG) GradientNew(radial bool) (*Gradient, string) {
 	gr := sv.Defs.NewChild(GradientType, gnm).(*Gradient)
 	url := NameToURL(gnm)
 	if radial {
-		gr.Grad.NewRadialGradient()
+		gr.Grad = *colors.RadialGradient()
 	} else {
-		gr.Grad.NewLinearGradient()
+		gr.Grad = *colors.LinearGradient()
 	}
 	return gr, url
 }
@@ -294,8 +296,8 @@ func (sv *SVG) GradientUpdateNodePoints(gi Node, prop string) {
 		return
 	}
 	bbox := gi.(Node).LocalBBox()
-	gr.Grad.SetGradientPoints(bbox)
-	gr.Grad.Gradient.Matrix = rasterx.Identity
+	gr.Grad.SetUserBounds(bbox)
+	gr.Grad.Matrix = mat32.Identity2D()
 }
 
 // GradientCloneNodeProp creates a new clone of the existing gradient for node
