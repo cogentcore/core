@@ -13,7 +13,7 @@ import "embed"
 var Cursors embed.FS
 
 // Cursor represents a cursor
-type Cursor int32 //enums:enum
+type Cursor int32 //enums:enum -transform kebab
 
 // Cursor constants, with names based on CSS (see https://developer.mozilla.org/en-US/docs/Web/CSS/cursor)
 // TODO: maybe add NoDrop and AllScroll
