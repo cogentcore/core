@@ -10,6 +10,8 @@ import (
 	"log"
 	"strings"
 
+	"log/slog"
+
 	"goki.dev/colors"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
@@ -65,7 +67,7 @@ func NewSidesTry[T any](vals ...T) (Sides[T], error) {
 // the right/top-right is set to the second value, the bottom/bottom-right is set
 // to the third value, and the left/bottom-left is set to the fourth value.
 // If more than 4 values are provided, the behavior is the same
-// as with 4 values, but Set also prints and returns
+// as with 4 values, but Set also logs and returns
 // an error. This error is not critical and does not need to be
 // handled, as the values are still set, but it can be if wished.
 // This behavior is based on the CSS multi-side/corner setting syntax,
@@ -95,8 +97,8 @@ func (s *Sides[T]) Set(vals ...T) error {
 		s.Right = vals[1]
 		s.Bottom = vals[2]
 		s.Left = vals[3]
-		err := fmt.Errorf("sides.Set: expected 0 to 4 values, but got %d", len(vals))
-		log.Println(err)
+		err := fmt.Errorf("programmer error: sides.Set: expected 0 to 4 values, but got %d", len(vals))
+		slog.Error(err.Error())
 		return err
 	}
 	return nil
@@ -105,26 +107,53 @@ func (s *Sides[T]) Set(vals ...T) error {
 // SetVert sets the values for the sides/corners in the
 // vertical/diagonally descending direction
 // (top/top-left and bottom/bottom-right) to the given value
-func (s *Sides[T]) SetVert(val T) {
+func (s *Sides[T]) SetVert(val T) *Sides[T] {
 	s.Top = val
 	s.Bottom = val
+	return s
 }
 
 // SetHoriz sets the values for the sides/corners in the
 // horizontal/diagonally ascending direction
 // (right/top-right and left/bottom-left) to the given value
-func (s *Sides[T]) SetHoriz(val T) {
+func (s *Sides[T]) SetHoriz(val T) *Sides[T] {
 	s.Right = val
 	s.Left = val
+	return s
 }
 
 // SetAll sets the values for all of the sides/corners
 // to the given value
-func (s *Sides[T]) SetAll(val T) {
+func (s *Sides[T]) SetAll(val T) *Sides[T] {
 	s.Top = val
 	s.Right = val
 	s.Bottom = val
 	s.Left = val
+	return s
+}
+
+// SetTop sets the top side to the given value
+func (s *Sides[T]) SetTop(top T) *Sides[T] {
+	s.Top = top
+	return s
+}
+
+// SetRight sets the right side to the given value
+func (s *Sides[T]) SetRight(right T) *Sides[T] {
+	s.Right = right
+	return s
+}
+
+// SetBottom sets the bottom side to the given value
+func (s *Sides[T]) SetBottom(bottom T) *Sides[T] {
+	s.Bottom = bottom
+	return s
+}
+
+// SetLeft sets the left side to the given value
+func (s *Sides[T]) SetLeft(left T) *Sides[T] {
+	s.Left = left
+	return s
 }
 
 // SetStringer is a type that can be set from a string
