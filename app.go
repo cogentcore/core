@@ -95,9 +95,6 @@ type App interface {
 	// PrefsDir + App.Name --ensures that the directory exists first.
 	AppPrefsDir() string
 
-	// FontPaths returns the default system font paths.
-	FontPaths() []string
-
 	// About is an informative message about the app.  Can use HTML
 	// formatting, including links.
 	About() string

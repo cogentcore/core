@@ -11,11 +11,9 @@ import (
 	"os/exec"
 	"os/user"
 	"path/filepath"
-	"sync"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/mimedata"
 )
 
@@ -41,10 +39,6 @@ func (app *appImpl) Platform() goosi.Platforms {
 func (app *appImpl) OpenURL(url string) {
 	cmd := exec.Command("xdg-open", url)
 	cmd.Run()
-}
-
-func (app *appImpl) FontPaths() []string {
-	return []string{"/usr/share/fonts/truetype"}
 }
 
 func (app *appImpl) PrefsDir() string {
@@ -126,126 +120,4 @@ func (ci *clipImpl) Write(data mimedata.Mimes) error {
 
 func (ci *clipImpl) Clear() {
 	// nop
-}
-
-//////////////////////////////////////////////////////
-//  Cursor
-
-// todo: glfw has a seriously impoverished set of standard cursors..
-// need to find a good collection and install
-
-var cursorMap = map[cursor.Shapes]glfw.StandardCursor{
-	cursor.Arrow:        glfw.ArrowCursor,
-	cursor.Cross:        glfw.CrosshairCursor,
-	cursor.DragCopy:     glfw.HandCursor,
-	cursor.DragMove:     glfw.HandCursor,
-	cursor.DragLink:     glfw.HandCursor,
-	cursor.HandPointing: glfw.HandCursor,
-	cursor.HandOpen:     glfw.HandCursor,
-	cursor.HandClosed:   glfw.HandCursor,
-	cursor.Help:         glfw.HandCursor,
-	cursor.IBeam:        glfw.IBeamCursor,
-	cursor.Not:          glfw.HandCursor,
-	cursor.UpDown:       glfw.VResizeCursor,
-	cursor.LeftRight:    glfw.HResizeCursor,
-	cursor.UpRight:      glfw.HResizeCursor,
-	cursor.UpLeft:       glfw.HResizeCursor,
-	cursor.AllArrows:    glfw.VResizeCursor,
-	cursor.Wait:         glfw.VResizeCursor,
-}
-
-type cursorImpl struct {
-	cursor.CursorBase
-	cursors map[cursor.Shapes]*glfw.Cursor
-	mu      sync.Mutex
-}
-
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}}
-
-func (c *cursorImpl) createCursors() {
-	if c.cursors != nil {
-		return
-	}
-	c.cursors = make(map[cursor.Shapes]*glfw.Cursor)
-	for cs, sc := range cursorMap {
-		cur := glfw.CreateStandardCursor(sc)
-		c.cursors[cs] = cur
-	}
-}
-
-func (c *cursorImpl) setImpl(sh cursor.Shapes) {
-	c.createCursors()
-	cur, ok := c.cursors[sh]
-	if !ok || cur == nil {
-		return
-	}
-	w := theApp.ctxtwin
-	w.glw.SetCursor(cur)
-}
-
-func (c *cursorImpl) Set(sh cursor.Shapes) {
-	c.mu.Lock()
-	c.Cur = sh
-	c.mu.Unlock()
-	c.setImpl(sh)
-}
-
-func (c *cursorImpl) Push(sh cursor.Shapes) {
-	c.mu.Lock()
-	c.PushStack(sh)
-	c.mu.Unlock()
-	c.setImpl(sh)
-}
-
-func (c *cursorImpl) Pop() {
-	c.mu.Lock()
-	sh, _ := c.PopStack()
-	c.mu.Unlock()
-	c.setImpl(sh)
-}
-
-func (c *cursorImpl) Hide() {
-	c.mu.Lock()
-	if c.Vis == false {
-		c.mu.Unlock()
-		return
-	}
-	c.Vis = false
-	w := theApp.ctxtwin
-	w.glw.SetInputMode(glfw.CursorMode, glfw.CursorHidden)
-	c.mu.Unlock()
-}
-
-func (c *cursorImpl) Show() {
-	c.mu.Lock()
-	if c.Vis {
-		c.mu.Unlock()
-		return
-	}
-	c.Vis = true
-	w := theApp.ctxtwin
-	w.glw.SetInputMode(glfw.CursorMode, glfw.CursorNormal)
-	c.mu.Unlock()
-}
-
-func (c *cursorImpl) PushIfNot(sh cursor.Shapes) bool {
-	c.mu.Lock()
-	if c.Cur == sh {
-		c.mu.Unlock()
-		return false
-	}
-	c.mu.Unlock()
-	c.Push(sh)
-	return true
-}
-
-func (c *cursorImpl) PopIf(sh cursor.Shapes) bool {
-	c.mu.Lock()
-	if c.Cur == sh {
-		c.mu.Unlock()
-		c.Pop()
-		return true
-	}
-	c.mu.Unlock()
-	return false
 }
