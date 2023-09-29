@@ -136,7 +136,7 @@ func (wb *WidgetBase) IsDisabled() bool {
 // of its children have the given flag.
 func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
-	wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, data any) bool {
+	wb.WalkPre(func(k ki.Ki) bool {
 		_, wb := AsWidget(k)
 		if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
 			return ki.Break

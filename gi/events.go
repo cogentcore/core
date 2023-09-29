@@ -158,6 +158,7 @@ const (
 	WidgetSignalsN
 )
 
+/*
 // EmitSelectedSignal emits the WidgetSelected signal for this widget
 func (wb *WidgetBase) EmitSelectedSignal() {
 	wb.WidgetSig.Emit(wb.This(), int64(WidgetSelected), nil)
@@ -172,13 +173,14 @@ func (wb *WidgetBase) EmitFocusedSignal() {
 func (wb *WidgetBase) EmitContextMenuSignal() {
 	wb.WidgetSig.Emit(wb.This(), int64(WidgetContextMenu), nil)
 }
+*/
 
 // FirstContainingPoint finds the first node whose WinBBox contains the given
 // point -- nil if none.  If leavesOnly is set then only nodes that have no
 // nodes (leaves, terminal nodes) will be considered
 func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkPre(func(k Ki) bool {
 		if k == wb.This() {
 			return ki.Continue
 		}

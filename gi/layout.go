@@ -215,7 +215,7 @@ type Layout struct {
 	ScrollsOff bool `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
 
 	// [view: -] signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)
-	ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
+	// ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
 // event functions for this type
@@ -392,18 +392,18 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	sb.TrackThr = sb.Step
 	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
-	sb.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig != int64(SliderValueChanged) {
-			return
-		}
-		li, _ := AsWidget(recv)
-		ls := AsLayout(li)
-		_ = ls
-		// wupdt := ls.TopUpdateStart()
-		// ls.Move2DTree()
-		// li.UpdateSig()
-		// ls.TopUpdateEnd(wupdt)
-	})
+	// sb.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig != int64(SliderValueChanged) {
+	// 		return
+	// 	}
+	// 	li, _ := AsWidget(recv)
+	// 	ls := AsLayout(li)
+	// 	_ = ls
+	// 	// wupdt := ls.TopUpdateStart()
+	// 	// ls.Move2DTree()
+	// 	// li.UpdateSig()
+	// 	// ls.TopUpdateEnd(wupdt)
+	// })
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.  todo: we are leaking
@@ -502,7 +502,7 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 	if ly.HasScroll[dim] {
 		nval := ly.Scrolls[dim].Value + delta
 		ly.Scrolls[dim].SetValueAction(nval)
-		ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
+		// ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
 	}
 }
 
@@ -511,7 +511,7 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
 		ly.Scrolls[dim].SetValueAction(pos)
-		ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
+		// ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
 	}
 }
 
@@ -519,7 +519,7 @@ func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 // position and DOES NOT emit a ScrollSig signal.
 func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
-		ly.Scrolls[dim].SetValueAction(pos)
+		// ly.Scrolls[dim].SetValueAction(pos)
 	}
 }
 
@@ -1061,7 +1061,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	lcnm := strings.ToLower(name)
 	var rki ki.Ki
 	gotAfter := false
-	ly.FuncDownBreadthFirst(0, nil, func(k ki.Ki, level int, data any) bool {
+	ly.WalkBreadth(0, nil, func(k ki.Ki, level int, data any) bool {
 		if k == ly.This() { // skip us
 			return ki.Continue
 		}

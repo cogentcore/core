@@ -1256,15 +1256,15 @@ func (w *RenderWin) SetCursor(me *mouse.Event) {
 		pop := w.CurPopup()
 		if pop == nil {
 			// if no popup, just do on window
-			w.FuncDownMeFirst(0, nil, fun)
+			w.WalkPre(fun)
 		} else {
 			_, popni := AsWidget(pop)
 			if popni == nil || !popni.PosInBBox(me.Pos()) || PopupIsTooltip(pop) {
 				// if not in popup (or it is a tooltip), do on window
-				w.FuncDownMeFirst(0, nil, fun)
+				w.WalkPre(fun)
 			} else {
 				// if in popup, do on popup
-				popni.FuncDownMeFirst(0, nil, fun)
+				popni.WalkPre(fun)
 			}
 
 		}
@@ -1800,7 +1800,7 @@ func EndTargProfile() {
 // ReportWinNodes reports the number of nodes in this window
 func (w *RenderWin) ReportWinNodes() {
 	nn := 0
-	w.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+	w.WalkPre(0, nil, func(k ki.Ki, level int, d any) bool {
 		nn++
 		return ki.Continue
 	})

@@ -465,7 +465,7 @@ func (fn *FileNode) IsIrregular() bool {
 // IsExternal returns true if file is external to main file tree
 func (fn *FileNode) IsExternal() bool {
 	isExt := false
-	fn.FuncUp(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkUp(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(TypeFileNode)
 		if sfni == nil {
 			return ki.Break
@@ -483,7 +483,7 @@ func (fn *FileNode) IsExternal() bool {
 // HasClosedParent returns true if node has a parent node with !IsOpen flag set
 func (fn *FileNode) HasClosedParent() bool {
 	hasClosed := false
-	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(TypeFileNode)
 		if sfni == nil {
 			return ki.Break
@@ -808,7 +808,7 @@ func (fn *FileNode) OpenAll() {
 func (fn *FileNode) CloseAll() {
 	fn.SetClosed()
 	fn.FRoot.SetDirClosed(fn.FPath)
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if sfn.IsDir() {
 			sfn.SetClosed()
@@ -963,7 +963,7 @@ func (fn *FileNode) FindFile(fnm string) (*FileNode, bool) {
 
 	var ffn *FileNode
 	found := false
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if strings.HasSuffix(string(sfn.FPath), fneff) {
 			ffn = sfn
@@ -982,7 +982,7 @@ func (fn *FileNode) FilesMatching(match string, ignoreCase bool) []*FileNode {
 	if ignoreCase {
 		match = strings.ToLower(match)
 	}
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if ignoreCase {
 			nm := strings.ToLower(sfn.Nm)
@@ -1017,7 +1017,7 @@ func FileNodeNameCountSort(ecs []FileNodeNameCount) {
 func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
 	var repo vci.Repo
 	var rnode *FileNode
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if sfn.DirRepo != nil {
 			repo = sfn.DirRepo
@@ -1035,7 +1035,7 @@ func (fn *FileNode) FirstVCS() (vci.Repo, *FileNode) {
 // (e.g., filecat.Code to find any code files)
 func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 	cmap := make(map[string]int, 20)
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
@@ -1065,7 +1065,7 @@ func (fn *FileNode) FileExtCounts(cat filecat.Cat) []FileNodeNameCount {
 // (e.g., filecat.Code to find any code files)
 func (fn *FileNode) LatestFileMod(cat filecat.Cat) time.Time {
 	tmod := time.Time{}
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if cat != filecat.Unknown {
 			if sfn.Info.Cat != cat {
@@ -1274,7 +1274,7 @@ func (fn *FileNode) Repo() (vci.Repo, *FileNode) {
 	}
 	var repo vci.Repo
 	var rnode *FileNode
-	fn.FuncUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkUpParent(0, fn, func(k ki.Ki, level int, d any) bool {
 		sfni := k.Embed(TypeFileNode)
 		if sfni == nil {
 			return ki.Break
@@ -1500,7 +1500,7 @@ func (fn *FileNode) BlameVcs() ([]byte, error) {
 
 // UpdateAllVcs does an update on any repositories below this one in file tree
 func (fn *FileNode) UpdateAllVcs() {
-	fn.FuncDownMeFirst(0, fn, func(k ki.Ki, level int, d any) bool {
+	fn.WalkPre(func(k Ki) bool {
 		sfn := k.Embed(TypeFileNode).(*FileNode)
 		if !sfn.IsDir() {
 			return ki.Continue

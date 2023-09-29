@@ -43,7 +43,7 @@ func (m *MenuActions) CopyFrom(men *MenuActions) {
 type MakeMenuFunc func(obj ki.Ki, m *MenuActions)
 
 // SetAction sets properties of given action
-func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) {
+func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun func()) {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -73,7 +73,7 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun ki.Re
 // which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 	if m == nil {
 		*m = make(MenuActions, 0, 10)
 	}
@@ -89,7 +89,7 @@ func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Act
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
 		ac := &Action{}
@@ -107,7 +107,7 @@ func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.K
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
 		ac := &Action{}
@@ -455,7 +455,7 @@ func RecyclePopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Sc
 // item -- the name of the Action is the string value, and the data will be
 // the index in the slice.  A string equal to curSel will be marked as
 // selected.  Location is from the ContextMenuPos of recv node.
-func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
+func StringsChooserPopup(strs []string, curSel string, recv Widget, fun func()) *Scene {
 	/*
 		var menu MenuActions
 		for i, it := range strs {
@@ -479,7 +479,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun ki.RecvF
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun ki.RecvFunc) *Scene {
+func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun func()) *Scene {
 	var menu MenuActions
 	for si, ss := range strs {
 		sz := len(ss)

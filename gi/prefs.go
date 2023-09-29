@@ -302,7 +302,7 @@ func (pf *Preferences) UpdateAll() {
 	pf.Apply()
 
 	gist.RebuildDefaultStyles = true
-	gist.ColorSpecCache = nil
+	colors.FullCache = nil
 	gist.StyleTemplates = nil
 	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
 	// 	w.SetSize(w.RenderWin.Size())

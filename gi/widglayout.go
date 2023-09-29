@@ -28,7 +28,7 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 // BBoxReport reports on all the bboxes for everything in the tree
 func (wb *WidgetBase) BBoxReport() string {
 	rpt := ""
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkPre(func(k Ki) bool {
 		nii, ni := AsWidget(k)
 		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break

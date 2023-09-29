@@ -334,7 +334,7 @@ func (tv *TreeView) SetChanged() {
 // HasClosedParent returns whether this node have a closed parent? if so, don't render!
 func (tv *TreeView) HasClosedParent() bool {
 	pcol := false
-	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
 		_, pg := gi.AsWidget(k)
 		if pg == nil {
 			return ki.Break
@@ -967,7 +967,7 @@ func (tv *TreeView) OpenAll() {
 	wupdt := tv.TopUpdateStart()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
-	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkPre(func(k Ki) bool {
 		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(false)
@@ -984,7 +984,7 @@ func (tv *TreeView) CloseAll() {
 	wupdt := tv.TopUpdateStart()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
-	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkPre(func(k Ki) bool {
 		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(true)
@@ -1002,7 +1002,7 @@ func (tv *TreeView) OpenParents() {
 	wupdt := tv.TopUpdateStart()
 	updt := tv.RootView.UpdateStart()
 	tv.RootView.SetFullReRender()
-	tv.FuncUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkUpParent(0, tv.This(), func(k ki.Ki, level int, d any) bool {
 		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvki.(*TreeView).SetClosedState(false)
@@ -1018,7 +1018,7 @@ func (tv *TreeView) OpenParents() {
 // FindSrcNode finds TreeView node for given source node, or nil if not found
 func (tv *TreeView) FindSrcNode(kn ki.Ki) *TreeView {
 	var ttv *TreeView
-	tv.FuncDownMeFirst(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkPre(func(k Ki) bool {
 		tvki := k.Embed(TypeTreeView)
 		if tvki != nil {
 			tvk := tvki.(*TreeView)
@@ -1691,7 +1691,7 @@ func (tv *TreeView) TreeViewParent() *TreeView {
 // to be updated for any reason.
 func (tv *TreeView) RootTreeView() *TreeView {
 	rn := tv
-	tv.FuncUp(0, tv.This(), func(k ki.Ki, level int, d any) bool {
+	tv.WalkUp(0, tv.This(), func(k ki.Ki, level int, d any) bool {
 		_, pg := gi.AsWidget(k)
 		if pg == nil {
 			return false

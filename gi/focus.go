@@ -51,7 +51,7 @@ func (wb *WidgetBase) HasFocus() bool {
 func (wb *WidgetBase) GrabFocus() {
 	foc := wb.This()
 	if !wb.CanFocus() {
-		wb.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+		wb.WalkPre(func(k ki.Ki) bool {
 			_, wb := AsWidget(k)
 			if wb == nil || wb.This() == nil || wb.IsDeleted() || wb.IsDestroyed() {
 				return ki.Break

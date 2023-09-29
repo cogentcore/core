@@ -11,6 +11,7 @@ import (
 	"io"
 	"sync"
 
+	"goki.dev/colors"
 	"goki.dev/enums"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
@@ -55,7 +56,7 @@ type Scene struct {
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 
 	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
-	BgColor gist.ColorSpec `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
+	BgColor colors.Full `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
 
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
@@ -210,7 +211,7 @@ func (sc *Scene) ContextColor() color.RGBA {
 // ContextColorSpecByURL finds a Node by an element name (URL-like path), and
 // attempts to convert it to a Gradient -- if successful, returns ColorSpec on that.
 // Used for colorspec styling based on url() value.
-func (sc *Scene) ContextColorSpecByURL(url string) *gist.ColorSpec {
+func (sc *Scene) ContextColorSpecByURL(url string) *colors.Full {
 	// todo: not currently supported -- see if needed for html / glide
 	return nil
 }

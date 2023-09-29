@@ -48,7 +48,7 @@ type ButtonBox struct {
 	Mutex bool `desc:"make the items mutually exclusive -- checking one turns off all the others"`
 
 	// [view: -] signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label
-	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
+	// ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
 
 // event functions for this type
@@ -71,11 +71,6 @@ func (bb *ButtonBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ButtonBox)
 	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	bb.Items = slices.Clone(fr.Items)
-}
-
-func (bb *ButtonBox) Disconnect() {
-	bb.WidgetBase.Disconnect()
-	bb.ButtonSig.DisconnectAll()
 }
 
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.
@@ -106,8 +101,8 @@ func (bb *ButtonBox) SelectItemAction(idx int) error {
 	if err != nil {
 		return err
 	}
-	cb := bb.Parts.Child(idx).(*CheckBox)
-	bb.ButtonSig.Emit(bb.This(), int64(idx), cb.Text)
+	// cb := bb.Parts.Child(idx).(*CheckBox)
+	// bb.ButtonSig.Emit(bb.This(), int64(idx), cb.Text)
 	return nil
 }
 
@@ -216,19 +211,19 @@ func (bb *ButtonBox) ConfigItems() {
 			cb.IconOff = icons.RadioButtonUnchecked
 		}
 		cb.SetProp("index", i)
-		cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig != int64(ButtonToggled) {
-				return
-			}
-			bbb := AsButtonBox(recv)
-			cbb := send.(*CheckBox)
-			idx := cbb.Prop("index").(int)
-			ischk := cbb.IsChecked()
-			if bbb.Mutex && ischk {
-				bbb.UnCheckAllBut(idx)
-			}
-			bbb.ButtonSig.Emit(bbb.This(), int64(idx), cbb.Text)
-		})
+		// cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	if sig != int64(ButtonToggled) {
+		// 		return
+		// 	}
+		// 	bbb := AsButtonBox(recv)
+		// 	cbb := send.(*CheckBox)
+		// 	idx := cbb.Prop("index").(int)
+		// 	ischk := cbb.IsChecked()
+		// 	if bbb.Mutex && ischk {
+		// 		bbb.UnCheckAllBut(idx)
+		// 	}
+		// 	bbb.ButtonSig.Emit(bbb.This(), int64(idx), cbb.Text)
+		// })
 	}
 }
 

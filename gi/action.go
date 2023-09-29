@@ -58,7 +58,7 @@ type Action struct {
 	Data any `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
 
 	// [view: -] signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action
-	ActionSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
+	// ActionSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for action -- does not have a signal type, as there is only one type: Action triggered -- data is Data of this action"`
 
 	// [view: -] optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing
 	UpdateFunc func(act *Action) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing"`
@@ -205,11 +205,6 @@ func (ac *Action) CopyFieldsFrom(frm any) {
 	ac.Data = fr.Data
 }
 
-func (ac *Action) Disconnect() {
-	ac.ButtonBase.Disconnect()
-	ac.ActionSig.DisconnectAll()
-}
-
 // ButtonWidget interface
 
 // Trigger triggers the action signal -- for external activation of action --
@@ -218,7 +213,7 @@ func (ac *Action) Trigger() {
 	if ac.HasFlag(Disabled) {
 		return
 	}
-	ac.ActionSig.Emit(ac.This(), 0, ac.Data)
+	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
 }
 
 // ButtonRelease triggers action signal
@@ -228,11 +223,11 @@ func (ac *Action) ButtonRelease() {
 		return
 	}
 	updt := ac.UpdateStart()
-	ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
+	// ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
 	menOpen := false
 	if ac.WasPressed {
-		ac.ActionSig.Emit(ac.This(), 0, ac.Data)
-		ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
+		// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
+		// ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
 		menOpen = ac.OpenMenu()
 		// } else {
 		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)

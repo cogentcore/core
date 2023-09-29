@@ -357,7 +357,7 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 // data which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action {
+func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -375,9 +375,9 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun ki.RecvFunc) *Action
 	}
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
-	if sigTo != nil && fun != nil {
-		ac.ActionSig.Connect(sigTo, fun)
-	}
+	// if sigTo != nil && fun != nil {
+	// 	ac.ActionSig.Connect(sigTo, fun)
+	// }
 	return ac
 }
 

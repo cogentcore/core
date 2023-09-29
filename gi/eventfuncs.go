@@ -7,7 +7,6 @@ package gi
 import (
 	"goki.dev/enums"
 	"goki.dev/goosi"
-	"goki.dev/ki/v2"
 )
 
 // note: closures vs. independent functions that don't capture any surrounding variables
@@ -25,7 +24,7 @@ type EventFunc struct {
 	Pri EventPris `desc:"priority of event"`
 
 	// function to process event
-	Func ki.RecvFunc `desc:"function to process event"`
+	Func func() `desc:"function to process event"`
 }
 
 // WidgetEvents contains the info for events processed by a Widget,
@@ -61,7 +60,7 @@ func (we *WidgetEvents) HasFuncs() bool {
 
 // AddFunc is the primary call for adding an event processing function.
 // It sets the All flag in addition to adding to the map of funcs.
-func (we *WidgetEvents) AddFunc(et goosi.EventTypes, pri EventPris, fun ki.RecvFunc) *WidgetEvents {
+func (we *WidgetEvents) AddFunc(et goosi.EventTypes, pri EventPris, fun func()) *WidgetEvents {
 	if we.Funcs == nil {
 		we.Funcs = make(map[goosi.EventTypes]*EventFunc)
 	}

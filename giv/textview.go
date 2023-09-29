@@ -57,16 +57,16 @@ type TextView struct {
 	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
 
 	// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
-	LineNumberColor gist.ColorSpec `desc:"the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties"`
+	LineNumberColor colors.Full `desc:"the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties"`
 
 	// the color used for the user text selection background color; this should be set in Stylers like all other style properties
-	SelectColor gist.ColorSpec `desc:"the color used for the user text selection background color; this should be set in Stylers like all other style properties"`
+	SelectColor colors.Full `desc:"the color used for the user text selection background color; this should be set in Stylers like all other style properties"`
 
 	// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
-	HighlightColor gist.ColorSpec `desc:"the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties"`
+	HighlightColor colors.Full `desc:"the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties"`
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor gist.ColorSpec `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
+	CursorColor colors.Full `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
 
 	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
 	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
@@ -3455,12 +3455,12 @@ func (tv *TextView) ClearScopelights() {
 }
 
 // RenderRegionBox renders a region in background color according to given background color
-func (tv *TextView) RenderRegionBox(reg textbuf.Region, bgclr *gist.ColorSpec) {
+func (tv *TextView) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
 	tv.RenderRegionBoxSty(reg, &tv.Style, bgclr)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgclr *gist.ColorSpec) {
+func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgclr *colors.Full) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
@@ -3507,7 +3507,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *gist.ColorSpec) {
+func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *colors.Full) {
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight

@@ -124,34 +124,33 @@ type EventMgr struct {
 // given function, used for sorting and delayed sending.
 type WinEventRecv struct {
 	Recv Widget
-	Func ki.RecvFunc
+	Func func()
 	Data int
 }
 
 // Set sets the recv and fun
-func (we *WinEventRecv) Set(r Widget, f ki.RecvFunc, data int) {
+func (we *WinEventRecv) Set(r Widget, f func()) {
 	we.Recv = r
 	we.Func = f
-	we.Data = data
 }
 
 // Call calls the function on the recv with the args
-func (we *WinEventRecv) Call(send Widget, sig int64, data any) {
+func (we *WinEventRecv) Call(send Widget, sig int64) {
 	if EventTrace {
-		fmt.Printf("calling event: %v method on: %v\n", data, we.Recv.Path())
+		// fmt.Printf("calling event: %v method on: %v\n", we.Recv.Path())
 	}
-	we.Func(we.Recv, send, sig, data)
+	we.Func() // we.Recv, send, sig, data)
 }
 
 type WinEventRecvList []WinEventRecv
 
-func (wl *WinEventRecvList) Add(recv Widget, fun ki.RecvFunc, data int) {
-	rr := WinEventRecv{Recv: recv, Func: fun, Data: data}
+func (wl *WinEventRecvList) Add(recv Widget, fun func()) {
+	rr := WinEventRecv{Recv: recv, Func: fun}
 	*wl = append(*wl, rr)
 }
 
-func (wl *WinEventRecvList) AddDepth(recv Widget, fun ki.RecvFunc, par Widget) {
-	wl.Add(recv, fun, recv.ParentLevel(par))
+func (wl *WinEventRecvList) AddDepth(recv Widget, fun func(), par Widget) {
+	wl.Add(recv, fun)
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
@@ -220,7 +219,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi goosi.Event) {
 	}
 	wants := fw.Events.Filter.HasFlag(et)
 	if wants {
-		fw.Events.Funcs[et].Func(foc.This(), nil, int64(et), evi)
+		fw.Events.Funcs[et].Func() // foc.This(), nil, int64(et), evi)
 	}
 }
 
@@ -243,7 +242,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 		// dispatch to inner-most one first
 		rvs := make(WinEventRecvList, 0, 10)
 
-		sc.Frame.FuncDownMeFirst(0, sc.Frame.This(), func(k ki.Ki, level int, d any) bool {
+		sc.Frame.WalkPre(func(k ki.Ki) bool {
 			wi, wb := AsWidget(k)
 			if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
 				return ki.Break
@@ -254,7 +253,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 			wants := wb.Events.Matches(et, pri)
 			if wants {
 				// fmt.Printf("pri: %s  et: %s   wb: %s\n", pri.String(), et.BitIndexString(), wb.Path())
-				rvs.Add(wi, wb.Events.Funcs[et].Func, level)
+				rvs.Add(wi, wb.Events.Funcs[et].Func)
 			}
 			return ki.Continue
 		})
@@ -282,7 +281,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 
 			// fmt.Printf("proc event type: %v: %v %v\n", et.BitIndexString(), evi, rr.Recv.Path())
 			// actually call the thing!
-			rr.Call(send, int64(et), evi)
+			rr.Call(send, int64(et))
 
 			if pri != LowRawPri && evi.IsHandled() { // someone took care of it
 				switch evi.Type() { // only grab events if processed
@@ -312,7 +311,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 /*
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
 // map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun ki.RecvFunc) bool {
+func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun func()) bool {
 	if !em.Master.IsInScope(recv, popup) {
 		return ki.Continue
 	}
@@ -657,7 +656,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.Event, popup bool) bool {
 		for pri := HiPri; pri < EventPrisN; pri++ {
 			esig := &em.EventSigs[et][pri]
 			gotOne := false
-			esig.ConsFunc(func(recv Widget, fun ki.RecvFunc) bool {
+			esig.ConsFunc(func(recv Widget, fun func()) bool {
 				if recv.IsDeleted() {
 					return ki.Continue
 				}
@@ -828,7 +827,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.Event, popup bool) bool {
 	send := em.Master.EventTopNode()
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[ftyp][pri]
-		esig.ConsFunc(func(recv Widget, fun ki.RecvFunc) bool {
+		esig.ConsFunc(func(recv Widget, fun func()) bool {
 			if recv.IsDeleted() {
 				return ki.Continue
 			}
@@ -971,7 +970,7 @@ func (em *EventMgr) FocusNext(foc Widget) bool {
 	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
 	for i := 0; i < 2; i++ {
-		focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
+		focRoot.WalkPre(func(k ki.Ki) bool {
 			if gotFocus {
 				return ki.Break
 			}
@@ -1049,7 +1048,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 
 	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
+	focRoot.WalkPre(func(k ki.Ki) bool {
 		if gotFocus {
 			return ki.Break
 		}
@@ -1082,7 +1081,7 @@ func (em *EventMgr) FocusLast() bool {
 
 	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
+	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
@@ -1104,7 +1103,7 @@ func (em *EventMgr) FocusLast() bool {
 func (em *EventMgr) ClearNonFocus(foc Widget) {
 	focRoot := em.CurFocus() // em.Master.FocusTopNode()
 
-	focRoot.FuncDownMeFirst(0, focRoot, func(k ki.Ki, level int, d any) bool {
+	focRoot.WalkPre(func(k ki.Ki) bool {
 		if k == focRoot { // skip top-level
 			return ki.Continue
 		}

@@ -151,7 +151,7 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
@@ -169,7 +169,7 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
@@ -187,7 +187,7 @@ func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 		return
 	}
 	pr := prof.Start("Widget.GetSizeTree." + wb.KiType().Name)
-	wb.FuncDownMeLast(0, wb.This(),
+	wb.WalkPost(0, wb.This(),
 		func(k ki.Ki, level int, d any) bool { // tests whether to process node
 			_, w := AsWidget(k)
 			if w == nil || w.IsDeleted() || w.IsDestroyed() {
@@ -252,7 +252,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
-	wb.FuncDownMeFirst(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.IsDeleted() || w.IsDestroyed() {
 			return ki.Break
@@ -495,7 +495,7 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *gist.Style) {
 // that is a ReRenderAnchor -- for optimized re-rendering
 func (wb *WidgetBase) ParentReRenderAnchor() Widget {
 	var par Widget
-	wb.FuncUp(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkUp(0, wb.This(), func(k ki.Ki, level int, d any) bool {
 		wi, w := AsWidget(k)
 		if w == nil {
 			return ki.Break // don't keep going up

@@ -232,7 +232,7 @@ type WidgetBase struct {
 	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
 
 	// [view: -] general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets
-	WidgetSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
+	// 	WidgetSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"general widget signals supported by all widgets, including select, focus, and context menu (right mouse button) events, which can be used by views and other compound widgets"`
 
 	// [view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
 	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
@@ -287,14 +287,6 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
 	wb.Style.CopyFrom(&fr.Style)
-}
-
-func (wb *WidgetBase) Disconnect() {
-	wb.Node.Disconnect()
-	wb.WidgetSig.DisconnectAll()
-	if wb.Parts != nil {
-		wb.Parts.DisconnectAll()
-	}
 }
 
 func (wb *WidgetBase) BaseIface() reflect.Type {

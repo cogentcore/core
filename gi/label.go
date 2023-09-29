@@ -56,7 +56,7 @@ type Label struct {
 	Type LabelTypes `desc:"the type of label"`
 
 	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
-	LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
+	// LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// render data for text label
 	TextRender girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
@@ -236,11 +236,6 @@ func (lb *Label) CopyFieldsFrom(frm any) {
 	lb.Redrawable = fr.Redrawable
 }
 
-func (lb *Label) Disconnect() {
-	lb.WidgetBase.Disconnect()
-	lb.LinkSig.DisconnectAll()
-}
-
 // SetText sets the text and updates the rendered version.
 // Note: if there is already a label set, and no other
 // larger updates are taking place, the new label may just
@@ -287,18 +282,18 @@ func (lb *Label) SetSelectable() *Label {
 // oswin/App.OpenURL())
 func (lb *Label) OpenLink(tl *girl.TextLink) {
 	// tl.Widget = lb.This() // todo: needs this
-	if len(lb.LinkSig.Cons) == 0 {
-		if girl.TextLinkHandler != nil {
-			if girl.TextLinkHandler(*tl) {
-				return
-			}
-		}
-		if girl.URLHandler != nil {
-			girl.URLHandler(tl.URL)
-		}
-		return
-	}
-	lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	// if len(lb.LinkSig.Cons) == 0 {
+	// 	if girl.TextLinkHandler != nil {
+	// 		if girl.TextLinkHandler(*tl) {
+	// 			return
+	// 		}
+	// 	}
+	// 	if girl.URLHandler != nil {
+	// 		girl.URLHandler(tl.URL)
+	// 	}
+	// 	return
+	// }
+	// lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 func (lb *Label) AddEvents(we *WidgetEvents) {

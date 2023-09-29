@@ -6,6 +6,7 @@ package gi
 
 import (
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/girl"
 	"goki.dev/girl/gist"
 	"goki.dev/girl/units"
@@ -243,15 +244,15 @@ func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
 // ParentBackgroundColor returns the background color
 // of the nearest widget parent of the widget that
 // has a defined background color. If no such parent is found,
-// it returns a new [gist.ColorSpec] with a solid
+// it returns a new [colors.Full] with a solid
 // color of [colors.Scheme.Background].
-func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
+func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		return !p.Style.BackgroundColor.IsNil()
 	})
 	if pwb == nil {
-		cs := gist.ColorSpec{}
+		cs := colors.Full{}
 		cs.SetColor(colors.Scheme.Background)
 		return cs
 	}
@@ -264,7 +265,7 @@ func (wb *WidgetBase) ParentBackgroundColor() gist.ColorSpec {
 // cursor. This function can be used for elements like labels
 // that have a default cursor ([cursor.IBeam]) but should
 // not override the cursor of a parent.
-func (wb *WidgetBase) ParentCursor(cur cursor.Shapes) cursor.Shapes {
+func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursor.Cursor {
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		// return p.Style.Cursor != cursor.Arrow
 		return true

@@ -55,7 +55,7 @@ type Complete struct {
 	Seed string `desc:"current completion seed"`
 
 	// [view: -] signal for complete -- see CompleteSignals for the types
-	CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
+	// CompleteSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for complete -- see CompleteSignals for the types"`
 
 	// the user's completion selection'
 	Completion string `desc:"the user's completion selection'"`
@@ -65,11 +65,6 @@ type Complete struct {
 	DelayTimer *time.Timer
 	DelayMu    sync.Mutex
 	ShowMu     sync.Mutex
-}
-
-func (cm *Complete) Disconnect() {
-	cm.Node.Disconnect()
-	cm.CompleteSig.DisconnectAll()
 }
 
 // CompleteSignals are signals that are sent by Complete
@@ -250,7 +245,7 @@ func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Poi
 func (c *Complete) Complete(s string) {
 	c.Cancel()
 	c.Completion = s
-	c.CompleteSig.Emit(c.This(), int64(CompleteSelect), s)
+	// c.CompleteSig.Emit(c.This(), int64(CompleteSelect), s)
 }
 
 // KeyInput is the opportunity for completion to act on specific key inputs
@@ -262,8 +257,8 @@ func (c *Complete) KeyInput(kf KeyFuns) bool { // true - caller should set key p
 			if count == 1 { // just complete
 				c.Complete(c.Completions[0].Text)
 			} else { // try to extend the seed
-				s := complete.ExtendSeed(c.Completions, c.Seed)
-				c.CompleteSig.Emit(c.This(), int64(CompleteExtend), s)
+				// s := complete.ExtendSeed(c.Completions, c.Seed)
+				// c.CompleteSig.Emit(c.This(), int64(CompleteExtend), s)
 			}
 			return true
 		}

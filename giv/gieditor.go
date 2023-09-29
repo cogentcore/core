@@ -191,7 +191,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 
 // // GetAllUpdates connects to all nodes in the tree to receive notification of changes
 // func (ge *GiEditor) GetAllUpdates(root ki.Ki) {
-// 	ge.KiRoot.FuncDownMeFirst(0, ge, func(k ki.Ki, level int, d any) bool {
+// 	ge.KiRoot.WalkPre(func(k ki.Ki) bool {
 // 		k.NodeSignal().Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			gee := recv.Embed(TypeGiEditor).(*GiEditor)
 // 			if !gee.Changed {

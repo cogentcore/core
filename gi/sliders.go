@@ -130,10 +130,10 @@ type SliderBase struct {
 	// TODO: make value and thumb full style objects
 
 	// the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is
-	ValueColor gist.ColorSpec `desc:"the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is"`
+	ValueColor colors.Full `desc:"the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is"`
 
 	// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
-	ThumbColor gist.ColorSpec `desc:"the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is"`
+	ThumbColor colors.Full `desc:"the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is"`
 
 	// state of slider
 	State SliderStates `json:"-" xml:"-" desc:"state of slider"`
@@ -142,7 +142,7 @@ type SliderBase struct {
 	StateStyles [SliderStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 
 	// [view: -] signal for slider -- see SliderSignals for the types
-	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	//	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
 }
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
@@ -168,10 +168,10 @@ func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	sb.Off = fr.Off
 }
 
-func (sb *SliderBase) Disconnect() {
-	sb.WidgetBase.Disconnect()
-	sb.SliderSig.DisconnectAll()
-}
+// func (sb *SliderBase) Disconnect() {
+// 	sb.WidgetBase.Disconnect()
+// 	// sb.SliderSig.DisconnectAll()
+// }
 
 // SliderSignals are signals that sliders can send
 type SliderSignals int64
@@ -282,7 +282,7 @@ func (sb *SliderBase) SliderPress(pos float32) {
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderDown)
 	sb.SetSliderPos(pos)
-	sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
 	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
 	sb.UpdateEnd(updt)
 }
@@ -294,7 +294,7 @@ func (sb *SliderBase) SliderRelease() {
 	wasPressed := (sb.State == SliderDown)
 	updt := sb.UpdateStart()
 	sb.SetSliderState(SliderHover)
-	sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
 	if wasPressed {
 		sb.EmitNewValue()
 	}
@@ -343,7 +343,7 @@ func (sb *SliderBase) EmitNewValue() bool {
 	if sb.Value == sb.EmitValue {
 		return false
 	}
-	sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
 	sb.EmitValue = sb.Value
 	return true
 }
@@ -384,7 +384,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 func (sb *SliderBase) SliderMove(start, end float32) {
 	del := end - start
 	sb.SetSliderPos(sb.DragPos + del)
-	sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value

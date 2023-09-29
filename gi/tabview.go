@@ -49,7 +49,7 @@ type TabView struct {
 	MaxChars int `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
 
 	// signal for tab widget -- see TabViewSignals for the types
-	TabViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
+	// TabViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
 
 	// show a new tab button at right of list of tabs
 	NewTabButton bool `desc:"show a new tab button at right of list of tabs"`
@@ -118,11 +118,6 @@ func (tv *TabView) CopyFieldsFrom(frm any) {
 	tv.MaxChars = fr.MaxChars
 	tv.NewTabButton = fr.NewTabButton
 	tv.NewTabType = fr.NewTabType
-}
-
-func (tv *TabView) Disconnect() {
-	tv.Layout.Disconnect()
-	tv.TabViewSig.DisconnectAll()
 }
 
 // NTabs returns number of tabs
@@ -234,7 +229,7 @@ func (tv *TabView) NewTabAction(typ *gti.Type, label string) Widget {
 	widg := tv.NewTab(typ, label)
 	fr := tv.Frame()
 	idx := len(*fr.Children()) - 1
-	tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
+	// tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
 	tv.UpdateEndLayout(updt)
 	return widg
 }
@@ -296,7 +291,7 @@ func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
 func (tv *TabView) SelectTabIndexAction(idx int) {
 	_, ok := tv.SelectTabIndex(idx)
 	if ok {
-		tv.TabViewSig.Emit(tv.This(), int64(TabSelected), idx)
+		// tv.TabViewSig.Emit(tv.This(), int64(TabSelected), idx)
 	}
 }
 
@@ -430,7 +425,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) 
 func (tv *TabView) DeleteTabIndexAction(idx int) {
 	_, tnm, ok := tv.DeleteTabIndex(idx, true)
 	if ok {
-		tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), tnm)
+		// tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), tnm)
 	}
 }
 

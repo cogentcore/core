@@ -55,7 +55,7 @@ type ComboBox struct {
 	Type ComboBoxTypes `desc:"the type of combo box"`
 
 	// [view: -] signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value
-	ComboSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
+	// ComboSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 
 	// maximum label length (in runes)
 	MaxLength int `desc:"maximum label length (in runes)"`
@@ -181,11 +181,6 @@ func (cb *ComboBox) CopyFieldsFrom(frm any) {
 	cb.MaxLength = fr.MaxLength
 }
 
-func (cb *ComboBox) Disconnect() {
-	cb.ButtonBase.Disconnect()
-	cb.ComboSig.DisconnectAll()
-}
-
 // ButtonWidget interface
 
 func (cb *ComboBox) ButtonRelease() {
@@ -197,10 +192,10 @@ func (cb *ComboBox) ButtonRelease() {
 		return
 	}
 	updt := cb.UpdateStart()
-	cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
-	if cb.WasPressed {
-		cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
-	}
+	// cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
+	// if cb.WasPressed {
+	// 	cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
+	// }
 	cb.UpdateEnd(updt)
 	/*
 		cb.BBoxMu.RLock()
@@ -513,7 +508,7 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 	}
 	updt := cb.UpdateStart()
 	cb.SelectItem(idx)
-	cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
+	// cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
 	cb.UpdateEnd(updt)
 }
 
@@ -554,11 +549,11 @@ func (cb *ComboBox) MakeItemsMenu() {
 		ac.Data = i // index is the data
 		ac.SetSelected(i == cb.CurIndex)
 		ac.SetAsMenu()
-		ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			idx := data.(int)
-			cbb := recv.(*ComboBox)
-			cbb.SelectItemAction(idx)
-		})
+		// ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	idx := data.(int)
+		// 	cbb := recv.(*ComboBox)
+		// 	cbb.SelectItemAction(idx)
+		// })
 	}
 }
 

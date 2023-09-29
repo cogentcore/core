@@ -67,13 +67,13 @@ type TextField struct {
 	LeadingIcon icons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
 
 	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
-	LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
+	// LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
 
 	// if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig
 	TrailingIcon icons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
 
 	// [view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal
-	TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
+	// TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
 
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
@@ -85,10 +85,10 @@ type TextField struct {
 	PlaceholderColor color.RGBA `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
 
 	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
-	SelectColor gist.ColorSpec `desc:"the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"`
+	SelectColor colors.Full `desc:"the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"`
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor gist.ColorSpec `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
+	CursorColor colors.Full `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
 
 	// true if the text has been edited relative to the original
 	Edited bool `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
@@ -130,7 +130,7 @@ type TextField struct {
 	SelectMode bool `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
 
 	// [view: -] signal for line edit -- see TextFieldSignals for the types
-	TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
+	// TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 
 	// render version of entire text, for sizing
 	RenderAll girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
@@ -248,11 +248,6 @@ func (tf *TextField) CopyFieldsFrom(frm any) {
 	tf.MaxWidthReq = fr.MaxWidthReq
 }
 
-func (tf *TextField) Disconnect() {
-	tf.WidgetBase.Disconnect()
-	tf.TextFieldSig.DisconnectAll()
-}
-
 // TextFieldTypes is an enum containing the
 // different possible types of text fields
 type TextFieldTypes int //enums:enum
@@ -336,12 +331,12 @@ func (tf *TextField) SetText(txt string) {
 // of the textfield that clears the text in the textfield when pressed
 func (tf *TextField) AddClearAction() {
 	tf.TrailingIcon = icons.Close
-	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff := AsTextField(recv)
-		if tff != nil {
-			tff.Clear()
-		}
-	})
+	// tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	tff := AsTextField(recv)
+	// 	if tff != nil {
+	// 		tff.Clear()
+	// 	}
+	// })
 }
 
 // SetTypePassword enables [TextField.NoEcho] and adds a trailing
@@ -349,22 +344,22 @@ func (tf *TextField) AddClearAction() {
 func (tf *TextField) SetTypePassword() {
 	tf.NoEcho = true
 	tf.TrailingIcon = icons.Visibility
-	tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff := AsTextField(recv)
-		if tff != nil {
-			updt := tff.UpdateStart()
-			tff.NoEcho = !tff.NoEcho
-			if tff.NoEcho {
-				tf.TrailingIcon = icons.Visibility
-			} else {
-				tf.TrailingIcon = icons.VisibilityOff
-			}
-			if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
-				icon.SetIcon(tf.TrailingIcon)
-			}
-			tff.UpdateEnd(updt)
-		}
-	})
+	// tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	tff := AsTextField(recv)
+	// 	if tff != nil {
+	// 		updt := tff.UpdateStart()
+	// 		tff.NoEcho = !tff.NoEcho
+	// 		if tff.NoEcho {
+	// 			tf.TrailingIcon = icons.Visibility
+	// 		} else {
+	// 			tf.TrailingIcon = icons.VisibilityOff
+	// 		}
+	// 		if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+	// 			icon.SetIcon(tf.TrailingIcon)
+	// 		}
+	// 		tff.UpdateEnd(updt)
+	// 	}
+	// })
 }
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -1495,25 +1490,26 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	}
 
 	mods, updt := parts.ConfigChildren(config)
+
 	if mods || gist.RebuildDefaultStyles {
-		if leadIconIdx != -1 {
-			leadIcon := parts.Child(leadIconIdx).(*Action)
-			leadIcon.SetIcon(tf.LeadingIcon)
-			tf.LeadingIconSig.Mu.RLock()
-			leadIcon.ActionSig.Mu.Lock()
-			leadIcon.ActionSig.Cons = tf.LeadingIconSig.Cons
-			leadIcon.ActionSig.Mu.Unlock()
-			tf.LeadingIconSig.Mu.RUnlock()
-		}
-		if trailIconIdx != -1 {
-			trailIcon := parts.Child(trailIconIdx).(*Action)
-			trailIcon.SetIcon(tf.TrailingIcon)
-			tf.TrailingIconSig.Mu.RLock()
-			trailIcon.ActionSig.Mu.Lock()
-			trailIcon.ActionSig.Cons = tf.TrailingIconSig.Cons
-			trailIcon.ActionSig.Mu.Unlock()
-			tf.TrailingIconSig.Mu.RUnlock()
-		}
+		// if leadIconIdx != -1 {
+		// 	leadIcon := parts.Child(leadIconIdx).(*Action)
+		// 	leadIcon.SetIcon(tf.LeadingIcon)
+		// 	tf.LeadingIconSig.Mu.RLock()
+		// 	leadIcon.ActionSig.Mu.Lock()
+		// 	leadIcon.ActionSig.Cons = tf.LeadingIconSig.Cons
+		// 	leadIcon.ActionSig.Mu.Unlock()
+		// 	tf.LeadingIconSig.Mu.RUnlock()
+		// }
+		// if trailIconIdx != -1 {
+		// 	trailIcon := parts.Child(trailIconIdx).(*Action)
+		// 	trailIcon.SetIcon(tf.TrailingIcon)
+		// 	tf.TrailingIconSig.Mu.RLock()
+		// 	trailIcon.ActionSig.Mu.Lock()
+		// 	trailIcon.ActionSig.Cons = tf.TrailingIconSig.Cons
+		// 	trailIcon.ActionSig.Mu.Unlock()
+		// 	tf.TrailingIconSig.Mu.RUnlock()
+		// }
 		tf.UpdateEnd(updt)
 	}
 }

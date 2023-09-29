@@ -77,7 +77,7 @@ type SpinBox struct {
 	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
 
 	// [view: -] signal for spin box -- has no signal types, just emitted when the value changes
-	SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
+	// SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 // event functions for this type
@@ -136,11 +136,6 @@ func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	sb.DownIcon = fr.DownIcon
 }
 
-func (sb *SpinBox) Disconnect() {
-	sb.WidgetBase.Disconnect()
-	sb.SpinBoxSig.DisconnectAll()
-}
-
 // SetMin sets the min limits on the value
 func (sb *SpinBox) SetMin(min float32) {
 	sb.HasMin = true
@@ -183,7 +178,7 @@ func (sb *SpinBox) SetValue(val float32) {
 // SetValueAction calls SetValue and also emits the signal
 func (sb *SpinBox) SetValueAction(val float32) {
 	sb.SetValue(val)
-	sb.SpinBoxSig.Emit(sb.This(), 0, sb.Value)
+	// sb.SpinBoxSig.Emit(sb.This(), 0, sb.Value)
 }
 
 // IncrValue increments the value by given number of steps (+ or -),

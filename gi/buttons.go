@@ -43,7 +43,7 @@ type ButtonBase struct {
 	WasPressed bool `desc:"whether the button has been pressed (typically accessed in an ButtonRelease event)"`
 
 	// [view: -] signal for button -- see ButtonSignals for the types
-	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
+	//	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
 
 	// the menu items for this menu -- typically add Action elements for menus, along with separators
 	Menu MenuActions `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
@@ -71,11 +71,6 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	bb.Indicator = fr.Indicator
 	bb.Shortcut = fr.Shortcut
 	bb.Menu = fr.Menu
-}
-
-func (bb *ButtonBase) Disconnect() {
-	bb.WidgetBase.Disconnect()
-	bb.ButtonSig.DisconnectAll()
 }
 
 // ButtonFlags extend WidgetFlags to hold button state
@@ -193,11 +188,11 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
 func (bb *ButtonBase) OnClicked(fun func()) ButtonWidget {
-	bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(ButtonClicked) {
-			fun()
-		}
-	})
+	// bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(ButtonClicked) {
+	// 		fun()
+	// 	}
+	// })
 	return bb.This().(ButtonWidget)
 }
 
@@ -214,7 +209,7 @@ func (bb *ButtonBase) ButtonPress() {
 		}
 	} else {
 		bb.WasPressed = true
-		bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
+		// bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
 	}
 	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
@@ -229,15 +224,15 @@ func (bb *ButtonBase) BaseButtonRelease() {
 	}
 	updt := bb.UpdateStart()
 
-	bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
+	// bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
 	if bb.WasPressed {
 		bb.WasPressed = false
-		bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
+		// bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
 		bb.OpenMenu()
 
 		if bb.IsCheckable() {
 			bb.ToggleChecked()
-			bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
+			// bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 		}
 	}
 	bb.ApplyStyle(bb.Sc)
@@ -638,7 +633,7 @@ func (bt *Button) OnInit() {
 		switch {
 		case bt.WasPressed:
 			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Palette.Primary.RelTone(50))
+			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Color = colors.Scheme.Primary.On
 		case bt.HasFlag(Hovered):
 			if bt.Type == ButtonElevated {
@@ -779,11 +774,11 @@ func (cb *CheckBox) FilterEvents() {
 // OnClicked calls the given function when the button is clicked,
 // which is the default / standard way of activating the button
 func (cb *CheckBox) OnClicked(fun func()) ButtonWidget {
-	cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(ButtonToggled) {
-			fun()
-		}
-	})
+	// cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(ButtonToggled) {
+	// 		fun()
+	// 	}
+	// })
 	return cb.This().(ButtonWidget)
 }
 
