@@ -13,7 +13,7 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
@@ -40,7 +40,7 @@ type SVG struct {
 	BgColor colors.Full `desc:"color to fill background if Fill set"`
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
-	Geom gist.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
+	Geom styles.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
@@ -55,7 +55,7 @@ type SVG struct {
 	InvertY bool `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
 
 	// [view: -] render state for rendering
-	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
@@ -258,7 +258,7 @@ func (sv *SVG) SetDPIXForm(logicalDPI float32) {
 // todo:  for gi wrapper node:
 //
 // func (sv *SVG) OnInit() {
-// 	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+// 	sv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 // 		if par := sv.ParentWidget(); par != nil {
 // 			sv.Paint.FillStyle.Color.SetColor(par.Style.Color)
 // 			sv.Paint.StrokeStyle.Color.SetColor(par.Style.Color)
@@ -331,7 +331,7 @@ func (g *SVGNode) NodeBBox(sv *SVG) image.Rectangle {
 // SetUnitContext sets the unit context based on size of viewport, element,
 // and parent element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render
-func (sv *SVG) SetUnitContext(pc *gist.Paint, el, par mat32.Vec2) {
+func (sv *SVG) SetUnitContext(pc *styles.Paint, el, par mat32.Vec2) {
 	pc.UnContext.Defaults()
 	pc.UnContext.DPI = 96 // paint (SVG) context is always 96 = 1to1
 	if sv.RenderState.Image != nil {

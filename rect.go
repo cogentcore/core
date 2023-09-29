@@ -67,8 +67,8 @@ func (g *Rect) Render(sv *SVG) {
 	pc := &g.Paint
 	rs.Lock()
 	// TODO: figure out a better way to do this
-	bs := gist.Border{}
-	bs.Style.Set(gist.BorderSolid)
+	bs := styles.Border{}
+	bs.Style.Set(styles.BorderSolid)
 	bs.Width.Set(pc.StrokeStyle.Width)
 	bs.Color.Set(pc.StrokeStyle.Color.Solid)
 	bs.Radius.Set(units.Px(g.Radius.X))
@@ -77,7 +77,7 @@ func (g *Rect) Render(sv *SVG) {
 	} else {
 		// todo: only supports 1 radius right now -- easy to add another
 		// SidesTODO: also support different radii for each corner
-		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, gist.NewSideFloats(g.Radius.X))
+		pc.DrawRoundedRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y, styles.NewSideFloats(g.Radius.X))
 	}
 	pc.FillStrokeClear(rs)
 	rs.Unlock()

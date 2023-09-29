@@ -12,7 +12,7 @@ import (
 	"strings"
 	"unicode"
 
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -238,7 +238,7 @@ func reflectPt(pt, rp mat32.Vec2) mat32.Vec2 {
 
 // PathDataRender traverses the path data and renders it using paint and render state --
 // we assume all the data has been validated and that n's are sufficient, etc
-func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
+func PathDataRender(data []PathData, pc *paint.Paint, rs *paint.State) {
 	sz := len(data)
 	if sz == 0 {
 		return
@@ -377,7 +377,7 @@ func PathDataRender(data []PathData, pc *girl.Paint, rs *girl.State) {
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
-				ncx, ncy := girl.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
+				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
 				cp.X, cp.Y = pc.DrawEllipticalArcPath(rs, ncx, ncy, cp.X, cp.Y, prv.X, prv.Y, rad.X, rad.Y, ang, largeArc, sweep)
 			}
 		case PcZ:
@@ -574,7 +574,7 @@ func PathDataIterFunc(data []PathData, fun func(idx int, cmd PathCmds, ptIdx int
 				} else {
 					cp = PathDataNextVec(data, &i)
 				}
-				nc.X, nc.Y = girl.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
+				nc.X, nc.Y = paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, prv.X, prv.Y, cp.X, cp.Y, sweep, largeArc)
 				if !fun(i-2, cmd, np, cp, []mat32.Vec2{nc, prv, rad, {X: ang}, {laf, sf}}) {
 					return
 				}
@@ -658,7 +658,7 @@ func PathCmdIsRel(pc PathCmds) bool {
 }
 
 // PathDataValidate validates the path data and emits error messages on log
-func PathDataValidate(pc *girl.Paint, data *[]PathData, errstr string) error {
+func PathDataValidate(pc *paint.Paint, data *[]PathData, errstr string) error {
 	sz := len(*data)
 	if sz == 0 {
 		return nil
@@ -1076,7 +1076,7 @@ func (g *Path) ApplyXFormImpl(xf mat32.Mat2, lpt mat32.Vec2) {
 				} else {
 					cp = PathDataXFormAbs(data, &i, xf, lpt)
 				}
-				ncx, ncy := girl.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, pc.X, pc.Y, cp.X, cp.Y, sweep, largeArc)
+				ncx, ncy := paint.FindEllipseCenter(&rad.X, &rad.Y, ang*math.Pi/180, pc.X, pc.Y, cp.X, cp.Y, sweep, largeArc)
 				_ = ncx
 				_ = ncy
 			}

@@ -404,7 +404,7 @@ var NodeBaseType = gti.AddType(&gti.Type{
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "ki.Props", Doc: "[view: no-inline] aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}}},
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", Doc: "bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.", Directives: gti.Directives{}}},
 		{"VisBBox", &gti.Field{Name: "VisBBox", Type: "image.Rectangle", Doc: "visible bounding box for the node intersected with the SVG image geometry", Directives: gti.Directives{}}},
-		{"Paint", &gti.Field{Name: "Paint", Type: "girl.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}}},
+		{"Paint", &gti.Field{Name: "Paint", Type: "paint.Paint", Doc: "paint style information for this node", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
@@ -594,7 +594,7 @@ var TextType = gti.AddType(&gti.Type{
 		{"Pos", &gti.Field{Name: "Pos", Type: "mat32.Vec2", Doc: "position of the left, baseline of the text", Directives: gti.Directives{}}},
 		{"Width", &gti.Field{Name: "Width", Type: "float32", Doc: "width of text to render if using word-wrapping", Directives: gti.Directives{}}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "text string to render", Directives: gti.Directives{}}},
-		{"TextRender", &gti.Field{Name: "TextRender", Type: "girl.Text", Doc: "render version of text", Directives: gti.Directives{}}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "paint.Text", Doc: "render version of text", Directives: gti.Directives{}}},
 		{"CharPosX", &gti.Field{Name: "CharPosX", Type: "[]float32", Doc: "character positions along X axis, if specified", Directives: gti.Directives{}}},
 		{"CharPosY", &gti.Field{Name: "CharPosY", Type: "[]float32", Doc: "character positions along Y axis, if specified", Directives: gti.Directives{}}},
 		{"CharPosDX", &gti.Field{Name: "CharPosDX", Type: "[]float32", Doc: "character delta-positions along X axis, if specified", Directives: gti.Directives{}}},

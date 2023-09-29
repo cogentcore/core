@@ -7,7 +7,7 @@ package svg
 import (
 	"image"
 
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
@@ -29,7 +29,7 @@ type Text struct {
 	Text string `xml:"text" desc:"text string to render"`
 
 	// render version of text
-	TextRender girl.Text `xml:"-" json:"-" desc:"render version of text"`
+	TextRender paint.Text `xml:"-" json:"-" desc:"render version of text"`
 
 	// character positions along X axis, if specified
 	CharPosX []float32 `desc:"character positions along X axis, if specified"`
@@ -127,16 +127,16 @@ func (g *Text) TextBBox() mat32.Box2 {
 		return mat32.Box2{}
 	}
 	pc := &g.Paint
-	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, 0, 1)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 
 	pos := g.Pos
 
-	if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
+	if styles.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorMiddle {
 		pos.X -= g.TextRender.Size.X * .5
-	} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
+	} else if styles.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.Size.X
 	}
 	if len(g.CharPosX) > 0 {
@@ -200,13 +200,13 @@ func (g *Text) RenderText(sv *SVG) {
 	if scalex == 1 {
 		scalex = 0
 	}
-	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	if !pc.FillStyle.Color.IsNil() {
 		pc.FontStyle.Color = pc.FillStyle.Color.Solid
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y
-	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext)
+	pc.FontStyle.Font = paint.OpenFont(&pc.FontStyle, &pc.UnContext)
 	sr := &(g.TextRender.Spans[0])
 	sr.Render[0].Face = pc.FontStyle.Face.Face // upscale
 	g.TextRender.Size = g.TextRender.Size.Mul(mat32.Vec2{scx, scy})
@@ -214,9 +214,9 @@ func (g *Text) RenderText(sv *SVG) {
 	// todo: align styling only affects multi-line text and is about how tspan is arranged within
 	// the overall text block.
 
-	if gist.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorMiddle {
+	if styles.IsAlignMiddle(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorMiddle {
 		pos.X -= g.TextRender.Size.X * .5
-	} else if gist.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == gist.AnchorEnd {
+	} else if styles.IsAlignEnd(pc.TextStyle.Align) || pc.TextStyle.Anchor == styles.AnchorEnd {
 		pos.X -= g.TextRender.Size.X
 	}
 	for i := range sr.Render {

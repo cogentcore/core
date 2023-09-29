@@ -844,7 +844,7 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 	_, ismark := itm.(*Marker)
 	if !isgp {
 		if issvg && !ismark {
-			sp := gist.StylePropsXML(props)
+			sp := styles.StylePropsXML(props)
 			if sp != "" {
 				XMLAddAttr(&se.Attr, "style", sp)
 			}
@@ -1124,7 +1124,7 @@ func SetStdXMLAttr(ni Node, name, val string) bool {
 		nb.Class = val
 		return true
 	case "style":
-		gist.SetStylePropsXML(val, (*map[string]any)(&nb.Props))
+		styles.SetStylePropsXML(val, (*map[string]any)(&nb.Props))
 		return true
 	}
 	return false

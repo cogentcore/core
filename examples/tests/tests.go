@@ -10,13 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/glop/dirs"
 	"goki.dev/svg"
 )
 
 func main() {
-	girl.FontLibrary.InitFontPaths(girl.FontPaths...)
+	paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 
 	dir := "./svgs"
 	out := "./testdata"

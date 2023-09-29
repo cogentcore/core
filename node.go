@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -26,7 +26,7 @@ type Node interface {
 	AsNodeBase() *NodeBase
 
 	// PaintStyle returns the SVG Paint style object for this node
-	PaintStyle() *girl.Paint
+	PaintStyle() *paint.Paint
 
 	// Style updates the Paint style for this node
 	Style(sv *SVG)
@@ -98,7 +98,7 @@ type NodeBase struct {
 	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"visible bounding box for the node intersected with the SVG image geometry"`
 
 	// paint style information for this node
-	Paint girl.Paint `json:"-" xml:"-" desc:"paint style information for this node"`
+	Paint paint.Paint `json:"-" xml:"-" desc:"paint style information for this node"`
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm any) {
@@ -133,7 +133,7 @@ func (n *NodeBase) BaseIface() reflect.Type {
 	return reflect.TypeOf((*NodeBase)(nil)).Elem()
 }
 
-func (g *NodeBase) PaintStyle() *girl.Paint {
+func (g *NodeBase) PaintStyle() *paint.Paint {
 	return &g.Paint
 }
 
@@ -398,7 +398,7 @@ func (g *NodeBase) BBoxes(sv *SVG) {
 // PushXForm checks our bounding box and visibility, returning false if
 // out of bounds.  If visible, pushes our xform.
 // Must be called as first step in Render.
-func (g *NodeBase) PushXForm(sv *SVG) (bool, *girl.State) {
+func (g *NodeBase) PushXForm(sv *SVG) (bool, *paint.State) {
 	g.BBox = image.Rectangle{}
 	if g.Paint.Off || g == nil || g.This() == nil {
 		return false, nil
