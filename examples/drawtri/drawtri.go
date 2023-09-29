@@ -9,6 +9,7 @@ import (
 	"image"
 	"time"
 
+	"goki.dev/cursors"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
 	"goki.dev/goosi/mouse"
@@ -49,7 +50,10 @@ func mainrun(a goosi.App) {
 	sy.Config()
 
 	frameCount := 0
+	cur := cursors.Default
 	stTime := time.Now()
+
+	fmt.Println(cursors.Cursors)
 
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
@@ -76,6 +80,13 @@ func mainrun(a goosi.App) {
 			frameCount = 0
 			stTime = eTime
 		}
+		if frameCount%60 == 0 {
+			cur++
+			if cur >= cursors.CursorN {
+				cur = cursors.Default
+			}
+			goosi.TheApp.Cursor(w).Set(cur)
+		}
 	}
 
 	for {
@@ -89,7 +100,7 @@ func mainrun(a goosi.App) {
 				renderFrame()
 			}
 		case *mouse.Event:
-			fmt.Println("got mouse event at pos", ev.Pos())
+			// fmt.Println("got mouse event at pos", ev.Pos())
 		}
 	}
 }

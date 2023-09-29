@@ -25,7 +25,8 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	nm := cursor.String()
 	sm := c.cursors[nm]
 	if sm == nil {
-		c.cursors[nm] = map[int]*glfw.Cursor{}
+		sm = map[int]*glfw.Cursor{}
+		c.cursors[nm] = sm
 	}
 	if cur, ok := sm[c.Size]; ok {
 		theApp.ctxtwin.glw.SetCursor(cur)
