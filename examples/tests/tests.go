@@ -28,7 +28,11 @@ func main() {
 		fmt.Println(fn)
 		sv := svg.NewSVG(640, 480)
 		svfn := filepath.Join(dir, fn)
-		sv.OpenXML(svfn)
+		err := sv.OpenXML(svfn)
+		if err != nil {
+			fmt.Println("error opening xml:", err)
+			continue
+		}
 		// fmt.Println(sv.Root.ViewBox)
 		sv.SetNormXForm()
 		sv.Render()

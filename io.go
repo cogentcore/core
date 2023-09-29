@@ -35,31 +35,31 @@ import (
 // using standard XML marshal / unmarshal
 
 var (
-	paramMismatchError  = errors.New("SVG Parse: Param mismatch")
-	commandUnknownError = errors.New("SVG Parse: Unknown command")
-	zeroLengthIdError   = errors.New("SVG Parse: zero length id")
-	missingIdError      = errors.New("SVG Parse: cannot find id")
+	errParamMismatch  = errors.New("SVG Parse: Param mismatch")
+	errCommandUnknown = errors.New("SVG Parse: Unknown command")
+	errZeroLengthID   = errors.New("SVG Parse: zero length id")
+	errMissingID      = errors.New("SVG Parse: cannot find id")
 )
 
 // OpenXML Opens XML-formatted SVG input from given file
 func (sv *SVG) OpenXML(fname string) error {
-	filename := string(fname)
+	filename := fname
 	fi, err := os.Stat(filename)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 	if fi.IsDir() {
-		err := fmt.Errorf("svg.OpenXML: file is a directory: %v\n", filename)
+		err := fmt.Errorf("svg.OpenXML: file is a directory: %v", filename)
 		log.Println(err)
 		return err
 	}
 	fp, err := os.Open(filename)
-	defer fp.Close()
 	if err != nil {
 		log.Println(err)
 		return err
 	}
+	defer fp.Close()
 	return sv.ReadXML(bufio.NewReader(fp))
 }
 
@@ -161,7 +161,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "viewBox":
 						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
-							return paramMismatchError
+							return errParamMismatch
 						}
 						curSvg.ViewBox.Min.X = pts[0]
 						curSvg.ViewBox.Min.Y = pts[1]
@@ -596,7 +596,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 					case "viewBox":
 						pts := mat32.ReadPoints(attr.Value)
 						if len(pts) != 4 {
-							return paramMismatchError
+							return errParamMismatch
 						}
 						mrk.ViewBox.Min.X = pts[0]
 						mrk.ViewBox.Min.Y = pts[1]
