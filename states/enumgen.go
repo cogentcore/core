@@ -11,11 +11,211 @@ import (
 	"goki.dev/enums"
 )
 
-var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+// AbilitiesN is the highest valid value
+// for type Abilities, plus one.
+const AbilitiesN Abilities = 10
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _AbilitiesNoOp() {
+	var x [1]struct{}
+	_ = x[Editable-(0)]
+	_ = x[Selectable-(1)]
+	_ = x[Activatable-(2)]
+	_ = x[Draggable-(3)]
+	_ = x[Scrollable-(4)]
+	_ = x[Focusable-(5)]
+	_ = x[FocusWithinable-(6)]
+	_ = x[Checkable-(7)]
+	_ = x[Hoverable-(8)]
+	_ = x[LongHoverable-(9)]
+}
+
+var _AbilitiesNameToValueMap = map[string]Abilities{
+	`Editable`:        0,
+	`editable`:        0,
+	`Selectable`:      1,
+	`selectable`:      1,
+	`Activatable`:     2,
+	`activatable`:     2,
+	`Draggable`:       3,
+	`draggable`:       3,
+	`Scrollable`:      4,
+	`scrollable`:      4,
+	`Focusable`:       5,
+	`focusable`:       5,
+	`FocusWithinable`: 6,
+	`focuswithinable`: 6,
+	`Checkable`:       7,
+	`checkable`:       7,
+	`Hoverable`:       8,
+	`hoverable`:       8,
+	`LongHoverable`:   9,
+	`longhoverable`:   9,
+}
+
+var _AbilitiesDescMap = map[Abilities]string{
+	0: `Editable means it can switch between ReadOnly and not`,
+	1: `Selectable means it can be Selected`,
+	2: `Activatable means it can be made Active`,
+	3: `Draggable means it can be Dragged`,
+	4: `Scrollable means it can be Scrolled`,
+	5: `Focusable means it can be Focused`,
+	6: `FocusWithinable means it can be FocusedWithin`,
+	7: `Checkable means it can be Checked`,
+	8: `Hoverable means it can be Hovered`,
+	9: `LongHoverable means it can be LongHovered`,
+}
+
+var _AbilitiesMap = map[Abilities]string{
+	0: `Editable`,
+	1: `Selectable`,
+	2: `Activatable`,
+	3: `Draggable`,
+	4: `Scrollable`,
+	5: `Focusable`,
+	6: `FocusWithinable`,
+	7: `Checkable`,
+	8: `Hoverable`,
+	9: `LongHoverable`,
+}
+
+// String returns the string representation
+// of this Abilities value.
+func (i Abilities) String() string {
+	str := ""
+	for _, ie := range _AbilitiesValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this Abilities value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i Abilities) BitIndexString() string {
+	if str, ok := _AbilitiesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the Abilities value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Abilities) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the Abilities value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *Abilities) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _AbilitiesNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _AbilitiesNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type Abilities")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the Abilities value as an int64.
+func (i Abilities) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Abilities value from an int64.
+func (i *Abilities) SetInt64(in int64) {
+	*i = Abilities(in)
+}
+
+// Desc returns the description of the Abilities value.
+func (i Abilities) Desc() string {
+	if str, ok := _AbilitiesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// AbilitiesValues returns all possible values
+// for the type Abilities.
+func AbilitiesValues() []Abilities {
+	return _AbilitiesValues
+}
+
+// Values returns all possible values
+// for the type Abilities.
+func (i Abilities) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_AbilitiesValues))
+	for i, d := range _AbilitiesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type Abilities.
+func (i Abilities) IsValid() bool {
+	_, ok := _AbilitiesMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i Abilities) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *Abilities) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Abilities) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Abilities) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 15
+const StatesN States = 17
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -25,17 +225,19 @@ func _StatesNoOp() {
 	_ = x[ReadOnly-(1)]
 	_ = x[Selected-(2)]
 	_ = x[Active-(3)]
-	_ = x[Focused-(4)]
-	_ = x[FocusedWithin-(5)]
-	_ = x[Checked-(6)]
-	_ = x[Hovered-(7)]
-	_ = x[LongHovered-(8)]
-	_ = x[Invalid-(9)]
-	_ = x[Required-(10)]
-	_ = x[Blank-(11)]
-	_ = x[Link-(12)]
-	_ = x[Visited-(13)]
-	_ = x[AnyLink-(14)]
+	_ = x[Dragged-(4)]
+	_ = x[Scrolled-(5)]
+	_ = x[Focused-(6)]
+	_ = x[FocusedWithin-(7)]
+	_ = x[Checked-(8)]
+	_ = x[Hovered-(9)]
+	_ = x[LongHovered-(10)]
+	_ = x[Invalid-(11)]
+	_ = x[Required-(12)]
+	_ = x[Blank-(13)]
+	_ = x[Link-(14)]
+	_ = x[Visited-(15)]
+	_ = x[AnyLink-(16)]
 }
 
 var _StatesNameToValueMap = map[string]States{
@@ -47,46 +249,52 @@ var _StatesNameToValueMap = map[string]States{
 	`selected`:      2,
 	`Active`:        3,
 	`active`:        3,
-	`Focused`:       4,
-	`focused`:       4,
-	`FocusedWithin`: 5,
-	`focusedwithin`: 5,
-	`Checked`:       6,
-	`checked`:       6,
-	`Hovered`:       7,
-	`hovered`:       7,
-	`LongHovered`:   8,
-	`longhovered`:   8,
-	`Invalid`:       9,
-	`invalid`:       9,
-	`Required`:      10,
-	`required`:      10,
-	`Blank`:         11,
-	`blank`:         11,
-	`Link`:          12,
-	`link`:          12,
-	`Visited`:       13,
-	`visited`:       13,
-	`AnyLink`:       14,
-	`anylink`:       14,
+	`Dragged`:       4,
+	`dragged`:       4,
+	`Scrolled`:      5,
+	`scrolled`:      5,
+	`Focused`:       6,
+	`focused`:       6,
+	`FocusedWithin`: 7,
+	`focusedwithin`: 7,
+	`Checked`:       8,
+	`checked`:       8,
+	`Hovered`:       9,
+	`hovered`:       9,
+	`LongHovered`:   10,
+	`longhovered`:   10,
+	`Invalid`:       11,
+	`invalid`:       11,
+	`Required`:      12,
+	`required`:      12,
+	`Blank`:         13,
+	`blank`:         13,
+	`Link`:          14,
+	`link`:          14,
+	`Visited`:       15,
+	`visited`:       15,
+	`AnyLink`:       16,
+	`anylink`:       16,
 }
 
 var _StatesDescMap = map[States]string{
 	0:  `Disabled elements cannot be interacted with or selected, but do display`,
 	1:  `ReadOnly elements elements cannot be changed`,
 	2:  `Selected elements have been marked for clipboard or other such actions`,
-	3:  `Active elements are currently being interacted with, including a button being pressed, an element being dragged or scrolled`,
-	4:  `Focused elements receive keyboard input`,
-	5:  `FocusedWithin elements have a Focused element within them, including self`,
-	6:  `Checked is for check boxes or radio buttons or other similar state`,
-	7:  `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active`,
-	8:  `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup`,
-	9:  `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
-	10: `Required indicates that the element must be set by the user`,
-	11: `Blank indicates that the element has yet to be set by user`,
-	12: `Link indicates a URL link that has not been visited yet`,
-	13: `Visited indicates a URL link that has been visited`,
-	14: `AnyLink is either Link or Visited`,
+	3:  `Active elements are currently being interacted with, usually involving a mouse button being pressed. It is distinct from Focused, Dragged, and Scrolled.`,
+	4:  `Dragged means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove). The Active state happens during the initial MouseDown, and, if`,
+	5:  `Scrolled means this element is currently being scrolled.`,
+	6:  `Focused elements receive keyboard input`,
+	7:  `FocusedWithin elements have a Focused element within them, including self`,
+	8:  `Checked is for check boxes or radio buttons or other similar state`,
+	9:  `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active`,
+	10: `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup`,
+	11: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
+	12: `Required indicates that the element must be set by the user`,
+	13: `Blank indicates that the element has yet to be set by user`,
+	14: `Link indicates a URL link that has not been visited yet`,
+	15: `Visited indicates a URL link that has been visited`,
+	16: `AnyLink is either Link or Visited`,
 }
 
 var _StatesMap = map[States]string{
@@ -94,17 +302,19 @@ var _StatesMap = map[States]string{
 	1:  `ReadOnly`,
 	2:  `Selected`,
 	3:  `Active`,
-	4:  `Focused`,
-	5:  `FocusedWithin`,
-	6:  `Checked`,
-	7:  `Hovered`,
-	8:  `LongHovered`,
-	9:  `Invalid`,
-	10: `Required`,
-	11: `Blank`,
-	12: `Link`,
-	13: `Visited`,
-	14: `AnyLink`,
+	4:  `Dragged`,
+	5:  `Scrolled`,
+	6:  `Focused`,
+	7:  `FocusedWithin`,
+	8:  `Checked`,
+	9:  `Hovered`,
+	10: `LongHovered`,
+	11: `Invalid`,
+	12: `Required`,
+	13: `Blank`,
+	14: `Link`,
+	15: `Visited`,
+	16: `AnyLink`,
 }
 
 // String returns the string representation

@@ -21,8 +21,18 @@ const (
 	Selected
 
 	// Active elements are currently being interacted with,
-	// including a button being pressed, an element being dragged or scrolled
+	// usually involving a mouse button being pressed.
+	// It is distinct from Focused, Dragged, and Scrolled.
 	Active
+
+	// Dragged means this element is currently being dragged
+	// by the mouse (i.e., a MouseDown event followed by MouseMove).
+	// The Active state happens during the initial MouseDown,
+	// and, if
+	Dragged
+
+	// Scrolled means this element is currently being scrolled.
+	Scrolled
 
 	// Focused elements receive keyboard input
 	Focused
