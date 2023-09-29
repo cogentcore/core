@@ -30,7 +30,8 @@ func mainrun(a goosi.App) {
 		panic(err)
 	}
 
-	goosi.TheApp.Cursor(w).SetSize(64)
+	goosi.TheApp.Cursor(w).SetSize(32)
+	goosi.TheApp.Cursor(w).Set(cursors.ResizeNS)
 
 	// note: drawer is always created and ready to go
 	// we are creating an additional rendering system here.
@@ -87,7 +88,7 @@ func mainrun(a goosi.App) {
 			if cur >= cursors.CursorN {
 				cur = cursors.Default
 			}
-			goosi.TheApp.Cursor(w).Set(cur)
+			// goosi.TheApp.Cursor(w).Set(cur)
 		}
 	}
 
