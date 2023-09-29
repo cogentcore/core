@@ -13,7 +13,7 @@ import (
 	"image"
 	"unicode/utf8"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/vgpu/v2/vdraw"
 )
 
@@ -64,7 +64,7 @@ type Window interface {
 
 	// Insets returns the size of any insets on the window in raw device pixels (dots).
 	// These insets can be caused by status bars, button overlays, or devices cutouts.
-	Insets() gist.SideFloats
+	Insets() styles.SideFloats
 
 	// SetWinSize sets the size of the window, in OS-specific window manager
 	// units that may not include any high DPI factors (DevPixRatio)

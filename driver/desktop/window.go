@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/eventmgr"
 	"goki.dev/goosi/window"
@@ -248,8 +248,8 @@ func (w *windowImpl) Position() image.Point {
 	return ps
 }
 
-func (w *windowImpl) Insets() gist.SideFloats {
-	return gist.NewSideFloats()
+func (w *windowImpl) Insets() styles.SideFloats {
+	return styles.NewSideFloats()
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {
