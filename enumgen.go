@@ -12,30 +12,30 @@ import (
 	"goki.dev/ki/v2"
 )
 
-var _NodeFlagsValues = []NodeFlags{9}
+var _NodeFlagsValues = []NodeFlags{7}
 
 // NodeFlagsN is the highest valid value
 // for type NodeFlags, plus one.
-const NodeFlagsN NodeFlags = 10
+const NodeFlagsN NodeFlags = 8
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _NodeFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[IsDef-(9)]
+	_ = x[IsDef-(7)]
 }
 
 var _NodeFlagsNameToValueMap = map[string]NodeFlags{
-	`IsDef`: 9,
-	`isdef`: 9,
+	`IsDef`: 7,
+	`isdef`: 7,
 }
 
 var _NodeFlagsDescMap = map[NodeFlags]string{
-	9: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
+	7: `Rendering means that the SVG is currently redrawing Can be useful to check for animations etc to decide whether to drive another update`,
 }
 
 var _NodeFlagsMap = map[NodeFlags]string{
-	9: `IsDef`,
+	7: `IsDef`,
 }
 
 // String returns the string representation

@@ -262,7 +262,7 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 // recursing into groups until a non-group item is found.
 func FirstNonGroupNode(kn ki.Ki) ki.Ki {
 	var ngn ki.Ki
-	kn.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+	kn.WalkPre(func(k ki.Ki) bool {
 		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
 			return ki.Break
 		}

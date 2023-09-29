@@ -172,7 +172,7 @@ func (sv *SVG) FullByURL(url string) *colors.Full {
 
 func (sv *SVG) Style() {
 	// set the Defs flags
-	sv.Defs.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+	sv.Defs.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
@@ -185,7 +185,7 @@ func (sv *SVG) Style() {
 	// TODO: cleaner svg styling from text color property
 	sv.SetUnitContext(&sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
 
-	sv.Root.FuncDownMeFirst(0, nil, func(k ki.Ki, level int, d any) bool {
+	sv.Root.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
 		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
 			return ki.Break
