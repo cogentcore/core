@@ -10,7 +10,8 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -125,7 +126,7 @@ type SliderBase struct {
 	Off bool `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
 
 	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
-	StyleBox gist.Style `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
+	StyleBox styles.Style `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
 
 	// TODO: make value and thumb full style objects
 
@@ -139,7 +140,7 @@ type SliderBase struct {
 	State SliderStates `json:"-" xml:"-" desc:"state of slider"`
 
 	// styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	StateStyles [SliderStatesN]gist.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	StateStyles [SliderStatesN]styles.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 
 	// [view: -] signal for slider -- see SliderSignals for the types
 	//	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
@@ -254,15 +255,15 @@ func (sb *SliderBase) SnapValue() {
 func (sb *SliderBase) SetSliderState(state SliderStates) {
 	prev := sb.State
 	if sb.IsDisabled() {
-		if sb.IsSelected() {
+		if sb.StateIs(states.Selected) {
 			state = SliderSelected
 		} else {
 			state = SliderInactive
 		}
 	} else {
-		if state == SliderActive && sb.IsSelected() {
+		if state == SliderActive && sb.StateIs(states.Selected) {
 			state = SliderSelected
-		} else if state == SliderActive && sb.HasFocus() {
+		} else if state == SliderActive && sb.StateIs(states.Focused) {
 			state = SliderFocus
 		}
 	}
@@ -521,7 +522,7 @@ func (sb *SliderBase) MouseEvent(we *WidgetEvents) {
 		sbb := AsSliderBase(recv)
 		if sbb.IsDisabled() {
 			me.SetHandled()
-			sbb.SetSelected(!sbb.IsSelected())
+			sbb.SetSelected(!sbb.StateIs(states.Selected))
 			sbb.EmitSelectedSignal()
 			sbb.UpdateSig()
 		} else {
@@ -720,16 +721,16 @@ func (sr *Slider) OnInit() {
 	sr.Max = 1.0
 	sr.Prec = 9
 
-	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	sr.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
 
-		sr.StyleBox.Border.Style.Set(gist.BorderNone)
+		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		// s.Cursor = cursor.HandPointing
-		s.Border.Style.Set(gist.BorderNone)
-		s.Border.Radius = gist.BorderRadiusFull
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Px(8))
 		if sr.Dim == mat32.X {
 			s.Width.SetEm(20)
@@ -748,7 +749,7 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -901,14 +902,14 @@ func (sb *ScrollBar) OnInit() {
 	sb.Max = 1.0
 	sb.Prec = 9
 
-	sb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		sb.StyleBox.Border.Style.Set(gist.BorderNone)
+	sb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
 		sb.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
 
-		s.Border.Style.Set(gist.BorderNone)
-		s.Border.Radius = gist.BorderRadiusFull
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusFull
 		// STYTODO: state styles
 	})
 }

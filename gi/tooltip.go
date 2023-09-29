@@ -6,7 +6,7 @@ package gi
 
 import (
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 )
 
@@ -14,9 +14,9 @@ import (
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(tooltip *Frame) {
-	tooltip.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
-		s.Border.Radius = gist.BorderRadiusExtraSmall
+	tooltip.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
@@ -34,10 +34,10 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 		psc.Win = win
 		psc.Type = ScTooltip
 
-		psc.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		psc.Frame.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			// TOOD: get border radius actually working
 			// without having parent background color workaround
-			s.Border.Radius = gist.BorderRadiusExtraSmall
+			s.Border.Radius = styles.BorderRadiusExtraSmall
 			s.BackgroundColor = psc.Frame.ParentBackgroundColor()
 		})
 
@@ -51,7 +51,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 
 		TooltipConfigStyles(frame)
 
-		lbl.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		lbl.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
 			mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
 

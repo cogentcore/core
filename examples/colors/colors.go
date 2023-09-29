@@ -10,7 +10,7 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 )
 
@@ -33,7 +33,7 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("vertical-align", gist.AlignMiddle)
+	row1.SetProp("vertical-align", styles.AlignMiddle)
 	row1.SetProp("horizontal-align", "center")
 	row1.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
 	row1.SetStretchMaxWidth()

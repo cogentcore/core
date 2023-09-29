@@ -9,7 +9,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/ki/v2"
@@ -31,16 +31,16 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
-	mfr.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mfr.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
 	})
 
 	title := gi.NewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	title.Type = gi.LabelHeadlineSmall
-	title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	title.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Width.SetCh(30) // need for wrap
 		s.SetStretchMaxWidth()
-		s.Text.WhiteSpace = gist.WhiteSpaceNormal // wrap
+		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
 	tv := mfr.NewChild(TypeTableView, "tv").(*TableView)

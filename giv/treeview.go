@@ -13,7 +13,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
@@ -61,7 +62,7 @@ type TreeView struct {
 	TreeViewSig ki.Signal `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
 
 	// styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	StateStyles [TreeViewStatesN]gist.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	StateStyles [TreeViewStatesN]styles.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
 
 	// just the size of our widget -- our alloc includes all of our children, but we only draw us
 	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
@@ -81,13 +82,13 @@ func init() {
 
 func (tv *TreeView) OnInit() {
 	tv.Indent.SetEm(1)
-	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
+	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
 		s.Margin.Set()
 		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
-		s.Text.Align = gist.AlignLeft
-		s.AlignV = gist.AlignTop
-		if w.IsSelected() {
+		s.Text.Align = styles.AlignLeft
+		s.AlignV = styles.AlignTop
+		if w.StateIs(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)
 		}
 	})
@@ -98,11 +99,11 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
-			parts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			parts.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				parts.Spacing.SetCh(0.5)
 			})
 		case "icon":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -112,19 +113,19 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			cb := child.(*gi.CheckBox)
 			cb.Icon = icons.KeyboardArrowDown
 			cb.IconOff = icons.KeyboardArrowRight
-			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			cb.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MaxWidth.SetEm(1.5)
 				s.MaxHeight.SetEm(1.5)
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		case "space":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MinWidth.SetCh(16)
@@ -552,7 +553,7 @@ func (tv *TreeView) SelectedSrcNodes() ki.Slice {
 // Select selects this node (if not already selected) -- must use this method
 // to update global selection list
 func (tv *TreeView) Select() {
-	if !tv.IsSelected() {
+	if !tv.StateIs(states.Selected) {
 		tv.SetSelected()
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
@@ -564,7 +565,7 @@ func (tv *TreeView) Select() {
 // Unselect unselects this node (if selected) -- must use this method
 // to update global selection list
 func (tv *TreeView) Unselect() {
-	if tv.IsSelected() {
+	if tv.StateIs(states.Selected) {
 		tv.ClearSelected()
 		sl := tv.SelectedViews()
 		sz := len(sl)
@@ -621,7 +622,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 	sel := false
 	switch mode {
 	case mouse.SelectOne:
-		if tv.IsSelected() {
+		if tv.StateIs(states.Selected) {
 			sl := tv.SelectedViews()
 			if len(sl) > 1 {
 				tv.UnselectAll()
@@ -668,7 +669,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			}
 		}
 	case mouse.ExtendOne:
-		if tv.IsSelected() {
+		if tv.StateIs(states.Selected) {
 			tv.UnselectAction()
 		} else {
 			tv.Select()
@@ -699,7 +700,7 @@ func (tv *TreeView) SelectAction(mode mouse.SelectModes) bool {
 
 // UnselectAction unselects this node (if selected) -- and emits a signal
 func (tv *TreeView) UnselectAction() {
-	if tv.IsSelected() {
+	if tv.StateIs(states.Selected) {
 		tv.Unselect()
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewUnselected), tv.This())
 	}
@@ -1068,7 +1069,7 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 		log.Printf("TreeView IsRootOrField nil SrcNode in: %v\n", tv.Path())
 		return false
 	}
-	if sk.IsField() {
+	if sk.Is(Field) {
 		if op != "" {
 			gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, gi.AddOk, gi.NoCancel, nil, nil)
 		}
@@ -2219,9 +2220,9 @@ func (tv *TreeView) Render(vp *Scene) {
 	if tv.PushBounds() {
 		if !tv.ScBBox.Empty() { // we are root and just here for the connections :)
 			tv.UpdateInactive()
-			if tv.IsSelected() {
+			if tv.StateIs(states.Selected) {
 				tv.Style = tv.StateStyles[TreeViewSel]
-			} else if tv.HasFocus() {
+			} else if tv.StateIs(states.Focused) {
 				tv.Style = tv.StateStyles[TreeViewFocus]
 			} else if tv.IsDisabled() {
 				tv.Style = tv.StateStyles[TreeViewInactive]

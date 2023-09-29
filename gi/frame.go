@@ -8,7 +8,7 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 )
 
@@ -26,8 +26,8 @@ var FrameEventFuncs WidgetEvents
 
 func (fr *Frame) OnInit() {
 	fr.AddEvents(&FrameEventFuncs)
-	fr.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
+	fr.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 	})

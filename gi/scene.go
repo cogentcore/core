@@ -13,8 +13,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/enums"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 )
 
@@ -41,7 +41,7 @@ type Scene struct {
 	Flags ScFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene"`
 
 	// Size and position relative to overall rendering context.
-	Geom gist.Geom2DInt
+	Geom styles.Geom2DInt
 
 	// Root of the scenegraph for this scene
 	Frame Frame `desc:"Root of the scenegraph for this scene"`
@@ -50,7 +50,7 @@ type Scene struct {
 	Decor Layout `desc:"Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil"`
 
 	// [view: -] render state for rendering
-	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
@@ -197,7 +197,7 @@ func (sc *Scene) SetCurrentColor(clr color.RGBA) {
 }
 
 // ContextColor gets the current color in concurrent-safe way.
-// Implements the gist.Context interface
+// Implements the styles.Context interface
 func (sc *Scene) ContextColor() color.RGBA {
 	if sc == nil {
 		return color.RGBA{}

@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/girl"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -67,7 +67,7 @@ func (vv *FontValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFu
 				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
 				si := TableViewSelectDialogValue(ddlg)
 				if si >= 0 {
-					fi := girl.FontLibrary.FontInfo[si]
+					fi := paint.FontLibrary.FontInfo[si]
 					vv.SetValue(fi.Name)
 					vv.UpdateWidget()
 				}

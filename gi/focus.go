@@ -4,7 +4,9 @@
 
 package gi
 
-import "goki.dev/ki/v2"
+import (
+	"goki.dev/ki/v2"
+)
 
 // FocusChanges are the kinds of changes that can be reported via
 // FocusChanged method
@@ -38,14 +40,6 @@ func (wb *WidgetBase) FocusChanged(change FocusChanges) {
 	wb.ApplyStyleUpdate(wb.Sc)
 }
 
-// HasFocus returns true if this node has keyboard focus and should
-// receive keyboard events -- typically this just returns HasFocus based
-// on the RenderWin-managed HasFocus flag, but some types may want to monitor
-// all keyboard activity for certain key keys..
-func (wb *WidgetBase) HasFocus() bool {
-	return wb.HasFlag(HasFocus)
-}
-
 // GrabFocus grabs the keyboard input focus on this item or the first item within it
 // that can be focused (if none, then goes ahead and sets focus to this object)
 func (wb *WidgetBase) GrabFocus() {
@@ -53,7 +47,7 @@ func (wb *WidgetBase) GrabFocus() {
 	if !wb.CanFocus() {
 		wb.WalkPre(func(k ki.Ki) bool {
 			_, wb := AsWidget(k)
-			if wb == nil || wb.This() == nil || wb.IsDeleted() || wb.IsDestroyed() {
+			if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 				return ki.Break
 			}
 			if !wb.CanFocus() {

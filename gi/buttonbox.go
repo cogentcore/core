@@ -10,7 +10,8 @@ import (
 	"slices"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -56,12 +57,12 @@ var ButtonBoxEventFuncs WidgetEvents
 
 func (bb *ButtonBox) OnInit() {
 	bb.AddEvents(&ButtonBoxEventFuncs)
-	bb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
+	bb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-		s.Text.Align = gist.AlignCenter
+		s.Text.Align = styles.AlignCenter
 		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		s.Color = colors.Scheme.OnSurface
 	})
@@ -85,7 +86,7 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 		bb.UnCheckAllBut(idx)
 	}
 	cb := bb.Parts.Child(idx).(*CheckBox)
-	cb.SetChecked(true)
+	cb.Style.State.SetFlag(true, states.Checked)
 	bb.UpdateEnd(updt)
 	return nil
 }
@@ -111,7 +112,7 @@ func (bb *ButtonBox) UnCheckAll() {
 	updt := bb.UpdateStart()
 	for _, cbi := range *bb.Parts.Children() {
 		cb := cbi.(*CheckBox)
-		cb.SetChecked(false)
+		cb.Style.State.SetFlag(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
 }
@@ -124,7 +125,7 @@ func (bb *ButtonBox) UnCheckAllBut(idx int) {
 			continue
 		}
 		cb := cbi.(*CheckBox)
-		cb.SetChecked(false)
+		cb.Style.State.SetFlag(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
 }
@@ -176,7 +177,7 @@ func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 		cbi := bb.Parts.Child(i)
 		cb := cbi.(*CheckBox)
 		on := bitflag.Has(val, int(ev.Value))
-		cb.SetChecked(on)
+		cb.Style.State.SetFlag(on, states.Checked)
 	}
 }
 
@@ -190,7 +191,7 @@ func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 		ev := els[i]
 		cbi := bb.Parts.Child(i)
 		cb := cbi.(*CheckBox)
-		if cb.IsChecked() {
+		if cb.StateIs(states.Checked) {
 			bitflag.Set(&val, int(ev.Value))
 		}
 	}
@@ -218,7 +219,7 @@ func (bb *ButtonBox) ConfigItems() {
 		// 	bbb := AsButtonBox(recv)
 		// 	cbb := send.(*CheckBox)
 		// 	idx := cbb.Prop("index").(int)
-		// 	ischk := cbb.IsChecked()
+		// 	ischk := cbb.StateIs(states.Checked)
 		// 	if bbb.Mutex && ischk {
 		// 		bbb.UnCheckAllBut(idx)
 		// 	}
@@ -237,7 +238,7 @@ func (bb *ButtonBox) ConfigParts(sc *Scene) {
 		config.Add(CheckBoxType, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config)
-	if mods || gist.RebuildDefaultStyles {
+	if mods || styles.RebuildDefaultStyles {
 		bb.ConfigItems()
 		bb.UpdateEnd(updt)
 	}

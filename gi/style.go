@@ -7,8 +7,8 @@ package gi
 import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/cursor"
 	"goki.dev/mat32/v2"
@@ -47,7 +47,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // A Styler should be added to a widget through the [WidgetBase.AddStyler]
 // method. We use stylers for styling because they give you complete
 // control and full programming logic without any CSS-selector magic.
-type Styler func(w *WidgetBase, s *gist.Style)
+type Styler func(w *WidgetBase, s *styles.Style)
 
 func (sc *Scene) SetDefaultStyle() {
 	sc.Frame.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
@@ -90,7 +90,7 @@ func (wb *WidgetBase) SetStyle(s Styler) Widget {
 // 	if child != nil {
 // 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
 // 		if ok {
-// 			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+// 			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 // 				f(wb)
 // 			})
 // 		}
@@ -99,7 +99,7 @@ func (wb *WidgetBase) SetStyle(s Styler) Widget {
 
 // ActiveStyle satisfies the ActiveStyler interface
 // and returns the active style of the widget
-func (wb *WidgetBase) ActiveStyle() *gist.Style {
+func (wb *WidgetBase) ActiveStyle() *styles.Style {
 	return &wb.Style
 }
 
@@ -114,7 +114,7 @@ func (wb *WidgetBase) StyleRUnlock() {
 }
 
 // BoxSpace returns the style BoxSpace value under read lock
-func (wb *WidgetBase) BoxSpace() gist.SideFloats {
+func (wb *WidgetBase) BoxSpace() styles.SideFloats {
 	wb.StyMu.RLock()
 	bs := wb.Style.BoxSpace()
 	wb.StyMu.RUnlock()
@@ -123,11 +123,11 @@ func (wb *WidgetBase) BoxSpace() gist.SideFloats {
 
 // ParentActiveStyle returns parent's active style or nil if not avail.
 // Calls StyleRLock so must call ParentStyleRUnlock when done.
-func (wb *WidgetBase) ParentActiveStyle() *gist.Style {
+func (wb *WidgetBase) ParentActiveStyle() *styles.Style {
 	if wb.Par == nil {
 		return nil
 	}
-	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+	if ps, ok := wb.Par.(styles.ActiveStyler); ok {
 		st := ps.ActiveStyle()
 		ps.StyleRLock()
 		return st
@@ -140,7 +140,7 @@ func (wb *WidgetBase) ParentStyleRUnlock() {
 	if wb.Par == nil {
 		return
 	}
-	if ps, ok := wb.Par.(gist.ActiveStyler); ok {
+	if ps, ok := wb.Par.(styles.ActiveStyler); ok {
 		ps.StyleRUnlock()
 	}
 }
@@ -165,7 +165,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 		return
 	}
 
-	wb.Style = gist.Style{}
+	wb.Style = styles.Style{}
 	wb.Style.Defaults()
 
 	// todo: remove all these prof steps -- should be much less now..
@@ -222,7 +222,7 @@ func (wb *WidgetBase) ApplyStyle(sc *Scene) {
 // SetUnitContext sets the unit context based on size of scene, element, and parent
 // element (from bbox) and then caches everything out in terms of raw pixel
 // dots for rendering -- call at start of render. Zero values for element and parent size are ignored.
-func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
+func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	if sc != nil {
 		rc := sc.RenderCtx()
 		if rc != nil {
@@ -234,7 +234,7 @@ func SetUnitContext(st *gist.Style, sc *Scene, el, par mat32.Vec2) {
 		}
 	}
 	pr := prof.Start("SetUnitContext-OpenFont")
-	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
+	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics
 	pr.End()
 	ptd := prof.Start("SetUnitContext-ToDots")
 	st.ToDots()
@@ -282,9 +282,9 @@ func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursor.Cursor {
 
 // SetMinPrefWidth sets minimum and preferred width;
 // will get at least this amount; max unspecified.
-// This adds a styler that calls [gist.Style.SetMinPrefWidth].
+// This adds a styler that calls [styles.Style.SetMinPrefWidth].
 func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetMinPrefWidth(val)
 	})
 	return wb.This().(Widget)
@@ -292,9 +292,9 @@ func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
 
 // SetMinPrefHeight sets minimum and preferred height;
 // will get at least this amount; max unspecified.
-// This adds a styler that calls [gist.Style.SetMinPrefHeight].
+// This adds a styler that calls [styles.Style.SetMinPrefHeight].
 func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetMinPrefHeight(val)
 	})
 	return wb.This().(Widget)
@@ -302,9 +302,9 @@ func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
 
 // SetStretchMaxWidth sets stretchy max width (-1);
 // can grow to take up avail room.
-// This adds a styler that calls [gist.Style.SetStretchMaxWidth].
+// This adds a styler that calls [styles.Style.SetStretchMaxWidth].
 func (wb *WidgetBase) SetStretchMaxWidth() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxWidth()
 	})
 	return wb.This().(Widget)
@@ -312,9 +312,9 @@ func (wb *WidgetBase) SetStretchMaxWidth() Widget {
 
 // SetStretchMaxHeight sets stretchy max height (-1);
 // can grow to take up avail room.
-// This adds a styler that calls [gist.Style.SetStretchMaxHeight].
+// This adds a styler that calls [styles.Style.SetStretchMaxHeight].
 func (wb *WidgetBase) SetStretchMaxHeight() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxHeight()
 	})
 	return wb.This().(Widget)
@@ -322,9 +322,9 @@ func (wb *WidgetBase) SetStretchMaxHeight() Widget {
 
 // SetStretchMax sets stretchy max width and height (-1);
 // can grow to take up avail room.
-// This adds a styler that calls [gist.Style.SetStretchMax].
+// This adds a styler that calls [styles.Style.SetStretchMax].
 func (wb *WidgetBase) SetStretchMax() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
 	})
@@ -334,9 +334,9 @@ func (wb *WidgetBase) SetStretchMax() Widget {
 // SetFixedWidth sets all width style options
 // (Width, MinWidth, and MaxWidth) to
 // the given fixed width unit value.
-// This adds a styler that calls [gist.Style.SetFixedWidth].
+// This adds a styler that calls [styles.Style.SetFixedWidth].
 func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetFixedWidth(val)
 	})
 	return wb.This().(Widget)
@@ -345,9 +345,9 @@ func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
 // SetFixedHeight sets all height style options
 // (Height, MinHeight, and MaxHeight) to
 // the given fixed height unit value.
-// This adds a styler that calls [gist.Style.SetFixedHeight].
+// This adds a styler that calls [styles.Style.SetFixedHeight].
 func (wb *WidgetBase) SetFixedHeight(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.SetFixedHeight(val)
 	})
 	return wb.This().(Widget)
@@ -387,10 +387,10 @@ var (
 	// to be used on Elevation 0 elements.
 	// There are no shadows part of BoxShadow0,
 	// so applying it is purely semantic.
-	BoxShadow0 = []gist.Shadow{}
+	BoxShadow0 = []styles.Shadow{}
 	// BoxShadow1 contains the shadows
 	// to be used on Elevation 1 elements.
-	BoxShadow1 = []gist.Shadow{
+	BoxShadow1 = []styles.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(3),
@@ -415,7 +415,7 @@ var (
 	}
 	// BoxShadow2 contains the shadows
 	// to be used on Elevation 2 elements.
-	BoxShadow2 = []gist.Shadow{
+	BoxShadow2 = []styles.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(2),
@@ -442,7 +442,7 @@ var (
 
 	// BoxShadow3 contains the shadows
 	// to be used on Elevation 3 elements.
-	BoxShadow3 = []gist.Shadow{
+	BoxShadow3 = []styles.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(5),
@@ -467,7 +467,7 @@ var (
 	}
 	// BoxShadow4 contains the shadows
 	// to be used on Elevation 4 elements.
-	BoxShadow4 = []gist.Shadow{
+	BoxShadow4 = []styles.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(5),
@@ -492,7 +492,7 @@ var (
 	}
 	// BoxShadow5 contains the shadows
 	// to be used on Elevation 5 elements.
-	BoxShadow5 = []gist.Shadow{
+	BoxShadow5 = []styles.Shadow{
 		{
 			HOffset: units.Px(0),
 			VOffset: units.Px(8),
@@ -532,7 +532,7 @@ func (nb *NodeBase) StyleProps(selector string) ki.Props {
 	if ok {
 		return spm
 	}
-	log.Printf("gist.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, nb.Path())
+	log.Printf("styles.StyleProps: looking for a ki.Props for style selector: %v, instead got type: %T, for node: %v\n", selector, spm, nb.Path())
 	return nil
 }
 

@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
@@ -63,7 +63,7 @@ func (la *LayoutAllocs) Reset() {
 type LayoutState struct {
 
 	// size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it
-	Size gist.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
+	Size styles.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
 
 	// allocated size and position -- set by parent Layout
 	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
@@ -77,7 +77,7 @@ type LayoutState struct {
 func (ld *LayoutState) Defaults() {
 }
 
-func (ld *LayoutState) SetFromStyle(ls *gist.Style) {
+func (ld *LayoutState) SetFromStyle(ls *styles.Style) {
 	ld.Reset()
 	// these are layout hints:
 	ld.Size.Need = ls.MinSizeDots()
@@ -335,7 +335,7 @@ func (ly *Layout) ManageOverflow(sc *Scene) {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Style.Overflow != gist.OverflowHidden {
+	if ly.Style.Overflow != styles.OverflowHidden {
 		sbw := ly.Style.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
@@ -1161,7 +1161,7 @@ func (ly *Layout) StyleFromProps(props ki.Props, sc *Scene) {
 				if iv, ok := laser.ToInt(val); ok {
 					ly.Lay = Layouts(iv)
 				} else {
-					gist.StyleSetError(key, val)
+					styles.StyleSetError(key, val)
 				}
 			}
 		case "spacing":
@@ -1297,12 +1297,12 @@ func (ly *Layout) FilterEvents() {
 	}
 }
 
-func (ly *Layout) HasFocus() bool {
-	if ly.IsDisabled() {
-		return false
-	}
-	return ly.ContainsFocus() // needed for getting key events
-}
+// func (ly *Layout) StateIs(states.Focused) bool {
+// 	if ly.IsDisabled() {
+// 		return false
+// 	}
+// 	return ly.ContainsFocus() // needed for getting key events
+// }
 
 ///////////////////////////////////////////////////////////
 //    Stretch and Space -- dummy elements for layouts
@@ -1315,7 +1315,7 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
-	st.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	st.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 	})
@@ -1348,7 +1348,7 @@ type Space struct {
 var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
-	sp.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	sp.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Width.SetCh(1)
 		s.Height.SetEm(1)
 	})

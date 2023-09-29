@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
@@ -36,7 +36,7 @@ var MenuBarEventFuncs WidgetEvents
 
 func (mb *MenuBar) OnInit() {
 	mb.AddEvents(&MenuBarEventFuncs)
-	mb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	mb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		s.Color = colors.Scheme.OnSurface
@@ -341,9 +341,9 @@ var ToolBarEventFuncs WidgetEvents
 
 func (tb *ToolBar) OnInit() {
 	tb.AddEvents(&ToolBarEventFuncs)
-	tb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	tb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.MaxWidth.SetPx(-1)
-		s.Border.Radius = gist.BorderRadiusFull
+		s.Border.Radius = styles.BorderRadiusFull
 	})
 }
 

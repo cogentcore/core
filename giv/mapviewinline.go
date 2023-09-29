@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 )
 
@@ -44,7 +44,7 @@ type MapViewInline struct {
 }
 
 func (mv *MapViewInline) OnInit() {
-	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MinWidth.SetEx(60)
 	})
 }
@@ -55,8 +55,8 @@ func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
 		case "Parts":
 			parts := child.(*gi.Layout)
 			parts.Lay = gi.LayoutHoriz
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.Overflow = gist.OverflowHidden // no scrollbars!
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		}
 	}

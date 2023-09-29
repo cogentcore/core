@@ -8,7 +8,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 )
 
 func main() {
@@ -31,11 +31,11 @@ func mainrun() {
 
 	lbl1 := tv.NewTab(gi.LabelType, "This is Label1").(*gi.Label)
 	lbl1.SetText("this is the contents of the first tab")
-	lbl1.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	lbl1.SetProp("white-space", styles.WhiteSpaceNormal) // wrap
 
 	lbl2 := tv.NewTab(gi.LabelType, "And this Label2").(*gi.Label)
 	lbl2.SetText("this is the contents of the second tab")
-	lbl2.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
+	lbl2.SetProp("white-space", styles.WhiteSpaceNormal) // wrap
 
 	tv1i, tv1ly := tv.NewTabLayout(giv.TypeTextView, "TextView1")
 	tv1ly.SetStretchMax()

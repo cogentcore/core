@@ -15,7 +15,7 @@ import (
 	"github.com/anthonynsimon/bild/clone"
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -49,7 +49,7 @@ var BitmapEventFuncs WidgetEvents
 
 func (bm *Bitmap) OnInit() {
 	bm.AddEvents(&BitmapEventFuncs)
-	bm.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	bm.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.MinWidth.SetPx(float32(bm.Size.X))
 		s.MinHeight.SetPx(float32(bm.Size.Y))
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)

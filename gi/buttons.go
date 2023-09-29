@@ -11,7 +11,8 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -109,34 +110,11 @@ const (
 
 // see menus.go for MakeMenuFunc, etc
 
-// IsCheckable returns if is this button checkable -- the Checked state is
-// independent of the generic widget selection state
-func (bb *ButtonBase) IsCheckable() bool {
-	return bb.HasFlag(ButtonFlagCheckable)
-}
-
 // SetCheckable sets whether this button is checkable -- emits ButtonToggled
 // signals if so -- the Checked state is independent of the generic widget
 // selection state
 func (bb *ButtonBase) SetCheckable(checkable bool) {
 	bb.SetFlag(checkable, ButtonFlagCheckable)
-}
-
-// IsChecked checks if button is checked
-func (bb *ButtonBase) IsChecked() bool {
-	return bb.HasFlag(ButtonFlagChecked)
-}
-
-// SetChecked sets the checked state of this button -- does not emit signal or
-// update
-func (bb *ButtonBase) SetChecked(chk bool) {
-	bb.SetFlag(chk, ButtonFlagChecked)
-}
-
-// ToggleChecked toggles the checked state of this button -- does not emit
-// signal or update
-func (bb *ButtonBase) ToggleChecked() {
-	bb.SetChecked(!bb.IsChecked())
 }
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
@@ -203,8 +181,8 @@ func (bb *ButtonBase) ButtonPress() {
 	updt := bb.UpdateStart()
 	if bb.IsDisabled() {
 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
-			bb.SetSelected(!bb.IsSelected())
-			bb.EmitSelectedSignal()
+			bb.SetSelected(!bb.StateIs(states.Selected))
+			// bb.EmitSelectedSignal()
 			bb.UpdateSig()
 		}
 	} else {
@@ -230,18 +208,13 @@ func (bb *ButtonBase) BaseButtonRelease() {
 		// bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
 		bb.OpenMenu()
 
-		if bb.IsCheckable() {
+		if bb.Is(ButtonFlagCheckable) {
 			bb.ToggleChecked()
 			// bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 		}
 	}
 	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
-}
-
-// IsMenu returns true this button is on a menu -- it is a menu item
-func (bb *ButtonBase) IsMenu() bool {
-	return bb.HasFlag(ButtonFlagMenu)
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
@@ -514,7 +487,7 @@ func (bb *ButtonBase) FocusChanged(change FocusChanges) {
 		bb.ApplyStyleUpdate(bb.Sc)
 	case FocusGot:
 		bb.ScrollToMe()
-		bb.EmitFocusedSignal()
+		// bb.EmitFocusedSignal()
 		bb.ApplyStyleUpdate(bb.Sc)
 	case FocusInactive: // don't care..
 	case FocusActive:
@@ -596,10 +569,10 @@ var ButtonEventFuncs WidgetEvents
 
 func (bt *Button) OnInit() {
 	bt.AddEvents(&ButtonEventFuncs)
-	bt.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	bt.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
-		s.Border.Radius = gist.BorderRadiusFull
-		s.Margin = gist.BoxShadowMargin(BoxShadow1).ToValues()
+		s.Border.Radius = styles.BorderRadiusFull
+		s.Margin = styles.BoxShadowMargin(BoxShadow1).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
 			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
@@ -607,7 +580,7 @@ func (bt *Button) OnInit() {
 		if bt.Text == "" {
 			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
-		s.Text.Align = gist.AlignCenter
+		s.Text.Align = styles.AlignCenter
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
@@ -616,14 +589,14 @@ func (bt *Button) OnInit() {
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 		case ButtonElevated:
-			s.Margin = gist.BoxShadowMargin(BoxShadow2).ToValues()
+			s.Margin = styles.BoxShadowMargin(BoxShadow2).ToValues()
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 			s.Color = colors.Scheme.Primary.Base
 			s.BoxShadow = BoxShadow1
 		case ButtonOutlined:
 			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 			s.Color = colors.Scheme.Primary.Base
-			s.Border.Style.Set(gist.BorderSolid)
+			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
 			s.Border.Width.Set(units.Px(1))
 		case ButtonText:
@@ -635,7 +608,7 @@ func (bt *Button) OnInit() {
 			// todo: just picking something at random to make it visible:
 			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Color = colors.Scheme.Primary.On
-		case bt.HasFlag(Hovered):
+		case bt.StateIs(states.Hovered):
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
 			} else {
@@ -650,34 +623,34 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	_, wb := AsWidget(child)
 	switch wb.Name() {
 	case "icon":
-		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "space":
-		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
-		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
-			s.AlignV = gist.AlignMiddle
+			s.AlignV = styles.AlignMiddle
 		})
 	case "ind-stretch":
-		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
-		wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
-			s.AlignV = gist.AlignBottom
+			s.AlignV = styles.AlignBottom
 		})
 	}
 }
@@ -707,13 +680,13 @@ var CheckBoxEventFuncs WidgetEvents
 
 func (cb *CheckBox) OnInit() {
 	cb.AddEvents(&CheckBoxEventFuncs)
-	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
-		s.Text.Align = gist.AlignLeft
+		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
-		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Style.Set(styles.BorderNone)
 		// switch cb.State {
 		// case ButtonActive:
 		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)
@@ -734,7 +707,7 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon0", "icon1":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
@@ -742,14 +715,14 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "label":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		}
 	}
@@ -822,7 +795,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 	}
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
-	if mods || gist.RebuildDefaultStyles {
+	if mods || styles.RebuildDefaultStyles {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, IconType, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
@@ -830,7 +803,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 		icoff := ist.Child(1).(*Icon)
 		icoff.SetIcon(cb.IconOff)
 	}
-	if cb.IsChecked() {
+	if cb.StateIs(states.Checked) {
 		ist.StackTop = 0
 	} else {
 		ist.StackTop = 1

@@ -7,7 +7,7 @@ package giv
 import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 )
 
@@ -32,7 +32,7 @@ type ArgView struct {
 
 func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
-	av.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	av.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
@@ -47,27 +47,27 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 		case "title":
 			title := child.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
-			title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			title.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MaxWidth.SetPx(-1)
-				s.Text.Align = gist.AlignCenter
-				s.AlignV = gist.AlignTop
+				s.Text.Align = styles.AlignCenter
+				s.AlignV = styles.AlignTop
 			})
 		case "args-grid":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.MinWidth.SetEm(1.5)
 				s.Width.SetEm(1.5)
 				s.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
 				s.MinHeight.SetEm(10)
 				s.Height.SetEm(10)
-				s.MaxHeight.SetPx(-1)            // for this to work, ALL layers above need it too
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.MaxHeight.SetPx(-1)              // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = 2
 			})
 		}
 		if w.Parent().Name() == "args-grid" {
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.AlignH = gist.AlignCenter
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				s.AlignH = styles.AlignCenter
 			})
 		}
 	}

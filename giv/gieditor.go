@@ -11,7 +11,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
@@ -38,7 +38,7 @@ type GiEditor struct {
 }
 
 func (ge *GiEditor) OnInit() {
-	ge.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	ge.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
@@ -52,10 +52,10 @@ func (ge *GiEditor) OnChildAdded(child ki.Ki) {
 		case "title":
 			title := child.(*gi.Label)
 			title.Type = gi.LabelHeadlineSmall
-			title.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			title.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.SetStretchMaxWidth()
-				s.AlignH = gist.AlignCenter
-				s.AlignV = gist.AlignTop
+				s.AlignH = styles.AlignCenter
+				s.AlignV = styles.AlignTop
 			})
 		}
 	}

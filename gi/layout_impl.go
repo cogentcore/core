@@ -7,7 +7,7 @@ package gi
 import (
 	"fmt"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
 
@@ -102,7 +102,7 @@ func GatherSizes(ly *Layout) {
 	prefSizing := false
 	mvp := ly.Sc
 	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
-		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
+		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -382,7 +382,7 @@ func GatherSizesGrid(ly *Layout) {
 	prefSizing := false
 	mvp := ly.Sc
 	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
-		prefSizing = ly.Style.Overflow == gist.OverflowScroll // special case
+		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 
 	// if there aren't existing prefs, we need to compute size
@@ -452,7 +452,7 @@ func GatherSizesGrid(ly *Layout) {
 
 // LayoutSharedDim implements calculations to layout for the shared dimension
 // (i.e., Vertical for Horizontal layout). Returns pos and size.
-func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.SideFloats, al gist.Align) (pos, size float32) {
+func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc styles.SideFloats, al styles.Align) (pos, size float32) {
 	usePref := true
 	targ := pref
 	extra := avail - targ
@@ -483,11 +483,11 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc gist.Si
 	if stretchMax || stretchNeed {
 		size += extra
 	} else {
-		if gist.IsAlignMiddle(al) {
+		if styles.IsAlignMiddle(al) {
 			pos += 0.5 * extra
-		} else if gist.IsAlignEnd(al) {
+		} else if styles.IsAlignEnd(al) {
 			pos += extra
-		} else if al == gist.AlignJustify { // treat justify as stretch
+		} else if al == styles.AlignJustify { // treat justify as stretch
 			size += extra
 		}
 	}
@@ -595,7 +595,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	}
 
 	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == gist.AlignJustify && !stretchNeed && !stretchMax {
+	if sz > 1 && extra > 0.0 && al == styles.AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
 		extraSpace = extra / float32(sz-1)
@@ -605,7 +605,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	pos := spc.Pos().Dim(dim)
 
 	// todo: need a direction setting too
-	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
+	if styles.IsAlignEnd(al) && !stretchNeed && !stretchMax {
 		pos += extra
 	}
 
@@ -787,7 +787,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	}
 
 	extraSpace := float32(0.0)
-	if sz > 1 && extra > 0.0 && al == gist.AlignJustify && !stretchNeed && !stretchMax {
+	if sz > 1 && extra > 0.0 && al == styles.AlignJustify && !stretchNeed && !stretchMax {
 		addSpace = true
 		// if neither, then just distribute as spacing for justify
 		extraSpace = extra / float32(sz-1)
@@ -797,7 +797,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 	pos := spc.Pos().Dim(dim)
 
 	// todo: need a direction setting too
-	if gist.IsAlignEnd(al) && !stretchNeed && !stretchMax {
+	if styles.IsAlignEnd(al) && !stretchNeed && !stretchMax {
 		pos += extra
 	}
 
@@ -880,7 +880,7 @@ func LayoutGridLay(ly *Layout) {
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, gist.SideFloats{}, al)
+			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
 			ni.LayState.Alloc.Size.SetDim(dim, size)
 			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 
@@ -893,7 +893,7 @@ func LayoutGridLay(ly *Layout) {
 			pref := ni.LayState.Size.Pref.Dim(dim)
 			need := ni.LayState.Size.Need.Dim(dim)
 			max := ni.LayState.Size.Max.Dim(dim)
-			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, gist.SideFloats{}, al)
+			pos, size := LayoutSharedDimImpl(ly, avail, need, pref, max, styles.SideFloats{}, al)
 			ni.LayState.Alloc.Size.SetDim(dim, size)
 			ni.LayState.Alloc.PosRel.SetDim(dim, pos+gd.AllocPosRel)
 		}

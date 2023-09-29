@@ -25,7 +25,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
@@ -1459,13 +1460,13 @@ func BlameDialog(avp *gi.Scene, fname string, blame, fbytes []byte) *TwinTextVie
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.TextViews()
-	tva.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.Text.WhiteSpace = gist.WhiteSpacePre
+	tva.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(30)
 		s.Height.SetEm(40)
 	})
-	tvb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.Text.WhiteSpace = gist.WhiteSpacePre
+	tvb.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)
 	})
@@ -1737,21 +1738,21 @@ func (ftv *FileTreeView) OnInit() {
 	ftv.SetFlag(int(TreeViewFlagUpdtRoot)) // filetree needs this
 	ftv.OpenDepth = 4
 	ftv.Indent.SetEm(1)
-	ftv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
+	ftv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Margin.Set()
 		s.Padding.Set()
-		s.Text.Align = gist.AlignLeft
-		s.AlignV = gist.AlignTop
-		if w.IsSelected() {
+		s.Text.Align = styles.AlignLeft
+		s.AlignV = styles.AlignTop
+		if w.StateIs(states.Selected) {
 			s.BackgroundColor.SetColor(colors.Scheme.TertiaryContainer)
 		}
 		switch w.Class {
 		case "exec":
-			s.Font.Weight = gist.WeightBold
+			s.Font.Weight = styles.WeightBold
 		case "open":
-			s.Font.Style = gist.FontItalic
+			s.Font.Style = styles.FontItalic
 		case "untracked":
 			s.Color = colors.MustFromHex("#808080")
 		case "modified":
@@ -1773,11 +1774,11 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
-			parts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			parts.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				parts.Spacing.SetCh(0.5)
 			})
 		case "icon":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -1787,19 +1788,19 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			cb := child.(*gi.CheckBox)
 			cb.Icon = icons.FolderOpen
 			cb.IconOff = icons.Folder
-			cb.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			cb.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MaxWidth.SetEm(1.5)
 				s.MaxHeight.SetEm(1.5)
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		case "space":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MinWidth.SetCh(16)

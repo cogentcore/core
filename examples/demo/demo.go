@@ -13,7 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -56,7 +56,7 @@ func mainrun() {
 func makeHome(tv *gi.TabView) {
 	home := tv.NewTab(gi.FrameType, "Home").(*gi.Frame)
 	home.Lay = gi.LayoutVert
-	home.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	home.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		home.Spacing.SetEx(1)
 		s.Padding.Set(units.Px(8))
 		s.MaxWidth.SetPx(-1)
@@ -83,23 +83,23 @@ func makeHome(tv *gi.TabView) {
 
 	// bt := gi.NewButton(home, "bt")
 	// bt.Text = "Big Shadow"
-	// bt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	// bt.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 	// 	bt.Style.AddBoxShadow(
-	// 		gist.Shadow{
+	// 		styles.Shadow{
 	// 			HOffset: units.Px(20),
 	// 			VOffset: units.Px(-10),
 	// 			Blur:    units.Px(150),
 	// 			Spread:  units.Px(150),
 	// 			Color:   colors.Green,
 	// 		},
-	// 		gist.Shadow{
+	// 		styles.Shadow{
 	// 			HOffset: units.Px(5),
 	// 			VOffset: units.Px(30),
 	// 			Blur:    units.Px(150),
 	// 			Spread:  units.Px(100),
 	// 			Color:   colors.Blue,
 	// 		},
-	// 		gist.Shadow{
+	// 		styles.Shadow{
 	// 			HOffset: units.Px(20),
 	// 			VOffset: units.Px(10),
 	// 			Blur:    units.Px(100),
@@ -119,7 +119,7 @@ func makeHome(tv *gi.TabView) {
 func makeText(tv *gi.TabView) {
 	text := tv.NewTab(gi.FrameType, "Text").(*gi.Frame)
 	text.Lay = gi.LayoutVert
-	text.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	text.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		text.Spacing.SetEx(1)
 		s.Padding.Set(units.Px(8))
 		s.MaxWidth.SetPx(-1)
@@ -145,7 +145,7 @@ func makeText(tv *gi.TabView) {
 func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
-	buttons.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	buttons.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		buttons.Spacing.SetEx(1)
 		s.Padding.Set(units.Px(8))
 		s.MaxWidth.SetPx(-1)
@@ -164,19 +164,19 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 	sbtitle.Type = gi.LabelHeadlineSmall
 
 	brow := gi.NewLayout(buttons, "brow", gi.LayoutHorizFlow)
-	brow.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	brow.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		brow.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
 	browt := gi.NewLayout(buttons, "browt", gi.LayoutHorizFlow)
-	browt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	browt.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		browt.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
 	browi := gi.NewLayout(buttons, "browi", gi.LayoutHorizFlow)
-	browi.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	browi.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		browi.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -185,19 +185,19 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 	mbtitle.Type = gi.LabelHeadlineSmall
 
 	mbrow := gi.NewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
-	mbrow.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mbrow.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		mbrow.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
 	mbrowt := gi.NewLayout(buttons, "mbrowt", gi.LayoutHorizFlow)
-	mbrowt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mbrowt.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		mbrowt.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
 
 	mbrowi := gi.NewLayout(buttons, "mbrowi", gi.LayoutHorizFlow)
-	mbrowi.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mbrowi.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		mbrowi.Spacing.SetEm(1)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -287,7 +287,7 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 func makeInputs(tv *gi.TabView) {
 	inputs := tv.NewTab(gi.FrameType, "Inputs").(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
-	inputs.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	inputs.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		inputs.Spacing.SetEx(1)
 		s.Padding.Set(units.Px(8))
 		s.MaxWidth.SetPx(-1)
@@ -357,7 +357,7 @@ func makeInputs(tv *gi.TabView) {
 	sboxh.SetMax(255)
 
 	cboxes := gi.NewLayout(inputs, "cboxes", gi.LayoutHoriz)
-	cboxes.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	cboxes.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		cboxes.Spacing.SetEm(0.5)
 	})
 
@@ -437,7 +437,7 @@ func makeInputs(tv *gi.TabView) {
 
 	tview := giv.NewTextView(inputs, "tview")
 	tview.SetBuf(tbuf)
-	tview.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tview.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MaxWidth.SetPx(500)
 		s.MaxHeight.SetPx(300)
 	})
@@ -446,7 +446,7 @@ func makeInputs(tv *gi.TabView) {
 func makeLayouts(tv *gi.TabView) {
 	layouts := tv.NewTab(gi.FrameType, "Layouts").(*gi.Frame)
 	layouts.Lay = gi.LayoutVert
-	layouts.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	layouts.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		layouts.Spacing.SetEx(1)
 		s.Padding.Set(units.Px(8))
 		s.MaxWidth.SetPx(-1)
@@ -454,14 +454,14 @@ func makeLayouts(tv *gi.TabView) {
 	})
 
 	vw := gi.NewLabel(layouts, "vw", "50vw")
-	vw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	vw.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Width = units.Vw(50)
 		s.BackgroundColor.SetSolid(colors.Scheme.Primary)
 		s.Color = colors.Scheme.OnPrimary
 	})
 
 	pw := gi.NewLabel(layouts, "pw", "50pw")
-	pw.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	pw.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Width = units.Pw(50)
 		s.BackgroundColor.SetSolid(colors.Scheme.PrimaryContainer)
 		s.Color = colors.Scheme.OnPrimaryContainer

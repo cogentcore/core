@@ -8,7 +8,8 @@ import (
 	"log"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
 	"goki.dev/icons"
@@ -95,15 +96,15 @@ var ActionEventFuncs WidgetEvents
 
 func (ac *Action) OnInit() {
 	ac.AddEvents(&ActionEventFuncs)
-	ac.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	ac.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
-		s.Border.Style.Set(gist.BorderNone)
-		s.Text.Align = gist.AlignCenter
+		s.Border.Style.Set(styles.BorderNone)
+		s.Text.Align = styles.AlignCenter
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		s.Color = colors.Scheme.OnSurface
 		switch ac.Type {
 		case ActionStandalone:
-			s.Border.Radius = gist.BorderRadiusFull
+			s.Border.Radius = styles.BorderRadiusFull
 			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
@@ -127,11 +128,11 @@ func (ac *Action) OnInit() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
-		if w.HasFlag(Hovered) {
+		if w.StateIs(states.Hovered) {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
-		if w.HasFocus() {
-			s.Border.Style.Set(gist.BorderSolid)
+		if w.StateIs(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Px(2))
 			s.Border.Color.Set(colors.Scheme.Outline)
 		}
@@ -155,7 +156,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 	if _, w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
@@ -163,35 +164,35 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				s.Padding.Set()
 			})
 		case "space":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(0.5)
 				s.MinWidth.SetCh(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "indicator":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
 				s.Margin.Set()
 				s.Padding.Set()
-				s.AlignV = gist.AlignBottom
+				s.AlignV = styles.AlignBottom
 			})
 		case "ind-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 			})
 		case "shortcut":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "sc-stretch":
-			w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		}
@@ -210,7 +211,7 @@ func (ac *Action) CopyFieldsFrom(frm any) {
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
 func (ac *Action) Trigger() {
-	if ac.HasFlag(Disabled) {
+	if ac.Is(Disabled) {
 		return
 	}
 	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
@@ -218,7 +219,7 @@ func (ac *Action) Trigger() {
 
 // ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {
-	if ac.HasFlag(Disabled) {
+	if ac.StateIs(states.Disabled) {
 		// fmt.Printf("action: %v inactive\n", ac.Nm)
 		return
 	}
@@ -234,7 +235,7 @@ func (ac *Action) ButtonRelease() {
 	}
 	_ = menOpen
 	// todo:
-	// if !menOpen && ac.IsMenu() && ac.Sc != nil {
+	// if !menOpen && ac.Is(ButtonFlagMenu) && ac.Sc != nil {
 	// 	win := ac.ParentRenderWin()
 	// 	if win != nil {
 	// 		win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
@@ -325,7 +326,7 @@ func (ac *Action) ConfigParts(sc *Scene) {
 			ac.Class = "toolbar-action"
 		}
 		ac.ConfigPartsButton()
-	case ac.IsMenu():
+	case ac.Is(ButtonFlagMenu):
 		ac.Type = ActionMenu
 		if ac.Class == "" {
 			ac.Class = "menu-action"

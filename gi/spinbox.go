@@ -10,7 +10,8 @@ import (
 	"log"
 	"strconv"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mouse"
@@ -95,25 +96,25 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "Parts":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.AlignV = gist.AlignMiddle
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
 			})
 		case "text-field":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.MinWidth.SetEm(6)
 			})
 		case "space":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "buttons":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.AlignV = gist.AlignMiddle
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
 			})
 		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
 			act := child.(*Action)
 			act.Type = ActionParts
-			act.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			act.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetPx(18)
 			})
 		}
@@ -215,7 +216,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		config.Add(LayoutType, "buttons")
 	}
 	mods, updt := parts.ConfigChildren(config)
-	if !mods && !gist.RebuildDefaultStyles {
+	if !mods && !styles.RebuildDefaultStyles {
 		return
 	}
 	if !sb.IsDisabled() {
@@ -331,7 +332,7 @@ func (sb *SpinBox) SpinBoxEvents(we *WidgetEvents) {
 func (sb *SpinBox) MouseScrollEvent(we *WidgetEvents) {
 	we.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSpinBox(recv)
-		if sbb.IsDisabled() || !sbb.HasFocus() {
+		if sbb.IsDisabled() || !sbb.StateIs(states.Focused) {
 			return
 		}
 		me := d.(*mouse.ScrollEvent)
@@ -346,7 +347,7 @@ func (sb *SpinBox) TextFieldEvent() {
 	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		sbb := AsSpinBox(recv)
 		if sig == int64(WidgetSelected) {
-			sbb.SetSelected(!sbb.IsSelected())
+			sbb.SetSelected(!sbb.StateIs(states.Selected))
 		}
 		sbb.WidgetSig.Emit(sbb.This(), sig, data) // passthrough
 	})
@@ -464,16 +465,16 @@ func (sb *SpinBox) Render(sc *Scene) {
 	if sb.PushBounds(sc) {
 		wi.FilterEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
-		tf.SetSelected(sb.IsSelected())
+		tf.SetSelected(sb.StateIs(states.Selected))
 		sb.RenderChildren(sc)
 		sb.RenderParts(sc)
 		sb.PopBounds(sc)
 	}
 }
 
-func (sb *SpinBox) HasFocus() bool {
-	if sb.IsDisabled() {
-		return false
-	}
-	return sb.ContainsFocus() // needed for getting key events
-}
+// func (sb *SpinBox) StateIs(states.Focused) bool {
+// 	if sb.IsDisabled() {
+// 		return false
+// 	}
+// 	return sb.ContainsFocus() // needed for getting key events
+// }

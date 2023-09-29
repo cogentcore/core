@@ -12,7 +12,7 @@ import (
 	"unicode/utf8"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -81,14 +81,14 @@ var ComboBoxEventFuncs WidgetEvents
 
 func (cb *ComboBox) OnInit() {
 	cb.AddEvents(&ComboBoxEventFuncs)
-	cb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
-		s.Text.Align = gist.AlignCenter
+		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
 			s.Padding.Set()
 			s.Padding.Right.SetPx(16 * Prefs.DensityMul())
 		} else {
-			s.Border.Radius = gist.BorderRadiusExtraSmall
+			s.Border.Radius = styles.BorderRadiusExtraSmall
 			s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
 		}
 		s.Color = colors.Scheme.OnSurface
@@ -96,13 +96,13 @@ func (cb *ComboBox) OnInit() {
 		case ComboBoxFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 			if cb.Editable {
-				s.Border.Style.Set(gist.BorderNone)
-				s.Border.Style.Bottom = gist.BorderSolid
+				s.Border.Style.Set(styles.BorderNone)
+				s.Border.Style.Bottom = styles.BorderSolid
 				s.Border.Width.Set()
 				s.Border.Width.Bottom = units.Px(1)
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
-				s.Border.Radius = gist.BorderRadiusExtraSmallTop
+				s.Border.Radius = styles.BorderRadiusExtraSmallTop
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Bottom = units.Px(2)
 					s.Border.Color.Bottom = colors.Scheme.Primary.Base
@@ -110,11 +110,11 @@ func (cb *ComboBox) OnInit() {
 
 			}
 		case ComboBoxOutlined:
-			s.Border.Style.Set(gist.BorderSolid)
+			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Px(1))
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if cb.Editable {
-				s.Border.Radius = gist.BorderRadiusExtraSmall
+				s.Border.Radius = styles.BorderRadiusExtraSmall
 				if cb.HasFlagWithin(CanFocus) {
 					s.Border.Width.Set(units.Px(2))
 					s.Border.Color.Set(colors.Scheme.Primary.Base)
@@ -128,15 +128,15 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "label":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		case "text":
 			text := child.(*TextField)
@@ -146,15 +146,15 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 			} else {
 				text.Type = TextFieldOutlined
 			}
-			text.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Border.Style.Set(gist.BorderNone)
+			text.AddStyler(func(w *WidgetBase, s *styles.Style) {
+				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Set()
 				if cb.MaxLength > 0 {
 					s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
 				}
 			})
 		case "ind-stretch":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				if cb.Editable {
 					s.Width.SetPx(0)
 				} else {
@@ -162,9 +162,9 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "indicator":
-			wb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetEm(1.5)
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		}
 	}
@@ -557,12 +557,12 @@ func (cb *ComboBox) MakeItemsMenu() {
 	}
 }
 
-func (cb *ComboBox) HasFocus() bool {
-	if cb.IsDisabled() {
-		return false
-	}
-	return cb.ContainsFocus() // needed for getting key events
-}
+// func (cb *ComboBox) StateIs(states.Focused) bool {
+// 	if cb.IsDisabled() {
+// 		return false
+// 	}
+// 	return cb.ContainsFocus() // needed for getting key events
+// }
 
 func (cb *ComboBox) AddEvents(we *WidgetEvents) {
 	if we.HasFuncs() {

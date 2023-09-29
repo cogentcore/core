@@ -7,7 +7,7 @@ package main
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 )
@@ -53,9 +53,9 @@ func mainrun() {
 
 	title := gi.NewLabel(trow, "title", hdrText)
 	// title.Text = "header" // use this to test word wrapping
-	title.SetProp("white-space", gist.WhiteSpaceNormal)
-	title.SetProp("text-align", gist.AlignRight)
-	title.SetProp("vertical-align", gist.AlignTop)
+	title.SetProp("white-space", styles.WhiteSpaceNormal)
+	title.SetProp("text-align", styles.AlignRight)
+	title.SetProp("vertical-align", styles.AlignTop)
 	title.SetProp("font-family", "Times New Roman, serif")
 	title.SetProp("font-size", "x-large")
 	// title.SetProp("letter-spacing", 2)
@@ -64,7 +64,7 @@ func mainrun() {
 	gi.NewLabel(trow, "rtxt", "this is to test right margin")
 
 	wrlab := gi.NewLabel(mfr, "wrlab", "")
-	wrlab.SetProp("white-space", gist.WhiteSpaceNormal)
+	wrlab.SetProp("white-space", styles.WhiteSpaceNormal)
 	wrlab.SetProp("width", "20em")
 	wrlab.SetProp("max-width", -1)
 	wrlab.SetProp("line-height", 1.2)

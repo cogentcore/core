@@ -116,7 +116,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 			if me.Action == mouse.Press && me.Button == mouse.Left {
 				me.SetHandled()
 				_, wbb := AsWidget(recv)
-				wbb.SetSelected(!wbb.IsSelected())
+				wbb.SetSelected(!wbb.StateIs(states.Selected))
 				wbb.EmitSelectedSignal()
 				wbb.ApplyStyleUpdate(wbb.Sc)
 			}
@@ -180,7 +180,7 @@ func (wb *WidgetBase) EmitContextMenuSignal() {
 // nodes (leaves, terminal nodes) will be considered
 func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki
-	wb.WalkPre(func(k Ki) bool {
+	wb.WalkPre(func(k ki.Ki) bool {
 		if k == wb.This() {
 			return ki.Continue
 		}
@@ -188,7 +188,7 @@ func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.K
 			return ki.Continue
 		}
 		_, w := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			// 3D?
 			return ki.Break
 		}

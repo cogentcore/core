@@ -11,7 +11,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -109,7 +109,7 @@ func mainrun() {
 	fnm.SetMinPrefWidth(units.Ch(60))
 
 	zmlb := gi.NewLabel(tbar, "zmlb", "Zoom: ")
-	zmlb.SetProp("vertical-align", gist.AlignMiddle)
+	zmlb.SetProp("vertical-align", styles.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
 	zoomout := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
@@ -149,7 +149,7 @@ func mainrun() {
 	gi.NewSpace(tbar, "spctr")
 	trlb := gi.NewLabel(tbar, "trlb", "Translate: ")
 	trlb.Tooltip = "Translation of overall image -- can use mouse drag to move as well"
-	trlb.SetProp("vertical-align", gist.AlignMiddle)
+	trlb.SetProp("vertical-align", styles.AlignMiddle)
 
 	trx := gi.NewSpinBox(tbar, "trx")
 	// zoom.SetMinPrefWidth(units.NewEm(10))

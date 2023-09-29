@@ -1448,7 +1448,7 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 	if !exists {
 		return false
 	}
-	if sa.IsDestroyed() {
+	if sa.Is(ki.Destroyed) {
 		delete(w.Shortcuts, chord)
 		return false
 	}

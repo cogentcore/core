@@ -7,7 +7,7 @@ package gi
 import (
 	"image"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
@@ -30,7 +30,7 @@ type Sprite struct {
 	Props ki.Props `desc:"properties for sprite -- allows user-extensible data"`
 
 	// position and size of the image within the overlay window texture
-	Geom gist.Geom2DInt `desc:"position and size of the image within the overlay window texture"`
+	Geom styles.Geom2DInt `desc:"position and size of the image within the overlay window texture"`
 
 	// pixels to render -- should be same size as Geom.Size
 	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`

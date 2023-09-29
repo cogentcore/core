@@ -16,14 +16,16 @@ import (
 	"sync"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/goosi/mouse"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
@@ -239,7 +241,7 @@ func (sv *SliceViewBase) OnInit() {
 	sv.InactKeyNav = true
 
 	sv.Lay = gi.LayoutVert
-	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	sv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -251,28 +253,28 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 		case "grid-lay": // grid layout
 			gl := child.(*gi.Layout)
 			gl.Lay = gi.LayoutHoriz
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				gl.SetStretchMax() // for this to work, ALL layers above need it too
 			})
 		case "grid": // slice grid
 			sg := child.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
-			sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			sg.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				nWidgPerRow, _ := sv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.SetMinPrefHeight(units.Em(6))
 				s.SetMinPrefWidth(units.Ch(20))
-				s.SetStretchMax()                // for this to work, ALL layers above need it too
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
 		}
 		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetEm(1.5)
 				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
-				s.Text.Align = gist.AlignRight
+				s.Text.Align = styles.AlignRight
 			})
 		}
 	}
@@ -645,7 +647,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if sv.Style.Font.Face == nil {
-		sv.Style.Font = girl.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
+		sv.Style.Font = paint.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
@@ -758,7 +760,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("slv-row").(int)
 						svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-						svv.UpdateSelectRow(row, wbb.IsSelected())
+						svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 					}
 				})
 			}
@@ -791,7 +793,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 							wbb := send.(gi.Node2D).AsWidget()
 							row := wbb.Prop("slv-row").(int)
 							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							svv.UpdateSelectRow(row, wbb.IsSelected())
+							svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 						}
 					})
 				}
@@ -1110,7 +1112,7 @@ func (sv *SliceViewBase) AddEvents() {
 	sv.SliceViewBaseEvents()
 }
 
-func (sv *SliceViewBase) HasFocus() bool {
+func (sv *SliceViewBase) StateIs(states.Focused) bool {
 	if !sv.ContainsFocus() {
 		return false
 	}
@@ -1172,7 +1174,7 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	ridx := nWidgPerRow * row
 	sg := sv.This().(SliceViewer).SliceGrid()
 	widg := sg.Child(ridx + idxOff).(gi.Node2D).AsWidget()
-	if widg.HasFocus() {
+	if widg.StateIs(states.Focused) {
 		return widg
 	}
 	sv.InFocusGrab = true
@@ -2224,7 +2226,7 @@ func (sv *SliceViewBase) SliceViewBaseEvents() {
 	svwe.AddFunc(goosi.MouseButtonEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*mouse.Event)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		// if !svv.HasFocus() {
+		// if !svv.StateIs(states.Focused) {
 		// 	svv.GrabFocus()
 		// }
 		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {

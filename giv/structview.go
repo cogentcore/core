@@ -15,9 +15,10 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -72,7 +73,7 @@ type StructView struct {
 func (sv *StructView) OnInit() {
 	sv.ShowToolBar = true
 	sv.Lay = gi.LayoutVert
-	sv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	sv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -82,25 +83,25 @@ func (sv *StructView) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "toolbar":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.SetStretchMaxWidth()
 			})
 		case "struct-grid":
 			sg := child.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.SetMinPrefHeight(units.Em(1.5))
 				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                // for this to work, ALL layers above need it too
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = 2
 			})
 		}
 		if w.Parent().Name() == "struct-grid" {
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.AlignH = gist.AlignLeft
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				s.AlignH = styles.AlignLeft
 			})
 		}
 	}
@@ -177,7 +178,7 @@ func (sv *StructView) UpdateField(field string) {
 // Config configures the view
 func (sv *StructView) ConfigWidget(vp *Scene) {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
-		if ks.IsDeleted() || ks.IsDestroyed() {
+		if ks.Is(ki.Deleted) || ks.Is(ki.Destroyed) {
 			return
 		}
 	}

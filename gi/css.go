@@ -34,7 +34,7 @@ func (ss *StyleSheet) CopyFieldsFrom(frm any) {
 func (ss *StyleSheet) ParseString(str string) error {
 	pss, err := parser.Parse(str)
 	if err != nil {
-		log.Printf("gist.StyleSheet ParseString parser error: %v\n", err)
+		log.Printf("styles.StyleSheet ParseString parser error: %v\n", err)
 		return err
 	}
 	ss.Sheet = pss

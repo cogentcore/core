@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -72,7 +73,7 @@ var SplitViewEventFuncs WidgetEvents
 
 func (sv *SplitView) OnInit() {
 	sv.AddEvents(&SplitViewEventFuncs)
-	sv.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	sv.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		sv.HandleSize.SetPx(10)
 
 		s.MaxWidth.SetPx(-1)
@@ -453,9 +454,9 @@ func (sv *SplitView) Render(sc *Scene) {
 	}
 }
 
-func (sv *SplitView) HasFocus() bool {
-	return sv.ContainsFocus() // anyone within us gives us focus..
-}
+// func (sv *SplitView) StateIs(states.Focused) bool {
+// 	return sv.ContainsFocus() // anyone within us gives us focus..
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
@@ -489,7 +490,7 @@ func (sr *Splitter) OnInit() {
 	sr.Prec = 4
 	sr.SetFlag(true, InstaDrag)
 
-	sr.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	sr.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
@@ -511,14 +512,14 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			// w.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			// w.AddStyler(func(w *WidgetBase, s *styles.Style) {
 			// 	s.MaxWidth.SetEm(1)
 			// 	s.MaxHeight.SetEm(5)
 			// 	s.MinWidth.SetEm(1)
 			// 	s.MinHeight.SetEm(5)
 			// 	s.Margin.Set()
 			// 	s.Padding.Set()
-			// 	s.AlignV = gist.AlignMiddle
+			// 	s.AlignV = styles.AlignMiddle
 			// })
 		}
 	}
@@ -617,7 +618,7 @@ func (sr *Splitter) MouseEvent(we *WidgetEvents) {
 		srr := sr
 		if srr.IsDisabled() {
 			me.SetHandled()
-			srr.SetSelected(!srr.IsSelected())
+			srr.SetSelected(!srr.StateIs(states.Selected))
 			srr.EmitSelectedSignal()
 			srr.UpdateSig()
 		} else {

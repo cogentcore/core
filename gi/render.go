@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
@@ -52,7 +52,7 @@ import (
 // which sets the node NeedsRender and ScNeedsRender flags,
 // to drive the rendering update at next DoNeedsRender call.
 //
-// Because Render checks for IsUpdating() flag, and doesn't render
+// Because Render checks for Is(Updating) flag, and doesn't render
 // if so, it should never be the case that a node is being modified
 // and rendered at the same time, avoiding need for mutexes.
 //
@@ -153,7 +153,7 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		wi.Config(sc)
@@ -171,7 +171,7 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
 	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		wi.ApplyStyle(sc)
@@ -190,14 +190,14 @@ func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 	wb.WalkPost(0, wb.This(),
 		func(k ki.Ki, level int, d any) bool { // tests whether to process node
 			_, w := AsWidget(k)
-			if w == nil || w.IsDeleted() || w.IsDestroyed() {
+			if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 				return ki.Break
 			}
 			return ki.Continue
 		},
 		func(k ki.Ki, level int, d any) bool { // this one does the work
 			wi, w := AsWidget(k)
-			if w == nil || w.IsDeleted() || w.IsDestroyed() {
+			if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 				return ki.Break
 			}
 			wi.GetSize(sc, iter)
@@ -254,10 +254,10 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
 	wb.WalkPre(func(k Ki) bool {
 		wi, w := AsWidget(k)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
 		}
-		if w.HasFlag(NeedsRender) && !w.IsUpdating() {
+		if w.Is(NeedsRender) && !w.Is(Updating) {
 			w.SetFlag(false, NeedsRender)
 			wi.Render(sc)
 			return ki.Break // done
@@ -274,7 +274,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.HasFlag(ScIsUpdating) {
+	if sc.Is(ScIsUpdating) {
 		fmt.Println("scene bail on updt")
 		return false
 	}
@@ -282,18 +282,18 @@ func (sc *Scene) DoUpdate() bool {
 	defer sc.SetFlag(false, ScIsUpdating)
 
 	switch {
-	case sc.HasFlag(ScNeedsRebuild):
+	case sc.Is(ScNeedsRebuild):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
-	case sc.HasFlag(ScNeedsLayout):
+	case sc.Is(ScNeedsLayout):
 		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderTree()
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
-	case sc.HasFlag(ScNeedsRender):
+	case sc.Is(ScNeedsRender):
 		// fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
@@ -388,7 +388,7 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds(sc *Scene) {
-	if wb.IsDeleted() || wb.IsDestroyed() || wb.This() == nil {
+	if wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.This() == nil {
 		return
 	}
 	rs := &sc.RenderState
@@ -417,7 +417,7 @@ func (wb *WidgetBase) RenderParts(sc *Scene) {
 func (wb *WidgetBase) RenderChildren(sc *Scene) {
 	for _, kid := range wb.Kids {
 		wi, w := AsWidget(kid)
-		if w == nil || w.IsDeleted() || w.IsDestroyed() || w.IsUpdating() {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) || w.Is(Updating) {
 			continue
 		}
 		wi.Render(sc)
@@ -454,32 +454,32 @@ func (wb *WidgetBase) ReRenderTree() {
 ////////////////////////////////////////////////////////////////////////////////
 //  Standard Box Model rendering
 
-// RenderLock returns the locked girl.State, Paint, and Style with StyMu locked.
+// RenderLock returns the locked paint.State, Paint, and Style with StyMu locked.
 // This should be called at start of widget-level rendering.
-func (wb *WidgetBase) RenderLock(sc *Scene) (*girl.State, *girl.Paint, *gist.Style) {
+func (wb *WidgetBase) RenderLock(sc *Scene) (*paint.State, *paint.Paint, *styles.Style) {
 	wb.StyMu.RLock()
 	rs := &sc.RenderState
 	rs.Lock()
 	return rs, &rs.Paint, &wb.Style
 }
 
-// RenderUnlock unlocks girl.State and style
-func (wb *WidgetBase) RenderUnlock(rs *girl.State) {
+// RenderUnlock unlocks paint.State and style
+func (wb *WidgetBase) RenderUnlock(rs *paint.State) {
 	rs.Unlock()
 	wb.StyMu.RUnlock()
 }
 
 // RenderBoxImpl implements the standard box model rendering -- assumes all
 // paint params have already been set
-func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
+func (wb *WidgetBase) RenderBoxImpl(sc *Scene, pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 	pc.DrawBox(rs, pos, sz, bs)
 }
 
 // RenderStdBox draws standard box using given style.
-// girl.State and Style must already be locked at this point (RenderLock)
-func (wb *WidgetBase) RenderStdBox(sc *Scene, st *gist.Style) {
+// paint.State and Style must already be locked at this point (RenderLock)
+func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	// SidesTODO: this is a pretty critical function, so a good place to look if things aren't working
 	wb.StyMu.RLock()
 	defer wb.StyMu.RUnlock()
@@ -500,7 +500,7 @@ func (wb *WidgetBase) ParentReRenderAnchor() Widget {
 		if w == nil {
 			return ki.Break // don't keep going up
 		}
-		if w.HasFlag(ReRenderAnchor) {
+		if w.Is(ReRenderAnchor) {
 			par = wi
 			return ki.Break
 		}

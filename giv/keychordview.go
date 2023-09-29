@@ -9,7 +9,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
@@ -78,15 +79,15 @@ type KeyChordEdit struct {
 }
 
 func (kc *KeyChordEdit) OnInit() {
-	kc.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	kc.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Cursor = cursor.HandPointing
-		s.AlignV = gist.AlignTop
-		s.Border.Style.Set(gist.BorderNone)
-		s.Border.Radius = gist.BorderRadiusFull
+		s.AlignV = styles.AlignTop
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusFull
 		s.Width.SetCh(20)
 		s.Padding.Set(units.Px(8 * gi.Prefs.DensityMul()))
 		s.SetStretchMaxWidth()
-		if w.IsSelected() {
+		if w.StateIs(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)
 			s.Color = colors.Scheme.OnTertiaryContainer
 		} else {
@@ -127,8 +128,8 @@ func (kc *KeyChordEdit) MouseEvent() {
 		if me.Action == mouse.Press && me.Button == mouse.Left {
 			if kcc.Selectable {
 				me.SetHandled()
-				kcc.SetSelected(!kcc.IsSelected())
-				if kcc.IsSelected() {
+				kcc.SetSelected(!kcc.StateIs(states.Selected))
+				if kcc.StateIs(states.Selected) {
 					kcc.GrabFocus()
 				}
 				kcc.EmitSelectedSignal()
@@ -146,7 +147,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 func (kc *KeyChordEdit) KeyChordEvent() {
 	kcwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
-		if kcc.HasFocus() && kcc.FocusActive {
+		if kcc.StateIs(states.Focused) && kcc.FocusActive {
 			kt := d.(*key.Event)
 			kt.SetHandled()
 			kcc.SetText(string(kt.Chord())) // that's easy!

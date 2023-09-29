@@ -6,7 +6,7 @@ package gi
 
 import (
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
 	"goki.dev/icons"
@@ -315,9 +315,9 @@ func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(frame *Frame) {
-	frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
-		s.Border.Style.Set(gist.BorderNone)
-		s.Border.Radius = gist.BorderRadiusExtraSmall
+	frame.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = BoxShadow2
 	})
@@ -357,7 +357,7 @@ func PopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Scene {
 			acn, ac := AsWidget(ac)
 			if acn != nil {
 				frame.AddChild(acn)
-				if ac.IsSelected() {
+				if ac.StateIs(states.Selected) {
 					focus = acn
 				}
 			}
@@ -420,7 +420,7 @@ func RecyclePopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Sc
 			acn, ac := AsWidget(ac)
 			if acn != nil {
 				frame.AddChild(acn)
-				if ac.IsSelected() {
+				if ac.StateIs(states.Selected) {
 					focus = acn
 				}
 			}
@@ -617,12 +617,12 @@ type Separator struct {
 
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
-	sp.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	sp.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
-		s.AlignV = gist.AlignCenter
-		s.AlignH = gist.AlignCenter
-		s.Border.Style.Set(gist.BorderSolid)
+		s.AlignV = styles.AlignCenter
+		s.AlignH = styles.AlignCenter
+		s.Border.Style.Set(styles.BorderSolid)
 		s.Border.Width.Set(units.Px(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)

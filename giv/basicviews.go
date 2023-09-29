@@ -11,7 +11,8 @@ import (
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -510,7 +511,7 @@ func (vv *BoolValueView) UpdateWidget() {
 	cb := vv.Widget.(*gi.CheckBox)
 	npv := laser.NonPtrValue(vv.Value)
 	bv, _ := laser.ToBool(npv.Interface())
-	cb.SetChecked(bv)
+	cb.Style.State.SetFlag(bv, states.Checked)
 }
 
 func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
@@ -523,7 +524,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
 		if sig == int64(gi.ButtonToggled) {
 			vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
 			cbb := vvv.Widget.(*gi.CheckBox)
-			if vvv.SetValue(cbb.IsChecked()) {
+			if vvv.SetValue(cbb.StateIs(states.Checked)) {
 				vvv.UpdateWidget() // always update after setting value..
 			}
 		}
@@ -891,7 +892,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	// STYTODO: figure out how how to handle these kinds of styles
-	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tf.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -939,7 +940,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tf.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -1035,7 +1036,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tf.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

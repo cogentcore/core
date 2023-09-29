@@ -19,7 +19,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/token"
@@ -156,13 +156,13 @@ func (se StyleEntry) ToProps() ki.Props {
 		pr["background-color"] = se.Background
 	}
 	if se.Bold == Yes {
-		pr["font-weight"] = gist.WeightBold
+		pr["font-weight"] = styles.WeightBold
 	}
 	if se.Italic == Yes {
-		pr["font-style"] = gist.FontItalic
+		pr["font-style"] = styles.FontItalic
 	}
 	if se.Underline == Yes {
-		pr["text-decoration"] = 1 << uint32(gist.DecoUnderline)
+		pr["text-decoration"] = 1 << uint32(styles.DecoUnderline)
 	}
 	return pr
 }
@@ -327,7 +327,7 @@ func (hs Style) SaveJSON(filename gi.FileName) error {
 // there but otherwise we use these as a fallback -- typically not overridden
 var Props = map[token.Tokens]ki.Props{
 	token.TextSpellErr: {
-		"text-decoration": 1 << uint32(gist.DecoDottedUnderline), // bitflag!
+		"text-decoration": 1 << uint32(styles.DecoDottedUnderline), // bitflag!
 	},
 }
 

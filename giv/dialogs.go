@@ -10,8 +10,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
@@ -93,7 +93,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.LayoutType, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tlv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)
 		s.SetStretchMax()
@@ -102,7 +102,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 	tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetDisabled()
 	tv.SetBuf(tb)
-	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
 	})
 
@@ -432,14 +432,14 @@ var FontChooserSizeDots = 18
 // so they are updated with that
 func FontChooserDialog(avp *gi.Scene, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
 	FontChooserSizeDots = int(avp.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
-	girl.FontLibrary.OpenAllFonts(FontChooserSizeDots)
-	dlg := TableViewSelectDialog(avp, &girl.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
+	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
+	dlg := TableViewSelectDialog(avp, &paint.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
 	return dlg
 }
 
 func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
 	if col == 4 {
-		finf, ok := slice.([]girl.FontInfo)
+		finf, ok := slice.([]paint.FontInfo)
 		if ok {
 			widg.SetProp("font-family", (finf)[row].Name)
 			widg.SetProp("font-stretch", (finf)[row].Stretch)

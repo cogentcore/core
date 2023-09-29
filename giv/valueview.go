@@ -14,7 +14,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/key"
 	"goki.dev/icons"
@@ -930,7 +930,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
-	tf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tf.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MinWidth.SetCh(16)
 	})
 	if completetag, ok := vv.Tag("complete"); ok {

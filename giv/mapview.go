@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -65,7 +65,7 @@ type MapView struct {
 func (mv *MapView) OnInit() {
 	mv.ShowToolBar = true
 	mv.Lay = gi.LayoutVert
-	mv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	mv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		mv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -78,12 +78,12 @@ func (mv *MapView) OnChildAdded(child ki.Ki) {
 			mg := child.(*gi.Frame)
 			mg.Lay = gi.LayoutGrid
 			mg.Stripes = gi.RowStripes
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.SetMinPrefHeight(units.Em(1.5))
 				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                // for this to work, ALL layers above need it too
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = mv.NCols
 			})
 		}

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 )
 
@@ -112,7 +112,7 @@ type StageBase struct {
 
 	// position and size within the parent Render context.
 	// Position is absolute offset relative to top left corner of render context.
-	Geom gist.Geom2DInt
+	Geom styles.Geom2DInt
 
 	// Title of the Stage -- generally auto-set based on Scene Title.
 	// Used for title of Window and Dialog types.

@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"goki.dev/girl/states"
 	"goki.dev/goosi"
 	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/key"
@@ -244,7 +245,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 
 		sc.Frame.WalkPre(func(k ki.Ki) bool {
 			wi, wb := AsWidget(k)
-			if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
+			if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 				return ki.Break
 			}
 			if !wb.PosInBBox(pos) {
@@ -600,7 +601,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.Event, popup bool) bool {
 		send := em.Master.EventTopNode()
 		for pri := HiPri; pri < EventPrisN; pri++ {
 			em.EventSigs[ftyp][pri].EmitFiltered(send, int64(ftyp), &fe, func(k Widget) bool {
-				if k.IsDeleted() { // destroyed is filtered upstream
+				if k.Is(ki.Deleted) { // destroyed is filtered upstream
 					return ki.Break
 				}
 				if !em.Master.IsInScope(k, popup) {
@@ -657,7 +658,7 @@ func (em *EventMgr) DoInstaDrag(me *mouse.Event, popup bool) bool {
 			esig := &em.EventSigs[et][pri]
 			gotOne := false
 			esig.ConsFunc(func(recv Widget, fun func()) bool {
-				if recv.IsDeleted() {
+				if recv.Is(ki.Deleted) {
 					return ki.Continue
 				}
 				if !em.Master.IsInScope(recv, popup) {
@@ -828,7 +829,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.Event, popup bool) bool {
 	for pri := HiPri; pri < EventPrisN; pri++ {
 		esig := &em.EventSigs[ftyp][pri]
 		esig.ConsFunc(func(recv Widget, fun func()) bool {
-			if recv.IsDeleted() {
+			if recv.Is(ki.Deleted) {
 				return ki.Continue
 			}
 			if !em.Master.IsInScope(recv, popup) {
@@ -1114,7 +1115,7 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 		if foc == k {
 			return ki.Continue
 		}
-		if wb.HasFocus() {
+		if wb.StateIs(states.Focused) {
 			if EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}

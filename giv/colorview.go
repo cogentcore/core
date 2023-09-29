@@ -14,7 +14,7 @@ import (
 	"goki.dev/cam/hsl"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mimedata"
@@ -53,7 +53,7 @@ type ColorView struct {
 
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
-	cv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	cv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 }
@@ -62,36 +62,36 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "value":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetEm(6)
 				s.MinHeight.SetEm(6)
-				s.Border.Radius = gist.BorderRadiusFull
+				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
 		case "slider-grid":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Columns = 4
 			})
 		case "hexlbl":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.AlignV = gist.AlignMiddle
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
 			})
 		case "palette":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Columns = 25
 			})
 		case "nums-hex":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(20)
 			})
 		case "num-lay":
 			vl := child.(*gi.Layout)
-			vl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			vl.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				vl.Spacing = gi.StdDialogVSpaceUnits
 			})
 		}
 		if sl, ok := child.(*gi.Slider); ok {
-			sl.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			sl.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(20)
 				s.Width.SetCh(20)
 				s.MinHeight.SetEm(1)
@@ -101,7 +101,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 		}
 		if child.Parent().Name() == "palette" {
 			if cbt, ok := child.(*gi.Button); ok {
-				cbt.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+				cbt.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 					c := colornames.Map[cbt.Name()]
 
 					s.BackgroundColor.SetColor(c)
@@ -150,7 +150,7 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 	// vvb := cv.NumView.AsValueViewBase()
 	// vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	cvv.ColorHSLA = gist.HSLAModel.Convert(cvv.Color).(gist.HSLA)
+	// 	cvv.ColorHSLA = styles.HSLAModel.Convert(cvv.Color).(styles.HSLA)
 	// 	cvv.UpdateSliderGrid()
 	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	// })
@@ -171,16 +171,16 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGB(r, g, b)"},
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("gist.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
+			text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromRGBA(r, g, b, a)"},
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("gist.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
+			text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
 	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"},
@@ -211,16 +211,16 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSL(h, s, l)"},
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("gist.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
+			text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "gist.ColorFromHSLA(h, s, l, a)"},
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("gist.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
+			text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
 	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"},
@@ -261,18 +261,18 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBB")`},
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
 			hs := colors.AsHex(cvv.Color)
 			// get rid of transparency because this is just RRGGBB
-			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, hs[:len(hs)-2])
+			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `gist.ColorFromHex("#RRGGBBAA")`},
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`},
 		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			cvv := recv.(*ColorView)
-			text := fmt.Sprintf(`gist.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
+			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
 			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
 		})
 	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
@@ -640,7 +640,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)
 		vv.Activate(svv.Sc, nil, nil)
 	})
-	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	ac.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen
@@ -712,8 +712,8 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-		s.Border.Radius = gist.BorderRadiusFull
+	ac.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+		s.Border.Radius = styles.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)

@@ -13,8 +13,9 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
@@ -72,7 +73,7 @@ type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Node2D, row, col 
 
 func (tv *TableView) OnInit() {
 	tv.Lay = gi.LayoutVert
-	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -84,55 +85,55 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 		case "frame": // slice frame
 			sf := child.(*gi.Frame)
 			sf.Lay = gi.LayoutVert
-			sf.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			sf.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.SetMinPrefWidth(units.Ch(20))
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
-				s.SetStretchMax()                // for this to work, ALL layers above need it too
-				s.Border.Style.Set(gist.BorderNone)
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Border.Style.Set(styles.BorderNone)
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "header": // slice header
 			sh := child.(*gi.ToolBar)
 			sh.Lay = gi.LayoutHoriz
-			sh.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			sh.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				sh.Spacing.SetPx(0)
-				s.Overflow = gist.OverflowHidden // no scrollbars!
+				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "grid-lay": // grid layout
 			gl := child.(*gi.Layout)
 			gl.Lay = gi.LayoutHoriz
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				gl.SetStretchMax() // for this to work, ALL layers above need it too
 			})
 		case "grid": // slice grid
 			sg := child.(*gi.Frame)
 			sg.Lay = gi.LayoutGrid
 			sg.Stripes = gi.RowStripes
-			sg.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			sg.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				// this causes everything to get off, especially resizing: not taking it into account presumably:
 				// sg.Spacing = gi.StdDialogVSpaceUnits
 
 				nWidgPerRow, _ := tv.RowWidgetNs()
 				s.Columns = nWidgPerRow
 				s.SetMinPrefHeight(units.Em(6))
-				s.SetStretchMax()                // for this to work, ALL layers above need it too
-				s.Overflow = gist.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
 		}
 		// STYTODO: set header sizes here (see LayoutHeader)
 		// if _, ok := child.(*gi.Label); ok && w.Parent().Name() == "header" {
-		// 	w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		// 	w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		// 		spc := tv.SliceHeader().Spacing.Dots
 		// 		ip, _ := w.IndexInParent()
 		// 		s.SetMinPrefWidth(units.Dot())
 		// 	})
 		// }
 		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetEm(1.5)
 				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
-				s.Text.Align = gist.AlignRight
+				s.Text.Align = styles.AlignRight
 			})
 		}
 	}
@@ -487,7 +488,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
 	if tv.Style.Font.Face == nil {
-		tv.Style.Font = girl.OpenFont(tv.Style.FontRender(), &tv.Style.UnContext)
+		tv.Style.Font = paint.OpenFont(tv.Style.FontRender(), &tv.Style.UnContext)
 	}
 	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
@@ -621,7 +622,7 @@ func (tv *TableView) UpdateSliceGrid() {
 						wbb := send.(gi.Node2D).AsWidget()
 						row := wbb.Prop("tv-row").(int)
 						tvv := recv.Embed(TypeTableView).(*TableView)
-						tvv.UpdateSelectRow(row, wbb.IsSelected())
+						tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 					}
 				})
 			}
@@ -684,7 +685,7 @@ func (tv *TableView) UpdateSliceGrid() {
 							row := wbb.Prop("tv-row").(int)
 							tvv := recv.Embed(TypeTableView).(*TableView)
 							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
-							tvv.UpdateSelectRow(row, wbb.IsSelected())
+							tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 							// }
 						}
 					})
@@ -995,7 +996,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
-		if widg.HasFocus() || widg.ContainsFocus() {
+		if widg.StateIs(states.Focused) || widg.ContainsFocus() {
 			return widg
 		}
 	}

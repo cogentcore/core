@@ -17,8 +17,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/icons"
@@ -58,7 +58,7 @@ type Preferences struct {
 	ScreenPrefs map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 
 	// the color scheme type (light or dark)
-	ColorSchemeType gist.ColorSchemeTypes `desc:"the color scheme type (light or dark)"`
+	ColorSchemeType styles.ColorSchemeTypes `desc:"the color scheme type (light or dark)"`
 
 	// the density (compactness) of content
 	Density Densities `desc:"the density (compactness) of content"`
@@ -122,12 +122,12 @@ type Preferences struct {
 var Prefs = Preferences{}
 
 func init() {
-	gist.ThePrefs = &Prefs
+	styles.ThePrefs = &Prefs
 }
 
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
-	pf.ColorSchemeType = gist.ColorSchemeLight
+	pf.ColorSchemeType = styles.ColorSchemeLight
 	pf.Density = DensityMedium
 	pf.Colors.Defaults()
 	pf.ColorSchemes = DefaultColorSchemes()
@@ -194,7 +194,7 @@ func (pf *Preferences) Save() error {
 
 // IsDarkMode returns true if the current background color preference is dark
 func (pf *Preferences) IsDarkMode() bool {
-	return pf.ColorSchemeType == gist.ColorSchemeDark
+	return pf.ColorSchemeType == styles.ColorSchemeDark
 }
 
 // OpenColors colors from a JSON-formatted file.
@@ -216,14 +216,14 @@ func (pf *Preferences) SaveColors(filename FileName) error {
 
 // LightMode sets colors to light mode
 func (pf *Preferences) LightMode() {
-	pf.ColorSchemeType = gist.ColorSchemeLight
+	pf.ColorSchemeType = styles.ColorSchemeLight
 	pf.Save()
 	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
 func (pf *Preferences) DarkMode() {
-	pf.ColorSchemeType = gist.ColorSchemeDark
+	pf.ColorSchemeType = styles.ColorSchemeDark
 	pf.Save()
 	pf.UpdateAll()
 }
@@ -249,7 +249,7 @@ func (pf *Preferences) Apply() {
 		pf.ColorSchemes["Dark"].HiStyle = "monokai"
 	}
 	/*
-		if pf.ColorSchemeType == gist.ColorSchemeLight {
+		if pf.ColorSchemeType == styles.ColorSchemeLight {
 			ColorScheme = ColorSchemes.Light
 		} else {
 			ColorScheme = ColorSchemes.Dark
@@ -269,9 +269,9 @@ func (pf *Preferences) Apply() {
 	}
 	if pf.FontPaths != nil {
 		paths := append(pf.FontPaths, goosi.TheApp.FontPaths()...)
-		girl.FontLibrary.InitFontPaths(paths...)
+		paint.FontLibrary.InitFontPaths(paths...)
 	} else {
-		girl.FontLibrary.InitFontPaths(goosi.TheApp.FontPaths()...)
+		paint.FontLibrary.InitFontPaths(goosi.TheApp.FontPaths()...)
 	}
 	pf.ApplyDPI()
 }
@@ -301,9 +301,9 @@ func (pf *Preferences) UpdateAll() {
 	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
 
-	gist.RebuildDefaultStyles = true
+	styles.RebuildDefaultStyles = true
 	colors.FullCache = nil
-	gist.StyleTemplates = nil
+	styles.StyleTemplates = nil
 	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
 	// 	w.SetSize(w.RenderWin.Size())
 	// }
@@ -311,7 +311,7 @@ func (pf *Preferences) UpdateAll() {
 	// for _, w := range AllRenderWins {
 	// 	w.FullReRender()
 	// }
-	gist.RebuildDefaultStyles = false
+	styles.RebuildDefaultStyles = false
 	// and another without rebuilding?  yep all are required
 	// for _, w := range AllRenderWins {
 	// 	w.FullReRender()
@@ -400,7 +400,7 @@ func (pf *Preferences) UpdateUser() {
 }
 
 /////////////////////////////////////////////////////////
-// Following are gist.Prefs interface
+// Following are styles.Prefs interface
 
 // PrefColor returns preference color of given name (case insensitive)
 // std names are: font, background, shadow, border, control, icon, select, highlight, link

@@ -890,95 +890,65 @@ func (i *EventPris) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+var _WidgetFlagsValues = []WidgetFlags{7, 8, 9, 10, 11, 12, 13, 14}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 21
+const WidgetFlagsN WidgetFlags = 15
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(7)]
-	_ = x[EventsConnected-(8)]
-	_ = x[CanFocus-(9)]
-	_ = x[HasFocus-(10)]
-	_ = x[ReRenderAnchor-(11)]
-	_ = x[Invisible-(12)]
-	_ = x[Disabled-(13)]
-	_ = x[Selected-(14)]
-	_ = x[Hovered-(15)]
-	_ = x[Active-(16)]
-	_ = x[MouseHasEntered-(17)]
-	_ = x[DNDHasEntered-(18)]
-	_ = x[NodeDragging-(19)]
-	_ = x[InstaDrag-(20)]
+	_ = x[CanFocus-(8)]
+	_ = x[ReRenderAnchor-(9)]
+	_ = x[Invisible-(10)]
+	_ = x[MouseHasEntered-(11)]
+	_ = x[DNDHasEntered-(12)]
+	_ = x[NodeDragging-(13)]
+	_ = x[InstaDrag-(14)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`NeedsRender`:     7,
 	`needsrender`:     7,
-	`EventsConnected`: 8,
-	`eventsconnected`: 8,
-	`CanFocus`:        9,
-	`canfocus`:        9,
-	`HasFocus`:        10,
-	`hasfocus`:        10,
-	`ReRenderAnchor`:  11,
-	`rerenderanchor`:  11,
-	`Invisible`:       12,
-	`invisible`:       12,
-	`Disabled`:        13,
-	`disabled`:        13,
-	`Selected`:        14,
-	`selected`:        14,
-	`Hovered`:         15,
-	`hovered`:         15,
-	`Active`:          16,
-	`active`:          16,
-	`MouseHasEntered`: 17,
-	`mousehasentered`: 17,
-	`DNDHasEntered`:   18,
-	`dndhasentered`:   18,
-	`NodeDragging`:    19,
-	`nodedragging`:    19,
-	`InstaDrag`:       20,
-	`instadrag`:       20,
+	`CanFocus`:        8,
+	`canfocus`:        8,
+	`ReRenderAnchor`:  9,
+	`rerenderanchor`:  9,
+	`Invisible`:       10,
+	`invisible`:       10,
+	`MouseHasEntered`: 11,
+	`mousehasentered`: 11,
+	`DNDHasEntered`:   12,
+	`dndhasentered`:   12,
+	`NodeDragging`:    13,
+	`nodedragging`:    13,
+	`InstaDrag`:       14,
+	`instadrag`:       14,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	7:  `NeedsRender needs to be rendered on next render itration`,
-	8:  `EventsConnected: this node has been connected to receive events from the window -- to optimize event processing, connections are typically only established for visible nodes during render, and disconnected when not visible`,
-	9:  `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
-	10: `HasFocus: does this node currently have the focus for keyboard input events? use tab / alt tab and clicking events to update focus -- see interface on RenderWin`,
-	11: `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
-	12: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	13: `Disabled disables all interaction with the user or other nodes; nodes should indicate this disabled state in an appropriate way, and each node should interpret events appropriately based on this state`,
-	14: `Selected indicates that this node has been selected by the user -- widely supported across different nodes`,
-	15: `Hovered indicates that the node is being hovered over by a mouse cursor or has been long-pressed on mobile`,
-	16: `Active indicates that this node is currently being interacted with (typically pressed down) by the user`,
-	17: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	18: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	19: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	20: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	8:  `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
+	9:  `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
+	10: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
+	11: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
+	12: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
+	13: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
+	14: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
 	7:  `NeedsRender`,
-	8:  `EventsConnected`,
-	9:  `CanFocus`,
-	10: `HasFocus`,
-	11: `ReRenderAnchor`,
-	12: `Invisible`,
-	13: `Disabled`,
-	14: `Selected`,
-	15: `Hovered`,
-	16: `Active`,
-	17: `MouseHasEntered`,
-	18: `DNDHasEntered`,
-	19: `NodeDragging`,
-	20: `InstaDrag`,
+	8:  `CanFocus`,
+	9:  `ReRenderAnchor`,
+	10: `Invisible`,
+	11: `MouseHasEntered`,
+	12: `DNDHasEntered`,
+	13: `NodeDragging`,
+	14: `InstaDrag`,
 }
 
 // String returns the string representation

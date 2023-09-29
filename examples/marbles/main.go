@@ -51,7 +51,7 @@ func mainrun() {
 	// style sheet
 	var css = ki.Props{
 		"Action": ki.Props{
-			"background-color": gi.Prefs.Colors.Control, // gist.Color{255, 240, 240, 255},
+			"background-color": gi.Prefs.Colors.Control, // styles.Color{255, 240, 240, 255},
 		},
 		"#combo": ki.Props{
 			"background-color": colors.FromRGB(240, 255, 240),

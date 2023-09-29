@@ -7,7 +7,7 @@ package giv
 import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -30,7 +30,7 @@ type TwinTextViews struct {
 
 func (tv *TwinTextViews) OnInit() {
 	tv.Dim = mat32.X
-	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
@@ -41,13 +41,13 @@ func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "text-a-lay", "text-b-lay":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.SetStretchMax()
 				s.SetMinPrefWidth(units.Ch(80))
 				s.SetMinPrefHeight(units.Em(40))
 			})
 		case "text-a", "text-b":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Font.Family = string(gi.Prefs.MonoFont)
 			})
 		}

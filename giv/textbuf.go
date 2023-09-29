@@ -19,7 +19,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/glop/indent"
 	"goki.dev/glop/runes"
 	"goki.dev/icons"
@@ -2156,7 +2156,7 @@ func (tb *TextBuf) SetLineIcon(ln int, icon icons.Icon) {
 		ic = &gi.Icon{}
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
-		ic.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+		ic.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 		})

@@ -19,21 +19,12 @@ const (
 	// NeedsRender needs to be rendered on next render itration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
-	// EventsConnected: this node has been connected to receive events from
-	// the window -- to optimize event processing, connections are typically
-	// only established for visible nodes during render, and disconnected when
-	// not visible
-	EventsConnected
-
 	// CanFocus: can this node accept focus to receive keyboard input events
 	// -- set by default for typical nodes that do so, but can be overridden,
 	// including by the style 'can-focus' property
 	CanFocus
 
-	// HasFocus: does this node currently have the focus for keyboard input
-	// events?  use tab / alt tab and clicking events to update focus -- see
-	// interface on RenderWin
-	HasFocus
+	// todo: remove:
 
 	// ReRenderAnchor: this node has a static size, and repaints its
 	// background -- any children under it that need to dynamically resize on
@@ -51,24 +42,6 @@ const (
 	// take place as normal, so that when the flag is cleared, rendering can
 	// proceed directly.
 	Invisible
-
-	// Disabled disables all interaction with the user or other nodes;
-	// nodes should indicate this disabled state in an
-	// appropriate way, and each node should interpret events appropriately
-	// based on this state
-	Disabled
-
-	// Selected indicates that this node has been selected by the user --
-	// widely supported across different nodes
-	Selected
-
-	// Hovered indicates that the node is being hovered over by a mouse
-	// cursor or has been long-pressed on mobile
-	Hovered
-
-	// Active indicates that this node is currently being interacted
-	// with (typically pressed down) by the user
-	Active
 
 	// MouseHasEntered indicates that the MouseFocusEvent Enter was previously
 	// registered on this node
@@ -88,11 +61,6 @@ const (
 	// primarily about dragging (e.g., the Splitter handle)
 	InstaDrag
 )
-
-// IsSelected tests if this node is flagged as [Selected]
-func (wb *WidgetBase) IsSelected() bool {
-	return wb.HasFlag(Selected)
-}
 
 // SetSelected sets the selected flag to given value
 func (wb *WidgetBase) SetSelected(sel bool) {
@@ -138,7 +106,7 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
 	wb.WalkPre(func(k ki.Ki) bool {
 		_, wb := AsWidget(k)
-		if wb == nil || wb.IsDeleted() || wb.IsDestroyed() {
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		if wb.HasFlag(flag) {

@@ -14,8 +14,9 @@ import (
 	"unicode"
 
 	"goki.dev/colors"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/key"
@@ -133,10 +134,10 @@ type TextField struct {
 	// TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 
 	// render version of entire text, for sizing
-	RenderAll girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderAll paint.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
 
 	// render version of just visible text
-	RenderVis girl.Text `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+	RenderVis paint.Text `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
 
 	// font height, cached during styling
 	FontHeight float32 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
@@ -161,7 +162,7 @@ func (tf *TextField) OnInit() {
 	tf.AddEvents(&TextFieldEventFuncs)
 
 	// TOOD: figure out how to have primary cursor color
-	tf.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	tf.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -177,15 +178,15 @@ func (tf *TextField) OnInit() {
 		if !tf.TrailingIcon.IsNil() {
 			s.Padding.Right.SetPx(12)
 		}
-		s.Text.Align = gist.AlignLeft
+		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnSurface
 		switch tf.Type {
 		case TextFieldFilled:
-			s.Border.Style.Set(gist.BorderNone)
-			s.Border.Style.Bottom = gist.BorderSolid
+			s.Border.Style.Set(styles.BorderNone)
+			s.Border.Style.Bottom = styles.BorderSolid
 			s.Border.Width.Set()
 			s.Border.Color.Set()
-			s.Border.Radius = gist.BorderRadiusExtraSmallTop
+			s.Border.Radius = styles.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 			if tf.IsFocusActive() {
 				s.Border.Width.Bottom = units.Px(2)
@@ -195,8 +196,8 @@ func (tf *TextField) OnInit() {
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 			}
 		case TextFieldOutlined:
-			s.Border.Style.Set(gist.BorderSolid)
-			s.Border.Radius = gist.BorderRadiusExtraSmall
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Radius = styles.BorderRadiusExtraSmall
 			if tf.IsFocusActive() {
 				s.Border.Width.Set(units.Px(2))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
@@ -205,7 +206,7 @@ func (tf *TextField) OnInit() {
 				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		}
-		if tf.IsSelected() {
+		if tf.StateIs(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 		}
 	})
@@ -217,20 +218,20 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		case "lead-icon":
 			lead := child.(*Action)
 			lead.Type = ActionParts
-			lead.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			lead.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Right.SetPx(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		case "trail-icon":
 			trail := child.(*Action)
 			trail.Type = ActionParts
-			trail.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			trail.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Left.SetPx(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = gist.AlignMiddle
+				s.AlignV = styles.AlignMiddle
 			})
 		}
 	}
@@ -919,13 +920,13 @@ func TextFieldBlink() {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
-		if BlinkingTextField.IsDestroyed() || BlinkingTextField.IsDeleted() {
+		if BlinkingTextField.Is(ki.Destroyed) || BlinkingTextField.Is(ki.Deleted) {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Sc == nil || !tf.HasFocus() || !tf.IsFocusActive() || !tf.This().(Widget).IsVisible() {
+		if tf.Sc == nil || !tf.StateIs(states.Focused) || !tf.IsFocusActive() || !tf.This().(Widget).IsVisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
@@ -935,7 +936,7 @@ func TextFieldBlink() {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
-		// if win.IsUpdating() {
+		// if win.Is(Updating) {
 		// 	TextFieldBlinkMu.Unlock()
 		// 	continue
 		// }
@@ -1388,7 +1389,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	if tf.ParentRenderWin() == nil {
 		return
 	}
-	if !tf.IsDisabled() && !tf.HasFocus() {
+	if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
 		tf.GrabFocus()
 	}
 	me.SetHandled()
@@ -1396,7 +1397,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	case mouse.Left:
 		if me.Action == mouse.Press {
 			if tf.IsDisabled() {
-				tf.SetSelected(!tf.IsSelected())
+				tf.SetSelected(!tf.StateIs(states.Selected))
 				tf.EmitSelectedSignal()
 				tf.UpdateSig()
 			} else {
@@ -1491,7 +1492,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 
 	mods, updt := parts.ConfigChildren(config)
 
-	if mods || gist.RebuildDefaultStyles {
+	if mods || styles.RebuildDefaultStyles {
 		// if leadIconIdx != -1 {
 		// 	leadIcon := parts.Child(leadIconIdx).(*Action)
 		// 	leadIcon.SetIcon(tf.LeadingIcon)
@@ -1538,7 +1539,7 @@ func (tf *TextField) ApplyStyle(sc *Scene) {
 
 func (tf *TextField) UpdateRenderAll() bool {
 	st := &tf.Style
-	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
+	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
 		txt = concealDots(len(tf.EditTxt))
@@ -1606,7 +1607,7 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 
 	tf.AutoScroll() // inits paint with our style
 	st := &tf.Style
-	st.Font = girl.OpenFont(st.FontRender(), &st.UnContext)
+	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(sc, st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]
 	tf.RenderSelect(sc)
@@ -1627,7 +1628,7 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 }
 
 func (tf *TextField) Render(sc *Scene) {
-	if tf.HasFocus() && tf.IsFocusActive() && BlinkingTextField == tf {
+	if tf.StateIs(states.Focused) && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
 	wi := tf.This().(Widget)
@@ -1635,7 +1636,7 @@ func (tf *TextField) Render(sc *Scene) {
 		wi.FilterEvents()
 		tf.RenderTextField(sc)
 		if !tf.HasFlag(Disabled) {
-			if tf.HasFocus() && tf.IsFocusActive() {
+			if tf.StateIs(states.Focused) && tf.IsFocusActive() {
 				tf.StartCursor()
 			} else {
 				tf.StopCursor()

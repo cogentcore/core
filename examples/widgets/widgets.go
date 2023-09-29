@@ -9,7 +9,8 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -54,13 +55,13 @@ func mainrun() {
 <kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetStretchMax().
-		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
-			s.Text.WhiteSpace = gist.WhiteSpaceNormal
-			s.Text.Align = gist.AlignCenter
-			s.Text.AlignV = gist.AlignCenter
+		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
+			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			s.Text.Align = styles.AlignCenter
+			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
 			s.Font.Size = units.Pt(24) // todo: "x-large"?
-			// s.Font.SetSize(gist.XLarge)
+			// s.Font.SetSize(styles.XLarge)
 			s.Text.LineHeight = units.Em(1.5)
 		})
 
@@ -77,7 +78,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).
 		SetTooltip("press this <i>button</i> to pop up a dialog box").
-		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
+		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
 		}).(*gi.Button).
@@ -110,18 +111,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// 	fmt.Println(button2.State)
 	// 	switch button2.State {
 	// 	case gi.ButtonHover:
-	// 		button2.Style.BackgroundColor.SetSolid(gist.MustColorFromName("darkblue"))
+	// 		button2.Style.BackgroundColor.SetSolid(styles.MustColorFromName("darkblue"))
 	// 	default:
-	// 		button2.Style.Border.Color.Set(gist.Transparent)
+	// 		button2.Style.Border.Color.Set(styles.Transparent)
 	// 		button2.Style.Border.Width.Set(units.Px(2))
 	// 		button2.Style.Border.Radius.Set(units.Px(10))
-	// 		button2.Style.BackgroundColor.SetSolid(gist.MustColorFromName("blue"))
-	// 		button2.Style.Color.SetColor(gist.MustColorFromName("white"))
+	// 		button2.Style.BackgroundColor.SetSolid(styles.MustColorFromName("blue"))
+	// 		button2.Style.Color.SetColor(styles.MustColorFromName("white"))
 	// 		button2.Style.Padding.Set(units.Px(10), units.Px(5))
 	// 		button2.Style.Height = units.Px(50)
 	// 	}
 	// }
-	// button2.SetProp("border-color", gist.NewSides[gist.Color](gist.MustColorFromName("green"), gist.MustColorFromName("red"), gist.MustColorFromName("blue"), gist.MustColorFromName("orange")))
+	// button2.SetProp("border-color", styles.NewSides[styles.Color](styles.MustColorFromName("green"), styles.MustColorFromName("red"), styles.MustColorFromName("blue"), styles.MustColorFromName("orange")))
 	// button2.SetProp("border-width", "2px 4px 6px 8px")
 	// button2.SetProp("border-radius", "0 2 6 10")
 
@@ -131,7 +132,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// todo: need convenient OnToggled
 	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 		if sig == int64(gi.ButtonToggled) {
-			fmt.Printf("Checkbox toggled: %v\n", checkbox.IsChecked())
+			fmt.Printf("Checkbox toggled: %v\n", checkbox.StateIs(states.Checked))
 		}
 	})
 
@@ -167,8 +168,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	srow := gi.NewLayout(frame, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
-		SetStyle(func(w *gi.WidgetBase, s *gist.Style) {
-			s.AlignH = gist.AlignLeft
+		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
+			s.AlignH = styles.AlignLeft
 		})
 
 	// todo: need Slider interface with Set methods

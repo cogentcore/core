@@ -72,14 +72,14 @@ type Dialog struct {
 }
 
 func (dlg *Dialog) StyleFrame() {
-	dlg.Frame.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	dlg.Frame.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Color = colors.Scheme.OnSurface
-		s.Border.Radius = gist.BorderRadiusExtraLarge
+		s.Border.Radius = styles.BorderRadiusExtraLarge
 
 		dlg.Frame.Spacing = StdDialogVSpaceUnits
-		s.Border.Style.Set(gist.BorderNone)
+		s.Border.Style.Set(styles.BorderNone)
 		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Color)
 		if !DialogsSepRenderWin {
@@ -97,27 +97,27 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 		case "title":
 			title := child.(*Label)
 			title.Type = LabelHeadlineSmall
-			title.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			title.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				s.MaxWidth.SetPx(-1)
-				s.AlignH = gist.AlignCenter
-				s.AlignV = gist.AlignTop
+				s.AlignH = styles.AlignCenter
+				s.AlignV = styles.AlignTop
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "prompt":
 			prompt := child.(*Label)
 			prompt.Type = LabelBodyMedium
-			prompt.AddStyler(func(w *WidgetBase, s *gist.Style) {
-				s.Text.WhiteSpace = gist.WhiteSpaceNormal
+			prompt.AddStyler(func(w *WidgetBase, s *styles.Style) {
+				s.Text.WhiteSpace = styles.WhiteSpaceNormal
 				s.MaxWidth.SetPx(-1)
 				s.Width.SetCh(30)
-				s.Text.Align = gist.AlignLeft
-				s.AlignV = gist.AlignTop
+				s.Text.Align = styles.AlignLeft
+				s.AlignV = styles.AlignTop
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "buttons":
 			bts := child.(*Layout)
-			bts.AddStyler(func(w *WidgetBase, s *gist.Style) {
+			bts.AddStyler(func(w *WidgetBase, s *styles.Style) {
 				bts.Spacing.SetPx(8 * Prefs.DensityMul())
 				s.SetStretchMaxWidth()
 			})
@@ -252,7 +252,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 
 // Close requests that the dialog be closed -- it does not alter any state or send any signals
 func (dlg *Dialog) Close() {
-	if dlg == nil || dlg.Frame.This() == nil || dlg.Frame.IsDestroyed() || dlg.Frame.IsDeleted() {
+	if dlg == nil || dlg.Frame.This() == nil || dlg.Frame.Is(ki.Destroyed) || dlg.Frame.Is(ki.Deleted) {
 		return
 	}
 	win := dlg.Win
@@ -485,7 +485,7 @@ func (dlg *Dialog) ConfigWidget(sc *Scene) {
 	dlg.Scene.Config()
 }
 
-func (dlg *Dialog) HasFocus() bool {
+func (dlg *Dialog) StateIs(states.Focused) bool {
 	return true // dialog ALWAYS gets all the events!
 }
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 )
 
@@ -53,8 +53,8 @@ func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 		if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
 			label := child.(*gi.Label)
 			label.Redrawable = true
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
-				s.AlignH = gist.AlignLeft
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				s.AlignH = styles.AlignLeft
 			})
 		}
 	}

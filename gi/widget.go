@@ -13,7 +13,8 @@ import (
 	"reflect"
 	"sync"
 
-	"goki.dev/girl/gist"
+	"goki.dev/enums"
+	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -122,12 +123,6 @@ type Widget interface {
 	// FocusChanges values.
 	FocusChanged(change FocusChanges)
 
-	// HasFocus returns true if this node has keyboard focus and should
-	// receive keyboard events -- typically this just returns HasFocus based
-	// on the RenderWin-managed HasFocus flag, but some types may want to monitor
-	// all keyboard activity for certain key keys..
-	HasFocus() bool
-
 	// MakeContextMenu creates the context menu items (typically Action
 	// elements, but it can be anything) for a given widget, typically
 	// activated by the right mouse button or equivalent.  Widget has a
@@ -220,7 +215,7 @@ type WidgetBase struct {
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
 
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Style gist.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	Style styles.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
@@ -293,6 +288,10 @@ func (wb *WidgetBase) BaseIface() reflect.Type {
 	return laser.TypeFor[Widget]()
 }
 
+func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
+	return wb.Style.State.HasFlag(flag)
+}
+
 func (wb *WidgetBase) SetTooltip(tt string) Widget {
 	wb.Tooltip = tt
 	return wb.This().(Widget)
@@ -308,7 +307,7 @@ func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
 	parts.InitName(parts, "parts")
 	parts.Lay = lay
 	ki.SetParent(parts, wb)
-	parts.SetFlag(true, ki.IsField)
+	parts.SetFlag(true, ki.Field)
 	wb.Parts = parts
 	return parts
 }

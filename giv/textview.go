@@ -18,8 +18,9 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/laser"
@@ -72,7 +73,7 @@ type TextView struct {
 	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
 
 	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
-	Renders []girl.Text `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Renders []paint.Text `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
 
 	// starting offsets for top of each line
 	Offs []float32 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
@@ -84,7 +85,7 @@ type TextView struct {
 	LineNoOff float32 `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
 
 	// render for line numbers
-	LineNoRender girl.Text `json:"-" xml:"-" desc:"render for line numbers"`
+	LineNoRender paint.Text `json:"-" xml:"-" desc:"render for line numbers"`
 
 	// total size of all lines as rendered
 	LinesSize image.Point `json:"-" xml:"-" desc:"total size of all lines as rendered"`
@@ -141,7 +142,7 @@ type TextView struct {
 	LinkSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// normal style and focus style
-	StateStyles [TextViewStatesN]gist.Style `json:"-" xml:"-" desc:"normal style and focus style"`
+	StateStyles [TextViewStatesN]styles.Style `json:"-" xml:"-" desc:"normal style and focus style"`
 
 	// font height, cached during styling
 	FontHeight float32 `json:"-" xml:"-" desc:"font height, cached during styling"`
@@ -180,7 +181,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 
 func (tv *TextView) OnInit() {
 	tv.AddEvents(&TextViewEventFuncs)
-	tv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		tv.CursorWidth.SetPx(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)
@@ -189,20 +190,20 @@ func (tv *TextView) OnInit() {
 
 		s.Cursor = cursor.IBeam
 		if gi.Prefs.Editor.WordWrap {
-			s.Text.WhiteSpace = gist.WhiteSpacePreWrap
+			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {
-			s.Text.WhiteSpace = gist.WhiteSpacePre
+			s.Text.WhiteSpace = styles.WhiteSpacePre
 		}
-		s.Border.Style.Set(gist.BorderNone) // don't render our own border
-		s.Border.Radius = gist.BorderRadiusLarge
+		s.Border.Style.Set(styles.BorderNone) // don't render our own border
+		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Set()
 		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
-		s.AlignV = gist.AlignTop
-		s.Text.Align = gist.AlignLeft
+		s.AlignV = styles.AlignTop
+		s.Text.Align = styles.AlignLeft
 		s.Text.TabSize = 4
 		s.Color = colors.Scheme.OnSurface
 
-		if w.HasFocus() {
+		if w.StateIs(states.Focused) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		} else {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
@@ -424,7 +425,7 @@ func (tv *TextView) LinesInserted(tbe *textbuf.Edit) {
 	}
 
 	// Renders
-	tmprn := make([]girl.Text, nsz)
+	tmprn := make([]paint.Text, nsz)
 	nrn := append(tv.Renders, tmprn...)
 	copy(nrn[stln+nsz:], nrn[stln:])
 	copy(nrn[stln:], tmprn)
@@ -600,7 +601,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	if cap(tv.Renders) >= nln {
 		tv.Renders = tv.Renders[:nln]
 	} else {
-		tv.Renders = make([]girl.Text, nln)
+		tv.Renders = make([]paint.Text, nln)
 	}
 	if cap(tv.Offs) >= nln {
 		tv.Offs = tv.Offs[:nln]
@@ -1936,7 +1937,7 @@ func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, 
 
 	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.CheckBox)
 	lb.SetText("Lexical Items")
-	lb.SetChecked(lexitems)
+	lb.Style.State.SetFlag(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
 
 	if recv != nil && fun != nil {
@@ -1960,7 +1961,7 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 		repl = tf.Text()
 	}
 	lb := frame.ChildByName("lexb", 3).(*gi.CheckBox)
-	lexItems = lb.IsChecked()
+	lexItems = lb.StateIs(states.Checked)
 	return
 }
 
@@ -3176,13 +3177,13 @@ func TextViewBlink() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
-		if BlinkingTextView.IsDestroyed() || BlinkingTextView.IsDeleted() {
+		if BlinkingTextView.Is(ki.Destroyed) || BlinkingTextView.Is(ki.Deleted) {
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Scene == nil || !tv.HasFocus() || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
+		if tv.Scene == nil || !tv.StateIs(states.Focused) || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
 			tv.RenderCursor(false)
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
@@ -3193,7 +3194,7 @@ func TextViewBlink() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
-		if win.IsUpdating() {
+		if win.Is(Updating) {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
@@ -3330,7 +3331,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	if tv.Buf == nil {
 		return
 	}
-	if !tv.Buf.Opts.DepthColor || tv.IsDisabled() || !tv.HasFocus() || !tv.IsFocusActive() {
+	if !tv.Buf.Opts.DepthColor || tv.IsDisabled() || !tv.StateIs(states.Focused) || !tv.IsFocusActive() {
 		return
 	}
 	tv.Buf.MarkupMu.RLock() // needed for HiTags access
@@ -3460,7 +3461,7 @@ func (tv *TextView) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgclr *colors.Full) {
+func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
@@ -3507,7 +3508,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *gist.Style, bgcl
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *gist.Style, bgclr *colors.Full) {
+func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight
@@ -3537,7 +3538,7 @@ func (tv *TextView) VisSizes() {
 	}
 	sty := &tv.Style
 	spc := sty.BoxSpace()
-	sty.Font = girl.OpenFont(sty.FontRender(), &sty.UnContext)
+	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
 	tv.LineHeight = sty.Text.EffLineHeight(tv.FontHeight)
 	sz := tv.ScBBox.Size()
@@ -4575,16 +4576,16 @@ func (tv *TextView) KeyInputInsertRune(kt *key.Event) {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (tv *TextView) OpenLink(tl *girl.TextLink) {
+func (tv *TextView) OpenLink(tl *paint.TextLink) {
 	tl.Widget = tv.This().(gi.Node2D)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
-		if girl.TextLinkHandler != nil {
-			if girl.TextLinkHandler(*tl) {
+		if paint.TextLinkHandler != nil {
+			if paint.TextLinkHandler(*tl) {
 				return
 			}
-			if girl.URLHandler != nil {
-				girl.URLHandler(tl.URL)
+			if paint.URLHandler != nil {
+				paint.URLHandler(tl.URL)
 			}
 		}
 		return
@@ -4594,7 +4595,7 @@ func (tv *TextView) OpenLink(tl *girl.TextLink) {
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (tv *TextView) LinkAt(pos lex.Pos) (*girl.TextLink, bool) {
+func (tv *TextView) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
@@ -4615,7 +4616,7 @@ func (tv *TextView) LinkAt(pos lex.Pos) (*girl.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (tv *TextView) OpenLinkAt(pos lex.Pos) (*girl.TextLink, bool) {
+func (tv *TextView) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	tl, ok := tv.LinkAt(pos)
 	if ok {
 		rend := &tv.Renders[pos.Ln]
@@ -4632,7 +4633,7 @@ func (tv *TextView) OpenLinkAt(pos lex.Pos) (*girl.TextLink, bool) {
 
 // MouseEvent handles the mouse.Event
 func (tv *TextView) MouseEvent(me *mouse.Event) {
-	if !tv.HasFocus() {
+	if !tv.StateIs(states.Focused) {
 		tv.GrabFocus()
 	}
 	tv.SetFlag(int(TextViewFocusActive))
@@ -4795,7 +4796,7 @@ func (tv *TextView) StyleTextView() {
 	tv.StyMu.Lock()
 	defer tv.StyMu.Unlock()
 
-	if gist.RebuildDefaultStyles {
+	if styles.RebuildDefaultStyles {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
@@ -4811,16 +4812,16 @@ func (tv *TextView) StyleTextView() {
 		tv.Buf.Opts.StyleFromProps(tv.Props)
 	}
 	if tv.IsDisabled() {
-		if tv.IsSelected() {
+		if tv.StateIs(states.Selected) {
 			tv.Style = tv.StateStyles[TextViewSel]
 		} else {
 			tv.Style = tv.StateStyles[TextViewInactive]
 		}
 	} else if tv.NLines == 0 {
 		tv.Style = tv.StateStyles[TextViewInactive]
-	} else if tv.HasFocus() {
+	} else if tv.StateIs(states.Focused) {
 		tv.Style = tv.StateStyles[TextViewFocus]
-	} else if tv.IsSelected() {
+	} else if tv.StateIs(states.Selected) {
 		tv.Style = tv.StateStyles[TextViewSel]
 	} else {
 		tv.Style = tv.StateStyles[TextViewActive]
@@ -4854,7 +4855,7 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 	}
 	tv.DoLayoutChildren(iter)
 	if tv.ParentRenderWin() != nil &&
-		(tv.LinesSize == (image.Point{}) || gist.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
+		(tv.LinesSize == (image.Point{}) || styles.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
 			tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
@@ -4899,7 +4900,7 @@ func (tv *TextView) Render(vp *Scene) {
 			tv.CursorPos = tv.ScrollToCursorPos
 			tv.ScrollCursorToTop()
 		}
-		if tv.HasFocus() && tv.IsFocusActive() {
+		if tv.StateIs(states.Focused) && tv.IsFocusActive() {
 			// fmt.Printf("tv render: %v  start cursor\n", tv.Nm)
 			tv.StartCursor()
 		} else {

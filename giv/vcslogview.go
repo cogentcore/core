@@ -6,7 +6,8 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
@@ -39,7 +40,7 @@ type VCSLogView struct {
 }
 
 func (lv *VCSLogView) OnInit() {
-	lv.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+	lv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		s.SetStretchMax()
 	})
 }
@@ -48,7 +49,7 @@ func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "a-tf", "b-tf":
-			w.AddStyler(func(w *gi.WidgetBase, s *gist.Style) {
+			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(12)
 			})
 		}
@@ -129,8 +130,8 @@ func (lv *VCSLogView) ToggleRev() {
 	cba := tb.ChildByName("a-rev", 2).(*gi.CheckBox)
 	cbb := tb.ChildByName("b-rev", 2).(*gi.CheckBox)
 	lv.SetA = !lv.SetA
-	cba.SetChecked(lv.SetA)
-	cbb.SetChecked(!lv.SetA)
+	cba.Style.State.SetFlag(lv.SetA, states.Checked)
+	cbb.Style.State.SetFlag(!lv.SetA, states.Checked)
 	tb.UpdateEnd(updt)
 }
 
@@ -153,7 +154,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cba := gi.NewCheckBox(tb, "a-rev")
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
-		cba.SetChecked(true)
+		cba.Style.State.SetFlag(true, states.Checked)
 		tfa := gi.NewTextField(tb, "a-tf")
 		tfa.SetText(lv.RevA)
 		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -181,15 +182,15 @@ func (lv *VCSLogView) ConfigToolBar() {
 
 		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
-				lv.SetA = cba.IsChecked()
-				cbb.SetChecked(!lv.SetA)
+				lv.SetA = cba.StateIs(states.Checked)
+				cbb.Style.State.SetFlag(!lv.SetA, states.Checked)
 				cbb.UpdateSig()
 			}
 		})
 		cbb.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
-				lv.SetA = !cbb.IsChecked()
-				cba.SetChecked(lv.SetA)
+				lv.SetA = !cbb.StateIs(states.Checked)
+				cba.Style.State.SetFlag(lv.SetA, states.Checked)
 				cba.UpdateSig()
 			}
 		})

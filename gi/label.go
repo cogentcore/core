@@ -9,8 +9,9 @@ import (
 	"image/color"
 
 	"goki.dev/colors"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
@@ -59,7 +60,7 @@ type Label struct {
 	// LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// render data for text label
-	TextRender girl.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+	TextRender paint.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
 
 	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
 	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
@@ -130,10 +131,10 @@ var LabelEventFuncs WidgetEvents
 func (lb *Label) OnInit() {
 	lb.AddEvents(&LabelEventFuncs)
 	lb.Type = LabelLabelLarge
-	lb.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	lb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
-		s.Text.WhiteSpace = gist.WhiteSpaceNormal
-		s.AlignV = gist.AlignMiddle
+		s.Text.WhiteSpace = styles.WhiteSpaceNormal
+		s.AlignV = styles.AlignMiddle
 		s.BackgroundColor.SetSolid(colors.Transparent)
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
@@ -142,82 +143,82 @@ func (lb *Label) OnInit() {
 			s.Text.LineHeight.SetPx(20)
 			s.Font.Size.SetPx(14)
 			s.Text.LetterSpacing.SetPx(0.1)
-			s.Font.Weight = gist.WeightMedium
+			s.Font.Weight = styles.WeightMedium
 		case LabelLabelMedium:
 			s.Text.LineHeight.SetPx(16)
 			s.Font.Size.SetPx(12)
 			s.Text.LetterSpacing.SetPx(0.5)
-			s.Font.Weight = gist.WeightMedium
+			s.Font.Weight = styles.WeightMedium
 		case LabelLabelSmall:
 			s.Text.LineHeight.SetPx(16)
 			s.Font.Size.SetPx(11)
 			s.Text.LetterSpacing.SetPx(0.5)
-			s.Font.Weight = gist.WeightMedium
+			s.Font.Weight = styles.WeightMedium
 		case LabelBodyLarge:
 			s.Text.LineHeight.SetPx(24)
 			s.Font.Size.SetPx(16)
 			s.Text.LetterSpacing.SetPx(0.5)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelBodyMedium:
 			s.Text.LineHeight.SetPx(20)
 			s.Font.Size.SetPx(14)
 			s.Text.LetterSpacing.SetPx(0.25)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelBodySmall:
 			s.Text.LineHeight.SetPx(16)
 			s.Font.Size.SetPx(12)
 			s.Text.LetterSpacing.SetPx(0.4)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelTitleLarge:
 			s.Text.LineHeight.SetPx(28)
 			s.Font.Size.SetPx(22)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelTitleMedium:
 			s.Text.LineHeight.SetPx(24)
 			s.Font.Size.SetPx(16)
 			s.Text.LetterSpacing.SetPx(0.15)
-			s.Font.Weight = gist.WeightMedium
+			s.Font.Weight = styles.WeightMedium
 		case LabelTitleSmall:
 			s.Text.LineHeight.SetPx(20)
 			s.Font.Size.SetPx(14)
 			s.Text.LetterSpacing.SetPx(0.1)
-			s.Font.Weight = gist.WeightMedium
+			s.Font.Weight = styles.WeightMedium
 		case LabelHeadlineLarge:
 			s.Text.LineHeight.SetPx(40)
 			s.Font.Size.SetPx(32)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineMedium:
 			s.Text.LineHeight.SetPx(36)
 			s.Font.Size.SetPx(28)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineSmall:
 			s.Text.LineHeight.SetPx(32)
 			s.Font.Size.SetPx(24)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelDisplayLarge:
 			s.Text.LineHeight.SetPx(64)
 			s.Font.Size.SetPx(57)
 			s.Text.LetterSpacing.SetPx(-0.25)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelDisplayMedium:
 			s.Text.LineHeight.SetPx(52)
 			s.Font.Size.SetPx(45)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		case LabelDisplaySmall:
 			s.Text.LineHeight.SetPx(44)
 			s.Font.Size.SetPx(36)
 			s.Text.LetterSpacing.SetPx(0)
-			s.Font.Weight = gist.WeightNormal
+			s.Font.Weight = styles.WeightNormal
 		}
 		if w.IsDisabled() {
 			s.Font.Opacity = 0.7
 		}
-		if w.IsSelected() {
+		if w.StateIs(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 			s.Color = colors.Scheme.Tertiary.OnContainer
 		}
@@ -280,16 +281,16 @@ func (lb *Label) SetSelectable() *Label {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (lb *Label) OpenLink(tl *girl.TextLink) {
+func (lb *Label) OpenLink(tl *paint.TextLink) {
 	// tl.Widget = lb.This() // todo: needs this
 	// if len(lb.LinkSig.Cons) == 0 {
-	// 	if girl.TextLinkHandler != nil {
-	// 		if girl.TextLinkHandler(*tl) {
+	// 	if paint.TextLinkHandler != nil {
+	// 		if paint.TextLinkHandler(*tl) {
 	// 			return
 	// 		}
 	// 	}
-	// 	if girl.URLHandler != nil {
-	// 		girl.URLHandler(tl.URL)
+	// 	if paint.URLHandler != nil {
+	// 		paint.URLHandler(tl.URL)
 	// 	}
 	// 	return
 	// }
@@ -368,7 +369,7 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 		}
 		if me.Action == mouse.DoubleClick && me.Button == mouse.Left && llb.Selectable {
 			updt := llb.UpdateStart()
-			llb.SetSelected(!llb.IsSelected())
+			llb.SetSelected(!llb.StateIs(states.Selected))
 			llb.EmitSelectedSignal()
 			llb.UpdateEnd(updt)
 		}
@@ -407,10 +408,10 @@ func (lb *Label) MouseMoveEvent(we *WidgetEvents) {
 }
 
 func (lb *Label) GrabCurBackgroundColor() {
-	if lb.Sc == nil || lb.IsSelected() {
+	if lb.Sc == nil || lb.StateIs(states.Selected) {
 		return
 	}
-	if !gist.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {
+	if !styles.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {
 		return
 	}
 	pos := lb.ContextMenuPos()

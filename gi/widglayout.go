@@ -30,7 +30,7 @@ func (wb *WidgetBase) BBoxReport() string {
 	rpt := ""
 	wb.WalkPre(func(k Ki) bool {
 		nii, ni := AsWidget(k)
-		if nii == nil || ni.IsDeleted() || ni.IsDestroyed() {
+		if nii == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		rpt += fmt.Sprintf("%v: vp: %v\n", ni.Nm, ni.ScBBox)
@@ -45,7 +45,7 @@ func (wb *WidgetBase) BBoxReport() string {
 // setting units context relative to parent objects
 func (wb *WidgetBase) AddParentPos() mat32.Vec2 {
 	if pwi, pwb := AsWidget(wb.Par); pwi != nil {
-		if !wb.IsField() {
+		if !wb.Is(Field) {
 			wb.LayState.Alloc.Pos = pwb.LayState.Alloc.PosOrig.Add(wb.LayState.Alloc.PosRel)
 		}
 		return pwb.LayState.Alloc.Size

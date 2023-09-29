@@ -10,7 +10,7 @@ import (
 	"log"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/svg"
@@ -42,7 +42,7 @@ var IconEventFuncs WidgetEvents
 
 func (ic *Icon) OnInit() {
 	ic.AddEvents(&IconEventFuncs)
-	ic.AddStyler(func(w *WidgetBase, s *gist.Style) {
+	ic.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
 		s.BackgroundColor.SetSolid(colors.Transparent)
