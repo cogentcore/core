@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -19,6 +20,10 @@ func main() {
 
 	dir := "./svgs"
 	out := "./testdata"
+	err := os.MkdirAll(out, 0755)
+	if err != nil {
+		panic("error creating testdata directory if it doesn't already exist")
+	}
 	files := dirs.ExtFileNames(dir, []string{".svg"})
 
 	for _, fn := range files {
