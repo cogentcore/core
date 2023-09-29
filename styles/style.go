@@ -29,8 +29,15 @@ import (
 
 // Style has all the CSS-based style elements -- used for widget-type GUI objects.
 type Style struct {
-	// State holds style-relevant state flags, for convenient styling access
+	// State holds style-relevant state flags, for convenient styling access,
+	// given that styles typically depend on element states.
 	State states.States
+
+	// Abilities specifies the abilities of this element, which determine
+	// which kinds of states the element can express.
+	// This is used by the goosi.events system.  Putting this info next
+	// to the State info makes it easy to configure and manage.
+	Abilities states.Abilities
 
 	// todo big enum of how to display item -- controls layout etc
 	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`

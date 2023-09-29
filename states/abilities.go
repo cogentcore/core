@@ -4,6 +4,8 @@
 
 package states
 
+import "goki.dev/enums"
+
 // Abilities represent abilities of GUI elements to take on different States,
 // and are aligned with the States flags.  All elements can be disabled.
 // these correspond to some of the global attributes in CSS:
@@ -41,3 +43,8 @@ const (
 	// LongHoverable means it can be LongHovered
 	LongHoverable
 )
+
+// Is is a shortcut for HasFlag for Abilities
+func (ab *Abilities) Is(flag enums.BitFlag) bool {
+	return ab.HasFlag(flag)
+}
