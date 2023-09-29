@@ -51,8 +51,8 @@ type Node struct {
 	// [view: -] last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
 	index int `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method"`
 
-	// [view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function
-	depth int `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
+	// [view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function
+	depth int `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function"`
 }
 
 // check implementation of [Ki] interface
@@ -183,11 +183,13 @@ func (n *Node) IndexInParent() (int, bool) {
 // found, and -1 if not found.
 func (n *Node) ParentLevel(par Ki) int {
 	parLev := -1
-	n.FuncUpParent(0, n, func(k Ki, level int, d any) bool {
+	level := 0
+	n.WalkUpParent(func(k Ki) bool {
 		if k == par {
 			parLev = level
 			return Break
 		}
+		level++
 		return Continue
 	})
 	return parLev
@@ -722,7 +724,7 @@ func (n *Node) Destroy() {
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
 	//
-	// n.FuncFields(0, nil, func(k Ki, level int, d any) bool {
+	// n.FuncFields(0, nil, func(k Ki) bool {
 	// 	k.Destroy()
 	// 	return true
 	// })
@@ -875,18 +877,17 @@ func (n *Node) PropTag() string {
 //////////////////////////////////////////////////////////////////////////
 //  Tree walking and state updating
 
-// FuncUp calls function on given node and all the way up to its parents,
+// WalkUp calls function on given node and all the way up to its parents,
 // and so on -- sequentially all in current go routine (generally
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *Node) FuncUp(level int, data any, fun Func) bool {
+func (n *Node) WalkUp(fun func(k Ki) bool) bool {
 	cur := n.This()
 	for {
-		if !fun(cur, level, data) { // false return means stop
+		if !fun(cur) { // false return means stop
 			return false
 		}
-		level++
 		par := cur.Parent()
 		if par == nil || par == cur { // prevent loops
 			return true
@@ -896,21 +897,20 @@ func (n *Node) FuncUp(level int, data any, fun Func) bool {
 	return true
 }
 
-// FuncUpParent calls function on parent of node and all the way up to its
+// WalkUpParent calls function on parent of node and all the way up to its
 // parents, and so on -- sequentially all in current go routine (generally
 // necessary for going up, which is typically quite fast anyway) -- level
 // is incremented after each step (starts at 0, goes up), and passed to
 // function -- returns false if fun aborts with false, else true.
-func (n *Node) FuncUpParent(level int, data any, fun Func) bool {
+func (n *Node) WalkUpParent(fun func(k Ki) bool) bool {
 	if IsRoot(n) {
 		return true
 	}
 	cur := n.Parent()
 	for {
-		if !fun(cur, level, data) { // false return means stop
+		if !fun(cur) { // false return means stop
 			return false
 		}
-		level++
 		par := cur.Parent()
 		if par == nil || par == cur { // prevent loops
 			return true
@@ -948,16 +948,15 @@ func (tm TravMap) Get(k Ki) int {
 // strategy -- same as used in TreeView:
 // https://stackoverflow.com/questions/5278580/non-recursive-depth-first-search-algorithm
 
-// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
+// WalkPre calls function on this node (Pre version) and then iterates
 // in a depth-first manner over all the children.
 // The node traversal is non-recursive and uses locally-allocated state -- safe
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
-// The level var tracks overall depth in the tree.
 // If fun returns false then any further traversal of that branch of the tree is
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
-func (n *Node) FuncDownMeFirst(level int, data any, fun Func) {
+func (n *Node) WalkPre(fun func(Ki) bool) {
 	if n.This() == nil || n.IsDeleted() {
 		return
 	}
@@ -967,7 +966,69 @@ func (n *Node) FuncDownMeFirst(level int, data any, fun Func) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.IsDeleted() && fun(cur, level, data) { // false return means stop
+		if cur.This() != nil && !cur.IsDeleted() && fun(cur) { // false return means stop
+			if cur.HasChildren() {
+				tm.Set(cur, 0) // 0 for no fields
+				nxt := cur.Child(0)
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+					cur = nxt.This()
+					tm.Start(cur)
+					continue
+				}
+			}
+		} else {
+			tm.Set(cur, cur.NumChildren())
+		}
+		// if we get here, we're in the ascent branch -- move to the right and then up
+		for {
+			curChild := tm.Get(cur)
+			if (curChild + 1) < cur.NumChildren() {
+				curChild++
+				tm.Set(cur, curChild)
+				nxt := cur.Child(curChild)
+				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+					cur = nxt.This()
+					tm.Start(cur)
+					continue outer
+				}
+				continue
+			}
+			tm.End(cur)
+			// couldn't go right, move up..
+			if cur == start {
+				break outer // done!
+			}
+			par := cur.Parent()
+			if par == nil || par == cur { // shouldn't happen, but does..
+				// fmt.Printf("nil / cur parent %v\n", par)
+				break outer
+			}
+			cur = par
+		}
+	}
+}
+
+// WalkPreLevel calls function on this node (Pre version) and then iterates
+// in a depth-first manner over all the children.
+// The node traversal is non-recursive and uses locally-allocated state -- safe
+// for concurrent calling (modulo conflict management in function call itself).
+// Function calls are sequential all in current go routine.
+// The level var tracks overall depth in the tree.
+// If fun returns false then any further traversal of that branch of the tree is
+// aborted, but other branches continue -- i.e., if fun on current node
+// returns false, children are not processed further.
+func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
+	if n.This() == nil || n.IsDeleted() {
+		return
+	}
+	level := 0
+	tm := TravMap{} // not significantly faster to pre-allocate larger size
+	start := n.This()
+	cur := start
+	tm.Start(cur)
+outer:
+	for {
+		if cur.This() != nil && !cur.IsDeleted() && fun(cur, level) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
@@ -1012,7 +1073,7 @@ outer:
 	}
 }
 
-// FuncDownMeLast iterates in a depth-first manner over the children, calling
+// WalkPost iterates in a depth-first manner over the children, calling
 // doChildTestFunc on each node to test if processing should proceed (if it returns
 // false then that branch of the tree is not further processed), and then
 // calls given fun function after all of a node's children.
@@ -1021,7 +1082,7 @@ outer:
 // for concurrent calling (modulo conflict management in function call itself).
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
-func (n *Node) FuncDownMeLast(level int, data any, doChildTestFunc Func, fun Func) {
+func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
 	if n.This() == nil || n.IsDeleted() {
 		return
 	}
@@ -1031,8 +1092,7 @@ func (n *Node) FuncDownMeLast(level int, data any, doChildTestFunc Func, fun Fun
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.IsDeleted() && doChildTestFunc(cur, level, data) { // false return means stop
-			level++ // this is the descent branch
+		if cur.This() != nil && !cur.IsDeleted() && doChildTestFunc(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
@@ -1044,7 +1104,6 @@ outer:
 			}
 		} else {
 			tm.Set(cur, cur.NumChildren())
-			level++ // we will pop back up out of this next
 		}
 		// if we get here, we're in the ascent branch -- move to the right and then up
 		for {
@@ -1060,8 +1119,7 @@ outer:
 				}
 				continue
 			}
-			level--
-			fun(cur, level, data) // now we call the function, last..
+			fun(cur) // now we call the function, last..
 			// couldn't go right, move up..
 			tm.End(cur)
 			if cur == start {
@@ -1080,13 +1138,14 @@ outer:
 // https://herringtondarkholme.github.io/2014/02/17/generator/
 // https://stackoverflow.com/questions/2549541/performing-breadth-first-search-recursively/2549825#2549825
 
-// FuncDownBreadthFirst calls function on all children in breadth-first order
+// WalkBreadth calls function on all children in breadth-first order
 // using the standard queue strategy.  This depends on and updates the
 // Depth parameter of the node.  If fun returns false then any further
 // traversal of that branch of the tree is aborted, but other branches continue.
-func (n *Node) FuncDownBreadthFirst(level int, data any, fun Func) {
+func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 	start := n.This()
 
+	level := 0
 	SetDepth(start, level)
 	queue := make([]Ki, 1)
 	queue[0] = start
@@ -1099,7 +1158,7 @@ func (n *Node) FuncDownBreadthFirst(level int, data any, fun Func) {
 		depth := Depth(cur)
 		queue = queue[1:]
 
-		if cur.This() != nil && !cur.IsDeleted() && fun(cur, depth, data) { // false return means don't proceed
+		if cur.This() != nil && !cur.IsDeleted() && fun(cur) { // false return means don't proceed
 			for _, k := range *cur.Children() {
 				if k != nil && k.This() != nil && !k.IsDeleted() {
 					SetDepth(k, depth+1)
@@ -1139,7 +1198,7 @@ func (n *Node) UpdateStart() bool {
 		return false
 	}
 	// pr := prof.Start("ki.Node.UpdateStart")
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+	n.WalkPre(func(k Ki) bool {
 		if !k.IsUpdating() {
 			k.ClearUpdateFlags()
 			k.SetFlag(true, Updating)
@@ -1168,7 +1227,7 @@ func (n *Node) UpdateEnd(updt bool) {
 		DelMgr.DestroyDeleted()
 	}
 	// pr := prof.Start("ki.Node.UpdateEnd")
-	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+	n.WalkPre(func(k Ki) bool {
 		k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
 		return true
 	})

@@ -52,13 +52,13 @@ func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
 	kid.This().OnAdd()
-	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
+	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildAdded(kid)
 		return Continue
 	})
 	if parent != nil {
 		parup := parent.IsUpdating()
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		n.WalkPre(func(k Ki) bool {
 			k.SetFlag(parup, Updating)
 			return Continue
 		})
@@ -84,7 +84,7 @@ func DeleteFromParent(kid Ki) {
 		return
 	}
 	n := kid.AsNode()
-	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
+	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildDeleting(kid)
 		return Continue
 	})
@@ -99,7 +99,7 @@ func DeleteFromParent(kid Ki) {
 func DeletingChildren(k Ki) {
 	k.This().OnChildrenDeleting()
 	n := k.AsNode()
-	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
+	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildrenDeleting()
 		return Continue
 	})
@@ -130,7 +130,7 @@ func Root(k Ki) Ki {
 
 // Depth returns the current depth of the node.
 // This is only valid in a given context, not a stable
-// property of the node (e.g., used in FuncDownBreadthFirst).
+// property of the node (e.g., used in WalkBreadth).
 func Depth(kn Ki) int {
 	return kn.AsNode().depth
 }
@@ -144,7 +144,7 @@ func SetDepth(kn Ki, depth int) {
 // case they are out-of-sync due to more complex tree maninpulations --
 // only call at a known point of non-updating.
 func UpdateReset(kn Ki) {
-	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+	kn.WalkPre(func(k Ki) bool {
 		k.SetFlag(false, Updating)
 		return true
 	})
@@ -180,7 +180,7 @@ func UniqueNameCheck(k Ki) bool {
 // if not unique, call UniquifyNames or take other steps to ensure uniqueness.
 func UniqueNameCheckAll(kn Ki) bool {
 	allunq := true
-	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+	kn.WalkPre(func(k Ki) bool {
 		unq := UniqueNameCheck(k)
 		if !unq {
 			allunq = false
@@ -280,7 +280,7 @@ func UniquifyNames(kn Ki) {
 // Otherwise, existing names are preserved if they are unique, and only
 // duplicates are renamed.  This is a bit slower.
 func UniquifyNamesAll(kn Ki) {
-	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+	kn.WalkPre(func(k Ki) bool {
 		UniquifyNames(k)
 		return Continue
 	})

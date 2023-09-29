@@ -20,7 +20,7 @@ var NodeType = gti.AddType(&gti.Type{
 		{"Kids", &gti.Field{Name: "Kids", Type: "Slice", Doc: "[tableview: -] Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage", Directives: gti.Directives{}}},
 		{"Ths", &gti.Field{Name: "Ths", Type: "Ki", Doc: "[view: -] we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.", Directives: gti.Directives{}}},
 		{"index", &gti.Field{Name: "index", Type: "int", Doc: "[view: -] last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method", Directives: gti.Directives{}}},
-		{"depth", &gti.Field{Name: "depth", Type: "int", Doc: "[view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function", Directives: gti.Directives{}}},
+		{"depth", &gti.Field{Name: "depth", Type: "int", Doc: "[view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function", Directives: gti.Directives{}}},
 	}),
 	Embeds:   ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),

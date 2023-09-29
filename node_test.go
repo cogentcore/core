@@ -473,102 +473,102 @@ func TestNodeCallFun(t *testing.T) {
 	UniquifyNames(parent.This())
 
 	res := make([]string, 0, 10)
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+	parent.WalkPreLevel(func(k Ki, level int) bool {
+		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		return true
 	})
 
-	trg := []string{"[par1, fun_down, lev 0]", "[child1, fun_down, lev 1]", "[child1_001, fun_down, lev 1]", "[subchild1, fun_down, lev 2]", "[child1_002, fun_down, lev 1]"}
+	trg := []string{"[par1, lev 0]", "[child1, lev 1]", "[child1_001, lev 1]", "[subchild1, lev 2]", "[child1_002, lev 1]"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FuncDown error -- results:\n%v\n != target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
 	// test return = false case
-	parent.FuncDownMeFirst(0, "fun_down", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+	parent.WalkPreLevel(func(k Ki, level int) bool {
+		res = append(res, fmt.Sprintf("[%v, lev %v]", k.Name(), level))
 		if k.Name() == "child1_001" {
 			return Break
 		}
 		return Continue
 	})
 
-	trg = []string{"[par1, fun_down, lev 0]", "[child1, fun_down, lev 1]", "[child1_001, fun_down, lev 1]", "[child1_002, fun_down, lev 1]"}
+	trg = []string{"[par1, lev 0]", "[child1, lev 1]", "[child1_001, lev 1]", "[child1_002, lev 1]"}
 	if !reflect.DeepEqual(res, trg) {
 		t.Errorf("FuncDown return false error -- results:\n%v\n != target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
-	schild2.FuncUp(0, "fun_up", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("%v, %v", k.Name(), d))
+	schild2.WalkUp(func(k Ki) bool {
+		res = append(res, fmt.Sprintf("%v", k.Name()))
 		return Continue
 	})
 	//	fmt.Printf("result: %v\n", res)
 
-	trg = []string{"subchild1, fun_up", "child1_001, fun_up", "par1, fun_up"}
+	trg = []string{"subchild1", "child1_001", "par1"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("FuncUp error -- results: %v != target: %v\n", res, trg)
+		t.Errorf("WalkUp error -- results: %v != target: %v\n", res, trg)
 	}
 	res = res[:0]
 
-	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
+	parent.WalkPost(func(k Ki) bool {
 		return Continue
 	},
-		func(k Ki, level int, d any) bool {
-			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+		func(k Ki) bool {
+			res = append(res, fmt.Sprintf("[%v]", k.Name()))
 			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[child1, fun_down_me_last, lev 1]", "[subchild1, fun_down_me_last, lev 2]", "[child1_001, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
+	trg = []string{"[child1]", "[subchild1]", "[child1_001]", "[child1_002]", "[par1]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField WalkPost error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
 	// test for return = false working
-	parent.FuncDownMeLast(0, "fun_down_me_last", func(k Ki, level int, d any) bool {
+	parent.WalkPost(func(k Ki) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
 		return Continue
 	},
-		func(k Ki, level int, d any) bool {
+		func(k Ki) bool {
 			if k.Name() == "child1_001" {
 				return Break
 			}
-			res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+			res = append(res, fmt.Sprintf("[%v]", k.Name()))
 			return Continue
 		})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[child1, fun_down_me_last, lev 1]", "[child1_002, fun_down_me_last, lev 1]", "[par1, fun_down_me_last, lev 0]"}
+	trg = []string{"[child1]", "[child1_002]", "[par1]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownMeLast error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField WalkPost error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
-	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d any) bool {
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+	parent.WalkBreadth(func(k Ki) bool {
+		res = append(res, fmt.Sprintf("[%v]", k.Name()))
 		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_001, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]", "[subchild1, fun_breadth, lev 2]"}
+	trg = []string{"[par1]", "[child1]", "[child1_001]", "[child1_002]", "[subchild1]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownBreadthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField WalkBreadth error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 
 	// test for return false
-	parent.FuncDownBreadthFirst(0, "fun_breadth", func(k Ki, level int, d any) bool {
+	parent.WalkBreadth(func(k Ki) bool {
 		if k.Name() == "child1_001" {
 			return Break
 		}
-		res = append(res, fmt.Sprintf("[%v, %v, lev %v]", k.Name(), d, level))
+		res = append(res, fmt.Sprintf("[%v]", k.Name()))
 		return Continue
 	})
 	// fmt.Printf("node field fun result: %v\n", res)
-	trg = []string{"[par1, fun_breadth, lev 0]", "[child1, fun_breadth, lev 1]", "[child1_002, fun_breadth, lev 1]"}
+	trg = []string{"[par1]", "[child1]", "[child1_002]"}
 	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("NodeField FuncDownBreadthFirst error -- results:\n%v\n!= target:\n%v\n", res, trg)
+		t.Errorf("NodeField WalkBreadth error -- results:\n%v\n!= target:\n%v\n", res, trg)
 	}
 	res = res[:0]
 }
@@ -604,7 +604,7 @@ func TestNodeUpdate(t *testing.T) {
 
 	UniquifyNamesAll(parent.This())
 
-	parent.FuncDownMeFirst(0, "upcnt", func(n Ki, level int, d any) bool {
+	parent.WalkPre(func(n Ki) bool {
 		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.IsUpdating()))
 		return Continue
 	})
@@ -908,11 +908,11 @@ func BenchmarkBuildGuiTreeSlow_NodeEmbed(b *testing.B) {
 	// prof.Profiling = false
 }
 
-func BenchmarkFuncDownMeFirst_NodeEmbed(b *testing.B) {
+func BenchmarkWalkPre_NodeEmbed(b *testing.B) {
 	wt := TestGUITree_NodeEmbed
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		wt.WalkPre(func(k Ki) bool {
 			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue
@@ -922,11 +922,11 @@ func BenchmarkFuncDownMeFirst_NodeEmbed(b *testing.B) {
 	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
 
-func BenchmarkFuncDownMeFirst_NodeField(b *testing.B) {
+func BenchmarkWalkPre_NodeField(b *testing.B) {
 	wt := TestGUITree_NodeField
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		wt.WalkPre(func(k Ki) bool {
 			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue
@@ -936,11 +936,11 @@ func BenchmarkFuncDownMeFirst_NodeField(b *testing.B) {
 	// fmt.Printf("tot nodes: %d\n", TotNodes)
 }
 
-func BenchmarkFuncDownMeFirst_NodeField2(b *testing.B) {
+func BenchmarkWalkPre_NodeField2(b *testing.B) {
 	wt := TestGUITree_NodeField2
 	nnodes := 0
 	for n := 0; n < b.N; n++ {
-		wt.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		wt.WalkPre(func(k Ki) bool {
 			k.SetFlag(false, Updating)
 			nnodes++
 			return Continue

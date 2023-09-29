@@ -412,21 +412,31 @@ type Ki interface {
 	//  Tree walking and Paths
 	//   note: always put function args last -- looks better for inline functions
 
-	// FuncUp calls function on given node and all the way up to its parents,
+	// WalkUp calls function on given node and all the way up to its parents,
 	// and so on -- sequentially all in current go routine (generally
 	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
-	FuncUp(level int, data any, fun Func) bool
+	WalkUp(fun func(k Ki) bool) bool
 
-	// FuncUpParent calls function on parent of node and all the way up to its
+	// WalkUpParent calls function on parent of node and all the way up to its
 	// parents, and so on -- sequentially all in current go routine (generally
 	// necessary for going up, which is typically quite fast anyway) -- level
 	// is incremented after each step (starts at 0, goes up), and passed to
 	// function -- returns false if fun aborts with false, else true.
-	FuncUpParent(level int, data any, fun Func) bool
+	WalkUpParent(fun func(k Ki) bool) bool
 
-	// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
+	// WalkPre calls function on this node (MeFirst) and then iterates
+	// in a depth-first manner over all the children.
+	// The node traversal is non-recursive and uses locally-allocated state -- safe
+	// for concurrent calling (modulo conflict management in function call itself).
+	// Function calls are sequential all in current go routine.
+	// If fun returns false then any further traversal of that branch of the tree is
+	// aborted, but other branches continue -- i.e., if fun on current node
+	// returns false, children are not processed further.
+	WalkPre(fun func(k Ki) bool)
+
+	// WalkPre calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children.
 	// The node traversal is non-recursive and uses locally-allocated state -- safe
 	// for concurrent calling (modulo conflict management in function call itself).
@@ -435,9 +445,9 @@ type Ki interface {
 	// If fun returns false then any further traversal of that branch of the tree is
 	// aborted, but other branches continue -- i.e., if fun on current node
 	// returns false, children are not processed further.
-	FuncDownMeFirst(level int, data any, fun Func)
+	WalkPreLevel(fun func(k Ki, level int) bool)
 
-	// FuncDownMeLast iterates in a depth-first manner over the children, calling
+	// WalkPost iterates in a depth-first manner over the children, calling
 	// doChildTestFunc on each node to test if processing should proceed (if it returns
 	// false then that branch of the tree is not further processed), and then
 	// calls given fun function after all of a node's children
@@ -447,13 +457,13 @@ type Ki interface {
 	// a chance of multiple threads running at the same time.
 	// Function calls are sequential all in current go routine.
 	// The level var tracks overall depth in the tree.
-	FuncDownMeLast(level int, data any, doChildTestFunc Func, fun Func)
+	WalkPost(doChildTestFunc func(k Ki) bool, fun func(k Ki) bool)
 
-	// FuncDownBreadthFirst calls function on all children in breadth-first order
+	// WalkBreadth calls function on all children in breadth-first order
 	// using the standard queue strategy.  This depends on and updates the
 	// Depth parameter of the node.  If fun returns false then any further
 	// traversal of that branch of the tree is aborted, but other branches continue.
-	FuncDownBreadthFirst(level int, data any, fun Func)
+	WalkBreadth(fun func(k Ki) bool)
 
 	// UpdateStart should be called when starting to modify the tree (state or
 	// structure) -- returns whether this node was first to set the Updating
