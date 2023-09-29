@@ -9,21 +9,21 @@ package ki
 type Flags int64 //enums:bitflag
 
 const (
-	// IsField indicates a node is a field in its parent node, not a child in children.
-	IsField Flags = iota
+	// Field indicates a node is a field in its parent node, not a child in children.
+	Field Flags = iota
 
 	// Updating flag is set at UpdateStart and cleared if we were the first
 	// updater at UpdateEnd.
 	Updating
 
-	// NodeDeleted means this node has been deleted (removed from Parent)
+	// Deleted means this node has been deleted (removed from Parent)
 	// Set just prior to calling OnDelete()
-	NodeDeleted
+	Deleted
 
-	// NodeDestroyed means this node has been destroyed.
+	// Destroyed means this node has been destroyed.
 	// It should be skipped in all further processing, if there
 	// are remaining pointers to it.
-	NodeDestroyed
+	Destroyed
 
 	// ChildAdded means one or more new children were added to the node.
 	ChildAdded

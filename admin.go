@@ -57,7 +57,7 @@ func SetParent(kid Ki, parent Ki) {
 		return Continue
 	})
 	if parent != nil {
-		parup := parent.IsUpdating()
+		parup := parent.Is(Updating)
 		n.WalkPre(func(k Ki) bool {
 			k.SetFlag(parup, Updating)
 			return Continue
@@ -88,7 +88,7 @@ func DeleteFromParent(kid Ki) {
 		k.This().OnChildDeleting(kid)
 		return Continue
 	})
-	kid.SetFlag(true, NodeDeleted)
+	kid.SetFlag(true, Deleted)
 	kid.This().OnDelete()
 	SetParent(kid, nil)
 }
@@ -289,18 +289,18 @@ func UniquifyNamesAll(kn Ki) {
 //////////////////////////////////////////////////////////////////////////////
 //  Deletion manager
 
-// Deleted manages all the deleted Ki elements, that are destined to then be
+// DeletedKi manages all the deleted Ki elements, that are destined to then be
 // destroyed, without having an additional pointer on the Ki object
-type Deleted struct {
+type DeletedKi struct {
 	Dels []Ki
 	Mu   sync.Mutex
 }
 
 // DelMgr is the manager of all deleted items
-var DelMgr = Deleted{}
+var DelMgr = DeletedKi{}
 
 // Add the Ki elements to the deleted list
-func (dm *Deleted) Add(kis ...Ki) {
+func (dm *DeletedKi) Add(kis ...Ki) {
 	dm.Mu.Lock()
 	if dm.Dels == nil {
 		dm.Dels = make([]Ki, 0)
@@ -310,7 +310,7 @@ func (dm *Deleted) Add(kis ...Ki) {
 }
 
 // DestroyDeleted destroys any deleted items in list
-func (dm *Deleted) DestroyDeleted() {
+func (dm *DeletedKi) DestroyDeleted() {
 	// pr := prof.Start("ki.DestroyDeleted")
 	// defer pr.End()
 	dm.Mu.Lock()

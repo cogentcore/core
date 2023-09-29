@@ -334,40 +334,19 @@ type Ki interface {
 	//////////////////////////////////////////////////////////////////////////
 	//  Flags
 
-	// HasFlag checks if flag is set
-	// using atomic, safe for concurrent access
-	HasFlag(f enums.BitFlag) bool
+	// Is checks if flag is set, using atomic, safe for concurrent access
+	Is(f enums.BitFlag) bool
 
 	// SetFlag sets the given flag(s) to given state
 	// using atomic, safe for concurrent access
 	SetFlag(on bool, f ...enums.BitFlag)
 
-	// IsField checks if this is a field on a parent struct (via IsField
-	// Flag), as opposed to a child in Children -- Ki nodes can be added as
-	// fields to structs and set the struct as their parent.
-	// In which case, they should have their IsField flag set.
-	IsField() bool
-
-	// IsUpdating checks if node is currently updating.
-	IsUpdating() bool
-
 	// SetChildAdded sets the ChildAdded flag -- set when notification is needed
 	// for Add, Insert methods
 	SetChildAdded()
 
-	// IsDeleted checks if this node has just been deleted (within last update
-	// cycle), indicated by the NodeDeleted flag which is set when the node is
-	// deleted, and is cleared at next UpdateStart call.
-	IsDeleted() bool
-
-	// IsDestroyed checks if this node has been destroyed.
-	// The NodeDestroyed flag is set at start of Destroy function.
-	// Places where pointers to potentially destroyed nodes may linger
-	// should also check this flag and reset those pointers.
-	IsDestroyed() bool
-
 	// ClearUpdateFlags resets all structure update related flags:
-	// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted
+	// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
 	// automatically called on StartUpdate to reset any old state.
 	ClearUpdateFlags()
 

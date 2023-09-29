@@ -605,7 +605,7 @@ func TestNodeUpdate(t *testing.T) {
 	UniquifyNamesAll(parent.This())
 
 	parent.WalkPre(func(n Ki) bool {
-		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.IsUpdating()))
+		res = append(res, fmt.Sprintf("%v %v", n.Name(), n.Is(Updating)))
 		return Continue
 	})
 	// fmt.Printf("res: %v\n", res)

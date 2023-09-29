@@ -80,7 +80,7 @@ func (n *Node) String() string {
 // (e.g., in reflect calls).  Returns nil if node is nil,
 // has been destroyed, or is improperly constructed.
 func (n *Node) This() Ki {
-	if n == nil || n.IsDestroyed() {
+	if n == nil || n.Is(Destroyed) {
 		return nil
 	}
 	return n.Ths
@@ -359,7 +359,7 @@ func UnescapePathName(name string) string {
 // Path is only valid when child names are unique (see Unique* functions)
 func (n *Node) Path() string {
 	if n.Par != nil {
-		if n.IsField() {
+		if n.Is(Field) {
 			return n.Par.Path() + "." + EscapePathName(n.Nm)
 		}
 		return n.Par.Path() + "/" + EscapePathName(n.Nm)
@@ -380,7 +380,7 @@ func (n *Node) PathFrom(par Ki) string {
 		} else {
 			ppath = n.Par.PathFrom(par)
 		}
-		if n.IsField() {
+		if n.Is(Field) {
 			return ppath + "." + EscapePathName(n.Nm)
 		}
 		return ppath + "/" + EscapePathName(n.Nm)
@@ -690,7 +690,7 @@ func (n *Node) DeleteChildren(destroy bool) {
 		if kid == nil {
 			continue
 		}
-		kid.SetFlag(true, NodeDeleted)
+		kid.SetFlag(true, Deleted)
 		kid.This().OnDelete()
 		SetParent(kid, nil)
 		UpdateReset(kid)
@@ -729,7 +729,7 @@ func (n *Node) Destroy() {
 	// 	return true
 	// })
 	DelMgr.DestroyDeleted() // then destroy all those kids
-	n.SetFlag(true, NodeDestroyed)
+	n.SetFlag(true, Destroyed)
 	n.Ths = nil // last gasp: lose our own sense of self..
 	// note: above is thread-safe because This() accessor checks Destroyed
 }
@@ -737,9 +737,8 @@ func (n *Node) Destroy() {
 //////////////////////////////////////////////////////////////////////////
 //  Flags
 
-// HasFlag checks if flag is set
-// using atomic, safe for concurrent access
-func (n *Node) HasFlag(f enums.BitFlag) bool {
+// Is checks if flag is set, using atomic, safe for concurrent access
+func (n *Node) Is(f enums.BitFlag) bool {
 	return n.Flags.HasFlag(f)
 }
 
@@ -749,47 +748,17 @@ func (n *Node) SetFlag(on bool, f ...enums.BitFlag) {
 	n.Flags.SetFlag(on, f...)
 }
 
-// IsField checks if this is a field on a parent struct (via IsField
-// Flag), as opposed to a child in Children -- Ki nodes can be added as
-// fields to structs and they are automatically parented and named with
-// field name during Init function -- essentially they function as fixed
-// children of the parent struct, and are automatically included in
-// FuncDown* traversals, etc -- see also FunFields.
-func (n *Node) IsField() bool {
-	return n.Flags.HasFlag(IsField)
-}
-
-// IsUpdating checks if node is currently updating.
-func (n *Node) IsUpdating() bool {
-	return n.Flags.HasFlag(Updating)
-}
-
 // SetChildAdded sets the ChildAdded flag -- set when notification is needed
 // for Add, Insert methods
 func (n *Node) SetChildAdded() {
 	n.SetFlag(true, ChildAdded)
 }
 
-// IsDeleted checks if this node has just been deleted (within last update
-// cycle), indicated by the NodeDeleted flag which is set when the node is
-// deleted, and is cleared at next UpdateStart call.
-func (n *Node) IsDeleted() bool {
-	return n.Flags.HasFlag(NodeDeleted)
-}
-
-// IsDestroyed checks if this node has been destroyed.
-// The NodeDestroyed flag is set at start of Destroy function.
-// Places where pointers to potentially destroyed nodes may linger
-// should also check this flag and reset those pointers.
-func (n *Node) IsDestroyed() bool {
-	return n.Flags.HasFlag(NodeDestroyed)
-}
-
 // ClearUpdateFlags resets all structure update related flags:
-// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted
+// ChildAdded, ChildDeleted, ChildrenDeleted, Deleted
 // automatically called on StartUpdate to reset any old state.
 func (n *Node) ClearUpdateFlags() {
-	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted)
+	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, Deleted)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -957,7 +926,7 @@ func (tm TravMap) Get(k Ki) int {
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
 func (n *Node) WalkPre(fun func(Ki) bool) {
-	if n.This() == nil || n.IsDeleted() {
+	if n.This() == nil || n.Is(Deleted) {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -966,11 +935,11 @@ func (n *Node) WalkPre(fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.IsDeleted() && fun(cur) { // false return means stop
+		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -986,7 +955,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1018,7 +987,7 @@ outer:
 // aborted, but other branches continue -- i.e., if fun on current node
 // returns false, children are not processed further.
 func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
-	if n.This() == nil || n.IsDeleted() {
+	if n.This() == nil || n.Is(Deleted) {
 		return
 	}
 	level := 0
@@ -1028,12 +997,12 @@ func (n *Node) WalkPreLevel(fun func(k Ki, level int) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.IsDeleted() && fun(cur, level) { // false return means stop
+		if cur.This() != nil && !cur.Is(Deleted) && fun(cur, level) { // false return means stop
 			level++ // this is the descent branch
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue
@@ -1050,7 +1019,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1083,7 +1052,7 @@ outer:
 // Function calls are sequential all in current go routine.
 // The level var tracks overall depth in the tree.
 func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
-	if n.This() == nil || n.IsDeleted() {
+	if n.This() == nil || n.Is(Deleted) {
 		return
 	}
 	tm := TravMap{} // not significantly faster to pre-allocate larger size
@@ -1092,11 +1061,11 @@ func (n *Node) WalkPost(doChildTestFunc func(Ki) bool, fun func(Ki) bool) {
 	tm.Start(cur)
 outer:
 	for {
-		if cur.This() != nil && !cur.IsDeleted() && doChildTestFunc(cur) { // false return means stop
+		if cur.This() != nil && !cur.Is(Deleted) && doChildTestFunc(cur) { // false return means stop
 			if cur.HasChildren() {
 				tm.Set(cur, 0) // 0 for no fields
 				nxt := cur.Child(0)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Set(cur, -1)
 					continue
@@ -1112,7 +1081,7 @@ outer:
 				curChild++
 				tm.Set(cur, curChild)
 				nxt := cur.Child(curChild)
-				if nxt != nil && nxt.This() != nil && !nxt.IsDeleted() {
+				if nxt != nil && nxt.This() != nil && !nxt.Is(Deleted) {
 					cur = nxt.This()
 					tm.Start(cur)
 					continue outer
@@ -1158,9 +1127,9 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 		depth := Depth(cur)
 		queue = queue[1:]
 
-		if cur.This() != nil && !cur.IsDeleted() && fun(cur) { // false return means don't proceed
+		if cur.This() != nil && !cur.Is(Deleted) && fun(cur) { // false return means don't proceed
 			for _, k := range *cur.Children() {
-				if k != nil && k.This() != nil && !k.IsDeleted() {
+				if k != nil && k.This() != nil && !k.Is(Deleted) {
 					SetDepth(k, depth+1)
 					queue = append(queue, k)
 				}
@@ -1194,12 +1163,12 @@ func (n *Node) WalkBreadth(fun func(k Ki) bool) {
 //	defer n.UpdateEnd(updt)
 //	... code
 func (n *Node) UpdateStart() bool {
-	if n.IsUpdating() || n.IsDestroyed() {
+	if n.Is(Updating) || n.Is(Destroyed) {
 		return false
 	}
 	// pr := prof.Start("ki.Node.UpdateStart")
 	n.WalkPre(func(k Ki) bool {
-		if !k.IsUpdating() {
+		if !k.Is(Updating) {
 			k.ClearUpdateFlags()
 			k.SetFlag(true, Updating)
 			return Continue
@@ -1220,10 +1189,10 @@ func (n *Node) UpdateEnd(updt bool) {
 	if !updt {
 		return
 	}
-	if n.IsDestroyed() || n.IsDeleted() {
+	if n.Is(Destroyed) || n.Is(Deleted) {
 		return
 	}
-	if n.HasFlag(ChildDeleted) || n.HasFlag(ChildrenDeleted) {
+	if n.Is(ChildDeleted) || n.Is(ChildrenDeleted) {
 		DelMgr.DestroyDeleted()
 	}
 	// pr := prof.Start("ki.Node.UpdateEnd")

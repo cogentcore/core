@@ -21,24 +21,24 @@ const FlagsN Flags = 7
 // Re-run the enumgen command to generate them again.
 func _FlagsNoOp() {
 	var x [1]struct{}
-	_ = x[IsField-(0)]
+	_ = x[Field-(0)]
 	_ = x[Updating-(1)]
-	_ = x[NodeDeleted-(2)]
-	_ = x[NodeDestroyed-(3)]
+	_ = x[Deleted-(2)]
+	_ = x[Destroyed-(3)]
 	_ = x[ChildAdded-(4)]
 	_ = x[ChildDeleted-(5)]
 	_ = x[ChildrenDeleted-(6)]
 }
 
 var _FlagsNameToValueMap = map[string]Flags{
-	`IsField`:         0,
-	`isfield`:         0,
+	`Field`:           0,
+	`field`:           0,
 	`Updating`:        1,
 	`updating`:        1,
-	`NodeDeleted`:     2,
-	`nodedeleted`:     2,
-	`NodeDestroyed`:   3,
-	`nodedestroyed`:   3,
+	`Deleted`:         2,
+	`deleted`:         2,
+	`Destroyed`:       3,
+	`destroyed`:       3,
 	`ChildAdded`:      4,
 	`childadded`:      4,
 	`ChildDeleted`:    5,
@@ -48,20 +48,20 @@ var _FlagsNameToValueMap = map[string]Flags{
 }
 
 var _FlagsDescMap = map[Flags]string{
-	0: `IsField indicates a node is a field in its parent node, not a child in children.`,
+	0: `Field indicates a node is a field in its parent node, not a child in children.`,
 	1: `Updating flag is set at UpdateStart and cleared if we were the first updater at UpdateEnd.`,
-	2: `NodeDeleted means this node has been deleted (removed from Parent) Set just prior to calling OnDelete()`,
-	3: `NodeDestroyed means this node has been destroyed. It should be skipped in all further processing, if there are remaining pointers to it.`,
+	2: `Deleted means this node has been deleted (removed from Parent) Set just prior to calling OnDelete()`,
+	3: `Destroyed means this node has been destroyed. It should be skipped in all further processing, if there are remaining pointers to it.`,
 	4: `ChildAdded means one or more new children were added to the node.`,
 	5: `ChildDeleted means one or more children were deleted from the node.`,
 	6: `ChildrenDeleted means all children were deleted.`,
 }
 
 var _FlagsMap = map[Flags]string{
-	0: `IsField`,
+	0: `Field`,
 	1: `Updating`,
-	2: `NodeDeleted`,
-	3: `NodeDestroyed`,
+	2: `Deleted`,
+	3: `Destroyed`,
 	4: `ChildAdded`,
 	5: `ChildDeleted`,
 	6: `ChildrenDeleted`,
