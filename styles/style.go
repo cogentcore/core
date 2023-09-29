@@ -19,10 +19,10 @@ import (
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
 // styling strategy:
-// * either direct Go code based styling functions or ki.Props style map[string]any settings.
-// * we process those properties dynamically when rendering (first pass only) into state
+//	- either direct Go code based styling functions or ki.Props style map[string]any settings.
+//	- we process those properties dynamically when rendering (first pass only) into state
 //   on objects that can be directly used during rendering
-// * good for basic rendering -- lots of additional things that could be extended later..
+//	- good for basic rendering -- lots of additional things that could be extended later..
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
@@ -35,7 +35,7 @@ type Style struct {
 
 	// Abilities specifies the abilities of this element, which determine
 	// which kinds of states the element can express.
-	// This is used by the goosi.events system.  Putting this info next
+	// This is used by the goosi/events system.  Putting this info next
 	// to the State info makes it easy to configure and manage.
 	Abilities states.Abilities
 

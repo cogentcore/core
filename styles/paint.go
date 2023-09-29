@@ -218,10 +218,8 @@ func (pf *Fill) SetColor(cl color.Color) {
 	}
 }
 
-//COLORTODO(kai): rename this to SetFull (and the other SetColorSpec below)
-
-// SetColorSpec sets full color spec from source
-func (pf *Fill) SetColorSpec(cl *colors.Full) {
+// SetFullColor sets full color (solid or gradient) from source
+func (pf *Fill) SetFullColor(cl *colors.Full) {
 	if cl == nil {
 		pf.On = false
 	} else {
@@ -327,8 +325,8 @@ func (ps *Stroke) SetColor(cl color.Color) {
 	}
 }
 
-// SetColorSpec sets full color spec from source
-func (ps *Stroke) SetColorSpec(cl *colors.Full) {
+// SetFullColor sets full color spec from source
+func (ps *Stroke) SetFullColor(cl *colors.Full) {
 	if cl == nil {
 		ps.On = false
 	} else {

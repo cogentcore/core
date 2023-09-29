@@ -25,6 +25,14 @@ const (
 	// Draggable means it can be Dragged
 	Draggable
 
+	// Droppable means it can receive Drop events
+	// (not specific to current Drag item, just generally)
+	Droppable
+
+	// Slideable means it has a slider element that can be dragged
+	// to change value.  Cannot be both Draggable and Slideable.
+	Slideable
+
 	// Scrollable means it can be Scrolled
 	Scrollable
 

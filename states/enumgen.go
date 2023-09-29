@@ -11,11 +11,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
 
 // AbilitiesN is the highest valid value
 // for type Abilities, plus one.
-const AbilitiesN Abilities = 10
+const AbilitiesN Abilities = 12
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -25,12 +25,14 @@ func _AbilitiesNoOp() {
 	_ = x[Selectable-(1)]
 	_ = x[Activatable-(2)]
 	_ = x[Draggable-(3)]
-	_ = x[Scrollable-(4)]
-	_ = x[Focusable-(5)]
-	_ = x[FocusWithinable-(6)]
-	_ = x[Checkable-(7)]
-	_ = x[Hoverable-(8)]
-	_ = x[LongHoverable-(9)]
+	_ = x[Droppable-(4)]
+	_ = x[Slideable-(5)]
+	_ = x[Scrollable-(6)]
+	_ = x[Focusable-(7)]
+	_ = x[FocusWithinable-(8)]
+	_ = x[Checkable-(9)]
+	_ = x[Hoverable-(10)]
+	_ = x[LongHoverable-(11)]
 }
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
@@ -42,44 +44,52 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`activatable`:     2,
 	`Draggable`:       3,
 	`draggable`:       3,
-	`Scrollable`:      4,
-	`scrollable`:      4,
-	`Focusable`:       5,
-	`focusable`:       5,
-	`FocusWithinable`: 6,
-	`focuswithinable`: 6,
-	`Checkable`:       7,
-	`checkable`:       7,
-	`Hoverable`:       8,
-	`hoverable`:       8,
-	`LongHoverable`:   9,
-	`longhoverable`:   9,
+	`Droppable`:       4,
+	`droppable`:       4,
+	`Slideable`:       5,
+	`slideable`:       5,
+	`Scrollable`:      6,
+	`scrollable`:      6,
+	`Focusable`:       7,
+	`focusable`:       7,
+	`FocusWithinable`: 8,
+	`focuswithinable`: 8,
+	`Checkable`:       9,
+	`checkable`:       9,
+	`Hoverable`:       10,
+	`hoverable`:       10,
+	`LongHoverable`:   11,
+	`longhoverable`:   11,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
-	0: `Editable means it can switch between ReadOnly and not`,
-	1: `Selectable means it can be Selected`,
-	2: `Activatable means it can be made Active`,
-	3: `Draggable means it can be Dragged`,
-	4: `Scrollable means it can be Scrolled`,
-	5: `Focusable means it can be Focused`,
-	6: `FocusWithinable means it can be FocusedWithin`,
-	7: `Checkable means it can be Checked`,
-	8: `Hoverable means it can be Hovered`,
-	9: `LongHoverable means it can be LongHovered`,
+	0:  `Editable means it can switch between ReadOnly and not`,
+	1:  `Selectable means it can be Selected`,
+	2:  `Activatable means it can be made Active`,
+	3:  `Draggable means it can be Dragged`,
+	4:  `Droppable means it can receive Drop events (not specific to current Drag item, just generally)`,
+	5:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
+	6:  `Scrollable means it can be Scrolled`,
+	7:  `Focusable means it can be Focused`,
+	8:  `FocusWithinable means it can be FocusedWithin`,
+	9:  `Checkable means it can be Checked`,
+	10: `Hoverable means it can be Hovered`,
+	11: `LongHoverable means it can be LongHovered`,
 }
 
 var _AbilitiesMap = map[Abilities]string{
-	0: `Editable`,
-	1: `Selectable`,
-	2: `Activatable`,
-	3: `Draggable`,
-	4: `Scrollable`,
-	5: `Focusable`,
-	6: `FocusWithinable`,
-	7: `Checkable`,
-	8: `Hoverable`,
-	9: `LongHoverable`,
+	0:  `Editable`,
+	1:  `Selectable`,
+	2:  `Activatable`,
+	3:  `Draggable`,
+	4:  `Droppable`,
+	5:  `Slideable`,
+	6:  `Scrollable`,
+	7:  `Focusable`,
+	8:  `FocusWithinable`,
+	9:  `Checkable`,
+	10: `Hoverable`,
+	11: `LongHoverable`,
 }
 
 // String returns the string representation
@@ -211,11 +221,11 @@ func (i *Abilities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
+var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 17
+const StatesN States = 20
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -226,18 +236,21 @@ func _StatesNoOp() {
 	_ = x[Selected-(2)]
 	_ = x[Active-(3)]
 	_ = x[Dragged-(4)]
-	_ = x[Scrolled-(5)]
-	_ = x[Focused-(6)]
-	_ = x[FocusedWithin-(7)]
-	_ = x[Checked-(8)]
-	_ = x[Hovered-(9)]
-	_ = x[LongHovered-(10)]
-	_ = x[Invalid-(11)]
-	_ = x[Required-(12)]
-	_ = x[Blank-(13)]
-	_ = x[Link-(14)]
-	_ = x[Visited-(15)]
-	_ = x[AnyLink-(16)]
+	_ = x[Sliding-(5)]
+	_ = x[Scrolled-(6)]
+	_ = x[Focused-(7)]
+	_ = x[FocusedWithin-(8)]
+	_ = x[Checked-(9)]
+	_ = x[Hovered-(10)]
+	_ = x[LongHovered-(11)]
+	_ = x[DragHovered-(12)]
+	_ = x[DropOK-(13)]
+	_ = x[Invalid-(14)]
+	_ = x[Required-(15)]
+	_ = x[Blank-(16)]
+	_ = x[Link-(17)]
+	_ = x[Visited-(18)]
+	_ = x[AnyLink-(19)]
 }
 
 var _StatesNameToValueMap = map[string]States{
@@ -251,50 +264,59 @@ var _StatesNameToValueMap = map[string]States{
 	`active`:        3,
 	`Dragged`:       4,
 	`dragged`:       4,
-	`Scrolled`:      5,
-	`scrolled`:      5,
-	`Focused`:       6,
-	`focused`:       6,
-	`FocusedWithin`: 7,
-	`focusedwithin`: 7,
-	`Checked`:       8,
-	`checked`:       8,
-	`Hovered`:       9,
-	`hovered`:       9,
-	`LongHovered`:   10,
-	`longhovered`:   10,
-	`Invalid`:       11,
-	`invalid`:       11,
-	`Required`:      12,
-	`required`:      12,
-	`Blank`:         13,
-	`blank`:         13,
-	`Link`:          14,
-	`link`:          14,
-	`Visited`:       15,
-	`visited`:       15,
-	`AnyLink`:       16,
-	`anylink`:       16,
+	`Sliding`:       5,
+	`sliding`:       5,
+	`Scrolled`:      6,
+	`scrolled`:      6,
+	`Focused`:       7,
+	`focused`:       7,
+	`FocusedWithin`: 8,
+	`focusedwithin`: 8,
+	`Checked`:       9,
+	`checked`:       9,
+	`Hovered`:       10,
+	`hovered`:       10,
+	`LongHovered`:   11,
+	`longhovered`:   11,
+	`DragHovered`:   12,
+	`draghovered`:   12,
+	`DropOK`:        13,
+	`dropok`:        13,
+	`Invalid`:       14,
+	`invalid`:       14,
+	`Required`:      15,
+	`required`:      15,
+	`Blank`:         16,
+	`blank`:         16,
+	`Link`:          17,
+	`link`:          17,
+	`Visited`:       18,
+	`visited`:       18,
+	`AnyLink`:       19,
+	`anylink`:       19,
 }
 
 var _StatesDescMap = map[States]string{
-	0:  `Disabled elements cannot be interacted with or selected, but do display`,
-	1:  `ReadOnly elements elements cannot be changed`,
-	2:  `Selected elements have been marked for clipboard or other such actions`,
-	3:  `Active elements are currently being interacted with, usually involving a mouse button being pressed. It is distinct from Focused, Dragged, and Scrolled.`,
-	4:  `Dragged means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove). The Active state happens during the initial MouseDown, and, if`,
-	5:  `Scrolled means this element is currently being scrolled.`,
-	6:  `Focused elements receive keyboard input`,
-	7:  `FocusedWithin elements have a Focused element within them, including self`,
-	8:  `Checked is for check boxes or radio buttons or other similar state`,
-	9:  `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active`,
-	10: `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup`,
-	11: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
-	12: `Required indicates that the element must be set by the user`,
-	13: `Blank indicates that the element has yet to be set by user`,
-	14: `Link indicates a URL link that has not been visited yet`,
-	15: `Visited indicates a URL link that has been visited`,
-	16: `AnyLink is either Link or Visited`,
+	0:  `Disabled elements cannot be interacted with or selected, but do display.`,
+	1:  `ReadOnly elements cannot be changed, but can be selected.`,
+	2:  `Selected elements have been marked for clipboard or other such actions.`,
+	3:  `Active elements are currently being interacted with, usually involving a mouse button being pressed in the element. A text field will be active while being clicked on, and this can also result in a Focused state. If further movement happens, an element can also end up being Dragged or Sliding.`,
+	4:  `Dragged means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove), as part of a drag-n-drop sequence.`,
+	5:  `Sliding means this element is currently being manipulated via mouse to change the slider state, which will continue until the mouse is released, even if it goes off the element. It should also still be Active.`,
+	6:  `Scrolled means this element is currently being scrolled.`,
+	7:  `Focused elements receive keyboard input.`,
+	8:  `FocusedWithin elements have a Focused element within them, including self.`,
+	9:  `Checked is for check boxes or radio buttons or other similar state.`,
+	10: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
+	11: `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
+	12: `DragHovered indicates that a mouse pointer has entered the space over an element, during a drag-n-drop sequence. This makes it a candidate for a potential drop target. See DropOK for state in relation to that.`,
+	13: `DropOK indicates that a DragHovered element is OK to receive a Drop from the current Dragged item, subject also to the Droppable ability.`,
+	14: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
+	15: `Required indicates that the element must be set by the user`,
+	16: `Blank indicates that the element has yet to be set by user`,
+	17: `Link indicates a URL link that has not been visited yet`,
+	18: `Visited indicates a URL link that has been visited`,
+	19: `AnyLink is either Link or Visited`,
 }
 
 var _StatesMap = map[States]string{
@@ -303,18 +325,21 @@ var _StatesMap = map[States]string{
 	2:  `Selected`,
 	3:  `Active`,
 	4:  `Dragged`,
-	5:  `Scrolled`,
-	6:  `Focused`,
-	7:  `FocusedWithin`,
-	8:  `Checked`,
-	9:  `Hovered`,
-	10: `LongHovered`,
-	11: `Invalid`,
-	12: `Required`,
-	13: `Blank`,
-	14: `Link`,
-	15: `Visited`,
-	16: `AnyLink`,
+	5:  `Sliding`,
+	6:  `Scrolled`,
+	7:  `Focused`,
+	8:  `FocusedWithin`,
+	9:  `Checked`,
+	10: `Hovered`,
+	11: `LongHovered`,
+	12: `DragHovered`,
+	13: `DropOK`,
+	14: `Invalid`,
+	15: `Required`,
+	16: `Blank`,
+	17: `Link`,
+	18: `Visited`,
+	19: `AnyLink`,
 }
 
 // String returns the string representation

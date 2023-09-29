@@ -351,7 +351,7 @@ func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *colors.Full) {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Solid}, image.Point{}, draw.Src)
 	} else {
-		pc.FillStyle.SetColorSpec(clr)
+		pc.FillStyle.SetFullColor(clr)
 		pc.DrawRectangle(rs, pos.X, pos.Y, size.X, size.Y)
 		pc.Fill(rs)
 	}
