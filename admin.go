@@ -56,7 +56,7 @@ func SetParent(kid Ki, parent Ki) {
 		k.This().OnChildAdded(kid)
 		return Continue
 	})
-	if parent != nil && !parent.OnlySelfUpdate() {
+	if parent != nil {
 		parup := parent.IsUpdating()
 		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
 			k.SetFlag(parup, Updating)
@@ -74,6 +74,35 @@ func MoveToParent(kid Ki, parent Ki) {
 		oldPar.DeleteChild(kid, false)
 	}
 	parent.AddChild(kid)
+}
+
+// DeleteFromParent calls OnChildDeleting on all parents of given node
+// then calls OnDelete on the node, and finally sets the Parent to nil.
+// Call this *before* deleting the child.
+func DeleteFromParent(kid Ki) {
+	if kid.Parent() == nil {
+		return
+	}
+	n := kid.AsNode()
+	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
+		k.This().OnChildDeleting(kid)
+		return Continue
+	})
+	kid.SetFlag(true, NodeDeleted)
+	kid.This().OnDelete()
+	SetParent(kid, nil)
+}
+
+// DeletingChildren calls OnChildrenDeleting on given node
+// and all parents thereof.
+// Call this *before* deleting the children.
+func DeletingChildren(k Ki) {
+	k.This().OnChildrenDeleting()
+	n := k.AsNode()
+	n.FuncUpParent(0, nil, func(k Ki, level int, data any) bool {
+		k.This().OnChildrenDeleting()
+		return Continue
+	})
 }
 
 // New adds a new child of the given the type
@@ -115,14 +144,10 @@ func SetDepth(kn Ki, depth int) {
 // case they are out-of-sync due to more complex tree maninpulations --
 // only call at a known point of non-updating.
 func UpdateReset(kn Ki) {
-	if kn.OnlySelfUpdate() {
-		kn.SetFlag(false, Updating)
-	} else {
-		kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			k.SetFlag(false, Updating)
-			return true
-		})
-	}
+	kn.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		k.SetFlag(false, Updating)
+		return true
+	})
 }
 
 //////////////////////////////////////////////////

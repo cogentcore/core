@@ -10,13 +10,10 @@ import (
 
 // TestNodeType is the [gti.Type] for [TestNode]
 var TestNodeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/ki/v2/testdata.TestNode",
+	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.TestNode",
 	Doc:        "",
 	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Sig1", &gti.Field{Name: "Sig1", Type: "ki.Signal", Doc: "", Directives: gti.Directives{}}},
-		{"Sig2", &gti.Field{Name: "Sig2", Type: "ki.Signal", Doc: "", Directives: gti.Directives{}}},
-	}),
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -42,7 +39,7 @@ func (t *TestNode) New() ki.Ki {
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
 var NodeEmbedType = gti.AddType(&gti.Type{
-	Name: "goki.dev/ki/v2/testdata.NodeEmbed",
+	Name: "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeEmbed",
 	Doc:  "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "direct", Directive: "value", Args: []string{}},
@@ -76,7 +73,7 @@ func (t *NodeEmbed) New() ki.Ki {
 
 // NodeFieldType is the [gti.Type] for [NodeField]
 var NodeFieldType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/ki/v2/testdata.NodeField",
+	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeField",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -107,7 +104,7 @@ func (t *NodeField) New() ki.Ki {
 
 // NodeField2Type is the [gti.Type] for [NodeField2]
 var NodeField2Type = gti.AddType(&gti.Type{
-	Name:       "goki.dev/ki/v2/testdata.NodeField2",
+	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeField2",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

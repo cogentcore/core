@@ -7,7 +7,6 @@ package ki_test
 import (
 	"fmt"
 	"reflect"
-	"strings"
 	"testing"
 
 	"goki.dev/gti"
@@ -303,7 +302,7 @@ func TestNodeConfig(t *testing.T) {
 	// child4 :=
 	parent.NewChild(typ, "child3")
 
-	config1 := TypeAndNameList{
+	config1 := Config{
 		{Type: testdata.NodeEmbedType, Name: "child2"},
 		{Type: testdata.NodeEmbedType, Name: "child3"},
 		{Type: testdata.NodeEmbedType, Name: "child1"},
@@ -318,7 +317,7 @@ func TestNodeConfig(t *testing.T) {
 
 	cf1 := fmt.Sprintf("config1:\n%v\n", parent.Kids)
 
-	config2 := TypeAndNameList{
+	config2 := Config{
 		{testdata.NodeEmbedType, "child4"},
 		{NodeType, "child1"}, // note: changing this to Node type removes child1.subchild1
 		{testdata.NodeEmbedType, "child5"},
@@ -582,9 +581,6 @@ func TestNodeUpdate(t *testing.T) {
 	parent.Mbr2 = 32
 
 	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v flags %v", s.Name(), NodeSignals(sig), s.AsNode().Flags.String()))
-	})
 	// child1 :=
 	updt := parent.UpdateStart()
 	parent.SetChildAdded()
@@ -600,35 +596,11 @@ func TestNodeUpdate(t *testing.T) {
 	child2.SetChildAdded()
 	parent.UpdateEnd(updt)
 
-	for ri := range res {
-		res[ri] = strings.Replace(res[ri], "HasNoKiFields|", "", -1)
-	}
-	// fmt.Printf("res: %v\n", res)
-	trg := []string{"par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded", "par1 sig NodeSignalUpdated flags ChildAdded"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("Add child sigs error -- results:\n%v\n!= target:\n%v\n", res, trg)
-	}
-	res = res[:0]
-
-	child2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
-	})
-	schild2.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), NodeSignals(sig)))
-	})
-
 	// fmt.Print("\nnode update top starting\n")
 	updt = child2.UpdateStart()
 	updt2 := schild2.UpdateStart()
 	schild2.UpdateEnd(updt2)
 	child2.UpdateEnd(updt)
-
-	// fmt.Printf("res: %v\n", res)
-	trg = []string{"child1 sig NodeSignalUpdated"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("update signal only top error -- results: %v != target: %v\n", res, trg)
-	}
-	res = res[:0]
 
 	UniquifyNamesAll(parent.This())
 
@@ -637,11 +609,6 @@ func TestNodeUpdate(t *testing.T) {
 		return Continue
 	})
 	// fmt.Printf("res: %v\n", res)
-
-	trg = []string{"par1 false", "child1 false", "child1_001 false", "subchild1 false", "child1_002 false"}
-	if !reflect.DeepEqual(res, trg) {
-		t.Errorf("update counts error -- results: %v != target: %v\n", res, trg)
-	}
 
 }
 
@@ -652,10 +619,6 @@ func TestProps(t *testing.T) {
 	parent.Mbr1 = "bloop"
 	parent.Mbr2 = 32
 
-	res := make([]string, 0, 10)
-	parent.NodeSignal().Connect(&parent, func(r, s Ki, sig int64, d any) {
-		res = append(res, fmt.Sprintf("%v sig %v", s.Name(), sig))
-	})
 	// child1 :=
 	parent.NewChild(typ, "child1")
 	child2 := parent.NewChild(typ, "child1")
@@ -721,10 +684,6 @@ func TestProps(t *testing.T) {
 }
 
 func TestTreeMod(t *testing.T) {
-	SignalTrace = true
-	sigs := ""
-	SignalTraceString = &sigs
-
 	tree1 := Node{}
 	typ := tree1.KiType()
 	tree1.InitName(&tree1, "tree1")
@@ -746,9 +705,6 @@ func TestTreeMod(t *testing.T) {
 	// schild22 :=
 	child22.NewChild(typ, "subchild22")
 
-	// fmt.Printf("Setup Signals:\n%v", sigs)
-	sigs = ""
-
 	// fmt.Printf("#################################\n")
 
 	// fmt.Printf("Trees before:\n%v%v", tree1, tree2)
@@ -760,35 +716,13 @@ func TestTreeMod(t *testing.T) {
 	// fmt.Printf("#################################\n")
 	// fmt.Printf("Trees after add child12 move:\n%v%v", tree1, tree2)
 
-	mvsigs := `ki.Signal Emit from: tree1 sig: NodeSignalUpdated data: ChildDeleted
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: ChildAdded
-`
-
-	_ = mvsigs
-	// fmt.Printf("Move Signals:\n%v", sigs)
-	if sigs != mvsigs {
-		t.Errorf("TestTreeMod child12 move signals:\n%v\nnot as expected:\n%v\n", sigs, mvsigs)
-	}
-	sigs = ""
-
 	updt = tree2.UpdateStart()
 	tree2.DeleteChild(child12, true)
 	tree2.UpdateEnd(updt)
 
 	// fmt.Printf("#################################\n")
 
-	delsigs := `ki.Signal Emit from: child12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: subchild12 sig: NodeSignalDeleting data: <nil>
-ki.Signal Emit from: tree2 sig: NodeSignalUpdated data: ChildDeleted
-`
-
-	_ = delsigs
-	// fmt.Printf("Delete Signals:\n%v", sigs)
-	if sigs != delsigs {
-		t.Errorf("TestTreeMod child12 delete signals:\n%v\nnot as expected:\n%v\n", sigs, delsigs)
-	}
-	sigs = ""
-
+	// todo need actual tests in here!
 }
 
 /*

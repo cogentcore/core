@@ -49,8 +49,6 @@ import (
 //     automatically triggers update signals at the highest level of the
 //     affected tree, resulting in efficient updating logic for arbitrary
 //     nested tree modifications.
-//   - Signal framework for sending messages such as the Update signals, used
-//     extensively in the GoGi GUI framework for sending event messages etc.
 //   - ConfigChildren system for minimally updating children to fit a given
 //     Name & Type template.
 //   - Automatic JSON I/O of entire tree including type information.
@@ -298,7 +296,7 @@ type Ki interface {
 	// that is true, the result from the corresponding UpdateStart call --
 	// UpdateEnd is NOT called, allowing for further subsequent updates before
 	// you call UpdateEnd(updt).
-	ConfigChildren(config TypeAndNameList) (mods, updt bool)
+	ConfigChildren(config Config) (mods, updt bool)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deleting Children
@@ -353,34 +351,23 @@ type Ki interface {
 	// IsUpdating checks if node is currently updating.
 	IsUpdating() bool
 
-	// OnlySelfUpdate checks if this node only applies UpdateStart / End logic
-	// to itself, not its children (which is the default) (via Flag of same
-	// name) -- useful for a parent node that has a different function than
-	// its children.
-	OnlySelfUpdate() bool
-
 	// SetChildAdded sets the ChildAdded flag -- set when notification is needed
 	// for Add, Insert methods
 	SetChildAdded()
-
-	// SetValUpdated sets the ValUpdated flag -- set when notification is needed
-	// for modifying a value (field, prop, etc)
-	SetValUpdated()
 
 	// IsDeleted checks if this node has just been deleted (within last update
 	// cycle), indicated by the NodeDeleted flag which is set when the node is
 	// deleted, and is cleared at next UpdateStart call.
 	IsDeleted() bool
 
-	// IsDestroyed checks if this node has been destroyed -- the NodeDestroyed
-	// flag is set at start of Destroy function -- the Signal Emit process
-	// checks for destroyed receiver nodes and removes connections to them
-	// automatically -- other places where pointers to potentially destroyed
-	// nodes may linger should also check this flag and reset those pointers.
+	// IsDestroyed checks if this node has been destroyed.
+	// The NodeDestroyed flag is set at start of Destroy function.
+	// Places where pointers to potentially destroyed nodes may linger
+	// should also check this flag and reset those pointers.
 	IsDestroyed() bool
 
-	// ClearUpdateFlags resets all structure and value update related flags:
-	// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted, ValUpdated
+	// ClearUpdateFlags resets all structure update related flags:
+	// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted
 	// automatically called on StartUpdate to reset any old state.
 	ClearUpdateFlags()
 
@@ -469,16 +456,6 @@ type Ki interface {
 	// traversal of that branch of the tree is aborted, but other branches continue.
 	FuncDownBreadthFirst(level int, data any, fun Func)
 
-	//////////////////////////////////////////////////////////////////////////
-	//  State update signaling -- automatically consolidates all changes across
-	//   levels so there is only one update at end (optionally per node or only
-	//   at highest level)
-	//   All modification starts with UpdateStart() and ends with UpdateEnd()
-
-	// NodeSignal returns the main signal for this node that is used for
-	// update, child signals.
-	NodeSignal() *Signal
-
 	// UpdateStart should be called when starting to modify the tree (state or
 	// structure) -- returns whether this node was first to set the Updating
 	// flag (if so, all children have their Updating flag set -- pass the
@@ -496,33 +473,13 @@ type Ki interface {
 	//   ... code
 	UpdateStart() bool
 
-	// UpdateEnd should be called when done updating after an UpdateStart, and
-	// passed the result of the UpdateStart call -- if this is true, the
-	// NodeSignalUpdated signal will be emitted and the Updating flag will be
-	// cleared, and DestroyDeleted called -- otherwise it is a no-op.
+	// UpdateEnd should be called when done updating after an UpdateStart,
+	// and passed the result of the UpdateStart call.
+	// If this arg is true, the OnUpdated method will be called and the Updating
+	// flag will be cleared.  Also, if any ChildDeleted flags have been set,
+	// the delete manager DestroyDeleted is called.
+	// If the updt bool arg is false, this function is a no-op.
 	UpdateEnd(updt bool)
-
-	// UpdateEndNoSig is just like UpdateEnd except it does not emit a
-	// NodeSignalUpdated signal -- use this for situations where updating is
-	// already known to be in progress and the signal would be redundant.
-	UpdateEndNoSig(updt bool)
-
-	// UpdateSig just emits a NodeSignalUpdated if the Updating flag is not
-	// set -- use this to trigger an update of a given node when there aren't
-	// any structural changes and you don't need to prevent any lower-level
-	// updates -- much more efficient than a pair of UpdateStart /
-	// UpdateEnd's.  Returns true if an update signal was sent.
-	UpdateSig() bool
-
-	// Disconnect disconnects this node, by calling DisconnectAll() on
-	// any Signal or Ki fields.  Any Node that adds a Signal or a Ki Field
-	// must define an updated version of this method that calls its
-	// embedded parent's version and then calls DisconnectAll() on
-	// its Signal and Ki fields.
-	Disconnect()
-
-	// DisconnectAll disconnects all the way from me down the tree.
-	DisconnectAll()
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Deep Copy of Trees
@@ -553,7 +510,7 @@ type Ki interface {
 	CopyFieldsFrom(frm any)
 
 	//////////////////////////////////////////////////////////////////////////
-	// Init events
+	// 	Event-specific methods
 
 	// OnInit is called when the node is
 	// initialized (ie: through InitName).
@@ -579,6 +536,36 @@ type Ki interface {
 	// This function does nothing by default, but it can be
 	// implemented by higher-level types that want to do something.
 	OnChildAdded(child Ki)
+
+	// OnDelete is called when the node is deleted from a parent.
+	// It will be called only once in the lifetime of the node,
+	// unless the node is moved. It will not be called on root
+	// nodes, as they are never deleted from a parent.
+	// It does nothing by default, but it can be implemented
+	// by higher-level types that want to do something.
+	OnDelete()
+
+	// OnChildDeleting is called when a node is just about to be deleted from
+	// this node or any of its children. When a node is deleted from
+	// a tree, it calls this function on each of its parents,
+	// going in order from the closest parent to the furthest parent,
+	// and then [OnDelete].
+	// This function does nothing by default, but it can be
+	// implemented by higher-level types that want to do something.
+	OnChildDeleting(child Ki)
+
+	// OnChildrenDeleting is called when all children are deleted from
+	// this node or any of its children.
+	// This function does nothing by default, but it can be
+	// implemented by higher-level types that want to do something.
+	OnChildrenDeleting()
+
+	// OnUpdated is called during UpdateEnd if the updt flag is true,
+	// indicating that this was the upper-most Ki node that was
+	// updated in the latest round of updating.
+	// This function does nothing by default, but it can be
+	// implemented by higher-level types that want to do something.
+	OnUpdated()
 }
 
 // see node.go for struct implementing this interface

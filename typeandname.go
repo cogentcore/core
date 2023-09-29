@@ -17,8 +17,8 @@ type TypeAndName struct {
 }
 
 // list of type-and-names -- can be created from a string spec
-type TypeAndNameList []TypeAndName
+type Config []TypeAndName
 
-func (t *TypeAndNameList) Add(typ *gti.Type, nm string) {
+func (t *Config) Add(typ *gti.Type, nm string) {
 	(*t) = append(*t, TypeAndName{typ, nm})
 }

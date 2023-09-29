@@ -10,8 +10,6 @@ import "goki.dev/ki/v2"
 
 type TestNode struct {
 	ki.Node
-	Sig1 ki.Signal
-	Sig2 ki.Signal
 }
 
 // func (tn *TestNode) CopyFieldsFrom(frm any) { // note nothing to copy here
@@ -60,11 +58,6 @@ func (nf *NodeField) FieldByName(field string) (ki.Ki, error) {
 	return nf.NodeEmbed.FieldByName(field)
 }
 
-func (nf *NodeField) Disconnect() {
-	nf.Field1.DisconnectAll()
-	nf.NodeEmbed.Disconnect()
-}
-
 type NodeField2 struct {
 	NodeField
 	Field2 NodeEmbed
@@ -84,9 +77,4 @@ func (nf *NodeField2) FieldByName(field string) (ki.Ki, error) {
 		return &nf.Field2, nil
 	}
 	return nf.NodeField.FieldByName(field)
-}
-
-func (nf *NodeField2) Disconnect() {
-	nf.Field2.DisconnectAll()
-	nf.NodeField.Disconnect()
 }

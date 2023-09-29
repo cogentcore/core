@@ -327,7 +327,7 @@ func (sl *Slice) UnmarshalJSON(b []byte) error {
 	}
 	// fmt.Printf("n parsed: %d from %v\n", n, string(bn))
 
-	tnl := make(TypeAndNameList, n)
+	tnl := make(Config, n)
 
 	for i := 0; i < n; i++ {
 		fld := flds[2*i+1]

@@ -45,9 +45,6 @@ type Node struct {
 	// [tableview: -] Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
 	Kids Slice `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
 
-	// [view: -] Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead
-	NodeSig Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"Ki.NodeSignal() signal for node structure / state changes -- emits NodeSignals signals -- can also extend to custom signals (see signal.go) but in general better to create a new Signal instead"`
-
 	// [view: -] we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
 	Ths Ki `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
 
@@ -56,9 +53,6 @@ type Node struct {
 
 	// [view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function
 	depth int `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in FuncDownBreadthFirst function"`
-
-	// [view: -] cached version of the field offsets relative to base Node address -- used in generic field access.
-	fieldOffs []uintptr `copy:"-" json:"-" xml:"-" view:"-" desc:"cached version of the field offsets relative to base Node address -- used in generic field access."`
 }
 
 // check implementation of [Ki] interface
@@ -144,6 +138,22 @@ func (n *Node) OnAdd() {}
 // OnChildAdded is a placeholder implementation of
 // [Ki.OnChildAdded] that does nothing.
 func (n *Node) OnChildAdded(child Ki) {}
+
+// OnDelete is a placeholder implementation of
+// [Ki.OnDelete] that does nothing.
+func (n *Node) OnDelete() {}
+
+// OnChildDeleting is a placeholder implementation of
+// [Ki.OnChildDeleting] that does nothing.
+func (n *Node) OnChildDeleting(child Ki) {}
+
+// OnChildrenDeleting is a placeholder implementation of
+// [Ki.OnChildrenDeleting] that does nothing.
+func (n *Node) OnChildrenDeleting() {}
+
+// OnUpdated is a placeholder implementation of
+// [Ki.OnUpdated] that does nothing.
+func (n *Node) OnUpdated() {}
 
 //////////////////////////////////////////////////////////////////////////
 //  Parents
@@ -604,7 +614,7 @@ func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub string) (mods, upd
 // that is true, the result from the corresponding UpdateStart call --
 // UpdateEnd is NOT called, allowing for further subsequent updates before
 // you call UpdateEnd(updt).
-func (n *Node) ConfigChildren(config TypeAndNameList) (mods, updt bool) {
+func (n *Node) ConfigChildren(config Config) (mods, updt bool) {
 	return n.Kids.Config(n.This(), config)
 }
 
@@ -627,9 +637,7 @@ func (n *Node) DeleteChildAtIndex(idx int, destroy bool) error {
 		// update blocking note: children of child etc will not send a signal
 		// at this point -- only later at destroy -- up to this parent to
 		// manage all that
-		child.SetFlag(true, NodeDeleted)
-		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
-		SetParent(child, nil)
+		DeleteFromParent(child)
 	}
 	n.Kids.DeleteAtIndex(idx)
 	if destroy {
@@ -673,16 +681,17 @@ func (n *Node) DeleteChildByName(name string, destroy bool) (Ki, error) {
 func (n *Node) DeleteChildren(destroy bool) {
 	updt := n.This().UpdateStart()
 	n.SetFlag(true, ChildrenDeleted)
+	DeletingChildren(n.This())
 	kids := n.Kids
 	n.Kids = n.Kids[:0] // preserves capacity of list
-	for _, child := range kids {
-		if child == nil {
+	for _, kid := range kids {
+		if kid == nil {
 			continue
 		}
-		child.SetFlag(true, NodeDeleted)
-		child.NodeSignal().Emit(child, int64(NodeSignalDeleting), nil)
-		SetParent(child, nil)
-		UpdateReset(child)
+		kid.SetFlag(true, NodeDeleted)
+		kid.This().OnDelete()
+		SetParent(kid, nil)
+		UpdateReset(kid)
 	}
 	if destroy {
 		DelMgr.Add(kids...)
@@ -710,7 +719,6 @@ func (n *Node) Destroy() {
 	if n.This() == nil { // already dead!
 		return
 	}
-	n.DisconnectAll()
 	n.DeleteChildren(true) // first delete all my children
 	// and destroy all my fields
 	//
@@ -754,24 +762,10 @@ func (n *Node) IsUpdating() bool {
 	return n.Flags.HasFlag(Updating)
 }
 
-// OnlySelfUpdate checks if this node only applies UpdateStart / End logic
-// to itself, not its children (which is the default) (via Flag of same
-// name) -- useful for a parent node that has a different function than
-// its children.
-func (n *Node) OnlySelfUpdate() bool {
-	return n.Flags.HasFlag(OnlySelfUpdate)
-}
-
 // SetChildAdded sets the ChildAdded flag -- set when notification is needed
 // for Add, Insert methods
 func (n *Node) SetChildAdded() {
 	n.SetFlag(true, ChildAdded)
-}
-
-// SetValUpdated sets the ValUpdated flag -- set when notification is needed
-// for modifying a value (field, prop, etc)
-func (n *Node) SetValUpdated() {
-	n.SetFlag(true, ValUpdated)
 }
 
 // IsDeleted checks if this node has just been deleted (within last update
@@ -781,20 +775,19 @@ func (n *Node) IsDeleted() bool {
 	return n.Flags.HasFlag(NodeDeleted)
 }
 
-// IsDestroyed checks if this node has been destroyed -- the NodeDestroyed
-// flag is set at start of Destroy function -- the Signal Emit process
-// checks for destroyed receiver nodes and removes connections to them
-// automatically -- other places where pointers to potentially destroyed
-// nodes may linger should also check this flag and reset those pointers.
+// IsDestroyed checks if this node has been destroyed.
+// The NodeDestroyed flag is set at start of Destroy function.
+// Places where pointers to potentially destroyed nodes may linger
+// should also check this flag and reset those pointers.
 func (n *Node) IsDestroyed() bool {
 	return n.Flags.HasFlag(NodeDestroyed)
 }
 
-// ClearUpdateFlags resets all structure and value update related flags:
-// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted, ValUpdated
+// ClearUpdateFlags resets all structure update related flags:
+// ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted
 // automatically called on StartUpdate to reset any old state.
 func (n *Node) ClearUpdateFlags() {
-	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted, ValUpdated)
+	n.SetFlag(false, ChildAdded, ChildDeleted, ChildrenDeleted, NodeDeleted)
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1124,12 +1117,6 @@ func (n *Node) FuncDownBreadthFirst(level int, data any, fun Func) {
 
 // after an UpdateEnd, DestroyDeleted is called
 
-// NodeSignal returns the main signal for this node that is used for
-// update, child signals.
-func (n *Node) NodeSignal() *Signal {
-	return &n.NodeSig
-}
-
 // UpdateStart should be called when starting to modify the tree (state or
 // structure) -- returns whether this node was first to set the Updating
 // flag (if so, all children have their Updating flag set -- pass the
@@ -1151,27 +1138,25 @@ func (n *Node) UpdateStart() bool {
 	if n.IsUpdating() || n.IsDestroyed() {
 		return false
 	}
-	if n.OnlySelfUpdate() {
-		n.SetFlag(true, Updating)
-	} else {
-		// pr := prof.Start("ki.Node.UpdateStart")
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			if !k.IsUpdating() {
-				k.ClearUpdateFlags()
-				k.SetFlag(true, Updating)
-				return Continue
-			}
-			return Break // bail -- already updating
-		})
-		// pr.End()
-	}
+	// pr := prof.Start("ki.Node.UpdateStart")
+	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
+		if !k.IsUpdating() {
+			k.ClearUpdateFlags()
+			k.SetFlag(true, Updating)
+			return Continue
+		}
+		return Break // bail -- already updating
+	})
+	// pr.End()
 	return true
 }
 
-// UpdateEnd should be called when done updating after an UpdateStart, and
-// passed the result of the UpdateStart call -- if this is true, the
-// NodeSignalUpdated signal will be emitted and the Updating flag will be
-// cleared, and DestroyDeleted called -- otherwise it is a no-op.
+// UpdateEnd should be called when done updating after an UpdateStart,
+// and passed the result of the UpdateStart call.
+// If this arg is true, the OnUpdated method will be called and the Updating
+// flag will be cleared.  Also, if any ChildDeleted flags have been set,
+// the delete manager DestroyDeleted is called.
+// If the updt bool arg is false, this function is a no-op.
 func (n *Node) UpdateEnd(updt bool) {
 	if !updt {
 		return
@@ -1182,73 +1167,13 @@ func (n *Node) UpdateEnd(updt bool) {
 	if n.HasFlag(ChildDeleted) || n.HasFlag(ChildrenDeleted) {
 		DelMgr.DestroyDeleted()
 	}
-	if n.OnlySelfUpdate() {
-		n.SetFlag(false, Updating)
-		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags)
-	} else {
-		// pr := prof.Start("ki.Node.UpdateEnd")
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
-			return true
-		})
-		// pr.End()
-		n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags)
-	}
-}
-
-// UpdateEndNoSig is just like UpdateEnd except it does not emit a
-// NodeSignalUpdated signal -- use this for situations where updating is
-// already known to be in progress and the signal would be redundant.
-func (n *Node) UpdateEndNoSig(updt bool) {
-	if !updt {
-		return
-	}
-	if n.IsDestroyed() || n.IsDeleted() {
-		return
-	}
-	if n.HasFlag(ChildDeleted) || n.HasFlag(ChildrenDeleted) {
-		DelMgr.DestroyDeleted()
-	}
-	if n.OnlySelfUpdate() {
-		n.SetFlag(false, Updating)
-		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
-	} else {
-		n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-			k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
-			return true
-		})
-		// n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags())
-	}
-}
-
-// UpdateSig just emits a NodeSignalUpdated if the Updating flag is not
-// set -- use this to trigger an update of a given node when there aren't
-// any structural changes and you don't need to prevent any lower-level
-// updates -- much more efficient than a pair of UpdateStart /
-// UpdateEnd's.  Returns true if an update signal was sent.
-func (n *Node) UpdateSig() bool {
-	if n.IsUpdating() || n.IsDestroyed() {
-		return false
-	}
-	n.NodeSignal().Emit(n.This(), int64(NodeSignalUpdated), n.Flags)
-	return true
-}
-
-// Disconnect disconnects this node, by calling DisconnectAll() on
-// any Signal or Ki fields.  Any Node that adds a Signal or a Ki Field
-// must define an updated version of this method that calls its
-// embedded parent's version and then calls DisconnectAll() on
-// its Signal and Ki fields.
-func (n *Node) Disconnect() {
-	n.NodeSig.DisconnectAll()
-}
-
-// DisconnectAll disconnects all the way from me down the tree.
-func (n *Node) DisconnectAll() {
+	// pr := prof.Start("ki.Node.UpdateEnd")
 	n.FuncDownMeFirst(0, nil, func(k Ki, level int, d any) bool {
-		k.Disconnect()
+		k.SetFlag(false, Updating) // note: could check first and break here but good to ensure all clear
 		return true
 	})
+	// pr.End()
+	n.This().OnUpdated()
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1294,12 +1219,10 @@ func (n *Node) CopyFrom(frm Ki) error {
 // Any pointers within the cloned tree will correctly point within the new
 // cloned tree (see Copy info).
 func (n *Node) Clone() Ki {
-	// todo: gti
-	// nki := NewOfType(Type(n.This()))
-	// nki.InitName(nki, n.Nm)
-	// nki.CopyFrom(n.This())
-	// return nki
-	return nil
+	nki := NewOfType(n.This().KiType())
+	nki.InitName(nki, n.Nm)
+	nki.CopyFrom(n.This())
+	return nki
 }
 
 // CopyFromRaw performs a raw copy that just does the deep copy of the

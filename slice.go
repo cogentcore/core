@@ -308,7 +308,7 @@ func (sl *Slice) Swap(i, j int) error {
 // type-and-name list.  If the node is != nil, then it has UpdateStart / End
 // logic applied to it, only if necessary, as indicated by mods, updt return
 // values.
-func (sl *Slice) Config(n Ki, config TypeAndNameList) (mods, updt bool) {
+func (sl *Slice) Config(n Ki, config Config) (mods, updt bool) {
 	mods, updt = false, false
 	// first make a map for looking up the indexes of the names
 	nm := make(map[string]int)
@@ -368,9 +368,7 @@ func (sl *Slice) configDeleteKid(kid Ki, i int, n Ki, mods, updt *bool) {
 			n.SetFlag(true, ChildDeleted)
 		}
 	}
-	kid.SetFlag(true, NodeDeleted)
-	kid.NodeSignal().Emit(kid, int64(NodeSignalDeleting), nil)
-	SetParent(kid, nil)
+	DeleteFromParent(kid)
 	DelMgr.Add(kid)
 	sl.DeleteAtIndex(i)
 	UpdateReset(kid) // it won't get the UpdateEnd from us anymore -- init fresh in any case
@@ -395,7 +393,7 @@ func (sl *Slice) CopyFrom(frm Slice) {
 func (sl *Slice) ConfigCopy(n Ki, frm Slice) {
 	sz := len(frm)
 	if sz > 0 || n == nil {
-		cfg := make(TypeAndNameList, sz)
+		cfg := make(Config, sz)
 		for i, kid := range frm {
 			cfg[i].Type = kid.KiType()
 			cfg[i].Name = kid.Name()
