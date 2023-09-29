@@ -6,7 +6,7 @@ package girl
 
 import (
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
 

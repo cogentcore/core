@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
-	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/units"
 	"goki.dev/laser"
 )
@@ -25,21 +25,13 @@ import (
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
 
-// StyleTemplates are cached styles used for styling large numbers of identical
-// elements in views
-var StyleTemplates map[string]*Style
-
-// StyleTemplatesMu is a mutex protecting updates to StyleTemplates
-var StyleTemplatesMu sync.RWMutex
-
 // IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
 
 // Style has all the CSS-based style elements -- used for widget-type objects
 type Style struct {
-
-	// if present, then this should use unique template name for cached style -- critical for large numbers of repeated widgets in e.g., sliceview, tableview, etc
-	Template string `desc:"if present, then this should use unique template name for cached style -- critical for large numbers of repeated widgets in e.g., sliceview, tableview, etc"`
+	// State holds style-relevant state flags, for convenient styling access
+	State states.States
 
 	// todo big enum of how to display item -- controls layout etc
 	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
@@ -231,61 +223,23 @@ func NewStyle() Style {
 	return s
 }
 
+// Is returns true if the State flag is set
+func (s *Style) Is(st states.States) bool {
+	return s.State.HasFlag(st)
+}
+
 // CopyFrom copies from another style, while preserving relevant local state
 func (s *Style) CopyFrom(cp *Style) {
 	is := s.IsSet
 	pn := s.PropsNil
 	ds := s.dotsSet
 	lu := s.lastUnCtxt
-	tm := s.Template
 	*s = *cp
 	s.BackgroundColor = cp.BackgroundColor
 	s.IsSet = is
 	s.PropsNil = pn
 	s.dotsSet = ds
 	s.lastUnCtxt = lu
-	s.Template = tm
-}
-
-// FromTemplate checks if there is a template for this style, returning
-// false for hasTemplate if not (in which case usual styling should proceed).
-// If there is a template, and it has already been saved, the style is copied
-// from the existing template.  If there is a template name set but no
-// existing template has yet been saved, then saveTemplate = true and
-// the SaveTemplate call should be made on this style after it has gone through
-// the usual styling process.
-func (s *Style) FromTemplate() (hasTemplate bool, saveTemplate bool) {
-	if s.Template == "" {
-		return false, false
-	}
-	if RebuildDefaultStyles {
-		return false, true
-	}
-	StyleTemplatesMu.RLock()
-	defer StyleTemplatesMu.RUnlock()
-	if ts, has := StyleTemplates[s.Template]; has {
-		s.CopyFrom(ts)
-		s.IsSet = true
-		s.dotsSet = true
-		s.PropsNil = ts.PropsNil
-		return true, false
-	}
-	return true, true // need to call save when done
-}
-
-// SaveTemplate should only be called for styles that have template
-// but none has yet been saved, as determined by FromTemplate call.
-func (s *Style) SaveTemplate() {
-	ts := &Style{}
-	ts.CopyFrom(s)
-	ts.lastUnCtxt = s.lastUnCtxt
-	ts.PropsNil = s.PropsNil
-	StyleTemplatesMu.Lock()
-	if StyleTemplates == nil {
-		StyleTemplates = make(map[string]*Style)
-	}
-	StyleTemplates[s.Template] = ts
-	StyleTemplatesMu.Unlock()
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than

@@ -17,7 +17,7 @@ import (
 	"unicode/utf8"
 
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"

@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 )
 
 // note: the responses to the following two tests depend on what is installed on the system

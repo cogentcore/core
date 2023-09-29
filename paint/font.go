@@ -13,7 +13,7 @@ import (
 
 	"github.com/goki/freetype/truetype"
 	"goki.dev/colors"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"golang.org/x/image/font/opentype"
 )

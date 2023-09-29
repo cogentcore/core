@@ -12,8 +12,8 @@ import (
 	"os"
 
 	"goki.dev/colors"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
 )
 

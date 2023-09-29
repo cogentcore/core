@@ -11,7 +11,7 @@ import (
 	"sync"
 	"unicode"
 
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/font"
