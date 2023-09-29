@@ -70,7 +70,7 @@ func (g *Rect) Render(sv *SVG) {
 	bs := gist.Border{}
 	bs.Style.Set(gist.BorderSolid)
 	bs.Width.Set(pc.StrokeStyle.Width)
-	bs.Color.Set(pc.StrokeStyle.Color.Color)
+	bs.Color.Set(pc.StrokeStyle.Color.Solid)
 	bs.Radius.Set(units.Px(g.Radius.X))
 	if g.Radius.X == 0 && g.Radius.Y == 0 {
 		pc.DrawRectangle(rs, g.Pos.X, g.Pos.Y, g.Size.X, g.Size.Y)

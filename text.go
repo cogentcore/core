@@ -202,7 +202,7 @@ func (g *Text) RenderText(sv *SVG) {
 	}
 	pc.FontStyle.Font = girl.OpenFont(&pc.FontStyle, &pc.UnContext) // use original size font
 	if !pc.FillStyle.Color.IsNil() {
-		pc.FontStyle.Color = pc.FillStyle.Color.Color
+		pc.FontStyle.Color = pc.FillStyle.Color.Solid
 	}
 	g.TextRender.SetString(g.Text, &pc.FontStyle, &pc.UnContext, &pc.TextStyle, true, rot, scalex)
 	pc.FontStyle.Size = units.Value{Val: orgsz.Val * scy, Un: orgsz.Un, Dots: orgsz.Dots * scy} // rescale by y

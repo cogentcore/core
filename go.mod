@@ -4,7 +4,6 @@ go 1.21.0
 
 require (
 	github.com/aymerick/douceur v0.2.0
-	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	goki.dev/colors v0.8.12
 	goki.dev/enums v0.9.20
 	goki.dev/girl v0.0.3
@@ -28,6 +27,7 @@ require (
 	github.com/goki/freetype v1.0.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
+	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/cam v0.9.17 // indirect
 	golang.org/x/text v0.13.0 // indirect

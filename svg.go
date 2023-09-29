@@ -37,7 +37,7 @@ type SVG struct {
 	Fill bool `desc:"fill the viewport with background-color"`
 
 	// color to fill background if Fill set
-	BgColor gist.ColorSpec `desc:"color to fill background if Fill set"`
+	BgColor colors.Full `desc:"color to fill background if Fill set"`
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
 	Geom gist.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
@@ -149,7 +149,7 @@ func (sv *SVG) DeleteAll() {
 // Color has support for special color names that are relative to
 // this current color.
 func (sv *SVG) Base() color.RGBA {
-	return sv.BgColor.Color
+	return sv.BgColor.Solid
 }
 
 // FullByURL finds a Node by an element name (URL-like path), and

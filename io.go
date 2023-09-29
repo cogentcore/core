@@ -21,7 +21,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/srwiley/rasterx"
 	"goki.dev/colors"
 	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
@@ -993,43 +992,50 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 	XMLAddAttr(&me.Attr, "id", name)
 
 	linear := true
-	if cs.Source == gist.LinearGradient {
-		me.Name.Local = "linearGradient"
-	} else {
+	if gr.Radial {
 		linear = false
 		me.Name.Local = "radialGradient"
+	} else {
+		me.Name.Local = "linearGradient"
 	}
 
-	nilpts := gr.Points[0] == 0 && gr.Points[1] == 0 && gr.Points[2] == 1 && gr.Points[3] == 0 && gr.Points[4] == 0
-	if !nilpts {
-		if linear {
-			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gr.Points[0]))
-			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gr.Points[1]))
-			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gr.Points[2]))
-			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gr.Points[3]))
-		} else {
-			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", gr.Points[0]))
-			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", gr.Points[1]))
-			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", gr.Points[2]))
-			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", gr.Points[3]))
-			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", gr.Points[4]))
+	if linear {
+		// must be non-zero to add
+		if gr.Bounds != (mat32.Box2{}) {
+			XMLAddAttr(&me.Attr, "x1", fmt.Sprintf("%g", gr.Bounds.Min.X))
+			XMLAddAttr(&me.Attr, "y1", fmt.Sprintf("%g", gr.Bounds.Min.Y))
+			XMLAddAttr(&me.Attr, "x2", fmt.Sprintf("%g", gr.Bounds.Max.X))
+			XMLAddAttr(&me.Attr, "y2", fmt.Sprintf("%g", gr.Bounds.Max.Y))
 		}
-		if gr.Units == rasterx.ObjectBoundingBox {
-			XMLAddAttr(&me.Attr, "gradientUnits", "objectBoundingBox")
-		} else {
-			XMLAddAttr(&me.Attr, "gradientUnits", "userSpaceOnUse")
+	} else {
+		// must be non-zero to add
+		if gr.Center != (mat32.Vec2{}) {
+			XMLAddAttr(&me.Attr, "cx", fmt.Sprintf("%g", gr.Center.X))
+			XMLAddAttr(&me.Attr, "cy", fmt.Sprintf("%g", gr.Center.Y))
+		}
+		if gr.Focal != (mat32.Vec2{}) {
+			XMLAddAttr(&me.Attr, "fx", fmt.Sprintf("%g", gr.Focal.X))
+			XMLAddAttr(&me.Attr, "fy", fmt.Sprintf("%g", gr.Focal.Y))
+		}
+		if gr.Radius != 0 {
+			XMLAddAttr(&me.Attr, "r", fmt.Sprintf("%g", gr.Radius))
 		}
 	}
+	if gr.Units == colors.ObjectBoundingBox {
+		XMLAddAttr(&me.Attr, "gradientUnits", "objectBoundingBox")
+	} else {
+		XMLAddAttr(&me.Attr, "gradientUnits", "userSpaceOnUse")
+	}
 	switch gr.Spread {
-	case rasterx.ReflectSpread:
+	case colors.ReflectSpread:
 		XMLAddAttr(&me.Attr, "spreadMethod", "reflect")
-	case rasterx.RepeatSpread:
+	case colors.RepeatSpread:
 		XMLAddAttr(&me.Attr, "spreadMethod", "repeat")
 	}
 
-	idxf := gr.Matrix == rasterx.Identity
+	idxf := gr.Matrix == mat32.Identity2D()
 	if !idxf {
-		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.A, gr.Matrix.B, gr.Matrix.C, gr.Matrix.D, gr.Matrix.E, gr.Matrix.F))
+		XMLAddAttr(&me.Attr, "gradientTransform", fmt.Sprintf("matrix(%g,%g,%g,%g,%g,%g)", gr.Matrix.XX, gr.Matrix.YX, gr.Matrix.XY, gr.Matrix.YY, gr.Matrix.X0, gr.Matrix.Y0))
 	}
 
 	if nd.StopsName != "" {
@@ -1041,7 +1047,7 @@ func SVGNodeXMLGrad(nd *Gradient, name string, enc *XMLEncoder) {
 		for _, gs := range gr.Stops {
 			se := xml.StartElement{}
 			se.Name.Local = "stop"
-			clr := colors.AsRGBA(gs.StopColor)
+			clr := gs.Color
 			hs := colors.AsHex(clr)[:7] // get rid of transparency
 			XMLAddAttr(&se.Attr, "style", fmt.Sprintf("stop-color:%s;stop-opacity:%g;", hs, gs.Opacity))
 			XMLAddAttr(&se.Attr, "offset", fmt.Sprintf("%g", gs.Offset))

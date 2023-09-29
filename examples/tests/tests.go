@@ -10,15 +10,11 @@ import (
 	"strings"
 
 	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
 	"goki.dev/glop/dirs"
 	"goki.dev/svg"
 )
 
 func main() {
-	prefs := &gist.Prefs{}
-	prefs.Defaults()
-	gist.ThePrefs = prefs // text rendering depends on this
 	girl.FontLibrary.InitFontPaths(girl.FontPaths...)
 
 	dir := "./svgs"

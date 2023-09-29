@@ -12,7 +12,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -337,7 +336,7 @@ func (g *NodeBase) ApplyCSS(sv *SVG, key string, css ki.Props) bool {
 		return false
 	}
 	pc := &g.Paint
-	ctxt := any(sv).(gist.Context)
+	ctxt := colors.Context(sv)
 	if g.Par != sv.Root.This() {
 		pp := g.Par.(Node).PaintStyle()
 		pc.SetStyleProps(&pp.Paint, pmap, ctxt)
