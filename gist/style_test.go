@@ -17,7 +17,7 @@ import (
 type TestContext struct {
 }
 
-func (tc *TestContext) Base() color.Color {
+func (tc *TestContext) Base() color.RGBA {
 	return colors.White
 }
 
