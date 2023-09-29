@@ -428,9 +428,8 @@ type Ki interface {
 
 	// FuncDownMeFirst calls function on this node (MeFirst) and then iterates
 	// in a depth-first manner over all the children.
-	// This uses node state information to manage the traversal and is very fast,
-	// but can only be called by one thread at a time -- use a Mutex if there is
-	// a chance of multiple threads running at the same time.
+	// The node traversal is non-recursive and uses locally-allocated state -- safe
+	// for concurrent calling (modulo conflict management in function call itself).
 	// Function calls are sequential all in current go routine.
 	// The level var tracks overall depth in the tree.
 	// If fun returns false then any further traversal of that branch of the tree is
@@ -569,11 +568,6 @@ type Ki interface {
 }
 
 // see node.go for struct implementing this interface
-
-// Func is a function to call on ki objects walking the tree -- return Break
-// = false means don't continue processing this branch of the tree, but other
-// branches can continue.  return Continue = true continues down the tree.
-type Func func(k Ki, level int, data any) bool
 
 // KiType is a Ki reflect.Type, suitable for checking for Type.Implements.
 var KiType = reflect.TypeOf((*Ki)(nil)).Elem()
