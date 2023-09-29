@@ -62,7 +62,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	lv.File = file
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(TypeTableView, "log")
 	mods, updt := lv.ConfigChildren(config)

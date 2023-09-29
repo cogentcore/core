@@ -181,7 +181,7 @@ func (sv *StructView) ConfigWidget(vp *Scene) {
 			return
 		}
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
@@ -269,7 +269,7 @@ func (sv *StructView) ConfigStructGrid() {
 		return
 	}
 	sg := sv.StructGrid()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {

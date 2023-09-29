@@ -599,7 +599,7 @@ func (dv *DiffView) UndoDiff(ab int) {
 
 func (dv *DiffView) ConfigWidget(vp *Scene) {
 	dv.Lay = gi.LayoutVert
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.LayoutType, "diff-lay")
 	mods, updt := dv.ConfigChildren(config)
@@ -753,7 +753,7 @@ func (dv *DiffView) ConfigTexts() {
 	dv.BufB.Filename = gi.FileName(dv.FileB)
 	dv.BufB.Opts.LineNos = true
 	dv.BufB.Stat() // update markup
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.LayoutType, "text-a-lay")
 	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := lay.ConfigChildren(config)

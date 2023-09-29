@@ -178,7 +178,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 		return
 	}
 	sz := len(menus)
-	tnl := make(ki.TypeAndNameList, sz+1)
+	tnl := make(ki.Config, sz+1)
 	typ := ActionType // note: could pass in action type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ

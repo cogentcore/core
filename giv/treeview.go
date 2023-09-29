@@ -206,7 +206,7 @@ func (tv *TreeView) SyncToSrc(tvIdx *int, init bool, depth int) {
 	}
 	vcprop := "view-closed"
 	skids := *sk.Children()
-	tnl := make(ki.TypeAndNameList, 0, len(skids))
+	tnl := make(ki.Config, 0, len(skids))
 	typ := ki.Type(tv.This()) // always make our type
 	flds := make([]ki.Ki, 0)
 	fldClosed := make([]bool, 0)
@@ -1897,7 +1897,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 func (tv *TreeView) ConfigParts(vp *Scene) {
 	parts := tv.NewParts(gi.LayoutHoriz)
 	parts.Style.Template = "giv.TreeView.Parts"
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	if tv.HasChildren() {
 		config.Add(gi.TypeCheckBox, "branch")
 	}

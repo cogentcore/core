@@ -225,7 +225,7 @@ func (cb *ComboBox) ButtonRelease() {
 
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
-func (cb *ComboBox) ConfigPartsIconText(config *ki.TypeAndNameList, icnm icons.Icon) (icIdx, txIdx int) {
+func (cb *ComboBox) ConfigPartsIconText(config *ki.Config, icnm icons.Icon) (icIdx, txIdx int) {
 	// todo: add some styles for button layout
 	icIdx = -1
 	txIdx = -1
@@ -251,7 +251,7 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 
 // ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
 // for editable combobox, where textfield then takes up the rest of the space
-func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.TypeAndNameList, defOn bool) int {
+func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) int {
 	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
 	if !needInd {
 		return -1
@@ -268,7 +268,7 @@ func (cb *ComboBox) ConfigParts(sc *Scene) {
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = laser.ToBool(eb)
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	var icIdx, lbIdx, txIdx, indIdx int
 	if cb.Editable {
 		lbIdx = -1

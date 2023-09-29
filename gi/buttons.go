@@ -301,7 +301,7 @@ func (bb *ButtonBase) ResetMenu() {
 // (as long as it is not explicitly set to [icons.None]);
 // returns the index in Parts of the indicator object, which is named "indicator";
 // an "ind-stretch" is added as well to put on the right by default.
-func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.TypeAndNameList, defOn bool) int {
+func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.Config, defOn bool) int {
 	needInd := !bb.Indicator.IsNil() || (defOn && bb.Indicator != icons.None)
 	if !needInd {
 		return -1
@@ -459,7 +459,7 @@ func (bb *ButtonBase) ButtonRelease() {
 
 func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	parts := bb.NewParts(LayoutHoriz)
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
 
@@ -816,7 +816,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 	if !cb.IconOff.IsValid() {
 		cb.IconOff = icons.CheckBoxOutlineBlank
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx := 0 // always there
 	lbIdx := -1
 	config.Add(LayoutType, "stack")

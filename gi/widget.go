@@ -45,7 +45,7 @@ type Widget interface {
 	// ConfigWidget does the actual configuration of the widget,
 	// primarily configuring its Parts.
 	// All configuration should be robust to multiple calls
-	// (i.e., use Parts.ConfigChildren with TypeAndNameList).
+	// (i.e., use Parts.ConfigChildren with Config).
 	// Outer Config call handles all the other infrastructure,
 	// so this call just does the core configuration.
 	ConfigWidget(sc *Scene)

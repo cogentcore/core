@@ -95,7 +95,7 @@ func (sv *StructViewInline) ConfigParts(vp *Scene) {
 		return
 	}
 	parts := sv.NewParts(gi.LayoutHoriz)
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	// always start fresh!
 	sv.FieldViews = make([]ValueView, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {

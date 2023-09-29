@@ -254,7 +254,7 @@ func (ac *Action) ConfigWidget(sc *Scene) {
 }
 
 // ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
-func (ac *Action) ConfigPartsAddShortcut(config *ki.TypeAndNameList) int {
+func (ac *Action) ConfigPartsAddShortcut(config *ki.Config) int {
 	config.Add(StretchType, "sc-stretch")
 	scIdx := len(*config)
 	config.Add(LabelType, "shortcut")
@@ -276,7 +276,7 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 // ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton() {
 	parts := ac.NewParts(LayoutHoriz)
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	mods, updt := parts.ConfigChildren(config)
@@ -290,7 +290,7 @@ func (ac *Action) ConfigPartsButton() {
 // ConfigPartsMenuItem sets the label, icon, etc for action menu item
 func (ac *Action) ConfigPartsMenuItem() {
 	parts := ac.NewParts(LayoutHoriz)
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
 	indIdx := ac.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1

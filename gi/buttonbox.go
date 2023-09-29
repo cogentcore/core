@@ -237,7 +237,7 @@ func (bb *ButtonBox) ConfigParts(sc *Scene) {
 		bb.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	for _, lb := range bb.Items {
 		config.Add(CheckBoxType, lb)
 	}

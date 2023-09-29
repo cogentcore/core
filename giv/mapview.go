@@ -136,7 +136,7 @@ func (mv *MapView) UpdateValues() {
 
 // Config configures the view
 func (mv *MapView) ConfigWidget(vp *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
@@ -185,7 +185,7 @@ func (mv *MapView) ConfigMapGrid() {
 		return
 	}
 	sg := mv.MapGrid()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)

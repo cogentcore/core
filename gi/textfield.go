@@ -1477,7 +1477,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 		parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	leadIconIdx, trailIconIdx := -1, -1
 	if !tf.LeadingIcon.IsNil() {
 		// config.Add(StretchType, "lead-icon-str")

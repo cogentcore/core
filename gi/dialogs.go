@@ -365,13 +365,13 @@ const (
 	NoCancel  = false
 )
 
-// StdButtonConfig returns a ki.TypeAndNameList for calling on ConfigChildren
+// StdButtonConfig returns a ki.Config for calling on ConfigChildren
 // of a button box, to create standard Ok, Cancel buttons (if true),
 // optionally starting with a Stretch element that will cause the buttons to
 // be arranged on the right -- a space element is added between buttons if
 // more than one
-func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.TypeAndNameList {
-	config := ki.TypeAndNameList{}
+func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.Config {
+	config := ki.Config{}
 	if stretch {
 		config.Add(StretchType, "stretch")
 	}

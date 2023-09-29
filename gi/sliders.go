@@ -610,7 +610,7 @@ func (sb *SliderBase) ConfigSlider(sc *Scene) {
 
 func (sb *SliderBase) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutNil)
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
 	mods, updt := parts.ConfigChildren(config)
 	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)

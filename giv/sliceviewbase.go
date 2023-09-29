@@ -376,13 +376,13 @@ func (sv *SliceViewBase) UpdateValues() {
 
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget(vp *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
 	gl := sv.GridLayout()
-	gconfig := ki.TypeAndNameList{}
+	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above

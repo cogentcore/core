@@ -246,7 +246,7 @@ func (tv *TableView) IsConfiged() bool {
 
 // Config configures the view
 func (tv *TableView) ConfigWidget(vp *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "frame")
 	mods, updt := tv.ConfigChildren(config)
@@ -340,7 +340,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
-	sgcfg := ki.TypeAndNameList{}
+	sgcfg := ki.Config{}
 	sgcfg.Add(gi.TypeToolBar, "header")
 	sgcfg.Add(gi.LayoutType, "grid-lay")
 	sg.ConfigChildren(sgcfg)
@@ -348,7 +348,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgh := tv.SliceHeader()
 
 	gl := tv.GridLayout()
-	gconfig := ki.TypeAndNameList{}
+	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.TypeScrollBar, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
@@ -356,7 +356,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sgf = tv.This().(SliceViewer).SliceGrid()
 
 	// Configure Header
-	hcfg := ki.TypeAndNameList{}
+	hcfg := ki.Config{}
 	if tv.ShowIndex {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}

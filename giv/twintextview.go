@@ -78,7 +78,7 @@ func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
 
 func (tv *TwinTextViews) ConfigTexts() {
 	tv.MakeBufs()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.LayoutType, "text-a-lay")
 	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := tv.ConfigChildren(config)

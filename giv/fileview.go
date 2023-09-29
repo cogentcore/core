@@ -284,7 +284,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 
 // Config configures the view
 func (fv *FileView) ConfigWidget(vp *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
 	config.Add(gi.LayoutType, "sel-row")
@@ -306,7 +306,7 @@ func (fv *FileView) ConfigPathBar() {
 	pr.Lay = gi.LayoutHoriz
 	pr.SetStretchMaxWidth()
 
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.LabelType, "path-lbl")
 	config.Add(gi.TypeComboBox, "path")
 	config.Add(gi.ActionType, "path-up")
@@ -376,7 +376,7 @@ func (fv *FileView) ConfigPathBar() {
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(TypeTableView, "favs-view")
 	config.Add(TypeTableView, "files-view")
 	fr.ConfigChildren(config) // already covered by parent update
@@ -415,7 +415,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 func (fv *FileView) ConfigSelRow() {
 	sr := fv.SelRow()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.LabelType, "sel-lbl")
 	config.Add(gi.TextFieldType, "sel")
 	config.Add(gi.LabelType, "ext-lbl")

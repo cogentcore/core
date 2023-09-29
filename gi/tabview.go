@@ -695,7 +695,7 @@ func (tb *TabButton) ConfigParts(sc *Scene) {
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)

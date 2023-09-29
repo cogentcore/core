@@ -84,7 +84,7 @@ func (mv *MapViewInline) ConfigParts(vp *Scene) {
 	if laser.IfaceIsNil(mv.Map) {
 		return
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
 	mv.Values = make([]ValueView, 0)

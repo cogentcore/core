@@ -94,7 +94,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 
 // Config configures the view
 func (av *ArgView) ConfigWidget(vp *Scene) {
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")
 	mods, updt := av.ConfigChildren(config)
@@ -134,7 +134,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg := av.ArgsGrid()
 	sg.Lay = gi.LayoutGrid
 	sg.Stripes = gi.RowStripes
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	for i := range av.Args {
 		ad := &av.Args[i]
 		if ad.HasValSet() {

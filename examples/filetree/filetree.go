@@ -264,10 +264,10 @@ func (fb *FileBrowse) Defaults() {
 //////////////////////////////////////////////////////////////////////////////////////
 //   GUI configs
 
-// StdFrameConfig returns a TypeAndNameList for configuring a standard Frame
+// StdFrameConfig returns a Config for configuring a standard Frame
 // -- can modify as desired before calling ConfigChildren on Frame using this
-func (fb *FileBrowse) StdFrameConfig() ki.TypeAndNameList {
-	config := ki.TypeAndNameList{}
+func (fb *FileBrowse) StdFrameConfig() ki.Config {
+	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
@@ -349,9 +349,9 @@ func (fb *FileBrowse) ConfigToolbar() {
 	giv.ToolBarView(fb, fb.Scene, tb)
 }
 
-// SplitViewConfig returns a TypeAndNameList for configuring the SplitView
-func (fb *FileBrowse) SplitViewConfig() ki.TypeAndNameList {
-	config := ki.TypeAndNameList{}
+// SplitViewConfig returns a Config for configuring the SplitView
+func (fb *FileBrowse) SplitViewConfig() ki.Config {
+	config := ki.Config{}
 	config.Add(gi.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
 		config.Add(gi.LayoutType, fmt.Sprintf("textview-lay-%v", i))

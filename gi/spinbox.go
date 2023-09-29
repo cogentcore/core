@@ -213,7 +213,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	if sb.DownIcon.IsNil() {
 		sb.DownIcon = icons.KeyboardArrowDown
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	config.Add(TextFieldType, "text-field")
 	if !sb.IsDisabled() {
 		config.Add(SpaceType, "space")

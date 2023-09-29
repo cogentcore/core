@@ -56,7 +56,7 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.TypeAndNameList, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
+func (wb *WidgetBase) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
 	icIdx = -1
 	lbIdx = -1
 	if icnm.IsValid() {

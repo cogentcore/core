@@ -393,7 +393,7 @@ func (ft *FileTree) ExtFileNodeByPath(fpath string) (*FileNode, error) {
 func (ft *FileTree) UpdateExtFiles(efn *FileNode) {
 	efn.Info.Mode = os.ModeDir | os.ModeIrregular // mark as dir, irregular
 	efn.SetOpen()
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	typ := ft.NodeType
 	for _, f := range ft.ExtFiles {
 		config.Add(typ, DirAndFile(f))
@@ -647,9 +647,9 @@ func (fn *FileNode) UpdateDir() {
 
 // ConfigOfFiles returns a type-and-name list for configuring nodes based on
 // files immediately within given path
-func (fn *FileNode) ConfigOfFiles(path string) ki.TypeAndNameList {
-	config1 := ki.TypeAndNameList{}
-	config2 := ki.TypeAndNameList{}
+func (fn *FileNode) ConfigOfFiles(path string) ki.Config {
+	config1 := ki.Config{}
+	config2 := ki.Config{}
 	typ := fn.FRoot.NodeType
 	filepath.Walk(path, func(pth string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -690,7 +690,7 @@ func (fn *FileNode) ConfigOfFiles(path string) ki.TypeAndNameList {
 }
 
 // SortConfigByModTime sorts given config list by mod time
-func (fn *FileNode) SortConfigByModTime(confg ki.TypeAndNameList) {
+func (fn *FileNode) SortConfigByModTime(confg ki.Config) {
 	sort.Slice(confg, func(i, j int) bool {
 		ifn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[i].Name))
 		jfn, _ := os.Stat(filepath.Join(string(fn.FPath), confg[j].Name))

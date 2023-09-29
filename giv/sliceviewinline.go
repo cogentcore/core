@@ -108,7 +108,7 @@ func (sv *SliceViewInline) ConfigParts(vp *Scene) {
 	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
-	config := ki.TypeAndNameList{}
+	config := ki.Config{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
 
