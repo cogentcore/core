@@ -29,7 +29,7 @@ type Cursor interface {
 	// enum value must correspond to a filename of the form "name.svg" in
 	// [goki.dev/cursors.Cursors]; this will be satisfied automatically by all
 	// [cursor.Cursor] values.
-	Set(cursor enums.Enum)
+	Set(cursor enums.Enum) error
 
 	// IsVisible returns whether cursor is currently visible (according to [Cursor.Hide] and [Cursor.Show] actions)
 	IsVisible() bool
@@ -39,6 +39,9 @@ type Cursor interface {
 
 	// Show shows the cursor after a hide if it is hidden.
 	Show()
+
+	// SetSize sets the size that cursors are rendered at.
+	SetSize(size int)
 }
 
 // CursorBase provides the common infrastructure for the [Cursor] interface,
@@ -51,6 +54,9 @@ type CursorBase struct {
 
 	// Vis is whether the cursor is visible; be sure to initialize to true!
 	Vis bool
+
+	// Size is the size that cursors are rendered at
+	Size int
 }
 
 // CursorBase should be a valid cursor so that it can be used directly in mobile
@@ -60,12 +66,23 @@ func (c *CursorBase) Current() enums.Enum {
 	return c.Cur
 }
 
-func (c *CursorBase) Set(cursor enums.Enum) {}
+func (c *CursorBase) Set(cursor enums.Enum) error {
+	c.Cur = cursor
+	return nil
+}
 
 func (c *CursorBase) IsVisible() bool {
 	return c.Vis
 }
 
-func (c *CursorBase) Hide() {}
+func (c *CursorBase) Hide() {
+	c.Vis = false
+}
 
-func (c *CursorBase) Show() {}
+func (c *CursorBase) Show() {
+	c.Vis = true
+}
+
+func (c *CursorBase) SetSize(size int) {
+	c.Size = size
+}
