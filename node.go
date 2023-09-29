@@ -263,7 +263,7 @@ func (g *NodeBase) ReadGeom(sv *SVG, dat []float32) {
 func FirstNonGroupNode(kn ki.Ki) ki.Ki {
 	var ngn ki.Ki
 	kn.WalkPre(func(k ki.Ki) bool {
-		if k == nil || k.This() == nil || k.IsDeleted() || k.IsDestroyed() {
+		if k == nil || k.This() == nil || k.Is(ki.Deleted) || k.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		if _, isgp := k.(*Group); isgp {

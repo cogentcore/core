@@ -14,7 +14,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -174,7 +174,7 @@ func (sv *SVG) Style() {
 	// set the Defs flags
 	sv.Defs.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
-		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+		if ni == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		ni.SetFlag(true, IsDef)
@@ -187,7 +187,7 @@ func (sv *SVG) Style() {
 
 	sv.Root.WalkPre(func(k ki.Ki) bool {
 		ni := k.(Node)
-		if ni == nil || ni.IsDeleted() || ni.IsDestroyed() {
+		if ni == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		ni.Style(sv)

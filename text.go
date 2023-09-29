@@ -8,7 +8,7 @@ import (
 	"image"
 
 	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
