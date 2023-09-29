@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gist
+package styles
 
 import (
 	"log"
@@ -136,7 +136,7 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 
 // StyleSetError reports that cannot set property of given key with given value
 func StyleSetError(key string, val any) {
-	log.Printf("gist.Style error: cannot set key: %s from value: %v\n", key, val)
+	log.Printf("styles.Style error: cannot set key: %s from value: %v\n", key, val)
 }
 
 type StyleFunc func(obj any, key string, val any, par any, ctxt colors.Context)

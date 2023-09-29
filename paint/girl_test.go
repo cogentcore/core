@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"fmt"
@@ -34,7 +34,7 @@ func TestRender(t *testing.T) {
 	rs.PushBounds(szrec)
 	rs.Lock()
 
-	bs := gist.Border{}
+	bs := styles.Border{}
 	bs.Color.Set(colors.Red, colors.Blue, colors.Green, colors.Orange)
 	bs.Width.Set(units.Dot(20), units.Dot(30), units.Dot(40), units.Dot(50))
 	bs.ToDots(&pc.UnContext)
@@ -69,13 +69,13 @@ func TestRender(t *testing.T) {
 	// pc.FillStrokeClear(rs)
 
 	// Text rendering
-	tsty := &gist.Text{}
+	tsty := &styles.Text{}
 	tsty.Defaults()
-	fsty := &gist.FontRender{}
+	fsty := &styles.FontRender{}
 	fsty.Defaults()
 
 	// experiment!
-	tsty.Align = gist.AlignCenter
+	tsty.Align = styles.AlignCenter
 
 	txt := &Text{}
 	txt.SetHTML("This is <a>HTML</a> <b>formatted</b> <i>text</i>", fsty, tsty, &pc.UnContext, nil)

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"log"
@@ -26,7 +26,7 @@ import (
 // The font size is always rounded to nearest integer, to produce
 // better-looking results (presumably).  The current metrics and given
 // unit.Context are updated based on the properties of the font.
-func OpenFont(fs *gist.FontRender, ctxt *units.Context) gist.Font {
+func OpenFont(fs *styles.FontRender, ctxt *units.Context) styles.Font {
 	facenm := FontFaceName(fs.Family, fs.Stretch, fs.Weight, fs.Style)
 	if fs.Size.Dots == 0 {
 		fs.Size.ToDots(ctxt)
@@ -55,7 +55,7 @@ func OpenFont(fs *gist.FontRender, ctxt *units.Context) gist.Font {
 // display dots, and if strokeWidth is > 0, the font is drawn in outline form
 // (stroked) instead of filled (supported in SVG).
 // loadFontMu must be locked prior to calling
-func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace, error) {
+func OpenFontFace(name, path string, size int, strokeWidth int) (*styles.FontFace, error) {
 	if strings.HasPrefix(path, "gofont") {
 		return OpenGoFont(name, path, size, strokeWidth)
 	}
@@ -75,7 +75,7 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 			DPI:  72,
 			// Hinting: font.HintingFull,
 		})
-		ff := gist.NewFontFace(name, size, face)
+		ff := styles.NewFontFace(name, size, face)
 		return ff, err
 	} else {
 		f, err := truetype.Parse(fontBytes)
@@ -88,14 +88,14 @@ func OpenFontFace(name, path string, size int, strokeWidth int) (*gist.FontFace,
 			// Hinting: font.HintingFull,
 			// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
 		})
-		ff := gist.NewFontFace(name, size, face)
+		ff := styles.NewFontFace(name, size, face)
 		return ff, nil
 	}
 }
 
 // FontStyleCSS looks for "tag" name props in cssAgg props, and applies those to
 // style if found, and returns true -- false if no such tag found
-func FontStyleCSS(fs *gist.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt colors.Context) bool {
+func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit *units.Context, ctxt colors.Context) bool {
 	if cssAgg == nil {
 		return false
 	}

@@ -4,7 +4,7 @@
 
 //go:build darwin
 
-package girl
+package paint
 
 // FontPaths contains the filepaths in which fonts are stored on Darwin (macOS/iOS).
 var FontPaths = []string{"/System/Library/Fonts", "/Library/Fonts"}

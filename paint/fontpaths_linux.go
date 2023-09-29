@@ -4,7 +4,7 @@
 
 //go:build linux
 
-package girl
+package paint
 
 // FontPaths contains the filepaths in which fonts are stored on Linux.
 var FontPaths = []string{"/usr/share/fonts/truetype"}

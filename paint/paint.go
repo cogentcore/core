@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"errors"
@@ -49,7 +49,7 @@ SOFTWARE.
 // Text rendering is handled separately in TextRender, but it depends
 // minimally on styling parameters in FontStyle
 type Paint struct {
-	gist.Paint
+	styles.Paint
 }
 
 func NewPaint() Paint {
@@ -190,15 +190,15 @@ func (pc *Paint) NewSubPath(rs *State) {
 
 func (pc *Paint) capfunc() rasterx.CapFunc {
 	switch pc.StrokeStyle.Cap {
-	case gist.LineCapButt:
+	case styles.LineCapButt:
 		return rasterx.ButtCap
-	case gist.LineCapRound:
+	case styles.LineCapRound:
 		return rasterx.RoundCap
-	case gist.LineCapSquare:
+	case styles.LineCapSquare:
 		return rasterx.SquareCap
-	case gist.LineCapCubic:
+	case styles.LineCapCubic:
 		return rasterx.CubicCap
-	case gist.LineCapQuadratic:
+	case styles.LineCapQuadratic:
 		return rasterx.QuadraticCap
 	}
 	return nil
@@ -206,17 +206,17 @@ func (pc *Paint) capfunc() rasterx.CapFunc {
 
 func (pc *Paint) joinmode() rasterx.JoinMode {
 	switch pc.StrokeStyle.Join {
-	case gist.LineJoinMiter:
+	case styles.LineJoinMiter:
 		return rasterx.Miter
-	case gist.LineJoinMiterClip:
+	case styles.LineJoinMiterClip:
 		return rasterx.MiterClip
-	case gist.LineJoinRound:
+	case styles.LineJoinRound:
 		return rasterx.Round
-	case gist.LineJoinBevel:
+	case styles.LineJoinBevel:
 		return rasterx.Bevel
-	case gist.LineJoinArcs:
+	case styles.LineJoinArcs:
 		return rasterx.Arc
-	case gist.LineJoinArcsClip:
+	case styles.LineJoinArcsClip:
 		return rasterx.ArcClip
 	}
 	return rasterx.Arc
@@ -229,7 +229,7 @@ func (pc *Paint) StrokeWidth(rs *State) float32 {
 	if dw == 0 {
 		return dw
 	}
-	if pc.VecEff == gist.VecEffNonScalingStroke {
+	if pc.VecEff == styles.VecEffNonScalingStroke {
 		return dw
 	}
 	scx, scy := rs.XForm.ExtractScale()
@@ -298,7 +298,7 @@ func (pc *Paint) fill(rs *State) {
 	defer rs.RasterMu.Unlock()
 
 	rf := &rs.Raster.Filler
-	rf.SetWinding(pc.FillStyle.Rule == gist.FillRuleNonZero)
+	rf.SetWinding(pc.FillStyle.Rule == styles.FillRuleNonZero)
 	rs.Scanner.SetClip(rs.Bounds)
 	rs.Path.AddTo(rf)
 	fbox := rs.Scanner.GetPathExtent()
@@ -479,10 +479,10 @@ func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 // // DrawRectangle draws a rectangle by setting the stroke style and width
 // // and calling DrawConsistentRectangle if the given border width and
 // // color styles for each side are the same. Otherwise, it calls DrawChangingRectangle.
-// func (pc *Paint) DrawRectangle1(rs *State, x, y, w, h float32, bs gist.Border) {
+// func (pc *Paint) DrawRectangle1(rs *State, x, y, w, h float32, bs styles.Border) {
 // 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 // 		// set the color if it is not the same as the already set color
-// 		if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
 // 			pc.StrokeStyle.SetColor(bs.Color.Top)
 // 		}
 // 		pc.StrokeStyle.Width = bs.Width.Top
@@ -494,7 +494,7 @@ func (pc *Paint) DrawPolygonPxToDots(rs *State, points []mat32.Vec2) {
 
 // DrawBorder is a higher-level function that draws, strokes, and fills
 // an potentially rounded border box with the given position, size, and border styles.
-func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs gist.Border) {
+func (pc *Paint) DrawBorder(rs *State, x, y, w, h float32, bs styles.Border) {
 	r := bs.Radius.Dots()
 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 		// set the color if it is not nil and the stroke style is not on and set to the correct color
@@ -610,7 +610,7 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 }
 
 // // DrawChangingRectangle draws a rectangle with changing border styles
-// func (pc *Paint) DrawChangingRectangle(rs *State, x, y, w, h float32, bs gist.Border) {
+// func (pc *Paint) DrawChangingRectangle(rs *State, x, y, w, h float32, bs styles.Border) {
 // 	// use consistent rectangle for fill, and then draw borders side by side
 // 	pc.DrawConsistentRectangle(rs, x, y, w, h)
 // 	pc.Fill(rs)
@@ -619,7 +619,7 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 // 	pc.MoveTo(rs, x, y)
 
 // 	// set the color if it is not the same as the already set color
-// 	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
 // 		pc.StrokeStyle.SetColor(bs.Color.Top)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Top
@@ -663,10 +663,10 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 // // DrawRectangle draws a rounded rectangle by setting the stroke style and width
 // // and calling DrawConsistentRoundedRectangle if the given border width and
 // // color styles for each side are the same. Otherwise, it calls DrawChangingRoundedRectangle.
-// func (pc *Paint) DrawRoundedRectangle1(rs *State, x, y, w, h float32, bs gist.Border) {
+// func (pc *Paint) DrawRoundedRectangle1(rs *State, x, y, w, h float32, bs styles.Border) {
 // 	if bs.Color.AllSame() && bs.Width.Dots().AllSame() {
 // 		// set the color if it is not the same as the already set color
-// 		if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 		if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
 // 			pc.StrokeStyle.SetColor(bs.Color.Top)
 // 		}
 // 		pc.StrokeStyle.Width = bs.Width.Top
@@ -679,7 +679,7 @@ func (pc *Paint) DrawRectangle(rs *State, x, y, w, h float32) {
 // DrawRoundedRectangle draws a standard rounded rectangle
 // with a consistent border and with the given x and y position,
 // width and height, and border radius for each corner.
-func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.SideFloats) {
+func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r styles.SideFloats) {
 	// clamp border radius values
 	min := mat32.Min(w/2, h/2)
 	r.Top = mat32.Clamp(r.Top, 0, min)
@@ -732,7 +732,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.Side
 
 // // DrawChangingRectangle draws a rounder rectangle with the given x and y position,
 // // width and height, and border radius for each corner.
-// func (pc *Paint) DrawMultiStyleBorder(rs *State, x, y, w, h float32, bs gist.Border) {
+// func (pc *Paint) DrawMultiStyleBorder(rs *State, x, y, w, h float32, bs styles.Border) {
 // 	r := bs.Radius.Dots()
 
 // 	// use consistent rounded rectangle for fill, and then draw borders side by side
@@ -761,7 +761,7 @@ func (pc *Paint) DrawRoundedRectangle(rs *State, x, y, w, h float32, r gist.Side
 // 	pc.MoveTo(rs, xtli, ytl)
 
 // 	// set the color if it is not the same as the already set color
-// 	if pc.StrokeStyle.Color.Source != gist.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
+// 	if pc.StrokeStyle.Color.Source != styles.SolidColor || bs.Color.Top != pc.StrokeStyle.Color.Color {
 // 		pc.StrokeStyle.SetColor(bs.Color.Top)
 // 	}
 // 	pc.StrokeStyle.Width = bs.Width.Top

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"bytes"
@@ -46,7 +46,7 @@ type Text struct {
 	Size mat32.Vec2 `desc:"last size of overall rendered text"`
 
 	// where relevant, this is the (default, dominant) text direction for the span
-	Dir gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Dir styles.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
 
 	// hyperlinks within rendered text
 	Links []TextLink `desc:"hyperlinks within rendered text"`
@@ -100,14 +100,14 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 		}
 
 		// todo: cache flags if these are actually needed
-		if sr.HasDeco.HasFlag(gist.DecoBackgroundColor) {
+		if sr.HasDeco.HasFlag(styles.DecoBackgroundColor) {
 			sr.RenderBg(rs, tpos)
 		}
-		if sr.HasDeco.HasFlag(gist.DecoUnderline) || sr.HasDeco.HasFlag(gist.DecoDottedUnderline) {
+		if sr.HasDeco.HasFlag(styles.DecoUnderline) || sr.HasDeco.HasFlag(styles.DecoDottedUnderline) {
 			sr.RenderUnderline(rs, tpos)
 		}
-		if sr.HasDeco.HasFlag(gist.DecoOverline) {
-			sr.RenderLine(rs, tpos, gist.DecoOverline, 1.1)
+		if sr.HasDeco.HasFlag(styles.DecoOverline) {
+			sr.RenderLine(rs, tpos, styles.DecoOverline, 1.1)
 		}
 
 		for i, r := range sr.Text {
@@ -166,8 +166,8 @@ func (tr *Text) Render(rs *State, pos mat32.Vec2) {
 				})
 			}
 		}
-		if sr.HasDeco.HasFlag(gist.DecoLineThrough) {
-			sr.RenderLine(rs, tpos, gist.DecoLineThrough, 0.25)
+		if sr.HasDeco.HasFlag(styles.DecoLineThrough) {
+			sr.RenderLine(rs, tpos, styles.DecoLineThrough, 0.25)
 		}
 	}
 }
@@ -196,7 +196,7 @@ func (tr *Text) RenderTopPos(rs *State, tpos mat32.Vec2) {
 // apply these per character after.  Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BackgroundColor in font style, and never
 // renders background color
-func (tr *Text) SetString(str string, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
+func (tr *Text) SetString(str string, fontSty *styles.FontRender, ctxt *units.Context, txtSty *styles.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -215,7 +215,7 @@ func (tr *Text) SetString(str string, fontSty *gist.FontRender, ctxt *units.Cont
 // entire string, and does TB rotated layout (-90 deg).
 // Be sure that OpenFont has been run so a valid Face is available.
 // noBG ignores any BackgroundColor in font style, and never renders background color
-func (tr *Text) SetStringRot90(str string, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, scalex float32) {
+func (tr *Text) SetStringRot90(str string, fontSty *styles.FontRender, ctxt *units.Context, txtSty *styles.Text, noBG bool, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -236,7 +236,7 @@ func (tr *Text) SetStringRot90(str string, fontSty *gist.FontRender, ctxt *units
 // apply these per character after Be sure that OpenFont has been run so a
 // valid Face is available.  noBG ignores any BackgroundColor in font style, and never
 // renders background color
-func (tr *Text) SetRunes(str []rune, fontSty *gist.FontRender, ctxt *units.Context, txtSty *gist.Text, noBG bool, rot, scalex float32) {
+func (tr *Text) SetRunes(str []rune, fontSty *styles.FontRender, ctxt *units.Context, txtSty *styles.Text, noBG bool, rot, scalex float32) {
 	if len(tr.Spans) != 1 {
 		tr.Spans = make([]Span, 1)
 	}
@@ -252,27 +252,27 @@ func (tr *Text) SetRunes(str []rune, fontSty *gist.FontRender, ctxt *units.Conte
 // SetHTMLSimpleTag sets the styling parameters for simple html style tags
 // that only require updating the given font spec values -- returns true if handled
 // https://www.w3schools.com/cssref/css_default_values.asp
-func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssAgg map[string]any) bool {
+func SetHTMLSimpleTag(tag string, fs *styles.FontRender, ctxt *units.Context, cssAgg map[string]any) bool {
 	did := false
 	switch tag {
 	case "b", "strong":
-		fs.Weight = gist.WeightBold
+		fs.Weight = styles.WeightBold
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "i", "em", "var", "cite":
-		fs.Style = gist.FontItalic
+		fs.Style = styles.FontItalic
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "ins":
 		fallthrough
 	case "u":
-		fs.SetDeco(gist.DecoUnderline)
+		fs.SetDeco(styles.DecoUnderline)
 		did = true
 	case "s", "del", "strike":
-		fs.SetDeco(gist.DecoLineThrough)
+		fs.SetDeco(styles.DecoLineThrough)
 		did = true
 	case "sup":
-		fs.SetDeco(gist.DecoSuper)
+		fs.SetDeco(styles.DecoSuper)
 		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
 		curpts -= 2
 		fs.Size = units.Pt(float32(curpts))
@@ -280,7 +280,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "sub":
-		fs.SetDeco(gist.DecoSub)
+		fs.SetDeco(styles.DecoSub)
 		fallthrough
 	case "small":
 		curpts := math.Round(float64(fs.Size.Convert(units.UnitPt, ctxt).Val))
@@ -297,16 +297,16 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "xx-small", "x-small", "smallf", "medium", "large", "x-large", "xx-large":
-		fs.Size = units.Pt(gist.FontSizePoints[tag])
+		fs.Size = units.Pt(styles.FontSizePoints[tag])
 		fs.Size.ToDots(ctxt)
 		fs.Font = OpenFont(fs, ctxt)
 		did = true
 	case "mark":
 		// TODO: use correct color
-		// fs.BackgroundColor.SetSolid(gist.ThePrefs.PrefColor("highlight"))
+		// fs.BackgroundColor.SetSolid(styles.ThePrefs.PrefColor("highlight"))
 		did = true
 	case "abbr", "acronym":
-		fs.SetDeco(gist.DecoDottedUnderline)
+		fs.SetDeco(styles.DecoDottedUnderline)
 		did = true
 	case "tt", "kbd", "samp", "code":
 		fs.Family = "monospace"
@@ -326,7 +326,7 @@ func SetHTMLSimpleTag(tag string, fs *gist.FontRender, ctxt *units.Context, cssA
 // -- result can then be processed by different layout algorithms as needed.
 // cssAgg, if non-nil, should contain CSSAgg properties -- will be tested for
 // special css styling of each element.
-func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTML(str string, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre([]byte(str), font, txtSty, ctxt, cssAgg)
 	} else {
@@ -336,7 +336,7 @@ func (tr *Text) SetHTML(str string, font *gist.FontRender, txtSty *gist.Text, ct
 
 // SetHTMLBytes does SetHTML with bytes as input -- more efficient -- use this
 // if already in bytes
-func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLBytes(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
 	if txtSty.HasPre() {
 		tr.SetHTMLPre(str, font, txtSty, ctxt, cssAgg)
 	} else {
@@ -346,7 +346,7 @@ func (tr *Text) SetHTMLBytes(str []byte, font *gist.FontRender, txtSty *gist.Tex
 
 // This is the No-Pre parser that uses the golang XML decoder system, which
 // strips all whitespace and is thus unsuitable for any Pre case
-func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLNoPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
 	//	errstr := "gi.Text SetHTML"
 	sz := len(str)
 	if sz == 0 {
@@ -373,7 +373,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*gist.FontRender, 1, 10)
+	fstack := make([]*styles.FontRender, 1, 10)
 	fstack[0] = font
 	for {
 		t, err := decoder.Token()
@@ -394,7 +394,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 				switch nm {
 				case "a":
 					fs.Color = colors.Scheme.Primary.Base
-					fs.SetDeco(gist.DecoUnderline)
+					fs.SetDeco(styles.DecoUnderline)
 					curLinkIdx = len(tr.Links)
 					tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 					sprop := make(map[string]any, len(se.Attr))
@@ -437,11 +437,11 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 				for _, attr := range se.Attr {
 					switch attr.Name.Local {
 					case "style":
-						gist.SetStylePropsXML(attr.Value, &sprop)
+						styles.SetStylePropsXML(attr.Value, &sprop)
 					case "class":
 						if cssAgg != nil {
 							clnm := "." + attr.Value
-							if aggp, ok := gist.SubProps(cssAgg, clnm); ok {
+							if aggp, ok := styles.SubProps(cssAgg, clnm); ok {
 								fs.SetStyleProps(nil, aggp, nil)
 								fs.Font = OpenFont(&fs, ctxt)
 							}
@@ -511,7 +511,7 @@ func (tr *Text) SetHTMLNoPre(str []byte, font *gist.FontRender, txtSty *gist.Tex
 // Only basic styling tags, including <span> elements with style parameters
 // (including class names) are decoded.  Whitespace is decoded as-is,
 // including LF \n etc, except in WhiteSpacePreLine case which only preserves LF's
-func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text, ctxt *units.Context, cssAgg map[string]any) {
+func (tr *Text) SetHTMLPre(str []byte, font *styles.FontRender, txtSty *styles.Text, ctxt *units.Context, cssAgg map[string]any) {
 	// errstr := "gi.Text SetHTMLPre"
 
 	sz := len(str)
@@ -529,7 +529,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 	nextIsParaStart := false
 	curLinkIdx := -1 // if currently processing an <a> link element
 
-	fstack := make([]*gist.FontRender, 1, 10)
+	fstack := make([]*styles.FontRender, 1, 10)
 	fstack[0] = font
 
 	tagstack := make([]string, 0, 10)
@@ -606,7 +606,7 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 					switch stag {
 					case "a":
 						fs.Color = colors.Scheme.Primary.Base
-						fs.SetDeco(gist.DecoUnderline)
+						fs.SetDeco(styles.DecoUnderline)
 						curLinkIdx = len(tr.Links)
 						tl := &TextLink{StartSpan: len(tr.Spans) - 1, StartIdx: len(curSp.Text)}
 						if nattr > 0 {
@@ -660,11 +660,11 @@ func (tr *Text) SetHTMLPre(str []byte, font *gist.FontRender, txtSty *gist.Text,
 						// fmt.Printf("nm: %v  val: %v\n", nm, vl)
 						switch nm {
 						case "style":
-							gist.SetStylePropsXML(vl, &sprop)
+							styles.SetStylePropsXML(vl, &sprop)
 						case "class":
 							if cssAgg != nil {
 								clnm := "." + vl
-								if aggp, ok := gist.SubProps(cssAgg, clnm); ok {
+								if aggp, ok := styles.SubProps(cssAgg, clnm); ok {
 									fs.SetStyleProps(nil, aggp, nil)
 									fs.Font = OpenFont(&fs, ctxt)
 								}
@@ -818,10 +818,10 @@ func (tx *Text) RuneEndPos(idx int) (pos mat32.Vec2, si, ri int, ok bool) {
 // LayoutStdLR does basic standard layout of text in LR direction, assigning
 // relative positions to spans and runes according to given styles, and given
 // size overall box (nonzero values used to constrain). Returns total
-// resulting size box for text.  Font face in gist.Font is used for
+// resulting size box for text.  Font face in styles.Font is used for
 // determining line spacing here -- other versions can do more expensive
 // calculations of variable line spacing as needed.
-func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
+func (tr *Text) LayoutStdLR(txtSty *styles.Text, fontSty *styles.FontRender, ctxt *units.Context, size mat32.Vec2) mat32.Vec2 {
 	if len(tr.Spans) == 0 {
 		return mat32.Vec2Zero
 	}
@@ -829,7 +829,7 @@ func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *u
 	// pr := prof.Start("TextLayout")
 	// defer pr.End()
 	//
-	tr.Dir = gist.LRTB
+	tr.Dir = styles.LRTB
 	fontSty.Font = OpenFont(fontSty, ctxt)
 	fht := fontSty.Face.Metrics.Height
 	dsc := mat32.FromFixed(fontSty.Face.Face.Metrics().Descent)
@@ -954,9 +954,9 @@ func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *u
 	vextra := size.Y - vht
 	if vextra > 0 {
 		switch {
-		case gist.IsAlignMiddle(txtSty.AlignV):
+		case styles.IsAlignMiddle(txtSty.AlignV):
 			vpad = vextra / 2
-		case gist.IsAlignEnd(txtSty.AlignV):
+		case styles.IsAlignEnd(txtSty.AlignV):
 			vpad = vextra
 		}
 	}
@@ -976,9 +976,9 @@ func (tr *Text) LayoutStdLR(txtSty *gist.Text, fontSty *gist.FontRender, ctxt *u
 		hextra := size.X - ssz.X
 		if hextra > 0 {
 			switch {
-			case gist.IsAlignMiddle(txtSty.Align):
+			case styles.IsAlignMiddle(txtSty.Align):
 				sr.RelPos.X += hextra / 2
-			case gist.IsAlignEnd(txtSty.Align):
+			case styles.IsAlignEnd(txtSty.Align):
 				sr.RelPos.X += hextra
 			}
 		}

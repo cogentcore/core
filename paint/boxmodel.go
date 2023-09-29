@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"goki.dev/colors"
@@ -12,13 +12,13 @@ import (
 
 // DrawBox calls DrawBorder with position, size and border parameters
 // as a convenience method for DrawStdBox
-func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs gist.Border) {
+func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs styles.Border) {
 	pc.DrawBorder(rs, pos.X, pos.Y, sz.X, sz.Y, bs)
 }
 
 // DrawStdBox draws the CSS "standard box" model using given style.
 // This is used for rendering widgets such as buttons, textfields, etc in a GUI.
-func (pc *Paint) DrawStdBox(rs *State, st *gist.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full) {
+func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full) {
 	mpos := pos.Add(st.EffMargin().Pos())
 	msz := sz.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()
@@ -56,7 +56,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *gist.Style, pos mat32.Vec2, sz mat32.
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
 			// we only want radius for border, no actual border
-			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), gist.Border{Radius: st.Border.Radius})
+			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), styles.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
 			if shadow.Blur.Dots != 0 {
 				// must divide by 2 like CSS

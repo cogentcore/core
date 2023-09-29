@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"errors"
@@ -44,10 +44,10 @@ type Span struct {
 	LastPos mat32.Vec2 `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates"`
 
 	// where relevant, this is the (default, dominant) text direction for the span
-	Dir gist.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Dir styles.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
 
 	// mask of decorations that have been set on this span -- optimizes rendering passes
-	HasDeco gist.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
+	HasDeco styles.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
 }
 
 // Init initializes a new span with given capacity
@@ -110,10 +110,10 @@ func (sr *Span) RuneEndPos(idx int) mat32.Vec2 {
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *Span) HasDecoUpdate(bg color.Color, deco gist.TextDecorations) {
+func (sr *Span) HasDecoUpdate(bg color.Color, deco styles.TextDecorations) {
 	sr.HasDeco |= deco
 	if bg != nil {
-		sr.HasDeco.SetFlag(true, gist.DecoBackgroundColor)
+		sr.HasDeco.SetFlag(true, styles.DecoBackgroundColor)
 	}
 }
 
@@ -122,18 +122,18 @@ func (sr *Span) IsNewPara() bool {
 	if len(sr.Render) == 0 {
 		return false
 	}
-	return sr.Render[0].Deco.HasFlag(gist.DecoParaStart)
+	return sr.Render[0].Deco.HasFlag(styles.DecoParaStart)
 }
 
 // SetNewPara sets this as starting a new paragraph
 func (sr *Span) SetNewPara() {
 	if len(sr.Render) > 0 {
-		sr.Render[0].Deco.SetFlag(true, gist.DecoParaStart)
+		sr.Render[0].Deco.SetFlag(true, styles.DecoParaStart)
 	}
 }
 
 // AppendRune adds one rune and associated formatting info
-func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco gist.TextDecorations) {
+func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco styles.TextDecorations) {
 	sr.Text = append(sr.Text, r)
 	rr := Rune{Face: face, Color: clr, BackgroundColor: bg, Deco: deco}
 	sr.Render = append(sr.Render, rr)
@@ -142,11 +142,11 @@ func (sr *Span) AppendRune(r rune, face font.Face, clr, bg color.Color, deco gis
 
 // AppendString adds string and associated formatting info, optimized with
 // only first rune having non-nil face and color settings
-func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, deco gist.TextDecorations, sty *gist.FontRender, ctxt *units.Context) {
+func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, deco styles.TextDecorations, sty *styles.FontRender, ctxt *units.Context) {
 	if len(str) == 0 {
 		return
 	}
-	ucfont := &gist.FontRender{}
+	ucfont := &styles.FontRender{}
 	// todo: oswin!
 	// if oswin.TheApp != nil && oswin.TheApp.Platform() == oswin.MacOS {
 	ucfont.Family = "Arial Unicode"
@@ -189,7 +189,7 @@ func (sr *Span) AppendString(str string, face font.Face, clr, bg color.Color, de
 }
 
 // SetRenders sets rendering parameters based on style
-func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetRenders(sty *styles.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sz := len(sr.Text)
 	if sz == 0 {
 		return
@@ -200,7 +200,7 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 		bgc = nil
 	}
 
-	ucfont := &gist.FontRender{}
+	ucfont := &styles.FontRender{}
 	ucfont.Family = "Arial Unicode"
 	ucfont.Size = sty.Size
 	ucfont.Font = OpenFont(ucfont, ctxt)
@@ -227,7 +227,7 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 			sr.Render[i].ScaleX = scalex
 		}
 	}
-	if sty.Deco != gist.DecoNone {
+	if sty.Deco != styles.DecoNone {
 		for i := range sr.Text {
 			sr.Render[i].Deco = sty.Deco
 		}
@@ -253,7 +253,7 @@ func (sr *Span) SetRenders(sty *gist.FontRender, ctxt *units.Context, noBG bool,
 // SetString initializes to given plain text string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *Span) SetString(str string, sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetString(str string, sty *styles.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = []rune(str)
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -261,7 +261,7 @@ func (sr *Span) SetString(str string, sty *gist.FontRender, ctxt *units.Context,
 // SetRunes initializes to given plain rune string, with given default style
 // parameters that are set for the first render element -- constructs Render
 // slice of same size as Text
-func (sr *Span) SetRunes(str []rune, sty *gist.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
+func (sr *Span) SetRunes(str []rune, sty *styles.FontRender, ctxt *units.Context, noBG bool, rot, scalex float32) {
 	sr.Text = str
 	sr.SetRenders(sty, ctxt, noBG, rot, scalex)
 }
@@ -280,7 +280,7 @@ func (sr *Span) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) 
 		// log.Println(err)
 		return
 	}
-	sr.Dir = gist.LRTB
+	sr.Dir = styles.LRTB
 	sz := len(sr.Text)
 	prevR := rune(-1)
 	lspc := letterSpace
@@ -303,10 +303,10 @@ func (sr *Span) SetRunePosLR(letterSpace, wordSpace, chsz float32, tabSize int) 
 		rr.RelPos.X = fpos
 		rr.RelPos.Y = 0
 
-		if rr.Deco.HasFlag(gist.DecoSuper) {
+		if rr.Deco.HasFlag(styles.DecoSuper) {
 			rr.RelPos.Y = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if rr.Deco.HasFlag(gist.DecoSub) {
+		if rr.Deco.HasFlag(styles.DecoSub) {
 			rr.RelPos.Y = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -350,7 +350,7 @@ func (sr *Span) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize int) 
 		// log.Println(err)
 		return
 	}
-	sr.Dir = gist.TB
+	sr.Dir = styles.TB
 	sz := len(sr.Text)
 	lspc := letterSpace
 	wspc := wordSpace
@@ -370,10 +370,10 @@ func (sr *Span) SetRunePosTB(letterSpace, wordSpace, chsz float32, tabSize int) 
 		rr.RelPos.X = 0
 		rr.RelPos.Y = fpos
 
-		if rr.Deco.HasFlag(gist.DecoSuper) {
+		if rr.Deco.HasFlag(styles.DecoSuper) {
 			rr.RelPos.Y = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if rr.Deco.HasFlag(gist.DecoSub) {
+		if rr.Deco.HasFlag(styles.DecoSub) {
 			rr.RelPos.Y = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -417,7 +417,7 @@ func (sr *Span) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize in
 		// log.Println(err)
 		return
 	}
-	sr.Dir = gist.TB
+	sr.Dir = styles.TB
 	sz := len(sr.Text)
 	prevR := rune(-1)
 	lspc := letterSpace
@@ -442,10 +442,10 @@ func (sr *Span) SetRunePosTBRot(letterSpace, wordSpace, chsz float32, tabSize in
 		rr.RelPos.Y = fpos
 		rr.RelPos.X = 0
 
-		if rr.Deco.HasFlag(gist.DecoSuper) {
+		if rr.Deco.HasFlag(styles.DecoSuper) {
 			rr.RelPos.X = -0.45 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
-		if rr.Deco.HasFlag(gist.DecoSub) {
+		if rr.Deco.HasFlag(styles.DecoSub) {
 			rr.RelPos.X = 0.15 * mat32.FromFixed(curFace.Metrics().Ascent)
 		}
 
@@ -711,7 +711,7 @@ func (sr *Span) RenderUnderline(rs *State, tpos mat32.Vec2) {
 			continue
 		}
 		rr := &(sr.Render[i])
-		if !(rr.Deco.HasFlag(gist.DecoUnderline) || rr.Deco.HasFlag(gist.DecoDottedUnderline)) {
+		if !(rr.Deco.HasFlag(styles.DecoUnderline) || rr.Deco.HasFlag(styles.DecoDottedUnderline)) {
 			if didLast {
 				pc.Stroke(rs)
 			}
@@ -743,7 +743,7 @@ func (sr *Span) RenderUnderline(rs *State, tpos mat32.Vec2) {
 			pc.StrokeStyle.Width.Dots = dw
 			pc.StrokeStyle.Color.SetColor(curColor)
 		}
-		if rr.Deco.HasFlag(gist.DecoDottedUnderline) {
+		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float64{2, 2}
 		}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, 2 * dw}))
@@ -765,7 +765,7 @@ func (sr *Span) RenderUnderline(rs *State, tpos mat32.Vec2) {
 }
 
 // RenderLine renders overline or line-through -- anything that is a function of ascent
-func (sr *Span) RenderLine(rs *State, tpos mat32.Vec2, deco gist.TextDecorations, ascPct float32) {
+func (sr *Span) RenderLine(rs *State, tpos mat32.Vec2, deco styles.TextDecorations, ascPct float32) {
 	curFace := sr.Render[0].Face
 	curColor := sr.Render[0].Color
 	didLast := false

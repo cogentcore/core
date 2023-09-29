@@ -4,7 +4,7 @@
 
 //go:build windows
 
-package girl
+package paint
 
 // FontPaths contains the filepaths in which fonts are stored on Windows.
 var FontPaths = []string{"C:\\Windows\\Fonts"}

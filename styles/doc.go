@@ -10,4 +10,4 @@ These are all based on the CSS standard: https://www.w3schools.com/cssref/defaul
 The xml struct tags provide the (lowercase) keyword for each tag -- tags can be
 parsed from strings using these keywords.
 */
-package gist
+package styles

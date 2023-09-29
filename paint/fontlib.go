@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"fmt"
@@ -42,13 +42,13 @@ type FontInfo struct {
 	Name string `desc:"official regularized name of font"`
 
 	// stretch: normal, expanded, condensed, etc
-	Stretch gist.FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`
+	Stretch styles.FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`
 
 	// weight: normal, bold, etc
-	Weight gist.FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`
+	Weight styles.FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`
 
 	// style -- normal, italic, etc
-	Style gist.FontStyles `xml:"style" desc:"style -- normal, italic, etc"`
+	Style styles.FontStyles `xml:"style" desc:"style -- normal, italic, etc"`
 
 	// example text -- styled according to font params in chooser
 	Example string `desc:"example text -- styled according to font params in chooser"`
@@ -77,7 +77,7 @@ type FontLib struct {
 	FontInfo []FontInfo `desc:"information about each font -- this list should be used for selecting valid regularized font names"`
 
 	// double-map of cached fonts, by font name and then integer font size within that
-	Faces map[string]map[int]*gist.FontFace `desc:"double-map of cached fonts, by font name and then integer font size within that"`
+	Faces map[string]map[int]*styles.FontFace `desc:"double-map of cached fonts, by font name and then integer font size within that"`
 }
 
 // FontLibrary is the gi font library, initialized from fonts available on font paths
@@ -104,7 +104,7 @@ func (fl *FontLib) Init() {
 		fl.FontPaths = make([]string, 0)
 		fl.FontsAvail = make(map[string]string)
 		fl.FontInfo = make([]FontInfo, 0)
-		fl.Faces = make(map[string]map[int]*gist.FontFace)
+		fl.Faces = make(map[string]map[int]*styles.FontFace)
 		loadFontMu.Unlock()
 		return // no paths to load from yet
 	}
@@ -120,7 +120,7 @@ func (fl *FontLib) Init() {
 // Font gets a particular font, specified by the official regularized font
 // name (see FontsAvail list), at given dots size (integer), using a cache of
 // loaded fonts.
-func (fl *FontLib) Font(fontnm string, size int) (*gist.FontFace, error) {
+func (fl *FontLib) Font(fontnm string, size int) (*styles.FontFace, error) {
 	fontnm = strings.ToLower(fontnm)
 	fl.Init()
 	loadFontMu.RLock()
@@ -146,7 +146,7 @@ func (fl *FontLib) Font(fontnm string, size int) (*gist.FontFace, error) {
 		}
 		facemap := fl.Faces[fontnm]
 		if facemap == nil {
-			facemap = make(map[int]*gist.FontFace)
+			facemap = make(map[int]*styles.FontFace)
 			fl.Faces[fontnm] = facemap
 		}
 		facemap[size] = face
@@ -265,12 +265,12 @@ func (fl *FontLib) FontsAvailFromPath(path string) error {
 				}
 			}
 		}
-		fn = gist.FixFontMods(fn)
+		fn = styles.FixFontMods(fn)
 		basefn := strings.ToLower(fn)
 		if _, ok := fl.FontsAvail[basefn]; !ok {
 			fl.FontsAvail[basefn] = path
 			fi := FontInfo{Name: fn, Example: FontInfoExample}
-			_, fi.Stretch, fi.Weight, fi.Style = gist.FontNameToMods(fn)
+			_, fi.Stretch, fi.Weight, fi.Style = styles.FontNameToMods(fn)
 			fl.FontInfo = append(fl.FontInfo, fi)
 			// fmt.Printf("added font: %v at path %q\n", basefn, path)
 
@@ -359,7 +359,7 @@ var GoFonts = map[string]GoFontInfo{
 	"gofont/gosmallcapsitalic": {"Go Small Caps Italic", gosmallcapsitalic.TTF},
 }
 
-func OpenGoFont(name, path string, size int, strokeWidth int) (*gist.FontFace, error) {
+func OpenGoFont(name, path string, size int, strokeWidth int) (*styles.FontFace, error) {
 	gf, ok := GoFonts[path]
 	if !ok {
 		return nil, fmt.Errorf("font path for the Go font not found: %v", path)
@@ -372,7 +372,7 @@ func OpenGoFont(name, path string, size int, strokeWidth int) (*gist.FontFace, e
 		// GlyphCacheEntries: 1024, // default is 512 -- todo benchmark
 
 	})
-	ff := gist.NewFontFace(name, size, face)
+	ff := styles.NewFontFace(name, size, face)
 	return ff, nil
 }
 
@@ -381,7 +381,7 @@ func (fl *FontLib) GoFontsAvail() {
 		basefn := strings.ToLower(gf.name)
 		fl.FontsAvail[basefn] = path
 		fi := FontInfo{Name: gf.name, Example: FontInfoExample}
-		_, fi.Stretch, fi.Weight, fi.Style = gist.FontNameToMods(gf.name)
+		_, fi.Stretch, fi.Weight, fi.Style = styles.FontNameToMods(gf.name)
 		fl.FontInfo = append(fl.FontInfo, fi)
 	}
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package girl
+package paint
 
 import (
 	"fmt"
@@ -30,9 +30,9 @@ func TestFontAlts(t *testing.T) {
 	fmt.Printf("FontAlts: fantasy: %v  serif: %v, mono: %v\n", fa, serif, mono)
 }
 
-var testStrs = []gist.FontStretch{gist.FontStrNormal, gist.FontStrCondensed, gist.FontStrExpanded}
-var testWts = []gist.FontWeights{gist.WeightNormal, gist.WeightLight, gist.WeightBold, gist.WeightBlack}
-var testStys = []gist.FontStyles{gist.FontNormal, gist.FontItalic, gist.FontOblique}
+var testStrs = []styles.FontStretch{styles.FontStrNormal, styles.FontStrCondensed, styles.FontStrExpanded}
+var testWts = []styles.FontWeights{styles.WeightNormal, styles.WeightLight, styles.WeightBold, styles.WeightBlack}
+var testStys = []styles.FontStyles{styles.FontNormal, styles.FontItalic, styles.FontOblique}
 var testNms = []string{"serif", "sans-serif", "monospace", "courier", "cursive", "fantasy"}
 
 func TestFontFaceName(t *testing.T) {
