@@ -33,13 +33,14 @@ func Get(name string, size int) (*Cursor, error) {
 	sm := Cursors[name]
 	if sm == nil {
 		sm = map[int]*Cursor{}
+		Cursors[name] = sm
 	}
 	if c, ok := sm[cursorSize]; ok {
 		return c, nil
 	}
 
 	sv := svg.NewSVG(cursorSize, cursorSize)
-	err := sv.OpenFS(cursors.Cursors, name+".svg") // TODO: support custom cursors
+	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
 	if err != nil {
 		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
 		slog.Error(err.Error())
