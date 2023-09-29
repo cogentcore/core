@@ -8,10 +8,9 @@ package cursorimg
 import (
 	"fmt"
 	"image"
-	"log/slog"
+	"image/png"
 
 	"goki.dev/cursors"
-	"goki.dev/svg"
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]
@@ -37,16 +36,29 @@ func Get(name string, size int) (*Cursor, error) {
 		return c, nil
 	}
 
-	sv := svg.NewSVG(size, size)
-	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
+	f, err := cursors.Cursors.Open("png/" + name + ".png")
 	if err != nil {
-		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
-		slog.Error(err.Error())
-		return nil, err
+		return nil, fmt.Errorf("error opening PNG file for cursor %q: %w", name, err)
 	}
-	sv.SetNormXForm()
-	sv.Render()
+	defer f.Close()
+	img, err := png.Decode(f)
+	if err != nil {
+		return nil, fmt.Errorf("error reading PNG file for cursor %q: %w", name, err)
+	}
 	return &Cursor{
-		Image: sv.Pixels,
+		Image: img,
 	}, nil
+
+	// sv := svg.NewSVG(size, size)
+	// err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
+	// if err != nil {
+	// 	err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
+	// 	slog.Error(err.Error())
+	// 	return nil, err
+	// }
+	// sv.SetNormXForm()
+	// sv.Render()
+	// return &Cursor{
+	// 	Image: sv.Pixels,
+	// }, nil
 }
