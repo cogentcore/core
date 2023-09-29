@@ -15,12 +15,11 @@ import (
 	"goki.dev/laser"
 )
 
-// style implements CSS-based styling using map[string]any to hold name / vals
-// CSS style reference: https://www.w3schools.com/cssref/default.asp
+// style implements CSS-based styling, as in: https://www.w3schools.com/cssref/default.asp
 // list of inherited: https://stackoverflow.com/questions/5612302/which-css-properties-are-inherited
 
 // styling strategy:
-// * indiv objects specify styles using property map -- good b/c it is fully open-ended
+// * either direct Go code based styling functions or ki.Props style map[string]any settings.
 // * we process those properties dynamically when rendering (first pass only) into state
 //   on objects that can be directly used during rendering
 // * good for basic rendering -- lots of additional things that could be extended later..
@@ -28,7 +27,7 @@ import (
 // IMPORTANT: any changes here must be updated in style_props.go StyleStyleFuncs
 // and likewise for all sub-styles as fields here.
 
-// Style has all the CSS-based style elements -- used for widget-type objects
+// Style has all the CSS-based style elements -- used for widget-type GUI objects.
 type Style struct {
 	// State holds style-relevant state flags, for convenient styling access
 	State states.States

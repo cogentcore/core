@@ -11,11 +11,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 11
+const StatesN States = 15
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -26,51 +26,67 @@ func _StatesNoOp() {
 	_ = x[Selected-(2)]
 	_ = x[Active-(3)]
 	_ = x[Focused-(4)]
-	_ = x[FocusWithin-(5)]
+	_ = x[FocusedWithin-(5)]
 	_ = x[Checked-(6)]
 	_ = x[Hovered-(7)]
-	_ = x[Pressed-(8)]
+	_ = x[LongHovered-(8)]
 	_ = x[Invalid-(9)]
-	_ = x[Link-(10)]
+	_ = x[Required-(10)]
+	_ = x[Blank-(11)]
+	_ = x[Link-(12)]
+	_ = x[Visited-(13)]
+	_ = x[AnyLink-(14)]
 }
 
 var _StatesNameToValueMap = map[string]States{
-	`Disabled`:    0,
-	`disabled`:    0,
-	`ReadOnly`:    1,
-	`readonly`:    1,
-	`Selected`:    2,
-	`selected`:    2,
-	`Active`:      3,
-	`active`:      3,
-	`Focused`:     4,
-	`focused`:     4,
-	`FocusWithin`: 5,
-	`focuswithin`: 5,
-	`Checked`:     6,
-	`checked`:     6,
-	`Hovered`:     7,
-	`hovered`:     7,
-	`Pressed`:     8,
-	`pressed`:     8,
-	`Invalid`:     9,
-	`invalid`:     9,
-	`Link`:        10,
-	`link`:        10,
+	`Disabled`:      0,
+	`disabled`:      0,
+	`ReadOnly`:      1,
+	`readonly`:      1,
+	`Selected`:      2,
+	`selected`:      2,
+	`Active`:        3,
+	`active`:        3,
+	`Focused`:       4,
+	`focused`:       4,
+	`FocusedWithin`: 5,
+	`focusedwithin`: 5,
+	`Checked`:       6,
+	`checked`:       6,
+	`Hovered`:       7,
+	`hovered`:       7,
+	`LongHovered`:   8,
+	`longhovered`:   8,
+	`Invalid`:       9,
+	`invalid`:       9,
+	`Required`:      10,
+	`required`:      10,
+	`Blank`:         11,
+	`blank`:         11,
+	`Link`:          12,
+	`link`:          12,
+	`Visited`:       13,
+	`visited`:       13,
+	`AnyLink`:       14,
+	`anylink`:       14,
 }
 
 var _StatesDescMap = map[States]string{
-	0:  ``,
-	1:  ``,
-	2:  ``,
-	3:  ``,
-	4:  ``,
-	5:  ``,
-	6:  ``,
-	7:  ``,
-	8:  ``,
-	9:  ``,
-	10: ``,
+	0:  `Disabled elements cannot be interacted with or selected, but do display`,
+	1:  `ReadOnly elements elements cannot be changed`,
+	2:  `Selected elements have been marked for clipboard or other such actions`,
+	3:  `Active elements are currently being interacted with, including a button being pressed, an element being dragged or scrolled`,
+	4:  `Focused elements receive keyboard input`,
+	5:  `FocusedWithin elements have a Focused element within them, including self`,
+	6:  `Checked is for check boxes or radio buttons or other similar state`,
+	7:  `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active`,
+	8:  `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup`,
+	9:  `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
+	10: `Required indicates that the element must be set by the user`,
+	11: `Blank indicates that the element has yet to be set by user`,
+	12: `Link indicates a URL link that has not been visited yet`,
+	13: `Visited indicates a URL link that has been visited`,
+	14: `AnyLink is either Link or Visited`,
 }
 
 var _StatesMap = map[States]string{
@@ -79,12 +95,16 @@ var _StatesMap = map[States]string{
 	2:  `Selected`,
 	3:  `Active`,
 	4:  `Focused`,
-	5:  `FocusWithin`,
+	5:  `FocusedWithin`,
 	6:  `Checked`,
 	7:  `Hovered`,
-	8:  `Pressed`,
+	8:  `LongHovered`,
 	9:  `Invalid`,
-	10: `Link`,
+	10: `Required`,
+	11: `Blank`,
+	12: `Link`,
+	13: `Visited`,
+	14: `AnyLink`,
 }
 
 // String returns the string representation

@@ -13,7 +13,7 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// Paint provides the styling parameters for rendering
+// Paint provides the styling parameters for SVG-style rendering
 type Paint struct {
 
 	// prop: display:none -- node and everything below it are off, non-rendering
