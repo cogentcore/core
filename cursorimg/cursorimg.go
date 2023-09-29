@@ -8,7 +8,7 @@ package cursorimg
 import (
 	"fmt"
 	"image"
-	"image/png"
+	_ "image/png"
 
 	"goki.dev/cursors"
 )
@@ -41,7 +41,7 @@ func Get(name string, size int) (*Cursor, error) {
 		return nil, fmt.Errorf("error opening PNG file for cursor %q: %w", name, err)
 	}
 	defer f.Close()
-	img, err := png.Decode(f)
+	img, _, err := image.Decode(f)
 	if err != nil {
 		return nil, fmt.Errorf("error reading PNG file for cursor %q: %w", name, err)
 	}
