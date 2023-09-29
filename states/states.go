@@ -14,7 +14,7 @@ const (
 	// Disabled elements cannot be interacted with or selected, but do display
 	Disabled States = iota
 
-	// ReadOnly elements elements cannot be changed
+	// ReadOnly elements cannot be changed, but can be selected
 	ReadOnly
 
 	// Selected elements have been marked for clipboard or other such actions
