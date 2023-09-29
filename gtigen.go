@@ -231,7 +231,7 @@ var GradientType = gti.AddType(&gti.Type{
 	Doc:        "Gradient is used for holding a specified color gradient (ColorSpec)\nname is id for lookup in url",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Grad", &gti.Field{Name: "Grad", Type: "gist.ColorSpec", Doc: "the color gradient", Directives: gti.Directives{}}},
+		{"Grad", &gti.Field{Name: "Grad", Type: "colors.Full", Doc: "the color gradient", Directives: gti.Directives{}}},
 		{"StopsName", &gti.Field{Name: "StopsName", Type: "string", Doc: "name of another gradient to get stops from", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
