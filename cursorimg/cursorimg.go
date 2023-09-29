@@ -28,18 +28,16 @@ var Cursors = map[string]map[int]*Cursor{}
 // Get returns the cursor object corresponding to the given cursor name,
 // with the given size. If it is not already cached in [Cursors], it renders and caches it.
 func Get(name string, size int) (*Cursor, error) {
-	// TODO: move to prefs
-	const cursorSize = 32
 	sm := Cursors[name]
 	if sm == nil {
 		sm = map[int]*Cursor{}
 		Cursors[name] = sm
 	}
-	if c, ok := sm[cursorSize]; ok {
+	if c, ok := sm[size]; ok {
 		return c, nil
 	}
 
-	sv := svg.NewSVG(cursorSize, cursorSize)
+	sv := svg.NewSVG(size, size)
 	err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
 	if err != nil {
 		err := fmt.Errorf("error opening SVG file for cursor %q: %w", name, err)
