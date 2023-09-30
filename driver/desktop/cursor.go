@@ -13,26 +13,27 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}, cursors: map[string]map[int]*glfw.Cursor{}}
+var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
 type cursorImpl struct {
 	cursor.CursorBase
-	cursors map[string]map[int]*glfw.Cursor // cached cursors
+	cursors map[enums.Enum]map[int]*glfw.Cursor // cached cursors
 	mu      sync.Mutex
 }
 
 func (c *cursorImpl) Set(cursor enums.Enum) error {
-	nm := cursor.String()
-	sm := c.cursors[nm]
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	sm := c.cursors[cursor]
 	if sm == nil {
 		sm = map[int]*glfw.Cursor{}
-		c.cursors[nm] = sm
+		c.cursors[cursor] = sm
 	}
 	if cur, ok := sm[c.Size]; ok {
 		theApp.ctxtwin.glw.SetCursor(cur)
 	}
 
-	ci, err := cursorimg.Get(nm, c.Size)
+	ci, err := cursorimg.Get(cursor, c.Size)
 	if err != nil {
 		return err
 	}
