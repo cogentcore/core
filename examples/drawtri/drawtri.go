@@ -12,8 +12,7 @@ import (
 	"goki.dev/cursors"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
-	"goki.dev/goosi/mouse"
-	"goki.dev/goosi/window"
+	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
@@ -96,16 +95,19 @@ func mainrun(a goosi.App) {
 
 	for {
 		evi := w.NextEvent()
-		switch ev := evi.(type) {
-		case *window.Event:
+		et := evi.Type()
+		switch et {
+		case events.Window:
+			ev := evi.(*events.WindowEvent)
 			switch ev.Action {
-			case window.Close:
+			case events.Close:
 				return
-			case window.Paint:
-				renderFrame()
 			}
-		case *mouse.Event:
-			// fmt.Println("got mouse event at pos", ev.Pos())
+		case events.WindowPaint:
+			// fmt.Println("paint")
+			renderFrame()
+		case events.MouseMove:
+			// fmt.Println("got mouse event at pos", evi.Pos())
 		}
 	}
 }
