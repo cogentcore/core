@@ -14,7 +14,7 @@ import (
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]
-// of the cursor and its hot spot.
+// of the cursor and its hotspot.
 type Cursor struct {
 	Image   image.Image
 	Hotspot image.Point
