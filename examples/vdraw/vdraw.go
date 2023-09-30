@@ -10,7 +10,6 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"path/filepath"
 	"runtime"
 	"time"
 
@@ -69,28 +68,22 @@ func main() {
 		vgpu.Terminate()
 	}
 
-	videoFiles := []string{"countdown.mp4"}
-	imgs := make([]image.Image, len(videoFiles))
-
 	stoff := 15 // causes images to wrap around sets, so this tests that..
 
-	for i, fnm := range videoFiles {
-		pnm := filepath.Join("../videos", fnm)
-		imgs[i], err = video.ReadFrame(pnm, 150)
+	rendImgs := func(idx int) {
+		img, err := video.ReadFrame("../videos/countdown.mp4", idx)
 		if err != nil {
 			panic(err)
 		}
-		drw.SetGoImage(i+stoff, 0, imgs[i], vgpu.NoFlipY)
-	}
-
-	drw.SyncImages()
-
-	rendImgs := func(idx int) {
-		drw.StartDraw(0) // specifically starting with correct descIdx is key..
-		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
-		for range videoFiles {
-			drw.Copy(0, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.SetGoImage(stoff, 0, img, vgpu.NoFlipY)
+		drw.SyncImages()
+		descIdx := 0
+		if stoff >= vgpu.MaxTexturesPerSet {
+			descIdx = 1
 		}
+		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
+		drw.Scale(stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.Copy(stoff, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
 		drw.EndDraw()
 	}
 
