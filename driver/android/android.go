@@ -485,6 +485,14 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}
 }
 
+func screenOrientation(width, height int) size.Orientation {
+	if width > height {
+		return size.OrientationLandscape
+	}
+
+	return size.OrientationPortrait
+}
+
 func runInputQueue(vm, jniEnv, ctx uintptr) error {
 	env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
 
