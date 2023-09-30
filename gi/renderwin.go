@@ -15,10 +15,8 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
-	"goki.dev/goosi/mouse"
-	"goki.dev/goosi/window"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
 	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
@@ -42,11 +40,11 @@ var CurRenderWin *RenderWin
 
 var (
 	// DragStartMSec is the number of milliseconds to wait before initiating a
-	// regular mouse drag event (as opposed to a basic mouse.Press)
+	// regular events drag event (as opposed to a basic events.Press)
 	DragStartMSec = 50
 
 	// DragStartPix is the number of pixels that must be moved before
-	// initiating a regular mouse drag event (as opposed to a basic mouse.Press)
+	// initiating a regular events drag event (as opposed to a basic events.Press)
 	DragStartPix = 4
 
 	// DNDStartMSec is the number of milliseconds to wait before initiating a
@@ -61,7 +59,7 @@ var (
 	// hover event (e.g., for opening a tooltip)
 	HoverStartMSec = 1000
 
-	// HoverMaxPix is the maximum number of pixels that mouse can move and still
+	// HoverMaxPix is the maximum number of pixels that events can move and still
 	// register a Hover event
 	HoverMaxPix = 5
 
@@ -688,16 +686,16 @@ func (w *RenderWin) SendShowEvent() {
 		return
 	}
 	w.SetFlag(true, WinFlagSentShow)
-	se := window.NewEvent(window.Show)
-	se.Init()
-	w.StageMgr.HandleEvent(se)
+	// se := window.NewEvent(window.Show)
+	// se.Init()
+	// w.StageMgr.HandleEvent(se)
 }
 
 // SendWinFocusEvent sends the RenderWinFocusEvent to widgets
-func (w *RenderWin) SendWinFocusEvent(act window.Actions) {
-	se := window.NewEvent(act)
-	se.Init()
-	w.StageMgr.HandleEvent(se)
+func (w *RenderWin) SendWinFocusEvent(act events.WinActions) {
+	// se := window.NewEvent(act)
+	// se.Init()
+	// w.StageMgr.HandleEvent(se)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -742,13 +740,13 @@ func (w *RenderWin) EventLoop() {
 	// our last act must be self destruction!
 }
 
-// HandleEvent processes given goosi.Event.
+// HandleEvent processes given events.Event.
 // All event processing operates under a RenderCtx.ReadLock
 // so that no rendering update can occur during event-driven updates.
 // Because rendering itself is event driven, this extra level of safety
 // is redundant in this case, but other non-event-driven updates require
 // the lock protection.
-func (w *RenderWin) HandleEvent(evi goosi.Event) {
+func (w *RenderWin) HandleEvent(evi events.Event) {
 	w.RenderCtx().ReadLock()
 	defer w.RenderCtx().ReadUnlock()
 
@@ -764,84 +762,91 @@ func (w *RenderWin) HandleEvent(evi goosi.Event) {
 	w.StageMgr.HandleEvent(evi)
 }
 
-func (w *RenderWin) HandleWindowEvents(evi goosi.Event) {
-	ev := evi.(*window.Event)
-	et := evi.Type()
-	switch et {
-	case goosi.WindowPaintEvent:
-		evi.SetHandled()
-		w.RenderCtx().ReadUnlock() // one case where we need to break lock
-		w.RenderWindow()
-		w.RenderCtx().ReadLock()
-	case goosi.WindowResizeEvent:
-		evi.SetHandled()
-		w.Resized(w.GoosiWin.Size())
-	case goosi.WindowEvent:
-		switch ev.Action {
-		case window.Close:
-			// fmt.Printf("got close event for window %v \n", w.Name)
-			evi.SetHandled()
-			w.SetFlag(true, WinFlagStopEventLoop)
-			w.RenderCtx().ReadUnlock() // one case where we need to break lock
-			w.Closed()
-			w.RenderCtx().ReadLock()
-		case window.Minimize:
-			evi.SetHandled()
-			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
-			// and lets the size event go through when we come back later
-			// if goosi.TheApp.Platform().IsMobile() {
-			// 	w.Scene.Geom.Size = image.Point{}
-			// }
-		case window.Show:
-			evi.SetHandled()
-			// note that this is sent delayed by driver
-			if WinEventTrace {
-				fmt.Printf("Win: %v got show event\n", w.Name)
-			}
-			// if w.NeedWinMenuUpdate() {
-			// 	w.MainMenuUpdateRenderWins()
-			// }
-			w.SendShowEvent() // happens AFTER full render
-		case window.Move:
-			evi.SetHandled()
-			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
-			if WinGeomTrace {
-				log.Printf("WinGeomPrefs: recording from Move\n")
-			}
-			WinGeomMgr.RecordPref(w)
-		case window.Focus:
-			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
-			if !w.HasFlag(WinFlagGotFocus) {
-				w.SetFlag(true, WinFlagGotFocus)
-				w.SendWinFocusEvent(window.Focus)
-				if WinEventTrace {
-					fmt.Printf("Win: %v got focus\n", w.Name)
-				}
-				// if w.NeedWinMenuUpdate() {
-				// 	w.MainMenuUpdateRenderWins()
-				// }
-			} else {
-				if WinEventTrace {
-					fmt.Printf("Win: %v got extra focus\n", w.Name)
-				}
-			}
-		case window.DeFocus:
-			if WinEventTrace {
-				fmt.Printf("Win: %v lost focus\n", w.Name)
-			}
-			w.SetFlag(false, WinFlagGotFocus)
-			w.SendWinFocusEvent(window.DeFocus)
-		case window.ScreenUpdate:
-			w.Resized(w.GoosiWin.Size())
-			// TODO: figure out how to restore this stuff without breaking window size on mobile
+func (w *RenderWin) HandleWindowEvents(evi events.Event) {
+	/*
+	   ev := evi.(*window.Event)
+	   et := evi.Type()
+	   switch et {
+	   case goosi.WindowPaintEvent:
 
-			// WinGeomMgr.AbortSave() // anything just prior to this is sus
-			// if !goosi.TheApp.NoScreens() {
-			// 	Prefs.UpdateAll()
-			// 	WinGeomMgr.RestoreAll()
-			// }
-		}
-	}
+	   	evi.SetHandled()
+	   	w.RenderCtx().ReadUnlock() // one case where we need to break lock
+	   	w.RenderWindow()
+	   	w.RenderCtx().ReadLock()
+
+	   case goosi.WindowResizeEvent:
+
+	   	evi.SetHandled()
+	   	w.Resized(w.GoosiWin.Size())
+
+	   case goosi.WindowEvent:
+
+	   		switch ev.Action {
+	   		case window.Close:
+	   			// fmt.Printf("got close event for window %v \n", w.Name)
+	   			evi.SetHandled()
+	   			w.SetFlag(true, WinFlagStopEventLoop)
+	   			w.RenderCtx().ReadUnlock() // one case where we need to break lock
+	   			w.Closed()
+	   			w.RenderCtx().ReadLock()
+	   		case window.Minimize:
+	   			evi.SetHandled()
+	   			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
+	   			// and lets the size event go through when we come back later
+	   			// if goosi.TheApp.Platform().IsMobile() {
+	   			// 	w.Scene.Geom.Size = image.Point{}
+	   			// }
+	   		case window.Show:
+	   			evi.SetHandled()
+	   			// note that this is sent delayed by driver
+	   			if WinEventTrace {
+	   				fmt.Printf("Win: %v got show event\n", w.Name)
+	   			}
+	   			// if w.NeedWinMenuUpdate() {
+	   			// 	w.MainMenuUpdateRenderWins()
+	   			// }
+	   			w.SendShowEvent() // happens AFTER full render
+	   		case window.Move:
+	   			evi.SetHandled()
+	   			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
+	   			if WinGeomTrace {
+	   				log.Printf("WinGeomPrefs: recording from Move\n")
+	   			}
+	   			WinGeomMgr.RecordPref(w)
+	   		case window.Focus:
+	   			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+	   			if !w.HasFlag(WinFlagGotFocus) {
+	   				w.SetFlag(true, WinFlagGotFocus)
+	   				w.SendWinFocusEvent(window.Focus)
+	   				if WinEventTrace {
+	   					fmt.Printf("Win: %v got focus\n", w.Name)
+	   				}
+	   				// if w.NeedWinMenuUpdate() {
+	   				// 	w.MainMenuUpdateRenderWins()
+	   				// }
+	   			} else {
+	   				if WinEventTrace {
+	   					fmt.Printf("Win: %v got extra focus\n", w.Name)
+	   				}
+	   			}
+	   		case window.DeFocus:
+	   			if WinEventTrace {
+	   				fmt.Printf("Win: %v lost focus\n", w.Name)
+	   			}
+	   			w.SetFlag(false, WinFlagGotFocus)
+	   			w.SendWinFocusEvent(window.DeFocus)
+	   		case window.ScreenUpdate:
+	   			w.Resized(w.GoosiWin.Size())
+	   			// TODO: figure out how to restore this stuff without breaking window size on mobile
+
+	   			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+	   			// if !goosi.TheApp.NoScreens() {
+	   			// 	Prefs.UpdateAll()
+	   			// 	WinGeomMgr.RestoreAll()
+	   			// }
+	   		}
+	   	}
+	*/
 }
 
 // InitialFocus establishes the initial focus for the window if no focus
@@ -939,7 +944,7 @@ func (w *RenderWin) DeleteSprite(nm string) bool {
 }
 
 // SpriteEvent processes given event for any active sprites
-func (w *RenderWin) SelSpriteEvent(evi goosi.Event) {
+func (w *RenderWin) SelSpriteEvent(evi events.Event) {
 	// w.StageMgr.RenderCtx.Mu.Lock()
 	// defer w.StageMgr.RenderCtx.Mu.Unlock()
 
@@ -958,7 +963,7 @@ func (w *RenderWin) SelSpriteEvent(evi goosi.Event) {
 			continue
 		}
 		ep := evi.Pos()
-		if et == goosi.MouseDragEvent {
+		if et == events.EventsDragEvent {
 			if sp.Name == w.SpriteDragging {
 				sig.Emit(w.This(), int64(et), evi)
 			}
@@ -1074,7 +1079,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 
 
 	w.delPop = false                      // if true, delete this popup after event loop
-	if et > goosi.EventTypesN || et < 0 { // we don't handle other types of events here
+	if et > events.TypesN || et < 0 { // we don't handle other types of events here
 		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Name, et)
 		return
 	}
@@ -1098,7 +1103,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 		w.SetFlag(false, WinFlagIsResizing)
 	}
 
-	w.EventMgr.MouseEvents(evi)
+	w.EventMgr.EventsEvents(evi)
 
 	if !w.HiPriorityEvents(evi) {
 		return
@@ -1108,18 +1113,18 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	// Send Events to Widgets
 
 	hasFocus := w.HasFlag(WinFlagGotFocus)
-	if _, ok := evi.(*mouse.ScrollEvent); ok {
+	if _, ok := evi.(*events.Scroll); ok {
 		if !hasFocus {
 			w.EventMgr.Scrolling = nil // not valid
 		}
 		hasFocus = true // doesn't need focus!
 	}
-	if me, ok := evi.(*mouse.Event); ok {
+	if me, ok := evi.(events.Event); ok {
 		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
-		w.SetCursor(me) // always set cursor on mouse move
+		w.SetCursor(me) // always set cursor on events move
 	}
 	// if someone clicks while in selection mode, stop selection mode and stop the event
-	if me, ok := evi.(*mouse.Event); w.IsInSelectionMode() && ok {
+	if me, ok := evi.(events.Event); w.IsInSelectionMode() && ok {
 		me.SetHandled()
 		w.SetSelectionModeState(false)
 		w.DeleteSprite(RenderWinSelectionSpriteName)
@@ -1129,8 +1134,8 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	if (hasFocus || !evi.OnWinFocus()) && !evi.IsHandled() {
 		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
 		w.EventMgr.SendEventSignal(evi, evToPopup)
-		if !w.delPop && et == goosi.MouseMoveEvent && !evi.IsHandled() {
-			didFocus := w.EventMgr.GenMouseFocusEvents(evi.(*mouse.Event), evToPopup)
+		if !w.delPop && et == events.EventsMoveEvent && !evi.IsHandled() {
+			didFocus := w.EventMgr.GenEventsFocusEvents(evi.(events.Event), evToPopup)
 			if didFocus && w.CurPopupIsTooltip() {
 				w.delPop = true
 			}
@@ -1140,8 +1145,8 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	////////////////////////////////////////////////////////////////////////////
 	// Low priority windows events
 
-	if !evi.IsHandled() && et == goosi.KeyChordEvent {
-		ke := evi.(*key.Event)
+	if !evi.IsHandled() && et == events.KeyChord {
+		ke := evi.(*events.Key)
 		kc := ke.Chord()
 		if w.TriggerShortcut(kc) {
 			evi.SetHandled()
@@ -1150,7 +1155,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 
 	if !evi.IsHandled() {
 		switch e := evi.(type) {
-		case *key.Event:
+		case *events.Key:
 			keyDelPop := w.KeyChordEventLowPri(e)
 			if keyDelPop {
 				w.delPop = true
@@ -1158,10 +1163,10 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 		}
 	}
 
-	w.EventMgr.MouseEventReset(evi)
-	if evi.Type() == goosi.MouseButtonEvent {
-		me := evi.(*mouse.Event)
-		if me.Action == mouse.Release {
+	w.EventMgr.EventsEventReset(evi)
+	if evi.Type() == events.EventsButtonEvent {
+		me := evi.(events.Event)
+		if me.Action == events.Release {
 			w.SpriteDragging = ""
 		}
 	}
@@ -1173,11 +1178,11 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 		cpop := w.CurPopup()
 		if cpop != nil && !w.delPop {
 			if PopupIsTooltip(cpop) {
-				if et != goosi.MouseMoveEvent {
+				if et != events.EventsMoveEvent {
 					w.delPop = true
 				}
-			} else if me, ok := evi.(*mouse.Event); ok {
-				if me.Action == mouse.Release {
+			} else if me, ok := evi.(events.Event); ok {
+				if me.Action == events.Release {
 					if w.ShouldDeletePopupMenu(cpop, me) {
 						w.delPop = true
 					}
@@ -1186,7 +1191,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 
 			if PopupIsCompleter(cpop) {
 				fsz := len(w.EventMgr.FocusStack)
-				if fsz > 0 && et == goosi.KeyChordEvent {
+				if fsz > 0 && et == events.KeyChord {
 					w.EventMgr.SendSig(w.EventMgr.FocusStack[fsz-1], cpop, evi)
 				}
 			}
@@ -1210,9 +1215,9 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 
 */
 
-// SetCursor sets the cursor based on the given mouse event.
+// SetCursor sets the cursor based on the given events event.
 // Also handles sending widget selection events.
-func (w *RenderWin) SetCursor(me *mouse.Event) {
+func (w *RenderWin) SetCursor(me events.Event) {
 	/*
 		if w.IsClosing() {
 			return
@@ -1304,9 +1309,9 @@ func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
 // HiProrityEvents processes High-priority events for RenderWin.
 // RenderWin gets first crack at these events, and handles window-specific ones
 // returns true if processing should continue and false if was handled
-func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
+func (w *RenderWin) HiPriorityEvents(evi events.Event) bool {
 	switch evi.(type) {
-	case *mouse.Event:
+	case events.Event:
 		// if w.EventMgr.DNDStage == DNDStarted {
 		// 	w.DNDMoveEvent(e)
 		// } else {
@@ -1315,8 +1320,8 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		// 		e.SetHandled() // ignore
 		// 	}
 		// }
-		// case *mouse.Event:
-		// if w.EventMgr.DNDStage == DNDStarted && e.Action == mouse.Release {
+		// case events.Event:
+		// if w.EventMgr.DNDStage == DNDStarted && e.Action == events.Release {
 		// 	w.DNDDropEvent(e)
 		// }
 		// w.FocusActiveClick(e)
@@ -1324,10 +1329,10 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		// if w.NeedWinMenuUpdate() {
 		// 	w.MainMenuUpdateRenderWins()
 		// }
-		// case *mouse.Event:
+		// case events.Event:
 		// todo:
 		// if bitflag.HasAllAtomic(&w.Flag, WinFlagGotPaint), WinFlagGotFocus)) {
-		// if we are getting mouse input, and still haven't done this, do it..
+		// if we are getting events input, and still haven't done this, do it..
 		// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
 		// if w.Scene.Geom.Size != w.GoosiWin.Size() {
 		// 	w.Resized(w.GoosiWin.Size())
@@ -1340,11 +1345,11 @@ func (w *RenderWin) HiPriorityEvents(evi goosi.Event) bool {
 		// w.EventMgr.ActivateStartFocus()
 		// }
 		// }
-	case *dnd.Event:
-		// if e.Action == dnd.External {
-		// 	w.EventMgr.DNDDropMod = e.Mod
-		// }
-	case *key.Event:
+	// case *dnd.Event:
+	// if e.Action == dnd.External {
+	// 	w.EventMgr.DNDDropMod = e.Mod
+	// }
+	case *events.Key:
 		// keyDelPop := w.KeyChordEventHiPri(e)
 		// if keyDelPop {
 		// 	w.delPop = true
@@ -1471,7 +1476,7 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 
 // KeyChordEventHiPri handles all the high-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventHiPri(e *key.Event) bool {
+func (w *RenderWin) KeyChordEventHiPri(e *events.Key) bool {
 	delPop := false
 	if KeyEventTrace {
 		fmt.Printf("RenderWin HiPri KeyInput: %v event: %v\n", w.Name, e.String())
@@ -1509,7 +1514,7 @@ func (w *RenderWin) KeyChordEventHiPri(e *key.Event) bool {
 
 // KeyChordEventLowPri handles all the lower-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventLowPri(e *key.Event) bool {
+func (w *RenderWin) KeyChordEventLowPri(e *events.Key) bool {
 	if e.IsHandled() {
 		return false
 	}
@@ -1565,12 +1570,12 @@ func (w *RenderWin) KeyChordEventLowPri(e *key.Event) bool {
 /////////////////////////////////////////////////////////////////////////////
 //                   Key Focus
 
-// FocusActiveClick updates the FocusActive status based on mouse clicks in
+// FocusActiveClick updates the FocusActive status based on events clicks in
 // or out of the focused item
-func (w *RenderWin) FocusActiveClick(e *mouse.Event) {
+func (w *RenderWin) FocusActiveClick(e events.Event) {
 	/*
 		cfoc := w.EventMgr.CurFocus()
-		if cfoc == nil || e.Button != mouse.Left || e.Action != mouse.Press {
+		if cfoc == nil || e.Button != events.Left || e.Action != events.Press {
 			return
 		}
 		cpop := w.CurPopup()
@@ -1651,7 +1656,7 @@ func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 }
 
 // DNDMoveEvent handles drag-n-drop move events.
-func (w *RenderWin) DNDMoveEvent(e *mouse.Event) {
+func (w *RenderWin) DNDMoveEvent(e events.Event) {
 	sp, ok := w.SpriteByName(DNDSpriteName)
 	if ok {
 		sp.SetBottomPos(e.Where)
@@ -1662,7 +1667,7 @@ func (w *RenderWin) DNDMoveEvent(e *mouse.Event) {
 }
 
 // DNDDropEvent handles drag-n-drop drop event (action = release).
-func (w *RenderWin) DNDDropEvent(e *mouse.Event) {
+func (w *RenderWin) DNDDropEvent(e events.Event) {
 	proc := w.EventMgr.SendDNDDropEvent(e)
 	if !proc {
 		w.ClearDragNDrop()

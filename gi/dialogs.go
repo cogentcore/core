@@ -191,24 +191,24 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	dlg.Win = nil
 
 	// note: LowPri allows all other events to be processed before dialog
-	win.EventMgrwe.AddFunc(dlg.Frame.This(), goosi.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*key.Event)
+	win.EventMgrwe.AddFunc(dlg.Frame.This(), events.KeyChord, LowPri, func(recv, send ki.Ki, sig int64, d any) {
+		kt := d.(*events.Key)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", dlg.Name)
 		}
-		kf := KeyFun(kt.Chord())
+		kf := KeyFun(kt.KeyChord())
 		switch kf {
 		case KeyFunAbort:
 			dlg.Cancel()
 			kt.SetHandled()
 		}
 	})
-	win.EventMgrwe.AddFunc(dlg.Frame.This(), goosi.KeyChordEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*key.Event)
+	win.EventMgrwe.AddFunc(dlg.Frame.This(), events.KeyChord, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+		kt := d.(*events.Key)
 		if KeyEventTrace {
 			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", dlg.Name)
 		}
-		kf := KeyFun(kt.Chord())
+		kf := KeyFun(kt.KeyChord())
 		switch kf {
 		case KeyFunAccept:
 			dlg.Accept()
@@ -216,7 +216,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 		}
 	})
 	// this is not a good idea
-	// winwe.AddFunc(dlg.Frame.This(), goosi.MouseButtonEvent, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	// winwe.AddFunc(dlg.Frame.This(), events.MouseUp, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(*mouse.Event)
 	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
 	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {

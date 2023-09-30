@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
-	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -40,8 +39,8 @@ func (sve *Editor) CopyFieldsFrom(frm any) {
 
 // EditorEvents handles svg editing events
 func (sve *Editor) EditorEvents() {
-	svewe.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	svewe.AddFunc(events.MouseDrag, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		ssvg := sve
 		if ssvg.HasFlag(NodeDragging) {
@@ -63,8 +62,8 @@ func (sve *Editor) EditorEvents() {
 		}
 
 	})
-	svewe.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.ScrollEvent)
+	svewe.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*events.Scroll)
 		me.SetHandled()
 		ssvg := sve
 		if ssvg.SetDragCursor {
@@ -80,8 +79,8 @@ func (sve *Editor) EditorEvents() {
 		// ssvg.SetFullReRender()
 		// ssvg.UpdateSig()
 	})
-	svewe.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	svewe.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		ssvg := sve
 		if ssvg.SetDragCursor {
 			goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
@@ -89,15 +88,15 @@ func (sve *Editor) EditorEvents() {
 		}
 		obj := ssvg.FirstContainingPoint(me.Where, true)
 		_ = obj
-		if me.Action == mouse.Release && me.Button == mouse.Right {
+		if me.Action == events.Release && me.Button == events.Right {
 			me.SetHandled()
 			// if obj != nil {
 			// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
 			// }
 		}
 	})
-	svewe.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	svewe.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		ssvg := sve
 		obj := ssvg.FirstContainingPoint(me.Where, true)
@@ -109,7 +108,7 @@ func (sve *Editor) EditorEvents() {
 	})
 }
 
-func (sve *Editor) AddEvents() {
+func (sve *Editor) SetTypeHandlers() {
 	sve.EditorEvents()
 }
 
@@ -132,10 +131,8 @@ func (sve *Editor) SetTransform() {
 }
 
 func (sve *Editor) Render(sc *Scene) {
-	wi := sve.This().(Widget)
 	if sve.PushBounds(sc) {
 		// rs := &sve.Render
-		wi.AddEvents()
 		// if sve.Fill {
 		// 	sve.FillScene()
 		// }

@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -66,10 +67,9 @@ type TabView struct {
 }
 
 // event functions for this type
-var TabViewEventFuncs WidgetEvents
+var TabViewHandlers = InitWidgetHandlers(&TabView{})
 
 func (tv *TabView) OnInit() {
-	tv.AddEvents(&TabViewEventFuncs)
 	tv.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -555,14 +555,11 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) FilterEvents() {
-	tv.Events.CopyFrom(&TabViewEventFuncs)
+func (tv *TabView) HandleEvent(ev events.Event) {
 }
 
 func (tv *TabView) Render(sc *Scene) {
-	wi := tv.This().(Widget)
 	if tv.PushBounds(sc) {
-		wi.FilterEvents()
 		tv.RenderScrolls(sc)
 		tv.RenderChildren(sc)
 		tv.RenderTabSeps(sc)
@@ -583,10 +580,9 @@ type TabButton struct {
 }
 
 // event functions for this type
-var TabButtonEventFuncs WidgetEvents
+var TabButtonHandlers = InitWidgetHandlers(&TabButton{})
 
 func (tb *TabButton) OnInit() {
-	tb.AddEvents(&TabButtonEventFuncs)
 	tb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
@@ -678,8 +674,7 @@ func (tb *TabButton) TabView() *TabView {
 	return AsTabView(tv)
 }
 
-func (tb *TabButton) FilterEvents() {
-	tb.Events.CopyFrom(&TabButtonEventFuncs)
+func (tb *TabButton) HandleEvent(ev events.Event) {
 }
 
 func (tb *TabButton) ConfigParts(sc *Scene) {

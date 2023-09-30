@@ -10,8 +10,7 @@ import (
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -81,14 +80,14 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 // MouseEvent handles button MouseEvent
 func (cv *ColorMapView) MouseEvent() {
-	cvwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	cvwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		cvv := recv.(*ColorMapView)
-		if me.Button == mouse.Left {
+		if me.Button == events.Left {
 			switch me.Action {
-			case mouse.DoubleClick: // we just count as a regular click
+			case events.DoubleClick: // we just count as a regular click
 				fallthrough
-			case mouse.Press:
+			case events.Press:
 				me.SetHandled()
 				cvv.ChooseColorMap()
 			}
@@ -96,7 +95,7 @@ func (cv *ColorMapView) MouseEvent() {
 	})
 }
 
-func (cv *ColorMapView) AddEvents() {
+func (cv *ColorMapView) SetTypeHandlers() {
 	cv.MouseEvent()
 	cv.HoverTooltipEvent()
 }
@@ -147,9 +146,7 @@ func (cv *ColorMapView) Render(vp *Scene) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
-	wi := cv.This().(Widget)
 	if cv.PushBounds() {
-		wi.FilterEvents()
 		cv.RenderColorMap()
 		cv.RenderChildren()
 		cv.PopBounds()

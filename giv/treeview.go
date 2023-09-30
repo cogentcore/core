@@ -17,10 +17,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -606,7 +603,7 @@ func (tv *TreeView) SelectAll() {
 	nn := tv.RootView
 	nn.Select()
 	for nn != nil {
-		nn = nn.MoveDown(mouse.SelectQuiet)
+		nn = nn.MoveDown(events.SelectQuiet)
 	}
 	tv.TopUpdateEnd(wupdt)
 	tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllSelected), tv.This())
@@ -614,14 +611,14 @@ func (tv *TreeView) SelectAll() {
 
 // SelectUpdate updates selection to include this node, using selectmode
 // from mouse event (ExtendContinuous, ExtendOne).  Returns true if this node selected
-func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
-	if mode == mouse.NoSelect {
+func (tv *TreeView) SelectUpdate(mode events.SelectModes) bool {
+	if mode == events.NoSelect {
 		return false
 	}
 	wupdt := tv.TopUpdateStart()
 	sel := false
 	switch mode {
-	case mouse.SelectOne:
+	case events.SelectOne:
 		if tv.StateIs(states.Selected) {
 			sl := tv.SelectedViews()
 			if len(sl) > 1 {
@@ -636,7 +633,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			tv.GrabFocus()
 			sel = true
 		}
-	case mouse.ExtendContinuous:
+	case events.ExtendContinuous:
 		sl := tv.SelectedViews()
 		if len(sl) == 0 {
 			tv.Select()
@@ -658,17 +655,17 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			tv.Select()
 			if tv.ViewIdx < minIdx {
 				for cidx < minIdx {
-					nn = nn.MoveDown(mouse.SelectQuiet) // just select
+					nn = nn.MoveDown(events.SelectQuiet) // just select
 					cidx = nn.ViewIdx
 				}
 			} else if tv.ViewIdx > maxIdx {
 				for cidx > maxIdx {
-					nn = nn.MoveUp(mouse.SelectQuiet) // just select
+					nn = nn.MoveUp(events.SelectQuiet) // just select
 					cidx = nn.ViewIdx
 				}
 			}
 		}
-	case mouse.ExtendOne:
+	case events.ExtendOne:
 		if tv.StateIs(states.Selected) {
 			tv.UnselectAction()
 		} else {
@@ -676,10 +673,10 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 			tv.GrabFocus()
 			sel = true
 		}
-	case mouse.SelectQuiet:
+	case events.SelectQuiet:
 		tv.Select()
 		// not sel -- no signal..
-	case mouse.UnselectQuiet:
+	case events.UnselectQuiet:
 		tv.Unselect()
 		// not sel -- no signal..
 	}
@@ -690,7 +687,7 @@ func (tv *TreeView) SelectUpdate(mode mouse.SelectModes) bool {
 // SelectAction updates selection to include this node, using selectmode
 // from mouse event (ExtendContinuous, ExtendOne), and emits selection signal
 // returns true if signal emitted
-func (tv *TreeView) SelectAction(mode mouse.SelectModes) bool {
+func (tv *TreeView) SelectAction(mode events.SelectModes) bool {
 	sel := tv.SelectUpdate(mode)
 	if sel {
 		tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewSelected), tv.This())
@@ -711,7 +708,7 @@ func (tv *TreeView) UnselectAction() {
 
 // MoveDown moves the selection down to next element in the tree, using given
 // select mode (from keyboard modifiers) -- returns newly selected node
-func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveDown(selMode events.SelectModes) *TreeView {
 	if tv.Par == nil {
 		return nil
 	}
@@ -731,7 +728,7 @@ func (tv *TreeView) MoveDown(selMode mouse.SelectModes) *TreeView {
 
 // MoveDownAction moves the selection down to next element in the tree, using given
 // select mode (from keyboard modifiers) -- and emits select event for newly selected item
-func (tv *TreeView) MoveDownAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveDownAction(selMode events.SelectModes) *TreeView {
 	nn := tv.MoveDown(selMode)
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
@@ -743,7 +740,7 @@ func (tv *TreeView) MoveDownAction(selMode mouse.SelectModes) *TreeView {
 
 // MoveDownSibling moves down only to siblings, not down into children, using
 // given select mode (from keyboard modifiers)
-func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveDownSibling(selMode events.SelectModes) *TreeView {
 	if tv.Par == nil {
 		return nil
 	}
@@ -765,7 +762,7 @@ func (tv *TreeView) MoveDownSibling(selMode mouse.SelectModes) *TreeView {
 
 // MoveUp moves selection up to previous element in the tree, using given
 // select mode (from keyboard modifiers) -- returns newly selected node
-func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveUp(selMode events.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
 		return nil
 	}
@@ -789,7 +786,7 @@ func (tv *TreeView) MoveUp(selMode mouse.SelectModes) *TreeView {
 
 // MoveUpAction moves the selection up to previous element in the tree, using given
 // select mode (from keyboard modifiers) -- and emits select event for newly selected item
-func (tv *TreeView) MoveUpAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveUpAction(selMode events.SelectModes) *TreeView {
 	nn := tv.MoveUp(selMode)
 	if nn != nil && nn != tv {
 		nn.GrabFocus()
@@ -804,13 +801,13 @@ var TreeViewPageSteps = 10
 
 // MovePageUpAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
-func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MovePageUpAction(selMode events.SelectModes) *TreeView {
 	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
-	if selMode == mouse.SelectOne {
-		mvMode = mouse.NoSelect
-	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
-		mvMode = mouse.SelectQuiet
+	if selMode == events.SelectOne {
+		mvMode = events.NoSelect
+	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+		mvMode = events.SelectQuiet
 	}
 	fnn := tv.MoveUp(mvMode)
 	if fnn != nil && fnn != tv {
@@ -821,7 +818,7 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 			}
 			fnn = nn
 		}
-		if selMode == mouse.SelectOne {
+		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.GrabFocus()
@@ -834,13 +831,13 @@ func (tv *TreeView) MovePageUpAction(selMode mouse.SelectModes) *TreeView {
 
 // MovePageDownAction moves the selection up to previous TreeViewPageSteps elements in the tree,
 // using given select mode (from keyboard modifiers) -- and emits select event for newly selected item
-func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MovePageDownAction(selMode events.SelectModes) *TreeView {
 	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
-	if selMode == mouse.SelectOne {
-		mvMode = mouse.NoSelect
-	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
-		mvMode = mouse.SelectQuiet
+	if selMode == events.SelectOne {
+		mvMode = events.NoSelect
+	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+		mvMode = events.SelectQuiet
 	}
 	fnn := tv.MoveDown(mvMode)
 	if fnn != nil && fnn != tv {
@@ -851,7 +848,7 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 			}
 			fnn = nn
 		}
-		if selMode == mouse.SelectOne {
+		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.GrabFocus()
@@ -864,7 +861,7 @@ func (tv *TreeView) MovePageDownAction(selMode mouse.SelectModes) *TreeView {
 
 // MoveToLastChild moves to the last child under me, using given select mode
 // (from keyboard modifiers)
-func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveToLastChild(selMode events.SelectModes) *TreeView {
 	if tv.Par == nil || tv == tv.RootView {
 		return nil
 	}
@@ -884,7 +881,7 @@ func (tv *TreeView) MoveToLastChild(selMode mouse.SelectModes) *TreeView {
 // MoveHomeAction moves the selection up to top of the tree,
 // using given select mode (from keyboard modifiers)
 // and emits select event for newly selected item
-func (tv *TreeView) MoveHomeAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveHomeAction(selMode events.SelectModes) *TreeView {
 	tv.RootView.SelectUpdate(selMode)
 	tv.RootView.GrabFocus()
 	tv.RootView.ScrollToMe()
@@ -895,13 +892,13 @@ func (tv *TreeView) MoveHomeAction(selMode mouse.SelectModes) *TreeView {
 // MoveEndAction moves the selection to the very last node in the tree
 // using given select mode (from keyboard modifiers) -- and emits select event
 // for newly selected item
-func (tv *TreeView) MoveEndAction(selMode mouse.SelectModes) *TreeView {
+func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 	wupdt := tv.TopUpdateStart()
 	mvMode := selMode
-	if selMode == mouse.SelectOne {
-		mvMode = mouse.NoSelect
-	} else if selMode == mouse.ExtendContinuous || selMode == mouse.ExtendOne {
-		mvMode = mouse.SelectQuiet
+	if selMode == events.SelectOne {
+		mvMode = events.NoSelect
+	} else if selMode == events.ExtendContinuous || selMode == events.ExtendOne {
+		mvMode = events.SelectQuiet
 	}
 	fnn := tv.MoveDown(mvMode)
 	if fnn != nil && fnn != tv {
@@ -912,7 +909,7 @@ func (tv *TreeView) MoveEndAction(selMode mouse.SelectModes) *TreeView {
 			}
 			fnn = nn
 		}
-		if selMode == mouse.SelectOne {
+		if selMode == events.SelectOne {
 			fnn.SelectUpdate(selMode)
 		}
 		fnn.GrabFocus()
@@ -1136,7 +1133,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 				if ski != nil {
 					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 						stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
-						stv.SelectAction(mouse.SelectOne)
+						stv.SelectAction(events.SelectOne)
 					}
 				}
 			}
@@ -1177,7 +1174,7 @@ func (tv *TreeView) SrcAddChild() {
 					tvv.Open()
 					if tvk := tvv.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 						stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
-						stv.SelectAction(mouse.SelectOne)
+						stv.SelectAction(events.SelectOne)
 					}
 				}
 			}
@@ -1190,8 +1187,8 @@ func (tv *TreeView) SrcDelete() {
 	if tv.IsRootOrField(ttl) {
 		return
 	}
-	if tv.MoveDown(mouse.SelectOne) == nil {
-		tv.MoveUp(mouse.SelectOne)
+	if tv.MoveDown(events.SelectOne) == nil {
+		tv.MoveUp(events.SelectOne)
 	}
 	sk := tv.SrcNode
 	if sk == nil {
@@ -1240,7 +1237,7 @@ func (tv *TreeView) SrcDuplicate() {
 	tvpar.SetChanged()
 	if tvk := tvpar.ChildByName("tv_"+nm, 0); tvk != nil {
 		stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
-		stv.SelectAction(mouse.SelectOne)
+		stv.SelectAction(events.SelectOne)
 	}
 }
 
@@ -1358,16 +1355,16 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
 	})
 	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
-		tvv.PasteChildren(data.(mimedata.Mimes), dnd.DropCopy)
+		tvv.PasteChildren(data.(mimedata.Mimes), events.DropCopy)
 	})
 	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
 		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
-			tvv.PasteBefore(data.(mimedata.Mimes), dnd.DropCopy)
+			tvv.PasteBefore(data.(mimedata.Mimes), events.DropCopy)
 		})
 		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
-			tvv.PasteAfter(data.(mimedata.Mimes), dnd.DropCopy)
+			tvv.PasteAfter(data.(mimedata.Mimes), events.DropCopy)
 		})
 	}
 	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1407,14 +1404,14 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 // PasteBefore inserts object(s) from mime data before this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) PasteBefore(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 0, "Paste Before")
 }
 
 // PasteAfter inserts object(s) from mime data after this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) PasteAfter(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAt(md, mod, 1, "Paste After")
 }
 
@@ -1424,7 +1421,7 @@ const TreeViewTempMovedTag = `_\&MOVED\&`
 // PasteAt inserts object(s) from mime data at rel position to this node.
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
-func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm string) {
+func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
 	sl, pl := tv.NodesFromMimeData(md)
 
 	if tv.Par == nil {
@@ -1452,7 +1449,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	var ski ki.Ki
 	for i, ns := range sl {
 		orgpath := pl[i]
-		if mod != dnd.DropMove {
+		if mod != events.DropMove {
 			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
 				ns.SetName(ns.Name() + "_Copy")
 			}
@@ -1460,7 +1457,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 		par.SetChildAdded()
 		par.InsertChild(ns, myidx+i)
 		npath := ns.PathFrom(sroot)
-		if mod == dnd.DropMove && npath == orgpath { // we will be nuked immediately after drag
+		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
 		}
 		if i == sz-1 {
@@ -1473,14 +1470,14 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod dnd.DropMods, rel int, actNm 
 	if ski != nil {
 		if tvk := tvpar.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
 			stv, _ := tvk.Embed(TypeTreeView).(*TreeView)
-			stv.SelectAction(mouse.SelectOne)
+			stv.SelectAction(events.SelectOne)
 		}
 	}
 }
 
 // PasteChildren inserts object(s) from mime data at end of children of this
 // node
-func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
 	sl, _ := tv.NodesFromMimeData(md)
 
 	sk := tv.SrcNode
@@ -1522,20 +1519,20 @@ func (tv *TreeView) DragNDropStart() {
 }
 
 // DragNDropTarget handles a drag-n-drop onto this node
-func (tv *TreeView) DragNDropTarget(de *dnd.Event) {
+func (tv *TreeView) DragNDropTarget(de events.Event) {
 	de.Target = tv.This()
-	if de.Mod == dnd.DropLink {
-		de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	if de.Mod == events.DropLink {
+		de.Mod = events.DropCopy // link not supported -- revert to copy
 	}
 	de.SetHandled()
 	tv.This().(gi.DragNDropper).Drop(de.Data, de.Mod)
 }
 
 // DragNDropExternal handles a drag-n-drop external drop onto this node
-func (tv *TreeView) DragNDropExternal(de *dnd.Event) {
+func (tv *TreeView) DragNDropExternal(de events.Event) {
 	de.Target = tv.This()
-	if de.Mod == dnd.DropLink {
-		de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	if de.Mod == events.DropLink {
+		de.Mod = events.DropCopy // link not supported -- revert to copy
 	}
 	de.SetHandled()
 	tv.This().(gi.DragNDropper).DropExternal(de.Data, de.Mod)
@@ -1544,7 +1541,7 @@ func (tv *TreeView) DragNDropExternal(de *dnd.Event) {
 // DragNDropFinalize is called to finalize actions on the Source node prior to
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore
-func (tv *TreeView) DragNDropFinalize(mod dnd.DropMods) {
+func (tv *TreeView) DragNDropFinalize(mod events.DropMods) {
 	if tv.Scene == nil {
 		return
 	}
@@ -1566,8 +1563,8 @@ func (tv *TreeView) DragNDropFinalizeDefMod() {
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (tv *TreeView) Dragged(de *dnd.Event) {
-	if de.Mod != dnd.DropMove {
+func (tv *TreeView) Dragged(de events.Event) {
+	if de.Mod != events.DropMove {
 		return
 	}
 	sroot := tv.RootView.SrcNode
@@ -1592,17 +1589,17 @@ func (tv *TreeView) Dragged(de *dnd.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods) {
+func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 	if len(*m) > 0 {
 		return
 	}
 	switch mod {
-	case dnd.DropCopy:
+	case events.DropCopy:
 		m.AddLabel("Copy (Use Shift to Move):")
-	case dnd.DropMove:
+	case events.DropMove:
 		m.AddLabel("Move:")
 	}
-	if mod == dnd.DropCopy {
+	if mod == events.DropCopy {
 		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
@@ -1631,7 +1628,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods) {
 
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
 	var men gi.Menu
 	tv.MakeDropMenu(&men, md, mod)
 	pos := tv.ContextMenuPos()
@@ -1639,30 +1636,30 @@ func (tv *TreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 }
 
 // DropExternal is not handled by base case but could be in derived
-func (tv *TreeView) DropExternal(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 	tv.DropCancel()
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
 func (tv *TreeView) DropAssign(md mimedata.Mimes) {
 	tv.PasteAssign(md)
-	tv.DragNDropFinalize(dnd.DropCopy)
+	tv.DragNDropFinalize(events.DropCopy)
 }
 
 // DropBefore inserts object(s) from mime data before this node
-func (tv *TreeView) DropBefore(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) DropBefore(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteBefore(md, mod)
 	tv.DragNDropFinalize(mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
-func (tv *TreeView) DropAfter(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) DropAfter(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteAfter(md, mod)
 	tv.DragNDropFinalize(mod)
 }
 
 // DropChildren inserts object(s) from mime data at end of children of this node
-func (tv *TreeView) DropChildren(md mimedata.Mimes, mod dnd.DropMods) {
+func (tv *TreeView) DropChildren(md mimedata.Mimes, mod events.DropMods) {
 	tv.PasteChildren(md, mod)
 	tv.DragNDropFinalize(mod)
 }
@@ -1670,7 +1667,7 @@ func (tv *TreeView) DropChildren(md mimedata.Mimes, mod dnd.DropMods) {
 // DropCancel cancels the drop action e.g., preventing deleting of source
 // items in a Move case
 func (tv *TreeView) DropCancel() {
-	tv.DragNDropFinalize(dnd.DropIgnore)
+	tv.DragNDropFinalize(events.DropIgnore)
 }
 
 ////////////////////////////////////////////////////
@@ -1707,16 +1704,16 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
-func (tv *TreeView) KeyInput(kt *key.Event) {
+func (tv *TreeView) KeyInput(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 	}
-	kf := gi.KeyFun(kt.Chord())
-	selMode := mouse.SelectModeBits(kt.Modifiers)
+	kf := gi.KeyFun(kt.KeyChord())
+	selMode := events.SelectModeBits(kt.Modifiers)
 
-	if selMode == mouse.SelectOne {
+	if selMode == events.SelectOne {
 		if tv.SelectMode() {
-			selMode = mouse.ExtendContinuous
+			selMode = events.ExtendContinuous
 		}
 	}
 
@@ -1788,25 +1785,25 @@ func (tv *TreeView) KeyInput(kt *key.Event) {
 }
 
 func (tv *TreeView) TreeViewEvents() {
-	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		tvv.KeyInput(kt)
 	})
 	tvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		if recv == nil {
 			return
 		}
-		de := d.(*dnd.Event)
+		de := d.(events.Event)
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
-		case dnd.Start:
+		case events.Start:
 			tvv.DragNDropStart()
-		case dnd.DropOnTarget:
+		case events.DropOnTarget:
 			tvv.DragNDropTarget(de)
-		case dnd.DropFmSource:
+		case events.DropFmSource:
 			tvv.This().(gi.DragNDropper).Dragged(de)
-		case dnd.External:
+		case events.External:
 			tvv.DragNDropExternal(de)
 		}
 	})
@@ -1814,14 +1811,14 @@ func (tv *TreeView) TreeViewEvents() {
 		if recv == nil {
 			return
 		}
-		de := d.(*dnd.FocusEvent)
+		de := d.(*events.FocusEvent)
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		switch de.Action {
-		case dnd.Enter:
+		case events.Enter:
 			tvv.ParentRenderWin().DNDSetCursor(de.Mod)
-		case dnd.Exit:
+		case events.Exit:
 			tvv.ParentRenderWin().DNDNotCursor()
-		case dnd.Hover:
+		case events.Hover:
 			tvv.Open()
 		}
 	})
@@ -1837,26 +1834,26 @@ func (tv *TreeView) TreeViewEvents() {
 	}
 	if lbl, ok := tv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lblwe.AddFunc(goosi.MouseButtonEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lblwe.AddFunc(events.MouseUp, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			tvvi := lb.Parent().Parent()
 			if tvvi == nil || tvvi.This() == nil { // deleted
 				return
 			}
 			tvv := tvvi.Embed(TypeTreeView).(*TreeView)
-			me := d.(*mouse.Event)
+			me := d.(events.Event)
 			switch me.Button {
-			case mouse.Left:
+			case events.Left:
 				switch me.Action {
-				case mouse.DoubleClick:
+				case events.DoubleClick:
 					tvv.ToggleClose()
 					me.SetHandled()
-				case mouse.Release:
+				case events.Release:
 					tvv.SelectAction(me.SelectMode())
 					me.SetHandled()
 				}
-			case mouse.Right:
-				if me.Action == mouse.Release {
+			case events.Right:
+				if me.Action == events.Release {
 					me.SetHandled()
 					tvv.This().(gi.Node2D).ContextMenu()
 				}
@@ -2229,7 +2226,7 @@ func (tv *TreeView) Render(vp *Scene) {
 			} else {
 				tv.Style = tv.StateStyles[TreeViewActive]
 			}
-			tv.This().(gi.Node2D).AddEvents()
+			tv.This().(gi.Node2D).SetTypeHandlers()
 
 			// note: this is std except using WidgetSize instead of AllocSize
 			rs, pc, st := tv.RenderLock(vp)
@@ -2241,7 +2238,7 @@ func (tv *TreeView) Render(vp *Scene) {
 			if bg.IsNil() {
 				bg = tv.ParentBackgroundColor()
 			}
-			pc.FillStyle.SetColorSpec(&bg)
+			pc.FillStyle.SetFullColor(&bg)
 			// tv.RenderStdBox()
 			pos := tv.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
 			sz := tv.WidgetSize.Sub(st.EffMargin().Size())
@@ -2256,7 +2253,7 @@ func (tv *TreeView) Render(vp *Scene) {
 	tv.ClearFullReRender()
 }
 
-func (tv *TreeView) AddEvents() {
+func (tv *TreeView) SetTypeHandlers() {
 	tv.TreeViewEvents()
 }
 

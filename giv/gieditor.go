@@ -14,7 +14,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -518,7 +518,7 @@ func (ge *GiEditor) SelectionLoop() {
 					tv.RootView.CloseAll()
 					tv.RootView.UnselectAll()
 					tv.OpenParents()
-					tv.SelectAction(mouse.SelectOne)
+					tv.SelectAction(events.SelectOne)
 					tv.ScrollToMe()
 
 					tv.RootView.UpdateEnd(updt)

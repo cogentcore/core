@@ -12,8 +12,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -126,10 +125,9 @@ const (
 )
 
 // event functions for this type
-var LabelEventFuncs WidgetEvents
+var LabelHandlers = InitWidgetHandlers(&Label{})
 
 func (lb *Label) OnInit() {
-	lb.AddEvents(&LabelEventFuncs)
 	lb.Type = LabelLabelLarge
 	lb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
@@ -297,31 +295,27 @@ func (lb *Label) OpenLink(tl *paint.TextLink) {
 	// lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-func (lb *Label) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
+func (lb *Label) SetTypeHandlers(we *events.Handlers) {
 	lb.WidgetEvents(we)
 	lb.LabelEvents(we)
 }
 
-func (lb *Label) FilterEvents() {
-	lb.Events.CopyFrom(&LabelEventFuncs)
+func (lb *Label) HandleEvent(ev events.Event) {
 	hasLinks := len(lb.TextRender.Links) > 0
 	if !hasLinks {
-		lb.Events.Ex(goosi.MouseMoveEvent)
+		lb.Events.Ex(events.MouseMove)
 	}
 }
 
-func (lb *Label) LabelEvents(we *WidgetEvents) {
+func (lb *Label) LabelEvents(we *events.Handlers) {
 	lb.HoverEvent(we)
 	lb.MouseEvent(we)
 	lb.MouseMoveEvent(we)
 }
 
-func (lb *Label) HoverEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (lb *Label) HoverEvent(we *events.Handlers) {
+	we.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		llb := AsLabel(recv)
 		hasLinks := len(lb.TextRender.Links) > 0
 		if hasLinks {
@@ -350,13 +344,13 @@ func (lb *Label) HoverEvent(we *WidgetEvents) {
 	})
 }
 
-func (lb *Label) MouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (lb *Label) MouseEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		llb := AsLabel(recv)
 		hasLinks := len(llb.TextRender.Links) > 0
 		pos := llb.RenderPos
-		if me.Action == mouse.Press && me.Button == mouse.Left && hasLinks {
+		if me.Action == events.Press && me.Button == events.Left && hasLinks {
 			for ti := range llb.TextRender.Links {
 				tl := &llb.TextRender.Links[ti]
 				tlb := tl.Bounds(&llb.TextRender, pos)
@@ -367,13 +361,13 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 				}
 			}
 		}
-		if me.Action == mouse.DoubleClick && me.Button == mouse.Left && llb.Selectable {
+		if me.Action == events.DoubleClick && me.Button == events.Left && llb.Selectable {
 			updt := llb.UpdateStart()
 			llb.SetSelected(!llb.StateIs(states.Selected))
 			llb.EmitSelectedSignal()
 			llb.UpdateEnd(updt)
 		}
-		if me.Action == mouse.Release && me.Button == mouse.Right {
+		if me.Action == events.Release && me.Button == events.Right {
 			me.SetHandled()
 			llb.EmitContextMenuSignal()
 			llb.This().(Widget).ContextMenu()
@@ -381,9 +375,9 @@ func (lb *Label) MouseEvent(we *WidgetEvents) {
 	})
 }
 
-func (lb *Label) MouseMoveEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseMoveEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (lb *Label) MouseMoveEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseMove, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		llb := AsLabel(recv)
 		pos := llb.RenderPos
@@ -491,9 +485,7 @@ func (lb *Label) RenderLabel(sc *Scene) {
 }
 
 func (lb *Label) Render(sc *Scene) {
-	wi := lb.This().(Widget)
 	if lb.PushBounds(sc) {
-		wi.FilterEvents()
 		lb.RenderLabel(sc)
 		lb.RenderChildren(sc)
 		lb.PopBounds(sc)

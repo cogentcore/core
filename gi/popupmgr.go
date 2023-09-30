@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 // PopupStageMgr manages popup Stages within a main Stage element (Window, etc).
@@ -26,7 +26,7 @@ func (pm *PopupStageMgr) AsPopupMgr() *PopupStageMgr {
 // HandleEvent processes Popup events.
 // Only gets OnFocus events if in focus.
 // requires outer RenderContext mutex!
-func (pm *PopupStageMgr) HandleEvent(evi goosi.Event) {
+func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 	top := pm.Top()
 	if top == nil {
 		return
@@ -39,7 +39,7 @@ func (pm *PopupStageMgr) HandleEvent(evi goosi.Event) {
 			return
 		}
 		if tb.ClickOff {
-			if evi.Type() == goosi.MouseButtonEvent {
+			if evi.Type() == events.MouseUp {
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
 			}

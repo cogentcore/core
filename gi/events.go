@@ -7,10 +7,15 @@ package gi
 import (
 	"image"
 
-	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
+
+func InitWidgetHandlers[T Widget](w T) events.Handlers {
+	we := events.Handlers{}
+	w.SetTypeHandlers(&we)
+	return we
+}
 
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
@@ -24,37 +29,34 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	return pos.In(wb.ScBBox)
 }
 
-// AddEvents adds the default event functions
+// SetTypeHandlers adds the default event functions
 // for Widget objects. It calls [WidgetEvents], so any Widget
-// implementing a custom AddEvents function should
+// implementing a custom SetTypeHandlers function should
 // first call [WidgetEvents].
-func (wb *WidgetBase) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
+func (wb *WidgetBase) SetTypeHandlers(we *events.Handlers) {
 	wb.WidgetEvents(we)
 }
 
-func (wb *WidgetBase) FilterEvents() {
+func (wb *WidgetBase) HandleEvent(ev events.Event) {
 }
 
 // WidgetEvents adds the default events for Widget objects.
-// Any Widget implementing a custom AddEvents function
+// Any Widget implementing a custom SetTypeHandlers function
 // should first call this function.
-func (wb *WidgetBase) WidgetEvents(we *WidgetEvents) {
+func (wb *WidgetBase) WidgetEvents(we *events.Handlers) {
 	// nb.WidgetMouseEvent() ??
 	wb.WidgetMouseFocusEvent(we)
 	wb.HoverTooltipEvent(we)
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
-func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+func (wb *WidgetBase) WidgetMouseEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		wbb := AsWidgetBase(recv)
 		if wbb.IsDisabled() {
 			return
 		}
-		me := data.(*mouse.Event)
+		me := data.(events.Event)
 		me.SetHandled()
 		wbb.WidgetOnMouseEvent(me)
 	})
@@ -63,19 +65,19 @@ func (wb *WidgetBase) WidgetMouseEvent(we *WidgetEvents) {
 // WidgetOnMouseEvent is the function called on Widget objects
 // when they get a mouse click event. If you are declaring a custom
 // mouse event function, you should call this function first.
-func (wb *WidgetBase) WidgetOnMouseEvent(me *mouse.Event) {
-	wb.SetFlag(me.Action == mouse.Press, Active)
+func (wb *WidgetBase) WidgetOnMouseEvent(me events.Event) {
+	// wb.SetFlag(me.Action == events.Press, Active)
 	wb.ApplyStyleUpdate(wb.Sc)
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
-func (wb *WidgetBase) WidgetMouseFocusEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseFocusEvent, RegPri, func(recv, send ki.Ki, sig int64, data any) {
+func (wb *WidgetBase) WidgetMouseFocusEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseEnter, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		wbb := AsWidgetBase(recv)
 		if wbb.IsDisabled() {
 			return
 		}
-		me := data.(*mouse.Event)
+		me := data.(events.Event)
 		me.SetHandled()
 		wbb.WidgetOnMouseFocusEvent(me)
 	})
@@ -84,8 +86,8 @@ func (wb *WidgetBase) WidgetMouseFocusEvent(we *WidgetEvents) {
 // WidgetOnMouseFocusEvent is the function called on Widget objects
 // when they get a mouse foucs event. If you are declaring a custom
 // mouse foucs event function, you should call this function first.
-func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.Event) {
-	enter := me.Action == mouse.Enter
+func (wb *WidgetBase) WidgetOnMouseFocusEvent(me events.Event) {
+	enter := me.Action == events.Enter
 	wb.SetFlag(enter, Hovered)
 	wb.ApplyStyleUpdate(wb.Sc)
 	// TODO: trigger mouse focus exit after clicking down
@@ -99,8 +101,8 @@ func (wb *WidgetBase) WidgetOnMouseFocusEvent(me *mouse.Event) {
 // you need to also connect to other mouse events, you must copy this code --
 // all processing of a mouse event must happen within one function b/c there
 // can only be one registered per receiver and event type.  sel = Left button
-// mouse.Press event, toggles the selected state, and emits a SelectedEvent.
-// ctxtMenu = connects to Right button mouse.Press event, and sends a
+// events.Press event, toggles the selected state, and emits a SelectedEvent.
+// ctxtMenu = connects to Right button events.Press event, and sends a
 // WidgetSig WidgetContextMenu signal, followed by calling ContextMenu method
 // -- signal can be used to change state prior to generating context menu,
 // including setting a CtxtMenuFunc that removes all items and thus negates
@@ -110,10 +112,10 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	if !sel && !ctxtMenu {
 		return
 	}
-	wbwe.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	wbwe.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		if sel {
-			if me.Action == mouse.Press && me.Button == mouse.Left {
+			if me.Action == events.Press && me.Button == events.Left {
 				me.SetHandled()
 				_, wbb := AsWidget(recv)
 				wbb.SetSelected(!wbb.StateIs(states.Selected))
@@ -122,7 +124,7 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 			}
 		}
 		if ctxtMenu {
-			if me.Action == mouse.Release && me.Button == mouse.Right {
+			if me.Action == events.Release && me.Button == events.Right {
 				me.SetHandled()
 				wi, wbb := AsWidget(recv)
 				wbb.EmitContextMenuSignal()

@@ -11,11 +11,9 @@ import (
 	"time"
 
 	"goki.dev/girl/states"
-	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -75,11 +73,11 @@ type EventMgr struct {
 	// drag-n-drop source node
 	DNDSource Widget `desc:"drag-n-drop source node"`
 
-	// final event for DND which is sent if a finalize is received
-	DNDFinalEvent *dnd.Event `desc:"final event for DND which is sent if a finalize is received"`
-
-	// modifier in place at time of drop event (DropMove or DropCopy)
-	DNDDropMod dnd.DropMods `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
+	// 	// final event for DND which is sent if a finalize is received
+	// 	DNDFinalEvent events.Event `desc:"final event for DND which is sent if a finalize is received"`
+	//
+	// 	// modifier in place at time of drop event (DropMove or DropCopy)
+	// 	DNDDropMod events.DropMods `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
 
 	// node receiving keyboard events -- use SetFocus, CurFocus
 	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
@@ -94,10 +92,10 @@ type EventMgr struct {
 	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
 
 	// Last modifier key bits from most recent Mouse, Keyboard events
-	LastModBits goosi.Modifiers `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
+	LastModBits key.Modifiers `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
 
 	// Last Select Mode from most recent Mouse, Keyboard events
-	LastSelMode mouse.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
 
 	// Last mouse position from most recent Mouse events
 	LastMousePos image.Point `desc:"Last mouse position from most recent Mouse events"`
@@ -105,53 +103,20 @@ type EventMgr struct {
 	// change in position accumulated from skipped-over laggy mouse move events
 	LagSkipDeltaPos image.Point `desc:"change in position accumulated from skipped-over laggy mouse move events"`
 
-	// true if last event was skipped due to lag
-	LagLastSkipped  bool `desc:"true if last event was skipped due to lag"`
-	startDrag       *mouse.Event
-	dragStarted     bool
-	startDND        *mouse.Event
-	dndStarted      bool
-	startHover      *mouse.Event
-	curHover        *mouse.Event
-	hoverStarted    bool
-	hoverTimer      *time.Timer
-	startDNDHover   *mouse.Event
-	curDNDHover     *mouse.Event
-	dndHoverStarted bool
-	dndHoverTimer   *time.Timer
-}
-
-// WinEventRecv is used to hold info about widgets receiving event signals to
-// given function, used for sorting and delayed sending.
-type WinEventRecv struct {
-	Recv Widget
-	Func func()
-	Data int
-}
-
-// Set sets the recv and fun
-func (we *WinEventRecv) Set(r Widget, f func()) {
-	we.Recv = r
-	we.Func = f
-}
-
-// Call calls the function on the recv with the args
-func (we *WinEventRecv) Call(send Widget, sig int64) {
-	if EventTrace {
-		// fmt.Printf("calling event: %v method on: %v\n", we.Recv.Path())
-	}
-	we.Func() // we.Recv, send, sig, data)
-}
-
-type WinEventRecvList []WinEventRecv
-
-func (wl *WinEventRecvList) Add(recv Widget, fun func()) {
-	rr := WinEventRecv{Recv: recv, Func: fun}
-	*wl = append(*wl, rr)
-}
-
-func (wl *WinEventRecvList) AddDepth(recv Widget, fun func(), par Widget) {
-	wl.Add(recv, fun)
+	/*
+		startDrag       events.Event
+		dragStarted     bool
+		startDND        events.Event
+		dndStarted      bool
+		startHover      events.Event
+		curHover        events.Event
+		hoverStarted    bool
+		hoverTimer      *time.Timer
+		startDNDHover   events.Event
+		curDNDHover     events.Event
+		dndHoverStarted bool
+		dndHoverTimer   *time.Timer
+	*/
 }
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
@@ -174,9 +139,9 @@ func (em *EventMgr) RenderWin() *RenderWin {
 ///////////////////////////////////////////////////////////////////////
 // 	HandleEvent
 
-func (em *EventMgr) HandleEvent(sc *Scene, evi goosi.Event) {
+func (em *EventMgr) HandleEvent(sc *Scene, evi events.Event) {
 	et := evi.Type()
-	if et > goosi.EventTypesN || et < 0 {
+	if et > events.TypesN || et < 0 {
 		return // can't handle other types of events here
 	}
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
@@ -199,10 +164,10 @@ func (em *EventMgr) SetRenderWinFocusActive(active bool) {
 	win.SetFocusActive(active)
 }
 
-func (em *EventMgr) HandleOtherEvent(sc *Scene, evi goosi.Event) {
+func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 }
 
-func (em *EventMgr) HandleFocusEvent(sc *Scene, evi goosi.Event) {
+func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	et := evi.Type()
 	foc := em.CurFocus()
 	if foc == nil {
@@ -224,7 +189,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi goosi.Event) {
 	}
 }
 
-func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
+func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	pos := evi.LocalPos()
 	et := evi.Type()
 
@@ -274,7 +239,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 		for i := nrv - 1; i >= 0; i-- {
 			rr := rvs[i]
 			switch evi.Type() {
-			case goosi.MouseDragEvent:
+			case events.MouseDragEvent:
 				if em.Dragging == nil {
 					rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
 				}
@@ -286,12 +251,12 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 
 			if pri != LowRawPri && evi.IsHandled() { // someone took care of it
 				switch evi.Type() { // only grab events if processed
-				case goosi.MouseDragEvent:
+				case events.MouseDragEvent:
 					if em.Dragging == nil {
 						em.Dragging = rr.Recv
 						rr.Recv.SetFlag(true, NodeDragging)
 					}
-				case goosi.MouseScrollEvent:
+				case events.MouseScrollEvent:
 					if em.Scrolling == nil {
 						em.Scrolling = rr.Recv
 					}
@@ -299,7 +264,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 				break
 			} else {
 				switch evi.Type() {
-				case goosi.MouseDragEvent:
+				case events.MouseDragEvent:
 					if em.Dragging == nil {
 						rr.Recv.SetFlag(false, NodeDragging) // clear provisional
 					}
@@ -312,7 +277,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi goosi.Event) {
 /*
 // SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
 // map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun func()) bool {
+func (em *EventMgr) SendEventSignalFunc(evi events.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun func()) bool {
 	if !em.Master.IsInScope(recv, popup) {
 		return ki.Continue
 	}
@@ -327,7 +292,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 	if evi.HasPos() {
 		pos := evi.LocalPos()
 		switch evi.Type() {
-		case goosi.MouseDragEvent:
+		case events.MouseDragEvent:
 			if em.Dragging != nil {
 				if em.Dragging == wb.This() {
 					if EventTrace {
@@ -345,7 +310,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 				}
 				return ki.Continue
 			}
-		case goosi.MouseScrollEvent:
+		case events.MouseScrollEvent:
 			if em.Scrolling != nil {
 				if em.Scrolling == wb.This() {
 					if EventTrace {
@@ -382,7 +347,7 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 
 // // SendSig directly calls SendSig from given recv, sender for given event
 // // across all priorities.
-// func (em *EventMgr) SendSig(recv, sender Widget, evi goosi.Event) {
+// func (em *EventMgr) SendSig(recv, sender Widget, evi events.Event) {
 // 	et := evi.Type()
 // 	for pri := HiPri; pri < EventPrisN; pri++ {
 // 		em.EventSigs[et][pri].SendSig(recv, sender, int64(et), evi)
@@ -393,50 +358,50 @@ func (em *EventMgr) SendEventSignalFunc(evi goosi.Event, popup bool, rvs *WinEve
 //  Mouse event processing
 
 // MouseEvents processes mouse drag and move events
-func (em *EventMgr) MouseEvents(evi goosi.Event) {
+func (em *EventMgr) MouseEvents(evi events.Event) {
 	et := evi.Type()
-	if et == goosi.MouseDragEvent {
+	if et == events.MouseDragEvent {
 		em.MouseDragEvents(evi)
-	} else if et != goosi.KeyEvent { // allow modifier keypress
+	} else if et != events.KeyEvent { // allow modifier keypress
 		em.ResetMouseDrag()
 	}
 
-	if et == goosi.MouseMoveEvent {
+	if et == events.MouseMoveEvent {
 		em.MouseMoveEvents(evi)
 	} else {
 		em.ResetMouseMove()
 	}
 
-	if et == goosi.MouseButtonEvent {
-		me := evi.(*mouse.Event)
+	if et == events.MouseButtonEvent {
+		me := evi.(events.Event)
 		em.LastModBits = me.Mods
 		em.LastSelMode = me.SelectMode()
 		em.LastMousePos = me.Pos()
 	}
-	if et == goosi.KeyChordEvent {
-		ke := evi.(*key.Event)
+	if et == events.KeyChordEvent {
+		ke := evi.(*events.Key)
 		em.LastModBits = ke.Mods
-		em.LastSelMode = mouse.SelectModeBits(ke.Mods)
+		em.LastSelMode = events.SelectModeBits(ke.Mods)
 	}
 }
 
 // MouseEventReset resets state for "catch" events (Dragging, Scrolling)
-func (em *EventMgr) MouseEventReset(evi goosi.Event) {
+func (em *EventMgr) MouseEventReset(evi events.Event) {
 	et := evi.Type()
-	if em.Dragging != nil && et != goosi.MouseDragEvent {
+	if em.Dragging != nil && et != events.MouseDragEvent {
 		em.Dragging.SetFlag(false, NodeDragging)
 		em.Dragging = nil
 	}
-	if em.Scrolling != nil && et != goosi.MouseScrollEvent {
+	if em.Scrolling != nil && et != events.MouseScrollEvent {
 		em.Scrolling = nil
 	}
 }
 
-// MouseDragEvents processes MouseDragEvent to Detect start of drag and DND.
+// MouseDragEvents processes MouseDragEvent to Detect start of drag and EVEnts.
 // These require timing and delays, e.g., due to minor wiggles when pressing
 // the mouse button
-func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
-	me := evi.(*mouse.Event)
+func (em *EventMgr) MouseDragEvents(evi events.Event) {
+	me := evi.(events.Event)
 	em.LastModBits = me.Mods
 	em.LastSelMode = me.SelectMode()
 	em.LastMousePos = me.Pos()
@@ -464,9 +429,9 @@ func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
 		if em.startDND == nil {
 			em.startDND = me
 		} else {
-			delayMs := int(now.Sub(em.startDND.Time()) / time.Millisecond)
+			delayMs := int(now.Sub(em.startEVEnts.Time()) / time.Millisecond)
 			if delayMs >= DNDStartMSec {
-				dst := int(mat32.Hypot(float32(em.startDND.Where.X-me.Pos().X), float32(em.startDND.Where.Y-me.Pos().Y)))
+				dst := int(mat32.Hypot(float32(em.startEVEnts.Where.X-me.Pos().X), float32(em.startEVEnts.Where.Y-me.Pos().Y)))
 				if dst >= DNDStartPix {
 					em.dndStarted = true
 					em.DNDStartEvent(em.startDND)
@@ -509,7 +474,7 @@ func (em *EventMgr) MouseDragEvents(evi goosi.Event) {
 	}
 	// if we have started dragging but aren't dragging anything, scroll
 	if (em.dragStarted || em.dndStarted) && em.Dragging == nil && em.DNDSource == nil {
-		scev := mouse.NewScrollEvent(me.Pos(), me.Pos().Sub(me.Start).Mul(-1), me.Mods)
+		scev := events.NewScrollEvent(me.Pos(), me.Pos().Sub(me.Start).Mul(-1), me.Mods)
 		scev.Init()
 		// em.HandleEvent(sc, scev)
 	}
@@ -535,8 +500,8 @@ func (em *EventMgr) ResetMouseDrag() {
 
 // MouseMoveEvents processes MouseMoveEvent to detect start of hover events.
 // These require timing and delays
-func (em *EventMgr) MouseMoveEvents(evi goosi.Event) {
-	me := evi.(*mouse.Event)
+func (em *EventMgr) MouseMoveEvents(evi events.Event) {
+	me := evi.(events.Event)
 	em.LastModBits = me.Mods
 	em.LastSelMode = me.SelectMode()
 	em.LastMousePos = me.Pos()
@@ -544,7 +509,7 @@ func (em *EventMgr) MouseMoveEvents(evi goosi.Event) {
 	if !em.hoverStarted {
 		em.hoverStarted = true
 		em.startHover = me
-		em.curHover = mouse.NewEventCopy(goosi.MouseHoverEvent, me)
+		em.curHover = events.NewEventCopy(events.MouseHoverEvent, me)
 		em.hoverTimer = time.AfterFunc(time.Duration(HoverStartMSec)*time.Millisecond, func() {
 			em.TimerMu.Lock()
 			hoe := em.curHover
@@ -568,7 +533,7 @@ func (em *EventMgr) MouseMoveEvents(evi goosi.Event) {
 			em.hoverTimer = nil
 			em.hoverStarted = false
 		} else {
-			em.curHover = mouse.NewEventCopy(goosi.MouseHoverEvent, me)
+			em.curHover = events.NewEventCopy(events.MouseHoverEvent, me)
 		}
 	}
 	em.TimerMu.Unlock()
@@ -587,15 +552,15 @@ func (em *EventMgr) ResetMouseMove() {
 	em.TimerMu.Unlock()
 }
 
-// GenMouseFocusEvents processes mouse.Event to generate mouse.Event
+// GenMouseFocusEvents processes events.Event to generate events.Event
 // events -- returns true if any such events were sent.  If popup is true,
 // then only items on popup are in scope, otherwise items NOT on popup are in
 // scope (if no popup, everything is in scope).
-func (em *EventMgr) GenMouseFocusEvents(mev *mouse.Event, popup bool) bool {
+func (em *EventMgr) GenMouseFocusEvents(mev events.Event, popup bool) bool {
 	/*
-		fe := mouse.NewEventCopy(goosi.MouseFocusEvent, mev)
+		fe := events.NewEventCopy(events.MouseFocusEvent, mev)
 		pos := mev.LocalPos()
-		ftyp := goosi.MouseFocusEvent
+		ftyp := events.MouseFocusEvent
 		updated := false
 		updt := false
 		send := em.Master.EventTopNode()
@@ -612,7 +577,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.Event, popup bool) bool {
 					in := ni.PosInBBox(pos)
 					if in {
 						if !ni.HasFlag(MouseHasEntered) {
-							fe.Action = mouse.Enter
+							fe.Action = events.Enter
 							ni.SetFlag(true, MouseHasEntered)
 							if !updated {
 								updt = em.Master.EventTopUpdateStart()
@@ -624,7 +589,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.Event, popup bool) bool {
 						}
 					} else { // mouse not in object
 						if ni.HasFlag(MouseHasEntered) {
-							fe.Action = mouse.Exit
+							fe.Action = events.Exit
 							ni.SetFlag(false, MouseHasEntered)
 							if !updated {
 								updt = em.Master.EventTopUpdateStart()
@@ -651,7 +616,7 @@ func (em *EventMgr) GenMouseFocusEvents(mev *mouse.Event, popup bool) bool {
 
 // DoInstaDrag tests whether the given mouse DragEvent is on a widget marked
 // with InstaDrag
-func (em *EventMgr) DoInstaDrag(me *mouse.Event, popup bool) bool {
+func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
 	/*
 		et := me.Type()
 		for pri := HiPri; pri < EventPrisN; pri++ {
@@ -687,9 +652,9 @@ func (em *EventMgr) DoInstaDrag(me *mouse.Event, popup bool) bool {
 }
 
 // SendHoverEvent sends mouse hover event, based on last mouse move event
-func (em *EventMgr) SendHoverEvent(he *mouse.Event) {
+func (em *EventMgr) SendHoverEvent(he events.Event) {
 	he.ClearHandled()
-	he.Action = mouse.Hover
+	he.Action = events.Hover
 	// em.HandleEvent(he)
 }
 
@@ -720,8 +685,8 @@ const (
 var DNDTrace = false
 
 // DNDStartEvent handles drag-n-drop start events.
-func (em *EventMgr) DNDStartEvent(e *mouse.Event) {
-	de := dnd.NewEvent(dnd.Start, e.Where, e.Mods)
+func (em *EventMgr) DNDStartEvent(e events.Event) {
+	de := events.NewEvent(events.Start, e.Where, e.Mods)
 	de.Start = e.Where
 	de.StTime = e.GenTime
 	de.DefaultMod() // based on current key modifiers
@@ -750,26 +715,26 @@ func (em *EventMgr) DNDIsInternalSrc() bool {
 }
 
 // SendDNDHoverEvent sends DND hover event, based on last mouse move event
-func (em *EventMgr) SendDNDHoverEvent(e *mouse.Event) {
+func (em *EventMgr) SendDNDHoverEvent(e events.Event) {
 	if e == nil {
 		return
 	}
-	he := &dnd.Event{}
+	he := &events.Event{}
 	he.EventBase = e.EventBase
 	he.ClearHandled()
-	he.Action = dnd.Hover
+	he.Action = events.Hover
 	// em.HandleEvent(&he)
 }
 
 // SendDNDMoveEvent sends DND move event
-func (em *EventMgr) SendDNDMoveEvent(e *mouse.Event) *dnd.Event {
+func (em *EventMgr) SendDNDMoveEvent(e events.Event) events.Event {
 	// todo: when e.Where goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
-	de := &dnd.Event{}
+	de := &events.Event{}
 	de.EventBase = e.EventBase
 	de.ClearHandled()
 	de.DefaultMod() // based on current key modifiers
-	de.Action = dnd.Move
+	de.Action = events.Move
 	// em.HandleEvent(de)
 	// em.GenDNDFocusEvents(de)
 	return de
@@ -777,12 +742,12 @@ func (em *EventMgr) SendDNDMoveEvent(e *mouse.Event) *dnd.Event {
 
 // SendDNDDropEvent sends DND drop event -- returns false if drop event was not processed
 // in which case the event should be cleared (by the RenderWin)
-func (em *EventMgr) SendDNDDropEvent(e *mouse.Event) bool {
-	de := &dnd.Event{}
+func (em *EventMgr) SendDNDDropEvent(e events.Event) bool {
+	de := &events.Event{}
 	de.EventBase = e.EventBase
 	de.ClearHandled()
 	de.DefaultMod()
-	de.Action = dnd.DropOnTarget
+	de.Action = events.DropOnTarget
 	de.Data = em.DNDData
 	de.Source = em.DNDSource
 	em.DNDSource.SetFlag(false, NodeDragging)
@@ -811,16 +776,16 @@ func (em *EventMgr) ClearDND() {
 }
 
 /*
-// GenDNDFocusEvents processes mouse.Event to generate dnd.FocusEvent
+// GenDNDFocusEvents processes events.Event to generate events.FocusEvent
 // events -- returns true if any such events were sent.  If popup is true,
 // then only items on popup are in scope, otherwise items NOT on popup are in
 // scope (if no popup, everything is in scope).  Extra work is done to ensure
 // that Exit from prior widget is always sent before Enter to next one.
-func (em *EventMgr) GenDNDFocusEvents(mev *dnd.Event, popup bool) bool {
-	fe := &dnd.Event{}
+func (em *EventMgr) GenDNDFocusEvents(mev events.Event, popup bool) bool {
+	fe := &events.Event{}
 	*fe = *mev
 	pos := mev.LocalPos()
-	ftyp := goosi.DNDFocusEvent
+	ftyp := events.DNDFocusEvent
 
 	// first pass is just to get all the ins and outs
 	var ins, outs WinEventRecvList
@@ -858,11 +823,11 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.Event, popup bool) bool {
 	if len(outs)+len(ins) > 0 {
 		updt := em.Master.EventTopUpdateStart()
 		// now send all the exits before the enters..
-		fe.Action = dnd.Exit
+		fe.Action = events.Exit
 		for i := range outs {
 			outs[i].Call(send, int64(ftyp), &fe)
 		}
-		fe.Action = dnd.Enter
+		fe.Action = events.Enter
 		for i := range ins {
 			ins[i].Call(send, int64(ftyp), &fe)
 		}
@@ -880,7 +845,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev *dnd.Event, popup bool) bool {
 // SendKeyChordEvent sends a KeyChord event with given values.  If popup is
 // true, then only items on popup are in scope, otherwise items NOT on popup
 // are in scope (if no popup, everything is in scope).
-func (em *EventMgr) SendKeyChordEvent(popup bool, r rune, mods ...goosi.Modifiers) {
+func (em *EventMgr) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
 	ke := key.NewEvent(r, 0, key.Press, 0)
 	ke.SetTime()
 	// ke.SetModifiers(mods...)
@@ -1198,7 +1163,7 @@ func (em *EventMgr) InitialFocus() {
 // MangerKeyChordEvents handles lower-priority manager-level key events.
 // Mainly tab, shift-tab, and GoGiEditor and Prefs.
 // event will be marked as processed if handled here.
-func (em *EventMgr) ManagerKeyChordEvents(e *key.Event) {
+func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.IsHandled() {
 		return
 	}

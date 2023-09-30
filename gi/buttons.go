@@ -8,15 +8,13 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -53,13 +51,6 @@ type ButtonBase struct {
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
-// event functions for this type
-var ButtonBaseEventFuncs WidgetEvents
-
-func (bb *ButtonBase) OnInit() {
-	bb.AddEvents(&ButtonBaseEventFuncs)
-}
-
 func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*ButtonBase)
 	if !ok {
@@ -78,34 +69,8 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 type ButtonFlags WidgetFlags //enums:bitflag
 
 const (
-	// button is checkable -- enables display of check control
-	ButtonFlagCheckable ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
-
-	// button is checked
-	ButtonFlagChecked
-
 	// Menu flag means that the button is a menu item
-	ButtonFlagMenu
-)
-
-// ButtonSignals are signals that buttons can send
-type ButtonSignals int64 //enums:enum
-
-const (
-	// ButtonClicked is the main signal to check for normal button activation
-	// -- button pressed down and up
-	ButtonClicked ButtonSignals = iota
-
-	// Pressed means button pushed down but not yet up
-	ButtonPressed
-
-	// Released means mouse button was released - typically look at
-	// ButtonClicked instead of this one
-	ButtonReleased
-
-	// Toggled means the checked / unchecked state was toggled -- only sent
-	// for buttons with Checkable flag set
-	ButtonToggled
+	ButtonFlagMenu ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
 )
 
 // see menus.go for MakeMenuFunc, etc
@@ -114,7 +79,7 @@ const (
 // signals if so -- the Checked state is independent of the generic widget
 // selection state
 func (bb *ButtonBase) SetCheckable(checkable bool) {
-	bb.SetFlag(checkable, ButtonFlagCheckable)
+	bb.Style.Abilities.SetFlag(checkable, states.Checkable)
 }
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
@@ -174,45 +139,37 @@ func (bb *ButtonBase) OnClicked(fun func()) ButtonWidget {
 	return bb.This().(ButtonWidget)
 }
 
-// ButtonPress sets the button in the down state -- mouse clicked down but
-// not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
-// ButtonClicked is down and up
-func (bb *ButtonBase) ButtonPress() {
-	updt := bb.UpdateStart()
-	if bb.IsDisabled() {
-		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
-			bb.SetSelected(!bb.StateIs(states.Selected))
-			// bb.EmitSelectedSignal()
-			bb.UpdateSig()
-		}
-	} else {
-		bb.WasPressed = true
-		// bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
-	}
-	bb.ApplyStyle(bb.Sc)
-	bb.UpdateEndRender(updt)
-}
+//
+// // ButtonPress sets the button in the down state -- mouse clicked down but
+// // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
+// // ButtonClicked is down and up
+// func (bb *ButtonBase) ButtonPress() {
+// 	updt := bb.UpdateStart()
+// 	if bb.IsDisabled() {
+// 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
+// 			bb.SetSelected(!bb.StateIs(states.Selected))
+// 			// bb.EmitSelectedSignal()
+// 			bb.UpdateSig()
+// 		}
+// 	} else {
+// 		bb.WasPressed = true
+// 		// bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
+// 	}
+// 	bb.ApplyStyle(bb.Sc)
+// 	bb.UpdateEndRender(updt)
+// }
 
-// BaseButtonRelease action: the button has just been released -- sends a released
-// signal and returns state to normal, and emits clicked signal if if it was
-// previously in pressed state
-func (bb *ButtonBase) BaseButtonRelease() {
+// BaseButtonClicked
+func (bb *ButtonBase) BaseButtonClicked() {
 	if bb.IsDisabled() {
 		return
 	}
 	updt := bb.UpdateStart()
-
-	// bb.ButtonSig.Emit(bb.This(), int64(ButtonReleased), nil)
-	if bb.WasPressed {
-		bb.WasPressed = false
-		// bb.ButtonSig.Emit(bb.This(), int64(ButtonClicked), nil)
-		bb.OpenMenu()
-
-		if bb.Is(ButtonFlagCheckable) {
-			bb.ToggleChecked()
-			// bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
-		}
-	}
+	bb.OpenMenu()
+	// if bb.Is(ButtonFlagCheckable) {
+	// 	bb.ToggleChecked()
+	// 	bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
+	// }
 	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
 }
@@ -294,59 +251,47 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 }
 
 // MouseEvents handles button MouseEvent
-func (bb *ButtonBase) MouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (bb *ButtonBase) MouseEvent(we *events.Handlers) {
+	we.Add(events.Click, func(recv any, ev events.Event) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
-		bbb.WidgetOnMouseEvent(me)
-		if me.Button == mouse.Left {
-			switch me.Action {
-			case mouse.DoubleClick: // we just count as a regular click
-				fallthrough
-			case mouse.Press:
-				me.SetHandled()
-				bbb.ButtonPress()
-			case mouse.Release:
-				me.SetHandled()
-				bw.ButtonRelease()
-			}
+		bbb.WidgetOnMouseEvent(ev)
+		if ev.MouseButton() == events.Left {
+			bb.BaseButtonClicked()
 		}
 	})
 }
 
 // KeyChordEvent handles button KeyChord events
-func (bb *ButtonBase) KeyChordEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (bb *ButtonBase) KeyChordEvent(we *events.Handlers) {
+	we.Add(events.KeyChord, func(recv any, ev events.Event) {
 		bw := recv.(ButtonWidget)
 		bbb := bw.AsButtonBase()
 		if bbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.Event)
 		if KeyEventTrace {
 			fmt.Printf("Button KeyChordEvent: %v\n", bbb.Path())
 		}
-		kf := KeyFun(kt.Chord())
-		if kf == KeyFunEnter || kt.Rune == ' ' {
+		kf := KeyFun(ev.KeyChord())
+		if kf == KeyFunEnter || ev.KeyRune() == ' ' {
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			kt.SetHandled()
-			bbb.ButtonPress()
-			bw.ButtonRelease()
+			ev.SetHandled()
+			bbb.BaseButtonClicked()
 			// }
 		}
 	})
 }
 
-func (bb *ButtonBase) HoverTooltipEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
-		wbb := AsButtonBase(recv)
-		tt := wbb.Tooltip
-		if wbb.Shortcut != "" {
-			tt = "[ " + wbb.Shortcut.Shortcut() + " ]: " + tt
+func (bb *ButtonBase) HoverTooltipEvent(we *events.Handlers) {
+	we.Add(events.LongHoverStart, func(recv any, ev events.Event) {
+		bw := recv.(ButtonWidget)
+		bbb := bw.AsButtonBase()
+		_ = bbb
+		tt := bbb.Tooltip
+		if bbb.Shortcut != "" {
+			tt = "[ " + bbb.Shortcut.Shortcut() + " ]: " + tt
 		}
-		_ = me
 		// todo:
 		// if tt != "" {
 		// 	me.SetHandled()
@@ -359,11 +304,22 @@ func (bb *ButtonBase) HoverTooltipEvent(we *WidgetEvents) {
 	})
 }
 
-func (bb *ButtonBase) ButtonEvents(we *WidgetEvents) {
+var ButtonBaseHandlers = InitWidgetHandlers(&ButtonBase{})
+
+func (bb *ButtonBase) SetTypeHandlers(we *events.Handlers) {
+	bb.ButtonEvents(we)
+}
+
+func (bb *ButtonBase) ButtonEvents(we *events.Handlers) {
 	bb.WidgetEvents(we)
 	bb.HoverTooltipEvent(we)
 	bb.MouseEvent(we)
 	bb.KeyChordEvent(we)
+}
+
+func (bb *ButtonBase) HandleEvent(ev events.Event) {
+	bb.Listeners.Call(ev)
+	ButtonBaseHandlers.Call(bb.This(), ev)
 }
 
 ///////////////////////////////////////////////////////////
@@ -460,25 +416,12 @@ func (bb *ButtonBase) RenderButton(sc *Scene) {
 }
 
 func (bb *ButtonBase) Render(sc *Scene) {
-	wi := bb.This().(Widget)
 	if bb.PushBounds(sc) {
-		wi.FilterEvents()
 		bb.RenderButton(sc)
 		bb.RenderParts(sc)
 		bb.RenderChildren(sc)
 		bb.PopBounds(sc)
 	}
-}
-
-func (bb *ButtonBase) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
-	bb.ButtonEvents(we)
-}
-
-func (bb *ButtonBase) FilterEvents() {
-	bb.Events.CopyFrom(&ButtonBaseEventFuncs)
 }
 
 func (bb *ButtonBase) FocusChanged(change FocusChanges) {
@@ -564,11 +507,7 @@ const (
 	ButtonText
 )
 
-// event functions for this type
-var ButtonEventFuncs WidgetEvents
-
 func (bt *Button) OnInit() {
-	bt.AddEvents(&ButtonEventFuncs)
 	bt.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = styles.BorderRadiusFull
@@ -660,8 +599,9 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-func (bb *Button) FilterEvents() {
-	bb.Events.CopyFrom(&ButtonEventFuncs)
+func (bb *Button) HandleEvent(ev events.Event) {
+	bb.Listeners.Call(ev)
+	ButtonBaseHandlers.Call(bb.This(), ev)
 }
 
 ///////////////////////////////////////////////////////////
@@ -676,10 +616,9 @@ type CheckBox struct {
 }
 
 // event functions for this type
-var CheckBoxEventFuncs WidgetEvents
+var CheckBoxHandlers = InitWidgetHandlers(&CheckBox{})
 
 func (cb *CheckBox) OnInit() {
-	cb.AddEvents(&CheckBoxEventFuncs)
 	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
@@ -740,8 +679,7 @@ func (cb *CheckBox) AsButtonBase() *ButtonBase {
 	return &(cb.ButtonBase)
 }
 
-func (cb *CheckBox) FilterEvents() {
-	cb.Events.CopyFrom(&CheckBoxEventFuncs)
+func (cb *CheckBox) HandleEvent(ev events.Event) {
 }
 
 // OnClicked calls the given function when the button is clicked,

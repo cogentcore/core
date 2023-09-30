@@ -7,7 +7,6 @@ package gi
 import (
 	"reflect"
 
-	"goki.dev/goosi/dnd"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -97,6 +96,8 @@ type Clipper interface {
 	Paste()
 }
 
+/*
+
 // DragNDropper is the interface for standard drag-n-drop actions
 // Types can use this interface to support extensible DND functionality
 // used in all relevant valueview types in giv package (e.g., TreeView)
@@ -120,3 +121,5 @@ type DragNDropper interface {
 	// will be nil.
 	DropExternal(md mimedata.Mimes, mod dnd.DropMods)
 }
+
+*/

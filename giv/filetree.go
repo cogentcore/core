@@ -28,10 +28,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
@@ -1832,47 +1829,47 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	}
 }
 
-func (ftv *FileTreeView) AddEvents() {
+func (ftv *FileTreeView) SetTypeHandlers() {
 	ftv.FileTreeViewEvents()
 }
 
 func (ftv *FileTreeView) FileTreeViewEvents() {
-	ftvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	ftvwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tvv := recv.Embed(TypeFileTreeView).(*FileTreeView)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		tvv.KeyInput(kt)
 	})
 	ftvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		de := d.(*dnd.Event)
+		de := d.(events.Event)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
 			return
 		}
 		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
-		case dnd.Start:
+		case events.Start:
 			tvv.DragNDropStart()
-		case dnd.DropOnTarget:
+		case events.DropOnTarget:
 			tvv.DragNDropTarget(de)
-		case dnd.DropFmSource:
+		case events.DropFmSource:
 			tvv.This().(gi.DragNDropper).Dragged(de)
-		case dnd.External:
+		case events.External:
 			tvv.DragNDropExternal(de)
 		}
 	})
 	ftvwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		de := d.(*dnd.FocusEvent)
+		de := d.(*events.FocusEvent)
 		tvvi := recv.Embed(TypeFileTreeView)
 		if tvvi == nil {
 			return
 		}
 		tvv := tvvi.(*FileTreeView)
 		switch de.Action {
-		case dnd.Enter:
+		case events.Enter:
 			tvv.ParentRenderWin().DNDSetCursor(de.Mod)
-		case dnd.Exit:
+		case events.Exit:
 			tvv.ParentRenderWin().DNDNotCursor()
-		case dnd.Hover:
+		case events.Hover:
 			tvv.Open()
 		}
 	})
@@ -1888,26 +1885,26 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 	if lbl, ok := ftv.LabelPart(); ok {
 		// HiPri is needed to override label's native processing
-		lblwe.AddFunc(goosi.MouseButtonEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		lblwe.AddFunc(events.MouseUp, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			lb, _ := recv.(*gi.Label)
 			ftvvi := lb.Parent().Parent()
 			if ftvvi == nil || ftvvi.This() == nil { // deleted
 				return
 			}
 			ftvv := ftvvi.Embed(TypeFileTreeView).(*FileTreeView)
-			me := d.(*mouse.Event)
+			me := d.(events.Event)
 			switch me.Button {
-			case mouse.Left:
+			case events.Left:
 				switch me.Action {
-				case mouse.DoubleClick:
+				case events.DoubleClick:
 					ftvv.ToggleClose()
 					me.SetHandled()
-				case mouse.Release:
+				case events.Release:
 					ftvv.SelectAction(me.SelectMode())
 					me.SetHandled()
 				}
-			case mouse.Right:
-				if me.Action == mouse.Release {
+			case events.Right:
+				if me.Action == events.Release {
 					me.SetHandled()
 					ftvv.This().(gi.Node2D).ContextMenu()
 				}
@@ -1916,16 +1913,16 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 }
 
-func (ftv *FileTreeView) KeyInput(kt *key.Event) {
+func (ftv *FileTreeView) KeyInput(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", ftv.Path())
 	}
-	kf := gi.KeyFun(kt.Chord())
-	selMode := mouse.SelectModeBits(kt.Modifiers)
+	kf := gi.KeyFun(kt.KeyChord())
+	selMode := events.SelectModeBits(kt.Modifiers)
 
-	if selMode == mouse.SelectOne {
+	if selMode == events.SelectOne {
 		if ftv.SelectMode() {
-			selMode = mouse.ExtendContinuous
+			selMode = events.ExtendContinuous
 		}
 	}
 
@@ -2349,12 +2346,12 @@ func (ftv *FileTreeView) Paste() {
 
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+func (ftv *FileTreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
 	ftv.PasteMime(md)
 }
 
 // DropExternal is not handled by base case but could be in derived
-func (ftv *FileTreeView) DropExternal(md mimedata.Mimes, mod dnd.DropMods) {
+func (ftv *FileTreeView) DropExternal(md mimedata.Mimes, mod events.DropMods) {
 	ftv.PasteMime(md)
 }
 
@@ -2565,9 +2562,9 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 // Dragged is called after target accepts the drop -- we just remove
 // elements that were moved
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
-func (ftv *FileTreeView) Dragged(de *dnd.Event) {
+func (ftv *FileTreeView) Dragged(de events.Event) {
 	// fmt.Printf("ftv dragged: %v\n", ftv.Path())
-	if de.Mod != dnd.DropMove {
+	if de.Mod != events.DropMove {
 		return
 	}
 	sroot := ftv.RootView.SrcNode

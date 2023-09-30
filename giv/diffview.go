@@ -15,9 +15,7 @@ import (
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -824,9 +822,9 @@ func (tv *DiffTextView) DiffView() *DiffView {
 	return dvi.(*DiffView)
 }
 
-// MouseEvent handles the mouse.Event to process double-click
-func (tv *DiffTextView) MouseEvent(me *mouse.Event) {
-	if me.Button != mouse.Left || me.Action != mouse.DoubleClick {
+// MouseEvent handles the events.Event to process double-click
+func (tv *DiffTextView) MouseEvent(me events.Event) {
+	if me.Button != events.Left || me.Action != events.DoubleClick {
 		tv.TextView.MouseEvent(me)
 		return
 	}
@@ -854,20 +852,20 @@ func (tv *DiffTextView) TextViewEvents() {
 	tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tvwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeDiffTextView).(*DiffTextView)
-		me := d.(*mouse.Event)
+		me := d.(events.Event)
 		txf.MouseEvent(me) // gets our new one
 	})
 	tv.MouseFocusEvent()
-	tvwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	tvwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		txf.KeyInput(kt)
 	})
 }
 
-// AddEvents indirectly sets connections between mouse and key events and actions
-func (tv *DiffTextView) AddEvents() {
+// SetTypeHandlers indirectly sets connections between mouse and key events and actions
+func (tv *DiffTextView) SetTypeHandlers() {
 	tv.TextViewEvents()
 }

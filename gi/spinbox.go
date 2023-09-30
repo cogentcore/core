@@ -12,9 +12,7 @@ import (
 
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -82,10 +80,9 @@ type SpinBox struct {
 }
 
 // event functions for this type
-var SpinBoxEventFuncs WidgetEvents
+var SpinBoxHandlers = InitWidgetHandlers(&SpinBox{})
 
 func (sb *SpinBox) OnInit() {
-	sb.AddEvents(&SpinBoxEventFuncs)
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -311,31 +308,27 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sb *SpinBox) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
+func (sb *SpinBox) SetTypeHandlers(we *events.Handlers) {
 	sb.SpinBoxEvents(we)
 }
 
-func (sb *SpinBox) FilterEvents() {
-	sb.Events.CopyFrom(&SpinBoxEventFuncs)
+func (sb *SpinBox) HandleEvent(ev events.Event) {
 }
 
-func (sb *SpinBox) SpinBoxEvents(we *WidgetEvents) {
+func (sb *SpinBox) SpinBoxEvents(we *events.Handlers) {
 	sb.HoverTooltipEvent(we)
 	sb.MouseScrollEvent(we)
 	// sb.TextFieldEvent(we)
 	sb.KeyChordEvent(we)
 }
 
-func (sb *SpinBox) MouseScrollEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseScrollEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SpinBox) MouseScrollEvent(we *events.Handlers) {
+	we.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := AsSpinBox(recv)
 		if sbb.IsDisabled() || !sbb.StateIs(states.Focused) {
 			return
 		}
-		me := d.(*mouse.ScrollEvent)
+		me := d.(*events.Scroll)
 		me.SetHandled()
 		sbb.IncrValue(float32(me.NonZeroDelta(false)))
 	})
@@ -353,17 +346,17 @@ func (sb *SpinBox) TextFieldEvent() {
 	})
 }
 
-func (sb *SpinBox) KeyChordEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+func (sb *SpinBox) KeyChordEvent(we *events.Handlers) {
+	we.AddFunc(events.KeyChord, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		sbb := recv.(*SpinBox)
 		if sbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		if KeyEventTrace {
 			fmt.Printf("SpinBox KeyChordEvent: %v\n", sbb.Path())
 		}
-		kf := KeyFun(kt.Chord())
+		kf := KeyFun(kt.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
 			kt.SetHandled()
@@ -461,9 +454,7 @@ func (sb *SpinBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 }
 
 func (sb *SpinBox) Render(sc *Scene) {
-	wi := sb.This().(Widget)
 	if sb.PushBounds(sc) {
-		wi.FilterEvents()
 		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
 		tf.SetSelected(sb.StateIs(states.Selected))
 		sb.RenderChildren(sc)

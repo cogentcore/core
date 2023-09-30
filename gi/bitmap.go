@@ -45,10 +45,9 @@ type Bitmap struct {
 }
 
 // event functions for this type
-var BitmapEventFuncs WidgetEvents
+var BitmapHandlers = InitWidgetHandlers(&Bitmap{})
 
 func (bm *Bitmap) OnInit() {
-	bm.AddEvents(&BitmapEventFuncs)
 	bm.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.MinWidth.SetPx(float32(bm.Size.X))
 		s.MinHeight.SetPx(float32(bm.Size.Y))
@@ -168,9 +167,7 @@ func (bm *Bitmap) DrawIntoScene(sc *Scene) {
 }
 
 func (bm *Bitmap) Render(sc *Scene) {
-	wi := bm.This().(Widget)
 	if bm.PushBounds(sc) {
-		wi.FilterEvents()
 		bm.RenderChildren(sc)
 		bm.DrawIntoScene(bm.Sc)
 		bm.PopBounds(sc)

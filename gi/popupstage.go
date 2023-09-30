@@ -4,7 +4,7 @@
 
 package gi
 
-import "goki.dev/goosi"
+import "goki.dev/goosi/events"
 
 // PopupStage supports Popup types (Menu, Tooltip, Snakbar, Chooser),
 // which are transitory and simple, without additional decor,
@@ -55,7 +55,7 @@ func (st *PopupStage) StageAdded(smi StageMgr) {
 	// }
 }
 
-func (st *PopupStage) HandleEvent(evi goosi.Event) {
+func (st *PopupStage) HandleEvent(evi events.Event) {
 	evi.SetLocalOff(st.Scene.Geom.Pos)
 	// todo: need a simpler event filter delivery guy:
 	// st.EventMgr.HandleEvent(st.Scene, evi)

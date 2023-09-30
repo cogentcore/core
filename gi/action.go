@@ -11,7 +11,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -92,10 +92,9 @@ const (
 )
 
 // event functions for this type
-var ActionEventFuncs WidgetEvents
+var ActionHandlers = InitWidgetHandlers(&Action{})
 
 func (ac *Action) OnInit() {
-	ac.AddEvents(&ActionEventFuncs)
 	ac.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(styles.BorderNone)
@@ -211,7 +210,7 @@ func (ac *Action) CopyFieldsFrom(frm any) {
 // Trigger triggers the action signal -- for external activation of action --
 // only works if action is not inactive
 func (ac *Action) Trigger() {
-	if ac.Is(Disabled) {
+	if ac.StateIs(states.Disabled) {
 		return
 	}
 	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)

@@ -396,9 +396,7 @@ func (wb *WidgetBase) PopBounds(sc *Scene) {
 }
 
 func (wb *WidgetBase) Render(sc *Scene) {
-	wi := wb.This().(Widget)
 	if wb.PushBounds(sc) {
-		wi.FilterEvents()
 		wb.RenderParts(sc)
 		wb.RenderChildren(sc)
 		wb.PopBounds(sc)

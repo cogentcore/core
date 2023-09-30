@@ -14,9 +14,8 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -122,10 +121,10 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 }
 
 func (kc *KeyChordEdit) MouseEvent() {
-	kcwe.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	kcwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
-		if me.Action == mouse.Press && me.Button == mouse.Left {
+		if me.Action == events.Press && me.Button == events.Left {
 			if kcc.Selectable {
 				me.SetHandled()
 				kcc.SetSelected(!kcc.StateIs(states.Selected))
@@ -136,7 +135,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 				kcc.UpdateSig()
 			}
 		}
-		if me.Action == mouse.Release && me.Button == mouse.Right {
+		if me.Action == events.Release && me.Button == events.Right {
 			me.SetHandled()
 			kcc.EmitContextMenuSignal()
 			kcc.This().(gi.Node2D).ContextMenu()
@@ -145,13 +144,13 @@ func (kc *KeyChordEdit) MouseEvent() {
 }
 
 func (kc *KeyChordEdit) KeyChordEvent() {
-	kcwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	kcwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if kcc.StateIs(states.Focused) && kcc.FocusActive {
-			kt := d.(*key.Event)
+			kt := d.(*events.Key)
 			kt.SetHandled()
-			kcc.SetText(string(kt.Chord())) // that's easy!
-			goosi.TheApp.ClipBoard(kc.ParentRenderWin().RenderWin).Write(mimedata.NewText(string(kt.Chord())))
+			kcc.SetText(string(kt.KeyChord())) // that's easy!
+			goosi.TheApp.ClipBoard(kc.ParentRenderWin().RenderWin).Write(mimedata.NewText(string(kt.KeyChord())))
 			kcc.ChordUpdated()
 		}
 	})
@@ -165,7 +164,7 @@ func (kc *KeyChordEdit) ApplyStyle() {
 	kc.LayoutLabel()
 }
 
-func (kc *KeyChordEdit) AddEvents() {
+func (kc *KeyChordEdit) SetTypeHandlers() {
 	kc.HoverEvent()
 	kc.MouseEvent()
 	kc.KeyChordEvent()

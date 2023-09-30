@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 // MainStage manages a Scene serving as content for a
@@ -242,7 +243,7 @@ func (st *MainStage) StageAdded(smi StageMgr) {
 }
 
 // HandleEvent handles all the non-Window events
-func (st *MainStage) HandleEvent(evi goosi.Event) {
+func (st *MainStage) HandleEvent(evi events.Event) {
 	if st.Scene == nil {
 		return
 	}

@@ -8,6 +8,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 )
 
 // TooltipConfigStyles configures the default styles
@@ -79,9 +80,9 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 
 // HoverTooltipEvent connects to HoverEvent and pops up a tooltip -- most
 // widgets should call this as part of their event connection method
-func (wb *WidgetBase) HoverTooltipEvent(we *WidgetEvents) {
+func (wb *WidgetBase) HoverTooltipEvent(we *events.Handlers) {
 	/*
-		we.AddFunc(goosi.MouseHoverEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		we.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			me := d.(*mouse.Event)
 			wbb := AsWidgetBase(recv)
 			if wbb.Tooltip != "" {

@@ -53,10 +53,9 @@ type ButtonBox struct {
 }
 
 // event functions for this type
-var ButtonBoxEventFuncs WidgetEvents
+var ButtonBoxHandlers = InitWidgetHandlers(&ButtonBox{})
 
 func (bb *ButtonBox) OnInit() {
-	bb.AddEvents(&ButtonBoxEventFuncs)
 	bb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
@@ -268,9 +267,7 @@ func (bb *ButtonBox) RenderButtonBox(sc *Scene) {
 }
 
 func (bb *ButtonBox) Render(sc *Scene) {
-	wi := bb.This().(Widget)
 	if bb.PushBounds(sc) {
-		wi.FilterEvents()
 		bb.RenderButtonBox(sc)
 		bb.RenderParts(sc)
 		bb.RenderChildren(sc)

@@ -23,7 +23,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
@@ -813,23 +813,23 @@ func (fv *FileView) ApplyStyle() {
 	sf.StartFocus() // need to call this when window is actually active
 }
 
-func (fv *FileView) AddEvents() {
+func (fv *FileView) SetTypeHandlers() {
 	fv.FileViewEvents()
 }
 
 func (fv *FileView) FileViewEvents() {
-	fvwe.AddFunc(goosi.KeyChordEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+	fvwe.AddFunc(events.KeyChord, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		fvv := recv.Embed(TypeFileView).(*FileView)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		fvv.KeyInput(kt)
 	})
 }
 
-func (fv *FileView) KeyInput(kt *key.Event) {
+func (fv *FileView) KeyInput(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
-	kf := gi.KeyFun(kt.Chord())
+	kf := gi.KeyFun(kt.KeyChord())
 	switch kf {
 	case gi.KeyFunJump, gi.KeyFunWordLeft:
 		kt.SetHandled()

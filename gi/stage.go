@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 )
 
 var (
@@ -229,7 +229,7 @@ type Stage interface {
 	StageAdded(sm StageMgr)
 
 	// HandleEvent handles given event within this stage
-	HandleEvent(evi goosi.Event)
+	HandleEvent(evi events.Event)
 
 	// DoUpdate calls DoUpdate on the Scene,
 	// performing any Widget-level updates and rendering.
@@ -270,7 +270,7 @@ func (st *StageBase) RenderCtx() *RenderContext {
 	return nil
 }
 
-func (st *StageBase) HandleEvent(evi goosi.Event) {
+func (st *StageBase) HandleEvent(evi events.Event) {
 }
 
 func (st *StageBase) Delete() {

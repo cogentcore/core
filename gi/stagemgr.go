@@ -8,7 +8,7 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/ordmap"
 )
 
@@ -191,7 +191,7 @@ func (sm *MainStageMgr) Resize(sz image.Point) {
 	}
 }
 
-func (sm *MainStageMgr) HandleEvent(evi goosi.Event) {
+func (sm *MainStageMgr) HandleEvent(evi events.Event) {
 	sz := sm.Stack.Len()
 	for i := sz - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i).AsMain()

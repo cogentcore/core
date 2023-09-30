@@ -20,7 +20,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -257,8 +257,8 @@ func (pf *Preferences) Apply() {
 	*/
 
 	// TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
-	mouse.DoubleClickInterval = pf.Params.DoubleClickInterval
-	mouse.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
+	events.DoubleClickInterval = pf.Params.DoubleClickInterval
+	events.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu
 
 	if pf.KeyMap != "" {
@@ -1008,11 +1008,11 @@ type PrefsDetailed struct {
 	// [def: 30] [min: 5] [step: 1] the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
 
-	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
-	DragStartMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
+	DragStartMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
 
-	// [def: 4] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)
-	DragStartPix int `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic mouse.Press)"`
+	// [def: 4] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
+	DragStartPix int `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
 
 	// [def: 200] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
 	DNDStartMSec int `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`

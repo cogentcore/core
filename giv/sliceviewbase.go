@@ -21,10 +21,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -1094,9 +1091,7 @@ func (sv *SliceViewBase) Render(vp *Scene) {
 		return
 	}
 	sv.ToolBar().UpdateActions()
-	wi := sv.This().(Widget)
 	if sv.PushBounds() {
-		wi.FilterEvents()
 		sv.FrameStdRender() // this just renders widgets that have already been created
 		sv.RenderScrolls()
 		sv.RenderChildren()
@@ -1108,7 +1103,7 @@ func (sv *SliceViewBase) NeedsDoubleReRender() bool {
 	return false
 }
 
-func (sv *SliceViewBase) AddEvents() {
+func (sv *SliceViewBase) SetTypeHandlers() {
 	sv.SliceViewBaseEvents()
 }
 
@@ -1296,7 +1291,7 @@ func SliceIdxByValue(slc any, fldVal any) (int, bool) {
 
 // MoveDown moves the selection down to next row, using given select mode
 // (from keyboard modifiers) -- returns newly selected row or -1 if failed
-func (sv *SliceViewBase) MoveDown(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MoveDown(selMode events.SelectModes) int {
 	if sv.SelectedIdx >= sv.SliceSize-1 {
 		sv.SelectedIdx = sv.SliceSize - 1
 		return -1
@@ -1309,7 +1304,7 @@ func (sv *SliceViewBase) MoveDown(selMode mouse.SelectModes) int {
 // MoveDownAction moves the selection down to next row, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected
 // row
-func (sv *SliceViewBase) MoveDownAction(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MoveDownAction(selMode events.SelectModes) int {
 	nidx := sv.MoveDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
@@ -1320,7 +1315,7 @@ func (sv *SliceViewBase) MoveDownAction(selMode mouse.SelectModes) int {
 
 // MoveUp moves the selection up to previous idx, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (sv *SliceViewBase) MoveUp(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MoveUp(selMode events.SelectModes) int {
 	if sv.SelectedIdx <= 0 {
 		sv.SelectedIdx = 0
 		return -1
@@ -1332,7 +1327,7 @@ func (sv *SliceViewBase) MoveUp(selMode mouse.SelectModes) int {
 
 // MoveUpAction moves the selection up to previous idx, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (sv *SliceViewBase) MoveUpAction(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MoveUpAction(selMode events.SelectModes) int {
 	nidx := sv.MoveUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
@@ -1343,7 +1338,7 @@ func (sv *SliceViewBase) MoveUpAction(selMode mouse.SelectModes) int {
 
 // MovePageDown moves the selection down to next page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (sv *SliceViewBase) MovePageDown(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MovePageDown(selMode events.SelectModes) int {
 	if sv.SelectedIdx >= sv.SliceSize-1 {
 		sv.SelectedIdx = sv.SliceSize - 1
 		return -1
@@ -1356,7 +1351,7 @@ func (sv *SliceViewBase) MovePageDown(selMode mouse.SelectModes) int {
 
 // MovePageDownAction moves the selection down to next page, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (sv *SliceViewBase) MovePageDownAction(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MovePageDownAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
@@ -1367,7 +1362,7 @@ func (sv *SliceViewBase) MovePageDownAction(selMode mouse.SelectModes) int {
 
 // MovePageUp moves the selection up to previous page, using given select mode
 // (from keyboard modifiers) -- returns newly selected idx or -1 if failed
-func (sv *SliceViewBase) MovePageUp(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MovePageUp(selMode events.SelectModes) int {
 	if sv.SelectedIdx <= 0 {
 		sv.SelectedIdx = 0
 		return -1
@@ -1380,7 +1375,7 @@ func (sv *SliceViewBase) MovePageUp(selMode mouse.SelectModes) int {
 
 // MovePageUpAction moves the selection up to previous page, using given select
 // mode (from keyboard modifiers) -- and emits select event for newly selected idx
-func (sv *SliceViewBase) MovePageUpAction(selMode mouse.SelectModes) int {
+func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
@@ -1445,7 +1440,7 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 		}
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 	} else {
-		selMode := mouse.SelectOne
+		selMode := events.SelectOne
 		em := sv.EventMgr()
 		if em != nil {
 			selMode = em.LastSelMode
@@ -1532,8 +1527,8 @@ func (sv *SliceViewBase) SelectAllIdxs() {
 // SelectIdxAction is called when a select action has been received (e.g., a
 // mouse click) -- translates into selection updates -- gets selection mode
 // from mouse event (ExtendContinuous, ExtendOne)
-func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
-	if mode == mouse.NoSelect {
+func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
+	if mode == events.NoSelect {
 		return
 	}
 	idx = min(idx, sv.SliceSize-1)
@@ -1546,7 +1541,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 	defer sv.TopUpdateEnd(wupdt)
 
 	switch mode {
-	case mouse.SelectOne:
+	case events.SelectOne:
 		if sv.IdxIsSelected(idx) {
 			if len(sv.SelectedIdxs) > 1 {
 				sv.UnselectAllIdxs()
@@ -1561,7 +1556,7 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 			sv.IdxGrabFocus(idx)
 		}
 		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
-	case mouse.ExtendContinuous:
+	case events.ExtendContinuous:
 		if len(sv.SelectedIdxs) == 0 {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
@@ -1583,19 +1578,19 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 			sv.SelectIdx(idx)
 			if idx < minIdx {
 				for cidx < minIdx {
-					r := sv.MoveDown(mouse.SelectQuiet) // just select
+					r := sv.MoveDown(events.SelectQuiet) // just select
 					cidx = r
 				}
 			} else if idx > maxIdx {
 				for cidx > maxIdx {
-					r := sv.MoveUp(mouse.SelectQuiet) // just select
+					r := sv.MoveUp(events.SelectQuiet) // just select
 					cidx = r
 				}
 			}
 			sv.IdxGrabFocus(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
-	case mouse.ExtendOne:
+	case events.ExtendOne:
 		if sv.IdxIsSelected(idx) {
 			sv.UnselectIdxAction(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), -1) // -1 = unselected
@@ -1605,13 +1600,13 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode mouse.SelectModes) {
 			sv.IdxGrabFocus(idx)
 			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
 		}
-	case mouse.Unselect:
+	case events.Unselect:
 		sv.SelectedIdx = idx
 		sv.UnselectIdxAction(idx)
-	case mouse.SelectQuiet:
+	case events.SelectQuiet:
 		sv.SelectedIdx = idx
 		sv.SelectIdx(idx)
-	case mouse.UnselectQuiet:
+	case events.UnselectQuiet:
 		sv.SelectedIdx = idx
 		sv.UnselectIdx(idx)
 	}
@@ -1742,7 +1737,7 @@ func (sv *SliceViewBase) Cut() {
 	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectIdxAction(idx, mouse.SelectOne)
+	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
 // CutIdxs copies selected indexes to clip.Board and deletes selected indexes
@@ -1854,7 +1849,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectIdxAction(idx, mouse.SelectOne)
+	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
 // Duplicate copies selected items and inserts them after current selection --
@@ -1894,10 +1889,10 @@ func (sv *SliceViewBase) DragNDropStart() {
 }
 
 // DragNDropTarget handles a drag-n-drop drop
-func (sv *SliceViewBase) DragNDropTarget(de *dnd.Event) {
+func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 	de.Target = sv.This()
-	if de.Mod == dnd.DropLink {
-		de.Mod = dnd.DropCopy // link not supported -- revert to copy
+	if de.Mod == events.DropLink {
+		de.Mod = events.DropCopy // link not supported -- revert to copy
 	}
 	idx, ok := sv.IdxFromPos(de.Where.Y)
 	if ok {
@@ -1912,17 +1907,17 @@ func (sv *SliceViewBase) DragNDropTarget(de *dnd.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods, idx int) {
+func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods, idx int) {
 	if len(*m) > 0 {
 		return
 	}
 	switch mod {
-	case dnd.DropCopy:
+	case events.DropCopy:
 		m.AddLabel("Copy (Shift=Move):")
-	case dnd.DropMove:
+	case events.DropMove:
 		m.AddLabel("Move:")
 	}
-	if mod == dnd.DropCopy {
+	if mod == events.DropCopy {
 		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.DropAssign(data.(mimedata.Mimes), idx)
@@ -1944,7 +1939,7 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod dnd.DropMods, id
 
 // Drop pops up a menu to determine what specifically to do with dropped items
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
-func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod dnd.DropMods) {
+func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
 	var men gi.Menu
 	sv.MakeDropMenu(&men, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
@@ -1955,21 +1950,21 @@ func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod dnd.DropMods) {
 func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
 	sv.DraggedIdxs = nil
 	sv.This().(SliceViewer).PasteAssign(md, idx)
-	sv.DragNDropFinalize(dnd.DropCopy)
+	sv.DragNDropFinalize(events.DropCopy)
 }
 
 // DragNDropFinalize is called to finalize actions on the Source node prior to
 // performing target actions -- mod must indicate actual action taken by the
 // target, including ignore -- ends up calling DragNDropSource if us..
-func (sv *SliceViewBase) DragNDropFinalize(mod dnd.DropMods) {
+func (sv *SliceViewBase) DragNDropFinalize(mod events.DropMods) {
 	sv.UnselectAllIdxs()
 	sv.ParentRenderWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropSource is called after target accepts the drop -- we just remove
 // elements that were moved
-func (sv *SliceViewBase) DragNDropSource(de *dnd.Event) {
-	if de.Mod != dnd.DropMove || len(sv.DraggedIdxs) == 0 {
+func (sv *SliceViewBase) DragNDropSource(de events.Event) {
+	if de.Mod != events.DropMove || len(sv.DraggedIdxs) == 0 {
 		return
 	}
 
@@ -1987,7 +1982,7 @@ func (sv *SliceViewBase) DragNDropSource(de *dnd.Event) {
 	sv.DraggedIdxs = nil
 	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.UpdateEnd(updt)
-	sv.SelectIdxAction(idx, mouse.SelectOne)
+	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
 // SaveDraggedIdxs saves selectedindexes into dragged indexes
@@ -2010,14 +2005,14 @@ func (sv *SliceViewBase) SaveDraggedIdxs(idx int) {
 }
 
 // DropBefore inserts object(s) from mime data before this node
-func (sv *SliceViewBase) DropBefore(md mimedata.Mimes, mod dnd.DropMods, idx int) {
+func (sv *SliceViewBase) DropBefore(md mimedata.Mimes, mod events.DropMods, idx int) {
 	sv.SaveDraggedIdxs(idx)
 	sv.This().(SliceViewer).PasteAtIdx(md, idx)
 	sv.DragNDropFinalize(mod)
 }
 
 // DropAfter inserts object(s) from mime data after this node
-func (sv *SliceViewBase) DropAfter(md mimedata.Mimes, mod dnd.DropMods, idx int) {
+func (sv *SliceViewBase) DropAfter(md mimedata.Mimes, mod events.DropMods, idx int) {
 	sv.SaveDraggedIdxs(idx + 1)
 	sv.This().(SliceViewer).PasteAtIdx(md, idx+1)
 	sv.DragNDropFinalize(mod)
@@ -2026,7 +2021,7 @@ func (sv *SliceViewBase) DropAfter(md mimedata.Mimes, mod dnd.DropMods, idx int)
 // DropCancel cancels the drop action e.g., preventing deleting of source
 // items in a Move case
 func (sv *SliceViewBase) DropCancel() {
-	sv.DragNDropFinalize(dnd.DropIgnore)
+	sv.DragNDropFinalize(events.DropIgnore)
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -2086,12 +2081,12 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 }
 
 // KeyInputNav supports multiple selection navigation keys
-func (sv *SliceViewBase) KeyInputNav(kt *key.Event) {
-	kf := gi.KeyFun(kt.Chord())
-	selMode := mouse.SelectModeBits(kt.Modifiers)
-	if selMode == mouse.SelectOne {
+func (sv *SliceViewBase) KeyInputNav(kt *events.Key) {
+	kf := gi.KeyFun(kt.KeyChord())
+	selMode := events.SelectModeBits(kt.Modifiers)
+	if selMode == events.SelectOne {
 		if sv.SelectMode {
-			selMode = mouse.ExtendContinuous
+			selMode = events.ExtendContinuous
 		}
 	}
 	switch kf {
@@ -2121,7 +2116,7 @@ func (sv *SliceViewBase) KeyInputNav(kt *key.Event) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputActive(kt *key.Event) {
+func (sv *SliceViewBase) KeyInputActive(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
@@ -2130,34 +2125,34 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.Event) {
 		return
 	}
 	idx := sv.SelectedIdx
-	kf := gi.KeyFun(kt.Chord())
+	kf := gi.KeyFun(kt.KeyChord())
 	switch kf {
 	// case gi.KeyFunDelete: // too dangerous
 	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx, true)
 	// 	sv.SelectMode = false
-	// 	sv.SelectIdxAction(idx, mouse.SelectOne)
+	// 	sv.SelectIdxAction(idx, events.SelectOne)
 	// 	kt.SetHandled()
 	case gi.KeyFunDuplicate:
 		nidx := sv.Duplicate()
 		sv.SelectMode = false
 		if nidx >= 0 {
-			sv.SelectIdxAction(nidx, mouse.SelectOne)
+			sv.SelectIdxAction(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
 	case gi.KeyFunInsert:
 		sv.This().(SliceViewer).SliceNewAt(idx)
 		sv.SelectMode = false
-		sv.SelectIdxAction(idx+1, mouse.SelectOne) // todo: somehow nidx not working
+		sv.SelectIdxAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
 	case gi.KeyFunInsertAfter:
 		sv.This().(SliceViewer).SliceNewAt(idx + 1)
 		sv.SelectMode = false
-		sv.SelectIdxAction(idx+1, mouse.SelectOne)
+		sv.SelectIdxAction(idx+1, events.SelectOne)
 		kt.SetHandled()
 	case gi.KeyFunCopy:
 		sv.CopyIdxs(true)
 		sv.SelectMode = false
-		sv.SelectIdxAction(idx, mouse.SelectOne)
+		sv.SelectIdxAction(idx, events.SelectOne)
 		kt.SetHandled()
 	case gi.KeyFunCut:
 		sv.CutIdxs()
@@ -2170,7 +2165,7 @@ func (sv *SliceViewBase) KeyInputActive(kt *key.Event) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputInactive(kt *key.Event) {
+func (sv *SliceViewBase) KeyInputInactive(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
 	}
@@ -2180,7 +2175,7 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.Event) {
 			return
 		}
 	}
-	kf := gi.KeyFun(kt.Chord())
+	kf := gi.KeyFun(kt.KeyChord())
 	idx := sv.SelectedIdx
 	switch {
 	case kf == gi.KeyFunMoveDown:
@@ -2215,69 +2210,69 @@ func (sv *SliceViewBase) KeyInputInactive(kt *key.Event) {
 
 func (sv *SliceViewBase) SliceViewBaseEvents() {
 	// LowPri to allow other focal widgets to capture
-	svwe.AddFunc(goosi.MouseScrollEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.ScrollEvent)
+	svwe.AddFunc(events.Scroll, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(*events.Scroll)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		me.SetHandled()
 		sbb := svv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
 		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
 	})
-	svwe.AddFunc(goosi.MouseButtonEvent, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+	svwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		// if !svv.StateIs(states.Focused) {
 		// 	svv.GrabFocus()
 		// }
-		if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
+		if me.Button == events.Left && me.Action == events.DoubleClick {
 			si := svv.SelectedIdx
 			svv.UnselectAllIdxs()
 			svv.SelectIdx(si)
 			svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
 			me.SetHandled()
 		}
-		if me.Button == mouse.Right && me.Action == mouse.Release {
+		if me.Button == events.Right && me.Action == events.Release {
 			svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
 			me.SetHandled()
 		}
 	})
 	if sv.IsDisabled() {
 		if sv.InactKeyNav {
-			svwe.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+			svwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-				kt := d.(*key.Event)
+				kt := d.(*events.Key)
 				svv.KeyInputInactive(kt)
 			})
 		}
 	} else {
-		svwe.AddFunc(goosi.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
+		svwe.AddFunc(events.KeyChord, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			kt := d.(*key.Event)
+			kt := d.(*events.Key)
 			svv.KeyInputActive(kt)
 		})
 		svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-			de := d.(*dnd.Event)
+			de := d.(events.Event)
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			switch de.Action {
-			case dnd.Start:
+			case events.Start:
 				svv.DragNDropStart()
-			case dnd.DropOnTarget:
+			case events.DropOnTarget:
 				svv.DragNDropTarget(de)
-			case dnd.DropFmSource:
+			case events.DropFmSource:
 				svv.DragNDropSource(de)
 			}
 		})
 		sg := sv.This().(SliceViewer).SliceGrid()
 		if sg != nil {
 			sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				de := d.(*dnd.FocusEvent)
+				de := d.(*events.FocusEvent)
 				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
 				switch de.Action {
-				case dnd.Enter:
+				case events.Enter:
 					sgg.ParentRenderWin().DNDSetCursor(de.Mod)
-				case dnd.Exit:
+				case events.Exit:
 					sgg.ParentRenderWin().DNDNotCursor()
-				case dnd.Hover:
+				case events.Hover:
 					// nothing here?
 				}
 			})

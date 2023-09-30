@@ -16,7 +16,7 @@ import (
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )

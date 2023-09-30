@@ -14,7 +14,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )

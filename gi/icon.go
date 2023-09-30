@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/svg"
@@ -38,10 +39,9 @@ type Icon struct {
 }
 
 // event functions for this type
-var IconEventFuncs WidgetEvents
+var IconHandlers = InitWidgetHandlers(&Icon{})
 
 func (ic *Icon) OnInit() {
-	ic.AddEvents(&IconEventFuncs)
 	ic.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
@@ -134,8 +134,7 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 	draw.Draw(sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
 }
 
-func (ic *Icon) FilterEvents() {
-	ic.Events.CopyFrom(&IconEventFuncs)
+func (ic *Icon) HandleEvent(ev events.Event) {
 }
 
 // RenderSVG renders the SVG to Pixels if needs update
@@ -163,10 +162,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 
 func (ic *Icon) Render(sc *Scene) {
 	ic.RenderSVG(sc)
-
-	wi := ic.This().(Widget)
 	if ic.PushBounds(sc) {
-		wi.FilterEvents()
 		ic.RenderChildren(sc)
 		ic.DrawIntoScene(sc)
 		ic.PopBounds(sc)

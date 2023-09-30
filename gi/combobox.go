@@ -14,8 +14,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -77,10 +76,9 @@ const (
 )
 
 // event functions for this type
-var ComboBoxEventFuncs WidgetEvents
+var ComboBoxHandlers = InitWidgetHandlers(&ComboBox{})
 
 func (cb *ComboBox) OnInit() {
-	cb.AddEvents(&ComboBoxEventFuncs)
 	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignCenter
@@ -564,29 +562,25 @@ func (cb *ComboBox) MakeItemsMenu() {
 // 	return cb.ContainsFocus() // needed for getting key events
 // }
 
-func (cb *ComboBox) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
+func (cb *ComboBox) SetTypeHandlers(we *events.Handlers) {
 	cb.ButtonEvents(we)
 	cb.KeyChordEvent(we)
 }
 
-func (cb *ComboBox) FilterEvents() {
-	cb.Events.CopyFrom(&ComboBoxEventFuncs)
+func (cb *ComboBox) HandleEvent(ev events.Event) {
 }
 
-func (cb *ComboBox) KeyChordEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.KeyChordEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
+func (cb *ComboBox) KeyChordEvent(we *events.Handlers) {
+	we.AddFunc(events.KeyChord, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		cbb := recv.(*ComboBox) // todo: embed!
 		if cbb.IsDisabled() {
 			return
 		}
-		kt := d.(*key.Event)
+		kt := d.(events.Event)
 		if KeyEventTrace {
 			fmt.Printf("ComboBox KeyChordEvent: %v\n", cbb.Path())
 		}
-		kf := KeyFun(kt.Chord())
+		kf := KeyFun(kt.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
 			kt.SetHandled()

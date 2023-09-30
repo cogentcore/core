@@ -19,9 +19,8 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -156,11 +155,9 @@ type TextField struct {
 }
 
 // event functions for this type
-var TextFieldEventFuncs WidgetEvents
+var TextFieldHandlers = InitWidgetHandlers(&TextField{})
 
 func (tf *TextField) OnInit() {
-	tf.AddEvents(&TextFieldEventFuncs)
-
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyler(func(w *WidgetBase, s *styles.Style) {
 		tf.CursorWidth.SetPx(1)
@@ -1222,7 +1219,7 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // SetCursorFromPixel finds cursor location from pixel offset relative to
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
-func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectModes) {
+func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectModes) {
 	if tf.ParentRenderWin() == nil {
 		return
 	}
@@ -1230,12 +1227,12 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 	defer tf.UpdateEndRender(updt)
 	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
-	if tf.SelectMode || selMode != mouse.SelectOne {
-		if !tf.SelectMode && selMode != mouse.SelectOne {
+	if tf.SelectMode || selMode != events.SelectOne {
+		if !tf.SelectMode && selMode != events.SelectOne {
 			tf.SelectStart = oldPos
 			tf.SelectMode = true
 		}
-		if !tf.HasFlag(NodeDragging) && selMode == mouse.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		if !tf.HasFlag(NodeDragging) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
 		} else {
 			tf.SelectRegUpdate(tf.CursorPos)
@@ -1249,16 +1246,12 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode mouse.SelectMode
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (tf *TextField) AddEvents(we *WidgetEvents) {
-	if we.HasFuncs() {
-		return
-	}
+func (tf *TextField) SetTypeHandlers(we *events.Handlers) {
 	tf.WidgetEvents(we)
 	tf.TextFieldEvents(we)
 }
 
-func (tf *TextField) FilterEvents() {
-	tf.Events.CopyFrom(&TextFieldEventFuncs)
+func (tf *TextField) HandleEvent(ev events.Event) {
 	// if tf.Sc.Type == ScDialog {
 	// todo: need dialogsig!
 	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1271,11 +1264,11 @@ func (tf *TextField) FilterEvents() {
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tf *TextField) KeyInput(kt *key.Event) {
+func (tf *TextField) KeyInput(kt *events.Key) {
 	if KeyEventTrace {
 		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 	}
-	kf := KeyFun(kt.Chord())
+	kf := KeyFun(kt.KeyChord())
 	// todo:
 	// win := tf.ParentRenderWin()
 	// if tf.Complete != nil {
@@ -1384,8 +1377,8 @@ func (tf *TextField) KeyInput(kt *key.Event) {
 	}
 }
 
-// HandleMouseEvent handles the mouse.Event
-func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
+// HandleMouseEvent handles the events.Event
+func (tf *TextField) HandleMouseEvent(me events.Event) {
 	if tf.ParentRenderWin() == nil {
 		return
 	}
@@ -1394,8 +1387,8 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	}
 	me.SetHandled()
 	switch me.Button {
-	case mouse.Left:
-		if me.Action == mouse.Press {
+	case events.Left:
+		if me.Action == events.Press {
 			if tf.IsDisabled() {
 				tf.SetSelected(!tf.StateIs(states.Selected))
 				tf.EmitSelectedSignal()
@@ -1404,7 +1397,7 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 				pt := tf.PointToRelPos(me.Pos())
 				tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			}
-		} else if me.Action == mouse.DoubleClick {
+		} else if me.Action == events.DoubleClick {
 			me.SetHandled()
 			if tf.HasSelection() {
 				if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
@@ -1416,15 +1409,15 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 				tf.SelectWord()
 			}
 		}
-	case mouse.Middle:
-		if !tf.IsDisabled() && me.Action == mouse.Press {
+	case events.Middle:
+		if !tf.IsDisabled() && me.Action == events.Press {
 			me.SetHandled()
 			pt := tf.PointToRelPos(me.Pos())
 			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
 			tf.Paste()
 		}
-	case mouse.Right:
-		if me.Action == mouse.Press {
+	case events.Right:
+		if me.Action == events.Press {
 			me.SetHandled()
 			tf.EmitContextMenuSignal()
 			tf.This().(Widget).ContextMenu()
@@ -1432,36 +1425,36 @@ func (tf *TextField) HandleMouseEvent(me *mouse.Event) {
 	}
 }
 
-func (tf *TextField) MouseDragEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseDragEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (tf *TextField) MouseDragEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseDrag, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		tff := AsTextField(recv)
 		if !tff.SelectMode {
 			tff.SelectModeToggle()
 		}
 		pt := tff.PointToRelPos(me.Pos())
-		tff.SetCursorFromPixel(float32(pt.X), mouse.SelectOne)
+		tff.SetCursorFromPixel(float32(pt.X), events.SelectOne)
 	})
 }
 
-func (tf *TextField) MouseEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseButtonEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tf *TextField) MouseEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := AsTextField(recv)
-		me := d.(*mouse.Event)
+		me := d.(events.Event)
 		tff.HandleMouseEvent(me)
 	})
 }
 
-func (tf *TextField) KeyChordEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.KeyChordEvent, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tf *TextField) KeyChordEvent(we *events.Handlers) {
+	we.AddFunc(events.KeyChord, RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		tff := AsTextField(recv)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		tff.KeyInput(kt)
 	})
 }
 
-func (tf *TextField) TextFieldEvents(we *WidgetEvents) {
+func (tf *TextField) TextFieldEvents(we *events.Handlers) {
 	tf.MouseDragEvent(we)
 	tf.MouseEvent(we)
 	tf.KeyChordEvent(we)
@@ -1633,7 +1626,6 @@ func (tf *TextField) Render(sc *Scene) {
 	}
 	wi := tf.This().(Widget)
 	if tf.PushBounds(sc) {
-		wi.FilterEvents()
 		tf.RenderTextField(sc)
 		if !tf.HasFlag(Disabled) {
 			if tf.StateIs(states.Focused) && tf.IsFocusActive() {

@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -97,27 +98,18 @@ type Widget interface {
 	// down as parBBox do the children's DoLayout.
 	ChildrenBBoxes(sc *Scene) image.Rectangle
 
-	// Render: Final rendering pass, each node is fully responsible for
+	// Render: Actual rendering pass, each node is fully responsible for
 	// calling Render on its own children, to provide maximum flexibility
 	// (see RenderChildren for default impl) -- bracket the render calls in
 	// PushBounds / PopBounds and a false from PushBounds indicates that
-	// ScBBox is empty and no rendering should occur.  Typically call
-	// AddEvents to set up connections to receive window events if
-	// visible, and disconnect if not.
+	// ScBBox is empty and no rendering should occur.
 	Render(sc *Scene)
 
-	// AddEvents: Adds all event processing functions for this type.
-	// Start with: if we.HasFuncs() { return }.
-	// Call in OnInit with the TypeEventFuncs type-specific var
-	// to ensure that all the event funcs are registered.
-	AddEvents(we *WidgetEvents)
+	// SetTypeHandlers: Adds all event processing functions for this type.
+	SetTypeHandlers(we *events.Handlers)
 
-	// FilterEvents: Initialize Event processing filter to determine
-	// which events this widget receives, called at start of Render.
-	// First method is: xx.Events.CopyFrom(TypeEventFuncs)
-	// then Ex exclude any events that should be ignored.
-	// Events are automatically excluded for invisible widgets.
-	FilterEvents()
+	// HandleEvent calls registered event Listener functions
+	HandleEvent(ev events.Event)
 
 	// FocusChanged is called on node for changes in focus -- see the
 	// FocusChanges values.
@@ -220,8 +212,9 @@ type WidgetBase struct {
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
 
-	// filter and map of event processing functions that determine which events and how they are processed for this widget
-	Events WidgetEvents `desc:"filter and map of event processing functions that determine which events and how they are processed for this widget"`
+	// Listeners provides to add arbitrary functions to listen to particular event types.
+	// These are called first before the type-general event Handlers.
+	Listeners events.Listeners
 
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
@@ -243,10 +236,9 @@ type WidgetBase struct {
 }
 
 // event functions for this type
-var WidgetEventFuncs WidgetEvents
+var WidgetHandlers = InitWidgetHandlers(&WidgetBase{})
 
 func (wb *WidgetBase) OnInit() {
-	wb.AddEvents(&WidgetEventFuncs)
 }
 
 // AsWidget returns the given Ki object
@@ -365,7 +357,7 @@ func (wb *WidgetBase) ParentRenderWin() *RenderWin {
 }
 
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.HasFlag(Invisible) {
+	if wb == nil || wb.This() == nil || wb.Is(Invisible) {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {

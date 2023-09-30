@@ -29,9 +29,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
 	"goki.dev/glop/indent"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
@@ -167,7 +166,7 @@ type TextView struct {
 }
 
 // event functions for this type
-var TextViewEventFuncs WidgetEvents
+var TextViewHandlers = InitWidgetHandlers(&TextView{})
 
 // NewTextViewLayout adds a new layout with textview
 // to given parent node, with given name.  Layout adds "-lay" suffix.
@@ -180,7 +179,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 }
 
 func (tv *TextView) OnInit() {
-	tv.AddEvents(&TextViewEventFuncs)
+	tv.SetTypeHandlers(&TextViewListen)
 	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
 		tv.CursorWidth.SetPx(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
@@ -1792,7 +1791,7 @@ func (tv *TextView) ISearchStart() {
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *TextView) ISearchKeyInput(kt *key.Event) {
+func (tv *TextView) ISearchKeyInput(kt *events.Key) {
 	r := kt.Rune
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
@@ -2072,7 +2071,7 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *TextView) QReplaceKeyInput(kt *key.Event) {
+func (tv *TextView) QReplaceKeyInput(kt *events.Key) {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 
@@ -2086,7 +2085,7 @@ func (tv *TextView) QReplaceKeyInput(kt *key.Event) {
 		if !tv.QReplaceNextMatch() {
 			tv.QReplaceCancel()
 		}
-	case kt.Rune == 'q' || kt.Chord() == "ReturnEnter":
+	case kt.Rune == 'q' || kt.KeyChord() == "ReturnEnter":
 		tv.QReplaceCancel()
 	case kt.Rune == '!':
 		tv.QReplaceReplaceAll(tv.QReplace.Pos)
@@ -2757,7 +2756,7 @@ func (tv *TextView) Lookup() {
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
-func (tv *TextView) ISpellKeyInput(kt *key.Event) {
+func (tv *TextView) ISpellKeyInput(kt *events.Key) {
 	if !tv.Buf.IsSpellEnabled(tv.CursorPos) {
 		return
 	}
@@ -2765,7 +2764,7 @@ func (tv *TextView) ISpellKeyInput(kt *key.Event) {
 	isDoc := tv.Buf.Info.Cat == filecat.Doc
 	tp := tv.CursorPos
 
-	kf := gi.KeyFun(kt.Chord())
+	kf := gi.KeyFun(kt.KeyChord())
 	switch kf {
 	case gi.KeyFunMoveUp:
 		if isDoc {
@@ -4039,7 +4038,7 @@ func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode mouse.SelectModes) {
+func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
 	oldPos := tv.CursorPos
 	if newPos == oldPos {
 		return
@@ -4048,7 +4047,7 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode m
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 
-	if !tv.SelectMode && selMode == mouse.ExtendContinuous {
+	if !tv.SelectMode && selMode == events.ExtendContinuous {
 		if tv.SelectReg == textbuf.RegionNil {
 			tv.SelectStart = tv.CursorPos
 		}
@@ -4060,13 +4059,13 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode m
 	}
 
 	tv.SetCursor(newPos)
-	if tv.SelectMode || selMode != mouse.SelectOne {
-		if !tv.SelectMode && selMode != mouse.SelectOne {
+	if tv.SelectMode || selMode != events.SelectOne {
+		if !tv.SelectMode && selMode != events.SelectOne {
 			tv.SelectMode = true
 			tv.SelectStart = newPos
 			tv.SelectRegUpdate(tv.CursorPos)
 		}
-		if !tv.IsDragging() && selMode == mouse.SelectOne {
+		if !tv.IsDragging() && selMode == events.SelectOne {
 			ln := tv.CursorPos.Ln
 			ch := tv.CursorPos.Ch
 			if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
@@ -4096,7 +4095,7 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode m
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
-func (tv *TextView) ShiftSelect(kt *key.Event) {
+func (tv *TextView) ShiftSelect(kt *events.Key) {
 	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		if tv.SelectReg == textbuf.RegionNil {
@@ -4109,7 +4108,7 @@ func (tv *TextView) ShiftSelect(kt *key.Event) {
 
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
-func (tv *TextView) ShiftSelectExtend(kt *key.Event) {
+func (tv *TextView) ShiftSelectExtend(kt *events.Key) {
 	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
@@ -4118,11 +4117,11 @@ func (tv *TextView) ShiftSelectExtend(kt *key.Event) {
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tv *TextView) KeyInput(kt *key.Event) {
+func (tv *TextView) KeyInput(kt *events.Key) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
-	kf := gi.KeyFun(kt.Chord())
+	kf := gi.KeyFun(kt.KeyChord())
 	win := tv.ParentRenderWin()
 	tv.ClearScopelights()
 
@@ -4470,7 +4469,7 @@ func (tv *TextView) KeyInput(kt *key.Event) {
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
-func (tv *TextView) KeyInputInsertBra(kt *key.Event) {
+func (tv *TextView) KeyInputInsertBra(kt *events.Key) {
 	bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 	defer tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 	pos := tv.CursorPos
@@ -4520,7 +4519,7 @@ func (tv *TextView) KeyInputInsertBra(kt *key.Event) {
 }
 
 // KeyInputInsertRune handles the insertion of a typed character
-func (tv *TextView) KeyInputInsertRune(kt *key.Event) {
+func (tv *TextView) KeyInputInsertRune(kt *events.Key) {
 	kt.SetHandled()
 	if tv.ISearch.On {
 		tv.CancelComplete()
@@ -4631,8 +4630,8 @@ func (tv *TextView) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	return tl, ok
 }
 
-// MouseEvent handles the mouse.Event
-func (tv *TextView) MouseEvent(me *mouse.Event) {
+// MouseEvent handles the events.Event
+func (tv *TextView) MouseEvent(me events.Event) {
 	if !tv.StateIs(states.Focused) {
 		tv.GrabFocus()
 	}
@@ -4644,15 +4643,15 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 	pt := tv.PointToRelPos(me.Pos())
 	newPos := tv.PixelToCursor(pt)
 	switch me.Button {
-	case mouse.Left:
-		if me.Action == mouse.Press {
+	case events.Left:
+		if me.Action == events.Press {
 			me.SetHandled()
 			if _, got := tv.OpenLinkAt(newPos); got {
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 				tv.SavePosHistory(tv.CursorPos)
 			}
-		} else if me.Action == mouse.DoubleClick {
+		} else if me.Action == events.DoubleClick {
 			me.SetHandled()
 			if tv.HasSelection() {
 				if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
@@ -4673,15 +4672,15 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 			}
 			tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 		}
-	case mouse.Middle:
-		if !tv.IsDisabled() && me.Action == mouse.Press {
+	case events.Middle:
+		if !tv.IsDisabled() && me.Action == events.Press {
 			me.SetHandled()
 			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.SavePosHistory(tv.CursorPos)
 			tv.Paste()
 		}
-	case mouse.Right:
-		if me.Action == mouse.Press {
+	case events.Right:
+		if me.Action == events.Press {
 			me.SetHandled()
 			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.EmitContextMenuSignal()
@@ -4696,9 +4695,9 @@ func (tv *TextView) MouseEvent(me *mouse.Event) {
 // }
 
 // MouseMoveEvent
-func (tv *TextView) MouseMoveEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (tv *TextView) MouseMoveEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseMove, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		tvv := recv.Embed(TypeTextView).(*TextView)
 		pt := tv.PointToRelPos(me.Pos())
@@ -4728,9 +4727,9 @@ func (tv *TextView) MouseMoveEvent(we *WidgetEvents) {
 	})
 }
 
-func (tv *TextView) MouseDragEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseDragEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*mouse.Event)
+func (tv *TextView) MouseDragEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseDrag, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		me := d.(events.Event)
 		me.SetHandled()
 		txf := recv.Embed(TypeTextView).(*TextView)
 		if !txf.SelectMode {
@@ -4738,17 +4737,17 @@ func (tv *TextView) MouseDragEvent(we *WidgetEvents) {
 		}
 		pt := txf.PointToRelPos(me.Pos())
 		newPos := txf.PixelToCursor(pt)
-		txf.SetCursorFromMouse(pt, newPos, mouse.SelectOne)
+		txf.SetCursorFromMouse(pt, newPos, events.SelectOne)
 	})
 }
 
-func (tv *TextView) MouseFocusEvent(we *WidgetEvents) {
-	we.AddFunc(goosi.MouseFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+func (tv *TextView) MouseFocusEvent(we *events.Handlers) {
+	we.AddFunc(events.MouseEnter, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		if txf.IsDisabled() {
 			return
 		}
-		me := d.(*mouse.Event)
+		me := d.(events.Event)
 		me.SetHandled()
 		// TODO: is this needed?
 		txf.RefreshIfNeeded()
@@ -4756,19 +4755,19 @@ func (tv *TextView) MouseFocusEvent(we *WidgetEvents) {
 }
 
 // TextViewEvents sets connections between mouse and key events and actions
-func (tv *TextView) TextViewEvents(we *WidgetEvents) {
+func (tv *TextView) TextViewEvents(we *events.Handlers) {
 	tv.HoverTooltipEvent(we)
 	tv.MouseMoveEvent(we)
 	tv.MouseDragEvent(we)
-	we.AddFunc(goosi.MouseButtonEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
-		me := d.(*mouse.Event)
+		me := d.(events.Event)
 		txf.MouseEvent(me)
 	})
 	tv.MouseFocusEvent(we)
-	we.AddFunc(goosi.KeyChordEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	we.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
-		kt := d.(*key.Event)
+		kt := d.(*events.Key)
 		txf.KeyInput(kt)
 	})
 
@@ -4890,10 +4889,7 @@ func (tv *TextView) Render(vp *Scene) {
 		}
 	}
 
-	wi := tv.This().(Widget)
-
 	if tv.PushBounds() {
-		wi.FilterEvents()
 		tv.RenderAllLinesInBounds()
 		if tv.ScrollToCursorOnRender {
 			tv.ScrollToCursorOnRender = false
@@ -4915,8 +4911,8 @@ func (tv *TextView) Render(vp *Scene) {
 	}
 }
 
-// AddEvents indirectly sets connections between mouse and key events and actions
-func (tv *TextView) AddEvents() {
+// SetTypeHandlers indirectly sets connections between mouse and key events and actions
+func (tv *TextView) SetTypeHandlers() {
 	tv.TextViewEvents()
 }
 

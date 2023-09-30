@@ -133,40 +133,30 @@ func (i *ActionTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ButtonFlagsValues = []ButtonFlags{21, 22, 23}
+var _ButtonFlagsValues = []ButtonFlags{15}
 
 // ButtonFlagsN is the highest valid value
 // for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 24
+const ButtonFlagsN ButtonFlags = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ButtonFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ButtonFlagCheckable-(21)]
-	_ = x[ButtonFlagChecked-(22)]
-	_ = x[ButtonFlagMenu-(23)]
+	_ = x[ButtonFlagMenu-(15)]
 }
 
 var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagCheckable`: 21,
-	`buttonflagcheckable`: 21,
-	`ButtonFlagChecked`:   22,
-	`buttonflagchecked`:   22,
-	`ButtonFlagMenu`:      23,
-	`buttonflagmenu`:      23,
+	`ButtonFlagMenu`: 15,
+	`buttonflagmenu`: 15,
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	21: `button is checkable -- enables display of check control`,
-	22: `button is checked`,
-	23: `Menu flag means that the button is a menu item`,
+	15: `Menu flag means that the button is a menu item`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
-	21: `ButtonFlagCheckable`,
-	22: `ButtonFlagChecked`,
-	23: `ButtonFlagMenu`,
+	15: `ButtonFlagMenu`,
 }
 
 // String returns the string representation
@@ -322,122 +312,6 @@ func (i ButtonFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ButtonFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _ButtonSignalsValues = []ButtonSignals{0, 1, 2, 3}
-
-// ButtonSignalsN is the highest valid value
-// for type ButtonSignals, plus one.
-const ButtonSignalsN ButtonSignals = 4
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ButtonSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[ButtonClicked-(0)]
-	_ = x[ButtonPressed-(1)]
-	_ = x[ButtonReleased-(2)]
-	_ = x[ButtonToggled-(3)]
-}
-
-var _ButtonSignalsNameToValueMap = map[string]ButtonSignals{
-	`ButtonClicked`:  0,
-	`buttonclicked`:  0,
-	`ButtonPressed`:  1,
-	`buttonpressed`:  1,
-	`ButtonReleased`: 2,
-	`buttonreleased`: 2,
-	`ButtonToggled`:  3,
-	`buttontoggled`:  3,
-}
-
-var _ButtonSignalsDescMap = map[ButtonSignals]string{
-	0: `ButtonClicked is the main signal to check for normal button activation -- button pressed down and up`,
-	1: `Pressed means button pushed down but not yet up`,
-	2: `Released means mouse button was released - typically look at ButtonClicked instead of this one`,
-	3: `Toggled means the checked / unchecked state was toggled -- only sent for buttons with Checkable flag set`,
-}
-
-var _ButtonSignalsMap = map[ButtonSignals]string{
-	0: `ButtonClicked`,
-	1: `ButtonPressed`,
-	2: `ButtonReleased`,
-	3: `ButtonToggled`,
-}
-
-// String returns the string representation
-// of this ButtonSignals value.
-func (i ButtonSignals) String() string {
-	if str, ok := _ButtonSignalsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the ButtonSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ButtonSignals) SetString(s string) error {
-	if val, ok := _ButtonSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ButtonSignalsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ButtonSignals")
-}
-
-// Int64 returns the ButtonSignals value as an int64.
-func (i ButtonSignals) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ButtonSignals value from an int64.
-func (i *ButtonSignals) SetInt64(in int64) {
-	*i = ButtonSignals(in)
-}
-
-// Desc returns the description of the ButtonSignals value.
-func (i ButtonSignals) Desc() string {
-	if str, ok := _ButtonSignalsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// ButtonSignalsValues returns all possible values
-// for the type ButtonSignals.
-func ButtonSignalsValues() []ButtonSignals {
-	return _ButtonSignalsValues
-}
-
-// Values returns all possible values
-// for the type ButtonSignals.
-func (i ButtonSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ButtonSignalsValues))
-	for i, d := range _ButtonSignalsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ButtonSignals.
-func (i ButtonSignals) IsValid() bool {
-	_, ok := _ButtonSignalsMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ButtonSignals) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ButtonSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
@@ -3138,30 +3012,30 @@ func (i *TextFieldSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextFieldFlagsValues = []TextFieldFlags{21}
+var _TextFieldFlagsValues = []TextFieldFlags{15}
 
 // TextFieldFlagsN is the highest valid value
 // for type TextFieldFlags, plus one.
-const TextFieldFlagsN TextFieldFlags = 22
+const TextFieldFlagsN TextFieldFlags = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TextFieldFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TextFieldFocusActive-(21)]
+	_ = x[TextFieldFocusActive-(15)]
 }
 
 var _TextFieldFlagsNameToValueMap = map[string]TextFieldFlags{
-	`TextFieldFocusActive`: 21,
-	`textfieldfocusactive`: 21,
+	`TextFieldFocusActive`: 15,
+	`textfieldfocusactive`: 15,
 }
 
 var _TextFieldFlagsDescMap = map[TextFieldFlags]string{
-	21: `TextFieldFocusActive indicates that the focus is active in this field`,
+	15: `TextFieldFocusActive indicates that the focus is active in this field`,
 }
 
 var _TextFieldFlagsMap = map[TextFieldFlags]string{
-	21: `TextFieldFocusActive`,
+	15: `TextFieldFocusActive`,
 }
 
 // String returns the string representation
