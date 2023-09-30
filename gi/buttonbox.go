@@ -22,7 +22,7 @@ import (
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
 //
-//goki:embed
+//goki:embedder
 type ButtonBox struct {
 	WidgetBase
 
@@ -39,11 +39,19 @@ type ButtonBox struct {
 	// ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button box, when any button is updated -- the signal type is the index of the selected item, and the data is the label"`
 }
 
-// event functions for this type
-var ButtonBoxHandlers = InitWidgetHandlers(&ButtonBox{})
+func (bb *ButtonBox) CopyFieldsFrom(frm any) {
+	fr := frm.(*ButtonBox)
+	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	bb.Items = slices.Clone(fr.Items)
+}
 
 func (bb *ButtonBox) OnInit() {
-	bb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	bb.WidgetHandlers()
+	bb.ButtonBoxStyles()
+}
+
+func (bb *ButtonBox) ButtonBoxStyles() {
+	bb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
@@ -52,12 +60,6 @@ func (bb *ButtonBox) OnInit() {
 		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		s.Color = colors.Scheme.OnSurface
 	})
-}
-
-func (bb *ButtonBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*ButtonBox)
-	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	bb.Items = slices.Clone(fr.Items)
 }
 
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.

@@ -53,7 +53,7 @@ func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 		if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
 			label := child.(*gi.Label)
 			label.Redrawable = true
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.AlignH = styles.AlignLeft
 			})
 		}

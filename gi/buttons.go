@@ -128,18 +128,6 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	return bb.This().(ButtonWidget)
 }
 
-// OnClicked calls the given function when the button is clicked,
-// which is the default / standard way of activating the button
-func (bb *ButtonBase) OnClicked(fun func()) ButtonWidget {
-	// bb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(ButtonClicked) {
-	// 		fun()
-	// 	}
-	// })
-	return bb.This().(ButtonWidget)
-}
-
-//
 // // ButtonPress sets the button in the down state -- mouse clicked down but
 // // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
 // // ButtonClicked is down and up
@@ -161,7 +149,7 @@ func (bb *ButtonBase) OnClicked(fun func()) ButtonWidget {
 
 // BaseButtonClicked
 func (bb *ButtonBase) BaseButtonClicked() {
-	if bb.IsDisabled() {
+	if bb.StateIs(states.Disabled) {
 		return
 	}
 	updt := bb.UpdateStart()
@@ -250,47 +238,41 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 	ic.SetIcon(icnm)
 }
 
-// MouseEvents handles button MouseEvent
-func (bb *ButtonBase) MouseEvent(we *events.Handlers) {
-	we.Add(events.Click, func(recv any, ev events.Event) {
-		bw := recv.(ButtonWidget)
-		bbb := bw.AsButtonBase()
-		bbb.WidgetOnMouseEvent(ev)
-		if ev.MouseButton() == events.Left {
-			bb.BaseButtonClicked()
-		}
-	})
-}
+//////////////////////////////////////////////////////////////////
+//		Events
 
-// KeyChordEvent handles button KeyChord events
-func (bb *ButtonBase) KeyChordEvent(we *events.Handlers) {
-	we.Add(events.KeyChord, func(recv any, ev events.Event) {
-		bw := recv.(ButtonWidget)
-		bbb := bw.AsButtonBase()
-		if bbb.IsDisabled() {
+// ClickOnEnterSpace adds key event handler for Enter or Space
+// to generate a Click action
+func (bb *ButtonBase) ClickOnEnterSpace() {
+	bb.On(events.KeyChord, func(e events.Event) {
+		if bb.StateIs(states.Disabled) {
 			return
 		}
 		if KeyEventTrace {
 			fmt.Printf("Button KeyChordEvent: %v\n", bbb.Path())
 		}
-		kf := KeyFun(ev.KeyChord())
+		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunEnter || ev.KeyRune() == ' ' {
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			ev.SetHandled()
-			bbb.BaseButtonClicked()
+			e.SetHandled()   // todo ?
+			bb.SendMeClick() // todo: write this
 			// }
 		}
 	})
 }
 
-func (bb *ButtonBase) HoverTooltipEvent(we *events.Handlers) {
-	we.Add(events.LongHoverStart, func(recv any, ev events.Event) {
-		bw := recv.(ButtonWidget)
-		bbb := bw.AsButtonBase()
-		_ = bbb
-		tt := bbb.Tooltip
-		if bbb.Shortcut != "" {
-			tt = "[ " + bbb.Shortcut.Shortcut() + " ]: " + tt
+func (bb *ButtonBase) LongHoverTooltip() {
+	bb.On(events.LongHoverStart, func(e events.Event) {
+		if bb.StateIs(states.Disabled) {
+			return
+		}
+		if bb.Tooltip == "" {
+			return
+		}
+		e.SetHandled()
+		tt := bb.Tooltip
+		if bb.Shortcut != "" {
+			tt = "[ " + bb.Shortcut.Shortcut() + " ]: " + tt
 		}
 		// todo:
 		// if tt != "" {
@@ -304,22 +286,10 @@ func (bb *ButtonBase) HoverTooltipEvent(we *events.Handlers) {
 	})
 }
 
-var ButtonBaseHandlers = InitWidgetHandlers(&ButtonBase{})
-
-func (bb *ButtonBase) SetTypeHandlers(we *events.Handlers) {
-	bb.ButtonEvents(we)
-}
-
-func (bb *ButtonBase) ButtonEvents(we *events.Handlers) {
-	bb.WidgetEvents(we)
-	bb.HoverTooltipEvent(we)
-	bb.MouseEvent(we)
-	bb.KeyChordEvent(we)
-}
-
-func (bb *ButtonBase) HandleEvent(ev events.Event) {
-	bb.Listeners.Call(ev)
-	ButtonBaseHandlers.Call(bb.This(), ev)
+func (bb *ButtonBase) ButtonBaseHandlers() {
+	bb.WidgetHandlers()
+	bb.LongHoverTooltip()
+	bb.ClickOnEnterSpace()
 }
 
 ///////////////////////////////////////////////////////////
@@ -333,10 +303,6 @@ type ButtonWidget interface {
 	// AsButtonBase gets the button base for most basic functions -- reduces
 	// interface size.
 	AsButtonBase() *ButtonBase
-
-	// ButtonRelease is called for release of button -- this is where buttons
-	// actually differ in functionality.
-	ButtonRelease()
 
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
@@ -352,10 +318,6 @@ type ButtonWidget interface {
 	// Use this for optimized auto-updating based on nature of changes made.
 	// Otherwise, can set Icon directly followed by ReConfig()
 	SetIcon(iconName icons.Icon) ButtonWidget
-
-	// OnClicked calls the given function when the button is clicked,
-	// which is the default / standard way of activating the button
-	OnClicked(fun func()) ButtonWidget
 }
 
 ///////////////////////////////////////////////////////////
@@ -450,7 +412,7 @@ func (bb *ButtonBase) Destroy() {
 // in Qt Quick -- by default it puts the icon to the left and the text to the
 // right
 //
-//goki:embed
+//goki:embedder
 type Button struct {
 	ButtonBase
 
@@ -492,7 +454,12 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	bt.ButtonBaseHandlers()
+	bt.ButtonStyles()
+}
+
+func (bt *Button) ButtonStyles() {
+	bt.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Margin = styles.BoxShadowMargin(BoxShadow1).ToValues()
@@ -546,29 +513,29 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	_, wb := AsWidget(child)
 	switch wb.Name() {
 	case "icon":
-		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "space":
-		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
-		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
 		})
 	case "ind-stretch":
-		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
-		wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
@@ -583,11 +550,6 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-func (bb *Button) HandleEvent(ev events.Event) {
-	bb.Listeners.Call(ev)
-	ButtonBaseHandlers.Call(bb.This(), ev)
-}
-
 ///////////////////////////////////////////////////////////
 // CheckBox
 
@@ -599,11 +561,19 @@ type CheckBox struct {
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-// event functions for this type
-var CheckBoxHandlers = InitWidgetHandlers(&CheckBox{})
+func (cb *CheckBox) CopyFieldsFrom(frm any) {
+	fr := frm.(*CheckBox)
+	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.IconOff = fr.IconOff
+}
 
 func (cb *CheckBox) OnInit() {
-	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	cb.ButtonBaseHandlers()
+	cb.CheckBoxStyles()
+}
+
+func (cb *CheckBox) CheckBoxStyles() {
+	cb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
@@ -630,7 +600,7 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon0", "icon1":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
@@ -638,11 +608,11 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "label":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
@@ -651,35 +621,20 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (cb *CheckBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*CheckBox)
-	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	cb.IconOff = fr.IconOff
-}
-
 // CheckBoxWidget interface
 
-func (cb *CheckBox) AsButtonBase() *ButtonBase {
-	return &(cb.ButtonBase)
-}
+// todo: base widget will set checked state automatically, setstyle, updaterender
 
-func (cb *CheckBox) HandleEvent(ev events.Event) {
-}
-
-// OnClicked calls the given function when the button is clicked,
-// which is the default / standard way of activating the button
-func (cb *CheckBox) OnClicked(fun func()) ButtonWidget {
-	// cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(ButtonToggled) {
-	// 		fun()
-	// 	}
-	// })
-	return cb.This().(ButtonWidget)
-}
-
-func (cb *CheckBox) ButtonRelease() {
-	cb.BaseButtonRelease()
-}
+// // OnClicked calls the given function when the button is clicked,
+// // which is the default / standard way of activating the button
+// func (cb *CheckBox) OnClicked(fun func()) ButtonWidget {
+// 	// cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 	// 	if sig == int64(ButtonToggled) {
+// 	// 		fun()
+// 	// 	}
+// 	// })
+// 	return cb.This().(ButtonWidget)
+// }
 
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
 // states, and updates button

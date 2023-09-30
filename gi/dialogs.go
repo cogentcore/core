@@ -72,7 +72,7 @@ type Dialog struct {
 }
 
 func (dlg *Dialog) StyleFrame() {
-	dlg.Frame.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	dlg.Frame.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Color = colors.Scheme.OnSurface
@@ -97,7 +97,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 		case "title":
 			title := child.(*Label)
 			title.Type = LabelHeadlineSmall
-			title.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			title.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.MaxWidth.SetPx(-1)
 				s.AlignH = styles.AlignCenter
 				s.AlignV = styles.AlignTop
@@ -106,7 +106,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 		case "prompt":
 			prompt := child.(*Label)
 			prompt.Type = LabelBodyMedium
-			prompt.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			prompt.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Text.WhiteSpace = styles.WhiteSpaceNormal
 				s.MaxWidth.SetPx(-1)
 				s.Width.SetCh(30)
@@ -117,7 +117,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 			})
 		case "buttons":
 			bts := child.(*Layout)
-			bts.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			bts.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				bts.Spacing.SetPx(8 * Prefs.DensityMul())
 				s.SetStretchMaxWidth()
 			})

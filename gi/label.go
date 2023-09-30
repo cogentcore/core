@@ -23,7 +23,7 @@ import (
 // signal.  The default white-space option is 'pre' -- set to 'normal' or
 // other options to get word-wrapping etc.
 //
-//goki:embed
+//goki:embedder
 type Label struct {
 	WidgetBase
 
@@ -50,6 +50,14 @@ type Label struct {
 
 	// current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg
 	CurBackgroundColor color.RGBA `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
+}
+
+func (lb *Label) CopyFieldsFrom(frm any) {
+	fr := frm.(*Label)
+	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	lb.Text = fr.Text
+	lb.Selectable = fr.Selectable
+	lb.Redrawable = fr.Redrawable
 }
 
 // LabelTypes is an enum containing the different
@@ -108,12 +116,14 @@ const (
 	LabelLabelSmall
 )
 
-// event functions for this type
-var LabelHandlers = InitWidgetHandlers(&Label{})
-
 func (lb *Label) OnInit() {
+	lb.WidgetHandlers()
+	lb.LabelStyles()
+}
+
+func (lb *Label) LabelStyles() {
 	lb.Type = LabelLabelLarge
-	lb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	lb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
@@ -207,16 +217,9 @@ func (lb *Label) OnInit() {
 	})
 }
 
+// todo: parent should do this:
 func (lb *Label) OnAdd() {
 	lb.Selectable = lb.ParentByType(ButtonBaseType, ki.Embeds) == nil
-}
-
-func (lb *Label) CopyFieldsFrom(frm any) {
-	fr := frm.(*Label)
-	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	lb.Text = fr.Text
-	lb.Selectable = fr.Selectable
-	lb.Redrawable = fr.Redrawable
 }
 
 // SetText sets the text and updates the rendered version.
@@ -279,41 +282,37 @@ func (lb *Label) OpenLink(tl *paint.TextLink) {
 	// lb.LinkSig.Emit(lb.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
-func (lb *Label) SetTypeHandlers(we *events.Handlers) {
-	lb.WidgetEvents(we)
-	lb.LabelEvents(we)
+// func (lb *Label) HandleEvent(ev events.Event) {
+// 	// hasLinks := len(lb.TextRender.Links) > 0
+// 	// if !hasLinks {
+// 	// 	lb.Events.Ex(events.MouseMove)
+// 	// }
+// }
+
+func (lb *Label) LabelHandlers() {
+	lb.LongHoverURL()
+	lb.ClickOnURL()
+	lb.LinkCursor()
 }
 
-func (lb *Label) HandleEvent(ev events.Event) {
-	hasLinks := len(lb.TextRender.Links) > 0
-	if !hasLinks {
-		lb.Events.Ex(events.MouseMove)
-	}
-}
-
-func (lb *Label) LabelEvents(we *events.Handlers) {
-	lb.HoverEvent(we)
-	lb.MouseEvent(we)
-	lb.MouseMoveEvent(we)
-}
-
-func (lb *Label) HoverEvent(we *events.Handlers) {
-	we.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		llb := AsLabel(recv)
-		hasLinks := len(lb.TextRender.Links) > 0
-		if hasLinks {
-			pos := llb.RenderPos
-			for ti := range llb.TextRender.Links {
-				tl := &llb.TextRender.Links[ti]
-				tlb := tl.Bounds(&llb.TextRender, pos)
-				if me.Where.In(tlb) {
-					PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
-					me.SetHandled()
-					return
-				}
-			}
+func (lb *Label) LongHoverURL() {
+	lb.On(events.LongHoverStart, func(e events.Event) {
+		if lb.StateIs(states.Disabled) {
+			return
 		}
+		// hasLinks := len(lb.TextRender.Links) > 0
+		// if hasLinks {
+		// 	pos := llb.RenderPos
+		// 	for ti := range llb.TextRender.Links {
+		// 		tl := &llb.TextRender.Links[ti]
+		// 		tlb := tl.Bounds(&llb.TextRender, pos)
+		// 		if me.Where.In(tlb) {
+		// 			PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
+		// 			me.SetHandled()
+		// 			return
+		// 		}
+		// 	}
+		// }
 		/*
 			todo:
 			if llb.Tooltip != "" {
@@ -328,46 +327,43 @@ func (lb *Label) HoverEvent(we *events.Handlers) {
 	})
 }
 
-func (lb *Label) MouseEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		llb := AsLabel(recv)
-		hasLinks := len(llb.TextRender.Links) > 0
-		pos := llb.RenderPos
-		if me.Action == events.Press && me.Button == events.Left && hasLinks {
-			for ti := range llb.TextRender.Links {
-				tl := &llb.TextRender.Links[ti]
-				tlb := tl.Bounds(&llb.TextRender, pos)
-				if me.Where.In(tlb) {
-					llb.OpenLink(tl)
-					me.SetHandled()
-					return
-				}
+func (lb *Label) ClickOnURL() {
+	lb.On(events.Click, func(e events.Event) {
+		if bb.StateIs(states.Disabled) {
+			return
+		}
+		hasLinks := len(lb.TextRender.Links) > 0
+		if !hasLinks {
+			return
+		}
+		pos := lb.RenderPos
+		for ti := range lb.TextRender.Links {
+			tl := &lb.TextRender.Links[ti]
+			tlb := tl.Bounds(&lb.TextRender, pos)
+			if me.Where.In(tlb) {
+				lb.OpenLink(tl)
+				me.SetHandled()
+				return
 			}
 		}
-		if me.Action == events.DoubleClick && me.Button == events.Left && llb.Selectable {
-			updt := llb.UpdateStart()
-			llb.SetSelected(!llb.StateIs(states.Selected))
-			llb.EmitSelectedSignal()
-			llb.UpdateEnd(updt)
+	})
+	lb.On(events.DoubleClick, func(e events.Event) {
+		if !lb.StateIs(states.Selectable) || bb.StateIs(states.Disabled) {
+			return
+
 		}
-		if me.Action == events.Release && me.Button == events.Right {
-			me.SetHandled()
-			llb.EmitContextMenuSignal()
-			llb.This().(Widget).ContextMenu()
-		}
+		updt := lb.UpdateStart()
+		lb.SetSelected(!lb.StateIs(states.Selected))
+		lb.UpdateEnd(updt)
 	})
 }
 
-func (lb *Label) MouseMoveEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseMove, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		me.SetHandled()
-		llb := AsLabel(recv)
-		pos := llb.RenderPos
+func (lb *Label) LinkCursor() {
+	lb.On(events.MouseMove, func(e events.Event) {
+		pos := lb.RenderPos
 		inLink := false
-		for _, tl := range llb.TextRender.Links {
-			tlb := tl.Bounds(&llb.TextRender, pos)
+		for _, tl := range lb.TextRender.Links {
+			tlb := tl.Bounds(&lb.TextRender, pos)
 			if me.Where.In(tlb) {
 				inLink = true
 				break

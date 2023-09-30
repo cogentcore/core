@@ -65,7 +65,7 @@ type MapView struct {
 func (mv *MapView) OnInit() {
 	mv.ShowToolBar = true
 	mv.Lay = gi.LayoutVert
-	mv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	mv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		mv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -78,7 +78,7 @@ func (mv *MapView) OnChildAdded(child ki.Ki) {
 			mg := child.(*gi.Frame)
 			mg.Lay = gi.LayoutGrid
 			mg.Stripes = gi.RowStripes
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.SetMinPrefHeight(units.Em(1.5))
 				s.SetMinPrefWidth(units.Em(10))

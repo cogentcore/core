@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -60,6 +61,17 @@ type ComboBox struct {
 	MaxLength int `desc:"maximum label length (in runes)"`
 }
 
+func (cb *ComboBox) CopyFieldsFrom(frm any) {
+	fr := frm.(*ComboBox)
+	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.Editable = fr.Editable
+	cb.CurVal = fr.CurVal
+	cb.CurIndex = fr.CurIndex
+	cb.Items = fr.Items
+	cb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
+	cb.MaxLength = fr.MaxLength
+}
+
 // ComboBoxTypes is an enum containing the
 // different possible types of combo boxes
 type ComboBoxTypes int //enums:enum
@@ -75,11 +87,18 @@ const (
 	ComboBoxOutlined
 )
 
-// event functions for this type
-var ComboBoxHandlers = InitWidgetHandlers(&ComboBox{})
-
 func (cb *ComboBox) OnInit() {
-	cb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	cb.ComboBoxHandlers()
+	cb.ComboBoxStyles()
+}
+
+func (cb *ComboBox) ComboBoxHandlers() {
+	cb.ButtonBaseHandlers()
+	cb.ComboBoxKeys()
+}
+
+func (cb *ComboBox) ComboBoxStyles() {
+	cb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
@@ -126,12 +145,12 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "label":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
@@ -144,7 +163,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 			} else {
 				text.Type = TextFieldOutlined
 			}
-			text.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			text.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Set()
 				if cb.MaxLength > 0 {
@@ -152,7 +171,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "ind-stretch":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				if cb.Editable {
 					s.Width.SetPx(0)
 				} else {
@@ -160,23 +179,12 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "indicator":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetEm(1.5)
 				s.AlignV = styles.AlignMiddle
 			})
 		}
 	}
-}
-
-func (cb *ComboBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*ComboBox)
-	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	cb.Editable = fr.Editable
-	cb.CurVal = fr.CurVal
-	cb.CurIndex = fr.CurIndex
-	cb.Items = fr.Items
-	cb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
-	cb.MaxLength = fr.MaxLength
 }
 
 // ButtonWidget interface
@@ -555,74 +563,57 @@ func (cb *ComboBox) MakeItemsMenu() {
 	}
 }
 
-// func (cb *ComboBox) StateIs(states.Focused) bool {
-// 	if cb.IsDisabled() {
-// 		return false
-// 	}
-// 	return cb.ContainsFocus() // needed for getting key events
-// }
-
-func (cb *ComboBox) SetTypeHandlers(we *events.Handlers) {
-	cb.ButtonEvents(we)
-	cb.KeyChordEvent(we)
-}
-
-func (cb *ComboBox) HandleEvent(ev events.Event) {
-}
-
-func (cb *ComboBox) KeyChordEvent(we *events.Handlers) {
-	we.AddFunc(events.KeyChord, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		cbb := recv.(*ComboBox) // todo: embed!
-		if cbb.IsDisabled() {
+func (cb *ComboBox) ComboBoxKeys() {
+	we.On(events.KeyChord, func(e events.Event) {
+		if cb.StateIs(states.Disabled) {
 			return
 		}
-		kt := d.(events.Event)
 		if KeyEventTrace {
-			fmt.Printf("ComboBox KeyChordEvent: %v\n", cbb.Path())
+			fmt.Printf("ComboBox KeyChordEvent: %v\n", cb.Path())
 		}
 		kf := KeyFun(kt.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
-			kt.SetHandled()
-			if len(cbb.Items) > 0 {
-				idx := cbb.CurIndex - 1
+			e.SetHandled()
+			if len(cb.Items) > 0 {
+				idx := cb.CurIndex - 1
 				if idx < 0 {
-					idx += len(cbb.Items)
+					idx += len(cb.Items)
 				}
-				cbb.SelectItemAction(idx)
+				cb.SelectItemAction(idx)
 			}
 		case kf == KeyFunMoveDown:
-			kt.SetHandled()
-			if len(cbb.Items) > 0 {
-				idx := cbb.CurIndex + 1
-				if idx >= len(cbb.Items) {
-					idx -= len(cbb.Items)
+			e.SetHandled()
+			if len(cb.Items) > 0 {
+				idx := cb.CurIndex + 1
+				if idx >= len(cb.Items) {
+					idx -= len(cb.Items)
 				}
-				cbb.SelectItemAction(idx)
+				cb.SelectItemAction(idx)
 			}
 		case kf == KeyFunPageUp:
-			kt.SetHandled()
-			if len(cbb.Items) > 10 {
-				idx := cbb.CurIndex - 10
+			e.SetHandled()
+			if len(cb.Items) > 10 {
+				idx := cb.CurIndex - 10
 				for idx < 0 {
-					idx += len(cbb.Items)
+					idx += len(cb.Items)
 				}
-				cbb.SelectItemAction(idx)
+				cb.SelectItemAction(idx)
 			}
 		case kf == KeyFunPageDown:
-			kt.SetHandled()
-			if len(cbb.Items) > 10 {
-				idx := cbb.CurIndex + 10
-				for idx >= len(cbb.Items) {
-					idx -= len(cbb.Items)
+			e.SetHandled()
+			if len(cb.Items) > 10 {
+				idx := cb.CurIndex + 10
+				for idx >= len(cb.Items) {
+					idx -= len(cb.Items)
 				}
-				cbb.SelectItemAction(idx)
+				cb.SelectItemAction(idx)
 			}
-		case kf == KeyFunEnter || (!cbb.Editable && kt.Rune == ' '):
+		case kf == KeyFunEnter || (!cb.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
-			kt.SetHandled()
-			cbb.ButtonPress()
-			cbb.ButtonRelease()
+			e.SetHandled()
+			cb.ButtonPress()
+			cb.ButtonRelease()
 			// }
 		}
 	})

@@ -180,7 +180,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 
 func (tv *TextView) OnInit() {
 	tv.SetTypeHandlers(&TextViewListen)
-	tv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	tv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		tv.CursorWidth.SetPx(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)
@@ -4695,7 +4695,7 @@ func (tv *TextView) MouseEvent(me events.Event) {
 // }
 
 // MouseMoveEvent
-func (tv *TextView) MouseMoveEvent(we *events.Handlers) {
+func (tv *TextView) MouseMoveEvent() {
 	we.AddFunc(events.MouseMove, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		me.SetHandled()
@@ -4727,7 +4727,7 @@ func (tv *TextView) MouseMoveEvent(we *events.Handlers) {
 	})
 }
 
-func (tv *TextView) MouseDragEvent(we *events.Handlers) {
+func (tv *TextView) MouseDragEvent() {
 	we.AddFunc(events.MouseDrag, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		me.SetHandled()
@@ -4741,7 +4741,7 @@ func (tv *TextView) MouseDragEvent(we *events.Handlers) {
 	})
 }
 
-func (tv *TextView) MouseFocusEvent(we *events.Handlers) {
+func (tv *TextView) MouseFocusEvent() {
 	we.AddFunc(events.MouseEnter, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		txf := recv.Embed(TypeTextView).(*TextView)
 		if txf.IsDisabled() {
@@ -4755,7 +4755,7 @@ func (tv *TextView) MouseFocusEvent(we *events.Handlers) {
 }
 
 // TextViewEvents sets connections between mouse and key events and actions
-func (tv *TextView) TextViewEvents(we *events.Handlers) {
+func (tv *TextView) TextViewEvents() {
 	tv.HoverTooltipEvent(we)
 	tv.MouseMoveEvent(we)
 	tv.MouseDragEvent(we)

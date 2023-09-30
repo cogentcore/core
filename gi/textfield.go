@@ -37,7 +37,7 @@ var CursorBlinkMSec = 500
 
 // TextField is a widget for editing a line of text
 //
-//goki:embed
+//goki:embedder
 type TextField struct {
 	WidgetBase
 
@@ -138,12 +138,26 @@ type TextField struct {
 	NoEcho bool `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
-// event functions for this type
-var TextFieldHandlers = InitWidgetHandlers(&TextField{})
+func (tf *TextField) CopyFieldsFrom(frm any) {
+	fr := frm.(*TextField)
+	tf.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	tf.Txt = fr.Txt
+	tf.Placeholder = fr.Placeholder
+	tf.LeadingIcon = fr.LeadingIcon
+	tf.TrailingIcon = fr.TrailingIcon
+	tf.CursorWidth = fr.CursorWidth
+	tf.Edited = fr.Edited
+	tf.MaxWidthReq = fr.MaxWidthReq
+}
 
 func (tf *TextField) OnInit() {
+	tf.TextFieldHandlers()
+	tf.TextFieldStyles()
+}
+
+func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
-	tf.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	tf.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -199,7 +213,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		case "lead-icon":
 			lead := child.(*Action)
 			lead.Type = ActionParts
-			lead.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			lead.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Right.SetPx(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
@@ -208,7 +222,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		case "trail-icon":
 			trail := child.(*Action)
 			trail.Type = ActionParts
-			trail.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			trail.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Font.Size.SetPx(20)
 				s.Margin.Left.SetPx(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
@@ -216,18 +230,6 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			})
 		}
 	}
-}
-
-func (tf *TextField) CopyFieldsFrom(frm any) {
-	fr := frm.(*TextField)
-	tf.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	tf.Txt = fr.Txt
-	tf.Placeholder = fr.Placeholder
-	tf.LeadingIcon = fr.LeadingIcon
-	tf.TrailingIcon = fr.TrailingIcon
-	tf.CursorWidth = fr.CursorWidth
-	tf.Edited = fr.Edited
-	tf.MaxWidthReq = fr.MaxWidthReq
 }
 
 // TextFieldTypes is an enum containing the
@@ -1228,220 +1230,189 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//    KeyInput handling
+//    Event handling
 
-func (tf *TextField) SetTypeHandlers(we *events.Handlers) {
-	tf.WidgetEvents(we)
-	tf.TextFieldEvents(we)
-}
+// func (tf *TextField) HandleEvent(ev events.Event) {
+// 	// if tf.Sc.Type == ScDialog {
+// 	// todo: need dialogsig!
+// 	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 	// 	tff := AsTextField(recv)
+// 	// 	if sig == int64(DialogAccepted) {
+// 	// 		tff.EditDone()
+// 	// 	}
+// 	// })
+// 	// }
+// }
 
-func (tf *TextField) HandleEvent(ev events.Event) {
-	// if tf.Sc.Type == ScDialog {
-	// todo: need dialogsig!
-	// dlg.DialogSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	tff := AsTextField(recv)
-	// 	if sig == int64(DialogAccepted) {
-	// 		tff.EditDone()
-	// 	}
-	// })
-	// }
-}
+// if tf.IsDisabled() {
+// 	tf.SetSelected(!tf.StateIs(states.Selected))
+// 	tf.EmitSelectedSignal()
+// 	tf.UpdateSig()
+// } else {
 
-// KeyInput handles keyboard input into the text field and from the completion menu
-func (tf *TextField) KeyInput(kt *events.Key) {
-	if KeyEventTrace {
-		fmt.Printf("TextField KeyInput: %v\n", tf.Path())
-	}
-	kf := KeyFun(kt.KeyChord())
-	// todo:
-	// win := tf.ParentRenderWin()
-	// if tf.Complete != nil {
-	// 	cpop := win.CurPopup()
-	// 	if PopupIsCompleter(cpop) {
-	// 		tf.Complete.KeyInput(kf)
-	// 	}
-	// }
-
-	if !tf.IsFocusActive() && kf == KeyFunAbort {
-		return
-	}
-
-	// first all the keys that work for both inactive and active
-	switch kf {
-	case KeyFunMoveRight:
-		kt.SetHandled()
-		tf.CursorForward(1)
-		tf.OfferComplete(dontForce)
-	case KeyFunMoveLeft:
-		kt.SetHandled()
-		tf.CursorBackward(1)
-		tf.OfferComplete(dontForce)
-	case KeyFunHome:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.CursorStart()
-	case KeyFunEnd:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.CursorEnd()
-	case KeyFunSelectMode:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.SelectModeToggle()
-	case KeyFunCancelSelect:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.SelectReset()
-	case KeyFunSelectAll:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.SelectAll()
-	case KeyFunCopy:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.This().(Clipper).Copy(true) // reset
-	}
-	if tf.IsDisabled() || kt.IsHandled() {
-		return
-	}
-	switch kf {
-	case KeyFunEnter:
-		fallthrough
-	case KeyFunFocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
-		fallthrough
-	case KeyFunAccept: // ctrl+enter
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.EditDone()
-		tf.FocusNext()
-	case KeyFunFocusPrev:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.EditDone()
-		tf.FocusPrev()
-	case KeyFunAbort: // esc
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.Revert()
-		tf.FocusChanged(FocusInactive)
-	case KeyFunBackspace:
-		kt.SetHandled()
-		tf.CursorBackspace(1)
-		tf.OfferComplete(dontForce)
-	case KeyFunKill:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.CursorKill()
-	case KeyFunDelete:
-		kt.SetHandled()
-		tf.CursorDelete(1)
-	case KeyFunCut:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.This().(Clipper).Cut()
-	case KeyFunPaste:
-		kt.SetHandled()
-		tf.CancelComplete()
-		tf.This().(Clipper).Paste()
-	case KeyFunComplete:
-		kt.SetHandled()
-		tf.OfferComplete(force)
-	case KeyFunNil:
-		if unicode.IsPrint(kt.Rune) {
-			if !kt.HasAnyModifier(goosi.Control, goosi.Meta) {
-				kt.SetHandled()
-				tf.InsertAtCursor(string(kt.Rune))
-				if kt.Rune == ' ' {
-					tf.CancelComplete()
-				} else {
-					tf.OfferComplete(dontForce)
-				}
-			}
+func (tf *TextField) TextFieldMouse(e events.Event) {
+	tf.On(events.MouseDown, func(e events.Event) {
+		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
+			tf.GrabFocus()
 		}
-	}
-}
-
-// HandleMouseEvent handles the events.Event
-func (tf *TextField) HandleMouseEvent(me events.Event) {
-	if tf.ParentRenderWin() == nil {
-		return
-	}
-	if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
-		tf.GrabFocus()
-	}
-	me.SetHandled()
-	switch me.Button {
-	case events.Left:
-		if me.Action == events.Press {
-			if tf.IsDisabled() {
-				tf.SetSelected(!tf.StateIs(states.Selected))
-				tf.EmitSelectedSignal()
-				tf.UpdateSig()
-			} else {
-				pt := tf.PointToRelPos(me.Pos())
-				tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
-			}
-		} else if me.Action == events.DoubleClick {
-			me.SetHandled()
-			if tf.HasSelection() {
-				if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
-					tf.SelectReset()
-				} else {
-					tf.SelectAll()
-				}
-			} else {
-				tf.SelectWord()
-			}
-		}
-	case events.Middle:
-		if !tf.IsDisabled() && me.Action == events.Press {
-			me.SetHandled()
-			pt := tf.PointToRelPos(me.Pos())
-			tf.SetCursorFromPixel(float32(pt.X), me.SelectMode())
+		e.SetHandled()
+		switch e.MouseButton() {
+		case events.Left:
+			pt := tf.PointToRelPos(e.Pos())
+			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
+		case events.Middle:
+			e.SetHandled()
+			pt := tf.PointToRelPos(e.Pos())
+			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
 			tf.Paste()
 		}
-	case events.Right:
-		if me.Action == events.Press {
-			me.SetHandled()
-			tf.EmitContextMenuSignal()
-			tf.This().(Widget).ContextMenu()
+	})
+
+	tf.On(events.DoubleClick, func(e events.Event) {
+		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
+			tf.GrabFocus()
 		}
-	}
-}
-
-func (tf *TextField) MouseDragEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseDrag, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		me.SetHandled()
-		tff := AsTextField(recv)
-		if !tff.SelectMode {
-			tff.SelectModeToggle()
+		e.SetHandled()
+		if tf.HasSelection() {
+			if tf.SelectStart == 0 && tf.SelectEnd == len(tf.EditTxt) {
+				tf.SelectReset()
+			} else {
+				tf.SelectAll()
+			}
+		} else {
+			tf.SelectWord()
 		}
-		pt := tff.PointToRelPos(me.Pos())
-		tff.SetCursorFromPixel(float32(pt.X), events.SelectOne)
+	})
+
+	tf.On(events.MouseDrag, func(e events.Event) {
+		e.SetHandled()
+		if !tf.SelectMode {
+			tf.SelectModeToggle()
+		}
+		pt := tf.PointToRelPos(e.Pos())
+		tf.SetCursorFromPixel(float32(pt.X), events.SelectOne)
 	})
 }
 
-func (tf *TextField) MouseEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := AsTextField(recv)
-		me := d.(events.Event)
-		tff.HandleMouseEvent(me)
+func (tf *TextField) TextFieldKeys() {
+	tf.On(events.KeyChord, func(e events.Event) {
+		if KeyEventTrace {
+			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
+		}
+		kf := KeyFun(e.KeyChord())
+		// todo:
+		// win := tf.ParentRenderWin()
+		// if tf.Complete != nil {
+		// 	cpop := win.CurPopup()
+		// 	if PopupIsCompleter(cpop) {
+		// 		tf.Complete.KeyInput(kf)
+		// 	}
+		// }
+
+		if !tf.IsFocusActive() && kf == KeyFunAbort {
+			return
+		}
+
+		// first all the keys that work for both inactive and active
+		switch kf {
+		case KeyFunMoveRight:
+			e.SetHandled()
+			tf.CursorForward(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunMoveLeft:
+			e.SetHandled()
+			tf.CursorBackward(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunHome:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.CursorStart()
+		case KeyFunEnd:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.CursorEnd()
+		case KeyFunSelectMode:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.SelectModeToggle()
+		case KeyFunCancelSelect:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.SelectReset()
+		case KeyFunSelectAll:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.SelectAll()
+		case KeyFunCopy:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.This().(Clipper).Copy(true) // reset
+		}
+		if bb.StateIs(states.Disabled) || e.IsHandled() {
+			return
+		}
+		switch kf {
+		case KeyFunEnter:
+			fallthrough
+		case KeyFunFocusNext: // we process tab to make it EditDone as opposed to other ways of losing focus
+			fallthrough
+		case KeyFunAccept: // ctrl+enter
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.EditDone()
+			tf.FocusNext()
+		case KeyFunFocusPrev:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.EditDone()
+			tf.FocusPrev()
+		case KeyFunAbort: // esc
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.Revert()
+			tf.FocusChanged(FocusInactive)
+		case KeyFunBackspace:
+			e.SetHandled()
+			tf.CursorBackspace(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunKill:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.CursorKill()
+		case KeyFunDelete:
+			e.SetHandled()
+			tf.CursorDelete(1)
+		case KeyFunCut:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.This().(Clipper).Cut()
+		case KeyFunPaste:
+			e.SetHandled()
+			tf.CancelComplete()
+			tf.This().(Clipper).Paste()
+		case KeyFunComplete:
+			e.SetHandled()
+			tf.OfferComplete(force)
+		case KeyFunNil:
+			if unicode.IsPrint(e.Rune) {
+				if !e.HasAnyModifier(goosi.Control, goosi.Meta) {
+					e.SetHandled()
+					tf.InsertAtCursor(string(e.Rune))
+					if e.Rune == ' ' {
+						tf.CancelComplete()
+					} else {
+						tf.OfferComplete(dontForce)
+					}
+				}
+			}
+		}
 	})
 }
 
-func (tf *TextField) KeyChordEvent(we *events.Handlers) {
-	we.AddFunc(events.KeyChord, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tff := AsTextField(recv)
-		kt := d.(*events.Key)
-		tff.KeyInput(kt)
-	})
-}
-
-func (tf *TextField) TextFieldEvents(we *events.Handlers) {
-	tf.MouseDragEvent(we)
-	tf.MouseEvent(we)
-	tf.KeyChordEvent(we)
+func (tf *TextField) TextFieldHandlers() {
+	tf.WidgetHandlers()
+	tf.TextFieldMouse()
+	tf.TextFieldKeys()
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {

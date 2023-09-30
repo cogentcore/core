@@ -35,7 +35,7 @@ type ActOpts struct {
 // this is controlled by the Class which is automatically set to
 // menu, menubar, or toolbar
 //
-//goki:embed
+//goki:embedder
 type Action struct {
 	ButtonBase
 
@@ -75,11 +75,13 @@ const (
 	ActionToolBar
 )
 
-// event functions for this type
-var ActionHandlers = InitWidgetHandlers(&Action{})
-
 func (ac *Action) OnInit() {
-	ac.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	ac.ButtonBaseHandlers()
+	ac.ActionStyles()
+}
+
+func (ac *Action) ActionStyles() {
+	ac.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(styles.BorderNone)
 		s.Text.Align = styles.AlignCenter
@@ -139,7 +141,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 	if _, w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
@@ -147,17 +149,17 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				s.Padding.Set()
 			})
 		case "space":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(0.5)
 				s.MinWidth.SetCh(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "indicator":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
@@ -166,16 +168,16 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				s.AlignV = styles.AlignBottom
 			})
 		case "ind-stretch":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 			})
 		case "shortcut":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "sc-stretch":
-			w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		}
@@ -191,14 +193,18 @@ func (ac *Action) CopyFieldsFrom(frm any) {
 
 // ButtonWidget interface
 
-// Trigger triggers the action signal -- for external activation of action --
-// only works if action is not inactive
-func (ac *Action) Trigger() {
-	if ac.StateIs(states.Disabled) {
-		return
-	}
-	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
-}
+// todo: Trigger is SendMeClick()
+
+// // Trigger triggers the action signal -- for external activation of action --
+// // only works if action is not inactive
+// func (ac *Action) Trigger() {
+// 	if ac.StateIs(states.Disabled) {
+// 		return
+// 	}
+// 	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
+// }
+
+// todo: bad:
 
 // ButtonRelease triggers action signal
 func (ac *Action) ButtonRelease() {

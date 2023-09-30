@@ -44,7 +44,7 @@ var CustomConfigStyles func(w *WidgetBase)
 // but they are passed the widget base and style for convenience
 // and so that they can be used for multiple elements if desired;
 // you can get all of the information you need from the function.
-// A Styler should be added to a widget through the [WidgetBase.AddStyler]
+// A Styler should be added to a widget through the [WidgetBase.AddStyles]
 // method. We use stylers for styling because they give you complete
 // control and full programming logic without any CSS-selector magic.
 type Styler func(w *WidgetBase, s *styles.Style)
@@ -57,27 +57,15 @@ func (sc *Scene) SetDefaultStyle() {
 ////////////////////////////////////////////////////////////////////
 // 	Widget Styling functions
 
-// AddStyler adds the given styler to the
+// AddStyles adds the given styler to the
 // widget's stylers, initializing them if necessary.
 // This function can be called by both internal
 // and end-user code.
 // It should only be done before showing the scene
 // during initial configuration -- otherwise requries
 // a StyMu mutex lock.
-func (wb *WidgetBase) AddStyler(s Styler) Widget {
-	if wb.Stylers == nil {
-		wb.Stylers = []Styler{}
-	}
+func (wb *WidgetBase) AddStyles(s Styler) Widget {
 	wb.Stylers = append(wb.Stylers, s)
-	return wb.This().(Widget)
-}
-
-// todo: should reserve ApplyStyle for user and rename existing to something
-// more internal.
-// note: cannot Change AddStyler signature to return Widget, so need a new method
-
-func (wb *WidgetBase) SetStyle(s Styler) Widget {
-	wb.AddStyler(s)
 	return wb.This().(Widget)
 }
 
@@ -90,12 +78,14 @@ func (wb *WidgetBase) SetStyle(s Styler) Widget {
 // 	if child != nil {
 // 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
 // 		if ok {
-// 			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+// 			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 // 				f(wb)
 // 			})
 // 		}
 // 	}
 // }
+
+// TODO: get rid of this!?
 
 // ActiveStyle satisfies the ActiveStyler interface
 // and returns the active style of the widget
@@ -284,7 +274,7 @@ func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursor.Cursor {
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [styles.Style.SetMinPrefWidth].
 func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetMinPrefWidth(val)
 	})
 	return wb.This().(Widget)
@@ -294,7 +284,7 @@ func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [styles.Style.SetMinPrefHeight].
 func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetMinPrefHeight(val)
 	})
 	return wb.This().(Widget)
@@ -304,7 +294,7 @@ func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMaxWidth].
 func (wb *WidgetBase) SetStretchMaxWidth() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxWidth()
 	})
 	return wb.This().(Widget)
@@ -314,7 +304,7 @@ func (wb *WidgetBase) SetStretchMaxWidth() Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMaxHeight].
 func (wb *WidgetBase) SetStretchMaxHeight() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxHeight()
 	})
 	return wb.This().(Widget)
@@ -324,7 +314,7 @@ func (wb *WidgetBase) SetStretchMaxHeight() Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMax].
 func (wb *WidgetBase) SetStretchMax() Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
 	})
@@ -336,7 +326,7 @@ func (wb *WidgetBase) SetStretchMax() Widget {
 // the given fixed width unit value.
 // This adds a styler that calls [styles.Style.SetFixedWidth].
 func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetFixedWidth(val)
 	})
 	return wb.This().(Widget)
@@ -347,7 +337,7 @@ func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
 // the given fixed height unit value.
 // This adds a styler that calls [styles.Style.SetFixedHeight].
 func (wb *WidgetBase) SetFixedHeight(val units.Value) Widget {
-	wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.SetFixedHeight(val)
 	})
 	return wb.This().(Widget)

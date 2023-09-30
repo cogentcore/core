@@ -105,10 +105,7 @@ type Widget interface {
 	// ScBBox is empty and no rendering should occur.
 	Render(sc *Scene)
 
-	// SetTypeHandlers: Adds all event processing functions for this type.
-	SetTypeHandlers(we *events.Handlers)
-
-	// HandleEvent calls registered event Listener functions
+	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(ev events.Event)
 
 	// FocusChanged is called on node for changes in focus -- see the
@@ -200,8 +197,8 @@ type WidgetBase struct {
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
-	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code
-	Stylers []Styler `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyler, which can be called by end-user and internal code"`
+	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code
+	Stylers []Styler `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
@@ -209,12 +206,12 @@ type WidgetBase struct {
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
 	Style styles.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
 
+	// Listeners are event listener functions for processing events on this widget.
+	// type specific Listeners are added in OnInit when the widget is initialized.
+	Listeners events.Listeners
+
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
-
-	// Listeners provides to add arbitrary functions to listen to particular event types.
-	// These are called first before the type-general event Handlers.
-	Listeners events.Listeners
 
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
@@ -234,9 +231,6 @@ type WidgetBase struct {
 	// [view: -] mutex protecting the BBox fields
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the BBox fields"`
 }
-
-// event functions for this type
-var WidgetHandlers = InitWidgetHandlers(&WidgetBase{})
 
 func (wb *WidgetBase) OnInit() {
 }

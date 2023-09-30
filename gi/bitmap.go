@@ -44,22 +44,24 @@ type Bitmap struct {
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 
-// event functions for this type
-var BitmapHandlers = InitWidgetHandlers(&Bitmap{})
-
-func (bm *Bitmap) OnInit() {
-	bm.AddStyler(func(w *WidgetBase, s *styles.Style) {
-		s.MinWidth.SetPx(float32(bm.Size.X))
-		s.MinHeight.SetPx(float32(bm.Size.Y))
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-	})
-}
-
 func (bm *Bitmap) CopyFieldsFrom(frm any) {
 	fr := frm.(*Bitmap)
 	bm.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	bm.Size = fr.Size
 	bm.Filename = fr.Filename
+}
+
+func (bm *Bitmap) OnInit() {
+	bm.WidgetHandlers()
+	bm.BitmapStyles()
+}
+
+func (bm *Bitmap) BitmapStyles() {
+	bm.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.MinWidth.SetPx(float32(bm.Size.X))
+		s.MinHeight.SetPx(float32(bm.Size.Y))
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+	})
 }
 
 // SetSize sets size of the bitmap image.

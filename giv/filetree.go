@@ -1457,12 +1457,12 @@ func BlameDialog(avp *gi.Scene, fname string, blame, fbytes []byte) *TwinTextVie
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.TextViews()
-	tva.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	tva.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(30)
 		s.Height.SetEm(40)
 	})
-	tvb.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	tvb.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)
@@ -1735,7 +1735,7 @@ func (ftv *FileTreeView) OnInit() {
 	ftv.SetFlag(int(TreeViewFlagUpdtRoot)) // filetree needs this
 	ftv.OpenDepth = 4
 	ftv.Indent.SetEm(1)
-	ftv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	ftv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Margin.Set()
@@ -1771,11 +1771,11 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
-			parts.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			parts.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				parts.Spacing.SetCh(0.5)
 			})
 		case "icon":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -1785,7 +1785,7 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			cb := child.(*gi.CheckBox)
 			cb.Icon = icons.FolderOpen
 			cb.IconOff = icons.Folder
-			cb.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			cb.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MaxWidth.SetEm(1.5)
@@ -1793,11 +1793,11 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 				s.AlignV = styles.AlignMiddle
 			})
 		case "space":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Width.SetEm(0.5)
 			})
 		case "label":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.MinWidth.SetCh(16)

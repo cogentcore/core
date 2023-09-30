@@ -10,7 +10,6 @@ import (
 
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 )
 
 // Frame is a Layout that renders a background according to the
@@ -20,17 +19,6 @@ type Frame struct {
 
 	// options for striped backgrounds -- rendered as darker bands relative to background color
 	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
-}
-
-// event functions for this type
-var FrameHandlers = InitWidgetHandlers(&Frame{})
-
-func (fr *Frame) OnInit() {
-	fr.AddStyler(func(w *WidgetBase, s *styles.Style) {
-		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Radius.Set()
-		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
-	})
 }
 
 func (fr *Frame) CopyFieldsFrom(frm any) {
@@ -43,7 +31,17 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 	fr.Stripes = cp.Stripes
 }
 
-func (fr *Frame) HandleEvent(ev events.Event) {
+func (fr *Frame) OnInit() {
+	fr.LayoutHandlers()
+	fr.FrameStyles()
+}
+
+func (fr *Frame) FrameStyles() {
+	fr.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius.Set()
+		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+	})
 }
 
 // Stripes defines stripes options for elements that can render striped backgrounds

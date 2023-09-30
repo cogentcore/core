@@ -7,18 +7,19 @@ package gi
 import (
 	"image"
 
+	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
 
-func InitWidgetHandlers[T Widget](w T) events.Handlers {
-	we := events.Handlers{}
-	w.SetTypeHandlers(&we)
-	return we
-}
-
 func (wb *WidgetBase) EventMgr() *EventMgr {
 	return &wb.Sc.EventMgr
+}
+
+// On adds an event listener function for the given event type
+func (wb *WidgetBase) On(etype events.Type, fun func(e events.Event)) Widget {
+	wb.Listeners.Add(etype, fun)
+	return wb.This().(Widget)
 }
 
 // PosInBBox returns true if given position is within
@@ -29,28 +30,38 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	return pos.In(wb.ScBBox)
 }
 
-// SetTypeHandlers adds the default event functions
-// for Widget objects. It calls [WidgetEvents], so any Widget
-// implementing a custom SetTypeHandlers function should
-// first call [WidgetEvents].
-func (wb *WidgetBase) SetTypeHandlers(we *events.Handlers) {
-	wb.WidgetEvents(we)
-}
-
 func (wb *WidgetBase) HandleEvent(ev events.Event) {
+	wb.Listeners.Call(ev)
 }
 
-// WidgetEvents adds the default events for Widget objects.
-// Any Widget implementing a custom SetTypeHandlers function
-// should first call this function.
-func (wb *WidgetBase) WidgetEvents(we *events.Handlers) {
+// WidgetHandlers adds the default events for Widget objects.
+func (wb *WidgetBase) WidgetHandlers() {
 	// nb.WidgetMouseEvent() ??
-	wb.WidgetMouseFocusEvent(we)
-	wb.HoverTooltipEvent(we)
+	// wb.WidgetMouseFocusEvent()
+	wb.LongHoverTooltipHandler()
 }
 
+// LongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
+// Most widgets should call this as part of their event handler methods.
+func (wb *WidgetBase) LongHoverTooltip() {
+	wb.On(events.LongHoverStart, func(e events.Handler) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.Tooltip == "" {
+			return
+		}
+		e.SetHandled()
+		// pos := wbb.WinBBox.Max
+		// pos.X -= 20
+		// mvp := wbb.Sc
+		// PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
+	})
+}
+
+/*
 // WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
-func (wb *WidgetBase) WidgetMouseEvent(we *events.Handlers) {
+func (wb *WidgetBase) WidgetMouseEvent() {
 	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		wbb := AsWidgetBase(recv)
 		if wbb.IsDisabled() {
@@ -71,7 +82,7 @@ func (wb *WidgetBase) WidgetOnMouseEvent(me events.Event) {
 }
 
 // WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
-func (wb *WidgetBase) WidgetMouseFocusEvent(we *events.Handlers) {
+func (wb *WidgetBase) WidgetMouseFocusEvent() {
 	we.AddFunc(events.MouseEnter, RegPri, func(recv, send ki.Ki, sig int64, data any) {
 		wbb := AsWidgetBase(recv)
 		if wbb.IsDisabled() {
@@ -96,6 +107,8 @@ func (wb *WidgetBase) WidgetOnMouseFocusEvent(me events.Event) {
 	// // 	nb.ClearActive()
 	// }
 }
+
+*/
 
 // WidgetMouseEvents connects to either or both mouse events -- IMPORTANT: if
 // you need to also connect to other mouse events, you must copy this code --

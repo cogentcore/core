@@ -31,21 +31,23 @@ type MenuBar struct {
 	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
 }
 
-// event functions for this type
-var MenuBarHandlers = InitWidgetHandlers(&MenuBar{})
-
-func (mb *MenuBar) OnInit() {
-	mb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-		s.MaxWidth.SetPx(-1)
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-		s.Color = colors.Scheme.OnSurface
-	})
-}
-
 func (mb *MenuBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*MenuBar)
 	mb.Layout.CopyFieldsFrom(&fr.Layout)
 	mb.MainMenu = fr.MainMenu
+}
+
+func (mb *MenuBar) OnInit() {
+	mb.LayoutHandlers()
+	mb.MenuBarStyles()
+}
+
+func (mb *MenuBar) MenuBarStyles() {
+	mb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.MaxWidth.SetPx(-1)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+		s.Color = colors.Scheme.OnSurface
+	})
 }
 
 // MenuBarStdRender does the standard rendering of the bar
@@ -312,24 +314,26 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 // ToolBar is a Layout (typically LayoutHoriz) that renders a
 // background and is useful for holding Actions that do things
 //
-//goki:embed
+//goki:embedder
 type ToolBar struct {
 	Layout
-}
-
-// event functions for this type
-var ToolBarHandlers = InitWidgetHandlers(&ToolBar{})
-
-func (tb *ToolBar) OnInit() {
-	tb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-		s.MaxWidth.SetPx(-1)
-		s.Border.Radius = styles.BorderRadiusFull
-	})
 }
 
 func (tb *ToolBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ToolBar)
 	tb.Layout.CopyFieldsFrom(&fr.Layout)
+}
+
+func (tb *ToolBar) OnInit() {
+	tb.ToolBarStyles()
+	tb.LayoutHandlers()
+}
+
+func (tb *ToolBar) ToolBarStyles() {
+	tb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.MaxWidth.SetPx(-1)
+		s.Border.Radius = styles.BorderRadiusFull
+	})
 }
 
 // AddAction adds an action to the toolbar using given options, and connects
@@ -398,7 +402,7 @@ func (tb *ToolBar) Render(sc *Scene) {
 	}
 }
 
-func (tb *ToolBar) MouseFocusEvent(we *events.Handlers) {
+func (tb *ToolBar) MouseFocusEvent() {
 	we.AddFunc(events.MouseEnter, HiPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		tbb := AsToolBar(recv)
@@ -409,17 +413,11 @@ func (tb *ToolBar) MouseFocusEvent(we *events.Handlers) {
 	})
 }
 
-func (tb *ToolBar) SetTypeHandlers(we *events.Handlers) {
-	tb.Layout.SetTypeHandlers(we)
-	tb.MouseFocusEvent(we)
-}
-
-func (tb *ToolBar) HandleEvent(ev events.Event) {
-	tb.SetShortcuts()
-}
+// func (tb *ToolBar) HandleEvent(ev events.Event) {
+// 	tb.SetShortcuts()
+// }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-// Called in SetTypeHandlers()
 func (tb *ToolBar) SetShortcuts() {
 	win := tb.ParentRenderWin()
 	if win == nil {

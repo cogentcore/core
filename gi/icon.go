@@ -11,7 +11,6 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/svg"
@@ -38,22 +37,24 @@ type Icon struct {
 	RendSize image.Point
 }
 
-// event functions for this type
-var IconHandlers = InitWidgetHandlers(&Icon{})
-
-func (ic *Icon) OnInit() {
-	ic.AddStyler(func(w *WidgetBase, s *styles.Style) {
-		s.Width.SetEm(1)
-		s.Height.SetEm(1)
-		s.BackgroundColor.SetSolid(colors.Transparent)
-	})
-}
-
 func (ic *Icon) CopyFieldsFrom(frm any) {
 	fr := frm.(*Icon)
 	ic.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	ic.IconName = fr.IconName
 	ic.Filename = fr.Filename
+}
+
+func (ic *Icon) OnInit() {
+	ic.WidgetHandlers()
+	ic.IconStyles()
+}
+
+func (ic *Icon) IconStyles() {
+	ic.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.Width.SetEm(1)
+		s.Height.SetEm(1)
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
 }
 
 // SetIcon sets the icon by name into given Icon wrapper, returning error
@@ -132,9 +133,6 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 		r = nr
 	}
 	draw.Draw(sc.Pixels, r, ic.SVG.Pixels, sp, draw.Over)
-}
-
-func (ic *Icon) HandleEvent(ev events.Event) {
 }
 
 // RenderSVG renders the SVG to Pixels if needs update

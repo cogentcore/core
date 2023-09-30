@@ -126,6 +126,7 @@ var LayoutFocusNameTimeoutMSec = 500
 // LayoutFocusNameTabMSec is the number of milliseconds since last focus name
 // event to allow tab to focus on next element with same name.
 var LayoutFocusNameTabMSec = 2000
+
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background color will have no effect.
@@ -142,7 +143,8 @@ var LayoutFocusNameTabMSec = 2000
 // to the desired number of columns, from which the number of rows
 // is computed -- otherwise it uses the square root of number of
 // elements.
-//goki:embed
+//
+//goki:embedder
 type Layout struct {
 	WidgetBase
 
@@ -198,12 +200,6 @@ type Layout struct {
 	// ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
-// event functions for this type
-var LayoutHandlers = InitWidgetHandlers(&Layout{})
-
-func (ly *Layout) OnInit() {
-}
-
 func (ly *Layout) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Layout)
 	if !ok {
@@ -214,6 +210,16 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 	ly.Lay = fr.Lay
 	ly.Spacing = fr.Spacing
 	ly.StackTop = fr.StackTop
+}
+
+func (ly *Layout) OnInit() {
+	ly.LayoutHandlers()
+	ly.WidgetStyles()
+}
+
+func (ly *Layout) LayoutHandlers() {
+	// todo: maybe need scrolling stuff in here?
+	ly.WidgetHandlers()
 }
 
 // Layouts are the different types of layouts
@@ -1068,7 +1074,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 
 // LayoutScrollEvents registers scrolling-related mouse events processed by
 // Layout -- most subclasses of Layout will want these..
-func (ly *Layout) LayoutScrollEvents(we *events.Handlers) {
+func (ly *Layout) LayoutScrollEvents() {
 	// LowPri to allow other focal widgets to capture
 	we.AddFunc(events.MouseScrollEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(*events.Scroll)
@@ -1091,7 +1097,7 @@ func (ly *Layout) LayoutScrollEvents(we *events.Handlers) {
 }
 
 // KeyChordEvent processes (lowpri) layout key events
-func (ly *Layout) KeyChordEvent(we *events.Handlers) {
+func (ly *Layout) KeyChordEvent() {
 	// LowPri to allow other focal widgets to capture
 	we.AddFunc(events.KeyChordEvent, LowPri, func(recv, send ki.Ki, sig int64, d any) {
 		li := AsLayout(recv)
@@ -1257,8 +1263,8 @@ func (ly *Layout) Render(sc *Scene) {
 	}
 }
 
-func (ly *Layout) SetTypeHandlers(we *events.Handlers) {
-	ly.WidgetEvents(we)
+func (ly *Layout) SetTypeHandlers() {
+	ly.AddWidgetHandlers()
 	ly.LayoutScrollEvents(we)
 	ly.KeyChordEvent(we)
 }
@@ -1287,7 +1293,7 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
-	st.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	st.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 	})
@@ -1320,7 +1326,7 @@ type Space struct {
 var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
-	sp.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	sp.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.Width.SetCh(1)
 		s.Height.SetEm(1)
 	})

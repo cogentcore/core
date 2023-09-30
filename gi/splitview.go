@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -34,7 +33,7 @@ import (
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
 //
-//goki:embed
+//goki:embedder
 type SplitView struct {
 	WidgetBase
 
@@ -51,11 +50,22 @@ type SplitView struct {
 	Dim mat32.Dims `desc:"dimension along which to split the space"`
 }
 
-// event functions for this type
-var SplitViewHandlers = InitWidgetHandlers(&SplitView{})
+func (sv *SplitView) CopyFieldsFrom(frm any) {
+	fr := frm.(*SplitView)
+	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sv.HandleSize = fr.HandleSize
+	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
+	mat32.CopyFloat32s(&sv.SavedSplits, fr.SavedSplits)
+	sv.Dim = fr.Dim
+}
 
 func (sv *SplitView) OnInit() {
-	sv.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	sv.SplitViewHandlers()
+	sv.SplitViewStyles()
+}
+
+func (sv *SplitView) SplitViewStyles() {
+	sv.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		sv.HandleSize.SetPx(10)
 
 		s.MaxWidth.SetPx(-1)
@@ -69,15 +79,6 @@ func (sv *SplitView) OnChildAdded(child ki.Ki) {
 	if sp, ok := child.(*Splitter); ok {
 		sp.ThumbSize = sv.HandleSize
 	}
-}
-
-func (sv *SplitView) CopyFieldsFrom(frm any) {
-	fr := frm.(*SplitView)
-	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sv.HandleSize = fr.HandleSize
-	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
-	mat32.CopyFloat32s(&sv.SavedSplits, fr.SavedSplits)
-	sv.Dim = fr.Dim
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -299,52 +300,40 @@ func (sv *SplitView) ConfigSplitters(sc *Scene) {
 	}
 }
 
-func (sv *SplitView) KeyInput(kt *events.Key) {
-	kc := string(kt.KeyChord())
-	mod := "Control+"
-	if goosi.TheApp.Platform() == goosi.MacOS {
-		mod = "Meta+"
-	}
-	if !strings.HasPrefix(kc, mod) {
-		return
-	}
-	kns := kc[len(mod):]
-
-	knc, err := strconv.Atoi(kns)
-	if err != nil {
-		return
-	}
-	kn := int(knc)
-	// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
-	if kn == 0 {
-		kt.SetHandled()
-		sv.EvenSplits()
-	} else if kn <= len(sv.Kids) {
-		kt.SetHandled()
-		if sv.Splits[kn-1] <= 0.01 {
-			sv.RestoreChild(kn - 1)
-		} else {
-			sv.CollapseChild(true, kn-1)
+func (sv *SplitView) SplitViewKeys() {
+	sv.On(events.KeyChord, func(e events.Event) {
+		kc := string(e.KeyChord())
+		mod := "Control+"
+		if goosi.TheApp.Platform() == goosi.MacOS {
+			mod = "Meta+"
 		}
-	}
-}
+		if !strings.HasPrefix(kc, mod) {
+			return
+		}
+		kns := kc[len(mod):]
 
-func (sv *SplitView) KeyChordEvent(we *events.Handlers) {
-	we.AddFunc(events.KeyChord, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		svv := AsSplitView(recv)
-		svv.KeyInput(d.(*events.Key))
+		knc, err := strconv.Atoi(kns)
+		if err != nil {
+			return
+		}
+		kn := int(knc)
+		// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
+		if kn == 0 {
+			e.SetHandled()
+			sv.EvenSplits()
+		} else if kn <= len(sv.Kids) {
+			e.SetHandled()
+			if sv.Splits[kn-1] <= 0.01 {
+				sv.RestoreChild(kn - 1)
+			} else {
+				sv.CollapseChild(true, kn-1)
+			}
+		}
 	})
 }
 
-func (sv *SplitView) SetTypeHandlers(we *events.Handlers) {
-	sv.SplitViewEvents(we)
-}
-
-func (sv *SplitView) HandleEvent(ev events.Event) {
-}
-
-func (sv *SplitView) SplitViewEvents(we *events.Handlers) {
-	sv.KeyChordEvent(we)
+func (sv *SplitView) SplitViewHandlers() {
+	sv.SplitViewKeys()
 }
 
 func (sv *SplitView) StyleSplitView(sc *Scene) {
@@ -450,10 +439,12 @@ type Splitter struct {
 	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
 }
 
-// event functions for this type
-var SplitterHandlers = InitWidgetHandlers(&Splitter{})
-
 func (sr *Splitter) OnInit() {
+	sr.SplitterHandlers()
+	sr.SplitterStyles()
+}
+
+func (sr *Splitter) SplitterStyles() {
 	// STYTODO: fix splitter styles
 	sr.ValThumb = false
 	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
@@ -464,7 +455,7 @@ func (sr *Splitter) OnInit() {
 	sr.Prec = 4
 	sr.SetFlag(true, InstaDrag)
 
-	sr.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	sr.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
@@ -486,7 +477,7 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			// w.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			// w.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			// 	s.MaxWidth.SetEm(1)
 			// 	s.MaxHeight.SetEm(5)
 			// 	s.MinWidth.SetEm(1)
@@ -586,76 +577,59 @@ func (sr *Splitter) SplitView() *SplitView {
 	return svi
 }
 
-func (sr *Splitter) MouseEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		srr := sr
-		if srr.IsDisabled() {
-			me.SetHandled()
-			srr.SetSelected(!srr.StateIs(states.Selected))
-			srr.EmitSelectedSignal()
-			srr.UpdateSig()
+func (sr *Splitter) SplitterMouse() {
+	sr.On(events.MouseDown, func(e events.Event) {
+		// if srr.IsDisabled() {
+		// 	me.SetHandled()
+		// 	srr.SetSelected(!srr.StateIs(states.Selected))
+		// 	srr.EmitSelectedSignal()
+		// 	srr.UpdateSig()
+		// } else {
+		if e.MouseButton() != events.Left {
+			return
+		}
+		e.SetHandled()
+		ed := sr.This().(SliderPositioner).PointToRelPos(e.Where)
+		st := &sr.Style
+		// SidesTODO: unsure about dim
+		spc := st.EffMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
+		if sr.Dim == mat32.X {
+			sr.SliderPress(float32(ed.X) - spc)
 		} else {
-			if me.Button == events.Left {
-				me.SetHandled()
-				if me.Action == events.Press {
-					ed := srr.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &srr.Style
-					// SidesTODO: unsure about dim
-					spc := st.EffMargin().Pos().Dim(srr.Dim) + 0.5*srr.ThSize
-					if srr.Dim == mat32.X {
-						srr.SliderPress(float32(ed.X) - spc)
-					} else {
-						srr.SliderPress(float32(ed.Y) - spc)
-					}
-				} else if me.Action == events.DoubleClick {
-					sv := srr.SplitView()
-					if sv != nil {
-						if sv.IsCollapsed(srr.SplitterNo) {
-							sv.RestoreSplits()
-						} else {
-							sv.CollapseChild(true, srr.SplitterNo)
-						}
-					}
-				} else {
-					srr.SliderRelease()
-				}
+			sr.SliderPress(float32(ed.Y) - spc)
+		}
+	})
+	sr.On(events.DoubleClick, func(e events.Event) {
+		e.SetHandled()
+		sv := sr.SplitView()
+		if sv != nil {
+			if sv.IsCollapsed(sr.SplitterNo) {
+				sv.RestoreSplits()
+			} else {
+				sv.CollapseChild(true, sr.SplitterNo)
 			}
 		}
 	})
-}
-
-func (sr *Splitter) MouseScrollEvent(we *events.Handlers) {
 	// todo: just disabling at this point to prevent bad side-effects
-	// srwe.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	srr := recv.Embed(TypeSliderBase).(*SliderBase)
+	// sr.On(events.Scroll, func(e events.Event) {
 	// 	if srr.IsInactive() {
 	// 		return
 	// 	}
-	// 	me := d.(*events.Scroll)
-	// 	me.SetHandled()
+	// 	e := d.(*events.Scroll)
+	// 	e.SetHandled()
 	// 	cur := float32(srr.Pos)
 	// 	if srr.Dim == mat32.X {
-	// 		srr.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+	// 		srr.SliderMove(cur, cur+float32(e.NonZeroDelta(true))) // preferX
 	// 	} else {
-	// 		srr.SliderMove(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+	// 		srr.SliderMove(cur, cur-float32(e.NonZeroDelta(false))) // preferY
 	// 	}
 	// })
 }
 
-func (sr *Splitter) SplitterEvents(we *events.Handlers) {
-	sr.MouseDragEvent(we)
-	sr.MouseEvent(we)
-	sr.MouseFocusEvent(we)
-	sr.MouseScrollEvent(we)
-	sr.KeyChordEvent(we)
-}
-
-func (sr *Splitter) SetTypeHandlers(we *events.Handlers) {
-	sr.SplitterEvents(we)
-}
-
-func (sr *Splitter) HandleEvent(ev events.Event) {
+func (sr *Splitter) SplitterHandlers() {
+	sr.SliderMouse()
+	sr.SliderKeys()
+	sr.SplitterMouse()
 }
 
 func (sr *Splitter) Render(sc *Scene) {

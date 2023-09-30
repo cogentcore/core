@@ -53,7 +53,7 @@ type ColorView struct {
 
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
-	cv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	cv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 }
@@ -62,36 +62,36 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "value":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetEm(6)
 				s.MinHeight.SetEm(6)
 				s.Border.Radius = styles.BorderRadiusFull
 				s.BackgroundColor.SetSolid(cv.Color)
 			})
 		case "slider-grid":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Columns = 4
 			})
 		case "hexlbl":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.AlignV = styles.AlignMiddle
 			})
 		case "palette":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Columns = 25
 			})
 		case "nums-hex":
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(20)
 			})
 		case "num-lay":
 			vl := child.(*gi.Layout)
-			vl.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			vl.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				vl.Spacing = gi.StdDialogVSpaceUnits
 			})
 		}
 		if sl, ok := child.(*gi.Slider); ok {
-			sl.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			sl.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(20)
 				s.Width.SetCh(20)
 				s.MinHeight.SetEm(1)
@@ -101,7 +101,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 		}
 		if child.Parent().Name() == "palette" {
 			if cbt, ok := child.(*gi.Button); ok {
-				cbt.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+				cbt.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 					c := colornames.Map[cbt.Name()]
 
 					s.BackgroundColor.SetColor(c)
@@ -640,7 +640,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
 		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)
 		vv.Activate(svv.Sc, nil, nil)
 	})
-	ac.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	ac.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen
@@ -712,7 +712,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
-	ac.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	ac.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

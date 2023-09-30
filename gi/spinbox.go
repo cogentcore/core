@@ -15,14 +15,13 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
 // SpinBox combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 //
-//goki:embed
+//goki:embedder
 type SpinBox struct {
 	WidgetBase
 
@@ -63,46 +62,6 @@ type SpinBox struct {
 	// SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
-// event functions for this type
-var SpinBoxHandlers = InitWidgetHandlers(&SpinBox{})
-
-func (sb *SpinBox) OnInit() {
-	sb.Step = 0.1
-	sb.PageStep = 0.2
-	sb.Max = 1.0
-	sb.Prec = 6
-}
-
-func (sb *SpinBox) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "Parts":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-			})
-		case "text-field":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-				s.MinWidth.SetEm(6)
-			})
-		case "space":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-				s.Width.SetCh(0.1)
-			})
-		case "buttons":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-			})
-		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
-			act := child.(*Action)
-			act.Type = ActionParts
-			act.AddStyler(func(w *WidgetBase, s *styles.Style) {
-				s.Font.Size.SetPx(18)
-			})
-		}
-	}
-
-}
-
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*SpinBox)
 	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -116,6 +75,48 @@ func (sb *SpinBox) CopyFieldsFrom(frm any) {
 	sb.Prec = fr.Prec
 	sb.UpIcon = fr.UpIcon
 	sb.DownIcon = fr.DownIcon
+}
+
+func (sb *SpinBox) OnInit() {
+	sb.SpinBoxHandlers()
+	sb.SpinBoxStyles()
+}
+
+func (sb *SpinBox) SpinBoxStyles() {
+	sb.Step = 0.1
+	sb.PageStep = 0.2
+	sb.Max = 1.0
+	sb.Prec = 6
+}
+
+func (sb *SpinBox) OnChildAdded(child ki.Ki) {
+	if _, wb := AsWidget(child); wb != nil {
+		switch wb.Name() {
+		case "Parts":
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
+			})
+		case "text-field":
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+				s.MinWidth.SetEm(6)
+			})
+		case "space":
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+				s.Width.SetCh(0.1)
+			})
+		case "buttons":
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
+			})
+		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
+			act := child.(*Action)
+			act.Type = ActionParts
+			act.AddStyles(func(w *WidgetBase, s *styles.Style) {
+				s.Font.Size.SetPx(18)
+			})
+		}
+	}
+
 }
 
 // SetMin sets the min limits on the value
@@ -292,67 +293,53 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sb *SpinBox) SetTypeHandlers(we *events.Handlers) {
-	sb.SpinBoxEvents(we)
+func (sb *SpinBox) SpinBoxHandlers() {
+	sb.WidgetHandlers()
+	sb.SpinBoxTextFieldSelect()
+	sb.SpinBoxScroll()
+	sb.SpinBoxKeys()
 }
 
-func (sb *SpinBox) HandleEvent(ev events.Event) {
-}
-
-func (sb *SpinBox) SpinBoxEvents(we *events.Handlers) {
-	sb.HoverTooltipEvent(we)
-	sb.MouseScrollEvent(we)
-	// sb.TextFieldEvent(we)
-	sb.KeyChordEvent(we)
-}
-
-func (sb *SpinBox) MouseScrollEvent(we *events.Handlers) {
-	we.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := AsSpinBox(recv)
-		if sbb.IsDisabled() || !sbb.StateIs(states.Focused) {
+func (sb *SpinBox) SpinBoxScroll() {
+	sb.On(events.Scroll, func(e events.Event) {
+		if bb.StateIs(states.Disabled) || !sbb.StateIs(states.Focused) {
 			return
 		}
-		me := d.(*events.Scroll)
-		me.SetHandled()
-		sbb.IncrValue(float32(me.NonZeroDelta(false)))
+		e.SetHandled()
+		bb.IncrValue(float32(e.NonZeroDelta(false)))
 	})
 }
 
 // todo: how to deal with this??
-func (sb *SpinBox) TextFieldEvent() {
+func (sb *SpinBox) SpinBoxTextFieldSelect() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	tf.WidgetSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		sbb := AsSpinBox(recv)
-		if sig == int64(WidgetSelected) {
-			sbb.SetSelected(!sbb.StateIs(states.Selected))
-		}
-		sbb.WidgetSig.Emit(sbb.This(), sig, data) // passthrough
+	tf.On(events.Select, func(e events.Event) {
+		sb.SetSelected(!sb.StateIs(states.Selected))
+		sb.SendMe(events.Select)
 	})
 }
 
-func (sb *SpinBox) KeyChordEvent(we *events.Handlers) {
-	we.AddFunc(events.KeyChord, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := recv.(*SpinBox)
-		if sbb.IsDisabled() {
+func (sb *SpinBox) SpinBoxKeys() {
+	sb.On(events.KeyChord, func(e events.Event) {
+		if bb.StateIs(states.Disabled) {
 			return
 		}
-		kt := d.(*events.Key)
 		if KeyEventTrace {
 			fmt.Printf("SpinBox KeyChordEvent: %v\n", sbb.Path())
 		}
-		kf := KeyFun(kt.KeyChord())
+		kf := KeyFun(e.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
-			kt.SetHandled()
+			e.SetHandled()
 			sb.IncrValue(1)
 		case kf == KeyFunMoveDown:
-			kt.SetHandled()
+			e.SetHandled()
 			sb.IncrValue(-1)
 		case kf == KeyFunPageUp:
-			kt.SetHandled()
+			e.SetHandled()
 			sb.PageIncrValue(1)
 		case kf == KeyFunPageDown:
-			kt.SetHandled()
+			e.SetHandled()
 			sb.PageIncrValue(-1)
 		}
 	})
@@ -362,6 +349,7 @@ func (sb *SpinBox) ConfigWidget(sc *Scene) {
 	sb.ConfigParts(sc)
 }
 
+/*
 // StyleFromProps styles SpinBox-specific fields from ki.Prop properties
 // doesn't support inherit or default
 func (sb *SpinBox) StyleFromProps(props ki.Props, sc *Scene) {
@@ -413,19 +401,7 @@ func (sb *SpinBox) StyleFromProps(props ki.Props, sc *Scene) {
 		sb.PageStep = 10 * sb.Step
 	}
 }
-
-// StyleSpinBox does spinbox styling -- sets StyMu Lock
-func (sb *SpinBox) StyleSpinBox(sc *Scene) {
-	sb.StyMu.Lock()
-	defer sb.StyMu.Unlock()
-
-	sb.ApplyStyleWidget(sc)
-}
-
-func (sb *SpinBox) ApplyStyle(sc *Scene) {
-	sb.StyleSpinBox(sc)
-	sb.ConfigParts(sc)
-}
+*/
 
 func (sb *SpinBox) GetSize(sc *Scene, iter int) {
 	sb.GetSizeParts(sc, iter)
@@ -446,10 +422,3 @@ func (sb *SpinBox) Render(sc *Scene) {
 		sb.PopBounds(sc)
 	}
 }
-
-// func (sb *SpinBox) StateIs(states.Focused) bool {
-// 	if sb.IsDisabled() {
-// 		return false
-// 	}
-// 	return sb.ContainsFocus() // needed for getting key events
-// }

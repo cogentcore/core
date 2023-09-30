@@ -286,7 +286,7 @@ func (w *RenderWin) ConfigInsets() {
 	mainVlay, ok := w.Scene.ChildByName("main-vlay", 0).(*Layout)
 	if ok {
 		insets := w.RenderWin.Insets()
-		mainVlay.AddStyler(func(w *WidgetBase, s *styles.Style) {
+		mainVlay.AddStyles(func(w *WidgetBase, s *styles.Style) {
 			mainVlay.Style.Padding.Set(
 				units.Dot(insets.Top),
 				units.Dot(insets.Right),

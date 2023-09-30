@@ -40,7 +40,7 @@ type SliderPositioner interface {
 // that represents a value, as in a scrollbar, and the scrolling range is size
 // - thumbsize
 //
-//goki:embed
+//goki:embedder
 type SliderBase struct {
 	WidgetBase
 
@@ -214,14 +214,14 @@ const (
 // SliderSelectors are Style selector names for the different states
 var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}
 
-// event functions for this type
-var SliderBaseHandlers = InitWidgetHandlers(&SliderBase{})
-
 func (sb *SliderBase) OnInit() {
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
 	sb.Prec = 9
+	sb.ThumbSize = units.Em(1.5)
+	sb.ThSize = 25.0
+	sb.ThSizeReal = sr.ThSize
 }
 
 // SnapValue snaps the value to step sizes if snap option is set
@@ -254,50 +254,6 @@ func (sb *SliderBase) SetSliderState(state SliderStates) {
 		sb.StyMu.Lock()
 		sb.ApplyStyleWidget(sb.Sc)
 		sb.StyMu.Unlock()
-	}
-}
-
-// SliderPress sets the slider in the down state -- mouse clicked down but
-// not yet up -- emits SliderPress signal
-func (sb *SliderBase) SliderPress(pos float32) {
-	sb.EmitValue = sb.Min - 1.0 // invalid value
-	updt := sb.UpdateStart()
-	sb.SetSliderState(SliderDown)
-	sb.SetSliderPos(pos)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
-	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
-	sb.UpdateEnd(updt)
-}
-
-// SliderRelease called when the slider has just been released -- sends a
-// released signal and returns state to normal, and emits clicked signal if if
-// it was previously in pressed state
-func (sb *SliderBase) SliderRelease() {
-	wasPressed := (sb.State == SliderDown)
-	updt := sb.UpdateStart()
-	sb.SetSliderState(SliderHover)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
-	if wasPressed {
-		sb.EmitNewValue()
-	}
-	sb.UpdateEnd(updt)
-}
-
-// SliderEnterHover slider starting hover
-func (sb *SliderBase) SliderEnterHover() {
-	if sb.State != SliderHover {
-		updt := sb.UpdateStart()
-		sb.SetSliderState(SliderHover)
-		sb.UpdateEnd(updt)
-	}
-}
-
-// SliderExitHover called when slider exiting hover
-func (sb *SliderBase) SliderExitHover() {
-	if sb.State == SliderHover {
-		updt := sb.UpdateStart()
-		sb.SetSliderState(SliderActive)
-		sb.UpdateEnd(updt)
 	}
 }
 
@@ -360,13 +316,6 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		sb.EmitNewValue()
 	}
 	sb.UpdateEnd(updt)
-}
-
-// SliderMove called when slider moved along relevant axis
-func (sb *SliderBase) SliderMove(start, end float32) {
-	del := end - start
-	sb.SetSliderPos(sb.DragPos + del)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value
@@ -432,45 +381,6 @@ func (sb *SliderBase) UpdateThumbValSize() {
 	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
 }
 
-func (sb *SliderBase) KeyInput(kt *events.Key) {
-	if KeyEventTrace {
-		fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
-	}
-	kf := KeyFun(kt.KeyChord())
-	switch kf {
-	case KeyFunMoveUp:
-		sb.SetValueAction(sb.Value - sb.Step)
-		kt.SetHandled()
-	case KeyFunMoveLeft:
-		sb.SetValueAction(sb.Value - sb.Step)
-		kt.SetHandled()
-	case KeyFunMoveDown:
-		sb.SetValueAction(sb.Value + sb.Step)
-		kt.SetHandled()
-	case KeyFunMoveRight:
-		sb.SetValueAction(sb.Value + sb.Step)
-		kt.SetHandled()
-	case KeyFunPageUp:
-		sb.SetValueAction(sb.Value - sb.PageStep)
-		kt.SetHandled()
-	// case KeyFunPageLeft:
-	// 	sb.SetValueAction(sb.Value - sb.PageStep)
-	// 	kt.SetHandled()
-	case KeyFunPageDown:
-		sb.SetValueAction(sb.Value + sb.PageStep)
-		kt.SetHandled()
-	// case KeyFunPageRight:
-	// 	sb.SetValueAction(sb.Value + sb.PageStep)
-	// 	kt.SetHandled()
-	case KeyFunHome:
-		sb.SetValueAction(sb.Min)
-		kt.SetHandled()
-	case KeyFunEnd:
-		sb.SetValueAction(sb.Max)
-		kt.SetHandled()
-	}
-}
-
 // PointToRelPos translates a point in global pixel coords into relative
 // position within node.  This satisfies the SliderPositioner interface.
 func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
@@ -479,104 +389,180 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(sb.ScBBox.Min)
 }
 
-func (sb *SliderBase) MouseDragEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseDrag, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		sbb := AsSliderBase(recv)
-		if sbb.IsDisabled() {
+///////////////////////////////////////////////////////////
+// 	Events
+
+// SliderPress sets the slider in the down state -- mouse clicked down but
+// not yet up -- emits SliderPress signal
+func (sb *SliderBase) SliderPress(pos float32) {
+	sb.EmitValue = sb.Min - 1.0 // invalid value
+	updt := sb.UpdateStart()
+	sb.SetSliderState(SliderDown)
+	sb.SetSliderPos(pos)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
+	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
+	sb.UpdateEnd(updt)
+}
+
+// SliderMove called when slider moved along relevant axis
+func (sb *SliderBase) SliderMove(start, end float32) {
+	del := end - start
+	sb.SetSliderPos(sb.DragPos + del)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
+}
+
+// SliderRelease called when the slider has just been released -- sends a
+// released signal and returns state to normal, and emits clicked signal if if
+// it was previously in pressed state
+func (sb *SliderBase) SliderRelease() {
+	wasPressed := (sb.State == SliderDown)
+	updt := sb.UpdateStart()
+	sb.SetSliderState(SliderHover)
+	// sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
+	if wasPressed {
+		sb.EmitNewValue()
+	}
+	sb.UpdateEnd(updt)
+}
+
+// SliderEnterHover slider starting hover
+func (sb *SliderBase) SliderEnterHover() {
+	if sb.State != SliderHover {
+		updt := sb.UpdateStart()
+		sb.SetSliderState(SliderHover)
+		sb.UpdateEnd(updt)
+	}
+}
+
+// SliderExitHover called when slider exiting hover
+func (sb *SliderBase) SliderExitHover() {
+	if sb.State == SliderHover {
+		updt := sb.UpdateStart()
+		sb.SetSliderState(SliderActive)
+		sb.UpdateEnd(updt)
+	}
+}
+
+func (sb *SliderBase) SliderMouse() {
+	sb.On(events.SliderStart, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
 			return
 		}
-		me.SetHandled()
-		st := sbb.This().(SliderPositioner).PointToRelPos(me.Start)
-		ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
-		if sbb.Dim == mat32.X {
-			sbb.SliderMove(float32(st.X), float32(ed.X))
+		e.SetHandled()
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := &sb.Style
+		// SidesTODO: not sure about dim
+		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		if sb.Dim == mat32.X {
+			sb.SliderPress(float32(ed.X) - spc)
 		} else {
-			sbb.SliderMove(float32(st.Y), float32(ed.Y))
+			sb.SliderPress(float32(ed.Y) - spc)
 		}
 	})
-}
-
-func (sb *SliderBase) MouseEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		sbb := AsSliderBase(recv)
-		if sbb.IsDisabled() {
-			me.SetHandled()
-			sbb.SetSelected(!sbb.StateIs(states.Selected))
-			sbb.EmitSelectedSignal()
-			sbb.UpdateSig()
-		} else {
-			if me.Button == events.Left {
-				me.SetHandled()
-				if me.Action == events.Press {
-					ed := sbb.This().(SliderPositioner).PointToRelPos(me.Where)
-					st := &sbb.Style
-					// SidesTODO: not sure about dim
-					spc := st.EffMargin().Pos().Dim(sbb.Dim) + 0.5*sbb.ThSizeReal
-					if sbb.Dim == mat32.X {
-						sbb.SliderPress(float32(ed.X) - spc)
-					} else {
-						sbb.SliderPress(float32(ed.Y) - spc)
-					}
-				} else {
-					sbb.SliderRelease()
-				}
-			}
-		}
-	})
-}
-
-func (sb *SliderBase) MouseFocusEvent(we *events.Handlers) {
-	we.AddFunc(events.MouseEnter, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := AsSliderBase(recv)
-		if sbb.IsDisabled() {
+	sb.On(events.SliderMove, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
 			return
 		}
-		me := d.(events.Event)
-		me.SetHandled()
-		if me.Action == events.Enter {
-			sbb.SliderEnterHover()
+		e.SetHandled()
+		st := sbb.This().(SliderPositioner).PointToRelPos(e.StartPos())
+		ed := sbb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		if sb.Dim == mat32.X {
+			sb.SliderMove(float32(st.X), float32(ed.X))
 		} else {
-			sbb.SliderExitHover()
+			sb.SliderMove(float32(st.Y), float32(ed.Y))
 		}
 	})
-}
-
-func (sb *SliderBase) MouseScrollEvent(we *events.Handlers) {
-	we.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := AsSliderBase(recv)
-		if sbb.IsDisabled() {
+	sb.On(events.SliderStop, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
 			return
 		}
-		me := d.(*events.Scroll)
-		me.SetHandled()
-		cur := float32(sbb.Pos)
-		if sbb.Dim == mat32.X {
-			sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(true))) // preferX
+		e.SetHandled()
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := &sb.Style
+		// SidesTODO: not sure about dim
+		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		if sb.Dim == mat32.X {
+			sb.SliderPress(float32(ed.X) - spc)
 		} else {
-			sbb.SliderMove(cur, cur-float32(me.NonZeroDelta(false))) // preferY
+			sb.SliderPress(float32(ed.Y) - spc)
 		}
 	})
-}
-
-func (sb *SliderBase) KeyChordEvent(we *events.Handlers) {
-	we.AddFunc(events.KeyChord, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		sbb := AsSliderBase(recv)
-		if sbb.IsDisabled() {
+	sb.On(events.MouseEnter, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
 			return
 		}
-		sbb.KeyInput(d.(*events.Key))
+		e.SetHandled()
+		if e.Action == events.Enter {
+			sb.SliderEnterHover()
+		} else {
+			sb.SliderExitHover()
+		}
+	})
+	sb.On(events.Scroll, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		e.SetHandled()
+		cur := float32(sb.Pos)
+		if sb.Dim == mat32.X {
+			sb.SliderMove(cur, cur+float32(e.NonZeroDelta(true))) // preferX
+		} else {
+			sb.SliderMove(cur, cur-float32(e.NonZeroDelta(false))) // preferY
+		}
 	})
 }
 
-func (sb *SliderBase) SliderEvents(we *events.Handlers) {
-	sb.MouseDragEvent(we)
-	sb.MouseEvent(we)
-	sb.MouseFocusEvent(we)
-	sb.MouseScrollEvent(we)
-	sb.KeyChordEvent(we)
+func (sb *SliderBase) SliderKeys() {
+	sb.On(events.KeyChord, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		if KeyEventTrace {
+			fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
+		}
+		kf := KeyFun(e.KeyChord())
+		switch kf {
+		case KeyFunMoveUp:
+			sb.SetValueAction(sb.Value - sb.Step)
+			e.SetHandled()
+		case KeyFunMoveLeft:
+			sb.SetValueAction(sb.Value - sb.Step)
+			e.SetHandled()
+		case KeyFunMoveDown:
+			sb.SetValueAction(sb.Value + sb.Step)
+			e.SetHandled()
+		case KeyFunMoveRight:
+			sb.SetValueAction(sb.Value + sb.Step)
+			e.SetHandled()
+		case KeyFunPageUp:
+			sb.SetValueAction(sb.Value - sb.PageStep)
+			e.SetHandled()
+		// case KeyFunPageLeft:
+		// 	sb.SetValueAction(sb.Value - sb.PageStep)
+		// 	kt.SetHandled()
+		case KeyFunPageDown:
+			sb.SetValueAction(sb.Value + sb.PageStep)
+			e.SetHandled()
+		// case KeyFunPageRight:
+		// 	sb.SetValueAction(sb.Value + sb.PageStep)
+		// 	kt.SetHandled()
+		case KeyFunHome:
+			sb.SetValueAction(sb.Min)
+			e.SetHandled()
+		case KeyFunEnd:
+			sb.SetValueAction(sb.Max)
+			e.SetHandled()
+		}
+	})
 }
+
+func (sb *SliderBase) SliderBaseHandlers() {
+	sb.SliderMouse()
+	sb.SliderKeys()
+}
+
+///////////////////////////////////////////////////////////
+// 	Config
 
 func (sb *SliderBase) ConfigWidget(sc *Scene) {
 	sb.ConfigSlider(sc)
@@ -689,19 +675,23 @@ type Slider struct {
 	SliderBase
 }
 
-// event functions for this type
-var SliderHandlers = InitWidgetHandlers(&Slider{})
+func (sr *Slider) CopyFieldsFrom(frm any) {
+	fr := frm.(*Slider)
+	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+}
 
 func (sr *Slider) OnInit() {
+	sr.SliderBase.OnInit() // defaults
+	sr.SliderBaseHandlers()
+	sr.SliderStyles()
+}
+
+func (sr *Slider) SliderStyles() {
 	sr.ThumbSize = units.Em(1.5)
 	sr.ThSize = 25.0
 	sr.ThSizeReal = sr.ThSize
-	sr.Step = 0.1
-	sr.PageStep = 0.2
-	sr.Max = 1.0
-	sr.Prec = 9
 
-	sr.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	sr.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
@@ -729,7 +719,7 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -738,10 +728,6 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 		}
 	}
 
-}
-func (sr *Slider) CopyFieldsFrom(frm any) {
-	fr := frm.(*Slider)
-	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
 func (sr *Slider) ConfigWidget(sc *Scene) {
@@ -833,13 +819,6 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	}
 }
 
-func (sr *Slider) SetTypeHandlers(we *events.Handlers) {
-	sr.SliderEvents(we)
-}
-
-func (sr *Slider) HandleEvent(ev events.Event) {
-}
-
 func (sr *Slider) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
@@ -863,19 +842,22 @@ type ScrollBar struct {
 	SliderBase
 }
 
-// event functions for this type
-var ScrollBarHandlers = InitWidgetHandlers(&ScrollBar{})
+func (sb *ScrollBar) CopyFieldsFrom(frm any) {
+	fr := frm.(*ScrollBar)
+	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+}
 
 func (sb *ScrollBar) OnInit() {
 	sb.SliderBase.OnInit()
+	sb.SliderBaseHandlers()
+	sb.ScrollBarStyles()
+}
+
+func (sb *ScrollBar) ScrollBarStyles() {
 	sb.ValThumb = true
 	sb.ThumbSize = units.Ex(1)
-	sb.Step = 0.1
-	sb.PageStep = 0.2
-	sb.Max = 1.0
-	sb.Prec = 9
 
-	sb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	sb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
@@ -885,11 +867,6 @@ func (sb *ScrollBar) OnInit() {
 		s.Border.Radius = styles.BorderRadiusFull
 		// STYTODO: state styles
 	})
-}
-
-func (sb *ScrollBar) CopyFieldsFrom(frm any) {
-	fr := frm.(*ScrollBar)
-	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
 }
 
 func (sb *ScrollBar) ConfigWidget(sc *Scene) {
@@ -952,13 +929,6 @@ func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
 	sb.RenderBoxImpl(sc, pos, sz, st.Border)
 }
 
-func (sb *ScrollBar) SetTypeHandlers(we *events.Handlers) {
-	sb.SliderEvents(we)
-}
-
-func (sb *ScrollBar) HandleEvent(ev events.Event) {
-}
-
 func (sb *ScrollBar) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
@@ -996,26 +966,20 @@ type ProgressBar struct {
 	ProgMu sync.Mutex `desc:"mutex for updating progress"`
 }
 
-// event functions for this type
-var ProgressBarHandlers = InitWidgetHandlers(&ProgressBar{})
+func (pb *ProgressBar) CopyFieldsFrom(frm any) {
+	fr := frm.(*ProgressBar)
+	pb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+}
 
 func (pb *ProgressBar) OnInit() {
-	pb.ScrollBar.OnInit()
+	pb.ScrollBar.OnInit() // use same handlers etc
+
 	pb.Dim = mat32.X
 	pb.ValThumb = true
 	pb.ThumbVal = 1
 	pb.Value = 0
 	pb.ThumbSize = units.Ex(1)
-	pb.Step = 0.1
-	pb.PageStep = 0.2
-	pb.Max = 1.0
-	pb.Prec = 9
-	pb.SetFlag(true, Disabled) // TODO: this shouldn't be disabled, just read only
-}
-
-func (pb *ProgressBar) CopyFieldsFrom(frm any) {
-	fr := frm.(*ProgressBar)
-	pb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
+	pb.Style.State.SetFlag(true, states.ReadOnly) // TODO: this shouldn't be disabled, just read only
 }
 
 func ProgressDefaultInc(max int) int {

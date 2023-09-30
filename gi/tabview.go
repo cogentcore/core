@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -27,7 +26,7 @@ import (
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
 //
-//goki:embed
+//goki:embedder
 type TabView struct {
 	Layout
 
@@ -50,11 +49,25 @@ type TabView struct {
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
-// event functions for this type
-var TabViewHandlers = InitWidgetHandlers(&TabView{})
+func (tv *TabView) CopyFieldsFrom(frm any) {
+	fr := frm.(*TabView)
+	tv.Layout.CopyFieldsFrom(&fr.Layout)
+	tv.MaxChars = fr.MaxChars
+	tv.NewTabButton = fr.NewTabButton
+	tv.NewTabType = fr.NewTabType
+}
 
 func (tv *TabView) OnInit() {
-	tv.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	tv.TabViewHandlers()
+	tv.TabViewStyles()
+}
+
+func (tv *TabView) TabViewHandlers() {
+	tv.LayoutHandlers()
+}
+
+func (tv *TabView) TabViewStyles() {
+	tv.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(styles.BorderSolid)
@@ -71,7 +84,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "tabs":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.SetStretchMaxWidth()
 				s.Height.SetEm(1.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
@@ -88,21 +101,13 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 		case "frame":
 			frame := child.(*Frame)
 			frame.StackTopOnly = true // key for allowing each tab to have its own size
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.SetMinPrefWidth(units.Em(10))
 				s.SetMinPrefHeight(units.Em(6))
 				s.SetStretchMax()
 			})
 		}
 	}
-}
-
-func (tv *TabView) CopyFieldsFrom(frm any) {
-	fr := frm.(*TabView)
-	tv.Layout.CopyFieldsFrom(&fr.Layout)
-	tv.MaxChars = fr.MaxChars
-	tv.NewTabButton = fr.NewTabButton
-	tv.NewTabType = fr.NewTabType
 }
 
 // NTabs returns number of tabs
@@ -539,9 +544,6 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) HandleEvent(ev events.Event) {
-}
-
 func (tv *TabView) Render(sc *Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderScrolls(sc)
@@ -563,11 +565,13 @@ type TabButton struct {
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
-// event functions for this type
-var TabButtonHandlers = InitWidgetHandlers(&TabButton{})
-
 func (tb *TabButton) OnInit() {
-	tb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+	tb.ActionHandlers()
+	tb.TabButtonStyles()
+}
+
+func (tb *TabButton) TabButtonStyles() {
+	tb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetPx(500)
@@ -606,11 +610,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "Parts":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "icon":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -619,16 +623,16 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		case "label":
 			label := child.(*Label)
 			label.Type = LabelTitleSmall
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "close-stretch":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetCh(1)
 			})
 		case "close":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Width.SetEx(0.5)
 				s.Height.SetEx(0.5)
 				s.Margin.Set()
@@ -638,11 +642,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "sc-stretch":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		case "shortcut":
-			wb.AddStyler(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
@@ -656,9 +660,6 @@ func (tb *TabButton) TabView() *TabView {
 		return nil
 	}
 	return AsTabView(tv)
-}
-
-func (tb *TabButton) HandleEvent(ev events.Event) {
 }
 
 func (tb *TabButton) ConfigParts(sc *Scene) {

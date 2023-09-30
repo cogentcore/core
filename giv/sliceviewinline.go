@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -49,7 +50,7 @@ type SliceViewInline struct {
 }
 
 func (sv *SliceViewInline) OnInit() {
-	sv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+	sv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 		s.MinWidth.SetCh(20)
 	})
 }
@@ -60,7 +61,7 @@ func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
 		case "Parts":
 			parts := child.(*gi.Layout)
 			parts.Lay = gi.LayoutHoriz
-			w.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		}
