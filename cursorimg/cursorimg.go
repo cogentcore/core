@@ -10,6 +10,8 @@ import (
 	"image"
 	_ "image/png"
 
+	"log/slog"
+
 	"goki.dev/cursors"
 	"goki.dev/enums"
 )
@@ -57,9 +59,14 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading PNG file for cursor %q: %w", name, err)
 	}
+	hot, ok := cursors.Hotspots[cursor]
+	if !ok {
+		slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
+		hot = image.Pt(16, 16)
+	}
 	return &Cursor{
 		Image:   img,
-		Hotspot: cursors.Hotspots[cursor],
+		Hotspot: hot,
 	}, nil
 
 	// TODO: render from SVG at some point
