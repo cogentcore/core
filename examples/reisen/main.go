@@ -19,8 +19,6 @@ import (
 )
 
 const (
-	width                             = 320
-	height                            = 240
 	frameBufferSize                   = 1024
 	sampleRate                        = 44100
 	channelCount                      = 2
