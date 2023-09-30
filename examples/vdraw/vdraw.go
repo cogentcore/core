@@ -83,7 +83,7 @@ func main() {
 		}
 		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
 		drw.Scale(stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
-		drw.Copy(stoff, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
+		// drw.Copy(stoff, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
 		drw.EndDraw()
 	}
 
