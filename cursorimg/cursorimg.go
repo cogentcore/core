@@ -36,8 +36,17 @@ func Get(name string, size int) (*Cursor, error) {
 		return c, nil
 	}
 
-	// TODO: support sizes
-	f, err := cursors.Cursors.Open("png/mc/" + name + ".png")
+	// TODO: maybe support more sizes
+	dir := ""
+	switch size {
+	case 32:
+		dir = "32"
+	case 64:
+		dir = "64"
+	default:
+		return nil, fmt.Errorf("invalid cursor size %d; expected 32 or 64", size)
+	}
+	f, err := cursors.Cursors.Open("png/" + dir + "/" + name + ".png")
 	if err != nil {
 		return nil, fmt.Errorf("error opening PNG file for cursor %q: %w", name, err)
 	}
@@ -50,6 +59,7 @@ func Get(name string, size int) (*Cursor, error) {
 		Image: img,
 	}, nil
 
+	// TODO: render from SVG at some point
 	// sv := svg.NewSVG(size, size)
 	// err := sv.OpenFS(cursors.Cursors, "svg/"+name+".svg") // TODO: support custom cursors
 	// if err != nil {
