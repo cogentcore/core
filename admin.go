@@ -64,8 +64,8 @@ func SetParent(kid Ki, parent Ki) {
 			if li < 0 {
 				slog.Error("programmer/internal error: type name missing '.' character", "type", tpnm)
 			} else {
-				kebab := strcase.ToKebab(tpnm[li+1:]) // need to get rid of "."
-				kid.SetName(kebab + "-" + strconv.FormatUint(c, 10))
+				kebab := strcase.ToKebab(tpnm[li+1:])                  // need to get rid of "."
+				kid.SetName(kebab + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
 			}
 		}
 	}

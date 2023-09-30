@@ -833,8 +833,9 @@ func TestAutoTypeName(t *testing.T) {
 
 	child := root.NewChild(NodeType, "")
 	nm := child.Name()
-	if nm != "node-1" {
-		t.Errorf("expected name %q for auto node name, but got %q", "node-1", nm)
+	want := "node-0"
+	if nm != want {
+		t.Errorf("expected name %q for auto node name, but got %q", want, nm)
 	}
 }
 
