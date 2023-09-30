@@ -7,7 +7,6 @@ package styles
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"strings"
 
 	"log/slog"
@@ -40,19 +39,8 @@ type Sides[T any] struct {
 
 // NewSides is a helper that creates new sides/corners of the given type
 // and calls Set on them with the given values.
-// It does not return any error values and just logs them.
-func NewSides[T any](vals ...T) Sides[T] {
-	sides, _ := NewSidesTry[T](vals...)
-	return sides
-}
-
-// NewSidesTry is a helper that creates new sides/corners of the given type
-// and calls Set on them with the given values.
-// It returns an error value if there is one.
-func NewSidesTry[T any](vals ...T) (Sides[T], error) {
-	sides := Sides[T]{}
-	err := sides.Set(vals...)
-	return sides, err
+func NewSides[T any](vals ...T) *Sides[T] {
+	return (&Sides[T]{}).Set(vals...)
 }
 
 // Set sets the values of the sides/corners from the given list of 0 to 4 values.
@@ -67,13 +55,11 @@ func NewSidesTry[T any](vals ...T) (Sides[T], error) {
 // the right/top-right is set to the second value, the bottom/bottom-right is set
 // to the third value, and the left/bottom-left is set to the fourth value.
 // If more than 4 values are provided, the behavior is the same
-// as with 4 values, but Set also logs and returns
-// an error. This error is not critical and does not need to be
-// handled, as the values are still set, but it can be if wished.
+// as with 4 values, but Set also logs a programmer error.
 // This behavior is based on the CSS multi-side/corner setting syntax,
 // like that with padding and border-radius (see https://www.w3schools.com/css/css_padding.asp
 // and https://www.w3schools.com/cssref/css3_pr_border-radius.php)
-func (s *Sides[T]) Set(vals ...T) error {
+func (s *Sides[T]) Set(vals ...T) *Sides[T] {
 	switch len(vals) {
 	case 0:
 		var zval T
@@ -97,11 +83,9 @@ func (s *Sides[T]) Set(vals ...T) error {
 		s.Right = vals[1]
 		s.Bottom = vals[2]
 		s.Left = vals[3]
-		err := fmt.Errorf("programmer error: sides.Set: expected 0 to 4 values, but got %d", len(vals))
-		slog.Error(err.Error())
-		return err
+		slog.Error(fmt.Sprintf("programmer error: sides.Set: expected 0 to 4 values, but got %d", len(vals)))
 	}
-	return nil
+	return s
 }
 
 // SetVert sets the values for the sides/corners in the
@@ -192,17 +176,18 @@ func (s *Sides[T]) SetString(str string) error {
 		ss, ok := any(&vals[i]).(SetStringer)
 		if !ok {
 			err := fmt.Errorf("(Sides).SetString('%s'): to set from a string, the sides type (%T) must implement SetStringer (needs SetString(str string) error function)", str, s)
-			log.Println(err)
+			slog.Error(err.Error())
 			return err
 		}
 		err := ss.SetString(field)
 		if err != nil {
 			nerr := fmt.Errorf("(Sides).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
-			log.Println(nerr)
+			slog.Error(nerr.Error())
 			return nerr
 		}
 	}
-	return s.Set(vals...)
+	s.Set(vals...)
+	return nil
 }
 
 // SideValues contains units.Value values for each side/corner of a box
@@ -212,19 +197,10 @@ type SideValues struct {
 
 // NewSideValues is a helper that creates new side/corner values
 // and calls Set on them with the given values.
-// It does not return any error values and just logs them.
 func NewSideValues(vals ...units.Value) SideValues {
-	sides, _ := NewSideValuesTry(vals...)
-	return sides
-}
-
-// NewSideValuesTry is a helper that creates new side/corner
-// values and calls Set on them with the given values.
-// It returns an error value if there is one.
-func NewSideValuesTry(vals ...units.Value) (SideValues, error) {
 	sides := Sides[units.Value]{}
-	err := sides.Set(vals...)
-	return SideValues{Sides: sides}, err
+	sides.Set(vals...)
+	return SideValues{sides}
 }
 
 // ToDots converts the values for each of the sides/corners
@@ -257,19 +233,10 @@ type SideFloats struct {
 
 // NewSideFloats is a helper that creates new side/corner floats
 // and calls Set on them with the given values.
-// It does not return any error values and just logs them.
 func NewSideFloats(vals ...float32) SideFloats {
-	sides, _ := NewSideFloatsTry(vals...)
-	return sides
-}
-
-// NewSideFloatsTry is a helper that creates new side/corner floats
-// and calls Set on them with the given values.
-// It returns an error value if there is one.
-func NewSideFloatsTry(vals ...float32) (SideFloats, error) {
 	sides := Sides[float32]{}
-	err := sides.Set(vals...)
-	return SideFloats{Sides: sides}, err
+	sides.Set(vals...)
+	return SideFloats{sides}
 }
 
 // Add adds the side floats to the
@@ -356,17 +323,9 @@ type SideColors struct {
 // and calls Set on them with the given values.
 // It does not return any error values and just logs them.
 func NewSideColors(vals ...color.RGBA) SideColors {
-	sides, _ := NewSideColorsTry(vals...)
-	return sides
-}
-
-// NewSideColorsTry is a helper that creates new side/corner colors
-// and calls Set on them with the given values.
-// It returns an error value if there is one.
-func NewSideColorsTry(vals ...color.RGBA) (SideColors, error) {
 	sides := Sides[color.RGBA]{}
-	err := sides.Set(vals...)
-	return SideColors{Sides: sides}, err
+	sides.Set(vals...)
+	return SideColors{sides}
 }
 
 // SetAny sets the sides/corners from the given value of any type
@@ -400,12 +359,13 @@ func (s *SideColors) SetString(str string, base color.Color) error {
 		clr, err := colors.FromString(field, base)
 		if err != nil {
 			nerr := fmt.Errorf("(SideColors).SetString('%s'): error setting sides of type %T from string: %w", str, s, err)
-			log.Println(nerr)
+			slog.Error(nerr.Error())
 			return nerr
 		}
 		vals[i] = clr
 	}
-	return s.Set(vals...)
+	s.Set(vals...)
+	return nil
 }
 
 // AllSame returns whether all of the sides/corners are the same
