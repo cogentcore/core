@@ -17,11 +17,11 @@ import (
 	"sync"
 
 	vk "github.com/goki/vulkan"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
-	mapp "goki.dev/mobile/app"
 	"goki.dev/mobile/event/size"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -57,6 +57,7 @@ type appImpl struct {
 	quitReqFunc   func()
 	quitCleanFunc func()
 	darkMode      bool
+	insets        styles.SideFloats
 }
 
 var mainCallback func(goosi.App)
@@ -441,12 +442,4 @@ func (app *appImpl) Quit() {
 	}
 	app.QuitClean()
 	app.stopMain()
-}
-
-func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
-	app.mobapp.ShowVirtualKeyboard(mapp.KeyboardType(typ))
-}
-
-func (app *appImpl) HideVirtualKeyboard() {
-	app.mobapp.HideVirtualKeyboard()
 }

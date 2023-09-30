@@ -56,6 +56,7 @@ import (
 	"time"
 	"unsafe"
 
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/mobile/app/internal/callfn"
 	"goki.dev/mobile/event/key"
@@ -299,11 +300,11 @@ func main(f func(App)) {
 	}
 }
 
-// driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard(keyboard KeyboardType) {
+// ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
+func (a *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
 	err := mobileinit.RunOnJVM(func(vm, jniEnv, ctx uintptr) error {
 		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showKeyboard(env, C.int(int32(keyboard)))
+		C.showKeyboard(env, C.int(int32(typ)))
 		return nil
 	})
 	if err != nil {
@@ -311,8 +312,8 @@ func driverShowVirtualKeyboard(keyboard KeyboardType) {
 	}
 }
 
-// driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func driverHideVirtualKeyboard() {
+// HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
+func (a *appImpl) HideVirtualKeyboard() {
 	if err := mobileinit.RunOnJVM(hideSoftInput); err != nil {
 		log.Fatalf("app: %v", err)
 	}
@@ -338,7 +339,7 @@ func filePickerReturned(str *C.char) {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight = top, bottom, left, right
+	theApp.insets.Set(top, right, bottom, left)
 }
 
 func mimeStringFromFilter(filter *FileFilter) string {
