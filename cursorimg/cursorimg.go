@@ -37,7 +37,7 @@ func Get(name string, size int) (*Cursor, error) {
 	}
 
 	// TODO: support sizes
-	f, err := cursors.Cursors.Open("png/32/" + name + ".png")
+	f, err := cursors.Cursors.Open("png/mc/" + name + ".png")
 	if err != nil {
 		return nil, fmt.Errorf("error opening PNG file for cursor %q: %w", name, err)
 	}
