@@ -4,13 +4,9 @@
 
 package events
 
-// Note: see GoGi Handlers for event handlers that are registered
-// _once for each type_ and called with a receiver object.
-
 // Listeners registers lists of event listener functions
 // to receive different event types.
-// Listeners are closure methods with all context captured,
-// registered on specific objects.
+// Listeners are closure methods with all context captured.
 type Listeners map[Types][]func(ev Event)
 
 // Init ensures that map is constructed

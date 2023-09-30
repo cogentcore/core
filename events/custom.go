@@ -28,5 +28,5 @@ func (ce CustomEvent) HasPos() bool {
 }
 
 func (ce CustomEvent) Pos() image.Point {
-	return ce.Where
+	return ce.Pos()
 }

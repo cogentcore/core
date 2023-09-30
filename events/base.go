@@ -95,6 +95,10 @@ func (ev Base) Type() Types {
 	return ev.Typ
 }
 
+func (ev *Base) AsBase() *Base {
+	return ev
+}
+
 func (ev Base) IsSame(oth Event) bool {
 	return ev.Typ == oth.Type() // basic check.  redefine in subtypes
 }
@@ -207,6 +211,11 @@ func (ev Base) MouseButton() Buttons {
 	return ev.Button
 }
 
+// Modifiers returns the modifier keys present at time of event
+func (ev Base) Modifiers() key.Modifiers {
+	return ev.Mods
+}
+
 func (ev Base) KeyRune() rune {
 	return ev.Rune
 }
@@ -221,4 +230,11 @@ func (ev Base) KeyCode() key.Codes {
 // the "Code" prefix.
 func (ev Base) KeyChord() key.Chord {
 	return key.NewChord(ev.Rune, ev.Code, ev.Mods)
+}
+
+func (ev Base) Clone() Event {
+	nb := &Base{}
+	*nb = ev
+	nb.Flags.SetFlag(false, Handled)
+	return nb
 }

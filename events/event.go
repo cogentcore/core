@@ -52,6 +52,10 @@ type Event interface {
 	// Type returns the type of event associated with given event
 	Type() Types
 
+	// AsBase returns this event as a Base event type,
+	// which is used for most Event types.
+	AsBase() *Base
+
 	// IsUnique returns true if this event must always be sent,
 	// even if the last event sent is of the same type.
 	// This is true for Key, MouseButton,
@@ -112,6 +116,11 @@ type Event interface {
 	// Init sets the time to now, and any other init -- done just prior to event delivery
 	Init()
 
+	// Clone returns a duplicate of this event with the basic event parameters
+	// copied (specialized Event types have their own CloneX methods)
+	// and the Handled flag is reset.  This is suitable for repurposing.
+	Clone() Event
+
 	// SetTime sets the event time to Now
 	SetTime()
 
@@ -124,6 +133,9 @@ type Event interface {
 
 	// SelectMode returns the selection mode based on given modifiers on event
 	SelectMode() SelectModes
+
+	// Modifiers returns the modifier keys present at time of event
+	Modifiers() key.Modifiers
 
 	// Rune is the meaning of the key event as determined by the
 	// operating system. The mapping is determined by system-dependent
