@@ -7,12 +7,9 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/color"
-	"image/draw"
 	_ "image/jpeg"
 	_ "image/png"
 	"log"
-	"math/rand"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -89,51 +86,21 @@ func main() {
 	drw.SyncImages()
 
 	rendImgs := func(idx int) {
-		descIdx := 0
-		if idx+stoff >= vgpu.MaxTexturesPerSet {
-			descIdx = 1
-		}
-		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
-		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
-		for i := range videoFiles {
-			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			dp := image.Point{i * 50, i * 50}
-			drw.Copy(i+stoff, 0, dp, image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.StartDraw(0) // specifically starting with correct descIdx is key..
+		drw.Scale(0, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
+		for range videoFiles {
+			drw.Copy(0, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
 		}
 		drw.EndDraw()
 	}
 
 	_ = rendImgs
 
-	red := color.RGBA{255, 0, 0, 255}
-	green := color.RGBA{0, 255, 0, 255}
-	blue := color.RGBA{0, 0, 255, 255}
-
-	colors := []color.Color{color.White, color.Black, red, green, blue}
-
-	fillRnd := func() {
-		nclr := len(colors)
-		drw.StartFill()
-		for i := 0; i < 5; i++ {
-			sp := image.Point{rand.Intn(500), rand.Intn(500)}
-			sz := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.FillRect(colors[i%nclr], image.Rectangle{Min: sp, Max: sp.Add(sz)}, draw.Src)
-		}
-		drw.EndFill()
-	}
-
 	frameCount := 0
 	stTime := time.Now()
 
 	renderFrame := func() {
-		fcr := frameCount % 4
-		_ = fcr
-		switch {
-		case fcr < 3:
-			rendImgs(fcr)
-		default:
-			fillRnd()
-		}
+		rendImgs(frameCount)
 		frameCount++
 
 		eTime := time.Now()
