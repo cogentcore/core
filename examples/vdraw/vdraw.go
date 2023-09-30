@@ -71,7 +71,7 @@ func main() {
 	stoff := 15 // causes images to wrap around sets, so this tests that..
 
 	rendImgs := func(idx int) {
-		img, err := video.ReadFrame("../videos/countdown.mp4", idx)
+		img, err := video.ReadFrame("../videos/deer.mp4", idx)
 		if err != nil {
 			panic(err)
 		}
