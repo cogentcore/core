@@ -17,7 +17,7 @@ import (
 // of the cursor and its hot spot.
 type Cursor struct {
 	Image   image.Image
-	HotSpot image.Point
+	Hotspot image.Point
 }
 
 // Cursors contains all of the cached rendered cursors, specified first
