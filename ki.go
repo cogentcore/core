@@ -246,8 +246,8 @@ type Ki interface {
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
-	// NewChild creates a new child of given type and
-	// add at end of children list.
+	// NewChild creates a new child of the given type and
+	// adds it at end of children list.
 	// The name should be unique among children.
 	// No UpdateStart / End wrapping is done: do that externally as needed.
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
