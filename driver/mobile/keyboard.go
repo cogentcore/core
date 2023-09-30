@@ -1,7 +1,10 @@
 package app
 
 import "C"
-import "goki.dev/mobile/event/key"
+import (
+	"goki.dev/goosi/events"
+	"goki.dev/mobile/event/key"
+)
 
 // KeyboardType represents the type of a keyboard
 type KeyboardType int32
@@ -18,7 +21,7 @@ const (
 //export keyboardTyped
 func keyboardTyped(str *C.char) {
 	for _, r := range C.GoString(str) {
-		k := key.Event{
+		k := events.Key{
 			Rune:      r,
 			Code:      getCodeFromRune(r),
 			Direction: key.DirPress,
@@ -32,11 +35,11 @@ func keyboardTyped(str *C.char) {
 
 //export keyboardDelete
 func keyboardDelete() {
-	theApp.eventsIn <- key.Event{
+	theApp.eventsIn <- events.Key{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirPress,
 	}
-	theApp.eventsIn <- key.Event{
+	theApp.eventsIn <- events.Key{
 		Code:      key.CodeDeleteBackspace,
 		Direction: key.DirRelease,
 	}

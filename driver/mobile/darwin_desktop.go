@@ -29,6 +29,7 @@ import (
 	"runtime"
 	"unsafe"
 
+	"goki.dev/goosi/events"
 	"goki.dev/mobile/event/key"
 	"goki.dev/mobile/event/lifecycle"
 	"goki.dev/mobile/event/paint"
@@ -175,7 +176,7 @@ func eventKey(runeVal int32, direction uint8, code uint16, flags uint32) {
 		}
 	}
 
-	theApp.events.In() <- key.Event{
+	theApp.events.In() <- events.Key{
 		Rune:      convRune(rune(runeVal)),
 		Code:      convVirtualKeyCode(code),
 		Modifiers: modifiers,

@@ -63,7 +63,7 @@ func (ch Chord) Decode() (r rune, mods Modifiers, err error) {
 	if len(rs) == 1 {
 		r = rs[0]
 	} else {
-		err = fmt.Errorf("goosi/key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
+		err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
 	}
 	return
 }

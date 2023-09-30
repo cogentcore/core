@@ -60,7 +60,7 @@ func NewMouse(typ Types, but Buttons, where image.Point, mods key.Modifiers) *Mo
 
 // NewEventCopy makes a new copy of an existing event.
 // it resets the Handled flag.
-// func NewEventCopy(typ goosi.EventTypes, cp *Event) *Mouse {
+// func NewEventCopy(typ events.Types, cp *Event) *Mouse {
 // 	ev := &Mouse{}
 // 	*ev = *cp
 // 	ev.Typ = typ

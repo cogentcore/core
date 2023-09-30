@@ -63,6 +63,7 @@ import (
 	"time"
 	"unsafe"
 
+	"goki.dev/goosi/events"
 	"goki.dev/mobile/app/internal/callfn"
 	"goki.dev/mobile/event/key"
 	"goki.dev/mobile/event/lifecycle"
@@ -581,7 +582,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		return
 	}
 
-	k := key.Event{
+	k := events.Key{
 		Rune: rune(C.getKeyRune(env, e)),
 		Code: convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e))),
 	}

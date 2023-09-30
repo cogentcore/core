@@ -138,7 +138,7 @@ func newVkWindow(opts *goosi.NewWindowOptions, sc *goosi.Screen) (*glfw.Window, 
 	return win, err
 }
 
-// NextEvent implements the goosi.EventDeque interface.
+// NextEvent implements the events.EventDeque interface.
 func (w *windowImpl) NextEvent() events.Event {
 	e := w.Deque.NextEvent()
 	return e

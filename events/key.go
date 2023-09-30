@@ -10,9 +10,9 @@ import (
 	"goki.dev/goosi/events/key"
 )
 
-// key.Event is a low-level immediately-generated key event, tracking press
+// events.Key is a low-level immediately-generated key event, tracking press
 // and release of keys -- suitable for fine-grained tracking of key events --
-// see also key.Event for events that are generated only on key press,
+// see also events.Key for events that are generated only on key press,
 // and that include the full chord information about all the modifier keys
 // that were present when a non-modifier key was released
 type Key struct {

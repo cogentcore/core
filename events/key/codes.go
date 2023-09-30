@@ -171,7 +171,7 @@ const (
 
 // TODO: Given we use runes outside the unicode space, should we provide a
 // printing function? Related: it's a little unfortunate that printing a
-// key.Event with %v gives not very readable output like:
+// events.Key with %v gives not very readable output like:
 //	{100 7 key.Modifiers() Press}
 
 var CodeRuneMap = map[Codes]rune{
