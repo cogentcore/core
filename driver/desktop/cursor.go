@@ -36,7 +36,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	if err != nil {
 		return err
 	}
-	gc := glfw.CreateCursor(ci.Image, ci.HotSpot.X, ci.HotSpot.Y)
+	gc := glfw.CreateCursor(ci.Image, ci.Hotspot.X, ci.Hotspot.Y)
 	sm[c.Size] = gc
 	theApp.ctxtwin.glw.SetCursor(gc)
 	return nil
