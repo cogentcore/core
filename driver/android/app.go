@@ -21,7 +21,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
-	"goki.dev/goosi/window"
 	mapp "goki.dev/mobile/app"
 	"goki.dev/mobile/event/size"
 	"goki.dev/vgpu/v2/vdraw"
@@ -108,13 +107,14 @@ func (app *appImpl) SendEmptyEvent() {
 // PollEventsOnMain does the equivalent of the mainLoop but using PollEvents
 // and returning when there are no more events.
 func (app *appImpl) PollEventsOnMain() {
-
+	// TODO: implement?
 }
 
 // PollEvents tells the main event loop to check for any gui events right now.
 // Call this periodically from longer-running functions to ensure
 // GUI responsiveness.
 func (app *appImpl) PollEvents() {
+	// TODO: implement?
 }
 
 // stopMain stops the main loop and thus terminates the app
@@ -177,31 +177,14 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 			break
 		}
 	}
-	app.mu.Lock()
-	defer app.mu.Unlock()
-	if app.windows == nil {
-		app.windows = []*windowImpl{}
-	}
-	for _, win := range app.windows {
-		win.isVisible = false
-		win.focus(false)
-	}
-	win := &windowImpl{
-		app:       app,
-		isVisible: true,
-	}
-	app.windows = append(app.windows, win)
-	win.focus(true)
-	// if the size event doesn't yet exist (ie: this is probably the first window),
-	// this will get handled later in the event loop.
-	// if not (ie: probably a new window), we need to handle it here.
-	if len(app.windows) != 0 {
-		app.getScreen()
-		goosi.InitScreenLogicalDPIFunc()
-		win.LogDPI = app.screens[0].LogicalDPI
-		win.sendWindowEvent(window.ScreenUpdate)
-	}
-	return win, nil
+	// TODO: do we need to do this?
+	// app.mu.Lock()
+	// defer app.mu.Unlock()
+	// app.getScreen()
+	// goosi.InitScreenLogicalDPIFunc()
+	// app.window.LogDPI = app.screens[0].LogicalDPI
+	// app.window.sendWindowEvent(window.ScreenUpdate)
+	return app.window, nil
 }
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer
@@ -232,9 +215,6 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
-	log.Println("set window pointer to", app.winptr)
-	log.Println("total number of windows:", len(app.windows))
-
 	return nil
 }
 
@@ -245,11 +225,12 @@ func (app *appImpl) setScreen(sc *goosi.Screen) {
 	app.screens[0] = sc
 }
 
-func (app *appImpl) getScreen() {
+// updateScreen gets the size information from [app.sizeEvent],
+// updates the window sizing information, and then calls [setScreen].
+func (app *appImpl) updateScreen() {
 	physX, physY := units.Pt(float32(app.sizeEvent.WidthPt)), units.Pt(float32(app.sizeEvent.HeightPt))
 	physX.Convert(units.UnitMm, &units.Context{})
 	physY.Convert(units.UnitMm, &units.Context{})
-	fmt.Println("pixels per pt", app.sizeEvent.PixelsPerPt)
 	sc := &goosi.Screen{
 		ScreenNumber: 0,
 		Geometry:     app.sizeEvent.Bounds(),
@@ -260,16 +241,14 @@ func (app *appImpl) getScreen() {
 
 		Orientation: goosi.ScreenOrientation(app.sizeEvent.Orientation),
 	}
-	for _, win := range app.windows {
-		win.PhysDPI = 36 * app.sizeEvent.PixelsPerPt
-		win.PxSize = app.sizeEvent.Size()
-		win.WnSize = win.PxSize
-	}
+	app.window.PhysDPI = 36 * app.sizeEvent.PixelsPerPt
+	app.window.PxSize = app.sizeEvent.Size()
+	app.window.WnSize = app.window.PxSize
 	app.setScreen(sc)
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
-	return
+	// TODO: implement?
 }
 
 func (app *appImpl) NScreens() int {
@@ -300,7 +279,10 @@ func (app *appImpl) NoScreens() bool {
 func (app *appImpl) NWindows() int {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	return len(app.windows)
+	if app.window != nil {
+		return 1
+	}
+	return 0
 }
 
 func (app *appImpl) Window(win int) goosi.Window {
@@ -315,10 +297,8 @@ func (app *appImpl) Window(win int) goosi.Window {
 func (app *appImpl) WindowByName(name string) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	for _, window := range app.windows {
-		if window.Name() == name {
-			return window
-		}
+	if app.window.Name() == name {
+		return app.window
 	}
 	return nil
 }
@@ -326,28 +306,16 @@ func (app *appImpl) WindowByName(name string) goosi.Window {
 func (app *appImpl) WindowInFocus() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	for _, window := range app.windows {
-		if window.IsFocus() {
-			return window
-		}
+	if app.window.IsFocus() {
+		return app.window
 	}
 	return nil
-}
-
-// waitWindowInFocus waits until there is a window in focus and then returns it
-func (app *appImpl) waitWindowInFocus() goosi.Window {
-	for {
-		win := app.WindowInFocus()
-		if win != nil {
-			return win
-		}
-	}
 }
 
 func (app *appImpl) ContextWindow() goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	return app.windows[0]
+	return app.window
 }
 
 func (app *appImpl) Name() string {
@@ -395,12 +363,13 @@ func (app *appImpl) Platform() goosi.Platforms {
 }
 
 func (app *appImpl) OpenURL(url string) {
-
+	// TODO: implement
 }
 
 // SrcDir tries to locate dir in GOPATH/src/ or GOROOT/src/pkg/ and returns its
 // full path. GOPATH may contain a list of paths.  From Robin Elkind github.com/mewkiz/pkg
 func SrcDir(dir string) (absDir string, err error) {
+	// TODO: does this make sense?
 	for _, srcDir := range build.Default.SrcDirs() {
 		absDir = filepath.Join(srcDir, dir)
 		finfo, err := os.Stat(absDir)
@@ -412,6 +381,7 @@ func SrcDir(dir string) (absDir string, err error) {
 }
 
 func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
+	// TODO: implement
 	// app.mu.Lock()
 	// app.ctxtwin = win.(*windowImpl)
 	// app.mu.Unlock()
@@ -420,7 +390,7 @@ func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
 }
 
 func (app *appImpl) Cursor(win goosi.Window) cursor.Cursor {
-	return &theCursor
+	return &cursor.CursorBase{} // no-op
 }
 
 func (app *appImpl) SetQuitReqFunc(fun func()) {
@@ -447,6 +417,7 @@ func (app *appImpl) IsQuitting() bool {
 }
 
 func (app *appImpl) QuitClean() {
+	// TODO: implement?
 	// app.quitting = true
 	// if app.quitCleanFunc != nil {
 	// 	app.quitCleanFunc()
