@@ -14,6 +14,13 @@ type Type struct {
 	// Name is the fully package-path-qualified name of the type (eg: goki.dev/gi/v2/gi.Button)
 	Name string
 
+	// ShortName is the short, package-qualified name of the type (eg: gi.Button)
+	ShortName string
+
+	// IDName is the short, package-unqualified, kebab-case name of the type that is suitable
+	// for use in an ID (eg: button)
+	IDName string
+
 	// Doc has all of the comment documentation
 	// info as one string with directives removed.
 	Doc string

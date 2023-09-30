@@ -3,6 +3,7 @@ module goki.dev/gti
 go 1.21.0
 
 require (
+	github.com/iancoleman/strcase v0.3.0
 	goki.dev/gengo v0.3.5
 	goki.dev/grease v0.8.16
 	goki.dev/ordmap v0.5.5
@@ -12,7 +13,6 @@ require (
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
-	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect

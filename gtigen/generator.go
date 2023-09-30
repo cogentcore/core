@@ -16,6 +16,7 @@ import (
 
 	"log/slog"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gengo"
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -200,6 +201,8 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		typ := &Type{
 			Name:       ts.Name.Name,
 			FullName:   FullName(g.Pkg, ts.Name.Name),
+			ShortName:  g.Pkg.Name + "." + ts.Name.Name,
+			IDName:     strcase.ToKebab(ts.Name.Name),
 			Type:       ts,
 			Doc:        doc,
 			Pkg:        g.Pkg.Name,
