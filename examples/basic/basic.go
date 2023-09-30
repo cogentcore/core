@@ -7,7 +7,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
+	"image"
 	"os"
 
 	"github.com/disintegration/imaging"
@@ -15,26 +15,30 @@ import (
 )
 
 func main() {
-	reader := ExampleReadFrameAsJpeg("./in1.mp4", 100)
-	img, err := imaging.Decode(reader)
+	img, err := ReadFrame("./in.mp4", 150)
 	if err != nil {
 		panic(err)
 	}
-	err = imaging.Save(img, "./out1.jpeg")
+	err = imaging.Save(img, "./out.jpg")
 	if err != nil {
 		panic(err)
 	}
 }
 
-func ExampleReadFrameAsJpeg(inFileName string, frameNum int) io.Reader {
-	buf := bytes.NewBuffer(nil)
-	err := ffmpeg.Input(inFileName).
-		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frameNum)}).
+// ReadFrame reads the given frame number from the given video file as a JPEG image.
+func ReadFrame(file string, frame int) (image.Image, error) {
+	buf := &bytes.Buffer{}
+	err := ffmpeg.Input(file).
+		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frame)}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
 		WithOutput(buf, os.Stdout).
 		Run()
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("error getting frame %d from video %q: %w", frame, file, err)
 	}
-	return buf
+	img, err := imaging.Decode(buf)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding frame %d from video %q into image: %w", frame, file, err)
+	}
+	return img, nil
 }
