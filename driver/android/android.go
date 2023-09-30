@@ -57,15 +57,15 @@ import (
 	"unsafe"
 
 	"goki.dev/goosi"
+	"goki.dev/goosi/driver/mobile/callfn"
+	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/app/internal/callfn"
 	"goki.dev/mobile/event/key"
 	"goki.dev/mobile/event/lifecycle"
 	"goki.dev/mobile/event/paint"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
 	"goki.dev/mobile/geom"
-	"goki.dev/mobile/internal/mobileinit"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -284,7 +284,7 @@ var (
 	darkMode                                                             bool
 )
 
-func main(f func(App)) {
+func main(f func(*appImpl)) {
 	mainUserFn = f
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
@@ -339,7 +339,7 @@ func filePickerReturned(str *C.char) {
 
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
-	theApp.insets.Set(top, right, bottom, left)
+	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
 func mimeStringFromFilter(filter *FileFilter) string {
