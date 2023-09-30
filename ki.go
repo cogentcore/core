@@ -142,6 +142,11 @@ type Ki interface {
 	// NumChildren returns the number of children
 	NumChildren() int
 
+	// NumLifetimeChildren returns the number of children that this node
+	// has ever had added to it (it is not decremented when a child is removed).
+	// It is used for unique naming of children.
+	NumLifetimeChildren() uint64
+
 	// Children returns a pointer to the slice of children (Node.Kids) -- use
 	// methods on ki.Slice for further ways to access (ByName, ByType, etc).
 	// Slice can be modified, deleted directly (e.g., sort, reorder) but Add

@@ -7,8 +7,10 @@ package ki
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"goki.dev/gti"
 )
@@ -51,6 +53,13 @@ func ThisCheck(k Ki) error {
 func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
+	pn := parent.AsNode()
+	if pn != nil {
+		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
+		if kid.Name() == "" {
+			kid.SetName(kid.Name() + kid.KiType().Name + "-" + strconv.FormatUint(c, 10))
+		}
+	}
 	kid.This().OnAdd()
 	n.WalkUpParent(func(k Ki) bool {
 		k.This().OnChildAdded(kid)

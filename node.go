@@ -48,6 +48,9 @@ type Node struct {
 	// [view: -] we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
 	Ths Ki `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
 
+	// the number of children that have ever been added to this node, which is used for unique naming
+	NumLifetimeKids uint64 `desc:"the number of children that have ever been added to this node, which is used for unique naming"`
+
 	// [view: -] last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
 	index int `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method"`
 
@@ -258,6 +261,10 @@ func (n *Node) HasChildren() bool {
 // NumChildren returns the number of children of this node.
 func (n *Node) NumChildren() int {
 	return len(n.Kids)
+}
+
+func (n *Node) NumLifetimeChildren() uint64 {
+	return n.NumLifetimeKids
 }
 
 // Children returns a pointer to the slice of children (Node.Kids) -- use
