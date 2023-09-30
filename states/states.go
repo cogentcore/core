@@ -6,8 +6,6 @@ package states
 
 import "goki.dev/enums"
 
-//go:generate enumgen
-
 // States are GUI states of elements that are relevant for styling based on
 // [CSS Pseudo-classes](https://developer.mozilla.org/en-US/docs/Web/CSS/Pseudo-classes)
 type States int64 //enums:bitflag
