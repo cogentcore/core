@@ -7,11 +7,13 @@ package ki
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
 )
 
@@ -41,7 +43,7 @@ func InitNode(this Ki) {
 func ThisCheck(k Ki) error {
 	if k.This() == nil {
 		err := fmt.Errorf("Ki Node %v ThisCheck: node has null 'this' pointer -- must call Init or InitName on root nodes!", k.Name())
-		log.Print(err)
+		log.Println(err)
 		return err
 	}
 	return nil
@@ -57,7 +59,14 @@ func SetParent(kid Ki, parent Ki) {
 	if pn != nil {
 		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
 		if kid.Name() == "" {
-			kid.SetName(kid.Name() + kid.KiType().Name + "-" + strconv.FormatUint(c, 10))
+			tpnm := kid.KiType().Name
+			li := strings.LastIndex(tpnm, ".")
+			if li < 0 {
+				slog.Error("programmer/internal error: type name missing '.' character", "type", tpnm)
+			} else {
+				kebab := strcase.ToKebab(tpnm[li:])
+				kid.SetName(kebab + "-" + strconv.FormatUint(c, 10))
+			}
 		}
 	}
 	kid.This().OnAdd()
