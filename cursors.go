@@ -5,7 +5,12 @@
 // Package cursors provides Go constant names for cursors as SVG files.
 package cursors
 
-import "embed"
+import (
+	"embed"
+	"image"
+
+	"goki.dev/enums"
+)
 
 // Cursors contains all of the default embedded svg cursors
 //
@@ -99,3 +104,8 @@ const (
 	// Poof indicates that an item will dissapear when it is released
 	Poof
 )
+
+// Hotspots contains the cursor hotspot points for every cursor.
+// It is initialized to contain the hotspots for all of the default
+// cursors, but it should be extended by anyone defining custom cursors.
+var Hotspots = map[enums.Enum]image.Point{}

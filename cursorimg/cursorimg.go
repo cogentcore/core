@@ -11,6 +11,7 @@ import (
 	_ "image/png"
 
 	"goki.dev/cursors"
+	"goki.dev/enums"
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]
@@ -21,21 +22,22 @@ type Cursor struct {
 }
 
 // Cursors contains all of the cached rendered cursors, specified first
-// by name and then by size.
-var Cursors = map[string]map[int]*Cursor{}
+// by cursor enum and then by size.
+var Cursors = map[enums.Enum]map[int]*Cursor{}
 
-// Get returns the cursor object corresponding to the given cursor name,
+// Get returns the cursor object corresponding to the given cursor enum,
 // with the given size. If it is not already cached in [Cursors], it renders and caches it.
-func Get(name string, size int) (*Cursor, error) {
-	sm := Cursors[name]
+func Get(cursor enums.Enum, size int) (*Cursor, error) {
+	sm := Cursors[cursor]
 	if sm == nil {
 		sm = map[int]*Cursor{}
-		Cursors[name] = sm
+		Cursors[cursor] = sm
 	}
 	if c, ok := sm[size]; ok {
 		return c, nil
 	}
 
+	name := cursor.String()
 	// TODO: maybe support more sizes
 	dir := ""
 	switch size {
@@ -56,7 +58,8 @@ func Get(name string, size int) (*Cursor, error) {
 		return nil, fmt.Errorf("error reading PNG file for cursor %q: %w", name, err)
 	}
 	return &Cursor{
-		Image: img,
+		Image:   img,
+		Hotspot: cursors.Hotspots[cursor],
 	}, nil
 
 	// TODO: render from SVG at some point
