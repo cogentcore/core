@@ -5,13 +5,17 @@ import (
 	"encoding/binary"
 	"fmt"
 	"image"
+	"runtime"
 	"time"
+
+	vk "github.com/goki/vulkan"
 
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
-	"github.com/hajimehoshi/ebiten"
-	_ "github.com/silbinarywolf/preferdiscretegpu"
+	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/zergon321/reisen"
+	"goki.dev/vgpu/v2/vdraw"
+	"goki.dev/vgpu/v2/vgpu"
 )
 
 const (
@@ -195,45 +199,53 @@ func streamSamples(sampleSource <-chan [2]float64) beep.Streamer {
 	})
 }
 
-// Game holds all the data
-// necessary for playing video.
-type Game struct {
-	videoSprite            *ebiten.Image
-	ticker                 <-chan time.Time
-	errs                   <-chan error
-	frameBuffer            <-chan *image.RGBA
-	fps                    int
-	videoTotalFramesPlayed int
-	videoPlaybackFPS       int
-	perSecond              <-chan time.Time
-	last                   time.Time
-	deltaTime              float64
+func init() {
+	// must lock main thread for gpu!
+	runtime.LockOSThread()
 }
 
-// Strarts reading samples and frames
-// of the media file.
-func (game *Game) Start(fname string) error {
+func main() {
+	if vgpu.Init() != nil {
+		return
+	}
+
+	glfw.WindowHint(glfw.ClientAPI, glfw.NoAPI)
+	window, err := glfw.CreateWindow(1024, 768, "vDraw Test", nil, nil)
+	vgpu.IfPanic(err)
+
+	// note: for graphics, require these instance extensions before init gpu!
+	winext := window.GetRequiredInstanceExtensions()
+	gp := vgpu.NewGPU()
+	gp.AddInstanceExt(winext...)
+	vgpu.Debug = true
+	gp.Config("vDraw test")
+
+	// gp.PropsString(true) // print
+
+	surfPtr, err := window.CreateWindowSurface(gp.Instance, nil)
+	if err != nil {
+		panic(err)
+	}
+	sf := vgpu.NewSurface(gp, vk.SurfaceFromPointer(surfPtr))
+
+	fmt.Printf("format: %s\n", sf.Format.String())
+
+	// Audio and video logic
+
 	// Initialize the audio speaker.
-	err := speaker.Init(sampleRate,
+	err = speaker.Init(sampleRate,
 		SpeakerSampleRate.N(time.Second/10))
 
 	if err != nil {
-		return err
-	}
-
-	// Sprite for drawing video frames.
-	game.videoSprite, err = ebiten.NewImage(
-		width, height, ebiten.FilterDefault)
-
-	if err != nil {
-		return err
+		panic(err)
 	}
 
 	// Open the media file.
-	media, err := reisen.NewMedia(fname)
+	media, err := reisen.NewMedia("../videos/deer.mp4")
 
 	if err != nil {
-		return err
+		panic(err)
+
 	}
 
 	// Get the FPS for playing
@@ -241,114 +253,111 @@ func (game *Game) Start(fname string) error {
 	videoFPS, _ := media.Streams()[0].FrameRate()
 
 	if err != nil {
-		return err
+		panic(err)
+
 	}
 
 	// SPF for frame ticker.
 	spf := 1.0 / float64(videoFPS)
-	frameDuration, err := time.
-		ParseDuration(fmt.Sprintf("%fs", spf))
+	frameDuration, err := time.ParseDuration(fmt.Sprintf("%fs", spf))
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	// Start decoding streams.
 	var sampleSource <-chan [2]float64
-	game.frameBuffer, sampleSource,
-		game.errs, err = readVideoAndAudio(media)
+	frameBuffer, sampleSource, errChan, err := readVideoAndAudio(media)
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
 	// Start playing audio samples.
 	speaker.Play(streamSamples(sampleSource))
 
-	game.ticker = time.Tick(frameDuration)
+	drw := &vdraw.Drawer{}
+	drw.YIsDown = true
+	drw.ConfigSurface(sf, 16) // requires 2 NDesc
 
-	// Setup metrics.
-	game.last = time.Now()
-	game.fps = 0
-	game.perSecond = time.Tick(time.Second)
-	game.videoTotalFramesPlayed = 0
-	game.videoPlaybackFPS = 0
+	drw.SetMaxTextures(32) // test resizing
 
-	return nil
-}
+	destroy := func() {
+		vk.DeviceWaitIdle(sf.Device.Device)
+		drw.Destroy()
+		sf.Destroy()
+		gp.Destroy()
+		window.Destroy()
+		vgpu.Terminate()
+	}
 
-func (game *Game) Update(screen *ebiten.Image) error {
-	// Compute dt.
-	game.deltaTime = time.Since(game.last).Seconds()
-	game.last = time.Now()
+	stoff := 15 // causes images to wrap around sets, so this tests that..
 
-	// Check for incoming errors.
-	select {
-	case err, ok := <-game.errs:
-		if ok {
-			return err
+	update := func(idx int) {
+		// Check for incoming errors.
+		select {
+		case err, ok := <-errChan:
+			if ok {
+				panic(err)
+			}
+		default:
 		}
 
-	default:
-	}
-
-	// Read video frames and draw them.
-	select {
-	case <-game.ticker:
-		frame, ok := <-game.frameBuffer
+		// Read video frames and draw them.
+		frame, ok := <-frameBuffer
 
 		if ok {
-			game.videoSprite.ReplacePixels(frame.Pix)
-
-			game.videoTotalFramesPlayed++
-			game.videoPlaybackFPS++
+			drw.SetGoImage(stoff, 0, frame, vgpu.NoFlipY)
+			drw.SyncImages()
 		}
 
-	default:
+		descIdx := 0
+		if stoff >= vgpu.MaxTexturesPerSet {
+			descIdx = 1
+		}
+		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
+		drw.Scale(stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
+		// drw.Copy(stoff, 0, image.ZP, image.ZR, vdraw.Src, vgpu.NoFlipY)
+		drw.EndDraw()
 	}
 
-	// Draw the video sprite.
-	op := &ebiten.DrawImageOptions{}
-	err := screen.DrawImage(game.videoSprite, op)
+	frameCount := 0
+	stTime := time.Now()
 
-	if err != nil {
-		return err
+	renderFrame := func() {
+		update(frameCount)
+		frameCount++
+
+		eTime := time.Now()
+		dur := float64(eTime.Sub(stTime)) / float64(time.Second)
+		if dur > 100 {
+			fps := float64(frameCount) / dur
+			fmt.Printf("fps: %.0f\n", fps)
+			frameCount = 0
+			stTime = eTime
+		}
 	}
 
-	game.fps++
+	glfw.PollEvents()
+	renderFrame()
+	glfw.PollEvents()
 
-	// Update metrics in the window title.
-	select {
-	case <-game.perSecond:
-		ebiten.SetWindowTitle(fmt.Sprintf("%s | FPS: %d | dt: %f | Frames: %d | Video FPS: %d",
-			"Video", game.fps, game.deltaTime, game.videoTotalFramesPlayed, game.videoPlaybackFPS))
+	exitC := make(chan struct{}, 2)
 
-		game.fps = 0
-		game.videoPlaybackFPS = 0
-
-	default:
-	}
-
-	return nil
-}
-
-func (game *Game) Layout(a, b int) (int, int) {
-	return width, height
-}
-
-func main() {
-	game := &Game{}
-	err := game.Start("../videos/countdown.mp4")
-	handleError(err)
-
-	ebiten.SetWindowSize(width, height)
-	ebiten.SetWindowTitle("Video")
-	err = ebiten.RunGame(game)
-	handleError(err)
-}
-
-func handleError(err error) {
-	if err != nil {
-		panic(err)
+	fpsTicker := time.NewTicker(frameDuration)
+	for {
+		select {
+		case <-exitC:
+			fpsTicker.Stop()
+			destroy()
+			return
+		case <-fpsTicker.C:
+			if window.ShouldClose() {
+				exitC <- struct{}{}
+				continue
+			}
+			glfw.PollEvents()
+			renderFrame()
+		}
 	}
 }

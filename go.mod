@@ -7,8 +7,6 @@ require (
 	github.com/faiface/beep v1.1.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20221017161538-93cebf72946b
 	github.com/goki/vulkan v1.0.6
-	github.com/hajimehoshi/ebiten v1.12.12
-	github.com/silbinarywolf/preferdiscretegpu v1.0.0
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/zergon321/reisen v0.1.9
 	goki.dev/vgpu/v2 v2.0.0-dev0.0.5
