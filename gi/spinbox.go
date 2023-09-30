@@ -19,26 +19,10 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-type SpinBoxEmbedder interface {
-	AsSpinBox() *SpinBox
-}
-
-func AsSpinBox(k ki.Ki) *SpinBox {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(SpinBoxEmbedder); ok {
-		return ac.AsSpinBox()
-	}
-	return nil
-}
-
-func (ac *SpinBox) AsSpinBox() *SpinBox {
-	return ac
-}
-
 // SpinBox combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
+//
+//goki:embed
 type SpinBox struct {
 	WidgetBase
 

@@ -446,27 +446,11 @@ func (bb *ButtonBase) Destroy() {
 ///////////////////////////////////////////////////////////
 // Button
 
-type ButtonEmbedder interface {
-	AsButton() *Button
-}
-
-func AsButton(k ki.Ki) *Button {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(ButtonEmbedder); ok {
-		return ac.AsButton()
-	}
-	return nil
-}
-
-func (lb *Button) AsButton() *Button {
-	return lb
-}
-
 // Button is a standard command button -- PushButton in Qt Widgets, and Button
 // in Qt Quick -- by default it puts the icon to the left and the text to the
 // right
+//
+//goki:embed
 type Button struct {
 	ButtonBase
 

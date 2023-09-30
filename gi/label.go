@@ -17,29 +17,13 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-type LabelEmbedder interface {
-	AsLabel() *Label
-}
-
-func AsLabel(k ki.Ki) *Label {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(LabelEmbedder); ok {
-		return ac.AsLabel()
-	}
-	return nil
-}
-
-func (lb *Label) AsLabel() *Label {
-	return lb
-}
-
 // Label is a widget for rendering text labels -- supports full widget model
 // including box rendering, and full HTML styling, including links -- LinkSig
 // emits link with data of URL -- opens default browser if nobody receiving
 // signal.  The default white-space option is 'pre' -- set to 'normal' or
 // other options to get word-wrapping etc.
+//
+//goki:embed
 type Label struct {
 	WidgetBase
 

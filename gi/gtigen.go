@@ -103,12 +103,14 @@ func (t *MenuBar) New() ki.Ki {
 
 // ToolBarType is the [gti.Type] for [ToolBar]
 var ToolBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ToolBar",
-	ShortName:  "gi.ToolBar",
-	IDName:     "tool-bar",
-	Doc:        "ToolBar is a Layout (typically LayoutHoriz) that renders a gradient\nbackground and is useful for holding Actions that do things",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Name:      "goki.dev/gi/v2/gi.ToolBar",
+	ShortName: "gi.ToolBar",
+	IDName:    "tool-bar",
+	Doc:       "ToolBar is a Layout (typically LayoutHoriz) that renders a\nbackground and is useful for holding Actions that do things",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "Layout", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -130,6 +132,28 @@ func (t *ToolBar) KiType() *gti.Type {
 // New returns a new [*ToolBar] value
 func (t *ToolBar) New() ki.Ki {
 	return &ToolBar{}
+}
+
+// ToolBarEmbedder is an interface that all types that embed ToolBar satisfy
+type ToolBarEmbedder interface {
+	AsToolBar() *ToolBar
+}
+
+// AsToolBar returns the given value as a value of type ToolBar if the type
+// of the given value embeds ToolBar, or nil otherwise
+func AsToolBar(k ki.Ki) *ToolBar {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ToolBarEmbedder); ok {
+		return t.AsToolBar()
+	}
+	return nil
+}
+
+// AsToolBar satisfies the [ToolBarEmbedder] interface
+func (t *ToolBar) AsToolBar() *ToolBar {
+	return t
 }
 
 // BitmapType is the [gti.Type] for [Bitmap]
@@ -169,11 +193,13 @@ func (t *Bitmap) New() ki.Ki {
 
 // ButtonBoxType is the [gti.Type] for [ButtonBox]
 var ButtonBoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ButtonBox",
-	ShortName:  "gi.ButtonBox",
-	IDName:     "button-box",
-	Doc:        "ButtonBox is a widget for containing a set of CheckBox buttons.\nIt can optionally enforce mutual excusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.ButtonBox",
+	ShortName: "gi.ButtonBox",
+	IDName:    "button-box",
+	Doc:       "ButtonBox is a widget for containing a set of CheckBox buttons.\nIt can optionally enforce mutual excusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (checbox button labels)", Directives: gti.Directives{}}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
@@ -200,6 +226,28 @@ func (t *ButtonBox) KiType() *gti.Type {
 // New returns a new [*ButtonBox] value
 func (t *ButtonBox) New() ki.Ki {
 	return &ButtonBox{}
+}
+
+// ButtonBoxEmbedder is an interface that all types that embed ButtonBox satisfy
+type ButtonBoxEmbedder interface {
+	AsButtonBox() *ButtonBox
+}
+
+// AsButtonBox returns the given value as a value of type ButtonBox if the type
+// of the given value embeds ButtonBox, or nil otherwise
+func AsButtonBox(k ki.Ki) *ButtonBox {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ButtonBoxEmbedder); ok {
+		return t.AsButtonBox()
+	}
+	return nil
+}
+
+// AsButtonBox satisfies the [ButtonBoxEmbedder] interface
+func (t *ButtonBox) AsButtonBox() *ButtonBox {
+	return t
 }
 
 // ButtonBaseType is the [gti.Type] for [ButtonBase]
@@ -243,11 +291,13 @@ func (t *ButtonBase) New() ki.Ki {
 
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Button",
-	ShortName:  "gi.Button",
-	IDName:     "button",
-	Doc:        "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Button",
+	ShortName: "gi.Button",
+	IDName:    "button",
+	Doc:       "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button (default, primary, secondary, etc)", Directives: gti.Directives{}}},
 	}),
@@ -272,6 +322,28 @@ func (t *Button) KiType() *gti.Type {
 // New returns a new [*Button] value
 func (t *Button) New() ki.Ki {
 	return &Button{}
+}
+
+// ButtonEmbedder is an interface that all types that embed Button satisfy
+type ButtonEmbedder interface {
+	AsButton() *Button
+}
+
+// AsButton returns the given value as a value of type Button if the type
+// of the given value embeds Button, or nil otherwise
+func AsButton(k ki.Ki) *Button {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ButtonEmbedder); ok {
+		return t.AsButton()
+	}
+	return nil
+}
+
+// AsButton satisfies the [ButtonEmbedder] interface
+func (t *Button) AsButton() *Button {
+	return t
 }
 
 // CheckBoxType is the [gti.Type] for [CheckBox]
@@ -497,11 +569,13 @@ func (t *Icon) New() ki.Ki {
 
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Label",
-	ShortName:  "gi.Label",
-	IDName:     "label",
-	Doc:        "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Label",
+	ShortName: "gi.Label",
+	IDName:    "label",
+	Doc:       "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label to display", Directives: gti.Directives{}}},
 		{"Selectable", &gti.Field{Name: "Selectable", Type: "bool", Doc: "is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks", Directives: gti.Directives{}}},
@@ -534,13 +608,37 @@ func (t *Label) New() ki.Ki {
 	return &Label{}
 }
 
+// LabelEmbedder is an interface that all types that embed Label satisfy
+type LabelEmbedder interface {
+	AsLabel() *Label
+}
+
+// AsLabel returns the given value as a value of type Label if the type
+// of the given value embeds Label, or nil otherwise
+func AsLabel(k ki.Ki) *Label {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(LabelEmbedder); ok {
+		return t.AsLabel()
+	}
+	return nil
+}
+
+// AsLabel satisfies the [LabelEmbedder] interface
+func (t *Label) AsLabel() *Label {
+	return t
+}
+
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Layout",
-	ShortName:  "gi.Layout",
-	IDName:     "layout",
-	Doc:        "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nThe alignment is NOT inherited by default so must be specified per\nchild, except that the parent alignment is used within the relevant\ndimension (e.g., horizontal-align for a LayoutHoriz layout,\nto determine left, right, center, justified).\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Layout",
+	ShortName: "gi.Layout",
+	IDName:    "layout",
+	Doc:       "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nThe alignment is NOT inherited by default so must be specified per\nchild, except that the parent alignment is used within the relevant\ndimension (e.g., horizontal-align for a LayoutHoriz layout,\nto determine left, right, center, justified).\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Lay", &gti.Field{Name: "Lay", Type: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}}},
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}}},
@@ -580,6 +678,28 @@ func (t *Layout) KiType() *gti.Type {
 // New returns a new [*Layout] value
 func (t *Layout) New() ki.Ki {
 	return &Layout{}
+}
+
+// LayoutEmbedder is an interface that all types that embed Layout satisfy
+type LayoutEmbedder interface {
+	AsLayout() *Layout
+}
+
+// AsLayout returns the given value as a value of type Layout if the type
+// of the given value embeds Layout, or nil otherwise
+func AsLayout(k ki.Ki) *Layout {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(LayoutEmbedder); ok {
+		return t.AsLayout()
+	}
+	return nil
+}
+
+// AsLayout satisfies the [LayoutEmbedder] interface
+func (t *Layout) AsLayout() *Layout {
+	return t
 }
 
 // StretchType is the [gti.Type] for [Stretch]
@@ -743,11 +863,13 @@ var _ = gti.AddType(&gti.Type{
 
 // SliderBaseType is the [gti.Type] for [SliderBase]
 var SliderBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.SliderBase",
-	ShortName:  "gi.SliderBase",
-	IDName:     "slider-base",
-	Doc:        "SliderBase has common slider functionality -- two major modes: ValThumb =\nfalse is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size\n- thumbsize",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.SliderBase",
+	ShortName: "gi.SliderBase",
+	IDName:    "slider-base",
+	Doc:       "SliderBase has common slider functionality -- two major modes: ValThumb =\nfalse is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size\n- thumbsize",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "float32", Doc: "current value", Directives: gti.Directives{}}},
 		{"EmitValue", &gti.Field{Name: "EmitValue", Type: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}}},
@@ -797,6 +919,28 @@ func (t *SliderBase) KiType() *gti.Type {
 // New returns a new [*SliderBase] value
 func (t *SliderBase) New() ki.Ki {
 	return &SliderBase{}
+}
+
+// SliderBaseEmbedder is an interface that all types that embed SliderBase satisfy
+type SliderBaseEmbedder interface {
+	AsSliderBase() *SliderBase
+}
+
+// AsSliderBase returns the given value as a value of type SliderBase if the type
+// of the given value embeds SliderBase, or nil otherwise
+func AsSliderBase(k ki.Ki) *SliderBase {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SliderBaseEmbedder); ok {
+		return t.AsSliderBase()
+	}
+	return nil
+}
+
+// AsSliderBase satisfies the [SliderBaseEmbedder] interface
+func (t *SliderBase) AsSliderBase() *SliderBase {
+	return t
 }
 
 // SliderType is the [gti.Type] for [Slider]
@@ -899,11 +1043,13 @@ func (t *ProgressBar) New() ki.Ki {
 
 // SpinBoxType is the [gti.Type] for [SpinBox]
 var SpinBoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.SpinBox",
-	ShortName:  "gi.SpinBox",
-	IDName:     "spin-box",
-	Doc:        "SpinBox combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.SpinBox",
+	ShortName: "gi.SpinBox",
+	IDName:    "spin-box",
+	Doc:       "SpinBox combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "float32", Doc: "current value", Directives: gti.Directives{}}},
 		{"HasMin", &gti.Field{Name: "HasMin", Type: "bool", Doc: "is there a minimum value to enforce", Directives: gti.Directives{}}},
@@ -940,13 +1086,37 @@ func (t *SpinBox) New() ki.Ki {
 	return &SpinBox{}
 }
 
+// SpinBoxEmbedder is an interface that all types that embed SpinBox satisfy
+type SpinBoxEmbedder interface {
+	AsSpinBox() *SpinBox
+}
+
+// AsSpinBox returns the given value as a value of type SpinBox if the type
+// of the given value embeds SpinBox, or nil otherwise
+func AsSpinBox(k ki.Ki) *SpinBox {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SpinBoxEmbedder); ok {
+		return t.AsSpinBox()
+	}
+	return nil
+}
+
+// AsSpinBox satisfies the [SpinBoxEmbedder] interface
+func (t *SpinBox) AsSpinBox() *SpinBox {
+	return t
+}
+
 // SplitViewType is the [gti.Type] for [SplitView]
 var SplitViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.SplitView",
-	ShortName:  "gi.SplitView",
-	IDName:     "split-view",
-	Doc:        "SplitView allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.SplitView",
+	ShortName: "gi.SplitView",
+	IDName:    "split-view",
+	Doc:       "SplitView allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"HandleSize", &gti.Field{Name: "HandleSize", Type: "units.Value", Doc: "size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this", Directives: gti.Directives{}}},
 		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element", Directives: gti.Directives{}}},
@@ -974,6 +1144,28 @@ func (t *SplitView) KiType() *gti.Type {
 // New returns a new [*SplitView] value
 func (t *SplitView) New() ki.Ki {
 	return &SplitView{}
+}
+
+// SplitViewEmbedder is an interface that all types that embed SplitView satisfy
+type SplitViewEmbedder interface {
+	AsSplitView() *SplitView
+}
+
+// AsSplitView returns the given value as a value of type SplitView if the type
+// of the given value embeds SplitView, or nil otherwise
+func AsSplitView(k ki.Ki) *SplitView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SplitViewEmbedder); ok {
+		return t.AsSplitView()
+	}
+	return nil
+}
+
+// AsSplitView satisfies the [SplitViewEmbedder] interface
+func (t *SplitView) AsSplitView() *SplitView {
+	return t
 }
 
 // SplitterType is the [gti.Type] for [Splitter]
@@ -1012,11 +1204,13 @@ func (t *Splitter) New() ki.Ki {
 
 // TabViewType is the [gti.Type] for [TabView]
 var TabViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.TabView",
-	ShortName:  "gi.TabView",
-	IDName:     "tab-view",
-	Doc:        "TabView switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabView is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.TabView",
+	ShortName: "gi.TabView",
+	IDName:    "tab-view",
+	Doc:       "TabView switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabView is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}}},
@@ -1045,6 +1239,28 @@ func (t *TabView) KiType() *gti.Type {
 // New returns a new [*TabView] value
 func (t *TabView) New() ki.Ki {
 	return &TabView{}
+}
+
+// TabViewEmbedder is an interface that all types that embed TabView satisfy
+type TabViewEmbedder interface {
+	AsTabView() *TabView
+}
+
+// AsTabView returns the given value as a value of type TabView if the type
+// of the given value embeds TabView, or nil otherwise
+func AsTabView(k ki.Ki) *TabView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(TabViewEmbedder); ok {
+		return t.AsTabView()
+	}
+	return nil
+}
+
+// AsTabView satisfies the [TabViewEmbedder] interface
+func (t *TabView) AsTabView() *TabView {
+	return t
 }
 
 // TabButtonType is the [gti.Type] for [TabButton]
@@ -1082,11 +1298,13 @@ func (t *TabButton) New() ki.Ki {
 
 // TextFieldType is the [gti.Type] for [TextField]
 var TextFieldType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.TextField",
-	ShortName:  "gi.TextField",
-	IDName:     "text-field",
-	Doc:        "TextField is a widget for editing a line of text",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.TextField",
+	ShortName: "gi.TextField",
+	IDName:    "text-field",
+	Doc:       "TextField is a widget for editing a line of text",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Txt", &gti.Field{Name: "Txt", Type: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
@@ -1139,6 +1357,28 @@ func (t *TextField) KiType() *gti.Type {
 // New returns a new [*TextField] value
 func (t *TextField) New() ki.Ki {
 	return &TextField{}
+}
+
+// TextFieldEmbedder is an interface that all types that embed TextField satisfy
+type TextFieldEmbedder interface {
+	AsTextField() *TextField
+}
+
+// AsTextField returns the given value as a value of type TextField if the type
+// of the given value embeds TextField, or nil otherwise
+func AsTextField(k ki.Ki) *TextField {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(TextFieldEmbedder); ok {
+		return t.AsTextField()
+	}
+	return nil
+}
+
+// AsTextField satisfies the [TextFieldEmbedder] interface
+func (t *TextField) AsTextField() *TextField {
+	return t
 }
 
 // WidgetBaseType is the [gti.Type] for [WidgetBase]

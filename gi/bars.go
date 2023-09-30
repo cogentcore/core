@@ -309,27 +309,11 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
-type ToolBarEmbedder interface {
-	AsToolBar() *ToolBar
-}
-
-func AsToolBar(k ki.Ki) *ToolBar {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(ToolBarEmbedder); ok {
-		return ac.AsToolBar()
-	}
-	return nil
-}
-
-func (tb *ToolBar) AsToolBar() *ToolBar {
-	return tb
-}
-
-// ToolBar is a Layout (typically LayoutHoriz) that renders a gradient
+// ToolBar is a Layout (typically LayoutHoriz) that renders a
 // background and is useful for holding Actions that do things
-type ToolBar struct { //goki:embedder
+//
+//goki:embed
+type ToolBar struct {
 	Layout
 }
 

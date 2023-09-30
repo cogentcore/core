@@ -35,25 +35,9 @@ const dontForce = false
 // and off -- set to 0 to disable blinking
 var CursorBlinkMSec = 500
 
-type TextFieldEmbedder interface {
-	AsTextField() *TextField
-}
-
-func AsTextField(k ki.Ki) *TextField {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(TextFieldEmbedder); ok {
-		return ac.AsTextField()
-	}
-	return nil
-}
-
-func (ac *TextField) AsTextField() *TextField {
-	return ac
-}
-
 // TextField is a widget for editing a line of text
+//
+//goki:embed
 type TextField struct {
 	WidgetBase
 

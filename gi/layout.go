@@ -126,25 +126,6 @@ var LayoutFocusNameTimeoutMSec = 500
 // LayoutFocusNameTabMSec is the number of milliseconds since last focus name
 // event to allow tab to focus on next element with same name.
 var LayoutFocusNameTabMSec = 2000
-
-type LayoutEmbedder interface {
-	AsLayout() *Layout
-}
-
-func AsLayout(k ki.Ki) *Layout {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ly, ok := k.(LayoutEmbedder); ok {
-		return ly.AsLayout()
-	}
-	return nil
-}
-
-func (ly *Layout) AsLayout() *Layout {
-	return ly
-}
-
 // Layout is the primary node type responsible for organizing the sizes
 // and positions of child widgets. It does not render, only organize,
 // so properties like background color will have no effect.
@@ -161,6 +142,7 @@ func (ly *Layout) AsLayout() *Layout {
 // to the desired number of columns, from which the number of rows
 // is computed -- otherwise it uses the square root of number of
 // elements.
+//goki:embed
 type Layout struct {
 	WidgetBase
 

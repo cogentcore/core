@@ -19,24 +19,6 @@ import (
 	"goki.dev/ki/v2"
 )
 
-type TabViewEmbedder interface {
-	AsTabView() *TabView
-}
-
-func AsTabView(k ki.Ki) *TabView {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(TabViewEmbedder); ok {
-		return ac.AsTabView()
-	}
-	return nil
-}
-
-func (ac *TabView) AsTabView() *TabView {
-	return ac
-}
-
 // TabView switches among child widgets via tabs.  The selected widget gets
 // the full allocated space avail after the tabs are accounted for.  The
 // TabView is just a Vertical layout that manages two child widgets: a
@@ -44,6 +26,8 @@ func (ac *TabView) AsTabView() *TabView {
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
+//
+//goki:embed
 type TabView struct {
 	Layout
 

@@ -20,24 +20,6 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-type SplitViewEmbedder interface {
-	AsSplitView() *SplitView
-}
-
-func AsSplitView(k ki.Ki) *SplitView {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(SplitViewEmbedder); ok {
-		return ac.AsSplitView()
-	}
-	return nil
-}
-
-func (ac *SplitView) AsSplitView() *SplitView {
-	return ac
-}
-
 // Config notes: only needs config when number of kids changes
 // otherwise just needs new layout
 
@@ -51,6 +33,8 @@ func (ac *SplitView) AsSplitView() *SplitView {
 // performance.  It uses the Widget Parts to hold the splitter widgets
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
+//
+//goki:embed
 type SplitView struct {
 	WidgetBase
 

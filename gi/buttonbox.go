@@ -17,25 +17,12 @@ import (
 	"goki.dev/ki/v2"
 )
 
-type ButtonBoxEmbedder interface {
-	AsButtonBox() *ButtonBox
-}
-
-func AsButtonBox(k ki.Ki) *ButtonBox {
-	if ac, ok := k.(ButtonBoxEmbedder); ok {
-		return ac.AsButtonBox()
-	}
-	return nil
-}
-
-func (bb *ButtonBox) AsButtonBox() *ButtonBox {
-	return bb
-}
-
 // ButtonBox is a widget for containing a set of CheckBox buttons.
 // It can optionally enforce mutual excusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
+//
+//goki:embed
 type ButtonBox struct {
 	WidgetBase
 

@@ -32,24 +32,6 @@ type SliderPositioner interface {
 	PointToRelPos(pt image.Point) image.Point
 }
 
-type SliderBaseEmbedder interface {
-	AsSliderBase() *SliderBase
-}
-
-func AsSliderBase(k ki.Ki) *SliderBase {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(SliderBaseEmbedder); ok {
-		return ac.AsSliderBase()
-	}
-	return nil
-}
-
-func (ac *SliderBase) AsSliderBase() *SliderBase {
-	return ac
-}
-
 // todo: need a Slider interface with all the Set* methods
 // returning Slider
 
@@ -57,6 +39,8 @@ func (ac *SliderBase) AsSliderBase() *SliderBase {
 // false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size
 // - thumbsize
+//
+//goki:embed
 type SliderBase struct {
 	WidgetBase
 
