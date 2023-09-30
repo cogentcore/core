@@ -48,7 +48,7 @@ func (sve *Editor) EditorEvents() {
 				goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Push(cursor.HandOpen)
 				ssvg.SetDragCursor = true
 			}
-			del := me.Where.Sub(me.From)
+			del := me.Pos().Sub(me.From)
 			ssvg.Trans.X += float32(del.X)
 			ssvg.Trans.Y += float32(del.Y)
 			ssvg.SetTransform()
@@ -86,7 +86,7 @@ func (sve *Editor) EditorEvents() {
 			goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
 			ssvg.SetDragCursor = false
 		}
-		obj := ssvg.FirstContainingPoint(me.Where, true)
+		obj := ssvg.FirstContainingPoint(me.Pos(), true)
 		_ = obj
 		if me.Action == events.Release && me.Button == events.Right {
 			me.SetHandled()
@@ -99,9 +99,9 @@ func (sve *Editor) EditorEvents() {
 		me := d.(events.Event)
 		me.SetHandled()
 		ssvg := sve
-		obj := ssvg.FirstContainingPoint(me.Where, true)
+		obj := ssvg.FirstContainingPoint(me.Pos(), true)
 		if obj != nil {
-			pos := me.Where
+			pos := me.Pos()
 			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
 			PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Sc, ttxt)
 		}

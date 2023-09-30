@@ -1659,7 +1659,7 @@ func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
 func (w *RenderWin) DNDMoveEvent(e events.Event) {
 	sp, ok := w.SpriteByName(DNDSpriteName)
 	if ok {
-		sp.SetBottomPos(e.Where)
+		sp.SetBottomPos(e.Pos())
 	}
 	de := w.EventMgr.SendDNDMoveEvent(e)
 	w.DNDUpdateCursor(de.Mod)

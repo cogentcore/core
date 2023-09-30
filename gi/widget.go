@@ -24,8 +24,10 @@ import (
 type Widget interface {
 	ki.Ki
 
-	// SetStyle sets the styling of the widget by adding a Styler function
-	SetStyle(s Styler) Widget
+	// todo: rename .Style to .Styles and AddStyles to Style()
+
+	// AddStyles sets the styling of the widget by adding a Styler function
+	AddStyles(s Styler) Widget
 
 	// SetTooltip sets the Tooltip message when hovering over the widget
 	SetTooltip(tt string) Widget
@@ -107,6 +109,11 @@ type Widget interface {
 
 	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(ev events.Event)
+
+	// SendMe sends an event of given type to this widget,
+	// optionally starting from values in the given original event
+	// (recommended to include where possible).
+	SendMe(ev events.Types, orig events.Event)
 
 	// FocusChanged is called on node for changes in focus -- see the
 	// FocusChanges values.

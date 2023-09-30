@@ -120,10 +120,11 @@ func (cb *ComboBox) ComboBoxStyles() {
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-				if cb.HasFlagWithin(CanFocus) {
-					s.Border.Width.Bottom = units.Px(2)
-					s.Border.Color.Bottom = colors.Scheme.Primary.Base
-				}
+				// if cb.HasFlagWithin(CanFocus) {
+				// todo:
+				s.Border.Width.Bottom = units.Px(2)
+				s.Border.Color.Bottom = colors.Scheme.Primary.Base
+				// }
 
 			}
 		case ComboBoxOutlined:
@@ -132,10 +133,11 @@ func (cb *ComboBox) ComboBoxStyles() {
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
-				if cb.HasFlagWithin(CanFocus) {
-					s.Border.Width.Set(units.Px(2))
-					s.Border.Color.Set(colors.Scheme.Primary.Base)
-				}
+				// if cb.HasFlagWithin(CanFocus) {
+				// todo:
+				s.Border.Width.Set(units.Px(2))
+				s.Border.Color.Set(colors.Scheme.Primary.Base)
+				// }
 			}
 		}
 	})
@@ -564,14 +566,14 @@ func (cb *ComboBox) MakeItemsMenu() {
 }
 
 func (cb *ComboBox) ComboBoxKeys() {
-	we.On(events.KeyChord, func(e events.Event) {
+	cb.On(events.KeyChord, func(e events.Event) {
 		if cb.StateIs(states.Disabled) {
 			return
 		}
 		if KeyEventTrace {
 			fmt.Printf("ComboBox KeyChordEvent: %v\n", cb.Path())
 		}
-		kf := KeyFun(kt.KeyChord())
+		kf := KeyFun(e.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
 			e.SetHandled()
@@ -612,8 +614,7 @@ func (cb *ComboBox) ComboBoxKeys() {
 		case kf == KeyFunEnter || (!cb.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
 			e.SetHandled()
-			cb.ButtonPress()
-			cb.ButtonRelease()
+			cb.SendMe(events.Click, e)
 			// }
 		}
 	})

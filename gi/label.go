@@ -236,7 +236,7 @@ func (lb *Label) SetText(txt string) *Label {
 
 	lb.StyMu.RLock()
 	lb.Text = txt
-	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
 	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
 		lb.TextRender.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
@@ -306,7 +306,7 @@ func (lb *Label) LongHoverURL() {
 		// 	for ti := range llb.TextRender.Links {
 		// 		tl := &llb.TextRender.Links[ti]
 		// 		tlb := tl.Bounds(&llb.TextRender, pos)
-		// 		if me.Where.In(tlb) {
+		// 		if me.Pos().In(tlb) {
 		// 			PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
 		// 			me.SetHandled()
 		// 			return
@@ -329,7 +329,7 @@ func (lb *Label) LongHoverURL() {
 
 func (lb *Label) ClickOnURL() {
 	lb.On(events.Click, func(e events.Event) {
-		if bb.StateIs(states.Disabled) {
+		if lb.StateIs(states.Disabled) {
 			return
 		}
 		hasLinks := len(lb.TextRender.Links) > 0
@@ -340,15 +340,15 @@ func (lb *Label) ClickOnURL() {
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if me.Where.In(tlb) {
+			if e.Pos().In(tlb) {
 				lb.OpenLink(tl)
-				me.SetHandled()
+				e.SetHandled()
 				return
 			}
 		}
 	})
 	lb.On(events.DoubleClick, func(e events.Event) {
-		if !lb.StateIs(states.Selectable) || bb.StateIs(states.Disabled) {
+		if !lb.StateIs(states.Selectable) || lb.StateIs(states.Disabled) {
 			return
 
 		}
@@ -364,7 +364,7 @@ func (lb *Label) LinkCursor() {
 		inLink := false
 		for _, tl := range lb.TextRender.Links {
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if me.Where.In(tlb) {
+			if e.Pos().In(tlb) {
 				inLink = true
 				break
 			}
@@ -405,7 +405,7 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
@@ -435,7 +435,7 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	lb.DoLayoutBase(sc, parBBox, true, iter)
 	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
-	lb.Style.BackgroundColor.Color = colors.Transparent // always use transparent bg for actual text
+	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {

@@ -133,30 +133,30 @@ func (i *ActionTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ButtonFlagsValues = []ButtonFlags{15}
+var _ButtonFlagsValues = []ButtonFlags{14}
 
 // ButtonFlagsN is the highest valid value
 // for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 16
+const ButtonFlagsN ButtonFlags = 15
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ButtonFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ButtonFlagMenu-(15)]
+	_ = x[ButtonFlagMenu-(14)]
 }
 
 var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagMenu`: 15,
-	`buttonflagmenu`: 15,
+	`ButtonFlagMenu`: 14,
+	`buttonflagmenu`: 14,
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	15: `Menu flag means that the button is a menu item`,
+	14: `Menu flag means that the button is a menu item`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
-	15: `ButtonFlagMenu`,
+	14: `ButtonFlagMenu`,
 }
 
 // String returns the string representation
@@ -764,65 +764,60 @@ func (i *EventPris) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7, 8, 9, 10, 11, 12, 13, 14}
+var _WidgetFlagsValues = []WidgetFlags{7, 8, 9, 10, 11, 12, 13}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 15
+const WidgetFlagsN WidgetFlags = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(7)]
-	_ = x[CanFocus-(8)]
-	_ = x[ReRenderAnchor-(9)]
-	_ = x[Invisible-(10)]
-	_ = x[MouseHasEntered-(11)]
-	_ = x[DNDHasEntered-(12)]
-	_ = x[NodeDragging-(13)]
-	_ = x[InstaDrag-(14)]
+	_ = x[ReRenderAnchor-(8)]
+	_ = x[Invisible-(9)]
+	_ = x[MouseHasEntered-(10)]
+	_ = x[DNDHasEntered-(11)]
+	_ = x[NodeDragging-(12)]
+	_ = x[InstaDrag-(13)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`NeedsRender`:     7,
 	`needsrender`:     7,
-	`CanFocus`:        8,
-	`canfocus`:        8,
-	`ReRenderAnchor`:  9,
-	`rerenderanchor`:  9,
-	`Invisible`:       10,
-	`invisible`:       10,
-	`MouseHasEntered`: 11,
-	`mousehasentered`: 11,
-	`DNDHasEntered`:   12,
-	`dndhasentered`:   12,
-	`NodeDragging`:    13,
-	`nodedragging`:    13,
-	`InstaDrag`:       14,
-	`instadrag`:       14,
+	`ReRenderAnchor`:  8,
+	`rerenderanchor`:  8,
+	`Invisible`:       9,
+	`invisible`:       9,
+	`MouseHasEntered`: 10,
+	`mousehasentered`: 10,
+	`DNDHasEntered`:   11,
+	`dndhasentered`:   11,
+	`NodeDragging`:    12,
+	`nodedragging`:    12,
+	`InstaDrag`:       13,
+	`instadrag`:       13,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	7:  `NeedsRender needs to be rendered on next render itration`,
-	8:  `CanFocus: can this node accept focus to receive keyboard input events -- set by default for typical nodes that do so, but can be overridden, including by the style &#39;can-focus&#39; property`,
-	9:  `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
-	10: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	11: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	12: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	13: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	14: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	8:  `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
+	9:  `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
+	10: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
+	11: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
+	12: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
+	13: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
 	7:  `NeedsRender`,
-	8:  `CanFocus`,
-	9:  `ReRenderAnchor`,
-	10: `Invisible`,
-	11: `MouseHasEntered`,
-	12: `DNDHasEntered`,
-	13: `NodeDragging`,
-	14: `InstaDrag`,
+	8:  `ReRenderAnchor`,
+	9:  `Invisible`,
+	10: `MouseHasEntered`,
+	11: `DNDHasEntered`,
+	12: `NodeDragging`,
+	13: `InstaDrag`,
 }
 
 // String returns the string representation
@@ -3012,30 +3007,30 @@ func (i *TextFieldSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextFieldFlagsValues = []TextFieldFlags{15}
+var _TextFieldFlagsValues = []TextFieldFlags{14}
 
 // TextFieldFlagsN is the highest valid value
 // for type TextFieldFlags, plus one.
-const TextFieldFlagsN TextFieldFlags = 16
+const TextFieldFlagsN TextFieldFlags = 15
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TextFieldFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TextFieldFocusActive-(15)]
+	_ = x[TextFieldFocusActive-(14)]
 }
 
 var _TextFieldFlagsNameToValueMap = map[string]TextFieldFlags{
-	`TextFieldFocusActive`: 15,
-	`textfieldfocusactive`: 15,
+	`TextFieldFocusActive`: 14,
+	`textfieldfocusactive`: 14,
 }
 
 var _TextFieldFlagsDescMap = map[TextFieldFlags]string{
-	15: `TextFieldFocusActive indicates that the focus is active in this field`,
+	14: `TextFieldFocusActive indicates that the focus is active in this field`,
 }
 
 var _TextFieldFlagsMap = map[TextFieldFlags]string{
-	15: `TextFieldFocusActive`,
+	14: `TextFieldFocusActive`,
 }
 
 // String returns the string representation

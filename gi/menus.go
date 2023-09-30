@@ -63,9 +63,9 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun func(
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	ac.SetAsMenu()
-	if sigTo != nil && fun != nil {
-		ac.ActionSig.Connect(sigTo, fun)
-	}
+	// if sigTo != nil && fun != nil {
+	// 	ac.ActionSig.Connect(sigTo, fun)
+	// }
 }
 
 // AddAction adds an action to the menu using given options, and connects the
@@ -278,6 +278,7 @@ func (m *MenuActions) AddStdAppMenu(win *RenderWin) {
 // AddRenderWinsMenu adds menu items for current main and dialog windows.
 // must be called under RenderWinGlobalMu mutex lock!
 func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
+	/*  todo
 	m.AddAction(ActOpts{Label: "Minimize"},
 		nil, func(recv, send ki.Ki, sig int64, data any) {
 			win.GoosiWin.Minimize()
@@ -306,6 +307,7 @@ func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 			}
 		}
 	}
+	*/
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

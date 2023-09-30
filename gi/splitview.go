@@ -589,7 +589,7 @@ func (sr *Splitter) SplitterMouse() {
 			return
 		}
 		e.SetHandled()
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.Where)
+		ed := sr.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sr.Style
 		// SidesTODO: unsure about dim
 		spc := st.EffMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize

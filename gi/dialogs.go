@@ -81,7 +81,7 @@ func (dlg *Dialog) StyleFrame() {
 		dlg.Frame.Spacing = StdDialogVSpaceUnits
 		s.Border.Style.Set(styles.BorderNone)
 		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Color)
+		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Solid)
 		if !DialogsSepRenderWin {
 			s.BoxShadow = BoxShadow3
 		}

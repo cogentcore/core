@@ -5,17 +5,12 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"sync"
-	"time"
 
-	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
-	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 )
 
 // EventPris for different queues of event signals, processed in priority order
@@ -65,13 +60,13 @@ type EventMgr struct {
 	Scrolling Widget `desc:"node receiving mouse scrolling events -- anchor to same"`
 
 	// stage of DND process
-	DNDStage DNDStages `desc:"stage of DND process"`
-
-	// drag-n-drop data -- if non-nil, then DND is taking place
-	DNDData mimedata.Mimes `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
-
-	// drag-n-drop source node
-	DNDSource Widget `desc:"drag-n-drop source node"`
+	// DNDStage DNDStages `desc:"stage of DND process"`
+	//
+	// // drag-n-drop data -- if non-nil, then DND is taking place
+	// DNDData mimedata.Mimes `desc:"drag-n-drop data -- if non-nil, then DND is taking place"`
+	//
+	// // drag-n-drop source node
+	// DNDSource Widget `desc:"drag-n-drop source node"`
 
 	// 	// final event for DND which is sent if a finalize is received
 	// 	DNDFinalEvent events.Event `desc:"final event for DND which is sent if a finalize is received"`
@@ -149,8 +144,8 @@ func (em *EventMgr) HandleEvent(sc *Scene, evi events.Event) {
 	switch {
 	case evi.HasPos():
 		em.HandlePosEvent(sc, evi)
-	case evi.OnFocus():
-		em.HandleFocusEvent(sc, evi)
+	// case evi.OnFocus(): // todo: needs more
+	// 	em.HandleFocusEvent(sc, evi)
 	default:
 		em.HandleOtherEvent(sc, evi)
 	}
@@ -168,110 +163,95 @@ func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
-	et := evi.Type()
-	foc := em.CurFocus()
-	if foc == nil {
-		return
-	}
-	fw := foc.AsWidget()
-	if win := em.RenderWin(); win != nil {
-		if !win.IsFocusActive() { // reactivate on keyboard input
-			win.SetFocusActive(true)
-			if EventTrace {
-				fmt.Printf("Event: set focus active, was not: %v\n", fw.Path())
-			}
-			foc.FocusChanged(FocusActive)
+	/*
+		foc := em.CurFocus()
+		if foc == nil {
+			return
 		}
-	}
-	wants := fw.Events.Filter.HasFlag(et)
-	if wants {
-		fw.Events.Funcs[et].Func() // foc.This(), nil, int64(et), evi)
-	}
+		fw := foc.AsWidget()
+		if win := em.RenderWin(); win != nil {
+			if !win.IsFocusActive() { // reactivate on keyboard input
+				win.SetFocusActive(true)
+				if EventTrace {
+					fmt.Printf("Event: set focus active, was not: %v\n", fw.Path())
+				}
+				foc.FocusChanged(FocusActive)
+			}
+		}
+		fw.HandleEvent(evi)
+	*/
 }
 
 func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	pos := evi.LocalPos()
-	et := evi.Type()
 
 	// todo: all the stuff about dragging here
 	// todo: sc.Decor needs to be processed too!  do that first!
 
-	// note: we don't really have a ki sender -- window is no longer a Ki
-	var send Widget
+	var allbb []Widget
 
-	for pri := HiPri; pri < EventPrisN; pri++ {
-		if pri != LowRawPri && evi.IsHandled() { // someone took care of it
-			continue
+	sc.Frame.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+			return ki.Break
 		}
-
-		// we take control of signal process to sort elements by depth, and
-		// dispatch to inner-most one first
-		rvs := make(WinEventRecvList, 0, 10)
-
-		sc.Frame.WalkPre(func(k ki.Ki) bool {
-			wi, wb := AsWidget(k)
-			if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
-				return ki.Break
-			}
-			if !wb.PosInBBox(pos) {
-				return ki.Break
-			}
-			wants := wb.Events.Matches(et, pri)
-			if wants {
-				// fmt.Printf("pri: %s  et: %s   wb: %s\n", pri.String(), et.BitIndexString(), wb.Path())
-				rvs.Add(wi, wb.Events.Funcs[et].Func)
-			}
-			return ki.Continue
-		})
-
-		nrv := len(rvs)
-
-		if nrv == 0 {
-			continue
+		if !wb.PosInBBox(pos) {
+			return ki.Break
 		}
+		allbb = append(allbb, wi)
+		return ki.Continue
+	})
 
-		// // deepest first
-		// sort.Slice(rvs, func(i, j int) bool {
-		// 	return rvs[i].Data > rvs[j].Data
-		// })
-
-		// reverse order
-		for i := nrv - 1; i >= 0; i-- {
-			rr := rvs[i]
-			switch evi.Type() {
-			case events.MouseDragEvent:
-				if em.Dragging == nil {
-					rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
-				}
-			}
-
-			// fmt.Printf("proc event type: %v: %v %v\n", et.BitIndexString(), evi, rr.Recv.Path())
-			// actually call the thing!
-			rr.Call(send, int64(et))
-
-			if pri != LowRawPri && evi.IsHandled() { // someone took care of it
-				switch evi.Type() { // only grab events if processed
-				case events.MouseDragEvent:
-					if em.Dragging == nil {
-						em.Dragging = rr.Recv
-						rr.Recv.SetFlag(true, NodeDragging)
-					}
-				case events.MouseScrollEvent:
-					if em.Scrolling == nil {
-						em.Scrolling = rr.Recv
-					}
-				}
-				break
-			} else {
-				switch evi.Type() {
-				case events.MouseDragEvent:
-					if em.Dragging == nil {
-						rr.Recv.SetFlag(false, NodeDragging) // clear provisional
-					}
-				}
-			}
-		}
+	// todo: send allbb to events.Mgr
+	n := len(allbb)
+	if n == 0 {
+		return
 	}
+	for i := n - 1; i >= 0; i-- {
+		w := allbb[i]
+		w.HandleEvent(evi)
+	}
+
+	// // deepest first
+	// sort.Slice(rvs, func(i, j int) bool {
+	// 	return rvs[i].Data > rvs[j].Data
+	// })
+
+	// reverse order
+	// 	switch evi.Type() {
+	// 	case events.MouseDragEvent:
+	// 		if em.Dragging == nil {
+	// 			rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
+	// 		}
+	// 	}
+	//
+	// 	// fmt.Printf("proc event type: %v: %v %v\n", et.BitIndexString(), evi, rr.Recv.Path())
+	// 	// actually call the thing!
+	// 	rr.Call(send, int64(et))
+	//
+	// 	if pri != LowRawPri && evi.IsHandled() { // someone took care of it
+	// 		switch evi.Type() { // only grab events if processed
+	// 		case events.MouseDragEvent:
+	// 			if em.Dragging == nil {
+	// 				em.Dragging = rr.Recv
+	// 				rr.Recv.SetFlag(true, NodeDragging)
+	// 			}
+	// 		case events.MouseScrollEvent:
+	// 			if em.Scrolling == nil {
+	// 				em.Scrolling = rr.Recv
+	// 			}
+	// 		}
+	// 		break
+	// 	} else {
+	// 		switch evi.Type() {
+	// 		case events.MouseDragEvent:
+	// 			if em.Dragging == nil {
+	// 				rr.Recv.SetFlag(false, NodeDragging) // clear provisional
+	// 			}
+	// 		}
+	// 	}
+	// }
+
 }
 
 /*
@@ -343,7 +323,6 @@ func (em *EventMgr) SendEventSignalFunc(evi events.Event, popup bool, rvs *WinEv
 	rvs.AddDepth(recv, fun, top)
 	return ki.Continue
 }
-*/
 
 // // SendSig directly calls SendSig from given recv, sender for given event
 // // across all priorities.
@@ -557,7 +536,7 @@ func (em *EventMgr) ResetMouseMove() {
 // then only items on popup are in scope, otherwise items NOT on popup are in
 // scope (if no popup, everything is in scope).
 func (em *EventMgr) GenMouseFocusEvents(mev events.Event, popup bool) bool {
-	/*
+
 		fe := events.NewEventCopy(events.MouseFocusEvent, mev)
 		pos := mev.LocalPos()
 		ftyp := events.MouseFocusEvent
@@ -610,14 +589,12 @@ func (em *EventMgr) GenMouseFocusEvents(mev events.Event, popup bool) bool {
 			em.Master.EventTopUpdateEnd(updt)
 		}
 		return updated
-	*/
 	return false
 }
 
 // DoInstaDrag tests whether the given mouse DragEvent is on a widget marked
 // with InstaDrag
 func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
-	/*
 		et := me.Type()
 		for pri := HiPri; pri < EventPrisN; pri++ {
 			esig := &em.EventSigs[et][pri]
@@ -647,7 +624,6 @@ func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
 				return ki.Continue
 			}
 		}
-	*/
 	return ki.Break
 }
 
@@ -686,8 +662,8 @@ var DNDTrace = false
 
 // DNDStartEvent handles drag-n-drop start events.
 func (em *EventMgr) DNDStartEvent(e events.Event) {
-	de := events.NewEvent(events.Start, e.Where, e.Mods)
-	de.Start = e.Where
+	de := events.NewEvent(events.Start, e.Pos(), e.Mods)
+	de.Start = e.Pos()
 	de.StTime = e.GenTime
 	de.DefaultMod() // based on current key modifiers
 	em.DNDStage = DNDStartSent
@@ -728,7 +704,7 @@ func (em *EventMgr) SendDNDHoverEvent(e events.Event) {
 
 // SendDNDMoveEvent sends DND move event
 func (em *EventMgr) SendDNDMoveEvent(e events.Event) events.Event {
-	// todo: when e.Where goes negative, transition to OS DND
+	// todo: when e.Pos() goes negative, transition to OS DND
 	// todo: send move / enter / exit events to anyone listening
 	de := &events.Event{}
 	de.EventBase = e.EventBase
@@ -775,7 +751,6 @@ func (em *EventMgr) ClearDND() {
 	}
 }
 
-/*
 // GenDNDFocusEvents processes events.Event to generate events.FocusEvent
 // events -- returns true if any such events were sent.  If popup is true,
 // then only items on popup are in scope, otherwise items NOT on popup are in
@@ -836,8 +811,6 @@ func (em *EventMgr) GenDNDFocusEvents(mev events.Event, popup bool) bool {
 	}
 	return ki.Break
 }
-
-*/
 
 ///////////////////////////////////////////////////////////////////
 //   Key events
@@ -1185,3 +1158,5 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	}
 }
+
+*/

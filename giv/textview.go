@@ -4712,7 +4712,7 @@ func (tv *TextView) MouseMoveEvent() {
 		inLink := false
 		for _, tl := range rend.Links {
 			tlb := tl.Bounds(rend, pos)
-			if me.Where.In(tlb) {
+			if me.Pos().In(tlb) {
 				inLink = true
 				break
 			}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"goki.dev/enums"
+	"goki.dev/girl/states"
 	"goki.dev/ki/v2"
 )
 
@@ -18,11 +19,6 @@ type WidgetFlags ki.Flags //enums:bitflag
 const (
 	// NeedsRender needs to be rendered on next render itration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
-
-	// CanFocus: can this node accept focus to receive keyboard input events
-	// -- set by default for typical nodes that do so, but can be overridden,
-	// including by the style 'can-focus' property
-	CanFocus
 
 	// todo: remove:
 
@@ -64,40 +60,40 @@ const (
 
 // SetSelected sets the selected flag to given value
 func (wb *WidgetBase) SetSelected(sel bool) {
-	wb.SetFlag(sel, Selected)
+	wb.Style.State.SetFlag(sel, states.Selected)
 }
 
 // CanFocus checks if this node can receive keyboard focus
 func (wb *WidgetBase) CanFocus() bool {
-	return wb.HasFlag(CanFocus)
+	return wb.Style.Abilities.HasFlag(states.Focusable)
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.SetFlag(wb.HasFlag(Active), CanFocus)
+	wb.Style.Abilities.SetFlag(wb.StateIs(states.Active), states.Focusable)
 }
 
 // SetFocusState sets the HasFocus flag
 func (wb *WidgetBase) SetFocusState(focus bool) {
-	wb.SetFlag(focus, HasFocus)
+	wb.Style.State.SetFlag(focus, states.Focused)
 }
 
 // SetEnabledState sets the Disabled flag
 func (wb *WidgetBase) SetEnabledState(enabled bool) {
-	wb.SetFlag(!enabled, Disabled)
+	wb.Style.State.SetFlag(!enabled, states.Disabled)
 }
 
 // SetEnabledStateUpdt sets the Disabled flag
 func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
-	wb.SetFlag(!enabled, Disabled)
+	wb.Style.State.SetFlag(!enabled, states.Disabled)
 	wb.ApplyStyleUpdate(wb.Sc)
 }
 
 // IsDisabled tests if this node is flagged as [Disabled].
 // If so, behave and style appropriately.
 func (wb *WidgetBase) IsDisabled() bool {
-	return wb.HasFlag(Disabled)
+	return wb.StateIs(states.Disabled)
 }
 
 // HasFlagWithin returns whether the current node or any
@@ -109,7 +105,7 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 			return ki.Break
 		}
-		if wb.HasFlag(flag) {
+		if wb.Is(flag) {
 			got = true
 			return ki.Break
 		}

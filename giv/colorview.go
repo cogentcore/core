@@ -517,13 +517,13 @@ func (cv *ColorView) UpdateImpl() {
 	cv.UpdateValueFrame()
 	// cv.NumView.UpdateWidget()
 	// v := cv.Value()
-	// v.Style.BackgroundColor.Color = cv.Color // direct copy
+	// v.Style.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateValueFrame updates the value frame of the color view
 // that displays the color.
 func (cv *ColorView) UpdateValueFrame() {
-	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Style.BackgroundColor.Color = cv.Color // direct copy
+	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Style.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateNums updates the values of the number inputs

@@ -15,7 +15,7 @@ var ActionType = gti.AddType(&gti.Type{
 	IDName:    "action",
 	Doc:       "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "[view: -] optional data that is sent with the ActionSig when it is emitted", Directives: gti.Directives{}}},
@@ -108,7 +108,7 @@ var ToolBarType = gti.AddType(&gti.Type{
 	IDName:    "tool-bar",
 	Doc:       "ToolBar is a Layout (typically LayoutHoriz) that renders a\nbackground and is useful for holding Actions that do things",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -198,7 +198,7 @@ var ButtonBoxType = gti.AddType(&gti.Type{
 	IDName:    "button-box",
 	Doc:       "ButtonBox is a widget for containing a set of CheckBox buttons.\nIt can optionally enforce mutual excusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (checbox button labels)", Directives: gti.Directives{}}},
@@ -296,7 +296,7 @@ var ButtonType = gti.AddType(&gti.Type{
 	IDName:    "button",
 	Doc:       "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button (default, primary, secondary, etc)", Directives: gti.Directives{}}},
@@ -574,7 +574,7 @@ var LabelType = gti.AddType(&gti.Type{
 	IDName:    "label",
 	Doc:       "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label to display", Directives: gti.Directives{}}},
@@ -637,7 +637,7 @@ var LayoutType = gti.AddType(&gti.Type{
 	IDName:    "layout",
 	Doc:       "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nThe alignment is NOT inherited by default so must be specified per\nchild, except that the parent alignment is used within the relevant\ndimension (e.g., horizontal-align for a LayoutHoriz layout,\nto determine left, right, center, justified).\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Lay", &gti.Field{Name: "Lay", Type: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}}},
@@ -868,7 +868,7 @@ var SliderBaseType = gti.AddType(&gti.Type{
 	IDName:    "slider-base",
 	Doc:       "SliderBase has common slider functionality -- two major modes: ValThumb =\nfalse is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size\n- thumbsize",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "float32", Doc: "current value", Directives: gti.Directives{}}},
@@ -1048,7 +1048,7 @@ var SpinBoxType = gti.AddType(&gti.Type{
 	IDName:    "spin-box",
 	Doc:       "SpinBox combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "float32", Doc: "current value", Directives: gti.Directives{}}},
@@ -1115,7 +1115,7 @@ var SplitViewType = gti.AddType(&gti.Type{
 	IDName:    "split-view",
 	Doc:       "SplitView allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"HandleSize", &gti.Field{Name: "HandleSize", Type: "units.Value", Doc: "size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this", Directives: gti.Directives{}}},
@@ -1209,7 +1209,7 @@ var TabViewType = gti.AddType(&gti.Type{
 	IDName:    "tab-view",
 	Doc:       "TabView switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabView is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}}},
@@ -1303,7 +1303,7 @@ var TextFieldType = gti.AddType(&gti.Type{
 	IDName:    "text-field",
 	Doc:       "TextField is a widget for editing a line of text",
 	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Txt", &gti.Field{Name: "Txt", Type: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}}},
@@ -1399,8 +1399,8 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]Styler", Doc: "a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code", Directives: gti.Directives{}}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}}},
 		{"Style", &gti.Field{Name: "Style", Type: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners provides to add arbitrary functions to listen to particular event types.\nThese are called first before the type-general event Handlers.", Directives: gti.Directives{}}},
 		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}}},
 		{"CtxtMenuFunc", &gti.Field{Name: "CtxtMenuFunc", Type: "CtxtMenuFunc", Doc: "[view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate", Directives: gti.Directives{}}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}}},

@@ -249,13 +249,13 @@ func (bb *ButtonBase) ClickOnEnterSpace() {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("Button KeyChordEvent: %v\n", bbb.Path())
+			fmt.Printf("Button KeyChordEvent: %v\n", bb.Path())
 		}
 		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunEnter || ev.KeyRune() == ' ' {
+		if kf == KeyFunEnter || e.KeyRune() == ' ' {
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			e.SetHandled()   // todo ?
-			bb.SendMeClick() // todo: write this
+			e.SetHandled()             // todo ?
+			bb.SendMe(events.Click, e) // todo: write this
 			// }
 		}
 	})
@@ -337,10 +337,6 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 func (bb *ButtonBase) ConfigWidget(sc *Scene) {
 	// bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts(sc)
-}
-
-func (bb *ButtonBase) ButtonRelease() {
-	bb.BaseButtonRelease() // do base
 }
 
 func (bb *ButtonBase) ConfigParts(sc *Scene) {

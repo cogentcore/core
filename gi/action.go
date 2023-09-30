@@ -123,16 +123,16 @@ func (ac *Action) ActionStyles() {
 		}
 		// switch ac.State {
 		// case ButtonActive:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(7))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(7))
 		// case ButtonInactive:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(20))
 		// 	s.Color = colors.Scheme.OnBackground.Highlight(20)
 		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(15))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(15))
 		// case ButtonHover:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(20))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(20))
 		// case ButtonDown:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Color.Highlight(25))
+		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(25))
 		// }
 	})
 }

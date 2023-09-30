@@ -17,9 +17,23 @@ func (wb *WidgetBase) EventMgr() *EventMgr {
 }
 
 // On adds an event listener function for the given event type
-func (wb *WidgetBase) On(etype events.Type, fun func(e events.Event)) Widget {
+func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 	wb.Listeners.Add(etype, fun)
 	return wb.This().(Widget)
+}
+
+// SendMe sends an event of given type to this widget,
+// optionally starting from values in the given original event
+// (recommended to include where possible).
+func (wb *WidgetBase) SendMe(typ events.Types, orig events.Event) {
+	var e events.Event
+	if orig != nil {
+		e = orig.Clone()
+		e.AsBase().Typ = typ
+	} else {
+		e = &events.Base{Typ: typ}
+	}
+	wb.This().(Widget).HandleEvent(e)
 }
 
 // PosInBBox returns true if given position is within
@@ -38,13 +52,13 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 func (wb *WidgetBase) WidgetHandlers() {
 	// nb.WidgetMouseEvent() ??
 	// wb.WidgetMouseFocusEvent()
-	wb.LongHoverTooltipHandler()
+	wb.LongHoverTooltip()
 }
 
 // LongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
 // Most widgets should call this as part of their event handler methods.
 func (wb *WidgetBase) LongHoverTooltip() {
-	wb.On(events.LongHoverStart, func(e events.Handler) {
+	wb.On(events.LongHoverStart, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}

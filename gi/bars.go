@@ -10,7 +10,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -402,19 +401,13 @@ func (tb *ToolBar) Render(sc *Scene) {
 	}
 }
 
-func (tb *ToolBar) MouseFocusEvent() {
-	we.AddFunc(events.MouseEnter, HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		tbb := AsToolBar(recv)
-		if tbb != nil {
-			tbb.UpdateActions()
-		}
-		// do NOT mark as processed -- HiPri and not mutex
-	})
-}
-
-// func (tb *ToolBar) HandleEvent(ev events.Event) {
-// 	tb.SetShortcuts()
+// func (tb *ToolBar) MouseFocusEvent() {
+// 	tb.On(events.MouseEnter, func(e events.Event) {
+// 		if tb != nil {
+// 			tb.UpdateActions()
+// 		}
+// 		// do NOT mark as processed -- HiPri and not mutex
+// 	})
 // }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar

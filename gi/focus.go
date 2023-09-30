@@ -57,53 +57,54 @@ func (wb *WidgetBase) GrabFocus() {
 			return ki.Break // done
 		})
 	}
-	em := wb.EventMgr()
-	if em != nil {
-		em.SetFocus(foc.(Widget))
-	}
+	_ = foc
+	// em := wb.EventMgr()
+	// if em != nil {
+	// 	em.SetFocus(foc.(Widget))
+	// }
 }
 
 // FocusNext moves the focus onto the next item
 func (wb *WidgetBase) FocusNext() {
-	em := wb.EventMgr()
-	if em != nil {
-		em.FocusNext(em.CurFocus())
-	}
+	// em := wb.EventMgr()
+	// if em != nil {
+	// 	em.FocusNext(em.CurFocus())
+	// }
 }
 
 // FocusPrev moves the focus onto the previous item
 func (wb *WidgetBase) FocusPrev() {
-	em := wb.EventMgr()
-	if em != nil {
-		em.FocusPrev(em.CurFocus())
-	}
+	// em := wb.EventMgr()
+	// if em != nil {
+	// 	em.FocusPrev(em.CurFocus())
+	// }
 }
 
 // StartFocus specifies this widget to give focus to when the window opens
 func (wb *WidgetBase) StartFocus() {
-	em := wb.EventMgr()
-	if em != nil {
-		em.SetStartFocus(wb.This().(Widget))
-	}
+	// em := wb.EventMgr()
+	// if em != nil {
+	// 	em.SetStartFocus(wb.This().(Widget))
+	// }
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the RenderWin
 func (wb *WidgetBase) ContainsFocus() bool {
-	em := wb.EventMgr()
-	if em == nil {
-		return false
-	}
-	cur := em.CurFocus()
-	if cur == nil {
-		return false
-	}
-	if cur == wb.This() {
-		return true
-	}
-	plev := cur.ParentLevel(wb.This())
-	if plev < 0 {
-		return false
-	}
+	// em := wb.EventMgr()
+	// if em == nil {
+	// 	return false
+	// }
+	// cur := em.CurFocus()
+	// if cur == nil {
+	// 	return false
+	// }
+	// if cur == wb.This() {
+	// 	return true
+	// }
+	// plev := cur.ParentLevel(wb.This())
+	// if plev < 0 {
+	// 	return false
+	// }
 	return true
 }
