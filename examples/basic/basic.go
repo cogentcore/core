@@ -5,17 +5,12 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"image"
-	"os"
-
 	"github.com/disintegration/imaging"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"goki.dev/video"
 )
 
 func main() {
-	img, err := ReadFrame("./in.mp4", 150)
+	img, err := video.ReadFrame("./in.mp4", 150)
 	if err != nil {
 		panic(err)
 	}
@@ -23,22 +18,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-// ReadFrame reads the given frame number from the given video file as a JPEG image.
-func ReadFrame(file string, frame int) (image.Image, error) {
-	buf := &bytes.Buffer{}
-	err := ffmpeg.Input(file).
-		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frame)}).
-		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).
-		Run()
-	if err != nil {
-		return nil, fmt.Errorf("error getting frame %d from video %q: %w", frame, file, err)
-	}
-	img, err := imaging.Decode(buf)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding frame %d from video %q into image: %w", frame, file, err)
-	}
-	return img, nil
 }
