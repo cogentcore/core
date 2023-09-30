@@ -288,8 +288,8 @@ func (app *appImpl) NWindows() int {
 func (app *appImpl) Window(win int) goosi.Window {
 	app.mu.Lock()
 	defer app.mu.Unlock()
-	if win < len(app.windows) {
-		return app.windows[win]
+	if win == 0 {
+		return app.window
 	}
 	return nil
 }

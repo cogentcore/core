@@ -17,8 +17,6 @@ import (
 	"goki.dev/vgpu/v2/vdraw"
 )
 
-// TODO: actually implement things for mobile window
-
 type windowImpl struct {
 	goosi.WindowBase
 	events.Deque
@@ -278,6 +276,15 @@ func (w *windowImpl) Close() {
 	}
 }
 
-func (w *windowImpl) SetMousePos(x, y float64) {}
+func (w *windowImpl) SetMousePos(x, y float64) {
+	// no-op
+}
 
-func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {}
+func (w *windowImpl) SetCursorEnabled(enabled, raw bool) {
+	// no-op
+}
+
+func (w *windowImpl) IsCursorEnabled() bool {
+	// no-op
+	return false
+}
