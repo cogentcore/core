@@ -48,11 +48,9 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 import "C"
 import (
 	"log"
-	"mime"
 	"os"
 	"runtime"
 	"runtime/debug"
-	"strings"
 	"time"
 	"unsafe"
 
@@ -325,86 +323,9 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 	return nil
 }
 
-var fileCallback func(string, func())
-
-//export filePickerReturned
-func filePickerReturned(str *C.char) {
-	if fileCallback == nil {
-		return
-	}
-
-	fileCallback(C.GoString(str), nil)
-	fileCallback = nil
-}
-
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
-}
-
-func mimeStringFromFilter(filter *FileFilter) string {
-	mimes := "*/*"
-	if filter.MimeTypes != nil {
-		mimes = strings.Join(filter.MimeTypes, "|")
-	} else if filter.Extensions != nil {
-		var mimeTypes []string
-		for _, ext := range filter.Extensions {
-			if mimeEntry, ok := mimeMap[ext]; ok {
-				mimeTypes = append(mimeTypes, mimeEntry)
-
-				continue
-			}
-
-			mimeType := mime.TypeByExtension(ext)
-			if mimeType == "" {
-				log.Println("Could not find mime for extension " + ext + ", allowing all")
-				return "*/*" // could not find one, so allow all
-			}
-
-			mimeTypes = append(mimeTypes, mimeType)
-		}
-		mimes = strings.Join(mimeTypes, "|")
-	}
-	return mimes
-}
-
-func driverShowFileOpenPicker(callback func(string, func()), filter *FileFilter) {
-	fileCallback = callback
-
-	mimes := mimeStringFromFilter(filter)
-	mimeStr := C.CString(mimes)
-	defer C.free(unsafe.Pointer(mimeStr))
-
-	open := func(vm, jniEnv, ctx uintptr) error {
-		// TODO pass in filter...
-		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileOpen(env, mimeStr)
-		return nil
-	}
-
-	if err := mobileinit.RunOnJVM(open); err != nil {
-		log.Fatalf("app: %v", err)
-	}
-}
-
-func driverShowFileSavePicker(callback func(string, func()), filter *FileFilter, filename string) {
-	fileCallback = callback
-
-	mimes := mimeStringFromFilter(filter)
-	mimeStr := C.CString(mimes)
-	defer C.free(unsafe.Pointer(mimeStr))
-	filenameStr := C.CString(filename)
-	defer C.free(unsafe.Pointer(filenameStr))
-
-	save := func(vm, jniEnv, ctx uintptr) error {
-		env := (*C.JNIEnv)(unsafe.Pointer(jniEnv)) // not a Go heap pointer
-		C.showFileSave(env, mimeStr, filenameStr)
-		return nil
-	}
-
-	if err := mobileinit.RunOnJVM(save); err != nil {
-		log.Fatalf("app: %v", err)
-	}
 }
 
 var mainUserFn func(App)
