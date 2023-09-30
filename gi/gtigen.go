@@ -45,10 +45,13 @@ func (t *Action) New() ki.Ki {
 	return &Action{}
 }
 
+// ActionEmbedder is an interface that all types that embed Action satisfy
 type ActionEmbedder interface {
 	AsAction() *Action
 }
 
+// AsAction returns the given value as a value of type Action if the type
+// of the given value embeds Action, or nil otherwise
 func AsAction(k ki.Ki) *Action {
 	if k == nil || k.This() == nil {
 		return nil
@@ -59,6 +62,7 @@ func AsAction(k ki.Ki) *Action {
 	return nil
 }
 
+// AsAction satisfies the [ActionEmbedder] interface
 func (t *Action) AsAction() *Action {
 	return t
 }
