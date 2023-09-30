@@ -13,7 +13,6 @@ import (
 	_ "image/png"
 	"log"
 	"math/rand"
-	"os"
 	"path/filepath"
 	"runtime"
 	"time"
@@ -23,23 +22,12 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
+	"goki.dev/video"
 )
 
 func init() {
 	// must lock main thread for gpu!
 	runtime.LockOSThread()
-}
-
-func OpenImage(fname string) image.Image {
-	file, err := os.Open(fname)
-	if err != nil {
-		fmt.Printf("image: %s\n", err)
-	}
-	gimg, _, err := image.Decode(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return gimg
 }
 
 func main() {
@@ -84,27 +72,18 @@ func main() {
 		vgpu.Terminate()
 	}
 
-	imgFiles := []string{"ground.png", "wood.png", "teximg.jpg"}
-	imgs := make([]image.Image, len(imgFiles))
+	videoFiles := []string{"countdown.mp4"}
+	imgs := make([]image.Image, len(videoFiles))
 
 	stoff := 15 // causes images to wrap around sets, so this tests that..
 
-	for i, fnm := range imgFiles {
-		pnm := filepath.Join("images", fnm)
-		imgs[i] = OpenImage(pnm)
+	for i, fnm := range videoFiles {
+		pnm := filepath.Join("../videos", fnm)
+		imgs[i], err = video.ReadFrame(pnm, 150)
+		if err != nil {
+			panic(err)
+		}
 		drw.SetGoImage(i+stoff, 0, imgs[i], vgpu.NoFlipY)
-	}
-
-	// icons loaded into a texture array
-	iconFiles := []string{"sound1.png", "text.png", "up.png", "world1.png"}
-	iconImgs := make([]image.Image, len(iconFiles))
-	iconIdx := 0
-	iconFmt := vgpu.NewImageFormat(20, 22, len(iconFiles))
-	drw.ConfigImage(iconIdx, iconFmt)
-	for i, fnm := range iconFiles {
-		pnm := filepath.Join("images", fnm)
-		iconImgs[i] = OpenImage(pnm)
-		drw.SetGoImage(iconIdx, i, iconImgs[i], vgpu.NoFlipY)
 	}
 
 	drw.SyncImages()
@@ -116,14 +95,10 @@ func main() {
 		}
 		drw.StartDraw(descIdx) // specifically starting with correct descIdx is key..
 		drw.Scale(idx+stoff, 0, sf.Format.Bounds(), image.ZR, vdraw.Src, vgpu.NoFlipY)
-		for i := range imgFiles {
+		for i := range videoFiles {
 			// dp := image.Point{rand.Intn(500), rand.Intn(500)}
 			dp := image.Point{i * 50, i * 50}
 			drw.Copy(i+stoff, 0, dp, image.ZR, vdraw.Src, vgpu.NoFlipY)
-		}
-		for i := range iconFiles {
-			dp := image.Point{rand.Intn(500), rand.Intn(500)}
-			drw.Copy(iconIdx, i, dp, image.ZR, vdraw.Over, vgpu.NoFlipY)
 		}
 		drw.EndDraw()
 	}
