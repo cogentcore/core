@@ -73,11 +73,11 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	`,
 ))
 
-// HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embed"
+// HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
 // commend directive. This function is used in [KiMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
 	return slices.ContainsFunc([]*gti.Directive(typ.Directives), func(d *gti.Directive) bool {
-		return d.Tool == "goki" && d.Directive == "embed"
+		return d.Tool == "goki" && d.Directive == "embedder"
 	})
 }
 
