@@ -10,11 +10,13 @@ import (
 
 // ActionType is the [gti.Type] for [Action]
 var ActionType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Action",
-	ShortName:  "gi.Action",
-	IDName:     "action",
-	Doc:        "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Action",
+	ShortName: "gi.Action",
+	IDName:    "action",
+	Doc:       "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embed", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "[view: -] optional data that is sent with the ActionSig when it is emitted", Directives: gti.Directives{}}},
 		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(act *Action)", Doc: "[view: -] optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing", Directives: gti.Directives{}}},
@@ -41,6 +43,24 @@ func (t *Action) KiType() *gti.Type {
 // New returns a new [*Action] value
 func (t *Action) New() ki.Ki {
 	return &Action{}
+}
+
+type ActionEmbedder interface {
+	AsAction() *Action
+}
+
+func AsAction(k ki.Ki) *Action {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ActionEmbedder); ok {
+		return t.AsAction()
+	}
+	return nil
+}
+
+func (t *Action) AsAction() *Action {
+	return t
 }
 
 // MenuBarType is the [gti.Type] for [MenuBar]

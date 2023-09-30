@@ -16,24 +16,6 @@ import (
 	"goki.dev/ki/v2"
 )
 
-type ActionEmbedder interface {
-	AsAction() *Action
-}
-
-func AsAction(k ki.Ki) *Action {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if ac, ok := k.(ActionEmbedder); ok {
-		return ac.AsAction()
-	}
-	return nil
-}
-
-func (ac *Action) AsAction() *Action {
-	return ac
-}
-
 // ActOpts provides named and partial parameters for AddAction method
 type ActOpts struct {
 	Name        string
@@ -52,6 +34,8 @@ type ActOpts struct {
 // differs depending on whether it is in a Menu versus a MenuBar or ToolBar --
 // this is controlled by the Class which is automatically set to
 // menu, menubar, or toolbar
+//
+//goki:embed
 type Action struct {
 	ButtonBase
 
