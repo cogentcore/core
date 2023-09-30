@@ -56,7 +56,7 @@ type appImpl struct {
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
-	mobapp        mapp.App
+	darkMode      bool
 }
 
 var mainCallback func(goosi.App)

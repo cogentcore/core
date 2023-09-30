@@ -19,15 +19,11 @@ until this is complete. Next JNI_OnLoad is called. When that is
 complete, one of two entry points is called.
 
 All-Go apps built using NativeActivity enter at ANativeActivity_onCreate.
-
-Go libraries (for example, those built with gomobile bind) do not use
-the app package initialization.
 */
-
-package app
+package android
 
 /*
-#cgo LDFLAGS: -landroid -llog -lEGL -lGLESv2
+#cgo LDFLAGS: -landroid -llog
 
 #include <android/configuration.h>
 #include <android/input.h>
@@ -35,17 +31,11 @@ package app
 #include <android/looper.h>
 #include <android/native_activity.h>
 #include <android/native_window.h>
-#include <EGL/egl.h>
 #include <jni.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-extern EGLDisplay display;
-extern EGLSurface surface;
-
-char* createEGLSurface(ANativeWindow* window);
-char* destroyEGLSurface();
 int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 
 void showKeyboard(JNIEnv* env, int keyboardType);
@@ -57,7 +47,6 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 */
 import "C"
 import (
-	"fmt"
 	"log"
 	"mime"
 	"os"
@@ -203,7 +192,7 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	darkMode = bool(dark)
+	theApp.window.darkMode = bool(dark)
 }
 
 type windowConfig struct {
@@ -293,10 +282,6 @@ var (
 	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
 	darkMode                                                             bool
 )
-
-func init() {
-	// theApp.registerGLViewportFilter()
-}
 
 func main(f func(App)) {
 	mainUserFn = f
@@ -603,43 +588,6 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 	}
 	// TODO(crawshaw): set Modifiers.
 	theApp.eventsIn <- k
-}
-
-func eglGetError() string {
-	switch errNum := C.eglGetError(); errNum {
-	case C.EGL_SUCCESS:
-		return "EGL_SUCCESS"
-	case C.EGL_NOT_INITIALIZED:
-		return "EGL_NOT_INITIALIZED"
-	case C.EGL_BAD_ACCESS:
-		return "EGL_BAD_ACCESS"
-	case C.EGL_BAD_ALLOC:
-		return "EGL_BAD_ALLOC"
-	case C.EGL_BAD_ATTRIBUTE:
-		return "EGL_BAD_ATTRIBUTE"
-	case C.EGL_BAD_CONTEXT:
-		return "EGL_BAD_CONTEXT"
-	case C.EGL_BAD_CONFIG:
-		return "EGL_BAD_CONFIG"
-	case C.EGL_BAD_CURRENT_SURFACE:
-		return "EGL_BAD_CURRENT_SURFACE"
-	case C.EGL_BAD_DISPLAY:
-		return "EGL_BAD_DISPLAY"
-	case C.EGL_BAD_SURFACE:
-		return "EGL_BAD_SURFACE"
-	case C.EGL_BAD_MATCH:
-		return "EGL_BAD_MATCH"
-	case C.EGL_BAD_PARAMETER:
-		return "EGL_BAD_PARAMETER"
-	case C.EGL_BAD_NATIVE_PIXMAP:
-		return "EGL_BAD_NATIVE_PIXMAP"
-	case C.EGL_BAD_NATIVE_WINDOW:
-		return "EGL_BAD_NATIVE_WINDOW"
-	case C.EGL_CONTEXT_LOST:
-		return "EGL_CONTEXT_LOST"
-	default:
-		return fmt.Sprintf("Unknown EGL err: %d", errNum)
-	}
 }
 
 var androidKeycoe = map[int32]key.Code{
