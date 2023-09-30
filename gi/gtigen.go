@@ -11,6 +11,8 @@ import (
 // ActionType is the [gti.Type] for [Action]
 var ActionType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Action",
+	ShortName:  "gi.Action",
+	IDName:     "action",
 	Doc:        "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -44,6 +46,8 @@ func (t *Action) New() ki.Ki {
 // MenuBarType is the [gti.Type] for [MenuBar]
 var MenuBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.MenuBar",
+	ShortName:  "gi.MenuBar",
+	IDName:     "menu-bar",
 	Doc:        "MenuBar is a Layout (typically LayoutHoriz) that renders a gradient\nbackground and has convenience methods for adding menus.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -76,6 +80,8 @@ func (t *MenuBar) New() ki.Ki {
 // ToolBarType is the [gti.Type] for [ToolBar]
 var ToolBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ToolBar",
+	ShortName:  "gi.ToolBar",
+	IDName:     "tool-bar",
 	Doc:        "ToolBar is a Layout (typically LayoutHoriz) that renders a gradient\nbackground and is useful for holding Actions that do things",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -105,6 +111,8 @@ func (t *ToolBar) New() ki.Ki {
 // BitmapType is the [gti.Type] for [Bitmap]
 var BitmapType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Bitmap",
+	ShortName:  "gi.Bitmap",
+	IDName:     "bitmap",
 	Doc:        "Bitmap is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -138,6 +146,8 @@ func (t *Bitmap) New() ki.Ki {
 // ButtonBoxType is the [gti.Type] for [ButtonBox]
 var ButtonBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ButtonBox",
+	ShortName:  "gi.ButtonBox",
+	IDName:     "button-box",
 	Doc:        "ButtonBox is a widget for containing a set of CheckBox buttons.\nIt can optionally enforce mutual excusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -171,6 +181,8 @@ func (t *ButtonBox) New() ki.Ki {
 // ButtonBaseType is the [gti.Type] for [ButtonBase]
 var ButtonBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ButtonBase",
+	ShortName:  "gi.ButtonBase",
+	IDName:     "button-base",
 	Doc:        "ButtonBase has common button functionality for all buttons, including\nButton, Action, MenuButton, CheckBox, etc",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -208,6 +220,8 @@ func (t *ButtonBase) New() ki.Ki {
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Button",
+	ShortName:  "gi.Button",
+	IDName:     "button",
 	Doc:        "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -239,6 +253,8 @@ func (t *Button) New() ki.Ki {
 // CheckBoxType is the [gti.Type] for [CheckBox]
 var CheckBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.CheckBox",
+	ShortName:  "gi.CheckBox",
+	IDName:     "check-box",
 	Doc:        "CheckBox toggles between a checked and unchecked state",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -270,6 +286,8 @@ func (t *CheckBox) New() ki.Ki {
 // ComboBoxType is the [gti.Type] for [ComboBox]
 var ComboBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ComboBox",
+	ShortName:  "gi.ComboBox",
+	IDName:     "combo-box",
 	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [icons.Icon] type, then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -309,6 +327,8 @@ func (t *ComboBox) New() ki.Ki {
 // CompleteType is the [gti.Type] for [Complete]
 var CompleteType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Complete",
+	ShortName:  "gi.Complete",
+	IDName:     "complete",
 	Doc:        "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -352,6 +372,8 @@ func (t *Complete) New() ki.Ki {
 // StyleSheetType is the [gti.Type] for [StyleSheet]
 var StyleSheetType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.StyleSheet",
+	ShortName:  "gi.StyleSheet",
+	IDName:     "style-sheet",
 	Doc:        "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -383,6 +405,8 @@ func (t *StyleSheet) New() ki.Ki {
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Frame",
+	ShortName:  "gi.Frame",
+	IDName:     "frame",
 	Doc:        "Frame is a Layout that renders a background according to the\nbackground-color style setting, and optional striping for grid layouts",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -414,6 +438,8 @@ func (t *Frame) New() ki.Ki {
 // IconType is the [gti.Type] for [Icon]
 var IconType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Icon",
+	ShortName:  "gi.Icon",
+	IDName:     "icon",
 	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -448,6 +474,8 @@ func (t *Icon) New() ki.Ki {
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Label",
+	ShortName:  "gi.Label",
+	IDName:     "label",
 	Doc:        "Label is a widget for rendering text labels -- supports full widget model\nincluding box rendering, and full HTML styling, including links -- LinkSig\nemits link with data of URL -- opens default browser if nobody receiving\nsignal.  The default white-space option is 'pre' -- set to 'normal' or\nother options to get word-wrapping etc.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -485,6 +513,8 @@ func (t *Label) New() ki.Ki {
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Layout",
+	ShortName:  "gi.Layout",
+	IDName:     "layout",
 	Doc:        "Layout is the primary node type responsible for organizing the sizes\nand positions of child widgets. It does not render, only organize,\nso properties like background color will have no effect.\nAll arbitrary collections of widgets should generally be contained\nwithin a layout -- otherwise the parent widget must take over\nresponsibility for positioning.\nThe alignment is NOT inherited by default so must be specified per\nchild, except that the parent alignment is used within the relevant\ndimension (e.g., horizontal-align for a LayoutHoriz layout,\nto determine left, right, center, justified).\nLayouts can automatically add scrollbars depending on the Overflow\nlayout style.\nFor a Grid layout, the 'columns' property should generally be set\nto the desired number of columns, from which the number of rows\nis computed -- otherwise it uses the square root of number of\nelements.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -531,6 +561,8 @@ func (t *Layout) New() ki.Ki {
 // StretchType is the [gti.Type] for [Stretch]
 var StretchType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Stretch",
+	ShortName:  "gi.Stretch",
+	IDName:     "stretch",
 	Doc:        "Stretch adds an infinitely stretchy element for spacing out layouts\n(max-size = -1) set the width / height property to determine how much it\ntakes relative to other stretchy elements",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -560,6 +592,8 @@ func (t *Stretch) New() ki.Ki {
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
+	ShortName:  "gi.Space",
+	IDName:     "space",
 	Doc:        "Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set\nwidth / height property to change",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -589,6 +623,8 @@ func (t *Space) New() ki.Ki {
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Separator",
+	ShortName:  "gi.Separator",
+	IDName:     "separator",
 	Doc:        "Separator draws a vertical or horizontal line",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -618,8 +654,10 @@ func (t *Separator) New() ki.Ki {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name: "goki.dev/gi/v2/gi.ColorPrefs",
-	Doc:  "ColorPrefs specify colors for all major categories of GUI elements, and are\nused in the default styles.",
+	Name:      "goki.dev/gi/v2/gi.ColorPrefs",
+	ShortName: "gi.ColorPrefs",
+	IDName:    "color-prefs",
+	Doc:       "ColorPrefs specify colors for all major categories of GUI elements, and are\nused in the default styles.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -640,8 +678,10 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name: "goki.dev/gi/v2/gi.EditorPrefs",
-	Doc:  "EditorPrefs contains editor preferences.  It can also be set\nfrom ki.Props style properties.",
+	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
+	ShortName: "gi.EditorPrefs",
+	IDName:    "editor-prefs",
+	Doc:       "EditorPrefs contains editor preferences.  It can also be set\nfrom ki.Props style properties.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -661,8 +701,10 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name: "goki.dev/gi/v2/gi.FavPathItem",
-	Doc:  "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order",
+	Name:      "goki.dev/gi/v2/gi.FavPathItem",
+	ShortName: "gi.FavPathItem",
+	IDName:    "fav-path-item",
+	Doc:       "FavPathItem represents one item in a favorite path list, for display of\nfavorites.  Is an ordered list instead of a map because user can organize\nin order",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
@@ -678,6 +720,8 @@ var _ = gti.AddType(&gti.Type{
 // SliderBaseType is the [gti.Type] for [SliderBase]
 var SliderBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SliderBase",
+	ShortName:  "gi.SliderBase",
+	IDName:     "slider-base",
 	Doc:        "SliderBase has common slider functionality -- two major modes: ValThumb =\nfalse is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size\n- thumbsize",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -734,6 +778,8 @@ func (t *SliderBase) New() ki.Ki {
 // SliderType is the [gti.Type] for [Slider]
 var SliderType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Slider",
+	ShortName:  "gi.Slider",
+	IDName:     "slider",
 	Doc:        "Slider is a standard value slider with a fixed-sized thumb knob -- if an\nIcon is set, it is used for the knob of the slider",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -763,6 +809,8 @@ func (t *Slider) New() ki.Ki {
 // ScrollBarType is the [gti.Type] for [ScrollBar]
 var ScrollBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ScrollBar",
+	ShortName:  "gi.ScrollBar",
+	IDName:     "scroll-bar",
 	Doc:        "ScrollBar has a proportional thumb size reflecting amount of content visible",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -792,6 +840,8 @@ func (t *ScrollBar) New() ki.Ki {
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ProgressBar",
+	ShortName:  "gi.ProgressBar",
+	IDName:     "progress-bar",
 	Doc:        "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -826,6 +876,8 @@ func (t *ProgressBar) New() ki.Ki {
 // SpinBoxType is the [gti.Type] for [SpinBox]
 var SpinBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SpinBox",
+	ShortName:  "gi.SpinBox",
+	IDName:     "spin-box",
 	Doc:        "SpinBox combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -867,6 +919,8 @@ func (t *SpinBox) New() ki.Ki {
 // SplitViewType is the [gti.Type] for [SplitView]
 var SplitViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.SplitView",
+	ShortName:  "gi.SplitView",
+	IDName:     "split-view",
 	Doc:        "SplitView allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -901,6 +955,8 @@ func (t *SplitView) New() ki.Ki {
 // SplitterType is the [gti.Type] for [Splitter]
 var SplitterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Splitter",
+	ShortName:  "gi.Splitter",
+	IDName:     "splitter",
 	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplitView, with draggable resizing of the splitter -- parent is Parts\nlayout of the SplitView -- based on SliderBase",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -933,6 +989,8 @@ func (t *Splitter) New() ki.Ki {
 // TabViewType is the [gti.Type] for [TabView]
 var TabViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.TabView",
+	ShortName:  "gi.TabView",
+	IDName:     "tab-view",
 	Doc:        "TabView switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabView is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -968,6 +1026,8 @@ func (t *TabView) New() ki.Ki {
 // TabButtonType is the [gti.Type] for [TabButton]
 var TabButtonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.TabButton",
+	ShortName:  "gi.TabButton",
+	IDName:     "tab-button",
 	Doc:        "TabButton is a larger select action and a small close action. Indicator\nicon is used for close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -999,6 +1059,8 @@ func (t *TabButton) New() ki.Ki {
 // TextFieldType is the [gti.Type] for [TextField]
 var TextFieldType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.TextField",
+	ShortName:  "gi.TextField",
+	IDName:     "text-field",
 	Doc:        "TextField is a widget for editing a line of text",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1058,6 +1120,8 @@ func (t *TextField) New() ki.Ki {
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.WidgetBase",
+	ShortName:  "gi.WidgetBase",
+	IDName:     "widget-base",
 	Doc:        "WidgetBase is the base type for all Widget Node2D elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
