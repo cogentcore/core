@@ -7,13 +7,11 @@ package ki
 import (
 	"fmt"
 	"log"
-	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 
-	"github.com/iancoleman/strcase"
 	"goki.dev/gti"
 )
 
@@ -59,14 +57,7 @@ func SetParent(kid Ki, parent Ki) {
 		pn := parent.AsNode()
 		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
 		if kid.Name() == "" {
-			tpnm := kid.KiType().Name
-			li := strings.LastIndex(tpnm, ".")
-			if li < 0 {
-				slog.Error("programmer/internal error: type name missing '.' character", "type", tpnm)
-			} else {
-				kebab := strcase.ToKebab(tpnm[li+1:])                  // need to get rid of "."
-				kid.SetName(kebab + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
-			}
+			kid.SetName(kid.KiType().IDName + "-" + strconv.FormatUint(c-1, 10)) // must subtract 1 so we start at 0
 		}
 	}
 	kid.This().OnAdd()
