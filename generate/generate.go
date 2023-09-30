@@ -9,11 +9,13 @@ package generate
 
 import (
 	"fmt"
+	"slices"
 	"text/template"
 
 	"goki.dev/enums/enumgen"
 	"goki.dev/gengo"
 	"goki.dev/goki/config"
+	"goki.dev/gti"
 	"goki.dev/gti/gtigen"
 	"golang.org/x/tools/go/packages"
 )
@@ -22,7 +24,10 @@ import (
 // and functions specific to Ki types.
 // Note: the KiPkg template in this template exists to handle
 // the case in which goki generate is ran in the ki package itself.
-var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
+var KiMethodsTmpl = template.Must(template.New("KiMethods").
+	Funcs(template.FuncMap{
+		"HasEmbedDirective": HasEmbedDirective,
+	}).Parse(
 	`
 	{{define "KiPkg"}} {{if eq .Pkg "ki"}} {{else}} ki. {{end}} {{end}}
 
@@ -40,8 +45,41 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").Parse(
 	// New returns a new [*{{.Name}}] value
 	func (t *{{.Name}}) New() {{template "KiPkg" .}}Ki {
 		return &{{.Name}}{}
-	}`,
+	}
+	
+	{{if HasEmbedDirective .}}
+	// {{.Name}}Embedder is an interface that all types that embed {{.Name}} satisfy
+	type {{.Name}}Embedder interface {
+		As{{.Name}}() *{{.Name}}
+	}
+	
+	// As{{.Name}} returns the given value as a value of type {{.Name}} if the type
+	// of the given value embeds {{.Name}}, or nil otherwise
+	func As{{.Name}}(k {{template "KiPkg" .}}Ki) *{{.Name}} {
+		if k == nil || k.This() == nil {
+			return nil
+		}
+		if t, ok := k.({{.Name}}Embedder); ok {
+			return t.As{{.Name}}()
+		}
+		return nil
+	}
+	
+	// As{{.Name}} satisfies the [{{.Name}}Embedder] interface
+	func (t *{{.Name}}) As{{.Name}}() *{{.Name}} {
+		return t
+	}
+	{{end}}
+	`,
 ))
+
+// HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embed"
+// commend directive. This function is used in [KiMethodsTmpl].
+func HasEmbedDirective(typ *gtigen.Type) bool {
+	return slices.ContainsFunc([]*gti.Directive(typ.Directives), func(d *gti.Directive) bool {
+		return d.Tool == "goki" && d.Directive == "embed"
+	})
+}
 
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
