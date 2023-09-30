@@ -39,8 +39,6 @@ public class GoNativeActivity extends NativeActivity {
 	private static final int NUMBER_KEYBOARD_CODE = 2;
 	private static final int PASSWORD_KEYBOARD_CODE = 3;
 
-	private native void filePickerReturned(String str);
-
 	private native void insetsChanged(int top, int bottom, int left, int right);
 
 	private native void keyboardTyped(String str);
@@ -153,43 +151,6 @@ public class GoNativeActivity extends NativeActivity {
 		});
 	}
 
-	static void showFileOpen(String mimes) {
-		goNativeActivity.doShowFileOpen(mimes);
-	}
-
-	void doShowFileOpen(String mimes) {
-		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-		if ("application/x-directory".equals(mimes) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-			intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE); // ask for a directory picker if OS supports it
-			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-		} else if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			intent.setType("*/*");
-			intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
-			intent.addCategory(Intent.CATEGORY_OPENABLE);
-		} else {
-			intent.setType(mimes);
-			intent.addCategory(Intent.CATEGORY_OPENABLE);
-		}
-		startActivityForResult(Intent.createChooser(intent, "Open File"), FILE_OPEN_CODE);
-	}
-
-	static void showFileSave(String mimes, String filename) {
-		goNativeActivity.doShowFileSave(mimes, filename);
-	}
-
-	void doShowFileSave(String mimes, String filename) {
-		Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-		if (mimes.contains("|") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-			intent.setType("*/*");
-			intent.putExtra(Intent.EXTRA_MIME_TYPES, mimes.split("\\|"));
-		} else {
-			intent.setType(mimes);
-		}
-		intent.putExtra(Intent.EXTRA_TITLE, filename);
-		intent.addCategory(Intent.CATEGORY_OPENABLE);
-		startActivityForResult(Intent.createChooser(intent, "Save File"), FILE_SAVE_CODE);
-	}
-
 	static int getRune(int deviceId, int keyCode, int metaState) {
 		try {
 			int rune = KeyCharacterMap.load(deviceId).get(keyCode, metaState);
@@ -299,23 +260,6 @@ public class GoNativeActivity extends NativeActivity {
 				});
 			}
 		});
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// unhandled request
-		if (requestCode != FILE_OPEN_CODE && requestCode != FILE_SAVE_CODE) {
-			return;
-		}
-
-		// dialog was cancelled
-		if (resultCode != Activity.RESULT_OK) {
-			filePickerReturned("");
-			return;
-		}
-
-		Uri uri = data.getData();
-		filePickerReturned(uri.toString());
 	}
 
 	@Override
