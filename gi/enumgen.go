@@ -2053,12 +2053,12 @@ func _DensitiesNoOp() {
 }
 
 var _DensitiesNameToValueMap = map[string]Densities{
-	`DensityCompact`: 0,
-	`densitycompact`: 0,
-	`DensityMedium`:  1,
-	`densitymedium`:  1,
-	`DensitySpread`:  2,
-	`densityspread`:  2,
+	`Compact`: 0,
+	`compact`: 0,
+	`Medium`:  1,
+	`medium`:  1,
+	`Spread`:  2,
+	`spread`:  2,
 }
 
 var _DensitiesDescMap = map[Densities]string{
@@ -2068,9 +2068,9 @@ var _DensitiesDescMap = map[Densities]string{
 }
 
 var _DensitiesMap = map[Densities]string{
-	0: `DensityCompact`,
-	1: `DensityMedium`,
-	2: `DensitySpread`,
+	0: `Compact`,
+	1: `Medium`,
+	2: `Spread`,
 }
 
 // String returns the string representation
@@ -3186,5 +3186,116 @@ func (i TextFieldFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _ThemesValues = []Themes{0, 1, 2}
+
+// ThemesN is the highest valid value
+// for type Themes, plus one.
+const ThemesN Themes = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ThemesNoOp() {
+	var x [1]struct{}
+	_ = x[ThemeAuto-(0)]
+	_ = x[ThemeLight-(1)]
+	_ = x[ThemeDark-(2)]
+}
+
+var _ThemesNameToValueMap = map[string]Themes{
+	`Auto`:  0,
+	`auto`:  0,
+	`Light`: 1,
+	`light`: 1,
+	`Dark`:  2,
+	`dark`:  2,
+}
+
+var _ThemesDescMap = map[Themes]string{
+	0: `ThemeAuto indicates to use the theme specified by the operating system`,
+	1: `ThemeLight indicates to use a light theme`,
+	2: `ThemeDark indicates to use a dark theme`,
+}
+
+var _ThemesMap = map[Themes]string{
+	0: `Auto`,
+	1: `Light`,
+	2: `Dark`,
+}
+
+// String returns the string representation
+// of this Themes value.
+func (i Themes) String() string {
+	if str, ok := _ThemesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the Themes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *Themes) SetString(s string) error {
+	if val, ok := _ThemesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _ThemesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type Themes")
+}
+
+// Int64 returns the Themes value as an int64.
+func (i Themes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the Themes value from an int64.
+func (i *Themes) SetInt64(in int64) {
+	*i = Themes(in)
+}
+
+// Desc returns the description of the Themes value.
+func (i Themes) Desc() string {
+	if str, ok := _ThemesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ThemesValues returns all possible values
+// for the type Themes.
+func ThemesValues() []Themes {
+	return _ThemesValues
+}
+
+// Values returns all possible values
+// for the type Themes.
+func (i Themes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ThemesValues))
+	for i, d := range _ThemesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type Themes.
+func (i Themes) IsValid() bool {
+	_, ok := _ThemesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i Themes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *Themes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

@@ -798,30 +798,6 @@ func (t *Separator) New() ki.Ki {
 }
 
 var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ColorPrefs",
-	ShortName: "gi.ColorPrefs",
-	IDName:    "color-prefs",
-	Doc:       "ColorPrefs specify colors for all major categories of GUI elements, and are\nused in the default styles.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"HiStyle", &gti.Field{Name: "HiStyle", Type: "HiStyleName", Doc: "text highilighting style / theme", Directives: gti.Directives{}}},
-		{"Font", &gti.Field{Name: "Font", Type: "color.RGBA", Doc: "default font / pen color", Directives: gti.Directives{}}},
-		{"Background", &gti.Field{Name: "Background", Type: "color.RGBA", Doc: "default background color", Directives: gti.Directives{}}},
-		{"Shadow", &gti.Field{Name: "Shadow", Type: "color.RGBA", Doc: "color for shadows -- should generally be a darker shade of the background color", Directives: gti.Directives{}}},
-		{"Border", &gti.Field{Name: "Border", Type: "color.RGBA", Doc: "default border color, for button, frame borders, etc", Directives: gti.Directives{}}},
-		{"Control", &gti.Field{Name: "Control", Type: "color.RGBA", Doc: "default main color for controls: buttons, etc", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "color.RGBA", Doc: "color for icons or other solidly-colored, small elements", Directives: gti.Directives{}}},
-		{"Select", &gti.Field{Name: "Select", Type: "color.RGBA", Doc: "color for selected elements", Directives: gti.Directives{}}},
-		{"Highlight", &gti.Field{Name: "Highlight", Type: "color.RGBA", Doc: "color for highlight background", Directives: gti.Directives{}}},
-		{"Link", &gti.Field{Name: "Link", Type: "color.RGBA", Doc: "color for links in text etc", Directives: gti.Directives{}}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
-var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
 	ShortName: "gi.EditorPrefs",
 	IDName:    "editor-prefs",

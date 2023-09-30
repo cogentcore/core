@@ -7,12 +7,10 @@ package gi
 import (
 	"encoding/json"
 	"fmt"
-	"image/color"
 	"io/ioutil"
 	"log"
 	"os/user"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"goki.dev/colors"
@@ -57,20 +55,14 @@ type Preferences struct {
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
 
-	// the color scheme type (light or dark)
-	ColorSchemeType styles.ColorSchemeTypes `desc:"the color scheme type (light or dark)"`
+	// the color theme
+	Theme Themes `desc:"the color theme"`
 
 	// the density (compactness) of content
 	Density Densities `desc:"the density (compactness) of content"`
 
 	// the color key used to generate the color scheme
 	ColorKey matcolor.Key `desc:"the color key used to generate the color scheme"`
-
-	// active color preferences
-	Colors ColorPrefs `desc:"active color preferences"`
-
-	// named color schemes -- has Light and Dark schemes by default
-	ColorSchemes map[string]*ColorPrefs `desc:"named color schemes -- has Light and Dark schemes by default"`
 
 	// [view: inline] parameters controlling GUI behavior
 	Params ParamPrefs `view:"inline" desc:"parameters controlling GUI behavior"`
@@ -121,16 +113,10 @@ type Preferences struct {
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
-func init() {
-	styles.ThePrefs = &Prefs
-}
-
 func (pf *Preferences) Defaults() {
 	pf.LogicalDPIScale = 1.0
-	pf.ColorSchemeType = styles.ColorSchemeLight
+	pf.Theme = ThemeLight
 	pf.Density = DensityMedium
-	pf.Colors.Defaults()
-	pf.ColorSchemes = DefaultColorSchemes()
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
@@ -192,38 +178,20 @@ func (pf *Preferences) Save() error {
 	return err
 }
 
-// IsDarkMode returns true if the current background color preference is dark
-func (pf *Preferences) IsDarkMode() bool {
-	return pf.ColorSchemeType == styles.ColorSchemeDark
-}
+// TODO: need to handle auto theme and set things correctly
 
-// OpenColors colors from a JSON-formatted file.
-func (pf *Preferences) OpenColors(filename FileName) error {
-	err := pf.Colors.OpenJSON(filename)
-	// if err == nil {
-	// 	pf.UpdateAll() // no!  this recolors the dialog as it is closing!  do it separately
-	// }
-	pf.Changed = true
-	return err
-}
-
-// Save colors to a JSON-formatted file, for easy sharing of your favorite
-// palettes.
-func (pf *Preferences) SaveColors(filename FileName) error {
-	pf.Changed = true
-	return pf.Colors.SaveJSON(filename)
-}
-
-// LightMode sets colors to light mode
+// LightMode sets the color theme to light mode
 func (pf *Preferences) LightMode() {
-	pf.ColorSchemeType = styles.ColorSchemeLight
+	pf.Theme = ThemeLight
+	colors.SetScheme(false)
 	pf.Save()
 	pf.UpdateAll()
 }
 
 // DarkMode sets colors to dark mode
 func (pf *Preferences) DarkMode() {
-	pf.ColorSchemeType = styles.ColorSchemeDark
+	pf.Theme = ThemeDark
+	colors.SetScheme(true)
 	pf.Save()
 	pf.UpdateAll()
 }
@@ -235,18 +203,6 @@ func (pf *Preferences) Apply() {
 		if pf.FavPaths[i].Ic == "" {
 			pf.FavPaths[i].Ic = "folder"
 		}
-	}
-	if pf.Colors.HiStyle == "" {
-		pf.Colors.HiStyle = "emacs"
-	}
-	if len(pf.ColorSchemes) < 2 {
-		pf.ColorSchemes = DefaultColorSchemes()
-	}
-	if pf.ColorSchemes["Light"].HiStyle == "" {
-		pf.ColorSchemes["Light"].HiStyle = "emacs"
-	}
-	if pf.ColorSchemes["Dark"].HiStyle == "" {
-		pf.ColorSchemes["Dark"].HiStyle = "monokai"
 	}
 	/*
 		if pf.ColorSchemeType == styles.ColorSchemeLight {
@@ -268,10 +224,10 @@ func (pf *Preferences) Apply() {
 		PrefsDet.Apply()
 	}
 	if pf.FontPaths != nil {
-		paths := append(pf.FontPaths, goosi.TheApp.FontPaths()...)
+		paths := append(pf.FontPaths, paint.FontPaths...)
 		paint.FontLibrary.InitFontPaths(paths...)
 	} else {
-		paint.FontLibrary.InitFontPaths(goosi.TheApp.FontPaths()...)
+		paint.FontLibrary.InitFontPaths(paint.FontPaths...)
 	}
 	pf.ApplyDPI()
 }
@@ -303,7 +259,6 @@ func (pf *Preferences) UpdateAll() {
 
 	styles.RebuildDefaultStyles = true
 	colors.FullCache = nil
-	styles.StyleTemplates = nil
 	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
 	// 	w.SetSize(w.RenderWin.Size())
 	// }
@@ -399,17 +354,9 @@ func (pf *Preferences) UpdateUser() {
 	}
 }
 
-/////////////////////////////////////////////////////////
-// Following are styles.Prefs interface
-
-// PrefColor returns preference color of given name (case insensitive)
-// std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *Preferences) PrefColor(clrName string) *color.RGBA {
-	return pf.Colors.PrefColor(clrName)
-}
-
 // PrefFontFamily returns the default FontFamily
 func (pf *Preferences) PrefFontFamily() string {
+	// TODO: where should this go?
 	return string(pf.FontFamily)
 }
 
@@ -517,7 +464,7 @@ var PreferencesProps = ki.Props{
 
 // Densities is an enum representing the different
 // density options in user preferences
-type Densities int //enums:enum
+type Densities int //enums:enum -trimprefix Density
 
 const (
 	// DensityCompact represents a compact density
@@ -545,174 +492,6 @@ func (pf *Preferences) DensityMul() float32 {
 	}
 	log.Println("got invalid preferences density value", pf.Density)
 	return 1
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-//   ColorPrefs
-
-// ColorPrefs specify colors for all major categories of GUI elements, and are
-// used in the default styles.
-//
-//gti:add
-type ColorPrefs struct {
-
-	// text highilighting style / theme
-	HiStyle HiStyleName `desc:"text highilighting style / theme"`
-
-	// default font / pen color
-	Font color.RGBA `desc:"default font / pen color"`
-
-	// default background color
-	Background color.RGBA `desc:"default background color"`
-
-	// color for shadows -- should generally be a darker shade of the background color
-	Shadow color.RGBA `desc:"color for shadows -- should generally be a darker shade of the background color"`
-
-	// default border color, for button, frame borders, etc
-	Border color.RGBA `desc:"default border color, for button, frame borders, etc"`
-
-	// default main color for controls: buttons, etc
-	Control color.RGBA `desc:"default main color for controls: buttons, etc"`
-
-	// color for icons or other solidly-colored, small elements
-	Icon color.RGBA `desc:"color for icons or other solidly-colored, small elements"`
-
-	// color for selected elements
-	Select color.RGBA `desc:"color for selected elements"`
-
-	// color for highlight background
-	Highlight color.RGBA `desc:"color for highlight background"`
-
-	// color for links in text etc
-	Link color.RGBA `desc:"color for links in text etc"`
-}
-
-func (pf *ColorPrefs) Defaults() {
-	pf.HiStyle = "emacs"
-	pf.Font = colors.Black
-	pf.Border = colors.MustFromHex("#e6e6e6")
-	pf.Background = colors.White
-	pf.Shadow = colors.MustFromString("darken-10", &pf.Background)
-	pf.Control = colors.MustFromHex("#F8F8F8")
-	pf.Icon = colors.MustFromString("highlight-30", pf.Control)
-	pf.Select = colors.MustFromHex("#CFC")
-	pf.Highlight = colors.MustFromHex("#FFA")
-	pf.Link = colors.MustFromHex("#00F")
-}
-
-func (pf *ColorPrefs) DarkDefaults() {
-	pf.HiStyle = "monokai"
-	pf.Font = colors.FromRGB(175, 175, 175)
-	pf.Background = colors.FromRGB(0, 0, 0)
-	pf.Shadow = colors.FromRGB(64, 64, 64)
-	pf.Border = colors.FromRGB(102, 102, 102)
-	pf.Control = colors.FromRGB(17, 57, 57)
-	pf.Icon = colors.FromRGB(70, 70, 192)
-	pf.Select = colors.FromRGB(17, 100, 100)
-	pf.Highlight = colors.FromRGB(66, 82, 0)
-	pf.Link = colors.FromRGB(117, 117, 249)
-}
-
-func DefaultColorSchemes() map[string]*ColorPrefs {
-	cs := map[string]*ColorPrefs{}
-	lc := &ColorPrefs{}
-	lc.Defaults()
-	cs["Light"] = lc
-	dc := &ColorPrefs{}
-	dc.DarkDefaults()
-	cs["Dark"] = dc
-	return cs
-}
-
-// PrefColor returns preference color of given name (case insensitive)
-// std names are: font, background, shadow, border, control, icon, select, highlight, link
-func (pf *ColorPrefs) PrefColor(clrName string) *color.RGBA {
-	lc := strings.Replace(strings.ToLower(clrName), "-", "", -1)
-	switch lc {
-	case "font":
-		return &pf.Font
-	case "background":
-		return &pf.Background
-	case "shadow":
-		return &pf.Shadow
-	case "border":
-		return &pf.Border
-	case "control":
-		return &pf.Control
-	case "icon":
-		return &pf.Icon
-	case "select":
-		return &pf.Select
-	case "highlight":
-		return &pf.Highlight
-	case "link":
-		return &pf.Link
-	}
-	log.Printf("Preference color %v (simplified to: %v) not found\n", clrName, lc)
-	return nil
-}
-
-// OpenJSON opens colors from a JSON-formatted file.
-func (pf *ColorPrefs) OpenJSON(filename FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
-	if err != nil {
-		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
-		log.Println(err)
-		return err
-	}
-	return json.Unmarshal(b, pf)
-}
-
-// SaveJSON saves colors to a JSON-formatted file.
-func (pf *ColorPrefs) SaveJSON(filename FileName) error {
-	b, err := json.MarshalIndent(pf, "", "  ")
-	if err != nil {
-		log.Println(err) // unlikely
-		return err
-	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
-	if err != nil {
-		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, AddOk, NoCancel, nil, nil)
-		log.Println(err)
-	}
-	return err
-}
-
-// SetToPrefs sets this color scheme as the current active setting in overall
-// default prefs.
-func (pf *ColorPrefs) SetToPrefs() {
-	Prefs.Colors = *pf
-	Prefs.UpdateAll()
-}
-
-// ColorPrefsProps defines the ToolBar
-var ColorPrefsProps = ki.Props{
-	"ToolBar": ki.PropSlice{
-		{"OpenJSON", ki.Props{
-			"label": "Open...",
-			"icon":  icons.FileOpen,
-			"desc":  "open set of colors from a json-formatted file",
-			"Args": ki.PropSlice{
-				{"Color File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"SaveJSON", ki.Props{
-			"label": "Save As...",
-			"desc":  "Saves colors to JSON formatted file.",
-			"icon":  icons.SaveAs,
-			"Args": ki.PropSlice{
-				{"Color File Name", ki.Props{
-					"ext": ".json",
-				}},
-			},
-		}},
-		{"SetToPrefs", ki.Props{
-			"desc": "Sets this color scheme as the current active color scheme in Prefs.",
-			"icon": icons.Palette,
-		}},
-	},
 }
 
 //////////////////////////////////////////////////////////////////
@@ -1283,7 +1062,6 @@ func (pf *PrefsDebug) Connect() {
 	pf.WinGeomTrace = &WinGeomTrace
 	pf.KeyEventTrace = &KeyEventTrace
 	pf.EventTrace = &EventTrace
-	pf.DNDTrace = &DNDTrace
 	pf.GoCompleteTrace = &golang.CompleteTrace
 	pf.GoTypeTrace = &golang.TraceTypes
 	pf.StructViewIfDebug = &StructViewIfDebug
