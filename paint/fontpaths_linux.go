@@ -6,5 +6,5 @@
 
 package paint
 
-// FontPaths contains the filepaths in which fonts are stored on Linux.
+// FontPaths contains the filepaths in which fonts are stored for the current platform.
 var FontPaths = []string{"/usr/share/fonts/truetype"}
