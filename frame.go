@@ -8,12 +8,15 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"os"
 
 	"github.com/disintegration/imaging"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
+
+func init() {
+	ffmpeg.LogCompiledCommand = false
+}
 
 // ReadFrame reads the given frame number from the given video file as a JPEG image.
 func ReadFrame(file string, frame int) (image.Image, error) {
@@ -21,7 +24,7 @@ func ReadFrame(file string, frame int) (image.Image, error) {
 	err := ffmpeg.Input(file).
 		Filter("select", ffmpeg.Args{fmt.Sprintf("gte(n,%d)", frame)}).
 		Output("pipe:", ffmpeg.KwArgs{"vframes": 1, "format": "image2", "vcodec": "mjpeg"}).
-		WithOutput(buf, os.Stdout).
+		WithOutput(buf).
 		Run()
 	if err != nil {
 		return nil, fmt.Errorf("error getting frame %d from video %q: %w", frame, file, err)
