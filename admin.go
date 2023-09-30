@@ -55,8 +55,8 @@ func ThisCheck(k Ki) error {
 func SetParent(kid Ki, parent Ki) {
 	n := kid.AsNode()
 	n.Par = parent
-	pn := parent.AsNode()
-	if pn != nil {
+	if parent != nil {
+		pn := parent.AsNode()
 		c := atomic.AddUint64(&pn.NumLifetimeKids, 1)
 		if kid.Name() == "" {
 			tpnm := kid.KiType().Name
@@ -64,7 +64,7 @@ func SetParent(kid Ki, parent Ki) {
 			if li < 0 {
 				slog.Error("programmer/internal error: type name missing '.' character", "type", tpnm)
 			} else {
-				kebab := strcase.ToKebab(tpnm[li:])
+				kebab := strcase.ToKebab(tpnm[li+1:]) // need to get rid of "."
 				kid.SetName(kebab + "-" + strconv.FormatUint(c, 10))
 			}
 		}

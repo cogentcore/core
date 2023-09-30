@@ -827,6 +827,17 @@ func TestClone(t *testing.T) {
 	*/
 }
 
+func TestAutoTypeName(t *testing.T) {
+	root := &Node{}
+	root.InitName(root, "root")
+
+	child := root.NewChild(NodeType, "")
+	nm := child.Name()
+	if nm != "node-1" {
+		t.Errorf("expected name %q for auto node name, but got %q", "node-1", nm)
+	}
+}
+
 // BuildGuiTreeSlow builds a tree that is typical of GUI structures where there are
 // many widgets in a container and each widget has some number of parts.
 // Uses slow AddChild method instead of fast one.
