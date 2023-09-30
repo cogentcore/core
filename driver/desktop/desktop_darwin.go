@@ -50,9 +50,8 @@ import (
 	"unsafe"
 
 	"goki.dev/goosi"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/osevent"
 	"goki.dev/pi/v2/filecat"
 )
 
@@ -290,10 +289,10 @@ func (mm *mainMenuImpl) AddItem(men goosi.Menu, titles string, shortcut string, 
 		if err == nil {
 			sc = strings.ToLower(string(r))
 		}
-		scShift = mods.HasFlag(goosi.Shift)
-		scControl = mods.HasFlag(goosi.Control)
-		scAlt = mods.HasFlag(goosi.Alt)
-		scCommand = mods.HasFlag(goosi.Meta)
+		scShift = mods.HasFlag(key.Shift)
+		scControl = mods.HasFlag(key.Control)
+		scAlt = mods.HasFlag(key.Alt)
+		scCommand = mods.HasFlag(key.Meta)
 	}
 
 	scs := C.CString(sc)
@@ -348,9 +347,7 @@ func macOpenFile(fname *C.char, flen C.int) {
 	if theApp.NWindows() == 0 {
 		theApp.openFiles = append(theApp.openFiles, ofn)
 	} else {
-		win := theApp.Window(0)
-		osev := osevent.NewOpenFilesEvent([]string{ofn})
-		osev.Init()
-		win.Send(osev)
+		// win := theApp.Window(0)
+		// win.EventMgr.NewOS(events.OSEvent, []string{ofn})
 	}
 }

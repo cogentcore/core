@@ -1,97 +1,68 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// based on golang.org/x/mobile/event:
-//
-// Copyright 2015 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
-// Package window defines events associated with windows -- including changes
-// in the dimensions, physical resolution and orientation of the app's window,
-// and iconify, open and close events.
-package window
-
-//go:generate enumgen
+package events
 
 import (
 	"fmt"
-
-	"goki.dev/goosi"
 )
 
-// window.Event reports on actions taken on a window.
+// WindowEvent reports on actions taken on a window.
 // The goosi.Window Flags and other state information
 // will always be updated prior to this event being sent,
 // so those should be consulted directly for the new current state.
-type Event struct {
-	goosi.EventBase
+type WindowEvent struct {
+	Base
 
 	// Action taken on the window -- what has changed.
 	// Window state fields have current values.
-	Action Actions
+	Action WinActions
 }
 
-func NewEvent(act Actions) *Event {
-	ev := &Event{}
+func NewWindow(act WinActions) *WindowEvent {
+	ev := &WindowEvent{}
 	ev.Action = act
-	ev.Typ = goosi.WindowEvent
+	ev.Typ = Window
 	ev.SetUnique()
 	return ev
 }
 
-func NewResizeEvent() *Event {
-	ev := &Event{}
-	ev.Action = Resize
-	ev.Typ = goosi.WindowResizeEvent
+func NewWindowResize() *WindowEvent {
+	ev := &WindowEvent{}
+	ev.Typ = WindowResize
 	// not unique
 	return ev
 }
 
-func NewPaintEvent() *Event {
-	ev := &Event{}
-	ev.Action = Paint
-	ev.Typ = goosi.WindowPaintEvent
+func NewWindowPaint() *WindowEvent {
+	ev := &WindowEvent{}
+	ev.Typ = WindowPaint
 	// not unique
 	return ev
 }
 
-func (ev *Event) HasPos() bool {
+func (ev *WindowEvent) HasPos() bool {
 	return false
 }
 
-func (ev *Event) OnFocus() bool {
-	return false
-}
-
-func (ev Event) IsSame(oth goosi.Event) bool {
-	if ev.Typ != oth.Type() {
-		return false
-	}
-	oact := oth.(*Event).Action
-	return ev.Action == oact
-}
-
-func (ev *Event) String() string {
+func (ev *WindowEvent) String() string {
 	return fmt.Sprintf("Type: %v Action: %v  Time: %v", ev.Type(), ev.Action, ev.Time())
 }
 
-// Actions is the action taken on the window by the user.
-type Actions int32 //enums:enum
+// WinActions is the action taken on the window by the user.
+type WinActions int32 //enums:enum
 
 const (
+	// NoWinAction is the zero value for special types (Resize, Paint)
+	NoWinAction WinActions = iota
+
 	// Close means that the window is about to close, but has not yet closed.
-	Close Actions = iota
+	Close
 
 	// Minimize means that the window has been iconified / miniaturized / is no
 	// longer visible.
 	Minimize
-
-	// Resize means that the window was resized, including changes in DPI
-	// associated with moving to a new screen.  Position may have also changed
-	// too.  Requires a redraw.
-	Resize
 
 	// Move means that the window was moved but NOT resized or changed in any
 	// other way -- does not require a redraw, but anything tracking positions
@@ -105,10 +76,6 @@ const (
 	// DeFocus indicates that the window is no longer activated for
 	// receiving input.
 	DeFocus
-
-	// Paint events are sent to drive updating of the window at
-	// regular FPS frames per second intervals.
-	Paint
 
 	// Show is for the WindowShow event -- sent by the system 1 second
 	// after the window has opened, to ensure that full rendering

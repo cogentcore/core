@@ -7,20 +7,46 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package eventmgr
+package events
 
 import (
 	"sync"
-
-	"goki.dev/goosi"
-	"goki.dev/goosi/mouse"
 )
+
+// Dequer is an infinitely buffered double-ended queue of events.
+// If an event is not marked as Unique, and the last
+// event in the queue is of the same type, then the new one
+// replaces the last one.  This automatically implements
+// event compression to manage the common situation where
+// event processing is slower than event generation,
+// such as with Mouse movement and Paint events.
+type Dequer interface {
+	// Send adds an event to the end of the deque,
+	// replacing the last of the same type unless marked
+	// as Unique.
+	// They are returned by NextEvent in FIFO order.
+	Send(e Event)
+
+	// SendFirst adds an event to the start of the deque.
+	// They are returned by NextEvent in LIFO order,
+	// and have priority over events sent via Send.
+	SendFirst(e Event)
+
+	// NextEvent returns the next event in the deque.
+	// It blocks until such an event has been sent.
+	NextEvent() Event
+
+	// PollEvent returns the next event in the deque if available,
+	// and returns true.
+	// If none are available, it returns false immediately.
+	PollEvent() (Event, bool)
+}
 
 // Deque is an infinitely buffered double-ended queue of events.
 // The zero value is usable, but a Deque value must not be copied.
 type Deque struct {
-	Back  []goosi.Event // FIFO.
-	Front []goosi.Event // LIFO.
+	Back  []Event // FIFO.
+	Front []Event // LIFO.
 
 	Mu   sync.Mutex
 	Cond sync.Cond // Cond.L is lazily initialized to &Deque.Mu.
@@ -35,7 +61,7 @@ func (q *Deque) LockAndInit() {
 
 // NextEvent returns the next event in the deque.
 // It blocks until such an event has been sent.
-func (q *Deque) NextEvent() goosi.Event {
+func (q *Deque) NextEvent() Event {
 	q.LockAndInit()
 	defer q.Mu.Unlock()
 
@@ -61,7 +87,7 @@ func (q *Deque) NextEvent() goosi.Event {
 // PollEvent returns the next event in the deque if available,
 // and returns true.
 // If none are available, it returns false immediately.
-func (q *Deque) PollEvent() (goosi.Event, bool) {
+func (q *Deque) PollEvent() (Event, bool) {
 	q.LockAndInit()
 	defer q.Mu.Unlock()
 
@@ -85,7 +111,7 @@ func (q *Deque) PollEvent() (goosi.Event, bool) {
 // replacing the last of the same type unless marked
 // as Unique.
 // They are returned by NextEvent in FIFO order.
-func (q *Deque) Send(ev goosi.Event) {
+func (q *Deque) Send(ev Event) {
 	q.LockAndInit()
 	defer q.Mu.Unlock()
 
@@ -95,14 +121,14 @@ func (q *Deque) Send(ev goosi.Event) {
 		if ev.IsSame(lev) {
 			q.Back[n-1] = ev // replace
 			switch ev.Type() {
-			case goosi.MouseMoveEvent, goosi.MouseDragEvent:
-				me := ev.(*mouse.Event)
-				le := lev.(*mouse.Event)
+			case MouseMove, MouseDrag:
+				me := ev.(*Mouse)
+				le := lev.(*Mouse)
 				me.Prev = le.Prev
 				me.PrvTime = le.PrvTime
-			case goosi.MouseScrollEvent:
-				me := ev.(*mouse.ScrollEvent)
-				le := lev.(*mouse.ScrollEvent)
+			case Scroll:
+				me := ev.(*MouseScroll)
+				le := lev.(*MouseScroll)
 				me.Delta = me.Delta.Add(le.Delta)
 			}
 			q.Cond.Signal()
@@ -116,7 +142,7 @@ func (q *Deque) Send(ev goosi.Event) {
 // SendFirst adds an event to the start of the deque.
 // They are returned by NextEvent in LIFO order,
 // and have priority over events sent via Send.
-func (q *Deque) SendFirst(ev goosi.Event) {
+func (q *Deque) SendFirst(ev Event) {
 	q.LockAndInit()
 	defer q.Mu.Unlock()
 

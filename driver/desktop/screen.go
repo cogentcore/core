@@ -10,7 +10,7 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
-	"goki.dev/goosi/window"
+	"goki.dev/goosi/events"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
@@ -42,7 +42,7 @@ func monitorChange(monitor *glfw.Monitor, event glfw.PeripheralEvent) {
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: sending screen update\n")
 		}
-		fw.EventMgr.Window(window.ScreenUpdate)
+		fw.EventMgr.Window(events.ScreenUpdate)
 	} else {
 		if monitorDebug {
 			log.Printf("MonitorDebug: monitorChange: no windows, NOT sending screen update\n")

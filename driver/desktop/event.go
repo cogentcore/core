@@ -9,25 +9,24 @@ import (
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"goki.dev/goosi"
-	"goki.dev/goosi/dnd"
-	"goki.dev/goosi/key"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
-	"goki.dev/goosi/mouse"
 )
 
-func glfwMods(mod glfw.ModifierKey) goosi.Modifiers {
-	var m goosi.Modifiers
+func glfwMods(mod glfw.ModifierKey) key.Modifiers {
+	var m key.Modifiers
 	if mod&glfw.ModShift != 0 {
-		m.SetFlag(true, goosi.Shift)
+		m.SetFlag(true, key.Shift)
 	}
 	if mod&glfw.ModControl != 0 {
-		m.SetFlag(true, goosi.Control)
+		m.SetFlag(true, key.Control)
 	}
 	if mod&glfw.ModAlt != 0 {
-		m.SetFlag(true, goosi.Alt)
+		m.SetFlag(true, key.Alt)
 	}
 	if mod&glfw.ModSuper != 0 {
-		m.SetFlag(true, goosi.Meta)
+		m.SetFlag(true, key.Meta)
 	}
 	return m
 }
@@ -47,23 +46,22 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 	mods := glfwMods(mod)
 	ec := glfwKeyCode(ky)
 	rn, _ := key.CodeRuneMap[ec]
-	act := key.Press
+	typ := events.KeyDown
 	if action == glfw.Release {
-		act = key.Release
+		typ = events.KeyUp
 	} else if action == glfw.Repeat {
-		act = key.Press
+		typ = events.KeyDown
 	}
 	fw := w.focusWindow()
-	fw.EventMgr.Key(rn, ec, act, mods)
+	fw.EventMgr.Key(typ, rn, ec, mods)
 	glfw.PostEmptyEvent() // todo: why??
 }
 
 // char input
 func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
-	act := key.Press
 	fw := w.focusWindow()
-	fw.EventMgr.KeyChord(char, key.CodeUnknown, act, mods)
+	fw.EventMgr.KeyChord(char, key.CodeUnknown, mods)
 	glfw.PostEmptyEvent() // todo: why?
 }
 
@@ -84,36 +82,36 @@ func (w *windowImpl) mousePosToPoint(x, y float64) image.Point {
 
 func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, action glfw.Action, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
-	but := mouse.Left
+	but := events.Left
 	switch button {
 	case glfw.MouseButtonMiddle:
-		but = mouse.Middle
+		but = events.Middle
 	case glfw.MouseButtonRight:
-		but = mouse.Right
+		but = events.Right
 	}
-	act := mouse.Press
+	typ := events.MouseDown
 	if action == glfw.Release {
-		act = mouse.Release
+		typ = events.MouseUp
 	}
 	if mod&glfw.ModControl != 0 { // special case: control always = RMB  can undo this downstream..
-		but = mouse.Right
+		but = events.Right
 	}
 	where := w.curMousePosPoint(gw)
-	w.EventMgr.MouseButton(but, act, where, mods)
+	w.EventMgr.MouseButton(typ, but, where, mods)
 	glfw.PostEmptyEvent() // why?
 }
 
 func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	if theApp.Platform() == goosi.MacOS {
-		xoff *= float64(mouse.ScrollWheelSpeed)
-		yoff *= float64(mouse.ScrollWheelSpeed)
+		xoff *= float64(events.ScrollWheelSpeed)
+		yoff *= float64(events.ScrollWheelSpeed)
 	} else { // others have lower multipliers in general
-		xoff *= 4 * float64(mouse.ScrollWheelSpeed)
-		yoff *= 4 * float64(mouse.ScrollWheelSpeed)
+		xoff *= 4 * float64(events.ScrollWheelSpeed)
+		yoff *= 4 * float64(events.ScrollWheelSpeed)
 	}
 	delta := image.Point{int(-xoff), int(-yoff)}
 	where := w.curMousePosPoint(gw)
-	w.EventMgr.MouseScroll(where, delta)
+	w.EventMgr.Scroll(where, delta)
 	glfw.PostEmptyEvent()
 }
 
@@ -125,9 +123,9 @@ func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
 	if w.mouseDisabled {
 		w.EventMgr.ResettingPos = true
 		if theApp.Platform() == goosi.MacOS {
-			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X)/float64(w.DevPixRatio), float64(w.EventMgr.LastMousePos.Y)/float64(w.DevPixRatio))
+			w.glw.SetCursorPos(float64(w.EventMgr.Last.MousePos.X)/float64(w.DevPixRatio), float64(w.EventMgr.Last.MousePos.Y)/float64(w.DevPixRatio))
 		} else {
-			w.glw.SetCursorPos(float64(w.EventMgr.LastMousePos.X), float64(w.EventMgr.LastMousePos.Y))
+			w.glw.SetCursorPos(float64(w.EventMgr.Last.MousePos.X), float64(w.EventMgr.Last.MousePos.Y))
 		}
 		w.EventMgr.ResettingPos = false
 	}
@@ -147,8 +145,8 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 	for i, s := range names {
 		md[i] = mimedata.NewTextData(s)
 	}
-	where := w.curMousePosPoint(gw)
-	w.EventMgr.DND(dnd.External, where, md)
+	// where := w.curMousePosPoint(gw)
+	// w.EventMgr.DND(dnd.External, where, md)
 }
 
 func glfwKeyCode(kcode glfw.Key) key.Codes {

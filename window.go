@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vdraw"
 )
 
@@ -231,7 +232,7 @@ type Window interface {
 	// This only takes effect prior to opening a new window.
 	SetFPS(fps int)
 
-	EventDeque
+	events.Dequer
 }
 
 // WindowBase provides a base-level implementation of the generic data aspects
