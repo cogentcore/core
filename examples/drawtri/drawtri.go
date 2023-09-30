@@ -83,14 +83,13 @@ func mainrun(a goosi.App) {
 			stTime = eTime
 		}
 		if frameCount%60 == 0 {
-		start:
 			cur++
 			if cur >= cursors.CursorN {
 				cur = cursors.Default
 			}
 			err := goosi.TheApp.Cursor(w).Set(cur)
 			if err != nil {
-				goto start
+				fmt.Println("error setting cursor:", err)
 			}
 		}
 	}
