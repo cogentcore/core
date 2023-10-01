@@ -355,6 +355,10 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			app.screen.UpdatePhysicalDPI()
 			app.screen.UpdateLogicalDPI()
 
+			app.window.PhysDPI = app.screen.PhysicalDPI
+			app.window.PxSize = app.screen.PixSize
+			app.window.WnSize = wsz
+
 			app.window.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			app.window.EvMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code

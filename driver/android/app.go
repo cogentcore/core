@@ -10,7 +10,6 @@ package android
 import (
 	"fmt"
 	"go/build"
-	"image"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,7 +17,6 @@ import (
 
 	vk "github.com/goki/vulkan"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
@@ -218,28 +216,6 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.winptr = winPtr
 	app.window.EvMgr.Window(events.Focus)
 	return nil
-}
-
-// updateScreen gets the size information from [app.sizeEvent],
-// updates the window sizing information, and then calls [setScreen].
-func (app *appImpl) updateScreen() {
-	physX, physY := units.Pt(float32(app.sizeEvent.WidthPt)), units.Pt(float32(app.sizeEvent.HeightPt))
-	physX.Convert(units.UnitMm, &units.Context{})
-	physY.Convert(units.UnitMm, &units.Context{})
-	sc := &goosi.Screen{
-		ScreenNumber: 0,
-		Geometry:     app.sizeEvent.Bounds(),
-		PixSize:      app.sizeEvent.Size(),
-		PhysicalSize: image.Point{X: int(physX.Val), Y: int(physY.Val)},
-		PhysicalDPI:  36 * app.sizeEvent.PixelsPerPt,
-		LogicalDPI:   2.0,
-
-		Orientation: goosi.ScreenOrientation(app.sizeEvent.Orientation),
-	}
-	app.window.PhysDPI = 36 * app.sizeEvent.PixelsPerPt
-	app.window.PxSize = app.sizeEvent.Size()
-	app.window.WnSize = app.window.PxSize
-	app.setScreen(sc)
 }
 
 func (app *appImpl) DeleteWin(w *windowImpl) {
