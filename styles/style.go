@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/girl/units"
 	"goki.dev/laser"
@@ -232,6 +233,11 @@ func NewStyle() Style {
 // Is returns true if the State flag is set
 func (s *Style) Is(st states.States) bool {
 	return s.State.HasFlag(st)
+}
+
+// SetAbilities sets the abilities flags
+func (s *Style) SetAbilities(on bool, able ...enums.BitFlag) {
+	s.Abilities.SetFlag(on, able...)
 }
 
 // CopyFrom copies from another style, while preserving relevant local state
