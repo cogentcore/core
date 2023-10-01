@@ -148,6 +148,22 @@ func (em *Mgr) Scroll(where, delta image.Point) {
 	em.Deque.Send(ev)
 }
 
+// Touch creates and sends a touch event with the given values.
+// It also creates and sends a corresponding mouse event.
+func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
+	ev := NewTouch(typ, seq, where)
+	ev.Init()
+	em.Deque.Send(ev)
+
+	if typ == TouchStart {
+		em.MouseButton(MouseDown, Left, where, 0) // TODO: modifiers
+	} else if typ == TouchEnd {
+		em.MouseButton(MouseUp, Left, where, 0) // TODO: modifiers
+	} else {
+		em.MouseMove(where)
+	}
+}
+
 //	func (em *Mgr) DND(act dnd.Actions, where image.Point, data mimedata.Mimes) {
 //		ev := dnd.NewEvent(act, where, em.Last.Mods)
 //		ev.Data = data

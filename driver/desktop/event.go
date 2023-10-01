@@ -149,6 +149,7 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 	// w.EvMgr.DND(dnd.External, where, md)
 }
 
+// TODO: should this be a map?
 func glfwKeyCode(kcode glfw.Key) key.Codes {
 	switch kcode {
 	case glfw.KeyA:

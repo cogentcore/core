@@ -4,6 +4,8 @@
 
 package events
 
+import "image"
+
 // The best source on android input events is the NDK: include/android/input.h
 //
 // iOS event handling guide:
@@ -23,13 +25,13 @@ type Touch struct {
 // Sequence identifies a sequence of touch events.
 type Sequence int64
 
-// todo: this is half-baked -- need real case.  should have position.
-
-func NewTouch(typ Types, seq Sequence) *Touch {
+// NewTouch creates a new touch event from the given values.
+func NewTouch(typ Types, seq Sequence, where image.Point) *Touch {
 	ev := &Touch{}
 	ev.Typ = typ
 	ev.SetUnique()
 	ev.Sequence = seq
+	ev.Where = where
 	return ev
 }
 
