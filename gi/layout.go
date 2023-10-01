@@ -1161,9 +1161,6 @@ func (ly *Layout) StyleToDots(uc *units.Context) {
 
 // StyleLayout does layout styling -- it sets the StyMu Lock
 func (ly *Layout) StyleLayout(sc *Scene) {
-	ly.StyMu.Lock()
-	defer ly.StyMu.Unlock()
-
 	ly.ApplyStyleWidget(sc)
 	ly.StyleToDots(&ly.Style.UnContext)
 }

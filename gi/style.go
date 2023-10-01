@@ -119,7 +119,6 @@ func (wb *WidgetBase) ParentActiveStyle() *styles.Style {
 	}
 	if ps, ok := wb.Par.(styles.ActiveStyler); ok {
 		st := ps.ActiveStyle()
-		ps.StyleRLock()
 		return st
 	}
 	return nil
@@ -163,7 +162,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Style.InheritFields(parSty)
-		wb.ParentStyleRUnlock()
+		// wb.ParentStyleRUnlock()
 	}
 	pin.End()
 

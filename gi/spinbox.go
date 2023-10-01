@@ -313,11 +313,16 @@ func (sb *SpinBox) SpinBoxScroll() {
 
 // todo: how to deal with this??
 func (sb *SpinBox) SpinBoxTextFieldSelect() {
+	if sb.Parts == nil {
+		return
+	}
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	tf.On(events.Select, func(e events.Event) {
-		sb.SetSelected(!sb.StateIs(states.Selected))
-		sb.Send(events.Select, nil)
-	})
+	if tf != nil {
+		tf.On(events.Select, func(e events.Event) {
+			sb.SetSelected(!sb.StateIs(states.Selected))
+			sb.Send(events.Select, nil)
+		})
+	}
 }
 
 func (sb *SpinBox) SpinBoxKeys() {

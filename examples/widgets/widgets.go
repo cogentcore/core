@@ -9,9 +9,9 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -55,7 +55,7 @@ func mainrun() {
 <kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetStretchMax().
-		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
+		AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
@@ -78,11 +78,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).
 		SetTooltip("press this <i>button</i> to pop up a dialog box").
-		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
+		AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
 		}).(*gi.Button).
-		OnClicked(func() {
+		On(events.Click, func(e events.Event) {
 			fmt.Printf("Button1 clicked\n")
 			// gi.StringPromptDialog(vp, "", "Enter value here..",
 			// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
@@ -99,13 +99,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Open GoGiEditor").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things").(*gi.Button)
 
+	_ = button2
+
 	// this is the "full strength" general purpose signaling framework
-	button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-		if sig == int64(gi.ButtonClicked) {
-			// giv.GoGiEditorDialog(win)
-		}
-	})
+	// button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		// giv.GoGiEditorDialog(win)
+	// 	}
+	// })
 
 	// button2.StyleFunc = func() {
 	// 	fmt.Println(button2.State)
@@ -129,34 +131,37 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	checkbox := gi.NewCheckBox(brow, "checkbox").
 		SetText("Toggle").(*gi.CheckBox)
 
+	_ = checkbox
 	// todo: need convenient OnToggled
-	checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.ButtonToggled) {
-			fmt.Printf("Checkbox toggled: %v\n", checkbox.StateIs(states.Checked))
-		}
-	})
+	// checkbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(gi.ButtonToggled) {
+	// 		fmt.Printf("Checkbox toggled: %v\n", checkbox.StateIs(states.Checked))
+	// 	}
+	// })
 
 	// note: receiver for menu items with shortcuts must be a Node2D or RenderWin
 	mb1 := gi.NewButton(brow, "menubutton1").
 		SetText("Menu Button").(*gi.Button)
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
 
-	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
-
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
-
-	mb1.Menu.AddSeparator("sep1")
-
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-		mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-		})
+	_ = mb1
+	// mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
+	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	// 	})
+	//
+	// mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
+	//
+	// mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
+	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	// 	})
+	//
+	// mb1.Menu.AddSeparator("sep1")
+	//
+	// mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
+	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	// 	})
 
 	//////////////////////////////////////////
 	//      Sliders
@@ -168,7 +173,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	srow := gi.NewLayout(frame, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
-		SetStyle(func(w *gi.WidgetBase, s *styles.Style) {
+		AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
 
@@ -190,17 +195,17 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	slider2.SetStretchMaxHeight()
 	slider2.SetValue(0.5)
 
-	slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig != int64(gi.SliderMoved) {
-			fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-		}
-	})
-
-	slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig != int64(gi.SliderMoved) {
-			fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-		}
-	})
+	// slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig != int64(gi.SliderMoved) {
+	// 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
+	// 	}
+	// })
+	//
+	// slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig != int64(gi.SliderMoved) {
+	// 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
+	// 	}
+	// })
 
 	scrollbar1 := gi.NewScrollBar(srow, "scrollbar1")
 	scrollbar1.Dim = mat32.X
@@ -211,11 +216,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	scrollbar1.SetValue(0.25)
 	// scrollbar1.Snap = true
 	// scrollbar1.Tracking = true
-	scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig != int64(gi.SliderMoved) {
-			fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-		}
-	})
+	// scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig != int64(gi.SliderMoved) {
+	// 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
+	// 	}
+	// })
 
 	scrollbar2 := gi.NewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = mat32.Y
@@ -228,11 +233,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	scrollbar2.Tracking = true
 	scrollbar2.Step = 1
 	scrollbar2.PageStep = 10
-	scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.SliderValueChanged) { // typically this is the one you care about
-			fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-		}
-	})
+	// scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(gi.SliderValueChanged) { // typically this is the one you care about
+	// 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
+	// 	}
+	// })
 
 	//////////////////////////////////////////
 	//      Text Widgets
@@ -249,15 +254,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	edit1.Placeholder = "Enter text here..."
 	// edit1.SetText("Edit this text")
 	// edit1.SetProp("min-width", "20em")
-	edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		estr := ""
-		if rn, ok := data.([]rune); ok {
-			estr = string(rn)
-		} else if st, ok := data.(string); ok {
-			estr = st
-		}
-		fmt.Printf("Received line edit signal: %v from edit: %v with data: %s\n", gi.TextFieldSignals(sig), send.Name(), estr)
-	})
+	// edit1.TextFieldSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	estr := ""
+	// 	if rn, ok := data.([]rune); ok {
+	// 		estr = string(rn)
+	// 	} else if st, ok := data.(string); ok {
+	// 		estr = st
+	// 	}
+	// 	fmt.Printf("Received line edit signal: %v from edit: %v with data: %s\n", gi.TextFieldSignals(sig), send.Name(), estr)
+	// })
 	// edit1.SetProp("inactive", true)
 
 	sb := gi.NewSpinBox(txrow, "spin")
@@ -265,15 +270,16 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	sb.Step = 1
 	sb.Format = "%#X"
 	sb.SetMin(0)
-	sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
-	})
+	// sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
+	// })
 
 	cb := gi.NewComboBox(txrow, "combo")
+	_ = cb
 	// cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
-	cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
-	})
+	// cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)
+	// })
 
 	//////////////////////////////////////////
 	//      Main Menu
