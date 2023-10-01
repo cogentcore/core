@@ -117,7 +117,9 @@ outer:
 			if w.app.Surface == nil {
 				break
 			}
+			w.app.mu.Lock()
 			w.EvMgr.WindowPaint()
+			w.app.mu.Unlock()
 			// NOTE: this is incredibly important; do not remove it (see [onNativeWindowRedrawNeeded] for why)
 			select {
 			case windowRedrawDone <- struct{}{}:
