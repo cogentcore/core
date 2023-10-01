@@ -5,6 +5,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"image"
 	"time"
@@ -15,6 +16,9 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/vgpu/v2/vgpu"
 )
+
+//go:embed *.spv
+var content embed.FS
 
 func main() { driver.Main(mainrun) }
 
@@ -45,16 +49,14 @@ func mainrun(a goosi.App) {
 	sy.ConfigRender(&sf.Format, vgpu.UndefType)
 	sf.SetRender(&sy.Render)
 
-	pl.AddShaderFile("trianglelit", vgpu.VertexShader, "trianglelit.spv")
-	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
+	pl.AddShaderEmbed("trianglelit", vgpu.VertexShader, content, "trianglelit.spv")
+	pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
 
 	sy.Config()
 
 	frameCount := 0
 	cur := cursors.Default
 	stTime := time.Now()
-
-	fmt.Println(cursors.Cursors)
 
 	renderFrame := func() {
 		// fmt.Printf("frame: %d\n", frameCount)
