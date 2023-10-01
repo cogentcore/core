@@ -29,7 +29,5 @@ func mainrun() {
 			// gi.NewDialog(dialog, but).SetModal().SetMovable().SetCloseable().Run()
 		})
 
-	gi.NewWindow(scene).
-		SetWidth(512).SetHeight(384).
-		Run().Wait()
+	gi.NewWindow(scene).Run().Wait()
 }

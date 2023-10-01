@@ -121,6 +121,7 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
 	st.Scene.Config()
+	fmt.Println("running window", st.OwnWin, CurRenderWin)
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()

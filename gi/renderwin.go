@@ -259,6 +259,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	win.Title = title
 	var err error
 	win.GoosiWin, err = goosi.TheApp.NewWindow(opts)
+	fmt.Println("got new goosi render win", win.GoosiWin)
 	if err != nil {
 		fmt.Printf("GoGi NewRenderWin error: %v \n", err)
 		return nil
@@ -267,6 +268,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	win.GoosiWin.SetParent(win)
 	// win.GoosiWin.SetFPS(1) // todo: debug mode!
 	drw := win.GoosiWin.Drawer()
+	fmt.Println("goosi drawer", drw)
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites
 

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 )
 
@@ -303,9 +304,9 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 	st.Type = typ
 	switch st.Type {
 	case Window:
-		// if !goosi.TheApp.IsMobile() {
-		// 	st.OwnWin = true
-		// }
+		if !goosi.TheApp.Platform().IsMobile() {
+			st.OwnWin = true
+		}
 		st.Modal = true // note: there is no global modal option between RenderWin windows
 	case Dialog:
 		st.Modal = true
