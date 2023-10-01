@@ -5,6 +5,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"image"
 	"time"
@@ -18,6 +19,9 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
+
+//go:embed *.spv
+var content embed.FS
 
 type CamView struct {
 	Model mat32.Mat4
@@ -56,8 +60,8 @@ func mainrun(a goosi.App) {
 	sy.SetClearColor(0.2, 0.2, 0.2, 1)
 	sy.SetRasterization(vk.PolygonModeFill, vk.CullModeNone, vk.FrontFaceCounterClockwise, 1.0)
 
-	pl.AddShaderFile("indexed", vgpu.VertexShader, "indexed.spv")
-	pl.AddShaderFile("vtxcolor", vgpu.FragmentShader, "vtxcolor.spv")
+	pl.AddShaderEmbed("indexed", vgpu.VertexShader, content, "indexed.spv")
+	pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
 
 	vars := sy.Vars()
 	vset := vars.AddVertexSet()
@@ -161,6 +165,9 @@ func mainrun(a goosi.App) {
 	for {
 		evi := w.NextEvent()
 		et := evi.Type()
+		if et != events.WindowPaint {
+			fmt.Println("got event", evi)
+		}
 		switch et {
 		case events.Window:
 			ev := evi.(*events.WindowEvent)
