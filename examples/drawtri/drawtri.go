@@ -33,6 +33,8 @@ func mainrun(a goosi.App) {
 		panic(err)
 	}
 
+	fmt.Println("got new window", w)
+
 	goosi.TheApp.Cursor(w).SetSize(32)
 
 	// note: drawer is always created and ready to go
@@ -53,6 +55,8 @@ func mainrun(a goosi.App) {
 	pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
 
 	sy.Config()
+
+	fmt.Println("made and configured pipelines")
 
 	frameCount := 0
 	cur := cursors.Default
@@ -96,7 +100,9 @@ func mainrun(a goosi.App) {
 	}
 
 	for {
+		fmt.Println("waiting for event")
 		evi := w.NextEvent()
+		fmt.Println("got event", evi)
 		et := evi.Type()
 		switch et {
 		case events.Window:
