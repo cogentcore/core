@@ -1,8 +1,8 @@
-// Copyright 2018 The GoKi Authors. All rights reserved.
+// Copyright 2023 The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build android || ios
+//go:build android
 
 package driver
 
@@ -10,9 +10,9 @@ import "C"
 
 import (
 	"goki.dev/goosi"
-	"goki.dev/goosi/driver/mobile"
+	"goki.dev/goosi/driver/android"
 )
 
 func driverMain(f func(goosi.App)) {
-	mobile.Main(f)
+	android.Main(f)
 }
