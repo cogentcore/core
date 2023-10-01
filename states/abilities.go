@@ -33,6 +33,9 @@ const (
 	// to change value.  Cannot be both Draggable and Slideable.
 	Slideable
 
+	// Checkable means it can be Checked
+	Checkable
+
 	// Scrollable means it can be Scrolled
 	Scrollable
 
@@ -41,9 +44,6 @@ const (
 
 	// FocusWithinable means it can be FocusedWithin
 	FocusWithinable
-
-	// Checkable means it can be Checked
-	Checkable
 
 	// Hoverable means it can be Hovered
 	Hoverable
@@ -55,4 +55,14 @@ const (
 // Is is a shortcut for HasFlag for Abilities
 func (ab *Abilities) Is(flag enums.BitFlag) bool {
 	return ab.HasFlag(flag)
+}
+
+// IsPressable is true when an element is Selectable, Activatable, Draggable, Slideable, or Checkable
+func (ab *Abilities) IsPressable() bool {
+	return ab.HasFlag(Selectable) || ab.HasFlag(Activatable) || ab.HasFlag(Draggable) || ab.HasFlag(Slideable) || ab.HasFlag(Checkable)
+}
+
+// IsHoverable is true for both Hoverable and LongHoverable
+func (ab *Abilities) IsHoverable() bool {
+	return ab.HasFlag(Hoverable) || ab.HasFlag(LongHoverable)
 }

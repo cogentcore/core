@@ -4,6 +4,8 @@
 
 package states
 
+//go:generate enumgen
+
 import "goki.dev/enums"
 
 // States are GUI states of elements that are relevant for styling based on
