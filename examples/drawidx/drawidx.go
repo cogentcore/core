@@ -189,7 +189,6 @@ func mainrun(a goosi.App) {
 				return
 			}
 		case events.WindowPaint:
-			fmt.Println("paint")
 			if w.IsVisible() {
 				renderFrame()
 			} else {
