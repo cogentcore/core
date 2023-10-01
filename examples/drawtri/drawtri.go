@@ -124,10 +124,6 @@ func mainrun(a goosi.App) {
 			}
 		case events.WindowPaint:
 			// fmt.Println("paint")
-			if sf == nil {
-				fmt.Println("skipping paint event because window not yet made")
-				break
-			}
 			renderFrame()
 		case events.MouseMove:
 			fmt.Println("got mouse event at pos", evi.Pos())
