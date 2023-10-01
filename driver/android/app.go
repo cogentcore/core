@@ -216,7 +216,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
-	app.window.EventMgr.Window(events.Focus)
+	app.window.EvMgr.Window(events.Focus)
 	return nil
 }
 
