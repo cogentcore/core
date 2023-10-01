@@ -954,7 +954,7 @@ func (pf *PrefsDetailed) Apply() {
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight
 	DialogsSepRenderWin = pf.DialogsSepRenderWin
-	TheViewIFace.PrefsDetApply(pf)
+	// TheViewIFace.PrefsDetApply(pf) // TODO: add this once we have giv working
 	// in giv:
 	// TextViewClipHistMax = pf.TextViewClipHistMax
 	// TextBuf*
