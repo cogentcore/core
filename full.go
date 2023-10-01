@@ -93,10 +93,16 @@ func (f *Full) RenderColor(opacity float32, bounds image.Rectangle, xform mat32.
 // and string.
 func (f *Full) SetAny(val any, ctx Context) error {
 	switch valv := val.(type) {
+	case *Full:
+		*f = *valv
+	case Full:
+		*f = valv
 	case color.Color:
 		f.Solid = AsRGBA(valv)
 	case *Gradient:
 		*f.Gradient = *valv
+	case Gradient:
+		*f.Gradient = valv
 	case string:
 		f.SetString(valv, ctx)
 	}
