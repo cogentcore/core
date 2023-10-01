@@ -59,7 +59,7 @@ import (
 	"goki.dev/goosi/driver/mobile/callfn"
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/event/key"
+	"goki.dev/goosi/events/key"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
 )
@@ -467,26 +467,21 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		return
 	}
 
-	k := events.Key{
-		Rune: rune(C.getKeyRune(env, e)),
-		Code: convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e))),
-	}
-	if k.Rune >= '0' && k.Rune <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
+	r := rune(C.getKeyRune(env, e))
+	code := convAndroidKeyCode(int32(C.AKeyEvent_getKeyCode(e)))
+
+	if r >= '0' && r <= '9' { // GBoard generates key events for numbers, but we see them in textChanged
 		return
 	}
-	switch C.AKeyEvent_getAction(e) {
-	case C.AKEY_STATE_DOWN:
-		k.Direction = key.DirPress
-	case C.AKEY_STATE_UP:
-		k.Direction = key.DirRelease
-	default:
-		k.Direction = key.DirNone
+	typ := events.KeyDown
+	if C.AKeyEvent_getAction(e) == C.AKEY_STATE_UP {
+		typ = events.KeyUp
 	}
 	// TODO(crawshaw): set Modifiers.
-	theApp.window.EvMgr.Key()// TODO(kai): key event
+	theApp.window.EvMgr.Key(typ, r, code, 0)
 }
 
-var androidKeycoe = map[int32]key.Code{
+var androidKeycodes = map[int32]key.Codes{
 	C.AKEYCODE_HOME:            key.CodeHome,
 	C.AKEYCODE_0:               key.Code0,
 	C.AKEYCODE_1:               key.Code1,
@@ -588,8 +583,8 @@ var androidKeycoe = map[int32]key.Code{
 	C.AKEYCODE_VOLUME_MUTE:     key.CodeMute,
 }
 
-func convAndroidKeyCode(aKeyCode int32) key.Code {
-	if code, ok := androidKeycoe[aKeyCode]; ok {
+func convAndroidKeyCode(aKeyCode int32) key.Codes {
+	if code, ok := androidKeycodes[aKeyCode]; ok {
 		return code
 	}
 	return key.CodeUnknown
