@@ -13,7 +13,7 @@ func main() { gimain.Main(mainrun) }
 
 func mainrun() {
 	// gi.WinEventTrace = true
-	gi.EventTrace = true
+	// gi.EventTrace = true
 	// gi.LayoutTrace = true
 	// gi.RenderTrace = true
 
