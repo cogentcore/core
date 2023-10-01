@@ -123,19 +123,19 @@ func (app *appImpl) mainLoop() {
 	app.mainDone = make(chan struct{})
 	// SetThreadPri(1)
 	// time.Sleep(100 * time.Millisecond)
-	go main(mainCallback)
-	for {
-		select {
-		case <-app.mainDone:
-			app.destroyVk()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		}
-	}
+	main(mainCallback)
+	// for {
+	// 	select {
+	// 	case <-app.mainDone:
+	// 		app.destroyVk()
+	// 		return
+	// 	case f := <-app.mainQueue:
+	// 		f.f()
+	// 		if f.done != nil {
+	// 			f.done <- true
+	// 		}
+	// 	}
+	// }
 }
 
 // stopMain stops the main loop and thus terminates the app
@@ -209,6 +209,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	defer app.mu.Unlock()
 	fmt.Println("will return")
 	fmt.Println("returning", app.window)
+	go app.window.winLoop()
 	// app.getScreen()
 	// goosi.InitScreenLogicalDPIFunc()
 	// app.window.LogDPI = app.screens[0].LogicalDPI
@@ -251,6 +252,9 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 		publish:     make(chan struct{}),
 		winClose:    make(chan struct{}),
 		publishDone: make(chan struct{}),
+		WindowBase: goosi.WindowBase{
+			FPS: 60,
+		},
 	}
 	fmt.Println("before deque")
 	app.window.EvMgr.Deque = &app.window.Deque

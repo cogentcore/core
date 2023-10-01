@@ -112,7 +112,7 @@ func mainrun(a goosi.App) {
 				return
 			}
 		case events.WindowPaint:
-			// fmt.Println("paint")
+			fmt.Println("paint")
 			renderFrame()
 		case events.MouseMove:
 			// fmt.Println("got mouse event at pos", evi.Pos())
