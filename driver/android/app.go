@@ -219,6 +219,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	app.window.EvMgr.Deque = &app.window.Deque
 	fmt.Println("after deque")
 	fmt.Println(app.window)
+	app.window.EvMgr.Window(events.Show)
 	app.window.EvMgr.Window(events.Focus)
 	fmt.Println("done with new window")
 	fmt.Println("will return")

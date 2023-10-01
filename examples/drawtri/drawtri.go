@@ -37,26 +37,32 @@ func mainrun(a goosi.App) {
 
 	goosi.TheApp.Cursor(w).SetSize(32)
 
-	// note: drawer is always created and ready to go
-	// we are creating an additional rendering system here.
-	sf := w.Drawer().Surf
-	sy := sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
+	var sf *vgpu.Surface
+	var sy *vgpu.System
+	var pl *vgpu.Pipeline
 
-	destroy := func() {
-		sy.Destroy()
+	make := func() {
+		// note: drawer is always created and ready to go
+		// we are creating an additional rendering system here.
+		sf = w.Drawer().Surf
+		sy = sf.GPU.NewGraphicsSystem("drawidx", &sf.Device)
+
+		destroy := func() {
+			sy.Destroy()
+		}
+		w.SetDestroyGPUResourcesFunc(destroy)
+
+		pl = sy.NewPipeline("drawtri")
+		sy.ConfigRender(&sf.Format, vgpu.UndefType)
+		sf.SetRender(&sy.Render)
+
+		pl.AddShaderEmbed("trianglelit", vgpu.VertexShader, content, "trianglelit.spv")
+		pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
+
+		sy.Config()
+
+		fmt.Println("made and configured pipelines")
 	}
-	w.SetDestroyGPUResourcesFunc(destroy)
-
-	pl := sy.NewPipeline("drawtri")
-	sy.ConfigRender(&sf.Format, vgpu.UndefType)
-	sf.SetRender(&sy.Render)
-
-	pl.AddShaderEmbed("trianglelit", vgpu.VertexShader, content, "trianglelit.spv")
-	pl.AddShaderEmbed("vtxcolor", vgpu.FragmentShader, content, "vtxcolor.spv")
-
-	sy.Config()
-
-	fmt.Println("made and configured pipelines")
 
 	frameCount := 0
 	cur := cursors.Default
@@ -110,12 +116,18 @@ func mainrun(a goosi.App) {
 			ev := evi.(*events.WindowEvent)
 			fmt.Println("got window event", ev)
 			switch ev.Action {
+			case events.Show:
+				make()
 			case events.Close:
 				fmt.Println("got events.Close; returning")
 				return
 			}
 		case events.WindowPaint:
 			// fmt.Println("paint")
+			if sf == nil {
+				fmt.Println("skipping paint event because window not yet made")
+				break
+			}
 			renderFrame()
 		case events.MouseMove:
 			fmt.Println("got mouse event at pos", evi.Pos())
