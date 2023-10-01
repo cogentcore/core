@@ -341,7 +341,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 		case cfg := <-windowConfigChange:
 			dotsPerPx = cfg.dotsPerPx
 		case w := <-windowRedrawNeeded:
-			app.window.EventMgr.Window(events.Focus)
+			app.window.EvMgr.Window(events.Focus)
 
 			widthDots := int(C.ANativeWindow_getWidth(w))
 			heightDots := int(C.ANativeWindow_getHeight(w))
@@ -355,11 +355,11 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			app.screen.UpdatePhysicalDPI()
 			app.screen.UpdateLogicalDPI()
 
-			app.window.EventMgr.WindowPaint()
+			app.window.EvMgr.WindowPaint()
 		case <-windowDestroyed:
-			app.window.EventMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
+			app.window.EvMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
 		case <-activityDestroyed:
-			app.window.EventMgr.Window(events.Close)
+			app.window.EvMgr.Window(events.Close)
 		case <-app.publish: // TODO: do something here?
 			select {
 			case windowRedrawDone <- struct{}{}:
