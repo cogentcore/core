@@ -61,7 +61,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/mobile/event/size"
-	"goki.dev/mobile/event/touch"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -435,25 +434,23 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 	case C.AINPUT_EVENT_TYPE_MOTION:
 		// At most one of the events in this batch is an up or down event; get its index and change.
 		upDownIndex := C.size_t(C.AMotionEvent_getAction(e)&C.AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> C.AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT
-		upDownType := touch.TypeMove
+		upDownType := events.TouchMove
 		switch C.AMotionEvent_getAction(e) & C.AMOTION_EVENT_ACTION_MASK {
 		case C.AMOTION_EVENT_ACTION_DOWN, C.AMOTION_EVENT_ACTION_POINTER_DOWN:
-			upDownType = touch.TypeBegin
+			upDownType = events.TouchStart
 		case C.AMOTION_EVENT_ACTION_UP, C.AMOTION_EVENT_ACTION_POINTER_UP:
-			upDownType = touch.TypeEnd
+			upDownType = events.TouchEnd
 		}
 
 		for i, n := C.size_t(0), C.AMotionEvent_getPointerCount(e); i < n; i++ {
-			t := touch.TypeMove
+			t := events.TouchMove
 			if i == upDownIndex {
 				t = upDownType
 			}
-			theApp.window.EvMgr <- touch.Event{ // TODO(kai): touch event
-				X:        float32(C.AMotionEvent_getX(e, i)),
-				Y:        float32(C.AMotionEvent_getY(e, i)),
-				Sequence: touch.Sequence(C.AMotionEvent_getPointerId(e, i)),
-				Type:     t,
-			}
+			seq := events.Sequence(C.AMotionEvent_getPointerId(e, i))
+			x := int(C.AMotionEvent_getX(e, i))
+			y := int(C.AMotionEvent_getY(e, i))
+			theApp.window.EvMgr.Touch(t, seq, image.Pt(x, y))
 		}
 	default:
 		log.Printf("unknown input event, type=%d", C.AInputEvent_getType(e))
