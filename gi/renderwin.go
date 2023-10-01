@@ -38,30 +38,6 @@ func Wait() {
 var CurRenderWin *RenderWin
 
 var (
-	// DragStartMSec is the number of milliseconds to wait before initiating a
-	// regular events drag event (as opposed to a basic events.Press)
-	DragStartMSec = 50
-
-	// DragStartPix is the number of pixels that must be moved before
-	// initiating a regular events drag event (as opposed to a basic events.Press)
-	DragStartPix = 4
-
-	// DNDStartMSec is the number of milliseconds to wait before initiating a
-	// drag-n-drop event -- gotta drag it like you mean it
-	DNDStartMSec = 200
-
-	// DNDStartPix is the number of pixels that must be moved before
-	// initiating a drag-n-drop event -- gotta drag it like you mean it
-	DNDStartPix = 20
-
-	// HoverStartMSec is the number of milliseconds to wait before initiating a
-	// hover event (e.g., for opening a tooltip)
-	HoverStartMSec = 1000
-
-	// HoverMaxPix is the maximum number of pixels that events can move and still
-	// register a Hover event
-	HoverMaxPix = 5
-
 	// LocalMainMenu controls whether the main menu is displayed locally at top of
 	// each window, in addition to the global menu at the top of the screen.  Mac
 	// native apps do not do this, but OTOH it makes things more consistent with

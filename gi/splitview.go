@@ -79,7 +79,7 @@ func (sv *SplitView) SplitViewStyles() {
 func (sv *SplitView) OnChildAdded(child ki.Ki) {
 	if sp, ok := child.(*Splitter); ok {
 		sp.ThumbSize = sv.HandleSize
-		sp.On(events.SliderStop, func(e events.Event) {
+		sp.On(events.SlideStop, func(e events.Event) {
 			sv.SetSplitAction(sp.SplitterNo, sp.Value)
 		})
 	}
@@ -387,7 +387,7 @@ func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 		if i < sz-1 {
 			spl := sv.Parts.Child(i).(*Splitter)
 			spl.Value = spsum
-			spl.UpdatePosFromValue()
+			spl.UpdatePosFromValue(spl.Value)
 		}
 	}
 
@@ -504,7 +504,7 @@ func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool 
 	sr.DoLayoutParts(sc, parBBox, iter)
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
-	sr.UpdatePosFromValue()
+	sr.UpdatePosFromValue(sr.Value)
 	sr.DragPos = sr.Pos
 	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.ScBBox
@@ -587,9 +587,9 @@ func (sr *Splitter) SplitterMouse() {
 		// SidesTODO: unsure about dim
 		spc := st.EffMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
 		if sr.Dim == mat32.X {
-			sr.SliderPress(float32(ed.X) - spc)
+			sr.SetSliderPos(float32(ed.X) - spc)
 		} else {
-			sr.SliderPress(float32(ed.Y) - spc)
+			sr.SetSliderPos(float32(ed.Y) - spc)
 		}
 	})
 	sr.On(events.DoubleClick, func(e events.Event) {

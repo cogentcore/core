@@ -804,22 +804,22 @@ type PrefsDetailed struct {
 	MenuMaxHeight int `def:"30" min:"5" step:"1" desc:"the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size."`
 
 	// [def: 50] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
-	DragStartMSec int `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
+	DragStartTime time.Duration `def:"50" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
 
 	// [def: 4] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
-	DragStartPix int `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
+	DragStartDist int `def:"4" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)"`
 
 	// [def: 200] [min: 5] [max: 1000] [step: 5] the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
-	DNDStartMSec int `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	SlideStartTime time.Duration `def:"200" min:"5" max:"1000" step:"5" desc:"the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 
 	// [def: 20] [min: 0] [max: 100] [step: 1] the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
-	DNDStartPix int `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
+	SlideStartDist int `def:"20" min:"0" max:"100" step:"1" desc:"the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it"`
 
 	// [def: 500] [min: 10] [max: 10000] [step: 10] the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
-	HoverStartMSec int `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
+	LongHoverTime int `def:"500" min:"10" max:"10000" step:"10" desc:"the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)"`
 
 	// [def: 50] [min: 0] [max: 1000] [step: 1] the maximum number of pixels that mouse can move and still register a Hover event
-	HoverMaxPix int `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
+	LongHoverStopDist int `def:"50" min:"0" max:"1000" step:"1" desc:"the maximum number of pixels that mouse can move and still register a Hover event"`
 
 	// [def: 0] [min: 0] [max: 10000] [step: 10] the number of milliseconds to wait before offering completions
 	CompleteWaitMSec int `def:"0" min:"0" max:"10000" step:"10" desc:"the number of milliseconds to wait before offering completions"`
@@ -914,12 +914,12 @@ func (pf *PrefsDetailed) Save() error {
 // defaults
 func (pf *PrefsDetailed) Defaults() {
 	pf.MenuMaxHeight = MenuMaxHeight
-	pf.DragStartMSec = DragStartMSec
-	pf.DragStartPix = DragStartPix
-	pf.DNDStartMSec = DNDStartMSec
-	pf.DNDStartPix = DNDStartPix
-	pf.HoverStartMSec = HoverStartMSec
-	pf.HoverMaxPix = HoverMaxPix
+	pf.DragStartTime = DragStartTime
+	pf.DragStartDist = DragStartDist
+	pf.SlideStartTime = SlideStartTime
+	pf.SlideStartDist = SlideStartDist
+	pf.LongHoverTime = LongHoverTime
+	pf.LongHoverStopDist = LongHoverStopDist
 	pf.CompleteWaitMSec = CompleteWaitMSec
 	pf.CompleteMaxItems = CompleteMaxItems
 	pf.CursorBlinkMSec = CursorBlinkMSec
@@ -941,12 +941,12 @@ func (pf *PrefsDetailed) Defaults() {
 // Apply detailed preferences to all the relevant settings.
 func (pf *PrefsDetailed) Apply() {
 	MenuMaxHeight = pf.MenuMaxHeight
-	DragStartMSec = pf.DragStartMSec
-	DragStartPix = pf.DragStartPix
-	DNDStartMSec = pf.DNDStartMSec
-	DNDStartPix = pf.DNDStartPix
-	HoverStartMSec = pf.HoverStartMSec
-	HoverMaxPix = pf.HoverMaxPix
+	DragStartTime = pf.DragStartTime
+	DragStartDist = pf.DragStartDist
+	SlideStartTime = pf.SlideStartTime
+	SlideStartDist = pf.SlideStartDist
+	LongHoverTime = pf.LongHoverTime
+	LongHoverStopDist = pf.LongHoverStopDist
 	CompleteWaitMSec = pf.CompleteWaitMSec
 	CompleteMaxItems = pf.CompleteMaxItems
 	CursorBlinkMSec = pf.CursorBlinkMSec
