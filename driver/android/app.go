@@ -123,18 +123,19 @@ func (app *appImpl) mainLoop() {
 	app.mainDone = make(chan struct{})
 	// SetThreadPri(1)
 	// time.Sleep(100 * time.Millisecond)
-	for {
-		select {
-		case <-app.mainDone:
-			app.destroyVk()
-			return
-		case f := <-app.mainQueue:
-			f.f()
-			if f.done != nil {
-				f.done <- true
-			}
-		}
-	}
+	main(mainCallback)
+	// for {
+	// 	select {
+	// 	case <-app.mainDone:
+	// 		app.destroyVk()
+	// 		return
+	// 	case f := <-app.mainQueue:
+	// 		f.f()
+	// 		if f.done != nil {
+	// 			f.done <- true
+	// 		}
+	// 	}
+	// }
 }
 
 // stopMain stops the main loop and thus terminates the app
@@ -192,9 +193,9 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
-		fmt.Println("locking in new window")
+		// fmt.Println("locking in new window")
 		app.mu.Lock()
-		fmt.Println("past lock in new window")
+		// fmt.Println("past lock in new window")
 		winptr = app.winptr
 		app.mu.Unlock()
 
@@ -204,8 +205,8 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	}
 	fmt.Println("done with new window")
 	// TODO: do we need to do this?
-	// app.mu.Lock()
-	// defer app.mu.Unlock()
+	app.mu.Lock()
+	defer app.mu.Unlock()
 	// app.getScreen()
 	// goosi.InitScreenLogicalDPIFunc()
 	// app.window.LogDPI = app.screens[0].LogicalDPI
@@ -241,6 +242,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
+	fmt.Println(app.window)
 	app.window.EvMgr.Window(events.Focus)
 	return nil
 }

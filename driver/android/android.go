@@ -156,7 +156,7 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
 	theApp.winptr = uintptr(unsafe.Pointer(window))
-	fmt.Println("win creATED", theApp.winptr)
+	fmt.Println("win created", theApp.winptr)
 	theApp.setSysWindow(nil, theApp.winptr)
 }
 
@@ -283,9 +283,8 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func main(f func(*appImpl)) {
+func main(f func(goosi.App)) {
 	fmt.Println("in main")
-	mainUserFn = f
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
 		fmt.Println("running input queue")
@@ -331,12 +330,10 @@ func insetsChanged(top, bottom, left, right int) {
 	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
-var mainUserFn func(*appImpl)
-
 func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 	donec := make(chan struct{})
 	go func() {
-		mainUserFn(theApp)
+		mainCallback(theApp)
 		close(donec)
 	}()
 
