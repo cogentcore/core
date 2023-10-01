@@ -50,7 +50,7 @@ type SliceViewInline struct {
 }
 
 func (sv *SliceViewInline) OnInit() {
-	sv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	sv.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(20)
 	})
 }
@@ -61,7 +61,7 @@ func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
 		case "Parts":
 			parts := child.(*gi.Layout)
 			parts.Lay = gi.LayoutHoriz
-			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		}

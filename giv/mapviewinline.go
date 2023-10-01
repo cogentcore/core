@@ -45,7 +45,7 @@ type MapViewInline struct {
 }
 
 func (mv *MapViewInline) OnInit() {
-	mv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	mv.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetEx(60)
 	})
 }
@@ -56,7 +56,7 @@ func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
 		case "Parts":
 			parts := child.(*gi.Layout)
 			parts.Lay = gi.LayoutHoriz
-			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		}

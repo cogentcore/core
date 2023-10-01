@@ -33,7 +33,7 @@ type ArgView struct {
 
 func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
-	av.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	av.AddStyles(func(s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
@@ -48,13 +48,13 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 		case "title":
 			title := child.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
-			title.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			title.AddStyles(func(s *styles.Style) {
 				s.MaxWidth.SetPx(-1)
 				s.Text.Align = styles.AlignCenter
 				s.AlignV = styles.AlignTop
 			})
 		case "args-grid":
-			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.MinWidth.SetEm(1.5)
 				s.Width.SetEm(1.5)
@@ -67,7 +67,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 			})
 		}
 		if w.Parent().Name() == "args-grid" {
-			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.AlignH = styles.AlignCenter
 			})
 		}

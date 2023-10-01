@@ -40,7 +40,7 @@ type VCSLogView struct {
 }
 
 func (lv *VCSLogView) OnInit() {
-	lv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	lv.AddStyles(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
 }
@@ -49,7 +49,7 @@ func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
 	if w := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "a-tf", "b-tf":
-			w.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Width.SetEm(12)
 			})
 		}

@@ -31,13 +31,13 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
-	mfr.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	mfr.AddStyles(func(s *styles.Style) {
 		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
 	})
 
 	title := gi.NewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")
 	title.Type = gi.LabelHeadlineSmall
-	title.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	title.AddStyles(func(s *styles.Style) {
 		s.Width.SetCh(30) // need for wrap
 		s.SetStretchMaxWidth()
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap

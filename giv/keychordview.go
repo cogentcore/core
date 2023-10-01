@@ -78,7 +78,7 @@ type KeyChordEdit struct {
 }
 
 func (kc *KeyChordEdit) OnInit() {
-	kc.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	kc.AddStyles(func(s *styles.Style) {
 		s.Cursor = cursor.HandPointing
 		s.AlignV = styles.AlignTop
 		s.Border.Style.Set(styles.BorderNone)

@@ -930,7 +930,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
-	tf.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 	})
 	if completetag, ok := vv.Tag("complete"); ok {

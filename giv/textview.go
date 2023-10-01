@@ -180,7 +180,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 
 func (tv *TextView) OnInit() {
 	tv.SetTypeHandlers(&TextViewListen)
-	tv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tv.AddStyles(func(s *styles.Style) {
 		tv.CursorWidth.SetPx(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)

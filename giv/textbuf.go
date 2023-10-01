@@ -2156,7 +2156,7 @@ func (tb *TextBuf) SetLineIcon(ln int, icon icons.Icon) {
 		ic = &gi.Icon{}
 		ic.InitName(ic, string(icon))
 		ic.SetIcon(icon)
-		ic.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+		ic.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 		})

@@ -892,7 +892,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	// STYTODO: figure out how how to handle these kinds of styles
-	tf.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -940,7 +940,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetPx(-1)
 	})
@@ -1036,7 +1036,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
-	tf.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tf.AddStyles(func(s *styles.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

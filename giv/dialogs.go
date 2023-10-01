@@ -93,7 +93,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 	tb.Stat() // update markup
 
 	tlv := frame.InsertNewChild(gi.LayoutType, prIdx+1, "text-lay").(*gi.Layout)
-	tlv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tlv.AddStyles(func(s *styles.Style) {
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)
 		s.SetStretchMax()
@@ -102,7 +102,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 	tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetDisabled()
 	tv.SetBuf(tb)
-	tv.AddStyles(func(w *gi.WidgetBase, s *styles.Style) {
+	tv.AddStyles(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
 	})
 
