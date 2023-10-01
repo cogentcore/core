@@ -9,6 +9,7 @@ import (
 	"image"
 	"time"
 
+	"goki.dev/enums"
 	"goki.dev/goosi/events/key"
 )
 
@@ -136,6 +137,12 @@ type Event interface {
 
 	// Modifiers returns the modifier keys present at time of event
 	Modifiers() key.Modifiers
+
+	// HasAllModifiers tests whether all of given modifier(s) were set
+	HasAllModifiers(mods ...enums.BitFlag) bool
+
+	// HasAnyModifier testes whether any of the given modifiers were set
+	HasAnyModifier(mods ...enums.BitFlag) bool
 
 	// Rune is the meaning of the key event as determined by the
 	// operating system. The mapping is determined by system-dependent
