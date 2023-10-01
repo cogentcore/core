@@ -54,15 +54,14 @@ type Screen struct {
 	PhysicalSize image.Point
 
 	// LogicalDPI is the logical dots per inch of the screen,
-	// which is used for all rendering.  It is set as a function of the
-	// global ZoomFactor and the LogicalDPIScale, either the global
-	// or per-screen name version if it exists.
+	// which is used for all rendering.
+	// It is: transient zoom factor * screen-specific multiplier * PhysicalDPI
 	LogicalDPI float32
 
 	// PhysicalDPI is the physical dots per inch of the screen,
-	// for generating true-to-physical-size output, for example
-	// see the gi/units package for translating into various other
-	// units.
+	// for generating true-to-physical-size output.
+	// It is computed as 25.4 * (PixSize.X / PhysicalSize.X)
+	// where 25.4 is the number of mm per inch.
 	PhysicalDPI float32
 
 	// Color depth of the screen, in bits.
