@@ -975,3 +975,27 @@ func BenchmarkStdNew(b *testing.B) {
 		n.InitName(n, "")
 	}
 }
+
+// these var arg benchmarks were used to determine whether there
+// would be a performance cost to using var args for name, startIdx,
+// and other things. the result was no cost (about 0.23 ns/op for both)
+
+func BenchmarkVarArgs(b *testing.B) {
+	f := func(v int, vs ...int) int {
+		return 800 + v/70
+	}
+	for n := 0; n < b.N; n++ {
+		v := f(n)
+		v += 3
+	}
+}
+
+func BenchmarkNoVarArgs(b *testing.B) {
+	f := func(v int) int {
+		return 800 + v/70
+	}
+	for n := 0; n < b.N; n++ {
+		v := f(n)
+		v += 3
+	}
+}
