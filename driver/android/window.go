@@ -119,6 +119,11 @@ outer:
 			if hasShown {
 				w.EvMgr.WindowPaint()
 			}
+			// NOTE: this is incredibly important; do not remove it (see [onNativeWindowRedrawNeeded] for why)
+			select {
+			case windowRedrawDone <- struct{}{}:
+			default:
+			}
 		}
 	}
 }
