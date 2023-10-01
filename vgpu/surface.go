@@ -390,7 +390,8 @@ func (sf *Surface) PresentImage(frameIdx uint32) error {
 	})
 
 	switch ret {
-	case vk.ErrorOutOfDate, vk.Suboptimal:
+	// TODO: we shouldn't handle suboptimal on mobile, but we need to on desktop
+	case vk.ErrorOutOfDate: //, vk.Suboptimal:
 		sf.ReConfigSwapchain()
 		if Debug {
 			fmt.Printf("vgpu.Surface:PresentImage, new format: %#v\n", sf.Format)
