@@ -82,7 +82,6 @@ func (w *windowImpl) NextEvent() events.Event {
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
 	fmt.Println("starting window loop")
-	winShow := time.NewTimer(time.Second / 2) // this is a backup to ensure shown eventually..
 	var winPaint *time.Ticker
 	if w.FPS > 0 {
 		winPaint = time.NewTicker(time.Second / time.Duration(w.FPS))
@@ -94,7 +93,6 @@ outer:
 	for {
 		select {
 		case <-w.winClose:
-			winShow.Stop() // todo: close channel too??
 			winPaint.Stop()
 			hasShown = false
 			break outer
@@ -106,12 +104,6 @@ outer:
 			if f.done != nil {
 				f.done <- true
 			}
-		case <-winShow.C:
-			if w.app.gpu == nil {
-				break outer
-			}
-			// w.EvMgr.Window(events.Show)
-			hasShown = true
 		case <-winPaint.C:
 			if w.app.gpu == nil {
 				break outer
