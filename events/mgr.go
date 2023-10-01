@@ -182,6 +182,7 @@ func (em *Mgr) WindowResize() {
 func (em *Mgr) Custom(data any) {
 	ce := &CustomEvent{}
 	ce.Typ = Custom
+	ce.Data = data
 	ce.Init()
 	em.Deque.Send(ce)
 }

@@ -110,7 +110,7 @@ outer:
 			if w.app.gpu == nil {
 				break outer
 			}
-			w.EvMgr.Window(events.Show)
+			// w.EvMgr.Window(events.Show)
 			hasShown = true
 		case <-winPaint.C:
 			if w.app.gpu == nil {
