@@ -280,8 +280,10 @@ var (
 	activityDestroyed  = make(chan struct{})
 )
 
-func main(f func(goosi.App)) {
+func (app *appImpl) mainLoop() {
 	fmt.Println("in main")
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
 		fmt.Println("running input queue")
@@ -328,18 +330,23 @@ func insetsChanged(top, bottom, left, right int) {
 }
 
 func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
-	donec := make(chan struct{})
 	go func() {
 		mainCallback(theApp)
-		close(donec)
+		app.stopMain()
 	}()
 
 	var dotsPerPx float32
 
 	for {
 		select {
-		case <-donec:
+		case <-app.mainDone:
+			app.destroyVk()
 			return nil
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
 		case cfg := <-windowConfigChange:
 			dotsPerPx = cfg.dotsPerPx
 		case w := <-windowRedrawNeeded:

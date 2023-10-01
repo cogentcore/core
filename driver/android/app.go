@@ -66,10 +66,6 @@ func Main(f func(goosi.App)) {
 	mainCallback = f
 	theApp.initVk()
 	goosi.TheApp = theApp
-	// go func() {
-	// 	mainCallback(theApp)
-	// 	theApp.stopMain()
-	// }()
 	theApp.mainLoop()
 }
 
@@ -114,28 +110,6 @@ func (app *appImpl) PollEventsOnMain() {
 // GUI responsiveness.
 func (app *appImpl) PollEvents() {
 	// TODO: implement?
-}
-
-// mainLoop starts running event loop on main thread (must be called
-// from the main thread).
-func (app *appImpl) mainLoop() {
-	app.mainQueue = make(chan funcRun)
-	app.mainDone = make(chan struct{})
-	// SetThreadPri(1)
-	// time.Sleep(100 * time.Millisecond)
-	main(mainCallback)
-	// for {
-	// 	select {
-	// 	case <-app.mainDone:
-	// 		app.destroyVk()
-	// 		return
-	// 	case f := <-app.mainQueue:
-	// 		f.f()
-	// 		if f.done != nil {
-	// 			f.done <- true
-	// 		}
-	// 	}
-	// }
 }
 
 // stopMain stops the main loop and thus terminates the app
