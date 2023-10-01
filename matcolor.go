@@ -29,14 +29,22 @@ var Schemes = matcolor.NewSchemes(Palette)
 // access the color scheme; ideally, almost all color values should
 // be set to something in here. For more specific tones of colors,
 // see [Palette]. For setting the color schemes of your app, see
-// [Schemes] and [SetSchemes]. For setting whether this scheme to
-// light or dark, see [SetScheme].
+// [Schemes] and [SetSchemes]. For setting this scheme to
+// be light or dark, see [SetScheme].
 var Scheme = &Schemes.Light
 
 // SetSchemes sets [Schemes], [Scheme], and [Palette] based on the
-// given [matcolor.Key]. It is the main way that end-user code should
-// set the color schemes to something custom.
-func SetSchemes(key *matcolor.Key) {
+// given primary color. It is the main way that end-user code should
+// set the color schemes to something custom. For more specific control,
+// see [SetSchemesFromKey].
+func SetSchemes(primary color.RGBA) {
+	SetSchemesFromKey(matcolor.KeyFromPrimary(primary))
+}
+
+// SetSchemes sets [Schemes], [Scheme], and [Palette] based on the
+// given [matcolor.Key]. It should be used instead of [SetSchemes]
+// if you want more specific control over the color scheme.
+func SetSchemesFromKey(key *matcolor.Key) {
 	Palette = matcolor.NewPalette(key)
 	Schemes = matcolor.NewSchemes(Palette)
 	SetScheme(matcolor.SchemeIsDark)
