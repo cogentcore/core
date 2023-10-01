@@ -286,6 +286,7 @@ func (app *appImpl) mainLoop() {
 	app.mainDone = make(chan struct{})
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
+		defer func() { handleRecover(recover()) }()
 		fmt.Println("running input queue")
 		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
@@ -331,6 +332,7 @@ func insetsChanged(top, bottom, left, right int) {
 
 func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 	go func() {
+		defer func() { handleRecover(recover()) }()
 		mainCallback(theApp)
 		app.stopMain()
 	}()

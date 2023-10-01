@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"sync"
 
 	vk "github.com/goki/vulkan"
@@ -60,9 +61,32 @@ type appImpl struct {
 
 var mainCallback func(goosi.App)
 
+// handleRecover takes the given value of recover, and, if it is not nil,
+// prints a panic message and a stack trace, using a string-based log
+// method that guarantees that the stack trace will be printed before
+// the program exits. This is needed because, without this, the program
+// will exit before it can print the stack trace, which makes debugging
+// nearly impossible. The correct usage of handleRecover is:
+//
+//	func myFunc() {
+//		defer func() { handleRecover(recover()) }()
+//		...
+//	}
+func handleRecover(r any) {
+	if r == nil {
+		return
+	}
+	log.Println("panic:", r)
+	log.Println("")
+	log.Println("----- START OF STACK TRACE: -----")
+	log.Println(string(debug.Stack()))
+	log.Fatalln("----- END OF STACK TRACE -----")
+}
+
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
+	defer func() { handleRecover(recover()) }()
 	mainCallback = f
 	theApp.initVk()
 	goosi.TheApp = theApp
@@ -163,6 +187,7 @@ func (app *appImpl) fullDestroyVk() {
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	defer func() { handleRecover(recover()) }()
 	fmt.Println("in new window")
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
@@ -209,6 +234,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
 func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) error {
+	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
 	var sf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
