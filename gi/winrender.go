@@ -170,16 +170,18 @@ func (w *RenderWin) RenderWindow() {
 	// fmt.Println("start render")
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
-
+	fmt.Println("render window; updating all")
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
 	if !stageMods && !sceneMods {                  // nothing to do!
 		fmt.Printf("no mods\n")
 		return
 	}
 
+	fmt.Println("gathering scenes")
 	if stageMods {
 		w.GatherScenes()
 	}
+	fmt.Println("drawing scenes")
 	w.DrawScenes()
 	// fmt.Println("done render")
 }

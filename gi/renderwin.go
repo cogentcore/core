@@ -762,6 +762,7 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 }
 
 func (w *RenderWin) HandleWindowEvents(evi events.Event) {
+	fmt.Println("handle window events")
 	et := evi.Type()
 	switch et {
 	case events.WindowPaint:
