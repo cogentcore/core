@@ -124,7 +124,7 @@ func (lb *Label) OnInit() {
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelLabelLarge
 	lb.AddStyles(func(s *styles.Style) {
-		lb.Style.Abilities.SetFlag(true, states.LongHoverable)
+		lb.Style.SetAbilities(true, states.LongHoverable)
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle

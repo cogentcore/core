@@ -130,8 +130,8 @@ func (lv *VCSLogView) ToggleRev() {
 	cba := tb.ChildByName("a-rev", 2).(*gi.CheckBox)
 	cbb := tb.ChildByName("b-rev", 2).(*gi.CheckBox)
 	lv.SetA = !lv.SetA
-	cba.Style.State.SetFlag(lv.SetA, states.Checked)
-	cbb.Style.State.SetFlag(!lv.SetA, states.Checked)
+	cba.SetState(lv.SetA, states.Checked)
+	cbb.SetState(!lv.SetA, states.Checked)
 	tb.UpdateEnd(updt)
 }
 
@@ -154,7 +154,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cba := gi.NewCheckBox(tb, "a-rev")
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
-		cba.Style.State.SetFlag(true, states.Checked)
+		cba.SetState(true, states.Checked)
 		tfa := gi.NewTextField(tb, "a-tf")
 		tfa.SetText(lv.RevA)
 		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -183,14 +183,14 @@ func (lv *VCSLogView) ConfigToolBar() {
 		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
 				lv.SetA = cba.StateIs(states.Checked)
-				cbb.Style.State.SetFlag(!lv.SetA, states.Checked)
+				cbb.SetState(!lv.SetA, states.Checked)
 				cbb.UpdateSig()
 			}
 		})
 		cbb.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.ButtonToggled) {
 				lv.SetA = !cbb.StateIs(states.Checked)
-				cba.Style.State.SetFlag(lv.SetA, states.Checked)
+				cba.SetState(lv.SetA, states.Checked)
 				cba.UpdateSig()
 			}
 		})

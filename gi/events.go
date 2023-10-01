@@ -75,39 +75,55 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.Style.Abilities.Is(states.Activatable) {
+		if wb.AbilityIs(states.Activatable) {
 			// note: don't mark event as handled as other widgets may also get it
-			wb.Style.State.SetFlag(true, states.Active)
+			wb.SetState(true, states.Active)
 		}
 	})
 	wb.On(events.MouseUp, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.Style.Abilities.Is(states.Activatable) {
+		if wb.AbilityIs(states.Activatable) {
 			// note: don't mark event as handled as other widgets may also get it
-			wb.Style.State.SetFlag(false, states.Active)
+			wb.SetState(false, states.Active)
+		}
+	})
+	wb.On(events.Click, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Checkable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.Style.Abilities.Is(states.Hoverable) {
+		if wb.AbilityIs(states.Hoverable) {
 			// note: don't mark event as handled as other widgets may also get it
-			wb.Style.State.SetFlag(true, states.Hovered)
+			wb.SetState(true, states.Hovered)
 		}
 	})
 	wb.On(events.MouseLeave, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.Style.Abilities.Is(states.Hoverable) {
+		if wb.AbilityIs(states.Hoverable) {
 			// note: don't mark event as handled as other widgets may also get it
-			wb.Style.State.SetFlag(false, states.Hovered)
+			wb.SetState(false, states.Hovered)
 		}
 	})
 }
+
+// 	if bb.IsDisabled() {
+// 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
+// 			bb.SetSelected(!bb.StateIs(states.Selected))
+// 			// bb.EmitSelectedSignal()
+// 			bb.UpdateSig()
+// 		}
 
 // LongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
 // Most widgets should call this as part of their event handler methods.

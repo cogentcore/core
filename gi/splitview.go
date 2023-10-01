@@ -491,7 +491,7 @@ func (sr *Splitter) ConfigWidget(sc *Scene) {
 }
 
 func (sr *Splitter) ApplyStyle(sc *Scene) {
-	sr.Style.State.SetFlag(false, states.Focusable)
+	sr.SetState(false, states.Focusable)
 	sr.StyleSlider(sc)
 }
 

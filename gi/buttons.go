@@ -38,12 +38,6 @@ type ButtonBase struct {
 	// optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 
-	// whether the button has been pressed (typically accessed in an ButtonRelease event)
-	WasPressed bool `desc:"whether the button has been pressed (typically accessed in an ButtonRelease event)"`
-
-	// [view: -] signal for button -- see ButtonSignals for the types
-	//	ButtonSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for button -- see ButtonSignals for the types"`
-
 	// the menu items for this menu -- typically add Action elements for menus, along with separators
 	Menu MenuActions `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 
@@ -77,7 +71,7 @@ const (
 
 // SetCheckable sets whether this button is checkable
 func (bb *ButtonBase) SetCheckable(checkable bool) {
-	bb.Style.Abilities.SetFlag(checkable, states.Checkable)
+	bb.Style.SetAbilities(checkable, states.Checkable)
 }
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
@@ -131,12 +125,6 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 // // ButtonClicked is down and up
 // func (bb *ButtonBase) ButtonPress() {
 // 	updt := bb.UpdateStart()
-// 	if bb.IsDisabled() {
-// 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
-// 			bb.SetSelected(!bb.StateIs(states.Selected))
-// 			// bb.EmitSelectedSignal()
-// 			bb.UpdateSig()
-// 		}
 // 	} else {
 // 		bb.WasPressed = true
 // 		// bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
@@ -156,6 +144,15 @@ func (bb *ButtonBase) BaseButtonClicked() {
 	// 	bb.ToggleChecked()
 	// 	bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
 	// }
+
+	// todo:
+	// if !menOpen && ac.Is(ButtonFlagMenu) && ac.Sc != nil {
+	// 	win := ac.ParentRenderWin()
+	// 	if win != nil {
+	// 		win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
+	// 	}
+	// }
+
 	bb.ApplyStyle(bb.Sc)
 	bb.UpdateEndRender(updt)
 }
@@ -454,7 +451,7 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) ButtonStyles() {
 	bt.AddStyles(func(s *styles.Style) {
-		s.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Margin = styles.BoxShadowMargin(BoxShadow1).ToValues()
@@ -569,13 +566,23 @@ func (cb *CheckBox) OnInit() {
 
 func (cb *CheckBox) CheckBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
-		cb.Style.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(styles.BorderNone)
+
+		if cb.Parts != nil && cb.Parts.HasChildren() {
+			ist := cb.Parts.ChildByName("stack", 0).(*Layout)
+			if cb.StateIs(states.Checked) {
+				ist.StackTop = 0
+			} else {
+				ist.StackTop = 1
+			}
+		}
+
 		// switch cb.State {
 		// case ButtonActive:
 		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)

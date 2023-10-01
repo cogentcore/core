@@ -191,48 +191,6 @@ func (ac *Action) CopyFieldsFrom(frm any) {
 	ac.Data = fr.Data
 }
 
-// ButtonWidget interface
-
-// todo: Trigger is SendMeClick()
-
-// // Trigger triggers the action signal -- for external activation of action --
-// // only works if action is not inactive
-// func (ac *Action) Trigger() {
-// 	if ac.StateIs(states.Disabled) {
-// 		return
-// 	}
-// 	// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
-// }
-
-// todo: bad:
-
-// ButtonRelease triggers action signal
-func (ac *Action) ButtonRelease() {
-	if ac.StateIs(states.Disabled) {
-		// fmt.Printf("action: %v inactive\n", ac.Nm)
-		return
-	}
-	updt := ac.UpdateStart()
-	// ac.ButtonSig.Emit(ac.This(), int64(ButtonReleased), nil)
-	menOpen := false
-	if ac.WasPressed {
-		// ac.ActionSig.Emit(ac.This(), 0, ac.Data)
-		// ac.ButtonSig.Emit(ac.This(), int64(ButtonClicked), ac.Data)
-		menOpen = ac.OpenMenu()
-		// } else {
-		// 	fmt.Printf("action: %v not was pressed\n", ac.Nm)
-	}
-	_ = menOpen
-	// todo:
-	// if !menOpen && ac.Is(ButtonFlagMenu) && ac.Sc != nil {
-	// 	win := ac.ParentRenderWin()
-	// 	if win != nil {
-	// 		win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
-	// 	}
-	// }
-	ac.UpdateEnd(updt)
-}
-
 // Config calls functions to initialize widget and parts
 func (ac *Action) ConfigWidget(sc *Scene) {
 	ac.ConfigParts(sc)

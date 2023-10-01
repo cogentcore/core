@@ -511,7 +511,7 @@ func (vv *BoolValueView) UpdateWidget() {
 	cb := vv.Widget.(*gi.CheckBox)
 	npv := laser.NonPtrValue(vv.Value)
 	bv, _ := laser.ToBool(npv.Interface())
-	cb.Style.State.SetFlag(bv, states.Checked)
+	cb.SetState(bv, states.Checked)
 }
 
 func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {

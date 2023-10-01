@@ -178,7 +178,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 
 	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
 	if wb.Style.Inactive { // inactive can only set, not clear
-		wb.Style.State.SetFlag(true, states.Disabled)
+		wb.SetState(true, states.Disabled)
 	}
 	sc.SetCurrentColor(wb.Style.Color)
 

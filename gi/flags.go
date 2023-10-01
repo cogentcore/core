@@ -60,7 +60,7 @@ const (
 
 // SetSelected sets the selected flag to given value
 func (wb *WidgetBase) SetSelected(sel bool) {
-	wb.Style.State.SetFlag(sel, states.Selected)
+	wb.SetState(sel, states.Selected)
 }
 
 // CanFocus checks if this node can receive keyboard focus
@@ -71,22 +71,22 @@ func (wb *WidgetBase) CanFocus() bool {
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.Style.Abilities.SetFlag(wb.StateIs(states.Active), states.Focusable)
+	wb.Style.SetAbilities(wb.StateIs(states.Active), states.Focusable)
 }
 
 // SetFocusState sets the HasFocus flag
 func (wb *WidgetBase) SetFocusState(focus bool) {
-	wb.Style.State.SetFlag(focus, states.Focused)
+	wb.SetState(focus, states.Focused)
 }
 
 // SetEnabledState sets the Disabled flag
 func (wb *WidgetBase) SetEnabledState(enabled bool) {
-	wb.Style.State.SetFlag(!enabled, states.Disabled)
+	wb.SetState(!enabled, states.Disabled)
 }
 
 // SetEnabledStateUpdt sets the Disabled flag
 func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
-	wb.Style.State.SetFlag(!enabled, states.Disabled)
+	wb.SetState(!enabled, states.Disabled)
 	wb.ApplyStyleUpdate(wb.Sc)
 }
 

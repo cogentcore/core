@@ -514,7 +514,7 @@ func (tf *TextField) CursorKill() {
 
 // ClearSelected resets both the global selected flag and any current selection
 func (tf *TextField) ClearSelected() {
-	tf.Style.State.SetFlag(false, states.Selected)
+	tf.SetState(false, states.Selected)
 	tf.SelectReset()
 }
 

@@ -983,7 +983,7 @@ func (pb *ProgressBar) OnInit() {
 	pb.ThumbVal = 1
 	pb.Value = 0
 	pb.ThumbSize = units.Ex(1)
-	pb.Style.State.SetFlag(true, states.ReadOnly) // TODO: this shouldn't be disabled, just read only
+	pb.SetState(true, states.ReadOnly) // TODO: this shouldn't be disabled, just read only
 }
 
 func ProgressDefaultInc(max int) int {

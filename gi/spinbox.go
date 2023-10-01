@@ -231,7 +231,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	}
 	// text-field
 	tf := parts.ChildByName("text-field", 0).(*TextField)
-	tf.Style.State.SetFlag(sb.IsDisabled(), states.Disabled)
+	tf.SetState(sb.IsDisabled(), states.Disabled)
 	tf.Txt = sb.ValToString(sb.Value)
 	if !sb.IsDisabled() {
 		// todo: events

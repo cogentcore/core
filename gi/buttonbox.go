@@ -74,7 +74,7 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 		bb.UnCheckAllBut(idx)
 	}
 	cb := bb.Parts.Child(idx).(*CheckBox)
-	cb.Style.State.SetFlag(true, states.Checked)
+	cb.SetState(true, states.Checked)
 	bb.UpdateEnd(updt)
 	return nil
 }
@@ -100,7 +100,7 @@ func (bb *ButtonBox) UnCheckAll() {
 	updt := bb.UpdateStart()
 	for _, cbi := range *bb.Parts.Children() {
 		cb := cbi.(*CheckBox)
-		cb.Style.State.SetFlag(false, states.Checked)
+		cb.SetState(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
 }
@@ -113,7 +113,7 @@ func (bb *ButtonBox) UnCheckAllBut(idx int) {
 			continue
 		}
 		cb := cbi.(*CheckBox)
-		cb.Style.State.SetFlag(false, states.Checked)
+		cb.SetState(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
 }
@@ -165,7 +165,7 @@ func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 		cbi := bb.Parts.Child(i)
 		cb := cbi.(*CheckBox)
 		on := bitflag.Has(val, int(ev.Value))
-		cb.Style.State.SetFlag(on, states.Checked)
+		cb.SetState(on, states.Checked)
 	}
 }
 

@@ -1936,7 +1936,7 @@ func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, 
 
 	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.CheckBox)
 	lb.SetText("Lexical Items")
-	lb.Style.State.SetFlag(lexitems, states.Checked)
+	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
 
 	if recv != nil && fun != nil {

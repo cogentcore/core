@@ -552,38 +552,38 @@ func (ly *Layout) ScrollDelta(me *events.MouseScroll) {
 
 func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	cbb := ly.ChildrenBBoxes(sc)
-	if ly.Lay == LayoutStacked {
-		sn, err := ly.ChildTry(ly.StackTop)
-		if err != nil {
-			return false
+	// todo: we need a flag for this for tab frame to not do this -- thought this was there already!
+	// if ly.Lay == LayoutStacked {
+	// 	sn, err := ly.ChildTry(ly.StackTop)
+	// 	if err != nil {
+	// 		return false
+	// 	}
+	// 	nii, _ := AsWidget(sn)
+	// 	return nii.DoLayout(sc, cbb, iter)
+	// } else {
+	redo := false
+	for _, kid := range ly.Kids {
+		wi, _ := AsWidget(kid)
+		if wi.DoLayout(sc, cbb, iter) {
+			redo = true
 		}
-		nii, _ := AsWidget(sn)
-		return nii.DoLayout(sc, cbb, iter)
-	} else {
-		redo := false
-		for _, kid := range ly.Kids {
-			nii, _ := AsWidget(kid)
-			if nii.DoLayout(sc, cbb, iter) {
-				redo = true
-			}
-		}
-		return redo
 	}
+	return redo
+	// }
 }
 
 // render the children
 func (ly *Layout) RenderChildren(sc *Scene) {
 	if ly.Lay == LayoutStacked {
 		for i, kid := range ly.Kids {
-			if _, ni := AsWidget(kid); ni != nil {
+			if _, wi := AsWidget(kid); wi != nil {
 				if i == ly.StackTop {
-					ni.SetFlag(false, Invisible)
+					wi.SetFlag(false, Invisible)
 				} else {
-					ni.SetFlag(true, Invisible)
+					wi.SetFlag(true, Invisible)
 				}
 			}
 		}
-		// note: all nodes need to render to disconnect b/c of invisible
 	}
 	for _, kid := range ly.Kids {
 		if kid == nil {

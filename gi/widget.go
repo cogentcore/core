@@ -288,6 +288,15 @@ func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
 	return wb.Style.State.HasFlag(flag)
 }
 
+func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
+	return wb.Style.Abilities.HasFlag(flag)
+}
+
+// SetState sets the Style.State flags
+func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) {
+	wb.Style.State.SetFlag(on, state...)
+}
+
 func (wb *WidgetBase) SetTooltip(tt string) Widget {
 	wb.Tooltip = tt
 	return wb.This().(Widget)
