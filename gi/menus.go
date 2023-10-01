@@ -317,7 +317,7 @@ func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
 func MenuFrameConfigStyles(frame *Frame) {
-	frame.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	frame.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
@@ -619,7 +619,7 @@ type Separator struct {
 
 func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
-	sp.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	sp.AddStyles(func(s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(0))
 		s.AlignV = styles.AlignCenter

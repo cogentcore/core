@@ -98,7 +98,7 @@ func (cb *ComboBox) ComboBoxHandlers() {
 }
 
 func (cb *ComboBox) ComboBoxStyles() {
-	cb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	cb.AddStyles(func(s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
@@ -147,12 +147,12 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "label":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
@@ -165,7 +165,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 			} else {
 				text.Type = TextFieldOutlined
 			}
-			text.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			text.AddStyles(func(s *styles.Style) {
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Set()
 				if cb.MaxLength > 0 {
@@ -173,7 +173,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "ind-stretch":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				if cb.Editable {
 					s.Width.SetPx(0)
 				} else {
@@ -181,7 +181,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				}
 			})
 		case "indicator":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Font.Size.SetEm(1.5)
 				s.AlignV = styles.AlignMiddle
 			})

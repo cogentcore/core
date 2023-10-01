@@ -50,7 +50,7 @@ func (ic *Icon) OnInit() {
 }
 
 func (ic *Icon) IconStyles() {
-	ic.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	ic.AddStyles(func(s *styles.Style) {
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
 		s.BackgroundColor.SetSolid(colors.Transparent)

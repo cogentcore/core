@@ -36,18 +36,18 @@ import (
 // AddStyleFunc within it. For reference on
 // how you should structure your CustomStyleFunc, you
 // should look at https://goki.dev/docs/gi/styling.
-var CustomConfigStyles func(w *WidgetBase)
+var CustomConfigStyles func(w Widget)
 
 // Styler is a fuction that can be used to style an element.
 // They are the building blocks of the GoGi styling system.
 // They can be used as a closure and capture surrounding context,
-// but they are passed the widget base and style for convenience
-// and so that they can be used for multiple elements if desired;
-// you can get all of the information you need from the function.
-// A Styler should be added to a widget through the [WidgetBase.AddStyles]
-// method. We use stylers for styling because they give you complete
+// but they are passed the style for convenience and so that they
+// can be used for multiple elements if desired; you can get most
+// of the information you need from the function. A Styler should be
+// added to a widget through the [WidgetBase.AddStyles] method.
+// We use stylers for styling because they give you complete
 // control and full programming logic without any CSS-selector magic.
-type Styler func(w *WidgetBase, s *styles.Style)
+type Styler func(s *styles.Style)
 
 func (sc *Scene) SetDefaultStyle() {
 	sc.Frame.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
@@ -78,7 +78,7 @@ func (wb *WidgetBase) AddStyles(s Styler) Widget {
 // 	if child != nil {
 // 		wb, ok := child.Embed(TypeWidgetBase).(*WidgetBase)
 // 		if ok {
-// 			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+// 			wb.AddStyles(func(s *styles.Style) {
 // 				f(wb)
 // 			})
 // 		}
@@ -189,7 +189,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 // the StyleFuncs field in sequential ascending order.
 func (wb *WidgetBase) RunStylers() {
 	for _, s := range wb.Stylers {
-		s(wb, &wb.Style)
+		s(&wb.Style)
 	}
 }
 
@@ -273,7 +273,7 @@ func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursors.Cursor {
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [styles.Style.SetMinPrefWidth].
 func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetMinPrefWidth(val)
 	})
 	return wb.This().(Widget)
@@ -283,7 +283,7 @@ func (wb *WidgetBase) SetMinPrefWidth(val units.Value) Widget {
 // will get at least this amount; max unspecified.
 // This adds a styler that calls [styles.Style.SetMinPrefHeight].
 func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetMinPrefHeight(val)
 	})
 	return wb.This().(Widget)
@@ -293,7 +293,7 @@ func (wb *WidgetBase) SetMinPrefHeight(val units.Value) Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMaxWidth].
 func (wb *WidgetBase) SetStretchMaxWidth() Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 	})
 	return wb.This().(Widget)
@@ -303,7 +303,7 @@ func (wb *WidgetBase) SetStretchMaxWidth() Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMaxHeight].
 func (wb *WidgetBase) SetStretchMaxHeight() Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetStretchMaxHeight()
 	})
 	return wb.This().(Widget)
@@ -313,7 +313,7 @@ func (wb *WidgetBase) SetStretchMaxHeight() Widget {
 // can grow to take up avail room.
 // This adds a styler that calls [styles.Style.SetStretchMax].
 func (wb *WidgetBase) SetStretchMax() Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
 	})
@@ -325,7 +325,7 @@ func (wb *WidgetBase) SetStretchMax() Widget {
 // the given fixed width unit value.
 // This adds a styler that calls [styles.Style.SetFixedWidth].
 func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetFixedWidth(val)
 	})
 	return wb.This().(Widget)
@@ -336,7 +336,7 @@ func (wb *WidgetBase) SetFixedWidth(val units.Value) Widget {
 // the given fixed height unit value.
 // This adds a styler that calls [styles.Style.SetFixedHeight].
 func (wb *WidgetBase) SetFixedHeight(val units.Value) Widget {
-	wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	wb.AddStyles(func(s *styles.Style) {
 		s.SetFixedHeight(val)
 	})
 	return wb.This().(Widget)

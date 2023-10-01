@@ -695,7 +695,7 @@ func (sr *Slider) SliderStyles() {
 	sr.ThSize = 25.0
 	sr.ThSizeReal = sr.ThSize
 
-	sr.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	sr.AddStyles(func(s *styles.Style) {
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
@@ -723,7 +723,7 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -861,7 +861,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 	sb.ValThumb = true
 	sb.ThumbSize = units.Ex(1)
 
-	sb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	sb.AddStyles(func(s *styles.Style) {
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)

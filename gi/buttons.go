@@ -453,7 +453,7 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) ButtonStyles() {
-	bt.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	bt.AddStyles(func(s *styles.Style) {
 		s.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = styles.BorderRadiusFull
@@ -508,29 +508,29 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	_, wb := AsWidget(child)
 	switch wb.Name() {
 	case "icon":
-		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "space":
-		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
-		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
 		})
 	case "ind-stretch":
-		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
-		wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		wb.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
@@ -568,7 +568,7 @@ func (cb *CheckBox) OnInit() {
 }
 
 func (cb *CheckBox) CheckBoxStyles() {
-	cb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	cb.AddStyles(func(s *styles.Style) {
 		cb.Style.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
@@ -596,7 +596,7 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "icon0", "icon1":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
@@ -604,11 +604,11 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetCh(0.1)
 			})
 		case "label":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle

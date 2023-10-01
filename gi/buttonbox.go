@@ -51,7 +51,7 @@ func (bb *ButtonBox) OnInit() {
 }
 
 func (bb *ButtonBox) ButtonBoxStyles() {
-	bb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	bb.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Px(2))
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))

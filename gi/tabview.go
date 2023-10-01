@@ -68,7 +68,7 @@ func (tv *TabView) TabViewHandlers() {
 }
 
 func (tv *TabView) TabViewStyles() {
-	tv.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	tv.AddStyles(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(styles.BorderSolid)
@@ -85,7 +85,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "tabs":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.SetStretchMaxWidth()
 				s.Height.SetEm(1.8)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
@@ -102,7 +102,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 		case "frame":
 			frame := child.(*Frame)
 			frame.StackTopOnly = true // key for allowing each tab to have its own size
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Em(10))
 				s.SetMinPrefHeight(units.Em(6))
 				s.SetStretchMax()
@@ -572,7 +572,7 @@ func (tb *TabButton) OnInit() {
 }
 
 func (tb *TabButton) TabButtonStyles() {
-	tb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	tb.AddStyles(func(s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetPx(500)
@@ -596,10 +596,10 @@ func (tb *TabButton) TabButtonStyles() {
 		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
 
-		if tb.StateIs(states.Hovered) {
+		if s.Is(states.Hovered) {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
-		if w.StateIs(states.Focused) {
+		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Px(2))
 			s.Border.Color.Set(colors.Scheme.Outline)
@@ -611,11 +611,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	if _, wb := AsWidget(child); wb != nil {
 		switch wb.Name() {
 		case "Parts":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "icon":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetEm(1)
 				s.Height.SetEm(1)
 				s.Margin.Set()
@@ -624,16 +624,16 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		case "label":
 			label := child.(*Label)
 			label.Type = LabelTitleSmall
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "close-stretch":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetCh(1)
 			})
 		case "close":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Width.SetEx(0.5)
 				s.Height.SetEx(0.5)
 				s.Margin.Set()
@@ -643,11 +643,11 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "sc-stretch":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		case "shortcut":
-			wb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			wb.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})

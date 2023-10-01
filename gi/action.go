@@ -81,7 +81,7 @@ func (ac *Action) OnInit() {
 }
 
 func (ac *Action) ActionStyles() {
-	ac.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	ac.AddStyles(func(s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(styles.BorderNone)
 		s.Text.Align = styles.AlignCenter
@@ -96,7 +96,7 @@ func (ac *Action) ActionStyles() {
 			s.Color = colors.Scheme.Secondary.OnContainer
 		case ActionParts:
 			s.Border.Radius.Set()
-			s.BackgroundColor = w.ParentBackgroundColor()
+			s.BackgroundColor.SetSolid(colors.Transparent)
 			// s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
 			// s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
 		case ActionMenu:
@@ -113,10 +113,10 @@ func (ac *Action) ActionStyles() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
-		if w.StateIs(states.Hovered) {
+		if s.Is(states.Hovered) {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
-		if w.StateIs(states.Focused) {
+		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Px(2))
 			s.Border.Color.Set(colors.Scheme.Outline)
@@ -141,7 +141,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 	if _, w := AsWidget(child); w != nil {
 		switch w.Name() {
 		case "icon":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
@@ -149,17 +149,17 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				s.Padding.Set()
 			})
 		case "space":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Width.SetCh(0.5)
 				s.MinWidth.SetCh(0.5)
 			})
 		case "label":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "indicator":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				if ac.Type == ActionMenu {
 					s.Font.Size.SetEm(1.5)
 				}
@@ -168,16 +168,16 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				s.AlignV = styles.AlignBottom
 			})
 		case "ind-stretch":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Width.SetEm(1)
 			})
 		case "shortcut":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.Margin.Set()
 				s.Padding.Set()
 			})
 		case "sc-stretch":
-			w.AddStyles(func(w *WidgetBase, s *styles.Style) {
+			w.AddStyles(func(s *styles.Style) {
 				s.MinWidth.SetCh(2)
 			})
 		}

@@ -14,7 +14,7 @@ import (
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
 func TooltipConfigStyles(tooltip *Frame) {
-	tooltip.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	tooltip.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
@@ -34,7 +34,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 		psc.Win = win
 		psc.Type = ScTooltip
 
-		psc.Frame.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		psc.Frame.AddStyles(func(s *styles.Style) {
 			// TOOD: get border radius actually working
 			// without having parent background color workaround
 			s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -51,7 +51,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 
 		TooltipConfigStyles(frame)
 
-		lbl.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		lbl.AddStyles(func(s *styles.Style) {
 			mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
 			mwdots = mat32.Min(mwdots, float32(mainSc.Geom.Size.X-20))
 

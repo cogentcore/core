@@ -1290,7 +1290,7 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
-	st.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	st.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetPx(-1)
 		s.MaxHeight.SetPx(-1)
 	})
@@ -1323,7 +1323,7 @@ type Space struct {
 var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
-	sp.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	sp.AddStyles(func(s *styles.Style) {
 		s.Width.SetCh(1)
 		s.Height.SetEm(1)
 	})

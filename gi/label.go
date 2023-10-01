@@ -123,7 +123,7 @@ func (lb *Label) OnInit() {
 
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelLabelLarge
-	lb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	lb.AddStyles(func(s *styles.Style) {
 		lb.Style.Abilities.SetFlag(true, states.LongHoverable)
 		// s.Cursor = lb.ParentCursor(cursor.IBeam)
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
@@ -208,10 +208,10 @@ func (lb *Label) LabelStyles() {
 			s.Text.LetterSpacing.SetPx(0)
 			s.Font.Weight = styles.WeightNormal
 		}
-		if w.IsDisabled() {
+		if s.Is(states.Disabled) {
 			s.Font.Opacity = 0.7
 		}
-		if w.StateIs(states.Selected) {
+		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 			s.Color = colors.Scheme.Tertiary.OnContainer
 		}

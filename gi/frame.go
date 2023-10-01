@@ -37,7 +37,7 @@ func (fr *Frame) OnInit() {
 }
 
 func (fr *Frame) FrameStyles() {
-	fr.AddStyles(func(w *WidgetBase, s *styles.Style) {
+	fr.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
