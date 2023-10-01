@@ -38,6 +38,9 @@ type Key struct {
 	// the tertiary accent key color
 	Tertiary color.RGBA `desc:"the tertiary accent key color"`
 
+	// the select accent key color
+	Select color.RGBA `desc:"the select accent key color"`
+
 	// the error accent key color
 	Error color.RGBA `desc:"the error accent key color"`
 
@@ -68,6 +71,7 @@ func KeyFromPrimary(primary color.RGBA) *Key {
 	// Material adds 60, but we subtract 60 to get green instead of pink when specifying
 	// blue (TODO: is this a good idea, or should we just follow Material?)
 	k.Tertiary = p.WithHue(p.Hue - 60).WithChroma(24).AsRGBA()
+	k.Select = p.WithChroma(24).AsRGBA()
 	k.Error = color.RGBA{179, 38, 30, 255}   // #B3261E (Material default error color)
 	k.Success = color.RGBA{50, 168, 50, 255} // #32a832 (arbitrarily chosen; TODO: maybe come up with a better default success color)
 	k.Warn = color.RGBA{168, 143, 50, 255}   // #a88f32 (arbitrarily chosen; TODO: maybe come up with a better default warn color)

@@ -19,6 +19,9 @@ type Scheme struct {
 	// Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors
 	Tertiary Accent `desc:"Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors"`
 
+	// Select is the selection color applied to selected or highlighted elements and text
+	Select Accent `desc:"Select is the selection color applied to selected or highlighted elements and text"`
+
 	// Error is the error color applied to elements that indicate an error or danger
 	Error Accent `desc:"Error is the error color applied to elements that indicate an error or danger"`
 
@@ -138,6 +141,7 @@ func NewLightScheme(p *Palette) Scheme {
 		Primary:   NewAccentLight(p.Primary),
 		Secondary: NewAccentLight(p.Secondary),
 		Tertiary:  NewAccentLight(p.Tertiary),
+		Select:    NewAccentLight(p.Select),
 		Error:     NewAccentLight(p.Error),
 		Success:   NewAccentLight(p.Success),
 		Warn:      NewAccentLight(p.Warn),
@@ -185,6 +189,7 @@ func NewDarkScheme(p *Palette) Scheme {
 		Primary:   NewAccentDark(p.Primary),
 		Secondary: NewAccentDark(p.Secondary),
 		Tertiary:  NewAccentDark(p.Tertiary),
+		Select:    NewAccentDark(p.Select),
 		Error:     NewAccentDark(p.Error),
 		Success:   NewAccentDark(p.Success),
 		Warn:      NewAccentDark(p.Warn),
