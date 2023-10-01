@@ -172,14 +172,18 @@ outer:
 			if w.glw == nil {
 				break outer
 			}
+			w.mu.Lock()
 			w.EvMgr.Window(events.Show)
+			w.mu.Unlock()
 			hasShown = true
 		case <-winPaint.C:
 			if w.glw == nil {
 				break outer
 			}
 			if hasShown {
+				w.mu.Lock()
 				w.EvMgr.WindowPaint()
+				w.mu.Unlock()
 			}
 		}
 	}
@@ -405,11 +409,11 @@ func (w *windowImpl) CloseClean() {
 
 func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
+	w.EvMgr.Window(events.Close)
 	w.mu.Lock()
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	w.EvMgr.Window(events.Close)
 	theApp.DeleteWin(w)
 	w.app.RunOnMain(func() {
 		vk.DeviceWaitIdle(w.Surface.Device.Device)
