@@ -260,8 +260,13 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
+	fmt.Println("might show; window:", app.window)
+	// if the window already exists, we are coming back to it, so we need to show it
+	// again and send a screen update
 	if app.window != nil {
+		fmt.Println("showing")
 		app.window.EvMgr.Window(events.Show)
+		app.window.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil
 }

@@ -372,7 +372,11 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 
 			app.window.EvMgr.WindowPaint()
 		case <-windowDestroyed:
+			// we need to set the size of the window to 0 so that it detects a size difference
+			// and lets the size event go through when we come back later
+			app.window.SetSize(image.Point{})
 			app.window.EvMgr.Window(events.Minimize)
+			// app.destroyVk()
 		case <-activityDestroyed:
 			app.window.EvMgr.Window(events.Close)
 		}
