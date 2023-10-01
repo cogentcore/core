@@ -65,6 +65,9 @@ type Event interface {
 	// the same type, it is replaced instead of adding a new one.
 	IsUnique() bool
 
+	// NeedsFocus this event goes to current focus widget
+	NeedsFocus() bool
+
 	// HasPos returns true if the event has a window position where it takes place
 	HasPos() bool
 

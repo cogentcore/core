@@ -21,21 +21,8 @@ type Mgr struct {
 	// flag for ignoring mouse events when disabling mouse movement
 	ResettingPos bool
 
-	// MouseInStack is the stack of current elements under the mouse.
-	// This is set when GUI generates a MouseEnter event based on
-	// MouseMove or MouseDrag event sent to it.
-	// MouseInStack ElStack
-
-	// DragEl is the current element being dragged
-	DragEl El
-
-	// SlidingEl is the current slider element being manipulated with MouseDrag
-	SlidingEl El
-
-	// FocusEl is the current focus element
-	FocusEl El
-
 	// Last has the prior state for key variables
+
 	Last MgrState
 }
 
@@ -72,6 +59,9 @@ type MgrState struct {
 	// Key event code
 	Key key.Codes
 }
+
+///////////////////////////////////////////////////////////////
+//  New Events
 
 // SendKey processes a basic key event and sends it
 func (em *Mgr) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {

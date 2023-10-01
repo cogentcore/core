@@ -23,10 +23,13 @@ package events
 type Types int64 //enums:enum
 
 const (
+	// zero value is an unknown type
+	UnknownType Types = iota
+
 	// MouseDown happens when a mouse button is pressed down. See Button() for which.
 	// See Click for a synthetic event representing a MouseDown followed by MouseUp
 	// on the same element -- often that is the most useful.
-	MouseDown Types = iota
+	MouseDown
 
 	// MouseUp happens when a mouse button is released. See Button() for which.
 	MouseUp

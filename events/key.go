@@ -33,6 +33,10 @@ func (ev *Key) HasPos() bool {
 	return false
 }
 
+func (ev *Key) NeedsFocus() bool {
+	return true
+}
+
 func (ev *Key) String() string {
 	if ev.Rune >= 0 {
 		return fmt.Sprintf("%v{Chord: %v, Rune: %d, Hex: %X, Mods: %v, Time: %v}", ev.Type(), ev.KeyChord(), ev.Rune, ev.Rune, key.ModsString(ev.Mods), ev.Time())

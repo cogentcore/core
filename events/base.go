@@ -157,6 +157,10 @@ func (ev Base) HasAnyModifier(mods ...enums.BitFlag) bool {
 	return key.HasAnyModifier(ev.Mods, mods...)
 }
 
+func (ev Base) NeedsFocus() bool {
+	return false
+}
+
 func (ev Base) HasPos() bool {
 	return false
 }
