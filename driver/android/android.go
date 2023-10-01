@@ -448,7 +448,7 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 			if i == upDownIndex {
 				t = upDownType
 			}
-			theApp.eventsIn <- touch.Event{
+			theApp.window.EvMgr <- touch.Event{ // TODO(kai): touch event
 				X:        float32(C.AMotionEvent_getX(e, i)),
 				Y:        float32(C.AMotionEvent_getY(e, i)),
 				Sequence: touch.Sequence(C.AMotionEvent_getPointerId(e, i)),
@@ -483,7 +483,7 @@ func processKey(env *C.JNIEnv, e *C.AInputEvent) {
 		k.Direction = key.DirNone
 	}
 	// TODO(crawshaw): set Modifiers.
-	theApp.eventsIn <- k
+	theApp.window.EvMgr.Key()// TODO(kai): key event
 }
 
 var androidKeycoe = map[int32]key.Code{
