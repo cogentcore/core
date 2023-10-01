@@ -358,7 +358,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
 			DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
 			// }
-			theApp.window.EventMgr.Window(events.Focus)
+			theApp.window.EvMgr.Window(events.Focus)
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 			theApp.screen.ScreenNumber = 0
@@ -379,9 +379,9 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:
-			theApp.window.EventMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
+			theApp.window.EvMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
 		case <-activityDestroyed:
-			theApp.window.EventMgr.Window(events.Close)
+			theApp.window.EvMgr.Window(events.Close)
 		case <-theApp.publish: // TODO: do something here?
 			select {
 			case windowRedrawDone <- struct{}{}:

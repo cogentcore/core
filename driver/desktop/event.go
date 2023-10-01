@@ -53,7 +53,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 		typ = events.KeyDown
 	}
 	fw := w.focusWindow()
-	fw.EventMgr.Key(typ, rn, ec, mods)
+	fw.EvMgr.Key(typ, rn, ec, mods)
 	glfw.PostEmptyEvent() // todo: why??
 }
 
@@ -61,7 +61,7 @@ func (w *windowImpl) keyEvent(gw *glfw.Window, ky glfw.Key, scancode int, action
 func (w *windowImpl) charEvent(gw *glfw.Window, char rune, mod glfw.ModifierKey) {
 	mods := glfwMods(mod)
 	fw := w.focusWindow()
-	fw.EventMgr.KeyChord(char, key.CodeUnknown, mods)
+	fw.EvMgr.KeyChord(char, key.CodeUnknown, mods)
 	glfw.PostEmptyEvent() // todo: why?
 }
 
@@ -97,7 +97,7 @@ func (w *windowImpl) mouseButtonEvent(gw *glfw.Window, button glfw.MouseButton, 
 		but = events.Right
 	}
 	where := w.curMousePosPoint(gw)
-	w.EventMgr.MouseButton(typ, but, where, mods)
+	w.EvMgr.MouseButton(typ, but, where, mods)
 	glfw.PostEmptyEvent() // why?
 }
 
@@ -111,25 +111,25 @@ func (w *windowImpl) scrollEvent(gw *glfw.Window, xoff, yoff float64) {
 	}
 	delta := image.Point{int(-xoff), int(-yoff)}
 	where := w.curMousePosPoint(gw)
-	w.EventMgr.Scroll(where, delta)
+	w.EvMgr.Scroll(where, delta)
 	glfw.PostEmptyEvent()
 }
 
 func (w *windowImpl) cursorPosEvent(gw *glfw.Window, x, y float64) {
-	if w.EventMgr.ResettingPos {
+	if w.EvMgr.ResettingPos {
 		return
 	}
 	where := w.mousePosToPoint(x, y)
 	if w.mouseDisabled {
-		w.EventMgr.ResettingPos = true
+		w.EvMgr.ResettingPos = true
 		if theApp.Platform() == goosi.MacOS {
-			w.glw.SetCursorPos(float64(w.EventMgr.Last.MousePos.X)/float64(w.DevPixRatio), float64(w.EventMgr.Last.MousePos.Y)/float64(w.DevPixRatio))
+			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X)/float64(w.DevPixRatio), float64(w.EvMgr.Last.MousePos.Y)/float64(w.DevPixRatio))
 		} else {
-			w.glw.SetCursorPos(float64(w.EventMgr.Last.MousePos.X), float64(w.EventMgr.Last.MousePos.Y))
+			w.glw.SetCursorPos(float64(w.EvMgr.Last.MousePos.X), float64(w.EvMgr.Last.MousePos.Y))
 		}
-		w.EventMgr.ResettingPos = false
+		w.EvMgr.ResettingPos = false
 	}
-	w.EventMgr.MouseMove(where)
+	w.EvMgr.MouseMove(where)
 	glfw.PostEmptyEvent()
 }
 
@@ -146,7 +146,7 @@ func (w *windowImpl) dropEvent(gw *glfw.Window, names []string) {
 		md[i] = mimedata.NewTextData(s)
 	}
 	// where := w.curMousePosPoint(gw)
-	// w.EventMgr.DND(dnd.External, where, md)
+	// w.EvMgr.DND(dnd.External, where, md)
 }
 
 func glfwKeyCode(kcode glfw.Key) key.Codes {

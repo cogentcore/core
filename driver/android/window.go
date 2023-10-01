@@ -110,14 +110,14 @@ outer:
 			if w.app.gpu == nil {
 				break outer
 			}
-			w.EventMgr.Window(events.Show)
+			w.EvMgr.Window(events.Show)
 			hasShown = true
 		case <-winPaint.C:
 			if w.app.gpu == nil {
 				break outer
 			}
 			if hasShown {
-				w.EventMgr.WindowPaint()
+				w.EvMgr.WindowPaint()
 			}
 		}
 	}
@@ -150,7 +150,7 @@ func (w *windowImpl) SendEmptyEvent() {
 	if w.IsClosed() {
 		return
 	}
-	w.EventMgr.Custom(nil)
+	w.EvMgr.Custom(nil)
 }
 
 func (w *windowImpl) Screen() *goosi.Screen {
@@ -269,7 +269,7 @@ func (w *windowImpl) Close() {
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	w.EventMgr.Window(events.Close)
+	w.EvMgr.Window(events.Close)
 	theApp.DeleteWin(w)
 	if theApp.quitting {
 		theApp.quitCloseCnt <- struct{}{}

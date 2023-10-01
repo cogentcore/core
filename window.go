@@ -232,6 +232,12 @@ type Window interface {
 	// This only takes effect prior to opening a new window.
 	SetFPS(fps int)
 
+	// EventMgr returns the events.Mgr for this window,
+	// which manages all of the Event sending.
+	// GUI window systems must interact with this manager to inform it
+	// about widgets in relation to the position of the mouse, etc.
+	EventMgr() *events.Mgr
+
 	events.Dequer
 }
 
@@ -249,6 +255,8 @@ type WindowBase struct {
 	Par         any
 	Flag        WindowFlags
 	FPS         int
+	EvMgr       events.Mgr
+
 	// set this to a function that will destroy GPU resources
 	// in the main thread prior to destroying the drawer
 	// and the surface -- otherwise it is difficult to
@@ -306,6 +314,10 @@ func (w *WindowBase) IsFocus() bool {
 
 func (w *WindowBase) SetFPS(fps int) {
 	w.FPS = fps
+}
+
+func (w *WindowBase) EventMgr() *events.Mgr {
+	return &w.EvMgr
 }
 
 func (w *WindowBase) SetDestroyGPUResourcesFunc(f func()) {
