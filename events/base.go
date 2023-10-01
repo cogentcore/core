@@ -107,7 +107,8 @@ func (ev Base) IsUnique() bool {
 	return ev.Flags.HasFlag(Unique)
 }
 
-func (ev Base) SetUnique() {
+func (ev *Base) SetUnique() {
+	fmt.Println("making unique:", ev)
 	ev.Flags.SetFlag(true, Unique)
 }
 

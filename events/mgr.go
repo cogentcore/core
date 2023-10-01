@@ -5,6 +5,7 @@
 package events
 
 import (
+	"fmt"
 	"image"
 	"time"
 
@@ -163,8 +164,11 @@ func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
 
 func (em *Mgr) Window(act WinActions) {
 	ev := NewWindow(act)
+	fmt.Println("win ev is unique 0", ev.IsUnique(), "-", ev)
 	ev.Init()
+	fmt.Println("win ev is unique 1", ev.IsUnique(), "-", ev)
 	em.Deque.Send(ev)
+	fmt.Println("win ev is unique 2", ev.IsUnique(), "-", ev)
 }
 
 func (em *Mgr) WindowPaint() {

@@ -10,6 +10,7 @@
 package events
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -116,6 +117,7 @@ func (q *Deque) Send(ev Event) {
 	defer q.Mu.Unlock()
 
 	n := len(q.Back)
+	fmt.Println("is unique:", ev.IsUnique(), "for:", ev)
 	if !ev.IsUnique() && n > 0 {
 		lev := q.Back[n-1]
 		if ev.IsSame(lev) {
