@@ -158,8 +158,8 @@ func (app *appImpl) mainLoop() {
 			if f.done != nil {
 				f.done <- true
 			}
-			// default:
-			// 	glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
+		default:
+			glfw.WaitEventsTimeout(0.2) // timeout is essential to prevent hanging (on mac at least)
 		}
 	}
 }
