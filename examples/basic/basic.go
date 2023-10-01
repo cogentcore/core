@@ -12,10 +12,10 @@ import (
 func main() { gimain.Main(mainrun) }
 
 func mainrun() {
-	// gi.WinEventTrace = true
-	// gi.EventTrace = true
-	// gi.LayoutTrace = true
-	// gi.RenderTrace = true
+	gi.WinEventTrace = true
+	gi.EventTrace = true
+	gi.LayoutTrace = true
+	gi.RenderTrace = true
 
 	scene := gi.NewScene("hello").SetTitle("Hello World!")
 	gi.NewLabel(&scene.Frame, "label").SetText("Hello, World!")
