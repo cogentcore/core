@@ -198,17 +198,34 @@ func (w *RenderWin) DrawScenes() {
 	rs := &w.RenderScenes
 
 	rs.SetImages(drw) // ensure all updated images copied
-
+	if !w.IsVisible() {
+		return
+	}
 	drw.SyncImages()
+	if !w.IsVisible() {
+		return
+	}
 	drw.StartDraw(0)
+	if !w.IsVisible() {
+		return
+	}
 	drw.UseTextureSet(0)
+	if !w.IsVisible() {
+		return
+	}
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
+	if !w.IsVisible() {
+		return
+	}
 	rs.DrawAll(drw)
 
 	// todo:
 	// drw.UseTextureSet(2)
 	// w.DrawSprites()
 
+	if !w.IsVisible() {
+		return
+	}
 	drw.EndDraw()
 
 	// pr.End()

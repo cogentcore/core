@@ -154,8 +154,10 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 		return
 	}
 
+	state := wb.Style.State
 	wb.Style = styles.Style{}
 	wb.Style.Defaults()
+	wb.Style.State = state
 
 	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("ApplyStyleWidget-Inherit")

@@ -489,11 +489,11 @@ func (bt *Button) ButtonStyles() {
 		}
 		// state styling -- probably want this as sub-case in each one above
 		switch {
-		case bt.WasPressed:
+		case s.Is(states.Active):
 			// todo: just picking something at random to make it visible:
 			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Color = colors.Scheme.Primary.On
-		case bt.StateIs(states.Hovered):
+		case s.Is(states.Hovered):
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
 			} else {

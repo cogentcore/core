@@ -54,6 +54,7 @@ func (ic *Icon) IconStyles() {
 		s.Width.SetEm(1)
 		s.Height.SetEm(1)
 		s.BackgroundColor.SetSolid(colors.Transparent)
+		ic.SVG.Color.SetSolid(s.Color)
 	})
 }
 
@@ -152,6 +153,7 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 		return
 	}
 	sv.Resize(sz) // does Config if needed
+
 	sv.Render()
 	ic.RendSize = sz
 	sv.Name = string(ic.IconName)

@@ -45,20 +45,68 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	return pos.In(wb.ScBBox)
 }
 
+// HandleEvent sends the given event to all Listeners for that event type.
+// It also checks if the State has changed and calls ApplyStyle if so.
+// If more significant Config level changes are needed due to an event,
+// the event handler must do this itself.
 func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	if EventTrace {
 		if ev.Type() != events.MouseMove {
 			fmt.Println("Event to Widget:", wb.Path(), ev.String())
 		}
 	}
+	state := wb.Style.State
 	wb.Listeners.Call(ev)
+	if wb.Style.State != state {
+		wb.ApplyStyleUpdate(wb.Sc)
+	}
 }
 
 // WidgetHandlers adds the default events for Widget objects.
 func (wb *WidgetBase) WidgetHandlers() {
-	// nb.WidgetMouseEvent() ??
-	// wb.WidgetMouseFocusEvent()
+	wb.WidgetStateFromMouse()
 	wb.LongHoverTooltip()
+}
+
+// WidgetStateFromMouse updates standard State flags based on mouse events,
+// such as MouseDown / Up -> Active and MouseEnter / Leave -> Hovered
+func (wb *WidgetBase) WidgetStateFromMouse() {
+	wb.On(events.MouseDown, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.Style.Abilities.Is(states.Activatable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.Style.State.SetFlag(true, states.Active)
+		}
+	})
+	wb.On(events.MouseUp, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.Style.Abilities.Is(states.Activatable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.Style.State.SetFlag(false, states.Active)
+		}
+	})
+	wb.On(events.MouseEnter, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.Style.Abilities.Is(states.Hoverable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.Style.State.SetFlag(true, states.Hovered)
+		}
+	})
+	wb.On(events.MouseLeave, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.Style.Abilities.Is(states.Hoverable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.Style.State.SetFlag(false, states.Hovered)
+		}
+	})
 }
 
 // LongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
@@ -78,57 +126,6 @@ func (wb *WidgetBase) LongHoverTooltip() {
 		// PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
 	})
 }
-
-/*
-// WidgetMouseFocusEvent does the default handling for mouse click events for the Widget
-func (wb *WidgetBase) WidgetMouseEvent() {
-	we.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		wbb := AsWidgetBase(recv)
-		if wbb.IsDisabled() {
-			return
-		}
-		me := data.(events.Event)
-		me.SetHandled()
-		wbb.WidgetOnMouseEvent(me)
-	})
-}
-
-// WidgetOnMouseEvent is the function called on Widget objects
-// when they get a mouse click event. If you are declaring a custom
-// mouse event function, you should call this function first.
-func (wb *WidgetBase) WidgetOnMouseEvent(me events.Event) {
-	// wb.SetFlag(me.Action == events.Press, Active)
-	wb.ApplyStyleUpdate(wb.Sc)
-}
-
-// WidgetMouseFocusEvent does the default handling for mouse focus events for the Widget
-func (wb *WidgetBase) WidgetMouseFocusEvent() {
-	we.AddFunc(events.MouseEnter, RegPri, func(recv, send ki.Ki, sig int64, data any) {
-		wbb := AsWidgetBase(recv)
-		if wbb.IsDisabled() {
-			return
-		}
-		me := data.(events.Event)
-		me.SetHandled()
-		wbb.WidgetOnMouseFocusEvent(me)
-	})
-}
-
-// WidgetOnMouseFocusEvent is the function called on Widget objects
-// when they get a mouse foucs event. If you are declaring a custom
-// mouse foucs event function, you should call this function first.
-func (wb *WidgetBase) WidgetOnMouseFocusEvent(me events.Event) {
-	enter := me.Action == events.Enter
-	wb.SetFlag(enter, Hovered)
-	wb.ApplyStyleUpdate(wb.Sc)
-	// TODO: trigger mouse focus exit after clicking down
-	// while leaving; then clear active here
-	// // if !enter {
-	// // 	nb.ClearActive()
-	// }
-}
-
-*/
 
 // WidgetMouseEvents connects to either or both mouse events -- IMPORTANT: if
 // you need to also connect to other mouse events, you must copy this code --
@@ -167,31 +164,6 @@ func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
 	})
 }
 */
-
-// WidgetSignals are general signals that all widgets can send, via WidgetSig
-// signal
-type WidgetSignals int64
-
-const (
-	// WidgetSelected is triggered when a widget is selected, typically via
-	// left mouse button click (see EmitSelectedSignal) -- is NOT contingent
-	// on actual IsSelected status -- just reports the click event.
-	// The data is the index of the selected item for multi-item widgets
-	// (-1 = none / unselected)
-	WidgetSelected WidgetSignals = iota
-
-	// WidgetFocused is triggered when a widget receives keyboard focus (see
-	// EmitFocusedSignal -- call in FocusChanged for gotFocus
-	WidgetFocused
-
-	// WidgetContextMenu is triggered when a widget receives a
-	// right-mouse-button press, BEFORE generating and displaying the context
-	// menu, so that relevant state can be updated etc (see
-	// EmitContextMenuSignal)
-	WidgetContextMenu
-
-	WidgetSignalsN
-)
 
 /*
 // EmitSelectedSignal emits the WidgetSelected signal for this widget
