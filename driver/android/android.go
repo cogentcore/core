@@ -155,6 +155,8 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
+	theApp.mu.Lock()
+	defer theApp.mu.Unlock()
 	theApp.winptr = uintptr(unsafe.Pointer(window))
 	fmt.Println("win created", theApp.winptr)
 	theApp.setSysWindow(nil, theApp.winptr)

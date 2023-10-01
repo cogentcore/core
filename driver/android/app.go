@@ -207,6 +207,8 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	// TODO: do we need to do this?
 	app.mu.Lock()
 	defer app.mu.Unlock()
+	fmt.Println("will return")
+	fmt.Println("returning", app.window)
 	// app.getScreen()
 	// goosi.InitScreenLogicalDPIFunc()
 	// app.window.LogDPI = app.screens[0].LogicalDPI
@@ -216,9 +218,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer
 func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) error {
-	app.mu.Lock()
-	defer app.mu.Unlock()
-
+	fmt.Println("setting sys window")
 	var sf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
@@ -228,12 +228,14 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	}
 	app.Surface = vgpu.NewSurface(app.gpu, sf)
 
+	fmt.Println("setting system")
 	app.System = app.gpu.NewGraphicsSystem(app.name, &app.Surface.Device)
 	app.System.ConfigRender(&app.Surface.Format, vgpu.UndefType)
 	app.Surface.SetRender(&app.System.Render)
 	// app.window.System.Mem.Vars.NDescs = vgpu.MaxTexturesPerSet
 	app.System.Config()
 
+	fmt.Println("making drawer")
 	app.Draw = vdraw.Drawer{
 		Sys:     *app.System,
 		YIsDown: true,
@@ -241,7 +243,18 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	// app.window.Draw.ConfigSys()
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
+	fmt.Println("making window")
 	app.winptr = winPtr
+	app.window = &windowImpl{
+		app:         app,
+		isVisible:   true,
+		publish:     make(chan struct{}),
+		winClose:    make(chan struct{}),
+		publishDone: make(chan struct{}),
+	}
+	fmt.Println("before deque")
+	app.window.EvMgr.Deque = &app.window.Deque
+	fmt.Println("after deque")
 	fmt.Println(app.window)
 	app.window.EvMgr.Window(events.Focus)
 	return nil
