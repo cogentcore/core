@@ -292,7 +292,7 @@ func (g *NodeBase) Style(sv *SVG) {
 	pc.StyleSet = false // this is always first call, restart
 
 	var parCSSAgg ki.Props
-	if g.Par != nil && g.Par != sv.Root.This() {
+	if g.Par != nil { // && g.Par != sv.Root.This()
 		pn := g.Par.(Node)
 		parCSSAgg = pn.AsNodeBase().CSSAgg
 		pp := pn.PaintStyle()

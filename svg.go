@@ -34,13 +34,16 @@ type SVG struct {
 	Desc string `xml:"desc" desc:"the description of the svg"`
 
 	// fill the viewport with background-color
-	Fill bool `desc:"fill the viewport with background-color"`
+	Fill bool
 
 	// color to fill background if Fill set
-	BgColor colors.Full `desc:"color to fill background if Fill set"`
+	BgColor colors.Full
+
+	// Color can be set to provide a default Fill and Stroke Color value
+	Color colors.Full
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
-	Geom styles.Geom2DInt `desc:"Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image"`
+	Geom styles.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
@@ -182,7 +185,10 @@ func (sv *SVG) Style() {
 	})
 
 	sv.Root.Paint.Defaults()
-	// TODO: cleaner svg styling from text color property
+	if !sv.Color.IsNil() {
+		sv.Root.SetProp("stroke", sv.Color)
+		sv.Root.SetProp("fill", sv.Color)
+	}
 	sv.SetUnitContext(&sv.Root.Paint.Paint, mat32.Vec2{}, mat32.Vec2{})
 
 	sv.Root.WalkPre(func(k ki.Ki) bool {
