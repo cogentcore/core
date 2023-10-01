@@ -258,7 +258,7 @@ func (sv *SVG) SetDPIXForm(logicalDPI float32) {
 // todo:  for gi wrapper node:
 //
 // func (sv *SVG) OnInit() {
-// 	sv.AddStyler(func(w *gi.WidgetBase, s *styles.Style) {
+// 	sv.AddStyler(func(s *styles.Style) {
 // 		if par := sv.ParentWidget(); par != nil {
 // 			sv.Paint.FillStyle.Color.SetColor(par.Style.Color)
 // 			sv.Paint.StrokeStyle.Color.SetColor(par.Style.Color)
