@@ -342,7 +342,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 	for {
 		select {
 		case <-app.mainDone:
-			app.destroyVk()
+			app.fullDestroyVk()
 			return nil
 		case f := <-app.mainQueue:
 			f.f()
@@ -376,7 +376,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			// and lets the size event go through when we come back later
 			app.window.SetSize(image.Point{})
 			app.window.EvMgr.Window(events.Minimize)
-			// app.destroyVk()
+			app.destroyVk()
 		case <-activityDestroyed:
 			app.window.EvMgr.Window(events.Close)
 		}

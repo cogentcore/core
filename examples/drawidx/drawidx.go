@@ -190,7 +190,11 @@ func mainrun(a goosi.App) {
 			}
 		case events.WindowPaint:
 			fmt.Println("paint")
-			renderFrame()
+			if w.IsVisible() {
+				renderFrame()
+			} else {
+				fmt.Println("skipping paint event")
+			}
 		case events.MouseDown:
 			if haveKeyboard {
 				goosi.TheApp.HideVirtualKeyboard()

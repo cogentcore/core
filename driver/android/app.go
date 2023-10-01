@@ -165,6 +165,7 @@ func (app *appImpl) initVk() {
 func (app *appImpl) destroyVk() {
 	app.mu.Lock()
 	defer app.mu.Unlock()
+	fmt.Println("destroying vk")
 	vk.DeviceWaitIdle(app.Surface.Device.Device)
 	app.Draw.Destroy()
 	app.Surface.Destroy()

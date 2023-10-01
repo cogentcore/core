@@ -61,6 +61,9 @@ func (w *windowImpl) IsClosed() bool {
 }
 
 func (w *windowImpl) IsVisible() bool {
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
+	fmt.Println("in is visible", w.isVisible, w.app.Surface)
 	return w.isVisible && w.app.Surface != nil
 }
 
@@ -90,6 +93,7 @@ func (w *windowImpl) winLoop() {
 	}
 outer:
 	for {
+		fmt.Println("win loop iter")
 		select {
 		case <-w.winClose:
 			winPaint.Stop() // todo: close channel too??
