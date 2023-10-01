@@ -47,6 +47,7 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 */
 import "C"
 import (
+	"fmt"
 	"image"
 	"log"
 	"os"
@@ -87,6 +88,7 @@ func setCurrentContext(vm *C.JavaVM, ctx C.jobject) {
 
 //export callMain
 func callMain(mainPC uintptr) {
+	fmt.Println("calling main")
 	for _, name := range []string{"FILESDIR", "TMPDIR", "PATH", "LD_LIBRARY_PATH"} {
 		n := C.CString(name)
 		os.Setenv(name, C.GoString(C.getenv(n)))
@@ -111,6 +113,7 @@ func callMain(mainPC uintptr) {
 
 //export onStart
 func onStart(activity *C.ANativeActivity) {
+	fmt.Println("started")
 }
 
 //export onResume
@@ -132,6 +135,7 @@ func onStop(activity *C.ANativeActivity) {
 
 //export onCreate
 func onCreate(activity *C.ANativeActivity) {
+	fmt.Println("created")
 	// Set the initial configuration.
 	//
 	// Note we use unbuffered channels to talk to the activity loop, and
@@ -152,6 +156,8 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
 	theApp.winptr = uintptr(unsafe.Pointer(window))
+	fmt.Println("win creATED", theApp.winptr)
+	theApp.setSysWindow(nil, theApp.winptr)
 }
 
 //export onNativeWindowRedrawNeeded
@@ -229,6 +235,7 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 		log.Print("android device reports no screen density")
 		dpi = 72
 	default:
+		// TODO: fix this always happening with value 240
 		log.Printf("android device reports unknown density: %d", density)
 		// All we can do is guess.
 		if density > 0 {
@@ -277,16 +284,18 @@ var (
 )
 
 func main(f func(*appImpl)) {
+	fmt.Println("in main")
 	mainUserFn = f
 	// TODO: merge the runInputQueue and mainUI functions?
 	go func() {
+		fmt.Println("running input queue")
 		if err := mobileinit.RunOnJVM(runInputQueue); err != nil {
 			log.Fatalf("app: %v", err)
 		}
 	}()
 	// Preserve this OS thread for:
 	//	1. the attached JNI thread
-	//	2. the GL context
+	fmt.Println("running main UI")
 	if err := mobileinit.RunOnJVM(theApp.mainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}

@@ -144,6 +144,8 @@ func (app *appImpl) stopMain() {
 
 // initVk initializes vulkan things
 func (app *appImpl) initVk() {
+	fmt.Println("initializing vk")
+	vgpu.Debug = true
 	err := vk.SetDefaultGetInstanceProcAddr()
 	if err != nil {
 		log.Fatalln("goosi/driver/android.app.initVk: failed to set Vulkan DefaultGetInstanceProcAddr")
@@ -157,6 +159,7 @@ func (app *appImpl) initVk() {
 	app.gpu = vgpu.NewGPU()
 	app.gpu.AddInstanceExt(winext...)
 	app.gpu.Config(app.name)
+	fmt.Println("init vk done")
 }
 
 // destroyVk destroys vulkan things (the drawer and surface of the window) for when the app becomes invisible
@@ -185,10 +188,13 @@ func (app *appImpl) fullDestroyVk() {
 // It waits for the underlying system window to be created first.
 // Also, it hides all other windows and shows the new one.
 func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
+	fmt.Println("in new window")
 	// the actual system window has to exist before we can create the window
 	var winptr uintptr
 	for {
+		fmt.Println("locking in new window")
 		app.mu.Lock()
+		fmt.Println("past lock in new window")
 		winptr = app.winptr
 		app.mu.Unlock()
 
@@ -196,6 +202,7 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 			break
 		}
 	}
+	fmt.Println("done with new window")
 	// TODO: do we need to do this?
 	// app.mu.Lock()
 	// defer app.mu.Unlock()
