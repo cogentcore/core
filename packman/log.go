@@ -28,7 +28,7 @@ func Log(c *config.Config) error {
 		}
 	}
 	// we are logging continiously so we can't buffer, and we must forcefully pipe stdout and stderr
-	err := xe.Major().SetBuffer(false).SetStdout(os.Stdout).SetStderr(os.Stderr).Run("adb", "logcat", "*:"+c.Log.All, "Go:I", "GoLog:I")
+	err := xe.Major().SetBuffer(false).SetStdout(os.Stdout).SetStderr(os.Stderr).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
 	}
