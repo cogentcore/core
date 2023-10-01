@@ -177,10 +177,25 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 			break
 		}
 	}
-	fmt.Println("done with new window")
-	// TODO: do we need to do this?
+	fmt.Println("making new window")
 	app.mu.Lock()
 	defer app.mu.Unlock()
+	app.window = &windowImpl{
+		app:         app,
+		isVisible:   true,
+		publish:     make(chan struct{}),
+		winClose:    make(chan struct{}),
+		publishDone: make(chan struct{}),
+		WindowBase: goosi.WindowBase{
+			FPS: 60,
+		},
+	}
+	fmt.Println("before deque")
+	app.window.EvMgr.Deque = &app.window.Deque
+	fmt.Println("after deque")
+	fmt.Println(app.window)
+	app.window.EvMgr.Window(events.Focus)
+	fmt.Println("done with new window")
 	fmt.Println("will return")
 	fmt.Println("returning", app.window)
 	go app.window.winLoop()
@@ -218,23 +233,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	// app.window.Draw.ConfigSys()
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
-	fmt.Println("making window")
 	app.winptr = winPtr
-	app.window = &windowImpl{
-		app:         app,
-		isVisible:   true,
-		publish:     make(chan struct{}),
-		winClose:    make(chan struct{}),
-		publishDone: make(chan struct{}),
-		WindowBase: goosi.WindowBase{
-			FPS: 60,
-		},
-	}
-	fmt.Println("before deque")
-	app.window.EvMgr.Deque = &app.window.Deque
-	fmt.Println("after deque")
-	fmt.Println(app.window)
-	app.window.EvMgr.Window(events.Focus)
 	return nil
 }
 

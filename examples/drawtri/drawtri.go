@@ -100,22 +100,25 @@ func mainrun(a goosi.App) {
 	}
 
 	for {
-		fmt.Println("waiting for event")
 		evi := w.NextEvent()
-		fmt.Println("got event", evi)
 		et := evi.Type()
+		if et != events.WindowPaint {
+			fmt.Println("got event", evi)
+		}
 		switch et {
 		case events.Window:
 			ev := evi.(*events.WindowEvent)
+			fmt.Println("got window event", ev)
 			switch ev.Action {
 			case events.Close:
+				fmt.Println("got events.Close; returning")
 				return
 			}
 		case events.WindowPaint:
 			// fmt.Println("paint")
 			renderFrame()
 		case events.MouseMove:
-			// fmt.Println("got mouse event at pos", evi.Pos())
+			fmt.Println("got mouse event at pos", evi.Pos())
 		}
 	}
 }

@@ -370,7 +370,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 
 			app.window.EvMgr.WindowPaint()
 		case <-windowDestroyed:
-			app.window.EvMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
+			app.window.EvMgr.Window(events.Minimize)
 		case <-activityDestroyed:
 			app.window.EvMgr.Window(events.Close)
 		}
