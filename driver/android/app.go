@@ -22,6 +22,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/events"
 	"goki.dev/mobile/event/size"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
@@ -216,6 +217,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
+	app.window.EventMgr.Window(events.Focus)
 	return nil
 }
 

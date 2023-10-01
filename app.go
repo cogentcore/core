@@ -196,6 +196,8 @@ func (p Platforms) IsMobile() bool {
 // VirtualKeyboardTypes are all of the supported virtual keyboard types for mobile platforms
 type VirtualKeyboardTypes int32 //enums:enum
 
+// TOOD(kai): support more of these (see https://developer.android.com/reference/android/view/inputmethod/EditorInfo)
+
 const (
 	// DefaultKeyboard is the keyboard with default input style and "return" return key
 	DefaultKeyboard VirtualKeyboardTypes = iota

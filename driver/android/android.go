@@ -154,7 +154,7 @@ func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
 
 //export onNativeWindowCreated
 func onNativeWindowCreated(activity *C.ANativeActivity, window *C.ANativeWindow) {
-	theApp.window = uintptr(unsafe.Pointer(window))
+	theApp.winptr = uintptr(unsafe.Pointer(window))
 }
 
 //export onNativeWindowRedrawNeeded
@@ -191,7 +191,7 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	theApp.window.darkMode = bool(dark)
+	theApp.darkMode = bool(dark)
 }
 
 type windowConfig struct {
@@ -328,7 +328,7 @@ func insetsChanged(top, bottom, left, right int) {
 	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
 }
 
-var mainUserFn func(App)
+var mainUserFn func(*appImpl)
 
 var DisplayMetrics struct {
 	WidthPx  int
@@ -360,7 +360,7 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
 			DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
 			// }
-			theApp.sendLifecycle(lifecycle.StageFocused)
+			theApp.window.EventMgr.Window(events.Focus)
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 			theApp.eventsIn <- size.Event{
