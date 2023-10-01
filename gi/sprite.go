@@ -8,7 +8,6 @@ import (
 	"image"
 
 	"goki.dev/girl/styles"
-	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
@@ -84,38 +83,40 @@ func (sp *Sprite) GrabRenderFrom(wi Widget) {
 	}
 }
 
+// todo: replace with events
+
 // ConnectEvent adds a Signal connection for given event type to given receiver.
 // only mouse events are supported.
 // Sprite events are always top priority -- if mouse is inside sprite geom, then it is sent
 // if event function does not mark event as processed, it will continue to propagate
-func (sp *Sprite) ConnectEvent(recv ki.Ki, et events.Types, fun func()) {
-	if sp.Events == nil {
-		sp.Events = make(map[events.Types]*ki.Signal)
-	}
-	sg, ok := sp.Events[et]
-	if !ok {
-		sg = &ki.Signal{}
-		sp.Events[et] = sg
-	}
-	sg.Connect(recv, fun)
-}
-
-// DisconnectEvent removes Signal connection for given event type to given receiver.
-func (sp *Sprite) DisconnectEvent(recv ki.Ki, et events.Types, fun func()) {
-	if sp.Events == nil {
-		return
-	}
-	sg, ok := sp.Events[et]
-	if !ok {
-		return
-	}
-	sg.Disconnect(recv)
-}
-
-// DisconnectAllEvents removes all event connections for this sprite
-func (sp *Sprite) DisconnectAllEvents() {
-	sp.Events = nil
-}
+// func (sp *Sprite) ConnectEvent(recv ki.Ki, et events.Types, fun func()) {
+// 	if sp.Events == nil {
+// 		sp.Events = make(map[events.Types]*ki.Signal)
+// 	}
+// 	sg, ok := sp.Events[et]
+// 	if !ok {
+// 		sg = &ki.Signal{}
+// 		sp.Events[et] = sg
+// 	}
+// 	sg.Connect(recv, fun)
+// }
+//
+// // DisconnectEvent removes Signal connection for given event type to given receiver.
+// func (sp *Sprite) DisconnectEvent(recv ki.Ki, et events.Types, fun func()) {
+// 	if sp.Events == nil {
+// 		return
+// 	}
+// 	sg, ok := sp.Events[et]
+// 	if !ok {
+// 		return
+// 	}
+// 	sg.Disconnect(recv)
+// }
+//
+// // DisconnectAllEvents removes all event connections for this sprite
+// func (sp *Sprite) DisconnectAllEvents() {
+// 	sp.Events = nil
+// }
 
 /////////////////////////////////////////////////////////////////////
 // Sprites

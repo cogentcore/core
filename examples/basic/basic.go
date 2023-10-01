@@ -5,6 +5,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 )
 
@@ -21,7 +22,7 @@ func mainrun() {
 
 	gi.NewButton(&scene.Frame, "open-dialog").
 		SetText("Open Dialog").SetIcon(icons.OpenInNew).
-		OnClicked(func() {
+		On(events.Click, func(e events.Event) {
 			fmt.Println("button clicked")
 			// dialog := gi.NewScene("dialog")
 			// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")

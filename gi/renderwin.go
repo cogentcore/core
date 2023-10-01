@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -677,7 +676,7 @@ func (w *RenderWin) StopEventLoop() {
 // if nobody is listening (e.g., if a popup is posted without a surrounding
 // event, as in Complete.ShowCompletions
 func (w *RenderWin) SendCustomEvent(data any) {
-	goosi.SendCustomEvent(w.GoosiWin, data)
+	w.GoosiWin.EventMgr().Custom(data)
 }
 
 // SendShowEvent sends the WinShowEvent to anyone listening -- only sent once..
@@ -751,10 +750,10 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 	defer w.RenderCtx().ReadUnlock()
 
 	et := evi.Type()
-	if EventTrace && et != goosi.WindowPaintEvent {
-		log.Printf("Got event: %s\n", et.BitIndexString())
+	if EventTrace && et != events.WindowPaint {
+		log.Printf("Got event: %s\n", et.String())
 	}
-	if et >= goosi.WindowEvent && et <= goosi.WindowPaintEvent {
+	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(evi)
 		return
 	}
@@ -767,7 +766,7 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 	   ev := evi.(*window.Event)
 	   et := evi.Type()
 	   switch et {
-	   case goosi.WindowPaintEvent:
+	   case events.WindowPaint:
 
 	   	evi.SetHandled()
 	   	w.RenderCtx().ReadUnlock() // one case where we need to break lock
@@ -1099,7 +1098,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 			}
 		}
 	}
-	if et != goosi.WindowResizeEvent && et != goosi.WindowPaintEvent {
+	if et != goosi.WindowResizeEvent && et != events.WindowPaint {
 		w.SetFlag(false, WinFlagIsResizing)
 	}
 
@@ -1467,7 +1466,7 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Name, chord, sa.Text)
 	}
-	sa.Trigger()
+	sa.SendMe(events.Click, nil)
 	return true
 }
 
@@ -1484,7 +1483,7 @@ func (w *RenderWin) KeyChordEventHiPri(e *events.Key) bool {
 	if e.IsHandled() {
 		return false
 	}
-	cs := e.Chord()
+	cs := e.KeyChord()
 	kf := KeyFun(cs)
 	// cpop := w.CurPopup()
 	switch kf {
@@ -1508,63 +1507,66 @@ func (w *RenderWin) KeyChordEventHiPri(e *events.Key) bool {
 		// 	delPop = true
 		// }
 	}
-	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
+	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.KeyChord())
 	return delPop
 }
 
 // KeyChordEventLowPri handles all the lower-priority window-specific key
 // events, returning its input on whether any existing popup should be deleted
 func (w *RenderWin) KeyChordEventLowPri(e *events.Key) bool {
-	if e.IsHandled() {
-		return false
-	}
-	// w.EventMgr.ManagerKeyChordEvents(e)
-	if e.IsHandled() {
-		return false
-	}
-	cs := e.Chord()
-	kf := KeyFun(cs)
-	delPop := false
-	switch kf {
-	case KeyFunWinSnapshot:
-		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		fnm, _ := filepath.Abs("./GrabOf_" + w.Name + "_" + dstr + ".png")
-		// SaveImage(fnm, w.Scene.Pixels)
-		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
-		e.SetHandled()
-	case KeyFunZoomIn:
-		w.ZoomDPI(1)
-		e.SetHandled()
-	case KeyFunZoomOut:
-		w.ZoomDPI(-1)
-		e.SetHandled()
-	case KeyFunRefresh:
-		e.SetHandled()
-		fmt.Printf("Win: %v display refreshed\n", w.Name)
-		goosi.TheApp.GetScreens()
-		Prefs.UpdateAll()
-		WinGeomMgr.RestoreAll()
-		// w.FocusInactivate()
-		// w.FullReRender()
-		// sz := w.GoosiWin.Size()
-		// w.SetSize(sz)
-	case KeyFunWinFocusNext:
-		e.SetHandled()
-		AllRenderWins.FocusNext()
-	}
-	switch cs { // some other random special codes, during dev..
-	case "Control+Alt+R":
-		// ProfileToggle()
-		e.SetHandled()
-	case "Control+Alt+F":
-		// w.BenchmarkFullRender()
-		e.SetHandled()
-	case "Control+Alt+H":
-		// w.BenchmarkReRender()
-		e.SetHandled()
-	}
-	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.Chord())
-	return delPop
+	/*
+		if e.IsHandled() {
+			return false
+		}
+		// w.EventMgr.ManagerKeyChordEvents(e)
+		if e.IsHandled() {
+			return false
+		}
+		cs := e.KeyChord()
+		kf := KeyFun(cs)
+		delPop := false
+		switch kf {
+		case KeyFunWinSnapshot:
+			dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
+			fnm, _ := filepath.Abs("./GrabOf_" + w.Name + "_" + dstr + ".png")
+			// SaveImage(fnm, w.Scene.Pixels)
+			fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
+			e.SetHandled()
+		case KeyFunZoomIn:
+			w.ZoomDPI(1)
+			e.SetHandled()
+		case KeyFunZoomOut:
+			w.ZoomDPI(-1)
+			e.SetHandled()
+		case KeyFunRefresh:
+			e.SetHandled()
+			fmt.Printf("Win: %v display refreshed\n", w.Name)
+			goosi.TheApp.GetScreens()
+			Prefs.UpdateAll()
+			WinGeomMgr.RestoreAll()
+			// w.FocusInactivate()
+			// w.FullReRender()
+			// sz := w.GoosiWin.Size()
+			// w.SetSize(sz)
+		case KeyFunWinFocusNext:
+			e.SetHandled()
+			AllRenderWins.FocusNext()
+		}
+		switch cs { // some other random special codes, during dev..
+		case "Control+Alt+R":
+			// ProfileToggle()
+			e.SetHandled()
+		case "Control+Alt+F":
+			// w.BenchmarkFullRender()
+			e.SetHandled()
+		case "Control+Alt+H":
+			// w.BenchmarkReRender()
+			e.SetHandled()
+		}
+		// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.KeyChord())
+		return delPop
+	*/
+	return false
 }
 
 /////////////////////////////////////////////////////////////////////////////

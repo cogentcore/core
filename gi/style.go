@@ -8,9 +8,9 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/cursor"
 	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 )
@@ -177,7 +177,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 
 	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
 	if wb.Style.Inactive { // inactive can only set, not clear
-		wb.SetFlag(true, Disabled)
+		wb.Style.State.SetFlag(true, states.Disabled)
 	}
 	sc.SetCurrentColor(wb.Style.Color)
 
@@ -255,7 +255,7 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 // cursor. This function can be used for elements like labels
 // that have a default cursor ([cursor.IBeam]) but should
 // not override the cursor of a parent.
-func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursor.Cursor {
+func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursors.Cursor {
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		// return p.Style.Cursor != cursor.Arrow
 		return true
@@ -264,7 +264,7 @@ func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursor.Cursor {
 		return cur
 	}
 	// return pwb.Style.Cursor
-	return cursor.Arrow
+	return cursors.Default
 }
 
 /////////////////////////////////////////////////////////////////

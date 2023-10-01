@@ -213,9 +213,9 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		// not compiled into style prop
 		// up.SetFlagState(sb.IsInactive(), int(Inactive))
 		up.SetIcon(sb.UpIcon)
-		up.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			sbb := AsSpinBox(recv)
-			sbb.IncrValue(1.0)
+		// todo:
+		up.On(events.Click, func(e events.Event) {
+			sb.IncrValue(1.0)
 		})
 		// dn
 		dn := buts.Child(1).(*Action)
@@ -223,28 +223,28 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		dn.SetName("down")
 		dn.SetProp("no-focus", true)
 		dn.Icon = sb.DownIcon
-		dn.ActionSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			sbb := AsSpinBox(recv)
-			sbb.IncrValue(-1.0)
+		dn.On(events.Click, func(e events.Event) {
+			sb.IncrValue(-1.0)
 		})
 		// space
 		// sp := parts.ChildByName("space", 2).(*Space)
 	}
 	// text-field
 	tf := parts.ChildByName("text-field", 0).(*TextField)
-	tf.SetFlag(sb.IsDisabled(), Disabled)
+	tf.Style.State.SetFlag(sb.IsDisabled(), states.Disabled)
 	tf.Txt = sb.ValToString(sb.Value)
 	if !sb.IsDisabled() {
-		tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
-				sbb := AsSpinBox(recv)
-				tf := send.(*TextField)
-				vl, err := sb.StringToVal(tf.Text())
-				if err == nil {
-					sbb.SetValueAction(vl)
-				}
-			}
-		})
+		// todo: events
+		// tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
+		// 		sbb := AsSpinBox(recv)
+		// 		tf := send.(*TextField)
+		// 		vl, err := sb.StringToVal(tf.Text())
+		// 		if err == nil {
+		// 			sbb.SetValueAction(vl)
+		// 		}
+		// 	}
+		// })
 	}
 	sb.UpdateEnd(updt)
 
@@ -302,11 +302,12 @@ func (sb *SpinBox) SpinBoxHandlers() {
 
 func (sb *SpinBox) SpinBoxScroll() {
 	sb.On(events.Scroll, func(e events.Event) {
-		if bb.StateIs(states.Disabled) || !sbb.StateIs(states.Focused) {
+		if sb.StateIs(states.Disabled) || !sb.StateIs(states.Focused) {
 			return
 		}
-		e.SetHandled()
-		bb.IncrValue(float32(e.NonZeroDelta(false)))
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
+		sb.IncrValue(float32(se.NonZeroDelta(false)))
 	})
 }
 
@@ -315,17 +316,17 @@ func (sb *SpinBox) SpinBoxTextFieldSelect() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.On(events.Select, func(e events.Event) {
 		sb.SetSelected(!sb.StateIs(states.Selected))
-		sb.SendMe(events.Select)
+		sb.SendMe(events.Select, nil)
 	})
 }
 
 func (sb *SpinBox) SpinBoxKeys() {
 	sb.On(events.KeyChord, func(e events.Event) {
-		if bb.StateIs(states.Disabled) {
+		if sb.StateIs(states.Disabled) {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("SpinBox KeyChordEvent: %v\n", sbb.Path())
+			fmt.Printf("SpinBox KeyChordEvent: %v\n", sb.Path())
 		}
 		kf := KeyFun(e.KeyChord())
 		switch {

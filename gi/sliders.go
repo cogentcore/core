@@ -221,7 +221,7 @@ func (sb *SliderBase) OnInit() {
 	sb.Prec = 9
 	sb.ThumbSize = units.Em(1.5)
 	sb.ThSize = 25.0
-	sb.ThSizeReal = sr.ThSize
+	sb.ThSizeReal = sb.ThSize
 }
 
 // SnapValue snaps the value to step sizes if snap option is set
@@ -464,8 +464,8 @@ func (sb *SliderBase) SliderMouse() {
 			return
 		}
 		e.SetHandled()
-		st := sbb.This().(SliderPositioner).PointToRelPos(e.StartPos())
-		ed := sbb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := sb.This().(SliderPositioner).PointToRelPos(e.StartPos())
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		if sb.Dim == mat32.X {
 			sb.SliderMove(float32(st.X), float32(ed.X))
 		} else {
@@ -492,22 +492,26 @@ func (sb *SliderBase) SliderMouse() {
 			return
 		}
 		e.SetHandled()
-		if e.Action == events.Enter {
-			sb.SliderEnterHover()
-		} else {
-			sb.SliderExitHover()
+		sb.SliderEnterHover()
+	})
+	sb.On(events.MouseLeave, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
 		}
+		e.SetHandled()
+		sb.SliderExitHover()
 	})
 	sb.On(events.Scroll, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
-		e.SetHandled()
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
 		cur := float32(sb.Pos)
 		if sb.Dim == mat32.X {
-			sb.SliderMove(cur, cur+float32(e.NonZeroDelta(true))) // preferX
+			sb.SliderMove(cur, cur+float32(se.NonZeroDelta(true))) // preferX
 		} else {
-			sb.SliderMove(cur, cur-float32(e.NonZeroDelta(false))) // preferY
+			sb.SliderMove(cur, cur-float32(se.NonZeroDelta(false))) // preferY
 		}
 	})
 }
@@ -827,7 +831,7 @@ func (sr *Slider) FocusChanged(change FocusChanges) {
 	case FocusGot:
 		sr.ScrollToMe()
 		sr.SetSliderState(SliderFocus)
-		sr.EmitFocusedSignal()
+		// sr.EmitFocusedSignal()
 		sr.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:
@@ -936,7 +940,7 @@ func (sb *ScrollBar) FocusChanged(change FocusChanges) {
 		sb.UpdateSig()
 	case FocusGot:
 		sb.SetSliderState(SliderFocus)
-		sb.EmitFocusedSignal()
+		// sb.EmitFocusedSignal()
 		sb.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:

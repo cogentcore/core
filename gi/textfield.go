@@ -20,6 +20,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -112,9 +113,6 @@ type TextField struct {
 
 	// if true, select text as cursor moves
 	SelectMode bool `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
-
-	// [view: -] signal for line edit -- see TextFieldSignals for the types
-	// TextFieldSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for line edit -- see TextFieldSignals for the types"`
 
 	// render version of entire text, for sizing
 	RenderAll paint.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
@@ -291,7 +289,7 @@ const (
 
 // IsFocusActive returns true if we have active focus for keyboard input
 func (tf *TextField) IsFocusActive() bool {
-	return tf.HasFlag(TextFieldFocusActive)
+	return tf.Is(TextFieldFocusActive)
 }
 
 // Text returns the current text -- applies any unapplied changes first, and
@@ -352,7 +350,7 @@ func (tf *TextField) EditDone() {
 	if tf.Edited {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
-		tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDone), tf.Txt)
+		tf.SendMe(events.Change, nil)
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
@@ -365,7 +363,8 @@ func (tf *TextField) EditDeFocused() {
 	if tf.Edited {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
-		tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDeFocused), tf.Txt)
+		// todo: focus lost?
+		// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDeFocused), tf.Txt)
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()
@@ -392,7 +391,8 @@ func (tf *TextField) Clear() {
 	tf.EndPos = 0
 	tf.SelectReset()
 	tf.GrabFocus() // this is essential for ensuring that the clear applies after focus is lost..
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldCleared), tf.Txt)
+	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldCleared), tf.Txt)
+	// todo: no std equivalent
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -479,7 +479,8 @@ func (tf *TextField) CursorBackspace(steps int) {
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos-steps], tf.EditTxt[tf.CursorPos:]...)
 	tf.CursorBackward(steps)
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldBackspace), tf.Txt)
+	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldBackspace), tf.Txt)
+	// todo: why?
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -498,7 +499,8 @@ func (tf *TextField) CursorDelete(steps int) {
 	defer tf.UpdateEndRender(updt)
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDelete), tf.Txt)
+	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDelete), tf.Txt)
+	// todo: why?
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -512,7 +514,7 @@ func (tf *TextField) CursorKill() {
 
 // ClearSelected resets both the global selected flag and any current selection
 func (tf *TextField) ClearSelected() {
-	tf.WidgetBase.SetFlag(false, Selected)
+	tf.Style.State.SetFlag(false, states.Selected)
 	tf.SelectReset()
 }
 
@@ -733,33 +735,37 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
-	tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
+	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
+	// todo: why?
 }
 
 func (tf *TextField) MakeContextMenu(m *MenuActions) {
-	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
-		tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tff := AsTextField(recv)
-			tff.This().(Clipper).Copy(true)
-		})
-	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-	if !tf.IsDisabled() {
-		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
-		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
-			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := AsTextField(recv)
-				tff.This().(Clipper).Cut()
-			})
-		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
-			tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tff := AsTextField(recv)
-				tff.This().(Clipper).Paste()
-			})
-		ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).IsEmpty(), Disabled)
-	}
+	// todo
+	/*
+		cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
+			ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
+				tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+					tff := AsTextField(recv)
+					tff.This().(Clipper).Copy(true)
+				})
+			ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
+			if !tf.IsDisabled() {
+				ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
+				ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
+				ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
+					tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+						tff := AsTextField(recv)
+						tff.This().(Clipper).Cut()
+					})
+				ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
+				ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
+					tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+						tff := AsTextField(recv)
+						tff.This().(Clipper).Paste()
+					})
+				ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).IsEmpty(), Disabled)
+			}
+	*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -770,7 +776,7 @@ func (tf *TextField) MakeContextMenu(m *MenuActions) {
 func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
-			tf.Complete.CompleteSig.Disconnect(tf.This())
+			// tf.Complete.CompleteSig.Disconnect(tf.This())
 			tf.Complete.Destroy()
 		}
 		tf.Complete = nil
@@ -782,14 +788,15 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 	tf.Complete.MatchFunc = matchFun
 	tf.Complete.EditFunc = editFun
 	// note: only need to connect once..
-	tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tff := AsTextField(recv)
-		if sig == int64(CompleteSelect) {
-			tff.CompleteText(data.(string)) // always use data
-		} else if sig == int64(CompleteExtend) {
-			tff.CompleteExtend(data.(string)) // always use data
-		}
-	})
+	// todo:
+	// tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	tff := AsTextField(recv)
+	// 	if sig == int64(CompleteSelect) {
+	// 		tff.CompleteText(data.(string)) // always use data
+	// 	} else if sig == int64(CompleteExtend) {
+	// 		tff.CompleteExtend(data.(string)) // always use data
+	// 	}
+	// })
 }
 
 // OfferComplete pops up a menu of possible completions
@@ -1218,7 +1225,8 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 			tf.SelectStart = oldPos
 			tf.SelectMode = true
 		}
-		if !tf.HasFlag(NodeDragging) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		// todo: NodeDragging is not up-to-date
+		if !tf.Is(NodeDragging) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
 		} else {
 			tf.SelectRegUpdate(tf.CursorPos)
@@ -1250,7 +1258,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 // 	tf.UpdateSig()
 // } else {
 
-func (tf *TextField) TextFieldMouse(e events.Event) {
+func (tf *TextField) TextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
@@ -1348,7 +1356,7 @@ func (tf *TextField) TextFieldKeys() {
 			tf.CancelComplete()
 			tf.This().(Clipper).Copy(true) // reset
 		}
-		if bb.StateIs(states.Disabled) || e.IsHandled() {
+		if tf.StateIs(states.Disabled) || e.IsHandled() {
 			return
 		}
 		switch kf {
@@ -1394,11 +1402,11 @@ func (tf *TextField) TextFieldKeys() {
 			e.SetHandled()
 			tf.OfferComplete(force)
 		case KeyFunNil:
-			if unicode.IsPrint(e.Rune) {
-				if !e.HasAnyModifier(goosi.Control, goosi.Meta) {
+			if unicode.IsPrint(e.KeyRune()) {
+				if !e.HasAnyModifier(key.Control, key.Meta) {
 					e.SetHandled()
-					tf.InsertAtCursor(string(e.Rune))
-					if e.Rune == ' ' {
+					tf.InsertAtCursor(string(e.KeyRune()))
+					if e.KeyRune() == ' ' {
 						tf.CancelComplete()
 					} else {
 						tf.OfferComplete(dontForce)
@@ -1423,6 +1431,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	}
 	config := ki.Config{}
 	leadIconIdx, trailIconIdx := -1, -1
+	_ = trailIconIdx
 	if !tf.LeadingIcon.IsNil() {
 		// config.Add(StretchType, "lead-icon-str")
 		config.Add(ActionType, "lead-icon")
@@ -1579,10 +1588,9 @@ func (tf *TextField) Render(sc *Scene) {
 	if tf.StateIs(states.Focused) && tf.IsFocusActive() && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
-	wi := tf.This().(Widget)
 	if tf.PushBounds(sc) {
 		tf.RenderTextField(sc)
-		if !tf.HasFlag(Disabled) {
+		if !tf.IsDisabled() {
 			if tf.StateIs(states.Focused) && tf.IsFocusActive() {
 				tf.StartCursor()
 			} else {
@@ -1605,7 +1613,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 		tf.SetFlag(true, TextFieldFocusActive)
 		tf.ScrollToMe()
 		// tf.CursorEnd()
-		tf.EmitFocusedSignal()
+		// tf.EmitFocusedSignal()
 		tf.ApplyStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)

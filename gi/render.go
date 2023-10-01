@@ -82,14 +82,10 @@ import (
 //
 // ki Signals in general should not be used
 
-// UpdateSig just sets NeedsRender flag, in addition to sending
-// the standard Ki update signal.  This will drive updating of
-// the node on the next DoNUpdate pass.
-func (wb *WidgetBase) UpdateSig() bool {
-	// note: we do not have the scene here!!
-	// this means we need to cache it..
+// UpdateSig just sets NeedsRender flag
+// This will drive updating of the node on the next DoUpdate pass.
+func (wb *WidgetBase) UpdateSig() {
 	wb.SetNeedsRender(wb.Sc, true)
-	return wb.Node.UpdateSig()
 }
 
 // SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
@@ -151,7 +147,7 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
-	wb.WalkPre(func(k Ki) bool {
+	wb.WalkPre(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
@@ -169,7 +165,7 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
-	wb.WalkPre(func(k Ki) bool {
+	wb.WalkPre(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
@@ -187,15 +183,14 @@ func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 		return
 	}
 	pr := prof.Start("Widget.GetSizeTree." + wb.KiType().Name)
-	wb.WalkPost(0, wb.This(),
-		func(k ki.Ki, level int, d any) bool { // tests whether to process node
-			_, w := AsWidget(k)
-			if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
-				return ki.Break
-			}
-			return ki.Continue
-		},
-		func(k ki.Ki, level int, d any) bool { // this one does the work
+	wb.WalkPost(func(k ki.Ki) bool { // tests whether to process node
+		_, w := AsWidget(k)
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+			return ki.Break
+		}
+		return ki.Continue
+	},
+		func(k ki.Ki) bool { // this one does the work
 			wi, w := AsWidget(k)
 			if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 				return ki.Break
@@ -252,12 +247,12 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 		return
 	}
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
-	wb.WalkPre(func(k Ki) bool {
+	wb.WalkPre(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
 			return ki.Break
 		}
-		if w.Is(NeedsRender) && !w.Is(Updating) {
+		if w.Is(NeedsRender) && !w.Is(ki.Updating) {
 			w.SetFlag(false, NeedsRender)
 			wi.Render(sc)
 			return ki.Break // done
@@ -274,7 +269,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.Is(ScIsUpdating) {
+	if sc.HasFlag(ScIsUpdating) {
 		fmt.Println("scene bail on updt")
 		return false
 	}
@@ -282,18 +277,18 @@ func (sc *Scene) DoUpdate() bool {
 	defer sc.SetFlag(false, ScIsUpdating)
 
 	switch {
-	case sc.Is(ScNeedsRebuild):
+	case sc.HasFlag(ScNeedsRebuild):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
-	case sc.Is(ScNeedsLayout):
+	case sc.HasFlag(ScNeedsLayout):
 		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderTree()
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
-	case sc.Is(ScNeedsRender):
+	case sc.HasFlag(ScNeedsRender):
 		// fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
 		sc.Frame.DoNeedsRender(sc)
@@ -415,7 +410,7 @@ func (wb *WidgetBase) RenderParts(sc *Scene) {
 func (wb *WidgetBase) RenderChildren(sc *Scene) {
 	for _, kid := range wb.Kids {
 		wi, w := AsWidget(kid)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) || w.Is(Updating) {
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) || w.Is(ki.Updating) {
 			continue
 		}
 		wi.Render(sc)
@@ -493,7 +488,7 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 // that is a ReRenderAnchor -- for optimized re-rendering
 func (wb *WidgetBase) ParentReRenderAnchor() Widget {
 	var par Widget
-	wb.WalkUp(0, wb.This(), func(k ki.Ki, level int, d any) bool {
+	wb.WalkUp(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
 		if w == nil {
 			return ki.Break // don't keep going up

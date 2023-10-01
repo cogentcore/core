@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -78,6 +79,9 @@ func (sv *SplitView) SplitViewStyles() {
 func (sv *SplitView) OnChildAdded(child ki.Ki) {
 	if sp, ok := child.(*Splitter); ok {
 		sp.ThumbSize = sv.HandleSize
+		sp.On(events.SliderStop, func(e events.Event) {
+			sv.SetSplitAction(sp.SplitterNo, sp.Value)
+		})
 	}
 }
 
@@ -285,15 +289,6 @@ func (sv *SplitView) ConfigSplitters(sc *Scene) {
 		sp.Max = 1.0
 		sp.Snap = false
 		sp.ThumbSize = sv.HandleSize
-		if mods {
-			sp.SliderSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(SliderReleased) {
-					spr := AsSplitView(recv)
-					spl := send.(*Splitter)
-					spr.SetSplitAction(spl.SplitterNo, spl.Value)
-				}
-			})
-		}
 	}
 	if mods {
 		sv.Parts.UpdateEnd(updt)
@@ -496,10 +491,8 @@ func (sr *Splitter) ConfigWidget(sc *Scene) {
 }
 
 func (sr *Splitter) ApplyStyle(sc *Scene) {
-	sr.SetFlag(false, CanFocus)
+	sr.Style.State.SetFlag(false, states.Focusable)
 	sr.StyleSlider(sc)
-	sr.StyMu.Lock()
-	sr.StyMu.Unlock()
 }
 
 func (sr *Splitter) GetSize(sc *Scene, iter int) {
@@ -696,7 +689,7 @@ func (sr *Splitter) FocusChanged(change FocusChanges) {
 		sr.UpdateSig()
 	case FocusGot:
 		sr.SetSliderState(SliderFocus)
-		sr.EmitFocusedSignal()
+		// sr.EmitFocusedSignal()
 		sr.UpdateSig()
 	case FocusInactive: // don't care..
 	case FocusActive:

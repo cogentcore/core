@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -154,11 +155,8 @@ func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
-	tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		tvv := AsTabView(recv)
-		act := send.(*TabButton)
-		tabIdx := act.Data.(int)
-		tvv.SelectTabIndexAction(tabIdx)
+	tab.On(events.Click, func(e events.Event) {
+		tv.SelectTabIndexAction(idx)
 	})
 	fr := tv.Frame()
 	if len(fr.Kids) == 1 {
@@ -219,6 +217,8 @@ func (tv *TabView) NewTabAction(typ *gti.Type, label string) Widget {
 	widg := tv.NewTab(typ, label)
 	fr := tv.Frame()
 	idx := len(*fr.Children()) - 1
+	_ = idx
+	// todo: needed?
 	// tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
 	tv.UpdateEndLayout(updt)
 	return widg
@@ -414,7 +414,9 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) 
 // this is called by the delete button on the tab
 func (tv *TabView) DeleteTabIndexAction(idx int) {
 	_, tnm, ok := tv.DeleteTabIndex(idx, true)
+	_ = tnm
 	if ok {
+		// todo: needed?
 		// tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), tnm)
 	}
 }
@@ -434,10 +436,9 @@ func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 		tab := tb.InsertNewChild(ActionType, ntb, "new-tab").(*Action)
 		tab.Data = -1
 		tab.SetIcon(icons.Add)
-		tab.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := AsTabView(recv)
-			tvv.NewTabAction(tvv.NewTabType, "New Tab")
-			tvv.SelectTabIndex(len(*tvv.Frame().Children()) - 1)
+		tab.On(events.Click, func(e events.Event) {
+			tv.NewTabAction(tv.NewTabType, "New Tab")
+			tv.SelectTabIndex(len(*tv.Frame().Children()) - 1)
 		})
 		return true
 	} else {
@@ -566,7 +567,7 @@ type TabButton struct {
 }
 
 func (tb *TabButton) OnInit() {
-	tb.ActionHandlers()
+	tb.ButtonBaseHandlers()
 	tb.TabButtonStyles()
 }
 
@@ -687,12 +688,11 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
-		cls.ActionSig.ConnectOnly(tb.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tbb := tb
-			tabIdx := tbb.Data.(int)
+		cls.On(events.Click, func(e events.Event) {
+			tabIdx := tb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {
-				if !Prefs.Params.OnlyCloseActiveTab || tbb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
+				if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
 					tvv.DeleteTabIndexAction(tabIdx)
 				} else {
 					tvv.SelectTabIndexAction(tabIdx) // otherwise select

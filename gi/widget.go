@@ -107,6 +107,9 @@ type Widget interface {
 	// ScBBox is empty and no rendering should occur.
 	Render(sc *Scene)
 
+	// On adds an event listener function for the given event type
+	On(etype events.Types, fun func(e events.Event)) Widget
+
 	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(ev events.Event)
 
