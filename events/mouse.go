@@ -69,7 +69,7 @@ func NewMouse(typ Types, but Buttons, where image.Point, mods key.Modifiers) *Mo
 // }
 
 func (ev *Mouse) String() string {
-	return fmt.Sprintf("Type: %v Button: %v Pos: %v  Mods: %v Time: %v", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time())
+	return fmt.Sprintf("%v{Button: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Button, ev.Where, key.ModsString(ev.Mods), ev.Time())
 }
 
 func (ev Mouse) HasPos() bool {

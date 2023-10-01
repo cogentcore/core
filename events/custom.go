@@ -20,7 +20,7 @@ type CustomEvent struct {
 }
 
 func (ce CustomEvent) String() string {
-	return fmt.Sprintf("Type: %v Data: %v  Time: %v", ce.Type(), ce.Data, ce.Time())
+	return fmt.Sprintf("%v{Data: %v, Time: %v}", ce.Type(), ce.Data, ce.Time())
 }
 
 func (ce CustomEvent) HasPos() bool {

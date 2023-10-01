@@ -24,7 +24,6 @@ int32_t getKeyRune(JNIEnv* env, AInputEvent* e);
 */
 import "C"
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -81,7 +80,6 @@ func processEvent(env *C.JNIEnv, e *C.AInputEvent) {
 			seq := events.Sequence(C.AMotionEvent_getPointerId(e, i))
 			x := int(C.AMotionEvent_getX(e, i))
 			y := int(C.AMotionEvent_getY(e, i))
-			fmt.Println("touch event")
 			theApp.window.EvMgr.Touch(t, seq, image.Pt(x, y))
 		}
 	default:

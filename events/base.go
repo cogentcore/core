@@ -136,7 +136,7 @@ func (ev *Base) ClearHandled() {
 }
 
 func (ev Base) String() string {
-	return fmt.Sprintf("Event at Time: %v", ev.Time())
+	return fmt.Sprintf("%v{Time: %v}", ev.Typ, ev.Time())
 }
 
 func (ev Base) OnWinFocus() bool {

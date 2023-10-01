@@ -35,7 +35,7 @@ func (ev *Key) HasPos() bool {
 
 func (ev *Key) String() string {
 	if ev.Rune >= 0 {
-		return fmt.Sprintf("Type: %v  Chord: %v  Rune: %d hex: %X  Mods: %v  Time: %v", ev.Type(), ev.KeyChord(), ev.Rune, ev.Rune, key.ModsString(ev.Mods), ev.Time())
+		return fmt.Sprintf("%v{Chord: %v, Rune: %d, Hex: %X, Mods: %v, Time: %v}", ev.Type(), ev.KeyChord(), ev.Rune, ev.Rune, key.ModsString(ev.Mods), ev.Time())
 	}
-	return fmt.Sprintf("Type: %v  Code: %v  Mods: %v  Time: %v", ev.Type(), ev.Code, key.ModsString(ev.Mods), ev.Time())
+	return fmt.Sprintf("%v{Code: %v, Mods: %v, Time: %v}", ev.Type(), ev.Code, key.ModsString(ev.Mods), ev.Time())
 }

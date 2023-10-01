@@ -5,7 +5,6 @@
 package events
 
 import (
-	"fmt"
 	"image"
 	"time"
 
@@ -154,7 +153,6 @@ func (em *Mgr) Scroll(where, delta image.Point) {
 func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
 	ev := NewTouch(typ, seq, where)
 	ev.Init()
-	fmt.Println("sending touch event", ev)
 	em.Deque.Send(ev)
 
 	if typ == TouchStart {

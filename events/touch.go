@@ -4,7 +4,10 @@
 
 package events
 
-import "image"
+import (
+	"fmt"
+	"image"
+)
 
 // The best source on android input events is the NDK: include/android/input.h
 //
@@ -37,6 +40,10 @@ func NewTouch(typ Types, seq Sequence, where image.Point) *Touch {
 
 func (ev *Touch) HasPos() bool {
 	return true
+}
+
+func (ev *Touch) String() string {
+	return fmt.Sprintf("%v{Pos: %v, Sequence: %v, Time: %v}", ev.Type(), ev.Where, ev.Sequence, ev.Time())
 }
 
 // todo: what about these higher-level abstractions of touch-like events?
