@@ -5,12 +5,36 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"sync"
+	"time"
 
+	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
+)
+
+var (
+	// DragStartTime is the time to wait before DragStart
+	DragStartTime = 200 * time.Millisecond
+
+	// DragStartDist is pixel distance that must be moved before DragStart
+	DragStartDist = 20
+
+	// SlideStartTime is the time to wait before SlideStart
+	SlideStartTime = 50 * time.Millisecond
+
+	// SlideStartDist is pixel distance that must be moved before SlideStart
+	SlideStartDist = 4
+
+	// LongHoverTime is the time to wait before LongHoverStart event
+	LongHoverTime = 500
+
+	// LongHoverStopDist is the pixel distance beyond which the LongHoverStop
+	// event is sent
+	LongHoverStopDist = 5
 )
 
 // // MgrActive indicates current active state
@@ -42,8 +66,11 @@ type EventMgr struct {
 	// Current active state
 	// Active MgrActive
 
-	// stack of hovered events
+	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
 	Hovers []Widget
+
+	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
+	DragHovers []Widget
 
 	// node that was just pressed
 	Press Widget
@@ -84,17 +111,8 @@ type EventMgr struct {
 	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
 	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
 
-	// Last modifier key bits from most recent Mouse, Keyboard events
-	LastModBits key.Modifiers `desc:"Last modifier key bits from most recent Mouse, Keyboard events"`
-
 	// Last Select Mode from most recent Mouse, Keyboard events
 	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
-
-	// Last mouse position from most recent Mouse events
-	LastMousePos image.Point `desc:"Last mouse position from most recent Mouse events"`
-
-	// change in position accumulated from skipped-over laggy mouse move events
-	LagSkipDeltaPos image.Point `desc:"change in position accumulated from skipped-over laggy mouse move events"`
 
 	/*
 		startDrag       events.Event
@@ -158,86 +176,26 @@ func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
-	/*
-		foc := em.CurFocus()
-		if foc == nil {
-			return
-		}
-		fw := foc.AsWidget()
-		if win := em.RenderWin(); win != nil {
-			if !win.IsFocusActive() { // reactivate on keyboard input
-				win.SetFocusActive(true)
-				if EventTrace {
-					fmt.Printf("Event: set focus active, was not: %v\n", fw.Path())
-				}
-				foc.FocusChanged(FocusActive)
+	if em.Focus == nil {
+		return
+	}
+	fi := em.Focus
+	if win := em.RenderWin(); win != nil {
+		if !win.IsFocusActive() { // reactivate on keyboard input
+			win.SetFocusActive(true)
+			if EventTrace {
+				fmt.Printf("Event: set focus active, was not: %v\n", fi.Path())
 			}
+			fi.FocusChanged(FocusActive)
 		}
-		fw.HandleEvent(evi)
-	*/
+	}
+	fi.HandleEvent(evi)
 }
 
 func (em *EventMgr) ResetOnMouseDown() {
 	em.Press = nil
 	em.Drag = nil
 	em.Slide = nil
-}
-
-// UpdateHovers updates the hovered widgets based on current
-// widgets in bounding box.  For mouse move but not drag.
-func (em *EventMgr) UpdateHovers(ws []Widget, evi events.Event) {
-	hov := make([]Widget, 0, len(ws))
-	for _, w := range ws {
-		wb := w.AsWidget()
-		if wb.Style.Abilities.IsHoverable() {
-			hov = append(hov, w)
-		}
-	}
-
-	for _, prv := range em.Hovers {
-		stillIn := false
-		for _, cur := range hov {
-			if prv == cur {
-				stillIn = true
-				break
-			}
-		}
-		if !stillIn {
-			prv.Send(events.MouseLeave, evi)
-		}
-	}
-
-	for _, cur := range hov {
-		wasIn := false
-		for _, prv := range em.Hovers {
-			if prv == cur {
-				wasIn = true
-				break
-			}
-		}
-		if !wasIn {
-			cur.Send(events.MouseEnter, evi)
-		}
-	}
-	// todo: detect change in top one, use to update cursor
-	em.Hovers = hov
-}
-
-func (em *EventMgr) AllInBBox(w Widget, allbb *[]Widget, pos image.Point) {
-	w.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
-			return ki.Break
-		}
-		if !wb.PosInBBox(pos) {
-			return ki.Break
-		}
-		*allbb = append(*allbb, wi)
-		if wb.Parts != nil {
-			em.AllInBBox(wb.Parts, allbb, pos)
-		}
-		return ki.Continue
-	})
 }
 
 func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
@@ -300,18 +258,43 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 			}
 		}
 	}
-
 	switch et {
 	case events.MouseDown:
 		if press != nil {
 			em.Press = press
 		}
 	case events.MouseMove:
-		em.UpdateHovers(allbb, evi)
+		hovs := make([]Widget, 0, len(allbb))
+		for _, w := range allbb { // requires forward iter through allbb
+			wb := w.AsWidget()
+			if wb.Style.Abilities.IsHoverable() {
+				hovs = append(hovs, w)
+			}
+		}
+		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
 	case events.MouseDrag:
-		// if em.Drag != nil {
-		// 	em.UpdateDragMove(allbb) // DragEnter / DragLeave
-		// }
+		switch {
+		case em.Drag != nil:
+			hovs := make([]Widget, 0, len(allbb))
+			for _, w := range allbb { // requires forward iter through allbb
+				wb := w.AsWidget()
+				if wb.AbilityIs(states.Droppable) {
+					hovs = append(hovs, w)
+				}
+			}
+			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, evi, events.DragEnter, events.DragLeave)
+		case em.Slide != nil:
+		case em.Press != nil && em.Press.AbilityIs(states.Slideable):
+			if em.DragStartCheck(evi, SlideStartTime, SlideStartDist) {
+				em.Slide = em.Press
+				em.Slide.Send(events.SlideStart, evi)
+			}
+		case em.Press != nil && em.Press.AbilityIs(states.Draggable):
+			if em.DragStartCheck(evi, DragStartTime, DragStartDist) {
+				em.Drag = em.Press
+				em.Drag.Send(events.DragStart, evi)
+			}
+		}
 	case events.MouseUp:
 		if em.Press == up && up != nil {
 			up.Send(events.Click, evi)
@@ -319,169 +302,70 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 		em.Press = nil
 	}
 
-	// // deepest first
-	// sort.Slice(rvs, func(i, j int) bool {
-	// 	return rvs[i].Data > rvs[j].Data
-	// })
+}
 
-	// reverse order
-	// 	switch evi.Type() {
-	// 	case events.MouseDragEvent:
-	// 		if em.Dragging == nil {
-	// 			rr.Recv.SetFlag(true, NodeDragging) // PROVISIONAL!
-	// 		}
-	// 	}
-	//
-	// 	// fmt.Printf("proc event type: %v: %v %v\n", et.BitIndexString(), evi, rr.Recv.Path())
-	// 	// actually call the thing!
-	// 	rr.Call(send, int64(et))
-	//
-	// 	if pri != LowRawPri && evi.IsHandled() { // someone took care of it
-	// 		switch evi.Type() { // only grab events if processed
-	// 		case events.MouseDragEvent:
-	// 			if em.Dragging == nil {
-	// 				em.Dragging = rr.Recv
-	// 				rr.Recv.SetFlag(true, NodeDragging)
-	// 			}
-	// 		case events.MouseScrollEvent:
-	// 			if em.Scrolling == nil {
-	// 				em.Scrolling = rr.Recv
-	// 			}
-	// 		}
-	// 		break
-	// 	} else {
-	// 		switch evi.Type() {
-	// 		case events.MouseDragEvent:
-	// 			if em.Dragging == nil {
-	// 				rr.Recv.SetFlag(false, NodeDragging) // clear provisional
-	// 			}
-	// 		}
-	// 	}
-	// }
+// UpdateHovers updates the hovered widgets based on current
+// widgets in bounding box.
+func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, leave events.Types) []Widget {
+	for _, prv := range em.Hovers {
+		stillIn := false
+		for _, cur := range hov {
+			if prv == cur {
+				stillIn = true
+				break
+			}
+		}
+		if !stillIn {
+			prv.Send(events.MouseLeave, evi)
+		}
+	}
 
+	for _, cur := range hov {
+		wasIn := false
+		for _, prv := range em.Hovers {
+			if prv == cur {
+				wasIn = true
+				break
+			}
+		}
+		if !wasIn {
+			cur.Send(events.MouseEnter, evi)
+		}
+	}
+	// todo: detect change in top one, use to update cursor
+	return hov
+}
+
+func (em *EventMgr) AllInBBox(w Widget, allbb *[]Widget, pos image.Point) {
+	w.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+			return ki.Break
+		}
+		if !wb.PosInBBox(pos) {
+			return ki.Break
+		}
+		*allbb = append(*allbb, wi)
+		if wb.Parts != nil {
+			em.AllInBBox(wb.Parts, allbb, pos)
+		}
+		return ki.Continue
+	})
+}
+
+func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int) bool {
+	since := evi.SinceStart()
+	if since < dur {
+		return false
+	}
+	dst := int(mat32.NewVec2FmPoint(evi.StartDelta()).Length())
+	if dst < dist {
+		return false
+	}
+	return true
 }
 
 /*
-// SendEventSignalFunc is the inner loop of the SendEventSignal -- needed to deal with
-// map iterator locking logic in a cleaner way.  Returns true to continue, false to break
-func (em *EventMgr) SendEventSignalFunc(evi events.Event, popup bool, rvs *WinEventRecvList, recv Widget, fun func()) bool {
-	if !em.Master.IsInScope(recv, popup) {
-		return ki.Continue
-	}
-	nii, ni := AsWidget(recv)
-	if ni != nil {
-		if evi.OnFocus() {
-		}
-	}
-	top := em.Master.EventTopNode()
-	// remainder is done using generic node interface, for 2D and 3D
-	_, wb := AsWidget(recv)
-	if evi.HasPos() {
-		pos := evi.LocalPos()
-		switch evi.Type() {
-		case events.MouseDragEvent:
-			if em.Dragging != nil {
-				if em.Dragging == wb.This() {
-					if EventTrace {
-						fmt.Printf("Event: dragging top pri: %v\n", recv.Path())
-					}
-					rvs.Add(recv, fun, 10000)
-					return ki.Break
-				} else {
-					return ki.Continue
-				}
-			} else {
-				if wb.PosInBBox(pos) {
-					rvs.AddDepth(recv, fun, top)
-					return ki.Break
-				}
-				return ki.Continue
-			}
-		case events.MouseScrollEvent:
-			if em.Scrolling != nil {
-				if em.Scrolling == wb.This() {
-					if EventTrace {
-						fmt.Printf("Event: scrolling top pri: %v\n", recv.Path())
-					}
-					rvs.Add(recv, fun, 10000)
-				} else {
-					return ki.Continue
-				}
-			} else {
-				if wb.PosInBBox(pos) {
-					rvs.AddDepth(recv, fun, top)
-					return ki.Break
-				}
-				return ki.Continue
-			}
-		default:
-			if em.Dragging == wb.This() { // dragger always gets it
-				if EventTrace {
-					fmt.Printf("Event: dragging, non drag top pri: %v\n", recv.Path())
-				}
-				rvs.Add(recv, fun, 10000) // top priority -- can't steal!
-				return ki.Break
-			}
-			if !wb.PosInBBox(pos) {
-				return ki.Continue
-			}
-		}
-	}
-	rvs.AddDepth(recv, fun, top)
-	return ki.Continue
-}
-
-// // SendSig directly calls SendSig from given recv, sender for given event
-// // across all priorities.
-// func (em *EventMgr) SendSig(recv, sender Widget, evi events.Event) {
-// 	et := evi.Type()
-// 	for pri := HiPri; pri < EventPrisN; pri++ {
-// 		em.EventSigs[et][pri].SendSig(recv, sender, int64(et), evi)
-// 	}
-// }
-
-///////////////////////////////////////////////////////////////////////////
-//  Mouse event processing
-
-// MouseEvents processes mouse drag and move events
-func (em *EventMgr) MouseEvents(evi events.Event) {
-	et := evi.Type()
-	if et == events.MouseDragEvent {
-		em.MouseDragEvents(evi)
-	} else if et != events.KeyEvent { // allow modifier keypress
-		em.ResetMouseDrag()
-	}
-
-	if et == events.MouseMoveEvent {
-		em.MouseMoveEvents(evi)
-	} else {
-		em.ResetMouseMove()
-	}
-
-	if et == events.MouseButtonEvent {
-		me := evi.(events.Event)
-		em.LastModBits = me.Mods
-		em.LastSelMode = me.SelectMode()
-		em.LastMousePos = me.Pos()
-	}
-	if et == events.KeyChordEvent {
-		ke := evi.(*events.Key)
-		em.LastModBits = ke.Mods
-		em.LastSelMode = events.SelectModeBits(ke.Mods)
-	}
-}
-
-// MouseEventReset resets state for "catch" events (Dragging, Scrolling)
-func (em *EventMgr) MouseEventReset(evi events.Event) {
-	et := evi.Type()
-	if em.Dragging != nil && et != events.MouseDragEvent {
-		em.Dragging.SetFlag(false, NodeDragging)
-		em.Dragging = nil
-	}
-	if em.Scrolling != nil && et != events.MouseScrollEvent {
-		em.Scrolling = nil
-	}
-}
 
 // MouseDragEvents processes MouseDragEvent to Detect start of drag and EVEnts.
 // These require timing and delays, e.g., due to minor wiggles when pressing
@@ -503,7 +387,7 @@ func (em *EventMgr) MouseDragEvents(evi events.Event) {
 				delayMs := int(now.Sub(em.startDrag.Time()) / time.Millisecond)
 				if delayMs >= DragStartMSec {
 					dst := int(mat32.Hypot(float32(em.startDrag.Where.X-me.Pos().X), float32(em.startDrag.Where.Y-me.Pos().Y)))
-					if dst >= DragStartPix {
+					if dst >= DragStartDist {
 						em.dragStarted = true
 						em.startDrag = nil
 					}
@@ -638,67 +522,6 @@ func (em *EventMgr) ResetMouseMove() {
 	em.TimerMu.Unlock()
 }
 
-// GenMouseFocusEvents processes events.Event to generate events.Event
-// events -- returns true if any such events were sent.  If popup is true,
-// then only items on popup are in scope, otherwise items NOT on popup are in
-// scope (if no popup, everything is in scope).
-func (em *EventMgr) GenMouseFocusEvents(mev events.Event, popup bool) bool {
-
-		fe := events.NewEventCopy(events.MouseFocusEvent, mev)
-		pos := mev.LocalPos()
-		ftyp := events.MouseFocusEvent
-		updated := false
-		updt := false
-		send := em.Master.EventTopNode()
-		for pri := HiPri; pri < EventPrisN; pri++ {
-			em.EventSigs[ftyp][pri].EmitFiltered(send, int64(ftyp), &fe, func(k Widget) bool {
-				if k.Is(ki.Deleted) { // destroyed is filtered upstream
-					return ki.Break
-				}
-				if !em.Master.IsInScope(k, popup) {
-					return ki.Break
-				}
-				_, ni := AsWidget(k)
-				if ni != nil {
-					in := ni.PosInBBox(pos)
-					if in {
-						if !ni.HasFlag(MouseHasEntered) {
-							fe.Action = events.Enter
-							ni.SetFlag(true, MouseHasEntered)
-							if !updated {
-								updt = em.Master.EventTopUpdateStart()
-								updated = true
-							}
-							return ki.Continue // send event
-						} else {
-							return ki.Break // already in
-						}
-					} else { // mouse not in object
-						if ni.HasFlag(MouseHasEntered) {
-							fe.Action = events.Exit
-							ni.SetFlag(false, MouseHasEntered)
-							if !updated {
-								updt = em.Master.EventTopUpdateStart()
-								updated = true
-							}
-							return ki.Continue // send event
-						} else {
-							return ki.Break // already out
-						}
-					}
-				} else {
-					// 3D
-					return ki.Break
-				}
-			})
-		}
-		if updated {
-			em.Master.EventTopUpdateEnd(updt)
-		}
-		return updated
-	return false
-}
-
 // DoInstaDrag tests whether the given mouse DragEvent is on a widget marked
 // with InstaDrag
 func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
@@ -732,13 +555,6 @@ func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
 			}
 		}
 	return ki.Break
-}
-
-// SendHoverEvent sends mouse hover event, based on last mouse move event
-func (em *EventMgr) SendHoverEvent(he events.Event) {
-	he.ClearHandled()
-	he.Action = events.Hover
-	// em.HandleEvent(he)
 }
 
 //////////////////////////////////////////////////////////////////////

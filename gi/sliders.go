@@ -48,7 +48,7 @@ type SliderBase struct {
 	Value float32 `xml:"value" desc:"current value"`
 
 	// previous emitted value - don't re-emit if it is the same
-	EmitValue float32 `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	LastValue float32 `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
 
 	// minimum value in range
 	Min float32 `xml:"min" desc:"minimum value in range"`
@@ -225,11 +225,13 @@ func (sb *SliderBase) OnInit() {
 }
 
 // SnapValue snaps the value to step sizes if snap option is set
-func (sb *SliderBase) SnapValue() {
-	if sb.Snap {
-		sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
-		sb.Value = mat32.Truncate(sb.Value, sb.Prec)
+func (sb *SliderBase) SnapValue(val float32) float32 {
+	if !sb.Snap {
+		return val
 	}
+	val = mat32.IntMultiple(val, sb.Step)
+	val = mat32.Truncate(val, sb.Prec)
+	return val
 }
 
 // SetSliderState sets the slider state to given state, updates style
@@ -270,19 +272,18 @@ func (sb *SliderBase) SizeFromAlloc() {
 	if !sb.ValThumb {
 		sb.Size -= sb.ThSize // half on each side
 	}
-	sb.UpdatePosFromValue()
+	sb.UpdatePosFromValue(sb.Value)
 	sb.DragPos = sb.Pos
 }
 
-// EmitNewValue emits new Value, if it has not already been emitted.
-// Compares Value to EmitValue and only emits if different, sets EmitValue.
-// Returns true if value emitted, false otherwise.
-func (sb *SliderBase) EmitNewValue() bool {
-	if sb.Value == sb.EmitValue {
+// SendChanged sends a Changed message if given new value is
+// different from the existing Value.
+func (sb *SliderBase) SendChanged(val float32, e events.Event) bool {
+	if sb.LastValue == val {
 		return false
 	}
-	// sb.SliderSig.Emit(sb.This(), int64(SliderValueChanged), sb.Value)
-	sb.EmitValue = sb.Value
+	sb.LastValue = val
+	sb.Send(events.Change, e)
 	return true
 }
 
@@ -302,24 +303,25 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		}
 	}
 	sb.Pos = mat32.Max(0, sb.Pos)
-	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
-	sb.Value = mat32.Clamp(sb.Value, sb.Min, sb.Max)
+	val := mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
+	val = mat32.Clamp(val, sb.Min, sb.Max)
 	if sb.ValThumb {
-		sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal)
+		val = mat32.Min(val, sb.Max-sb.ThumbVal)
 	}
 	sb.DragPos = sb.Pos
 	if sb.Snap {
-		sb.SnapValue()
-		sb.UpdatePosFromValue()
+		val = sb.SnapValue(val)
 	}
-	if sb.Tracking && mat32.Abs(sb.Value-sb.EmitValue) > sb.TrackThr {
-		sb.EmitNewValue()
+	sb.Value = val
+	sb.UpdatePosFromValue(val)
+	if sb.Tracking && mat32.Abs(sb.Value-val) > sb.TrackThr {
+		sb.SendChanged(val, nil)
 	}
-	sb.UpdateEnd(updt)
+	sb.UpdateEndRender(updt)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value
-func (sb *SliderBase) UpdatePosFromValue() {
+func (sb *SliderBase) UpdatePosFromValue(val float32) {
 	if sb.Size == 0.0 {
 		return
 	}
@@ -331,7 +333,7 @@ func (sb *SliderBase) UpdatePosFromValue() {
 			effSz -= 0.5 // rounding errors
 		}
 	}
-	sb.Pos = effSz * (sb.Value - sb.Min) / (sb.Max - sb.Min)
+	sb.Pos = effSz * (val - sb.Min) / (sb.Max - sb.Min)
 }
 
 // SetValue sets the value and updates the slider position, but does not
@@ -345,7 +347,7 @@ func (sb *SliderBase) SetValue(val float32) {
 	val = mat32.Max(val, sb.Min)
 	if sb.Value != val {
 		sb.Value = val
-		sb.UpdatePosFromValue()
+		sb.UpdatePosFromValue(val)
 		sb.DragPos = sb.Pos
 	}
 	sb.UpdateEnd(updt)
@@ -358,7 +360,7 @@ func (sb *SliderBase) SetValueAction(val float32) {
 		return
 	}
 	sb.SetValue(val)
-	sb.EmitNewValue()
+	sb.Send(events.Change, nil)
 }
 
 // SetThumbValue sets the thumb value to given value and updates the thumb size
@@ -392,59 +394,8 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 ///////////////////////////////////////////////////////////
 // 	Events
 
-// SliderPress sets the slider in the down state -- mouse clicked down but
-// not yet up -- emits SliderPress signal
-func (sb *SliderBase) SliderPress(pos float32) {
-	sb.EmitValue = sb.Min - 1.0 // invalid value
-	updt := sb.UpdateStart()
-	sb.SetSliderState(SliderDown)
-	sb.SetSliderPos(pos)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderPressed), sb.Value)
-	// bitflasb.Set(&sb.Flag, int(SliderFlagDragging))
-	sb.UpdateEnd(updt)
-}
-
-// SliderMove called when slider moved along relevant axis
-func (sb *SliderBase) SliderMove(start, end float32) {
-	del := end - start
-	sb.SetSliderPos(sb.DragPos + del)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderMoved), sb.Value)
-}
-
-// SliderRelease called when the slider has just been released -- sends a
-// released signal and returns state to normal, and emits clicked signal if if
-// it was previously in pressed state
-func (sb *SliderBase) SliderRelease() {
-	wasPressed := (sb.State == SliderDown)
-	updt := sb.UpdateStart()
-	sb.SetSliderState(SliderHover)
-	// sb.SliderSig.Emit(sb.This(), int64(SliderReleased), sb.Value)
-	if wasPressed {
-		sb.EmitNewValue()
-	}
-	sb.UpdateEnd(updt)
-}
-
-// SliderEnterHover slider starting hover
-func (sb *SliderBase) SliderEnterHover() {
-	if sb.State != SliderHover {
-		updt := sb.UpdateStart()
-		sb.SetSliderState(SliderHover)
-		sb.UpdateEnd(updt)
-	}
-}
-
-// SliderExitHover called when slider exiting hover
-func (sb *SliderBase) SliderExitHover() {
-	if sb.State == SliderHover {
-		updt := sb.UpdateStart()
-		sb.SetSliderState(SliderActive)
-		sb.UpdateEnd(updt)
-	}
-}
-
 func (sb *SliderBase) SliderMouse() {
-	sb.On(events.SliderStart, func(e events.Event) {
+	sb.On(events.SlideStart, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
@@ -454,12 +405,12 @@ func (sb *SliderBase) SliderMouse() {
 		// SidesTODO: not sure about dim
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
-			sb.SliderPress(float32(ed.X) - spc)
+			sb.SetSliderPos(float32(ed.X) - spc)
 		} else {
-			sb.SliderPress(float32(ed.Y) - spc)
+			sb.SetSliderPos(float32(ed.Y) - spc)
 		}
 	})
-	sb.On(events.SliderMove, func(e events.Event) {
+	sb.On(events.SlideMove, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
@@ -467,12 +418,12 @@ func (sb *SliderBase) SliderMouse() {
 		st := sb.This().(SliderPositioner).PointToRelPos(e.StartPos())
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		if sb.Dim == mat32.X {
-			sb.SliderMove(float32(st.X), float32(ed.X))
+			sb.SetSliderPos(float32(ed.X) - float32(st.X))
 		} else {
-			sb.SliderMove(float32(st.Y), float32(ed.Y))
+			sb.SetSliderPos(float32(ed.Y) - float32(st.Y))
 		}
 	})
-	sb.On(events.SliderStop, func(e events.Event) {
+	sb.On(events.SlideStop, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
@@ -482,24 +433,10 @@ func (sb *SliderBase) SliderMouse() {
 		// SidesTODO: not sure about dim
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
-			sb.SliderPress(float32(ed.X) - spc)
+			sb.SetSliderPos(float32(ed.X) - spc)
 		} else {
-			sb.SliderPress(float32(ed.Y) - spc)
+			sb.SetSliderPos(float32(ed.Y) - spc)
 		}
-	})
-	sb.On(events.MouseEnter, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		e.SetHandled()
-		sb.SliderEnterHover()
-	})
-	sb.On(events.MouseLeave, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		e.SetHandled()
-		sb.SliderExitHover()
 	})
 	sb.On(events.Scroll, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
@@ -507,11 +444,11 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		cur := float32(sb.Pos)
+		// cur := float32(sb.Pos)
 		if sb.Dim == mat32.X {
-			sb.SliderMove(cur, cur+float32(se.NonZeroDelta(true))) // preferX
+			sb.SetSliderPos(float32(se.NonZeroDelta(true))) // preferX
 		} else {
-			sb.SliderMove(cur, cur-float32(se.NonZeroDelta(false))) // preferY
+			sb.SetSliderPos(float32(se.NonZeroDelta(false))) // preferY
 		}
 	})
 }
@@ -561,6 +498,7 @@ func (sb *SliderBase) SliderKeys() {
 }
 
 func (sb *SliderBase) SliderBaseHandlers() {
+	sb.WidgetHandlers()
 	sb.SliderMouse()
 	sb.SliderKeys()
 }
@@ -696,6 +634,7 @@ func (sr *Slider) SliderStyles() {
 	sr.ThSizeReal = sr.ThSize
 
 	sr.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		sr.ThumbSize = units.Px(20)
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
@@ -716,6 +655,16 @@ func (sr *Slider) SliderStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		s.Color = colors.Scheme.Primary.On
 		// STYTODO: state styles
+		switch {
+		case s.Is(states.Active):
+			// todo: just picking something at random to make it visible:
+			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
+			s.Color = colors.Scheme.Primary.On
+		case s.Is(states.Hovered):
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		case s.Is(states.Sliding):
+			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+		}
 	})
 }
 

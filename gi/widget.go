@@ -54,6 +54,15 @@ type Widget interface {
 	// so this call just does the core configuration.
 	ConfigWidget(sc *Scene)
 
+	// StateIs returns true if given Style.State flag is set
+	StateIs(flag enums.BitFlag) bool
+
+	// AbilityIs returns true if given Style.Abilities flag is set
+	AbilityIs(flag enums.BitFlag) bool
+
+	// SetState sets given Style.State flags
+	SetState(on bool, state ...enums.BitFlag)
+
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
 	ApplyStyle(sc *Scene)
