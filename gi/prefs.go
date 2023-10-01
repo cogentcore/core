@@ -7,6 +7,7 @@ package gi
 import (
 	"encoding/json"
 	"fmt"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os/user"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
@@ -49,20 +49,20 @@ func Init() {
 // the GoGi user preferences directory -- see oswin/App for further info.
 type Preferences struct {
 
+	// the color theme
+	Theme Themes `desc:"the color theme"`
+
+	// the primary color used to generate the color scheme
+	Color color.RGBA `desc:"the primary color used to generate the color scheme"`
+
+	// the density (compactness) of content
+	Density Densities `desc:"the density (compactness) of content"`
+
 	// [min: 0.1] [step: 0.1] overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
 	LogicalDPIScale float32 `min:"0.1" step:"0.1" desc:"overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc"`
 
 	// screen-specific preferences -- will override overall defaults if set
 	ScreenPrefs map[string]ScreenPrefs `desc:"screen-specific preferences -- will override overall defaults if set"`
-
-	// the color theme
-	Theme Themes `desc:"the color theme"`
-
-	// the density (compactness) of content
-	Density Densities `desc:"the density (compactness) of content"`
-
-	// the color key used to generate the color scheme
-	ColorKey matcolor.Key `desc:"the color key used to generate the color scheme"`
 
 	// [view: inline] parameters controlling GUI behavior
 	Params ParamPrefs `view:"inline" desc:"parameters controlling GUI behavior"`
@@ -113,10 +113,27 @@ type Preferences struct {
 // Prefs are the overall preferences
 var Prefs = Preferences{}
 
+// OverridePrefsColor is whether to override the color specified in [Prefs.Color]
+// with whatever the developer specifies, typically through [colors.SetSchemes].
+// The intended usage is:
+//
+//	gi.OverridePrefsColor = true
+//	colors.SetSchemes(colors.Green)
+//
+// It is recommended that you do not set this to give the user more control over
+// their experience, but you can if you wish to enforce brand colors.
+//
+// The user preference color will always be overridden if it is the default value
+// of Google Blue (#4285f4), so a more recommended option would be to set your
+// own custom scheme but not OverridePrefsColor, giving you brand colors unless
+// your user explicitly states a preference for a specific color.
+var OverridePrefsColor = false
+
 func (pf *Preferences) Defaults() {
-	pf.LogicalDPIScale = 1.0
 	pf.Theme = ThemeLight
+	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.Density = DensityMedium
+	pf.LogicalDPIScale = 1.0
 	pf.Params.Defaults()
 	pf.Editor.Defaults()
 	pf.FavPaths.SetToDefaults()
@@ -204,13 +221,12 @@ func (pf *Preferences) Apply() {
 			pf.FavPaths[i].Ic = "folder"
 		}
 	}
-	/*
-		if pf.ColorSchemeType == styles.ColorSchemeLight {
-			ColorScheme = ColorSchemes.Light
-		} else {
-			ColorScheme = ColorSchemes.Dark
-		}
-	*/
+	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
+	// which means that we will always override the color, even without OverridePrefsColor
+	if !OverridePrefsColor || pf.Color == (color.RGBA{66, 133, 244, 255}) {
+		colors.SetSchemes(pf.Color)
+	}
+	colors.SetScheme(pf.Theme == ThemeDark) // TODO(kai): support ThemeAuto
 
 	// TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
 	events.DoubleClickInterval = pf.Params.DoubleClickInterval
