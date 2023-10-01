@@ -762,90 +762,85 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 }
 
 func (w *RenderWin) HandleWindowEvents(evi events.Event) {
-	/*
-	   ev := evi.(*window.Event)
-	   et := evi.Type()
-	   switch et {
-	   case events.WindowPaint:
+	et := evi.Type()
+	switch et {
+	case events.WindowPaint:
+		evi.SetHandled()
+		w.RenderCtx().ReadUnlock() // one case where we need to break lock
+		w.RenderWindow()
+		w.RenderCtx().ReadLock()
 
-	   	evi.SetHandled()
-	   	w.RenderCtx().ReadUnlock() // one case where we need to break lock
-	   	w.RenderWindow()
-	   	w.RenderCtx().ReadLock()
+	case events.WindowResize:
+		evi.SetHandled()
+		w.Resized(w.GoosiWin.Size())
 
-	   case goosi.WindowResizeEvent:
+	case events.Window:
+		ev := evi.(*events.WindowEvent)
+		switch ev.Action {
+		case events.Close:
+			// fmt.Printf("got close event for window %v \n", w.Name)
+			evi.SetHandled()
+			w.SetFlag(true, WinFlagStopEventLoop)
+			w.RenderCtx().ReadUnlock() // one case where we need to break lock
+			w.Closed()
+			w.RenderCtx().ReadLock()
+		case events.Minimize:
+			evi.SetHandled()
+			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
+			// and lets the size event go through when we come back later
+			// if goosi.TheApp.Platform().IsMobile() {
+			// 	w.Scene.Geom.Size = image.Point{}
+			// }
+		case events.Show:
+			evi.SetHandled()
+			// note that this is sent delayed by driver
+			if WinEventTrace {
+				fmt.Printf("Win: %v got show event\n", w.Name)
+			}
+			// if w.NeedWinMenuUpdate() {
+			// 	w.MainMenuUpdateRenderWins()
+			// }
+			w.SendShowEvent() // happens AFTER full render
+		case events.Move:
+			evi.SetHandled()
+			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
+			if WinGeomTrace {
+				log.Printf("WinGeomPrefs: recording from Move\n")
+			}
+			WinGeomMgr.RecordPref(w)
+		case events.Focus:
+			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
+			if !w.HasFlag(WinFlagGotFocus) {
+				w.SetFlag(true, WinFlagGotFocus)
+				w.SendWinFocusEvent(events.Focus)
+				if WinEventTrace {
+					fmt.Printf("Win: %v got focus\n", w.Name)
+				}
+				// if w.NeedWinMenuUpdate() {
+				// 	w.MainMenuUpdateRenderWins()
+				// }
+			} else {
+				if WinEventTrace {
+					fmt.Printf("Win: %v got extra focus\n", w.Name)
+				}
+			}
+		case events.DeFocus:
+			if WinEventTrace {
+				fmt.Printf("Win: %v lost focus\n", w.Name)
+			}
+			w.SetFlag(false, WinFlagGotFocus)
+			w.SendWinFocusEvent(events.DeFocus)
+		case events.ScreenUpdate:
+			w.Resized(w.GoosiWin.Size())
+			// TODO: figure out how to restore this stuff without breaking window size on mobile
 
-	   	evi.SetHandled()
-	   	w.Resized(w.GoosiWin.Size())
-
-	   case goosi.WindowEvent:
-
-	   		switch ev.Action {
-	   		case window.Close:
-	   			// fmt.Printf("got close event for window %v \n", w.Name)
-	   			evi.SetHandled()
-	   			w.SetFlag(true, WinFlagStopEventLoop)
-	   			w.RenderCtx().ReadUnlock() // one case where we need to break lock
-	   			w.Closed()
-	   			w.RenderCtx().ReadLock()
-	   		case window.Minimize:
-	   			evi.SetHandled()
-	   			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
-	   			// and lets the size event go through when we come back later
-	   			// if goosi.TheApp.Platform().IsMobile() {
-	   			// 	w.Scene.Geom.Size = image.Point{}
-	   			// }
-	   		case window.Show:
-	   			evi.SetHandled()
-	   			// note that this is sent delayed by driver
-	   			if WinEventTrace {
-	   				fmt.Printf("Win: %v got show event\n", w.Name)
-	   			}
-	   			// if w.NeedWinMenuUpdate() {
-	   			// 	w.MainMenuUpdateRenderWins()
-	   			// }
-	   			w.SendShowEvent() // happens AFTER full render
-	   		case window.Move:
-	   			evi.SetHandled()
-	   			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
-	   			if WinGeomTrace {
-	   				log.Printf("WinGeomPrefs: recording from Move\n")
-	   			}
-	   			WinGeomMgr.RecordPref(w)
-	   		case window.Focus:
-	   			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
-	   			if !w.HasFlag(WinFlagGotFocus) {
-	   				w.SetFlag(true, WinFlagGotFocus)
-	   				w.SendWinFocusEvent(window.Focus)
-	   				if WinEventTrace {
-	   					fmt.Printf("Win: %v got focus\n", w.Name)
-	   				}
-	   				// if w.NeedWinMenuUpdate() {
-	   				// 	w.MainMenuUpdateRenderWins()
-	   				// }
-	   			} else {
-	   				if WinEventTrace {
-	   					fmt.Printf("Win: %v got extra focus\n", w.Name)
-	   				}
-	   			}
-	   		case window.DeFocus:
-	   			if WinEventTrace {
-	   				fmt.Printf("Win: %v lost focus\n", w.Name)
-	   			}
-	   			w.SetFlag(false, WinFlagGotFocus)
-	   			w.SendWinFocusEvent(window.DeFocus)
-	   		case window.ScreenUpdate:
-	   			w.Resized(w.GoosiWin.Size())
-	   			// TODO: figure out how to restore this stuff without breaking window size on mobile
-
-	   			// WinGeomMgr.AbortSave() // anything just prior to this is sus
-	   			// if !goosi.TheApp.NoScreens() {
-	   			// 	Prefs.UpdateAll()
-	   			// 	WinGeomMgr.RestoreAll()
-	   			// }
-	   		}
-	   	}
-	*/
+			// WinGeomMgr.AbortSave() // anything just prior to this is sus
+			// if !goosi.TheApp.NoScreens() {
+			// 	Prefs.UpdateAll()
+			// 	WinGeomMgr.RestoreAll()
+			// }
+		}
+	}
 }
 
 // InitialFocus establishes the initial focus for the window if no focus
