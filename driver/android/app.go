@@ -144,7 +144,6 @@ func (app *appImpl) stopMain() {
 
 // initVk initializes vulkan things
 func (app *appImpl) initVk() {
-	log.SetPrefix("GoMobile: ")
 	err := vk.SetDefaultGetInstanceProcAddr()
 	if err != nil {
 		log.Fatalln("goosi/driver/android.app.initVk: failed to set Vulkan DefaultGetInstanceProcAddr")
