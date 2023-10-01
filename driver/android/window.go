@@ -88,13 +88,11 @@ func (w *windowImpl) winLoop() {
 	} else {
 		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
 	}
-	hasShown := false
 outer:
 	for {
 		select {
 		case <-w.winClose:
-			winPaint.Stop()
-			hasShown = false
+			winPaint.Stop() // todo: close channel too??
 			break outer
 		case f := <-w.runQueue:
 			if w.app.gpu == nil {
@@ -105,12 +103,17 @@ outer:
 				f.done <- true
 			}
 		case <-winPaint.C:
+			// the app is closed, so we are done
 			if w.app.gpu == nil {
 				break outer
 			}
-			if hasShown {
-				w.EvMgr.WindowPaint()
+			// we don't have a surface, so we skip for
+			// now, but we don't break the outer loop,
+			// as we could come back later
+			if w.app.Surface == nil {
+				break
 			}
+			w.EvMgr.WindowPaint()
 			// NOTE: this is incredibly important; do not remove it (see [onNativeWindowRedrawNeeded] for why)
 			select {
 			case windowRedrawDone <- struct{}{}:

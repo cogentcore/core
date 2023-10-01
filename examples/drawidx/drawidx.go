@@ -189,7 +189,7 @@ func mainrun(a goosi.App) {
 				return
 			}
 		case events.WindowPaint:
-			// fmt.Println("paint")
+			fmt.Println("paint")
 			renderFrame()
 		case events.MouseDown:
 			if haveKeyboard {
