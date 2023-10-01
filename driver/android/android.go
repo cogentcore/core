@@ -288,7 +288,7 @@ func main(f func(*appImpl)) {
 	// Preserve this OS thread for:
 	//	1. the attached JNI thread
 	//	2. the GL context
-	if err := mobileinit.RunOnJVM(mainUI); err != nil {
+	if err := mobileinit.RunOnJVM(theApp.mainUI); err != nil {
 		log.Fatalf("app: %v", err)
 	}
 }
@@ -364,11 +364,11 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			app.window.EvMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
 		case <-activityDestroyed:
 			app.window.EvMgr.Window(events.Close)
-		case <-app.publish: // TODO: do something here?
-			select {
-			case windowRedrawDone <- struct{}{}:
-			default:
-			}
+			// case <-app.publish: // TODO(kai): do something here?
+			// 	select {
+			// 	case windowRedrawDone <- struct{}{}:
+			// 	default:
+			// 	}
 		}
 	}
 }
