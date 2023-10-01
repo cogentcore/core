@@ -27,7 +27,6 @@ import (
 
 type windowImpl struct {
 	goosi.WindowBase
-	events.Deque
 	app            *appImpl
 	glw            *glfw.Window
 	Surface        *vgpu.Surface

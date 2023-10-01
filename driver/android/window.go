@@ -19,9 +19,7 @@ import (
 
 type windowImpl struct {
 	goosi.WindowBase
-	events.Deque
 	app                *appImpl
-	EventMgr           events.Mgr
 	scrnName           string // last known screen name
 	runQueue           chan funcRun
 	publish            chan struct{}

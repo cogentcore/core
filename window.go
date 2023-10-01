@@ -244,6 +244,7 @@ type Window interface {
 // WindowBase provides a base-level implementation of the generic data aspects
 // of the window, including maintaining the current window size and dpi
 type WindowBase struct {
+	events.Deque
 	Nm          string
 	Titl        string
 	Pos         image.Point
