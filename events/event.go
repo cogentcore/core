@@ -83,41 +83,59 @@ type Event interface {
 	// to compute Local versions of positions.
 	LocalOff() image.Point
 
-	// LocalPos returns the local position, which can be adjusted from the window pos
-	// via SubLocalOffset based on a local top-left coordinate for a region within
-	// the window.
+	// LocalPos returns the local position,
+	// which can be adjusted from the window pos
+	// via SubLocalOffset based on a local top-left
+	// coordinate for a region within the window.
 	LocalPos() image.Point
 
-	// StartPos returns the original starting window-based position.
+	// StartPos returns the starting (MouseDown) window-based position.
 	StartPos() image.Point
 
-	// LocalStartPos returns the local starting position
+	// LocalStartPos returns the starting (MouseDown) local position
 	LocalStartPos() image.Point
 
-	// PrevPos returns the original previous window-based position.
+	// StartDelta returns Pos - Start
+	StartDelta() image.Point
+
+	// PrevPos returns the previous (MouseMove/Drag) window-based position.
 	PrevPos() image.Point
 
-	// LocalPrevPos returns the local previous position
+	// LocalPrevPos returns the previous (MouseMove/Drag) local position
 	LocalPrevPos() image.Point
+
+	// PrevDelta returns Pos - Prev
+	PrevDelta() image.Point
 
 	// Time returns the time at which the event was generated, in UnixNano nanosecond units
 	Time() time.Time
 
-	// StartTime returns time of StartPos, or other starting time of relevance to the event,
-	// in UnixNano nanosecond units.
+	// StartTime returns time of StartPos (MouseDown),
+	// or other starting time of relevance to the event.
 	StartTime() time.Time
 
-	// PrevTime returns time of PrevPos, or other earlier time of relevance to the event,
-	// in UnixNano nanosecond units.
+	// SinceStart returns Time().Sub(StartTime()) -- duration since Start
+	SinceStart() time.Duration
+
+	// PrevTime returns time of PrevPos (MouseMove),
+	// or other earlier time of relevance to the event.
 	PrevTime() time.Time
 
+	// SincePrev returns Time().Sub(PrevTime()) -- duration since Prev
+	SincePrev() time.Duration
+
 	// IsHandled returns whether this event has already been processed
+	// Event handling checks this and terminates processing if
+	// SetHandled has been called.
 	IsHandled() bool
 
-	// SetHandled marks the event as having been processed
+	// SetHandled marks the event as having been processed,
+	// so no further processing occurs.  This can accomplish
+	// the same effect as PreventDefault function in JavaScript.
 	SetHandled()
 
-	// Init sets the time to now, and any other init -- done just prior to event delivery
+	// Init sets the time to now, and any other initialization.
+	// Done just prior to event Send.
 	Init()
 
 	// Clone returns a duplicate of this event with the basic event parameters

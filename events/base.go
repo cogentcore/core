@@ -119,8 +119,16 @@ func (ev Base) StartTime() time.Time {
 	return ev.StTime.Time()
 }
 
+func (ev Base) SinceStart() time.Duration {
+	return ev.Time().Sub(ev.StartTime())
+}
+
 func (ev Base) PrevTime() time.Time {
 	return ev.PrvTime.Time()
+}
+
+func (ev Base) SincePrev() time.Duration {
+	return ev.Time().Sub(ev.PrevTime())
 }
 
 func (ev Base) IsHandled() bool {
@@ -177,8 +185,11 @@ func (ev Base) PrevPos() image.Point {
 	return ev.Prev
 }
 
-// Delta returns the amount of mouse movement (Where - Prev)
-func (ev Base) Delta() image.Point {
+func (ev Base) StartDelta() image.Point {
+	return ev.Where.Sub(ev.Start)
+}
+
+func (ev Base) PrevDelta() image.Point {
 	return ev.Where.Sub(ev.Prev)
 }
 

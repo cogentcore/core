@@ -405,9 +405,9 @@ func _TypesNoOp() {
 	_ = x[DragMove-(13)]
 	_ = x[DragEnter-(14)]
 	_ = x[DragLeave-(15)]
-	_ = x[SliderStart-(16)]
-	_ = x[SliderMove-(17)]
-	_ = x[SliderStop-(18)]
+	_ = x[SlideStart-(16)]
+	_ = x[SlideMove-(17)]
+	_ = x[SlideStop-(18)]
 	_ = x[Scroll-(19)]
 	_ = x[KeyDown-(20)]
 	_ = x[KeyUp-(21)]
@@ -461,12 +461,12 @@ var _TypesNameToValueMap = map[string]Types{
 	`dragenter`:      14,
 	`DragLeave`:      15,
 	`dragleave`:      15,
-	`SliderStart`:    16,
-	`sliderstart`:    16,
-	`SliderMove`:     17,
-	`slidermove`:     17,
-	`SliderStop`:     18,
-	`sliderstop`:     18,
+	`SlideStart`:     16,
+	`slidestart`:     16,
+	`SlideMove`:      17,
+	`slidemove`:      17,
+	`SlideStop`:      18,
+	`slidestop`:      18,
 	`Scroll`:         19,
 	`scroll`:         19,
 	`KeyDown`:        20,
@@ -522,9 +522,9 @@ var _TypesDescMap = map[Types]string{
 	13: `DragMove is for a MouseDrag event during the drag-n-drop sequence. Usually don&#39;t need to listen to this one. MouseDrag is also sent.`,
 	14: `DragEnter is like MouseEnter but after a DragStart during a drag-n-drop sequence. MouseEnter is not sent in this case.`,
 	15: `DragLeave is like MouseLeave but after a DragStart during a drag-n-drop sequence. MouseLeave is not sent in this case.`,
-	16: `SliderStart is for a Slideable element when Active and a sufficient distance of MouseDrag events has occurred to engage the SliderStart event. Sets the Sliding state.`,
-	17: `SliderMove is for a Slideable element after SliderStart is being dragged via MouseDrag events.`,
-	18: `SliderStop is when the mouse button is released on a Slideable element being dragged via MouseDrag events. This typically also accompanied by a Changed event for the new slider value.`,
+	16: `SlideStart is for a Slideable element when Active and a sufficient distance of MouseDrag events has occurred to engage the SlideStart event. Sets the Sliding state.`,
+	17: `SlideMove is for a Slideable element after SlideStart is being dragged via MouseDrag events.`,
+	18: `SlideStop is when the mouse button is released on a Slideable element being dragged via MouseDrag events. This typically also accompanied by a Changed event for the new slider value.`,
 	19: `Scroll is for scroll wheel or other scrolling events (gestures). These are not unique and Delta is updated during compression.`,
 	20: `KeyDown is when a key is pressed down. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
 	21: `KeyUp is when a key is released. This provides fine-grained data about each key as it happens. KeyChord is recommended for a more complete Key event.`,
@@ -562,9 +562,9 @@ var _TypesMap = map[Types]string{
 	13: `DragMove`,
 	14: `DragEnter`,
 	15: `DragLeave`,
-	16: `SliderStart`,
-	17: `SliderMove`,
-	18: `SliderStop`,
+	16: `SlideStart`,
+	17: `SlideMove`,
+	18: `SlideStop`,
 	19: `Scroll`,
 	20: `KeyDown`,
 	21: `KeyUp`,

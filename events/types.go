@@ -105,19 +105,19 @@ const (
 	// drag-n-drop sequence.  MouseLeave is not sent in this case.
 	DragLeave
 
-	// SliderStart is for a Slideable element when Active and a
+	// SlideStart is for a Slideable element when Active and a
 	// sufficient distance of MouseDrag events has occurred to
-	// engage the SliderStart event.  Sets the Sliding state.
-	SliderStart
+	// engage the SlideStart event.  Sets the Sliding state.
+	SlideStart
 
-	// SliderMove is for a Slideable element after SliderStart
+	// SlideMove is for a Slideable element after SlideStart
 	// is being dragged via MouseDrag events.
-	SliderMove
+	SlideMove
 
-	// SliderStop is when the mouse button is released on a Slideable
+	// SlideStop is when the mouse button is released on a Slideable
 	// element being dragged via MouseDrag events.  This typically
 	// also accompanied by a Changed event for the new slider value.
-	SliderStop
+	SlideStop
 
 	// Scroll is for scroll wheel or other scrolling events (gestures).
 	// These are not unique and Delta is updated during compression.
