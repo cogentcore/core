@@ -223,6 +223,23 @@ func (em *EventMgr) UpdateHovers(ws []Widget, evi events.Event) {
 	em.Hovers = hov
 }
 
+func (em *EventMgr) AllInBBox(w Widget, allbb *[]Widget, pos image.Point) {
+	w.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+			return ki.Break
+		}
+		if !wb.PosInBBox(pos) {
+			return ki.Break
+		}
+		*allbb = append(*allbb, wi)
+		if wb.Parts != nil {
+			em.AllInBBox(wb.Parts, allbb, pos)
+		}
+		return ki.Continue
+	})
+}
+
 func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	pos := evi.LocalPos()
 	et := evi.Type()
@@ -254,18 +271,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	}
 
 	var allbb []Widget
-
-	sc.Frame.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
-			return ki.Break
-		}
-		if !wb.PosInBBox(pos) {
-			return ki.Break
-		}
-		allbb = append(allbb, wi)
-		return ki.Continue
-	})
+	em.AllInBBox(&sc.Frame, &allbb, pos)
 
 	n := len(allbb)
 	if n == 0 {
