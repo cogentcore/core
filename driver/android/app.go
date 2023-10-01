@@ -70,7 +70,7 @@ func Main(f func(goosi.App)) {
 		mainCallback(theApp)
 		theApp.stopMain()
 	}()
-	theApp.eventLoop()
+	theApp.mainLoop()
 }
 
 type funcRun struct {
@@ -114,6 +114,27 @@ func (app *appImpl) PollEventsOnMain() {
 // GUI responsiveness.
 func (app *appImpl) PollEvents() {
 	// TODO: implement?
+}
+
+// mainLoop starts running event loop on main thread (must be called
+// from the main thread).
+func (app *appImpl) mainLoop() {
+	app.mainQueue = make(chan funcRun)
+	app.mainDone = make(chan struct{})
+	// SetThreadPri(1)
+	// time.Sleep(100 * time.Millisecond)
+	for {
+		select {
+		case <-app.mainDone:
+			app.destroyVk()
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+		}
+	}
 }
 
 // stopMain stops the main loop and thus terminates the app
@@ -352,7 +373,7 @@ func SrcDir(dir string) (absDir string, err error) {
 }
 
 func (app *appImpl) ClipBoard(win goosi.Window) clip.Board {
-	// TODO: implement
+	// TODO: implement clipboard
 	// app.mu.Lock()
 	// app.ctxtwin = win.(*windowImpl)
 	// app.mu.Unlock()

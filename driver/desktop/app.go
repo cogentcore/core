@@ -141,7 +141,7 @@ func (app *appImpl) PollEvents() {
 	app.RunOnMain(func() { app.PollEventsOnMain() })
 }
 
-// MainLoop starts running event loop on main thread (must be called
+// mainLoop starts running event loop on main thread (must be called
 // from the main thread).
 func (app *appImpl) mainLoop() {
 	app.mainQueue = make(chan funcRun)
