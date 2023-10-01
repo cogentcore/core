@@ -46,7 +46,7 @@ type Screen struct {
 	// On OS-X  it is backingScaleFactor = 2.0 on "retina"
 	DevicePixelRatio float32
 
-	//	PixSize is the number of actual pixels in the screen
+	// PixSize is the number of actual pixels in the screen
 	// computed as Size * DevicePixelRatio
 	PixSize image.Point
 

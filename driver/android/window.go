@@ -154,7 +154,7 @@ func (w *windowImpl) SendEmptyEvent() {
 }
 
 func (w *windowImpl) Screen() *goosi.Screen {
-	sc := w.app.screens[0]
+	sc := w.app.screen[0]
 	return sc
 }
 

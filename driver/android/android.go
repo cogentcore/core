@@ -47,6 +47,7 @@ void Java_org_golang_app_GoNativeActivity_filePickerReturned(JNIEnv *env, jclass
 */
 import "C"
 import (
+	"image"
 	"log"
 	"os"
 	"runtime"
@@ -59,7 +60,6 @@ import (
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
 	"goki.dev/mobile/event/key"
-	"goki.dev/mobile/event/lifecycle"
 	"goki.dev/mobile/event/paint"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
@@ -336,8 +336,6 @@ var DisplayMetrics struct {
 }
 
 func mainUI(vm, jniEnv, ctx uintptr) error {
-	// workAvailable := theApp.worker.WorkAvailable()
-
 	donec := make(chan struct{})
 	go func() {
 		mainUserFn(theApp)
@@ -363,6 +361,9 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			theApp.window.EventMgr.Window(events.Focus)
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
+			theApp.screen.ScreenNumber = 0
+			theApp.screen.PixSize = image.Point{widthPx, heightPx}
+			theApp.screen.Geometry = image.Rectangle{Max: theApp.screen.PixSize}
 			theApp.eventsIn <- size.Event{
 				WidthPx:       widthPx,
 				HeightPx:      heightPx,
@@ -378,30 +379,14 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 			}
 			theApp.eventsIn <- paint.Event{External: true}
 		case <-windowDestroyed:
-			// if C.surface != nil {
-			// 	if errStr := C.destroyEGLSurface(); errStr != nil {
-			// 		return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-			// 	}
-			// }
-			// C.surface = nil
-			theApp.sendLifecycle(lifecycle.StageAlive)
+			theApp.window.EventMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
 		case <-activityDestroyed:
-			theApp.sendLifecycle(lifecycle.StageDead)
-		// case <-workAvailable:
-		// 	theApp.worker.DoWork()
-		case <-theApp.publish:
-			// TODO: compare a generation number to redrawGen for stale paints?
-			// if C.surface != nil {
-			// 	// eglSwapBuffers blocks until vsync.
-			// 	if C.eglSwapBuffers(C.display, C.surface) == C.EGL_FALSE {
-			// 		log.Printf("app: failed to swap buffers (%s)", eglGetError())
-			// 	}
-			// }
+			theApp.window.EventMgr.Window(events.Close)
+		case <-theApp.publish: // TODO: do something here?
 			select {
 			case windowRedrawDone <- struct{}{}:
 			default:
 			}
-			theApp.publishResult <- PublishResult{}
 		}
 	}
 }

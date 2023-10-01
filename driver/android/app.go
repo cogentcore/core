@@ -29,7 +29,7 @@ import (
 )
 
 var theApp = &appImpl{
-	screens:      make([]*goosi.Screen, 0),
+	screen:       &goosi.Screen{},
 	name:         "GoGi",
 	quitCloseCnt: make(chan struct{}),
 }
@@ -47,9 +47,8 @@ type appImpl struct {
 	window        *windowImpl
 	gpu           *vgpu.GPU
 	sizeEvent     size.Event // the last size event
-	screens       []*goosi.Screen
-	screensAll    []*goosi.Screen // unique list of all screens ever seen -- get info from here if fails
-	noScreens     bool            // if all screens have been disconnected, don't do anything..
+	screen        *goosi.Screen
+	noScreens     bool // if all screens have been disconnected, don't do anything..
 	name          string
 	about         string
 	openFiles     []string
@@ -221,13 +220,6 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	return nil
 }
 
-func (app *appImpl) setScreen(sc *goosi.Screen) {
-	if len(app.screens) == 0 {
-		app.screens = make([]*goosi.Screen, 1)
-	}
-	app.screens[0] = sc
-}
-
 // updateScreen gets the size information from [app.sizeEvent],
 // updates the window sizing information, and then calls [setScreen].
 func (app *appImpl) updateScreen() {
@@ -255,28 +247,28 @@ func (app *appImpl) DeleteWin(w *windowImpl) {
 }
 
 func (app *appImpl) NScreens() int {
-	return len(app.screens)
+	if app.screen != nil {
+		return 1
+	}
+	return 0
 }
 
 func (app *appImpl) Screen(scrN int) *goosi.Screen {
-	sz := len(app.screens)
-	if scrN < sz {
-		return app.screens[scrN]
+	if scrN == 0 {
+		return app.screen
 	}
 	return nil
 }
 
 func (app *appImpl) ScreenByName(name string) *goosi.Screen {
-	for _, sc := range app.screens {
-		if sc.Name == name {
-			return sc
-		}
+	if app.screen.Name == name {
+		return app.screen
 	}
 	return nil
 }
 
 func (app *appImpl) NoScreens() bool {
-	return app.noScreens
+	return app.screen == nil
 }
 
 func (app *appImpl) NWindows() int {
