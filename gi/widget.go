@@ -113,10 +113,10 @@ type Widget interface {
 	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(ev events.Event)
 
-	// SendMe sends an event of given type to this widget,
+	// Send sends an event of given type to this widget,
 	// optionally starting from values in the given original event
 	// (recommended to include where possible).
-	SendMe(ev events.Types, orig events.Event)
+	Send(ev events.Types, orig events.Event)
 
 	// FocusChanged is called on node for changes in focus -- see the
 	// FocusChanges values.

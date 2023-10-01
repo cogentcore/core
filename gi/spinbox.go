@@ -316,7 +316,7 @@ func (sb *SpinBox) SpinBoxTextFieldSelect() {
 	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
 	tf.On(events.Select, func(e events.Event) {
 		sb.SetSelected(!sb.StateIs(states.Selected))
-		sb.SendMe(events.Select, nil)
+		sb.Send(events.Select, nil)
 	})
 }
 

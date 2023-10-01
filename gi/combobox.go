@@ -614,7 +614,7 @@ func (cb *ComboBox) ComboBoxKeys() {
 		case kf == KeyFunEnter || (!cb.Editable && e.KeyRune() == ' '):
 			// if !(kt.Rune == ' ' && cbb.Sc.Type == ScCompleter) {
 			e.SetHandled()
-			cb.SendMe(events.Click, e)
+			cb.Send(events.Click, e)
 			// }
 		}
 	})

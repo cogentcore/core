@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/girl/states"
@@ -25,7 +26,7 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 // SendMe sends an event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).
-func (wb *WidgetBase) SendMe(typ events.Types, orig events.Event) {
+func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 	var e events.Event
 	if orig != nil {
 		e = orig.Clone()
@@ -45,6 +46,11 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 }
 
 func (wb *WidgetBase) HandleEvent(ev events.Event) {
+	if EventTrace {
+		if ev.Type() != events.MouseMove {
+			fmt.Println("Event to Widget:", wb.Path(), ev.String())
+		}
+	}
 	wb.Listeners.Call(ev)
 }
 

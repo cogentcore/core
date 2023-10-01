@@ -750,7 +750,7 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 	defer w.RenderCtx().ReadUnlock()
 
 	et := evi.Type()
-	if EventTrace && et != events.WindowPaint {
+	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
 		log.Printf("Got event: %s\n", et.String())
 	}
 	if et >= events.Window && et <= events.WindowPaint {
@@ -1461,7 +1461,7 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Name, chord, sa.Text)
 	}
-	sa.SendMe(events.Click, nil)
+	sa.Send(events.Click, nil)
 	return true
 }
 

@@ -13,33 +13,19 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// EventPris for different queues of event signals, processed in priority order
-type EventPris int32 //enums:enum
-
-const (
-	// HiPri = high priority -- event receivers processed first -- can be used
-	// to override default behavior
-	HiPri EventPris = iota
-
-	// RegPri = default regular priority -- most should be here
-	RegPri
-
-	// LowPri = low priority -- processed last -- typically for containers /
-	// dialogs etc
-	LowPri
-
-	// LowRawPri = unfiltered (raw) low priority -- ignores whether the event
-	// was already processed.
-	LowRawPri
-)
-
-const (
-	// Popups means include popups
-	Popups = true
-
-	// NoPopups means exclude popups
-	NoPopups = false
-)
+// // MgrActive indicates current active state
+// type MgrActive int32 //enums:enum
+//
+// const (
+// 	// NothingActive indicates no active state
+// 	NothingActive MgrActive = iota
+//
+// 	Pressing
+//
+// 	Dragging
+//
+// 	Sliding
+// )
 
 // EventMgr is an event manager that handles incoming events for a
 // MainStage object (Window, Dialog, Sheet).  It distributes events
@@ -53,11 +39,23 @@ type EventMgr struct {
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
 
-	// node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same
-	Dragging Widget `desc:"node receiving mouse dragging events -- not for DND but things like sliders -- anchor to same"`
+	// Current active state
+	// Active MgrActive
 
-	// node receiving mouse scrolling events -- anchor to same
-	Scrolling Widget `desc:"node receiving mouse scrolling events -- anchor to same"`
+	// stack of hovered events
+	Hovers []Widget
+
+	// node that was just pressed
+	Press Widget
+
+	// node receiving mouse dragging events -- for drag-n-drop
+	Drag Widget
+
+	// node receiving mouse sliding events
+	Slide Widget
+
+	// node receiving mouse scrolling events
+	Scroll Widget
 
 	// stage of DND process
 	// DNDStage DNDStages `desc:"stage of DND process"`
@@ -135,17 +133,14 @@ func (em *EventMgr) RenderWin() *RenderWin {
 // 	HandleEvent
 
 func (em *EventMgr) HandleEvent(sc *Scene, evi events.Event) {
-	et := evi.Type()
-	if et > events.TypesN || et < 0 {
-		return // can't handle other types of events here
-	}
+	// et := evi.Type()
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
 
 	switch {
 	case evi.HasPos():
 		em.HandlePosEvent(sc, evi)
-	// case evi.OnFocus(): // todo: needs more
-	// 	em.HandleFocusEvent(sc, evi)
+	case evi.NeedsFocus():
+		em.HandleFocusEvent(sc, evi)
 	default:
 		em.HandleOtherEvent(sc, evi)
 	}
@@ -182,11 +177,81 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	*/
 }
 
+func (em *EventMgr) ResetOnMouseDown() {
+	em.Press = nil
+	em.Drag = nil
+	em.Slide = nil
+}
+
+// UpdateHovers updates the hovered widgets based on current
+// widgets in bounding box.  For mouse move but not drag.
+func (em *EventMgr) UpdateHovers(ws []Widget, evi events.Event) {
+	hov := make([]Widget, 0, len(ws))
+	for _, w := range ws {
+		wb := w.AsWidget()
+		if wb.Style.Abilities.IsHoverable() {
+			hov = append(hov, w)
+		}
+	}
+
+	for _, prv := range em.Hovers {
+		stillIn := false
+		for _, cur := range hov {
+			if prv == cur {
+				stillIn = true
+				break
+			}
+		}
+		if !stillIn {
+			prv.Send(events.MouseLeave, evi)
+		}
+	}
+
+	for _, cur := range hov {
+		wasIn := false
+		for _, prv := range em.Hovers {
+			if prv == cur {
+				wasIn = true
+				break
+			}
+		}
+		if !wasIn {
+			cur.Send(events.MouseEnter, evi)
+		}
+	}
+	// todo: detect change in top one, use to update cursor
+	em.Hovers = hov
+}
+
 func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	pos := evi.LocalPos()
+	et := evi.Type()
 
-	// todo: all the stuff about dragging here
-	// todo: sc.Decor needs to be processed too!  do that first!
+	isDrag := false
+	switch et {
+	case events.MouseDown:
+		em.ResetOnMouseDown()
+	case events.MouseDrag:
+		switch {
+		case em.Drag != nil:
+			isDrag = true
+			em.Drag.HandleEvent(evi)
+			em.Drag.Send(events.DragMove, evi)
+			// still needs to handle dragenter / leave
+		case em.Slide != nil:
+			em.Slide.HandleEvent(evi)
+			em.Slide.Send(events.DragMove, evi)
+			return // nothing further
+		case em.Press != nil:
+			// todo: distance to start sliding, dragging
+		}
+	case events.Scroll:
+		switch {
+		case em.Scroll != nil:
+			em.Scroll.HandleEvent(evi)
+			return
+		}
+	}
 
 	var allbb []Widget
 
@@ -202,14 +267,50 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 		return ki.Continue
 	})
 
-	// todo: send allbb to events.Mgr
 	n := len(allbb)
 	if n == 0 {
 		return
 	}
+
+	var press, move, up Widget
 	for i := n - 1; i >= 0; i-- {
 		w := allbb[i]
-		w.HandleEvent(evi)
+		if !isDrag {
+			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
+		}
+		wb := w.AsWidget()
+		switch et {
+		case events.MouseMove:
+			if move == nil && wb.Style.Abilities.IsHoverable() {
+				move = w
+			}
+		case events.MouseDown:
+			if press == nil && wb.Style.Abilities.IsPressable() {
+				press = w
+			}
+		case events.MouseUp:
+			if up == nil && wb.Style.Abilities.IsPressable() {
+				up = w
+			}
+		}
+	}
+
+	switch et {
+	case events.MouseDown:
+		if press != nil {
+			em.Press = press
+		}
+	case events.MouseMove:
+		em.UpdateHovers(allbb, evi)
+	case events.MouseDrag:
+		// if em.Drag != nil {
+		// 	em.UpdateDragMove(allbb) // DragEnter / DragLeave
+		// }
+	case events.MouseUp:
+		if em.Press == up && up != nil {
+			up.Send(events.Click, evi)
+		}
+		em.Press = nil
 	}
 
 	// // deepest first

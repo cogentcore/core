@@ -350,7 +350,7 @@ func (tf *TextField) EditDone() {
 	if tf.Edited {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
-		tf.SendMe(events.Change, nil)
+		tf.Send(events.Change, nil)
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()

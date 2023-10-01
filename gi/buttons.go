@@ -75,9 +75,7 @@ const (
 
 // see menus.go for MakeMenuFunc, etc
 
-// SetCheckable sets whether this button is checkable -- emits ButtonToggled
-// signals if so -- the Checked state is independent of the generic widget
-// selection state
+// SetCheckable sets whether this button is checkable
 func (bb *ButtonBase) SetCheckable(checkable bool) {
 	bb.Style.Abilities.SetFlag(checkable, states.Checkable)
 }
@@ -254,8 +252,8 @@ func (bb *ButtonBase) ClickOnEnterSpace() {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunEnter || e.KeyRune() == ' ' {
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			e.SetHandled()             // todo ?
-			bb.SendMe(events.Click, e) // todo: write this
+			e.SetHandled()           // todo ?
+			bb.Send(events.Click, e) // todo: write this
 			// }
 		}
 	})
@@ -456,6 +454,7 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) ButtonStyles() {
 	bt.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		s.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		// s.Cursor = cursor.HandPointing
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Margin = styles.BoxShadowMargin(BoxShadow1).ToValues()
@@ -570,6 +569,7 @@ func (cb *CheckBox) OnInit() {
 
 func (cb *CheckBox) CheckBoxStyles() {
 	cb.AddStyles(func(w *WidgetBase, s *styles.Style) {
+		cb.Style.Abilities.SetFlag(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
