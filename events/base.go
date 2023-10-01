@@ -108,7 +108,6 @@ func (ev Base) IsUnique() bool {
 }
 
 func (ev *Base) SetUnique() {
-	fmt.Println("making unique:", ev)
 	ev.Flags.SetFlag(true, Unique)
 }
 

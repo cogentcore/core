@@ -215,22 +215,10 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 			FPS: 60,
 		},
 	}
-	fmt.Println("before deque")
 	app.window.EvMgr.Deque = &app.window.Deque
-	fmt.Println("after deque")
-	fmt.Println(app.window)
-	fmt.Println("showing")
-	app.window.EvMgr.Custom("CUSTOM TEST EVENT")
 	app.window.EvMgr.Window(events.Show)
-	// app.window.EvMgr.Window(events.Focus)
-	fmt.Println("done with new window")
-	fmt.Println("will return")
-	fmt.Println("returning", app.window)
+	app.window.EvMgr.Window(events.Focus)
 	go app.window.winLoop()
-	// app.getScreen()
-	// goosi.InitScreenLogicalDPIFunc()
-	// app.window.LogDPI = app.screens[0].LogicalDPI
-	// app.window.sendWindowEvent(window.ScreenUpdate)
 	return app.window, nil
 }
 
@@ -263,11 +251,9 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
 	app.winptr = winPtr
-	fmt.Println("might show; window:", app.window)
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if app.window != nil {
-		fmt.Println("showing")
 		app.window.EvMgr.Window(events.Show)
 		app.window.EvMgr.Window(events.ScreenUpdate)
 	}

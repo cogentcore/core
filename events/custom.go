@@ -6,7 +6,6 @@ package events
 
 import (
 	"fmt"
-	"image"
 )
 
 // CustomEvent is a user-specified event that can be sent and received
@@ -25,8 +24,4 @@ func (ce CustomEvent) String() string {
 
 func (ce CustomEvent) HasPos() bool {
 	return ce.PosAvail
-}
-
-func (ce CustomEvent) Pos() image.Point {
-	return ce.Pos()
 }
