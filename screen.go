@@ -38,7 +38,7 @@ type Screen struct {
 	ScreenNumber int
 
 	// Geometry contains the geometry of the screen in window manager
-	// size units, which may not be same as raw pixels
+	// size units, which may not be same as raw pixels (dots)
 	Geometry image.Rectangle
 
 	// DevicePixelRatio is a factor that scales the screen's
@@ -47,7 +47,7 @@ type Screen struct {
 	DevicePixelRatio float32
 
 	// PixSize is the number of actual pixels in the screen
-	// computed as Size * DevicePixelRatio
+	// (raw display dots), computed as Size * DevicePixelRatio
 	PixSize image.Point
 
 	// PhysicalSize is the actual physical size of the screen, in mm.
@@ -143,6 +143,12 @@ func (sc *Screen) UpdateLogicalDPI() {
 		}
 	}
 	sc.LogicalDPI = LogicalFmPhysicalDPI(ZoomFactor*dpisc, sc.PhysicalDPI)
+}
+
+// UpdatePhysicalDPI updates the value of [Screen.PhysicalDPI] based on
+// [Screen.PixSize] and [Screen.PhysicalSize]
+func (sc *Screen) UpdatePhysicalDPI() {
+	sc.PhysicalDPI = 25.4 * (float32(sc.PixSize.X) / float32(sc.PhysicalSize.X))
 }
 
 // WinSizeToPix returns window manager size units

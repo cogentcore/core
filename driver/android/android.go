@@ -60,10 +60,8 @@ import (
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
 	"goki.dev/mobile/event/key"
-	"goki.dev/mobile/event/paint"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
-	"goki.dev/mobile/geom"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -196,7 +194,7 @@ func setDarkMode(dark C.bool) {
 
 type windowConfig struct {
 	orientation size.Orientation
-	pixelsPerPt float32
+	dotsPerPx   float32 // raw display dots per standard pixel (1/96 of 1 in)
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
@@ -251,7 +249,7 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 
 	return windowConfig{
 		orientation: o,
-		pixelsPerPt: float32(dpi) / 72,
+		dotsPerPx:   float32(dpi) / 96,
 	}
 }
 
@@ -277,9 +275,6 @@ var (
 	windowRedrawDone   = make(chan struct{})
 	windowConfigChange = make(chan windowConfig)
 	activityDestroyed  = make(chan struct{})
-
-	screenInsetTop, screenInsetBottom, screenInsetLeft, screenInsetRight int
-	darkMode                                                             bool
 )
 
 func main(f func(*appImpl)) {
@@ -330,59 +325,42 @@ func insetsChanged(top, bottom, left, right int) {
 
 var mainUserFn func(*appImpl)
 
-var DisplayMetrics struct {
-	WidthPx  int
-	HeightPx int
-}
-
-func mainUI(vm, jniEnv, ctx uintptr) error {
+func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 	donec := make(chan struct{})
 	go func() {
 		mainUserFn(theApp)
 		close(donec)
 	}()
 
-	var pixelsPerPt float32
+	var dotsPerPx float32
 
 	for {
 		select {
 		case <-donec:
 			return nil
 		case cfg := <-windowConfigChange:
-			pixelsPerPt = cfg.pixelsPerPt
+			dotsPerPx = cfg.dotsPerPx
 		case w := <-windowRedrawNeeded:
-			// if C.surface == nil {
-			// 	if errStr := C.createEGLSurface(w); errStr != nil {
-			// 		return fmt.Errorf("%s (%s)", C.GoString(errStr), eglGetError())
-			// 	}
-			DisplayMetrics.WidthPx = int(C.ANativeWindow_getWidth(w))
-			DisplayMetrics.HeightPx = int(C.ANativeWindow_getHeight(w))
-			// }
-			theApp.window.EventMgr.Window(events.Focus)
-			widthPx := int(C.ANativeWindow_getWidth(w))
-			heightPx := int(C.ANativeWindow_getHeight(w))
-			theApp.screen.ScreenNumber = 0
-			theApp.screen.PixSize = image.Point{widthPx, heightPx}
-			theApp.screen.Geometry = image.Rectangle{Max: theApp.screen.PixSize}
-			theApp.eventsIn <- size.Event{
-				WidthPx:       widthPx,
-				HeightPx:      heightPx,
-				WidthPt:       geom.Pt(float32(widthPx) / pixelsPerPt),
-				HeightPt:      geom.Pt(float32(heightPx) / pixelsPerPt),
-				InsetTopPx:    screenInsetTop,
-				InsetBottomPx: screenInsetBottom,
-				InsetLeftPx:   screenInsetLeft,
-				InsetRightPx:  screenInsetRight,
-				PixelsPerPt:   pixelsPerPt,
-				Orientation:   screenOrientation(widthPx, heightPx), // we are guessing orientation here as it was not always working
-				DarkMode:      darkMode,
-			}
-			theApp.eventsIn <- paint.Event{External: true}
+			app.window.EventMgr.Window(events.Focus)
+
+			widthDots := int(C.ANativeWindow_getWidth(w))
+			heightDots := int(C.ANativeWindow_getHeight(w))
+
+			app.screen.ScreenNumber = 0
+			app.screen.DevicePixelRatio = dotsPerPx
+			wsz := image.Point{widthDots, heightDots}
+			app.screen.Geometry = image.Rectangle{Max: wsz}
+			app.screen.PixSize = app.screen.WinSizeToPix(wsz)
+			app.screen.Orientation = screenOrientation(widthDots, heightDots)
+			app.screen.UpdatePhysicalDPI()
+			app.screen.UpdateLogicalDPI()
+
+			app.window.EventMgr.WindowPaint()
 		case <-windowDestroyed:
-			theApp.window.EventMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
+			app.window.EventMgr.Window(events.Show) // TODO: does this make sense? it is based on the gomobile code
 		case <-activityDestroyed:
-			theApp.window.EventMgr.Window(events.Close)
-		case <-theApp.publish: // TODO: do something here?
+			app.window.EventMgr.Window(events.Close)
+		case <-app.publish: // TODO: do something here?
 			select {
 			case windowRedrawDone <- struct{}{}:
 			default:
@@ -391,12 +369,11 @@ func mainUI(vm, jniEnv, ctx uintptr) error {
 	}
 }
 
-func screenOrientation(width, height int) size.Orientation {
+func screenOrientation(width, height int) goosi.ScreenOrientation {
 	if width > height {
-		return size.OrientationLandscape
+		return goosi.Landscape
 	}
-
-	return size.OrientationPortrait
+	return goosi.Portrait
 }
 
 func runInputQueue(vm, jniEnv, ctx uintptr) error {
