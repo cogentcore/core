@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-//go:build linux && !android
+//go:build android
 
 package paint
 
 // FontPaths contains the filepaths in which fonts are stored for the current platform.
-var FontPaths = []string{"/usr/share/fonts/truetype"}
+var FontPaths = []string{"/system/fonts"}
