@@ -170,6 +170,7 @@ func mainrun(a goosi.App) {
 		}
 	}
 
+	haveKeyboard := false
 	for {
 		evi := w.NextEvent()
 		et := evi.Type()
@@ -190,8 +191,13 @@ func mainrun(a goosi.App) {
 		case events.WindowPaint:
 			// fmt.Println("paint")
 			renderFrame()
-		case events.MouseMove:
-			fmt.Println("got mouse event at pos", evi.Pos())
+		case events.MouseDown:
+			if haveKeyboard {
+				goosi.TheApp.HideVirtualKeyboard()
+			} else {
+				goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
+			}
+			haveKeyboard = !haveKeyboard
 		}
 	}
 }
