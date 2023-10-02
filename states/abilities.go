@@ -25,7 +25,7 @@ const (
 	// Draggable means it can be Dragged
 	Draggable
 
-	// Droppable means it can receive Drop events
+	// Droppable means it can receive DragEnter, DragLeave, and Drop events
 	// (not specific to current Drag item, just generally)
 	Droppable
 
