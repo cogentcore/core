@@ -338,6 +338,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 	}()
 
 	var dotsPerPx float32
+	_ = dotsPerPx
 
 	for {
 		select {
@@ -358,17 +359,22 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			heightDots := int(C.ANativeWindow_getHeight(w))
 
 			app.screen.ScreenNumber = 0
-			app.screen.DevicePixelRatio = dotsPerPx
-			wsz := image.Point{widthDots, heightDots}
-			app.screen.Geometry = image.Rectangle{Max: wsz}
-			app.screen.PixSize = app.screen.WinSizeToPix(wsz)
+			app.screen.DevicePixelRatio = 1
+			psz := image.Point{widthDots, heightDots}
+			app.screen.PixSize = psz
+			app.screen.Geometry.Max = app.screen.WinSizeFmPix(psz)
+			app.screen.PhysicalSize = psz.Mul(int(dotsPerPx * 25.4))
 			app.screen.Orientation = screenOrientation(widthDots, heightDots)
 			app.screen.UpdatePhysicalDPI()
 			app.screen.UpdateLogicalDPI()
+			fmt.Printf("screen: %#v\n", app.screen)
 
+			app.window.DevPixRatio = 1
 			app.window.PhysDPI = app.screen.PhysicalDPI
+			app.window.LogDPI = app.screen.LogicalDPI
 			app.window.PxSize = app.screen.PixSize
-			app.window.WnSize = wsz
+			app.window.WnSize = app.screen.Geometry.Max
+			fmt.Printf("window: %#v\n", app.window)
 
 			app.window.EvMgr.WindowResize()
 			app.window.EvMgr.WindowPaint()
