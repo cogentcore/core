@@ -6,7 +6,6 @@ package paint
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -348,7 +347,6 @@ func (pc *Paint) Fill(rs *State) {
 // FillBox is an optimized fill of a square region with a uniform color if
 // the given color spec is a solid color
 func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *colors.Full) {
-	fmt.Println("in fill box", clr)
 	if clr.Gradient == nil {
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Solid}, image.Point{}, draw.Src)
