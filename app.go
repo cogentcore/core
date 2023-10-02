@@ -77,7 +77,9 @@ type App interface {
 	// means to use the default option values.
 	NewWindow(opts *NewWindowOptions) (Window, error)
 
-	// ClipBoard returns the clip.Board handler for the system, in context of given window.
+	// ClipBoard returns the clip.Board handler for the system,
+	// in context of given window, which is optional (can be nil)
+	// but can provide useful context on some systems.
 	ClipBoard(win Window) clip.Board
 
 	// Cursor returns the cursor.Cursor handler for the system, in context of given window.

@@ -219,7 +219,18 @@ type Window interface {
 
 	// Drawer returns the drawing system attached to this window surface.
 	// This is typically used for high-performance rendering to the surface.
+	// Wrap access in Lock() / Unlock() calls.
 	Drawer() *vdraw.Drawer
+
+	// Lock attempts to grab the overall window Mutex lock
+	// and returns true if the window is still open and ready for business.
+	// Otherwise, it might have been closed and any further use should be
+	// abandoned.  Do this before any use of window resources
+	// (eg. rendering to the Drawer).
+	Lock() bool
+
+	// Unlock unlocks the Mutex.  Must be called after Lock() is done.
+	Unlock()
 
 	// SetDestroyGPUResourcesFunc sets the given function
 	// that will be called on the main thread just prior
@@ -234,8 +245,6 @@ type Window interface {
 
 	// EventMgr returns the events.Mgr for this window,
 	// which manages all of the Event sending.
-	// GUI window systems must interact with this manager to inform it
-	// about widgets in relation to the position of the mouse, etc.
 	EventMgr() *events.Mgr
 
 	events.Dequer

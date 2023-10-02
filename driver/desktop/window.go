@@ -54,6 +54,19 @@ func (w *windowImpl) Handle() any {
 	return w.glw
 }
 
+func (w *windowImpl) Lock() bool {
+	w.mu.Lock()
+	if w.glw == nil || w.app.gpu == nil {
+		w.mu.Unlock()
+		return false
+	}
+	return true
+}
+
+func (w *windowImpl) Unlock() {
+	w.mu.Unlock()
+}
+
 func (w *windowImpl) Drawer() *vdraw.Drawer {
 	return &w.Draw
 }
@@ -410,6 +423,7 @@ func (w *windowImpl) Close() {
 		w.Surface.Destroy()
 		w.glw.Destroy()
 		w.glw = nil // marks as closed for all other calls
+		w.Surface = nil
 	})
 	if theApp.quitting {
 		theApp.quitCloseCnt <- struct{}{}

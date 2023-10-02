@@ -52,12 +52,25 @@ func (w *windowImpl) MainMenu() goosi.MainMenu {
 	return w.mainMenu
 }
 
+func (w *windowImpl) Lock() bool {
+	w.mu.Lock()
+	if w.app.gpu == nil || w.app.Surface == nil {
+		w.mu.Unlock()
+		return false
+	}
+	return true
+}
+
+func (w *windowImpl) Unlock() {
+	w.mu.Unlock()
+}
+
 func (w *windowImpl) Drawer() *vdraw.Drawer {
 	return &w.app.Draw
 }
 
 func (w *windowImpl) IsClosed() bool {
-	return w.app.gpu == nil
+	return w.app.gpu == nil || w.app.Surface == nil
 }
 
 func (w *windowImpl) IsVisible() bool {
