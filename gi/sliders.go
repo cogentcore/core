@@ -401,7 +401,6 @@ func (sb *SliderBase) SliderMouse() {
 		e.SetHandled()
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
-		// SidesTODO: not sure about dim
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(float32(ed.X) - spc)
@@ -444,7 +443,6 @@ func (sb *SliderBase) SliderMouse() {
 		e.SetHandled()
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
-		// SidesTODO: not sure about dim
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(float32(ed.X) - spc)

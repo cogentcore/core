@@ -296,7 +296,14 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 			}
 		}
 	case events.MouseUp:
-		if em.Press == up && up != nil {
+		switch {
+		case em.Slide != nil:
+			em.Slide.Send(events.SlideStop, evi)
+			em.Slide = nil
+		case em.Drag != nil:
+			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
+			em.Drag = nil
+		case em.Press == up && up != nil:
 			up.Send(events.Click, evi)
 		}
 		em.Press = nil
