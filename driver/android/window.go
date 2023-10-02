@@ -159,8 +159,7 @@ func (w *windowImpl) SendEmptyEvent() {
 }
 
 func (w *windowImpl) Screen() *goosi.Screen {
-	sc := w.app.screen
-	return sc
+	return w.app.screen
 }
 
 func (w *windowImpl) Size() image.Point {

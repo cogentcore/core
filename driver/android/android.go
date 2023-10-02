@@ -56,7 +56,6 @@ import (
 	"goki.dev/goosi/driver/mobile/callfn"
 	"goki.dev/goosi/driver/mobile/mobileinit"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/event/size"
 )
 
 // mimeMap contains standard mime entries that are missing on Android
@@ -195,8 +194,8 @@ func setDarkMode(dark C.bool) {
 }
 
 type windowConfig struct {
-	orientation size.Orientation
-	dotsPerPx   float32 // raw display dots per standard pixel (1/96 of 1 in)
+	orientation goosi.ScreenOrientation
+	dpi         float32 // raw display dots per inch
 }
 
 func windowConfigRead(activity *C.ANativeActivity) windowConfig {
@@ -242,17 +241,17 @@ func windowConfigRead(activity *C.ANativeActivity) windowConfig {
 		}
 	}
 
-	o := size.OrientationUnknown
+	o := goosi.OrientationUnknown
 	switch orient {
 	case C.ACONFIGURATION_ORIENTATION_PORT:
-		o = size.OrientationPortrait
+		o = goosi.Portrait
 	case C.ACONFIGURATION_ORIENTATION_LAND:
-		o = size.OrientationLandscape
+		o = goosi.Landscape
 	}
 
 	return windowConfig{
 		orientation: o,
-		dotsPerPx:   float32(dpi) / 96,
+		dpi:         float32(dpi),
 	}
 }
 
@@ -337,8 +336,8 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 		app.stopMain()
 	}()
 
-	var dotsPerPx float32
-	_ = dotsPerPx
+	var dpi float32
+	var orientation goosi.ScreenOrientation
 
 	for {
 		select {
@@ -351,30 +350,34 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 				f.done <- true
 			}
 		case cfg := <-windowConfigChange:
-			dotsPerPx = cfg.dotsPerPx
+			dpi = cfg.dpi
+			orientation = cfg.orientation
 		case w := <-windowRedrawNeeded:
 			app.window.EvMgr.Window(events.Focus)
 
-			widthDots := int(C.ANativeWindow_getWidth(w))
-			heightDots := int(C.ANativeWindow_getHeight(w))
+			widthPx := int(C.ANativeWindow_getWidth(w))
+			heightPx := int(C.ANativeWindow_getHeight(w))
 
-			app.screen.ScreenNumber = 0
-			app.screen.DevicePixelRatio = 1
-			psz := image.Point{widthDots, heightDots}
-			app.screen.PixSize = psz
-			app.screen.Geometry.Max = app.screen.WinSizeFmPix(psz)
-			app.screen.PhysicalSize = psz.Mul(int(dotsPerPx * 25.4))
-			app.screen.Orientation = screenOrientation(widthDots, heightDots)
-			app.screen.UpdatePhysicalDPI()
-			app.screen.UpdateLogicalDPI()
-			fmt.Printf("screen: %#v\n", app.screen)
+			if orientation == goosi.OrientationUnknown {
+				app.screen.Orientation = screenOrientation(widthPx, heightPx)
+			} else {
+				app.screen.Orientation = orientation
+			}
 
-			app.window.DevPixRatio = 1
+			app.screen.PixSize = image.Pt(widthPx, heightPx)
+			app.screen.Geometry.Max = app.screen.PixSize
+
+			app.screen.PhysicalDPI = dpi
+			app.screen.LogicalDPI = dpi
+
+			physX := 25.4 * float32(widthPx) / dpi
+			physY := 25.4 * float32(heightPx) / dpi
+			app.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+
 			app.window.PhysDPI = app.screen.PhysicalDPI
 			app.window.LogDPI = app.screen.LogicalDPI
 			app.window.PxSize = app.screen.PixSize
 			app.window.WnSize = app.screen.Geometry.Max
-			fmt.Printf("window: %#v\n", app.window)
 
 			app.window.EvMgr.WindowResize()
 			app.window.EvMgr.WindowPaint()
