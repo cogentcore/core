@@ -395,7 +395,7 @@ func (w *windowImpl) CloseClean() {
 
 func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
-	w.EvMgr.Window(events.Close)
+	w.EvMgr.Window(events.WinClose)
 	w.mu.Lock()
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
@@ -515,7 +515,7 @@ func (w *windowImpl) moved(gw *glfw.Window, x, y int) {
 	w.mu.Unlock()
 	// w.app.GetScreens() // this can crash here on win disconnect..
 	w.getScreen()
-	w.EvMgr.Window(events.Move)
+	w.EvMgr.Window(events.WinMove)
 }
 
 func (w *windowImpl) winResized(gw *glfw.Window, width, height int) {
@@ -573,12 +573,12 @@ func (w *windowImpl) focus(gw *glfw.Window, focused bool) {
 		}
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Focus))
-		w.EvMgr.Window(events.Focus)
+		w.EvMgr.Window(events.WinFocus)
 	} else {
 		// fmt.Printf("unfoc win: %v, foc: %v\n", w.Nm, bitflag.HasAtomic(&w.Flag, int(goosi.Focus)))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
 		w.EvMgr.Last.MousePos = image.Point{-1, -1} // key for preventing random click to same location
-		w.EvMgr.Window(events.DeFocus)
+		w.EvMgr.Window(events.WinFocusLost)
 	}
 }
 
@@ -586,10 +586,10 @@ func (w *windowImpl) iconify(gw *glfw.Window, iconified bool) {
 	if iconified {
 		// bitflag.SetAtomic(&w.Flag, int(goosi.Minimized))
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Focus))
-		w.EvMgr.Window(events.Minimize)
+		w.EvMgr.Window(events.WinMinimize)
 	} else {
 		// bitflag.ClearAtomic(&w.Flag, int(goosi.Minimized))
 		w.getScreen()
-		w.EvMgr.Window(events.Minimize)
+		w.EvMgr.Window(events.WinMinimize)
 	}
 }

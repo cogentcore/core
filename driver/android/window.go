@@ -273,7 +273,7 @@ func (w *windowImpl) Close() {
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
-	w.EvMgr.Window(events.Close)
+	w.EvMgr.Window(events.WinClose)
 	theApp.DeleteWin(w)
 	if theApp.quitting {
 		theApp.quitCloseCnt <- struct{}{}

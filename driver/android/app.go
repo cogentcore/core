@@ -224,8 +224,8 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		},
 	}
 	app.window.EvMgr.Deque = &app.window.Deque
-	app.window.EvMgr.Window(events.Show)
-	app.window.EvMgr.Window(events.Focus)
+	app.window.EvMgr.Window(events.WinShow)
+	app.window.EvMgr.Window(events.WinFocus)
 
 	go app.window.winLoop()
 
@@ -265,7 +265,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if app.window != nil {
-		app.window.EvMgr.Window(events.Show)
+		app.window.EvMgr.Window(events.WinShow)
 		app.window.EvMgr.Window(events.ScreenUpdate)
 	}
 	return nil

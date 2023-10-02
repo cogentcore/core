@@ -57,31 +57,31 @@ const (
 	// NoWinAction is the zero value for special types (Resize, Paint)
 	NoWinAction WinActions = iota
 
-	// Close means that the window is about to close, but has not yet closed.
-	Close
+	// WinClose means that the window is about to close, but has not yet closed.
+	WinClose
 
-	// Minimize means that the window has been iconified / miniaturized / is no
+	// WinMinimize means that the window has been iconified / miniaturized / is no
 	// longer visible.
-	Minimize
+	WinMinimize
 
-	// Move means that the window was moved but NOT resized or changed in any
+	// WinMove means that the window was moved but NOT resized or changed in any
 	// other way -- does not require a redraw, but anything tracking positions
 	// will want to update.
-	Move
+	WinMove
 
-	// Focus indicates that the window has been activated for receiving user
+	// WinFocus indicates that the window has been activated for receiving user
 	// input.
-	Focus
+	WinFocus
 
-	// DeFocus indicates that the window is no longer activated for
+	// WinFocusLost indicates that the window is no longer activated for
 	// receiving input.
-	DeFocus
+	WinFocusLost
 
-	// Show is for the WindowShow event -- sent by the system 1 second
+	// WinShow is for the WindowShow event -- sent by the system shortly
 	// after the window has opened, to ensure that full rendering
 	// is completed with the proper size, and to trigger one-time actions such as
 	// configuring the main menu after the window has opened.
-	Show
+	WinShow
 
 	// ScreenUpdate occurs when any of the screen information is updated
 	// This event is sent to the first window on the list of active windows

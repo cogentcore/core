@@ -353,7 +353,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			dpi = cfg.dpi
 			orientation = cfg.orientation
 		case w := <-windowRedrawNeeded:
-			app.window.EvMgr.Window(events.Focus)
+			app.window.EvMgr.Window(events.WinFocus)
 
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
@@ -386,10 +386,10 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			// we need to set the size of the window to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			app.window.SetSize(image.Point{})
-			app.window.EvMgr.Window(events.Minimize)
+			app.window.EvMgr.Window(events.WinMinimize)
 			app.destroyVk()
 		case <-activityDestroyed:
-			app.window.EvMgr.Window(events.Close)
+			app.window.EvMgr.Window(events.WinClose)
 		}
 	}
 }

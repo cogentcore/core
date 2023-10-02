@@ -379,11 +379,11 @@ func (i *SelectModes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36}
+var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38}
 
 // TypesN is the highest valid value
 // for type Types, plus one.
-const TypesN Types = 37
+const TypesN Types = 39
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -419,13 +419,15 @@ func _TypesNoOp() {
 	_ = x[Rotate-(27)]
 	_ = x[Select-(28)]
 	_ = x[Deselect-(29)]
-	_ = x[Change-(30)]
-	_ = x[Window-(31)]
-	_ = x[WindowResize-(32)]
-	_ = x[WindowPaint-(33)]
-	_ = x[OS-(34)]
-	_ = x[OSOpenFiles-(35)]
-	_ = x[Custom-(36)]
+	_ = x[Focus-(30)]
+	_ = x[FocusLost-(31)]
+	_ = x[Change-(32)]
+	_ = x[Window-(33)]
+	_ = x[WindowResize-(34)]
+	_ = x[WindowPaint-(35)]
+	_ = x[OS-(36)]
+	_ = x[OSOpenFiles-(37)]
+	_ = x[Custom-(38)]
 }
 
 var _TypesNameToValueMap = map[string]Types{
@@ -489,20 +491,24 @@ var _TypesNameToValueMap = map[string]Types{
 	`select`:         28,
 	`Deselect`:       29,
 	`deselect`:       29,
-	`Change`:         30,
-	`change`:         30,
-	`Window`:         31,
-	`window`:         31,
-	`WindowResize`:   32,
-	`windowresize`:   32,
-	`WindowPaint`:    33,
-	`windowpaint`:    33,
-	`OS`:             34,
-	`os`:             34,
-	`OSOpenFiles`:    35,
-	`osopenfiles`:    35,
-	`Custom`:         36,
-	`custom`:         36,
+	`Focus`:          30,
+	`focus`:          30,
+	`FocusLost`:      31,
+	`focuslost`:      31,
+	`Change`:         32,
+	`change`:         32,
+	`Window`:         33,
+	`window`:         33,
+	`WindowResize`:   34,
+	`windowresize`:   34,
+	`WindowPaint`:    35,
+	`windowpaint`:    35,
+	`OS`:             36,
+	`os`:             36,
+	`OSOpenFiles`:    37,
+	`osopenfiles`:    37,
+	`Custom`:         38,
+	`custom`:         38,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -536,13 +542,15 @@ var _TypesDescMap = map[Types]string{
 	27: `Rotate is a touch-based rotate event.`,
 	28: `Select is sent when a Selectable element is selected.`,
 	29: `Deselect is sent when a Selectable element is deselected.`,
-	30: `Change is when a value represented by the element has changed. This is for Editable, Checkable, Slidable items.`,
-	31: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
-	32: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
-	33: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
-	34: `OS is an operating system generated event (app level typically)`,
-	35: `OSOpenFiles is an event telling app to open given files`,
-	36: `Custom is a user-defined event with a data any field`,
+	30: `Focus is sent when Focsable element receives Focus`,
+	31: `FocusLost is sent when Focsable element loses Focus`,
+	32: `Change is when a value represented by the element has changed. This is for Editable, Checkable, Slidable items.`,
+	33: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
+	34: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
+	35: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
+	36: `OS is an operating system generated event (app level typically)`,
+	37: `OSOpenFiles is an event telling app to open given files`,
+	38: `Custom is a user-defined event with a data any field`,
 }
 
 var _TypesMap = map[Types]string{
@@ -576,13 +584,15 @@ var _TypesMap = map[Types]string{
 	27: `Rotate`,
 	28: `Select`,
 	29: `Deselect`,
-	30: `Change`,
-	31: `Window`,
-	32: `WindowResize`,
-	33: `WindowPaint`,
-	34: `OS`,
-	35: `OSOpenFiles`,
-	36: `Custom`,
+	30: `Focus`,
+	31: `FocusLost`,
+	32: `Change`,
+	33: `Window`,
+	34: `WindowResize`,
+	35: `WindowPaint`,
+	36: `OS`,
+	37: `OSOpenFiles`,
+	38: `Custom`,
 }
 
 // String returns the string representation
@@ -831,53 +841,53 @@ const WinActionsN WinActions = 8
 func _WinActionsNoOp() {
 	var x [1]struct{}
 	_ = x[NoWinAction-(0)]
-	_ = x[Close-(1)]
-	_ = x[Minimize-(2)]
-	_ = x[Move-(3)]
-	_ = x[Focus-(4)]
-	_ = x[DeFocus-(5)]
-	_ = x[Show-(6)]
+	_ = x[WinClose-(1)]
+	_ = x[WinMinimize-(2)]
+	_ = x[WinMove-(3)]
+	_ = x[WinFocus-(4)]
+	_ = x[WinFocusLost-(5)]
+	_ = x[WinShow-(6)]
 	_ = x[ScreenUpdate-(7)]
 }
 
 var _WinActionsNameToValueMap = map[string]WinActions{
 	`NoWinAction`:  0,
 	`nowinaction`:  0,
-	`Close`:        1,
-	`close`:        1,
-	`Minimize`:     2,
-	`minimize`:     2,
-	`Move`:         3,
-	`move`:         3,
-	`Focus`:        4,
-	`focus`:        4,
-	`DeFocus`:      5,
-	`defocus`:      5,
-	`Show`:         6,
-	`show`:         6,
+	`WinClose`:     1,
+	`winclose`:     1,
+	`WinMinimize`:  2,
+	`winminimize`:  2,
+	`WinMove`:      3,
+	`winmove`:      3,
+	`WinFocus`:     4,
+	`winfocus`:     4,
+	`WinFocusLost`: 5,
+	`winfocuslost`: 5,
+	`WinShow`:      6,
+	`winshow`:      6,
 	`ScreenUpdate`: 7,
 	`screenupdate`: 7,
 }
 
 var _WinActionsDescMap = map[WinActions]string{
 	0: `NoWinAction is the zero value for special types (Resize, Paint)`,
-	1: `Close means that the window is about to close, but has not yet closed.`,
-	2: `Minimize means that the window has been iconified / miniaturized / is no longer visible.`,
-	3: `Move means that the window was moved but NOT resized or changed in any other way -- does not require a redraw, but anything tracking positions will want to update.`,
-	4: `Focus indicates that the window has been activated for receiving user input.`,
-	5: `DeFocus indicates that the window is no longer activated for receiving input.`,
-	6: `Show is for the WindowShow event -- sent by the system 1 second after the window has opened, to ensure that full rendering is completed with the proper size, and to trigger one-time actions such as configuring the main menu after the window has opened.`,
+	1: `WinClose means that the window is about to close, but has not yet closed.`,
+	2: `WinMinimize means that the window has been iconified / miniaturized / is no longer visible.`,
+	3: `WinMove means that the window was moved but NOT resized or changed in any other way -- does not require a redraw, but anything tracking positions will want to update.`,
+	4: `WinFocus indicates that the window has been activated for receiving user input.`,
+	5: `WinFocusLost indicates that the window is no longer activated for receiving input.`,
+	6: `WinShow is for the WindowShow event -- sent by the system shortly after the window has opened, to ensure that full rendering is completed with the proper size, and to trigger one-time actions such as configuring the main menu after the window has opened.`,
 	7: `ScreenUpdate occurs when any of the screen information is updated This event is sent to the first window on the list of active windows and it should then perform any necessary updating`,
 }
 
 var _WinActionsMap = map[WinActions]string{
 	0: `NoWinAction`,
-	1: `Close`,
-	2: `Minimize`,
-	3: `Move`,
-	4: `Focus`,
-	5: `DeFocus`,
-	6: `Show`,
+	1: `WinClose`,
+	2: `WinMinimize`,
+	3: `WinMove`,
+	4: `WinFocus`,
+	5: `WinFocusLost`,
+	6: `WinShow`,
 	7: `ScreenUpdate`,
 }
 

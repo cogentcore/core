@@ -166,6 +166,12 @@ const (
 	// Deselect is sent when a Selectable element is deselected.
 	Deselect
 
+	// Focus is sent when Focsable element receives Focus
+	Focus
+
+	// FocusLost is sent when Focsable element loses Focus
+	FocusLost
+
 	// Change is when a value represented by the element has changed.
 	// This is for Editable, Checkable, Slidable items.
 	Change
