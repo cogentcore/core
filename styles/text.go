@@ -63,7 +63,7 @@ type Text struct {
 
 // LineHeightNormal represents a normal line height,
 // equal to the default height of the font being used.
-var LineHeightNormal = units.Px(-1)
+var LineHeightNormal = units.Dp(-1)
 
 func (ts *Text) Defaults() {
 	ts.LineHeight = LineHeightNormal

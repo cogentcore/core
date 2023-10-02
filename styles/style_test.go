@@ -86,7 +86,7 @@ func TestStyle(t *testing.T) {
 	}
 	st.PosX = units.Ex(0)
 
-	props = map[string]any{"x": units.Px(12)}
+	props = map[string]any{"x": units.Dp(12)}
 	st.StyleFromProps(par, props, ctx)
 	if st.PosX.Val != 12 || st.PosX.Un != units.UnitPx {
 		t.Errorf("posx != 12px: %v", st.PosX)

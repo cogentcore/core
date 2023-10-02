@@ -85,43 +85,43 @@ func (bs *Border) ToDots(uc *units.Context) {
 var (
 	// BorderRadiusNone indicates to use no border radius,
 	// which creates a fully rectangular element
-	BorderRadiusNone = NewSideValues(units.Px(0))
+	BorderRadiusNone = NewSideValues(units.Dp(0))
 	// BorderRadiusExtraSmall indicates to use extra small
 	// 4px rounded corners
-	BorderRadiusExtraSmall = NewSideValues(units.Px(4))
+	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
 	// BorderRadiusExtraSmallTop indicates to use extra small
 	// 4px rounded corners on the top of the element and no
 	// border radius on the bottom of the element
-	BorderRadiusExtraSmallTop = NewSideValues(units.Px(4), units.Px(4), units.Px(0), units.Px(0))
+	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Dp(0), units.Dp(0))
 	// BorderRadiusSmall indicates to use small
 	// 8px rounded corners
-	BorderRadiusSmall = NewSideValues(units.Px(8))
+	BorderRadiusSmall = NewSideValues(units.Dp(8))
 	// BorderRadiusMedium indicates to use medium
 	// 12px rounded corners
-	BorderRadiusMedium = NewSideValues(units.Px(12))
+	BorderRadiusMedium = NewSideValues(units.Dp(12))
 	// BorderRadiusLarge indicates to use large
 	// 16px rounded corners
-	BorderRadiusLarge = NewSideValues(units.Px(16))
+	BorderRadiusLarge = NewSideValues(units.Dp(16))
 	// BorderRadiusLargeEnd indicates to use large
 	// 16px rounded corners on the end (right side)
 	// of the element and no border radius elsewhere
-	BorderRadiusLargeEnd = NewSideValues(units.Px(0), units.Px(16), units.Px(16), units.Px(0))
+	BorderRadiusLargeEnd = NewSideValues(units.Dp(0), units.Dp(16), units.Dp(16), units.Dp(0))
 	// BorderRadiusLargeTop indicates to use large
 	// 16px rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusLargeTop = NewSideValues(units.Px(16), units.Px(16), units.Px(0), units.Px(0))
+	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Dp(0), units.Dp(0))
 	// BorderRadiusExtraLarge indicates to use extra large
 	// 28px rounded corners
-	BorderRadiusExtraLarge = NewSideValues(units.Px(28))
+	BorderRadiusExtraLarge = NewSideValues(units.Dp(28))
 	// BorderRadiusExtraLargeTop indicates to use extra large
 	// 28px rounded corners on the top of the element
 	// and no border radius on the bottom of the element
-	BorderRadiusExtraLargeTop = NewSideValues(units.Px(28), units.Px(28), units.Px(0), units.Px(0))
+	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Dp(0), units.Dp(0))
 	// BorderRadiusFull indicates to use a full border radius,
 	// which creates a circular/pill-shaped object.
 	// It is defined to be a value that the width/height of an object
 	// will never exceed.
-	BorderRadiusFull = NewSideValues(units.Px(1_000_000_000))
+	BorderRadiusFull = NewSideValues(units.Dp(1_000_000_000))
 )
 
 // IMPORTANT: any changes here must be updated in style_props.go StyleShadowFuncs

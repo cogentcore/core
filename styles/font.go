@@ -57,7 +57,7 @@ type Font struct {
 func (fs *Font) Defaults() {
 	// fs.Color = Black
 	fs.Opacity = 1.0
-	fs.Size = units.Pt(12)
+	fs.Size = units.Dp(16)
 }
 
 // InheritFields from parent: Manual inheriting of values is much faster than

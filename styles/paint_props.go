@@ -116,9 +116,9 @@ var StyleStrokeFuncs = map[string]StyleFunc{
 	},
 	"stroke-opacity": StyleFuncFloat(float32(1),
 		func(obj *Stroke) *float32 { return &(obj.Opacity) }),
-	"stroke-width": StyleFuncUnits(units.Px(1),
+	"stroke-width": StyleFuncUnits(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.Width) }),
-	"stroke-min-width": StyleFuncUnits(units.Px(1),
+	"stroke-min-width": StyleFuncUnits(units.Dp(1),
 		func(obj *Stroke) *units.Value { return &(obj.MinWidth) }),
 	"stroke-dasharray": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Stroke)

@@ -288,9 +288,9 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 		func(obj *Style) *units.Value { return &(obj.MaxWidth) }),
 	"max-height": StyleFuncUnits(units.Value{},
 		func(obj *Style) *units.Value { return &(obj.MaxHeight) }),
-	"min-width": StyleFuncUnits(units.Px(2),
+	"min-width": StyleFuncUnits(units.Dp(2),
 		func(obj *Style) *units.Value { return &(obj.MinWidth) }),
-	"min-height": StyleFuncUnits(units.Px(2),
+	"min-height": StyleFuncUnits(units.Dp(2),
 		func(obj *Style) *units.Value { return &(obj.MinHeight) }),
 	"margin": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		s := obj.(*Style)
