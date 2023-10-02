@@ -364,7 +364,8 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 				app.screen.Orientation = orientation
 			}
 
-			app.screen.PixSize = image.Pt(widthPx, heightPx)
+			app.screen.DevicePixelRatio = 1
+			app.screen.PixSize = image.Pt(widthPx, heightPx).Div(5)
 			app.screen.Geometry.Max = app.screen.PixSize
 
 			app.screen.PhysicalDPI = dpi
