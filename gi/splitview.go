@@ -67,10 +67,10 @@ func (sv *SplitView) OnInit() {
 
 func (sv *SplitView) SplitViewStyles() {
 	sv.AddStyles(func(s *styles.Style) {
-		sv.HandleSize.SetPx(10)
+		sv.HandleSize.SetDp(10)
 
-		s.MaxWidth.SetPx(-1)
-		s.MaxHeight.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
+		s.MaxHeight.SetDp(-1)
 		s.Margin.Set()
 		s.Padding.Set()
 	})
@@ -442,7 +442,7 @@ func (sr *Splitter) OnInit() {
 func (sr *Splitter) SplitterStyles() {
 	// STYTODO: fix splitter styles
 	sr.ValThumb = false
-	sr.ThumbSize = units.Px(10) // will be replaced by parent HandleSize
+	sr.ThumbSize = units.Dp(10) // will be replaced by parent HandleSize
 	sr.Step = 0.01
 	sr.PageStep = 0.1
 	sr.Max = 1.0
@@ -452,17 +452,17 @@ func (sr *Splitter) SplitterStyles() {
 
 	sr.AddStyles(func(s *styles.Style) {
 		s.Margin.Set()
-		s.Padding.Set(units.Px(6 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(6 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 		s.Color = colors.Scheme.OnBackground
 		if sr.Dim == mat32.X {
-			s.MinWidth.SetPx(2)
-			s.MinHeight.SetPx(100)
-			s.Height.SetPx(100)
-			s.MaxHeight.SetPx(100)
+			s.MinWidth.SetDp(2)
+			s.MinHeight.SetDp(100)
+			s.Height.SetDp(100)
+			s.MaxHeight.SetDp(100)
 		} else {
-			s.MinHeight.SetPx(2)
-			s.MinWidth.SetPx(100)
+			s.MinHeight.SetDp(2)
+			s.MinWidth.SetDp(100)
 		}
 	})
 

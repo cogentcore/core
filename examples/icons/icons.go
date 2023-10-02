@@ -36,7 +36,7 @@ func mainrun() {
 	mfr := win.SetMainFrame()
 
 	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("margin", units.Px(2))
+	row1.SetProp("margin", units.Dp(2))
 	row1.SetStretchMaxWidth()
 
 	spc := gi.NewSpace(mfr, "spc1")
@@ -52,8 +52,8 @@ func mainrun() {
 	grid.Stripes = gi.RowStripes
 	grid.SetProp("columns", nColumns)
 	grid.SetProp("horizontal-align", "center")
-	grid.SetProp("margin", units.Px(1))
-	// grid.SetProp("spacing", units.Px(1))
+	grid.SetProp("margin", units.Dp(1))
+	// grid.SetProp("spacing", units.Dp(1))
 	grid.SetStretchMaxWidth()
 	grid.SetStretchMaxHeight()
 
@@ -70,16 +70,16 @@ func mainrun() {
 		gi.NewLabel(vb, "lab1", icnms)
 
 		smico := gi.NewIcon(vb, icnms, icnm)
-		smico.SetMinPrefWidth(units.Px(24))
-		smico.SetMinPrefHeight(units.Px(24))
+		smico.SetMinPrefWidth(units.Dp(24))
+		smico.SetMinPrefHeight(units.Dp(24))
 		smico.SetProp("background-color", colors.Transparent)
 		smico.SetProp("fill", colors.Scheme.OnBackground)
 		smico.SetProp("stroke", colors.Scheme.OnBackground)
 		// smico.SetProp("horizontal-align", gi.AlignLeft)
 
 		// ico := gi.NewIcon(vb, icnms+"_big", icnms)
-		// ico.SetMinPrefWidth(units.Px(100))
-		// ico.SetMinPrefHeight(units.Px(100))
+		// ico.SetMinPrefWidth(units.Dp(100))
+		// ico.SetMinPrefHeight(units.Dp(100))
 		// ico.SetProp("background-color", colors.Transparent)
 		// ico.SetProp("fill", "#88F")
 		// ico.SetProp("stroke", "black")

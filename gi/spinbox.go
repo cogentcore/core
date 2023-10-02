@@ -112,7 +112,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			act := child.(*Action)
 			act.Type = ActionParts
 			act.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetPx(18)
+				s.Font.Size.SetDp(18)
 			})
 		}
 	}

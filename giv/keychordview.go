@@ -84,7 +84,7 @@ func (kc *KeyChordEdit) OnInit() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Width.SetCh(20)
-		s.Padding.Set(units.Px(8 * gi.Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8 * gi.Prefs.DensityMul()))
 		s.SetStretchMaxWidth()
 		if w.StateIs(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)

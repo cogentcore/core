@@ -17,7 +17,7 @@ func TooltipConfigStyles(tooltip *Frame) {
 	tooltip.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = BoxShadow1 // STYTODO: not sure whether we should have this

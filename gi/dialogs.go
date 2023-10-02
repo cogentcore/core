@@ -80,7 +80,7 @@ func (dlg *Dialog) StyleFrame() {
 
 		dlg.Frame.Spacing = StdDialogVSpaceUnits
 		s.Border.Style.Set(styles.BorderNone)
-		s.Padding.Set(units.Px(24 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(24 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Solid)
 		if !DialogsSepRenderWin {
 			s.BoxShadow = BoxShadow3
@@ -98,7 +98,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 			title := child.(*Label)
 			title.Type = LabelHeadlineSmall
 			title.AddStyles(func(s *styles.Style) {
-				s.MaxWidth.SetPx(-1)
+				s.MaxWidth.SetDp(-1)
 				s.AlignH = styles.AlignCenter
 				s.AlignV = styles.AlignTop
 				s.BackgroundColor.SetSolid(colors.Transparent)
@@ -108,7 +108,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 			prompt.Type = LabelBodyMedium
 			prompt.AddStyles(func(s *styles.Style) {
 				s.Text.WhiteSpace = styles.WhiteSpaceNormal
-				s.MaxWidth.SetPx(-1)
+				s.MaxWidth.SetDp(-1)
 				s.Width.SetCh(30)
 				s.Text.Align = styles.AlignLeft
 				s.AlignV = styles.AlignTop
@@ -118,7 +118,7 @@ func (dlg *Dialog) OnChildAdded(child ki.Ki) {
 		case "buttons":
 			bts := child.(*Layout)
 			bts.AddStyles(func(s *styles.Style) {
-				bts.Spacing.SetPx(8 * Prefs.DensityMul())
+				bts.Spacing.SetDp(8 * Prefs.DensityMul())
 				s.SetStretchMaxWidth()
 			})
 		}

@@ -72,12 +72,12 @@ func (tv *TabView) TabViewStyles() {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(styles.BorderSolid)
-		s.Border.Width.Set(units.Px(1))
+		s.Border.Width.Set(units.Dp(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
-		s.MaxWidth.SetPx(-1)
-		s.MaxHeight.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
+		s.MaxHeight.SetDp(-1)
 	})
 }
 
@@ -91,12 +91,12 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 				s.Margin.Set()
 				s.Padding.Set()
-				// tabs.Spacing.SetPx(4 * Prefs.DensityMul())
+				// tabs.Spacing.SetDp(4 * Prefs.DensityMul())
 				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 
 				// s.Border.Style.Set(styles.BorderNone)
 				// s.Border.Style.Bottom = styles.BorderSolid
-				// s.Border.Width.Bottom.SetPx(1)
+				// s.Border.Width.Bottom.SetDp(1)
 				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
 			})
 		case "frame":
@@ -575,11 +575,11 @@ func (tb *TabButton) TabButtonStyles() {
 	tb.AddStyles(func(s *styles.Style) {
 		// s.Cursor = cursor.HandPointing
 		s.MinWidth.SetCh(8)
-		s.MaxWidth.SetPx(500)
+		s.MaxWidth.SetDp(500)
 		s.MinHeight.SetEm(1.6)
 
 		// s.Border.Style.Right = styles.BorderSolid
-		// s.Border.Width.Right.SetPx(1)
+		// s.Border.Width.Right.SetDp(1)
 
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		s.Color = colors.Scheme.OnSurface
@@ -587,12 +587,12 @@ func (tb *TabButton) TabButtonStyles() {
 		s.Border.Radius.Set()
 		s.Text.Align = styles.AlignCenter
 		s.Margin.Set()
-		s.Padding.Set(units.Px(8 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {
 		// 	s.Border.Style.Bottom = styles.BorderSolid
-		// 	s.Border.Width.Bottom.SetPx(2)
+		// 	s.Border.Width.Bottom.SetDp(2)
 		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
 
@@ -601,7 +601,7 @@ func (tb *TabButton) TabButtonStyles() {
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Px(2))
+			s.Border.Width.Set(units.Dp(2))
 			s.Border.Color.Set(colors.Scheme.Outline)
 		}
 	})

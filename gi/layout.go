@@ -1291,8 +1291,8 @@ type Stretch struct {
 
 func (st *Stretch) OnInit() {
 	st.AddStyles(func(s *styles.Style) {
-		s.MaxWidth.SetPx(-1)
-		s.MaxHeight.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
+		s.MaxHeight.SetDp(-1)
 	})
 }
 

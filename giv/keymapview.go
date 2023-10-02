@@ -32,7 +32,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	mfr := win.SetMainFrame()
 	mfr.Lay = gi.LayoutVert
 	mfr.AddStyles(func(s *styles.Style) {
-		s.Margin.Set(units.Px(8 * gi.Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(8 * gi.Prefs.DensityMul()))
 	})
 
 	title := gi.NewLabel(mfr, "title", "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map")

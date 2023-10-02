@@ -51,18 +51,18 @@ func mainrun() {
 	gi.NewLabel(trow, "title").SetText(
 		`This is a <b>demonstration</b> of the
 <span style="color:red">various</span> <a href="https://goki.dev/gi/v2">GoGi</a> <i>Widgets</i><br>
-<large>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
-<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</large><br>
+<small>Shortcuts: <kbd>` + string(prsc) + `</kbd> = Preferences,
+<kbd>` + string(giedsc) + `</kbd> = Editor, <kbd>Ctrl/Cmd +/-</kbd> = zoom</small><br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
+		SetType(gi.LabelHeadlineSmall).
 		SetStretchMax().
 		AddStyles(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
-			s.Font.Size = units.Dp(32) // todo: "x-large"?
-			// s.Font.SetSize(styles.XLarge)
-			s.Text.LineHeight = units.Em(1.5)
+			// s.Font.Size = units.Dp(24) // todo: "x-large"?
+			// s.Text.LineHeight = units.Em(1.5)
 		})
 
 	//////////////////////////////////////////
@@ -116,12 +116,12 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// 		button2.Style.BackgroundColor.SetSolid(styles.MustColorFromName("darkblue"))
 	// 	default:
 	// 		button2.Style.Border.Color.Set(styles.Transparent)
-	// 		button2.Style.Border.Width.Set(units.Px(2))
-	// 		button2.Style.Border.Radius.Set(units.Px(10))
+	// 		button2.Style.Border.Width.Set(units.Dp(2))
+	// 		button2.Style.Border.Radius.Set(units.Dp(10))
 	// 		button2.Style.BackgroundColor.SetSolid(styles.MustColorFromName("blue"))
 	// 		button2.Style.Color.SetColor(styles.MustColorFromName("white"))
-	// 		button2.Style.Padding.Set(units.Px(10), units.Px(5))
-	// 		button2.Style.Height = units.Px(50)
+	// 		button2.Style.Padding.Set(units.Dp(10), units.Dp(5))
+	// 		button2.Style.Height = units.Dp(50)
 	// 	}
 	// }
 	// button2.SetProp("border-color", styles.NewSides[styles.Color](styles.MustColorFromName("green"), styles.MustColorFromName("red"), styles.MustColorFromName("blue"), styles.MustColorFromName("orange")))

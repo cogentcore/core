@@ -104,7 +104,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 			fv.SetDisabled() // select only
 			w.AddStyles(func(s *styles.Style) {
 				s.SetStretchMaxHeight()
-				s.MaxWidth.SetPx(0) // no stretch
+				s.MaxWidth.SetDp(0) // no stretch
 			})
 		case "files-view":
 			fv := child.(*TableView)
@@ -118,7 +118,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 			sr := child.(*gi.Layout)
 			sr.Lay = gi.LayoutHoriz
 			w.AddStyles(func(s *styles.Style) {
-				sr.Spacing.SetPx(4 * gi.Prefs.DensityMul())
+				sr.Spacing.SetDp(4 * gi.Prefs.DensityMul())
 				s.SetStretchMaxWidth()
 			})
 		case "sel": // sel field

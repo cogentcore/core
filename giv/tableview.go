@@ -97,7 +97,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 			sh := child.(*gi.ToolBar)
 			sh.Lay = gi.LayoutHoriz
 			sh.AddStyles(func(s *styles.Style) {
-				sh.Spacing.SetPx(0)
+				sh.Spacing.SetDp(0)
 				s.Overflow = styles.OverflowHidden // no scrollbars!
 			})
 		case "grid-lay": // grid layout
@@ -132,7 +132,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 			w.AddStyles(func(s *styles.Style) {
 				s.MinWidth.SetEm(1.5)
-				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
+				s.Padding.Right.SetDp(4 * gi.Prefs.DensityMul())
 				s.Text.Align = styles.AlignRight
 			})
 		}

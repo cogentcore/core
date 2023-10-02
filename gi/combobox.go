@@ -103,10 +103,10 @@ func (cb *ComboBox) ComboBoxStyles() {
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
 			s.Padding.Set()
-			s.Padding.Right.SetPx(16 * Prefs.DensityMul())
+			s.Padding.Right.SetDp(16 * Prefs.DensityMul())
 		} else {
 			s.Border.Radius = styles.BorderRadiusExtraSmall
-			s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
+			s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(16*Prefs.DensityMul()))
 		}
 		s.Color = colors.Scheme.OnSurface
 		switch cb.Type {
@@ -116,26 +116,26 @@ func (cb *ComboBox) ComboBoxStyles() {
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Style.Bottom = styles.BorderSolid
 				s.Border.Width.Set()
-				s.Border.Width.Bottom = units.Px(1)
+				s.Border.Width.Bottom = units.Dp(1)
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 				s.Border.Radius = styles.BorderRadiusExtraSmallTop
 				// if cb.HasFlagWithin(CanFocus) {
 				// todo:
-				s.Border.Width.Bottom = units.Px(2)
+				s.Border.Width.Bottom = units.Dp(2)
 				s.Border.Color.Bottom = colors.Scheme.Primary.Base
 				// }
 
 			}
 		case ComboBoxOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Px(1))
+			s.Border.Width.Set(units.Dp(1))
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
 				// if cb.HasFlagWithin(CanFocus) {
 				// todo:
-				s.Border.Width.Set(units.Px(2))
+				s.Border.Width.Set(units.Dp(2))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
 				// }
 			}
@@ -175,9 +175,9 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		case "ind-stretch":
 			wb.AddStyles(func(s *styles.Style) {
 				if cb.Editable {
-					s.Width.SetPx(0)
+					s.Width.SetDp(0)
 				} else {
-					s.Width.SetPx(16 * Prefs.DensityMul())
+					s.Width.SetDp(16 * Prefs.DensityMul())
 				}
 			})
 		case "indicator":

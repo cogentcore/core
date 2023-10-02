@@ -181,7 +181,7 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 func (tv *TextView) OnInit() {
 	tv.SetTypeHandlers(&TextViewListen)
 	tv.AddStyles(func(s *styles.Style) {
-		tv.CursorWidth.SetPx(1)
+		tv.CursorWidth.SetDp(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)
 		tv.HighlightColor.SetSolid(colors.Orange)
@@ -196,7 +196,7 @@ func (tv *TextView) OnInit() {
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Set()
-		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(4 * gi.Prefs.DensityMul()))
 		s.AlignV = styles.AlignTop
 		s.Text.Align = styles.AlignLeft
 		s.Text.TabSize = 4

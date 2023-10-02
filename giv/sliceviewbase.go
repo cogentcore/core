@@ -270,7 +270,7 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 			w.AddStyles(func(s *styles.Style) {
 				s.MinWidth.SetEm(1.5)
-				s.Padding.Right.SetPx(4 * gi.Prefs.DensityMul())
+				s.Padding.Right.SetDp(4 * gi.Prefs.DensityMul())
 				s.Text.Align = styles.AlignRight
 			})
 		}
@@ -548,7 +548,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Dim = mat32.Y
 	sb.Tracking = true
 	if sv.Style.ScrollBarWidth.Dots == 0 {
-		sb.SetFixedWidth(units.Px(16))
+		sb.SetFixedWidth(units.Dp(16))
 	} else {
 		sb.SetFixedWidth(sv.Style.ScrollBarWidth)
 	}

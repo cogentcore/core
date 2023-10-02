@@ -894,7 +894,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
-		s.MaxWidth.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
 	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -942,7 +942,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
 	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
-		s.MaxWidth.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
 	})
 
 	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {

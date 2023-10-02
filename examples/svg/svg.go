@@ -93,8 +93,8 @@ func mainrun() {
 	svge.InitScale()
 	svge.Fill = true
 	svge.SetProp("background-color", "white")
-	svge.SetProp("width", units.Px(float32(width-20)))
-	svge.SetProp("height", units.Px(float32(height-100)))
+	svge.SetProp("width", units.Dp(float32(width-20)))
+	svge.SetProp("height", units.Dp(float32(height-100)))
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 

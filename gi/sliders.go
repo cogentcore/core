@@ -634,7 +634,7 @@ func (sr *Slider) SliderStyles() {
 
 	sr.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
-		sr.ThumbSize = units.Px(20)
+		sr.ThumbSize = units.Dp(20)
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
 
@@ -643,13 +643,13 @@ func (sr *Slider) SliderStyles() {
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Padding.Set(units.Px(8))
+		s.Padding.Set(units.Dp(8))
 		if sr.Dim == mat32.X {
 			s.Width.SetEm(20)
-			s.Height.SetPx(4)
+			s.Height.SetDp(4)
 		} else {
 			s.Height.SetEm(20)
-			s.Width.SetPx(4)
+			s.Width.SetDp(4)
 		}
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Color = colors.Scheme.Primary.On
@@ -668,7 +668,7 @@ func (sr *Slider) SliderStyles() {
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Px(1))
+			s.Border.Width.Set(units.Dp(1))
 		}
 	})
 }

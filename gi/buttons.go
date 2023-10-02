@@ -467,7 +467,7 @@ func (bt *Button) ButtonStyles() {
 			s.Color = colors.Scheme.Primary.Base
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Px(1))
+			s.Border.Width.Set(units.Dp(1))
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		}
@@ -487,7 +487,7 @@ func (bt *Button) ButtonStyles() {
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Px(1))
+			s.Border.Width.Set(units.Dp(1))
 		}
 		// STYTODO: add state styles for buttons
 	})
@@ -562,8 +562,8 @@ func (cb *CheckBox) CheckBoxStyles() {
 		// s.Cursor = cursor.HandPointing
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
-		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		s.Padding.Set(units.Px(1 * Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(styles.BorderNone)
 
 		if cb.Parts != nil && cb.Parts.HasChildren() {

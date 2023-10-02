@@ -258,6 +258,14 @@ func (lb *Label) SetText(txt string) *Label {
 	return lb
 }
 
+// SetType sets the formatting type of the label
+func (lb *Label) SetType(typ LabelTypes) *Label {
+	updt := lb.UpdateStart()
+	lb.Type = typ
+	lb.UpdateEnd(updt)
+	return lb
+}
+
 func (lb *Label) SetSelectable() *Label {
 	lb.Selectable = true
 	return lb

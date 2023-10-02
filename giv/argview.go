@@ -37,8 +37,8 @@ func (av *ArgView) OnInit() {
 		av.Spacing = gi.StdDialogVSpaceUnits
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
-		s.MaxWidth.SetPx(-1)
-		s.MaxHeight.SetPx(-1)
+		s.MaxWidth.SetDp(-1)
+		s.MaxHeight.SetDp(-1)
 	})
 }
 
@@ -49,7 +49,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 			title := child.(*gi.Label)
 			title.Type = gi.LabelTitleLarge
 			title.AddStyles(func(s *styles.Style) {
-				s.MaxWidth.SetPx(-1)
+				s.MaxWidth.SetDp(-1)
 				s.Text.Align = styles.AlignCenter
 				s.AlignV = styles.AlignTop
 			})
@@ -58,10 +58,10 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.MinWidth.SetEm(1.5)
 				s.Width.SetEm(1.5)
-				s.MaxWidth.SetPx(-1) // for this to work, ALL layers above need it too
+				s.MaxWidth.SetDp(-1) // for this to work, ALL layers above need it too
 				s.MinHeight.SetEm(10)
 				s.Height.SetEm(10)
-				s.MaxHeight.SetPx(-1)              // for this to work, ALL layers above need it too
+				s.MaxHeight.SetDp(-1)              // for this to work, ALL layers above need it too
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 				s.Columns = 2
 			})

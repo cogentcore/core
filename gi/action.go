@@ -90,19 +90,19 @@ func (ac *Action) ActionStyles() {
 		switch ac.Type {
 		case ActionStandalone:
 			s.Border.Radius = styles.BorderRadiusFull
-			s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
+			s.Margin.Set(units.Dp(2 * Prefs.DensityMul()))
+			s.Padding.Set(units.Dp(6*Prefs.DensityMul()), units.Dp(12*Prefs.DensityMul()))
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 		case ActionParts:
 			s.Border.Radius.Set()
 			s.BackgroundColor.SetSolid(colors.Transparent)
-			// s.Margin.Set(units.Px(2 * Prefs.DensityMul()))
-			// s.Padding.Set(units.Px(2 * Prefs.DensityMul()))
+			// s.Margin.Set(units.Dp(2 * Prefs.DensityMul()))
+			// s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))
 		case ActionMenu:
 			s.Margin.Set()
-			s.Padding.Set(units.Px(6*Prefs.DensityMul()), units.Px(12*Prefs.DensityMul()))
-			s.MaxWidth.SetPx(-1)
+			s.Padding.Set(units.Dp(6*Prefs.DensityMul()), units.Dp(12*Prefs.DensityMul()))
+			s.MaxWidth.SetDp(-1)
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		case ActionMenuBar:
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
@@ -118,7 +118,7 @@ func (ac *Action) ActionStyles() {
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Px(2))
+			s.Border.Width.Set(units.Dp(2))
 			s.Border.Color.Set(colors.Scheme.Outline)
 		}
 		// switch ac.State {

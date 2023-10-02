@@ -82,7 +82,7 @@ func (tv *TreeView) OnInit() {
 	tv.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Margin.Set()
-		s.Padding.Set(units.Px(4 * gi.Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(4 * gi.Prefs.DensityMul()))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		if w.StateIs(states.Selected) {

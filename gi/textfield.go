@@ -158,20 +158,20 @@ func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
-		tf.CursorWidth.SetPx(1)
+		tf.CursorWidth.SetDp(1)
 		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
 		// s.Cursor = cursor.IBeam
 		s.MinWidth.SetEm(20)
-		s.Margin.Set(units.Px(1 * Prefs.DensityMul()))
-		s.Padding.Set(units.Px(8*Prefs.DensityMul()), units.Px(16*Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(16*Prefs.DensityMul()))
 		if !tf.LeadingIcon.IsNil() {
-			s.Padding.Left.SetPx(12)
+			s.Padding.Left.SetDp(12)
 		}
 		if !tf.TrailingIcon.IsNil() {
-			s.Padding.Right.SetPx(12)
+			s.Padding.Right.SetDp(12)
 		}
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnSurface
@@ -184,20 +184,20 @@ func (tf *TextField) TextFieldStyles() {
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 			if tf.StateIs(states.Focused) {
-				s.Border.Width.Bottom = units.Px(2)
+				s.Border.Width.Bottom = units.Dp(2)
 				s.Border.Color.Bottom = colors.Scheme.Primary.Base
 			} else {
-				s.Border.Width.Bottom = units.Px(1)
+				s.Border.Width.Bottom = units.Dp(1)
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 			}
 		case TextFieldOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Radius = styles.BorderRadiusExtraSmall
 			if tf.StateIs(states.Focused) {
-				s.Border.Width.Set(units.Px(2))
+				s.Border.Width.Set(units.Dp(2))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
 			} else {
-				s.Border.Width.Set(units.Px(1))
+				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		}
@@ -214,8 +214,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			lead := child.(*Action)
 			lead.Type = ActionParts
 			lead.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetPx(20)
-				s.Margin.Right.SetPx(16 * Prefs.DensityMul())
+				s.Font.Size.SetDp(20)
+				s.Margin.Right.SetDp(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
@@ -223,8 +223,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			trail := child.(*Action)
 			trail.Type = ActionParts
 			trail.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetPx(20)
-				s.Margin.Left.SetPx(16 * Prefs.DensityMul())
+				s.Font.Size.SetDp(20)
+				s.Margin.Left.SetDp(16 * Prefs.DensityMul())
 				s.Color = colors.Scheme.OnSurfaceVariant
 				s.AlignV = styles.AlignMiddle
 			})
