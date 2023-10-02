@@ -477,7 +477,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 	rctx.Size = sz
 	rctx.Visible = true
 	rctx.LogicalDPI = w.LogicalDPI()
-	fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
+	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.StageMgr.Resize(sz)
 	// w.ConfigInsets()
 	if WinGeomTrace {

@@ -232,9 +232,9 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	pr.End()
 }
 
-// LayoutRenderTree does a layout and render of the tree:
+// LayoutRenderScene does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
-func (sc *Scene) LayoutRenderTree() {
+func (sc *Scene) LayoutRenderScene() {
 	sc.Frame.GetSizeTree(sc, 0)
 	sc.Frame.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
 	sc.Frame.DoLayoutTree(sc)
@@ -289,18 +289,18 @@ func (sc *Scene) DoUpdate() bool {
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
-		fmt.Println("scene restyle")
+		// fmt.Println("scene restyle")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
-		sc.ApplyStylesScene()
-		sc.LayoutRenderTree()
+		sc.ApplyStyleScene()
+		sc.LayoutRenderScene()
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.HasFlag(ScNeedsLayout):
 		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
-		sc.LayoutRenderTree()
+		sc.LayoutRenderScene()
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
 	case sc.HasFlag(ScNeedsRender):
@@ -324,10 +324,10 @@ func (sc *Scene) ConfigScene() {
 	sc.Frame.ConfigTree(sc)
 }
 
-// ApplyStylesScene calls ApplyStyles on all widgets in the Scene,
+// ApplyStyleScene calls ApplyStyle on all widgets in the Scene,
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
-func (sc *Scene) ApplyStylesScene() {
+func (sc *Scene) ApplyStyleScene() {
 	sc.SetFlag(true, ScIsUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScIsUpdating)
 
@@ -341,8 +341,8 @@ func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
 	sc.SetFlag(true, ScRebuild)
 	sc.ConfigScene()
-	sc.ApplyStylesScene()
-	sc.LayoutRenderTree()
+	sc.ApplyStyleScene()
+	sc.LayoutRenderScene()
 	sc.SetFlag(false, ScRebuild)
 }
 

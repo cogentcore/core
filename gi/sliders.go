@@ -308,13 +308,12 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	if sb.ValThumb {
 		val = mat32.Min(val, sb.Max-sb.ThumbVal)
 	}
-	sb.SlideStartPos = sb.Pos
 	if sb.Snap {
 		val = sb.SnapValue(val)
 	}
 	sb.Value = val
 	sb.UpdatePosFromValue(val)
-	if sb.Tracking && mat32.Abs(sb.Value-val) > sb.TrackThr {
+	if sb.Tracking && mat32.Abs(sb.LastValue-val) > sb.TrackThr {
 		sb.SendChanged(val, nil)
 	}
 	sb.UpdateEndRender(updt)
@@ -409,28 +408,29 @@ func (sb *SliderBase) SliderMouse() {
 		} else {
 			sb.SetSliderPos(float32(ed.Y) - spc)
 		}
+		sb.SlideStartPos = sb.Pos
 	})
-	sb.On(events.SlideStart, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		e.SetHandled()
-		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
-		st := &sb.Style
-		// SidesTODO: not sure about dim
-		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
-		if sb.Dim == mat32.X {
-			sb.SetSliderPos(float32(ed.X) - spc)
-		} else {
-			sb.SetSliderPos(float32(ed.Y) - spc)
-		}
-	})
+	// sb.On(events.SlideStart, func(e events.Event) {
+	// 	if sb.StateIs(states.Disabled) {
+	// 		return
+	// 	}
+	// 	e.SetHandled()
+	// 	ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+	// 	st := &sb.Style
+	// 	// SidesTODO: not sure about dim
+	// 	spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+	// 	if sb.Dim == mat32.X {
+	// 		sb.SetSliderPos(float32(ed.X) - spc)
+	// 	} else {
+	// 		sb.SetSliderPos(float32(ed.Y) - spc)
+	// 	}
+	// })
 	sb.On(events.SlideMove, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
 		e.SetHandled()
-		del := e.PrevDelta()
+		del := e.StartDelta()
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(sb.SlideStartPos + float32(del.X))
 		} else {
@@ -451,6 +451,7 @@ func (sb *SliderBase) SliderMouse() {
 		} else {
 			sb.SetSliderPos(float32(ed.Y) - spc)
 		}
+		sb.SlideStartPos = sb.Pos
 	})
 	sb.On(events.Scroll, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
@@ -459,10 +460,11 @@ func (sb *SliderBase) SliderMouse() {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(sb.SlideStartPos + float32(se.NonZeroDelta(true))) // preferX
+			sb.SetSliderPos(sb.SlideStartPos - float32(se.NonZeroDelta(true))) // preferX
 		} else {
-			sb.SetSliderPos(sb.SlideStartPos + float32(se.NonZeroDelta(false))) // preferY
+			sb.SetSliderPos(sb.SlideStartPos - float32(se.NonZeroDelta(false))) // preferY
 		}
+		sb.SlideStartPos = sb.Pos
 	})
 }
 
@@ -673,6 +675,7 @@ func (sr *Slider) SliderStyles() {
 			// todo: just picking something at random to make it visible:
 			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
 			s.Color = colors.Scheme.Primary.On
+			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
 		case s.Is(states.Hovered):
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Sliding):
@@ -824,6 +827,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 	sb.ThumbSize = units.Ex(1)
 
 	sb.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
@@ -832,6 +836,17 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		// STYTODO: state styles
+		switch {
+		case s.Is(states.Active):
+			// todo: just picking something at random to make it visible:
+			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
+			s.Color = colors.Scheme.Primary.On
+			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+		case s.Is(states.Hovered):
+			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
+		case s.Is(states.Sliding):
+			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+		}
 	})
 }
 
