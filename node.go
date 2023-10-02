@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"strconv"
 
 	"log"
@@ -95,17 +96,26 @@ func (n *Node) AsNode() *Node {
 }
 
 // InitName initializes this node to given actual object as a Ki interface
-// and sets its name.  The names should be unique among children of a node.
+// and sets its name. The names should be unique among children of a node.
 // This is needed for root nodes -- automatically done for other nodes
-// when they are added to the Ki tree.
+// when they are added to the Ki tree. If the name is unspecified, it
+// defaults to the ID (kebab-case) name of the type.
 // Even though this is a method and gets the method receiver, it needs
 // an "external" version of itself passed as the first arg, from which
 // the proper Ki interface pointer will be obtained.  This is the only
-// way to get virtual functional calling to work within the Go framework.
-func (n *Node) InitName(k Ki, name string) {
+// way to get virtual functional calling to work within the Go language.
+func (n *Node) InitName(k Ki, name ...string) {
 	InitNode(k)
-	n.SetName(name)
+	if len(name) > 0 {
+		n.SetName(name[0])
+	}
+	if len(name) > 1 {
+		slog.Warn("programmer error: multiple name values passed to (ki.Node).InitName")
+		slog.Debug(string(debug.Stack()))
+	}
 }
+
+// TODO: should this return a [gti.Type]?
 
 // BaseIface returns the base interface type for all elements
 // within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
@@ -292,7 +302,7 @@ func (n *Node) Child(idx int) Ki {
 }
 
 // ChildTry returns the child at given index.  Try version returns error if index is invalid.
-// See methods on ki.Slice for more ways to acces.
+// See methods on ki.Slice for more ways to access.
 func (n *Node) ChildTry(idx int) (Ki, error) {
 	if err := n.IsValidIndex(idx); err != nil {
 		return nil, err
@@ -300,12 +310,17 @@ func (n *Node) ChildTry(idx int) (Ki, error) {
 	return n.Kids[idx], nil
 }
 
-// ChildByName returns first element that has given name, nil if not found.
-// startIdx arg allows for optimized bidirectional find if you have
-// an idea where it might be -- can be key speedup for large lists -- pass
-// [ki.StartMiddle] to start in the middle (good default).
-func (n *Node) ChildByName(name string, startIdx int) Ki {
-	return n.Kids.ElemByName(name, startIdx)
+// ChildByName returns the first element that has given name, and nil
+// if no such element is found. startIdx arg allows for optimized
+// bidirectional find if you have an idea where it might be, which
+// can be a key speedup for large lists. If no value is specified for
+// startIdx, it starts in the middle, which is a good default.
+func (n *Node) ChildByName(name string, startIdx ...int) Ki {
+	si := -1
+	if len(startIdx) > 0 {
+		si = startIdx[0]
+	}
+	return n.Kids.ElemByName(name, si)
 }
 
 // ChildByNameTry returns first element that has given name, error if not found.
