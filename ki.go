@@ -54,14 +54,15 @@ import (
 //   - Automatic JSON I/O of entire tree including type information.
 type Ki interface {
 	// InitName initializes this node to given actual object as a Ki interface
-	// and sets its name.  The names should be unique among children of a node.
+	// and sets its name. The names should be unique among children of a node.
 	// This is needed for root nodes -- automatically done for other nodes
-	// when they are added to the Ki tree.
+	// when they are added to the Ki tree. If the name is unspecified, it
+	// defaults to the ID (kebab-case) name of the type.
 	// Even though this is a method and gets the method receiver, it needs
 	// an "external" version of itself passed as the first arg, from which
 	// the proper Ki interface pointer will be obtained.  This is the only
 	// way to get virtual functional calling to work within the Go language.
-	InitName(this Ki, name string)
+	InitName(this Ki, name ...string)
 
 	// This returns the Ki interface that guarantees access to the Ki
 	// interface in a way that always reveals the underlying type
@@ -162,35 +163,37 @@ type Ki interface {
 	// See methods on ki.Slice for more ways to access.
 	ChildTry(idx int) (Ki, error)
 
-	// ChildByName returns first element that has given name, nil if not found.
-	// startIdx arg allows for optimized bidirectional find if you have
-	// an idea where it might be -- can be key speedup for large lists -- pass
-	// [ki.StartMiddle] to start in the middle (good default).
-	ChildByName(name string, startIdx int) Ki
+	// ChildByName returns the first element that has given name, and nil
+	// if no such element is found. startIdx arg allows for optimized
+	// bidirectional find if you have an idea where it might be, which
+	// can be a key speedup for large lists. If no value is specified for
+	// startIdx, it starts in the middle, which is a good default.
+	ChildByName(name string, startIdx ...int) Ki
 
-	// ChildByNameTry returns first element that has given name -- Try version
-	// returns error message if not found.
-	// startIdx arg allows for optimized bidirectional find if you have
-	// an idea where it might be -- can be key speedup for large lists -- pass
-	// [ki.StartMiddle] to start in the middle (good default).
-	ChildByNameTry(name string, startIdx int) (Ki, error)
+	// ChildByNameTry returns the first element that has given name, and an error
+	// if no such element is found. startIdx arg allows for optimized
+	// bidirectional find if you have an idea where it might be, which
+	// can be a key speedup for large lists. If no value is specified for
+	// startIdx, it starts in the middle, which is a good default.
+	ChildByNameTry(name string, startIdx ...int) (Ki, error)
 
-	// ChildByType returns first element that has given type, nil if not found.
-	// If embeds is true, then it looks for any type that embeds the given type
-	// at any level of anonymous embedding.
-	// startIdx arg allows for optimized bidirectional find if you have
-	// an idea where it might be -- can be key speedup for large lists -- pass
-	// [ki.StartMiddle] to start in the middle (good default).
-	ChildByType(t *gti.Type, embeds bool, startIdx int) Ki
+	// ChildByType returns the first element that has the given type, and nil
+	// if not found. If embeds is true, then it also looks for any type that
+	// embeds the given type at any level of anonymous embedding.
+	// startIdx arg allows for optimized bidirectional find if you have an
+	// idea where it might be, which can be a key speedup for large lists. If
+	// no value is specified for startIdx, it starts in the middle, which is a
+	// good default.
+	ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki
 
-	// ChildByTypeTry returns first element that has given name -- Try version
-	// returns error message if not found.
-	// If embeds is true, then it looks for any type that embeds the given type
-	// at any level of anonymous embedding.
-	// startIdx arg allows for optimized bidirectional find if you have
-	// an idea where it might be -- can be key speedup for large lists -- pass
-	// [ki.StartMiddle] to start in the middle (good default).
-	ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error)
+	// ChildByTypeTry returns the first element that has the given type, and an
+	// error if not found. If embeds is true, then it also looks for any type that
+	// embeds the given type at any level of anonymous embedding.
+	// startIdx arg allows for optimized bidirectional find if you have an
+	// idea where it might be, which can be a key speedup for large lists. If
+	// no value is specified for startIdx, it starts in the middle, which is a
+	// good default.
+	ChildByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, error)
 
 	//////////////////////////////////////////////////////////////////////////
 	//  Paths
@@ -246,20 +249,21 @@ type Ki interface {
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	AddChild(kid Ki) error
 
-	// NewChild creates a new child of the given type and
-	// adds it at end of children list.
-	// The name should be unique among children.
+	// NewChild creates a new child of the given type and adds it at end
+	// of children list. The name should be unique among children. If the
+	// name is unspecified, it defaults to the ID (kebab-case) name of the
+	// type, plus the [Ki.NumLifetimeChildren] of its parent.
 	// No UpdateStart / End wrapping is done: do that externally as needed.
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
-	NewChild(typ *gti.Type, name string) Ki
+	NewChild(typ *gti.Type, name ...string) Ki
 
-	// SetChild sets child at given index to be the given item -- if name is
-	// non-empty then it sets the name of the child as well -- just calls Init
-	// (or InitName) on the child, and SetParent.
-	// Names should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
-	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
-	SetChild(kid Ki, idx int, name string) error
+	// SetChild sets child at given index to be the given item; if it is passed
+	// a name, then it sets the name of the child as well; just calls Init
+	// (or InitName) on the child, and SetParent. Names should be unique
+	// among children. No UpdateStart / End wrapping is done: do that
+	// externally as needed. Can also call SetFlag(ki.ChildAdded) if
+	// notification is needed.
+	SetChild(kid Ki, idx int, name ...string) error
 
 	// InsertChild adds given child at position in children list.
 	// The kid node is assumed to not be on another tree (see MoveToParent)
@@ -268,16 +272,19 @@ type Ki interface {
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
 	InsertChild(kid Ki, at int) error
 
-	// InsertNewChild creates a new child of given type and
-	// add at position in children list.
-	// The name should be unique among children.
-	// No UpdateStart / End wrapping is done: do that externally as needed.
+	// InsertNewChild creates a new child of given type and add at position
+	// in children list. The name should be unique among children. If the
+	// name is unspecified, it defaults to the ID (kebab-case) name of the
+	// type, plus the [Ki.NumLifetimeChildren] of its parent. No
+	// UpdateStart / End wrapping is done: do that externally as needed.
 	// Can also call SetFlag(ki.ChildAdded) if notification is needed.
-	InsertNewChild(typ *gti.Type, at int, name string) Ki
+	InsertNewChild(typ *gti.Type, at int, name ...string) Ki
 
 	// SetNChildren ensures that there are exactly n children, deleting any
 	// extra, and creating any new ones, using NewChild with given type and
 	// naming according to nameStubX where X is the index of the child.
+	// If nameStub is not specified, it defaults to the ID (kebab-case)
+	// name of the type.
 	//
 	// IMPORTANT: returns whether any modifications were made (mods) AND if
 	// that is true, the result from the corresponding UpdateStart call --
@@ -288,7 +295,7 @@ type Ki interface {
 	// change their names, or call UniquifyNames -- use ConfigChildren for
 	// those cases -- this function is for simpler cases where a parent uses
 	// this function consistently to manage children all of the same type.
-	SetNChildren(n int, typ *gti.Type, nameStub string) (mods, updt bool)
+	SetNChildren(n int, typ *gti.Type, nameStub ...string) (mods, updt bool)
 
 	// ConfigChildren configures children according to given list of
 	// type-and-name's -- attempts to have minimal impact relative to existing
@@ -432,9 +439,9 @@ type Ki interface {
 	WalkPreLevel(fun func(k Ki, level int) bool)
 
 	// WalkPost iterates in a depth-first manner over the children, calling
-	// doChildTestFunc on each node to test if processing should proceed (if it returns
-	// false then that branch of the tree is not further processed), and then
-	// calls given fun function after all of a node's children
+	// doChildTestFunc on each node to test if processing should proceed (if
+	// it returns false then that branch of the tree is not further processed),
+	// and then calls given fun function after all of a node's children
 	// have been iterated over ("Me Last").
 	// This uses node state information to manage the traversal and is very fast,
 	// but can only be called by one thread at a time -- use a Mutex if there is
