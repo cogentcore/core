@@ -22,19 +22,18 @@ import (
 
 // KiMethodsTmpl is a template that contains the methods
 // and functions specific to Ki types.
-// Note: the KiPkg template in this template exists to handle
-// the case in which goki generate is ran in the ki package itself.
 var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	Funcs(template.FuncMap{
 		"HasEmbedDirective": HasEmbedDirective,
+		"KiPkg":             KiPkg,
 	}).Parse(
 	`
-	{{define "KiPkg"}} {{if eq .Pkg "ki"}} {{else}} ki. {{end}} {{end}}
-
-	// New{{.Name}} adds a new [{{.Name}}] with
-	// the given name to the given parent.
-	func New{{.Name}}(par {{template "KiPkg" .}}Ki, name string) *{{.Name}} {
-		return par.NewChild({{.Name}}Type, name).(*{{.Name}})
+	// New{{.Name}} adds a new [{{.Name}}] with the given name
+	// to the given parent. If the name is unspecified, it defaults
+	// to the ID (kebab-case) name of the type, plus the
+	// [{{KiPkg .}}Ki.NumLifetimeChildren] of the given parent.
+	func New{{.Name}}(par {{KiPkg .}}Ki, name ...string) *{{.Name}} {
+		return par.NewChild({{.Name}}Type, name...).(*{{.Name}})
 	}
 
 	// KiType returns the [*gti.Type] of [{{.Name}}]
@@ -43,7 +42,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	}
 
 	// New returns a new [*{{.Name}}] value
-	func (t *{{.Name}}) New() {{template "KiPkg" .}}Ki {
+	func (t *{{.Name}}) New() {{KiPkg .}}Ki {
 		return &{{.Name}}{}
 	}
 	
@@ -55,7 +54,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	
 	// As{{.Name}} returns the given value as a value of type {{.Name}} if the type
 	// of the given value embeds {{.Name}}, or nil otherwise
-	func As{{.Name}}(k {{template "KiPkg" .}}Ki) *{{.Name}} {
+	func As{{.Name}}(k {{KiPkg .}}Ki) *{{.Name}} {
 		if k == nil || k.This() == nil {
 			return nil
 		}
@@ -72,6 +71,16 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	{{end}}
 	`,
 ))
+
+// KiPkg returns the package identifier for the ki package in
+// the context of the given type ("" if it is already in the ki
+// package, and "ki." otherwise)
+func KiPkg(typ *gtigen.Type) string {
+	if typ.Pkg == "ki" { // we are already in ki
+		return ""
+	}
+	return "ki."
+}
 
 // HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
 // commend directive. This function is used in [KiMethodsTmpl].
