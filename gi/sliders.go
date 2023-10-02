@@ -716,7 +716,7 @@ func (sr *Slider) GetSize(sc *Scene, iter int) {
 }
 
 func (sr *Slider) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sr.DoLayoutBase(sc, parBBox, iter)
 	sr.DoLayoutParts(sc, parBBox, iter)
 	sr.SizeFromAlloc()
 	return sr.DoLayoutChildren(sc, iter)
@@ -850,7 +850,7 @@ func (sb *ScrollBar) GetSize(sc *Scene, iter int) {
 }
 
 func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sb.DoLayoutBase(sc, parBBox, iter)
 	sb.DoLayoutParts(sc, parBBox, iter)
 	for i := 0; i < int(SliderStatesN); i++ {
 		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)

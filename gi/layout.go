@@ -1187,7 +1187,7 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
 	//	}
 	//}
-	ly.DoLayoutBase(sc, parBBox, true, iter) // init style
+	ly.DoLayoutBase(sc, parBBox, iter)
 	redo := false
 	switch ly.Lay {
 	case LayoutHoriz:
@@ -1309,7 +1309,7 @@ func (st *Stretch) ApplyStyle(sc *Scene) {
 }
 
 func (st *Stretch) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	st.DoLayoutBase(sc, parBBox, true, iter) // init style
+	st.DoLayoutBase(sc, parBBox, iter)
 	return st.DoLayoutChildren(sc, iter)
 }
 
@@ -1342,6 +1342,6 @@ func (sp *Space) ApplyStyle(sc *Scene) {
 }
 
 func (sp *Space) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sp.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sp.DoLayoutBase(sc, parBBox, iter)
 	return sp.DoLayoutChildren(sc, iter)
 }

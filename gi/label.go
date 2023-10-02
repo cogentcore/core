@@ -433,7 +433,7 @@ func (lb *Label) GetSize(sc *Scene, iter int) {
 }
 
 func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	lb.DoLayoutBase(sc, parBBox, true, iter)
+	lb.DoLayoutBase(sc, parBBox, iter)
 	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
 	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text

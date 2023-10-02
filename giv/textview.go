@@ -4848,7 +4848,7 @@ func (tv *TextView) GetSize(vp *Scene, iter int) {
 
 // DoLayoutn
 func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
-	tv.DoLayoutBase(parBBox, true, iter) // init style
+	tv.DoLayoutBase(parBBox, iter)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}

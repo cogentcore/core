@@ -414,7 +414,7 @@ func (sb *SpinBox) GetSize(sc *Scene, iter int) {
 }
 
 func (sb *SpinBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sb.DoLayoutBase(sc, parBBox, iter)
 	sb.DoLayoutParts(sc, parBBox, iter)
 	return sb.DoLayoutChildren(sc, iter)
 }

@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 	"strings"
 	"time"
 
@@ -295,6 +296,7 @@ func (st *StageBase) SetNameFromScene() Stage {
 func (st *StageBase) SetScene(sc *Scene) Stage {
 	st.Scene = sc
 	if sc != nil {
+		sc.Stage = st.Stage
 		st.SetNameFromScene()
 	}
 	return st.Stage
@@ -415,6 +417,10 @@ func (st *StageBase) SetSide(side StageSides) Stage {
 
 // Run does the default run behavior based on the type of stage
 func (st *StageBase) Run() Stage {
+	if st.Scene == nil {
+		log.Println("ERROR: stage has nil scene")
+	}
+	st.Scene.ConfigScene() // always config prior to running
 	switch st.Type {
 	case Window:
 		return st.Stage.AsMain().RunWindow()

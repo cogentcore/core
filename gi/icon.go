@@ -110,7 +110,7 @@ func (ic *Icon) ApplyStyle(sc *Scene) {
 }
 
 func (ic *Icon) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	ic.DoLayoutBase(sc, parBBox, true, iter)
+	ic.DoLayoutBase(sc, parBBox, iter)
 	return ic.DoLayoutChildren(sc, iter)
 }
 

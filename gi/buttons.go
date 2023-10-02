@@ -357,7 +357,7 @@ func (bb *ButtonBase) ApplyStyle(sc *Scene) {
 }
 
 func (bb *ButtonBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	bb.DoLayoutBase(sc, parBBox, iter)
 	bb.DoLayoutParts(sc, parBBox, iter)
 	return bb.DoLayoutChildren(sc, iter)
 }

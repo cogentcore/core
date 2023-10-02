@@ -349,7 +349,7 @@ func (sv *SplitView) ApplyStyle(sc *Scene) {
 }
 
 func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sv.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sv.DoLayoutBase(sc, parBBox, iter)
 	sv.DoLayoutParts(sc, parBBox, iter)
 	sv.UpdateSplits()
 
@@ -500,7 +500,7 @@ func (sr *Splitter) GetSize(sc *Scene, iter int) {
 }
 
 func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sr.DoLayoutBase(sc, parBBox, true, iter) // init style
+	sr.DoLayoutBase(sc, parBBox, iter)
 	sr.DoLayoutParts(sc, parBBox, iter)
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)

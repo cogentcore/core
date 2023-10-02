@@ -96,41 +96,44 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 
 # Detailed Render Logic
 
-Rendering is done in 5 separate passes:
+There are 4 major steps to making the `Scene` tree of `Widget` elements ready to render:
 
-0. Config: In a MeFirst downward pass, Viewport pointer is set, styles are
-   initialized, and any other widget-specific init is done.
+1. `Config` configures `Parts` and other settings on the `Widget` based on settings reflected in the fields of the Widget.  This is "structural" in terms of sub-widget parts, but not about styling.
 
-1. SetStyle: In a MeFirst downward pass, all properties are cached out in
-   an inherited manner, and incorporating any css styles, into either the
-   Paint (SVG) or Style (Widget) object for each Node.  Only done once after
-   structural changes -- styles are not for dynamic changes.
+2. `ApplyStyle` applies styling functions to the configured `Widget` to determine how it will look when rendered.  Generally it should be called after any `Config` step, and the `ReConfig` method on a widget does just this.
 
-2. GetSize: MeLast downward pass, each node first calls
-   g.Layout.Reset(), then sets their LayoutSize according to their own
-   intrinsic size parameters, and/or those of its children if it is a Layout.
+3. `DoLayout` gathers sizes and uses styling info etc to arrange widgets on the screen.  This generally must be done after changes made in `Config` or `ApplyStyle`, which set flags indicating that this is needed at the next render pass.  Critically, DoLayout is where the Styling settings made in ApplyStyle are "cached out" into raw pixel dots, based on the DPI and Size of the window.
 
-3. DoLayout: MeFirst downward pass (each node calls on its children at
-   appropriate point) with relevant parent BBox that the children are
-   constrained to render within -- they then intersect this BBox with their
-   own BBox (from BBox2D) -- typically just call DoLayoutBase for default
-   behavior -- and add parent position to AllocPos. Layout does all its
-   sizing and positioning of children in this pass, based on the GetSize data
-   gathered bottom-up and constraints applied top-down from higher levels.
-   Typically only a single iteration is required but multiple are supported
-   (needed for word-wrapped text or flow layouts).
+4. `Render` itself does the actual drawing of the widgets to the `Scene` `Pixels` image, which is then uploaded to the `RenderWin` window that you actually see.
 
-4. Render: Final rendering pass, each node is fully responsible for
-   rendering its own children, to provide maximum flexibility (see
-   RenderChildren) -- bracket the render calls in PushBounds / PopBounds
-   and a false from PushBounds indicates that VpBBox is empty and no
-   rendering should occur.  Nodes typically connect / disconnect to receive
-   events from the window based on this visibility here.
+The window updating happens in a separate step, typically 60 times per second, which checks for flags on the `Scene` indicating if any new rendering or layout updating is needed.  This separate updating pass is designed to eliminate the possibility of collisions between updating and rendering, using atomically set flags to signal what needs to be updated at any point (these flags are not set until _after_ changes have been made, and unchanged nodes are not re-renderd).
 
-   * Move2D: optional pass invoked by scrollbars to move elements relative to
+## Initial configuration
+
+First, there is code, e.g., in user's `mainrun` function, or other libraries, that calls `NewScene` and `NewButton` etc to construct widgets for a scene.  During this process, various parameters (fields) on the Widgets are set, that then determine e.g., how the Parts of the widget will then be configured.
+
+## Stage.Run()
+
+When the `scene` is put into a `Stage` container and then `Run()`, we call `ConfigScene()` on the Scene to make sure that everything is fully configured according to the settings made during initial construction.
+
+## RenderWindow
+
+Then, when the Scene is actually rendered to a `RenderWin` window that you can actually see, it is continually subject to various levels of updating depending on how much it has changed.
+
+* If the `RenderWin` has a different size or DPI than the Scene was previously presented at, then `ApplyStyleScene` is called to allow `Style` functions to do things differently depending on the rendering context (i.e., "responsive" styling).  Then, a full Layout and render pass is done.
+
+* If anything was subject to `Config` or `ApplyStyle` changes, then a new `DoLayout` pass is done.
+
+* If only State changes were made due to events (e.g., a mouse hovering over a button), then just a `Render` update is done.
+
+The computing of actual style sizes in terms of dots, which happens in `SetUnitContext`, has to happen twice: first in `ApplyStyle` so that the layout `GetSizes` functions have correct info about how much size a label etc takes when rendered, and then after the Layout is done, to reflect what is actually going to be rendered.
+
+## Scrolling, other Spaces
+
+* Move2D: optional pass invoked by scrollbars to move elements relative to
    their previously-assigned positions.
 
-   * SVG nodes skip the Size and Layout passes, and render directly into
+* SVG nodes skip the Size and Layout passes, and render directly into
    parent SVG viewport
 
 

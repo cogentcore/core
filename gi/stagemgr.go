@@ -26,6 +26,7 @@ type StageMgr interface {
 // extended by PopupStageMgr and MainStageMgr.
 // Manages a stack of Stage elements.
 type StageMgrBase struct {
+	StageMgr StageMgr
 
 	// stack of stages
 	Stack ordmap.Map[string, Stage]
@@ -57,7 +58,7 @@ func (sm *StageMgrBase) Push(st Stage) {
 
 	sm.Modified = true
 	sm.Stack.Add(st.AsBase().Name, st)
-	st.StageAdded(sm)
+	st.StageAdded(sm.StageMgr)
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none.
@@ -178,7 +179,8 @@ func (sm *MainStageMgr) AsMainMgr() *MainStageMgr {
 
 // Init is called when owning RenderWin is created.
 // Initializes data structures
-func (sm *MainStageMgr) Init(win *RenderWin) {
+func (sm *MainStageMgr) Init(this StageMgr, win *RenderWin) {
+	sm.StageMgr = this
 	sm.RenderWin = win
 	sm.RenderCtx = &RenderContext{LogicalDPI: 96, Visible: false}
 }

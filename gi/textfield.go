@@ -1529,7 +1529,7 @@ func (tf *TextField) GetSize(sc *Scene, iter int) {
 }
 
 func (tf *TextField) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	tf.DoLayoutBase(sc, parBBox, true, iter) // init style
+	tf.DoLayoutBase(sc, parBBox, iter)
 	tf.DoLayoutParts(sc, parBBox, iter)
 	redo := tf.DoLayoutChildren(sc, iter)
 	tf.SetEffPosAndSize()

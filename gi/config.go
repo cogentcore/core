@@ -33,6 +33,7 @@ func (wb *WidgetBase) ReConfig() {
 	}
 	wi := wb.This().(Widget)
 	wi.Config(wb.Sc)
+	wi.ApplyStyle(wb.Sc)
 }
 
 func (wb *WidgetBase) Config(sc *Scene) {
@@ -42,10 +43,7 @@ func (wb *WidgetBase) Config(sc *Scene) {
 	wi := wb.This().(Widget)
 	updt := wi.UpdateStart()
 	wb.Sc = sc
-	wb.Style.Defaults()    // reset
-	wb.LayState.Defaults() // doesn't overwrite
-	wi.ConfigWidget(sc)    // where everything actually happens
-	wi.ApplyStyle(sc)
+	wi.ConfigWidget(sc) // where everything actually happens
 	wb.UpdateEnd(updt)
 	wb.SetNeedsLayout(sc, updt)
 }

@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"log"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/paint"
@@ -150,6 +152,10 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	pr := prof.Start("ApplyStyleWidget")
 	defer pr.End()
 
+	if wb.Sc == nil && sc != nil {
+		wb.Sc = sc
+	}
+
 	if wb.OverrideStyle {
 		return
 	}
@@ -172,6 +178,8 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.RunStylers()
 	prun.End()
 
+	// note: it is critical to do this styling here so that layout getsizes
+	// has the proper info for laying out items
 	puc := prof.Start("ApplyStyleWidget-SetUnitContext")
 	SetUnitContext(&wb.Style, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
@@ -218,11 +226,15 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		rc := sc.RenderCtx()
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
+		} else {
+			log.Println("ERROR: SetUnitContext RenderCtx is nil for Scene", sc.Name)
 		}
 		if sc.RenderState.Image != nil {
 			sz := sc.Geom.Size // Render.Image.Bounds().Size()
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		}
+	} else {
+		log.Println("ERROR: SetUnitContext Scene nil!")
 	}
 	pr := prof.Start("SetUnitContext-OpenFont")
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics

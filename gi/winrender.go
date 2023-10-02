@@ -28,6 +28,32 @@ const (
 	MaxSpritesPerTexture = 128
 )
 
+// RenderParams are the key RenderWin params that determine if
+// a scene needs to be restyled since last render, if these params change.
+type RenderParams struct {
+	// LogicalDPI is the current logical dots-per-inch resolution of the
+	// window, which should be used for most conversion of standard units.
+	LogicalDPI float32
+
+	// Size of the rendering window, in actual "dot" pixels used for rendering.
+	Size image.Point
+}
+
+// NeedsRestyle returns true if the current render context
+// params differ from those used in last render.
+func (rp *RenderParams) NeedsRestyle(rc *RenderContext) bool {
+	if rp.LogicalDPI != rc.LogicalDPI || rp.Size != rc.Size {
+		return true
+	}
+	return false
+}
+
+// SaveRender grabs current render context params
+func (rp *RenderParams) SaveRender(rc *RenderContext) {
+	rp.LogicalDPI = rc.LogicalDPI
+	rp.Size = rc.Size
+}
+
 // RenderContext provides rendering context from outer RenderWin
 // window to Stage and Scene elements to inform styling, layout
 // and rendering.  It also has the master Mutex for any updates

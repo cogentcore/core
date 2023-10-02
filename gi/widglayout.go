@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -150,7 +151,7 @@ func (wb *WidgetBase) DoLayoutParts(sc *Scene, parBBox image.Rectangle, iter int
 }
 
 func (wb *WidgetBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	wb.DoLayoutBase(sc, parBBox, true, iter) // init style
+	wb.DoLayoutBase(sc, parBBox, iter)
 	wb.DoLayoutParts(sc, parBBox, iter)
 	return wb.DoLayoutChildren(sc, iter)
 }
@@ -162,17 +163,22 @@ func (wb *WidgetBase) InitLayout(sc *Scene) bool {
 	return false
 }
 
-// todo: wtf with initStyle ??
+// todo: wtf with initStyle ??  always true.
 
 // DoLayoutBase provides basic DoLayout functions -- good for most cases
-func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, initStyle bool, iter int) {
+func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int) {
+	if sc == nil {
+		sc = wb.Sc
+		if sc == nil {
+			log.Println("ERROR: DoLayoutBase Scene is nil", wb.Path())
+		}
+	}
 	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
-	if initStyle {
-		SetUnitContext(&wb.Style, sc, wb.NodeSize(), psize) // update units with final layout
-	}
-	wb.BBox = wi.BBoxes() // only compute once, at this point
+	// this is the one point when Style Dots are actually computed!
+	SetUnitContext(&wb.Style, sc, wb.NodeSize(), psize) // update units with final layout
+	wb.BBox = wi.BBoxes()                               // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {

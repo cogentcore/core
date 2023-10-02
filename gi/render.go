@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
 
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
@@ -276,11 +277,25 @@ func (sc *Scene) DoUpdate() bool {
 	sc.SetFlag(true, ScIsUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScIsUpdating)
 
+	rc := sc.RenderCtx()
+	if rc == nil {
+		log.Println("ERROR: scene render context is nil:", sc.Name)
+		return true
+	}
+
 	switch {
 	case sc.HasFlag(ScNeedsRebuild):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
+	case sc.LastRender.NeedsRestyle(rc):
+		fmt.Println("scene restyle")
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
+		sc.Fill() // full redraw
+		sc.ApplyStylesScene()
+		sc.LayoutRenderTree()
+		sc.SetFlag(true, ScImageUpdated)
+		sc.LastRender.SaveRender(rc)
 	case sc.HasFlag(ScNeedsLayout):
 		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
@@ -298,13 +313,26 @@ func (sc *Scene) DoUpdate() bool {
 	return true
 }
 
-// Config calls Config on all nodes in the tree,
+// ConfigScene calls Config on all widgets in the Scene,
 // which will set NeedsLayout to drive subsequent layout and render.
-// This is a top-level call, typically only done in a Show function.
-func (sc *Scene) Config() {
+// This is a top-level call, typically only done when the window
+// is first drawn, once the full sizing information is available.
+func (sc *Scene) ConfigScene() {
 	sc.SetFlag(true, ScIsUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScIsUpdating)
+
 	sc.Frame.ConfigTree(sc)
+}
+
+// ApplyStylesScene calls ApplyStyles on all widgets in the Scene,
+// This is needed whenever the window geometry, DPI,
+// etc is updated, which affects styling.
+func (sc *Scene) ApplyStylesScene() {
+	sc.SetFlag(true, ScIsUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScIsUpdating)
+
+	sc.Frame.ApplyStyleTree(sc)
+	sc.SetFlag(true, ScNeedsLayout)
 }
 
 // DoRebuild implements the ScNeedsRebuild case
@@ -312,7 +340,8 @@ func (sc *Scene) Config() {
 func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
 	sc.SetFlag(true, ScRebuild)
-	sc.Frame.ConfigTree(sc)
+	sc.ConfigScene()
+	sc.ApplyStylesScene()
 	sc.LayoutRenderTree()
 	sc.SetFlag(false, ScRebuild)
 }
@@ -336,7 +365,7 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	defer sc.SetFlag(false, ScIsUpdating)
 
 	sc.SetFlag(true, ScPrefSizing)
-	sc.Config()
+	sc.ConfigScene()
 
 	frame := &sc.Frame
 	frame.ApplyStyleTree(sc) // sufficient to get sizes

@@ -40,10 +40,16 @@ type Widget interface {
 
 	// Config configures the widget, primarily configuring its Parts.
 	// it does _not_ call Config on children, just self.
-	// ConfigTree handles full tree configuration.
-	// This config calls UpdateStart / End, ApplyStyle, and SetNeedsLayout,
+	// ApplyStyle must generally be called after Config - it is called
+	// automatically when Scene is first shown, but must be called
+	// manually thereafter as needed after configuration changes.
+	// See ReConfig for a convenience function that does both.
+	// ConfigScene on Scene handles full tree configuration.
+	// This config calls UpdateStart / End, and SetNeedsLayout,
 	// and calls ConfigWidget to do the actual configuration,
 	// so it does not need to manage this housekeeping.
+	// Thus, this Config call is typically never changed, and
+	// all custom configuration should happen in ConfigWidget.
 	Config(sc *Scene)
 
 	// ConfigWidget does the actual configuration of the widget,
@@ -53,6 +59,11 @@ type Widget interface {
 	// Outer Config call handles all the other infrastructure,
 	// so this call just does the core configuration.
 	ConfigWidget(sc *Scene)
+
+	// ReConfig calls Config and ApplyStyle on this widget.
+	// This should be called if any config options are changed,
+	// while the Scene is being viewed.
+	ReConfig()
 
 	// StateIs returns true if given Style.State flag is set
 	StateIs(flag enums.BitFlag) bool

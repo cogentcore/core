@@ -270,12 +270,7 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	drw := win.GoosiWin.Drawer()
 	drw.SetMaxTextures(vgpu.MaxTexturesPerSet * 3)       // use 3 sets
 	win.RenderScenes.MaxIdx = vgpu.MaxTexturesPerSet * 2 // reserve last for sprites
-
-	// 	win.DirDraws.SetIdxRange(1, MaxDirectUploads)
-	// 	// win.DirDraws.FlipY = true // drawing is flipped in general here.
-	// 	win.PopDraws.SetIdxRange(win.DirDraws.MaxIdx, MaxPopups)
-
-	win.StageMgr.Init(win)
+	win.StageMgr.Init(&win.StageMgr, win)
 
 	// win.GoosiWin.SetDestroyGPUResourcesFunc(func() {
 	// 	for _, ph := range win.Phongs {
@@ -481,6 +476,8 @@ func (w *RenderWin) Resized(sz image.Point) {
 	}
 	rctx.Size = sz
 	rctx.Visible = true
+	rctx.LogicalDPI = w.LogicalDPI()
+	fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.StageMgr.Resize(sz)
 	// w.ConfigInsets()
 	if WinGeomTrace {

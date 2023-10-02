@@ -6,6 +6,7 @@ package gi
 
 import (
 	"image"
+	"log"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
@@ -46,6 +47,7 @@ func (st *MainStage) MainMgr() *MainStageMgr {
 
 func (st *MainStage) RenderCtx() *RenderContext {
 	if st.StageMgr == nil {
+		log.Println("ERROR: MainStage has nil StageMgr:", st.Name)
 		return nil
 	}
 	return st.StageMgr.RenderCtx
@@ -119,7 +121,6 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 // RunWindow runs a Window with current settings.
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
-	st.Scene.Config()
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()

@@ -9,6 +9,7 @@ import (
 	"image/color"
 	"image/png"
 	"io"
+	"log"
 	"sync"
 
 	"goki.dev/colors"
@@ -67,8 +68,11 @@ type Scene struct {
 	// [view: -] Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
 
-	// [view: -] CurStyleNode is always set to the current node that is being styled used for finding url references -- only active during a Style pass
-	// CurStyleNode WidgetD `copy:"-" json:"-" xml:"-" view:"-" desc:"CurStyleNode is always set to the current node that is being styled used for finding url references -- only active during a Style pass"`
+	// LastRender captures key params from last render.
+	// If different then a new ApplyStyleScene is needed.
+	LastRender RenderParams
+
+	// todo: should be able to remove UpdtMu, StackMu
 
 	// [view: -] UpdtMu is mutex for scene updates
 	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for scene updates"`
@@ -100,14 +104,17 @@ func (sc *Scene) SetTitle(title string) *Scene {
 }
 
 func (sc *Scene) RenderCtx() *RenderContext {
-	if sc.Stage == nil { // todo: error msg?
+	sm := sc.StageMgr()
+	if sm == nil {
+		log.Println("ERROR: Scene has nil StageMgr:", sc.Name)
 		return nil
 	}
-	return sc.Stage.RenderCtx()
+	return sm.RenderCtx
 }
 
 func (sc *Scene) StageMgr() *MainStageMgr {
-	if sc.Stage == nil { // todo: error msg?
+	if sc.Stage == nil {
+		log.Println("ERROR: Scene has nil Stage:", sc.Name)
 		return nil
 	}
 	return sc.Stage.MainMgr()
