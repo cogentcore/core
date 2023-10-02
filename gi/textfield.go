@@ -1324,7 +1324,7 @@ func (tf *TextField) TextFieldKeys() {
 			e.SetHandled()
 			tf.CancelComplete()
 			tf.Revert()
-			tf.FocusChanged(FocusInactive)
+			// tf.FocusChanged(FocusInactive)
 		case KeyFunBackspace:
 			e.SetHandled()
 			tf.CursorBackspace(1)
@@ -1359,6 +1359,69 @@ func (tf *TextField) TextFieldKeys() {
 					}
 				}
 			}
+		}
+	})
+}
+
+/*
+func (tf *TextField) FocusChanged(change FocusChanges) {
+	switch change {
+	case FocusLost:
+		tf.SetState(false, states.Focused)
+		tf.EditDone()
+		tf.ApplyStyleUpdate(tf.Sc)
+	case FocusGot:
+		tf.SetState(true, states.Focused)
+		tf.ScrollToMe()
+		// tf.CursorEnd()
+		// tf.EmitFocusedSignal()
+		tf.ApplyStyleUpdate(tf.Sc)
+		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
+		} else {
+			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
+		}
+	case FocusInactive:
+		tf.SetState(false, states.Focused)
+		tf.EditDeFocused()
+		tf.ApplyStyleUpdate(tf.Sc)
+		goosi.TheApp.HideVirtualKeyboard()
+	case FocusActive:
+		tf.SetState(true, states.Focused)
+		tf.ScrollToMe()
+		tf.ApplyStyleUpdate(tf.Sc)
+		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
+		} else {
+			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
+		}
+		// todo: see about cursor
+	}
+}
+*/
+
+func (tf *TextField) TextFieldStateFromFocus() {
+	tf.On(events.Focus, func(e events.Event) {
+		if tf.StateIs(states.Disabled) {
+			return
+		}
+		if tf.AbilityIs(states.Focusable) {
+			tf.ScrollToMe()
+			if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+				goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
+			} else {
+				goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
+			}
+			tf.SetState(true, states.Focused)
+		}
+	})
+	tf.On(events.FocusLost, func(e events.Event) {
+		if tf.StateIs(states.Disabled) {
+			return
+		}
+		if tf.AbilityIs(states.Focusable) {
+			tf.EditDone()
+			tf.SetState(false, states.Focused)
 		}
 	})
 }
@@ -1546,41 +1609,6 @@ func (tf *TextField) Render(sc *Scene) {
 		tf.RenderParts(sc)
 		tf.RenderChildren(sc)
 		tf.PopBounds(sc)
-	}
-}
-
-func (tf *TextField) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		tf.SetState(false, states.Focused)
-		tf.EditDone()
-		tf.ApplyStyleUpdate(tf.Sc)
-	case FocusGot:
-		tf.SetState(true, states.Focused)
-		tf.ScrollToMe()
-		// tf.CursorEnd()
-		// tf.EmitFocusedSignal()
-		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
-		} else {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
-		}
-	case FocusInactive:
-		tf.SetState(false, states.Focused)
-		tf.EditDeFocused()
-		tf.ApplyStyleUpdate(tf.Sc)
-		goosi.TheApp.HideVirtualKeyboard()
-	case FocusActive:
-		tf.SetState(true, states.Focused)
-		tf.ScrollToMe()
-		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
-		} else {
-			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
-		}
-		// todo: see about cursor
 	}
 }
 

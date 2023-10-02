@@ -199,7 +199,7 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 			return
 		}
 		if wb.AbilityIs(states.Focusable) {
-			// note: don't mark event as handled as other widgets may also get it
+			wb.ScrollToMe()
 			wb.SetState(true, states.Focused)
 		}
 	})
@@ -208,7 +208,6 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 			return
 		}
 		if wb.AbilityIs(states.Focusable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(false, states.Focused)
 		}
 	})

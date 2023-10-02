@@ -5,43 +5,9 @@
 package gi
 
 import (
-	"fmt"
-
 	"goki.dev/girl/states"
 	"goki.dev/ki/v2"
 )
-
-// FocusChanges are the kinds of changes that can be reported via
-// FocusChanged method
-type FocusChanges int32 //enums:enum
-
-const (
-	// FocusLost means that keyboard focus is on a different widget
-	// (typically) and this one lost focus
-	FocusLost FocusChanges = iota
-
-	// FocusGot means that this widget just got keyboard focus
-	FocusGot
-
-	// FocusInactive means that although this widget retains keyboard focus
-	// (nobody else has it), the user has clicked on something else and
-	// therefore the focus should be considered inactive (distracted), and any
-	// changes should be applied as this other action could result in closing
-	// of a dialog etc.  Keyboard events will still be sent to the focus
-	// widget, but it is up to the widget if or how to process them (e.g., it
-	// could reactivate on its own).
-	FocusInactive
-
-	// FocusActive means that the user has moved the mouse back into the
-	// focused widget to resume active keyboard focus.
-	FocusActive
-)
-
-// FocusChanged handles the default behavior for node focus changes
-// by calling [NodeBase.SetNeedsStyle] and sending an update signal.
-func (wb *WidgetBase) FocusChanged(change FocusChanges) {
-	wb.ApplyStyleUpdate(wb.Sc)
-}
 
 // GrabFocus grabs the keyboard input focus on this item or the first item within it
 // that can be focused (if none, then goes ahead and sets focus to this object)
@@ -62,7 +28,7 @@ func (wb *WidgetBase) GrabFocus() {
 	}
 	em := wb.EventMgr()
 	if em != nil {
-		fmt.Println("set focus:", foc.Path())
+		// fmt.Println("grab focus:", foc.Path())
 		em.SetFocus(foc.(Widget))
 	}
 }

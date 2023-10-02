@@ -377,19 +377,6 @@ func (bb *ButtonBase) Render(sc *Scene) {
 	}
 }
 
-func (bb *ButtonBase) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		bb.ApplyStyleUpdate(bb.Sc)
-	case FocusGot:
-		bb.ScrollToMe()
-		// bb.EmitFocusedSignal()
-		bb.ApplyStyleUpdate(bb.Sc)
-	case FocusInactive: // don't care..
-	case FocusActive:
-	}
-}
-
 func (bb *ButtonBase) Destroy() {
 	if bb.Menu != nil {
 		bb.Menu.DeleteShortcuts(bb.ParentRenderWin())

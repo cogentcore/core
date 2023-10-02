@@ -777,21 +777,6 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	}
 }
 
-func (sr *Slider) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		sr.SetSliderState(SliderActive) // lose any hover state but whatever..
-		sr.UpdateSig()
-	case FocusGot:
-		sr.ScrollToMe()
-		sr.SetSliderState(SliderFocus)
-		// sr.EmitFocusedSignal()
-		sr.UpdateSig()
-	case FocusInactive: // don't care..
-	case FocusActive:
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ScrollBar
 
@@ -898,20 +883,6 @@ func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
 	sz.SetDim(sb.Dim, sb.ThSize)
 	pc.FillStyle.SetFullColor(&sb.ValueColor)
 	sb.RenderBoxImpl(sc, pos, sz, st.Border)
-}
-
-func (sb *ScrollBar) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		sb.SetSliderState(SliderActive) // lose any hover state but whatever..
-		sb.UpdateSig()
-	case FocusGot:
-		sb.SetSliderState(SliderFocus)
-		// sb.EmitFocusedSignal()
-		sb.UpdateSig()
-	case FocusInactive: // don't care..
-	case FocusActive:
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -133,79 +133,79 @@ func (lb *Label) LabelStyles() {
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
 		case LabelLabelLarge:
-			s.Text.LineHeight.SetPx(20)
-			s.Font.Size.SetPx(14)
-			s.Text.LetterSpacing.SetPx(0.1)
+			s.Text.LineHeight.SetDp(20)
+			s.Font.Size.SetDp(14)
+			s.Text.LetterSpacing.SetDp(0.1)
 			s.Font.Weight = styles.WeightMedium
 		case LabelLabelMedium:
-			s.Text.LineHeight.SetPx(16)
-			s.Font.Size.SetPx(12)
-			s.Text.LetterSpacing.SetPx(0.5)
+			s.Text.LineHeight.SetDp(16)
+			s.Font.Size.SetDp(12)
+			s.Text.LetterSpacing.SetDp(0.5)
 			s.Font.Weight = styles.WeightMedium
 		case LabelLabelSmall:
-			s.Text.LineHeight.SetPx(16)
-			s.Font.Size.SetPx(11)
-			s.Text.LetterSpacing.SetPx(0.5)
+			s.Text.LineHeight.SetDp(16)
+			s.Font.Size.SetDp(11)
+			s.Text.LetterSpacing.SetDp(0.5)
 			s.Font.Weight = styles.WeightMedium
 		case LabelBodyLarge:
-			s.Text.LineHeight.SetPx(24)
-			s.Font.Size.SetPx(16)
-			s.Text.LetterSpacing.SetPx(0.5)
+			s.Text.LineHeight.SetDp(24)
+			s.Font.Size.SetDp(16)
+			s.Text.LetterSpacing.SetDp(0.5)
 			s.Font.Weight = styles.WeightNormal
 		case LabelBodyMedium:
-			s.Text.LineHeight.SetPx(20)
-			s.Font.Size.SetPx(14)
-			s.Text.LetterSpacing.SetPx(0.25)
+			s.Text.LineHeight.SetDp(20)
+			s.Font.Size.SetDp(14)
+			s.Text.LetterSpacing.SetDp(0.25)
 			s.Font.Weight = styles.WeightNormal
 		case LabelBodySmall:
-			s.Text.LineHeight.SetPx(16)
-			s.Font.Size.SetPx(12)
-			s.Text.LetterSpacing.SetPx(0.4)
+			s.Text.LineHeight.SetDp(16)
+			s.Font.Size.SetDp(12)
+			s.Text.LetterSpacing.SetDp(0.4)
 			s.Font.Weight = styles.WeightNormal
 		case LabelTitleLarge:
-			s.Text.LineHeight.SetPx(28)
-			s.Font.Size.SetPx(22)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(28)
+			s.Font.Size.SetDp(22)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		case LabelTitleMedium:
-			s.Text.LineHeight.SetPx(24)
-			s.Font.Size.SetPx(16)
-			s.Text.LetterSpacing.SetPx(0.15)
+			s.Text.LineHeight.SetDp(24)
+			s.Font.Size.SetDp(16)
+			s.Text.LetterSpacing.SetDp(0.15)
 			s.Font.Weight = styles.WeightMedium
 		case LabelTitleSmall:
-			s.Text.LineHeight.SetPx(20)
-			s.Font.Size.SetPx(14)
-			s.Text.LetterSpacing.SetPx(0.1)
+			s.Text.LineHeight.SetDp(20)
+			s.Font.Size.SetDp(14)
+			s.Text.LetterSpacing.SetDp(0.1)
 			s.Font.Weight = styles.WeightMedium
 		case LabelHeadlineLarge:
-			s.Text.LineHeight.SetPx(40)
-			s.Font.Size.SetPx(32)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(40)
+			s.Font.Size.SetDp(32)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineMedium:
-			s.Text.LineHeight.SetPx(36)
-			s.Font.Size.SetPx(28)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(36)
+			s.Font.Size.SetDp(28)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		case LabelHeadlineSmall:
-			s.Text.LineHeight.SetPx(32)
-			s.Font.Size.SetPx(24)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(32)
+			s.Font.Size.SetDp(24)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		case LabelDisplayLarge:
-			s.Text.LineHeight.SetPx(64)
-			s.Font.Size.SetPx(57)
-			s.Text.LetterSpacing.SetPx(-0.25)
+			s.Text.LineHeight.SetDp(64)
+			s.Font.Size.SetDp(57)
+			s.Text.LetterSpacing.SetDp(-0.25)
 			s.Font.Weight = styles.WeightNormal
 		case LabelDisplayMedium:
-			s.Text.LineHeight.SetPx(52)
-			s.Font.Size.SetPx(45)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(52)
+			s.Font.Size.SetDp(45)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		case LabelDisplaySmall:
-			s.Text.LineHeight.SetPx(44)
-			s.Font.Size.SetPx(36)
-			s.Text.LetterSpacing.SetPx(0)
+			s.Text.LineHeight.SetDp(44)
+			s.Font.Size.SetDp(36)
+			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
 		}
 		if s.Is(states.Disabled) {

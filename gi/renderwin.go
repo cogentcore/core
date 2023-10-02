@@ -1366,74 +1366,7 @@ func (w *RenderWin) KeyChordEventLowPri(e *events.Key) bool {
 	return false
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//                   Key Focus
-
-// FocusActiveClick updates the FocusActive status based on events clicks in
-// or out of the focused item
-func (w *RenderWin) FocusActiveClick(e events.Event) {
-	/*
-		cfoc := w.EventMgr.CurFocus()
-		if cfoc == nil || e.Button != events.Left || e.Action != events.Press {
-			return
-		}
-		cpop := w.CurPopup()
-		if cpop != nil { // no updating on popups
-			return
-		}
-		wi, wb := AsWidget(cfoc)
-		if wb != nil && wb.This() != nil {
-			if wb.PosInBBox(e.Pos()) {
-				if !w.HasFlag(WinFocusActive) {
-					w.SetFlag(true, WinFocusActive)
-					wi.FocusChanged(FocusActive)
-				}
-			} else {
-				if w.MainMenu != nil {
-					if w.MainMenu.PosInBBox(e.Pos()) { // main menu is not inactivating!
-						return
-					}
-				}
-				if w.HasFlag(WinFocusActive) {
-					w.SetFlag(false, WinFocusActive)
-					wi.FocusChanged(FocusInactive)
-				}
-			}
-		}
-	*/
-}
-
 /*
-// FocusInactivate inactivates the current focus element
-func (w *RenderWin) FocusInactivate() {
-	cfoc := w.EventMgr.CurFocus()
-	if cfoc == nil || !w.HasFlag(WinFocusActive) {
-		return
-	}
-	wi, wb := AsWidget(cfoc)
-	if wb != nil && wb.This() != nil {
-		w.SetFlag(false, WinFocusActive)
-		wi.FocusChanged(FocusInactive)
-	}
-}
-
-// IsRenderWinInFocus returns true if this window is the one currently in focus
-func (w *RenderWin) IsRenderWinInFocus() bool {
-	fwin := goosi.TheApp.RenderWinInFocus()
-	if w.GoosiWin == fwin {
-		return true
-	}
-	return false
-}
-
-// RenderWinInFocus returns the window in focus according to goosi.
-// There is a small chance it could be nil.
-func RenderWinInFocus() *RenderWin {
-	fwin := goosi.TheApp.RenderWinInFocus()
-	fw, _ := AllRenderWins.FindRenderWin(fwin)
-	return fw
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //                   DND: Drag-n-Drop
 

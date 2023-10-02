@@ -681,17 +681,3 @@ func (sr *Splitter) RenderSplitter(sc *Scene) {
 	sr.RenderUnlock(rs)
 	// }
 }
-
-func (sr *Splitter) FocusChanged(change FocusChanges) {
-	switch change {
-	case FocusLost:
-		sr.SetSliderState(SliderActive) // lose any hover state but whatever..
-		sr.UpdateSig()
-	case FocusGot:
-		sr.SetSliderState(SliderFocus)
-		// sr.EmitFocusedSignal()
-		sr.UpdateSig()
-	case FocusInactive: // don't care..
-	case FocusActive:
-	}
-}

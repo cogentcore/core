@@ -138,10 +138,6 @@ type Widget interface {
 	// (recommended to include where possible).
 	Send(ev events.Types, orig events.Event)
 
-	// FocusChanged is called on node for changes in focus -- see the
-	// FocusChanges values.
-	FocusChanged(change FocusChanges)
-
 	// MakeContextMenu creates the context menu items (typically Action
 	// elements, but it can be anything) for a given widget, typically
 	// activated by the right mouse button or equivalent.  Widget has a

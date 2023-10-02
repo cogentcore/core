@@ -60,7 +60,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
 			s.Font.Family = "Times New Roman, serif"
-			s.Font.Size = units.Pt(24) // todo: "x-large"?
+			s.Font.Size = units.Dp(32) // todo: "x-large"?
 			// s.Font.SetSize(styles.XLarge)
 			s.Text.LineHeight = units.Em(1.5)
 		})
