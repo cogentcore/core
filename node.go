@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"runtime/debug"
 	"strconv"
 
 	"log"
@@ -109,13 +108,9 @@ func (n *Node) InitName(k Ki, name ...string) {
 	if len(name) > 0 {
 		n.SetName(name[0])
 	}
-	if len(name) > 1 {
-		slog.Warn("programmer error: multiple name values passed to (ki.Node).InitName")
-		slog.Debug(string(debug.Stack()))
-	}
 }
 
-// TODO: should this return a [gti.Type]?
+// TODO: should BaseIface return a [gti.Type]?
 
 // BaseIface returns the base interface type for all elements
 // within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
@@ -316,44 +311,58 @@ func (n *Node) ChildTry(idx int) (Ki, error) {
 // can be a key speedup for large lists. If no value is specified for
 // startIdx, it starts in the middle, which is a good default.
 func (n *Node) ChildByName(name string, startIdx ...int) Ki {
-	si := -1
+	si := StartMiddle
 	if len(startIdx) > 0 {
 		si = startIdx[0]
 	}
 	return n.Kids.ElemByName(name, si)
 }
 
-// ChildByNameTry returns first element that has given name, error if not found.
-// startIdx arg allows for optimized bidirectional find if you have
-// an idea where it might be -- can be key speedup for large lists -- pass
-// [ki.StartMiddle] to start in the middle (good default).
-func (n *Node) ChildByNameTry(name string, startIdx int) (Ki, error) {
-	idx, ok := n.Kids.IndexByName(name, startIdx)
+// ChildByNameTry returns the first element that has given name, and an error
+// if no such element is found. startIdx arg allows for optimized
+// bidirectional find if you have an idea where it might be, which
+// can be a key speedup for large lists. If no value is specified for
+// startIdx, it starts in the middle, which is a good default.
+func (n *Node) ChildByNameTry(name string, startIdx ...int) (Ki, error) {
+	si := StartMiddle
+	if len(startIdx) > 0 {
+		si = startIdx[0]
+	}
+	idx, ok := n.Kids.IndexByName(name, si)
 	if !ok {
 		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
 	}
 	return n.Kids[idx], nil
 }
 
-// ChildByType returns first element that has given type, nil if not found.
-// If embeds is true, then it looks for any type that embeds the given type
-// at any level of anonymous embedding.
-// startIdx arg allows for optimized bidirectional find if you have
-// an idea where it might be -- can be key speedup for large lists -- pass
-// [ki.StartMiddle] to start in the middle (good default).
-func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx int) Ki {
-	return n.Kids.ElemByType(t, embeds, startIdx)
+// ChildByType returns the first element that has the given type, and nil
+// if not found. If embeds is true, then it also looks for any type that
+// embeds the given type at any level of anonymous embedding.
+// startIdx arg allows for optimized bidirectional find if you have an
+// idea where it might be, which can be a key speedup for large lists. If
+// no value is specified for startIdx, it starts in the middle, which is a
+// good default.
+func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
+	si := StartMiddle
+	if len(startIdx) > 0 {
+		si = startIdx[0]
+	}
+	return n.Kids.ElemByType(t, embeds, si)
 }
 
-// ChildByTypeTry returns first element that has given name -- Try version
-// returns error message if not found.
-// If embeds is true, then it looks for any type that embeds the given type
-// at any level of anonymous embedding.
-// startIdx arg allows for optimized bidirectional find if you have
-// an idea where it might be -- can be key speedup for large lists -- pass
-// [ki.StartMiddle] to start in the middle (good default).
-func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error) {
-	idx, ok := n.Kids.IndexByType(t, embeds, startIdx)
+// ChildByTypeTry returns the first element that has the given type, and an
+// error if not found. If embeds is true, then it also looks for any type that
+// embeds the given type at any level of anonymous embedding.
+// startIdx arg allows for optimized bidirectional find if you have an
+// idea where it might be, which can be a key speedup for large lists. If
+// no value is specified for startIdx, it starts in the middle, which is a
+// good default.
+func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, error) {
+	si := StartMiddle
+	if len(startIdx) > 0 {
+		si = startIdx[0]
+	}
+	idx, ok := n.Kids.IndexByType(t, embeds, si)
 	if !ok {
 		return nil, fmt.Errorf("ki %v: child of type: %s not found", n.Nm, t.Name)
 	}
@@ -362,6 +371,8 @@ func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx int) (Ki, error
 
 //////////////////////////////////////////////////////////////////////////
 //  Paths
+
+// TODO: is this the best way to escape paths?
 
 // EscapePathName returns a name that replaces any path delimiter symbols
 // . or / with \, and \\ escaped versions.
@@ -388,6 +399,8 @@ func (n *Node) Path() string {
 	}
 	return "/" + EscapePathName(n.Nm)
 }
+
+// TODO(kai): exclude parent and leading slash in PathFrom
 
 // PathFrom returns path to this node from given parent node, using
 // node Names separated by / and fields by .
@@ -518,35 +531,38 @@ func (n *Node) AddChild(kid Ki) error {
 	return nil
 }
 
-// NewChild creates a new child of given type and
-// add at end of children list.
-// The name should be unique among children.
+// NewChild creates a new child of the given type and adds it at end
+// of children list. The name should be unique among children. If the
+// name is unspecified, it defaults to the ID (kebab-case) name of the
+// type, plus the [Ki.NumLifetimeChildren] of its parent.
 // No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetChildAdded() if notification is needed.
-func (n *Node) NewChild(typ *gti.Type, name string) Ki {
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+func (n *Node) NewChild(typ *gti.Type, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	InitNode(kid)
 	n.Kids = append(n.Kids, kid)
-	kid.SetName(name)
+	if len(name) > 0 {
+		kid.SetName(name[0])
+	}
 	SetParent(kid, n.This())
 	return kid
 }
 
-// SetChild sets child at given index to be the given item -- if name is
-// non-empty then it sets the name of the child as well -- just calls Init
-// (or InitName) on the child, and SetParent.
-// Names should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetChildAdded() if notification is needed.
-func (n *Node) SetChild(kid Ki, idx int, name string) error {
+// SetChild sets child at given index to be the given item; if it is passed
+// a name, then it sets the name of the child as well; just calls Init
+// (or InitName) on the child, and SetParent. Names should be unique
+// among children. No UpdateStart / End wrapping is done: do that
+// externally as needed. Can also call SetFlag(ki.ChildAdded) if
+// notification is needed.
+func (n *Node) SetChild(kid Ki, idx int, name ...string) error {
 	if err := n.Kids.IsValidIndex(idx); err != nil {
 		return err
 	}
-	if name != "" {
-		kid.InitName(kid, name)
+	if len(name) > 0 {
+		kid.InitName(kid, name[0])
 	} else {
 		InitNode(kid)
 	}
@@ -570,19 +586,22 @@ func (n *Node) InsertChild(kid Ki, at int) error {
 	return nil
 }
 
-// InsertNewChild creates a new child of given type and
-// add at position in children list.
-// The name should be unique among children.
-// No UpdateStart / End wrapping is done: do that externally as needed.
-// Can also call SetChildAdded() if notification is needed.
-func (n *Node) InsertNewChild(typ *gti.Type, at int, name string) Ki {
+// InsertNewChild creates a new child of given type and add at position
+// in children list. The name should be unique among children. If the
+// name is unspecified, it defaults to the ID (kebab-case) name of the
+// type, plus the [Ki.NumLifetimeChildren] of its parent. No
+// UpdateStart / End wrapping is done: do that externally as needed.
+// Can also call SetFlag(ki.ChildAdded) if notification is needed.
+func (n *Node) InsertNewChild(typ *gti.Type, at int, name ...string) Ki {
 	if err := ThisCheck(n); err != nil {
 		return nil
 	}
 	kid := NewOfType(typ)
 	InitNode(kid)
 	n.Kids.Insert(kid, at)
-	kid.SetName(name)
+	if len(name) > 0 {
+		kid.SetName(name[0])
+	}
 	SetParent(kid, n.This())
 	return kid
 }
@@ -590,6 +609,8 @@ func (n *Node) InsertNewChild(typ *gti.Type, at int, name string) Ki {
 // SetNChildren ensures that there are exactly n children, deleting any
 // extra, and creating any new ones, using NewChild with given type and
 // naming according to nameStubX where X is the index of the child.
+// If nameStub is not specified, it defaults to the ID (kebab-case)
+// name of the type.
 //
 // IMPORTANT: returns whether any modifications were made (mods) AND if
 // that is true, the result from the corresponding UpdateStart call --
@@ -597,10 +618,10 @@ func (n *Node) InsertNewChild(typ *gti.Type, at int, name string) Ki {
 // you call UpdateEnd(updt)
 //
 // Note that this does not ensure existing children are of given type, or
-// change their names -- use ConfigChildren for those cases.
-// This function is for simpler cases where a parent uses this function
-// consistently to manage children all of the same type.
-func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub string) (mods, updt bool) {
+// change their names, or call UniquifyNames -- use ConfigChildren for
+// those cases -- this function is for simpler cases where a parent uses
+// this function consistently to manage children all of the same type.
+func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub ...string) (mods, updt bool) {
 	mods, updt = false, false
 	sz := len(n.Kids)
 	if trgn == sz {
@@ -614,12 +635,16 @@ func (n *Node) SetNChildren(trgn int, typ *gti.Type, nameStub string) (mods, upd
 		sz--
 		n.DeleteChildAtIndex(sz, true)
 	}
+	ns := typ.IDName
+	if len(nameStub) > 0 {
+		ns = nameStub[0]
+	}
 	for sz < trgn {
 		if !mods {
 			mods = true
 			updt = n.This().UpdateStart()
 		}
-		nm := fmt.Sprintf("%s%d", nameStub, sz)
+		nm := fmt.Sprintf("%s%d", ns, sz)
 		n.InsertNewChild(typ, sz, nm)
 		sz++
 	}
@@ -885,7 +910,6 @@ func (n *Node) WalkUp(fun func(k Ki) bool) bool {
 		}
 		cur = par
 	}
-	return true
 }
 
 // WalkUpParent calls function on parent of node and all the way up to its
