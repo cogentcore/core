@@ -831,7 +831,7 @@ func TestAutoTypeName(t *testing.T) {
 	root := &Node{}
 	root.InitName(root, "root")
 
-	child := root.NewChild(NodeType, "")
+	child := root.NewChild(NodeType)
 	nm := child.Name()
 	want := "node-0"
 	if nm != want {
@@ -965,14 +965,14 @@ func BenchmarkWalkPre_NodeField2(b *testing.B) {
 func BenchmarkNewOfType(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		n := NewOfType(NodeType)
-		n.InitName(n, "")
+		n.InitName(n)
 	}
 }
 
 func BenchmarkStdNew(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		n := new(Node)
-		n.InitName(n, "")
+		n.InitName(n)
 	}
 }
 
