@@ -123,33 +123,30 @@ type RenderWin struct {
 type WinFlags int64 //enums:bitflag
 
 const (
-	// WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that
+	// WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that
 	// sized it -- affects whether other default geom should be applied.
-	WinFlagHasGeomPrefs WinFlags = iota
+	WinHasGeomPrefs WinFlags = iota
 
-	// WinFlagIsClosing is atomic flag indicating window is closing
-	WinFlagIsClosing
+	// WinClosing is atomic flag indicating window is closing
+	WinClosing
 
-	// WinFlagIsResizing is atomic flag indicating window is resizing
-	WinFlagIsResizing
+	// WinResizing is atomic flag indicating window is resizing
+	WinResizing
 
-	// WinFlagGotFocus indicates that have we received RenderWin focus
-	WinFlagGotFocus
+	// WinGotFocus indicates that have we received RenderWin focus
+	WinGotFocus
 
-	// WinFlagSentShow have we sent the show event yet?  Only ever sent ONCE
-	WinFlagSentShow
+	// WinSentShow have we sent the show event yet?  Only ever sent ONCE
+	WinSentShow
 
-	// WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
-	WinFlagGoLoop
+	// WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end
+	WinGoLoop
 
-	// WinFlagStopEventLoop is set when event loop stop is requested
-	WinFlagStopEventLoop
-
-	// WinFlagFocusActive indicates if widget focus is currently in an active state or not
-	WinFlagFocusActive
+	// WinStopEventLoop is set when event loop stop is requested
+	WinStopEventLoop
 
 	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
-	WinFlagSelectionMode
+	WinSelectionMode
 )
 
 // HasFlag returns true if given flag is set
@@ -157,40 +154,14 @@ func (w *RenderWin) HasFlag(flag enums.BitFlag) bool {
 	return w.Flags.HasFlag(flag)
 }
 
+// Is returns true if given flag is set
+func (w *RenderWin) Is(flag enums.BitFlag) bool {
+	return w.Flags.HasFlag(flag)
+}
+
 // SetFlag sets given flag(s) on or off
 func (w *RenderWin) SetFlag(on bool, flag ...enums.BitFlag) {
 	w.Flags.SetFlag(on, flag...)
-}
-
-// HasGeomPrefs returns true if geometry prefs were set already
-func (w *RenderWin) HasGeomPrefs() bool {
-	return w.HasFlag(WinFlagHasGeomPrefs)
-}
-
-// IsClosing returns true if window has requested to close -- don't
-// attempt to update it any further
-func (w *RenderWin) IsClosing() bool {
-	return w.HasFlag(WinFlagIsClosing)
-}
-
-// IsFocusActive returns true if window has focus active flag set
-func (w *RenderWin) IsFocusActive() bool {
-	return w.HasFlag(WinFlagFocusActive)
-}
-
-// SetFocusActive sets focus active flag to given state
-func (w *RenderWin) SetFocusActive(active bool) {
-	w.SetFlag(active, WinFlagFocusActive)
-}
-
-// IsInSelectionMode returns true if window has selection mode set
-func (w *RenderWin) IsInSelectionMode() bool {
-	return w.HasFlag(WinFlagSelectionMode)
-}
-
-// SetSelectionMode sets selection mode to given state
-func (w *RenderWin) SetSelectionMode(selmode bool) {
-	w.SetFlag(selmode, WinFlagSelectionMode)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -419,12 +390,6 @@ func (w *RenderWin) SetSize(sz image.Point) {
 	w.GoosiWin.SetSize(sz)
 }
 
-// IsResizing means the window is actively being resized by user -- don't try
-// to update otherwise
-func (w *RenderWin) IsResizing() bool {
-	return w.HasFlag(WinFlagIsResizing)
-}
-
 // StackAll returns a formatted stack trace of all goroutines.
 // It calls runtime.Stack with a large enough buffer to capture the entire trace.
 func StackAll() []byte {
@@ -500,14 +465,14 @@ func (w *RenderWin) Minimize() {
 }
 
 // Close closes the window -- this is not a request -- it means:
-// definitely close it -- flags window as such -- check IsClosing()
+// definitely close it -- flags window as such -- check Is(WinClosing)
 func (w *RenderWin) Close() {
-	if w.IsClosing() {
+	if w.Is(WinClosing) {
 		return
 	}
 	// this causes hangs etc: not good
 	// w.StageMgr.RenderCtx.Mu.Lock() // allow other stuff to finish
-	w.SetFlag(true, WinFlagIsClosing)
+	w.SetFlag(true, WinClosing)
 	// w.StageMgr.RenderCtx.Mu.Unlock()
 	w.GoosiWin.Close()
 }
@@ -593,7 +558,7 @@ func (w *RenderWin) SetCloseCleanFunc(fun func(win *RenderWin)) {
 
 // IsVisible is the main visibility check -- don't do any window updates if not visible!
 func (w *RenderWin) IsVisible() bool {
-	if w == nil || w.GoosiWin == nil || w.IsClosed() || w.IsClosing() || !w.GoosiWin.IsVisible() {
+	if w == nil || w.GoosiWin == nil || w.IsClosed() || w.Is(WinClosing) || !w.GoosiWin.IsVisible() {
 		return false
 	}
 	return true
@@ -635,13 +600,13 @@ func (w *RenderWin) StartEventLoop() {
 // thread can wait on that for all windows to close.
 func (w *RenderWin) GoStartEventLoop() {
 	WinWait.Add(1)
-	w.SetFlag(true, WinFlagGoLoop)
+	w.SetFlag(true, WinGoLoop)
 	go w.EventLoop()
 }
 
 // StopEventLoop tells the event loop to stop running when the next event arrives.
 func (w *RenderWin) StopEventLoop() {
-	w.SetFlag(true, WinFlagStopEventLoop)
+	w.SetFlag(true, WinStopEventLoop)
 }
 
 // SendCustomEvent sends a custom event with given data to this window -- widgets can connect
@@ -655,10 +620,10 @@ func (w *RenderWin) SendCustomEvent(data any) {
 
 // SendShowEvent sends the WinShowEvent to anyone listening -- only sent once..
 func (w *RenderWin) SendShowEvent() {
-	if w.HasFlag(WinFlagSentShow) {
+	if w.HasFlag(WinSentShow) {
 		return
 	}
-	w.SetFlag(true, WinFlagSentShow)
+	w.SetFlag(true, WinSentShow)
 	// se := window.NewEvent(window.Show)
 	// se.Init()
 	// w.StageMgr.HandleEvent(se)
@@ -705,13 +670,13 @@ func (w *RenderWin) EventLoop() {
 		}
 	}()
 	for {
-		if w.HasFlag(WinFlagStopEventLoop) {
-			w.SetFlag(false, WinFlagStopEventLoop)
+		if w.HasFlag(WinStopEventLoop) {
+			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
 		evi := w.GoosiWin.NextEvent()
-		if w.HasFlag(WinFlagStopEventLoop) {
-			w.SetFlag(false, WinFlagStopEventLoop)
+		if w.HasFlag(WinStopEventLoop) {
+			w.SetFlag(false, WinStopEventLoop)
 			break
 		}
 		w.HandleEvent(evi)
@@ -719,7 +684,7 @@ func (w *RenderWin) EventLoop() {
 	if WinEventTrace {
 		fmt.Printf("Win: %v out of event loop\n", w.Name)
 	}
-	if w.HasFlag(WinFlagGoLoop) {
+	if w.HasFlag(WinGoLoop) {
 		WinWait.Done()
 	}
 	// our last act must be self destruction!
@@ -771,7 +736,7 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			evi.SetHandled()
-			w.SetFlag(true, WinFlagStopEventLoop)
+			w.SetFlag(true, WinStopEventLoop)
 			w.RenderCtx().ReadUnlock() // one case where we need to break lock
 			w.Closed()
 			w.RenderCtx().ReadLock()
@@ -801,8 +766,8 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 			WinGeomMgr.RecordPref(w)
 		case events.WinFocus:
 			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
-			if !w.HasFlag(WinFlagGotFocus) {
-				w.SetFlag(true, WinFlagGotFocus)
+			if !w.HasFlag(WinGotFocus) {
+				w.SetFlag(true, WinGotFocus)
 				w.SendWinFocusEvent(events.WinFocus)
 				if WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
@@ -819,7 +784,7 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 			if WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
-			w.SetFlag(false, WinFlagGotFocus)
+			w.SetFlag(false, WinGotFocus)
 			w.SendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			w.Resized(w.GoosiWin.Size())
@@ -1085,7 +1050,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 		}
 	}
 	if et != goosi.WindowResizeEvent && et != events.WindowPaint {
-		w.SetFlag(false, WinFlagIsResizing)
+		w.SetFlag(false, WinResizing)
 	}
 
 	w.EventMgr.EventsEvents(evi)
@@ -1097,7 +1062,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 	////////////////////////////////////////////////////////////////////////////
 	// Send Events to Widgets
 
-	hasFocus := w.HasFlag(WinFlagGotFocus)
+	hasFocus := w.HasFlag(WinGotFocus)
 	if _, ok := evi.(*events.Scroll); ok {
 		if !hasFocus {
 			w.EventMgr.Scrolling = nil // not valid
@@ -1109,7 +1074,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 		w.SetCursor(me) // always set cursor on events move
 	}
 	// if someone clicks while in selection mode, stop selection mode and stop the event
-	if me, ok := evi.(events.Event); w.IsInSelectionMode() && ok {
+	if me, ok := evi.(events.Event); w.HasFlag(WinSelectionMode) && ok {
 		me.SetHandled()
 		w.SetSelectionModeState(false)
 		w.DeleteSprite(RenderWinSelectionSpriteName)
@@ -1204,7 +1169,7 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 // Also handles sending widget selection events.
 func (w *RenderWin) SetCursor(me events.Event) {
 	/*
-		if w.IsClosing() {
+		if w.Is(WinClosing) {
 			return
 		}
 		maxLevel := 0
@@ -1259,7 +1224,7 @@ func (w *RenderWin) SetCursor(me events.Event) {
 
 		}
 
-		if w.IsInSelectionMode() && maxLevelWidget != nil {
+		if w.HasFlag(WinSelectionMode) && maxLevelWidget != nil {
 			me.SetHandled()
 			w.SelectionSprite(maxLevelWidget)
 			w.SelectedWidget = maxLevelWidget
@@ -1316,7 +1281,7 @@ func (w *RenderWin) HiPriorityEvents(evi events.Event) bool {
 		// }
 		// case events.Event:
 		// todo:
-		// if bitflag.HasAllAtomic(&w.Flag, WinFlagGotPaint), WinFlagGotFocus)) {
+		// if bitflag.HasAllAtomic(&w.Flag, WinGotPaint), WinGotFocus)) {
 		// if we are getting events input, and still haven't done this, do it..
 		// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
 		// if w.Scene.Geom.Size != w.GoosiWin.Size() {
@@ -1573,8 +1538,8 @@ func (w *RenderWin) FocusActiveClick(e events.Event) {
 		wi, wb := AsWidget(cfoc)
 		if wb != nil && wb.This() != nil {
 			if wb.PosInBBox(e.Pos()) {
-				if !w.HasFlag(WinFlagFocusActive) {
-					w.SetFlag(true, WinFlagFocusActive)
+				if !w.HasFlag(WinFocusActive) {
+					w.SetFlag(true, WinFocusActive)
 					wi.FocusChanged(FocusActive)
 				}
 			} else {
@@ -1583,8 +1548,8 @@ func (w *RenderWin) FocusActiveClick(e events.Event) {
 						return
 					}
 				}
-				if w.HasFlag(WinFlagFocusActive) {
-					w.SetFlag(false, WinFlagFocusActive)
+				if w.HasFlag(WinFocusActive) {
+					w.SetFlag(false, WinFocusActive)
 					wi.FocusChanged(FocusInactive)
 				}
 			}
@@ -1596,12 +1561,12 @@ func (w *RenderWin) FocusActiveClick(e events.Event) {
 // FocusInactivate inactivates the current focus element
 func (w *RenderWin) FocusInactivate() {
 	cfoc := w.EventMgr.CurFocus()
-	if cfoc == nil || !w.HasFlag(WinFlagFocusActive) {
+	if cfoc == nil || !w.HasFlag(WinFocusActive) {
 		return
 	}
 	wi, wb := AsWidget(cfoc)
 	if wb != nil && wb.This() != nil {
-		w.SetFlag(false, WinFlagFocusActive)
+		w.SetFlag(false, WinFocusActive)
 		wi.FocusChanged(FocusInactive)
 	}
 }

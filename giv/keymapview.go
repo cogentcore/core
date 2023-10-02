@@ -89,7 +89,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 
 	win.MainMenuUpdated()
 
-	if !win.HasGeomPrefs() { // resize to contents
+	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
 		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}

@@ -409,21 +409,7 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		sb.SlideStartPos = sb.Pos
 	})
-	// sb.On(events.SlideStart, func(e events.Event) {
-	// 	if sb.StateIs(states.Disabled) {
-	// 		return
-	// 	}
-	// 	e.SetHandled()
-	// 	ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
-	// 	st := &sb.Style
-	// 	// SidesTODO: not sure about dim
-	// 	spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
-	// 	if sb.Dim == mat32.X {
-	// 		sb.SetSliderPos(float32(ed.X) - spc)
-	// 	} else {
-	// 		sb.SetSliderPos(float32(ed.Y) - spc)
-	// 	}
-	// })
+	// note: not doing anything in particular on SlideStart
 	sb.On(events.SlideMove, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
@@ -665,7 +651,7 @@ func (sr *Slider) SliderStyles() {
 			s.Height.SetEm(20)
 			s.Width.SetPx(4)
 		}
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Color = colors.Scheme.Primary.On
 		// STYTODO: state styles
 		switch {
@@ -830,6 +816,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
 		sb.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull

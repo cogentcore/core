@@ -3189,7 +3189,7 @@ func TextViewBlink() {
 			continue
 		}
 		win := tv.ParentRenderWin()
-		if win == nil || win.IsResizing() || win.IsClosed() || !win.IsRenderWinInFocus() {
+		if win == nil || win.Is(WinResizing) || win.IsClosed() || !win.IsRenderWinInFocus() {
 			TextViewBlinkMu.Unlock()
 			continue
 		}
@@ -3223,7 +3223,7 @@ func (tv *TextView) StartCursor() {
 	}
 	tv.BlinkOn = true
 	win := tv.ParentRenderWin()
-	if win != nil && !win.IsResizing() {
+	if win != nil && !win.Is(WinResizing) {
 		tv.RenderCursor(true)
 	}
 	//	fmt.Printf("set blink tv: %v\n", tv.Path())

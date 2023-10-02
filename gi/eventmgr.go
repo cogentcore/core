@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"goki.dev/girl/states"
+	"goki.dev/goosi"
+	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -37,19 +39,9 @@ var (
 	LongHoverStopDist = 5
 )
 
-// // MgrActive indicates current active state
-// type MgrActive int32 //enums:enum
-//
-// const (
-// 	// NothingActive indicates no active state
-// 	NothingActive MgrActive = iota
-//
-// 	Pressing
-//
-// 	Dragging
-//
-// 	Sliding
-// )
+// note: EventMgr should be in _exclusive_ control of its own state
+// and IF we end up needing a mutex, it should be global on main
+// entry points (HandleEvent, anything else?)
 
 // EventMgr is an event manager that handles incoming events for a
 // MainStage object (Window, Dialog, Sheet).  It distributes events
@@ -62,9 +54,6 @@ type EventMgr struct {
 
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
-
-	// Current active state
-	// Active MgrActive
 
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
 	Hovers []Widget
@@ -102,9 +91,6 @@ type EventMgr struct {
 	// node receiving keyboard events -- use SetFocus, CurFocus
 	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 
-	// mutex that protects focus updating
-	FocusMu sync.RWMutex `desc:"mutex that protects focus updating"`
-
 	// stack of focus
 	FocusStack []Widget `desc:"stack of focus"`
 
@@ -138,7 +124,7 @@ func (em *EventMgr) MainStageMgr() *MainStageMgr {
 	return em.Main.StageMgr
 }
 
-// RenderWin returns the overall render window, if possible.
+// RenderWin returns the overall render window, which could be nil
 func (em *EventMgr) RenderWin() *RenderWin {
 	mgr := em.MainStageMgr()
 	if mgr == nil {
@@ -164,33 +150,14 @@ func (em *EventMgr) HandleEvent(sc *Scene, evi events.Event) {
 	}
 }
 
-func (em *EventMgr) SetRenderWinFocusActive(active bool) {
-	win := em.RenderWin()
-	if win == nil {
-		return
-	}
-	win.SetFocusActive(active)
-}
-
 func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	if em.Focus == nil {
-		fmt.Println("no focus")
 		return
 	}
 	fi := em.Focus
-	if win := em.RenderWin(); win != nil {
-		if !win.IsFocusActive() { // reactivate on keyboard input
-			win.SetFocusActive(true)
-			if EventTrace {
-				fmt.Printf("Event: set focus active, was not: %v\n", fi.Path())
-			}
-			fi.FocusChanged(FocusActive)
-		}
-	}
-	fmt.Println("foc", fi.Path(), evi.String())
 	fi.HandleEvent(evi)
 }
 
@@ -404,20 +371,15 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 // 	// em.HandleEvent(&ke)
 // }
 
-// // CurFocus gets the current focus node under mutex protection
-// func (em *EventMgr) CurFocus() Widget {
-// 	em.FocusMu.RLock()
-// 	defer em.FocusMu.RUnlock()
-// 	return em.Focus
-// }
-
-// setFocusPtr JUST sets the focus pointer under mutex protection --
-// use SetFocus for end-user setting of focus
-// func (em *EventMgr) setFocusPtr(k Widget) {
-// 	em.FocusMu.Lock()
-// 	em.Focus = k
-// 	em.FocusMu.Unlock()
-// }
+// ClipBoard returns the goosi clip.Board, supplying the window context
+// if available.
+func (em *EventMgr) ClipBoard() clip.Board {
+	var gwin goosi.Window
+	if win := em.RenderWin(); win != nil {
+		gwin = win.GoosiWin
+	}
+	return goosi.TheApp.ClipBoard(gwin)
+}
 
 // SetFocus sets focus to given item -- returns true if focus changed.
 // If item is nil, then nothing has focus.
@@ -610,19 +572,16 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 
 // PushFocus pushes current focus onto stack and sets new focus.
 func (em *EventMgr) PushFocus(p Widget) {
-	// em.FocusMu.Lock()
 	if em.FocusStack == nil {
 		em.FocusStack = make([]Widget, 0, 50)
 	}
 	em.FocusStack = append(em.FocusStack, em.Focus)
 	em.Focus = nil // don't un-focus on prior item when pushing
-	// em.FocusMu.Unlock()
 	em.FocusOnOrNext(p)
 }
 
 // PopFocus pops off the focus stack and sets prev to current focus.
 func (em *EventMgr) PopFocus() {
-	// em.FocusMu.Lock()
 	if em.FocusStack == nil || len(em.FocusStack) == 0 {
 		em.Focus = nil
 		return
@@ -632,34 +591,24 @@ func (em *EventMgr) PopFocus() {
 	nxtf := em.FocusStack[sz-1]
 	_, wb := AsWidget(nxtf)
 	if wb != nil && wb.This() != nil {
-		// em.FocusMu.Unlock()
 		em.SetFocus(nxtf)
-		// em.FocusMu.Lock()
 	}
 	em.FocusStack = em.FocusStack[:sz-1]
-	// em.FocusMu.Unlock()
 }
 
 // SetStartFocus sets the given item to be first focus when window opens.
 func (em *EventMgr) SetStartFocus(k Widget) {
-	// em.FocusMu.Lock()
 	em.StartFocus = k
-	// em.FocusMu.Unlock()
 }
 
 // ActivateStartFocus activates start focus if there is no current focus
 // and StartFocus is set -- returns true if activated
 func (em *EventMgr) ActivateStartFocus() bool {
-	// em.FocusMu.RLock()
 	if em.StartFocus == nil {
-		em.FocusMu.RUnlock()
 		return false
 	}
-	// em.FocusMu.RUnlock()
-	// em.FocusMu.Lock()
 	sf := em.StartFocus
 	em.StartFocus = nil
-	// em.FocusMu.Unlock()
 	em.FocusOnOrNext(sf)
 	return true
 }

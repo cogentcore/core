@@ -193,9 +193,9 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
-	// fmt.Println("start render")
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
+
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
 	if !stageMods && !sceneMods {                  // nothing to do!
 		fmt.Printf("no mods\n")
@@ -217,6 +217,14 @@ func (w *RenderWin) DrawScenes() {
 		}
 		return
 	}
+	if !w.GoosiWin.Lock() {
+		if WinEventTrace {
+			fmt.Printf("window was closed: %v\n", w.Name)
+		}
+		return
+	}
+	defer w.GoosiWin.Unlock()
+
 	// pr := prof.Start("win.DrawScenes")
 
 	drw := w.GoosiWin.Drawer()

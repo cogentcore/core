@@ -158,7 +158,7 @@ func (ge *GiEditor) EditColorScheme() {
 		svd.UpdateFields()
 	})
 
-	if !win.HasGeomPrefs() { // resize to contents
+	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
 		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
@@ -170,10 +170,10 @@ func (ge *GiEditor) EditColorScheme() {
 // ToggleSelectionMode toggles the editor between selection mode or not
 func (ge *GiEditor) ToggleSelectionMode() {
 	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
-		if !win.IsInSelectionMode() && win.SelectedWidgetChan == nil {
+		if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
 			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 		}
-		win.SetSelectionModeState(!win.IsInSelectionMode())
+		win.SetFlag(!win.HasFlag(WinSelectionMode), WinSelectionMode)
 	}
 }
 
@@ -311,7 +311,7 @@ func (ge *GiEditor) SetChanged() {
 func (ge *GiEditor) Render(vp *Scene) {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentRenderWin(); win != nil {
-		if !win.IsResizing() {
+		if !win.Is(WinResizing) {
 			win.MainMenuUpdateActives()
 		}
 	}
@@ -337,7 +337,7 @@ var GiEditorProps = ki.Props{
 				win, ok := ge.KiRoot.(*gi.RenderWin)
 				act.SetEnabledStateUpdt(ok)
 				if ok {
-					if win.IsInSelectionMode() {
+					if win.HasFlag(WinSelectionMode) {
 						act.SetText("Disable Selection")
 					} else {
 						act.SetText("Enable Selection")

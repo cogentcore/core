@@ -226,7 +226,7 @@ func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
 	// })
 
 	if DialogsSepRenderWin {
-		if !win.HasGeomPrefs() {
+		if !win.HasFlag(WinHasGeomPrefs) {
 			// fmt.Printf("setsz: %v\n", vpsz)
 			win.SetSize(vpsz)
 		}

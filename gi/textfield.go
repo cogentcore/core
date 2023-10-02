@@ -26,6 +26,7 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
 )
 
 const force = true
@@ -181,7 +182,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.Border.Color.Set()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-			if tf.IsFocusActive() {
+			if tf.StateIs(states.Focused) {
 				s.Border.Width.Bottom = units.Px(2)
 				s.Border.Color.Bottom = colors.Scheme.Primary.Base
 			} else {
@@ -191,7 +192,7 @@ func (tf *TextField) TextFieldStyles() {
 		case TextFieldOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Radius = styles.BorderRadiusExtraSmall
-			if tf.IsFocusActive() {
+			if tf.StateIs(states.Focused) {
 				s.Border.Width.Set(units.Px(2))
 				s.Border.Color.Set(colors.Scheme.Primary.Base)
 			} else {
@@ -244,45 +245,6 @@ const (
 	// and no background color
 	TextFieldOutlined
 )
-
-// TextFieldSignals are signals that that textfield can send
-type TextFieldSignals int64 //enums:enum
-
-const (
-	// TextFieldDone is main signal -- return or tab was pressed and the edit was
-	// intentionally completed.  data is the text.
-	TextFieldDone TextFieldSignals = iota
-
-	// TextFieldDeFocused means that the user has transitioned focus away from
-	// the text field due to interactions elsewhere, and any ongoing changes have been
-	// applied and the editor is no longer active.  data is the text.
-	// If you have a button that performs the same action as pressing enter in a textfield,
-	// then pressing that button will trigger a TextFieldDeFocused event, for any active
-	// edits.  Otherwise, you probably want to respond to both TextFieldDone and
-	// TextFieldDeFocused as "apply" events that trigger actions associated with the field.
-	TextFieldDeFocused
-
-	// TextFieldSelected means that some text was selected (for Inactive state,
-	// selection is via WidgetSig)
-	TextFieldSelected
-
-	// TextFieldCleared means the clear button was clicked
-	TextFieldCleared
-
-	// TextFieldInsert is emitted when a character is inserted into the textfield
-	TextFieldInsert
-
-	// TextFieldBackspace is emitted when a character before cursor is deleted
-	TextFieldBackspace
-
-	// TextFieldDelete is emitted when a character after cursor is deleted
-	TextFieldDelete
-)
-
-// IsFocusActive returns true if we have active focus for keyboard input
-func (tf *TextField) IsFocusActive() bool {
-	return tf.StateIs(states.Focused)
-}
 
 // Text returns the current text -- applies any unapplied changes first, and
 // sends a signal if so -- this is the end-user method to get the current
@@ -383,8 +345,6 @@ func (tf *TextField) Clear() {
 	tf.EndPos = 0
 	tf.SelectReset()
 	tf.GrabFocus() // this is essential for ensuring that the clear applies after focus is lost..
-	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldCleared), tf.Txt)
-	// todo: no std equivalent
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -471,8 +431,6 @@ func (tf *TextField) CursorBackspace(steps int) {
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos-steps], tf.EditTxt[tf.CursorPos:]...)
 	tf.CursorBackward(steps)
-	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldBackspace), tf.Txt)
-	// todo: why?
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
@@ -491,8 +449,6 @@ func (tf *TextField) CursorDelete(steps int) {
 	defer tf.UpdateEndRender(updt)
 	tf.Edited = true
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
-	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldDelete), tf.Txt)
-	// todo: why?
 }
 
 // CursorKill deletes text from cursor to end of text
@@ -555,6 +511,7 @@ func (tf *TextField) SelectAll() {
 	tf.SelectStart = 0
 	tf.SelectInit = 0
 	tf.SelectEnd = len(tf.EditTxt)
+	fmt.Println("selall")
 	tf.UpdateEndRender(updt)
 }
 
@@ -645,7 +602,10 @@ func (tf *TextField) Cut() {
 	}
 	cut := tf.DeleteSelection()
 	if cut != "" {
-		goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(mimedata.NewText(cut))
+		em := tf.EventMgr()
+		if em != nil {
+			em.ClipBoard().Write(mimedata.NewText(cut))
+		}
 	}
 }
 
@@ -692,7 +652,10 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	// goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(md)
+	em := tf.EventMgr()
+	if em != nil {
+		em.ClipBoard().Write(md)
+	}
 	if reset {
 		tf.SelectReset()
 	}
@@ -702,13 +665,17 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	// data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Read([]string{filecat.TextPlain})
-	// if data != nil {
-	// 	if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
-	// 		tf.DeleteSelection()
-	// 	}
-	// 	tf.InsertAtCursor(data.Text(filecat.TextPlain))
-	// }
+	em := tf.EventMgr()
+	if em == nil {
+		return
+	}
+	data := em.ClipBoard().Read([]string{filecat.TextPlain})
+	if data != nil {
+		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+			tf.DeleteSelection()
+		}
+		tf.InsertAtCursor(data.Text(filecat.TextPlain))
+	}
 }
 
 // InsertAtCursor inserts given text at current cursor position
@@ -727,8 +694,6 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.EditTxt = nt
 	tf.EndPos += rsl
 	tf.CursorForward(rsl)
-	// tf.TextFieldSig.Emit(tf.This(), int64(TextFieldInsert), tf.EditTxt)
-	// todo: why?
 }
 
 func (tf *TextField) MakeContextMenu(m *MenuActions) {
@@ -908,13 +873,13 @@ func TextFieldBlink() {
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Sc == nil || !tf.StateIs(states.Focused) || !tf.IsFocusActive() || !tf.This().(Widget).IsVisible() {
+		if tf.Sc == nil || !tf.StateIs(states.Focused) || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
 		win := tf.ParentRenderWin()
-		if win == nil || win.IsResizing() || win.IsClosed() /*|| !win.IsRenderWinInFocus() */ {
+		if win == nil || win.Is(WinResizing) || win.IsClosed() /*|| !win.IsRenderWinInFocus() */ {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
@@ -948,7 +913,7 @@ func (tf *TextField) StartCursor() {
 	}
 	tf.BlinkOn = true
 	win := tf.ParentRenderWin()
-	if win != nil && !win.IsResizing() {
+	if win != nil && !win.Is(WinResizing) {
 		tf.RenderCursor(true)
 	}
 	BlinkingTextField = tf
@@ -1202,11 +1167,11 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 }
 
 // SetCursorFromPixel finds cursor location from pixel offset relative to
-// WinBBox of text field, and sets current cursor to it, updating selection as
-// well
+// WinBBox of text field, and sets current cursor to it, updating selection too.
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectModes) {
 	updt := tf.UpdateStart()
 	defer tf.UpdateEndRender(updt)
+
 	oldPos := tf.CursorPos
 	tf.CursorPos = tf.PixelToCursor(pixOff)
 	if tf.SelectMode || selMode != events.SelectOne {
@@ -1214,8 +1179,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 			tf.SelectStart = oldPos
 			tf.SelectMode = true
 		}
-		// todo: NodeDragging is not up-to-date
-		if !tf.Is(NodeDragging) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+		if !tf.StateIs(states.Sliding) && selMode == events.SelectOne { // && tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
 			tf.SelectReset()
 		} else {
 			tf.SelectRegUpdate(tf.CursorPos)
@@ -1280,8 +1244,10 @@ func (tf *TextField) TextFieldMouse() {
 			tf.SelectWord()
 		}
 	})
-
-	tf.On(events.MouseDrag, func(e events.Event) {
+	tf.On(events.SlideMove, func(e events.Event) {
+		if tf.StateIs(states.Disabled) {
+			return
+		}
 		e.SetHandled()
 		if !tf.SelectMode {
 			tf.SelectModeToggle()
@@ -1306,7 +1272,7 @@ func (tf *TextField) TextFieldKeys() {
 		// 	}
 		// }
 
-		if !tf.IsFocusActive() && kf == KeyFunAbort {
+		if !tf.StateIs(states.Focused) && kf == KeyFunAbort {
 			return
 		}
 
@@ -1574,13 +1540,13 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 }
 
 func (tf *TextField) Render(sc *Scene) {
-	if tf.StateIs(states.Focused) && tf.IsFocusActive() && BlinkingTextField == tf {
+	if tf.StateIs(states.Focused) && tf.StateIs(states.Focused) && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
 	if tf.PushBounds(sc) {
 		tf.RenderTextField(sc)
 		if !tf.IsDisabled() {
-			if tf.StateIs(states.Focused) && tf.IsFocusActive() {
+			if tf.StateIs(states.Focused) && tf.StateIs(states.Focused) {
 				tf.StartCursor()
 			} else {
 				tf.StopCursor()

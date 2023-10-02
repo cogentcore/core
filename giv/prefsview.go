@@ -69,7 +69,7 @@ func PrefsView(pf *gi.Preferences) *gi.RenderWin {
 
 	win.MainMenuUpdated()
 
-	if !win.HasGeomPrefs() { // resize to contents
+	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
 		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
@@ -134,7 +134,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.RenderWin {
 
 	win.MainMenuUpdated()
 
-	if !win.HasGeomPrefs() { // resize to contents
+	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
 		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}
@@ -169,7 +169,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.RenderWin {
 	// MainMenuView(pf, win, mmen)
 	// win.MainMenuUpdated()
 
-	if !win.HasGeomPrefs() { // resize to contents
+	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
 		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
 		win.SetSize(vpsz)
 	}

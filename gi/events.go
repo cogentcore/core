@@ -69,15 +69,16 @@ func (wb *WidgetBase) WidgetHandlers() {
 	wb.WidgetStateFromFocus()
 }
 
-// WidgetStateFromMouse updates standard State flags based on mouse events,
-// such as MouseDown / Up -> Active and MouseEnter / Leave -> Hovered
+// WidgetStateFromMouse updates all standard State flags based on mouse events,
+// such as MouseDown / Up -> Active and MouseEnter / Leave -> Hovered.
+// None of these "consume" the event by setting Handled flag, as they are
+// designed to work in conjunction with more specific handlers.
 func (wb *WidgetBase) WidgetStateFromMouse() {
 	wb.On(events.MouseDown, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
 		if wb.AbilityIs(states.Activatable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(true, states.Active)
 		}
 	})
@@ -86,7 +87,6 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Activatable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(false, states.Active)
 		}
 	})
@@ -95,7 +95,6 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Checkable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 		if wb.AbilityIs(states.Focusable) {
@@ -107,7 +106,6 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Hoverable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(true, states.Hovered)
 		}
 	})
@@ -116,8 +114,55 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Hoverable) {
-			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(false, states.Hovered)
+		}
+	})
+	wb.On(events.LongHoverStart, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.LongHoverable) {
+			wb.SetState(true, states.LongHovered)
+		}
+	})
+	wb.On(events.LongHoverEnd, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.LongHoverable) {
+			wb.SetState(false, states.LongHovered)
+		}
+	})
+	wb.On(events.SlideStart, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Slideable) {
+			wb.SetState(true, states.Sliding)
+		}
+	})
+	wb.On(events.SlideStop, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Slideable) {
+			wb.SetState(false, states.Sliding)
+		}
+	})
+	wb.On(events.DragStart, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Draggable) {
+			wb.SetState(true, states.Dragging)
+		}
+	})
+	wb.On(events.Drop, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Draggable) {
+			wb.SetState(false, states.Dragging)
 		}
 	})
 }

@@ -551,7 +551,7 @@ type ParamPrefs struct {
 }
 
 func (pf *ParamPrefs) Defaults() {
-	pf.DoubleClickInterval = 500
+	pf.DoubleClickInterval = 500 * time.Millisecond
 	pf.ScrollWheelSpeed = 20
 	pf.LocalMainMenu = true // much better
 	pf.OnlyCloseActiveTab = false

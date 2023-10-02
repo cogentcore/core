@@ -2032,70 +2032,65 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8}
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // WinFlagsN is the highest valid value
 // for type WinFlags, plus one.
-const WinFlagsN WinFlags = 9
+const WinFlagsN WinFlags = 8
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WinFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[WinFlagHasGeomPrefs-(0)]
-	_ = x[WinFlagIsClosing-(1)]
-	_ = x[WinFlagIsResizing-(2)]
-	_ = x[WinFlagGotFocus-(3)]
-	_ = x[WinFlagSentShow-(4)]
-	_ = x[WinFlagGoLoop-(5)]
-	_ = x[WinFlagStopEventLoop-(6)]
-	_ = x[WinFlagFocusActive-(7)]
-	_ = x[WinFlagSelectionMode-(8)]
+	_ = x[WinHasGeomPrefs-(0)]
+	_ = x[WinClosing-(1)]
+	_ = x[WinResizing-(2)]
+	_ = x[WinGotFocus-(3)]
+	_ = x[WinSentShow-(4)]
+	_ = x[WinGoLoop-(5)]
+	_ = x[WinStopEventLoop-(6)]
+	_ = x[WinSelectionMode-(7)]
 }
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
-	`WinFlagHasGeomPrefs`:  0,
-	`winflaghasgeomprefs`:  0,
-	`WinFlagIsClosing`:     1,
-	`winflagisclosing`:     1,
-	`WinFlagIsResizing`:    2,
-	`winflagisresizing`:    2,
-	`WinFlagGotFocus`:      3,
-	`winflaggotfocus`:      3,
-	`WinFlagSentShow`:      4,
-	`winflagsentshow`:      4,
-	`WinFlagGoLoop`:        5,
-	`winflaggoloop`:        5,
-	`WinFlagStopEventLoop`: 6,
-	`winflagstopeventloop`: 6,
-	`WinFlagFocusActive`:   7,
-	`winflagfocusactive`:   7,
-	`WinFlagSelectionMode`: 8,
-	`winflagselectionmode`: 8,
+	`WinHasGeomPrefs`:  0,
+	`winhasgeomprefs`:  0,
+	`WinClosing`:       1,
+	`winclosing`:       1,
+	`WinResizing`:      2,
+	`winresizing`:      2,
+	`WinGotFocus`:      3,
+	`wingotfocus`:      3,
+	`WinSentShow`:      4,
+	`winsentshow`:      4,
+	`WinGoLoop`:        5,
+	`wingoloop`:        5,
+	`WinStopEventLoop`: 6,
+	`winstopeventloop`: 6,
+	`WinSelectionMode`: 7,
+	`winselectionmode`: 7,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
-	0: `WinFlagHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
-	1: `WinFlagIsClosing is atomic flag indicating window is closing`,
-	2: `WinFlagIsResizing is atomic flag indicating window is resizing`,
-	3: `WinFlagGotFocus indicates that have we received RenderWin focus`,
-	4: `WinFlagSentShow have we sent the show event yet? Only ever sent ONCE`,
-	5: `WinFlagGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
-	6: `WinFlagStopEventLoop is set when event loop stop is requested`,
-	7: `WinFlagFocusActive indicates if widget focus is currently in an active state or not`,
-	8: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	0: `WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that sized it -- affects whether other default geom should be applied.`,
+	1: `WinClosing is atomic flag indicating window is closing`,
+	2: `WinResizing is atomic flag indicating window is resizing`,
+	3: `WinGotFocus indicates that have we received RenderWin focus`,
+	4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`,
+	5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
+	6: `WinStopEventLoop is set when event loop stop is requested`,
+	7: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{
-	0: `WinFlagHasGeomPrefs`,
-	1: `WinFlagIsClosing`,
-	2: `WinFlagIsResizing`,
-	3: `WinFlagGotFocus`,
-	4: `WinFlagSentShow`,
-	5: `WinFlagGoLoop`,
-	6: `WinFlagStopEventLoop`,
-	7: `WinFlagFocusActive`,
-	8: `WinFlagSelectionMode`,
+	0: `WinHasGeomPrefs`,
+	1: `WinClosing`,
+	2: `WinResizing`,
+	3: `WinGotFocus`,
+	4: `WinSentShow`,
+	5: `WinGoLoop`,
+	6: `WinStopEventLoop`,
+	7: `WinSelectionMode`,
 }
 
 // String returns the string representation
@@ -2757,137 +2752,6 @@ func (i TextFieldTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TextFieldTypes) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _TextFieldSignalsValues = []TextFieldSignals{0, 1, 2, 3, 4, 5, 6}
-
-// TextFieldSignalsN is the highest valid value
-// for type TextFieldSignals, plus one.
-const TextFieldSignalsN TextFieldSignals = 7
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TextFieldSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[TextFieldDone-(0)]
-	_ = x[TextFieldDeFocused-(1)]
-	_ = x[TextFieldSelected-(2)]
-	_ = x[TextFieldCleared-(3)]
-	_ = x[TextFieldInsert-(4)]
-	_ = x[TextFieldBackspace-(5)]
-	_ = x[TextFieldDelete-(6)]
-}
-
-var _TextFieldSignalsNameToValueMap = map[string]TextFieldSignals{
-	`TextFieldDone`:      0,
-	`textfielddone`:      0,
-	`TextFieldDeFocused`: 1,
-	`textfielddefocused`: 1,
-	`TextFieldSelected`:  2,
-	`textfieldselected`:  2,
-	`TextFieldCleared`:   3,
-	`textfieldcleared`:   3,
-	`TextFieldInsert`:    4,
-	`textfieldinsert`:    4,
-	`TextFieldBackspace`: 5,
-	`textfieldbackspace`: 5,
-	`TextFieldDelete`:    6,
-	`textfielddelete`:    6,
-}
-
-var _TextFieldSignalsDescMap = map[TextFieldSignals]string{
-	0: `TextFieldDone is main signal -- return or tab was pressed and the edit was intentionally completed. data is the text.`,
-	1: `TextFieldDeFocused means that the user has transitioned focus away from the text field due to interactions elsewhere, and any ongoing changes have been applied and the editor is no longer active. data is the text. If you have a button that performs the same action as pressing enter in a textfield, then pressing that button will trigger a TextFieldDeFocused event, for any active edits. Otherwise, you probably want to respond to both TextFieldDone and TextFieldDeFocused as &#34;apply&#34; events that trigger actions associated with the field.`,
-	2: `TextFieldSelected means that some text was selected (for Inactive state, selection is via WidgetSig)`,
-	3: `TextFieldCleared means the clear button was clicked`,
-	4: `TextFieldInsert is emitted when a character is inserted into the textfield`,
-	5: `TextFieldBackspace is emitted when a character before cursor is deleted`,
-	6: `TextFieldDelete is emitted when a character after cursor is deleted`,
-}
-
-var _TextFieldSignalsMap = map[TextFieldSignals]string{
-	0: `TextFieldDone`,
-	1: `TextFieldDeFocused`,
-	2: `TextFieldSelected`,
-	3: `TextFieldCleared`,
-	4: `TextFieldInsert`,
-	5: `TextFieldBackspace`,
-	6: `TextFieldDelete`,
-}
-
-// String returns the string representation
-// of this TextFieldSignals value.
-func (i TextFieldSignals) String() string {
-	if str, ok := _TextFieldSignalsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the TextFieldSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *TextFieldSignals) SetString(s string) error {
-	if val, ok := _TextFieldSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TextFieldSignalsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type TextFieldSignals")
-}
-
-// Int64 returns the TextFieldSignals value as an int64.
-func (i TextFieldSignals) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the TextFieldSignals value from an int64.
-func (i *TextFieldSignals) SetInt64(in int64) {
-	*i = TextFieldSignals(in)
-}
-
-// Desc returns the description of the TextFieldSignals value.
-func (i TextFieldSignals) Desc() string {
-	if str, ok := _TextFieldSignalsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// TextFieldSignalsValues returns all possible values
-// for the type TextFieldSignals.
-func TextFieldSignalsValues() []TextFieldSignals {
-	return _TextFieldSignalsValues
-}
-
-// Values returns all possible values
-// for the type TextFieldSignals.
-func (i TextFieldSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextFieldSignalsValues))
-	for i, d := range _TextFieldSignalsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TextFieldSignals.
-func (i TextFieldSignals) IsValid() bool {
-	_, ok := _TextFieldSignalsMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextFieldSignals) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextFieldSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

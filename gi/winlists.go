@@ -104,14 +104,14 @@ func (wl *RenderWinList) Win(idx int) *RenderWin {
 	return (*wl)[idx]
 }
 
-// Focused returns the (first) window in this list that has the WinFlagGotFocus flag set
+// Focused returns the (first) window in this list that has the WinGotFocus flag set
 // and the index in the list (nil, -1 if not present)
 func (wl *RenderWinList) Focused() (*RenderWin, int) {
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
 
 	for i, fw := range *wl {
-		if fw.HasFlag(WinFlagGotFocus) {
+		if fw.HasFlag(WinGotFocus) {
 			return fw, i
 		}
 	}

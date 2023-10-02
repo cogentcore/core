@@ -419,7 +419,7 @@ func (sv *StructView) Render(vp *Scene) {
 		sv.ToolBar().UpdateActions()
 	}
 	if win := sv.ParentRenderWin(); win != nil {
-		if !win.IsResizing() {
+		if !win.Is(WinResizing) {
 			win.MainMenuUpdateActives()
 		}
 	}

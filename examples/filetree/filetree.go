@@ -431,7 +431,7 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 func (fb *FileBrowse) Render(vp *Scene) {
 	fb.ToolBar().UpdateActions()
 	if win := fb.ParentRenderWin(); win != nil {
-		if !win.IsResizing() {
+		if !win.Is(WinResizing) {
 			win.MainMenuUpdateActives()
 		}
 	}

@@ -187,7 +187,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 		return nil
 	}
 	if wgp != nil {
-		win.SetFlag(true, WinFlagHasGeomPrefs)
+		win.SetFlag(true, WinHasGeomPrefs)
 	}
 	AllRenderWins.Add(win)
 	MainRenderWins.Add(win)
