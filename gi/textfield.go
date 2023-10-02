@@ -26,7 +26,6 @@ import (
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 )
 
 const force = true
@@ -156,6 +155,7 @@ func (tf *TextField) OnInit() {
 func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		tf.CursorWidth.SetPx(1)
 		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -279,17 +279,9 @@ const (
 	TextFieldDelete
 )
 
-type TextFieldFlags WidgetFlags //enums:bitflag
-
-// these extend NodeBase NodeFlags to hold TextField state
-const (
-	// TextFieldFocusActive indicates that the focus is active in this field
-	TextFieldFocusActive TextFieldFlags = TextFieldFlags(WidgetFlagsN) + iota
-)
-
 // IsFocusActive returns true if we have active focus for keyboard input
 func (tf *TextField) IsFocusActive() bool {
-	return tf.Is(TextFieldFocusActive)
+	return tf.StateIs(states.Focused)
 }
 
 // Text returns the current text -- applies any unapplied changes first, and
@@ -700,7 +692,7 @@ func (tf *TextField) Copy(reset bool) {
 	}
 	md := mimedata.NewMimes(0, 1)
 	tf.This().(Clipper).MimeData(&md)
-	goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(md)
+	// goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Write(md)
 	if reset {
 		tf.SelectReset()
 	}
@@ -710,13 +702,13 @@ func (tf *TextField) Copy(reset bool) {
 // cursor is within a current selection, that selection is replaced.
 // Satisfies Clipper interface -- can be extended in subtypes.
 func (tf *TextField) Paste() {
-	data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Read([]string{filecat.TextPlain})
-	if data != nil {
-		if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
-			tf.DeleteSelection()
-		}
-		tf.InsertAtCursor(data.Text(filecat.TextPlain))
-	}
+	// data := goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).Read([]string{filecat.TextPlain})
+	// if data != nil {
+	// 	if tf.CursorPos >= tf.SelectStart && tf.CursorPos < tf.SelectEnd {
+	// 		tf.DeleteSelection()
+	// 	}
+	// 	tf.InsertAtCursor(data.Text(filecat.TextPlain))
+	// }
 }
 
 // InsertAtCursor inserts given text at current cursor position
@@ -1213,9 +1205,6 @@ func (tf *TextField) PixelToCursor(pixOff float32) int {
 // WinBBox of text field, and sets current cursor to it, updating selection as
 // well
 func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectModes) {
-	if tf.ParentRenderWin() == nil {
-		return
-	}
 	updt := tf.UpdateStart()
 	defer tf.UpdateEndRender(updt)
 	oldPos := tf.CursorPos
@@ -1606,11 +1595,11 @@ func (tf *TextField) Render(sc *Scene) {
 func (tf *TextField) FocusChanged(change FocusChanges) {
 	switch change {
 	case FocusLost:
-		tf.SetFlag(false, TextFieldFocusActive)
+		tf.SetState(false, states.Focused)
 		tf.EditDone()
 		tf.ApplyStyleUpdate(tf.Sc)
 	case FocusGot:
-		tf.SetFlag(true, TextFieldFocusActive)
+		tf.SetState(true, states.Focused)
 		tf.ScrollToMe()
 		// tf.CursorEnd()
 		// tf.EmitFocusedSignal()
@@ -1621,12 +1610,12 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
 		}
 	case FocusInactive:
-		tf.SetFlag(false, TextFieldFocusActive)
+		tf.SetState(false, states.Focused)
 		tf.EditDeFocused()
 		tf.ApplyStyleUpdate(tf.Sc)
 		goosi.TheApp.HideVirtualKeyboard()
 	case FocusActive:
-		tf.SetFlag(true, TextFieldFocusActive)
+		tf.SetState(true, states.Focused)
 		tf.ScrollToMe()
 		tf.ApplyStyleUpdate(tf.Sc)
 		if _, ok := tf.Parent().Parent().(*SpinBox); ok {

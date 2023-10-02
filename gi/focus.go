@@ -5,6 +5,9 @@
 package gi
 
 import (
+	"fmt"
+
+	"goki.dev/girl/states"
 	"goki.dev/ki/v2"
 )
 
@@ -43,49 +46,49 @@ func (wb *WidgetBase) FocusChanged(change FocusChanges) {
 // GrabFocus grabs the keyboard input focus on this item or the first item within it
 // that can be focused (if none, then goes ahead and sets focus to this object)
 func (wb *WidgetBase) GrabFocus() {
-	foc := wb.This()
-	if !wb.CanFocus() {
+	foc := wb.This().(Widget)
+	if !foc.AbilityIs(states.Focusable) {
 		wb.WalkPre(func(k ki.Ki) bool {
-			_, wb := AsWidget(k)
-			if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+			kwi, kwb := AsWidget(k)
+			if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) || kwb.Is(ki.Destroyed) {
 				return ki.Break
 			}
-			if !wb.CanFocus() {
+			if !kwb.AbilityIs(states.Focusable) {
 				return ki.Continue
 			}
-			foc = k
+			foc = kwi
 			return ki.Break // done
 		})
 	}
-	_ = foc
-	// em := wb.EventMgr()
-	// if em != nil {
-	// 	em.SetFocus(foc.(Widget))
-	// }
+	em := wb.EventMgr()
+	if em != nil {
+		fmt.Println("set focus:", foc.Path())
+		em.SetFocus(foc.(Widget))
+	}
 }
 
 // FocusNext moves the focus onto the next item
 func (wb *WidgetBase) FocusNext() {
-	// em := wb.EventMgr()
-	// if em != nil {
-	// 	em.FocusNext(em.CurFocus())
-	// }
+	em := wb.EventMgr()
+	if em != nil {
+		em.FocusNext(em.Focus)
+	}
 }
 
 // FocusPrev moves the focus onto the previous item
 func (wb *WidgetBase) FocusPrev() {
-	// em := wb.EventMgr()
-	// if em != nil {
-	// 	em.FocusPrev(em.CurFocus())
-	// }
+	em := wb.EventMgr()
+	if em != nil {
+		em.FocusPrev(em.Focus)
+	}
 }
 
 // StartFocus specifies this widget to give focus to when the window opens
 func (wb *WidgetBase) StartFocus() {
-	// em := wb.EventMgr()
-	// if em != nil {
-	// 	em.SetStartFocus(wb.This().(Widget))
-	// }
+	em := wb.EventMgr()
+	if em != nil {
+		em.SetStartFocus(wb.This().(Widget))
+	}
 }
 
 // ContainsFocus returns true if this widget contains the current focus widget

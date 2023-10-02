@@ -768,21 +768,21 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 	case events.Window:
 		ev := evi.(*events.WindowEvent)
 		switch ev.Action {
-		case events.Close:
+		case events.WinClose:
 			// fmt.Printf("got close event for window %v \n", w.Name)
 			evi.SetHandled()
 			w.SetFlag(true, WinFlagStopEventLoop)
 			w.RenderCtx().ReadUnlock() // one case where we need to break lock
 			w.Closed()
 			w.RenderCtx().ReadLock()
-		case events.Minimize:
+		case events.WinMinimize:
 			evi.SetHandled()
 			// on mobile platforms, we need to set the size to 0 so that it detects a size difference
 			// and lets the size event go through when we come back later
 			// if goosi.TheApp.Platform().IsMobile() {
 			// 	w.Scene.Geom.Size = image.Point{}
 			// }
-		case events.Show:
+		case events.WinShow:
 			evi.SetHandled()
 			// note that this is sent delayed by driver
 			if WinEventTrace {
@@ -792,18 +792,18 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 			// 	w.MainMenuUpdateRenderWins()
 			// }
 			w.SendShowEvent() // happens AFTER full render
-		case events.Move:
+		case events.WinMove:
 			evi.SetHandled()
 			// fmt.Printf("win move: %v\n", w.GoosiWin.Position())
 			if WinGeomTrace {
 				log.Printf("WinGeomPrefs: recording from Move\n")
 			}
 			WinGeomMgr.RecordPref(w)
-		case events.Focus:
+		case events.WinFocus:
 			StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
 			if !w.HasFlag(WinFlagGotFocus) {
 				w.SetFlag(true, WinFlagGotFocus)
-				w.SendWinFocusEvent(events.Focus)
+				w.SendWinFocusEvent(events.WinFocus)
 				if WinEventTrace {
 					fmt.Printf("Win: %v got focus\n", w.Name)
 				}
@@ -815,12 +815,12 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 					fmt.Printf("Win: %v got extra focus\n", w.Name)
 				}
 			}
-		case events.DeFocus:
+		case events.WinFocusLost:
 			if WinEventTrace {
 				fmt.Printf("Win: %v lost focus\n", w.Name)
 			}
 			w.SetFlag(false, WinFlagGotFocus)
-			w.SendWinFocusEvent(events.DeFocus)
+			w.SendWinFocusEvent(events.WinFocusLost)
 		case events.ScreenUpdate:
 			w.Resized(w.GoosiWin.Size())
 			// TODO: figure out how to restore this stuff without breaking window size on mobile

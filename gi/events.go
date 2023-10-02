@@ -66,6 +66,7 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 func (wb *WidgetBase) WidgetHandlers() {
 	wb.WidgetStateFromMouse()
 	wb.LongHoverTooltip()
+	wb.WidgetStateFromFocus()
 }
 
 // WidgetStateFromMouse updates standard State flags based on mouse events,
@@ -96,6 +97,9 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.AbilityIs(states.Checkable) {
 			// note: don't mark event as handled as other widgets may also get it
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
+		}
+		if wb.AbilityIs(states.Focusable) {
+			wb.GrabFocus()
 		}
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {
@@ -140,6 +144,28 @@ func (wb *WidgetBase) LongHoverTooltip() {
 		// pos.X -= 20
 		// mvp := wbb.Sc
 		// PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
+	})
+}
+
+// WidgetStateFromFocus updates standard State flags based on Focus events
+func (wb *WidgetBase) WidgetStateFromFocus() {
+	wb.On(events.Focus, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Focusable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.SetState(true, states.Focused)
+		}
+	})
+	wb.On(events.FocusLost, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if wb.AbilityIs(states.Focusable) {
+			// note: don't mark event as handled as other widgets may also get it
+			wb.SetState(false, states.Focused)
+		}
 	})
 }
 

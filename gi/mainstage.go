@@ -30,9 +30,6 @@ type MainStage struct {
 
 	// the parent stage manager for this stage, which lives in a RenderWin
 	StageMgr *MainStageMgr
-
-	// event manager for this stage
-	EventMgr EventMgr
 }
 
 // AsMain returns this stage as a MainStage (for Main Window, Dialog, Sheet) types.
@@ -64,7 +61,6 @@ func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 	st.SetScene(sc)
 	st.CtxWidget = ctx
 	st.PopupMgr.Main = st
-	st.EventMgr.Main = st
 	return st
 }
 
@@ -254,8 +250,9 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 	if evi.IsHandled() {
 		return
 	}
+	st.Scene.EventMgr.Main = st
 	evi.SetLocalOff(st.Scene.Geom.Pos)
-	st.EventMgr.HandleEvent(st.Scene, evi)
+	st.Scene.EventMgr.HandleEvent(st.Scene, evi)
 }
 
 /*

@@ -30,7 +30,7 @@ var (
 	SlideStartDist = 4
 
 	// LongHoverTime is the time to wait before LongHoverStart event
-	LongHoverTime = 500
+	LongHoverTime = 500 * time.Millisecond
 
 	// LongHoverStopDist is the pixel distance beyond which the LongHoverStop
 	// event is sent
@@ -177,6 +177,7 @@ func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	if em.Focus == nil {
+		fmt.Println("no focus")
 		return
 	}
 	fi := em.Focus
@@ -189,6 +190,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 			fi.FocusChanged(FocusActive)
 		}
 	}
+	fmt.Println("foc", fi.Path(), evi.String())
 	fi.HandleEvent(evi)
 }
 
@@ -371,6 +373,337 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 	}
 	return true
 }
+
+///////////////////////////////////////////////////////////////////
+//   Key events
+
+// SendKeyChordEvent sends a KeyChord event with given values.  If popup is
+// true, then only items on popup are in scope, otherwise items NOT on popup
+// are in scope (if no popup, everything is in scope).
+// func (em *EventMgr) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
+// 	ke := key.NewEvent(r, 0, key.Press, 0)
+// 	ke.SetTime()
+// 	// ke.SetModifiers(mods...)
+// 	// em.HandleEvent(ke)
+// }
+
+// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
+// If popup is true, then only items on popup are in scope, otherwise items
+// NOT on popup are in scope (if no popup, everything is in scope).
+// func (em *EventMgr) SendKeyFunEvent(kf KeyFuns, popup bool) {
+// 	chord := ActiveKeyMap.ChordForFun(kf)
+// 	if chord == "" {
+// 		return
+// 	}
+// 	r, mods, err := chord.Decode()
+// 	if err != nil {
+// 		return
+// 	}
+// 	ke := key.NewEvent(r, 0, key.Press, mods)
+// 	ke.SetTime()
+// 	// em.HandleEvent(&ke)
+// }
+
+// // CurFocus gets the current focus node under mutex protection
+// func (em *EventMgr) CurFocus() Widget {
+// 	em.FocusMu.RLock()
+// 	defer em.FocusMu.RUnlock()
+// 	return em.Focus
+// }
+
+// setFocusPtr JUST sets the focus pointer under mutex protection --
+// use SetFocus for end-user setting of focus
+// func (em *EventMgr) setFocusPtr(k Widget) {
+// 	em.FocusMu.Lock()
+// 	em.Focus = k
+// 	em.FocusMu.Unlock()
+// }
+
+// SetFocus sets focus to given item -- returns true if focus changed.
+// If item is nil, then nothing has focus.
+func (em *EventMgr) SetFocus(w Widget) bool { // , evi events.Event
+	cfoc := em.Focus
+	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) || cfoc.Is(ki.Destroyed) {
+		em.Focus = nil
+		cfoc = nil
+	}
+	if cfoc == w {
+		return false
+	}
+
+	if cfoc != nil {
+		cfoc.Send(events.FocusLost, nil)
+	}
+	em.Focus = w
+	if w != nil {
+		w.Send(events.Focus, nil)
+	}
+	return true
+}
+
+// FocusNext sets the focus on the next item
+// that can accept focus after the given item (can be nil).
+// returns true if a focus item found.
+func (em *EventMgr) FocusNext(foc Widget) bool {
+	gotFocus := false
+	focusNext := false // get the next guy
+	if foc == nil {
+		focusNext = true
+	}
+
+	focRoot := em.Main.Scene.Frame.This().(Widget)
+
+	for i := 0; i < 2; i++ {
+		focRoot.WalkPre(func(k ki.Ki) bool {
+			if gotFocus {
+				return ki.Break
+			}
+			wi, wb := AsWidget(k)
+			if wb == nil || wb.This() == nil {
+				return ki.Continue
+			}
+			if foc == wi { // current focus can be a non-can-focus item
+				focusNext = true
+				return ki.Continue
+			}
+			if !focusNext {
+				return ki.Continue
+			}
+			if !wb.AbilityIs(states.Focusable) {
+				return ki.Continue
+			}
+			em.SetFocus(wi)
+			gotFocus = true
+			return ki.Break // done
+		})
+		if gotFocus {
+			return true
+		}
+		focusNext = true // this time around, just get the first one
+	}
+	return gotFocus
+}
+
+// FocusOnOrNext sets the focus on the given item, or the next one that can
+// accept focus -- returns true if a new focus item found.
+func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
+	cfoc := em.Focus
+	if cfoc == foc {
+		return true
+	}
+	_, wb := AsWidget(foc)
+	if wb == nil || wb.This() == nil {
+		return false
+	}
+	if wb.AbilityIs(states.Focusable) {
+		em.SetFocus(foc)
+		return true
+	}
+	return em.FocusNext(foc)
+}
+
+// FocusOnOrPrev sets the focus on the given item, or the previous one that can
+// accept focus -- returns true if a new focus item found.
+func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
+	cfoc := em.Focus
+	if cfoc == foc {
+		return true
+	}
+	_, wb := AsWidget(foc)
+	if wb == nil || wb.This() == nil {
+		return false
+	}
+	if wb.AbilityIs(states.Focusable) {
+		em.SetFocus(foc)
+		return true
+	}
+	return em.FocusPrev(foc)
+}
+
+// FocusPrev sets the focus on the previous item before the given item (can be nil)
+func (em *EventMgr) FocusPrev(foc Widget) bool {
+	if foc == nil { // must have a current item here
+		em.FocusLast()
+		return false
+	}
+
+	gotFocus := false
+	var prevItem Widget
+
+	focRoot := em.Main.Scene.Frame.This().(Widget)
+
+	focRoot.WalkPre(func(k ki.Ki) bool {
+		if gotFocus {
+			return ki.Break
+		}
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
+			return ki.Continue
+		}
+		if foc == wi {
+			gotFocus = true
+			return ki.Break
+		}
+		if !wb.AbilityIs(states.Focusable) {
+			return ki.Continue
+		}
+		prevItem = wi
+		return ki.Continue
+	})
+	if gotFocus && prevItem != nil {
+		em.SetFocus(prevItem)
+		return true
+	} else {
+		return em.FocusLast()
+	}
+}
+
+// FocusLast sets the focus on the last item in the tree -- returns true if a
+// focusable item was found
+func (em *EventMgr) FocusLast() bool {
+	var lastItem Widget
+
+	focRoot := em.Main.Scene.Frame.This().(Widget)
+
+	focRoot.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
+			return ki.Continue
+		}
+		if !wb.AbilityIs(states.Focusable) {
+			return ki.Continue
+		}
+		lastItem = wi
+		return ki.Continue
+	})
+	em.SetFocus(lastItem)
+	if lastItem == nil {
+		return false
+	}
+	return true
+}
+
+// ClearNonFocus clears the focus of any non-w.Focus item.
+func (em *EventMgr) ClearNonFocus(foc Widget) {
+	focRoot := em.Main.Scene.Frame.This().(Widget)
+
+	focRoot.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wi == focRoot { // skip top-level
+			return ki.Continue
+		}
+		if wb == nil || wb.This() == nil {
+			return ki.Continue
+		}
+		if foc == wi {
+			return ki.Continue
+		}
+		if wb.StateIs(states.Focused) {
+			if EventTrace {
+				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
+			}
+			wi.Send(events.FocusLost, nil)
+		}
+		return ki.Continue
+	})
+}
+
+// PushFocus pushes current focus onto stack and sets new focus.
+func (em *EventMgr) PushFocus(p Widget) {
+	// em.FocusMu.Lock()
+	if em.FocusStack == nil {
+		em.FocusStack = make([]Widget, 0, 50)
+	}
+	em.FocusStack = append(em.FocusStack, em.Focus)
+	em.Focus = nil // don't un-focus on prior item when pushing
+	// em.FocusMu.Unlock()
+	em.FocusOnOrNext(p)
+}
+
+// PopFocus pops off the focus stack and sets prev to current focus.
+func (em *EventMgr) PopFocus() {
+	// em.FocusMu.Lock()
+	if em.FocusStack == nil || len(em.FocusStack) == 0 {
+		em.Focus = nil
+		return
+	}
+	sz := len(em.FocusStack)
+	em.Focus = nil
+	nxtf := em.FocusStack[sz-1]
+	_, wb := AsWidget(nxtf)
+	if wb != nil && wb.This() != nil {
+		// em.FocusMu.Unlock()
+		em.SetFocus(nxtf)
+		// em.FocusMu.Lock()
+	}
+	em.FocusStack = em.FocusStack[:sz-1]
+	// em.FocusMu.Unlock()
+}
+
+// SetStartFocus sets the given item to be first focus when window opens.
+func (em *EventMgr) SetStartFocus(k Widget) {
+	// em.FocusMu.Lock()
+	em.StartFocus = k
+	// em.FocusMu.Unlock()
+}
+
+// ActivateStartFocus activates start focus if there is no current focus
+// and StartFocus is set -- returns true if activated
+func (em *EventMgr) ActivateStartFocus() bool {
+	// em.FocusMu.RLock()
+	if em.StartFocus == nil {
+		em.FocusMu.RUnlock()
+		return false
+	}
+	// em.FocusMu.RUnlock()
+	// em.FocusMu.Lock()
+	sf := em.StartFocus
+	em.StartFocus = nil
+	// em.FocusMu.Unlock()
+	em.FocusOnOrNext(sf)
+	return true
+}
+
+// InitialFocus establishes the initial focus for the window if no focus
+// is set -- uses ActivateStartFocus or FocusNext as backup.
+func (em *EventMgr) InitialFocus() {
+	if em.Focus == nil {
+		if !em.ActivateStartFocus() {
+			em.FocusNext(em.Focus)
+		}
+	}
+}
+
+/*
+///////////////////////////////////////////////////////////////////
+//   Manager-level event processing
+
+// MangerKeyChordEvents handles lower-priority manager-level key events.
+// Mainly tab, shift-tab, and GoGiEditor and Prefs.
+// event will be marked as processed if handled here.
+func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
+	if e.IsHandled() {
+		return
+	}
+	cs := e.Chord()
+	kf := KeyFun(cs)
+	switch kf {
+	case KeyFunFocusNext: // tab
+		em.FocusNext(em.CurFocus())
+		e.SetHandled()
+	case KeyFunFocusPrev: // shift-tab
+		em.FocusPrev(em.CurFocus())
+		e.SetHandled()
+	case KeyFunGoGiEditor:
+		// todo:
+		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())
+		e.SetHandled()
+	case KeyFunPrefs:
+		TheViewIFace.PrefsView(&Prefs)
+		e.SetHandled()
+	}
+}
+*/
 
 /*
 
@@ -741,352 +1074,4 @@ func (em *EventMgr) GenDNDFocusEvents(mev events.Event, popup bool) bool {
 	}
 	return ki.Break
 }
-
-///////////////////////////////////////////////////////////////////
-//   Key events
-
-// SendKeyChordEvent sends a KeyChord event with given values.  If popup is
-// true, then only items on popup are in scope, otherwise items NOT on popup
-// are in scope (if no popup, everything is in scope).
-func (em *EventMgr) SendKeyChordEvent(popup bool, r rune, mods ...key.Modifiers) {
-	ke := key.NewEvent(r, 0, key.Press, 0)
-	ke.SetTime()
-	// ke.SetModifiers(mods...)
-	// em.HandleEvent(ke)
-}
-
-// SendKeyFunEvent sends a KeyChord event with params from the given KeyFun.
-// If popup is true, then only items on popup are in scope, otherwise items
-// NOT on popup are in scope (if no popup, everything is in scope).
-func (em *EventMgr) SendKeyFunEvent(kf KeyFuns, popup bool) {
-	chord := ActiveKeyMap.ChordForFun(kf)
-	if chord == "" {
-		return
-	}
-	r, mods, err := chord.Decode()
-	if err != nil {
-		return
-	}
-	ke := key.NewEvent(r, 0, key.Press, mods)
-	ke.SetTime()
-	// em.HandleEvent(&ke)
-}
-
-// CurFocus gets the current focus node under mutex protection
-func (em *EventMgr) CurFocus() Widget {
-	em.FocusMu.RLock()
-	defer em.FocusMu.RUnlock()
-	return em.Focus
-}
-
-// setFocusPtr JUST sets the focus pointer under mutex protection --
-// use SetFocus for end-user setting of focus
-func (em *EventMgr) setFocusPtr(k Widget) {
-	em.FocusMu.Lock()
-	em.Focus = k
-	em.FocusMu.Unlock()
-}
-
-// SetFocus sets focus to given item -- returns true if focus changed.
-// If item is nil, then nothing has focus.
-func (em *EventMgr) SetFocus(k Widget) bool {
-	cfoc := em.CurFocus()
-	if cfoc == k {
-		if k != nil {
-			_, wb := AsWidget(k)
-			if wb != nil && wb.This() != nil {
-				wb.SetFocusState(true) // ensure focus flag always set
-			}
-		}
-		return false
-	}
-
-	if cfoc != nil {
-		wi, wb := AsWidget(cfoc)
-		if wb != nil && wb.This() != nil {
-			wb.SetFocusState(false)
-			// fmt.Printf("clear foc: %v\n", ni.Path())
-			wi.FocusChanged(FocusLost)
-		}
-	}
-	em.setFocusPtr(k)
-	if k == nil {
-		return true
-	}
-	wi, wb := AsWidget(k)
-	if wb == nil || wb.This() == nil { // only 2d for now
-		em.setFocusPtr(nil)
-		return false
-	}
-	wb.SetFocusState(true)
-	em.SetRenderWinFocusActive(true)
-	// fmt.Printf("set foc: %v\n", ni.Path())
-	em.ClearNonFocus(k) // shouldn't need this but actually sometimes do
-	wi.FocusChanged(FocusGot)
-	return true
-}
-
-//	FocusNext sets the focus on the next item that can accept focus after the
-//
-// given item (can be nil) -- returns true if a focus item found.
-func (em *EventMgr) FocusNext(foc Widget) bool {
-	gotFocus := false
-	focusNext := false // get the next guy
-	if foc == nil {
-		focusNext = true
-	}
-
-	focRoot := em.CurFocus() // em.Master.FocusTopNode()
-
-	for i := 0; i < 2; i++ {
-		focRoot.WalkPre(func(k ki.Ki) bool {
-			if gotFocus {
-				return ki.Break
-			}
-			wi, wb := AsWidget(k)
-			if wb == nil || wb.This() == nil {
-				return ki.Continue
-			}
-			if foc == wi { // current focus can be a non-can-focus item
-				focusNext = true
-				return ki.Continue
-			}
-			if !focusNext {
-				return ki.Continue
-			}
-			if !wb.CanFocus() {
-				return ki.Continue
-			}
-			em.SetFocus(wi)
-			gotFocus = true
-			return ki.Break // done
-		})
-		if gotFocus {
-			return true
-		}
-		focusNext = true // this time around, just get the first one
-	}
-	return gotFocus
-}
-
-// FocusOnOrNext sets the focus on the given item, or the next one that can
-// accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
-	cfoc := em.CurFocus()
-	if cfoc == foc {
-		return true
-	}
-	_, wb := AsWidget(foc)
-	if wb == nil || wb.This() == nil {
-		return false
-	}
-	if wb.CanFocus() {
-		em.SetFocus(foc)
-		return true
-	}
-	return em.FocusNext(foc)
-}
-
-// FocusOnOrPrev sets the focus on the given item, or the previous one that can
-// accept focus -- returns true if a new focus item found.
-func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
-	cfoc := em.CurFocus()
-	if cfoc == foc {
-		return true
-	}
-	_, wb := AsWidget(foc)
-	if wb == nil || wb.This() == nil {
-		return false
-	}
-	if wb.CanFocus() {
-		em.SetFocus(foc)
-		return true
-	}
-	return em.FocusPrev(foc)
-}
-
-// FocusPrev sets the focus on the previous item before the given item (can be nil)
-func (em *EventMgr) FocusPrev(foc Widget) bool {
-	if foc == nil { // must have a current item here
-		em.FocusLast()
-		return false
-	}
-
-	gotFocus := false
-	var prevItem Widget
-
-	focRoot := em.CurFocus() // em.Master.FocusTopNode()
-
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		if gotFocus {
-			return ki.Break
-		}
-		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
-			return ki.Continue
-		}
-		if foc == wi {
-			gotFocus = true
-			return ki.Break
-		}
-		if !wb.CanFocus() {
-			return ki.Continue
-		}
-		prevItem = wi
-		return ki.Continue
-	})
-	if gotFocus && prevItem != nil {
-		em.SetFocus(prevItem)
-		return true
-	} else {
-		return em.FocusLast()
-	}
-}
-
-// FocusLast sets the focus on the last item in the tree -- returns true if a
-// focusable item was found
-func (em *EventMgr) FocusLast() bool {
-	var lastItem Widget
-
-	focRoot := em.CurFocus() // em.Master.FocusTopNode()
-
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
-			return ki.Continue
-		}
-		if !wb.CanFocus() {
-			return ki.Continue
-		}
-		lastItem = wi
-		return ki.Continue
-	})
-	em.SetFocus(lastItem)
-	if lastItem == nil {
-		return false
-	}
-	return true
-}
-
-// ClearNonFocus clears the focus of any non-w.Focus item.
-func (em *EventMgr) ClearNonFocus(foc Widget) {
-	focRoot := em.CurFocus() // em.Master.FocusTopNode()
-
-	focRoot.WalkPre(func(k ki.Ki) bool {
-		if k == focRoot { // skip top-level
-			return ki.Continue
-		}
-		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
-			return ki.Continue
-		}
-		if foc == k {
-			return ki.Continue
-		}
-		if wb.StateIs(states.Focused) {
-			if EventTrace {
-				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
-			}
-			wb.SetFlag(false, HasFocus)
-			wi.FocusChanged(FocusLost)
-		}
-		return ki.Continue
-	})
-}
-
-// PushFocus pushes current focus onto stack and sets new focus.
-func (em *EventMgr) PushFocus(p Widget) {
-	em.FocusMu.Lock()
-	if em.FocusStack == nil {
-		em.FocusStack = make([]Widget, 0, 50)
-	}
-	em.FocusStack = append(em.FocusStack, em.Focus)
-	em.Focus = nil // don't un-focus on prior item when pushing
-	em.FocusMu.Unlock()
-	em.FocusOnOrNext(p)
-}
-
-// PopFocus pops off the focus stack and sets prev to current focus.
-func (em *EventMgr) PopFocus() {
-	em.FocusMu.Lock()
-	if em.FocusStack == nil || len(em.FocusStack) == 0 {
-		em.Focus = nil
-		return
-	}
-	sz := len(em.FocusStack)
-	em.Focus = nil
-	nxtf := em.FocusStack[sz-1]
-	_, wb := AsWidget(nxtf)
-	if wb != nil && wb.This() != nil {
-		em.FocusMu.Unlock()
-		em.SetFocus(nxtf)
-		em.FocusMu.Lock()
-	}
-	em.FocusStack = em.FocusStack[:sz-1]
-	em.FocusMu.Unlock()
-}
-
-// SetStartFocus sets the given item to be first focus when window opens.
-func (em *EventMgr) SetStartFocus(k Widget) {
-	em.FocusMu.Lock()
-	em.StartFocus = k
-	em.FocusMu.Unlock()
-}
-
-// ActivateStartFocus activates start focus if there is no current focus
-// and StartFocus is set -- returns true if activated
-func (em *EventMgr) ActivateStartFocus() bool {
-	em.FocusMu.RLock()
-	if em.StartFocus == nil {
-		em.FocusMu.RUnlock()
-		return false
-	}
-	em.FocusMu.RUnlock()
-	em.FocusMu.Lock()
-	sf := em.StartFocus
-	em.StartFocus = nil
-	em.FocusMu.Unlock()
-	em.FocusOnOrNext(sf)
-	return true
-}
-
-// InitialFocus establishes the initial focus for the window if no focus
-// is set -- uses ActivateStartFocus or FocusNext as backup.
-func (em *EventMgr) InitialFocus() {
-	if em.CurFocus() == nil {
-		if !em.ActivateStartFocus() {
-			em.FocusNext(em.CurFocus())
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////
-//   Manager-level event processing
-
-// MangerKeyChordEvents handles lower-priority manager-level key events.
-// Mainly tab, shift-tab, and GoGiEditor and Prefs.
-// event will be marked as processed if handled here.
-func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
-	if e.IsHandled() {
-		return
-	}
-	cs := e.Chord()
-	kf := KeyFun(cs)
-	switch kf {
-	case KeyFunFocusNext: // tab
-		em.FocusNext(em.CurFocus())
-		e.SetHandled()
-	case KeyFunFocusPrev: // shift-tab
-		em.FocusPrev(em.CurFocus())
-		e.SetHandled()
-	case KeyFunGoGiEditor:
-		// todo:
-		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())
-		e.SetHandled()
-	case KeyFunPrefs:
-		TheViewIFace.PrefsView(&Prefs)
-		e.SetHandled()
-	}
-}
-
 */
