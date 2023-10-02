@@ -505,7 +505,7 @@ func (sr *Splitter) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool 
 	// sr.SizeFromAlloc()
 	sr.Size = sr.LayState.Alloc.Size.Dim(sr.Dim)
 	sr.UpdatePosFromValue(sr.Value)
-	sr.DragPos = sr.Pos
+	sr.SlideStartPos = sr.Pos
 	sr.BBoxMu.RLock()
 	sr.OrigWinBBox = sr.ScBBox
 	sr.BBoxMu.RUnlock()

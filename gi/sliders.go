@@ -90,7 +90,7 @@ type SliderBase struct {
 	Pos float32 `xml:"-" desc:"logical position of the slider relative to Size"`
 
 	// underlying drag position of slider -- not subject to snapping
-	DragPos float32 `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
+	SlideStartPos float32 `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
 
 	// dimension along which the slider slides
 	Dim mat32.Dims `desc:"dimension along which the slider slides"`
@@ -144,7 +144,7 @@ func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	sb.Icon = fr.Icon
 	sb.ValThumb = fr.ValThumb
 	sb.Pos = fr.Pos
-	sb.DragPos = fr.DragPos
+	sb.SlideStartPos = fr.SlideStartPos
 	sb.Tracking = fr.Tracking
 	sb.TrackThr = fr.TrackThr
 	sb.Snap = fr.Snap
@@ -273,15 +273,15 @@ func (sb *SliderBase) SizeFromAlloc() {
 		sb.Size -= sb.ThSize // half on each side
 	}
 	sb.UpdatePosFromValue(sb.Value)
-	sb.DragPos = sb.Pos
+	sb.SlideStartPos = sb.Pos
 }
 
 // SendChanged sends a Changed message if given new value is
 // different from the existing Value.
 func (sb *SliderBase) SendChanged(val float32, e events.Event) bool {
-	if sb.LastValue == val {
-		return false
-	}
+	// if sb.LastValue == val {
+	// 	return false
+	// }
 	sb.LastValue = val
 	sb.Send(events.Change, e)
 	return true
@@ -308,7 +308,7 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 	if sb.ValThumb {
 		val = mat32.Min(val, sb.Max-sb.ThumbVal)
 	}
-	sb.DragPos = sb.Pos
+	sb.SlideStartPos = sb.Pos
 	if sb.Snap {
 		val = sb.SnapValue(val)
 	}
@@ -348,7 +348,7 @@ func (sb *SliderBase) SetValue(val float32) {
 	if sb.Value != val {
 		sb.Value = val
 		sb.UpdatePosFromValue(val)
-		sb.DragPos = sb.Pos
+		sb.SlideStartPos = sb.Pos
 	}
 	sb.UpdateEnd(updt)
 }
@@ -395,6 +395,21 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 // 	Events
 
 func (sb *SliderBase) SliderMouse() {
+	sb.On(events.MouseDown, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		e.SetHandled()
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := &sb.Style
+		// SidesTODO: not sure about dim
+		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		if sb.Dim == mat32.X {
+			sb.SetSliderPos(float32(ed.X) - spc)
+		} else {
+			sb.SetSliderPos(float32(ed.Y) - spc)
+		}
+	})
 	sb.On(events.SlideStart, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
@@ -415,12 +430,11 @@ func (sb *SliderBase) SliderMouse() {
 			return
 		}
 		e.SetHandled()
-		st := sb.This().(SliderPositioner).PointToRelPos(e.StartPos())
-		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		del := e.PrevDelta()
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(float32(ed.X) - float32(st.X))
+			sb.SetSliderPos(sb.SlideStartPos + float32(del.X))
 		} else {
-			sb.SetSliderPos(float32(ed.Y) - float32(st.Y))
+			sb.SetSliderPos(sb.SlideStartPos + float32(del.Y))
 		}
 	})
 	sb.On(events.SlideStop, func(e events.Event) {
@@ -444,11 +458,10 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		// cur := float32(sb.Pos)
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(float32(se.NonZeroDelta(true))) // preferX
+			sb.SetSliderPos(sb.SlideStartPos + float32(se.NonZeroDelta(true))) // preferX
 		} else {
-			sb.SetSliderPos(float32(se.NonZeroDelta(false))) // preferY
+			sb.SetSliderPos(sb.SlideStartPos + float32(se.NonZeroDelta(false))) // preferY
 		}
 	})
 }

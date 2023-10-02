@@ -215,7 +215,7 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 			// still needs to handle dragenter / leave
 		case em.Slide != nil:
 			em.Slide.HandleEvent(evi)
-			em.Slide.Send(events.DragMove, evi)
+			em.Slide.Send(events.SlideMove, evi)
 			return // nothing further
 		case em.Press != nil:
 			// todo: distance to start sliding, dragging

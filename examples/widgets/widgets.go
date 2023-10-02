@@ -187,25 +187,20 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	slider1.Snap = true
 	slider1.Tracking = true
 	slider1.Icon = icons.RadioButtonChecked
+	slider1.On(events.Change, func(e events.Event) {
+		fmt.Println("slider1", slider1.Value)
+	})
 
 	slider2 := gi.NewSlider(srow, "slider2")
 	slider2.Dim = mat32.Y
+	slider2.Tracking = true
 	slider2.SetMinPrefHeight(units.Em(10))
 	slider2.SetMinPrefWidth(units.Em(1))
 	slider2.SetStretchMaxHeight()
 	slider2.SetValue(0.5)
-
-	// slider1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig != int64(gi.SliderMoved) {
-	// 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-	// 	}
-	// })
-	//
-	// slider2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig != int64(gi.SliderMoved) {
-	// 		fmt.Printf("Received slider signal: %v from slider: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-	// 	}
-	// })
+	slider2.On(events.Change, func(e events.Event) {
+		fmt.Println("slider2", slider2.Value)
+	})
 
 	scrollbar1 := gi.NewScrollBar(srow, "scrollbar1")
 	scrollbar1.Dim = mat32.X
@@ -214,13 +209,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	scrollbar1.SetMinPrefHeight(units.Em(1))
 	scrollbar1.SetThumbValue(0.25)
 	scrollbar1.SetValue(0.25)
-	// scrollbar1.Snap = true
-	// scrollbar1.Tracking = true
-	// scrollbar1.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig != int64(gi.SliderMoved) {
-	// 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-	// 	}
-	// })
+	scrollbar1.Snap = true
+	scrollbar1.Tracking = true
+	scrollbar1.On(events.Change, func(e events.Event) {
+		fmt.Println("scroll1", scrollbar1.Value)
+	})
 
 	scrollbar2 := gi.NewScrollBar(srow, "scrollbar2")
 	scrollbar2.Dim = mat32.Y
@@ -233,11 +226,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	scrollbar2.Tracking = true
 	scrollbar2.Step = 1
 	scrollbar2.PageStep = 10
-	// scrollbar2.SliderSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(gi.SliderValueChanged) { // typically this is the one you care about
-	// 		fmt.Printf("Received scrollbar signal: %v from scrollbar: %v with data: %v\n", gi.SliderSignals(sig), send.Name(), data)
-	// 	}
-	// })
+	scrollbar2.On(events.Change, func(e events.Event) {
+		fmt.Println("scroll2", scrollbar2.Value)
+	})
 
 	//////////////////////////////////////////
 	//      Text Widgets
