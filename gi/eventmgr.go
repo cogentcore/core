@@ -159,6 +159,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	}
 	fi := em.Focus
 	fi.HandleEvent(evi)
+	em.ManagerKeyChordEvents(evi)
 }
 
 func (em *EventMgr) ResetOnMouseDown() {
@@ -392,6 +393,7 @@ func (em *EventMgr) SetFocus(w Widget) bool { // , evi events.Event
 	if cfoc == w {
 		return false
 	}
+	// fmt.Println("set focus:", w)
 
 	if cfoc != nil {
 		cfoc.Send(events.FocusLost, nil)
@@ -431,7 +433,7 @@ func (em *EventMgr) FocusNext(foc Widget) bool {
 			if !focusNext {
 				return ki.Continue
 			}
-			if !wb.AbilityIs(states.Focusable) {
+			if !wi.AbilityIs(states.Focusable) {
 				return ki.Continue
 			}
 			em.SetFocus(wi)
@@ -577,6 +579,7 @@ func (em *EventMgr) PushFocus(p Widget) {
 	}
 	em.FocusStack = append(em.FocusStack, em.Focus)
 	em.Focus = nil // don't un-focus on prior item when pushing
+	fmt.Println("push focus:", p)
 	em.FocusOnOrNext(p)
 }
 
@@ -623,10 +626,6 @@ func (em *EventMgr) InitialFocus() {
 	}
 }
 
-/*
-///////////////////////////////////////////////////////////////////
-//   Manager-level event processing
-
 // MangerKeyChordEvents handles lower-priority manager-level key events.
 // Mainly tab, shift-tab, and GoGiEditor and Prefs.
 // event will be marked as processed if handled here.
@@ -634,25 +633,27 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.IsHandled() {
 		return
 	}
-	cs := e.Chord()
+	if e.Type() != events.KeyChord {
+		return
+	}
+	cs := e.KeyChord()
 	kf := KeyFun(cs)
 	switch kf {
 	case KeyFunFocusNext: // tab
-		em.FocusNext(em.CurFocus())
+		em.FocusNext(em.Focus)
 		e.SetHandled()
 	case KeyFunFocusPrev: // shift-tab
-		em.FocusPrev(em.CurFocus())
+		em.FocusPrev(em.Focus)
 		e.SetHandled()
 	case KeyFunGoGiEditor:
 		// todo:
 		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())
 		e.SetHandled()
 	case KeyFunPrefs:
-		TheViewIFace.PrefsView(&Prefs)
+		// TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
 	}
 }
-*/
 
 /*
 

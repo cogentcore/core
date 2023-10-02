@@ -100,7 +100,9 @@ func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
 		return
 	}
 	wb.SetFlag(true, NeedsRender)
-	sc.SetFlag(true, ScNeedsRender)
+	if sc != nil {
+		sc.SetFlag(true, ScNeedsRender)
+	}
 }
 
 // UpdateEndRender should be called instead of UpdateEnd

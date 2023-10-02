@@ -497,6 +497,11 @@ func (bt *Button) ButtonStyles() {
 				s.BoxShadow = BoxShadow1
 			}
 		}
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Px(1))
+		}
 		// STYTODO: add state styles for buttons
 	})
 }

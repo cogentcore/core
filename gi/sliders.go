@@ -349,7 +349,7 @@ func (sb *SliderBase) SetValue(val float32) {
 		sb.UpdatePosFromValue(val)
 		sb.SlideStartPos = sb.Pos
 	}
-	sb.UpdateEnd(updt)
+	sb.UpdateEndRender(updt)
 }
 
 // SetValueAction sets the value and updates the slider representation, and
@@ -664,6 +664,11 @@ func (sr *Slider) SliderStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Sliding):
 			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+		}
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Px(1))
 		}
 	})
 }
