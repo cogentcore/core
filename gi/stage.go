@@ -425,7 +425,6 @@ func (st *StageBase) Run() Stage {
 	default:
 		return st.Stage.AsPopup().RunPopup()
 	}
-	return st.Stage
 }
 
 // Wait waits for the window to close.

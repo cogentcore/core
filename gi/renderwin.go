@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
 
@@ -696,6 +697,18 @@ func (w *RenderWin) PollEvents() {
 // events for the window and dispatches them to receiving nodes, and manages
 // other state etc (popups, etc).
 func (w *RenderWin) EventLoop() {
+	// this recover allows for debugging on Android, and we need to do it separately
+	// here because this is the main thing in a separate goroutine that goosi doesn't
+	// control. TODO: maybe figure out a more sustainable approach to this.
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("panic:", r)
+			log.Println("")
+			log.Println("----- START OF STACK TRACE: -----")
+			log.Println(string(debug.Stack()))
+			log.Fatalln("----- END OF STACK TRACE -----")
+		}
+	}()
 	for {
 		if w.HasFlag(WinFlagStopEventLoop) {
 			w.SetFlag(false, WinFlagStopEventLoop)
@@ -725,7 +738,10 @@ func (w *RenderWin) EventLoop() {
 // the lock protection.
 func (w *RenderWin) HandleEvent(evi events.Event) {
 	w.RenderCtx().ReadLock()
-	defer w.RenderCtx().ReadUnlock()
+	// we manually handle ReadUnlock's in this function instead of deferring
+	// it to avoid a cryptic "sync: can't unlock an already unlocked RWMutex"
+	// error when panicking in the rendering goroutine. This is critical for
+	// debugging on Android. TODO: maybe figure out a more sustainable approach to this.
 
 	et := evi.Type()
 	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
@@ -733,10 +749,12 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(evi)
+		w.RenderCtx().ReadUnlock()
 		return
 	}
 	// fmt.Printf("got event type: %v: %v\n", et.BitIndexString(), evi)
 	w.StageMgr.HandleEvent(evi)
+	w.RenderCtx().ReadUnlock()
 }
 
 func (w *RenderWin) HandleWindowEvents(evi events.Event) {
