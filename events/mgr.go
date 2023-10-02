@@ -71,10 +71,10 @@ func (em *Mgr) Key(typ Types, rn rune, code key.Codes, mods key.Modifiers) {
 	ev.Init()
 	em.Deque.Send(ev)
 
-	// don't include alt here.
-	// missing: !mapped ||
+	_, mapped := key.CodeRuneMap[code]
+
 	if typ == KeyDown && ev.Code < key.CodeLeftControl &&
-		(ev.HasAnyModifier(key.Control, key.Meta) || ev.Code == key.CodeTab) {
+		(ev.HasAnyModifier(key.Control, key.Meta) || !mapped || ev.Code == key.CodeTab) {
 		che := NewKey(KeyChord, rn, code, mods)
 		che.Init()
 		em.Deque.Send(che)
