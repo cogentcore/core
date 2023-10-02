@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 
 	"goki.dev/goosi"
@@ -121,7 +120,6 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
 	st.Scene.Config()
-	fmt.Println("running window", st.OwnWin, CurRenderWin)
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
@@ -225,17 +223,12 @@ func (st *MainStage) Resize(sz image.Point) {
 // returns stageMods = true if any Popup Stages have been modified
 // and sceneMods = true if any Scenes have been modified.
 func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
-	fmt.Println("doing update for main stage", st)
 	if st.Scene == nil {
-		fmt.Println("returning from doing update for main stage due to no scene", st)
 		return
 	}
-	fmt.Println("updating popup mgr")
 	stageMods, sceneMods = st.PopupMgr.UpdateAll()
-	fmt.Println("updating scene")
 	scMod := st.Scene.DoUpdate()
 	sceneMods = sceneMods || scMod
-	fmt.Println("returning from doing update for main stage due to success")
 	return
 }
 

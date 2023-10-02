@@ -269,7 +269,6 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	fmt.Println("updating scene")
 	if sc.HasFlag(ScIsUpdating) {
 		fmt.Println("scene bail on updt")
 		return false
@@ -277,21 +276,18 @@ func (sc *Scene) DoUpdate() bool {
 	sc.SetFlag(true, ScIsUpdating) // prevent rendering
 	defer sc.SetFlag(false, ScIsUpdating)
 
-	fmt.Println("switching", sc.Flags)
 	switch {
 	case sc.HasFlag(ScNeedsRebuild):
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.HasFlag(ScNeedsLayout):
-		fmt.Println("scene layout start")
+		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
-		fmt.Println("filling")
 		sc.Fill() // full redraw
-		fmt.Println("layout render tree")
 		sc.LayoutRenderTree()
 		sc.SetFlag(true, ScImageUpdated)
-		fmt.Println("scene layout done")
+		// fmt.Println("scene layout done")
 	case sc.HasFlag(ScNeedsRender):
 		// fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
@@ -326,13 +322,9 @@ func (sc *Scene) DoRebuild() {
 // Typically the root Frame fills its background with color
 // but it can e.g., leave corners transparent for popups etc.
 func (sc *Scene) Fill() {
-	fmt.Println("in fill")
 	rs := &sc.RenderState
-	fmt.Println("locking")
 	rs.Lock()
-	fmt.Println("filling box")
 	rs.Paint.FillBox(rs, mat32.Vec2Zero, mat32.NewVec2FmPoint(sc.Geom.Size), &sc.BgColor)
-	fmt.Println("unlocking")
 	rs.Unlock()
 }
 

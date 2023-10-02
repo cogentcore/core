@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"sync"
 
@@ -118,23 +117,16 @@ func (sm *StageMgrBase) UpdateAll() (stageMods, sceneMods bool) {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
 
-	fmt.Println("updating all")
-
 	stageMods = sm.Modified
 	sm.Modified = false
 
-	fmt.Println("getting stack length", sm, sm.Stack)
 	sz := sm.Stack.Len()
 	if sz == 0 {
-		fmt.Println("returning from update all")
 		return
 	}
-	fmt.Println("going through stack order")
 	for _, kv := range sm.Stack.Order {
 		st := kv.Val
-		fmt.Println("doing update for", st)
 		stMod, scMod := st.DoUpdate()
-		fmt.Println("done with do update for", st)
 		stageMods = stageMods || stMod
 		sceneMods = sceneMods || scMod
 	}
