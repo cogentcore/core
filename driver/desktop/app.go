@@ -202,7 +202,7 @@ func (app *appImpl) initVk() {
 func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error) {
 	if len(app.winlist) == 0 && goosi.InitScreenLogicalDPIFunc != nil {
 		if monitorDebug {
-			log.Printf("app first new window calling InitScreenLogicalDPIFunc\n")
+			log.Println("app first new window calling InitScreenLogicalDPIFunc")
 		}
 		goosi.InitScreenLogicalDPIFunc()
 	}

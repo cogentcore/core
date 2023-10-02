@@ -83,6 +83,7 @@ func (w *windowImpl) NextEvent() events.Event {
 
 // winLoop is the window's own locked processing loop.
 func (w *windowImpl) winLoop() {
+	defer func() { handleRecover(recover()) }()
 	fmt.Println("starting window loop")
 	var winPaint *time.Ticker
 	if w.FPS > 0 {

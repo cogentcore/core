@@ -86,6 +86,7 @@ func handleRecover(r any) {
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
+	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
 	theApp.initVk()
@@ -204,6 +205,10 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		}
 	}
 	fmt.Println("making new window")
+	if goosi.InitScreenLogicalDPIFunc != nil {
+		log.Println("app first new window calling InitScreenLogicalDPIFunc")
+		goosi.InitScreenLogicalDPIFunc()
+	}
 	app.mu.Lock()
 	defer app.mu.Unlock()
 	app.window = &windowImpl{
@@ -213,19 +218,24 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 		winClose:    make(chan struct{}),
 		publishDone: make(chan struct{}),
 		WindowBase: goosi.WindowBase{
-			FPS: 60,
+			Titl: opts.GetTitle(),
+			Flag: opts.Flags,
+			FPS:  60,
 		},
 	}
 	app.window.EvMgr.Deque = &app.window.Deque
 	app.window.EvMgr.Window(events.Show)
 	app.window.EvMgr.Window(events.Focus)
+
 	go app.window.winLoop()
+
 	return app.window, nil
 }
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
 func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) error {
+	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
 	var sf vk.Surface

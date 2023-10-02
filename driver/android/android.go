@@ -370,6 +370,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			app.window.PxSize = app.screen.PixSize
 			app.window.WnSize = wsz
 
+			app.window.EvMgr.WindowResize()
 			app.window.EvMgr.WindowPaint()
 		case <-windowDestroyed:
 			// we need to set the size of the window to 0 so that it detects a size difference
