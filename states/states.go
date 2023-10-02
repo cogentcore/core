@@ -30,10 +30,10 @@ const (
 	// Dragged or Sliding.
 	Active
 
-	// Dragged means this element is currently being dragged
+	// Dragging means this element is currently being dragged
 	// by the mouse (i.e., a MouseDown event followed by MouseMove),
 	// as part of a drag-n-drop sequence.
-	Dragged
+	Dragging
 
 	// Sliding means this element is currently being manipulated
 	// via mouse to change the slider state, which will continue
@@ -41,8 +41,8 @@ const (
 	// It should also still be Active.
 	Sliding
 
-	// Scrolled means this element is currently being scrolled.
-	Scrolled
+	// Scrolling means this element is currently being scrolled.
+	Scrolling
 
 	// Focused elements receive keyboard input.
 	Focused

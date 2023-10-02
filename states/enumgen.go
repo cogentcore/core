@@ -67,7 +67,7 @@ var _AbilitiesDescMap = map[Abilities]string{
 	1:  `Selectable means it can be Selected`,
 	2:  `Activatable means it can be made Active`,
 	3:  `Draggable means it can be Dragged`,
-	4:  `Droppable means it can receive Drop events (not specific to current Drag item, just generally)`,
+	4:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
 	5:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
 	6:  `Checkable means it can be Checked`,
 	7:  `Scrollable means it can be Scrolled`,
@@ -235,9 +235,9 @@ func _StatesNoOp() {
 	_ = x[ReadOnly-(1)]
 	_ = x[Selected-(2)]
 	_ = x[Active-(3)]
-	_ = x[Dragged-(4)]
+	_ = x[Dragging-(4)]
 	_ = x[Sliding-(5)]
-	_ = x[Scrolled-(6)]
+	_ = x[Scrolling-(6)]
 	_ = x[Focused-(7)]
 	_ = x[FocusedWithin-(8)]
 	_ = x[Checked-(9)]
@@ -262,12 +262,12 @@ var _StatesNameToValueMap = map[string]States{
 	`selected`:      2,
 	`Active`:        3,
 	`active`:        3,
-	`Dragged`:       4,
-	`dragged`:       4,
+	`Dragging`:      4,
+	`dragging`:      4,
 	`Sliding`:       5,
 	`sliding`:       5,
-	`Scrolled`:      6,
-	`scrolled`:      6,
+	`Scrolling`:     6,
+	`scrolling`:     6,
 	`Focused`:       7,
 	`focused`:       7,
 	`FocusedWithin`: 8,
@@ -301,9 +301,9 @@ var _StatesDescMap = map[States]string{
 	1:  `ReadOnly elements cannot be changed, but can be selected.`,
 	2:  `Selected elements have been marked for clipboard or other such actions.`,
 	3:  `Active elements are currently being interacted with, usually involving a mouse button being pressed in the element. A text field will be active while being clicked on, and this can also result in a Focused state. If further movement happens, an element can also end up being Dragged or Sliding.`,
-	4:  `Dragged means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove), as part of a drag-n-drop sequence.`,
+	4:  `Dragging means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove), as part of a drag-n-drop sequence.`,
 	5:  `Sliding means this element is currently being manipulated via mouse to change the slider state, which will continue until the mouse is released, even if it goes off the element. It should also still be Active.`,
-	6:  `Scrolled means this element is currently being scrolled.`,
+	6:  `Scrolling means this element is currently being scrolled.`,
 	7:  `Focused elements receive keyboard input.`,
 	8:  `FocusedWithin elements have a Focused element within them, including self.`,
 	9:  `Checked is for check boxes or radio buttons or other similar state.`,
@@ -324,9 +324,9 @@ var _StatesMap = map[States]string{
 	1:  `ReadOnly`,
 	2:  `Selected`,
 	3:  `Active`,
-	4:  `Dragged`,
+	4:  `Dragging`,
 	5:  `Sliding`,
-	6:  `Scrolled`,
+	6:  `Scrolling`,
 	7:  `Focused`,
 	8:  `FocusedWithin`,
 	9:  `Checked`,
