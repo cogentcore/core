@@ -27,14 +27,15 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
+	"golang.org/x/image/draw"
 )
 
 const force = true
 const dontForce = false
 
-// CursorBlinkMSec is number of milliseconds that cursor blinks on
+// CursorBlinkTime is time that cursor blinks on
 // and off -- set to 0 to disable blinking
-var CursorBlinkMSec = 500
+var CursorBlinkTime = 500 * time.Millisecond
 
 // TextField is a widget for editing a line of text
 //
@@ -839,6 +840,18 @@ func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
 	return mat32.Vec2{pos.X + cpos, pos.Y}
 }
 
+// ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
+func (tf *TextField) ScrollLayoutToCursor() bool {
+	ly := tf.ParentScrollLayout()
+	if ly == nil {
+		return false
+	}
+	cpos := tf.CharStartPos(tf.CursorPos, false).ToPointFloor()
+	bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
+	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
+	return ly.ScrollToBox(bbox)
+}
+
 // TextFieldBlinkMu is mutex protecting TextFieldBlink updating and access
 var TextFieldBlinkMu sync.Mutex
 
@@ -873,20 +886,11 @@ func TextFieldBlink() {
 			continue
 		}
 		tf := BlinkingTextField
-		if tf.Sc == nil || !tf.StateIs(states.Focused) || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
+		if tf.Sc == nil || tf.Sc.MainStage() == nil || !tf.StateIs(states.Focused) || !tf.This().(Widget).IsVisible() {
 			BlinkingTextField = nil
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
-		win := tf.ParentRenderWin()
-		if win == nil || win.Is(WinResizing) || win.IsClosed() /*|| !win.IsRenderWinInFocus() */ {
-			TextFieldBlinkMu.Unlock()
-			continue
-		}
-		// if win.Is(Updating) {
-		// 	TextFieldBlinkMu.Unlock()
-		// 	continue
-		// }
 		tf.BlinkOn = !tf.BlinkOn
 		tf.RenderCursor(tf.BlinkOn)
 		TextFieldBlinkMu.Unlock()
@@ -902,20 +906,17 @@ func (tf *TextField) StartCursor() {
 		return
 	}
 	tf.BlinkOn = true
-	if CursorBlinkMSec == 0 {
+	if CursorBlinkTime == 0 {
 		tf.RenderCursor(true)
 		return
 	}
 	TextFieldBlinkMu.Lock()
 	if TextFieldBlinker == nil {
-		TextFieldBlinker = time.NewTicker(time.Duration(CursorBlinkMSec) * time.Millisecond)
+		TextFieldBlinker = time.NewTicker(CursorBlinkTime)
 		go TextFieldBlink()
 	}
 	tf.BlinkOn = true
-	win := tf.ParentRenderWin()
-	if win != nil && !win.Is(WinResizing) {
-		tf.RenderCursor(true)
-	}
+	tf.RenderCursor(true)
 	BlinkingTextField = tf
 	TextFieldBlinkMu.Unlock()
 }
@@ -956,42 +957,27 @@ func (tf *TextField) RenderCursor(on bool) {
 	tf.CursorMu.Lock()
 	defer tf.CursorMu.Unlock()
 
-	// todo:
-	// win := tf.ParentRenderWin()
-	// sp := tf.CursorSprite()
-	// if on {
-	// 	win.ActivateSprite(sp.Name)
-	// } else {
-	// 	win.InactivateSprite(sp.Name)
-	// }
-	// sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
-	// win.UpdateSig()
-}
-
-// ScrollLayoutToCursor scrolls any scrolling layout above us so that the cursor is in view
-func (tf *TextField) ScrollLayoutToCursor() bool {
-	ly := tf.ParentScrollLayout()
-	if ly == nil {
-		return false
+	sp := tf.CursorSprite(on)
+	if sp == nil {
+		return
 	}
-	cpos := tf.CharStartPos(tf.CursorPos, false).ToPointFloor()
-	bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
-	bbox := image.Rectangle{Min: cpos, Max: cpos.Add(bbsz)}
-	return ly.ScrollToBox(bbox)
+	sp.Geom.Pos = tf.CharStartPos(tf.CursorPos, true).ToPointFloor()
 }
 
 // CursorSprite returns the Sprite for the cursor (which is
 // only rendered once with a vertical bar, and just activated and inactivated
-// depending on render status)
-func (tf *TextField) CursorSprite() *Sprite {
-	return nil
-	/* todo:
-	win := tf.ParentRenderWin()
-	if win == nil {
+// depending on render status).  On sets the On status of the cursor.
+func (tf *TextField) CursorSprite(on bool) *Sprite {
+	sc := tf.Sc
+	if sc == nil {
 		return nil
 	}
+	ms := sc.MainStage()
+	if ms == nil {
+		return nil // only MainStage has sprites
+	}
 	spnm := fmt.Sprintf("%v-%v", TextFieldSpriteName, tf.FontHeight)
-	sp, ok := win.SpriteByName(spnm)
+	sp, ok := ms.Sprites.SpriteByName(spnm)
 	// TODO: figure out how to update caret color on color scheme change
 	if !ok {
 		bbsz := image.Point{int(mat32.Ceil(tf.CursorWidth.Dots)), int(mat32.Ceil(tf.FontHeight))}
@@ -999,12 +985,17 @@ func (tf *TextField) CursorSprite() *Sprite {
 			bbsz.X = 2
 		}
 		sp = NewSprite(spnm, bbsz, image.Point{})
+		sp.On = on
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{tf.CursorColor.Color}, image.Point{}, draw.Src)
-		win.AddSprite(sp)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{tf.CursorColor.Solid}, image.Point{}, draw.Src)
+		ms.Sprites.Add(sp)
+	}
+	if on {
+		ms.Sprites.ActivateSprite(sp.Name)
+	} else {
+		ms.Sprites.InactivateSprite(sp.Name)
 	}
 	return sp
-	*/
 }
 
 // RenderSelect renders the selected region, if any, underneath the text
@@ -1546,7 +1537,7 @@ func (tf *TextField) Render(sc *Scene) {
 	if tf.PushBounds(sc) {
 		tf.RenderTextField(sc)
 		if !tf.IsDisabled() {
-			if tf.StateIs(states.Focused) && tf.StateIs(states.Focused) {
+			if tf.StateIs(states.Focused) {
 				tf.StartCursor()
 			} else {
 				tf.StopCursor()

@@ -104,7 +104,7 @@ func (sc *Scene) SetTitle(title string) *Scene {
 }
 
 func (sc *Scene) RenderCtx() *RenderContext {
-	sm := sc.StageMgr()
+	sm := sc.MainStageMgr()
 	if sm == nil {
 		log.Println("ERROR: Scene has nil StageMgr:", sc.Name)
 		return nil
@@ -112,12 +112,22 @@ func (sc *Scene) RenderCtx() *RenderContext {
 	return sm.RenderCtx
 }
 
-func (sc *Scene) StageMgr() *MainStageMgr {
+// MainStageMgr returns the MainStageMgr that typically lives in a RenderWin
+// and manages all of the MainStage elements (Windows, Dialogs etc),
+// which in turn manage their popups.  This Scene could be in a popup
+// or in a main stage.
+func (sc *Scene) MainStageMgr() *MainStageMgr {
 	if sc.Stage == nil {
 		log.Println("ERROR: Scene has nil Stage:", sc.Name)
 		return nil
 	}
 	return sc.Stage.MainMgr()
+}
+
+// MainStage returns this Scene's Stage as a MainStage,
+// which could be nil if in fact it is in a PopupStage.
+func (sc *Scene) MainStage() *MainStage {
+	return sc.Stage.AsMain()
 }
 
 // Resize resizes the scene, creating a new image -- updates Geom Size

@@ -3212,13 +3212,13 @@ func (tv *TextView) StartCursor() {
 		return
 	}
 	tv.BlinkOn = true
-	if gi.CursorBlinkMSec == 0 {
+	if gi.CursorBlinkTime == 0 {
 		tv.RenderCursor(true)
 		return
 	}
 	TextViewBlinkMu.Lock()
 	if TextViewBlinker == nil {
-		TextViewBlinker = time.NewTicker(time.Duration(gi.CursorBlinkMSec) * time.Millisecond)
+		TextViewBlinker = time.NewTicker(gi.CursorBlinkTime)
 		go TextViewBlink()
 	}
 	tv.BlinkOn = true

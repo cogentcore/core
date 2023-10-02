@@ -203,7 +203,9 @@ func (w *RenderWin) RenderWindow() {
 	}
 
 	if stageMods {
-		w.GatherScenes()
+		if !w.GatherScenes() {
+			return
+		}
 	}
 	w.DrawScenes()
 	// fmt.Println("done render")
@@ -231,15 +233,20 @@ func (w *RenderWin) DrawScenes() {
 	rs := &w.RenderScenes
 
 	rs.SetImages(drw) // ensure all updated images copied
+
+	top := w.StageMgr.Top().AsMain()
+	if top.Sprites.Modified {
+		top.Sprites.ConfigSprites(drw)
+	}
+
 	drw.SyncImages()
 	drw.StartDraw(0)
 	drw.UseTextureSet(0)
 	drw.Scale(0, 0, drw.Surf.Format.Bounds(), image.Rectangle{}, draw.Src, vgpu.NoFlipY)
 	rs.DrawAll(drw)
 
-	// todo:
-	// drw.UseTextureSet(2)
-	// w.DrawSprites()
+	drw.UseTextureSet(2)
+	top.Sprites.DrawSprites(drw)
 
 	drw.EndDraw()
 
@@ -247,20 +254,20 @@ func (w *RenderWin) DrawScenes() {
 }
 
 // GatherScenes finds all the Scene elements that drive rendering
-// into the RenderScenes list.
-func (w *RenderWin) GatherScenes() {
+// into the RenderScenes list.  Returns false on failure / nothing to render.
+func (w *RenderWin) GatherScenes() bool {
 	rs := &w.RenderScenes
 	rs.Reset()
 
 	sm := &w.StageMgr
-	sz := sm.Stack.Len()
-	if sz == 0 {
-		return // shouldn't happen!
+	n := sm.Stack.Len()
+	if n == 0 {
+		return false // shouldn't happen!
 	}
 
 	// first, find the top-level window:
 	winIdx := 0
-	for i := sz - 1; i >= 0; i-- {
+	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		if st.Type == Window {
 			rs.Add(st.Scene)
@@ -270,12 +277,13 @@ func (w *RenderWin) GatherScenes() {
 	}
 
 	// then add everyone above that
-	for i := winIdx + 1; i < sz; i++ {
+	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		rs.Add(st.Scene)
 	}
 
-	top := sm.Stack.ValByIdx(sz - 1).AsMain()
+	top := sm.Top().AsMain()
+	top.Sprites.Modified = true // ensure configured
 
 	// then add the popups for the top main stage
 	for _, kv := range top.PopupMgr.Stack.Order {
@@ -286,4 +294,5 @@ func (w *RenderWin) GatherScenes() {
 	if WinEventTrace {
 		fmt.Printf("n scenes: %d\n", len(rs.Scenes))
 	}
+	return true
 }

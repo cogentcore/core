@@ -827,8 +827,8 @@ type PrefsDetailed struct {
 	// [def: 25] [min: 5] [step: 1] the maximum number of completions offered in popup
 	CompleteMaxItems int `def:"25" min:"5" step:"1" desc:"the maximum number of completions offered in popup"`
 
-	// [def: 500] [min: 0] [max: 1000] [step: 5] number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking
-	CursorBlinkMSec int `def:"500" min:"0" max:"1000" step:"5" desc:"number of milliseconds that cursor blinks on and off -- set to 0 to disable blinking"`
+	// [def: 500] [min: 0] [max: 1000] [step: 5] time interval for cursor blinking on and off -- set to 0 to disable blinking
+	CursorBlinkTime time.Duration `def:"500" min:"0" max:"1000" step:"5" desc:"time interval for cursor blinking on and off -- set to 0 to disable blinking"`
 
 	// [def: 25] [min: 1] [step: 5] is amount of time to wait (in Milliseconds) before trying to autoscroll again
 	LayoutAutoScrollDelayMSec int `def:"25" min:"1" step:"5" desc:"is amount of time to wait (in Milliseconds) before trying to autoscroll again"`
@@ -922,7 +922,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.LongHoverStopDist = LongHoverStopDist
 	pf.CompleteWaitMSec = CompleteWaitMSec
 	pf.CompleteMaxItems = CompleteMaxItems
-	pf.CursorBlinkMSec = CursorBlinkMSec
+	pf.CursorBlinkTime = CursorBlinkTime
 	pf.LayoutAutoScrollDelayMSec = LayoutAutoScrollDelayMSec
 	pf.LayoutPageSteps = LayoutPageSteps
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
@@ -949,7 +949,7 @@ func (pf *PrefsDetailed) Apply() {
 	LongHoverStopDist = pf.LongHoverStopDist
 	CompleteWaitMSec = pf.CompleteWaitMSec
 	CompleteMaxItems = pf.CompleteMaxItems
-	CursorBlinkMSec = pf.CursorBlinkMSec
+	CursorBlinkTime = pf.CursorBlinkTime
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight

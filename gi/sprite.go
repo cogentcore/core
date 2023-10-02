@@ -5,13 +5,16 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
+	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
+	"golang.org/x/image/draw"
 )
 
 // A Sprite is just an image (with optional background) that can be drawn onto
@@ -208,3 +211,108 @@ func (ss *Sprites) Reset() {
 	ss.Names.Reset()
 	ss.Modified = true
 }
+
+// ActivateSprite flags the sprite as active, setting Modified if wasn't before
+func (ss *Sprites) ActivateSprite(name string) {
+	sp, ok := ss.SpriteByName(name)
+	if !ok {
+		return // not worth bothering about errs -- use a consistent string var!
+	}
+	if !sp.On {
+		sp.On = true
+		ss.Modified = true
+	}
+}
+
+// InactivateSprite flags the sprite as inactive, setting Modified if wasn't before
+func (ss *Sprites) InactivateSprite(name string) {
+	sp, ok := ss.SpriteByName(name)
+	if !ok {
+		return // not worth bothering about errs -- use a consistent string var!
+	}
+	if sp.On {
+		sp.On = false
+		ss.Modified = true
+	}
+}
+
+// InactivateAllSprites inactivates all sprites, setting Modified if wasn't before
+func (ss *Sprites) InactivateAllSprites() {
+	for _, sp := range ss.Names.Order {
+		if sp.Val.On {
+			sp.Val.On = false
+			ss.Modified = true
+		}
+	}
+}
+
+// ConfigSprites updates the Drawer configuration of sprites.
+// Does a new SzAlloc, and sets corresponding images.
+func (ss *Sprites) ConfigSprites(drw *vdraw.Drawer) {
+	// fmt.Println("config sprites")
+	ss.AllocSizes()
+	sa := &ss.SzAlloc
+	for gpi, ga := range sa.GpAllocs {
+		gsz := sa.GpSizes[gpi]
+		imgidx := SpriteStart + gpi
+		drw.ConfigImage(imgidx, vgpu.NewImageFormat(gsz.X, gsz.Y, len(ga)))
+		for ii, spi := range ga {
+			if err := ss.Names.IdxIsValid(spi); err != nil {
+				fmt.Println(err)
+				continue
+			}
+			sp := ss.Names.ValByIdx(spi)
+			drw.SetGoImage(imgidx, ii, sp.Pixels, vgpu.NoFlipY)
+		}
+	}
+	ss.Modified = false
+}
+
+// DrawSprites draws sprites
+func (ss *Sprites) DrawSprites(drw *vdraw.Drawer) {
+	// fmt.Println("draw sprites")
+	sa := &ss.SzAlloc
+	for gpi, ga := range sa.GpAllocs {
+		imgidx := SpriteStart + gpi
+		for ii, spi := range ga {
+			if ss.Names.IdxIsValid(spi) != nil {
+				continue
+			}
+			sp := ss.Names.ValByIdx(spi)
+			if !sp.On {
+				continue
+			}
+			drw.Copy(imgidx, ii, sp.Geom.Pos, image.Rectangle{}, draw.Over, vgpu.NoFlipY)
+		}
+	}
+}
+
+// SpriteEvent processes given event for any active sprites
+// func (ss *Sprites) SelSpriteEvent(evi events.Event) {
+// 	// w.StageMgr.RenderCtx.Mu.Lock()
+// 	// defer w.StageMgr.RenderCtx.Mu.Unlock()
+//
+// 	et := evi.Type()
+//
+// 	for _, spkv := range w.Sprites.Names.Order {
+// 		sp := spkv.Val
+// 		if !sp.On {
+// 			continue
+// 		}
+// 		if sp.Events == nil {
+// 			continue
+// 		}
+// 		sig, ok := sp.Events[et]
+// 		if !ok {
+// 			continue
+// 		}
+// 		ep := evi.Pos()
+// 		if et == events.EventsDragEvent {
+// 			if sp.Name == w.SpriteDragging {
+// 				sig.Emit(w.This(), int64(et), evi)
+// 			}
+// 		} else if ep.In(sp.Geom.Bounds()) {
+// 			sig.Emit(w.This(), int64(et), evi)
+// 		}
+// 	}
+// }

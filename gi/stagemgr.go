@@ -164,12 +164,6 @@ type MainStageMgr struct {
 
 	// growing stack of viewing history of all stages.
 	History []*MainStage
-
-	// sprites are named images that are rendered last overlaying everything else.
-	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
-
-	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-	SpriteDragging string `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
 }
 
 // AsMainMgr returns underlying MainStageMgr or nil if a PopupStageMgr
