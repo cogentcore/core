@@ -87,7 +87,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 		return nil
 	}
 	st := &PopupStage{}
-	st.Stage = st
+	st.This = st
 	st.SetType(typ)
 	st.SetScene(sc)
 	st.CtxWidget = ctx

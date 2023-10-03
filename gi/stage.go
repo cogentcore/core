@@ -92,9 +92,9 @@ const (
 // Popup types (Menu, Tooltip, Snakbar, Chooser).
 // MainStage has an EventMgr for managing events including for Popups.
 type StageBase struct {
-	// Stage as a Stage interface -- preserves original identity
-	// use for chain return values
-	Stage Stage
+	// This is the Stage as a Stage interface -- preserves actual identity
+	// when calling interface methods in StageBase.  Also use for chain return values.
+	This Stage
 
 	// type of Stage: determines behavior and Styling
 	Type StageTypes
@@ -290,16 +290,16 @@ func (st *StageBase) SetNameFromScene() Stage {
 	sc := st.Scene
 	st.Name = sc.Name + "-" + strings.ToLower(st.Type.String())
 	st.Title = sc.Title
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetScene(sc *Scene) Stage {
 	st.Scene = sc
 	if sc != nil {
-		sc.Stage = st.Stage
+		sc.Stage = st.This
 		st.SetNameFromScene()
 	}
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetType(typ StageTypes) Stage {
@@ -336,83 +336,83 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 		st.ClickOff = true
 	}
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetName(name string) Stage {
 	st.Name = name
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetTitle(title string) Stage {
 	st.Title = title
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetModal() Stage {
 	st.Modal = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetScrim() Stage {
 	st.Scrim = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetClickOff() Stage {
 	st.ClickOff = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetTimeout(dur time.Duration) Stage {
 	st.Timeout = dur
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetWidth(width int) Stage {
 	st.Width = width
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetHeight(height int) Stage {
 	st.Height = height
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetOwnWin() Stage {
 	st.OwnWin = true
-	return st.Stage
+	return st.This
 }
 
 // SetSharedWin sets OwnWin off to override default OwnWin for Desktop Window
 func (st *StageBase) SetSharedWin() Stage {
 	st.OwnWin = false
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetBack() Stage {
 	st.Back = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetCloseable() Stage {
 	st.Closeable = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetMovable() Stage {
 	st.Movable = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetResizable() Stage {
 	st.Resizable = true
-	return st.Stage
+	return st.This
 }
 
 func (st *StageBase) SetSide(side StageSides) Stage {
 	st.Side = side
-	return st.Stage
+	return st.This
 }
 
 // Run does the default run behavior based on the type of stage
@@ -423,13 +423,13 @@ func (st *StageBase) Run() Stage {
 	st.Scene.ConfigScene() // always config prior to running
 	switch st.Type {
 	case Window:
-		return st.Stage.AsMain().RunWindow()
+		return st.This.AsMain().RunWindow()
 	case Dialog:
-		return st.Stage.AsMain().RunDialog()
+		return st.This.AsMain().RunDialog()
 	case Sheet:
-		return st.Stage.AsMain().RunSheet()
+		return st.This.AsMain().RunSheet()
 	default:
-		return st.Stage.AsPopup().RunPopup()
+		return st.This.AsPopup().RunPopup()
 	}
 }
 
@@ -437,7 +437,7 @@ func (st *StageBase) Run() Stage {
 // This should be included after the main window Run() call.
 func (st *StageBase) Wait() Stage {
 	Wait()
-	return st.Stage
+	return st.This
 }
 
 // DoUpdate for base just calls DoUpdate on scene
