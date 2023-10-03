@@ -19,6 +19,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"log/slog"
+
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -26,31 +28,31 @@ const plistPath = `/Library/Preferences/.GlobalPreferences.plist`
 
 var plist = filepath.Join(os.Getenv("HOME"), plistPath)
 
-// IsDark returns whether the system color theme is dark (as opposed to light),
-// and any error that occurred when getting that information.
-func (app *appImpl) IsDark() (bool, error) {
+// IsDark returns whether the system color theme is dark (as opposed to light).
+func (app *appImpl) IsDark() bool {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
-			return false, nil
+			return false
 		} else {
-			return false, fmt.Errorf("unexpected error when running command to get system color theme: %w", err)
+			slog.Error("unexpected error when running command to get system color theme" + err.Error())
+			return false
 		}
 	}
-	return true, nil
+	return true
 }
 
-// IsDarkMonitor monitors the state of the dark mode and calls the given function
-// with the new value whenever it changes. It returns a channel that will
+// isDarkMonitor monitors the state of the dark mode in a separate goroutine
+// and calls the given function with the new value whenever it changes. It returns a channel that will
 // receive any errors that occur during the monitoring, as it happens in a
 // separate goroutine. It also returns any error that occurred during the
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil. It also takes a done channel, and it will stop monitoring when
 // that done channel is closed.
-func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
+func (app *appImpl) isDarkMonitor() {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, fmt.Errorf("error creating file watcher: %w", err)
+		slog.Error("error creating file watcher: %w", err)
 	}
 
 	ec := make(chan error)
