@@ -705,7 +705,7 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 
 	et := evi.Type()
 	if EventTrace && et != events.WindowPaint && et != events.MouseMove {
-		log.Printf("Got event: %s\n", et.String())
+		log.Printf("Got event: %s\n", evi)
 	}
 	if et >= events.Window && et <= events.WindowPaint {
 		w.HandleWindowEvents(evi)
