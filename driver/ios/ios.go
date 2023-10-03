@@ -230,12 +230,12 @@ func (a *app) loop(ctx C.GLintptr) {
 	}
 }
 
-// driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
-func driverShowVirtualKeyboard(keyboard KeyboardType) {
-	C.showKeyboard(C.int(int32(keyboard)))
+// ShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
+func (app *appImpl) ShowVirtualKeyboard(typ goosi.VirtualKeyboardTypes) {
+	C.showKeyboard(C.int(int32(typ)))
 }
 
-// driverHideVirtualKeyboard requests the driver to hide any visible virtual keyboard
-func driverHideVirtualKeyboard() {
+// HideVirtualKeyboard requests the driver to hide any visible virtual keyboard
+func (app *appImpl) HideVirtualKeyboard() {
 	C.hideKeyboard()
 }
