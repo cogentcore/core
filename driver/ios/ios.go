@@ -43,7 +43,6 @@ import (
 	"unsafe"
 
 	"goki.dev/mobile/event/lifecycle"
-	"goki.dev/mobile/event/paint"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
 	"goki.dev/mobile/geom"
@@ -87,8 +86,8 @@ var DisplayMetrics struct {
 
 //export setWindowPtr
 func setWindowPtr(window *C.void) {
-	theApp.window = uintptr(unsafe.Pointer(window))
-	log.Println("set window pointer to:", theApp.window)
+	theApp.winptr = uintptr(unsafe.Pointer(window))
+	log.Println("set window pointer to:", theApp.winptr)
 }
 
 //export setDisplayMetrics
@@ -153,7 +152,7 @@ func updateConfig(width, height, orientation int32) {
 		Orientation:   o,
 		DarkMode:      bool(C.isDark()),
 	}
-	theApp.eventsIn <- paint.Event{External: true}
+	theApp.window.EvMgr.WindowPaint()
 }
 
 // touchIDs is the current active touches. The position in the array
