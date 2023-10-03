@@ -14,7 +14,6 @@
 package desktop
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,7 +34,7 @@ func (app *appImpl) IsDark() bool {
 		if _, ok := err.(*exec.ExitError); ok {
 			return false
 		} else {
-			slog.Error("unexpected error when running command to get system color theme" + err.Error())
+			slog.Error("unexpected error when running command to get system color theme: " + err.Error())
 			return false
 		}
 	}
@@ -43,26 +42,18 @@ func (app *appImpl) IsDark() bool {
 }
 
 // isDarkMonitor monitors the state of the dark mode in a separate goroutine
-// and calls the given function with the new value whenever it changes. It returns a channel that will
-// receive any errors that occur during the monitoring, as it happens in a
-// separate goroutine. It also returns any error that occurred during the
-// initial set up of the monitoring. If the error is non-nil, the error channel
-// will be nil. It also takes a done channel, and it will stop monitoring when
-// that done channel is closed.
+// and calls the given function with the new value whenever it changes.
 func (app *appImpl) isDarkMonitor() {
+	// TODO: do we need to close gracefully here if the app is done?
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		slog.Error("error creating file watcher: %w", err)
+		slog.Error("error creating file watcher for system color theme: " + err.Error())
+		return
 	}
 
-	ec := make(chan error)
 	go func() {
 		defer watcher.Close()
-		wasDark, err := IsDark() // we need to store this so that we only update when it changes
-		if err != nil {
-			ec <- fmt.Errorf("error while getting theme: %w", err)
-			return
-		}
+		wasDark := app.IsDark() // we need to store this so that we only update when it changes
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -70,13 +61,9 @@ func (app *appImpl) isDarkMonitor() {
 					return
 				}
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					isDark, err := IsDark()
-					if err != nil {
-						ec <- fmt.Errorf("error while getting theme: %w", err)
-						return
-					}
+					isDark := app.IsDark()
 					if isDark != wasDark {
-						fn(isDark)
+						app.isDark = isDark
 						wasDark = isDark
 					}
 				}
@@ -84,20 +71,13 @@ func (app *appImpl) isDarkMonitor() {
 				if !ok {
 					return
 				}
-				ec <- fmt.Errorf("watcher error: %w", err)
-				return
-			case _, ok := <-done:
-				// if done is closed, we return
-				if !ok {
-					return
-				}
+				slog.Error("system color theme watcher error: " + err.Error())
 			}
 		}
 	}()
 
 	err = watcher.Add(plist)
 	if err != nil {
-		return nil, fmt.Errorf("error adding file watcher: %w", err)
+		slog.Error("error adding system color theme file watcher: " + err.Error())
 	}
-	return ec, nil
 }
