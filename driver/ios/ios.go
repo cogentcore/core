@@ -199,9 +199,16 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 			panic("out of touchIDs")
 		}
 	}
-
-	t := touch.Type(cTouchType)
-	if t == touch.TypeEnd {
+	t := events.TouchStart
+	switch cTouchType {
+	case 0:
+		t = events.TouchStart
+	case 1:
+		t = events.TouchMove
+	case 2:
+		t = events.TouchEnd
+	}
+	if t == events.TouchEnd {
 		// Clear all touchIDs when touch ends. The UITouch pointers are unique
 		// at every multi-touch event. See:
 		// https://github.com/fyne-io/fyne/issues/2407
