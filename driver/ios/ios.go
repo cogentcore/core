@@ -46,7 +46,6 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/event/touch"
 )
 
 var initThreadID uint64
@@ -207,8 +206,6 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		t = events.TouchMove
 	case 2:
 		t = events.TouchEnd
-	}
-	if t == events.TouchEnd {
 		// Clear all touchIDs when touch ends. The UITouch pointers are unique
 		// at every multi-touch event. See:
 		// https://github.com/fyne-io/fyne/issues/2407
@@ -218,12 +215,7 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 		}
 	}
 
-	theApp.eventsIn <- touch.Event{
-		X:        x,
-		Y:        y,
-		Sequence: touch.Sequence(id),
-		Type:     t,
-	}
+	theApp.window.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
 }
 
 //export lifecycleDead
