@@ -182,9 +182,9 @@ func mainrun(a goosi.App) {
 			ev := evi.(*events.WindowEvent)
 			fmt.Println("got window event", ev)
 			switch ev.Action {
-			case events.Show:
+			case events.WinShow:
 				make()
-			case events.Close:
+			case events.WinClose:
 				fmt.Println("got events.Close; returning")
 				return
 			}
