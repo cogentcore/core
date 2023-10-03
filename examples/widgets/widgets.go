@@ -144,10 +144,13 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Menu Button").(*gi.Button)
 
 	_ = mb1
-	// mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1},
-	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-	// 	})
+
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func() {
+		fmt.Println("Menu Action 1")
+	})
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, func() {
+		fmt.Println("Menu Action 2")
+	})
 	//
 	// mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
 	//

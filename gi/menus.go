@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"image"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -43,7 +45,7 @@ func (m *MenuActions) CopyFrom(men *MenuActions) {
 type MakeMenuFunc func(obj ki.Ki, m *MenuActions)
 
 // SetAction sets properties of given action
-func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun func()) {
+func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func()) {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -73,12 +75,12 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, sigTo ki.Ki, fun func(
 // which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
+func (m *MenuActions) AddAction(opts ActOpts, fun func()) *Action {
 	if m == nil {
 		*m = make(MenuActions, 0, 10)
 	}
 	ac := &Action{}
-	m.SetAction(ac, opts, sigTo, fun)
+	m.SetAction(ac, opts, fun)
 	*m = append(*m, ac.This().(Widget))
 	return ac
 }
@@ -89,15 +91,15 @@ func (m *MenuActions) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.Ki, fun func()) *Action {
+func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, fun func()) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
 		ac := &Action{}
-		m.SetAction(ac, opts, sigTo, fun)
+		m.SetAction(ac, opts, fun)
 		ki.SliceInsert(sl, ac.This(), idx)
 		return ac
 	} else {
-		return m.AddAction(opts, sigTo, fun)
+		return m.AddAction(opts, fun)
 	}
 }
 
@@ -107,15 +109,15 @@ func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, sigTo ki.K
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, sigTo ki.Ki, fun func()) *Action {
+func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, fun func()) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
 		ac := &Action{}
-		m.SetAction(ac, opts, sigTo, fun)
+		m.SetAction(ac, opts, fun)
 		ki.SliceInsert(sl, ac.This(), idx+1)
 		return ac
 	} else {
-		return m.AddAction(opts, sigTo, fun)
+		return m.AddAction(opts, fun)
 	}
 }
 
@@ -325,13 +327,47 @@ func MenuFrameConfigStyles(frame *Frame) {
 	})
 }
 
-func (pm *PopupStageMgr) AddMenu(sc *Scene) {
-	// mn := NewMenu(sc)
-}
-
 // MenuMaxHeight is the maximum height of any menu popup panel in units of font height
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
+
+func MenuSceneFromActions(menu MenuActions, name string, pos image.Point) *Scene {
+	msc := NewScene(name + "-menu")
+	frame := &msc.Frame
+	MenuFrameConfigStyles(frame)
+	msc.Geom.Pos = pos
+	// var focus ki.Ki
+	for _, ac := range menu {
+		wi, _ := AsWidget(ac)
+		if wi != nil {
+			frame.AddChild(wi.Clone())
+			// if wi.StateIs(states.Selected) {
+			// 	focus = wi
+			// }
+		}
+	}
+	return msc
+}
+
+// NewMenu returns a new Menu stage with given scene contents,
+// in connection with given widget (which provides key context).
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func NewMenu(sc *Scene, ctx Widget) *PopupStage {
+	return NewPopupStage(Menu, sc, ctx)
+}
+
+// NewMenuActions returns a new Menu stage with given scene contents,
+// in connection with given widget (which provides key context).
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func NewMenuActions(menu MenuActions, ctx Widget) *PopupStage {
+	cwb := ctx.AsWidget()
+	pos := cwb.ScBBox.Min
+	return NewMenu(MenuSceneFromActions(menu, ctx.Name(), pos), ctx)
+}
 
 // PopupMenu pops up a scene with a layout that draws the supplied actions
 // positions are relative to given scene -- name is relevant base name to
@@ -481,7 +517,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun func()) 
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun func()) *Scene {
+func SubStringsChooserPopup(strs [][]string, curSel string, ctx Widget, fun func()) *Scene {
 	var menu MenuActions
 	for si, ss := range strs {
 		sz := len(ss)
@@ -489,19 +525,20 @@ func SubStringsChooserPopup(strs [][]string, curSel string, recv Widget, fun fun
 			continue
 		}
 		s1 := ss[0]
-		sm := menu.AddAction(ActOpts{Label: s1}, nil, nil)
+		sm := menu.AddAction(ActOpts{Label: s1}, nil)
 		sm.SetAsMenu()
 		for i := 1; i < sz; i++ {
 			it := ss[i]
 			cnm := s1 + ": " + it
-			ac := sm.Menu.AddAction(ActOpts{Label: it, Data: []int{si, i}}, recv, fun)
+			ac := sm.Menu.AddAction(ActOpts{Label: it, Data: []int{si, i}}, fun)
 			ac.SetSelected(cnm == curSel)
 		}
 	}
-	wb := recv.AsWidget()
-	pos := recv.ContextMenuPos()
-	sc := wb.Sc
-	return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
+	// wb := ctx.AsWidget()
+	// pos := recv.ContextMenuPos()
+	// sc := wb.Sc
+	// return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
+	return nil
 }
 
 // StringsInsertFirst inserts the given string at start of a string slice,
