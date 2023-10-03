@@ -41,7 +41,6 @@ import (
 	"log"
 	"runtime"
 	"strings"
-	"time"
 	"unsafe"
 
 	"goki.dev/goosi"
@@ -198,15 +197,15 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	for {
-		select {
-		case <-theApp.publish:
-			theApp.publishResult <- PublishResult{}
-			return
-		case <-time.After(100 * time.Millisecond): // incase the method blocked!!
-			return
-		}
-	}
+	// for {
+	// 	select {
+	// 	case <-theApp.publish:
+	// 		theApp.publishResult <- PublishResult{}
+	// 		return
+	// 	case <-time.After(100 * time.Millisecond): // incase the method blocked!!
+	// 		return
+	// 	}
+	// }
 }
 
 //export startloop
@@ -219,13 +218,22 @@ func startloop(ctx C.GLintptr) {
 // After UIKit has captured the initial OS thread for processing UIKit
 // events in runApp, it starts loop on another goroutine. It is locked
 // to an OS thread for its OpenGL context.
-func (a *app) loop(ctx C.GLintptr) {
+func (app *appImpl) loop(ctx C.GLintptr) {
 	runtime.LockOSThread()
 
 	for {
 		select {
-		case <-theApp.publish:
-			theApp.publishResult <- PublishResult{}
+		case <-app.mainDone:
+			app.fullDestroyVk()
+			return
+		case f := <-app.mainQueue:
+			f.f()
+			if f.done != nil {
+				f.done <- true
+			}
+			// case <-theApp.publish:
+			// 	theApp.publishResult <- PublishResult{}
+			// }
 		}
 	}
 }
