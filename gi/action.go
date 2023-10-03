@@ -5,12 +5,14 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"goki.dev/colors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -297,4 +299,24 @@ func (ac *Action) UpdateActions() {
 	if ac.Menu != nil {
 		ac.Menu.UpdateActions()
 	}
+}
+
+func (ac *Action) ClickDismissMenu() {
+	ac.On(events.Click, func(e events.Event) {
+		if ac.StateIs(states.Disabled) {
+			return
+		}
+		if ac.Sc != nil && ac.Sc.Stage != nil {
+			pst := ac.Sc.Stage.AsPopup()
+			if pst != nil && pst.Type == Menu {
+				pst.Close()
+			}
+		} else {
+			if ac.Sc == nil {
+				fmt.Println("ac.Sc == nil")
+			} else if ac.Sc.Stage == nil {
+				fmt.Println("ac.Sc.Stage == nil")
+			}
+		}
+	})
 }

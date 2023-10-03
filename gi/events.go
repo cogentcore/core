@@ -100,6 +100,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.AbilityIs(states.Checkable) {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
+		// fmt.Println("click", wb)
 		if wb.AbilityIs(states.Focusable) {
 			wb.GrabFocus()
 		} else {

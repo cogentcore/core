@@ -342,10 +342,11 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 		}
 		cl := wi.Clone().This().(Widget)
 		cb := cl.AsWidget()
+		cb.Listeners[events.Click] = wb.Listeners[events.Click]
 		if ac, ok := cl.(*Action); ok {
 			ac.SetAsMenu()
+			ac.ClickDismissMenu()
 		}
-		cb.Listeners = wb.Listeners
 		cb.Sc = msc
 		frame.AddChild(cl)
 	}

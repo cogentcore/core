@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"log"
 
 	"goki.dev/goosi/events"
@@ -155,8 +154,27 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	cmgr.Push(st)
 
 	sz := st.Scene.PrefSize(ms.Geom.Size)
-	fmt.Println("new pop sz", sz)
+	// fmt.Println("new pop sz", sz)
 	st.Scene.Resize(sz)
 
 	return st
+}
+
+// Close closes this stage as a popup
+func (st *PopupStage) Close() {
+	mn := st.Main
+	if mn == nil {
+		log.Println("ERROR: popupstage has no Main")
+		return
+	}
+	mm := st.MainMgr()
+	if mm == nil {
+		log.Println("ERROR: popupstage has no MainMgr")
+		return
+	}
+	mm.RenderCtx.Mu.RLock()
+	defer mm.RenderCtx.Mu.RUnlock()
+
+	cmgr := &mn.PopupMgr
+	cmgr.PopDelete()
 }
