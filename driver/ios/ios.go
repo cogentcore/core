@@ -36,13 +36,14 @@ void hideKeyboard();
 */
 import "C"
 import (
+	"fmt"
 	"log"
 	"runtime"
 	"strings"
 	"time"
 	"unsafe"
 
-	"goki.dev/mobile/event/lifecycle"
+	"goki.dev/goosi/events"
 	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
 	"goki.dev/mobile/geom"
@@ -86,8 +87,9 @@ var DisplayMetrics struct {
 
 //export setWindowPtr
 func setWindowPtr(window *C.void) {
-	theApp.winptr = uintptr(unsafe.Pointer(window))
-	log.Println("set window pointer to:", theApp.winptr)
+	theApp.mu.Lock()
+	defer theApp.mu.Unlock()
+	theApp.setSysWindow(uintptr(unsafe.Pointer(window)))
 }
 
 //export setDisplayMetrics
@@ -204,16 +206,27 @@ func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
 }
 
 //export lifecycleDead
-func lifecycleDead() { theApp.sendLifecycle(lifecycle.StageDead) }
+func lifecycleDead() {
+	fmt.Println("lifecycle dead")
+	theApp.fullDestroyVk()
+}
 
 //export lifecycleAlive
-func lifecycleAlive() { theApp.sendLifecycle(lifecycle.StageAlive) }
+func lifecycleAlive() {
+	fmt.Println("lifecycle alive")
+}
 
 //export lifecycleVisible
-func lifecycleVisible() { theApp.sendLifecycle(lifecycle.StageVisible) }
+func lifecycleVisible() { 
+	fmt.Println("lifecycle visible")
+	theApp.window.EvMgr.Window(events.WinShow)
+ }
 
 //export lifecycleFocused
-func lifecycleFocused() { theApp.sendLifecycle(lifecycle.StageFocused) }
+func lifecycleFocused() { 
+	fmt.Println("lifecycle focused")
+	theApp.window.EvMgr.Window(events.WinFocus)
+ }
 
 //export drawloop
 func drawloop() {

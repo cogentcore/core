@@ -234,14 +234,14 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 
 // setSysWindow sets the underlying system window pointer, surface, system, and drawer.
 // It should only be called when app.mu is already locked.
-func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) error {
+func (app *appImpl) setSysWindow(winptr uintptr) error {
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	fmt.Println("setting sys window")
 	var sf vk.Surface
 	// we have to remake the surface, system, and drawer every time someone reopens the window
 	// because the operating system changes the underlying window
-	ret := vk.CreateWindowSurface(app.gpu.Instance, winPtr, nil, &sf)
+	ret := vk.CreateWindowSurface(app.gpu.Instance, winptr, nil, &sf)
 	if err := vk.Error(ret); err != nil {
 		return err
 	}
@@ -261,7 +261,7 @@ func (app *appImpl) setSysWindow(opts *goosi.NewWindowOptions, winPtr uintptr) e
 	// app.window.Draw.ConfigSys()
 	app.Draw.ConfigSurface(app.Surface, vgpu.MaxTexturesPerSet)
 
-	app.winptr = winPtr
+	app.winptr = winptr
 	// if the window already exists, we are coming back to it, so we need to show it
 	// again and send a screen update
 	if app.window != nil {
