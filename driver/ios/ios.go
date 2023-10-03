@@ -170,54 +170,6 @@ func updateConfig(width, height, orientation int32) {
 	theApp.window.EvMgr.WindowPaint()
 }
 
-// touchIDs is the current active touches. The position in the array
-// is the ID, the value is the UITouch* pointer value.
-//
-// It is widely reported that the iPhone can handle up to 5 simultaneous
-// touch events, while the iPad can handle 11.
-var touchIDs [11]uintptr
-
-//export sendTouch
-func sendTouch(cTouch, cTouchType uintptr, x, y float32) {
-	id := -1
-	for i, val := range touchIDs {
-		if val == cTouch {
-			id = i
-			break
-		}
-	}
-	if id == -1 {
-		for i, val := range touchIDs {
-			if val == 0 {
-				touchIDs[i] = cTouch
-				id = i
-				break
-			}
-		}
-		if id == -1 {
-			panic("out of touchIDs")
-		}
-	}
-	t := events.TouchStart
-	switch cTouchType {
-	case 0:
-		t = events.TouchStart
-	case 1:
-		t = events.TouchMove
-	case 2:
-		t = events.TouchEnd
-		// Clear all touchIDs when touch ends. The UITouch pointers are unique
-		// at every multi-touch event. See:
-		// https://github.com/fyne-io/fyne/issues/2407
-		// https://developer.apple.com/documentation/uikit/touches_presses_and_gestures?language=objc
-		for idx := range touchIDs {
-			touchIDs[idx] = 0
-		}
-	}
-
-	theApp.window.EvMgr.Touch(t, events.Sequence(id), image.Pt(int(x), int(y)))
-}
-
 //export lifecycleDead
 func lifecycleDead() {
 	fmt.Println("lifecycle dead")
