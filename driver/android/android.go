@@ -145,6 +145,11 @@ func onDestroy(activity *C.ANativeActivity) {
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
+	if hasFocus > 0 {
+		theApp.window.EvMgr.Window(events.WinFocus)
+	} else {
+		theApp.window.EvMgr.Window(events.WinFocusLost)
+	}
 }
 
 //export onNativeWindowCreated
@@ -353,8 +358,6 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			dpi = cfg.dpi
 			orientation = cfg.orientation
 		case w := <-windowRedrawNeeded:
-			app.window.EvMgr.Window(events.WinFocus)
-
 			widthPx := int(C.ANativeWindow_getWidth(w))
 			heightPx := int(C.ANativeWindow_getHeight(w))
 
