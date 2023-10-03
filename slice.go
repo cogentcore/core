@@ -15,6 +15,8 @@ import (
 // underlying types
 type Slice []Ki
 
+// TODO(kai): remove StartMiddle? we no longer need it
+
 // StartMiddle indicates to start searching
 // in the middle for slice search functions.
 const StartMiddle int = -1

@@ -311,11 +311,7 @@ func (n *Node) ChildTry(idx int) (Ki, error) {
 // can be a key speedup for large lists. If no value is specified for
 // startIdx, it starts in the middle, which is a good default.
 func (n *Node) ChildByName(name string, startIdx ...int) Ki {
-	si := StartMiddle
-	if len(startIdx) > 0 {
-		si = startIdx[0]
-	}
-	return n.Kids.ElemByName(name, si)
+	return n.Kids.ElemByName(name, startIdx...)
 }
 
 // ChildByNameTry returns the first element that has given name, and an error
@@ -324,11 +320,7 @@ func (n *Node) ChildByName(name string, startIdx ...int) Ki {
 // can be a key speedup for large lists. If no value is specified for
 // startIdx, it starts in the middle, which is a good default.
 func (n *Node) ChildByNameTry(name string, startIdx ...int) (Ki, error) {
-	si := StartMiddle
-	if len(startIdx) > 0 {
-		si = startIdx[0]
-	}
-	idx, ok := n.Kids.IndexByName(name, si)
+	idx, ok := n.Kids.IndexByName(name, startIdx...)
 	if !ok {
 		return nil, fmt.Errorf("ki %v: child named: %v not found", n.Nm, name)
 	}
@@ -343,11 +335,7 @@ func (n *Node) ChildByNameTry(name string, startIdx ...int) (Ki, error) {
 // no value is specified for startIdx, it starts in the middle, which is a
 // good default.
 func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
-	si := StartMiddle
-	if len(startIdx) > 0 {
-		si = startIdx[0]
-	}
-	return n.Kids.ElemByType(t, embeds, si)
+	return n.Kids.ElemByType(t, embeds, startIdx...)
 }
 
 // ChildByTypeTry returns the first element that has the given type, and an
@@ -358,11 +346,7 @@ func (n *Node) ChildByType(t *gti.Type, embeds bool, startIdx ...int) Ki {
 // no value is specified for startIdx, it starts in the middle, which is a
 // good default.
 func (n *Node) ChildByTypeTry(t *gti.Type, embeds bool, startIdx ...int) (Ki, error) {
-	si := StartMiddle
-	if len(startIdx) > 0 {
-		si = startIdx[0]
-	}
-	idx, ok := n.Kids.IndexByType(t, embeds, si)
+	idx, ok := n.Kids.IndexByType(t, embeds, startIdx...)
 	if !ok {
 		return nil, fmt.Errorf("ki %v: child of type: %s not found", n.Nm, t.Name)
 	}
