@@ -16,7 +16,6 @@
 
 #import <UIKit/UIKit.h>
 #import <MobileCoreServices/MobileCoreServices.h>
-// #import <GLKit/GLKit.h>
 #import <UserNotifications/UserNotifications.h>
 
 struct utsname sysInfo;
@@ -74,25 +73,6 @@ struct utsname sysInfo;
 
 - (void)applicationWillTerminate:(UIApplication *)application {
 	lifecycleDead();
-}
-
-- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentsAtURLs:(NSArray <NSURL *>*)urls {
-    if ([urls count] == 0) {
-        return;
-    }
-
-    NSURL* url = urls[0];
-    NSURL* toClose = NULL;
-    BOOL secured = [url startAccessingSecurityScopedResource];
-    if (secured) {
-        toClose = url;
-    }
-
-    filePickerReturned((char*)[[url description] UTF8String], toClose);
-}
-
-- (void)documentPickerWasCancelled:(UIDocumentPickerViewController *)controller {
-    filePickerReturned("", NULL);
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
@@ -238,24 +218,6 @@ void runApp(void) {
 	}
 }
 
-/*
-void makeCurrentContext(GLintptr context) {
-	EAGLContext* ctx = (EAGLContext*)context;
-	if (![EAGLContext setCurrentContext:ctx]) {
-		// TODO(crawshaw): determine how terrible this is. Exit?
-		NSLog(@"failed to set current context");
-	}
-}
-
-void swapBuffers(GLintptr context) {
-	__block EAGLContext* ctx = (EAGLContext*)context;
-	dispatch_sync(dispatch_get_main_queue(), ^{
-		[EAGLContext setCurrentContext:ctx];
-		[ctx presentRenderbuffer:GL_RENDERBUFFER];
-	});
-}
-*/
-
 uint64_t threadID() {
 	uint64_t id;
 	if (pthread_threadid_np(pthread_self(), &id)) {
@@ -322,80 +284,4 @@ void hideKeyboard() {
     dispatch_async(dispatch_get_main_queue(), ^{
         [view resignFirstResponder];
     });
-}
-
-NSMutableArray *docTypesForMimeExts(char *mimes, char *exts) {
-    NSMutableArray *docTypes = [NSMutableArray array];
-    if (mimes != NULL && strlen(mimes) > 0) {
-        NSString *mimeList = [NSString stringWithUTF8String:mimes];
-
-        if ([mimeList isEqualToString:@"application/x-directory"]) {
-            [docTypes addObject:kUTTypeFolder];
-        } else {
-            NSArray *mimeItems = [mimeList componentsSeparatedByString:@"|"];
-
-            for (NSString *mime in mimeItems)  {
-                CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mime, NULL);
-
-                [docTypes addObject:UTI];
-            }
-        }
-    } else if (exts != NULL && strlen(exts) > 0) {
-        NSString *extList = [NSString stringWithUTF8String:exts];
-        NSArray *extItems = [extList componentsSeparatedByString:@"|"];
-
-        for (NSString *ext in extItems)  {
-            CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, ext, NULL);
-
-            [docTypes addObject:UTI];
-        }
-    } else {
-        [docTypes addObject:@"public.data"];
-    }
-
-    return docTypes;
-}
-
-void showFileOpenPicker(char* mimes, char *exts) {
-    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
-
-    NSMutableArray *docTypes = docTypesForMimeExts(mimes, exts);
-
-    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
-        initWithDocumentTypes:docTypes inMode:UIDocumentPickerModeOpen];
-    documentPicker.delegate = appDelegate;
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
-    });
-}
-
-void showFileSavePicker(char* mimes, char *exts) {
-    GoAppAppDelegate *appDelegate = (GoAppAppDelegate *)[[UIApplication sharedApplication] delegate];
-
-    NSMutableArray *docTypes = docTypesForMimeExts(mimes, exts);
-
-    NSURL *temporaryDirectoryURL = [NSURL fileURLWithPath: NSTemporaryDirectory() isDirectory: YES];
-    NSURL *temporaryFileURL = [temporaryDirectoryURL URLByAppendingPathComponent:@"filename"];
-
-    char* bytes = "\n";
-    NSData *data = [NSData dataWithBytes:bytes length:1];
-    BOOL ok = [data writeToURL:temporaryFileURL atomically:YES];
-
-    UIDocumentPickerViewController *documentPicker = [[UIDocumentPickerViewController alloc]
-        initWithURL:temporaryFileURL inMode:UIDocumentPickerModeMoveToService];
-    documentPicker.delegate = appDelegate;
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [appDelegate.controller presentViewController:documentPicker animated:YES completion:nil];
-    });
-}
-
-void closeFileResource(void* urlPtr) {
-    if (urlPtr == NULL) {
-        return;
-    }
-
-    NSURL* url = (NSURL*) urlPtr;
-    [url stopAccessingSecurityScopedResource];
 }
