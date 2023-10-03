@@ -37,16 +37,16 @@ void hideKeyboard();
 import "C"
 import (
 	"fmt"
+	"image"
 	"log"
 	"runtime"
 	"strings"
 	"time"
 	"unsafe"
 
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/event/size"
 	"goki.dev/mobile/event/touch"
-	"goki.dev/mobile/geom"
 )
 
 var initThreadID uint64
@@ -77,7 +77,7 @@ func main(f func(App)) {
 	panic("unexpected return from app.runApp")
 }
 
-var pixelsPerPt float32
+var dpi float32     // raw display dots per inch
 var screenScale int // [UIScreen mainScreen].scale, either 1, 2, or 3.
 
 var DisplayMetrics struct {
@@ -125,35 +125,49 @@ func setScreen(scale int) {
 		v = 163 // emergency fallback
 	}
 
-	pixelsPerPt = v * float32(scale) / 72
+	dpi = v * float32(scale)
 	screenScale = scale
 }
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
-	o := size.OrientationUnknown
+	theApp.screen.Orientation = goosi.OrientationUnknown
 	switch orientation {
 	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
-		o = size.OrientationPortrait
+		theApp.screen.Orientation = goosi.Portrait
 	case C.UIDeviceOrientationLandscapeLeft, C.UIDeviceOrientationLandscapeRight:
-		o = size.OrientationLandscape
+		theApp.screen.Orientation = goosi.Landscape
 		width, height = height, width
 	}
 	insets := C.getDevicePadding()
+	fscale := float32(screenScale)
+	theApp.insets.Set(
+		float32(insets.top)*fscale,
+		float32(insets.right)*fscale,
+		float32(insets.bottom)*fscale,
+		float32(insets.left)*fscale,
+	)
 
-	theApp.eventsIn <- size.Event{
-		WidthPx:       int(width),
-		HeightPx:      int(height),
-		WidthPt:       geom.Pt(float32(width) / pixelsPerPt),
-		HeightPt:      geom.Pt(float32(height) / pixelsPerPt),
-		InsetTopPx:    int(float32(insets.top) * float32(screenScale)),
-		InsetBottomPx: int(float32(insets.bottom) * float32(screenScale)),
-		InsetLeftPx:   int(float32(insets.left) * float32(screenScale)),
-		InsetRightPx:  int(float32(insets.right) * float32(screenScale)),
-		PixelsPerPt:   pixelsPerPt,
-		Orientation:   o,
-		DarkMode:      bool(C.isDark()),
-	}
+	theApp.screen.DevicePixelRatio = fscale // TODO(kai): is this actually DevicePixelRatio?
+	theApp.screen.PixSize = image.Pt(int(width), int(height))
+	theApp.screen.Geometry.Max = theApp.screen.PixSize
+
+	theApp.screen.PhysicalDPI = dpi
+	theApp.screen.LogicalDPI = dpi
+
+	physX := 25.4 * float32(width) / dpi
+	physY := 25.4 * float32(height) / dpi
+	theApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
+
+	// TODO(kai): system dark mode
+
+	theApp.window.PhysDPI = theApp.screen.PhysicalDPI
+	theApp.window.LogDPI = theApp.screen.LogicalDPI
+	theApp.window.PxSize = theApp.screen.PixSize
+	theApp.window.WnSize = theApp.screen.Geometry.Max
+	theApp.window.DevPixRatio = theApp.screen.DevicePixelRatio
+
+	theApp.window.EvMgr.WindowResize()
 	theApp.window.EvMgr.WindowPaint()
 }
 
@@ -217,16 +231,16 @@ func lifecycleAlive() {
 }
 
 //export lifecycleVisible
-func lifecycleVisible() { 
+func lifecycleVisible() {
 	fmt.Println("lifecycle visible")
 	theApp.window.EvMgr.Window(events.WinShow)
- }
+}
 
 //export lifecycleFocused
-func lifecycleFocused() { 
+func lifecycleFocused() {
 	fmt.Println("lifecycle focused")
 	theApp.window.EvMgr.Window(events.WinFocus)
- }
+}
 
 //export drawloop
 func drawloop() {

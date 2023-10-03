@@ -382,6 +382,7 @@ func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
 			app.window.LogDPI = app.screen.LogicalDPI
 			app.window.PxSize = app.screen.PixSize
 			app.window.WnSize = app.screen.Geometry.Max
+			app.window.DevPixRatio = app.screen.DevicePixelRatio
 
 			app.window.EvMgr.WindowResize()
 			app.window.EvMgr.WindowPaint()
