@@ -221,11 +221,8 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	// for workAvailable := theApp.worker.WorkAvailable(); ; {
 	for {
 		select {
-		// case <-workAvailable:
-		// theApp.worker.DoWork()
 		case <-theApp.publish:
 			theApp.publishResult <- PublishResult{}
 			return
@@ -247,41 +244,13 @@ func startloop(ctx C.GLintptr) {
 // to an OS thread for its OpenGL context.
 func (a *app) loop(ctx C.GLintptr) {
 	runtime.LockOSThread()
-	// C.makeCurrentContext(ctx)
-
-	// workAvailable := a.worker.WorkAvailable()
 
 	for {
 		select {
-		// case <-workAvailable:
-		// 	a.worker.DoWork()
 		case <-theApp.publish:
-			// loop1:
-			// for {
-			// 	select {
-			// 	case <-workAvailable:
-			// 		a.worker.DoWork()
-			// 	default:
-			// 		break loop1
-			// 	}
-			// }
-			// C.swapBuffers(ctx)
 			theApp.publishResult <- PublishResult{}
 		}
 	}
-}
-
-func cStringsForFilter(filter *FileFilter) (*C.char, *C.char) {
-	mimes := strings.Join(filter.MimeTypes, "|")
-
-	// extensions must have the '.' removed for UTI lookups on iOS
-	extList := []string{}
-	for _, ext := range filter.Extensions {
-		extList = append(extList, ext[1:])
-	}
-	exts := strings.Join(extList, "|")
-
-	return C.CString(mimes), C.CString(exts)
 }
 
 // driverShowVirtualKeyboard requests the driver to show a virtual keyboard for text input
