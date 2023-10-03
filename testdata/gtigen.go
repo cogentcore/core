@@ -10,7 +10,9 @@ import (
 
 // TestNodeType is the [gti.Type] for [TestNode]
 var TestNodeType = gti.AddType(&gti.Type{
-	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.TestNode",
+	Name:       "goki.dev/ki/v2/testdata.TestNode",
+	ShortName:  "testdata.TestNode",
+	IDName:     "test-node",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -21,10 +23,12 @@ var TestNodeType = gti.AddType(&gti.Type{
 	Instance: &TestNode{},
 })
 
-// NewTestNode adds a new [TestNode] with
-// the given name to the given parent.
-func NewTestNode(par ki.Ki, name string) *TestNode {
-	return par.NewChild(TestNodeType, name).(*TestNode)
+// NewTestNode adds a new [TestNode] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTestNode(par ki.Ki, name ...string) *TestNode {
+	return par.NewChild(TestNodeType, name...).(*TestNode)
 }
 
 // KiType returns the [*gti.Type] of [TestNode]
@@ -39,8 +43,10 @@ func (t *TestNode) New() ki.Ki {
 
 // NodeEmbedType is the [gti.Type] for [NodeEmbed]
 var NodeEmbedType = gti.AddType(&gti.Type{
-	Name: "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeEmbed",
-	Doc:  "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti",
+	Name:      "goki.dev/ki/v2/testdata.NodeEmbed",
+	ShortName: "testdata.NodeEmbed",
+	IDName:    "node-embed",
+	Doc:       "NodeEmbed embeds ki.Node and adds a couple of fields.\nAlso has a directive processed by gti",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "direct", Directive: "value", Args: []string{}},
 	},
@@ -55,10 +61,12 @@ var NodeEmbedType = gti.AddType(&gti.Type{
 	Instance: &NodeEmbed{},
 })
 
-// NewNodeEmbed adds a new [NodeEmbed] with
-// the given name to the given parent.
-func NewNodeEmbed(par ki.Ki, name string) *NodeEmbed {
-	return par.NewChild(NodeEmbedType, name).(*NodeEmbed)
+// NewNodeEmbed adds a new [NodeEmbed] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewNodeEmbed(par ki.Ki, name ...string) *NodeEmbed {
+	return par.NewChild(NodeEmbedType, name...).(*NodeEmbed)
 }
 
 // KiType returns the [*gti.Type] of [NodeEmbed]
@@ -73,7 +81,9 @@ func (t *NodeEmbed) New() ki.Ki {
 
 // NodeFieldType is the [gti.Type] for [NodeField]
 var NodeFieldType = gti.AddType(&gti.Type{
-	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeField",
+	Name:       "goki.dev/ki/v2/testdata.NodeField",
+	ShortName:  "testdata.NodeField",
+	IDName:     "node-field",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -86,10 +96,12 @@ var NodeFieldType = gti.AddType(&gti.Type{
 	Instance: &NodeField{},
 })
 
-// NewNodeField adds a new [NodeField] with
-// the given name to the given parent.
-func NewNodeField(par ki.Ki, name string) *NodeField {
-	return par.NewChild(NodeFieldType, name).(*NodeField)
+// NewNodeField adds a new [NodeField] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewNodeField(par ki.Ki, name ...string) *NodeField {
+	return par.NewChild(NodeFieldType, name...).(*NodeField)
 }
 
 // KiType returns the [*gti.Type] of [NodeField]
@@ -104,7 +116,9 @@ func (t *NodeField) New() ki.Ki {
 
 // NodeField2Type is the [gti.Type] for [NodeField2]
 var NodeField2Type = gti.AddType(&gti.Type{
-	Name:       "_/Users/oreilly/go/src/goki.dev/ki/v2/testdata.NodeField2",
+	Name:       "goki.dev/ki/v2/testdata.NodeField2",
+	ShortName:  "testdata.NodeField2",
+	IDName:     "node-field-2",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -117,10 +131,12 @@ var NodeField2Type = gti.AddType(&gti.Type{
 	Instance: &NodeField2{},
 })
 
-// NewNodeField2 adds a new [NodeField2] with
-// the given name to the given parent.
-func NewNodeField2(par ki.Ki, name string) *NodeField2 {
-	return par.NewChild(NodeField2Type, name).(*NodeField2)
+// NewNodeField2 adds a new [NodeField2] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewNodeField2(par ki.Ki, name ...string) *NodeField2 {
+	return par.NewChild(NodeField2Type, name...).(*NodeField2)
 }
 
 // KiType returns the [*gti.Type] of [NodeField2]

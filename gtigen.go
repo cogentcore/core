@@ -30,10 +30,12 @@ var NodeType = gti.AddType(&gti.Type{
 	Instance: &Node{},
 })
 
-// NewNode adds a new [Node] with
-// the given name to the given parent.
-func NewNode(par Ki, name string) *Node {
-	return par.NewChild(NodeType, name).(*Node)
+// NewNode adds a new [Node] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [Ki.NumLifetimeChildren] of the given parent.
+func NewNode(par Ki, name ...string) *Node {
+	return par.NewChild(NodeType, name...).(*Node)
 }
 
 // KiType returns the [*gti.Type] of [Node]
