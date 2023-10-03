@@ -32,10 +32,15 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 		return
 	}
 	tb := top.AsBase()
+	ts := tb.Scene
 	if evi.HasPos() {
 		pos := evi.Pos()
-		if top.IsPtIn(pos) { // stage handles
+		// fmt.Println("pos:", pos, "top geom:", ts.Geom)
+		if pos.In(ts.Geom.Bounds()) {
 			top.HandleEvent(evi) // either will be handled or not..
+			if tb.Modal {
+				evi.SetHandled()
+			}
 			return
 		}
 		if tb.ClickOff {

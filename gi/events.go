@@ -14,6 +14,9 @@ import (
 )
 
 func (wb *WidgetBase) EventMgr() *EventMgr {
+	if wb.Sc == nil {
+		return nil
+	}
 	return &wb.Sc.EventMgr
 }
 
@@ -99,6 +102,8 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		}
 		if wb.AbilityIs(states.Focusable) {
 			wb.GrabFocus()
+		} else {
+			wb.FocusClear()
 		}
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {

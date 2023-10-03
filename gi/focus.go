@@ -49,6 +49,14 @@ func (wb *WidgetBase) FocusPrev() {
 	}
 }
 
+// FocusClear resets focs to nil
+func (wb *WidgetBase) FocusClear() {
+	em := wb.EventMgr()
+	if em != nil {
+		em.SetFocus(nil)
+	}
+}
+
 // StartFocus specifies this widget to give focus to when the window opens
 func (wb *WidgetBase) StartFocus() {
 	em := wb.EventMgr()

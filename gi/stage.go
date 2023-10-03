@@ -5,12 +5,10 @@
 package gi
 
 import (
-	"image"
 	"log"
 	"strings"
 	"time"
 
-	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 )
@@ -111,10 +109,6 @@ type StageBase struct {
 
 	// [view: -] the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows
 	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows"`
-
-	// position and size within the parent Render context.
-	// Position is absolute offset relative to top left corner of render context.
-	Geom styles.Geom2DInt
 
 	// Title of the Stage -- generally auto-set based on Scene Title.
 	// Used for title of Window and Dialog types.
@@ -243,10 +237,6 @@ type Stage interface {
 	// Scenes have their own Delete method that allows them to Preserve
 	// themselves for re-use, but stages are always struck when done.
 	Delete()
-
-	// IsPtIn returns true if given point is inside the Geom Bounds
-	// of this Stage.
-	IsPtIn(pt image.Point) bool
 }
 
 func (st *StageBase) AsBase() *StageBase {
@@ -449,13 +439,4 @@ func (st *StageBase) DoUpdate() (stageMods, sceneMods bool) {
 	}
 	sceneMods = st.Scene.DoUpdate()
 	return
-}
-
-///////////////////////////////////////////////////
-//  	Events
-
-// IsPtIn returns true if given point is inside the Geom Bounds
-// of this Stage.
-func (st *StageBase) IsPtIn(pt image.Point) bool {
-	return pt.In(st.Geom.Bounds())
 }

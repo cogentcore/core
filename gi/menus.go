@@ -5,11 +5,10 @@
 package gi
 
 import (
-	"image"
-
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -65,9 +64,9 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func()) {
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	ac.SetAsMenu()
-	// if sigTo != nil && fun != nil {
-	// 	ac.ActionSig.Connect(sigTo, fun)
-	// }
+	ac.On(events.Click, func(e events.Event) {
+		fun()
+	})
 }
 
 // AddAction adds an action to the menu using given options, and connects the
@@ -331,20 +330,24 @@ func MenuFrameConfigStyles(frame *Frame) {
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
 
-func MenuSceneFromActions(menu MenuActions, name string, pos image.Point) *Scene {
+func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 	msc := NewScene(name + "-menu")
 	frame := &msc.Frame
 	MenuFrameConfigStyles(frame)
-	msc.Geom.Pos = pos
 	// var focus ki.Ki
 	for _, ac := range menu {
-		wi, _ := AsWidget(ac)
-		if wi != nil {
-			frame.AddChild(wi.Clone())
-			// if wi.StateIs(states.Selected) {
-			// 	focus = wi
-			// }
+		wi, wb := AsWidget(ac)
+		if wi == nil {
+			continue
 		}
+		cl := wi.Clone().This().(Widget)
+		cb := cl.AsWidget()
+		if ac, ok := cl.(*Action); ok {
+			ac.SetAsMenu()
+		}
+		cb.Listeners = wb.Listeners
+		cb.Sc = msc
+		frame.AddChild(cl)
 	}
 	return msc
 }
@@ -355,6 +358,9 @@ func MenuSceneFromActions(menu MenuActions, name string, pos image.Point) *Scene
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewMenu(sc *Scene, ctx Widget) *PopupStage {
+	cwb := ctx.AsWidget()
+	pos := cwb.ScBBox.Min
+	sc.Geom.Pos = pos
 	return NewPopupStage(Menu, sc, ctx)
 }
 
@@ -364,9 +370,7 @@ func NewMenu(sc *Scene, ctx Widget) *PopupStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewMenuActions(menu MenuActions, ctx Widget) *PopupStage {
-	cwb := ctx.AsWidget()
-	pos := cwb.ScBBox.Min
-	return NewMenu(MenuSceneFromActions(menu, ctx.Name(), pos), ctx)
+	return NewMenu(MenuSceneFromActions(menu, ctx.Name()), ctx)
 }
 
 // PopupMenu pops up a scene with a layout that draws the supplied actions

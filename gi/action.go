@@ -28,12 +28,15 @@ type ActOpts struct {
 	UpdateFunc  func(act *Action)
 }
 
+// todo: need data etc?  maybe remove?
+
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
 // toolbars, and also for any standalone simple action.  The default styling
 // differs depending on whether it is in a Menu versus a MenuBar or ToolBar --
 // this is controlled by the Class which is automatically set to
-// menu, menubar, or toolbar
+// menu, menubar, or toolbar.
+// The Action(s) are called via the On(events.Click) action.
 //
 //goki:embedder
 type Action struct {
@@ -47,6 +50,13 @@ type Action struct {
 
 	// the type of action
 	Type ActionTypes `desc:"the type of action"`
+}
+
+func (ac *Action) CopyFieldsFrom(frm any) {
+	fr := frm.(*Action)
+	ac.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	ac.Data = fr.Data
+	ac.Type = fr.Type
 }
 
 // ActionTypes is an enum representing
@@ -79,6 +89,7 @@ func (ac *Action) OnInit() {
 
 func (ac *Action) ActionStyles() {
 	ac.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		// s.Cursor = cursor.HandPointing
 		s.Border.Style.Set(styles.BorderNone)
 		s.Text.Align = styles.AlignCenter
@@ -180,12 +191,6 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 		}
 	}
 
-}
-
-func (ac *Action) CopyFieldsFrom(frm any) {
-	fr := frm.(*Action)
-	ac.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
-	ac.Data = fr.Data
 }
 
 // Config calls functions to initialize widget and parts

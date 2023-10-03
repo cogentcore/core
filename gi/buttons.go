@@ -57,6 +57,7 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	bb.Indicator = fr.Indicator
 	bb.Shortcut = fr.Shortcut
 	bb.Menu = fr.Menu
+	bb.MakeMenuFunc = fr.MakeMenuFunc
 }
 
 // ButtonFlags extend WidgetFlags to hold button state
@@ -118,43 +119,6 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	}
 	bb.UpdateEndLayout(updt)
 	return bb.This().(ButtonWidget)
-}
-
-// // ButtonPress sets the button in the down state -- mouse clicked down but
-// // not yet up -- emits ButtonPressed signal AND WidgetSig Selected signal --
-// // ButtonClicked is down and up
-// func (bb *ButtonBase) ButtonPress() {
-// 	updt := bb.UpdateStart()
-// 	} else {
-// 		bb.WasPressed = true
-// 		// bb.ButtonSig.Emit(bb.This(), int64(ButtonPressed), nil)
-// 	}
-// 	bb.ApplyStyle(bb.Sc)
-// 	bb.UpdateEndRender(updt)
-// }
-
-// BaseButtonClicked
-func (bb *ButtonBase) BaseButtonClicked() {
-	if bb.StateIs(states.Disabled) {
-		return
-	}
-	updt := bb.UpdateStart()
-	bb.OpenMenu()
-	// if bb.Is(ButtonFlagCheckable) {
-	// 	bb.ToggleChecked()
-	// 	bb.ButtonSig.Emit(bb.This(), int64(ButtonToggled), nil)
-	// }
-
-	// todo:
-	// if !menOpen && ac.Is(ButtonFlagMenu) && ac.Sc != nil {
-	// 	win := ac.ParentRenderWin()
-	// 	if win != nil {
-	// 		win.ClosePopup(ac.Sc) // in case we are a menu popup -- no harm if not
-	// 	}
-	// }
-
-	bb.ApplyStyle(bb.Sc)
-	bb.UpdateEndRender(updt)
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the

@@ -69,6 +69,7 @@ func (st *PopupStage) HandleEvent(evi events.Event) {
 	}
 	st.Scene.EventMgr.Main = st.Main
 	evi.SetLocalOff(st.Scene.Geom.Pos)
+	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
 	st.Scene.EventMgr.HandleEvent(st.Scene, evi)
 }
 
@@ -102,7 +103,10 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 
 	switch typ {
 	case Menu:
+		st.Modal = true
+		st.ClickOff = true
 		MenuFrameConfigStyles(&sc.Frame)
+	case Dialog:
 	}
 
 	return st
@@ -151,7 +155,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	cmgr.Push(st)
 
 	sz := st.Scene.PrefSize(ms.Geom.Size)
-	fmt.Println("sz", sz)
+	fmt.Println("new pop sz", sz)
 	st.Scene.Resize(sz)
 
 	return st

@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -189,8 +190,10 @@ func (sc *Scene) ScIsVisible() bool {
 // Removes Decor and Frame Widgets
 func (sc *Scene) Delete() {
 	if sc.Flags.HasFlag(ScPreserve) {
+		fmt.Println("preserving delete", sc.Name)
 		return
 	}
+	fmt.Println("deleting scene", sc.Name)
 	sc.DeleteImpl()
 }
 

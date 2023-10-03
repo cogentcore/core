@@ -42,6 +42,11 @@ func mainrun() {
 	scene := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 	frame := &scene.Frame // todo: scene will be the frame
 
+	tbar := gi.NewToolBar(frame, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
+	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func() {
+		fmt.Println("Toolbar Action 1")
+	})
+
 	trow := gi.NewLayout(frame, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 

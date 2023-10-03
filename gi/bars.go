@@ -10,6 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -340,7 +341,7 @@ func (tb *ToolBar) ToolBarStyles() {
 // data which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
+func (tb *ToolBar) AddAction(opts ActOpts, fun func()) *Action {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -358,9 +359,9 @@ func (tb *ToolBar) AddAction(opts ActOpts, sigTo ki.Ki, fun func()) *Action {
 	}
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
-	// if sigTo != nil && fun != nil {
-	// 	ac.ActionSig.Connect(sigTo, fun)
-	// }
+	ac.On(events.Click, func(e events.Event) {
+		fun()
+	})
 	return ac
 }
 
