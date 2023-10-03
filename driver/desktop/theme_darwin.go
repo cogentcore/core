@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Code heavily based on https://gist.github.com/jerblack/869a303d1a604171bf8f00bbbefa59c2
+// Code based on https://gist.github.com/jerblack/869a303d1a604171bf8f00bbbefa59c2
 // MIT License
 // Copyright 2022 Jeremy Black
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -11,7 +11,7 @@
 
 //go:build darwin
 
-package goosi
+package desktop
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ var plist = filepath.Join(os.Getenv("HOME"), plistPath)
 
 // IsDark returns whether the system color theme is dark (as opposed to light),
 // and any error that occurred when getting that information.
-func IsDark() (bool, error) {
+func (app *appImpl) IsDark() (bool, error) {
 	cmd := exec.Command("defaults", "read", "-g", "AppleInterfaceStyle")
 	if err := cmd.Run(); err != nil {
 		if _, ok := err.(*exec.ExitError); ok {
@@ -47,7 +47,7 @@ func IsDark() (bool, error) {
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil. It also takes a done channel, and it will stop monitoring when
 // that done channel is closed.
-func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
+func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("error creating file watcher: %w", err)

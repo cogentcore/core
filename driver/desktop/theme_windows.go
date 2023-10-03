@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Code heavily based on https://gist.github.com/jerblack/1d05bbcebb50ad55c312e4d7cf1bc909
+// Code based on https://gist.github.com/jerblack/1d05bbcebb50ad55c312e4d7cf1bc909
 // MIT License
 // Copyright 2022 Jeremy Black
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -11,7 +11,7 @@
 
 //go:build windows
 
-package goosi
+package desktop
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ const (
 
 // IsDark returns whether the system color theme is dark (as opposed to light)
 // and any error that occurred when getting that information.
-func IsDark() (bool, error) {
+func (app *appImpl) IsDark() (bool, error) {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
 		return false, fmt.Errorf("error opening theme registry key: %w", err)
@@ -48,7 +48,7 @@ func IsDark() (bool, error) {
 // initial set up of the monitoring. If the error is non-nil, the error channel
 // will be nil. It also takes a done channel, and it will stop monitoring when
 // that done channel is closed.
-func IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
+func (app *appImpl) IsDarkMonitor(fn func(isDark bool), done chan struct{}) (chan error, error) {
 	var regNotifyChangeKeyValue *syscall.Proc
 
 	if advapi32, err := syscall.LoadDLL("Advapi32.dll"); err == nil {
