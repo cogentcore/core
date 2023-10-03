@@ -15,6 +15,7 @@ package desktop
 
 import (
 	"fmt"
+	"log/slog"
 	"syscall"
 
 	"golang.org/x/sys/windows/registry"
@@ -25,21 +26,24 @@ const (
 	themeRegName = `AppsUseLightTheme`                                            // <- For apps. Use SystemUsesLightTheme for taskbar and tray
 )
 
-// IsDark returns whether the system color theme is dark (as opposed to light)
-// and any error that occurred when getting that information.
-func (app *appImpl) IsDark() (bool, error) {
+// IsDark returns whether the system color theme is dark (as opposed to light).
+func (app *appImpl) IsDark() bool {
 	k, err := registry.OpenKey(registry.CURRENT_USER, themeRegKey, registry.QUERY_VALUE)
 	if err != nil {
-		return false, fmt.Errorf("error opening theme registry key: %w", err)
+		slog.Error("error opening theme registry key: " + err.Error())
+		return false
 	}
 	defer k.Close()
 	val, _, err := k.GetIntegerValue(themeRegName)
 	if err != nil {
-		return false, fmt.Errorf("error getting theme registry value: %w", err)
+		slog.Error("error getting theme registry value: " + err.Error())
+		return false
 	}
 	// dark mode is 0
-	return val == 0, nil
+	return val == 0
 }
+
+// TODO(kai): fix IsDarkMonitor on windows
 
 // IsDarkMonitor monitors the state of the dark mode and calls the given function
 // with the new value whenever it changes. It returns a channel that will
