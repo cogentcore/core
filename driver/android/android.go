@@ -145,6 +145,8 @@ func onDestroy(activity *C.ANativeActivity) {
 
 //export onWindowFocusChanged
 func onWindowFocusChanged(activity *C.ANativeActivity, hasFocus C.int) {
+	theApp.mu.Lock()
+	defer theApp.mu.Unlock()
 	if hasFocus > 0 {
 		theApp.window.EvMgr.Window(events.WinFocus)
 	} else {

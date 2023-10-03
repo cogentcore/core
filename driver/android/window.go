@@ -9,7 +9,6 @@ package android
 import (
 	"fmt"
 	"image"
-	"sync"
 	"time"
 
 	"goki.dev/girl/styles"
@@ -26,7 +25,6 @@ type windowImpl struct {
 	publish            chan struct{}
 	publishDone        chan struct{}
 	winClose           chan struct{}
-	mu                 sync.Mutex
 	mainMenu           goosi.MainMenu
 	closeReqFunc       func(win goosi.Window)
 	closeCleanFunc     func(win goosi.Window)
@@ -53,16 +51,17 @@ func (w *windowImpl) MainMenu() goosi.MainMenu {
 }
 
 func (w *windowImpl) Lock() bool {
-	w.mu.Lock()
+	// we re-use app mu for window because the app actually controls the system window
+	w.app.mu.Lock()
 	if w.app.gpu == nil || w.app.Surface == nil {
-		w.mu.Unlock()
+		w.app.mu.Unlock()
 		return false
 	}
 	return true
 }
 
 func (w *windowImpl) Unlock() {
-	w.mu.Unlock()
+	w.app.mu.Unlock()
 }
 
 func (w *windowImpl) Drawer() *vdraw.Drawer {
@@ -197,20 +196,20 @@ func (w *windowImpl) Insets() styles.SideFloats {
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	return w.PhysDPI
 }
 
 func (w *windowImpl) LogicalDPI() float32 {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	return w.LogDPI
 }
 
 func (w *windowImpl) SetLogicalDPI(dpi float32) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	w.LogDPI = dpi
 }
 
@@ -251,14 +250,14 @@ func (w *windowImpl) Minimize() {
 }
 
 func (w *windowImpl) SetCloseReqFunc(fun func(win goosi.Window)) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	w.closeReqFunc = fun
 }
 
 func (w *windowImpl) SetCloseCleanFunc(fun func(win goosi.Window)) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	w.closeCleanFunc = fun
 }
 
@@ -281,8 +280,8 @@ func (w *windowImpl) CloseClean() {
 
 func (w *windowImpl) Close() {
 	// this is actually the final common pathway for closing here
-	w.mu.Lock()
-	defer w.mu.Unlock()
+	w.app.mu.Lock()
+	defer w.app.mu.Unlock()
 	w.winClose <- struct{}{} // break out of draw loop
 	w.CloseClean()
 	// fmt.Printf("sending close event to window: %v\n", w.Nm)
