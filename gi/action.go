@@ -30,15 +30,17 @@ type ActOpts struct {
 	UpdateFunc  func(act *Action)
 }
 
-// todo: need data etc?  maybe remove?
-
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
 // toolbars, and also for any standalone simple action.  The default styling
 // differs depending on whether it is in a Menu versus a MenuBar or ToolBar --
 // this is controlled by the Class which is automatically set to
 // menu, menubar, or toolbar.
-// The Action(s) are called via the On(events.Click) action.
+// Action functions provide the *Action that generated them, which has
+// a Data value that can be used to determine the proper action to take,
+// in the case of automatically-generated chooser-type menus.
+// The Action(s) are called via the On(events.Click) action,
+// that wraps the func(act *Action) call.
 //
 //goki:embedder
 type Action struct {

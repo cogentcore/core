@@ -169,9 +169,11 @@ func (wb *WidgetBase) InitLayout(sc *Scene) bool {
 func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int) {
 	if sc == nil {
 		sc = wb.Sc
-		if sc == nil {
-			log.Println("ERROR: DoLayoutBase Scene is nil", wb.Path())
-		}
+	} else if wb.Sc == nil {
+		wb.Sc = sc
+	}
+	if wb.Sc == nil {
+		log.Println("ERROR: DoLayoutBase Scene is nil", wb.Path())
 	}
 	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()
@@ -296,4 +298,30 @@ func (wb *WidgetBase) ScrollToMe() bool {
 		return false
 	}
 	return ly.ScrollToItem(wb.This().(Widget))
+}
+
+//////////////////////////////////////////////////////////////////
+//		Widget position functions
+
+// WinBBox returns the RenderWin based bounding box for the widget
+// by adding the Scene position to the ScBBox
+func (wb *WidgetBase) WinBBox() image.Rectangle {
+	if wb.Sc == nil {
+		fmt.Println("ERROR: WinPos Scene is nil")
+		return wb.ScBBox
+	}
+	return wb.ScBBox.Add(wb.Sc.Geom.Pos)
+}
+
+// WinPos returns the RenderWin based position within the
+// bounding box of the widget, where the x, y coordinates
+// are the proportion across the bounding box to use:
+// 0 = left / top, 1 = right / bottom
+func (wb *WidgetBase) WinPos(x, y float32) image.Point {
+	bb := wb.WinBBox()
+	sz := bb.Size()
+	var pt image.Point
+	pt.X = bb.Min.X + int(mat32.Round(float32(sz.X)*x))
+	pt.Y = bb.Min.Y + int(mat32.Round(float32(sz.Y)*y))
+	return pt
 }

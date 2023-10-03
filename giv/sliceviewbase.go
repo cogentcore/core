@@ -1794,10 +1794,10 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 // a menu to determine what specifically to do
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	sv.UnselectAllIdxs()
-	var men gi.Menu
-	sv.MakePasteMenu(&men, md, idx)
+	var menu gi.Menu
+	sv.MakePasteMenu(&menu, md, idx)
 	pos := sv.IdxPos(idx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, "svPasteMenu")
+	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
 }
 
 // PasteAssign assigns mime data (only the first one!) to this idx
@@ -1940,10 +1940,10 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods,
 // Drop pops up a menu to determine what specifically to do with dropped items
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var men gi.Menu
-	sv.MakeDropMenu(&men, md, mod, sv.CurIdx)
+	var menu gi.Menu
+	sv.MakeDropMenu(&menu, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
-	gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, "svDropMenu")
+	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -2058,17 +2058,17 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if val == nil {
 		return
 	}
-	var men gi.Menu
+	var menu gi.Menu
 
-	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &men) {
+	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
 		if sv.ShowViewCtxtMenu {
-			men.AddSeparator("sep-svmenu")
-			sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
+			menu.AddSeparator("sep-svmenu")
+			sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
 		}
 	} else {
-		sv.This().(SliceViewer).StdCtxtMenu(&men, idx)
+		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
 	}
-	if len(men) > 0 {
+	if len(menu) > 0 {
 		pos := sv.IdxPos(idx)
 		if pos == (image.Point{}) {
 			em := sv.EventMgr()
@@ -2076,7 +2076,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 				pos = em.LastMousePos
 			}
 		}
-		gi.PopupMenu(men, pos.X, pos.Y, sv.Sc, sv.Nm+"-menu")
+		gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
 	}
 }
 

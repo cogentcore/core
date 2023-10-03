@@ -154,6 +154,18 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	cmgr.Push(st)
 
 	sz := st.Scene.PrefSize(ms.Geom.Size)
+
+	frame := st.Scene.Frame
+	scrollWd := int(frame.Style.ScrollBarWidth.Dots)
+	fontHt := int(frame.Style.Font.Face.Metrics.Height)
+
+	switch st.Type {
+	case Menu:
+		sz.X += scrollWd
+		maxht := int(MenuMaxHeight * fontHt)
+		sz.Y = min(maxht, sz.Y)
+
+	}
 	// fmt.Println("new pop sz", sz)
 	st.Scene.Resize(sz)
 

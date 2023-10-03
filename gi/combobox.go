@@ -48,9 +48,6 @@ type ComboBox struct {
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
 
-	// the menu of actions for selecting items -- automatically generated from Items
-	ItemsMenu MenuActions `json:"-" xml:"-" desc:"the menu of actions for selecting items -- automatically generated from Items"`
-
 	// the type of combo box
 	Type ComboBoxTypes `desc:"the type of combo box"`
 
@@ -68,7 +65,6 @@ func (cb *ComboBox) CopyFieldsFrom(frm any) {
 	cb.CurVal = fr.CurVal
 	cb.CurIndex = fr.CurIndex
 	cb.Items = fr.Items
-	cb.ItemsMenu.CopyFrom(&fr.ItemsMenu)
 	cb.MaxLength = fr.MaxLength
 }
 
@@ -189,43 +185,6 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// ButtonWidget interface
-
-func (cb *ComboBox) ButtonRelease() {
-	if cb.IsDisabled() {
-		return
-	}
-	cb.MakeItemsMenu()
-	if len(cb.ItemsMenu) == 0 {
-		return
-	}
-	updt := cb.UpdateStart()
-	// cb.ButtonSig.Emit(cb.This(), int64(ButtonReleased), nil)
-	// if cb.WasPressed {
-	// 	cb.ButtonSig.Emit(cb.This(), int64(ButtonClicked), nil)
-	// }
-	cb.UpdateEnd(updt)
-	/*
-		cb.BBoxMu.RLock()
-		pos := cb.WinBBox.Max
-		if pos.X == 0 && pos.Y == 0 { // offscreen
-			pos = cb.ObjBBox.Max
-		}
-		indic := AsWidgetBase(cb.Parts.ChildByName("indicator", 3))
-		if indic != nil {
-			pos = indic.WinBBox.Min
-			if pos.X == 0 && pos.Y == 0 {
-				pos = indic.ObjBBox.Min
-			}
-		} else {
-			pos.Y -= 10
-			pos.X -= 10
-		}
-		cb.BBoxMu.RUnlock()
-		PopupMenu(cb.ItemsMenu, pos.X, pos.Y, cb.Sc, cb.Text)
-	*/
-}
-
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
 func (cb *ComboBox) ConfigPartsIconText(config *ki.Config, icnm icons.Icon) (icIdx, txIdx int) {
@@ -267,6 +226,7 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool
 }
 
 func (cb *ComboBox) ConfigParts(sc *Scene) {
+	cb.MakeMenuFunc = cb.MakeItemsMenu
 	parts := cb.NewParts(LayoutHoriz)
 	if eb, err := cb.PropTry("editable"); err == nil {
 		cb.Editable, _ = laser.ToBool(eb)
@@ -520,15 +480,16 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 	cb.UpdateEnd(updt)
 }
 
-// MakeItemsMenu makes menu of all the items
-func (cb *ComboBox) MakeItemsMenu() {
+// MakeItemsMenu makes menu of all the items.  It is set as the
+// MakeMenuFunc for this combobox.
+func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *MenuActions) {
 	nitm := len(cb.Items)
-	if cb.ItemsMenu == nil {
-		cb.ItemsMenu = make(MenuActions, 0, nitm)
+	if cb.Menu == nil {
+		cb.Menu = make(MenuActions, 0, nitm)
 	}
-	sz := len(cb.ItemsMenu)
+	sz := len(cb.Menu)
 	if nitm < sz {
-		cb.ItemsMenu = cb.ItemsMenu[0:nitm]
+		cb.Menu = cb.Menu[0:nitm]
 	}
 	if nitm == 0 {
 		return
@@ -537,11 +498,11 @@ func (cb *ComboBox) MakeItemsMenu() {
 	for i, it := range cb.Items {
 		var ac *Action
 		if sz > i {
-			ac = cb.ItemsMenu[i].(*Action)
+			ac = cb.Menu[i].(*Action)
 		} else {
 			ac = &Action{}
 			ki.InitNode(ac)
-			cb.ItemsMenu = append(cb.ItemsMenu, ac.This().(Widget))
+			cb.Menu = append(cb.Menu, ac.This().(Widget))
 		}
 		nm := "Item_" + strconv.Itoa(i)
 		ac.SetName(nm)
@@ -557,11 +518,10 @@ func (cb *ComboBox) MakeItemsMenu() {
 		ac.Data = i // index is the data
 		ac.SetSelected(i == cb.CurIndex)
 		ac.SetAsMenu()
-		// ac.ActionSig.ConnectOnly(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	idx := data.(int)
-		// 	cbb := recv.(*ComboBox)
-		// 	cbb.SelectItemAction(idx)
-		// })
+		idx := i
+		ac.On(events.Click, func(e events.Event) {
+			cb.SelectItemAction(idx)
+		})
 	}
 }
 

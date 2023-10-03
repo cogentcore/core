@@ -1380,10 +1380,10 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 		log.Printf("TreeView PasteMenu nil SrcNode in: %v\n", tv.Path())
 		return
 	}
-	var men gi.Menu
-	tv.MakePasteMenu(&men, md)
+	var menu gi.Menu
+	tv.MakePasteMenu(&menu, md)
 	pos := tv.ContextMenuPos()
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Scene, "tvPasteMenu")
+	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1629,10 +1629,10 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (tv *TreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var men gi.Menu
-	tv.MakeDropMenu(&men, md, mod)
+	var menu gi.Menu
+	tv.MakeDropMenu(&menu, md, mod)
 	pos := tv.ContextMenuPos()
-	gi.PopupMenu(men, pos.X, pos.Y, tv.Scene, "tvDropMenu")
+	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
 }
 
 // DropExternal is not handled by base case but could be in derived

@@ -146,7 +146,7 @@ type Widget interface {
 	MakeContextMenu(menu *MenuActions)
 
 	// ContextMenuPos returns the default position for popup menus --
-	// by default in the middle of the Stage, but can be adapted as
+	// by default in the middle its Bounding Box, but can be adapted as
 	// appropriate for different widgets.
 	ContextMenuPos() image.Point
 
@@ -327,7 +327,7 @@ func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
 	parts := &Layout{}
 	parts.InitName(parts, "parts")
 	parts.Lay = lay
-	ki.SetParent(parts, wb)
+	ki.SetParent(parts, wb.This())
 	parts.SetFlag(true, ki.Field)
 	wb.Parts = parts
 	return parts

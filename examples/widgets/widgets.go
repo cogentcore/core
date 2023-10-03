@@ -43,7 +43,7 @@ func mainrun() {
 	frame := &scene.Frame // todo: scene will be the frame
 
 	tbar := gi.NewToolBar(frame, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
-	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func() {
+	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func(act *gi.Action) {
 		fmt.Println("Toolbar Action 1")
 	})
 
@@ -148,28 +148,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	mb1 := gi.NewButton(brow, "menubutton1").
 		SetText("Menu Button").(*gi.Button)
 
-	_ = mb1
-
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func() {
-		fmt.Println("Menu Action 1")
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func(act *gi.Action) {
+		fmt.Println(act.Name(), act.Data)
 	})
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, func() {
-		fmt.Println("Menu Action 2")
+	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil)
+	_ = mi2
+	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1}, func(act *gi.Action) {
+		fmt.Println(act.Text, act.Data)
 	})
-	//
-	// mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil, nil)
-	//
-	// mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1},
-	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-	// 	})
-	//
-	// mb1.Menu.AddSeparator("sep1")
-	//
-	// mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3},
-	// 	mb1.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 		fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
-	// 	})
+	mb1.Menu.AddSeparator("sep1")
+	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3}, func(act *gi.Action) {
+		fmt.Println(act.Text, act.Data)
+	})
 
 	//////////////////////////////////////////
 	//      Sliders

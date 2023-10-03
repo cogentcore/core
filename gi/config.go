@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"goki.dev/icons"
@@ -38,6 +39,7 @@ func (wb *WidgetBase) ReConfig() {
 
 func (wb *WidgetBase) Config(sc *Scene) {
 	if wb.This() == nil {
+		fmt.Println("ERROR: nil this in config")
 		return
 	}
 	wi := wb.This().(Widget)

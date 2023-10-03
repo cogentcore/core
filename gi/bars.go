@@ -341,7 +341,7 @@ func (tb *ToolBar) ToolBarStyles() {
 // data which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (tb *ToolBar) AddAction(opts ActOpts, fun func()) *Action {
+func (tb *ToolBar) AddAction(opts ActOpts, fun func(act *Action)) *Action {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -359,9 +359,11 @@ func (tb *ToolBar) AddAction(opts ActOpts, fun func()) *Action {
 	}
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
-	ac.On(events.Click, func(e events.Event) {
-		fun()
-	})
+	if fun != nil {
+		ac.On(events.Click, func(e events.Event) {
+			fun(ac)
+		})
+	}
 	return ac
 }
 

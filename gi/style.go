@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 
 	"goki.dev/colors"
@@ -154,6 +155,9 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 
 	if wb.Sc == nil && sc != nil {
 		wb.Sc = sc
+	}
+	if wb.Sc == nil {
+		fmt.Println("ERROR: Scene is nil", wb)
 	}
 
 	if wb.OverrideStyle {

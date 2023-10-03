@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"image"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -41,10 +43,10 @@ func (m *MenuActions) CopyFrom(men *MenuActions) {
 
 // MakeMenuFunc is a callback for making a menu on demand, receives the object
 // calling this function (typically an Action or Button) and the menu
-type MakeMenuFunc func(obj ki.Ki, m *MenuActions)
+type MakeMenuFunc func(obj Widget, m *MenuActions)
 
 // SetAction sets properties of given action
-func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func()) {
+func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func(act *Action)) {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -64,9 +66,11 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func()) {
 	ac.Data = opts.Data
 	ac.UpdateFunc = opts.UpdateFunc
 	ac.SetAsMenu()
-	ac.On(events.Click, func(e events.Event) {
-		fun()
-	})
+	if fun != nil {
+		ac.On(events.Click, func(e events.Event) {
+			fun(ac)
+		})
+	}
 }
 
 // AddAction adds an action to the menu using given options, and connects the
@@ -74,7 +78,7 @@ func (m *MenuActions) SetAction(ac *Action, opts ActOpts, fun func()) {
 // which is stored on the action and then passed in the action signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the actions (enabled or not typically).
-func (m *MenuActions) AddAction(opts ActOpts, fun func()) *Action {
+func (m *MenuActions) AddAction(opts ActOpts, fun func(act *Action)) *Action {
 	if m == nil {
 		*m = make(MenuActions, 0, 10)
 	}
@@ -90,7 +94,7 @@ func (m *MenuActions) AddAction(opts ActOpts, fun func()) *Action {
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, fun func()) *Action {
+func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, fun func(act *Action)) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, before, 0); got {
 		ac := &Action{}
@@ -108,7 +112,7 @@ func (m *MenuActions) InsertActionBefore(before string, opts ActOpts, fun func()
 // and then passed in the action signal.  Optional updateFunc is a function
 // called prior to showing the menu to update the actions (enabled or not
 // typically).  If name not found, adds to end of list..
-func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, fun func()) *Action {
+func (m *MenuActions) InsertActionAfter(after string, opts ActOpts, fun func(act *Action)) *Action {
 	sl := (*[]ki.Ki)(m)
 	if idx, got := ki.SliceIndexByName(sl, after, 0); got {
 		ac := &Action{}
@@ -203,7 +207,7 @@ func (m *MenuActions) FindActionByName(name string) (*Action, bool) {
 	return nil, false
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 // Standard menu elements
 
 /*
@@ -311,7 +315,7 @@ func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 	*/
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
 // PopupMenu function
 
 // MenuFrameConfigStyles configures the default styles
@@ -330,11 +334,13 @@ func MenuFrameConfigStyles(frame *Frame) {
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
 
+// MenuSceneFromActions constructs a Scene from given list of MenuActions
+// for displaying a Menu.
 func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 	msc := NewScene(name + "-menu")
 	frame := &msc.Frame
 	MenuFrameConfigStyles(frame)
-	// var focus ki.Ki
+	// todo: look for Selected item to get initial focus
 	for _, ac := range menu {
 		wi, wb := AsWidget(ac)
 		if wi == nil {
@@ -342,10 +348,12 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 		}
 		cl := wi.Clone().This().(Widget)
 		cb := cl.AsWidget()
-		cb.Listeners[events.Click] = wb.Listeners[events.Click]
 		if ac, ok := cl.(*Action); ok {
 			ac.SetAsMenu()
-			ac.ClickDismissMenu()
+			if ac.Menu == nil {
+				cb.Listeners[events.Click] = wb.Listeners[events.Click]
+				ac.ClickDismissMenu()
+			}
 		}
 		cb.Sc = msc
 		frame.AddChild(cl)
@@ -353,164 +361,76 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 	return msc
 }
 
-// NewMenu returns a new Menu stage with given scene contents,
-// in connection with given widget (which provides key context).
+// NewMenuScene returns a new Menu stage with given scene contents,
+// in connection with given widget, which provides key context
+// for constructing the menu, at given RenderWin position
+// (e.g., use ContextMenuPos or WinPos method on ctx Widget).
+// Typically use NewMenu which takes standard MenuActions.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewMenu(sc *Scene, ctx Widget) *PopupStage {
-	cwb := ctx.AsWidget()
-	pos := cwb.ScBBox.Min
+// Use Run call at the end to start the Stage running.
+func NewMenuScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 	sc.Geom.Pos = pos
 	return NewPopupStage(Menu, sc, ctx)
 }
 
-// NewMenuActions returns a new Menu stage with given scene contents,
-// in connection with given widget (which provides key context).
+// NewMenu returns a new Menu stage with given scene contents,
+// in connection with given widget, which provides key context
+// for constructing the menu at given RenderWin position
+// (e.g., use ContextMenuPos or WinPos method on ctx Widget).
+// The menu is specified in terms of MenuActions.
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewMenuActions(menu MenuActions, ctx Widget) *PopupStage {
-	return NewMenu(MenuSceneFromActions(menu, ctx.Name()), ctx)
+// Use Run call at the end to start the Stage running.
+func NewMenu(menu MenuActions, ctx Widget, pos image.Point) *PopupStage {
+	return NewMenuScene(MenuSceneFromActions(menu, ctx.Name()), ctx, pos)
 }
 
-// PopupMenu pops up a scene with a layout that draws the supplied actions
-// positions are relative to given scene -- name is relevant base name to
-// which Menu is appended
-func PopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Scene {
-	/*	win := parSc.Win
-		mainSc := win.Scene
-		if len(menu) == 0 {
-			log.Printf("GoGi PopupMenu: empty menu given\n")
-			return nil
-		}
+///////////////////////////////////////////////////////////////
+// 	Context Menu
 
-		menu.UpdateActions()
+// CtxtMenuFunc is a function for creating a context menu for given node
+type CtxtMenuFunc func(g Widget, m *MenuActions)
 
-		psc := &Scene{}
-		psc.Name = name + "Menu"
-		psc.Win = win
-		psc.Type = ScMenu
-
-		psc.Geom.Pos = image.Point{x, y}
-		frame := &psc.Frame
-		MenuFrameConfigStyles(frame)
-		var focus ki.Ki
-		for _, ac := range menu {
-			acn, ac := AsWidget(ac)
-			if acn != nil {
-				frame.AddChild(acn)
-				if ac.StateIs(states.Selected) {
-					focus = acn
-				}
-			}
-		}
-		frame.ConfigTree(psc)
-		frame.ApplyStyleTree(psc) // sufficient to get sizes
-		mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
-		frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-		frame.GetSizeTree(psc, 0)          // collect sizes
-		psc.Win = nil
-		scextra := frame.Style.ScrollBarWidth.Dots
-		frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
-		vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
-		maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
-		vpsz.Y = min(maxht, vpsz.Y)
-		x = max(0, x)
-		y = max(0, y)
-		x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
-		y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
-		psc.Resize(vpsz)
-		psc.Geom.Pos = image.Point{x, y}
-		win.SetNextPopup(psc, focus)
-		return psc
-	*/
-	return nil
+func (wb *WidgetBase) MakeContextMenu(m *MenuActions) {
+	// derived types put native menu code here
+	if wb.CtxtMenuFunc != nil {
+		wb.CtxtMenuFunc(wb.This().(Widget), m)
+	}
+	mvp := wb.Sc
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
-// TODO: not working; need to get working.
-// RecyclePopupMenu reuses the already existing popup to display
-// a scene with a layout that draws the supplied actions
-// positions are relative to given scene -- name is relevant base name to
-// which Menu is appended
-func RecyclePopupMenu(menu MenuActions, x, y int, parSc *Scene, name string) *Scene {
-	/*
-		win := parSc.Win
-		mainSc := win.Scene
-		if len(menu) == 0 {
-			log.Printf("GoGi PopupMenu: empty menu given\n")
-			return nil
-		}
-
-		menu.UpdateActions()
-
-		psc, ok := win.CurPopup()
-		if !ok {
-			return PopupMenu(menu, x, y, parSc, name)
-		}
-		// psc.InitName(psc, name+"Menu")
-		psc.Win = win
-		psc.Type = ScMenu
-
-		psc.Geom.Pos = image.Point{x, y}
-		// note: not setting ScFlagPopupDestroyAll -- we keep the menu list intact
-		frame := &psc.Frame
-		frame.DeleteChildren(ki.NoDestroyKids)
-		// frame.Properties().CopyFrom(MenuFrameProps, ki.DeepCopy)
-		var focus ki.Ki
-		_ = focus
-		for _, ac := range menu {
-			acn, ac := AsWidget(ac)
-			if acn != nil {
-				frame.AddChild(acn)
-				if ac.StateIs(states.Selected) {
-					focus = acn
-				}
-			}
-		}
-		frame.ConfigTree(psc)
-		frame.ApplyStyleTree(psc) // sufficient to get sizes
-		mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
-		frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-		frame.GetSizeTree(psc, 0)          // collect sizes
-		psc.Win = nil
-		scextra := frame.Style.ScrollBarWidth.Dots
-		frame.LayState.Size.Pref.X += scextra // make room for scrollbar..
-		vpsz := frame.LayState.Size.Pref.Min(mainSz.MulScalar(2)).ToPoint()
-		maxht := int(32 * frame.Style.Font.Face.Metrics.Height)
-		vpsz.Y = min(maxht, vpsz.Y)
-		x = max(0, x)
-		y = max(0, y)
-		x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
-		y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit
-		psc.Resize(vpsz)
-		psc.Geom.Pos = image.Point{x, y}
-		psc.SetFullReRender()
-		win.SetNextPopup(psc, focus)
-		return psc
-	*/
-	return nil
+func (wb *WidgetBase) ContextMenuPos() image.Point {
+	return wb.WinPos(.5, .5) // center
 }
+
+func (wb *WidgetBase) ContextMenu() {
+	var menu MenuActions
+	wi := wb.This().(Widget)
+	wi.MakeContextMenu(&menu)
+	if len(menu) == 0 {
+		return
+	}
+	NewMenu(menu, wi, wi.ContextMenuPos()).Run()
+}
+
+///////////////////////////////////////////////////////////////
+// 	Choosers
 
 // StringsChooserPopup creates a menu of the strings in the given string
 // slice, and calls the given function on receiver when the user selects --
 // this is the ActionSig signal, coming from the Action for the given menu
 // item -- the name of the Action is the string value, and the data will be
 // the index in the slice.  A string equal to curSel will be marked as
-// selected.  Location is from the ContextMenuPos of recv node.
-func StringsChooserPopup(strs []string, curSel string, recv Widget, fun func()) *Scene {
-	/*
-		var menu MenuActions
-		for i, it := range strs {
-			ac := menu.AddAction(ActOpts{Label: it, Data: i}, recv, fun)
-			ac.SetSelected(it == curSel)
-		}
-		wb := recv.AsWidget()
-		pos := recv.ContextMenuPos()
-		sc := wb.Sc
-		return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
-	*/
-	return nil
+// selected. ctx Widget provides position etc for the menu.
+func StringsChooserPopup(strs []string, curSel string, ctx Widget, fun func(act *Action)) {
+	var menu MenuActions
+	for i, it := range strs {
+		ac := menu.AddAction(ActOpts{Label: it, Data: i}, fun)
+		ac.SetSelected(it == curSel)
+	}
+	NewMenu(menu, ctx, ctx.ContextMenuPos()).Run()
 }
 
 // SubStringsChooserPopup creates a menu of the sub-strings in the given
@@ -522,7 +442,7 @@ func StringsChooserPopup(strs []string, curSel string, recv Widget, fun func()) 
 // []int{s,i} slice of submenu and item indexes.
 // A string of subMenu: item equal to curSel will be marked as selected.
 // Location is from the ContextMenuPos of recv node.
-func SubStringsChooserPopup(strs [][]string, curSel string, ctx Widget, fun func()) *Scene {
+func SubStringsChooserPopup(strs [][]string, curSel string, ctx Widget, fun func(act *Action)) *Scene {
 	var menu MenuActions
 	for si, ss := range strs {
 		sz := len(ss)

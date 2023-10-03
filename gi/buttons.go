@@ -56,7 +56,7 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	bb.Icon = fr.Icon
 	bb.Indicator = fr.Indicator
 	bb.Shortcut = fr.Shortcut
-	bb.Menu = fr.Menu
+	bb.Menu.CopyFrom(&fr.Menu)
 	bb.MakeMenuFunc = fr.MakeMenuFunc
 }
 
@@ -134,31 +134,18 @@ func (bb *ButtonBase) OpenMenu() bool {
 		return false
 	}
 	if bb.MakeMenuFunc != nil {
-		bb.MakeMenuFunc(bb.This(), &bb.Menu)
+		bb.MakeMenuFunc(bb.This().(Widget), &bb.Menu)
 	}
-	// bb.BBoxMu.RLock()
-	// pos := bb.WinBBox.Max
-	// if pos.X == 0 && pos.Y == 0 { // offscreen
-	// 	pos = bb.ObjBBox.Max
-	// }
-	// indic := AsWidgetBase(bb.Parts.ChildByName("indicator", 3))
-	// if indic != nil {
-	// 	pos = indic.WinBBox.Min
-	// 	if pos.X == 0 && pos.Y == 0 {
-	// 		pos = indic.ObjBBox.Min
-	// 	}
-	// } else {
-	// 	pos.X = bb.WinBBox.Min.X
-	// 	if pos.X == 0 {
-	// 		pos.X = bb.ObjBBox.Min.X
-	// 	}
-	// }
-	// bb.BBoxMu.RUnlock()
-	if bb.Sc != nil {
-		NewMenuActions(bb.Menu, bb.This().(Widget)).Run()
-		return true
+	pos := bb.ContextMenuPos()
+	if bb.Parts != nil {
+		if indic := bb.Parts.ChildByName("indicator", 3); indic != nil {
+			pos = indic.(Widget).ContextMenuPos()
+		}
+	} else {
+		fmt.Println("ButtonBase ERROR: parts nil", bb)
 	}
-	return false
+	NewMenu(bb.Menu, bb.This().(Widget), pos).Run()
+	return true
 }
 
 // ResetMenu removes all items in the menu
@@ -308,6 +295,9 @@ func (bb *ButtonBase) ConfigWidget(sc *Scene) {
 
 func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	parts := bb.NewParts(LayoutHoriz)
+	if bb.HasMenu() && bb.Indicator.IsNil() {
+		bb.Indicator = icons.Menu
+	}
 	config := ki.Config{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)
 	indIdx := bb.ConfigPartsAddIndicator(&config, false) // default off
@@ -358,9 +348,8 @@ func (bb *ButtonBase) Destroy() {
 ///////////////////////////////////////////////////////////
 // Button
 
-// Button is a standard command button -- PushButton in Qt Widgets, and Button
-// in Qt Quick -- by default it puts the icon to the left and the text to the
-// right
+// Button is a standard standalone button.
+// Do On(events.Click) to register a function to execute when pressed.
 //
 //goki:embedder
 type Button struct {
