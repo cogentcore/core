@@ -18,9 +18,9 @@ func mainrun() {
 	gi.RenderTrace = true
 
 	scene := gi.NewScene("hello").SetTitle("Hello World!")
-	gi.NewLabel(&scene.Frame, "label").SetText("Hello, World!")
+	gi.NewLabel(&scene.Frame).SetText("Hello, World!")
 
-	gi.NewButton(&scene.Frame, "open-dialog").
+	gi.NewButton(&scene.Frame).
 		SetText("Open Dialog").SetIcon(icons.OpenInNew).
 		On(events.Click, func(e events.Event) {
 			fmt.Println("button clicked")
