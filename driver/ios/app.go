@@ -55,7 +55,7 @@ type appImpl struct {
 	quitCloseCnt  chan struct{} // counts windows to make sure all are closed before done
 	quitReqFunc   func()
 	quitCleanFunc func()
-	darkMode      bool
+	isDark        bool
 	insets        styles.SideFloats
 }
 
@@ -465,4 +465,8 @@ func (app *appImpl) Quit() {
 	}
 	app.QuitClean()
 	app.stopMain()
+}
+
+func (app *appImpl) IsDark() bool {
+	return app.isDark
 }

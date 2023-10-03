@@ -168,6 +168,9 @@ type App interface {
 	// HideVirtualKeyboard hides the virtual keyboard.
 	// HideVirtualKeyboard only has an effect on mobile platforms (iOS and Android).
 	HideVirtualKeyboard()
+
+	// IsDark returns whether the system color theme is dark (as oppposed to light)
+	IsDark() bool
 }
 
 // Platforms are all the supported platforms for Goosi

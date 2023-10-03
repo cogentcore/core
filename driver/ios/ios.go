@@ -158,7 +158,7 @@ func updateConfig(width, height, orientation int32) {
 	physY := 25.4 * float32(height) / dpi
 	theApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
 
-	// TODO(kai): system dark mode
+	theApp.isDark = bool(C.isDark())
 
 	theApp.window.PhysDPI = theApp.screen.PhysicalDPI
 	theApp.window.LogDPI = theApp.screen.LogicalDPI

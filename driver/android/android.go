@@ -195,7 +195,7 @@ func onContentRectChanged(activity *C.ANativeActivity, rect *C.ARect) {
 
 //export setDarkMode
 func setDarkMode(dark C.bool) {
-	theApp.darkMode = bool(dark)
+	theApp.isDark = bool(dark)
 }
 
 type windowConfig struct {
