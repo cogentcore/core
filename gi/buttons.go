@@ -166,36 +166,34 @@ func (bb *ButtonBase) HasMenu() bool {
 // OpenMenu will open any menu associated with this element -- returns true if
 // menu opened, false if not
 func (bb *ButtonBase) OpenMenu() bool {
-	/* todo:
 	if !bb.HasMenu() {
 		return false
 	}
 	if bb.MakeMenuFunc != nil {
 		bb.MakeMenuFunc(bb.This(), &bb.Menu)
 	}
-	bb.BBoxMu.RLock()
-	pos := bb.WinBBox.Max
-	if pos.X == 0 && pos.Y == 0 { // offscreen
-		pos = bb.ObjBBox.Max
-	}
-	indic := AsWidgetBase(bb.Parts.ChildByName("indicator", 3))
-	if indic != nil {
-		pos = indic.WinBBox.Min
-		if pos.X == 0 && pos.Y == 0 {
-			pos = indic.ObjBBox.Min
-		}
-	} else {
-		pos.X = bb.WinBBox.Min.X
-		if pos.X == 0 {
-			pos.X = bb.ObjBBox.Min.X
-		}
-	}
-	bb.BBoxMu.RUnlock()
+	// bb.BBoxMu.RLock()
+	// pos := bb.WinBBox.Max
+	// if pos.X == 0 && pos.Y == 0 { // offscreen
+	// 	pos = bb.ObjBBox.Max
+	// }
+	// indic := AsWidgetBase(bb.Parts.ChildByName("indicator", 3))
+	// if indic != nil {
+	// 	pos = indic.WinBBox.Min
+	// 	if pos.X == 0 && pos.Y == 0 {
+	// 		pos = indic.ObjBBox.Min
+	// 	}
+	// } else {
+	// 	pos.X = bb.WinBBox.Min.X
+	// 	if pos.X == 0 {
+	// 		pos.X = bb.ObjBBox.Min.X
+	// 	}
+	// }
+	// bb.BBoxMu.RUnlock()
 	if bb.Sc != nil {
-		PopupMenu(bb.Menu, pos.X, pos.Y, bb.Sc, bb.Text)
+		NewMenuActions(bb.Menu, bb.This().(Widget)).Run()
 		return true
 	}
-	*/
 	return false
 }
 
@@ -235,6 +233,15 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 
 //////////////////////////////////////////////////////////////////
 //		Events
+
+func (bb *ButtonBase) ClickMenu() {
+	bb.On(events.Click, func(e events.Event) {
+		if bb.StateIs(states.Disabled) {
+			return
+		}
+		bb.OpenMenu()
+	})
+}
 
 // ClickOnEnterSpace adds key event handler for Enter or Space
 // to generate a Click action
@@ -284,6 +291,7 @@ func (bb *ButtonBase) LongHoverTooltip() {
 func (bb *ButtonBase) ButtonBaseHandlers() {
 	bb.WidgetHandlers()
 	bb.LongHoverTooltip()
+	bb.ClickMenu()
 	bb.ClickOnEnterSpace()
 }
 
@@ -351,9 +359,9 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 
 func (bb *ButtonBase) ApplyStyle(sc *Scene) {
 	bb.ApplyStyleWidget(sc)
-	if bb.Menu != nil {
-		bb.Menu.SetShortcuts(bb.ParentRenderWin())
-	}
+	// if bb.Menu != nil { // todo:
+	// 	bb.Menu.SetShortcuts(bb.ParentRenderWin())
+	// }
 }
 
 func (bb *ButtonBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
