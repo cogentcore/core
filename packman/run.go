@@ -14,6 +14,8 @@ import (
 
 // Run builds and runs the config package. It also displays the logs generated
 // by the app. It uses the same config info as build.
+//
+//gti:add
 func Run(c *config.Config) error {
 	if len(c.Build.Target) > 0 {
 		return fmt.Errorf("can only run on 1 platform at a time, but got %d (%v)", len(c.Build.Target), c.Build.Target)
@@ -32,7 +34,11 @@ func Run(c *config.Config) error {
 			return fmt.Errorf("error installing app: %w", err)
 		}
 		// see https://stackoverflow.com/a/25398877
-		return xe.Run("adb", "shell", "monkey", "-p", c.Build.ID, "1")
+		err = xe.Run("adb", "shell", "monkey", "-p", c.Build.ID, "1")
+		if err != nil {
+			return fmt.Errorf("error starting app: %w", err)
+		}
+		return Log(c)
 	}
 	return nil
 }
