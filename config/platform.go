@@ -48,7 +48,7 @@ func ArchSupported(arch string) error {
 	return nil
 }
 
-// ParsePlatform parses the given platform string of format os[/arch]
+// SetString sets the platform from the given string of format os[/arch]
 func (p *Platform) SetString(platform string) error {
 	before, after, found := strings.Cut(platform, "/")
 	err := OSSupported(before)
@@ -57,6 +57,7 @@ func (p *Platform) SetString(platform string) error {
 	}
 	if !found {
 		*p = Platform{OS: before, Arch: "*"}
+		return nil
 	}
 	err = ArchSupported(after)
 	if err != nil {
@@ -64,6 +65,12 @@ func (p *Platform) SetString(platform string) error {
 	}
 	*p = Platform{OS: before, Arch: after}
 	return nil
+}
+
+func (p *Platform) UnmarshalJSON(b []byte) error {
+	platform := string(b)
+	platform = strings.ReplaceAll(platform, `"`, "") // the quotes get passed in
+	return p.SetString(platform)
 }
 
 // ArchsForOS returns contains all of the architectures supported for
