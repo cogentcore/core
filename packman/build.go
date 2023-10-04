@@ -27,7 +27,6 @@ func Build(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
 	}
-	androidArchs := []string{}
 	for _, platform := range c.Build.Target {
 		err := config.OSSupported(platform.OS)
 		if err != nil {
@@ -39,25 +38,16 @@ func Build(c *config.Config) error {
 				return err
 			}
 		}
-		if platform.OS == "android" {
-			androidArchs = append(androidArchs, platform.Arch)
-			continue
-		}
-		if platform.OS == "ios" {
-			// TODO: implement ios
-			continue
+		if platform.OS == "android" || platform.OS == "ios" {
+			return mobile.Build(c)
 		}
 		if platform.OS == "js" {
-			// TODO: implement js
-			continue
+			return fmt.Errorf("TODO: implement web support")
 		}
 		err = BuildDesktop(c.Build.Package, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
-	}
-	if len(androidArchs) != 0 {
-		return mobile.Build(c)
 	}
 	return nil
 }
