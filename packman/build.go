@@ -51,7 +51,7 @@ func Build(c *config.Config) error {
 		if platform.OS == "js" {
 			return fmt.Errorf("TODO: implement web support")
 		}
-		err = BuildDesktop(c.Build.Package, platform)
+		err = BuildDesktop(c, platform)
 		if err != nil {
 			return fmt.Errorf("build: %w", err)
 		}
@@ -59,13 +59,19 @@ func Build(c *config.Config) error {
 	return nil
 }
 
-// BuildDesktop builds an executable for the package at the given path for the given desktop platform.
+// BuildDesktop builds an executable for the config package for the given desktop platform.
 // BuildDesktop does not check whether platforms are valid, so it should be called through Build in almost all cases.
-func BuildDesktop(pkgPath string, platform config.Platform) error {
+func BuildDesktop(c *config.Config, platform config.Platform) error {
 	xc := xe.Major()
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
-	err := xc.Run("go", "build", "-o", BuildPath(pkgPath), pkgPath)
+	if c.Build.Output == "" {
+		c.Build.Output = filepath.Join(".goki", "bin", "build", c.Build.Package)
+	}
+	if platform.OS == "windows" {
+		c.Build.Output += ".exe"
+	}
+	err := xc.Run("go", "build", "-o", c.Build.Output, c.Build.Package)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}

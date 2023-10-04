@@ -22,8 +22,3 @@ func AppName(pkgPath string) string {
 	}
 	return filepath.Base(dir)
 }
-
-// BuildPath returns the path to the build binary output directory from the given package path.
-func BuildPath(pkgPath string) string {
-	return filepath.Join(pkgPath, "bin", "build")
-}
