@@ -228,6 +228,20 @@ func (app *appImpl) NewWindow(opts *goosi.NewWindowOptions) (goosi.Window, error
 	app.window.EvMgr.Window(events.WinShow)
 	app.window.EvMgr.Window(events.WinFocus)
 
+	// on iOS, NewWindow happens after updateConfig, so we copy the
+	// info over from the screen here.
+	fmt.Println("copying physical dpi; screen:", theApp.screen, "; window:", theApp.window)
+	theApp.window.PhysDPI = theApp.screen.PhysicalDPI
+	fmt.Println("copied physical dpi")
+	theApp.window.LogDPI = theApp.screen.LogicalDPI
+	theApp.window.PxSize = theApp.screen.PixSize
+	theApp.window.WnSize = theApp.screen.Geometry.Max
+	theApp.window.DevPixRatio = theApp.screen.DevicePixelRatio
+
+	fmt.Println("sending window events")
+	theApp.window.EvMgr.WindowResize()
+	theApp.window.EvMgr.WindowPaint()
+
 	go app.window.winLoop()
 
 	return app.window, nil

@@ -129,6 +129,8 @@ func setScreen(scale int) {
 
 //export updateConfig
 func updateConfig(width, height, orientation int32) {
+	theApp.mu.Lock()
+	defer theApp.mu.Unlock()
 	theApp.screen.Orientation = goosi.OrientationUnknown
 	switch orientation {
 	case C.UIDeviceOrientationPortrait, C.UIDeviceOrientationPortraitUpsideDown:
@@ -137,6 +139,7 @@ func updateConfig(width, height, orientation int32) {
 		theApp.screen.Orientation = goosi.Landscape
 		width, height = height, width
 	}
+	fmt.Println("getting device padding")
 	insets := C.getDevicePadding()
 	fscale := float32(screenScale)
 	theApp.insets.Set(
@@ -157,16 +160,9 @@ func updateConfig(width, height, orientation int32) {
 	physY := 25.4 * float32(height) / dpi
 	theApp.screen.PhysicalSize = image.Pt(int(physX), int(physY))
 
+	fmt.Println("getting is dark")
 	theApp.isDark = bool(C.isDark())
-
-	theApp.window.PhysDPI = theApp.screen.PhysicalDPI
-	theApp.window.LogDPI = theApp.screen.LogicalDPI
-	theApp.window.PxSize = theApp.screen.PixSize
-	theApp.window.WnSize = theApp.screen.Geometry.Max
-	theApp.window.DevPixRatio = theApp.screen.DevicePixelRatio
-
-	theApp.window.EvMgr.WindowResize()
-	theApp.window.EvMgr.WindowPaint()
+	fmt.Println("got is dark")
 }
 
 //export lifecycleDead
