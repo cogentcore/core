@@ -7,6 +7,7 @@ package packman
 import (
 	"fmt"
 	"path/filepath"
+	"runtime"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
@@ -20,11 +21,19 @@ func Run(c *config.Config) error {
 	if len(c.Build.Target) != 1 {
 		return fmt.Errorf("can only run on 1 platform at a time, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
+	t := c.Build.Target[0]
+	// if no arch is specified, we can assume it is the current arch,
+	// as the user is running it (it could be a different arch when testing
+	// on an external mobile device, but it is up to the user to specify
+	// that arch in that case)
+	if t.Arch == "*" {
+		t.Arch = runtime.GOARCH
+		c.Build.Target[0] = t
+	}
 	err := Build(c)
 	if err != nil {
 		return fmt.Errorf("error building app: %w", err)
 	}
-	t := c.Build.Target[0]
 	switch t.OS {
 	case "darwin", "windows", "linux":
 		return xe.Verbose().SetBuffer(false).Run(filepath.Join(".", c.Build.Output))

@@ -55,10 +55,18 @@ func InstallPackage(pkg Package) error {
 // InstallLocal installs a local package from the filesystem
 // on the user's device for the config target operating systems.
 func InstallLocal(c *config.Config) error {
-	for _, p := range c.Build.Target {
+	for i, p := range c.Build.Target {
 		err := config.OSSupported(p.OS)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
+		}
+		// if no arch is specified, we can assume it is the current arch,
+		// as the user is running it (it could be a different arch when testing
+		// on an external mobile device, but it is up to the user to specify
+		// that arch in that case)
+		if p.Arch == "*" {
+			p.Arch = runtime.GOARCH
+			c.Build.Target[i] = p
 		}
 		if p.OS == "android" || p.OS == "ios" {
 			err := Build(c)
