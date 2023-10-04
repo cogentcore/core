@@ -58,7 +58,7 @@ type Build struct {
 	Package string `def:"." desc:"the path of the package to build"`
 
 	// the target platforms to build executables for
-	Target []Platform `desc:"the target platforms to build executables for"`
+	Target []Platform `flag:"t,target" desc:"the target platforms to build executables for"`
 
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output" desc:"the output file name; if not specified, it depends on the package being built"`
