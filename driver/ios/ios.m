@@ -20,7 +20,7 @@
 
 struct utsname sysInfo;
 
-@interface GoAppAppController : GLKViewController<UIContentContainer, GLKViewDelegate>
+@interface GoAppAppController : UIViewController<UIContentContainer>
 @end
 
 @interface GoAppView : UIView
@@ -113,9 +113,10 @@ struct utsname sysInfo;
 	self.view.multipleTouchEnabled = true;
 	self.view.userInteractionEnabled = YES;
 	
-	self.paused = YES;
-	self.resumeOnDidBecomeActive = NO;
-	self.preferredFramesPerSecond = 0;
+	// TODO(kai): figure out to what to do with this
+	// self.paused = YES;
+	// self.resumeOnDidBecomeActive = NO;
+	// self.preferredFramesPerSecond = 0;
 
 	int scale = 1;
 	if ([[UIScreen mainScreen] respondsToSelector:@selector(displayLinkWithTarget:selector:)]) {
