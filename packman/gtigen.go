@@ -22,21 +22,6 @@ var _ = gti.AddFunc(&gti.Func{
 })
 
 var _ = gti.AddFunc(&gti.Func{
-	Name: "goki.dev/goki/packman.GenerateColorScheme",
-	Doc:  "GenerateColorScheme generates a Go color scheme\ndeclaration file from a Material Theme Builder\nAndroid Views XML file located at the config source\nfile path. It stores the resulting Go file\nat the config destination file path. The generated\nfile is part of the config package and puts the\nconfig comment as the comment for the ColorSchemes variable.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		&gti.Directive{Tool: "grease", Directive: "cmd", Args: []string{"-name", "colorgen"}},
-	},
-	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"c", &gti.Field{Name: "c", Type: "*config.Config", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
-	}),
-})
-
-var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.Install",
 	Doc:  "Install installs the package the config ID\nby looking for it in the list of supported packages.\nIf the config ID is a filepath, it calls [InstallLocal] instead.",
 	Directives: gti.Directives{
