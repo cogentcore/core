@@ -279,7 +279,7 @@ func onStop() {
 	system = nil
 	surface.Destroy()
 	gpu.Destroy()
-	vgpu.Terminate()
+	// vgpu.Terminate()
 }
 
 func updateMats() {
@@ -397,7 +397,7 @@ func main() {
 	app.Main(func(a app.App) {
 		log.SetPrefix("GoMobileVulkan: ")
 		vgpu.Debug = true
-		vgpu.AndroidSoftwareEmulator = true // IMPORTANT: this is critical if using mac software emulator!!
+		// vgpu.AndroidSoftwareEmulator = true // IMPORTANT: this is critical if using mac software emulator!!
 		orPanic(vk.SetDefaultGetInstanceProcAddr())
 		orPanic(vk.Init())
 
