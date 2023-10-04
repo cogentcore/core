@@ -83,12 +83,11 @@ struct utsname sysInfo;
 @end
 
 @interface GoAppAppController ()
-// @property (strong, nonatomic) EAGLContext *context;
-// @property (strong, nonatomic) GLKView *glview;
 @property (strong, nonatomic) GoInputView *inputView;
 @end
 
 @implementation GoAppAppController
+// TODO(kai): figure out what to do with this
 // - (void)viewWillAppear:(BOOL)animated
 // {
 //	// TODO: replace by swapping out GLKViewController for a UIVIewController.
@@ -148,9 +147,9 @@ struct utsname sysInfo;
    // [self.view display]; // todo: seems unnecessary?
 }
 
-#define TOUCH_TYPE_BEGIN 0 // touch.TypeBegin
-#define TOUCH_TYPE_MOVE  1 // touch.TypeMove
-#define TOUCH_TYPE_END   2 // touch.TypeEnd
+#define TOUCH_TYPE_BEGIN 0 // goosi.TouchStart
+#define TOUCH_TYPE_MOVE  1 // touch.TouchMove
+#define TOUCH_TYPE_END   2 // touch.TouchEnd
 
 static void sendTouches(int change, NSSet* touches) {
 	CGFloat scale = [UIScreen mainScreen].nativeScale;

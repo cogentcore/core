@@ -86,6 +86,7 @@ func handleRecover(r any) {
 // Main is called from main thread when it is time to start running the
 // main loop.  When function f returns, the app ends automatically.
 func Main(f func(goosi.App)) {
+	log.Println("GoLog: IN MAIN")
 	debug.SetPanicOnFault(true)
 	defer func() { handleRecover(recover()) }()
 	mainCallback = f
