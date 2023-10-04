@@ -20,7 +20,7 @@ import (
 //
 //gti:add
 func Install(c *config.Config) error {
-	if c.Install.Package == "." || c.Install.Package == ".." || strings.Contains(c.Install.Package, "/") {
+	if c.Build.Package == "." || c.Build.Package == ".." || strings.Contains(c.Build.Package, "/") {
 		return InstallLocal(c)
 	}
 	packages, err := LoadPackages()
@@ -28,11 +28,11 @@ func Install(c *config.Config) error {
 		return fmt.Errorf("error loading packages: %w", err)
 	}
 	for _, pkg := range packages {
-		if pkg.ID == c.Install.Package {
+		if pkg.ID == c.Build.Package {
 			return InstallPackage(pkg)
 		}
 	}
-	return fmt.Errorf("error: could not find package %s", c.Install.Package)
+	return fmt.Errorf("error: could not find package %s", c.Build.Package)
 }
 
 // InstallPackage installs the given package object.
@@ -54,23 +54,23 @@ func InstallPackage(pkg Package) error {
 // InstallLocal installs a local package from the filesystem
 // on the user's device for the config target operating systems.
 func InstallLocal(c *config.Config) error {
-	for _, os := range c.Install.Target {
-		err := config.OSSupported(os)
+	for _, p := range c.Build.Target {
+		err := config.OSSupported(p.OS)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}
-		if os == "android" || os == "ios" {
+		if p.OS == "android" || p.OS == "ios" {
 			err := mobile.Install(c)
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
 			continue
 		}
-		if os == "js" {
+		if p.OS == "js" {
 			// TODO: implement js
 			continue
 		}
-		err = InstallLocalDesktop(c.Install.Package, os)
+		err = InstallLocalDesktop(c.Build.Package, p.OS)
 		if err != nil {
 			return fmt.Errorf("install: %w", err)
 		}

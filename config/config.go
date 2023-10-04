@@ -39,9 +39,6 @@ type Config struct {
 	// [view: add-fields] the configuration options for the colorgen command
 	Colorgen Colorgen `cmd:"colorgen" view:"add-fields" desc:"the configuration options for the colorgen command"`
 
-	// [view: add-fields] the configuration options for the install command
-	Install Install `cmd:"install" view:"add-fields" desc:"the configuration options for the install command"`
-
 	// [view: add-fields] the configuration options for the log command
 	Log Log `cmd:"log" view:"add-fields" desc:"the configuration options for the log command"`
 
@@ -116,15 +113,6 @@ type Colorgen struct {
 
 	// the comment for the color schemes variable
 	Comment string `desc:"the comment for the color schemes variable"`
-}
-
-type Install struct {
-
-	// [def: .] the name/path of the package to install
-	Package string `def:"." desc:"the name/path of the package to install"`
-
-	// the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)
-	Target []string `desc:"the target platforms to install the executables on, as a list of operating systems (this should include no more than the operating system you are on, android, and ios)"`
 }
 
 type Log struct {
