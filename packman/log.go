@@ -7,7 +7,6 @@ package packman
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
@@ -27,8 +26,8 @@ func Log(c *config.Config) error {
 			return fmt.Errorf("error clearing logs: %w", err)
 		}
 	}
-	// we are logging continiously so we can't buffer, and we must forcefully pipe stdout and stderr
-	err := xe.Major().SetBuffer(false).SetStdout(os.Stdout).SetStderr(os.Stderr).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
+	// we are logging continiously so we can't buffer, and we must be verbose
+	err := xe.Verbose().SetBuffer(false).Run("adb", "logcat", "*:"+c.Log.All, "Go:D", "GoLog:D")
 	if err != nil {
 		return fmt.Errorf("erroring getting logs: %w", err)
 	}
