@@ -7,6 +7,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// IMPORTANT: after making any changes to this file, you need
+// to run go generate in github.com/goki/goki/mobile 
+
 package org.golang.app;
 
 import android.app.Activity;
