@@ -56,7 +56,7 @@ func (bb *ButtonBase) CopyFieldsFrom(frm any) {
 	bb.Icon = fr.Icon
 	bb.Indicator = fr.Indicator
 	bb.Shortcut = fr.Shortcut
-	bb.Menu.CopyFrom(&fr.Menu)
+	bb.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in actions; todo: could do more elaborate copy etc but is it worth it?
 	bb.MakeMenuFunc = fr.MakeMenuFunc
 }
 
