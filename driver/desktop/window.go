@@ -163,12 +163,20 @@ func (w *windowImpl) winLoop() {
 	} else {
 		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
 	}
+	// winShow := time.NewTimer(500 * time.Millisecond)
+	// shown := false
 outer:
 	for {
 		select {
 		case <-w.winClose:
 			winPaint.Stop()
 			break outer
+		// case <-winShow.C:
+		// 	if w.glw == nil {
+		// 		break outer
+		// 	}
+		// 	w.EvMgr.Window(events.WinShow)
+		// 	shown = true
 		case f := <-w.runQueue:
 			if w.glw == nil {
 				break outer
@@ -181,6 +189,9 @@ outer:
 			if w.glw == nil {
 				break outer
 			}
+			// if !shown {
+			// 	continue
+			// }
 			w.mu.Lock()
 			w.EvMgr.WindowPaint()
 			w.mu.Unlock()
