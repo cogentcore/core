@@ -177,7 +177,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 				}
 				s.Margin.Set()
 				s.Padding.Set()
-				s.AlignV = styles.AlignBottom
+				s.AlignV = styles.AlignMiddle
 			})
 		case "ind-stretch":
 			w.AddStyles(func(s *styles.Style) {
@@ -284,9 +284,9 @@ func (ac *Action) ConfigParts(sc *Scene) {
 		if ac.Class == "" {
 			ac.Class = "menu-action"
 		}
-		if ac.Indicator == "" && ac.HasMenu() {
-			ac.Indicator = icons.KeyboardArrowRight
-		}
+		// if ac.Indicator == "" && ac.HasMenu() {
+		// 	ac.Indicator = icons.KeyboardArrowRight
+		// }
 		ac.ConfigPartsMenuItem()
 	default:
 		ac.ConfigPartsButton()
