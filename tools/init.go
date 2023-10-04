@@ -21,7 +21,7 @@ import (
 //
 //gti:add
 func Init(c *config.Config) error {
-	err := os.Mkdir(".goki", 0750)
+	err := os.MkdirAll(".goki", 0750)
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
 	}
@@ -32,6 +32,9 @@ func Init(c *config.Config) error {
 		}
 		base := filepath.Base(cdir)
 		c.Name = base
+	}
+	if c.Build.ID == "" {
+		c.Build.ID = "com.org.todo." + c.Name
 	}
 	err = tomls.Save(c, ".goki/config.toml")
 	if err != nil {
