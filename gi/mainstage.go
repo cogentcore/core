@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -79,14 +80,7 @@ func NewWindow(sc *Scene) *MainStage {
 	return NewMainStage(Window, sc, nil)
 }
 
-// NewDialog returns a new Dialog stage with given scene contents,
-// in connection with given widget (which provides key context).
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewDialog(sc *Scene, ctx Widget) *MainStage {
-	return NewMainStage(Dialog, sc, ctx)
-}
+// NewDialog in dialogs.go
 
 // NewSheet returns a new Sheet stage with given scene contents,
 // in connection with given widget (which provides key context).
@@ -126,6 +120,9 @@ func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
 	if st.OwnWin {
 		win := st.NewRenderWin()
+		if CurRenderWin == nil {
+			CurRenderWin = win
+		}
 		win.GoStartEventLoop()
 		return st
 	}
@@ -141,18 +138,30 @@ func (st *MainStage) RunWindow() *MainStage {
 // RenderWin field will be set to the parent RenderWin window.
 func (st *MainStage) RunDialog() *MainStage {
 	st.AddDialogDecor()
+
+	ctx := st.CtxWidget.AsWidget()
+	ms := ctx.Sc.MainStageMgr()
+	if ms == nil {
+		fmt.Println("RunDialog: CurRenderWin is nil")
+		return nil
+	}
+	winsz := ms.RenderCtx.Size
+
+	sz := st.Scene.PrefSize(winsz)
+	sz.X = 150
+	sz.Y = 100
+	st.Scene.Resize(sz)
+	fmt.Println(sz)
+
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
 		return st
 	}
-	if CurRenderWin == nil {
-		// todo: error here -- must have main window!
-		return nil
-	}
 	// todo: need some kind of linkage here for dialog relative to existing window
 	// probably just CurRenderWin but it needs to be a stack or updated properly etc.
-	CurRenderWin.StageMgr.Push(st)
+	ms.Push(st)
+	st.StageMgr = ms
 	return st
 }
 

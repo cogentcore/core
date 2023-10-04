@@ -219,6 +219,9 @@ func (w *RenderWin) DrawScenes() {
 		}
 		return
 	}
+	// if !w.HasFlag(WinSentShow) {
+	// 	return
+	// }
 	if !w.GoosiWin.Lock() {
 		if WinEventTrace {
 			fmt.Printf("window was closed: %v\n", w.Name)

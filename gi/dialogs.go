@@ -5,7 +5,12 @@
 package gi
 
 import (
+	"log"
+
+	"goki.dev/colors"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 )
 
 // DialogsSepRenderWin determines if dialog windows open in a separate OS-level
@@ -37,8 +42,141 @@ const (
 )
 
 // standard vertical space between elements in a dialog, in Ex units
-var StdDialogVSpace = float32(1)
-var StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
+var (
+	StdDialogVSpace = float32(1)
+
+	StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
+)
+
+// DialogStage is a MainStage with methods for configuring a dialog
+type DialogStage struct {
+	Stage *MainStage
+
+	// Accepted means that the dialog was accepted -- else canceled
+	Accepted bool
+}
+
+// NewDialog returns a new DialogStage stage with given scene contents,
+// in connection with given widget (which provides key context).
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func NewDialog(sc *Scene, ctx Widget) *DialogStage {
+	dlg := &DialogStage{}
+	dlg.Stage = NewMainStage(Dialog, sc, ctx)
+	sc.Geom.Pos = ctx.ContextMenuPos()
+	if dlg.Stage.Title != "" {
+		dlg.AddTitle(dlg.Stage.Title)
+	}
+	return dlg
+}
+
+func (dlg *DialogStage) Run() *DialogStage {
+	dlg.Stage.Run()
+	return dlg
+}
+
+// AddTitle adds title to dialog.  If title string is passed
+// then a new title is set -- otherwise the existing Title is used.
+func (dlg *DialogStage) AddTitle(title ...string) *DialogStage {
+	if len(title) > 0 {
+		dlg.Stage.Title = title[0]
+	}
+	NewLabel(&dlg.Stage.Scene.Frame, "title").SetText(dlg.Stage.Title).
+		SetType(LabelHeadlineSmall).AddStyles(func(s *styles.Style) {
+		s.MaxWidth.SetDp(-1)
+		s.AlignH = styles.AlignCenter
+		s.AlignV = styles.AlignTop
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
+	return dlg
+}
+
+// AddPrompt adds given prompt to dialog.
+func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
+	NewLabel(&dlg.Stage.Scene.Frame, "prompt").SetText(prompt).
+		SetType(LabelBodyMedium).AddStyles(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpaceNormal
+		s.MaxWidth.SetDp(-1)
+		s.Width.SetCh(30)
+		s.Text.Align = styles.AlignLeft
+		s.AlignV = styles.AlignTop
+		s.Color = colors.Scheme.OnSurfaceVariant
+		s.BackgroundColor.SetSolid(colors.Transparent)
+	})
+	return dlg
+}
+
+// AddButtonBox adds layout for holding buttons at bottom of dialog
+func (dlg *DialogStage) AddButtonBox() *Layout {
+	bb := NewLayout(&dlg.Stage.Scene.Frame, "buttons").
+		SetLayout(LayoutHoriz)
+	bb.AddStyles(func(s *styles.Style) {
+		bb.Spacing.SetDp(8 * Prefs.DensityMul())
+		s.SetStretchMaxWidth()
+	})
+	return bb
+}
+
+// AddOk adds Ok button to given ButtonBox, connecting to Accept method
+func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
+	NewButton(bb, "ok").SetText("Ok").On(events.Click, func(e events.Event) {
+		dlg.Accept()
+	})
+	return dlg
+}
+
+// AddCancel adds Cancel button to given ButtonBox, connecting to Cancel method
+func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
+	NewButton(bb, "cancel").SetText("Cancel").On(events.Click, func(e events.Event) {
+		dlg.Cancel()
+	})
+	return dlg
+}
+
+// AddOkCancel adds Ok, Cancel buttons
+func (dlg *DialogStage) AddOkCancel() *DialogStage {
+	bb := dlg.AddButtonBox()
+	dlg.AddOk(bb)
+	dlg.AddCancel(bb)
+	return dlg
+}
+
+// Accept accepts the dialog, activated by the default Ok button
+func (dlg *DialogStage) Accept() {
+	dlg.Accepted = true
+	// if dlg.SigVal >= 0 {
+	// 	dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
+	// } else {
+	// 	dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
+	// }
+	dlg.Close()
+}
+
+// Cancel cancels the dialog, activated by the default Cancel button
+func (dlg *DialogStage) Cancel() {
+	dlg.Accepted = false
+	// if dlg.SigVal >= 0 {
+	// 	dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
+	// } else {
+	// 	dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
+	// }
+	dlg.Close()
+}
+
+// Close closes this stage as a popup
+func (dlg *DialogStage) Close() {
+	mm := dlg.Stage.StageMgr
+	if mm == nil {
+		log.Println("ERROR: dlg has no MainMgr")
+		return
+	}
+	if dlg.Stage.OwnWin {
+		mm.RenderWin.CloseReq()
+		return
+	}
+	mm.PopDelete()
+}
 
 /*
 // Dialog supports dialog functionality -- based on a scene that can either

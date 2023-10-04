@@ -80,25 +80,31 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	brow := gi.NewLayout(frame, "brow").
 		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
-	gi.NewButton(brow, "button1").
+	b1 := gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).
 		SetTooltip("press this <i>button</i> to pop up a dialog box").
 		AddStyles(func(s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
-		}).(*gi.Button).
-		On(events.Click, func(e events.Event) {
-			fmt.Printf("Button1 clicked\n")
-			// gi.StringPromptDialog(vp, "", "Enter value here..",
-			// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
-			// 	rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			// 		dlg := send.(*gi.Dialog)
-			// 		if sig == int64(gi.DialogAccepted) {
-			// 			val := gi.StringPromptDialogValue(dlg)
-			// 			fmt.Printf("got string value: %v\n", val)
-			// 		}
-			// 	})
-		})
+		}).(*gi.Button)
+
+	b1.On(events.Click, func(e events.Event) {
+		fmt.Printf("Button1 clicked\n")
+		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).AddTitle("Test Dialog").
+			AddPrompt("This is a prompt").AddOkCancel()
+		// dlg.OwnWin = true
+		dlg.Run()
+
+		// gi.StringPromptDialog(vp, "", "Enter value here..",
+		// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
+		// 	rec.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 		dlg := send.(*gi.Dialog)
+		// 		if sig == int64(gi.DialogAccepted) {
+		// 			val := gi.StringPromptDialogValue(dlg)
+		// 			fmt.Printf("got string value: %v\n", val)
+		// 		}
+		// 	})
+	})
 
 	button2 := gi.NewButton(brow, "button2").
 		SetText("Open GoGiEditor").
