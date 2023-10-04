@@ -15,12 +15,6 @@ import (
 // underlying types
 type Slice []Ki
 
-// TODO(kai): remove StartMiddle? we no longer need it
-
-// StartMiddle indicates to start searching
-// in the middle for slice search functions.
-const StartMiddle int = -1
-
 // NOTE: we have to define Slice* functions operating on a generic *[]Ki
 // element as the first (not receiver) argument, to be able to use these
 // functions in any other types that are based on ki.Slice or are other forms
