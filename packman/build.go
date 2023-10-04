@@ -65,15 +65,27 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	xc := xe.Major()
 	xc.Env["GOOS"] = platform.OS
 	xc.Env["GOARCH"] = platform.Arch
+
+	origPkg := c.Build.Package
+	// need to get real package and output location so that install commands work later
+	if c.Build.Package == "." {
+		dir, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error getting current working directory: %w", err)
+		}
+		c.Build.Package = filepath.Base(dir)
+	}
 	if c.Build.Output == "" {
 		c.Build.Output = filepath.Join(".goki", "bin", "build", c.Build.Package)
 	}
 	if platform.OS == "windows" {
 		c.Build.Output += ".exe"
 	}
-	err := xc.Run("go", "build", "-o", c.Build.Output, c.Build.Package)
+
+	err := xc.Run("go", "build", "-o", c.Build.Output, origPkg)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
+
 	return nil
 }
