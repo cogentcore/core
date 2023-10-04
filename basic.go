@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"reflect"
 	"strconv"
 
@@ -793,6 +794,22 @@ func ToStringPrec(v any, prec int) string {
 //
 //gopy:interface=handle
 func SetRobust(to, frm any) bool {
+	if sa, ok := to.(SetAnyer); ok {
+		err := sa.SetAny(frm)
+		if err != nil {
+			slog.Error("laser.SetRobust: error setting using SetAnyer interface", "err", err, "to", to, "from", frm)
+			return false
+		}
+		return true
+	}
+	if ss, ok := to.(SetStringer); ok {
+		err := ss.SetString(ToString(frm))
+		if err != nil {
+			slog.Error("laser.SetRobust: error setting using SetStringer interface", "err", err, "to", to, "from", frm)
+			return false
+		}
+		return true
+	}
 	if AnyIsNil(to) {
 		return false
 	}
