@@ -131,12 +131,11 @@ outer:
 			w.app.mu.Lock()
 			w.EvMgr.WindowPaint()
 			w.app.mu.Unlock()
-			// TODO(kai): what should happen here?
-			// // NOTE: this is incredibly important; do not remove it (see [onNativeWindowRedrawNeeded] for why)
-			// select {
-			// case windowRedrawDone <- struct{}{}:
-			// default:
-			// }
+			// NOTE: this is incredibly important; do not remove it
+			select {
+			case w.publishDone <- struct{}{}:
+			default:
+			}
 		}
 	}
 }

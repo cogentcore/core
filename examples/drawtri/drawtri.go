@@ -8,6 +8,7 @@ import (
 	"embed"
 	"fmt"
 	"image"
+	"log"
 	"time"
 
 	"goki.dev/cursors"
@@ -20,7 +21,10 @@ import (
 //go:embed *.spv
 var content embed.FS
 
-func main() { driver.Main(mainrun) }
+func main() {
+	log.Println("GoLog: in main.main")
+	driver.Main(mainrun)
+}
 
 func mainrun(a goosi.App) {
 	opts := &goosi.NewWindowOptions{

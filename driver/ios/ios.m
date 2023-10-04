@@ -212,6 +212,7 @@ static void sendTouches(int change, NSSet* touches) {
 @end
 
 void runApp(void) {
+	printf("GoLog: ObjectiveC: GoKi: RUN APP");
 	char * argv[] = {};
 	@autoreleasepool {
 		UIApplicationMain(0, argv, nil, NSStringFromClass([GoAppAppDelegate class]));

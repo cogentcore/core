@@ -25,8 +25,6 @@ package ios
 extern struct utsname sysInfo;
 
 void runApp(void);
-void makeCurrentContext(GLintptr ctx);
-void swapBuffers(GLintptr ctx);
 uint64_t threadID();
 
 UIEdgeInsets getDevicePadding();
@@ -41,6 +39,7 @@ import (
 	"log"
 	"runtime"
 	"strings"
+	"time"
 	"unsafe"
 
 	"goki.dev/goosi"
@@ -71,6 +70,7 @@ func main(f func(goosi.App)) {
 		f(theApp)
 		// TODO(crawshaw): trigger runApp to return
 	}()
+	log.Println("running c app")
 	C.runApp()
 	panic("unexpected return from app.runApp")
 }
@@ -197,20 +197,20 @@ func drawloop() {
 	runtime.LockOSThread()
 	defer runtime.UnlockOSThread()
 
-	// for {
-	// 	select {
-	// 	case <-theApp.publish:
-	// 		theApp.publishResult <- PublishResult{}
-	// 		return
-	// 	case <-time.After(100 * time.Millisecond): // incase the method blocked!!
-	// 		return
-	// 	}
-	// }
+	for {
+		select {
+		case <-theApp.window.publish:
+			theApp.window.publishDone <- struct{}{}
+			return
+		case <-time.After(100 * time.Millisecond): // in case the method blocked!
+			return
+		}
+	}
 }
 
 //export startloop
-func startloop(ctx C.GLintptr) {
-	go theApp.loop(ctx)
+func startloop() {
+	go theApp.loop()
 }
 
 // loop is the primary drawing loop.
@@ -218,7 +218,7 @@ func startloop(ctx C.GLintptr) {
 // After UIKit has captured the initial OS thread for processing UIKit
 // events in runApp, it starts loop on another goroutine. It is locked
 // to an OS thread for its OpenGL context.
-func (app *appImpl) loop(ctx C.GLintptr) {
+func (app *appImpl) loop() {
 	runtime.LockOSThread()
 
 	for {
@@ -231,9 +231,8 @@ func (app *appImpl) loop(ctx C.GLintptr) {
 			if f.done != nil {
 				f.done <- true
 			}
-			// case <-theApp.publish:
-			// 	theApp.publishResult <- PublishResult{}
-			// }
+		case <-theApp.window.publish:
+			theApp.window.publishDone <- struct{}{}
 		}
 	}
 }
