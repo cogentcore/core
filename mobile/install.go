@@ -6,14 +6,13 @@ package mobile
 
 import (
 	"fmt"
-	"path"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
 )
 
-// Install compiles and installs the app named by the import path on the
-// attached mobile device.
+// Install installs the app named by the import path on the attached mobile device.
+// It assumes that it has already been built.
 //
 // Only -target android is supported. The 'adb' tool must be on the PATH.
 func Install(c *config.Config) error {
@@ -21,10 +20,6 @@ func Install(c *config.Config) error {
 	if len(c.Build.Target) != 1 || c.Build.Target[0].OS != "android" {
 		return fmt.Errorf("target for install must be android, but got %v", c.Build.Target)
 	}
-	pkg, err := BuildImpl(c)
-	if err != nil {
-		return err
-	}
 
-	return xe.Run("adb", "install", "-r", AndroidPkgName(path.Base(pkg.PkgPath))+".apk")
+	return xe.Run("adb", "install", "-r", c.Build.Output)
 }

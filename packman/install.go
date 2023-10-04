@@ -60,7 +60,11 @@ func InstallLocal(c *config.Config) error {
 			return fmt.Errorf("install: %w", err)
 		}
 		if p.OS == "android" || p.OS == "ios" {
-			err := mobile.Install(c)
+			err := Build(c)
+			if err != nil {
+				return fmt.Errorf("error building: %w", err)
+			}
+			err = mobile.Install(c)
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
