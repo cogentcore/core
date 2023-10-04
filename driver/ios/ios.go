@@ -61,7 +61,7 @@ func init() {
 	initThreadID = uint64(C.threadID())
 }
 
-func main(f func(App)) {
+func main(f func(goosi.App)) {
 	//if tid := uint64(C.threadID()); tid != initThreadID {
 	//	log.Fatalf("app.Run called on thread %d, but app.init ran on %d", tid, initThreadID)
 	//}

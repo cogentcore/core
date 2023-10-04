@@ -91,7 +91,7 @@ func Main(f func(goosi.App)) {
 	mainCallback = f
 	theApp.initVk()
 	goosi.TheApp = theApp
-	theApp.mainLoop()
+	main(f)
 }
 
 type funcRun struct {
