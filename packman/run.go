@@ -17,7 +17,7 @@ import (
 //
 //gti:add
 func Run(c *config.Config) error {
-	if len(c.Build.Target) > 0 {
+	if len(c.Build.Target) != 1 {
 		return fmt.Errorf("can only run on 1 platform at a time, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
 	err := Build(c)

@@ -33,8 +33,8 @@ type Config struct {
 	// the type of the project (app/library)
 	Type Types `desc:"the type of the project (app/library)"`
 
-	// [view: add-fields] the configuration options for the build command
-	Build Build `cmd:"build,install" view:"add-fields" desc:"the configuration options for the build command"`
+	// [view: add-fields] the configuration options for the build, install, and run commands
+	Build Build `cmd:"build,install,run" view:"add-fields" desc:"the configuration options for the build, install, and run commands"`
 
 	// [view: add-fields] the configuration options for the colorgen command
 	Colorgen Colorgen `cmd:"colorgen" view:"add-fields" desc:"the configuration options for the colorgen command"`
