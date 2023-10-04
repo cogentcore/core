@@ -136,7 +136,7 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 			n = cwd
 		}
 		n = path.Base(n)
-		c.Build.Output = n + ".app"
+		c.Build.Output = filepath.Join(".goki", "bin", "build", n+".app")
 	}
 	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output), nil)
 	if !c.Build.PrintOnly {

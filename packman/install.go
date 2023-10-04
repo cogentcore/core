@@ -14,9 +14,10 @@ import (
 	"goki.dev/xe"
 )
 
-// Install installs the package the config ID
-// by looking for it in the list of supported packages.
-// If the config ID is a filepath, it calls [InstallLocal] instead.
+// Install installs the config package by looking for it in the list
+// of supported packages. If the config ID is a filepath, it installs
+// the package at that filepath on the local system. Install uses the
+// same config info as build.
 //
 //gti:add
 func Install(c *config.Config) error {

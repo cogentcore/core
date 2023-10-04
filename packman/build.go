@@ -23,7 +23,7 @@ func Build(c *config.Config) error {
 	if len(c.Build.Target) == 0 {
 		return errors.New("build: expected at least 1 platform")
 	}
-	err := os.MkdirAll(filepath.Join(".", "bin", "build"), 0700)
+	err := os.MkdirAll(filepath.Join(".goki", "bin", "build"), 0700)
 	if err != nil {
 		return fmt.Errorf("build: failed to create bin/build directory: %w", err)
 	}

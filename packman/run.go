@@ -4,9 +4,18 @@
 
 package packman
 
-import "goki.dev/goki/config"
+import (
+	"fmt"
 
+	"goki.dev/goki/config"
+)
+
+// Run builds and runs the config package. It uses the same
+// config info as build.
 func Run(c *config.Config) error {
-	// TODO(kai): implement run
+	err := Build(c)
+	if err != nil {
+		return fmt.Errorf("error building package: %w", err)
+	}
 	return nil
 }
