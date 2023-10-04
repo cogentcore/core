@@ -48,8 +48,6 @@ func ArchSupported(arch string) error {
 	return nil
 }
 
-// TODO: get all archs correctly when parsing platform
-
 // ParsePlatform parses the given platform string of format os[/arch]
 func (p *Platform) SetString(platform string) error {
 	before, after, found := strings.Cut(platform, "/")
@@ -58,7 +56,7 @@ func (p *Platform) SetString(platform string) error {
 		return fmt.Errorf("error parsing platform: %w", err)
 	}
 	if !found {
-		*p = Platform{OS: before, Arch: "all"}
+		*p = Platform{OS: before, Arch: "*"}
 	}
 	err = ArchSupported(after)
 	if err != nil {
@@ -66,6 +64,16 @@ func (p *Platform) SetString(platform string) error {
 	}
 	*p = Platform{OS: before, Arch: after}
 	return nil
+}
+
+// ArchsForOS returns contains all of the architectures supported for
+// each operating system.
+var ArchsForOS = map[string][]string{
+	"darwin":  {"386", "amd64", "arm", "arm64"},
+	"windows": {"386", "amd64", "arm", "arm64"},
+	"linux":   {"386", "amd64", "arm", "arm64"},
+	"android": {"386", "amd64", "arm", "arm64"},
+	"ios":     {"386", "amd64", "arm", "arm64"},
 }
 
 // SupportedOS is a map containing all operating systems and whether they are supported by GoKi.

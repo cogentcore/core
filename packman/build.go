@@ -32,13 +32,20 @@ func Build(c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		if platform.Arch != "all" {
+		if platform.Arch != "*" {
 			err := config.ArchSupported(platform.Arch)
 			if err != nil {
 				return err
 			}
 		}
 		if platform.OS == "android" || platform.OS == "ios" {
+			if platform.Arch == "*" {
+				archs := config.ArchsForOS[platform.OS]
+				c.Build.Target = make([]config.Platform, len(archs))
+				for i, arch := range archs {
+					c.Build.Target[i] = config.Platform{OS: platform.OS, Arch: arch}
+				}
+			}
 			return mobile.Build(c)
 		}
 		if platform.OS == "js" {
