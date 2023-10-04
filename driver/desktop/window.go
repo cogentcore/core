@@ -192,9 +192,9 @@ outer:
 			// if !shown {
 			// 	continue
 			// }
-			w.mu.Lock()
+			// w.mu.Lock()
 			w.EvMgr.WindowPaint()
-			w.mu.Unlock()
+			// w.mu.Unlock()
 		}
 	}
 }
