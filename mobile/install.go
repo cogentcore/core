@@ -14,12 +14,19 @@ import (
 // Install installs the app named by the import path on the attached mobile device.
 // It assumes that it has already been built.
 //
-// Only -target android is supported. The 'adb' tool must be on the PATH.
+// On Android, the 'adb' tool must be on the PATH.
+// On iOS, Install also runs the app.
 func Install(c *config.Config) error {
-	// TODO: use install config fields, not build ones
-	if len(c.Build.Target) != 1 || c.Build.Target[0].OS != "android" {
-		return fmt.Errorf("target for install must be android, but got %v", c.Build.Target)
+	if len(c.Build.Target) != 1 {
+		return fmt.Errorf("need at least one target platform for install")
 	}
-
-	return xe.Run("adb", "install", "-r", c.Build.Output)
+	t := c.Build.Target[0]
+	switch t.OS {
+	case "android":
+		return xe.Run("adb", "install", "-r", c.Build.Output)
+	case "ios":
+		return xe.Run("ios-deploy", "--debug", "--bundle", c.Build.Output)
+	default:
+		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
+	}
 }
