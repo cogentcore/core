@@ -5,9 +5,9 @@
 package gi
 
 var (
-	// Update2DTrace reports a trace of updates that trigger re-rendering.
+	// UpdateTrace reports a trace of updates that trigger re-rendering.
 	// Can be set in PrefsDebug from prefs gui
-	Update2DTrace bool
+	UpdateTrace bool
 
 	// RenderTrace reports a trace of the nodes rendering
 	// (just printfs to stdout).
@@ -24,15 +24,11 @@ var (
 	// excludes mouse move events
 	WinEventTrace = false
 
-	// WinPublishTrace reports the stack trace leading up to win publish events
+	// WinRenderTrace reports the stack trace leading up to win publish events
 	// which are expensive -- wrap multiple updates in UpdateStart / End
 	// to prevent
 	// can be set in PrefsDebug from prefs gui
-	WinPublishTrace = false
-
-	// WinDrawTrace highlights the window regions that are drawn to update
-	// the window, using filled colored rectangles
-	WinDrawTrace = false
+	WinRenderTrace = false
 
 	// KeyEventTrace reports a trace of keyboard events to stdout
 	// can be set in PrefsDebug from prefs gui

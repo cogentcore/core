@@ -99,6 +99,9 @@ func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
 	if !updt {
 		return
 	}
+	if UpdateTrace {
+		fmt.Println("UpdateTrace: NeedsRender:", wb)
+	}
 	wb.SetFlag(true, NeedsRender)
 	if sc != nil {
 		sc.SetFlag(true, ScNeedsRender)
@@ -127,6 +130,9 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 func (wb *WidgetBase) SetNeedsLayout(sc *Scene, updt bool) {
 	if !updt || sc == nil {
 		return
+	}
+	if updt && UpdateTrace {
+		fmt.Println("UpdateTrace: NeedsLayout:", wb)
 	}
 	sc.SetFlag(true, ScNeedsLayout)
 }
@@ -281,7 +287,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	rc := sc.RenderCtx()
 	if rc == nil {
-		log.Println("ERROR: scene render context is nil:", sc.Name)
+		log.Println("ERROR: scene render context is nil:", sc.Nm)
 		return true
 	}
 
@@ -311,6 +317,8 @@ func (sc *Scene) DoUpdate() bool {
 		sc.Frame.DoNeedsRender(sc)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
+	default:
+		return false
 	}
 	return true
 }

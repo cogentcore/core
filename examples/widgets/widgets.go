@@ -20,15 +20,12 @@ import (
 func main() { gimain.Main(mainrun) }
 
 func mainrun() {
-	width := 1024
-	height := 768
-
 	// turn these on to see a traces of various stages of processing..
-	// gi.Update2DTrace = true
+	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
 	// gi.LayoutTrace = true
-	// ki.SignalTrace = true
 	// gi.WinEventTrace = true
+	// gi.WinRenderTrace = true
 	// gi.EventTrace = true
 	// gi.KeyEventTrace = true
 
@@ -92,7 +89,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Printf("Button1 clicked\n")
 		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).AddTitle("Test Dialog").
 			AddPrompt("This is a prompt").AddOkCancel()
-		// dlg.Stage.OwnWin = true // getting stuck trying to render -- not ready.
+		dlg.Stage.OwnWin = true // getting stuck trying to render -- not ready.
 		dlg.Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",
@@ -362,7 +359,5 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	win.MainMenuUpdated()
 	*/
 
-	gi.NewWindow(scene).
-		SetWidth(width).SetHeight(height).
-		Run().Wait()
+	gi.NewWindow(scene).Run().Wait()
 }

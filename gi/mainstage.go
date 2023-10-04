@@ -45,6 +45,10 @@ func (st *MainStage) AsMain() *MainStage {
 	return st
 }
 
+func (st *MainStage) String() string {
+	return "MainStage: " + st.StageBase.String()
+}
+
 func (st *MainStage) MainMgr() *MainStageMgr {
 	return st.StageMgr
 }
@@ -115,9 +119,36 @@ func (st *MainStage) AddSheetDecor() *MainStage {
 	return st
 }
 
+// FirstWinManager creates a MainStageMgr for the first window
+// to be able to get sizing information prior to having a RenderWin,
+// based on the goosi App Screen Size. Only adds a RenderCtx.
+func (st *MainStage) FirstWinManager() *MainStageMgr {
+	ms := &MainStageMgr{}
+	ms.This = ms
+	rc := &RenderContext{}
+	ms.RenderCtx = rc
+	scr := goosi.TheApp.Screen(0)
+	rc.Size = scr.Geometry.Size()
+	fmt.Println("Screen Size:", rc.Size)
+	rc.Visible = true
+	rc.LogicalDPI = scr.LogicalDPI
+	return ms
+}
+
 // RunWindow runs a Window with current settings.
 func (st *MainStage) RunWindow() *MainStage {
 	st.AddWindowDecor() // sensitive to cases
+
+	// note: need a StageMgr to get initial pref size
+	if CurRenderWin == nil {
+		st.StageMgr = st.FirstWinManager()
+	} else {
+		st.StageMgr = &CurRenderWin.StageMgr
+	}
+	sz := st.Scene.PrefSize(st.RenderCtx().Size)
+	fmt.Println("win size:", sz)
+	st.Scene.Resize(sz)
+
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		if CurRenderWin == nil {
@@ -151,10 +182,10 @@ func (st *MainStage) RunDialog() *MainStage {
 	sz := st.Scene.PrefSize(winsz)
 	fmt.Println(sz)
 	st.Scene.Resize(sz)
-	st.Width = sz.X
-	st.Height = sz.Y
 
 	if st.OwnWin {
+		st.Type = Window                  // critical: now is its own window!
+		st.Scene.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
 		return st
@@ -178,10 +209,13 @@ func (st *MainStage) RunSheet() *MainStage {
 }
 
 func (st *MainStage) NewRenderWin() *RenderWin {
+	if st.Scene == nil {
+		fmt.Println("MainStage.NewRenderWin: ERROR: Scene is nil")
+	}
 	name := st.Name
 	title := st.Title
 	opts := &goosi.NewWindowOptions{
-		Title: title, Size: image.Point{st.Width, st.Height}, StdPixels: true,
+		Title: title, Size: st.Scene.Geom.Size, StdPixels: false,
 	}
 	wgp := WinGeomMgr.Pref(name, nil)
 	if wgp != nil {
@@ -240,6 +274,12 @@ func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
 	stageMods, sceneMods = st.PopupMgr.UpdateAll()
 	scMod := st.Scene.DoUpdate()
 	sceneMods = sceneMods || scMod
+	// if scMod {
+	// 	fmt.Println("main scene mod:", st.Scene.Name)
+	// }
+	if stageMods {
+		fmt.Println("pop stage mod:", st.Name)
+	}
 	return
 }
 

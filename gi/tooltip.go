@@ -30,7 +30,7 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 		win := parSc.Win
 		mainSc := win.Scene
 		psc := &Scene{}
-		psc.Name = name + "Tooltip"
+		psc.Nm = name + "Tooltip"
 		psc.Win = win
 		psc.Type = ScTooltip
 

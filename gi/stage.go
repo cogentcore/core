@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -126,12 +127,6 @@ type StageBase struct {
 	// if > 0, disappears after a timeout duration
 	Timeout time.Duration
 
-	// if non-zero, requested width in standardized 96 DPI Pixel units.  otherwise automatically resizes.
-	Width int
-
-	// if non-zero, requested height in standardized 96 DPI Pixel units.  otherwise automatically resizes.
-	Height int
-
 	// if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	OwnWin bool
 
@@ -154,6 +149,7 @@ type StageBase struct {
 // Stage interface provides methods for setting values on Stages.
 // Convert to *MainStage or *PopupStage via As methods.
 type Stage interface {
+	fmt.Stringer
 
 	// AsBase returns this stage as a StageBase for accessing base fields.
 	AsBase() *StageBase
@@ -185,10 +181,6 @@ type Stage interface {
 	SetClickOff() Stage
 
 	SetTimeout(dur time.Duration) Stage
-
-	SetWidth(width int) Stage
-
-	SetHeight(height int) Stage
 
 	SetOwnWin() Stage
 
@@ -251,6 +243,18 @@ func (st *StageBase) AsPopup() *PopupStage {
 	return nil
 }
 
+func (st *StageBase) String() string {
+	str := fmt.Sprintf("%s Type: %s", st.Name, st.Type)
+	if st.Scene != nil {
+		str += "  Scene: " + st.Scene.Name()
+	}
+	rc := st.This.RenderCtx()
+	if rc != nil {
+		str += "  Rc: " + rc.String()
+	}
+	return str
+}
+
 func (st *StageBase) MainMgr() *MainStageMgr {
 	return nil
 }
@@ -278,7 +282,7 @@ func (st *StageBase) SetNameFromScene() Stage {
 		return nil
 	}
 	sc := st.Scene
-	st.Name = sc.Name + "-" + strings.ToLower(st.Type.String())
+	st.Name = sc.Name() + "-" + strings.ToLower(st.Type.String())
 	st.Title = sc.Title
 	return st.This
 }
@@ -359,16 +363,6 @@ func (st *StageBase) SetTimeout(dur time.Duration) Stage {
 	return st.This
 }
 
-func (st *StageBase) SetWidth(width int) Stage {
-	st.Width = width
-	return st.This
-}
-
-func (st *StageBase) SetHeight(height int) Stage {
-	st.Height = height
-	return st.This
-}
-
 func (st *StageBase) SetOwnWin() Stage {
 	st.OwnWin = true
 	return st.This
@@ -438,5 +432,8 @@ func (st *StageBase) DoUpdate() (stageMods, sceneMods bool) {
 		return
 	}
 	sceneMods = st.Scene.DoUpdate()
+	if sceneMods {
+		fmt.Println("scene mod", st.Scene.Name)
+	}
 	return
 }

@@ -33,7 +33,7 @@ import (
 type Scene struct {
 
 	// name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.
-	Name string `desc:"name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique."`
+	Nm string `desc:"name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique."`
 
 	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
 	Title string `desc:"title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types"`
@@ -88,7 +88,7 @@ type Scene struct {
 // of the specified width and height.
 func NewScene(name string) *Scene {
 	sc := &Scene{}
-	sc.Name = name
+	sc.Nm = name
 	sc.BgColor.SetColor(color.Transparent)
 	sc.Frame.InitName(&sc.Frame, "frame")
 	sc.Frame.Lay = LayoutVert
@@ -103,10 +103,14 @@ func (sc *Scene) SetTitle(title string) *Scene {
 	return sc
 }
 
+func (sc *Scene) Name() string {
+	return sc.Nm
+}
+
 func (sc *Scene) RenderCtx() *RenderContext {
 	sm := sc.MainStageMgr()
 	if sm == nil {
-		log.Println("ERROR: Scene has nil StageMgr:", sc.Name)
+		log.Println("ERROR: Scene has nil StageMgr:", sc.Nm)
 		return nil
 	}
 	return sm.RenderCtx
@@ -118,7 +122,7 @@ func (sc *Scene) RenderCtx() *RenderContext {
 // or in a main stage.
 func (sc *Scene) MainStageMgr() *MainStageMgr {
 	if sc.Stage == nil {
-		log.Println("ERROR: Scene has nil Stage:", sc.Name)
+		log.Println("ERROR: Scene has nil Stage:", sc.Nm)
 		return nil
 	}
 	return sc.Stage.MainMgr()

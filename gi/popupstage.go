@@ -26,6 +26,10 @@ func (st *PopupStage) AsPopup() *PopupStage {
 	return st
 }
 
+func (st *PopupStage) String() string {
+	return "PopupStage: " + st.StageBase.String()
+}
+
 func (st *PopupStage) MainMgr() *MainStageMgr {
 	if st.Main == nil {
 		return nil

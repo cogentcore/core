@@ -231,7 +231,7 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
 		} else {
-			log.Println("ERROR: SetUnitContext RenderCtx is nil for Scene", sc.Name)
+			log.Println("ERROR: SetUnitContext RenderCtx is nil for Scene", sc.Name())
 		}
 		if sc.RenderState.Image != nil {
 			sz := sc.Geom.Size // Render.Image.Bounds().Size()

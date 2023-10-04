@@ -1012,7 +1012,7 @@ var StructViewIfDebug = false
 type PrefsDebug struct {
 
 	// reports trace of updates that trigger re-rendering (printfs to stdout)
-	Update2DTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
+	UpdateTrace *bool `desc:"reports trace of updates that trigger re-rendering (printfs to stdout)"`
 
 	// reports trace of the nodes rendering (printfs to stdout)
 	RenderTrace *bool `desc:"reports trace of the nodes rendering (printfs to stdout)"`
@@ -1024,10 +1024,7 @@ type PrefsDebug struct {
 	WinEventTrace *bool `desc:"reports trace of window events (printfs to stdout)"`
 
 	// reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent
-	WinPublishTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
-
-	// WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles
-	WinDrawTrace *bool `desc:"WinDrawTrace highlights the window regions that are drawn to update the window, using filled colored rectangles"`
+	WinRenderTrace *bool `desc:"reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent"`
 
 	// WinGeomTrace records window geometry saving / loading functions
 	WinGeomTrace *bool `desc:"WinGeomTrace records window geometry saving / loading functions"`
@@ -1069,12 +1066,11 @@ var PrefsDebugProps = ki.Props{
 
 // Connect connects debug fields with actual variables controlling debugging
 func (pf *PrefsDebug) Connect() {
-	pf.Update2DTrace = &Update2DTrace
+	pf.UpdateTrace = &UpdateTrace
 	pf.RenderTrace = &RenderTrace
 	pf.LayoutTrace = &LayoutTrace
 	pf.WinEventTrace = &WinEventTrace
-	pf.WinPublishTrace = &WinPublishTrace
-	pf.WinDrawTrace = &WinDrawTrace
+	pf.WinRenderTrace = &WinRenderTrace
 	pf.WinGeomTrace = &WinGeomTrace
 	pf.KeyEventTrace = &KeyEventTrace
 	pf.EventTrace = &EventTrace

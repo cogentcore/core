@@ -269,7 +269,7 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
 	// always keep name updated in case that changed
 	if data != nil {
 		dflags := data.(int64)
-		if gi.Update2DTrace {
+		if gi.UpdateTrace {
 			// todo: fixme
 			// fmt.Printf("treeview: %v got signal: %v from node: %v  data: %v  flags %v\n", tv.Path(), ki.NodeSignals(sig), send.Path(), kit.BitFlagsToString(dflags, ki.FlagsN), kit.BitFlagsToString(send.Flags(), ki.FlagsN))
 		}
@@ -281,7 +281,7 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
 		// 		tv.SetFullReRender() // re-render for struct updates on root node
 		// 	}
 		// 	tvIdx := tv.ViewIdx
-		// 	if gi.Update2DTrace {
+		// 	if gi.UpdateTrace {
 		// 		fmt.Printf("treeview: structupdate for node, idx: %v  %v", tvIdx, tv.Path())
 		// 	}
 		// 	tv.SyncToSrc(&tvIdx, false, 0)

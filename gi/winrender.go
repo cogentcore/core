@@ -106,6 +106,11 @@ func (rc *RenderContext) ReadUnlock() {
 	rc.Mu.RUnlock()
 }
 
+func (rc *RenderContext) String() string {
+	str := fmt.Sprintf("Size: %s  Visible: %v", rc.Size, rc.Visible)
+	return str
+}
+
 //////////////////////////////////////////////////////////////////////
 //  RenderScenes
 
@@ -153,9 +158,25 @@ func (rs *RenderScenes) Add(sc *Scene) int {
 
 // SetImages calls drw.SetGoImage on all updated Scene images
 func (rs *RenderScenes) SetImages(drw *vdraw.Drawer) {
+	if len(rs.Scenes) == 0 {
+		if WinRenderTrace {
+			fmt.Println("RenderScene.SetImages: no scenes")
+		}
+	}
 	for i, sc := range rs.Scenes {
 		if sc.HasFlag(ScIsUpdating) || !sc.HasFlag(ScImageUpdated) {
+			if WinRenderTrace {
+				if sc.HasFlag(ScIsUpdating) {
+					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
+				}
+				if !sc.HasFlag(ScImageUpdated) {
+					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name())
+				}
+			}
 			continue
+		}
+		if WinRenderTrace {
+			fmt.Println("RenderScenes.SetImages:", sc.Name(), sc.Pixels.Bounds())
 		}
 		drw.SetGoImage(i, 0, sc.Pixels, vgpu.NoFlipY)
 		sc.SetFlag(false, ScImageUpdated)
@@ -198,12 +219,17 @@ func (w *RenderWin) RenderWindow() {
 
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
 	if !stageMods && !sceneMods {                  // nothing to do!
-		fmt.Printf("no mods\n")
+		// fmt.Println("no mods") // note: get a ton of these..
 		return
+	}
+
+	if WinRenderTrace {
+		fmt.Println("RenderWindow: doing render:", w.Name)
 	}
 
 	if stageMods {
 		if !w.GatherScenes() {
+			fmt.Println("RenderWindow: ERROR: no scenes")
 			return
 		}
 	}
@@ -214,21 +240,21 @@ func (w *RenderWin) RenderWindow() {
 // DrawScenes does the drawing of RenderScenes to the window.
 func (w *RenderWin) DrawScenes() {
 	if !w.IsVisible() || w.GoosiWin.IsMinimized() {
-		if WinEventTrace {
-			fmt.Printf("skipping update on inactive / minimized window: %v\n", w.Name)
+		if WinRenderTrace {
+			fmt.Printf("RenderWindow: skipping update on inactive / minimized window: %v\n", w.Name)
 		}
 		return
 	}
 	// if !w.HasFlag(WinSentShow) {
 	// 	return
 	// }
-	// if !w.GoosiWin.Lock() {
-	// 	if WinEventTrace {
-	// 		fmt.Printf("window was closed: %v\n", w.Name)
-	// 	}
-	// 	return
-	// }
-	// defer w.GoosiWin.Unlock()
+	if !w.GoosiWin.Lock() {
+		if WinRenderTrace {
+			fmt.Printf("RenderWindow: window was closed: %v\n", w.Name)
+		}
+		return
+	}
+	defer w.GoosiWin.Unlock()
 
 	// pr := prof.Start("win.DrawScenes")
 
@@ -265,6 +291,7 @@ func (w *RenderWin) GatherScenes() bool {
 	sm := &w.StageMgr
 	n := sm.Stack.Len()
 	if n == 0 {
+		fmt.Println("ERROR: GatherScenes stack empty")
 		return false // shouldn't happen!
 	}
 
@@ -273,6 +300,9 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		if st.Type == Window {
+			if WinRenderTrace {
+				fmt.Println("GatherScenes: main Window:", st.String())
+			}
 			rs.Add(st.Scene)
 			winIdx = i
 			break
@@ -283,6 +313,9 @@ func (w *RenderWin) GatherScenes() bool {
 	for i := winIdx + 1; i < n; i++ {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		rs.Add(st.Scene)
+		if WinRenderTrace {
+			fmt.Println("GatherScenes: overlay Stage:", st.String())
+		}
 	}
 
 	top := sm.Top().AsMain()
@@ -292,10 +325,9 @@ func (w *RenderWin) GatherScenes() bool {
 	for _, kv := range top.PopupMgr.Stack.Order {
 		st := kv.Val.AsBase()
 		rs.Add(st.Scene)
-	}
-
-	if WinEventTrace {
-		fmt.Printf("n scenes: %d\n", len(rs.Scenes))
+		if WinRenderTrace {
+			fmt.Println("GatherScenes: popup:", st.String())
+		}
 	}
 	return true
 }
