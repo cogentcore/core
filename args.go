@@ -345,9 +345,34 @@ func ParseFlag(name string, value string, allFlags *Fields, errNotFound bool) er
 // SetFieldValue sets the value of the given configuration field
 // to the given string argument value.
 func SetFieldValue(f *Field, value string) error {
-	ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
-	if !ok {
-		return fmt.Errorf("not able to set field %q from flag value %q", f.Name, value)
+	nptyp := laser.NonPtrType(f.Value.Type())
+	vk := nptyp.Kind()
+	switch {
+	// TODO: more robust parsing of maps and slices
+	case vk == reflect.Map:
+		strs := strings.Split(value, ",")
+		mval := map[string]string{}
+		for _, str := range strs {
+			k, v, found := strings.Cut(str, "=")
+			if !found {
+				return fmt.Errorf("missing key-value pair for setting map flag %q from flag value %q (element %q has no %q)", f.Names[0], value, str, "=")
+			}
+			mval[k] = v
+		}
+		err := laser.CopyMapRobust(f.Value.Interface(), mval)
+		if err != nil {
+			return fmt.Errorf("unable to set map flag %q from flag value %q: %w", f.Names[0], value, err)
+		}
+	case vk == reflect.Slice:
+		err := laser.CopySliceRobust(f.Value.Interface(), strings.Split(value, ","))
+		if err != nil {
+			return fmt.Errorf("unable to set slice flag %q from flag value %q: %w", f.Names[0], value, err)
+		}
+	default:
+		ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
+		if !ok {
+			return fmt.Errorf("unable to set flag %q from flag value %q", f.Names[0], value)
+		}
 	}
 	return nil
 }
