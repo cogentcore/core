@@ -152,6 +152,51 @@ func SetMinor(c *Config) {
 	minor = c
 }
 
+// verbose is the config object for [Verbose] specified through [SetVerbose]
+var verbose *Config
+
+// Verbose returns the default [Config] object for a verbose command,
+// based on [grog.UserLevel]. It should be used for commands that
+// whose output are the purpose of an application; for example, a
+// logger or diff viewer. It results in commands and output being
+// printed with a [grog.UserLevel] of [slog.LevelWarn] or below,
+// whereas [Major] and [Minor] result in that when it is [slog.LevelInfo]
+// and [slog.levelDebug] or below, respectively. The object return by
+// Verbose is guaranteed to be unique, so it can be modified directly.
+func Verbose() *Config {
+	if verbose != nil {
+		// need to make a new copy so people can't modify the underlying
+		res := *verbose
+		return &res
+	}
+	if grog.UserLevel <= slog.LevelWarn {
+		return &Config{
+			Buffer:   true,
+			Env:      map[string]string{},
+			Stdout:   os.Stdout,
+			Stderr:   os.Stderr,
+			Stdin:    os.Stdin,
+			Commands: os.Stdout,
+			Errors:   os.Stderr,
+		}
+	}
+	return &Config{
+		Buffer: true,
+		Env:    map[string]string{},
+		Stderr: os.Stderr,
+		Stdin:  os.Stdin,
+		Errors: os.Stderr,
+	}
+}
+
+// SetVerbose sets the config object that [Verbose] returns. It should
+// be used sparingly, and only in cases where there is a clear property
+// that should be set for all commands. If the given config object is
+// nil, [Verbose] will go back to returning its default value.
+func SetVerbose(c *Config) {
+	verbose = c
+}
+
 // GetWriter returns the appropriate writer to use based on the given writer and error.
 // If the given error is non-nil, the returned writer is guaranteed to be non-nil,
 // with [Config.Stderr] used as a backup. Otherwise, the returned writer will only
