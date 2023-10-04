@@ -99,6 +99,10 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 		return nil, fmt.Errorf("cannot set -o when building non-main package")
 	}
 
+	if c.Build.ID == "" {
+		return nil, fmt.Errorf("mobile platforms require -id to be set")
+	}
+
 	var nmpkgs map[string]bool
 	switch {
 	case IsAndroidPlatform(c.Build.Target[0].OS):
@@ -131,10 +135,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 			}
 			return pkg, nil
 		}
-		if c.Build.BundleID == "" {
-			return nil, fmt.Errorf("-target=ios requires -bundleid set")
-		}
-		nmpkgs, err = GoAppleBuild(c, pkg, c.Build.BundleID, c.Build.Target)
+		nmpkgs, err = GoAppleBuild(c, pkg, c.Build.ID, c.Build.Target)
 		if err != nil {
 			return nil, err
 		}

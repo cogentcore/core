@@ -96,8 +96,8 @@ type Build struct {
 	// [def: 29] the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
 	AndroidTargetSDK int `def:"29" desc:"the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)"`
 
-	// the bundle ID to use with the app (required for target iOS and N/A otherwise)
-	BundleID string `desc:"the bundle ID to use with the app (required for target iOS and N/A otherwise)"`
+	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)
+	ID string `desc:"the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)"`
 }
 
 type Colorgen struct {

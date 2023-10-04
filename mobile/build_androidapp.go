@@ -54,8 +54,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		buf := new(bytes.Buffer)
 		buf.WriteString(`<?xml version="1.0" encoding="utf-8"?>`)
 		err := ManifestTmpl.Execute(buf, ManifestTmplData{
-			// TODO(crawshaw): a better package path.
-			JavaPkgPath: "org.golang.todo." + libName,
+			JavaPkgPath: c.Build.ID,
 			Name:        strings.Title(appName),
 			LibName:     libName,
 		})
@@ -175,6 +174,7 @@ func GoAndroidBuild(c *config.Config, pkg *packages.Package, targets []config.Pl
 		}
 	}
 
+	// TODO: what should we do about OpenAL?
 	for _, t := range targets {
 		toolchain := NDK.Toolchain(t.Arch)
 		if nmpkgs[t.Arch]["goki.dev/mobile/exp/audio/al"] {
