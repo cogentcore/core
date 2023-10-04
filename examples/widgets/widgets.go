@@ -92,7 +92,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Printf("Button1 clicked\n")
 		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).AddTitle("Test Dialog").
 			AddPrompt("This is a prompt").AddOkCancel()
-		dlg.Stage.OwnWin = true // getting stuck trying to render -- not ready.
+		// dlg.Stage.OwnWin = true // getting stuck trying to render -- not ready.
 		dlg.Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",

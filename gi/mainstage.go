@@ -147,21 +147,19 @@ func (st *MainStage) RunDialog() *MainStage {
 	}
 	winsz := ms.RenderCtx.Size
 
+	st.StageMgr = ms // temporary
 	sz := st.Scene.PrefSize(winsz)
-	sz.X = 150
-	sz.Y = 100
-	st.Scene.Resize(sz)
 	fmt.Println(sz)
+	st.Scene.Resize(sz)
+	st.Width = sz.X
+	st.Height = sz.Y
 
 	if st.OwnWin {
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
 		return st
 	}
-	// todo: need some kind of linkage here for dialog relative to existing window
-	// probably just CurRenderWin but it needs to be a stack or updated properly etc.
 	ms.Push(st)
-	st.StageMgr = ms
 	return st
 }
 

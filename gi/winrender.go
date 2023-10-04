@@ -222,13 +222,13 @@ func (w *RenderWin) DrawScenes() {
 	// if !w.HasFlag(WinSentShow) {
 	// 	return
 	// }
-	if !w.GoosiWin.Lock() {
-		if WinEventTrace {
-			fmt.Printf("window was closed: %v\n", w.Name)
-		}
-		return
-	}
-	defer w.GoosiWin.Unlock()
+	// if !w.GoosiWin.Lock() {
+	// 	if WinEventTrace {
+	// 		fmt.Printf("window was closed: %v\n", w.Name)
+	// 	}
+	// 	return
+	// }
+	// defer w.GoosiWin.Unlock()
 
 	// pr := prof.Start("win.DrawScenes")
 
