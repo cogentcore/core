@@ -157,8 +157,8 @@ var verbose *Config
 
 // Verbose returns the default [Config] object for a verbose command,
 // based on [grog.UserLevel]. It should be used for commands that
-// whose output are the purpose of an application; for example, a
-// logger or diff viewer. It results in commands and output being
+// whose output are central to an application; for example, for a
+// logger or app runner. It results in commands and output being
 // printed with a [grog.UserLevel] of [slog.LevelWarn] or below,
 // whereas [Major] and [Minor] result in that when it is [slog.LevelInfo]
 // and [slog.levelDebug] or below, respectively. The object return by
