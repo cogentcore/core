@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/girl/units"
@@ -50,7 +51,7 @@ type Style struct {
 	Inactive bool `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
 
 	// the cursor to switch to upon hovering over the element (inherited)
-	// Cursor cursor.Shapes `desc:"the cursor to switch to upon hovering over the element (inherited)"`
+	Cursor cursors.Cursor `desc:"the cursor to switch to upon hovering over the element (inherited)"`
 
 	// prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor
 	ZIndex int `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
@@ -258,7 +259,6 @@ func (s *Style) CopyFrom(cp *Style) {
 // automatic version!
 func (s *Style) InheritFields(par *Style) {
 	// fmt.Println("Inheriting from", *par)
-	// s.Cursor = par.Cursor
 	s.Color = par.Color
 	s.Font.InheritFields(&par.Font)
 	s.Text.InheritFields(&par.Text)
