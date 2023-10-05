@@ -432,8 +432,8 @@ func (st *StageBase) DoUpdate() (stageMods, sceneMods bool) {
 		return
 	}
 	sceneMods = st.Scene.DoUpdate()
-	if sceneMods {
-		fmt.Println("scene mod", st.Scene.Name)
-	}
+	// if sceneMods {
+	// 	fmt.Println("scene mod", st.Scene.Name())
+	// }
 	return
 }

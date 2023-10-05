@@ -928,7 +928,6 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.LayoutFocusNameTimeoutMSec = LayoutFocusNameTimeoutMSec
 	pf.LayoutFocusNameTabMSec = LayoutFocusNameTabMSec
 	pf.MenuMaxHeight = MenuMaxHeight
-	pf.DialogsSepRenderWin = DialogsSepRenderWin
 	// TheViewIFace.PrefsDetDefaults(pf) // todo:
 	// in giv:
 	// TextViewClipHistMax
@@ -953,7 +952,6 @@ func (pf *PrefsDetailed) Apply() {
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight
-	DialogsSepRenderWin = pf.DialogsSepRenderWin
 	// TheViewIFace.PrefsDetApply(pf) // TODO: add this once we have giv working
 	// in giv:
 	// TextViewClipHistMax = pf.TextViewClipHistMax

@@ -370,9 +370,6 @@ func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 		if wb == nil {
 			continue
 		}
-		if wb.KiType().HasEmbed(FrameType) {
-			wb.SetFlag(true, ReRenderAnchor)
-		}
 		isz := sp * avail
 		wb.LayState.Alloc.Size.SetDim(sv.Dim, isz)
 		wb.LayState.Alloc.Size.SetDim(odim, osz)

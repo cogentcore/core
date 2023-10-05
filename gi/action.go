@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -94,7 +95,7 @@ func (ac *Action) OnInit() {
 func (ac *Action) ActionStyles() {
 	ac.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
 		s.Text.Align = styles.AlignCenter
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)

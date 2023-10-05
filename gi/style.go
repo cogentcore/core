@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"goki.dev/colors"
-	"goki.dev/cursors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -264,24 +263,6 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 		return cs
 	}
 	return pwb.Style.BackgroundColor
-}
-
-// ParentCursor returns the cursor of the nearest
-// widget parent of the widget that has a a non-default
-// cursor. If no such parent is found, it returns the given
-// cursor. This function can be used for elements like labels
-// that have a default cursor ([cursor.IBeam]) but should
-// not override the cursor of a parent.
-func (wb *WidgetBase) ParentCursor(cur cursors.Cursor) cursors.Cursor {
-	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		// return p.Style.Cursor != cursor.Arrow
-		return true
-	})
-	if pwb == nil {
-		return cur
-	}
-	// return pwb.Style.Cursor
-	return cursors.Default
 }
 
 /////////////////////////////////////////////////////////////////

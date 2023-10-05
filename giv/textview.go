@@ -16,13 +16,13 @@ import (
 	"unicode"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 
@@ -187,7 +187,7 @@ func (tv *TextView) OnInit() {
 		tv.HighlightColor.SetSolid(colors.Orange)
 		tv.CursorColor.SetSolid(colors.Scheme.OnSurface)
 
-		s.Cursor = cursor.IBeam
+		s.Cursor = cursors.Text
 		if gi.Prefs.Editor.WordWrap {
 			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		} else {
@@ -532,7 +532,6 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", ki.Type(tv.Par), tv.Path())
 		return mat32.Vec2Zero
 	}
-	parw.SetFlag(true, ReRenderAnchor)
 	paloc := parw.LayState.Alloc.SizeOrig
 	if !paloc.IsNil() {
 		// fmt.Printf("paloc: %v, psc: %v  lineonoff: %v\n", paloc, parw.ScBBox, tv.LineNoOff)
@@ -4719,9 +4718,9 @@ func (tv *TextView) MouseMoveEvent() {
 		}
 		// TODO: figure out how to handle links with new cursor setup
 		if inLink {
-			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
 		} else {
-			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
+			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
 		}
 
 	})

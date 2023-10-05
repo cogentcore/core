@@ -8,6 +8,10 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"os"
+	"runtime"
+	"runtime/pprof"
+	"time"
 
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
@@ -523,20 +527,103 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	pc.DrawStdBox(rs, st, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &csp)
 }
 
-// ParentReRenderAnchor returns parent (including this node)
-// that is a ReRenderAnchor -- for optimized re-rendering
-func (wb *WidgetBase) ParentReRenderAnchor() Widget {
-	var par Widget
-	wb.WalkUp(func(k ki.Ki) bool {
-		wi, w := AsWidget(k)
-		if w == nil {
-			return ki.Break // don't keep going up
-		}
-		if w.Is(ReRenderAnchor) {
-			par = wi
-			return ki.Break
-		}
+/////////////////////////////////////////////////////////////////////////////
+//                   Profiling and Benchmarking, controlled by hot-keys
+
+// ProfileToggle turns profiling on or off
+func ProfileToggle() {
+	if prof.Profiling {
+		EndTargProfile()
+		EndCPUMemProfile()
+	} else {
+		StartTargProfile()
+		StartCPUMemProfile()
+	}
+}
+
+// StartCPUMemProfile starts the standard Go cpu and memory profiling.
+func StartCPUMemProfile() {
+	fmt.Println("Starting Std CPU / Mem Profiling")
+	f, err := os.Create("cpu.prof")
+	if err != nil {
+		log.Fatal("could not create CPU profile: ", err)
+	}
+	if err := pprof.StartCPUProfile(f); err != nil {
+		log.Fatal("could not start CPU profile: ", err)
+	}
+}
+
+// EndCPUMemProfile ends the standard Go cpu and memory profiling.
+func EndCPUMemProfile() {
+	fmt.Println("Ending Std CPU / Mem Profiling")
+	pprof.StopCPUProfile()
+	f, err := os.Create("mem.prof")
+	if err != nil {
+		log.Fatal("could not create memory profile: ", err)
+	}
+	runtime.GC() // get up-to-date statistics
+	if err := pprof.WriteHeapProfile(f); err != nil {
+		log.Fatal("could not write memory profile: ", err)
+	}
+	f.Close()
+}
+
+// StartTargProfile starts targeted profiling using goki prof package.
+func StartTargProfile() {
+	fmt.Printf("Starting Targeted Profiling\n")
+	prof.Reset()
+	prof.Profiling = true
+}
+
+// EndTargProfile ends targeted profiling and prints report.
+func EndTargProfile() {
+	prof.Report(time.Millisecond)
+	prof.Profiling = false
+}
+
+// ReportWinNodes reports the number of nodes in this scene
+func (sc *Scene) ReportWinNodes() {
+	nn := 0
+	sc.Frame.WalkPre(func(k ki.Ki) bool {
+		nn++
 		return ki.Continue
 	})
-	return par
+	fmt.Printf("Scene: %v has: %v nodes\n", sc.Name(), nn)
+}
+
+// BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
+// and everything), reporting targeted profile results and generating standard
+// Go cpu.prof and mem.prof outputs.
+func (sc *Scene) BenchmarkFullRender() {
+	fmt.Println("Starting BenchmarkFullRender")
+	sc.ReportWinNodes()
+	StartCPUMemProfile()
+	StartTargProfile()
+	ts := time.Now()
+	n := 50
+	for i := 0; i < n; i++ {
+		sc.Frame.DoLayoutTree(sc)
+		sc.Frame.Render(sc)
+	}
+	td := time.Now().Sub(ts)
+	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	EndTargProfile()
+	EndCPUMemProfile()
+}
+
+// BenchmarkReRender runs benchmark of 50 re-render-only updates of display
+// (just the raw rendering, no styling or layout), reporting targeted profile
+// results and generating standard Go cpu.prof and mem.prof outputs.
+func (sc *Scene) BenchmarkReRender() {
+	fmt.Println("Starting BenchmarkReRender")
+	sc.ReportWinNodes()
+	StartTargProfile()
+	ts := time.Now()
+	n := 50
+	for i := 0; i < n; i++ {
+		sc.Frame.Render(sc)
+	}
+	td := time.Now().Sub(ts)
+	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
+	EndTargProfile()
 }

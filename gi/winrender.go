@@ -217,8 +217,11 @@ func (w *RenderWin) RenderWindow() {
 	w.RenderCtx().WriteLock()
 	defer w.RenderCtx().WriteUnlock()
 
+	redraw := w.HasFlag(WinRedraw)
+	w.SetFlag(false, WinRedraw)
+
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
-	if !stageMods && !sceneMods {                  // nothing to do!
+	if !redraw && !stageMods && !sceneMods {       // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
 		return
 	}
@@ -227,7 +230,7 @@ func (w *RenderWin) RenderWindow() {
 		fmt.Println("RenderWindow: doing render:", w.Name)
 	}
 
-	if stageMods {
+	if stageMods || redraw {
 		if !w.GatherScenes() {
 			fmt.Println("RenderWindow: ERROR: no scenes")
 			return

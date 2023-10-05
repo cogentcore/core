@@ -10,23 +10,16 @@ package gimain
 import (
 	"sync/atomic"
 
-	"goki.dev/gi/v2/gi"
 	// "goki.dev/gi/v2/giv"
+	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
-	"goki.dev/svg"
 	_ "goki.dev/vgpu/v2/vphong"
 )
 
-// these dummy variables force inclusion of relevant packages
-var dummyGi gi.Widget
-var dummSvg svg.Line
-
-// var dummyVV giv.ValueViewBase
-
 // Main is run in a main package to start the GUI driver / event loop,
 // and call given function as the effective "main" function.
-func Main(mainrun func()) {
+func Run(mainrun func()) {
 	DebugEnumSizes()
 	driver.Main(func(app goosi.App) {
 		gi.Init()

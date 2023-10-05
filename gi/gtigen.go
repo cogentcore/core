@@ -13,7 +13,7 @@ var ActionType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Action",
 	ShortName: "gi.Action",
 	IDName:    "action",
-	Doc:       "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar",
+	Doc:       "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar.\nAction functions provide the *Action that generated them, which has\na Data value that can be used to determine the proper action to take,\nin the case of automatically-generated chooser-type menus.\nThe Action(s) are called via the On(events.Click) action,\nthat wraps the func(act *Action) call.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -29,12 +29,10 @@ var ActionType = gti.AddType(&gti.Type{
 	Instance: &Action{},
 })
 
-// NewAction adds a new [Action] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewAction(par ki.Ki, name ...string) *Action {
-	return par.NewChild(ActionType, name...).(*Action)
+// NewAction adds a new [Action] with
+// the given name to the given parent.
+func NewAction(par ki.Ki, name string) *Action {
+	return par.NewChild(ActionType, name).(*Action)
 }
 
 // KiType returns the [*gti.Type] of [Action]
@@ -87,12 +85,10 @@ var MenuBarType = gti.AddType(&gti.Type{
 	Instance: &MenuBar{},
 })
 
-// NewMenuBar adds a new [MenuBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewMenuBar(par ki.Ki, name ...string) *MenuBar {
-	return par.NewChild(MenuBarType, name...).(*MenuBar)
+// NewMenuBar adds a new [MenuBar] with
+// the given name to the given parent.
+func NewMenuBar(par ki.Ki, name string) *MenuBar {
+	return par.NewChild(MenuBarType, name).(*MenuBar)
 }
 
 // KiType returns the [*gti.Type] of [MenuBar]
@@ -122,12 +118,10 @@ var ToolBarType = gti.AddType(&gti.Type{
 	Instance: &ToolBar{},
 })
 
-// NewToolBar adds a new [ToolBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewToolBar(par ki.Ki, name ...string) *ToolBar {
-	return par.NewChild(ToolBarType, name...).(*ToolBar)
+// NewToolBar adds a new [ToolBar] with
+// the given name to the given parent.
+func NewToolBar(par ki.Ki, name string) *ToolBar {
+	return par.NewChild(ToolBarType, name).(*ToolBar)
 }
 
 // KiType returns the [*gti.Type] of [ToolBar]
@@ -181,12 +175,10 @@ var BitmapType = gti.AddType(&gti.Type{
 	Instance: &Bitmap{},
 })
 
-// NewBitmap adds a new [Bitmap] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewBitmap(par ki.Ki, name ...string) *Bitmap {
-	return par.NewChild(BitmapType, name...).(*Bitmap)
+// NewBitmap adds a new [Bitmap] with
+// the given name to the given parent.
+func NewBitmap(par ki.Ki, name string) *Bitmap {
+	return par.NewChild(BitmapType, name).(*Bitmap)
 }
 
 // KiType returns the [*gti.Type] of [Bitmap]
@@ -220,12 +212,10 @@ var ButtonBoxType = gti.AddType(&gti.Type{
 	Instance: &ButtonBox{},
 })
 
-// NewButtonBox adds a new [ButtonBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBox(par ki.Ki, name ...string) *ButtonBox {
-	return par.NewChild(ButtonBoxType, name...).(*ButtonBox)
+// NewButtonBox adds a new [ButtonBox] with
+// the given name to the given parent.
+func NewButtonBox(par ki.Ki, name string) *ButtonBox {
+	return par.NewChild(ButtonBoxType, name).(*ButtonBox)
 }
 
 // KiType returns the [*gti.Type] of [ButtonBox]
@@ -282,12 +272,10 @@ var ButtonBaseType = gti.AddType(&gti.Type{
 	Instance: &ButtonBase{},
 })
 
-// NewButtonBase adds a new [ButtonBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBase(par ki.Ki, name ...string) *ButtonBase {
-	return par.NewChild(ButtonBaseType, name...).(*ButtonBase)
+// NewButtonBase adds a new [ButtonBase] with
+// the given name to the given parent.
+func NewButtonBase(par ki.Ki, name string) *ButtonBase {
+	return par.NewChild(ButtonBaseType, name).(*ButtonBase)
 }
 
 // KiType returns the [*gti.Type] of [ButtonBase]
@@ -305,7 +293,7 @@ var ButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Button",
 	ShortName: "gi.Button",
 	IDName:    "button",
-	Doc:       "Button is a standard command button -- PushButton in Qt Widgets, and Button\nin Qt Quick -- by default it puts the icon to the left and the text to the\nright",
+	Doc:       "Button is a standard standalone button.\nDo On(events.Click) to register a function to execute when pressed.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -319,12 +307,10 @@ var ButtonType = gti.AddType(&gti.Type{
 	Instance: &Button{},
 })
 
-// NewButton adds a new [Button] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButton(par ki.Ki, name ...string) *Button {
-	return par.NewChild(ButtonType, name...).(*Button)
+// NewButton adds a new [Button] with
+// the given name to the given parent.
+func NewButton(par ki.Ki, name string) *Button {
+	return par.NewChild(ButtonType, name).(*Button)
 }
 
 // KiType returns the [*gti.Type] of [Button]
@@ -376,12 +362,10 @@ var CheckBoxType = gti.AddType(&gti.Type{
 	Instance: &CheckBox{},
 })
 
-// NewCheckBox adds a new [CheckBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewCheckBox(par ki.Ki, name ...string) *CheckBox {
-	return par.NewChild(CheckBoxType, name...).(*CheckBox)
+// NewCheckBox adds a new [CheckBox] with
+// the given name to the given parent.
+func NewCheckBox(par ki.Ki, name string) *CheckBox {
+	return par.NewChild(CheckBoxType, name).(*CheckBox)
 }
 
 // KiType returns the [*gti.Type] of [CheckBox]
@@ -408,7 +392,6 @@ var ComboBoxType = gti.AddType(&gti.Type{
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
-		{"ItemsMenu", &gti.Field{Name: "ItemsMenu", Type: "MenuActions", Doc: "the menu of actions for selecting items -- automatically generated from Items", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
 	}),
@@ -419,12 +402,10 @@ var ComboBoxType = gti.AddType(&gti.Type{
 	Instance: &ComboBox{},
 })
 
-// NewComboBox adds a new [ComboBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewComboBox(par ki.Ki, name ...string) *ComboBox {
-	return par.NewChild(ComboBoxType, name...).(*ComboBox)
+// NewComboBox adds a new [ComboBox] with
+// the given name to the given parent.
+func NewComboBox(par ki.Ki, name string) *ComboBox {
+	return par.NewChild(ComboBoxType, name).(*ComboBox)
 }
 
 // KiType returns the [*gti.Type] of [ComboBox]
@@ -466,12 +447,10 @@ var CompleteType = gti.AddType(&gti.Type{
 	Instance: &Complete{},
 })
 
-// NewComplete adds a new [Complete] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewComplete(par ki.Ki, name ...string) *Complete {
-	return par.NewChild(CompleteType, name...).(*Complete)
+// NewComplete adds a new [Complete] with
+// the given name to the given parent.
+func NewComplete(par ki.Ki, name string) *Complete {
+	return par.NewChild(CompleteType, name).(*Complete)
 }
 
 // KiType returns the [*gti.Type] of [Complete]
@@ -501,12 +480,10 @@ var StyleSheetType = gti.AddType(&gti.Type{
 	Instance: &StyleSheet{},
 })
 
-// NewStyleSheet adds a new [StyleSheet] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStyleSheet(par ki.Ki, name ...string) *StyleSheet {
-	return par.NewChild(StyleSheetType, name...).(*StyleSheet)
+// NewStyleSheet adds a new [StyleSheet] with
+// the given name to the given parent.
+func NewStyleSheet(par ki.Ki, name string) *StyleSheet {
+	return par.NewChild(StyleSheetType, name).(*StyleSheet)
 }
 
 // KiType returns the [*gti.Type] of [StyleSheet]
@@ -536,12 +513,10 @@ var FrameType = gti.AddType(&gti.Type{
 	Instance: &Frame{},
 })
 
-// NewFrame adds a new [Frame] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFrame(par ki.Ki, name ...string) *Frame {
-	return par.NewChild(FrameType, name...).(*Frame)
+// NewFrame adds a new [Frame] with
+// the given name to the given parent.
+func NewFrame(par ki.Ki, name string) *Frame {
+	return par.NewChild(FrameType, name).(*Frame)
 }
 
 // KiType returns the [*gti.Type] of [Frame]
@@ -574,12 +549,10 @@ var IconType = gti.AddType(&gti.Type{
 	Instance: &Icon{},
 })
 
-// NewIcon adds a new [Icon] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewIcon(par ki.Ki, name ...string) *Icon {
-	return par.NewChild(IconType, name...).(*Icon)
+// NewIcon adds a new [Icon] with
+// the given name to the given parent.
+func NewIcon(par ki.Ki, name string) *Icon {
+	return par.NewChild(IconType, name).(*Icon)
 }
 
 // KiType returns the [*gti.Type] of [Icon]
@@ -617,12 +590,10 @@ var LabelType = gti.AddType(&gti.Type{
 	Instance: &Label{},
 })
 
-// NewLabel adds a new [Label] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewLabel(par ki.Ki, name ...string) *Label {
-	return par.NewChild(LabelType, name...).(*Label)
+// NewLabel adds a new [Label] with
+// the given name to the given parent.
+func NewLabel(par ki.Ki, name string) *Label {
+	return par.NewChild(LabelType, name).(*Label)
 }
 
 // KiType returns the [*gti.Type] of [Label]
@@ -691,12 +662,10 @@ var LayoutType = gti.AddType(&gti.Type{
 	Instance: &Layout{},
 })
 
-// NewLayout adds a new [Layout] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewLayout(par ki.Ki, name ...string) *Layout {
-	return par.NewChild(LayoutType, name...).(*Layout)
+// NewLayout adds a new [Layout] with
+// the given name to the given parent.
+func NewLayout(par ki.Ki, name string) *Layout {
+	return par.NewChild(LayoutType, name).(*Layout)
 }
 
 // KiType returns the [*gti.Type] of [Layout]
@@ -746,12 +715,10 @@ var StretchType = gti.AddType(&gti.Type{
 	Instance: &Stretch{},
 })
 
-// NewStretch adds a new [Stretch] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStretch(par ki.Ki, name ...string) *Stretch {
-	return par.NewChild(StretchType, name...).(*Stretch)
+// NewStretch adds a new [Stretch] with
+// the given name to the given parent.
+func NewStretch(par ki.Ki, name string) *Stretch {
+	return par.NewChild(StretchType, name).(*Stretch)
 }
 
 // KiType returns the [*gti.Type] of [Stretch]
@@ -779,12 +746,10 @@ var SpaceType = gti.AddType(&gti.Type{
 	Instance: &Space{},
 })
 
-// NewSpace adds a new [Space] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSpace(par ki.Ki, name ...string) *Space {
-	return par.NewChild(SpaceType, name...).(*Space)
+// NewSpace adds a new [Space] with
+// the given name to the given parent.
+func NewSpace(par ki.Ki, name string) *Space {
+	return par.NewChild(SpaceType, name).(*Space)
 }
 
 // KiType returns the [*gti.Type] of [Space]
@@ -814,12 +779,10 @@ var SeparatorType = gti.AddType(&gti.Type{
 	Instance: &Separator{},
 })
 
-// NewSeparator adds a new [Separator] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSeparator(par ki.Ki, name ...string) *Separator {
-	return par.NewChild(SeparatorType, name...).(*Separator)
+// NewSeparator adds a new [Separator] with
+// the given name to the given parent.
+func NewSeparator(par ki.Ki, name string) *Separator {
+	return par.NewChild(SeparatorType, name).(*Separator)
 }
 
 // KiType returns the [*gti.Type] of [Separator]
@@ -916,12 +879,10 @@ var SliderBaseType = gti.AddType(&gti.Type{
 	Instance: &SliderBase{},
 })
 
-// NewSliderBase adds a new [SliderBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSliderBase(par ki.Ki, name ...string) *SliderBase {
-	return par.NewChild(SliderBaseType, name...).(*SliderBase)
+// NewSliderBase adds a new [SliderBase] with
+// the given name to the given parent.
+func NewSliderBase(par ki.Ki, name string) *SliderBase {
+	return par.NewChild(SliderBaseType, name).(*SliderBase)
 }
 
 // KiType returns the [*gti.Type] of [SliderBase]
@@ -971,12 +932,10 @@ var SliderType = gti.AddType(&gti.Type{
 	Instance: &Slider{},
 })
 
-// NewSlider adds a new [Slider] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSlider(par ki.Ki, name ...string) *Slider {
-	return par.NewChild(SliderType, name...).(*Slider)
+// NewSlider adds a new [Slider] with
+// the given name to the given parent.
+func NewSlider(par ki.Ki, name string) *Slider {
+	return par.NewChild(SliderType, name).(*Slider)
 }
 
 // KiType returns the [*gti.Type] of [Slider]
@@ -1004,12 +963,10 @@ var ScrollBarType = gti.AddType(&gti.Type{
 	Instance: &ScrollBar{},
 })
 
-// NewScrollBar adds a new [ScrollBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewScrollBar(par ki.Ki, name ...string) *ScrollBar {
-	return par.NewChild(ScrollBarType, name...).(*ScrollBar)
+// NewScrollBar adds a new [ScrollBar] with
+// the given name to the given parent.
+func NewScrollBar(par ki.Ki, name string) *ScrollBar {
+	return par.NewChild(ScrollBarType, name).(*ScrollBar)
 }
 
 // KiType returns the [*gti.Type] of [ScrollBar]
@@ -1042,12 +999,10 @@ var ProgressBarType = gti.AddType(&gti.Type{
 	Instance: &ProgressBar{},
 })
 
-// NewProgressBar adds a new [ProgressBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewProgressBar(par ki.Ki, name ...string) *ProgressBar {
-	return par.NewChild(ProgressBarType, name...).(*ProgressBar)
+// NewProgressBar adds a new [ProgressBar] with
+// the given name to the given parent.
+func NewProgressBar(par ki.Ki, name string) *ProgressBar {
+	return par.NewChild(ProgressBarType, name).(*ProgressBar)
 }
 
 // KiType returns the [*gti.Type] of [ProgressBar]
@@ -1089,12 +1044,10 @@ var SpinBoxType = gti.AddType(&gti.Type{
 	Instance: &SpinBox{},
 })
 
-// NewSpinBox adds a new [SpinBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSpinBox(par ki.Ki, name ...string) *SpinBox {
-	return par.NewChild(SpinBoxType, name...).(*SpinBox)
+// NewSpinBox adds a new [SpinBox] with
+// the given name to the given parent.
+func NewSpinBox(par ki.Ki, name string) *SpinBox {
+	return par.NewChild(SpinBoxType, name).(*SpinBox)
 }
 
 // KiType returns the [*gti.Type] of [SpinBox]
@@ -1151,12 +1104,10 @@ var SplitViewType = gti.AddType(&gti.Type{
 	Instance: &SplitView{},
 })
 
-// NewSplitView adds a new [SplitView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSplitView(par ki.Ki, name ...string) *SplitView {
-	return par.NewChild(SplitViewType, name...).(*SplitView)
+// NewSplitView adds a new [SplitView] with
+// the given name to the given parent.
+func NewSplitView(par ki.Ki, name string) *SplitView {
+	return par.NewChild(SplitViewType, name).(*SplitView)
 }
 
 // KiType returns the [*gti.Type] of [SplitView]
@@ -1209,12 +1160,10 @@ var SplitterType = gti.AddType(&gti.Type{
 	Instance: &Splitter{},
 })
 
-// NewSplitter adds a new [Splitter] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSplitter(par ki.Ki, name ...string) *Splitter {
-	return par.NewChild(SplitterType, name...).(*Splitter)
+// NewSplitter adds a new [Splitter] with
+// the given name to the given parent.
+func NewSplitter(par ki.Ki, name string) *Splitter {
+	return par.NewChild(SplitterType, name).(*Splitter)
 }
 
 // KiType returns the [*gti.Type] of [Splitter]
@@ -1250,12 +1199,10 @@ var TabViewType = gti.AddType(&gti.Type{
 	Instance: &TabView{},
 })
 
-// NewTabView adds a new [TabView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTabView(par ki.Ki, name ...string) *TabView {
-	return par.NewChild(TabViewType, name...).(*TabView)
+// NewTabView adds a new [TabView] with
+// the given name to the given parent.
+func NewTabView(par ki.Ki, name string) *TabView {
+	return par.NewChild(TabViewType, name).(*TabView)
 }
 
 // KiType returns the [*gti.Type] of [TabView]
@@ -1307,12 +1254,10 @@ var TabButtonType = gti.AddType(&gti.Type{
 	Instance: &TabButton{},
 })
 
-// NewTabButton adds a new [TabButton] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTabButton(par ki.Ki, name ...string) *TabButton {
-	return par.NewChild(TabButtonType, name...).(*TabButton)
+// NewTabButton adds a new [TabButton] with
+// the given name to the given parent.
+func NewTabButton(par ki.Ki, name string) *TabButton {
+	return par.NewChild(TabButtonType, name).(*TabButton)
 }
 
 // KiType returns the [*gti.Type] of [TabButton]
@@ -1372,12 +1317,10 @@ var TextFieldType = gti.AddType(&gti.Type{
 	Instance: &TextField{},
 })
 
-// NewTextField adds a new [TextField] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTextField(par ki.Ki, name ...string) *TextField {
-	return par.NewChild(TextFieldType, name...).(*TextField)
+// NewTextField adds a new [TextField] with
+// the given name to the given parent.
+func NewTextField(par ki.Ki, name string) *TextField {
+	return par.NewChild(TextFieldType, name).(*TextField)
 }
 
 // KiType returns the [*gti.Type] of [TextField]
@@ -1445,12 +1388,10 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Instance: &WidgetBase{},
 })
 
-// NewWidgetBase adds a new [WidgetBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewWidgetBase(par ki.Ki, name ...string) *WidgetBase {
-	return par.NewChild(WidgetBaseType, name...).(*WidgetBase)
+// NewWidgetBase adds a new [WidgetBase] with
+// the given name to the given parent.
+func NewWidgetBase(par ki.Ki, name string) *WidgetBase {
+	return par.NewChild(WidgetBaseType, name).(*WidgetBase)
 }
 
 // KiType returns the [*gti.Type] of [WidgetBase]

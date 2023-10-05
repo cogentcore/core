@@ -9,6 +9,7 @@ import (
 	"image/color"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -124,8 +125,13 @@ func (lb *Label) OnInit() {
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelLabelLarge
 	lb.AddStyles(func(s *styles.Style) {
-		lb.Style.SetAbilities(true, states.LongHoverable)
-		// s.Cursor = lb.ParentCursor(cursor.IBeam)
+		s.SetAbilities(true, states.LongHoverable)
+		if s.Abilities.Is(states.Selectable) {
+			s.Cursor = cursors.Text
+		} else {
+			s.Cursor = cursors.None
+		}
+
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
 		s.BackgroundColor.SetSolid(colors.Transparent)
@@ -382,9 +388,9 @@ func (lb *Label) LinkCursor() {
 		/*
 			// TODO: figure out how to get links to work with new cursor setup
 			if inLink {
-				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursor.HandPointing)
+				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
 			} else {
-				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursor.HandPointing)
+				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
 			}
 		*/
 	})

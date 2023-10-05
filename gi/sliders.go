@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -640,7 +641,7 @@ func (sr *Slider) SliderStyles() {
 
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Grab
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Dp(8))
@@ -660,10 +661,12 @@ func (sr *Slider) SliderStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
 			s.Color = colors.Scheme.Primary.On
 			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			s.Cursor = cursors.Grabbing
 		case s.Is(states.Hovered):
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Sliding):
 			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			s.Cursor = cursors.Grabbing
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)

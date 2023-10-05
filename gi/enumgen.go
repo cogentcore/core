@@ -133,30 +133,30 @@ func (i *ActionTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ButtonFlagsValues = []ButtonFlags{14}
+var _ButtonFlagsValues = []ButtonFlags{10}
 
 // ButtonFlagsN is the highest valid value
 // for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 15
+const ButtonFlagsN ButtonFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ButtonFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ButtonFlagMenu-(14)]
+	_ = x[ButtonFlagMenu-(10)]
 }
 
 var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagMenu`: 14,
-	`buttonflagmenu`: 14,
+	`ButtonFlagMenu`: 10,
+	`buttonflagmenu`: 10,
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	14: `Menu flag means that the button is a menu item`,
+	10: `Menu flag means that the button is a menu item`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
-	14: `ButtonFlagMenu`,
+	10: `ButtonFlagMenu`,
 }
 
 // String returns the string representation
@@ -648,60 +648,40 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7, 8, 9, 10, 11, 12, 13}
+var _WidgetFlagsValues = []WidgetFlags{7, 8, 9}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 14
+const WidgetFlagsN WidgetFlags = 10
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(7)]
-	_ = x[ReRenderAnchor-(8)]
-	_ = x[Invisible-(9)]
-	_ = x[MouseHasEntered-(10)]
-	_ = x[DNDHasEntered-(11)]
-	_ = x[NodeDragging-(12)]
-	_ = x[InstaDrag-(13)]
+	_ = x[Invisible-(8)]
+	_ = x[InstaDrag-(9)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
-	`NeedsRender`:     7,
-	`needsrender`:     7,
-	`ReRenderAnchor`:  8,
-	`rerenderanchor`:  8,
-	`Invisible`:       9,
-	`invisible`:       9,
-	`MouseHasEntered`: 10,
-	`mousehasentered`: 10,
-	`DNDHasEntered`:   11,
-	`dndhasentered`:   11,
-	`NodeDragging`:    12,
-	`nodedragging`:    12,
-	`InstaDrag`:       13,
-	`instadrag`:       13,
+	`NeedsRender`: 7,
+	`needsrender`: 7,
+	`Invisible`:   8,
+	`invisible`:   8,
+	`InstaDrag`:   9,
+	`instadrag`:   9,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
-	7:  `NeedsRender needs to be rendered on next render itration`,
-	8:  `ReRenderAnchor: this node has a static size, and repaints its background -- any children under it that need to dynamically resize on a ReRender (Update) can refer the update up to rerendering this node, instead of going further up the tree -- e.g., true of Frame&#39;s within a SplitView`,
-	9:  `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	10: `MouseHasEntered indicates that the MouseFocusEvent Enter was previously registered on this node`,
-	11: `DNDHasEntered indicates that the DNDFocusEvent Enter was previously registered on this node`,
-	12: `NodeDragging indicates this node is currently dragging -- win.Dragging set to this node`,
-	13: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	7: `NeedsRender needs to be rendered on next render itration`,
+	8: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabview or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
+	9: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
-	7:  `NeedsRender`,
-	8:  `ReRenderAnchor`,
-	9:  `Invisible`,
-	10: `MouseHasEntered`,
-	11: `DNDHasEntered`,
-	12: `NodeDragging`,
-	13: `InstaDrag`,
+	7: `NeedsRender`,
+	8: `Invisible`,
+	9: `InstaDrag`,
 }
 
 // String returns the string representation
@@ -1916,11 +1896,11 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8}
 
 // WinFlagsN is the highest valid value
 // for type WinFlags, plus one.
-const WinFlagsN WinFlags = 8
+const WinFlagsN WinFlags = 9
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -1933,7 +1913,8 @@ func _WinFlagsNoOp() {
 	_ = x[WinSentShow-(4)]
 	_ = x[WinGoLoop-(5)]
 	_ = x[WinStopEventLoop-(6)]
-	_ = x[WinSelectionMode-(7)]
+	_ = x[WinRedraw-(7)]
+	_ = x[WinSelectionMode-(8)]
 }
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
@@ -1951,8 +1932,10 @@ var _WinFlagsNameToValueMap = map[string]WinFlags{
 	`wingoloop`:        5,
 	`WinStopEventLoop`: 6,
 	`winstopeventloop`: 6,
-	`WinSelectionMode`: 7,
-	`winselectionmode`: 7,
+	`WinRedraw`:        7,
+	`winredraw`:        7,
+	`WinSelectionMode`: 8,
+	`winselectionmode`: 8,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
@@ -1963,7 +1946,8 @@ var _WinFlagsDescMap = map[WinFlags]string{
 	4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`,
 	5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
 	6: `WinStopEventLoop is set when event loop stop is requested`,
-	7: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	7: `WinRedraw forces a redraw of the window on next paint event`,
+	8: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{
@@ -1974,7 +1958,8 @@ var _WinFlagsMap = map[WinFlags]string{
 	4: `WinSentShow`,
 	5: `WinGoLoop`,
 	6: `WinStopEventLoop`,
-	7: `WinSelectionMode`,
+	7: `WinRedraw`,
+	8: `WinSelectionMode`,
 }
 
 // String returns the string representation

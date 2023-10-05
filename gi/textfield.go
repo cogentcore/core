@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -163,7 +164,7 @@ func (tf *TextField) TextFieldStyles() {
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
-		// s.Cursor = cursor.IBeam
+		s.Cursor = cursors.Text
 		s.MinWidth.SetEm(20)
 		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(16*Prefs.DensityMul()))

@@ -146,7 +146,9 @@ func (st *MainStage) RunWindow() *MainStage {
 		st.StageMgr = &CurRenderWin.StageMgr
 	}
 	sz := st.Scene.PrefSize(st.RenderCtx().Size)
-	fmt.Println("win size:", sz)
+	if WinRenderTrace {
+		fmt.Println("MainStage.RunWindow: Window Size:", sz)
+	}
 	st.Scene.Resize(sz)
 
 	if st.OwnWin {
@@ -180,7 +182,9 @@ func (st *MainStage) RunDialog() *MainStage {
 
 	st.StageMgr = ms // temporary
 	sz := st.Scene.PrefSize(winsz)
-	fmt.Println(sz)
+	if WinRenderTrace {
+		fmt.Println("MainStage.RunDialog: Size:", sz)
+	}
 	st.Scene.Resize(sz)
 
 	if st.OwnWin {

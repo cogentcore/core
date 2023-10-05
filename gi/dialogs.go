@@ -13,34 +13,6 @@ import (
 	"goki.dev/goosi/events"
 )
 
-// DialogsSepRenderWin determines if dialog windows open in a separate OS-level
-// window, or do they open within the same parent window.  If only within
-// parent window, then they are always effectively modal.
-var DialogsSepRenderWin = true
-
-// DialogState indicates the state of the dialog.
-type DialogState int64
-
-const (
-	// DialogExists is the existential state -- struct exists and is likely
-	// being constructed.
-	DialogExists DialogState = iota
-
-	// DialogOpenModal means dialog is open in a modal state, blocking all other input.
-	DialogOpenModal
-
-	// DialogOpenModeless means dialog is open in a modeless state, allowing other input.
-	DialogOpenModeless
-
-	// DialogAccepted means Ok was pressed -- dialog accepted.
-	DialogAccepted
-
-	// DialogCanceled means Cancel was pressed -- button canceled.
-	DialogCanceled
-
-	DialogStateN
-)
-
 // standard vertical space between elements in a dialog, in Ex units
 var (
 	StdDialogVSpace = float32(1)
@@ -118,23 +90,43 @@ func (dlg *DialogStage) AddButtonBox() *Layout {
 	return bb
 }
 
-// AddOk adds Ok button to given ButtonBox, connecting to Accept method
+// AddOk adds Ok button to given ButtonBox, connecting to Accept method.
+// and also the Ctrl+Enter keychord event.
+// Also sends a Change event to the dialog scene for listeners there.
 func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
+	scfr := dlg.Stage.Scene.Frame
 	NewButton(bb, "ok").SetText("Ok").On(events.Click, func(e events.Event) {
 		dlg.Accept()
+		scfr.Send(events.Change, e)
+	})
+	scfr.On(events.KeyChord, func(e events.Event) {
+		kf := KeyFun(e.KeyChord())
+		if kf == KeyFunAccept {
+			dlg.Accept()
+		}
 	})
 	return dlg
 }
 
-// AddCancel adds Cancel button to given ButtonBox, connecting to Cancel method
+// AddCancel adds Cancel button to given ButtonBox, connecting to Cancel method,
+// and also the Esc keychord event.
+// Also sends a Change event to the dialog scene for listeners there
 func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
+	scfr := dlg.Stage.Scene.Frame
 	NewButton(bb, "cancel").SetText("Cancel").On(events.Click, func(e events.Event) {
 		dlg.Cancel()
+		scfr.Send(events.Change, e)
+	})
+	scfr.On(events.KeyChord, func(e events.Event) {
+		kf := KeyFun(e.KeyChord())
+		if kf == KeyFunAbort {
+			dlg.Cancel()
+		}
 	})
 	return dlg
 }
 
-// AddOkCancel adds Ok, Cancel buttons
+// AddOkCancel adds Ok, Cancel buttons, and standard Esc = Cancel keyboard action
 func (dlg *DialogStage) AddOkCancel() *DialogStage {
 	bb := dlg.AddButtonBox()
 	dlg.AddOk(bb)
@@ -145,22 +137,12 @@ func (dlg *DialogStage) AddOkCancel() *DialogStage {
 // Accept accepts the dialog, activated by the default Ok button
 func (dlg *DialogStage) Accept() {
 	dlg.Accepted = true
-	// if dlg.SigVal >= 0 {
-	// 	dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
-	// } else {
-	// 	dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
-	// }
 	dlg.Close()
 }
 
 // Cancel cancels the dialog, activated by the default Cancel button
 func (dlg *DialogStage) Cancel() {
 	dlg.Accepted = false
-	// if dlg.SigVal >= 0 {
-	// 	dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
-	// } else {
-	// 	dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
-	// }
 	dlg.Close()
 }
 

@@ -17,9 +17,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-func main() { gimain.Main(mainrun) }
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	// turn these on to see a traces of various stages of processing..
 	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
@@ -87,9 +87,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	b1.On(events.Click, func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).AddTitle("Test Dialog").
-			AddPrompt("This is a prompt").AddOkCancel()
-		dlg.Stage.OwnWin = true // getting stuck trying to render -- not ready.
+		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).
+			AddTitle("Test Dialog").
+			AddPrompt("This is a prompt").
+			AddOkCancel()
+		dlg.Stage.OwnWin = true
 		dlg.Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",

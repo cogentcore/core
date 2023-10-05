@@ -7,15 +7,21 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log"
+	"path/filepath"
 	"sync"
 	"time"
 
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
+	"goki.dev/grr"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
+	"goki.dev/svg"
 )
 
 var (
@@ -54,6 +60,9 @@ type EventMgr struct {
 
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
+
+	// stack of widgets with mouse pointer in BBox, and are not Disabled
+	MouseInBBox []Widget
 
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
 	Hovers []Widget
@@ -154,11 +163,9 @@ func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
-	if em.Focus == nil {
-		return
+	if em.Focus != nil {
+		em.Focus.HandleEvent(evi)
 	}
-	fi := em.Focus
-	fi.HandleEvent(evi)
 	em.ManagerKeyChordEvents(evi)
 }
 
@@ -198,21 +205,29 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 		}
 	}
 
-	var allbb []Widget
-	em.AllInBBox(&sc.Frame, &allbb, pos)
+	em.MouseInBBox = nil
+	em.GetMouseInBBox(&sc.Frame, pos)
 
-	n := len(allbb)
+	n := len(em.MouseInBBox)
 	if n == 0 {
 		return
 	}
 
+	cursorSet := false
+
 	var press, move, up Widget
 	for i := n - 1; i >= 0; i-- {
-		w := allbb[i]
+		w := em.MouseInBBox[i]
+		wb := w.AsWidget()
+		if !cursorSet && wb.Style.Cursor != cursors.None {
+			em.SetCursor(wb.Style.Cursor)
+			cursorSet = true
+			// fmt.Println(wb.Style.Cursor)
+		}
+
 		if !isDrag {
 			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
 		}
-		wb := w.AsWidget()
 		switch et {
 		case events.MouseMove:
 			if move == nil && wb.Style.Abilities.IsHoverable() {
@@ -234,8 +249,8 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 			em.Press = press
 		}
 	case events.MouseMove:
-		hovs := make([]Widget, 0, len(allbb))
-		for _, w := range allbb { // requires forward iter through allbb
+		hovs := make([]Widget, 0, len(em.MouseInBBox))
+		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 			wb := w.AsWidget()
 			if wb.Style.Abilities.IsHoverable() {
 				hovs = append(hovs, w)
@@ -245,8 +260,8 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
-			hovs := make([]Widget, 0, len(allbb))
-			for _, w := range allbb { // requires forward iter through allbb
+			hovs := make([]Widget, 0, len(em.MouseInBBox))
+			for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 				wb := w.AsWidget()
 				if wb.AbilityIs(states.Droppable) {
 					hovs = append(hovs, w)
@@ -313,18 +328,18 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 	return hov
 }
 
-func (em *EventMgr) AllInBBox(w Widget, allbb *[]Widget, pos image.Point) {
+func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	w.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.StateIs(states.Disabled) {
 			return ki.Break
 		}
 		if !wb.PosInBBox(pos) {
 			return ki.Break
 		}
-		*allbb = append(*allbb, wi)
+		em.MouseInBBox = append(em.MouseInBBox, wi)
 		if wb.Parts != nil {
-			em.AllInBBox(wb.Parts, allbb, pos)
+			em.GetMouseInBBox(wb.Parts, pos)
 		}
 		return ki.Continue
 	})
@@ -380,6 +395,17 @@ func (em *EventMgr) ClipBoard() clip.Board {
 		gwin = win.GoosiWin
 	}
 	return goosi.TheApp.ClipBoard(gwin)
+}
+
+// SetCursor sets window cursor to given Cursor
+func (em *EventMgr) SetCursor(cur cursors.Cursor) {
+	var gwin goosi.Window
+	if win := em.RenderWin(); win != nil {
+		gwin = win.GoosiWin
+	}
+	grr.Log0(goosi.TheApp.Cursor(gwin).Set(cur))
+	// todo: this would be simpler:
+	// gwin.SetCursor(cur)
 }
 
 // SetFocus sets focus to given item -- returns true if focus changed.
@@ -636,8 +662,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.Type() != events.KeyChord {
 		return
 	}
+	mainsc := em.Main.Scene
 	cs := e.KeyChord()
 	kf := KeyFun(cs)
+	// fmt.Println(kf, cs)
 	switch kf {
 	case KeyFunFocusNext: // tab
 		em.FocusNext(em.Focus)
@@ -652,8 +680,112 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	case KeyFunPrefs:
 		// TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
+	case KeyFunWinSnapshot:
+		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
+		fnm, _ := filepath.Abs("./GrabOf_" + mainsc.Name() + "_" + dstr + ".png")
+		svg.SaveImage(fnm, em.Main.Scene.Pixels)
+		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
+		e.SetHandled()
+	case KeyFunZoomIn:
+		em.RenderWin().ZoomDPI(1)
+		e.SetHandled()
+	case KeyFunZoomOut:
+		em.RenderWin().ZoomDPI(-1)
+		e.SetHandled()
+	case KeyFunRefresh:
+		e.SetHandled()
+		fmt.Printf("Win: %v display refreshed\n", mainsc.Name())
+		goosi.TheApp.GetScreens()
+		Prefs.UpdateAll()
+		WinGeomMgr.RestoreAll()
+		// w.FocusInactivate()
+		// w.FullReRender()
+		// sz := w.GoosiWin.Size()
+		// w.SetSize(sz)
+	case KeyFunWinFocusNext:
+		e.SetHandled()
+		AllRenderWins.FocusNext()
+	}
+	switch cs { // some other random special codes, during dev..
+	case "Control+Alt+R":
+		ProfileToggle()
+		e.SetHandled()
+	case "Control+Alt+F":
+		mainsc.BenchmarkFullRender()
+		e.SetHandled()
+	case "Control+Alt+H":
+		mainsc.BenchmarkReRender()
+		e.SetHandled()
 	}
 }
+
+// AddShortcut adds given shortcut to given action.
+func (w *RenderWin) AddShortcut(chord key.Chord, act *Action) {
+	if chord == "" {
+		return
+	}
+	if w.Shortcuts == nil {
+		w.Shortcuts = make(Shortcuts, 100)
+	}
+	sa, exists := w.Shortcuts[chord]
+	if exists && sa != act && sa.Text != act.Text {
+		if KeyEventTrace {
+			log.Printf("gi.RenderWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
+		}
+	}
+	w.Shortcuts[chord] = act
+}
+
+// DeleteShortcut deletes given shortcut
+func (w *RenderWin) DeleteShortcut(chord key.Chord, act *Action) {
+	if chord == "" {
+		return
+	}
+	if w.Shortcuts == nil {
+		return
+	}
+	sa, exists := w.Shortcuts[chord]
+	if exists && sa == act {
+		delete(w.Shortcuts, chord)
+	}
+}
+
+// TriggerShortcut attempts to trigger a shortcut, returning true if one was
+// triggered, and false otherwise.  Also eliminates any shortcuts with deleted
+// actions, and does not trigger for Inactive actions.
+func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
+	if KeyEventTrace {
+		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
+	}
+	if w.Shortcuts == nil {
+		return false
+	}
+	sa, exists := w.Shortcuts[chord]
+	if !exists {
+		return false
+	}
+	if sa.Is(ki.Destroyed) {
+		delete(w.Shortcuts, chord)
+		return false
+	}
+	if sa.IsDisabled() {
+		if KeyEventTrace {
+			fmt.Printf("Shortcut chord: %v, action: %v -- is inactive, not fired\n", chord, sa.Text)
+		}
+		return false
+	}
+
+	if KeyEventTrace {
+		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Name, chord, sa.Text)
+	}
+	sa.Send(events.Click, nil)
+	return true
+}
+
+// TODO: all of the code below should be deleted once the corresponding DND
+// functionality has been implemented in a much cleaner way.  Most of the
+// logic should already be in place above.  Just need to check drop targets,
+// update cursor, grab the initial sprite, etc.
 
 /*
 
@@ -1024,4 +1156,151 @@ func (em *EventMgr) GenDNDFocusEvents(mev events.Event, popup bool) bool {
 	}
 	return ki.Break
 }
+*/
+
+/*
+/////////////////////////////////////////////////////////////////////////////
+//   Window level DND: Drag-n-Drop
+
+const DNDSpriteName = "gi.RenderWin:DNDSprite"
+
+// StartDragNDrop is called by a node to start a drag-n-drop operation on
+// given source node, which is responsible for providing the data and Sprite
+// representation of the node.
+func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
+	w.EventMgr.DNDStart(src, data)
+	if _, sw := AsWidget(src); sw != nil {
+		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPo)
+	}
+	w.DeleteSprite(DNDSpriteName)
+	sp.Name = DNDSpriteName
+	sp.On = true
+	w.AddSprite(sp)
+	w.DNDSetCursor(dnd.DefaultModBits(w.EventMgr.LastModBits))
+}
+
+// DNDMoveEvent handles drag-n-drop move events.
+func (w *RenderWin) DNDMoveEvent(e events.Event) {
+	sp, ok := w.SpriteByName(DNDSpriteName)
+	if ok {
+		sp.SetBottomPos(e.Pos())
+	}
+	de := w.EventMgr.SendDNDMoveEvent(e)
+	w.DNDUpdateCursor(de.Mod)
+	e.SetHandled()
+}
+
+// DNDDropEvent handles drag-n-drop drop event (action = release).
+func (w *RenderWin) DNDDropEvent(e events.Event) {
+	proc := w.EventMgr.SendDNDDropEvent(e)
+	if !proc {
+		w.ClearDragNDrop()
+	}
+}
+
+// FinalizeDragNDrop is called by a node to finalize the drag-n-drop
+// operation, after given action has been performed on the target -- allows
+// target to cancel, by sending dnd.DropIgnore.
+func (w *RenderWin) FinalizeDragNDrop(action dnd.DropMods) {
+	if w.EventMgr.DNDStage != DNDDropped {
+		w.ClearDragNDrop()
+		return
+	}
+	if w.EventMgr.DNDFinalEvent == nil { // shouldn't happen...
+		w.ClearDragNDrop()
+		return
+	}
+	de := w.EventMgr.DNDFinalEvent
+	de.ClearHandled()
+	de.Mod = action
+	if de.Source != nil {
+		de.Action = dnd.DropFmSource
+		w.EventMgr.SendSig(de.Source, w, de)
+	}
+	w.ClearDragNDrop()
+}
+
+// ClearDragNDrop clears any existing DND values.
+func (w *RenderWin) ClearDragNDrop() {
+	w.EventMgr.ClearDND()
+	w.DeleteSprite(DNDSpriteName)
+	w.DNDClearCursor()
+}
+
+// DNDModCursor gets the appropriate cursor based on the DND event mod.
+func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
+	switch dmod {
+	case dnd.DropCopy:
+		return cursor.DragCopy
+	case dnd.DropMove:
+		return cursor.DragMove
+	case dnd.DropLink:
+		return cursor.DragLink
+	}
+	return cursor.Not
+}
+
+// DNDSetCursor sets the cursor based on the DND event mod -- does a
+// "PushIfNot" so safe for multiple calls.
+func (w *RenderWin) DNDSetCursor(dmod dnd.DropMods) {
+	dndc := DNDModCursor(dmod)
+	goosi.TheApp.Cursor(w.GoosiWin).PushIfNot(dndc)
+}
+
+// DNDNotCursor sets the cursor to Not = can't accept a drop
+func (w *RenderWin) DNDNotCursor() {
+	goosi.TheApp.Cursor(w.GoosiWin).PushIfNot(cursor.Not)
+}
+
+// DNDUpdateCursor updates the cursor based on the current DND event mod if
+// different from current (but no update if Not)
+func (w *RenderWin) DNDUpdateCursor(dmod dnd.DropMods) bool {
+	dndc := DNDModCursor(dmod)
+	curs := goosi.TheApp.Cursor(w.GoosiWin)
+	if !curs.IsDrag() || curs.Current() == dndc {
+		return false
+	}
+	curs.Push(dndc)
+	return true
+}
+
+// DNDClearCursor clears any existing DND cursor that might have been set.
+func (w *RenderWin) DNDClearCursor() {
+	curs := goosi.TheApp.Cursor(w.GoosiWin)
+	for curs.IsDrag() || curs.Current() == cursor.Not {
+		curs.Pop()
+	}
+}
+
+// HiProrityEvents processes High-priority events for RenderWin.
+// RenderWin gets first crack at these events, and handles window-specific ones
+// returns true if processing should continue and false if was handled
+func (w *RenderWin) HiPriorityEvents(evi events.Event) bool {
+	switch evi.(type) {
+	case events.Event:
+		// if w.EventMgr.DNDStage == DNDStarted {
+		// 	w.DNDMoveEvent(e)
+		// } else {
+		// 	w.SelSpriteEvent(evi)
+		// 	if !w.EventMgr.dragStarted {
+		// 		e.SetHandled() // ignore
+		// 	}
+		// }
+		// case events.Event:
+		// if w.EventMgr.DNDStage == DNDStarted && e.Action == events.Release {
+		// 	w.DNDDropEvent(e)
+		// }
+		// w.FocusActiveClick(e)
+		// w.SelSpriteEvent(evi)
+		// if w.NeedWinMenuUpdate() {
+		// 	w.MainMenuUpdateRenderWins()
+		// }
+	// case *dnd.Event:
+	// if e.Action == dnd.External {
+	// 	w.EventMgr.DNDDropMod = e.Mod
+	// }
+	}
+	return true
+}
+
 */

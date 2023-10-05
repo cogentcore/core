@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -39,7 +40,8 @@ func (fr *Frame) OnInit() {
 
 func (fr *Frame) FrameStyles() {
 	fr.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable)
+		s.SetAbilities(true, states.Activatable, states.FocusWithinable)
+		s.Cursor = cursors.Arrow
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))

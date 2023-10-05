@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -198,6 +199,8 @@ func (tv *TabView) NewTabLayout(typ *gti.Type, label string) (Widget, *Layout) {
 	widg := ly.NewChild(typ, label).(Widget)
 	return widg, ly
 }
+
+// todo: this should be: NewTabScene -- add a new scene -- should be the default
 
 // NewTabFrame adds a new widget as a new tab of given widget type,
 // with given tab label, and returns the new widget.
@@ -474,14 +477,12 @@ func (tv *TabView) ConfigWidget(sc *Scene) {
 		return
 	}
 	tv.Lay = LayoutVert
-	tv.SetFlag(true, ReRenderAnchor)
 
 	frame := NewFrame(tv, "tabs")
 	frame.Lay = LayoutHorizFlow
 
 	frame = NewFrame(tv, "frame")
 	frame.Lay = LayoutStacked
-	frame.SetFlag(true, ReRenderAnchor)
 
 	tv.ConfigNewTabButton(sc)
 }
@@ -573,7 +574,7 @@ func (tb *TabButton) OnInit() {
 
 func (tb *TabButton) TabButtonStyles() {
 	tb.AddStyles(func(s *styles.Style) {
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetDp(500)
 		s.MinHeight.SetEm(1.6)

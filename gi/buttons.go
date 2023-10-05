@@ -10,6 +10,7 @@ import (
 	"log"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -400,7 +401,7 @@ func (bt *Button) OnInit() {
 func (bt *Button) ButtonStyles() {
 	bt.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Margin = styles.BoxShadowMargin(BoxShadow1).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
@@ -520,7 +521,7 @@ func (cb *CheckBox) OnInit() {
 func (cb *CheckBox) CheckBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))

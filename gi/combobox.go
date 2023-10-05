@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -95,7 +96,7 @@ func (cb *ComboBox) ComboBoxHandlers() {
 
 func (cb *ComboBox) ComboBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
-		// s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
 			s.Padding.Set()

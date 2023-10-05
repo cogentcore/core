@@ -20,15 +20,6 @@ const (
 	// NeedsRender needs to be rendered on next render itration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
-	// todo: remove:
-
-	// ReRenderAnchor: this node has a static size, and repaints its
-	// background -- any children under it that need to dynamically resize on
-	// a ReRender (Update) can refer the update up to rerendering this node,
-	// instead of going further up the tree -- e.g., true of Frame's within a
-	// SplitView
-	ReRenderAnchor
-
 	// Invisible means that the node has been marked as invisible by a parent
 	// that has switch-like powers (e.g., layout stacked / tabview or splitter
 	// panel that has been collapsed).  This flag is propagated down to all
@@ -38,18 +29,6 @@ const (
 	// take place as normal, so that when the flag is cleared, rendering can
 	// proceed directly.
 	Invisible
-
-	// MouseHasEntered indicates that the MouseFocusEvent Enter was previously
-	// registered on this node
-	MouseHasEntered
-
-	// DNDHasEntered indicates that the DNDFocusEvent Enter was previously
-	// registered on this node
-	DNDHasEntered
-
-	// NodeDragging indicates this node is currently dragging -- win.Dragging
-	// set to this node
-	NodeDragging
 
 	// InstaDrag indicates this node should start dragging immediately when
 	// clicked -- otherwise there is a time-and-distance threshold to the

@@ -16,8 +16,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -144,6 +143,9 @@ const (
 
 	// WinStopEventLoop is set when event loop stop is requested
 	WinStopEventLoop
+
+	// WinRedraw forces a redraw of the window on next paint event
+	WinRedraw
 
 	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
 	WinSelectionMode
@@ -355,6 +357,9 @@ func (w *RenderWin) LogicalDPI() float32 {
 // ZoomDPI -- positive steps increase logical DPI, negative steps decrease it,
 // in increments of 6 dots to keep fonts rendering clearly.
 func (w *RenderWin) ZoomDPI(steps int) {
+	rctx := w.StageMgr.RenderCtx
+	rctx.Mu.RLock()
+
 	// w.InactivateAllSprites()
 	sc := w.GoosiWin.Screen()
 	if sc == nil {
@@ -368,10 +373,20 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	if nldpinet < 6 {
 		nldpinet = 6
 	}
+	oldzoom := goosi.ZoomFactor
 	goosi.ZoomFactor = nldpinet / cldpi
 	Prefs.ApplyDPI()
 	fmt.Printf("Effective LogicalDPI now: %v  PhysicalDPI: %v  Eff LogicalDPIScale: %v  ZoomFactor: %v\n", nldpinet, pdpi, nldpinet/pdpi, goosi.ZoomFactor)
-	// w.FullReRender()
+
+	// actually resize window in proportion:
+	zr := goosi.ZoomFactor / oldzoom
+	curSz := rctx.Size
+	nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
+	rctx.Mu.RUnlock()
+	w.GoosiWin.SetSize(nsz)
+
+	// todo: need to set rebuild flag on window, scenes need to look at that
+	// (they have their local rebuild flag but it is too much of a pain to set all of those)
 }
 
 // SetWinSize requests that the window be resized to the given size
@@ -717,6 +732,32 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 	w.RenderCtx().ReadUnlock()
 }
 
+/*
+	w.EventMgr.EventsEvents(evi)
+
+	if !w.HiPriorityEvents(evi) {
+		return
+	}
+
+	if !evi.IsHandled() && et == events.KeyChord {
+		ke := evi.(*events.Key)
+		kc := ke.Chord()
+		if w.TriggerShortcut(kc) {
+			evi.SetHandled()
+		}
+	}
+
+	if !evi.IsHandled() {
+		switch e := evi.(type) {
+		case *events.Key:
+			keyDelPop := w.KeyChordEventLowPri(e)
+			if keyDelPop {
+				w.delPop = true
+			}
+		}
+	}
+*/
+
 func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 	et := evi.Type()
 	switch et {
@@ -802,7 +843,7 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 // InitialFocus establishes the initial focus for the window if no focus
 // is set -- uses ActivateStartFocus or FocusNext as backup.
 func (w *RenderWin) InitialFocus() {
-	// w.EventMgr.InitialFocus()
+	w.StageMgr.Top().AsBase().Scene.EventMgr.InitialFocus()
 	if prof.Profiling {
 		now := time.Now()
 		opent := now.Sub(RenderWinOpenTimer)
@@ -871,217 +912,6 @@ func (w *RenderWin) MainMenuUpdateRenderWins() {
 }
 */
 
-/*
-
-
-	w.delPop = false                      // if true, delete this popup after event loop
-	if et > events.TypesN || et < 0 { // we don't handle other types of events here
-		fmt.Printf("Win: %v got out-of-range event: %v\n", w.Name, et)
-		return
-	}
-
-	{ // popup delete check
-		w.PopMu.RLock()
-		dpop := w.DelPopup
-		cpop := w.Popup
-		w.PopMu.RUnlock()
-		if dpop != nil {
-			if dpop == cpop {
-				w.ClosePopup(dpop)
-			} else {
-				if WinEventTrace {
-					fmt.Printf("zombie popup: %v  cur: %v\n", dpop.Name(), cpop.Name())
-				}
-			}
-		}
-	}
-	if et != goosi.WindowResizeEvent && et != events.WindowPaint {
-		w.SetFlag(false, WinResizing)
-	}
-
-	w.EventMgr.EventsEvents(evi)
-
-	if !w.HiPriorityEvents(evi) {
-		return
-	}
-
-	////////////////////////////////////////////////////////////////////////////
-	// Send Events to Widgets
-
-	hasFocus := w.HasFlag(WinGotFocus)
-	if _, ok := evi.(*events.Scroll); ok {
-		if !hasFocus {
-			w.EventMgr.Scrolling = nil // not valid
-		}
-		hasFocus = true // doesn't need focus!
-	}
-	if me, ok := evi.(events.Event); ok {
-		hasFocus = true // also doesn't need focus (there can be hover events while not focused)
-		w.SetCursor(me) // always set cursor on events move
-	}
-	// if someone clicks while in selection mode, stop selection mode and stop the event
-	if me, ok := evi.(events.Event); w.HasFlag(WinSelectionMode) && ok {
-		me.SetHandled()
-		w.SetSelectionModeState(false)
-		w.DeleteSprite(RenderWinSelectionSpriteName)
-		w.SelectedWidgetChan <- w.SelectedWidget
-	}
-
-	if (hasFocus || !evi.OnWinFocus()) && !evi.IsHandled() {
-		evToPopup := !w.CurPopupIsTooltip() // don't send events to tooltips!
-		w.EventMgr.SendEventSignal(evi, evToPopup)
-		if !w.delPop && et == events.EventsMoveEvent && !evi.IsHandled() {
-			didFocus := w.EventMgr.GenEventsFocusEvents(evi.(events.Event), evToPopup)
-			if didFocus && w.CurPopupIsTooltip() {
-				w.delPop = true
-			}
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////
-	// Low priority windows events
-
-	if !evi.IsHandled() && et == events.KeyChord {
-		ke := evi.(*events.Key)
-		kc := ke.Chord()
-		if w.TriggerShortcut(kc) {
-			evi.SetHandled()
-		}
-	}
-
-	if !evi.IsHandled() {
-		switch e := evi.(type) {
-		case *events.Key:
-			keyDelPop := w.KeyChordEventLowPri(e)
-			if keyDelPop {
-				w.delPop = true
-			}
-		}
-	}
-
-	w.EventMgr.EventsEventReset(evi)
-	if evi.Type() == events.EventsButtonEvent {
-		me := evi.(events.Event)
-		if me.Action == events.Release {
-			w.SpriteDragging = ""
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////
-	// Delete popup?
-
-	{
-		cpop := w.CurPopup()
-		if cpop != nil && !w.delPop {
-			if PopupIsTooltip(cpop) {
-				if et != events.EventsMoveEvent {
-					w.delPop = true
-				}
-			} else if me, ok := evi.(events.Event); ok {
-				if me.Action == events.Release {
-					if w.ShouldDeletePopupMenu(cpop, me) {
-						w.delPop = true
-					}
-				}
-			}
-
-			if PopupIsCompleter(cpop) {
-				fsz := len(w.EventMgr.FocusStack)
-				if fsz > 0 && et == events.KeyChord {
-					w.EventMgr.SendSig(w.EventMgr.FocusStack[fsz-1], cpop, evi)
-				}
-			}
-		}
-	}
-
-	////////////////////////////////////////////////////////////////////////////
-	// Actually delete popup and push a new one
-
-	if w.delPop {
-		w.ClosePopup(w.CurPopup())
-	}
-
-	w.PopMu.RLock()
-	npop := w.NextPopup
-	w.PopMu.RUnlock()
-	if npop != nil {
-		w.PushPopup(npop)
-	}
-}
-
-*/
-
-// SetCursor sets the cursor based on the given events event.
-// Also handles sending widget selection events.
-func (w *RenderWin) SetCursor(me events.Event) {
-	/*
-		if w.Is(WinClosing) {
-			return
-		}
-		maxLevel := 0
-		maxLevelWidget := &WidgetBase{}
-		maxLevelCursor := cursor.Arrow
-
-		fun := func(k ki.Ki, level int, data any) bool {
-			_, wb := AsWidget(k)
-			if wb == nil {
-				// could have nodes further down (eg with menu which is ki.Slice), so continue
-				return ki.Continue
-			}
-			if !wb.PosInBBox(me.Pos()) {
-				// however, if we are out of bbox, there is no way to get back in
-				return ki.Break
-			}
-			if !wb.IsVisible() || level < maxLevel {
-				// could have visible or higher level ones further down
-				return ki.Continue
-			}
-
-			wb, ok := wb.This().Embed(TypeWidgetBase).(*WidgetBase)
-			if !ok {
-				// same logic as with Node2D
-				return ki.Continue
-			}
-			maxLevel = level
-			maxLevelWidget = wb
-			maxLevelCursor = wb.Style.Cursor
-			if wb.IsDisabled() {
-				maxLevelCursor = cursor.Not
-				// once we get to a disabled element,
-				// we won't waste time going further
-				return ki.Break
-			}
-			return ki.Continue
-		}
-
-		pop := w.CurPopup()
-		if pop == nil {
-			// if no popup, just do on window
-			w.WalkPre(fun)
-		} else {
-			_, popni := AsWidget(pop)
-			if popni == nil || !popni.PosInBBox(me.Pos()) || PopupIsTooltip(pop) {
-				// if not in popup (or it is a tooltip), do on window
-				w.WalkPre(fun)
-			} else {
-				// if in popup, do on popup
-				popni.WalkPre(fun)
-			}
-
-		}
-
-		if w.HasFlag(WinSelectionMode) && maxLevelWidget != nil {
-			me.SetHandled()
-			w.SelectionSprite(maxLevelWidget)
-			w.SelectedWidget = maxLevelWidget
-			goosi.TheApp.Cursor(w.GoosiWin).Set(cursor.Arrow) // always arrow in selection mode
-		} else {
-			// only set cursor if not in selection mode
-			goosi.TheApp.Cursor(w.GoosiWin).Set(maxLevelCursor)
-		}
-	*/
-}
-
 // RenderWinSelectionSpriteName is the sprite name used for the semi-transparent
 // blue box rendered above elements selected in selection mode
 var RenderWinSelectionSpriteName = "gi.RenderWin.SelectionBox"
@@ -1100,171 +930,6 @@ func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
 		return sp
 	*/
 	return nil
-}
-
-// HiProrityEvents processes High-priority events for RenderWin.
-// RenderWin gets first crack at these events, and handles window-specific ones
-// returns true if processing should continue and false if was handled
-func (w *RenderWin) HiPriorityEvents(evi events.Event) bool {
-	switch evi.(type) {
-	case events.Event:
-		// if w.EventMgr.DNDStage == DNDStarted {
-		// 	w.DNDMoveEvent(e)
-		// } else {
-		// 	w.SelSpriteEvent(evi)
-		// 	if !w.EventMgr.dragStarted {
-		// 		e.SetHandled() // ignore
-		// 	}
-		// }
-		// case events.Event:
-		// if w.EventMgr.DNDStage == DNDStarted && e.Action == events.Release {
-		// 	w.DNDDropEvent(e)
-		// }
-		// w.FocusActiveClick(e)
-		// w.SelSpriteEvent(evi)
-		// if w.NeedWinMenuUpdate() {
-		// 	w.MainMenuUpdateRenderWins()
-		// }
-		// case events.Event:
-		// todo:
-		// if bitflag.HasAllAtomic(&w.Flag, WinGotPaint), WinGotFocus)) {
-		// if we are getting events input, and still haven't done this, do it..
-		// fmt.Printf("Doing full render at size: %v\n", w.Scene.Geom.Size)
-		// if w.Scene.Geom.Size != w.GoosiWin.Size() {
-		// 	w.Resized(w.GoosiWin.Size())
-		// } else {
-		// 	w.FullReRender()
-		// }
-		// w.SendShowEvent() // happens AFTER full render
-		// }
-		// if w.EventMgr.Focus == nil { // not using lock-protected b/c can conflict with popup
-		// w.EventMgr.ActivateStartFocus()
-		// }
-		// }
-	// case *dnd.Event:
-	// if e.Action == dnd.External {
-	// 	w.EventMgr.DNDDropMod = e.Mod
-	// }
-	case *events.Key:
-		// keyDelPop := w.KeyChordEventHiPri(e)
-		// if keyDelPop {
-		// 	w.delPop = true
-		// }
-	}
-	return true
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//                   Sending Events
-
-// Most of event stuff is in events.go, controlled by EventMgr
-
-// func (w *RenderWin) EventTopNode() ki.Ki {
-// 	return w.This()
-// }
-//
-// func (w *RenderWin) FocusTopNode() ki.Ki {
-// 	cpop := w.CurPopup()
-// 	if cpop != nil {
-// 		return cpop
-// 	}
-// 	return w.Scene.This()
-// }
-
-// IsInScope returns true if the given object is in scope for receiving events.
-// If popup is true, then only items on popup are in scope, otherwise
-// items NOT on popup are in scope (if no popup, everything is in scope).
-func (w *RenderWin) IsInScope(k ki.Ki, popup bool) bool {
-	/*
-		cpop := w.CurPopup()
-		if cpop == nil {
-			return true
-		}
-		if k.This() == cpop {
-			return popup
-		}
-		_, wb := AsWidget(k)
-		if wb == nil {
-			np := k.ParentByType(TypeNode2DBase, ki.Embeds)
-			if np != nil {
-				wb = np.Embed(TypeNode2DBase).(*Node2DBase)
-			} else {
-				return false
-			}
-		}
-		mvp := wb.Sc
-		if mvp == nil {
-			return false
-		}
-		if mvp.This() == cpop {
-			return popup
-		}
-		return !popup
-	*/
-	return false
-}
-
-// AddShortcut adds given shortcut to given action.
-func (w *RenderWin) AddShortcut(chord key.Chord, act *Action) {
-	if chord == "" {
-		return
-	}
-	if w.Shortcuts == nil {
-		w.Shortcuts = make(Shortcuts, 100)
-	}
-	sa, exists := w.Shortcuts[chord]
-	if exists && sa != act && sa.Text != act.Text {
-		if KeyEventTrace {
-			log.Printf("gi.RenderWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
-		}
-	}
-	w.Shortcuts[chord] = act
-}
-
-// DeleteShortcut deletes given shortcut
-func (w *RenderWin) DeleteShortcut(chord key.Chord, act *Action) {
-	if chord == "" {
-		return
-	}
-	if w.Shortcuts == nil {
-		return
-	}
-	sa, exists := w.Shortcuts[chord]
-	if exists && sa == act {
-		delete(w.Shortcuts, chord)
-	}
-}
-
-// TriggerShortcut attempts to trigger a shortcut, returning true if one was
-// triggered, and false otherwise.  Also eliminates any shortcuts with deleted
-// actions, and does not trigger for Inactive actions.
-func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
-	if KeyEventTrace {
-		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
-	}
-	if w.Shortcuts == nil {
-		return false
-	}
-	sa, exists := w.Shortcuts[chord]
-	if !exists {
-		return false
-	}
-	if sa.Is(ki.Destroyed) {
-		delete(w.Shortcuts, chord)
-		return false
-	}
-	if sa.IsDisabled() {
-		if KeyEventTrace {
-			fmt.Printf("Shortcut chord: %v, action: %v -- is inactive, not fired\n", chord, sa.Text)
-		}
-		return false
-	}
-
-	if KeyEventTrace {
-		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Name, chord, sa.Text)
-	}
-	sa.Send(events.Click, nil)
-	return true
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1307,276 +972,3 @@ func (w *RenderWin) KeyChordEventHiPri(e *events.Key) bool {
 	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.KeyChord())
 	return delPop
 }
-
-// KeyChordEventLowPri handles all the lower-priority window-specific key
-// events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventLowPri(e *events.Key) bool {
-	/*
-		if e.IsHandled() {
-			return false
-		}
-		// w.EventMgr.ManagerKeyChordEvents(e)
-		if e.IsHandled() {
-			return false
-		}
-		cs := e.KeyChord()
-		kf := KeyFun(cs)
-		delPop := false
-		switch kf {
-		case KeyFunWinSnapshot:
-			dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-			fnm, _ := filepath.Abs("./GrabOf_" + w.Name + "_" + dstr + ".png")
-			// SaveImage(fnm, w.Scene.Pixels)
-			fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
-			e.SetHandled()
-		case KeyFunZoomIn:
-			w.ZoomDPI(1)
-			e.SetHandled()
-		case KeyFunZoomOut:
-			w.ZoomDPI(-1)
-			e.SetHandled()
-		case KeyFunRefresh:
-			e.SetHandled()
-			fmt.Printf("Win: %v display refreshed\n", w.Name)
-			goosi.TheApp.GetScreens()
-			Prefs.UpdateAll()
-			WinGeomMgr.RestoreAll()
-			// w.FocusInactivate()
-			// w.FullReRender()
-			// sz := w.GoosiWin.Size()
-			// w.SetSize(sz)
-		case KeyFunWinFocusNext:
-			e.SetHandled()
-			AllRenderWins.FocusNext()
-		}
-		switch cs { // some other random special codes, during dev..
-		case "Control+Alt+R":
-			// ProfileToggle()
-			e.SetHandled()
-		case "Control+Alt+F":
-			// w.BenchmarkFullRender()
-			e.SetHandled()
-		case "Control+Alt+H":
-			// w.BenchmarkReRender()
-			e.SetHandled()
-		}
-		// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.KeyChord())
-		return delPop
-	*/
-	return false
-}
-
-/*
-/////////////////////////////////////////////////////////////////////////////
-//                   DND: Drag-n-Drop
-
-const DNDSpriteName = "gi.RenderWin:DNDSprite"
-
-// StartDragNDrop is called by a node to start a drag-n-drop operation on
-// given source node, which is responsible for providing the data and Sprite
-// representation of the node.
-func (w *RenderWin) StartDragNDrop(src ki.Ki, data mimedata.Mimes, sp *Sprite) {
-	w.EventMgr.DNDStart(src, data)
-	if _, sw := AsWidget(src); sw != nil {
-		sp.SetBottomPos(sw.LayState.Alloc.Pos.ToPo)
-	}
-	w.DeleteSprite(DNDSpriteName)
-	sp.Name = DNDSpriteName
-	sp.On = true
-	w.AddSprite(sp)
-	w.DNDSetCursor(dnd.DefaultModBits(w.EventMgr.LastModBits))
-}
-
-// DNDMoveEvent handles drag-n-drop move events.
-func (w *RenderWin) DNDMoveEvent(e events.Event) {
-	sp, ok := w.SpriteByName(DNDSpriteName)
-	if ok {
-		sp.SetBottomPos(e.Pos())
-	}
-	de := w.EventMgr.SendDNDMoveEvent(e)
-	w.DNDUpdateCursor(de.Mod)
-	e.SetHandled()
-}
-
-// DNDDropEvent handles drag-n-drop drop event (action = release).
-func (w *RenderWin) DNDDropEvent(e events.Event) {
-	proc := w.EventMgr.SendDNDDropEvent(e)
-	if !proc {
-		w.ClearDragNDrop()
-	}
-}
-
-// FinalizeDragNDrop is called by a node to finalize the drag-n-drop
-// operation, after given action has been performed on the target -- allows
-// target to cancel, by sending dnd.DropIgnore.
-func (w *RenderWin) FinalizeDragNDrop(action dnd.DropMods) {
-	if w.EventMgr.DNDStage != DNDDropped {
-		w.ClearDragNDrop()
-		return
-	}
-	if w.EventMgr.DNDFinalEvent == nil { // shouldn't happen...
-		w.ClearDragNDrop()
-		return
-	}
-	de := w.EventMgr.DNDFinalEvent
-	de.ClearHandled()
-	de.Mod = action
-	if de.Source != nil {
-		de.Action = dnd.DropFmSource
-		w.EventMgr.SendSig(de.Source, w, de)
-	}
-	w.ClearDragNDrop()
-}
-
-// ClearDragNDrop clears any existing DND values.
-func (w *RenderWin) ClearDragNDrop() {
-	w.EventMgr.ClearDND()
-	w.DeleteSprite(DNDSpriteName)
-	w.DNDClearCursor()
-}
-
-// DNDModCursor gets the appropriate cursor based on the DND event mod.
-func DNDModCursor(dmod dnd.DropMods) cursor.Shapes {
-	switch dmod {
-	case dnd.DropCopy:
-		return cursor.DragCopy
-	case dnd.DropMove:
-		return cursor.DragMove
-	case dnd.DropLink:
-		return cursor.DragLink
-	}
-	return cursor.Not
-}
-
-// DNDSetCursor sets the cursor based on the DND event mod -- does a
-// "PushIfNot" so safe for multiple calls.
-func (w *RenderWin) DNDSetCursor(dmod dnd.DropMods) {
-	dndc := DNDModCursor(dmod)
-	goosi.TheApp.Cursor(w.GoosiWin).PushIfNot(dndc)
-}
-
-// DNDNotCursor sets the cursor to Not = can't accept a drop
-func (w *RenderWin) DNDNotCursor() {
-	goosi.TheApp.Cursor(w.GoosiWin).PushIfNot(cursor.Not)
-}
-
-// DNDUpdateCursor updates the cursor based on the current DND event mod if
-// different from current (but no update if Not)
-func (w *RenderWin) DNDUpdateCursor(dmod dnd.DropMods) bool {
-	dndc := DNDModCursor(dmod)
-	curs := goosi.TheApp.Cursor(w.GoosiWin)
-	if !curs.IsDrag() || curs.Current() == dndc {
-		return false
-	}
-	curs.Push(dndc)
-	return true
-}
-
-// DNDClearCursor clears any existing DND cursor that might have been set.
-func (w *RenderWin) DNDClearCursor() {
-	curs := goosi.TheApp.Cursor(w.GoosiWin)
-	for curs.IsDrag() || curs.Current() == cursor.Not {
-		curs.Pop()
-	}
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//                   Profiling and Benchmarking, controlled by hot-keys
-
-// ProfileToggle turns profiling on or off
-func ProfileToggle() {
-	if prof.Profiling {
-		EndTargProfile()
-		EndCPUMemProfile()
-	} else {
-		StartTargProfile()
-		StartCPUMemProfile()
-	}
-}
-
-// StartCPUMemProfile starts the standard Go cpu and memory profiling.
-func StartCPUMemProfile() {
-	fmt.Println("Starting Std CPU / Mem Profiling")
-	f, err := os.Create("cpu.prof")
-	if err != nil {
-		log.Fatal("could not create CPU profile: ", err)
-	}
-	if err := pprof.StartCPUProfile(f); err != nil {
-		log.Fatal("could not start CPU profile: ", err)
-	}
-}
-
-// EndCPUMemProfile ends the standard Go cpu and memory profiling.
-func EndCPUMemProfile() {
-	fmt.Println("Ending Std CPU / Mem Profiling")
-	pprof.StopCPUProfile()
-	f, err := os.Create("mem.prof")
-	if err != nil {
-		log.Fatal("could not create memory profile: ", err)
-	}
-	runtime.GC() // get up-to-date statistics
-	if err := pprof.WriteHeapProfile(f); err != nil {
-		log.Fatal("could not write memory profile: ", err)
-	}
-	f.Close()
-}
-
-// StartTargProfile starts targeted profiling using goki prof package.
-func StartTargProfile() {
-	fmt.Printf("Starting Targeted Profiling\n")
-	prof.Reset()
-	prof.Profiling = true
-}
-
-// EndTargProfile ends targeted profiling and prints report.
-func EndTargProfile() {
-	prof.Report(time.Millisecond)
-	prof.Profiling = false
-}
-
-// ReportWinNodes reports the number of nodes in this window
-func (w *RenderWin) ReportWinNodes() {
-	nn := 0
-	w.WalkPre(0, nil, func(k ki.Ki, level int, d any) bool {
-		nn++
-		return ki.Continue
-	})
-	fmt.Printf("Win: %v has: %v nodes\n", w.Name, nn)
-}
-
-// BenchmarkFullRender runs benchmark of 50 full re-renders (full restyling, layout,
-// and everything), reporting targeted profile results and generating standard
-// Go cpu.prof and mem.prof outputs.
-func (w *RenderWin) BenchmarkFullRender() {
-	fmt.Println("Starting BenchmarkFullRender")
-	w.ReportWinNodes()
-	StartCPUMemProfile()
-	StartTargProfile()
-	ts := time.Now()
-	n := 50
-	for i := 0; i < n; i++ {
-		w.Scene.FullRenderTree()
-	}
-	td := time.Now().Sub(ts)
-	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargProfile()
-	EndCPUMemProfile()
-}
-
-// BenchmarkReRender runs benchmark of 50 re-render-only updates of display
-// (just the raw rendering, no styling or layout), reporting targeted profile
-// results and generating standard Go cpu.prof and mem.prof outputs.
-func (w *RenderWin) BenchmarkReRender() {
-	fmt.Println("Starting BenchmarkReRender")
-	w.ReportWinNodes()
-	StartTargProfile()
-	ts := time.Now()
-	n := 50
-	for i := 0; i < n; i++ {
-		w.Scene.RenderTree()
-	}
-	td := time.Now().Sub(ts)
-	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
-	EndTargProfile()
-}
-*/

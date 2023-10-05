@@ -8,12 +8,12 @@ import (
 	"reflect"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
@@ -79,7 +79,7 @@ type KeyChordEdit struct {
 
 func (kc *KeyChordEdit) OnInit() {
 	kc.AddStyles(func(s *styles.Style) {
-		s.Cursor = cursor.HandPointing
+		s.Cursor = cursors.Pointer
 		s.AlignV = styles.AlignTop
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
