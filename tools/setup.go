@@ -61,7 +61,7 @@ func SetupIOS(c *config.Config) error {
 		if hdr.Name != lname {
 			continue
 		}
-		err = os.MkdirAll(gdir, 0750)
+		err = xe.MkdirAll(gdir, 0750)
 		if err != nil {
 			return fmt.Errorf("error creating directory for MoltenVK dylib: %w", err)
 		}
@@ -74,13 +74,26 @@ func SetupIOS(c *config.Config) error {
 		if err != nil {
 			return fmt.Errorf("error copying MoltenVK dylib to MoltenVK dylib file: %w", err)
 		}
-		err = xe.Major().SetDir(gdir).Run("lipo", "-create", tlfname, "-output", "MoltenVK.framework")
+		err = xe.Major().SetDir(gdir).Run("lipo", "-create", tlfname, "-output", "MoltenVK")
 		if err != nil {
-			return fmt.Errorf("error creating framework from MoltenVK dylib file: %w", err)
+			return fmt.Errorf("error creating library from MoltenVK dylib file: %w", err)
 		}
 		err = os.Remove(tlpath)
 		if err != nil {
 			return fmt.Errorf("error removing temporary MoltenVK dylib file: %w", err)
+		}
+
+		err = xe.MkdirAll(gdir+"/MoltenVK.framework", 0750)
+		if err != nil {
+			return fmt.Errorf("error making directory for MoltenK framework: %w", err)
+		}
+		err = os.Rename(gdir+"/MoltenVK", gdir+"/MoltenVK.framework/MoltenVK")
+		if err != nil {
+			return fmt.Errorf("error moving MoltenVK library into MoltenVK framework: %w", err)
+		}
+		err = xe.Major().SetDir(gdir+"/MoltenVK.framework").Run("install_name_tool", "-change", "@rpath/libMoltenVK.dylib", "@executable_path/MoltenVK.framework/MoltenVK", "MoltenVK")
+		if err != nil {
+			return fmt.Errorf("error changing executable path of MoltenVK library inside of MoltenVK framework: %w", err)
 		}
 		return nil
 	}
