@@ -69,14 +69,17 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 	} else {
 		cm.Stderr = c.Stderr
 		cm.Stdout = c.Stdout
-		// need to do now because we aren't buffering
-		if c.Commands != nil {
-			if cm.Dir != "" {
-				c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, cm.Dir) + ": "))
-			}
-			c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
-		}
 	}
+	// need to do now because we aren't buffering, or we are guaranteed to print them
+	// regardless of whether there is an error anyway, so we should print it now so
+	// people can see it earlier (especially important if it runs for a long time).
+	if !c.Buffer || c.Commands != nil {
+		if cm.Dir != "" {
+			c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, cm.Dir) + ": "))
+		}
+		c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
+	}
+
 	cm.Stdin = c.Stdin
 	cm.Dir = c.Dir
 
@@ -86,7 +89,11 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 
 	if c.Buffer {
 		// if we have an error, we print the commands and stdout regardless of the config info
-		c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
+		// (however, we don't print the command if we are guaranteed to print it regardless, as
+		// we already printed it above in that case)
+		if c.Commands == nil {
+			c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
+		}
 		sout := c.GetWriter(c.Stdout, err)
 		if sout != nil {
 			sout.Write(obuf.Bytes())
