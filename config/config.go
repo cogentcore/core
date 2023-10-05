@@ -64,6 +64,12 @@ type Build struct {
 	// the output file name; if not specified, it depends on the package being built
 	Output string `flag:"o,output" desc:"the output file name; if not specified, it depends on the package being built"`
 
+	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)
+	ID string `desc:"the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)"`
+
+	// whether to build/run the app in debug mode
+	Debug bool `flag:"d,debug" desc:"whether to build/run the app in debug mode"`
+
 	// force rebuilding of packages that are already up-to-date
 	Rebuild bool `flag:"a,rebuild" desc:"force rebuilding of packages that are already up-to-date"`
 
@@ -99,9 +105,6 @@ type Build struct {
 
 	// [def: 29] the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
 	AndroidTargetSDK int `def:"29" desc:"the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)"`
-
-	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)
-	ID string `desc:"the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)"`
 }
 
 type Colorgen struct {

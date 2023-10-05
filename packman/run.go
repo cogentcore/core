@@ -42,8 +42,12 @@ func Run(c *config.Config) error {
 		if err != nil {
 			return fmt.Errorf("error installing app: %w", err)
 		}
-		// see https://stackoverflow.com/a/25398877
-		err = xe.Verbose().SetBuffer(false).Run("adb", "shell", "am", "start", "-D", "-n", c.Build.ID+"/.org.golang.app.GoNativeActivity")
+		// see https://stackoverflow.com/a/4567928
+		args := []string{"shell", "am", "start", "-n", c.Build.ID + "/org.golang.app.GoNativeActivity"}
+		if c.Build.Debug {
+			args = append(args, "-D")
+		}
+		err = xe.Verbose().SetBuffer(false).Run("adb", args...)
 		if err != nil {
 			return fmt.Errorf("error starting app: %w", err)
 		}
