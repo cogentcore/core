@@ -67,8 +67,8 @@ type Build struct {
 	// the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)
 	ID string `desc:"the bundle / package ID to use for the app (required for mobile platforms and N/A otherwise); it is typically in the format com.org.app (eg: com.goki.widgets)"`
 
-	// whether to build/run the app in debug mode; this currently only works on iOS
-	Debug bool `flag:"d,debug" desc:"whether to build/run the app in debug mode; this currently only works on iOS"`
+	// whether to build/run the app in debug mode; this currently only works on mobile platforms
+	Debug bool `flag:"d,debug" desc:"whether to build/run the app in debug mode; this currently only works on mobile platforms"`
 
 	// force rebuilding of packages that are already up-to-date
 	Rebuild bool `flag:"a,rebuild" desc:"force rebuilding of packages that are already up-to-date"`
