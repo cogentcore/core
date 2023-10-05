@@ -40,8 +40,8 @@ type Config struct {
 	// [view: add-fields] the configuration options for the build, install, and run commands
 	Build Build `cmd:"build,install,run" view:"add-fields" desc:"the configuration options for the build, install, and run commands"`
 
-	// [view: add-fields] the configuration options for the colorgen command
-	Colorgen Colorgen `cmd:"colorgen" view:"add-fields" desc:"the configuration options for the colorgen command"`
+	// [view: add-fields] the configuration options for the setup command
+	Setup Setup `cmd:"setup" view:"add-fields" desc:"the configuration options for the setup command"`
 
 	// [view: add-fields] the configuration options for the log command
 	Log Log `cmd:"log" view:"add-fields" desc:"the configuration options for the log command"`
@@ -107,19 +107,10 @@ type Build struct {
 	AndroidTargetSDK int `def:"29" desc:"the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)"`
 }
 
-type Colorgen struct {
+type Setup struct {
 
-	// [def: colors.xml] the source file path to generate the color schemes from
-	Source string `def:"colors.xml" desc:"the source file path to generate the color schemes from"`
-
-	// [def: colorgen.go] the output file to store the resulting Go file in
-	Output string `def:"colorgen.go" desc:"the output file to store the resulting Go file in"`
-
-	// [def: main] the package in which the color schemes will be used
-	Package string `def:"main" desc:"the package in which the color schemes will be used"`
-
-	// the comment for the color schemes variable
-	Comment string `desc:"the comment for the color schemes variable"`
+	// the platform to set things up for
+	Platform Platform `desc:"the platform to set things up for"`
 }
 
 type Log struct {

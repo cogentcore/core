@@ -20,3 +20,17 @@ var _ = gti.AddFunc(&gti.Func{
 		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 	}),
 })
+
+var _ = gti.AddFunc(&gti.Func{
+	Name: "goki.dev/goki/tools.Setup",
+	Doc:  "Setup does platform-specific setup that ensures that development can be done\nfor the config platform, mostly by installing necessary tools.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"c", &gti.Field{Name: "c", Type: "*config.Config", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
+	}),
+})
