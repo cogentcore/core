@@ -28,13 +28,14 @@ func Setup(c *config.Config) error {
 
 // SetupIOS is the implementation of [Setup] for iOS.
 func SetupIOS(c *config.Config) error {
-	resp, err := http.Get("https://github.com/KhronosGroup/MoltenVK/releases/download/latest/MoltenVK-ios.tar")
+	murl := "https://github.com/KhronosGroup/MoltenVK/releases/latest/download/MoltenVK-ios.tar"
+	resp, err := http.Get(murl)
 	if err != nil {
-		return fmt.Errorf("error downloading iOS framework tar from latest MoltenVK release: %w", err)
+		return fmt.Errorf("error downloading iOS framework tar from latest MoltenVK release at url %q: %w", murl, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("got status code %d when downloading iOS framework tar from latest MoltenVK release", resp.StatusCode)
+		return fmt.Errorf("got status code %d when downloading iOS framework tar from latest MoltenVK release at url %q", resp.StatusCode, murl)
 	}
 	tr := tar.NewReader(resp.Body)
 	for {

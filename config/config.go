@@ -56,7 +56,7 @@ type Config struct {
 type Build struct {
 
 	// [def: .] the path of the package to build
-	Package string `def:"." desc:"the path of the package to build"`
+	Package string `def:"." posarg:"0" required:"-" desc:"the path of the package to build"`
 
 	// the target platforms to build executables for
 	Target []Platform `flag:"t,target" desc:"the target platforms to build executables for"`
@@ -110,7 +110,7 @@ type Build struct {
 type Setup struct {
 
 	// the platform to set things up for
-	Platform Platform `desc:"the platform to set things up for"`
+	Platform Platform `posarg:"0" desc:"the platform to set things up for"`
 }
 
 type Log struct {
