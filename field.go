@@ -98,7 +98,12 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 			}
 
 			AddFieldsImpl(laser.PtrValue(fv).Interface(), nwPath, nwCmdPath, allFields, usedNames, cmd)
-			continue
+			// we still add ourself if we are a struct, so we keep going,
+			// unless we are associated with a command, in which case there
+			// is no point in adding ourself
+			if hct {
+				continue
+			}
 		}
 		// we first add our unqualified command name, which is the best case scenario
 		name := f.Name
