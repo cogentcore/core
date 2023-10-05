@@ -1896,11 +1896,11 @@ func (i *Densities) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7, 8}
+var _WinFlagsValues = []WinFlags{0, 1, 2, 3, 4, 5, 6, 7}
 
 // WinFlagsN is the highest valid value
 // for type WinFlags, plus one.
-const WinFlagsN WinFlags = 9
+const WinFlagsN WinFlags = 8
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -1913,8 +1913,7 @@ func _WinFlagsNoOp() {
 	_ = x[WinSentShow-(4)]
 	_ = x[WinGoLoop-(5)]
 	_ = x[WinStopEventLoop-(6)]
-	_ = x[WinRedraw-(7)]
-	_ = x[WinSelectionMode-(8)]
+	_ = x[WinSelectionMode-(7)]
 }
 
 var _WinFlagsNameToValueMap = map[string]WinFlags{
@@ -1932,10 +1931,8 @@ var _WinFlagsNameToValueMap = map[string]WinFlags{
 	`wingoloop`:        5,
 	`WinStopEventLoop`: 6,
 	`winstopeventloop`: 6,
-	`WinRedraw`:        7,
-	`winredraw`:        7,
-	`WinSelectionMode`: 8,
-	`winselectionmode`: 8,
+	`WinSelectionMode`: 7,
+	`winselectionmode`: 7,
 }
 
 var _WinFlagsDescMap = map[WinFlags]string{
@@ -1946,8 +1943,7 @@ var _WinFlagsDescMap = map[WinFlags]string{
 	4: `WinSentShow have we sent the show event yet? Only ever sent ONCE`,
 	5: `WinGoLoop true if we are running from GoStartEventLoop -- requires a WinWait.Done at end`,
 	6: `WinStopEventLoop is set when event loop stop is requested`,
-	7: `WinRedraw forces a redraw of the window on next paint event`,
-	8: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
+	7: `WinSelectionMode indicates that the window is in GoGi inspect editor edit mode`,
 }
 
 var _WinFlagsMap = map[WinFlags]string{
@@ -1958,8 +1954,7 @@ var _WinFlagsMap = map[WinFlags]string{
 	4: `WinSentShow`,
 	5: `WinGoLoop`,
 	6: `WinStopEventLoop`,
-	7: `WinRedraw`,
-	8: `WinSelectionMode`,
+	7: `WinSelectionMode`,
 }
 
 // String returns the string representation
@@ -2091,11 +2086,11 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6, 7}
+var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 8
+const ScFlagsN ScFlags = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -2105,10 +2100,9 @@ func _ScFlagsNoOp() {
 	_ = x[ScNeedsRender-(1)]
 	_ = x[ScNeedsLayout-(2)]
 	_ = x[ScNeedsRebuild-(3)]
-	_ = x[ScRebuild-(4)]
-	_ = x[ScImageUpdated-(5)]
-	_ = x[ScPrefSizing-(6)]
-	_ = x[ScPreserve-(7)]
+	_ = x[ScImageUpdated-(4)]
+	_ = x[ScPrefSizing-(5)]
+	_ = x[ScPreserve-(6)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
@@ -2120,14 +2114,12 @@ var _ScFlagsNameToValueMap = map[string]ScFlags{
 	`scneedslayout`:  2,
 	`ScNeedsRebuild`: 3,
 	`scneedsrebuild`: 3,
-	`ScRebuild`:      4,
-	`screbuild`:      4,
-	`ScImageUpdated`: 5,
-	`scimageupdated`: 5,
-	`ScPrefSizing`:   6,
-	`scprefsizing`:   6,
-	`ScPreserve`:     7,
-	`scpreserve`:     7,
+	`ScImageUpdated`: 4,
+	`scimageupdated`: 4,
+	`ScPrefSizing`:   5,
+	`scprefsizing`:   5,
+	`ScPreserve`:     6,
+	`scpreserve`:     6,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
@@ -2135,10 +2127,9 @@ var _ScFlagsDescMap = map[ScFlags]string{
 	1: `ScNeedsRender means nodes have flagged that they need a Render update.`,
 	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
 	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	4: `ScRebuild triggers extra rebuilding of all elements during Config, including all icons, sprites, cursors, etc. Set by DoRebuild call.`,
-	5: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
-	6: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-	7: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+	4: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
+	5: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
+	6: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
@@ -2146,10 +2137,9 @@ var _ScFlagsMap = map[ScFlags]string{
 	1: `ScNeedsRender`,
 	2: `ScNeedsLayout`,
 	3: `ScNeedsRebuild`,
-	4: `ScRebuild`,
-	5: `ScImageUpdated`,
-	6: `ScPrefSizing`,
-	7: `ScPreserve`,
+	4: `ScImageUpdated`,
+	5: `ScPrefSizing`,
+	6: `ScPreserve`,
 }
 
 // String returns the string representation
@@ -2732,5 +2722,165 @@ func (i Themes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *Themes) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
+var _RenderContextFlagsValues = []RenderContextFlags{0, 1}
+
+// RenderContextFlagsN is the highest valid value
+// for type RenderContextFlags, plus one.
+const RenderContextFlagsN RenderContextFlags = 2
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _RenderContextFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[RenderVisible-(0)]
+	_ = x[RenderRebuild-(1)]
+}
+
+var _RenderContextFlagsNameToValueMap = map[string]RenderContextFlags{
+	`RenderVisible`: 0,
+	`rendervisible`: 0,
+	`RenderRebuild`: 1,
+	`renderrebuild`: 1,
+}
+
+var _RenderContextFlagsDescMap = map[RenderContextFlags]string{
+	0: `the window is visible and should be rendered to`,
+	1: `forces a rebuild of all scene elements`,
+}
+
+var _RenderContextFlagsMap = map[RenderContextFlags]string{
+	0: `RenderVisible`,
+	1: `RenderRebuild`,
+}
+
+// String returns the string representation
+// of this RenderContextFlags value.
+func (i RenderContextFlags) String() string {
+	str := ""
+	for _, ie := range _RenderContextFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this RenderContextFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i RenderContextFlags) BitIndexString() string {
+	if str, ok := _RenderContextFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the RenderContextFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *RenderContextFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the RenderContextFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *RenderContextFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _RenderContextFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _RenderContextFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type RenderContextFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the RenderContextFlags value as an int64.
+func (i RenderContextFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the RenderContextFlags value from an int64.
+func (i *RenderContextFlags) SetInt64(in int64) {
+	*i = RenderContextFlags(in)
+}
+
+// Desc returns the description of the RenderContextFlags value.
+func (i RenderContextFlags) Desc() string {
+	if str, ok := _RenderContextFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// RenderContextFlagsValues returns all possible values
+// for the type RenderContextFlags.
+func RenderContextFlagsValues() []RenderContextFlags {
+	return _RenderContextFlagsValues
+}
+
+// Values returns all possible values
+// for the type RenderContextFlags.
+func (i RenderContextFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_RenderContextFlagsValues))
+	for i, d := range _RenderContextFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type RenderContextFlags.
+func (i RenderContextFlags) IsValid() bool {
+	_, ok := _RenderContextFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i RenderContextFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *RenderContextFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i RenderContextFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *RenderContextFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

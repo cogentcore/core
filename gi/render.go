@@ -70,8 +70,6 @@ import (
 // and highest frequency first:
 // * ScNeedsRender: does NeedsRender on nodes.
 // * ScNeedsLayout: does GetSize, DoLayout, then Render -- after Config.
-// * ScNeedsRebuild: Config, Layout with DoRebuild flag set -- for a full
-//   rebuild of the scene (e.g., after global style changes, zooming, etc)
 //
 // Event handling, styling, etc updates should:
 // * Wrap with UpdateStart / End
@@ -296,8 +294,8 @@ func (sc *Scene) DoUpdate() bool {
 	}
 
 	switch {
-	case sc.HasFlag(ScNeedsRebuild):
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender, ScNeedsRebuild)
+	case rc.HasFlag(RenderRebuild):
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
@@ -349,15 +347,14 @@ func (sc *Scene) ApplyStyleScene() {
 	sc.SetFlag(true, ScNeedsLayout)
 }
 
-// DoRebuild implements the ScNeedsRebuild case
-// Typically not called otherwise, and assumes ScIsUpdating already set.
+// DoRebuild does the full re-render and RenderContext Rebuild flag
+// should be used by Widgets to rebuild things that are otherwise
+// cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
 	sc.Fill() // full redraw
-	sc.SetFlag(true, ScRebuild)
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
 	sc.LayoutRenderScene()
-	sc.SetFlag(false, ScRebuild)
 }
 
 // Fill fills the scene with BgColor (default transparent)

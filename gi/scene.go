@@ -172,7 +172,7 @@ func (sc *Scene) ScIsVisible() bool {
 	if sc.RenderCtx == nil || sc.Pixels == nil {
 		return false
 	}
-	return sc.RenderCtx().Visible
+	return sc.RenderCtx().HasFlag(RenderVisible)
 }
 
 // todo: remove
@@ -273,18 +273,11 @@ const (
 	// (e.g., after global style changes, zooming, etc)
 	ScNeedsRebuild
 
-	// ScRebuild triggers extra rebuilding of all elements during
-	// Config, including all icons, sprites, cursors, etc.
-	// Set by DoRebuild call.
-	ScRebuild
-
 	// ScImageUpdated indicates that the Scene's image has been updated
 	// e.g., due to a render or a resize.  This is reset by the
 	// global RenderWin rendering pass, so it knows whether it needs to
 	// copy the image up to the GPU or not.
 	ScImageUpdated
-
-	// todo: rename below:
 
 	// ScPrefSizing means that this scene is currently doing a
 	// PrefSize computation to compute the size of the scene

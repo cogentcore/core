@@ -9,6 +9,7 @@ import (
 	"image"
 	"sync"
 
+	"goki.dev/enums"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 	"golang.org/x/image/draw"
@@ -54,20 +55,31 @@ func (rp *RenderParams) SaveRender(rc *RenderContext) {
 	rp.Size = rc.Size
 }
 
+// RenderContextFlags represent RenderContext state
+type RenderContextFlags int64 //enums:bitflag
+
+const (
+	// the window is visible and should be rendered to
+	RenderVisible RenderContextFlags = iota
+
+	// forces a rebuild of all scene elements
+	RenderRebuild
+)
+
 // RenderContext provides rendering context from outer RenderWin
 // window to Stage and Scene elements to inform styling, layout
 // and rendering.  It also has the master Mutex for any updates
 // to the window contents: use Read lock for anything updating.
 type RenderContext struct {
+	// Flags hold binary context state
+	Flags RenderContextFlags
+
 	// LogicalDPI is the current logical dots-per-inch resolution of the
 	// window, which should be used for most conversion of standard units.
 	LogicalDPI float32
 
 	// Size of the rendering window, in actual "dot" pixels used for rendering.
 	Size image.Point
-
-	// Visible is true if window is visible and should be rendered to
-	Visible bool
 
 	// Mu is mutex for locking out rendering and any destructive updates.
 	// it is Write locked during rendering to provide exclusive blocking
@@ -86,6 +98,16 @@ func (rc *RenderContext) WriteLock() {
 // WriteUnlock must be called for each WriteLock, when done.
 func (rc *RenderContext) WriteUnlock() {
 	rc.Mu.Unlock()
+}
+
+// HasFlag returns true if given flag is set
+func (rc *RenderContext) HasFlag(flag enums.BitFlag) bool {
+	return rc.Flags.HasFlag(flag)
+}
+
+// SetFlag sets given flag(s) on or off
+func (rc *RenderContext) SetFlag(on bool, flag ...enums.BitFlag) {
+	rc.Flags.SetFlag(on, flag...)
 }
 
 // ReadLock should be called whenever modifying anything in the entire
@@ -107,7 +129,7 @@ func (rc *RenderContext) ReadUnlock() {
 }
 
 func (rc *RenderContext) String() string {
-	str := fmt.Sprintf("Size: %s  Visible: %v", rc.Size, rc.Visible)
+	str := fmt.Sprintf("Size: %s  Visible: %v", rc.Size, rc.HasFlag(RenderVisible))
 	return str
 }
 
@@ -214,14 +236,17 @@ func (w *RenderWin) RenderCtx() *RenderContext {
 // during this time.  All other updates are done with a Read lock so they
 // won't interfere with each other.
 func (w *RenderWin) RenderWindow() {
-	w.RenderCtx().WriteLock()
-	defer w.RenderCtx().WriteUnlock()
+	rc := w.RenderCtx()
+	rc.WriteLock()
+	rebuild := rc.HasFlag(RenderRebuild)
 
-	redraw := w.HasFlag(WinRedraw)
-	w.SetFlag(false, WinRedraw)
+	defer func() {
+		rc.WriteUnlock()
+		rc.SetFlag(false, RenderRebuild)
+	}()
 
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
-	if !redraw && !stageMods && !sceneMods {       // nothing to do!
+	if !rebuild && !stageMods && !sceneMods {      // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
 		return
 	}
@@ -230,7 +255,7 @@ func (w *RenderWin) RenderWindow() {
 		fmt.Println("RenderWindow: doing render:", w.Name)
 	}
 
-	if stageMods || redraw {
+	if stageMods || rebuild {
 		if !w.GatherScenes() {
 			fmt.Println("RenderWindow: ERROR: no scenes")
 			return

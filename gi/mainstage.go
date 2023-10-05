@@ -130,7 +130,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 	scr := goosi.TheApp.Screen(0)
 	rc.Size = scr.Geometry.Size()
 	fmt.Println("Screen Size:", rc.Size)
-	rc.Visible = true
+	rc.SetFlag(true, RenderVisible)
 	rc.LogicalDPI = scr.LogicalDPI
 	return ms
 }
@@ -187,7 +187,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	}
 	st.Scene.Resize(sz)
 
-	if st.OwnWin {
+	if st.OwnWin && !goosi.TheApp.Platform().IsMobile() {
 		st.Type = Window                  // critical: now is its own window!
 		st.Scene.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()

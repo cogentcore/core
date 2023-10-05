@@ -138,8 +138,9 @@ func (ic *Icon) DrawIntoScene(sc *Scene) {
 
 // RenderSVG renders the SVG to Pixels if needs update
 func (ic *Icon) RenderSVG(sc *Scene) {
+	rc := ic.Sc.RenderCtx()
 	sv := &ic.SVG
-	if !sc.HasFlag(ScRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
+	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
 		if isz == ic.RendSize && sv.Name == string(ic.IconName) {
 			return

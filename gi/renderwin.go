@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
-	"goki.dev/prof/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
 
@@ -118,7 +117,7 @@ type RenderWin struct {
 	// Frames []*vgpu.RenderFrame ` json:"-" xml:"-" desc:"the render frames for the window"`
 }
 
-// WinFlags extend NodeBase NodeFlags to hold RenderWin state
+// WinFlags represent RenderWin state
 type WinFlags int64 //enums:bitflag
 
 const (
@@ -143,9 +142,6 @@ const (
 
 	// WinStopEventLoop is set when event loop stop is requested
 	WinStopEventLoop
-
-	// WinRedraw forces a redraw of the window on next paint event
-	WinRedraw
 
 	// WinSelectionMode indicates that the window is in GoGi inspect editor edit mode
 	WinSelectionMode
@@ -382,11 +378,9 @@ func (w *RenderWin) ZoomDPI(steps int) {
 	zr := goosi.ZoomFactor / oldzoom
 	curSz := rctx.Size
 	nsz := mat32.NewVec2FmPoint(curSz).MulScalar(zr).ToPointCeil()
+	rctx.SetFlag(true, RenderRebuild) // trigger full rebuild
 	rctx.Mu.RUnlock()
 	w.GoosiWin.SetSize(nsz)
-
-	// todo: need to set rebuild flag on window, scenes need to look at that
-	// (they have their local rebuild flag but it is too much of a pain to set all of those)
 }
 
 // SetWinSize requests that the window be resized to the given size
@@ -422,7 +416,7 @@ func StackAll() []byte {
 func (w *RenderWin) Resized(sz image.Point) {
 	rctx := w.StageMgr.RenderCtx
 	if !w.IsVisible() {
-		rctx.Visible = false
+		rctx.SetFlag(false, RenderVisible)
 		return
 	}
 	rctx.Mu.RLock()
@@ -442,7 +436,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 	// w.FocusInactivate()
 	// w.InactivateAllSprites()
 	if !w.IsVisible() {
-		rctx.Visible = false
+		rctx.SetFlag(false, RenderVisible)
 		if WinEventTrace {
 			fmt.Printf("Win: %v Resized already closed\n", w.Name)
 		}
@@ -455,7 +449,7 @@ func (w *RenderWin) Resized(sz image.Point) {
 		StringsInsertFirstUnique(&FocusRenderWins, w.Name, 10)
 	}
 	rctx.Size = sz
-	rctx.Visible = true
+	rctx.SetFlag(true, RenderVisible)
 	rctx.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.StageMgr.Resize(sz)
@@ -732,32 +726,6 @@ func (w *RenderWin) HandleEvent(evi events.Event) {
 	w.RenderCtx().ReadUnlock()
 }
 
-/*
-	w.EventMgr.EventsEvents(evi)
-
-	if !w.HiPriorityEvents(evi) {
-		return
-	}
-
-	if !evi.IsHandled() && et == events.KeyChord {
-		ke := evi.(*events.Key)
-		kc := ke.Chord()
-		if w.TriggerShortcut(kc) {
-			evi.SetHandled()
-		}
-	}
-
-	if !evi.IsHandled() {
-		switch e := evi.(type) {
-		case *events.Key:
-			keyDelPop := w.KeyChordEventLowPri(e)
-			if keyDelPop {
-				w.delPop = true
-			}
-		}
-	}
-*/
-
 func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 	et := evi.Type()
 	switch et {
@@ -840,17 +808,6 @@ func (w *RenderWin) HandleWindowEvents(evi events.Event) {
 	}
 }
 
-// InitialFocus establishes the initial focus for the window if no focus
-// is set -- uses ActivateStartFocus or FocusNext as backup.
-func (w *RenderWin) InitialFocus() {
-	w.StageMgr.Top().AsBase().Scene.EventMgr.InitialFocus()
-	if prof.Profiling {
-		now := time.Now()
-		opent := now.Sub(RenderWinOpenTimer)
-		fmt.Printf("Win: %v took: %v to open\n", w.Name, opent)
-	}
-}
-
 /*
 /////////////////////////////////////////////////////////////////////////////
 //                   MainMenu Updating
@@ -930,45 +887,4 @@ func (w *RenderWin) SelectionSprite(wb *WidgetBase) *Sprite {
 		return sp
 	*/
 	return nil
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//                   Key Events Handled by RenderWin
-
-// KeyChordEventHiPri handles all the high-priority window-specific key
-// events, returning its input on whether any existing popup should be deleted
-func (w *RenderWin) KeyChordEventHiPri(e *events.Key) bool {
-	delPop := false
-	if KeyEventTrace {
-		fmt.Printf("RenderWin HiPri KeyInput: %v event: %v\n", w.Name, e.String())
-	}
-	if e.IsHandled() {
-		return false
-	}
-	cs := e.KeyChord()
-	kf := KeyFun(cs)
-	// cpop := w.CurPopup()
-	switch kf {
-	case KeyFunWinClose:
-		w.CloseReq()
-		e.SetHandled()
-	case KeyFunMenu:
-		if w.MainMenu != nil {
-			w.MainMenu.GrabFocus()
-			e.SetHandled()
-		}
-	case KeyFunAbort:
-		// if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
-		// 	delPop = true
-		// 	e.SetHandled()
-		// } else if w.EventMgr.DNDStage > DNDNotStarted {
-		// 	w.ClearDragNDrop()
-		// }
-	case KeyFunAccept:
-		// if PopupIsMenu(cpop) || PopupIsTooltip(cpop) {
-		// 	delPop = true
-		// }
-	}
-	// fmt.Printf("key chord: rune: %v Chord: %v\n", e.Rune, e.KeyChord())
-	return delPop
 }

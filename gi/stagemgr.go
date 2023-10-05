@@ -178,7 +178,7 @@ func (sm *MainStageMgr) AsMainMgr() *MainStageMgr {
 func (sm *MainStageMgr) Init(this StageMgr, win *RenderWin) {
 	sm.This = this
 	sm.RenderWin = win
-	sm.RenderCtx = &RenderContext{LogicalDPI: 96, Visible: false}
+	sm.RenderCtx = &RenderContext{LogicalDPI: 96}
 }
 
 // resize resizes all main stages

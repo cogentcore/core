@@ -676,6 +676,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		return
 	}
 	mainsc := em.Main.Scene
+	win := em.RenderWin()
 	cs := e.KeyChord()
 	kf := KeyFun(cs)
 	// fmt.Println(kf, cs)
@@ -693,6 +694,14 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	case KeyFunPrefs:
 		// TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
+	case KeyFunWinClose:
+		win.CloseReq()
+		e.SetHandled()
+	case KeyFunMenu:
+		if win.MainMenu != nil {
+			win.MainMenu.GrabFocus()
+			e.SetHandled()
+		}
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + mainsc.Name() + "_" + dstr + ".png")
@@ -700,10 +709,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
 	case KeyFunZoomIn:
-		em.RenderWin().ZoomDPI(1)
+		win.ZoomDPI(1)
 		e.SetHandled()
 	case KeyFunZoomOut:
-		em.RenderWin().ZoomDPI(-1)
+		win.ZoomDPI(-1)
 		e.SetHandled()
 	case KeyFunRefresh:
 		e.SetHandled()
