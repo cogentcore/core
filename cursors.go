@@ -23,8 +23,10 @@ type Cursor int32 //enums:enum -transform kebab
 // Cursor constants, with names based on CSS (see https://developer.mozilla.org/en-US/docs/Web/CSS/cursor)
 // TODO: maybe add NoDrop and AllScroll
 const (
-	// Default is a default arrow cursor
-	Default Cursor = iota
+	// None indicates no preference for a cursor; will typically be inherited
+	None Cursor = iota
+	// Arrow is a standard arrow cursor, which is the default window cursor
+	Arrow
 	// ContextMenu indicates that a context menu is available
 	ContextMenu
 	// Help indicates that help information is available
