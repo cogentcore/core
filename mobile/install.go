@@ -18,7 +18,7 @@ import (
 // On iOS, Install also runs the app.
 func Install(c *config.Config) error {
 	if len(c.Build.Target) != 1 {
-		return fmt.Errorf("need at least one target platform for install")
+		return fmt.Errorf("expected 1 target platform, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
 	t := c.Build.Target[0]
 	switch t.OS {
@@ -29,7 +29,7 @@ func Install(c *config.Config) error {
 		if !c.Build.Debug {
 			args = append(args, "--justlaunch")
 		}
-		return xe.Run("ios-deploy", args...)
+		return xe.Verbose().SetBuffer(false).Run("ios-deploy", args...)
 	default:
 		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
 	}
