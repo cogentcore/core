@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 
 	"goki.dev/goki/config"
+	"goki.dev/xe"
 )
 
 // Setup does platform-specific setup that ensures that development can be done
@@ -36,7 +37,9 @@ func SetupIOS(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error getting user home directory: %w", err)
 	}
-	tlname := filepath.Join(hdir, "Library/goki/_tmp_goki_setup_libMoltenVK.dylib")
+	gdir := filepath.Join(hdir, "Library", "goki")
+	tlfname := "_tmp_goki_setup_libMoltenVK.dylib"
+	tlpath := filepath.Join(gdir, tlfname)
 
 	resp, err := http.Get(murl)
 	if err != nil {
@@ -58,11 +61,11 @@ func SetupIOS(c *config.Config) error {
 		if hdr.Name != lname {
 			continue
 		}
-		err = os.MkdirAll(filepath.Dir(tlname), 0750)
+		err = os.MkdirAll(gdir, 0750)
 		if err != nil {
 			return fmt.Errorf("error creating directory for MoltenVK dylib: %w", err)
 		}
-		f, err := os.Create(tlname)
+		f, err := os.Create(tlpath)
 		if err != nil {
 			return fmt.Errorf("error creating file for MoltenVK dylib: %w", err)
 		}
@@ -70,6 +73,14 @@ func SetupIOS(c *config.Config) error {
 		_, err = io.Copy(f, tr)
 		if err != nil {
 			return fmt.Errorf("error copying MoltenVK dylib to MoltenVK dylib file: %w", err)
+		}
+		err = xe.Major().SetDir(gdir).Run("lipo", "-create", tlfname, "-output", "MoltenVK.framework")
+		if err != nil {
+			return fmt.Errorf("error creating framework from MoltenVK dylib file: %w", err)
+		}
+		err = os.Remove(tlpath)
+		if err != nil {
+			return fmt.Errorf("error removing temporary MoltenVK dylib file: %w", err)
 		}
 		return nil
 	}
