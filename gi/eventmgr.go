@@ -166,6 +166,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
+	sc.Frame.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
 	em.ManagerKeyChordEvents(evi)
 }
 
@@ -341,6 +342,18 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		if wb.Parts != nil {
 			em.GetMouseInBBox(wb.Parts, pos)
 		}
+		// todo: causing things to hang -- needs more debugging
+		/*
+			ly := AsLayout(k)
+			if ly != nil {
+				for d := mat32.X; d <= mat32.Y; d++ {
+					if ly.HasScroll[d] {
+						sb := ly.Scrolls[d]
+						em.GetMouseInBBox(sb, pos)
+					}
+				}
+			}
+		*/
 		return ki.Continue
 	})
 }

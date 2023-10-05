@@ -195,9 +195,6 @@ type Layout struct {
 
 	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
 	ScrollsOff bool `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
-
-	// [view: -] signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)
-	// ScrollSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for layout scrolling -- sends signal whenever layout is scrolled due to user input -- signal type is dimension (mat32.X or Y) and data is new position (not delta)"`
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {
@@ -376,6 +373,10 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	sb.TrackThr = sb.Step
 	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
+	sb.On(events.Change, func(e events.Event) {
+		ly.Move2DTree(sc)
+	})
+
 	// sb.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	if sig != int64(SliderValueChanged) {
 	// 		return
