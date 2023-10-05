@@ -100,7 +100,7 @@ func BuildImpl(c *config.Config) (*packages.Package, error) {
 	}
 
 	if c.Build.ID == "" {
-		return nil, fmt.Errorf("mobile platforms require -id to be set")
+		c.Build.ID = "com.org.todo." + c.Name
 	}
 
 	var nmpkgs map[string]bool
