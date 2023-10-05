@@ -7,6 +7,10 @@
 package config
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"goki.dev/enums/enumgen"
 	"goki.dev/gti/gtigen"
 	"goki.dev/xe"
@@ -154,6 +158,18 @@ type Generate struct {
 	AddKiTypes bool `def:"true" desc:"whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)"`
 }
 
-func (c *Config) OnConfig(cmd string) {
+func (c *Config) OnConfig(cmd string) error {
 	xe.SetMajor(xe.Major().SetPrintOnly(c.Build.PrintOnly))
+	if c.Name == "" {
+		cdir, err := os.Getwd()
+		if err != nil {
+			return fmt.Errorf("error finding current directory: %w", err)
+		}
+		base := filepath.Base(cdir)
+		c.Name = base
+	}
+	if c.Build.ID == "" {
+		c.Build.ID = "com.org.todo." + c.Name
+	}
+	return nil
 }

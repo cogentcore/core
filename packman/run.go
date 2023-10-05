@@ -43,7 +43,7 @@ func Run(c *config.Config) error {
 			return fmt.Errorf("error installing app: %w", err)
 		}
 		// see https://stackoverflow.com/a/25398877
-		err = xe.Run("adb", "shell", "monkey", "-p", c.Build.ID, "1")
+		err = xe.Verbose().SetBuffer(false).Run("adb", "shell", "am", "start", "-D", "-n", c.Build.ID+"/.org.golang.app.GoNativeActivity")
 		if err != nil {
 			return fmt.Errorf("error starting app: %w", err)
 		}

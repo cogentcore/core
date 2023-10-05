@@ -7,7 +7,6 @@ package tools
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"goki.dev/goki/config"
 	"goki.dev/grows/tomls"
@@ -24,17 +23,6 @@ func Init(c *config.Config) error {
 	err := os.MkdirAll(".goki", 0750)
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)
-	}
-	if c.Name == "" {
-		cdir, err := os.Getwd()
-		if err != nil {
-			return fmt.Errorf("error finding current directory: %w", err)
-		}
-		base := filepath.Base(cdir)
-		c.Name = base
-	}
-	if c.Build.ID == "" {
-		c.Build.ID = "com.org.todo." + c.Name
 	}
 	err = tomls.Save(c, ".goki/config.toml")
 	if err != nil {

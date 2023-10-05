@@ -12,8 +12,7 @@ import (
 	"goki.dev/xe"
 )
 
-// Log prints the logs from your app running on the
-// config operating system (android or ios) to the terminal.
+// Log prints the logs from your app running on android to the terminal.
 //
 //gti:add
 func Log(c *config.Config) error {
