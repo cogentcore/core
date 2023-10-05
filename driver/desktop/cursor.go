@@ -13,7 +13,7 @@ import (
 	"goki.dev/goosi/cursor"
 )
 
-var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
+var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, cursors: map[enums.Enum]map[int]*glfw.Cursor{}}
 
 type cursorImpl struct {
 	cursor.CursorBase
