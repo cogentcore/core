@@ -25,7 +25,11 @@ func Install(c *config.Config) error {
 	case "android":
 		return xe.Run("adb", "install", "-r", c.Build.Output)
 	case "ios":
-		return xe.Run("ios-deploy", "--debug", "--bundle", c.Build.Output)
+		args := []string{"--bundle", c.Build.Output, "--debug"}
+		if !c.Build.Debug {
+			args = append(args, "--justlaunch")
+		}
+		return xe.Run("ios-deploy", args...)
 	default:
 		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
 	}

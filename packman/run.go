@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"goki.dev/goki/config"
+	"goki.dev/goki/mobile"
 	"goki.dev/xe"
 )
 
@@ -56,6 +57,8 @@ func Run(c *config.Config) error {
 			return Log(c)
 		}
 		return nil
+	case "ios":
+		return mobile.Install(c) // install already runs on iOS
 	}
 	return nil
 }
