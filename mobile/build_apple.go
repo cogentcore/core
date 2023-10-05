@@ -147,6 +147,11 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 		if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output); err != nil {
 			return nil, err
 		}
+
+		err := xe.Run("cp", "-r", "$HOME/Library/goki/MoltenVK.framework", c.Build.Output)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return nmpkgs, nil
 }
