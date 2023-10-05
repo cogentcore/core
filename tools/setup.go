@@ -31,7 +31,7 @@ func Setup(c *config.Config) error {
 func SetupIOS(c *config.Config) error {
 	murl := "https://github.com/KhronosGroup/MoltenVK/releases/latest/download/MoltenVK-ios.tar"
 	lname := "MoltenVK/MoltenVK/dylib/iOS/libMoltenVK.dylib"
-	tlname := "/System/Library/Frameworks/__tmp_goki_setup_libMoltenVK.dylib"
+	tlname := "~/Library/goki/_tmp_goki_setup_libMoltenVK.dylib"
 
 	resp, err := http.Get(murl)
 	if err != nil {
