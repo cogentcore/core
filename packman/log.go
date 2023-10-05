@@ -5,19 +5,20 @@
 package packman
 
 import (
-	"errors"
 	"fmt"
 
 	"goki.dev/goki/config"
 	"goki.dev/xe"
 )
 
-// Log prints the logs from your app running on android to the terminal.
+// Log prints the logs from your app running on Android to the terminal.
+// Android is the only supported platform for log; use the -debug flag on
+// run for other platforms.
 //
 //gti:add
 func Log(c *config.Config) error {
-	if c.Log.Target == "ios" {
-		return errors.New("ios not supported yet")
+	if c.Log.Target != "android" {
+		return fmt.Errorf("only android is supported for log; use the -debug flag on run for other platforms")
 	}
 	if !c.Log.Keep {
 		err := xe.Run("adb", "logcat", "-c")

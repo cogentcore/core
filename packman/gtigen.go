@@ -37,7 +37,7 @@ var _ = gti.AddFunc(&gti.Func{
 
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/goki/packman.Log",
-	Doc:  "Log prints the logs from your app running on the\nconfig operating system (android or ios) to the terminal.",
+	Doc:  "Log prints the logs from your app running on Android to the terminal.\nAndroid is the only supported platform for log; use the -debug flag on\nrun for other platforms.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
