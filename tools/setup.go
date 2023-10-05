@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"goki.dev/goki/config"
 )
@@ -29,6 +30,9 @@ func Setup(c *config.Config) error {
 // SetupIOS is the implementation of [Setup] for iOS.
 func SetupIOS(c *config.Config) error {
 	murl := "https://github.com/KhronosGroup/MoltenVK/releases/latest/download/MoltenVK-ios.tar"
+	lname := "MoltenVK/MoltenVK/dylib/iOS/libMoltenVK.dylib"
+	tlname := "/System/Library/Frameworks/__tmp_goki_setup_libMoltenVK.dylib"
+
 	resp, err := http.Get(murl)
 	if err != nil {
 		return fmt.Errorf("error downloading iOS framework tar from latest MoltenVK release at url %q: %w", murl, err)
@@ -46,7 +50,19 @@ func SetupIOS(c *config.Config) error {
 		if err != nil {
 			return fmt.Errorf("error reading iOS framework tar: %w", err)
 		}
-		fmt.Println(hdr.Name)
+		if hdr.Name != lname {
+			continue
+		}
+		f, err := os.Create(tlname)
+		if err != nil {
+			return fmt.Errorf("error creating file for MoltenVK dylib: %w", err)
+		}
+		defer f.Close()
+		_, err = io.Copy(f, tr)
+		if err != nil {
+			return fmt.Errorf("error copying MoltenVK dylib to MoltenVK dylib file: %w", err)
+		}
+		return nil
 	}
-	return nil
+	return fmt.Errorf("internal error: did not find MoltenVK dylib at %q in iOS framework tar", lname)
 }
