@@ -35,6 +35,11 @@ func Run(c *config.Config) error {
 	if err != nil {
 		return fmt.Errorf("error building app: %w", err)
 	}
+	// Build may have added iossimulator, so we get rid of it for
+	// the running stage (we already confirmed we were passed 1 up above)
+	if len(c.Build.Target) > 1 {
+		c.Build.Target = []config.Platform{t}
+	}
 	switch t.OS {
 	case "darwin", "windows", "linux":
 		return xe.Verbose().SetBuffer(false).Run(filepath.Join(".", c.Build.Output))
