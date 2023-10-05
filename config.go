@@ -71,7 +71,7 @@ var major *Config
 // [slog.LevelInfo] or below, whereas [Minor] results in that when
 // it is [slog.LevelDebug] or below. Most commands in a typical use
 // case should be Major, which is why the global helper functions
-// operate on it. The object return by Major is guaranteed to be
+// operate on it. The object returned by Major is guaranteed to be
 // unique, so it can be modified directly.
 func Major() *Config {
 	if major != nil {
@@ -116,7 +116,7 @@ var minor *Config
 // user to know about and be able to see the output of. It results in
 // commands and output being printed with a [grog.UserLevel] of
 // [slog.LevelDebug] or below, whereas [Major] results in that when
-// it is [slog.LevelInfo] or below. The object return by Minor is
+// it is [slog.LevelInfo] or below. The object returned by Minor is
 // guaranteed to be unique, so it can be modified directly.
 func Minor() *Config {
 	if minor != nil {
@@ -156,12 +156,12 @@ func SetMinor(c *Config) {
 var verbose *Config
 
 // Verbose returns the default [Config] object for a verbose command,
-// based on [grog.UserLevel]. It should be used for commands that
+// based on [grog.UserLevel]. It should be used for commands
 // whose output are central to an application; for example, for a
 // logger or app runner. It results in commands and output being
 // printed with a [grog.UserLevel] of [slog.LevelWarn] or below,
 // whereas [Major] and [Minor] result in that when it is [slog.LevelInfo]
-// and [slog.levelDebug] or below, respectively. The object return by
+// and [slog.levelDebug] or below, respectively. The object returned by
 // Verbose is guaranteed to be unique, so it can be modified directly.
 func Verbose() *Config {
 	if verbose != nil {
@@ -195,6 +195,36 @@ func Verbose() *Config {
 // nil, [Verbose] will go back to returning its default value.
 func SetVerbose(c *Config) {
 	verbose = c
+}
+
+// silent is the config object for [Silent] specified through [SetSilent]
+var silent *Config
+
+// Silent returns the default [Config] object for a silent command,
+// based on [grog.UserLevel]. It should be used for commands that
+// whose output/input is private and needs to be always hidden from
+// the user; for example, for a command that involves passwords.
+// It results in commands and output never being printed. The object
+// returned by Silent is guaranteed to be unique, so it can be modified directly.
+func Silent() *Config {
+	if silent != nil {
+		// need to make a new copy so people can't modify the underlying
+		res := *silent
+		return &res
+	}
+	return &Config{
+		Buffer: true,
+		Env:    map[string]string{},
+		Stdin:  os.Stdin,
+	}
+}
+
+// SetSilent sets the config object that [Silent] returns. It should
+// be used sparingly, and only in cases where there is a clear property
+// that should be set for all commands. If the given config object is
+// nil, [Silent] will go back to returning its default value.
+func SetSilent(c *Config) {
+	silent = c
 }
 
 // GetWriter returns the appropriate writer to use based on the given writer and error.
