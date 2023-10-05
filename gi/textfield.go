@@ -209,27 +209,29 @@ func (tf *TextField) TextFieldStyles() {
 }
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "lead-icon":
-			lead := child.(*Action)
-			lead.Type = ActionParts
-			lead.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetDp(20)
-				s.Margin.Right.SetDp(16 * Prefs.DensityMul())
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
-			})
-		case "trail-icon":
-			trail := child.(*Action)
-			trail.Type = ActionParts
-			trail.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetDp(20)
-				s.Margin.Left.SetDp(16 * Prefs.DensityMul())
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.AlignV = styles.AlignMiddle
-			})
-		}
+	_, wb := AsWidget(child)
+	if wb == nil {
+		return
+	}
+	switch wb.Name() {
+	case "lead-icon":
+		lead := child.(*Action)
+		lead.Type = ActionParts
+		lead.AddStyles(func(s *styles.Style) {
+			s.Font.Size.SetDp(20)
+			s.Margin.Right.SetDp(16 * Prefs.DensityMul())
+			s.Color = colors.Scheme.OnSurfaceVariant
+			s.AlignV = styles.AlignMiddle
+		})
+	case "trail-icon":
+		trail := child.(*Action)
+		trail.Type = ActionParts
+		trail.AddStyles(func(s *styles.Style) {
+			s.Font.Size.SetDp(20)
+			s.Margin.Left.SetDp(16 * Prefs.DensityMul())
+			s.Color = colors.Scheme.OnSurfaceVariant
+			s.AlignV = styles.AlignMiddle
+		})
 	}
 }
 

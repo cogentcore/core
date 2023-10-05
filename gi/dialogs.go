@@ -96,6 +96,7 @@ func (dlg *DialogStage) AddButtonBox() *Layout {
 func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
 	scfr := dlg.Stage.Scene.Frame
 	NewButton(bb, "ok").SetText("Ok").On(events.Click, func(e events.Event) {
+		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Accept()
 		scfr.Send(events.Change, e)
 	})
@@ -114,6 +115,7 @@ func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
 func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
 	scfr := dlg.Stage.Scene.Frame
 	NewButton(bb, "cancel").SetText("Cancel").On(events.Click, func(e events.Event) {
+		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Cancel()
 		scfr.Send(events.Change, e)
 	})

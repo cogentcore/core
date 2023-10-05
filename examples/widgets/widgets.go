@@ -91,6 +91,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			AddTitle("Test Dialog").
 			AddPrompt("This is a prompt").
 			AddOkCancel()
+		dlg.Stage.Modal = false // works!
 		dlg.Stage.OwnWin = false
 		dlg.Run()
 
