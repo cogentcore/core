@@ -45,6 +45,7 @@ func Run(c *config.Config) error {
 		// see https://stackoverflow.com/a/4567928
 		args := []string{"shell", "am", "start", "-n", c.Build.ID + "/org.golang.app.GoNativeActivity"}
 		if c.Build.Debug {
+			// TODO: get debug on Android working
 			args = append(args, "-D")
 		}
 		err = xe.Verbose().SetBuffer(false).Run("adb", args...)
