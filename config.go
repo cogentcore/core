@@ -99,7 +99,7 @@ var MetaCmds = []*Cmd[*MetaConfig]{
 // be called at the end of the [Config] function, with the command that has
 // been parsed as an argument.
 type OnConfigurer interface {
-	OnConfig(cmd string)
+	OnConfig(cmd string) error
 }
 
 // Config is the main, high-level configuration setting function,
@@ -194,7 +194,10 @@ func Config[T any](opts *Options, cfg T, cmds ...*Cmd[T]) (string, error) {
 		errs = append(errs, err)
 	}
 	if cfer, ok := any(cfg).(OnConfigurer); ok {
-		cfer.OnConfig(cmd)
+		err := cfer.OnConfig(cmd)
+		if err != nil {
+			errs = append(errs, err)
+		}
 	}
 	return cmd, errors.Join(errs...)
 }
