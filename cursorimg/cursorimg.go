@@ -10,8 +10,6 @@ import (
 	"image"
 	_ "image/png"
 
-	"log/slog"
-
 	"goki.dev/cursors"
 	"goki.dev/enums"
 )
@@ -61,7 +59,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 	hot, ok := cursors.Hotspots[cursor]
 	if !ok {
-		slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
+		// slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
 		hot = image.Pt(16, 16)
 	}
 	return &Cursor{
