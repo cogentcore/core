@@ -28,7 +28,7 @@ func Setup(c *config.Config) error {
 
 // SetupIOS is the implementation of [Setup] for iOS.
 func SetupIOS(c *config.Config) error {
-	tmp, err := os.MkdirTemp("", "goki-setup-ios-vulkan")
+	tmp, err := os.MkdirTemp("", "goki-setup-ios-vulkan-")
 	if err != nil {
 		return err
 	}
