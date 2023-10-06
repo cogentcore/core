@@ -246,11 +246,11 @@ func EnvInit(c *config.Config) (err error) {
 				return err
 			}
 
-			// hdir, err := os.UserHomeDir()
-			// if err != nil {
-			// 	return fmt.Errorf("error getting user home directory: %w", err)
-			// }
-			// mff := " -F" + hdir + "/Library/goki" // need to link to MoltenVK.framework in user's goki library
+			hdir, err := os.UserHomeDir()
+			if err != nil {
+				return fmt.Errorf("error getting user home directory: %w", err)
+			}
+			mff := " -F" + hdir + "/Library/goki" // need to link to MoltenVK.framework in user's goki library
 
 			AppleEnv[platform+"/"+arch] = map[string]string{
 				"GOOS":         goos,
@@ -260,7 +260,7 @@ func EnvInit(c *config.Config) (err error) {
 				"CXX":          clang + "++",
 				"CGO_CFLAGS":   cflags + " -arch " + ArchClang(arch),
 				"CGO_CXXFLAGS": cflags + " -arch " + ArchClang(arch),
-				"CGO_LDFLAGS":  cflags + " -arch " + ArchClang(arch),
+				"CGO_LDFLAGS":  cflags + " -arch " + ArchClang(arch) + mff,
 				"CGO_ENABLED":  "1",
 				"DARWIN_SDK":   sdk,
 			}

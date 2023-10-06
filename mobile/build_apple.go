@@ -148,15 +148,11 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 			return nil, err
 		}
 
-		// need to copy framework and update path
+		// need to copy framework
 		err := xe.Run("cp", "-r", "$HOME/Library/goki/MoltenVK.framework", c.Build.Output)
 		if err != nil {
 			return nil, err
 		}
-		// err = xe.Major().Run("install_name_tool", "-change", "@rpath/libMoltenVK.dylib", "@executable_path/MoltenVK.framework/MoltenVK", c.Build.Output+"/main")
-		// if err != nil {
-		// 	return nil, err
-		// }
 	}
 	return nmpkgs, nil
 }
