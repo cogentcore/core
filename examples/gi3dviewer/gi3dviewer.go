@@ -13,18 +13,12 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin/driver/vkos"
 	"goki.dev/gi/v2/units"
 	"goki.dev/ki/v2/ki"
 	"goki.dev/mat32/v2"
 )
 
-func main() {
-
-	vkos.VkOsDebug = false
-
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
 func mainrun() {
 	width := 1600
