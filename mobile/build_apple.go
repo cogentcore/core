@@ -141,17 +141,22 @@ func GoAppleBuild(c *config.Config, pkg *packages.Package, bundleID string, targ
 	xe.PrintCmd(fmt.Sprintf("mv %s %s", TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output), nil)
 	if !c.Build.PrintOnly {
 		// if output already exists, remove.
-		if err := os.RemoveAll(c.Build.Output); err != nil {
+		if err := xe.RemoveAll(c.Build.Output); err != nil {
 			return nil, err
 		}
 		if err := os.Rename(TmpDir+"/build/Release-iphoneos/main.app", c.Build.Output); err != nil {
 			return nil, err
 		}
 
-		err := xe.Run("cp", "-r", "$HOME/Library/goki/MoltenVK.framework", c.Build.Output)
+		// need to copy framework and update path
+		err := xe.Run("cp", "-r", "$HOME/devFrameworks/MoltenVK.framework", c.Build.Output)
 		if err != nil {
 			return nil, err
 		}
+		// err = xe.Major().Run("install_name_tool", "-change", "@rpath/libMoltenVK.dylib", "@executable_path/MoltenVK.framework/MoltenVK", c.Build.Output+"/main")
+		// if err != nil {
+		// 	return nil, err
+		// }
 	}
 	return nmpkgs, nil
 }
