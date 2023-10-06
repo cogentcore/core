@@ -82,6 +82,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Activatable) {
+			// fmt.Println("active:", wb)
 			wb.SetState(true, states.Active)
 		}
 	})
@@ -144,6 +145,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Slideable) {
+			// fmt.Println("sliding:", wb)
 			wb.SetState(true, states.Sliding)
 		}
 	})
@@ -152,7 +154,8 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Slideable) {
-			wb.SetState(false, states.Sliding)
+			wb.SetState(false, states.Sliding, states.Active)
+			// fmt.Println("done sliding:", wb)
 		}
 	})
 	wb.On(events.DragStart, func(e events.Event) {
@@ -168,7 +171,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		if wb.AbilityIs(states.Draggable) {
-			wb.SetState(false, states.Dragging)
+			wb.SetState(false, states.Dragging, states.Active)
 		}
 	})
 }

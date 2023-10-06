@@ -226,13 +226,12 @@ func (sb *SliderBase) OnInit() {
 }
 
 // SnapValue snaps the value to step sizes if snap option is set
-func (sb *SliderBase) SnapValue(val float32) float32 {
+func (sb *SliderBase) SnapValue() {
 	if !sb.Snap {
-		return val
+		return
 	}
-	val = mat32.IntMultiple(val, sb.Step)
-	val = mat32.Truncate(val, sb.Prec)
-	return val
+	sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
+	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
 }
 
 // SetSliderState sets the slider state to given state, updates style
@@ -279,11 +278,11 @@ func (sb *SliderBase) SizeFromAlloc() {
 
 // SendChanged sends a Changed message if given new value is
 // different from the existing Value.
-func (sb *SliderBase) SendChanged(val float32, e events.Event) bool {
-	// if sb.LastValue == val {
-	// 	return false
-	// }
-	sb.LastValue = val
+func (sb *SliderBase) SendChanged(e events.Event) bool {
+	if sb.Value == sb.LastValue {
+		return false
+	}
+	sb.LastValue = sb.Value
 	sb.Send(events.Change, e)
 	return true
 }
@@ -304,18 +303,17 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		}
 	}
 	sb.Pos = mat32.Max(0, sb.Pos)
-	val := mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
-	val = mat32.Clamp(val, sb.Min, sb.Max)
+	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
+	sb.Value = mat32.Clamp(sb.Value, sb.Min, sb.Max)
 	if sb.ValThumb {
-		val = mat32.Min(val, sb.Max-sb.ThumbVal)
+		sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal)
 	}
 	if sb.Snap {
-		val = sb.SnapValue(val)
+		sb.SnapValue()
 	}
-	sb.Value = val
-	sb.UpdatePosFromValue(val)
-	if sb.Tracking && mat32.Abs(sb.LastValue-val) > sb.TrackThr {
-		sb.SendChanged(val, nil)
+	sb.UpdatePosFromValue(sb.Value)
+	if sb.Tracking && mat32.Abs(sb.LastValue-sb.Value) > sb.TrackThr {
+		sb.SendChanged(nil)
 	}
 	sb.UpdateEndRender(updt)
 }
@@ -399,7 +397,6 @@ func (sb *SliderBase) SliderMouse() {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
-		e.SetHandled()
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
@@ -415,7 +412,6 @@ func (sb *SliderBase) SliderMouse() {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
-		e.SetHandled()
 		del := e.StartDelta()
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(sb.SlideStartPos + float32(del.X))
@@ -427,7 +423,6 @@ func (sb *SliderBase) SliderMouse() {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
-		e.SetHandled()
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
 		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
@@ -656,17 +651,18 @@ func (sr *Slider) SliderStyles() {
 		s.Color = colors.Scheme.Primary.On
 		// STYTODO: state styles
 		switch {
+		case s.Is(states.Sliding):
+			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(40))
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
 			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Color = colors.Scheme.Primary.On
 			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Hovered):
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
-		case s.Is(states.Sliding):
-			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
-			s.Cursor = cursors.Grabbing
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
@@ -815,15 +811,17 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		// STYTODO: state styles
 		switch {
+		case s.Is(states.Sliding):
+			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(40))
+			sb.ValueColor.SetSolid(colors.Palette.Primary.Tone(40))
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Active):
 			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
+			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Color = colors.Scheme.Primary.On
 			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
 		case s.Is(states.Hovered):
-			s.BackgroundColor.SetSolid(colors.Scheme.Outline)
-		case s.Is(states.Sliding):
-			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		}
 	})
 }
