@@ -281,9 +281,9 @@ func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
 	// if scMod {
 	// 	fmt.Println("main scene mod:", st.Scene.Name)
 	// }
-	if stageMods {
-		fmt.Println("pop stage mod:", st.Name)
-	}
+	// if stageMods {
+	// 	fmt.Println("pop stage mod:", st.Name)
+	// }
 	return
 }
 
@@ -306,6 +306,9 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 	// deal with all of this, not just going to the popup right away
 	st.PopupMgr.HandleEvent(evi)
 	if evi.IsHandled() {
+		if EventTrace && evi.Type() != events.MouseMove {
+			log.Println("Event handled by popup:", evi)
+		}
 		return
 	}
 	st.Scene.EventMgr.Main = st

@@ -248,6 +248,8 @@ func (wb *WidgetBase) Move2DTree(sc *Scene) {
 	pwi, pwb := AsWidget(wb.Par)
 	if pwb != nil {
 		parBBox = pwi.ChildrenBBoxes(sc)
+	} else {
+		parBBox.Max = sc.RenderCtx().Size
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
 	wb.This().(Widget).Move2D(sc, delta, parBBox) // important to use interface version to get interface!

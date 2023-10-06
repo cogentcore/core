@@ -314,9 +314,9 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 
 func (bb *ButtonBase) ApplyStyle(sc *Scene) {
 	bb.ApplyStyleWidget(sc)
-	// if bb.Menu != nil { // todo:
-	// 	bb.Menu.SetShortcuts(bb.ParentRenderWin())
-	// }
+	if bb.Menu != nil {
+		bb.Menu.SetShortcuts(bb.EventMgr())
+	}
 }
 
 func (bb *ButtonBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -342,7 +342,7 @@ func (bb *ButtonBase) Render(sc *Scene) {
 
 func (bb *ButtonBase) Destroy() {
 	if bb.Menu != nil {
-		bb.Menu.DeleteShortcuts(bb.ParentRenderWin())
+		bb.Menu.DeleteShortcuts(bb.EventMgr())
 	}
 }
 

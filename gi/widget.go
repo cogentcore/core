@@ -376,17 +376,6 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
-// todo: remove this and replace with EventMgr
-// all calls to this will fail.
-func (wb *WidgetBase) ParentRenderWin() *RenderWin {
-	if wb.Sc == nil {
-		return nil
-	}
-	log.Println("TODO: replace all calls to ParentRenderWin() with EventMgr calls!")
-	// return wb.Sc.Win
-	return nil
-}
-
 func (wb *WidgetBase) IsVisible() bool {
 	if wb == nil || wb.This() == nil || wb.Is(Invisible) {
 		return false

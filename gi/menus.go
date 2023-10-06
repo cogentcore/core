@@ -154,25 +154,25 @@ func (m *MenuActions) AddLabel(lbl string) *Label {
 
 // SetShortcuts sets the shortcuts to given window -- call when the menu has
 // been attached to a window
-func (m *MenuActions) SetShortcuts(win *RenderWin) {
-	if win == nil {
+func (m *MenuActions) SetShortcuts(em *EventMgr) {
+	if em == nil {
 		return
 	}
 	for _, mi := range *m {
 		if ac := AsAction(mi); ac != nil {
-			win.AddShortcut(ac.Shortcut, ac)
+			em.AddShortcut(ac.Shortcut, ac)
 		}
 	}
 }
 
 // DeleteShortcuts deletes the shortcuts in given window
-func (m *MenuActions) DeleteShortcuts(win *RenderWin) {
-	if win == nil {
+func (m *MenuActions) DeleteShortcuts(em *EventMgr) {
+	if em == nil {
 		return
 	}
 	for _, mi := range *m {
 		if ac := AsAction(mi); ac != nil {
-			win.DeleteShortcut(ac.Shortcut, ac)
+			em.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
 }

@@ -701,32 +701,26 @@ func (tf *TextField) InsertAtCursor(str string) {
 }
 
 func (tf *TextField) MakeContextMenu(m *MenuActions) {
-	// todo
-	/*
-		cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-			ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc},
-				tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-					tff := AsTextField(recv)
-					tff.This().(Clipper).Copy(true)
-				})
-			ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-			if !tf.IsDisabled() {
-				ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
-				ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-				ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc},
-					tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-						tff := AsTextField(recv)
-						tff.This().(Clipper).Cut()
-					})
-				ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-				ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc},
-					tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-						tff := AsTextField(recv)
-						tff.This().(Clipper).Paste()
-					})
-				ac.SetFlag(goosi.TheApp.ClipBoard(tf.ParentRenderWin().GoosiWin).IsEmpty(), Disabled)
-			}
-	*/
+	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
+	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc}, func(ac *Action) {
+		tf.This().(Clipper).Copy(true)
+	})
+	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
+	if !tf.IsDisabled() {
+		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
+		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
+		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc}, func(ac *Action) {
+			tf.This().(Clipper).Cut()
+		})
+		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
+		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc}, func(ac *Action) {
+			tf.This().(Clipper).Paste()
+		})
+		cb := tf.Sc.EventMgr.ClipBoard()
+		if cb != nil {
+			ac.SetState(cb.IsEmpty(), states.Disabled)
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

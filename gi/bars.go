@@ -114,14 +114,14 @@ func (mb *MenuBar) UpdateActions() {
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 // Called in SetTypeHandlers()
 func (mb *MenuBar) SetShortcuts() {
-	win := mb.ParentRenderWin()
-	if win == nil {
+	em := mb.EventMgr()
+	if em == nil {
 		return
 	}
 	for _, mi := range mb.Kids {
 		if mi.KiType().HasEmbed(ActionType) {
 			ac := AsAction(mi)
-			win.AddShortcut(ac.Shortcut, ac)
+			em.AddShortcut(ac.Shortcut, ac)
 		}
 	}
 }
@@ -133,14 +133,14 @@ func (mb *MenuBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (mb *MenuBar) DeleteShortcuts() {
-	win := mb.ParentRenderWin()
-	if win == nil {
+	em := mb.EventMgr()
+	if em == nil {
 		return
 	}
 	for _, mi := range mb.Kids {
 		if mi.KiType().HasEmbed(ActionType) {
 			ac := AsAction(mi)
-			win.DeleteShortcut(ac.Shortcut, ac)
+			em.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
 }
@@ -415,14 +415,14 @@ func (tb *ToolBar) Render(sc *Scene) {
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 func (tb *ToolBar) SetShortcuts() {
-	win := tb.ParentRenderWin()
-	if win == nil {
+	em := tb.EventMgr()
+	if em == nil {
 		return
 	}
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ActionType) {
 			ac := AsAction(mi)
-			win.AddShortcut(ac.Shortcut, ac)
+			em.AddShortcut(ac.Shortcut, ac)
 		}
 	}
 }
@@ -434,14 +434,14 @@ func (tb *ToolBar) Destroy() {
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
 func (tb *ToolBar) DeleteShortcuts() {
-	win := tb.ParentRenderWin()
-	if win == nil {
+	em := tb.EventMgr()
+	if em == nil {
 		return
 	}
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ActionType) {
 			ac := AsAction(mi)
-			win.DeleteShortcut(ac.Shortcut, ac)
+			em.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
 }

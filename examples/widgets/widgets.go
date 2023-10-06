@@ -268,9 +268,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	// sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
 	// })
-
-	cb := gi.NewComboBox(txrow, "combo")
-	_ = cb
+	//
+	// 	cb := gi.NewComboBox(txrow, "combo")
+	// 	_ = cb
 	// cb.ItemsFromTypes(kit.Types.AllImplementersOf(reflect.TypeOf((*gi.Node2D)(nil)).Elem(), false), true, true, 50)
 	// cb.ComboSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	fmt.Printf("ComboBox %v selected index: %v data: %v\n", send.Name(), sig, data)

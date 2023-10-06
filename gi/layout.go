@@ -349,6 +349,8 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sb := ly.Scrolls[d]
 		sb.InitName(sb, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sb, ly.This())
+		// sb.SetFlag(true, ki.Field)
+		sb.Sc = sc
 		sb.Dim = d
 		sb.Config(sc)
 		sb.Tracking = true
@@ -370,25 +372,13 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
 	// SidesTODO: not sure about this
 	sb.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
-	sb.TrackThr = sb.Step
+	sb.TrackThr = 1
 	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
 	sb.On(events.Change, func(e events.Event) {
+		ly.SetNeedsLayout(sc, true)
 		ly.Move2DTree(sc)
 	})
-
-	// sb.SliderSig.ConnectOnly(ly.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig != int64(SliderValueChanged) {
-	// 		return
-	// 	}
-	// 	li, _ := AsWidget(recv)
-	// 	ls := AsLayout(li)
-	// 	_ = ls
-	// 	// wupdt := ls.TopUpdateStart()
-	// 	// ls.Move2DTree()
-	// 	// li.UpdateSig()
-	// 	// ls.TopUpdateEnd(wupdt)
-	// })
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.  todo: we are leaking

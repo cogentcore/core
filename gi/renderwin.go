@@ -94,9 +94,6 @@ type RenderWin struct {
 	// main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
 	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 
-	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
-	Shortcuts Shortcuts `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
-
 	// below are internal vars used during the event loop
 
 	lastWinMenuUpdate time.Time

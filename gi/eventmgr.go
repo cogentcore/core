@@ -82,6 +82,21 @@ type EventMgr struct {
 	// node receiving mouse scrolling events
 	Scroll Widget
 
+	// node receiving keyboard events -- use SetFocus, CurFocus
+	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+
+	// stack of focus
+	FocusStack []Widget `desc:"stack of focus"`
+
+	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
+	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+
+	// Last Select Mode from most recent Mouse, Keyboard events
+	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+
+	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
+	Shortcuts Shortcuts `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+
 	// stage of DND process
 	// DNDStage DNDStages `desc:"stage of DND process"`
 	//
@@ -96,18 +111,6 @@ type EventMgr struct {
 	//
 	// 	// modifier in place at time of drop event (DropMove or DropCopy)
 	// 	DNDDropMod events.DropMods `desc:"modifier in place at time of drop event (DropMove or DropCopy)"`
-
-	// node receiving keyboard events -- use SetFocus, CurFocus
-	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
-
-	// stack of focus
-	FocusStack []Widget `desc:"stack of focus"`
-
-	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
-	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
-
-	// Last Select Mode from most recent Mouse, Keyboard events
-	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
 
 	/*
 		startDrag       events.Event
@@ -211,6 +214,9 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 
 	n := len(em.MouseInBBox)
 	if n == 0 {
+		if EventTrace && et != events.MouseMove {
+			log.Println("Nothing in bbox:", sc.Frame.ScBBox, "pos:", pos)
+		}
 		return
 	}
 
@@ -342,18 +348,15 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		if wb.Parts != nil {
 			em.GetMouseInBBox(wb.Parts, pos)
 		}
-		// todo: causing things to hang -- needs more debugging
-		/*
-			ly := AsLayout(k)
-			if ly != nil {
-				for d := mat32.X; d <= mat32.Y; d++ {
-					if ly.HasScroll[d] {
-						sb := ly.Scrolls[d]
-						em.GetMouseInBBox(sb, pos)
-					}
+		ly := AsLayout(k)
+		if ly != nil {
+			for d := mat32.X; d <= mat32.Y; d++ {
+				if ly.HasScroll[d] {
+					sb := ly.Scrolls[d]
+					em.GetMouseInBBox(sb, pos)
 				}
 			}
-		*/
+		}
 		return ki.Continue
 	})
 }
@@ -739,55 +742,58 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		mainsc.BenchmarkReRender()
 		e.SetHandled()
 	}
+	if !e.IsHandled() {
+		em.TriggerShortcut(cs)
+	}
 }
 
 // AddShortcut adds given shortcut to given action.
-func (w *RenderWin) AddShortcut(chord key.Chord, act *Action) {
+func (em *EventMgr) AddShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
 	}
-	if w.Shortcuts == nil {
-		w.Shortcuts = make(Shortcuts, 100)
+	if em.Shortcuts == nil {
+		em.Shortcuts = make(Shortcuts, 100)
 	}
-	sa, exists := w.Shortcuts[chord]
+	sa, exists := em.Shortcuts[chord]
 	if exists && sa != act && sa.Text != act.Text {
 		if KeyEventTrace {
 			log.Printf("gi.RenderWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
 		}
 	}
-	w.Shortcuts[chord] = act
+	em.Shortcuts[chord] = act
 }
 
 // DeleteShortcut deletes given shortcut
-func (w *RenderWin) DeleteShortcut(chord key.Chord, act *Action) {
+func (em *EventMgr) DeleteShortcut(chord key.Chord, act *Action) {
 	if chord == "" {
 		return
 	}
-	if w.Shortcuts == nil {
+	if em.Shortcuts == nil {
 		return
 	}
-	sa, exists := w.Shortcuts[chord]
+	sa, exists := em.Shortcuts[chord]
 	if exists && sa == act {
-		delete(w.Shortcuts, chord)
+		delete(em.Shortcuts, chord)
 	}
 }
 
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
 // actions, and does not trigger for Inactive actions.
-func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
+func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
 	}
-	if w.Shortcuts == nil {
+	if em.Shortcuts == nil {
 		return false
 	}
-	sa, exists := w.Shortcuts[chord]
+	sa, exists := em.Shortcuts[chord]
 	if !exists {
 		return false
 	}
 	if sa.Is(ki.Destroyed) {
-		delete(w.Shortcuts, chord)
+		delete(em.Shortcuts, chord)
 		return false
 	}
 	if sa.IsDisabled() {
@@ -798,7 +804,7 @@ func (w *RenderWin) TriggerShortcut(chord key.Chord) bool {
 	}
 
 	if KeyEventTrace {
-		fmt.Printf("Win: %v Shortcut chord: %v, action: %v triggered\n", w.Name, chord, sa.Text)
+		fmt.Printf("Shortcut chord: %v, action: %v triggered\n", chord, sa.Text)
 	}
 	sa.Send(events.Click, nil)
 	return true
