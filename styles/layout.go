@@ -30,7 +30,7 @@ import (
 // IMPORTANT: any changes here must be updated in style_props.go StyleLayoutFuncs
 
 // ScrollBarWidthDefault is the default width of a scrollbar in pixels
-var ScrollBarWidthDefault = float32(15)
+var ScrollBarWidthDefault = float32(12)
 
 // // Layout contains style preferences on the layout of the element.
 // type Layout struct {
