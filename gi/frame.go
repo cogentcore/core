@@ -77,7 +77,7 @@ func (fr *Frame) RenderStripes(sc *Scene) {
 	pos := fr.LayState.Alloc.Pos
 	sz := fr.LayState.Alloc.Size
 
-	delta := fr.Move2DDelta(image.Point{})
+	delta := fr.LayoutScrollDelta(image.Point{})
 
 	// TODO: fix stripes
 	// hic := st.BackgroundColor.Solid.Highlight(Prefs.Params.ZebraStripeWeight)

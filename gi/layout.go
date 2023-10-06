@@ -377,7 +377,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
 	sb.On(events.Change, func(e events.Event) {
 		ly.SetNeedsLayout(sc, true)
-		ly.Move2DTree(sc)
+		ly.LayoutScrollTree(sc)
 	})
 }
 
@@ -460,13 +460,13 @@ func (ly *Layout) SetScrollsOff() {
 	}
 }
 
-// Move2DScrolls moves scrollbars based on scrolling taking place in parent
+// LayoutScrollScrolls moves scrollbars based on scrolling taking place in parent
 // layouts -- critical to call this BEFORE we add our own delta, which is
 // generated from these very same scrollbars.
-func (ly *Layout) Move2DScrolls(sc *Scene, delta image.Point, parBBox image.Rectangle) {
+func (ly *Layout) LayoutScrollScrolls(sc *Scene, delta image.Point, parBBox image.Rectangle) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
-			ly.Scrolls[d].Move2D(sc, delta, parBBox)
+			ly.Scrolls[d].LayoutScroll(sc, delta, parBBox)
 		}
 	}
 }
@@ -587,7 +587,7 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 	}
 }
 
-func (ly *Layout) Move2DChildren(sc *Scene, delta image.Point) {
+func (ly *Layout) LayoutScrollChildren(sc *Scene, delta image.Point) {
 	wi := ly.This().(Widget)
 	cbb := wi.ChildrenBBoxes(sc)
 	if ly.Lay == LayoutStacked {
@@ -596,12 +596,12 @@ func (ly *Layout) Move2DChildren(sc *Scene, delta image.Point) {
 			return
 		}
 		nii, _ := AsWidget(sn)
-		nii.Move2D(sc, delta, cbb)
+		nii.LayoutScroll(sc, delta, cbb)
 	} else {
 		for _, kid := range ly.Kids {
 			nii, _ := AsWidget(kid)
 			if nii != nil {
-				nii.Move2D(sc, delta, cbb)
+				nii.LayoutScroll(sc, delta, cbb)
 			}
 		}
 	}
@@ -1209,16 +1209,16 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	ly.NeedsRedo = ly.DoLayoutChildren(sc, iter) // layout done with canonical positions
 
 	if !ly.NeedsRedo || iter == 1 {
-		delta := ly.Move2DDelta((image.Point{}))
+		delta := ly.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
-			ly.Move2DChildren(sc, delta) // move is a separate step
+			ly.LayoutScrollChildren(sc, delta) // move is a separate step
 		}
 	}
 	return ly.NeedsRedo
 }
 
 // we add our own offset here
-func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
+func (ly *Layout) LayoutScrollDelta(delta image.Point) image.Point {
 	if ly.HasScroll[mat32.X] {
 		off := ly.Scrolls[mat32.X].Value
 		delta.X -= int(off)
@@ -1230,11 +1230,11 @@ func (ly *Layout) Move2DDelta(delta image.Point) image.Point {
 	return delta
 }
 
-func (ly *Layout) Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle) {
-	ly.Move2DBase(sc, delta, parBBox)
-	ly.Move2DScrolls(sc, delta, parBBox) // move scrolls BEFORE adding our own!
-	delta = ly.Move2DDelta(delta)        // add our offset
-	ly.Move2DChildren(sc, delta)
+func (ly *Layout) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Rectangle) {
+	ly.LayoutScrollBase(sc, delta, parBBox)
+	ly.LayoutScrollScrolls(sc, delta, parBBox) // move scrolls BEFORE adding our own!
+	delta = ly.LayoutScrollDelta(delta)        // add our offset
+	ly.LayoutScrollChildren(sc, delta)
 	ly.RenderScrolls(sc)
 }
 

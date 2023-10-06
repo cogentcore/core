@@ -130,19 +130,14 @@ The computing of actual style sizes in terms of dots, which happens in `SetUnitC
 
 ## Scrolling, other Spaces
 
-* Move2D: optional pass invoked by scrollbars to move elements relative to
-   their previously-assigned positions.
+* LayoutScroll: optional pass invoked by scrollbars to move elements relative to their previously-assigned positions.
 
-* SVG nodes skip the Size and Layout passes, and render directly into
-   parent SVG viewport
-
+* SVG nodes skip the Size and Layout passes, and render directly into parent SVG viewport
 
 
 # v2 Rewrite TODO / Discussion
 
 ## TODO
-
-* search for Cursor and fix everywhere with new cursors
 
 * Get rid of extra UpdateStart / End in Config* calls -- all are wrapped in outer Config so unnec.
 

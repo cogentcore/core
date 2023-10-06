@@ -97,12 +97,12 @@ type Widget interface {
 	// = true indicates another iteration required (pass this up the chain).
 	DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 
-	// Move2D: optional MeFirst downward pass to move all elements by given
+	// LayoutScroll: optional MeFirst downward pass to move all elements by given
 	// delta -- used for scrolling -- the layout pass assigns canonical
 	// positions, saved in AllocPosOrig and BBox, and this adds the given
 	// delta to that AllocPosOrig -- each node must call ComputeBBoxes to
 	// update its bounding box information given the new position.
-	Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle)
+	LayoutScroll(sc *Scene, delta image.Point, parBBox image.Rectangle)
 
 	// BBoxes: compute the raw bounding box of this node relative to its
 	// parent scene -- called during DoLayout to set node BBox field, which
@@ -211,11 +211,11 @@ type WidgetBase struct {
 
 	// todo: need to fully revisit scrolling logic!
 
-	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by Move2D, whereas ScBBox is
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by Move2D, whereas ScBBox is"`
+	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is"`
 
-	// full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + Move2D delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
+	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
+	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
 
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`

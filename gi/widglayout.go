@@ -224,26 +224,26 @@ func (wb *WidgetBase) ChildrenBBoxes(sc *Scene) image.Rectangle {
 }
 
 //////////////////////////////////////////////////////////////////
-//		Move2D scrolling
+//		LayoutScroll
 
-func (wb *WidgetBase) Move2D(sc *Scene, delta image.Point, parBBox image.Rectangle) {
-	wb.Move2DBase(sc, delta, parBBox)
+func (wb *WidgetBase) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Rectangle) {
+	wb.LayoutScrollBase(sc, delta, parBBox)
 	if wb.Parts != nil {
-		wb.Parts.This().(Widget).Move2D(sc, delta, parBBox)
+		wb.Parts.This().(Widget).LayoutScroll(sc, delta, parBBox)
 	}
-	wb.Move2DChildren(sc, delta)
+	wb.LayoutScrollChildren(sc, delta)
 }
 
-// Move2DBase does the basic move on this node
-func (wb *WidgetBase) Move2DBase(sc *Scene, delta image.Point, parBBox image.Rectangle) {
+// LayoutScrollBase does the basic move on this node
+func (wb *WidgetBase) LayoutScrollBase(sc *Scene, delta image.Point, parBBox image.Rectangle) {
 	wb.LayState.Alloc.Pos = wb.LayState.Alloc.PosOrig.Add(mat32.NewVec2FmPoint(delta))
 	wb.This().(Widget).ComputeBBoxes(sc, parBBox, delta)
 }
 
-// Move2DTree does move2d pass -- each node iterates over children for maximum
+// LayoutScrollTree does move2d pass -- each node iterates over children for maximum
 // control -- this starts with parent ChildrenBBox and current delta -- can be
 // called de novo
-func (wb *WidgetBase) Move2DTree(sc *Scene) {
+func (wb *WidgetBase) LayoutScrollTree(sc *Scene) {
 	parBBox := image.Rectangle{}
 	pwi, pwb := AsWidget(wb.Par)
 	if pwb != nil {
@@ -252,20 +252,17 @@ func (wb *WidgetBase) Move2DTree(sc *Scene) {
 		parBBox.Max = sc.RenderCtx().Size
 	}
 	delta := wb.LayState.Alloc.Pos.Sub(wb.LayState.Alloc.PosOrig).ToPoint()
-	wb.This().(Widget).Move2D(sc, delta, parBBox) // important to use interface version to get interface!
+	wb.This().(Widget).LayoutScroll(sc, delta, parBBox) // important to use interface version to get interface!
 }
 
-// todo: move should just update bboxes with offset from parent
-// passed down
-
-// Move2DChildren moves all of node's children, giving them the ChildrenBBoxes
-// -- default call at end of Move2D
-func (wb *WidgetBase) Move2DChildren(sc *Scene, delta image.Point) {
+// LayoutScrollChildren moves all of node's children, giving them the ChildrenBBoxes
+// -- default call at end of LayoutScroll
+func (wb *WidgetBase) LayoutScrollChildren(sc *Scene, delta image.Point) {
 	cbb := wb.This().(Widget).ChildrenBBoxes(sc)
 	for _, kid := range wb.Kids {
 		cwi, _ := AsWidget(kid)
 		if cwi != nil {
-			cwi.Move2D(sc, delta, cbb)
+			cwi.LayoutScroll(sc, delta, cbb)
 		}
 	}
 }

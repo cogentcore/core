@@ -351,9 +351,11 @@ func (sc *Scene) ApplyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
-	sc.Fill() // full redraw
+	sc.Fill()               // full redraw
+	ld := sc.Frame.LayState // save our current layout data
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
+	sc.Frame.LayState = ld
 	sc.LayoutRenderScene()
 }
 
@@ -477,7 +479,7 @@ func (wb *WidgetBase) ReRenderTree() {
 	wb.LayState = ld // restore
 	wb.DoLayoutTree()
 	if !delta.IsNil() {
-		wb.Move2D(delta.ToPointFloor(), parBBox)
+		wb.LayoutScroll(delta.ToPointFloor(), parBBox)
 	}
 	wb.RenderTree()
 	wb.UpdateEndNoSig(updt)
