@@ -49,8 +49,19 @@ type Type struct {
 	AllEmbeds map[uint64]*Type
 }
 
+func (tp *Type) String() string {
+	return tp.Name
+}
+
+func (tp *Type) Label() string {
+	return tp.ShortName
+}
+
 // ReflectType returns the [reflect.Type] for this type, using the Instance
 func (tp *Type) ReflectType() reflect.Type {
+	if tp.Instance == nil {
+		return nil
+	}
 	return reflect.TypeOf(tp.Instance).Elem()
 }
 
@@ -76,8 +87,11 @@ func (tp *Type) CompileEmbeds() {
 	if tp.Embeds == nil {
 		return
 	}
-	tp.AllEmbeds = make(map[uint64]*Type)
 	rt := tp.ReflectType()
+	if rt == nil {
+		return
+	}
+	tp.AllEmbeds = make(map[uint64]*Type)
 	for _, em := range tp.Embeds.Order {
 		enm := em.Val.Name
 		if idx := strings.LastIndex(enm, "."); idx >= 0 {

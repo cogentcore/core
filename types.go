@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"sort"
 	"sync/atomic"
 )
 
@@ -63,18 +64,6 @@ func AddType(typ *Type) *Type {
 	return typ
 }
 
-// example constructor:
-// var TypeMyType = gti.AddType(&gti.Type{
-// 	Name: "goki.dev/ki/v2.MyType",
-// 	Comment: `my type is awesome`,
-// 	Directives: gti.Directives{},
-// 	Methods: ordmap.Make(...),
-// 	Embeds: ordmap.Make(...),
-// 	Fields: ordmap.Make(...),
-// 	// optional instance
-// 	Instance: &MyType{},
-// })
-
 // TypeName returns the long, full package-path qualified type name.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeName(typ reflect.Type) string {
@@ -90,6 +79,21 @@ func TypeNameObj(v any) string {
 		typ = typ.Elem()
 	}
 	return TypeName(typ)
+}
+
+// AllEmbeddersOf returns all registered types that embed the given type.
+// List is sorted in alpha order by fully package-path-qualified Name.
+func AllEmbeddersOf(typ *Type) []*Type {
+	var typs []*Type
+	for _, t := range Types {
+		if t.HasEmbed(typ) {
+			typs = append(typs, t)
+		}
+	}
+	sort.Slice(typs, func(i, j int) bool {
+		return typs[i].Name < typs[j].Name
+	})
+	return typs
 }
 
 // ShortTypeName returns the short version of a package-qualified type name
