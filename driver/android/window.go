@@ -103,12 +103,18 @@ func (w *windowImpl) winLoop() {
 	} else {
 		winPaint = &time.Ticker{C: make(chan time.Time)} // nop
 	}
+	winShow := time.NewTimer(200 * time.Millisecond)
 outer:
 	for {
 		select {
 		case <-w.winClose:
 			winPaint.Stop() // todo: close channel too??
 			break outer
+		case <-winShow.C:
+			if w.app.gpu == nil {
+				break outer
+			}
+			w.EvMgr.Window(events.WinShow)
 		case f := <-w.runQueue:
 			if w.app.gpu == nil {
 				break outer
