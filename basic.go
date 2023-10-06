@@ -99,104 +99,104 @@ func ToBool(v any) (bool, error) {
 		return vt != 0, nil
 	case *int:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *int")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case int32:
-		return vt != 0, true
+		return vt != 0, nil
 	case *int32:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *int32")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case int64:
-		return vt != 0, true
+		return vt != 0, nil
 	case *int64:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *int64")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case uint8:
-		return vt != 0, true
+		return vt != 0, nil
 	case *uint8:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *uint8")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case float64:
-		return vt != 0, true
+		return vt != 0, nil
 	case *float64:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *float64")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case float32:
-		return vt != 0, true
+		return vt != 0, nil
 	case *float32:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *float32")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case string:
 		r, err := strconv.ParseBool(vt)
 		if err != nil {
-			return false, false
+			return false, err
 		}
-		return r, true
+		return r, nil
 	case *string:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *string")
 		}
 		r, err := strconv.ParseBool(*vt)
 		if err != nil {
-			return false, false
+			return false, err
 		}
-		return r, true
+		return r, nil
 	case int8:
-		return vt != 0, true
+		return vt != 0, nil
 	case *int8:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *int8")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case int16:
-		return vt != 0, true
+		return vt != 0, nil
 	case *int16:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *int16")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case uint16:
-		return vt != 0, true
+		return vt != 0, nil
 	case *uint16:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *uint16")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case uint32:
-		return vt != 0, true
+		return vt != 0, nil
 	case *uint32:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *uint32")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case uint64:
-		return vt != 0, true
+		return vt != 0, nil
 	case *uint64:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *uint64")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	case uintptr:
-		return vt != 0, true
+		return vt != 0, nil
 	case *uintptr:
 		if vt == nil {
-			return false, false
+			return false, fmt.Errorf("got nil *uintptr")
 		}
-		return *vt != 0, true
+		return *vt != 0, nil
 	}
 
-	return false, false
+	return false, fmt.Errorf("got value %v of unsupported type %T", v, v)
 }
 
 // ToInt robustly converts to an int64 any basic elemental type
@@ -851,8 +851,8 @@ func SetRobust(to, frm any) bool {
 			return true
 		}
 	case vk == reflect.Bool:
-		fm, ok := ToBool(frm)
-		if ok {
+		fm, err := ToBool(frm)
+		if err == nil {
 			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
 			return true
 		}
