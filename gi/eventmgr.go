@@ -169,7 +169,7 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
-	sc.Frame.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
+	sc.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
 	em.ManagerKeyChordEvents(evi)
 }
 
@@ -210,12 +210,12 @@ func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
 	}
 
 	em.MouseInBBox = nil
-	em.GetMouseInBBox(&sc.Frame, pos)
+	em.GetMouseInBBox(sc, pos)
 
 	n := len(em.MouseInBBox)
 	if n == 0 {
 		if EventTrace && et != events.MouseMove {
-			log.Println("Nothing in bbox:", sc.Frame.ScBBox, "pos:", pos)
+			log.Println("Nothing in bbox:", sc.ScBBox, "pos:", pos)
 		}
 		return
 	}

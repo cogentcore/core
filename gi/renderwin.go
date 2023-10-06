@@ -450,7 +450,6 @@ func (w *RenderWin) Resized(sz image.Point) {
 	rctx.LogicalDPI = w.LogicalDPI()
 	// fmt.Printf("resize dpi: %v\n", w.LogicalDPI())
 	w.StageMgr.Resize(sz)
-	// w.ConfigInsets()
 	if WinGeomTrace {
 		log.Printf("WinGeomPrefs: recording from Resize\n")
 	}

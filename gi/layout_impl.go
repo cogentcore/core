@@ -101,7 +101,7 @@ func GatherSizes(ly *Layout) {
 
 	prefSizing := false
 	mvp := ly.Sc
-	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
+	if mvp != nil && mvp.Is(ScPrefSizing) {
 		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 
@@ -381,7 +381,7 @@ func GatherSizesGrid(ly *Layout) {
 
 	prefSizing := false
 	mvp := ly.Sc
-	if mvp != nil && mvp.HasFlag(ScPrefSizing) {
+	if mvp != nil && mvp.Is(ScPrefSizing) {
 		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 

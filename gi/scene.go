@@ -13,7 +13,6 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/enums"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -84,10 +83,9 @@ type Scene struct {
 // parent argument for that.
 func StageScene(name string) *Scene {
 	sc := &Scene{}
-	sc.Nm = name
+	sc.InitName(sc, name)
 	sc.BgColor.SetColor(color.Transparent)
-	sc.Frame.InitName(&sc.Frame, "frame")
-	sc.Frame.Lay = LayoutVert
+	sc.Lay = LayoutVert
 	sc.Decor.InitName(&sc.Decor, "decor")
 	sc.Decor.Lay = LayoutNil
 	sc.SetDefaultStyle()
@@ -97,10 +95,6 @@ func StageScene(name string) *Scene {
 func (sc *Scene) SetTitle(title string) *Scene {
 	sc.Title = title
 	return sc
-}
-
-func (sc *Scene) Name() string {
-	return sc.Nm
 }
 
 func (sc *Scene) RenderCtx() *RenderContext {
@@ -150,18 +144,6 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	sc.Geom.Size = nwsz // make sure
 	sc.SetFlag(true, ScNeedsLayout)
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
-}
-
-// HasFlag checks if flag is set
-// using atomic, safe for concurrent access
-func (sc *Scene) HasFlag(f enums.BitFlag) bool {
-	return sc.Flags.HasFlag(f)
-}
-
-// SetFlag sets the given flag(s) to given state
-// using atomic, safe for concurrent access
-func (sc *Scene) SetFlag(on bool, f ...enums.BitFlag) {
-	sc.Flags.SetFlag(on, f...)
 }
 
 func (sc *Scene) ScIsVisible() bool {
@@ -248,10 +230,10 @@ func (sc *Scene) EncodePNG(w io.Writer) error {
 type ScFlags int64 //enums:bitflag
 
 const (
-	// ScIsUpdating means scene is in the process of updating:
+	// ScUpdating means scene is in the process of updating:
 	// set for any kind of tree-level update.
 	// skip any further update passes until it goes off.
-	ScIsUpdating ScFlags = iota
+	ScUpdating ScFlags = ScFlags(WidgetFlagsN) + iota
 
 	// ScNeedsRender means nodes have flagged that they need a Render
 	// update.

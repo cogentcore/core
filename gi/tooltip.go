@@ -13,7 +13,7 @@ import (
 // TooltipConfigStyles configures the default styles
 // for the given tooltip frame with the given parent.
 // It should be called on tooltips when they are created.
-func TooltipConfigStyles(tooltip *Frame) {
+func TooltipConfigStyles(tooltip *Scene) {
 	tooltip.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
@@ -34,22 +34,21 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 		psc.Win = win
 		psc.Type = ScTooltip
 
-		psc.Frame.AddStyles(func(s *styles.Style) {
+		psc.AddStyles(func(s *styles.Style) {
 			// TOOD: get border radius actually working
 			// without having parent background color workaround
 			s.Border.Radius = styles.BorderRadiusExtraSmall
-			s.BackgroundColor = psc.Frame.ParentBackgroundColor()
+			s.BackgroundColor = psc.ParentBackgroundColor()
 		})
 
 		psc.Geom.Pos = image.Point{x, y}
 		psc.SetFlag(true, ScPopupDestroyAll) // nuke it all
 
-		frame := &psc.Frame
-		lbl := NewLabel(frame, "ttlbl")
+		lbl := NewLabel(psc, "ttlbl")
 		lbl.Text = tooltip
 		lbl.Type = LabelBodyMedium
 
-		TooltipConfigStyles(frame)
+		TooltipConfigStyles(psc)
 
 		lbl.AddStyles(func(s *styles.Style) {
 			mwdots := parSc.Frame.Style.UnContext.ToDots(40, units.UnitEm)
@@ -58,13 +57,13 @@ func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
 			s.MaxWidth.SetDot(mwdots)
 		})
 
-		frame.ConfigTree(psc)
-		frame.ApplyStyleTree(psc) // sufficient to get sizes
+		psc.ConfigTree(psc)
+		psc.ApplyStyleTree(psc) // sufficient to get sizes
 		mainSz := mat32.NewVec2FmPoint(mainSc.Geom.Size)
-		frame.LayState.Alloc.Size = mainSz // give it the whole vp initially
-		frame.GetSizeTree(psc, 0)          // collect sizes
+		psc.LayState.Alloc.Size = mainSz // give it the whole vp initially
+		psc.GetSizeTree(psc, 0)          // collect sizes
 		psc.Win = nil
-		vpsz := frame.LayState.Size.Pref.Min(mainSz).ToPoint()
+		vpsz := psc.LayState.Size.Pref.Min(mainSz).ToPoint()
 
 		x = min(x, mainSc.Geom.Size.X-vpsz.X) // fit
 		y = min(y, mainSc.Geom.Size.Y-vpsz.Y) // fit

@@ -413,7 +413,7 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 			sb := ly.Scrolls[d]
 			sb.GetSize(sc, 0)
 			sb.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
-			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0)
+			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0-spc.Size().Dim(odim))
 			// SidesTODO: not sure about this
 			sb.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other

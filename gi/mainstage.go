@@ -9,6 +9,8 @@ import (
 	"image"
 	"log"
 
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -100,6 +102,27 @@ func NewSheet(sc *Scene, side StageSides, ctx Widget) *MainStage {
 /////////////////////////////////////////////////////
 //		Decorate
 
+// SetWindowInsets updates the padding on the Scene
+// to the inset values provided by the RenderWin window.
+func (st *MainStage) SetWindowInsets() {
+	if st.StageMgr == nil {
+		return
+	}
+	if st.StageMgr.RenderWin == nil {
+		return
+	}
+	insets := st.StageMgr.RenderWin.GoosiWin.Insets()
+	// fmt.Println(insets)
+	st.Scene.AddStyles(func(s *styles.Style) {
+		s.Padding.Set(
+			units.Dot(insets.Top),
+			units.Dot(insets.Right),
+			units.Dot(insets.Bottom),
+			units.Dot(insets.Left),
+		)
+	})
+}
+
 // only called when !OwnWin
 func (st *MainStage) AddWindowDecor() *MainStage {
 	if st.Back {
@@ -107,6 +130,7 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 		_ = but
 		// todo: do more button config
 	}
+
 	return st
 }
 
@@ -130,7 +154,7 @@ func (st *MainStage) FirstWinManager() *MainStageMgr {
 	ms.RenderCtx = rc
 	scr := goosi.TheApp.Screen(0)
 	rc.Size = scr.Geometry.Size()
-	fmt.Println("Screen Size:", rc.Size)
+	// fmt.Println("Screen Size:", rc.Size)
 	rc.SetFlag(true, RenderVisible)
 	rc.LogicalDPI = scr.LogicalDPI
 	return ms
@@ -157,11 +181,13 @@ func (st *MainStage) RunWindow() *MainStage {
 		if CurRenderWin == nil {
 			CurRenderWin = win
 		}
+		st.SetWindowInsets()
 		win.GoStartEventLoop()
 		return st
 	}
 	if CurRenderWin == nil {
 		CurRenderWin = st.NewRenderWin()
+		st.SetWindowInsets()
 		CurRenderWin.GoStartEventLoop()
 		return st
 	}
@@ -264,6 +290,7 @@ func (st *MainStage) Resize(sz image.Point) {
 	}
 	switch st.Type {
 	case Window:
+		st.SetWindowInsets()
 		st.Scene.Resize(sz)
 		// todo: other types fit in constraints
 	}
@@ -338,24 +365,6 @@ func (w *RenderWin) ConfigVLay() {
 	w.MainMenu = w.Scene.Frame.Child(0).(*MenuBar)
 	w.MainMenu.MainMenu = true
 	w.MainMenu.SetStretchMaxWidth()
-}
-
-// ConfigInsets updates the padding on the main layout of the window
-// to the inset values provided by the RenderWin window.
-func (w *RenderWin) ConfigInsets() {
-	mainVlay, ok := w.Scene.ChildByName("main-vlay", 0).(*Layout)
-	if ok {
-		insets := w.RenderWin.Insets()
-		mainVlay.AddStyles(func(s *styles.Style) {
-			mainVlay.Style.Padding.Set(
-				units.Dot(insets.Top),
-				units.Dot(insets.Right),
-				units.Dot(insets.Bottom),
-				units.Dot(insets.Left),
-			)
-		})
-	}
-
 }
 
 // AddMainMenu installs MainMenu as first element of main layout

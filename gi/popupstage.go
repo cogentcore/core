@@ -109,8 +109,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	case Menu:
 		st.Modal = true
 		st.ClickOff = true
-		MenuFrameConfigStyles(&sc.Frame)
-	case Dialog:
+		MenuSceneConfigStyles(sc)
 	}
 
 	return st
@@ -162,7 +161,10 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sc := st.Scene
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
-	fontHt := int(sc.Style.Font.Face.Metrics.Height)
+	fontHt := 30
+	if sc.Style.Font.Face != nil {
+		fontHt = int(sc.Style.Font.Face.Metrics.Height)
+	}
 
 	switch st.Type {
 	case Menu:

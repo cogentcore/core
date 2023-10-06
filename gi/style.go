@@ -52,8 +52,8 @@ var CustomConfigStyles func(w Widget)
 type Styler func(s *styles.Style)
 
 func (sc *Scene) SetDefaultStyle() {
-	sc.Frame.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
-	sc.Frame.Style.Color = colors.Scheme.OnBackground
+	sc.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
+	sc.Style.Color = colors.Scheme.OnBackground
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -318,11 +318,11 @@ func (m *MenuActions) AddRenderWinsMenu(win *RenderWin) {
 ///////////////////////////////////////////////////////////////////
 // PopupMenu function
 
-// MenuFrameConfigStyles configures the default styles
+// MenuSceneConfigStyles configures the default styles
 // for the given pop-up menu frame with the given parent.
 // It should be called on menu frames when they are created.
-func MenuFrameConfigStyles(frame *Frame) {
-	frame.AddStyles(func(s *styles.Style) {
+func MenuSceneConfigStyles(msc *Scene) {
+	msc.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
@@ -338,8 +338,7 @@ var MenuMaxHeight = 30
 // for displaying a Menu.
 func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 	msc := StageScene(name + "-menu")
-	frame := &msc.Frame
-	MenuFrameConfigStyles(frame)
+	MenuSceneConfigStyles(msc)
 	// todo: look for Selected item to get initial focus
 	for _, ac := range menu {
 		wi, wb := AsWidget(ac)
@@ -356,7 +355,7 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 			}
 		}
 		cb.Sc = msc
-		frame.AddChild(cl)
+		msc.AddChild(cl)
 	}
 	return msc
 }

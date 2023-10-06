@@ -186,12 +186,12 @@ func (rs *RenderScenes) SetImages(drw *vdraw.Drawer) {
 		}
 	}
 	for i, sc := range rs.Scenes {
-		if sc.HasFlag(ScIsUpdating) || !sc.HasFlag(ScImageUpdated) {
+		if sc.Is(ScUpdating) || !sc.Is(ScImageUpdated) {
 			if WinRenderTrace {
-				if sc.HasFlag(ScIsUpdating) {
+				if sc.Is(ScUpdating) {
 					fmt.Println("RenderScenes.SetImages: sc IsUpdating", sc.Name())
 				}
-				if !sc.HasFlag(ScImageUpdated) {
+				if !sc.Is(ScImageUpdated) {
 					fmt.Println("RenderScenes.SetImages: sc Image NotUpdated", sc.Name())
 				}
 			}

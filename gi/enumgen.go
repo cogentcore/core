@@ -2086,60 +2086,60 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{0, 1, 2, 3, 4, 5, 6}
+var _ScFlagsValues = []ScFlags{10, 11, 12, 13, 14, 15, 16}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 7
+const ScFlagsN ScFlags = 17
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ScFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ScIsUpdating-(0)]
-	_ = x[ScNeedsRender-(1)]
-	_ = x[ScNeedsLayout-(2)]
-	_ = x[ScNeedsRebuild-(3)]
-	_ = x[ScImageUpdated-(4)]
-	_ = x[ScPrefSizing-(5)]
-	_ = x[ScPreserve-(6)]
+	_ = x[ScUpdating-(10)]
+	_ = x[ScNeedsRender-(11)]
+	_ = x[ScNeedsLayout-(12)]
+	_ = x[ScNeedsRebuild-(13)]
+	_ = x[ScImageUpdated-(14)]
+	_ = x[ScPrefSizing-(15)]
+	_ = x[ScPreserve-(16)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`ScIsUpdating`:   0,
-	`scisupdating`:   0,
-	`ScNeedsRender`:  1,
-	`scneedsrender`:  1,
-	`ScNeedsLayout`:  2,
-	`scneedslayout`:  2,
-	`ScNeedsRebuild`: 3,
-	`scneedsrebuild`: 3,
-	`ScImageUpdated`: 4,
-	`scimageupdated`: 4,
-	`ScPrefSizing`:   5,
-	`scprefsizing`:   5,
-	`ScPreserve`:     6,
-	`scpreserve`:     6,
+	`ScUpdating`:     10,
+	`scupdating`:     10,
+	`ScNeedsRender`:  11,
+	`scneedsrender`:  11,
+	`ScNeedsLayout`:  12,
+	`scneedslayout`:  12,
+	`ScNeedsRebuild`: 13,
+	`scneedsrebuild`: 13,
+	`ScImageUpdated`: 14,
+	`scimageupdated`: 14,
+	`ScPrefSizing`:   15,
+	`scprefsizing`:   15,
+	`ScPreserve`:     16,
+	`scpreserve`:     16,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
-	0: `ScIsUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	1: `ScNeedsRender means nodes have flagged that they need a Render update.`,
-	2: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
-	3: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	4: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
-	5: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-	6: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+	10: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	11: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+	12: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
+	13: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
+	14: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
+	15: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
+	16: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
-	0: `ScIsUpdating`,
-	1: `ScNeedsRender`,
-	2: `ScNeedsLayout`,
-	3: `ScNeedsRebuild`,
-	4: `ScImageUpdated`,
-	5: `ScPrefSizing`,
-	6: `ScPreserve`,
+	10: `ScUpdating`,
+	11: `ScNeedsRender`,
+	12: `ScNeedsLayout`,
+	13: `ScNeedsRebuild`,
+	14: `ScImageUpdated`,
+	15: `ScPrefSizing`,
+	16: `ScPreserve`,
 }
 
 // String returns the string representation

@@ -245,10 +245,10 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 // LayoutRenderScene does a layout and render of the tree:
 // GetSize, DoLayout, Render.  Needed after Config.
 func (sc *Scene) LayoutRenderScene() {
-	sc.Frame.GetSizeTree(sc, 0)
-	sc.Frame.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
-	sc.Frame.DoLayoutTree(sc)
-	sc.Frame.Render(sc)
+	sc.GetSizeTree(sc, 0)
+	sc.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
+	sc.DoLayoutTree(sc)
+	sc.Render(sc)
 }
 
 // DoNeedsRender calls Render on tree from me for nodes
@@ -280,12 +280,12 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 // returns false if already updating.
 // This is the main update call made by the RenderWin at FPS frequency.
 func (sc *Scene) DoUpdate() bool {
-	if sc.HasFlag(ScIsUpdating) {
+	if sc.Is(ScUpdating) {
 		fmt.Println("scene bail on updt")
 		return false
 	}
-	sc.SetFlag(true, ScIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScIsUpdating)
+	sc.SetFlag(true, ScUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScUpdating)
 
 	rc := sc.RenderCtx()
 	if rc == nil {
@@ -306,17 +306,17 @@ func (sc *Scene) DoUpdate() bool {
 		sc.LayoutRenderScene()
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
-	case sc.HasFlag(ScNeedsLayout):
+	case sc.Is(ScNeedsLayout):
 		// fmt.Println("scene layout start")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderScene()
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
-	case sc.HasFlag(ScNeedsRender):
+	case sc.Is(ScNeedsRender):
 		// fmt.Println("scene render start")
 		sc.SetFlag(false, ScNeedsRender)
-		sc.Frame.DoNeedsRender(sc)
+		sc.DoNeedsRender(sc)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
 	default:
@@ -330,20 +330,20 @@ func (sc *Scene) DoUpdate() bool {
 // This is a top-level call, typically only done when the window
 // is first drawn, once the full sizing information is available.
 func (sc *Scene) ConfigScene() {
-	sc.SetFlag(true, ScIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScIsUpdating)
+	sc.SetFlag(true, ScUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScUpdating)
 
-	sc.Frame.ConfigTree(sc)
+	sc.ConfigTree(sc)
 }
 
 // ApplyStyleScene calls ApplyStyle on all widgets in the Scene,
 // This is needed whenever the window geometry, DPI,
 // etc is updated, which affects styling.
 func (sc *Scene) ApplyStyleScene() {
-	sc.SetFlag(true, ScIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScIsUpdating)
+	sc.SetFlag(true, ScUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScUpdating)
 
-	sc.Frame.ApplyStyleTree(sc)
+	sc.ApplyStyleTree(sc)
 	sc.SetFlag(true, ScNeedsLayout)
 }
 
@@ -351,11 +351,11 @@ func (sc *Scene) ApplyStyleScene() {
 // should be used by Widgets to rebuild things that are otherwise
 // cached (e.g., Icon, TextCursor).
 func (sc *Scene) DoRebuild() {
-	sc.Fill()               // full redraw
-	ld := sc.Frame.LayState // save our current layout data
+	sc.Fill()         // full redraw
+	ld := sc.LayState // save our current layout data
 	sc.ConfigScene()
 	sc.ApplyStyleScene()
-	sc.Frame.LayState = ld
+	sc.LayState = ld
 	sc.LayoutRenderScene()
 }
 
@@ -374,23 +374,22 @@ func (sc *Scene) Fill() {
 // initSz is the initial size -- e.g., size of screen.
 // Used for auto-sizing windows.
 func (sc *Scene) PrefSize(initSz image.Point) image.Point {
-	sc.SetFlag(true, ScIsUpdating) // prevent rendering
-	defer sc.SetFlag(false, ScIsUpdating)
+	sc.SetFlag(true, ScUpdating) // prevent rendering
+	defer sc.SetFlag(false, ScUpdating)
 
 	sc.SetFlag(true, ScPrefSizing)
 	sc.ConfigScene()
 
-	frame := &sc.Frame
-	frame.ApplyStyleTree(sc) // sufficient to get sizes
-	frame.LayState.Alloc.Size.SetPoint(initSz)
-	frame.GetSizeTree(sc, 0) // collect sizes
+	sc.ApplyStyleTree(sc) // sufficient to get sizes
+	sc.LayState.Alloc.Size.SetPoint(initSz)
+	sc.GetSizeTree(sc, 0) // collect sizes
 
 	sc.SetFlag(false, ScPrefSizing)
 
-	vpsz := frame.LayState.Size.Pref.ToPoint()
+	vpsz := sc.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(frame.Style.MinWidth.Dots)
-	sth := int(frame.Style.MinHeight.Dots)
+	stw := int(sc.Style.MinWidth.Dots)
+	sth := int(sc.Style.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = max(vpsz.X, stw)
 	vpsz.Y = max(vpsz.Y, sth)
@@ -583,7 +582,7 @@ func EndTargProfile() {
 // ReportWinNodes reports the number of nodes in this scene
 func (sc *Scene) ReportWinNodes() {
 	nn := 0
-	sc.Frame.WalkPre(func(k ki.Ki) bool {
+	sc.WalkPre(func(k ki.Ki) bool {
 		nn++
 		return ki.Continue
 	})
@@ -601,8 +600,8 @@ func (sc *Scene) BenchmarkFullRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		sc.Frame.DoLayoutTree(sc)
-		sc.Frame.Render(sc)
+		sc.DoLayoutTree(sc)
+		sc.Render(sc)
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
@@ -620,7 +619,7 @@ func (sc *Scene) BenchmarkReRender() {
 	ts := time.Now()
 	n := 50
 	for i := 0; i < n; i++ {
-		sc.Frame.Render(sc)
+		sc.Render(sc)
 	}
 	td := time.Now().Sub(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
