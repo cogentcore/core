@@ -79,24 +79,24 @@ func ValueIsZero(v reflect.Value) bool {
 // ToBool robustly converts to a bool any basic elemental type
 // (including pointers to such)
 // using a big type switch organized for greatest efficiency.
-// tries the glop/bools/.Booler interface if not a bool type.
+// tries the [goki.dev/glop/bools.Booler] interface if not a bool type.
 //
 //gopy:interface=handle
-func ToBool(v any) (bool, bool) {
+func ToBool(v any) (bool, error) {
 	switch vt := v.(type) {
 	case bool:
-		return vt, true
+		return vt, nil
 	case *bool:
-		return *vt, true
+		return *vt, nil
 	}
 
 	if br, ok := v.(bools.Booler); ok {
-		return br.Bool(), true
+		return br.Bool(), nil
 	}
 
 	switch vt := v.(type) {
 	case int:
-		return vt != 0, true
+		return vt != 0, nil
 	case *int:
 		if vt == nil {
 			return false, false
