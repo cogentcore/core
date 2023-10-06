@@ -73,7 +73,11 @@ func InstallLocal(c *config.Config) error {
 			if err != nil {
 				return fmt.Errorf("error building: %w", err)
 			}
+			// we only want this target for install
+			ot := c.Build.Target
+			c.Build.Target = []config.Platform{p}
 			err = mobile.Install(c)
+			c.Build.Target = ot
 			if err != nil {
 				return fmt.Errorf("install: %w", err)
 			}
