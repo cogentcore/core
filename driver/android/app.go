@@ -22,7 +22,6 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events"
-	"goki.dev/mobile/event/size"
 	"goki.dev/vgpu/v2/vdraw"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -45,7 +44,6 @@ type appImpl struct {
 	Draw          vdraw.Drawer
 	window        *windowImpl
 	gpu           *vgpu.GPU
-	sizeEvent     size.Event // the last size event
 	screen        *goosi.Screen
 	noScreens     bool // if all screens have been disconnected, don't do anything..
 	name          string

@@ -193,12 +193,7 @@ func (w *windowImpl) Position() image.Point {
 }
 
 func (w *windowImpl) Insets() styles.SideFloats {
-	return styles.NewSideFloats(
-		float32(w.app.sizeEvent.InsetTopPx),
-		float32(w.app.sizeEvent.InsetRightPx),
-		float32(w.app.sizeEvent.InsetBottomPx),
-		float32(w.app.sizeEvent.InsetLeftPx),
-	)
+	return w.app.insets
 }
 
 func (w *windowImpl) PhysicalDPI() float32 {

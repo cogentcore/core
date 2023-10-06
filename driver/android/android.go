@@ -332,6 +332,7 @@ func hideSoftInput(vm, jniEnv, ctx uintptr) error {
 //export insetsChanged
 func insetsChanged(top, bottom, left, right int) {
 	theApp.insets.Set(float32(top), float32(right), float32(bottom), float32(left))
+	// fmt.Println("ic:", theApp.insets)
 }
 
 func (app *appImpl) mainUI(vm, jniEnv, ctx uintptr) error {
