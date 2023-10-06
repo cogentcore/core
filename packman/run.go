@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"log/slog"
+
 	"goki.dev/goki/config"
-	"goki.dev/goki/mobile"
 	"goki.dev/xe"
 )
 
@@ -63,7 +64,13 @@ func Run(c *config.Config) error {
 		}
 		return nil
 	case "ios":
-		return mobile.Install(c) // install already runs on iOS
+		args := []string{"-b", c.Build.Output, "-d"}
+		if !c.Build.Debug {
+			// TODO: is there a way to launch without running the debugger?
+			slog.Warn("using run with target ios and debug disabled is not recommended, as a significant amount of time is spent loading the debugger just to launch the app; consider specifying debug mode with -d or use install and manually open the app instead")
+			args = append(args, "--justlaunch")
+		}
+		return xe.Verbose().SetBuffer(false).Run("ios-deploy", args...)
 	}
 	return nil
 }

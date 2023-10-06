@@ -15,7 +15,6 @@ import (
 // It assumes that it has already been built.
 //
 // On Android, the 'adb' tool must be on the PATH.
-// On iOS, Install also runs the app.
 func Install(c *config.Config) error {
 	if len(c.Build.Target) != 1 {
 		return fmt.Errorf("expected 1 target platform, but got %d (%v)", len(c.Build.Target), c.Build.Target)
@@ -25,11 +24,7 @@ func Install(c *config.Config) error {
 	case "android":
 		return xe.Run("adb", "install", "-r", c.Build.Output)
 	case "ios":
-		args := []string{"--bundle", c.Build.Output, "--debug"}
-		if !c.Build.Debug {
-			args = append(args, "--justlaunch")
-		}
-		return xe.Verbose().SetBuffer(false).Run("ios-deploy", args...)
+		return xe.Run("ios-deploy", "-b", c.Build.Output)
 	default:
 		return fmt.Errorf("mobile.Install only supports target platforms android and ios, but got %q", t.OS)
 	}
