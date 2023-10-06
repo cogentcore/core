@@ -10,6 +10,7 @@ import (
 	"runtime"
 
 	"goki.dev/goki/config"
+	"goki.dev/goki/mobile"
 	"goki.dev/grog"
 	"goki.dev/xe"
 )
@@ -34,7 +35,7 @@ func Run(c *config.Config) error {
 
 	if t.OS == "ios" && !c.Build.Debug {
 		// TODO: is there a way to launch without running the debugger?
-		grog.PrintlnWarn("warning: using run with target ios and debug disabled is not recommended, as a significant amount of time is spent loading the debugger just to launch the app; consider specifying debug mode with -d or use install and manually open the app instead")
+		grog.PrintlnWarn("warning: only installing, not running, because there is no effective way to just launch an app on iOS from the terminal without debugging; pass the -d flag to run and debug")
 	}
 
 	err := Build(c)
@@ -69,11 +70,10 @@ func Run(c *config.Config) error {
 		}
 		return nil
 	case "ios":
-		args := []string{"-b", c.Build.Output, "-d"}
 		if !c.Build.Debug {
-			args = append(args, "--justlaunch")
+			return mobile.Install(c)
 		}
-		return xe.Verbose().SetBuffer(false).Run("ios-deploy", args...)
+		return xe.Verbose().SetBuffer(false).Run("ios-deploy", "-b", c.Build.Output, "-d")
 	}
 	return nil
 }
