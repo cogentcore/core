@@ -600,7 +600,9 @@ func (sr *SliderBase) StyleSlider(sc *Scene) {
 
 	sr.ApplyStyleWidget(sc)
 	sr.StyleToDots(&sr.Style.UnContext)
-	sr.ThSize = sr.ThumbSize.Dots
+	if !sr.ValThumb {
+		sr.ThSize = sr.ThumbSize.Dots
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -652,14 +654,16 @@ func (sr *Slider) SliderStyles() {
 		// STYTODO: state styles
 		switch {
 		case s.Is(states.Sliding):
-			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(40))
+			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			sr.ValueColor.SetSolid(colors.Palette.Primary.Tone(60))
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
 			// todo: just picking something at random to make it visible:
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Color = colors.Scheme.Primary.On
-			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(50))
+			sr.ValueColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Hovered):
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
@@ -804,7 +808,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
-		sb.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
+		sb.ThumbColor.SetSolid(colors.Transparent)
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 		s.Border.Style.Set(styles.BorderNone)
@@ -812,16 +816,22 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		// STYTODO: state styles
 		switch {
 		case s.Is(states.Sliding):
-			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(40))
-			sb.ValueColor.SetSolid(colors.Palette.Primary.Tone(40))
+			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(40))
+			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(40))
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Active):
 			// todo: just picking something at random to make it visible:
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Color = colors.Scheme.Primary.On
-			sb.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
+			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(60))
+			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(60))
 		case s.Is(states.Hovered):
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+		}
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Dp(1))
 		}
 	})
 }
