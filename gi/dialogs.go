@@ -79,6 +79,20 @@ func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
 	return dlg
 }
 
+// SetModal sets the modal behavior of the dialog:
+// true = blocks all other input, false = allows other input
+func (dlg *DialogStage) SetModal(modal bool) *DialogStage {
+	dlg.Stage.Modal = modal
+	return dlg
+}
+
+// SetNewWindow sets whether dialog opens in a new window
+// or on top of the existing window.
+func (dlg *DialogStage) SetNewWindow(newWindow bool) *DialogStage {
+	dlg.Stage.NewWindow = newWindow
+	return dlg
+}
+
 // AddButtonBox adds layout for holding buttons at bottom of dialog
 func (dlg *DialogStage) AddButtonBox() *Layout {
 	bb := NewLayout(dlg.Stage.Scene, "buttons").
@@ -155,7 +169,7 @@ func (dlg *DialogStage) Close() {
 		log.Println("ERROR: dlg has no MainMgr")
 		return
 	}
-	if dlg.Stage.OwnWin {
+	if dlg.Stage.NewWindow {
 		mm.RenderWin.CloseReq()
 		return
 	}

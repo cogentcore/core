@@ -2308,7 +2308,7 @@ var _StageTypesNameToValueMap = map[string]StageTypes{
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
-	0: `Window is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, OwnWin).`,
+	0: `Window is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`,
 	1: `Dialog is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
 	2: `Sheet is a MainStage that displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide of the RenderWin main window. It can be Modal or not.`,
 	3: `Menu is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,

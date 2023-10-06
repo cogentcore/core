@@ -124,7 +124,7 @@ func (st *MainStage) SetWindowInsets() {
 	})
 }
 
-// only called when !OwnWin
+// only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
 	if st.Back {
 		but := NewButton(&st.Scene.Decor, "win-back")
@@ -137,7 +137,7 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 
 func (st *MainStage) AddDialogDecor() *MainStage {
 	sc := st.Scene
-	if !st.OwnWin {
+	if !st.NewWindow {
 		sc.AddStyles(func(s *styles.Style) {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 			s.Border.Radius = styles.BorderRadiusLarge
@@ -187,7 +187,7 @@ func (st *MainStage) RunWindow() *MainStage {
 	}
 	st.Scene.Resize(sz)
 
-	if st.OwnWin {
+	if st.NewWindow {
 		win := st.NewRenderWin()
 		if CurRenderWin == nil {
 			CurRenderWin = win
@@ -201,6 +201,12 @@ func (st *MainStage) RunWindow() *MainStage {
 		st.SetWindowInsets()
 		CurRenderWin.GoStartEventLoop()
 		return st
+	}
+	if st.CtxWidget != nil {
+		ms := st.CtxWidget.AsWidget().Sc.MainStageMgr()
+		ms.Push(st)
+	} else {
+		CurRenderWin.StageMgr.Push(st)
 	}
 	return st
 }
@@ -225,7 +231,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	}
 	st.Scene.Resize(sz)
 
-	if st.OwnWin && !goosi.TheApp.Platform().IsMobile() {
+	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		st.Type = Window                  // critical: now is its own window!
 		st.Scene.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()

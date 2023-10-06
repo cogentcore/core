@@ -35,7 +35,7 @@ const (
 	// One of these must be created first, as the primary App contents,
 	// and it typically persists throughout.  It fills the RenderWin window.
 	// Additional Windows can be created either within the same RenderWin
-	// (Mobile) or in separate RenderWin windows (Desktop, OwnWin).
+	// (Mobile) or in separate RenderWin windows (Desktop, NewWindow).
 	Window StageTypes = iota
 
 	// Dialog is a MainStage that displays Scene in a smaller dialog window
@@ -127,8 +127,8 @@ type StageBase struct {
 	// if > 0, disappears after a timeout duration
 	Timeout time.Duration
 
-	// if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
-	OwnWin bool
+	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
+	NewWindow bool
 
 	// for Windows: add a back button
 	Back bool
@@ -182,9 +182,9 @@ type Stage interface {
 
 	SetTimeout(dur time.Duration) Stage
 
-	SetOwnWin() Stage
+	SetNewWindow() Stage
 
-	// SetSharedWin sets OwnWin off to override default OwnWin for Desktop Window
+	// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
 	SetSharedWin() Stage
 
 	SetBack() Stage
@@ -304,7 +304,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 	switch st.Type {
 	case Window:
 		if !goosi.TheApp.Platform().IsMobile() {
-			st.OwnWin = true
+			st.NewWindow = true
 		}
 		st.Modal = true // note: there is no global modal option between RenderWin windows
 	case Dialog:
@@ -366,14 +366,14 @@ func (st *StageBase) SetTimeout(dur time.Duration) Stage {
 	return st.This
 }
 
-func (st *StageBase) SetOwnWin() Stage {
-	st.OwnWin = true
+func (st *StageBase) SetNewWindow() Stage {
+	st.NewWindow = true
 	return st.This
 }
 
-// SetSharedWin sets OwnWin off to override default OwnWin for Desktop Window
+// SetSharedWin sets NewWindow off to override default NewWindow for Desktop Window
 func (st *StageBase) SetSharedWin() Stage {
-	st.OwnWin = false
+	st.NewWindow = false
 	return st.This
 }
 
