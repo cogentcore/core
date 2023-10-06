@@ -9,6 +9,7 @@ import (
 	"image"
 	"log"
 
+	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -135,6 +136,16 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
+	sc := st.Scene
+	if !st.OwnWin {
+		sc.AddStyles(func(s *styles.Style) {
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+			s.Border.Radius = styles.BorderRadiusLarge
+			// s.Border.Width.Set(units.Dp(5))
+			// s.Border.Color.Set(colors.Red)
+		})
+	}
+
 	// todo: moveable, resizable
 	return st
 }

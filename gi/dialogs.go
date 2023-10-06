@@ -95,7 +95,7 @@ func (dlg *DialogStage) AddButtonBox() *Layout {
 // Also sends a Change event to the dialog scene for listeners there.
 func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
 	sc := dlg.Stage.Scene
-	NewButton(bb, "ok").SetText("Ok").On(events.Click, func(e events.Event) {
+	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Accept()
 		sc.Send(events.Change, e)
@@ -114,7 +114,7 @@ func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
 // Also sends a Change event to the dialog scene for listeners there
 func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
 	sc := dlg.Stage.Scene
-	NewButton(bb, "cancel").SetText("Cancel").On(events.Click, func(e events.Event) {
+	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Cancel()
 		sc.Send(events.Change, e)
@@ -131,8 +131,8 @@ func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
 // AddOkCancel adds Ok, Cancel buttons, and standard Esc = Cancel keyboard action
 func (dlg *DialogStage) AddOkCancel() *DialogStage {
 	bb := dlg.AddButtonBox()
-	dlg.AddOk(bb)
 	dlg.AddCancel(bb)
+	dlg.AddOk(bb)
 	return dlg
 }
 

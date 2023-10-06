@@ -62,11 +62,12 @@ func (fr *Frame) FrameStdRender(sc *Scene) {
 	rs, _, st := fr.RenderLock(sc)
 	defer fr.RenderUnlock(rs)
 
-	fr.RenderStdBox(sc, st)
+	// fmt.Println(fr.Nm)
 
-	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
-		fr.RenderStripes(sc)
-	}
+	fr.RenderStdBox(sc, st)
+	//	if fr.Lay == LayoutGrid && fr.Stripes != NoStripes && Prefs.Params.ZebraStripeWeight != 0 {
+	//		fr.RenderStripes(sc)
+	//	}
 }
 
 func (fr *Frame) RenderStripes(sc *Scene) {

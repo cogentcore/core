@@ -496,6 +496,14 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
+// SetType sets the type of the Button for styling purposes
+func (bt *Button) SetType(typ ButtonTypes) *Button {
+	updt := bt.UpdateStart()
+	bt.Type = typ
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
 ///////////////////////////////////////////////////////////
 // CheckBox
 
