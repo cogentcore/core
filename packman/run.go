@@ -9,9 +9,8 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"log/slog"
-
 	"goki.dev/goki/config"
+	"goki.dev/grog"
 	"goki.dev/xe"
 )
 
@@ -32,6 +31,12 @@ func Run(c *config.Config) error {
 		t.Arch = runtime.GOARCH
 		c.Build.Target[0] = t
 	}
+
+	if t.OS == "ios" && !c.Build.Debug {
+		// TODO: is there a way to launch without running the debugger?
+		grog.PrintlnWarn("warning: using run with target ios and debug disabled is not recommended, as a significant amount of time is spent loading the debugger just to launch the app; consider specifying debug mode with -d or use install and manually open the app instead")
+	}
+
 	err := Build(c)
 	if err != nil {
 		return fmt.Errorf("error building app: %w", err)
@@ -66,8 +71,6 @@ func Run(c *config.Config) error {
 	case "ios":
 		args := []string{"-b", c.Build.Output, "-d"}
 		if !c.Build.Debug {
-			// TODO: is there a way to launch without running the debugger?
-			slog.Warn("using run with target ios and debug disabled is not recommended, as a significant amount of time is spent loading the debugger just to launch the app; consider specifying debug mode with -d or use install and manually open the app instead")
 			args = append(args, "--justlaunch")
 		}
 		return xe.Verbose().SetBuffer(false).Run("ios-deploy", args...)
