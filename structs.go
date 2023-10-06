@@ -371,7 +371,6 @@ func SetFromDefaultTags(obj any) error {
 	}
 	val := NonPtrValue(ov)
 	typ := val.Type()
-	var err error
 	for i := 0; i < typ.NumField(); i++ {
 		f := typ.Field(i)
 		fv := val.Field(i)
@@ -391,13 +390,12 @@ func SetFromDefaultTags(obj any) error {
 				continue
 			}
 		}
-		ok = SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
+		err := SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
 		if !ok {
-			err = fmt.Errorf("SetFromDefaultTags: was not able to set field: %s in object of type: %s from val: %s", f.Name, typ.Name(), def)
-			log.Println(err)
+			return fmt.Errorf("SetFromDefaultTags: error setting field %q in object of type %q from val %q: %w", f.Name, typ.Name(), def, err)
 		}
 	}
-	return err
+	return nil
 }
 
 // StructTags returns a map[string]string of the tag string from a reflect.StructTag value
