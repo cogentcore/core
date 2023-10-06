@@ -7,8 +7,6 @@ package laser
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"log/slog"
 	"reflect"
 	"strconv"
 
@@ -480,21 +478,21 @@ func ToFloat32(v any) (float32, error) {
 		return float32(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *int32")
 		}
 		return float32(*vt), nil
 	case int64:
 		return float32(vt), nil
 	case *int64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *int64")
 		}
 		return float32(*vt), nil
 	case uint8:
 		return float32(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *uint8")
 		}
 		return float32(*vt), nil
 	case bool:
@@ -504,7 +502,7 @@ func ToFloat32(v any) (float32, error) {
 		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *bool")
 		}
 		if *vt {
 			return 1, nil
@@ -513,62 +511,62 @@ func ToFloat32(v any) (float32, error) {
 	case string:
 		r, err := strconv.ParseFloat(vt, 32)
 		if err != nil {
-			return 0.0, fmt.Errorf("got nil *int")
+			return 0, err
 		}
 		return float32(r), nil
 	case *string:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *string")
 		}
 		r, err := strconv.ParseFloat(*vt, 32)
 		if err != nil {
-			return 0.0, fmt.Errorf("got nil *int")
+			return 0, err
 		}
 		return float32(r), nil
 	case int8:
 		return float32(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *int8")
 		}
 		return float32(*vt), nil
 	case int16:
 		return float32(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *int8")
 		}
 		return float32(*vt), nil
 	case uint16:
 		return float32(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *uint16")
 		}
 		return float32(*vt), nil
 	case uint32:
 		return float32(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *uint32")
 		}
 		return float32(*vt), nil
 	case uint64:
 		return float32(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *uint64")
 		}
 		return float32(*vt), nil
 	case uintptr:
 		return float32(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, fmt.Errorf("got nil *int")
+			return 0, fmt.Errorf("got nil *uintptr")
 		}
 		return float32(*vt), nil
 	}
-	return 0, fmt.Errorf("got nil *int")
+	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
 }
 
 // ToString robustly converts anything to a String
@@ -796,75 +794,79 @@ func ToStringPrec(v any, prec int) string {
 // is set to the source length and is thus equivalent to the source slice.
 //
 //gopy:interface=handle
-func SetRobust(to, frm any) bool {
+func SetRobust(to, frm any) error {
 	if sa, ok := to.(SetAnyer); ok {
 		err := sa.SetAny(frm)
 		if err != nil {
-			slog.Error("laser.SetRobust: error setting using SetAnyer interface", "err", err, "to", to, "from", frm)
-			return false
+			return err
 		}
-		return true
+		return nil
 	}
 	if ss, ok := to.(SetStringer); ok {
-		err := ss.SetString(ToString(frm))
-		if err != nil {
-			slog.Error("laser.SetRobust: error setting using SetStringer interface", "err", err, "to", to, "from", frm)
-			return false
+		if s, ok := frm.(string); ok {
+			err := ss.SetString(s)
+			if err != nil {
+				return err
+			}
+			return nil
 		}
-		return true
 	}
+
 	if AnyIsNil(to) {
-		return false
+		return fmt.Errorf("got nil destination value")
 	}
 	v := reflect.ValueOf(to)
 	vnp := NonPtrValue(v)
 	if !vnp.IsValid() {
-		return false
+		return fmt.Errorf("got invalid destination value %v of type %T", to, to)
 	}
 	typ := vnp.Type()
 	vp := OnePtrValue(vnp)
 	vk := vnp.Kind()
 	if !vp.Elem().CanSet() {
-		log.Printf("laser.SetRobust 'to' cannot be set -- must be a variable or field, not a const or tmp or other value that cannot be set.  Value info: %v\n", vp)
-		return false
+		return fmt.Errorf("destination value cannot be set; it must be a variable or field, not a const or tmp or other value that cannot be set (value: %v of type %T)", vp, vp)
 	}
 
 	if es, ok := to.(enums.EnumSetter); ok {
 		if str, ok := frm.(string); ok {
-			es.SetString(str)
-			return true
+			return es.SetString(str)
 		}
-		fm, ok := ToInt(frm)
-		if ok {
-			es.SetInt64(int64(fm))
-			return true
+		fm, err := ToInt(frm)
+		if err != nil {
+			return err
 		}
+		es.SetInt64(int64(fm))
+		return nil
 	}
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Int64:
-		fm, ok := ToInt(frm)
-		if ok {
-			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-			return true
+		fm, err := ToInt(frm)
+		if err != nil {
+			return err
 		}
+		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		return nil
 	case vk >= reflect.Uint && vk <= reflect.Uint64:
-		fm, ok := ToInt(frm)
-		if ok {
-			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-			return true
+		fm, err := ToInt(frm)
+		if err != nil {
+			return err
 		}
+		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		return nil
 	case vk == reflect.Bool:
 		fm, err := ToBool(frm)
-		if err == nil {
-			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-			return true
+		if err != nil {
+			return err
 		}
+		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		return nil
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		fm, ok := ToFloat(frm)
-		if ok {
-			vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-			return true
+		fm, err := ToFloat(frm)
+		if err != nil {
+			return err
 		}
+		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
+		return nil
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// cv := v.Complex()
 		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
@@ -872,45 +874,43 @@ func SetRobust(to, frm any) bool {
 	case vk == reflect.String:
 		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
-		return true
+		return nil
 	case vk == reflect.Struct:
 		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(frm)), to) // todo: this is not working -- see what marshal says, etc
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("laser.SetRobust, struct from string:", err, "for example:", string(marsh))
+				return fmt.Errorf("error setting struct from string: %w (example format for string: %s)", err, string(marsh))
 			}
-			return err == nil
+			return nil
 		}
 	case vk == reflect.Slice:
 		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(frm)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("laser.SetRobust, slice from string:", err, "for example:", string(marsh))
+				return fmt.Errorf("error setting slice from string: %w (example format for string: %s)", err, string(marsh))
 			}
-			return err == nil
+			return nil
 		}
-		err := CopySliceRobust(to, frm)
-		return err == nil
+		return CopySliceRobust(to, frm)
 	case vk == reflect.Map:
 		if NonPtrType(reflect.TypeOf(frm)).Kind() == reflect.String {
 			err := json.Unmarshal([]byte(ToString(frm)), to)
 			if err != nil {
 				marsh, _ := json.Marshal(to)
-				log.Println("laser.SetRobust, map from string:", err, "for example:", string(marsh))
+				return fmt.Errorf("error setting map from string: %w (example format for string: %s)", err, string(marsh))
 			}
-			return err == nil
+			return nil
 		}
-		err := CopyMapRobust(to, frm)
-		return err == nil
+		return CopyMapRobust(to, frm)
 	}
 
 	fv := reflect.ValueOf(frm)
 	// Just set it if possible to assign
 	if fv.Type().AssignableTo(typ) {
 		vp.Elem().Set(fv)
-		return true
+		return nil
 	}
-	return false
+	return fmt.Errorf("unable to set value %v of type %T from value %v of type %T (not a supported type pair and direct assigning is not possible)", to, to, frm, frm)
 }
