@@ -47,34 +47,33 @@ func TestConverts(t *testing.T) {
 
 	// note: this does not work
 	// reflect.ValueOf(&fv).Elem().Set(reflect.ValueOf("1.58").Convert(reflect.TypeOf(fv)))
-	ok := false
 
 	ft := "1.58"
-	ok = SetRobust(&fv, ft)
+	err := SetRobust(&fv, ft)
 	fs := fmt.Sprintf("%v", fv)
-	if !ok || fs != ft {
-		t.Errorf("Float convert error: %v != %v, ok: %v\n", fs, ft, ok)
+	if err != nil || fs != ft {
+		t.Errorf("Float convert error: %v != %v, err: %v", fs, ft, err)
 	}
 
 	it := "1"
-	ok = SetRobust(&iv, true)
+	err = SetRobust(&iv, true)
 	is := fmt.Sprintf("%v", iv)
-	if !ok || is != it {
-		t.Errorf("Int convert error: %v != %v, ok: %v\n", is, it, ok)
+	if err != nil || is != it {
+		t.Errorf("Int convert error: %v != %v, err: %v", is, it, err)
 	}
 
 	st := "22"
-	ok = SetRobust(&sv, 22)
+	err = SetRobust(&sv, 22)
 	ss := fmt.Sprintf("%v", sv)
-	if !ok || ss != st {
-		t.Errorf("String convert error: %v != %v, ok: %v\n", ss, st, ok)
+	if err != nil || ss != st {
+		t.Errorf("String convert error: %v != %v, err: %v\n", ss, st, err)
 	}
 	tc := C{}
 	InitC()
-	ok = SetRobust(&tc, c)
+	err = SetRobust(&tc, c)
 	// fmt.Printf("tc %+v\n", tc)
-	if !ok || tc != c {
-		t.Errorf("Struct convert error: %+v != %+v, ok: %v\n", c, tc, ok)
+	if err != nil || tc != c {
+		t.Errorf("Struct convert error: %+v != %+v, err: %v\n", c, tc, err)
 	}
 }
 
