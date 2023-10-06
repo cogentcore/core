@@ -4794,7 +4794,7 @@ func (tv *TextView) StyleTextView() {
 	tv.StyMu.Lock()
 	defer tv.StyMu.Unlock()
 
-	if styles.RebuildDefaultStyles {
+	if tv.NeedsRebuild() {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
@@ -4852,9 +4852,8 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
 	tv.DoLayoutChildren(iter)
-	if tv.ParentRenderWin() != nil &&
-		(tv.LinesSize == (image.Point{}) || styles.RebuildDefaultStyles || tv.Scene.IsDoingFullRender() || tv.NeedsRefresh() ||
-			tv.NLines != tv.Buf.NumLines()) {
+	if tv.LinesSize == (image.Point{} || tv.NeedsRebuild() || tv.NeedsRefresh() ||
+		tv.NLines != tv.Buf.NumLines()) {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}

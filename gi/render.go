@@ -151,6 +151,18 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 	wb.SetNeedsLayout(wb.Sc, updt)
 }
 
+// NeedsRebuild returns true if the RenderContext indicates a full rebuild is needed
+func (wb *WidgetBase) NeedsRebuild() bool {
+	if wb.This() == nil || wb.Sc == nil || wb.Sc.Stage == nil {
+		return false
+	}
+	rc := wb.Sc.RenderCtx()
+	if rc == nil {
+		return false
+	}
+	return rc.HasFlag(RenderRebuild)
+}
+
 // ConfigTree calls Config on every Widget in the tree from me.
 // Config automatically calls ApplyStyle.
 func (wb *WidgetBase) ConfigTree(sc *Scene) {

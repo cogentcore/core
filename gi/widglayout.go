@@ -16,6 +16,51 @@ import (
 ////////////////////////////////////////////////////////////////////
 // 	BBox bounding boxes
 
+// HasSc checks that the Sc Scene has been set.
+// Called prior to using -- logs an error if not.
+// todo: need slog Debug mode for this kind of thing.
+func (wb *WidgetBase) HasSc() bool {
+	if wb.This() == nil || wb.Sc == nil {
+		log.Printf("gi.WidgetBase: object or scene is nil\n") // todo: slog.Debug
+		return false
+	}
+	return true
+}
+
+// ReConfig is a convenience method for reconfiguring a widget after changes
+// have been made.  In general it is more efficient to call Set* methods that
+// automatically determine if Config is needed.
+// The plain Config method is used during initial configuration,
+// called by the Scene and caches the Sc pointer.
+func (wb *WidgetBase) ReConfig() {
+	if !wb.HasSc() {
+		return
+	}
+	wi := wb.This().(Widget)
+	wi.Config(wb.Sc)
+	wi.ApplyStyle(wb.Sc)
+}
+
+func (wb *WidgetBase) Config(sc *Scene) {
+	if wb.This() == nil {
+		fmt.Println("ERROR: nil this in config")
+		return
+	}
+	wi := wb.This().(Widget)
+	updt := wi.UpdateStart()
+	wb.Sc = sc
+	wi.ConfigWidget(sc) // where everything actually happens
+	wb.UpdateEnd(updt)
+	wb.SetNeedsLayout(sc, updt)
+}
+
+func (wb *WidgetBase) ConfigWidget(sc *Scene) {
+	// this must be defined for each widget type
+}
+
+////////////////////////////////////////////////////////////////////
+// 	BBox bounding boxes
+
 // ComputeBBoxesBase -- computes the ScBBox and WinBBox from BBox, with
 // whatever delta may be in effect
 func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delta image.Point) {
@@ -305,8 +350,7 @@ func (wb *WidgetBase) ScrollToMe() bool {
 // WinBBox returns the RenderWin based bounding box for the widget
 // by adding the Scene position to the ScBBox
 func (wb *WidgetBase) WinBBox() image.Rectangle {
-	if wb.Sc == nil {
-		fmt.Println("ERROR: WinPos Scene is nil")
+	if !wb.HasSc() {
 		return wb.ScBBox
 	}
 	return wb.ScBBox.Add(wb.Sc.Geom.Pos)

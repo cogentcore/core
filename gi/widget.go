@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -171,6 +172,43 @@ type Widget interface {
 	// very challenging without mistakenly overwriting invisibility at various
 	// levels.
 	IsVisible() bool
+
+	// SetMinPrefWidth sets minimum and preferred width;
+	// will get at least this amount; max unspecified.
+	// This adds a styler that calls [styles.Style.SetMinPrefWidth].
+	SetMinPrefWidth(val units.Value) Widget
+
+	// SetMinPrefHeight sets minimum and preferred height;
+	// will get at least this amount; max unspecified.
+	// This adds a styler that calls [styles.Style.SetMinPrefHeight].
+	SetMinPrefHeight(val units.Value) Widget
+
+	// SetStretchMaxWidth sets stretchy max width (-1);
+	// can grow to take up avail room.
+	// This adds a styler that calls [styles.Style.SetStretchMaxWidth].
+	SetStretchMaxWidth() Widget
+
+	// SetStretchMaxHeight sets stretchy max height (-1);
+	// can grow to take up avail room.
+	// This adds a styler that calls [styles.Style.SetStretchMaxHeight].
+	SetStretchMaxHeight() Widget
+
+	// SetStretchMax sets stretchy max width and height (-1);
+	// can grow to take up avail room.
+	// This adds a styler that calls [styles.Style.SetStretchMax].
+	SetStretchMax() Widget
+
+	// SetFixedWidth sets all width style options
+	// (Width, MinWidth, and MaxWidth) to
+	// the given fixed width unit value.
+	// This adds a styler that calls [styles.Style.SetFixedWidth].
+	SetFixedWidth(val units.Value) Widget
+
+	// SetFixedHeight sets all height style options
+	// (Height, MinHeight, and MaxHeight) to
+	// the given fixed height unit value.
+	// This adds a styler that calls [styles.Style.SetFixedHeight].
+	SetFixedHeight(val units.Value) Widget
 
 	// todo: revisit this -- in general anything with a largish image (including svg,
 	// SubScene, but not Icon) should get put on a list so the RenderWin Drawer just

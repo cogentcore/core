@@ -226,7 +226,7 @@ func (bb *ButtonBox) ConfigParts(sc *Scene) {
 		config.Add(CheckBoxType, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config)
-	if mods || styles.RebuildDefaultStyles {
+	if mods || bb.NeedsRebuild() {
 		bb.ConfigItems()
 		bb.UpdateEnd(updt)
 	}

@@ -1299,11 +1299,6 @@ func (st *Stretch) ApplyStyle(sc *Scene) {
 	st.ApplyStyleWidget(sc)
 }
 
-func (st *Stretch) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	st.DoLayoutBase(sc, parBBox, iter)
-	return st.DoLayoutChildren(sc, iter)
-}
-
 // Space adds a fixed sized (1 ch x 1 em by default) blank space to a layout -- set
 // width / height property to change
 type Space struct {
@@ -1330,9 +1325,4 @@ func (sp *Space) ApplyStyle(sc *Scene) {
 	defer sp.StyMu.Unlock()
 
 	sp.ApplyStyleWidget(sc)
-}
-
-func (sp *Space) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sp.DoLayoutBase(sc, parBBox, iter)
-	return sp.DoLayoutChildren(sc, iter)
 }

@@ -400,7 +400,7 @@ func (lb *Label) GrabCurBackgroundColor() {
 	if lb.Sc == nil || lb.StateIs(states.Selected) {
 		return
 	}
-	if !styles.RebuildDefaultStyles && !colors.IsNil(lb.CurBackgroundColor) {
+	if !lb.NeedsRebuild() && !colors.IsNil(lb.CurBackgroundColor) {
 		return
 	}
 	pos := lb.ContextMenuPos()

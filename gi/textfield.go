@@ -50,17 +50,17 @@ type TextField struct {
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
 
-	// if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig
-	LeadingIcon icons.Icon `desc:"if specified, an action will be added at the start of the text field with this icon; its signal is exposed through LeadingIconSig"`
+	// functions and data for textfield completion
+	Complete *Complete `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
 
-	// [view: -] if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal
-	// LeadingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if LeadingIcon is set, this is the signal of the leading icon; see [Action.ActionSig] for information on this signal"`
+	// replace displayed characters with bullets to conceal text
+	NoEcho bool
 
-	// if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig
-	TrailingIcon icons.Icon `desc:"if specified, an action will be added at the end of the text field with this icon; its signal is exposed through TrailingIconSig"`
+	// if specified, an action will be added at the start of the text field with this icon
+	LeadingIcon icons.Icon
 
-	// [view: -] if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal
-	// TrailingIconSig ki.Signal `json:"-" xml:"-" view:"-" desc:"if TrailingIcon is set, this is the signal of the trailing icon; see [Action.ActionSig] for information on this signal"`
+	// if specified, an action will be added at the end of the text field with this icon
+	TrailingIcon icons.Icon
 
 	// width of cursor -- set from cursor-width property (inherited)
 	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
@@ -130,12 +130,6 @@ type TextField struct {
 
 	// [view: -] mutex for updating cursor between blinker and field
 	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
-
-	// functions and data for textfield completion
-	Complete *Complete `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
-
-	// replace displayed characters with bullets to conceal text
-	NoEcho bool `copy:"-" json:"-" xml:"-" desc:"replace displayed characters with bullets to conceal text"`
 }
 
 func (tf *TextField) CopyFieldsFrom(frm any) {
@@ -143,6 +137,7 @@ func (tf *TextField) CopyFieldsFrom(frm any) {
 	tf.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	tf.Txt = fr.Txt
 	tf.Placeholder = fr.Placeholder
+	tf.NoEcho = fr.NoEcho
 	tf.LeadingIcon = fr.LeadingIcon
 	tf.TrailingIcon = fr.TrailingIcon
 	tf.CursorWidth = fr.CursorWidth
@@ -232,6 +227,24 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			s.Color = colors.Scheme.OnSurfaceVariant
 			s.AlignV = styles.AlignMiddle
 		})
+		switch tf.TrailingIcon {
+		case icons.Close:
+			trail.On(events.Click, func(e events.Event) {
+				tf.Clear()
+			})
+		case icons.Visibility, icons.VisibilityOff:
+			trail.On(events.Click, func(e events.Event) {
+				tf.NoEcho = !tf.NoEcho
+				if tf.NoEcho {
+					tf.TrailingIcon = icons.Visibility
+				} else {
+					tf.TrailingIcon = icons.VisibilityOff
+				}
+				if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+					icon.SetIcon(tf.TrailingIcon)
+				}
+			})
+		}
 	}
 }
 
@@ -259,47 +272,34 @@ func (tf *TextField) Text() string {
 }
 
 // SetText sets the text to be edited and reverts any current edit to reflect this new text
-func (tf *TextField) SetText(txt string) {
+func (tf *TextField) SetText(txt string) *TextField {
 	if tf.Txt == txt && !tf.Edited {
-		return
+		return tf
 	}
 	tf.Txt = txt
 	tf.Revert()
+	return tf
+}
+
+// SetPlaceholder sets the placeholder text
+func (tf *TextField) SetPlaceholder(txt string) *TextField {
+	tf.Placeholder = txt
+	return tf
 }
 
 // AddClearAction adds a trailing icon action at the end
 // of the textfield that clears the text in the textfield when pressed
-func (tf *TextField) AddClearAction() {
+func (tf *TextField) AddClearAction() *TextField {
 	tf.TrailingIcon = icons.Close
-	// tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	tff := AsTextField(recv)
-	// 	if tff != nil {
-	// 		tff.Clear()
-	// 	}
-	// })
+	return tf
 }
 
 // SetTypePassword enables [TextField.NoEcho] and adds a trailing
 // icon action at the end of the textfield that toggles [TextField.NoEcho]
-func (tf *TextField) SetTypePassword() {
+func (tf *TextField) SetTypePassword() *TextField {
 	tf.NoEcho = true
 	tf.TrailingIcon = icons.Visibility
-	// tf.TrailingIconSig.Connect(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	tff := AsTextField(recv)
-	// 	if tff != nil {
-	// 		updt := tff.UpdateStart()
-	// 		tff.NoEcho = !tff.NoEcho
-	// 		if tff.NoEcho {
-	// 			tf.TrailingIcon = icons.Visibility
-	// 		} else {
-	// 			tf.TrailingIcon = icons.VisibilityOff
-	// 		}
-	// 		if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
-	// 			icon.SetIcon(tf.TrailingIcon)
-	// 		}
-	// 		tff.UpdateEnd(updt)
-	// 	}
-	// })
+	return tf
 }
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -1445,7 +1445,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 		leadIconIdx = 0
 	}
 	if !tf.TrailingIcon.IsNil() {
-		config.Add(StretchType, "trail-icon-str")
+		config.Add(SpaceType, "trail-icon-str")
 		config.Add(ActionType, "trail-icon")
 		if leadIconIdx == -1 {
 			trailIconIdx = 1
@@ -1455,27 +1455,17 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	}
 
 	mods, updt := parts.ConfigChildren(config)
-
-	if mods || styles.RebuildDefaultStyles {
-		// if leadIconIdx != -1 {
-		// 	leadIcon := parts.Child(leadIconIdx).(*Action)
-		// 	leadIcon.SetIcon(tf.LeadingIcon)
-		// 	tf.LeadingIconSig.Mu.RLock()
-		// 	leadIcon.ActionSig.Mu.Lock()
-		// 	leadIcon.ActionSig.Cons = tf.LeadingIconSig.Cons
-		// 	leadIcon.ActionSig.Mu.Unlock()
-		// 	tf.LeadingIconSig.Mu.RUnlock()
-		// }
-		// if trailIconIdx != -1 {
-		// 	trailIcon := parts.Child(trailIconIdx).(*Action)
-		// 	trailIcon.SetIcon(tf.TrailingIcon)
-		// 	tf.TrailingIconSig.Mu.RLock()
-		// 	trailIcon.ActionSig.Mu.Lock()
-		// 	trailIcon.ActionSig.Cons = tf.TrailingIconSig.Cons
-		// 	trailIcon.ActionSig.Mu.Unlock()
-		// 	tf.TrailingIconSig.Mu.RUnlock()
-		// }
+	if mods || tf.NeedsRebuild() {
+		if leadIconIdx != -1 {
+			leadIcon := parts.Child(leadIconIdx).(*Action)
+			leadIcon.SetIcon(tf.LeadingIcon)
+		}
+		if trailIconIdx != -1 {
+			trailIcon := parts.Child(trailIconIdx).(*Action)
+			trailIcon.SetIcon(tf.TrailingIcon)
+		}
 		tf.UpdateEnd(updt)
+		tf.SetNeedsLayout(sc, updt)
 	}
 }
 

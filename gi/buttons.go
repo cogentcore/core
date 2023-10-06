@@ -87,6 +87,24 @@ func (bb *ButtonBase) SetAsButton() {
 	bb.SetFlag(false, ButtonFlagMenu)
 }
 
+// LabelWidget returns the label widget if present
+func (bb *ButtonBase) LabelWidget() *Label {
+	lbi := bb.Parts.ChildByName("label")
+	if lbi == nil {
+		return nil
+	}
+	return lbi.(*Label)
+}
+
+// IconWidget returns the iconl widget if present
+func (bb *ButtonBase) IconWidget() *Icon {
+	ici := bb.Parts.ChildByName("icon")
+	if ici == nil {
+		return nil
+	}
+	return ici.(*Icon)
+}
+
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
@@ -95,12 +113,17 @@ func (bb *ButtonBase) SetText(txt string) ButtonWidget {
 		return bb.This().(ButtonWidget)
 	}
 	updt := bb.UpdateStart()
-	recfg := (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
+	recfg := bb.Parts == nil || (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
 	bb.Text = txt
 	if recfg {
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
+	} else {
+		lbl := bb.LabelWidget()
+		if lbl != nil {
+			lbl.SetText(bb.Text)
+		}
 	}
-	bb.UpdateEndLayout(updt)
+	bb.UpdateEndLayout(updt) // todo: could optimize to not re-layout every time but..
 	return bb.This().(ButtonWidget)
 }
 
@@ -117,6 +140,11 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 	bb.Icon = iconName
 	if recfg {
 		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
+	} else {
+		ic := bb.IconWidget()
+		if ic != nil {
+			ic.SetIcon(bb.Icon)
+		}
 	}
 	bb.UpdateEndLayout(updt)
 	return bb.This().(ButtonWidget)
@@ -290,7 +318,6 @@ func (bb *ButtonBase) AsButtonBase() *ButtonBase {
 }
 
 func (bb *ButtonBase) ConfigWidget(sc *Scene) {
-	// bb.State = ButtonActive
 	bb.This().(ButtonWidget).ConfigParts(sc)
 }
 
@@ -309,6 +336,41 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	if mods {
 		bb.UpdateEnd(updt)
 		bb.SetNeedsLayout(sc, updt)
+	}
+}
+
+// ConfigPartsIconLabel adds to config to create parts, of icon
+// and label left-to right in a row, based on whether items are nil or empty
+func (bb *ButtonBase) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
+	icIdx = -1
+	lbIdx = -1
+	if icnm.IsValid() {
+		icIdx = len(*config)
+		config.Add(IconType, "icon")
+		if txt != "" {
+			config.Add(SpaceType, "space")
+		}
+	}
+	if txt != "" {
+		lbIdx = len(*config)
+		config.Add(LabelType, "label")
+	}
+	return
+}
+
+// ConfigPartsSetIconLabel sets the icon and text values in parts, and get
+// part style props, using given props if not set in object props
+func (bb *ButtonBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
+	if icIdx >= 0 {
+		ic := bb.Parts.Child(icIdx).(*Icon)
+		ic.SetIcon(icnm)
+	}
+	if lbIdx >= 0 {
+		lbl := bb.Parts.Child(lbIdx).(*Label)
+		if lbl.Text != txt {
+			lbl.SetText(txt)
+			lbl.Config(bb.Sc) // this is essential
+		}
 	}
 }
 
@@ -433,23 +495,29 @@ func (bt *Button) ButtonStyles() {
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		}
-		// state styling -- probably want this as sub-case in each one above
-		switch {
-		case s.Is(states.Active):
-			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
-			s.Color = colors.Scheme.Primary.On
-		case s.Is(states.Hovered):
+		// note: some of these states are mix-and-match, don't put in a switch
+		if s.Is(states.Hovered) {
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = BoxShadow2
 			} else {
 				s.BoxShadow = BoxShadow1
 			}
 		}
+		if s.Is(states.Active) {
+			// todo: just picking something at random to make it visible:
+			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
+			s.Color = colors.Scheme.Primary.On
+		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
 			s.Border.Width.Set(units.Dp(1))
+		}
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		}
+		if s.Is(states.Disabled) {
+			s.Color = colors.Scheme.Surface
 		}
 		// STYTODO: add state styles for buttons
 	})
@@ -472,6 +540,7 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		wb.AddStyles(func(s *styles.Style) {
+			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
@@ -544,20 +613,23 @@ func (cb *CheckBox) CheckBoxStyles() {
 				ist.StackTop = 1
 			}
 		}
-
-		// switch cb.State {
-		// case ButtonActive:
-		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		// case ButtonInactive:
-		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		// 	s.Color.SetColor(colors.Scheme.OnBackground.Highlight(30))
-		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(10))
-		// case ButtonHover:
-		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(15))
-		// case ButtonDown:
-		// 	s.BackgroundColor.SetSolid(colors.Scheme.Background.Highlight(20))
-		// }
+		if s.Is(states.Hovered) {
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		}
+		if s.Is(states.Active) {
+			s.Color = colors.Scheme.Tertiary.Base
+		}
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Width.Set(units.Dp(1))
+			s.Border.Color.Set(colors.Scheme.Outline)
+		}
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		}
+		if s.Is(states.Disabled) {
+			s.Color = colors.Scheme.SurfaceContainer
+		}
 	})
 }
 
@@ -637,7 +709,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 	}
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
-	if mods || styles.RebuildDefaultStyles {
+	if mods || cb.NeedsRebuild() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, IconType, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)

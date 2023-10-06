@@ -586,15 +586,15 @@ func (sp *Separator) OnInit() {
 		s.AlignV = styles.AlignCenter
 		s.AlignH = styles.AlignCenter
 		s.Border.Style.Set(styles.BorderSolid)
-		s.Border.Width.Set(units.Dp(1))
+		s.Border.Width.Set(units.Dp(4))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
 		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		if sp.Horiz {
 			s.MaxWidth.SetDp(-1)
-			s.MinHeight.SetDp(1)
+			s.MinHeight.SetDp(4)
 		} else {
 			s.MaxHeight.SetDp(-1)
-			s.MinWidth.SetDp(1)
+			s.MinWidth.SetDp(4)
 		}
 	})
 }

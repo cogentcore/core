@@ -6,17 +6,18 @@ package gi
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 	"strconv"
 	"unicode/utf8"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/enums"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -51,9 +52,6 @@ type ComboBox struct {
 
 	// the type of combo box
 	Type ComboBoxTypes `desc:"the type of combo box"`
-
-	// [view: -] signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value
-	// ComboSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for combo box, when a new value has been selected -- the signal type is the index of the selected item, and the data is the value"`
 
 	// maximum label length (in runes)
 	MaxLength int `desc:"maximum label length (in runes)"`
@@ -96,6 +94,7 @@ func (cb *ComboBox) ComboBoxHandlers() {
 
 func (cb *ComboBox) ComboBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
@@ -137,6 +136,23 @@ func (cb *ComboBox) ComboBoxStyles() {
 				// }
 			}
 		}
+		if s.Is(states.Hovered) {
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+		}
+		if s.Is(states.Active) {
+			s.Color = colors.Scheme.Tertiary.Base
+		}
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Width.Set(units.Dp(1))
+			s.Border.Color.Set(colors.Scheme.Outline)
+		}
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		}
+		if s.Is(states.Disabled) {
+			s.Color = colors.Scheme.SurfaceContainer
+		}
 	})
 }
 
@@ -153,6 +169,9 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
+				if cb.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
+				}
 			})
 		case "text":
 			text := child.(*TextField)
@@ -179,7 +198,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 			})
 		case "indicator":
 			wb.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetEm(1.5)
+				s.Font.Size.SetDp(16)
 				s.AlignV = styles.AlignMiddle
 			})
 		}
@@ -214,8 +233,8 @@ func (cb *ComboBox) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 
 // ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
 // for editable combobox, where textfield then takes up the rest of the space
-func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) int {
-	needInd := (bb.HasMenu() || defOn) && bb.Indicator != icons.None
+func (cb *ComboBox) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) int {
+	needInd := (cb.HasMenu() || defOn) && cb.Indicator != icons.None
 	if !needInd {
 		return -1
 	}
@@ -229,15 +248,11 @@ func (bb *ButtonBase) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool
 func (cb *ComboBox) ConfigParts(sc *Scene) {
 	cb.MakeMenuFunc = cb.MakeItemsMenu
 	parts := cb.NewParts(LayoutHoriz)
-	if eb, err := cb.PropTry("editable"); err == nil {
-		cb.Editable, _ = laser.ToBool(eb)
-	}
 	config := ki.Config{}
 	var icIdx, lbIdx, txIdx, indIdx int
 	if cb.Editable {
 		lbIdx = -1
 		icIdx, txIdx = cb.ConfigPartsIconText(&config, cb.Icon)
-		cb.SetProp("no-focus", true)
 		indIdx = cb.ConfigPartsAddIndicatorSpace(&config, true) // use space instead of stretch
 	} else {
 		txIdx = -1
@@ -250,12 +265,9 @@ func (cb *ComboBox) ConfigParts(sc *Scene) {
 	if txIdx >= 0 {
 		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
 	}
-	if cb.MaxLength > 0 && lbIdx >= 0 {
-		lbl := parts.Child(lbIdx).(*Label)
-		lbl.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
-	}
 	if mods {
 		cb.UpdateEnd(updt)
+		cb.SetNeedsLayout(sc, updt)
 	}
 }
 
@@ -302,17 +314,16 @@ func (cb *ComboBox) SetToMaxLength(maxLen int) {
 	cb.MaxLength = ml
 }
 
-// ItemsFromTypes sets the Items list from a list of types -- see e.g.,
-// AllImplementersOf or AllEmbedsOf in kit.TypeRegistry -- if setFirst then
-// set current item to the first item in the list, sort sorts the list in
-// ascending order, and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit
-func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLen int) {
-	sz := len(tl)
-	if sz == 0 {
-		return
+// ItemsFromTypes sets the Items list from a list of types, e.g., from gti.AllEmbedersOf.
+// If setFirst then set current item to the first item in the list,
+// and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit.
+func (cb *ComboBox) ItemsFromTypes(tl []*gti.Type, setFirst, sort bool, maxLen int) *ComboBox {
+	n := len(tl)
+	if n == 0 {
+		return cb
 	}
-	cb.Items = make([]any, sz)
+	cb.Items = make([]any, n)
 	for i, typ := range tl {
 		cb.Items[i] = typ
 	}
@@ -325,18 +336,19 @@ func (cb *ComboBox) ItemsFromTypes(tl []reflect.Type, setFirst, sort bool, maxLe
 	if setFirst {
 		cb.SetCurIndex(0)
 	}
+	return cb
 }
 
-// ItemsFromStringList sets the Items list from a list of string values -- if
-// setFirst then set current item to the first item in the list, and maxLen if
-// > 0 auto-sets the width of the button to the contents, with the given upper
-// limit
-func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) {
-	sz := len(el)
-	if sz == 0 {
-		return
+// ItemsFromStringList sets the Items list from a list of string values.
+// If setFirst then set current item to the first item in the list,
+// and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit.
+func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) *ComboBox {
+	n := len(el)
+	if n == 0 {
+		return cb
 	}
-	cb.Items = make([]any, sz)
+	cb.Items = make([]any, n)
 	for i, str := range el {
 		cb.Items[i] = str
 	}
@@ -346,18 +358,19 @@ func (cb *ComboBox) ItemsFromStringList(el []string, setFirst bool, maxLen int) 
 	if setFirst {
 		cb.SetCurIndex(0)
 	}
+	return cb
 }
 
-// ItemsFromIconList sets the Items list from a list of icons.Icon values -- if
-// setFirst then set current item to the first item in the list, and maxLen if
-// > 0 auto-sets the width of the button to the contents, with the given upper
-// limit
-func (cb *ComboBox) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int) {
-	sz := len(el)
-	if sz == 0 {
-		return
+// ItemsFromIconList sets the Items list from a list of icons.Icon values.
+// If setFirst then set current item to the first item in the list,
+// and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit.
+func (cb *ComboBox) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int) *ComboBox {
+	n := len(el)
+	if n == 0 {
+		return cb
 	}
-	cb.Items = make([]any, sz)
+	cb.Items = make([]any, n)
 	for i, str := range el {
 		cb.Items[i] = str
 	}
@@ -367,24 +380,23 @@ func (cb *ComboBox) ItemsFromIconList(el []icons.Icon, setFirst bool, maxLen int
 	if setFirst {
 		cb.SetCurIndex(0)
 	}
+	return cb
 }
 
-/*
-
-// ItemsFromEnumList sets the Items list from a list of enum values (see
-// kit.EnumRegistry) -- if setFirst then set current item to the first item in
-// the list, and maxLen if > 0 auto-sets the width of the button to the
-// contents, with the given upper limit
-func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen int) {
-	sz := len(el)
-	if sz == 0 {
-		return
+// ItemsFromEnumListsets the Items list from a list of enums.Enum values.
+// If setFirst then set current item to the first item in the list,
+// and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit.
+func (cb *ComboBox) ItemsFromEnums(el []enums.Enum, setFirst bool, maxLen int) *ComboBox {
+	n := len(el)
+	if n == 0 {
+		return cb
 	}
-	cb.Items = make([]any, sz)
-	cb.Tooltips = make([]string, sz)
+	cb.Items = make([]any, n)
+	cb.Tooltips = make([]string, n)
 	for i, enum := range el {
 		cb.Items[i] = enum
-		cb.Tooltips[i] = enum.Desc
+		cb.Tooltips[i] = enum.Desc()
 	}
 	if maxLen > 0 {
 		cb.SetToMaxLength(maxLen)
@@ -392,18 +404,16 @@ func (cb *ComboBox) ItemsFromEnumList(el []kit.EnumValue, setFirst bool, maxLen 
 	if setFirst {
 		cb.SetCurIndex(0)
 	}
+	return cb
 }
 
-// ItemsFromEnum sets the Items list from an enum type, which must be
-// registered on kit.EnumRegistry -- if setFirst then set current item to the
-// first item in the list, and maxLen if > 0 auto-sets the width of the button
-// to the contents, with the given upper limit -- see kit.EnumRegistry, and
-// maxLen if > 0 auto-sets the width of the button to the contents, with the
-// given upper limit
-func (cb *ComboBox) ItemsFromEnum(enumtyp reflect.Type, setFirst bool, maxLen int) {
-	cb.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true), setFirst, maxLen)
+// ItemsFromEnum sets the Items list from given enums.Enum Values().
+// If setFirst then set current item to the first item in the list,
+// and maxLen if > 0 auto-sets the width of the button to the
+// contents, with the given upper limit.
+func (cb *ComboBox) ItemsFromEnum(enum enums.Enum, setFirst bool, maxLen int) *ComboBox {
+	return cb.ItemsFromEnums(enum.Values(), setFirst, maxLen)
 }
-*/
 
 // FindItem finds an item on list of items and returns its index
 func (cb *ComboBox) FindItem(it any) int {
@@ -460,25 +470,24 @@ func (cb *ComboBox) ShowCurVal() {
 }
 
 // SelectItem selects a given item and updates the display to it
-func (cb *ComboBox) SelectItem(idx int) {
+func (cb *ComboBox) SelectItem(idx int) *ComboBox {
 	if cb.This() == nil {
-		return
+		return cb
 	}
 	updt := cb.UpdateStart()
 	cb.SetCurIndex(idx)
-	cb.UpdateEnd(updt)
+	cb.UpdateEndLayout(updt)
+	return cb
 }
 
-// SelectItemAction selects a given item and emits the index as the ComboSig signal
-// and the selected item as the data.
+// SelectItemAction selects a given item and updates the display to it
+// and sends a Changed event to indicate that the value has changed.
 func (cb *ComboBox) SelectItemAction(idx int) {
 	if cb.This() == nil {
 		return
 	}
-	updt := cb.UpdateStart()
 	cb.SelectItem(idx)
-	// cb.ComboSig.Emit(cb.This(), int64(cb.CurIndex), cb.CurVal)
-	cb.UpdateEnd(updt)
+	cb.Send(events.Change, nil)
 }
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
@@ -488,8 +497,8 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *MenuActions) {
 	if cb.Menu == nil {
 		cb.Menu = make(MenuActions, 0, nitm)
 	}
-	sz := len(cb.Menu)
-	if nitm < sz {
+	n := len(cb.Menu)
+	if nitm < n {
 		cb.Menu = cb.Menu[0:nitm]
 	}
 	if nitm == 0 {
@@ -498,7 +507,7 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *MenuActions) {
 	_, ics := cb.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range cb.Items {
 		var ac *Action
-		if sz > i {
+		if n > i {
 			ac = cb.Menu[i].(*Action)
 		} else {
 			ac = &Action{}

@@ -48,8 +48,8 @@ type SliderBase struct {
 	// current value
 	Value float32 `xml:"value" desc:"current value"`
 
-	// previous emitted value - don't re-emit if it is the same
-	LastValue float32 `copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	// dimension along which the slider slides
+	Dim mat32.Dims `desc:"dimension along which the slider slides"`
 
 	// minimum value in range
 	Min float32 `xml:"min" desc:"minimum value in range"`
@@ -63,23 +63,7 @@ type SliderBase struct {
 	// larger PageUp / Dn step size
 	PageStep float32 `xml:"pagestep" desc:"larger PageUp / Dn step size"`
 
-	// size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing
-	Size float32 `xml:"size" desc:"size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing"`
-
-	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-	ThSize float32 `xml:"-" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
-
-	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-	ThSizeReal float32 `xml:"-" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
-
-	// styled fixed size of the thumb
-	ThumbSize units.Value `xml:"thumb-size" desc:"styled fixed size of the thumb"`
-
-	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
-	Prec int `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
-
-	// [view: show-name] optional icon for the dragging knob
-	Icon icons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
+	// todo: shouldn't this be a units guy:?
 
 	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
 	ValThumb bool `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
@@ -87,14 +71,11 @@ type SliderBase struct {
 	// value that the thumb represents, in the same units
 	ThumbVal float32 `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
 
-	// logical position of the slider relative to Size
-	Pos float32 `xml:"-" desc:"logical position of the slider relative to Size"`
+	// styled fixed size of the thumb -- only if not doing ValThumb
+	ThumbSize units.Value `xml:"thumb-size" desc:"styled fixed size of the thumb -- only if not doing ValThumb"`
 
-	// underlying drag position of slider -- not subject to snapping
-	SlideStartPos float32 `xml:"-" desc:"underlying drag position of slider -- not subject to snapping"`
-
-	// dimension along which the slider slides
-	Dim mat32.Dims `desc:"dimension along which the slider slides"`
+	// [view: show-name] optional icon for the dragging knob
+	Icon icons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
 
 	// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
 	Tracking bool `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
@@ -108,8 +89,8 @@ type SliderBase struct {
 	// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
 	Off bool `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
 
-	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
-	StyleBox styles.Style `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
+	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
+	Prec int `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
 
 	// TODO: make value and thumb full style objects
 
@@ -119,14 +100,29 @@ type SliderBase struct {
 	// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
 	ThumbColor colors.Full `desc:"the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is"`
 
-	// state of slider
-	State SliderStates `json:"-" xml:"-" desc:"state of slider"`
+	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
+	StyleBox styles.Style `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
 
-	// styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	StateStyles [SliderStatesN]styles.Style `copy:"-" json:"-" xml:"-" desc:"styles for different states of the slider, one for each state -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
+	//////////////////////////////////////////////////////////////////
+	// 	Computed values below
 
-	// [view: -] signal for slider -- see SliderSignals for the types
-	//	SliderSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for slider -- see SliderSignals for the types"`
+	// logical position of the slider relative to Size
+	Pos float32 `inactive:"+" desc:"logical position of the slider relative to Size"`
+
+	// previous emitted value - don't re-emit if it is the same
+	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+
+	// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
+	Size float32 `inactive:"+" desc:"computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation"`
+
+	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
+	ThSize float32 `inactive:"+" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
+
+	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
+	ThSizeReal float32 `inactive:"+" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
+
+	// underlying drag position of slider -- not subject to snapping
+	SlideStartPos float32 `inactive:"+" desc:"underlying drag position of slider -- not subject to snapping"`
 }
 
 func (sb *SliderBase) CopyFieldsFrom(frm any) {
@@ -178,43 +174,6 @@ const (
 	SliderSignalsN
 )
 
-// SliderStates are mutually-exclusive slider states -- determines appearance
-type SliderStates int32
-
-const (
-	// normal state -- there but not being interacted with
-	SliderActive SliderStates = iota
-
-	// inactive -- not responsive
-	SliderInactive
-
-	// mouse is hovering over the slider
-	SliderHover
-
-	// slider is the focus -- will respond to keyboard input
-	SliderFocus
-
-	// slider is currently being pressed down
-	SliderDown
-
-	// slider has been selected
-	SliderSelected
-
-	// TODO: remove these hacky states
-
-	// use background-color here to fill in selected value of slider
-	SliderValue
-
-	// these styles define the overall box around slider -- typically no border and a white background -- needs a background to allow local re-rendering
-	SliderBox
-
-	// total number of slider states
-	SliderStatesN
-)
-
-// SliderSelectors are Style selector names for the different states
-var SliderSelectors = []string{":active", ":inactive", ":hover", ":focus", ":down", ":selected", ":value", ":box"}
-
 func (sb *SliderBase) OnInit() {
 	sb.Step = 0.1
 	sb.PageStep = 0.2
@@ -232,31 +191,6 @@ func (sb *SliderBase) SnapValue() {
 	}
 	sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
 	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
-}
-
-// SetSliderState sets the slider state to given state, updates style
-func (sb *SliderBase) SetSliderState(state SliderStates) {
-	prev := sb.State
-	if sb.IsDisabled() {
-		if sb.StateIs(states.Selected) {
-			state = SliderSelected
-		} else {
-			state = SliderInactive
-		}
-	} else {
-		if state == SliderActive && sb.StateIs(states.Selected) {
-			state = SliderSelected
-		} else if state == SliderActive && sb.StateIs(states.Focused) {
-			state = SliderFocus
-		}
-	}
-	sb.State = state
-	sb.Style = sb.StateStyles[state] // get relevant styles
-	if prev != state {
-		sb.StyMu.Lock()
-		sb.ApplyStyleWidget(sb.Sc)
-		sb.StyMu.Unlock()
-	}
 }
 
 // SizeFromAlloc gets size from allocation
@@ -334,9 +268,9 @@ func (sb *SliderBase) UpdatePosFromValue(val float32) {
 	sb.Pos = effSz * (val - sb.Min) / (sb.Max - sb.Min)
 }
 
-// SetValue sets the value and updates the slider position, but does not
-// emit an updated signal (see SetValueAction)
-func (sb *SliderBase) SetValue(val float32) {
+// SetValue sets the value and updates the slider position,
+// but does not send a Change event (see Action version)
+func (sb *SliderBase) SetValue(val float32) *SliderBase {
 	updt := sb.UpdateStart()
 	val = mat32.Min(val, sb.Max)
 	if sb.ValThumb {
@@ -349,6 +283,7 @@ func (sb *SliderBase) SetValue(val float32) {
 		sb.SlideStartPos = sb.Pos
 	}
 	sb.UpdateEndRender(updt)
+	return sb
 }
 
 // SetValueAction sets the value and updates the slider representation, and
@@ -361,14 +296,15 @@ func (sb *SliderBase) SetValueAction(val float32) {
 	sb.Send(events.Change, nil)
 }
 
-// SetThumbValue sets the thumb value to given value and updates the thumb size
-// -- for scrollbar-style sliders where the thumb size represents visible range
-func (sb *SliderBase) SetThumbValue(val float32) {
+// SetThumbValue sets the thumb value to given value and updates the thumb size.
+// For scrollbar-style sliders where the thumb size represents visible range.
+func (sb *SliderBase) SetThumbValue(val float32) *SliderBase {
 	updt := sb.UpdateStart()
 	sb.ThumbVal = mat32.Min(val, sb.Max)
 	sb.ThumbVal = mat32.Max(sb.ThumbVal, sb.Min)
 	sb.UpdateThumbValSize()
-	sb.UpdateEnd(updt)
+	sb.UpdateEndRender(updt)
+	return sb
 }
 
 // UpdateThumbValSize sets thumb size as proportion of min / max (e.sb., amount
@@ -381,6 +317,87 @@ func (sb *SliderBase) UpdateThumbValSize() {
 	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
 }
 
+///////////////////////////////////////////////////////////
+// 	Setters
+
+func (sb *SliderBase) SetDim(dim mat32.Dims) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.Dim = dim
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetMin(val float32) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.Min = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetMax(val float32) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.Max = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetStep(val float32) *SliderBase {
+	sb.Step = val
+	return sb
+}
+
+func (sb *SliderBase) SetPageStep(val float32) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.PageStep = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetValThumb(valThumb bool) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.ValThumb = valThumb
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetThumbSize(val units.Value) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.ThumbSize = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetIcon(ic icons.Icon) *SliderBase {
+	updt := sb.UpdateStart()
+	sb.Icon = ic
+	// todo: actually set icon
+	sb.UpdateEndLayout(updt)
+	return sb
+}
+
+func (sb *SliderBase) SetTracking(track bool) *SliderBase {
+	sb.Tracking = track
+	return sb
+}
+
+func (sb *SliderBase) SetTrackThr(val float32) *SliderBase {
+	sb.TrackThr = val
+	return sb
+}
+
+func (sb *SliderBase) SetSnap(snap bool) *SliderBase {
+	sb.Snap = snap
+	return sb
+}
+
+func (sb *SliderBase) SetPrec(val int) *SliderBase {
+	sb.Prec = val
+	return sb
+}
+
+///////////////////////////////////////////////////////////
+// 	Events
+
 // PointToRelPos translates a point in global pixel coords into relative
 // position within node.  This satisfies the SliderPositioner interface.
 func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
@@ -388,9 +405,6 @@ func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
 	defer sb.BBoxMu.RUnlock()
 	return pt.Sub(sb.ScBBox.Min)
 }
-
-///////////////////////////////////////////////////////////
-// 	Events
 
 func (sb *SliderBase) SliderMouse() {
 	sb.On(events.MouseDown, func(e events.Event) {
@@ -506,21 +520,24 @@ func (sb *SliderBase) ConfigWidget(sc *Scene) {
 }
 
 func (sb *SliderBase) ConfigSlider(sc *Scene) {
-	sb.State = SliderActive
-	if sb.IsDisabled() {
-		sb.State = SliderInactive
-	}
 	sb.ConfigParts(sc)
 }
 
 func (sb *SliderBase) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutNil)
 	config := ki.Config{}
-	icIdx, lbIdx := sb.ConfigPartsIconLabel(&config, sb.Icon, "")
+	icIdx := -1
+	if sb.Icon.IsValid() {
+		icIdx = len(config)
+		config.Add(IconType, "icon")
+	}
 	mods, updt := parts.ConfigChildren(config)
-	sb.ConfigPartsSetIconLabel(sb.Icon, "", icIdx, lbIdx)
+	if icIdx >= 0 {
+		ic := sb.Parts.Child(icIdx).(*Icon)
+		ic.SetIcon(sb.Icon)
+	}
 	if mods {
-		sb.UpdateEnd(updt)
+		sb.UpdateEndLayout(updt)
 	}
 }
 
@@ -853,9 +870,6 @@ func (sb *ScrollBar) GetSize(sc *Scene, iter int) {
 func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	sb.DoLayoutBase(sc, parBBox, iter)
 	sb.DoLayoutParts(sc, parBBox, iter)
-	for i := 0; i < int(SliderStatesN); i++ {
-		sb.StateStyles[i].CopyUnitContext(&sb.Style.UnContext)
-	}
 	sb.SizeFromAlloc()
 	return sb.DoLayoutChildren(sc, iter)
 }

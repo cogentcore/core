@@ -51,8 +51,10 @@ func (ic *Icon) OnInit() {
 
 func (ic *Icon) IconStyles() {
 	ic.AddStyles(func(s *styles.Style) {
-		s.Width.SetEm(1)
+		s.Width.SetEm(1) // todo: somehow this was ramping up progressively. Em wrong!?
 		s.Height.SetEm(1)
+		// s.Width.SetDp(24)
+		// s.Height.SetDp(24)
 		s.BackgroundColor.SetSolid(colors.Transparent)
 		ic.SVG.Color.SetSolid(s.Color)
 	})
@@ -90,13 +92,12 @@ func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
 }
 
 func (ic *Icon) GetSize(sc *Scene, iter int) {
-	if iter > 0 {
-		return
+	ic.InitLayout(sc)
+	if ic.SVG.Pixels != nil {
+		ic.GetSizeFromWH(float32(ic.SVG.Geom.Size.X), float32(ic.SVG.Geom.Size.Y))
+	} else {
+		ic.GetSizeFromWH(2, 2)
 	}
-	ic.GetSizeFromWH(2, 2)
-	// todo: ?
-	// ic.SVG.Nm = ic.Nm
-	// ic.LayState.Alloc.Size = sic.LayState.Alloc.Size
 }
 
 func (ic *Icon) ApplyStyle(sc *Scene) {

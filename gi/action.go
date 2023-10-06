@@ -126,27 +126,24 @@ func (ac *Action) ActionStyles() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
+		// note: some of these states are mix-and-match, don't put in a switch
 		if s.Is(states.Hovered) {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
+		if s.Is(states.Active) {
+			s.Color = colors.Scheme.Tertiary.Base
+		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Dp(2))
+			s.Border.Width.Set(units.Dp(1))
 			s.Border.Color.Set(colors.Scheme.Outline)
 		}
-		// switch ac.State {
-		// case ButtonActive:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(7))
-		// case ButtonInactive:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(20))
-		// 	s.Color = colors.Scheme.OnBackground.Highlight(20)
-		// case ButtonFocus, ButtonSelected:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(15))
-		// case ButtonHover:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(20))
-		// case ButtonDown:
-		// 	s.BackgroundColor.SetSolid(s.BackgroundColor.Solid.Highlight(25))
-		// }
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		}
+		if s.Is(states.Disabled) {
+			s.Color = colors.Scheme.SurfaceContainer
+		}
 	})
 }
 
@@ -156,7 +153,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 		case "icon":
 			w.AddStyles(func(s *styles.Style) {
 				if ac.Type == ActionMenu {
-					s.Font.Size.SetEm(1.5)
+					s.Font.Size.SetDp(16)
 				}
 				s.Margin.Set()
 				s.Padding.Set()
@@ -174,7 +171,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 		case "indicator":
 			w.AddStyles(func(s *styles.Style) {
 				if ac.Type == ActionMenu {
-					s.Font.Size.SetEm(1.5)
+					s.Font.Size.SetDp(16)
 				}
 				s.Margin.Set()
 				s.Padding.Set()
@@ -285,9 +282,9 @@ func (ac *Action) ConfigParts(sc *Scene) {
 		if ac.Class == "" {
 			ac.Class = "menu-action"
 		}
-		// if ac.Indicator == "" && ac.HasMenu() {
-		// 	ac.Indicator = icons.KeyboardArrowRight
-		// }
+		if ac.Indicator == "" && ac.HasMenu() {
+			ac.Indicator = icons.KeyboardArrowRight
+		}
 		ac.ConfigPartsMenuItem()
 	default:
 		ac.ConfigPartsButton()

@@ -198,7 +198,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 		config.Add(LayoutType, "buttons")
 	}
 	mods, updt := parts.ConfigChildren(config)
-	if !mods && !styles.RebuildDefaultStyles {
+	if !mods && !sb.NeedsRebuild() {
 		return
 	}
 	if !sb.IsDisabled() {
