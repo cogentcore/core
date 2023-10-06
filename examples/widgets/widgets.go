@@ -36,15 +36,14 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	scene := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
-	frame := &scene.Frame // todo: scene will be the frame
+	scene := gi.StageScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	tbar := gi.NewToolBar(frame, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
+	tbar := gi.NewToolBar(scene, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
 	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func(act *gi.Action) {
 		fmt.Println("Toolbar Action 1")
 	})
 
-	trow := gi.NewLayout(frame, "trow").
+	trow := gi.NewLayout(scene, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
 	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
@@ -70,11 +69,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(frame, "blspc")
-	gi.NewLabel(gi.NewLayout(frame, "blrow").SetLayout(gi.LayoutHoriz), "blab").
+	gi.NewSpace(scene, "blspc")
+	gi.NewLabel(gi.NewLayout(scene, "blrow").SetLayout(gi.LayoutHoriz), "blab").
 		SetText("Buttons:").SetSelectable()
 
-	brow := gi.NewLayout(frame, "brow").
+	brow := gi.NewLayout(scene, "brow").
 		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
 	b1 := gi.NewButton(brow, "button1").
@@ -87,7 +86,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	b1.On(events.Click, func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-		dlg := gi.NewDialog(gi.NewScene("dlg"), b1).
+		dlg := gi.NewDialog(gi.StageScene("dlg"), b1).
 			AddTitle("Test Dialog").
 			AddPrompt("This is a prompt").
 			AddOkCancel()
@@ -112,7 +111,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	_ = button2
 
-	// this is the "full strength" general purpose signaling framework
+	// this is the "full strength" general purpose signaling scenework
 	// button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
 	// 	if sig == int64(gi.ButtonClicked) {
@@ -170,11 +169,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(frame, "slspc")
-	gi.NewLabel(gi.NewLayout(frame, "slrow").SetLayout(gi.LayoutHoriz), "slab").
+	gi.NewSpace(scene, "slspc")
+	gi.NewLabel(gi.NewLayout(scene, "slrow").SetLayout(gi.LayoutHoriz), "slab").
 		SetText("Sliders:")
 
-	srow := gi.NewLayout(frame, "srow").SetLayout(gi.LayoutHoriz).
+	srow := gi.NewLayout(scene, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
 		AddStyles(func(s *styles.Style) {
@@ -237,11 +236,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewSpace(frame, "tlspc")
-	gi.NewLabel(gi.NewLayout(frame, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
+	gi.NewSpace(scene, "tlspc")
+	gi.NewLabel(gi.NewLayout(scene, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
 		SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(frame, "txrow").SetLayout(gi.LayoutHoriz).
+	txrow := gi.NewLayout(scene, "txrow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth()
 

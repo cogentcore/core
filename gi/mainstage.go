@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/ki/v2"
 )
 
 // MainStage manages a Scene serving as content for a
@@ -251,7 +252,7 @@ func (st *MainStage) NewRenderWin() *RenderWin {
 func (st *MainStage) Delete() {
 	st.PopupMgr.CloseAll()
 	if st.Scene != nil {
-		st.Scene.Delete()
+		st.Scene.Delete(ki.DestroyKids)
 	}
 	st.Scene = nil
 	st.StageMgr = nil

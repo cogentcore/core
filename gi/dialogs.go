@@ -54,7 +54,7 @@ func (dlg *DialogStage) AddTitle(title ...string) *DialogStage {
 	if len(title) > 0 {
 		dlg.Stage.Title = title[0]
 	}
-	NewLabel(&dlg.Stage.Scene.Frame, "title").SetText(dlg.Stage.Title).
+	NewLabel(dlg.Stage.Scene, "title").SetText(dlg.Stage.Title).
 		SetType(LabelHeadlineSmall).AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.AlignH = styles.AlignCenter
@@ -66,7 +66,7 @@ func (dlg *DialogStage) AddTitle(title ...string) *DialogStage {
 
 // AddPrompt adds given prompt to dialog.
 func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
-	NewLabel(&dlg.Stage.Scene.Frame, "prompt").SetText(prompt).
+	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).AddStyles(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.MaxWidth.SetDp(-1)
@@ -81,7 +81,7 @@ func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
 
 // AddButtonBox adds layout for holding buttons at bottom of dialog
 func (dlg *DialogStage) AddButtonBox() *Layout {
-	bb := NewLayout(&dlg.Stage.Scene.Frame, "buttons").
+	bb := NewLayout(dlg.Stage.Scene, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.AddStyles(func(s *styles.Style) {
 		bb.Spacing.SetDp(8 * Prefs.DensityMul())
@@ -94,13 +94,13 @@ func (dlg *DialogStage) AddButtonBox() *Layout {
 // and also the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog scene for listeners there.
 func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
-	scfr := dlg.Stage.Scene.Frame
+	sc := dlg.Stage.Scene
 	NewButton(bb, "ok").SetText("Ok").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Accept()
-		scfr.Send(events.Change, e)
+		sc.Send(events.Change, e)
 	})
-	scfr.On(events.KeyChord, func(e events.Event) {
+	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAccept {
 			dlg.Accept()
@@ -113,13 +113,13 @@ func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
 // and also the Esc keychord event.
 // Also sends a Change event to the dialog scene for listeners there
 func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
-	scfr := dlg.Stage.Scene.Frame
+	sc := dlg.Stage.Scene
 	NewButton(bb, "cancel").SetText("Cancel").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.Cancel()
-		scfr.Send(events.Change, e)
+		sc.Send(events.Change, e)
 	})
-	scfr.On(events.KeyChord, func(e events.Event) {
+	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAbort {
 			dlg.Cancel()
@@ -590,7 +590,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 		return NewStdDialog(opts, ok, cancel), false
 	}
 	ew, has := DialogRenderWins.FindData(data)
-	if has && ew.Scene.Frame.NumChildren() > 0 {
+	if has && ew.Scene.NumChildren() > 0 {
 		ew.RenderWin.Raise()
 		// dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
 		// return dlg, true

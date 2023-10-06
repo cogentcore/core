@@ -337,7 +337,7 @@ var MenuMaxHeight = 30
 // MenuSceneFromActions constructs a Scene from given list of MenuActions
 // for displaying a Menu.
 func MenuSceneFromActions(menu MenuActions, name string) *Scene {
-	msc := NewScene(name + "-menu")
+	msc := StageScene(name + "-menu")
 	frame := &msc.Frame
 	MenuFrameConfigStyles(frame)
 	// todo: look for Selected item to get initial focus

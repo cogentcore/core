@@ -457,7 +457,7 @@ func (em *EventMgr) FocusNext(foc Widget) bool {
 		focusNext = true
 	}
 
-	focRoot := em.Main.Scene.Frame.This().(Widget)
+	focRoot := em.Main.Scene.This().(Widget)
 
 	for i := 0; i < 2; i++ {
 		focRoot.WalkPre(func(k ki.Ki) bool {
@@ -536,7 +536,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 	gotFocus := false
 	var prevItem Widget
 
-	focRoot := em.Main.Scene.Frame.This().(Widget)
+	focRoot := em.Main.Scene.This().(Widget)
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		if gotFocus {
@@ -569,7 +569,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 func (em *EventMgr) FocusLast() bool {
 	var lastItem Widget
 
-	focRoot := em.Main.Scene.Frame.This().(Widget)
+	focRoot := em.Main.Scene.This().(Widget)
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
@@ -591,7 +591,7 @@ func (em *EventMgr) FocusLast() bool {
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
 func (em *EventMgr) ClearNonFocus(foc Widget) {
-	focRoot := em.Main.Scene.Frame.This().(Widget)
+	focRoot := em.Main.Scene.This().(Widget)
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)

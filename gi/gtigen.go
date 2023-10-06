@@ -871,6 +871,53 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SceneType is the [gti.Type] for [Scene]
+var SceneType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Scene",
+	ShortName:  "gi.Scene",
+	IDName:     "scene",
+	Doc:        "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context (e.g., bounding boxes\nand pointer to current parent Stage), so",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Nm", &gti.Field{Name: "Nm", Type: "string", Doc: "name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.", Directives: gti.Directives{}}},
+		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}}},
+		{"Flags", &gti.Field{Name: "Flags", Type: "ScFlags", Doc: "has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene", Directives: gti.Directives{}}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "styles.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}}},
+		{"Decor", &gti.Field{Name: "Decor", Type: "Layout", Doc: "Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil", Directives: gti.Directives{}}},
+		{"RenderState", &gti.Field{Name: "RenderState", Type: "paint.State", Doc: "[view: -] render state for rendering", Directives: gti.Directives{}}},
+		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] live pixels that we render into", Directives: gti.Directives{}}},
+		{"BgColor", &gti.Field{Name: "BgColor", Type: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}}},
+		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}}},
+		{"CurColor", &gti.Field{Name: "CurColor", Type: "color.RGBA", Doc: "[view: -] Current color in styling -- used for relative color names", Directives: gti.Directives{}}},
+		{"LastRender", &gti.Field{Name: "LastRender", Type: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}}},
+		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", Doc: "[view: -] StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Frame", &gti.Field{Name: "Frame", Type: "Frame", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Scene{},
+})
+
+// NewScene adds a new [Scene] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewScene(par ki.Ki, name ...string) *Scene {
+	return par.NewChild(SceneType, name...).(*Scene)
+}
+
+// KiType returns the [*gti.Type] of [Scene]
+func (t *Scene) KiType() *gti.Type {
+	return SceneType
+}
+
+// New returns a new [*Scene] value
+func (t *Scene) New() ki.Ki {
+	return &Scene{}
+}
+
 // SliderBaseType is the [gti.Type] for [SliderBase]
 var SliderBaseType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.SliderBase",

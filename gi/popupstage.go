@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"goki.dev/goosi/events"
+	"goki.dev/ki/v2"
 )
 
 // PopupStage supports Popup types (Menu, Tooltip, Snakbar, Chooser),
@@ -46,7 +47,7 @@ func (st *PopupStage) RenderCtx() *RenderContext {
 
 func (st *PopupStage) Delete() {
 	if st.Scene != nil {
-		st.Scene.Delete()
+		st.Scene.Delete(ki.DestroyKids)
 	}
 	st.Scene = nil
 	st.Main = nil
@@ -159,9 +160,9 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sz := st.Scene.PrefSize(ms.Geom.Size)
 
-	frame := st.Scene.Frame
-	scrollWd := int(frame.Style.ScrollBarWidth.Dots)
-	fontHt := int(frame.Style.Font.Face.Metrics.Height)
+	sc := st.Scene
+	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
+	fontHt := int(sc.Style.Font.Face.Metrics.Height)
 
 	switch st.Type {
 	case Menu:

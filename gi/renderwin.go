@@ -91,8 +91,8 @@ type RenderWin struct {
 	// arranged in order.  See winrender.go for all rendering code.
 	RenderScenes RenderScenes
 
-	// main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu
-	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene.Frame always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	// main menu -- is first element of Scene always -- leave empty to not render.  On MacOS, this drives screen main menu
+	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene always -- leave empty to not render.  On MacOS, this drives screen main menu"`
 
 	// below are internal vars used during the event loop
 

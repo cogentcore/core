@@ -19,11 +19,14 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// see render.go for scene-based rendering code.
+// see:
+//	- render.go for scene-based rendering code
+//	- widglayout for layout
+//	- style.go for style
 
-// Scene contains a Widget tree, rooted in a Frame layout,
+// Scene contains a Widget tree, rooted in an embedded Frame layout,
 // which renders into its Pixels image.
-// The Scene is set in a Stage, which sets the Stage pointer to itself.
+// The Scene is set in a Stage (pointer retained in Scene).
 // Stage has a StageMgr manager for controlling things like Popups
 // (Menus and Dialogs, etc).
 //
@@ -31,6 +34,7 @@ import (
 // within a given Stage and overall rendering context (e.g., bounding boxes
 // and pointer to current parent Stage), so
 type Scene struct {
+	Frame
 
 	// name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.
 	Nm string `desc:"name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique."`
@@ -43,9 +47,6 @@ type Scene struct {
 
 	// Size and position relative to overall rendering context.
 	Geom styles.Geom2DInt
-
-	// Root of the scenegraph for this scene
-	Frame Frame `desc:"Root of the scenegraph for this scene"`
 
 	// Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil
 	Decor Layout `desc:"Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil"`
@@ -72,21 +73,16 @@ type Scene struct {
 	// If different then a new ApplyStyleScene is needed.
 	LastRender RenderParams
 
-	// todo: should be able to remove UpdtMu, StackMu
-
-	// [view: -] UpdtMu is mutex for scene updates
-	UpdtMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"UpdtMu is mutex for scene updates"`
-
-	// [view: -] StackMu is mutex for adding to UpdtStack
-	StackMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StackMu is mutex for adding to UpdtStack"`
-
 	// [view: -] StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
 }
 
-// NewScene creates a new Scene with Pixels Image
-// of the specified width and height.
-func NewScene(name string) *Scene {
+// StageScene creates a new Scene that will serve as the contents of a Stage
+// (e.g., a Window, Dialog, etc).  Scenes can also be added as part of the
+// Widget tree within another Scene, where they provide an optimized rendering
+// context for areas that tend to update frequently -- use NewScene with a
+// parent argument for that.
+func StageScene(name string) *Scene {
 	sc := &Scene{}
 	sc.Nm = name
 	sc.BgColor.SetColor(color.Transparent)
@@ -191,7 +187,7 @@ func (sc *Scene) ScIsVisible() bool {
 
 // Delete this Scene if not Flagged for preservation.
 // Removes Decor and Frame Widgets
-func (sc *Scene) Delete() {
+func (sc *Scene) Delete(destroy bool) {
 	if sc.Flags.HasFlag(ScPreserve) {
 		return
 	}
@@ -200,11 +196,8 @@ func (sc *Scene) Delete() {
 
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
-	sc.UpdtMu.Lock()
-	defer sc.UpdtMu.Unlock()
-
 	sc.Decor.DeleteChildren(ki.DestroyKids)
-	sc.Frame.DeleteChildren(ki.DestroyKids)
+	sc.DeleteChildren(ki.DestroyKids)
 }
 
 // SetCurrentColor sets the current color in concurrent-safe way
