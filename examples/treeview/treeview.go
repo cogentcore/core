@@ -66,11 +66,9 @@ type TestNodeB struct {
 	SubObj TestNodeA `desc:"a sub-object"`
 }
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	// a source tree to view
 	srctree := TestNodeB{}
 	srctree.InitName(&srctree, "par1")

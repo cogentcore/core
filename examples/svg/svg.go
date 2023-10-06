@@ -18,9 +18,7 @@ import (
 	"goki.dev/svg"
 )
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
 var CurFilename = ""
 var TheSVG *svg.Editor
@@ -64,7 +62,7 @@ func FileViewOpenSVG(vp *gi.Scene) {
 		})
 }
 
-func mainrun() {
+func app() {
 	width := 1600
 	height := 1200
 

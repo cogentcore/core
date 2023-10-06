@@ -23,9 +23,7 @@ var (
 	Frame  *gi.Frame
 )
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
 type TableStruct struct {
 
@@ -96,8 +94,7 @@ type Struct struct {
 	Val float32 `desc:"a value"`
 }
 
-func mainrun() {
-
+func app() {
 	tstslice := make([]string, 40)
 
 	for i := 0; i < len(tstslice); i++ {

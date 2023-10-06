@@ -19,10 +19,10 @@ import (
 )
 
 func main() {
-	gimain.Main(mainrun)
+	gimain.Run(app)
 }
 
-func mainrun() {
+gimain.Run(app)
 	width := 1024
 	height := 768
 

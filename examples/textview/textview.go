@@ -14,11 +14,9 @@ import (
 
 var samplefile gi.FileName = "sample.go"
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	width := 1024
 	height := 768
 

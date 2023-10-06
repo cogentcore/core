@@ -9,11 +9,9 @@ import (
 	"goki.dev/gi/v2/gimain"
 )
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	width := 1024
 	height := 768
 	win := gi.NewMainRenderWin("gogi-align", "Align Test RenderWin", width, height)

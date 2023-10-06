@@ -13,11 +13,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	width := 1024
 	height := 768
 

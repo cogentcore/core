@@ -564,11 +564,9 @@ func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
 //////////////////////////////////////////////////////////////////////////////////////
 //  main
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	gi.SetAppName("file-browser")
 	gi.SetAppAbout(`<code>FileBrowser</code> is a demo / test of the FileTree / FileNode browser in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://goki.dev/gi/v2de">gide on GitHub</a>`)
 

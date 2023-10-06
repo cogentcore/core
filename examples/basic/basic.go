@@ -9,9 +9,9 @@ import (
 	"goki.dev/icons"
 )
 
-func main() { gimain.Main(mainrun) }
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	gi.WinEventTrace = true
 	gi.EventTrace = true
 	gi.LayoutTrace = true

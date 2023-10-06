@@ -27,11 +27,9 @@ var SvgCoords *svg.Group
 var gmin, gmax, gsz, ginc mat32.Vec2
 var GraphSize float32 = 800
 
-func main() {
-	gimain.Main(mainrun)
-}
+func main() { gimain.Run(app) }
 
-func mainrun() {
+func app() {
 	width := 1024
 	height := 1024
 
