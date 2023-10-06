@@ -87,6 +87,9 @@ func ToBool(v any) (bool, error) {
 	case bool:
 		return vt, nil
 	case *bool:
+		if vt == nil {
+			return false, fmt.Errorf("got nil *bool")
+		}
 		return *vt, nil
 	}
 
@@ -204,122 +207,122 @@ func ToBool(v any) (bool, error) {
 // using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToInt(v any) (int64, bool) {
+func ToInt(v any) (int64, error) {
 	switch vt := v.(type) {
 	case int:
-		return int64(vt), true
+		return int64(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case int32:
-		return int64(vt), true
+		return int64(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int32")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case int64:
-		return vt, true
+		return vt, nil
 	case *int64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int64")
 		}
-		return *vt, true
+		return *vt, nil
 	case uint8:
-		return int64(vt), true
+		return int64(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint8")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case float64:
-		return int64(vt), true
+		return int64(vt), nil
 	case *float64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float64")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case float32:
-		return int64(vt), true
+		return int64(vt), nil
 	case *float32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float32")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case bool:
 		if vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *bool")
 		}
 		if *vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case string:
 		r, err := strconv.ParseInt(vt, 0, 64)
 		if err != nil {
-			return 0, false
+			return 0, err
 		}
-		return r, true
+		return r, nil
 	case *string:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *string")
 		}
 		r, err := strconv.ParseInt(*vt, 0, 64)
 		if err != nil {
-			return 0, false
+			return 0, err
 		}
-		return r, true
+		return r, nil
 	case int8:
-		return int64(vt), true
+		return int64(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int8")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case int16:
-		return int64(vt), true
+		return int64(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int16")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case uint16:
-		return int64(vt), true
+		return int64(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint16")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case uint32:
-		return int64(vt), true
+		return int64(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint32")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case uint64:
-		return int64(vt), true
+		return int64(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint64")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	case uintptr:
-		return int64(vt), true
+		return int64(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uintptr")
 		}
-		return int64(*vt), true
+		return int64(*vt), nil
 	}
-	return 0, false
+	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
 }
 
 // ToFloat robustly converts to a float64 any basic elemental type
@@ -327,122 +330,122 @@ func ToInt(v any) (int64, bool) {
 // using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToFloat(v any) (float64, bool) {
+func ToFloat(v any) (float64, error) {
 	switch vt := v.(type) {
 	case float64:
-		return vt, true
+		return vt, nil
 	case *float64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float64")
 		}
-		return *vt, true
+		return *vt, nil
 	case float32:
-		return float64(vt), true
+		return float64(vt), nil
 	case *float32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float32")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case int:
-		return float64(vt), true
+		return float64(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case int32:
-		return float64(vt), true
+		return float64(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int32")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case int64:
-		return float64(vt), true
+		return float64(vt), nil
 	case *int64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int64")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case uint8:
-		return float64(vt), true
+		return float64(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint8")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case bool:
 		if vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *bool")
 		}
 		if *vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case string:
 		r, err := strconv.ParseFloat(vt, 64)
 		if err != nil {
-			return 0.0, false
+			return 0.0, err
 		}
-		return r, true
+		return r, nil
 	case *string:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *string")
 		}
 		r, err := strconv.ParseFloat(*vt, 64)
 		if err != nil {
-			return 0.0, false
+			return 0.0, err
 		}
-		return r, true
+		return r, nil
 	case int8:
-		return float64(vt), true
+		return float64(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int8")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case int16:
-		return float64(vt), true
+		return float64(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int16")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case uint16:
-		return float64(vt), true
+		return float64(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint16")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case uint32:
-		return float64(vt), true
+		return float64(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint32")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case uint64:
-		return float64(vt), true
+		return float64(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uint64")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	case uintptr:
-		return float64(vt), true
+		return float64(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *uintptr")
 		}
-		return float64(*vt), true
+		return float64(*vt), nil
 	}
-	return 0, false
+	return 0, fmt.Errorf("got value %v of unsupported type %T", v, v)
 }
 
 // ToFloat32 robustly converts to a float32 any basic elemental type
@@ -450,122 +453,122 @@ func ToFloat(v any) (float64, bool) {
 // using a big type switch organized for greatest efficiency.
 //
 //gopy:interface=handle
-func ToFloat32(v any) (float32, bool) {
+func ToFloat32(v any) (float32, error) {
 	switch vt := v.(type) {
 	case float32:
-		return vt, true
+		return vt, nil
 	case *float32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float32")
 		}
-		return *vt, true
+		return *vt, nil
 	case float64:
-		return float32(vt), true
+		return float32(vt), nil
 	case *float64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *float64")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case int:
-		return float32(vt), true
+		return float32(vt), nil
 	case *int:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case int32:
-		return float32(vt), true
+		return float32(vt), nil
 	case *int32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case int64:
-		return float32(vt), true
+		return float32(vt), nil
 	case *int64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case uint8:
-		return float32(vt), true
+		return float32(vt), nil
 	case *uint8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case bool:
 		if vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case *bool:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
 		if *vt {
-			return 1, true
+			return 1, nil
 		}
-		return 0, true
+		return 0, nil
 	case string:
 		r, err := strconv.ParseFloat(vt, 32)
 		if err != nil {
-			return 0.0, false
+			return 0.0, fmt.Errorf("got nil *int")
 		}
-		return float32(r), true
+		return float32(r), nil
 	case *string:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
 		r, err := strconv.ParseFloat(*vt, 32)
 		if err != nil {
-			return 0.0, false
+			return 0.0, fmt.Errorf("got nil *int")
 		}
-		return float32(r), true
+		return float32(r), nil
 	case int8:
-		return float32(vt), true
+		return float32(vt), nil
 	case *int8:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case int16:
-		return float32(vt), true
+		return float32(vt), nil
 	case *int16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case uint16:
-		return float32(vt), true
+		return float32(vt), nil
 	case *uint16:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case uint32:
-		return float32(vt), true
+		return float32(vt), nil
 	case *uint32:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case uint64:
-		return float32(vt), true
+		return float32(vt), nil
 	case *uint64:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	case uintptr:
-		return float32(vt), true
+		return float32(vt), nil
 	case *uintptr:
 		if vt == nil {
-			return 0, false
+			return 0, fmt.Errorf("got nil *int")
 		}
-		return float32(*vt), true
+		return float32(*vt), nil
 	}
-	return 0, false
+	return 0, fmt.Errorf("got nil *int")
 }
 
 // ToString robustly converts anything to a String
@@ -865,7 +868,7 @@ func SetRobust(to, frm any) bool {
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// cv := v.Complex()
 		// rv := strconv.FormatFloat(real(cv), 'G', -1, 64) + "," + strconv.FormatFloat(imag(cv), 'G', -1, 64)
-		// return rv, true
+		// return rv, nil
 	case vk == reflect.String:
 		fm := ToString(frm)
 		vp.Elem().Set(reflect.ValueOf(fm).Convert(typ))
