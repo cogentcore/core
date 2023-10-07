@@ -147,33 +147,33 @@ func NewLightScheme(p *Palette) Scheme {
 		Warn:      NewAccentLight(p.Warn),
 		Custom:    map[string]Accent{},
 
-		SurfaceDim:    p.Neutral.Tone(87),
-		Surface:       p.Neutral.Tone(98),
-		SurfaceBright: p.Neutral.Tone(98),
+		SurfaceDim:    p.Neutral.AbsTone(87),
+		Surface:       p.Neutral.AbsTone(98),
+		SurfaceBright: p.Neutral.AbsTone(98),
 
-		SurfaceContainerLowest:  p.Neutral.Tone(100),
-		SurfaceContainerLow:     p.Neutral.Tone(96),
-		SurfaceContainer:        p.Neutral.Tone(94),
-		SurfaceContainerHigh:    p.Neutral.Tone(92),
-		SurfaceContainerHighest: p.Neutral.Tone(90),
+		SurfaceContainerLowest:  p.Neutral.AbsTone(100),
+		SurfaceContainerLow:     p.Neutral.AbsTone(96),
+		SurfaceContainer:        p.Neutral.AbsTone(94),
+		SurfaceContainerHigh:    p.Neutral.AbsTone(92),
+		SurfaceContainerHighest: p.Neutral.AbsTone(90),
 
-		SurfaceVariant:   p.NeutralVariant.Tone(90),
-		OnSurface:        p.NeutralVariant.Tone(10),
-		OnSurfaceVariant: p.NeutralVariant.Tone(30),
+		SurfaceVariant:   p.NeutralVariant.AbsTone(90),
+		OnSurface:        p.NeutralVariant.AbsTone(10),
+		OnSurfaceVariant: p.NeutralVariant.AbsTone(30),
 
-		InverseSurface:   p.Neutral.Tone(20),
-		InverseOnSurface: p.Neutral.Tone(95),
-		InversePrimary:   p.Primary.Tone(80),
+		InverseSurface:   p.Neutral.AbsTone(20),
+		InverseOnSurface: p.Neutral.AbsTone(95),
+		InversePrimary:   p.Primary.AbsTone(80),
 
-		Background:   p.Neutral.Tone(98),
-		OnBackground: p.Neutral.Tone(10),
+		Background:   p.Neutral.AbsTone(98),
+		OnBackground: p.Neutral.AbsTone(10),
 
-		Outline:        p.NeutralVariant.Tone(50),
-		OutlineVariant: p.NeutralVariant.Tone(80),
+		Outline:        p.NeutralVariant.AbsTone(50),
+		OutlineVariant: p.NeutralVariant.AbsTone(80),
 
-		Shadow:      p.Neutral.Tone(0),
-		SurfaceTint: p.Primary.Tone(40),
-		Scrim:       p.Neutral.Tone(0),
+		Shadow:      p.Neutral.AbsTone(0),
+		SurfaceTint: p.Primary.AbsTone(40),
+		Scrim:       p.Neutral.AbsTone(0),
 	}
 	for nm, c := range p.Custom {
 		s.Custom[nm] = NewAccentLight(c)
@@ -195,33 +195,33 @@ func NewDarkScheme(p *Palette) Scheme {
 		Warn:      NewAccentDark(p.Warn),
 		Custom:    map[string]Accent{},
 
-		SurfaceDim:    p.Neutral.Tone(6),
-		Surface:       p.Neutral.Tone(6),
-		SurfaceBright: p.Neutral.Tone(24),
+		SurfaceDim:    p.Neutral.AbsTone(6),
+		Surface:       p.Neutral.AbsTone(6),
+		SurfaceBright: p.Neutral.AbsTone(24),
 
-		SurfaceContainerLowest:  p.Neutral.Tone(4),
-		SurfaceContainerLow:     p.Neutral.Tone(10),
-		SurfaceContainer:        p.Neutral.Tone(12),
-		SurfaceContainerHigh:    p.Neutral.Tone(17),
-		SurfaceContainerHighest: p.Neutral.Tone(22),
+		SurfaceContainerLowest:  p.Neutral.AbsTone(4),
+		SurfaceContainerLow:     p.Neutral.AbsTone(10),
+		SurfaceContainer:        p.Neutral.AbsTone(12),
+		SurfaceContainerHigh:    p.Neutral.AbsTone(17),
+		SurfaceContainerHighest: p.Neutral.AbsTone(22),
 
-		SurfaceVariant:   p.NeutralVariant.Tone(30),
-		OnSurface:        p.NeutralVariant.Tone(90),
-		OnSurfaceVariant: p.NeutralVariant.Tone(80),
+		SurfaceVariant:   p.NeutralVariant.AbsTone(30),
+		OnSurface:        p.NeutralVariant.AbsTone(90),
+		OnSurfaceVariant: p.NeutralVariant.AbsTone(80),
 
-		InverseSurface:   p.Neutral.Tone(90),
-		InverseOnSurface: p.Neutral.Tone(20),
-		InversePrimary:   p.Primary.Tone(40),
+		InverseSurface:   p.Neutral.AbsTone(90),
+		InverseOnSurface: p.Neutral.AbsTone(20),
+		InversePrimary:   p.Primary.AbsTone(40),
 
-		Background:   p.Neutral.Tone(6),
-		OnBackground: p.Neutral.Tone(90),
+		Background:   p.Neutral.AbsTone(6),
+		OnBackground: p.Neutral.AbsTone(90),
 
-		Outline:        p.NeutralVariant.Tone(60),
-		OutlineVariant: p.NeutralVariant.Tone(30),
+		Outline:        p.NeutralVariant.AbsTone(60),
+		OutlineVariant: p.NeutralVariant.AbsTone(30),
 
-		Shadow:      p.Neutral.Tone(0),
-		SurfaceTint: p.Primary.Tone(80),
-		Scrim:       p.Neutral.Tone(0),
+		Shadow:      p.Neutral.AbsTone(100),
+		SurfaceTint: p.Primary.AbsTone(80),
+		Scrim:       p.Neutral.AbsTone(0),
 	}
 	for nm, c := range p.Custom {
 		s.Custom[nm] = NewAccentDark(c)

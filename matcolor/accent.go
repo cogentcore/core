@@ -25,19 +25,19 @@ type Accent struct {
 // NewAccentLight returns a new light theme [Accent] from the given [Tones]
 func NewAccentLight(tones Tones) Accent {
 	return Accent{
-		Base:        tones.Tone(40),
-		On:          tones.Tone(100),
-		Container:   tones.Tone(90),
-		OnContainer: tones.Tone(10),
+		Base:        tones.AbsTone(40),
+		On:          tones.AbsTone(100),
+		Container:   tones.AbsTone(90),
+		OnContainer: tones.AbsTone(10),
 	}
 }
 
 // NewAccentDark returns a new dark theme [Accent] from the given [Tones]
 func NewAccentDark(tones Tones) Accent {
 	return Accent{
-		Base:        tones.Tone(80),
-		On:          tones.Tone(20),
-		Container:   tones.Tone(30),
-		OnContainer: tones.Tone(90),
+		Base:        tones.AbsTone(80),
+		On:          tones.AbsTone(20),
+		Container:   tones.AbsTone(30),
+		OnContainer: tones.AbsTone(90),
 	}
 }
