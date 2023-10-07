@@ -671,7 +671,8 @@ func (w *RenderWin) EventLoop() {
 			log.Println("")
 			log.Println("----- START OF STACK TRACE: -----")
 			log.Println(string(debug.Stack()))
-			log.Fatalln("----- END OF STACK TRACE -----")
+			log.Println("----- END OF STACK TRACE -----")
+			panic(r)
 		}
 	}()
 	for {
