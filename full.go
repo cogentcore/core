@@ -36,17 +36,10 @@ func (f *Full) SolidOrNil() color.Color {
 	return f.Solid
 }
 
-// SetSolid sets the color to the given solid color,
-// also setting the gradient to nil.
-func (f *Full) SetSolid(solid color.RGBA) {
-	f.Solid = solid
-	f.Gradient = nil
-}
-
 // SetSolid sets the color to the given solid [color.Color],
 // also setting the gradient to nil.
-func (f *Full) SetColor(clr color.Color) {
-	f.Solid = AsRGBA(clr)
+func (f *Full) SetSolid(solid color.Color) {
+	f.Solid = AsRGBA(solid)
 	f.Gradient = nil
 }
 
