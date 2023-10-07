@@ -369,9 +369,9 @@ func SetFieldValue(f *Field, value string) error {
 			return fmt.Errorf("unable to set slice flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
 	default:
-		ok := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
-		if !ok {
-			return fmt.Errorf("unable to set flag %q from flag value %q", f.Names[0], value)
+		err := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
+		if err != nil {
+			return fmt.Errorf("error setting set flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
 	}
 	return nil
@@ -416,9 +416,9 @@ func AddFlags(allFields *Fields, allFlags *Fields, args []string, flags map[stri
 		posArgTag, ok := f.Tag.Lookup("posarg")
 		if ok {
 			if posArgTag == "all" {
-				ok := laser.SetRobust(v.Value.Interface(), args)
-				if !ok {
-					return nil, fmt.Errorf("not able to set field %q to all positional arguments: %v", f.Name, args)
+				err := laser.SetRobust(v.Value.Interface(), args)
+				if err != nil {
+					return nil, fmt.Errorf("error setting field %q to all positional arguments: %v: %w", f.Name, args, err)
 				}
 				// everybody has been consumed
 				for i := range args {
