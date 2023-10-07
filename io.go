@@ -23,6 +23,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/grows/images"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -406,7 +407,7 @@ func (sv *SVG) UnmarshalXML(decoder *xml.Decoder, se xml.StartElement) error {
 								log.Printf("image base64 encoding string not properly formatted: %s\n", bs64)
 							}
 							eb := []byte(es[fmti+8:])
-							im, err := ImageFmBase64(fm, eb)
+							im, err := images.FmBase64(fm, eb)
 							if err != nil {
 								log.Println(err)
 							} else {
@@ -947,8 +948,8 @@ func SVGNodeMarshalXML(itm ki.Ki, enc *XMLEncoder, setName string) string {
 		XMLAddAttr(&se.Attr, "width", fmt.Sprintf("%g", nd.Size.X))
 		XMLAddAttr(&se.Attr, "height", fmt.Sprintf("%g", nd.Size.Y))
 		XMLAddAttr(&se.Attr, "preserveAspectRatio", fmt.Sprintf("%v", nd.PreserveAspectRatio))
-		ib, fmt := ImageToBase64PNG(nd.Pixels)
-		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(Base64SplitLines(ib)))
+		ib, fmt := images.ToBase64PNG(nd.Pixels)
+		XMLAddAttr(&se.Attr, "xlink:href", "data:"+fmt+";base64,"+string(images.Base64SplitLines(ib)))
 	case *MetaData:
 		if strings.HasPrefix(nd.Nm, "namedview") {
 			nm = "sodipodi:namedview"

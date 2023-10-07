@@ -5,18 +5,11 @@
 package svg
 
 import (
-	"bytes"
-	"encoding/base64"
 	"errors"
-	"fmt"
 	"image"
-	"image/jpeg"
-	"image/png"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
+	"goki.dev/grows/images"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/draw"
@@ -81,57 +74,6 @@ func (g *Image) SetImageSize(nwsz image.Point) {
 		return
 	}
 	g.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
-}
-
-// OpenImage opens an image for the bitmap, and resizes to the size of the image
-// or the specified size -- pass 0 for width and/or height to use the actual image size
-// for that dimension
-func (g *Image) OpenImage(filename string, width, height float32) error {
-	img, err := OpenImage(filename)
-	if err != nil {
-		log.Printf("svg.OpenImage -- could not open file: %v, err: %v\n", filename, err)
-		return err
-	}
-	g.Filename = filename
-	g.SetImage(img, width, height)
-	return nil
-}
-
-// SaveImage saves current image to a file
-func (g *Image) SaveImage(filename string) error {
-	if g.Pixels == nil {
-		return errors.New("svg.SaveImage Pixels is nil")
-	}
-	return SaveImage(filename, g.Pixels)
-}
-
-// OpenImage opens an image from given path filename -- format is inferred automatically.
-func OpenImage(path string) (image.Image, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	im, _, err := image.Decode(file)
-	return im, err
-}
-
-// SaveImage saves image to file, with format inferred from filename -- JPEG and PNG
-// supported by default.
-func SaveImage(path string, im image.Image) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	ext := strings.ToLower(filepath.Ext(path))
-	if ext == ".png" {
-		return png.Encode(file, im)
-	} else if ext == ".jpg" || ext == ".jpeg" {
-		return jpeg.Encode(file, im, &jpeg.Options{Quality: 90})
-	} else {
-		return fmt.Errorf("svg.SaveImage: extension: %s not recognized -- only .png and .jpg / jpeg supported", ext)
-	}
 }
 
 // SetImage sets an image for the bitmap , and resizes to the size of the image
@@ -291,87 +233,24 @@ var ImageProps = ki.Props{
 }
 */
 
-// ImageToBase64PNG returns bytes of image encoded as a PNG in Base64 format
-// with "image/png" mimetype returned
-func ImageToBase64PNG(img image.Image) ([]byte, string) {
-	ibuf := &bytes.Buffer{}
-	png.Encode(ibuf, img)
-	ib := ibuf.Bytes()
-	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
-	base64.StdEncoding.Encode(eb, ib)
-	return eb, "image/png"
-}
-
-// ImageToBase64JPG returns bytes image encoded as a JPG in Base64 format
-// with "image/jpeg" mimetype returned
-func ImageToBase64JPG(img image.Image) ([]byte, string) {
-	ibuf := &bytes.Buffer{}
-	jpeg.Encode(ibuf, img, &jpeg.Options{Quality: 90})
-	ib := ibuf.Bytes()
-	eb := make([]byte, base64.StdEncoding.EncodedLen(len(ib)))
-	base64.StdEncoding.Encode(eb, ib)
-	return eb, "image/jpeg"
-}
-
-// Base64SplitLines splits the encoded Base64 bytes into standard lines of 76
-// chars each.  The last line also ends in a newline
-func Base64SplitLines(b []byte) []byte {
-	ll := 76
-	sz := len(b)
-	nl := (sz / ll)
-	rb := make([]byte, sz+nl+1)
-	for i := 0; i < nl; i++ {
-		st := ll * i
-		rst := ll*i + i
-		copy(rb[rst:rst+ll], b[st:st+ll])
-		rb[rst+ll] = '\n'
-	}
-	st := ll * nl
-	rst := ll*nl + nl
-	ln := sz - st
-	copy(rb[rst:rst+ln], b[st:st+ln])
-	rb[rst+ln] = '\n'
-	return rb
-}
-
-// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
-func ImageFmBase64PNG(eb []byte) (image.Image, error) {
-	if eb[76] == ' ' {
-		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
-	}
-	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
-	_, err := base64.StdEncoding.Decode(db, eb)
+// OpenImage opens an image for the bitmap, and resizes to the size of the image
+// or the specified size -- pass 0 for width and/or height to use the actual image size
+// for that dimension
+func (g *Image) OpenImage(filename string, width, height float32) error {
+	img, _, err := images.Open(filename)
 	if err != nil {
-		log.Println(err)
-		return nil, err
+		log.Printf("svg.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		return err
 	}
-	rb := bytes.NewReader(db)
-	return png.Decode(rb)
+	g.Filename = filename
+	g.SetImage(img, width, height)
+	return nil
 }
 
-// ImageFmBase64PNG returns image from Base64-encoded bytes in PNG format
-func ImageFmBase64JPG(eb []byte) (image.Image, error) {
-	if eb[76] == ' ' {
-		eb = bytes.ReplaceAll(eb, []byte(" "), []byte("\n"))
+// SaveImage saves current image to a file
+func (g *Image) SaveImage(filename string) error {
+	if g.Pixels == nil {
+		return errors.New("svg.SaveImage Pixels is nil")
 	}
-	db := make([]byte, base64.StdEncoding.DecodedLen(len(eb)))
-	_, err := base64.StdEncoding.Decode(db, eb)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	rb := bytes.NewReader(db)
-	return jpeg.Decode(rb)
-}
-
-// ImageFmBase64 returns image from Base64-encoded bytes in either PNG or JPEG format
-// based on fmt which must end in either png or jpeg
-func ImageFmBase64(fmt string, eb []byte) (image.Image, error) {
-	if strings.HasSuffix(fmt, "png") {
-		return ImageFmBase64PNG(eb)
-	}
-	if strings.HasSuffix(fmt, "jpeg") {
-		return ImageFmBase64JPG(eb)
-	}
-	return nil, errors.New("image format must be either png or jpeg")
+	return images.Save(g.Pixels, filename)
 }
