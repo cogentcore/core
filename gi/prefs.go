@@ -225,7 +225,6 @@ func (pf *Preferences) Apply() {
 	if !OverridePrefsColor || pf.Color == (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(pf.Color)
 	}
-	fmt.Println("apply prefs", pf.Theme)
 	switch pf.Theme {
 	case ThemeLight:
 		colors.SetScheme(false)

@@ -8,6 +8,7 @@ import (
 	"image"
 	"log"
 
+	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -45,6 +46,8 @@ func (fr *Frame) FrameStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))
+		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+		s.Color = colors.Scheme.OnSurface
 	})
 }
 
