@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -629,41 +630,23 @@ func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
 		}
 		switch key {
 		case "tab-size":
-			if iv, ok := laser.ToInt(val); ok {
-				pf.TabSize = int(iv)
-			}
+			pf.TabSize = int(grr.Log(laser.ToInt(val)))
 		case "space-indent":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.SpaceIndent = iv
-			}
+			pf.SpaceIndent = grr.Log(laser.ToBool(val))
 		case "word-wrap":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.WordWrap = iv
-			}
+			pf.WordWrap = grr.Log(laser.ToBool(val))
 		case "line-nos":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.LineNos = iv
-			}
+			pf.LineNos = grr.Log(laser.ToBool(val))
 		case "completion":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.Completion = iv
-			}
+			pf.Completion = grr.Log(laser.ToBool(val))
 		case "spell-correct":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.SpellCorrect = iv
-			}
+			pf.SpellCorrect = grr.Log(laser.ToBool(val))
 		case "auto-indent":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.AutoIndent = iv
-			}
+			pf.AutoIndent = grr.Log(laser.ToBool(val))
 		case "emacs-undo":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.EmacsUndo = iv
-			}
+			pf.EmacsUndo = grr.Log(laser.ToBool(val))
 		case "depth-color":
-			if iv, ok := laser.ToBool(val); ok {
-				pf.DepthColor = iv
-			}
+			pf.DepthColor = grr.Log(laser.ToBool(val))
 		}
 	}
 }

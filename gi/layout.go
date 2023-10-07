@@ -1133,10 +1133,11 @@ func (ly *Layout) StyleFromProps(props ki.Props, sc *Scene) {
 			case Layouts:
 				ly.Lay = vt
 			default:
-				if iv, ok := laser.ToInt(val); ok {
+				iv, err := laser.ToInt(val)
+				if err == nil {
 					ly.Lay = Layouts(iv)
 				} else {
-					styles.StyleSetError(key, val)
+					styles.StyleSetError(key, val, err)
 				}
 			}
 		case "spacing":
