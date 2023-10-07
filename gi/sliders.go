@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -538,71 +537,6 @@ func (sb *SliderBase) ConfigParts(sc *Scene) {
 	}
 	if mods {
 		sb.UpdateEndLayout(updt)
-	}
-}
-
-// StyleFromProps styles Slider-specific fields from ki.Prop properties
-// doesn't support inherit or default
-func (sr *SliderBase) StyleFromProps(props ki.Props, sc *Scene) {
-	for key, val := range props {
-		if len(key) == 0 {
-			continue
-		}
-		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
-			continue
-		}
-		switch key {
-		case "value":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.Value = iv
-			}
-		case "min":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.Min = iv
-			}
-		case "max":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.Max = iv
-			}
-		case "step":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.Step = iv
-			}
-		case "pagestep":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.PageStep = iv
-			}
-		case "size":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.Size = iv
-			}
-		case "thumb-size":
-			sr.ThumbSize.SetIFace(val, key)
-		case "thumb-val":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.ThumbVal = iv
-			}
-		case "track-thr":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sr.TrackThr = iv
-			}
-		case "prec":
-			if iv, ok := laser.ToInt(val); ok {
-				sr.Prec = int(iv)
-			}
-		case "val-thumb":
-			if bv, ok := laser.ToBool(val); ok {
-				sr.ValThumb = bv
-			}
-		case "tracking":
-			if bv, ok := laser.ToBool(val); ok {
-				sr.Tracking = bv
-			}
-		case "snap":
-			if bv, ok := laser.ToBool(val); ok {
-				sr.Snap = bv
-			}
-		}
 	}
 }
 

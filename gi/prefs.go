@@ -19,10 +19,8 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/langs/golang"
 )
@@ -616,39 +614,6 @@ func (pf *EditorPrefs) Defaults() {
 	pf.SpellCorrect = true
 	pf.AutoIndent = true
 	pf.DepthColor = true
-}
-
-// StyleFromProps styles Slider-specific fields from ki.Prop properties
-// doesn't support inherit or default
-func (pf *EditorPrefs) StyleFromProps(props ki.Props) {
-	for key, val := range props {
-		if len(key) == 0 {
-			continue
-		}
-		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
-			continue
-		}
-		switch key {
-		case "tab-size":
-			pf.TabSize = int(grr.Log(laser.ToInt(val)))
-		case "space-indent":
-			pf.SpaceIndent = grr.Log(laser.ToBool(val))
-		case "word-wrap":
-			pf.WordWrap = grr.Log(laser.ToBool(val))
-		case "line-nos":
-			pf.LineNos = grr.Log(laser.ToBool(val))
-		case "completion":
-			pf.Completion = grr.Log(laser.ToBool(val))
-		case "spell-correct":
-			pf.SpellCorrect = grr.Log(laser.ToBool(val))
-		case "auto-indent":
-			pf.AutoIndent = grr.Log(laser.ToBool(val))
-		case "emacs-undo":
-			pf.EmacsUndo = grr.Log(laser.ToBool(val))
-		case "depth-color":
-			pf.DepthColor = grr.Log(laser.ToBool(val))
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////

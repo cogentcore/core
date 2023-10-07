@@ -355,60 +355,6 @@ func (sb *SpinBox) ConfigWidget(sc *Scene) {
 	sb.ConfigParts(sc)
 }
 
-/*
-// StyleFromProps styles SpinBox-specific fields from ki.Prop properties
-// doesn't support inherit or default
-func (sb *SpinBox) StyleFromProps(props ki.Props, sc *Scene) {
-	for key, val := range props {
-		if len(key) == 0 {
-			continue
-		}
-		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
-			continue
-		}
-		switch key {
-		case "value":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sb.Value = iv
-			}
-		case "min":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sb.Min = iv
-			}
-		case "max":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sb.Max = iv
-			}
-		case "step":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sb.Step = iv
-			}
-		case "pagestep":
-			if iv, ok := laser.ToFloat32(val); ok {
-				sb.PageStep = iv
-			}
-		case "prec":
-			if iv, ok := laser.ToInt(val); ok {
-				sb.Prec = int(iv)
-			}
-		case "has-min":
-			if bv, ok := laser.ToBool(val); ok {
-				sb.HasMin = bv
-			}
-		case "has-max":
-			if bv, ok := laser.ToBool(val); ok {
-				sb.HasMax = bv
-			}
-		case "format":
-			sb.Format = laser.ToString(val)
-		}
-	}
-	if sb.PageStep < sb.Step { // often forget to set this..
-		sb.PageStep = 10 * sb.Step
-	}
-}
-*/
-
 func (sb *SpinBox) GetSize(sc *Scene, iter int) {
 	sb.GetSizeParts(sc, iter)
 }

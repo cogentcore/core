@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -1114,36 +1113,6 @@ func (ly *Layout) ChildrenBBoxes(sc *Scene) image.Rectangle {
 	nb.Max.X -= int(ly.ExtraSize.X)
 	nb.Max.Y -= int(ly.ExtraSize.Y)
 	return nb
-}
-
-// StyleFromProps styles Layout-specific fields from ki.Prop properties
-// doesn't support inherit or default
-func (ly *Layout) StyleFromProps(props ki.Props, sc *Scene) {
-	keys := []string{"lay", "spacing"}
-	for _, key := range keys {
-		val, has := props[key]
-		if !has {
-			continue
-		}
-		switch key {
-		case "lay":
-			switch vt := val.(type) {
-			case string:
-				ly.Lay.SetString(vt)
-			case Layouts:
-				ly.Lay = vt
-			default:
-				iv, err := laser.ToInt(val)
-				if err == nil {
-					ly.Lay = Layouts(iv)
-				} else {
-					styles.StyleSetError(key, val, err)
-				}
-			}
-		case "spacing":
-			ly.Spacing.SetIFace(val, key)
-		}
-	}
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
