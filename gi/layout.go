@@ -12,7 +12,6 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/cursors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -218,7 +217,6 @@ func (ly *Layout) OnInit() {
 func (ly *Layout) LayoutStyles() {
 	ly.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.FocusWithinable)
-		s.Cursor = cursors.Arrow
 	})
 }
 
