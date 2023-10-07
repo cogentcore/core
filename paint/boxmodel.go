@@ -29,7 +29,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	if bg.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
-		// (see https://goki.dev/gi/v2/issues/565)
+		// (see https://github.com/goki/gi/issues/565)
 		bg = sbg
 	}
 
@@ -38,7 +38,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// box shadows and borders. We couldn't just
 	// do this when there are box shadows, as they
 	// may be removed and then need to be covered up.
-	// This also fixes https://goki.dev/gi/v2/issues/579.
+	// This also fixes https://github.com/goki/gi/issues/579.
 	// This isn't an ideal solution because of performance,
 	// so TODO: maybe come up with a better solution for this.
 	// We need to use raw LayState data because we need to clear
