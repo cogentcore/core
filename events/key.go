@@ -38,8 +38,8 @@ func (ev *Key) NeedsFocus() bool {
 }
 
 func (ev *Key) String() string {
-	if ev.Rune >= 0 {
-		return fmt.Sprintf("%v{Chord: %v, Rune: %d, Hex: %X, Mods: %v, Time: %v}", ev.Type(), ev.KeyChord(), ev.Rune, ev.Rune, key.ModsString(ev.Mods), ev.Time())
+	if ev.Typ == KeyChord {
+		return fmt.Sprintf("%v{Chord: %v, Rune: %d, Hex: %X, Mods: %v, Time: %v, Handled: %v}", ev.Type(), ev.KeyChord(), ev.Rune, ev.Rune, key.ModsString(ev.Mods), ev.Time(), ev.IsHandled())
 	}
-	return fmt.Sprintf("%v{Code: %v, Mods: %v, Time: %v}", ev.Type(), ev.Code, key.ModsString(ev.Mods), ev.Time())
+	return fmt.Sprintf("%v{Code: %v, Mods: %v, Time: %v, Handled: %v}", ev.Type(), ev.Code, key.ModsString(ev.Mods), ev.Time(), ev.IsHandled())
 }
