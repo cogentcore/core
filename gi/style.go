@@ -250,17 +250,14 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 // ParentBackgroundColor returns the background color
 // of the nearest widget parent of the widget that
 // has a defined background color. If no such parent is found,
-// it returns a new [colors.Full] with a solid
-// color of [colors.Scheme.Background].
+// it returns a transparent background color.
 func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		return !p.Style.BackgroundColor.IsNil()
 	})
 	if pwb == nil {
-		cs := colors.Full{}
-		cs.SetColor(colors.Scheme.Background)
-		return cs
+		return colors.Full{}
 	}
 	return pwb.Style.BackgroundColor
 }

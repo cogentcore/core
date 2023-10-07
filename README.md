@@ -90,7 +90,7 @@ All of the main "front end" code just deals with `image.RGBA` through the [girl]
 
 * Active users should join [Google Groups goki-gi](https://groups.google.com/forum/#!forum/goki-gi) emailing list to receive more detailed status updates.
 
-* Please file [Issues](https://goki.dev/gi/v2/issues) for anything that does not work.
+* Please file [Issues](https://github.com/goki/gi/issues) for anything that does not work.
 
 * 3/2019: `python` wrapper is now available!  you can do most of GoGi from python now.  See [README.md](https://goki.dev/gi/v2/tree/master/python/README.md) file there for more details.
 

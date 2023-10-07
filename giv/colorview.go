@@ -482,7 +482,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 func (cv *ColorView) ConfigPalette() {
 	pg := gi.NewLayout(cv, "palette", gi.LayoutGrid)
 
-	// STYTOOD: use hct sorted names here (see https://goki.dev/gi/v2/issues/619)
+	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
 	nms := colors.Names
 
 	for _, cn := range nms {
