@@ -251,6 +251,7 @@ func (w *RenderWin) RenderWindow() {
 		return
 	}
 
+	fmt.Println(w.GoosiWin.Size())
 	if WinRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.Name)
 	}
