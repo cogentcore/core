@@ -285,12 +285,20 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		return !p.Style.BackgroundColor.IsNil()
+		// if we have a color or a state layer, we are a relevant breakpoint
+		return !p.Style.BackgroundColor.IsNil() || p.Style.StateLayer > 0
 	})
 	if pwb == nil {
 		return colors.Full{}
 	}
-	return pwb.Style.StateBackgroundColor()
+	// If we don't have a background color ourselves (but we have a state layer),
+	// we recursively get our parent's background color and apply our state layer
+	// to it. This makes state layers work on transparent elements.
+	if pwb.Style.BackgroundColor.IsNil() {
+		return pwb.Style.StateBackgroundColor(pwb.ParentBackgroundColor())
+	}
+	// Otherwise, we can directly apply the state layer to our background color
+	return pwb.Style.StateBackgroundColor(pwb.Style.BackgroundColor)
 }
 
 /////////////////////////////////////////////////////////////////
