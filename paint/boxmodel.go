@@ -5,8 +5,6 @@
 package paint
 
 import (
-	"fmt"
-
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
@@ -37,9 +35,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 
 	// TODO: support state layers on gradient backgrounds
 	if st.StateLayer > 0 && st.BackgroundColor.Gradient == nil {
-		fmt.Println("original bg", bg.Solid)
 		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(st.Color, st.StateLayer))
-		fmt.Println("new bg", bg.Solid, "content color", st.Color, "state layer opacity", st.StateLayer)
 	}
 
 	// We need to fill the whole box where the
