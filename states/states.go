@@ -93,6 +93,23 @@ const (
 )
 
 // Is is a shortcut for HasFlag for States
-func (st *States) Is(flag enums.BitFlag) bool {
+func (st States) Is(flag enums.BitFlag) bool {
 	return st.HasFlag(flag)
+}
+
+// StateLayer returns the state layer opacity for the state, appropriate for use
+// as the value of [goki.dev/girl/styles.Style.StateLayer]
+func (st States) StateLayer() float32 {
+	switch st {
+	case Hovered:
+		return 8
+	case Focused:
+		return 10
+	case Active:
+		return 10
+	case Dragging:
+		return 16
+	default:
+		return 0
+	}
 }
