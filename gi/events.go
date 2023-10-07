@@ -305,3 +305,90 @@ func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.K
 	})
 	return rval
 }
+
+///////////////////////////////////////////////////////////////////
+//		Focus
+
+// GrabFocus grabs the keyboard input focus on this item or the first item within it
+// that can be focused (if none, then goes ahead and sets focus to this object)
+func (wb *WidgetBase) GrabFocus() {
+	foc := wb.This().(Widget)
+	if !foc.AbilityIs(states.Focusable) {
+		foc = wb.FocusableInMe()
+	}
+	em := wb.EventMgr()
+	if em != nil {
+		// fmt.Println("grab focus:", foc)
+		em.GrabFocus(foc.(Widget)) // doesn't send event
+	}
+}
+
+// FocusableInMe returns the first Focusable element within this widget
+func (wb *WidgetBase) FocusableInMe() Widget {
+	var foc Widget
+	wb.WalkPre(func(k ki.Ki) bool {
+		kwi, kwb := AsWidget(k)
+		if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) || kwb.Is(ki.Destroyed) {
+			return ki.Break
+		}
+		if !kwb.AbilityIs(states.Focusable) {
+			return ki.Continue
+		}
+		foc = kwi
+		return ki.Break // done
+	})
+	return foc
+}
+
+// FocusNext moves the focus onto the next item
+func (wb *WidgetBase) FocusNext() {
+	em := wb.EventMgr()
+	if em != nil {
+		em.FocusNext()
+	}
+}
+
+// FocusPrev moves the focus onto the previous item
+func (wb *WidgetBase) FocusPrev() {
+	em := wb.EventMgr()
+	if em != nil {
+		em.FocusPrev()
+	}
+}
+
+// FocusClear resets focus to nil, but keeps the previous focus to pick up next time..
+func (wb *WidgetBase) FocusClear() {
+	em := wb.EventMgr()
+	if em != nil {
+		em.FocusClear()
+	}
+}
+
+// StartFocus specifies this widget to give focus to when the window opens
+func (wb *WidgetBase) StartFocus() {
+	em := wb.EventMgr()
+	if em != nil {
+		em.SetStartFocus(wb.This().(Widget))
+	}
+}
+
+// ContainsFocus returns true if this widget contains the current focus widget
+// as maintained in the RenderWin
+func (wb *WidgetBase) ContainsFocus() bool {
+	em := wb.EventMgr()
+	if em == nil {
+		return false
+	}
+	cur := em.Focus
+	if cur == nil {
+		return false
+	}
+	if cur == wb.This() {
+		return true
+	}
+	plev := cur.ParentLevel(wb.This())
+	if plev < 0 {
+		return false
+	}
+	return true
+}

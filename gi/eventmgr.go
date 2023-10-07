@@ -82,13 +82,13 @@ type EventMgr struct {
 	Scroll Widget
 
 	// node receiving keyboard events -- use SetFocus, CurFocus
-	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
+	Focus Widget
 
 	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
-	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+	StartFocus Widget
 
-	// stack of focus
-	FocusStack []Widget
+	// previously-focused widget -- what was in Focus when FocusClear is called
+	PrevFocus Widget
 
 	// stack of focus within elements
 	FocusWithinStack []Widget
@@ -168,6 +168,10 @@ func (em *EventMgr) HandleOtherEvent(evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(evi events.Event) {
+	if !evi.IsHandled() && em.Focus == nil && em.PrevFocus != nil {
+		em.SetFocus(em.PrevFocus)
+		em.PrevFocus = nil
+	}
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
@@ -445,9 +449,33 @@ func (em *EventMgr) SetCursor(cur cursors.Cursor) {
 	// gwin.SetCursor(cur)
 }
 
+// FocusClear saves current focus to FocusPrev
+func (em *EventMgr) FocusClear() bool {
+	if em.Focus != nil {
+		em.PrevFocus = em.Focus
+	}
+	return em.GrabFocus(nil)
+}
+
+// GrabFocus sets focus to given item -- returns true if focus changed.
+// If item is nil, then nothing has focus.
+// This does NOT send the events.Focus event to the widget.
+func (em *EventMgr) GrabFocus(w Widget) bool {
+	return em.SetFocusImpl(w, false) // no event
+}
+
 // SetFocus sets focus to given item -- returns true if focus changed.
 // If item is nil, then nothing has focus.
-func (em *EventMgr) SetFocus(w Widget) bool { // , evi events.Event
+// This sends the events.Focus event to the widget -- see GrabFocus
+// for a version that does not.
+func (em *EventMgr) SetFocus(w Widget) bool {
+	return em.SetFocusImpl(w, true) // sends event
+}
+
+// SetFocusImpl sets focus to given item -- returns true if focus changed.
+// If item is nil, then nothing has focus.
+// sendEvent determines whether the events.Focus event is sent to the focused item.
+func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
 	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) || cfoc.Is(ki.Destroyed) {
 		em.Focus = nil
@@ -462,7 +490,7 @@ func (em *EventMgr) SetFocus(w Widget) bool { // , evi events.Event
 		cfoc.Send(events.FocusLost, nil)
 	}
 	em.Focus = w
-	if w != nil {
+	if sendEvent && w != nil {
 		w.Send(events.Focus, nil)
 	}
 	return true
@@ -488,9 +516,10 @@ func (em *EventMgr) FocusWithins() bool {
 }
 
 // FocusNext sets the focus on the next item
-// that can accept focus after the given item (can be nil).
+// that can accept focus after the current Focus item.
 // returns true if a focus item found.
-func (em *EventMgr) FocusNext(foc Widget) bool {
+func (em *EventMgr) FocusNext() bool {
+	foc := em.Focus
 	gotFocus := false
 	focusNext := false // get the next guy
 	if foc == nil {
@@ -545,7 +574,8 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 		em.SetFocus(foc)
 		return true
 	}
-	return em.FocusNext(foc)
+	em.Focus = foc
+	return em.FocusNext()
 }
 
 // FocusOnOrPrev sets the focus on the given item, or the previous one that can
@@ -563,11 +593,13 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		em.SetFocus(foc)
 		return true
 	}
-	return em.FocusPrev(foc)
+	em.Focus = foc
+	return em.FocusPrev()
 }
 
 // FocusPrev sets the focus on the previous item before the given item (can be nil)
-func (em *EventMgr) FocusPrev(foc Widget) bool {
+func (em *EventMgr) FocusPrev() bool {
+	foc := em.Focus
 	if foc == nil { // must have a current item here
 		em.FocusLast()
 		return false
@@ -654,32 +686,6 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 	})
 }
 
-// PushFocus pushes current focus onto stack and sets new focus.
-func (em *EventMgr) PushFocus(p Widget) {
-	if em.FocusStack == nil {
-		em.FocusStack = make([]Widget, 0, 50)
-	}
-	em.FocusStack = append(em.FocusStack, em.Focus)
-	em.Focus = nil // don't un-focus on prior item when pushing
-	em.FocusOnOrNext(p)
-}
-
-// PopFocus pops off the focus stack and sets prev to current focus.
-func (em *EventMgr) PopFocus() {
-	if em.FocusStack == nil || len(em.FocusStack) == 0 {
-		em.Focus = nil
-		return
-	}
-	sz := len(em.FocusStack)
-	em.Focus = nil
-	nxtf := em.FocusStack[sz-1]
-	_, wb := AsWidget(nxtf)
-	if wb != nil && wb.This() != nil {
-		em.SetFocus(nxtf)
-	}
-	em.FocusStack = em.FocusStack[:sz-1]
-}
-
 // SetStartFocus sets the given item to be first focus when window opens.
 func (em *EventMgr) SetStartFocus(k Widget) {
 	em.StartFocus = k
@@ -693,7 +699,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 	}
 	sf := em.StartFocus
 	em.StartFocus = nil
-	em.FocusOnOrNext(sf)
+	em.GrabFocus(sf)
 	return true
 }
 
@@ -702,7 +708,7 @@ func (em *EventMgr) ActivateStartFocus() bool {
 func (em *EventMgr) InitialFocus() {
 	if em.Focus == nil {
 		if !em.ActivateStartFocus() {
-			em.FocusNext(em.Focus)
+			em.FocusNext()
 		}
 	}
 }

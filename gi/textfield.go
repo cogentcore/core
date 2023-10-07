@@ -1215,10 +1215,17 @@ func (tf *TextField) TextFieldMouse() {
 			tf.Paste()
 		}
 	})
-
+	tf.On(events.Click, func(e events.Event) {
+		if tf.StateIs(states.Disabled) {
+			return
+		}
+		tf.GrabFocus()
+		tf.Send(events.Focus, e) // sets focused flag
+	})
 	tf.On(events.DoubleClick, func(e events.Event) {
 		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
+			tf.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
 		if tf.HasSelection() {

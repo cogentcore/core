@@ -56,12 +56,6 @@ func (st *PopupStage) Delete() {
 func (st *PopupStage) StageAdded(smi StageMgr) {
 	pm := smi.AsPopupMgr()
 	st.Main = pm.Main
-	// todo: ?
-	// if pfoc != nil {
-	// 	sm.EventMgr.PushFocus(pfoc)
-	// } else {
-	// 	sm.EventMgr.PushFocus(st)
-	// }
 }
 
 func (st *PopupStage) HandleEvent(evi events.Event) {

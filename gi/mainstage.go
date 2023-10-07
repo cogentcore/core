@@ -334,12 +334,6 @@ func (st *MainStage) DoUpdate() (stageMods, sceneMods bool) {
 
 func (st *MainStage) StageAdded(smi StageMgr) {
 	st.StageMgr = smi.AsMainMgr()
-	// todo: ?
-	// if pfoc != nil {
-	// 	sm.EventMgr.PushFocus(pfoc)
-	// } else {
-	// 	sm.EventMgr.PushFocus(st)
-	// }
 }
 
 // HandleEvent handles all the non-Window events

@@ -21,13 +21,15 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// LayoutPrefMaxRows is maximum number of rows to use in a grid layout
-// when computing the preferred size (ScFlagPrefSizing)
-var LayoutPrefMaxRows = 20
+var (
+	// LayoutPrefMaxRows is maximum number of rows to use in a grid layout
+	// when computing the preferred size (ScFlagPrefSizing)
+	LayoutPrefMaxRows = 20
 
-// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
-// when computing the preferred size (ScFlagPrefSizing)
-var LayoutPrefMaxCols = 20
+	// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
+	// when computing the preferred size (ScFlagPrefSizing)
+	LayoutPrefMaxCols = 20
+)
 
 // LayoutAllocs contains all the the layout allocations: size, position.
 // These are set by the parent Layout during the Layout process.
@@ -987,13 +989,13 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	}
 	switch kf {
 	case KeyFunFocusNext: // tab
-		if em.FocusNext(em.Focus) {
+		if em.FocusNext() {
 			// fmt.Println("foc next", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
 	case KeyFunFocusPrev: // shift-tab
-		if em.FocusPrev(em.Focus) {
+		if em.FocusPrev() {
 			// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
