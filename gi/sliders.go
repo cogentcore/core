@@ -584,8 +584,17 @@ func (sr *Slider) SliderStyles() {
 	sr.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		sr.ThumbSize = units.Dp(20)
+
+		// we use a different color for the thumb and value color so that
+		// they get the correct state layer
+		s.Color = colors.Scheme.Primary.On
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
+		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
+		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
+
+		s.Color = colors.Scheme.OnSurface
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
@@ -600,18 +609,11 @@ func (sr *Slider) SliderStyles() {
 			s.Height.SetEm(20)
 			s.Width.SetDp(4)
 		}
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Color = colors.Scheme.Primary.On
 		// STYTODO: state styles
 		switch {
 		case s.Is(states.Sliding):
-			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(60))
-			sr.ValueColor.SetSolid(colors.Palette.Primary.Tone(60))
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
-			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(50))
-			sr.ValueColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Cursor = cursors.Grabbing
 		}
 		if s.Is(states.Focused) {
@@ -682,7 +684,10 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	pc.FillStyle.SetFullColor(&st.BackgroundColor)
+
+	// need to apply state layer
+	ebg := st.StateBackgroundColor(st.BackgroundColor)
+	pc.FillStyle.SetFullColor(&ebg)
 
 	// layout is as follows, for width dimension
 	// |      bw             bw     |
