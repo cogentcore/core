@@ -132,10 +132,10 @@ type EventMgr struct {
 
 // MainStageMgr returns the MainStageMgr for our Main Stage
 func (em *EventMgr) MainStageMgr() *MainStageMgr {
-	if em.Main == nil {
+	if em.Scene == nil {
 		return nil
 	}
-	return em.Main.StageMgr
+	return em.Scene.MainStageMgr()
 }
 
 // RenderWin returns the overall render window, which could be nil
@@ -150,36 +150,32 @@ func (em *EventMgr) RenderWin() *RenderWin {
 ///////////////////////////////////////////////////////////////////////
 // 	HandleEvent
 
-func (em *EventMgr) HandleEvent(sc *Scene, evi events.Event) {
+func (em *EventMgr) HandleEvent(evi events.Event) {
 	// et := evi.Type()
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
 
 	switch {
 	case evi.HasPos():
-		em.HandlePosEvent(sc, evi)
+		em.HandlePosEvent(evi)
 	case evi.NeedsFocus():
-		em.HandleFocusEvent(sc, evi)
+		em.HandleFocusEvent(evi)
 	default:
-		em.HandleOtherEvent(sc, evi)
+		em.HandleOtherEvent(evi)
 	}
 }
 
-func (em *EventMgr) HandleOtherEvent(sc *Scene, evi events.Event) {
+func (em *EventMgr) HandleOtherEvent(evi events.Event) {
 }
 
-func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
+func (em *EventMgr) HandleFocusEvent(evi events.Event) {
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
-	if !evi.IsHandled() {
-		if em.FocusWithins() {
-			n := len(em.FocusWithinStack)
-			for i := n - 1; i >= 0; i-- {
-				fw := em.FocusWithinStack[i]
-				fw.HandleEvent(evi)
-				if evi.IsHandled() {
-					break
-				}
+	if !evi.IsHandled() && em.FocusWithins() {
+		for _, fw := range em.FocusWithinStack {
+			fw.HandleEvent(evi)
+			if evi.IsHandled() {
+				break
 			}
 		}
 	}
@@ -192,9 +188,10 @@ func (em *EventMgr) ResetOnMouseDown() {
 	em.Slide = nil
 }
 
-func (em *EventMgr) HandlePosEvent(sc *Scene, evi events.Event) {
+func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	pos := evi.LocalPos()
 	et := evi.Type()
+	sc := em.Scene
 
 	isDrag := false
 	switch et {
@@ -479,13 +476,6 @@ func (em *EventMgr) FocusWithins() bool {
 	return true
 }
 
-func (em *EventMgr) MainScene() Widget {
-	if em.Main == nil || em.Main.Scene == nil {
-		return nil
-	}
-	return em.Main.Scene.This().(Widget)
-}
-
 // FocusNext sets the focus on the next item
 // that can accept focus after the given item (can be nil).
 // returns true if a focus item found.
@@ -630,10 +620,7 @@ func (em *EventMgr) FocusLast() bool {
 
 // ClearNonFocus clears the focus of any non-w.Focus item.
 func (em *EventMgr) ClearNonFocus(foc Widget) {
-	focRoot := em.MainScene()
-	if focRoot == nil {
-		return
-	}
+	focRoot := em.Scene
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
@@ -719,8 +706,11 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	if e.Type() != events.KeyChord {
 		return
 	}
-	mainsc := em.Main.Scene
 	win := em.RenderWin()
+	if win == nil {
+		return
+	}
+	sc := em.Scene
 	cs := e.KeyChord()
 	kf := KeyFun(cs)
 	// fmt.Println(kf, cs)
@@ -742,8 +732,8 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		}
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
-		fnm, _ := filepath.Abs("./GrabOf_" + mainsc.Name() + "_" + dstr + ".png")
-		svg.SaveImage(fnm, em.Main.Scene.Pixels)
+		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
+		svg.SaveImage(fnm, sc.Pixels)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
 	case KeyFunZoomIn:
@@ -754,7 +744,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		e.SetHandled()
 	case KeyFunRefresh:
 		e.SetHandled()
-		fmt.Printf("Win: %v display refreshed\n", mainsc.Name())
+		fmt.Printf("Win: %v display refreshed\n", sc.Name())
 		goosi.TheApp.GetScreens()
 		Prefs.UpdateAll()
 		WinGeomMgr.RestoreAll()
@@ -771,10 +761,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 		ProfileToggle()
 		e.SetHandled()
 	case "Control+Alt+F":
-		mainsc.BenchmarkFullRender()
+		sc.BenchmarkFullRender()
 		e.SetHandled()
 	case "Control+Alt+H":
-		mainsc.BenchmarkReRender()
+		sc.BenchmarkReRender()
 		e.SetHandled()
 	}
 	if !e.IsHandled() {

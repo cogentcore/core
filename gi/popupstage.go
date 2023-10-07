@@ -71,10 +71,9 @@ func (st *PopupStage) HandleEvent(evi events.Event) {
 	if evi.IsHandled() {
 		return
 	}
-	st.Scene.EventMgr.Main = st.Main
 	evi.SetLocalOff(st.Scene.Geom.Pos)
 	// fmt.Println("pos:", evi.Pos(), "local:", evi.LocalPos())
-	st.Scene.EventMgr.HandleEvent(st.Scene, evi)
+	st.Scene.EventMgr.HandleEvent(evi)
 }
 
 // NewPopupStage returns a new PopupStage with given type and scene contents.

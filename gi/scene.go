@@ -84,6 +84,7 @@ type Scene struct {
 func StageScene(name string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name)
+	sc.EventMgr.Scene = sc
 	sc.BgColor.SetColor(color.Transparent)
 	sc.Lay = LayoutVert
 	sc.Decor.InitName(&sc.Decor, "decor")

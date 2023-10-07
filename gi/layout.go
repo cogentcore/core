@@ -12,6 +12,8 @@ import (
 	"time"
 	"unicode"
 
+	"goki.dev/cursors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -209,7 +211,15 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 }
 
 func (ly *Layout) OnInit() {
+	ly.LayoutStyles()
 	ly.LayoutHandlers()
+}
+
+func (ly *Layout) LayoutStyles() {
+	ly.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.FocusWithinable)
+		s.Cursor = cursors.Arrow
+	})
 }
 
 func (ly *Layout) LayoutHandlers() {
@@ -851,8 +861,10 @@ func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
 	return nil, -1
 }
 
-// FocusNextChild attempts to move the focus into the next layout child (with
-// wraparound to start) -- returns true if successful
+// FocusNextChild attempts to move the focus into the next layout child
+// (with wraparound to start) -- returns true if successful.
+// if updn is true, then for Grid layouts, it moves down to next row
+// instead of just the sequentially next item.
 func (ly *Layout) FocusNextChild(updn bool) bool {
 	sz := len(ly.Kids)
 	if sz <= 1 {
@@ -886,7 +898,9 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 }
 
 // FocusPrevChild attempts to move the focus into the previous layout child
-// (with wraparound to end) -- returns true if successful
+// (with wraparound to end) -- returns true if successful.
+// If updn is true, then for Grid layouts, it moves up to next row
+// instead of just the sequentially next item.
 func (ly *Layout) FocusPrevChild(updn bool) bool {
 	sz := len(ly.Kids)
 	if sz <= 1 {
@@ -917,7 +931,8 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	return true
 }
 
-// ClosePopup closes this stage as a popup
+// ClosePopup closes the parent Stage as a PopupStage.
+// Returns false if not a popup.
 func (ly *Layout) ClosePopup() bool {
 	ps := ly.Sc.PopupStage()
 	if ps == nil {
@@ -931,14 +946,37 @@ func (ly *Layout) ClosePopup() bool {
 // in terms of number of items.
 var LayoutPageSteps = 10
 
+// LayoutKeys handles all key events for navigating focus within a Layout
+// Typically this is done by the parent Scene level layout, but can be
+// done by default if FocusWithinable Ability is set.
+func (ly *Layout) LayoutKeys() {
+	ly.On(events.KeyChord, func(e events.Event) {
+		ly.LayoutKeysImpl(e)
+	})
+}
+
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeysImpl(e events.Event) {
-	// if KeyEventTrace {
-	fmt.Println("Layout KeyInput:", ly)
-	// }
+	if KeyEventTrace {
+		fmt.Println("Layout KeyInput:", ly)
+	}
 	kf := KeyFun(e.KeyChord())
 	if kf == KeyFunAbort {
 		if ly.ClosePopup() {
+			e.SetHandled()
+		}
+		return
+	}
+	switch kf {
+	case KeyFunFocusNext: // tab
+		if ly.FocusNextChild(false) {
+			fmt.Println("foc next", ly, ly.EventMgr().Focus)
+			e.SetHandled()
+		}
+		return
+	case KeyFunFocusPrev: // shift-tab
+		if ly.FocusPrevChild(false) {
+			fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
@@ -1102,14 +1140,6 @@ func (ly *Layout) LayoutScrollEvents() {
 	// 		li.AutoScroll(me.Pos())
 	// 	}
 	// })
-}
-
-// LayoutKeys does key events
-func (ly *Layout) LayoutKeys() {
-	// LowPri to allow other focal widgets to capture
-	ly.On(events.KeyChord, func(e events.Event) { // LowPri
-		ly.LayoutKeysImpl(e)
-	})
 }
 
 ///////////////////////////////////////////////////
