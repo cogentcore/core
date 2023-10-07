@@ -686,7 +686,7 @@ func (sr *Span) RenderBg(rs *State, tpos mat32.Vec2) {
 			didLast = false
 			continue
 		}
-		pc.FillStyle.Color.SetColor(rr.BackgroundColor)
+		pc.FillStyle.Color.SetSolid(rr.BackgroundColor)
 		szt := mat32.Vec2{rr.Size.X, -rr.Size.Y}
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, dsc32}))
 		ul := sp.Add(tx.MulVec2AsVec(mat32.Vec2{0, szt.Y}))
@@ -741,7 +741,7 @@ func (sr *Span) RenderUnderline(rs *State, tpos mat32.Vec2) {
 		dw := .05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color.SetColor(curColor)
+			pc.StrokeStyle.Color.SetSolid(curColor)
 		}
 		if rr.Deco.HasFlag(styles.DecoDottedUnderline) {
 			pc.StrokeStyle.Dashes = []float64{2, 2}
@@ -807,7 +807,7 @@ func (sr *Span) RenderLine(rs *State, tpos mat32.Vec2, deco styles.TextDecoratio
 		dw := 0.05 * rr.Size.Y
 		if !didLast {
 			pc.StrokeStyle.Width.Dots = dw
-			pc.StrokeStyle.Color.SetColor(curColor)
+			pc.StrokeStyle.Color.SetSolid(curColor)
 		}
 		yo := ascPct * asc32
 		sp := rp.Add(tx.MulVec2AsVec(mat32.Vec2{0, -yo}))

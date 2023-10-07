@@ -214,7 +214,7 @@ func (pf *Fill) SetColor(cl color.Color) {
 		pf.On = false
 	} else {
 		pf.On = true
-		pf.Color.SetColor(cl)
+		pf.Color.SetSolid(cl)
 	}
 }
 
@@ -321,7 +321,7 @@ func (ps *Stroke) SetColor(cl color.Color) {
 		ps.On = false
 	} else {
 		ps.On = true
-		ps.Color.SetColor(cl)
+		ps.Color.SetSolid(cl)
 	}
 }
 
