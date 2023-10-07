@@ -327,7 +327,7 @@ func MenuSceneConfigStyles(msc *Scene) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.BoxShadow = BoxShadow2
+		s.BoxShadow = styles.BoxShadow2()
 	})
 }
 

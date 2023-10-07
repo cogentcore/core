@@ -20,7 +20,7 @@ func TooltipConfigStyles(tooltip *Scene) {
 		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
-		s.BoxShadow = BoxShadow1 // STYTODO: not sure whether we should have this
+		s.BoxShadow = styles.BoxShadow1() // STYTODO: not sure whether we should have this
 	})
 }
 
