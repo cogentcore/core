@@ -129,7 +129,7 @@ var Prefs = Preferences{}
 var OverridePrefsColor = false
 
 func (pf *Preferences) Defaults() {
-	pf.Theme = ThemeLight
+	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
 	pf.Density = DensityMedium
 	pf.LogicalDPIScale = 1.0
@@ -225,7 +225,15 @@ func (pf *Preferences) Apply() {
 	if !OverridePrefsColor || pf.Color == (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(pf.Color)
 	}
-	colors.SetScheme(pf.Theme == ThemeDark) // TODO(kai): support ThemeAuto
+	fmt.Println("apply prefs", pf.Theme)
+	switch pf.Theme {
+	case ThemeLight:
+		colors.SetScheme(false)
+	case ThemeDark:
+		colors.SetScheme(true)
+	case ThemeAuto:
+		colors.SetScheme(goosi.TheApp.IsDark())
+	}
 
 	// TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
 	events.DoubleClickInterval = pf.Params.DoubleClickInterval
