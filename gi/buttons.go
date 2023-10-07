@@ -503,11 +503,6 @@ func (bt *Button) ButtonStyles() {
 				s.BoxShadow = styles.BoxShadow1()
 			}
 		}
-		if s.Is(states.Active) {
-			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Palette.Primary.Tone(50))
-			s.Color = colors.Scheme.Primary.On
-		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
@@ -614,12 +609,6 @@ func (cb *CheckBox) CheckBoxStyles() {
 			} else {
 				ist.StackTop = 1
 			}
-		}
-		if s.Is(states.Hovered) {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		}
-		if s.Is(states.Active) {
-			s.Color = colors.Scheme.Select.Base
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)

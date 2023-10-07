@@ -596,10 +596,6 @@ func (tb *TabButton) TabButtonStyles() {
 		// 	s.Border.Width.Bottom.SetDp(2)
 		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
-
-		if s.Is(states.Hovered) {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
-		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(2))

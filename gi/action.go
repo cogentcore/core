@@ -126,13 +126,6 @@ func (ac *Action) ActionStyles() {
 			s.Margin.Set()
 			ac.Indicator = icons.None
 		}
-		// note: some of these states are mix-and-match, don't put in a switch
-		if s.Is(states.Hovered) {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
-		}
-		if s.Is(states.Active) {
-			s.Color = colors.Scheme.Select.Base
-		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))

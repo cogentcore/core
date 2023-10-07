@@ -610,14 +610,9 @@ func (sr *Slider) SliderStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
-			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
-			s.Color = colors.Scheme.Primary.On
 			sr.ThumbColor.SetSolid(colors.Palette.Primary.Tone(50))
 			sr.ValueColor.SetSolid(colors.Palette.Primary.Tone(50))
 			s.Cursor = cursors.Grabbing
-		case s.Is(states.Hovered):
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
@@ -764,20 +759,14 @@ func (sb *ScrollBar) ScrollBarStyles() {
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		// STYTODO: state styles
 		switch {
 		case s.Is(states.Sliding):
+			// TODO(kai): need to figure out how to do state layers for these colors
 			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(40))
 			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(40))
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
 		case s.Is(states.Active):
-			// todo: just picking something at random to make it visible:
-			s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
-			s.Color = colors.Scheme.Primary.On
 			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(60))
 			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(60))
-		case s.Is(states.Hovered):
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)

@@ -136,12 +136,6 @@ func (cb *ComboBox) ComboBoxStyles() {
 				// }
 			}
 		}
-		if s.Is(states.Hovered) {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
-		}
-		if s.Is(states.Active) {
-			s.Color = colors.Scheme.Select.Base
-		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
