@@ -319,7 +319,7 @@ func AlphaBlend(dst, src color.Color) color.RGBA {
 	dr, dg, db, da := dst.RGBA()
 	sr, sg, sb, sa := src.RGBA()
 	// The 0x101 is here for the same reason as in [image/draw.drawRGBA]
-	a := (m - sa) * 0x101
+	a := (m - sa)
 
 	res.R = uint8((uint32(dr)*a/m + sr) >> 8)
 	res.G = uint8((uint32(dg)*a/m + sg) >> 8)
