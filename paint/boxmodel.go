@@ -23,19 +23,17 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	msz := sz.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()
 
-	prevBg := st.BackgroundColor
-	if st.BackgroundColor.IsNil() {
+	// the background color we actually use
+	bg := st.BackgroundColor
+	if bg.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		// we will revert this change later so that the
-		// underlying style object is not modified
-		st.BackgroundColor = *surroundBgColor
+		bg = *surroundBgColor
 	}
-	// the background color we actually use
-	bg := st.StateBackgroundColor()
-	// we revert our change so that the underlying style object is not modified
-	st.BackgroundColor = prevBg
+	// we need to apply the state layer after getting the
+	// surrounding background color
+	bg = st.StateBackgroundColor(bg)
 
 	// We need to fill the whole box where the
 	// box shadows / element can go to prevent growing

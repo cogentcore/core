@@ -338,19 +338,20 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 // StyleDefault is default style can be used when property specifies "default"
 var StyleDefault Style
 
-// StateBackgroundColor returns the effective background color of
-// the style based on [Style.State], [Style.StateLayer],
-// [Style.BackgroundColor], and [Style.Color]. It does not modify
-// the underlying style object.
-func (s *Style) StateBackgroundColor() colors.Full {
+// StateBackgroundColor returns the stateful, effective version of
+// the given background color by applying [Style.StateLayer] based on
+// [Style.Color]. It does not modify the underlying style object.
+func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
 	if s.StateLayer <= 0 {
-		return s.BackgroundColor
+		return bg
 	}
-	if s.BackgroundColor.Gradient == nil {
-		return colors.Full{Solid: colors.AlphaBlend(s.BackgroundColor.Solid, colors.SetAF32(s.Color, s.StateLayer))}
+	if bg.Gradient == nil {
+		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(s.Color, s.StateLayer))
+		return bg
 	}
+	// still need to copy because underlying gradient isn't automatically copied
 	res := colors.Full{}
-	res.CopyFrom(&s.BackgroundColor)
+	res.CopyFrom(&bg)
 	for i, stop := range res.Gradient.Stops {
 		res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(s.Color, s.StateLayer))
 	}
