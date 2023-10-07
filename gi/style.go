@@ -167,6 +167,9 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.Style = styles.Style{}
 	wb.Style.Defaults()
 	wb.Style.State = state
+	// default to state layer associated with the state,
+	// which the developer can override in their stylers
+	wb.Style.StateLayer = wb.Style.State.StateLayer()
 
 	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("ApplyStyleWidget-Inherit")
