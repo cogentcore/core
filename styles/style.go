@@ -337,3 +337,22 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 
 // StyleDefault is default style can be used when property specifies "default"
 var StyleDefault Style
+
+// StateBackgroundColor returns the effective background color of
+// the style based on [Style.State], [Style.StateLayer],
+// [Style.BackgroundColor], and [Style.Color]. It does not modify
+// the underlying style object.
+func (s *Style) StateBackgroundColor() colors.Full {
+	if s.StateLayer <= 0 {
+		return s.BackgroundColor
+	}
+	if s.BackgroundColor.Gradient == nil {
+		return colors.Full{Solid: colors.AlphaBlend(s.BackgroundColor.Solid, colors.SetAF32(s.Color, s.StateLayer))}
+	}
+	res := colors.Full{}
+	res.CopyFrom(&s.BackgroundColor)
+	for i, stop := range res.Gradient.Stops {
+		res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(s.Color, s.StateLayer))
+	}
+	return res
+}

@@ -23,20 +23,19 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	msz := sz.Sub(st.EffMargin().Size())
 	rad := st.Border.Radius.Dots()
 
+	prevBg := st.BackgroundColor
 	// the background color we actually use
-	bg := st.BackgroundColor
-	sbg := surroundBgColor
-	if bg.IsNil() {
+	if st.BackgroundColor.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		bg = *sbg
+		// we will revert this change later so that the
+		// underlying style object is not modified
+		st.BackgroundColor = *surroundBgColor
 	}
-
-	// TODO: support state layers on gradient backgrounds
-	if st.StateLayer > 0 && st.BackgroundColor.Gradient == nil {
-		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(st.Color, st.StateLayer))
-	}
+	bg := st.StateBackgroundColor()
+	// we revert our change so that the underlying style object is not modified
+	st.BackgroundColor = prevBg
 
 	// We need to fill the whole box where the
 	// box shadows / element can go to prevent growing
@@ -49,7 +48,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// We need to use raw LayState data because we need to clear
 	// any box shadow that may have gone in margin.
 	mspos, mssz := st.BoxShadowPosSize(pos, sz)
-	pc.FillBox(rs, mspos, mssz, sbg)
+	pc.FillBox(rs, mspos, mssz, surroundBgColor)
 
 	// first do any shadow
 	if st.HasBoxShadow() {
