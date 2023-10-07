@@ -290,7 +290,14 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	if pwb == nil {
 		return colors.Full{}
 	}
-	return pwb.Style.BackgroundColor
+	bg := pwb.Style.BackgroundColor
+	// we need to apply state layer here also so that children
+	// inherit it correctly when their parent state changes
+	// TODO: support state layers on gradient backgrounds
+	if pwb.Style.StateLayer > 0 && bg.Gradient == nil {
+		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(pwb.Style.Color, pwb.Style.StateLayer))
+	}
+	return bg
 }
 
 /////////////////////////////////////////////////////////////////
