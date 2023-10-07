@@ -48,6 +48,7 @@ func (fr *Frame) FrameStyles() {
 		s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		s.Color = colors.Scheme.OnSurface
+		s.StateLayer = 0 // we never want state layers on frames
 	})
 }
 
