@@ -539,6 +539,8 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
+		label := child.(*Label)
+		label.Type = LabelLabelLarge
 		wb.AddStyles(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			s.Margin.Set()

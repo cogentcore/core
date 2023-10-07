@@ -123,7 +123,7 @@ func (lb *Label) OnInit() {
 }
 
 func (lb *Label) LabelStyles() {
-	lb.Type = LabelLabelLarge
+	lb.Type = LabelBodyLarge
 	lb.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.LongHoverable)
 		if s.Abilities.Is(states.Selectable) {
