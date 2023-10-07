@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/szalloc"
 	"goki.dev/vgpu/v2/vdraw"
@@ -32,7 +32,7 @@ type Sprite struct {
 	Props ki.Props `desc:"properties for sprite -- allows user-extensible data"`
 
 	// position and size of the image within the overlay window texture
-	Geom styles.Geom2DInt `desc:"position and size of the image within the overlay window texture"`
+	Geom mat32.Geom2DInt `desc:"position and size of the image within the overlay window texture"`
 
 	// pixels to render -- should be same size as Geom.Size
 	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`

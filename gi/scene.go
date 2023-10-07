@@ -14,8 +14,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // see:
@@ -45,7 +45,7 @@ type Scene struct {
 	Flags ScFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene"`
 
 	// Size and position relative to overall rendering context.
-	Geom styles.Geom2DInt
+	Geom mat32.Geom2DInt
 
 	// Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil
 	Decor Layout `desc:"Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil"`
@@ -136,7 +136,7 @@ func (sc *Scene) MainStage() *MainStage {
 
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
-func (sc *Scene) FitInWindow(winGeom styles.Geom2DInt) {
+func (sc *Scene) FitInWindow(winGeom mat32.Geom2DInt) {
 	geom := sc.Geom.FitInWindow(winGeom)
 	sc.Resize(geom.Size)
 	sc.Geom.Pos = geom.Pos
