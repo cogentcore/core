@@ -247,6 +247,8 @@ func (s *Style) BoxShadowMargin() SideFloats {
 	return BoxShadowMargin(s.BoxShadow)
 }
 
+// TODO(kai): there should be a better way to do this
+
 // BoxShadowMargin returns the maximum box shadow margin
 // of the given box shadows, calculated through [Shadow.Margin].
 func BoxShadowMargin(shadows []Shadow) SideFloats {
