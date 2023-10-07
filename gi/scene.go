@@ -85,7 +85,7 @@ func StageScene(name string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name)
 	sc.EventMgr.Scene = sc
-	sc.BgColor.SetColor(color.Transparent)
+	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert
 	sc.Decor.InitName(&sc.Decor, "decor")
 	sc.Decor.Lay = LayoutNil

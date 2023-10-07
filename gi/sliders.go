@@ -588,8 +588,8 @@ func (sr *Slider) SliderStyles() {
 		// we use a different color for the thumb and value color so that
 		// they get the correct state layer
 		s.Color = colors.Scheme.Primary.On
-		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
-		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
+		sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
+		sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 
@@ -755,8 +755,8 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Color = colors.Scheme.OnSurface
 
-		sb.ValueColor.SetColor(colors.Scheme.OutlineVariant)
-		sb.ThumbColor.SetColor(colors.Transparent)
+		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
+		sb.ThumbColor.SetSolid(colors.Transparent)
 		sb.ValueColor = s.StateBackgroundColor(sb.ValueColor)
 
 		s.Border.Style.Set(styles.BorderNone)
