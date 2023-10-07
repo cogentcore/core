@@ -590,8 +590,8 @@ func (sr *Slider) SliderStyles() {
 		s.Color = colors.Scheme.Primary.On
 		sr.ValueColor.SetColor(colors.Scheme.Primary.Base)
 		sr.ThumbColor.SetColor(colors.Scheme.Primary.Base)
-		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
+		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 
 		s.Color = colors.Scheme.OnSurface
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
@@ -609,7 +609,6 @@ func (sr *Slider) SliderStyles() {
 			s.Height.SetEm(20)
 			s.Width.SetDp(4)
 		}
-		// STYTODO: state styles
 		switch {
 		case s.Is(states.Sliding):
 			s.Cursor = cursors.Grabbing
@@ -753,20 +752,20 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
-		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
-		sb.ThumbColor.SetSolid(colors.Transparent)
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Color = colors.Scheme.OnSurface
+
+		sb.ValueColor.SetColor(colors.Scheme.OutlineVariant)
+		sb.ThumbColor.SetColor(colors.Transparent)
+		sb.ValueColor = s.StateBackgroundColor(sb.ValueColor)
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		switch {
 		case s.Is(states.Sliding):
-			// TODO(kai): need to figure out how to do state layers for these colors
-			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(40))
-			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(40))
+			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
-			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(60))
-			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(60))
+			s.Cursor = cursors.Grabbing
 		}
 	})
 }
