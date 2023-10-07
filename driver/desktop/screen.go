@@ -5,6 +5,7 @@
 package desktop
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -177,6 +178,7 @@ func (app *appImpl) GetScreens() {
 			app.screens[1].ScreenNumber = 1
 		}
 	}
+	fmt.Printf("%#v\n%#v\n", app.screens[0], app.screens[1])
 	app.mu.Unlock()
 }
 

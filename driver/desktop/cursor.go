@@ -31,6 +31,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	}
 	if cur, ok := sm[c.Size]; ok {
 		theApp.ctxtwin.glw.SetCursor(cur)
+		return nil
 	}
 
 	ci, err := cursorimg.Get(cursor, c.Size)
