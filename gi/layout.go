@@ -426,9 +426,10 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 		} else {
 			opad = pad.Bottom
 		}
-		if opad > 0 {
-			fmt.Println(ly, "opad: ", odim, opad)
-		}
+		opad = 0 // todo: temporary override until we get this fixed.
+		// if opad > 0 {
+		// 	fmt.Println(ly, "opad: ", odim, opad)
+		// }
 		if ly.HasScroll[d] {
 			sb := ly.Scrolls[d]
 			sb.GetSize(sc, 0)
@@ -981,13 +982,13 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	switch kf {
 	case KeyFunFocusNext: // tab
 		if ly.FocusNextChild(false) {
-			fmt.Println("foc next", ly, ly.EventMgr().Focus)
+			// fmt.Println("foc next", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
 	case KeyFunFocusPrev: // shift-tab
 		if ly.FocusPrevChild(false) {
-			fmt.Println("foc prev", ly, ly.EventMgr().Focus)
+			// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
