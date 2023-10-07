@@ -450,7 +450,7 @@ func (sr *Splitter) SplitterStyles() {
 	sr.AddStyles(func(s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(6 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+		s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		s.Color = colors.Scheme.OnBackground
 		if sr.Dim == mat32.X {
 			s.MinWidth.SetDp(2)

@@ -155,7 +155,7 @@ func (tf *TextField) TextFieldStyles() {
 	tf.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
 		tf.CursorWidth.SetDp(1)
-		tf.SelectColor.SetColor(colors.Scheme.Tertiary.Container)
+		tf.SelectColor.SetColor(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
@@ -198,7 +198,7 @@ func (tf *TextField) TextFieldStyles() {
 			}
 		}
 		if tf.StateIs(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 	})
 }

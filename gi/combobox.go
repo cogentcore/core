@@ -140,7 +140,7 @@ func (cb *ComboBox) ComboBoxStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 		}
 		if s.Is(states.Active) {
-			s.Color = colors.Scheme.Tertiary.Base
+			s.Color = colors.Scheme.Select.Base
 		}
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
@@ -148,7 +148,7 @@ func (cb *ComboBox) ComboBoxStyles() {
 			s.Border.Color.Set(colors.Scheme.Outline)
 		}
 		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 		if s.Is(states.Disabled) {
 			s.Color = colors.Scheme.SurfaceContainer
