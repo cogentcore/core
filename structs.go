@@ -392,7 +392,7 @@ func SetFromDefaultTags(obj any) error {
 		}
 		err := SetRobust(PtrValue(fv).Interface(), def) // overkill but whatever
 		if !ok {
-			return fmt.Errorf("SetFromDefaultTags: error setting field %q in object of type %q from val %q: %w", f.Name, typ.Name(), def, err)
+			return fmt.Errorf("laser.SetFromDefaultTags: error setting field %q in object of type %q from val %q: %w", f.Name, typ.Name(), def, err)
 		}
 	}
 	return nil
@@ -431,11 +431,11 @@ func StringJSON(it any) string {
 func SetField(obj any, field string, val any) error {
 	fv := FlatFieldValueByName(obj, field)
 	if !fv.IsValid() {
-		return fmt.Errorf("laser.SetField, could not find field %v", field)
+		return fmt.Errorf("laser.SetField: could not find field %q", field)
 	}
-	var err error
-	if !SetRobust(PtrValue(fv).Interface(), val) {
-		err = fmt.Errorf("laser.SetField, SetRobust failed to set field %v to value: %v", field, val)
+	err := SetRobust(PtrValue(fv).Interface(), val)
+	if err != nil {
+		return fmt.Errorf("laser.SetField: SetRobust failed to set field %q to value: %v: %w", field, val, err)
 	}
-	return err
+	return nil
 }
