@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/girl/paint"
 	"goki.dev/glop/dirs"
+	"goki.dev/grows/images"
 	"goki.dev/svg"
 )
 
@@ -42,6 +43,6 @@ func main() {
 		sv.SetNormXForm()
 		sv.Render()
 		imfn := filepath.Join(out, strings.TrimSuffix(fn, ".svg")+".png")
-		svg.SaveImage(imfn, sv.Pixels)
+		images.Save(sv.Pixels, imfn)
 	}
 }
