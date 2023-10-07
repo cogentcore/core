@@ -17,13 +17,17 @@ var theCursor = cursorImpl{CursorBase: cursor.CursorBase{Vis: true, Size: 32}, c
 
 type cursorImpl struct {
 	cursor.CursorBase
-	cursors map[enums.Enum]map[int]*glfw.Cursor // cached cursors
-	mu      sync.Mutex
+	cursors  map[enums.Enum]map[int]*glfw.Cursor // cached cursors
+	mu       sync.Mutex
+	prevSize int // cached previous size
 }
 
 func (c *cursorImpl) Set(cursor enums.Enum) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if cursor == c.Cur && c.Size == c.prevSize { // we already have, so we don't need to set again
+		return nil
+	}
 	sm := c.cursors[cursor]
 	if sm == nil {
 		sm = map[int]*glfw.Cursor{}
@@ -31,6 +35,7 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	}
 	if cur, ok := sm[c.Size]; ok {
 		theApp.ctxtwin.glw.SetCursor(cur)
+		c.prevSize = c.Size
 		return nil
 	}
 
@@ -41,5 +46,6 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	gc := glfw.CreateCursor(ci.Image, ci.Hotspot.X, ci.Hotspot.Y)
 	sm[c.Size] = gc
 	theApp.ctxtwin.glw.SetCursor(gc)
+	c.prevSize = c.Size
 	return nil
 }
