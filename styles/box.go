@@ -7,6 +7,7 @@ package styles
 import (
 	"image/color"
 
+	"goki.dev/colors"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
@@ -273,4 +274,157 @@ func (s *Style) HasBoxShadow() bool {
 		}
 	}
 	return false
+}
+
+// Pre-configured box shadow values, based on
+// those in Material 3.
+
+// BoxShadow0 returns the shadows
+// to be used on Elevation 0 elements.
+// There are no shadows part of BoxShadow0,
+// so applying it is purely semantic.
+func BoxShadow0() []Shadow {
+	return []Shadow{}
+}
+
+// BoxShadow1 contains the shadows
+// to be used on Elevation 1 elements.
+func BoxShadow1() []Shadow {
+	return []Shadow{
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(3),
+			Blur:    units.Dp(1),
+			Spread:  units.Dp(-2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(2),
+			Blur:    units.Dp(2),
+			Spread:  units.Dp(0),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(1),
+			Blur:    units.Dp(5),
+			Spread:  units.Dp(0),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		},
+	}
+}
+
+// BoxShadow2 returns the shadows
+// to be used on Elevation 2 elements.
+func BoxShadow2() []Shadow {
+	return []Shadow{
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(2),
+			Blur:    units.Dp(4),
+			Spread:  units.Dp(-1),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(4),
+			Blur:    units.Dp(5),
+			Spread:  units.Dp(0),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(1),
+			Blur:    units.Dp(10),
+			Spread:  units.Dp(0),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		},
+	}
+}
+
+// TODO: figure out why 3 and 4 are the same
+
+// BoxShadow3 returns the shadows
+// to be used on Elevation 3 elements.
+func BoxShadow3() []Shadow {
+	return []Shadow{
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(5),
+			Blur:    units.Dp(5),
+			Spread:  units.Dp(-3),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(8),
+			Blur:    units.Dp(10),
+			Spread:  units.Dp(1),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(3),
+			Blur:    units.Dp(14),
+			Spread:  units.Dp(2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		},
+	}
+}
+
+// BoxShadow4 returns the shadows
+// to be used on Elevation 4 elements.
+func BoxShadow4() []Shadow {
+	return []Shadow{
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(5),
+			Blur:    units.Dp(5),
+			Spread:  units.Dp(-3),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(8),
+			Blur:    units.Dp(10),
+			Spread:  units.Dp(1),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(3),
+			Blur:    units.Dp(14),
+			Spread:  units.Dp(2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		},
+	}
+}
+
+// BoxShadow5 returns the shadows
+// to be used on Elevation 5 elements.
+func BoxShadow5() []Shadow {
+	return []Shadow{
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(8),
+			Blur:    units.Dp(10),
+			Spread:  units.Dp(-6),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.2),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(16),
+			Blur:    units.Dp(24),
+			Spread:  units.Dp(2),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.14),
+		},
+		{
+			HOffset: units.Dp(0),
+			VOffset: units.Dp(6),
+			Blur:    units.Dp(30),
+			Spread:  units.Dp(5),
+			Color:   colors.SetAF32(colors.Scheme.Shadow, 0.12),
+		},
+	}
 }
