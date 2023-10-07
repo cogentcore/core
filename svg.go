@@ -43,7 +43,7 @@ type SVG struct {
 	Color colors.Full
 
 	// Size is size of image, Pos is offset within any parent viewport.  Node bounding boxes are based on 0 Pos offset within Pixels image
-	Geom styles.Geom2DInt
+	Geom mat32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
 	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
