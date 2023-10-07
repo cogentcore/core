@@ -515,7 +515,6 @@ func (tf *TextField) SelectAll() {
 	tf.SelectStart = 0
 	tf.SelectInit = 0
 	tf.SelectEnd = len(tf.EditTxt)
-	fmt.Println("selall")
 	tf.UpdateEndRender(updt)
 }
 

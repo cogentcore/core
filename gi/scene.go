@@ -118,10 +118,28 @@ func (sc *Scene) MainStageMgr() *MainStageMgr {
 	return sc.Stage.MainMgr()
 }
 
+// PopupStage returns the Stage as a PopupStage.
+// nil if it is not a popup.
+func (sc *Scene) PopupStage() *PopupStage {
+	if sc.Stage == nil {
+		return nil
+	}
+	return sc.Stage.AsPopup()
+}
+
 // MainStage returns this Scene's Stage as a MainStage,
 // which could be nil if in fact it is in a PopupStage.
 func (sc *Scene) MainStage() *MainStage {
 	return sc.Stage.AsMain()
+}
+
+// FitInWindow fits Scene geometry (pos, size) into given window geom.
+// Calls resize for the new size.
+func (sc *Scene) FitInWindow(winGeom styles.Geom2DInt) {
+	geom := sc.Geom.FitPosSizeInWindow(winGeom)
+	sc.Resize(geom.Size)
+	sc.Geom.Pos = geom.Pos
+	// fmt.Println("win", winGeom, "geom", geom)
 }
 
 // Resize resizes the scene, creating a new image -- updates Geom Size

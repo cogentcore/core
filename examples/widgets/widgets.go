@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -29,6 +30,8 @@ func app() {
 	// gi.WinRenderTrace = true
 	// gi.EventTrace = true
 	// gi.KeyEventTrace = true
+
+	goosi.ZoomFactor = 2
 
 	gi.SetAppName("widgets")
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.

@@ -305,7 +305,7 @@ func AsWidget(k ki.Ki) (Widget, *WidgetBase) {
 	if k == nil || k.This() == nil {
 		return nil, nil
 	}
-	if w, ok := k.(Widget); ok {
+	if w, ok := k.This().(Widget); ok {
 		return w, w.AsWidget()
 	}
 	return nil, nil

@@ -161,20 +161,22 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sc := st.Scene
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
-	fontHt := 30
+	fontHt := 16
 	if sc.Style.Font.Face != nil {
 		fontHt = int(sc.Style.Font.Face.Metrics.Height)
 	}
 
 	switch st.Type {
 	case Menu:
-		sz.X += scrollWd
+		sz.X += scrollWd * 2
 		maxht := int(MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)
 
 	}
-	// fmt.Println("new pop sz", sz)
-	st.Scene.Resize(sz)
+	sc.Geom.Size = sz
+	sc.FitInWindow(ms.Geom)
+
+	sc.EventMgr.InitialFocus()
 
 	return st
 }

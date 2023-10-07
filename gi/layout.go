@@ -214,6 +214,7 @@ func (ly *Layout) OnInit() {
 
 func (ly *Layout) LayoutHandlers() {
 	// todo: maybe need scrolling stuff in here?
+	ly.LayoutKeys()
 	ly.WidgetHandlers()
 }
 
@@ -853,62 +854,76 @@ func (ly *Layout) ChildWithFocus() (ki.Ki, int) {
 // FocusNextChild attempts to move the focus into the next layout child (with
 // wraparound to start) -- returns true if successful
 func (ly *Layout) FocusNextChild(updn bool) bool {
-	/*
-		sz := len(ly.Kids)
-		if sz <= 1 {
-			return false
-		}
-		foc, idx := ly.ChildWithFocus()
-		if foc == nil {
-			return false
-		}
-		em := ly.EventMgr()
-		cur := em.CurFocus()
-		nxti := idx + 1
-		if ly.Lay == LayoutGrid && updn {
-			nxti = idx + ly.Style.Columns
-		}
-		did := false
-		if nxti < sz {
-			did = em.FocusOnOrNext(ly.Child(nxti).(Widget))
-		} else {
-			did = em.FocusOnOrNext(ly.Child(0).(Widget))
-		}
-		if !did || em.CurFocus() == cur {
-			return false
-		}
-	*/
+	sz := len(ly.Kids)
+	if sz <= 1 {
+		return false
+	}
+	foc, idx := ly.ChildWithFocus()
+	if foc == nil {
+		return false
+	}
+	em := ly.EventMgr()
+	if em == nil {
+		return false
+	}
+	cur := em.Focus
+	nxti := idx + 1
+	if ly.Lay == LayoutGrid && updn {
+		nxti = idx + ly.Style.Columns
+	}
+	did := false
+	if nxti < sz {
+		nx := ly.Child(nxti).(Widget)
+		did = em.FocusOnOrNext(nx)
+	} else {
+		nx := ly.Child(0).(Widget)
+		did = em.FocusOnOrNext(nx)
+	}
+	if !did || em.Focus == cur {
+		return false
+	}
 	return true
 }
 
 // FocusPrevChild attempts to move the focus into the previous layout child
 // (with wraparound to end) -- returns true if successful
 func (ly *Layout) FocusPrevChild(updn bool) bool {
-	/*
-		sz := len(ly.Kids)
-		if sz <= 1 {
-			return false
-		}
-		foc, idx := ly.ChildWithFocus()
-		if foc == nil {
-			return false
-		}
-		em := ly.EventMgr()
-		cur := em.CurFocus()
-		nxti := idx - 1
-		if ly.Lay == LayoutGrid && updn {
-			nxti = idx - ly.Style.Columns
-		}
-		did := false
-		if nxti >= 0 {
-			did = em.FocusOnOrPrev(ly.Child(nxti).(Widget))
-		} else {
-			did = em.FocusOnOrPrev(ly.Child(sz - 1).(Widget))
-		}
-		if !did || em.CurFocus() == cur {
-			return false
-		}
-	*/
+	sz := len(ly.Kids)
+	if sz <= 1 {
+		return false
+	}
+	foc, idx := ly.ChildWithFocus()
+	if foc == nil {
+		return false
+	}
+	em := ly.EventMgr()
+	if em == nil {
+		return false
+	}
+	cur := em.Focus
+	nxti := idx - 1
+	if ly.Lay == LayoutGrid && updn {
+		nxti = idx - ly.Style.Columns
+	}
+	did := false
+	if nxti >= 0 {
+		did = em.FocusOnOrPrev(ly.Child(nxti).(Widget))
+	} else {
+		did = em.FocusOnOrPrev(ly.Child(sz - 1).(Widget))
+	}
+	if !did || em.Focus == cur {
+		return false
+	}
+	return true
+}
+
+// ClosePopup closes this stage as a popup
+func (ly *Layout) ClosePopup() bool {
+	ps := ly.Sc.PopupStage()
+	if ps == nil {
+		return false
+	}
+	ps.Close()
 	return true
 }
 
@@ -922,6 +937,12 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		fmt.Printf("Layout KeyInput: %v\n", ly.Path())
 	}
 	kf := KeyFun(e.KeyChord())
+	if kf == KeyFunAbort {
+		if ly.ClosePopup() {
+			e.SetHandled()
+		}
+		return
+	}
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
 		switch kf {
 		case KeyFunMoveRight:
@@ -971,11 +992,6 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 			if proc {
 				e.SetHandled()
 			}
-			return
-		}
-	}
-	if nf, err := ly.PropTry("no-focus-name"); err == nil {
-		if nf.(bool) {
 			return
 		}
 	}

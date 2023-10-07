@@ -85,11 +85,14 @@ type EventMgr struct {
 	// node receiving keyboard events -- use SetFocus, CurFocus
 	Focus Widget `desc:"node receiving keyboard events -- use SetFocus, CurFocus"`
 
-	// stack of focus
-	FocusStack []Widget `desc:"stack of focus"`
-
 	// node to focus on at start when no other focus has been set yet -- use SetStartFocus
 	StartFocus Widget `desc:"node to focus on at start when no other focus has been set yet -- use SetStartFocus"`
+
+	// stack of focus
+	FocusStack []Widget
+
+	// stack of focus within elements
+	FocusWithinStack []Widget
 
 	// Last Select Mode from most recent Mouse, Keyboard events
 	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
@@ -169,7 +172,19 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
 	}
-	sc.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
+	if !evi.IsHandled() {
+		if em.FocusWithins() {
+			n := len(em.FocusWithinStack)
+			for i := n - 1; i >= 0; i-- {
+				fw := em.FocusWithinStack[i]
+				fw.HandleEvent(evi)
+				if evi.IsHandled() {
+					break
+				}
+			}
+		}
+	}
+	// sc.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
 	em.ManagerKeyChordEvents(evi)
 }
 
@@ -447,6 +462,25 @@ func (em *EventMgr) SetFocus(w Widget) bool { // , evi events.Event
 	return true
 }
 
+// FocusWithins gets the FocusWithin containers of the current Focus event
+func (em *EventMgr) FocusWithins() bool {
+	em.FocusWithinStack = nil
+	if em.Focus == nil {
+		return false
+	}
+	em.Focus.WalkUpParent(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wi == nil {
+			return ki.Break
+		}
+		if wb.AbilityIs(states.FocusWithinable) {
+			em.FocusWithinStack = append(em.FocusWithinStack, wi)
+		}
+		return ki.Continue
+	})
+	return true
+}
+
 // FocusNext sets the focus on the next item
 // that can accept focus after the given item (can be nil).
 // returns true if a focus item found.
@@ -621,7 +655,6 @@ func (em *EventMgr) PushFocus(p Widget) {
 	}
 	em.FocusStack = append(em.FocusStack, em.Focus)
 	em.Focus = nil // don't un-focus on prior item when pushing
-	fmt.Println("push focus:", p)
 	em.FocusOnOrNext(p)
 }
 

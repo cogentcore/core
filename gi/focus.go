@@ -68,20 +68,20 @@ func (wb *WidgetBase) StartFocus() {
 // ContainsFocus returns true if this widget contains the current focus widget
 // as maintained in the RenderWin
 func (wb *WidgetBase) ContainsFocus() bool {
-	// em := wb.EventMgr()
-	// if em == nil {
-	// 	return false
-	// }
-	// cur := em.CurFocus()
-	// if cur == nil {
-	// 	return false
-	// }
-	// if cur == wb.This() {
-	// 	return true
-	// }
-	// plev := cur.ParentLevel(wb.This())
-	// if plev < 0 {
-	// 	return false
-	// }
+	em := wb.EventMgr()
+	if em == nil {
+		return false
+	}
+	cur := em.Focus
+	if cur == nil {
+		return false
+	}
+	if cur == wb.This() {
+		return true
+	}
+	plev := cur.ParentLevel(wb.This())
+	if plev < 0 {
+		return false
+	}
 	return true
 }

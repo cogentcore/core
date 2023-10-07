@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -356,6 +357,10 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 		}
 		cb.Sc = msc
 		msc.AddChild(cl)
+		if cb.StateIs(states.Selected) {
+			// fmt.Println("sel", cb)
+			msc.EventMgr.SetStartFocus(cl)
+		}
 	}
 	return msc
 }

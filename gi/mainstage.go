@@ -347,12 +347,10 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 	if st.Scene == nil {
 		return
 	}
-	// todo: probably want to pre-filter here and have the event manager
-	// deal with all of this, not just going to the popup right away
 	st.PopupMgr.HandleEvent(evi)
 	if evi.IsHandled() {
 		if EventTrace && evi.Type() != events.MouseMove {
-			log.Println("Event handled by popup:", evi)
+			fmt.Println("Event handled by popup:", evi)
 		}
 		return
 	}
