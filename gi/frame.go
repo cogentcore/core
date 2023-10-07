@@ -124,8 +124,8 @@ func (fr *Frame) RenderStripes(sc *Scene) {
 func (fr *Frame) Render(sc *Scene) {
 	if fr.PushBounds(sc) {
 		fr.FrameStdRender(sc)
-		fr.RenderScrolls(sc)
 		fr.RenderChildren(sc)
+		fr.RenderScrolls(sc)
 		fr.PopBounds(sc)
 	} else {
 		fr.SetScrollsOff()

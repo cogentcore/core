@@ -416,14 +416,25 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 	sbw := ly.Style.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
+	pad := ly.Style.Padding.Dots()
 	avail := ly.AvailSize()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		odim := mat32.OtherDim(d)
+		var opad float32
+		if odim == mat32.X {
+			opad = pad.Right
+		} else {
+			opad = pad.Bottom
+		}
+		if opad > 0 {
+			fmt.Println(ly, "opad: ", odim, opad)
+		}
 		if ly.HasScroll[d] {
 			sb := ly.Scrolls[d]
 			sb.GetSize(sc, 0)
 			sb.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
-			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0-spc.Size().Dim(odim))
+
+			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0-opad)
 			// SidesTODO: not sure about this
 			sb.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
@@ -1256,11 +1267,8 @@ func (ly *Layout) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Recta
 
 func (ly *Layout) Render(sc *Scene) {
 	if ly.PushBounds(sc) {
-		if ly.ScrollsOff {
-			ly.ManageOverflow(sc)
-		}
-		ly.RenderScrolls(sc)
 		ly.RenderChildren(sc)
+		ly.RenderScrolls(sc)
 		ly.PopBounds(sc)
 	} else {
 		ly.SetScrollsOff()
