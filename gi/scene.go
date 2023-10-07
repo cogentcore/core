@@ -80,10 +80,10 @@ type Scene struct {
 // (e.g., a Window, Dialog, etc).  Scenes can also be added as part of the
 // Widget tree within another Scene, where they provide an optimized rendering
 // context for areas that tend to update frequently -- use NewScene with a
-// parent argument for that.
-func StageScene(name string) *Scene {
+// parent argument for that. If no name is provided, it defaults to "scene".
+func StageScene(name ...string) *Scene {
 	sc := &Scene{}
-	sc.InitName(sc, name)
+	sc.InitName(sc, name...)
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert

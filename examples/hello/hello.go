@@ -8,7 +8,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	scene := gi.NewScene("hello")
-	gi.NewLabel(&scene.Frame).SetText("Hello, World!")
-	gi.NewWindow(scene).SetName("hello").Run().Wait()
+	scene := gi.StageScene()
+	gi.NewLabel(scene).SetText("Hello, World!")
+	gi.NewWindow(scene).Run().Wait()
 }

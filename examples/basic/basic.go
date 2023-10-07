@@ -17,10 +17,10 @@ func app() {
 	gi.LayoutTrace = true
 	gi.RenderTrace = true
 
-	scene := gi.NewScene("hello").SetTitle("Hello World!")
-	gi.NewLabel(&scene.Frame).SetText("Hello, World!")
+	scene := gi.StageScene().SetTitle("Basic")
+	gi.NewLabel(scene).SetText("Hello, World!")
 
-	gi.NewButton(&scene.Frame).
+	gi.NewButton(scene).
 		SetText("Open Dialog").SetIcon(icons.OpenInNew).
 		On(events.Click, func(e events.Event) {
 			fmt.Println("button clicked")
