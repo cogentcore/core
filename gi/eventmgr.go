@@ -18,10 +18,10 @@ import (
 	"goki.dev/goosi/clip"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
+	"goki.dev/grows/images"
 	"goki.dev/grr"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/svg"
 )
 
 var (
@@ -733,7 +733,7 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	case KeyFunWinSnapshot:
 		dstr := time.Now().Format("Mon_Jan_2_15:04:05_MST_2006")
 		fnm, _ := filepath.Abs("./GrabOf_" + sc.Name() + "_" + dstr + ".png")
-		svg.SaveImage(fnm, sc.Pixels)
+		images.Save(sc.Pixels, fnm)
 		fmt.Printf("Saved RenderWin Image to: %s\n", fnm)
 		e.SetHandled()
 	case KeyFunZoomIn:

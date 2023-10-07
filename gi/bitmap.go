@@ -16,10 +16,10 @@ import (
 	"github.com/anthonynsimon/bild/transform"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/grows/images"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
-	"goki.dev/svg"
 	"golang.org/x/image/draw"
 	"golang.org/x/image/math/f64"
 )
@@ -82,7 +82,7 @@ func (bm *Bitmap) SetSize(nwsz image.Point) {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
-	img, err := svg.OpenImage(string(filename))
+	img, _, err := images.Open(string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -96,7 +96,7 @@ func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
 func (bm *Bitmap) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
-	img, err := OpenImageFS(fsys, string(filename))
+	img, _, err := images.OpenFS(fsys, string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
@@ -195,17 +195,6 @@ func GrabRenderFrom(wi Widget) *image.RGBA {
 	img := image.NewRGBA(image.Rectangle{Max: sz})
 	draw.Draw(img, img.Bounds(), sc.Pixels, wb.ScBBox.Min, draw.Src)
 	return img
-}
-
-// OpenImageFS opens an image from given path filename -- format is inferred automatically.
-func OpenImageFS(fsys fs.FS, fname string) (image.Image, error) {
-	file, err := fsys.Open(fname)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	im, _, err := image.Decode(file)
-	return im, err
 }
 
 // ImageToRGBA returns given image as an image.RGBA (no conversion if it is already)
