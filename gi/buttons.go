@@ -236,8 +236,8 @@ func (bb *ButtonBase) ClickOnEnterSpace() {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunEnter || e.KeyRune() == ' ' {
 			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			e.SetHandled()           // todo ?
-			bb.Send(events.Click, e) // todo: write this
+			e.SetHandled()
+			bb.Send(events.Click, e)
 			// }
 		}
 	})
