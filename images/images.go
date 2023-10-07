@@ -14,6 +14,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -70,6 +71,20 @@ func ExtToFormat(ext string) (Formats, error) {
 // png, jpeg, gif, tiff, bmp, and webp are supported.
 func Open(filename string) (image.Image, Formats, error) {
 	file, err := os.Open(filename)
+	if err != nil {
+		return nil, None, err
+	}
+	defer file.Close()
+	return Read(file)
+}
+
+// OpenFS opens an image from the given filename
+// using the given [fs.FS] filesystem (e.g., for embed files).
+// The format is inferred automatically,
+// and is returned using the Formats enum.
+// png, jpeg, gif, tiff, bmp, and webp are supported.
+func OpenFS(fsys fs.FS, filename string) (image.Image, Formats, error) {
+	file, err := fsys.Open(filename)
 	if err != nil {
 		return nil, None, err
 	}
