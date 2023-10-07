@@ -5,7 +5,8 @@
 package styles
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 
 	"goki.dev/colors"
 	"goki.dev/enums"
@@ -134,9 +135,9 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 
 // These functions set styles from map[string]any which are used for styling
 
-// StyleSetError reports that cannot set property of given key with given value
-func StyleSetError(key string, val any) {
-	log.Printf("styles.Style error: cannot set key: %s from value: %v\n", key, val)
+// StyleSetError reports that cannot set property of given key with given value due to given error
+func StyleSetError(key string, val any, err error) {
+	slog.Error(fmt.Sprintf("styles.Style: error setting key %q from value %v: %v", key, val, err))
 }
 
 type StyleFunc func(obj any, key string, val any, par any, ctxt colors.Context)
@@ -226,9 +227,7 @@ var StyleStyleFuncs = map[string]StyleFunc{
 		if laser.ToString(val) == "none" {
 			s.Display = false
 		} else {
-			if bv, ok := laser.ToBool(val); ok {
-				s.Display = bv
-			}
+			s.Display = grr.Log(laser.ToBool(val))
 		}
 	},
 	"visible": StyleFuncBool(false,
@@ -402,10 +401,11 @@ var StyleFontFuncs = map[string]StyleFunc{
 		case TextDecorations:
 			fs.Deco = vt
 		default:
-			if iv, ok := laser.ToInt(val); ok {
+			iv, err := laser.ToInt(val)
+			if err == nil {
 				fs.Deco = TextDecorations(iv)
 			} else {
-				StyleSetError(key, val)
+				StyleSetError(key, val, err)
 			}
 		}
 	},
@@ -473,10 +473,11 @@ var StyleBorderFuncs = map[string]StyleFunc{
 		case []BorderStyles:
 			bs.Style.Set(vt...)
 		default:
-			if iv, ok := laser.ToInt(val); ok {
+			iv, err := laser.ToInt(val)
+			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {
-				StyleSetError(key, val)
+				StyleSetError(key, val, err)
 			}
 		}
 	},
@@ -541,10 +542,11 @@ var StyleOutlineFuncs = map[string]StyleFunc{
 		case []BorderStyles:
 			bs.Style.Set(vt...)
 		default:
-			if iv, ok := laser.ToInt(val); ok {
+			iv, err := laser.ToInt(val)
+			if err == nil {
 				bs.Style.Set(BorderStyles(iv))
 			} else {
-				StyleSetError(key, val)
+				StyleSetError(key, val, err)
 			}
 		}
 	},

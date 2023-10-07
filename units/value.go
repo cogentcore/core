@@ -6,10 +6,10 @@ package units
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"goki.dev/laser"
+	"log/slog"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -352,9 +352,9 @@ func (v *Value) SetString(str string) error {
 	trstr := strings.TrimSpace(strings.Replace(str, "%", "pct", -1))
 	sz := len(trstr)
 	if sz < 2 {
-		vc, ok := laser.ToFloat(str)
-		if !ok {
-			return fmt.Errorf("(units.Value).SetString: unable to convert string value '%s' into a number", trstr)
+		vc, err := laser.ToFloat(str)
+		if err != nil {
+			return fmt.Errorf("(units.Value).SetString: unable to convert string value %q into a number: %w", trstr, err)
 		}
 		v.Val = float32(vc)
 		v.Un = UnitPx
@@ -414,12 +414,12 @@ func (v *Value) SetIFace(iface any, key string) error {
 	case *Value:
 		*v = *val
 	default: // assume Px as an implicit default
-		valflt, ok := laser.ToFloat(iface)
-		if ok {
+		valflt, err := laser.ToFloat(iface)
+		if err == nil {
 			v.Set(float32(valflt), UnitPx)
 		} else {
-			err := fmt.Errorf("units.Value could not set property: %v from: %v type: %T", key, val, val)
-			log.Println(err)
+			err := fmt.Errorf("units.Value: could not set property %q from value: %v of type: %T: %w", key, val, val, err)
+			slog.Error(err.Error())
 			return err
 		}
 	}
