@@ -22,6 +22,11 @@ const (
 	// Activatable means it can be made Active
 	Activatable
 
+	// Pressable means it can be pressed but is not Activatable.
+	// Pressed items receive Click events, but do not get the automatic
+	// Active state otherwise associated with Activatable items.
+	Pressable
+
 	// Draggable means it can be Dragged
 	Draggable
 
@@ -59,7 +64,7 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 
 // IsPressable is true when an element is Selectable, Activatable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.HasFlag(Selectable) || ab.HasFlag(Activatable) || ab.HasFlag(Draggable) || ab.HasFlag(Slideable) || ab.HasFlag(Checkable)
+	return ab.HasFlag(Selectable) || ab.HasFlag(Activatable) || ab.HasFlag(Draggable) || ab.HasFlag(Slideable) || ab.HasFlag(Checkable) || ab.HasFlag(Pressable)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable
