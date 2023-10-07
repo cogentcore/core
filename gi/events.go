@@ -26,9 +26,12 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 	return wb.This().(Widget)
 }
 
-// SendMe sends an event of given type to this widget,
+// Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).
+// Do NOT send an existing event using this method if you
+// want the Handled state to persist throughout the call chain;
+// call HandleEvent directly for any existing events.
 func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 	var e events.Event
 	if orig != nil {
@@ -38,14 +41,6 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 		e = &events.Base{Typ: typ}
 	}
 	wb.This().(Widget).HandleEvent(e)
-}
-
-// PosInBBox returns true if given position is within
-// this node's win bbox (under read lock)
-func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
-	wb.BBoxMu.RLock()
-	defer wb.BBoxMu.RUnlock()
-	return pos.In(wb.ScBBox)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
@@ -70,6 +65,14 @@ func (wb *WidgetBase) WidgetHandlers() {
 	wb.WidgetStateFromMouse()
 	wb.LongHoverTooltip()
 	wb.WidgetStateFromFocus()
+}
+
+// PosInBBox returns true if given position is within
+// this node's win bbox (under read lock)
+func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
+	wb.BBoxMu.RLock()
+	defer wb.BBoxMu.RUnlock()
+	return pos.In(wb.ScBBox)
 }
 
 // WidgetStateFromMouse updates all standard State flags based on mouse events,
