@@ -347,14 +347,14 @@ func (st *MainStage) HandleEvent(evi events.Event) {
 	if st.Scene == nil {
 		return
 	}
+	st.Scene.EventMgr.Main = st
 	st.PopupMgr.HandleEvent(evi)
-	if evi.IsHandled() {
-		if EventTrace && evi.Type() != events.MouseMove {
+	if evi.IsHandled() || st.PopupMgr.TopIsModal() {
+		if true && evi.Type() != events.MouseMove {
 			fmt.Println("Event handled by popup:", evi)
 		}
 		return
 	}
-	st.Scene.EventMgr.Main = st
 	evi.SetLocalOff(st.Scene.Geom.Pos)
 	st.Scene.EventMgr.HandleEvent(st.Scene, evi)
 }

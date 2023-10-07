@@ -49,14 +49,13 @@ var (
 // and IF we end up needing a mutex, it should be global on main
 // entry points (HandleEvent, anything else?)
 
-// EventMgr is an event manager that handles incoming events for a
-// MainStage object (Window, Dialog, Sheet).  It distributes events
-// to a Scene based on position or focus, and deals with more complex
-// cases such as dragging, drag-n-drop, and hovering.
+// EventMgr is an event manager that handles incoming events for a Scene.
+// It creates all the derived event types (Hover, Sliding, Dragging)
+// and Focus management for keyboard events.
 type EventMgr struct {
 
-	// Stage is the owning MainStage that we manage events for
-	Main *MainStage
+	// Scene is the scene that we manage events for
+	Scene *Scene
 
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
 	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
@@ -184,7 +183,6 @@ func (em *EventMgr) HandleFocusEvent(sc *Scene, evi events.Event) {
 			}
 		}
 	}
-	// sc.HandleEvent(evi) // frame always gets a crack at it -- for dialog events
 	em.ManagerKeyChordEvents(evi)
 }
 
@@ -498,10 +496,7 @@ func (em *EventMgr) FocusNext(foc Widget) bool {
 		focusNext = true
 	}
 
-	focRoot := em.MainScene()
-	if focRoot == nil {
-		return false
-	}
+	focRoot := em.Scene
 
 	for i := 0; i < 2; i++ {
 		focRoot.WalkPre(func(k ki.Ki) bool {
@@ -580,10 +575,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 	gotFocus := false
 	var prevItem Widget
 
-	focRoot := em.MainScene()
-	if focRoot == nil {
-		return false
-	}
+	focRoot := em.Scene
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		if gotFocus {
@@ -616,10 +608,7 @@ func (em *EventMgr) FocusPrev(foc Widget) bool {
 func (em *EventMgr) FocusLast() bool {
 	var lastItem Widget
 
-	focRoot := em.MainScene()
-	if focRoot == nil {
-		return false
-	}
+	focRoot := em.Scene
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
@@ -736,12 +725,6 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	kf := KeyFun(cs)
 	// fmt.Println(kf, cs)
 	switch kf {
-	case KeyFunFocusNext: // tab
-		em.FocusNext(em.Focus)
-		e.SetHandled()
-	case KeyFunFocusPrev: // shift-tab
-		em.FocusPrev(em.Focus)
-		e.SetHandled()
 	case KeyFunGoGiEditor:
 		// todo:
 		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())

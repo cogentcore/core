@@ -340,7 +340,7 @@ var MenuMaxHeight = 30
 func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 	msc := StageScene(name + "-menu")
 	MenuSceneConfigStyles(msc)
-	// todo: look for Selected item to get initial focus
+	hasSelected := false
 	for _, ac := range menu {
 		wi, wb := AsWidget(ac)
 		if wi == nil {
@@ -357,10 +357,13 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 		}
 		cb.Sc = msc
 		msc.AddChild(cl)
-		if cb.StateIs(states.Selected) {
-			// fmt.Println("sel", cb)
+		if !hasSelected && cb.StateIs(states.Selected) {
 			msc.EventMgr.SetStartFocus(cl)
+			hasSelected = true
 		}
+	}
+	if !hasSelected && msc.HasChildren() {
+		msc.EventMgr.SetStartFocus(msc.Child(0).(Widget))
 	}
 	return msc
 }

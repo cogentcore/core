@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"fmt"
+
 	"goki.dev/goosi/events"
 )
 
@@ -23,9 +25,23 @@ func (pm *PopupStageMgr) AsPopupMgr() *PopupStageMgr {
 	return pm
 }
 
+// TopIsModal returns true if there is a Top PopupStage and
+// it is Modal.
+func (pm *PopupStageMgr) TopIsModal() bool {
+	top := pm.Top()
+	if top == nil {
+		return false
+	}
+	tb := top.AsBase()
+	mod := tb.Modal
+	if mod {
+		fmt.Println("is modal:", tb.Scene)
+	}
+	return mod
+}
+
 // HandleEvent processes Popup events.
-// Only gets OnFocus events if in focus.
-// requires outer RenderContext mutex!
+// requires outer RenderContext mutex.
 func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 	top := pm.Top()
 	if top == nil {

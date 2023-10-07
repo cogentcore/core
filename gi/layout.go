@@ -933,9 +933,9 @@ var LayoutPageSteps = 10
 
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeysImpl(e events.Event) {
-	if KeyEventTrace {
-		fmt.Printf("Layout KeyInput: %v\n", ly.Path())
-	}
+	// if KeyEventTrace {
+	fmt.Println("Layout KeyInput:", ly)
+	// }
 	kf := KeyFun(e.KeyChord())
 	if kf == KeyFunAbort {
 		if ly.ClosePopup() {
