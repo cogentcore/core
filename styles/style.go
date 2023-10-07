@@ -119,6 +119,9 @@ type Style struct {
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 
+	// StateLayer, if above zero, indicates to create a state layer with this much opacity and the color [Style.Color]
+	StateLayer float32 `desc:"StateLayer, if above zero, indicates to create a state layer with this much opacity and the color [Style.Color]"`
+
 	// border around the box element
 	Border Border `xml:"border" desc:"border around the box element"`
 

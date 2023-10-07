@@ -24,13 +24,18 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	rad := st.Border.Radius.Dots()
 
 	// the background color we actually use
-	bg := &st.BackgroundColor
+	bg := st.BackgroundColor
 	sbg := surroundBgColor
 	if bg.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
 		// (see https://github.com/goki/gi/issues/565)
-		bg = sbg
+		bg = *sbg
+	}
+
+	// TODO: support state layers on gradient backgrounds
+	if st.StateLayer > 0 && st.BackgroundColor.Gradient == nil {
+		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(st.Color, st.StateLayer))
 	}
 
 	// We need to fill the whole box where the
@@ -72,9 +77,9 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// the whole area with the background color first so the border
 	// doesn't render weirdly
 	if rad.IsZero() {
-		pc.FillBox(rs, mpos, msz, bg)
+		pc.FillBox(rs, mpos, msz, &bg)
 	} else {
-		pc.FillStyle.SetFullColor(bg)
+		pc.FillStyle.SetFullColor(&bg)
 		// no border -- fill only
 		pc.DrawRoundedRectangle(rs, mpos.X, mpos.Y, msz.X, msz.Y, rad)
 		pc.Fill(rs)
