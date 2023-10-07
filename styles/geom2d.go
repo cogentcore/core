@@ -38,3 +38,39 @@ func (gm *Geom2DInt) SetRect(r image.Rectangle) {
 	gm.Pos = r.Min
 	gm.Size = r.Size()
 }
+
+// FitGeomInWindow returns a position and size for a region (sub-window)
+// within a larger window geom (pos and size) that fits entirely
+// within that window to the extent possible,
+// given an initial starting position and size.
+// The position is first adjusted to try to fit the size, and then the size
+// is adjusted to make it fit if it is still too big.
+func FitGeomInWindow(stPos, stSz, winPos, winSz int) (pos, sz int) {
+	pos = stPos
+	sz = stSz
+	if pos < winPos {
+		pos = winPos
+	}
+	if pos+sz > winSz {
+		pos = winSz - sz
+	}
+	if pos < winPos {
+		pos = winPos
+	}
+	if pos+sz > winSz {
+		sz = winSz - winPos
+	}
+	return
+}
+
+// FitInWindow returns a position and size for a region (sub-window)
+// within a larger window geom that fits entirely within that window to the
+// extent possible, for the initial "ideal" starting position and size.
+// The position is first adjusted to try to fit the size, and then the size
+// is adjusted to make it fit if it is still too big.
+func (gm *Geom2DInt) FitInWindow(win Geom2DInt) Geom2DInt {
+	var fit Geom2DInt
+	fit.Pos.X, fit.Size.X = FitGeomInWindow(gm.Pos.X, gm.Size.X, win.Pos.X, win.Size.X)
+	fit.Pos.Y, fit.Size.Y = FitGeomInWindow(gm.Pos.Y, gm.Size.Y, win.Pos.Y, win.Size.Y)
+	return fit
+}
