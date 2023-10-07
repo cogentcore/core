@@ -163,13 +163,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 		return
 	}
 
-	state := wb.Style.State
-	wb.Style = styles.Style{}
-	wb.Style.Defaults()
-	wb.Style.State = state
-	// default to state layer associated with the state,
-	// which the developer can override in their stylers
-	wb.Style.StateLayer = wb.Style.State.StateLayer()
+	wb.DefaultStyleWidget()
 
 	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("ApplyStyleWidget-Inherit")
@@ -199,6 +193,39 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.ApplyStyleParts(sc)
 
 	psc.End()
+}
+
+// DefaultStyleWidget applies the base, widget-universal default
+// styles to the widget. It is called automatically in [ApplyStyleWidget]
+// and should not need to be called by end-user code.
+func (wb *WidgetBase) DefaultStyleWidget() {
+	s := &wb.Style
+
+	state := s.State
+	*s = styles.Style{}
+	s.Defaults()
+	s.State = state
+
+	// if we are disabled, we do not react to any state changes,
+	// and instead always have the same gray colors
+	if s.Is(states.Disabled) {
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
+		s.Color = colors.Scheme.OnSurfaceVariant
+	} else {
+		// default to state layer associated with the state,
+		// which the developer can override in their stylers
+		s.StateLayer = s.State.StateLayer()
+
+		if s.Is(states.Focused) {
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Dp(1))
+		}
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.On)
+		}
+	}
 }
 
 // RunStylers runs the style functions specified in

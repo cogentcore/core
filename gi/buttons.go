@@ -495,7 +495,6 @@ func (bt *Button) ButtonStyles() {
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		}
-		// note: some of these states are mix-and-match, don't put in a switch
 		if s.Is(states.Hovered) {
 			if bt.Type == ButtonElevated {
 				s.BoxShadow = styles.BoxShadow2()
@@ -503,18 +502,6 @@ func (bt *Button) ButtonStyles() {
 				s.BoxShadow = styles.BoxShadow1()
 			}
 		}
-		if s.Is(states.Focused) {
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Dp(1))
-		}
-		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		}
-		if s.Is(states.Disabled) {
-			s.Color = colors.Scheme.Surface
-		}
-		// STYTODO: add state styles for buttons
 	})
 }
 
