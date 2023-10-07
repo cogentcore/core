@@ -453,9 +453,9 @@ func (sb *SliderBase) SliderMouse() {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(sb.SlideStartPos - float32(se.NonZeroDelta(true))) // preferX
+			sb.SetSliderPos(sb.SlideStartPos - float32(se.DimDelta(mat32.X)))
 		} else {
-			sb.SetSliderPos(sb.SlideStartPos - float32(se.NonZeroDelta(false))) // preferY
+			sb.SetSliderPos(sb.SlideStartPos - float32(se.DimDelta(mat32.Y)))
 		}
 		sb.SlideStartPos = sb.Pos
 	})

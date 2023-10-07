@@ -309,8 +309,18 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			up.Send(events.Click, evi)
 		}
 		em.Press = nil
+	case events.Scroll:
+		switch {
+		case em.Slide != nil:
+			em.Slide.HandleEvent(evi)
+		case em.Drag != nil:
+			em.Drag.HandleEvent(evi)
+		case em.Press != nil:
+			em.Press.HandleEvent(evi)
+		default:
+			em.Scene.HandleEvent(evi)
+		}
 	}
-
 }
 
 // UpdateHovers updates the hovered widgets based on current

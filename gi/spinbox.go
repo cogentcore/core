@@ -307,7 +307,7 @@ func (sb *SpinBox) SpinBoxScroll() {
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sb.IncrValue(float32(se.NonZeroDelta(false)))
+		sb.IncrValue(float32(se.DimDelta(mat32.Y)))
 	})
 }
 

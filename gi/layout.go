@@ -378,9 +378,8 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	sb.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
 	sb.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
-	// SidesTODO: not sure about this
 	sb.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
-	sb.TrackThr = 1
+	sb.TrackThr = 0.01
 	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
 	sb.On(events.Change, func(e events.Event) {
@@ -522,40 +521,45 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 // and there is a non-zero in other, then the consumed dimension is reset to 0
 // and the event is left unprocessed, so a higher level can consume the
 // remainder.
-func (ly *Layout) ScrollDelta(me *events.MouseScroll) {
-	del := me.Delta
-	hasShift := me.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other dimension
+func (ly *Layout) ScrollDelta(e events.Event) {
+	se := e.(*events.MouseScroll)
+	var del image.Point
+	del.X = se.DimDelta(mat32.X)
+	del.Y = se.DimDelta(mat32.Y)
+	fdel := mat32.NewVec2FmPoint(del)
+
+	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other diension
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
-			me.SetHandled()
+			e.SetHandled()
 			return
 		}
-		ly.ScrollActionDelta(mat32.X, float32(del.Y))
-		me.SetHandled()
+		ly.ScrollActionDelta(mat32.X, fdel.Y)
+		e.SetHandled()
 		return
 	}
 
 	if ly.HasScroll[mat32.Y] && ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v both del: %v\n", ly.Nm, del)
-		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
-		ly.ScrollActionDelta(mat32.X, float32(del.X))
-		me.SetHandled()
+		ly.ScrollActionDelta(mat32.Y, fdel.Y)
+		ly.ScrollActionDelta(mat32.X, fdel.X)
+		e.SetHandled()
 	} else if ly.HasScroll[mat32.Y] {
 		// fmt.Printf("ly: %v y del: %v\n", ly.Nm, del)
-		ly.ScrollActionDelta(mat32.Y, float32(del.Y))
+		ly.ScrollActionDelta(mat32.Y, fdel.Y)
 		if del.X != 0 {
-			me.Delta.Y = 0
+			se.Delta.Y = 0
 		} else {
-			me.SetHandled()
+			e.SetHandled()
 		}
 	} else if ly.HasScroll[mat32.X] {
 		// fmt.Printf("ly: %v x del: %v\n", ly.Nm, del)
 		if del.X != 0 {
-			ly.ScrollActionDelta(mat32.X, float32(del.X))
+			ly.ScrollActionDelta(mat32.X, fdel.X)
 			if del.Y != 0 {
-				me.Delta.X = 0
+				se.Delta.X = 0
 			} else {
-				me.SetHandled()
+				e.SetHandled()
 			}
 		}
 	}
@@ -1133,9 +1137,8 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // LayoutScrollEvents registers scrolling-related mouse events processed by
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) LayoutScrollEvents() {
-	// LowPri to allow other focal widgets to capture
-	ly.On(events.Scroll, func(e events.Event) { // note: was lowpri
-		ly.ScrollDelta(e.(*events.MouseScroll))
+	ly.On(events.Scroll, func(e events.Event) {
+		ly.ScrollDelta(e)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
 	// we.AddFunc(events.DNDMoveEvent, HiPri, func(recv, send ki.Ki, sig int64, d any) {
