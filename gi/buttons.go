@@ -620,7 +620,6 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 				s.Height.SetEm(1.5)
 				s.Margin.Set()
 				s.Padding.Set()
-				s.BackgroundColor.SetSolid(colors.Transparent)
 			})
 		case "space":
 			wb.AddStyles(func(s *styles.Style) {
