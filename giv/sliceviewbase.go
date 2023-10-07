@@ -69,7 +69,7 @@ type SliceViewer interface {
 	SliceGridNeedsUpdate() bool
 
 	// StyleRow calls a custom style function on given row (and field)
-	StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int, vv ValueView)
+	StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv ValueView)
 
 	// RowFirstWidget returns the first widget for given row (could be index or
 	// not) -- false if out of range
@@ -332,7 +332,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 
 // Update is the high-level update display call -- robust to any changes
 func (sv *SliceViewBase) Update() {
-	if !sv.This().(gi.Node2D).IsVisible() {
+	if !sv.This().(gi.Widget).IsVisible() {
 		return
 	}
 	wupdt := sv.TopUpdateStart()
@@ -517,7 +517,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 		idxlab.Text = itxt
 	}
 
-	widg := ki.NewOfType(vtyp).(gi.Node2D)
+	widg := ki.NewOfType(vtyp).(gi.Widget)
 	sg.SetChild(widg, idxOff, valnm)
 	vv.ConfigWidget(widg)
 
@@ -565,7 +565,7 @@ func (sv *SliceViewBase) ConfigScroll() {
 		wupdt := sv.TopUpdateStart()
 		svv.StartIdx = int(sb.Value)
 		svv.This().(SliceViewer).UpdateSliceGrid()
-		svv.Sc.ReRenderNode(svv.This().(gi.Node2D))
+		svv.Sc.ReRenderNode(svv.This().(gi.Widget))
 		svv.TopUpdateEnd(wupdt)
 	})
 }
@@ -754,7 +754,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				idxlab.Style.Template = "giv.SliceViewBase.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
-						wbb := send.(gi.Node2D).AsWidget()
+						wbb := send.(gi.Widget).AsWidget()
 						row := wbb.Prop("slv-row").(int)
 						svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 						svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
@@ -765,29 +765,29 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			idxlab.SetSelected(issel)
 		}
 
-		var widg gi.Node2D
+		var widg gi.Widget
 		if sg.Kids[ridx+idxOff] != nil {
-			widg = sg.Kids[ridx+idxOff].(gi.Node2D)
+			widg = sg.Kids[ridx+idxOff].(gi.Widget)
 			vv.UpdateWidget()
 			if sv.IsDisabled() {
-				widg.AsNode2D().SetDisabled()
+				widg.AsWidget().SetDisabled()
 			}
-			widg.AsNode2D().SetSelected(issel)
+			widg.AsWidget().SetSelected(issel)
 		} else {
-			widg = ki.NewOfType(vtyp).(gi.Node2D)
+			widg = ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(widg, ridx+idxOff, valnm)
 			vv.ConfigWidget(widg)
 			wb := widg.AsWidget()
 			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 
 			if sv.IsDisabled() {
-				widg.AsNode2D().SetDisabled()
+				widg.AsWidget().SetDisabled()
 				if wb != nil {
 					wb.SetProp("slv-row", i)
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.WidgetSelected) {
-							wbb := send.(gi.Node2D).AsWidget()
+							wbb := send.(gi.Widget).AsWidget()
 							row := wbb.Prop("slv-row").(int)
 							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
@@ -1073,7 +1073,7 @@ func (sv *SliceViewBase) ApplyStyle() {
 		return
 	}
 	mvp := sv.Sc
-	if mvp != nil && sv.This().(gi.Node2D).IsVisible() &&
+	if mvp != nil && sv.This().(gi.Widget).IsVisible() &&
 		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.ScFlagPrefSizing))) {
 		if sv.This().(SliceViewer).LayoutSliceGrid() {
 			sv.This().(SliceViewer).UpdateSliceGrid()
@@ -1154,7 +1154,7 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	}
 	nWidgPerRow, _ := sv.This().(SliceViewer).RowWidgetNs()
 	sg := sv.This().(SliceViewer).SliceGrid()
-	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
+	widg := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
 	return widg, true
 }
 
@@ -1168,7 +1168,7 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
 	ridx := nWidgPerRow * row
 	sg := sv.This().(SliceViewer).SliceGrid()
-	widg := sg.Child(ridx + idxOff).(gi.Node2D).AsWidget()
+	widg := sg.Child(ridx + idxOff).(gi.Widget).AsWidget()
 	if widg.StateIs(states.Focused) {
 		return widg
 	}
@@ -1398,13 +1398,13 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	rowidx := row * nWidgPerRow
 	if sv.ShowIndex {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
-			widg := sg.Child(rowidx).(gi.Node2D).AsNode2D()
+			widg := sg.Child(rowidx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
-		widg := sg.Child(rowidx + idxOff).(gi.Node2D).AsNode2D()
+		widg := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
 		widg.SetSelected(sel)
 		widg.UpdateSig()
 	}

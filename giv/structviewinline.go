@@ -138,7 +138,7 @@ func (sv *StructViewInline) ConfigParts(vp *Scene) {
 		lbl := parts.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
-		widg := parts.Child((i * 2) + 1).(gi.Node2D)
+		widg := parts.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true

@@ -40,7 +40,7 @@ func (vv *HiStyleValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *HiStyleValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *HiStyleValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

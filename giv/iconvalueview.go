@@ -50,7 +50,7 @@ func (vv *IconValueView) UpdateWidget() {
 	}
 }
 
-func (vv *IconValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

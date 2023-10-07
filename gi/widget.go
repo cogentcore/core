@@ -227,7 +227,7 @@ type Widget interface {
 	DirectWinUpload()
 }
 
-// WidgetBase is the base type for all Widget Node2D elements, which are
+// WidgetBase is the base type for all Widget Widget elements, which are
 // managed by a containing Layout, and use all 5 rendering passes.  All
 // elemental widgets must support the Inactive and Selected states in a
 // reasonable way (Selected only essential when also Inactive), so they can

@@ -306,7 +306,7 @@ func (tv *TextView) Refresh() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return
 	}
 	tv.LayoutAllLines(false)
@@ -469,7 +469,7 @@ func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 		tv.Refresh()
 		tv.SetCursorShow(tv.CursorPos)
 	case TextBufInsert:
-		if tv.Renders == nil || !tv.This().(gi.Node2D).IsVisible() {
+		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
 		}
 		tbe := data.(*textbuf.Edit)
@@ -488,7 +488,7 @@ func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 			}
 		}
 	case TextBufDelete:
-		if tv.Renders == nil || !tv.This().(gi.Node2D).IsVisible() {
+		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
 		}
 		tbe := data.(*textbuf.Edit)
@@ -2940,7 +2940,7 @@ func (tv *TextView) ScrollCursorInView() bool {
 	if tv == nil || tv.This() == nil {
 		return false
 	}
-	if tv.This().(gi.Node2D).IsVisible() {
+	if tv.This().(gi.Widget).IsVisible() {
 		curBBox := tv.CursorBBox(tv.CursorPos)
 		return tv.ScrollInView(curBBox)
 	}
@@ -3181,7 +3181,7 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Scene == nil || !tv.StateIs(states.Focused) || !tv.IsFocusActive() || !tv.This().(gi.Node2D).IsVisible() {
+		if tv.Scene == nil || !tv.StateIs(states.Focused) || !tv.IsFocusActive() || !tv.This().(gi.Widget).IsVisible() {
 			tv.RenderCursor(false)
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
@@ -3207,7 +3207,7 @@ func (tv *TextView) StartCursor() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return
 	}
 	tv.BlinkOn = true
@@ -3235,7 +3235,7 @@ func (tv *TextView) StopCursor() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	// if !tv.This().(gi.Node2D).IsVisible() {
+	// if !tv.This().(gi.Widget).IsVisible() {
 	// 	return
 	// }
 	tv.RenderCursor(false)
@@ -3261,7 +3261,7 @@ func (tv *TextView) RenderCursor(on bool) {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return
 	}
 	if tv.Renders == nil {
@@ -3569,7 +3569,7 @@ func (tv *TextView) RenderAllLines() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return
 	}
 	rs := tv.Render()
@@ -3782,7 +3782,7 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	if tv == nil || tv.This() == nil || tv.Buf == nil {
 		return false
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return false
 	}
 	if st >= tv.NLines {
@@ -4575,7 +4575,7 @@ func (tv *TextView) KeyInputInsertRune(kt *events.Key) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (tv *TextView) OpenLink(tl *paint.TextLink) {
-	tl.Widget = tv.This().(gi.Node2D)
+	tl.Widget = tv.This().(gi.Widget)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	if len(tv.LinkSig.Cons) == 0 {
 		if paint.TextLinkHandler != nil {
@@ -4683,7 +4683,7 @@ func (tv *TextView) MouseEvent(me events.Event) {
 			me.SetHandled()
 			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 			tv.EmitContextMenuSignal()
-			tv.This().(gi.Node2D).ContextMenu()
+			tv.This().(gi.Widget).ContextMenu()
 		}
 	}
 }
@@ -4782,7 +4782,7 @@ func (tv *TextView) TextViewEvents() {
 }
 
 ////////////////////////////////////////////////////
-//  Node2D Interface
+//  Widget Interface
 
 // Config calls Init on widget
 // func (tv *TextView) ConfigWidget(vp *Scene) {

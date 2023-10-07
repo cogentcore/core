@@ -145,7 +145,7 @@ func (cv *ColorView) ConfigWidget(vp *Scene) {
 	// cv.NumView = ToValueView(&cv.Color, "")
 	// cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
 	// vtyp := cv.NumView.WidgetType()
-	// widg := nl.NewChild(vtyp, "nums").(gi.Node2D)
+	// widg := nl.NewChild(vtyp, "nums").(gi.Widget)
 	// cv.NumView.ConfigWidget(widg)
 	// vvb := cv.NumView.AsValueViewBase()
 	// vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -627,7 +627,7 @@ func (vv *ColorValueView) UpdateWidget() {
 	ac.UpdateSig()
 }
 
-func (vv *ColorValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
@@ -708,7 +708,7 @@ func (vv *ColorNameValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *ColorNameValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

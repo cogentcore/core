@@ -437,7 +437,7 @@ func FontChooserDialog(avp *gi.Scene, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvF
 	return dlg
 }
 
-func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
+func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
 	if col == 4 {
 		finf, ok := slice.([]paint.FontInfo)
 		if ok {
@@ -446,7 +446,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, v
 			widg.SetProp("font-weight", (finf)[row].Weight)
 			widg.SetProp("font-style", (finf)[row].Style)
 			widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
-			widg.AsNode2D().SetFullReRender()
+			widg.AsWidget().SetFullReRender()
 		}
 	}
 }
@@ -467,7 +467,7 @@ func IconChooserDialog(avp *gi.Scene, curIc icons.Icon, opts DlgOpts, recv ki.Ki
 	return dlg
 }
 
-func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Node2D, row int, vv ValueView) {
+func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv ValueView) {
 	ic, ok := slice.([]icons.Icon)
 	if ok {
 		widg.(*gi.Action).SetText(string(ic[row]))

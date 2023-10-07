@@ -615,7 +615,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Node2D interface
+// Widget interface
 
 func (dlg *Dialog) ConfigWidget(sc *Scene) {
 	dlg.Scene.Config()
@@ -682,7 +682,7 @@ func ChoiceDialog(avp *Scene, opts DlgOpts, choices []string, recv ki.Ki, fun ki
 
 // NewKiDialog prompts for creating new item(s) of a given type, showing types
 // that implement given interface.
-// Use construct of form: reflect.TypeOf((*gi.Node2D)(nil)).Elem()
+// Use construct of form: reflect.TypeOf((*gi.Widget)(nil)).Elem()
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func NewKiDialog(avp *Scene, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {

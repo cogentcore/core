@@ -145,13 +145,13 @@ func (sv *SliceViewInline) ConfigParts(vp *Scene) {
 			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
 			svv.SetChanged()
 		})
-		widg := sv.Parts.Child(i).(gi.Node2D)
+		widg := sv.Parts.Child(i).(gi.Widget)
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
 		vv.ConfigWidget(widg)
 		if sv.IsDisabled() {
-			widg.AsNode2D().SetDisabled()
+			widg.AsWidget().SetDisabled()
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

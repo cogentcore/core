@@ -122,7 +122,7 @@ func (vv *KeyMapValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *KeyMapValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *KeyMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

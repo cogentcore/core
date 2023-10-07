@@ -69,7 +69,7 @@ var _ SliceViewer = (*TableView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView)
+type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView)
 
 func (tv *TableView) OnInit() {
 	tv.Lay = gi.LayoutVert
@@ -423,7 +423,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		vtyp := vv.WidgetType()
 		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 		cidx := idxOff + fli
-		widg := ki.NewOfType(vtyp).(gi.Node2D)
+		widg := ki.NewOfType(vtyp).(gi.Widget)
 		sgf.SetChild(widg, cidx, valnm)
 		vv.ConfigWidget(widg)
 	}
@@ -533,7 +533,7 @@ func (tv *TableView) LayoutHeader() {
 	}
 	sumwd := float32(0)
 	for fli := 0; fli < nfld; fli++ {
-		lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+		lbl := sgh.Child(fli).(gi.Widget).AsWidget()
 		wd := gd[fli].AllocSize - spc
 		if fli == 0 {
 			wd += spc
@@ -544,7 +544,7 @@ func (tv *TableView) LayoutHeader() {
 	if !tv.IsDisabled() {
 		mx := len(sgf.GridData[gi.Col])
 		for fli := nfld; fli < mx; fli++ {
-			lbl := sgh.Child(fli).(gi.Node2D).AsWidget()
+			lbl := sgh.Child(fli).(gi.Widget).AsWidget()
 			wd := gd[fli].AllocSize - spc
 			lbl.SetFixedWidth(units.Dot(wd))
 			sumwd += wd
@@ -619,7 +619,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				idxlab.Style.Template = "giv.TableView.IndexLabel"
 				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					if sig == int64(gi.WidgetSelected) {
-						wbb := send.(gi.Node2D).AsWidget()
+						wbb := send.(gi.Widget).AsWidget()
 						row := wbb.Prop("tv-row").(int)
 						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
@@ -661,16 +661,16 @@ func (tv *TableView) UpdateSliceGrid() {
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
 			cidx := ridx + idxOff + fli
-			var widg gi.Node2D
+			var widg gi.Widget
 			if sg.Kids[cidx] != nil {
-				widg = sg.Kids[cidx].(gi.Node2D)
+				widg = sg.Kids[cidx].(gi.Widget)
 				vv.UpdateWidget()
 				if tv.IsDisabled() {
-					widg.AsNode2D().SetDisabled()
+					widg.AsWidget().SetDisabled()
 				}
-				widg.AsNode2D().SetSelected(issel)
+				widg.AsWidget().SetSelected(issel)
 			} else {
-				widg = ki.NewOfType(vtyp).(gi.Node2D)
+				widg = ki.NewOfType(vtyp).(gi.Widget)
 				sg.SetChild(widg, cidx, valnm)
 				vv.ConfigWidget(widg)
 				wb := widg.AsWidget()
@@ -681,7 +681,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					wb.ClearSelected()
 					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
-							wbb := send.(gi.Node2D).AsWidget()
+							wbb := send.(gi.Widget).AsWidget()
 							row := wbb.Prop("tv-row").(int)
 							tvv := recv.Embed(TypeTableView).(*TableView)
 							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
@@ -691,7 +691,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					})
 				}
 				if tv.IsDisabled() {
-					widg.AsNode2D().SetDisabled()
+					widg.AsWidget().SetDisabled()
 				} else {
 					vvb := vv.AsValueViewBase()
 					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
@@ -752,7 +752,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	tv.UpdateScroll()
 }
 
-func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Node2D, idx, fidx int, vv ValueView) {
+func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv ValueView) {
 	if tv.StyleFunc != nil {
 		tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
 	}
@@ -969,13 +969,13 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 	sg := tv.SliceGrid()
-	widg := sg.Kids[row*nWidgPerRow].(gi.Node2D).AsWidget()
+	widg := sg.Kids[row*nWidgPerRow].(gi.Widget).AsWidget()
 	if widg.ScBBox != (image.Rectangle{}) {
 		return widg, true
 	}
 	ridx := nWidgPerRow * row
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if widg.ScBBox != (image.Rectangle{}) {
 			return widg, true
 		}
@@ -995,7 +995,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	sg := tv.SliceGrid()
 	// first check if we already have focus
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if widg.StateIs(states.Focused) || widg.ContainsFocus() {
 			return widg
 		}
@@ -1003,7 +1003,7 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 	tv.InFocusGrab = true
 	defer func() { tv.InFocusGrab = false }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		widg := sg.Child(ridx + idxOff + fli).(gi.Node2D).AsWidget()
+		widg := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if widg.CanFocus() {
 			widg.GrabFocus()
 			return widg
@@ -1026,14 +1026,14 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		seldx := ridx + idxOff + fli
 		if sg.Kids.IsValidIndex(seldx) == nil {
-			widg := sg.Child(seldx).(gi.Node2D).AsNode2D()
+			widg := sg.Child(seldx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}
 	}
 	if tv.ShowIndex {
 		if sg.Kids.IsValidIndex(ridx) == nil {
-			widg := sg.Child(ridx).(gi.Node2D).AsNode2D()
+			widg := sg.Child(ridx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
 			widg.UpdateSig()
 		}

@@ -1906,7 +1906,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 			case events.Right:
 				if me.Action == events.Release {
 					me.SetHandled()
-					ftvv.This().(gi.Node2D).ContextMenu()
+					ftvv.This().(gi.Widget).ContextMenu()
 				}
 			}
 		})

@@ -38,7 +38,7 @@ func (vv *FileValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *FileValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

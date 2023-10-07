@@ -38,7 +38,7 @@ func (vv *FontValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *FontValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

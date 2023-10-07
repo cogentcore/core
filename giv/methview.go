@@ -17,6 +17,7 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/ki/v2/bitflag"
 )
 
 // these are special menus that we ignore
@@ -390,7 +391,7 @@ func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any
 				nac := &gi.Action{}
 				nac.InitName(nac, mm.Name)
 				nac.SetAsMenu()
-				pa.Menu = append(pa.Menu, nac.This().(gi.Node2D))
+				pa.Menu = append(pa.Menu, nac.This().(gi.Widget))
 				rv := ActionsView(val, vtyp, vp, nac, mm.Value)
 				if !rv {
 					rval = false

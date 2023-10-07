@@ -406,7 +406,7 @@ func makeInputs(tv *gi.TabView) {
 
 	colorvv := giv.ToValueView(&clr, "")
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
-	cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Node2D)
+	cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Widget)
 	colorvv.ConfigWidget(cvvw)
 
 	sliderys := gi.NewLayout(inputs, "sliderys", gi.LayoutHorizFlow)

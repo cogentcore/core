@@ -42,7 +42,7 @@ func (vv *KeyChordValueView) UpdateWidget() {
 	kc.SetText(txt)
 }
 
-func (vv *KeyChordValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *KeyChordValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)
@@ -138,7 +138,7 @@ func (kc *KeyChordEdit) MouseEvent() {
 		if me.Action == events.Release && me.Button == events.Right {
 			me.SetHandled()
 			kcc.EmitContextMenuSignal()
-			kcc.This().(gi.Node2D).ContextMenu()
+			kcc.This().(gi.Widget).ContextMenu()
 		}
 	})
 }

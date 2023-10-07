@@ -354,7 +354,7 @@ func (sv *StructView) ConfigStructGrid() {
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
 		lbl.Redrawable = true
-		widg := sg.Child((i * 2) + 1).(gi.Node2D)
+		widg := sg.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
 			sv.HasDefs = true
@@ -432,7 +432,7 @@ func (sv *StructView) Render(vp *Scene) {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "def" default tags -- if so, needs updating
-func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bool) (hasDef, inactTag bool) {
+func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Widget, isInact bool) (hasDef, inactTag bool) {
 	vvb := vv.AsValueViewBase()
 	if lbltag, has := vv.Tag("label"); has {
 		lbl.Text = lbltag
@@ -441,10 +441,10 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Node2D, isInact bo
 	}
 	if _, has := vv.Tag("inactive"); has {
 		inactTag = true
-		widg.AsNode2D().SetDisabled()
+		widg.AsWidget().SetDisabled()
 	} else {
 		if isInact {
-			widg.AsNode2D().SetDisabled()
+			widg.AsWidget().SetDisabled()
 			vv.SetTag("inactive", "true")
 		}
 	}

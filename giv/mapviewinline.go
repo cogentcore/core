@@ -133,14 +133,14 @@ func (mv *MapViewInline) ConfigParts(vp *Scene) {
 			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
 			mvv.SetChanged()
 		})
-		keyw := mv.Parts.Child(i * 2).(gi.Node2D)
-		widg := mv.Parts.Child((i * 2) + 1).(gi.Node2D)
+		keyw := mv.Parts.Child(i * 2).(gi.Widget)
+		widg := mv.Parts.Child((i * 2) + 1).(gi.Widget)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if mv.IsDisabled() {
-			widg.AsNode2D().SetDisabled()
-			keyw.AsNode2D().SetDisabled()
+			widg.AsWidget().SetDisabled()
+			keyw.AsWidget().SetDisabled()
 		}
 	}
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)

@@ -488,7 +488,7 @@ var StyleSheetType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.StyleSheet",
 	ShortName:  "gi.StyleSheet",
 	IDName:     "style-sheet",
-	Doc:        "StyleSheet is a Node2D node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
+	Doc:        "StyleSheet is a Widget node that contains a stylesheet -- property values\ncontained in this sheet can be transformed into ki.Props and set in CSS\nfield of appropriate node",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Sheet", &gti.Field{Name: "Sheet", Type: "*css.Stylesheet", Doc: "", Directives: gti.Directives{}}},
@@ -1461,7 +1461,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.WidgetBase",
 	ShortName:  "gi.WidgetBase",
 	IDName:     "widget-base",
-	Doc:        "WidgetBase is the base type for all Widget Node2D elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
+	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Class", &gti.Field{Name: "Class", Type: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}}},

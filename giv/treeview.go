@@ -1042,7 +1042,7 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	// derived types put native menu code here
 	if tv.CtxtMenuFunc != nil {
-		tv.CtxtMenuFunc(tv.This().(gi.Node2D), m)
+		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
 	}
 	// note: root inactivity is relevant factor here..
 	if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
@@ -1855,7 +1855,7 @@ func (tv *TreeView) TreeViewEvents() {
 			case events.Right:
 				if me.Action == events.Release {
 					me.SetHandled()
-					tvv.This().(gi.Node2D).ContextMenu()
+					tvv.This().(gi.Widget).ContextMenu()
 				}
 			}
 		})
@@ -1863,7 +1863,7 @@ func (tv *TreeView) TreeViewEvents() {
 }
 
 ////////////////////////////////////////////////////
-// Node2D interface
+// Widget interface
 
 // qt calls the open / close thing a "branch"
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
@@ -2084,7 +2084,7 @@ func (tv *TreeView) GetSize(vp *Scene, iter int) {
 	if !tv.IsClosed() {
 		// we layout children under us
 		for _, kid := range tv.Kids {
-			gis := kid.(gi.Node2D).AsWidget()
+			gis := kid.(gi.Widget).AsWidget()
 			if gis == nil || gis.This() == nil {
 				continue
 			}
@@ -2121,8 +2121,8 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 	for i := 0; i < int(TreeViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
 	}
-	tv.BBox = tv.This().(gi.Node2D).BBoxes() // only compute once, at this point
-	tv.This().(gi.Node2D).ComputeBBoxes(vp, parBBox, image.Point{})
+	tv.BBox = tv.This().(gi.Widget).BBoxes() // only compute once, at this point
+	tv.This().(gi.Widget).ComputeBBoxes(vp, parBBox, image.Point{})
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
@@ -2136,7 +2136,7 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 			if kid == nil || kid.This() == nil {
 				continue
 			}
-			ni := kid.(gi.Node2D).AsWidget()
+			ni := kid.(gi.Widget).AsWidget()
 			if ni == nil {
 				continue
 			}
@@ -2180,14 +2180,14 @@ func (tv *TreeView) IsVisible() bool {
 	if tv.HasFlag(Invisible) {
 		return false
 	}
-	return tv.RootView.Par.This().(gi.Node2D).IsVisible()
+	return tv.RootView.Par.This().(gi.Widget).IsVisible()
 }
 
 func (tv *TreeView) PushBounds() bool {
 	if tv == nil || tv.This() == nil {
 		return false
 	}
-	if !tv.This().(gi.Node2D).IsVisible() {
+	if !tv.This().(gi.Widget).IsVisible() {
 		return false
 	}
 	if tv.ScBBox.Empty() && tv.This() != tv.RootView.This() { // root must always connect!
@@ -2226,7 +2226,7 @@ func (tv *TreeView) Render(vp *Scene) {
 			} else {
 				tv.Style = tv.StateStyles[TreeViewActive]
 			}
-			tv.This().(gi.Node2D).SetTypeHandlers()
+			tv.This().(gi.Widget).SetTypeHandlers()
 
 			// note: this is std except using WidgetSize instead of AllocSize
 			rs, pc, st := tv.RenderLock(vp)

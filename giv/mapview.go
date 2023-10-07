@@ -258,8 +258,8 @@ func (mv *MapView) ConfigMapGrid() {
 			mvv, _ := recv.Embed(TypeMapView).(*MapView)
 			mvv.SetChanged()
 		})
-		keyw := sg.Child(i * ncol).(gi.Node2D)
-		widg := sg.Child(i*ncol + 1).(gi.Node2D)
+		keyw := sg.Child(i * ncol).(gi.Widget)
+		widg := sg.Child(i*ncol + 1).(gi.Widget)
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
 		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {

@@ -54,7 +54,7 @@ func (vv *StructValueView) UpdateWidget() {
 	}
 }
 
-func (vv *StructValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *StructValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
@@ -120,7 +120,7 @@ func (vv *StructInlineValueView) UpdateWidget() {
 	}
 }
 
-func (vv *StructInlineValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *StructInlineValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
@@ -173,7 +173,7 @@ func (vv *SliceValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *SliceValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *SliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
@@ -264,7 +264,7 @@ func (vv *SliceInlineValueView) UpdateWidget() {
 	}
 }
 
-func (vv *SliceInlineValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *SliceInlineValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
@@ -311,7 +311,7 @@ func (vv *MapValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *MapValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *MapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)
@@ -377,7 +377,7 @@ func (vv *MapInlineValueView) UpdateWidget() {
 	}
 }
 
-func (vv *MapInlineValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *MapInlineValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
@@ -445,7 +445,7 @@ func (vv *KiPtrValueView) UpdateWidget() {
 	mb.SetText(path)
 }
 
-func (vv *KiPtrValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *KiPtrValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	mb := vv.Widget.(*gi.Button)
@@ -514,7 +514,7 @@ func (vv *BoolValueView) UpdateWidget() {
 	cb.SetState(bv, states.Checked)
 }
 
-func (vv *BoolValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *BoolValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.CheckBox)
@@ -557,7 +557,7 @@ func (vv *IntValueView) UpdateWidget() {
 	}
 }
 
-func (vv *IntValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
@@ -629,7 +629,7 @@ func (vv *FloatValueView) UpdateWidget() {
 	}
 }
 
-func (vv *FloatValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
@@ -714,7 +714,7 @@ func (vv *EnumValueView) UpdateWidget() {
 	}
 }
 
-func (vv *EnumValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *EnumValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
@@ -777,7 +777,7 @@ func (vv *BitFlagView) UpdateWidget() {
 	}
 }
 
-func (vv *BitFlagView) ConfigWidget(widg gi.Node2D) {
+func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ButtonBox)
 	vv.StdConfigWidget(&cb.Parts)
@@ -824,7 +824,7 @@ func (vv *TypeValueView) UpdateWidget() {
 	}
 }
 
-func (vv *TypeValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *TypeValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
@@ -885,7 +885,7 @@ func (vv *ByteSliceValueView) UpdateWidget() {
 	}
 }
 
-func (vv *ByteSliceValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *ByteSliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -934,7 +934,7 @@ func (vv *RuneSliceValueView) UpdateWidget() {
 	}
 }
 
-func (vv *RuneSliceValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *RuneSliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -985,7 +985,7 @@ func (vv *NilValueView) UpdateWidget() {
 	sb.SetText("nil " + tstr)
 }
 
-func (vv *NilValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *NilValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
@@ -1029,7 +1029,7 @@ func (vv *TimeValueView) UpdateWidget() {
 	tf.SetText(tm.Format(DefaultTimeFormat))
 }
 
-func (vv *TimeValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *TimeValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)

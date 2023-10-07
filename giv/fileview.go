@@ -252,11 +252,11 @@ const (
 	FileViewSignalsN
 )
 
-func FileViewStyleFunc(tv *TableView, slice any, widg gi.Node2D, row, col int, vv ValueView) {
+func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
 	// STYTODO: get rid of this and move to OnChildAdded
 	finf, ok := slice.([]*FileInfo)
 	if ok {
-		wi := widg.AsNode2D()
+		wi := widg.AsWidget()
 		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
 			if _, err := wi.PropTry("color"); err != nil {
 				wi.SetFullReRender()

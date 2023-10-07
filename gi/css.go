@@ -12,7 +12,7 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// StyleSheet is a Node2D node that contains a stylesheet -- property values
+// StyleSheet is a Widget node that contains a stylesheet -- property values
 // contained in this sheet can be transformed into ki.Props and set in CSS
 // field of appropriate node
 type StyleSheet struct {

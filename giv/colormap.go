@@ -186,7 +186,7 @@ func (vv *ColorMapValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *ColorMapValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Action)

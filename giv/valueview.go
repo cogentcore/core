@@ -445,7 +445,7 @@ type ValueView interface {
 	// value, including setting up the signal connections to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).
-	ConfigWidget(widg gi.Node2D)
+	ConfigWidget(widg gi.Widget)
 
 	// HasAction returns true if this value has an associated action, such as
 	// pulling up a dialog or chooser for this value.  Activate method will
@@ -551,7 +551,7 @@ type ValueViewBase struct {
 	WidgetTyp reflect.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
-	Widget gi.Node2D `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
+	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -687,7 +687,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 				if val != kv.Interface() && !laser.ValueIsZero(curnv) {
 					var vp *gi.Scene
 					if vv.Widget != nil {
-						widg := vv.Widget.AsNode2D()
+						widg := vv.Widget.AsWidget()
 						vp = widg.Scene
 					}
 					// actually new key and current exists
@@ -919,7 +919,7 @@ func (vv *ValueViewBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
+func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf, ok := vv.Widget.(*gi.TextField)
@@ -958,9 +958,9 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Node2D) {
 }
 
 // StdConfigWidget does all of the standard widget configuration tag options
-func (vv *ValueViewBase) StdConfigWidget(widg gi.Node2D) {
+func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
 	// STYTODO: get rid of this
-	nb := widg.AsNode2D()
+	nb := widg.AsWidget()
 	if widthtag, ok := vv.Tag("width"); ok {
 		width, ok := laser.ToFloat32(widthtag)
 		if ok {
@@ -1120,7 +1120,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *VersCtrlValueView) ConfigWidget(widg gi.Node2D) {
+func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -1140,11 +1140,11 @@ func (vv *VersCtrlValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.Re
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
-	var recv gi.Node2D
+	var recv gi.Widget
 	if vv.Widget != nil {
 		recv = vv.Widget
 	} else {
-		recv = vp.This().(gi.Node2D)
+		recv = vp.This().(gi.Widget)
 	}
 	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data any) {
 		ac := send.(*gi.Action)

@@ -981,15 +981,19 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 		}
 		return
 	}
+	em := ly.EventMgr()
+	if em == nil {
+		return
+	}
 	switch kf {
 	case KeyFunFocusNext: // tab
-		if ly.FocusNextChild(false) {
+		if em.FocusNext(em.Focus) {
 			// fmt.Println("foc next", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
 		return
 	case KeyFunFocusPrev: // shift-tab
-		if ly.FocusPrevChild(false) {
+		if em.FocusPrev(em.Focus) {
 			// fmt.Println("foc prev", ly, ly.EventMgr().Focus)
 			e.SetHandled()
 		}
@@ -998,7 +1002,7 @@ func (ly *Layout) LayoutKeysImpl(e events.Event) {
 	if ly.Lay == LayoutHoriz || ly.Lay == LayoutGrid || ly.Lay == LayoutHorizFlow {
 		switch kf {
 		case KeyFunMoveRight:
-			if ly.FocusNextChild(false) { // allow higher layers to try..
+			if ly.FocusNextChild(false) {
 				e.SetHandled()
 			}
 			return
@@ -1156,7 +1160,7 @@ func (ly *Layout) LayoutScrollEvents() {
 }
 
 ///////////////////////////////////////////////////
-//   Standard Node2D interface
+//   Standard Widget interface
 
 func (ly *Layout) BBoxes() image.Rectangle {
 	bb := ly.BBoxFromAlloc()
@@ -1282,19 +1286,6 @@ func (ly *Layout) SetTypeHandlers() {
 	ly.LayoutScrollEvents()
 	ly.LayoutKeys()
 }
-
-// func (ly *Layout) HandleEvent(ev events.Event) {
-// 	if !ly.HasAnyScroll() {
-// 		ly.Events.Ex(events.MouseScrollEvent, events.DNDMoveEvent, events.MouseMoveEvent)
-// 	}
-// }
-
-// func (ly *Layout) StateIs(states.Focused) bool {
-// 	if ly.IsDisabled() {
-// 		return false
-// 	}
-// 	return ly.ContainsFocus() // needed for getting key events
-// }
 
 ///////////////////////////////////////////////////////////
 //    Stretch and Space -- dummy elements for layouts

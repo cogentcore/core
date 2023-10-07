@@ -304,7 +304,7 @@ type ButtonWidget interface {
 }
 
 ///////////////////////////////////////////////////////////
-// ButtonBase Node2D and ButtonwWidget interface
+// ButtonBase Widget and ButtonwWidget interface
 
 func AsButtonBase(k ki.Ki) *ButtonBase {
 	if ac, ok := k.(ButtonWidget); ok {
