@@ -308,6 +308,27 @@ func Blend(pct float32, x, y color.Color) color.RGBA {
 	return AsRGBA(f32)
 }
 
+/* todo: impl
+
+https://cs.opensource.google/go/go/+/refs/tags/go1.21.2:src/image/draw/draw.go
+
+func AlphaBlend(dst, src color.Color) {
+	// The 0x101 is here for the same reason as in drawRGBA.
+	a := (m - sa) * 0x101
+	// rgba values as uint8:
+	dr := &dst.Pix[i+0]
+	dg := &dst.Pix[i+1]
+	db := &dst.Pix[i+2]
+	da := &dst.Pix[i+3]
+
+	// s is already as uint32
+	*dr = uint8((uint32(*dr)*a/m + sr) >> 8)
+	*dg = uint8((uint32(*dg)*a/m + sg) >> 8)
+	*db = uint8((uint32(*db)*a/m + sb) >> 8)
+	*da = uint8((uint32(*da)*a/m + sa) >> 8)
+}
+*/
+
 // Inverse returns the inverse of the given color
 // (255 - each component);
 // does not change the alpha channel.
