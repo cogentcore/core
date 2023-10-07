@@ -136,7 +136,7 @@ func (sc *Scene) MainStage() *MainStage {
 // FitInWindow fits Scene geometry (pos, size) into given window geom.
 // Calls resize for the new size.
 func (sc *Scene) FitInWindow(winGeom styles.Geom2DInt) {
-	geom := sc.Geom.FitPosSizeInWindow(winGeom)
+	geom := sc.Geom.FitInWindow(winGeom)
 	sc.Resize(geom.Size)
 	sc.Geom.Pos = geom.Pos
 	// fmt.Println("win", winGeom, "geom", geom)
