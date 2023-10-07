@@ -24,7 +24,6 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	rad := st.Border.Radius.Dots()
 
 	prevBg := st.BackgroundColor
-	// the background color we actually use
 	if st.BackgroundColor.IsNil() {
 		// we need to do this to prevent
 		// elements from rendering over themselves
@@ -33,6 +32,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 		// underlying style object is not modified
 		st.BackgroundColor = *surroundBgColor
 	}
+	// the background color we actually use
 	bg := st.StateBackgroundColor()
 	// we revert our change so that the underlying style object is not modified
 	st.BackgroundColor = prevBg
