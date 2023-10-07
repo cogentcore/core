@@ -100,15 +100,15 @@ func (st States) Is(flag enums.BitFlag) bool {
 // StateLayer returns the state layer opacity for the state, appropriate for use
 // as the value of [goki.dev/girl/styles.Style.StateLayer]
 func (st States) StateLayer() float32 {
-	switch st {
-	case Hovered:
-		return 8
-	case Focused:
-		return 10
-	case Active:
-		return 10
-	case Dragging:
+	switch {
+	case st.Is(Dragging):
 		return 16
+	case st.Is(Active):
+		return 10
+	case st.Is(Focused):
+		return 10
+	case st.Is(Hovered):
+		return 8
 	default:
 		return 0
 	}

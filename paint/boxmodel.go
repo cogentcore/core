@@ -37,6 +37,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// we set it to the one specified by the state. This allows for state layers to
 	// work for states automatically by default, but allow overriding it to custom values
 	// if wanted. The user can always set StateLayer to -1 to get no state layer.
+	// fmt.Println(st.Color, st.State, st.StateLayer, st.State.StateLayer())
 	if ssl := st.State.StateLayer(); st.StateLayer == 0 && ssl != 0 {
 		st.StateLayer = ssl
 	}
