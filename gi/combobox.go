@@ -136,11 +136,6 @@ func (cb *ComboBox) ComboBoxStyles() {
 				// }
 			}
 		}
-		if s.Is(states.Focused) {
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Width.Set(units.Dp(1))
-			s.Border.Color.Set(colors.Scheme.Outline)
-		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}

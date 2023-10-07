@@ -616,11 +616,6 @@ func (sr *Slider) SliderStyles() {
 		case s.Is(states.Active):
 			s.Cursor = cursors.Grabbing
 		}
-		if s.Is(states.Focused) {
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Dp(1))
-		}
 	})
 }
 
@@ -772,11 +767,6 @@ func (sb *ScrollBar) ScrollBarStyles() {
 		case s.Is(states.Active):
 			sb.ThumbColor.SetSolid(colors.Palette.Secondary.Tone(60))
 			sb.ValueColor.SetSolid(colors.Palette.Secondary.Tone(60))
-		}
-		if s.Is(states.Focused) {
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Dp(1))
 		}
 	})
 }

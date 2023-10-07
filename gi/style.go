@@ -219,7 +219,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 
 		if s.Is(states.Focused) {
 			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Color.Set(colors.Scheme.Primary.Base)
 			s.Border.Width.Set(units.Dp(1))
 		}
 		if s.Is(states.Selected) {
