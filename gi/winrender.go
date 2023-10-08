@@ -258,7 +258,7 @@ func (w *RenderWin) RenderWindow() {
 
 	if stageMods || rebuild {
 		if !w.GatherScenes() {
-			fmt.Println("RenderWindow: ERROR: no scenes")
+			slog.Error("RenderWindow: no scenes")
 			return
 		}
 	}
