@@ -134,7 +134,6 @@ func (lb *Label) LabelStyles() {
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
-		s.BackgroundColor.SetSolid(colors.Transparent)
 		// Label styles based on https://m3.material.io/styles/typography/type-scale-tokens
 		// TODO: maybe support brand and plain global fonts with larger labels defaulting to brand and smaller to plain
 		switch lb.Type {
@@ -213,13 +212,6 @@ func (lb *Label) LabelStyles() {
 			s.Font.Size.SetDp(36)
 			s.Text.LetterSpacing.SetDp(0)
 			s.Font.Weight = styles.WeightNormal
-		}
-		if s.Is(states.Disabled) {
-			s.Font.Opacity = 0.7
-		}
-		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-			s.Color = colors.Scheme.Select.OnContainer
 		}
 	})
 }

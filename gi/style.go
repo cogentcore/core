@@ -211,7 +211,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	if s.Is(states.Disabled) {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		s.Color = colors.Scheme.OnSurfaceVariant
-		s.Font.Opacity = 0.38
+		s.Opacity = 0.38
 	} else {
 		// default to state layer associated with the state,
 		// which the developer can override in their stylers
