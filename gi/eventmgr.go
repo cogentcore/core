@@ -153,7 +153,9 @@ func (em *EventMgr) RenderWin() *RenderWin {
 func (em *EventMgr) HandleEvent(evi events.Event) {
 	// et := evi.Type()
 	// fmt.Printf("got event type: %v: %v\n", et, evi)
-
+	if evi.IsHandled() {
+		return
+	}
 	switch {
 	case evi.HasPos():
 		em.HandlePosEvent(evi)
@@ -165,15 +167,19 @@ func (em *EventMgr) HandleEvent(evi events.Event) {
 }
 
 func (em *EventMgr) HandleOtherEvent(evi events.Event) {
+	fmt.Println("TODO: Other event not handled", evi)
 }
 
 func (em *EventMgr) HandleFocusEvent(evi events.Event) {
-	if !evi.IsHandled() && em.Focus == nil {
-		if em.PrevFocus != nil {
+	if em.Focus == nil {
+		switch {
+		case em.PrevFocus != nil:
 			em.SetFocus(em.PrevFocus)
 			em.PrevFocus = nil
-		} else {
-			em.FocusNext()
+		case em.StartFocus != nil:
+			em.SetFocus(em.PrevFocus)
+		default:
+			em.FocusFirst()
 		}
 	}
 	if em.Focus != nil {
@@ -640,13 +646,37 @@ func (em *EventMgr) FocusPrev() bool {
 	}
 }
 
-// FocusLast sets the focus on the last item in the tree -- returns true if a
-// focusable item was found
-func (em *EventMgr) FocusLast() bool {
-	var lastItem Widget
-
+// FocusFirst sets the focus on the first focusable item in the tree.
+// returns true if a focusable item was found.
+func (em *EventMgr) FocusFirst() bool {
+	var firstItem Widget
 	focRoot := em.Scene
 
+	focRoot.WalkPre(func(k ki.Ki) bool {
+		wi, wb := AsWidget(k)
+		if wb == nil || wb.This() == nil {
+			return ki.Continue
+		}
+		if !wb.AbilityIs(states.Focusable) {
+			return ki.Continue
+		}
+		firstItem = wi
+		return ki.Break
+	})
+	em.SetFocus(firstItem)
+	if firstItem == nil {
+		return false
+	}
+	return true
+}
+
+// FocusLast sets the focus on the last focusable item in the tree.
+// returns true if a focusable item was found.
+func (em *EventMgr) FocusLast() bool {
+	var lastItem Widget
+	focRoot := em.Scene
+
+	// todo: could use walking functions in ki
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
 		if wb == nil || wb.This() == nil {
