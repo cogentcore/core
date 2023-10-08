@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"image"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -24,8 +26,22 @@ func TooltipConfigStyles(tooltip *Scene) {
 	})
 }
 
-// PopupTooltip pops up a scene displaying the tooltip text
-func PopupTooltip(tooltip string, x, y int, parSc *Scene, name string) *Scene {
+// NewTooltipScene returns a new Tooltip stage with given scene contents,
+// in connection with given widget (which provides key context).
+// Make further configuration choices using Set* methods, which
+// can be chained directly after the New call.
+// Use an appropriate Run call at the end to start the Stage running.
+func NewTooltipScene(sc *Scene, ctx Widget) *PopupStage {
+	return NewPopupStage(Tooltip, sc, ctx)
+}
+
+// NewTooltip pops up a scene displaying the tooltip text for the given widget
+// at the given position.
+func NewTooltip(w Widget, pos image.Point) *PopupStage {
+	sc := StageScene(w.Name() + "-tooltip")
+	sc.Geom.Pos = pos
+	NewLabel(sc, "tooltip").SetText("Hello, World!")
+	return NewTooltipScene(sc, w)
 	/*
 		win := parSc.Win
 		mainSc := win.Scene

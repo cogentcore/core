@@ -108,15 +108,6 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	return st
 }
 
-// NewTooltip returns a new Tooltip stage with given scene contents,
-// in connection with given widget (which provides key context).
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use an appropriate Run call at the end to start the Stage running.
-func NewTooltip(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(Tooltip, sc, ctx)
-}
-
 // NewSnackbar returns a new Snackbar stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which

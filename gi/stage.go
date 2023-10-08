@@ -176,6 +176,8 @@ type Stage interface {
 
 	SetModal() Stage
 
+	SetModeless() Stage
+
 	SetScrim() Stage
 
 	SetClickOff() Stage
@@ -323,7 +325,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 		st.ClickOff = true
 	case Tooltip:
-		st.Modal = true
+		st.Modal = false
 		st.Scrim = false
 	case Snackbar:
 		st.Modal = true
@@ -348,6 +350,11 @@ func (st *StageBase) SetTitle(title string) Stage {
 
 func (st *StageBase) SetModal() Stage {
 	st.Modal = true
+	return st.This
+}
+
+func (st *StageBase) SetModeless() Stage {
+	st.Modal = false
 	return st.This
 }
 
