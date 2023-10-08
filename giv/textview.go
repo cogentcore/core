@@ -2610,30 +2610,28 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 
 // MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.MenuActions) {
-	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
-		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			txf := recv.Embed(TypeTextView).(*TextView)
-			txf.Copy(true)
-		})
+	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Action) {
+		tv.Copy(true)
+	})
 	ac.SetEnabledState(tv.HasSelection())
 	if !tv.IsDisabled() {
 		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(TypeTextView).(*TextView)
-				txf.Cut()
+				tv := recv.Embed(TypeTextView).(*TextView)
+				tv.Cut()
 			})
 		ac.SetEnabledState(tv.HasSelection())
 		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(TypeTextView).(*TextView)
-				txf.Paste()
+				tv := recv.Embed(TypeTextView).(*TextView)
+				tv.Paste()
 			})
-		ac.SetDisabledState(goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).IsEmpty())
+		ac.SetState(goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).IsEmpty(), states.Disabled)
 	} else {
 		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				txf := recv.Embed(TypeTextView).(*TextView)
-				txf.Clear()
+				tv := recv.Embed(TypeTextView).(*TextView)
+				tv.Clear()
 			})
 	}
 }
@@ -4710,26 +4708,26 @@ func (tv *TextView) MouseDragEvent() {
 	we.AddFunc(events.MouseDrag, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		me.SetHandled()
-		txf := recv.Embed(TypeTextView).(*TextView)
-		if !txf.SelectMode {
-			txf.SelectModeToggle()
+		tv := recv.Embed(TypeTextView).(*TextView)
+		if !tv.SelectMode {
+			tv.SelectModeToggle()
 		}
-		pt := txf.PointToRelPos(me.Pos())
-		newPos := txf.PixelToCursor(pt)
-		txf.SetCursorFromMouse(pt, newPos, events.SelectOne)
+		pt := tv.PointToRelPos(me.Pos())
+		newPos := tv.PixelToCursor(pt)
+		tv.SetCursorFromMouse(pt, newPos, events.SelectOne)
 	})
 }
 
 func (tv *TextView) MouseFocusEvent() {
 	we.AddFunc(events.MouseEnter, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(TypeTextView).(*TextView)
-		if txf.IsDisabled() {
+		tv := recv.Embed(TypeTextView).(*TextView)
+		if tv.IsDisabled() {
 			return
 		}
 		me := d.(events.Event)
 		me.SetHandled()
 		// TODO: is this needed?
-		txf.RefreshIfNeeded()
+		tv.RefreshIfNeeded()
 	})
 }
 
@@ -4739,23 +4737,23 @@ func (tv *TextView) TextViewEvents() {
 	tv.MouseMoveEvent(we)
 	tv.MouseDragEvent(we)
 	we.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(TypeTextView).(*TextView)
+		tv := recv.Embed(TypeTextView).(*TextView)
 		me := d.(events.Event)
-		txf.MouseEvent(me)
+		tv.MouseEvent(me)
 	})
 	tv.MouseFocusEvent(we)
 	we.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(TypeTextView).(*TextView)
+		tv := recv.Embed(TypeTextView).(*TextView)
 		kt := d.(*events.Key)
-		txf.KeyInput(kt)
+		tv.KeyInput(kt)
 	})
 
 	// todo: need to handle this separately!!
 	if dlg, ok := tv.Scene.This().(*gi.Dialog); ok {
 		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			txf, _ := recv.Embed(TypeTextView).(*TextView)
+			tv, _ := recv.Embed(TypeTextView).(*TextView)
 			if sig == int64(gi.DialogAccepted) {
-				txf.EditDone()
+				tv.EditDone()
 			}
 		})
 	}
@@ -4807,7 +4805,7 @@ func (tv *TextView) StyleTextView() {
 }
 
 // ApplyStyle calls StyleTextView and sets the style
-func (tv *TextView) ApplyStyle() {
+func (tv *TextView) ApplyStyle(sc *gi.Scene) {
 	tv.SetFlag(int(gi.CanFocus)) // always focusable
 	tv.StyleTextView()
 }

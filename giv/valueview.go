@@ -16,9 +16,11 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events/key"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -437,7 +439,7 @@ type ValueView interface {
 
 	// WidgetType returns an appropriate type of widget to represent the
 	// current value.
-	WidgetType() reflect.Type
+	WidgetType() *gti.Type
 
 	// UpdateWidget updates the widget representation to reflect the current
 	// value.  Must first check for a nil widget -- can be called in a
@@ -455,15 +457,13 @@ type ValueView interface {
 	// trigger this action.
 	HasAction() bool
 
-	// Activate triggers any action associated with this value, such as
-	// pulling up a dialog or chooser for this value.  This is called by
-	// default for single-argument methods that have value representations
-	// with actions.  The scene provides a context for opening other
-	// windows, and the receiver and dlgFunc should receive the DialogSig for
-	// the relevant dialog, or a pass-on call thereof, including the
-	// DialogAccepted or Canceled signal, so that the caller can execute its
-	// own actions based on the user hitting Ok or Cancel.
-	Activate(vp *gi.Scene, fun func())
+	// OpenDialog opens a dialog or chooser for this value.
+	// This is called by default for single-argument methods that have value
+	// representations with actions.  The ctx Widget provides a context
+	// for opening the dialog, and function is called with the the relevant dialog,
+	// so that the caller can execute its own actions based on the user
+	// hitting Ok or Cancel.
+	OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage))
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -548,7 +548,7 @@ type ValueViewBase struct {
 	Idx int `desc:"if Owner is a slice, this is the index for the value in the slice"`
 
 	// type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface
-	WidgetTyp reflect.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
+	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
 	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
@@ -651,7 +651,7 @@ func (vv *ValueViewBase) HasAction() bool {
 	return false
 }
 
-func (vv *ValueViewBase) Activate(vp *gi.Scene, fun func()) {
+func (vv *ValueViewBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -894,7 +894,7 @@ func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //   Base Widget Functions -- these are typically redefined in ValueView subtypes
 
-func (vv *ValueViewBase) WidgetType() reflect.Type {
+func (vv *ValueViewBase) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
@@ -923,7 +923,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
+	tf.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -1098,7 +1098,7 @@ type VersCtrlValueView struct {
 	ValueViewBase
 }
 
-func (vv *VersCtrlValueView) WidgetType() reflect.Type {
+func (vv *VersCtrlValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -1121,7 +1121,7 @@ func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(func(dlg *gi.DialogStage) {
 		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Scene, nil, nil)
+		vvv.OpenDialog(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -1130,7 +1130,7 @@ func (vv *VersCtrlValueView) HasAction() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *VersCtrlValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}

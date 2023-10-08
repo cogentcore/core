@@ -233,9 +233,9 @@ func (sv *SliceViewInline) UpdateValues() {
 	sv.UpdateEnd(updt)
 }
 
-func (sv *SliceViewInline) ApplyStyle() {
+func (sv *SliceViewInline) ApplyStyle(sc *gi.Scene) {
 	sv.ConfigParts(vp)
-	sv.WidgetBase.ApplyStyle()
+	sv.WidgetBase.ApplyStyle(sc)
 }
 
 func (sv *SliceViewInline) Render(vp *gi.Scene) {

@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"reflect"
-
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
@@ -17,6 +15,7 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -29,8 +28,8 @@ type KeyChordValueView struct {
 	ValueViewBase
 }
 
-func (vv *KeyChordValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = TypeKeyChordEdit
+func (vv *KeyChordValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = KeyChordEditType
 	return vv.WidgetTyp
 }
 
@@ -148,7 +147,7 @@ func (kc *KeyChordEdit) KeyChordEvent() {
 	})
 }
 
-func (kc *KeyChordEdit) ApplyStyle() {
+func (kc *KeyChordEdit) ApplyStyle(sc *gi.Scene) {
 	kc.SetCanFocusIfActive()
 	kc.Selectable = true
 	kc.Redrawable = true

@@ -79,13 +79,13 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
 	if len(ld.Text) > 0 {
-		TextViewDialog(nil, ld.Text, DlgOpts{Title: "Lookup: " + text})
+		TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
 		return ld
 	}
 	if ld.Filename != "" {
 		txt := textbuf.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
-		TextViewDialog(nil, txt, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt})
+		TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt}, txt, nil)
 		return ld
 	}
 
@@ -94,11 +94,12 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 // CompleteText does completion for text files
 func CompleteText(data any, text string, posLn, posCh int) (md complete.Matches) {
-	err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
-	if err != nil {
-		fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
-		return md
-	}
+	// todo:
+	// err := gi.InitSpell() // text completion uses the spell code to generate completions and suggestions
+	// if err != nil {
+	// 	fmt.Printf("Could not initialize spelling model: Spelling model needed for text completion: %v", err)
+	// 	return md
+	// }
 
 	md.Seed = complete.SeedWhiteSpace(text)
 	if md.Seed == "" {

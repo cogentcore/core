@@ -6,12 +6,12 @@ package giv
 
 import (
 	"fmt"
-	"reflect"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -106,7 +106,7 @@ type KeyMapValueView struct {
 	ValueViewBase
 }
 
-func (vv *KeyMapValueView) WidgetType() reflect.Type {
+func (vv *KeyMapValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -128,7 +128,7 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeKeyMapValueView).(*KeyMapValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -137,7 +137,7 @@ func (vv *KeyMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KeyMapValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *KeyMapValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}

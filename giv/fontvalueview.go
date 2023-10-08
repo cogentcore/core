@@ -5,11 +5,10 @@
 package giv
 
 import (
-	"reflect"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -23,7 +22,7 @@ type FontValueView struct {
 	ValueViewBase
 }
 
-func (vv *FontValueView) WidgetType() reflect.Type {
+func (vv *FontValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -46,7 +45,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeFontValueView).(*FontValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -55,7 +54,7 @@ func (vv *FontValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FontValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *FontValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}

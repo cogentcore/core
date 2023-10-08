@@ -151,7 +151,7 @@ func (av *ArgView) ConfigArgsGrid() {
 			continue
 		}
 		lbl := sg.Child(i * 2).(*gi.Label)
-		vvb := ad.View.AsValueViewBase()
+		// vvb := ad.View.AsValueViewBase()
 		// vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	avv, _ := recv.Embed(TypeArgView).(*ArgView)
 		// 	// note: updating here is redundant -- relevant field will have already updated

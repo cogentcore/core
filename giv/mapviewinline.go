@@ -216,9 +216,9 @@ func (mv *MapViewInline) UpdateValues() {
 	mv.ConfigParts(vp)
 }
 
-func (mv *MapViewInline) ApplyStyle() {
+func (mv *MapViewInline) ApplyStyle(sc *gi.Scene) {
 	mv.ConfigParts(vp)
-	mv.WidgetBase.ApplyStyle()
+	mv.WidgetBase.ApplyStyle(sc)
 }
 
 func (mv *MapViewInline) Render(vp *gi.Scene) {

@@ -426,12 +426,12 @@ func (mv *MapView) ConfigToolbar() {
 	mv.ToolbarMap = mv.Map
 }
 
-func (mv *MapView) ApplyStyle() {
+func (mv *MapView) ApplyStyle(sc *gi.Scene) {
 	mvp := mv.Sc
 	if mvp != nil && mvp.IsDoingFullRender() {
 		mv.Config()
 	}
-	mv.Frame.ApplyStyle()
+	mv.Frame.ApplyStyle(sc)
 }
 
 func (mv *MapView) Render(vp *gi.Scene) {

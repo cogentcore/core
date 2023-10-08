@@ -5,9 +5,8 @@
 package giv
 
 import (
-	"reflect"
-
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -21,7 +20,7 @@ type FileValueView struct {
 	ValueViewBase
 }
 
-func (vv *FileValueView) WidgetType() reflect.Type {
+func (vv *FileValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -45,7 +44,7 @@ func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeFileValueView).(*FileValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -54,7 +53,7 @@ func (vv *FileValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FileValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *FileValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}
