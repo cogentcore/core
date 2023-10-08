@@ -64,7 +64,7 @@ type FileView struct {
 	SelectedIdx int `desc:"index of currently-selected file in Files list (-1 if none)"`
 
 	// signal for file actions
-	FileSig ki.Signal `desc:"signal for file actions"`
+	// FileSig ki.Signal `desc:"signal for file actions"`
 
 	// [view: -] change notify for current dir
 	Watcher *fsnotify.Watcher `view:"-" desc:"change notify for current dir"`
@@ -284,7 +284,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 }
 
 // Config configures the view
-func (fv *FileView) ConfigWidget(vp *Scene) {
+func (fv *FileView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")

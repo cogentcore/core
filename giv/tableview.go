@@ -246,7 +246,7 @@ func (tv *TableView) IsConfiged() bool {
 }
 
 // Config configures the view
-func (tv *TableView) ConfigWidget(vp *Scene) {
+func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "frame")
@@ -951,7 +951,7 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
+func (tv *TableView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	redo := tv.Frame.DoLayout(vp, parBBox, iter)
 	if !tv.IsConfiged() {
 		return redo

@@ -55,12 +55,6 @@ type TreeView struct {
 	// styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4.
 	OpenDepth int `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
 
-	// signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types
-	TreeViewSig ki.Signal `json:"-" xml:"-" desc:"signal for TreeView -- all are emitted from the root tree view widget, with data = affected node -- see TreeViewSignals for the types"`
-
-	// styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that
-	StateStyles [TreeViewStatesN]styles.Style `json:"-" xml:"-" desc:"styles for different states of the widget -- everything inherits from the base Style which is styled first according to the user-set styles, and then subsequent style settings can override that"`
-
 	// just the size of our widget -- our alloc includes all of our children, but we only draw us
 	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
 
@@ -2020,7 +2014,7 @@ var TreeViewProps = ki.Props{
 	},
 }
 
-func (tv *TreeView) ConfigWidget(vp *Scene) {
+func (tv *TreeView) ConfigWidget(vp *gi.Scene) {
 	// // optimized init -- avoid tree walking
 	if tv.RootView != tv {
 		tv.Scene = tv.RootView.Scene
@@ -2071,7 +2065,7 @@ func (tv *TreeView) ApplyStyle() {
 // TreeView is tricky for alloc because it is both a layout of its children but has to
 // maintain its own bbox for its own widget.
 
-func (tv *TreeView) GetSize(vp *Scene, iter int) {
+func (tv *TreeView) GetSize(vp *gi.Scene, iter int) {
 	tv.InitLayout(vp * Scene)
 	if tv.HasClosedParent() {
 		return // nothing
@@ -2104,7 +2098,7 @@ func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	tv.Parts.DoLayout(vp, parBBox, iter)
 }
 
-func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
+func (tv *TreeView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
@@ -2118,10 +2112,7 @@ func (tv *TreeView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
 	gi.SetUnitContext(&tv.Style, tv.Scene, tv.NodeSize(), psize) // update units with final layout
-	for i := 0; i < int(TreeViewStatesN); i++ {
-		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
-	}
-	tv.BBox = tv.This().(gi.Widget).BBoxes() // only compute once, at this point
+	tv.BBox = tv.This().(gi.Widget).BBoxes()                     // only compute once, at this point
 	tv.This().(gi.Widget).ComputeBBoxes(vp, parBBox, image.Point{})
 
 	if gi.LayoutTrace {
@@ -2155,7 +2146,7 @@ func (tv *TreeView) BBoxes() image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (tv *TreeView) ChildrenBBoxes(vp *Scene) image.Rectangle {
+func (tv *TreeView) ChildrenBBoxes(vp *gi.Scene) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
 		pwi, _ := gi.AsWidget(tv.Par)
@@ -2203,7 +2194,7 @@ func (tv *TreeView) PushBounds() bool {
 	return true
 }
 
-func (tv *TreeView) Render(vp *Scene) {
+func (tv *TreeView) Render(vp *gi.Scene) {
 	if tv.HasClosedParent() {
 		return // nothing
 	}
@@ -2217,15 +2208,15 @@ func (tv *TreeView) Render(vp *Scene) {
 	if tv.PushBounds() {
 		if !tv.ScBBox.Empty() { // we are root and just here for the connections :)
 			tv.UpdateInactive()
-			if tv.StateIs(states.Selected) {
-				tv.Style = tv.StateStyles[TreeViewSel]
-			} else if tv.StateIs(states.Focused) {
-				tv.Style = tv.StateStyles[TreeViewFocus]
-			} else if tv.IsDisabled() {
-				tv.Style = tv.StateStyles[TreeViewInactive]
-			} else {
-				tv.Style = tv.StateStyles[TreeViewActive]
-			}
+			// if tv.StateIs(states.Selected) {
+			// 	tv.Style = tv.StateStyles[TreeViewSel]
+			// } else if tv.StateIs(states.Focused) {
+			// 	tv.Style = tv.StateStyles[TreeViewFocus]
+			// } else if tv.IsDisabled() {
+			// 	tv.Style = tv.StateStyles[TreeViewInactive]
+			// } else {
+			// 	tv.Style = tv.StateStyles[TreeViewActive]
+			// }
 			tv.This().(gi.Widget).SetTypeHandlers()
 
 			// note: this is std except using WidgetSize instead of AllocSize

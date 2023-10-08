@@ -108,7 +108,7 @@ type SliceViewer interface {
 	ItemCtxtMenu(idx int)
 
 	// StdCtxtMenu generates the standard context menu for this view
-	StdCtxtMenu(m *gi.Menu, idx int)
+	StdCtxtMenu(m *gi.MenuActions, idx int)
 
 	// NeedsDoubleReRender returns true if initial render requires a 2nd pass
 	NeedsDoubleReRender() bool
@@ -184,12 +184,6 @@ type SliceViewBase struct {
 
 	// list of currently-dragged indexes
 	DraggedIdxs []int `copy:"-" desc:"list of currently-dragged indexes"`
-
-	// slice view specific signals: insert, delete, double-click
-	SliceViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"slice view specific signals: insert, delete, double-click"`
-
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -374,7 +368,7 @@ func (sv *SliceViewBase) UpdateValues() {
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) ConfigWidget(vp *Scene) {
+func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
@@ -1086,7 +1080,7 @@ func (sv *SliceViewBase) ApplyStyle() {
 	// sg.StartFocus() // need to call this when window is actually active
 }
 
-func (sv *SliceViewBase) Render(vp *Scene) {
+func (sv *SliceViewBase) Render(vp *gi.Scene) {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}

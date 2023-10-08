@@ -1021,9 +1021,6 @@ func (tf *TextField) RenderSelect(sc *Scene) {
 
 	rs := &sc.RenderState
 	pc := &rs.Paint
-	// st := &tf.StateStyles[TextFieldSel]
-	// tf.State = TextFieldSel
-	// tf.RunStylers()
 	tsz := tf.TextWidth(effst, effed)
 	pc.FillBox(rs, spos, mat32.NewVec2(tsz, tf.FontHeight), &tf.SelectColor)
 }

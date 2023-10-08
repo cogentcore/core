@@ -49,12 +49,6 @@ type MapView struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-
-	// map view specific signals: add, delete, double-click
-	MapViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"map view specific signals: add, delete, double-click"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 
@@ -135,7 +129,7 @@ func (mv *MapView) UpdateValues() {
 }
 
 // Config configures the view
-func (mv *MapView) ConfigWidget(vp *Scene) {
+func (mv *MapView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.TypeToolBar, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
@@ -450,7 +444,7 @@ func (mv *MapView) ApplyStyle() {
 	mv.Frame.ApplyStyle()
 }
 
-func (mv *MapView) Render(vp *Scene) {
+func (mv *MapView) Render(vp *gi.Scene) {
 	if mv.IsConfiged() {
 		mv.ToolBar().UpdateActions() // nil safe..
 	}

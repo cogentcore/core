@@ -7,6 +7,7 @@ package giv
 import (
 	"fmt"
 
+	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
 	"goki.dev/goosi/cursor"
 	"goki.dev/ki/v2"
@@ -17,7 +18,7 @@ import (
 
 // Editor supports editing of SVG elements
 type Editor struct {
-	WidgetBase
+	gi.WidgetBase
 
 	// view translation offset (from dragging)
 	Trans mat32.Vec2 `desc:"view translation offset (from dragging)"`
@@ -130,7 +131,7 @@ func (sve *Editor) SetTransform() {
 	sve.SetProp("transform", fmt.Sprintf("translate(%v,%v) scale(%v,%v)", sve.Trans.X, sve.Trans.Y, sve.Scale, sve.Scale))
 }
 
-func (sve *Editor) Render(sc *Scene) {
+func (sve *Editor) Render(sc *gi.Scene) {
 	if sve.PushBounds(sc) {
 		// rs := &sve.Render
 		// if sve.Fill {

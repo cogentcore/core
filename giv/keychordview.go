@@ -74,7 +74,7 @@ type KeyChordEdit struct {
 	FocusActive bool `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
 
 	// [view: -] signal -- only one event, when chord is updated from key input
-	KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
+	// KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
 }
 
 func (kc *KeyChordEdit) OnInit() {

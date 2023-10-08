@@ -134,15 +134,6 @@ type TextView struct {
 	// query replace data
 	QReplace QReplace `json:"-" xml:"-" desc:"query replace data"`
 
-	// [view: -] signal for text view -- see TextViewSignals for the types
-	TextViewSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for text view -- see TextViewSignals for the types"`
-
-	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
-	LinkSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
-
-	// normal style and focus style
-	StateStyles [TextViewStatesN]styles.Style `json:"-" xml:"-" desc:"normal style and focus style"`
-
 	// font height, cached during styling
 	FontHeight float32 `json:"-" xml:"-" desc:"font height, cached during styling"`
 
@@ -1910,7 +1901,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, recv ki.Ki, fun ki.RecvFunc) *gi.Dialog {
+func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, fun func()) *gi.Dialog {
 	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
 	dlg.Modal = true
 
@@ -4785,7 +4776,7 @@ func (tv *TextView) TextViewEvents() {
 //  Widget Interface
 
 // Config calls Init on widget
-// func (tv *TextView) ConfigWidget(vp *Scene) {
+// func (tv *TextView) ConfigWidget(vp *gi.Scene) {
 //
 // }
 
@@ -4809,21 +4800,21 @@ func (tv *TextView) StyleTextView() {
 	if tv.Buf != nil {
 		tv.Buf.Opts.StyleFromProps(tv.Props)
 	}
-	if tv.IsDisabled() {
-		if tv.StateIs(states.Selected) {
-			tv.Style = tv.StateStyles[TextViewSel]
-		} else {
-			tv.Style = tv.StateStyles[TextViewInactive]
-		}
-	} else if tv.NLines == 0 {
-		tv.Style = tv.StateStyles[TextViewInactive]
-	} else if tv.StateIs(states.Focused) {
-		tv.Style = tv.StateStyles[TextViewFocus]
-	} else if tv.StateIs(states.Selected) {
-		tv.Style = tv.StateStyles[TextViewSel]
-	} else {
-		tv.Style = tv.StateStyles[TextViewActive]
-	}
+	// if tv.IsDisabled() {
+	// 	if tv.StateIs(states.Selected) {
+	// 		tv.Style = tv.StateStyles[TextViewSel]
+	// 	} else {
+	// 		tv.Style = tv.StateStyles[TextViewInactive]
+	// 	}
+	// } else if tv.NLines == 0 {
+	// 	tv.Style = tv.StateStyles[TextViewInactive]
+	// } else if tv.StateIs(states.Focused) {
+	// 	tv.Style = tv.StateStyles[TextViewFocus]
+	// } else if tv.StateIs(states.Selected) {
+	// 	tv.Style = tv.StateStyles[TextViewSel]
+	// } else {
+	// 	tv.Style = tv.StateStyles[TextViewActive]
+	// }
 }
 
 // ApplyStyle calls StyleTextView and sets the style
@@ -4833,7 +4824,7 @@ func (tv *TextView) ApplyStyle() {
 }
 
 // GetSize
-func (tv *TextView) GetSize(vp *Scene, iter int) {
+func (tv *TextView) GetSize(vp *gi.Scene, iter int) {
 	if iter > 0 {
 		return
 	}
@@ -4846,7 +4837,7 @@ func (tv *TextView) GetSize(vp *Scene, iter int) {
 }
 
 // DoLayoutn
-func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool {
+func (tv *TextView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	tv.DoLayoutBase(parBBox, iter)
 	for i := 0; i < int(TextViewStatesN); i++ {
 		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
@@ -4862,7 +4853,7 @@ func (tv *TextView) DoLayout(vp *Scene, parBBox image.Rectangle, iter int) bool 
 }
 
 // Render does some preliminary work and then calls render on children
-func (tv *TextView) Render(vp *Scene) {
+func (tv *TextView) Render(vp *gi.Scene) {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	// if tv.NeedsFullReRender() {
 	// 	tv.SetNeedsRefresh()

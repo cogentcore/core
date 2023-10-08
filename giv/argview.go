@@ -25,7 +25,7 @@ type ArgView struct {
 	Title string `desc:"title / prompt to show above the editor fields"`
 
 	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
+	// ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -79,10 +79,6 @@ func (av *ArgView) Disconnect() {
 	av.ViewSig.DisconnectAll()
 }
 
-var ArgViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // SetArgs sets the source args that we are viewing -- rebuilds the children
 // to represent
 func (av *ArgView) SetArgs(arg []ArgData) {
@@ -94,7 +90,7 @@ func (av *ArgView) SetArgs(arg []ArgData) {
 }
 
 // Config configures the view
-func (av *ArgView) ConfigWidget(vp *Scene) {
+func (av *ArgView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.FrameType, "args-grid")

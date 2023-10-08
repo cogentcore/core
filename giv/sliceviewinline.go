@@ -42,9 +42,6 @@ type SliceViewInline struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
@@ -105,7 +102,7 @@ var SliceViewInlineProps = ki.Props{
 }
 
 // ConfigParts configures Parts for the current slice
-func (sv *SliceViewInline) ConfigParts(vp *Scene) {
+func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 	if laser.IfaceIsNil(sv.Slice) {
 		return
 	}
@@ -250,7 +247,7 @@ func (sv *SliceViewInline) ApplyStyle() {
 	sv.WidgetBase.ApplyStyle()
 }
 
-func (sv *SliceViewInline) Render(vp *Scene) {
+func (sv *SliceViewInline) Render(vp *gi.Scene) {
 	if sv.FullReRenderIfNeeded() {
 		return
 	}

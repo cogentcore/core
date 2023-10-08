@@ -460,7 +460,7 @@ type ValueView interface {
 	// the relevant dialog, or a pass-on call thereof, including the
 	// DialogAccepted or Canceled signal, so that the caller can execute its
 	// own actions based on the user hitting Ok or Cancel.
-	Activate(vp *gi.Scene, recv ki.Ki, dlgFunc ki.RecvFunc)
+	Activate(vp *gi.Scene, fun func())
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -513,9 +513,6 @@ type ValueView interface {
 // fallback for everything that doesn't provide a specific ValueViewer type.
 type ValueViewBase struct {
 	ki.Node
-
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update -- data is the value that was set"`
 
 	// the reflect.Value representation of the value
 	Value reflect.Value `desc:"the reflect.Value representation of the value"`

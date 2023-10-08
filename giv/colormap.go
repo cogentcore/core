@@ -34,7 +34,7 @@ type ColorMapView struct {
 	Map *colormap.Map `desc:"the colormap that we view"`
 
 	// [view: -] signal for color map -- triggers when new color map is set via chooser
-	ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
+	// ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
 }
 
 func (cv *ColorMapView) Disconnect() {
@@ -142,10 +142,7 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render(vp *Scene) {
-	if cv.FullReRenderIfNeeded() {
-		return
-	}
+func (cv *ColorMapView) Render(vp *gi.Scene) {
 	if cv.PushBounds() {
 		cv.RenderColorMap()
 		cv.RenderChildren()
@@ -205,7 +202,7 @@ func (vv *ColorMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorMapValueView) Activate(vp *gi.Scene, fun func()) {
 	if vv.IsInactive() {
 		return
 	}

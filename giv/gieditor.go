@@ -204,7 +204,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // }
 
 // Config configures the widget
-func (ge *GiEditor) ConfigWidget(vp *Scene) {
+func (ge *GiEditor) ConfigWidget(vp *gi.Scene) {
 	if ge.KiRoot == nil {
 		return
 	}
@@ -307,7 +307,7 @@ func (ge *GiEditor) SetChanged() {
 	ge.ToolBar().UpdateActions() // nil safe
 }
 
-func (ge *GiEditor) Render(vp *Scene) {
+func (ge *GiEditor) Render(vp *gi.Scene) {
 	ge.ToolBar().UpdateActions()
 	if win := ge.ParentRenderWin(); win != nil {
 		if !win.Is(WinResizing) {

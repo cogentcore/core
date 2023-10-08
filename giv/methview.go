@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/ki/v2/bitflag"
 )
 
 // these are special menus that we ignore
@@ -832,15 +831,15 @@ const (
 )
 
 func (ad *ArgData) HasDef() bool {
-	return bitflag.Has32(int32(ad.Flags), int(ArgDataHasDef))
+	return ad.Flags.HasFlag(ArgDataHasDef)
 }
 
 func (ad *ArgData) SetHasDef() {
-	bitflag.Set32((*int32)(&ad.Flags), int(ArgDataHasDef))
+	return ad.Flags.HasFlag(ArgDataHasDef)
 }
 
 func (ad *ArgData) HasValSet() bool {
-	return bitflag.Has32(int32(ad.Flags), int(ArgDataValSet))
+	return ad.Flags.HasFlag(ArgDataValSet)
 }
 
 // MethArgHist stores the history of method arg values -- used for setting defaults
@@ -895,7 +894,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 				case "value":
 					ad.Default = pv
 					ad.SetHasDef()
-					bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+					ad.Flags.Set(true, ArgDataValSet)
 					nprompt--
 				case "default-field":
 					field := pv.(string)
@@ -909,10 +908,10 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 			}
 		}
 
-		if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenuVal)) {
+		if md.Flags.HasFlag(MethViewHasSubMenuVal) {
 			ad.Default = md.SubMenuVal
 			ad.SetHasDef()
-			bitflag.Set32((*int32)(&ad.Flags), int(ArgDataValSet))
+			ad.Flags.HasFlag(ArgDataValSet)
 			nprompt--
 		}
 
@@ -1063,7 +1062,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 				nac.SetSelected()
 			}
 		}
-		bitflag.Set32((*int32)(&nd.Flags), int(MethViewHasSubMenuVal))
+		nd.Flags.SetFlag(true, MethViewHasSubMenuVal)
 		nac.Data = &nd
 		*m = append(*m, nac)
 	}

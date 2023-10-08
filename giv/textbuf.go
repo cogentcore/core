@@ -127,9 +127,6 @@ type TextBuf struct {
 	// mutex for updating markup delay timer
 	MarkupDelayMu sync.Mutex `json:"-" xml:"-" desc:"mutex for updating markup delay timer"`
 
-	// [view: -] signal for buffer -- see TextBufSignals for the types
-	TextBufSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for buffer -- see TextBufSignals for the types"`
-
 	// the TextViews that are currently viewing this buffer
 	Views []*TextView `json:"-" xml:"-" desc:"the TextViews that are currently viewing this buffer"`
 
@@ -139,11 +136,11 @@ type TextBuf struct {
 	// history of cursor positions -- can move back through them
 	PosHistory []lex.Pos `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 
-	// functions and data for text completion
-	Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
+	// // functions and data for text completion
+	// Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
 
-	// functions and data for spelling correction
-	Spell *gi.Spell `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+	// // functions and data for spelling correction
+	// Spell *gi.Spell `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 
 	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *TextView `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`

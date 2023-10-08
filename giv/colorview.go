@@ -41,12 +41,6 @@ type ColorView struct {
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
-	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
-	ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
-
-	// manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value
-	ManipSig ki.Signal `json:"-" xml:"-" desc:"manipulating signal -- this is sent when sliders are being manipulated -- ViewSig is only sent at end for final selected value"`
-
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 }
@@ -120,10 +114,6 @@ func (cv *ColorView) Disconnect() {
 	cv.ManipSig.DisconnectAll()
 }
 
-var ColorViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) {
 	cv.Color = colors.AsRGBA(clr)
@@ -134,7 +124,7 @@ func (cv *ColorView) SetColor(clr color.Color) {
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget(vp *Scene) {
+func (cv *ColorView) ConfigWidget(vp *gi.Scene) {
 	if cv.HasChildren() {
 		return
 	}
@@ -540,7 +530,7 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
-func (cv *ColorView) Render(vp *Scene) {
+func (cv *ColorView) Render(vp *gi.Scene) {
 	if cv.FullReRenderIfNeeded() {
 		return
 	}
@@ -655,7 +645,7 @@ func (vv *ColorValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorValueView) Activate(vp *gi.Scene, fun func()) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -727,7 +717,7 @@ func (vv *ColorNameValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *ColorNameValueView) Activate(vp *gi.Scene, fun func()) {
 	if vv.IsInactive() {
 		return
 	}

@@ -36,9 +36,6 @@ type Sprite struct {
 
 	// pixels to render -- should be same size as Geom.Size
 	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`
-
-	// optional event signals for given event type
-	// Events map[events.Types]*ki.Signal `desc:"optional event signals for given event type"`
 }
 
 // NewSprite returns a new sprite with given name, which must remain

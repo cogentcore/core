@@ -57,9 +57,6 @@ type SpinBox struct {
 
 	// [view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown
 	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
-
-	// [view: -] signal for spin box -- has no signal types, just emitted when the value changes
-	// SpinBoxSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for spin box -- has no signal types, just emitted when the value changes"`
 }
 
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
