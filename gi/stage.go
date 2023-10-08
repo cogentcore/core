@@ -230,7 +230,7 @@ type Stage interface {
 	// and sceneMods = true if any Scenes have been modified.
 	DoUpdate() (stageMods, sceneMods bool)
 
-	// Delete closes and frees resources for everything in the stage
+	// Delete closes and frees resources for everything in the stage.
 	// Scenes have their own Delete method that allows them to Preserve
 	// themselves for re-use, but stages are always struck when done.
 	Delete()

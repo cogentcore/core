@@ -53,6 +53,22 @@ func (sm *StageMgrBase) Top() Stage {
 	return sm.Stack.ValByIdx(sz - 1)
 }
 
+// TopOfType returns the top-most Stage in the Stack
+// of the given type, under Read Lock
+func (sm *StageMgrBase) TopOfType(typ StageTypes) Stage {
+	sm.Mu.RLock()
+	defer sm.Mu.RUnlock()
+
+	l := sm.Stack.Len()
+	for i := l - 1; i <= 0; i-- {
+		st := sm.Stack.ValByIdx(i)
+		if st.AsBase().Type == typ {
+			return st
+		}
+	}
+	return nil
+}
+
 // Push pushes a new Stage to top, under Write lock
 func (sm *StageMgrBase) Push(st Stage) {
 	sm.Mu.Lock()
