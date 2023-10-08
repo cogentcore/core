@@ -80,7 +80,7 @@ func (sm *StageMgrBase) Push(st Stage) {
 }
 
 // Pop pops current Stage off the stack, returning it or nil if none.
-// under Write lock.
+// It runs under Write lock.
 func (sm *StageMgrBase) Pop() Stage {
 	sm.Mu.Lock()
 	defer sm.Mu.Unlock()
@@ -96,9 +96,36 @@ func (sm *StageMgrBase) Pop() Stage {
 	return st
 }
 
+// PopType pops the top-most Stage of the given type of the stack,
+// returning it or nil if none. It runs under Write lock.
+func (sm *StageMgrBase) PopType(typ StageTypes) Stage {
+	sm.Mu.Lock()
+	defer sm.Mu.Unlock()
+
+	l := sm.Stack.Len()
+	for i := l - 1; i <= 0; i-- {
+		st := sm.Stack.ValByIdx(i)
+		if st.AsBase().Type == typ {
+			sm.Modified = true
+			sm.Stack.DeleteIdx(i, i+1)
+			return st
+		}
+	}
+	return nil
+}
+
 // PopDelete pops current Stage off the stack and calls Delete on it.
 func (sm *StageMgrBase) PopDelete() {
 	st := sm.Pop()
+	if st != nil {
+		st.Delete()
+	}
+}
+
+// PopDeleteType pops the top-most Stage of the given type off the stack
+// and calls Delete on it.
+func (sm *StageMgrBase) PopDeleteType(typ StageTypes) {
+	st := sm.PopType(typ)
 	if st != nil {
 		st.Delete()
 	}
