@@ -125,8 +125,14 @@ type Style struct {
 	// border around the box element
 	Border Border `xml:"border" desc:"border around the box element"`
 
+	// MaxBorder is the largest border that will ever be rendered around the element, the size of which is used for computing the effective margin to allocate for the element
+	MaxBorder Border `desc:"MaxBorder is the largest border that will ever be rendered around the element, the size of which is used for computing the effective margin to allocate for the element"`
+
 	// prop: box-shadow = the box shadows to render around box (can have multiple)
 	BoxShadow []Shadow `xml:"box-shadow" desc:"prop: box-shadow = the box shadows to render around box (can have multiple)"`
+
+	// MaxBoxShadow contains the largest shadows that will ever be rendered around the element, the size of which are used for computing the effective margin to allocate for the element
+	MaxBoxShadow []Shadow `desc:"MaxBoxShadow contains the largest shadows that will ever be rendered around the element, the size of which are used for computing the effective margin to allocate for the element"`
 
 	// font parameters -- no xml prefix -- also has color, background-color
 	Font Font `desc:"font parameters -- no xml prefix -- also has color, background-color"`
@@ -306,18 +312,14 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 // in dots -- todo: must complicate this if we want different spacing on
 // different sides box outside-in: margin | border | padding | content
 func (s *Style) BoxSpace() SideFloats {
-	return s.EffMargin().Add(s.Border.Width.Dots()).Add(s.Padding.Dots())
+	return s.TotalMargin().Add(s.Border.Width.Dots()).Add(s.Padding.Dots())
 }
 
-// EffMargin returns the effective margin of the element
-// holding the style, using the maximum of the actual
-// margin and the box shadow margin.
-func (s *Style) EffMargin() SideFloats {
-	// TODO: this does not follow the CSS spec
-	// (shadow is supposed to be outside of the box model),
-	// but that is incompatible with the way we position things.
-	// Maybe we could come up with a better way to do this at some point.
-	return s.Margin.Dots().Max(s.BoxShadowMargin())
+// TotalMargin returns the total effective margin of the element
+// holding the style, using the sum of the actual margin, the max
+// border width, and the max box shadow effective margin.
+func (s *Style) TotalMargin() SideFloats {
+	return s.Margin.Dots().Add(s.MaxBorder.Width.Dots()).Add(s.MaxBoxShadowMargin())
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

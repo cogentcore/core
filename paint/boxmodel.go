@@ -19,8 +19,8 @@ func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs styles.Bor
 // DrawStdBox draws the CSS "standard box" model using given style.
 // This is used for rendering widgets such as buttons, textfields, etc in a GUI.
 func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full) {
-	mpos := pos.Add(st.EffMargin().Pos())
-	msz := sz.Sub(st.EffMargin().Size())
+	mpos := pos.Add(st.TotalMargin().Pos())
+	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
 
 	// the background color we actually use

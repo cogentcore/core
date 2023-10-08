@@ -203,8 +203,6 @@ func (s *Shadow) Margin() SideFloats {
 	// Spread benefits every side.
 	// Offset goes either way, depending on side.
 	// Every side must be positive.
-	// TODO: add s.Blur.Dots here without breaking
-	// clear area
 	return NewSideFloats(
 		mat32.Max(s.Spread.Dots-s.VOffset.Dots+s.Blur.Dots/2, 0),
 		mat32.Max(s.Spread.Dots+s.HOffset.Dots+s.Blur.Dots/2, 0),
@@ -241,15 +239,13 @@ func (s *Style) BoxShadowPosSize(startPos, startSize mat32.Vec2) (pos mat32.Vec2
 	return minPos, maxMax.Sub(minPos)
 }
 
-// BoxShadowMargin returns the maximum box shadow margin
-// of the style, calculated through [Shadow.Margin]
-func (s *Style) BoxShadowMargin() SideFloats {
-	return BoxShadowMargin(s.BoxShadow)
+// MaxBoxShadowMargin returns the maximum effective box
+// shadow margin of the style, calculated through [Shadow.Margin]
+func (s *Style) MaxBoxShadowMargin() SideFloats {
+	return BoxShadowMargin(s.MaxBoxShadow)
 }
 
-// TODO(kai): there should be a better way to do this
-
-// BoxShadowMargin returns the maximum box shadow margin
+// BoxShadowMargin returns the maximum effective box shadow margin
 // of the given box shadows, calculated through [Shadow.Margin].
 func BoxShadowMargin(shadows []Shadow) SideFloats {
 	max := SideFloats{}
