@@ -152,7 +152,7 @@ var Hotspots = map[enums.Enum]image.Point{
 	ResizeNWSE:          image.Pt(128, 128),
 	ZoomIn:              image.Pt(128, 128),
 	ZoomOut:             image.Pt(128, 128),
-	ScreenshotSelection: image.Pt(128, 128), // TODO
-	ScreenshotWindow:    image.Pt(128, 128), // TODO
-	Poof:                image.Pt(128, 128), // TODO
+	ScreenshotSelection: image.Pt(128, 128),
+	ScreenshotWindow:    image.Pt(128, 128),
+	Poof:                image.Pt(64, 24),
 }
