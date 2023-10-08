@@ -5,9 +5,9 @@
 package cursorimg
 
 import (
-	"image"
 	"image/color"
 	"image/draw"
+	"os"
 	"testing"
 
 	"goki.dev/cursors"
@@ -15,7 +15,11 @@ import (
 )
 
 func TestHotspot(t *testing.T) {
-	const size = 64
+	err := os.MkdirAll("testdata", 0750)
+	if err != nil {
+		t.Fatal(err)
+	}
+	const size = 32
 	for _, c := range cursors.CursorValues() {
 		if c == cursors.None {
 			continue
@@ -24,9 +28,9 @@ func TestHotspot(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		red := color.NRGBA{R: 255, A: 200}
-		hs := cur.ImageHotspot(size)
-		draw.Draw(cur.Image.(draw.Image), image.Rect(hs.X-3, hs.Y-3, hs.X+3, hs.Y+3), image.NewUniform(red), hs.Sub(image.Pt(3, 3)), draw.Over)
+		red := color.RGBA{R: 255, A: 255}
+		hs := cur.Hotspot
+		cur.Image.(draw.Image).Set(hs.X, hs.Y, red)
 		err = images.Save(cur.Image, "testdata/"+c.String()+".png")
 		if err != nil {
 			t.Fatal(err)

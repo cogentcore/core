@@ -20,15 +20,10 @@ import (
 type Cursor struct {
 	// The cached image of the cursor.
 	Image image.Image
-	// The hotspot is expressed in terms of two times the percentage of the
-	// size of the cursor it is from the top-left corner (0-200).
+	// The size of the cursor.
+	Size int
+	// The hotspot is expressed in terms of raw cursor pixels.
 	Hotspot image.Point
-}
-
-// ImageHotspot returns the hotspot of the cursor when
-// it is an image of the given size
-func (c *Cursor) ImageHotspot(size int) image.Point {
-	return c.Hotspot.Mul(size).Div(200)
 }
 
 // Cursors contains all of the cached rendered cursors, specified first
@@ -69,7 +64,8 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	}
 	return &Cursor{
 		Image:   img,
-		Hotspot: hot,
+		Size:    size,
+		Hotspot: hot.Mul(size).Div(200),
 	}, nil
 
 	// TODO: render from SVG at some point
