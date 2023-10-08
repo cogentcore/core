@@ -17,8 +17,8 @@ import (
 // DebugEnumSizes is a startup function that reports current sizes of some big
 // enums, just to make sure everything is well below 64..
 func DebugEnumSizes() {
-	fmt.Printf("ki.NodeFlagsN: %d\n", ki.FlagsN)
-	fmt.Printf("gi.NodeFlagsN: %d\n", gi.NodeFlagsN)
+	fmt.Printf("ki.WidgetFlagsN: %d\n", ki.FlagsN)
+	fmt.Printf("gi.WidgetFlagsN: %d\n", gi.WidgetFlagsN)
 	fmt.Printf("gi.WinFlagN: %d\n", gi.WinFlagsN)
 	fmt.Printf("gi.ScFlagN: %d\n", gi.ScFlagsN)
 }

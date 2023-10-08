@@ -20,6 +20,7 @@ import (
 	"goki.dev/glop/bools"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // StructView represents a struct, creating a property editor of the fields --
@@ -77,7 +78,7 @@ func (sv *StructView) OnInit() {
 }
 
 func (sv *StructView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "toolbar":
 			w.AddStyles(func(s *styles.Style) {
@@ -104,15 +105,6 @@ func (sv *StructView) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sv *StructView) Disconnect() {
-	sv.Frame.Disconnect()
-	sv.ViewSig.DisconnectAll()
-}
-
-var StructViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
 func (sv *StructView) SetStruct(st any) {
@@ -123,7 +115,7 @@ func (sv *StructView) SetStruct(st any) {
 		sv.SetFullReRender()
 		if sv.Struct != nil {
 			if k, ok := sv.Struct.(ki.Ki); ok {
-				k.NodeSignal().Disconnect(sv.This())
+				// k.NodeSignal().Disconnect(sv.This())
 			}
 		}
 		sv.Struct = st
@@ -212,7 +204,7 @@ func (sv *StructView) ToolBar() *gi.ToolBar {
 // one has been defined for this struct type through its registered type
 // properties.
 func (sv *StructView) ConfigToolbar() {
-	if laser.IfaceIsNil(sv.Struct) {
+	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
 	if sv.ToolbarStru == sv.Struct {
@@ -263,7 +255,7 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 
 // ConfigStructGrid configures the StructGrid for the current struct
 func (sv *StructView) ConfigStructGrid() {
-	if laser.IfaceIsNil(sv.Struct) {
+	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
 	sg := sv.StructGrid()

@@ -17,6 +17,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -86,7 +87,7 @@ func (tv *TreeView) OnInit() {
 }
 
 func (tv *TreeView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
@@ -126,11 +127,6 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			menu.Indicator = icons.None
 		}
 	}
-}
-
-func (tv *TreeView) Disconnect() {
-	tv.WidgetBase.Disconnect()
-	tv.TreeViewSig.DisconnectAll()
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -425,7 +421,7 @@ type TreeViewFlags ki.Flags //enums:bitflag
 
 const (
 	// TreeViewFlagClosed means node is toggled closed (children not visible)
-	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.NodeFlagsN) + iota
+	TreeViewFlagClosed TreeViewFlags = TreeViewFlags(gi.WidgetFlagsN) + iota
 
 	// TreeViewFlagChanged is updated on the root node whenever a gui edit is
 	// made through the tree view on the tree -- this does not track any other
@@ -1033,7 +1029,7 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
+func (tv *TreeView) MakeContextMenu(m *gi.MenuActions) {
 	// derived types put native menu code here
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
@@ -1339,7 +1335,7 @@ func (tv *TreeView) Paste() {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
+func (tv *TreeView) MakePasteMenu(m *gi.MenuActions, data any) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1374,7 +1370,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 		log.Printf("TreeView PasteMenu nil SrcNode in: %v\n", tv.Path())
 		return
 	}
-	var menu gi.Menu
+	var menu gi.MenuActions
 	tv.MakePasteMenu(&menu, md)
 	pos := tv.ContextMenuPos()
 	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
@@ -1583,7 +1579,7 @@ func (tv *TreeView) Dragged(de events.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
+func (tv *TreeView) MakeDropMenu(m *gi.MenuActions, data any, mod events.DropMods) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1623,7 +1619,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (tv *TreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.Menu
+	var menu gi.MenuActions
 	tv.MakeDropMenu(&menu, md, mod)
 	pos := tv.ContextMenuPos()
 	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
@@ -1698,7 +1694,7 @@ func (tv *TreeView) RootTreeView() *TreeView {
 	return rn
 }
 
-func (tv *TreeView) KeyInput(kt *events.Key) {
+func (tv *TreeView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", tv.Path())
 	}
@@ -1886,7 +1882,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts(vp *Scene) {
+func (tv *TreeView) ConfigParts(vp *gi.Scene) {
 	parts := tv.NewParts(gi.LayoutHoriz)
 	parts.Style.Template = "giv.TreeView.Parts"
 	config := ki.Config{}
@@ -1929,7 +1925,6 @@ func (tv *TreeView) ConfigParts(vp *Scene) {
 }
 
 var TreeViewProps = ki.Props{
-	ki.EnumTypeFlag: TypeTreeViewFlags,
 	"CtxtMenuActive": ki.PropSlice{
 		{"SrcAddChild", ki.Props{
 			"label": "Add Child",
@@ -2248,25 +2243,26 @@ func (tv *TreeView) SetTypeHandlers() {
 	tv.TreeViewEvents()
 }
 
-func (tv *TreeView) FocusChanged(change gi.FocusChanges) {
-	switch change {
-	case gi.FocusLost:
-		tv.UpdateSig()
-	case gi.FocusGot:
-		if tv.This() == tv.RootView.This() {
-			sl := tv.SelectedViews()
-			if len(sl) > 0 {
-				fsl := sl[0]
-				if fsl != tv {
-					fsl.GrabFocus()
-					return
-				}
-			}
-		}
-		tv.ScrollToMe()
-		tv.EmitFocusedSignal()
-		tv.UpdateSig()
-	case gi.FocusInactive: // don't care..
-	case gi.FocusActive:
-	}
-}
+//
+// func (tv *TreeView) FocusChanged(change gi.FocusChanges) {
+// 	switch change {
+// 	case gi.FocusLost:
+// 		tv.UpdateSig()
+// 	case gi.FocusGot:
+// 		if tv.This() == tv.RootView.This() {
+// 			sl := tv.SelectedViews()
+// 			if len(sl) > 0 {
+// 				fsl := sl[0]
+// 				if fsl != tv {
+// 					fsl.GrabFocus()
+// 					return
+// 				}
+// 			}
+// 		}
+// 		tv.ScrollToMe()
+// 		tv.EmitFocusedSignal()
+// 		tv.UpdateSig()
+// 	case gi.FocusInactive: // don't care..
+// 	case gi.FocusActive:
+// 	}
+// }

@@ -47,7 +47,7 @@ func (ge *GiEditor) OnInit() {
 }
 
 func (ge *GiEditor) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "title":
 			title := child.(*gi.Label)
@@ -318,7 +318,6 @@ func (ge *GiEditor) Render(vp *gi.Scene) {
 }
 
 var GiEditorProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
@@ -479,8 +478,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		inClosePrompt = true
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 			Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-			[]string{"Close Without Saving", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					win.Close()

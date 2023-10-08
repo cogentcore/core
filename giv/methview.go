@@ -17,6 +17,7 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // these are special menus that we ignore
@@ -162,7 +163,7 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 // cases, and then falls back on "CtxtMenu".  Returns false if there is no
 // context menu defined for this type, or on errors (which are programmer
 // errors sent to log).
-func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
+func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.MenuActions) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -335,7 +336,7 @@ func MethViewErr(vtyp reflect.Type, msg string) {
 // MethViewTypeProps gets props, typ of val, returns false if not found or
 // other err
 func MethViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
-	if laser.IfaceIsNil(val) {
+	if laser.AnyIsNil(val) {
 		return nil, nil, false
 	}
 	vtyp := reflect.TypeOf(val)
@@ -971,7 +972,7 @@ func MethViewUpdateFunc(act *gi.Action) {
 }
 
 // MethViewSubMenuFunc is a MakeMenuFunc for items that have submenus
-func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
+func MethViewSubMenuFunc(aki ki.Ki, m *gi.MenuActions) {
 	ac := aki.(*gi.Action)
 	md := ac.Data.(*MethViewData)
 	smd := md.SubMenuSlice
@@ -1005,12 +1006,12 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	md.Sc.Win.MainMenuUpdated()
 }
 
-func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
+func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.MenuActions, isSub bool, defstr string, gotDef bool) {
 	sz := mvnp.Len()
 	if sz == 0 {
 		return
 	}
-	*m = make(gi.Menu, 0, sz)
+	*m = make(gi.MenuActions, 0, sz)
 	e1 := mvnp.Index(0)
 	if e1.Kind() == reflect.Slice { // multi-slice -- sub-menus
 		for i := 0; i < sz; i++ {

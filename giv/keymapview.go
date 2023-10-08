@@ -68,8 +68,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		inClosePrompt = true
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save KeyMaps Before Closing?",
 			Prompt: "Do you want to save any changes to std preferences keymaps file before closing, or Cancel the close and do a Save to a different file?"},
-			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					km.SavePrefs()
@@ -138,7 +137,7 @@ func (vv *KeyMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KeyMapValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *KeyMapValueView) Activate(vp *gi.Scene, fun func()) {
 	if vv.IsInactive() {
 		return
 	}

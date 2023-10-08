@@ -147,32 +147,6 @@ func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	sb.Off = fr.Off
 }
 
-// func (sb *SliderBase) Disconnect() {
-// 	sb.WidgetBase.Disconnect()
-// 	// sb.SliderSig.DisconnectAll()
-// }
-
-// SliderSignals are signals that sliders can send
-type SliderSignals int64
-
-const (
-	// SliderValueChanged indicates that the value has changed -- if tracking
-	// is enabled, then this tracks online changes -- otherwise only at the
-	// end.  The data on the signal is the float32 Value.
-	SliderValueChanged SliderSignals = iota
-
-	// SliderPressed means slider was pushed down but not yet up.
-	SliderPressed
-
-	// SliderReleased means the slider has been released after being pressed.
-	SliderReleased
-
-	// SliderMoved means the slider position has moved (low level move event).
-	SliderMoved
-
-	SliderSignalsN
-)
-
 func (sb *SliderBase) OnInit() {
 	sb.Step = 0.1
 	sb.PageStep = 0.2

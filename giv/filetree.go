@@ -28,6 +28,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -1427,7 +1428,7 @@ func BlameDialog(avp *gi.Scene, fname string, blame, fbytes []byte) *TwinTextVie
 	title := "VCS Blame: " + DirAndFile(fname)
 	dlg := gi.NewStdDialog(gi.DlgOpts{Title: title}, gi.AddOk, gi.NoCancel)
 
-	frame := dlg.Frame()
+	frame := dlg.Stage.Scene
 	_, prIdx := dlg.PromptWidget(frame)
 
 	tv := frame.InsertNewChild(TypeTwinTextViews, prIdx+1, "twin-view").(*TwinTextViews)
@@ -1519,7 +1520,6 @@ func (fn *FileNode) UpdateAllVcs() {
 }
 
 var FileNodeProps = ki.Props{
-	ki.EnumTypeFlag: TypeFileNodeFlags,
 	"CallMethods": ki.PropSlice{
 		{"RenameFile", ki.Props{
 			"label": "Rename...",
@@ -1767,7 +1767,7 @@ func (ftv *FileTreeView) OnInit() {
 }
 
 func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
@@ -1913,7 +1913,7 @@ func (ftv *FileTreeView) FileTreeViewEvents() {
 	}
 }
 
-func (ftv *FileTreeView) KeyInput(kt *events.Key) {
+func (ftv *FileTreeView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TreeView KeyInput: %v\n", ftv.Path())
 	}
@@ -2045,10 +2045,9 @@ func (ftv *FileTreeView) DeleteFilesImpl() {
 // DeleteFiles calls DeleteFile on any selected nodes. If any directory is selected
 // all files and subdirectories are also deleted.
 func (ftv *FileTreeView) DeleteFiles() {
-	gi.ChoiceDialog(ftv.Sc, gi.DlgOpts{Title: "Delete Files?",
+	gi.ChoiceDialog(ftv, gi.DlgOpts{Title: "Delete Files?",
 		Prompt: "Ok to delete file(s)?  This is not undoable and files are not moving to trash / recycle bin. If any selections are directories all files and subdirectories will also be deleted."},
-		[]string{"Delete Files", "Cancel"},
-		ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		[]string{"Delete Files", "Cancel"}, func(dlg *gi.DialogStage) {
 			switch sig {
 			case 0:
 				ftv.DeleteFilesImpl()
@@ -2441,8 +2440,7 @@ func (ftv *FileTreeView) PasteMimeCopyFilesCheck(tdir *FileNode, md mimedata.Mim
 	if len(existing) > 0 {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "File(s) Exist in Target Dir, Overwrite?",
 			Prompt: fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing)},
-			[]string{"No, Cancel", "Yes, Overwrite"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"No, Cancel", "Yes, Overwrite"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					ftv.DropCancel()
@@ -2500,8 +2498,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	if len(existing) == 1 && fname == tfn.Nm {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files, or cancel?", tfn.Nm)},
-			[]string{"Overwrite Target", "Diff Files", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"Overwrite Target", "Diff Files", "Cancel"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2517,7 +2514,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files, or cancel?", tfn.Nm, fname, fname)},
 			[]string{"Overwrite Target", "Overwrite Existing", "Diff to Target", "Diff to Existing", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2540,8 +2537,7 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 	} else {
 		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
 			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files, or cancel?", tfn.Nm, fname, fname)},
-			[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"},
-			ftv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					CopyFile(tpath, srcpath, mode)
@@ -2684,7 +2680,6 @@ var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
 })
 
 var FileTreeViewProps = ki.Props{
-	ki.EnumTypeFlag: TypeTreeViewFlags,
 	"CtxtMenuActive": ki.PropSlice{
 		{"ShowFileInfo", ki.Props{
 			"label": "File Info",

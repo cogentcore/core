@@ -29,6 +29,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
 	"goki.dev/glop/indent"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
@@ -156,9 +157,6 @@ type TextView struct {
 	lastFilename   gi.FileName
 }
 
-// event functions for this type
-var TextViewHandlers = InitWidgetHandlers(&TextView{})
-
 // NewTextViewLayout adds a new layout with textview
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Textview should always have a parent Layout to manage
@@ -170,7 +168,11 @@ func NewTextViewLayout(parent ki.Ki, name string) (*TextView, *gi.Layout) {
 }
 
 func (tv *TextView) OnInit() {
-	tv.SetTypeHandlers(&TextViewListen)
+	tv.TextViewEvents()
+	tv.TextViewStyles()
+}
+
+func (tv *TextView) TextViewStyles() {
 	tv.AddStyles(func(s *styles.Style) {
 		tv.CursorWidth.SetDp(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
@@ -199,12 +201,6 @@ func (tv *TextView) OnInit() {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
 		}
 	})
-}
-
-func (tv *TextView) Disconnect() {
-	tv.WidgetBase.Disconnect()
-	tv.TextViewSig.DisconnectAll()
-	tv.LinkSig.DisconnectAll()
 }
 
 // TextViewSignals are signals that text view can send
@@ -257,7 +253,7 @@ type TextViewFlags ki.Flags //enums:bitflag
 
 const (
 	// TextViewNeedsRefresh indicates when refresh is required
-	TextViewNeedsRefresh TextViewFlags = TextViewFlags(gi.NodeFlagsN) + iota
+	TextViewNeedsRefresh TextViewFlags = TextViewFlags(gi.WidgetFlagsN) + iota
 
 	// TextViewInReLayout indicates that we are currently resizing ourselves via parent layout
 	TextViewInReLayout
@@ -1781,7 +1777,7 @@ func (tv *TextView) ISearchStart() {
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *TextView) ISearchKeyInput(kt *events.Key) {
+func (tv *TextView) ISearchKeyInput(kt events.Event) {
 	r := kt.Rune
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
@@ -1901,12 +1897,12 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, fun func()) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts, gi.AddOk, gi.AddCancel)
-	dlg.Modal = true
+func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg := gi.NewStdDialog(ctx, opts, fun)
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
+
 	tff := frame.InsertNewChild(gi.TypeComboBox, prIdx+1, "find").(*gi.ComboBox)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
@@ -1929,18 +1925,12 @@ func QReplaceDialog(avp *gi.Scene, find string, lexitems bool, opts gi.DlgOpts, 
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
 // QReplaceDialogValues gets the string values
-func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
-	frame := dlg.Frame()
+func QReplaceDialogValues(dlg *gi.DialogStage) (find, repl string, lexItems bool) {
+	frame := dlg.Stage.Scene
 	tff := frame.ChildByName("find", 1).(*gi.ComboBox)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
@@ -1961,9 +1951,8 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv.Scene, find, tv.QReplace.LexItems, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		dlg := send.(*gi.Dialog)
-		if sig == int64(gi.DialogAccepted) {
+	QReplaceDialog(tv, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, tv.QReplace.LexItems, func(dlg *gi.DialogStage) {
+		if dlg.Accepted {
 			find, repl, lexItems := QReplaceDialogValues(dlg)
 			tv.QReplaceStart(find, repl, lexItems)
 		}
@@ -2061,7 +2050,7 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *TextView) QReplaceKeyInput(kt *events.Key) {
+func (tv *TextView) QReplaceKeyInput(kt events.Event) {
 	wupdt := tv.TopUpdateStart()
 	defer tv.TopUpdateEnd(wupdt)
 
@@ -2620,7 +2609,7 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 }
 
 // MakeContextMenu builds the textview context menu
-func (tv *TextView) MakeContextMenu(m *gi.Menu) {
+func (tv *TextView) MakeContextMenu(m *gi.MenuActions) {
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			txf := recv.Embed(TypeTextView).(*TextView)
@@ -2746,7 +2735,7 @@ func (tv *TextView) Lookup() {
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
-func (tv *TextView) ISpellKeyInput(kt *events.Key) {
+func (tv *TextView) ISpellKeyInput(kt events.Event) {
 	if !tv.Buf.IsSpellEnabled(tv.CursorPos) {
 		return
 	}
@@ -4085,7 +4074,7 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode e
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
-func (tv *TextView) ShiftSelect(kt *events.Key) {
+func (tv *TextView) ShiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		if tv.SelectReg == textbuf.RegionNil {
@@ -4098,7 +4087,7 @@ func (tv *TextView) ShiftSelect(kt *events.Key) {
 
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
-func (tv *TextView) ShiftSelectExtend(kt *events.Key) {
+func (tv *TextView) ShiftSelectExtend(kt events.Event) {
 	hasShift := kt.HasAnyModifier(goosi.Shift)
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
@@ -4107,7 +4096,7 @@ func (tv *TextView) ShiftSelectExtend(kt *events.Key) {
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tv *TextView) KeyInput(kt *events.Key) {
+func (tv *TextView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
@@ -4459,7 +4448,7 @@ func (tv *TextView) KeyInput(kt *events.Key) {
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
-func (tv *TextView) KeyInputInsertBra(kt *events.Key) {
+func (tv *TextView) KeyInputInsertBra(kt events.Event) {
 	bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
 	defer tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
 	pos := tv.CursorPos
@@ -4509,7 +4498,7 @@ func (tv *TextView) KeyInputInsertBra(kt *events.Key) {
 }
 
 // KeyInputInsertRune handles the insertion of a typed character
-func (tv *TextView) KeyInputInsertRune(kt *events.Key) {
+func (tv *TextView) KeyInputInsertRune(kt events.Event) {
 	kt.SetHandled()
 	if tv.ISearch.On {
 		tv.CancelComplete()
@@ -4902,38 +4891,37 @@ func (tv *TextView) Render(vp *gi.Scene) {
 
 // SetTypeHandlers indirectly sets connections between mouse and key events and actions
 func (tv *TextView) SetTypeHandlers() {
-	tv.TextViewEvents()
 }
 
 // FocusChanged appropriate actions for various types of focus changes
-func (tv *TextView) FocusChanged(change gi.FocusChanges) {
-	switch change {
-	case gi.FocusLost:
-		tv.ClearFlag(int(TextViewFocusActive))
-		// tv.EditDone()
-		tv.StopCursor() // make sure no cursor
-		tv.UpdateSig()
-		goosi.TheApp.HideVirtualKeyboard()
-		// fmt.Printf("lost focus: %v\n", tv.Nm)
-	case gi.FocusGot:
-		tv.SetFlag(int(TextViewFocusActive))
-		tv.EmitFocusedSignal()
-		tv.UpdateSig()
-		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-		// fmt.Printf("got focus: %v\n", tv.Nm)
-	case gi.FocusInactive:
-		tv.ClearFlag(int(TextViewFocusActive))
-		tv.StopCursor()
-		// tv.EditDone()
-		// tv.UpdateSig()
-		goosi.TheApp.HideVirtualKeyboard()
-		// fmt.Printf("focus inactive: %v\n", tv.Nm)
-	case gi.FocusActive:
-		// fmt.Printf("focus active: %v\n", tv.Nm)
-		tv.SetFlag(int(TextViewFocusActive))
-		// tv.UpdateSig()
-		// todo: see about cursor
-		tv.StartCursor()
-		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-	}
-}
+// func (tv *TextView) FocusChanged(change gi.FocusChanges) {
+// 	switch change {
+// 	case gi.FocusLost:
+// 		tv.ClearFlag(int(TextViewFocusActive))
+// 		// tv.EditDone()
+// 		tv.StopCursor() // make sure no cursor
+// 		tv.UpdateSig()
+// 		goosi.TheApp.HideVirtualKeyboard()
+// 		// fmt.Printf("lost focus: %v\n", tv.Nm)
+// 	case gi.FocusGot:
+// 		tv.SetFlag(int(TextViewFocusActive))
+// 		tv.EmitFocusedSignal()
+// 		tv.UpdateSig()
+// 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
+// 		// fmt.Printf("got focus: %v\n", tv.Nm)
+// 	case gi.FocusInactive:
+// 		tv.ClearFlag(int(TextViewFocusActive))
+// 		tv.StopCursor()
+// 		// tv.EditDone()
+// 		// tv.UpdateSig()
+// 		goosi.TheApp.HideVirtualKeyboard()
+// 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
+// 	case gi.FocusActive:
+// 		// fmt.Printf("focus active: %v\n", tv.Nm)
+// 		tv.SetFlag(int(TextViewFocusActive))
+// 		// tv.UpdateSig()
+// 		// todo: see about cursor
+// 		tv.StartCursor()
+// 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
+// 	}
+// }

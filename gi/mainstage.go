@@ -226,6 +226,7 @@ func (st *MainStage) RunDialog() *MainStage {
 		st.Type = Window            // critical: now is its own window!
 		sc.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
+		DialogRenderWins.Add(win)
 		win.GoStartEventLoop()
 		return st
 	}

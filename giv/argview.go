@@ -10,6 +10,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
@@ -43,7 +44,7 @@ func (av *ArgView) OnInit() {
 }
 
 func (av *ArgView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "title":
 			title := child.(*gi.Label)
@@ -74,18 +75,13 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (av *ArgView) Disconnect() {
-	av.Frame.Disconnect()
-	av.ViewSig.DisconnectAll()
-}
-
 // SetArgs sets the source args that we are viewing -- rebuilds the children
 // to represent
 func (av *ArgView) SetArgs(arg []ArgData) {
 	updt := false
 	updt = av.UpdateStart()
 	av.Args = arg
-	av.Config()
+	av.Config(av.Sc)
 	av.UpdateEnd(updt)
 }
 
@@ -125,7 +121,7 @@ func (av *ArgView) SetTitle(title string) {
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
 func (av *ArgView) ConfigArgsGrid() {
-	if laser.IfaceIsNil(av.Args) {
+	if laser.AnyIsNil(av.Args) {
 		return
 	}
 	sg := av.ArgsGrid()
@@ -146,7 +142,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config) // not sure if always unique?
 	if mods {
-		av.SetFullReRender()
+		av.SetNeedsLayout(av.Sc, updt)
 	} else {
 		updt = sg.UpdateStart()
 	}
@@ -157,11 +153,11 @@ func (av *ArgView) ConfigArgsGrid() {
 		}
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := ad.View.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data any) {
-			avv, _ := recv.Embed(TypeArgView).(*ArgView)
-			// note: updating here is redundant -- relevant field will have already updated
-			avv.ViewSig.Emit(avv.This(), 0, nil)
-		})
+		// vvb.ViewSig.ConnectOnly(av.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	avv, _ := recv.Embed(TypeArgView).(*ArgView)
+		// 	// note: updating here is redundant -- relevant field will have already updated
+		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
+		// })
 		lbl.Text = ad.Name
 		lbl.Tooltip = ad.Desc
 		widg := sg.Child((i * 2) + 1).(gi.Widget)

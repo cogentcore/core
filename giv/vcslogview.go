@@ -46,7 +46,7 @@ func (lv *VCSLogView) OnInit() {
 }
 
 func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "a-tf", "b-tf":
 			w.AddStyles(func(s *styles.Style) {
@@ -198,13 +198,8 @@ func (lv *VCSLogView) ConfigToolBar() {
 
 }
 
-// VCSLogViewProps are style properties for DebugView
-var VCSLogViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // VCSLogViewDialog opens a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogViewDialog(repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog {
+func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.DialogStage {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"
@@ -214,15 +209,13 @@ func VCSLogViewDialog(repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog 
 	if since != "" {
 		title += " since: " + since
 	}
-	dlg := gi.NewStdDialog(gi.DlgOpts{Title: title}, gi.NoOk, gi.NoCancel)
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title}, nil)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	lv := frame.InsertNewChild(TypeVCSLogView, prIdx+1, "vcslog").(*VCSLogView)
 	lv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	lv.Config(repo, lg, file, since)
 
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, nil, nil)
 	return dlg
 }

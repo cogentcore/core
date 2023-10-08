@@ -14,6 +14,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/ki/v2"
@@ -97,21 +98,12 @@ func (kc *KeyChordEdit) OnInit() {
 	})
 }
 
-func (kc *KeyChordEdit) Disconnect() {
-	kc.Label.Disconnect()
-	kc.KeyChordSig.DisconnectAll()
-}
-
-var KeyChordEditProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // ChordUpdated emits KeyChordSig when a new chord has been entered
 func (kc *KeyChordEdit) ChordUpdated() {
 	kc.KeyChordSig.Emit(kc.This(), 0, kc.Text)
 }
 
-func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
+func (kc *KeyChordEdit) MakeContextMenu(m *gi.MenuActions) {
 	m.AddAction(gi.ActOpts{Label: "Clear"},
 		kc, func(recv, send ki.Ki, sig int64, data any) {
 			kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
@@ -170,29 +162,29 @@ func (kc *KeyChordEdit) SetTypeHandlers() {
 	kc.KeyChordEvent()
 }
 
-func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
-	switch change {
-	case gi.FocusLost:
-		kc.FocusActive = false
-		kc.ClearSelected()
-		kc.ChordUpdated()
-		kc.UpdateSig()
-	case gi.FocusGot:
-		kc.FocusActive = true
-		kc.SetSelected(true)
-		kc.ScrollToMe()
-		kc.EmitFocusedSignal()
-		kc.UpdateSig()
-	case gi.FocusInactive:
-		kc.FocusActive = false
-		kc.ClearSelected()
-		kc.ChordUpdated()
-		kc.UpdateSig()
-	case gi.FocusActive:
-		// we don't re-activate on keypress here, so that you don't end up stuck
-		// on a given keychord
-		// kc.SetSelected()
-		// kc.FocusActive = true
-		// kc.ScrollToMe()
-	}
-}
+// func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
+// 	switch change {
+// 	case gi.FocusLost:
+// 		kc.FocusActive = false
+// 		kc.ClearSelected()
+// 		kc.ChordUpdated()
+// 		kc.UpdateSig()
+// 	case gi.FocusGot:
+// 		kc.FocusActive = true
+// 		kc.SetSelected(true)
+// 		kc.ScrollToMe()
+// 		kc.EmitFocusedSignal()
+// 		kc.UpdateSig()
+// 	case gi.FocusInactive:
+// 		kc.FocusActive = false
+// 		kc.ClearSelected()
+// 		kc.ChordUpdated()
+// 		kc.UpdateSig()
+// 	case gi.FocusActive:
+// 		// we don't re-activate on keypress here, so that you don't end up stuck
+// 		// on a given keychord
+// 		// kc.SetSelected()
+// 		// kc.FocusActive = true
+// 		// kc.ScrollToMe()
+// 	}
+// }

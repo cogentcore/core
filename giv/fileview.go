@@ -18,7 +18,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -88,7 +87,7 @@ func (fv *FileView) OnInit() {
 }
 
 func (fv *FileView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "files-row":
 			fr := child.(*gi.Layout)
@@ -144,8 +143,6 @@ func (fv *FileView) Disconnect() {
 		close(fv.DoneWatcher)
 		fv.DoneWatcher = nil
 	}
-	fv.Frame.Disconnect()
-	fv.FileSig.DisconnectAll()
 }
 
 // FileViewFilterFunc is a filtering function for files -- returns true if the
@@ -211,10 +208,6 @@ func (fv *FileView) SelectFile() {
 		}
 		fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
 	}
-}
-
-var FileViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // STYTODO: get rid of this or make it use actual color values
@@ -825,7 +818,7 @@ func (fv *FileView) FileViewEvents() {
 	})
 }
 
-func (fv *FileView) KeyInput(kt *events.Key) {
+func (fv *FileView) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("FileView KeyInput: %v\n", fv.Path())
 	}
@@ -848,10 +841,6 @@ func (fv *FileView) KeyInput(kt *events.Key) {
 		sf := fv.SelField()
 		sf.GrabFocus()
 	}
-}
-
-func (fv *FileView) StateIs(states.Focused) bool {
-	return true // always.. we're typically a dialog anyway
 }
 
 ////////////////////////////////////////////////////////////////////////////////

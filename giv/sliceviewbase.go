@@ -21,9 +21,11 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/filecat"
 )
@@ -38,7 +40,7 @@ type SliceViewer interface {
 	AsSliceViewBase() *SliceViewBase
 
 	// Config configures the view
-	Config()
+	// Config()
 
 	// IsConfiged returns true if is fully configured for display
 	IsConfiged() bool
@@ -239,7 +241,7 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "grid-lay": // grid layout
 			gl := child.(*gi.Layout)
@@ -271,12 +273,6 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sv *SliceViewBase) Disconnect() {
-	sv.Frame.Disconnect()
-	sv.SliceViewSig.DisconnectAll()
-	sv.ViewSig.DisconnectAll()
-}
-
 func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 	return sv
 }
@@ -288,7 +284,7 @@ func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice
 func (sv *SliceViewBase) SetSlice(sl any) {
-	if laser.IfaceIsNil(sl) {
+	if laser.AnyIsNil(sl) {
 		sv.Slice = nil
 		return
 	}
@@ -483,7 +479,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 
 	sg.DeleteChildren(ki.DestroyKids)
 
-	if laser.IfaceIsNil(sv.Slice) {
+	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
@@ -619,7 +615,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if laser.IfaceIsNil(sv.Slice) {
+	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
@@ -688,7 +684,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if laser.IfaceIsNil(sv.Slice) {
+	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -1017,7 +1013,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 // ConfigToolbar configures the toolbar actions
 func (sv *SliceViewBase) ConfigToolbar() {
-	if laser.IfaceIsNil(sv.Slice) {
+	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
 	if sv.ToolbarSlice == sv.Slice {
@@ -1101,15 +1097,15 @@ func (sv *SliceViewBase) SetTypeHandlers() {
 	sv.SliceViewBaseEvents()
 }
 
-func (sv *SliceViewBase) StateIs(states.Focused) bool {
-	if !sv.ContainsFocus() {
-		return false
-	}
-	if sv.IsDisabled() {
-		return sv.InactKeyNav
-	}
-	return true
-}
+// func (sv *SliceViewBase) StateIs(states.Focused) bool {
+// 	if !sv.ContainsFocus() {
+// 		return false
+// 	}
+// 	if sv.IsDisabled() {
+// 		return sv.InactKeyNav
+// 	}
+// 	return true
+// }
 
 //////////////////////////////////////////////////////////////////////////////
 //  Row access methods
@@ -1764,7 +1760,7 @@ func (sv *SliceViewBase) PasteIdx(idx int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
+func (sv *SliceViewBase) MakePasteMenu(m *gi.MenuActions, data any, idx int) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1788,7 +1784,7 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 // a menu to determine what specifically to do
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	sv.UnselectAllIdxs()
-	var menu gi.Menu
+	var menu gi.MenuActions
 	sv.MakePasteMenu(&menu, md, idx)
 	pos := sv.IdxPos(idx)
 	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
@@ -1901,7 +1897,7 @@ func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods, idx int) {
+func (sv *SliceViewBase) MakeDropMenu(m *gi.MenuActions, data any, mod events.DropMods, idx int) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1934,7 +1930,7 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods,
 // Drop pops up a menu to determine what specifically to do with dropped items
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.Menu
+	var menu gi.MenuActions
 	sv.MakeDropMenu(&menu, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
 	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
@@ -2021,7 +2017,7 @@ func (sv *SliceViewBase) DropCancel() {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
+func (sv *SliceViewBase) StdCtxtMenu(m *gi.MenuActions, idx int) {
 	if sv.isArray {
 		return
 	}
@@ -2052,7 +2048,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if val == nil {
 		return
 	}
-	var menu gi.Menu
+	var menu gi.MenuActions
 
 	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
 		if sv.ShowViewCtxtMenu {
@@ -2075,7 +2071,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 }
 
 // KeyInputNav supports multiple selection navigation keys
-func (sv *SliceViewBase) KeyInputNav(kt *events.Key) {
+func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	kf := gi.KeyFun(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers)
 	if selMode == events.SelectOne {
@@ -2110,7 +2106,7 @@ func (sv *SliceViewBase) KeyInputNav(kt *events.Key) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputActive(kt *events.Key) {
+func (sv *SliceViewBase) KeyInputActive(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
@@ -2159,7 +2155,7 @@ func (sv *SliceViewBase) KeyInputActive(kt *events.Key) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputInactive(kt *events.Key) {
+func (sv *SliceViewBase) KeyInputInactive(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
 	}

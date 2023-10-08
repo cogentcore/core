@@ -243,11 +243,11 @@ type DlgOpts struct {
 	Data any
 }
 
-// StdDialog configures a standard DialogStage per the options provided.
+// NewStdDialog configures a standard DialogStage per the options provided.
 // Call Run() to run the returned dialog (can be further configed).
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
-func StdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
+func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
 	dlg := NewDialog(StageScene("std-dialog"), ctx)
 	if opts.Title != "" {
 		dlg.Title(opts.Title)
@@ -270,25 +270,24 @@ func StdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStag
 	return dlg
 }
 
-/*
-// RecycleStdDialog looks for existing dialog window with same Data --
+// RecycleStdDialog looks for existing dialog window with same Data.
 // if found brings that to the front, returns it, and true bool.
-// else (and if data is nil) calls NewStdDialog, returns false.
-func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
+// else (and if data is nil) calls StdDialog, returns false.
+func RecycleStdDialog(ctx Widget, opts DlgOpts, data any, fun func(dlg *DialogStage)) (*DialogStage, bool) {
 	if data == nil {
-		return NewStdDialog(opts, ok, cancel), false
+		return NewStdDialog(ctx, opts, fun), false
 	}
-	ew, has := DialogRenderWins.FindData(data)
-	if has && ew.Scene.NumChildren() > 0 {
-		ew.RenderWin.Raise()
+	ew, has := DialogRenderWins.FindData(data) // todo: this needs to save DialogStage not renderwin
+	_ = ew
+	if has {
+		// ew.RenderWin.Raise()
 		// dlg := ew.Child(0).Embed(TypeDialog).(*Dialog)
 		// return dlg, true
 	}
-	dlg := NewStdDialog(opts, ok, cancel)
+	dlg := NewStdDialog(ctx, opts, fun)
 	dlg.Data = data
 	return dlg, false
 }
-*/
 
 //////////////////////////////////////////////////////////////////////////
 //     Specific Dialogs
@@ -300,7 +299,7 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
 func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
-	dlg := StdDialog(ctx, opts, fun)
+	dlg := NewStdDialog(ctx, opts, fun)
 	return dlg
 }
 
@@ -311,7 +310,7 @@ func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogS
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
 func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *DialogStage)) *DialogStage {
-	dlg := StdDialog(ctx, opts, fun)
+	dlg := NewStdDialog(ctx, opts, fun)
 
 	sc := dlg.Stage.Scene
 	bb := dlg.ConfigButtonBox()
@@ -355,7 +354,7 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
 func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fun func(dlg *DialogStage)) *DialogStage {
-	dlg := StdDialog(ctx, opts, fun)
+	dlg := NewStdDialog(ctx, opts, fun)
 	dlg.Data = strval
 	prIdx := dlg.PromptWidgetIdx()
 	tf := dlg.Stage.Scene.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
@@ -376,7 +375,7 @@ func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fu
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func NewKiDialog(avp *Scene, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := StdDialog(opts, AddOk, AddCancel)
+	dlg := NewStdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
 	_, prIdx := dlg.PromptWidget()

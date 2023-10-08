@@ -38,7 +38,7 @@ func (tv *TwinTextViews) OnInit() {
 }
 
 func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "text-a-lay", "text-b-lay":
 			w.AddStyles(func(s *styles.Style) {
@@ -121,9 +121,4 @@ func (tv *TwinTextViews) TextViews() (*TextView, *TextView) {
 	av := a.Child(0).(*TextView)
 	bv := b.Child(0).(*TextView)
 	return av, bv
-}
-
-// TwinTextViewsProps are style properties for TwinTextViews
-var TwinTextViewsProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }

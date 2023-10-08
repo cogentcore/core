@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // MapView represents a map, creating a property editor of the values --
@@ -66,7 +67,7 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "map-grid":
 			mg := child.(*gi.Frame)
@@ -84,12 +85,6 @@ func (mv *MapView) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (mv *MapView) Disconnect() {
-	mv.Frame.Disconnect()
-	mv.MapViewSig.DisconnectAll()
-	mv.ViewSig.DisconnectAll()
-}
-
 // SetMap sets the source map that we are viewing -- rebuilds the children to
 // represent this map
 func (mv *MapView) SetMap(mp any) {
@@ -97,10 +92,6 @@ func (mv *MapView) SetMap(mp any) {
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
 	mv.Config()
-}
-
-var MapViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // MapViewSignals are signals that mapview can send, mostly for editing
@@ -175,7 +166,7 @@ func (mv *MapView) KiPropTag() string {
 
 // ConfigMapGrid configures the MapGrid for the current map
 func (mv *MapView) ConfigMapGrid() {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	sg := mv.MapGrid()
@@ -314,7 +305,7 @@ func (mv *MapView) SetChanged() {
 // MapChangeValueType changes the type of the value for given map element at
 // idx -- for maps with any values
 func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -350,7 +341,7 @@ func (mv *MapView) ToggleSort() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapView) MapAdd() {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -368,7 +359,7 @@ func (mv *MapView) MapAdd() {
 
 // MapDelete deletes a key-value from the map
 func (mv *MapView) MapDelete(key reflect.Value) {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()
@@ -388,7 +379,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 
 // ConfigToolbar configures the toolbar actions
 func (mv *MapView) ConfigToolbar() {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable

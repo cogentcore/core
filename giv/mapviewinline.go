@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // MapViewInline represents a map as a single line widget, for smaller maps
@@ -48,7 +49,7 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
@@ -58,15 +59,6 @@ func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
 			})
 		}
 	}
-}
-
-func (mv *MapViewInline) Disconnect() {
-	mv.WidgetBase.Disconnect()
-	mv.ViewSig.DisconnectAll()
-}
-
-var MapViewInlineProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
@@ -79,7 +71,7 @@ func (mv *MapViewInline) SetMap(mp any) {
 
 // ConfigParts configures Parts for the current map
 func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	config := ki.Config{}
@@ -175,7 +167,7 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 				// }
 			}
 			dlg := MapViewDialog(mvv.Scene, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
-			mvvvk := dlg.Frame().ChildByType(TypeMapView, ki.Embeds, 2)
+			mvvvk := dlg.Stage.Scene.ChildByType(TypeMapView, ki.Embeds, 2)
 			if mvvvk != nil {
 				mvvv := mvvvk.(*MapView)
 				mvvv.MapValView = mvv.MapValView
@@ -200,7 +192,7 @@ func (mv *MapViewInline) SetChanged() {
 
 // MapAdd adds a new entry to the map
 func (mv *MapViewInline) MapAdd() {
-	if laser.IfaceIsNil(mv.Map) {
+	if laser.AnyIsNil(mv.Map) {
 		return
 	}
 	updt := mv.UpdateStart()

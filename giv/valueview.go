@@ -4,6 +4,8 @@
 
 package giv
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"image/color"
@@ -19,6 +21,7 @@ import (
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 func init() {
@@ -255,7 +258,7 @@ func ToValueView(it any, tags string) ValueView {
 			ki.InitNode(vv)
 			return vv
 		}
-		if laser.IfaceIsNil(it) {
+		if laser.AnyIsNil(it) {
 			vv := &NilValueView{}
 			ki.InitNode(vv)
 			return vv
@@ -554,11 +557,6 @@ type ValueViewBase struct {
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-func (vv *ValueViewBase) Disconnect() {
-	vv.Node.Disconnect()
-	vv.ViewSig.DisconnectAll()
-}
-
 func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
 	return vv
 }
@@ -653,7 +651,7 @@ func (vv *ValueViewBase) HasAction() bool {
 	return false
 }
 
-func (vv *ValueViewBase) Activate(vp *gi.Scene, recv ki.Ki, fun ki.RecvFunc) {
+func (vv *ValueViewBase) Activate(vp *gi.Scene, fun func()) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -691,7 +689,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 					gi.ChoiceDialog(vp,
 						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
 						[]string{"Cancel Change", "Overwrite"},
-						vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+						func(dlg *gi.DialogStage) {
 							switch sig {
 							case 0:
 								if vp != nil {
@@ -942,7 +940,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	tf.TextFieldSig.ConnectOnly(func(dlg *gi.DialogStage) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(TypeValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)
@@ -991,7 +989,7 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.MenuActions) bool {
 	return CtxtMenuView(val, inactive, vp, menu)
 }
 
@@ -1120,7 +1118,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	ac.ActionSig.ConnectOnly(func(dlg *gi.DialogStage) {
 		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.Activate(ac.Scene, nil, nil)
@@ -1132,7 +1130,7 @@ func (vv *VersCtrlValueView) HasAction() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *VersCtrlValueView) Activate(vp *gi.Scene, fun func()) {
 	if vv.IsInactive() {
 		return
 	}

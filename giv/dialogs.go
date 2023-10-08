@@ -13,7 +13,7 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -29,20 +29,20 @@ type DlgOpts struct {
 	// optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc.
 	Prompt string `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
 
-	// optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs
-	CSS ki.Props `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	// display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not.
+	Ok bool `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+
+	// display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not.
+	Cancel bool `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
+
+	// if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one
+	Data any `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
-
-	// display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not.
-	Ok bool `desc:"display the Ok button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
-
-	// display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not.
-	Cancel bool `desc:"display the Cancel button, in most View dialogs where it otherwise is not shown by default -- these views always apply edits immediately, and typically this obviates the need for Ok and Cancel, but sometimes you're giving users a temporary object to edit, and you want them to indicate if they want to proceed or not."`
 
 	// if true, user cannot add elements of the slice
 	NoAdd bool `desc:"if true, user cannot add elements of the slice"`
@@ -53,9 +53,6 @@ type DlgOpts struct {
 	// if true all fields will be inactive
 	Inactive bool `desc:"if true all fields will be inactive"`
 
-	// if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one
-	Data any `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
-
 	// filename, e.g., for TextView, to get highlighting
 	Filename string `desc:"filename, e.g., for TextView, to get highlighting"`
 
@@ -65,26 +62,26 @@ type DlgOpts struct {
 
 // ToGiOpts converts giv opts to gi opts
 func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
-	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, CSS: d.CSS}
+	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: d.Ok, Cancel: d.Cancel}
 }
 
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
+func TextViewDialog(ctx gi.Widget, text []byte, opts DlgOpts) *TextView {
 	var dlg *gi.Dialog
-	if opts.Data != nil {
-		recyc := false
-		dlg, recyc = gi.RecycleStdDialog(opts.Data, opts.ToGiOpts(), opts.Ok, opts.Cancel)
-		if recyc {
-			return TextViewDialogTextView(dlg)
-		}
-	} else {
-		dlg = gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
-	}
+	// if opts.Data != nil {
+	// 	recyc := false
+	// 	dlg, recyc = gi.RecycleStdDialog(opts.Data, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	// 	if recyc {
+	// 		return TextViewDialogTextView(dlg)
+	// 	}
+	// } else {
+	dlg = gi.NewStdDialog(ctx, opts.ToGiOpts())
+	// }
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx()
 
 	tb := &TextBuf{}
 	tb.InitName(tb, "text-view-dialog-buf")
@@ -99,7 +96,7 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 		s.SetStretchMax()
 	})
 	tv := NewTextView(tlv, "text-view")
-	tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
+	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetDisabled()
 	tv.SetBuf(tb)
 	tv.AddStyles(func(s *styles.Style) {
@@ -108,94 +105,73 @@ func TextViewDialog(avp *gi.Scene, text []byte, opts DlgOpts) *TextView {
 
 	tb.SetText(text) // triggers remarkup
 
-	bbox, _ := dlg.ButtonBox(frame)
-	if bbox == nil {
-		bbox = dlg.AddButtonBox(frame)
-	}
-	cpb := gi.NewButton(bbox, "copy-to-clip")
-	cpb.SetText("Copy To Clipboard")
-	cpb.SetIcon(icons.ContentCopy)
-	cpb.ButtonSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.ButtonClicked) {
-			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			goosi.TheApp.ClipBoard(ddlg.Win.RenderWin).Write(mimedata.NewTextBytes(text))
-		}
+	bbox := dlg.ConfigButtonBox()
+	cpb := gi.NewButton(bbox, "copy-to-clip").
+		SetText("Copy To Clipboard").
+		SetIcon(icons.ContentCopy).On(events.Click, func(e events.Event) {
+		dlg.Stage.Scene.ClipBoard().Write(mimedata.NewTextBytes(text))
 	})
-
-	dlg.UpdateEndNoSig(true) // going to be shown
-	dlg.Open(0, 0, avp, nil)
 	return tv
 }
 
 // TextViewDialogTextView returns the text view from a TextViewDialog
-func TextViewDialogTextView(dlg *gi.Dialog) *TextView {
-	frame := dlg.Frame()
+func TextViewDialogTextView(dlg *gi.DialogStage) *TextView {
+	frame := dlg.Stage.Scene
 	tlv := frame.ChildByName("text-lay", 2)
 	tv := tlv.ChildByName("text-view", 0)
 	return tv.(*TextView)
 }
 
-// StructViewDialog is for editing fields of a structure using a StructView --
-// optionally connects to given signal receiving object and function for
+// StructViewDialog is for editing fields of a structure using a StructView.
+// Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 // gopy:interface=handle
-func StructViewDialog(avp *gi.Scene, stru any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(stru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), stru, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TypeStructView, prIdx+1, "struct-view").(*StructView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
+	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	if opts.Inactive {
 		sv.SetDisabled()
 	}
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetStruct(stru)
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, func() {
-		MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
-	})
+	// dlg.Open(0, 0, avp, func() {
+	// 	MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
+	// })
 	return dlg
 }
 
-// MapViewDialog is for editing elements of a map using a MapView -- optionally
-// connects to given signal receiving object and function for dialog signals
+// MapViewDialog is for editing elements of a map using a MapView.
+// Optionally connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 // gopy:interface=handle
-func MapViewDialog(avp *gi.Scene, mp any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
 	// note: map is not directly comparable, so we have to use the pointer here..
 	mptr := reflect.ValueOf(mp).Pointer()
-	dlg, recyc := gi.RecycleStdDialog(mptr, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), mptr, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeMapView, prIdx+1, "map-view").(*MapView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
+	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetMap(mp)
-
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, func() {
-		MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
-	})
+	// dlg.Open(0, 0, avp, func() {
+	// 	MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
+	// })
 	return dlg
 }
 
@@ -204,17 +180,17 @@ func MapViewDialog(avp *gi.Scene, mp any, opts DlgOpts, recv ki.Ki, dlgFunc ki.R
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func SliceViewDialog(avp *gi.Scene, slice any, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
+	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
@@ -223,14 +199,9 @@ func SliceViewDialog(avp *gi.Scene, slice any, opts DlgOpts, styleFunc SliceView
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
 
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, func() {
-		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
-	})
+	// dlg.Open(0, 0, avp, func() {
+	// 	MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
+	// })
 	return dlg
 }
 
@@ -238,17 +209,16 @@ func SliceViewDialog(avp *gi.Scene, slice any, opts DlgOpts, styleFunc SliceView
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).  This version does not have the style function.
 // gopy:interface=handle
-func SliceViewDialogNoStyle(avp *gi.Scene, slice any, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(false)
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
@@ -256,14 +226,9 @@ func SliceViewDialogNoStyle(avp *gi.Scene, slice any, opts DlgOpts, recv ki.Ki, 
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
 
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, func() {
-		MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
-	})
+	// dlg.Open(0, 0, avp, func() {
+	// 	MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
+	// })
 	return dlg
 }
 
@@ -272,51 +237,43 @@ func SliceViewDialogNoStyle(avp *gi.Scene, slice any, opts DlgOpts, recv ki.Ki, 
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
 // gopy:interface=handle
-func SliceViewSelectDialog(avp *gi.Scene, slice, curVal any, opts DlgOpts, styleFunc SliceViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	if opts.CSS == nil {
-		opts.CSS = ki.Props{
-			"textfield": ki.Props{
-				":inactive": ki.Props{
-					"background-color": &gi.Prefs.Colors.Control,
-				},
-			},
-		}
-	}
-	dlg, recyc := gi.RecycleStdDialog(slice, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	// if opts.CSS == nil {
+	// 	opts.CSS = ki.Props{
+	// 		"textfield": ki.Props{
+	// 			":inactive": ki.Props{
+	// 				"background-color": &gi.Prefs.Colors.Control,
+	// 			},
+	// 		},
+	// 	}
+	// }
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slice)
 
-	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(SliceViewDoubleClicked) {
-			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			ddlg.Accept()
-		}
-	})
-
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
+	// sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(SliceViewDoubleClicked) {
+	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
+	// 		ddlg.Accept()
+	// 	}
+	// })
 	return dlg
 }
 
 // SliceViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
-	frame := dlg.Frame()
+func SliceViewSelectDialogValue(dlg *gi.DialogStage) int {
+	frame := dlg.Stage.Scene
 	sv := frame.ChildByName("slice-view", 0)
 	if sv != nil {
 		svv := sv.(*SliceView)
@@ -330,17 +287,16 @@ func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func TableViewDialog(avp *gi.Scene, slcOfStru any, opts DlgOpts, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), opts.Ok, opts.Cancel)
+func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc TableViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(false)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
@@ -352,14 +308,9 @@ func TableViewDialog(avp *gi.Scene, slcOfStru any, opts DlgOpts, styleFunc Table
 	}
 	sv.SetSlice(slcOfStru)
 
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, func() {
-		MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
-	})
+	// dlg.Open(0, 0, avp, func() {
+	// 	MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
+	// })
 	return dlg
 }
 
@@ -369,51 +320,44 @@ func TableViewDialog(avp *gi.Scene, slcOfStru any, opts DlgOpts, styleFunc Table
 // reporting selection events, and dlgFunc for the overall dialog signals.
 // Also has an optional styling function for styling elements of the table.
 // gopy:interface=handle
-func TableViewSelectDialog(avp *gi.Scene, slcOfStru any, opts DlgOpts, initRow int, styleFunc TableViewStyleFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	if opts.CSS == nil {
-		opts.CSS = ki.Props{
-			"textfield": ki.Props{
-				":inactive": ki.Props{
-					"background-color": &gi.Prefs.Colors.Control,
-				},
-			},
-		}
-	}
-	dlg, recyc := gi.RecycleStdDialog(slcOfStru, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow int, styleFunc TableViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	// if opts.CSS == nil {
+	// 	opts.CSS = ki.Props{
+	// 		"textfield": ki.Props{
+	// 			":inactive": ki.Props{
+	// 				"background-color": &gi.Prefs.Colors.Control,
+	// 			},
+	// 		},
+	// 	}
+	// }
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(true)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slcOfStru)
 
-	sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(SliceViewDoubleClicked) {
-			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			ddlg.Accept()
-		}
-	})
+	// sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(SliceViewDoubleClicked) {
+	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
+	// 		ddlg.Accept()
+	// 	}
+	// })
 
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
 // TableViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func TableViewSelectDialogValue(dlg *gi.Dialog) int {
-	frame := dlg.Frame()
+func TableViewSelectDialogValue(dlg *gi.DialogStage) int {
+	frame := dlg.Stage.Scene
 	sv := frame.ChildByName("tableview", 0)
 	if sv != nil {
 		svv := sv.(*TableView)
@@ -430,40 +374,41 @@ var FontChooserSizeDots = 18
 // FontChooserDialog for choosing a font -- the recv and func signal receivers
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
-func FontChooserDialog(avp *gi.Scene, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
+func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
 	FontChooserSizeDots = int(avp.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
-	dlg := TableViewSelectDialog(avp, &paint.FontLibrary.FontInfo, opts, -1, FontInfoStyleFunc, recv, dlgFunc)
+	dlg := TableViewSelectDialog(ctx, opts, &paint.FontLibrary.FontInfo, -1, FontInfoStyleFunc, fun)
 	return dlg
 }
 
 func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
-	if col == 4 {
-		finf, ok := slice.([]paint.FontInfo)
-		if ok {
-			widg.SetProp("font-family", (finf)[row].Name)
-			widg.SetProp("font-stretch", (finf)[row].Stretch)
-			widg.SetProp("font-weight", (finf)[row].Weight)
-			widg.SetProp("font-style", (finf)[row].Style)
-			widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
-			widg.AsWidget().SetFullReRender()
-		}
+	if col != 4 {
+		return
+	}
+	finf, ok := slice.([]paint.FontInfo)
+	if ok {
+		widg.SetProp("font-family", (finf)[row].Name)
+		widg.SetProp("font-stretch", (finf)[row].Stretch)
+		widg.SetProp("font-weight", (finf)[row].Weight)
+		widg.SetProp("font-style", (finf)[row].Style)
+		widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
+		widg.AsWidget().SetFullReRender()
 	}
 }
 
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(avp *gi.Scene, curIc icons.Icon, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	if opts.CSS == nil {
-		opts.CSS = ki.Props{
-			"icon": ki.Props{
-				"width":  units.Em(2),
-				"height": units.Em(2),
-			},
-		}
-	}
-	dlg := SliceViewSelectDialog(avp, &gi.CurIconList, curIc, opts, IconChooserStyleFunc, recv, dlgFunc)
+func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	// if opts.CSS == nil {
+	// 	opts.CSS = ki.Props{
+	// 		"icon": ki.Props{
+	// 			"width":  units.Em(2),
+	// 			"height": units.Em(2),
+	// 		},
+	// 	}
+	// }
+	dlg := SliceViewSelectDialog(ctx, opts, &gi.CurIconList, curIc, IconChooserStyleFunc, fun)
 	return dlg
 }
 
@@ -478,33 +423,25 @@ func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv 
 // ColorViewDialog for editing a color using a ColorView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func ColorViewDialog(avp *gi.Scene, clr color.RGBA, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg, recyc := gi.RecycleStdDialog(clr, opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), clr, fun)
 	if recyc {
 		return dlg
 	}
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeColorView, prIdx+1, "color-view").(*ColorView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetColor(clr)
-
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
 	return dlg
 }
 
 // ColorViewDialogValue gets the color from the dialog
-func ColorViewDialogValue(dlg *gi.Dialog) color.RGBA {
-	frame := dlg.Frame()
+func ColorViewDialogValue(dlg *gi.DialogStage) color.RGBA {
+	frame := dlg.Stage.Scene
 	cvvvk := frame.ChildByType(TypeColorView, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
@@ -520,37 +457,32 @@ func ColorViewDialogValue(dlg *gi.Dialog) color.RGBA {
 // to get the resulting selected file.  The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(avp *gi.Scene, filename, ext string, opts DlgOpts, filterFunc FileViewFilterFunc, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFunc FileViewFilterFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	gopts := opts.ToGiOpts()
+	gopts.Ok = true
+	gopts.Cancel = true
+	dlg := gi.NewStdDialog(ctx, gopts, fun)
 	dlg.SetName("file-view") // use a consistent name for consistent sizing / placement
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	fv := frame.InsertNewChild(TypeFileView, prIdx+1, "file-view").(*FileView)
-	fv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
-	fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(FileViewDoubleClicked) {
-			ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-			ddlg.Accept()
-		}
-	})
-
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
+	// fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(FileViewDoubleClicked) {
+	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
+	// 		ddlg.Accept()
+	// 	}
+	// })
 	return dlg
 }
 
 // FileViewDialogValue gets the full path of selected file
-func FileViewDialogValue(dlg *gi.Dialog) string {
-	frame := dlg.Frame()
+func FileViewDialogValue(dlg *gi.DialogStage) string {
+	frame := dlg.Stage.Scene
 	fvk := frame.ChildByName("file-view", 0)
 	if fvk != nil {
 		fv := fvk.(*FileView)
@@ -561,22 +493,15 @@ func FileViewDialogValue(dlg *gi.Dialog) string {
 }
 
 // ArgViewDialog for editing args for a method call in the MethView system
-func ArgViewDialog(avp *gi.Scene, args []ArgData, opts DlgOpts, recv ki.Ki, dlgFunc ki.RecvFunc) *gi.Dialog {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), gi.AddOk, gi.AddCancel)
+func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgData, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
 
-	frame := dlg.Frame()
-	_, prIdx := dlg.PromptWidget(frame)
+	frame := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx(frame)
 
 	sv := frame.InsertNewChild(TypeArgView, prIdx+1, "arg-view").(*ArgView)
-	sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetDisabledState(false)
 	sv.SetArgs(args)
 
-	if recv != nil && dlgFunc != nil {
-		dlg.DialogSig.Connect(recv, dlgFunc)
-	}
-
-	dlg.UpdateEndNoSig(true)
-	dlg.Open(0, 0, avp, nil)
 	return dlg
 }

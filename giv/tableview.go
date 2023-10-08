@@ -21,6 +21,7 @@ import (
 	"goki.dev/goosi/cursor"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
 
@@ -80,7 +81,7 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "frame": // slice frame
 			sf := child.(*gi.Frame)
@@ -142,7 +143,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
 // to represent this slice (does Update if already viewing).
 func (tv *TableView) SetSlice(sl any) {
-	if laser.IfaceIsNil(sl) {
+	if laser.AnyIsNil(sl) {
 		tv.Slice = nil
 		return
 	}
@@ -179,10 +180,6 @@ func (tv *TableView) SetSlice(sl any) {
 
 	tv.Config()
 	tv.UpdateEnd(updt)
-}
-
-var TableViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
 
 // StructType sets the StruType and returns the type of the struct within the
@@ -328,7 +325,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		sgf.DeleteChildren(ki.DestroyKids)
 	}
 
-	if laser.IfaceIsNil(tv.Slice) {
+	if laser.AnyIsNil(tv.Slice) {
 		return
 	}
 
@@ -469,7 +466,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if laser.IfaceIsNil(tv.Slice) {
+	if laser.AnyIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return false
 	}
@@ -566,7 +563,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	if laser.IfaceIsNil(tv.Slice) {
+	if laser.AnyIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -871,7 +868,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 // ConfigToolbar configures the toolbar actions
 func (tv *TableView) ConfigToolbar() {
-	if laser.IfaceIsNil(tv.Slice) {
+	if laser.AnyIsNil(tv.Slice) {
 		return
 	}
 	if tv.ToolbarSlice == tv.Slice {
@@ -1094,7 +1091,7 @@ func (tv *TableView) EditIdx(idx int) {
 	StructViewDialog(tv.Scene, stru, DlgOpts{Title: tynm}, nil, nil)
 }
 
-func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
+func (tv *TableView) StdCtxtMenu(m *gi.MenuActions, idx int) {
 	if tv.isArray {
 		return
 	}

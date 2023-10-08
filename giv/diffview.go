@@ -81,7 +81,7 @@ func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Tex
 func DiffViewDialog(avp *gi.Scene, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
 	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
 
-	frame := dlg.Frame()
+	frame := dlg.Stage.Scene
 	_, prIdx := dlg.PromptWidget(frame)
 
 	dv := frame.InsertNewChild(TypeDiffView, prIdx+1, "diff-view").(*DiffView)
@@ -151,7 +151,7 @@ func (dv *DiffView) OnInit() {
 }
 
 func (dv *DiffView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "text-a-lay", "text-b-lay":
 			w.AddStyles(func(s *styles.Style) {
@@ -786,7 +786,6 @@ func (dv *DiffView) IsConfiged() bool {
 
 // DiffViewProps are style properties for DiffView
 var DiffViewProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 	"CallMethods": ki.PropSlice{
 		{"SaveFileA", ki.Props{
 			"Args": ki.PropSlice{

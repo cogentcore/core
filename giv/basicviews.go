@@ -15,6 +15,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // basicviews contains all the ValueView's for basic builtin types
@@ -61,11 +62,11 @@ func (vv *StructValueView) ConfigWidget(widg gi.Widget) {
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
-		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Scene, nil, nil)
-	})
+	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
+	// 	ac := vvv.Widget.(*gi.Action)
+	// 	vvv.Activate(ac.Scene, nil, nil)
+	// })
 	vv.UpdateWidget()
 }
 
@@ -85,8 +86,8 @@ func (vv *StructValueView) Activate(vp *gi.Scene, fun func()) {
 		desc = ""
 	}
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := StructViewDialog(vp, opv.Interface(), DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	svk := dlg.Frame().ChildByType(TypeStructView, ki.Embeds, 2)
+	dlg := StructViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), nil)
+	svk := dlg.Stage.Scene.ChildByType(StructViewType, ki.Embeds, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
 		sv.StructValView = vv
@@ -103,7 +104,7 @@ type StructInlineValueView struct {
 }
 
 func (vv *StructInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = TypeStructViewInline
+	vv.WidgetTyp = StructViewInlineType
 	return vv.WidgetTyp
 }
 
@@ -130,11 +131,11 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
-	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeStructInlineValueView).(*StructInlineValueView)
-		// vvv.UpdateWidget() // prob not necc..
-		vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	})
+	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeStructInlineValueView).(*StructInlineValueView)
+	// 	// vvv.UpdateWidget() // prob not necc..
+	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
+	// })
 	vv.UpdateWidget()
 }
 
@@ -178,18 +179,18 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
 	vv.IsArray = laser.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
-	if slci != nil && !laser.IfaceIsNil(slci) {
+	if slci != nil && !laser.AnyIsNil(slci) {
 		vv.ElType = laser.SliceElType(slci)
 		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Scene, nil, nil)
-	})
+	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
+	// 	ac := vvv.Widget.(*gi.Action)
+	// 	vvv.Activate(ac.Scene, nil, nil)
+	// })
 	vv.UpdateWidget()
 }
 
@@ -212,28 +213,28 @@ func (vv *SliceValueView) Activate(vp *gi.Scene, fun func()) {
 	inact := vv.This().(ValueView).IsInactive()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(TypeTableView, ki.Embeds, 2)
+		dlg := TableViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
+		svk := dlg.Stage.Scene.ChildByType(TableViewType, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
-			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-				vv.UpdateWidget()
-				vv.ViewSig.Emit(vv.This(), 0, nil)
-			})
+			// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			// 	vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
+			// 	vv.UpdateWidget()
+			// 	vv.ViewSig.Emit(vv.This(), 0, nil)
+			// })
 		}
 	} else {
-		dlg := SliceViewDialog(vp, slci, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, nil, recv, dlgFunc)
-		svk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
+		dlg := SliceViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
+		svk := dlg.Stage.Scene.ChildByType(SliceViewType, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
-			sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-				vv.UpdateWidget()
-				vv.ViewSig.Emit(vv.This(), 0, nil)
-			})
+			// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			// 	vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
+			// 	vv.UpdateWidget()
+			// 	vv.ViewSig.Emit(vv.This(), 0, nil)
+			// })
 		}
 	}
 }
@@ -275,11 +276,11 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Widget) {
 	// npv := vv.Value.Elem()
 	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sv.SetSlice(vv.Value.Interface())
-	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
-		vvv.UpdateWidget()
-		vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	})
+	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
+	// 	vvv.UpdateWidget()
+	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
+	// })
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -339,15 +340,15 @@ func (vv *MapValueView) Activate(vp *gi.Scene, fun func()) {
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
 	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	mvk := dlg.Frame().ChildByType(TypeMapView, ki.Embeds, 2)
+	mvk := dlg.Stage.Scene.ChildByType(TypeMapView, ki.Embeds, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
-		mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
-			vv.UpdateWidget()
-			vv.ViewSig.Emit(vv.This(), 0, nil)
-		})
+		// mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	vv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
+		// 	vv.UpdateWidget()
+		// 	vv.ViewSig.Emit(vv.This(), 0, nil)
+		// })
 	}
 }
 
@@ -388,11 +389,11 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Widget) {
 	// npv := vv.Value.Elem()
 	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
 	sv.SetMap(vv.Value.Interface())
-	sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
-		vvv.UpdateWidget()
-		vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	})
+	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
+	// 	vvv.UpdateWidget()
+	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
+	// })
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1049,7 +1050,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Widget) {
 			} else {
 				tm := vvv.TimeVal()
 				*tm = nt
-				vvv.ViewSig.Emit(vvv.This(), 0, nil)
+				// vvv.ViewSig.Emit(vvv.This(), 0, nil)
 				vvv.UpdateWidget()
 			}
 		}

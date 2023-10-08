@@ -9,7 +9,6 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
-	"goki.dev/ki/v2"
 )
 
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles
@@ -51,7 +50,7 @@ func PrefsView(pf *gi.Preferences) *gi.RenderWin {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
 			Prompt: "Do you want to save any changes to preferences before closing?"},
 			[]string{"Cancel", "Discard and Close", "Save and Close"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					inClosePrompt = false
@@ -116,7 +115,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.RenderWin {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Prefs Before Closing?",
 			Prompt: "Do you want to save any changes to detailed preferences before closing?"},
 			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					pf.Save()

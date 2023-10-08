@@ -736,7 +736,6 @@ func (tf *TextField) MakeContextMenu(m *MenuActions) {
 func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
-			// tf.Complete.CompleteSig.Disconnect(tf.This())
 			tf.Complete.Destroy()
 		}
 		tf.Complete = nil

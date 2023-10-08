@@ -53,7 +53,7 @@ func (cv *ColorView) OnInit() {
 }
 
 func (cv *ColorView) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "value":
 			w.AddStyles(func(s *styles.Style) {
@@ -106,12 +106,6 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 			}
 		}
 	}
-}
-
-func (cv *ColorView) Disconnect() {
-	cv.Frame.Disconnect()
-	cv.ViewSig.DisconnectAll()
-	cv.ManipSig.DisconnectAll()
 }
 
 // SetColor sets the source color

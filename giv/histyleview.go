@@ -57,7 +57,7 @@ func (vv *HiStyleValueView) HasAction() bool {
 	return true
 }
 
-func (vv *HiStyleValueView) Activate(vp *gi.Scene, dlgRecv ki.Ki, dlgFunc ki.RecvFunc) {
+func (vv *HiStyleValueView) Activate(vp *gi.Scene, fun func()) {
 	if vv.IsInactive() {
 		return
 	}
@@ -130,8 +130,7 @@ func HiStylesView(st *histyle.Styles) {
 		inClosePrompt = true
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Styles Before Closing?",
 			Prompt: "Do you want to save any changes to std preferences styles file before closing, or Cancel the close and do a Save to a different file?"},
-			[]string{"Save and Close", "Discard and Close", "Cancel"},
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+			[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.DialogStage) {
 				switch sig {
 				case 0:
 					st.SavePrefs()

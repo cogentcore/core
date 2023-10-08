@@ -13,6 +13,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // SliceViewInline represents a slice as a single line widget, for smaller
@@ -53,7 +54,7 @@ func (sv *SliceViewInline) OnInit() {
 }
 
 func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		switch w.Name() {
 		case "Parts":
 			parts := child.(*gi.Layout)
@@ -65,14 +66,9 @@ func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sv *SliceViewInline) Disconnect() {
-	sv.WidgetBase.Disconnect()
-	sv.ViewSig.DisconnectAll()
-}
-
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice
 func (sv *SliceViewInline) SetSlice(sl any) {
-	if laser.IfaceIsNil(sl) {
+	if laser.AnyIsNil(sl) {
 		sv.Slice = nil
 		return
 	}
@@ -97,13 +93,9 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 	sv.UpdateEnd(updt)
 }
 
-var SliceViewInlineProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // ConfigParts configures Parts for the current slice
 func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
-	if laser.IfaceIsNil(sv.Slice) {
+	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
 	config := ki.Config{}
@@ -185,14 +177,14 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 				title = "Slice of " + laser.NonPtrType(elType).Name()
 			}
 			dlg := SliceViewDialog(svv.Scene, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
-			svvvk := dlg.Frame().ChildByType(TypeSliceView, ki.Embeds, 2)
+			svvvk := dlg.Stage.Scene.ChildByType(TypeSliceView, ki.Embeds, 2)
 			if svvvk != nil {
 				svvv := svvvk.(*SliceView)
 				svvv.SliceValView = svv.SliceValView
-				svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-					svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
-				})
+				// svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
+				// 	svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
+				// 	svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
+				// })
 			}
 		})
 	}

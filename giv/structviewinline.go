@@ -11,6 +11,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
+	"goki.dev/laser"
 )
 
 // StructViewInline represents a struct as a single line widget, for smaller
@@ -46,7 +47,7 @@ type StructViewInline struct {
 }
 
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
-	if w := gi.AsWidget(child); w != nil {
+	if w, _ := gi.AsWidget(child); w != nil {
 		if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
 			label := child.(*gi.Label)
 			label.Redrawable = true
@@ -55,11 +56,6 @@ func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 			})
 		}
 	}
-}
-
-func (sv *StructViewInline) Disconnect() {
-	sv.WidgetBase.Disconnect()
-	sv.ViewSig.DisconnectAll()
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
@@ -82,13 +78,9 @@ func (sv *StructViewInline) SetStruct(st any) {
 	sv.UpdateEnd(updt)
 }
 
-var StructViewInlineProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
-
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
-	if laser.IfaceIsNil(sv.Struct) {
+	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
 	parts := sv.NewParts(gi.LayoutHoriz)

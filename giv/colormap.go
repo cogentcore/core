@@ -37,11 +37,6 @@ type ColorMapView struct {
 	// ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
 }
 
-func (cv *ColorMapView) Disconnect() {
-	cv.WidgetBase.Disconnect()
-	cv.ColorMapSig.DisconnectAll()
-}
-
 // SetColorMap sets the color map and triggers a display update
 func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 	cv.Map = cmap
