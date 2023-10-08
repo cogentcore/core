@@ -219,6 +219,9 @@ func (ly *Layout) OnInit() {
 func (ly *Layout) LayoutStyles() {
 	ly.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.FocusWithinable)
+		// we never want state layers and borders on layouts
+		s.StateLayer = 0
+		s.MaxBorder = styles.Border{}
 	})
 }
 
