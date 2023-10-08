@@ -809,11 +809,10 @@ func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
 
 	// pc.StrokeStyle.SetColor(&st.Border.Color)
 	// pc.StrokeStyle.Width = st.Border.Width
-	bg := st.BackgroundColor
-	if bg.IsNil() {
-		bg = sb.ParentBackgroundColor()
-	}
-	pc.FillStyle.SetFullColor(&bg)
+
+	// need to apply state layer
+	ebg := st.StateBackgroundColor(st.BackgroundColor)
+	pc.FillStyle.SetFullColor(&ebg)
 
 	// scrollbar is basic box in content size
 	spc := st.BoxSpace()
