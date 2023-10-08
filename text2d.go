@@ -128,7 +128,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 			sz = txt.TxtRender.Size
 		}
 	}
-	marg := txt.Sty.EffMargin()
+	marg := txt.Sty.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TxtPos = marg.Pos()
 	szpt := sz.ToPoint()
