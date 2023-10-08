@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log/slog"
 
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
@@ -209,24 +210,23 @@ func (wb *WidgetBase) LongHoverTooltip() {
 			return
 		}
 		e.SetHandled()
-		// pos := wbb.WinBBox.Max
-		// pos.X -= 20
-		// mvp := wbb.Sc
-		// PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
 		fmt.Println("long hover tooltip end", wb, wb.Tooltip)
-		if wb.Tooltip == "" {
+		mstg := wb.Sc.MainStage()
+		if mstg == nil {
+			slog.Error("nil main stage in long hover end tooltip event", "widget", wb)
 			return
 		}
+		tooltip := mstg.PopupMgr.TopOfType(Tooltip)
+		if tooltip == nil {
+			return
+		}
+		tooltip.Delete()
 		e.SetHandled()
-		// pos := wbb.WinBBox.Max
-		// pos.X -= 20
-		// mvp := wbb.Sc
-		// PopupTooltip(wbb.Tooltip, pos.X, pos.Y, mvp, wbb.Nm)
 	})
 }
 

@@ -11,7 +11,7 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// PopupStage supports Popup types (Menu, Tooltip, Snakbar, Chooser),
+// PopupStage supports Popup types (Menu, Tooltip, Snackbar, Chooser),
 // which are transitory and simple, without additional decor,
 // and are associated with and managed by a MainStage element (Window, etc).
 type PopupStage struct {
