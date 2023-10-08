@@ -114,4 +114,44 @@ const (
 // cursors, but it should be extended by anyone defining custom cursors.
 // Each hotspot is expressed in terms of a percentage of the size
 // of the cursor from the top-left corner.
-var Hotspots = map[enums.Enum]image.Point{}
+var Hotspots = map[enums.Enum]image.Point{
+	Arrow:               image.Pt(53, 13),
+	ContextMenu:         image.Pt(29, 28),
+	Help:                image.Pt(99, 99),
+	Pointer:             image.Pt(69, 44),
+	Progress:            image.Pt(54, 13),
+	Wait:                image.Pt(103, 99),
+	Cell:                image.Pt(98, 100),
+	Crosshair:           image.Pt(100, 100),
+	Text:                image.Pt(99, 103),
+	VerticalText:        image.Pt(103, 99),
+	Alias:               image.Pt(120, 55),
+	Copy:                image.Pt(54, 13),
+	Move:                image.Pt(100, 100), // TODO
+	NotAllowed:          image.Pt(54, 13),
+	Grab:                image.Pt(98, 66),
+	Grabbing:            image.Pt(107, 97),
+	ResizeCol:           image.Pt(100, 100),
+	ResizeRow:           image.Pt(100, 100),
+	ResizeUp:            image.Pt(100, 100),
+	ResizeRight:         image.Pt(100, 100),
+	ResizeDown:          image.Pt(100, 100),
+	ResizeLeft:          image.Pt(100, 100),
+	ResizeN:             image.Pt(100, 100),
+	ResizeE:             image.Pt(100, 100),
+	ResizeS:             image.Pt(100, 100),
+	ResizeW:             image.Pt(100, 100),
+	ResizeNE:            image.Pt(100, 100),
+	ResizeNW:            image.Pt(100, 100),
+	ResizeSE:            image.Pt(100, 100),
+	ResizeSW:            image.Pt(100, 100),
+	ResizeEW:            image.Pt(100, 100),
+	ResizeNS:            image.Pt(100, 100),
+	ResizeNESW:          image.Pt(100, 100),
+	ResizeNWSE:          image.Pt(100, 100),
+	ZoomIn:              image.Pt(100, 100),
+	ZoomOut:             image.Pt(100, 100),
+	ScreenshotSelection: image.Pt(100, 100), // TODO
+	ScreenshotWindow:    image.Pt(100, 100), // TODO
+	Poof:                image.Pt(100, 100), // TODO
+}
