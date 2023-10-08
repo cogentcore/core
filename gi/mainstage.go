@@ -7,7 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
+	"log/slog"
 
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -59,7 +59,7 @@ func (st *MainStage) MainMgr() *MainStageMgr {
 
 func (st *MainStage) RenderCtx() *RenderContext {
 	if st.StageMgr == nil {
-		log.Println("ERROR: MainStage has nil StageMgr:", st.Name)
+		slog.Error("MainStage has nil StageMgr", "stage", st.Name)
 		return nil
 	}
 	return st.StageMgr.RenderCtx
@@ -255,7 +255,7 @@ func (st *MainStage) RunSheet() *MainStage {
 
 func (st *MainStage) NewRenderWin() *RenderWin {
 	if st.Scene == nil {
-		fmt.Println("MainStage.NewRenderWin: ERROR: Scene is nil")
+		slog.Error("MainStage.NewRenderWin: Scene is nil")
 	}
 	name := st.Name
 	title := st.Title

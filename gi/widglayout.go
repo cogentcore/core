@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -43,7 +44,7 @@ func (wb *WidgetBase) ReConfig() {
 
 func (wb *WidgetBase) Config(sc *Scene) {
 	if wb.This() == nil {
-		fmt.Println("ERROR: nil this in config")
+		slog.Error("nil this in config")
 		return
 	}
 	wi := wb.This().(Widget)
@@ -218,7 +219,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int)
 		wb.Sc = sc
 	}
 	if wb.Sc == nil {
-		log.Println("ERROR: DoLayoutBase Scene is nil", wb.Path())
+		slog.Error("DoLayoutBase Scene is nil", "widget", wb)
 	}
 	wi := wb.This().(Widget)
 	psize := wb.AddParentPos()

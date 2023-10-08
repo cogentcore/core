@@ -7,6 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
+	"log/slog"
 	"sync"
 
 	"goki.dev/enums"
@@ -319,7 +320,7 @@ func (w *RenderWin) GatherScenes() bool {
 	sm := &w.StageMgr
 	n := sm.Stack.Len()
 	if n == 0 {
-		fmt.Println("ERROR: GatherScenes stack empty")
+		slog.Error("GatherScenes stack empty")
 		return false // shouldn't happen!
 	}
 

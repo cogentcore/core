@@ -5,8 +5,7 @@
 package gi
 
 import (
-	"fmt"
-	"log"
+	"log/slog"
 
 	"goki.dev/colors"
 	"goki.dev/girl/paint"
@@ -156,7 +155,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 		wb.Sc = sc
 	}
 	if wb.Sc == nil {
-		fmt.Println("ERROR: Scene is nil", wb)
+		slog.Error("Scene is nil", "widget", wb)
 	}
 
 	if wb.OverrideStyle {
@@ -263,14 +262,14 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 		if rc != nil {
 			st.UnContext.DPI = rc.LogicalDPI
 		} else {
-			log.Println("ERROR: SetUnitContext RenderCtx is nil for Scene", sc.Name())
+			slog.Error("SetUnitContext RenderCtx is nil", "scene", sc.Name())
 		}
 		if sc.RenderState.Image != nil {
 			sz := sc.Geom.Size // Render.Image.Bounds().Size()
 			st.UnContext.SetSizes(float32(sz.X), float32(sz.Y), el.X, el.Y, par.X, par.Y)
 		}
 	} else {
-		log.Println("ERROR: SetUnitContext Scene nil!")
+		slog.Error("SetUnitContext Scene nil!")
 	}
 	pr := prof.Start("SetUnitContext-OpenFont")
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext) // calls SetUnContext after updating metrics

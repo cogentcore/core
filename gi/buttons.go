@@ -9,6 +9,8 @@ import (
 	"image"
 	"log"
 
+	"log/slog"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/states"
@@ -171,7 +173,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 			pos = indic.(Widget).ContextMenuPos()
 		}
 	} else {
-		fmt.Println("ButtonBase ERROR: parts nil", bb)
+		slog.Error("ButtonBase: parts nil", "button", bb)
 	}
 	NewMenu(bb.Menu, bb.This().(Widget), pos).Run()
 	return true

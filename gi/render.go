@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -301,7 +302,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	rc := sc.RenderCtx()
 	if rc == nil {
-		log.Println("ERROR: scene render context is nil:", sc.Nm)
+		slog.Error("scene render context is nil", "scene", sc.Nm)
 		return true
 	}
 

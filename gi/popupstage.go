@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"log"
+	"log/slog"
 
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -76,12 +76,12 @@ func (st *PopupStage) HandleEvent(evi events.Event) {
 // Use Run call at the end to start the Stage running.
 func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	if ctx == nil {
-		log.Println("ERROR: NewPopupStage needs a context Widget")
+		slog.Error("NewPopupStage needs a context Widget")
 		return nil
 	}
 	cwb := ctx.AsWidget()
 	if cwb.Sc == nil || cwb.Sc.Stage == nil {
-		log.Println("ERROR: NewPopupStage context doesn't have a Stage")
+		slog.Error("NewPopupStage context doesn't have a Stage")
 		return nil
 	}
 	st := &PopupStage{}
@@ -139,7 +139,7 @@ func NewChooser(sc *Scene, ctx Widget) *PopupStage {
 func (st *PopupStage) RunPopup() *PopupStage {
 	mm := st.MainMgr()
 	if mm == nil {
-		log.Println("ERROR: popupstage has no MainMgr")
+		slog.Error("popupstage has no MainMgr")
 		return st
 	}
 	mm.RenderCtx.Mu.RLock()
@@ -177,12 +177,12 @@ func (st *PopupStage) RunPopup() *PopupStage {
 func (st *PopupStage) Close() {
 	mn := st.Main
 	if mn == nil {
-		log.Println("ERROR: popupstage has no Main")
+		slog.Error("popupstage has no Main")
 		return
 	}
 	mm := st.MainMgr()
 	if mm == nil {
-		log.Println("ERROR: popupstage has no MainMgr")
+		slog.Error("popupstage has no MainMgr")
 		return
 	}
 	mm.RenderCtx.Mu.RLock()

@@ -5,7 +5,7 @@
 package gi
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
@@ -194,7 +194,7 @@ func (dlg *DialogStage) CancelDialog() {
 func (dlg *DialogStage) Close() {
 	mm := dlg.Stage.StageMgr
 	if mm == nil {
-		log.Println("ERROR: dlg has no MainMgr")
+		slog.Error("dialog has no MainMgr")
 		return
 	}
 	if dlg.Stage.NewWindow {

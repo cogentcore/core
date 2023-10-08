@@ -14,6 +14,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
+	_ "goki.dev/grog" // for correctly formatted log messages
 	_ "goki.dev/vgpu/v2/vphong"
 )
 

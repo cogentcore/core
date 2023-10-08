@@ -6,7 +6,7 @@ package gi
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -405,7 +405,7 @@ func (st *StageBase) SetSide(side StageSides) Stage {
 // Run does the default run behavior based on the type of stage
 func (st *StageBase) Run() Stage {
 	if st.Scene == nil {
-		log.Println("ERROR: stage has nil scene")
+		slog.Error("stage has nil scene")
 	}
 	st.Scene.ConfigScene() // always config prior to running
 	// st.This.InitialFocus() // not working

@@ -9,7 +9,7 @@ import (
 	"image/color"
 	"image/png"
 	"io"
-	"log"
+	"log/slog"
 	"sync"
 
 	"goki.dev/colors"
@@ -101,7 +101,7 @@ func (sc *Scene) SetTitle(title string) *Scene {
 func (sc *Scene) RenderCtx() *RenderContext {
 	sm := sc.MainStageMgr()
 	if sm == nil {
-		log.Println("ERROR: Scene has nil StageMgr:", sc.Nm)
+		slog.Error("Scene has nil StageMgr", "scene", sc.Nm)
 		return nil
 	}
 	return sm.RenderCtx
@@ -113,7 +113,7 @@ func (sc *Scene) RenderCtx() *RenderContext {
 // or in a main stage.
 func (sc *Scene) MainStageMgr() *MainStageMgr {
 	if sc.Stage == nil {
-		log.Println("ERROR: Scene has nil Stage:", sc.Nm)
+		slog.Error("Scene has nil Stage", "scene", sc.Nm)
 		return nil
 	}
 	return sc.Stage.MainMgr()
