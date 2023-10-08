@@ -443,13 +443,14 @@ func (em *EventMgr) ClipBoard() clip.Board {
 
 // SetCursor sets window cursor to given Cursor
 func (em *EventMgr) SetCursor(cur cursors.Cursor) {
-	var gwin goosi.Window
-	if win := em.RenderWin(); win != nil {
-		gwin = win.GoosiWin
+	win := em.RenderWin()
+	if win == nil {
+		return
 	}
-	grr.Log0(goosi.TheApp.Cursor(gwin).Set(cur))
-	// todo: this would be simpler:
-	// gwin.SetCursor(cur)
+	if win.Is(WinClosing) {
+		return
+	}
+	grr.Log0(goosi.TheApp.Cursor(win.GoosiWin).Set(cur))
 }
 
 // FocusClear saves current focus to FocusPrev
