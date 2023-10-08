@@ -10,6 +10,7 @@ import (
 	"sort"
 
 	vk "github.com/goki/vulkan"
+	"golang.org/x/exp/slog"
 )
 
 // MemSizeAlign returns the size aligned according to align byte increments
@@ -140,7 +141,7 @@ func (mm *Memory) AllocHostStorageBuff() {
 	var stb *MemBuff // current storage buffer
 	for mi, vm := range mm.StorageMems {
 		if vm.Size > maxBuff {
-			log.Printf("ERROR: vgpu.Memory AllocHostStorageBuff:  Variable: %s needs more memory: %X than Max available: %X\n", vm.Var.Name, vm.Size, maxBuff)
+			slog.Error("vgpu.Memory AllocHostStorageBuff: variable needs more memory than Max available", "Variable", vm.Var.Name, "NeedsMemory", vm.Size, "MaxAvailable", maxBuff)
 			vm.Size = maxBuff
 		}
 		newSz := curSz + vm.Size

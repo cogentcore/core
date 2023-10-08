@@ -20,6 +20,7 @@ import (
 	vk "github.com/goki/vulkan"
 	"goki.dev/laser"
 	"goki.dev/vgpu/v2/vkinit"
+	"golang.org/x/exp/slog"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
@@ -485,19 +486,19 @@ func dbgCallbackFunc(flags vk.DebugReportFlags, objectType vk.DebugReportObjectT
 	switch {
 	case flags&vk.DebugReportFlags(vk.DebugReportInformationBit) != 0:
 		if !(strings.Contains(pLayerPrefix, "Loader") && strings.Contains(pMessage, "Device Extension")) {
-			log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+			slog.Info("["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 		}
 	case flags&vk.DebugReportFlags(vk.DebugReportWarningBit) != 0:
-		log.Printf("WARNING: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		slog.Warn("["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 	case flags&vk.DebugReportFlags(vk.DebugReportPerformanceWarningBit) != 0:
-		log.Printf("PERFORMANCE WARNING: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		slog.Warn("PERFORMANCE: ["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 	case flags&vk.DebugReportFlags(vk.DebugReportErrorBit) != 0:
-		log.Printf("ERROR: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		slog.Error("["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 	case flags&vk.DebugReportFlags(vk.DebugReportDebugBit) != 0:
-		log.Printf("DEBUG: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+		slog.Debug("["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 	default:
 		if !(strings.Contains(pLayerPrefix, "Loader") && strings.Contains(pMessage, "Device Extension")) {
-			log.Printf("INFORMATION: [%s] Code %d : %s", pLayerPrefix, messageCode, pMessage)
+			slog.Info("["+pLayerPrefix+"]", "Code", messageCode, "Message", pMessage)
 		}
 	}
 	return vk.Bool32(vk.False)
