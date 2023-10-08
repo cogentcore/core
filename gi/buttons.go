@@ -465,7 +465,6 @@ func (bt *Button) ButtonStyles() {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Margin = styles.BoxShadowMargin(styles.BoxShadow1()).ToValues()
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
 		if !bt.Icon.IsNil() {
 			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
@@ -474,6 +473,7 @@ func (bt *Button) ButtonStyles() {
 			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
 		}
 		s.Text.Align = styles.AlignCenter
+		s.MaxBoxShadow = styles.BoxShadow1()
 		switch bt.Type {
 		case ButtonFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
@@ -482,9 +482,9 @@ func (bt *Button) ButtonStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
 		case ButtonElevated:
-			s.Margin = styles.BoxShadowMargin(styles.BoxShadow2()).ToValues()
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 			s.Color = colors.Scheme.Primary.Base
+			s.MaxBoxShadow = styles.BoxShadow2()
 			s.BoxShadow = styles.BoxShadow1()
 		case ButtonOutlined:
 			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
@@ -496,11 +496,7 @@ func (bt *Button) ButtonStyles() {
 			s.Color = colors.Scheme.Primary.Base
 		}
 		if s.Is(states.Hovered) {
-			if bt.Type == ButtonElevated {
-				s.BoxShadow = styles.BoxShadow2()
-			} else {
-				s.BoxShadow = styles.BoxShadow1()
-			}
+			s.BoxShadow = s.MaxBoxShadow
 		}
 	})
 }
