@@ -222,7 +222,7 @@ func (pf *Preferences) Apply() {
 	}
 	// Google Blue (#4285f4) is the default value and thus indicates no user preference,
 	// which means that we will always override the color, even without OverridePrefsColor
-	if !OverridePrefsColor || pf.Color == (color.RGBA{66, 133, 244, 255}) {
+	if !OverridePrefsColor && pf.Color != (color.RGBA{66, 133, 244, 255}) {
 		colors.SetSchemes(pf.Color)
 	}
 	switch pf.Theme {
