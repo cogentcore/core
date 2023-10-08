@@ -41,7 +41,11 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 	} else {
 		e = &events.Base{Typ: typ}
 	}
-	wb.This().(Widget).HandleEvent(e)
+	w, ok := wb.This().(Widget)
+	if !ok {
+		return
+	}
+	w.HandleEvent(e)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
