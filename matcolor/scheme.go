@@ -219,7 +219,7 @@ func NewDarkScheme(p *Palette) Scheme {
 		Outline:        p.NeutralVariant.AbsTone(60),
 		OutlineVariant: p.NeutralVariant.AbsTone(30),
 
-		Shadow:      p.Neutral.AbsTone(100),
+		Shadow:      p.Neutral.AbsTone(0),
 		SurfaceTint: p.Primary.AbsTone(80),
 		Scrim:       p.Neutral.AbsTone(0),
 	}
