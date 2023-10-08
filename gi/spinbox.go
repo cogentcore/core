@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image"
 	"log"
+	"log/slog"
 	"strconv"
 
 	"goki.dev/girl/states"
@@ -115,32 +116,35 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 }
 
 // SetMin sets the min limits on the value
-func (sb *SpinBox) SetMin(min float32) {
+func (sb *SpinBox) SetMin(min float32) *SpinBox {
 	sb.HasMin = true
 	sb.Min = min
+	return sb
 }
 
 // SetMax sets the max limits on the value
-func (sb *SpinBox) SetMax(max float32) {
+func (sb *SpinBox) SetMax(max float32) *SpinBox {
 	sb.HasMax = true
 	sb.Max = max
+	return sb
 }
 
 // SetMinMax sets the min and max limits on the value
-func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) {
+func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *SpinBox {
 	sb.HasMin = hasMin
 	sb.Min = min
 	sb.HasMax = hasMax
 	sb.Max = max
 	if sb.Max < sb.Min {
-		log.Printf("gi.SpinBox SetMinMax: max was less than min -- disabling limits\n")
+		slog.Warn("gi.SpinBox.SetMinMax: max was less than min; disabling limits")
 		sb.HasMax = false
 		sb.HasMin = false
 	}
+	return sb
 }
 
 // SetValue sets the value, enforcing any limits, and updates the display
-func (sb *SpinBox) SetValue(val float32) {
+func (sb *SpinBox) SetValue(val float32) *SpinBox {
 	updt := sb.UpdateStart()
 	defer sb.UpdateEnd(updt)
 	sb.Value = val
@@ -151,30 +155,32 @@ func (sb *SpinBox) SetValue(val float32) {
 		sb.Value = mat32.Max(sb.Value, sb.Min)
 	}
 	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
+	return sb
 }
 
 // SetValueAction calls SetValue and also emits the signal
-func (sb *SpinBox) SetValueAction(val float32) {
+func (sb *SpinBox) SetValueAction(val float32) *SpinBox {
 	sb.SetValue(val)
-	// sb.SpinBoxSig.Emit(sb.This(), 0, sb.Value)
+	sb.Send(events.Change, nil)
+	return sb
 }
 
 // IncrValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sb *SpinBox) IncrValue(steps float32) {
+func (sb *SpinBox) IncrValue(steps float32) *SpinBox {
 	val := sb.Value + steps*sb.Step
 	val = mat32.IntMultiple(val, sb.Step)
-	sb.SetValueAction(val)
+	return sb.SetValueAction(val)
 }
 
 // PageIncrValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sb *SpinBox) PageIncrValue(steps float32) {
+func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
 	val := sb.Value + steps*sb.PageStep
 	val = mat32.IntMultiple(val, sb.PageStep)
-	sb.SetValueAction(val)
+	return sb.SetValueAction(val)
 }
 
 func (sb *SpinBox) ConfigParts(sc *Scene) {
