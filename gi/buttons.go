@@ -250,12 +250,15 @@ func (bb *ButtonBase) LongHoverTooltip() {
 		if bb.StateIs(states.Disabled) {
 			return
 		}
-		if bb.Tooltip == "" {
+		if bb.Tooltip == "" && bb.Shortcut == "" {
 			return
 		}
 		tt := bb.Tooltip
 		if bb.Shortcut != "" {
-			tt = "[ " + bb.Shortcut.Shortcut() + " ]: " + tt
+			tt = "[ " + bb.Shortcut.Shortcut() + " ]"
+			if bb.Tooltip != "" {
+				tt += ": " + bb.Tooltip
+			}
 		}
 		e.SetHandled()
 		NewTooltipText(bb, tt, e.Pos()).Run()
