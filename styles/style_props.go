@@ -5,7 +5,6 @@
 package styles
 
 import (
-	"fmt"
 	"log/slog"
 
 	"goki.dev/colors"
@@ -137,7 +136,7 @@ func StyleFuncEnum[T any](initVal enums.Enum, getField func(obj *T) enums.EnumSe
 
 // StyleSetError reports that cannot set property of given key with given value due to given error
 func StyleSetError(key string, val any, err error) {
-	slog.Error(fmt.Sprintf("styles.Style: error setting key %q from value %v: %v", key, val, err))
+	slog.Error("styles.Style: error setting value", "key", key, "value", val, "err", err)
 }
 
 type StyleFunc func(obj any, key string, val any, par any, ctxt colors.Context)

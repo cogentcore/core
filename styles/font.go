@@ -6,7 +6,7 @@ package styles
 
 import (
 	"image/color"
-	"log"
+	"log/slog"
 	"strings"
 
 	"goki.dev/colors"
@@ -73,7 +73,7 @@ func (fs *Font) InheritFields(par *Font) {
 // ToDots runs ToDots on unit values, to compile down to raw pixels
 func (fs *Font) ToDots(uc *units.Context) {
 	if fs.Size.Un == units.UnitEm || fs.Size.Un == units.UnitEx || fs.Size.Un == units.UnitCh {
-		log.Println("ERROR: girl.styles.Font.Size was set Em, Ex, or Ch -- that is recursive and unstable!")
+		slog.Error("girl/styles.Font.Size was set to Em, Ex, or Ch; that is recursive and unstable!", "unit", fs.Size.Un)
 		fs.Size.SetDp(12)
 	}
 	fs.Size.ToDots(uc)

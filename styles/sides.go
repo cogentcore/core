@@ -83,7 +83,7 @@ func (s *Sides[T]) Set(vals ...T) *Sides[T] {
 		s.Right = vals[1]
 		s.Bottom = vals[2]
 		s.Left = vals[3]
-		slog.Error(fmt.Sprintf("programmer error: sides.Set: expected 0 to 4 values, but got %d", len(vals)))
+		slog.Error("programmer error: sides.Set: expected 0 to 4 values, but got", "numValues", len(vals))
 	}
 	return s
 }
