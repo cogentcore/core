@@ -30,6 +30,8 @@ func app() {
 	// gi.WinRenderTrace = true
 	// gi.EventTrace = true
 	// gi.KeyEventTrace = true
+	// events.TraceEventCompression = true
+	// events.TraceWindowPaint = true
 
 	goosi.ZoomFactor = 2
 
