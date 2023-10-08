@@ -59,6 +59,21 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 	// this must be defined for each widget type
 }
 
+// ConfigPartsImpl initializes the parts of the widget if they
+// are not already through [WidgetBase.NewParts], calls
+// [ki.Node.ConfigChildren] on those parts with the given config,
+// and then handles necessary updating logic with the given scene.
+func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, lay Layouts, config ki.Config) {
+	parts := wb.NewParts(LayoutHoriz)
+	mods, updt := parts.ConfigChildren(config)
+	if !mods && !wb.NeedsRebuild() {
+		parts.UpdateEnd(updt)
+		return
+	}
+	parts.UpdateEnd(updt)
+	wb.SetNeedsLayout(sc, updt)
+}
+
 ////////////////////////////////////////////////////////////////////
 // 	BBox bounding boxes
 

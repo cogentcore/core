@@ -206,20 +206,11 @@ func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
 }
 
 func (sb *SpinBox) ConfigParts(sc *Scene) {
-	parts := sb.NewParts(LayoutHoriz)
-
 	config := ki.Config{}
 	config.Add(ActionType, "down")
 	config.Add(TextFieldType, "text-field")
 	config.Add(ActionType, "up")
-
-	mods, updt := parts.ConfigChildren(config)
-	if !mods && !sb.NeedsRebuild() {
-		parts.UpdateEnd(updt)
-		return
-	}
-	parts.UpdateEnd(updt)
-	sb.SetNeedsLayout(sc, updt)
+	sb.ConfigPartsImpl(sc, LayoutHoriz, config)
 }
 
 // FormatIsInt returns true if the format string requires an integer value
