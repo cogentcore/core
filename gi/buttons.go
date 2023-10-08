@@ -325,8 +325,8 @@ func (bb *ButtonBase) ConfigWidget(sc *Scene) {
 
 func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	parts := bb.NewParts(LayoutHoriz)
-	if bb.HasMenu() && bb.Indicator.IsNil() {
-		bb.Indicator = icons.Menu
+	if bb.HasMenu() && bb.Icon.IsNil() {
+		bb.Icon = icons.Menu
 	}
 	config := ki.Config{}
 	icIdx, lbIdx := bb.ConfigPartsIconLabel(&config, bb.Icon, bb.Text)

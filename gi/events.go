@@ -206,6 +206,7 @@ func (wb *WidgetBase) LongHoverTooltip() {
 		if wb.Tooltip == "" {
 			return
 		}
+		fmt.Println("long hover tooltip")
 		e.SetHandled()
 		// pos := wbb.WinBBox.Max
 		// pos.X -= 20
