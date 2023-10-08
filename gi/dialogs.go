@@ -201,7 +201,7 @@ func (dlg *DialogStage) Close() {
 		mm.RenderWin.CloseReq()
 		return
 	}
-	mm.PopDelete()
+	mm.PopDeleteType(Dialog)
 }
 
 // DefaultStyle sets default style functions for dialog Scene
