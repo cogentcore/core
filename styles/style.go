@@ -308,18 +308,27 @@ func (s *Style) CopyUnitContext(ctxt *units.Context) {
 	}
 }
 
-// BoxSpace returns extra space around the central content in the box model,
-// in dots -- todo: must complicate this if we want different spacing on
-// different sides box outside-in: margin | border | padding | content
+// BoxSpace returns extra space around the central content in the box model, in dots
 func (s *Style) BoxSpace() SideFloats {
-	return s.TotalMargin().Add(s.Border.Width.Dots()).Add(s.Padding.Dots())
+	return s.TotalMargin().Add(s.Padding.Dots())
 }
 
 // TotalMargin returns the total effective margin of the element
 // holding the style, using the sum of the actual margin, the max
-// border width, and the max box shadow effective margin.
+// border width, and the max box shadow effective margin. If the
+// values for the max border width / box shadow are unset, the
+// current values are used instead, which allows for the omission
+// of the max properties when the values do not change.
 func (s *Style) TotalMargin() SideFloats {
-	return s.Margin.Dots().Add(s.MaxBorder.Width.Dots()).Add(s.MaxBoxShadowMargin())
+	mbw := s.MaxBorder.Width.Dots()
+	if mbw.IsZero() {
+		mbw = s.Border.Width.Dots()
+	}
+	mbsm := s.MaxBoxShadowMargin()
+	if mbsm.IsZero() {
+		mbsm = s.BoxShadowMargin()
+	}
+	return s.Margin.Dots().Add(mbw).Add(mbsm)
 }
 
 // SubProps returns a sub-property map from given prop map for a given styling

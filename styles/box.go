@@ -239,6 +239,12 @@ func (s *Style) BoxShadowPosSize(startPos, startSize mat32.Vec2) (pos mat32.Vec2
 	return minPos, maxMax.Sub(minPos)
 }
 
+// BoxShadowMargin returns the effective box
+// shadow margin of the style, calculated through [Shadow.Margin]
+func (s *Style) BoxShadowMargin() SideFloats {
+	return BoxShadowMargin(s.BoxShadow)
+}
+
 // MaxBoxShadowMargin returns the maximum effective box
 // shadow margin of the style, calculated through [Shadow.Margin]
 func (s *Style) MaxBoxShadowMargin() SideFloats {
