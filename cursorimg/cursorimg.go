@@ -65,7 +65,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	return &Cursor{
 		Image:   img,
 		Size:    size,
-		Hotspot: hot.Mul(size).Div(200),
+		Hotspot: hot.Mul(size).Div(256),
 	}, nil
 
 	// TODO: render from SVG at some point

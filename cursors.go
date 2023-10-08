@@ -112,8 +112,9 @@ const (
 // Hotspots contains the cursor hotspot points for every cursor.
 // It is initialized to contain the hotspots for all of the default
 // cursors, but it should be extended by anyone defining custom cursors.
-// Each hotspot is expressed in terms of two times the percentage of the
-// size of the cursor it is from the top-left corner (0-200).
+// Each hotspot is expressed as a point relative to the top-left corner
+// of the cursor, on a scale of 0-256, which is scaled to the size of
+// the cursor later on.
 var Hotspots = map[enums.Enum]image.Point{
 	Arrow:               image.Pt(53, 13),
 	ContextMenu:         image.Pt(29, 28),
