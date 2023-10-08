@@ -168,9 +168,13 @@ func (em *EventMgr) HandleOtherEvent(evi events.Event) {
 }
 
 func (em *EventMgr) HandleFocusEvent(evi events.Event) {
-	if !evi.IsHandled() && em.Focus == nil && em.PrevFocus != nil {
-		em.SetFocus(em.PrevFocus)
-		em.PrevFocus = nil
+	if !evi.IsHandled() && em.Focus == nil {
+		if em.PrevFocus != nil {
+			em.SetFocus(em.PrevFocus)
+			em.PrevFocus = nil
+		} else {
+			em.FocusNext()
+		}
 	}
 	if em.Focus != nil {
 		em.Focus.HandleEvent(evi)
