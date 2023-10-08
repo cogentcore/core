@@ -605,7 +605,6 @@ func (sr *Slider) SliderStyles() {
 
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
-		s.Cursor = cursors.Grab
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Dp(8))
@@ -616,6 +615,7 @@ func (sr *Slider) SliderStyles() {
 			s.Height.SetEm(20)
 			s.Width.SetDp(4)
 		}
+		s.Cursor = cursors.Grab
 		switch {
 		case s.Is(states.Sliding):
 			s.Cursor = cursors.Grabbing
@@ -768,6 +768,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
+		s.Cursor = cursors.Grab
 		switch {
 		case s.Is(states.Sliding):
 			s.Cursor = cursors.Grabbing
