@@ -423,13 +423,18 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	if deep == em.LongHoverWidget {
 		cpos := evi.Pos()
 		dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
-		fmt.Println(dst)
-		// if we have gone too far, we are done
-		if dst > LongHoverStopDist {
-			em.LongHoverWidget.Send(events.LongHoverEnd, evi)
-			clearLongHover()
+		// if we haven't gone too far, we have nothing to do
+		if dst <= LongHoverStopDist {
+			return
 		}
-		return
+		// If we have gone too far, we are done with the long hover and
+		// we must clear it. However, critically, we do not return, as
+		// we must make a new tooltip immediately; otherwise, we may end
+		// up not getting another mouse move event, so we will be on the
+		// element with no tooltip, which is a bug. Not returning here is
+		// the solution to https://github.com/goki/gi/issues/553
+		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
+		clearLongHover()
 	}
 
 	// if we have changed and still have the timer, we never
