@@ -134,7 +134,7 @@ func TestNodeEscapePaths(t *testing.T) {
 }
 
 func TestNodePathFrom(t *testing.T) {
-	a := NewNode(nil, "a")
+	a := NewRoot[*Node]("a")
 	b := NewNode(a, "b")
 	c := NewNode(b, "c")
 	d := NewNode(c, "d")

@@ -11,8 +11,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"goki.dev/gti"
 )
 
 // admin has infrastructure level code, outside of ki interface
@@ -116,9 +114,24 @@ func DeletingChildren(k Ki) {
 
 // New adds a new child of the given the type
 // with the given name to the given parent.
+// If the name is unspecified, it defaults to the
+// ID (kebab-case) name of the type, plus the
+// [Ki.NumLifetimeChildren] of its parent.
 // It is a helper function that calls [Ki.NewChild].
-func New[T Ki](par Ki, name string) T {
-	return par.NewChild(gti.TypeByValue((*T)(nil)), name).(T)
+func New[T Ki](par Ki, name ...string) T {
+	var n T
+	return par.NewChild(n.KiType(), name...).(T)
+}
+
+// NewRoot returns a new root node of the given the type
+// with the given name. If the name is unspecified, it
+// defaults to the ID (kebab-case) name of the type.
+// It is a helper function that calls [Ki.InitName].
+func NewRoot[T Ki](name ...string) T {
+	var n T
+	n = n.New().(T)
+	n.InitName(n, name...)
+	return n
 }
 
 // IsRoot tests if this node is the root node -- checks Parent = nil.
