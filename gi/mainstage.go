@@ -9,12 +9,12 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 )
 
 // MainStage manages a Scene serving as content for a
@@ -136,16 +136,6 @@ func (st *MainStage) AddWindowDecor() *MainStage {
 }
 
 func (st *MainStage) AddDialogDecor() *MainStage {
-	sc := st.Scene
-	if !st.NewWindow {
-		sc.AddStyles(func(s *styles.Style) {
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-			s.Border.Radius = styles.BorderRadiusLarge
-			// s.Border.Width.Set(units.Dp(5))
-			// s.Border.Color.Set(colors.Red)
-		})
-	}
-
 	// todo: moveable, resizable
 	return st
 }
@@ -224,20 +214,25 @@ func (st *MainStage) RunDialog() *MainStage {
 	}
 	winsz := ms.RenderCtx.Size
 
+	sc := st.Scene
 	st.StageMgr = ms // temporary
-	sz := st.Scene.PrefSize(winsz)
+	sz := sc.PrefSize(winsz)
 	if WinRenderTrace {
 		fmt.Println("MainStage.RunDialog: Size:", sz)
 	}
-	st.Scene.Resize(sz)
 
 	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
-		st.Type = Window                  // critical: now is its own window!
-		st.Scene.Geom.Pos = image.Point{} // ignore pos
+		sc.Resize(sz)
+		st.Type = Window            // critical: now is its own window!
+		sc.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		win.GoStartEventLoop()
 		return st
 	}
+	winGeom := mat32.Geom2DInt{Size: sz}
+	sc.Geom.Size = sz
+	sc.FitInWindow(winGeom) // does resize
+
 	ms.Push(st)
 	return st
 }

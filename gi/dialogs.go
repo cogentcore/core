@@ -24,8 +24,14 @@ var (
 type DialogStage struct {
 	Stage *MainStage
 
+	// Data has arbitrary data for this dialog
+	Data any
+
 	// Accepted means that the dialog was accepted -- else canceled
 	Accepted bool
+
+	// ButtonBox goes here when added
+	ButtonBox *Layout
 }
 
 // NewDialog returns a new DialogStage stage with given scene contents,
@@ -38,8 +44,9 @@ func NewDialog(sc *Scene, ctx Widget) *DialogStage {
 	dlg.Stage = NewMainStage(Dialog, sc, ctx)
 	sc.Geom.Pos = ctx.ContextMenuPos()
 	if dlg.Stage.Title != "" {
-		dlg.AddTitle(dlg.Stage.Title)
+		dlg.Title(dlg.Stage.Title)
 	}
+	dlg.DefaultStyle()
 	return dlg
 }
 
@@ -48,9 +55,9 @@ func (dlg *DialogStage) Run() *DialogStage {
 	return dlg
 }
 
-// AddTitle adds title to dialog.  If title string is passed
+// Title adds title to dialog.  If title string is passed
 // then a new title is set -- otherwise the existing Title is used.
-func (dlg *DialogStage) AddTitle(title ...string) *DialogStage {
+func (dlg *DialogStage) Title(title ...string) *DialogStage {
 	if len(title) > 0 {
 		dlg.Stage.Title = title[0]
 	}
@@ -64,8 +71,8 @@ func (dlg *DialogStage) AddTitle(title ...string) *DialogStage {
 	return dlg
 }
 
-// AddPrompt adds given prompt to dialog.
-func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
+// Prompt adds given prompt to dialog.
+func (dlg *DialogStage) Prompt(prompt string) *DialogStage {
 	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).AddStyles(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
@@ -79,85 +86,92 @@ func (dlg *DialogStage) AddPrompt(prompt string) *DialogStage {
 	return dlg
 }
 
-// SetModal sets the modal behavior of the dialog:
+// Modal sets the modal behavior of the dialog:
 // true = blocks all other input, false = allows other input
-func (dlg *DialogStage) SetModal(modal bool) *DialogStage {
+func (dlg *DialogStage) Modal(modal bool) *DialogStage {
 	dlg.Stage.Modal = modal
 	return dlg
 }
 
-// SetNewWindow sets whether dialog opens in a new window
+// NewWindow sets whether dialog opens in a new window
 // or on top of the existing window.
-func (dlg *DialogStage) SetNewWindow(newWindow bool) *DialogStage {
+func (dlg *DialogStage) NewWindow(newWindow bool) *DialogStage {
 	dlg.Stage.NewWindow = newWindow
 	return dlg
 }
 
-// AddButtonBox adds layout for holding buttons at bottom of dialog
-func (dlg *DialogStage) AddButtonBox() *Layout {
+// ConfigButtonBox adds layout for holding buttons at bottom of dialog
+// and saves as ButtonBox field, if not already done.
+func (dlg *DialogStage) ConfigButtonBox() *Layout {
+	if dlg.ButtonBox != nil {
+		return dlg.ButtonBox
+	}
 	bb := NewLayout(dlg.Stage.Scene, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.AddStyles(func(s *styles.Style) {
 		bb.Spacing.SetDp(8 * Prefs.DensityMul())
 		s.SetStretchMaxWidth()
 	})
+	dlg.ButtonBox = bb
 	return bb
 }
 
-// AddOk adds Ok button to given ButtonBox, connecting to Accept method.
-// and also the Ctrl+Enter keychord event.
+// Ok adds Ok button to the ButtonBox at bottom of dialog,
+// connecting to Accept method the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog scene for listeners there.
-func (dlg *DialogStage) AddOk(bb *Layout) *DialogStage {
+func (dlg *DialogStage) Ok() *DialogStage {
+	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
 	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
-		dlg.Accept()
+		dlg.AcceptDialog()
 		sc.Send(events.Change, e)
 	})
 	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAccept {
-			dlg.Accept()
+			dlg.AcceptDialog()
 		}
 	})
 	return dlg
 }
 
-// AddCancel adds Cancel button to given ButtonBox, connecting to Cancel method,
-// and also the Esc keychord event.
+// Cancel adds Cancel button to the ButtonBox at bottom of dialog,
+// connecting to Cancel method and the Esc keychord event.
 // Also sends a Change event to the dialog scene for listeners there
-func (dlg *DialogStage) AddCancel(bb *Layout) *DialogStage {
+func (dlg *DialogStage) Cancel() *DialogStage {
+	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
 	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").On(events.Click, func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
-		dlg.Cancel()
+		dlg.CancelDialog()
 		sc.Send(events.Change, e)
 	})
 	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAbort {
-			dlg.Cancel()
+			dlg.CancelDialog()
 		}
 	})
 	return dlg
 }
 
-// AddOkCancel adds Ok, Cancel buttons, and standard Esc = Cancel keyboard action
-func (dlg *DialogStage) AddOkCancel() *DialogStage {
-	bb := dlg.AddButtonBox()
-	dlg.AddCancel(bb)
-	dlg.AddOk(bb)
+// OkCancel adds Ok, Cancel buttons,
+// and standard Esc = Cancel, Ctrl+Enter keyboard action
+func (dlg *DialogStage) OkCancel() *DialogStage {
+	dlg.Cancel()
+	dlg.Ok()
 	return dlg
 }
 
-// Accept accepts the dialog, activated by the default Ok button
-func (dlg *DialogStage) Accept() {
+// AcceptDialog accepts the dialog, activated by the default Ok button
+func (dlg *DialogStage) AcceptDialog() {
 	dlg.Accepted = true
 	dlg.Close()
 }
 
-// Cancel cancels the dialog, activated by the default Cancel button
-func (dlg *DialogStage) Cancel() {
+// CancelDialog cancels the dialog, activated by the default Cancel button
+func (dlg *DialogStage) CancelDialog() {
 	dlg.Accepted = false
 	dlg.Close()
 }
@@ -176,426 +190,66 @@ func (dlg *DialogStage) Close() {
 	mm.PopDelete()
 }
 
-/*
-// Dialog supports dialog functionality -- based on a scene that can either
-// be rendered in a separate window or on top of an existing one.
-type Dialog struct {
-	Scene
-
-	// title text displayed as the window title for the dialog
-	Title string `desc:"title text displayed as the window title for the dialog"`
-
-	// a prompt string displayed below the title
-	Prompt string `desc:"a prompt string displayed below the title"`
-
-	// open the dialog in a modal state, blocking all other input
-	Modal bool `desc:"open the dialog in a modal state, blocking all other input"`
-
-	// default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway
-	DefSize image.Point `desc:"default size -- if non-zero, then this is used instead of doing an initial size computation -- can save a lot of time for complex dialogs -- sizes are remembered and used after first use anyway"`
-
-	// state of the dialog
-	State DialogState `desc:"state of the dialog"`
-
-	// signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)
-	SigVal int64 `desc:"signal value that will be sent, if >= 0 (by default, DialogAccepted or DialogCanceled will be sent for standard Ok / Cancel buttons)"`
-
-	// [view: -] signal for dialog -- sends a signal when opened, accepted, or canceled
-	DialogSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for dialog -- sends a signal when opened, accepted, or canceled"`
-
-	// [view: -] the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows
-	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods for windows that represent a given data element -- prevents redundant windows"`
-}
-
-func (dlg *Dialog) StyleFrame() {
-	dlg.Frame.AddStyles(func(s *styles.Style) {
+// DefaultStyle sets default style functions for dialog Scene
+func (dlg *DialogStage) DefaultStyle() {
+	st := dlg.Stage
+	sc := st.Scene
+	sc.AddStyles(func(s *styles.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Border.Radius = styles.BorderRadiusLarge
+		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
-		s.Border.Radius = styles.BorderRadiusExtraLarge
-
-		dlg.Frame.Spacing = StdDialogVSpaceUnits
+		sc.Spacing = StdDialogVSpaceUnits
 		s.Border.Style.Set(styles.BorderNone)
 		s.Padding.Set(units.Dp(24 * Prefs.DensityMul()))
-		s.BackgroundColor.SetSolid(dlg.Frame.Style.BackgroundColor.Solid)
-		if !DialogsSepRenderWin {
-			s.BoxShadow = BoxShadow3
-		}
-
-	})
-}
-
-// todo: need to do this on frame
-
-func (dlg *Dialog) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "title":
-			title := child.(*Label)
-			title.Type = LabelHeadlineSmall
-			title.AddStyles(func(s *styles.Style) {
-				s.MaxWidth.SetDp(-1)
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
-				s.BackgroundColor.SetSolid(colors.Transparent)
-			})
-		case "prompt":
-			prompt := child.(*Label)
-			prompt.Type = LabelBodyMedium
-			prompt.AddStyles(func(s *styles.Style) {
-				s.Text.WhiteSpace = styles.WhiteSpaceNormal
-				s.MaxWidth.SetDp(-1)
-				s.Width.SetCh(30)
-				s.Text.Align = styles.AlignLeft
-				s.AlignV = styles.AlignTop
-				s.Color = colors.Scheme.OnSurfaceVariant
-				s.BackgroundColor.SetSolid(colors.Transparent)
-			})
-		case "buttons":
-			bts := child.(*Layout)
-			bts.AddStyles(func(s *styles.Style) {
-				bts.Spacing.SetDp(8 * Prefs.DensityMul())
-				s.SetStretchMaxWidth()
-			})
-		}
-		if button, ok := child.(*Button); ok {
-			button.Type = ButtonText
-		}
-	}
-}
-
-// ValidScene finds a non-nil scene, either using the provided one, or
-// using the first main window's scene
-func ValidScene(avp *Scene) *Scene {
-	if avp != nil {
-		return avp
-	}
-	if fwin, _ := AllRenderWins.Focused(); fwin != nil {
-		return fwin.Scene
-	}
-	if fwin := AllRenderWins.Win(0); fwin != nil {
-		return fwin.Scene
-	}
-	log.Printf("gi.ValidScene: No gi.AllRenderWins to get scene from!\n")
-	return nil
-}
-
-// Open this dialog, in given location (0 = middle of window), finding window
-// from given scene -- returns false if it fails for any reason.  optional
-// cvgFunc can perform additional configuration after the dialog window has
-// been created and dialog added to it -- some configs require the window.
-func (dlg *Dialog) Open(x, y int, avp *Scene, cfgFunc func()) bool {
-	avp = ValidScene(avp)
-	if avp == nil {
-		return false
-	}
-	win := avp.Win
-	if win == nil {
-		return false
-	}
-
-	if dlg.Modal {
-		dlg.State = DialogOpenModal
-	} else {
-		dlg.State = DialogOpenModeless
-	}
-	dlg.Frame.Lay = LayoutVert
-
-	if DialogsSepRenderWin {
-		win = NewDialogWin(dlg.Name, dlg.Title, 100, 100, dlg.Modal)
-		win.Data = dlg.Data
-		// todo: win.Scene
-		// win.AddChild(dlg)
-		// win.Scene = &dlg.Scene
-		// win.MasterVLay = dlg.Frame.Embed(LayoutType).(*Layout)
-		// fmt.Printf("new win dpi: %v\n", win.LogicalDPI())
-	}
-
-	dlg.Win = win
-
-	if cfgFunc != nil {
-		cfgFunc()
-	}
-
-	vpsz := dlg.DefSize
-	if dlg.DefSize == (image.Point{}) {
-		vpsz = dlg.PrefSize(win.RenderWin.Screen().PixSize)
-		if !DialogsSepRenderWin {
-			// vpsz = dlg.Frame.LayState.Size.Pref.Min(win.Scene.LayState.Alloc.Size.MulScalar(.9)).ToPoint()
-		}
-	}
-	dlg.Win = nil
-
-	// note: LowPri allows all other events to be processed before dialog
-	win.EventMgrwe.AddFunc(dlg.Frame.This(), events.KeyChord, LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*events.Key)
-		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPri KeyInput: %v\n", dlg.Name)
-		}
-		kf := KeyFun(kt.KeyChord())
-		switch kf {
-		case KeyFunAbort:
-			dlg.Cancel()
-			kt.SetHandled()
+		if !st.NewWindow {
+			s.BoxShadow = styles.BoxShadow3()
 		}
 	})
-	win.EventMgrwe.AddFunc(dlg.Frame.This(), events.KeyChord, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-		kt := d.(*events.Key)
-		if KeyEventTrace {
-			fmt.Printf("gi.Dialog LowPriRaw KeyInput: %v\n", dlg.Name)
-		}
-		kf := KeyFun(kt.KeyChord())
-		switch kf {
-		case KeyFunAccept:
-			dlg.Accept()
-			kt.SetHandled()
-		}
-	})
-	// this is not a good idea
-	// winwe.AddFunc(dlg.Frame.This(), events.MouseUp, LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	me := d.(*mouse.Event)
-	// 	ddlg, _ := recv.Embed(TypeDialog).(*Dialog)
-	// 	if me.Button == mouse.Left && me.Action == mouse.DoubleClick {
-	// 		ddlg.Accept()
-	// 		me.SetHandled()
-	// 	}
-	// })
-
-	if DialogsSepRenderWin {
-		if !win.HasFlag(WinHasGeomPrefs) {
-			// fmt.Printf("setsz: %v\n", vpsz)
-			win.SetSize(vpsz)
-		}
-		win.GoStartEventLoop()
-	} else {
-		vpsz.X = 800
-		vpsz.Y = 800
-		x = max(0, x)
-		y = max(0, y)
-		if x == 0 && y == 0 {
-			x = win.Scene.Geom.Size.X / 3
-			y = win.Scene.Geom.Size.Y / 3
-		}
-		x = min(x, win.Scene.Geom.Size.X-vpsz.X) // fit
-		y = min(y, win.Scene.Geom.Size.Y-vpsz.Y) // fit
-		dlg.Type = ScDialog                      // ScPopup
-		dlg.Resize(vpsz)
-		dlg.Geom.Pos = image.Point{x, y}
-		win.SetNextPopup(&dlg.Scene, nil)
-	}
-	return true
 }
 
-// Close requests that the dialog be closed -- it does not alter any state or send any signals
-func (dlg *Dialog) Close() {
-	if dlg == nil || dlg.Frame.This() == nil || dlg.Frame.Is(ki.Destroyed) || dlg.Frame.Is(ki.Deleted) {
-		return
-	}
-	win := dlg.Win
-	if win != nil {
-		if DialogsSepRenderWin {
-			win.Close()
-		} else {
-			win.ClosePopup(&dlg.Scene)
-		}
-	}
-}
-
-// Accept accepts the dialog, activated by the default Ok button
-func (dlg *Dialog) Accept() {
-	if dlg == nil {
-		return
-	}
-	dlg.State = DialogAccepted
-	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
-	} else {
-		dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
-	}
-	dlg.Close()
-}
-
-// Cancel cancels the dialog, activated by the default Cancel button
-func (dlg *Dialog) Cancel() {
-	if dlg == nil {
-		return
-	}
-	dlg.State = DialogCanceled
-	if dlg.SigVal >= 0 {
-		dlg.DialogSig.Emit(dlg.Frame.This(), dlg.SigVal, nil)
-	} else {
-		dlg.DialogSig.Emit(dlg.Frame.This(), int64(dlg.State), nil)
-	}
-	dlg.Close()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Configuration functions construct standard types of dialogs but anything can be done
-
-// SetTitle sets the title and adds a Label named "title" to the given frame layout if passed
-func (dlg *Dialog) SetTitle(title string) *Label {
-	dlg.Title = title
-	lab := NewLabel(dlg.Frame.This(), "title")
-	lab.Text = title
-	return lab
-}
-
-// Title returns the title label widget, and its index, within frame -- nil, -1 if not found
-func (dlg *Dialog) TitleWidget() (*Label, int) {
-	idx, ok := dlg.Frame.Children().IndexByName("title", 0)
-	if !ok {
-		return nil, -1
-	}
-	return dlg.Frame.Child(idx).(*Label), idx
-}
-
-// SetPrompt sets the prompt and adds a Label named "prompt" to the given
-// frame layout if passed
-func (dlg *Dialog) SetPrompt(prompt string) *Label {
-	dlg.Prompt = prompt
-	lab := NewLabel(dlg.Frame.This(), "prompt")
-	lab.Text = prompt
-	return lab
-}
-
-// PromptWidget returns the prompt label widget, and its index, within frame -- if
-// nil returns the title widget (flexible if prompt is nil)
-func (dlg *Dialog) PromptWidget() (*Label, int) {
-	idx, ok := dlg.Frame.Children().IndexByName("prompt", 0)
-	if !ok {
-		return dlg.TitleWidget()
-	}
-	return dlg.Frame.Child(idx).(*Label), idx
-}
-
-// PromptWidgetIdx returns the prompt label widget index only
-// for use in Python with only one return value.
-func (dlg *Dialog) PromptWidgetIdx() int {
-	_, idx := dlg.PromptWidget()
-	return idx
-}
-
-// AddButtonBox adds a button box (Row Layout) named "buttons" to given frame,
-// with an extra space above it
-func (dlg *Dialog) AddButtonBox() *Layout {
-	NewSpace(&dlg.Frame, "button-space")
-	bb := NewLayout(&dlg.Frame, "buttons")
-	bb.Lay = LayoutHoriz
-	return bb
-}
-
-// ButtonBox returns the ButtonBox layout widget, and its index, within frame -- nil, -1 if not found
-func (dlg *Dialog) ButtonBox() (*Layout, int) {
-	idx, ok := dlg.Frame.Children().IndexByName("buttons", 0)
-	if !ok {
-		return nil, -1
-	}
-	return dlg.Frame.Child(idx).(*Layout), idx
-}
-
-// Dialog Ok, Cancel options
-const (
-	AddOk     = true
-	NoOk      = false
-	AddCancel = true
-	NoCancel  = false
-)
-
-// StdButtonConfig returns a ki.Config for calling on ConfigChildren
-// of a button box, to create standard Ok, Cancel buttons (if true),
-// optionally starting with a Stretch element that will cause the buttons to
-// be arranged on the right -- a space element is added between buttons if
-// more than one
-func (dlg *Dialog) StdButtonConfig(stretch, ok, cancel bool) ki.Config {
-	config := ki.Config{}
-	if stretch {
-		config.Add(StretchType, "stretch")
-	}
-	if cancel {
-		config.Add(ButtonType, "cancel")
-	}
-	if ok {
-		config.Add(ButtonType, "ok")
-	}
-	return config
-}
-
-// StdButtonConnect connects standard buttons in given button box layout to
-// Accept / Cancel actions
-func (dlg *Dialog) StdButtonConnect(ok, cancel bool, bb *Layout) {
-	if ok {
-		okb := AsButton(bb.ChildByName("ok", 0))
-		okb.SetText("Ok")
-		okb.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(ButtonClicked) {
-				dlg.Accept()
-			}
-		})
-	}
-	if cancel {
-		canb := AsButton(bb.ChildByName("cancel", 0))
-		canb.SetText("Cancel")
-		canb.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(ButtonClicked) {
-				dlg.Cancel()
-			}
-		})
-	}
-}
-
-// StdDialog configures a basic standard dialog with a title, prompt, and ok /
-// cancel buttons -- any empty text will not be added
-func (dlg *Dialog) StdDialog(title, prompt string, ok, cancel bool) {
-	dlg.SigVal = -1
-	if title != "" {
-		dlg.SetTitle(title)
-	}
-	if prompt != "" {
-		dlg.SetPrompt(prompt)
-	}
-	if ok || cancel {
-		bb := dlg.AddButtonBox()
-		bbc := dlg.StdButtonConfig(true, ok, cancel)
-		mods, updt := bb.ConfigChildren(bbc)
-		dlg.StdButtonConnect(ok, cancel, bb)
-		if mods {
-			bb.UpdateEnd(updt)
-		}
-	}
-	dlg.SetFlag(true, ScPopupDestroyAll) // std is disposable
-}
-
-// DlgOpts are the basic dialog options accepted by all dialog methods --
+// DlgOpts are the basic dialog options for standard dialog methods.
 // provides a named, optional way to specify these args
 type DlgOpts struct {
 
-	// generally should be provided -- will also be used for setting name of dialog and associated window
-	Title string `desc:"generally should be provided -- will also be used for setting name of dialog and associated window"`
+	// generally should be provided -- used for setting name of dialog and associated window
+	Title string
 
 	// optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc.
-	Prompt string `desc:"optional more detailed description of what is being requested and how it will be used -- is word-wrapped and can contain full html formatting etc."`
+	Prompt string
 
-	// optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs
-	CSS ki.Props `desc:"optional style properties applied to dialog -- can be used to customize any aspect of existing dialogs"`
+	// display the Ok button
+	Ok bool
+
+	// display the Cancel button.
+	Cancel bool
+
+	// Data for dialogs that return specific data
+	Data any
 }
 
-// NewStdDialog returns a basic standard dialog with given options (title,
-// prompt, CSS styling) and whether ok, cancel buttons should be shown -- any
-// empty text will not be added.
-// Use AddOk / NoOk, AddCancel / NoCancel for bool args.
-func NewStdDialog(opts DlgOpts, ok, cancel bool) *Dialog {
-	title := opts.Title
-	nm := strcase.ToKebab(title)
-	if title == "" {
-		nm = "unnamed-dialog"
+// StdDialog configures a standard DialogStage per the options provided.
+// Context provides the relevant source context opening the dialog.
+func StdDialog(opts DlgOpts, ctx Widget) *DialogStage {
+	dlg := NewDialog(StageScene("std-dialog"), ctx)
+	if opts.Title != "" {
+		dlg.Title(opts.Title)
 	}
-	dlg := Dialog{}
-	dlg.Name = nm
-	dlg.Frame.CSS = opts.CSS
-	dlg.StdDialog(opts.Title, opts.Prompt, ok, cancel)
-	return &dlg
+	if opts.Prompt != "" {
+		dlg.Prompt(opts.Prompt)
+	}
+	if opts.Ok {
+		dlg.Ok()
+	}
+	if opts.Cancel {
+		dlg.Cancel()
+	}
+	dlg.Modal(true).NewWindow(false)
+	return dlg
 }
 
+/*
 // RecycleStdDialog looks for existing dialog window with same Data --
 // if found brings that to the front, returns it, and true bool.
 // else (and if data is nil) calls NewStdDialog, returns false.
@@ -613,40 +267,30 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 	dlg.Data = data
 	return dlg, false
 }
-
-//////////////////////////////////////////////////////////////////////////
-// Widget interface
-
-func (dlg *Dialog) ConfigWidget(sc *Scene) {
-	dlg.Scene.Config()
-}
-
-func (dlg *Dialog) StateIs(states.Focused) bool {
-	return true // dialog ALWAYS gets all the events!
-}
+*/
 
 //////////////////////////////////////////////////////////////////////////
 //     Specific Dialogs
 
-// PromptDialog opens a basic standard dialog with a title, prompt, and ok /
-// cancel buttons -- any empty text will not be added -- optionally connects
-// to given signal receiving object and function for dialog signals (nil to
-// ignore).  Scene is optional to properly contextualize dialog to given
-// master window.
-func PromptDialog(avp *Scene, opts DlgOpts, ok, cancel bool, recv ki.Ki, fun ki.RecvFunc) {
-	dlg := NewStdDialog(opts, ok, cancel)
-	dlg.Modal = true
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
+// PromptDialog opens a standard dialog configured via options.
+// The given closure will be called with the dialog when it returns,
+// and the Accepted flag indicates if Ok or Cancel was pressed.
+func PromptDialog(opts DlgOpts, ctx Widget, fun func(dlg *DialogStage)) *DialogStage {
+	dlg := StdDialog(opts, ctx)
+	if fun != nil {
+		dlg.Stage.Scene.On(events.Change, func(e events.Event) {
+			fun(dlg)
+		})
 	}
-	dlg.Open(0, 0, avp, nil)
+	return dlg
 }
 
+/*
 // ChoiceDialog presents any number of buttons with labels as given, for the
 // user to choose among -- the clicked button number (starting at 0) will be
 // sent to the receiving object and function for dialog signals.  Scene is
 // optional to properly contextualize dialog to given master window.
-func ChoiceDialog(avp *Scene, opts DlgOpts, choices []string, recv ki.Ki, fun ki.RecvFunc) {
+func ChoiceDialog(avp *Scene, opts DlgOpts, choices []string, fun func(dlg *DialogStage)) {
 	dlg := NewStdDialog(opts, NoOk, NoCancel) // no buttons
 	dlg.Modal = true
 	if recv != nil && fun != nil {

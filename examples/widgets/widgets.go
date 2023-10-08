@@ -88,10 +88,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	b1.On(events.Click, func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
 		gi.NewDialog(gi.StageScene("dlg"), b1).
-			AddTitle("Test Dialog").
-			AddPrompt("This is a prompt").
-			SetModal(true).SetNewWindow(true).
-			AddOkCancel().Run()
+			Title("Test Dialog").Prompt("This is a prompt").
+			Modal(true).NewWindow(true).OkCancel().Run()
 
 		// gi.StringPromptDialog(vp, "", "Enter value here..",
 		// 	gi.DlgOpts{Title: "Button1 Dialog", Prompt: "This is a string prompt dialog!  Various specific types of dialogs are available."},
@@ -107,16 +105,12 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	button2 := gi.NewButton(brow, "button2").
 		SetText("Open GoGiEditor").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things").(*gi.Button)
-
 	_ = button2
-
-	// this is the "full strength" general purpose signaling scenework
-	// button2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	fmt.Printf("Received button signal: %v from button: %v\n", gi.ButtonSignals(sig), send.Name())
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		// giv.GoGiEditorDialog(win)
-	// 	}
-	// })
+	button2.On(events.Click, func(e events.Event) {
+		gi.PromptDialog(gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(dlg *gi.DialogStage) {
+			fmt.Println("dialog looks OK:", dlg.Accepted)
+		}).Run()
+	})
 
 	checkbox := gi.NewCheckBox(brow, "checkbox").
 		SetText("Toggle")

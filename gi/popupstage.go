@@ -150,9 +150,8 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	cmgr := &st.Main.PopupMgr
 	cmgr.Push(st)
 
-	sz := st.Scene.PrefSize(ms.Geom.Size)
-
 	sc := st.Scene
+	sz := sc.PrefSize(ms.Geom.Size)
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
 	fontHt := 16
 	if sc.Style.Font.Face != nil {
@@ -167,7 +166,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	}
 	sc.Geom.Size = sz
-	sc.FitInWindow(ms.Geom)
+	sc.FitInWindow(ms.Geom) // does resize
 
 	sc.EventMgr.InitialFocus()
 
