@@ -53,11 +53,11 @@ type SpinBox struct {
 	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 	Format string `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
 
-	// [view: show-name] icon to use for up button -- defaults to icons.KeyboardArrowUp
-	UpIcon icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to icons.KeyboardArrowUp"`
+	// [view: show-name] icon to use for up button -- defaults to [icons.Add]
+	UpIcon icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to [icons.Add]"`
 
-	// [view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown
-	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to icons.KeyboardArrowDown"`
+	// [view: show-name] icon to use for down button -- defaults to [icons.Remove]
+	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to [icons.Remove]"`
 }
 
 func (sb *SpinBox) CopyFieldsFrom(frm any) {
@@ -95,21 +95,43 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "text-field":
-		w.AddStyles(func(s *styles.Style) {
-			s.MinWidth.SetEm(6)
+		tf := w.(*TextField)
+		if !sb.IsDisabled() {
+			sb.SpinBoxTextFieldHandlers(tf)
+		}
+		tf.Txt = sb.ValToString(sb.Value)
+		tf.SetState(sb.IsDisabled(), states.Disabled)
+		tf.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetEm(8)
 		})
-	case "space":
-		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetCh(0.1)
+	case "up":
+		up := w.(*Action)
+		up.Type = ActionParts
+		if sb.UpIcon.IsNil() {
+			sb.UpIcon = icons.Add
+		}
+		up.SetIcon(sb.UpIcon)
+		w.SetState(sb.IsDisabled(), states.Disabled)
+		up.On(events.Click, func(e events.Event) {
+			sb.IncrValue(1)
 		})
-	case "buttons":
-		w.AddStyles(func(s *styles.Style) {
-			s.AlignV = styles.AlignMiddle
+		up.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Focusable)
+			s.Font.Size.SetDp(18)
 		})
-	case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
-		act := w.(*Action)
-		act.Type = ActionParts
-		act.AddStyles(func(s *styles.Style) {
+	case "down":
+		down := w.(*Action)
+		down.Type = ActionParts
+		if sb.DownIcon.IsNil() {
+			sb.DownIcon = icons.Remove
+		}
+		down.SetIcon(sb.DownIcon)
+		w.SetState(sb.IsDisabled(), states.Disabled)
+		down.On(events.Click, func(e events.Event) {
+			sb.IncrValue(-1)
+		})
+		down.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Focusable)
 			s.Font.Size.SetDp(18)
 		})
 	}
@@ -185,57 +207,16 @@ func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
 
 func (sb *SpinBox) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutHoriz)
-	if sb.UpIcon.IsNil() {
-		sb.UpIcon = icons.KeyboardArrowUp
-	}
-	if sb.DownIcon.IsNil() {
-		sb.DownIcon = icons.KeyboardArrowDown
-	}
+
 	config := ki.Config{}
+	config.Add(ActionType, "down")
 	config.Add(TextFieldType, "text-field")
-	if !sb.IsDisabled() {
-		config.Add(SpaceType, "space")
-		config.Add(LayoutType, "buttons")
-	}
+	config.Add(ActionType, "up")
+
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !sb.NeedsRebuild() {
 		parts.UpdateEnd(updt)
 		return
-	}
-	if !sb.IsDisabled() {
-		// STYTODO: maybe do some of this config in OnChildAdded?
-		buts := parts.ChildByName("buttons", 1).(*Layout)
-		buts.Lay = LayoutVert
-		buts.SetNChildren(2, ActionType, "but")
-		// up
-		up := buts.Child(0).(*Action)
-		up.SetName("up")
-		up.SetProp("no-focus", true) // note: cannot be in compiled props b/c
-		// not compiled into style prop
-		// up.SetFlagState(sb.IsInactive(), int(Inactive))
-		up.SetIcon(sb.UpIcon)
-		// todo:
-		up.On(events.Click, func(e events.Event) {
-			sb.IncrValue(1.0)
-		})
-		// dn
-		dn := buts.Child(1).(*Action)
-		// dn.SetFlagState(sb.IsInactive(), int(Inactive))
-		dn.SetName("down")
-		dn.SetProp("no-focus", true)
-		dn.Icon = sb.DownIcon
-		dn.On(events.Click, func(e events.Event) {
-			sb.IncrValue(-1.0)
-		})
-		// space
-		// sp := parts.ChildByName("space", 2).(*Space)
-	}
-	// text-field
-	tf := parts.ChildByName("text-field", 0).(*TextField)
-	tf.SetState(sb.IsDisabled(), states.Disabled)
-	tf.Txt = sb.ValToString(sb.Value)
-	if !sb.IsDisabled() {
-		sb.SpinBoxTextFieldHandlers(tf)
 	}
 	parts.UpdateEnd(updt)
 	sb.SetNeedsLayout(sc, updt)
