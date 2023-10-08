@@ -1881,7 +1881,7 @@ func (tv *TreeView) LabelPart() (*gi.Label, bool) {
 	return nil, false
 }
 
-func (tv *TreeView) ConfigParts(vp *gi.Scene) {
+func (tv *TreeView) ConfigParts(sc *gi.Scene) {
 	parts := tv.NewParts(gi.LayoutHoriz)
 	parts.Style.Template = "giv.TreeView.Parts"
 	config := ki.Config{}
@@ -1899,7 +1899,7 @@ func (tv *TreeView) ConfigParts(vp *gi.Scene) {
 				wb.SetProp("no-focus", true) // note: cannot be in compiled props
 				wb.Style.Template = "giv.TreeView.Branch"
 				// STYTODO: do we really need this?
-				wb.ApplyStyle() // this is key for getting styling to take effect on first try
+				wb.ApplyStyle(sc) // this is key for getting styling to take effect on first try
 			}
 		}
 	}
@@ -1934,7 +1934,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunInsert,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetDisabledState(tv.IsRootOrField(""))
+				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
 		}},
 		{"SrcInsertAfter", ki.Props{
@@ -1942,7 +1942,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunInsertAfter,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetDisabledState(tv.IsRootOrField(""))
+				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
 		}},
 		{"SrcDuplicate", ki.Props{
@@ -1950,7 +1950,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunDuplicate,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetDisabledState(tv.IsRootOrField(""))
+				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
 		}},
 		{"SrcDelete", ki.Props{
@@ -1958,7 +1958,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunDelete,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetDisabledState(tv.IsRootOrField(""))
+				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
 		}},
 		{"sep-edit", ki.BlankProp{}},
@@ -1974,7 +1974,7 @@ var TreeViewProps = ki.Props{
 			"shortcut": gi.KeyFunCut,
 			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-				act.SetDisabledState(tv.IsRootOrField(""))
+				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
 		}},
 		{"Paste", ki.Props{
@@ -2009,7 +2009,7 @@ var TreeViewProps = ki.Props{
 	},
 }
 
-func (tv *TreeView) ConfigWidget(vp *gi.Scene) {
+func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
 	// // optimized init -- avoid tree walking
 	if tv.RootView != tv {
 		tv.Scene = tv.RootView.Scene
@@ -2019,7 +2019,7 @@ func (tv *TreeView) ConfigWidget(vp *gi.Scene) {
 	tv.Style.Defaults()
 	tv.Style.Template = "giv.TreeView." + ki.Type(tv).Name()
 	tv.LayState.Defaults() // doesn't overwrite
-	tv.ConfigParts(vp)
+	tv.ConfigParts(sc)
 	// tv.ConnectToScene()
 }
 
@@ -2050,22 +2050,22 @@ func (tv *TreeView) StyleTreeView() {
 	tv.Indent.ToDots(&tv.Style.UnContext)
 	tv.Parts.Style.InheritFields(&tv.Style)
 	tv.StyMu.Unlock()
-	tv.ConfigParts(vp)
+	tv.ConfigParts(sc)
 }
 
-func (tv *TreeView) ApplyStyle() {
+func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
 	tv.StyleTreeView()
 }
 
 // TreeView is tricky for alloc because it is both a layout of its children but has to
 // maintain its own bbox for its own widget.
 
-func (tv *TreeView) GetSize(vp *gi.Scene, iter int) {
-	tv.InitLayout(vp * Scene)
+func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
+	tv.InitLayout(sc)
 	if tv.HasClosedParent() {
 		return // nothing
 	}
-	tv.GetSizeParts(vp, iter) // get our size from parts
+	tv.GetSizeParts(sc, iter) // get our size from parts
 	tv.WidgetSize = tv.LayState.Alloc.Size
 	h := mat32.Ceil(tv.WidgetSize.Y)
 	w := tv.WidgetSize.X
@@ -2090,10 +2090,10 @@ func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
-	tv.Parts.DoLayout(vp, parBBox, iter)
+	tv.Parts.DoLayout(sc, parBBox, iter)
 }
 
-func (tv *TreeView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
+func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	if tv.HasClosedParent() {
 		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
 	}
@@ -2108,7 +2108,7 @@ func (tv *TreeView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bo
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
 	gi.SetUnitContext(&tv.Style, tv.Scene, tv.NodeSize(), psize) // update units with final layout
 	tv.BBox = tv.This().(gi.Widget).BBoxes()                     // only compute once, at this point
-	tv.This().(gi.Widget).ComputeBBoxes(vp, parBBox, image.Point{})
+	tv.This().(gi.Widget).ComputeBBoxes(sc, parBBox, image.Point{})
 
 	if gi.LayoutTrace {
 		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
@@ -2141,11 +2141,11 @@ func (tv *TreeView) BBoxes() image.Rectangle {
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
 
-func (tv *TreeView) ChildrenBBoxes(vp *gi.Scene) image.Rectangle {
+func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
 	if tv.Par != nil {       // use parents children bbox to determine where we can draw
 		pwi, _ := gi.AsWidget(tv.Par)
-		ar = ar.Intersect(pwi.ChildrenBBoxes(vp))
+		ar = ar.Intersect(pwi.ChildrenBBoxes(sc))
 	}
 	return ar
 }
@@ -2189,7 +2189,7 @@ func (tv *TreeView) PushBounds() bool {
 	return true
 }
 
-func (tv *TreeView) Render(vp *gi.Scene) {
+func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.HasClosedParent() {
 		return // nothing
 	}
@@ -2215,7 +2215,7 @@ func (tv *TreeView) Render(vp *gi.Scene) {
 			tv.This().(gi.Widget).SetTypeHandlers()
 
 			// note: this is std except using WidgetSize instead of AllocSize
-			rs, pc, st := tv.RenderLock(vp)
+			rs, pc, st := tv.RenderLock(sc)
 			pc.FontStyle = *st.FontRender()
 			// SidesTODO: look here if tree view borders break
 			// pc.StrokeStyle.SetColor(&st.Border.Color)

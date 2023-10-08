@@ -7,12 +7,16 @@ package giv
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"reflect"
 	"time"
 
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -28,7 +32,7 @@ type StructValueView struct {
 	ValueViewBase
 }
 
-func (vv *StructValueView) WidgetType() reflect.Type {
+func (vv *StructValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -65,7 +69,7 @@ func (vv *StructValueView) ConfigWidget(widg gi.Widget) {
 	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
 	// 	ac := vvv.Widget.(*gi.Action)
-	// 	vvv.Activate(ac.Scene, nil, nil)
+	// 	vvv.OpenDialog(ac.Scene, nil, nil)
 	// })
 	vv.UpdateWidget()
 }
@@ -74,7 +78,7 @@ func (vv *StructValueView) HasAction() bool {
 	return true
 }
 
-func (vv *StructValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *StructValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -86,7 +90,7 @@ func (vv *StructValueView) Activate(vp *gi.Scene, fun func()) {
 		desc = ""
 	}
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := StructViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), nil)
+	dlg := StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), nil)
 	svk := dlg.Stage.Scene.ChildByType(StructViewType, ki.Embeds, 2)
 	if svk != nil {
 		sv := svk.(*StructView)
@@ -103,7 +107,7 @@ type StructInlineValueView struct {
 	ValueViewBase
 }
 
-func (vv *StructInlineValueView) WidgetType() reflect.Type {
+func (vv *StructInlineValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = StructViewInlineType
 	return vv.WidgetTyp
 }
@@ -150,7 +154,7 @@ type SliceValueView struct {
 	ElIsStruct bool         // whether non-pointer element type is a struct or not
 }
 
-func (vv *SliceValueView) WidgetType() reflect.Type {
+func (vv *SliceValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -189,7 +193,7 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Widget) {
 	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
 	// 	ac := vvv.Widget.(*gi.Action)
-	// 	vvv.Activate(ac.Scene, nil, nil)
+	// 	vvv.OpenDialog(ac.Scene, nil, nil)
 	// })
 	vv.UpdateWidget()
 }
@@ -198,7 +202,7 @@ func (vv *SliceValueView) HasAction() bool {
 	return true
 }
 
-func (vv *SliceValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -213,7 +217,7 @@ func (vv *SliceValueView) Activate(vp *gi.Scene, fun func()) {
 	inact := vv.This().(ValueView).IsInactive()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
+		dlg := TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
 		svk := dlg.Stage.Scene.ChildByType(TableViewType, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*TableView)
@@ -225,7 +229,7 @@ func (vv *SliceValueView) Activate(vp *gi.Scene, fun func()) {
 			// })
 		}
 	} else {
-		dlg := SliceViewDialog(vv, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
+		dlg := SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
 		svk := dlg.Stage.Scene.ChildByType(SliceViewType, ki.Embeds, 2)
 		if svk != nil {
 			sv := svk.(*SliceView)
@@ -247,8 +251,8 @@ type SliceInlineValueView struct {
 	ValueViewBase
 }
 
-func (vv *SliceInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = TypeSliceViewInline
+func (vv *SliceInlineValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = SliceViewInlineType
 	return vv.WidgetTyp
 }
 
@@ -274,7 +278,7 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Widget) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
+	sv.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sv.SetSlice(vv.Value.Interface())
 	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
@@ -291,7 +295,7 @@ type MapValueView struct {
 	ValueViewBase
 }
 
-func (vv *MapValueView) WidgetType() reflect.Type {
+func (vv *MapValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -318,11 +322,11 @@ func (vv *MapValueView) ConfigWidget(widg gi.Widget) {
 	ac := vv.Widget.(*gi.Action)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
-		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Scene, nil, nil)
-	})
+	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
+	// 	ac := vvv.Widget.(*gi.Action)
+	// 	vvv.OpenDialog(ac.Scene, nil, nil)
+	// })
 	vv.UpdateWidget()
 }
 
@@ -330,7 +334,7 @@ func (vv *MapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *MapValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *MapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -339,8 +343,8 @@ func (vv *MapValueView) Activate(vp *gi.Scene, fun func()) {
 	desc, _ := vv.Tag("desc")
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := MapViewDialog(vp, mpi, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
-	mvk := dlg.Stage.Scene.ChildByType(TypeMapView, ki.Embeds, 2)
+	dlg := MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, mpi, fun)
+	mvk := dlg.Stage.Scene.ChildByType(MapViewType, ki.Embeds, 2)
 	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
@@ -360,8 +364,8 @@ type MapInlineValueView struct {
 	ValueViewBase
 }
 
-func (vv *MapInlineValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = TypeMapViewInline
+func (vv *MapInlineValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = MapViewInlineType
 	return vv.WidgetTyp
 }
 
@@ -387,7 +391,7 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Widget) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetDisabledState(vv.This().(ValueView).IsInactive())
+	sv.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sv.SetMap(vv.Value.Interface())
 	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
@@ -404,7 +408,7 @@ type KiPtrValueView struct {
 	ValueViewBase
 }
 
-func (vv *KiPtrValueView) WidgetType() reflect.Type {
+func (vv *KiPtrValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
@@ -453,23 +457,19 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Widget) {
 	mb.Indicator = icons.KeyboardArrowDown
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.ResetMenu()
-	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"},
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vvv, _ := recv.Embed(TypeKiPtrValueView).(*KiPtrValueView)
-			k := vvv.KiStruct()
-			if k != nil {
-				mb := vvv.Widget.(*gi.Button)
-				vvv.Activate(mb.Scene, nil, nil)
-			}
-		})
-	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"},
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			vvv, _ := recv.Embed(TypeKiPtrValueView).(*KiPtrValueView)
-			k := vvv.KiStruct()
-			if k != nil {
-				GoGiEditorDialog(k)
-			}
-		})
+	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"}, func(act *gi.Action) {
+		k := vv.KiStruct()
+		if k != nil {
+			mb := vv.Widget.(*gi.Button)
+			vv.OpenDialog(mb, nil)
+		}
+	})
+	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"}, func(act *gi.Action) {
+		k := vv.KiStruct()
+		if k != nil {
+			GoGiEditorDialog(k)
+		}
+	})
 	vv.UpdateWidget()
 }
 
@@ -477,7 +477,7 @@ func (vv *KiPtrValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KiPtrValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *KiPtrValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -489,7 +489,7 @@ func (vv *KiPtrValueView) Activate(vp *gi.Scene, fun func()) {
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
 	inact := vv.This().(ValueView).IsInactive()
-	StructViewDialog(vp, k, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, recv, dlgFunc)
+	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, k, fun)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -500,8 +500,8 @@ type BoolValueView struct {
 	ValueViewBase
 }
 
-func (vv *BoolValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeCheckBox
+func (vv *BoolValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.CheckBoxType
 	return vv.WidgetTyp
 }
 
@@ -520,16 +520,16 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.CheckBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
-	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.ButtonToggled) {
-			vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
-			cbb := vvv.Widget.(*gi.CheckBox)
-			if vvv.SetValue(cbb.StateIs(states.Checked)) {
-				vvv.UpdateWidget() // always update after setting value..
-			}
-		}
-	})
+	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
+	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	if sig == int64(gi.ButtonToggled) {
+	// 		vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
+	// 		cbb := vvv.Widget.(*gi.CheckBox)
+	// 		if vvv.SetValue(cbb.StateIs(states.Checked)) {
+	// 			vvv.UpdateWidget() // always update after setting value..
+	// 		}
+	// 	}
+	// })
 	vv.UpdateWidget()
 }
 
@@ -541,8 +541,8 @@ type IntValueView struct {
 	ValueViewBase
 }
 
-func (vv *IntValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeSpinBox
+func (vv *IntValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.SpinBoxType
 	return vv.WidgetTyp
 }
 
@@ -552,8 +552,8 @@ func (vv *IntValueView) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.SpinBox)
 	npv := laser.NonPtrValue(vv.Value)
-	fv, ok := laser.ToFloat32(npv.Interface())
-	if ok {
+	fv, err := laser.ToFloat32(npv.Interface())
+	if err != nil {
 		sb.SetValue(fv)
 	}
 }
@@ -563,7 +563,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
+	sb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
@@ -575,33 +575,33 @@ func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 		sb.SetMin(0)
 	}
 	if mintag, ok := vv.Tag("min"); ok {
-		minv, ok := laser.ToFloat32(mintag)
-		if ok {
+		minv, err := laser.ToFloat32(mintag)
+		if err != nil {
 			sb.SetMin(minv)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, ok := laser.ToFloat32(maxtag)
-		if ok {
+		maxv, err := laser.ToFloat32(maxtag)
+		if err != nil {
 			sb.SetMax(maxv)
 		}
 	}
 	if steptag, ok := vv.Tag("step"); ok {
-		step, ok := laser.ToFloat32(steptag)
-		if ok {
+		step, err := laser.ToFloat32(steptag)
+		if err != nil {
 			sb.Step = step
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeIntValueView).(*IntValueView)
-		sbb := vvv.Widget.(*gi.SpinBox)
-		if vvv.SetValue(sbb.Value) {
-			vvv.UpdateWidget()
-		}
-	})
+	// sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeIntValueView).(*IntValueView)
+	// 	sbb := vvv.Widget.(*gi.SpinBox)
+	// 	if vvv.SetValue(sbb.Value) {
+	// 		vvv.UpdateWidget()
+	// 	}
+	// })
 	vv.UpdateWidget()
 }
 
@@ -613,8 +613,8 @@ type FloatValueView struct {
 	ValueViewBase
 }
 
-func (vv *FloatValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeSpinBox
+func (vv *FloatValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.SpinBoxType
 	return vv.WidgetTyp
 }
 
@@ -624,8 +624,8 @@ func (vv *FloatValueView) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.SpinBox)
 	npv := laser.NonPtrValue(vv.Value)
-	fv, ok := laser.ToFloat32(npv.Interface())
-	if ok {
+	fv, err := laser.ToFloat32(npv.Interface())
+	if err != nil {
 		sb.SetValue(fv)
 	}
 }
@@ -635,27 +635,27 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.SpinBox)
 	sb.Tooltip, _ = vv.Tag("desc")
-	sb.SetDisabledState(vv.This().(ValueView).IsInactive())
+	sb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
-		minv, ok := laser.ToFloat32(mintag)
-		if ok {
+		minv, err := laser.ToFloat32(mintag)
+		if err != nil {
 			sb.HasMin = true
 			sb.Min = minv
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
-		maxv, ok := laser.ToFloat32(maxtag)
-		if ok {
+		maxv, err := laser.ToFloat32(maxtag)
+		if err != nil {
 			sb.HasMax = true
 			sb.Max = maxv
 		}
 	}
 	sb.Step = .1 // smaller default
 	if steptag, ok := vv.Tag("step"); ok {
-		step, ok := laser.ToFloat32(steptag)
-		if ok {
+		step, err := laser.ToFloat32(steptag)
+		if err != nil {
 			sb.Step = step
 		}
 	}
@@ -663,13 +663,13 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 		sb.Format = fmttag
 	}
 
-	sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeFloatValueView).(*FloatValueView)
-		sbb := vvv.Widget.(*gi.SpinBox)
-		if vvv.SetValue(sbb.Value) {
-			vvv.UpdateWidget()
-		}
-	})
+	// sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeFloatValueView).(*FloatValueView)
+	// 	sbb := vvv.Widget.(*gi.SpinBox)
+	// 	if vvv.SetValue(sbb.Value) {
+	// 		vvv.UpdateWidget()
+	// 	}
+	// })
 	vv.UpdateWidget()
 }
 
@@ -679,28 +679,26 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 // EnumValueView presents a combobox for choosing enums
 type EnumValueView struct {
 	ValueViewBase
-	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-func (vv *EnumValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeComboBox
+func (vv *EnumValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ComboBoxType
 	return vv.WidgetTyp
 }
 
-func (vv *EnumValueView) EnumType() reflect.Type {
-	if vv.AltType != nil {
-		return vv.AltType
+func (vv *EnumValueView) EnumValue() enums.Enum {
+	ev, ok := vv.Value.Interface().(enums.Enum)
+	if ok {
+		return ev
 	}
-	// derive type indirectly from the interface instead of directly from the value
-	// because that works for any types as in property maps
-	typ := laser.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
-	return typ
+	slog.Error("giv.EnumValueView: type must be enums.Enum")
+	return nil
 }
 
 func (vv *EnumValueView) SetEnumValueFromInt(ival int64) bool {
-	typ := vv.EnumType()
-	eval := laser.EnumIfaceFromInt64(ival, typ)
-	return vv.SetValue(eval)
+	// typ := vv.EnumType()
+	// eval := laser.EnumIfaceFromInt64(ival, typ)
+	return vv.SetValue(ival)
 }
 
 func (vv *EnumValueView) UpdateWidget() {
@@ -709,8 +707,8 @@ func (vv *EnumValueView) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.ComboBox)
 	npv := laser.NonPtrValue(vv.Value)
-	iv, ok := laser.ToInt(npv.Interface())
-	if ok {
+	iv, err := laser.ToInt(npv.Interface())
+	if err != nil {
 		sb.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
 	}
 }
@@ -720,16 +718,14 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
+	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 
-	typ := vv.EnumType()
-	cb.ItemsFromEnum(typ, false, 50)
-	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeEnumValueView).(*EnumValueView)
-		cbb := vvv.Widget.(*gi.ComboBox)
-		eval := cbb.CurVal.(laser.EnumValue)
-		if vvv.SetEnumValueFromInt(eval.Value) { // todo: using index
-			vvv.UpdateWidget()
+	ev := vv.EnumValue()
+	cb.ItemsFromEnum(ev, false, 50)
+	cb.On(events.Change, func(e events.Event) {
+		cval := cb.CurVal.(enums.Enum)
+		if vv.SetEnumValueFromInt(cval.Int64()) { // todo: using index
+			vv.UpdateWidget()
 		}
 	})
 	vv.UpdateWidget()
@@ -744,59 +740,63 @@ type BitFlagView struct {
 	AltType reflect.Type // alternative type, e.g., from EnumType: property
 }
 
-func (vv *BitFlagView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.ButtonTypeBox
+func (vv *BitFlagView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonBoxType
 	return vv.WidgetTyp
 }
 
-func (vv *BitFlagView) EnumType() reflect.Type {
-	if vv.AltType != nil {
-		return vv.AltType
+func (vv *BitFlagView) EnumValue() enums.BitFlag {
+	ev, ok := vv.Value.Interface().(enums.BitFlag)
+	if ok {
+		return ev
 	}
-	// derive type indirectly from the interface instead of directly from the value
-	// because that works for any types as in property maps
-	typ := laser.NonPtrType(reflect.TypeOf(vv.Value.Interface()))
-	return typ
+	slog.Error("giv.BitFlagView: type must be enums.BitFlag")
+	return nil
 }
 
 func (vv *BitFlagView) SetEnumValueFromInt(ival int64) bool {
-	typ := vv.EnumType()
-	eval := laser.EnumIfaceFromInt64(ival, typ)
-	return vv.SetValue(eval)
+	// todo: needs to set flags?
+	// typ := vv.EnumType()
+	// eval := laser.EnumIfaceFromInt64(ival, typ)
+	return vv.SetValue(ival)
 }
 
 func (vv *BitFlagView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.ButtonBox)
+	bb := vv.Widget.(*gi.ButtonBox)
+	_ = bb
 	npv := laser.NonPtrValue(vv.Value)
-	iv, ok := laser.ToInt(npv.Interface())
-	if ok {
-		typ := vv.EnumType()
-		sb.UpdateFromBitFlags(typ, int64(iv))
+	iv, err := laser.ToInt(npv.Interface())
+	_ = iv
+	if err != nil {
+		// ev := vv.EnumValue() // todo:
+		// bb.UpdateFromBitFlags(typ, int64(iv))
 	}
 }
 
 func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.ButtonBox)
-	vv.StdConfigWidget(&cb.Parts)
-	cb.Parts.Lay = gi.LayoutHoriz
+	// vv.StdConfigWidget(cb.Parts)
+	// cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
+	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 
-	typ := vv.EnumType()
-	cb.ItemsFromEnum(typ)
-	cb.ConfigParts(vp)
-	cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
-		cbb := vvv.Widget.(*gi.ButtonBox)
-		etyp := vvv.EnumType()
-		val := cbb.BitFlagsValue(etyp)
-		vvv.SetEnumValueFromInt(val)
-		// vvv.UpdateWidget()
-	})
+	// todo!
+	ev := vv.EnumValue()
+	_ = ev
+	// cb.ItemsFromEnum(ev)
+	// cb.ConfigParts(sc)
+	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
+	// 	cbb := vvv.Widget.(*gi.ButtonBox)
+	// 	etyp := vvv.EnumType()
+	// 	val := cbb.BitFlagsValue(etyp)
+	// 	vvv.SetEnumValueFromInt(val)
+	// 	// vvv.UpdateWidget()
+	// })
 	vv.UpdateWidget()
 }
 
@@ -808,8 +808,8 @@ type TypeValueView struct {
 	ValueViewBase
 }
 
-func (vv *TypeValueView) WidgetType() reflect.Type {
-	vv.WidgetTyp = gi.TypeComboBox
+func (vv *TypeValueView) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ComboBoxType
 	return vv.WidgetTyp
 }
 
@@ -819,7 +819,7 @@ func (vv *TypeValueView) UpdateWidget() {
 	}
 	sb := vv.Widget.(*gi.ComboBox)
 	npv := laser.NonPtrValue(vv.Value)
-	typ, ok := npv.Interface().(reflect.Type)
+	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
 		sb.SetCurVal(typ)
 	}
@@ -830,32 +830,31 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.ComboBox)
 	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetDisabledState(vv.This().(ValueView).IsInactive())
+	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 
-	typEmbeds := ki.KiT_Node
-	if kiv, ok := vv.Owner.(ki.Ki); ok {
-		if tep, ok := kiv.PropInherit("type-embeds", ki.Inherit, ki.TypeProps); ok {
-			if te, ok := tep.(reflect.Type); ok {
-				typEmbeds = te
-			}
-		}
-	}
+	typEmbeds := ki.NodeType
+	// if kiv, ok := vv.Owner.(ki.Ki); ok {
+	// 	if tep, ok := kiv.PropInherit("type-embeds", ki.Inherit, ki.TypeProps); ok {
+	// 		// todo:
+	// 		// if te, ok := tep.(reflect.Type); ok {
+	// 		// 	typEmbeds = te
+	// 		// }
+	// 	}
+	// }
 	if tetag, ok := vv.Tag("type-embeds"); ok {
-		typ := laser.Types.Type(tetag)
+		typ := gti.TypeByName(tetag)
 		if typ != nil {
 			typEmbeds = typ
 		}
 	}
 
-	tl := laser.Types.AllEmbedsOf(typEmbeds, true, false)
+	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.ItemsFromTypes(tl, false, true, 50)
 
-	cb.ComboSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeTypeValueView).(*TypeValueView)
-		cbb := vvv.Widget.(*gi.ComboBox)
-		tval := cbb.CurVal.(reflect.Type)
-		if vvv.SetValue(tval) {
-			vvv.UpdateWidget()
+	cb.On(events.Change, func(e events.Event) {
+		tval := cb.CurVal.(*gti.Type)
+		if vv.SetValue(tval) {
+			vv.UpdateWidget()
 		}
 	})
 	vv.UpdateWidget()
@@ -869,7 +868,7 @@ type ByteSliceValueView struct {
 	ValueViewBase
 }
 
-func (vv *ByteSliceValueView) WidgetType() reflect.Type {
+func (vv *ByteSliceValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
@@ -891,20 +890,16 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
+	tf.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(TypeByteSliceValueView).(*ByteSliceValueView)
-			tf := send.(*gi.TextField)
-			if vvv.SetValue(tf.Text()) {
-				vvv.UpdateWidget() // always update after setting value..
-			}
+	tf.On(events.Change, func(e events.Event) {
+		if vv.SetValue(tf.Text()) {
+			vv.UpdateWidget() // always update after setting value..
 		}
 	})
 	vv.UpdateWidget()
@@ -918,7 +913,7 @@ type RuneSliceValueView struct {
 	ValueViewBase
 }
 
-func (vv *RuneSliceValueView) WidgetType() reflect.Type {
+func (vv *RuneSliceValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
@@ -940,19 +935,15 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
+	tf.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(TypeRuneSliceValueView).(*RuneSliceValueView)
-			tf := send.(*gi.TextField)
-			if vvv.SetValue(tf.Text()) {
-				vvv.UpdateWidget() // always update after setting value..
-			}
+	tf.On(events.Change, func(e events.Event) {
+		if vv.SetValue(tf.Text()) {
+			vv.UpdateWidget() // always update after setting value..
 		}
 	})
 	vv.UpdateWidget()
@@ -966,7 +957,7 @@ type NilValueView struct {
 	ValueViewBase
 }
 
-func (vv *NilValueView) WidgetType() reflect.Type {
+func (vv *NilValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.LabelType
 	return vv.WidgetTyp
 }
@@ -1004,7 +995,7 @@ type TimeValueView struct {
 	ValueViewBase
 }
 
-func (vv *TimeValueView) WidgetType() reflect.Type {
+func (vv *TimeValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
@@ -1036,23 +1027,19 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Widget) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetDisabledState(vv.This().(ValueView).IsInactive())
+	tf.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	tf.AddStyles(func(s *styles.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
-	tf.TextFieldSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(TypeTimeValueView).(*TimeValueView)
-			tf := send.(*gi.TextField)
-			nt, err := time.Parse(DefaultTimeFormat, tf.Text())
-			if err != nil {
-				log.Println(err)
-			} else {
-				tm := vvv.TimeVal()
-				*tm = nt
-				// vvv.ViewSig.Emit(vvv.This(), 0, nil)
-				vvv.UpdateWidget()
-			}
+	tf.On(events.Change, func(e events.Event) {
+		nt, err := time.Parse(DefaultTimeFormat, tf.Text())
+		if err != nil {
+			log.Println(err)
+		} else {
+			tm := vv.TimeVal()
+			*tm = nt
+			// vvv.ViewSig.Emit(vvv.This(), 0, nil)
+			vv.UpdateWidget()
 		}
 	})
 	vv.UpdateWidget()

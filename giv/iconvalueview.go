@@ -5,11 +5,11 @@
 package giv
 
 import (
-	"reflect"
 	"strings"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -24,7 +24,7 @@ type IconValueView struct {
 	ValueViewBase
 }
 
-func (vv *IconValueView) WidgetType() reflect.Type {
+func (vv *IconValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -60,7 +60,7 @@ func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(IconTypeValueView).(*IconValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -69,7 +69,7 @@ func (vv *IconValueView) HasAction() bool {
 	return true
 }
 
-func (vv *IconValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *IconValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}

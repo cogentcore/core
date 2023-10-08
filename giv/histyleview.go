@@ -6,13 +6,13 @@ package giv
 
 import (
 	"fmt"
-	"reflect"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -26,7 +26,7 @@ type HiStyleValueView struct {
 	ValueViewBase
 }
 
-func (vv *HiStyleValueView) WidgetType() reflect.Type {
+func (vv *HiStyleValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -48,7 +48,7 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Widget) {
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeHiStyleValueView).(*HiStyleValueView)
 		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -57,7 +57,7 @@ func (vv *HiStyleValueView) HasAction() bool {
 	return true
 }
 
-func (vv *HiStyleValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *HiStyleValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}

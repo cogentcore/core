@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"reflect"
 	"sort"
 
 	"goki.dev/cam/hsl"
@@ -16,8 +15,9 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -109,21 +109,21 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 
 // SetColor sets the source color
 func (cv *ColorView) SetColor(clr color.Color) {
+	updt := cv.UpdateStart()
 	cv.Color = colors.AsRGBA(clr)
 	cv.ColorHSLA = hsl.FromColor(clr)
 	cv.ColorHSLA.Round()
-	cv.Config()
-	cv.Update()
+	cv.UpdateEndRender(updt)
 }
 
 // Config configures a standard setup of entire view
-func (cv *ColorView) ConfigWidget(vp *gi.Scene) {
+func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	if cv.HasChildren() {
 		return
 	}
 	updt := cv.UpdateStart()
-	vl := gi.NewLayout(cv, "slider-lay", gi.LayoutHoriz)
-	nl := gi.NewLayout(cv, "num-lay", gi.LayoutVert)
+	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
+	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
 
 	// cv.NumView = ToValueView(&cv.Color, "")
 	// cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
@@ -138,158 +138,132 @@ func (cv *ColorView) ConfigWidget(vp *gi.Scene) {
 	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
 	// })
 
-	rgbalay := gi.NewLayout(nl, "nums-rgba-lay", gi.LayoutHoriz)
+	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetLayout(gi.LayoutHoriz)
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
-	nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		updt := cvv.UpdateStart()
-		cvv.ColorHSLA = hsl.FromColor(cvv.Color)
-		cvv.ColorHSLA.Round()
-		cvv.ViewSig.Emit(cvv.This(), 0, nil)
-		cvv.UpdateEnd(updt)
-	})
+	// nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	cvv, _ := recv.Embed(TypeColorView).(*ColorView)
+	// 	updt := cvv.UpdateStart()
+	// 	cvv.ColorHSLA = hsl.FromColor(cvv.Color)
+	// 	cvv.ColorHSLA.Round()
+	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
+	// 	cvv.UpdateEnd(updt)
+	// })
 
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("rgb(%d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cvv.Color.R, cvv.Color.G, cvv.Color.B, cvv.Color.A)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("rgb(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
 
-	hslalay := gi.NewLayout(nl, "nums-hsla-lay", gi.LayoutHoriz)
+	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetLayout(gi.LayoutHoriz)
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
-	nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		updt := cvv.UpdateStart()
-		cvv.Color = cv.ColorHSLA.AsRGBA()
-		cvv.ViewSig.Emit(cvv.This(), 0, nil)
-		cvv.UpdateEnd(updt)
-	})
+	// nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
+	// 	updt := cv.UpdateStart()
+	// 	cv.Color = cv.ColorHSLA.AsRGBA()
+	// 	cv.ViewSig.Emit(cv.This(), 0, nil)
+	// 	cv.UpdateEnd(updt)
+	// })
 
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("hsl(%g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cvv.ColorHSLA.H, cvv.ColorHSLA.S, cvv.ColorHSLA.L, cvv.ColorHSLA.A)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("hsl(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"}, func(act *gi.Action) {
+		text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
 
-	hexlay := gi.NewLayout(nl, "nums-hex-lay", gi.LayoutHoriz)
+	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetLayout(gi.LayoutHoriz)
 
-	gi.NewLabel(hexlay, "hexlbl", "Hex")
+	gi.NewLabel(hexlay, "hexlbl").SetText("Hex")
 
 	hex := gi.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
-	hex.TextFieldSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-			updt := cvv.UpdateStart()
-			clr, err := colors.FromHex(hex.Text())
-			if err != nil {
-				log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
-			}
-			cvv.Color = clr
-			cvv.ColorHSLA = hsl.FromColor(cvv.Color)
-			cvv.ColorHSLA.Round()
-			cvv.ViewSig.Emit(cvv.This(), 0, nil)
-			cvv.UpdateEnd(updt)
+	hex.On(events.Change, func(e events.Event) {
+		updt := cv.UpdateStart()
+		clr, err := colors.FromHex(hex.Text())
+		if err != nil {
+			log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
 		}
+		cv.Color = clr
+		cv.ColorHSLA = hsl.FromColor(cv.Color)
+		cv.ColorHSLA.Round()
+		cv.Send(events.Change, e)
+		cv.UpdateEnd(updt)
 	})
 
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			hs := colors.AsHex(cvv.Color)
-			// get rid of transparency because this is just RRGGBB
-			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cvv.Color))
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			hs := colors.AsHex(cvv.Color)
-			text := hs[:len(hs)-2]
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"},
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv := recv.(*ColorView)
-			text := colors.AsHex(cvv.Color)
-			goosi.TheApp.ClipBoard(cv.ParentRenderWin().RenderWin).Write(mimedata.NewText(text))
-		})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`}, func(act *gi.Action) {
+		hs := colors.AsHex(cv.Color)
+		// get rid of transparency because this is just RRGGBB
+		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`}, func(act *gi.Action) {
+		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cv.Color))
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"}, func(act *gi.Action) {
+		hs := colors.AsHex(cv.Color)
+		text := hs[:len(hs)-2]
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
+	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"}, func(act *gi.Action) {
+		text := colors.AsHex(cv.Color)
+		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+	})
 
-	gi.NewFrame(vl, "value", gi.LayoutHoriz)
-	sg := gi.NewLayout(vl, "slider-grid", gi.LayoutGrid)
+	gi.NewFrame(vl, "value").SetLayout(gi.LayoutHoriz)
+	sg := gi.NewLayout(vl, "slider-grid").SetLayout(gi.LayoutGrid)
 
-	rl := gi.NewLabel(sg, "rlab", "Red:")
+	rl := gi.NewLabel(sg, "rlab").SetText("Red:")
 	rs := gi.NewSlider(sg, "red")
-	hl := gi.NewLabel(sg, "hlab", "Hue:")
+	hl := gi.NewLabel(sg, "hlab").SetText("Hue:")
 	hs := gi.NewSlider(sg, "hue")
-	gl := gi.NewLabel(sg, "glab", "Green:")
+	gl := gi.NewLabel(sg, "glab").SetText("Green:")
 	gs := gi.NewSlider(sg, "green")
-	sl := gi.NewLabel(sg, "slab", "Sat:")
+	sl := gi.NewLabel(sg, "slab").SetText("Sat:")
 	ss := gi.NewSlider(sg, "sat")
-	bl := gi.NewLabel(sg, "blab", "Blue:")
+	bl := gi.NewLabel(sg, "blab").SetText("Blue:")
 	bs := gi.NewSlider(sg, "blue")
-	ll := gi.NewLabel(sg, "llab", "Light:")
+	ll := gi.NewLabel(sg, "llab").SetText("Light:")
 	ls := gi.NewSlider(sg, "light")
-	al := gi.NewLabel(sg, "alab", "Alpha:")
+	al := gi.NewLabel(sg, "alab").SetText("Alpha:")
 	as := gi.NewSlider(sg, "alpha")
 
+	// todo: do inline
 	rl.Redrawable = true
 	gl.Redrawable = true
 	bl.Redrawable = true
@@ -311,14 +285,14 @@ func (cv *ColorView) ConfigWidget(vp *gi.Scene) {
 	cv.UpdateEnd(updt)
 }
 
-// IsConfiged returns true if widget is fully configured
-func (cv *ColorView) IsConfiged() bool {
-	if !cv.HasChildren() {
-		return false
-	}
-	sl := cv.SliderLay()
-	return sl.HasChildren()
-}
+// // IsConfiged returns true if widget is fully configured
+// func (cv *ColorView) IsConfiged() bool {
+// 	if !cv.HasChildren() {
+// 		return false
+// 	}
+// 	sl := cv.SliderLay()
+// 	return sl.HasChildren()
+// }
 
 func (cv *ColorView) NumLay() *gi.Layout {
 	return cv.ChildByName("num-lay", 1).(*gi.Layout)
@@ -365,21 +339,21 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
-		if sig == int64(gi.SliderReleased) {
-			updt := cvv.UpdateStart()
-			cvv.SetRGBValue(slv.Value, rgb)
-			cvv.ViewSig.Emit(cvv.This(), 0, nil)
-			cvv.UpdateEnd(updt)
-		} else if sig == int64(gi.SliderValueChanged) {
-			updt := cvv.UpdateStart()
-			cvv.SetRGBValue(slv.Value, rgb)
-			cvv.ManipSig.Emit(cvv.This(), 0, nil)
-			cvv.UpdateEnd(updt)
-		}
-	})
+	// sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
+	// 	slv := send.Embed(gi.TypeSlider).(*gi.Slider)
+	// 	if sig == int64(gi.SliderReleased) {
+	// 		updt := cv.UpdateStart()
+	// 		cv.SetRGBValue(slv.Value, rgb)
+	// 		cv.ViewSig.Emit(cv.This(), 0, nil)
+	// 		cv.UpdateEnd(updt)
+	// 	} else if sig == int64(gi.SliderValueChanged) {
+	// 		updt := cv.UpdateStart()
+	// 		cv.SetRGBValue(slv.Value, rgb)
+	// 		cv.ManipSig.Emit(cv.This(), 0, nil)
+	// 		cv.UpdateEnd(updt)
+	// 	}
+	// })
 }
 
 func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
@@ -421,21 +395,21 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-		slv := send.Embed(gi.TypeSlider).(*gi.Slider)
-		if sig == int64(gi.SliderReleased) {
-			updt := cvv.UpdateStart()
-			cvv.SetHSLValue(slv.Value, hsl)
-			cvv.ViewSig.Emit(cvv.This(), 0, nil)
-			cvv.UpdateEnd(updt)
-		} else if sig == int64(gi.SliderValueChanged) {
-			updt := cvv.UpdateStart()
-			cvv.SetHSLValue(slv.Value, hsl)
-			cvv.ManipSig.Emit(cvv.This(), 0, nil)
-			cvv.UpdateEnd(updt)
-		}
-	})
+	// sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
+	// 	slv := send.Embed(gi.TypeSlider).(*gi.Slider)
+	// 	if sig == int64(gi.SliderReleased) {
+	// 		updt := cv.UpdateStart()
+	// 		cv.SetHSLValue(slv.Value, hsl)
+	// 		cv.ViewSig.Emit(cv.This(), 0, nil)
+	// 		cv.UpdateEnd(updt)
+	// 	} else if sig == int64(gi.SliderValueChanged) {
+	// 		updt := cv.UpdateStart()
+	// 		cv.SetHSLValue(slv.Value, hsl)
+	// 		cv.ManipSig.Emit(cv.This(), 0, nil)
+	// 		cv.UpdateEnd(updt)
+	// 	}
+	// })
 }
 
 func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
@@ -463,7 +437,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 }
 
 func (cv *ColorView) ConfigPalette() {
-	pg := gi.NewLayout(cv, "palette", gi.LayoutGrid)
+	pg := gi.NewLayout(cv, "palette").SetLayout(gi.LayoutGrid)
 
 	// STYTOOD: use hct sorted names here (see https://github.com/goki/gi/issues/619)
 	nms := colors.Names
@@ -472,24 +446,24 @@ func (cv *ColorView) ConfigPalette() {
 		cbt := gi.NewButton(pg, cn)
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
-		cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-			if sig == int64(gi.ButtonPressed) {
-				but := send.Embed(gi.ButtonType).(*gi.Button)
-				cvv.Color = colors.LogFromName(but.Nm)
-				cvv.ColorHSLA = hsl.FromColor(cvv.Color)
-				cvv.ColorHSLA.Round()
-				cvv.ViewSig.Emit(cvv.This(), 0, nil)
-				cvv.Update()
-			}
-		})
+		// cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
+		// 	if sig == int64(gi.ButtonPressed) {
+		// 		but := send.Embed(gi.ButtonType).(*gi.Button)
+		// 		cv.Color = colors.LogFromName(but.Nm)
+		// 		cv.ColorHSLA = hsl.FromColor(cv.Color)
+		// 		cv.ColorHSLA.Round()
+		// 		cv.ViewSig.Emit(cv.This(), 0, nil)
+		// 		cv.Update()
+		// 	}
+		// })
 	}
 }
 
 func (cv *ColorView) Update() {
 	updt := cv.UpdateStart()
 	cv.UpdateImpl()
-	cv.UpdateEnd(updt)
+	cv.UpdateEndRender(updt)
 }
 
 // UpdateImpl does the raw updates based on current value,
@@ -523,18 +497,13 @@ func (cv *ColorView) UpdateNums() {
 	cv.NumLay().ChildByName("nums-hex-lay", 2).ChildByName("nums-hex", 1).(*gi.TextField).SetText(hs)
 }
 
-func (cv *ColorView) Render(vp *gi.Scene) {
-	if cv.FullReRenderIfNeeded() {
-		return
-	}
-	if cv.PushBounds() {
-		updt := cv.UpdateStart()
-		cv.UpdateImpl()
-		cv.UpdateEndNoSig(updt)
-		cv.PopBounds()
-	}
-	cv.Frame.Render()
-}
+// func (cv *ColorView) Render(sc *gi.Scene) {
+// 	if cv.PushBounds(sc) {
+// 		cv.RenderFrame(sc)
+// 		cv.RenderChildren(sc)
+// 		cv.PopBounds(sc)
+// 	}
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorValueView
@@ -596,7 +565,7 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 	}
 }
 
-func (vv *ColorValueView) WidgetType() reflect.Type {
+func (vv *ColorValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -606,7 +575,6 @@ func (vv *ColorValueView) UpdateWidget() {
 		return
 	}
 	ac := vv.Widget.(*gi.Action)
-	ac.SetFullReRender()
 	ac.UpdateSig()
 }
 
@@ -619,16 +587,15 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	ac.SetText("Edit Color")
 	ac.SetIcon(icons.Colors)
 	ac.Tooltip = "Open color picker dialog"
-	ac.ActionSig.ConnectOnly(ac.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv, _ := recv.Embed(gi.ActionType).(*gi.Action)
-		vv.Activate(svv.Sc, nil, nil)
+	ac.On(events.Click, func(e events.Event) {
+		vv.OpenDialog(ac, nil)
 	})
 	ac.AddStyles(func(s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen
 		dclr := colors.SetAF32(clr, 1)
-		s.BackgroundColor.SetColor(dclr)
+		s.BackgroundColor.SetSolid(dclr)
 		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 	})
 	vv.UpdateWidget()
@@ -638,7 +605,7 @@ func (vv *ColorValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -651,18 +618,18 @@ func (vv *ColorValueView) Activate(vp *gi.Scene, fun func()) {
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	ColorViewDialog(vp, dclr, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave},
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				cclr := ColorViewDialogValue(ddlg)
-				vv.SetColor(cclr)
-				vv.UpdateWidget()
-			}
-			if dlgRecv != nil && dlgFunc != nil {
-				dlgFunc(dlgRecv, send, sig, data)
-			}
-		})
+	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave}, dclr, func(dlg *gi.DialogStage) {
+		if !dlg.Accepted {
+			return
+		}
+		// todo: use data
+		// cclr := ColorViewDialogValue(ddlg)
+		// vv.SetColor(cclr)
+		vv.UpdateWidget()
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -674,7 +641,7 @@ type ColorNameValueView struct {
 	ValueViewBase
 }
 
-func (vv *ColorNameValueView) WidgetType() reflect.Type {
+func (vv *ColorNameValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -698,10 +665,8 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
 	ac.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeColorNameValueView).(*ColorNameValueView)
-		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Sc, nil, nil)
+	ac.On(events.Click, func(e events.Event) {
+		vv.OpenDialog(ac, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -710,7 +675,7 @@ func (vv *ColorNameValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *ColorNameValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}
@@ -735,18 +700,18 @@ func (vv *ColorNameValueView) Activate(vp *gi.Scene, fun func()) {
 		}
 	}
 	desc, _ := vv.Tag("desc")
-	TableViewSelectDialog(vp, &sl, DlgOpts{Title: "Select a Color Name", Prompt: desc}, curRow, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				si := TableViewSelectDialogValue(ddlg)
-				if si >= 0 {
-					vv.SetValue(sl[si].Name)
-					vv.UpdateWidget()
-				}
-			}
-			if dlgRecv != nil && dlgFunc != nil {
-				dlgFunc(dlgRecv, send, sig, data)
-			}
-		})
+	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: desc}, &sl, curRow, nil, func(dlg *gi.DialogStage) {
+		if !dlg.Accepted {
+			return
+		}
+		// todo: use data
+		// si := TableViewSelectDialogValue(ddlg)
+		// if si >= 0 {
+		// 	vv.SetValue(sl[si].Name)
+		// 	vv.UpdateWidget()
+		// }
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }

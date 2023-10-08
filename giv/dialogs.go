@@ -11,6 +11,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -68,17 +69,17 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(ctx gi.Widget, text []byte, opts DlgOpts) *TextView {
-	var dlg *gi.Dialog
-	// if opts.Data != nil {
-	// 	recyc := false
-	// 	dlg, recyc = gi.RecycleStdDialog(opts.Data, opts.ToGiOpts(), opts.Ok, opts.Cancel)
-	// 	if recyc {
-	// 		return TextViewDialogTextView(dlg)
-	// 	}
-	// } else {
-	dlg = gi.NewStdDialog(ctx, opts.ToGiOpts())
-	// }
+func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.DialogStage)) *TextView {
+	var dlg *gi.DialogStage
+	if opts.Data != nil {
+		recyc := false
+		dlg, recyc = gi.RecycleStdDialog(ctx, opts.ToGiOpts(), opts.Data, fun)
+		if recyc {
+			return TextViewDialogTextView(dlg)
+		}
+	} else {
+		dlg = gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
+	}
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
@@ -97,7 +98,7 @@ func TextViewDialog(ctx gi.Widget, text []byte, opts DlgOpts) *TextView {
 	})
 	tv := NewTextView(tlv, "text-view")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	tv.SetDisabled()
+	tv.SetState(true, states.Disabled)
 	tv.SetBuf(tb)
 	tv.AddStyles(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
@@ -106,10 +107,10 @@ func TextViewDialog(ctx gi.Widget, text []byte, opts DlgOpts) *TextView {
 	tb.SetText(text) // triggers remarkup
 
 	bbox := dlg.ConfigButtonBox()
-	cpb := gi.NewButton(bbox, "copy-to-clip").
+	gi.NewButton(bbox, "copy-to-clip").
 		SetText("Copy To Clipboard").
 		SetIcon(icons.ContentCopy).On(events.Click, func(e events.Event) {
-		dlg.Stage.Scene.ClipBoard().Write(mimedata.NewTextBytes(text))
+		dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
 	})
 	return tv
 }
@@ -135,11 +136,11 @@ func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Di
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeStructView, prIdx+1, "struct-view").(*StructView)
+	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
 	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	if opts.Inactive {
-		sv.SetDisabled()
-	}
+	// if opts.Inactive {
+	// 	sv.SetDisabled()
+	// }
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetStruct(stru)
@@ -162,9 +163,9 @@ func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.DialogS
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeMapView, prIdx+1, "map-view").(*MapView)
+	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
 	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
@@ -187,11 +188,11 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
+	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
 	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	sv.SetDisabledState(false)
+	sv.SetState(false, states.Disabled)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
@@ -216,10 +217,10 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.SetDisabledState(false)
+	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
+	sv.SetState(false, states.Disabled)
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
 	sv.ViewPath = opts.ViewPath
@@ -253,10 +254,10 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeSliceView, prIdx+1, "slice-view").(*SliceView)
-	sv.SetDisabledState(true)
+	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
+	sv.SetState(true, states.Disabled)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
@@ -294,17 +295,17 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
-	sv.SetDisabledState(false)
+	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
+	sv.SetState(false, states.Disabled)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
 	sv.NoDelete = opts.NoDelete
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	if opts.Inactive {
-		sv.SetDisabled()
+		sv.SetState(true, states.Disabled)
 	}
 	sv.SetSlice(slcOfStru)
 
@@ -336,10 +337,10 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeTableView, prIdx+1, "tableview").(*TableView)
-	sv.SetDisabledState(true)
+	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
+	sv.SetState(true, states.Disabled)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
@@ -375,7 +376,8 @@ var FontChooserSizeDots = 18
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
 func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
-	FontChooserSizeDots = int(avp.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
+	wb := ctx.AsWidget()
+	FontChooserSizeDots = int(wb.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(ctx, opts, &paint.FontLibrary.FontInfo, -1, FontInfoStyleFunc, fun)
 	return dlg
@@ -392,7 +394,6 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 		widg.SetProp("font-weight", (finf)[row].Weight)
 		widg.SetProp("font-style", (finf)[row].Style)
 		widg.SetProp("font-size", units.Pt(float32(FontChooserSize)))
-		widg.AsWidget().SetFullReRender()
 	}
 }
 
@@ -430,9 +431,9 @@ func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *
 	}
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeColorView, prIdx+1, "color-view").(*ColorView)
+	sv := frame.InsertNewChild(ColorViewType, prIdx+1, "color-view").(*ColorView)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetColor(clr)
@@ -442,7 +443,7 @@ func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *
 // ColorViewDialogValue gets the color from the dialog
 func ColorViewDialogValue(dlg *gi.DialogStage) color.RGBA {
 	frame := dlg.Stage.Scene
-	cvvvk := frame.ChildByType(TypeColorView, ki.Embeds, 2)
+	cvvvk := frame.ChildByType(ColorViewType, ki.Embeds, 2)
 	if cvvvk != nil {
 		cvvv := cvvvk.(*ColorView)
 		return colors.AsRGBA(cvvv.Color)
@@ -462,12 +463,12 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 	gopts.Ok = true
 	gopts.Cancel = true
 	dlg := gi.NewStdDialog(ctx, gopts, fun)
-	dlg.SetName("file-view") // use a consistent name for consistent sizing / placement
+	dlg.Stage.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	fv := frame.InsertNewChild(TypeFileView, prIdx+1, "file-view").(*FileView)
+	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 
@@ -497,10 +498,10 @@ func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgData, fun func(dlg *gi
 	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
 
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	sv := frame.InsertNewChild(TypeArgView, prIdx+1, "arg-view").(*ArgView)
-	sv.SetDisabledState(false)
+	sv := frame.InsertNewChild(ArgViewType, prIdx+1, "arg-view").(*ArgView)
+	sv.SetState(false, states.Disabled)
 	sv.SetArgs(args)
 
 	return dlg

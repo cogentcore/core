@@ -1056,8 +1056,8 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	sv.ToolbarSlice = sv.Slice
 }
 
-func (sv *SliceViewBase) ApplyStyle() {
-	sv.Frame.ApplyStyle()
+func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
+	sv.Frame.ApplyStyle(sc)
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}

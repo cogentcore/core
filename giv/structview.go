@@ -377,12 +377,12 @@ func (sv *StructView) ConfigStructGrid() {
 	sg.UpdateEnd(updt)
 }
 
-func (sv *StructView) ApplyStyle() {
+func (sv *StructView) ApplyStyle(sc *gi.Scene) {
 	mvp := sv.Sc
 	if mvp != nil && mvp.IsDoingFullRender() {
 		sv.Config()
 	}
-	sv.Frame.ApplyStyle()
+	sv.Frame.ApplyStyle(sc)
 }
 
 func (sv *StructView) UpdateFieldAction() {

@@ -2590,7 +2590,7 @@ var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) 
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetDisabledState(fn.IsExternal())
+		act.SetState(fn.IsExternal(), states.Disabled)
 	}
 })
 
@@ -2608,7 +2608,7 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
-		act.SetDisabledState(fn.IsDir() || fn.IsExternal())
+		act.SetState(fn.IsDir() || fn.IsExternal(), states.Disabled)
 	}
 })
 
@@ -2795,7 +2795,7 @@ var FileTreeViewProps = ki.Props{
 	},
 }
 
-func (ft *FileTreeView) ApplyStyle() {
+func (ft *FileTreeView) ApplyStyle(sc *gi.Scene) {
 	fn := ft.FileNode()
 	ft.Class = ""
 	if fn != nil {

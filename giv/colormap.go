@@ -5,12 +5,11 @@
 package giv
 
 import (
-	"reflect"
-
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
@@ -32,9 +31,11 @@ type ColorMapView struct {
 
 	// the colormap that we view
 	Map *colormap.Map `desc:"the colormap that we view"`
+}
 
-	// [view: -] signal for color map -- triggers when new color map is set via chooser
-	// ColorMapSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for color map -- triggers when new color map is set via chooser"`
+func (cv *ColorMapView) OnInit() {
+	cv.ColorMapHandlers()
+	// todo: style
 }
 
 // SetColorMap sets the color map and triggers a display update
@@ -47,7 +48,7 @@ func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 // and signals the ColorMapSig signal
 func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) {
 	cv.Map = cmap
-	cv.ColorMapSig.Emit(cv.This(), 0, nil)
+	cv.Send(events.Change, nil)
 	cv.UpdateSig()
 }
 
@@ -58,48 +59,33 @@ func (cv *ColorMapView) ChooseColorMap() {
 	if cv.Map != nil {
 		cur = cv.Map.Name
 	}
-	SliceViewSelectDialog(cv.Scene, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, nil,
-		cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				si := SliceViewSelectDialogValue(ddlg)
-				if si >= 0 {
-					nmap, ok := colormap.AvailMaps[sl[si]]
-					if ok {
-						cv.SetColorMapAction(nmap)
-					}
-				}
-			}
-		})
-}
-
-// MouseEvent handles button MouseEvent
-func (cv *ColorMapView) MouseEvent() {
-	cvwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		cvv := recv.(*ColorMapView)
-		if me.Button == events.Left {
-			switch me.Action {
-			case events.DoubleClick: // we just count as a regular click
-				fallthrough
-			case events.Press:
-				me.SetHandled()
-				cvv.ChooseColorMap()
-			}
+	SliceViewSelectDialog(cv, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, &sl, cur, nil, func(dlg *gi.DialogStage) {
+		if !dlg.Accepted {
+			return
 		}
+		// todo: use data for this!
+		// si := SliceViewSelectDialogValue(ddlg)
+		// if si >= 0 {
+		// 		nmap, ok := colormap.AvailMaps[sl[si]]
+		// 			if ok {
+		// 				cv.SetColorMapAction(nmap)
+		// 			}
 	})
 }
 
-func (cv *ColorMapView) SetTypeHandlers() {
-	cv.MouseEvent()
-	cv.HoverTooltipEvent()
+func (cv *ColorMapView) ColorMapHandlers() {
+	cv.WidgetHandlers()
+	cv.On(events.Click, func(e events.Event) {
+		cv.ChooseColorMap()
+	})
+
 }
 
-func (cv *ColorMapView) RenderColorMap() {
+func (cv *ColorMapView) RenderColorMap(sc *gi.Scene) {
 	if cv.Map == nil {
 		cv.Map = colormap.StdMaps["ColdHot"]
 	}
-	rs := cv.Render()
+	rs := &sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
 
@@ -137,11 +123,11 @@ func (cv *ColorMapView) RenderColorMap() {
 	rs.Unlock()
 }
 
-func (cv *ColorMapView) Render(vp *gi.Scene) {
-	if cv.PushBounds() {
-		cv.RenderColorMap()
-		cv.RenderChildren()
-		cv.PopBounds()
+func (cv *ColorMapView) Render(sc *gi.Scene) {
+	if cv.PushBounds(sc) {
+		cv.RenderColorMap(sc)
+		cv.RenderChildren(sc)
+		cv.PopBounds(sc)
 	}
 }
 
@@ -161,7 +147,7 @@ type ColorMapValueView struct {
 	ValueViewBase
 }
 
-func (vv *ColorMapValueView) WidgetType() reflect.Type {
+func (vv *ColorMapValueView) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ActionType
 	return vv.WidgetTyp
 }
@@ -185,10 +171,8 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	ac.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeColorMapValueView).(*ColorMapValueView)
-		ac := vvv.Widget.(*gi.Action)
-		vvv.Activate(ac.Scene, nil, nil)
+	ac.On(events.Click, func(e events.Event) {
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -197,25 +181,26 @@ func (vv *ColorMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) Activate(vp *gi.Scene, fun func()) {
+func (vv *ColorMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
 	if vv.IsInactive() {
 		return
 	}
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	SliceViewSelectDialog(vp, &sl, cur, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, nil,
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				si := SliceViewSelectDialogValue(ddlg)
-				if si >= 0 {
-					vv.SetValue(sl[si])
-					vv.UpdateWidget()
-				}
-			}
-			if dlgRecv != nil && dlgFunc != nil {
-				dlgFunc(dlgRecv, send, sig, data)
-			}
-		})
+	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, &sl, cur, nil, func(dlg *gi.DialogStage) {
+		if !dlg.Accepted {
+			return
+		}
+		// todo: use data
+		// si := SliceViewSelectDialogValue(ddlg)
+		// if si >= 0 {
+		// 	vv.SetValue(sl[si])
+		// 	vv.UpdateWidget()
+		// }
+		//
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }

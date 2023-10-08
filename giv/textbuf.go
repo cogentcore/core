@@ -363,7 +363,7 @@ func (tb *TextBuf) SetInactive(inactive bool) {
 // internally just use lf = \n
 
 // New initializes a new buffer with n blank lines
-func (tb *TextBuf) New(nlines int) {
+func (tb *TextBuf) NewBuf(nlines int) {
 	nlines = max(nlines, 1)
 	tb.LinesMu.Lock()
 	tb.MarkupMu.Lock()

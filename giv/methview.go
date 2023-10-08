@@ -715,7 +715,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 			ad.View.SetTag("desc", ad.Desc)
 		}
 		if ad.View.HasAction() {
-			ad.View.Activate(md.Sc, ad.View, func(recv, send ki.Ki, sig int64, data any) {
+			ad.View.OpenDialog(md.Sc, ad.View, func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					MethViewCallMeth(md, args)
 				}
