@@ -111,6 +111,16 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			wb.FocusClear()
 		}
 	})
+	wb.On(events.DoubleClick, func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		// if we are not double clickable, we just treat
+		// it as a click event
+		if !wb.AbilityIs(states.DoubleClickable) {
+			wb.Send(events.Click, e)
+		}
+	})
 	wb.On(events.MouseEnter, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
