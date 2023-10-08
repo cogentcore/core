@@ -590,19 +590,18 @@ func (sp *Separator) OnInit() {
 	// TODO: fix disappearing separator in menu
 	sp.AddStyles(func(s *styles.Style) {
 		s.Margin.Set()
-		s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(0))
+		s.Padding.Set(units.Dp(4*Prefs.DensityMul()), units.Dp(0))
 		s.AlignV = styles.AlignCenter
 		s.AlignH = styles.AlignCenter
-		s.Border.Style.Set(styles.BorderSolid)
-		s.Border.Width.Set(units.Dp(4))
-		s.Border.Color.Set(colors.Scheme.OutlineVariant)
-		s.BackgroundColor.SetSolid(colors.Scheme.OutlineVariant)
+		s.Border.Style.Top = styles.BorderSolid
+		s.Border.Color.Top = colors.Scheme.OutlineVariant
+		s.Border.Width.Top.SetDp(1)
 		if sp.Horiz {
 			s.MaxWidth.SetDp(-1)
-			s.MinHeight.SetDp(4)
+			s.MinHeight.SetDp(1)
 		} else {
 			s.MaxHeight.SetDp(-1)
-			s.MinWidth.SetDp(4)
+			s.MinWidth.SetDp(1)
 		}
 	})
 }
