@@ -27,6 +27,11 @@ const (
 	// Active state otherwise associated with Activatable items.
 	Pressable
 
+	// DoubleClickable indicates that an element does something different
+	// when it is clicked on twice in a row. If this is not set, DoubleClick
+	// events are processed in the same way as Click events.
+	DoubleClickable
+
 	// Draggable means it can be Dragged
 	Draggable
 
@@ -62,9 +67,10 @@ func (ab *Abilities) Is(flag enums.BitFlag) bool {
 	return ab.HasFlag(flag)
 }
 
-// IsPressable is true when an element is Selectable, Activatable, Draggable, Slideable, or Checkable
+// IsPressable returns true when an element is Selectable, Activatable,
+// DoubleClickable, Draggable, Slideable, or Checkable
 func (ab *Abilities) IsPressable() bool {
-	return ab.HasFlag(Selectable) || ab.HasFlag(Activatable) || ab.HasFlag(Draggable) || ab.HasFlag(Slideable) || ab.HasFlag(Checkable) || ab.HasFlag(Pressable)
+	return ab.Is(Selectable) || ab.Is(Activatable) || ab.Is(DoubleClickable) || ab.Is(Draggable) || ab.Is(Slideable) || ab.Is(Checkable) || ab.Is(Pressable)
 }
 
 // IsHoverable is true for both Hoverable and LongHoverable

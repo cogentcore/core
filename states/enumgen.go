@@ -11,11 +11,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}
+var _AbilitiesValues = []Abilities{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}
 
 // AbilitiesN is the highest valid value
 // for type Abilities, plus one.
-const AbilitiesN Abilities = 13
+const AbilitiesN Abilities = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -25,15 +25,16 @@ func _AbilitiesNoOp() {
 	_ = x[Selectable-(1)]
 	_ = x[Activatable-(2)]
 	_ = x[Pressable-(3)]
-	_ = x[Draggable-(4)]
-	_ = x[Droppable-(5)]
-	_ = x[Slideable-(6)]
-	_ = x[Checkable-(7)]
-	_ = x[Scrollable-(8)]
-	_ = x[Focusable-(9)]
-	_ = x[FocusWithinable-(10)]
-	_ = x[Hoverable-(11)]
-	_ = x[LongHoverable-(12)]
+	_ = x[DoubleClickable-(4)]
+	_ = x[Draggable-(5)]
+	_ = x[Droppable-(6)]
+	_ = x[Slideable-(7)]
+	_ = x[Checkable-(8)]
+	_ = x[Scrollable-(9)]
+	_ = x[Focusable-(10)]
+	_ = x[FocusWithinable-(11)]
+	_ = x[Hoverable-(12)]
+	_ = x[LongHoverable-(13)]
 }
 
 var _AbilitiesNameToValueMap = map[string]Abilities{
@@ -45,24 +46,26 @@ var _AbilitiesNameToValueMap = map[string]Abilities{
 	`activatable`:     2,
 	`Pressable`:       3,
 	`pressable`:       3,
-	`Draggable`:       4,
-	`draggable`:       4,
-	`Droppable`:       5,
-	`droppable`:       5,
-	`Slideable`:       6,
-	`slideable`:       6,
-	`Checkable`:       7,
-	`checkable`:       7,
-	`Scrollable`:      8,
-	`scrollable`:      8,
-	`Focusable`:       9,
-	`focusable`:       9,
-	`FocusWithinable`: 10,
-	`focuswithinable`: 10,
-	`Hoverable`:       11,
-	`hoverable`:       11,
-	`LongHoverable`:   12,
-	`longhoverable`:   12,
+	`DoubleClickable`: 4,
+	`doubleclickable`: 4,
+	`Draggable`:       5,
+	`draggable`:       5,
+	`Droppable`:       6,
+	`droppable`:       6,
+	`Slideable`:       7,
+	`slideable`:       7,
+	`Checkable`:       8,
+	`checkable`:       8,
+	`Scrollable`:      9,
+	`scrollable`:      9,
+	`Focusable`:       10,
+	`focusable`:       10,
+	`FocusWithinable`: 11,
+	`focuswithinable`: 11,
+	`Hoverable`:       12,
+	`hoverable`:       12,
+	`LongHoverable`:   13,
+	`longhoverable`:   13,
 }
 
 var _AbilitiesDescMap = map[Abilities]string{
@@ -70,15 +73,16 @@ var _AbilitiesDescMap = map[Abilities]string{
 	1:  `Selectable means it can be Selected`,
 	2:  `Activatable means it can be made Active`,
 	3:  `Pressable means it can be pressed but is not Activatable. Pressed items receive Click events, but do not get the automatic Active state otherwise associated with Activatable items.`,
-	4:  `Draggable means it can be Dragged`,
-	5:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
-	6:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
-	7:  `Checkable means it can be Checked`,
-	8:  `Scrollable means it can be Scrolled`,
-	9:  `Focusable means it can be Focused`,
-	10: `FocusWithinable means it can be FocusedWithin`,
-	11: `Hoverable means it can be Hovered`,
-	12: `LongHoverable means it can be LongHovered`,
+	4:  `DoubleClickable indicates that an element does something different when it is clicked on twice in a row. If this is not set, DoubleClick events are processed in the same way as Click events.`,
+	5:  `Draggable means it can be Dragged`,
+	6:  `Droppable means it can receive DragEnter, DragLeave, and Drop events (not specific to current Drag item, just generally)`,
+	7:  `Slideable means it has a slider element that can be dragged to change value. Cannot be both Draggable and Slideable.`,
+	8:  `Checkable means it can be Checked`,
+	9:  `Scrollable means it can be Scrolled`,
+	10: `Focusable means it can be Focused`,
+	11: `FocusWithinable means it can be FocusedWithin`,
+	12: `Hoverable means it can be Hovered`,
+	13: `LongHoverable means it can be LongHovered`,
 }
 
 var _AbilitiesMap = map[Abilities]string{
@@ -86,15 +90,16 @@ var _AbilitiesMap = map[Abilities]string{
 	1:  `Selectable`,
 	2:  `Activatable`,
 	3:  `Pressable`,
-	4:  `Draggable`,
-	5:  `Droppable`,
-	6:  `Slideable`,
-	7:  `Checkable`,
-	8:  `Scrollable`,
-	9:  `Focusable`,
-	10: `FocusWithinable`,
-	11: `Hoverable`,
-	12: `LongHoverable`,
+	4:  `DoubleClickable`,
+	5:  `Draggable`,
+	6:  `Droppable`,
+	7:  `Slideable`,
+	8:  `Checkable`,
+	9:  `Scrollable`,
+	10: `Focusable`,
+	11: `FocusWithinable`,
+	12: `Hoverable`,
+	13: `LongHoverable`,
 }
 
 // String returns the string representation
