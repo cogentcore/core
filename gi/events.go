@@ -221,11 +221,7 @@ func (wb *WidgetBase) LongHoverTooltip() {
 			slog.Error("nil main stage in long hover end tooltip event", "widget", wb)
 			return
 		}
-		tooltip := mstg.PopupMgr.TopOfType(Tooltip)
-		if tooltip == nil {
-			return
-		}
-		tooltip.Delete()
+		mstg.PopupMgr.PopDeleteType(Tooltip)
 		e.SetHandled()
 	})
 }
