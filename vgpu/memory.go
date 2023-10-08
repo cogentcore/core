@@ -9,8 +9,9 @@ import (
 	"log"
 	"sort"
 
+	"log/slog"
+
 	vk "github.com/goki/vulkan"
-	"golang.org/x/exp/slog"
 )
 
 // MemSizeAlign returns the size aligned according to align byte increments

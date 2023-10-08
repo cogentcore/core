@@ -17,10 +17,11 @@ import (
 	"strings"
 	"unsafe"
 
+	"log/slog"
+
 	vk "github.com/goki/vulkan"
 	"goki.dev/laser"
 	"goki.dev/vgpu/v2/vkinit"
-	"golang.org/x/exp/slog"
 )
 
 // Key docs: https://gpuopen.com/learn/understanding-vulkan-objects/
