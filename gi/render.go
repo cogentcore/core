@@ -109,6 +109,13 @@ func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
 	if sc != nil {
 		sc.SetFlag(true, ScNeedsRender)
 	}
+	// parent of Parts needs to render if parent
+	fi, _ := wb.ParentWidgetIf(func(p *WidgetBase) bool {
+		return p.Is(ki.Field)
+	})
+	if fi != nil && fi.Parent() != nil {
+		fi.Parent().This().SetFlag(true, NeedsRender)
+	}
 }
 
 // UpdateEndRender should be called instead of UpdateEnd

@@ -686,6 +686,7 @@ func (tf *TextField) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tf *TextField) InsertAtCursor(str string) {
+	fmt.Println(tf.Flags)
 	updt := tf.UpdateStart()
 	defer tf.UpdateEndRender(updt)
 	if tf.HasSelection() {
@@ -1471,7 +1472,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 			trailIcon := parts.Child(trailIconIdx).(*Action)
 			trailIcon.SetIcon(tf.TrailingIcon)
 		}
-		tf.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
 		tf.SetNeedsLayout(sc, updt)
 	}
 }

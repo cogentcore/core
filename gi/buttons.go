@@ -336,7 +336,7 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 	bb.ConfigPartsSetIconLabel(bb.Icon, bb.Text, icIdx, lbIdx)
 	bb.ConfigPartsIndicator(indIdx)
 	if mods {
-		bb.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
 		bb.SetNeedsLayout(sc, updt)
 	}
 }
@@ -701,6 +701,7 @@ func (cb *CheckBox) ConfigParts(sc *Scene) {
 		}
 	}
 	if mods {
-		cb.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
+		cb.SetNeedsLayout(sc, updt)
 	}
 }

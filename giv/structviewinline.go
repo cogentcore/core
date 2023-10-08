@@ -118,9 +118,6 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 		config.Add(gi.ActionType, "edit-action")
 	}
 	mods, updt := parts.ConfigChildren(config)
-	if !mods {
-		updt = parts.UpdateStart()
-	}
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := parts.Child(i * 2).(*gi.Label)
@@ -142,6 +139,7 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 		}
 	}
 	parts.UpdateEnd(updt)
+	sv.UpdateEndLayout(sc, updt)
 }
 
 func (sv *StructViewInline) UpdateFields() {

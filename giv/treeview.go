@@ -1921,6 +1921,7 @@ func (tv *TreeView) ConfigParts(vp *gi.Scene) {
 		lbl.SetText(tv.Label())
 	}
 	parts.UpdateEnd(updt)
+	tv.UpdateEndLayout(sc, updt)
 }
 
 var TreeViewProps = ki.Props{

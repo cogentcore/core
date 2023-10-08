@@ -254,7 +254,7 @@ func (cb *ComboBox) ConfigParts(sc *Scene) {
 		cb.ConfigPartsSetText(cb.Text, txIdx, icIdx, indIdx)
 	}
 	if mods {
-		cb.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
 		cb.SetNeedsLayout(sc, updt)
 	}
 }

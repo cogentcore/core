@@ -90,7 +90,7 @@ func (sb *SpinBox) SpinBoxStyles() {
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
-	case "Parts":
+	case "parts":
 		w.AddStyles(func(s *styles.Style) {
 			s.AlignV = styles.AlignMiddle
 		})
@@ -146,7 +146,7 @@ func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32)
 // SetValue sets the value, enforcing any limits, and updates the display
 func (sb *SpinBox) SetValue(val float32) *SpinBox {
 	updt := sb.UpdateStart()
-	defer sb.UpdateEnd(updt)
+	defer sb.UpdateEndRender(updt)
 	sb.Value = val
 	if sb.HasMax {
 		sb.Value = mat32.Min(sb.Value, sb.Max)
@@ -185,7 +185,6 @@ func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
 
 func (sb *SpinBox) ConfigParts(sc *Scene) {
 	parts := sb.NewParts(LayoutHoriz)
-
 	if sb.UpIcon.IsNil() {
 		sb.UpIcon = icons.KeyboardArrowUp
 	}
@@ -200,6 +199,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	}
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !sb.NeedsRebuild() {
+		parts.UpdateEnd(updt)
 		return
 	}
 	if !sb.IsDisabled() {
@@ -236,20 +236,9 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	tf.Txt = sb.ValToString(sb.Value)
 	if !sb.IsDisabled() {
 		sb.SpinBoxTextFieldHandlers(tf)
-		// todo: events
-		// tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
-		// 		sbb := AsSpinBox(recv)
-		// 		tf := send.(*TextField)
-		// 		vl, err := sb.StringToVal(tf.Text())
-		// 		if err == nil {
-		// 			sbb.SetValueAction(vl)
-		// 		}
-		// 	}
-		// })
 	}
-	sb.UpdateEnd(updt)
-
+	parts.UpdateEnd(updt)
+	sb.SetNeedsLayout(sc, updt)
 }
 
 // FormatIsInt returns true if the format string requires an integer value

@@ -517,7 +517,8 @@ func (sb *SliderBase) ConfigParts(sc *Scene) {
 		ic.SetIcon(sb.Icon)
 	}
 	if mods {
-		sb.UpdateEndLayout(updt)
+		parts.UpdateEndLayout(updt)
+		sb.SetNeedsLayout(sc, updt)
 	}
 }
 

@@ -364,6 +364,7 @@ func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
 	parts.Lay = lay
 	ki.SetParent(parts, wb.This())
 	parts.SetFlag(true, ki.Field)
+	parts.SetFlag(false, ki.Updating) // we inherit this from parent, but parent doesn't auto-clear us
 	wb.Parts = parts
 	return parts
 }

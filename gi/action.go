@@ -209,7 +209,7 @@ func (ac *Action) ConfigPartsShortcut(scIdx int) {
 }
 
 // ConfigPartsButton sets the label, icon etc for the button
-func (ac *Action) ConfigPartsButton() {
+func (ac *Action) ConfigPartsButton(sc *Scene) {
 	parts := ac.NewParts(LayoutHoriz)
 	config := ki.Config{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
@@ -218,12 +218,13 @@ func (ac *Action) ConfigPartsButton() {
 	ac.ConfigPartsSetIconLabel(ac.Icon, ac.Text, icIdx, lbIdx)
 	ac.ConfigPartsIndicator(indIdx)
 	if mods {
-		ac.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
+		ac.SetNeedsLayout(sc, updt)
 	}
 }
 
 // ConfigPartsMenuItem sets the label, icon, etc for action menu item
-func (ac *Action) ConfigPartsMenuItem() {
+func (ac *Action) ConfigPartsMenuItem(sc *Scene) {
 	parts := ac.NewParts(LayoutHoriz)
 	config := ki.Config{}
 	icIdx, lbIdx := ac.ConfigPartsIconLabel(&config, ac.Icon, ac.Text)
@@ -239,7 +240,8 @@ func (ac *Action) ConfigPartsMenuItem() {
 	ac.ConfigPartsIndicator(indIdx)
 	ac.ConfigPartsShortcut(scIdx)
 	if mods {
-		ac.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
+		ac.SetNeedsLayout(sc, updt)
 	}
 }
 
@@ -258,13 +260,13 @@ func (ac *Action) ConfigParts(sc *Scene) {
 		if ac.Class == "" {
 			ac.Class = "menubar-action"
 		}
-		ac.ConfigPartsButton()
+		ac.ConfigPartsButton(sc)
 	case istbar:
 		ac.Type = ActionToolBar
 		if ac.Class == "" {
 			ac.Class = "toolbar-action"
 		}
-		ac.ConfigPartsButton()
+		ac.ConfigPartsButton(sc)
 	case ac.Is(ButtonFlagMenu):
 		ac.Type = ActionMenu
 		if ac.Class == "" {
@@ -273,9 +275,9 @@ func (ac *Action) ConfigParts(sc *Scene) {
 		if ac.Indicator == "" && ac.HasMenu() {
 			ac.Indicator = icons.KeyboardArrowRight
 		}
-		ac.ConfigPartsMenuItem()
+		ac.ConfigPartsMenuItem(sc)
 	default:
-		ac.ConfigPartsButton()
+		ac.ConfigPartsButton(sc)
 	}
 }
 
