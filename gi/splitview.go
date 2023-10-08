@@ -582,7 +582,7 @@ func (sr *Splitter) SplitterMouse() {
 		ed := sr.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sr.Style
 		// SidesTODO: unsure about dim
-		spc := st.EffMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
+		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
 		if sr.Dim == mat32.X {
 			sr.SetSliderPos(float32(ed.X) - spc)
 		} else {

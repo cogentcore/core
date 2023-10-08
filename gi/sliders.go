@@ -412,7 +412,7 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
-		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(float32(ed.X) - spc)
 		} else {
@@ -438,7 +438,7 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
 		st := &sb.Style
-		spc := st.EffMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
 			sb.SetSliderPos(float32(ed.X) - spc)
 		} else {
@@ -648,7 +648,7 @@ func (sr *Slider) GetSize(sc *Scene, iter int) {
 	st := &sr.Style
 	odim := mat32.OtherDim(sr.Dim)
 	// get at least thumbsize + margin + border.size
-	sz := sr.ThSize + st.EffMargin().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
+	sz := sr.ThSize + st.TotalMargin().Size().Dim(odim) + (st.Border.Width.Dots().Size().Dim(odim))
 	sr.LayState.Alloc.Size.SetDim(odim, sz)
 }
 

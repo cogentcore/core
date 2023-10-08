@@ -2240,8 +2240,8 @@ func (tv *TreeView) Render(vp *Scene) {
 			}
 			pc.FillStyle.SetFullColor(&bg)
 			// tv.RenderStdBox()
-			pos := tv.LayState.Alloc.Pos.Add(st.EffMargin().Pos())
-			sz := tv.WidgetSize.Sub(st.EffMargin().Size())
+			pos := tv.LayState.Alloc.Pos.Add(st.TotalMargin().Pos())
+			sz := tv.WidgetSize.Sub(st.TotalMargin().Size())
 			tv.RenderBoxImpl(pos, sz, st.Border)
 			tv.RenderUnlock(rs)
 			tv.RenderParts()

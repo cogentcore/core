@@ -540,7 +540,7 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 		ni := tb.AsWidget()
 
 		pos := ni.LayState.Alloc.Pos
-		sz := ni.LayState.Alloc.Size.Sub(st.EffMargin().Size())
+		sz := ni.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
 		pc.DrawLine(rs, pos.X-bw.Pos().X, pos.Y, pos.X-bw.Pos().X, pos.Y+sz.Y)
 	}
 	pc.FillStrokeClear(rs)
