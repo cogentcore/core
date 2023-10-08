@@ -133,6 +133,20 @@ func TestNodeEscapePaths(t *testing.T) {
 	}
 }
 
+func TestNodePathFrom(t *testing.T) {
+	a := NewNode(nil, "a")
+	b := NewNode(a, "b")
+	c := NewNode(b, "c")
+	d := NewNode(c, "d")
+	NewNode(d, "e")
+
+	have := d.PathFrom(b)
+	want := "c/d"
+	if have != want {
+		t.Errorf("expected PathFrom to be %q, but got %q", want, have)
+	}
+}
+
 func TestNodeDeleteChild(t *testing.T) {
 	parent := testdata.NodeEmbed{}
 	parent.InitName(&parent, "par1")
