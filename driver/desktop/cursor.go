@@ -43,9 +43,8 @@ func (c *cursorImpl) Set(cursor enums.Enum) error {
 	if err != nil {
 		return err
 	}
-	hx := (ci.Hotspot.X * c.Size) / 200
-	hy := (ci.Hotspot.Y * c.Size) / 200
-	gc := glfw.CreateCursor(ci.Image, hx, hy)
+	h := ci.Hotspot
+	gc := glfw.CreateCursor(ci.Image, h.X, h.Y)
 	sm[c.Size] = gc
 	theApp.ctxtwin.glw.SetCursor(gc)
 	c.prevSize = c.Size
