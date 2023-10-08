@@ -286,6 +286,7 @@ func (s *Style) ToDotsImpl(uc *units.Context) {
 	s.Font.ToDots(uc)
 	s.Text.ToDots(uc)
 	s.Border.ToDots(uc)
+	s.MaxBorder.ToDots(uc)
 	s.Outline.ToDots(uc)
 	s.BoxShadowToDots(uc)
 }

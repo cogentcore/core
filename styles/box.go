@@ -267,6 +267,9 @@ func (s *Style) BoxShadowToDots(uc *units.Context) {
 	for i := range s.BoxShadow {
 		s.BoxShadow[i].ToDots(uc)
 	}
+	for i := range s.MaxBoxShadow {
+		s.MaxBoxShadow[i].ToDots(uc)
+	}
 }
 
 // HasBoxShadow returns whether the style has
