@@ -5,7 +5,6 @@
 package grease
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"reflect"
@@ -149,7 +148,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 					obase = of.Name[:oli]
 				}
 				if nbase == obase {
-					slog.Error(fmt.Sprintf("programmer error: fields %q and %q were both assigned the same name (%q)\n", of.Name, nf.Name, name))
+					slog.Error("programmer error: grease: two fields were assigned the same name", "name", name, "field0", of.Name, "field1", nf.Name)
 					os.Exit(1)
 				}
 
@@ -168,7 +167,7 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 				ofn := ofns == "-" || ofns == "false"
 
 				if nfn && ofn {
-					slog.Error(fmt.Sprintf("programmer error: %s specified on two config fields (%q and %q) with the same name (%q); keep %s on the field you want to be able to access without nesting (eg: with %q instead of %q) and remove it from the other one\n", `nest:"-"`, of.Name, nf.Name, name, `nest:"-"`, "-"+name, "-"+strcase.ToKebab(nf.Name)))
+					slog.Error(`programmer error: grease: nest:"-" specified on two config fields with the same name; keep nest:"-" on the field you want to be able to access without nesting and remove it from the other one`, "name", name, "field0", of.Name, "field1", nf.Name, "exampleFlagWithoutNesting", "-"+name, "exampleFlagWithNesting", "-"+strcase.ToKebab(nf.Name))
 					os.Exit(1)
 				} else if !nfn && !ofn {
 					// neither one gets it, so we replace both with fully qualified name
