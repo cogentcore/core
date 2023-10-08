@@ -504,10 +504,8 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 	if ly.HasScroll[dim] {
 		sb := ly.Scrolls[dim]
 		nval := sb.Value + delta
-		// sb.SetValueAction(nval)
 		sb.SetValue(nval)
 		ly.SetNeedsLayout(ly.Sc, true)
-		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
@@ -518,7 +516,6 @@ func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 		sb := ly.Scrolls[dim]
 		sb.SetValue(pos)
 		ly.SetNeedsLayout(ly.Sc, true)
-		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
@@ -529,7 +526,6 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 		sb := ly.Scrolls[dim]
 		sb.SetValue(pos)
 		ly.SetNeedsLayout(ly.Sc, true)
-		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
