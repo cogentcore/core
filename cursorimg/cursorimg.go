@@ -19,8 +19,8 @@ import (
 type Cursor struct {
 	// The cached image of the cursor.
 	Image image.Image
-	// The hotspot in terms of a percentage of the size
-	// of the cursor from the top-left corner.
+	// The hotspot is expressed in terms of two times the percentage of the
+	// size of the cursor it is from the top-left corner (0-200).
 	Hotspot image.Point
 }
 
