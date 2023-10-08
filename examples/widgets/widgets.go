@@ -223,14 +223,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("Text:", edit1.Text())
 	})
 
-	sb := gi.NewSpinBox(txrow, "spin")
-	sb.SetMax(255)
-	sb.Step = 1
-	sb.Format = "%#X"
-	sb.SetMin(0)
-	// sb.SpinBoxSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	fmt.Printf("SpinBox %v value changed: %v\n", send.Name(), data)
-	// })
+	sb := gi.NewSpinBox(txrow).SetMax(255).SetStep(1).SetMin(0)
+	sb.On(events.Change, func(e events.Event) {
+		fmt.Println("spinbox value changed to", sb.Value)
+	})
 
 	cb := gi.NewComboBox(txrow, "combo").
 		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)

@@ -63,8 +63,8 @@ func (wb *WidgetBase) ConfigWidget(sc *Scene) {
 // are not already through [WidgetBase.NewParts], calls
 // [ki.Node.ConfigChildren] on those parts with the given config,
 // and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, lay Layouts, config ki.Config) {
-	parts := wb.NewParts(LayoutHoriz)
+func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) {
+	parts := wb.NewParts(lay)
 	mods, updt := parts.ConfigChildren(config)
 	if !mods && !wb.NeedsRebuild() {
 		parts.UpdateEnd(updt)

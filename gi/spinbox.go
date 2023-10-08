@@ -96,11 +96,23 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		})
 	case "text-field":
 		tf := w.(*TextField)
-		if !sb.IsDisabled() {
-			sb.SpinBoxTextFieldHandlers(tf)
-		}
 		tf.Txt = sb.ValToString(sb.Value)
 		tf.SetState(sb.IsDisabled(), states.Disabled)
+		tf.On(events.Select, func(e events.Event) {
+			if sb.IsDisabled() {
+				return
+			}
+			sb.SetSelected(!sb.StateIs(states.Selected))
+			sb.Send(events.Select, nil)
+		})
+		tf.On(events.Click, func(e events.Event) {
+			if sb.IsDisabled() {
+				return
+			}
+			fmt.Println("sb tf click")
+			sb.SetState(true, states.Focused)
+			sb.HandleEvent(e)
+		})
 		tf.AddStyles(func(s *styles.Style) {
 			s.MinWidth.SetEm(8)
 		})
@@ -165,6 +177,12 @@ func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32)
 	return sb
 }
 
+// SetStep sets the step (increment) value of the spinbox
+func (sb *SpinBox) SetStep(step float32) *SpinBox {
+	sb.Step = step
+	return sb
+}
+
 // SetValue sets the value, enforcing any limits, and updates the display
 func (sb *SpinBox) SetValue(val float32) *SpinBox {
 	updt := sb.UpdateStart()
@@ -177,6 +195,10 @@ func (sb *SpinBox) SetValue(val float32) *SpinBox {
 		sb.Value = mat32.Max(sb.Value, sb.Min)
 	}
 	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
+	tf := sb.TextField()
+	if tf != nil {
+		tf.SetText(sb.ValToString(sb.Value))
+	}
 	return sb
 }
 
@@ -191,6 +213,7 @@ func (sb *SpinBox) SetValueAction(val float32) *SpinBox {
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
 func (sb *SpinBox) IncrValue(steps float32) *SpinBox {
+	fmt.Println("sb incr", steps)
 	val := sb.Value + steps*sb.Step
 	val = mat32.IntMultiple(val, sb.Step)
 	return sb.SetValueAction(val)
@@ -210,7 +233,15 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	config.Add(ActionType, "down")
 	config.Add(TextFieldType, "text-field")
 	config.Add(ActionType, "up")
-	sb.ConfigPartsImpl(sc, LayoutHoriz, config)
+	sb.ConfigPartsImpl(sc, config, LayoutHoriz)
+}
+
+func (sb *SpinBox) TextField() *TextField {
+	tf, ok := sb.Parts.ChildByName("text-field", 1).(*TextField)
+	if !ok {
+		return nil
+	}
+	return tf
 }
 
 // FormatIsInt returns true if the format string requires an integer value
@@ -270,19 +301,6 @@ func (sb *SpinBox) SpinBoxScroll() {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		sb.IncrValue(float32(se.DimDelta(mat32.Y)))
-	})
-}
-
-// todo: how to deal with this??
-func (sb *SpinBox) SpinBoxTextFieldHandlers(tf *TextField) {
-	tf.On(events.Select, func(e events.Event) {
-		sb.SetSelected(!sb.StateIs(states.Selected))
-		sb.Send(events.Select, nil)
-	})
-	tf.On(events.Click, func(e events.Event) {
-		fmt.Println("sb tf click")
-		sb.SetState(true, states.Focused)
-		sb.HandleEvent(e)
 	})
 }
 
