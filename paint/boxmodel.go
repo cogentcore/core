@@ -52,11 +52,14 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	if st.HasBoxShadow() {
 		for _, shadow := range st.BoxShadow {
 			pc.StrokeStyle.SetColor(nil)
-			pc.FillStyle.SetColor(shadow.Color)
 
 			// TODO: better handling of opacity?
 			prevOpacity := pc.FillStyle.Opacity
 			pc.FillStyle.Opacity = float32(shadow.Color.A) / 255
+			// we reset it back to 255 so that only the opacity affects it and we don't get double transparency
+			shadow.Color = colors.SetA(shadow.Color, 255) // not a pointer so we can update
+
+			pc.FillStyle.SetColor(shadow.Color)
 			// we only want radius for border, no actual border
 			pc.DrawBox(rs, shadow.BasePos(mpos), shadow.BaseSize(msz), styles.Border{Radius: st.Border.Radius})
 			// pc.FillStyle.Opacity = 1.0
