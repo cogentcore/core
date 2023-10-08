@@ -21,9 +21,6 @@ import (
 // for rendering -- see [FontRender] for that.
 type Font struct {
 
-	// prop: opacity = alpha value to apply to all elements
-	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to all elements"`
-
 	// prop: font-size (inherited) = size of font to render -- convert to points when getting font to use
 	Size units.Value `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited) = size of font to render -- convert to points when getting font to use"`
 
@@ -56,8 +53,6 @@ type Font struct {
 }
 
 func (fs *Font) Defaults() {
-	// fs.Color = Black
-	fs.Opacity = 1.0
 	fs.Size = units.Dp(16)
 }
 

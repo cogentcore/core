@@ -260,6 +260,8 @@ var StyleStyleFuncs = map[string]StyleFunc{
 		}
 		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
 	},
+	"opacity": StyleFuncFloat(float32(1),
+		func(obj *Style) *float32 { return &(obj.Opacity) }),
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -336,8 +338,6 @@ var StyleLayoutFuncs = map[string]StyleFunc{
 
 // StyleFontFuncs are functions for styling the Font object
 var StyleFontFuncs = map[string]StyleFunc{
-	"opacity": StyleFuncFloat(float32(1),
-		func(obj *Font) *float32 { return &(obj.Opacity) }),
 	"font-size": func(obj any, key string, val any, par any, ctxt colors.Context) {
 		fs := obj.(*Font)
 		if inh, init := StyleInhInit(val, par); inh || init {

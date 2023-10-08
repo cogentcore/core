@@ -29,34 +29,34 @@ func TestStyle(t *testing.T) {
 	st := &Style{}
 	par := &Style{}
 	ctx := &TestContext{}
-	par.Font.Opacity = .34
+	par.Opacity = .34
 	props := map[string]any{"opacity": float64(0.25)}
 	st.StyleFromProps(par, props, ctx)
-	if st.Font.Opacity != 0.25 {
-		t.Errorf("opacity != 0.25: %g", st.Font.Opacity)
+	if st.Opacity != 0.25 {
+		t.Errorf("opacity != 0.25: %g", st.Opacity)
 	}
-	st.Font.Opacity = 0
+	st.Opacity = 0
 
 	props = map[string]any{"opacity": float32(0.25)}
 	st.StyleFromProps(par, props, ctx)
-	if st.Font.Opacity != 0.25 {
-		t.Errorf("opacity != 0.25: %g", st.Font.Opacity)
+	if st.Opacity != 0.25 {
+		t.Errorf("opacity != 0.25: %g", st.Opacity)
 	}
-	st.Font.Opacity = 0
+	st.Opacity = 0
 
 	props = map[string]any{"opacity": 2}
 	st.StyleFromProps(par, props, ctx)
-	if st.Font.Opacity != 2 {
-		t.Errorf("opacity != 2: %g", st.Font.Opacity)
+	if st.Opacity != 2 {
+		t.Errorf("opacity != 2: %g", st.Opacity)
 	}
-	st.Font.Opacity = 0
+	st.Opacity = 0
 
 	props = map[string]any{"opacity": "0.25"}
 	st.StyleFromProps(par, props, ctx)
-	if st.Font.Opacity != 0.25 {
-		t.Errorf("opacity != 2: %g", st.Font.Opacity)
+	if st.Opacity != 0.25 {
+		t.Errorf("opacity != 2: %g", st.Opacity)
 	}
-	st.Font.Opacity = 0
+	st.Opacity = 0
 
 	props = map[string]any{"horizontal-align": AlignFlexEnd}
 	st.StyleFromProps(par, props, ctx)

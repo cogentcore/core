@@ -119,6 +119,9 @@ type Style struct {
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
 
+	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
+	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to the foreground and background of this element and all of its children"`
+
 	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color [Style.Color]. It is automatically set based on [Style.State], but can be overridden in stylers.
 	StateLayer float32 `desc:"StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color [Style.Color]. It is automatically set based on [Style.State], but can be overridden in stylers."`
 
@@ -168,6 +171,7 @@ func (s *Style) Defaults() {
 
 	s.LayoutDefaults()
 	s.Color = colors.Black
+	s.Opacity = 1
 	s.Font.Defaults()
 	s.Text.Defaults()
 }
