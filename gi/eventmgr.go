@@ -66,6 +66,15 @@ type EventMgr struct {
 	// stack of hovered widgets: have mouse pointer in BBox and have Hoverable flag
 	Hovers []Widget
 
+	// the current candidate for a long hover event
+	LongHoverWidget Widget
+
+	// the position of the mouse at the start of LongHoverTimer
+	LongHoverPos image.Point
+
+	// the timer for the LongHover event, started with time.AfterFunc
+	LongHoverTimer *time.Timer
+
 	// stack of drag-hovered widgets: have mouse pointer in BBox and have Droppable flag
 	DragHovers []Widget
 
@@ -288,6 +297,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
+		em.HandleLongHover(evi)
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -367,6 +377,69 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 	}
 	// todo: detect change in top one, use to update cursor
 	return hov
+}
+
+// HandleLongHover handles long hover events
+func (em *EventMgr) HandleLongHover(evi events.Event) {
+	em.TimerMu.Lock()
+	defer em.TimerMu.Unlock()
+
+	clearLongHover := func() {
+		if em.LongHoverTimer != nil {
+			em.LongHoverTimer.Stop() // TODO: do we need to close this?
+			em.LongHoverTimer = nil
+		}
+		em.LongHoverWidget = nil
+		em.LongHoverPos = image.Point{}
+	}
+
+	// we have no hovers, so we must be done
+	if len(em.Hovers) < 1 {
+		if em.LongHoverWidget == nil {
+			return
+		}
+		// if we have already finished the timer, then we have already
+		// sent the LongHoverStart event, so we have to send the end one
+		if em.LongHoverTimer == nil {
+			em.LongHoverWidget.Send(events.LongHoverEnd, nil)
+		}
+		clearLongHover()
+		return
+	}
+
+	// we only care about the deepest element
+	top := em.Hovers[len(em.Hovers)-1]
+
+	// we still have the current one, so there is nothing to do
+	if top == em.LongHoverWidget {
+		return
+	}
+
+	// if we have changed and still have the timer, we never
+	// sent a start event, so we just bail
+	if em.LongHoverTimer != nil {
+		clearLongHover()
+		return
+	}
+
+	// we now know we don't have the timer and thus sent the start
+	// event already, so we need to send a end event
+	if em.LongHoverWidget != nil {
+		em.LongHoverWidget.Send(events.LongHoverEnd, nil)
+		clearLongHover()
+	}
+
+	// now we can set it to our new widget
+	em.LongHoverWidget = top
+	em.LongHoverPos = evi.LocalPos()
+	em.LongHoverTimer = time.AfterFunc(LongHoverTime, func() {
+		em.TimerMu.Lock()
+		defer em.TimerMu.Unlock()
+		if em.LongHoverWidget == nil {
+			return
+		}
+		em.LongHoverWidget.Send(events.LongHoverStart, nil)
+	})
 }
 
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
