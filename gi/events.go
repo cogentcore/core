@@ -204,6 +204,7 @@ func (wb *WidgetBase) LongHoverTooltip() {
 			return
 		}
 		fmt.Println("long hover tooltip start", wb, wb.Tooltip)
+		NewTooltip(wb, e.Pos()).Run()
 		if wb.Tooltip == "" {
 			return
 		}

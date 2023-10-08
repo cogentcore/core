@@ -401,7 +401,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 		// if we have already finished the timer, then we have already
 		// sent the LongHoverStart event, so we have to send the end one
 		if em.LongHoverTimer == nil {
-			em.LongHoverWidget.Send(events.LongHoverEnd, nil)
+			em.LongHoverWidget.Send(events.LongHoverEnd, evi)
 		}
 		clearLongHover()
 		return
@@ -425,7 +425,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	// we now know we don't have the timer and thus sent the start
 	// event already, so we need to send a end event
 	if em.LongHoverWidget != nil {
-		em.LongHoverWidget.Send(events.LongHoverEnd, nil)
+		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
 		clearLongHover()
 	}
 
@@ -438,7 +438,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 		if em.LongHoverWidget == nil {
 			return
 		}
-		em.LongHoverWidget.Send(events.LongHoverStart, nil)
+		em.LongHoverWidget.Send(events.LongHoverStart, evi)
 		// we are done with the timer, and this indicates that
 		// we have sent a LongHoverStart event
 		em.LongHoverTimer = nil
