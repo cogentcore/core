@@ -5,12 +5,18 @@
 package events
 
 import (
+	"fmt"
 	"image"
 	"time"
 
 	"goki.dev/glop/nptime"
 	"goki.dev/goosi/events/key"
 )
+
+// TraceWindowPaint prints out a . for each WindowPaint event
+// - for other window events, * for mouse move events.
+// Makes it easier to see what is going on in the overall flow.
+var TraceWindowPaint = false
 
 // Mgr manages the event construction and sending process,
 // for its parent window.  Caches state as needed
@@ -22,8 +28,10 @@ type Mgr struct {
 	ResettingPos bool
 
 	// Last has the prior state for key variables
-
 	Last MgrState
+
+	// PaintCount is used for printing paint events as .
+	PaintCount int
 }
 
 // MgrState tracks basic event state over time
@@ -128,6 +136,9 @@ func (em *Mgr) MouseMove(where image.Point) {
 	// if em.Win.IsCursorEnabled() {
 	// 	em.Last.MousePos = where
 	// }
+	if TraceWindowPaint {
+		fmt.Printf("*")
+	}
 	em.Deque.Send(ev)
 }
 
@@ -164,19 +175,33 @@ func (em *Mgr) Touch(typ Types, seq Sequence, where image.Point) {
 func (em *Mgr) Window(act WinActions) {
 	ev := NewWindow(act)
 	ev.Init()
-	em.Deque.Send(ev)
+	if TraceWindowPaint {
+		fmt.Printf("-")
+	}
+	em.Deque.SendFirst(ev)
 }
 
 func (em *Mgr) WindowPaint() {
 	ev := NewWindowPaint()
 	ev.Init()
-	em.Deque.Send(ev)
+	if TraceWindowPaint {
+		fmt.Printf(".")
+		em.PaintCount++
+		if em.PaintCount > 60 {
+			fmt.Println("")
+			em.PaintCount = 0
+		}
+	}
+	em.Deque.SendFirst(ev) // separate channel for window!
 }
 
 func (em *Mgr) WindowResize() {
 	ev := NewWindowResize()
 	ev.Init()
-	em.Deque.Send(ev)
+	if TraceWindowPaint {
+		fmt.Printf("r")
+	}
+	em.Deque.SendFirst(ev)
 }
 
 func (em *Mgr) Custom(data any) {
