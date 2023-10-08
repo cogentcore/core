@@ -393,8 +393,19 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 		em.LongHoverPos = image.Point{}
 	}
 
-	// we have no hovers, so we must be done
-	if len(em.Hovers) < 1 {
+	// we only care about the deepest (latest in stack)
+	// element that can be long hovered
+	var deep Widget
+	for i := len(em.Hovers) - 1; i >= 0; i-- {
+		h := em.Hovers[i]
+		if h.AbilityIs(states.LongHoverable) {
+			deep = h
+			break
+		}
+	}
+
+	// we have no long hovers, so we must be done
+	if deep == nil {
 		if em.LongHoverWidget == nil {
 			return
 		}
@@ -407,12 +418,9 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 		return
 	}
 
-	// we only care about the deepest element
-	top := em.Hovers[len(em.Hovers)-1]
-
 	// we still have the current one, so there is nothing to do
 	// but make sure our position hasn't changed too much
-	if top == em.LongHoverWidget {
+	if deep == em.LongHoverWidget {
 		cpos := evi.Pos()
 		dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
 		fmt.Println(dst)
@@ -439,7 +447,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	}
 
 	// now we can set it to our new widget
-	em.LongHoverWidget = top
+	em.LongHoverWidget = deep
 	em.LongHoverPos = evi.Pos()
 	em.LongHoverTimer = time.AfterFunc(LongHoverTime, func() {
 		em.TimerMu.Lock()
