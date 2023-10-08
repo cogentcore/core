@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/grows/images"
 )
 
 // Cursor represents a cached rendered cursor, with the [image.Image]
@@ -22,6 +23,12 @@ type Cursor struct {
 	// The hotspot is expressed in terms of two times the percentage of the
 	// size of the cursor it is from the top-left corner (0-200).
 	Hotspot image.Point
+}
+
+// ImageHotspot returns the hotspot of the cursor when
+// it is an image of the given size
+func (c *Cursor) ImageHotspot(size int) image.Point {
+	return c.Hotspot.Mul(size).Div(200)
 }
 
 // Cursors contains all of the cached rendered cursors, specified first
@@ -51,14 +58,9 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	default:
 		return nil, fmt.Errorf("invalid cursor size %d; expected 32 or 64", size)
 	}
-	f, err := cursors.Cursors.Open("png/" + dir + "/" + name + ".png")
+	img, _, err := images.OpenFS(cursors.Cursors, "png/"+dir+"/"+name+".png")
 	if err != nil {
-		return nil, fmt.Errorf("error opening PNG file for cursor %q: %w", name, err)
-	}
-	defer f.Close()
-	img, _, err := image.Decode(f)
-	if err != nil {
-		return nil, fmt.Errorf("error reading PNG file for cursor %q: %w", name, err)
+		return nil, fmt.Errorf("error opening image file for cursor %q: %w", name, err)
 	}
 	hot, ok := cursors.Hotspots[cursor]
 	if !ok {
