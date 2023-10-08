@@ -13,6 +13,7 @@ import (
 
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -114,7 +115,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			sb.HandleEvent(e)
 		})
 		tf.AddStyles(func(s *styles.Style) {
-			s.MinWidth.SetEm(8)
+			s.SetMinPrefWidth(units.Em(3))
 		})
 	case "up":
 		up := w.(*Action)

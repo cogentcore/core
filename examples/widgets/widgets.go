@@ -223,7 +223,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("Text:", edit1.Text())
 	})
 
-	sb := gi.NewSpinBox(txrow).SetMax(255).SetStep(1).SetMin(0)
+	sb := gi.NewSpinBox(txrow).SetMax(250).SetMin(-250).SetStep(5)
 	sb.On(events.Change, func(e events.Event) {
 		fmt.Println("spinbox value changed to", sb.Value)
 	})
