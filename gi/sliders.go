@@ -245,10 +245,17 @@ func (sb *SliderBase) SetSliderPos(pos float32) {
 		sb.SnapValue()
 	}
 	sb.UpdatePosFromValue(sb.Value)
+	sb.UpdateEndRender(updt)
+}
+
+// SetSliderPosAction sets the position of the slider at the given position in pixels,
+// and updates the corresponding Value based on that position.
+// This version sends tracking changes
+func (sb *SliderBase) SetSliderPosAction(pos float32) {
+	sb.SetSliderPos(pos)
 	if sb.Tracking && mat32.Abs(sb.LastValue-sb.Value) > sb.TrackThr {
 		sb.SendChanged(nil)
 	}
-	sb.UpdateEndRender(updt)
 }
 
 // UpdatePosFromValue updates the slider position based on the current Value
@@ -414,9 +421,9 @@ func (sb *SliderBase) SliderMouse() {
 		st := &sb.Style
 		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(float32(ed.X) - spc)
+			sb.SetSliderPosAction(float32(ed.X) - spc)
 		} else {
-			sb.SetSliderPos(float32(ed.Y) - spc)
+			sb.SetSliderPosAction(float32(ed.Y) - spc)
 		}
 		sb.SlideStartPos = sb.Pos
 	})
@@ -427,9 +434,9 @@ func (sb *SliderBase) SliderMouse() {
 		}
 		del := e.StartDelta()
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(sb.SlideStartPos + float32(del.X))
+			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.X))
 		} else {
-			sb.SetSliderPos(sb.SlideStartPos + float32(del.Y))
+			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.Y))
 		}
 	})
 	sb.On(events.SlideStop, func(e events.Event) {
@@ -440,9 +447,9 @@ func (sb *SliderBase) SliderMouse() {
 		st := &sb.Style
 		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(float32(ed.X) - spc)
+			sb.SetSliderPosAction(float32(ed.X) - spc)
 		} else {
-			sb.SetSliderPos(float32(ed.Y) - spc)
+			sb.SetSliderPosAction(float32(ed.Y) - spc)
 		}
 		sb.SlideStartPos = sb.Pos
 	})
@@ -453,9 +460,9 @@ func (sb *SliderBase) SliderMouse() {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		if sb.Dim == mat32.X {
-			sb.SetSliderPos(sb.SlideStartPos - float32(se.DimDelta(mat32.X)))
+			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.X)))
 		} else {
-			sb.SetSliderPos(sb.SlideStartPos - float32(se.DimDelta(mat32.Y)))
+			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.Y)))
 		}
 		sb.SlideStartPos = sb.Pos
 	})
@@ -777,7 +784,6 @@ func (sb *ScrollBar) ConfigWidget(sc *Scene) {
 func (sb *ScrollBar) ApplyStyle(sc *Scene) {
 	sb.SetCanFocusIfActive()
 	sb.StyleSlider(sc)
-	sb.ConfigParts(sc)
 }
 
 func (sb *ScrollBar) GetSize(sc *Scene, iter int) {
@@ -794,7 +800,7 @@ func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 func (sb *ScrollBar) Render(sc *Scene) {
 	if !sb.Off && sb.PushBounds(sc) {
 		sb.RenderDefaultStyle(sc)
-		sb.RenderChildren(sc)
+		// sb.RenderChildren(sc)
 		sb.PopBounds(sc)
 	}
 }

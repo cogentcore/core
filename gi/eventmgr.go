@@ -322,7 +322,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		case em.Press != nil:
 			em.Press.HandleEvent(evi)
 		default:
-			fmt.Println("passthrough scroll")
 			em.Scene.HandleEvent(evi)
 		}
 	}

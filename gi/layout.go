@@ -223,8 +223,8 @@ func (ly *Layout) LayoutStyles() {
 }
 
 func (ly *Layout) LayoutHandlers() {
-	// todo: maybe need scrolling stuff in here?
 	ly.LayoutKeys()
+	ly.LayoutScrollEvents()
 	ly.WidgetHandlers()
 }
 
@@ -365,6 +365,12 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sb.Config(sc)
 		sb.Tracking = true
 		sb.Min = 0.0
+		sb.On(events.Change, func(e events.Event) {
+			e.SetHandled()
+			// fmt.Println("change event")
+			ly.SetNeedsLayout(sc, true)
+			ly.LayoutScrollTree(sc)
+		})
 	}
 	spc := ly.BoxSpace()
 	avail := ly.AvailSize().Sub(spc.Size())
@@ -381,13 +387,9 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	sb.Step = ly.Style.Font.Size.Dots                  // step by lines
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
 	sb.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
-	sb.TrackThr = 0.01
+	sb.TrackThr = 1
 	sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal) // keep in range
 	// fmt.Printf("set sc lay: %v  max: %v  val: %v\n", ly.Path(), sc.Max, sc.Value)
-	sb.On(events.Change, func(e events.Event) {
-		ly.SetNeedsLayout(sc, true)
-		ly.LayoutScrollTree(sc)
-	})
 }
 
 // DeleteScroll deletes scrollbar along given dimesion.  todo: we are leaking
@@ -454,6 +456,7 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 func (ly *Layout) RenderScrolls(sc *Scene) {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
+			// fmt.Println("render scroll", d)
 			ly.Scrolls[d].Render(sc)
 		}
 	}
@@ -496,9 +499,12 @@ func (ly *Layout) LayoutScrollScrolls(sc *Scene, delta image.Point, parBBox imag
 // and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 	if ly.HasScroll[dim] {
-		nval := ly.Scrolls[dim].Value + delta
-		ly.Scrolls[dim].SetValueAction(nval)
-		// ly.ScrollSig.Emit(ly.This(), int64(dim), nval)
+		sb := ly.Scrolls[dim]
+		nval := sb.Value + delta
+		// sb.SetValueAction(nval)
+		sb.SetValue(nval)
+		ly.SetNeedsLayout(ly.Sc, true)
+		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
@@ -506,8 +512,10 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 // position and emits a ScrollSig signal.
 func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
-		ly.Scrolls[dim].SetValueAction(pos)
-		// ly.ScrollSig.Emit(ly.This(), int64(dim), pos)
+		sb := ly.Scrolls[dim]
+		sb.SetValue(pos)
+		ly.SetNeedsLayout(ly.Sc, true)
+		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
@@ -515,7 +523,10 @@ func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 // position and DOES NOT emit a ScrollSig signal.
 func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
-		// ly.Scrolls[dim].SetValueAction(pos)
+		sb := ly.Scrolls[dim]
+		sb.SetValue(pos)
+		ly.SetNeedsLayout(ly.Sc, true)
+		sb.SetNeedsRender(ly.Sc, true)
 	}
 }
 
@@ -621,13 +632,13 @@ func (ly *Layout) LayoutScrollChildren(sc *Scene, delta image.Point) {
 		if err != nil {
 			return
 		}
-		nii, _ := AsWidget(sn)
-		nii.LayoutScroll(sc, delta, cbb)
+		ci, _ := AsWidget(sn)
+		ci.LayoutScroll(sc, delta, cbb)
 	} else {
 		for _, kid := range ly.Kids {
-			nii, _ := AsWidget(kid)
-			if nii != nil {
-				nii.LayoutScroll(sc, delta, cbb)
+			ci, _ := AsWidget(kid)
+			if ci != nil {
+				ci.LayoutScroll(sc, delta, cbb)
 			}
 		}
 	}
@@ -1144,6 +1155,7 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 // Layout -- most subclasses of Layout will want these..
 func (ly *Layout) LayoutScrollEvents() {
 	ly.On(events.Scroll, func(e events.Event) {
+		// fmt.Println("event")
 		ly.ScrollDelta(e)
 	})
 	// HiPri to do it first so others can be in view etc -- does NOT consume event!
@@ -1268,7 +1280,13 @@ func (ly *Layout) LayoutScrollDelta(delta image.Point) image.Point {
 func (ly *Layout) LayoutScroll(sc *Scene, delta image.Point, parBBox image.Rectangle) {
 	ly.LayoutScrollBase(sc, delta, parBBox)
 	ly.LayoutScrollScrolls(sc, delta, parBBox) // move scrolls BEFORE adding our own!
-	delta = ly.LayoutScrollDelta(delta)        // add our offset
+	preDelta := delta
+	_ = preDelta
+	delta = ly.LayoutScrollDelta(delta) // add our offset
+	if ly.HasScroll[mat32.X] || ly.HasScroll[mat32.Y] {
+		// todo: diagnose direct manip
+		// fmt.Println("layout scroll", preDelta, delta)
+	}
 	ly.LayoutScrollChildren(sc, delta)
 	ly.RenderScrolls(sc)
 }
