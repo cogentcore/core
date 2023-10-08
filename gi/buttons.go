@@ -478,6 +478,9 @@ func (bt *Button) ButtonStyles() {
 		case ButtonFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Color = colors.Scheme.Primary.On
+			if s.Is(states.Focused) {
+				s.Border.Color.Set(colors.Scheme.InverseSurface) // primary is too hard to see
+			}
 		case ButtonTonal:
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
