@@ -19,7 +19,7 @@ func TestHotspot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const size = 32
+	const size = 64
 	for _, c := range cursors.CursorValues() {
 		if c == cursors.None {
 			continue
