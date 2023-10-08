@@ -600,18 +600,16 @@ func (sr *Slider) SliderStyles() {
 }
 
 func (sr *Slider) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "icon":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		}
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "icon":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
 	}
-
 }
 
 func (sr *Slider) ConfigWidget(sc *Scene) {

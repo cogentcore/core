@@ -83,32 +83,31 @@ func (tv *TabView) TabViewStyles() {
 }
 
 func (tv *TabView) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "tabs":
-			wb.AddStyles(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.Height.SetEm(1.8)
-				s.Overflow = styles.OverflowHidden // no scrollbars!
-				s.Margin.Set()
-				s.Padding.Set()
-				// tabs.Spacing.SetDp(4 * Prefs.DensityMul())
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "tabs":
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMaxWidth()
+			s.Height.SetEm(1.8)
+			s.Overflow = styles.OverflowHidden // no scrollbars!
+			s.Margin.Set()
+			s.Padding.Set()
+			// tabs.Spacing.SetDp(4 * Prefs.DensityMul())
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 
-				// s.Border.Style.Set(styles.BorderNone)
-				// s.Border.Style.Bottom = styles.BorderSolid
-				// s.Border.Width.Bottom.SetDp(1)
-				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
-			})
-		case "frame":
-			frame := child.(*Frame)
-			frame.StackTopOnly = true // key for allowing each tab to have its own size
-			wb.AddStyles(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetMinPrefHeight(units.Em(6))
-				s.SetStretchMax()
-			})
-		}
+			// s.Border.Style.Set(styles.BorderNone)
+			// s.Border.Style.Bottom = styles.BorderSolid
+			// s.Border.Width.Bottom.SetDp(1)
+			// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
+		})
+	case "frame":
+		frame := w.(*Frame)
+		frame.StackTopOnly = true // key for allowing each tab to have its own size
+		w.AddStyles(func(s *styles.Style) {
+			s.SetMinPrefWidth(units.Em(10))
+			s.SetMinPrefHeight(units.Em(6))
+			s.SetStretchMax()
+		})
 	}
 }
 
@@ -600,50 +599,49 @@ func (tb *TabButton) TabButtonStyles() {
 }
 
 func (tb *TabButton) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "Parts":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
-			})
-		case "icon":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "label":
-			label := child.(*Label)
-			label.Type = LabelTitleSmall
-			wb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "close-stretch":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetCh(1)
-			})
-		case "close":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetEx(0.5)
-				s.Height.SetEx(0.5)
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = styles.AlignMiddle
-				s.Border.Radius = styles.BorderRadiusFull
-				s.BackgroundColor.SetSolid(colors.Transparent)
-			})
-		case "sc-stretch":
-			wb.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetCh(2)
-			})
-		case "shortcut":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		}
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "Parts":
+		w.AddStyles(func(s *styles.Style) {
+			s.Overflow = styles.OverflowHidden // no scrollbars!
+		})
+	case "icon":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "label":
+		label := w.(*Label)
+		label.Type = LabelTitleSmall
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "close-stretch":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetCh(1)
+		})
+	case "close":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEx(0.5)
+			s.Height.SetEx(0.5)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = styles.AlignMiddle
+			s.Border.Radius = styles.BorderRadiusFull
+			s.BackgroundColor.SetSolid(colors.Transparent)
+		})
+	case "sc-stretch":
+		w.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetCh(2)
+		})
+	case "shortcut":
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+		})
 	}
 }
 

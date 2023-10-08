@@ -505,35 +505,35 @@ func (bt *Button) ButtonStyles() {
 }
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
-	_, wb := AsWidget(child)
-	switch wb.Name() {
+	w, _ := AsWidget(child)
+	switch w.Name() {
 	case "icon":
-		wb.AddStyles(func(s *styles.Style) {
+		w.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "space":
-		wb.AddStyles(func(s *styles.Style) {
+		w.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
-		label := child.(*Label)
+		label := w.(*Label)
 		label.Type = LabelLabelLarge
-		wb.AddStyles(func(s *styles.Style) {
+		w.AddStyles(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
 		})
 	case "ind-stretch":
-		wb.AddStyles(func(s *styles.Style) {
+		w.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
-		wb.AddStyles(func(s *styles.Style) {
+		w.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
@@ -606,26 +606,25 @@ func (cb *CheckBox) CheckBoxStyles() {
 }
 
 func (cb *CheckBox) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "icon0", "icon1":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(1.5)
-				s.Height.SetEm(1.5)
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "space":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetCh(0.1)
-			})
-		case "label":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = styles.AlignMiddle
-			})
-		}
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "icon0", "icon1":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1.5)
+			s.Height.SetEm(1.5)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "space":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetCh(0.1)
+		})
+	case "label":
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = styles.AlignMiddle
+		})
 	}
 }
 

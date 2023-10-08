@@ -466,19 +466,18 @@ func (sr *Splitter) SplitterStyles() {
 }
 
 func (sr *Splitter) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "icon":
-			// w.AddStyles(func(s *styles.Style) {
-			// 	s.MaxWidth.SetEm(1)
-			// 	s.MaxHeight.SetEm(5)
-			// 	s.MinWidth.SetEm(1)
-			// 	s.MinHeight.SetEm(5)
-			// 	s.Margin.Set()
-			// 	s.Padding.Set()
-			// 	s.AlignV = styles.AlignMiddle
-			// })
-		}
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "icon":
+		// w.AddStyles(func(s *styles.Style) {
+		// 	s.MaxWidth.SetEm(1)
+		// 	s.MaxHeight.SetEm(5)
+		// 	s.MinWidth.SetEm(1)
+		// 	s.MinHeight.SetEm(5)
+		// 	s.Margin.Set()
+		// 	s.Padding.Set()
+		// 	s.AlignV = styles.AlignMiddle
+		// })
 	}
 }
 

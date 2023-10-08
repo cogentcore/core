@@ -210,13 +210,10 @@ func (tf *TextField) TextFieldStyles() {
 }
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
-	_, wb := AsWidget(child)
-	if wb == nil {
-		return
-	}
-	switch wb.Name() {
+	w, _ := AsWidget(child)
+	switch w.Name() {
 	case "lead-icon":
-		lead := child.(*Action)
+		lead := w.(*Action)
 		lead.Type = ActionParts
 		lead.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)
@@ -225,7 +222,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "trail-icon":
-		trail := child.(*Action)
+		trail := w.(*Action)
 		trail.Type = ActionParts
 		trail.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)

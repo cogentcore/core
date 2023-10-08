@@ -146,51 +146,50 @@ func (cb *ComboBox) ComboBoxStyles() {
 }
 
 func (cb *ComboBox) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "icon":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "label":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-				s.AlignV = styles.AlignMiddle
-				if cb.MaxLength > 0 {
-					s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
-				}
-			})
-		case "text":
-			text := child.(*TextField)
-			text.Placeholder = cb.Placeholder
-			if cb.Type == ComboBoxFilled {
-				text.Type = TextFieldFilled
-			} else {
-				text.Type = TextFieldOutlined
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "icon":
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "label":
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = styles.AlignMiddle
+			if cb.MaxLength > 0 {
+				s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
 			}
-			text.AddStyles(func(s *styles.Style) {
-				s.Border.Style.Set(styles.BorderNone)
-				s.Border.Width.Set()
-				if cb.MaxLength > 0 {
-					s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
-				}
-			})
-		case "ind-stretch":
-			wb.AddStyles(func(s *styles.Style) {
-				if cb.Editable {
-					s.Width.SetDp(0)
-				} else {
-					s.Width.SetDp(16 * Prefs.DensityMul())
-				}
-			})
-		case "indicator":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetDp(16)
-				s.AlignV = styles.AlignMiddle
-			})
+		})
+	case "text":
+		text := w.(*TextField)
+		text.Placeholder = cb.Placeholder
+		if cb.Type == ComboBoxFilled {
+			text.Type = TextFieldFilled
+		} else {
+			text.Type = TextFieldOutlined
 		}
+		text.AddStyles(func(s *styles.Style) {
+			s.Border.Style.Set(styles.BorderNone)
+			s.Border.Width.Set()
+			if cb.MaxLength > 0 {
+				s.SetMinPrefWidth(units.Ch(float32(cb.MaxLength)))
+			}
+		})
+	case "ind-stretch":
+		w.AddStyles(func(s *styles.Style) {
+			if cb.Editable {
+				s.Width.SetDp(0)
+			} else {
+				s.Width.SetDp(16 * Prefs.DensityMul())
+			}
+		})
+	case "indicator":
+		w.AddStyles(func(s *styles.Style) {
+			s.Font.Size.SetDp(16)
+			s.AlignV = styles.AlignMiddle
+		})
 	}
 }
 

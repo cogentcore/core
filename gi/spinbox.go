@@ -87,33 +87,31 @@ func (sb *SpinBox) SpinBoxStyles() {
 }
 
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
-	if _, wb := AsWidget(child); wb != nil {
-		switch wb.Name() {
-		case "Parts":
-			wb.AddStyles(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-			})
-		case "text-field":
-			wb.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetEm(6)
-			})
-		case "space":
-			wb.AddStyles(func(s *styles.Style) {
-				s.Width.SetCh(0.1)
-			})
-		case "buttons":
-			wb.AddStyles(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-			})
-		case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
-			act := child.(*Action)
-			act.Type = ActionParts
-			act.AddStyles(func(s *styles.Style) {
-				s.Font.Size.SetDp(18)
-			})
-		}
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "Parts":
+		w.AddStyles(func(s *styles.Style) {
+			s.AlignV = styles.AlignMiddle
+		})
+	case "text-field":
+		w.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetEm(6)
+		})
+	case "space":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetCh(0.1)
+		})
+	case "buttons":
+		w.AddStyles(func(s *styles.Style) {
+			s.AlignV = styles.AlignMiddle
+		})
+	case "up", "down", "but0", "but1": // TODO: maybe fix this? (OnChildAdded is called with SetNChildren, so before actual names)
+		act := w.(*Action)
+		act.Type = ActionParts
+		act.AddStyles(func(s *styles.Style) {
+			s.Font.Size.SetDp(18)
+		})
 	}
-
 }
 
 // SetMin sets the min limits on the value
