@@ -90,13 +90,13 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "files-row":
-		fr := child.(*gi.Layout)
+		fr := w.(*gi.Layout)
 		fr.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMax()
 		})
 	case "favs-view":
-		fv := child.(*TableView)
+		fv := w.(*TableView)
 		fv.ShowIndex = false
 		fv.InactKeyNav = false // can only have one active -- files..
 		fv.ShowToolBar = false
@@ -106,7 +106,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 			s.MaxWidth.SetDp(0) // no stretch
 		})
 	case "files-view":
-		fv := child.(*TableView)
+		fv := w.(*TableView)
 		fv.ShowIndex = false // no index
 		fv.ShowToolBar = false
 		fv.SetDisabled() // select only
@@ -114,7 +114,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 			s.SetStretchMax()
 		})
 	case "sel-row":
-		sr := child.(*gi.Layout)
+		sr := w.(*gi.Layout)
 		sr.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
 			sr.Spacing.SetDp(4 * gi.Prefs.DensityMul())

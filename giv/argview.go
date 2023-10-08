@@ -47,7 +47,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "title":
-		title := child.(*gi.Label)
+		title := w.(*gi.Label)
 		title.Type = gi.LabelTitleLarge
 		title.AddStyles(func(s *styles.Style) {
 			s.MaxWidth.SetDp(-1)

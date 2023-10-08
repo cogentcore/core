@@ -84,7 +84,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "frame": // slice frame
-		sf := child.(*gi.Frame)
+		sf := w.(*gi.Frame)
 		sf.Lay = gi.LayoutVert
 		sf.AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Ch(20))
@@ -95,20 +95,20 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 			s.Padding.Set()
 		})
 	case "header": // slice header
-		sh := child.(*gi.ToolBar)
+		sh := w.(*gi.ToolBar)
 		sh.Lay = gi.LayoutHoriz
 		sh.AddStyles(func(s *styles.Style) {
 			sh.Spacing.SetDp(0)
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
 	case "grid-lay": // grid layout
-		gl := child.(*gi.Layout)
+		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
 	case "grid": // slice grid
-		sg := child.(*gi.Frame)
+		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
 		sg.AddStyles(func(s *styles.Style) {
@@ -123,7 +123,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 		})
 	}
 	// STYTODO: set header sizes here (see LayoutHeader)
-	// if _, ok := child.(*gi.Label); ok && w.Parent().Name() == "header" {
+	// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
 	// 	w.AddStyles(func(s *styles.Style) {
 	// 		spc := tv.SliceHeader().Spacing.Dots
 	// 		ip, _ := w.IndexInParent()

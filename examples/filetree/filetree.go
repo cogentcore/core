@@ -64,7 +64,7 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "title":
-		title := child.(*gi.Label)
+		title := w.(*gi.Label)
 		title.Type = gi.LabelHeadlineSmall
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
@@ -72,7 +72,7 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignTop
 		})
 	case "splitview":
-		split := child.(*gi.SplitView)
+		split := w.(*gi.SplitView)
 		split.Dim = mat32.X
 	}
 	ip, _ := w.IndexInParent()

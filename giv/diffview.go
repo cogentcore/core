@@ -168,7 +168,7 @@ func (dv *DiffView) OnChildAdded(child ki.Ki) {
 			s.SetStretchMaxWidth()
 		})
 	case "diff-lay":
-		df := child.(*gi.Layout)
+		df := w.(*gi.Layout)
 		df.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMax()

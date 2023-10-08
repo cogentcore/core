@@ -49,7 +49,7 @@ type StructViewInline struct {
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
-		label := child.(*gi.Label)
+		label := w.(*gi.Label)
 		label.Redrawable = true
 		w.AddStyles(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft

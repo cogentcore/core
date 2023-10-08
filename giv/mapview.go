@@ -70,7 +70,7 @@ func (mv *MapView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "map-grid":
-		mg := child.(*gi.Frame)
+		mg := w.(*gi.Frame)
 		mg.Lay = gi.LayoutGrid
 		mg.Stripes = gi.RowStripes
 		w.AddStyles(func(s *styles.Style) {

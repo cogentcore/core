@@ -79,12 +79,12 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 			s.MinWidth.SetCh(20)
 		})
 	case "num-lay":
-		vl := child.(*gi.Layout)
+		vl := w.(*gi.Layout)
 		vl.AddStyles(func(s *styles.Style) {
 			vl.Spacing = gi.StdDialogVSpaceUnits
 		})
 	}
-	if sl, ok := child.(*gi.Slider); ok {
+	if sl, ok := w.(*gi.Slider); ok {
 		sl.AddStyles(func(s *styles.Style) {
 			s.MinWidth.SetCh(20)
 			s.Width.SetCh(20)
@@ -94,7 +94,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 		})
 	}
 	if child.Parent().Name() == "palette" {
-		if cbt, ok := child.(*gi.Button); ok {
+		if cbt, ok := w.(*gi.Button); ok {
 			cbt.AddStyles(func(s *styles.Style) {
 				c := colornames.Map[cbt.Name()]
 

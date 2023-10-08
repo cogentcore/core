@@ -244,13 +244,13 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "grid-lay": // grid layout
-		gl := child.(*gi.Layout)
+		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
 	case "grid": // slice grid
-		sg := child.(*gi.Frame)
+		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
 		sg.AddStyles(func(s *styles.Style) {

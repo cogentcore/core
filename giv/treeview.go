@@ -90,7 +90,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "Parts":
-		parts := child.(*gi.Layout)
+		parts := w.(*gi.Layout)
 		parts.AddStyles(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
 		})
@@ -102,7 +102,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.Padding.Set()
 		})
 	case "branch":
-		cb := child.(*gi.CheckBox)
+		cb := w.(*heckBox)
 		cb.Icon = icons.KeyboardArrowDown
 		cb.IconOff = icons.KeyboardArrowRight
 		cb.AddStyles(func(s *styles.Style) {
@@ -123,7 +123,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.MinWidth.SetCh(16)
 		})
 	case "menu":
-		menu := child.(*gi.Button)
+		menu := w.(*gi.Button)
 		menu.Indicator = icons.None
 	}
 }

@@ -85,7 +85,7 @@ func (sv *StructView) OnChildAdded(child ki.Ki) {
 			s.SetStretchMaxWidth()
 		})
 	case "struct-grid":
-		sg := child.(*gi.Frame)
+		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
 		w.AddStyles(func(s *styles.Style) {
