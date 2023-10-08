@@ -229,8 +229,9 @@ func (st *MainStage) RunDialog() *MainStage {
 		win.GoStartEventLoop()
 		return st
 	}
-	winGeom := mat32.Geom2DInt{Size: sz}
+	winGeom := mat32.Geom2DInt{Size: winsz}
 	sc.Geom.Size = sz
+	// fmt.Println("dlg:", sc.Geom, "win:", winGeom)
 	sc.FitInWindow(winGeom) // does resize
 
 	ms.Push(st)

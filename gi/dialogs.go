@@ -7,14 +7,15 @@ package gi
 import (
 	"log"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 )
 
-// standard vertical space between elements in a dialog, in Ex units
 var (
+	// standard vertical space between elements in a dialog, in Ex units
 	StdDialogVSpace = float32(1)
 
 	StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
@@ -86,6 +87,17 @@ func (dlg *DialogStage) Prompt(prompt string) *DialogStage {
 	return dlg
 }
 
+// PromptWidgetIdx returns the prompt label widget index,
+// for adding additional elements below the prompt.
+// Returns -1 if not found.
+func (dlg *DialogStage) PromptWidgetIdx() int {
+	idx, ok := dlg.Stage.Scene.Children().IndexByName("prompt", 0)
+	if !ok {
+		return -1
+	}
+	return idx
+}
+
 // Modal sets the modal behavior of the dialog:
 // true = blocks all other input, false = allows other input
 func (dlg *DialogStage) Modal(modal bool) *DialogStage {
@@ -130,6 +142,7 @@ func (dlg *DialogStage) Ok() *DialogStage {
 	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAccept {
+			e.SetHandled()
 			dlg.AcceptDialog()
 		}
 	})
@@ -150,6 +163,7 @@ func (dlg *DialogStage) Cancel() *DialogStage {
 	sc.On(events.KeyChord, func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAbort {
+			e.SetHandled()
 			dlg.CancelDialog()
 		}
 	})
@@ -230,8 +244,10 @@ type DlgOpts struct {
 }
 
 // StdDialog configures a standard DialogStage per the options provided.
-// Context provides the relevant source context opening the dialog.
-func StdDialog(opts DlgOpts, ctx Widget) *DialogStage {
+// Call Run() to run the returned dialog (can be further configed).
+// Context provides the relevant source context opening the dialog,
+// for positioning and constructing the dialog.
+func StdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
 	dlg := NewDialog(StageScene("std-dialog"), ctx)
 	if opts.Title != "" {
 		dlg.Title(opts.Title)
@@ -246,6 +262,11 @@ func StdDialog(opts DlgOpts, ctx Widget) *DialogStage {
 		dlg.Cancel()
 	}
 	dlg.Modal(true).NewWindow(false)
+	if fun != nil {
+		dlg.Stage.Scene.On(events.Change, func(e events.Event) {
+			fun(dlg)
+		})
+	}
 	return dlg
 }
 
@@ -275,62 +296,87 @@ func RecycleStdDialog(data any, opts DlgOpts, ok, cancel bool) (*Dialog, bool) {
 // PromptDialog opens a standard dialog configured via options.
 // The given closure will be called with the dialog when it returns,
 // and the Accepted flag indicates if Ok or Cancel was pressed.
-func PromptDialog(opts DlgOpts, ctx Widget, fun func(dlg *DialogStage)) *DialogStage {
-	dlg := StdDialog(opts, ctx)
-	if fun != nil {
-		dlg.Stage.Scene.On(events.Change, func(e events.Event) {
-			fun(dlg)
+// Call Run() to run the returned dialog (can be further configed).
+// Context provides the relevant source context opening the dialog,
+// for positioning and constructing the dialog.
+func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
+	dlg := StdDialog(ctx, opts, fun)
+	return dlg
+}
+
+// ChoiceDialog presents any number of buttons with labels as given,
+// for the user to choose among.
+// The clicked button number (starting at 0) is the dlg.Data.
+// Call Run() to run the returned dialog (can be further configed).
+// Context provides the relevant source context opening the dialog,
+// for positioning and constructing the dialog.
+func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *DialogStage)) *DialogStage {
+	dlg := StdDialog(ctx, opts, fun)
+
+	sc := dlg.Stage.Scene
+	bb := dlg.ConfigButtonBox()
+	NewStretch(bb, "stretch")
+	for i, ch := range choices {
+		chnm := strcase.ToKebab(ch)
+		chidx := i
+
+		b := NewButton(bb, chnm).SetType(ButtonText).SetText(ch).On(events.Click, func(e events.Event) {
+			e.SetHandled() // otherwise propagates to dead elements
+			dlg.Data = chidx
+			if chnm == "cancel" {
+				dlg.CancelDialog()
+			} else {
+				dlg.AcceptDialog()
+			}
+			sc.Send(events.Change, e)
+		})
+		b.On(events.KeyChord, func(e events.Event) {
+			dlg.Data = chidx
+			kf := KeyFun(e.KeyChord())
+			if chnm == "cancel" {
+				if kf == KeyFunAbort {
+					e.SetHandled()
+					dlg.CancelDialog()
+				}
+			} else {
+				if kf == KeyFunAccept {
+					e.SetHandled()
+					dlg.AcceptDialog()
+				}
+			}
 		})
 	}
 	return dlg
 }
 
-/*
-// ChoiceDialog presents any number of buttons with labels as given, for the
-// user to choose among -- the clicked button number (starting at 0) will be
-// sent to the receiving object and function for dialog signals.  Scene is
-// optional to properly contextualize dialog to given master window.
-func ChoiceDialog(avp *Scene, opts DlgOpts, choices []string, fun func(dlg *DialogStage)) {
-	dlg := NewStdDialog(opts, NoOk, NoCancel) // no buttons
-	dlg.Modal = true
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
-	}
-
-	bb := dlg.AddButtonBox() // not otherwise made because no buttons above
-	NewStretch(bb, "stretch")
-	for i, ch := range choices {
-		chnm := strcase.ToKebab(ch)
-		b := NewButton(bb, chnm)
-		b.SetProp("__cdSigVal", int64(i))
-		b.SetText(ch)
-		if chnm == "cancel" {
-			b.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(ButtonClicked) {
-					dlg.SigVal = b.Prop("__cdSigVal").(int64)
-					dlg.Cancel()
-				}
-			})
-		} else {
-			b.ButtonSig.Connect(dlg.Frame.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(ButtonClicked) {
-					dlg.SigVal = b.Prop("__cdSigVal").(int64)
-					dlg.Accept()
-				}
-			})
-		}
-	}
-
-	dlg.Open(0, 0, avp, nil)
+// StringPromptDialog prompts the user for a string value.
+// The string is set as the Data field in the Dialog.
+// Call Run() to run the returned dialog (can be further configed).
+// Context provides the relevant source context opening the dialog,
+// for positioning and constructing the dialog.
+func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fun func(dlg *DialogStage)) *DialogStage {
+	dlg := StdDialog(ctx, opts, fun)
+	dlg.Data = strval
+	prIdx := dlg.PromptWidgetIdx()
+	tf := dlg.Stage.Scene.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
+	tf.Placeholder = placeholder
+	tf.SetText(strval)
+	tf.SetStretchMaxWidth()
+	tf.SetMinPrefWidth(units.Ch(40))
+	tf.On(events.Change, func(e events.Event) {
+		dlg.Data = tf.Text()
+	})
+	return dlg
 }
 
+/*
 // NewKiDialog prompts for creating new item(s) of a given type, showing types
 // that implement given interface.
 // Use construct of form: reflect.TypeOf((*gi.Widget)(nil)).Elem()
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).
 func NewKiDialog(avp *Scene, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog(opts, AddOk, AddCancel)
+	dlg := StdDialog(opts, AddOk, AddCancel)
 	dlg.Modal = true
 
 	_, prIdx := dlg.PromptWidget()
@@ -383,31 +429,4 @@ func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
 	return n, typ
 }
 
-// StringPromptDialog prompts the user for a string value -- optionally
-// connects to given signal receiving object and function for dialog signals
-// (nil to ignore).  Scene is optional to properly contextualize dialog to
-// given master window.
-func StringPromptDialog(avp *Scene, strval, placeholder string, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog(opts, AddOk, AddCancel)
-	dlg.Modal = true
-
-	_, prIdx := dlg.PromptWidget()
-	tf := dlg.Frame.InsertNewChild(TextFieldType, prIdx+1, "str-field").(*TextField)
-	tf.Placeholder = placeholder
-	tf.SetText(strval)
-	tf.SetStretchMaxWidth()
-	tf.SetMinPrefWidth(units.Ch(40))
-
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
-	}
-	dlg.Open(0, 0, avp, nil)
-	return dlg
-}
-
-// StringPromptDialogValue gets the string value the user set.
-func StringPromptDialogValue(dlg *Dialog) string {
-	tf := dlg.Frame.ChildByName("str-field", 0).(*TextField)
-	return tf.Text()
-}
 */
