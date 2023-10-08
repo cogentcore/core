@@ -207,7 +207,10 @@ type Ki interface {
 	// PathFrom returns path to this node from given parent node, using
 	// node Names separated by / and fields by .
 	// Node names escape any existing / and . characters to \\ and \,
-	// Path is only valid when child names are unique (see Unique* functions)
+	// Path is only valid for finding items when child names are unique
+	// (see Unique* functions). The paths that it returns exclude the
+	// name of the parent and the leading slash; for example, in a tree
+	// A/B/C/D/E, the result of D.PathFrom(B) would be C/D
 	PathFrom(par Ki) string
 
 	// FindPath returns Ki object at given path, starting from this node

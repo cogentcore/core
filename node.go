@@ -390,21 +390,25 @@ func (n *Node) Path() string {
 // node Names separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,
 // Path is only valid for finding items when child names are unique
-// (see Unique* functions)
+// (see Unique* functions). The paths that it returns exclude the
+// name of the parent and the leading slash; for example, in a tree
+// A/B/C/D/E, the result of D.PathFrom(B) would be C/D
 func (n *Node) PathFrom(par Ki) string {
-	if n.Par != nil {
-		ppath := ""
-		if n.Par == par {
-			ppath = "/" + EscapePathName(par.Name())
-		} else {
-			ppath = n.Par.PathFrom(par)
-		}
-		if n.Is(Field) {
-			return ppath + "." + EscapePathName(n.Nm)
-		}
-		return ppath + "/" + EscapePathName(n.Nm)
+	// we bail a level below the parent so it isn't in the path
+	if n.Par == nil || n.Par == par {
+		return n.Nm
 	}
-	return "/" + n.Nm
+	ppath := ""
+	if n.Par == par {
+		ppath = "/" + EscapePathName(par.Name())
+	} else {
+		ppath = n.Par.PathFrom(par)
+	}
+	if n.Is(Field) {
+		return ppath + "." + EscapePathName(n.Nm)
+	}
+	return ppath + "/" + EscapePathName(n.Nm)
+
 }
 
 // find the child on the path
