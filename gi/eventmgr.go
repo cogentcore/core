@@ -439,6 +439,9 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 			return
 		}
 		em.LongHoverWidget.Send(events.LongHoverStart, nil)
+		// we are done with the timer, and this indicates that
+		// we have sent a LongHoverStart event
+		em.LongHoverTimer = nil
 	})
 }
 
