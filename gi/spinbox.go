@@ -235,6 +235,7 @@ func (sb *SpinBox) ConfigParts(sc *Scene) {
 	tf.SetState(sb.IsDisabled(), states.Disabled)
 	tf.Txt = sb.ValToString(sb.Value)
 	if !sb.IsDisabled() {
+		sb.SpinBoxTextFieldHandlers(tf)
 		// todo: events
 		// tf.TextFieldSig.ConnectOnly(sb.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig == int64(TextFieldDone) || sig == int64(TextFieldDeFocused) {
@@ -296,7 +297,6 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 
 func (sb *SpinBox) SpinBoxHandlers() {
 	sb.WidgetHandlers()
-	sb.SpinBoxTextFieldSelect()
 	sb.SpinBoxScroll()
 	sb.SpinBoxKeys()
 }
@@ -313,17 +313,16 @@ func (sb *SpinBox) SpinBoxScroll() {
 }
 
 // todo: how to deal with this??
-func (sb *SpinBox) SpinBoxTextFieldSelect() {
-	if sb.Parts == nil {
-		return
-	}
-	tf := sb.Parts.ChildByName("text-field", 0).(*TextField)
-	if tf != nil {
-		tf.On(events.Select, func(e events.Event) {
-			sb.SetSelected(!sb.StateIs(states.Selected))
-			sb.Send(events.Select, nil)
-		})
-	}
+func (sb *SpinBox) SpinBoxTextFieldHandlers(tf *TextField) {
+	tf.On(events.Select, func(e events.Event) {
+		sb.SetSelected(!sb.StateIs(states.Selected))
+		sb.Send(events.Select, nil)
+	})
+	tf.On(events.Click, func(e events.Event) {
+		fmt.Println("sb tf click")
+		sb.SetState(true, states.Focused)
+		sb.HandleEvent(e)
+	})
 }
 
 func (sb *SpinBox) SpinBoxKeys() {

@@ -1215,6 +1215,7 @@ func (tf *TextField) TextFieldMouse() {
 		}
 	})
 	tf.On(events.Click, func(e events.Event) {
+		fmt.Println("tf click", tf.Style.State)
 		if tf.StateIs(states.Disabled) {
 			return
 		}
@@ -1404,6 +1405,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 
 func (tf *TextField) TextFieldStateFromFocus() {
 	tf.On(events.Focus, func(e events.Event) {
+		fmt.Println("tf focus", tf.Style.State, tf.Style.Abilities)
 		if tf.StateIs(states.Disabled) {
 			return
 		}
@@ -1587,7 +1589,7 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 }
 
 func (tf *TextField) Render(sc *Scene) {
-	if tf.StateIs(states.Focused) && tf.StateIs(states.Focused) && BlinkingTextField == tf {
+	if tf.StateIs(states.Focused) && BlinkingTextField == tf {
 		tf.ScrollLayoutToCursor()
 	}
 	if tf.PushBounds(sc) {
