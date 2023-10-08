@@ -245,20 +245,30 @@ func (bb *ButtonBase) ClickOnEnterSpace() {
 	})
 }
 
+// ShortcutTooltip returns the effective tooltip of the button
+// with any keyboard shortcut included.
+func (bb *ButtonBase) ShortcutTooltip() string {
+	if bb.Tooltip == "" && bb.Shortcut == "" {
+		return ""
+	}
+	res := bb.Tooltip
+	if bb.Shortcut != "" {
+		res = "[ " + bb.Shortcut.Shortcut() + " ]"
+		if bb.Tooltip != "" {
+			res += ": " + bb.Tooltip
+		}
+	}
+	return res
+}
+
 func (bb *ButtonBase) LongHoverTooltip() {
 	bb.On(events.LongHoverStart, func(e events.Event) {
 		if bb.StateIs(states.Disabled) {
 			return
 		}
-		if bb.Tooltip == "" && bb.Shortcut == "" {
+		tt := bb.ShortcutTooltip()
+		if tt == "" {
 			return
-		}
-		tt := bb.Tooltip
-		if bb.Shortcut != "" {
-			tt = "[ " + bb.Shortcut.Shortcut() + " ]"
-			if bb.Tooltip != "" {
-				tt += ": " + bb.Tooltip
-			}
 		}
 		e.SetHandled()
 		NewTooltipText(bb, tt, e.Pos()).Run()
@@ -459,7 +469,8 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) ButtonStyles() {
 	bt.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable)
+		s.SetAbilities(bt.ShortcutTooltip() != "", states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
@@ -577,7 +588,8 @@ func (cb *CheckBox) OnInit() {
 
 func (cb *CheckBox) CheckBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Checkable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Checkable)
+		s.SetAbilities(cb.ShortcutTooltip() != "", states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground

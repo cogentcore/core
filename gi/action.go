@@ -94,7 +94,8 @@ func (ac *Action) OnInit() {
 
 func (ac *Action) ActionStyles() {
 	ac.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable)
+		s.SetAbilities(ac.ShortcutTooltip() != "", states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
 		s.Text.Align = styles.AlignCenter
