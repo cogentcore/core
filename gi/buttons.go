@@ -253,20 +253,12 @@ func (bb *ButtonBase) LongHoverTooltip() {
 		if bb.Tooltip == "" {
 			return
 		}
-		e.SetHandled()
 		tt := bb.Tooltip
 		if bb.Shortcut != "" {
 			tt = "[ " + bb.Shortcut.Shortcut() + " ]: " + tt
 		}
-		// todo:
-		// if tt != "" {
-		// 	me.SetHandled()
-		// 	bb.BBoxMu.RLock()
-		// 	pos := wbb.WinBBox.Max
-		// 	bb.BBoxMu.RUnlock()
-		// 	pos.X -= 20
-		// 	PopupTooltip(tt, pos.X, pos.Y, wbb.Sc, wbb.Nm)
-		// }
+		e.SetHandled()
+		NewTooltipText(bb, tt, e.Pos()).Run()
 	})
 }
 

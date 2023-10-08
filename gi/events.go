@@ -204,25 +204,22 @@ func (wb *WidgetBase) LongHoverTooltip() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		fmt.Println("long hover tooltip start", wb, wb.Tooltip)
-		NewTooltip(wb, e.Pos()).Run()
 		if wb.Tooltip == "" {
 			return
 		}
 		e.SetHandled()
+		NewTooltip(wb, e.Pos()).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		fmt.Println("long hover tooltip end", wb, wb.Tooltip)
 		mstg := wb.Sc.MainStage()
 		if mstg == nil {
 			slog.Error("nil main stage in long hover end tooltip event", "widget", wb)
 			return
 		}
 		mstg.PopupMgr.PopDeleteType(Tooltip)
-		e.SetHandled()
 	})
 }
 

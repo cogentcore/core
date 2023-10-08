@@ -129,7 +129,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	_ = checkbox
 
 	mb1 := gi.NewButton(brow, "menubutton1").
-		SetText("Menu Button").(*gi.Button)
+		SetText("Menu Button").
+		SetTooltip("Press this button to pull up a nested menu of actions").(*gi.Button)
 
 	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func(act *gi.Action) {
 		fmt.Println(act.Name(), act.Data)

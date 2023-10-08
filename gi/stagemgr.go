@@ -60,7 +60,7 @@ func (sm *StageMgrBase) TopOfType(typ StageTypes) Stage {
 	defer sm.Mu.RUnlock()
 
 	l := sm.Stack.Len()
-	for i := l - 1; i <= 0; i-- {
+	for i := l - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
 		if st.AsBase().Type == typ {
 			return st
@@ -103,7 +103,7 @@ func (sm *StageMgrBase) PopType(typ StageTypes) Stage {
 	defer sm.Mu.Unlock()
 
 	l := sm.Stack.Len()
-	for i := l - 1; i <= 0; i-- {
+	for i := l - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i)
 		if st.AsBase().Type == typ {
 			sm.Modified = true
