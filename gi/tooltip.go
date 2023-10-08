@@ -40,7 +40,15 @@ func NewTooltipScene(sc *Scene, ctx Widget) *PopupStage {
 func NewTooltip(w Widget, pos image.Point) *PopupStage {
 	sc := StageScene(w.Name() + "-tooltip")
 	sc.Geom.Pos = pos
-	NewLabel(sc, "tooltip").SetText("Hello, World!")
+	sc.AddStyles(func(s *styles.Style) {
+		s.Border.Radius = styles.BorderRadiusExtraSmall
+		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
+	})
+	NewLabel(sc, "tooltip").SetText("Hello, World!").
+		SetType(LabelBodyMedium).
+		AddStyles(func(s *styles.Style) {
+			s.Color = colors.Scheme.InverseOnSurface
+		})
 	return NewTooltipScene(sc, w)
 	/*
 		win := parSc.Win
