@@ -54,15 +54,14 @@ func (sv *SliceViewInline) OnInit() {
 }
 
 func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "Parts":
-			parts := child.(*gi.Layout)
-			parts.Lay = gi.LayoutHoriz
-			w.AddStyles(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "Parts":
+		parts := child.(*gi.Layout)
+		parts.Lay = gi.LayoutHoriz
+		w.AddStyles(func(s *styles.Style) {
+			s.Overflow = styles.OverflowHidden // no scrollbars!
+		})
 	}
 }
 

@@ -38,19 +38,18 @@ func (tv *TwinTextViews) OnInit() {
 }
 
 func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "text-a-lay", "text-b-lay":
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMax()
-				s.SetMinPrefWidth(units.Ch(80))
-				s.SetMinPrefHeight(units.Em(40))
-			})
-		case "text-a", "text-b":
-			w.AddStyles(func(s *styles.Style) {
-				s.Font.Family = string(gi.Prefs.MonoFont)
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "text-a-lay", "text-b-lay":
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMax()
+			s.SetMinPrefWidth(units.Ch(80))
+			s.SetMinPrefHeight(units.Em(40))
+		})
+	case "text-a", "text-b":
+		w.AddStyles(func(s *styles.Style) {
+			s.Font.Family = string(gi.Prefs.MonoFont)
+		})
 	}
 }
 

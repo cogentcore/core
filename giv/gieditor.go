@@ -47,17 +47,16 @@ func (ge *GiEditor) OnInit() {
 }
 
 func (ge *GiEditor) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "title":
-			title := child.(*gi.Label)
-			title.Type = gi.LabelHeadlineSmall
-			title.AddStyles(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "title":
+		title := child.(*gi.Label)
+		title.Type = gi.LabelHeadlineSmall
+		title.AddStyles(func(s *styles.Style) {
+			s.SetStretchMaxWidth()
+			s.AlignH = styles.AlignCenter
+			s.AlignV = styles.AlignTop
+		})
 	}
 }
 

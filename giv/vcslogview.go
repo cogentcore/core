@@ -46,13 +46,12 @@ func (lv *VCSLogView) OnInit() {
 }
 
 func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "a-tf", "b-tf":
-			w.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(12)
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "a-tf", "b-tf":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(12)
+		})
 	}
 }
 

@@ -53,7 +53,7 @@ type FileBrowse struct {
 
 func (fb *FileBrowse) OnInit() {
 	fb.AddStyles(func(s *styles.Style) {
-		s.BackgroundColor.SetColor(colors.Scheme.Background)
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 		s.Margin.Set(units.Dp(8 * gi.Prefs.DensityMul()))
@@ -61,31 +61,30 @@ func (fb *FileBrowse) OnInit() {
 }
 
 func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "title":
-			title := child.(*gi.Label)
-			title.Type = gi.LabelHeadlineSmall
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-				s.AlignH = styles.AlignCenter
-				s.AlignV = styles.AlignTop
-			})
-		case "splitview":
-			split := child.(*gi.SplitView)
-			split.Dim = mat32.X
-		}
-		ip, _ := w.IndexInParent()
-		if w.Parent().Name() == "splitview" && ip > 0 {
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMax()
-				s.SetMinPrefWidth(units.Ch(20))
-				s.SetMinPrefHeight(units.Ch(10))
-				s.Font.Family = string(gi.Prefs.MonoFont)
-				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-				s.Text.TabSize = 4
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "title":
+		title := child.(*gi.Label)
+		title.Type = gi.LabelHeadlineSmall
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMaxWidth()
+			s.AlignH = styles.AlignCenter
+			s.AlignV = styles.AlignTop
+		})
+	case "splitview":
+		split := child.(*gi.SplitView)
+		split.Dim = mat32.X
+	}
+	ip, _ := w.IndexInParent()
+	if w.Parent().Name() == "splitview" && ip > 0 {
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMax()
+			s.SetMinPrefWidth(units.Ch(20))
+			s.SetMinPrefHeight(units.Ch(10))
+			s.Font.Family = string(gi.Prefs.MonoFont)
+			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+			s.Text.TabSize = 4
+		})
 	}
 }
 

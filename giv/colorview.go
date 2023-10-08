@@ -53,57 +53,56 @@ func (cv *ColorView) OnInit() {
 }
 
 func (cv *ColorView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "value":
-			w.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetEm(6)
-				s.MinHeight.SetEm(6)
-				s.Border.Radius = styles.BorderRadiusFull
-				s.BackgroundColor.SetSolid(cv.Color)
-			})
-		case "slider-grid":
-			w.AddStyles(func(s *styles.Style) {
-				s.Columns = 4
-			})
-		case "hexlbl":
-			w.AddStyles(func(s *styles.Style) {
-				s.AlignV = styles.AlignMiddle
-			})
-		case "palette":
-			w.AddStyles(func(s *styles.Style) {
-				s.Columns = 25
-			})
-		case "nums-hex":
-			w.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetCh(20)
-			})
-		case "num-lay":
-			vl := child.(*gi.Layout)
-			vl.AddStyles(func(s *styles.Style) {
-				vl.Spacing = gi.StdDialogVSpaceUnits
-			})
-		}
-		if sl, ok := child.(*gi.Slider); ok {
-			sl.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetCh(20)
-				s.Width.SetCh(20)
-				s.MinHeight.SetEm(1)
-				s.Height.SetEm(1)
-				s.Margin.Set(units.Dp(6 * gi.Prefs.DensityMul()))
-			})
-		}
-		if child.Parent().Name() == "palette" {
-			if cbt, ok := child.(*gi.Button); ok {
-				cbt.AddStyles(func(s *styles.Style) {
-					c := colornames.Map[cbt.Name()]
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "value":
+		w.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetEm(6)
+			s.MinHeight.SetEm(6)
+			s.Border.Radius = styles.BorderRadiusFull
+			s.BackgroundColor.SetSolid(cv.Color)
+		})
+	case "slider-grid":
+		w.AddStyles(func(s *styles.Style) {
+			s.Columns = 4
+		})
+	case "hexlbl":
+		w.AddStyles(func(s *styles.Style) {
+			s.AlignV = styles.AlignMiddle
+		})
+	case "palette":
+		w.AddStyles(func(s *styles.Style) {
+			s.Columns = 25
+		})
+	case "nums-hex":
+		w.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetCh(20)
+		})
+	case "num-lay":
+		vl := child.(*gi.Layout)
+		vl.AddStyles(func(s *styles.Style) {
+			vl.Spacing = gi.StdDialogVSpaceUnits
+		})
+	}
+	if sl, ok := child.(*gi.Slider); ok {
+		sl.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetCh(20)
+			s.Width.SetCh(20)
+			s.MinHeight.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set(units.Dp(6 * gi.Prefs.DensityMul()))
+		})
+	}
+	if child.Parent().Name() == "palette" {
+		if cbt, ok := child.(*gi.Button); ok {
+			cbt.AddStyles(func(s *styles.Style) {
+				c := colornames.Map[cbt.Name()]
 
-					s.BackgroundColor.SetColor(c)
-					s.MaxHeight.SetEm(1.3)
-					s.MaxWidth.SetEm(1.3)
-					s.Margin.Set()
-				})
-			}
+				s.BackgroundColor.SetSolid(c)
+				s.MaxHeight.SetEm(1.3)
+				s.MaxWidth.SetEm(1.3)
+				s.Margin.Set()
+			})
 		}
 	}
 }

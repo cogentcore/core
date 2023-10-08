@@ -87,45 +87,44 @@ func (tv *TreeView) OnInit() {
 }
 
 func (tv *TreeView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "Parts":
-			parts := child.(*gi.Layout)
-			parts.AddStyles(func(s *styles.Style) {
-				parts.Spacing.SetCh(0.5)
-			})
-		case "icon":
-			w.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(1)
-				s.Height.SetEm(1)
-				s.Margin.Set()
-				s.Padding.Set()
-			})
-		case "branch":
-			cb := child.(*gi.CheckBox)
-			cb.Icon = icons.KeyboardArrowDown
-			cb.IconOff = icons.KeyboardArrowRight
-			cb.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-				s.MaxWidth.SetEm(1.5)
-				s.MaxHeight.SetEm(1.5)
-				s.AlignV = styles.AlignMiddle
-			})
-		case "space":
-			w.AddStyles(func(s *styles.Style) {
-				s.Width.SetEm(0.5)
-			})
-		case "label":
-			w.AddStyles(func(s *styles.Style) {
-				s.Margin.Set()
-				s.Padding.Set()
-				s.MinWidth.SetCh(16)
-			})
-		case "menu":
-			menu := child.(*gi.Button)
-			menu.Indicator = icons.None
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "Parts":
+		parts := child.(*gi.Layout)
+		parts.AddStyles(func(s *styles.Style) {
+			parts.Spacing.SetCh(0.5)
+		})
+	case "icon":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "branch":
+		cb := child.(*gi.CheckBox)
+		cb.Icon = icons.KeyboardArrowDown
+		cb.IconOff = icons.KeyboardArrowRight
+		cb.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+			s.MaxWidth.SetEm(1.5)
+			s.MaxHeight.SetEm(1.5)
+			s.AlignV = styles.AlignMiddle
+		})
+	case "space":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(0.5)
+		})
+	case "label":
+		w.AddStyles(func(s *styles.Style) {
+			s.Margin.Set()
+			s.Padding.Set()
+			s.MinWidth.SetCh(16)
+		})
+	case "menu":
+		menu := child.(*gi.Button)
+		menu.Indicator = icons.None
 	}
 }
 

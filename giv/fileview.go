@@ -87,49 +87,48 @@ func (fv *FileView) OnInit() {
 }
 
 func (fv *FileView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "files-row":
-			fr := child.(*gi.Layout)
-			fr.Lay = gi.LayoutHoriz
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMax()
-			})
-		case "favs-view":
-			fv := child.(*TableView)
-			fv.ShowIndex = false
-			fv.InactKeyNav = false // can only have one active -- files..
-			fv.ShowToolBar = false
-			fv.SetDisabled() // select only
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMaxHeight()
-				s.MaxWidth.SetDp(0) // no stretch
-			})
-		case "files-view":
-			fv := child.(*TableView)
-			fv.ShowIndex = false // no index
-			fv.ShowToolBar = false
-			fv.SetDisabled() // select only
-			fv.AddStyles(func(s *styles.Style) {
-				s.SetStretchMax()
-			})
-		case "sel-row":
-			sr := child.(*gi.Layout)
-			sr.Lay = gi.LayoutHoriz
-			w.AddStyles(func(s *styles.Style) {
-				sr.Spacing.SetDp(4 * gi.Prefs.DensityMul())
-				s.SetStretchMaxWidth()
-			})
-		case "sel": // sel field
-			w.AddStyles(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(60))
-				s.SetStretchMaxWidth()
-			})
-		case "ext-label":
-			w.AddStyles(func(s *styles.Style) {
-				s.SetMinPrefWidth(units.Ch(10))
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "files-row":
+		fr := child.(*gi.Layout)
+		fr.Lay = gi.LayoutHoriz
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMax()
+		})
+	case "favs-view":
+		fv := child.(*TableView)
+		fv.ShowIndex = false
+		fv.InactKeyNav = false // can only have one active -- files..
+		fv.ShowToolBar = false
+		fv.SetDisabled() // select only
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMaxHeight()
+			s.MaxWidth.SetDp(0) // no stretch
+		})
+	case "files-view":
+		fv := child.(*TableView)
+		fv.ShowIndex = false // no index
+		fv.ShowToolBar = false
+		fv.SetDisabled() // select only
+		fv.AddStyles(func(s *styles.Style) {
+			s.SetStretchMax()
+		})
+	case "sel-row":
+		sr := child.(*gi.Layout)
+		sr.Lay = gi.LayoutHoriz
+		w.AddStyles(func(s *styles.Style) {
+			sr.Spacing.SetDp(4 * gi.Prefs.DensityMul())
+			s.SetStretchMaxWidth()
+		})
+	case "sel": // sel field
+		w.AddStyles(func(s *styles.Style) {
+			s.SetMinPrefWidth(units.Ch(60))
+			s.SetStretchMaxWidth()
+		})
+	case "ext-label":
+		w.AddStyles(func(s *styles.Style) {
+			s.SetMinPrefWidth(units.Ch(10))
+		})
 	}
 }
 

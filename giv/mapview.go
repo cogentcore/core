@@ -67,21 +67,20 @@ func (mv *MapView) OnInit() {
 }
 
 func (mv *MapView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "map-grid":
-			mg := child.(*gi.Frame)
-			mg.Lay = gi.LayoutGrid
-			mg.Stripes = gi.RowStripes
-			w.AddStyles(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(1.5))
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-				s.Columns = mv.NCols
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "map-grid":
+		mg := child.(*gi.Frame)
+		mg.Lay = gi.LayoutGrid
+		mg.Stripes = gi.RowStripes
+		w.AddStyles(func(s *styles.Style) {
+			// setting a pref here is key for giving it a scrollbar in larger context
+			s.SetMinPrefHeight(units.Em(1.5))
+			s.SetMinPrefWidth(units.Em(10))
+			s.SetStretchMax()                  // for this to work, ALL layers above need it too
+			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			s.Columns = mv.NCols
+		})
 	}
 }
 

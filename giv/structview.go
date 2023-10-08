@@ -78,30 +78,29 @@ func (sv *StructView) OnInit() {
 }
 
 func (sv *StructView) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "toolbar":
-			w.AddStyles(func(s *styles.Style) {
-				s.SetStretchMaxWidth()
-			})
-		case "struct-grid":
-			sg := child.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
-			sg.Stripes = gi.RowStripes
-			w.AddStyles(func(s *styles.Style) {
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(1.5))
-				s.SetMinPrefWidth(units.Em(10))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-				s.Columns = 2
-			})
-		}
-		if w.Parent().Name() == "struct-grid" {
-			w.AddStyles(func(s *styles.Style) {
-				s.AlignH = styles.AlignLeft
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "toolbar":
+		w.AddStyles(func(s *styles.Style) {
+			s.SetStretchMaxWidth()
+		})
+	case "struct-grid":
+		sg := child.(*gi.Frame)
+		sg.Lay = gi.LayoutGrid
+		sg.Stripes = gi.RowStripes
+		w.AddStyles(func(s *styles.Style) {
+			// setting a pref here is key for giving it a scrollbar in larger context
+			s.SetMinPrefHeight(units.Em(1.5))
+			s.SetMinPrefWidth(units.Em(10))
+			s.SetStretchMax()                  // for this to work, ALL layers above need it too
+			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			s.Columns = 2
+		})
+	}
+	if w.Parent().Name() == "struct-grid" {
+		w.AddStyles(func(s *styles.Style) {
+			s.AlignH = styles.AlignLeft
+		})
 	}
 }
 

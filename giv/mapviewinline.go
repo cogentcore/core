@@ -49,15 +49,14 @@ func (mv *MapViewInline) OnInit() {
 }
 
 func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "Parts":
-			parts := child.(*gi.Layout)
-			parts.Lay = gi.LayoutHoriz
-			w.AddStyles(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "Parts":
+		parts := child.(*gi.Layout)
+		parts.Lay = gi.LayoutHoriz
+		w.AddStyles(func(s *styles.Style) {
+			s.Overflow = styles.OverflowHidden // no scrollbars!
+		})
 	}
 }
 

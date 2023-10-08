@@ -241,35 +241,34 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
-	if w, _ := gi.AsWidget(child); w != nil {
-		switch w.Name() {
-		case "grid-lay": // grid layout
-			gl := child.(*gi.Layout)
-			gl.Lay = gi.LayoutHoriz
-			w.AddStyles(func(s *styles.Style) {
-				gl.SetStretchMax() // for this to work, ALL layers above need it too
-			})
-		case "grid": // slice grid
-			sg := child.(*gi.Frame)
-			sg.Lay = gi.LayoutGrid
-			sg.Stripes = gi.RowStripes
-			sg.AddStyles(func(s *styles.Style) {
-				nWidgPerRow, _ := sv.RowWidgetNs()
-				s.Columns = nWidgPerRow
-				// setting a pref here is key for giving it a scrollbar in larger context
-				s.SetMinPrefHeight(units.Em(6))
-				s.SetMinPrefWidth(units.Ch(20))
-				s.SetStretchMax()                  // for this to work, ALL layers above need it too
-				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			})
-		}
-		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-			w.AddStyles(func(s *styles.Style) {
-				s.MinWidth.SetEm(1.5)
-				s.Padding.Right.SetDp(4 * gi.Prefs.DensityMul())
-				s.Text.Align = styles.AlignRight
-			})
-		}
+	w, _ := gi.AsWidget(child)
+	switch w.Name() {
+	case "grid-lay": // grid layout
+		gl := child.(*gi.Layout)
+		gl.Lay = gi.LayoutHoriz
+		w.AddStyles(func(s *styles.Style) {
+			gl.SetStretchMax() // for this to work, ALL layers above need it too
+		})
+	case "grid": // slice grid
+		sg := child.(*gi.Frame)
+		sg.Lay = gi.LayoutGrid
+		sg.Stripes = gi.RowStripes
+		sg.AddStyles(func(s *styles.Style) {
+			nWidgPerRow, _ := sv.RowWidgetNs()
+			s.Columns = nWidgPerRow
+			// setting a pref here is key for giving it a scrollbar in larger context
+			s.SetMinPrefHeight(units.Em(6))
+			s.SetMinPrefWidth(units.Ch(20))
+			s.SetStretchMax()                  // for this to work, ALL layers above need it too
+			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+		})
+	}
+	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+		w.AddStyles(func(s *styles.Style) {
+			s.MinWidth.SetEm(1.5)
+			s.Padding.Right.SetDp(4 * gi.Prefs.DensityMul())
+			s.Text.Align = styles.AlignRight
+		})
 	}
 }
 
