@@ -435,6 +435,9 @@ type FontRender struct {
 
 	// prop: background-color = background color -- not inherited, transparent by default
 	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+
+	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
+	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to the foreground and background of this element and all of its children"`
 }
 
 // FontRender returns the font-rendering-related
@@ -444,16 +447,19 @@ func (s *Style) FontRender() *FontRender {
 		Font:            s.Font,
 		Color:           s.Color,
 		BackgroundColor: s.BackgroundColor,
+		Opacity:         s.Opacity,
 	}
 }
 
 func (fr *FontRender) Defaults() {
 	fr.Color = colors.Black
+	fr.Opacity = 1
 	fr.Font.Defaults()
 }
 
 // InheritFields from parent
 func (fr *FontRender) InheritFields(par *FontRender) {
 	fr.Color = par.Color
+	fr.Opacity = par.Opacity
 	fr.Font.InheritFields(&par.Font)
 }
