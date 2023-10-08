@@ -206,6 +206,10 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	s.Defaults()
 	s.State = state
 
+	s.MaxBorder.Style.Set(styles.BorderSolid)
+	s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
+	s.MaxBorder.Width.Set(units.Dp(1))
+
 	// if we are disabled, we do not react to any state changes,
 	// and instead always have the same gray colors
 	if s.Is(states.Disabled) {
@@ -218,9 +222,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 		s.StateLayer = s.State.StateLayer()
 
 		if s.Is(states.Focused) {
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Primary.Base)
-			s.Border.Width.Set(units.Dp(1))
+			s.Border = s.MaxBorder
 		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)

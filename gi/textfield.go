@@ -179,9 +179,12 @@ func (tf *TextField) TextFieldStyles() {
 			s.Border.Color.Set()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+
+			s.MaxBorder = s.Border
+			s.MaxBorder.Width.Bottom = units.Dp(2)
+			s.MaxBorder.Color.Bottom = colors.Scheme.Primary.Base
 			if tf.StateIs(states.Focused) {
-				s.Border.Width.Bottom = units.Dp(2)
-				s.Border.Color.Bottom = colors.Scheme.Primary.Base
+				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Bottom = units.Dp(1)
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
@@ -189,9 +192,12 @@ func (tf *TextField) TextFieldStyles() {
 		case TextFieldOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Radius = styles.BorderRadiusExtraSmall
+
+			s.MaxBorder = s.Border
+			s.MaxBorder.Width.Set(units.Dp(2))
+			s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
 			if tf.StateIs(states.Focused) {
-				s.Border.Width.Set(units.Dp(2))
-				s.Border.Color.Set(colors.Scheme.Primary.Base)
+				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Outline)
