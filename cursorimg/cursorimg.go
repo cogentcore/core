@@ -60,7 +60,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	hot, ok := cursors.Hotspots[cursor]
 	if !ok {
 		// slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
-		hot = image.Pt(100, 100)
+		hot = image.Pt(128, 128)
 	}
 	return &Cursor{
 		Image:   img,
