@@ -17,7 +17,10 @@ import (
 // Cursor represents a cached rendered cursor, with the [image.Image]
 // of the cursor and its hotspot.
 type Cursor struct {
-	Image   image.Image
+	// The cached image of the cursor.
+	Image image.Image
+	// The hotspot in terms of a percentage of the size
+	// of the cursor from the top-left corner.
 	Hotspot image.Point
 }
 
@@ -60,7 +63,7 @@ func Get(cursor enums.Enum, size int) (*Cursor, error) {
 	hot, ok := cursors.Hotspots[cursor]
 	if !ok {
 		// slog.Info("programmer error: missing cursor hotspot", "cursor", cursor)
-		hot = image.Pt(16, 16)
+		hot = image.Pt(100, 100)
 	}
 	return &Cursor{
 		Image:   img,
