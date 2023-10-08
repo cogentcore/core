@@ -110,7 +110,6 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			if sb.IsDisabled() {
 				return
 			}
-			fmt.Println("sb tf click")
 			sb.SetState(true, states.Focused)
 			sb.HandleEvent(e)
 		})
@@ -224,7 +223,6 @@ func (sb *SpinBox) SetValueAction(val float32) *SpinBox {
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
 func (sb *SpinBox) IncrValue(steps float32) *SpinBox {
-	fmt.Println("sb incr", steps)
 	val := sb.Value + steps*sb.Step
 	val = mat32.IntMultiple(val, sb.Step)
 	return sb.SetValueAction(val)
