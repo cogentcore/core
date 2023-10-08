@@ -153,7 +153,7 @@ func (tf *TextField) OnInit() {
 func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
 		tf.CursorWidth.SetDp(1)
 		tf.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant

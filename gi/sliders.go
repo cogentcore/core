@@ -564,7 +564,7 @@ func (sr *Slider) SliderStyles() {
 	sr.ThSizeReal = sr.ThSize
 
 	sr.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
 		sr.ThumbSize = units.Dp(20)
 
 		// we use a different color for the thumb and value color so that
@@ -729,7 +729,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 	sb.ThumbSize = units.Ex(1)
 
 	sb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable, states.Slideable)
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)

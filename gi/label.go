@@ -125,7 +125,6 @@ func (lb *Label) OnInit() {
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.LongHoverable)
 		if s.Abilities.Is(states.Selectable) {
 			s.Cursor = cursors.Text
 		} else {

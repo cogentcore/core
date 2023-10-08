@@ -40,7 +40,7 @@ var (
 	// LongHoverTime is the time to wait before LongHoverStart event
 	LongHoverTime = 500 * time.Millisecond
 
-	// LongHoverStopDist is the pixel distance beyond which the LongHoverStop
+	// LongHoverStopDist is the pixel distance beyond which the LongHoverEnd
 	// event is sent
 	LongHoverStopDist = 5
 )
@@ -411,7 +411,16 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	top := em.Hovers[len(em.Hovers)-1]
 
 	// we still have the current one, so there is nothing to do
+	// but make sure our position hasn't changed too much
 	if top == em.LongHoverWidget {
+		cpos := evi.Pos()
+		dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
+		fmt.Println(dst)
+		// if we have gone too far, we are done
+		if dst > LongHoverStopDist {
+			em.LongHoverWidget.Send(events.LongHoverEnd, evi)
+			clearLongHover()
+		}
 		return
 	}
 
@@ -431,7 +440,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 
 	// now we can set it to our new widget
 	em.LongHoverWidget = top
-	em.LongHoverPos = evi.LocalPos()
+	em.LongHoverPos = evi.Pos()
 	em.LongHoverTimer = time.AfterFunc(LongHoverTime, func() {
 		em.TimerMu.Lock()
 		defer em.TimerMu.Unlock()

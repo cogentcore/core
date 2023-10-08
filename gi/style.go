@@ -216,6 +216,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 		s.Color = colors.Scheme.OnSurfaceVariant
 		s.Opacity = 0.38
 	} else {
+		s.SetAbilities(wb.Tooltip != "", states.LongHoverable)
 		// default to state layer associated with the state,
 		// which the developer can override in their stylers
 		s.StateLayer = s.State.StateLayer()
