@@ -104,7 +104,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 				return
 			}
 			sb.SetSelected(!sb.StateIs(states.Selected))
-			sb.Send(events.Select, nil)
+			sb.Send(events.Select, e)
 		})
 		tf.On(events.Click, func(e events.Event) {
 			if sb.IsDisabled() {
@@ -113,6 +113,16 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			fmt.Println("sb tf click")
 			sb.SetState(true, states.Focused)
 			sb.HandleEvent(e)
+		})
+		tf.On(events.Change, func(e events.Event) {
+			text := tf.Text()
+			val, err := sb.StringToVal(text)
+			if err != nil {
+				// SNACKTODO
+				slog.Error("invalid spinbox value", "value", text, "err", err)
+				return
+			}
+			sb.SetValueAction(val)
 		})
 		tf.AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(3))
