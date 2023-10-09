@@ -418,11 +418,13 @@ func (sv *SplitView) Render(sc *Scene) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //    Splitter
 
+// TODO(kai): decide on splitter structure
+
 // Splitter provides the splitter handle and line separating two elements in a
 // SplitView, with draggable resizing of the splitter -- parent is Parts
-// layout of the SplitView -- based on SliderBase
+// layout of the SplitView -- based on Slider
 type Splitter struct {
-	SliderBase
+	Slider
 
 	// splitter number this one is
 	SplitterNo int `desc:"splitter number this one is"`
