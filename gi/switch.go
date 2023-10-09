@@ -14,29 +14,30 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// CheckBox toggles between a checked and unchecked state
-type CheckBox struct {
+// Switch is a widget that can toggle between an on and off state.
+// It can be displayed as a switch, checkbox, or radio button.
+type Switch struct {
 	Button
 
 	// [view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
 }
 
-func (cb *CheckBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*CheckBox)
-	cb.Button.CopyFieldsFrom(&fr.Button)
-	cb.IconOff = fr.IconOff
+func (sw *Switch) CopyFieldsFrom(frm any) {
+	fr := frm.(*Switch)
+	sw.Button.CopyFieldsFrom(&fr.Button)
+	sw.IconOff = fr.IconOff
 }
 
-func (cb *CheckBox) OnInit() {
-	cb.ButtonHandlers()
-	cb.CheckBoxStyles()
+func (sw *Switch) OnInit() {
+	sw.ButtonHandlers()
+	sw.CheckBoxStyles()
 }
 
-func (cb *CheckBox) CheckBoxStyles() {
-	cb.AddStyles(func(s *styles.Style) {
+func (sw *Switch) CheckBoxStyles() {
+	sw.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Checkable)
-		s.SetAbilities(cb.ShortcutTooltip() != "", states.LongHoverable)
+		s.SetAbilities(sw.ShortcutTooltip() != "", states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
@@ -44,9 +45,9 @@ func (cb *CheckBox) CheckBoxStyles() {
 		s.Padding.Set(units.Dp(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(styles.BorderNone)
 
-		if cb.Parts != nil && cb.Parts.HasChildren() {
-			ist := cb.Parts.ChildByName("stack", 0).(*Layout)
-			if cb.StateIs(states.Checked) {
+		if sw.Parts != nil && sw.Parts.HasChildren() {
+			ist := sw.Parts.ChildByName("stack", 0).(*Layout)
+			if sw.StateIs(states.Checked) {
 				ist.StackTop = 0
 			} else {
 				ist.StackTop = 1
@@ -64,7 +65,7 @@ func (cb *CheckBox) CheckBoxStyles() {
 	})
 }
 
-func (cb *CheckBox) OnChildAdded(child ki.Ki) {
+func (sw *Switch) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon0": // on
@@ -93,78 +94,63 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// CheckBoxWidget interface
-
-// todo: base widget will set checked state automatically, setstyle, updaterender
-
-// // OnClicked calls the given function when the button is clicked,
-// // which is the default / standard way of activating the button
-// func (cb *CheckBox) OnClicked(fun func()) ButtonWidget {
-// 	// cb.ButtonSig.Connect(cb.This(), func(recv, send ki.Ki, sig int64, data any) {
-// 	// 	if sig == int64(ButtonToggled) {
-// 	// 		fun()
-// 	// 	}
-// 	// })
-// 	return cb.This().(ButtonWidget)
-// }
-
 // SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
 // states, and updates button
-func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
-	updt := cb.UpdateStart()
-	cb.Icon = icOn
-	cb.IconOff = icOff
-	cb.ConfigParts(cb.Sc)
+func (sw *Switch) SetIcons(icOn, icOff icons.Icon) {
+	updt := sw.UpdateStart()
+	sw.Icon = icOn
+	sw.IconOff = icOff
+	sw.ConfigParts(sw.Sc)
 	// todo: better config logic -- do layout
-	cb.UpdateEnd(updt)
+	sw.UpdateEnd(updt)
 }
 
-func (cb *CheckBox) ConfigWidget(sc *Scene) {
-	cb.SetAbilities(true, states.Checkable)
-	cb.ConfigParts(sc)
+func (sw *Switch) ConfigWidget(sc *Scene) {
+	sw.SetAbilities(true, states.Checkable)
+	sw.ConfigParts(sc)
 }
 
-func (cb *CheckBox) ConfigParts(sc *Scene) {
-	parts := cb.NewParts(LayoutHoriz)
-	cb.SetAbilities(true, states.Checkable)
-	if !cb.Icon.IsValid() {
-		cb.Icon = icons.CheckBox // fallback
+func (sw *Switch) ConfigParts(sc *Scene) {
+	parts := sw.NewParts(LayoutHoriz)
+	sw.SetAbilities(true, states.Checkable)
+	if !sw.Icon.IsValid() {
+		sw.Icon = icons.CheckBox // fallback
 	}
-	if !cb.IconOff.IsValid() {
-		cb.IconOff = icons.CheckBoxOutlineBlank
+	if !sw.IconOff.IsValid() {
+		sw.IconOff = icons.CheckBoxOutlineBlank
 	}
 	config := ki.Config{}
 	icIdx := 0 // always there
 	lbIdx := -1
 	config.Add(LayoutType, "stack")
-	if cb.Text != "" {
+	if sw.Text != "" {
 		config.Add(SpaceType, "space")
 		lbIdx = len(config)
 		config.Add(LabelType, "label")
 	}
 	mods, updt := parts.ConfigChildren(config)
 	ist := parts.Child(icIdx).(*Layout)
-	if mods || cb.NeedsRebuild() {
+	if mods || sw.NeedsRebuild() {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, IconType, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		icon.SetIcon(cb.Icon)
+		icon.SetIcon(sw.Icon)
 		icoff := ist.Child(1).(*Icon)
-		icoff.SetIcon(cb.IconOff)
+		icoff.SetIcon(sw.IconOff)
 	}
-	if cb.StateIs(states.Checked) {
+	if sw.StateIs(states.Checked) {
 		ist.StackTop = 0
 	} else {
 		ist.StackTop = 1
 	}
 	if lbIdx >= 0 {
 		lbl := parts.Child(lbIdx).(*Label)
-		if lbl.Text != cb.Text {
-			lbl.SetText(cb.Text)
+		if lbl.Text != sw.Text {
+			lbl.SetText(sw.Text)
 		}
 	}
 	if mods {
 		parts.UpdateEnd(updt)
-		cb.SetNeedsLayout(sc, updt)
+		sw.SetNeedsLayout(sc, updt)
 	}
 }

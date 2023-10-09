@@ -1920,7 +1920,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 	tfr.ConfigParts(vp)
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.CheckBox)
+	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.Switch)
 	lb.SetText("Lexical Items")
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
@@ -1939,7 +1939,7 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
-	lb := frame.ChildByName("lexb", 3).(*gi.CheckBox)
+	lb := frame.ChildByName("lexb", 3).(*gi.Switch)
 	lexItems = lb.StateIs(states.Checked)
 	return
 }

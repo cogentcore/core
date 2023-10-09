@@ -1154,25 +1154,25 @@ var CheckBoxType = gti.AddType(&gti.Type{
 		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &CheckBox{},
+	Instance: &Switch{},
 })
 
 // NewCheckBox adds a new [CheckBox] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewCheckBox(par ki.Ki, name ...string) *CheckBox {
-	return par.NewChild(CheckBoxType, name...).(*CheckBox)
+func NewCheckBox(par ki.Ki, name ...string) *Switch {
+	return par.NewChild(CheckBoxType, name...).(*Switch)
 }
 
 // KiType returns the [*gti.Type] of [CheckBox]
-func (t *CheckBox) KiType() *gti.Type {
+func (t *Switch) KiType() *gti.Type {
 	return CheckBoxType
 }
 
 // New returns a new [*CheckBox] value
-func (t *CheckBox) New() ki.Ki {
-	return &CheckBox{}
+func (t *Switch) New() ki.Ki {
+	return &Switch{}
 }
 
 // TabViewType is the [gti.Type] for [TabView]
