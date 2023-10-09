@@ -416,6 +416,15 @@ func (st *StageBase) Run() Stage {
 	}
 	st.Scene.ConfigScene() // always config prior to running
 	// st.This.InitialFocus() // not working
+	defer func() {
+		fmt.Println(st.Timeout)
+		if st.Timeout > 0 {
+			time.AfterFunc(st.Timeout, func() {
+				fmt.Println("deleting stage")
+				st.This.MainMgr().PopDeleteType(st.Type)
+			})
+		}
+	}()
 	switch st.Type {
 	case Window:
 		return st.This.AsMain().RunWindow()
