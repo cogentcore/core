@@ -328,7 +328,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Modal = false
 		st.Scrim = false
 	case Snackbar:
-		st.Modal = true
+		st.Modal = false
 		st.Timeout = SnackbarTimeout
 	case Chooser:
 		st.Modal = false
