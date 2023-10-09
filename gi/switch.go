@@ -87,7 +87,7 @@ func (sw *Switch) SwitchStyles() {
 		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
 		s.Padding.Set(units.Dp(1 * Prefs.DensityMul()))
-		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Radius = styles.BorderRadiusExtraSmall
 
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
@@ -104,13 +104,25 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 	case "icon0": // on
 		w.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
-			s.Width.SetEm(1.5)
-			s.Height.SetEm(1.5)
+			// switches need to be bigger
+			if sw.Type == SwitchSwitch {
+				s.Width.SetEm(2.5)
+				s.Height.SetEm(2.5)
+			} else {
+				s.Width.SetEm(1.5)
+				s.Height.SetEm(1.5)
+			}
 		})
 	case "icon1": // off
 		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetEm(1.5)
-			s.Height.SetEm(1.5)
+			// switches need to be bigger
+			if sw.Type == SwitchSwitch {
+				s.Width.SetEm(2.5)
+				s.Height.SetEm(2.5)
+			} else {
+				s.Width.SetEm(1.5)
+				s.Height.SetEm(1.5)
+			}
 		})
 	case "space":
 		w.AddStyles(func(s *styles.Style) {
@@ -133,6 +145,8 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	sw.Type = typ
 	switch sw.Type {
 	case SwitchSwitch:
+		// TODO: material has more advanced switches with a checkmark
+		// if they are turned on; we could implement that at some point
 		sw.IconOn = icons.ToggleOn.Fill()
 		sw.IconOff = icons.ToggleOff
 	case SwitchCheckbox:
