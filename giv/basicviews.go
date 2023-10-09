@@ -33,7 +33,7 @@ type StructValueView struct {
 }
 
 func (vv *StructValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -41,20 +41,20 @@ func (vv *StructValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(npv) {
-		ac.SetText("nil")
+		bt.SetText("nil")
 	} else {
 		opv := laser.OnePtrUnderlyingValue(vv.Value)
 		if lbler, ok := opv.Interface().(gi.Labeler); ok {
-			ac.SetText(lbler.Label())
+			bt.SetText(lbler.Label())
 		} else {
 			txt := fmt.Sprintf("%T", npv.Interface())
 			if txt == "" {
 				fmt.Printf("no label for struct!")
 			}
-			ac.SetText(txt)
+			bt.SetText(txt)
 		}
 	}
 }
@@ -63,18 +63,18 @@ func (vv *StructValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
-	// 	ac := vvv.Widget.(*gi.Action)
+	// 	ac := vvv.Widget.(*gi.Button)
 	// 	vvv.OpenDialog(ac.Scene, nil, nil)
 	// })
 	vv.UpdateWidget()
 }
 
-func (vv *StructValueView) HasAction() bool {
+func (vv *StructValueView) HasButton() bool {
 	return true
 }
 
@@ -155,7 +155,7 @@ type SliceValueView struct {
 }
 
 func (vv *SliceValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -163,7 +163,7 @@ func (vv *SliceValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	txt := ""
 	if npv.Kind() == reflect.Interface {
@@ -187,18 +187,18 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Widget) {
 		vv.ElType = laser.SliceElType(slci)
 		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-	// 	ac := vvv.Widget.(*gi.Action)
+	// 	ac := vvv.Widget.(*gi.Button)
 	// 	vvv.OpenDialog(ac.Scene, nil, nil)
 	// })
 	vv.UpdateWidget()
 }
 
-func (vv *SliceValueView) HasAction() bool {
+func (vv *SliceValueView) HasButton() bool {
 	return true
 }
 
@@ -296,7 +296,7 @@ type MapValueView struct {
 }
 
 func (vv *MapValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -304,7 +304,7 @@ func (vv *MapValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	mpi := vv.Value.Interface()
 	txt := ""
@@ -319,18 +319,18 @@ func (vv *MapValueView) UpdateWidget() {
 func (vv *MapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
-	// 	ac := vvv.Widget.(*gi.Action)
+	// 	ac := vvv.Widget.(*gi.Button)
 	// 	vvv.OpenDialog(ac.Scene, nil, nil)
 	// })
 	vv.UpdateWidget()
 }
 
-func (vv *MapValueView) HasAction() bool {
+func (vv *MapValueView) HasButton() bool {
 	return true
 }
 
@@ -457,14 +457,14 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Widget) {
 	mb.Indicator = icons.KeyboardArrowDown
 	mb.Tooltip, _ = vv.Tag("desc")
 	mb.ResetMenu()
-	mb.Menu.AddAction(gi.ActOpts{Label: "Edit"}, func(act *gi.Action) {
+	mb.Menu.AddButton(gi.ActOpts{Label: "Edit"}, func(bt *gi.Button) {
 		k := vv.KiStruct()
 		if k != nil {
 			mb := vv.Widget.(*gi.Button)
 			vv.OpenDialog(mb, nil)
 		}
 	})
-	mb.Menu.AddAction(gi.ActOpts{Label: "GoGiEditor"}, func(act *gi.Action) {
+	mb.Menu.AddButton(gi.ActOpts{Label: "GoGiEditor"}, func(bt *gi.Button) {
 		k := vv.KiStruct()
 		if k != nil {
 			GoGiEditorDialog(k)
@@ -473,7 +473,7 @@ func (vv *KiPtrValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *KiPtrValueView) HasAction() bool {
+func (vv *KiPtrValueView) HasButton() bool {
 	return true
 }
 
@@ -501,7 +501,7 @@ type BoolValueView struct {
 }
 
 func (vv *BoolValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.CheckBoxType
+	vv.WidgetTyp = gi.SwitchType
 	return vv.WidgetTyp
 }
 
