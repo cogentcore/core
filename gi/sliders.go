@@ -33,16 +33,12 @@ type SliderPositioner interface {
 	PointToRelPos(pt image.Point) image.Point
 }
 
-// todo: need a Slider interface with all the Set* methods
-// returning Slider
-
-// SliderBase has common slider functionality -- two major modes: ValThumb =
-// false is a slider with a fixed-size thumb knob, while = true has a thumb
-// that represents a value, as in a scrollbar, and the scrolling range is size
-// - thumbsize
+// Slider is a slideable widget that provides slider functionality for two major modes.
+// ValThumb = false is a slider with a fixed-size thumb knob, while = true has a thumb
+// that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
 //
 //goki:embedder
-type SliderBase struct {
+type Slider struct {
 	WidgetBase
 
 	// current value
@@ -125,8 +121,8 @@ type SliderBase struct {
 	SlideStartPos float32 `inactive:"+" desc:"underlying drag position of slider -- not subject to snapping"`
 }
 
-func (sb *SliderBase) CopyFieldsFrom(frm any) {
-	fr := frm.(*SliderBase)
+func (sb *Slider) CopyFieldsFrom(frm any) {
+	fr := frm.(*Slider)
 	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sb.Value = fr.Value
 	sb.Min = fr.Min
@@ -148,7 +144,7 @@ func (sb *SliderBase) CopyFieldsFrom(frm any) {
 	sb.Off = fr.Off
 }
 
-func (sb *SliderBase) OnInit() {
+func (sb *Slider) OnInit() {
 	sb.Step = 0.1
 	sb.PageStep = 0.2
 	sb.Max = 1.0
@@ -156,407 +152,8 @@ func (sb *SliderBase) OnInit() {
 	sb.ThumbSize = units.Em(1.5)
 	sb.ThSize = 25.0
 	sb.ThSizeReal = sb.ThSize
-}
-
-// SnapValue snaps the value to step sizes if snap option is set
-func (sb *SliderBase) SnapValue() {
-	if !sb.Snap {
-		return
-	}
-	sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
-	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
-}
-
-// SizeFromAlloc gets size from allocation
-func (sb *SliderBase) SizeFromAlloc() {
-	if sb.LayState.Alloc.Size.IsNil() {
-		return
-	}
-	spc := sb.BoxSpace()
-	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - spc.Size().Dim(sb.Dim)
-	if sb.Size <= 0 {
-		return
-	}
-	if !sb.ValThumb {
-		sb.Size -= sb.ThSize // half on each side
-	}
-	sb.UpdatePosFromValue(sb.Value)
-	sb.SlideStartPos = sb.Pos
-}
-
-// SendChanged sends a Changed message if given new value is
-// different from the existing Value.
-func (sb *SliderBase) SendChanged(e events.Event) bool {
-	if sb.Value == sb.LastValue {
-		return false
-	}
-	sb.LastValue = sb.Value
-	sb.Send(events.Change, e)
-	return true
-}
-
-// SetSliderPos sets the position of the slider at the given position in pixels,
-// and updates the corresponding Value based on that position.
-func (sb *SliderBase) SetSliderPos(pos float32) {
-	updt := sb.UpdateStart()
-	sb.Pos = pos
-	sb.Pos = mat32.Min(sb.Size, sb.Pos)
-	effSz := sb.Size
-	if sb.ValThumb {
-		sb.UpdateThumbValSize()
-		sb.Pos = mat32.Min(sb.Size-sb.ThSize, sb.Pos)
-		if sb.ThSize != sb.ThSizeReal {
-			effSz -= sb.ThSize - sb.ThSizeReal
-			effSz -= .5 // rounding errors
-		}
-	}
-	sb.Pos = mat32.Max(0, sb.Pos)
-	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
-	sb.Value = mat32.Clamp(sb.Value, sb.Min, sb.Max)
-	if sb.ValThumb {
-		sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal)
-	}
-	if sb.Snap {
-		sb.SnapValue()
-	}
-	sb.UpdatePosFromValue(sb.Value)
-	sb.UpdateEndRender(updt)
-}
-
-// SetSliderPosAction sets the position of the slider at the given position in pixels,
-// and updates the corresponding Value based on that position.
-// This version sends tracking changes
-func (sb *SliderBase) SetSliderPosAction(pos float32) {
-	sb.SetSliderPos(pos)
-	if sb.Tracking && mat32.Abs(sb.LastValue-sb.Value) > sb.TrackThr {
-		sb.SendChanged(nil)
-	}
-}
-
-// UpdatePosFromValue updates the slider position based on the current Value
-func (sb *SliderBase) UpdatePosFromValue(val float32) {
-	if sb.Size == 0.0 {
-		return
-	}
-	effSz := sb.Size
-	if sb.ValThumb {
-		sb.UpdateThumbValSize()
-		if sb.ThSize != sb.ThSizeReal {
-			effSz -= sb.ThSize - sb.ThSizeReal
-			effSz -= 0.5 // rounding errors
-		}
-	}
-	sb.Pos = effSz * (val - sb.Min) / (sb.Max - sb.Min)
-}
-
-// SetValue sets the value and updates the slider position,
-// but does not send a Change event (see Action version)
-func (sb *SliderBase) SetValue(val float32) *SliderBase {
-	updt := sb.UpdateStart()
-	val = mat32.Min(val, sb.Max)
-	if sb.ValThumb {
-		val = mat32.Min(val, sb.Max-sb.ThumbVal)
-	}
-	val = mat32.Max(val, sb.Min)
-	if sb.Value != val {
-		sb.Value = val
-		sb.UpdatePosFromValue(val)
-		sb.SlideStartPos = sb.Pos
-	}
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-// SetValueAction sets the value and updates the slider representation, and
-// emits a changed signal
-func (sb *SliderBase) SetValueAction(val float32) {
-	if sb.Value == val {
-		return
-	}
-	sb.SetValue(val)
-	sb.Send(events.Change, nil)
-}
-
-// SetThumbValue sets the thumb value to given value and updates the thumb size.
-// For scrollbar-style sliders where the thumb size represents visible range.
-func (sb *SliderBase) SetThumbValue(val float32) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.ThumbVal = mat32.Min(val, sb.Max)
-	sb.ThumbVal = mat32.Max(sb.ThumbVal, sb.Min)
-	sb.UpdateThumbValSize()
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-// UpdateThumbValSize sets thumb size as proportion of min / max (e.sb., amount
-// visible in scrollbar) -- max's out to full size
-func (sb *SliderBase) UpdateThumbValSize() {
-	sb.ThSizeReal = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
-	sb.ThSizeReal = mat32.Min(sb.ThSizeReal, 1.0)
-	sb.ThSizeReal = mat32.Max(sb.ThSizeReal, 0.0)
-	sb.ThSizeReal *= sb.Size
-	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
-}
-
-///////////////////////////////////////////////////////////
-// 	Setters
-
-func (sb *SliderBase) SetDim(dim mat32.Dims) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.Dim = dim
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetMin(val float32) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.Min = val
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetMax(val float32) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.Max = val
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetStep(val float32) *SliderBase {
-	sb.Step = val
-	return sb
-}
-
-func (sb *SliderBase) SetPageStep(val float32) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.PageStep = val
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetValThumb(valThumb bool) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.ValThumb = valThumb
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetThumbSize(val units.Value) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.ThumbSize = val
-	sb.UpdateEndRender(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetIcon(ic icons.Icon) *SliderBase {
-	updt := sb.UpdateStart()
-	sb.Icon = ic
-	// todo: actually set icon
-	sb.UpdateEndLayout(updt)
-	return sb
-}
-
-func (sb *SliderBase) SetTracking(track bool) *SliderBase {
-	sb.Tracking = track
-	return sb
-}
-
-func (sb *SliderBase) SetTrackThr(val float32) *SliderBase {
-	sb.TrackThr = val
-	return sb
-}
-
-func (sb *SliderBase) SetSnap(snap bool) *SliderBase {
-	sb.Snap = snap
-	return sb
-}
-
-func (sb *SliderBase) SetPrec(val int) *SliderBase {
-	sb.Prec = val
-	return sb
-}
-
-///////////////////////////////////////////////////////////
-// 	Events
-
-// PointToRelPos translates a point in global pixel coords into relative
-// position within node.  This satisfies the SliderPositioner interface.
-func (sb *SliderBase) PointToRelPos(pt image.Point) image.Point {
-	sb.BBoxMu.RLock()
-	defer sb.BBoxMu.RUnlock()
-	return pt.Sub(sb.ScBBox.Min)
-}
-
-func (sb *SliderBase) SliderMouse() {
-	sb.On(events.MouseDown, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
-		st := &sb.Style
-		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
-		if sb.Dim == mat32.X {
-			sb.SetSliderPosAction(float32(ed.X) - spc)
-		} else {
-			sb.SetSliderPosAction(float32(ed.Y) - spc)
-		}
-		sb.SlideStartPos = sb.Pos
-	})
-	// note: not doing anything in particular on SlideStart
-	sb.On(events.SlideMove, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		del := e.StartDelta()
-		if sb.Dim == mat32.X {
-			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.X))
-		} else {
-			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.Y))
-		}
-	})
-	sb.On(events.SlideStop, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
-		st := &sb.Style
-		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
-		if sb.Dim == mat32.X {
-			sb.SetSliderPosAction(float32(ed.X) - spc)
-		} else {
-			sb.SetSliderPosAction(float32(ed.Y) - spc)
-		}
-		sb.SlideStartPos = sb.Pos
-	})
-	sb.On(events.Scroll, func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		se := e.(*events.MouseScroll)
-		se.SetHandled()
-		if sb.Dim == mat32.X {
-			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.X)))
-		} else {
-			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.Y)))
-		}
-		sb.SlideStartPos = sb.Pos
-	})
-}
-
-func (sb *SliderBase) SliderKeys() {
-	sb.OnKeyChord(func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
-			return
-		}
-		if KeyEventTrace {
-			fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
-		}
-		kf := KeyFun(e.KeyChord())
-		switch kf {
-		case KeyFunMoveUp:
-			sb.SetValueAction(sb.Value - sb.Step)
-			e.SetHandled()
-		case KeyFunMoveLeft:
-			sb.SetValueAction(sb.Value - sb.Step)
-			e.SetHandled()
-		case KeyFunMoveDown:
-			sb.SetValueAction(sb.Value + sb.Step)
-			e.SetHandled()
-		case KeyFunMoveRight:
-			sb.SetValueAction(sb.Value + sb.Step)
-			e.SetHandled()
-		case KeyFunPageUp:
-			sb.SetValueAction(sb.Value - sb.PageStep)
-			e.SetHandled()
-		// case KeyFunPageLeft:
-		// 	sb.SetValueAction(sb.Value - sb.PageStep)
-		// 	kt.SetHandled()
-		case KeyFunPageDown:
-			sb.SetValueAction(sb.Value + sb.PageStep)
-			e.SetHandled()
-		// case KeyFunPageRight:
-		// 	sb.SetValueAction(sb.Value + sb.PageStep)
-		// 	kt.SetHandled()
-		case KeyFunHome:
-			sb.SetValueAction(sb.Min)
-			e.SetHandled()
-		case KeyFunEnd:
-			sb.SetValueAction(sb.Max)
-			e.SetHandled()
-		}
-	})
-}
-
-func (sb *SliderBase) SliderBaseHandlers() {
-	sb.WidgetHandlers()
-	sb.SliderMouse()
-	sb.SliderKeys()
-}
-
-///////////////////////////////////////////////////////////
-// 	Config
-
-func (sb *SliderBase) ConfigWidget(sc *Scene) {
-	sb.ConfigSlider(sc)
-}
-
-func (sb *SliderBase) ConfigSlider(sc *Scene) {
-	sb.ConfigParts(sc)
-}
-
-func (sb *SliderBase) ConfigParts(sc *Scene) {
-	parts := sb.NewParts(LayoutNil)
-	config := ki.Config{}
-	icIdx := -1
-	if sb.Icon.IsValid() {
-		icIdx = len(config)
-		config.Add(IconType, "icon")
-	}
-	mods, updt := parts.ConfigChildren(config)
-	if icIdx >= 0 {
-		ic := sb.Parts.Child(icIdx).(*Icon)
-		ic.SetIcon(sb.Icon)
-	}
-	if mods {
-		parts.UpdateEndLayout(updt)
-		sb.SetNeedsLayout(sc, updt)
-	}
-}
-
-// ToDots runs ToDots on unit values, to compile down to raw pixels
-func (sr *SliderBase) StyleToDots(uc *units.Context) {
-	sr.ThumbSize.ToDots(uc)
-}
-
-func (sr *SliderBase) StyleSlider(sc *Scene) {
-	sr.StyMu.Lock()
-	defer sr.StyMu.Unlock()
-
-	sr.ApplyStyleWidget(sc)
-	sr.StyleToDots(&sr.Style.UnContext)
-	if !sr.ValThumb {
-		sr.ThSize = sr.ThumbSize.Dots
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Slider
-
-// Slider is a standard value slider with a fixed-sized thumb knob -- if an
-// Icon is set, it is used for the knob of the slider
-type Slider struct {
-	SliderBase
-}
-
-func (sr *Slider) CopyFieldsFrom(frm any) {
-	fr := frm.(*Slider)
-	sr.SliderBase.CopyFieldsFrom(&fr.SliderBase)
-}
-
-func (sr *Slider) OnInit() {
-	sr.SliderBase.OnInit() // defaults
-	sr.SliderBaseHandlers()
-	sr.SliderStyles()
+	sb.SliderBaseHandlers()
+	sb.SliderStyles()
 }
 
 func (sr *Slider) SliderStyles() {
@@ -614,9 +211,385 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (sr *Slider) ConfigWidget(sc *Scene) {
-	sr.ConfigSlider(sc)
-	sr.ConfigParts(sc)
+// SnapValue snaps the value to step sizes if snap option is set
+func (sb *Slider) SnapValue() {
+	if !sb.Snap {
+		return
+	}
+	sb.Value = mat32.IntMultiple(sb.Value, sb.Step)
+	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
+}
+
+// SizeFromAlloc gets size from allocation
+func (sb *Slider) SizeFromAlloc() {
+	if sb.LayState.Alloc.Size.IsNil() {
+		return
+	}
+	spc := sb.BoxSpace()
+	sb.Size = sb.LayState.Alloc.Size.Dim(sb.Dim) - spc.Size().Dim(sb.Dim)
+	if sb.Size <= 0 {
+		return
+	}
+	if !sb.ValThumb {
+		sb.Size -= sb.ThSize // half on each side
+	}
+	sb.UpdatePosFromValue(sb.Value)
+	sb.SlideStartPos = sb.Pos
+}
+
+// SendChanged sends a Changed message if given new value is
+// different from the existing Value.
+func (sb *Slider) SendChanged(e events.Event) bool {
+	if sb.Value == sb.LastValue {
+		return false
+	}
+	sb.LastValue = sb.Value
+	sb.Send(events.Change, e)
+	return true
+}
+
+// SetSliderPos sets the position of the slider at the given position in pixels,
+// and updates the corresponding Value based on that position.
+func (sb *Slider) SetSliderPos(pos float32) {
+	updt := sb.UpdateStart()
+	sb.Pos = pos
+	sb.Pos = mat32.Min(sb.Size, sb.Pos)
+	effSz := sb.Size
+	if sb.ValThumb {
+		sb.UpdateThumbValSize()
+		sb.Pos = mat32.Min(sb.Size-sb.ThSize, sb.Pos)
+		if sb.ThSize != sb.ThSizeReal {
+			effSz -= sb.ThSize - sb.ThSizeReal
+			effSz -= .5 // rounding errors
+		}
+	}
+	sb.Pos = mat32.Max(0, sb.Pos)
+	sb.Value = mat32.Truncate(sb.Min+(sb.Max-sb.Min)*(sb.Pos/effSz), sb.Prec)
+	sb.Value = mat32.Clamp(sb.Value, sb.Min, sb.Max)
+	if sb.ValThumb {
+		sb.Value = mat32.Min(sb.Value, sb.Max-sb.ThumbVal)
+	}
+	if sb.Snap {
+		sb.SnapValue()
+	}
+	sb.UpdatePosFromValue(sb.Value)
+	sb.UpdateEndRender(updt)
+}
+
+// SetSliderPosAction sets the position of the slider at the given position in pixels,
+// and updates the corresponding Value based on that position.
+// This version sends tracking changes
+func (sb *Slider) SetSliderPosAction(pos float32) {
+	sb.SetSliderPos(pos)
+	if sb.Tracking && mat32.Abs(sb.LastValue-sb.Value) > sb.TrackThr {
+		sb.SendChanged(nil)
+	}
+}
+
+// UpdatePosFromValue updates the slider position based on the current Value
+func (sb *Slider) UpdatePosFromValue(val float32) {
+	if sb.Size == 0.0 {
+		return
+	}
+	effSz := sb.Size
+	if sb.ValThumb {
+		sb.UpdateThumbValSize()
+		if sb.ThSize != sb.ThSizeReal {
+			effSz -= sb.ThSize - sb.ThSizeReal
+			effSz -= 0.5 // rounding errors
+		}
+	}
+	sb.Pos = effSz * (val - sb.Min) / (sb.Max - sb.Min)
+}
+
+// SetValue sets the value and updates the slider position,
+// but does not send a Change event (see Action version)
+func (sb *Slider) SetValue(val float32) *Slider {
+	updt := sb.UpdateStart()
+	val = mat32.Min(val, sb.Max)
+	if sb.ValThumb {
+		val = mat32.Min(val, sb.Max-sb.ThumbVal)
+	}
+	val = mat32.Max(val, sb.Min)
+	if sb.Value != val {
+		sb.Value = val
+		sb.UpdatePosFromValue(val)
+		sb.SlideStartPos = sb.Pos
+	}
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+// SetValueAction sets the value and updates the slider representation, and
+// emits a changed signal
+func (sb *Slider) SetValueAction(val float32) {
+	if sb.Value == val {
+		return
+	}
+	sb.SetValue(val)
+	sb.Send(events.Change, nil)
+}
+
+// SetThumbValue sets the thumb value to given value and updates the thumb size.
+// For scrollbar-style sliders where the thumb size represents visible range.
+func (sb *Slider) SetThumbValue(val float32) *Slider {
+	updt := sb.UpdateStart()
+	sb.ThumbVal = mat32.Min(val, sb.Max)
+	sb.ThumbVal = mat32.Max(sb.ThumbVal, sb.Min)
+	sb.UpdateThumbValSize()
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+// UpdateThumbValSize sets thumb size as proportion of min / max (e.sb., amount
+// visible in scrollbar) -- max's out to full size
+func (sb *Slider) UpdateThumbValSize() {
+	sb.ThSizeReal = ((sb.ThumbVal - sb.Min) / (sb.Max - sb.Min))
+	sb.ThSizeReal = mat32.Min(sb.ThSizeReal, 1.0)
+	sb.ThSizeReal = mat32.Max(sb.ThSizeReal, 0.0)
+	sb.ThSizeReal *= sb.Size
+	sb.ThSize = mat32.Max(sb.ThSizeReal, SliderMinThumbSize)
+}
+
+///////////////////////////////////////////////////////////
+// 	Setters
+
+func (sb *Slider) SetDim(dim mat32.Dims) *Slider {
+	updt := sb.UpdateStart()
+	sb.Dim = dim
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetMin(val float32) *Slider {
+	updt := sb.UpdateStart()
+	sb.Min = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetMax(val float32) *Slider {
+	updt := sb.UpdateStart()
+	sb.Max = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetStep(val float32) *Slider {
+	sb.Step = val
+	return sb
+}
+
+func (sb *Slider) SetPageStep(val float32) *Slider {
+	updt := sb.UpdateStart()
+	sb.PageStep = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetValThumb(valThumb bool) *Slider {
+	updt := sb.UpdateStart()
+	sb.ValThumb = valThumb
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetThumbSize(val units.Value) *Slider {
+	updt := sb.UpdateStart()
+	sb.ThumbSize = val
+	sb.UpdateEndRender(updt)
+	return sb
+}
+
+func (sb *Slider) SetIcon(ic icons.Icon) *Slider {
+	updt := sb.UpdateStart()
+	sb.Icon = ic
+	// todo: actually set icon
+	sb.UpdateEndLayout(updt)
+	return sb
+}
+
+func (sb *Slider) SetTracking(track bool) *Slider {
+	sb.Tracking = track
+	return sb
+}
+
+func (sb *Slider) SetTrackThr(val float32) *Slider {
+	sb.TrackThr = val
+	return sb
+}
+
+func (sb *Slider) SetSnap(snap bool) *Slider {
+	sb.Snap = snap
+	return sb
+}
+
+func (sb *Slider) SetPrec(val int) *Slider {
+	sb.Prec = val
+	return sb
+}
+
+///////////////////////////////////////////////////////////
+// 	Events
+
+// PointToRelPos translates a point in global pixel coords into relative
+// position within node.  This satisfies the SliderPositioner interface.
+func (sb *Slider) PointToRelPos(pt image.Point) image.Point {
+	sb.BBoxMu.RLock()
+	defer sb.BBoxMu.RUnlock()
+	return pt.Sub(sb.ScBBox.Min)
+}
+
+func (sb *Slider) SliderMouse() {
+	sb.On(events.MouseDown, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := &sb.Style
+		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		if sb.Dim == mat32.X {
+			sb.SetSliderPosAction(float32(ed.X) - spc)
+		} else {
+			sb.SetSliderPosAction(float32(ed.Y) - spc)
+		}
+		sb.SlideStartPos = sb.Pos
+	})
+	// note: not doing anything in particular on SlideStart
+	sb.On(events.SlideMove, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		del := e.StartDelta()
+		if sb.Dim == mat32.X {
+			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.X))
+		} else {
+			sb.SetSliderPosAction(sb.SlideStartPos + float32(del.Y))
+		}
+	})
+	sb.On(events.SlideStop, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		ed := sb.This().(SliderPositioner).PointToRelPos(e.Pos())
+		st := &sb.Style
+		spc := st.TotalMargin().Pos().Dim(sb.Dim) + 0.5*sb.ThSizeReal
+		if sb.Dim == mat32.X {
+			sb.SetSliderPosAction(float32(ed.X) - spc)
+		} else {
+			sb.SetSliderPosAction(float32(ed.Y) - spc)
+		}
+		sb.SlideStartPos = sb.Pos
+	})
+	sb.On(events.Scroll, func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		se := e.(*events.MouseScroll)
+		se.SetHandled()
+		if sb.Dim == mat32.X {
+			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.X)))
+		} else {
+			sb.SetSliderPosAction(sb.SlideStartPos - float32(se.DimDelta(mat32.Y)))
+		}
+		sb.SlideStartPos = sb.Pos
+	})
+}
+
+func (sb *Slider) SliderKeys() {
+	sb.OnKeyChord(func(e events.Event) {
+		if sb.StateIs(states.Disabled) {
+			return
+		}
+		if KeyEventTrace {
+			fmt.Printf("SliderBase KeyInput: %v\n", sb.Path())
+		}
+		kf := KeyFun(e.KeyChord())
+		switch kf {
+		case KeyFunMoveUp:
+			sb.SetValueAction(sb.Value - sb.Step)
+			e.SetHandled()
+		case KeyFunMoveLeft:
+			sb.SetValueAction(sb.Value - sb.Step)
+			e.SetHandled()
+		case KeyFunMoveDown:
+			sb.SetValueAction(sb.Value + sb.Step)
+			e.SetHandled()
+		case KeyFunMoveRight:
+			sb.SetValueAction(sb.Value + sb.Step)
+			e.SetHandled()
+		case KeyFunPageUp:
+			sb.SetValueAction(sb.Value - sb.PageStep)
+			e.SetHandled()
+		// case KeyFunPageLeft:
+		// 	sb.SetValueAction(sb.Value - sb.PageStep)
+		// 	kt.SetHandled()
+		case KeyFunPageDown:
+			sb.SetValueAction(sb.Value + sb.PageStep)
+			e.SetHandled()
+		// case KeyFunPageRight:
+		// 	sb.SetValueAction(sb.Value + sb.PageStep)
+		// 	kt.SetHandled()
+		case KeyFunHome:
+			sb.SetValueAction(sb.Min)
+			e.SetHandled()
+		case KeyFunEnd:
+			sb.SetValueAction(sb.Max)
+			e.SetHandled()
+		}
+	})
+}
+
+func (sb *Slider) SliderBaseHandlers() {
+	sb.WidgetHandlers()
+	sb.SliderMouse()
+	sb.SliderKeys()
+}
+
+///////////////////////////////////////////////////////////
+// 	Config
+
+func (sb *Slider) ConfigWidget(sc *Scene) {
+	sb.ConfigSlider(sc)
+}
+
+func (sb *Slider) ConfigSlider(sc *Scene) {
+	sb.ConfigParts(sc)
+}
+
+func (sb *Slider) ConfigParts(sc *Scene) {
+	parts := sb.NewParts(LayoutNil)
+	config := ki.Config{}
+	icIdx := -1
+	if sb.Icon.IsValid() {
+		icIdx = len(config)
+		config.Add(IconType, "icon")
+	}
+	mods, updt := parts.ConfigChildren(config)
+	if icIdx >= 0 {
+		ic := sb.Parts.Child(icIdx).(*Icon)
+		ic.SetIcon(sb.Icon)
+	}
+	if mods {
+		parts.UpdateEndLayout(updt)
+		sb.SetNeedsLayout(sc, updt)
+	}
+}
+
+// ToDots runs ToDots on unit values, to compile down to raw pixels
+func (sr *Slider) StyleToDots(uc *units.Context) {
+	sr.ThumbSize.ToDots(uc)
+}
+
+func (sr *Slider) StyleSlider(sc *Scene) {
+	sr.StyMu.Lock()
+	defer sr.StyMu.Unlock()
+
+	sr.ApplyStyleWidget(sc)
+	sr.StyleToDots(&sr.Style.UnContext)
+	if !sr.ValThumb {
+		sr.ThSize = sr.ThumbSize.Dots
+	}
 }
 
 func (sr *Slider) ApplyStyle(sc *Scene) {
