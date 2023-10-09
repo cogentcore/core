@@ -240,7 +240,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("spinbox value changed to", sb.Value)
 	})
 
-	cb := gi.NewComboBox(txrow, "combo").
+	cb := gi.NewComboBox(txrow, "combo").SetType(gi.ComboBoxOutlined).SetEditable(true).
 		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	cb.On(events.Change, func(e events.Event) {
