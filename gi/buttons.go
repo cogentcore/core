@@ -24,10 +24,13 @@ import (
 
 // todo: autoRepeat, autoRepeatInterval, autoRepeatDelay
 
-// ButtonBase has common button functionality for all buttons, including
-// Button, Action, MenuButton, CheckBox, etc
-type ButtonBase struct {
+// Button is a pressable button with text, an icon, an indicator, a shortcut,
+// and/or a menu. The standard behavior is to register a click event with OnClick(...).
+type Button struct {
 	WidgetBase
+
+	// the type of button
+	Type ButtonTypes `desc:"the type of button"`
 
 	// label for the button -- if blank then no label is presented
 	Text string `xml:"text" desc:"label for the button -- if blank then no label is presented"`
@@ -48,13 +51,14 @@ type ButtonBase struct {
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
 }
 
-func (bb *ButtonBase) CopyFieldsFrom(frm any) {
-	fr, ok := frm.(*ButtonBase)
+func (bb *Button) CopyFieldsFrom(frm any) {
+	fr, ok := frm.(*Button)
 	if !ok {
 		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", bb.KiType().Name)
 		return
 	}
 	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	bb.Type = fr.Type
 	bb.Text = fr.Text
 	bb.Icon = fr.Icon
 	bb.Indicator = fr.Indicator
@@ -74,23 +78,23 @@ const (
 // see menus.go for MakeMenuFunc, etc
 
 // SetCheckable sets whether this button is checkable
-func (bb *ButtonBase) SetCheckable(checkable bool) {
+func (bb *Button) SetCheckable(checkable bool) {
 	bb.Style.SetAbilities(checkable, states.Checkable)
 }
 
 // SetAsMenu ensures that this functions as a menu even before menu items are added
-func (bb *ButtonBase) SetAsMenu() {
+func (bb *Button) SetAsMenu() {
 	bb.SetFlag(true, ButtonFlagMenu)
 }
 
 // SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
 // or a menu function then it will still behave as a menu
-func (bb *ButtonBase) SetAsButton() {
+func (bb *Button) SetAsButton() {
 	bb.SetFlag(false, ButtonFlagMenu)
 }
 
 // LabelWidget returns the label widget if present
-func (bb *ButtonBase) LabelWidget() *Label {
+func (bb *Button) LabelWidget() *Label {
 	lbi := bb.Parts.ChildByName("label")
 	if lbi == nil {
 		return nil
@@ -99,7 +103,7 @@ func (bb *ButtonBase) LabelWidget() *Label {
 }
 
 // IconWidget returns the iconl widget if present
-func (bb *ButtonBase) IconWidget() *Icon {
+func (bb *Button) IconWidget() *Icon {
 	ici := bb.Parts.ChildByName("icon")
 	if ici == nil {
 		return nil
@@ -110,7 +114,7 @@ func (bb *ButtonBase) IconWidget() *Icon {
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
-func (bb *ButtonBase) SetText(txt string) ButtonWidget {
+func (bb *Button) SetText(txt string) ButtonWidget {
 	if bb.Text == txt {
 		return bb.This().(ButtonWidget)
 	}
@@ -133,7 +137,7 @@ func (bb *ButtonBase) SetText(txt string) ButtonWidget {
 // updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
-func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
+func (bb *Button) SetIcon(iconName icons.Icon) ButtonWidget {
 	if bb.Icon == iconName {
 		return bb.This().(ButtonWidget)
 	}
@@ -154,13 +158,13 @@ func (bb *ButtonBase) SetIcon(iconName icons.Icon) ButtonWidget {
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
 // explicit ButtonFlagMenu has been set
-func (bb *ButtonBase) HasMenu() bool {
+func (bb *Button) HasMenu() bool {
 	return bb.MakeMenuFunc != nil || len(bb.Menu) > 0
 }
 
 // OpenMenu will open any menu associated with this element -- returns true if
 // menu opened, false if not
-func (bb *ButtonBase) OpenMenu() bool {
+func (bb *Button) OpenMenu() bool {
 	if !bb.HasMenu() {
 		return false
 	}
@@ -180,7 +184,7 @@ func (bb *ButtonBase) OpenMenu() bool {
 }
 
 // ResetMenu removes all items in the menu
-func (bb *ButtonBase) ResetMenu() {
+func (bb *Button) ResetMenu() {
 	bb.Menu = make(MenuActions, 0, 10)
 }
 
@@ -189,7 +193,7 @@ func (bb *ButtonBase) ResetMenu() {
 // (as long as it is not explicitly set to [icons.None]);
 // returns the index in Parts of the indicator object, which is named "indicator";
 // an "ind-stretch" is added as well to put on the right by default.
-func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.Config, defOn bool) int {
+func (bb *Button) ConfigPartsAddIndicator(config *ki.Config, defOn bool) int {
 	needInd := !bb.Indicator.IsNil() || (defOn && bb.Indicator != icons.None)
 	if !needInd {
 		return -1
@@ -201,7 +205,7 @@ func (bb *ButtonBase) ConfigPartsAddIndicator(config *ki.Config, defOn bool) int
 	return indIdx
 }
 
-func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
+func (bb *Button) ConfigPartsIndicator(indIdx int) {
 	if indIdx < 0 {
 		return
 	}
@@ -216,7 +220,7 @@ func (bb *ButtonBase) ConfigPartsIndicator(indIdx int) {
 //////////////////////////////////////////////////////////////////
 //		Events
 
-func (bb *ButtonBase) ClickMenu() {
+func (bb *Button) ClickMenu() {
 	bb.On(events.Click, func(e events.Event) {
 		if bb.StateIs(states.Disabled) {
 			return
@@ -227,7 +231,7 @@ func (bb *ButtonBase) ClickMenu() {
 
 // ClickOnEnterSpace adds key event handler for Enter or Space
 // to generate a Click action
-func (bb *ButtonBase) ClickOnEnterSpace() {
+func (bb *Button) ClickOnEnterSpace() {
 	bb.On(events.KeyChord, func(e events.Event) {
 		if bb.StateIs(states.Disabled) {
 			return
@@ -247,7 +251,7 @@ func (bb *ButtonBase) ClickOnEnterSpace() {
 
 // ShortcutTooltip returns the effective tooltip of the button
 // with any keyboard shortcut included.
-func (bb *ButtonBase) ShortcutTooltip() string {
+func (bb *Button) ShortcutTooltip() string {
 	if bb.Tooltip == "" && bb.Shortcut == "" {
 		return ""
 	}
@@ -261,7 +265,7 @@ func (bb *ButtonBase) ShortcutTooltip() string {
 	return res
 }
 
-func (bb *ButtonBase) LongHoverTooltip() {
+func (bb *Button) LongHoverTooltip() {
 	bb.On(events.LongHoverStart, func(e events.Event) {
 		if bb.StateIs(states.Disabled) {
 			return
@@ -275,7 +279,7 @@ func (bb *ButtonBase) LongHoverTooltip() {
 	})
 }
 
-func (bb *ButtonBase) ButtonBaseHandlers() {
+func (bb *Button) ButtonBaseHandlers() {
 	bb.WidgetHandlers()
 	bb.LongHoverTooltip()
 	bb.ClickMenu()
@@ -292,7 +296,7 @@ type ButtonWidget interface {
 
 	// AsButtonBase gets the button base for most basic functions -- reduces
 	// interface size.
-	AsButtonBase() *ButtonBase
+	AsButtonBase() *Button
 
 	// ConfigParts configures the parts of the button -- called during init
 	// and style.
@@ -313,22 +317,22 @@ type ButtonWidget interface {
 ///////////////////////////////////////////////////////////
 // ButtonBase Widget and ButtonwWidget interface
 
-func AsButtonBase(k ki.Ki) *ButtonBase {
+func AsButtonBase(k ki.Ki) *Button {
 	if ac, ok := k.(ButtonWidget); ok {
 		return ac.AsButtonBase()
 	}
 	return nil
 }
 
-func (bb *ButtonBase) AsButtonBase() *ButtonBase {
+func (bb *Button) AsButtonBase() *Button {
 	return bb
 }
 
-func (bb *ButtonBase) ConfigWidget(sc *Scene) {
+func (bb *Button) ConfigWidget(sc *Scene) {
 	bb.This().(ButtonWidget).ConfigParts(sc)
 }
 
-func (bb *ButtonBase) ConfigParts(sc *Scene) {
+func (bb *Button) ConfigParts(sc *Scene) {
 	parts := bb.NewParts(LayoutHoriz)
 	if bb.HasMenu() && bb.Icon.IsNil() {
 		bb.Icon = icons.Menu
@@ -348,7 +352,7 @@ func (bb *ButtonBase) ConfigParts(sc *Scene) {
 
 // ConfigPartsIconLabel adds to config to create parts, of icon
 // and label left-to right in a row, based on whether items are nil or empty
-func (bb *ButtonBase) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
+func (bb *Button) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, txt string) (icIdx, lbIdx int) {
 	icIdx = -1
 	lbIdx = -1
 	if icnm.IsValid() {
@@ -367,7 +371,7 @@ func (bb *ButtonBase) ConfigPartsIconLabel(config *ki.Config, icnm icons.Icon, t
 
 // ConfigPartsSetIconLabel sets the icon and text values in parts, and get
 // part style props, using given props if not set in object props
-func (bb *ButtonBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
+func (bb *Button) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lbIdx int) {
 	if icIdx >= 0 {
 		ic := bb.Parts.Child(icIdx).(*Icon)
 		ic.SetIcon(icnm)
@@ -381,26 +385,26 @@ func (bb *ButtonBase) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx
 	}
 }
 
-func (bb *ButtonBase) ApplyStyle(sc *Scene) {
+func (bb *Button) ApplyStyle(sc *Scene) {
 	bb.ApplyStyleWidget(sc)
 	if bb.Menu != nil {
 		bb.Menu.SetShortcuts(bb.EventMgr())
 	}
 }
 
-func (bb *ButtonBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+func (bb *Button) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	bb.DoLayoutBase(sc, parBBox, iter)
 	bb.DoLayoutParts(sc, parBBox, iter)
 	return bb.DoLayoutChildren(sc, iter)
 }
 
-func (bb *ButtonBase) RenderButton(sc *Scene) {
+func (bb *Button) RenderButton(sc *Scene) {
 	rs, _, st := bb.RenderLock(sc)
 	bb.RenderStdBox(sc, st)
 	bb.RenderUnlock(rs)
 }
 
-func (bb *ButtonBase) Render(sc *Scene) {
+func (bb *Button) Render(sc *Scene) {
 	if bb.PushBounds(sc) {
 		bb.RenderButton(sc)
 		bb.RenderParts(sc)
@@ -409,24 +413,10 @@ func (bb *ButtonBase) Render(sc *Scene) {
 	}
 }
 
-func (bb *ButtonBase) Destroy() {
+func (bb *Button) Destroy() {
 	if bb.Menu != nil {
 		bb.Menu.DeleteShortcuts(bb.EventMgr())
 	}
-}
-
-///////////////////////////////////////////////////////////
-// Button
-
-// Button is a standard standalone button.
-// Do On(events.Click) to register a function to execute when pressed.
-//
-//goki:embedder
-type Button struct {
-	ButtonBase
-
-	// the type of button (default, primary, secondary, etc)
-	Type ButtonTypes `desc:"the type of button (default, primary, secondary, etc)"`
 }
 
 // ButtonTypes is an enum containing the
@@ -551,11 +541,6 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignBottom
 		})
 	}
-}
-
-func (bt *Button) CopyFieldsFrom(frm any) {
-	fr := frm.(*Button)
-	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
 // SetType sets the styling type of the button

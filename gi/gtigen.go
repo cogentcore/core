@@ -279,25 +279,25 @@ var ButtonBaseType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ButtonBase{},
+	Instance: &Button{},
 })
 
 // NewButtonBase adds a new [ButtonBase] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBase(par ki.Ki, name ...string) *ButtonBase {
-	return par.NewChild(ButtonBaseType, name...).(*ButtonBase)
+func NewButtonBase(par ki.Ki, name ...string) *Button {
+	return par.NewChild(ButtonBaseType, name...).(*Button)
 }
 
 // KiType returns the [*gti.Type] of [ButtonBase]
-func (t *ButtonBase) KiType() *gti.Type {
+func (t *Button) KiType() *gti.Type {
 	return ButtonBaseType
 }
 
 // New returns a new [*ButtonBase] value
-func (t *ButtonBase) New() ki.Ki {
-	return &ButtonBase{}
+func (t *Button) New() ki.Ki {
+	return &Button{}
 }
 
 // ButtonType is the [gti.Type] for [Button]
