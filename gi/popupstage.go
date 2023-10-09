@@ -6,6 +6,7 @@ package gi
 
 import (
 	"log/slog"
+	"time"
 
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -151,6 +152,13 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	sc.FitInWindow(ms.Geom) // does resize
 
 	sc.EventMgr.InitialFocus()
+
+	// TODO(kai): implement timeout for other types or only allow it for popup stages
+	if st.Timeout > 0 {
+		time.AfterFunc(st.Timeout, func() {
+			st.Main.PopupMgr.PopDeleteType(st.Type)
+		})
+	}
 
 	return st
 }
