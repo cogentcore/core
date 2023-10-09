@@ -39,7 +39,7 @@ type Labeler interface {
 }
 
 // ToLabel returns the gui-appropriate label for an item, using the Labeler
-// interface if it is defined, and falling back on kit.ToString converter
+// interface if it is defined, and falling back on [laser.ToString] converter
 // otherwise -- also contains label impls for basic interface types for which
 // we cannot easily define the Labeler interface
 func ToLabel(it any) string {

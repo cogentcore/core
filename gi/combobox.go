@@ -6,6 +6,7 @@ package gi
 
 import (
 	"fmt"
+	"log/slog"
 	"sort"
 	"strconv"
 	"unicode/utf8"
@@ -169,6 +170,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		} else {
 			text.Type = TextFieldOutlined
 		}
+		cb.TextFieldHandlers(text)
 		text.AddStyles(func(s *styles.Style) {
 			s.Border.Style.Set(styles.BorderNone)
 			s.Border.Width.Set()
@@ -604,7 +606,19 @@ func (cb *ComboBox) ComboBoxKeys() {
 
 func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
 	tf.On(events.Change, func(e events.Event) {
-		cb.ShowCurVal()
+		text := tf.Text()
+		fmt.Println("got text", text)
+		err := laser.SetRobust(&cb.CurVal, text)
+		if err != nil {
+			// TODO: use validation
+			slog.Error("invalid combobox value", "value", text, "err", err)
+			return
+		}
+		fmt.Printf("new cv %T\t%#v\n", cb.CurVal, cb.CurVal)
+		// need to call this to get it apply the changes
+		cb.SetCurVal(cb.CurVal)
+		// TODO: should we support a strict option that rejects
+		// values not already in the list?
 	})
 }
 
@@ -619,7 +633,7 @@ func (cb *ComboBox) CompleteMatch(data any, text string, posLn, posCh int) (md c
 			tooltip = cb.Tooltips[idx]
 		}
 		comps[idx] = complete.Completion{
-			Text: laser.ToString(item),
+			Text: ToLabel(item),
 			Desc: tooltip,
 		}
 	}

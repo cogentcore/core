@@ -313,7 +313,7 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 		text := tf.Text()
 		val, err := sb.StringToVal(text)
 		if err != nil {
-			// TODO: add validation message
+			// TODO: use validation
 			slog.Error("invalid spinbox value", "value", text, "err", err)
 			return
 		}
