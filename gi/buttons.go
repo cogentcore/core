@@ -43,11 +43,11 @@ type Button struct {
 	// [view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
 
-	// optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
-	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
+	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
+	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 
-	// the menu items for this menu -- typically add Action elements for menus, along with separators
-	Menu Menu `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	// the menu items for this menu -- typically add Button elements for menus, along with separators
+	Menu Menu `desc:"the menu items for this menu -- typically add Button elements for menus, along with separators"`
 
 	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
@@ -71,7 +71,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Icon = fr.Icon
 	bt.Indicator = fr.Indicator
 	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in actions; todo: could do more elaborate copy etc but is it worth it?
+	bt.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in buttons; todo: could do more elaborate copy etc but is it worth it?
 	bt.MakeMenuFunc = fr.MakeMenuFunc
 	bt.Data = fr.Data
 }
@@ -578,6 +578,6 @@ func (bt *Button) UpdateButtons() {
 		bt.UpdateFunc(bt)
 	}
 	if bt.Menu != nil {
-		bt.Menu.UpdateActions()
+		bt.Menu.UpdateButtons()
 	}
 }
