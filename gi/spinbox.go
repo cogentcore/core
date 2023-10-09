@@ -301,13 +301,14 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 		sb.SetSelected(!sb.StateIs(states.Selected))
 		sb.Send(events.Select, e)
 	})
-	tf.On(events.Click, func(e events.Event) {
-		if sb.IsDisabled() {
-			return
-		}
-		sb.SetState(true, states.Focused)
-		sb.HandleEvent(e)
-	})
+	// TODO(kai): improve spin box focus handling
+	// tf.On(events.Click, func(e events.Event) {
+	// 	if sb.IsDisabled() {
+	// 		return
+	// 	}
+	// 	sb.SetState(true, states.Focused)
+	// 	sb.HandleEvent(e)
+	// })
 	tf.On(events.Change, func(e events.Event) {
 		text := tf.Text()
 		val, err := sb.StringToVal(text)
