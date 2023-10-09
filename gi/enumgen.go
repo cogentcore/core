@@ -2155,6 +2155,112 @@ func (i *ScFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _SliderTypesValues = []SliderTypes{0, 1}
+
+// SliderTypesN is the highest valid value
+// for type SliderTypes, plus one.
+const SliderTypesN SliderTypes = 2
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _SliderTypesNoOp() {
+	var x [1]struct{}
+	_ = x[SliderSlider-(0)]
+	_ = x[SliderScrollbar-(1)]
+}
+
+var _SliderTypesNameToValueMap = map[string]SliderTypes{
+	`Slider`:    0,
+	`slider`:    0,
+	`Scrollbar`: 1,
+	`scrollbar`: 1,
+}
+
+var _SliderTypesDescMap = map[SliderTypes]string{
+	0: `SliderSlider indicates a standard, user-controllable slider for setting a numeric value`,
+	1: `SliderScrollbar indicates a slider acting as a scrollbar for content`,
+}
+
+var _SliderTypesMap = map[SliderTypes]string{
+	0: `Slider`,
+	1: `Scrollbar`,
+}
+
+// String returns the string representation
+// of this SliderTypes value.
+func (i SliderTypes) String() string {
+	if str, ok := _SliderTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the SliderTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *SliderTypes) SetString(s string) error {
+	if val, ok := _SliderTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _SliderTypesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type SliderTypes")
+}
+
+// Int64 returns the SliderTypes value as an int64.
+func (i SliderTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the SliderTypes value from an int64.
+func (i *SliderTypes) SetInt64(in int64) {
+	*i = SliderTypes(in)
+}
+
+// Desc returns the description of the SliderTypes value.
+func (i SliderTypes) Desc() string {
+	if str, ok := _SliderTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// SliderTypesValues returns all possible values
+// for the type SliderTypes.
+func SliderTypesValues() []SliderTypes {
+	return _SliderTypesValues
+}
+
+// Values returns all possible values
+// for the type SliderTypes.
+func (i SliderTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_SliderTypesValues))
+	for i, d := range _SliderTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type SliderTypes.
+func (i SliderTypes) IsValid() bool {
+	_, ok := _SliderTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i SliderTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *SliderTypes) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _StageTypesValues = []StageTypes{0, 1, 2, 3, 4, 5, 6}
 
 // StageTypesN is the highest valid value
