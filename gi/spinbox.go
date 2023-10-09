@@ -107,8 +107,8 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			s.SetMinPrefWidth(units.Em(3))
 		})
 	case "up":
-		up := w.(*Action)
-		up.Type = ActionParts
+		up := w.(*Button)
+		up.Type = ButtonAction
 		if sb.UpIcon.IsNil() {
 			sb.UpIcon = icons.Add
 		}
@@ -122,8 +122,8 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			s.Font.Size.SetDp(18)
 		})
 	case "down":
-		down := w.(*Action)
-		down.Type = ActionParts
+		down := w.(*Button)
+		down.Type = ButtonAction
 		if sb.DownIcon.IsNil() {
 			sb.DownIcon = icons.Remove
 		}
