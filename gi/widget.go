@@ -72,8 +72,11 @@ type Widget interface {
 	// AbilityIs returns true if given Style.Abilities flag is set
 	AbilityIs(flag enums.BitFlag) bool
 
-	// SetState sets given Style.State flags
+	// SetState sets the given [styles.Style.State] flags
 	SetState(on bool, state ...enums.BitFlag)
+
+	// SetAbilities sets the given [styles.Style.Abilities] flags
+	SetAbilities(on bool, able ...enums.BitFlag)
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
@@ -343,9 +346,14 @@ func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
 	return wb.Style.Abilities.HasFlag(flag)
 }
 
-// SetState sets the Style.State flags
+// SetState sets the given [styles.Style.State] flags
 func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) {
 	wb.Style.State.SetFlag(on, state...)
+}
+
+// SetAbilities sets the [styles.Style.Abilities] flags
+func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) {
+	wb.Style.Abilities.SetFlag(on, able...)
 }
 
 func (wb *WidgetBase) SetTooltip(tt string) Widget {

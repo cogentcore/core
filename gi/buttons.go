@@ -77,11 +77,6 @@ const (
 
 // see menus.go for MakeMenuFunc, etc
 
-// SetCheckable sets whether this button is checkable
-func (bb *Button) SetCheckable(checkable bool) {
-	bb.Style.SetAbilities(checkable, states.Checkable)
-}
-
 // SetAsMenu ensures that this functions as a menu even before menu items are added
 func (bb *Button) SetAsMenu() {
 	bb.SetFlag(true, ButtonFlagMenu)
@@ -102,7 +97,7 @@ func (bb *Button) LabelWidget() *Label {
 	return lbi.(*Label)
 }
 
-// IconWidget returns the iconl widget if present
+// IconWidget returns the icon widget if present
 func (bb *Button) IconWidget() *Icon {
 	ici := bb.Parts.ChildByName("icon")
 	if ici == nil {
