@@ -463,7 +463,7 @@ type ValueView interface {
 	// for opening the dialog, and function is called with the the relevant dialog,
 	// so that the caller can execute its own actions based on the user
 	// hitting Ok or Cancel.
-	OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage))
+	OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog))
 
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
@@ -651,7 +651,7 @@ func (vv *ValueViewBase) HasAction() bool {
 	return false
 }
 
-func (vv *ValueViewBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *ValueViewBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 }
 
 func (vv *ValueViewBase) Val() reflect.Value {
@@ -689,7 +689,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 					gi.ChoiceDialog(vp,
 						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
 						[]string{"Cancel Change", "Overwrite"},
-						func(dlg *gi.DialogStage) {
+						func(dlg *gi.Dialog) {
 							switch sig {
 							case 0:
 								if vp != nil {
@@ -940,7 +940,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(func(dlg *gi.DialogStage) {
+	tf.TextFieldSig.ConnectOnly(func(dlg *gi.Dialog) {
 		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
 			vvv, _ := recv.Embed(TypeValueViewBase).(*ValueViewBase)
 			tf := send.(*gi.TextField)
@@ -1118,7 +1118,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Action)
-	ac.ActionSig.ConnectOnly(func(dlg *gi.DialogStage) {
+	ac.ActionSig.ConnectOnly(func(dlg *gi.Dialog) {
 		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
 		ac := vvv.Widget.(*gi.Action)
 		vvv.OpenDialog(ac.Scene, nil, nil)
@@ -1130,7 +1130,7 @@ func (vv *VersCtrlValueView) HasAction() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
+func (vv *VersCtrlValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

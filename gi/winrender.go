@@ -328,7 +328,7 @@ func (w *RenderWin) GatherScenes() bool {
 	winIdx := 0
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i).AsMain()
-		if st.Type == Window {
+		if st.Type == WindowStage {
 			if WinRenderTrace {
 				fmt.Println("GatherScenes: main Window:", st.String())
 			}

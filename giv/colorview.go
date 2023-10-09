@@ -605,7 +605,7 @@ func (vv *ColorValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -618,7 +618,7 @@ func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage
 	if ok && clr != nil {
 		dclr = *clr
 	}
-	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave}, dclr, func(dlg *gi.DialogStage) {
+	ColorViewDialog(ctx, DlgOpts{Title: "Color Value View", Prompt: desc, TmpSave: vv.TmpSave}, dclr, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
 			return
 		}
@@ -675,7 +675,7 @@ func (vv *ColorNameValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *ColorNameValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
@@ -700,7 +700,7 @@ func (vv *ColorNameValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogS
 		}
 	}
 	desc, _ := vv.Tag("desc")
-	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: desc}, &sl, curRow, nil, func(dlg *gi.DialogStage) {
+	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: desc}, &sl, curRow, nil, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
 			return
 		}

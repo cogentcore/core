@@ -2160,50 +2160,50 @@ const StageTypesN StageTypes = 7
 // Re-run the enumgen command to generate them again.
 func _StageTypesNoOp() {
 	var x [1]struct{}
-	_ = x[Window-(0)]
-	_ = x[Dialog-(1)]
-	_ = x[Sheet-(2)]
-	_ = x[Menu-(3)]
-	_ = x[Tooltip-(4)]
-	_ = x[Snackbar-(5)]
-	_ = x[Chooser-(6)]
+	_ = x[WindowStage-(0)]
+	_ = x[DialogStage-(1)]
+	_ = x[SheetStage-(2)]
+	_ = x[MenuStage-(3)]
+	_ = x[TooltipStage-(4)]
+	_ = x[SnackbarStage-(5)]
+	_ = x[ChooserStage-(6)]
 }
 
 var _StageTypesNameToValueMap = map[string]StageTypes{
-	`Window`:   0,
-	`window`:   0,
-	`Dialog`:   1,
-	`dialog`:   1,
-	`Sheet`:    2,
-	`sheet`:    2,
-	`Menu`:     3,
-	`menu`:     3,
-	`Tooltip`:  4,
-	`tooltip`:  4,
-	`Snackbar`: 5,
-	`snackbar`: 5,
-	`Chooser`:  6,
-	`chooser`:  6,
+	`WindowStage`:   0,
+	`windowstage`:   0,
+	`DialogStage`:   1,
+	`dialogstage`:   1,
+	`SheetStage`:    2,
+	`sheetstage`:    2,
+	`MenuStage`:     3,
+	`menustage`:     3,
+	`TooltipStage`:  4,
+	`tooltipstage`:  4,
+	`SnackbarStage`: 5,
+	`snackbarstage`: 5,
+	`ChooserStage`:  6,
+	`chooserstage`:  6,
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
-	0: `Window is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`,
-	1: `Dialog is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
-	2: `Sheet is a MainStage that displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide of the RenderWin main window. It can be Modal or not.`,
-	3: `Menu is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
-	4: `Tooltip is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
-	5: `Snackbar is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
-	6: `Chooser is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
+	0: `WindowStage is a MainStage that displays a Scene in a full window. One of these must be created first, as the primary App contents, and it typically persists throughout. It fills the RenderWin window. Additional Windows can be created either within the same RenderWin (Mobile) or in separate RenderWin windows (Desktop, NewWindow).`,
+	1: `DialogStage is a MainStage that displays Scene in a smaller dialog window on top of a Window, or in its own RenderWin (on Desktop only). It can be Modal or not.`,
+	2: `SheetStage is a MainStage that displays Scene as a partially overlapping panel coming up from the Bottom or LeftSide of the RenderWin main window. It can be Modal or not.`,
+	3: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
+	4: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
+	5: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
+	6: `ChooserStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
 }
 
 var _StageTypesMap = map[StageTypes]string{
-	0: `Window`,
-	1: `Dialog`,
-	2: `Sheet`,
-	3: `Menu`,
-	4: `Tooltip`,
-	5: `Snackbar`,
-	6: `Chooser`,
+	0: `WindowStage`,
+	1: `DialogStage`,
+	2: `SheetStage`,
+	3: `MenuStage`,
+	4: `TooltipStage`,
+	5: `SnackbarStage`,
+	6: `ChooserStage`,
 }
 
 // String returns the string representation
@@ -2291,25 +2291,25 @@ const StageSidesN StageSides = 2
 // Re-run the enumgen command to generate them again.
 func _StageSidesNoOp() {
 	var x [1]struct{}
-	_ = x[Bottom-(0)]
-	_ = x[LeftSide-(1)]
+	_ = x[BottomSheet-(0)]
+	_ = x[SideSheet-(1)]
 }
 
 var _StageSidesNameToValueMap = map[string]StageSides{
-	`Bottom`:   0,
-	`bottom`:   0,
-	`LeftSide`: 1,
-	`leftside`: 1,
+	`BottomSheet`: 0,
+	`bottomsheet`: 0,
+	`SideSheet`:   1,
+	`sidesheet`:   1,
 }
 
 var _StageSidesDescMap = map[StageSides]string{
-	0: `Bottom anchors Sheet to the bottom of the window, with handle on the top`,
-	1: `LeftSide anchors Sheet to the left side of the window, with handle on the top`,
+	0: `BottomSheet anchors Sheet to the bottom of the window, with handle on the top`,
+	1: `SideSheet anchors Sheet to the side of the window, with handle on the top`,
 }
 
 var _StageSidesMap = map[StageSides]string{
-	0: `Bottom`,
-	1: `LeftSide`,
+	0: `BottomSheet`,
+	1: `SideSheet`,
 }
 
 // String returns the string representation

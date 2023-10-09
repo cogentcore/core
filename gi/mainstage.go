@@ -85,7 +85,7 @@ func NewMainStage(typ StageTypes, sc *Scene, ctx Widget) *MainStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewWindow(sc *Scene) *MainStage {
-	return NewMainStage(Window, sc, nil)
+	return NewMainStage(WindowStage, sc, nil)
 }
 
 // NewDialog in dialogs.go
@@ -97,7 +97,7 @@ func NewWindow(sc *Scene) *MainStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewSheet(sc *Scene, side StageSides, ctx Widget) *MainStage {
-	return NewMainStage(Sheet, sc, ctx).SetSide(side).(*MainStage)
+	return NewMainStage(SheetStage, sc, ctx).SetSide(side).(*MainStage)
 }
 
 /////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ func (st *MainStage) RunDialog() *MainStage {
 
 	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		sc.Resize(sz)
-		st.Type = Window            // critical: now is its own window!
+		st.Type = WindowStage            // critical: now is its own window!
 		sc.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		DialogRenderWins.Add(win)
@@ -303,7 +303,7 @@ func (st *MainStage) Resize(sz image.Point) {
 		return
 	}
 	switch st.Type {
-	case Window:
+	case WindowStage:
 		st.SetWindowInsets()
 		st.Scene.Resize(sz)
 		// todo: other types fit in constraints

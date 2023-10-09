@@ -237,7 +237,7 @@ func (sm *MainStageMgr) HandleEvent(evi events.Event) {
 	for i := n - 1; i >= 0; i-- {
 		st := sm.Stack.ValByIdx(i).AsMain()
 		st.HandleEvent(evi)
-		if evi.IsHandled() || st.Modal || st.Type == Window {
+		if evi.IsHandled() || st.Modal || st.Type == WindowStage {
 			return
 		}
 	}

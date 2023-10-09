@@ -54,7 +54,7 @@ func (vv *FontValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FontValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
+func (vv *FontValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

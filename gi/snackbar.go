@@ -37,7 +37,7 @@ type SnackbarOpts struct {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewSnackbarFromScene(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(Snackbar, sc, ctx)
+	return NewPopupStage(SnackbarStage, sc, ctx)
 }
 
 // NewSnackbar returns a new snackbar based on the given context widget and options.
@@ -80,7 +80,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 			if opts.ActionOnClick != nil {
 				opts.ActionOnClick(ac)
 			}
-			wsc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 		})
 	}
 	if !opts.Icon.IsNil() {
@@ -93,7 +93,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 			if opts.IconOnClick != nil {
 				opts.IconOnClick(ic)
 			}
-			wsc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 		})
 	}
 	return sc

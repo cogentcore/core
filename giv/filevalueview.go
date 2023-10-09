@@ -53,7 +53,7 @@ func (vv *FileValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FileValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
+func (vv *FileValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

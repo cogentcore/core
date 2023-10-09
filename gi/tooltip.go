@@ -20,7 +20,7 @@ import (
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewTooltipFromScene(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(Tooltip, sc, ctx)
+	return NewPopupStage(TooltipStage, sc, ctx)
 }
 
 // NewTooltip returns a new tooltip stage displaying the tooltip text

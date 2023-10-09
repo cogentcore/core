@@ -102,14 +102,14 @@ func app() {
 	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
 
 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
-	amen.Menu = make(gi.Menu, 0, 10)
+	amen.Menu = make(gi.MenuStage, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
 	// Linux, RenderWins or Meta for MacOS
 
 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
-	emen.Menu = make(gi.Menu, 0, 10)
+	emen.Menu = make(gi.MenuStage, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
 	win.SetCloseCleanFunc(func(w *gi.RenderWin) {

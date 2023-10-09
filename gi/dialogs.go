@@ -21,8 +21,8 @@ var (
 	StdDialogVSpaceUnits = units.Ex(StdDialogVSpace)
 )
 
-// DialogStage is a MainStage with methods for configuring a dialog
-type DialogStage struct {
+// Dialog is a MainStage with methods for configuring a dialog
+type Dialog struct {
 	Stage *MainStage
 
 	// Data has arbitrary data for this dialog
@@ -40,9 +40,9 @@ type DialogStage struct {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewDialog(sc *Scene, ctx Widget) *DialogStage {
-	dlg := &DialogStage{}
-	dlg.Stage = NewMainStage(Dialog, sc, ctx)
+func NewDialog(sc *Scene, ctx Widget) *Dialog {
+	dlg := &Dialog{}
+	dlg.Stage = NewMainStage(DialogStage, sc, ctx)
 	sc.Geom.Pos = ctx.ContextMenuPos()
 	if dlg.Stage.Title != "" {
 		dlg.Title(dlg.Stage.Title)
@@ -51,14 +51,14 @@ func NewDialog(sc *Scene, ctx Widget) *DialogStage {
 	return dlg
 }
 
-func (dlg *DialogStage) Run() *DialogStage {
+func (dlg *Dialog) Run() *Dialog {
 	dlg.Stage.Run()
 	return dlg
 }
 
 // Title adds title to dialog.  If title string is passed
 // then a new title is set -- otherwise the existing Title is used.
-func (dlg *DialogStage) Title(title ...string) *DialogStage {
+func (dlg *Dialog) Title(title ...string) *Dialog {
 	if len(title) > 0 {
 		dlg.Stage.Title = title[0]
 	}
@@ -73,7 +73,7 @@ func (dlg *DialogStage) Title(title ...string) *DialogStage {
 }
 
 // Prompt adds given prompt to dialog.
-func (dlg *DialogStage) Prompt(prompt string) *DialogStage {
+func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
 		SetType(LabelBodyMedium).AddStyles(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
@@ -90,7 +90,7 @@ func (dlg *DialogStage) Prompt(prompt string) *DialogStage {
 // PromptWidgetIdx returns the prompt label widget index,
 // for adding additional elements below the prompt.
 // Returns -1 if not found.
-func (dlg *DialogStage) PromptWidgetIdx() int {
+func (dlg *Dialog) PromptWidgetIdx() int {
 	idx, ok := dlg.Stage.Scene.Children().IndexByName("prompt", 0)
 	if !ok {
 		return -1
@@ -100,21 +100,21 @@ func (dlg *DialogStage) PromptWidgetIdx() int {
 
 // Modal sets the modal behavior of the dialog:
 // true = blocks all other input, false = allows other input
-func (dlg *DialogStage) Modal(modal bool) *DialogStage {
+func (dlg *Dialog) Modal(modal bool) *Dialog {
 	dlg.Stage.Modal = modal
 	return dlg
 }
 
 // NewWindow sets whether dialog opens in a new window
 // or on top of the existing window.
-func (dlg *DialogStage) NewWindow(newWindow bool) *DialogStage {
+func (dlg *Dialog) NewWindow(newWindow bool) *Dialog {
 	dlg.Stage.NewWindow = newWindow
 	return dlg
 }
 
 // ConfigButtonBox adds layout for holding buttons at bottom of dialog
 // and saves as ButtonBox field, if not already done.
-func (dlg *DialogStage) ConfigButtonBox() *Layout {
+func (dlg *Dialog) ConfigButtonBox() *Layout {
 	if dlg.ButtonBox != nil {
 		return dlg.ButtonBox
 	}
@@ -131,7 +131,7 @@ func (dlg *DialogStage) ConfigButtonBox() *Layout {
 // Ok adds Ok button to the ButtonBox at bottom of dialog,
 // connecting to Accept method the Ctrl+Enter keychord event.
 // Also sends a Change event to the dialog scene for listeners there.
-func (dlg *DialogStage) Ok() *DialogStage {
+func (dlg *Dialog) Ok() *Dialog {
 	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
 	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").On(events.Click, func(e events.Event) {
@@ -152,7 +152,7 @@ func (dlg *DialogStage) Ok() *DialogStage {
 // Cancel adds Cancel button to the ButtonBox at bottom of dialog,
 // connecting to Cancel method and the Esc keychord event.
 // Also sends a Change event to the dialog scene for listeners there
-func (dlg *DialogStage) Cancel() *DialogStage {
+func (dlg *Dialog) Cancel() *Dialog {
 	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
 	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").On(events.Click, func(e events.Event) {
@@ -172,26 +172,26 @@ func (dlg *DialogStage) Cancel() *DialogStage {
 
 // OkCancel adds Ok, Cancel buttons,
 // and standard Esc = Cancel, Ctrl+Enter keyboard action
-func (dlg *DialogStage) OkCancel() *DialogStage {
+func (dlg *Dialog) OkCancel() *Dialog {
 	dlg.Cancel()
 	dlg.Ok()
 	return dlg
 }
 
 // AcceptDialog accepts the dialog, activated by the default Ok button
-func (dlg *DialogStage) AcceptDialog() {
+func (dlg *Dialog) AcceptDialog() {
 	dlg.Accepted = true
 	dlg.Close()
 }
 
 // CancelDialog cancels the dialog, activated by the default Cancel button
-func (dlg *DialogStage) CancelDialog() {
+func (dlg *Dialog) CancelDialog() {
 	dlg.Accepted = false
 	dlg.Close()
 }
 
 // Close closes this stage as a popup
-func (dlg *DialogStage) Close() {
+func (dlg *Dialog) Close() {
 	mm := dlg.Stage.StageMgr
 	if mm == nil {
 		slog.Error("dialog has no MainMgr")
@@ -201,11 +201,11 @@ func (dlg *DialogStage) Close() {
 		mm.RenderWin.CloseReq()
 		return
 	}
-	mm.PopDeleteType(Dialog)
+	mm.PopDeleteType(DialogStage)
 }
 
 // DefaultStyle sets default style functions for dialog Scene
-func (dlg *DialogStage) DefaultStyle() {
+func (dlg *Dialog) DefaultStyle() {
 	st := dlg.Stage
 	sc := st.Scene
 	sc.AddStyles(func(s *styles.Style) {
@@ -247,7 +247,7 @@ type DlgOpts struct {
 // Call Run() to run the returned dialog (can be further configed).
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
-func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
+func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 	dlg := NewDialog(StageScene("std-dialog"), ctx)
 	if opts.Title != "" {
 		dlg.Title(opts.Title)
@@ -273,7 +273,7 @@ func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogS
 // RecycleStdDialog looks for existing dialog window with same Data.
 // if found brings that to the front, returns it, and true bool.
 // else (and if data is nil) calls StdDialog, returns false.
-func RecycleStdDialog(ctx Widget, opts DlgOpts, data any, fun func(dlg *DialogStage)) (*DialogStage, bool) {
+func RecycleStdDialog(ctx Widget, opts DlgOpts, data any, fun func(dlg *Dialog)) (*Dialog, bool) {
 	if data == nil {
 		return NewStdDialog(ctx, opts, fun), false
 	}
@@ -298,7 +298,7 @@ func RecycleStdDialog(ctx Widget, opts DlgOpts, data any, fun func(dlg *DialogSt
 // Call Run() to run the returned dialog (can be further configed).
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
-func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogStage {
+func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 	dlg := NewStdDialog(ctx, opts, fun)
 	return dlg
 }
@@ -309,7 +309,7 @@ func PromptDialog(ctx Widget, opts DlgOpts, fun func(dlg *DialogStage)) *DialogS
 // Call Run() to run the returned dialog (can be further configed).
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
-func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *DialogStage)) *DialogStage {
+func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dialog)) *Dialog {
 	dlg := NewStdDialog(ctx, opts, fun)
 
 	sc := dlg.Stage.Scene
@@ -353,7 +353,7 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 // Call Run() to run the returned dialog (can be further configed).
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
-func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fun func(dlg *DialogStage)) *DialogStage {
+func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fun func(dlg *Dialog)) *Dialog {
 	dlg := NewStdDialog(ctx, opts, fun)
 	dlg.Data = strval
 	prIdx := dlg.PromptWidgetIdx()

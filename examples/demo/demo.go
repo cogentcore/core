@@ -200,7 +200,7 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 		s.MaxWidth.SetDp(-1)
 	})
 
-	menu := gi.Menu{}
+	menu := gi.MenuStage{}
 
 	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {

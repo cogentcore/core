@@ -31,57 +31,57 @@ var (
 type StageTypes int32 //enums:enum
 
 const (
-	// Window is a MainStage that displays a Scene in a full window.
+	// WindowStage is a MainStage that displays a Scene in a full window.
 	// One of these must be created first, as the primary App contents,
 	// and it typically persists throughout.  It fills the RenderWin window.
 	// Additional Windows can be created either within the same RenderWin
 	// (Mobile) or in separate RenderWin windows (Desktop, NewWindow).
-	Window StageTypes = iota
+	WindowStage StageTypes = iota
 
-	// Dialog is a MainStage that displays Scene in a smaller dialog window
+	// DialogStage is a MainStage that displays Scene in a smaller dialog window
 	// on top of a Window, or in its own RenderWin (on Desktop only).
 	// It can be Modal or not.
-	Dialog
+	DialogStage
 
-	// Sheet is a MainStage that displays Scene as a
+	// SheetStage is a MainStage that displays Scene as a
 	// partially overlapping panel coming up from the
 	// Bottom or LeftSide of the RenderWin main window.
 	// It can be Modal or not.
-	Sheet
+	SheetStage
 
-	// Menu is a PopupStage that displays a Scene with Action Widgets
+	// MenuStage is a PopupStage that displays a Scene with Action Widgets
 	// overlaid on a MainStage.
 	// It is typically Modal and ClickOff, and closes when
 	// an Action is selected.
-	Menu
+	MenuStage
 
-	// Tooltip is a PopupStage that displays a Scene with extra info
+	// TooltipStage is a PopupStage that displays a Scene with extra info
 	// overlaid on a MainStage.
 	// It is typically ClickOff and not Modal.
-	Tooltip
+	TooltipStage
 
-	// Snackbar is a PopupStage displays a Scene with info and typically
+	// SnackbarStage is a PopupStage displays a Scene with info and typically
 	// an additional optional Action, usually displayed at the bottom.
 	// It is typically not ClickOff or Modal, but has a timeout.
-	Snackbar
+	SnackbarStage
 
-	// Chooser is a PopupStage that displays a Scene with text completions,
+	// ChooserStage is a PopupStage that displays a Scene with text completions,
 	// spelling corrections, or other such dynamic info.
 	// It is typically ClickOff, not Modal, dynamically updating,
 	// and closes when something is selected or typing renders
 	// it no longer relevant.
-	Chooser
+	ChooserStage
 )
 
 // StageSides are the Sides for Sheet Stages
 type StageSides int32 //enums:enum
 
 const (
-	// Bottom anchors Sheet to the bottom of the window, with handle on the top
-	Bottom StageSides = iota
+	// BottomSheet anchors Sheet to the bottom of the window, with handle on the top
+	BottomSheet StageSides = iota
 
-	// LeftSide anchors Sheet to the left side of the window, with handle on the top
-	LeftSide
+	// SideSheet anchors Sheet to the side of the window, with handle on the top
+	SideSheet
 )
 
 // StageBase is a container and manager for displaying a Scene
@@ -304,33 +304,33 @@ func (st *StageBase) SetScene(sc *Scene) Stage {
 func (st *StageBase) SetType(typ StageTypes) Stage {
 	st.Type = typ
 	switch st.Type {
-	case Window:
+	case WindowStage:
 		if !goosi.TheApp.Platform().IsMobile() {
 			st.NewWindow = true
 		}
 		st.Modal = true // note: there is no global modal option between RenderWin windows
-	case Dialog:
+	case DialogStage:
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
 		st.Movable = true
 		st.Resizable = true
-	case Sheet:
+	case SheetStage:
 		st.Modal = true
 		st.Scrim = true
 		st.ClickOff = true
 		st.Resizable = true
-	case Menu:
+	case MenuStage:
 		st.Modal = true
 		st.Scrim = false
 		st.ClickOff = true
-	case Tooltip:
+	case TooltipStage:
 		st.Modal = false
 		st.Scrim = false
-	case Snackbar:
+	case SnackbarStage:
 		st.Modal = false
 		st.Timeout = SnackbarTimeout
-	case Chooser:
+	case ChooserStage:
 		st.Modal = false
 		st.Scrim = false
 		st.ClickOff = true
@@ -417,11 +417,11 @@ func (st *StageBase) Run() Stage {
 	st.Scene.ConfigScene() // always config prior to running
 	// st.This.InitialFocus() // not working
 	switch st.Type {
-	case Window:
+	case WindowStage:
 		return st.This.AsMain().RunWindow()
-	case Dialog:
+	case DialogStage:
 		return st.This.AsMain().RunDialog()
-	case Sheet:
+	case SheetStage:
 		return st.This.AsMain().RunSheet()
 	default:
 		return st.This.AsPopup().RunPopup()

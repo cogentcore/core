@@ -439,7 +439,7 @@ func (tb *TextBuf) FileModCheck() bool {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
 			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
 			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
-			func(dlg *gi.DialogStage) {
+			func(dlg *gi.Dialog) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -543,7 +543,7 @@ func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Exists, Overwrite?",
 			Prompt: fmt.Sprintf("File already exists, overwrite?  File: %v", filename)},
 			[]string{"Cancel", "Overwrite"},
-			func(dlg *gi.DialogStage) {
+			func(dlg *gi.Dialog) {
 				cancel := false
 				switch sig {
 				case 0:
@@ -591,7 +591,7 @@ func (tb *TextBuf) Save() error {
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk",
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
-			func(dlg *gi.DialogStage) {
+			func(dlg *gi.Dialog) {
 				switch sig {
 				case 0:
 					CallMethod(tb, "SaveAs", vp)
@@ -614,7 +614,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
 				[]string{"Save", "Close Without Saving", "Cancel"},
-				func(dlg *gi.DialogStage) {
+				func(dlg *gi.Dialog) {
 					switch sig {
 					case 0:
 						tb.Save()
@@ -633,7 +633,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
 				[]string{"Close Without Saving", "Cancel"},
-				func(dlg *gi.DialogStage) {
+				func(dlg *gi.Dialog) {
 					switch sig {
 					case 0:
 						tb.ClearChanged()
@@ -2525,7 +2525,7 @@ func (tb *TextBuf) SetCompleter(data any, matchFun complete.MatchFunc, editFun c
 	tb.Complete.EditFunc = editFun
 	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
-	tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.DialogStage) {
+	tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
 		tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
 		if sig == int64(gi.CompleteSelect) {
 			tbf.CompleteText(data.(string)) // always use data
@@ -2621,7 +2621,7 @@ func (tb *TextBuf) SetSpell() {
 	tb.Spell = &gi.Spell{}
 	tb.Spell.InitName(tb.Spell, "tb-spellcorrect") // needed for standalone Ki's
 	// note: only need to connect once..
-	tb.Spell.SpellSig.ConnectOnly(func(dlg *gi.DialogStage) {
+	tb.Spell.SpellSig.ConnectOnly(func(dlg *gi.Dialog) {
 		if sig == int64(gi.SpellSelect) {
 			tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
 			tbf.CorrectText(data.(string)) // always use data

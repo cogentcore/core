@@ -100,7 +100,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	}
 
 	switch typ {
-	case Menu:
+	case MenuStage:
 		st.Modal = true
 		st.ClickOff = true
 		MenuSceneConfigStyles(sc)
@@ -115,7 +115,7 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewChooser(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(Chooser, sc, ctx)
+	return NewPopupStage(ChooserStage, sc, ctx)
 }
 
 // RunPopup runs a popup-style Stage in context widget's popups.
@@ -142,7 +142,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	}
 
 	switch st.Type {
-	case Menu:
+	case MenuStage:
 		sz.X += scrollWd * 2
 		maxht := int(MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)

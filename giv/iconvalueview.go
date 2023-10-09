@@ -69,7 +69,7 @@ func (vv *IconValueView) HasAction() bool {
 	return true
 }
 
-func (vv *IconValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
+func (vv *IconValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
