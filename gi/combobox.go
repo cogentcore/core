@@ -155,6 +155,8 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		w.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Selectable)
+			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle

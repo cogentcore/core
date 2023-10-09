@@ -531,6 +531,8 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 		label := w.(*Label)
 		label.Type = LabelLabelLarge
 		w.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Selectable)
+			s.Cursor = cursors.None
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			s.Margin.Set()
 			s.Padding.Set()
@@ -637,6 +639,8 @@ func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		w.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Selectable)
+			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
