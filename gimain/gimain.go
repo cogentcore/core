@@ -11,16 +11,19 @@ import (
 	"sync/atomic"
 
 	// "goki.dev/gi/v2/giv"
+	"log/slog"
+
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
 	"goki.dev/goosi/driver"
-	_ "goki.dev/grog" // for correctly formatted log messages
+	"goki.dev/grog"
 	_ "goki.dev/vgpu/v2/vphong"
 )
 
 // Main is run in a main package to start the GUI driver / event loop,
 // and call given function as the effective "main" function.
 func Run(mainrun func()) {
+	grog.UserLevel = slog.LevelInfo // TODO(kai): figure out better approach to setting default level
 	DebugEnumSizes()
 	driver.Main(func(app goosi.App) {
 		gi.Init()
