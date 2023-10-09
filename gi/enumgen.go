@@ -12,11 +12,11 @@ import (
 	"goki.dev/ki/v2"
 )
 
-var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4}
+var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5}
 
 // ButtonTypesN is the highest valid value
 // for type ButtonTypes, plus one.
-const ButtonTypesN ButtonTypes = 5
+const ButtonTypesN ButtonTypes = 6
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -27,19 +27,22 @@ func _ButtonTypesNoOp() {
 	_ = x[ButtonElevated-(2)]
 	_ = x[ButtonOutlined-(3)]
 	_ = x[ButtonText-(4)]
+	_ = x[ButtonAction-(5)]
 }
 
 var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
-	`ButtonFilled`:   0,
-	`buttonfilled`:   0,
-	`ButtonTonal`:    1,
-	`buttontonal`:    1,
-	`ButtonElevated`: 2,
-	`buttonelevated`: 2,
-	`ButtonOutlined`: 3,
-	`buttonoutlined`: 3,
-	`ButtonText`:     4,
-	`buttontext`:     4,
+	`Filled`:   0,
+	`filled`:   0,
+	`Tonal`:    1,
+	`tonal`:    1,
+	`Elevated`: 2,
+	`elevated`: 2,
+	`Outlined`: 3,
+	`outlined`: 3,
+	`Text`:     4,
+	`text`:     4,
+	`Action`:   5,
+	`action`:   5,
 }
 
 var _ButtonTypesDescMap = map[ButtonTypes]string{
@@ -47,15 +50,17 @@ var _ButtonTypesDescMap = map[ButtonTypes]string{
 	1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`,
 	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
 	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
-	4: `ButtonText is a low-importance button with only text and/or an icon and no border, background color, or shadow. They should only be used for low emphasis actions, and you must ensure they stand out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text and icon buttons.`,
+	4: `ButtonText is a low-importance button with no border, background color, or shadow. It renders primary-colored text. It should only be used for low emphasis actions, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text button, but it can also contain icons and other things.`,
+	5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar or menu), or as a part of another widget, like a spinbox or snackbar. It has no border, background color, or shadow, and it inherits the text color of its parent, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`,
 }
 
 var _ButtonTypesMap = map[ButtonTypes]string{
-	0: `ButtonFilled`,
-	1: `ButtonTonal`,
-	2: `ButtonElevated`,
-	3: `ButtonOutlined`,
-	4: `ButtonText`,
+	0: `Filled`,
+	1: `Tonal`,
+	2: `Elevated`,
+	3: `Outlined`,
+	4: `Text`,
+	5: `Action`,
 }
 
 // String returns the string representation
@@ -1099,7 +1104,7 @@ var _KeyFunsDescMap = map[KeyFuns]string{
 	52: ``,
 	53: ``,
 	54: ``,
-	55: `Below are menu specific functions -- use these as shortcuts for menu actions allows uniqueness of mapping and easy customization of all key actions`,
+	55: `Below are menu specific functions -- use these as shortcuts for menu buttons allows uniqueness of mapping and easy customization of all key buttons`,
 	56: ``,
 	57: ``,
 	58: ``,
