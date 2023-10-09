@@ -500,30 +500,31 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *Menu) {
 	}
 	_, ics := cb.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range cb.Items {
-		var ac *Button
+		var bt *Button
 		if n > i {
-			ac = cb.Menu[i].(*Button)
+			bt = cb.Menu[i].(*Button)
 		} else {
-			ac = &Button{}
-			ki.InitNode(ac)
-			cb.Menu = append(cb.Menu, ac.This().(Widget))
+			bt = &Button{}
+			ki.InitNode(bt)
+			cb.Menu = append(cb.Menu, bt.This().(Widget))
 		}
 		nm := "Item_" + strconv.Itoa(i)
-		ac.SetName(nm)
+		bt.SetName(nm)
+		bt.Type = ButtonAction
 		if ics {
-			ac.Icon = it.(icons.Icon)
-			ac.Tooltip = string(ac.Icon)
+			bt.Icon = it.(icons.Icon)
+			bt.Tooltip = string(bt.Icon)
 		} else {
-			ac.Text = ToLabel(it)
+			bt.Text = ToLabel(it)
 			if len(cb.Tooltips) > i {
-				ac.Tooltip = cb.Tooltips[i]
+				bt.Tooltip = cb.Tooltips[i]
 			}
 		}
-		ac.Data = i // index is the data
-		ac.SetSelected(i == cb.CurIndex)
-		ac.SetAsMenu()
+		bt.Data = i // index is the data
+		bt.SetSelected(i == cb.CurIndex)
+		bt.SetAsMenu()
 		idx := i
-		ac.On(events.Click, func(e events.Event) {
+		bt.On(events.Click, func(e events.Event) {
 			cb.SelectItemAction(idx)
 		})
 	}
