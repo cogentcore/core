@@ -189,7 +189,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			fmt.Println("slider2", slider2.Value)
 		})
 
-	scrollbar1 := gi.NewScrollBar(srow, "scrollbar1").
+	scrollbar1 := gi.NewSlider(srow, "scrollbar1").
+		SetType(gi.SliderScrollbar).
 		SetDim(mat32.X).
 		SetThumbValue(0.25).
 		SetValue(0.25).
@@ -200,7 +201,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			fmt.Println("scroll1", scrollbar1.Value)
 		})
 
-	scrollbar2 := gi.NewScrollBar(srow, "scrollbar2").
+	scrollbar2 := gi.NewSlider(srow, "scrollbar2").
+		SetType(gi.SliderScrollbar).
 		SetDim(mat32.Y).
 		SetThumbValue(10).
 		SetValue(0).
