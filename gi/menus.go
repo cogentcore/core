@@ -336,9 +336,8 @@ func MenuSceneConfigStyles(msc *Scene) {
 // scroll bars are enforced beyond that size.
 var MenuMaxHeight = 30
 
-// MenuSceneFromButtons constructs a Scene from given list of Menu buttons
-// for displaying a Menu.
-func MenuSceneFromButtons(menu Menu, name string) *Scene {
+// NewMenuScene constructs a Scene for displaying the given Menu.
+func NewMenuScene(menu Menu, name string) *Scene {
 	msc := StageScene(name + "-menu")
 	MenuSceneConfigStyles(msc)
 	hasSelected := false
@@ -369,7 +368,7 @@ func MenuSceneFromButtons(menu Menu, name string) *Scene {
 	return msc
 }
 
-// NewMenuScene returns a new Menu stage with given scene contents,
+// NewMenuFromScene returns a new Menu stage with given scene contents,
 // in connection with given widget, which provides key context
 // for constructing the menu, at given RenderWin position
 // (e.g., use ContextMenuPos or WinPos method on ctx Widget).
@@ -377,7 +376,7 @@ func MenuSceneFromButtons(menu Menu, name string) *Scene {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenuScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
+func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 	sc.Geom.Pos = pos
 	return NewPopupStage(MenuStage, sc, ctx)
 }
@@ -391,7 +390,7 @@ func NewMenuScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu Menu, ctx Widget, pos image.Point) *PopupStage {
-	return NewMenuScene(MenuSceneFromButtons(menu, ctx.Name()), ctx, pos)
+	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
 
 ///////////////////////////////////////////////////////////////
