@@ -368,7 +368,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sb.Config(sc)
 		sb.Tracking = true
 		sb.Min = 0.0
-		sb.On(events.Change, func(e events.Event) {
+		sb.OnChange(func(e events.Event) {
 			e.SetHandled()
 			// fmt.Println("change event")
 			ly.SetNeedsLayout(sc, true)

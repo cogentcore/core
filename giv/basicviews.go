@@ -722,7 +722,7 @@ func (vv *EnumValueView) ConfigWidget(widg gi.Widget) {
 
 	ev := vv.EnumValue()
 	cb.ItemsFromEnum(ev, false, 50)
-	cb.On(events.Change, func(e events.Event) {
+	cb.OnChange(func(e events.Event) {
 		cval := cb.CurVal.(enums.Enum)
 		if vv.SetEnumValueFromInt(cval.Int64()) { // todo: using index
 			vv.UpdateWidget()
@@ -851,7 +851,7 @@ func (vv *TypeValueView) ConfigWidget(widg gi.Widget) {
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.ItemsFromTypes(tl, false, true, 50)
 
-	cb.On(events.Change, func(e events.Event) {
+	cb.OnChange(func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)
 		if vv.SetValue(tval) {
 			vv.UpdateWidget()
@@ -897,7 +897,7 @@ func (vv *ByteSliceValueView) ConfigWidget(widg gi.Widget) {
 		s.MaxWidth.SetDp(-1)
 	})
 
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
 		}
@@ -941,7 +941,7 @@ func (vv *RuneSliceValueView) ConfigWidget(widg gi.Widget) {
 		s.MaxWidth.SetDp(-1)
 	})
 
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
 		}
@@ -1031,7 +1031,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Widget) {
 	tf.AddStyles(func(s *styles.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		nt, err := time.Parse(DefaultTimeFormat, tf.Text())
 		if err != nil {
 			log.Println(err)

@@ -33,6 +33,11 @@ func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
 	return wb.On(events.Click, fun)
 }
 
+// OnChange adds an event listener function for [events.Change] events
+func (wb *WidgetBase) OnChange(fun func(e events.Event)) Widget {
+	return wb.On(events.Change, fun)
+}
+
 // Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).

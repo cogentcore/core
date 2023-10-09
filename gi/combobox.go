@@ -618,7 +618,7 @@ func (cb *ComboBox) ComboBoxKeys() {
 }
 
 func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		text := tf.Text()
 		for idx, item := range cb.Items {
 			if text == ToLabel(item) {
