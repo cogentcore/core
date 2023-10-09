@@ -99,30 +99,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		tf := w.(*TextField)
 		tf.SetText(sb.ValToString(sb.Value))
 		tf.SetState(sb.IsDisabled(), states.Disabled)
-		tf.On(events.Select, func(e events.Event) {
-			if sb.IsDisabled() {
-				return
-			}
-			sb.SetSelected(!sb.StateIs(states.Selected))
-			sb.Send(events.Select, e)
-		})
-		tf.On(events.Click, func(e events.Event) {
-			if sb.IsDisabled() {
-				return
-			}
-			sb.SetState(true, states.Focused)
-			sb.HandleEvent(e)
-		})
-		tf.On(events.Change, func(e events.Event) {
-			text := tf.Text()
-			val, err := sb.StringToVal(text)
-			if err != nil {
-				// TODO: add validation message
-				slog.Error("invalid spinbox value", "value", text, "err", err)
-				return
-			}
-			sb.SetValueAction(val)
-		})
+		sb.TextFieldHandlers(tf)
 		tf.AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(3))
 		})
@@ -299,7 +276,6 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 func (sb *SpinBox) SpinBoxHandlers() {
 	sb.WidgetHandlers()
 	sb.SpinBoxScroll()
-	sb.SpinBoxKeys()
 }
 
 func (sb *SpinBox) SpinBoxScroll() {
@@ -313,8 +289,33 @@ func (sb *SpinBox) SpinBoxScroll() {
 	})
 }
 
-func (sb *SpinBox) SpinBoxKeys() {
-	sb.On(events.KeyChord, func(e events.Event) {
+// TextFieldHandlers adds the spinbox textfield handlers for the given textfield
+func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
+	tf.On(events.Select, func(e events.Event) {
+		if sb.IsDisabled() {
+			return
+		}
+		sb.SetSelected(!sb.StateIs(states.Selected))
+		sb.Send(events.Select, e)
+	})
+	tf.On(events.Click, func(e events.Event) {
+		if sb.IsDisabled() {
+			return
+		}
+		sb.SetState(true, states.Focused)
+		sb.HandleEvent(e)
+	})
+	tf.On(events.Change, func(e events.Event) {
+		text := tf.Text()
+		val, err := sb.StringToVal(text)
+		if err != nil {
+			// TODO: add validation message
+			slog.Error("invalid spinbox value", "value", text, "err", err)
+			return
+		}
+		sb.SetValueAction(val)
+	})
+	tf.On(events.KeyChord, func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}
