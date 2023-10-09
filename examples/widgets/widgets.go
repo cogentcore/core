@@ -44,6 +44,9 @@ func app() {
 	tbar := gi.NewToolBar(scene, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
 	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func(act *gi.Action) {
 		fmt.Println("Toolbar Action 1")
+		gi.NewSnackbar(tbar, gi.SnackbarOpts{
+			Text: "This is an important message!",
+		}).Run()
 	})
 
 	trow := gi.NewLayout(scene, "trow").
