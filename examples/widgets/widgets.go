@@ -56,6 +56,9 @@ func app() {
 			},
 		}).Run()
 	})
+	tbar.AddAction(gi.ActOpts{Label: "Action 2", Data: 2}, func(act *gi.Action) {
+		fmt.Println("Toolbar Action 2")
+	})
 
 	trow := gi.NewLayout(scene, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
