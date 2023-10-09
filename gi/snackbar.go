@@ -18,17 +18,17 @@ import (
 type SnackbarOpts struct {
 	// The main text message to display in the snackbar
 	Text string
-	// If not "", the text of an action to display in the snackbar
-	Action string
-	// If non-nil, the function to call when the main text action
+	// If not "", the text of an button to display in the snackbar
+	Button string
+	// If non-nil, the function to call when the main text button
 	// in the snackbar is clicked
-	ActionOnClick func(ac *Action)
-	// If not [icons.None], the icon to display as an action
+	ButtonOnClick func(bt *Button)
+	// If not [icons.None], the icon to display as a button
 	// on the right side of the snack bar
 	Icon icons.Icon
-	// If non-nil, the function to call when the icon action in the
+	// If non-nil, the function to call when the icon button in the
 	// snackabr is clicked
-	IconOnClick func(ac *Action)
+	IconOnClick func(bt *Button)
 }
 
 // NewSnackbarFromScene returns a new Snackbar stage with given scene contents,
@@ -66,26 +66,23 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.Width.SetVw(100)
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium)
-	if opts.Action != "" || !opts.Icon.IsNil() {
+	if opts.Button != "" || !opts.Icon.IsNil() {
 		NewStretch(sc, "stretch")
 	}
-	if opts.Action != "" {
-		ac := NewAction(sc, "action").SetType(ActionParts)
-		ac.SetText(opts.Action)
-		ac.AddStyles(func(s *styles.Style) {
+	if opts.Button != "" {
+		bt := NewButton(sc, "button").SetType(ButtonText).SetText(opts.Button)
+		bt.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.InversePrimary
 		})
-
-		ac.On(events.Click, func(e events.Event) {
-			if opts.ActionOnClick != nil {
-				opts.ActionOnClick(ac)
+		bt.On(events.Click, func(e events.Event) {
+			if opts.ButtonOnClick != nil {
+				opts.ButtonOnClick(bt)
 			}
 			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 		})
 	}
 	if !opts.Icon.IsNil() {
-		ic := NewAction(sc, "icon").SetType(ActionParts)
-		ic.SetIcon(opts.Icon)
+		ic := NewButton(sc, "icon").SetType(ButtonText).SetIcon(opts.Icon)
 		ic.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.InverseOnSurface
 		})
