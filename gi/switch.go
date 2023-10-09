@@ -139,7 +139,7 @@ func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 		sw.IconOn = icons.CheckBox.Fill()
 		sw.IconOff = icons.CheckBoxOutlineBlank
 	case SwitchRadioButton:
-		sw.IconOn = icons.RadioButtonChecked.Fill()
+		sw.IconOn = icons.RadioButtonChecked
 		sw.IconOff = icons.RadioButtonUnchecked
 	}
 	sw.UpdateEndLayout(updt)
