@@ -186,7 +186,7 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 		// fallback
 		switch sw.Type {
 		case SwitchSwitch:
-			sw.IconOn = icons.ToggleOn
+			sw.IconOn = icons.ToggleOn.Fill()
 		case SwitchCheckbox:
 			sw.IconOn = icons.CheckBox.Fill()
 		case SwitchRadioButton:
@@ -237,5 +237,20 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	if mods {
 		parts.UpdateEnd(updt)
 		sw.SetNeedsLayout(sc, updt)
+	}
+}
+
+func (sw *Switch) RenderSwitch(sc *Scene) {
+	rs, _, st := sw.RenderLock(sc)
+	sw.RenderStdBox(sc, st)
+	sw.RenderUnlock(rs)
+}
+
+func (sw *Switch) Render(sc *Scene) {
+	if sw.PushBounds(sc) {
+		sw.RenderSwitch(sc)
+		sw.RenderParts(sc)
+		sw.RenderChildren(sc)
+		sw.PopBounds(sc)
 	}
 }
