@@ -473,7 +473,7 @@ var _ArgDataFlags_index = [...]uint8{0, 13, 26, 39}
 var FileInfoProps = ki.Props{
 	"CtxtMenu": ki.PropSlice{
 		{"Duplicate", ki.Props{
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -481,7 +481,7 @@ var FileInfoProps = ki.Props{
 		{"Delete", ki.Props{
 			"desc":    "Ok to delete this file?  This is not undoable and is not moving to trash / recycle bin",
 			"confirm": true,
-			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(fii interface{}, act *gi.Button) {
 				fi := fii.(*FileInfo)
 				act.SetInactiveState(fi.IsDir())
 			}),
@@ -498,13 +498,13 @@ var FileInfoProps = ki.Props{
 }
 
 func aaa() {
-	sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord)	
+	sf, ok := pv.(func(it interface{}, act *gi.Button) key.Chord)	
 }
 
 func ccc() {
 	if sf, ok := pv.(ShortcutFunc); ok {
 		ac.Shortcut = sf(md.Val, ac)
-	} else if sf, ok := pv.(func(it interface{}, act *gi.Action) key.Chord); ok {
+	} else if sf, ok := pv.(func(it interface{}, act *gi.Button) key.Chord); ok {
 		ac.Shortcut = sf(md.Val, ac)
 	} else {
 		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
@@ -613,7 +613,7 @@ func tst() {
 
 var PiViewProps = ki.Props{
 	"MainMenu": ki.PropSlice{
-		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Action) {
+		"updtfunc": giv.ActionUpdateFunc(func(pvi interface{}, act *gi.Button) {
 			pv := pvi.(*PiView)
 			act.SetActiveState(pv.Prefs.ProjFile != "")
 		}),

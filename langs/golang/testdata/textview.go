@@ -2396,7 +2396,7 @@ func (tv *TextView) PasteHist() {
 	}
 	cl := TextViewClipHistChooseList()
 	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data interface{}) {
-		ac := send.(*gi.Action)
+		ac := send.(*gi.Button)
 		idx := ac.Data.(int)
 		clip := TextViewClipHistory[idx]
 		if clip != nil {
