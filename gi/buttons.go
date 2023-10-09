@@ -67,6 +67,41 @@ func (bb *Button) CopyFieldsFrom(frm any) {
 	bb.MakeMenuFunc = fr.MakeMenuFunc
 }
 
+// ButtonTypes is an enum containing the
+// different possible types of buttons
+type ButtonTypes int //enums:enum
+
+const (
+	// ButtonFilled is a filled button with a
+	// contrasting background color. It should be
+	// used for prominent actions, typically those
+	// that are the final in a sequence. It is equivalent
+	// to Material Design's filled button.
+	ButtonFilled ButtonTypes = iota
+	// ButtonTonal is a filled button, similar
+	// to [ButtonFilled]. It is used for the same purposes,
+	// but it has a lighter background color and less emphasis.
+	// It is equivalent to Material Design's filled tonal button.
+	ButtonTonal
+	// ButtonElevated is an elevated button with
+	// a light background color and a shadow.
+	// It is equivalent to Material Design's elevated button.
+	ButtonElevated
+	// ButtonOutlined is an outlined button that is
+	// used for secondary actions that are still important.
+	// It is equivalent to Material Design's outlined button.
+	ButtonOutlined
+	// ButtonText is a low-importance button with only
+	// text and/or an icon and no border, background color,
+	// or shadow. They should only be used for low emphasis
+	// actions, and you must ensure they stand out from the
+	// surrounding context sufficiently. It is equivalent
+	// to Material Design's text and icon buttons.
+	ButtonText
+)
+
+// TODO(kai): do we really need ButtonFlags (couldn't we just check if the menu is nil?)
+
 // ButtonFlags extend WidgetFlags to hold button state
 type ButtonFlags WidgetFlags //enums:bitflag
 
@@ -74,6 +109,97 @@ const (
 	// Menu flag means that the button is a menu item
 	ButtonFlagMenu ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
 )
+
+func (bt *Button) OnInit() {
+	bt.ButtonBaseHandlers()
+	bt.ButtonStyles()
+}
+
+func (bt *Button) ButtonStyles() {
+	bt.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable)
+		s.SetAbilities(bt.ShortcutTooltip() != "", states.LongHoverable)
+		s.Cursor = cursors.Pointer
+		s.Border.Radius = styles.BorderRadiusFull
+		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
+		if !bt.Icon.IsNil() {
+			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
+		}
+		if bt.Text == "" {
+			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
+		}
+		s.Text.Align = styles.AlignCenter
+		s.MaxBoxShadow = styles.BoxShadow1()
+		switch bt.Type {
+		case ButtonFilled:
+			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+			s.Color = colors.Scheme.Primary.On
+			if s.Is(states.Focused) {
+				s.Border.Color.Set(colors.Scheme.OnSurface) // primary is too hard to see
+			}
+		case ButtonTonal:
+			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Color = colors.Scheme.Secondary.OnContainer
+		case ButtonElevated:
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			s.Color = colors.Scheme.Primary.Base
+			s.MaxBoxShadow = styles.BoxShadow2()
+			s.BoxShadow = styles.BoxShadow1()
+		case ButtonOutlined:
+			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+			s.Color = colors.Scheme.Primary.Base
+			s.Border.Style.Set(styles.BorderSolid)
+			s.Border.Color.Set(colors.Scheme.Outline)
+			s.Border.Width.Set(units.Dp(1))
+		case ButtonText:
+			s.Color = colors.Scheme.Primary.Base
+		}
+		if s.Is(states.Hovered) {
+			s.BoxShadow = s.MaxBoxShadow
+		}
+	})
+}
+
+func (bt *Button) OnChildAdded(child ki.Ki) {
+	w, _ := AsWidget(child)
+	switch w.Name() {
+	case "icon":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
+		})
+	case "space":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(0.5)
+			s.MinWidth.SetEm(0.5)
+		})
+	case "label":
+		label := w.(*Label)
+		label.Type = LabelLabelLarge
+		w.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, states.Selectable, states.DoubleClickable)
+			s.Cursor = cursors.None
+			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = styles.AlignMiddle
+		})
+	case "ind-stretch":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(0.5)
+		})
+	case "indicator":
+		w.AddStyles(func(s *styles.Style) {
+			s.Width.SetEm(1.125)
+			s.Height.SetEm(1.125)
+			s.Margin.Set()
+			s.Padding.Set()
+			s.AlignV = styles.AlignBottom
+		})
+	}
+}
 
 // see menus.go for MakeMenuFunc, etc
 
@@ -86,6 +212,14 @@ func (bb *Button) SetAsMenu() {
 // or a menu function then it will still behave as a menu
 func (bb *Button) SetAsButton() {
 	bb.SetFlag(false, ButtonFlagMenu)
+}
+
+// SetType sets the styling type of the button
+func (bt *Button) SetType(typ ButtonTypes) *Button {
+	updt := bt.UpdateStart()
+	bt.Type = typ
+	bt.UpdateEndLayout(updt)
+	return bt
 }
 
 // LabelWidget returns the label widget if present
@@ -109,15 +243,15 @@ func (bb *Button) IconWidget() *Icon {
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Text directly followed by ReConfig()
-func (bb *Button) SetText(txt string) ButtonWidget {
+func (bb *Button) SetText(txt string) *Button {
 	if bb.Text == txt {
-		return bb.This().(ButtonWidget)
+		return bb
 	}
 	updt := bb.UpdateStart()
 	recfg := bb.Parts == nil || (bb.Text == "" && txt != "") || (bb.Text != "" && txt == "")
 	bb.Text = txt
 	if recfg {
-		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
+		bb.ConfigParts(bb.Sc)
 	} else {
 		lbl := bb.LabelWidget()
 		if lbl != nil {
@@ -125,22 +259,22 @@ func (bb *Button) SetText(txt string) ButtonWidget {
 		}
 	}
 	bb.UpdateEndLayout(updt) // todo: could optimize to not re-layout every time but..
-	return bb.This().(ButtonWidget)
+	return bb
 }
 
 // SetIcon sets the Icon to given icon name (could be empty or 'none') and
 // updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
 // Otherwise, can set Icon directly followed by ReConfig()
-func (bb *Button) SetIcon(iconName icons.Icon) ButtonWidget {
+func (bb *Button) SetIcon(iconName icons.Icon) *Button {
 	if bb.Icon == iconName {
-		return bb.This().(ButtonWidget)
+		return bb
 	}
 	updt := bb.UpdateStart()
 	recfg := (bb.Icon == "" && iconName != "") || (bb.Icon != "" && iconName == "")
 	bb.Icon = iconName
 	if recfg {
-		bb.This().(ButtonWidget).ConfigParts(bb.Sc)
+		bb.ConfigParts(bb.Sc)
 	} else {
 		ic := bb.IconWidget()
 		if ic != nil {
@@ -148,12 +282,13 @@ func (bb *Button) SetIcon(iconName icons.Icon) ButtonWidget {
 		}
 	}
 	bb.UpdateEndLayout(updt)
-	return bb.This().(ButtonWidget)
+	return bb
 }
 
 // HasMenu returns true if there is a menu or menu-making function set, or the
 // explicit ButtonFlagMenu has been set
 func (bb *Button) HasMenu() bool {
+	// we're not even using ButtonFlagMenu!
 	return bb.MakeMenuFunc != nil || len(bb.Menu) > 0
 }
 
@@ -281,50 +416,8 @@ func (bb *Button) ButtonBaseHandlers() {
 	bb.ClickOnEnterSpace()
 }
 
-///////////////////////////////////////////////////////////
-//   ButtonWidget
-
-// ButtonWidget is an interface for button widgets allowing ButtonBase
-// defaults to handle most cases.
-type ButtonWidget interface {
-	Widget
-
-	// AsButtonBase gets the button base for most basic functions -- reduces
-	// interface size.
-	AsButtonBase() *Button
-
-	// ConfigParts configures the parts of the button -- called during init
-	// and style.
-	ConfigParts(sc *Scene)
-
-	// SetText sets the text and updates the button.
-	// Use this for optimized auto-updating based on nature of changes made.
-	// Otherwise, can set Text directly followed by ReConfig()
-	SetText(txt string) ButtonWidget
-
-	// SetIcon sets the Icon to given icon name (could be empty or 'none') and
-	// updates the button.
-	// Use this for optimized auto-updating based on nature of changes made.
-	// Otherwise, can set Icon directly followed by ReConfig()
-	SetIcon(iconName icons.Icon) ButtonWidget
-}
-
-///////////////////////////////////////////////////////////
-// ButtonBase Widget and ButtonwWidget interface
-
-func AsButtonBase(k ki.Ki) *Button {
-	if ac, ok := k.(ButtonWidget); ok {
-		return ac.AsButtonBase()
-	}
-	return nil
-}
-
-func (bb *Button) AsButtonBase() *Button {
-	return bb
-}
-
 func (bb *Button) ConfigWidget(sc *Scene) {
-	bb.This().(ButtonWidget).ConfigParts(sc)
+	bb.ConfigParts(sc)
 }
 
 func (bb *Button) ConfigParts(sc *Scene) {
@@ -412,136 +505,4 @@ func (bb *Button) Destroy() {
 	if bb.Menu != nil {
 		bb.Menu.DeleteShortcuts(bb.EventMgr())
 	}
-}
-
-// ButtonTypes is an enum containing the
-// different possible types of buttons
-type ButtonTypes int //enums:enum
-
-const (
-	// ButtonFilled is a filled button with a
-	// contrasting background color. It should be
-	// used for prominent actions, typically those
-	// that are the final in a sequence. It is equivalent
-	// to Material Design's filled button.
-	ButtonFilled ButtonTypes = iota
-	// ButtonTonal is a filled button, similar
-	// to [ButtonFilled]. It is used for the same purposes,
-	// but it has a lighter background color and less emphasis.
-	// It is equivalent to Material Design's filled tonal button.
-	ButtonTonal
-	// ButtonElevated is an elevated button with
-	// a light background color and a shadow.
-	// It is equivalent to Material Design's elevated button.
-	ButtonElevated
-	// ButtonOutlined is an outlined button that is
-	// used for secondary actions that are still important.
-	// It is equivalent to Material Design's outlined button.
-	ButtonOutlined
-	// ButtonText is a low-importance button with only
-	// text and/or an icon and no border, background color,
-	// or shadow. They should only be used for low emphasis
-	// actions, and you must ensure they stand out from the
-	// surrounding context sufficiently. It is equivalent
-	// to Material Design's text and icon buttons.
-	ButtonText
-)
-
-func (bt *Button) OnInit() {
-	bt.ButtonBaseHandlers()
-	bt.ButtonStyles()
-}
-
-func (bt *Button) ButtonStyles() {
-	bt.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable)
-		s.SetAbilities(bt.ShortcutTooltip() != "", states.LongHoverable)
-		s.Cursor = cursors.Pointer
-		s.Border.Radius = styles.BorderRadiusFull
-		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
-		if !bt.Icon.IsNil() {
-			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
-		}
-		if bt.Text == "" {
-			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
-		}
-		s.Text.Align = styles.AlignCenter
-		s.MaxBoxShadow = styles.BoxShadow1()
-		switch bt.Type {
-		case ButtonFilled:
-			s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
-			s.Color = colors.Scheme.Primary.On
-			if s.Is(states.Focused) {
-				s.Border.Color.Set(colors.Scheme.OnSurface) // primary is too hard to see
-			}
-		case ButtonTonal:
-			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
-			s.Color = colors.Scheme.Secondary.OnContainer
-		case ButtonElevated:
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-			s.Color = colors.Scheme.Primary.Base
-			s.MaxBoxShadow = styles.BoxShadow2()
-			s.BoxShadow = styles.BoxShadow1()
-		case ButtonOutlined:
-			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-			s.Color = colors.Scheme.Primary.Base
-			s.Border.Style.Set(styles.BorderSolid)
-			s.Border.Color.Set(colors.Scheme.Outline)
-			s.Border.Width.Set(units.Dp(1))
-		case ButtonText:
-			s.Color = colors.Scheme.Primary.Base
-		}
-		if s.Is(states.Hovered) {
-			s.BoxShadow = s.MaxBoxShadow
-		}
-	})
-}
-
-func (bt *Button) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "icon":
-		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "space":
-		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-			s.MinWidth.SetEm(0.5)
-		})
-	case "label":
-		label := w.(*Label)
-		label.Type = LabelLabelLarge
-		w.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Selectable, states.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-		})
-	case "ind-stretch":
-		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "indicator":
-		w.AddStyles(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignBottom
-		})
-	}
-}
-
-// SetType sets the styling type of the button
-func (bt *Button) SetType(typ ButtonTypes) *Button {
-	updt := bt.UpdateStart()
-	bt.Type = typ
-	bt.UpdateEndLayout(updt)
-	return bt
 }
