@@ -393,9 +393,9 @@ var PreferencesProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi any, act *Action) {
+				"updtfunc": func(pfi any, bt *Button) {
 					pf := pfi.(*Preferences)
-					act.SetEnabledState(pf.Changed)
+					bt.SetEnabledState(pf.Changed)
 				},
 			}},
 			{"sep-color", ki.BlankProp{}},
@@ -429,9 +429,9 @@ var PreferencesProps = ki.Props{
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
 			"icon": icons.Save,
-			"updtfunc": func(pfi any, act *Action) {
+			"updtfunc": func(pfi any, bt *Button) {
 				pf := pfi.(*Preferences)
-				act.SetEnabledStateUpdt(pf.Changed)
+				bt.SetEnabledStateUpdt(pf.Changed)
 			},
 		}},
 		{"sep-color", ki.BlankProp{}},
@@ -927,9 +927,9 @@ var PrefsDetailedProps = ki.Props{
 			}},
 			{"Save", ki.Props{
 				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi any, act *Action) {
+				"updtfunc": func(pfi any, bt *Button) {
 					pf := pfi.(*PrefsDetailed)
-					act.SetEnabledState(pf.Changed)
+					bt.SetEnabledState(pf.Changed)
 				},
 			}},
 			{"Close RenderWin", ki.BlankProp{}},
@@ -946,9 +946,9 @@ var PrefsDetailedProps = ki.Props{
 		{"Save", ki.Props{
 			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
 			"icon": icons.Save,
-			"updtfunc": func(pfi any, act *Action) {
+			"updtfunc": func(pfi any, bt *Button) {
 				pf := pfi.(*PrefsDetailed)
-				act.SetEnabledStateUpdt(pf.Changed)
+				bt.SetEnabledStateUpdt(pf.Changed)
 			},
 		}},
 	},
