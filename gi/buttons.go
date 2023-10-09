@@ -78,7 +78,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 
 // ButtonTypes is an enum containing the
 // different possible types of buttons
-type ButtonTypes int //enums:enum
+type ButtonTypes int //enums:enum -trimprefix Button
 
 const (
 	// ButtonFilled is a filled button with a
