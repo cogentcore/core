@@ -359,16 +359,17 @@ func (ly *Layout) HasAnyScroll() bool {
 func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	if ly.Scrolls[d] == nil {
 		ly.Scrolls[d] = &Slider{}
-		sb := ly.Scrolls[d]
-		sb.InitName(sb, fmt.Sprintf("Scroll%v", d))
-		ki.SetParent(sb, ly.This())
+		sr := ly.Scrolls[d]
+		sr.InitName(sr, fmt.Sprintf("Scroll%v", d))
+		ki.SetParent(sr, ly.This())
 		// sb.SetFlag(true, ki.Field)
-		sb.Sc = sc
-		sb.Dim = d
-		sb.Config(sc)
-		sb.Tracking = true
-		sb.Min = 0.0
-		sb.OnChange(func(e events.Event) {
+		sr.SetType(SliderScrollbar)
+		sr.Sc = sc
+		sr.Dim = d
+		sr.Config(sc)
+		sr.Tracking = true
+		sr.Min = 0.0
+		sr.OnChange(func(e events.Event) {
 			e.SetHandled()
 			// fmt.Println("change event")
 			ly.SetNeedsLayout(sc, true)

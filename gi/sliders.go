@@ -232,6 +232,14 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	}
 }
 
+// SetType sets the type of the slider
+func (sr *Slider) SetType(typ SliderTypes) *Slider {
+	updt := sr.UpdateStart()
+	sr.Type = typ
+	sr.UpdateEndLayout(updt)
+	return sr
+}
+
 // SnapValue snaps the value to step sizes if snap option is set
 func (sb *Slider) SnapValue() {
 	if !sb.Snap {
