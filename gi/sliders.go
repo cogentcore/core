@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"sync"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -701,6 +700,10 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	}
 }
 
+// TODO(kai): ProgressBar
+
+/*
+
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ProgressBar
 
@@ -776,3 +779,4 @@ func (pb *ProgressBar) ProgStep() {
 	}
 	pb.ProgMu.Unlock()
 }
+*/

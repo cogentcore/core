@@ -138,67 +138,6 @@ func (t *Bitmap) New() ki.Ki {
 	return &Bitmap{}
 }
 
-// ButtonBoxType is the [gti.Type] for [ButtonBox]
-var ButtonBoxType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ButtonBox",
-	ShortName: "gi.ButtonBox",
-	IDName:    "button-box",
-	Doc:       "ButtonBox is a widget for containing a set of CheckBox buttons.\nIt can optionally enforce mutual excusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (checbox button labels)", Directives: gti.Directives{}}},
-		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
-		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", Doc: "make the items mutually exclusive -- checking one turns off all the others", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ButtonBox{},
-})
-
-// NewButtonBox adds a new [ButtonBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBox(par ki.Ki, name ...string) *ButtonBox {
-	return par.NewChild(ButtonBoxType, name...).(*ButtonBox)
-}
-
-// KiType returns the [*gti.Type] of [ButtonBox]
-func (t *ButtonBox) KiType() *gti.Type {
-	return ButtonBoxType
-}
-
-// New returns a new [*ButtonBox] value
-func (t *ButtonBox) New() ki.Ki {
-	return &ButtonBox{}
-}
-
-// ButtonBoxEmbedder is an interface that all types that embed ButtonBox satisfy
-type ButtonBoxEmbedder interface {
-	AsButtonBox() *ButtonBox
-}
-
-// AsButtonBox returns the given value as a value of type ButtonBox if the type
-// of the given value embeds ButtonBox, or nil otherwise
-func AsButtonBox(k ki.Ki) *ButtonBox {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ButtonBoxEmbedder); ok {
-		return t.AsButtonBox()
-	}
-	return nil
-}
-
-// AsButtonBox satisfies the [ButtonBoxEmbedder] interface
-func (t *ButtonBox) AsButtonBox() *ButtonBox {
-	return t
-}
-
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Button",
@@ -266,6 +205,67 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
+// ButtonBoxType is the [gti.Type] for [ButtonBox]
+var ButtonBoxType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.ButtonBox",
+	ShortName: "gi.ButtonBox",
+	IDName:    "button-box",
+	Doc:       "ButtonBox is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (switch labels)", Directives: gti.Directives{}}},
+		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
+		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", Doc: "make the items mutually exclusive -- checking one turns off all the others", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &ButtonBox{},
+})
+
+// NewButtonBox adds a new [ButtonBox] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewButtonBox(par ki.Ki, name ...string) *ButtonBox {
+	return par.NewChild(ButtonBoxType, name...).(*ButtonBox)
+}
+
+// KiType returns the [*gti.Type] of [ButtonBox]
+func (t *ButtonBox) KiType() *gti.Type {
+	return ButtonBoxType
+}
+
+// New returns a new [*ButtonBox] value
+func (t *ButtonBox) New() ki.Ki {
+	return &ButtonBox{}
+}
+
+// ButtonBoxEmbedder is an interface that all types that embed ButtonBox satisfy
+type ButtonBoxEmbedder interface {
+	AsButtonBox() *ButtonBox
+}
+
+// AsButtonBox returns the given value as a value of type ButtonBox if the type
+// of the given value embeds ButtonBox, or nil otherwise
+func AsButtonBox(k ki.Ki) *ButtonBox {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ButtonBoxEmbedder); ok {
+		return t.AsButtonBox()
+	}
+	return nil
+}
+
+// AsButtonBox satisfies the [ButtonBoxEmbedder] interface
+func (t *ButtonBox) AsButtonBox() *ButtonBox {
+	return t
+}
+
 // ComboBoxType is the [gti.Type] for [ComboBox]
 var ComboBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ComboBox",
@@ -274,13 +274,14 @@ var ComboBoxType = gti.AddType(&gti.Type{
 	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [icons.Icon] type, then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}}},
+		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}}},
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", Doc: "current selected value", Directives: gti.Directives{}}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
-		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -787,16 +788,17 @@ func (t *Scene) New() ki.Ki {
 	return &Scene{}
 }
 
-// SliderBaseType is the [gti.Type] for [SliderBase]
-var SliderBaseType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.SliderBase",
-	ShortName: "gi.SliderBase",
-	IDName:    "slider-base",
-	Doc:       "SliderBase has common slider functionality -- two major modes: ValThumb =\nfalse is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size\n- thumbsize",
+// SliderType is the [gti.Type] for [Slider]
+var SliderType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Slider",
+	ShortName: "gi.Slider",
+	IDName:    "slider",
+	Doc:       "Slider is a slideable widget that provides slider functionality for two major modes.\nValThumb = false is a slider with a fixed-size thumb knob, while = true has a thumb\nthat represents a value, as in a scrollbar, and the scrolling range is size - thumbsize",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "SliderTypes", Doc: "the type of the slider", Directives: gti.Directives{}}},
 		{"Value", &gti.Field{Name: "Value", Type: "float32", Doc: "current value", Directives: gti.Directives{}}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}}},
 		{"Min", &gti.Field{Name: "Min", Type: "float32", Doc: "minimum value in range", Directives: gti.Directives{}}},
@@ -826,61 +828,6 @@ var SliderBaseType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SliderBase{},
-})
-
-// NewSliderBase adds a new [SliderBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSliderBase(par ki.Ki, name ...string) *SliderBase {
-	return par.NewChild(SliderBaseType, name...).(*SliderBase)
-}
-
-// KiType returns the [*gti.Type] of [SliderBase]
-func (t *SliderBase) KiType() *gti.Type {
-	return SliderBaseType
-}
-
-// New returns a new [*SliderBase] value
-func (t *SliderBase) New() ki.Ki {
-	return &SliderBase{}
-}
-
-// SliderBaseEmbedder is an interface that all types that embed SliderBase satisfy
-type SliderBaseEmbedder interface {
-	AsSliderBase() *SliderBase
-}
-
-// AsSliderBase returns the given value as a value of type SliderBase if the type
-// of the given value embeds SliderBase, or nil otherwise
-func AsSliderBase(k ki.Ki) *SliderBase {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SliderBaseEmbedder); ok {
-		return t.AsSliderBase()
-	}
-	return nil
-}
-
-// AsSliderBase satisfies the [SliderBaseEmbedder] interface
-func (t *SliderBase) AsSliderBase() *SliderBase {
-	return t
-}
-
-// SliderType is the [gti.Type] for [Slider]
-var SliderType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Slider",
-	ShortName:  "gi.Slider",
-	IDName:     "slider",
-	Doc:        "Slider is a standard value slider with a fixed-sized thumb knob -- if an\nIcon is set, it is used for the knob of the slider",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SliderBase", &gti.Field{Name: "SliderBase", Type: "SliderBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Slider{},
 })
 
@@ -902,75 +849,26 @@ func (t *Slider) New() ki.Ki {
 	return &Slider{}
 }
 
-// ScrollBarType is the [gti.Type] for [ScrollBar]
-var ScrollBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ScrollBar",
-	ShortName:  "gi.ScrollBar",
-	IDName:     "scroll-bar",
-	Doc:        "ScrollBar has a proportional thumb size reflecting amount of content visible",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SliderBase", &gti.Field{Name: "SliderBase", Type: "SliderBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ScrollBar{},
-})
-
-// NewScrollBar adds a new [ScrollBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewScrollBar(par ki.Ki, name ...string) *ScrollBar {
-	return par.NewChild(ScrollBarType, name...).(*ScrollBar)
+// SliderEmbedder is an interface that all types that embed Slider satisfy
+type SliderEmbedder interface {
+	AsSlider() *Slider
 }
 
-// KiType returns the [*gti.Type] of [ScrollBar]
-func (t *ScrollBar) KiType() *gti.Type {
-	return ScrollBarType
+// AsSlider returns the given value as a value of type Slider if the type
+// of the given value embeds Slider, or nil otherwise
+func AsSlider(k ki.Ki) *Slider {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SliderEmbedder); ok {
+		return t.AsSlider()
+	}
+	return nil
 }
 
-// New returns a new [*ScrollBar] value
-func (t *ScrollBar) New() ki.Ki {
-	return &ScrollBar{}
-}
-
-// ProgressBarType is the [gti.Type] for [ProgressBar]
-var ProgressBarType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ProgressBar",
-	ShortName:  "gi.ProgressBar",
-	IDName:     "progress-bar",
-	Doc:        "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ProgMax", &gti.Field{Name: "ProgMax", Type: "int", Doc: "maximum amount of progress to be achieved", Directives: gti.Directives{}}},
-		{"ProgInc", &gti.Field{Name: "ProgInc", Type: "int", Doc: "progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten", Directives: gti.Directives{}}},
-		{"ProgCur", &gti.Field{Name: "ProgCur", Type: "int", Doc: "current progress level", Directives: gti.Directives{}}},
-		{"ProgMu", &gti.Field{Name: "ProgMu", Type: "sync.Mutex", Doc: "mutex for updating progress", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ScrollBar", &gti.Field{Name: "ScrollBar", Type: "ScrollBar", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ProgressBar{},
-})
-
-// NewProgressBar adds a new [ProgressBar] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewProgressBar(par ki.Ki, name ...string) *ProgressBar {
-	return par.NewChild(ProgressBarType, name...).(*ProgressBar)
-}
-
-// KiType returns the [*gti.Type] of [ProgressBar]
-func (t *ProgressBar) KiType() *gti.Type {
-	return ProgressBarType
-}
-
-// New returns a new [*ProgressBar] value
-func (t *ProgressBar) New() ki.Ki {
-	return &ProgressBar{}
+// AsSlider satisfies the [SliderEmbedder] interface
+func (t *Slider) AsSlider() *Slider {
+	return t
 }
 
 // SpinBoxType is the [gti.Type] for [SpinBox]
@@ -1102,42 +1000,6 @@ func AsSplitView(k ki.Ki) *SplitView {
 // AsSplitView satisfies the [SplitViewEmbedder] interface
 func (t *SplitView) AsSplitView() *SplitView {
 	return t
-}
-
-// SplitterType is the [gti.Type] for [Splitter]
-var SplitterType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Splitter",
-	ShortName:  "gi.Splitter",
-	IDName:     "splitter",
-	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplitView, with draggable resizing of the splitter -- parent is Parts\nlayout of the SplitView -- based on SliderBase",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SplitterNo", &gti.Field{Name: "SplitterNo", Type: "int", Doc: "splitter number this one is", Directives: gti.Directives{}}},
-		{"OrigWinBBox", &gti.Field{Name: "OrigWinBBox", Type: "image.Rectangle", Doc: "copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SliderBase", &gti.Field{Name: "SliderBase", Type: "SliderBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Splitter{},
-})
-
-// NewSplitter adds a new [Splitter] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSplitter(par ki.Ki, name ...string) *Splitter {
-	return par.NewChild(SplitterType, name...).(*Splitter)
-}
-
-// KiType returns the [*gti.Type] of [Splitter]
-func (t *Splitter) KiType() *gti.Type {
-	return SplitterType
-}
-
-// New returns a new [*Splitter] value
-func (t *Splitter) New() ki.Ki {
-	return &Splitter{}
 }
 
 // SwitchType is the [gti.Type] for [Switch]
