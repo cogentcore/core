@@ -611,16 +611,16 @@ func (dv *DiffView) ConfigWidget(vp *gi.Scene) {
 	dv.UpdateEnd(updt)
 }
 
-func (dv *DiffView) FileModifiedUpdateA(act *gi.Action) {
-	act.SetEnabledStateUpdt(dv.BufA.IsChanged())
+func (dv *DiffView) FileModifiedUpdateA(bt *gi.Button) {
+	bt.SetEnabledStateUpdt(dv.BufA.IsChanged())
 }
 
-func (dv *DiffView) FileModifiedUpdateB(act *gi.Action) {
-	act.SetEnabledStateUpdt(dv.BufB.IsChanged())
+func (dv *DiffView) FileModifiedUpdateB(bt *gi.Button) {
+	bt.SetEnabledStateUpdt(dv.BufB.IsChanged())
 }
 
-func (dv *DiffView) HasDiffsUpdate(act *gi.Action) {
-	act.SetEnabledStateUpdt(len(dv.AlignD) > 1) // always has at least 1
+func (dv *DiffView) HasDiffsUpdate(bt *gi.Button) {
+	bt.SetEnabledStateUpdt(len(dv.AlignD) > 1) // always has at least 1
 }
 
 func (dv *DiffView) ConfigToolBar() {
@@ -630,28 +630,28 @@ func (dv *DiffView) ConfigToolBar() {
 		txta += ": " + dv.RevA
 	}
 	gi.NewLabel(tb, "label-a", txta)
-	tb.AddAction(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.NextDiff(0)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.PrevDiff(0)
 		})
-	tb.AddAction(gi.ActOpts{Label: "A <- B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in B, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "A <- B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in B, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.ApplyDiff(0, -1)
 			dvv.NextDiff(0)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A <- B)", UpdateFunc: dv.FileModifiedUpdateA},
+	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A <- B)", UpdateFunc: dv.FileModifiedUpdateA},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.UndoDiff(0)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA},
+	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			CallMethod(dvv, "SaveFileA", dv.Scene)
@@ -663,28 +663,28 @@ func (dv *DiffView) ConfigToolBar() {
 		txtb += ": " + dv.RevB
 	}
 	gi.NewLabel(tb, "label-b", txtb)
-	tb.AddAction(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.NextDiff(1)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.PrevDiff(1)
 		})
-	tb.AddAction(gi.ActOpts{Label: "A -> B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in A, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
+	tb.AddButton(gi.ActOpts{Label: "A -> B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in A, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.ApplyDiff(1, -1)
 			dvv.NextDiff(1)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A -> B)", UpdateFunc: dv.FileModifiedUpdateB},
+	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A -> B)", UpdateFunc: dv.FileModifiedUpdateB},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			dvv.UndoDiff(1)
 		})
-	tb.AddAction(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB},
+	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB},
 		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			dvv := recv.Embed(TypeDiffView).(*DiffView)
 			CallMethod(dvv, "SaveFileB", dv.Scene)
@@ -709,7 +709,7 @@ func (dv *DiffView) SetTextNames() {
 
 func (dv *DiffView) UpdateToolBar() {
 	tb := dv.ToolBar()
-	tb.UpdateActions()
+	tb.UpdateButtons()
 }
 
 func (dv *DiffView) ToolBar() *gi.ToolBar {
