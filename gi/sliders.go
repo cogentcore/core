@@ -41,6 +41,9 @@ type SliderPositioner interface {
 type Slider struct {
 	WidgetBase
 
+	// the type of the slider
+	Type SliderTypes `desc:"the type of the slider"`
+
 	// current value
 	Value float32 `xml:"value" desc:"current value"`
 
@@ -121,6 +124,17 @@ type Slider struct {
 	SlideStartPos float32 `inactive:"+" desc:"underlying drag position of slider -- not subject to snapping"`
 }
 
+// SliderTypes are the different types of sliders
+type SliderTypes int32 //enums:enum -trimprefix Slider
+
+const (
+	// SliderSlider indicates a standard, user-controllable slider
+	// for setting a numeric value
+	SliderSlider SliderTypes = iota
+	// SliderScrollbar indicates a slider acting as a scrollbar for content
+	SliderScrollbar
+)
+
 func (sb *Slider) CopyFieldsFrom(frm any) {
 	fr := frm.(*Slider)
 	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -157,19 +171,27 @@ func (sb *Slider) OnInit() {
 }
 
 func (sr *Slider) SliderStyles() {
-	sr.ThumbSize = units.Em(1.5)
-	sr.ThSize = 25.0
-	sr.ThSizeReal = sr.ThSize
-
 	sr.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		sr.ThumbSize = units.Dp(20)
 
-		// we use a different color for the thumb and value color so that
-		// they get the correct state layer
+		// we use a different color for the thumb and value color
+		// (compared to the background color) so that they get the
+		// correct state layer
 		s.Color = colors.Scheme.Primary.On
-		sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
-		sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
+
+		if sr.Type == SliderSlider {
+			sr.ThumbSize = units.Em(1.5)
+			sr.ThSize = 25.0
+			sr.ThSizeReal = sr.ThSize
+			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
+			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
+		} else {
+			sr.ValThumb = true
+			sr.ThumbSize = units.Ex(1)
+			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
+			sr.ThumbColor.SetSolid(colors.Transparent)
+		}
+
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 
@@ -677,107 +699,6 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		pc.FillStrokeClear(rs)
 		sr.RenderUnlock(rs)
 	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  ScrollBar
-
-// ScrollBar has a proportional thumb size reflecting amount of content visible
-type ScrollBar struct {
-	SliderBase
-}
-
-func (sb *ScrollBar) CopyFieldsFrom(frm any) {
-	fr := frm.(*ScrollBar)
-	sb.SliderBase.CopyFieldsFrom(&fr.SliderBase)
-}
-
-func (sb *ScrollBar) OnInit() {
-	sb.SliderBase.OnInit()
-	sb.SliderBaseHandlers()
-	sb.ScrollBarStyles()
-}
-
-func (sb *ScrollBar) ScrollBarStyles() {
-	sb.ValThumb = true
-	sb.ThumbSize = units.Ex(1)
-
-	sb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		sb.StyleBox.Border.Style.Set(styles.BorderNone)
-
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Color = colors.Scheme.OnSurface
-
-		sb.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
-		sb.ThumbColor.SetSolid(colors.Transparent)
-		sb.ValueColor = s.StateBackgroundColor(sb.ValueColor)
-
-		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Radius = styles.BorderRadiusFull
-		s.Cursor = cursors.Grab
-		switch {
-		case s.Is(states.Sliding):
-			s.Cursor = cursors.Grabbing
-		case s.Is(states.Active):
-			s.Cursor = cursors.Grabbing
-		}
-	})
-}
-
-func (sb *ScrollBar) ConfigWidget(sc *Scene) {
-	sb.ConfigSlider(sc)
-}
-
-func (sb *ScrollBar) ApplyStyle(sc *Scene) {
-	sb.SetCanFocusIfActive()
-	sb.StyleSlider(sc)
-}
-
-func (sb *ScrollBar) GetSize(sc *Scene, iter int) {
-	sb.InitLayout(sc)
-}
-
-func (sb *ScrollBar) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(sc, parBBox, iter)
-	sb.DoLayoutParts(sc, parBBox, iter)
-	sb.SizeFromAlloc()
-	return sb.DoLayoutChildren(sc, iter)
-}
-
-func (sb *ScrollBar) Render(sc *Scene) {
-	if !sb.Off && sb.PushBounds(sc) {
-		sb.RenderDefaultStyle(sc)
-		// sb.RenderChildren(sc)
-		sb.PopBounds(sc)
-	}
-}
-
-// render using a default style if not otherwise styled
-func (sb *ScrollBar) RenderDefaultStyle(sc *Scene) {
-	rs, pc, st := sb.RenderLock(sc)
-	defer sb.RenderUnlock(rs)
-
-	// overall fill box
-	sb.RenderStdBox(sc, &sb.StyleBox)
-
-	// pc.StrokeStyle.SetColor(&st.Border.Color)
-	// pc.StrokeStyle.Width = st.Border.Width
-
-	// need to apply state layer
-	ebg := st.StateBackgroundColor(st.BackgroundColor)
-	pc.FillStyle.SetFullColor(&ebg)
-
-	// scrollbar is basic box in content size
-	spc := st.BoxSpace()
-	pos := sb.LayState.Alloc.Pos.Add(spc.Pos())
-	sz := sb.LayState.Alloc.Size.Sub(spc.Size())
-
-	sb.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
-	pos.SetAddDim(sb.Dim, sb.Pos)            // start of thumb
-	sz.SetDim(sb.Dim, sb.ThSize)
-	pc.FillStyle.SetFullColor(&sb.ValueColor)
-	sb.RenderBoxImpl(sc, pos, sz, st.Border)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
