@@ -116,12 +116,10 @@ func (cb *ComboBox) ComboBoxStyles() {
 				s.Border.Color.Set()
 				s.Border.Color.Bottom = colors.Scheme.OnSurfaceVariant
 				s.Border.Radius = styles.BorderRadiusExtraSmallTop
-				// if cb.HasFlagWithin(CanFocus) {
-				// todo:
-				s.Border.Width.Bottom = units.Dp(2)
-				s.Border.Color.Bottom = colors.Scheme.Primary.Base
-				// }
-
+				if s.Is(states.FocusedWithin) {
+					s.Border.Width.Bottom = units.Dp(2)
+					s.Border.Color.Bottom = colors.Scheme.Primary.Base
+				}
 			}
 		case ComboBoxOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
@@ -129,11 +127,10 @@ func (cb *ComboBox) ComboBoxStyles() {
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
 			if cb.Editable {
 				s.Border.Radius = styles.BorderRadiusExtraSmall
-				// if cb.HasFlagWithin(CanFocus) {
-				// todo:
-				s.Border.Width.Set(units.Dp(2))
-				s.Border.Color.Set(colors.Scheme.Primary.Base)
-				// }
+				if s.Is(states.FocusedWithin) {
+					s.Border.Width.Set(units.Dp(2))
+					s.Border.Color.Set(colors.Scheme.Primary.Base)
+				}
 			}
 		}
 		if s.Is(states.Selected) {
@@ -486,6 +483,10 @@ func (cb *ComboBox) SelectItem(idx int) *ComboBox {
 	}
 	updt := cb.UpdateStart()
 	cb.SetCurIndex(idx)
+	tf, ok := cb.TextField()
+	if ok {
+		tf.SetText(ToLabel(cb.CurVal))
+	}
 	cb.UpdateEndLayout(updt)
 	return cb
 }
@@ -598,6 +599,12 @@ func (cb *ComboBox) ComboBoxKeys() {
 			cb.Send(events.Click, e)
 			// }
 		}
+	})
+}
+
+func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
+	tf.On(events.Change, func(e events.Event) {
+		cb.ShowCurVal()
 	})
 }
 
