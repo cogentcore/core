@@ -135,7 +135,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	toggle := gi.NewSwitch(brow).SetText("Toggle")
-	toggle.On(events.Change, func(e events.Event) {
+	toggle.OnChange(func(e events.Event) {
 		fmt.Println("toggled", toggle.StateIs(states.Checked))
 	})
 
@@ -231,19 +231,19 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(20))
 		}).(*gi.TextField)
-	edit1.On(events.Change, func(e events.Event) {
+	edit1.OnChange(func(e events.Event) {
 		fmt.Println("Text:", edit1.Text())
 	})
 
 	sb := gi.NewSpinBox(txrow).SetMax(1000).SetMin(-1000).SetStep(5)
-	sb.On(events.Change, func(e events.Event) {
+	sb.OnChange(func(e events.Event) {
 		fmt.Println("spinbox value changed to", sb.Value)
 	})
 
 	cb := gi.NewComboBox(txrow, "combo").SetType(gi.ComboBoxOutlined).SetEditable(true).
 		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
-	cb.On(events.Change, func(e events.Event) {
+	cb.OnChange(func(e events.Event) {
 		fmt.Printf("ComboBox selected index: %d data: %v\n", cb.CurIndex, cb.CurVal)
 	})
 

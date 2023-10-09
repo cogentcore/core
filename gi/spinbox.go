@@ -310,7 +310,7 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 	// 	sb.SetState(true, states.Focused)
 	// 	sb.HandleEvent(e)
 	// })
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		text := tf.Text()
 		val, err := sb.StringToVal(text)
 		if err != nil {

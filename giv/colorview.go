@@ -209,7 +209,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	hex := gi.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
-	hex.On(events.Change, func(e events.Event) {
+	hex.OnChange(func(e events.Event) {
 		updt := cv.UpdateStart()
 		clr, err := colors.FromHex(hex.Text())
 		if err != nil {

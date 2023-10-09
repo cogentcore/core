@@ -263,7 +263,7 @@ func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 	}
 	dlg.Modal(true).NewWindow(false)
 	if fun != nil {
-		dlg.Stage.Scene.On(events.Change, func(e events.Event) {
+		dlg.Stage.Scene.OnChange(func(e events.Event) {
 			fun(dlg)
 		})
 	}
@@ -362,7 +362,7 @@ func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fu
 	tf.SetText(strval)
 	tf.SetStretchMaxWidth()
 	tf.SetMinPrefWidth(units.Ch(40))
-	tf.On(events.Change, func(e events.Event) {
+	tf.OnChange(func(e events.Event) {
 		dlg.Data = tf.Text()
 	})
 	return dlg
