@@ -156,7 +156,7 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 			})
 		case "label":
 			w.AddStyles(func(s *styles.Style) {
-				s.SetAbilities(false, states.Selectable)
+				s.SetAbilities(false, states.Selectable, states.DoubleClickable)
 				s.Cursor = cursors.None
 				s.Margin.Set()
 				s.Padding.Set()
