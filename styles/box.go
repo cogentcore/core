@@ -88,34 +88,34 @@ var (
 	// which creates a fully rectangular element
 	BorderRadiusNone = NewSideValues(units.Dp(0))
 	// BorderRadiusExtraSmall indicates to use extra small
-	// 4px rounded corners
+	// 4dp rounded corners
 	BorderRadiusExtraSmall = NewSideValues(units.Dp(4))
 	// BorderRadiusExtraSmallTop indicates to use extra small
-	// 4px rounded corners on the top of the element and no
+	// 4dp rounded corners on the top of the element and no
 	// border radius on the bottom of the element
 	BorderRadiusExtraSmallTop = NewSideValues(units.Dp(4), units.Dp(4), units.Dp(0), units.Dp(0))
 	// BorderRadiusSmall indicates to use small
-	// 8px rounded corners
+	// 8dp rounded corners
 	BorderRadiusSmall = NewSideValues(units.Dp(8))
 	// BorderRadiusMedium indicates to use medium
-	// 12px rounded corners
+	// 12dp rounded corners
 	BorderRadiusMedium = NewSideValues(units.Dp(12))
 	// BorderRadiusLarge indicates to use large
-	// 16px rounded corners
+	// 16dp rounded corners
 	BorderRadiusLarge = NewSideValues(units.Dp(16))
 	// BorderRadiusLargeEnd indicates to use large
-	// 16px rounded corners on the end (right side)
+	// 16dp rounded corners on the end (right side)
 	// of the element and no border radius elsewhere
 	BorderRadiusLargeEnd = NewSideValues(units.Dp(0), units.Dp(16), units.Dp(16), units.Dp(0))
 	// BorderRadiusLargeTop indicates to use large
-	// 16px rounded corners on the top of the element
+	// 16dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
 	BorderRadiusLargeTop = NewSideValues(units.Dp(16), units.Dp(16), units.Dp(0), units.Dp(0))
 	// BorderRadiusExtraLarge indicates to use extra large
-	// 28px rounded corners
+	// 28dp rounded corners
 	BorderRadiusExtraLarge = NewSideValues(units.Dp(28))
 	// BorderRadiusExtraLargeTop indicates to use extra large
-	// 28px rounded corners on the top of the element
+	// 28dp rounded corners on the top of the element
 	// and no border radius on the bottom of the element
 	BorderRadiusExtraLargeTop = NewSideValues(units.Dp(28), units.Dp(28), units.Dp(0), units.Dp(0))
 	// BorderRadiusFull indicates to use a full border radius,
