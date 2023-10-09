@@ -384,8 +384,6 @@ func (n *Node) Path() string {
 	return "/" + EscapePathName(n.Nm)
 }
 
-// TODO(kai): exclude parent and leading slash in PathFrom
-
 // PathFrom returns path to this node from given parent node, using
 // node Names separated by / and fields by .
 // Node names escape any existing / and . characters to \\ and \,
