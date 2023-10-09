@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
@@ -311,17 +312,16 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
-// ToolBar is a Layout (typically LayoutHoriz) that renders a
-// background and is useful for holding Actions that do things
+// ToolBar is a [Frame] that is useful for holding [Action]s that do things.
 //
 //goki:embedder
 type ToolBar struct {
-	Layout
+	Frame
 }
 
 func (tb *ToolBar) CopyFieldsFrom(frm any) {
 	fr := frm.(*ToolBar)
-	tb.Layout.CopyFieldsFrom(&fr.Layout)
+	tb.Frame.CopyFieldsFrom(&fr.Frame)
 }
 
 func (tb *ToolBar) OnInit() {
@@ -333,6 +333,8 @@ func (tb *ToolBar) ToolBarStyles() {
 	tb.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.Margin.Set(units.Dp(4 * Prefs.DensityMul()))
 	})
 }
 
@@ -379,40 +381,6 @@ func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
 	return sp
 }
 
-// ToolBarStdRender does the standard rendering of the bar
-func (tb *ToolBar) ToolBarStdRender(sc *Scene) {
-	rs, pc, st := tb.RenderLock(sc)
-	pos := tb.LayState.Alloc.Pos
-	sz := tb.LayState.Alloc.Size
-	bg := st.BackgroundColor
-	if st.BackgroundColor.IsNil() {
-		bg = tb.ParentBackgroundColor()
-	}
-	pc.FillBox(rs, pos, sz, &bg)
-	tb.RenderUnlock(rs)
-}
-
-func (tb *ToolBar) Render(sc *Scene) {
-	if len(tb.Kids) == 0 { // todo: check for mac menu and don't render -- also need checks higher up
-		return
-	}
-	if tb.PushBounds(sc) {
-		tb.ToolBarStdRender(sc)
-		tb.RenderScrolls(sc)
-		tb.RenderChildren(sc)
-		tb.PopBounds(sc)
-	}
-}
-
-// func (tb *ToolBar) MouseFocusEvent() {
-// 	tb.On(events.MouseEnter, func(e events.Event) {
-// 		if tb != nil {
-// 			tb.UpdateActions()
-// 		}
-// 		// do NOT mark as processed -- HiPri and not mutex
-// 	})
-// }
-
 // SetShortcuts sets the shortcuts to window associated with Toolbar
 func (tb *ToolBar) SetShortcuts() {
 	em := tb.EventMgr()
@@ -429,7 +397,7 @@ func (tb *ToolBar) SetShortcuts() {
 
 func (tb *ToolBar) Destroy() {
 	tb.DeleteShortcuts()
-	tb.Layout.Destroy()
+	tb.Frame.Destroy()
 }
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed

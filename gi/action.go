@@ -126,6 +126,8 @@ func (ac *Action) ActionStyles() {
 			s.Padding.Set(units.Em(0.25*Prefs.DensityMul()), units.Em(0.5*Prefs.DensityMul()))
 			s.Margin.Set()
 			ac.Indicator = icons.None
+			s.BackgroundColor.SetSolid(colors.Transparent)
+			s.Border.Radius = styles.BorderRadiusSmall
 		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
