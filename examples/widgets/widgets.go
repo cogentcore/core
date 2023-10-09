@@ -45,8 +45,9 @@ func app() {
 	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func(act *gi.Action) {
 		fmt.Println("Toolbar Action 1")
 		gi.NewSnackbar(tbar, gi.SnackbarOpts{
-			Text:   "Single-line snackbar with action",
-			Action: "Action",
+			Text:   "Something went wrong!",
+			Action: "Try again",
+			Icon:   icons.Close,
 		}).Run()
 	})
 
