@@ -62,11 +62,11 @@ func MainRun[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu.AddAppMenu(win)
 
 	// TODO: finish these functions
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
+	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 
@@ -89,7 +89,7 @@ func MainRun[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 			win.CloseReq()
 		})
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu.AddCopyCutPaste(win)
 
 	vp.UpdateEndNoSig(updt)
