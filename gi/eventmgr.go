@@ -921,8 +921,8 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	}
 }
 
-// AddShortcut adds given shortcut to given action.
-func (em *EventMgr) AddShortcut(chord key.Chord, act *Action) {
+// AddShortcut adds given shortcut to given button.
+func (em *EventMgr) AddShortcut(chord key.Chord, bt *Button) {
 	if chord == "" {
 		return
 	}
@@ -930,16 +930,16 @@ func (em *EventMgr) AddShortcut(chord key.Chord, act *Action) {
 		em.Shortcuts = make(Shortcuts, 100)
 	}
 	sa, exists := em.Shortcuts[chord]
-	if exists && sa != act && sa.Text != act.Text {
+	if exists && sa != bt && sa.Text != bt.Text {
 		if KeyEventTrace {
-			log.Printf("gi.RenderWin shortcut: %v already exists on action: %v -- will be overwritten with action: %v\n", chord, sa.Text, act.Text)
+			log.Printf("gi.RenderWin shortcut: %v already exists on button: %v -- will be overwritten with button: %v\n", chord, sa.Text, bt.Text)
 		}
 	}
-	em.Shortcuts[chord] = act
+	em.Shortcuts[chord] = bt
 }
 
 // DeleteShortcut deletes given shortcut
-func (em *EventMgr) DeleteShortcut(chord key.Chord, act *Action) {
+func (em *EventMgr) DeleteShortcut(chord key.Chord, bt *Button) {
 	if chord == "" {
 		return
 	}
@@ -947,17 +947,17 @@ func (em *EventMgr) DeleteShortcut(chord key.Chord, act *Action) {
 		return
 	}
 	sa, exists := em.Shortcuts[chord]
-	if exists && sa == act {
+	if exists && sa == bt {
 		delete(em.Shortcuts, chord)
 	}
 }
 
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
-// actions, and does not trigger for Inactive actions.
+// buttons, and does not trigger for Inactive buttons.
 func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
-		fmt.Printf("Shortcut chord: %v -- looking for action\n", chord)
+		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)
 	}
 	if em.Shortcuts == nil {
 		return false
@@ -972,13 +972,13 @@ func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	}
 	if sa.IsDisabled() {
 		if KeyEventTrace {
-			fmt.Printf("Shortcut chord: %v, action: %v -- is inactive, not fired\n", chord, sa.Text)
+			fmt.Printf("Shortcut chord: %v, button: %v -- is inactive, not fired\n", chord, sa.Text)
 		}
 		return false
 	}
 
 	if KeyEventTrace {
-		fmt.Printf("Shortcut chord: %v, action: %v triggered\n", chord, sa.Text)
+		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
 	sa.Send(events.Click, nil)
 	return true
