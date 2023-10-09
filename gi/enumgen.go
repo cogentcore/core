@@ -12,124 +12,124 @@ import (
 	"goki.dev/ki/v2"
 )
 
-var _ActionTypesValues = []ActionTypes{0, 1, 2, 3, 4}
+var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4}
 
-// ActionTypesN is the highest valid value
-// for type ActionTypes, plus one.
-const ActionTypesN ActionTypes = 5
+// ButtonTypesN is the highest valid value
+// for type ButtonTypes, plus one.
+const ButtonTypesN ButtonTypes = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _ActionTypesNoOp() {
+func _ButtonTypesNoOp() {
 	var x [1]struct{}
-	_ = x[ActionStandalone-(0)]
-	_ = x[ActionParts-(1)]
-	_ = x[ActionMenu-(2)]
-	_ = x[ActionMenuBar-(3)]
-	_ = x[ActionToolBar-(4)]
+	_ = x[ButtonFilled-(0)]
+	_ = x[ButtonTonal-(1)]
+	_ = x[ButtonElevated-(2)]
+	_ = x[ButtonOutlined-(3)]
+	_ = x[ButtonText-(4)]
 }
 
-var _ActionTypesNameToValueMap = map[string]ActionTypes{
-	`ActionStandalone`: 0,
-	`actionstandalone`: 0,
-	`ActionParts`:      1,
-	`actionparts`:      1,
-	`ActionMenu`:       2,
-	`actionmenu`:       2,
-	`ActionMenuBar`:    3,
-	`actionmenubar`:    3,
-	`ActionToolBar`:    4,
-	`actiontoolbar`:    4,
+var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
+	`ButtonFilled`:   0,
+	`buttonfilled`:   0,
+	`ButtonTonal`:    1,
+	`buttontonal`:    1,
+	`ButtonElevated`: 2,
+	`buttonelevated`: 2,
+	`ButtonOutlined`: 3,
+	`buttonoutlined`: 3,
+	`ButtonText`:     4,
+	`buttontext`:     4,
 }
 
-var _ActionTypesDescMap = map[ActionTypes]string{
-	0: `ActionStandalone is a default, standalone action that is not part of a menu, menubar, toolbar, or other element`,
-	1: `ActionParts is an action that is part of another element (like a clear button in a textfield)`,
-	2: `ActionMenu is an action contained within a popup menu`,
-	3: `ActionMenuBar is an action contained within a menu bar`,
-	4: `ActionToolBar is an action contained within a toolbar`,
+var _ButtonTypesDescMap = map[ButtonTypes]string{
+	0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`,
+	1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`,
+	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
+	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
+	4: `ButtonText is a low-importance button with only text and/or an icon and no border, background color, or shadow. They should only be used for low emphasis actions, and you must ensure they stand out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text and icon buttons.`,
 }
 
-var _ActionTypesMap = map[ActionTypes]string{
-	0: `ActionStandalone`,
-	1: `ActionParts`,
-	2: `ActionMenu`,
-	3: `ActionMenuBar`,
-	4: `ActionToolBar`,
+var _ButtonTypesMap = map[ButtonTypes]string{
+	0: `ButtonFilled`,
+	1: `ButtonTonal`,
+	2: `ButtonElevated`,
+	3: `ButtonOutlined`,
+	4: `ButtonText`,
 }
 
 // String returns the string representation
-// of this ActionTypes value.
-func (i ActionTypes) String() string {
-	if str, ok := _ActionTypesMap[i]; ok {
+// of this ButtonTypes value.
+func (i ButtonTypes) String() string {
+	if str, ok := _ButtonTypesMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ActionTypes value from its
+// SetString sets the ButtonTypes value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *ActionTypes) SetString(s string) error {
-	if val, ok := _ActionTypesNameToValueMap[s]; ok {
+func (i *ButtonTypes) SetString(s string) error {
+	if val, ok := _ButtonTypesNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _ActionTypesNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ButtonTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type ActionTypes")
+	return errors.New(s + " is not a valid value for type ButtonTypes")
 }
 
-// Int64 returns the ActionTypes value as an int64.
-func (i ActionTypes) Int64() int64 {
+// Int64 returns the ButtonTypes value as an int64.
+func (i ButtonTypes) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the ActionTypes value from an int64.
-func (i *ActionTypes) SetInt64(in int64) {
-	*i = ActionTypes(in)
+// SetInt64 sets the ButtonTypes value from an int64.
+func (i *ButtonTypes) SetInt64(in int64) {
+	*i = ButtonTypes(in)
 }
 
-// Desc returns the description of the ActionTypes value.
-func (i ActionTypes) Desc() string {
-	if str, ok := _ActionTypesDescMap[i]; ok {
+// Desc returns the description of the ButtonTypes value.
+func (i ButtonTypes) Desc() string {
+	if str, ok := _ButtonTypesDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// ActionTypesValues returns all possible values
-// for the type ActionTypes.
-func ActionTypesValues() []ActionTypes {
-	return _ActionTypesValues
+// ButtonTypesValues returns all possible values
+// for the type ButtonTypes.
+func ButtonTypesValues() []ButtonTypes {
+	return _ButtonTypesValues
 }
 
 // Values returns all possible values
-// for the type ActionTypes.
-func (i ActionTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ActionTypesValues))
-	for i, d := range _ActionTypesValues {
+// for the type ButtonTypes.
+func (i ButtonTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ButtonTypesValues))
+	for i, d := range _ButtonTypesValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type ActionTypes.
-func (i ActionTypes) IsValid() bool {
-	_, ok := _ActionTypesMap[i]
+// valid option for type ButtonTypes.
+func (i ButtonTypes) IsValid() bool {
+	_, ok := _ButtonTypesMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ActionTypes) MarshalText() ([]byte, error) {
+func (i ButtonTypes) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ActionTypes) UnmarshalText(text []byte) error {
+func (i *ButtonTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
@@ -152,7 +152,7 @@ var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
 }
 
 var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	10: `Menu flag means that the button is a menu item`,
+	10: `Menu flag means that the button is a menu item itself (not that it has a menu; see [Button.HasMenu])`,
 }
 
 var _ButtonFlagsMap = map[ButtonFlags]string{
@@ -312,127 +312,6 @@ func (i ButtonFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ButtonFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4}
-
-// ButtonTypesN is the highest valid value
-// for type ButtonTypes, plus one.
-const ButtonTypesN ButtonTypes = 5
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ButtonTypesNoOp() {
-	var x [1]struct{}
-	_ = x[ButtonFilled-(0)]
-	_ = x[ButtonTonal-(1)]
-	_ = x[ButtonElevated-(2)]
-	_ = x[ButtonOutlined-(3)]
-	_ = x[ButtonText-(4)]
-}
-
-var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
-	`ButtonFilled`:   0,
-	`buttonfilled`:   0,
-	`ButtonTonal`:    1,
-	`buttontonal`:    1,
-	`ButtonElevated`: 2,
-	`buttonelevated`: 2,
-	`ButtonOutlined`: 3,
-	`buttonoutlined`: 3,
-	`ButtonText`:     4,
-	`buttontext`:     4,
-}
-
-var _ButtonTypesDescMap = map[ButtonTypes]string{
-	0: `ButtonFilled is a filled button with a contrasting background color. It should be used for prominent actions, typically those that are the final in a sequence. It is equivalent to Material Design&#39;s filled button.`,
-	1: `ButtonTonal is a filled button, similar to [ButtonFilled]. It is used for the same purposes, but it has a lighter background color and less emphasis. It is equivalent to Material Design&#39;s filled tonal button.`,
-	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
-	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
-	4: `ButtonText is a low-importance button with only text and/or an icon and no border, background color, or shadow. They should only be used for low emphasis actions, and you must ensure they stand out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text and icon buttons.`,
-}
-
-var _ButtonTypesMap = map[ButtonTypes]string{
-	0: `ButtonFilled`,
-	1: `ButtonTonal`,
-	2: `ButtonElevated`,
-	3: `ButtonOutlined`,
-	4: `ButtonText`,
-}
-
-// String returns the string representation
-// of this ButtonTypes value.
-func (i ButtonTypes) String() string {
-	if str, ok := _ButtonTypesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the ButtonTypes value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ButtonTypes) SetString(s string) error {
-	if val, ok := _ButtonTypesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _ButtonTypesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type ButtonTypes")
-}
-
-// Int64 returns the ButtonTypes value as an int64.
-func (i ButtonTypes) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ButtonTypes value from an int64.
-func (i *ButtonTypes) SetInt64(in int64) {
-	*i = ButtonTypes(in)
-}
-
-// Desc returns the description of the ButtonTypes value.
-func (i ButtonTypes) Desc() string {
-	if str, ok := _ButtonTypesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// ButtonTypesValues returns all possible values
-// for the type ButtonTypes.
-func ButtonTypesValues() []ButtonTypes {
-	return _ButtonTypesValues
-}
-
-// Values returns all possible values
-// for the type ButtonTypes.
-func (i ButtonTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ButtonTypesValues))
-	for i, d := range _ButtonTypesValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ButtonTypes.
-func (i ButtonTypes) IsValid() bool {
-	_, ok := _ButtonTypesMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ButtonTypes) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ButtonTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

@@ -8,67 +8,6 @@ import (
 	"goki.dev/ordmap"
 )
 
-// ActionType is the [gti.Type] for [Action]
-var ActionType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Action",
-	ShortName: "gi.Action",
-	IDName:    "action",
-	Doc:       "Action is a button widget that can display a text label and / or an icon\nand / or a keyboard shortcut -- this is what is put in menus, menubars, and\ntoolbars, and also for any standalone simple action.  The default styling\ndiffers depending on whether it is in a Menu versus a MenuBar or ToolBar --\nthis is controlled by the Class which is automatically set to\nmenu, menubar, or toolbar.\nAction functions provide the *Action that generated them, which has\na Data value that can be used to determine the proper action to take,\nin the case of automatically-generated chooser-type menus.\nThe Action(s) are called via the On(events.Click) action,\nthat wraps the func(act *Action) call.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "[view: -] optional data that is sent with the ActionSig when it is emitted", Directives: gti.Directives{}}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(act *Action)", Doc: "[view: -] optional function that is called to update state of action (typically updating Active state) -- called automatically for menus prior to showing", Directives: gti.Directives{}}},
-		{"Type", &gti.Field{Name: "Type", Type: "ActionTypes", Doc: "the type of action", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Action{},
-})
-
-// NewAction adds a new [Action] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewAction(par ki.Ki, name ...string) *Action {
-	return par.NewChild(ActionType, name...).(*Action)
-}
-
-// KiType returns the [*gti.Type] of [Action]
-func (t *Action) KiType() *gti.Type {
-	return ActionType
-}
-
-// New returns a new [*Action] value
-func (t *Action) New() ki.Ki {
-	return &Action{}
-}
-
-// ActionEmbedder is an interface that all types that embed Action satisfy
-type ActionEmbedder interface {
-	AsAction() *Action
-}
-
-// AsAction returns the given value as a value of type Action if the type
-// of the given value embeds Action, or nil otherwise
-func AsAction(k ki.Ki) *Action {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ActionEmbedder); ok {
-		return t.AsAction()
-	}
-	return nil
-}
-
-// AsAction satisfies the [ActionEmbedder] interface
-func (t *Action) AsAction() *Action {
-	return t
-}
-
 // MenuBarType is the [gti.Type] for [MenuBar]
 var MenuBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.MenuBar",
@@ -78,7 +17,7 @@ var MenuBarType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MainMenu", &gti.Field{Name: "MainMenu", Type: "bool", Doc: "is this the main menu bar for a window?  controls whether displayed on macOS", Directives: gti.Directives{}}},
-		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*Action", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}}},
+		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "Layout", Doc: "", Directives: gti.Directives{}}},
@@ -110,7 +49,7 @@ var ToolBarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ToolBar",
 	ShortName: "gi.ToolBar",
 	IDName:    "tool-bar",
-	Doc:       "ToolBar is a [Frame] that is useful for holding [Action]s that do things.",
+	Doc:       "ToolBar is a [Frame] that is useful for holding [Button]s that do things.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -262,11 +201,13 @@ func (t *ButtonBox) AsButtonBox() *ButtonBox {
 
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Button",
-	ShortName:  "gi.Button",
-	IDName:     "button",
-	Doc:        "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Button",
+	ShortName: "gi.Button",
+	IDName:    "button",
+	Doc:       "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}}},
@@ -275,6 +216,8 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "MenuActions", Doc: "the menu items for this menu -- typically add Action elements for menus, along with separators", Directives: gti.Directives{}}},
 		{"MakeMenuFunc", &gti.Field{Name: "MakeMenuFunc", Type: "MakeMenuFunc", Doc: "[view: -] set this to make a menu on demand -- if set then this button acts like a menu button", Directives: gti.Directives{}}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "[view: -] optional data that is sent with events to identify the button", Directives: gti.Directives{}}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *Button)", Doc: "[view: -] optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -299,6 +242,28 @@ func (t *Button) KiType() *gti.Type {
 // New returns a new [*Button] value
 func (t *Button) New() ki.Ki {
 	return &Button{}
+}
+
+// ButtonEmbedder is an interface that all types that embed Button satisfy
+type ButtonEmbedder interface {
+	AsButton() *Button
+}
+
+// AsButton returns the given value as a value of type Button if the type
+// of the given value embeds Button, or nil otherwise
+func AsButton(k ki.Ki) *Button {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(ButtonEmbedder); ok {
+		return t.AsButton()
+	}
+	return nil
+}
+
+// AsButton satisfies the [ButtonEmbedder] interface
+func (t *Button) AsButton() *Button {
+	return t
 }
 
 // ComboBoxType is the [gti.Type] for [ComboBox]
@@ -1271,41 +1236,6 @@ func AsTabView(k ki.Ki) *TabView {
 // AsTabView satisfies the [TabViewEmbedder] interface
 func (t *TabView) AsTabView() *TabView {
 	return t
-}
-
-// TabButtonType is the [gti.Type] for [TabButton]
-var TabButtonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.TabButton",
-	ShortName:  "gi.TabButton",
-	IDName:     "tab-button",
-	Doc:        "TabButton is a larger select action and a small close action. Indicator\nicon is used for close icon.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Action", &gti.Field{Name: "Action", Type: "Action", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TabButton{},
-})
-
-// NewTabButton adds a new [TabButton] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTabButton(par ki.Ki, name ...string) *TabButton {
-	return par.NewChild(TabButtonType, name...).(*TabButton)
-}
-
-// KiType returns the [*gti.Type] of [TabButton]
-func (t *TabButton) KiType() *gti.Type {
-	return TabButtonType
-}
-
-// New returns a new [*TabButton] value
-func (t *TabButton) New() ki.Ki {
-	return &TabButton{}
 }
 
 // TextFieldType is the [gti.Type] for [TextField]
