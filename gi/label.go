@@ -13,7 +13,9 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/mimedata"
 	"goki.dev/mat32/v2"
 )
 
@@ -277,6 +279,7 @@ func (lb *Label) LabelHandlers() {
 	lb.LabelLongHover()
 	lb.LabelClick()
 	lb.LabelMouseMove()
+	lb.LabelKeys()
 }
 
 func (lb *Label) LabelLongHover() {
@@ -363,6 +366,19 @@ func (lb *Label) LabelMouseMove() {
 				goosi.TheApp.Cursor(lb.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
 			}
 		*/
+	})
+}
+
+func (lb *Label) LabelKeys() {
+	lb.On(events.KeyChord, func(e events.Event) {
+		if !lb.StateIs(states.Selected) {
+			return
+		}
+		kf := KeyFun(e.KeyChord())
+		if kf == KeyFunCopy {
+			e.SetHandled()
+			goosi.TheApp.ClipBoard(lb.EventMgr().RenderWin().GoosiWin).Write(mimedata.NewText(lb.Text))
+		}
 	})
 }
 
