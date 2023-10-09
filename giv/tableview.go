@@ -1090,7 +1090,7 @@ func (tv *TableView) EditIdx(idx int) {
 	StructViewDialog(tv.Scene, stru, DlgOpts{Title: tynm}, nil, nil)
 }
 
-func (tv *TableView) StdCtxtMenu(m *gi.MenuActions, idx int) {
+func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	if tv.isArray {
 		return
 	}

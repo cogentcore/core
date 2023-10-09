@@ -47,7 +47,7 @@ type Button struct {
 	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this action -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
 
 	// the menu items for this menu -- typically add Action elements for menus, along with separators
-	Menu MenuActions `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
+	Menu Menu `desc:"the menu items for this menu -- typically add Action elements for menus, along with separators"`
 
 	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
@@ -327,7 +327,7 @@ func (bt *Button) OpenMenu() bool {
 
 // ResetMenu removes all items in the menu
 func (bt *Button) ResetMenu() {
-	bt.Menu = make(MenuActions, 0, 10)
+	bt.Menu = make(Menu, 0, 10)
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;

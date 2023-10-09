@@ -482,10 +482,10 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
 // MakeMenuFunc for this combobox.
-func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *MenuActions) {
+func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *Menu) {
 	nitm := len(cb.Items)
 	if cb.Menu == nil {
-		cb.Menu = make(MenuActions, 0, nitm)
+		cb.Menu = make(Menu, 0, nitm)
 	}
 	n := len(cb.Menu)
 	if nitm < n {

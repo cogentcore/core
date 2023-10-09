@@ -702,7 +702,7 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.CursorForward(rsl)
 }
 
-func (tf *TextField) MakeContextMenu(m *MenuActions) {
+func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
 	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc}, func(ac *Action) {
 		tf.This().(Clipper).Copy(true)

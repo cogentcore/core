@@ -110,7 +110,7 @@ type SliceViewer interface {
 	ItemCtxtMenu(idx int)
 
 	// StdCtxtMenu generates the standard context menu for this view
-	StdCtxtMenu(m *gi.MenuActions, idx int)
+	StdCtxtMenu(m *gi.Menu, idx int)
 
 	// NeedsDoubleReRender returns true if initial render requires a 2nd pass
 	NeedsDoubleReRender() bool
@@ -1759,7 +1759,7 @@ func (sv *SliceViewBase) PasteIdx(idx int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceViewBase) MakePasteMenu(m *gi.MenuActions, data any, idx int) {
+func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1783,7 +1783,7 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.MenuActions, data any, idx int) {
 // a menu to determine what specifically to do
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	sv.UnselectAllIdxs()
-	var menu gi.MenuActions
+	var menu gi.Menu
 	sv.MakePasteMenu(&menu, md, idx)
 	pos := sv.IdxPos(idx)
 	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
@@ -1896,7 +1896,7 @@ func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.MenuActions, data any, mod events.DropMods, idx int) {
+func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods, idx int) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1929,7 +1929,7 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.MenuActions, data any, mod events.Dr
 // Drop pops up a menu to determine what specifically to do with dropped items
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.MenuActions
+	var menu gi.Menu
 	sv.MakeDropMenu(&menu, md, mod, sv.CurIdx)
 	pos := sv.IdxPos(sv.CurIdx)
 	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
@@ -2016,7 +2016,7 @@ func (sv *SliceViewBase) DropCancel() {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (sv *SliceViewBase) StdCtxtMenu(m *gi.MenuActions, idx int) {
+func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
 	if sv.isArray {
 		return
 	}
@@ -2047,7 +2047,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if val == nil {
 		return
 	}
-	var menu gi.MenuActions
+	var menu gi.Menu
 
 	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
 		if sv.ShowViewCtxtMenu {

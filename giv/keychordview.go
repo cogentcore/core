@@ -102,7 +102,7 @@ func (kc *KeyChordEdit) ChordUpdated() {
 	kc.KeyChordSig.Emit(kc.This(), 0, kc.Text)
 }
 
-func (kc *KeyChordEdit) MakeContextMenu(m *gi.MenuActions) {
+func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 	m.AddAction(gi.ActOpts{Label: "Clear"},
 		kc, func(recv, send ki.Ki, sig int64, data any) {
 			kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
