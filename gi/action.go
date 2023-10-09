@@ -45,7 +45,7 @@ type ActOpts struct {
 //
 //goki:embedder
 type Action struct {
-	ButtonBase
+	Button
 
 	// [view: -] optional data that is sent with the ActionSig when it is emitted
 	Data any `json:"-" xml:"-" view:"-" desc:"optional data that is sent with the ActionSig when it is emitted"`
@@ -59,7 +59,7 @@ type Action struct {
 
 func (ac *Action) CopyFieldsFrom(frm any) {
 	fr := frm.(*Action)
-	ac.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	ac.Button.CopyFieldsFrom(&fr.Button)
 	ac.Data = fr.Data
 	ac.Type = fr.Type
 }

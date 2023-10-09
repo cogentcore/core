@@ -30,7 +30,7 @@ import (
 // to strings for the display.  If the items are [icons.Icon] type, then they
 // are displayed using icons instead.
 type ComboBox struct {
-	ButtonBase
+	Button
 
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
 	Editable bool `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
@@ -59,7 +59,7 @@ type ComboBox struct {
 
 func (cb *ComboBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*ComboBox)
-	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.Button.CopyFieldsFrom(&fr.Button)
 	cb.Editable = fr.Editable
 	cb.CurVal = fr.CurVal
 	cb.CurIndex = fr.CurIndex

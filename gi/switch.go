@@ -16,7 +16,7 @@ import (
 
 // CheckBox toggles between a checked and unchecked state
 type CheckBox struct {
-	ButtonBase
+	Button
 
 	// [view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
 	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
@@ -24,7 +24,7 @@ type CheckBox struct {
 
 func (cb *CheckBox) CopyFieldsFrom(frm any) {
 	fr := frm.(*CheckBox)
-	cb.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
+	cb.Button.CopyFieldsFrom(&fr.Button)
 	cb.IconOff = fr.IconOff
 }
 
