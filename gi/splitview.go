@@ -296,7 +296,7 @@ func (sv *SplitView) ConfigSplitters(sc *Scene) {
 }
 
 func (sv *SplitView) SplitViewKeys() {
-	sv.On(events.KeyChord, func(e events.Event) {
+	sv.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
 		if goosi.TheApp.Platform() == goosi.MacOS {

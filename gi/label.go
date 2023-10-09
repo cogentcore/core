@@ -368,7 +368,7 @@ func (lb *Label) LabelMouseMove() {
 }
 
 func (lb *Label) LabelKeys() {
-	lb.On(events.KeyChord, func(e events.Event) {
+	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
 		fmt.Println("kc", e)
 		if !lb.StateIs(states.Selected) {

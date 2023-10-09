@@ -1252,7 +1252,7 @@ func (tf *TextField) TextFieldMouse() {
 }
 
 func (tf *TextField) TextFieldKeys() {
-	tf.On(events.KeyChord, func(e events.Event) {
+	tf.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
 		}

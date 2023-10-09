@@ -28,6 +28,8 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 	return wb.This().(Widget)
 }
 
+// Helper functions for common event types
+
 // OnClick adds an event listener function for [events.Click] events
 func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
 	return wb.On(events.Click, fun)
@@ -36,6 +38,11 @@ func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
 // OnChange adds an event listener function for [events.Change] events
 func (wb *WidgetBase) OnChange(fun func(e events.Event)) Widget {
 	return wb.On(events.Change, fun)
+}
+
+// OnKeyChord adds an event listener function for [events.KeyChord] events
+func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) Widget {
+	return wb.On(events.KeyChord, fun)
 }
 
 // Send sends an NEW event of given type to this widget,

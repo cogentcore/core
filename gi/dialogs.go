@@ -139,7 +139,7 @@ func (dlg *Dialog) Ok() *Dialog {
 		dlg.AcceptDialog()
 		sc.Send(events.Change, e)
 	})
-	sc.On(events.KeyChord, func(e events.Event) {
+	sc.OnKeyChord(func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAccept {
 			e.SetHandled()
@@ -160,7 +160,7 @@ func (dlg *Dialog) Cancel() *Dialog {
 		dlg.CancelDialog()
 		sc.Send(events.Change, e)
 	})
-	sc.On(events.KeyChord, func(e events.Event) {
+	sc.OnKeyChord(func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunAbort {
 			e.SetHandled()
@@ -319,7 +319,8 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 		chnm := strcase.ToKebab(ch)
 		chidx := i
 
-		b := NewButton(bb, chnm).SetType(ButtonText).SetText(ch).OnClick(func(e events.Event) {
+		b := NewButton(bb, chnm).SetType(ButtonText).SetText(ch)
+		b.OnClick(func(e events.Event) {
 			e.SetHandled() // otherwise propagates to dead elements
 			dlg.Data = chidx
 			if chnm == "cancel" {
@@ -329,7 +330,7 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 			}
 			sc.Send(events.Change, e)
 		})
-		b.On(events.KeyChord, func(e events.Event) {
+		b.OnKeyChord(func(e events.Event) {
 			dlg.Data = chidx
 			kf := KeyFun(e.KeyChord())
 			if chnm == "cancel" {
