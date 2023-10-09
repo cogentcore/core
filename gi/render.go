@@ -623,7 +623,7 @@ func (sc *Scene) BenchmarkFullRender() {
 		sc.DoLayoutTree(sc)
 		sc.Render(sc)
 	}
-	td := time.Now().Sub(ts)
+	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	EndTargProfile()
 	EndCPUMemProfile()
@@ -641,7 +641,7 @@ func (sc *Scene) BenchmarkReRender() {
 	for i := 0; i < n; i++ {
 		sc.Render(sc)
 	}
-	td := time.Now().Sub(ts)
+	td := time.Since(ts)
 	fmt.Printf("Time for %v Re-Renders: %12.2f s\n", n, float64(td)/float64(time.Second))
 	EndTargProfile()
 }

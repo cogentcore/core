@@ -26,7 +26,7 @@ var (
 	// WinGeomTrace logs window geometry saving / loading functions
 	WinGeomTrace = false
 
-	WinGeomNoLockErr = errors.New("WinGeom could not lock lock file")
+	ErrWinGeomNoLock = errors.New("WinGeom could not lock lock file")
 )
 
 // WinGeomPrefs is the data structure for recording the window geometry
@@ -104,7 +104,7 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 			time.Sleep(mgr.LockSleep)
 			continue
 		}
-		if time.Now().Sub(lts) > 1*time.Second {
+		if time.Since(lts) > 1*time.Second {
 			// log.Printf("WinGeomPrefs: lock file stale: %v\n", lts.String())
 			os.Remove(pnm)
 			continue
@@ -113,7 +113,7 @@ func (mgr *WinGeomPrefsMgr) LockFile() error {
 		time.Sleep(mgr.LockSleep)
 	}
 	// log.Printf("WinGeomPrefs: failed to lock file: %v\n", pnm)
-	return WinGeomNoLockErr
+	return ErrWinGeomNoLock
 }
 
 // UnLockFile unlocks the win_geom_prefs lock file (just removes it)
