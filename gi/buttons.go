@@ -605,6 +605,9 @@ func (cb *CheckBox) CheckBoxStyles() {
 				ist.StackTop = 1
 			}
 		}
+		if s.Is(states.Checked) {
+			s.Color = colors.Scheme.Primary.Base
+		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
@@ -617,12 +620,16 @@ func (cb *CheckBox) CheckBoxStyles() {
 func (cb *CheckBox) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
-	case "icon0", "icon1":
+	case "icon0": // on
+		w.AddStyles(func(s *styles.Style) {
+			s.Color = colors.Scheme.Primary.Base
+			s.Width.SetEm(1.5)
+			s.Height.SetEm(1.5)
+		})
+	case "icon1": // off
 		w.AddStyles(func(s *styles.Style) {
 			s.Width.SetEm(1.5)
 			s.Height.SetEm(1.5)
-			s.Margin.Set()
-			s.Padding.Set()
 		})
 	case "space":
 		w.AddStyles(func(s *styles.Style) {
