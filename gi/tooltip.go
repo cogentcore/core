@@ -12,24 +12,30 @@ import (
 	"goki.dev/girl/units"
 )
 
-// NewTooltipScene returns a new Tooltip stage with given scene contents,
+// NewTooltipFromScene returns a new Tooltip stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewTooltipScene(sc *Scene, ctx Widget) *PopupStage {
+func NewTooltipFromScene(sc *Scene, ctx Widget) *PopupStage {
 	return NewPopupStage(Tooltip, sc, ctx)
 }
 
-// NewTooltip returns a new scene displaying the tooltip text
+// NewTooltip returns a new tooltip stage displaying the tooltip text
 // for the given widget at the given position.
 func NewTooltip(w Widget, pos image.Point) *PopupStage {
 	return NewTooltipText(w, w.AsWidget().Tooltip, pos)
 }
 
-// NewTooltipText returns a new scene displaying the given tooltip text
+// NewTooltipText returns a new tooltip stage displaying the given tooltip text
 // for the given widget at the given position.
 func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
+	return NewTooltipFromScene(NewTooltipScene(w, tooltip, pos), w)
+}
+
+// NewTooltipScene returns a new tooltip scene for the given widget with the
+// given tooltip at the given position.
+func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := StageScene(w.Name() + "-tooltip")
 	sc.Geom.Pos = pos
 	sc.AddStyles(func(s *styles.Style) {
@@ -40,5 +46,5 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 		s.BoxShadow = styles.BoxShadow1()
 	})
 	NewLabel(sc, "tooltip").SetText(tooltip).SetType(LabelBodyMedium)
-	return NewTooltipScene(sc, w)
+	return sc
 }
