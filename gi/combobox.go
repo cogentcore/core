@@ -496,11 +496,11 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *Menu) {
 	}
 	_, ics := cb.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range cb.Items {
-		var ac *Action
+		var ac *Button
 		if n > i {
-			ac = cb.Menu[i].(*Action)
+			ac = cb.Menu[i].(*Button)
 		} else {
-			ac = &Action{}
+			ac = &Button{}
 			ki.InitNode(ac)
 			cb.Menu = append(cb.Menu, ac.This().(Widget))
 		}
