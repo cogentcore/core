@@ -87,11 +87,11 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu = make(gi.MenuStage, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu = make(gi.MenuStage, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 

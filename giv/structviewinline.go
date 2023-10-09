@@ -115,7 +115,7 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 		return true
 	})
 	if sv.AddAction {
-		config.Add(gi.ActionType, "edit-action")
+		config.Add(gi.ButtonType, "edit-action")
 	}
 	mods, updt := parts.ConfigChildren(config)
 	sv.HasDefs = false

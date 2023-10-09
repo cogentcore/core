@@ -320,7 +320,7 @@ var GiEditorProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
-			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
 				act.SetEnabledStateUpdt(ge.Changed)
 			}),
@@ -329,7 +329,7 @@ var GiEditorProps = ki.Props{
 		{"ToggleSelectionMode", ki.Props{
 			"icon": icons.ArrowSelectorTool,
 			"desc": "Select an element in the window to edit it",
-			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
 				win, ok := ge.KiRoot.(*gi.RenderWin)
 				act.SetEnabledStateUpdt(ok)
@@ -357,7 +357,7 @@ var GiEditorProps = ki.Props{
 		{"Save", ki.Props{
 			"icon": icons.Save,
 			"desc": "Save json-formatted Ki tree structure to existing filename",
-			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
 				act.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
 			}),
@@ -384,7 +384,7 @@ var GiEditorProps = ki.Props{
 		{"AppMenu", ki.BlankProp{}},
 		{"File", ki.PropSlice{
 			{"Update", ki.Props{
-				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 					ge := gei.(*GiEditor)
 					act.SetEnabledState(ge.Changed)
 				}),
@@ -403,7 +403,7 @@ var GiEditorProps = ki.Props{
 			{"Save", ki.Props{
 				"shortcut": gi.KeyFunMenuSave,
 				"desc":     "Save json-formatted Ki tree structure to existing filename",
-				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Action) {
+				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 					ge := gei.(*GiEditor)
 					act.SetEnabledState(ge.Changed && ge.Filename != "")
 				}),

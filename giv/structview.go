@@ -223,7 +223,7 @@ func (sv *StructView) ConfigToolbar() {
 				svv.UpdateFields()
 			})
 	} else {
-		act := tb.Child(0).(*gi.Action)
+		act := tb.Child(0).(*gi.Button)
 		act.Tooltip = ttip
 	}
 	ndef := 1 // number of default actions

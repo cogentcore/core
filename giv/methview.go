@@ -60,7 +60,7 @@ func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 	mbar.ConfigMenus(mnms)
 	rval := true
 	for mmi, mm := range mp {
-		ma := mbar.Child(mmi).(*gi.Action)
+		ma := mbar.Child(mmi).(*gi.Button)
 		if mm.Name == "AppMenu" {
 			ma.Menu.AddAppMenu(win)
 			continue
@@ -138,13 +138,13 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 			sep.Horiz = false
 			continue
 		}
-		var ac *gi.Action
+		var ac *gi.Button
 		if aci := tb.ChildByName(te.Name, 0); aci != nil { // allows overriding of defaults etc
-			ac = aci.(*gi.Action)
+			ac = aci.(*gi.Button)
 			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
-			ac = tb.NewChild(gi.ActionType, te.Name).(*gi.Action)
+			ac = tb.NewChild(gi.ButtonType, te.Name).(*gi.Button)
 		}
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
@@ -227,9 +227,9 @@ func CallMethod(val any, method string, vp *gi.Scene) bool {
 		MethViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type properties -- add to CallMethods to make available for CallMethod\n", method))
 		return false
 	}
-	ac, ok := acp.(*gi.Action)
+	ac, ok := acp.(*gi.Button)
 	if !ok {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Action -- should be!\n", method))
+		MethViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Button -- should be!\n", method))
 		return false
 	}
 
@@ -240,7 +240,7 @@ func CallMethod(val any, method string, vp *gi.Scene) bool {
 
 // MethViewSetActionData sets the MethViewData associated with the given action
 // with values updated from the given val and scene
-func MethViewSetActionData(ac *gi.Action, val any, vp *gi.Scene) {
+func MethViewSetActionData(ac *gi.Button, val any, vp *gi.Scene) {
 	if ac.Data == nil {
 		fmt.Printf("giv.MethView no MethViewData on action: %v\n", ac.Nm)
 		return
@@ -303,7 +303,7 @@ func MethViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Sce
 		if _, has := cmp[pnm]; has {
 			return rval
 		}
-		ac := &gi.Action{}
+		ac := &gi.Button{}
 		ac.InitName(ac, pnm)
 		ac.Text = strings.Replace(strings.Join(camelcase.Split(ac.Nm), " "), "  ", " ", -1)
 		cmp[pnm] = ac
@@ -379,7 +379,7 @@ var MethodViewCallMethsProp = "__MethViewCallMeths"
 // ActionsView processes properties for parent action pa for overall object
 // val of given type -- could have a sub-menu of further actions or might just
 // be a single action
-func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any) bool {
+func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Button, pp any) bool {
 	pa.Text = strings.Replace(strings.Join(camelcase.Split(pa.Nm), " "), "  ", " ", -1)
 	rval := true
 	switch pv := pp.(type) {
@@ -388,7 +388,7 @@ func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any
 			if strings.HasPrefix(mm.Name, "sep-") {
 				pa.Menu.AddSeparator(mm.Name)
 			} else {
-				nac := &gi.Action{}
+				nac := &gi.Button{}
 				nac.InitName(nac, mm.Name)
 				nac.SetAsMenu()
 				pa.Menu = append(pa.Menu, nac.This().(gi.Widget))
@@ -413,7 +413,7 @@ func ActionsView(val any, vtyp reflect.Type, vp *gi.Scene, pa *gi.Action, pp any
 }
 
 // ActionView configures given action with given props
-func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props ki.Props) bool {
+func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props ki.Props) bool {
 	// special action names
 	switch ac.Nm {
 	case "Close RenderWin":
@@ -469,7 +469,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props k
 		case "shortcut-func":
 			if sf, ok := pv.(ShortcutFunc); ok {
 				ac.Shortcut = sf(md.Val, ac)
-			} else if sf, ok := pv.(func(it any, act *gi.Action) key.Chord); ok {
+			} else if sf, ok := pv.(func(it any, act *gi.Button) key.Chord); ok {
 				ac.Shortcut = sf(md.Val, ac)
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
@@ -486,7 +486,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props k
 			if sf, ok := pv.(LabelFunc); ok {
 				str := sf(md.Val, ac)
 				ac.Text = str
-			} else if sf, ok := pv.(func(it any, act *gi.Action) string); ok {
+			} else if sf, ok := pv.(func(it any, act *gi.Button) string); ok {
 				ac.Text = sf(md.Val, ac)
 			} else {
 				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
@@ -508,7 +508,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Action, props k
 			if uf, ok := pv.(ActionUpdateFunc); ok {
 				md.UpdateFunc = uf
 				ac.UpdateFunc = MethViewUpdateFunc
-			} else if uf, ok := pv.(func(it any, act *gi.Action)); ok {
+			} else if uf, ok := pv.(func(it any, act *gi.Button)); ok {
 				md.UpdateFunc = ActionUpdateFunc(uf)
 				ac.UpdateFunc = MethViewUpdateFunc
 			} else {
@@ -628,15 +628,15 @@ type SubSubMenuFunc func(it any, vp *gi.Scene) [][]string
 // ShortcutFunc is a function that returns a key.Chord string for a shortcut
 // used in MethView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
-type ShortcutFunc func(it any, act *gi.Action) key.Chord
+type ShortcutFunc func(it any, act *gi.Button) key.Chord
 
 // LabelFunc is a function that returns a string to set a label
 // first argument is the object on which the method is defined (receiver)
-type LabelFunc func(it any, act *gi.Action) string
+type LabelFunc func(it any, act *gi.Button) string
 
 // ActionUpdateFunc is a function that updates method active / inactive status
 // first argument is the object on which the method is defined (receiver)
-type ActionUpdateFunc func(it any, act *gi.Action)
+type ActionUpdateFunc func(it any, act *gi.Button)
 
 // MethViewData is set to the Action.Data field for all MethView actions,
 // containing info needed to actually call the Method on value Val.
@@ -689,7 +689,7 @@ func (md *MethViewData) MethName() string {
 // MethViewCall is the receiver func for MethView actions that call a method
 // -- it uses the MethViewData to call the target method.
 func MethViewCall(recv, send ki.Ki, sig int64, data any) {
-	ac := send.(*gi.Action)
+	ac := send.(*gi.Button)
 	md := ac.Data.(*MethViewData)
 	if md.ArgProps == nil { // no args -- just call
 		MethViewCallNoArgPrompt(ac, md, nil)
@@ -736,7 +736,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 // MethViewCallNoArgPrompt calls the method in case where there is no
 // prompting otherwise of the user for arg values -- checks for Confirm case
 // or otherwise directly calls method
-func MethViewCallNoArgPrompt(ac *gi.Action, md *MethViewData, args []reflect.Value) {
+func MethViewCallNoArgPrompt(ac *gi.Button, md *MethViewData, args []reflect.Value) {
 	// if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
 	// 	if md.Sc != nil && md.Sc.Win != nil {
 	// 		md.Sc.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
@@ -964,7 +964,7 @@ func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool)
 
 // MethViewUpdateFunc is general Action.UpdateFunc that then calls any
 // MethViewData.UpdateFunc from its data
-func MethViewUpdateFunc(act *gi.Action) {
+func MethViewUpdateFunc(act *gi.Button) {
 	md := act.Data.(*MethViewData)
 	if md.UpdateFunc != nil && md.Val != nil {
 		md.UpdateFunc(md.Val, act)
@@ -973,7 +973,7 @@ func MethViewUpdateFunc(act *gi.Action) {
 
 // MethViewSubMenuFunc is a MakeMenuFunc for items that have submenus
 func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
-	ac := aki.(*gi.Action)
+	ac := aki.(*gi.Button)
 	md := ac.Data.(*MethViewData)
 	smd := md.SubMenuSlice
 	if md.SubMenuFunc != nil {
@@ -1021,7 +1021,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 			}
 			s1 := val.Index(0)
 			nm := laser.ToString(s1)
-			nac := &gi.Action{}
+			nac := &gi.Button{}
 			nac.InitName(nac, nm)
 			nac.Text = nm
 			nac.SetAsMenu()
@@ -1047,7 +1047,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 			*m = append(*m, sp)
 			continue
 		}
-		nac := &gi.Action{}
+		nac := &gi.Button{}
 		nac.InitName(nac, nm)
 		nac.Text = nm
 		nac.SetAsMenu()

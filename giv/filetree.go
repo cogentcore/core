@@ -2586,7 +2586,7 @@ func (ftv *FileTreeView) Dragged(de events.Event) {
 }
 
 // FileTreeInactiveExternFunc is an ActionUpdateFunc that inactivates action if node is external
-var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2595,7 +2595,7 @@ var FileTreeInactiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) 
 })
 
 // FileTreeActiveExternFunc is an ActionUpdateFunc that activates action if node is external
-var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2604,7 +2604,7 @@ var FileTreeActiveExternFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 })
 
 // FileTreeInactiveDirFunc is an ActionUpdateFunc that inactivates action if node is a dir
-var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2613,7 +2613,7 @@ var FileTreeInactiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 })
 
 // FileTreeActiveDirFunc is an ActionUpdateFunc that activates action if node is a dir
-var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2622,7 +2622,7 @@ var FileTreeActiveDirFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 })
 
 // FileTreeActiveNotInVcsFunc is an ActionUpdateFunc that inactivates action if node is not under version control
-var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2636,7 +2636,7 @@ var FileTreeActiveNotInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) 
 })
 
 // FileTreeActiveInVcsFunc is an ActionUpdateFunc that activates action if node is under version control
-var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2651,7 +2651,7 @@ var FileTreeActiveInVcsFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
 
 // FileTreeActiveInVcsModifiedFunc is an ActionUpdateFunc that activates action if node is under version control
 // and the file has been modified
-var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni any, act *gi.Action) {
+var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni any, act *gi.Button) {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	if fn != nil {
@@ -2665,7 +2665,7 @@ var FileTreeActiveInVcsModifiedFunc = ActionUpdateFunc(func(fni any, act *gi.Act
 })
 
 // VcsGetRemoveLabelFunc gets the appropriate label for removing from version control
-var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Action) string {
+var VcsLabelFunc = LabelFunc(func(fni any, act *gi.Button) string {
 	ftv := fni.(ki.Ki).Embed(TypeFileTreeView).(*FileTreeView)
 	fn := ftv.FileNode()
 	label := act.Text

@@ -302,10 +302,10 @@ func (fv *FileView) ConfigPathBar() {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "path-lbl")
 	config.Add(gi.TypeComboBox, "path")
-	config.Add(gi.ActionType, "path-up")
-	config.Add(gi.ActionType, "path-ref")
-	config.Add(gi.ActionType, "path-fav")
-	config.Add(gi.ActionType, "new-folder")
+	config.Add(gi.ButtonType, "path-up")
+	config.Add(gi.ButtonType, "path-ref")
+	config.Add(gi.ButtonType, "path-fav")
+	config.Add(gi.ButtonType, "new-folder")
 
 	pl := gi.NewLabel(pr, "path-lbl", "Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"

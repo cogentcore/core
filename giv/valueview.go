@@ -1099,7 +1099,7 @@ type VersCtrlValueView struct {
 }
 
 func (vv *VersCtrlValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -1107,7 +1107,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
@@ -1117,10 +1117,10 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.ActionSig.ConnectOnly(func(dlg *gi.Dialog) {
 		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.OpenDialog(ac.Scene, nil, nil)
 	})
 	vv.UpdateWidget()
@@ -1142,7 +1142,7 @@ func (vv *VersCtrlValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) 
 		recv = vp.This().(gi.Widget)
 	}
 	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data any) {
-		ac := send.(*gi.Action)
+		ac := send.(*gi.Button)
 		vv.SetValue(ac.Text)
 		vv.UpdateWidget()
 		if dlgRecv != nil && dlgFunc != nil {

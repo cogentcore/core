@@ -25,7 +25,7 @@ type IconValueView struct {
 }
 
 func (vv *IconValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -33,7 +33,7 @@ func (vv *IconValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if icons.Icon(txt).IsNil() {
 		ac.SetIcon("blank")
@@ -53,13 +53,13 @@ func (vv *IconValueView) UpdateWidget() {
 func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.Dp(4))
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(IconTypeValueView).(*IconValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()

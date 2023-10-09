@@ -109,8 +109,8 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
-	config.Add(gi.ActionType, "add-action")
-	config.Add(gi.ActionType, "edit-action")
+	config.Add(gi.ButtonType, "add-action")
+	config.Add(gi.ButtonType, "edit-action")
 	mods, updt := mv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = mv.Parts.UpdateStart()
@@ -133,7 +133,7 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 	}
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)
 	if err == nil {
-		adac := adack.(*gi.Action)
+		adac := adack.(*gi.Button)
 		adac.SetIcon(icons.Add)
 		adac.Tooltip = "add an entry to the map"
 		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -143,7 +143,7 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 	}
 	edack, err := mv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
-		edac := edack.(*gi.Action)
+		edac := edack.(*gi.Button)
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "map edit dialog"
 		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
