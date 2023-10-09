@@ -12,6 +12,8 @@ import (
 	"goki.dev/girl/units"
 )
 
+// TODO: rich tooltips
+
 // NewTooltipFromScene returns a new Tooltip stage with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
