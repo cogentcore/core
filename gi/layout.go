@@ -172,7 +172,7 @@ type Layout struct {
 	HasScroll [2]bool `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
 
 	// scroll bars -- we fully manage them as needed
-	Scrolls [2]*ScrollBar `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	Scrolls [2]*Slider `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
 
 	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
 	GridSize image.Point `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during GetSize pass"`
@@ -358,7 +358,7 @@ func (ly *Layout) HasAnyScroll() bool {
 // SetScroll sets a scrollbar along given dimension
 func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	if ly.Scrolls[d] == nil {
-		ly.Scrolls[d] = &ScrollBar{}
+		ly.Scrolls[d] = &Slider{}
 		sb := ly.Scrolls[d]
 		sb.InitName(sb, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sb, ly.This())
@@ -407,7 +407,7 @@ func (ly *Layout) DeleteScroll(d mat32.Dims) {
 }
 
 // DeactivateScroll turns off given scrollbar, without deleting, so it can be easily re-used
-func (ly *Layout) DeactivateScroll(sb *ScrollBar) {
+func (ly *Layout) DeactivateScroll(sb *Slider) {
 	sb.BBoxMu.Lock()
 	defer sb.BBoxMu.Unlock()
 	sb.LayState.Alloc.Pos = mat32.Vec2Zero
