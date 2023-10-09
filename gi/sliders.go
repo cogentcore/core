@@ -444,7 +444,7 @@ func (sb *SliderBase) SliderMouse() {
 }
 
 func (sb *SliderBase) SliderKeys() {
-	sb.On(events.KeyChord, func(e events.Event) {
+	sb.OnKeyChord(func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}

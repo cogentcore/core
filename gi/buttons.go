@@ -416,7 +416,7 @@ func (bt *Button) ClickDismissMenu() {
 // ClickOnEnterSpace adds key event handler for Enter or Space
 // to generate a Click action
 func (bt *Button) ClickOnEnterSpace() {
-	bt.On(events.KeyChord, func(e events.Event) {
+	bt.OnKeyChord(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
 		}

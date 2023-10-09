@@ -320,7 +320,7 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 		}
 		sb.SetValueAction(val)
 	})
-	tf.On(events.KeyChord, func(e events.Event) {
+	tf.OnKeyChord(func(e events.Event) {
 		if sb.StateIs(states.Disabled) {
 			return
 		}

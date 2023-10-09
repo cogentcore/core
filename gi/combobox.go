@@ -563,7 +563,7 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *Menu) {
 }
 
 func (cb *ComboBox) ComboBoxKeys() {
-	cb.On(events.KeyChord, func(e events.Event) {
+	cb.OnKeyChord(func(e events.Event) {
 		if cb.StateIs(states.Disabled) {
 			return
 		}

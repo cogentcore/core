@@ -976,7 +976,7 @@ var LayoutPageSteps = 10
 // Typically this is done by the parent Scene level layout, but can be
 // done by default if FocusWithinable Ability is set.
 func (ly *Layout) LayoutKeys() {
-	ly.On(events.KeyChord, func(e events.Event) {
+	ly.OnKeyChord(func(e events.Event) {
 		ly.LayoutKeysImpl(e)
 	})
 }

@@ -80,7 +80,7 @@ func (sw *Switch) SwitchHandlers() {
 		}
 		sw.Send(events.Change, e)
 	})
-	sw.On(events.KeyChord, func(e events.Event) {
+	sw.OnKeyChord(func(e events.Event) {
 		if sw.StateIs(states.Disabled) {
 			return
 		}
