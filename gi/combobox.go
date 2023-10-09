@@ -235,6 +235,10 @@ func (cb *ComboBox) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) 
 	return indIdx
 }
 
+func (cb *ComboBox) ConfigWidget(sc *Scene) {
+	cb.ConfigParts(sc)
+}
+
 func (cb *ComboBox) ConfigParts(sc *Scene) {
 	cb.MakeMenuFunc = cb.MakeItemsMenu
 	parts := cb.NewParts(LayoutHoriz)
