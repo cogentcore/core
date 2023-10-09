@@ -56,6 +56,7 @@ func (m *Menu) SetButton(bt *Button, opts ActOpts, fun func(bt *Button)) {
 		nm = string(opts.Icon)
 	}
 	bt.InitName(bt, nm)
+	bt.Type = ButtonAction
 	bt.Text = opts.Label
 	bt.Tooltip = opts.Tooltip
 	bt.Icon = icons.Icon(opts.Icon)
