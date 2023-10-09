@@ -58,10 +58,9 @@ func (sc *Scene) SetDefaultStyle() {
 ////////////////////////////////////////////////////////////////////
 // 	Widget Styling functions
 
-// AddStyles adds the given styler to the
-// widget's stylers, initializing them if necessary.
-// This function can be called by both internal
-// and end-user code.
+// AddStyles adds the given styler to the widget's stylers.
+// It is the main way for both end-user and internal code
+// to set the styles of a widget.
 // It should only be done before showing the scene
 // during initial configuration -- otherwise requries
 // a StyMu mutex lock.

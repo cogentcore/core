@@ -183,6 +183,9 @@ func (bt *Button) ButtonStyles() {
 			s.Padding.Set(units.Dp(6*Prefs.DensityMul()), units.Dp(12*Prefs.DensityMul()))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
+		if bt.Is(ButtonFlagMenu) {
+			s.SetStretchMaxWidth() // need to go to edge of menu
+		}
 		if s.Is(states.Hovered) {
 			s.BoxShadow = s.MaxBoxShadow
 		}
