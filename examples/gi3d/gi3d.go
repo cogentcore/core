@@ -403,7 +403,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu.AddAppMenu(win)
 	win.MainMenuUpdated()
 

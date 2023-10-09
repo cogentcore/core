@@ -43,7 +43,7 @@ func (vv *MeshValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := kit.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
@@ -53,11 +53,11 @@ func (vv *MeshValueView) UpdateWidget() {
 
 func (vv *MeshValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.Px(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeMeshValueView).(*MeshValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
@@ -137,7 +137,7 @@ func (vv *TexValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := kit.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
@@ -147,11 +147,11 @@ func (vv *TexValueView) UpdateWidget() {
 
 func (vv *TexValueView) ConfigWidget(widg gi.Node2D) {
 	vv.Widget = widg
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.NewPx(4))
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeTexValueView).(*TexValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.Activate(ac.ViewportSafe(), nil, nil)
 	})
 	vv.UpdateWidget()
