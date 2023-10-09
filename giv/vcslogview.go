@@ -126,8 +126,8 @@ func (lv *VCSLogView) SetRevB(rev string) {
 func (lv *VCSLogView) ToggleRev() {
 	tb := lv.ToolBar()
 	updt := tb.UpdateStart()
-	cba := tb.ChildByName("a-rev", 2).(*gi.CheckBox)
-	cbb := tb.ChildByName("b-rev", 2).(*gi.CheckBox)
+	cba := tb.ChildByName("a-rev", 2).(*gi.Switch)
+	cbb := tb.ChildByName("b-rev", 2).(*gi.Switch)
 	lv.SetA = !lv.SetA
 	cba.SetState(lv.SetA, states.Checked)
 	cbb.SetState(!lv.SetA, states.Checked)

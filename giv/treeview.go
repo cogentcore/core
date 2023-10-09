@@ -1858,9 +1858,9 @@ func (tv *TreeView) TreeViewEvents() {
 // http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
 
 // BranchPart returns the branch in parts, if it exists
-func (tv *TreeView) BranchPart() (*gi.CheckBox, bool) {
+func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
 	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
-		return icc.(*gi.CheckBox), true
+		return icc.(*gi.Switch), true
 	}
 	return nil, false
 }

@@ -70,7 +70,7 @@ func (bb *ButtonBox) SelectItem(idx int) error {
 	if bb.Mutex {
 		bb.UnCheckAllBut(idx)
 	}
-	cb := bb.Parts.Child(idx).(*CheckBox)
+	cb := bb.Parts.Child(idx).(*Switch)
 	cb.SetState(true, states.Checked)
 	bb.UpdateEnd(updt)
 	return nil
@@ -96,7 +96,7 @@ func (bb *ButtonBox) SelectItemAction(idx int) error {
 func (bb *ButtonBox) UnCheckAll() {
 	updt := bb.UpdateStart()
 	for _, cbi := range *bb.Parts.Children() {
-		cb := cbi.(*CheckBox)
+		cb := cbi.(*Switch)
 		cb.SetState(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
@@ -109,7 +109,7 @@ func (bb *ButtonBox) UnCheckAllBut(idx int) {
 		if i == idx {
 			continue
 		}
-		cb := cbi.(*CheckBox)
+		cb := cbi.(*Switch)
 		cb.SetState(false, states.Checked)
 	}
 	bb.UpdateEnd(updt)
@@ -186,7 +186,7 @@ func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 
 func (bb *ButtonBox) ConfigItems() {
 	for i, cbi := range *bb.Parts.Children() {
-		cb := cbi.(*CheckBox)
+		cb := cbi.(*Switch)
 		lbl := bb.Items[i]
 		cb.SetText(lbl)
 		if len(bb.Tooltips) > i {
