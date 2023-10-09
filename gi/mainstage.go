@@ -209,7 +209,7 @@ func (st *MainStage) RunDialog() *MainStage {
 	ctx := st.CtxWidget.AsWidget()
 	ms := ctx.Sc.MainStageMgr()
 	if ms == nil {
-		fmt.Println("RunDialog: CurRenderWin is nil")
+		slog.Error("RunDialog: CurRenderWin is nil")
 		return nil
 	}
 	winsz := ms.RenderCtx.Size
@@ -218,12 +218,12 @@ func (st *MainStage) RunDialog() *MainStage {
 	st.StageMgr = ms // temporary
 	sz := sc.PrefSize(winsz)
 	if WinRenderTrace {
-		fmt.Println("MainStage.RunDialog: Size:", sz)
+		slog.Info("MainStage.RunDialog: Size:", sz)
 	}
 
 	if st.NewWindow && !goosi.TheApp.Platform().IsMobile() {
 		sc.Resize(sz)
-		st.Type = WindowStage            // critical: now is its own window!
+		st.Type = WindowStage       // critical: now is its own window!
 		sc.Geom.Pos = image.Point{} // ignore pos
 		win := st.NewRenderWin()
 		DialogRenderWins.Add(win)

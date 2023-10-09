@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"image"
-
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -51,9 +49,6 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	sc := StageScene(w.Name() + "-snackbar")
 	sc.SetLayout(LayoutHoriz)
 	wsc := w.AsWidget().Sc
-	wscm := wsc.Geom.Bounds().Max
-	// TODO: improve positioning and sizing
-	sc.Geom.Pos = wscm.Sub(image.Pt(3*wscm.X/4, 50))
 	sc.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
@@ -93,5 +88,13 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 			wsc.MainStage().PopupMgr.PopDeleteType(SnackbarStage)
 		})
 	}
+	ps := sc.PrefSize(wsc.Geom.Size)
+	b := wsc.Geom.Bounds()
+	// Go in the middle [(max - min) / 2], and then subtract
+	// half of the size because we are specifying starting point,
+	// not the center. This results in us being centered.
+	sc.Geom.Pos.X = (b.Max.X - b.Min.X - ps.X) / 2
+	// get enough space to fit plus 10 extra pixels of margin
+	sc.Geom.Pos.Y = b.Max.Y - ps.Y - 10
 	return sc
 }
