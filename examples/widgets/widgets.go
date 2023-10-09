@@ -42,22 +42,22 @@ func app() {
 	scene := gi.StageScene("widgets").SetTitle("GoGi Widgets Demo")
 
 	tbar := gi.NewToolBar(scene, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
-	tbar.AddAction(gi.ActOpts{Label: "Action 1", Data: 1}, func(act *gi.Action) {
-		fmt.Println("Toolbar Action 1")
+	tbar.AddButton(gi.ActOpts{Label: "Button 1", Data: 1}, func(act *gi.Button) {
+		fmt.Println("Toolbar Button 1")
 		gi.NewSnackbar(tbar, gi.SnackbarOpts{
 			Text:   "Something went wrong!",
-			Action: "Try again",
-			ActionOnClick: func(ac *gi.Action) {
+			Button: "Try again",
+			ButtonOnClick: func(bt *gi.Button) {
 				fmt.Println("got snackbar try again event")
 			},
 			Icon: icons.Close,
-			IconOnClick: func(ac *gi.Action) {
+			IconOnClick: func(bt *gi.Button) {
 				fmt.Println("got snackbar close icon event")
 			},
 		}).Run()
 	})
-	tbar.AddAction(gi.ActOpts{Label: "Action 2", Data: 2}, func(act *gi.Action) {
-		fmt.Println("Toolbar Action 2")
+	tbar.AddButton(gi.ActOpts{Label: "Button 2", Data: 2}, func(act *gi.Button) {
+		fmt.Println("Toolbar Button 2")
 	})
 
 	trow := gi.NewLayout(scene, "trow").
@@ -144,19 +144,19 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	mb1 := gi.NewButton(brow, "menubutton1").
 		SetText("Menu Button").
-		SetTooltip("Press this button to pull up a nested menu of actions").(*gi.Button)
+		SetTooltip("Press this button to pull up a nested menu of buttons").(*gi.Button)
 
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func(act *gi.Action) {
-		fmt.Println(act.Name(), act.Data)
+	mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func(bt *gi.Button) {
+		fmt.Println(bt.Name(), bt.Data)
 	})
-	mi2 := mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil)
+	mi2 := mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil)
 	_ = mi2
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1}, func(act *gi.Action) {
-		fmt.Println(act.Text, act.Data)
+	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1}, func(bt *gi.Button) {
+		fmt.Println(bt.Text, bt.Data)
 	})
 	mb1.Menu.AddSeparator("sep1")
-	mb1.Menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3}, func(act *gi.Action) {
-		fmt.Println(act.Text, act.Data)
+	mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3}, func(bt *gi.Button) {
+		fmt.Println(bt.Text, bt.Data)
 	})
 
 	//////////////////////////////////////////
@@ -230,7 +230,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	edit1 := gi.NewTextField(txrow, "edit1").
 		SetPlaceholder("Enter text here...").
-		AddClearAction().
+		AddClearButton().
 		// SetTypePassword().
 		AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(20))
@@ -260,36 +260,36 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu.AddAppMenu(win)
 
 	// note: use KeyFunMenu* for standard shortcuts
 	// Command in shortcuts is automatically translated into Control for
 	// Linux, RenderWins or Meta for MacOS
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
-	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
+	fmen.Menu.AddButton(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:New menu action triggered\n")
+			fmt.Printf("File:New menu button triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Open menu action triggered\n")
+			fmt.Printf("File:Open menu button triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:Save menu action triggered\n")
+			fmt.Printf("File:Save menu button triggered\n")
 		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("File:SaveAs menu action triggered\n")
+			fmt.Printf("File:SaveAs menu button triggered\n")
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.CloseReq()
 		})
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu.AddCopyCutPaste(win)
 
 	inQuitPrompt := false
