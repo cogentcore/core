@@ -21,7 +21,7 @@ type FileValueView struct {
 }
 
 func (vv *FileValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -29,7 +29,7 @@ func (vv *FileValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(click to open file chooser)"
@@ -40,10 +40,10 @@ func (vv *FileValueView) UpdateWidget() {
 func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeFileValueView).(*FileValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()

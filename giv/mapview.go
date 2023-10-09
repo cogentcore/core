@@ -226,7 +226,7 @@ func (mv *MapView) ConfigMapGrid() {
 			typnm := "type-" + keytxt
 			config.Add(gi.TypeComboBox, typnm)
 		}
-		config.Add(gi.ActionType, delnm)
+		config.Add(gi.ButtonType, delnm)
 		mv.Keys = append(mv.Keys, kv)
 		mv.Values = append(mv.Values, vv)
 	}
@@ -277,13 +277,13 @@ func (mv *MapView) ConfigMapGrid() {
 				mvv.MapChangeValueType(idx, typ)
 			})
 		}
-		delact := sg.Child(i*ncol + ncol - 1).(*gi.Action)
+		delact := sg.Child(i*ncol + ncol - 1).(*gi.Button)
 		delact.SetIcon(icons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
 		delact.Style.Template = "giv.MapView.DelAction"
 		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			act := send.(*gi.Action)
+			act := send.(*gi.Button)
 			mvv := recv.Embed(TypeMapView).(*MapView)
 			mvv.MapDelete(act.Data.(ValueView).Val())
 		})

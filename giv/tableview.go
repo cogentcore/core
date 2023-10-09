@@ -360,7 +360,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		fld := tv.VisFields[fli]
 		labnm := "head-" + fld.Name
-		hcfg.Add(gi.ActionType, labnm)
+		hcfg.Add(gi.ButtonType, labnm)
 	}
 	if !tv.IsDisabled() {
 		hcfg.Add(gi.LabelType, "head-add")
@@ -386,7 +386,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		field := tv.VisFields[fli]
-		hdr := sgh.Child(idxOff + fli).(*gi.Action)
+		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
@@ -403,7 +403,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		}
 		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTableView).(*TableView)
-			act := send.(*gi.Action)
+			act := send.(*gi.Button)
 			fldIdx := act.Data.(int)
 			tvv.SortSliceAction(fldIdx)
 		})
@@ -431,7 +431,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
 			addnm := "add-" + itxt
-			addact := gi.Action{}
+			addact := gi.Button{}
 			sgf.SetChild(&addact, cidx, addnm)
 			addact.SetIcon(icons.Add)
 			cidx++
@@ -441,7 +441,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
 			delnm := "del-" + itxt
-			delact := gi.Action{}
+			delact := gi.Button{}
 			sgf.SetChild(&delact, cidx, delnm)
 			delact.SetIcon(icons.Delete)
 			cidx++
@@ -705,14 +705,14 @@ func (tv *TableView) UpdateSliceGrid() {
 			if !tv.NoAdd {
 				if sg.Kids[cidx] == nil {
 					addnm := fmt.Sprintf("add-%v", itxt)
-					addact := gi.Action{}
+					addact := gi.Button{}
 					sg.SetChild(&addact, cidx, addnm)
 					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
 					addact.Style.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						act := send.(*gi.Action)
+						act := send.(*gi.Button)
 						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.SliceNewAtRow(act.Data.(int) + 1)
 					})
@@ -722,14 +722,14 @@ func (tv *TableView) UpdateSliceGrid() {
 			if !tv.NoDelete {
 				if sg.Kids[cidx] == nil {
 					delnm := fmt.Sprintf("del-%v", itxt)
-					delact := gi.Action{}
+					delact := gi.Button{}
 					sg.SetChild(&delact, cidx, delnm)
 					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
 					delact.Data = i
 					delact.Style.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						act := send.(*gi.Action)
+						act := send.(*gi.Button)
 						tvv := recv.Embed(TypeTableView).(*TableView)
 						tvv.SliceDeleteAtRow(act.Data.(int), true)
 					})
@@ -841,7 +841,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	ascending := true
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
-		hdr := sgh.Child(idxOff + fli).(*gi.Action)
+		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		if fli == fldIdx {
 			if tv.SortIdx == fli {
 				tv.SortDesc = !tv.SortDesc

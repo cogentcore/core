@@ -492,10 +492,10 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu.AddAppMenu(win)
 
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
+	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 			fmt.Println("File:New menu action triggered")
@@ -518,7 +518,7 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 			win.CloseReq()
 		})
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu.AddCopyCutPaste(win)
 
 	inQuitPrompt := false

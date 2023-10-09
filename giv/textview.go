@@ -2425,7 +2425,7 @@ func (tv *TextView) PasteHist() {
 	}
 	cl := TextViewClipHistChooseList()
 	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data any) {
-		ac := send.(*gi.Action)
+		ac := send.(*gi.Button)
 		idx := ac.Data.(int)
 		clip := TextViewClipHistory[idx]
 		if clip != nil {
@@ -2610,7 +2610,7 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 
 // MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
-	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Action) {
+	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
 		tv.Copy(true)
 	})
 	ac.SetEnabledState(tv.HasSelection())

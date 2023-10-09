@@ -188,17 +188,17 @@ func app() {
 	mmen := win.MainMenu
 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
 	amen.Menu = make(gi.MenuStage, 0, 10)
 	amen.Menu.AddAppMenu(win)
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu = make(gi.MenuStage, 0, 10)
 	emen.Menu.AddCopyCutPaste(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
 	// Linux, RenderWins or Meta for MacOS
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Action)
+	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu = make(gi.MenuStage, 0, 10)
 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {

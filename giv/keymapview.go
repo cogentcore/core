@@ -107,7 +107,7 @@ type KeyMapValueView struct {
 }
 
 func (vv *KeyMapValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -115,7 +115,7 @@ func (vv *KeyMapValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	ac.SetFullReRender()
 	ac.SetText(txt)
@@ -124,10 +124,10 @@ func (vv *KeyMapValueView) UpdateWidget() {
 func (vv *KeyMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		vvv, _ := recv.Embed(TypeKeyMapValueView).(*KeyMapValueView)
-		ac := vvv.Widget.(*gi.Action)
+		ac := vvv.Widget.(*gi.Button)
 		vvv.OpenDialog(ac.Sc, nil, nil)
 	})
 	vv.UpdateWidget()

@@ -193,7 +193,7 @@ var StylesProps = ki.Props{
 			{"OpenPrefs", ki.Props{}},
 			{"SavePrefs", ki.Props{
 				"shortcut": gi.KeyFunMenuSave,
-				"updtfunc": func(sti any, act *gi.Action) {
+				"updtfunc": func(sti any, act *gi.Button) {
 					act.SetEnabledStateUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
 				},
 			}},
@@ -233,14 +233,14 @@ var StylesProps = ki.Props{
 		{"Add", ki.Props{ // note: overrides default Add
 			"desc": "Add a new style to the list.",
 			"icon": icons.Add,
-			"updtfunc": func(sti any, act *gi.Action) {
+			"updtfunc": func(sti any, act *gi.Button) {
 				act.SetEnabledStateUpdt(sti.(*Styles) == &CustomStyles)
 			},
 		}},
 		{"SavePrefs", ki.Props{
 			"desc": "saves styles to app prefs directory, in file hi_styles.json, which will be loaded automatically at startup into your CustomStyles.",
 			"icon": icons.Save,
-			"updtfunc": func(sti any, act *gi.Action) {
+			"updtfunc": func(sti any, act *gi.Button) {
 				act.SetEnabledStateUpdt(StylesChanged && sti.(*Styles) == &CustomStyles)
 			},
 		}},
@@ -269,7 +269,7 @@ var StylesProps = ki.Props{
 		{"ViewStd", ki.Props{
 			"desc":    `Shows the standard styles that are compiled into the program (from <a href="https://github.com/alecthomas/chroma">github.com/alecthomas/chroma</a>).  Save a style from there and load it into custom as a starting point for creating a variant of an existing style.`,
 			"confirm": true,
-			"updtfunc": func(sti any, act *gi.Action) {
+			"updtfunc": func(sti any, act *gi.Button) {
 				act.SetEnabledStateUpdt(sti.(*Styles) != &StdStyles)
 			},
 		}},

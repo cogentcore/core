@@ -1932,7 +1932,7 @@ var TreeViewProps = ki.Props{
 		{"SrcInsertBefore", ki.Props{
 			"label":    "Insert Before",
 			"shortcut": gi.KeyFunInsert,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
@@ -1940,7 +1940,7 @@ var TreeViewProps = ki.Props{
 		{"SrcInsertAfter", ki.Props{
 			"label":    "Insert After",
 			"shortcut": gi.KeyFunInsertAfter,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
@@ -1948,7 +1948,7 @@ var TreeViewProps = ki.Props{
 		{"SrcDuplicate", ki.Props{
 			"label":    "Duplicate",
 			"shortcut": gi.KeyFunDuplicate,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
@@ -1956,7 +1956,7 @@ var TreeViewProps = ki.Props{
 		{"SrcDelete", ki.Props{
 			"label":    "Delete",
 			"shortcut": gi.KeyFunDelete,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),
@@ -1972,7 +1972,7 @@ var TreeViewProps = ki.Props{
 		}},
 		{"Cut", ki.Props{
 			"shortcut": gi.KeyFunCut,
-			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Action) {
+			"updtfunc": ActionUpdateFunc(func(tvi any, act *gi.Button) {
 				tv := tvi.(ki.Ki).Embed(TypeTreeView).(*TreeView)
 				act.SetState(tv.IsRootOrField(""), states.Disabled)
 			}),

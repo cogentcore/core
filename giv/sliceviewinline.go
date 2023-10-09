@@ -120,9 +120,9 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 		sv.Values = append(sv.Values, vv)
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		config.Add(gi.ActionType, "add-action")
+		config.Add(gi.ButtonType, "add-action")
 	}
-	config.Add(gi.ActionType, "edit-action")
+	config.Add(gi.ButtonType, "edit-action")
 	mods, updt := sv.Parts.ConfigChildren(config)
 	if !mods {
 		updt = sv.Parts.UpdateStart()
@@ -145,7 +145,7 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 	if !sv.IsArray && !sv.IsFixedLen {
 		adack, err := sv.Parts.Children().ElemFromEndTry(1)
 		if err == nil {
-			adac := adack.(*gi.Action)
+			adac := adack.(*gi.Button)
 			adac.SetIcon(icons.Add)
 			adac.Tooltip = "add an element to the slice"
 			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -156,7 +156,7 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 	}
 	edack, err := sv.Parts.Children().ElemFromEndTry(0)
 	if err == nil {
-		edac := edack.(*gi.Action)
+		edac := edack.(*gi.Button)
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
 		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {

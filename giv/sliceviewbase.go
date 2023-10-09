@@ -515,14 +515,14 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 		if !sv.NoAdd {
 			cidx++
 			addnm := fmt.Sprintf("add-%v", itxt)
-			addact := gi.Action{}
+			addact := gi.Button{}
 			sg.SetChild(&addact, cidx, addnm)
 			addact.SetIcon(icons.Add)
 		}
 		if !sv.NoDelete {
 			cidx++
 			delnm := fmt.Sprintf("del-%v", itxt)
-			delact := gi.Action{}
+			delact := gi.Button{}
 			sg.SetChild(&delact, cidx, delnm)
 
 			delact.SetIcon(icons.Delete)
@@ -794,7 +794,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					if !sv.NoAdd {
 						cidx++
 						addnm := fmt.Sprintf("add-%v", itxt)
-						addact := gi.Action{}
+						addact := gi.Button{}
 						sg.SetChild(&addact, cidx, addnm)
 
 						addact.SetIcon(icons.Add)
@@ -802,7 +802,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.Data = i
 						addact.Style.Template = "giv.SliceViewBase.AddAction"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-							act := send.(*gi.Action)
+							act := send.(*gi.Button)
 							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.SliceNewAtRow(act.Data.(int) + 1)
 						})
@@ -811,7 +811,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					if !sv.NoDelete {
 						cidx++
 						delnm := fmt.Sprintf("del-%v", itxt)
-						delact := gi.Action{}
+						delact := gi.Button{}
 						sg.SetChild(&delact, cidx, delnm)
 
 						delact.SetIcon(icons.Delete)
@@ -819,7 +819,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.Data = i
 						delact.Style.Template = "giv.SliceViewBase.DelAction"
 						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-							act := send.(*gi.Action)
+							act := send.(*gi.Button)
 							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 							svv.SliceDeleteAtRow(act.Data.(int), true)
 						})
