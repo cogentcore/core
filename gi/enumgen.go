@@ -2392,6 +2392,117 @@ func (i *StageSides) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _SwitchTypesValues = []SwitchTypes{0, 1, 2}
+
+// SwitchTypesN is the highest valid value
+// for type SwitchTypes, plus one.
+const SwitchTypesN SwitchTypes = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _SwitchTypesNoOp() {
+	var x [1]struct{}
+	_ = x[SwitchSwitch-(0)]
+	_ = x[SwitchCheckbox-(1)]
+	_ = x[SwitchRadioButton-(2)]
+}
+
+var _SwitchTypesNameToValueMap = map[string]SwitchTypes{
+	`Switch`:      0,
+	`switch`:      0,
+	`Checkbox`:    1,
+	`checkbox`:    1,
+	`RadioButton`: 2,
+	`radiobutton`: 2,
+}
+
+var _SwitchTypesDescMap = map[SwitchTypes]string{
+	0: `SwitchSwitch indicates to display a switch as a switch (toggle slider)`,
+	1: `SwitchCheckbox indicates to display a switch as a checkbox`,
+	2: `SwitchRadioButton indicates to display a switch as a radio button`,
+}
+
+var _SwitchTypesMap = map[SwitchTypes]string{
+	0: `Switch`,
+	1: `Checkbox`,
+	2: `RadioButton`,
+}
+
+// String returns the string representation
+// of this SwitchTypes value.
+func (i SwitchTypes) String() string {
+	if str, ok := _SwitchTypesMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the SwitchTypes value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *SwitchTypes) SetString(s string) error {
+	if val, ok := _SwitchTypesNameToValueMap[s]; ok {
+		*i = val
+		return nil
+	}
+	if val, ok := _SwitchTypesNameToValueMap[strings.ToLower(s)]; ok {
+		*i = val
+		return nil
+	}
+	return errors.New(s + " is not a valid value for type SwitchTypes")
+}
+
+// Int64 returns the SwitchTypes value as an int64.
+func (i SwitchTypes) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the SwitchTypes value from an int64.
+func (i *SwitchTypes) SetInt64(in int64) {
+	*i = SwitchTypes(in)
+}
+
+// Desc returns the description of the SwitchTypes value.
+func (i SwitchTypes) Desc() string {
+	if str, ok := _SwitchTypesDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// SwitchTypesValues returns all possible values
+// for the type SwitchTypes.
+func SwitchTypesValues() []SwitchTypes {
+	return _SwitchTypesValues
+}
+
+// Values returns all possible values
+// for the type SwitchTypes.
+func (i SwitchTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_SwitchTypesValues))
+	for i, d := range _SwitchTypesValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type SwitchTypes.
+func (i SwitchTypes) IsValid() bool {
+	_, ok := _SwitchTypesMap[i]
+	return ok
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i SwitchTypes) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *SwitchTypes) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _TextFieldTypesValues = []TextFieldTypes{0, 1}
 
 // TextFieldTypesN is the highest valid value
