@@ -2609,7 +2609,7 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 }
 
 // MakeContextMenu builds the textview context menu
-func (tv *TextView) MakeContextMenu(m *gi.MenuActions) {
+func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Action) {
 		tv.Copy(true)
 	})

@@ -989,7 +989,7 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.MenuActions) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	return CtxtMenuView(val, inactive, vp, menu)
 }
 

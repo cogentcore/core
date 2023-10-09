@@ -1028,7 +1028,7 @@ func (tv *TreeView) ContextMenuPos() (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) MakeContextMenu(m *gi.MenuActions) {
+func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	// derived types put native menu code here
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
@@ -1334,7 +1334,7 @@ func (tv *TreeView) Paste() {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *gi.MenuActions, data any) {
+func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1369,7 +1369,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 		log.Printf("TreeView PasteMenu nil SrcNode in: %v\n", tv.Path())
 		return
 	}
-	var menu gi.MenuActions
+	var menu gi.Menu
 	tv.MakePasteMenu(&menu, md)
 	pos := tv.ContextMenuPos()
 	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
@@ -1578,7 +1578,7 @@ func (tv *TreeView) Dragged(de events.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (tv *TreeView) MakeDropMenu(m *gi.MenuActions, data any, mod events.DropMods) {
+func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 	if len(*m) > 0 {
 		return
 	}
@@ -1618,7 +1618,7 @@ func (tv *TreeView) MakeDropMenu(m *gi.MenuActions, data any, mod events.DropMod
 // Drop pops up a menu to determine what specifically to do with dropped items
 // satisfies gi.DragNDropper interface and can be overridden by subtypes
 func (tv *TreeView) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.MenuActions
+	var menu gi.Menu
 	tv.MakeDropMenu(&menu, md, mod)
 	pos := tv.ContextMenuPos()
 	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()

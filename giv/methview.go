@@ -163,7 +163,7 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 // cases, and then falls back on "CtxtMenu".  Returns false if there is no
 // context menu defined for this type, or on errors (which are programmer
 // errors sent to log).
-func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.MenuActions) bool {
+func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
@@ -972,7 +972,7 @@ func MethViewUpdateFunc(act *gi.Action) {
 }
 
 // MethViewSubMenuFunc is a MakeMenuFunc for items that have submenus
-func MethViewSubMenuFunc(aki ki.Ki, m *gi.MenuActions) {
+func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	ac := aki.(*gi.Action)
 	md := ac.Data.(*MethViewData)
 	smd := md.SubMenuSlice
@@ -1006,12 +1006,12 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.MenuActions) {
 	md.Sc.Win.MainMenuUpdated()
 }
 
-func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.MenuActions, isSub bool, defstr string, gotDef bool) {
+func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
 	sz := mvnp.Len()
 	if sz == 0 {
 		return
 	}
-	*m = make(gi.MenuActions, 0, sz)
+	*m = make(gi.Menu, 0, sz)
 	e1 := mvnp.Index(0)
 	if e1.Kind() == reflect.Slice { // multi-slice -- sub-menus
 		for i := 0; i < sz; i++ {
