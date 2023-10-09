@@ -101,7 +101,9 @@ const (
 	// It is equivalent to Material Design's outlined button.
 	ButtonOutlined
 	// ButtonText is a low-importance button with no border,
-	// background color, or shadow. It renders primary-colored text.
+	// background color, or shadow when not being interacted with.
+	// It renders primary-colored text, and it renders a background
+	// color and shadow when hovered/focused/active.
 	// It should only be used for low emphasis
 	// actions, and you must ensure it stands out from the
 	// surrounding context sufficiently. It is equivalent
@@ -112,10 +114,11 @@ const (
 	// as a simple action among a series of other buttons
 	// (eg: in a toolbar or menu), or as a part of another widget,
 	// like a spinbox or snackbar. It has no border, background color,
-	// or shadow, and it inherits the text color of its parent, and
-	// you must ensure it stands out from the surrounding context
-	// sufficiently. It is equivalent to Material Design's icon button,
-	// but it can also contain text and other things (and frequently does).
+	// or shadow when not being interacted with. It inherits the text
+	// color of its parent, and it renders a background when
+	// hovered/focused/active. you must ensure it stands out from the
+	// surrounding context  sufficiently. It is equivalent to Material Design's
+	// icon button, but it can also contain text and other things (and frequently does).
 	ButtonAction
 )
 
@@ -175,6 +178,8 @@ func (bt *Button) ButtonStyles() {
 			s.Border.Width.Set(units.Dp(1))
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
+		case ButtonAction:
+			s.MaxBoxShadow = styles.BoxShadow0()
 		}
 		if s.Is(states.Hovered) {
 			s.BoxShadow = s.MaxBoxShadow
