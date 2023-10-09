@@ -543,7 +543,7 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}}},
 		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}}},
 		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}}},
-		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*ScrollBar", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}}},
+		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}}},
 		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}}},
 		{"GridData", &gti.Field{Name: "GridData", Type: "[RowColN][]GridData", Doc: "grid data for rows in [0] and cols in [1]", Directives: gti.Directives{}}},
 		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}}},
@@ -1000,6 +1000,42 @@ func AsSplitView(k ki.Ki) *SplitView {
 // AsSplitView satisfies the [SplitViewEmbedder] interface
 func (t *SplitView) AsSplitView() *SplitView {
 	return t
+}
+
+// SplitterType is the [gti.Type] for [Splitter]
+var SplitterType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Splitter",
+	ShortName:  "gi.Splitter",
+	IDName:     "splitter",
+	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplitView, with draggable resizing of the splitter -- parent is Parts\nlayout of the SplitView -- based on Slider",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SplitterNo", &gti.Field{Name: "SplitterNo", Type: "int", Doc: "splitter number this one is", Directives: gti.Directives{}}},
+		{"OrigWinBBox", &gti.Field{Name: "OrigWinBBox", Type: "image.Rectangle", Doc: "copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Slider", &gti.Field{Name: "Slider", Type: "Slider", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Splitter{},
+})
+
+// NewSplitter adds a new [Splitter] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSplitter(par ki.Ki, name ...string) *Splitter {
+	return par.NewChild(SplitterType, name...).(*Splitter)
+}
+
+// KiType returns the [*gti.Type] of [Splitter]
+func (t *Splitter) KiType() *gti.Type {
+	return SplitterType
+}
+
+// New returns a new [*Splitter] value
+func (t *Splitter) New() ki.Ki {
+	return &Splitter{}
 }
 
 // SwitchType is the [gti.Type] for [Switch]
