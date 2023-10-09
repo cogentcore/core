@@ -49,6 +49,12 @@ type Button struct {
 
 	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
 	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+
+	// [view: -] optional data that is sent with events to identify the button
+	Data any `json:"-" xml:"-" view:"-" desc:"optional data that is sent with events to identify the button"`
+
+	// [view: -] optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing
+	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -65,6 +71,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Shortcut = fr.Shortcut
 	bt.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in actions; todo: could do more elaborate copy etc but is it worth it?
 	bt.MakeMenuFunc = fr.MakeMenuFunc
+	bt.Data = fr.Data
 }
 
 // ButtonTypes is an enum containing the
@@ -359,6 +366,19 @@ func (bt *Button) ClickMenu() {
 			return
 		}
 		bt.OpenMenu()
+		// dismiss menu if needed
+		if bt.Sc != nil && bt.Sc.Stage != nil {
+			pst := bt.Sc.Stage.AsPopup()
+			if pst != nil && pst.Type == Menu {
+				pst.Close()
+			}
+		} else {
+			if bt.Sc == nil {
+				slog.Error("ac.Sc == nil")
+			} else if bt.Sc.Stage == nil {
+				slog.Error("ac.Sc.Stage == nil")
+			}
+		}
 	})
 }
 
@@ -539,5 +559,15 @@ func (bt *Button) Render(sc *Scene) {
 func (bt *Button) Destroy() {
 	if bt.Menu != nil {
 		bt.Menu.DeleteShortcuts(bt.EventMgr())
+	}
+}
+
+// UpdateButtons calls UpdateFunc on me and any of my menu items
+func (bt *Button) UpdateButtons() {
+	if bt.UpdateFunc != nil {
+		bt.UpdateFunc(bt)
+	}
+	if bt.Menu != nil {
+		bt.Menu.UpdateActions()
 	}
 }
