@@ -32,6 +32,9 @@ import (
 type ComboBox struct {
 	Button
 
+	// the type of combo box
+	Type ComboBoxTypes `desc:"the type of combo box"`
+
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
 	Editable bool `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
 
@@ -49,9 +52,6 @@ type ComboBox struct {
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
-
-	// the type of combo box
-	Type ComboBoxTypes `desc:"the type of combo box"`
 
 	// maximum label length (in runes)
 	MaxLength int `desc:"maximum label length (in runes)"`
