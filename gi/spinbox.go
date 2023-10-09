@@ -97,7 +97,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		})
 	case "text-field":
 		tf := w.(*TextField)
-		tf.Txt = sb.ValToString(sb.Value)
+		tf.SetText(sb.ValToString(sb.Value))
 		tf.SetState(sb.IsDisabled(), states.Disabled)
 		tf.On(events.Select, func(e events.Event) {
 			if sb.IsDisabled() {
@@ -117,7 +117,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			text := tf.Text()
 			val, err := sb.StringToVal(text)
 			if err != nil {
-				// SNACKTODO
+				// TODO: add validation message
 				slog.Error("invalid spinbox value", "value", text, "err", err)
 				return
 			}
