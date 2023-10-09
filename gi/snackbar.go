@@ -51,7 +51,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	wsc := w.AsWidget().Sc
 	sc.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
+		s.Padding.SetHoriz(units.Dp(8 * Prefs.DensityMul()))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
