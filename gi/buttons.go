@@ -179,6 +179,8 @@ func (bt *Button) ButtonStyles() {
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
+			s.Border.Radius = styles.BorderRadiusNone
+			s.Padding.Set(units.Dp(6*Prefs.DensityMul()), units.Dp(12*Prefs.DensityMul()))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
 		if s.Is(states.Hovered) {
