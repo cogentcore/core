@@ -422,16 +422,28 @@ func (bt *Button) ConfigWidget(sc *Scene) {
 
 func (bt *Button) ConfigParts(sc *Scene) {
 	parts := bt.NewParts(LayoutHoriz)
-	if bt.HasMenu() && bt.Icon.IsNil() {
-		bt.Icon = icons.Menu
+	if bt.HasMenu() && bt.Icon.IsNil() && bt.Indicator.IsNil() {
+		if bt.Is(ButtonFlagMenu) {
+			bt.Indicator = icons.KeyboardArrowRight
+		} else {
+			bt.Icon = icons.Menu
+		}
 	}
 	config := ki.Config{}
 	icIdx, lbIdx := bt.ConfigPartsIconLabel(&config, bt.Icon, bt.Text)
 	indIdx := bt.ConfigPartsAddIndicator(&config, false) // default off
-
+	scIdx := -1
+	if bt.Is(ButtonFlagMenu) {
+		if indIdx < 0 && bt.Shortcut != "" {
+			scIdx = bt.ConfigPartsAddShortcut(&config)
+		} else if bt.Shortcut != "" {
+			slog.Error("gi.Button: shortcut cannot be used on a sub-menu for", "button", bt)
+		}
+	}
 	mods, updt := parts.ConfigChildren(config)
 	bt.ConfigPartsSetIconLabel(bt.Icon, bt.Text, icIdx, lbIdx)
 	bt.ConfigPartsIndicator(indIdx)
+	bt.ConfigPartsShortcut(scIdx)
 	if mods {
 		parts.UpdateEnd(updt)
 		bt.SetNeedsLayout(sc, updt)
@@ -471,6 +483,26 @@ func (bt *Button) ConfigPartsSetIconLabel(icnm icons.Icon, txt string, icIdx, lb
 			lbl.Config(bt.Sc) // this is essential
 		}
 	}
+}
+
+// ConfigPartsShortcut sets the shortcut
+func (bt *Button) ConfigPartsShortcut(scIdx int) {
+	if scIdx < 0 {
+		return
+	}
+	sc := bt.Parts.Child(scIdx).(*Label)
+	sclbl := bt.Shortcut.Shortcut()
+	if sc.Text != sclbl {
+		sc.Text = sclbl
+	}
+}
+
+// ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
+func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
+	config.Add(StretchType, "sc-stretch")
+	scIdx := len(*config)
+	config.Add(LabelType, "shortcut")
+	return scIdx
 }
 
 func (bt *Button) ApplyStyle(sc *Scene) {
