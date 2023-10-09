@@ -9,7 +9,6 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -55,7 +54,6 @@ func (ic *Icon) IconStyles() {
 		s.Height.SetEm(1)
 		// s.Width.SetDp(24)
 		// s.Height.SetDp(24)
-		s.BackgroundColor.SetSolid(colors.Transparent)
 	})
 }
 

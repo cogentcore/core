@@ -10,6 +10,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -55,7 +56,27 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 
 func (sw *Switch) OnInit() {
 	sw.WidgetHandlers()
+	sw.SwitchHandlers()
 	sw.SwitchStyles()
+}
+
+func (sw *Switch) SwitchHandlers() {
+	sw.On(events.Click, func(e events.Event) {
+		if sw.StateIs(states.Disabled) {
+			return
+		}
+		e.SetHandled()
+		sw.SetState(!sw.StateIs(states.Checked), states.Checked)
+		if sw.Parts != nil && sw.Parts.HasChildren() {
+			ist := sw.Parts.ChildByName("stack", 0).(*Layout)
+			if sw.StateIs(states.Checked) {
+				ist.StackTop = 0
+			} else {
+				ist.StackTop = 1
+			}
+		}
+		sw.Send(events.Change, e)
+	})
 }
 
 func (sw *Switch) SwitchStyles() {
@@ -68,14 +89,6 @@ func (sw *Switch) SwitchStyles() {
 		s.Padding.Set(units.Dp(1 * Prefs.DensityMul()))
 		s.Border.Style.Set(styles.BorderNone)
 
-		if sw.Parts != nil && sw.Parts.HasChildren() {
-			ist := sw.Parts.ChildByName("stack", 0).(*Layout)
-			if sw.StateIs(states.Checked) {
-				ist.StackTop = 0
-			} else {
-				ist.StackTop = 1
-			}
-		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
@@ -170,10 +183,26 @@ func (sw *Switch) ConfigWidget(sc *Scene) {
 func (sw *Switch) ConfigParts(sc *Scene) {
 	parts := sw.NewParts(LayoutHoriz)
 	if !sw.IconOn.IsValid() {
-		sw.IconOn = icons.CheckBox.Fill() // fallback
+		// fallback
+		switch sw.Type {
+		case SwitchSwitch:
+			sw.IconOn = icons.ToggleOn
+		case SwitchCheckbox:
+			sw.IconOn = icons.CheckBox.Fill()
+		case SwitchRadioButton:
+			sw.IconOn = icons.RadioButtonChecked.Fill()
+		}
 	}
 	if !sw.IconOff.IsValid() {
-		sw.IconOff = icons.CheckBoxOutlineBlank // fallback
+		// fallback
+		switch sw.Type {
+		case SwitchSwitch:
+			sw.IconOff = icons.ToggleOff
+		case SwitchCheckbox:
+			sw.IconOff = icons.CheckBoxOutlineBlank
+		case SwitchRadioButton:
+			sw.IconOff = icons.RadioButtonUnchecked
+		}
 	}
 	config := ki.Config{}
 	icIdx := 0 // always there

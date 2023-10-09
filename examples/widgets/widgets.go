@@ -134,12 +134,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}).Run()
 	})
 
-	checkbox := gi.NewSwitch(brow).SetText("Toggle")
-	checkbox.On(events.Click, func(e events.Event) {
-		fmt.Println("toggled", checkbox.StateIs(states.Checked))
+	toggle := gi.NewSwitch(brow).SetText("Toggle")
+	toggle.On(events.Change, func(e events.Event) {
+		fmt.Println("toggled", toggle.StateIs(states.Checked))
 	})
-
-	_ = checkbox
 
 	mb1 := gi.NewButton(brow, "menubutton1").
 		SetText("Menu Button").
@@ -149,7 +147,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println(bt.Name(), bt.Data)
 	})
 	mi2 := mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil)
-	_ = mi2
 	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1}, func(bt *gi.Button) {
 		fmt.Println(bt.Text, bt.Data)
 	})
