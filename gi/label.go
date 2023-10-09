@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/mat32/v2"
@@ -316,7 +315,6 @@ func (lb *Label) LabelLongHover() {
 
 func (lb *Label) LabelClick() {
 	lb.On(events.Click, func(e events.Event) {
-		fmt.Println("click")
 		if lb.StateIs(states.Disabled) {
 			return
 		}
@@ -336,7 +334,6 @@ func (lb *Label) LabelClick() {
 		}
 	})
 	lb.On(events.DoubleClick, func(e events.Event) {
-		fmt.Println("dbl click")
 		if !lb.AbilityIs(states.Selectable) || lb.StateIs(states.Disabled) {
 			return
 		}
@@ -371,13 +368,18 @@ func (lb *Label) LabelMouseMove() {
 
 func (lb *Label) LabelKeys() {
 	lb.On(events.KeyChord, func(e events.Event) {
+		// TODO(kai): get label copying working
+		fmt.Println("kc", e)
 		if !lb.StateIs(states.Selected) {
 			return
 		}
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunCopy {
 			e.SetHandled()
-			goosi.TheApp.ClipBoard(lb.EventMgr().RenderWin().GoosiWin).Write(mimedata.NewText(lb.Text))
+			md := mimedata.NewText(lb.Text)
+			lb.This().(Clipper).MimeData(&md)
+			lb.This().(Clipper).Copy(true)
+			fmt.Println("cp", md)
 		}
 	})
 }
