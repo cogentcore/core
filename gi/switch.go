@@ -120,13 +120,13 @@ func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 }
 
 func (cb *CheckBox) ConfigWidget(sc *Scene) {
-	cb.SetCheckable(true)
+	cb.SetAbilities(true, states.Checkable)
 	cb.This().(ButtonWidget).ConfigParts(sc)
 }
 
 func (cb *CheckBox) ConfigParts(sc *Scene) {
 	parts := cb.NewParts(LayoutHoriz)
-	cb.SetCheckable(true)
+	cb.SetAbilities(true, states.Checkable)
 	if !cb.Icon.IsValid() {
 		cb.Icon = icons.CheckBox // fallback
 	}
