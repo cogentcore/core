@@ -1238,6 +1238,41 @@ func (t *TabView) AsTabView() *TabView {
 	return t
 }
 
+// TabButtonType is the [gti.Type] for [TabButton]
+var TabButtonType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.TabButton",
+	ShortName:  "gi.TabButton",
+	IDName:     "tab-button",
+	Doc:        "TabButton contains a larger select button and a small close button. Indicator\nicon is used for close icon.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TabButton{},
+})
+
+// NewTabButton adds a new [TabButton] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTabButton(par ki.Ki, name ...string) *TabButton {
+	return par.NewChild(TabButtonType, name...).(*TabButton)
+}
+
+// KiType returns the [*gti.Type] of [TabButton]
+func (t *TabButton) KiType() *gti.Type {
+	return TabButtonType
+}
+
+// New returns a new [*TabButton] value
+func (t *TabButton) New() ki.Ki {
+	return &TabButton{}
+}
+
 // TextFieldType is the [gti.Type] for [TextField]
 var TextFieldType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.TextField",

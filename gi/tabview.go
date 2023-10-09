@@ -435,7 +435,7 @@ func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 		if tv.NewTabType == nil {
 			tv.NewTabType = FrameType
 		}
-		tab := tb.InsertNewChild(ActionType, ntb, "new-tab").(*Action)
+		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
 		tab.Data = -1
 		tab.SetIcon(icons.Add)
 		tab.On(events.Click, func(e events.Event) {
@@ -557,10 +557,10 @@ func (tv *TabView) Render(sc *Scene) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // TabButton
 
-// TabButton is a larger select action and a small close action. Indicator
+// TabButton contains a larger select button and a small close button. Indicator
 // icon is used for close icon.
 type TabButton struct {
-	Action
+	Button
 
 	// if true, this tab does not have the delete button avail
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
@@ -658,7 +658,7 @@ func (tb *TabButton) ConfigParts(sc *Scene) {
 		tb.ConfigPartsDeleteButton(sc)
 		return
 	}
-	tb.Action.ConfigParts(sc) // regular
+	tb.Button.ConfigParts(sc) // regular
 }
 
 func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
@@ -666,11 +666,11 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)
-	config.Add(ActionType, "close")
+	config.Add(ButtonType, "close")
 	mods, updt := tb.Parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
-		cls := tb.Parts.Child(clsIdx).(*Action)
+		cls := tb.Parts.Child(clsIdx).(*Button)
 		if tb.Indicator.IsNil() {
 			tb.Indicator = icons.Close
 		}
