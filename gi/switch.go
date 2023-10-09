@@ -76,9 +76,6 @@ func (sw *Switch) SwitchStyles() {
 				ist.StackTop = 1
 			}
 		}
-		if s.Is(states.Checked) {
-			s.Color = colors.Scheme.Primary.Base
-		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}

@@ -134,8 +134,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}).Run()
 	})
 
-	checkbox := gi.NewCheckBox(brow, "checkbox").
-		SetText("Toggle")
+	checkbox := gi.NewSwitch(brow).SetText("Toggle")
 	checkbox.On(events.Click, func(e events.Event) {
 		fmt.Println("toggled", checkbox.StateIs(states.Checked))
 	})
