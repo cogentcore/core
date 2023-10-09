@@ -201,14 +201,6 @@ func (ac *Action) ConfigWidget(sc *Scene) {
 	ac.ConfigParts(sc)
 }
 
-// ConfigPartsAddShortcut adds a menu shortcut, with a stretch space -- only called when needed
-func (ac *Action) ConfigPartsAddShortcut(config *ki.Config) int {
-	config.Add(StretchType, "sc-stretch")
-	scIdx := len(*config)
-	config.Add(LabelType, "shortcut")
-	return scIdx
-}
-
 // ConfigPartsShortcut sets the shortcut
 func (ac *Action) ConfigPartsShortcut(scIdx int) {
 	if scIdx < 0 {
