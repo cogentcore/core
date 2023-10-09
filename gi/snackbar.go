@@ -10,16 +10,25 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 )
 
 // SnackbarOpts contains the options used to create a snackbar.
 type SnackbarOpts struct {
-	Text          string
-	Action        *ActOpts
-	ActionOnClick func(act *Action)
-	Icon          icons.Icon
-	IconOnClick   func(act *Action)
+	// The main text message to display in the snackbar
+	Text string
+	// If not "", the text of an action to display in the snackbar
+	Action string
+	// If non-nil, the function to call when the main text action
+	// in the snackbar is clicked
+	ActionOnClick func(ac *Action)
+	// If not [icons.None], the icon to display as an action
+	// on the right side of the snack bar
+	Icon icons.Icon
+	// If non-nil, the function to call when the icon action in the
+	// snackabr is clicked
+	IconOnClick func(ac *Action)
 }
 
 // NewSnackbarFromScene returns a new Snackbar stage with given scene contents,
@@ -40,6 +49,7 @@ func NewSnackbar(w Widget, opts SnackbarOpts) *PopupStage {
 // and options.
 func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	sc := StageScene(w.Name() + "-snackbar")
+	sc.SetLayout(LayoutHoriz)
 	wsc := w.AsWidget().Sc
 	wscm := wsc.Geom.Bounds().Max
 	// TODO: improve positioning and sizing
@@ -50,8 +60,33 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow3()
+		s.AlignV = styles.AlignMiddle
+		sc.Spacing.SetDp(12 * Prefs.DensityMul())
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium)
-	// TODO: other elements
+	if opts.Action != "" {
+		ac := NewAction(sc, "action").SetType(ActionParts)
+		ac.SetText(opts.Action)
+		ac.AddStyles(func(s *styles.Style) {
+			s.Color = colors.Scheme.InversePrimary
+		})
+
+		ac.On(events.Click, func(e events.Event) {
+			if opts.ActionOnClick != nil {
+				opts.ActionOnClick(ac)
+			}
+			sc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+		})
+	}
+	if !opts.Icon.IsNil() {
+		ic := NewAction(sc, "icon")
+		ic.SetIcon(opts.Icon)
+		ic.On(events.Click, func(e events.Event) {
+			if opts.IconOnClick != nil {
+				opts.IconOnClick(ic)
+			}
+			sc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+		})
+	}
 	return sc
 }

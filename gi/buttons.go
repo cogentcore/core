@@ -556,7 +556,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.ButtonBase.CopyFieldsFrom(&fr.ButtonBase)
 }
 
-// SetType sets the type of the Button for styling purposes
+// SetType sets the styling type of the button
 func (bt *Button) SetType(typ ButtonTypes) *Button {
 	updt := bt.UpdateStart()
 	bt.Type = typ

@@ -184,6 +184,14 @@ func (ac *Action) OnChildAdded(child ki.Ki) {
 
 }
 
+// SetType sets the styling type of the action
+func (ac *Action) SetType(typ ActionTypes) *Action {
+	updt := ac.UpdateStart()
+	ac.Type = typ
+	ac.UpdateEndLayout(updt)
+	return ac
+}
+
 // Config calls functions to initialize widget and parts
 func (ac *Action) ConfigWidget(sc *Scene) {
 	ac.ConfigParts(sc)
