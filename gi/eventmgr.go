@@ -762,10 +762,7 @@ func (em *EventMgr) FocusFirst() bool {
 		return ki.Break
 	})
 	em.SetFocus(firstItem)
-	if firstItem == nil {
-		return false
-	}
-	return true
+	return firstItem != nil
 }
 
 // FocusLast sets the focus on the last focusable item in the tree.
