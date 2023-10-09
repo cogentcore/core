@@ -56,7 +56,6 @@ func (ic *Icon) IconStyles() {
 		// s.Width.SetDp(24)
 		// s.Height.SetDp(24)
 		s.BackgroundColor.SetSolid(colors.Transparent)
-		ic.SVG.Color.SetSolid(s.Color)
 	})
 }
 
@@ -107,7 +106,7 @@ func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.SVG.Norm = true
 	// ic.SVG.Fill = true
 	ic.ApplyStyleWidget(sc)
-	// todo: set ic.SVG style
+	ic.SVG.Color.SetSolid(ic.Style.Color)
 }
 
 func (ic *Icon) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
