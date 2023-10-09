@@ -195,6 +195,22 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 	}
 }
 
+// SetType sets the styling type of the combo box
+func (cb *ComboBox) SetType(typ ComboBoxTypes) *ComboBox {
+	updt := cb.UpdateStart()
+	cb.Type = typ
+	cb.UpdateEndLayout(updt)
+	return cb
+}
+
+// SetType sets whether the combo box is editable
+func (cb *ComboBox) SetEditable(editable bool) *ComboBox {
+	updt := cb.UpdateStart()
+	cb.Editable = editable
+	cb.UpdateEndLayout(updt)
+	return cb
+}
+
 // ConfigPartsIconText returns a standard config for creating parts, of icon
 // and text left-to right in a row -- always makes text
 func (cb *ComboBox) ConfigPartsIconText(config *ki.Config, icnm icons.Icon) (icIdx, txIdx int) {
