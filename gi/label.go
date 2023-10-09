@@ -6,7 +6,6 @@ package gi
 
 import (
 	"image"
-	"image/color"
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
@@ -46,9 +45,6 @@ type Label struct {
 
 	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
 	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
-
-	// current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg
-	CurBackgroundColor color.RGBA `copy:"-" xml:"-" json:"-" desc:"current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg"`
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {
@@ -371,18 +367,6 @@ func (lb *Label) LinkCursor() {
 	})
 }
 
-func (lb *Label) GrabCurBackgroundColor() {
-	if lb.Sc == nil || lb.StateIs(states.Selected) {
-		return
-	}
-	if !lb.NeedsRebuild() && !colors.IsNil(lb.CurBackgroundColor) {
-		return
-	}
-	pos := lb.ContextMenuPos()
-	clr := lb.Sc.Pixels.At(pos.X, pos.Y)
-	lb.CurBackgroundColor = colors.AsRGBA(clr)
-}
-
 // StyleLabel does label styling -- it sets the StyMu Lock
 func (lb *Label) StyleLabel(sc *Scene) {
 	lb.StyMu.Lock()
@@ -446,7 +430,6 @@ func (lb *Label) TextPos() mat32.Vec2 {
 }
 
 func (lb *Label) RenderLabel(sc *Scene) {
-	lb.GrabCurBackgroundColor()
 	rs, _, st := lb.RenderLock(sc)
 	defer lb.RenderUnlock(rs)
 	lb.RenderPos = lb.TextPos()
