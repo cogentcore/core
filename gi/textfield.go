@@ -56,10 +56,10 @@ type TextField struct {
 	// replace displayed characters with bullets to conceal text
 	NoEcho bool
 
-	// if specified, an action will be added at the start of the text field with this icon
+	// if specified, a button will be added at the start of the text field with this icon
 	LeadingIcon icons.Icon
 
-	// if specified, an action will be added at the end of the text field with this icon
+	// if specified, a button will be added at the end of the text field with this icon
 	TrailingIcon icons.Icon
 
 	// width of cursor -- set from cursor-width property (inherited)
@@ -213,8 +213,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "lead-icon":
-		lead := w.(*Action)
-		lead.Type = ActionParts
+		lead := w.(*Button)
+		lead.Type = ButtonAction
 		lead.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)
 			s.Margin.Right.SetDp(16 * Prefs.DensityMul())
@@ -222,8 +222,8 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "trail-icon":
-		trail := w.(*Action)
-		trail.Type = ActionParts
+		trail := w.(*Button)
+		trail.Type = ButtonAction
 		trail.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)
 			s.Margin.Left.SetDp(16 * Prefs.DensityMul())
@@ -243,7 +243,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 				} else {
 					tf.TrailingIcon = icons.VisibilityOff
 				}
-				if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+				if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
 					icon.SetIcon(tf.TrailingIcon)
 				}
 			})
@@ -290,15 +290,15 @@ func (tf *TextField) SetPlaceholder(txt string) *TextField {
 	return tf
 }
 
-// AddClearAction adds a trailing icon action at the end
+// AddClearButton adds a trailing icon button at the end
 // of the textfield that clears the text in the textfield when pressed
-func (tf *TextField) AddClearAction() *TextField {
+func (tf *TextField) AddClearButton() *TextField {
 	tf.TrailingIcon = icons.Close
 	return tf
 }
 
 // SetTypePassword enables [TextField.NoEcho] and adds a trailing
-// icon action at the end of the textfield that toggles [TextField.NoEcho]
+// icon button at the end of the textfield that toggles [TextField.NoEcho]
 func (tf *TextField) SetTypePassword() *TextField {
 	tf.NoEcho = true
 	tf.TrailingIcon = icons.Visibility
@@ -704,18 +704,18 @@ func (tf *TextField) InsertAtCursor(str string) {
 
 func (tf *TextField) MakeContextMenu(m *Menu) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddAction(ActOpts{Label: "Copy", Shortcut: cpsc}, func(ac *Action) {
+	ac := m.AddButton(ActOpts{Label: "Copy", Shortcut: cpsc}, func(bt *Button) {
 		tf.This().(Clipper).Copy(true)
 	})
 	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
 	if !tf.IsDisabled() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddAction(ActOpts{Label: "Cut", Shortcut: ctsc}, func(ac *Action) {
+		ac = m.AddButton(ActOpts{Label: "Cut", Shortcut: ctsc}, func(bt *Button) {
 			tf.This().(Clipper).Cut()
 		})
 		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-		ac = m.AddAction(ActOpts{Label: "Paste", Shortcut: ptsc}, func(ac *Action) {
+		ac = m.AddButton(ActOpts{Label: "Paste", Shortcut: ptsc}, func(bt *Button) {
 			tf.This().(Clipper).Paste()
 		})
 		cb := tf.Sc.EventMgr.ClipBoard()
@@ -1446,12 +1446,12 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	_ = trailIconIdx
 	if !tf.LeadingIcon.IsNil() {
 		// config.Add(StretchType, "lead-icon-str")
-		config.Add(ActionType, "lead-icon")
+		config.Add(ButtonType, "lead-icon")
 		leadIconIdx = 0
 	}
 	if !tf.TrailingIcon.IsNil() {
 		config.Add(SpaceType, "trail-icon-str")
-		config.Add(ActionType, "trail-icon")
+		config.Add(ButtonType, "trail-icon")
 		if leadIconIdx == -1 {
 			trailIconIdx = 1
 		} else {
@@ -1462,11 +1462,11 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 	mods, updt := parts.ConfigChildren(config)
 	if mods || tf.NeedsRebuild() {
 		if leadIconIdx != -1 {
-			leadIcon := parts.Child(leadIconIdx).(*Action)
+			leadIcon := parts.Child(leadIconIdx).(*Button)
 			leadIcon.SetIcon(tf.LeadingIcon)
 		}
 		if trailIconIdx != -1 {
-			trailIcon := parts.Child(trailIconIdx).(*Action)
+			trailIcon := parts.Child(trailIconIdx).(*Button)
 			trailIcon.SetIcon(tf.TrailingIcon)
 		}
 		parts.UpdateEnd(updt)
@@ -1547,11 +1547,11 @@ func (tf *TextField) SetEffPosAndSize() {
 	}
 	sz := tf.LayState.Alloc.Size
 	pos := tf.LayState.Alloc.Pos
-	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Action); ok {
+	if lead, ok := tf.Parts.ChildByName("lead-icon", 0).(*Button); ok {
 		pos.X += lead.LayState.Alloc.Size.X
 		sz.X -= lead.LayState.Alloc.Size.X
 	}
-	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Action); ok {
+	if trail, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
 		sz.X -= trail.LayState.Alloc.Size.X
 	}
 	tf.EffSize = sz
