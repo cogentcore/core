@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"log/slog"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/states"
@@ -55,12 +57,12 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switch) OnInit() {
-	sw.WidgetHandlers()
 	sw.SwitchHandlers()
 	sw.SwitchStyles()
 }
 
 func (sw *Switch) SwitchHandlers() {
+	sw.WidgetHandlers()
 	sw.On(events.Click, func(e events.Event) {
 		if sw.StateIs(states.Disabled) {
 			return
@@ -76,6 +78,21 @@ func (sw *Switch) SwitchHandlers() {
 			}
 		}
 		sw.Send(events.Change, e)
+	})
+	sw.On(events.KeyChord, func(e events.Event) {
+		if sw.StateIs(states.Disabled) {
+			return
+		}
+		if KeyEventTrace {
+			slog.Info("Switch KeyChordEvent", "switch", sw)
+		}
+		kf := KeyFun(e.KeyChord())
+		if kf == KeyFunEnter || e.KeyRune() == ' ' {
+			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
+			e.SetHandled()
+			sw.Send(events.Click, e)
+			// }
+		}
 	})
 }
 

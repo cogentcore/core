@@ -5,7 +5,6 @@
 package gi
 
 import (
-	"fmt"
 	"image"
 	"log"
 
@@ -421,7 +420,7 @@ func (bt *Button) ClickOnEnterSpace() {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("Button KeyChordEvent: %v\n", bt.Path())
+			slog.Info("Button KeyChordEvent", "button", bt)
 		}
 		kf := KeyFun(e.KeyChord())
 		if kf == KeyFunEnter || e.KeyRune() == ' ' {
