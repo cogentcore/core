@@ -21,7 +21,6 @@ import (
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 	"goki.dev/pi/v2/complete"
 )
 
@@ -38,6 +37,11 @@ type ComboBox struct {
 
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
 	Editable bool `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
+
+	// TODO(kai): implement AllowNew button
+
+	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
+	AllowNew bool `desc:"whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"`
 
 	// current selected value
 	CurVal any `json:"-" xml:"-" desc:"current selected value"`
@@ -206,6 +210,14 @@ func (cb *ComboBox) SetType(typ ComboBoxTypes) *ComboBox {
 func (cb *ComboBox) SetEditable(editable bool) *ComboBox {
 	updt := cb.UpdateStart()
 	cb.Editable = editable
+	cb.UpdateEndLayout(updt)
+	return cb
+}
+
+// SetAllowNew sets whether to allow the user to add new values
+func (cb *ComboBox) SetAllowNew(allowNew bool) *ComboBox {
+	updt := cb.UpdateStart()
+	cb.AllowNew = allowNew
 	cb.UpdateEndLayout(updt)
 	return cb
 }
@@ -608,17 +620,21 @@ func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
 	tf.On(events.Change, func(e events.Event) {
 		text := tf.Text()
 		fmt.Println("got text", text)
-		err := laser.SetRobust(&cb.CurVal, text)
-		if err != nil {
+		for idx, item := range cb.Items {
+			if text == ToLabel(item) {
+				cb.SetCurIndex(idx)
+				cb.Send(events.Change, nil)
+				return
+			}
+		}
+		if !cb.AllowNew {
 			// TODO: use validation
-			slog.Error("invalid combobox value", "value", text, "err", err)
+			slog.Error("invalid combobox value", "value", text)
 			return
 		}
-		fmt.Printf("new cv %T\t%#v\n", cb.CurVal, cb.CurVal)
-		// need to call this to get it apply the changes
-		cb.SetCurVal(cb.CurVal)
-		// TODO: should we support a strict option that rejects
-		// values not already in the list?
+		cb.Items = append(cb.Items, text)
+		cb.SetCurIndex(len(cb.Items) - 1)
+		cb.Send(events.Change, nil)
 	})
 }
 
