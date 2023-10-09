@@ -193,7 +193,7 @@ func (bb *ButtonBox) ConfigItems() {
 			cb.Tooltip = bb.Tooltips[i]
 		}
 		if bb.Mutex {
-			cb.Icon = icons.RadioButtonChecked
+			cb.IconOn = icons.RadioButtonChecked
 			cb.IconOff = icons.RadioButtonUnchecked
 		}
 		cb.SetProp("index", i)
