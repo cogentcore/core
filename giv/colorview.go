@@ -154,19 +154,19 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"}, func(act *gi.Action) {
+	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"}, func(act *gi.Action) {
+	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgb(r, g, b)"}, func(act *gi.Action) {
+	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "rgb(r, g, b)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("rgb(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	rgbacopy.Menu.AddAction(gi.ActOpts{Label: "rgba(r, g, b, a)"}, func(act *gi.Action) {
+	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "rgba(r, g, b, a)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
@@ -186,19 +186,19 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"}, func(act *gi.Action) {
+	hslacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"}, func(act *gi.Action) {
+	hslacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsl(h, s, l)"}, func(act *gi.Action) {
+	hslacopy.Menu.AddButton(gi.ActOpts{Label: "hsl(h, s, l)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("hsl(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hslacopy.Menu.AddAction(gi.ActOpts{Label: "hsla(h, s, l, a)"}, func(act *gi.Action) {
+	hslacopy.Menu.AddButton(gi.ActOpts{Label: "hsla(h, s, l, a)"}, func(bt *gi.Button) {
 		text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
@@ -225,22 +225,22 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`}, func(act *gi.Action) {
+	hexcopy.Menu.AddButton(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`}, func(bt *gi.Button) {
 		hs := colors.AsHex(cv.Color)
 		// get rid of transparency because this is just RRGGBB
 		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`}, func(act *gi.Action) {
+	hexcopy.Menu.AddButton(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`}, func(bt *gi.Button) {
 		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cv.Color))
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBB"}, func(act *gi.Action) {
+	hexcopy.Menu.AddButton(gi.ActOpts{Label: "#RRGGBB"}, func(bt *gi.Button) {
 		hs := colors.AsHex(cv.Color)
 		text := hs[:len(hs)-2]
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
-	hexcopy.Menu.AddAction(gi.ActOpts{Label: "#RRGGBBAA"}, func(act *gi.Action) {
+	hexcopy.Menu.AddButton(gi.ActOpts{Label: "#RRGGBBAA"}, func(bt *gi.Button) {
 		text := colors.AsHex(cv.Color)
 		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
 	})
@@ -248,29 +248,20 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	gi.NewFrame(vl, "value").SetLayout(gi.LayoutHoriz)
 	sg := gi.NewLayout(vl, "slider-grid").SetLayout(gi.LayoutGrid)
 
-	rl := gi.NewLabel(sg, "rlab").SetText("Red:")
+	gi.NewLabel(sg, "rlab").SetText("Red:")
 	rs := gi.NewSlider(sg, "red")
-	hl := gi.NewLabel(sg, "hlab").SetText("Hue:")
+	gi.NewLabel(sg, "hlab").SetText("Hue:")
 	hs := gi.NewSlider(sg, "hue")
-	gl := gi.NewLabel(sg, "glab").SetText("Green:")
+	gi.NewLabel(sg, "glab").SetText("Green:")
 	gs := gi.NewSlider(sg, "green")
-	sl := gi.NewLabel(sg, "slab").SetText("Sat:")
+	gi.NewLabel(sg, "slab").SetText("Sat:")
 	ss := gi.NewSlider(sg, "sat")
-	bl := gi.NewLabel(sg, "blab").SetText("Blue:")
+	gi.NewLabel(sg, "blab").SetText("Blue:")
 	bs := gi.NewSlider(sg, "blue")
-	ll := gi.NewLabel(sg, "llab").SetText("Light:")
+	gi.NewLabel(sg, "llab").SetText("Light:")
 	ls := gi.NewSlider(sg, "light")
-	al := gi.NewLabel(sg, "alab").SetText("Alpha:")
+	gi.NewLabel(sg, "alab").SetText("Alpha:")
 	as := gi.NewSlider(sg, "alpha")
-
-	// todo: do inline
-	rl.Redrawable = true
-	gl.Redrawable = true
-	bl.Redrawable = true
-	hl.Redrawable = true
-	sl.Redrawable = true
-	ll.Redrawable = true
-	al.Redrawable = true
 
 	cv.ConfigRGBSlider(rs, 0)
 	cv.ConfigRGBSlider(gs, 1)
@@ -566,7 +557,7 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 }
 
 func (vv *ColorValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -574,23 +565,23 @@ func (vv *ColorValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
-	ac.UpdateSig()
+	bt := vv.Widget.(*gi.Button)
+	bt.UpdateSig()
 }
 
 func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	bt := vv.Widget.(*gi.Button)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 
-	ac.SetText("Edit Color")
-	ac.SetIcon(icons.Colors)
-	ac.Tooltip = "Open color picker dialog"
-	ac.On(events.Click, func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt.SetText("Edit Color")
+	bt.SetIcon(icons.Colors)
+	bt.Tooltip = "Open color picker dialog"
+	bt.On(events.Click, func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
-	ac.AddStyles(func(s *styles.Style) {
+	bt.AddStyles(func(s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen
@@ -601,7 +592,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorValueView) HasAction() bool {
+func (vv *ColorValueView) HasButton() bool {
 	return true
 }
 
@@ -635,14 +626,14 @@ func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ColorNameValueView
 
-// ColorNameValueView presents an action for displaying a ColorNameName and selecting
+// ColorNameValueView presents an button for displaying a ColorNameName and selecting
 // meshes from a ChooserDialog
 type ColorNameValueView struct {
 	ValueViewBase
 }
 
 func (vv *ColorNameValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -650,28 +641,28 @@ func (vv *ColorNameValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
-	ac.AddStyles(func(s *styles.Style) {
+	bt := vv.Widget.(*gi.Button)
+	bt.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	ac.On(events.Click, func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt.On(events.Click, func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *ColorNameValueView) HasAction() bool {
+func (vv *ColorNameValueView) HasButton() bool {
 	return true
 }
 

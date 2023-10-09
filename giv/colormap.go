@@ -141,14 +141,14 @@ func (mn ColorMapName) ValueView() ValueView {
 	return vv
 }
 
-// ColorMapValueView presents an action for displaying a ColorMapName and selecting
+// ColorMapValueView presents an button for displaying a ColorMapName and selecting
 // meshes from a ChooserDialog
 type ColorMapValueView struct {
 	ValueViewBase
 }
 
 func (vv *ColorMapValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ActionType
+	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
@@ -156,7 +156,7 @@ func (vv *ColorMapValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
@@ -167,7 +167,7 @@ func (vv *ColorMapValueView) UpdateWidget() {
 func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Action)
+	ac := vv.Widget.(*gi.Button)
 	ac.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
@@ -177,7 +177,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorMapValueView) HasAction() bool {
+func (vv *ColorMapValueView) HasButton() bool {
 	return true
 }
 
