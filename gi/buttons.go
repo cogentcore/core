@@ -371,7 +371,7 @@ func (bt *Button) ClickMenu() {
 		// dismiss menu if needed
 		if bt.Sc != nil && bt.Sc.Stage != nil {
 			pst := bt.Sc.Stage.AsPopup()
-			if pst != nil && pst.Type == Menu {
+			if pst != nil && pst.Type == MenuStage {
 				pst.Close()
 			}
 		} else {

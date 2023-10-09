@@ -69,8 +69,8 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.DialogStage)) *TextView {
-	var dlg *gi.DialogStage
+func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *TextView {
+	var dlg *gi.Dialog
 	if opts.Data != nil {
 		recyc := false
 		dlg, recyc = gi.RecycleStdDialog(ctx, opts.ToGiOpts(), opts.Data, fun)
@@ -116,7 +116,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 }
 
 // TextViewDialogTextView returns the text view from a TextViewDialog
-func TextViewDialogTextView(dlg *gi.DialogStage) *TextView {
+func TextViewDialogTextView(dlg *gi.Dialog) *TextView {
 	frame := dlg.Stage.Scene
 	tlv := frame.ChildByName("text-lay", 2)
 	tv := tlv.ChildByName("text-view", 0)
@@ -127,7 +127,7 @@ func TextViewDialogTextView(dlg *gi.DialogStage) *TextView {
 // Optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore)
 // gopy:interface=handle
-func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), stru, fun)
 	if recyc {
 		return dlg
@@ -154,7 +154,7 @@ func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Di
 // Optionally connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
 // gopy:interface=handle
-func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	// note: map is not directly comparable, so we have to use the pointer here..
 	mptr := reflect.ValueOf(mp).Pointer()
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), mptr, fun)
@@ -181,7 +181,7 @@ func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.DialogS
 // dialog signals (nil to ignore).    Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
@@ -210,7 +210,7 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 // optionally connects to given signal receiving object and function for
 // dialog signals (nil to ignore).  This version does not have the style function.
 // gopy:interface=handle
-func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
@@ -238,7 +238,7 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 // and the overall dialog signal.  Also has an optional styling function for
 // styling elements of the table.
 // gopy:interface=handle
-func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	// if opts.CSS == nil {
 	// 	opts.CSS = ki.Props{
 	// 		"textfield": ki.Props{
@@ -273,7 +273,7 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 }
 
 // SliceViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func SliceViewSelectDialogValue(dlg *gi.DialogStage) int {
+func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
 	frame := dlg.Stage.Scene
 	sv := frame.ChildByName("slice-view", 0)
 	if sv != nil {
@@ -288,7 +288,7 @@ func SliceViewSelectDialogValue(dlg *gi.DialogStage) int {
 // function for dialog signals (nil to ignore).  Also has an optional styling
 // function for styling elements of the table.
 // gopy:interface=handle
-func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc TableViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc TableViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
 	if recyc {
 		return dlg
@@ -321,7 +321,7 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 // reporting selection events, and dlgFunc for the overall dialog signals.
 // Also has an optional styling function for styling elements of the table.
 // gopy:interface=handle
-func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow int, styleFunc TableViewStyleFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow int, styleFunc TableViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	// if opts.CSS == nil {
 	// 	opts.CSS = ki.Props{
 	// 		"textfield": ki.Props{
@@ -357,7 +357,7 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 }
 
 // TableViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func TableViewSelectDialogValue(dlg *gi.DialogStage) int {
+func TableViewSelectDialogValue(dlg *gi.Dialog) int {
 	frame := dlg.Stage.Scene
 	sv := frame.ChildByName("tableview", 0)
 	if sv != nil {
@@ -375,7 +375,7 @@ var FontChooserSizeDots = 18
 // FontChooserDialog for choosing a font -- the recv and func signal receivers
 // if non-nil are connected to the selection signal for the struct table view,
 // so they are updated with that
-func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	wb := ctx.AsWidget()
 	FontChooserSizeDots = int(wb.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
@@ -400,7 +400,7 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 // IconChooserDialog for choosing an Icon -- the recv and fun signal receivers
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
-func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	// if opts.CSS == nil {
 	// 	opts.CSS = ki.Props{
 	// 		"icon": ki.Props{
@@ -424,7 +424,7 @@ func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv 
 // ColorViewDialog for editing a color using a ColorView -- optionally
 // connects to given signal receiving object and function for dialog signals
 // (nil to ignore)
-func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), clr, fun)
 	if recyc {
 		return dlg
@@ -441,7 +441,7 @@ func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *
 }
 
 // ColorViewDialogValue gets the color from the dialog
-func ColorViewDialogValue(dlg *gi.DialogStage) color.RGBA {
+func ColorViewDialogValue(dlg *gi.Dialog) color.RGBA {
 	frame := dlg.Stage.Scene
 	cvvvk := frame.ChildByType(ColorViewType, ki.Embeds, 2)
 	if cvvvk != nil {
@@ -458,7 +458,7 @@ func ColorViewDialogValue(dlg *gi.DialogStage) color.RGBA {
 // to get the resulting selected file.  The optional filterFunc can filter
 // files shown in the view -- e.g., FileViewDirOnlyFilter (for only showing
 // directories) and FileViewExtOnlyFilter (for only showing directories).
-func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFunc FileViewFilterFunc, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFunc FileViewFilterFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	gopts := opts.ToGiOpts()
 	gopts.Ok = true
 	gopts.Cancel = true
@@ -482,7 +482,7 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 }
 
 // FileViewDialogValue gets the full path of selected file
-func FileViewDialogValue(dlg *gi.DialogStage) string {
+func FileViewDialogValue(dlg *gi.Dialog) string {
 	frame := dlg.Stage.Scene
 	fvk := frame.ChildByName("file-view", 0)
 	if fvk != nil {
@@ -494,7 +494,7 @@ func FileViewDialogValue(dlg *gi.DialogStage) string {
 }
 
 // ArgViewDialog for editing args for a method call in the MethView system
-func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgData, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgData, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
 
 	frame := dlg.Stage.Scene

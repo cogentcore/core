@@ -57,7 +57,7 @@ func (vv *HiStyleValueView) HasAction() bool {
 	return true
 }
 
-func (vv *HiStyleValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStage)) {
+func (vv *HiStyleValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
@@ -66,7 +66,7 @@ func (vv *HiStyleValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.DialogStag
 	SliceViewSelectDialog(vp, &histyle.StyleNames, cur, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, nil,
 		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
-				ddlg, _ := send.(*gi.Dialog)
+				ddlg, _ := send.(*gi.DialogStage)
 				si := SliceViewSelectDialogValue(ddlg)
 				if si >= 0 {
 					hs := histyle.StyleNames[si]
@@ -130,7 +130,7 @@ func HiStylesView(st *histyle.Styles) {
 		inClosePrompt = true
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Save Styles Before Closing?",
 			Prompt: "Do you want to save any changes to std preferences styles file before closing, or Cancel the close and do a Save to a different file?"},
-			[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.DialogStage) {
+			[]string{"Save and Close", "Discard and Close", "Cancel"}, func(dlg *gi.Dialog) {
 				switch sig {
 				case 0:
 					st.SavePrefs()

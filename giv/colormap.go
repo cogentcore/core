@@ -59,7 +59,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 	if cv.Map != nil {
 		cur = cv.Map.Name
 	}
-	SliceViewSelectDialog(cv, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, &sl, cur, nil, func(dlg *gi.DialogStage) {
+	SliceViewSelectDialog(cv, DlgOpts{Title: "Select a ColorMap", Prompt: "choose color map to use from among available list"}, &sl, cur, nil, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
 			return
 		}
@@ -181,14 +181,14 @@ func (vv *ColorMapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *ColorMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
 	desc, _ := vv.Tag("desc")
-	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, &sl, cur, nil, func(dlg *gi.DialogStage) {
+	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, &sl, cur, nil, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
 			return
 		}

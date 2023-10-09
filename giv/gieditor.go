@@ -477,7 +477,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		inClosePrompt = true
 		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 			Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-			[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.DialogStage) {
+			[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.Dialog) {
 				switch sig {
 				case 0:
 					win.Close()

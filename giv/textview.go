@@ -1451,7 +1451,7 @@ func (tv *TextView) JumpToLinePrompt() {
 	gi.StringPromptDialog(tv.Sc, "", "Line no..",
 		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dlg := send.(*gi.Dialog)
+			dlg := send.(*gi.DialogStage)
 			if sig == int64(gi.DialogAccepted) {
 				val := gi.StringPromptDialogValue(dlg)
 				ln, ok := laser.ToInt(val)
@@ -1897,7 +1897,7 @@ func (tv *TextView) QReplaceSig() {
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
-func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg := gi.NewStdDialog(ctx, opts, fun)
 
 	frame := dlg.Stage.Scene
@@ -1929,7 +1929,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 }
 
 // QReplaceDialogValues gets the string values
-func QReplaceDialogValues(dlg *gi.DialogStage) (find, repl string, lexItems bool) {
+func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 	frame := dlg.Stage.Scene
 	tff := frame.ChildByName("find", 1).(*gi.ComboBox)
 	if tf, found := tff.TextField(); found {
@@ -1951,7 +1951,7 @@ func (tv *TextView) QReplacePrompt() {
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
 	}
-	QReplaceDialog(tv, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, tv.QReplace.LexItems, func(dlg *gi.DialogStage) {
+	QReplaceDialog(tv, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, tv.QReplace.LexItems, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			find, repl, lexItems := QReplaceDialogValues(dlg)
 			tv.QReplaceStart(find, repl, lexItems)

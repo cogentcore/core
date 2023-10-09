@@ -885,7 +885,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						if sig == int64(gi.DialogAccepted) {
 							// svv, _ := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							dlg, _ := send.(*gi.Dialog)
+							dlg, _ := send.(*gi.DialogStage)
 							n, typ := gi.NewKiDialogValues(dlg)
 							updt := ownki.UpdateStart()
 							ownki.SetChildAdded()

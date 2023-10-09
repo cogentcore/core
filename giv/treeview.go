@@ -1104,7 +1104,7 @@ func (tv *TreeView) SrcInsertAt(rel int, actNm string) {
 			if sig == int64(gi.DialogAccepted) {
 				tvv, _ := recv.Embed(TypeTreeView).(*TreeView)
 				par := tvv.SrcNode
-				dlg, _ := send.(*gi.Dialog)
+				dlg, _ := send.(*gi.DialogStage)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := par.UpdateStart()
 				var ski ki.Ki
@@ -1144,7 +1144,7 @@ func (tv *TreeView) SrcAddChild() {
 			if sig == int64(gi.DialogAccepted) {
 				tvv, _ := recv.Embed(TypeTreeView).(*TreeView)
 				sk := tvv.SrcNode
-				dlg, _ := send.(*gi.Dialog)
+				dlg, _ := send.(*gi.DialogStage)
 				n, typ := gi.NewKiDialogValues(dlg)
 				updt := sk.UpdateStart()
 				sk.SetChildAdded()

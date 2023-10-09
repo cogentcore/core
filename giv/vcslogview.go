@@ -198,7 +198,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 }
 
 // VCSLogViewDialog opens a VCS Log View for given repo, log and file (file could be empty)
-func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.DialogStage {
+func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since string) *gi.Dialog {
 	title := "VCS Log: "
 	if file == "" {
 		title += "All files"

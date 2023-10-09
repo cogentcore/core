@@ -78,7 +78,7 @@ func (vv *StructValueView) HasAction() bool {
 	return true
 }
 
-func (vv *StructValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *StructValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -202,7 +202,7 @@ func (vv *SliceValueView) HasAction() bool {
 	return true
 }
 
-func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -334,7 +334,7 @@ func (vv *MapValueView) HasAction() bool {
 	return true
 }
 
-func (vv *MapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *MapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return
@@ -477,7 +477,7 @@ func (vv *KiPtrValueView) HasAction() bool {
 	return true
 }
 
-func (vv *KiPtrValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.DialogStage)) {
+func (vv *KiPtrValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	title, newPath, isZero := vv.Label()
 	if isZero {
 		return

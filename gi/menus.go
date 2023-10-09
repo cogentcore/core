@@ -378,7 +378,7 @@ func MenuSceneFromActions(menu MenuActions, name string) *Scene {
 // Use Run call at the end to start the Stage running.
 func NewMenuScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 	sc.Geom.Pos = pos
-	return NewPopupStage(Menu, sc, ctx)
+	return NewPopupStage(MenuStage, sc, ctx)
 }
 
 // NewMenu returns a new Menu stage with given scene contents,

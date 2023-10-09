@@ -129,7 +129,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		// gi.ChoiceDialog(button2, gi.DlgOpts{Title: "Which One?", Prompt: "What is your choice?"}, []string{"Ok", "Option1", "Option2", "Cancel"}, func(dlg *gi.DialogStage) {
 		// 	fmt.Println("choice option:", dlg.Data.(int), "accepted:", dlg.Accepted)
 		// }).Run()
-		gi.StringPromptDialog(button2, gi.DlgOpts{Title: "What is it?", Prompt: "Please enter your response:", Ok: true, Cancel: true}, "", "Enter string here...", func(dlg *gi.DialogStage) {
+		gi.StringPromptDialog(button2, gi.DlgOpts{Title: "What is it?", Prompt: "Please enter your response:", Ok: true, Cancel: true}, "", "Enter string here...", func(dlg *gi.Dialog) {
 			fmt.Println("string entered:", dlg.Data.(string), "accepted:", dlg.Accepted)
 		}).Run()
 	})
