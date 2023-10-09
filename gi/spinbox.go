@@ -86,6 +86,9 @@ func (sb *SpinBox) SpinBoxStyles() {
 	sb.PageStep = 0.2
 	sb.Max = 1.0
 	sb.Prec = 6
+	sb.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, states.Focusable)
+	})
 }
 
 func (sb *SpinBox) OnChildAdded(child ki.Ki) {
@@ -337,6 +340,11 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 			e.SetHandled()
 			sb.PageIncrValue(-1)
 		}
+	})
+	// spinbox always gives its focus to textfield
+	sb.On(events.Focus, func(e events.Event) {
+		tf.GrabFocus()
+		tf.Send(events.Focus, e) // sets focused flag
 	})
 }
 
