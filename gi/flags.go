@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"goki.dev/enums"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/ki/v2"
 )
@@ -44,13 +45,13 @@ func (wb *WidgetBase) SetSelected(sel bool) {
 
 // CanFocus checks if this node can receive keyboard focus
 func (wb *WidgetBase) CanFocus() bool {
-	return wb.Style.Abilities.HasFlag(states.Focusable)
+	return wb.Style.Abilities.HasFlag(abilities.Focusable)
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.SetAbilities(wb.StateIs(states.Active), states.Focusable)
+	wb.SetAbilities(wb.StateIs(states.Active), abilities.Focusable)
 }
 
 // SetFocusState sets the HasFocus flag

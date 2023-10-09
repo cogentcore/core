@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -141,8 +142,8 @@ func (bt *Button) OnInit() {
 
 func (bt *Button) ButtonStyles() {
 	bt.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable)
-		s.SetAbilities(bt.ShortcutTooltip() != "", states.LongHoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
@@ -211,7 +212,7 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 		label := w.(*Label)
 		label.Type = LabelLabelLarge
 		w.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Selectable, states.DoubleClickable)
+			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			s.Margin.Set()

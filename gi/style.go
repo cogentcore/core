@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -215,7 +216,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 		s.Color = colors.Scheme.OnSurfaceVariant
 		s.Opacity = 0.38
 	} else {
-		s.SetAbilities(wb.Tooltip != "", states.LongHoverable)
+		s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
 		// default to state layer associated with the state,
 		// which the developer can override in their stylers
 		s.StateLayer = s.State.StateLayer()

@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"strconv"
 
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -87,7 +88,7 @@ func (sb *SpinBox) SpinBoxStyles() {
 	sb.Max = 1.0
 	sb.Prec = 6
 	sb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Focusable)
+		s.SetAbilities(true, abilities.Focusable)
 	})
 }
 
@@ -118,7 +119,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			sb.IncrValue(1)
 		})
 		up.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Focusable)
+			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
 		})
 	case "down":
@@ -133,7 +134,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 			sb.IncrValue(-1)
 		})
 		down.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Focusable)
+			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
 		})
 	}

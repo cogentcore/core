@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -564,7 +565,7 @@ func (sr *Slider) SliderStyles() {
 	sr.ThSizeReal = sr.ThSize
 
 	sr.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		sr.ThumbSize = units.Dp(20)
 
 		// we use a different color for the thumb and value color so that
@@ -729,7 +730,7 @@ func (sb *ScrollBar) ScrollBarStyles() {
 	sb.ThumbSize = units.Ex(1)
 
 	sb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		sb.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)

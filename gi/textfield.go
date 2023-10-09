@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -153,7 +154,7 @@ func (tf *TextField) OnInit() {
 func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Slideable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		tf.CursorWidth.SetDp(1)
 		tf.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
@@ -1407,7 +1408,7 @@ func (tf *TextField) TextFieldStateFromFocus() {
 		if tf.StateIs(states.Disabled) {
 			return
 		}
-		if tf.AbilityIs(states.Focusable) {
+		if tf.AbilityIs(abilities.Focusable) {
 			tf.ScrollToMe()
 			if _, ok := tf.Parent().Parent().(*SpinBox); ok {
 				goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
@@ -1421,7 +1422,7 @@ func (tf *TextField) TextFieldStateFromFocus() {
 		if tf.StateIs(states.Disabled) {
 			return
 		}
-		if tf.AbilityIs(states.Focusable) {
+		if tf.AbilityIs(abilities.Focusable) {
 			tf.EditDone()
 			tf.SetState(false, states.Focused)
 		}

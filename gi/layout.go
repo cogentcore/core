@@ -12,7 +12,7 @@ import (
 	"time"
 	"unicode"
 
-	"goki.dev/girl/states"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -218,7 +218,7 @@ func (ly *Layout) OnInit() {
 
 func (ly *Layout) LayoutStyles() {
 	ly.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.FocusWithinable)
+		s.SetAbilities(true, abilities.FocusWithinable)
 		// we never want state layers and borders on layouts
 		s.StateLayer = 0
 		s.MaxBorder = styles.Border{}

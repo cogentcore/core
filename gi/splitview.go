@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/girl/states"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -487,7 +487,7 @@ func (sr *Splitter) ConfigWidget(sc *Scene) {
 }
 
 func (sr *Splitter) ApplyStyle(sc *Scene) {
-	sr.SetState(false, states.Focusable)
+	sr.SetState(false, abilities.Focusable)
 	sr.StyleSlider(sc)
 }
 

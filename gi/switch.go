@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -98,7 +99,7 @@ func (sw *Switch) SwitchHandlers() {
 
 func (sw *Switch) SwitchStyles() {
 	sw.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Checkable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
@@ -147,7 +148,7 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		w.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Selectable, states.DoubleClickable)
+			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
