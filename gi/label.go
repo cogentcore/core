@@ -30,11 +30,6 @@ type Label struct {
 	// label to display
 	Text string `xml:"text" desc:"label to display"`
 
-	// TODO(kai): can we remove redrawable?
-
-	// is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.
-	Redrawable bool `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
-
 	// the type of label
 	Type LabelTypes `desc:"the type of label"`
 
@@ -52,7 +47,6 @@ func (lb *Label) CopyFieldsFrom(frm any) {
 	fr := frm.(*Label)
 	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	lb.Text = fr.Text
-	lb.Redrawable = fr.Redrawable
 }
 
 // LabelTypes is an enum containing the different
