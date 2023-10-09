@@ -1140,37 +1140,40 @@ func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
 }
 
-// CheckBoxType is the [gti.Type] for [CheckBox]
-var CheckBoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.CheckBox",
-	ShortName:  "gi.CheckBox",
-	IDName:     "check-box",
-	Doc:        "CheckBox toggles between a checked and unchecked state",
+// SwitchType is the [gti.Type] for [Switch]
+var SwitchType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Switch",
+	ShortName:  "gi.Switch",
+	IDName:     "switch",
+	Doc:        "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "SwitchTypes", Doc: "the type of switch that this is", Directives: gti.Directives{}}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "the label text for the switch", Directives: gti.Directives{}}},
+		{"IconOn", &gti.Field{Name: "IconOn", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the on, checked state of the switch", Directives: gti.Directives{}}},
+		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Switch{},
 })
 
-// NewCheckBox adds a new [CheckBox] with the given name
+// NewSwitch adds a new [Switch] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewCheckBox(par ki.Ki, name ...string) *Switch {
-	return par.NewChild(CheckBoxType, name...).(*Switch)
+func NewSwitch(par ki.Ki, name ...string) *Switch {
+	return par.NewChild(SwitchType, name...).(*Switch)
 }
 
-// KiType returns the [*gti.Type] of [CheckBox]
+// KiType returns the [*gti.Type] of [Switch]
 func (t *Switch) KiType() *gti.Type {
-	return CheckBoxType
+	return SwitchType
 }
 
-// New returns a new [*CheckBox] value
+// New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
 }
@@ -1287,8 +1290,8 @@ var TextFieldType = gti.AddType(&gti.Type{
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
 		{"Complete", &gti.Field{Name: "Complete", Type: "*Complete", Doc: "functions and data for textfield completion", Directives: gti.Directives{}}},
 		{"NoEcho", &gti.Field{Name: "NoEcho", Type: "bool", Doc: "replace displayed characters with bullets to conceal text", Directives: gti.Directives{}}},
-		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "icons.Icon", Doc: "if specified, an action will be added at the start of the text field with this icon", Directives: gti.Directives{}}},
-		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "icons.Icon", Doc: "if specified, an action will be added at the end of the text field with this icon", Directives: gti.Directives{}}},
+		{"LeadingIcon", &gti.Field{Name: "LeadingIcon", Type: "icons.Icon", Doc: "if specified, a button will be added at the start of the text field with this icon", Directives: gti.Directives{}}},
+		{"TrailingIcon", &gti.Field{Name: "TrailingIcon", Type: "icons.Icon", Doc: "if specified, a button will be added at the end of the text field with this icon", Directives: gti.Directives{}}},
 		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "TextFieldTypes", Doc: "the type of the text field", Directives: gti.Directives{}}},
 		{"PlaceholderColor", &gti.Field{Name: "PlaceholderColor", Type: "color.RGBA", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color", Directives: gti.Directives{}}},
