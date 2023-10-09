@@ -88,8 +88,8 @@ const (
 	KeyFunWinClose
 	KeyFunWinSnapshot
 	KeyFunGoGiEditor
-	// Below are menu specific functions -- use these as shortcuts for menu actions
-	// allows uniqueness of mapping and easy customization of all key actions
+	// Below are menu specific functions -- use these as shortcuts for menu buttons
+	// allows uniqueness of mapping and easy customization of all key buttons
 	KeyFunMenuNew
 	KeyFunMenuNewAlt1 // alternative version (e.g., shift)
 	KeyFunMenuNewAlt2 // alternative version (e.g., alt)
@@ -245,17 +245,17 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 /////////////////////////////////////////////////////////////////////////////////
 // Shortcuts
 
-// Shortcuts is a map between a key chord and a specific Action that can be
+// Shortcuts is a map between a key chord and a specific Button that can be
 // triggered.  This mapping must be unique, in that each chord has unique
-// Action, and generally each Action only has a single chord as well, though
+// Button, and generally each Button only has a single chord as well, though
 // this is not strictly enforced.  Shortcuts are evaluated *after* the
 // standard KeyMap event processing, so any conflicts are resolved in favor of
 // the local widget's key event processing, with the shortcut only operating
 // when no conflicting widgets are in focus.  Shortcuts are always window-wide
-// and are intended for global window / toolbar actions.  Widget-specific key
+// and are intended for global window / toolbar buttons.  Widget-specific key
 // functions should be handled directly within widget key event
 // processing.
-type Shortcuts map[key.Chord]*Action
+type Shortcuts map[key.Chord]*Button
 
 /////////////////////////////////////////////////////////////////////////////////
 // KeyMaps -- list of KeyMap's
@@ -390,8 +390,8 @@ var KeyMapsProps = ki.Props{
 			{"OpenPrefs", ki.Props{}},
 			{"SavePrefs", ki.Props{
 				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(kmi any, act *Action) {
-					act.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
+				"updtfunc": func(kmi any, bt *Button) {
+					bt.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 				},
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -427,8 +427,8 @@ var KeyMapsProps = ki.Props{
 		{"SavePrefs", ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
 			"icon": icons.Save,
-			"updtfunc": func(kmi any, act *Action) {
-				act.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
+			"updtfunc": func(kmi any, bt *Button) {
+				bt.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 			},
 		}},
 		{"sep-file", ki.BlankProp{}},
@@ -456,16 +456,16 @@ var KeyMapsProps = ki.Props{
 		{"ViewStd", ki.Props{
 			"desc":    "Shows the standard maps that are compiled into the program and have all the lastest key functions bound to standard key chords.  Useful for comparing against custom maps.",
 			"confirm": true,
-			"updtfunc": func(kmi any, act *Action) {
-				act.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+			"updtfunc": func(kmi any, bt *Button) {
+				bt.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
 			},
 		}},
 		{"RevertToStd", ki.Props{
 			"icon":    icons.DeviceReset,
 			"desc":    "This reverts the keymaps to using the StdKeyMaps that are compiled into the program and have all the lastest key functions bound to standard key chords.  If you have edited your maps, and are finding things not working, it is a good idea to save your current maps and try this, or at least do ViewStdMaps to see the current standards.  <b>Your current map edits will be lost if you proceed!</b>  Continue?",
 			"confirm": true,
-			"updtfunc": func(kmi any, act *Action) {
-				act.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
+			"updtfunc": func(kmi any, bt *Button) {
+				bt.SetEnabledStateUpdt(kmi.(*KeyMaps) != &StdKeyMaps)
 			},
 		}},
 	},
