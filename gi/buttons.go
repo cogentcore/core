@@ -26,6 +26,8 @@ import (
 
 // Button is a pressable button with text, an icon, an indicator, a shortcut,
 // and/or a menu. The standard behavior is to register a click event with OnClick(...).
+//
+//goki:embedder
 type Button struct {
 	WidgetBase
 

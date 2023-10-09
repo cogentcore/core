@@ -29,7 +29,7 @@ type MenuBar struct {
 	MainMenu bool `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
 
 	// map of main menu items for callback from OS main menu (MacOS specific)
-	OSMainMenus map[string]*Action `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
+	OSMainMenus map[string]*Button `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
 }
 
 func (mb *MenuBar) CopyFieldsFrom(frm any) {
@@ -98,16 +98,16 @@ func (mb *MenuBar) Render(sc *Scene) {
 	}
 }
 
-// UpdateActions calls UpdateFunc on all actions in menu -- individual menus
+// UpdateButtons calls UpdateFunc on all buttons in menu -- individual menus
 // are automatically updated just prior to menu popup
-func (mb *MenuBar) UpdateActions() {
+func (mb *MenuBar) UpdateButtons() {
 	if mb == nil {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
-			ac.UpdateActions()
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
+			ac.UpdateButtons()
 		}
 	}
 }
@@ -120,8 +120,8 @@ func (mb *MenuBar) SetShortcuts() {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			em.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -139,29 +139,29 @@ func (mb *MenuBar) DeleteShortcuts() {
 		return
 	}
 	for _, mi := range mb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			em.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
 }
 
-// FindActionByName finds an action on the menu, or any sub-menu, with given
+// FindButtonByName finds an button on the menu, or any sub-menu, with given
 // name (exact match) -- this is not the Text label but the Name of the
-// element (for AddAction items, this is the same as Label or Icon (if Label
+// element (for AddButton items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
-func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
+func (m *MenuBar) FindButtonByName(name string) (*Button, bool) {
 	if m == nil {
 		return nil, false
 	}
 	for _, mi := range m.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			if ac.Name() == name {
 				return ac, true
 			}
 			if ac.Menu != nil {
-				if sac, ok := ac.Menu.FindActionByName(name); ok {
+				if sac, ok := ac.Menu.FindButtonByName(name); ok {
 					return sac, ok
 				}
 			}
@@ -170,16 +170,16 @@ func (m *MenuBar) FindActionByName(name string) (*Action, bool) {
 	return nil, false
 }
 
-// ConfigMenus configures Action items as children of MenuBar with the given
+// ConfigMenus configures Button items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
-// etc).  Access the resulting menus as .ChildByName("name").(*Action).
+// etc).  Access the resulting menus as .ChildByName("name").(*Button).
 func (mb *MenuBar) ConfigMenus(menus []string) {
 	if mb == nil {
 		return
 	}
 	sz := len(menus)
 	tnl := make(ki.Config, sz+1)
-	typ := ActionType // note: could pass in action type to make it more flexible, but..
+	typ := ButtonType // note: could pass in button type to make it more flexible, but..
 	for i, m := range menus {
 		tnl[i].Type = typ
 		tnl[i].Name = m
@@ -189,8 +189,8 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	_, updt := mb.ConfigChildren(tnl)
 	for i, m := range menus {
 		mi := mb.Kids[i]
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			ac.SetText(m)
 			ac.SetAsMenu()
 		}
@@ -202,7 +202,7 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 
 todo:
 
-// MainMenuFunc is the callback function for OS-generated menu actions.
+// MainMenuFunc is the callback function for OS-generated menu buttons.
 func MainMenuFunc(owin goosi.Window, title string, tag int) {
 	win, ok := owin.Parent().(*RenderWin)
 	if !ok {
@@ -231,15 +231,15 @@ func (mb *MenuBar) UpdateMainMenu(win *RenderWin) {
 		return
 	}
 
-	mb.UpdateActions()
+	mb.UpdateButtons()
 	osmm.SetFunc(MainMenuFunc)
 
 	mm := osmm.StartUpdate() // locks
 	osmm.Reset(mm)
-	mb.OSMainMenus = make(map[string]*Action, 100)
+	mb.OSMainMenus = make(map[string]*Button, 100)
 	for _, mi := range mb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			subm := osmm.AddSubMenu(mm, ac.Text)
 			mb.SetMainMenuSub(osmm, subm, ac)
 		}
@@ -266,10 +266,10 @@ func (mb *MenuBar) SetMainMenu(win *RenderWin) {
 }
 
 // SetMainMenuSub iterates over sub-menus, adding items to overall main menu.
-func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Action) {
+func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Button) {
 	for i, mi := range am.Menu {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			if len(ac.Menu) > 0 {
 				ssubm := osmm.AddSubMenu(subm, ac.Text)
 				mb.SetMainMenuSub(osmm, ssubm, ac)
@@ -285,8 +285,8 @@ func (mb *MenuBar) SetMainMenuSub(osmm goosi.MainMenu, subm goosi.Menu, am *Acti
 }
 
 // MainMenuUpdateActives updates the active state of all menu items, based on
-// active state of corresponding Actions (action self-update functions are
-// called via UpdateActions) -- can be called by method of same name on
+// active state of corresponding Buttons (button self-update functions are
+// called via UpdateButtons) -- can be called by method of same name on
 // RenderWin.
 func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 	osmm := win.GoosiWin.MainMenu()
@@ -294,7 +294,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 		return
 	}
 
-	mb.UpdateActions()
+	mb.UpdateButtons()
 	if mb.OSMainMenus == nil {
 		return
 	}
@@ -312,7 +312,7 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 ////////////////////////////////////////////////////////////////////////////////////////
 // ToolBar
 
-// ToolBar is a [Frame] that is useful for holding [Action]s that do things.
+// ToolBar is a [Frame] that is useful for holding [Button]s that do things.
 //
 //goki:embedder
 type ToolBar struct {
@@ -338,12 +338,12 @@ func (tb *ToolBar) ToolBarStyles() {
 	})
 }
 
-// AddAction adds an action to the toolbar using given options, and connects
-// the action signal to given receiver object and function, along with given
-// data which is stored on the action and then passed in the action signal.
+// AddButton adds an button to the toolbar using given options, and connects
+// the button signal to given receiver object and function, along with given
+// data which is stored on the button and then passed in the button signal.
 // Optional updateFunc is a function called prior to showing the menu to
-// update the actions (enabled or not typically).
-func (tb *ToolBar) AddAction(opts ActOpts, fun func(act *Action)) *Action {
+// update the buttons (enabled or not typically).
+func (tb *ToolBar) AddButton(opts ActOpts, fun func(act *Button)) *Button {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -351,7 +351,7 @@ func (tb *ToolBar) AddAction(opts ActOpts, fun func(act *Action)) *Action {
 	if nm == "" {
 		nm = string(opts.Icon)
 	}
-	ac := NewAction(tb, nm)
+	ac := NewButton(tb, nm)
 	ac.Text = opts.Label
 	ac.Icon = icons.Icon(opts.Icon)
 	ac.Tooltip = opts.Tooltip
@@ -386,8 +386,8 @@ func (tb *ToolBar) SetShortcuts() {
 		return
 	}
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			em.AddShortcut(ac.Shortcut, ac)
 		}
 	}
@@ -405,42 +405,42 @@ func (tb *ToolBar) DeleteShortcuts() {
 		return
 	}
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			em.DeleteShortcut(ac.Shortcut, ac)
 		}
 	}
 }
 
-// UpdateActions calls UpdateFunc on all actions in toolbar -- individual
+// UpdateButtons calls UpdateFunc on all buttons in toolbar -- individual
 // menus are automatically updated just prior to menu popup
-func (tb *ToolBar) UpdateActions() {
+func (tb *ToolBar) UpdateButtons() {
 	if tb == nil {
 		return
 	}
 	updt := tb.UpdateStart()
 	defer tb.UpdateEnd(updt)
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
-			ac.UpdateActions()
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
+			ac.UpdateButtons()
 		}
 	}
 }
 
-// FindActionByName finds an action on the toolbar, or any sub-menu, with
+// FindButtonByName finds an button on the toolbar, or any sub-menu, with
 // given name (exact match) -- this is not the Text label but the Name of the
-// element (for AddAction items, this is the same as Label or Icon (if Label
+// element (for AddButton items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
-func (tb *ToolBar) FindActionByName(name string) (*Action, bool) {
+func (tb *ToolBar) FindButtonByName(name string) (*Button, bool) {
 	for _, mi := range tb.Kids {
-		if mi.KiType().HasEmbed(ActionType) {
-			ac := AsAction(mi)
+		if mi.KiType().HasEmbed(ButtonType) {
+			ac := AsButton(mi)
 			if ac.Name() == name {
 				return ac, true
 			}
 			if ac.Menu != nil {
-				if sac, ok := ac.Menu.FindActionByName(name); ok {
+				if sac, ok := ac.Menu.FindButtonByName(name); ok {
 					return sac, ok
 				}
 			}
