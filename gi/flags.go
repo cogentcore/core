@@ -50,7 +50,7 @@ func (wb *WidgetBase) CanFocus() bool {
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
 // nodes don't need focus typically)
 func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.Style.SetAbilities(wb.StateIs(states.Active), states.Focusable)
+	wb.SetAbilities(wb.StateIs(states.Active), states.Focusable)
 }
 
 // SetFocusState sets the HasFocus flag
