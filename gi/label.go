@@ -61,53 +61,53 @@ type LabelTypes int //enums:enum
 
 const (
 	// LabelDisplayLarge is a large, short, and important
-	// display label with a default font size of 57px.
+	// display label with a default font size of 57dp.
 	LabelDisplayLarge LabelTypes = iota
 	// LabelDisplayMedium is a medium-sized, short, and important
-	// display label with a default font size of 45px.
+	// display label with a default font size of 45dp.
 	LabelDisplayMedium
 	// LabelDisplaySmall is a small, short, and important
-	// display label with a default font size of 36px.
+	// display label with a default font size of 36dp.
 	LabelDisplaySmall
 
 	// LabelHeadlineLarge is a large, high-emphasis
-	// headline label with a default font size of 32px.
+	// headline label with a default font size of 32dp.
 	LabelHeadlineLarge
 	// LabelHeadlineMedium is a medium-sized, high-emphasis
-	// headline label with a default font size of 28px.
+	// headline label with a default font size of 28dp.
 	LabelHeadlineMedium
 	// LabelHeadlineSmall is a small, high-emphasis
-	// headline label with a default font size of 24px.
+	// headline label with a default font size of 24dp.
 	LabelHeadlineSmall
 
 	// LabelTitleLarge is a large, medium-emphasis
-	// title label with a default font size of 22px.
+	// title label with a default font size of 22dp.
 	LabelTitleLarge
 	// LabelTitleMedium is a medium-sized, medium-emphasis
-	// title label with a default font size of 16px.
+	// title label with a default font size of 16dp.
 	LabelTitleMedium
 	// LabelTitleSmall is a small, medium-emphasis
-	// title label with a default font size of 14px.
+	// title label with a default font size of 14dp.
 	LabelTitleSmall
 
 	// LabelBodyLarge is a large body label used for longer
-	// passages of text with a default font size of 16px.
+	// passages of text with a default font size of 16dp.
 	LabelBodyLarge
 	// LabelBodyMedium is a medium-sized body label used for longer
-	// passages of text with a default font size of 14px.
+	// passages of text with a default font size of 14dp.
 	LabelBodyMedium
 	// LabelBodySmall is a small body label used for longer
-	// passages of text with a default font size of 12px.
+	// passages of text with a default font size of 12dp.
 	LabelBodySmall
 
 	// LabelLabelLarge is a large label used for label text (like a caption
-	// or the text inside a button) with a default font size of 14px.
+	// or the text inside a button) with a default font size of 14dp.
 	LabelLabelLarge
 	// LabelLabelMedium is a medium-sized label used for label text (like a caption
-	// or the text inside a button) with a default font size of 12px.
+	// or the text inside a button) with a default font size of 12dp.
 	LabelLabelMedium
 	// LabelLabelSmall is a small label used for label text (like a caption
-	// or the text inside a button) with a default font size of 11px.
+	// or the text inside a button) with a default font size of 11dp.
 	LabelLabelSmall
 )
 
