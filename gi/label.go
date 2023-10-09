@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -31,8 +30,7 @@ type Label struct {
 	// label to display
 	Text string `xml:"text" desc:"label to display"`
 
-	// is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks
-	Selectable bool `desc:"is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks"`
+	// TODO(kai): can we remove redrawable?
 
 	// is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.
 	Redrawable bool `desc:"is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other."`
@@ -57,7 +55,6 @@ func (lb *Label) CopyFieldsFrom(frm any) {
 	fr := frm.(*Label)
 	lb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	lb.Text = fr.Text
-	lb.Selectable = fr.Selectable
 	lb.Redrawable = fr.Redrawable
 }
 
@@ -125,11 +122,8 @@ func (lb *Label) OnInit() {
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.AddStyles(func(s *styles.Style) {
-		if s.Abilities.Is(states.Selectable) {
-			s.Cursor = cursors.Text
-		} else {
-			s.Cursor = cursors.None
-		}
+		s.SetAbilities(true, states.Selectable)
+		s.Cursor = cursors.Text
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
@@ -215,11 +209,6 @@ func (lb *Label) LabelStyles() {
 	})
 }
 
-// todo: parent should do this:
-func (lb *Label) OnAdd() {
-	lb.Selectable = lb.ParentByType(ButtonBaseType, ki.Embeds) == nil
-}
-
 // SetText sets the text and updates the rendered version.
 // Note: if there is already a label set, and no other
 // larger updates are taking place, the new label may just
@@ -260,11 +249,6 @@ func (lb *Label) SetType(typ LabelTypes) *Label {
 	updt := lb.UpdateStart()
 	lb.Type = typ
 	lb.UpdateEnd(updt)
-	return lb
-}
-
-func (lb *Label) SetSelectable() *Label {
-	lb.Selectable = true
 	return lb
 }
 
@@ -354,7 +338,7 @@ func (lb *Label) ClickOnURL() {
 		}
 	})
 	lb.On(events.DoubleClick, func(e events.Event) {
-		if !lb.StateIs(states.Selectable) || lb.StateIs(states.Disabled) {
+		if !lb.AbilityIs(states.Selectable) || lb.StateIs(states.Disabled) {
 			return
 
 		}
