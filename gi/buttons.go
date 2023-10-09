@@ -100,13 +100,23 @@ const (
 	// used for secondary actions that are still important.
 	// It is equivalent to Material Design's outlined button.
 	ButtonOutlined
-	// ButtonText is a low-importance button with only
-	// text and/or an icon and no border, background color,
-	// or shadow. They should only be used for low emphasis
-	// actions, and you must ensure they stand out from the
+	// ButtonText is a low-importance button with no border,
+	// background color, or shadow. It renders primary-colored text.
+	// It should only be used for low emphasis
+	// actions, and you must ensure it stands out from the
 	// surrounding context sufficiently. It is equivalent
-	// to Material Design's text and icon buttons.
+	// to Material Design's text button, but it can also
+	// contain icons and other things.
 	ButtonText
+	// ButtonAction is a simple button that typically serves
+	// as a simple action among a series of other buttons
+	// (eg: in a toolbar or menu), or as a part of another widget,
+	// like a spinbox or snackbar. It has no border, background color,
+	// or shadow, and it inherits the text color of its parent, and
+	// you must ensure it stands out from the surrounding context
+	// sufficiently. It is equivalent to Material Design's icon button,
+	// but it can also contain text and other things (and frequently does).
+	ButtonAction
 )
 
 // TODO(kai): the difference between ButtonFlagMenu and HasMenu is documented

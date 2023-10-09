@@ -82,7 +82,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		})
 	}
 	if !opts.Icon.IsNil() {
-		ic := NewButton(sc, "icon").SetType(ButtonText).SetIcon(opts.Icon)
+		ic := NewButton(sc, "icon").SetType(ButtonAction).SetIcon(opts.Icon)
 		ic.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.InverseOnSurface
 		})
