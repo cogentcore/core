@@ -369,15 +369,13 @@ func (tb *ToolBar) AddAction(opts ActOpts, fun func(act *Action)) *Action {
 	return ac
 }
 
-// AddSeparator adds a new separator to the toolbar -- automatically sets orientation
-// depending on layout.  All nodes need a name identifier.
-func (tb *ToolBar) AddSeparator(sepnm string) *Separator {
-	sp := NewSeparator(tb, sepnm)
-	if tb.Lay == LayoutHoriz {
-		sp.Horiz = false
-	} else {
-		sp.Horiz = true
-	}
+// AddSeparator adds a new separator to the toolbar. It automatically
+// sets its orientation depending on the layout of the toolbar. The
+// name does not need to be specified, and will default to "separator-"
+// plus the [ki.Ki.NumLifetimeChildren] of the toolbar.
+func (tb *ToolBar) AddSeparator(name ...string) *Separator {
+	sp := NewSeparator(tb, name...)
+	sp.Horiz = tb.Lay != LayoutHoriz
 	return sp
 }
 
