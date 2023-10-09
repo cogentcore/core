@@ -17,27 +17,50 @@ import (
 // Switch is a widget that can toggle between an on and off state.
 // It can be displayed as a switch, checkbox, or radio button.
 type Switch struct {
-	Button
+	WidgetBase
 
-	// [view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property
-	IconOff icons.Icon `xml:"icon-off" view:"show-name" desc:"icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property"`
+	// the type of switch that this is
+	Type SwitchTypes `desc:"the type of switch that this is"`
+
+	// the label text for the switch
+	Text string `desc:"the label text for the switch"`
+
+	// [view: show-name] icon to use for the on, checked state of the switch
+	IconOn icons.Icon `view:"show-name" desc:"icon to use for the on, checked state of the switch"`
+
+	// [view: show-name] icon to use for the off, unchecked state of the switch
+	IconOff icons.Icon `view:"show-name" desc:"icon to use for the off, unchecked state of the switch"`
 }
+
+// SwitchTypes contains the different types of [Switch]es
+type SwitchTypes int32 //enums:enum -trimprefix Switch
+
+const (
+	// SwitchSwitch indicates to display a switch as a switch (toggle slider)
+	SwitchSwitch SwitchTypes = iota
+	// SwitchCheckbox indicates to display a switch as a checkbox
+	SwitchCheckbox
+	// SwitchRadioButton indicates to display a switch as a radio button
+	SwitchRadioButton
+)
 
 func (sw *Switch) CopyFieldsFrom(frm any) {
 	fr := frm.(*Switch)
-	sw.Button.CopyFieldsFrom(&fr.Button)
+	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sw.Type = fr.Type
+	sw.Text = fr.Text
+	sw.IconOn = fr.IconOn
 	sw.IconOff = fr.IconOff
 }
 
 func (sw *Switch) OnInit() {
-	sw.ButtonHandlers()
-	sw.CheckBoxStyles()
+	sw.WidgetHandlers()
+	sw.SwitchStyles()
 }
 
-func (sw *Switch) CheckBoxStyles() {
+func (sw *Switch) SwitchStyles() {
 	sw.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.Checkable)
-		s.SetAbilities(sw.ShortcutTooltip() != "", states.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
@@ -94,30 +117,66 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// SetIcons sets the Icons (by name) for the On (checked) and Off (unchecked)
-// states, and updates button
-func (sw *Switch) SetIcons(icOn, icOff icons.Icon) {
+// SetType sets the styling type of the switch
+func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	updt := sw.UpdateStart()
-	sw.Icon = icOn
-	sw.IconOff = icOff
-	sw.ConfigParts(sw.Sc)
-	// todo: better config logic -- do layout
-	sw.UpdateEnd(updt)
+	sw.Type = typ
+	sw.UpdateEndLayout(updt)
+	return sw
+}
+
+// LabelWidget returns the label widget if present
+func (sw *Switch) LabelWidget() *Label {
+	lbi := sw.Parts.ChildByName("label")
+	if lbi == nil {
+		return nil
+	}
+	return lbi.(*Label)
+}
+
+// SetText sets the text and updates the switch.
+// Use this for optimized auto-updating based on nature of changes made.
+// Otherwise, can set Text directly followed by ReConfig()
+func (sw *Switch) SetText(txt string) *Switch {
+	if sw.Text == txt {
+		return sw
+	}
+	updt := sw.UpdateStart()
+	recfg := sw.Parts == nil || (sw.Text == "" && txt != "") || (sw.Text != "" && txt == "")
+	sw.Text = txt
+	if recfg {
+		sw.ConfigParts(sw.Sc)
+	} else {
+		lbl := sw.LabelWidget()
+		if lbl != nil {
+			lbl.SetText(sw.Text)
+		}
+	}
+	sw.UpdateEndLayout(updt) // todo: could optimize to not re-layout every time but..
+	return sw
+}
+
+// SetIcons sets the icons for the on (checked)
+// and off (unchecked) states, and updates the switch
+func (sw *Switch) SetIcons(on, off icons.Icon) *Switch {
+	updt := sw.UpdateStart()
+	sw.IconOn = on
+	sw.IconOff = off
+	sw.UpdateEndLayout(updt)
+	return sw
 }
 
 func (sw *Switch) ConfigWidget(sc *Scene) {
-	sw.SetAbilities(true, states.Checkable)
 	sw.ConfigParts(sc)
 }
 
 func (sw *Switch) ConfigParts(sc *Scene) {
 	parts := sw.NewParts(LayoutHoriz)
-	sw.SetAbilities(true, states.Checkable)
-	if !sw.Icon.IsValid() {
-		sw.Icon = icons.CheckBox // fallback
+	if !sw.IconOn.IsValid() {
+		sw.IconOn = icons.CheckBox.Fill() // fallback
 	}
 	if !sw.IconOff.IsValid() {
-		sw.IconOff = icons.CheckBoxOutlineBlank
+		sw.IconOff = icons.CheckBoxOutlineBlank // fallback
 	}
 	config := ki.Config{}
 	icIdx := 0 // always there
@@ -134,7 +193,7 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 		ist.Lay = LayoutStacked
 		ist.SetNChildren(2, IconType, "icon") // covered by above config update
 		icon := ist.Child(0).(*Icon)
-		icon.SetIcon(sw.Icon)
+		icon.SetIcon(sw.IconOn)
 		icoff := ist.Child(1).(*Icon)
 		icoff.SetIcon(sw.IconOff)
 	}
