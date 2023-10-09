@@ -9,6 +9,7 @@ import (
 	"image"
 	"log/slog"
 
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
@@ -89,7 +90,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Activatable) {
+		if wb.AbilityIs(abilities.Activatable) {
 			// fmt.Println("active:", wb)
 			wb.SetState(true, states.Active)
 		}
@@ -98,7 +99,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Activatable) {
+		if wb.AbilityIs(abilities.Activatable) {
 			wb.SetState(false, states.Active)
 		}
 	})
@@ -106,11 +107,11 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Checkable) {
+		if wb.AbilityIs(abilities.Checkable) {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
 		}
 		// fmt.Println("click", wb)
-		if wb.AbilityIs(states.Focusable) {
+		if wb.AbilityIs(abilities.Focusable) {
 			wb.GrabFocus()
 		} else {
 			wb.FocusClear()
@@ -122,7 +123,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		}
 		// if we are not double clickable, we just treat
 		// it as a click event
-		if !wb.AbilityIs(states.DoubleClickable) {
+		if !wb.AbilityIs(abilities.DoubleClickable) {
 			wb.Send(events.Click, e)
 		}
 	})
@@ -130,7 +131,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Hoverable) {
+		if wb.AbilityIs(abilities.Hoverable) {
 			wb.SetState(true, states.Hovered)
 		}
 	})
@@ -138,7 +139,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Hoverable) {
+		if wb.AbilityIs(abilities.Hoverable) {
 			wb.SetState(false, states.Hovered)
 		}
 	})
@@ -146,7 +147,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.LongHoverable) {
+		if wb.AbilityIs(abilities.LongHoverable) {
 			wb.SetState(true, states.LongHovered)
 		}
 	})
@@ -154,7 +155,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.LongHoverable) {
+		if wb.AbilityIs(abilities.LongHoverable) {
 			wb.SetState(false, states.LongHovered)
 		}
 	})
@@ -162,7 +163,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Slideable) {
+		if wb.AbilityIs(abilities.Slideable) {
 			// fmt.Println("sliding:", wb)
 			wb.SetState(true, states.Sliding)
 		}
@@ -171,7 +172,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Slideable) {
+		if wb.AbilityIs(abilities.Slideable) {
 			wb.SetState(false, states.Sliding, states.Active)
 			// fmt.Println("done sliding:", wb)
 		}
@@ -180,7 +181,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Draggable) {
+		if wb.AbilityIs(abilities.Draggable) {
 			wb.SetState(true, states.Dragging)
 		}
 	})
@@ -188,7 +189,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Draggable) {
+		if wb.AbilityIs(abilities.Draggable) {
 			wb.SetState(false, states.Dragging, states.Active)
 		}
 	})
@@ -233,7 +234,7 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Focusable) {
+		if wb.AbilityIs(abilities.Focusable) {
 			wb.ScrollToMe()
 			wb.SetState(true, states.Focused)
 		}
@@ -242,7 +243,7 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		if wb.AbilityIs(states.Focusable) {
+		if wb.AbilityIs(abilities.Focusable) {
 			wb.SetState(false, states.Focused)
 		}
 	})
@@ -336,7 +337,7 @@ func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.K
 // that can be focused (if none, then goes ahead and sets focus to this object)
 func (wb *WidgetBase) GrabFocus() {
 	foc := wb.This().(Widget)
-	if !foc.AbilityIs(states.Focusable) {
+	if !foc.AbilityIs(abilities.Focusable) {
 		foc = wb.FocusableInMe()
 	}
 	em := wb.EventMgr()
@@ -354,7 +355,7 @@ func (wb *WidgetBase) FocusableInMe() Widget {
 		if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) || kwb.Is(ki.Destroyed) {
 			return ki.Break
 		}
-		if !kwb.AbilityIs(states.Focusable) {
+		if !kwb.AbilityIs(abilities.Focusable) {
 			return ki.Continue
 		}
 		foc = kwi

@@ -10,6 +10,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -115,7 +116,7 @@ func (lb *Label) OnInit() {
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Selectable, states.DoubleClickable)
+		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		s.Cursor = cursors.Text
 
 		if s.Is(states.Selected) {
@@ -334,7 +335,7 @@ func (lb *Label) LabelClick() {
 		}
 	})
 	lb.On(events.DoubleClick, func(e events.Event) {
-		if !lb.AbilityIs(states.Selectable) || lb.StateIs(states.Disabled) {
+		if !lb.AbilityIs(abilities.Selectable) || lb.StateIs(states.Disabled) {
 			return
 		}
 		updt := lb.UpdateStart()

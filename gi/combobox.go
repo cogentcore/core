@@ -14,6 +14,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -99,7 +100,7 @@ func (cb *ComboBox) ComboBoxHandlers() {
 
 func (cb *ComboBox) ComboBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Activatable, states.Focusable, states.Hoverable, states.LongHoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
@@ -157,7 +158,7 @@ func (cb *ComboBox) OnChildAdded(child ki.Ki) {
 		})
 	case "label":
 		w.AddStyles(func(s *styles.Style) {
-			s.SetAbilities(false, states.Selectable, states.DoubleClickable)
+			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()

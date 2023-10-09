@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/goosi"
 	"goki.dev/goosi/clip"
@@ -304,18 +305,18 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			hovs := make([]Widget, 0, len(em.MouseInBBox))
 			for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 				wb := w.AsWidget()
-				if wb.AbilityIs(states.Droppable) {
+				if wb.AbilityIs(abilities.Droppable) {
 					hovs = append(hovs, w)
 				}
 			}
 			em.DragHovers = em.UpdateHovers(hovs, em.DragHovers, evi, events.DragEnter, events.DragLeave)
 		case em.Slide != nil:
-		case em.Press != nil && em.Press.AbilityIs(states.Slideable):
+		case em.Press != nil && em.Press.AbilityIs(abilities.Slideable):
 			if em.DragStartCheck(evi, SlideStartTime, SlideStartDist) {
 				em.Slide = em.Press
 				em.Slide.Send(events.SlideStart, evi)
 			}
-		case em.Press != nil && em.Press.AbilityIs(states.Draggable):
+		case em.Press != nil && em.Press.AbilityIs(abilities.Draggable):
 			if em.DragStartCheck(evi, DragStartTime, DragStartDist) {
 				em.Drag = em.Press
 				em.Drag.Send(events.DragStart, evi)
@@ -398,7 +399,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	var deep Widget
 	for i := len(em.Hovers) - 1; i >= 0; i-- {
 		h := em.Hovers[i]
-		if h.AbilityIs(states.LongHoverable) {
+		if h.AbilityIs(abilities.LongHoverable) {
 			deep = h
 			break
 		}
@@ -615,7 +616,7 @@ func (em *EventMgr) FocusWithins() bool {
 		if wi == nil {
 			return ki.Break
 		}
-		if wb.AbilityIs(states.FocusWithinable) {
+		if wb.AbilityIs(abilities.FocusWithinable) {
 			em.FocusWithinStack = append(em.FocusWithinStack, wi)
 		}
 		return ki.Continue
@@ -652,7 +653,7 @@ func (em *EventMgr) FocusNext() bool {
 			if !focusNext {
 				return ki.Continue
 			}
-			if !wi.AbilityIs(states.Focusable) {
+			if !wi.AbilityIs(abilities.Focusable) {
 				return ki.Continue
 			}
 			em.SetFocus(wi)
@@ -678,7 +679,7 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
-	if wb.AbilityIs(states.Focusable) {
+	if wb.AbilityIs(abilities.Focusable) {
 		em.SetFocus(foc)
 		return true
 	}
@@ -697,7 +698,7 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 	if wb == nil || wb.This() == nil {
 		return false
 	}
-	if wb.AbilityIs(states.Focusable) {
+	if wb.AbilityIs(abilities.Focusable) {
 		em.SetFocus(foc)
 		return true
 	}
@@ -730,7 +731,7 @@ func (em *EventMgr) FocusPrev() bool {
 			gotFocus = true
 			return ki.Break
 		}
-		if !wb.AbilityIs(states.Focusable) {
+		if !wb.AbilityIs(abilities.Focusable) {
 			return ki.Continue
 		}
 		prevItem = wi
@@ -755,7 +756,7 @@ func (em *EventMgr) FocusFirst() bool {
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
-		if !wb.AbilityIs(states.Focusable) {
+		if !wb.AbilityIs(abilities.Focusable) {
 			return ki.Continue
 		}
 		firstItem = wi
@@ -777,7 +778,7 @@ func (em *EventMgr) FocusLast() bool {
 		if wb == nil || wb.This() == nil {
 			return ki.Continue
 		}
-		if !wb.AbilityIs(states.Focusable) {
+		if !wb.AbilityIs(abilities.Focusable) {
 			return ki.Continue
 		}
 		lastItem = wi
