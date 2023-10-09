@@ -416,8 +416,8 @@ func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(d
 func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv ValueView) {
 	ic, ok := slice.([]icons.Icon)
 	if ok {
-		widg.(*gi.Action).SetText(string(ic[row]))
-		widg.SetProp("max-width", -1)
+		widg.(*gi.Button).SetText(string(ic[row]))
+		widg.SetStretchMaxWidth()
 	}
 }
 
