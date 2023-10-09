@@ -131,6 +131,17 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	updt := sw.UpdateStart()
 	sw.Type = typ
+	switch sw.Type {
+	case SwitchSwitch:
+		sw.IconOn = icons.ToggleOn.Fill()
+		sw.IconOff = icons.ToggleOff
+	case SwitchCheckbox:
+		sw.IconOn = icons.CheckBox.Fill()
+		sw.IconOff = icons.CheckBoxOutlineBlank
+	case SwitchRadioButton:
+		sw.IconOn = icons.RadioButtonChecked.Fill()
+		sw.IconOff = icons.RadioButtonUnchecked
+	}
 	sw.UpdateEndLayout(updt)
 	return sw
 }
@@ -144,25 +155,11 @@ func (sw *Switch) LabelWidget() *Label {
 	return lbi.(*Label)
 }
 
-// SetText sets the text and updates the switch.
-// Use this for optimized auto-updating based on nature of changes made.
-// Otherwise, can set Text directly followed by ReConfig()
+// SetText sets the text and updates the switch
 func (sw *Switch) SetText(txt string) *Switch {
-	if sw.Text == txt {
-		return sw
-	}
 	updt := sw.UpdateStart()
-	recfg := sw.Parts == nil || (sw.Text == "" && txt != "") || (sw.Text != "" && txt == "")
 	sw.Text = txt
-	if recfg {
-		sw.ConfigParts(sw.Sc)
-	} else {
-		lbl := sw.LabelWidget()
-		if lbl != nil {
-			lbl.SetText(sw.Text)
-		}
-	}
-	sw.UpdateEndLayout(updt) // todo: could optimize to not re-layout every time but..
+	sw.UpdateEndLayout(updt)
 	return sw
 }
 
@@ -183,26 +180,10 @@ func (sw *Switch) ConfigWidget(sc *Scene) {
 func (sw *Switch) ConfigParts(sc *Scene) {
 	parts := sw.NewParts(LayoutHoriz)
 	if !sw.IconOn.IsValid() {
-		// fallback
-		switch sw.Type {
-		case SwitchSwitch:
-			sw.IconOn = icons.ToggleOn.Fill()
-		case SwitchCheckbox:
-			sw.IconOn = icons.CheckBox.Fill()
-		case SwitchRadioButton:
-			sw.IconOn = icons.RadioButtonChecked.Fill()
-		}
+		sw.IconOn = icons.ToggleOn.Fill() // fallback
 	}
 	if !sw.IconOff.IsValid() {
-		// fallback
-		switch sw.Type {
-		case SwitchSwitch:
-			sw.IconOff = icons.ToggleOff
-		case SwitchCheckbox:
-			sw.IconOff = icons.CheckBoxOutlineBlank
-		case SwitchRadioButton:
-			sw.IconOff = icons.RadioButtonUnchecked
-		}
+		sw.IconOff = icons.ToggleOff // fallback
 	}
 	config := ki.Config{}
 	icIdx := 0 // always there
