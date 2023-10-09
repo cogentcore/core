@@ -342,7 +342,7 @@ func (wb *WidgetBase) GrabFocus() {
 	em := wb.EventMgr()
 	if em != nil {
 		// fmt.Println("grab focus:", foc)
-		em.GrabFocus(foc.(Widget)) // doesn't send event
+		em.GrabFocus(foc) // doesn't send event
 	}
 }
 
