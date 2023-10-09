@@ -100,13 +100,16 @@ const (
 	ButtonText
 )
 
-// TODO(kai): do we really need ButtonFlags (couldn't we just check if the menu is nil?)
+// TODO(kai): the difference between ButtonFlagMenu and HasMenu is documented
+// inconsistently, so we need to reach a clear decision on what they are an
+// whether we need ButtonFlags
 
 // ButtonFlags extend WidgetFlags to hold button state
 type ButtonFlags WidgetFlags //enums:bitflag
 
 const (
-	// Menu flag means that the button is a menu item
+	// Menu flag means that the button is a menu item itself
+	// (not that it has a menu; see [Button.HasMenu])
 	ButtonFlagMenu ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
 )
 
