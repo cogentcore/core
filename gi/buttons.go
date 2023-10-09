@@ -368,7 +368,15 @@ func (bt *Button) ClickMenu() {
 			return
 		}
 		bt.OpenMenu()
-		// dismiss menu if needed
+
+	})
+}
+
+func (bt *Button) ClickDismissMenu() {
+	bt.On(events.Click, func(e events.Event) {
+		if bt.StateIs(states.Disabled) {
+			return
+		}
 		if bt.Sc != nil && bt.Sc.Stage != nil {
 			pst := bt.Sc.Stage.AsPopup()
 			if pst != nil && pst.Type == MenuStage {
@@ -376,9 +384,9 @@ func (bt *Button) ClickMenu() {
 			}
 		} else {
 			if bt.Sc == nil {
-				slog.Error("ac.Sc == nil")
+				slog.Error("bt.Sc == nil")
 			} else if bt.Sc.Stage == nil {
-				slog.Error("ac.Sc.Stage == nil")
+				slog.Error("bt.Sc.Stage == nil")
 			}
 		}
 	})
