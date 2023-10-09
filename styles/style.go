@@ -12,6 +12,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/enums"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/units"
 	"goki.dev/laser"
@@ -39,7 +40,7 @@ type Style struct {
 	// which kinds of states the element can express.
 	// This is used by the goosi/events system.  Putting this info next
 	// to the State info makes it easy to configure and manage.
-	Abilities states.Abilities
+	Abilities abilities.Abilities
 
 	// todo big enum of how to display item -- controls layout etc
 	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`

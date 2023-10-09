@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package states
+package abilities
+
+//go:generate enumgen
 
 import "goki.dev/enums"
 
 // Abilities represent abilities of GUI elements to take on different States,
 // and are aligned with the States flags.  All elements can be disabled.
-// these correspond to some of the global attributes in CSS:
+// These correspond to some of the global attributes in CSS:
 // [MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes)
 type Abilities int64 //enums:bitflag
 
