@@ -64,7 +64,7 @@ func (sw *Switch) OnInit() {
 
 func (sw *Switch) SwitchHandlers() {
 	sw.WidgetHandlers()
-	sw.On(events.Click, func(e events.Event) {
+	sw.OnClick(func(e events.Event) {
 		if sw.StateIs(states.Disabled) {
 			return
 		}

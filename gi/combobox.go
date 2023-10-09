@@ -556,7 +556,7 @@ func (cb *ComboBox) MakeItemsMenu(obj Widget, menu *Menu) {
 		bt.SetSelected(i == cb.CurIndex)
 		bt.SetAsMenu()
 		idx := i
-		bt.On(events.Click, func(e events.Event) {
+		bt.OnClick(func(e events.Event) {
 			cb.SelectItemAction(idx)
 		})
 	}

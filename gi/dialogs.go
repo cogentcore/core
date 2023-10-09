@@ -134,7 +134,7 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 func (dlg *Dialog) Ok() *Dialog {
 	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
-	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").On(events.Click, func(e events.Event) {
+	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.AcceptDialog()
 		sc.Send(events.Change, e)
@@ -155,7 +155,7 @@ func (dlg *Dialog) Ok() *Dialog {
 func (dlg *Dialog) Cancel() *Dialog {
 	bb := dlg.ConfigButtonBox()
 	sc := dlg.Stage.Scene
-	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").On(events.Click, func(e events.Event) {
+	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.CancelDialog()
 		sc.Send(events.Change, e)
@@ -319,7 +319,7 @@ func ChoiceDialog(ctx Widget, opts DlgOpts, choices []string, fun func(dlg *Dial
 		chnm := strcase.ToKebab(ch)
 		chidx := i
 
-		b := NewButton(bb, chnm).SetType(ButtonText).SetText(ch).On(events.Click, func(e events.Event) {
+		b := NewButton(bb, chnm).SetType(ButtonText).SetText(ch).OnClick(func(e events.Event) {
 			e.SetHandled() // otherwise propagates to dead elements
 			dlg.Data = chidx
 			if chnm == "cancel" {

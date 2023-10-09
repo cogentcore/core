@@ -363,7 +363,7 @@ func (tb *ToolBar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
 	bt.Data = opts.Data
 	bt.UpdateFunc = opts.UpdateFunc
 	if fun != nil {
-		bt.On(events.Click, func(e events.Event) {
+		bt.OnClick(func(e events.Event) {
 			fun(bt)
 		})
 	}

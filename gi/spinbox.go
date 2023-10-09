@@ -115,7 +115,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		}
 		up.SetIcon(sb.UpIcon)
 		w.SetState(sb.IsDisabled(), states.Disabled)
-		up.On(events.Click, func(e events.Event) {
+		up.OnClick(func(e events.Event) {
 			sb.IncrValue(1)
 		})
 		up.AddStyles(func(s *styles.Style) {
@@ -130,7 +130,7 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		}
 		down.SetIcon(sb.DownIcon)
 		w.SetState(sb.IsDisabled(), states.Disabled)
-		down.On(events.Click, func(e events.Event) {
+		down.OnClick(func(e events.Event) {
 			sb.IncrValue(-1)
 		})
 		down.AddStyles(func(s *styles.Style) {
@@ -303,7 +303,7 @@ func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
 		sb.Send(events.Select, e)
 	})
 	// TODO(kai): improve spin box focus handling
-	// tf.On(events.Click, func(e events.Event) {
+	// tf.OnClick(func(e events.Event) {
 	// 	if sb.IsDisabled() {
 	// 		return
 	// 	}

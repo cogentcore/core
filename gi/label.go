@@ -315,7 +315,7 @@ func (lb *Label) LabelLongHover() {
 }
 
 func (lb *Label) LabelClick() {
-	lb.On(events.Click, func(e events.Event) {
+	lb.OnClick(func(e events.Event) {
 		if lb.StateIs(states.Disabled) {
 			return
 		}

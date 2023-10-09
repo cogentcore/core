@@ -384,7 +384,7 @@ func (bt *Button) ConfigPartsIndicator(indIdx int) {
 //		Events
 
 func (bt *Button) ClickMenu() {
-	bt.On(events.Click, func(e events.Event) {
+	bt.OnClick(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
 		}
@@ -394,7 +394,7 @@ func (bt *Button) ClickMenu() {
 }
 
 func (bt *Button) ClickDismissMenu() {
-	bt.On(events.Click, func(e events.Event) {
+	bt.OnClick(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
 		}
