@@ -219,9 +219,9 @@ func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
 
 func (sb *SpinBox) ConfigParts(sc *Scene) {
 	config := ki.Config{}
-	config.Add(ActionType, "down")
+	config.Add(ButtonType, "down")
 	config.Add(TextFieldType, "text-field")
-	config.Add(ActionType, "up")
+	config.Add(ButtonType, "up")
 	sb.ConfigPartsImpl(sc, config, LayoutHoriz)
 }
 
