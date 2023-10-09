@@ -500,10 +500,7 @@ func (em *EventMgr) DragStartCheck(evi events.Event, dur time.Duration, dist int
 		return false
 	}
 	dst := int(mat32.NewVec2FmPoint(evi.StartDelta()).Length())
-	if dst < dist {
-		return false
-	}
-	return true
+	return dst >= dist
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -785,10 +782,7 @@ func (em *EventMgr) FocusLast() bool {
 		return ki.Continue
 	})
 	em.SetFocus(lastItem)
-	if lastItem == nil {
-		return false
-	}
-	return true
+	return lastItem != nil
 }
 
 // ClearNonFocus clears the focus of any non-w.Focus item.

@@ -417,7 +417,6 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 		}
 		cur = pwb
 	}
-	return nil, nil, fmt.Errorf("(gi.WidgetBase).ParentWidgetIfTry: shouldn't get here: %v", wb)
 }
 
 func (wb *WidgetBase) IsVisible() bool {

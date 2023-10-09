@@ -166,7 +166,7 @@ func (sc *Scene) Resize(nwsz image.Point) {
 }
 
 func (sc *Scene) ScIsVisible() bool {
-	if sc.RenderCtx == nil || sc.Pixels == nil {
+	if sc.RenderCtx() == nil || sc.Pixels == nil {
 		return false
 	}
 	return sc.RenderCtx().HasFlag(RenderVisible)

@@ -176,7 +176,6 @@ func (ss *Sprites) Add(sp *Sprite) {
 func (ss *Sprites) Delete(sp *Sprite) {
 	ss.Names.DeleteKey(sp.Name)
 	ss.Modified = true
-	return
 }
 
 // HasSizeChanged returns true if a sprite's size has changed relative to
