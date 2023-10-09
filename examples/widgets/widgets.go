@@ -47,7 +47,13 @@ func app() {
 		gi.NewSnackbar(tbar, gi.SnackbarOpts{
 			Text:   "Something went wrong!",
 			Action: "Try again",
-			Icon:   icons.Close,
+			ActionOnClick: func(ac *gi.Action) {
+				fmt.Println("got snackbar try again event")
+			},
+			Icon: icons.Close,
+			IconOnClick: func(ac *gi.Action) {
+				fmt.Println("got snackbar close icon event")
+			},
 		}).Run()
 	})
 
