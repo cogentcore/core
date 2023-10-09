@@ -60,7 +60,7 @@ type Button struct {
 func (bt *Button) CopyFieldsFrom(frm any) {
 	fr, ok := frm.(*Button)
 	if !ok {
-		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier ButtonBase one\n", bt.KiType().Name)
+		log.Printf("GoGi node of type: %v needs a CopyFieldsFrom method defined -- currently falling back on earlier Button one\n", bt.KiType().Name)
 		return
 	}
 	bt.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
@@ -121,7 +121,7 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.ButtonBaseHandlers()
+	bt.ButtonHandlers()
 	bt.ButtonStyles()
 }
 
@@ -317,7 +317,7 @@ func (bt *Button) OpenMenu() bool {
 			pos = indic.(Widget).ContextMenuPos()
 		}
 	} else {
-		slog.Error("ButtonBase: parts nil", "button", bt)
+		slog.Error("Button: parts nil", "button", bt)
 	}
 	NewMenu(bt.Menu, bt.This().(Widget), pos).Run()
 	return true
@@ -432,7 +432,7 @@ func (bt *Button) LongHoverTooltip() {
 	})
 }
 
-func (bt *Button) ButtonBaseHandlers() {
+func (bt *Button) ButtonHandlers() {
 	bt.WidgetHandlers()
 	bt.LongHoverTooltip()
 	bt.ClickMenu()

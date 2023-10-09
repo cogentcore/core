@@ -567,7 +567,7 @@ type TabButton struct {
 }
 
 func (tb *TabButton) OnInit() {
-	tb.ButtonBaseHandlers()
+	tb.ButtonHandlers()
 	tb.TabButtonStyles()
 }
 

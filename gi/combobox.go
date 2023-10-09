@@ -88,7 +88,7 @@ func (cb *ComboBox) OnInit() {
 }
 
 func (cb *ComboBox) ComboBoxHandlers() {
-	cb.ButtonBaseHandlers()
+	cb.ButtonHandlers()
 	cb.ComboBoxKeys()
 }
 
