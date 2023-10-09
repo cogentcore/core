@@ -1438,21 +1438,21 @@ var _LabelTypesNameToValueMap = map[string]LabelTypes{
 }
 
 var _LabelTypesDescMap = map[LabelTypes]string{
-	0:  `LabelDisplayLarge is a large, short, and important display label with a default font size of 57px.`,
-	1:  `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45px.`,
-	2:  `LabelDisplaySmall is a small, short, and important display label with a default font size of 36px.`,
-	3:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32px.`,
-	4:  `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28px.`,
-	5:  `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24px.`,
-	6:  `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22px.`,
-	7:  `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16px.`,
-	8:  `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14px.`,
-	9:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16px.`,
-	10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14px.`,
-	11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12px.`,
-	12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14px.`,
-	13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12px.`,
-	14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11px.`,
+	0:  `LabelDisplayLarge is a large, short, and important display label with a default font size of 57dp.`,
+	1:  `LabelDisplayMedium is a medium-sized, short, and important display label with a default font size of 45dp.`,
+	2:  `LabelDisplaySmall is a small, short, and important display label with a default font size of 36dp.`,
+	3:  `LabelHeadlineLarge is a large, high-emphasis headline label with a default font size of 32dp.`,
+	4:  `LabelHeadlineMedium is a medium-sized, high-emphasis headline label with a default font size of 28dp.`,
+	5:  `LabelHeadlineSmall is a small, high-emphasis headline label with a default font size of 24dp.`,
+	6:  `LabelTitleLarge is a large, medium-emphasis title label with a default font size of 22dp.`,
+	7:  `LabelTitleMedium is a medium-sized, medium-emphasis title label with a default font size of 16dp.`,
+	8:  `LabelTitleSmall is a small, medium-emphasis title label with a default font size of 14dp.`,
+	9:  `LabelBodyLarge is a large body label used for longer passages of text with a default font size of 16dp.`,
+	10: `LabelBodyMedium is a medium-sized body label used for longer passages of text with a default font size of 14dp.`,
+	11: `LabelBodySmall is a small body label used for longer passages of text with a default font size of 12dp.`,
+	12: `LabelLabelLarge is a large label used for label text (like a caption or the text inside a button) with a default font size of 14dp.`,
+	13: `LabelLabelMedium is a medium-sized label used for label text (like a caption or the text inside a button) with a default font size of 12dp.`,
+	14: `LabelLabelSmall is a small label used for label text (like a caption or the text inside a button) with a default font size of 11dp.`,
 }
 
 var _LabelTypesMap = map[LabelTypes]string{

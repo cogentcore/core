@@ -23,7 +23,7 @@ var ActionType = gti.AddType(&gti.Type{
 		{"Type", &gti.Field{Name: "Type", Type: "ActionTypes", Doc: "the type of action", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
+		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Action{},
@@ -110,13 +110,13 @@ var ToolBarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ToolBar",
 	ShortName: "gi.ToolBar",
 	IDName:    "tool-bar",
-	Doc:       "ToolBar is a Layout (typically LayoutHoriz) that renders a\nbackground and is useful for holding Actions that do things",
+	Doc:       "ToolBar is a [Frame] that is useful for holding [Action]s that do things.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "Layout", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ToolBar{},
@@ -260,14 +260,15 @@ func (t *ButtonBox) AsButtonBox() *ButtonBox {
 	return t
 }
 
-// ButtonBaseType is the [gti.Type] for [ButtonBase]
-var ButtonBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ButtonBase",
-	ShortName:  "gi.ButtonBase",
-	IDName:     "button-base",
-	Doc:        "ButtonBase has common button functionality for all buttons, including\nButton, Action, MenuButton, CheckBox, etc",
+// ButtonType is the [gti.Type] for [Button]
+var ButtonType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Button",
+	ShortName:  "gi.Button",
+	IDName:     "button",
+	Doc:        "Button is a pressable button with text, an icon, an indicator, a shortcut,\nand/or a menu. The standard behavior is to register a click event with OnClick(...).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "[view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
@@ -277,43 +278,6 @@ var ButtonBaseType = gti.AddType(&gti.Type{
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Button{},
-})
-
-// NewButtonBase adds a new [ButtonBase] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBase(par ki.Ki, name ...string) *Button {
-	return par.NewChild(ButtonBaseType, name...).(*Button)
-}
-
-// KiType returns the [*gti.Type] of [ButtonBase]
-func (t *Button) KiType() *gti.Type {
-	return ButtonBaseType
-}
-
-// New returns a new [*ButtonBase] value
-func (t *Button) New() ki.Ki {
-	return &Button{}
-}
-
-// ButtonType is the [gti.Type] for [Button]
-var ButtonType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Button",
-	ShortName: "gi.Button",
-	IDName:    "button",
-	Doc:       "Button is a standard standalone button.\nDo On(events.Click) to register a function to execute when pressed.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button (default, primary, secondary, etc)", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Button{},
@@ -337,63 +301,6 @@ func (t *Button) New() ki.Ki {
 	return &Button{}
 }
 
-// ButtonEmbedder is an interface that all types that embed Button satisfy
-type ButtonEmbedder interface {
-	AsButton() *Button
-}
-
-// AsButton returns the given value as a value of type Button if the type
-// of the given value embeds Button, or nil otherwise
-func AsButton(k ki.Ki) *Button {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(ButtonEmbedder); ok {
-		return t.AsButton()
-	}
-	return nil
-}
-
-// AsButton satisfies the [ButtonEmbedder] interface
-func (t *Button) AsButton() *Button {
-	return t
-}
-
-// CheckBoxType is the [gti.Type] for [CheckBox]
-var CheckBoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.CheckBox",
-	ShortName:  "gi.CheckBox",
-	IDName:     "check-box",
-	Doc:        "CheckBox toggles between a checked and unchecked state",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &CheckBox{},
-})
-
-// NewCheckBox adds a new [CheckBox] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewCheckBox(par ki.Ki, name ...string) *CheckBox {
-	return par.NewChild(CheckBoxType, name...).(*CheckBox)
-}
-
-// KiType returns the [*gti.Type] of [CheckBox]
-func (t *CheckBox) KiType() *gti.Type {
-	return CheckBoxType
-}
-
-// New returns a new [*CheckBox] value
-func (t *CheckBox) New() ki.Ki {
-	return &CheckBox{}
-}
-
 // ComboBoxType is the [gti.Type] for [ComboBox]
 var ComboBoxType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ComboBox",
@@ -412,7 +319,7 @@ var ComboBoxType = gti.AddType(&gti.Type{
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ButtonBase", &gti.Field{Name: "ButtonBase", Type: "ButtonBase", Doc: "", Directives: gti.Directives{}}},
+		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ComboBox{},
@@ -602,12 +509,9 @@ var LabelType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label to display", Directives: gti.Directives{}}},
-		{"Selectable", &gti.Field{Name: "Selectable", Type: "bool", Doc: "is this label selectable? if so, it will change background color in response to selection events and update selection state on mouse clicks", Directives: gti.Directives{}}},
-		{"Redrawable", &gti.Field{Name: "Redrawable", Type: "bool", Doc: "is this label going to be redrawn frequently without an overall full re-render?  if so, you need to set this flag to avoid weird overlapping rendering results from antialiasing.  Also, if the label will change dynamically, this must be set to true, otherwise labels will illegibly overlay on top of each other.", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}}},
 		{"TextRender", &gti.Field{Name: "TextRender", Type: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}}},
 		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}}},
-		{"CurBackgroundColor", &gti.Field{Name: "CurBackgroundColor", Type: "color.RGBA", Doc: "current background color -- grabbed when rendering for first time, and used when toggling off of selected mode, or for redrawable, to wipe out bg", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -882,7 +786,7 @@ var SceneType = gti.AddType(&gti.Type{
 		{"Nm", &gti.Field{Name: "Nm", Type: "string", Doc: "name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.", Directives: gti.Directives{}}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}}},
 		{"Flags", &gti.Field{Name: "Flags", Type: "ScFlags", Doc: "has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene", Directives: gti.Directives{}}},
-		{"Geom", &gti.Field{Name: "Geom", Type: "styles.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}}},
 		{"Decor", &gti.Field{Name: "Decor", Type: "Layout", Doc: "Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil", Directives: gti.Directives{}}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "paint.State", Doc: "[view: -] render state for rendering", Directives: gti.Directives{}}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] live pixels that we render into", Directives: gti.Directives{}}},
@@ -934,24 +838,24 @@ var SliderBaseType = gti.AddType(&gti.Type{
 		{"Max", &gti.Field{Name: "Max", Type: "float32", Doc: "maximum value in range", Directives: gti.Directives{}}},
 		{"Step", &gti.Field{Name: "Step", Type: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}}},
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}}},
-		{"Size", &gti.Field{Name: "Size", Type: "float32", Doc: "size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing", Directives: gti.Directives{}}},
-		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}}},
-		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}}},
-		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "units.Value", Doc: "styled fixed size of the thumb", Directives: gti.Directives{}}},
-		{"Prec", &gti.Field{Name: "Prec", Type: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon for the dragging knob", Directives: gti.Directives{}}},
 		{"ValThumb", &gti.Field{Name: "ValThumb", Type: "bool", Doc: "if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed", Directives: gti.Directives{}}},
 		{"ThumbVal", &gti.Field{Name: "ThumbVal", Type: "float32", Doc: "value that the thumb represents, in the same units", Directives: gti.Directives{}}},
-		{"Pos", &gti.Field{Name: "Pos", Type: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}}},
+		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "units.Value", Doc: "styled fixed size of the thumb -- only if not doing ValThumb", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon for the dragging knob", Directives: gti.Directives{}}},
 		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change", Directives: gti.Directives{}}},
 		{"TrackThr", &gti.Field{Name: "TrackThr", Type: "float32", Doc: "threshold for amount of change in scroll value before emitting a signal in Tracking mode", Directives: gti.Directives{}}},
 		{"Snap", &gti.Field{Name: "Snap", Type: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}}},
 		{"Off", &gti.Field{Name: "Off", Type: "bool", Doc: "can turn off e.g., scrollbar rendering with this flag -- just prevents rendering", Directives: gti.Directives{}}},
+		{"Prec", &gti.Field{Name: "Prec", Type: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}}},
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "colors.Full", Doc: "the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}}},
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "colors.Full", Doc: "the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}}},
-		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}}},
-		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}}},
 		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "styles.Style", Doc: "an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering", Directives: gti.Directives{}}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}}},
+		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}}},
+		{"Size", &gti.Field{Name: "Size", Type: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}}},
+		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}}},
+		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}}},
+		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -1123,8 +1027,8 @@ var SpinBoxType = gti.AddType(&gti.Type{
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}}},
 		{"Format", &gti.Field{Name: "Format", Type: "string", Doc: "prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing", Directives: gti.Directives{}}},
-		{"UpIcon", &gti.Field{Name: "UpIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for up button -- defaults to icons.KeyboardArrowUp", Directives: gti.Directives{}}},
-		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for down button -- defaults to icons.KeyboardArrowDown", Directives: gti.Directives{}}},
+		{"UpIcon", &gti.Field{Name: "UpIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for up button -- defaults to [icons.Add]", Directives: gti.Directives{}}},
+		{"DownIcon", &gti.Field{Name: "DownIcon", Type: "icons.Icon", Doc: "[view: show-name] icon to use for down button -- defaults to [icons.Remove]", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -1269,6 +1173,41 @@ func (t *Splitter) KiType() *gti.Type {
 // New returns a new [*Splitter] value
 func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
+}
+
+// CheckBoxType is the [gti.Type] for [CheckBox]
+var CheckBoxType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.CheckBox",
+	ShortName:  "gi.CheckBox",
+	IDName:     "check-box",
+	Doc:        "CheckBox toggles between a checked and unchecked state",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "[view: show-name] icon to use for the off, unchecked state of the icon -- plain Icon holds the On state -- can be set with icon-off property", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &CheckBox{},
+})
+
+// NewCheckBox adds a new [CheckBox] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewCheckBox(par ki.Ki, name ...string) *CheckBox {
+	return par.NewChild(CheckBoxType, name...).(*CheckBox)
+}
+
+// KiType returns the [*gti.Type] of [CheckBox]
+func (t *CheckBox) KiType() *gti.Type {
+	return CheckBoxType
+}
+
+// New returns a new [*CheckBox] value
+func (t *CheckBox) New() ki.Ki {
+	return &CheckBox{}
 }
 
 // TabViewType is the [gti.Type] for [TabView]
