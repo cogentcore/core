@@ -5,18 +5,8 @@
 package gi
 
 import (
-	"fmt"
-	"log"
-
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // ActOpts provides named and partial parameters for AddAction method
@@ -28,8 +18,10 @@ type ActOpts struct {
 	Shortcut    key.Chord
 	ShortcutKey KeyFuns
 	Data        any
-	UpdateFunc  func(act *Action)
+	UpdateFunc  func(bt *Button)
 }
+
+/*
 
 // Action is a button widget that can display a text label and / or an icon
 // and / or a keyboard shortcut -- this is what is put in menus, menubars, and
@@ -88,7 +80,7 @@ const (
 )
 
 func (ac *Action) OnInit() {
-	ac.ButtonBaseHandlers()
+	ac.ButtonHandlers()
 	ac.ActionStyles()
 }
 
@@ -201,17 +193,6 @@ func (ac *Action) ConfigWidget(sc *Scene) {
 	ac.ConfigParts(sc)
 }
 
-// ConfigPartsShortcut sets the shortcut
-func (ac *Action) ConfigPartsShortcut(scIdx int) {
-	if scIdx < 0 {
-		return
-	}
-	sc := ac.Parts.Child(scIdx).(*Label)
-	sclbl := ac.Shortcut.Shortcut()
-	if sc.Text != sclbl {
-		sc.Text = sclbl
-	}
-}
 
 // ConfigPartsButton sets the label, icon etc for the button
 func (ac *Action) ConfigPartsButton(sc *Scene) {
@@ -315,3 +296,4 @@ func (ac *Action) ClickDismissMenu() {
 		}
 	})
 }
+*/

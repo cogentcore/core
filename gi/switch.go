@@ -29,7 +29,7 @@ func (cb *CheckBox) CopyFieldsFrom(frm any) {
 }
 
 func (cb *CheckBox) OnInit() {
-	cb.ButtonBaseHandlers()
+	cb.ButtonHandlers()
 	cb.CheckBoxStyles()
 }
 
