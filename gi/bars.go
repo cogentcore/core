@@ -343,7 +343,7 @@ func (tb *ToolBar) ToolBarStyles() {
 // data which is stored on the button and then passed in the button signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the buttons (enabled or not typically).
-func (tb *ToolBar) AddButton(opts ActOpts, fun func(act *Button)) *Button {
+func (tb *ToolBar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -351,22 +351,23 @@ func (tb *ToolBar) AddButton(opts ActOpts, fun func(act *Button)) *Button {
 	if nm == "" {
 		nm = string(opts.Icon)
 	}
-	ac := NewButton(tb, nm)
-	ac.Text = opts.Label
-	ac.Icon = icons.Icon(opts.Icon)
-	ac.Tooltip = opts.Tooltip
-	ac.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
+	bt := NewButton(tb, nm)
+	bt.Type = ButtonAction
+	bt.Text = opts.Label
+	bt.Icon = icons.Icon(opts.Icon)
+	bt.Tooltip = opts.Tooltip
+	bt.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
 	if opts.ShortcutKey != KeyFunNil {
-		ac.Shortcut = ShortcutForFun(opts.ShortcutKey)
+		bt.Shortcut = ShortcutForFun(opts.ShortcutKey)
 	}
-	ac.Data = opts.Data
-	ac.UpdateFunc = opts.UpdateFunc
+	bt.Data = opts.Data
+	bt.UpdateFunc = opts.UpdateFunc
 	if fun != nil {
-		ac.On(events.Click, func(e events.Event) {
-			fun(ac)
+		bt.On(events.Click, func(e events.Event) {
+			fun(bt)
 		})
 	}
-	return ac
+	return bt
 }
 
 // AddSeparator adds a new separator to the toolbar. It automatically
