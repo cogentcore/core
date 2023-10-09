@@ -17,8 +17,8 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// ButtonBox is a widget for containing a set of CheckBox buttons.
-// It can optionally enforce mutual excusivity (i.e., Radio Buttons).
+// ButtonBox is a widget for containing a set of switches.
+// It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
 //
@@ -26,8 +26,8 @@ import (
 type ButtonBox struct {
 	WidgetBase
 
-	// the list of items (checbox button labels)
-	Items []string `desc:"the list of items (checbox button labels)"`
+	// the list of items (switch labels)
+	Items []string `desc:"the list of items (switch labels)"`
 
 	// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
 	Tooltips []string `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
@@ -220,7 +220,7 @@ func (bb *ButtonBox) ConfigParts(sc *Scene) {
 	}
 	config := ki.Config{}
 	for _, lb := range bb.Items {
-		config.Add(CheckBoxType, lb)
+		config.Add(SwitchType, lb)
 	}
 	mods, updt := bb.Parts.ConfigChildren(config)
 	if mods || bb.NeedsRebuild() {
