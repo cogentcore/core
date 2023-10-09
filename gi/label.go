@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 
 	"goki.dev/colors"
@@ -112,14 +113,19 @@ const (
 
 func (lb *Label) OnInit() {
 	lb.WidgetHandlers()
+	lb.LabelHandlers()
 	lb.LabelStyles()
 }
 
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, states.Selectable)
+		s.SetAbilities(true, states.Selectable, states.DoubleClickable)
 		s.Cursor = cursors.Text
+
+		if s.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+		}
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
@@ -219,8 +225,6 @@ func (lb *Label) SetText(txt string) *Label {
 
 	lb.StyMu.RLock()
 	lb.Text = txt
-	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
-	// this makes it easier for it to update with dynamic bgs
 	if lb.Text == "" {
 		lb.TextRender.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	} else {
@@ -276,12 +280,12 @@ func (lb *Label) OpenLink(tl *paint.TextLink) {
 // }
 
 func (lb *Label) LabelHandlers() {
-	lb.LongHoverURL()
-	lb.ClickOnURL()
-	lb.LinkCursor()
+	lb.LabelLongHover()
+	lb.LabelClick()
+	lb.LabelMouseMove()
 }
 
-func (lb *Label) LongHoverURL() {
+func (lb *Label) LabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
 		if lb.StateIs(states.Disabled) {
 			return
@@ -313,8 +317,9 @@ func (lb *Label) LongHoverURL() {
 	})
 }
 
-func (lb *Label) ClickOnURL() {
+func (lb *Label) LabelClick() {
 	lb.On(events.Click, func(e events.Event) {
+		fmt.Println("click")
 		if lb.StateIs(states.Disabled) {
 			return
 		}
@@ -334,17 +339,17 @@ func (lb *Label) ClickOnURL() {
 		}
 	})
 	lb.On(events.DoubleClick, func(e events.Event) {
+		fmt.Println("dbl click")
 		if !lb.AbilityIs(states.Selectable) || lb.StateIs(states.Disabled) {
 			return
-
 		}
 		updt := lb.UpdateStart()
-		lb.SetSelected(!lb.StateIs(states.Selected))
+		lb.SetState(!lb.StateIs(states.Selected), states.Selected)
 		lb.UpdateEnd(updt)
 	})
 }
 
-func (lb *Label) LinkCursor() {
+func (lb *Label) LabelMouseMove() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		pos := lb.RenderPos
 		inLink := false
@@ -379,7 +384,6 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
@@ -409,7 +413,6 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	lb.DoLayoutBase(sc, parBBox, iter)
 	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
-	lb.Style.BackgroundColor.Solid = colors.Transparent // always use transparent bg for actual text
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
 	if lb.Style.Text.HasWordWrap() {
