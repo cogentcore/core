@@ -106,7 +106,6 @@ func (ic *Icon) ApplyStyle(sc *Scene) {
 	ic.SVG.Norm = true
 	// ic.SVG.Fill = true
 	ic.ApplyStyleWidget(sc)
-	ic.SVG.Color.SetSolid(ic.Style.Color)
 }
 
 func (ic *Icon) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -142,7 +141,8 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 	sv := &ic.SVG
 	if !rc.HasFlag(RenderRebuild) && sv.Pixels != nil { // if rebuilding rebuild..
 		isz := sv.Pixels.Bounds().Size()
-		if isz == ic.RendSize && sv.Name == string(ic.IconName) {
+		// if nothing has changed, we don't need to re-render
+		if isz == ic.RendSize && sv.Name == string(ic.IconName) && sv.Color.Solid == ic.Style.Color {
 			return
 		}
 	}
@@ -154,6 +154,9 @@ func (ic *Icon) RenderSVG(sc *Scene) {
 		return
 	}
 	sv.Resize(sz) // does Config if needed
+
+	// TODO: what about gradient icons?
+	ic.SVG.Color.SetSolid(ic.Style.Color)
 
 	sv.Render()
 	ic.RendSize = sz
