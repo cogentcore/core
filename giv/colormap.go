@@ -75,7 +75,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 
 func (cv *ColorMapView) ColorMapHandlers() {
 	cv.WidgetHandlers()
-	cv.On(events.Click, func(e events.Event) {
+	cv.OnClick(func(e events.Event) {
 		cv.ChooseColorMap()
 	})
 
@@ -171,7 +171,7 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	ac.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	ac.On(events.Click, func(e events.Event) {
+	ac.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()

@@ -28,6 +28,11 @@ func (wb *WidgetBase) On(etype events.Types, fun func(e events.Event)) Widget {
 	return wb.This().(Widget)
 }
 
+// OnClick adds an event listener function for [events.Click] events
+func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
+	return wb.On(events.Click, fun)
+}
+
 // Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).
@@ -103,7 +108,7 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			wb.SetState(false, states.Active)
 		}
 	})
-	wb.On(events.Click, func(e events.Event) {
+	wb.OnClick(func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}

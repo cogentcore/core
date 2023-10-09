@@ -101,7 +101,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			s.Height = units.Em(1.5)
 		}).(*gi.Button)
 
-	b1.On(events.Click, func(e events.Event) {
+	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
 		gi.NewDialog(gi.StageScene("dlg"), b1).
 			Title("Test Dialog").Prompt("This is a prompt").
@@ -122,7 +122,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetText("Open GoGiEditor").
 		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things").(*gi.Button)
 	_ = button2
-	button2.On(events.Click, func(e events.Event) {
+	button2.OnClick(func(e events.Event) {
 		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(dlg *gi.DialogStage) {
 		// 	fmt.Println("dialog looks OK:", dlg.Accepted)
 		// }).Run()

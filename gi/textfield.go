@@ -233,11 +233,11 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		})
 		switch tf.TrailingIcon {
 		case icons.Close:
-			trail.On(events.Click, func(e events.Event) {
+			trail.OnClick(func(e events.Event) {
 				tf.Clear()
 			})
 		case icons.Visibility, icons.VisibilityOff:
-			trail.On(events.Click, func(e events.Event) {
+			trail.OnClick(func(e events.Event) {
 				tf.NoEcho = !tf.NoEcho
 				if tf.NoEcho {
 					tf.TrailingIcon = icons.Visibility
@@ -1215,7 +1215,7 @@ func (tf *TextField) TextFieldMouse() {
 			tf.Paste()
 		}
 	})
-	tf.On(events.Click, func(e events.Event) {
+	tf.OnClick(func(e events.Event) {
 		if tf.StateIs(states.Disabled) {
 			return
 		}

@@ -155,7 +155,7 @@ func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
-	tab.On(events.Click, func(e events.Event) {
+	tab.OnClick(func(e events.Event) {
 		tv.SelectTabIndexAction(idx)
 	})
 	fr := tv.Frame()
@@ -438,7 +438,7 @@ func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
 		tab.Data = -1
 		tab.SetIcon(icons.Add)
-		tab.On(events.Click, func(e events.Event) {
+		tab.OnClick(func(e events.Event) {
 			tv.NewTabAction(tv.NewTabType, "New Tab")
 			tv.SelectTabIndex(len(*tv.Frame().Children()) - 1)
 		})
@@ -678,7 +678,7 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
-		cls.On(events.Click, func(e events.Event) {
+		cls.OnClick(func(e events.Event) {
 			tabIdx := tb.Data.(int)
 			tvv := tb.TabView()
 			if tvv != nil {

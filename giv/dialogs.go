@@ -109,7 +109,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 	bbox := dlg.ConfigButtonBox()
 	gi.NewButton(bbox, "copy-to-clip").
 		SetText("Copy To Clipboard").
-		SetIcon(icons.ContentCopy).On(events.Click, func(e events.Event) {
+		SetIcon(icons.ContentCopy).OnClick(func(e events.Event) {
 		dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
 	})
 	return tv

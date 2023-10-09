@@ -71,7 +71,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		bt.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.InversePrimary
 		})
-		bt.On(events.Click, func(e events.Event) {
+		bt.OnClick(func(e events.Event) {
 			if opts.ButtonOnClick != nil {
 				opts.ButtonOnClick(bt)
 			}
@@ -83,7 +83,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		ic.AddStyles(func(s *styles.Style) {
 			s.Color = colors.Scheme.InverseOnSurface
 		})
-		ic.On(events.Click, func(e events.Event) {
+		ic.OnClick(func(e events.Event) {
 			if opts.IconOnClick != nil {
 				opts.IconOnClick(ic)
 			}

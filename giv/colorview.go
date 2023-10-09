@@ -578,7 +578,7 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	bt.SetText("Edit Color")
 	bt.SetIcon(icons.Colors)
 	bt.Tooltip = "Open color picker dialog"
-	bt.On(events.Click, func(e events.Event) {
+	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
 	bt.AddStyles(func(s *styles.Style) {
@@ -656,7 +656,7 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
 	bt.AddStyles(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusFull
 	})
-	bt.On(events.Click, func(e events.Event) {
+	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
