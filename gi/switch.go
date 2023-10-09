@@ -114,14 +114,14 @@ func (cb *CheckBox) SetIcons(icOn, icOff icons.Icon) {
 	updt := cb.UpdateStart()
 	cb.Icon = icOn
 	cb.IconOff = icOff
-	cb.This().(ButtonWidget).ConfigParts(cb.Sc)
+	cb.ConfigParts(cb.Sc)
 	// todo: better config logic -- do layout
 	cb.UpdateEnd(updt)
 }
 
 func (cb *CheckBox) ConfigWidget(sc *Scene) {
 	cb.SetAbilities(true, states.Checkable)
-	cb.This().(ButtonWidget).ConfigParts(sc)
+	cb.ConfigParts(sc)
 }
 
 func (cb *CheckBox) ConfigParts(sc *Scene) {
