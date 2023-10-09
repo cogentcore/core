@@ -62,8 +62,13 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.BoxShadow = styles.BoxShadow3()
 		s.AlignV = styles.AlignMiddle
 		sc.Spacing.SetDp(12 * Prefs.DensityMul())
+		s.Height.SetDp(40)
+		s.Width.SetVw(100)
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium)
+	if opts.Action != "" || !opts.Icon.IsNil() {
+		NewStretch(sc, "stretch")
+	}
 	if opts.Action != "" {
 		ac := NewAction(sc, "action").SetType(ActionParts)
 		ac.SetText(opts.Action)
@@ -75,17 +80,20 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 			if opts.ActionOnClick != nil {
 				opts.ActionOnClick(ac)
 			}
-			sc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+			wsc.MainStage().PopupMgr.PopDeleteType(Snackbar)
 		})
 	}
 	if !opts.Icon.IsNil() {
-		ic := NewAction(sc, "icon")
+		ic := NewAction(sc, "icon").SetType(ActionParts)
 		ic.SetIcon(opts.Icon)
+		ic.AddStyles(func(s *styles.Style) {
+			s.Color = colors.Scheme.InverseOnSurface
+		})
 		ic.On(events.Click, func(e events.Event) {
 			if opts.IconOnClick != nil {
 				opts.IconOnClick(ic)
 			}
-			sc.MainStage().PopupMgr.PopDeleteType(Snackbar)
+			wsc.MainStage().PopupMgr.PopDeleteType(Snackbar)
 		})
 	}
 	return sc
