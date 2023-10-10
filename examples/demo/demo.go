@@ -15,6 +15,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -26,29 +27,20 @@ func app() {
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
-	rec := ki.Node{}          // receiver for events
-	rec.InitName(&rec, "rec") // this is essential for root objects not owned by other Ki tree nodes
+	sc := gi.StageScene("gogi-demo")
 
-	win := gi.NewMainRenderWin("gogi-demo", "The GoGi Demo", 1024, 768)
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-
-	tv := gi.NewTabView(mfr, "tv")
-	// tv.NoDeleteTabs = true
+	tv := gi.NewTabView(sc, "tv")
+	tv.NoDeleteTabs = true
 	tv.NewTabButton = true
 
 	makeHome(tv)
 	makeText(tv)
-	makeButtons(win, tv)
+	makeButtons(tv)
 	makeInputs(tv)
 	makeLayouts(tv)
 	makeFileTree(tv)
-	doRenderWinSetup(win, vp)
 
-	vp.UpdateEndNoSig(updt)
-	win.StartEventLoop()
+	gi.NewWindow(sc).Run().Wait()
 }
 
 func makeHome(tv *gi.TabView) {
@@ -140,7 +132,7 @@ func makeText(tv *gi.TabView) {
 
 }
 
-func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
+func makeButtons(tv *gi.TabView) {
 	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyles(func(s *styles.Style) {
@@ -161,64 +153,64 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 	sbtitle := gi.NewLabel(buttons, "sbtitle", "Standard Buttons")
 	sbtitle.Type = gi.LabelHeadlineSmall
 
-	brow := gi.NewLayout(buttons, "brow", gi.LayoutHorizFlow)
+	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
 	brow.AddStyles(func(s *styles.Style) {
 		brow.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	browt := gi.NewLayout(buttons, "browt", gi.LayoutHorizFlow)
+	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
 	browt.AddStyles(func(s *styles.Style) {
 		browt.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	browi := gi.NewLayout(buttons, "browi", gi.LayoutHorizFlow)
+	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
 	browi.AddStyles(func(s *styles.Style) {
 		browi.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	mbtitle := gi.NewLabel(buttons, "mbtitle", "Menu Buttons")
+	mbtitle := gi.NewLabel(buttons, "mbtitle").SetText("Menu Buttons")
 	mbtitle.Type = gi.LabelHeadlineSmall
 
-	mbrow := gi.NewLayout(buttons, "mbrow", gi.LayoutHorizFlow)
+	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
 	mbrow.AddStyles(func(s *styles.Style) {
 		mbrow.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	mbrowt := gi.NewLayout(buttons, "mbrowt", gi.LayoutHorizFlow)
+	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
 	mbrowt.AddStyles(func(s *styles.Style) {
 		mbrowt.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	mbrowi := gi.NewLayout(buttons, "mbrowi", gi.LayoutHorizFlow)
+	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
 	mbrowi.AddStyles(func(s *styles.Style) {
 		mbrowi.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
-	menu := gi.MenuStage{}
+	menu := gi.Menu{}
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	menu.AddButton(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
+		func(bt *gi.Button) {
+			fmt.Printf("Received menu action with data", bt.Data)
 		})
 
-	mi2 := menu.AddAction(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil, nil)
+	mi2 := menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil)
 
-	mi2.Menu.AddAction(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
+		func(bt *gi.Button) {
+			fmt.Printf("Received menu action with data", bt.Data)
 		})
 
 	menu.AddSeparator("sep1")
 
-	menu.AddAction(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Printf("Received menu action data: %v from menu action: %v\n", data, send.Name())
+	menu.AddButton(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
+		func(bt *gi.Button) {
+			fmt.Printf("Received menu action with data", bt.Data)
 		})
 
 	ics := []icons.Icon{
@@ -236,47 +228,33 @@ func makeButtons(win *gi.RenderWin, tv *gi.TabView) {
 			art = "An "
 		}
 
-		b := gi.NewButton(brow, "button"+s)
-		b.Text = s
-		b.Icon = ics[typ]
-		b.Type = typ
+		b := gi.NewButton(brow, "button"+s).SetType(typ).SetText(s).SetIcon(ics[typ])
 		b.Tooltip = "A standard " + sl + " button with a label and icon"
-		b.OnClicked(func() {
+		b.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", b.Nm)
 		})
 
-		bt := gi.NewButton(browt, "buttonText"+s)
-		bt.Text = s
-		bt.Type = typ
+		bt := gi.NewButton(browt, "buttonText"+s).SetType(typ).SetText(s)
 		bt.Tooltip = "A standard " + sl + " button with a label"
-		bt.OnClicked(func() {
+		bt.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bt.Nm)
 		})
 
-		bi := gi.NewButton(browi, "buttonIcon"+s)
-		bi.Type = typ
-		bi.Icon = ics[typ+5]
+		bi := gi.NewButton(browi, "buttonIcon"+s).SetType(typ).SetIcon(ics[typ+5])
 		bi.Tooltip = "A standard " + sl + " button with an icon"
-		bi.OnClicked(func() {
+		bi.OnClick(func(e events.Event) {
 			fmt.Println("Got click event on", bi.Nm)
 		})
 
-		mb := gi.NewButton(mbrow, "menuButton"+s)
-		mb.Text = s
-		mb.Icon = ics[typ+10]
-		mb.Type = typ
+		mb := gi.NewButton(mbrow, "menuButton"+s).SetType(typ).SetText(s).SetIcon(ics[typ+10])
 		mb.Menu = menu
 		mb.Tooltip = art + sl + " menu button with a label and icon"
 
-		mbt := gi.NewButton(mbrowt, "menuButtonText"+s)
-		mbt.Text = s
-		mbt.Type = typ
+		mbt := gi.NewButton(mbrowt, "menuButtonText"+s).SetType(typ).SetText(s)
 		mbt.Menu = menu
 		mbt.Tooltip = art + sl + " menu button with a label"
 
-		mbi := gi.NewButton(mbrowi, "menuButtonIcon"+s)
-		mbi.Icon = ics[typ+15]
-		mbi.Type = typ
+		mbi := gi.NewButton(mbrowi, "menuButtonIcon"+s).SetType(typ).SetIcon(ics[typ+15])
 		mbi.Menu = menu
 		mbi.Tooltip = art + sl + " menu button with an icon"
 	}
@@ -292,16 +270,12 @@ func makeInputs(tv *gi.TabView) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	ititle := gi.NewLabel(inputs, "ititle", "Inputs")
-	ititle.Type = gi.LabelHeadlineLarge
+	gi.NewLabel(inputs).SetText("Inputs").SetType(gi.LabelHeadlineLarge)
 
-	idesc := gi.NewLabel(inputs, "idesc",
-		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`,
-	)
-	idesc.Type = gi.LabelBodyLarge
+	gi.NewLabel(inputs, "idesc").SetText(
+		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`).SetType(gi.LabelBodyLarge)
 
-	tff := gi.NewTextField(inputs, "tff")
-	tff.Placeholder = "Filled Text Field"
+	tff := gi.NewTextField(inputs, "tff").SetPlaceholder("Filled Text Field")
 	tff.Type = gi.TextFieldFilled
 
 	tfo := gi.NewTextField(inputs, "tfo")
