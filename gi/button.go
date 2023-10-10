@@ -389,7 +389,6 @@ func (bt *Button) ClickMenu() {
 			return
 		}
 		bt.OpenMenu()
-
 	})
 }
 
@@ -409,26 +408,6 @@ func (bt *Button) ClickDismissMenu() {
 			} else if bt.Sc.Stage == nil {
 				slog.Error("bt.Sc.Stage == nil")
 			}
-		}
-	})
-}
-
-// ClickOnEnterSpace adds key event handler for Enter or Space
-// to generate a Click action
-func (bt *Button) ClickOnEnterSpace() {
-	bt.OnKeyChord(func(e events.Event) {
-		if bt.StateIs(states.Disabled) {
-			return
-		}
-		if KeyEventTrace {
-			slog.Info("Button KeyChordEvent", "button", bt)
-		}
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunEnter || e.KeyRune() == ' ' {
-			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			e.SetHandled()
-			bt.Send(events.Click, e)
-			// }
 		}
 	})
 }

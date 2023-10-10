@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"log/slog"
-
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -64,6 +62,7 @@ func (sw *Switch) OnInit() {
 
 func (sw *Switch) SwitchHandlers() {
 	sw.WidgetHandlers()
+	sw.ClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		if sw.StateIs(states.Disabled) {
 			return
@@ -79,21 +78,6 @@ func (sw *Switch) SwitchHandlers() {
 			}
 		}
 		sw.Send(events.Change, e)
-	})
-	sw.OnKeyChord(func(e events.Event) {
-		if sw.StateIs(states.Disabled) {
-			return
-		}
-		if KeyEventTrace {
-			slog.Info("Switch KeyChordEvent", "switch", sw)
-		}
-		kf := KeyFun(e.KeyChord())
-		if kf == KeyFunEnter || e.KeyRune() == ' ' {
-			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
-			e.SetHandled()
-			sw.Send(events.Click, e)
-			// }
-		}
 	})
 }
 
