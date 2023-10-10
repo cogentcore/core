@@ -1139,12 +1139,12 @@ func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
-// TabButtonType is the [gti.Type] for [TabButton]
-var TabButtonType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.TabButton",
-	ShortName:  "gi.TabButton",
-	IDName:     "tab-button",
-	Doc:        "TabButton contains a larger select button and a small close button. Indicator\nicon is used for close icon.",
+// TabType is the [gti.Type] for [Tab]
+var TabType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Tab",
+	ShortName:  "gi.Tab",
+	IDName:     "tab",
+	Doc:        "Tab is a tab button that contains a larger select button\nand a small close button. The Indicator icon is used for\nthe close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
@@ -1153,25 +1153,25 @@ var TabButtonType = gti.AddType(&gti.Type{
 		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TabButton{},
+	Instance: &Tab{},
 })
 
-// NewTabButton adds a new [TabButton] with the given name
+// NewTab adds a new [Tab] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTabButton(par ki.Ki, name ...string) *TabButton {
-	return par.NewChild(TabButtonType, name...).(*TabButton)
+func NewTab(par ki.Ki, name ...string) *Tab {
+	return par.NewChild(TabType, name...).(*Tab)
 }
 
-// KiType returns the [*gti.Type] of [TabButton]
-func (t *TabButton) KiType() *gti.Type {
-	return TabButtonType
+// KiType returns the [*gti.Type] of [Tab]
+func (t *Tab) KiType() *gti.Type {
+	return TabType
 }
 
-// New returns a new [*TabButton] value
-func (t *TabButton) New() ki.Ki {
-	return &TabButton{}
+// New returns a new [*Tab] value
+func (t *Tab) New() ki.Ki {
+	return &Tab{}
 }
 
 // TextFieldType is the [gti.Type] for [TextField]
