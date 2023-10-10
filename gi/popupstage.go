@@ -117,13 +117,13 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 	return st
 }
 
-// NewChooser returns a new Chooser stage with given scene contents,
+// NewCompleter returns a new [CompleterStage] with given scene contents,
 // in connection with given widget (which provides key context).
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
-func NewChooser(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(ChooserStage, sc, ctx)
+func NewCompleter(sc *Scene, ctx Widget) *PopupStage {
+	return NewPopupStage(CompleterStage, sc, ctx)
 }
 
 // RunPopup runs a popup-style Stage in context widget's popups.

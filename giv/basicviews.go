@@ -662,7 +662,7 @@ type EnumValueView struct {
 }
 
 func (vv *EnumValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ComboBoxType
+	vv.WidgetTyp = gi.ChooserType
 	return vv.WidgetTyp
 }
 
@@ -685,7 +685,7 @@ func (vv *EnumValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.ComboBox)
+	sb := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
 	iv, err := laser.ToInt(npv.Interface())
 	if err != nil {
@@ -696,7 +696,7 @@ func (vv *EnumValueView) UpdateWidget() {
 func (vv *EnumValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	cb := vv.Widget.(*gi.ComboBox)
+	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 
@@ -789,7 +789,7 @@ type TypeValueView struct {
 }
 
 func (vv *TypeValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ComboBoxType
+	vv.WidgetTyp = gi.ChooserType
 	return vv.WidgetTyp
 }
 
@@ -797,7 +797,7 @@ func (vv *TypeValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.ComboBox)
+	sb := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
 	typ, ok := npv.Interface().(*gti.Type)
 	if ok {
@@ -808,7 +808,7 @@ func (vv *TypeValueView) UpdateWidget() {
 func (vv *TypeValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	cb := vv.Widget.(*gi.ComboBox)
+	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 

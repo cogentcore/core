@@ -1903,7 +1903,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx(frame)
 
-	tff := frame.InsertNewChild(gi.ComboBoxType, prIdx+1, "find").(*gi.ComboBox)
+	tff := frame.InsertNewChild(gi.ComboBoxType, prIdx+1, "find").(*gi.Chooser)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
@@ -1913,7 +1913,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 		tff.SetCurVal(find)
 	}
 
-	tfr := frame.InsertNewChild(gi.ComboBoxType, prIdx+2, "repl").(*gi.ComboBox)
+	tfr := frame.InsertNewChild(gi.ComboBoxType, prIdx+2, "repl").(*gi.Chooser)
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
@@ -1931,11 +1931,11 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 // QReplaceDialogValues gets the string values
 func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 	frame := dlg.Stage.Scene
-	tff := frame.ChildByName("find", 1).(*gi.ComboBox)
+	tff := frame.ChildByName("find", 1).(*gi.Chooser)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
 	}
-	tfr := frame.ChildByName("repl", 2).(*gi.ComboBox)
+	tfr := frame.ChildByName("repl", 2).(*gi.Chooser)
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
