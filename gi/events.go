@@ -266,6 +266,27 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 	})
 }
 
+// ClickOnEnterSpace adds key event handler for Enter or Space
+// to generate a Click action
+func (wb *WidgetBase) ClickOnEnterSpace() {
+	wb.OnKeyChord(func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		if KeyEventTrace {
+			slog.Info("WidgetBase KeyChordEvent", "widget", wb)
+		}
+		kf := KeyFun(e.KeyChord())
+		if kf == KeyFunEnter || e.KeyRune() == ' ' {
+			// TODO: do we need this?
+			// if !(kt.Rune == ' ' && bbb.Sc.Type == ScCompleter) {
+			e.SetHandled()
+			wb.Send(events.Click, e)
+			// }
+		}
+	})
+}
+
 // WidgetMouseEvents connects to either or both mouse events -- IMPORTANT: if
 // you need to also connect to other mouse events, you must copy this code --
 // all processing of a mouse event must happen within one function b/c there
