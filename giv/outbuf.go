@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"slices"
 	"sync"
 	"time"
 )
@@ -70,7 +71,7 @@ func (ob *OutBuf) MonOut() {
 	ob.CurOutMus = make([][]byte, 0, 100)
 	for outscan.Scan() {
 		b := outscan.Bytes()
-		bc := slice.Clone(b) // outscan bytes are temp
+		bc := slices.Clone(b) // outscan bytes are temp
 		bec := HTMLEscapeBytes(bc)
 
 		ob.Mu.Lock()

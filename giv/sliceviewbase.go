@@ -20,9 +20,9 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -233,6 +233,8 @@ func (sv *SliceViewBase) OnInit() {
 	sv.ShowToolBar = true
 	sv.InactKeyNav = true
 
+	sv.HandleSliceViewEvents()
+
 	sv.Lay = gi.LayoutVert
 	sv.AddStyles(func(s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
@@ -314,8 +316,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 		sv.SelectedIdx = -1
 	}
 	sv.ResetSelectedIdxs()
-	sv.SetFullReRender()
-	sv.Config()
+	sv.Config(sv.Sc)
 	sv.UpdateEnd(updt)
 }
 
@@ -324,34 +325,12 @@ func (sv *SliceViewBase) Update() {
 	if !sv.This().(gi.Widget).IsVisible() {
 		return
 	}
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
-
 	updt := sv.UpdateStart()
-	sv.SetFullReRender()
+	defer sv.UpdateEndRender(updt)
+
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
 }
-
-// SliceViewSignals are signals that sliceview can send, mostly for editing
-// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
-// both modes.
-type SliceViewSignals int
-
-const (
-	// SliceViewDoubleClicked emitted during inactive mode when item
-	// double-clicked -- can be used for accepting dialog.
-	SliceViewDoubleClicked SliceViewSignals = iota
-
-	// SliceViewInserted emitted when a new item is inserted -- data is index of new item
-	SliceViewInserted
-
-	// SliceViewDeleted emitted when an item is deleted -- data is index of item deleted
-	SliceViewDeleted
-
-	SliceViewSignalsN
-)
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (sv *SliceViewBase) UpdateValues() {
@@ -372,14 +351,13 @@ func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
 	gl := sv.GridLayout()
 	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
-	gconfig.Add(gi.TypeScrollBar, "scrollbar")
+	gconfig.Add(gi.SliderType, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
 	if mods {
-		sv.SetFullReRender()
-		sv.UpdateEnd(updt)
+		sv.UpdateEndLayout(updt)
 	}
 }
 
@@ -545,17 +523,11 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb.Min = 0
 	sb.Step = 1
 	sv.UpdateScroll()
-
-	sb.SliderSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig != int64(gi.SliderValueChanged) {
-			return
-		}
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		wupdt := sv.TopUpdateStart()
-		svv.StartIdx = int(sb.Value)
-		svv.This().(SliceViewer).UpdateSliceGrid()
-		svv.Sc.ReRenderNode(svv.This().(gi.Widget))
-		svv.TopUpdateEnd(wupdt)
+	sb.OnChange(func(e events.Event) {
+		updt := sv.UpdateStart()
+		sv.StartIdx = int(sb.Value)
+		sv.This().(SliceViewer).UpdateSliceGrid()
+		sv.UpdateEndRender(updt)
 	})
 }
 
@@ -637,8 +609,8 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	}
 	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
 
-	mvp := sv.Sc
-	if mvp != nil && mvp.HasFlag(int(gi.ScFlagPrefSizing)) {
+	sc := sv.Sc
+	if sc != nil && sc.Is(gi.ScPrefSizing) {
 		sv.VisRows = gi.LayoutPrefMaxRows
 		sv.LayoutHeight = float32(sv.VisRows) * sv.RowHeight
 	} else {
@@ -677,11 +649,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	if sg == nil {
 		return
 	}
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
-
 	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
+	defer sg.UpdateEndLayout(updt)
 
 	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -711,6 +680,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	sv.UpdateStartIdx()
 
 	for i := 0; i < sv.DispRows; i++ {
+		i := i
 		ridx := i * nWidgPerRow
 		si := sv.StartIdx + i // slice idx
 		issel := sv.IdxIsSelected(si)
@@ -737,17 +707,11 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			} else {
 				idxlab = &gi.Label{}
 				sg.SetChild(idxlab, ridx, labnm)
-				idxlab.SetProp("slv-row", i) // all sigs deal with disp rows
-				idxlab.Selectable = true
-				idxlab.Redrawable = true
-				idxlab.Style.Template = "giv.SliceViewBase.IndexLabel"
-				idxlab.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					if sig == int64(gi.WidgetSelected) {
-						wbb := send.(gi.Widget).AsWidget()
-						row := wbb.Prop("slv-row").(int)
-						svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-						svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
-					}
+				// todo:
+				// idxlab.Selectable = true
+				// idxlab.Redrawable = true
+				idxlab.OnSelect(func(e events.Event) {
+					sv.UpdateSelectRow(i, sg.StateIs(states.Selected))
 				})
 			}
 			idxlab.SetText(sitxt)
@@ -773,21 +737,15 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 				widg.AsWidget().SetState(true, states.Disabled)
 				if wb != nil {
 					wb.SetProp("slv-row", i)
-					wb.ClearSelected()
-					wb.WidgetSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						if sig == int64(gi.WidgetSelected) {
-							wbb := send.(gi.Widget).AsWidget()
-							row := wbb.Prop("slv-row").(int)
-							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							svv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
-						}
+					wb.SetState(false, states.Selected)
+					wb.OnSelect(func(e events.Event) {
+						sv.UpdateSelectRow(i, wb.StateIs(states.Selected))
 					})
 				}
 			} else {
 				vvb := vv.AsValueViewBase()
-				vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svv, _ := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-					svv.SetChanged()
+				vvb.OnChange(func(e events.Event) {
+					sv.SendChange()
 				})
 				if !sv.isArray {
 					cidx := ridx + idxOff
@@ -800,11 +758,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.SetIcon(icons.Add)
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
-						addact.Style.Template = "giv.SliceViewBase.AddButton"
-						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-							act := send.(*gi.Button)
-							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							svv.SliceNewAtRow(act.Data.(int) + 1)
+						addact.OnClick(func(e events.Event) {
+							sv.SliceNewAtRow(i + 1)
 						})
 					}
 
@@ -817,11 +772,8 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.SetIcon(icons.Delete)
 						delact.Tooltip = "delete this element"
 						delact.Data = i
-						delact.Style.Template = "giv.SliceViewBase.DelAction"
-						delact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-							act := send.(*gi.Button)
-							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							svv.SliceDeleteAtRow(act.Data.(int), true)
+						delact.OnClick(func(e events.Event) {
+							sv.SliceDeleteAtRow(i, true)
 						})
 					}
 				}
@@ -844,7 +796,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 // types of changes, so this is just generic.
 func (sv *SliceViewBase) SetChanged() {
 	sv.Changed = true
-	sv.ViewSig.Emit(sv.This(), 0, nil)
+	sv.SendChange()
 	sv.ToolBar().UpdateButtons() // nil safe
 }
 
@@ -880,17 +832,14 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		vvb := sv.SliceValView.AsValueViewBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
-				gi.NewKiDialog(sv.Sc, ownki.BaseIface(),
-					gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:"},
-					sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						if sig == int64(gi.DialogAccepted) {
-							// svv, _ := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-							dlg, _ := send.(*gi.DialogStage)
-							n, typ := gi.NewKiDialogValues(dlg)
+				gi.NewKiDialog(sv, gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:", Ok: true, Cancel: true},
+					ownki.BaseType(), func(dlg *gi.Dialog) {
+						if dlg.Accepted {
+							typ := dlg.Data.(*gti.Type) // todo: n!
+							n := 1
 							updt := ownki.UpdateStart()
-							ownki.SetChildAdded()
 							for i := 0; i < n; i++ {
-								nm := fmt.Sprintf("New%v%v", typ.Name(), idx+1+i)
+								nm := fmt.Sprintf("New%v%v", typ.Name, idx+1+i)
 								ownki.InsertNewChild(typ, idx+1+i, nm)
 							}
 							sv.SetChanged()
@@ -923,15 +872,13 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.ScrollBar().SetFullReRender()
-	sv.SetFullReRender()
+	// sv.ScrollBar().SetFullReRender()
 
 	sv.ViewMuUnlock()
 
 	sv.This().(SliceViewer).LayoutSliceGrid()
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.ViewSig.Emit(sv.This(), 0, nil)
-	sv.SliceViewSig.Emit(sv.This(), int64(SliceViewInserted), idx)
+	sv.SendChange()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -1001,13 +948,12 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 
 	sv.SetChanged()
 	if doupdt {
-		sv.SetFullReRender()
-		sv.ScrollBar().SetFullReRender()
+		// sv.SetFullReRender()
+		// sv.ScrollBar().SetFullReRender()
 		sv.This().(SliceViewer).LayoutSliceGrid()
 		sv.This().(SliceViewer).UpdateSliceGrid()
 	}
-	sv.ViewSig.Emit(sv.This(), 0, nil)
-	sv.SliceViewSig.Emit(sv.This(), int64(SliceViewDeleted), idx)
+	sv.SendChange()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -1029,17 +975,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
-			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-				svv.This().(SliceViewer).UpdateSliceGrid()
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"}, func(act *gi.Button) {
+			sv.This().(SliceViewer).UpdateSliceGrid()
 
-			})
+		})
 		if ndef > 1 {
 			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
-				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-					svv.This().(SliceViewer).SliceNewAt(-1)
+				func(act *gi.Button) {
+					sv.This().(SliceViewer).SliceNewAt(-1)
 				})
 		}
 	}
@@ -1050,50 +993,42 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(sv.Slice) {
-		ToolBarView(sv.Slice, sv.Scene, tb)
-		tb.SetFullReRender()
+		ToolBarView(sv.Slice, sv.Sc, tb)
 	}
 	sv.ToolbarSlice = sv.Slice
 }
 
 func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
 	sv.Frame.ApplyStyle(sc)
-	if !sv.This().(SliceViewer).IsConfiged() {
-		return
-	}
-	mvp := sv.Sc
-	if mvp != nil && sv.This().(gi.Widget).IsVisible() &&
-		(mvp.IsDoingFullRender() || mvp.HasFlag(int(gi.ScFlagPrefSizing))) {
-		if sv.This().(SliceViewer).LayoutSliceGrid() {
-			sv.This().(SliceViewer).UpdateSliceGrid()
-		}
-	}
-	if sv.IsDisabled() {
-		sv.SetCanFocus()
-	}
-	// sg := sv.This().(SliceViewer).SliceGrid()
-	// sg.StartFocus() // need to call this when window is actually active
+	// if !sv.This().(SliceViewer).IsConfiged() {
+	// 	return
+	// }
+	// sc := sv.Sc
+	// if sc != nil && sv.This().(gi.Widget).IsVisible() &&
+	// 	(sc.IsDoingFullRender() || sc.HasFlag(int(gi.ScPrefSizing))) {
+	// 	if sv.This().(SliceViewer).LayoutSliceGrid() {
+	// 		sv.This().(SliceViewer).UpdateSliceGrid()
+	// 	}
+	// }
+	// if sv.IsDisabled() {
+	// 	sv.SetCanFocus()
+	// }
+	// // sg := sv.This().(SliceViewer).SliceGrid()
+	// // sg.StartFocus() // need to call this when window is actually active
 }
 
-func (sv *SliceViewBase) Render(vp *gi.Scene) {
-	if !sv.This().(SliceViewer).IsConfiged() {
-		return
-	}
+func (sv *SliceViewBase) Render(sc *gi.Scene) {
 	sv.ToolBar().UpdateButtons()
-	if sv.PushBounds() {
-		sv.FrameStdRender() // this just renders widgets that have already been created
-		sv.RenderScrolls()
-		sv.RenderChildren()
-		sv.PopBounds()
+	if sv.PushBounds(sc) {
+		sv.FrameStdRender(sc)
+		sv.RenderScrolls(sc)
+		sv.RenderChildren(sc)
+		sv.PopBounds(sc)
 	}
 }
 
 func (sv *SliceViewBase) NeedsDoubleReRender() bool {
 	return false
-}
-
-func (sv *SliceViewBase) SetTypeHandlers() {
-	sv.SliceViewBaseEvents()
 }
 
 // func (sv *SliceViewBase) StateIs(states.Focused) bool {
@@ -1197,7 +1132,7 @@ func (sv *SliceViewBase) RowFromPos(posY int) (int, bool) {
 	for rw := 0; rw < sv.DispRows; rw++ {
 		widg, ok := sv.This().(SliceViewer).RowFirstWidget(rw)
 		if ok {
-			if widg.WinBBox.Min.Y < posY && posY < widg.WinBBox.Max.Y {
+			if widg.ScBBox.Min.Y < posY && posY < widg.ScBBox.Max.Y {
 				return rw, true
 			}
 		}
@@ -1297,7 +1232,7 @@ func (sv *SliceViewBase) MoveDownAction(selMode events.SelectModes) int {
 	nidx := sv.MoveDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
+		sv.Send(events.Select, nil) // todo: need to do this for the item?
 	}
 	return nidx
 }
@@ -1320,7 +1255,7 @@ func (sv *SliceViewBase) MoveUpAction(selMode events.SelectModes) int {
 	nidx := sv.MoveUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
+		sv.Send(events.Select, nil)
 	}
 	return nidx
 }
@@ -1344,7 +1279,7 @@ func (sv *SliceViewBase) MovePageDownAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
+		sv.Send(events.Select, nil)
 	}
 	return nidx
 }
@@ -1368,7 +1303,7 @@ func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), nidx)
+		sv.Send(events.Select, nil)
 	}
 	return nidx
 }
@@ -1381,7 +1316,9 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
 		return
 	}
-	wupdt := sv.TopUpdateStart()
+	updt := sv.UpdateStart()
+	defer sv.UpdateEndRender(updt)
+
 	sg := sv.This().(SliceViewer).SliceGrid()
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
 	rowidx := row * nWidgPerRow
@@ -1397,7 +1334,6 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 		widg.SetSelected(sel)
 		widg.UpdateSig()
 	}
-	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectIdxWidgets sets the selection state of given slice index
@@ -1420,14 +1356,15 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 // UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 	if sv.IsDisabled() && !sv.InactMultiSel {
-		wupdt := sv.TopUpdateStart()
-		defer sv.TopUpdateEnd(wupdt)
+		updt := sv.UpdateStart()
+		defer sv.UpdateEndLayout(updt)
+
 		sv.UnselectAllIdxs()
 		if sel || sv.SelectedIdx == idx {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 		}
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
+		sv.Send(events.Select, nil)
 	} else {
 		selMode := events.SelectOne
 		em := sv.EventMgr()
@@ -1493,24 +1430,26 @@ func (sv *SliceViewBase) UnselectIdx(idx int) {
 
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
-	wupdt := sv.TopUpdateStart()
+	updt := sv.UpdateStart()
+	defer sv.UpdateEndRender(updt)
+
 	for r := range sv.SelectedIdxs {
 		sv.SelectIdxWidgets(r, false)
 	}
 	sv.ResetSelectedIdxs()
-	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectAllIdxs selects all idxs
 func (sv *SliceViewBase) SelectAllIdxs() {
-	wupdt := sv.TopUpdateStart()
+	updt := sv.UpdateStart()
+	defer sv.UpdateEndRender(updt)
+
 	sv.UnselectAllIdxs()
 	sv.SelectedIdxs = make(map[int]struct{}, sv.SliceSize)
 	for idx := 0; idx < sv.SliceSize; idx++ {
 		sv.SelectedIdxs[idx] = struct{}{}
 		sv.SelectIdxWidgets(idx, true)
 	}
-	sv.TopUpdateEnd(wupdt)
 }
 
 // SelectIdxAction is called when a select action has been received (e.g., a
@@ -1526,8 +1465,8 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 		return
 	}
 	// row := idx - sv.StartIdx // note: could be out of bounds
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
+	updt := sv.UpdateStart()
+	defer sv.UpdateEndRender(updt)
 
 	switch mode {
 	case events.SelectOne:
@@ -1544,13 +1483,13 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		}
-		sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
+		sv.Send(events.Select, nil) //  sv.SelectedIdx)
 	case events.ExtendContinuous:
 		if len(sv.SelectedIdxs) == 0 {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
-			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.Send(events.Select, nil) //  sv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -1577,17 +1516,17 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 				}
 			}
 			sv.IdxGrabFocus(idx)
-			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.Send(events.Select, nil) //  sv.SelectedIdx)
 		}
 	case events.ExtendOne:
 		if sv.IdxIsSelected(idx) {
 			sv.UnselectIdxAction(idx)
-			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), -1) // -1 = unselected
+			sv.Send(events.Select, nil) //  sv.SelectedIdx)
 		} else {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
-			sv.WidgetSig.Emit(sv.This(), int64(gi.WidgetSelected), sv.SelectedIdx)
+			sv.Send(events.Select, nil) //  sv.SelectedIdx)
 		}
 	case events.Unselect:
 		sv.SelectedIdx = idx
@@ -1671,7 +1610,7 @@ func (sv *SliceViewBase) Copy(reset bool) {
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
 	if md != nil {
-		goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Write(md)
+		sv.EventMgr().ClipBoard().Write(md)
 	}
 	if reset {
 		sv.UnselectAllIdxs()
@@ -1692,17 +1631,15 @@ func (sv *SliceViewBase) DeleteIdxs() {
 	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
-
 	updt := sv.UpdateStart()
+	defer sv.UpdateEndLayout(updt)
+
 	ixs := sv.SelectedIdxsList(true) // descending sort
 	for _, i := range ixs {
 		sv.This().(SliceViewer).SliceDeleteAt(i, false)
 	}
 	sv.SetChanged()
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
 }
 
 // Cut copies selected indexes to clip.Board and deletes selected indexes
@@ -1711,10 +1648,9 @@ func (sv *SliceViewBase) Cut() {
 	if len(sv.SelectedIdxs) == 0 {
 		return
 	}
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
-
 	updt := sv.UpdateStart()
+	defer sv.UpdateEndLayout(updt)
+
 	sv.CopyIdxs(false)
 	ixs := sv.SelectedIdxsList(true) // descending sort
 	idx := ixs[0]
@@ -1723,9 +1659,7 @@ func (sv *SliceViewBase) Cut() {
 		sv.This().(SliceViewer).SliceDeleteAt(i, false)
 	}
 	sv.SetChanged()
-	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -1742,7 +1676,7 @@ func (sv *SliceViewBase) CutIdxs() {
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (sv *SliceViewBase) Paste() {
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Read([]string{dt})
+	md := sv.EventMgr().ClipBoard().Read([]string{dt})
 	if md != nil {
 		sv.PasteMenu(md, sv.CurIdx)
 	}
@@ -1763,19 +1697,16 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
+	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, func(act *gi.Button) {
+		sv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
 	})
-	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
+	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, func(act *gi.Button) {
+		sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
-	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
+	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, func(act *gi.Button) {
+		sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, func(act *gi.Button) {
 	})
 }
 
@@ -1814,9 +1745,9 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	}
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := sv.SliceNPVal
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
 	updt := sv.UpdateStart()
+	defer sv.UpdateEndRender(updt)
+
 	for _, ns := range sl {
 		sz := svnp.Len()
 		svnp = reflect.Append(svnp, reflect.ValueOf(ns).Elem())
@@ -1835,9 +1766,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.SetFullReRender()
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -1852,7 +1781,7 @@ func (sv *SliceViewBase) Duplicate() int {
 	pasteAt := ixs[0]
 	sv.CopyIdxs(true)
 	dt := sv.This().(SliceViewer).MimeDataType()
-	md := goosi.TheApp.ClipBoard(sv.ParentRenderWin().RenderWin).Read([]string{dt})
+	md := sv.EventMgr().ClipBoard().Read([]string{dt})
 	sv.This().(SliceViewer).PasteAtIdx(md, pasteAt)
 	return pasteAt
 }
@@ -1867,32 +1796,34 @@ func (sv *SliceViewBase) DragNDropStart() {
 		return
 	}
 	md := sv.This().(SliceViewer).CopySelToMime()
+	_ = md
 	ixs := sv.SelectedIdxsList(false) // ascending
 	widg, ok := sv.This().(SliceViewer).RowFirstWidget(ixs[0])
 	if ok {
 		sp := &gi.Sprite{}
 		sp.GrabRenderFrom(widg)
 		gi.ImageClearer(sp.Pixels, 50.0)
-		sv.ParentRenderWin().StartDragNDrop(sv.This(), md, sp)
+		// todo:
+		// sv.ParentRenderWin().StartDragNDrop(sv.This(), md, sp)
 	}
 }
 
 // DragNDropTarget handles a drag-n-drop drop
 func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
-	de.Target = sv.This()
-	if de.Mod == events.DropLink {
-		de.Mod = events.DropCopy // link not supported -- revert to copy
-	}
-	idx, ok := sv.IdxFromPos(de.Pos().Y)
-	if ok {
-		de.SetHandled()
-		sv.CurIdx = idx
-		if dpr, ok := sv.This().(gi.DragNDropper); ok {
-			dpr.Drop(de.Data, de.Mod)
-		} else {
-			sv.Drop(de.Data, de.Mod)
-		}
-	}
+	// de.Target = sv.This()
+	// if de.Mod == events.DropLink {
+	// 	de.Mod = events.DropCopy // link not supported -- revert to copy
+	// }
+	// idx, ok := sv.IdxFromPos(de.Pos().Y)
+	// if ok {
+	// 	de.SetHandled()
+	// 	sv.CurIdx = idx
+	// 	if dpr, ok := sv.This().(gi.DragNDropper); ok {
+	// 		dpr.Drop(de.Data, de.Mod)
+	// 	} else {
+	// 		sv.Drop(de.Data, de.Mod)
+	// 	}
+	// }
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
@@ -1907,22 +1838,18 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods,
 		m.AddLabel("Move:")
 	}
 	if mod == events.DropCopy {
-		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			svv.DropAssign(data.(mimedata.Mimes), idx)
+		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, func(act *gi.Button) {
+			sv.DropAssign(data.(mimedata.Mimes), idx)
 		})
 	}
-	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
+	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, func(act *gi.Button) {
+		sv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
+	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, func(act *gi.Button) {
+		sv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		svv.DropCancel()
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, func(act *gi.Button) {
+		sv.DropCancel()
 	})
 }
 
@@ -1947,20 +1874,19 @@ func (sv *SliceViewBase) DropAssign(md mimedata.Mimes, idx int) {
 // target, including ignore -- ends up calling DragNDropSource if us..
 func (sv *SliceViewBase) DragNDropFinalize(mod events.DropMods) {
 	sv.UnselectAllIdxs()
-	sv.ParentRenderWin().FinalizeDragNDrop(mod)
+	// sv.ParentRenderWin().FinalizeDragNDrop(mod)
 }
 
 // DragNDropSource is called after target accepts the drop -- we just remove
 // elements that were moved
 func (sv *SliceViewBase) DragNDropSource(de events.Event) {
-	if de.Mod != events.DropMove || len(sv.DraggedIdxs) == 0 {
-		return
-	}
-
-	wupdt := sv.TopUpdateStart()
-	defer sv.TopUpdateEnd(wupdt)
+	// if de.Mod != events.DropMove || len(sv.DraggedIdxs) == 0 {
+	// 	return
+	// }
 
 	updt := sv.UpdateStart()
+	defer sv.UpdateEnd(updt)
+
 	sort.Slice(sv.DraggedIdxs, func(i, j int) bool {
 		return sv.DraggedIdxs[i] > sv.DraggedIdxs[j]
 	})
@@ -1970,7 +1896,6 @@ func (sv *SliceViewBase) DragNDropSource(de events.Event) {
 	}
 	sv.DraggedIdxs = nil
 	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -2020,26 +1945,18 @@ func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
 	if sv.isArray {
 		return
 	}
-	m.AddButton(gi.ActOpts{Label: "Copy", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			svv.CopyIdxs(true)
-		})
-	m.AddButton(gi.ActOpts{Label: "Cut", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			svv.CutIdxs()
-		})
-	m.AddButton(gi.ActOpts{Label: "Paste", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			svv.PasteIdx(data.(int))
-		})
-	m.AddButton(gi.ActOpts{Label: "Duplicate", Data: idx},
-		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			svv.Duplicate()
-		})
+	m.AddButton(gi.ActOpts{Label: "Copy", Data: idx}, func(act *gi.Button) {
+		sv.CopyIdxs(true)
+	})
+	m.AddButton(gi.ActOpts{Label: "Cut", Data: idx}, func(act *gi.Button) {
+		sv.CutIdxs()
+	})
+	m.AddButton(gi.ActOpts{Label: "Paste", Data: idx}, func(act *gi.Button) {
+		sv.PasteIdx(idx)
+	})
+	m.AddButton(gi.ActOpts{Label: "Duplicate", Data: idx}, func(act *gi.Button) {
+		sv.Duplicate()
+	})
 }
 
 func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
@@ -2049,22 +1966,23 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 	var menu gi.Menu
 
-	if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
-		if sv.ShowViewCtxtMenu {
-			menu.AddSeparator("sep-svmenu")
-			sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
-		}
-	} else {
-		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
-	}
+	// todo: CtxtMenuView
+	// if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
+	// 	if sv.ShowViewCtxtMenu {
+	// 		menu.AddSeparator("sep-svmenu")
+	// 		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
+	// 	}
+	// } else {
+	sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
+	// }
 	if len(menu) > 0 {
 		pos := sv.IdxPos(idx)
-		if pos == (image.Point{}) {
-			em := sv.EventMgr()
-			if em != nil {
-				pos = em.LastMousePos
-			}
-		}
+		// if pos == (image.Point{}) {
+		// 	em := sv.EventMgr()
+		// 	if em != nil {
+		// 		pos = em.LastMousePos
+		// 	}
+		// }
 		gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
 	}
 }
@@ -2072,7 +1990,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 // KeyInputNav supports multiple selection navigation keys
 func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	kf := gi.KeyFun(kt.KeyChord())
-	selMode := events.SelectModeBits(kt.Modifiers)
+	selMode := events.SelectModeBits(kt.Modifiers())
 	if selMode == events.SelectOne {
 		if sv.SelectMode {
 			selMode = events.ExtendContinuous
@@ -2191,80 +2109,77 @@ func (sv *SliceViewBase) KeyInputInactive(kt events.Event) {
 		sv.ScrollToIdx(ni)
 		sv.UpdateSelectIdx(ni, true)
 		kt.SetHandled()
-	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.Rune == ' ':
-		sv.SliceViewSig.Emit(sv.This(), int64(SliceViewDoubleClicked), sv.SelectedIdx)
+	case kf == gi.KeyFunEnter || kf == gi.KeyFunAccept || kt.KeyRune() == ' ':
+		sv.Send(events.DoubleClick, kt)
 		kt.SetHandled()
 	}
 }
 
-func (sv *SliceViewBase) SliceViewBaseEvents() {
+func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// LowPri to allow other focal widgets to capture
-	svwe.AddFunc(events.Scroll, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*events.Scroll)
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		me.SetHandled()
-		sbb := svv.This().(SliceViewer).ScrollBar()
+	sv.On(events.Scroll, func(e events.Event) {
+		e.SetHandled()
+		sbb := sv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
-		sbb.SliderMove(cur, cur+float32(me.NonZeroDelta(false))) // preferY
+		_ = sbb
+		_ = cur
+		// sbb.SliderMove(cur, cur+float32(e.NonZeroDelta(mat32.Y)))
 	})
-	svwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		// if !svv.StateIs(states.Focused) {
-		// 	svv.GrabFocus()
-		// }
-		if me.Button == events.Left && me.Action == events.DoubleClick {
-			si := svv.SelectedIdx
-			svv.UnselectAllIdxs()
-			svv.SelectIdx(si)
-			svv.SliceViewSig.Emit(svv.This(), int64(SliceViewDoubleClicked), si)
-			me.SetHandled()
-		}
-		if me.Button == events.Right && me.Action == events.Release {
-			svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
-			me.SetHandled()
-		}
+	sv.OnDoubleClick(func(e events.Event) {
+		si := sv.SelectedIdx
+		sv.UnselectAllIdxs()
+		sv.SelectIdx(si)
+		sv.Send(events.DoubleClick, e)
+		e.SetHandled()
 	})
+	// todo ctxmenu
+	// sv.Onwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	me := d.(events.Event)
+	// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
+	// 	// if !svv.StateIs(states.Focused) {
+	// 	// 	svv.GrabFocus()
+	// 	// }
+	// 	if me.Button == events.Right && me.Action == events.Release {
+	// 		svv.This().(SliceViewer).ItemCtxtMenu(svv.SelectedIdx)
+	// 		me.SetHandled()
+	// 	}
+	// })
 	if sv.IsDisabled() {
 		if sv.InactKeyNav {
-			svwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-				kt := d.(*events.Key)
-				svv.KeyInputInactive(kt)
+			sv.OnKeyChord(func(e events.Event) {
+				sv.KeyInputInactive(e)
 			})
 		}
 	} else {
-		svwe.AddFunc(events.KeyChord, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			kt := d.(*events.Key)
-			svv.KeyInputActive(kt)
+		sv.OnKeyChord(func(e events.Event) {
+			sv.KeyInputActive(e)
 		})
-		svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-			de := d.(events.Event)
-			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-			switch de.Action {
-			case events.Start:
-				svv.DragNDropStart()
-			case events.DropOnTarget:
-				svv.DragNDropTarget(de)
-			case events.DropFmSource:
-				svv.DragNDropSource(de)
-			}
-		})
-		sg := sv.This().(SliceViewer).SliceGrid()
-		if sg != nil {
-			sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-				de := d.(*events.FocusEvent)
-				sgg := recv.Embed(gi.FrameType).(*gi.Frame)
-				switch de.Action {
-				case events.Enter:
-					sgg.ParentRenderWin().DNDSetCursor(de.Mod)
-				case events.Exit:
-					sgg.ParentRenderWin().DNDNotCursor()
-				case events.Hover:
-					// nothing here?
-				}
-			})
-		}
+		// svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		// 	de := d.(events.Event)
+		// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
+		// 	switch de.Action {
+		// 	case events.Start:
+		// 		svv.DragNDropStart()
+		// 	case events.DropOnTarget:
+		// 		svv.DragNDropTarget(de)
+		// 	case events.DropFmSource:
+		// 		svv.DragNDropSource(de)
+		// 	}
+		// })
+		// sg := sv.This().(SliceViewer).SliceGrid()
+		// if sg != nil {
+		// 	sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+		// 		de := d.(*events.FocusEvent)
+		// 		sgg := recv.Embed(gi.FrameType).(*gi.Frame)
+		// 		switch de.Action {
+		// 		case events.Enter:
+		// 			sgg.ParentRenderWin().DNDSetCursor(de.Mod)
+		// 		case events.Exit:
+		// 			sgg.ParentRenderWin().DNDNotCursor()
+		// 		case events.Hover:
+		// 			// nothing here?
+		// 		}
+		// 	})
+		// }
 	}
 }

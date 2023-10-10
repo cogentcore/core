@@ -690,6 +690,7 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Color", &gti.Field{Name: "Color", Type: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}}},
+		{"NumView", &gti.Field{Name: "NumView", Type: "ValueView", Doc: "inline struct view of the numbers", Directives: gti.Directives{}}},
 		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
@@ -1973,6 +1974,7 @@ var ValueViewBaseType = gti.AddType(&gti.Type{
 		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
 		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface", Directives: gti.Directives{}}},
 		{"Widget", &gti.Field{Name: "Widget", Type: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

@@ -12,6 +12,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 )
 
 var (
@@ -369,64 +370,38 @@ func StringPromptDialog(ctx Widget, opts DlgOpts, strval, placeholder string, fu
 	return dlg
 }
 
-/*
-// NewKiDialog prompts for creating new item(s) of a given type, showing types
-// that implement given interface.
-// Use construct of form: reflect.TypeOf((*gi.Widget)(nil)).Elem()
-// Optionally connects to given signal receiving object and function for
-// dialog signals (nil to ignore).
-func NewKiDialog(avp *Scene, iface reflect.Type, opts DlgOpts, recv ki.Ki, fun ki.RecvFunc) *Dialog {
-	dlg := NewStdDialog(opts, AddOk, AddCancel)
-	dlg.Modal = true
+// NewKiDialog prompts for creating new item(s) of a given type,
+// showing registered gti types that embed given type.
+func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog)) *Dialog {
+	dlg := NewStdDialog(ctx, opts, fun)
+	dlg.Stage.Modal = true
 
-	_, prIdx := dlg.PromptWidget()
+	prIdx := dlg.PromptWidgetIdx()
 
-	nrow := dlg.Frame.InsertNewChild(LayoutType, prIdx+2, "n-row").(*Layout)
+	sc := dlg.Stage.Scene
+	nrow := sc.InsertNewChild(LayoutType, prIdx+1, "n-row").(*Layout)
 	nrow.Lay = LayoutHoriz
 
-	lbl := NewLabel(nrow, "n-label")
-	lbl.Text = "Number:  "
+	NewLabel(nrow, "n-label").SetText("Number:  ")
 
 	nsb := NewSpinBox(nrow, "n-field")
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1
 
-	tspc := dlg.Frame.InsertNewChild(SpaceType, prIdx+3, "type-space").(*Space)
+	tspc := sc.InsertNewChild(SpaceType, prIdx+2, "type-space").(*Space)
 	tspc.SetFixedHeight(units.Em(0.5))
 
-	trow := dlg.Frame.InsertNewChild(LayoutType, prIdx+4, "t-row").(*Layout)
+	trow := sc.InsertNewChild(LayoutType, prIdx+3, "t-row").(*Layout)
 	trow.Lay = LayoutHoriz
 
-	lbl = NewLabel(trow, "t-label")
-	lbl.Text = "Type:    "
+	NewLabel(trow, "t-label").SetText("Type:    ")
 
 	typs := NewComboBox(trow, "types")
-	_ = typs
-	// todo: fix
-	// typs.ItemsFromTypes(kit.Types.AllImplementersOf(iface, false), true, true, 50)
+	typs.ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
 
-	if recv != nil && fun != nil {
-		dlg.DialogSig.Connect(recv, fun)
-	}
-	dlg.Open(0, 0, avp, nil)
+	typs.OnChange(func(e events.Event) {
+		dlg.Data = typs.CurVal
+	})
 	return dlg
 }
-
-// NewKiDialogValues gets the user-set values from a NewKiDialog.
-func NewKiDialogValues(dlg *Dialog) (int, reflect.Type) {
-	nrow := dlg.Frame.ChildByName("n-row", 0).(*Layout)
-	ntf := nrow.ChildByName("n-field", 0).(*SpinBox)
-	n := int(ntf.Value)
-	trow := dlg.Frame.ChildByName("t-row", 0).(*Layout)
-	typs := trow.ChildByName("types", 0).(*ComboBox)
-	var typ reflect.Type
-	if typs.CurVal != nil {
-		typ = typs.CurVal.(reflect.Type)
-	} else {
-		log.Printf("gi.NewKiDialogValues: type is nil\n")
-	}
-	return n, typ
-}
-
-*/
