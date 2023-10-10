@@ -193,7 +193,7 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 			menu.AddSeparator(te.Name)
 			continue
 		}
-		ac := menu.AddAction(gi.ActOpts{Label: te.Name}, nil, nil)
+		ac := menu.AddButton(gi.ActOpts{Label: te.Name}, nil, nil)
 		rv := ActionsView(val, vtyp, vp, ac, te.Value)
 		if !rv {
 			rval = false
@@ -714,9 +714,9 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 		if ad.Desc != "" {
 			ad.View.SetTag("desc", ad.Desc)
 		}
-		if ad.View.HasAction() {
-			ad.View.OpenDialog(md.Sc, ad.View, func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
+		if ad.View.HasDialog() {
+			ad.View.OpenDialog(ad.View.Widget, func(dlg *gi.Dialog) {
+				if dlg.Accepted {
 					MethViewCallMeth(md, args)
 				}
 			})

@@ -1903,7 +1903,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx(frame)
 
-	tff := frame.InsertNewChild(gi.TypeComboBox, prIdx+1, "find").(*gi.ComboBox)
+	tff := frame.InsertNewChild(gi.ComboBoxType, prIdx+1, "find").(*gi.ComboBox)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
@@ -1913,7 +1913,7 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 		tff.SetCurVal(find)
 	}
 
-	tfr := frame.InsertNewChild(gi.TypeComboBox, prIdx+2, "repl").(*gi.ComboBox)
+	tfr := frame.InsertNewChild(gi.ComboBoxType, prIdx+2, "repl").(*gi.ComboBox)
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
@@ -2610,25 +2610,25 @@ func (tv *TextView) ContextMenuPos() (pos image.Point) {
 
 // MakeContextMenu builds the textview context menu
 func (tv *TextView) MakeContextMenu(m *gi.Menu) {
-	ac := m.AddAction(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
+	ac := m.AddButton(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
 		tv.Copy(true)
 	})
 	ac.SetEnabledState(tv.HasSelection())
 	if !tv.IsDisabled() {
-		ac = m.AddAction(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
+		ac = m.AddButton(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tv := recv.Embed(TypeTextView).(*TextView)
 				tv.Cut()
 			})
 		ac.SetEnabledState(tv.HasSelection())
-		ac = m.AddAction(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
+		ac = m.AddButton(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tv := recv.Embed(TypeTextView).(*TextView)
 				tv.Paste()
 			})
 		ac.SetState(goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).IsEmpty(), states.Disabled)
 	} else {
-		ac = m.AddAction(gi.ActOpts{Label: "Clear"},
+		ac = m.AddButton(gi.ActOpts{Label: "Clear"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tv := recv.Embed(TypeTextView).(*TextView)
 				tv.Clear()

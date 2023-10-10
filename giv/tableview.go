@@ -710,7 +710,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
-					addact.Style.Template = "giv.TableView.AddAction"
+					addact.Style.Template = "giv.TableView.AddButton"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Button)
 						tvv := recv.Embed(TableViewType).(*TableView)
@@ -884,13 +884,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				tvv := recv.Embed(TableViewType).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
+			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					tvv := recv.Embed(TableViewType).(*TableView)
 					tvv.SliceNewAt(-1)
@@ -1096,7 +1096,7 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	}
 	tv.SliceViewBase.StdCtxtMenu(m, idx)
 	m.AddSeparator("sep-edit")
-	m.AddAction(gi.ActOpts{Label: "Edit", Data: idx},
+	m.AddButton(gi.ActOpts{Label: "Edit", Data: idx},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TableViewType).(*TableView)
 			tvv.EditIdx(data.(int))

@@ -1338,25 +1338,25 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.PasteAssign(data.(mimedata.Mimes))
 	})
-	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.PasteChildren(data.(mimedata.Mimes), events.DropCopy)
 	})
 	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
-		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.PasteBefore(data.(mimedata.Mimes), events.DropCopy)
 		})
-		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.PasteAfter(data.(mimedata.Mimes), events.DropCopy)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	})
 	// todo: compare, etc..
 }
@@ -1589,26 +1589,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 		m.AddLabel("Move:")
 	}
 	if mod == events.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
 	if !tv.IsRootOrField("") && tv.RootView.This() != tv.This() {
-		m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
-		m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tvv := recv.Embed(TypeTreeView).(*TreeView)
 			tvv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tvv := recv.Embed(TypeTreeView).(*TreeView)
 		tvv.DropCancel()
 	})

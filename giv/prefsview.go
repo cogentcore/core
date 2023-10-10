@@ -18,7 +18,7 @@ func PrefsView(pf *gi.Preferences) *gi.RenderWin {
 	winm := "gogi-prefs"
 	width := 1280
 	height := 500
-	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Preferences", width, height)
+	win, recyc := gi.ActivateExistingMainWindow(pf, winm, "GoGi Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -83,7 +83,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) *gi.RenderWin {
 	winm := "gogi-prefs-det"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Detailed Preferences", width, height)
+	win, recyc := gi.ActivateExistingMainWindow(pf, winm, "GoGi Detailed Preferences", width, height)
 	if recyc {
 		return win
 	}
@@ -148,7 +148,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) *gi.RenderWin {
 	winm := "gogi-prefs-dbg"
 	width := 800
 	height := 800
-	win, recyc := gi.RecycleMainRenderWin(pf, winm, "GoGi Debugging Preferences", width, height)
+	win, recyc := gi.ActivateExistingMainWindow(pf, winm, "GoGi Debugging Preferences", width, height)
 	if recyc {
 		return win
 	}

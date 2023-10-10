@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -75,17 +76,19 @@ func init() {
 	})
 }
 
-// MapInlineLen is the number of map elements at or below which an inline
-// representation of the map will be presented -- more convenient for small
-// #'s of props
-var MapInlineLen = 3
+var (
+	// MapInlineLen is the number of map elements at or below which an inline
+	// representation of the map will be presented -- more convenient for small
+	// #'s of props
+	MapInlineLen = 3
 
-// StructInlineLen is the number of elemental struct fields at or below which an inline
-// representation of the struct will be presented -- more convenient for small structs
-var StructInlineLen = 6
+	// StructInlineLen is the number of elemental struct fields at or below which an inline
+	// representation of the struct will be presented -- more convenient for small structs
+	StructInlineLen = 6
 
-// SliceInlineLen is the number of slice elements below which inline will be used
-var SliceInlineLen = 6
+	// SliceInlineLen is the number of slice elements below which inline will be used
+	SliceInlineLen = 6
+)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  ValueViewer -- an interface for selecting ValueView GUI representation of types
@@ -455,7 +458,7 @@ type ValueView interface {
 	// HasAction returns true if this value has an associated action, such as
 	// pulling up a dialog or chooser for this value.  Activate method will
 	// trigger this action.
-	HasAction() bool
+	HasDialog() bool
 
 	// OpenDialog opens a dialog or chooser for this value.
 	// This is called by default for single-argument methods that have value
@@ -472,6 +475,14 @@ type ValueView interface {
 	// Ki.SetField for Ki types and laser.SetRobust otherwise -- emits a ViewSig
 	// signal when set.
 	SetValue(val any) bool
+
+	// SendChange sends events.Change event to all listeners registered on this view.
+	// This is the primary notification event for all ValueView elements.
+	SendChange()
+
+	// OnChange registers given listener function for Change events on ValueView.
+	// This is the primary notification event for all ValueView elements.
+	OnChange(fun func(e events.Event))
 
 	// SetTags sets tags for this valueview, for non-struct values, to
 	// influence interface for this value -- see
@@ -552,6 +563,10 @@ type ValueViewBase struct {
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
 	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
+
+	// Listeners are event listener functions for processing events on this widget.
+	// type specific Listeners are added in OnInit when the widget is initialized.
+	Listeners events.Listeners
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
@@ -647,7 +662,7 @@ func (vv *ValueViewBase) IsInactive() bool {
 	return false
 }
 
-func (vv *ValueViewBase) HasAction() bool {
+func (vv *ValueViewBase) HasDialog() bool {
 	return false
 }
 
@@ -701,7 +716,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 								ov.SetMapIndex(nv, cv)              // set new key to current value
 								vv.Value = nv                       // update value to new key
 								vv.This().(ValueView).SaveTmp()
-								vv.ViewSig.Emit(vv.This(), 0, nil)
+								vv.SendChange()
 								if vp != nil {
 									vp.SetNeedsFullRender()
 								}
@@ -737,8 +752,53 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 		vv.This().(ValueView).SaveTmp()
 	}
 	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
-	vv.ViewSig.Emit(vv.This(), 0, nil)
+	vv.SendChange()
 	return rval
+}
+
+// OnChange registers given listener function for Change events on ValueView.
+// This is the primary notification event for all ValueView elements.
+func (vv *ValueViewBase) OnChange(fun func(e events.Event)) {
+	vv.On(events.Change, fun)
+}
+
+// On adds an event listener function for the given event type
+func (vv *ValueViewBase) On(etype events.Types, fun func(e events.Event)) {
+	vv.Listeners.Add(etype, fun)
+}
+
+// SendChange sends events.Change event to all listeners registered on this view.
+// This is the primary notification event for all ValueView elements.
+func (vv *ValueViewBase) SendChange() {
+	vv.Send(events.Event, nil)
+}
+
+// Send sends an NEW event of given type to this widget,
+// optionally starting from values in the given original event
+// (recommended to include where possible).
+// Do NOT send an existing event using this method if you
+// want the Handled state to persist throughout the call chain;
+// call HandleEvent directly for any existing events.
+func (vv *ValueViewBase) Send(typ events.Types, orig events.Event) {
+	var e events.Event
+	if orig != nil {
+		e = orig.Clone()
+		e.AsBase().Typ = typ
+	} else {
+		e = &events.Base{Typ: typ}
+	}
+	vv.HandleEvent(e)
+}
+
+// HandleEvent sends the given event to all Listeners for that event type.
+// It also checks if the State has changed and calls ApplyStyle if so.
+// If more significant Config level changes are needed due to an event,
+// the event handler must do this itself.
+func (vv *ValueViewBase) HandleEvent(ev events.Event) {
+	if gi.EventTrace {
+		fmt.Println("Event to ValueView:", vv.String(), ev.String())
+	}
+	vv.Listeners.Call(ev)
 }
 
 func (vv *ValueViewBase) SaveTmp() {
@@ -1126,11 +1186,11 @@ func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *VersCtrlValueView) HasAction() bool {
+func (vv *VersCtrlValueView) HasDialog() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
+func (vv *VersCtrlValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

@@ -249,50 +249,48 @@ func NewRenderWin(name, title string, opts *goosi.NewWindowOptions) *RenderWin {
 	return win
 }
 
-/*
-// RecycleMainRenderWin looks for existing window with same Data --
-// if found brings that to the front, returns true for bool.
-// else (and if data is nil) calls NewDialogWin, and returns false.
-func RecycleMainRenderWin(data any, name, title string, width, height int) (*RenderWin, bool) {
+// MainScene returns the current MainStage Scene
+func (w *RenderWin) MainScene() *Scene {
+	top := w.StageMgr.Top()
+	if top == nil {
+		return nil
+	}
+	return top.AsBase().Scene
+}
+
+// ActivateExistingMainWindow looks for existing window with given Data.
+// If found brings that to the front, returns true for bool, else false.
+func ActivateExistingMainWindow(data any) bool {
 	if data == nil {
-		return NewMainRenderWin(name, title, width, height), false
+		return false
 	}
 	ew, has := MainRenderWins.FindData(data)
-	if has {
-		if WinEventTrace {
-			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
-		}
-		ew.RenderWin.Raise()
-		return ew, true
+	if !has {
+		return false
 	}
-	nw := NewMainRenderWin(name, title, width, height)
-	nw.Data = data
-	return nw, false
+	if WinEventTrace {
+		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
+	}
+	ew.Raise()
+	return true
 }
-*/
 
-/*
-
-// RecycleDialogWin looks for existing window with same Data --
-// if found brings that to the front, returns true for bool.
-// else (and if data is nil) calls [NewDialogWin], and returns false.
-func RecycleDialogWin(data any, name, title string, width, height int, modal bool) (*RenderWin, bool) {
+// ActivateExistingDialogWindow looks for existing dialog window with given Data.
+// If found brings that to the front, returns true for bool, else false.
+func ActivateExistingDialogWindow(data any) bool {
 	if data == nil {
-		return NewDialogWin(name, title, width, height, modal), false
+		return false
 	}
 	ew, has := DialogRenderWins.FindData(data)
-	if has {
-		if WinEventTrace {
-			fmt.Printf("Win: %v getting recycled based on data match\n", ew.Nm)
-		}
-		ew.RenderWin.Raise()
-		return ew, true
+	if !has {
+		return false
 	}
-	nw := NewDialogWin(name, title, width, height, modal)
-	nw.Data = data
-	return nw, false
+	if WinEventTrace {
+		fmt.Printf("Win: %v getting recycled based on data match\n", ew.Name)
+	}
+	ew.Raise()
+	return true
 }
-*/
 
 /*
 // SetName sets name of this window and also the RenderWin, and applies any window

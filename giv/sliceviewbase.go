@@ -800,7 +800,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						addact.SetIcon(icons.Add)
 						addact.Tooltip = "insert a new element at this index"
 						addact.Data = i
-						addact.Style.Template = "giv.SliceViewBase.AddAction"
+						addact.Style.Template = "giv.SliceViewBase.AddButton"
 						addact.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 							act := send.(*gi.Button)
 							svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
@@ -845,7 +845,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 func (sv *SliceViewBase) SetChanged() {
 	sv.Changed = true
 	sv.ViewSig.Emit(sv.This(), 0, nil)
-	sv.ToolBar().UpdateActions() // nil safe
+	sv.ToolBar().UpdateButtons() // nil safe
 }
 
 // SliceNewAtRow inserts a new blank element at given display row
@@ -1029,14 +1029,14 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 				svv.This().(SliceViewer).UpdateSliceGrid()
 
 			})
 		if ndef > 1 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
+			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
 				sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 					svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 					svv.This().(SliceViewer).SliceNewAt(-1)
@@ -1079,7 +1079,7 @@ func (sv *SliceViewBase) Render(vp *gi.Scene) {
 	if !sv.This().(SliceViewer).IsConfiged() {
 		return
 	}
-	sv.ToolBar().UpdateActions()
+	sv.ToolBar().UpdateButtons()
 	if sv.PushBounds() {
 		sv.FrameStdRender() // this just renders widgets that have already been created
 		sv.RenderScrolls()
@@ -1763,19 +1763,19 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
 	if len(*m) > 0 {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	})
 }
 
@@ -1907,20 +1907,20 @@ func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods,
 		m.AddLabel("Move:")
 	}
 	if mod == events.DropCopy {
-		m.AddAction(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.DropAssign(data.(mimedata.Mimes), idx)
 		})
 	}
-	m.AddAction(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
 	})
-	m.AddAction(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 		svv.DropCancel()
 	})
@@ -2020,22 +2020,22 @@ func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
 	if sv.isArray {
 		return
 	}
-	m.AddAction(gi.ActOpts{Label: "Copy", Data: idx},
+	m.AddButton(gi.ActOpts{Label: "Copy", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.CopyIdxs(true)
 		})
-	m.AddAction(gi.ActOpts{Label: "Cut", Data: idx},
+	m.AddButton(gi.ActOpts{Label: "Cut", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.CutIdxs()
 		})
-	m.AddAction(gi.ActOpts{Label: "Paste", Data: idx},
+	m.AddButton(gi.ActOpts{Label: "Paste", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.PasteIdx(data.(int))
 		})
-	m.AddAction(gi.ActOpts{Label: "Duplicate", Data: idx},
+	m.AddButton(gi.ActOpts{Label: "Duplicate", Data: idx},
 		sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
 			svv.Duplicate()

@@ -28,7 +28,7 @@ type StructViewInline struct {
 	StructValView ValueView `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
 
 	// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
-	AddAction bool `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
+	AddButton bool `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
 
 	// ValueView representations of the fields
 	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
@@ -114,7 +114,7 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 		sv.FieldViews = append(sv.FieldViews, vv)
 		return true
 	})
-	if sv.AddAction {
+	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
 	mods, updt := parts.ConfigChildren(config)

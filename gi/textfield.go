@@ -330,7 +330,7 @@ func (tf *TextField) EditDone() {
 	if tf.Edited {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
-		tf.Send(events.Change, nil)
+		tf.SendChange()
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()

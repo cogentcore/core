@@ -513,7 +513,7 @@ func (cb *ComboBox) SelectItemAction(idx int) {
 		return
 	}
 	cb.SelectItem(idx)
-	cb.Send(events.Change, nil)
+	cb.SendChange()
 }
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
@@ -623,7 +623,7 @@ func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
 		for idx, item := range cb.Items {
 			if text == ToLabel(item) {
 				cb.SetCurIndex(idx)
-				cb.Send(events.Change, nil)
+				cb.SendChange()
 				return
 			}
 		}
@@ -634,7 +634,7 @@ func (cb *ComboBox) TextFieldHandlers(tf *TextField) {
 		}
 		cb.Items = append(cb.Items, text)
 		cb.SetCurIndex(len(cb.Items) - 1)
-		cb.Send(events.Change, nil)
+		cb.SendChange()
 	})
 }
 

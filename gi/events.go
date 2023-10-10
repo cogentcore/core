@@ -76,6 +76,12 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 	w.HandleEvent(e)
 }
 
+// SendChange sends the events.Change event, which is widely used to signal
+// updating for most widgets
+func (wb *WidgetBase) SendChange() {
+	wb.SendChange()
+}
+
 // HandleEvent sends the given event to all Listeners for that event type.
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,

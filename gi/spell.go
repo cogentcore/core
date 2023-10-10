@@ -179,7 +179,7 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 	var text string
 	if sp.IsLastLearned(word) {
 		text = "unlearn"
-		m.AddAction(ActOpts{Label: text, Data: text},
+		m.AddButton(ActOpts{Label: text, Data: text},
 			sp, func(recv, send ki.Ki, sig int64, data any) {
 				sp.UnLearnLast()
 			})
@@ -190,13 +190,13 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 		}
 		if count == 0 {
 			text = "no suggestion"
-			m.AddAction(ActOpts{Label: text, Data: text},
+			m.AddButton(ActOpts{Label: text, Data: text},
 				sp, func(recv, send ki.Ki, sig int64, data any) {
 				})
 		} else {
 			for i := 0; i < count; i++ {
 				text = sp.Suggest[i]
-				m.AddAction(ActOpts{Label: text, Data: text},
+				m.AddButton(ActOpts{Label: text, Data: text},
 					sp, func(recv, send ki.Ki, sig int64, data any) {
 						sp.Spell(data.(string))
 					})
@@ -204,12 +204,12 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 		}
 		m.AddSeparator("")
 		text = "learn"
-		m.AddAction(ActOpts{Label: text, Data: text},
+		m.AddButton(ActOpts{Label: text, Data: text},
 			sp, func(recv, send ki.Ki, sig int64, data any) {
 				sp.LearnWord()
 			})
 		text = "ignore"
-		m.AddAction(ActOpts{Label: text, Data: text},
+		m.AddButton(ActOpts{Label: text, Data: text},
 			sp, func(recv, send ki.Ki, sig int64, data any) {
 				sp.IgnoreWord()
 			})

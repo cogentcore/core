@@ -10,6 +10,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -90,27 +92,8 @@ func (mv *MapView) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.Config()
+	mv.Config(mv.Sc)
 }
-
-// MapViewSignals are signals that mapview can send, mostly for editing
-// mode.  Selection events are sent on WidgetSig WidgetSelected signals in
-// both modes.
-type MapViewSignals int
-
-const (
-	// MapViewDoubleClicked emitted during inactive mode when item
-	// double-clicked -- can be used for accepting dialog.
-	MapViewDoubleClicked MapViewSignals = iota
-
-	// MapViewAdded emitted when a new blank item is added -- no data is sent.
-	MapViewAdded
-
-	// MapViewDeleted emitted when an item is deleted -- data is key of item deleted
-	MapViewDeleted
-
-	MapViewSignalsN
-)
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {
@@ -119,7 +102,8 @@ func (mv *MapView) UpdateValues() {
 }
 
 // Config configures the view
-func (mv *MapView) ConfigWidget(vp *gi.Scene) {
+func (mv *MapView) ConfigWidget(sc *gi.Scene) {
+	mv.Sc = sc
 	config := ki.Config{}
 	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
@@ -168,6 +152,7 @@ func (mv *MapView) ConfigMapGrid() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
+	sc := mv.Sc
 	sg := mv.MapGrid()
 	config := ki.Config{}
 	// always start fresh!
@@ -197,6 +182,7 @@ func (mv *MapView) ConfigMapGrid() {
 	// valtypes := append(kit.Types.AllTagged(typeTag), kit.Enums.AllTagged(typeTag)...)
 	// valtypes = append(valtypes, kit.Types.AllTagged("basic-type")...)
 	// valtypes = append(valtypes, kit.TypeFor[reflect.Type]())
+	valtypes := gti.AllEmbeddersOf(ki.NodeType) // todo: this is not right
 
 	mv.NCols = ncol
 
@@ -224,7 +210,7 @@ func (mv *MapView) ConfigMapGrid() {
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
 			typnm := "type-" + keytxt
-			config.Add(gi.TypeComboBox, typnm)
+			config.Add(gi.ComboBoxType, typnm)
 		}
 		config.Add(gi.ButtonType, delnm)
 		mv.Keys = append(mv.Keys, kv)
@@ -232,34 +218,20 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config)
 	if mods {
-		sg.SetFullReRender()
+		sg.SetNeedsLayout(sc, updt)
 	} else {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(TypeMapView).(*MapView)
-			mvv.SetChanged()
-		})
+		vvb.OnChange(func(e events.Event) { mv.SendChange() })
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		widg := sg.Child(i*ncol + 1).(gi.Widget)
 		kv := mv.Keys[i]
 		kvb := kv.AsValueViewBase()
-		kvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(TypeMapView).(*MapView)
-			mvv.SetChanged()
-		})
+		kvb.OnChange(func(e events.Event) { mv.SendChange() })
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
-		wb := widg.AsWidget()
-		if wb != nil {
-			wb.Style.Template = "giv.MapView.ItemWidget." + vv.WidgetType().Name()
-		}
-		wb = keyw.AsWidget()
-		if wb != nil {
-			wb.Style.Template = "giv.MapView.KeyWidget." + kv.WidgetType().Name()
-		}
 		if ifaceType {
 			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
@@ -268,24 +240,19 @@ func (mv *MapView) ConfigMapGrid() {
 				vtyp = strtyp // default to string
 			}
 			typw.SetCurVal(vtyp)
-			typw.SetProp("mapview-index", i)
-			typw.ComboSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				cb := send.(*gi.ComboBox)
-				typ := cb.CurVal.(reflect.Type)
-				idx := cb.Prop("mapview-index").(int)
-				mvv := recv.Embed(TypeMapView).(*MapView)
-				mvv.MapChangeValueType(idx, typ)
-			})
+			// typw.SetProp("mapview-index", i)
+			// typw.OnChange(func(e events.Event) {
+			// 	typ := typw.CurVal.(reflect.Type)
+			// 	idx := typw.Prop("mapview-index").(int) // todo: does anything?
+			// 	mv.SendChange()
+			// })
 		}
 		delact := sg.Child(i*ncol + ncol - 1).(*gi.Button)
 		delact.SetIcon(icons.Delete)
 		delact.Tooltip = "delete item"
 		delact.Data = kv
-		delact.Style.Template = "giv.MapView.DelAction"
-		delact.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			act := send.(*gi.Button)
-			mvv := recv.Embed(TypeMapView).(*MapView)
-			mvv.MapDelete(act.Data.(ValueView).Val())
+		delact.OnClick(func(e events.Event) {
+			mv.MapDelete(kv.Val())
 		})
 	}
 	sg.UpdateEnd(updt)
@@ -293,12 +260,11 @@ func (mv *MapView) ConfigMapGrid() {
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
 // MapView, indicating that some kind of edit / change has taken place to
-// the table data.  It isn't really practical to record all the different
-// types of changes, so this is just generic.
+// the table data.
 func (mv *MapView) SetChanged() {
 	mv.Changed = true
-	mv.ViewSig.Emit(mv.This(), 0, nil)
-	mv.ToolBar().UpdateActions() // nil safe
+	mv.SendChange()
+	mv.ToolBar().UpdateButtons() // nil safe
 }
 
 // MapChangeValueType changes the type of the value for given map element at
@@ -308,7 +274,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 		return
 	}
 	updt := mv.UpdateStart()
-	defer mv.UpdateEnd(updt)
+	defer mv.UpdateEndRender(updt)
 
 	keyv := mv.Keys[idx]
 	ck := laser.NonPtrValue(keyv.Val()) // current key value
@@ -343,9 +309,6 @@ func (mv *MapView) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
-	defer mv.UpdateEnd(updt)
-
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
@@ -353,7 +316,6 @@ func (mv *MapView) MapAdd() {
 	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
-	mv.MapViewSig.Emit(mv.This(), int64(MapViewAdded), nil)
 }
 
 // MapDelete deletes a key-value from the map
@@ -364,8 +326,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	updt := mv.UpdateStart()
 	defer mv.UpdateEnd(updt)
 
-	kvi := laser.NonPtrValue(key).Interface()
-
+	// kvi := laser.NonPtrValue(key).Interface()
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
@@ -373,7 +334,6 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.ConfigMapGrid()
 	mv.SetChanged()
-	mv.MapViewSig.Emit(mv.This(), int64(MapViewDeleted), kvi)
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -395,22 +355,16 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"},
-			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				mvv := recv.Embed(TypeMapView).(*MapView)
-				mvv.UpdateValues()
-			})
-		tb.AddAction(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"},
-			mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				mvv := recv.Embed(TypeMapView).(*MapView)
-				mvv.ToggleSort()
-			})
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"}, func(act *gi.Button) {
+			mv.UpdateValues()
+		})
+		tb.AddButton(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"}, func(act *gi.Button) {
+			mv.ToggleSort()
+		})
 		if ndef > 2 {
-			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"},
-				mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					mvv := recv.Embed(TypeMapView).(*MapView)
-					mvv.MapAdd()
-				})
+			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"}, func(act *gi.Button) {
+				mv.MapAdd()
+			})
 		}
 	}
 	sz := len(*tb.Children())
@@ -420,28 +374,19 @@ func (mv *MapView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(mv.Map) {
-		ToolBarView(mv.Map, mv.Scene, tb)
-		tb.SetFullReRender()
+		ToolBarView(mv.Map, mv.Sc, tb)
 	}
 	mv.ToolbarMap = mv.Map
 }
 
-func (mv *MapView) ApplyStyle(sc *gi.Scene) {
-	mvp := mv.Sc
-	if mvp != nil && mvp.IsDoingFullRender() {
-		mv.Config()
-	}
-	mv.Frame.ApplyStyle(sc)
-}
-
-func (mv *MapView) Render(vp *gi.Scene) {
+func (mv *MapView) Render(sc *gi.Scene) {
 	if mv.IsConfiged() {
-		mv.ToolBar().UpdateActions() // nil safe..
+		mv.ToolBar().UpdateButtons() // nil safe..
 	}
-	if win := mv.ParentRenderWin(); win != nil {
-		if !win.Is(WinResizing) {
-			win.MainMenuUpdateActives()
-		}
-	}
-	mv.Frame.Render()
+	// if win := mv.ParentRenderWin(); win != nil {
+	// 	if !win.Is(WinResizing) {
+	// 		win.MainMenuUpdateActives()
+	// 	}
+	// }
+	mv.Frame.Render(sc)
 }

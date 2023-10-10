@@ -218,7 +218,7 @@ func (sv *StructView) ConfigToolbar() {
 	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
 			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 				svv := recv.Embed(TypeStructView).(*StructView)
 				svv.UpdateFields()
@@ -367,7 +367,7 @@ func (sv *StructView) ConfigStructGrid() {
 				}
 				tb := svv.ToolBar()
 				if tb != nil {
-					tb.UpdateActions()
+					tb.UpdateButtons()
 				}
 				svv.ViewSig.Emit(svv.This(), 0, nil)
 				// vvv, _ := send.Embed(TypeValueViewBase).(*ValueViewBase)
@@ -405,7 +405,7 @@ func (sv *StructView) UpdateFieldAction() {
 
 func (sv *StructView) Render(vp *gi.Scene) {
 	if sv.IsConfiged() {
-		sv.ToolBar().UpdateActions()
+		sv.ToolBar().UpdateButtons()
 	}
 	if win := sv.ParentRenderWin(); win != nil {
 		if !win.Is(WinResizing) {

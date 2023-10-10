@@ -360,7 +360,7 @@ func (sr *Slider) SetValueAction(val float32) {
 		return
 	}
 	sr.SetValue(val)
-	sr.Send(events.Change, nil)
+	sr.SendChange()
 }
 
 // SetThumbValue sets the thumb value to given value and updates the thumb size.

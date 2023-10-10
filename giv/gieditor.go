@@ -8,9 +8,11 @@ import (
 	"fmt"
 
 	"goki.dev/colors"
+	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -100,67 +102,51 @@ func (ge *GiEditor) Open(filename gi.FileName) {
 
 // EditColorScheme pulls up a window to edit the current color scheme
 func (ge *GiEditor) EditColorScheme() {
-	/*
-		winm := "gogi-color-scheme"
-		width := 800
-		height := 800
-		win, recyc := gi.RecycleMainRenderWin(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
-		if recyc {
-			return
-		}
+	if gi.ActivateExistingMainWindow(&colors.Schemes) {
+		return
+	}
 
-		vp := win.WinScene()
-		updt := vp.UpdateStart()
+	sc := gi.StageScene("gogi-color-scheme")
+	sc.Title = "GoGi Color Scheme"
+	sc.Lay = gi.LayoutVert
+	sc.Data = &colors.Schemes
 
-		mfr := win.SetMainFrame()
-		mfr.Lay = gi.LayoutVert
+	key := &matcolor.Key{
+		Primary:        colors.FromRGB(123, 135, 122),
+		Secondary:      colors.FromRGB(106, 196, 178),
+		Tertiary:       colors.FromRGB(106, 196, 178),
+		Error:          colors.FromRGB(219, 46, 37),
+		Neutral:        colors.FromRGB(133, 131, 121),
+		NeutralVariant: colors.FromRGB(107, 106, 101),
+	}
+	p := matcolor.NewPalette(key)
+	schemes := matcolor.NewSchemes(p)
 
-		key := matcolor.Key{
-			Primary:        colors.FromRGB(123, 135, 122),
-			Secondary:      colors.FromRGB(106, 196, 178),
-			Tertiary:       colors.FromRGB(106, 196, 178),
-			Error:          colors.FromRGB(219, 46, 37),
-			Neutral:        colors.FromRGB(133, 131, 121),
-			NeutralVariant: colors.FromRGB(107, 106, 101),
-		}
-		p := matcolor.NewPalette(key)
-		schemes := matcolor.NewSchemes(p)
+	kv := NewStructView(sc, "kv")
+	kv.SetStruct(key)
+	kv.SetStretchMax()
 
-		kv := NewStructView(mfr, "kv")
-		kv.Scene = vp
-		kv.SetStruct(&key)
-		kv.SetStretchMax()
+	split := gi.NewSplitView(sc, "split")
+	split.Dim = mat32.X
 
-		split := gi.NewSplitView(mfr, "split")
-		split.Dim = mat32.X
+	svl := NewStructView(split, "svl")
+	svl.SetStruct(&schemes.Light)
+	svl.SetStretchMax()
 
-		svl := NewStructView(split, "svl")
-		svl.Scene = vp
-		svl.SetStruct(&schemes.Light)
-		svl.SetStretchMax()
+	svd := NewStructView(split, "svd")
+	svd.SetStruct(&schemes.Dark)
+	svd.SetStretchMax()
 
-		svd := NewStructView(split, "svd")
-		svd.Scene = vp
-		svd.SetStruct(&schemes.Dark)
-		svd.SetStretchMax()
+	kv.OnChange(func(e events.Event) {
+		p = matcolor.NewPalette(key)
+		schemes = matcolor.NewSchemes(p)
+		colors.Schemes = schemes
+		gi.Prefs.UpdateAll()
+		svl.UpdateFields()
+		svd.UpdateFields()
+	})
 
-		kv.ViewSig.Connect(kv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			p = matcolor.NewPalette(key)
-			schemes = matcolor.NewSchemes(p)
-			gi.ColorSchemes = *schemes
-			gi.Prefs.UpdateAll()
-			svl.UpdateFields()
-			svd.UpdateFields()
-		})
-
-		if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
-			vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
-			win.SetSize(vpsz)
-		}
-
-		vp.UpdateEndNoSig(updt)
-		win.GoStartEventLoop()
-	*/
+	gi.NewWindow(sc).Run()
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not
@@ -444,7 +430,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 		wti += ": " + obj.Name()
 	}
 
-	win, recyc := gi.RecycleMainRenderWin(obj, wnm, wti, width, height)
+	win, recyc := gi.ActivateExistingMainWindow(obj, wnm, wti, width, height)
 	if recyc {
 		mfr, err := win.MainFrame()
 		if err == nil {

@@ -11,12 +11,10 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/gti"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
@@ -46,18 +44,16 @@ func (vv *KeyChordValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)
-	kc.KeyChordSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeKeyChordValueView).(*KeyChordValueView)
-		kcc := vvv.Widget.(*KeyChordEdit)
-		if vvv.SetValue(key.Chord(kcc.Text)) {
-			vvv.UpdateWidget()
+	kc.OnChange(func(e events.Event) {
+		if vv.SetValue(key.Chord(kc.Text)) {
+			vv.UpdateWidget()
 		}
-		vvv.ViewSig.Emit(vvv.This(), 0, nil)
+		vv.SendChange()
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *KeyChordValueView) HasAction() bool {
+func (vv *KeyChordValueView) HasDialog() bool {
 	return false
 }
 
@@ -72,12 +68,14 @@ type KeyChordEdit struct {
 
 	// true if the keyboard focus is active or not -- when we lose active focus we apply changes
 	FocusActive bool `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
-
-	// [view: -] signal -- only one event, when chord is updated from key input
-	// KeyChordSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal -- only one event, when chord is updated from key input"`
 }
 
 func (kc *KeyChordEdit) OnInit() {
+	kc.KeyChordHandlers()
+	kc.KeyChordStyles()
+}
+
+func (kc *KeyChordEdit) KeyChordStyles() {
 	kc.AddStyles(func(s *styles.Style) {
 		s.Cursor = cursors.Pointer
 		s.AlignV = styles.AlignTop
@@ -86,33 +84,27 @@ func (kc *KeyChordEdit) OnInit() {
 		s.Width.SetCh(20)
 		s.Padding.Set(units.Dp(8 * gi.Prefs.DensityMul()))
 		s.SetStretchMaxWidth()
-		if w.StateIs(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.TertiaryContainer)
-			s.Color = colors.Scheme.OnTertiaryContainer
+		if s.State.Is(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.Color = colors.Scheme.Tertiary.OnContainer
 		} else {
 			// STYTODO: get state styles working
-			s.BackgroundColor.SetSolid(colors.Scheme.SecondaryContainer)
-			s.Color = colors.Scheme.OnSecondaryContainer
+			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Color = colors.Scheme.Secondary.OnContainer
 		}
 	})
 }
 
-// ChordUpdated emits KeyChordSig when a new chord has been entered
-func (kc *KeyChordEdit) ChordUpdated() {
-	kc.KeyChordSig.Emit(kc.This(), 0, kc.Text)
-}
-
 func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
-	m.AddAction(gi.ActOpts{Label: "Clear"},
-		kc, func(recv, send ki.Ki, sig int64, data any) {
-			kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
-			kcc.SetText("")
-			kcc.ChordUpdated()
-		})
+	m.AddButton(gi.ActOpts{Label: "Clear"}, func(act *gi.Button) {
+		kc.SetText("")
+		kc.SendChange()
+	})
 }
 
-func (kc *KeyChordEdit) MouseEvent() {
-	kcwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+/* todo: these should all be in WidgetBase now
+func (kc *KeyChordEdit) HandleMouseEvent() {
+	kc.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
 		if me.Action == events.Press && me.Button == events.Left {
@@ -133,32 +125,33 @@ func (kc *KeyChordEdit) MouseEvent() {
 		}
 	})
 }
+*/
 
-func (kc *KeyChordEdit) KeyChordEvent() {
-	kcwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
-		if kcc.StateIs(states.Focused) && kcc.FocusActive {
-			kt := d.(*events.Key)
-			kt.SetHandled()
-			kcc.SetText(string(kt.KeyChord())) // that's easy!
-			goosi.TheApp.ClipBoard(kc.ParentRenderWin().RenderWin).Write(mimedata.NewText(string(kt.KeyChord())))
-			kcc.ChordUpdated()
+func (kc *KeyChordEdit) HandleKeyChord() {
+	kc.On(events.KeyChord, func(e events.Event) {
+		if kc.StateIs(states.Focused) {
+			e.SetHandled()
+			kc.SetText(string(e.KeyChord())) // that's easy!
+			kc.EventMgr().ClipBoard().Write(mimedata.NewText(string(e.KeyChord())))
+			kc.SendChange()
 		}
 	})
 }
 
-func (kc *KeyChordEdit) ApplyStyle(sc *gi.Scene) {
-	kc.SetCanFocusIfActive()
-	kc.Selectable = true
-	kc.Redrawable = true
-	kc.StyleLabel()
-	kc.LayoutLabel()
-}
+// func (kc *KeyChordEdit) ApplyStyle(sc *gi.Scene) {
+// todo: are these still relevant?
+// 	kc.SetCanFocusIfActive()
+// 	kc.Selectable = true
+// 	kc.Redrawable = true
+// 	kc.StyleLabel()
+// 	kc.LayoutLabel()
+// }
 
-func (kc *KeyChordEdit) SetTypeHandlers() {
-	kc.HoverEvent()
-	kc.MouseEvent()
-	kc.KeyChordEvent()
+func (kc *KeyChordEdit) KeyChordHandlers() {
+	// kc.HoverEvent()
+	// kc.MouseEvent()
+	kc.WidgetHandlers()
+	kc.HandleKeyChord()
 }
 
 // func (kc *KeyChordEdit) FocusChanged(change gi.FocusChanges) {
@@ -166,7 +159,7 @@ func (kc *KeyChordEdit) SetTypeHandlers() {
 // 	case gi.FocusLost:
 // 		kc.FocusActive = false
 // 		kc.ClearSelected()
-// 		kc.ChordUpdated()
+//		   kc.SendChange()
 // 		kc.UpdateSig()
 // 	case gi.FocusGot:
 // 		kc.FocusActive = true
