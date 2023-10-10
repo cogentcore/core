@@ -9,6 +9,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -136,22 +137,62 @@ func (tv *TabView) CurTab() (Widget, int, bool) {
 	return widg, fr.StackTop, true
 }
 
-// AddTab adds a widget as a new tab, with given tab label, and returns the
-// index of that tab
-func (tv *TabView) AddTab(widg Widget, label string) int {
+// TODO(kai): once subscenes are working, we should make tabs be subscenes
+
+// NewTab adds a new tab with the given label and returns the resulting tab frame.
+// It is the main end-user API for creating new tabs. If a name is also passed,
+// the internal name (ID) of the tab will be set to that; otherwise, it will default
+// to the kebab-case version of the label.
+func (tv *TabView) NewTab(label string, name ...string) *Frame {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
-	tv.InsertTab(widg, label, idx)
+	frame := tv.InsertNewTab(label, idx, name...)
+	return frame
+}
+
+// InsertNewTab inserts a new tab with the given label at the given index position
+// within the list of tabs and returns the resulting tab frame. If a name is also
+// passed, the internal name (ID) of the tab will be set to that; otherwise, it will default
+// to the kebab-case version of the label.
+func (tv *TabView) InsertNewTab(label string, idx int, name ...string) *Frame {
+	updt := tv.UpdateStart()
+	fr := tv.Frame()
+	fr.SetChildAdded()
+	nm := ""
+	if len(name) > 0 {
+		nm = name[0]
+	} else {
+		nm = strcase.ToKebab(label)
+	}
+	frame := fr.InsertNewChild(FrameType, idx, nm).(*Frame)
+	tv.InsertTabOnlyAt(frame, label, idx, nm)
+	tv.UpdateEndLayout(updt)
+	return frame
+}
+
+// AddTab adds an already existing frame as a new tab with the given tab label
+// and returns the index of that tab.
+func (tv *TabView) AddTab(frame *Frame, label string) int {
+	fr := tv.Frame()
+	idx := len(*fr.Children())
+	tv.InsertTab(frame, label, idx)
 	return idx
 }
 
-// InsertTabOnlyAt inserts just the tab at given index -- after panel has
-// already been added to frame -- assumed to be wrapped in update.  Generally
-// for internal use.
-func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
+// InsertTabOnlyAt inserts just the tab at given index, after the panel has
+// already been added to the frame; assumed to be wrapped in update. Generally
+// for internal use only. If a name is also passed, the internal name (ID) of the tab
+// will be set to that; otherwise, it will default to the kebab-case version of the label.
+func (tv *TabView) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...string) {
 	tb := tv.Tabs()
 	tb.SetChildAdded()
-	tab := tb.InsertNewChild(TabButtonType, idx, label).(*TabButton)
+	nm := ""
+	if len(name) > 0 {
+		nm = name[0]
+	} else {
+		nm = strcase.ToKebab(label)
+	}
+	tab := tb.InsertNewChild(TabButtonType, idx, nm).(*TabButton)
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
@@ -164,79 +205,22 @@ func (tv *TabView) InsertTabOnlyAt(widg Widget, label string, idx int) {
 		fr.StackTop = 0
 		tab.SetSelected(true)
 	} else {
-		widg.SetFlag(true, Invisible) // new tab is invisible until selected
+		frame.SetFlag(true, Invisible) // new tab is invisible until selected
 	}
 }
 
-// InsertTab inserts a widget into given index position within list of tabs
-func (tv *TabView) InsertTab(widg Widget, label string, idx int) {
+// InsertTab inserts a frame into given index position within list of tabs.
+// If a name is also passed, the internal name (ID) of the tab will be set
+// to that; otherwise, it will default to the kebab-case version of the label.
+func (tv *TabView) InsertTab(frame *Frame, label string, idx int, name ...string) {
 	tv.Mu.Lock()
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
 	fr.SetChildAdded()
-	fr.InsertChild(widg, idx)
-	tv.InsertTabOnlyAt(widg, label, idx)
+	fr.InsertChild(frame, idx)
+	tv.InsertTabOnlyAt(frame, label, idx, name...)
 	tv.Mu.Unlock()
 	tv.UpdateEndLayout(updt)
-}
-
-// NewTab adds a new widget as a new tab of given widget type, with given
-// tab label, and returns the new widget
-func (tv *TabView) NewTab(typ *gti.Type, label string) Widget {
-	fr := tv.Frame()
-	idx := len(*fr.Children())
-	widg := tv.InsertNewTab(typ, label, idx)
-	return widg
-}
-
-// NewTabLayout adds a new widget as a new tab of given widget type,
-// with given tab label, and returns the new widget.
-// A Layout is added first and the widget is added to that layout.
-// The Layout has "-lay" suffix added to name.
-func (tv *TabView) NewTabLayout(typ *gti.Type, label string) (Widget, *Layout) {
-	ly := tv.NewTab(LayoutType, label).(*Layout)
-	ly.SetName(label + "-lay")
-	widg := ly.NewChild(typ, label).(Widget)
-	return widg, ly
-}
-
-// todo: this should be: NewTabScene -- add a new scene -- should be the default
-
-// NewTabFrame adds a new widget as a new tab of given widget type,
-// with given tab label, and returns the new widget.
-// A Frame is added first and the widget is added to that Frame.
-// The Frame has "-frame" suffix added to name.
-func (tv *TabView) NewTabFrame(typ *gti.Type, label string) (Widget, *Frame) {
-	fr := tv.NewTab(FrameType, label).(*Frame)
-	fr.SetName(label + "-frame")
-	widg := fr.NewChild(typ, label).(Widget)
-	return widg, fr
-}
-
-// NewTabAction adds a new widget as a new tab of given widget type, with given
-// tab label, and returns the new widget -- emits TabAdded signal
-func (tv *TabView) NewTabAction(typ *gti.Type, label string) Widget {
-	updt := tv.UpdateStart()
-	widg := tv.NewTab(typ, label)
-	fr := tv.Frame()
-	idx := len(*fr.Children()) - 1
-	_ = idx
-	// todo: needed?
-	// tv.TabViewSig.Emit(tv.This(), int64(TabAdded), idx)
-	tv.UpdateEndLayout(updt)
-	return widg
-}
-
-// InsertNewTab inserts a new widget of given type into given index position
-// within list of tabs, and returns that new widget
-func (tv *TabView) InsertNewTab(typ *gti.Type, label string, idx int) Widget {
-	updt := tv.UpdateStart()
-	fr := tv.Frame()
-	fr.SetChildAdded()
-	widg := fr.InsertNewChild(typ, idx, label).(Widget)
-	tv.InsertTabOnlyAt(widg, label, idx)
-	tv.UpdateEndLayout(updt)
-	return widg
 }
 
 // TabAtIndex returns content widget and tab button at given index, false if
@@ -358,21 +342,21 @@ func (tv *TabView) SelectTabByNameTry(label string) (Widget, error) {
 }
 
 // RecycleTab returns a tab with given name, first by looking for an existing one,
-// and if not found, making a new one with widget of given type.
-// If sel, then select it.  returns widget for tab.
-func (tv *TabView) RecycleTab(label string, typ *gti.Type, sel bool) Widget {
-	widg, err := tv.TabByNameTry(label)
+// and if not found, making a new one. If sel, then select it. It returns the
+// frame for the tab.
+func (tv *TabView) RecycleTab(label string, sel bool) *Frame {
+	frame, err := tv.TabByNameTry(label)
 	if err == nil {
 		if sel {
 			tv.SelectTabByName(label)
 		}
-		return widg
+		return frame
 	}
-	widg = tv.NewTab(typ, label)
+	frame = tv.NewTab(typ, label)
 	if sel {
 		tv.SelectTabByName(label)
 	}
-	return widg
+	return frame
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
