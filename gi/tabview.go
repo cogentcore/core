@@ -21,16 +21,16 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// TabView switches among child widgets via tabs.  The selected widget gets
+// Tabs switches among child widgets via tabs.  The selected widget gets
 // the full allocated space avail after the tabs are accounted for.  The
-// TabView is just a Vertical layout that manages two child widgets: a
+// Tabs is just a Vertical layout that manages two child widgets: a
 // HorizFlow Layout for the tabs (which can flow across multiple rows as
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
 //
 //goki:embedder
-type TabView struct {
+type Tabs struct {
 	Layout
 
 	// maximum number of characters to include in tab label -- elides labels that are longer than that
@@ -49,23 +49,23 @@ type TabView struct {
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
 
-func (tv *TabView) CopyFieldsFrom(frm any) {
-	fr := frm.(*TabView)
+func (tv *Tabs) CopyFieldsFrom(frm any) {
+	fr := frm.(*Tabs)
 	tv.Layout.CopyFieldsFrom(&fr.Layout)
 	tv.MaxChars = fr.MaxChars
 	tv.NewTabButton = fr.NewTabButton
 }
 
-func (tv *TabView) OnInit() {
+func (tv *Tabs) OnInit() {
 	tv.TabViewHandlers()
 	tv.TabViewStyles()
 }
 
-func (tv *TabView) TabViewHandlers() {
+func (tv *Tabs) TabViewHandlers() {
 	tv.LayoutHandlers()
 }
 
-func (tv *TabView) TabViewStyles() {
+func (tv *Tabs) TabViewStyles() {
 	tv.AddStyles(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -79,7 +79,7 @@ func (tv *TabView) TabViewStyles() {
 	})
 }
 
-func (tv *TabView) OnChildAdded(child ki.Ki) {
+func (tv *Tabs) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "tabs":
@@ -109,7 +109,7 @@ func (tv *TabView) OnChildAdded(child ki.Ki) {
 }
 
 // NTabs returns number of tabs
-func (tv *TabView) NTabs() int {
+func (tv *Tabs) NTabs() int {
 	fr := tv.Frame()
 	if fr == nil {
 		return 0
@@ -118,7 +118,7 @@ func (tv *TabView) NTabs() int {
 }
 
 // CurTab returns currently-selected tab, and its index -- returns false none
-func (tv *TabView) CurTab() (Widget, int, bool) {
+func (tv *Tabs) CurTab() (Widget, int, bool) {
 	if tv.NTabs() == 0 {
 		return nil, -1, false
 	}
@@ -138,7 +138,7 @@ func (tv *TabView) CurTab() (Widget, int, bool) {
 // It is the main end-user API for creating new tabs. If a name is also passed,
 // the internal name (ID) of the tab will be set to that; otherwise, it will default
 // to the kebab-case version of the label.
-func (tv *TabView) NewTab(label string, name ...string) *Frame {
+func (tv *Tabs) NewTab(label string, name ...string) *Frame {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	frame := tv.InsertNewTab(label, idx, name...)
@@ -149,7 +149,7 @@ func (tv *TabView) NewTab(label string, name ...string) *Frame {
 // within the list of tabs and returns the resulting tab frame. If a name is also
 // passed, the internal name (ID) of the tab will be set to that; otherwise, it will default
 // to the kebab-case version of the label.
-func (tv *TabView) InsertNewTab(label string, idx int, name ...string) *Frame {
+func (tv *Tabs) InsertNewTab(label string, idx int, name ...string) *Frame {
 	updt := tv.UpdateStart()
 	fr := tv.Frame()
 	fr.SetChildAdded()
@@ -167,7 +167,7 @@ func (tv *TabView) InsertNewTab(label string, idx int, name ...string) *Frame {
 
 // AddTab adds an already existing frame as a new tab with the given tab label
 // and returns the index of that tab.
-func (tv *TabView) AddTab(frame *Frame, label string) int {
+func (tv *Tabs) AddTab(frame *Frame, label string) int {
 	fr := tv.Frame()
 	idx := len(*fr.Children())
 	tv.InsertTab(frame, label, idx)
@@ -178,7 +178,7 @@ func (tv *TabView) AddTab(frame *Frame, label string) int {
 // already been added to the frame; assumed to be wrapped in update. Generally
 // for internal use only. If a name is also passed, the internal name (ID) of the tab
 // will be set to that; otherwise, it will default to the kebab-case version of the label.
-func (tv *TabView) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...string) {
+func (tv *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...string) {
 	tb := tv.Tabs()
 	tb.SetChildAdded()
 	nm := ""
@@ -207,7 +207,7 @@ func (tv *TabView) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...
 // InsertTab inserts a frame into given index position within list of tabs.
 // If a name is also passed, the internal name (ID) of the tab will be set
 // to that; otherwise, it will default to the kebab-case version of the label.
-func (tv *TabView) InsertTab(frame *Frame, label string, idx int, name ...string) {
+func (tv *Tabs) InsertTab(frame *Frame, label string, idx int, name ...string) {
 	tv.Mu.Lock()
 	fr := tv.Frame()
 	updt := tv.UpdateStart()
@@ -220,7 +220,7 @@ func (tv *TabView) InsertTab(frame *Frame, label string, idx int, name ...string
 
 // TabAtIndex returns content frame and tab button at given index, false if
 // index out of range (emits log message)
-func (tv *TabView) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
+func (tv *Tabs) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -238,7 +238,7 @@ func (tv *TabView) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
 
 // SelectTabIndex selects tab at given index, returning it -- returns false if
 // index is invalid
-func (tv *TabView) SelectTabIndex(idx int) (*Frame, bool) {
+func (tv *Tabs) SelectTabIndex(idx int) (*Frame, bool) {
 	frame, tab, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, false
@@ -258,13 +258,13 @@ func (tv *TabView) SelectTabIndex(idx int) (*Frame, bool) {
 }
 
 // TabByName returns tab with given name (nil if not found -- see TabByNameTry)
-func (tv *TabView) TabByName(label string) *Frame {
+func (tv *Tabs) TabByName(label string) *Frame {
 	t, _ := tv.TabByNameTry(label)
 	return t
 }
 
 // TabByNameTry returns tab with given name, and an error if not found.
-func (tv *TabView) TabByNameTry(label string) (*Frame, error) {
+func (tv *Tabs) TabByNameTry(label string) (*Frame, error) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -279,7 +279,7 @@ func (tv *TabView) TabByNameTry(label string) (*Frame, error) {
 }
 
 // TabIndexByName returns tab index for given tab name, and an error if not found.
-func (tv *TabView) TabIndexByName(label string) (int, error) {
+func (tv *Tabs) TabIndexByName(label string) (int, error) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -292,7 +292,7 @@ func (tv *TabView) TabIndexByName(label string) (int, error) {
 }
 
 // TabName returns tab name at given index
-func (tv *TabView) TabName(idx int) string {
+func (tv *Tabs) TabName(idx int) string {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -305,7 +305,7 @@ func (tv *TabView) TabName(idx int) string {
 }
 
 // SelectTabByName selects tab by name, returning it.
-func (tv *TabView) SelectTabByName(label string) *Frame {
+func (tv *Tabs) SelectTabByName(label string) *Frame {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
@@ -316,7 +316,7 @@ func (tv *TabView) SelectTabByName(label string) *Frame {
 }
 
 // SelectTabByNameTry selects tab by name, returning it.  Returns error if not found.
-func (tv *TabView) SelectTabByNameTry(label string) (*Frame, error) {
+func (tv *Tabs) SelectTabByNameTry(label string) (*Frame, error) {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
@@ -330,7 +330,7 @@ func (tv *TabView) SelectTabByNameTry(label string) (*Frame, error) {
 // and if not found, making a new one. If sel, then select it. It returns the
 // frame for the tab. If a name is also passed, the internal name (ID) of any new tab
 // will be set to that; otherwise, it will default to the kebab-case version of the label.
-func (tv *TabView) RecycleTab(label string, sel bool, name ...string) *Frame {
+func (tv *Tabs) RecycleTab(label string, sel bool, name ...string) *Frame {
 	frame, err := tv.TabByNameTry(label)
 	if err == nil {
 		if sel {
@@ -347,7 +347,7 @@ func (tv *TabView) RecycleTab(label string, sel bool, name ...string) *Frame {
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
 // tab contents -- returns frame if destroy == false, tab name, and bool success
-func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
+func (tv *Tabs) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
 	frame, _, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, "", false
@@ -383,7 +383,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) 
 }
 
 // ConfigNewTabButton configures the new tab + button at end of list of tabs
-func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
+func (tv *Tabs) ConfigNewTabButton(sc *Scene) bool {
 	sz := tv.NTabs()
 	tb := tv.Tabs()
 	ntb := len(tb.Kids)
@@ -427,7 +427,7 @@ const (
 // ConfigWidget initializes the tab widget children if it hasn't been done yet.
 // only the 2 primary children (Frames) need to be configured.
 // no re-config needed when adding / deleting tabs -- just new layout.
-func (tv *TabView) ConfigWidget(sc *Scene) {
+func (tv *Tabs) ConfigWidget(sc *Scene) {
 	if len(tv.Kids) != 0 {
 		return
 	}
@@ -444,20 +444,20 @@ func (tv *TabView) ConfigWidget(sc *Scene) {
 
 // Tabs returns the layout containing the tabs (the first element within us).
 // It configures the Tabs if necessary.
-func (tv *TabView) Tabs() *Frame {
+func (tv *Tabs) Tabs() *Frame {
 	tv.ConfigWidget(tv.Sc)
 	return tv.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout (the second element within us).
 // It configures the Tabs if necessary.
-func (tv *TabView) Frame() *Frame {
+func (tv *Tabs) Frame() *Frame {
 	tv.ConfigWidget(tv.Sc)
 	return tv.Child(1).(*Frame)
 }
 
 // UnselectOtherTabs turns off all the tabs except given one
-func (tv *TabView) UnselectOtherTabs(idx int) {
+func (tv *Tabs) UnselectOtherTabs(idx int) {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
@@ -472,7 +472,7 @@ func (tv *TabView) UnselectOtherTabs(idx int) {
 }
 
 // RenumberTabs assigns proper index numbers to each tab
-func (tv *TabView) RenumberTabs() {
+func (tv *Tabs) RenumberTabs() {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
@@ -482,7 +482,7 @@ func (tv *TabView) RenumberTabs() {
 }
 
 // RenderTabSeps renders the separators between tabs
-func (tv *TabView) RenderTabSeps(sc *Scene) {
+func (tv *Tabs) RenderTabSeps(sc *Scene) {
 	rs, pc, st := tv.RenderLock(sc)
 	defer tv.RenderUnlock(rs)
 
@@ -505,7 +505,7 @@ func (tv *TabView) RenderTabSeps(sc *Scene) {
 	pc.FillStrokeClear(rs)
 }
 
-func (tv *TabView) Render(sc *Scene) {
+func (tv *Tabs) Render(sc *Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderScrolls(sc)
 		tv.RenderChildren(sc)
@@ -607,12 +607,12 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (tb *TabButton) TabView() *TabView {
-	tv := tb.ParentByType(TabViewType, ki.Embeds)
+func (tb *TabButton) Tabs() *Tabs {
+	tv := tb.ParentByType(TabsType, ki.Embeds)
 	if tv == nil {
 		return nil
 	}
-	return AsTabView(tv)
+	return AsTabs(tv)
 }
 
 func (tb *TabButton) ConfigParts(sc *Scene) {
@@ -642,12 +642,12 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 		cls.SetProp("no-focus", true)
 		cls.OnClick(func(e events.Event) {
 			tabIdx := tb.Data.(int)
-			tvv := tb.TabView()
-			if tvv != nil {
+			ts := tb.Tabs()
+			if ts != nil {
 				if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
-					tvv.DeleteTabIndex(tabIdx, true)
+					ts.DeleteTabIndex(tabIdx, true)
 				} else {
-					tvv.SelectTabIndex(tabIdx) // otherwise select
+					ts.SelectTabIndex(tabIdx) // otherwise select
 				}
 			}
 		})
