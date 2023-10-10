@@ -30,21 +30,21 @@ func app() {
 
 	sc := gi.StageScene("gogi-demo")
 
-	tv := gi.NewTabView(sc, "tv")
-	tv.NoDeleteTabs = true
-	tv.NewTabButton = true
+	ts := gi.NewTabs(sc)
+	ts.NoDeleteTabs = true
+	ts.NewTabButton = true
 
-	makeHome(tv)
-	makeText(tv)
-	makeButtons(tv)
-	makeInputs(tv)
-	makeLayouts(tv)
+	makeHome(ts)
+	makeText(ts)
+	makeButtons(ts)
+	makeInputs(ts)
+	makeLayouts(ts)
 
 	gi.NewWindow(sc).Run().Wait()
 }
 
-func makeHome(tv *gi.Tabs) {
-	home := tv.NewTab(gi.FrameType, "Home").(*gi.Frame)
+func makeHome(ts *gi.Tabs) {
+	home := ts.NewTab("Home")
 	home.Lay = gi.LayoutVert
 	home.AddStyles(func(s *styles.Style) {
 		home.Spacing.SetEx(1)
@@ -104,8 +104,8 @@ func makeHome(tv *gi.Tabs) {
 	}
 }
 
-func makeText(tv *gi.Tabs) {
-	text := tv.NewTab(gi.FrameType, "Text").(*gi.Frame)
+func makeText(ts *gi.Tabs) {
+	text := ts.NewTab("Text")
 	text.Lay = gi.LayoutVert
 	text.AddStyles(func(s *styles.Style) {
 		text.Spacing.SetEx(1)
@@ -124,8 +124,8 @@ func makeText(tv *gi.Tabs) {
 	}
 }
 
-func makeButtons(tv *gi.Tabs) {
-	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
+func makeButtons(ts *gi.Tabs) {
+	buttons := ts.NewTab("Buttons")
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyles(func(s *styles.Style) {
 		buttons.Spacing.SetEx(1)
@@ -248,8 +248,8 @@ func makeButtons(tv *gi.Tabs) {
 	}
 }
 
-func makeInputs(tv *gi.Tabs) {
-	inputs := tv.NewTab(gi.FrameType, "Inputs").(*gi.Frame)
+func makeInputs(ts *gi.Tabs) {
+	inputs := ts.NewTab("Inputs")
 	inputs.Lay = gi.LayoutVert
 	inputs.AddStyles(func(s *styles.Style) {
 		inputs.Spacing.SetEx(1)
@@ -355,8 +355,8 @@ func makeInputs(tv *gi.Tabs) {
 	// })
 }
 
-func makeLayouts(tv *gi.Tabs) {
-	layouts := tv.NewTab(gi.FrameType, "Layouts").(*gi.Frame)
+func makeLayouts(ts *gi.Tabs) {
+	layouts := ts.NewTab("Layouts")
 	layouts.Lay = gi.LayoutVert
 	layouts.AddStyles(func(s *styles.Style) {
 		layouts.Spacing.SetEx(1)
