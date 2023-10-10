@@ -8,15 +8,9 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
-	"time"
 
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-)
-
-var (
-	// SnackbarTimeout is the default timeout for Snackbar Stage
-	SnackbarTimeout = 5 * time.Second // todo: put in prefs
 )
 
 // StageTypes are the types of Stage containers.
@@ -124,9 +118,6 @@ type StageBase struct {
 	// if true dismisses the Stage if user clicks anywhere off the Stage
 	ClickOff bool
 
-	// if > 0, disappears after a timeout duration
-	Timeout time.Duration
-
 	// NewWindow: if true, opens a Window or Dialog in its own separate operating system window (RenderWin).  This is by default true for Window on Desktop, otherwise false.
 	NewWindow bool
 
@@ -181,8 +172,6 @@ type Stage interface {
 	SetScrim() Stage
 
 	SetClickOff() Stage
-
-	SetTimeout(dur time.Duration) Stage
 
 	SetNewWindow() Stage
 
@@ -329,7 +318,6 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 	case SnackbarStage:
 		st.Modal = false
-		st.Timeout = SnackbarTimeout
 	case ChooserStage:
 		st.Modal = false
 		st.Scrim = false
@@ -365,11 +353,6 @@ func (st *StageBase) SetScrim() Stage {
 
 func (st *StageBase) SetClickOff() Stage {
 	st.ClickOff = true
-	return st.This
-}
-
-func (st *StageBase) SetTimeout(dur time.Duration) Stage {
-	st.Timeout = dur
 	return st.This
 }
 

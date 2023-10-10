@@ -5,11 +5,18 @@
 package gi
 
 import (
+	"time"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
+)
+
+var (
+	// SnackbarTimeout is the default timeout for [SnackbarStage]s
+	SnackbarTimeout = 7 * time.Second // todo: put in prefs
 )
 
 // SnackbarOpts contains the options used to create a snackbar.
@@ -35,7 +42,7 @@ type SnackbarOpts struct {
 // can be chained directly after the New call.
 // Use an appropriate Run call at the end to start the Stage running.
 func NewSnackbarFromScene(sc *Scene, ctx Widget) *PopupStage {
-	return NewPopupStage(SnackbarStage, sc, ctx)
+	return NewPopupStage(SnackbarStage, sc, ctx).SetTimeout(SnackbarTimeout)
 }
 
 // NewSnackbar returns a new snackbar based on the given context widget and options.
