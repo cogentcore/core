@@ -275,48 +275,21 @@ func makeInputs(tv *gi.TabView) {
 	gi.NewLabel(inputs).SetText(
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`).SetType(gi.LabelBodyLarge)
 
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled Text Field")
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined Text Field")
-	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled Text Field").AddClearButton()
-	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined Text Field").AddClearButton()
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled")
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined")
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).AddClearButton()
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton()
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).AddClearButton().SetLeadingIcon(icons.Search)
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetTypePassword().SetPlaceholder("Password")
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetTypePassword().SetPlaceholder("Password")
 
-	tffcs := gi.NewTextField(inputs, "tffcs")
-	tffcs.Placeholder = "Filled Text Field"
-	tffcs.Type = gi.TextFieldFilled
-	tffcs.AddClearAction()
-	tffcs.LeadingIcon = icons.Search
+	sboxes := gi.NewLayout(inputs, "sboxes").SetLayout(gi.LayoutHoriz)
 
-	tfocs := gi.NewTextField(inputs, "tfocs")
-	tfocs.Placeholder = "Outlined Text Field"
-	tfocs.Type = gi.TextFieldOutlined
-	tfocs.AddClearAction()
-	tfocs.LeadingIcon = icons.Search
+	gi.NewSpinBox(sboxes).SetValue(15).SetStep(5).SetMin(-50).SetMax(100)
+	gi.NewSpinBox(sboxes).SetFormat("%#X").SetValue(44).SetStep(1).SetMax(255)
 
-	tffp := gi.NewTextField(inputs, "tffp")
-	tffp.Placeholder = "Password Text Field"
-	tffp.Type = gi.TextFieldFilled
-	tffp.SetTypePassword()
-
-	tfop := gi.NewTextField(inputs, "tfop")
-	tfop.Placeholder = "Password Text Field"
-	tfop.Type = gi.TextFieldOutlined
-	tfop.SetTypePassword()
-
-	sboxes := gi.NewLayout(inputs, "sboxes", gi.LayoutHoriz)
-
-	sbox := gi.NewSpinBox(sboxes, "sbox")
-	sbox.Value = 15
-	sbox.Step = 5
-	sbox.SetMin(-50)
-	sbox.SetMax(100)
-
-	sboxh := gi.NewSpinBox(sboxes, "sboxh")
-	sboxh.Format = "%#X"
-	sboxh.Value = 44
-	sboxh.Step = 1
-	sboxh.SetMax(255)
-
-	cboxes := gi.NewLayout(inputs, "cboxes", gi.LayoutHoriz)
+	cboxes := gi.NewLayout(inputs, "cboxes").SetLayout(gi.LayoutHoriz)
 	cboxes.AddStyles(func(s *styles.Style) {
 		cboxes.Spacing.SetEm(0.5)
 	})

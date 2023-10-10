@@ -154,6 +154,12 @@ func (sb *SpinBox) SetMax(max float32) *SpinBox {
 	return sb
 }
 
+// SetMax sets the format of the spin box
+func (sb *SpinBox) SetFormat(format string) *SpinBox {
+	sb.Format = format
+	return sb
+}
+
 // SetMinMax sets the min and max limits on the value
 func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *SpinBox {
 	sb.HasMin = hasMin

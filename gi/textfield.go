@@ -297,6 +297,18 @@ func (tf *TextField) SetPlaceholder(txt string) *TextField {
 	return tf
 }
 
+// SetLeadingIcon sets the leading icon of the text field
+func (tf *TextField) SetLeadingIcon(icon icons.Icon) *TextField {
+	tf.LeadingIcon = icon
+	return tf
+}
+
+// SetTrailingIcon sets the trailing icon of the text field
+func (tf *TextField) SetTrailingIcon(icon icons.Icon) *TextField {
+	tf.TrailingIcon = icon
+	return tf
+}
+
 // AddClearButton adds a trailing icon button at the end
 // of the textfield that clears the text in the textfield when pressed
 func (tf *TextField) AddClearButton() *TextField {
