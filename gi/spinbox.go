@@ -202,7 +202,7 @@ func (sb *SpinBox) SetValue(val float32) *SpinBox {
 // SetValueAction calls SetValue and also emits the signal
 func (sb *SpinBox) SetValueAction(val float32) *SpinBox {
 	sb.SetValue(val)
-	sb.Send(events.Change, nil)
+	sb.SendChange()
 	return sb
 }
 

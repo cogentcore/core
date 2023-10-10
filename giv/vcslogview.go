@@ -173,7 +173,7 @@ func (lv *VCSLogView) ConfigToolBar() {
 			}
 		})
 		tb.AddSeparator("dsep")
-		tb.AddAction(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
+		tb.AddButton(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
 			func(recv, send ki.Ki, sig int64, data any) {
 				lvv := recv.Embed(TypeVCSLogView).(*VCSLogView)
 				DiffViewDialogFromRevs(lvv.Sc, lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)

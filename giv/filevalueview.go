@@ -48,7 +48,7 @@ func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *FileValueView) HasAction() bool {
+func (vv *FileValueView) HasDialog() bool {
 	return true
 }
 

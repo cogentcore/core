@@ -133,11 +133,10 @@ func (vv *StructInlineValueView) ConfigWidget(widg gi.Widget) {
 	sv.TmpSave = vv.TmpSave
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 	sv.SetStruct(vv.Value.Interface())
-	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeStructInlineValueView).(*StructInlineValueView)
-	// 	// vvv.UpdateWidget() // prob not necc..
-	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	// })
+	sv.OnChange(func(e events.Event) {
+		// vv.UpdateWidget() // not needed?
+		vv.SendChange()
+	})
 	vv.UpdateWidget()
 }
 
@@ -218,11 +217,10 @@ func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if svk != nil {
 			sv := svk.(*TableView)
 			sv.SliceValView = vv
-			// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			// 	vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-			// 	vv.UpdateWidget()
-			// 	vv.ViewSig.Emit(vv.This(), 0, nil)
-			// })
+			sv.OnChange(func(e events.Event) {
+				vv.UpdateWidget()
+				vv.SendChange()
+			})
 		}
 	} else {
 		dlg := SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
@@ -230,11 +228,10 @@ func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if svk != nil {
 			sv := svk.(*SliceView)
 			sv.SliceValView = vv
-			// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			// 	vv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-			// 	vv.UpdateWidget()
-			// 	vv.ViewSig.Emit(vv.This(), 0, nil)
-			// })
+			sv.OnChange(func(e events.Event) {
+				vv.UpdateWidget()
+				vv.SendChange()
+			})
 		}
 	}
 }
@@ -276,11 +273,10 @@ func (vv *SliceInlineValueView) ConfigWidget(widg gi.Widget) {
 	// npv := vv.Value.Elem()
 	sv.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sv.SetSlice(vv.Value.Interface())
-	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeSliceInlineValueView).(*SliceInlineValueView)
-	// 	vvv.UpdateWidget()
-	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	// })
+	sv.OnChange(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -342,11 +338,10 @@ func (vv *MapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if mvk != nil {
 		mv := mvk.(*MapView)
 		mv.MapValView = vv
-		// mv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	vv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
-		// 	vv.UpdateWidget()
-		// 	vv.ViewSig.Emit(vv.This(), 0, nil)
-		// })
+		mv.OnChange(func(e events.Event) {
+			vv.UpdateWidget()
+			vv.SendChange()
+		})
 	}
 }
 
@@ -387,11 +382,10 @@ func (vv *MapInlineValueView) ConfigWidget(widg gi.Widget) {
 	// npv := vv.Value.Elem()
 	sv.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sv.SetMap(vv.Value.Interface())
-	// sv.ViewSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeMapInlineValueView).(*MapInlineValueView)
-	// 	vvv.UpdateWidget()
-	// 	vvv.ViewSig.Emit(vvv.This(), 0, nil)
-	// })
+	sv.OnChange(func(e events.Event) {
+		vv.UpdateWidget()
+		vv.SendChange()
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1024,7 +1018,7 @@ func (vv *TimeValueView) ConfigWidget(widg gi.Widget) {
 		} else {
 			tm := vv.TimeVal()
 			*tm = nt
-			// vvv.ViewSig.Emit(vvv.This(), 0, nil)
+			// vv.SendChange()
 			vv.UpdateWidget()
 		}
 	})

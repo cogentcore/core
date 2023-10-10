@@ -66,11 +66,15 @@ func (wl *RenderWinList) FindData(data any) (*RenderWin, bool) {
 	}
 	RenderWinGlobalMu.Lock()
 	defer RenderWinGlobalMu.Unlock()
-	// for _, wi := range *wl {
-	// if wi.Data == data { // todo: now inside the stage
-	// 	return wi, true
-	// }
-	// }
+	for _, wi := range *wl {
+		msc := wi.MainScene()
+		if msc == nil {
+			continue
+		}
+		if msc.Data == data {
+			return wi, true
+		}
+	}
 	return nil, false
 }
 

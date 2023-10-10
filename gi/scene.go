@@ -36,19 +36,23 @@ type Scene struct {
 	Frame
 
 	// name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.
-	Nm string `desc:"name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique."`
+	Nm string
 
 	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
-	Title string `desc:"title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types"`
+	Title string
+
+	// Data is the optional data value being represented by this scene.
+	// Used e.g., for recycling views of a given item instead of creating new one.
+	Data any
 
 	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene
-	Flags ScFlags `desc:"has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene"`
+	Flags ScFlags
 
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt
 
 	// Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil
-	Decor Layout `desc:"Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil"`
+	Decor Layout
 
 	// [view: -] render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`

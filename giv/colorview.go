@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"reflect"
 	"sort"
 
 	"goki.dev/cam/hsl"
@@ -34,6 +35,9 @@ type ColorView struct {
 
 	// the color that we view
 	Color color.RGBA `desc:"the color that we view"`
+
+	// inline struct view of the numbers
+	NumView ValueView `desc:"inline struct view of the numbers"`
 
 	// the color that we view, in HSLA form
 	ColorHSLA hsl.HSL `desc:"the color that we view, in HSLA form"`
@@ -125,31 +129,28 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
 	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
 
-	// cv.NumView = ToValueView(&cv.Color, "")
-	// cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
-	// vtyp := cv.NumView.WidgetType()
-	// widg := nl.NewChild(vtyp, "nums").(gi.Widget)
-	// cv.NumView.ConfigWidget(widg)
-	// vvb := cv.NumView.AsValueViewBase()
-	// vvb.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	cvv.ColorHSLA = styles.HSLAModel.Convert(cvv.Color).(styles.HSLA)
-	// 	cvv.UpdateSliderGrid()
-	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
-	// })
+	cv.NumView = ToValueView(&cv.Color, "")
+	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
+	vtyp := cv.NumView.WidgetType()
+	widg := nl.NewChild(vtyp, "nums").(gi.Widget)
+	cv.NumView.ConfigWidget(widg)
+	vvb := cv.NumView.AsValueViewBase()
+	vvb.OnChange(func(e events.Event) {
+		cv.UpdateSliderGrid()
+		cv.SendChange()
+	})
 
 	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetLayout(gi.LayoutHoriz)
 
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
-	// nrgba.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	cvv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	updt := cvv.UpdateStart()
-	// 	cvv.ColorHSLA = hsl.FromColor(cvv.Color)
-	// 	cvv.ColorHSLA.Round()
-	// 	cvv.ViewSig.Emit(cvv.This(), 0, nil)
-	// 	cvv.UpdateEnd(updt)
-	// })
+	nrgba.OnChange(func(e events.Event) {
+		updt := cv.UpdateStart()
+		cv.ColorHSLA = hsl.FromColor(cv.Color)
+		cv.ColorHSLA.Round()
+		cv.UpdateEndRender(updt)
+		cv.SendChange()
+	})
 
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
@@ -175,13 +176,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
-	// nhsla.ViewSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	updt := cv.UpdateStart()
-	// 	cv.Color = cv.ColorHSLA.AsRGBA()
-	// 	cv.ViewSig.Emit(cv.This(), 0, nil)
-	// 	cv.UpdateEnd(updt)
-	// })
+	nhsla.OnChange(func(e events.Event) {
+		updt := cv.UpdateStart()
+		cv.Color = cv.ColorHSLA.AsRGBA()
+		cv.UpdateEndRender(updt)
+		cv.SendChange()
+	})
 
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
@@ -276,15 +276,6 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	cv.UpdateEnd(updt)
 }
 
-// // IsConfiged returns true if widget is fully configured
-// func (cv *ColorView) IsConfiged() bool {
-// 	if !cv.HasChildren() {
-// 		return false
-// 	}
-// 	sl := cv.SliderLay()
-// 	return sl.HasChildren()
-// }
-
 func (cv *ColorView) NumLay() *gi.Layout {
 	return cv.ChildByName("num-lay", 1).(*gi.Layout)
 }
@@ -330,21 +321,12 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	// sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	slv := send.Embed(gi.TypeSlider).(*gi.Slider)
-	// 	if sig == int64(gi.SliderReleased) {
-	// 		updt := cv.UpdateStart()
-	// 		cv.SetRGBValue(slv.Value, rgb)
-	// 		cv.ViewSig.Emit(cv.This(), 0, nil)
-	// 		cv.UpdateEnd(updt)
-	// 	} else if sig == int64(gi.SliderValueChanged) {
-	// 		updt := cv.UpdateStart()
-	// 		cv.SetRGBValue(slv.Value, rgb)
-	// 		cv.ManipSig.Emit(cv.This(), 0, nil)
-	// 		cv.UpdateEnd(updt)
-	// 	}
-	// })
+	sl.OnChange(func(e events.Event) {
+		updt := cv.UpdateStart()
+		cv.SetRGBValue(sl.Value, rgb)
+		cv.UpdateEndRender(updt)
+		cv.SendChange()
+	})
 }
 
 func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
@@ -386,21 +368,12 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Dim = mat32.X
 	sl.Tracking = true
 	sl.TrackThr = 1
-	// sl.SliderSig.ConnectOnly(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
-	// 	slv := send.Embed(gi.TypeSlider).(*gi.Slider)
-	// 	if sig == int64(gi.SliderReleased) {
-	// 		updt := cv.UpdateStart()
-	// 		cv.SetHSLValue(slv.Value, hsl)
-	// 		cv.ViewSig.Emit(cv.This(), 0, nil)
-	// 		cv.UpdateEnd(updt)
-	// 	} else if sig == int64(gi.SliderValueChanged) {
-	// 		updt := cv.UpdateStart()
-	// 		cv.SetHSLValue(slv.Value, hsl)
-	// 		cv.ManipSig.Emit(cv.This(), 0, nil)
-	// 		cv.UpdateEnd(updt)
-	// 	}
-	// })
+	sl.OnChange(func(e events.Event) {
+		updt := cv.UpdateStart()
+		cv.SetHSLValue(sl.Value, hsl)
+		cv.UpdateEndRender(updt)
+		cv.SendChange()
+	})
 }
 
 func (cv *ColorView) UpdateHSLSlider(sl *gi.Slider, hsl int) {
@@ -424,7 +397,7 @@ func (cv *ColorView) UpdateSliderGrid() {
 	cv.UpdateHSLSlider(sg.ChildByName("hue", 0).(*gi.Slider), 0)
 	cv.UpdateHSLSlider(sg.ChildByName("sat", 0).(*gi.Slider), 1)
 	cv.UpdateHSLSlider(sg.ChildByName("light", 0).(*gi.Slider), 2)
-	sg.UpdateEnd(updt)
+	sg.UpdateEndRender(updt)
 }
 
 func (cv *ColorView) ConfigPalette() {
@@ -437,17 +410,14 @@ func (cv *ColorView) ConfigPalette() {
 		cbt := gi.NewButton(pg, cn)
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
-		// cbt.ButtonSig.Connect(cv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	cv, _ := recv.Embed(TypeColorView).(*ColorView)
-		// 	if sig == int64(gi.ButtonPressed) {
-		// 		but := send.Embed(gi.ButtonType).(*gi.Button)
-		// 		cv.Color = colors.LogFromName(but.Nm)
-		// 		cv.ColorHSLA = hsl.FromColor(cv.Color)
-		// 		cv.ColorHSLA.Round()
-		// 		cv.ViewSig.Emit(cv.This(), 0, nil)
-		// 		cv.Update()
-		// 	}
-		// })
+		cbt.OnChange(func(e events.Event) {
+			updt := cv.UpdateStart()
+			cv.Color, _ = colors.FromName(cbt.Nm)
+			cv.ColorHSLA = hsl.FromColor(cv.Color)
+			cv.ColorHSLA.Round()
+			cv.UpdateEndRender(updt)
+			cv.SendChange()
+		})
 	}
 }
 

@@ -423,10 +423,6 @@ func makeLayouts(tv *gi.TabView) {
 // 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 // 			win.CloseReq()
 // 		})
-
-// 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-// 	emen.Menu.AddCopyCutPaste(win)
-
 // 	inQuitPrompt := false
 // 	gi.SetQuitReqFunc(func() {
 // 		if inQuitPrompt {

@@ -1632,7 +1632,7 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Struct", &gti.Field{Name: "Struct", Type: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}}},
 		{"StructValView", &gti.Field{Name: "StructValView", Type: "ValueView", Doc: "ValueView for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"AddAction", &gti.Field{Name: "AddAction", Type: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}}},
+		{"AddButton", &gti.Field{Name: "AddButton", Type: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}}},
 		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]ValueView", Doc: "ValueView representations of the fields", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},

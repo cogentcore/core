@@ -169,7 +169,7 @@ func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Po
 				text = cmp.Label
 			}
 			icon := cmp.Icon
-			m.AddAction(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
+			m.AddButton(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
 				c, func(recv, send ki.Ki, sig int64, data any) {
 					cc := recv.(*Complete)
 					cc.Complete(data.(string))

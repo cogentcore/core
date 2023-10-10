@@ -48,7 +48,7 @@ func (cv *ColorMapView) SetColorMap(cmap *colormap.Map) {
 // and signals the ColorMapSig signal
 func (cv *ColorMapView) SetColorMapAction(cmap *colormap.Map) {
 	cv.Map = cmap
-	cv.Send(events.Change, nil)
+	cv.SendChange()
 	cv.UpdateSig()
 }
 

@@ -96,7 +96,7 @@ func app() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddAction(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, win.This(),
+	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, win.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
@@ -110,7 +110,7 @@ func app() {
 	zmlb.SetProp("vertical-align", styles.AlignMiddle)
 	zmlb.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 
-	zoomout := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
+	zoomout := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomOut, Name: "zoomout", Tooltip: "zoom out"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 0.9)
 			win.FullReRender()
@@ -132,7 +132,7 @@ func app() {
 		win.FullReRender()
 	})
 
-	zoomin := tbar.AddAction(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
+	zoomin := tbar.AddButton(gi.ActOpts{Icon: icons.ZoomIn, Name: "zoomin", Tooltip: " zoom in"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			SetZoom(svge.Scale * 1.1)
 			win.FullReRender()
@@ -200,12 +200,12 @@ func app() {
 	// Linux, RenderWins or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu = make(gi.MenuStage, 0, 10)
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			FileViewOpenSVG(vp)
 		})
 	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
 			win.RenderWin.Close()
 		})

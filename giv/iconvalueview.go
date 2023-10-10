@@ -9,9 +9,9 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
@@ -57,37 +57,33 @@ func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
 	ac.SetProp("border-radius", units.Dp(4))
 	ac.SetProp("padding", 0)
 	ac.SetProp("margin", 0)
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(IconTypeValueView).(*IconValueView)
-		ac := vvv.Widget.(*gi.Button)
-		vvv.OpenDialog(ac.Sc, nil, nil)
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(ac, nil)
 	})
 	vv.UpdateWidget()
 }
 
-func (vv *IconValueView) HasAction() bool {
+func (vv *IconValueView) HasDialog() bool {
 	return true
 }
 
-func (vv *IconValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
+func (vv *IconValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
-	IconChooserDialog(vp, cur, DlgOpts{Title: "Select an Icon", Prompt: desc},
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				si := SliceViewSelectDialogValue(ddlg)
-				if si >= 0 {
-					ic := gi.CurIconList[si]
-					vv.SetValue(ic)
-					vv.UpdateWidget()
-				}
+	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: desc}, cur, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			si := SliceViewSelectDialogValue(dlg)
+			if si >= 0 {
+				ic := gi.CurIconList[si]
+				vv.SetValue(ic)
+				vv.UpdateWidget()
 			}
-			if dlgRecv != nil && dlgFunc != nil {
-				dlgFunc(dlgRecv, send, sig, data)
-			}
-		})
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }

@@ -10,6 +10,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -70,10 +71,11 @@ func (mv *MapViewInline) SetMap(mp any) {
 }
 
 // ConfigParts configures Parts for the current map
-func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
+func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
+	parts := mv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
 	mv.Keys = make([]ValueView, 0)
@@ -112,18 +114,15 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 	}
 	config.Add(gi.ButtonType, "add-action")
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := mv.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	if !mods {
-		updt = mv.Parts.UpdateStart()
+		updt = parts.UpdateStart()
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
-			mvv.SetChanged()
-		})
-		keyw := mv.Parts.Child(i * 2).(gi.Widget)
-		widg := mv.Parts.Child((i * 2) + 1).(gi.Widget)
+		vvb.OnChange(func(e events.Event) { mv.SendChange() })
+		keyw := parts.Child(i * 2).(gi.Widget)
+		widg := parts.Child((i * 2) + 1).(gi.Widget)
 		kv := mv.Keys[i]
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
@@ -132,53 +131,45 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 			keyw.AsWidget().SetState(true, states.Disabled)
 		}
 	}
-	adack, err := mv.Parts.Children().ElemFromEndTry(1)
+	adack, err := parts.Children().ElemFromEndTry(1)
 	if err == nil {
 		adac := adack.(*gi.Button)
 		adac.SetIcon(icons.Add)
 		adac.Tooltip = "add an entry to the map"
-		adac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
-			mvv.MapAdd()
+		adac.OnClick(func(e events.Event) {
+			mv.MapAdd()
 		})
+
 	}
-	edack, err := mv.Parts.Children().ElemFromEndTry(0)
+	edack, err := parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Button)
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "map edit dialog"
-		edac.ActionSig.ConnectOnly(mv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			mvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
-			vpath := mvv.ViewPath
+		edac.OnClick(func(e events.Event) {
+			vpath := mv.ViewPath
 			title := ""
-			if mvv.MapValView != nil {
+			if mv.MapValView != nil {
 				newPath := ""
 				isZero := false
-				title, newPath, isZero = mvv.MapValView.AsValueViewBase().Label()
+				title, newPath, isZero = mv.MapValView.AsValueViewBase().Label()
 				if isZero {
 					return
 				}
-				vpath = mvv.ViewPath + "/" + newPath
+				vpath = mv.ViewPath + "/" + newPath
 			} else {
-				tmptyp := laser.NonPtrType(reflect.TypeOf(mvv.Map))
+				tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
 				title = "Map of " + tmptyp.String()
 				// if tynm == "" {
 				// 	tynm = tmptyp.String()
 				// }
 			}
-			dlg := MapViewDialog(mvv.Scene, mvv.Map, DlgOpts{Title: title, Prompt: mvv.Tooltip, TmpSave: mvv.TmpSave, ViewPath: vpath}, nil, nil)
-			mvvvk := dlg.Stage.Scene.ChildByType(TypeMapView, ki.Embeds, 2)
-			if mvvvk != nil {
-				mvvv := mvvvk.(*MapView)
-				mvvv.MapValView = mvv.MapValView
-				mvvv.ViewSig.ConnectOnly(mvv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					mvvvv, _ := recv.Embed(TypeMapViewInline).(*MapViewInline)
-					mvvvv.ViewSig.Emit(mvvvv.This(), 0, nil)
-				})
-			}
+			MapViewDialog(mv, DlgOpts{Title: title, Prompt: mv.Tooltip, TmpSave: mv.TmpSave, ViewPath: vpath}, mv.Map, func(dlg *gi.Dialog) {
+				mv.SendChange()
+			})
 		})
 	}
-	mv.Parts.UpdateEnd(updt)
+	parts.UpdateEndLayout(updt)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -187,7 +178,7 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 // types of changes, so this is just generic.
 func (mv *MapViewInline) SetChanged() {
 	mv.Changed = true
-	mv.ViewSig.Emit(mv.This(), 0, nil)
+	mv.SendChange()
 }
 
 // MapAdd adds a new entry to the map
@@ -195,40 +186,28 @@ func (mv *MapViewInline) MapAdd() {
 	if laser.AnyIsNil(mv.Map) {
 		return
 	}
-	updt := mv.UpdateStart()
-	defer mv.UpdateEnd(updt)
-
 	laser.MapAdd(mv.Map)
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.SetFullReRender()
 	mv.UpdateFromMap()
 }
 
 func (mv *MapViewInline) UpdateFromMap() {
-	mv.ConfigParts(vp)
+	mv.ConfigParts(mv.Sc)
 }
 
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
-	mv.ConfigParts(vp)
+	mv.ConfigParts(mv.Sc)
 }
 
-func (mv *MapViewInline) ApplyStyle(sc *gi.Scene) {
-	mv.ConfigParts(vp)
-	mv.WidgetBase.ApplyStyle(sc)
-}
-
-func (mv *MapViewInline) Render(vp *gi.Scene) {
-	if mv.FullReRenderIfNeeded() {
-		return
-	}
-	if mv.PushBounds() {
-		mv.RenderParts()
-		mv.RenderChildren()
-		mv.PopBounds()
+func (mv *MapViewInline) Render(sc *gi.Scene) {
+	if mv.PushBounds(sc) {
+		mv.RenderParts(sc)
+		mv.RenderChildren(sc)
+		mv.PopBounds(sc)
 	}
 }

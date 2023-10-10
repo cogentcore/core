@@ -48,7 +48,7 @@ func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *FontValueView) HasAction() bool {
+func (vv *FontValueView) HasDialog() bool {
 	return true
 }
 

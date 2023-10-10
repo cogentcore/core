@@ -102,9 +102,6 @@ type StageBase struct {
 	// name of the Stage -- generally auto-set based on Scene Name
 	Name string
 
-	// [view: -] the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows
-	Data any `json:"-" xml:"-" view:"-" desc:"the main data element represented by this window -- used for Recycle* methods based on views representing a given data element -- prevents redundant windows"`
-
 	// Title of the Stage -- generally auto-set based on Scene Title.
 	// Used for title of Window and Dialog types.
 	Title string
