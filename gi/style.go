@@ -226,7 +226,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.On)
+			s.Color = colors.Scheme.Select.OnContainer
 		}
 	}
 }
