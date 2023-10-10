@@ -6,7 +6,7 @@ package gi
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/iancoleman/strcase"
@@ -17,7 +17,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
-	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
@@ -46,9 +45,6 @@ type TabView struct {
 	// if true, tabs are not user-deleteable
 	NoDeleteTabs bool `desc:"if true, tabs are not user-deleteable"`
 
-	// type of widget to create in a new tab via new tab button -- Frame by default
-	NewTabType *gti.Type `desc:"type of widget to create in a new tab via new tab button -- Frame by default"`
-
 	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
 }
@@ -58,7 +54,6 @@ func (tv *TabView) CopyFieldsFrom(frm any) {
 	tv.Layout.CopyFieldsFrom(&fr.Layout)
 	tv.MaxChars = fr.MaxChars
 	tv.NewTabButton = fr.NewTabButton
-	tv.NewTabType = fr.NewTabType
 }
 
 func (tv *TabView) OnInit() {
@@ -198,7 +193,7 @@ func (tv *TabView) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...
 	tab.NoDelete = tv.NoDeleteTabs
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
-		tv.SelectTabIndexAction(idx)
+		tv.SelectTabIndex(idx)
 	})
 	fr := tv.Frame()
 	if len(fr.Kids) == 1 {
@@ -223,9 +218,9 @@ func (tv *TabView) InsertTab(frame *Frame, label string, idx int, name ...string
 	tv.UpdateEndLayout(updt)
 }
 
-// TabAtIndex returns content widget and tab button at given index, false if
+// TabAtIndex returns content frame and tab button at given index, false if
 // index out of range (emits log message)
-func (tv *TabView) TabAtIndex(idx int) (Widget, *TabButton, bool) {
+func (tv *TabView) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -233,24 +228,24 @@ func (tv *TabView) TabAtIndex(idx int) (Widget, *TabButton, bool) {
 	tb := tv.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
-		log.Printf("giv.TabView: index %v out of range for number of tabs: %v\n", idx, sz)
+		slog.Error("gi.TabView: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
 	}
 	tab := tb.Child(idx).(*TabButton)
-	widg := fr.Child(idx).(Widget)
-	return widg, tab, true
+	frame := fr.Child(idx).(*Frame)
+	return frame, tab, true
 }
 
 // SelectTabIndex selects tab at given index, returning it -- returns false if
 // index is invalid
-func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
-	widg, tab, ok := tv.TabAtIndex(idx)
+func (tv *TabView) SelectTabIndex(idx int) (*Frame, bool) {
+	frame, tab, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, false
 	}
 	fr := tv.Frame()
 	if fr.StackTop == idx {
-		return widg, true
+		return frame, true
 	}
 	tv.Mu.Lock()
 	updt := tv.UpdateStart()
@@ -259,27 +254,17 @@ func (tv *TabView) SelectTabIndex(idx int) (Widget, bool) {
 	fr.StackTop = idx
 	tv.Mu.Unlock()
 	tv.UpdateEndLayout(updt)
-	return widg, true
-}
-
-// SelectTabIndexAction selects tab at given index and emits selected signal,
-// with the index of the selected tab -- this is what is called when a tab is
-// clicked
-func (tv *TabView) SelectTabIndexAction(idx int) {
-	_, ok := tv.SelectTabIndex(idx)
-	if ok {
-		// tv.TabViewSig.Emit(tv.This(), int64(TabSelected), idx)
-	}
+	return frame, true
 }
 
 // TabByName returns tab with given name (nil if not found -- see TabByNameTry)
-func (tv *TabView) TabByName(label string) Widget {
+func (tv *TabView) TabByName(label string) *Frame {
 	t, _ := tv.TabByNameTry(label)
 	return t
 }
 
 // TabByNameTry returns tab with given name, and an error if not found.
-func (tv *TabView) TabByNameTry(label string) (Widget, error) {
+func (tv *TabView) TabByNameTry(label string) (*Frame, error) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -289,8 +274,8 @@ func (tv *TabView) TabByNameTry(label string) (Widget, error) {
 		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, tv.Path())
 	}
 	fr := tv.Frame()
-	widg := fr.Child(idx).(Widget)
-	return widg, nil
+	frame := fr.Child(idx).(*Frame)
+	return frame, nil
 }
 
 // TabIndexByName returns tab index for given tab name, and an error if not found.
@@ -320,31 +305,32 @@ func (tv *TabView) TabName(idx int) string {
 }
 
 // SelectTabByName selects tab by name, returning it.
-func (tv *TabView) SelectTabByName(label string) Widget {
+func (tv *TabView) SelectTabByName(label string) *Frame {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
 		fr := tv.Frame()
-		return fr.Child(idx).(Widget)
+		return fr.Child(idx).(*Frame)
 	}
 	return nil
 }
 
 // SelectTabByNameTry selects tab by name, returning it.  Returns error if not found.
-func (tv *TabView) SelectTabByNameTry(label string) (Widget, error) {
+func (tv *TabView) SelectTabByNameTry(label string) (*Frame, error) {
 	idx, err := tv.TabIndexByName(label)
 	if err == nil {
 		tv.SelectTabIndex(idx)
 		fr := tv.Frame()
-		return fr.Child(idx).(Widget), nil
+		return fr.Child(idx).(*Frame), nil
 	}
 	return nil, err
 }
 
 // RecycleTab returns a tab with given name, first by looking for an existing one,
 // and if not found, making a new one. If sel, then select it. It returns the
-// frame for the tab.
-func (tv *TabView) RecycleTab(label string, sel bool) *Frame {
+// frame for the tab. If a name is also passed, the internal name (ID) of any new tab
+// will be set to that; otherwise, it will default to the kebab-case version of the label.
+func (tv *TabView) RecycleTab(label string, sel bool, name ...string) *Frame {
 	frame, err := tv.TabByNameTry(label)
 	if err == nil {
 		if sel {
@@ -352,7 +338,7 @@ func (tv *TabView) RecycleTab(label string, sel bool) *Frame {
 		}
 		return frame
 	}
-	frame = tv.NewTab(typ, label)
+	frame = tv.NewTab(label, name...)
 	if sel {
 		tv.SelectTabByName(label)
 	}
@@ -360,9 +346,9 @@ func (tv *TabView) RecycleTab(label string, sel bool) *Frame {
 }
 
 // DeleteTabIndex deletes tab at given index, optionally calling destroy on
-// tab contents -- returns widget if destroy == false, tab name, and bool success
-func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) {
-	widg, _, ok := tv.TabAtIndex(idx)
+// tab contents -- returns frame if destroy == false, tab name, and bool success
+func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (*Frame, string, bool) {
+	frame, _, ok := tv.TabAtIndex(idx)
 	if !ok {
 		return nil, "", false
 	}
@@ -392,19 +378,7 @@ func (tv *TabView) DeleteTabIndex(idx int, destroy bool) (Widget, string, bool) 
 	if destroy {
 		return nil, tnm, true
 	} else {
-		return widg, tnm, true
-	}
-}
-
-// DeleteTabIndexAction deletes tab at given index using destroy flag, and
-// emits TabDeleted signal with name of deleted tab
-// this is called by the delete button on the tab
-func (tv *TabView) DeleteTabIndexAction(idx int) {
-	_, tnm, ok := tv.DeleteTabIndex(idx, true)
-	_ = tnm
-	if ok {
-		// todo: needed?
-		// tv.TabViewSig.Emit(tv.This(), int64(TabDeleted), tnm)
+		return frame, tnm, true
 	}
 }
 
@@ -417,14 +391,11 @@ func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 		if ntb == sz+1 {
 			return false
 		}
-		if tv.NewTabType == nil {
-			tv.NewTabType = FrameType
-		}
 		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
 		tab.Data = -1
 		tab.SetIcon(icons.Add).SetType(ButtonAction)
 		tab.OnClick(func(e events.Event) {
-			tv.NewTabAction(tv.NewTabType, "New Tab")
+			tv.NewTab("New Tab")
 			tv.SelectTabIndex(len(*tv.Frame().Children()) - 1)
 		})
 		return true
@@ -471,14 +442,15 @@ func (tv *TabView) ConfigWidget(sc *Scene) {
 	tv.ConfigNewTabButton(sc)
 }
 
-// Tabs returns the layout containing the tabs -- the first element within us
+// Tabs returns the layout containing the tabs (the first element within us).
+// It configures the Tabs if necessary.
 func (tv *TabView) Tabs() *Frame {
-	// TODO(kai): come up with a better structure for this?
 	tv.ConfigWidget(tv.Sc)
 	return tv.Child(0).(*Frame)
 }
 
-// Frame returns the stacked frame layout -- the second element
+// Frame returns the stacked frame layout (the second element within us).
+// It configures the Tabs if necessary.
 func (tv *TabView) Frame() *Frame {
 	tv.ConfigWidget(tv.Sc)
 	return tv.Child(1).(*Frame)
@@ -673,9 +645,9 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 			tvv := tb.TabView()
 			if tvv != nil {
 				if !Prefs.Params.OnlyCloseActiveTab || tb.StateIs(states.Selected) { // only process delete when already selected if OnlyCloseActiveTab is on
-					tvv.DeleteTabIndexAction(tabIdx)
+					tvv.DeleteTabIndex(tabIdx, true)
 				} else {
-					tvv.SelectTabIndexAction(tabIdx) // otherwise select
+					tvv.SelectTabIndex(tabIdx) // otherwise select
 				}
 			}
 		})
