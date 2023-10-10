@@ -285,6 +285,12 @@ func (tf *TextField) SetText(txt string) *TextField {
 	return tf
 }
 
+// SetType sets the type of the text field
+func (tf *TextField) SetType(typ TextFieldTypes) *TextField {
+	tf.Type = typ
+	return tf
+}
+
 // SetPlaceholder sets the placeholder text
 func (tf *TextField) SetPlaceholder(txt string) *TextField {
 	tf.Placeholder = txt
