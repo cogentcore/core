@@ -331,14 +331,16 @@ func makeInputs(tv *gi.TabView) {
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
 
-	bbox := gi.NewButtonBox(inputs, "bbox")
-	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
-	bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
+	// TODO(kai): add back button boxes to demo
 
-	bboxr := gi.NewButtonBox(inputs, "bboxr")
-	bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
-	bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
-	bboxr.Mutex = true
+	// bbox := gi.NewButtonBox(inputs, "bbox")
+	// bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
+	// bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
+
+	// bboxr := gi.NewButtonBox(inputs, "bboxr")
+	// bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
+	// bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
+	// bboxr.Mutex = true
 
 	// tbuf := &giv.TextBuf{}
 	// tbuf.InitName(tbuf, "tbuf")
