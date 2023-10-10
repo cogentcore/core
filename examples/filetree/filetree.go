@@ -72,7 +72,7 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignTop
 		})
 	case "splitview":
-		split := w.(*gi.SplitView)
+		split := w.(*gi.Splits)
 		split.Dim = mat32.X
 	}
 	ip, _ := w.IndexInParent()
@@ -303,12 +303,12 @@ func (fb *FileBrowse) TitleWidget() (*gi.Label, int) {
 }
 
 // SplitView returns the main SplitView
-func (fb *FileBrowse) SplitView() (*gi.SplitView, int) {
+func (fb *FileBrowse) SplitView() (*gi.Splits, int) {
 	idx, ok := fb.Children().IndexByName("splitview", 2)
 	if !ok {
 		return nil, -1
 	}
-	return fb.Child(idx).(*gi.SplitView), idx
+	return fb.Child(idx).(*gi.Splits), idx
 }
 
 // TextViewByIndex returns the TextView by index, nil if not found

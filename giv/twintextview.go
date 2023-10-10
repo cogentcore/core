@@ -19,7 +19,7 @@ import (
 // TwinTextViews presents two side-by-side TextView windows in SplitView
 // that scroll in sync with each other.
 type TwinTextViews struct {
-	gi.SplitView
+	gi.Splits
 
 	// textbuf for A
 	BufA *TextBuf `json:"-" xml:"-" desc:"textbuf for A"`

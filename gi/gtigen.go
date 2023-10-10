@@ -941,12 +941,12 @@ func (t *SpinBox) AsSpinBox() *SpinBox {
 	return t
 }
 
-// SplitViewType is the [gti.Type] for [SplitView]
-var SplitViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.SplitView",
-	ShortName: "gi.SplitView",
-	IDName:    "split-view",
-	Doc:       "SplitView allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
+// SplitsType is the [gti.Type] for [Splits]
+var SplitsType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Splits",
+	ShortName: "gi.Splits",
+	IDName:    "splits",
+	Doc:       "Splits allocates a fixed proportion of space to each child, along given\ndimension, always using only the available space given to it by its parent\n(i.e., it will force its children, which should be layouts (typically\nFrame's), to have their own scroll bars as necessary).  It should\ngenerally be used as a main outer-level structure within a window,\nproviding a framework for inner elements -- it allows individual child\nelements to update independently and thus is important for speeding update\nperformance.  It uses the Widget Parts to hold the splitter widgets\nseparately from the children that contain the rest of the scenegraph to be\ndisplayed within each region.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -960,46 +960,46 @@ var SplitViewType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SplitView{},
+	Instance: &Splits{},
 })
 
-// NewSplitView adds a new [SplitView] with the given name
+// NewSplits adds a new [Splits] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSplitView(par ki.Ki, name ...string) *SplitView {
-	return par.NewChild(SplitViewType, name...).(*SplitView)
+func NewSplits(par ki.Ki, name ...string) *Splits {
+	return par.NewChild(SplitsType, name...).(*Splits)
 }
 
-// KiType returns the [*gti.Type] of [SplitView]
-func (t *SplitView) KiType() *gti.Type {
-	return SplitViewType
+// KiType returns the [*gti.Type] of [Splits]
+func (t *Splits) KiType() *gti.Type {
+	return SplitsType
 }
 
-// New returns a new [*SplitView] value
-func (t *SplitView) New() ki.Ki {
-	return &SplitView{}
+// New returns a new [*Splits] value
+func (t *Splits) New() ki.Ki {
+	return &Splits{}
 }
 
-// SplitViewEmbedder is an interface that all types that embed SplitView satisfy
-type SplitViewEmbedder interface {
-	AsSplitView() *SplitView
+// SplitsEmbedder is an interface that all types that embed Splits satisfy
+type SplitsEmbedder interface {
+	AsSplits() *Splits
 }
 
-// AsSplitView returns the given value as a value of type SplitView if the type
-// of the given value embeds SplitView, or nil otherwise
-func AsSplitView(k ki.Ki) *SplitView {
+// AsSplits returns the given value as a value of type Splits if the type
+// of the given value embeds Splits, or nil otherwise
+func AsSplits(k ki.Ki) *Splits {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(SplitViewEmbedder); ok {
-		return t.AsSplitView()
+	if t, ok := k.(SplitsEmbedder); ok {
+		return t.AsSplits()
 	}
 	return nil
 }
 
-// AsSplitView satisfies the [SplitViewEmbedder] interface
-func (t *SplitView) AsSplitView() *SplitView {
+// AsSplits satisfies the [SplitsEmbedder] interface
+func (t *Splits) AsSplits() *Splits {
 	return t
 }
 

@@ -23,7 +23,7 @@ import (
 // Config notes: only needs config when number of kids changes
 // otherwise just needs new layout
 
-// SplitView allocates a fixed proportion of space to each child, along given
+// Splits allocates a fixed proportion of space to each child, along given
 // dimension, always using only the available space given to it by its parent
 // (i.e., it will force its children, which should be layouts (typically
 // Frame's), to have their own scroll bars as necessary).  It should
@@ -35,7 +35,7 @@ import (
 // displayed within each region.
 //
 //goki:embedder
-type SplitView struct {
+type Splits struct {
 	WidgetBase
 
 	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
@@ -51,8 +51,8 @@ type SplitView struct {
 	Dim mat32.Dims `desc:"dimension along which to split the space"`
 }
 
-func (sv *SplitView) CopyFieldsFrom(frm any) {
-	fr := frm.(*SplitView)
+func (sv *Splits) CopyFieldsFrom(frm any) {
+	fr := frm.(*Splits)
 	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	sv.HandleSize = fr.HandleSize
 	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
@@ -60,12 +60,12 @@ func (sv *SplitView) CopyFieldsFrom(frm any) {
 	sv.Dim = fr.Dim
 }
 
-func (sv *SplitView) OnInit() {
+func (sv *Splits) OnInit() {
 	sv.SplitViewHandlers()
 	sv.SplitViewStyles()
 }
 
-func (sv *SplitView) SplitViewStyles() {
+func (sv *Splits) SplitViewStyles() {
 	sv.AddStyles(func(s *styles.Style) {
 		sv.HandleSize.SetDp(10)
 
@@ -76,7 +76,7 @@ func (sv *SplitView) SplitViewStyles() {
 	})
 }
 
-func (sv *SplitView) OnChildAdded(child ki.Ki) {
+func (sv *Splits) OnChildAdded(child ki.Ki) {
 	if sp, ok := child.(*Splitter); ok {
 		sp.ThumbSize = sv.HandleSize
 		sp.On(events.SlideStop, func(e events.Event) {
@@ -87,7 +87,7 @@ func (sv *SplitView) OnChildAdded(child ki.Ki) {
 
 // UpdateSplits updates the splits to be same length as number of children,
 // and normalized
-func (sv *SplitView) UpdateSplits() {
+func (sv *Splits) UpdateSplits() {
 	sz := len(sv.Kids)
 	if sz == 0 {
 		return
@@ -111,7 +111,7 @@ func (sv *SplitView) UpdateSplits() {
 }
 
 // EvenSplits splits space evenly across all panels
-func (sv *SplitView) EvenSplits() {
+func (sv *Splits) EvenSplits() {
 	updt := sv.UpdateStart()
 	sz := len(sv.Kids)
 	if sz == 0 {
@@ -126,7 +126,7 @@ func (sv *SplitView) EvenSplits() {
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
 // child entirely.
-func (sv *SplitView) SetSplits(splits ...float32) {
+func (sv *Splits) SetSplits(splits ...float32) {
 	sv.UpdateSplits()
 	sz := len(sv.Kids)
 	mx := min(sz, len(splits))
@@ -141,20 +141,20 @@ func (sv *SplitView) SetSplits(splits ...float32) {
 // can use 0 to hide / collapse a child entirely -- just does the basic local
 // update start / end -- use SetSplitsAction to trigger full rebuild
 // which is typically required
-func (sv *SplitView) SetSplitsList(splits []float32) {
+func (sv *Splits) SetSplitsList(splits []float32) {
 	sv.SetSplits(splits...)
 }
 
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of scene
-func (sv *SplitView) SetSplitsAction(splits ...float32) {
+func (sv *Splits) SetSplitsAction(splits ...float32) {
 	updt := sv.UpdateStart()
 	sv.SetSplits(splits...)
 	sv.UpdateEndLayout(updt)
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
-func (sv *SplitView) SaveSplits() {
+func (sv *Splits) SaveSplits() {
 	sz := len(sv.Splits)
 	if sz == 0 {
 		return
@@ -166,7 +166,7 @@ func (sv *SplitView) SaveSplits() {
 }
 
 // RestoreSplits restores a previously-saved set of splits (if it exists), does an update
-func (sv *SplitView) RestoreSplits() {
+func (sv *Splits) RestoreSplits() {
 	if sv.SavedSplits == nil {
 		return
 	}
@@ -176,7 +176,7 @@ func (sv *SplitView) RestoreSplits() {
 // CollapseChild collapses given child(ren) (sets split proportion to 0),
 // optionally saving the prior splits for later Restore function -- does an
 // Update -- triggered by double-click of splitter
-func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
+func (sv *Splits) CollapseChild(save bool, idxs ...int) {
 	updt := sv.UpdateStart()
 	if save {
 		sv.SaveSplits()
@@ -192,7 +192,7 @@ func (sv *SplitView) CollapseChild(save bool, idxs ...int) {
 }
 
 // RestoreChild restores given child(ren) -- does an Update
-func (sv *SplitView) RestoreChild(idxs ...int) {
+func (sv *Splits) RestoreChild(idxs ...int) {
 	updt := sv.UpdateStart()
 	sz := len(sv.Kids)
 	for _, idx := range idxs {
@@ -205,7 +205,7 @@ func (sv *SplitView) RestoreChild(idxs ...int) {
 }
 
 // IsCollapsed returns true if given split number is collapsed
-func (sv *SplitView) IsCollapsed(idx int) bool {
+func (sv *Splits) IsCollapsed(idx int) bool {
 	sz := len(sv.Kids)
 	if idx >= 0 && idx < sz {
 		return sv.Splits[idx] < 0.01
@@ -217,7 +217,7 @@ func (sv *SplitView) IsCollapsed(idx int) bool {
 // value is 0..1 value of position of that splitter -- it is a sum of all the
 // positions up to that point.  Splitters are updated to ensure that selected
 // position is achieved, while dividing remainder appropriately.
-func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
+func (sv *Splits) SetSplitAction(idx int, nwval float32) {
 	updt := sv.UpdateStart()
 	sz := len(sv.Splits)
 	oldsum := float32(0)
@@ -256,13 +256,13 @@ func (sv *SplitView) SetSplitAction(idx int, nwval float32) {
 	sv.UpdateEndRender(updt)
 }
 
-func (sv *SplitView) ConfigWidget(sc *Scene) {
+func (sv *Splits) ConfigWidget(sc *Scene) {
 	sv.NewParts(LayoutNil)
 	sv.UpdateSplits()
 	sv.ConfigSplitters(sc)
 }
 
-func (sv *SplitView) ConfigSplitters(sc *Scene) {
+func (sv *Splits) ConfigSplitters(sc *Scene) {
 	sz := len(sv.Kids)
 	mods, updt := sv.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
 	odim := mat32.OtherDim(sv.Dim)
@@ -295,7 +295,7 @@ func (sv *SplitView) ConfigSplitters(sc *Scene) {
 	}
 }
 
-func (sv *SplitView) SplitViewKeys() {
+func (sv *Splits) SplitViewKeys() {
 	sv.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
@@ -327,18 +327,18 @@ func (sv *SplitView) SplitViewKeys() {
 	})
 }
 
-func (sv *SplitView) SplitViewHandlers() {
+func (sv *Splits) SplitViewHandlers() {
 	sv.SplitViewKeys()
 }
 
-func (sv *SplitView) StyleSplitView(sc *Scene) {
+func (sv *Splits) StyleSplitView(sc *Scene) {
 	sv.ApplyStyleWidget(sc)
 	// todo: props?
 	// sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
 	// sv.HandleSize.ToDots(&sv.Style.UnContext)
 }
 
-func (sv *SplitView) ApplyStyle(sc *Scene) {
+func (sv *Splits) ApplyStyle(sc *Scene) {
 	sv.StyMu.Lock()
 
 	sv.StyleSplitView(sc)
@@ -348,7 +348,7 @@ func (sv *SplitView) ApplyStyle(sc *Scene) {
 	sv.ConfigSplitters(sc)
 }
 
-func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+func (sv *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	sv.DoLayoutBase(sc, parBBox, iter)
 	sv.DoLayoutParts(sc, parBBox, iter)
 	sv.UpdateSplits()
@@ -391,7 +391,7 @@ func (sv *SplitView) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool
 	return sv.DoLayoutChildren(sc, iter)
 }
 
-func (sv *SplitView) Render(sc *Scene) {
+func (sv *Splits) Render(sc *Scene) {
 	if sv.PushBounds(sc) {
 		for i, kid := range sv.Kids {
 			wi, wb := AsWidget(kid)
@@ -556,12 +556,12 @@ func (sr *Splitter) UpdateSplitterPos() {
 	*/
 }
 
-// SplitView returns our parent split view
-func (sr *Splitter) SplitView() *SplitView {
+// SplitView returns our parent splits
+func (sr *Splitter) Splits() *Splits {
 	if sr.Par == nil || sr.Par.Parent() == nil {
 		return nil
 	}
-	svi := AsSplitView(sr.Par.Parent())
+	svi := AsSplits(sr.Par.Parent())
 	if svi == nil {
 		return nil
 	}
@@ -592,7 +592,7 @@ func (sr *Splitter) SplitterMouse() {
 	})
 	sr.On(events.DoubleClick, func(e events.Event) {
 		e.SetHandled()
-		sv := sr.SplitView()
+		sv := sr.Splits()
 		if sv != nil {
 			if sv.IsCollapsed(sr.SplitterNo) {
 				sv.RestoreSplits()

@@ -126,7 +126,7 @@ func (ge *GiEditor) EditColorScheme() {
 	kv.SetStruct(key)
 	kv.SetStretchMax()
 
-	split := gi.NewSplitView(sc, "split")
+	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
 	svl := NewStructView(split, "svl")
@@ -197,7 +197,7 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.ToolBarType, "toolbar")
-	config.Add(gi.SplitViewType, "splitview")
+	config.Add(gi.SplitsType, "splits")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplitView()
@@ -219,8 +219,8 @@ func (ge *GiEditor) TitleWidget() *gi.Label {
 }
 
 // SplitView returns the main SplitView
-func (ge *GiEditor) SplitView() *gi.SplitView {
-	return ge.ChildByName("splitview", 2).(*gi.SplitView)
+func (ge *GiEditor) SplitView() *gi.Splits {
+	return ge.ChildByName("splitview", 2).(*gi.Splits)
 }
 
 // TreeView returns the main TreeView
