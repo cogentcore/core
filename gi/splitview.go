@@ -51,23 +51,23 @@ type Splits struct {
 	Dim mat32.Dims `desc:"dimension along which to split the space"`
 }
 
-func (sv *Splits) CopyFieldsFrom(frm any) {
+func (sl *Splits) CopyFieldsFrom(frm any) {
 	fr := frm.(*Splits)
-	sv.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sv.HandleSize = fr.HandleSize
-	mat32.CopyFloat32s(&sv.Splits, fr.Splits)
-	mat32.CopyFloat32s(&sv.SavedSplits, fr.SavedSplits)
-	sv.Dim = fr.Dim
+	sl.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sl.HandleSize = fr.HandleSize
+	mat32.CopyFloat32s(&sl.Splits, fr.Splits)
+	mat32.CopyFloat32s(&sl.SavedSplits, fr.SavedSplits)
+	sl.Dim = fr.Dim
 }
 
-func (sv *Splits) OnInit() {
-	sv.SplitViewHandlers()
-	sv.SplitViewStyles()
+func (sl *Splits) OnInit() {
+	sl.SplitViewHandlers()
+	sl.SplitViewStyles()
 }
 
-func (sv *Splits) SplitViewStyles() {
-	sv.AddStyles(func(s *styles.Style) {
-		sv.HandleSize.SetDp(10)
+func (sl *Splits) SplitViewStyles() {
+	sl.AddStyles(func(s *styles.Style) {
+		sl.HandleSize.SetDp(10)
 
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
@@ -76,64 +76,64 @@ func (sv *Splits) SplitViewStyles() {
 	})
 }
 
-func (sv *Splits) OnChildAdded(child ki.Ki) {
+func (sl *Splits) OnChildAdded(child ki.Ki) {
 	if sp, ok := child.(*Splitter); ok {
-		sp.ThumbSize = sv.HandleSize
+		sp.ThumbSize = sl.HandleSize
 		sp.On(events.SlideStop, func(e events.Event) {
-			sv.SetSplitAction(sp.SplitterNo, sp.Value)
+			sl.SetSplitAction(sp.SplitterNo, sp.Value)
 		})
 	}
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
 // and normalized
-func (sv *Splits) UpdateSplits() {
-	sz := len(sv.Kids)
+func (sl *Splits) UpdateSplits() {
+	sz := len(sl.Kids)
 	if sz == 0 {
 		return
 	}
-	if sv.Splits == nil || len(sv.Splits) != sz {
-		sv.Splits = make([]float32, sz)
+	if sl.Splits == nil || len(sl.Splits) != sz {
+		sl.Splits = make([]float32, sz)
 	}
 	sum := float32(0.0)
-	for _, sp := range sv.Splits {
+	for _, sp := range sl.Splits {
 		sum += sp
 	}
 	if sum == 0 { // set default even splits
-		sv.EvenSplits()
+		sl.EvenSplits()
 		sum = 1.0
 	} else {
 		norm := 1.0 / sum
-		for i := range sv.Splits {
-			sv.Splits[i] *= norm
+		for i := range sl.Splits {
+			sl.Splits[i] *= norm
 		}
 	}
 }
 
 // EvenSplits splits space evenly across all panels
-func (sv *Splits) EvenSplits() {
-	updt := sv.UpdateStart()
-	sz := len(sv.Kids)
+func (sl *Splits) EvenSplits() {
+	updt := sl.UpdateStart()
+	sz := len(sl.Kids)
 	if sz == 0 {
 		return
 	}
 	even := 1.0 / float32(sz)
-	for i := range sv.Splits {
-		sv.Splits[i] = even
+	for i := range sl.Splits {
+		sl.Splits[i] = even
 	}
-	sv.UpdateEndLayout(updt)
+	sl.UpdateEndLayout(updt)
 }
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
 // child entirely.
-func (sv *Splits) SetSplits(splits ...float32) {
-	sv.UpdateSplits()
-	sz := len(sv.Kids)
+func (sl *Splits) SetSplits(splits ...float32) {
+	sl.UpdateSplits()
+	sz := len(sl.Kids)
 	mx := min(sz, len(splits))
 	for i := 0; i < mx; i++ {
-		sv.Splits[i] = splits[i]
+		sl.Splits[i] = splits[i]
 	}
-	sv.UpdateSplits()
+	sl.UpdateSplits()
 }
 
 // SetSplitsList sets the split proportions using a list (slice) argument,
@@ -141,74 +141,74 @@ func (sv *Splits) SetSplits(splits ...float32) {
 // can use 0 to hide / collapse a child entirely -- just does the basic local
 // update start / end -- use SetSplitsAction to trigger full rebuild
 // which is typically required
-func (sv *Splits) SetSplitsList(splits []float32) {
-	sv.SetSplits(splits...)
+func (sl *Splits) SetSplitsList(splits []float32) {
+	sl.SetSplits(splits...)
 }
 
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of scene
-func (sv *Splits) SetSplitsAction(splits ...float32) {
-	updt := sv.UpdateStart()
-	sv.SetSplits(splits...)
-	sv.UpdateEndLayout(updt)
+func (sl *Splits) SetSplitsAction(splits ...float32) {
+	updt := sl.UpdateStart()
+	sl.SetSplits(splits...)
+	sl.UpdateEndLayout(updt)
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits
-func (sv *Splits) SaveSplits() {
-	sz := len(sv.Splits)
+func (sl *Splits) SaveSplits() {
+	sz := len(sl.Splits)
 	if sz == 0 {
 		return
 	}
-	if sv.SavedSplits == nil || len(sv.SavedSplits) != sz {
-		sv.SavedSplits = make([]float32, sz)
+	if sl.SavedSplits == nil || len(sl.SavedSplits) != sz {
+		sl.SavedSplits = make([]float32, sz)
 	}
-	copy(sv.SavedSplits, sv.Splits)
+	copy(sl.SavedSplits, sl.Splits)
 }
 
 // RestoreSplits restores a previously-saved set of splits (if it exists), does an update
-func (sv *Splits) RestoreSplits() {
-	if sv.SavedSplits == nil {
+func (sl *Splits) RestoreSplits() {
+	if sl.SavedSplits == nil {
 		return
 	}
-	sv.SetSplitsAction(sv.SavedSplits...)
+	sl.SetSplitsAction(sl.SavedSplits...)
 }
 
 // CollapseChild collapses given child(ren) (sets split proportion to 0),
 // optionally saving the prior splits for later Restore function -- does an
 // Update -- triggered by double-click of splitter
-func (sv *Splits) CollapseChild(save bool, idxs ...int) {
-	updt := sv.UpdateStart()
+func (sl *Splits) CollapseChild(save bool, idxs ...int) {
+	updt := sl.UpdateStart()
 	if save {
-		sv.SaveSplits()
+		sl.SaveSplits()
 	}
-	sz := len(sv.Kids)
+	sz := len(sl.Kids)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
-			sv.Splits[idx] = 0
+			sl.Splits[idx] = 0
 		}
 	}
-	sv.UpdateSplits()
-	sv.UpdateEndLayout(updt)
+	sl.UpdateSplits()
+	sl.UpdateEndLayout(updt)
 }
 
 // RestoreChild restores given child(ren) -- does an Update
-func (sv *Splits) RestoreChild(idxs ...int) {
-	updt := sv.UpdateStart()
-	sz := len(sv.Kids)
+func (sl *Splits) RestoreChild(idxs ...int) {
+	updt := sl.UpdateStart()
+	sz := len(sl.Kids)
 	for _, idx := range idxs {
 		if idx >= 0 && idx < sz {
-			sv.Splits[idx] = 1.0 / float32(sz)
+			sl.Splits[idx] = 1.0 / float32(sz)
 		}
 	}
-	sv.UpdateSplits()
-	sv.UpdateEndLayout(updt)
+	sl.UpdateSplits()
+	sl.UpdateEndLayout(updt)
 }
 
 // IsCollapsed returns true if given split number is collapsed
-func (sv *Splits) IsCollapsed(idx int) bool {
-	sz := len(sv.Kids)
+func (sl *Splits) IsCollapsed(idx int) bool {
+	sz := len(sl.Kids)
 	if idx >= 0 && idx < sz {
-		return sv.Splits[idx] < 0.01
+		return sl.Splits[idx] < 0.01
 	}
 	return false
 }
@@ -217,15 +217,15 @@ func (sv *Splits) IsCollapsed(idx int) bool {
 // value is 0..1 value of position of that splitter -- it is a sum of all the
 // positions up to that point.  Splitters are updated to ensure that selected
 // position is achieved, while dividing remainder appropriately.
-func (sv *Splits) SetSplitAction(idx int, nwval float32) {
-	updt := sv.UpdateStart()
-	sz := len(sv.Splits)
+func (sl *Splits) SetSplitAction(idx int, nwval float32) {
+	updt := sl.UpdateStart()
+	sz := len(sl.Splits)
 	oldsum := float32(0)
 	for i := 0; i <= idx; i++ {
-		oldsum += sv.Splits[i]
+		oldsum += sl.Splits[i]
 	}
 	delta := nwval - oldsum
-	oldval := sv.Splits[idx]
+	oldval := sl.Splits[idx]
 	uval := oldval + delta
 	if uval < 0 {
 		uval = 0
@@ -239,64 +239,64 @@ func (sv *Splits) SetSplitAction(idx int, nwval float32) {
 			if rmdr > 0 {
 				dper := rmdr / float32((sz-1)-idx)
 				for i := idx + 1; i < sz; i++ {
-					sv.Splits[i] = dper
+					sl.Splits[i] = dper
 				}
 			}
 		} else {
 			for i := idx + 1; i < sz; i++ {
-				curval := sv.Splits[i]
-				sv.Splits[i] = rmdr * (curval / oldrmdr) // proportional
+				curval := sl.Splits[i]
+				sl.Splits[i] = rmdr * (curval / oldrmdr) // proportional
 			}
 		}
 	}
-	sv.Splits[idx] = uval
-	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sv.Splits)
-	sv.UpdateSplits()
-	// fmt.Printf("splits: %v\n", sv.Splits)
-	sv.UpdateEndRender(updt)
+	sl.Splits[idx] = uval
+	// fmt.Printf("splits: %v value: %v  splts: %v\n", idx, nwval, sl.Splits)
+	sl.UpdateSplits()
+	// fmt.Printf("splits: %v\n", sl.Splits)
+	sl.UpdateEndRender(updt)
 }
 
-func (sv *Splits) ConfigWidget(sc *Scene) {
-	sv.NewParts(LayoutNil)
-	sv.UpdateSplits()
-	sv.ConfigSplitters(sc)
+func (sl *Splits) ConfigWidget(sc *Scene) {
+	sl.NewParts(LayoutNil)
+	sl.UpdateSplits()
+	sl.ConfigSplitters(sc)
 }
 
-func (sv *Splits) ConfigSplitters(sc *Scene) {
-	sz := len(sv.Kids)
-	mods, updt := sv.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
-	odim := mat32.OtherDim(sv.Dim)
-	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
-	handsz := sv.HandleSize.Dots
-	mid := 0.5 * (sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
+func (sl *Splits) ConfigSplitters(sc *Scene) {
+	sz := len(sl.Kids)
+	mods, updt := sl.Parts.SetNChildren(sz-1, SplitterType, "Splitter")
+	odim := mat32.OtherDim(sl.Dim)
+	spc := sl.BoxSpace()
+	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
+	handsz := sl.HandleSize.Dots
+	mid := 0.5 * (sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim))
 	spicon := icons.DragHandle
-	if sv.Dim == mat32.X {
+	if sl.Dim == mat32.X {
 		spicon = icons.DragIndicator
 	}
-	for i, spk := range *sv.Parts.Children() {
+	for i, spk := range *sl.Parts.Children() {
 		sp := spk.(*Splitter)
 		sp.SplitterNo = i
 		sp.Icon = spicon
-		sp.Dim = sv.Dim
-		sp.LayState.Alloc.Size.SetDim(sv.Dim, size)
+		sp.Dim = sl.Dim
+		sp.LayState.Alloc.Size.SetDim(sl.Dim, size)
 		sp.LayState.Alloc.Size.SetDim(odim, handsz*2)
 		sp.LayState.Alloc.SizeOrig = sp.LayState.Alloc.Size
-		sp.LayState.Alloc.PosRel.SetDim(sv.Dim, 0)
+		sp.LayState.Alloc.PosRel.SetDim(sl.Dim, 0)
 		sp.LayState.Alloc.PosRel.SetDim(odim, mid-handsz+float32(i)*handsz*4)
 		sp.LayState.Alloc.PosOrig = sp.LayState.Alloc.PosRel
 		sp.Min = 0.0
 		sp.Max = 1.0
 		sp.Snap = false
-		sp.ThumbSize = sv.HandleSize
+		sp.ThumbSize = sl.HandleSize
 	}
 	if mods {
-		sv.Parts.UpdateEnd(updt)
+		sl.Parts.UpdateEnd(updt)
 	}
 }
 
-func (sv *Splits) SplitViewKeys() {
-	sv.OnKeyChord(func(e events.Event) {
+func (sl *Splits) SplitViewKeys() {
+	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
 		if goosi.TheApp.Platform() == goosi.MacOS {
@@ -315,66 +315,66 @@ func (sv *Splits) SplitViewKeys() {
 		// fmt.Printf("kc: %v kns: %v kn: %v\n", kc, kns, kn)
 		if kn == 0 {
 			e.SetHandled()
-			sv.EvenSplits()
-		} else if kn <= len(sv.Kids) {
+			sl.EvenSplits()
+		} else if kn <= len(sl.Kids) {
 			e.SetHandled()
-			if sv.Splits[kn-1] <= 0.01 {
-				sv.RestoreChild(kn - 1)
+			if sl.Splits[kn-1] <= 0.01 {
+				sl.RestoreChild(kn - 1)
 			} else {
-				sv.CollapseChild(true, kn-1)
+				sl.CollapseChild(true, kn-1)
 			}
 		}
 	})
 }
 
-func (sv *Splits) SplitViewHandlers() {
-	sv.SplitViewKeys()
+func (sl *Splits) SplitViewHandlers() {
+	sl.SplitViewKeys()
 }
 
-func (sv *Splits) StyleSplitView(sc *Scene) {
-	sv.ApplyStyleWidget(sc)
+func (sl *Splits) StyleSplitView(sc *Scene) {
+	sl.ApplyStyleWidget(sc)
 	// todo: props?
-	// sv.HandleSize.SetFmInheritProp("handle-size", sv.This(), ki.NoInherit, ki.TypeProps)
-	// sv.HandleSize.ToDots(&sv.Style.UnContext)
+	// sl.HandleSize.SetFmInheritProp("handle-size", sl.This(), ki.NoInherit, ki.TypeProps)
+	// sl.HandleSize.ToDots(&sl.Style.UnContext)
 }
 
-func (sv *Splits) ApplyStyle(sc *Scene) {
-	sv.StyMu.Lock()
+func (sl *Splits) ApplyStyle(sc *Scene) {
+	sl.StyMu.Lock()
 
-	sv.StyleSplitView(sc)
-	sv.UpdateSplits()
-	sv.StyMu.Unlock()
+	sl.StyleSplitView(sc)
+	sl.UpdateSplits()
+	sl.StyMu.Unlock()
 
-	sv.ConfigSplitters(sc)
+	sl.ConfigSplitters(sc)
 }
 
-func (sv *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sv.DoLayoutBase(sc, parBBox, iter)
-	sv.DoLayoutParts(sc, parBBox, iter)
-	sv.UpdateSplits()
+func (sl *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sl.DoLayoutBase(sc, parBBox, iter)
+	sl.DoLayoutParts(sc, parBBox, iter)
+	sl.UpdateSplits()
 
-	handsz := sv.HandleSize.Dots
+	handsz := sl.HandleSize.Dots
 	// fmt.Printf("handsz: %v\n", handsz)
-	sz := len(sv.Kids)
-	odim := mat32.OtherDim(sv.Dim)
-	spc := sv.BoxSpace()
-	size := sv.LayState.Alloc.Size.Dim(sv.Dim) - spc.Size().Dim(sv.Dim)
+	sz := len(sl.Kids)
+	odim := mat32.OtherDim(sl.Dim)
+	spc := sl.BoxSpace()
+	size := sl.LayState.Alloc.Size.Dim(sl.Dim) - spc.Size().Dim(sl.Dim)
 	avail := size - handsz*float32(sz-1)
 	// fmt.Printf("avail: %v\n", avail)
-	osz := sv.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
+	osz := sl.LayState.Alloc.Size.Dim(odim) - spc.Size().Dim(odim)
 	pos := float32(0.0)
 
 	spsum := float32(0)
-	for i, sp := range sv.Splits {
-		_, wb := AsWidget(sv.Kids[i])
+	for i, sp := range sl.Splits {
+		_, wb := AsWidget(sl.Kids[i])
 		if wb == nil {
 			continue
 		}
 		isz := sp * avail
-		wb.LayState.Alloc.Size.SetDim(sv.Dim, isz)
+		wb.LayState.Alloc.Size.SetDim(sl.Dim, isz)
 		wb.LayState.Alloc.Size.SetDim(odim, osz)
 		wb.LayState.Alloc.SizeOrig = wb.LayState.Alloc.Size
-		wb.LayState.Alloc.PosRel.SetDim(sv.Dim, pos)
+		wb.LayState.Alloc.PosRel.SetDim(sl.Dim, pos)
 		wb.LayState.Alloc.PosRel.SetDim(odim, spc.Pos().Dim(odim))
 		// fmt.Printf("spl: %v sp: %v size: %v alloc: %v  pos: %v\n", i, sp, isz, wb.LayState.Alloc.SizeOrig, wb.LayState.Alloc.PosRel)
 
@@ -382,23 +382,23 @@ func (sv *Splits) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 		spsum += sp
 		if i < sz-1 {
-			spl := sv.Parts.Child(i).(*Splitter)
+			spl := sl.Parts.Child(i).(*Splitter)
 			spl.Value = spsum
 			spl.UpdatePosFromValue(spl.Value)
 		}
 	}
 
-	return sv.DoLayoutChildren(sc, iter)
+	return sl.DoLayoutChildren(sc, iter)
 }
 
-func (sv *Splits) Render(sc *Scene) {
-	if sv.PushBounds(sc) {
-		for i, kid := range sv.Kids {
+func (sl *Splits) Render(sc *Scene) {
+	if sl.PushBounds(sc) {
+		for i, kid := range sl.Kids {
 			wi, wb := AsWidget(kid)
 			if wb == nil {
 				continue
 			}
-			sp := sv.Splits[i]
+			sp := sl.Splits[i]
 			if sp <= 0.01 {
 				wb.SetFlag(true, Invisible)
 			} else {
@@ -406,13 +406,13 @@ func (sv *Splits) Render(sc *Scene) {
 			}
 			wi.Render(sc) // needs to disconnect using invisible
 		}
-		sv.Parts.Render(sc)
-		sv.PopBounds(sc)
+		sl.Parts.Render(sc)
+		sl.PopBounds(sc)
 	}
 }
 
-// func (sv *SplitView) StateIs(states.Focused) bool {
-// 	return sv.ContainsFocus() // anyone within us gives us focus..
+// func (sl *SplitView) StateIs(states.Focused) bool {
+// 	return sl.ContainsFocus() // anyone within us gives us focus..
 // }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -561,11 +561,11 @@ func (sr *Splitter) Splits() *Splits {
 	if sr.Par == nil || sr.Par.Parent() == nil {
 		return nil
 	}
-	svi := AsSplits(sr.Par.Parent())
-	if svi == nil {
+	sli := AsSplits(sr.Par.Parent())
+	if sli == nil {
 		return nil
 	}
-	return svi
+	return sli
 }
 
 func (sr *Splitter) SplitterMouse() {
@@ -592,12 +592,12 @@ func (sr *Splitter) SplitterMouse() {
 	})
 	sr.On(events.DoubleClick, func(e events.Event) {
 		e.SetHandled()
-		sv := sr.Splits()
-		if sv != nil {
-			if sv.IsCollapsed(sr.SplitterNo) {
-				sv.RestoreSplits()
+		sl := sr.Splits()
+		if sl != nil {
+			if sl.IsCollapsed(sr.SplitterNo) {
+				sl.RestoreSplits()
 			} else {
-				sv.CollapseChild(true, sr.SplitterNo)
+				sl.CollapseChild(true, sr.SplitterNo)
 			}
 		}
 	})
