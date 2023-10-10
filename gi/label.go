@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"image"
 
-	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
@@ -118,10 +117,6 @@ func (lb *Label) LabelStyles() {
 	lb.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		s.Cursor = cursors.Text
-
-		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		}
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle
