@@ -13,7 +13,6 @@ import (
 	"strconv"
 
 	"log"
-	"reflect"
 	"strings"
 
 	"goki.dev/enums"
@@ -110,14 +109,10 @@ func (n *Node) InitName(k Ki, name ...string) {
 	}
 }
 
-// TODO: should BaseIface return a [gti.Type]?
-
-// BaseIface returns the base interface type for all elements
-// within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
-// Used e.g., for determining what types of children
-// can be created.
-func (n *Node) BaseIface() reflect.Type {
-	return KiType
+// BaseType returns the base node type for all elements within this tree.
+// Used e.g., for determining what types of children can be created.
+func (n *Node) BaseType() *gti.Type {
+	return NodeType
 }
 
 // Name returns the user-defined name of the object (Node.Nm),

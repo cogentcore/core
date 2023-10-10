@@ -73,11 +73,9 @@ type Ki interface {
 	// AsNode returns the *ki.Node base type for this node.
 	AsNode() *Node
 
-	// BaseIface returns the base interface type for all elements
-	// within this tree.  Use reflect.TypeOf((*<interface_type>)(nil)).Elem().
-	// Used e.g., for determining what types of children
-	// can be created.
-	BaseIface() reflect.Type
+	// BaseType returns the base node type for all elements within this tree.
+	// Used e.g., for determining what types of children can be created.
+	BaseType() *gti.Type
 
 	// Name returns the user-defined name of the object (Node.Nm),
 	// for finding elements, generating paths, IO, etc.
