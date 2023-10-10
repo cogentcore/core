@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/cursors"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -437,7 +438,7 @@ func (tv *TabView) ConfigNewTabButton(sc *Scene) bool {
 		}
 		tab := tb.InsertNewChild(ButtonType, ntb, "new-tab").(*Button)
 		tab.Data = -1
-		tab.SetIcon(icons.Add)
+		tab.SetIcon(icons.Add).SetType(ButtonAction)
 		tab.OnClick(func(e events.Event) {
 			tv.NewTabAction(tv.NewTabType, "New Tab")
 			tv.SelectTabIndex(len(*tv.Frame().Children()) - 1)
@@ -619,6 +620,8 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 		label := w.(*Label)
 		label.Type = LabelTitleSmall
 		w.AddStyles(func(s *styles.Style) {
+			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
 		})
