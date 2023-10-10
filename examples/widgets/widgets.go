@@ -175,19 +175,19 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSnap(true).
 		SetTracking(true).
 		SetIcon(icons.RadioButtonChecked)
-	slider1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2)).
-		OnChange(, func(e events.Event) {
-			fmt.Println("slider1", slider1.Value)
-		})
+	slider1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2))
+	slider1.OnChange(func(e events.Event) {
+		fmt.Println("slider1", slider1.Value)
+	})
 
 	slider2 := gi.NewSlider(srow, "slider2").
 		SetDim(mat32.Y).
 		SetTracking(true).
 		SetValue(0.5)
-	slider2.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).
-		OnChange(, func(e events.Event) {
-			fmt.Println("slider2", slider2.Value)
-		})
+	slider2.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1))
+	slider2.OnChange(func(e events.Event) {
+		fmt.Println("slider2", slider2.Value)
+	})
 
 	scrollbar1 := gi.NewSlider(srow, "scrollbar1").
 		SetType(gi.SliderScrollbar).
@@ -196,10 +196,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetValue(0.25).
 		SetSnap(true).
 		SetTracking(true)
-	scrollbar1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1)).
-		OnChange(, func(e events.Event) {
-			fmt.Println("scroll1", scrollbar1.Value)
-		})
+	scrollbar1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1))
+	scrollbar1.OnChange(func(e events.Event) {
+		fmt.Println("scroll1", scrollbar1.Value)
+	})
 
 	scrollbar2 := gi.NewSlider(srow, "scrollbar2").
 		SetType(gi.SliderScrollbar).
@@ -210,10 +210,10 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetStep(1).
 		SetPageStep(10)
-	scrollbar2.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight().
-		OnChange(, func(e events.Event) {
-			fmt.Println("scroll2", scrollbar2.Value)
-		})
+	scrollbar2.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight()
+	scrollbar2.OnChange(func(e events.Event) {
+		fmt.Println("scroll2", scrollbar2.Value)
+	})
 
 	//////////////////////////////////////////
 	//      Text Widgets
