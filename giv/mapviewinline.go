@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -127,8 +128,8 @@ func (mv *MapViewInline) ConfigParts(vp *gi.Scene) {
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if mv.IsDisabled() {
-			widg.AsWidget().SetDisabled()
-			keyw.AsWidget().SetDisabled()
+			widg.AsWidget().SetState(true, states.Disabled)
+			keyw.AsWidget().SetState(true, states.Disabled)
 		}
 	}
 	adack, err := mv.Parts.Children().ElemFromEndTry(1)

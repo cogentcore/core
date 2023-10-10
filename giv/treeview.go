@@ -354,11 +354,11 @@ func (tv *TreeView) Label() string {
 func (tv *TreeView) UpdateInactive() bool {
 	tv.ClearDisabled()
 	if tv.SrcNode == nil {
-		tv.SetDisabled()
+		tv.SetState(true, states.Disabled)
 	} else {
 		if inact, err := tv.SrcNode.PropTry("inactive"); err == nil {
 			if bo, ok := laser.ToBool(inact); bo && ok {
-				tv.SetDisabled()
+				tv.SetState(true, states.Disabled)
 			}
 		}
 	}
@@ -1057,13 +1057,13 @@ func (tv *TreeView) IsRootOrField(op string) bool {
 	}
 	if sk.Is(Field) {
 		if op != "" {
-			gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op)}, gi.AddOk, gi.NoCancel, nil, nil)
+			gi.PromptDialog(tv, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v fields", op), Ok: true, Cancel: false}, nil)
 		}
 		return true
 	}
 	if tv.This() == tv.RootView.This() {
 		if op != "" {
-			gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op)}, gi.AddOk, gi.NoCancel, nil, nil)
+			gi.PromptDialog(tv, gi.DlgOpts{Title: "TreeView " + op, Prompt: fmt.Sprintf("Cannot %v the root of the tree", op), Ok: true, Cancel: false}, nil)
 		}
 		return true
 	}
@@ -1424,7 +1424,7 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	}
 	par := sk.Parent()
 	if par == nil {
-		gi.PromptDialog(tv.Scene, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree"}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
 		return
 	}
 	myidx, ok := sk.IndexInParent()

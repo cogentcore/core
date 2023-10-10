@@ -18,10 +18,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -100,7 +100,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		fv.ShowIndex = false
 		fv.InactKeyNav = false // can only have one active -- files..
 		fv.ShowToolBar = false
-		fv.SetDisabled() // select only
+		fv.SetState(true, states.Disabled) // select only
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMaxHeight()
 			s.MaxWidth.SetDp(0) // no stretch
@@ -109,7 +109,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		fv := w.(*TableView)
 		fv.ShowIndex = false // no index
 		fv.ShowToolBar = false
-		fv.SetDisabled() // select only
+		fv.SetState(true, states.Disabled) // select only
 		fv.AddStyles(func(s *styles.Style) {
 			s.SetStretchMax()
 		})
@@ -169,7 +169,7 @@ func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
 func (fv *FileView) SetFilename(filename, ext string) {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
 	fv.SetExt(ext)
-	fv.Config()
+	// fv.Config(fv.Sc)
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
@@ -177,7 +177,7 @@ func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file
 	fv.SetExt(ext)
-	fv.Config()
+	// fv.Config()
 }
 
 // SelectedFile returns the full path to selected file
@@ -205,7 +205,7 @@ func (fv *FileView) SelectFile() {
 			fv.UpdateFilesAction()
 			return
 		}
-		fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
+		// fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
 	}
 }
 
@@ -251,25 +251,25 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 		wi := widg.AsWidget()
 		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
 			if _, err := wi.PropTry("color"); err != nil {
-				wi.SetFullReRender()
+				// wi.SetFullReRender()
 			}
 			wi.SetProp("color", clr)
 			return
 		}
-		if fvv := tv.ParentByType(TypeFileView, ki.Embeds); fvv != nil {
-			fv := fvv.Embed(TypeFileView).(*FileView)
+		if fvv := tv.ParentByType(FileViewType, ki.Embeds); fvv != nil {
+			fv := fvv.(*FileView)
 			fn := finf[row].Name
 			ext := strings.ToLower(filepath.Ext(fn))
 			if _, has := fv.ExtMap[ext]; has {
 				if _, err := wi.PropTry("color"); err != nil {
-					wi.SetFullReRender()
+					// wi.SetFullReRender()
 				}
 				wi.SetProp("color", "pref(link)")
 				return
 			}
 		}
 		if _, err := wi.PropTry("color"); err == nil {
-			wi.SetFullReRender()
+			// wi.SetFullReRender()
 		}
 		wi.DeleteProp("color")
 	}
@@ -278,7 +278,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 // Config configures the view
 func (fv *FileView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "path-tbar")
+	config.Add(gi.ToolBarType, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
 	config.Add(gi.LayoutType, "sel-row")
 	mods, updt := fv.ConfigChildren(config)
@@ -301,7 +301,7 @@ func (fv *FileView) ConfigPathBar() {
 
 	config := ki.Config{}
 	config.Add(gi.LabelType, "path-lbl")
-	config.Add(gi.TypeComboBox, "path")
+	config.Add(gi.ComboBoxType, "path")
 	config.Add(gi.ButtonType, "path-up")
 	config.Add(gi.ButtonType, "path-ref")
 	config.Add(gi.ButtonType, "path-fav")
@@ -313,76 +313,61 @@ func (fv *FileView) ConfigPathBar() {
 	pf.Editable = true
 	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
-	pf.ConfigParts(vp)
+	pf.ConfigParts(fv.Sc)
 	pft, found := pf.TextField()
 	if found {
 		pft.SetCompleter(fv, fv.PathComplete, fv.PathCompleteEdit)
-		pft.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.TextFieldDone) {
-				fvv, _ := recv.Embed(TypeFileView).(*FileView)
-				pff, _ := send.(*gi.TextField)
-				fvv.DirPath = pff.Text()
-				fvv.UpdateFilesAction()
-			}
+		pft.OnChange(func(e events.Event) {
+			fv.DirPath = pft.Text()
+			fv.UpdateFilesAction()
 		})
 	}
-	pf.ComboSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(TypeFileView).(*FileView)
-		pff := send.Embed(gi.TypeComboBox).(*gi.ComboBox)
-		sp := data.(string)
+	pf.OnChange(func(e events.Event) {
+		sp := pf.CurVal.(string)
 		if sp == gi.FileViewResetPaths {
 			gi.SavedPaths = make(gi.FilePaths, 1, gi.Prefs.Params.SavedPathsMax)
-			gi.SavedPaths[0] = fvv.DirPath
-			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			gi.SavedPaths[0] = fv.DirPath
+			pf.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
 			gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
 			fv.UpdateFiles()
 		} else if sp == gi.FileViewEditPaths {
 			fv.EditPaths()
-			pff.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
+			pf.ItemsFromStringList(([]string)(gi.SavedPaths), true, 0)
 		} else {
-			fvv.DirPath = sp
-			fvv.UpdateFilesAction()
+			fv.DirPath = sp
+			fv.UpdateFilesAction()
 		}
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(TypeFileView).(*FileView)
-		fvv.DirPathUp()
+	pr.AddButton(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, func(act *gi.Button) {
+		fv.DirPathUp()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(TypeFileView).(*FileView)
-		fvv.UpdateFilesAction()
+	pr.AddButton(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, func(act *gi.Button) {
+		fv.UpdateFilesAction()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		fvv, _ := recv.Embed(TypeFileView).(*FileView)
-		fvv.AddPathToFavs()
+	pr.AddButton(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, func(act *gi.Button) {
+		fv.AddPathToFavs()
 	})
 
-	pr.AddAction(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"},
-		fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			fvv.NewFolder()
-		})
+	pr.AddButton(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"}, func(act *gi.Button) {
+		fv.NewFolder()
+	})
 }
 
 func (fv *FileView) ConfigFilesRow() {
 	fr := fv.FilesRow()
 	config := ki.Config{}
-	config.Add(TypeTableView, "favs-view")
-	config.Add(TypeTableView, "files-view")
+	config.Add(TableViewType, "favs-view")
+	config.Add(TableViewType, "files-view")
 	fr.ConfigChildren(config) // already covered by parent update
 
 	sv := fv.FavsView()
 	sv.SelectedIdx = -1
 	sv.SetSlice(&gi.Prefs.FavPaths)
-	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			svv, _ := send.(*TableView)
-			fvv.FavSelect(svv.SelectedIdx)
-		}
+	sv.OnSelect(func(e events.Event) {
+		fv.FavSelect(sv.SelectedIdx)
 	})
 
 	sv = fv.FilesView()
@@ -391,18 +376,11 @@ func (fv *FileView) ConfigFilesRow() {
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
 	}
-	sv.WidgetSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.WidgetSelected) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			svv, _ := send.(*TableView)
-			fvv.FileSelectAction(svv.SelectedIdx)
-		}
+	sv.OnSelect(func(e events.Event) {
+		fv.FileSelectAction(sv.SelectedIdx)
 	})
-	sv.SliceViewSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(SliceViewDoubleClicked) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			fvv.SelectFile()
-		}
+	sv.OnDoubleClick(func(e events.Event) {
+		fv.SelectFile()
 	})
 }
 
@@ -422,12 +400,8 @@ func (fv *FileView) ConfigSelRow() {
 	sf.Tooltip = fmt.Sprintf("enter file name.  special keys: up/down to move selection; %v or %v to go up to parent folder; %v or %v or %v or %v to select current file (if directory, goes into it, if file, selects and closes); %v or %v for prev / next history item; %s return to this field", gi.ShortcutForFun(gi.KeyFunWordLeft), gi.ShortcutForFun(gi.KeyFunJump), gi.ShortcutForFun(gi.KeyFunSelectMode), gi.ShortcutForFun(gi.KeyFunInsert), gi.ShortcutForFun(gi.KeyFunInsertAfter), gi.ShortcutForFun(gi.KeyFunMenuOpen), gi.ShortcutForFun(gi.KeyFunHistPrev), gi.ShortcutForFun(gi.KeyFunHistNext), gi.ShortcutForFun(gi.KeyFunSearch))
 	sf.SetCompleter(fv, fv.FileComplete, fv.FileCompleteEdit)
 	sf.SetText(fv.SelFile)
-	sf.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			pff, _ := send.(*gi.TextField)
-			fvv.SetSelFileAction(pff.Text())
-		}
+	sf.OnChange(func(e events.Event) {
+		fv.SetSelFileAction(sf.Text())
 	})
 	sf.StartFocus()
 
@@ -436,12 +410,8 @@ func (fv *FileView) ConfigSelRow() {
 	el.Tooltip = "target extension(s) to highlight -- if multiple, separate with commas, and do include the . at the start"
 	ef := fv.ExtField()
 	ef.SetText(fv.Ext)
-	ef.TextFieldSig.Connect(fv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			fvv, _ := recv.Embed(TypeFileView).(*FileView)
-			pff, _ := send.(*gi.TextField)
-			fvv.SetExtAction(pff.Text())
-		}
+	ef.OnChange(func(e events.Event) {
+		fv.SetExtAction(ef.Text())
 	})
 }
 
@@ -529,12 +499,11 @@ func (fv *FileView) UpdatePath() {
 // UpdateFilesAction updates list of files and other views for current path,
 // emitting FileSig signals around it -- this is for gui-generated actions only.
 func (fv *FileView) UpdateFilesAction() {
-	fv.FileSig.Emit(fv.This(), int64(FileViewWillUpdate), fv.DirPath)
-	fv.SetFullReRender()
+	// fv.FileSig.Emit(fv.This(), int64(FileViewWillUpdate), fv.DirPath)
 	fv.UpdateFiles()
 	sf := fv.SelField()
 	sf.GrabFocus()
-	fv.FileSig.Emit(fv.This(), int64(FileViewUpdated), fv.DirPath)
+	// fv.FileSig.Emit(fv.This(), int64(FileViewUpdated), fv.DirPath)
 }
 
 // UpdateFiles updates list of files and other views for current path
@@ -544,13 +513,14 @@ func (fv *FileView) UpdateFiles() {
 
 	updt := fv.UpdateStart()
 	defer fv.UpdateEnd(updt)
-	var owin goosi.RenderWin
-	win := fv.ParentRenderWin()
-	if win != nil {
-		owin = fv.Scene.Win.RenderWin
-	} else {
-		owin = goosi.TheApp.RenderWinInFocus()
-	}
+
+	// var owin goosi.RenderWin
+	// win := fv.ParentRenderWin()
+	// if win != nil {
+	// 	owin = fv.Scene.Win.RenderWin
+	// } else {
+	// 	owin = goosi.TheApp.RenderWinInFocus()
+	// }
 
 	fv.UpdatePath()
 	pf := fv.PathField()
@@ -564,8 +534,9 @@ func (fv *FileView) UpdateFiles() {
 	pf.SetText(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	goosi.TheApp.Cursor(owin).Push(cursor.Wait)
-	defer goosi.TheApp.Cursor(owin).Pop()
+
+	// goosi.TheApp.Cursor(owin).Push(cursor.Wait)
+	// defer goosi.TheApp.Cursor(owin).Pop()
 
 	effpath, err := filepath.EvalSymlinks(fv.DirPath)
 	if err != nil {
@@ -583,7 +554,7 @@ func (fv *FileView) UpdateFiles() {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
 			// if fv.Scene != nil {
-			// 	gi.PromptDialog(fv.Scene, "FileView UpdateFiles", emsg, gi.AddOk, gi.NoCancel, nil, nil)
+			// 	gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView UpdateFiles", emsg, Ok: true, Cancel: false}, nil)
 			// } else {
 			log.Printf("gi.FileView error: %v\n", emsg)
 			// }
@@ -615,7 +586,7 @@ func (fv *FileView) UpdateFiles() {
 	sv.SelVal = fv.SelFile
 	sv.SortSlice()
 	if !sv.IsConfiged() {
-		sv.Config()
+		sv.Config(fv.Sc)
 		sv.LayoutSliceGrid()
 	}
 	sv.UpdateSliceGrid()
@@ -664,13 +635,13 @@ func (fv *FileView) AddPathToFavs() {
 		fnm = dp
 	}
 	if _, found := gi.Prefs.FavPaths.FindPath(dp); found {
-		gi.PromptDialog(fv.Scene, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp)}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(fv, gi.DlgOpts{Title: "Add Path To Favorites", Prompt: fmt.Sprintf("Path is already on the favorites list: %v", dp), Ok: true, Cancel: false}, nil)
 		return
 	}
 	fi := gi.FavPathItem{"folder", fnm, dp}
 	gi.Prefs.FavPaths = append(gi.Prefs.FavPaths, fi)
 	gi.Prefs.Save()
-	fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
+	// fv.FileSig.Emit(fv.This(), int64(FileViewFavAdded), fi)
 	fv.UpdateFavs()
 }
 
@@ -706,9 +677,9 @@ func (fv *FileView) NewFolder() {
 	err := os.MkdirAll(np, 0775)
 	if err != nil {
 		emsg := fmt.Sprintf("NewFolder at: %q: Error: %v", fv.DirPath, err)
-		gi.PromptDialog(fv.Scene, gi.DlgOpts{Title: "FileView Error", Prompt: emsg}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(fv, gi.DlgOpts{Title: "FileView Error", Prompt: emsg, Ok: true, Cancel: false}, nil)
 	}
-	fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
+	// fv.FileSig.Emit(fv.This(), int64(FileViewNewFolder), fv.DirPath)
 	fv.UpdateFilesAction()
 }
 
@@ -731,7 +702,8 @@ func (fv *FileView) SetSelFileAction(sel string) {
 	fv.SelectedIdx = sv.SelectedIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
+	fv.Send(events.Select, nil) // receiver needs to get selectedFile
+	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
 // FileSelectAction updates selection with given selected file and emits
@@ -746,7 +718,8 @@ func (fv *FileView) FileSelectAction(idx int) {
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
+	fv.Send(events.Select, nil)
+	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
 // SetExt updates the ext to given (list of, comma separated) extensions
@@ -774,7 +747,6 @@ func (fv *FileView) SetExt(ext string) {
 // SetExtAction sets the current extension to highlight, and redisplays files
 func (fv *FileView) SetExtAction(ext string) {
 	fv.SetExt(ext)
-	fv.SetFullReRender()
 	fv.UpdateFiles()
 }
 
@@ -810,10 +782,8 @@ func (fv *FileView) SetTypeHandlers() {
 }
 
 func (fv *FileView) FileViewEvents() {
-	fvwe.AddFunc(events.KeyChord, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
-		fvv := recv.Embed(TypeFileView).(*FileView)
-		kt := d.(*events.Key)
-		fvv.KeyInput(kt)
+	fv.OnKeyChord(func(e events.Event) {
+		fv.KeyInput(e)
 	})
 }
 
@@ -923,15 +893,15 @@ func (fv *FileView) EditPaths() {
 	copy(tmp, gi.SavedPaths)
 	gi.StringsRemoveExtras((*[]string)(&tmp), gi.SavedPathsExtras)
 	opts := DlgOpts{Title: "Recent File Paths", Prompt: "Delete paths you no longer use", Ok: true, Cancel: true, NoAdd: true}
-	SliceViewDialog(fv.Scene, &tmp, opts,
-		nil, fv, func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				gi.SavedPaths = nil
-				gi.SavedPaths = append(gi.SavedPaths, tmp...)
-				// add back the reset/edit menu items
-				gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
-				gi.SavePaths()
-				fv.UpdateFiles()
-			}
-		})
+	SliceViewDialog(fv, opts, &tmp, nil, func(dlg *gi.Dialog) {
+		if !dlg.Accepted {
+			return
+		}
+		gi.SavedPaths = nil
+		gi.SavedPaths = append(gi.SavedPaths, tmp...)
+		// add back the reset/edit menu items
+		gi.StringsAddExtras((*[]string)(&gi.SavedPaths), gi.SavedPathsExtras)
+		gi.SavePaths()
+		fv.UpdateFiles()
+	})
 }

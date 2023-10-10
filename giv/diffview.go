@@ -18,7 +18,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/token"
 	"goki.dev/vci/v2"
@@ -39,7 +38,7 @@ func DiffFiles(afile, bfile string) (*DiffView, error) {
 	}
 	astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
 	bstr := strings.Split(strings.Replace(string(bb), "\r\n", "\n", -1), "\n")
-	dlg := DiffViewDialog(nil, astr, bstr, afile, bfile, "", "", DlgOpts{Title: "Diff File View:"})
+	dlg := DiffViewDialog(nil, DlgOpts{Title: "Diff File View:"}, astr, bstr, afile, bfile, "", "")
 	return dlg, nil
 }
 
@@ -74,26 +73,24 @@ func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Tex
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
-	return DiffViewDialog(nil, astr, bstr, file, file, rev_a, rev_b, DlgOpts{Title: "DiffVcs: " + DirAndFile(file)}), nil
+	return DiffViewDialog(nil, DlgOpts{Title: "DiffVcs: " + DirAndFile(file)}, astr, bstr, file, file, rev_a, rev_b), nil
 }
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
-func DiffViewDialog(avp *gi.Scene, astr, bstr []string, afile, bfile, arev, brev string, opts DlgOpts) *DiffView {
-	dlg := gi.NewStdDialog(opts.ToGiOpts(), opts.Ok, opts.Cancel)
+func DiffViewDialog(ctx gi.Widget, opts DlgOpts, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
+	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), nil)
 
 	frame := dlg.Stage.Scene
-	_, prIdx := dlg.PromptWidget(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	dv := frame.InsertNewChild(TypeDiffView, prIdx+1, "diff-view").(*DiffView)
+	dv := frame.InsertNewChild(DiffViewType, prIdx+1, "diff-view").(*DiffView)
 	dv.SetStretchMax()
 	dv.FileA = afile
 	dv.FileB = bfile
 	dv.RevA = arev
 	dv.RevB = brev
 	dv.DiffStrings(astr, bstr)
-
-	dlg.UpdateEndNoSig(true) // going to be shown
-	dlg.Open(0, 0, avp, nil)
+	dlg.Run()
 	return dv
 }
 
@@ -308,7 +305,7 @@ func (dv *DiffView) SaveFileB(fname gi.FileName) {
 // DiffView.
 func (dv *DiffView) DiffStrings(astr, bstr []string) {
 	if !dv.IsConfiged() {
-		dv.Config()
+		dv.Config(dv.Sc)
 	}
 	av, bv := dv.TextViews()
 	aupdt := av.UpdateStart()
@@ -597,7 +594,7 @@ func (dv *DiffView) UndoDiff(ab int) {
 func (dv *DiffView) ConfigWidget(vp *gi.Scene) {
 	dv.Lay = gi.LayoutVert
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.LayoutType, "diff-lay")
 	mods, updt := dv.ConfigChildren(config)
 	if !mods {
@@ -607,7 +604,6 @@ func (dv *DiffView) ConfigWidget(vp *gi.Scene) {
 		dv.ConfigToolBar()
 		dv.ConfigTexts()
 	}
-	dv.SetFullReRender()
 	dv.UpdateEnd(updt)
 }
 
@@ -629,33 +625,23 @@ func (dv *DiffView) ConfigToolBar() {
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
-	gi.NewLabel(tb, "label-a", txta)
-	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.NextDiff(0)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.PrevDiff(0)
-		})
-	tb.AddButton(gi.ActOpts{Label: "A <- B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in B, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.ApplyDiff(0, -1)
-			dvv.NextDiff(0)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A <- B)", UpdateFunc: dv.FileModifiedUpdateA},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.UndoDiff(0)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			CallMethod(dvv, "SaveFileA", dv.Scene)
-		})
+	gi.NewLabel(tb, "label-a").SetText(txta)
+	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.NextDiff(0)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.PrevDiff(0)
+	})
+	tb.AddButton(gi.ActOpts{Label: "A <- B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in B, and move to next diff", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.ApplyDiff(0, -1)
+		dv.NextDiff(0)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A <- B)", UpdateFunc: dv.FileModifiedUpdateA}, func(act *gi.Button) {
+		dv.UndoDiff(0)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateA}, func(act *gi.Button) {
+		CallMethod(dv, "SaveFileA", dv.Sc)
+	})
 	gi.NewStretch(tb, "str")
 
 	txtb := "B: " + DirAndFile(dv.FileB)
@@ -663,32 +649,22 @@ func (dv *DiffView) ConfigToolBar() {
 		txtb += ": " + dv.RevB
 	}
 	gi.NewLabel(tb, "label-b", txtb)
-	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.NextDiff(1)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.PrevDiff(1)
-		})
-	tb.AddButton(gi.ActOpts{Label: "A -> B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in A, and move to next diff", UpdateFunc: dv.HasDiffsUpdate},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.ApplyDiff(1, -1)
-			dvv.NextDiff(1)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A -> B)", UpdateFunc: dv.FileModifiedUpdateB},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			dvv.UndoDiff(1)
-		})
-	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB},
-		dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dvv := recv.Embed(TypeDiffView).(*DiffView)
-			CallMethod(dvv, "SaveFileB", dv.Scene)
-		})
+	tb.AddButton(gi.ActOpts{Label: "Next", Icon: icons.KeyboardArrowDown, Tooltip: "move down to next diff region", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.NextDiff(1)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Prev", Icon: icons.KeyboardArrowUp, Tooltip: "move up to previous diff region", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.PrevDiff(1)
+	})
+	tb.AddButton(gi.ActOpts{Label: "A -> B", Icon: icons.ContentCopy, Tooltip: "for current diff region, apply change from corresponding version in A, and move to next diff", UpdateFunc: dv.HasDiffsUpdate}, func(act *gi.Button) {
+		dv.ApplyDiff(1, -1)
+		dv.NextDiff(1)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Undo", Icon: icons.Undo, Tooltip: "undo last diff apply action (A -> B)", UpdateFunc: dv.FileModifiedUpdateB}, func(act *gi.Button) {
+		dv.UndoDiff(1)
+	})
+	tb.AddButton(gi.ActOpts{Label: "Save", Icon: icons.Save, Tooltip: "save edited version of file -- prompts for filename -- this will convert file back to its original form (removing side-by-side alignment) and end the diff editing function", UpdateFunc: dv.FileModifiedUpdateB}, func(act *gi.Button) {
+		CallMethod(dv, "SaveFileB", dv.Sc)
+	})
 }
 
 func (dv *DiffView) SetTextNames() {
@@ -766,11 +742,11 @@ func (dv *DiffView) ConfigTexts() {
 		bv.SetBuf(dv.BufB)
 
 		// sync scrolling
-		al.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			bl.ScrollToPos(mat32.Dims(sig), data.(float32))
+		al.On(events.Scroll, func(e events.Event) {
+			// bl.ScrollToPos(al.Pos(), data.(float32))
 		})
-		bl.ScrollSig.Connect(dv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			al.ScrollToPos(mat32.Dims(sig), data.(float32))
+		bl.On(events.Scroll, func(e events.Event) {
+			// al.ScrollToPos(mat32.Dims(sig), data.(float32))
 		})
 	}
 	lay.UpdateEnd(updt)
@@ -812,8 +788,12 @@ type DiffTextView struct {
 	TextView
 }
 
+func (tv *DiffTextView) OnInit() {
+	tv.TextViewEvents()
+}
+
 func (tv *DiffTextView) DiffView() *DiffView {
-	dvi := tv.ParentByType(TypeDiffView, ki.NoEmbeds)
+	dvi := tv.ParentByType(DiffViewType, ki.NoEmbeds)
 	if dvi == nil {
 		return nil
 	}
@@ -821,8 +801,8 @@ func (tv *DiffTextView) DiffView() *DiffView {
 }
 
 // MouseEvent handles the events.Event to process double-click
-func (tv *DiffTextView) MouseEvent(me events.Event) {
-	if me.Button != events.Left || me.Action != events.DoubleClick {
+func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
+	if me.MouseButton() != events.Left {
 		tv.TextView.MouseEvent(me)
 		return
 	}
@@ -847,23 +827,15 @@ func (tv *DiffTextView) MouseEvent(me events.Event) {
 
 // TextViewEvents sets connections between mouse and key events and actions
 func (tv *DiffTextView) TextViewEvents() {
-	tv.HoverTooltipEvent()
+	// tv.HoverTooltipEvent()
 	tv.MouseMoveEvent()
 	tv.MouseDragEvent()
-	tvwe.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(TypeDiffTextView).(*DiffTextView)
-		me := d.(events.Event)
-		txf.MouseEvent(me) // gets our new one
+	tv.On(events.DoubleClick, func(e events.Event) {
+		tv.HandleDoubleClick(e)
 	})
 	tv.MouseFocusEvent()
-	tvwe.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		txf := recv.Embed(TypeTextView).(*TextView)
-		kt := d.(*events.Key)
-		txf.KeyInput(kt)
+	tv.On(events.KeyChord, func(e events.Event) {
+		kt := e.(*events.Key)
+		tv.KeyInput(kt)
 	})
-}
-
-// SetTypeHandlers indirectly sets connections between mouse and key events and actions
-func (tv *DiffTextView) SetTypeHandlers() {
-	tv.TextViewEvents()
 }

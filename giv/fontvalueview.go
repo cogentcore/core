@@ -8,8 +8,8 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
@@ -42,10 +42,8 @@ func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
 	ac.SetProp("border-radius", units.Dp(4))
-	ac.ActionSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		vvv, _ := recv.Embed(TypeFontValueView).(*FontValueView)
-		ac := vvv.Widget.(*gi.Button)
-		vvv.OpenDialog(ac.Sc, nil, nil)
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -54,25 +52,23 @@ func (vv *FontValueView) HasAction() bool {
 	return true
 }
 
-func (vv *FontValueView) OpenDialog(vp *gi.Scene, fun func(dlg *gi.Dialog)) {
+func (vv *FontValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
 	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
 	desc, _ := vv.Tag("desc")
-	FontChooserDialog(vp, DlgOpts{Title: "Select a Font", Prompt: desc},
-		vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				si := TableViewSelectDialogValue(ddlg)
-				if si >= 0 {
-					fi := paint.FontLibrary.FontInfo[si]
-					vv.SetValue(fi.Name)
-					vv.UpdateWidget()
-				}
+	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: desc}, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			si := TableViewSelectDialogValue(dlg)
+			if si >= 0 {
+				fi := paint.FontLibrary.FontInfo[si]
+				vv.SetValue(fi.Name)
+				vv.UpdateWidget()
 			}
-			if dlgRecv != nil && dlgFunc != nil {
-				dlgFunc(dlgRecv, send, sig, data)
-			}
-		})
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }

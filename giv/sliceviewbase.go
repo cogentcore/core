@@ -50,7 +50,7 @@ type SliceViewer interface {
 	SliceGrid() *gi.Frame
 
 	// ScrollBar returns the SliceGrid scrollbar
-	ScrollBar() *gi.ScrollBar
+	ScrollBar() *gi.Slider
 
 	// RowWidgetNs returns number of widgets per row and offset for index label
 	RowWidgetNs() (nWidgPerRow, idxOff int)
@@ -365,7 +365,7 @@ func (sv *SliceViewBase) UpdateValues() {
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
@@ -403,8 +403,8 @@ func (sv *SliceViewBase) SliceGrid() *gi.Frame {
 }
 
 // ScrollBar returns the SliceGrid scrollbar
-func (sv *SliceViewBase) ScrollBar() *gi.ScrollBar {
-	return sv.GridLayout().ChildByName("scrollbar", 1).(*gi.ScrollBar)
+func (sv *SliceViewBase) ScrollBar() *gi.Slider {
+	return sv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
 }
 
 // ToolBar returns the toolbar widget
@@ -759,7 +759,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			widg = sg.Kids[ridx+idxOff].(gi.Widget)
 			vv.UpdateWidget()
 			if sv.IsDisabled() {
-				widg.AsWidget().SetDisabled()
+				widg.AsWidget().SetState(true, states.Disabled)
 			}
 			widg.AsWidget().SetSelected(issel)
 		} else {
@@ -770,7 +770,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 
 			if sv.IsDisabled() {
-				widg.AsWidget().SetDisabled()
+				widg.AsWidget().SetState(true, states.Disabled)
 				if wb != nil {
 					wb.SetProp("slv-row", i)
 					wb.ClearSelected()

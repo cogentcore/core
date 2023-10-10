@@ -244,7 +244,7 @@ func (tv *TableView) IsConfiged() bool {
 // Config configures the view
 func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.FrameType, "frame")
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
@@ -279,8 +279,8 @@ func (tv *TableView) SliceGrid() *gi.Frame {
 }
 
 // ScrollBar returns the SliceGrid scrollbar
-func (tv *TableView) ScrollBar() *gi.ScrollBar {
-	return tv.GridLayout().ChildByName("scrollbar", 1).(*gi.ScrollBar)
+func (tv *TableView) ScrollBar() *gi.Slider {
+	return tv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
 }
 
 // SliceHeader returns the Toolbar header for slice grid
@@ -338,7 +338,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	sgcfg := ki.Config{}
-	sgcfg.Add(gi.TypeToolBar, "header")
+	sgcfg.Add(gi.ToolBarType, "header")
 	sgcfg.Add(gi.LayoutType, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 
@@ -402,7 +402,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			hdr.Tooltip += ": " + dsc
 		}
 		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(TypeTableView).(*TableView)
+			tvv := recv.Embed(TableViewType).(*TableView)
 			act := send.(*gi.Button)
 			fldIdx := act.Data.(int)
 			tvv.SortSliceAction(fldIdx)
@@ -617,7 +617,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					if sig == int64(gi.WidgetSelected) {
 						wbb := send.(gi.Widget).AsWidget()
 						row := wbb.Prop("tv-row").(int)
-						tvv := recv.Embed(TypeTableView).(*TableView)
+						tvv := recv.Embed(TableViewType).(*TableView)
 						tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 					}
 				})
@@ -662,7 +662,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				widg = sg.Kids[cidx].(gi.Widget)
 				vv.UpdateWidget()
 				if tv.IsDisabled() {
-					widg.AsWidget().SetDisabled()
+					widg.AsWidget().SetState(true, states.Disabled)
 				}
 				widg.AsWidget().SetSelected(issel)
 			} else {
@@ -679,7 +679,7 @@ func (tv *TableView) UpdateSliceGrid() {
 						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
 							wbb := send.(gi.Widget).AsWidget()
 							row := wbb.Prop("tv-row").(int)
-							tvv := recv.Embed(TypeTableView).(*TableView)
+							tvv := recv.Embed(TableViewType).(*TableView)
 							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
 							tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
 							// }
@@ -687,12 +687,12 @@ func (tv *TableView) UpdateSliceGrid() {
 					})
 				}
 				if tv.IsDisabled() {
-					widg.AsWidget().SetDisabled()
+					widg.AsWidget().SetState(true, states.Disabled)
 				} else {
 					vvb := vv.AsValueViewBase()
 					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
 						func(recv, send ki.Ki, sig int64, data any) {
-							tvv, _ := recv.Embed(TypeTableView).(*TableView)
+							tvv, _ := recv.Embed(TableViewType).(*TableView)
 							tvv.SetChanged()
 						})
 				}
@@ -713,7 +713,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					addact.Style.Template = "giv.TableView.AddAction"
 					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Button)
-						tvv := recv.Embed(TypeTableView).(*TableView)
+						tvv := recv.Embed(TableViewType).(*TableView)
 						tvv.SliceNewAtRow(act.Data.(int) + 1)
 					})
 				}
@@ -730,7 +730,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.Style.Template = "giv.TableView.DelAction"
 					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 						act := send.(*gi.Button)
-						tvv := recv.Embed(TypeTableView).(*TableView)
+						tvv := recv.Embed(TableViewType).(*TableView)
 						tvv.SliceDeleteAtRow(act.Data.(int), true)
 					})
 				}
@@ -886,13 +886,13 @@ func (tv *TableView) ConfigToolbar() {
 		tb.SetStretchMaxWidth()
 		tb.AddAction(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
 			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tvv := recv.Embed(TypeTableView).(*TableView)
+				tvv := recv.Embed(TableViewType).(*TableView)
 				tvv.UpdateSliceGrid()
 			})
 		if ndef > 1 {
 			tb.AddAction(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
 				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					tvv := recv.Embed(TypeTableView).(*TableView)
+					tvv := recv.Embed(TableViewType).(*TableView)
 					tvv.SliceNewAt(-1)
 				})
 		}
@@ -1098,7 +1098,7 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	m.AddSeparator("sep-edit")
 	m.AddAction(gi.ActOpts{Label: "Edit", Data: idx},
 		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(TypeTableView).(*TableView)
+			tvv := recv.Embed(TableViewType).(*TableView)
 			tvv.EditIdx(data.(int))
 		})
 }

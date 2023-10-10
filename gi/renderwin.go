@@ -508,7 +508,7 @@ func (w *RenderWin) Closed() {
 		}
 		return
 	}
-	// w.SetDisabled() // marks as closed
+	// w.SetState(true, states.Disabled) // marks as closed
 	// w.FocusInactivate()
 	RenderWinGlobalMu.Lock()
 	if len(FocusRenderWins) > 0 {

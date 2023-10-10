@@ -459,7 +459,7 @@ func (tb *TextBuf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
 		vp := tb.SceneFromView()
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(tb, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		log.Println(err)
 		return err
 	}
@@ -503,7 +503,7 @@ func (tb *TextBuf) Revert() bool {
 		if err != nil {
 			vp := tb.SceneFromView()
 			if vp != nil { // only if viewing
-				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
+				gi.PromptDialog(vp, gi.DlgOpts{Title: "File could not be Re-Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 			}
 			log.Println(err)
 			return false
@@ -568,7 +568,7 @@ func (tb *TextBuf) SaveAs(filename gi.FileName) {
 func (tb *TextBuf) SaveFile(filename gi.FileName) error {
 	err := ioutil.WriteFile(string(filename), tb.Txt, 0644)
 	if err != nil {
-		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, gi.AddOk, gi.NoCancel, nil, nil)
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "Could not Save to File", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		log.Println(err)
 	} else {
 		tb.Filename = filename
@@ -903,7 +903,17 @@ func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 
 // AddFileNode adds the FileNode to the list or receivers of changes to buffer
 func (tb *TextBuf) AddFileNode(fn *FileNode) {
-	tb.TextBufSig.Connect(fn.This(), FileNodeBufSigRecv)
+	// tb.TextBufSig.Connect(fn.This(), // FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
+	// func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data any) {
+	// fn := AsFileNode(rvwki)
+	// fn := rvwki.Embed(FileNodeType).(*FileNode)
+	// switch TextBufSignals(sig) {
+	// case TextBufDone, TextBufInsert, TextBufDelete:
+	// 	if fn.Info.Vcs == vci.Stored {
+	// 		fn.Info.Vcs = vci.Modified
+	// 	}
+	// }
+	// }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -2774,6 +2784,6 @@ func init() {
 	TextBufs.InitName(&TextBufs, "giv-text-bufs")
 }
 
-func NewTextBuf() *TextBuf {
-	return TextBufs.New()
-}
+// func NewTextBuf() *TextBuf {
+// 	return TextBufs.New()
+// }

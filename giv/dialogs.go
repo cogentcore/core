@@ -139,7 +139,7 @@ func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Di
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
 	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	// if opts.Inactive {
-	// 	sv.SetDisabled()
+	// 	sv.SetState(true, states.Disabled)
 	// }
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave

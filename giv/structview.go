@@ -15,6 +15,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
@@ -171,7 +172,7 @@ func (sv *StructView) ConfigWidget(vp *gi.Scene) {
 		}
 	}
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.FrameType, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
 	sv.ConfigStructGrid()
@@ -429,10 +430,10 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Widget, isInact bo
 	}
 	if _, has := vv.Tag("inactive"); has {
 		inactTag = true
-		widg.AsWidget().SetDisabled()
+		widg.AsWidget().SetState(true, states.Disabled)
 	} else {
 		if isInact {
-			widg.AsWidget().SetDisabled()
+			widg.AsWidget().SetState(true, states.Disabled)
 			vv.SetTag("inactive", "true")
 		}
 	}
