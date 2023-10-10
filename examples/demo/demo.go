@@ -43,7 +43,7 @@ func app() {
 	gi.NewWindow(sc).Run().Wait()
 }
 
-func makeHome(tv *gi.TabView) {
+func makeHome(tv *gi.Tabs) {
 	home := tv.NewTab(gi.FrameType, "Home").(*gi.Frame)
 	home.Lay = gi.LayoutVert
 	home.AddStyles(func(s *styles.Style) {
@@ -104,7 +104,7 @@ func makeHome(tv *gi.TabView) {
 	}
 }
 
-func makeText(tv *gi.TabView) {
+func makeText(tv *gi.Tabs) {
 	text := tv.NewTab(gi.FrameType, "Text").(*gi.Frame)
 	text.Lay = gi.LayoutVert
 	text.AddStyles(func(s *styles.Style) {
@@ -124,7 +124,7 @@ func makeText(tv *gi.TabView) {
 	}
 }
 
-func makeButtons(tv *gi.TabView) {
+func makeButtons(tv *gi.Tabs) {
 	buttons := tv.NewTab(gi.FrameType, "Buttons").(*gi.Frame)
 	buttons.Lay = gi.LayoutVert
 	buttons.AddStyles(func(s *styles.Style) {
@@ -248,7 +248,7 @@ func makeButtons(tv *gi.TabView) {
 	}
 }
 
-func makeInputs(tv *gi.TabView) {
+func makeInputs(tv *gi.Tabs) {
 	inputs := tv.NewTab(gi.FrameType, "Inputs").(*gi.Frame)
 	inputs.Lay = gi.LayoutVert
 	inputs.AddStyles(func(s *styles.Style) {
@@ -355,7 +355,7 @@ func makeInputs(tv *gi.TabView) {
 	// })
 }
 
-func makeLayouts(tv *gi.TabView) {
+func makeLayouts(tv *gi.Tabs) {
 	layouts := tv.NewTab(gi.FrameType, "Layouts").(*gi.Frame)
 	layouts.Lay = gi.LayoutVert
 	layouts.AddStyles(func(s *styles.Style) {

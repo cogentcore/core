@@ -751,6 +751,7 @@ var SceneType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Nm", &gti.Field{Name: "Nm", Type: "string", Doc: "name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.", Directives: gti.Directives{}}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}}},
 		{"Flags", &gti.Field{Name: "Flags", Type: "ScFlags", Doc: "has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene", Directives: gti.Directives{}}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}}},
 		{"Decor", &gti.Field{Name: "Decor", Type: "Layout", Doc: "Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil", Directives: gti.Directives{}}},
@@ -1076,12 +1077,12 @@ func (t *Switch) New() ki.Ki {
 	return &Switch{}
 }
 
-// TabViewType is the [gti.Type] for [TabView]
-var TabViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.TabView",
-	ShortName: "gi.TabView",
-	IDName:    "tab-view",
-	Doc:       "TabView switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabView is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
+// TabsType is the [gti.Type] for [Tabs]
+var TabsType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Tabs",
+	ShortName: "gi.Tabs",
+	IDName:    "tabs",
+	Doc:       "Tabs switches among child widgets via tabs.  The selected widget gets\nthe full allocated space avail after the tabs are accounted for.  The\nTabs is just a Vertical layout that manages two child widgets: a\nHorizFlow Layout for the tabs (which can flow across multiple rows as\nneeded) and a Stacked Frame that actually contains all the children, and\nprovides scrollbars as needed to any content within.  Typically should have\nmax stretch and a set preferred size, so it expands.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -1089,53 +1090,52 @@ var TabViewType = gti.AddType(&gti.Type{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}}},
 		{"NoDeleteTabs", &gti.Field{Name: "NoDeleteTabs", Type: "bool", Doc: "if true, tabs are not user-deleteable", Directives: gti.Directives{}}},
-		{"NewTabType", &gti.Field{Name: "NewTabType", Type: "*gti.Type", Doc: "type of widget to create in a new tab via new tab button -- Frame by default", Directives: gti.Directives{}}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", Doc: "[view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "Layout", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TabView{},
+	Instance: &Tabs{},
 })
 
-// NewTabView adds a new [TabView] with the given name
+// NewTabs adds a new [Tabs] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTabView(par ki.Ki, name ...string) *TabView {
-	return par.NewChild(TabViewType, name...).(*TabView)
+func NewTabs(par ki.Ki, name ...string) *Tabs {
+	return par.NewChild(TabsType, name...).(*Tabs)
 }
 
-// KiType returns the [*gti.Type] of [TabView]
-func (t *TabView) KiType() *gti.Type {
-	return TabViewType
+// KiType returns the [*gti.Type] of [Tabs]
+func (t *Tabs) KiType() *gti.Type {
+	return TabsType
 }
 
-// New returns a new [*TabView] value
-func (t *TabView) New() ki.Ki {
-	return &TabView{}
+// New returns a new [*Tabs] value
+func (t *Tabs) New() ki.Ki {
+	return &Tabs{}
 }
 
-// TabViewEmbedder is an interface that all types that embed TabView satisfy
-type TabViewEmbedder interface {
-	AsTabView() *TabView
+// TabsEmbedder is an interface that all types that embed Tabs satisfy
+type TabsEmbedder interface {
+	AsTabs() *Tabs
 }
 
-// AsTabView returns the given value as a value of type TabView if the type
-// of the given value embeds TabView, or nil otherwise
-func AsTabView(k ki.Ki) *TabView {
+// AsTabs returns the given value as a value of type Tabs if the type
+// of the given value embeds Tabs, or nil otherwise
+func AsTabs(k ki.Ki) *Tabs {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(TabViewEmbedder); ok {
-		return t.AsTabView()
+	if t, ok := k.(TabsEmbedder); ok {
+		return t.AsTabs()
 	}
 	return nil
 }
 
-// AsTabView satisfies the [TabViewEmbedder] interface
-func (t *TabView) AsTabView() *TabView {
+// AsTabs satisfies the [TabsEmbedder] interface
+func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
