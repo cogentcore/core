@@ -187,7 +187,7 @@ func (tv *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 	} else {
 		nm = strcase.ToKebab(label)
 	}
-	tab := tb.InsertNewChild(TabButtonType, idx, nm).(*TabButton)
+	tab := tb.InsertNewChild(TabType, idx, nm).(*Tab)
 	tab.Data = idx
 	tab.Tooltip = label
 	tab.NoDelete = tv.NoDeleteTabs
@@ -220,7 +220,7 @@ func (tv *Tabs) InsertTab(frame *Frame, label string, idx int, name ...string) {
 
 // TabAtIndex returns content frame and tab button at given index, false if
 // index out of range (emits log message)
-func (tv *Tabs) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
+func (tv *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	tv.Mu.Lock()
 	defer tv.Mu.Unlock()
 
@@ -231,7 +231,7 @@ func (tv *Tabs) TabAtIndex(idx int) (*Frame, *TabButton, bool) {
 		slog.Error("gi.TabView: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
 	}
-	tab := tb.Child(idx).(*TabButton)
+	tab := tb.Child(idx).(*Tab)
 	frame := fr.Child(idx).(*Frame)
 	return frame, tab, true
 }
@@ -464,7 +464,7 @@ func (tv *Tabs) UnselectOtherTabs(idx int) {
 		if i == idx {
 			continue
 		}
-		tb := tbs.Child(i).(*TabButton)
+		tb := tbs.Child(i).(*Tab)
 		if tb.StateIs(states.Selected) {
 			tb.SetSelected(false)
 		}
@@ -476,7 +476,7 @@ func (tv *Tabs) RenumberTabs() {
 	sz := tv.NTabs()
 	tbs := tv.Tabs()
 	for i := 0; i < sz; i++ {
-		tb := tbs.Child(i).(*TabButton)
+		tb := tbs.Child(i).(*Tab)
 		tb.Data = i
 	}
 }
@@ -515,23 +515,24 @@ func (tv *Tabs) Render(sc *Scene) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// TabButton
+// Tab
 
-// TabButton contains a larger select button and a small close button. Indicator
-// icon is used for close icon.
-type TabButton struct {
+// Tab is a tab button that contains a larger select button
+// and a small close button. The Indicator icon is used for
+// the close icon.
+type Tab struct {
 	Button
 
 	// if true, this tab does not have the delete button avail
 	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
 }
 
-func (tb *TabButton) OnInit() {
+func (tb *Tab) OnInit() {
 	tb.ButtonHandlers()
 	tb.TabButtonStyles()
 }
 
-func (tb *TabButton) TabButtonStyles() {
+func (tb *Tab) TabButtonStyles() {
 	tb.AddStyles(func(s *styles.Style) {
 		s.Cursor = cursors.Pointer
 		s.MinWidth.SetCh(8)
@@ -558,7 +559,7 @@ func (tb *TabButton) TabButtonStyles() {
 	})
 }
 
-func (tb *TabButton) OnChildAdded(child ki.Ki) {
+func (tb *Tab) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "Parts":
@@ -607,7 +608,7 @@ func (tb *TabButton) OnChildAdded(child ki.Ki) {
 	}
 }
 
-func (tb *TabButton) Tabs() *Tabs {
+func (tb *Tab) Tabs() *Tabs {
 	tv := tb.ParentByType(TabsType, ki.Embeds)
 	if tv == nil {
 		return nil
@@ -615,7 +616,7 @@ func (tb *TabButton) Tabs() *Tabs {
 	return AsTabs(tv)
 }
 
-func (tb *TabButton) ConfigParts(sc *Scene) {
+func (tb *Tab) ConfigParts(sc *Scene) {
 	if !tb.NoDelete {
 		tb.ConfigPartsDeleteButton(sc)
 		return
@@ -623,7 +624,7 @@ func (tb *TabButton) ConfigParts(sc *Scene) {
 	tb.Button.ConfigParts(sc) // regular
 }
 
-func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
+func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
@@ -655,6 +656,6 @@ func (tb *TabButton) ConfigPartsDeleteButton(sc *Scene) {
 	}
 }
 
-func (tb *TabButton) ConfigWidget(sc *Scene) {
+func (tb *Tab) ConfigWidget(sc *Scene) {
 	tb.ConfigParts(sc)
 }
