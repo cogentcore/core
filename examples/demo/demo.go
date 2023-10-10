@@ -50,11 +50,9 @@ func makeHome(tv *gi.TabView) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	title := gi.NewLabel(home, "title", "The GoGi Demo")
-	title.Type = gi.LabelHeadlineLarge
+	gi.NewLabel(home).SetType(gi.LabelHeadlineLarge).SetText("The GoGi Demo")
 
-	desc := gi.NewLabel(home, "desc", "A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
-	desc.Type = gi.LabelBodyLarge
+	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText("A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 
 	// pbar := gi.NewProgressBar(home, "pbar")
 	// pbar.Start(100)
@@ -117,7 +115,7 @@ func makeText(tv *gi.TabView) {
 	gi.NewLabel(text).SetText(
 		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
-	for typ := gi.LabelTypes(0); typ < gi.LabelTypesN; typ++ {
+	for _, typ := range gi.LabelTypesValues() {
 		s := strings.TrimPrefix(typ.String(), "Label")
 		gi.NewLabel(text, "label"+s).SetType(typ).SetText(s)
 	}
