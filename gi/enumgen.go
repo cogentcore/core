@@ -2277,7 +2277,7 @@ func _StageTypesNoOp() {
 	_ = x[MenuStage-(3)]
 	_ = x[TooltipStage-(4)]
 	_ = x[SnackbarStage-(5)]
-	_ = x[ChooserStage-(6)]
+	_ = x[CompleterStage-(6)]
 }
 
 var _StageTypesNameToValueMap = map[string]StageTypes{

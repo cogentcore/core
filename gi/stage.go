@@ -59,12 +59,12 @@ const (
 	// It is typically not ClickOff or Modal, but has a timeout.
 	SnackbarStage
 
-	// ChooserStage is a PopupStage that displays a Scene with text completions,
+	// CompleterStage is a PopupStage that displays a Scene with text completions,
 	// spelling corrections, or other such dynamic info.
 	// It is typically ClickOff, not Modal, dynamically updating,
 	// and closes when something is selected or typing renders
 	// it no longer relevant.
-	ChooserStage
+	CompleterStage
 )
 
 // StageSides are the Sides for Sheet Stages
@@ -315,7 +315,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 	case SnackbarStage:
 		st.Modal = false
-	case ChooserStage:
+	case CompleterStage:
 		st.Modal = false
 		st.Scrim = false
 		st.ClickOff = true

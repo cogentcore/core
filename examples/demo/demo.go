@@ -278,9 +278,9 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSpinBox(sboxes).SetStep(5).SetMin(-50).SetMax(100)      //.SetValue(15)
 	gi.NewSpinBox(sboxes).SetFormat("%#X").SetStep(1).SetMax(255) //.SetValue(44)
 
-	cboxes := gi.NewLayout(inputs, "cboxes").SetLayout(gi.LayoutHoriz)
-	cboxes.AddStyles(func(s *styles.Style) {
-		cboxes.Spacing.SetEm(0.5)
+	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
+	choosers.AddStyles(func(s *styles.Style) {
+		choosers.Spacing.SetEm(0.5)
 	})
 
 	fruits := []any{"Apple", "Apricot", "Blueberry", "Blackberry", "Peach", "Strawberry"}
@@ -293,24 +293,24 @@ func makeInputs(ts *gi.Tabs) {
 		"A widely consumed small, red fruit",
 	}
 
-	cbf := gi.NewComboBox(cboxes, "cbf")
+	cbf := gi.NewChooser(choosers)
 	cbf.Text = "Select a fruit"
 	cbf.Items = fruits
 	cbf.Tooltips = fruitDescs
 
-	cbo := gi.NewComboBox(cboxes, "cbo")
+	cbo := gi.NewChooser(choosers)
 	cbo.Text = "Select a fruit"
 	cbo.Items = fruits
 	cbo.Tooltips = fruitDescs
 	cbo.Type = gi.ComboBoxOutlined
 
-	cbef := gi.NewComboBox(inputs, "cbef")
+	cbef := gi.NewChooser(inputs)
 	cbef.Editable = true
 	cbef.Placeholder = "Select or type a fruit"
 	cbef.Items = fruits
 	cbef.Tooltips = fruitDescs
 
-	cbeo := gi.NewComboBox(inputs, "cbeo")
+	cbeo := gi.NewChooser(inputs)
 	cbeo.Editable = true
 	cbeo.Placeholder = "Select or type a fruit"
 	cbeo.Items = fruits

@@ -266,12 +266,12 @@ func (t *ButtonBox) AsButtonBox() *ButtonBox {
 	return t
 }
 
-// ComboBoxType is the [gti.Type] for [ComboBox]
-var ComboBoxType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.ComboBox",
-	ShortName:  "gi.ComboBox",
-	IDName:     "combo-box",
-	Doc:        "ComboBox is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are [icons.Icon] type, then they\nare displayed using icons instead.",
+// ChooserType is the [gti.Type] for [Chooser]
+var ChooserType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Chooser",
+	ShortName:  "gi.Chooser",
+	IDName:     "chooser",
+	Doc:        "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
@@ -288,25 +288,25 @@ var ComboBoxType = gti.AddType(&gti.Type{
 		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ComboBox{},
+	Instance: &Chooser{},
 })
 
-// NewComboBox adds a new [ComboBox] with the given name
+// NewChooser adds a new [Chooser] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewComboBox(par ki.Ki, name ...string) *ComboBox {
-	return par.NewChild(ComboBoxType, name...).(*ComboBox)
+func NewChooser(par ki.Ki, name ...string) *Chooser {
+	return par.NewChild(ChooserType, name...).(*Chooser)
 }
 
-// KiType returns the [*gti.Type] of [ComboBox]
-func (t *ComboBox) KiType() *gti.Type {
-	return ComboBoxType
+// KiType returns the [*gti.Type] of [Chooser]
+func (t *Chooser) KiType() *gti.Type {
+	return ChooserType
 }
 
-// New returns a new [*ComboBox] value
-func (t *ComboBox) New() ki.Ki {
-	return &ComboBox{}
+// New returns a new [*Chooser] value
+func (t *Chooser) New() ki.Ki {
+	return &Chooser{}
 }
 
 // CompleteType is the [gti.Type] for [Complete]

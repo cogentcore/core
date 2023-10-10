@@ -397,7 +397,7 @@ func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog))
 
 	NewLabel(trow, "t-label").SetText("Type:    ")
 
-	typs := NewComboBox(trow, "types")
+	typs := NewChooser(trow, "types")
 	typs.ItemsFromTypes(gti.AllEmbeddersOf(typ), true, true, 50)
 
 	typs.OnChange(func(e events.Event) {

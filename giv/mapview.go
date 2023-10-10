@@ -210,7 +210,7 @@ func (mv *MapView) ConfigMapGrid() {
 		config.Add(vv.WidgetType(), valnm)
 		if ifaceType {
 			typnm := "type-" + keytxt
-			config.Add(gi.ComboBoxType, typnm)
+			config.Add(gi.ChooserType, typnm)
 		}
 		config.Add(gi.ButtonType, delnm)
 		mv.Keys = append(mv.Keys, kv)
@@ -233,7 +233,7 @@ func (mv *MapView) ConfigMapGrid() {
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
 		if ifaceType {
-			typw := sg.Child(i*ncol + 2).(*gi.ComboBox)
+			typw := sg.Child(i*ncol + 2).(*gi.Chooser)
 			typw.ItemsFromTypes(valtypes, false, true, 50)
 			vtyp := laser.NonPtrType(reflect.TypeOf(vv.Val().Interface()))
 			if vtyp == nil {

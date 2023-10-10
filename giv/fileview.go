@@ -301,7 +301,7 @@ func (fv *FileView) ConfigPathBar() {
 
 	config := ki.Config{}
 	config.Add(gi.LabelType, "path-lbl")
-	config.Add(gi.ComboBoxType, "path")
+	config.Add(gi.ChooserType, "path")
 	config.Add(gi.ButtonType, "path-up")
 	config.Add(gi.ButtonType, "path-ref")
 	config.Add(gi.ButtonType, "path-fav")
@@ -309,7 +309,7 @@ func (fv *FileView) ConfigPathBar() {
 
 	pl := gi.NewLabel(pr, "path-lbl", "Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
-	pf := gi.NewComboBox(pr, "path")
+	pf := gi.NewChooser(pr, "path")
 	pf.Editable = true
 	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
@@ -454,9 +454,9 @@ func (fv *FileView) WatchWatcher() {
 }
 
 // PathField returns the ComboBox of the path
-func (fv *FileView) PathField() *gi.ComboBox {
+func (fv *FileView) PathField() *gi.Chooser {
 	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
-	return pr.ChildByName("path", 1).(*gi.ComboBox)
+	return pr.ChildByName("path", 1).(*gi.Chooser)
 }
 
 func (fv *FileView) FilesRow() *gi.Layout {
