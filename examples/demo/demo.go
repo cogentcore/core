@@ -113,20 +113,14 @@ func makeText(tv *gi.TabView) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	ttitle := gi.NewLabel(text, "ttitle", "Text")
-	ttitle.Type = gi.LabelHeadlineLarge
-
-	tdesc := gi.NewLabel(text, "tdesc",
-		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`,
-	)
-	tdesc.Type = gi.LabelBodyLarge
+	gi.NewLabel(text).SetType(gi.LabelHeadlineLarge).SetText("Text")
+	gi.NewLabel(text).SetText(
+		`GoGi provides fully customizable text elements that can be styled in any way you want. Also, there are pre-configured style types for text that allow you to easily create common text types.`)
 
 	for typ := gi.LabelTypes(0); typ < gi.LabelTypesN; typ++ {
 		s := strings.TrimPrefix(typ.String(), "Label")
-		label := gi.NewLabel(text, "label"+s, s)
-		label.Type = typ
+		gi.NewLabel(text, "label"+s).SetType(typ).SetText(s)
 	}
-
 }
 
 func makeButtons(tv *gi.TabView) {
@@ -139,16 +133,12 @@ func makeButtons(tv *gi.TabView) {
 		s.MaxHeight.SetDp(-1)
 	})
 
-	btitle := gi.NewLabel(buttons, "btitle", "Buttons")
-	btitle.Type = gi.LabelHeadlineLarge
+	gi.NewLabel(buttons).SetType(gi.LabelHeadlineLarge).SetText("Buttons")
 
-	bdesc := gi.NewLabel(buttons, "bdesc",
-		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`,
-	)
-	bdesc.Type = gi.LabelBodyLarge
+	gi.NewLabel(buttons, "bdesc").SetText(
+		`GoGi provides customizable buttons that support various events and can be styled in any way you want. Also, there are pre-configured style types for buttons that allow you to achieve common functionality with ease. All buttons support any combination of a label, icon, and indicator.`)
 
-	sbtitle := gi.NewLabel(buttons, "sbtitle", "Standard Buttons")
-	sbtitle.Type = gi.LabelHeadlineSmall
+	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
 	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
 	brow.AddStyles(func(s *styles.Style) {
@@ -193,21 +183,21 @@ func makeButtons(tv *gi.TabView) {
 
 	menu.AddButton(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
 		func(bt *gi.Button) {
-			fmt.Printf("Received menu action with data", bt.Data)
+			fmt.Println("Received menu action with data", bt.Data)
 		})
 
 	mi2 := menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil)
 
 	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
 		func(bt *gi.Button) {
-			fmt.Printf("Received menu action with data", bt.Data)
+			fmt.Println("Received menu action with data", bt.Data)
 		})
 
 	menu.AddSeparator("sep1")
 
 	menu.AddButton(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
 		func(bt *gi.Button) {
-			fmt.Printf("Received menu action with data", bt.Data)
+			fmt.Println("Received menu action with data", bt.Data)
 		})
 
 	ics := []icons.Icon{
