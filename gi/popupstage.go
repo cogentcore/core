@@ -20,6 +20,9 @@ type PopupStage struct {
 
 	// Main is the MainStage that owns this Popup (via its PopupMgr)
 	Main *MainStage
+
+	// if > 0, disappears after a timeout duration
+	Timeout time.Duration
 }
 
 // AsPopup returns this stage as a PopupStage (for Popup types)
@@ -37,6 +40,11 @@ func (st *PopupStage) MainMgr() *MainStageMgr {
 		return nil
 	}
 	return st.Main.StageMgr
+}
+
+func (st *PopupStage) SetTimeout(dur time.Duration) *PopupStage {
+	st.Timeout = dur
+	return st
 }
 
 func (st *PopupStage) RenderCtx() *RenderContext {
