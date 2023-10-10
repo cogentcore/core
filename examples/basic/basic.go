@@ -22,7 +22,7 @@ func app() {
 
 	gi.NewButton(scene).
 		SetText("Open Dialog").SetIcon(icons.OpenInNew).
-		OnClick(, func(e events.Event) {
+		OnClick(func(e events.Event) {
 			fmt.Println("button clicked")
 			// dialog := gi.NewScene("dialog")
 			// gi.NewLabel(&dialog.Frame, "dialog").SetText("Dialog!")

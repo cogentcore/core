@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -463,14 +464,13 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 		}
 		inQuitPrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-			Prompt: "Are you <i>sure</i> you want to quit?"}, Ok: true, Cancel: true,
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
-					gi.Quit()
-				} else {
-					inQuitPrompt = false
-				}
-			})
+			Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
+			if dlg.Accepted {
+				gi.Quit()
+			} else {
+				inQuitPrompt = false
+			}
+		})
 	})
 
 	gi.SetQuitCleanFunc(func() {
@@ -484,18 +484,18 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 		}
 		inClosePrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
-		if dlg.Accepted {
-					gi.Quit()
-		} else {
-			inClosePrompt = false
-		}
-			})
+			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
+			if dlg.Accepted {
+				gi.Quit()
+			} else {
+				inClosePrompt = false
+			}
+		})
 	})
 
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		fmt.Printf("Doing final Close cleanup here..\n")
-	})
+	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
+	// 	fmt.Printf("Doing final Close cleanup here..\n")
+	// })
 
 	win.MainMenuUpdated()
 }
