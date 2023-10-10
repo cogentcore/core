@@ -293,29 +293,29 @@ func makeInputs(ts *gi.Tabs) {
 		"A widely consumed small, red fruit",
 	}
 
-	cbf := gi.NewChooser(choosers)
-	cbf.Text = "Select a fruit"
-	cbf.Items = fruits
-	cbf.Tooltips = fruitDescs
+	chf := gi.NewChooser(choosers)
+	chf.Text = "Select a fruit"
+	chf.Items = fruits
+	chf.Tooltips = fruitDescs
 
-	cbo := gi.NewChooser(choosers)
-	cbo.Text = "Select a fruit"
-	cbo.Items = fruits
-	cbo.Tooltips = fruitDescs
-	cbo.Type = gi.ComboBoxOutlined
+	cho := gi.NewChooser(choosers)
+	cho.Text = "Select a fruit"
+	cho.Items = fruits
+	cho.Tooltips = fruitDescs
+	cho.Type = gi.ComboBoxOutlined
 
-	cbef := gi.NewChooser(inputs)
-	cbef.Editable = true
-	cbef.Placeholder = "Select or type a fruit"
-	cbef.Items = fruits
-	cbef.Tooltips = fruitDescs
+	chef := gi.NewChooser(inputs)
+	chef.Editable = true
+	chef.Placeholder = "Select or type a fruit"
+	chef.Items = fruits
+	chef.Tooltips = fruitDescs
 
-	cbeo := gi.NewChooser(inputs)
-	cbeo.Editable = true
-	cbeo.Placeholder = "Select or type a fruit"
-	cbeo.Items = fruits
-	cbeo.Tooltips = fruitDescs
-	cbeo.Type = gi.ComboBoxOutlined
+	cheo := gi.NewChooser(inputs)
+	cheo.Editable = true
+	cheo.Placeholder = "Select or type a fruit"
+	cheo.Items = fruits
+	cheo.Tooltips = fruitDescs
+	cheo.Type = gi.ComboBoxOutlined
 
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
