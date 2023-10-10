@@ -79,7 +79,7 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 // SendChange sends the events.Change event, which is widely used to signal
 // updating for most widgets
 func (wb *WidgetBase) SendChange() {
-	wb.SendChange()
+	wb.Send(events.Change, nil)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
