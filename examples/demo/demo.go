@@ -36,7 +36,6 @@ func app() {
 	makeButtons(tv)
 	makeInputs(tv)
 	makeLayouts(tv)
-	makeFileTree(tv)
 
 	gi.NewWindow(sc).Run().Wait()
 }
@@ -326,14 +325,8 @@ func makeInputs(tv *gi.TabView) {
 	cbeo.Tooltips = fruitDescs
 	cbeo.Type = gi.ComboBoxOutlined
 
-	sliderx := gi.NewSlider(inputs, "sliderx")
-	sliderx.Dim = mat32.X
-	sliderx.Value = 0.5
-
-	sliderxi := gi.NewSlider(inputs, "sliderxi")
-	sliderxi.Dim = mat32.X
-	sliderxi.Value = 0.7
-	sliderxi.SetState(true, states.Disabled)
+	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
+	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
 	// clr := colors.Tan
 
@@ -344,14 +337,8 @@ func makeInputs(tv *gi.TabView) {
 
 	sliderys := gi.NewLayout(inputs, "sliderys").SetLayout(gi.LayoutHorizFlow)
 
-	slidery := gi.NewSlider(sliderys, "slidery")
-	slidery.Dim = mat32.Y
-	slidery.Value = 0.3
-
-	slideryi := gi.NewSlider(sliderys, "slideryi")
-	slideryi.Dim = mat32.Y
-	slideryi.Value = 0.2
-	slideryi.SetState(true, states.Disabled)
+	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
+	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
 
 	bbox := gi.NewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
@@ -411,11 +398,6 @@ func makeLayouts(tv *gi.TabView) {
 	// rightTitle := gi.NewLabel(right, "rightTitle", "Right")
 	// rightTitle.Type = gi.LabelHeadlineMedium
 
-}
-
-func makeFileTree(tv *gi.TabView) {
-	filetree := tv.NewTab(gi.FrameType, "File Tree").(*gi.Frame)
-	filetree.Lay = gi.LayoutVert
 }
 
 // func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
