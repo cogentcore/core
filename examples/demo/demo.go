@@ -272,25 +272,13 @@ func makeInputs(tv *gi.TabView) {
 
 	gi.NewLabel(inputs).SetText("Inputs").SetType(gi.LabelHeadlineLarge)
 
-	gi.NewLabel(inputs, "idesc").SetText(
+	gi.NewLabel(inputs).SetText(
 		`GoGi provides various customizable input widgets that cover all common uses. Various events can be bound to inputs, and their data can easily be fetched and used wherever needed. There are also pre-configured style types for most inputs that allow you to easily switch among common styling patterns.`).SetType(gi.LabelBodyLarge)
 
-	tff := gi.NewTextField(inputs, "tff").SetPlaceholder("Filled Text Field")
-	tff.Type = gi.TextFieldFilled
-
-	tfo := gi.NewTextField(inputs, "tfo")
-	tfo.Placeholder = "Outlined Text Field"
-	tfo.Type = gi.TextFieldOutlined
-
-	tffc := gi.NewTextField(inputs, "tffc")
-	tffc.Placeholder = "Filled Text Field"
-	tffc.Type = gi.TextFieldFilled
-	tffc.AddClearAction()
-
-	tfoc := gi.NewTextField(inputs, "tfoc")
-	tfoc.Placeholder = "Outlined Text Field"
-	tfoc.Type = gi.TextFieldOutlined
-	tfoc.AddClearAction()
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled Text Field")
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined Text Field")
+	gi.NewTextField(inputs).SetType(gi.TextFieldFilled).SetPlaceholder("Filled Text Field").AddClearButton()
+	gi.NewTextField(inputs).SetType(gi.TextFieldOutlined).SetPlaceholder("Outlined Text Field").AddClearButton()
 
 	tffcs := gi.NewTextField(inputs, "tffcs")
 	tffcs.Placeholder = "Filled Text Field"
