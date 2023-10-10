@@ -283,8 +283,9 @@ func makeInputs(tv *gi.TabView) {
 
 	sboxes := gi.NewLayout(inputs, "sboxes").SetLayout(gi.LayoutHoriz)
 
-	gi.NewSpinBox(sboxes).SetValue(15).SetStep(5).SetMin(-50).SetMax(100)
-	gi.NewSpinBox(sboxes).SetFormat("%#X").SetValue(44).SetStep(1).SetMax(255)
+	// TODO(kai): add back set value calls here
+	gi.NewSpinBox(sboxes).SetStep(5).SetMin(-50).SetMax(100)      //.SetValue(15)
+	gi.NewSpinBox(sboxes).SetFormat("%#X").SetStep(1).SetMax(255) //.SetValue(44)
 
 	cboxes := gi.NewLayout(inputs, "cboxes").SetLayout(gi.LayoutHoriz)
 	cboxes.AddStyles(func(s *styles.Style) {
