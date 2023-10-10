@@ -5,25 +5,90 @@
 package giv
 
 import (
-	"fmt"
-	"log"
 	"reflect"
-	"strings"
-
-	"github.com/fatih/camelcase"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // these are special menus that we ignore
 var specialMenus = map[string]struct{}{
 	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "RenderWins": {},
 }
+
+// ActionUpdateFunc is a function that updates method active / inactive status
+// first argument is the object on which the method is defined (receiver)
+type ActionUpdateFunc func(it any, act *gi.Button)
+
+// SubMenuFunc is a function that returns a string slice of submenu items
+// used in MethView submenu-func option
+// first argument is the object on which the method is defined (receiver)
+type SubMenuFunc func(it any, vp *gi.Scene) []string
+
+// SubSubMenuFunc is a function that returns a slice of string slices
+// to create submenu items each having their own submenus.
+// used in MethView submenu-func option
+// first argument is the object on which the method is defined (receiver)
+type SubSubMenuFunc func(it any, vp *gi.Scene) [][]string
+
+// ShortcutFunc is a function that returns a key.Chord string for a shortcut
+// used in MethView shortcut-func option
+// first argument is the object on which the method is defined (receiver)
+type ShortcutFunc func(it any, act *gi.Button) key.Chord
+
+// LabelFunc is a function that returns a string to set a label
+// first argument is the object on which the method is defined (receiver)
+type LabelFunc func(it any, act *gi.Button) string
+
+func HasToolBarView(val any) bool {
+	return false
+}
+
+func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
+	return false
+}
+
+// ArgData contains the relevant data for each arg, including the
+// reflect.Value, name, optional description, and default value
+type ArgData struct {
+	Val     reflect.Value
+	Name    string
+	Desc    string
+	View    ValueView
+	Default any
+	Flags   ArgDataFlags
+}
+
+// ArgDataFlags define bitflags for method view action options
+type ArgDataFlags int64 //enums:bitflag
+
+const (
+	// ArgDataHasDef means that there was a Default value set
+	ArgDataHasDef ArgDataFlags = iota
+
+	// ArgDataValSet means that there is a fixed value for this arg, given in
+	// the config props and set in the Default, so it does not need to be
+	// prompted for
+	ArgDataValSet
+)
+
+func (ad *ArgData) HasDef() bool {
+	return ad.Flags.HasFlag(ArgDataHasDef)
+}
+
+func (ad *ArgData) SetHasDef() {
+	ad.Flags.SetFlag(true, ArgDataHasDef)
+}
+
+func (ad *ArgData) HasValSet() bool {
+	return ad.Flags.HasFlag(ArgDataValSet)
+}
+
+func CallMethod(val any, method string, vp *gi.Scene) bool {
+	return false
+}
+
+/*  todo: this needs a full rewrite in light of gti etc.
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
 // properties registered on the type for given value element, through the
@@ -806,42 +871,6 @@ func MethViewShowValue(ctx gi.Widget, val reflect.Value, title, prompt string) {
 
 }
 
-// ArgData contains the relevant data for each arg, including the
-// reflect.Value, name, optional description, and default value
-type ArgData struct {
-	Val     reflect.Value
-	Name    string
-	Desc    string
-	View    ValueView
-	Default any
-	Flags   ArgDataFlags
-}
-
-// ArgDataFlags define bitflags for method view action options
-type ArgDataFlags int64 //enums:bitflag
-
-const (
-	// ArgDataHasDef means that there was a Default value set
-	ArgDataHasDef ArgDataFlags = iota
-
-	// ArgDataValSet means that there is a fixed value for this arg, given in
-	// the config props and set in the Default, so it does not need to be
-	// prompted for
-	ArgDataValSet
-)
-
-func (ad *ArgData) HasDef() bool {
-	return ad.Flags.HasFlag(ArgDataHasDef)
-}
-
-func (ad *ArgData) SetHasDef() {
-	return ad.Flags.HasFlag(ArgDataHasDef)
-}
-
-func (ad *ArgData) HasValSet() bool {
-	return ad.Flags.HasFlag(ArgDataValSet)
-}
-
 // MethArgHist stores the history of method arg values -- used for setting defaults
 // for next time the method is called.  Key is type:method name
 var MethArgHist = map[string]any{}
@@ -1067,3 +1096,5 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 		*m = append(*m, nac)
 	}
 }
+
+*/

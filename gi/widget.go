@@ -10,15 +10,14 @@ import (
 	"fmt"
 	"image"
 	"log"
-	"reflect"
 	"sync"
 
 	"goki.dev/enums"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/gti"
 	"goki.dev/ki/v2"
-	"goki.dev/laser"
 )
 
 // Widget is the interface for all GoGi Widget Nodes
@@ -334,8 +333,8 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.Style.CopyFrom(&fr.Style)
 }
 
-func (wb *WidgetBase) BaseIface() reflect.Type {
-	return laser.TypeFor[Widget]()
+func (wb *WidgetBase) BaseType() *gti.Type {
+	return WidgetBaseType
 }
 
 func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {

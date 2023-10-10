@@ -23,11 +23,11 @@ import (
 
 var (
 	// LayoutPrefMaxRows is maximum number of rows to use in a grid layout
-	// when computing the preferred size (ScFlagPrefSizing)
+	// when computing the preferred size (ScPrefSizing)
 	LayoutPrefMaxRows = 20
 
 	// LayoutPrefMaxCols is maximum number of columns to use in a grid layout
-	// when computing the preferred size (ScFlagPrefSizing)
+	// when computing the preferred size (ScPrefSizing)
 	LayoutPrefMaxCols = 20
 )
 
