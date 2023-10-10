@@ -488,11 +488,14 @@ func (tv *TabView) ConfigWidget(sc *Scene) {
 
 // Tabs returns the layout containing the tabs -- the first element within us
 func (tv *TabView) Tabs() *Frame {
+	// TODO(kai): come up with a better structure for this?
+	tv.ConfigWidget(tv.Sc)
 	return tv.Child(0).(*Frame)
 }
 
 // Frame returns the stacked frame layout -- the second element
 func (tv *TabView) Frame() *Frame {
+	tv.ConfigWidget(tv.Sc)
 	return tv.Child(1).(*Frame)
 }
 

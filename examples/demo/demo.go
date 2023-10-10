@@ -211,13 +211,13 @@ func makeButtons(tv *gi.TabView) {
 		})
 
 	ics := []icons.Icon{
-		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite,
-		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh,
-		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort,
-		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith,
+		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite, icons.PlayArrow,
+		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh, icons.Stop,
+		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort, icons.Details,
+		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith, icons.DateRange,
 	}
 
-	for typ := gi.ButtonTypes(0); typ < gi.ButtonTypesN; typ++ {
+	for _, typ := range gi.ButtonTypesValues() {
 		s := strings.TrimPrefix(typ.String(), "Button")
 		sl := strings.ToLower(s)
 		art := "A "
