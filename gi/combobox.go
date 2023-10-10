@@ -100,7 +100,7 @@ func (cb *ComboBox) ComboBoxHandlers() {
 
 func (cb *ComboBox) ComboBoxStyles() {
 	cb.AddStyles(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.LongHoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
 		if cb.Editable {
