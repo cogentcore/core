@@ -6,19 +6,16 @@ package main
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -338,14 +335,14 @@ func makeInputs(tv *gi.TabView) {
 	sliderxi.Value = 0.7
 	sliderxi.SetState(true, states.Disabled)
 
-	clr := colors.Tan
+	// clr := colors.Tan
 
-	colorvv := giv.ToValueView(&clr, "")
-	colorvv.SetSoloValue(reflect.ValueOf(&clr))
-	cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Widget)
-	colorvv.ConfigWidget(cvvw)
+	// colorvv := giv.ToValueView(&clr, "")
+	// colorvv.SetSoloValue(reflect.ValueOf(&clr))
+	// cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Widget)
+	// colorvv.ConfigWidget(cvvw)
 
-	sliderys := gi.NewLayout(inputs, "sliderys", gi.LayoutHorizFlow)
+	sliderys := gi.NewLayout(inputs, "sliderys").SetLayout(gi.LayoutHorizFlow)
 
 	slidery := gi.NewSlider(sliderys, "slidery")
 	slidery.Dim = mat32.Y
@@ -365,16 +362,16 @@ func makeInputs(tv *gi.TabView) {
 	bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
 	bboxr.Mutex = true
 
-	tbuf := &giv.TextBuf{}
-	tbuf.InitName(tbuf, "tbuf")
-	tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
+	// tbuf := &giv.TextBuf{}
+	// tbuf.InitName(tbuf, "tbuf")
+	// tbuf.SetText([]byte("A keyboard-navigable, multi-line\ntext editor with support for\ncompletion and syntax highlighting"))
 
-	tview := giv.NewTextView(inputs, "tview")
-	tview.SetBuf(tbuf)
-	tview.AddStyles(func(s *styles.Style) {
-		s.MaxWidth.SetDp(500)
-		s.MaxHeight.SetDp(300)
-	})
+	// tview := giv.NewTextView(inputs, "tview")
+	// tview.SetBuf(tbuf)
+	// tview.AddStyles(func(s *styles.Style) {
+	// 	s.MaxWidth.SetDp(500)
+	// 	s.MaxHeight.SetDp(300)
+	// })
 }
 
 func makeLayouts(tv *gi.TabView) {
@@ -390,15 +387,15 @@ func makeLayouts(tv *gi.TabView) {
 	vw := gi.NewLabel(layouts, "vw", "50vw")
 	vw.AddStyles(func(s *styles.Style) {
 		s.Width = units.Vw(50)
-		s.BackgroundColor.SetSolid(colors.Scheme.Primary)
-		s.Color = colors.Scheme.OnPrimary
+		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
+		s.Color = colors.Scheme.Primary.On
 	})
 
 	pw := gi.NewLabel(layouts, "pw", "50pw")
 	pw.AddStyles(func(s *styles.Style) {
 		s.Width = units.Pw(50)
-		s.BackgroundColor.SetSolid(colors.Scheme.PrimaryContainer)
-		s.Color = colors.Scheme.OnPrimaryContainer
+		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
+		s.Color = colors.Scheme.Primary.OnContainer
 	})
 
 	// sv := gi.NewSplitView(layouts, "sv")
@@ -421,81 +418,81 @@ func makeFileTree(tv *gi.TabView) {
 	filetree.Lay = gi.LayoutVert
 }
 
-func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
-	// Main Menu
+// func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
+// 	// Main Menu
 
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
+// 	appnm := gi.AppName()
+// 	mmen := win.MainMenu
+// 	mmen.ConfigMenus([]string{appnm, "File", "Edit", "RenderWin"})
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu.AddAppMenu(win)
+// 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
+// 	amen.Menu.AddAppMenu(win)
 
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:New menu action triggered")
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:Open menu action triggered")
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:Save menu action triggered")
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			fmt.Println("File:SaveAs menu action triggered")
-		})
-	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			win.CloseReq()
-		})
+// 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 			fmt.Println("File:New menu action triggered")
+// 		})
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 			fmt.Println("File:Open menu action triggered")
+// 		})
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 			fmt.Println("File:Save menu action triggered")
+// 		})
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+// 		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 			fmt.Println("File:SaveAs menu action triggered")
+// 		})
+// 	fmen.Menu.AddSeparator("csep")
+// 	fmen.Menu.AddAction(gi.ActOpts{Label: "Close RenderWin", ShortcutKey: gi.KeyFunWinClose},
+// 		win.This(), func(recv, send ki.Ki, sig int64, data any) {
+// 			win.CloseReq()
+// 		})
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu.AddCopyCutPaste(win)
+// 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
+// 	emen.Menu.AddCopyCutPaste(win)
 
-	inQuitPrompt := false
-	gi.SetQuitReqFunc(func() {
-		if inQuitPrompt {
-			return
-		}
-		inQuitPrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-			Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				gi.Quit()
-			} else {
-				inQuitPrompt = false
-			}
-		})
-	})
+// 	inQuitPrompt := false
+// 	gi.SetQuitReqFunc(func() {
+// 		if inQuitPrompt {
+// 			return
+// 		}
+// 		inQuitPrompt = true
+// 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
+// 			Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
+// 			if dlg.Accepted {
+// 				gi.Quit()
+// 			} else {
+// 				inQuitPrompt = false
+// 			}
+// 		})
+// 	})
 
-	gi.SetQuitCleanFunc(func() {
-		fmt.Printf("Doing final Quit cleanup here..\n")
-	})
+// 	gi.SetQuitCleanFunc(func() {
+// 		fmt.Printf("Doing final Quit cleanup here..\n")
+// 	})
 
-	inClosePrompt := false
-	win.SetCloseReqFunc(func(w *gi.RenderWin) {
-		if inClosePrompt {
-			return
-		}
-		inClosePrompt = true
-		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
-			if dlg.Accepted {
-				gi.Quit()
-			} else {
-				inClosePrompt = false
-			}
-		})
-	})
+// 	inClosePrompt := false
+// 	win.SetCloseReqFunc(func(w *gi.RenderWin) {
+// 		if inClosePrompt {
+// 			return
+// 		}
+// 		inClosePrompt = true
+// 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
+// 			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
+// 			if dlg.Accepted {
+// 				gi.Quit()
+// 			} else {
+// 				inClosePrompt = false
+// 			}
+// 		})
+// 	})
 
-	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-	// 	fmt.Printf("Doing final Close cleanup here..\n")
-	// })
+// 	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
+// 	// 	fmt.Printf("Doing final Close cleanup here..\n")
+// 	// })
 
-	win.MainMenuUpdated()
-}
+// 	win.MainMenuUpdated()
+// }
