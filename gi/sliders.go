@@ -171,6 +171,7 @@ func (sr *Slider) OnInit() {
 
 func (sr *Slider) SliderStyles() {
 	sr.AddStyles(func(s *styles.Style) {
+		fmt.Println(sr, sr.Type)
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		// we use a different color for the thumb and value color
@@ -184,6 +185,15 @@ func (sr *Slider) SliderStyles() {
 			sr.ThSizeReal = sr.ThSize
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
+			s.Padding.Set(units.Dp(8))
+
+			if sr.Dim == mat32.X {
+				s.Width.SetEm(20)
+				s.Height.SetDp(4)
+			} else {
+				s.Height.SetEm(20)
+				s.Width.SetDp(4)
+			}
 		} else {
 			sr.ValThumb = true
 			sr.ThumbSize = units.Ex(1)
@@ -201,14 +211,6 @@ func (sr *Slider) SliderStyles() {
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Padding.Set(units.Dp(8))
-		if sr.Dim == mat32.X {
-			s.Width.SetEm(20)
-			s.Height.SetDp(4)
-		} else {
-			s.Height.SetEm(20)
-			s.Width.SetDp(4)
-		}
 		s.Cursor = cursors.Grab
 		switch {
 		case s.Is(states.Sliding):
@@ -698,7 +700,7 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetFullColor(&sr.ThumbColor)
 
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+	if (sr.Icon.IsValid() && sr.Parts.HasChildren()) || sr.Type == SliderScrollbar {
 		sr.RenderUnlock(rs)
 		sr.Parts.Render(sc)
 	} else {
