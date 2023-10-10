@@ -43,7 +43,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
 	})
 
-	tv := mfr.NewChild(TypeTableView, "tv").(*TableView)
+	tv := mfr.NewChild(TableViewType, "tv").(*TableView)
 	tv.Scene = vp
 	tv.SetSlice(km)
 	tv.SetStretchMax()

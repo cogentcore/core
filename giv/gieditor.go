@@ -6,15 +6,11 @@ package giv
 
 import (
 	"fmt"
-	"log"
 
 	"goki.dev/colors"
-	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -65,7 +61,7 @@ func (ge *GiEditor) Update() {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.KiRoot.UpdateSig()
+	// ge.KiRoot.UpdateSig()
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
@@ -77,7 +73,7 @@ func (ge *GiEditor) Save() {
 		return
 	}
 
-	ge.KiRoot.SaveJSON(string(ge.Filename))
+	// ge.KiRoot.SaveJSON(string(ge.Filename))
 	ge.Changed = false
 }
 
@@ -86,7 +82,7 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.KiRoot.SaveJSON(string(filename))
+	// ge.KiRoot.SaveJSON(string(filename))
 	ge.Changed = false
 	ge.Filename = filename
 	ge.UpdateSig() // notify our editor
@@ -97,83 +93,86 @@ func (ge *GiEditor) Open(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
 	}
-	ge.KiRoot.OpenJSON(string(filename))
+	// ge.KiRoot.OpenJSON(string(filename))
 	ge.Filename = filename
-	ge.SetFullReRender()
 	ge.UpdateSig() // notify our editor
 }
 
 // EditColorScheme pulls up a window to edit the current color scheme
 func (ge *GiEditor) EditColorScheme() {
-	winm := "gogi-color-scheme"
-	width := 800
-	height := 800
-	win, recyc := gi.RecycleMainRenderWin(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
-	if recyc {
-		return
-	}
+	/*
+		winm := "gogi-color-scheme"
+		width := 800
+		height := 800
+		win, recyc := gi.RecycleMainRenderWin(&gi.ColorScheme, winm, "GoGi Color Scheme", width, height)
+		if recyc {
+			return
+		}
 
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
+		vp := win.WinScene()
+		updt := vp.UpdateStart()
 
-	mfr := win.SetMainFrame()
-	mfr.Lay = gi.LayoutVert
+		mfr := win.SetMainFrame()
+		mfr.Lay = gi.LayoutVert
 
-	key := matcolor.Key{
-		Primary:        colors.FromRGB(123, 135, 122),
-		Secondary:      colors.FromRGB(106, 196, 178),
-		Tertiary:       colors.FromRGB(106, 196, 178),
-		Error:          colors.FromRGB(219, 46, 37),
-		Neutral:        colors.FromRGB(133, 131, 121),
-		NeutralVariant: colors.FromRGB(107, 106, 101),
-	}
-	p := matcolor.NewPalette(key)
-	schemes := matcolor.NewSchemes(p)
+		key := matcolor.Key{
+			Primary:        colors.FromRGB(123, 135, 122),
+			Secondary:      colors.FromRGB(106, 196, 178),
+			Tertiary:       colors.FromRGB(106, 196, 178),
+			Error:          colors.FromRGB(219, 46, 37),
+			Neutral:        colors.FromRGB(133, 131, 121),
+			NeutralVariant: colors.FromRGB(107, 106, 101),
+		}
+		p := matcolor.NewPalette(key)
+		schemes := matcolor.NewSchemes(p)
 
-	kv := NewStructView(mfr, "kv")
-	kv.Scene = vp
-	kv.SetStruct(&key)
-	kv.SetStretchMax()
+		kv := NewStructView(mfr, "kv")
+		kv.Scene = vp
+		kv.SetStruct(&key)
+		kv.SetStretchMax()
 
-	split := gi.NewSplitView(mfr, "split")
-	split.Dim = mat32.X
+		split := gi.NewSplitView(mfr, "split")
+		split.Dim = mat32.X
 
-	svl := NewStructView(split, "svl")
-	svl.Scene = vp
-	svl.SetStruct(&schemes.Light)
-	svl.SetStretchMax()
+		svl := NewStructView(split, "svl")
+		svl.Scene = vp
+		svl.SetStruct(&schemes.Light)
+		svl.SetStretchMax()
 
-	svd := NewStructView(split, "svd")
-	svd.Scene = vp
-	svd.SetStruct(&schemes.Dark)
-	svd.SetStretchMax()
+		svd := NewStructView(split, "svd")
+		svd.Scene = vp
+		svd.SetStruct(&schemes.Dark)
+		svd.SetStretchMax()
 
-	kv.ViewSig.Connect(kv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		p = matcolor.NewPalette(key)
-		schemes = matcolor.NewSchemes(p)
-		gi.ColorSchemes = *schemes
-		gi.Prefs.UpdateAll()
-		svl.UpdateFields()
-		svd.UpdateFields()
-	})
+		kv.ViewSig.Connect(kv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			p = matcolor.NewPalette(key)
+			schemes = matcolor.NewSchemes(p)
+			gi.ColorSchemes = *schemes
+			gi.Prefs.UpdateAll()
+			svl.UpdateFields()
+			svd.UpdateFields()
+		})
 
-	if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
-		vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
-		win.SetSize(vpsz)
-	}
+		if !win.HasFlag(WinHasGeomPrefs) { // resize to contents
+			vpsz := vp.PrefSize(win.RenderWin.Screen().PixSize)
+			win.SetSize(vpsz)
+		}
 
-	vp.UpdateEndNoSig(updt)
-	win.GoStartEventLoop()
+		vp.UpdateEndNoSig(updt)
+		win.GoStartEventLoop()
+	*/
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not
 func (ge *GiEditor) ToggleSelectionMode() {
+	/* todo: renderwin is not a Ki anymore
 	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
 		if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
 			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 		}
 		win.SetFlag(!win.HasFlag(WinSelectionMode), WinSelectionMode)
 	}
+	*/
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -184,7 +183,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 		ge.KiRoot = root
 		// ge.GetAllUpdates(root)
 	}
-	ge.Config()
+	ge.Config(ge.Sc)
 	ge.UpdateEnd(updt)
 }
 
@@ -203,7 +202,7 @@ func (ge *GiEditor) SetRoot(root ki.Ki) {
 // }
 
 // Config configures the widget
-func (ge *GiEditor) ConfigWidget(vp *gi.Scene) {
+func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	if ge.KiRoot == nil {
 		return
 	}
@@ -211,8 +210,8 @@ func (ge *GiEditor) ConfigWidget(vp *gi.Scene) {
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(gi.TypeSplitView, "splitview")
+	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.SplitViewType, "splitview")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
 	ge.ConfigSplitView()
@@ -260,7 +259,7 @@ func (ge *GiEditor) ConfigToolbar() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	ToolBarView(ge, ge.Scene, tb)
+	ToolBarView(ge, ge.Sc, tb)
 }
 
 // ConfigSplitView configures the SplitView.
@@ -273,26 +272,29 @@ func (ge *GiEditor) ConfigSplitView() {
 	split.Dim = mat32.X
 
 	if len(split.Kids) == 0 {
-		tvfr := gi.NewFrame(split, "tvfr", gi.LayoutHoriz)
+		tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
 		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
-		tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if data == nil {
-				return
-			}
-			gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
-			svr := gee.StructView()
-			tvn, _ := data.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-			if sig == int64(TreeViewSelected) {
-				svr.SetStruct(tvn.SrcNode)
-			} else if sig == int64(TreeViewChanged) {
-				gee.SetChanged()
-			}
-		})
-		sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-			gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
-			gee.SetChanged()
-		})
+		_ = tv
+		_ = sv
+		// todo:
+		// tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	if data == nil {
+		// 		return
+		// 	}
+		// 	gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
+		// 	svr := gee.StructView()
+		// 	tvn, _ := data.(ki.Ki).Embed(TypeTreeView).(*TreeView)
+		// 	if sig == int64(TreeViewSelected) {
+		// 		svr.SetStruct(tvn.SrcNode)
+		// 	} else if sig == int64(TreeViewChanged) {
+		// 		gee.SetChanged()
+		// 	}
+		// })
+		// sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 	gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
+		// 	gee.SetChanged()
+		// })
 		split.SetSplits(.3, .7)
 	}
 	tv := ge.TreeView()
@@ -303,17 +305,17 @@ func (ge *GiEditor) ConfigSplitView() {
 
 func (ge *GiEditor) SetChanged() {
 	ge.Changed = true
-	ge.ToolBar().UpdateActions() // nil safe
+	ge.ToolBar().UpdateButtons() // nil safe
 }
 
-func (ge *GiEditor) Render(vp *gi.Scene) {
-	ge.ToolBar().UpdateActions()
-	if win := ge.ParentRenderWin(); win != nil {
-		if !win.Is(WinResizing) {
-			win.MainMenuUpdateActives()
-		}
-	}
-	ge.Frame.Render()
+func (ge *GiEditor) Render(sc *gi.Scene) {
+	ge.ToolBar().UpdateButtons()
+	// if win := ge.ParentRenderWin(); win != nil {
+	// 	if !win.Is(WinResizing) {
+	// 		win.MainMenuUpdateActives()
+	// 	}
+	// }
+	ge.Frame.Render(sc)
 }
 
 var GiEditorProps = ki.Props{
@@ -331,15 +333,17 @@ var GiEditorProps = ki.Props{
 			"desc": "Select an element in the window to edit it",
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 				ge := gei.(*GiEditor)
-				win, ok := ge.KiRoot.(*gi.RenderWin)
-				act.SetEnabledStateUpdt(ok)
-				if ok {
-					if win.HasFlag(WinSelectionMode) {
-						act.SetText("Disable Selection")
-					} else {
-						act.SetText("Enable Selection")
-					}
-				}
+				_ = ge
+				// win, ok := ge.KiRoot.(*gi.RenderWin) // todo
+				// ok := true
+				// act.SetEnabledStateUpdt(ok)
+				// if ok {
+				// 	if win.HasFlag(WinSelectionMode) {
+				// 		act.SetText("Disable Selection")
+				// 	} else {
+				// 		act.SetText("Enable Selection")
+				// 	}
+				// }
 			}),
 		}},
 		{"sep-file", ki.BlankProp{}},
@@ -430,6 +434,7 @@ var GiEditorProps = ki.Props{
 // GoGiEditorDialog opens an interactive editor of the given Ki tree, at its
 // root, returns GiEditor and window
 func GoGiEditorDialog(obj ki.Ki) *GiEditor {
+	/* todo
 	width := 1280
 	height := 920
 	wnm := "gogi-editor"
@@ -461,7 +466,7 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	MainMenuView(ge, win, mmen)
 
 	tb := ge.ToolBar()
-	tb.UpdateActions()
+	tb.UpdateButtons()
 
 	ge.SelectionLoop()
 
@@ -491,36 +496,41 @@ func GoGiEditorDialog(obj ki.Ki) *GiEditor {
 	vp.UpdateEndNoSig(updt)
 	win.GoStartEventLoop() // in a separate goroutine
 	return ge
+	*/
+	return nil
+
 }
 
 // SelectionLoop, if [KiRoot] is a [gi.RenderWin], runs a loop in a separate goroutine
 // that listens to the [RenderWin.SelectedWidgetChan] channel and selects selected elements.
 func (ge *GiEditor) SelectionLoop() {
-	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
-		go func() {
-			if win.SelectedWidgetChan == nil {
-				win.SelectedWidgetChan = make(chan *gi.WidgetBase)
-			}
-			for {
-				sw := <-win.SelectedWidgetChan
-				tv := ge.TreeView().FindSrcNode(sw.This())
-				if tv == nil {
-					log.Printf("GiEditor on %v: tree view source node missing for", sw)
-				} else {
-					// TODO: make quicker
-					wupdt := tv.RootView.TopUpdateStart()
-					updt := tv.RootView.UpdateStart()
-
-					tv.RootView.CloseAll()
-					tv.RootView.UnselectAll()
-					tv.OpenParents()
-					tv.SelectAction(events.SelectOne)
-					tv.ScrollToMe()
-
-					tv.RootView.UpdateEnd(updt)
-					tv.RootView.TopUpdateEnd(wupdt)
+	/*
+		if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
+			go func() {
+				if win.SelectedWidgetChan == nil {
+					win.SelectedWidgetChan = make(chan *gi.WidgetBase)
 				}
-			}
-		}()
-	}
+				for {
+					sw := <-win.SelectedWidgetChan
+					tv := ge.TreeView().FindSrcNode(sw.This())
+					if tv == nil {
+						log.Printf("GiEditor on %v: tree view source node missing for", sw)
+					} else {
+						// TODO: make quicker
+						wupdt := tv.RootView.TopUpdateStart()
+						updt := tv.RootView.UpdateStart()
+
+						tv.RootView.CloseAll()
+						tv.RootView.UnselectAll()
+						tv.OpenParents()
+						tv.SelectAction(events.SelectOne)
+						tv.ScrollToMe()
+
+						tv.RootView.UpdateEnd(updt)
+						tv.RootView.TopUpdateEnd(wupdt)
+					}
+				}
+			}()
+		}
+	*/
 }

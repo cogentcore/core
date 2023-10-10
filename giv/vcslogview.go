@@ -63,8 +63,8 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
-	config.Add(TypeTableView, "log")
+	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(TableViewType, "log")
 	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
 	if mods {
@@ -95,7 +95,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	} else {
 		updt = lv.UpdateStart()
 	}
-	tv.SetDisabled()
+	tv.SetState(true, states.Disabled)
 	tv.SetSlice(&lv.Log)
 	lv.UpdateEnd(updt)
 }

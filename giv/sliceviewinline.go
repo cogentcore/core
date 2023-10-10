@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -139,7 +140,7 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 		}
 		vv.ConfigWidget(widg)
 		if sv.IsDisabled() {
-			widg.AsWidget().SetDisabled()
+			widg.AsWidget().SetState(true, states.Disabled)
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

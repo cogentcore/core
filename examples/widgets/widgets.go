@@ -176,7 +176,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetIcon(icons.RadioButtonChecked)
 	slider1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2)).
-		On(events.Change, func(e events.Event) {
+		OnChange(, func(e events.Event) {
 			fmt.Println("slider1", slider1.Value)
 		})
 
@@ -185,7 +185,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetValue(0.5)
 	slider2.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).
-		On(events.Change, func(e events.Event) {
+		OnChange(, func(e events.Event) {
 			fmt.Println("slider2", slider2.Value)
 		})
 
@@ -197,7 +197,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSnap(true).
 		SetTracking(true)
 	scrollbar1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1)).
-		On(events.Change, func(e events.Event) {
+		OnChange(, func(e events.Event) {
 			fmt.Println("scroll1", scrollbar1.Value)
 		})
 
@@ -211,7 +211,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetStep(1).
 		SetPageStep(10)
 	scrollbar2.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight().
-		On(events.Change, func(e events.Event) {
+		OnChange(, func(e events.Event) {
 			fmt.Println("scroll2", scrollbar2.Value)
 		})
 
@@ -297,7 +297,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}
 		inQuitPrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-			Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
+			Prompt: "Are you <i>sure</i> you want to quit?"}, Ok: true, Cancel: true,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					gi.Quit()
@@ -318,7 +318,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		}
 		inClosePrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, gi.AddOk, gi.AddCancel,
+			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, Ok: true, Cancel: true,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					gi.Quit()

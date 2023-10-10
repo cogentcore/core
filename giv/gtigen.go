@@ -386,9 +386,7 @@ var EnumValueViewType = gti.AddType(&gti.Type{
 	IDName:     "enum-value-view",
 	Doc:        "EnumValueView presents a combobox for choosing enums",
 	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"AltType", &gti.Field{Name: "AltType", Type: "reflect.Type", Doc: "", Directives: gti.Directives{}}},
-	}),
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -655,7 +653,7 @@ var ColorMapValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorMapValueView",
 	ShortName:  "giv.ColorMapValueView",
 	IDName:     "color-map-value-view",
-	Doc:        "ColorMapValueView presents an action for displaying a ColorMapName and selecting\nmeshes from a ChooserDialog",
+	Doc:        "ColorMapValueView presents an button for displaying a ColorMapName and selecting\nmeshes from a ChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -761,7 +759,7 @@ var ColorNameValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorNameValueView",
 	ShortName:  "giv.ColorNameValueView",
 	IDName:     "color-name-value-view",
-	Doc:        "ColorNameValueView presents an action for displaying a ColorNameName and selecting\nmeshes from a ChooserDialog",
+	Doc:        "ColorNameValueView presents an button for displaying a ColorNameName and selecting\nmeshes from a ChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -879,7 +877,7 @@ var FileTreeType = gti.AddType(&gti.Type{
 		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}}},
 		{"Dirs", &gti.Field{Name: "Dirs", Type: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}}},
 		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", Doc: "if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed", Directives: gti.Directives{}}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "reflect.Type", Doc: "[view: -] type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}}},
+		{"NodeType", &gti.Field{Name: "NodeType", Type: "*gti.Type", Doc: "[view: -] type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}}},
 		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}}},
 		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "[view: -] change notify for all dirs", Directives: gti.Directives{}}},
 		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "[view: -] channel to close watcher watcher", Directives: gti.Directives{}}},
@@ -915,11 +913,13 @@ func (t *FileTree) New() ki.Ki {
 
 // FileNodeType is the [gti.Type] for [FileNode]
 var FileNodeType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FileNode",
-	ShortName:  "giv.FileNode",
-	IDName:     "file-node",
-	Doc:        "FileNode represents a file in the file system -- the name of the node is\nthe name of the file.  Folders have children containing further nodes.",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/giv.FileNode",
+	ShortName: "giv.FileNode",
+	IDName:    "file-node",
+	Doc:       "FileNode represents a file in the file system -- the name of the node is\nthe name of the file.  Folders have children containing further nodes.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FPath", &gti.Field{Name: "FPath", Type: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}}},
 		{"Info", &gti.Field{Name: "Info", Type: "FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}}},
@@ -953,14 +953,38 @@ func (t *FileNode) New() ki.Ki {
 	return &FileNode{}
 }
 
+// FileNodeEmbedder is an interface that all types that embed FileNode satisfy
+type FileNodeEmbedder interface {
+	AsFileNode() *FileNode
+}
+
+// AsFileNode returns the given value as a value of type FileNode if the type
+// of the given value embeds FileNode, or nil otherwise
+func AsFileNode(k ki.Ki) *FileNode {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(FileNodeEmbedder); ok {
+		return t.AsFileNode()
+	}
+	return nil
+}
+
+// AsFileNode satisfies the [FileNodeEmbedder] interface
+func (t *FileNode) AsFileNode() *FileNode {
+	return t
+}
+
 // FileTreeViewType is the [gti.Type] for [FileTreeView]
 var FileTreeViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FileTreeView",
-	ShortName:  "giv.FileTreeView",
-	IDName:     "file-tree-view",
-	Doc:        "FileTreeView is a TreeView that knows how to operate on FileNode nodes",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Name:      "goki.dev/gi/v2/giv.FileTreeView",
+	ShortName: "giv.FileTreeView",
+	IDName:    "file-tree-view",
+	Doc:       "FileTreeView is a TreeView that knows how to operate on FileNode nodes",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"TreeView", &gti.Field{Name: "TreeView", Type: "TreeView", Doc: "", Directives: gti.Directives{}}},
 	}),
@@ -984,6 +1008,28 @@ func (t *FileTreeView) KiType() *gti.Type {
 // New returns a new [*FileTreeView] value
 func (t *FileTreeView) New() ki.Ki {
 	return &FileTreeView{}
+}
+
+// FileTreeViewEmbedder is an interface that all types that embed FileTreeView satisfy
+type FileTreeViewEmbedder interface {
+	AsFileTreeView() *FileTreeView
+}
+
+// AsFileTreeView returns the given value as a value of type FileTreeView if the type
+// of the given value embeds FileTreeView, or nil otherwise
+func AsFileTreeView(k ki.Ki) *FileTreeView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(FileTreeViewEmbedder); ok {
+		return t.AsFileTreeView()
+	}
+	return nil
+}
+
+// AsFileTreeView satisfies the [FileTreeViewEmbedder] interface
+func (t *FileTreeView) AsFileTreeView() *FileTreeView {
+	return t
 }
 
 // FileValueViewType is the [gti.Type] for [FileValueView]
@@ -1696,6 +1742,67 @@ func (t *TableView) New() ki.Ki {
 	return &TableView{}
 }
 
+// TextBufType is the [gti.Type] for [TextBuf]
+var TextBufType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.TextBuf",
+	ShortName:  "giv.TextBuf",
+	IDName:     "text-buf",
+	Doc:        "TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds\nthe raw text lines (in original string and rune formats, and marked-up from\nsyntax highlighting), and sends signals for making edits to the text and\ncoordinating those edits across multiple views.  Views always only view a\nsingle buffer, so they directly call methods on the buffer to drive\nupdates, which are then broadcast.  It also has methods for loading and\nsaving buffers to files.  Unlike GUI Widgets, its methods are generally\nsignaling, without an explicit Action suffix.  Internally, the buffer\nrepresents new lines using \\n = LF, but saving and loading can deal with\nRenderWins/DOS CRLF format.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Txt", &gti.Field{Name: "Txt", Type: "[]byte", Doc: "the current value of the entire text being edited -- using []byte slice for greater efficiency", Directives: gti.Directives{}}},
+		{"Autosave", &gti.Field{Name: "Autosave", Type: "bool", Doc: "if true, auto-save file after changes (in a separate routine)", Directives: gti.Directives{}}},
+		{"Opts", &gti.Field{Name: "Opts", Type: "textbuf.Opts", Doc: "options for how text editing / viewing works", Directives: gti.Directives{}}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "gi.FileName", Doc: "filename of file last loaded or saved", Directives: gti.Directives{}}},
+		{"Info", &gti.Field{Name: "Info", Type: "FileInfo", Doc: "full info about file", Directives: gti.Directives{}}},
+		{"PiState", &gti.Field{Name: "PiState", Type: "pi.FileStates", Doc: "Pi parsing state info for file", Directives: gti.Directives{}}},
+		{"Hi", &gti.Field{Name: "Hi", Type: "HiMarkup", Doc: "syntax highlighting markup parameters (language, style, etc)", Directives: gti.Directives{}}},
+		{"NLines", &gti.Field{Name: "NLines", Type: "int", Doc: "number of lines", Directives: gti.Directives{}}},
+		{"LineIcons", &gti.Field{Name: "LineIcons", Type: "map[int]icons.Icon", Doc: "icons for given lines -- use SetLineIcon and DeleteLineIcon", Directives: gti.Directives{}}},
+		{"LineColors", &gti.Field{Name: "LineColors", Type: "map[int]color.RGBA", Doc: "special line number colors given lines -- use SetLineColor and DeleteLineColor", Directives: gti.Directives{}}},
+		{"Icons", &gti.Field{Name: "Icons", Type: "map[icons.Icon]*gi.Icon", Doc: "icons for each LineIcons being used", Directives: gti.Directives{}}},
+		{"Lines", &gti.Field{Name: "Lines", Type: "[][]rune", Doc: "the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!", Directives: gti.Directives{}}},
+		{"LineBytes", &gti.Field{Name: "LineBytes", Type: "[][]byte", Doc: "the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes", Directives: gti.Directives{}}},
+		{"Tags", &gti.Field{Name: "Tags", Type: "[]lex.Line", Doc: "", Directives: gti.Directives{}}},
+		{"HiTags", &gti.Field{Name: "HiTags", Type: "[]lex.Line", Doc: "", Directives: gti.Directives{}}},
+		{"Markup", &gti.Field{Name: "Markup", Type: "[][]byte", Doc: "marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered", Directives: gti.Directives{}}},
+		{"MarkupEdits", &gti.Field{Name: "MarkupEdits", Type: "[]*textbuf.Edit", Doc: "edits that have been made since last full markup", Directives: gti.Directives{}}},
+		{"ByteOffs", &gti.Field{Name: "ByteOffs", Type: "[]int", Doc: "offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines", Directives: gti.Directives{}}},
+		{"TotalBytes", &gti.Field{Name: "TotalBytes", Type: "int", Doc: "total bytes in document -- see ByteOffs for when it is updated", Directives: gti.Directives{}}},
+		{"LinesMu", &gti.Field{Name: "LinesMu", Type: "sync.RWMutex", Doc: "mutex for updating lines", Directives: gti.Directives{}}},
+		{"MarkupMu", &gti.Field{Name: "MarkupMu", Type: "sync.RWMutex", Doc: "mutex for updating markup", Directives: gti.Directives{}}},
+		{"MarkupDelayTimer", &gti.Field{Name: "MarkupDelayTimer", Type: "*time.Timer", Doc: "markup delay timer", Directives: gti.Directives{}}},
+		{"MarkupDelayMu", &gti.Field{Name: "MarkupDelayMu", Type: "sync.Mutex", Doc: "mutex for updating markup delay timer", Directives: gti.Directives{}}},
+		{"Views", &gti.Field{Name: "Views", Type: "[]*TextView", Doc: "the TextViews that are currently viewing this buffer", Directives: gti.Directives{}}},
+		{"Undos", &gti.Field{Name: "Undos", Type: "textbuf.Undo", Doc: "undo manager", Directives: gti.Directives{}}},
+		{"PosHistory", &gti.Field{Name: "PosHistory", Type: "[]lex.Pos", Doc: "history of cursor positions -- can move back through them", Directives: gti.Directives{}}},
+		{"CurView", &gti.Field{Name: "CurView", Type: "*TextView", Doc: "current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TextBuf{},
+})
+
+// NewTextBuf adds a new [TextBuf] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTextBuf(par ki.Ki, name ...string) *TextBuf {
+	return par.NewChild(TextBufType, name...).(*TextBuf)
+}
+
+// KiType returns the [*gti.Type] of [TextBuf]
+func (t *TextBuf) KiType() *gti.Type {
+	return TextBufType
+}
+
+// New returns a new [*TextBuf] value
+func (t *TextBuf) New() ki.Ki {
+	return &TextBuf{}
+}
+
 // TextViewType is the [gti.Type] for [TextView]
 var TextViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TextView",
@@ -1864,7 +1971,7 @@ var ValueViewBaseType = gti.AddType(&gti.Type{
 		{"Key", &gti.Field{Name: "Key", Type: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}}},
 		{"KeyView", &gti.Field{Name: "KeyView", Type: "ValueView", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
 		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
-		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "reflect.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface", Directives: gti.Directives{}}},
+		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface", Directives: gti.Directives{}}},
 		{"Widget", &gti.Field{Name: "Widget", Type: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 	}),

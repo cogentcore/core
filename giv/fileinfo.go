@@ -16,7 +16,6 @@ import (
 	"time"
 
 	"github.com/c2h5oh/datasize"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
@@ -59,6 +58,12 @@ type FileInfo struct {
 
 	// [tableview: -] full path to file, including name -- for file functions
 	Path string `tableview:"-" desc:"full path to file, including name -- for file functions"`
+}
+
+func NewFileInfo(fname string) (*FileInfo, error) {
+	fi := &FileInfo{}
+	err := fi.InitFile(fname)
+	return fi, err
 }
 
 // InitFile initializes a FileInfo based on a filename -- directly returns
@@ -286,7 +291,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	}
 	if fi.Sup != filecat.NoSupport {
 		snm := strings.ToLower(fi.Sup.String())
-		if icn := icons.Icon(snm); gi.IconNameIsValid(icn) {
+		if icn := icons.Icon(snm); icn.IsValid() {
 			return icn, true
 		}
 		if icn := icons.Icon("file-" + snm); icn.IsValid() {
@@ -301,7 +306,7 @@ func (fi *FileInfo) FindIcon() (icons.Icon, bool) {
 	}
 	if fi.Cat != filecat.Unknown {
 		cat := strings.ToLower(fi.Cat.String())
-		if icn := icons.Icon(cat); gi.IconNameIsValid(icn) {
+		if icn := icons.Icon(cat); icn.IsValid() {
 			return icn, true
 		}
 		if icn := icons.Icon("file-" + cat); icn.IsValid() {

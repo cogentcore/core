@@ -121,7 +121,7 @@ func (mv *MapView) UpdateValues() {
 // Config configures the view
 func (mv *MapView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
 	mv.ConfigMapGrid()

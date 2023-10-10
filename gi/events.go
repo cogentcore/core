@@ -45,6 +45,16 @@ func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) Widget {
 	return wb.On(events.KeyChord, fun)
 }
 
+// OnDoubleClick adds an event listener function for [events.DoubleClick] events
+func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) Widget {
+	return wb.On(events.DoubleClick, fun)
+}
+
+// OnSelect adds an event listener function for [events.Select] events
+func (wb *WidgetBase) OnSelect(fun func(e events.Event)) Widget {
+	return wb.On(events.Select, fun)
+}
+
 // Send sends an NEW event of given type to this widget,
 // optionally starting from values in the given original event
 // (recommended to include where possible).

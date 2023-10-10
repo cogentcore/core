@@ -269,7 +269,7 @@ func (fb *FileBrowse) Defaults() {
 func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.TypeToolBar, "toolbar")
+	config.Add(gi.ToolBarType, "toolbar")
 	config.Add(gi.TypeSplitView, "splitview")
 	return config
 }
@@ -388,7 +388,7 @@ func (fb *FileBrowse) ConfigSplitView() {
 			}
 			tvn, _ := data.(ki.Ki).Embed(giv.TypeFileTreeView).(*giv.FileTreeView)
 			fbb, _ := recv.Embed(TypeFileBrowse).(*FileBrowse)
-			fn := tvn.SrcNode.Embed(giv.TypeFileNode).(*giv.FileNode)
+			fn := tvn.SrcNode.Embed(giv.FileNodeType).(*giv.FileNode)
 			switch sig {
 			case int64(giv.TreeViewSelected):
 				fbb.FileNodeSelected(fn, tvn)
@@ -531,9 +531,8 @@ func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
 		if !inQuitPrompt {
 			inQuitPrompt = true
 			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-				Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
-				win.This(), func(recv, send ki.Ki, sig int64, data any) {
-					if sig == int64(gi.DialogAccepted) {
+				Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+					if dlg.Accepted {
 						gi.Quit()
 					} else {
 						inQuitPrompt = false

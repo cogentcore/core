@@ -66,11 +66,9 @@ func (vv *StructValueView) ConfigWidget(widg gi.Widget) {
 	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeStructValueView).(*StructValueView)
-	// 	ac := vvv.Widget.(*gi.Button)
-	// 	vvv.OpenDialog(ac.Scene, nil, nil)
-	// })
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(ac, nil)
+	})
 	vv.UpdateWidget()
 }
 
@@ -190,11 +188,9 @@ func (vv *SliceValueView) ConfigWidget(widg gi.Widget) {
 	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeSliceValueView).(*SliceValueView)
-	// 	ac := vvv.Widget.(*gi.Button)
-	// 	vvv.OpenDialog(ac.Scene, nil, nil)
-	// })
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(ac, nil)
+	})
 	vv.UpdateWidget()
 }
 
@@ -322,11 +318,9 @@ func (vv *MapValueView) ConfigWidget(widg gi.Widget) {
 	ac := vv.Widget.(*gi.Button)
 	ac.Icon = icons.Edit
 	ac.Tooltip, _ = vv.Tag("desc")
-	// ac.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeMapValueView).(*MapValueView)
-	// 	ac := vvv.Widget.(*gi.Button)
-	// 	vvv.OpenDialog(ac.Scene, nil, nil)
-	// })
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(ac, nil)
+	})
 	vv.UpdateWidget()
 }
 
@@ -521,15 +515,11 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Widget) {
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip, _ = vv.Tag("desc")
 	cb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
-	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(gi.ButtonToggled) {
-	// 		vvv, _ := recv.Embed(TypeBoolValueView).(*BoolValueView)
-	// 		cbb := vvv.Widget.(*gi.CheckBox)
-	// 		if vvv.SetValue(cbb.StateIs(states.Checked)) {
-	// 			vvv.UpdateWidget() // always update after setting value..
-	// 		}
-	// 	}
-	// })
+	cb.OnChange(func(e events.Event) {
+		if vv.SetValue(cb.StateIs(states.Checked)) {
+			vv.UpdateWidget() // always update after setting value..
+		}
+	})
 	vv.UpdateWidget()
 }
 
@@ -595,13 +585,11 @@ func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-	// sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeIntValueView).(*IntValueView)
-	// 	sbb := vvv.Widget.(*gi.SpinBox)
-	// 	if vvv.SetValue(sbb.Value) {
-	// 		vvv.UpdateWidget()
-	// 	}
-	// })
+	sb.OnChange(func(e events.Event) {
+		if vv.SetValue(sb.Value) {
+			vv.UpdateWidget()
+		}
+	})
 	vv.UpdateWidget()
 }
 
@@ -663,13 +651,11 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 		sb.Format = fmttag
 	}
 
-	// sb.SpinBoxSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	vvv, _ := recv.Embed(TypeFloatValueView).(*FloatValueView)
-	// 	sbb := vvv.Widget.(*gi.SpinBox)
-	// 	if vvv.SetValue(sbb.Value) {
-	// 		vvv.UpdateWidget()
-	// 	}
-	// })
+	sb.OnChange(func(e events.Event) {
+		if vv.SetValue(sb.Value) {
+			vv.UpdateWidget()
+		}
+	})
 	vv.UpdateWidget()
 }
 

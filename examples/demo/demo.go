@@ -335,7 +335,7 @@ func makeInputs(tv *gi.TabView) {
 	sliderxi := gi.NewSlider(inputs, "sliderxi")
 	sliderxi.Dim = mat32.X
 	sliderxi.Value = 0.7
-	sliderxi.SetDisabled()
+	sliderxi.SetState(true, states.Disabled)
 
 	clr := colors.Tan
 
@@ -353,7 +353,7 @@ func makeInputs(tv *gi.TabView) {
 	slideryi := gi.NewSlider(sliderys, "slideryi")
 	slideryi.Dim = mat32.Y
 	slideryi.Value = 0.2
-	slideryi.SetDisabled()
+	slideryi.SetState(true, states.Disabled)
 
 	bbox := gi.NewButtonBox(inputs, "bbox")
 	bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
@@ -463,7 +463,7 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 		}
 		inQuitPrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-			Prompt: "Are you <i>sure</i> you want to quit?"}, gi.AddOk, gi.AddCancel,
+			Prompt: "Are you <i>sure</i> you want to quit?"}, Ok: true, Cancel: true,
 			win.This(), func(recv, send ki.Ki, sig int64, data any) {
 				if sig == int64(gi.DialogAccepted) {
 					gi.Quit()
@@ -484,13 +484,12 @@ func doRenderWinSetup(win *gi.RenderWin, vp *gi.Scene) {
 		}
 		inClosePrompt = true
 		gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Close RenderWin?",
-			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well."}, gi.AddOk, gi.AddCancel,
-			win.This(), func(recv, send ki.Ki, sig int64, data any) {
-				if sig == int64(gi.DialogAccepted) {
+			Prompt: "Are you <i>sure</i> you want to close the window?  This will Quit the App as well.", Ok: true, Cancel: true}, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
+		if dlg.Accepted {
 					gi.Quit()
-				} else {
-					inClosePrompt = false
-				}
+		} else {
+			inClosePrompt = false
+		}
 			})
 	})
 

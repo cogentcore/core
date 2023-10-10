@@ -744,8 +744,7 @@ func MethViewCallNoArgPrompt(ac *gi.Button, md *MethViewData, args []reflect.Val
 	// 	return
 	// }
 	// if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
-	// 	gi.PromptDialog(md.Sc, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc}, gi.AddOk, gi.AddCancel,
-	// 		md.Sc.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 	gi.PromptDialog(md.Sc, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc, Ok: true, Cancel: true}, func(act *gi.Button) {
 	// 			if sig == int64(gi.DialogAccepted) {
 	// 				MethViewCallMeth(md, args)
 	// 			}
@@ -779,7 +778,7 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 }
 
 // MethViewShowValue displays a value in a dialog window (e.g., for MethViewShowReturn)
-func MethViewShowValue(vp *gi.Scene, val reflect.Value, title, prompt string) {
+func MethViewShowValue(ctx gi.Widget, val reflect.Value, title, prompt string) {
 	if laser.ValueIsZero(val) {
 		return
 	}
@@ -790,19 +789,19 @@ func MethViewShowValue(vp *gi.Scene, val reflect.Value, title, prompt string) {
 	tk := npv.Type().Kind()
 	switch tk {
 	case reflect.Struct:
-		StructViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
+		StructViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, val.Interface(), nil)
 	case reflect.Slice:
 		if bs, ok := npv.Interface().([]byte); ok {
-			TextViewDialog(vp, bs, DlgOpts{Title: title, Prompt: prompt, Ok: true})
+			TextViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true}, bs, nil)
 		} else if bs, ok := val.Interface().([]byte); ok {
-			TextViewDialog(vp, bs, DlgOpts{Title: title, Prompt: prompt, Ok: true})
+			TextViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true}, bs, nil)
 		} else {
-			SliceViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil, nil)
+			SliceViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, val.Interface(), nil, nil, nil)
 		}
 	case reflect.Map:
-		MapViewDialog(vp, val.Interface(), DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, nil, nil)
+		MapViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true, Cancel: true}, val.Interface(), nil, nil)
 	default:
-		TextViewDialog(vp, []byte(npv.String()), DlgOpts{Title: title, Prompt: prompt, Ok: true})
+		TextViewDialog(ctx, DlgOpts{Title: title, Prompt: prompt, Ok: true}, []byte(npv.String()))
 	}
 
 }
