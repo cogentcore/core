@@ -180,9 +180,9 @@ func (sr *Slider) SliderStyles() {
 		s.Color = colors.Scheme.Primary.On
 
 		if sr.Type == SliderSlider {
-			sr.ThumbSize = units.Em(1.5)
-			sr.ThSize = 25.0
-			sr.ThSizeReal = sr.ThSize
+			// sr.ThumbSize = units.Em(1.5)
+			// sr.ThSize = 25.0
+			// sr.ThSizeReal = sr.ThSize
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
@@ -195,10 +195,8 @@ func (sr *Slider) SliderStyles() {
 				s.Width.SetDp(4)
 			}
 		} else {
-			sr.ValThumb = true
-			sr.ThumbSize = units.Ex(1)
 			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
-			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
+			sr.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
 		}
 
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
@@ -238,6 +236,10 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 func (sr *Slider) SetType(typ SliderTypes) *Slider {
 	updt := sr.UpdateStart()
 	sr.Type = typ
+	if typ == SliderScrollbar {
+		sr.ValThumb = true
+		sr.ThumbSize = units.Ex(1)
+	}
 	sr.UpdateEndLayout(updt)
 	return sr
 }
@@ -700,7 +702,7 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
 	pc.FillStyle.SetFullColor(&sr.ThumbColor)
 
-	if (sr.Icon.IsValid() && sr.Parts.HasChildren()) || sr.Type == SliderScrollbar {
+	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
 		sr.Parts.Render(sc)
 	} else {
