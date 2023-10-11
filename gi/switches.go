@@ -13,7 +13,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -26,14 +25,17 @@ import (
 type Switches struct {
 	WidgetBase
 
+	// the type of switches that will be made
+	Type SwitchTypes `desc:"the type of switches that will be made"`
+
 	// the list of items (switch labels)
 	Items []string `desc:"the list of items (switch labels)"`
 
 	// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
 	Tooltips []string `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
 
-	// make the items mutually exclusive -- checking one turns off all the others
-	Mutex bool `desc:"make the items mutually exclusive -- checking one turns off all the others"`
+	// whether to make the items mutually exclusive (checking one turns off all the others)
+	Mutex bool `desc:"whether to make the items mutually exclusive (checking one turns off all the others)"`
 }
 
 func (sw *Switches) CopyFieldsFrom(frm any) {
@@ -92,7 +94,7 @@ func (sw *Switches) SelectItemAction(idx int) error {
 	return nil
 }
 
-// UnCheckAll unchecks all buttons
+// UnCheckAll unchecks all switches
 func (sw *Switches) UnCheckAll() {
 	updt := sw.UpdateStart()
 	for _, cbi := range *sw.Parts.Children() {
@@ -102,7 +104,7 @@ func (sw *Switches) UnCheckAll() {
 	sw.UpdateEnd(updt)
 }
 
-// UnCheckAllBut unchecks all buttons except given one
+// UnCheckAllBut unchecks all switches except given one
 func (sw *Switches) UnCheckAllBut(idx int) {
 	updt := sw.UpdateStart()
 	for i, cbi := range *sw.Parts.Children() {
@@ -186,17 +188,14 @@ func (sw *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 
 func (sw *Switches) ConfigItems() {
 	for i, cbi := range *sw.Parts.Children() {
-		cb := cbi.(*Switch)
+		s := cbi.(*Switch)
+		s.SetType(sw.Type)
 		lbl := sw.Items[i]
-		cb.SetText(lbl)
+		s.SetText(lbl)
 		if len(sw.Tooltips) > i {
-			cb.Tooltip = sw.Tooltips[i]
+			s.Tooltip = sw.Tooltips[i]
 		}
-		if sw.Mutex {
-			cb.IconOn = icons.RadioButtonChecked
-			cb.IconOff = icons.RadioButtonUnchecked
-		}
-		cb.SetProp("index", i)
+		s.SetProp("index", i)
 		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
