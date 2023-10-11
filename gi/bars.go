@@ -335,6 +335,7 @@ func (tb *ToolBar) ToolBarStyles() {
 		s.Border.Radius = styles.BorderRadiusFull
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Margin.Set(units.Dp(4))
+		s.Padding.SetHoriz(units.Dp(12))
 	})
 }
 
