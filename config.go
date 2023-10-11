@@ -5,6 +5,8 @@
 package ki
 
 import (
+	"fmt"
+
 	"goki.dev/gti"
 )
 
@@ -21,4 +23,12 @@ type Config []TypeAndName
 
 func (t *Config) Add(typ *gti.Type, nm string) {
 	(*t) = append(*t, TypeAndName{typ, nm})
+}
+
+func (t Config) GoString() string {
+	var str string
+	for i, tn := range t {
+		str += fmt.Sprintf("[%02d: %20s\t %20s\n", i, tn.Name, tn.Type.Name)
+	}
+	return str
 }
