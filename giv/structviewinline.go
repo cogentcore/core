@@ -159,3 +159,11 @@ func (sv *StructViewInline) UpdateFieldAction() {
 		sv.UpdateEndRender(updt)
 	}
 }
+
+func (sv *StructViewInline) Render(sc *gi.Scene) {
+	if sv.PushBounds(sc) {
+		sv.RenderParts(sc)
+		sv.RenderChildren(sc)
+		sv.PopBounds(sc)
+	}
+}
