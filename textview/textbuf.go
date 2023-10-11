@@ -2,19 +2,34 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package textview
 
 import (
+	"bytes"
+	"fmt"
 	"image/color"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+	"regexp"
 	"sync"
 	"time"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview/textbuf"
+	"goki.dev/girl/styles"
+	"goki.dev/glop/dirs"
+	"goki.dev/glop/indent"
+	"goki.dev/glop/runes"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/spell"
 	"goki.dev/pi/v2/token"
 )
 
@@ -63,7 +78,7 @@ type TextBuf struct {
 	Filename gi.FileName `json:"-" xml:"-" desc:"filename of file last loaded or saved"`
 
 	// full info about file
-	Info FileInfo `desc:"full info about file"`
+	Info filecat.FileInfo `desc:"full info about file"`
 
 	// Pi parsing state info for file
 	PiState pi.FileStates `desc:"Pi parsing state info for file"`
@@ -124,44 +139,16 @@ type TextBuf struct {
 	// history of cursor positions -- can move back through them
 	PosHistory []lex.Pos `json:"-" xml:"-" desc:"history of cursor positions -- can move back through them"`
 
-	// // functions and data for text completion
-	// Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
+	// functions and data for text completion
+	Complete *gi.Complete `json:"-" xml:"-" desc:"functions and data for text completion"`
 
-	// // functions and data for spelling correction
-	// Spell *gi.Spell `json:"-" xml:"-" desc:"functions and data for spelling correction"`
+	// functions and data for spelling correction
+	Spell *gi.Spell `json:"-" xml:"-" desc:"functions and data for spelling correction"`
 
 	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *TextView `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
-func (tb *TextBuf) Stat() error {
-	return nil
-}
-
-// SetText sets the text to given bytes
-func (tb *TextBuf) SetText(txt []byte) {
-}
-
-func (tb *TextBuf) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
-	return nil
-}
-
-func (tb *TextBuf) SaveAs(filename gi.FileName) {
-}
-
-func (tb *TextBuf) SetLineColor(ln int, clr color.RGBA) {
-}
-
-func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
-}
-
-func (tb *TextBuf) ReMarkup() {
-}
-
-func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
-}
-
-/*
 func (tb *TextBuf) OnInit() {
 	if tb.Hi.Style != "" {
 		return
@@ -221,7 +208,7 @@ const (
 )
 
 // TextBufFlags extend NodeBase NodeFlags to hold TextBuf state
-type TextBufFlags ki.Flags //enums:bitflag
+type TextBufFlags int64 //enums:bitflag
 
 const (
 	// TextBufAutoSaving is used in atomically safe way to protect autosaving
@@ -298,7 +285,7 @@ func (tb *TextBuf) EditDone() {
 	tb.AutoSaveDelete()
 	tb.ClearChanged()
 	tb.LinesToBytes()
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
+	// tb.TextBufSig.Emit(tb.This(), int64(TextBufDone), tb.Txt)
 }
 
 // Text returns the current text as a []byte array, applying all current
@@ -367,7 +354,7 @@ func (tb *TextBuf) SetHiStyle(style gi.HiStyleName) {
 
 // Refresh signals any views to refresh views
 func (tb *TextBuf) Refresh() {
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
+	// tb.TextBufSig.Emit(tb.This(), int64(TextBufNew), tb.Txt)
 }
 
 // SetInactive sets the buffer in an inactive state if inactive = true
@@ -416,7 +403,7 @@ func (tb *TextBuf) NewBuf(nlines int) {
 
 // Stat gets info about the file, including highlighting language
 func (tb *TextBuf) Stat() error {
-	tb.ClearFlag(int(TextBufFileModOk))
+	tb.SetFlag(false, TextBufFileModOk)
 	err := tb.Info.InitFile(string(tb.Filename))
 	if err != nil {
 		return err
@@ -444,7 +431,7 @@ func (tb *TextBuf) ConfigSupported() bool {
 // Stat (open, save) -- if haven't yet prompted, user is prompted to ensure
 // that this is OK.  returns true if file was modified
 func (tb *TextBuf) FileModCheck() bool {
-	if tb.HasFlag(int(TextBufFileModOk)) {
+	if tb.Is(TextBufFileModOk) {
 		return false
 	}
 	info, err := os.Stat(string(tb.Filename))
@@ -453,17 +440,17 @@ func (tb *TextBuf) FileModCheck() bool {
 	}
 	if info.ModTime() != time.Time(tb.Info.ModTime) {
 		vp := tb.SceneFromView()
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + DirAndFile(string(tb.Filename)),
+		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "File Changed on Disk: " + dirs.DirAndFile(string(tb.Filename)),
 			Prompt: fmt.Sprintf("File has changed on Disk since being opened or saved by you -- what do you want to do?  If you <code>Revert from Disk</code>, you will lose any existing edits in open buffer.  If you <code>Ignore and Proceed</code>, the next save will overwrite the changed file on disk, losing any changes there.  File: %v", tb.Filename)},
 			[]string{"Save As to diff File", "Revert from Disk", "Ignore and Proceed"},
 			func(dlg *gi.Dialog) {
-				switch sig {
+				switch dlg.Data.(int) {
 				case 0:
-					CallMethod(tb, "SaveAs", vp)
+					// CallMethod(tb, "SaveAs", vp)
 				case 1:
 					tb.Revert()
 				case 2:
-					tb.SetFlag(int(TextBufFileModOk))
+					tb.SetFlag(true, TextBufFileModOk)
 				}
 			})
 		return true
@@ -475,8 +462,8 @@ func (tb *TextBuf) FileModCheck() bool {
 func (tb *TextBuf) Open(filename gi.FileName) error {
 	err := tb.OpenFile(filename)
 	if err != nil {
-		vp := tb.SceneFromView()
-		gi.PromptDialog(tb, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
+		// vp := tb.SceneFromView()
+		gi.PromptDialog(nil, gi.DlgOpts{Title: "File could not be Opened", Prompt: err.Error(), Ok: true, Cancel: false}, nil)
 		log.Println(err)
 		return err
 	}
@@ -562,7 +549,7 @@ func (tb *TextBuf) SaveAsFunc(filename gi.FileName, afterFunc func(canceled bool
 			[]string{"Cancel", "Overwrite"},
 			func(dlg *gi.Dialog) {
 				cancel := false
-				switch sig {
+				switch dlg.Data.(int) {
 				case 0:
 					cancel = true
 				case 1:
@@ -609,9 +596,9 @@ func (tb *TextBuf) Save() error {
 			Prompt: fmt.Sprintf("File has changed on disk since being opened or saved by you -- what do you want to do?  File: %v", tb.Filename)},
 			[]string{"Save To Different File", "Open From Disk, Losing Changes", "Save File, Overwriting"},
 			func(dlg *gi.Dialog) {
-				switch sig {
+				switch dlg.Data.(int) {
 				case 0:
-					CallMethod(tb, "SaveAs", vp)
+					// CallMethod(tb, "SaveAs", vp)
 				case 1:
 					tb.Revert()
 				case 2:
@@ -632,7 +619,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 				Prompt: fmt.Sprintf("Do you want to save your changes to file: %v?", tb.Filename)},
 				[]string{"Save", "Close Without Saving", "Cancel"},
 				func(dlg *gi.Dialog) {
-					switch sig {
+					switch dlg.Data.(int) {
 					case 0:
 						tb.Save()
 						tb.Close(afterFun) // 2nd time through won't prompt
@@ -651,7 +638,7 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 				Prompt: "Do you want to save your changes (no filename for this buffer yet)?  If so, Cancel and then do Save As"},
 				[]string{"Close Without Saving", "Cancel"},
 				func(dlg *gi.Dialog) {
-					switch sig {
+					switch dlg.Data.(int) {
 					case 0:
 						tb.ClearChanged()
 						tb.AutoSaveDelete()
@@ -665,11 +652,11 @@ func (tb *TextBuf) Close(afterFun func(canceled bool)) bool {
 		}
 		return false // awaiting decisions..
 	}
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufClosed), nil)
+	// tb.TextBufSig.Emit(tb.This(), int64(TextBufClosed), nil)
 	// for _, tve := range tb.Views {
 	// 	tve.SetBuf(nil) // automatically disconnects signals, views
 	// }
-	tb.New(1)
+	tb.NewBuf(1)
 	tb.Filename = ""
 	tb.ClearChanged()
 	if afterFun != nil {
@@ -707,17 +694,17 @@ func (tb *TextBuf) AutoSaveFilename() string {
 
 // AutoSave does the autosave -- safe to call in a separate goroutine
 func (tb *TextBuf) AutoSave() error {
-	if tb.HasFlag(int(TextBufAutoSaving)) {
+	if tb.Is(TextBufAutoSaving) {
 		return nil
 	}
-	tb.SetFlag(int(TextBufAutoSaving))
+	tb.SetFlag(true, TextBufAutoSaving)
 	asfn := tb.AutoSaveFilename()
 	b := tb.LinesToBytesCopy()
 	err := ioutil.WriteFile(asfn, b, 0644)
 	if err != nil {
 		log.Printf("giv.TextBuf: Could not AutoSave file: %v, error: %v\n", asfn, err)
 	}
-	tb.ClearFlag(int(TextBufAutoSaving))
+	tb.SetFlag(false, TextBufAutoSaving)
 	return err
 }
 
@@ -807,7 +794,7 @@ func (tb *TextBuf) AppendTextMarkup(text []byte, markup []byte, signal bool) *te
 		tb.Markup[ln] = msplt[ln-st]
 	}
 	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+		// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	return tbe
 }
@@ -836,7 +823,7 @@ func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, signal bool)
 	tbe := tb.InsertText(ed, efft, false)
 	tb.Markup[tbe.Reg.Start.Ln] = markup
 	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+		// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	return tbe
 }
@@ -847,7 +834,7 @@ func (tb *TextBuf) AppendTextLineMarkup(text []byte, markup []byte, signal bool)
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
 func (tb *TextBuf) AddView(vw *TextView) {
 	tb.Views = append(tb.Views, vw)
-	tb.TextBufSig.Connect(vw.This(), TextViewBufSigRecv)
+	// tb.TextBufSig.Connect(vw.This(), TextViewBufSigRecv)
 }
 
 // DeleteView removes given viewer from our buffer
@@ -858,14 +845,14 @@ func (tb *TextBuf) DeleteView(vw *TextView) {
 			break
 		}
 	}
-	tb.TextBufSig.Disconnect(vw.This())
+	// tb.TextBufSig.Disconnect(vw.This())
 }
 
 // SceneFromView returns Scene from textview, if avail
 func (tb *TextBuf) SceneFromView() *gi.Scene {
-	if len(tb.Views) > 0 {
-		return tb.Views[0].Scene
-	}
+	// if len(tb.Views) > 0 {
+	// 	return tb.Views[0].Scene
+	// }
 	return nil
 }
 
@@ -902,7 +889,7 @@ func (tb *TextBuf) BatchUpdateStart() (bufUpdt, winUpdt, autoSave bool) {
 	if vp == nil {
 		return
 	}
-	winUpdt = vp.TopUpdateStart()
+	winUpdt = vp.UpdateStart()
 	return
 }
 
@@ -912,26 +899,26 @@ func (tb *TextBuf) BatchUpdateEnd(bufUpdt, winUpdt, autoSave bool) {
 	if winUpdt {
 		vp := tb.SceneFromView()
 		if vp != nil {
-			vp.TopUpdateEnd(winUpdt)
+			vp.UpdateEnd(winUpdt)
 		}
 	}
 	tb.UpdateEnd(bufUpdt) // nobody listening probably, but flag avail for testing
 }
 
 // AddFileNode adds the FileNode to the list or receivers of changes to buffer
-func (tb *TextBuf) AddFileNode(fn *FileNode) {
-	// tb.TextBufSig.Connect(fn.This(), // FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
-	// func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data any) {
-	// fn := AsFileNode(rvwki)
-	// fn := rvwki.Embed(FileNodeType).(*FileNode)
-	// switch TextBufSignals(sig) {
-	// case TextBufDone, TextBufInsert, TextBufDelete:
-	// 	if fn.Info.Vcs == vci.Stored {
-	// 		fn.Info.Vcs = vci.Modified
-	// 	}
-	// }
-	// }
-}
+// func (tb *TextBuf) AddFileNode(fn *FileNode) {
+// tb.TextBufSig.Connect(fn.This(), // FileNodeBufSigRecv receives a signal from the buffer and updates view accordingly
+// func FileNodeBufSigRecv(rvwki, sbufki ki.Ki, sig int64, data any) {
+// fn := AsFileNode(rvwki)
+// fn := rvwki.Embed(FileNodeType).(*FileNode)
+// switch TextBufSignals(sig) {
+// case TextBufDone, TextBufInsert, TextBufDelete:
+// 	if fn.Info.Vcs == vci.Stored {
+// 		fn.Info.Vcs = vci.Modified
+// 	}
+// }
+// }
+// }
 
 /////////////////////////////////////////////////////////////////////////////
 //   Accessing Text
@@ -979,7 +966,7 @@ func (tb *TextBuf) LinesToBytesCopy() []byte {
 // with raw text
 func (tb *TextBuf) BytesToLines() {
 	if len(tb.Txt) == 0 {
-		tb.New(1)
+		tb.NewBuf(1)
 		return
 	}
 	tb.LinesMu.Lock()
@@ -990,7 +977,7 @@ func (tb *TextBuf) BytesToLines() {
 		lns = lns[:tb.NLines]
 	}
 	tb.LinesMu.Unlock()
-	tb.New(tb.NLines)
+	tb.NewBuf(tb.NLines)
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
@@ -1120,7 +1107,7 @@ func (tb *TextBuf) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+		// tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1226,14 +1213,14 @@ func (tb *TextBuf) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edi
 	tb.FileModCheck() // will just revert changes if shouldn't have changed
 	tb.SetChanged()
 	if len(tb.Lines) == 0 {
-		tb.New(1)
+		tb.NewBuf(1)
 	}
 	tb.LinesMu.Lock()
 	tbe := tb.InsertTextImpl(st, text)
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+		// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1312,7 +1299,7 @@ func (tb *TextBuf) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit 
 			ie := &textbuf.Edit{}
 			ie.Reg.Start.Ln = nln - 1
 			ie.Reg.End.Ln = re.Reg.End.Ln
-			tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), ie)
+			// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), ie)
 		} else {
 			tb.Refresh()
 		}
@@ -1336,7 +1323,7 @@ func (tb *TextBuf) InsertTextRectImpl(tbe *textbuf.Edit) *textbuf.Edit {
 	// make sure there are enough lines -- add as needed
 	cln := len(tb.Lines)
 	if cln == 0 {
-		tb.New(nlns)
+		tb.NewBuf(nlns)
 	} else if cln <= ed.Ln {
 		nln := (1 + ed.Ln) - cln
 		tmp := make([][]rune, nln)
@@ -1647,7 +1634,7 @@ func (tb *TextBuf) MarkupLine(ln int) {
 
 // IsMarkingUp is true if the MarkupAllLines process is currently running
 func (tb *TextBuf) IsMarkingUp() bool {
-	return tb.HasFlag(int(TextBufMarkingUp))
+	return tb.Is(TextBufMarkingUp)
 }
 
 // InitialMarkup does the first-pass markup on the file
@@ -1672,12 +1659,13 @@ func (tb *TextBuf) StartDelayedReMarkup() {
 		tb.MarkupDelayTimer = nil
 	}
 	vp := tb.SceneFromView()
-	if vp != nil {
-		cpop := vp.Win.CurPopup()
-		if gi.PopupIsCompleter(cpop) {
-			return
-		}
-	}
+	_ = vp
+	// if vp != nil {
+	// 	cpop := vp.Win.CurPopup()
+	// 	if gi.PopupIsCompleter(cpop) {
+	// 		return
+	// 	}
+	// }
 	if tb.Complete != nil && tb.Complete.IsAboutToShow() {
 		return
 	}
@@ -1747,7 +1735,7 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	if tb.IsMarkingUp() {
 		return
 	}
-	tb.SetFlag(int(TextBufMarkingUp))
+	tb.SetFlag(true, TextBufMarkingUp)
 
 	tb.MarkupMu.Lock()
 	tb.MarkupEdits = nil
@@ -1765,7 +1753,7 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	}
 	mtags, err := tb.Hi.MarkupTagsAll(txt) // does full parse, outside of markup lock
 	if err != nil {
-		tb.ClearFlag(int(TextBufMarkingUp))
+		tb.SetFlag(false, TextBufMarkingUp)
 		return
 	}
 
@@ -1831,8 +1819,8 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 	}
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
-	tb.ClearFlag(int(TextBufMarkingUp))
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
+	tb.SetFlag(false, TextBufMarkingUp)
+	// tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
 }
 
 // MarkupFromTags does syntax highlighting markup using existing HiTags without
@@ -1841,15 +1829,15 @@ func (tb *TextBuf) MarkupAllLines(maxLines int) {
 func (tb *TextBuf) MarkupFromTags() {
 	tb.MarkupMu.Lock()
 	// getting the lock means we are in control of the flag
-	tb.SetFlag(int(TextBufMarkingUp))
+	tb.SetFlag(true, TextBufMarkingUp)
 
 	maxln := min(len(tb.HiTags), tb.NLines)
 	for ln := 0; ln < maxln; ln++ {
 		tb.Markup[ln] = tb.Hi.MarkupLine(tb.Lines[ln], tb.HiTags[ln], nil)
 	}
 	tb.MarkupMu.Unlock()
-	tb.ClearFlag(int(TextBufMarkingUp))
-	tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
+	tb.SetFlag(false, TextBufMarkingUp)
+	// tb.TextBufSig.Emit(tb.This(), int64(TextBufMarkUpdt), tb.Txt)
 }
 
 // MarkupLines generates markup of given range of lines. end is *inclusive*
@@ -1936,7 +1924,7 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
+				// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), utbe)
 			} else {
 				utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
@@ -1944,7 +1932,7 @@ func (tb *TextBuf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), utbe)
+				// tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), utbe)
 			}
 		}
 		tb.LinesMu.Lock()
@@ -2000,11 +1988,11 @@ func (tb *TextBuf) Redo() *textbuf.Edit {
 			if tbe.Delete {
 				tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				tb.LinesMu.Unlock()
-				tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
+				// tb.TextBufSig.Emit(tb.This(), int64(TextBufDelete), tbe)
 			} else {
 				tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 				tb.LinesMu.Unlock()
-				tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
+				// tb.TextBufSig.Emit(tb.This(), int64(TextBufInsert), tbe)
 			}
 		}
 		tb.LinesMu.Lock()
@@ -2552,21 +2540,21 @@ func (tb *TextBuf) SetCompleter(data any, matchFun complete.MatchFunc, editFun c
 	tb.Complete.EditFunc = editFun
 	tb.Complete.LookupFunc = lookupFun
 	// note: only need to connect once..
-	tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
-		tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
-		if sig == int64(gi.CompleteSelect) {
-			tbf.CompleteText(data.(string)) // always use data
-		} else if sig == int64(gi.CompleteExtend) {
-			tbf.CompleteExtend(data.(string)) // always use data
-		}
-	})
+	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
+	// 	tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
+	// 	if sig == int64(gi.CompleteSelect) {
+	// 		tbf.CompleteText(data.(string)) // always use data
+	// 	} else if sig == int64(gi.CompleteExtend) {
+	// 		tbf.CompleteExtend(data.(string)) // always use data
+	// 	}
+	// })
 }
 
 func (tb *TextBuf) DeleteCompleter() {
 	if tb.Complete == nil {
 		return
 	}
-	tb.Complete.CompleteSig.Disconnect(tb.This())
+	// tb.Complete.CompleteSig.Disconnect(tb.This())
 	tb.Complete.Destroy()
 	tb.Complete = nil
 }
@@ -2648,15 +2636,15 @@ func (tb *TextBuf) SetSpell() {
 	tb.Spell = &gi.Spell{}
 	tb.Spell.InitName(tb.Spell, "tb-spellcorrect") // needed for standalone Ki's
 	// note: only need to connect once..
-	tb.Spell.SpellSig.ConnectOnly(func(dlg *gi.Dialog) {
-		if sig == int64(gi.SpellSelect) {
-			tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
-			tbf.CorrectText(data.(string)) // always use data
-		} else if sig == int64(gi.SpellIgnore) {
-			tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
-			tbf.CorrectText(data.(string)) // always use data
-		}
-	})
+	// tb.Spell.SpellSig.ConnectOnly(func(dlg *gi.Dialog) {
+	// 	if sig == int64(gi.SpellSelect) {
+	// 		tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
+	// 		tbf.CorrectText(data.(string)) // always use data
+	// 	} else if sig == int64(gi.SpellIgnore) {
+	// 		tbf, _ := recv.Embed(TypeTextBuf).(*TextBuf)
+	// 		tbf.CorrectText(data.(string)) // always use data
+	// 	}
+	// })
 }
 
 // DeleteSpell deletes any existing spell object
@@ -2664,7 +2652,7 @@ func (tb *TextBuf) DeleteSpell() {
 	if tb.Spell == nil {
 		return
 	}
-	tb.Spell.SpellSig.Disconnect(tb.This())
+	// tb.Spell.SpellSig.Disconnect(tb.This())
 	tb.Spell.Destroy()
 	tb.Spell = nil
 }
@@ -2789,8 +2777,8 @@ type TextBufList struct {
 }
 
 // New returns a new TextBuf buffer
-func (tl *TextBufList) New() *TextBuf {
-	tb := tl.NewChild(TypeTextBuf, "newbuf").(*TextBuf)
+func (tl *TextBufList) NewBuf() *TextBuf {
+	tb := tl.NewChild(TextBufType, "newbuf").(*TextBuf)
 	return tb
 }
 
@@ -2804,5 +2792,3 @@ func init() {
 // func NewTextBuf() *TextBuf {
 // 	return TextBufs.New()
 // }
-
-*/

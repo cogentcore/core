@@ -2,11 +2,40 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package textview
+
+//go:generate goki generate
 
 import (
+	"fmt"
+	"image"
+	"image/color"
+	"log"
+	"strings"
+	"sync"
+	"time"
+	"unicode"
+
+	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview/textbuf"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/glop/indent"
+	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
+	"goki.dev/goosi/mimedata"
+	"goki.dev/ki/v2"
+	"goki.dev/laser"
+	"goki.dev/mat32/v2"
+	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
+	"goki.dev/pi/v2/pi"
+	"goki.dev/pi/v2/token"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to
@@ -15,27 +44,11 @@ import (
 // out to the views -- multiple views can be attached to a given buffer.  All
 // updating in the TextView should be within a single goroutine -- it would
 // require extensive protections throughout code otherwise.
+//
+//goki:embedder
 type TextView struct {
 	gi.WidgetBase
 
-	CursorPos lex.Pos
-}
-
-func (tv *TextView) SetBuf(buf *TextBuf) {
-}
-
-func (tv *TextView) SetCursorShow(pos lex.Pos) {
-}
-
-func (tv *TextView) ScrollToVertCenter(pos int) bool {
-	return true
-}
-
-func (tv *TextView) ScrollCursorToVertCenter() bool {
-	return true
-}
-
-/*
 	// the text buffer that we're editing
 	Buf *TextBuf `json:"-" xml:"-" desc:"the text buffer that we're editing"`
 
@@ -163,10 +176,10 @@ func (tv *TextView) OnInit() {
 func (tv *TextView) TextViewStyles() {
 	tv.AddStyles(func(s *styles.Style) {
 		tv.CursorWidth.SetDp(1)
-		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
-		tv.SelectColor.SetSolid(colors.Scheme.TertiaryContainer)
+		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
+		tv.SelectColor.SetSolid(colors.Scheme.Tertiary.Container)
 		tv.HighlightColor.SetSolid(colors.Orange)
-		tv.CursorColor.SetSolid(colors.Scheme.OnSurface)
+		tv.CursorColor.SetSolid(colors.Scheme.Surface)
 
 		s.Cursor = cursors.Text
 		if gi.Prefs.Editor.WordWrap {
@@ -183,7 +196,7 @@ func (tv *TextView) TextViewStyles() {
 		s.Text.TabSize = 4
 		s.Color = colors.Scheme.OnSurface
 
-		if w.StateIs(states.Focused) {
+		if s.State.Is(states.Focused) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		} else {
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
@@ -237,7 +250,7 @@ const (
 var TextViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // TextViewFlags extend NodeBase NodeFlags to hold TextView state
-type TextViewFlags ki.Flags //enums:bitflag
+type TextViewFlags int64 //enums:bitflag
 
 const (
 	// TextViewNeedsRefresh indicates when refresh is required
@@ -264,7 +277,7 @@ const (
 
 // IsFocusActive returns true if we have active focus for keyboard input
 func (tv *TextView) IsFocusActive() bool {
-	return tv.HasFlag(int(TextViewFocusActive))
+	return tv.Is(TextViewFocusActive)
 }
 
 // EditDone completes editing and copies the active edited text to the text --
@@ -302,18 +315,18 @@ func (tv *TextView) ReMarkup() {
 // NeedsRefresh checks if a refresh is required -- atomically safe for other
 // routines to set the NeedsRefresh flag
 func (tv *TextView) NeedsRefresh() bool {
-	return tv.HasFlag(int(TextViewNeedsRefresh))
+	return tv.Is(TextViewNeedsRefresh)
 }
 
 // SetNeedsRefresh flags that a refresh is required -- atomically safe for
 // other routines to call this
 func (tv *TextView) SetNeedsRefresh() {
-	tv.SetFlag(int(TextViewNeedsRefresh))
+	tv.SetFlag(true, TextViewNeedsRefresh)
 }
 
 // ClearNeedsRefresh clears needs refresh flag -- atomically safe
 func (tv *TextView) ClearNeedsRefresh() {
-	tv.ClearFlag(int(TextViewNeedsRefresh))
+	tv.SetFlag(false, TextViewNeedsRefresh)
 }
 
 // RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
@@ -336,7 +349,7 @@ func (tv *TextView) IsChanged() bool {
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
 func (tv *TextView) HasLineNos() bool {
-	return tv.HasFlag(int(TextViewHasLineNos))
+	return tv.Is(TextViewHasLineNos)
 }
 
 // Clear resets all the text in the buffer for this view
@@ -344,7 +357,7 @@ func (tv *TextView) Clear() {
 	if tv.Buf == nil {
 		return
 	}
-	tv.Buf.New(0)
+	tv.Buf.NewBuf(0)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -385,7 +398,6 @@ func (tv *TextView) SetBuf(buf *TextBuf) {
 		}
 	}
 	tv.LayoutAllLines(false)
-	tv.SetFullReRender()
 	tv.UpdateSig()
 	tv.SetCursorShow(tv.CursorPos)
 }
@@ -435,7 +447,7 @@ func (tv *TextView) LinesDeleted(tbe *textbuf.Edit) {
 
 // TextViewBufSigRecv receives a signal from the buffer and updates view accordingly
 func TextViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
-	tv := rvwki.Embed(TypeTextView).(*TextView)
+	tv := AsTextView(rvwki)
 	switch TextBufSignals(sig) {
 	case TextBufDone:
 	case TextBufNew:
@@ -493,7 +505,7 @@ func (tv *TextView) ParentLayout() *gi.Layout {
 	if tv.Par == nil {
 		return nil
 	}
-	return AsLayout(tv.Par)
+	return gi.AsLayout(tv.Par)
 }
 
 // RenderSize is the size we should pass to text rendering, based on alloc
@@ -504,7 +516,7 @@ func (tv *TextView) RenderSize() mat32.Vec2 {
 	}
 	parw := tv.ParentLayout()
 	if parw == nil {
-		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", ki.Type(tv.Par), tv.Path())
+		log.Printf("giv.TextView Programmer Error: A TextView MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.KiType(), tv.Path())
 		return mat32.Vec2Zero
 	}
 	paloc := parw.LayState.Alloc.SizeOrig
@@ -548,7 +560,7 @@ func (tv *TextView) HiStyle() {
 // Markup version of the source, and returns whether the current rendered size
 // is different from what it was previously
 func (tv *TextView) LayoutAllLines(inLayout bool) bool {
-	if inLayout && tv.HasFlag(int(TextViewInReLayout)) {
+	if inLayout && tv.Is(TextViewInReLayout) {
 		return false
 	}
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
@@ -588,7 +600,7 @@ func (tv *TextView) LayoutAllLines(inLayout bool) bool {
 	// fmt.Printf("rendersize: %v\n", sz)
 	sty := &tv.Style
 	fst := sty.FontRender()
-	fst.BackgroundColor.SetColor(nil)
+	fst.BackgroundColor.SetSolid(nil)
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
@@ -659,11 +671,11 @@ func (tv *TextView) ResizeIfNeeded(nwSz image.Point) bool {
 	}
 	ly := tv.ParentLayout()
 	if ly != nil {
-		tv.SetFlag(int(TextViewInReLayout))
+		tv.SetFlag(true, TextViewInReLayout)
 		gi.GatherSizes(ly) // can't call GetSize b/c that resets layout
-		ly.DoLayoutTree()
-		tv.SetFlag(int(TextViewRenderScrolls))
-		tv.ClearFlag(int(TextViewInReLayout))
+		ly.DoLayoutTree(tv.Sc)
+		tv.SetFlag(true, TextViewRenderScrolls)
+		tv.SetFlag(false, TextViewInReLayout)
 		// fmt.Printf("resized: %v\n", tv.LayState.Alloc.Size)
 	}
 	return true
@@ -680,7 +692,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 	}
 	sty := &tv.Style
 	fst := sty.FontRender()
-	fst.BackgroundColor.SetColor(nil)
+	fst.BackgroundColor.SetSolid(nil)
 	mxwd := float32(tv.LinesSize.X)
 	rerend := false
 
@@ -728,7 +740,7 @@ func (tv *TextView) LayoutLines(st, ed int, isDel bool) bool {
 
 // CursorMovedSig sends the signal that cursor has moved
 func (tv *TextView) CursorMovedSig() {
-	tv.TextViewSig.Emit(tv.This(), int64(TextViewCursorMoved), tv.CursorPos)
+	// tv.TextViewSig.Emit(tv.This(), int64(TextViewCursorMoved), tv.CursorPos)
 }
 
 // ValidateCursor sets current cursor to a valid cursor position
@@ -764,19 +776,20 @@ func (tv *TextView) SetCursor(pos lex.Pos) {
 		tv.CursorPos = lex.PosZero
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
+
 	cpln := tv.CursorPos.Ln
 	tv.ClearScopelights()
 	tv.CursorPos = tv.Buf.ValidPos(pos)
 	if cpln != tv.CursorPos.Ln && tv.HasLineNos() { // update cursor position highlight
-		rs := tv.Render()
+		rs := &tv.Sc.RenderState
 		rs.PushBounds(tv.ScBBox)
 		rs.Lock()
 		tv.RenderLineNo(cpln, true, true) // render bg, and do vpupload
 		tv.RenderLineNo(tv.CursorPos.Ln, true, true)
 		rs.Unlock()
-		tv.Scene.Render.PopBounds()
+		rs.PopBounds()
 	}
 	tv.Buf.MarkupLine(tv.CursorPos.Ln)
 	tv.CursorMovedSig()
@@ -904,8 +917,8 @@ func (tv *TextView) CursorSelect(org lex.Pos) {
 
 // CursorForward moves the cursor forward
 func (tv *TextView) CursorForward(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -926,8 +939,8 @@ func (tv *TextView) CursorForward(steps int) {
 
 // CursorForwardWord moves the cursor forward by words
 func (tv *TextView) CursorForwardWord(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -978,8 +991,8 @@ func (tv *TextView) CursorForwardWord(steps int) {
 
 // CursorDown moves the cursor down line(s)
 func (tv *TextView) CursorDown(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1025,8 +1038,8 @@ func (tv *TextView) CursorDown(steps int) {
 // CursorPageDown moves the cursor down page(s), where a page is defined abcdef
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageDown(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1045,8 +1058,8 @@ func (tv *TextView) CursorPageDown(steps int) {
 
 // CursorBackward moves the cursor backward
 func (tv *TextView) CursorBackward(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1067,8 +1080,8 @@ func (tv *TextView) CursorBackward(steps int) {
 
 // CursorBackwardWord moves the cursor backward by words
 func (tv *TextView) CursorBackwardWord(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1122,8 +1135,8 @@ func (tv *TextView) CursorBackwardWord(steps int) {
 
 // CursorUp moves the cursor up line(s)
 func (tv *TextView) CursorUp(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1167,8 +1180,8 @@ func (tv *TextView) CursorUp(steps int) {
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
 func (tv *TextView) CursorPageUp(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	for i := 0; i < steps; i++ {
@@ -1205,8 +1218,8 @@ func (tv *TextView) CursorRecenter() {
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartLine() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1237,8 +1250,8 @@ func (tv *TextView) CursorStartLine() {
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tv *TextView) CursorStartDoc() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = 0
@@ -1252,8 +1265,8 @@ func (tv *TextView) CursorStartDoc() {
 
 // CursorEndLine moves the cursor to the end of the text
 func (tv *TextView) CursorEndLine() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1285,8 +1298,8 @@ func (tv *TextView) CursorEndLine() {
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
 func (tv *TextView) CursorEndDoc() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	tv.CursorPos.Ln = max(tv.NLines-1, 0)
@@ -1304,8 +1317,8 @@ func (tv *TextView) CursorEndDoc() {
 
 // CursorBackspace deletes character(s) immediately before cursor
 func (tv *TextView) CursorBackspace(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
@@ -1323,8 +1336,8 @@ func (tv *TextView) CursorBackspace(steps int) {
 
 // CursorDelete deletes character(s) immediately after the cursor
 func (tv *TextView) CursorDelete(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -1339,8 +1352,8 @@ func (tv *TextView) CursorDelete(steps int) {
 
 // CursorBackspaceWord deletes words(s) immediately before cursor
 func (tv *TextView) CursorBackspaceWord(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	if tv.HasSelection() {
@@ -1357,8 +1370,8 @@ func (tv *TextView) CursorBackspaceWord(steps int) {
 
 // CursorDeleteWord deletes word(s) immediately after the cursor
 func (tv *TextView) CursorDeleteWord(steps int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	if tv.HasSelection() {
 		tv.DeleteSelection()
@@ -1373,8 +1386,8 @@ func (tv *TextView) CursorDeleteWord(steps int) {
 
 // CursorKill deletes text from cursor to end of text
 func (tv *TextView) CursorKill() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	org := tv.CursorPos
 	pos := tv.CursorPos
@@ -1402,8 +1415,8 @@ func (tv *TextView) CursorKill() {
 
 // CursorTranspose swaps the character at the cursor with the one before it
 func (tv *TextView) CursorTranspose() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.ValidateCursor()
 	pos := tv.CursorPos
 	if pos.Ch == 0 {
@@ -1436,14 +1449,12 @@ func (tv *TextView) CursorTransposeWord() {
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
 func (tv *TextView) JumpToLinePrompt() {
-	gi.StringPromptDialog(tv.Sc, "", "Line no..",
-		gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
-		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			dlg := send.(*gi.DialogStage)
-			if sig == int64(gi.DialogAccepted) {
-				val := gi.StringPromptDialogValue(dlg)
-				ln, ok := laser.ToInt(val)
-				if ok {
+	gi.StringPromptDialog(tv, gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
+		"", "Line no..", func(dlg *gi.Dialog) {
+			if dlg.Accepted {
+				val := dlg.Data.(string)
+				ln, err := laser.ToInt(val)
+				if err == nil {
 					tv.JumpToLine(int(ln))
 				}
 			}
@@ -1453,10 +1464,10 @@ func (tv *TextView) JumpToLinePrompt() {
 
 // JumpToLine jumps to given line number (minus 1)
 func (tv *TextView) JumpToLine(ln int) {
-	wupdt := tv.TopUpdateStart()
+	updt := tv.UpdateStart()
 	tv.SetCursorShow(lex.Pos{Ln: ln - 1})
 	tv.SavePosHistory(tv.CursorPos)
-	tv.TopUpdateEnd(wupdt)
+	tv.UpdateEnd(updt)
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
@@ -1540,8 +1551,8 @@ func (tv *TextView) CursorNextLink(wraparound bool) bool {
 			return false
 		}
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1565,8 +1576,8 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 			return false
 		}
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.HighlightRegion(reg)
 	tv.SetCursorShow(npos)
 	tv.SavePosHistory(tv.CursorPos)
@@ -1578,8 +1589,8 @@ func (tv *TextView) CursorPrevLink(wraparound bool) bool {
 
 // Undo undoes previous action
 func (tv *TextView) Undo() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tbe := tv.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
@@ -1596,8 +1607,8 @@ func (tv *TextView) Undo() {
 
 // Redo redoes previously undone action
 func (tv *TextView) Redo() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tbe := tv.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
@@ -1722,14 +1733,14 @@ func (tv *TextView) ISearchSelectMatch(midx int) {
 
 // ISearchSig sends the signal that ISearch is updated
 func (tv *TextView) ISearchSig() {
-	tv.TextViewSig.Emit(tv.This(), int64(TextViewISearch), tv.CursorPos)
+	// tv.TextViewSig.Emit(tv.This(), int64(TextViewISearch), tv.CursorPos)
 }
 
 // ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
 func (tv *TextView) ISearchStart() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	if tv.ISearch.On {
 		if tv.ISearch.Find != "" { // already searching -- find next
 			sz := len(tv.ISearch.Matches)
@@ -1766,9 +1777,9 @@ func (tv *TextView) ISearchStart() {
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (tv *TextView) ISearchKeyInput(kt events.Event) {
-	r := kt.Rune
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	r := kt.KeyRune()
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	// if tv.ISearch.Find == PrevISearchString { // undo starting point
 	// 	tv.ISearch.Find = ""
 	// }
@@ -1788,8 +1799,8 @@ func (tv *TextView) ISearchKeyInput(kt events.Event) {
 
 // ISearchBackspace gets rid of one item in search string
 func (tv *TextView) ISearchBackspace() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	if tv.ISearch.Find == PrevISearchString { // undo starting point
 		tv.ISearch.Find = ""
 		tv.ISearch.UseCase = false
@@ -1821,8 +1832,8 @@ func (tv *TextView) ISearchCancel() {
 	if !tv.ISearch.On {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	if tv.ISearch.Find != "" {
 		PrevISearchString = tv.ISearch.Find
 	}
@@ -1881,34 +1892,34 @@ var PrevQReplaceRepls []string
 
 // QReplaceSig sends the signal that QReplace is updated
 func (tv *TextView) QReplaceSig() {
-	tv.TextViewSig.Emit(tv.This(), int64(TextViewQReplace), tv.CursorPos)
+	// tv.TextViewSig.Emit(tv.This(), int64(TextViewQReplace), tv.CursorPos)
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with choosers with history
 func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg := gi.NewStdDialog(ctx, opts, fun)
 
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	sc := dlg.Stage.Scene
+	prIdx := dlg.PromptWidgetIdx()
 
-	tff := frame.InsertNewChild(gi.ComboBoxType, prIdx+1, "find").(*gi.Chooser)
+	tff := sc.InsertNewChild(gi.ChooserType, prIdx+1, "find").(*gi.Chooser)
 	tff.Editable = true
 	tff.SetStretchMaxWidth()
 	tff.SetMinPrefWidth(units.Ch(60))
-	tff.ConfigParts(vp)
+	tff.ConfigParts(sc)
 	tff.ItemsFromStringList(PrevQReplaceFinds, true, 0)
 	if find != "" {
 		tff.SetCurVal(find)
 	}
 
-	tfr := frame.InsertNewChild(gi.ComboBoxType, prIdx+2, "repl").(*gi.Chooser)
+	tfr := sc.InsertNewChild(gi.ChooserType, prIdx+2, "repl").(*gi.Chooser)
 	tfr.Editable = true
 	tfr.SetStretchMaxWidth()
 	tfr.SetMinPrefWidth(units.Ch(60))
-	tfr.ConfigParts(vp)
+	tfr.ConfigParts(sc)
 	tfr.ItemsFromStringList(PrevQReplaceRepls, true, 0)
 
-	lb := frame.InsertNewChild(gi.TypeCheckBox, prIdx+3, "lexb").(*gi.Switch)
+	lb := sc.InsertNewChild(gi.SwitchType, prIdx+3, "lexb").(*gi.Switch)
 	lb.SetText("Lexical Items")
 	lb.SetState(lexitems, states.Checked)
 	lb.Tooltip = "search matches entire lexically tagged items -- good for finding local variable names like 'i' and not matching everything"
@@ -1918,16 +1929,16 @@ func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, 
 
 // QReplaceDialogValues gets the string values
 func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
-	frame := dlg.Stage.Scene
-	tff := frame.ChildByName("find", 1).(*gi.Chooser)
+	sc := dlg.Stage.Scene
+	tff := sc.ChildByName("find", 1).(*gi.Chooser)
 	if tf, found := tff.TextField(); found {
 		find = tf.Text()
 	}
-	tfr := frame.ChildByName("repl", 2).(*gi.Chooser)
+	tfr := sc.ChildByName("repl", 2).(*gi.Chooser)
 	if tf, found := tfr.TextField(); found {
 		repl = tf.Text()
 	}
-	lb := frame.ChildByName("lexb", 3).(*gi.Switch)
+	lb := sc.ChildByName("lexb", 3).(*gi.Switch)
 	lexItems = lb.StateIs(states.Checked)
 	return
 }
@@ -2039,22 +2050,22 @@ func (tv *TextView) QReplaceReplaceAll(midx int) {
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
 func (tv *TextView) QReplaceKeyInput(kt events.Event) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 
 	switch {
-	case kt.Rune == 'y':
+	case kt.KeyRune() == 'y':
 		tv.QReplaceReplace(tv.QReplace.Pos)
 		if !tv.QReplaceNextMatch() {
 			tv.QReplaceCancel()
 		}
-	case kt.Rune == 'n':
+	case kt.KeyRune() == 'n':
 		if !tv.QReplaceNextMatch() {
 			tv.QReplaceCancel()
 		}
-	case kt.Rune == 'q' || kt.KeyChord() == "ReturnEnter":
+	case kt.KeyRune() == 'q' || kt.KeyChord() == "ReturnEnter":
 		tv.QReplaceCancel()
-	case kt.Rune == '!':
+	case kt.KeyRune() == '!':
 		tv.QReplaceReplaceAll(tv.QReplace.Pos)
 		tv.QReplaceCancel()
 	}
@@ -2065,8 +2076,8 @@ func (tv *TextView) QReplaceCancel() {
 	if !tv.QReplace.On {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.QReplace.On = false
 	tv.QReplace.Pos = -1
 	tv.QReplace.Matches = nil
@@ -2079,8 +2090,8 @@ func (tv *TextView) QReplaceCancel() {
 
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
 func (tv *TextView) EscPressed() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	switch {
 	case tv.ISearch.On:
 		tv.ISearchCancel()
@@ -2113,7 +2124,7 @@ func (tv *TextView) ReCaseSelection(c textbuf.Cases) string {
 
 // ClearSelected resets both the global selected flag and any current selection
 func (tv *TextView) ClearSelected() {
-	tv.WidgetBase.ClearSelected()
+	// tv.WidgetBase.ClearSelected()
 	tv.SelectReset()
 }
 
@@ -2148,8 +2159,8 @@ func (tv *TextView) SelectModeToggle() {
 
 // SelectAll selects all the text
 func (tv *TextView) SelectAll() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.SelectReg.Start = lex.PosZero
 	tv.SelectReg.End = tv.Buf.EndPos()
 	tv.RenderAllLines()
@@ -2412,14 +2423,13 @@ func (tv *TextView) PasteHist() {
 		return
 	}
 	cl := TextViewClipHistChooseList()
-	gi.StringsChooserPopup(cl, "", tv, func(recv, send ki.Ki, sig int64, data any) {
-		ac := send.(*gi.Button)
+	gi.StringsChooserPopup(cl, "", tv, func(ac *gi.Button) {
 		idx := ac.Data.(int)
 		clip := TextViewClipHistory[idx]
 		if clip != nil {
-			wupdt := tv.TopUpdateStart()
-			defer tv.TopUpdateEnd(wupdt)
-			goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(clip))
+			updt := tv.UpdateStart()
+			defer tv.UpdateEnd(updt)
+			tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
 			tv.InsertAtCursor(clip)
 			tv.SavePosHistory(tv.CursorPos)
 		}
@@ -2431,13 +2441,13 @@ func (tv *TextView) Cut() *textbuf.Edit {
 	if !tv.HasSelection() {
 		return nil
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	org := tv.SelectReg.Start
 	cut := tv.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
+		tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 		TextViewClipHistAdd(cb)
 	}
 	tv.SetCursorShow(org)
@@ -2460,11 +2470,11 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 	if tbe == nil {
 		return nil
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	cb := tbe.ToBytes()
 	TextViewClipHistAdd(cb)
-	goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
+	tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 	if reset {
 		tv.SelectReset()
 	}
@@ -2474,9 +2484,9 @@ func (tv *TextView) Copy(reset bool) *textbuf.Edit {
 
 // Paste inserts text from the clipboard at current cursor position
 func (tv *TextView) Paste() {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-	data := goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Read([]string{filecat.TextPlain})
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
+	data := tv.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
 	if data != nil {
 		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
 		tv.SavePosHistory(tv.CursorPos)
@@ -2485,8 +2495,8 @@ func (tv *TextView) Paste() {
 
 // InsertAtCursor inserts given text at current cursor position
 func (tv *TextView) InsertAtCursor(txt []byte) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	if tv.HasSelection() {
 		tbe := tv.DeleteSelection()
 		tv.CursorPos = tbe.AdjustPos(tv.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
@@ -2517,13 +2527,13 @@ func (tv *TextView) CutRect() *textbuf.Edit {
 	if !tv.HasSelection() {
 		return nil
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	npos := lex.Pos{Ln: tv.SelectReg.End.Ln, Ch: tv.SelectReg.Start.Ch}
 	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
+		tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 		TextViewClipRect = cut
 	}
 	tv.SetCursorShow(npos)
@@ -2538,10 +2548,10 @@ func (tv *TextView) CopyRect(reset bool) *textbuf.Edit {
 	if tbe == nil {
 		return nil
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	cb := tbe.ToBytes()
-	goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).Write(mimedata.NewTextBytes(cb))
+	tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 	TextViewClipRect = tbe
 	if reset {
 		tv.SelectReset()
@@ -2555,8 +2565,8 @@ func (tv *TextView) PasteRect() {
 	if TextViewClipRect == nil {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	ce := TextViewClipRect.Clone()
 	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
 	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
@@ -2590,9 +2600,10 @@ func (tv *TextView) ContextMenu() {
 // ContextMenuPos returns the position of the context menu
 func (tv *TextView) ContextMenuPos() (pos image.Point) {
 	em := tv.EventMgr()
-	if em != nil {
-		return em.LastMousePos
-	}
+	_ = em
+	// if em != nil {
+	// 	return em.LastMousePos
+	// }
 	return image.Point{100, 100}
 }
 
@@ -2603,24 +2614,18 @@ func (tv *TextView) MakeContextMenu(m *gi.Menu) {
 	})
 	ac.SetEnabledState(tv.HasSelection())
 	if !tv.IsDisabled() {
-		ac = m.AddButton(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut},
-			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tv := recv.Embed(TypeTextView).(*TextView)
-				tv.Cut()
-			})
+		ac = m.AddButton(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut}, func(act *gi.Button) {
+			tv.Cut()
+		})
 		ac.SetEnabledState(tv.HasSelection())
-		ac = m.AddButton(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste},
-			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tv := recv.Embed(TypeTextView).(*TextView)
-				tv.Paste()
-			})
-		ac.SetState(goosi.TheApp.ClipBoard(tv.ParentRenderWin().RenderWin).IsEmpty(), states.Disabled)
+		ac = m.AddButton(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste}, func(act *gi.Button) {
+			tv.Paste()
+		})
+		ac.SetState(tv.EventMgr().ClipBoard().IsEmpty(), states.Disabled)
 	} else {
-		ac = m.AddButton(gi.ActOpts{Label: "Clear"},
-			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tv := recv.Embed(TypeTextView).(*TextView)
-				tv.Clear()
-			})
+		ac = m.AddButton(gi.ActOpts{Label: "Clear"}, func(act *gi.Button) {
+			tv.Clear()
+		})
 	}
 }
 
@@ -2657,7 +2662,7 @@ func (tv *TextView) OfferComplete() {
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Buf.CurView = tv
-	tv.Buf.Complete.Show(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Scene, cpos, tv.ForceComplete)
+	tv.Buf.Complete.Show(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Sc, cpos, tv.ForceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
@@ -2716,7 +2721,7 @@ func (tv *TextView) Lookup() {
 	cpos.Y += 10
 	tv.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	tv.Buf.CurView = tv
-	tv.Buf.Complete.Lookup(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Scene, cpos, tv.ForceComplete)
+	tv.Buf.Complete.Lookup(s, tv.CursorPos.Ln, tv.CursorPos.Ch, tv.Sc, cpos, tv.ForceComplete)
 }
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
@@ -2790,7 +2795,7 @@ func (tv *TextView) ISpellKeyInput(kt events.Event) {
 			tv.SpellCheck(reg)
 		}
 	case gi.KeyFunNil:
-		if unicode.IsSpace(kt.Rune) || unicode.IsPunct(kt.Rune) && kt.Rune != '\'' { // contractions!
+		if unicode.IsSpace(kt.KeyRune()) || unicode.IsPunct(kt.KeyRune()) && kt.KeyRune() != '\'' { // contractions!
 			tp.Ch-- // we are one past the end of word
 			reg := tv.WordBefore(tp)
 			tv.SpellCheck(reg)
@@ -2870,7 +2875,7 @@ func (tv *TextView) OfferCorrect() bool {
 	cpos.X += 5
 	cpos.Y += 10
 	tv.Buf.CurView = tv
-	tv.Buf.Spell.Show(wb, tv.Scene, cpos)
+	tv.Buf.Spell.Show(wb, tv.Sc, cpos)
 	return true
 }
 
@@ -3147,21 +3152,21 @@ func TextViewBlink() {
 			continue
 		}
 		tv := BlinkingTextView
-		if tv.Scene == nil || !tv.StateIs(states.Focused) || !tv.IsFocusActive() || !tv.This().(gi.Widget).IsVisible() {
+		if tv.Sc == nil || !tv.StateIs(states.Focused) || !tv.IsFocusActive() || !tv.This().(gi.Widget).IsVisible() {
 			tv.RenderCursor(false)
 			BlinkingTextView = nil
 			TextViewBlinkMu.Unlock()
 			continue
 		}
-		win := tv.ParentRenderWin()
-		if win == nil || win.Is(WinResizing) || win.IsClosed() || !win.IsRenderWinInFocus() {
-			TextViewBlinkMu.Unlock()
-			continue
-		}
-		if win.Is(Updating) {
-			TextViewBlinkMu.Unlock()
-			continue
-		}
+		// win := tv.ParentRenderWin()
+		// if win == nil || win.Is(WinResizing) || win.IsClosed() || !win.IsRenderWinInFocus() {
+		// 	TextViewBlinkMu.Unlock()
+		// 	continue
+		// }
+		// if win.Is(Updating) {
+		// 	TextViewBlinkMu.Unlock()
+		// 	continue
+		// }
 		tv.BlinkOn = !tv.BlinkOn
 		tv.RenderCursor(tv.BlinkOn)
 		TextViewBlinkMu.Unlock()
@@ -3187,10 +3192,10 @@ func (tv *TextView) StartCursor() {
 		go TextViewBlink()
 	}
 	tv.BlinkOn = true
-	win := tv.ParentRenderWin()
-	if win != nil && !win.Is(WinResizing) {
-		tv.RenderCursor(true)
-	}
+	// win := tv.ParentRenderWin()
+	// if win != nil && !win.Is(WinResizing) {
+	// 	tv.RenderCursor(true)
+	// }
 	//	fmt.Printf("set blink tv: %v\n", tv.Path())
 	BlinkingTextView = tv
 	TextViewBlinkMu.Unlock()
@@ -3236,15 +3241,15 @@ func (tv *TextView) RenderCursor(on bool) {
 	tv.CursorMu.Lock()
 	defer tv.CursorMu.Unlock()
 
-	win := tv.ParentRenderWin()
-	sp := tv.CursorSprite()
-	if on {
-		win.ActivateSprite(sp.Name)
-	} else {
-		win.InactivateSprite(sp.Name)
-	}
-	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
-	win.UpdateSig()
+	// win := tv.ParentRenderWin()
+	// sp := tv.CursorSprite()
+	// if on {
+	// 	win.ActivateSprite(sp.Name)
+	// } else {
+	// 	win.InactivateSprite(sp.Name)
+	// }
+	// sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
+	// win.UpdateSig()
 }
 
 // CursorSpriteName returns the name of the cursor sprite
@@ -3257,23 +3262,24 @@ func (tv *TextView) CursorSpriteName() string {
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
 func (tv *TextView) CursorSprite() *gi.Sprite {
-	win := tv.ParentRenderWin()
-	if win == nil {
-		return nil
-	}
-	spnm := tv.CursorSpriteName()
-	sp, ok := win.SpriteByName(spnm)
-	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(tv.CursorWidth.Dots)), int(mat32.Ceil(tv.FontHeight))}
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
-		}
-		sp = gi.NewSprite(spnm, bbsz, image.Point{})
-		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{tv.CursorColor.Color}, image.Point{}, draw.Src)
-		win.AddSprite(sp)
-	}
-	return sp
+	// win := tv.ParentRenderWin()
+	// if win == nil {
+	// 	return nil
+	// }
+	// spnm := tv.CursorSpriteName()
+	// sp, ok := win.SpriteByName(spnm)
+	// if !ok {
+	// 	bbsz := image.Point{int(mat32.Ceil(tv.CursorWidth.Dots)), int(mat32.Ceil(tv.FontHeight))}
+	// 	if bbsz.X < 2 { // at least 2
+	// 		bbsz.X = 2
+	// 	}
+	// 	sp = gi.NewSprite(spnm, bbsz, image.Point{})
+	// 	ibox := sp.Pixels.Bounds()
+	// 	draw.Draw(sp.Pixels, ibox, &image.Uniform{tv.CursorColor.Color}, image.Point{}, draw.Src)
+	// 	win.AddSprite(sp)
+	// }
+	// return sp
+	return nil
 }
 
 // TextViewDepthOffsets are changes in color values from default background for different
@@ -3302,7 +3308,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 	defer tv.Buf.MarkupMu.RUnlock()
 	sty := &tv.Style
 	cspec := sty.BackgroundColor
-	bg := cspec.Color
+	bg := cspec.Solid
 	// STYTODO: fix textview colors
 	// isDark := bg.IsDark()
 	// nclrs := len(TextViewDepthColors)
@@ -3324,7 +3330,7 @@ func (tv *TextView) RenderDepthBg(stln, edln int) {
 		for ti := range ht {
 			lx := &ht[ti]
 			if lx.Tok.Depth > 0 {
-				cspec.Color = bg
+				cspec.Solid = bg
 				// if isDark {
 				// 	// reverse order too
 				// 	cspec.Color.Add(TextViewDepthColors[nclrs-1-lx.Tok.Depth%nclrs])
@@ -3397,8 +3403,8 @@ func (tv *TextView) ClearHighlights() {
 	if len(tv.Highlights) == 0 {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	tv.Highlights = tv.Highlights[:0]
 	tv.RenderAllLines()
 }
@@ -3408,8 +3414,8 @@ func (tv *TextView) ClearScopelights() {
 	if len(tv.Scopelights) == 0 {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 	sl := make([]textbuf.Region, len(tv.Scopelights))
 	copy(sl, tv.Scopelights)
 	tv.Scopelights = tv.Scopelights[:0]
@@ -3435,7 +3441,7 @@ func (tv *TextView) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bg
 		return
 	}
 
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
 	spc := sty.BoxSpace()
 
@@ -3481,7 +3487,7 @@ func (tv *TextView) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colo
 		return
 	}
 
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
 
 	pc.FillBox(rs, spos, epos.Sub(spos), bgclr) // same line, done
@@ -3498,7 +3504,8 @@ func (tv *TextView) RenderStartPos() mat32.Vec2 {
 // VisSizes computes the visible size of view given current parameters
 func (tv *TextView) VisSizes() {
 	if tv.Style.Font.Size.Val == 0 { // called under lock
-		tv.StyleTextView()
+		fmt.Println("style in size - shouldn't happen")
+		tv.StyleTextView(tv.Sc)
 	}
 	sty := &tv.Style
 	spc := sty.BoxSpace()
@@ -3519,11 +3526,11 @@ func (tv *TextView) VisSizes() {
 		lno = tv.Buf.Opts.LineNos
 	}
 	if lno {
-		tv.SetFlag(int(TextViewHasLineNos))
+		tv.SetFlag(true, TextViewHasLineNos)
 		// SidesTODO: this is sketchy
 		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
-		tv.ClearFlag(int(TextViewHasLineNos))
+		tv.SetFlag(false, TextViewHasLineNos)
 		tv.LineNoOff = 0
 	}
 	tv.RenderSize()
@@ -3538,21 +3545,21 @@ func (tv *TextView) RenderAllLines() {
 	if !tv.This().(gi.Widget).IsVisible() {
 		return
 	}
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	rs.PushBounds(tv.ScBBox)
-	wupdt := tv.TopUpdateStart()
+	updt := tv.UpdateStart()
 	tv.RenderAllLinesInBounds()
-	tv.PopBounds()
-	tv.Scene.This().(gi.Scene).ScUploadRegion(tv.ScBBox, tv.WinBBox)
+	tv.PopBounds(tv.Sc)
+	// tv.Sc.This().(gi.Scene).ScUploadRegion(tv.ScBBox, tv.ScBBox)
 	tv.RenderScrolls()
-	tv.TopUpdateEnd(wupdt)
+	tv.UpdateEnd(updt)
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
 // after PushBounds has already been called
 func (tv *TextView) RenderAllLinesInBounds() {
 	// fmt.Printf("render all: %v\n", tv.Nm)
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
 	sty := &tv.Style
@@ -3619,7 +3626,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	if !tv.HasLineNos() {
 		return
 	}
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
@@ -3627,7 +3634,7 @@ func (tv *TextView) RenderLineNosBoxAll() {
 	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
 	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Color)
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Solid)
 }
 
 // RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
@@ -3635,7 +3642,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	if !tv.HasLineNos() {
 		return
 	}
-	rs := tv.Render()
+	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
 	sty := &tv.Style
 	spc := sty.BoxSpace()
@@ -3646,7 +3653,7 @@ func (tv *TextView) RenderLineNosBox(st, ed int) {
 	// SidesTODO: this is sketchy
 	epos.X = spos.X + tv.LineNoOff - spc.Size().X/2
 	// fmt.Printf("line box: st %v ed: %v spos %v  epos %v\n", st, ed, spos, epos)
-	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Color)
+	pc.FillBoxColor(rs, spos, epos.Sub(spos), tv.LineNumberColor.Solid)
 }
 
 // RenderLineNo renders given line number -- called within context of other render
@@ -3658,11 +3665,11 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 		return
 	}
 
-	vp := tv.Scene
+	sc := tv.Sc
 	sty := &tv.Style
 	spc := sty.BoxSpace()
 	fst := sty.FontRender()
-	rs := &vp.Render
+	rs := &sc.RenderState
 	pc := &rs.Paint
 
 	// render fillbox
@@ -3683,17 +3690,17 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 			pc.FillBoxColor(rs, sbox, bszhlf, lclr)
 			nsp := sbox
 			nsp.X += bszhlf.X
-			pc.FillBoxColor(rs, nsp, bszhlf, tv.SelectColor.Color)
+			pc.FillBoxColor(rs, nsp, bszhlf, tv.SelectColor.Solid)
 		} else {
-			pc.FillBoxColor(rs, sbox, bsz, tv.SelectColor.Color)
+			pc.FillBoxColor(rs, sbox, bsz, tv.SelectColor.Solid)
 		}
 	} else if hasLClr {
 		pc.FillBoxColor(rs, sbox, bsz, lclr)
 	} else if defFill {
-		pc.FillBoxColor(rs, sbox, bsz, tv.LineNumberColor.Color)
+		pc.FillBoxColor(rs, sbox, bsz, tv.LineNumberColor.Solid)
 	}
 
-	fst.BackgroundColor.SetColor(nil)
+	fst.BackgroundColor.SetSolid(nil)
 	lfmt := fmt.Sprintf("%d", tv.LineNoDigs)
 	lfmt = "%" + lfmt + "d"
 	lnstr := fmt.Sprintf(lfmt, ln+1)
@@ -3709,7 +3716,7 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// if icnm, ok := tv.Buf.LineIcons[ln]; ok {
 	// 	ic := tv.Buf.Icons[icnm]
 	// 	ic.Par = tv
-	// 	ic.Scene = tv.Scene
+	// 	ic.Scene = tv.Sc
 	// 	// pos.X += 20 // todo
 	// 	sic := ic.SVGIcon()
 	// 	sic.Resize(image.Point{20, 20})
@@ -3721,24 +3728,24 @@ func (tv *TextView) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// 	r := image.Rectangle{Min: ist, Max: ied}
 	// 	sic.Sty.BackgroundColor.SetName("black")
 	// 	sic.FillScene()
-	// 	draw.Draw(tv.Scene.Pixels, r, sic.Pixels, image.Point{}, draw.Over)
+	// 	draw.Draw(tv.Sc.Pixels, r, sic.Pixels, image.Point{}, draw.Over)
 	// }
-	if vpUpload {
-		tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
-		winoff := tv.WinBBox.Min.Sub(tv.ScBBox.Min)
-		tWinBBox := tBBox.Add(winoff)
-		vp.This().(gi.Scene).ScUploadRegion(tBBox, tWinBBox)
-	}
+	// if vpUpload {
+	// 	tBBox := image.Rectangle{sbox.ToPointFloor(), ebox.ToPointCeil()}
+	// 	winoff := tv.ScBBox.Min.Sub(tv.ScBBox.Min)
+	// 	tScBBox := tBBox.Add(winoff)
+	// 	sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
+	// }
 }
 
 // RenderScrolls renders scrollbars if needed
 func (tv *TextView) RenderScrolls() {
-	if tv.HasFlag(int(TextViewRenderScrolls)) {
+	if tv.Is(TextViewRenderScrolls) {
 		ly := tv.ParentLayout()
 		if ly != nil {
-			ly.ReRenderScrolls()
+			ly.ReRenderScrolls(tv.Sc)
 		}
-		tv.ClearFlag(int(TextViewRenderScrolls))
+		tv.SetFlag(false, TextViewRenderScrolls)
 	}
 }
 
@@ -3760,10 +3767,10 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 	if st > ed {
 		return false
 	}
-	vp := tv.Scene
-	wupdt := tv.TopUpdateStart()
+	sc := tv.Sc
+	updt := tv.UpdateStart()
 	sty := &tv.Style
-	rs := &vp.Render
+	rs := &sc.RenderState
 	pc := &rs.Paint
 	pos := tv.RenderStartPos()
 	var boxMin, boxMax mat32.Vec2
@@ -3826,14 +3833,15 @@ func (tv *TextView) RenderLines(st, ed int) bool {
 		}
 
 		tBBox := image.Rectangle{boxMin.ToPointFloor(), boxMax.ToPointCeil()}
-		winoff := tv.WinBBox.Min.Sub(tv.ScBBox.Min)
-		tWinBBox := tBBox.Add(winoff)
-		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tWinBBox)
-		vp.This().(gi.Scene).ScUploadRegion(tBBox, tWinBBox)
+		winoff := tv.ScBBox.Min.Sub(tv.ScBBox.Min)
+		tScBBox := tBBox.Add(winoff)
+		_ = tScBBox
+		// fmt.Printf("Render lines upload: tbbox: %v  twinbbox: %v\n", tBBox, tScBBox)
+		// sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
 	}
-	tv.PopBounds()
+	tv.PopBounds(sc)
 	tv.RenderScrolls()
-	tv.TopUpdateEnd(wupdt)
+	tv.UpdateEnd(updt)
 	return true
 }
 
@@ -3885,20 +3893,20 @@ func (tv *TextView) LastVisibleLine(stln int) int {
 }
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel
-// location (e.g., from mouse click) which has had WinBBox.Min subtracted from
+// location (e.g., from mouse click) which has had ScBBox.Min subtracted from
 // it (i.e, relative to upper left of text area)
 func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 	if tv.NLines == 0 {
 		return lex.PosZero
 	}
 	sty := &tv.Style
-	yoff := float32(tv.WinBBox.Min.Y)
+	yoff := float32(tv.ScBBox.Min.Y)
 	stln := tv.FirstVisibleLine(0)
 	cln := stln
 	fls := tv.CharStartPos(lex.Pos{Ln: stln}).Y - yoff
 	if pt.Y < int(mat32.Floor(fls)) {
 		cln = stln
-	} else if pt.Y > tv.WinBBox.Max.Y {
+	} else if pt.Y > tv.ScBBox.Max.Y {
 		cln = tv.NLines - 1
 	} else {
 		got := false
@@ -3921,8 +3929,8 @@ func (tv *TextView) PixelToCursor(pt image.Point) lex.Pos {
 	if lnsz == 0 {
 		return lex.Pos{Ln: cln, Ch: 0}
 	}
-	xoff := float32(tv.WinBBox.Min.X)
-	scrl := tv.WinBBox.Min.X - tv.ObjBBox.Min.X
+	xoff := float32(tv.ScBBox.Min.X)
+	scrl := tv.ScBBox.Min.X - tv.ObjBBox.Min.X
 	nolno := pt.X - int(tv.LineNoOff)
 	sc := int(float32(nolno+scrl) / sty.Font.Face.Metrics.Ch)
 	sc -= sc / 4
@@ -4009,8 +4017,8 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode e
 		return
 	}
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 
 	if !tv.SelectMode && selMode == events.ExtendContinuous {
 		if tv.SelectReg == textbuf.RegionNil {
@@ -4030,20 +4038,20 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode e
 			tv.SelectStart = newPos
 			tv.SelectRegUpdate(tv.CursorPos)
 		}
-		if !tv.IsDragging() && selMode == events.SelectOne {
-			ln := tv.CursorPos.Ln
-			ch := tv.CursorPos.Ch
-			if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
-				tv.SelectReset()
-			}
-		} else {
-			tv.SelectRegUpdate(tv.CursorPos)
-		}
-		if tv.IsDragging() {
-			tv.AutoScroll(pt.Add(tv.WinBBox.Min))
-		} else {
-			tv.ScrollCursorToCenterIfHidden()
-		}
+		// if !tv.IsDragging() && selMode == events.SelectOne {
+		// 	ln := tv.CursorPos.Ln
+		// 	ch := tv.CursorPos.Ch
+		// 	if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
+		// 		tv.SelectReset()
+		// 	}
+		// } else {
+		// 	tv.SelectRegUpdate(tv.CursorPos)
+		// }
+		// if tv.IsDragging() {
+		// 	tv.AutoScroll(pt.Add(tv.ScBBox.Min))
+		// } else {
+		// 	tv.ScrollCursorToCenterIfHidden()
+		// }
 		tv.RenderSelectLines()
 	} else if tv.HasSelection() {
 		ln := tv.CursorPos.Ln
@@ -4061,7 +4069,7 @@ func (tv *TextView) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode e
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
 func (tv *TextView) ShiftSelect(kt events.Event) {
-	hasShift := kt.HasAnyModifier(goosi.Shift)
+	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
 		if tv.SelectReg == textbuf.RegionNil {
 			tv.SelectStart = tv.CursorPos
@@ -4074,7 +4082,7 @@ func (tv *TextView) ShiftSelect(kt events.Event) {
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
 func (tv *TextView) ShiftSelectExtend(kt events.Event) {
-	hasShift := kt.HasAnyModifier(goosi.Shift)
+	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
 	}
@@ -4087,25 +4095,25 @@ func (tv *TextView) KeyInput(kt events.Event) {
 		fmt.Printf("TextView KeyInput: %v\n", tv.Path())
 	}
 	kf := gi.KeyFun(kt.KeyChord())
-	win := tv.ParentRenderWin()
-	tv.ClearScopelights()
-
-	tv.RefreshIfNeeded()
-
-	cpop := win.CurPopup()
-	if gi.PopupIsCompleter(cpop) {
-		setprocessed := tv.Buf.Complete.KeyInput(kf)
-		if setprocessed {
-			kt.SetHandled()
-		}
-	}
-
-	if gi.PopupIsCorrector(cpop) {
-		setprocessed := tv.Buf.Spell.KeyInput(kf)
-		if setprocessed {
-			kt.SetHandled()
-		}
-	}
+	// win := tv.ParentRenderWin()
+	// tv.ClearScopelights()
+	//
+	// tv.RefreshIfNeeded()
+	//
+	// cpop := win.CurPopup()
+	// if gi.PopupIsCompleter(cpop) {
+	// 	setprocessed := tv.Buf.Complete.KeyInput(kf)
+	// 	if setprocessed {
+	// 		kt.SetHandled()
+	// 	}
+	// }
+	//
+	// if gi.PopupIsCorrector(cpop) {
+	// 	setprocessed := tv.Buf.Spell.KeyInput(kf)
+	// 	if setprocessed {
+	// 		kt.SetHandled()
+	// 	}
+	// }
 
 	if kt.IsHandled() {
 		return
@@ -4127,9 +4135,9 @@ func (tv *TextView) KeyInput(kt events.Event) {
 		tv.lastRecenter = 0
 	}
 
-	if kf != gi.KeyFunUndo && tv.HasFlag(int(TextViewLastWasUndo)) {
+	if kf != gi.KeyFunUndo && tv.Is(TextViewLastWasUndo) {
 		tv.Buf.EmacsUndoSave()
-		tv.ClearFlag(int(TextViewLastWasUndo))
+		tv.SetFlag(false, TextViewLastWasUndo)
 	}
 
 	gotTabAI := false // got auto-indent tab this time
@@ -4267,10 +4275,10 @@ func (tv *TextView) KeyInput(kt events.Event) {
 			kt.SetHandled()
 			tv.CursorPrevLink(true)
 		case kf == gi.KeyFunNil && tv.ISearch.On:
-			if unicode.IsPrint(kt.Rune) && !kt.HasAnyModifier(key.Control, key.Meta) {
+			if unicode.IsPrint(kt.KeyRune()) && !kt.HasAnyModifier(key.Control, key.Meta) {
 				tv.ISearchKeyInput(kt)
 			}
-		case kt.Rune == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
+		case kt.KeyRune() == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
 			kt.SetHandled()
 			tv.CursorPos.Ch--
 			tv.CursorNextLink(true) // todo: cursorcurlink
@@ -4279,7 +4287,7 @@ func (tv *TextView) KeyInput(kt events.Event) {
 		return
 	}
 	if kt.IsHandled() {
-		tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
+		tv.SetFlag(gotTabAI, TextViewLastWasTabAI)
 		return
 	}
 	switch kf {
@@ -4344,7 +4352,7 @@ func (tv *TextView) KeyInput(kt events.Event) {
 		cancelAll()
 		kt.SetHandled()
 		tv.Undo()
-		tv.SetFlag(int(TextViewLastWasUndo))
+		tv.SetFlag(true, TextViewLastWasUndo)
 	case gi.KeyFunRedo:
 		cancelAll()
 		kt.SetHandled()
@@ -4391,8 +4399,8 @@ func (tv *TextView) KeyInput(kt events.Event) {
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			wupdt := tv.TopUpdateStart()
-			lasttab := tv.HasFlag(int(TextViewLastWasTabAI))
+			updt := tv.UpdateStart()
+			lasttab := tv.Is(TextViewLastWasTabAI)
 			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent {
 				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 				tv.CursorPos.Ch = cpos
@@ -4401,7 +4409,7 @@ func (tv *TextView) KeyInput(kt events.Event) {
 			} else {
 				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Style.Text.TabSize))
 			}
-			tv.TopUpdateEnd(wupdt)
+			tv.UpdateEnd(updt)
 			tv.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunFocusPrev: // shift-tab
@@ -4420,17 +4428,17 @@ func (tv *TextView) KeyInput(kt events.Event) {
 			tv.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunNil:
-		if unicode.IsPrint(kt.Rune) {
+		if unicode.IsPrint(kt.KeyRune()) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
 				tv.KeyInputInsertRune(kt)
 			}
 		}
-		if unicode.IsSpace(kt.Rune) {
+		if unicode.IsSpace(kt.KeyRune()) {
 			tv.ForceComplete = false
 		}
 		tv.ISpellKeyInput(kt)
 	}
-	tv.SetFlagState(gotTabAI, int(TextViewLastWasTabAI))
+	tv.SetFlag(gotTabAI, TextViewLastWasTabAI)
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
@@ -4444,9 +4452,9 @@ func (tv *TextView) KeyInputInsertBra(kt events.Event) {
 	lnLen := len(curLn)
 	lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
 	if lp != nil && lp.Lang != nil {
-		match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.Rune, pos, curLn)
+		match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.KeyRune(), pos, curLn)
 	} else {
-		if kt.Rune == '{' {
+		if kt.KeyRune() == '{' {
 			if pos.Ch == lnLen {
 				if lnLen == 0 || unicode.IsSpace(curLn[pos.Ch-1]) {
 					newLine = true
@@ -4460,9 +4468,9 @@ func (tv *TextView) KeyInputInsertBra(kt events.Event) {
 		}
 	}
 	if match {
-		ket, _ := lex.BracePair(kt.Rune)
+		ket, _ := lex.BracePair(kt.KeyRune())
 		if newLine && tv.Buf.Opts.AutoIndent {
-			tv.InsertAtCursor([]byte(string(kt.Rune) + "\n"))
+			tv.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
 			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
 				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
@@ -4471,12 +4479,12 @@ func (tv *TextView) KeyInputInsertBra(kt events.Event) {
 			tv.InsertAtCursor([]byte("\n" + string(ket)))
 			tv.Buf.AutoIndent(tv.CursorPos.Ln)
 		} else {
-			tv.InsertAtCursor([]byte(string(kt.Rune) + string(ket)))
+			tv.InsertAtCursor([]byte(string(kt.KeyRune()) + string(ket)))
 			pos.Ch++
 		}
 		tv.lastAutoInsert = ket
 	} else {
-		tv.InsertAtCursor([]byte(string(kt.Rune)))
+		tv.InsertAtCursor([]byte(string(kt.KeyRune())))
 		pos.Ch++
 	}
 	tv.SetCursorShow(pos)
@@ -4493,36 +4501,36 @@ func (tv *TextView) KeyInputInsertRune(kt events.Event) {
 		tv.CancelComplete()
 		tv.QReplaceKeyInput(kt)
 	} else {
-		if kt.Rune == '{' || kt.Rune == '(' || kt.Rune == '[' {
+		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
 			tv.KeyInputInsertBra(kt)
-		} else if kt.Rune == '}' && tv.Buf.Opts.AutoIndent && tv.CursorPos.Ch == tv.Buf.LineLen(tv.CursorPos.Ln) {
+		} else if kt.KeyRune() == '}' && tv.Buf.Opts.AutoIndent && tv.CursorPos.Ch == tv.Buf.LineLen(tv.CursorPos.Ln) {
 			tv.CancelComplete()
 			tv.lastAutoInsert = 0
 			bufUpdt, winUpdt, autoSave := tv.Buf.BatchUpdateStart()
-			tv.InsertAtCursor([]byte(string(kt.Rune)))
+			tv.InsertAtCursor([]byte(string(kt.KeyRune())))
 			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
 				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
 			tv.Buf.BatchUpdateEnd(bufUpdt, winUpdt, autoSave)
-		} else if tv.lastAutoInsert == kt.Rune { // if we type what we just inserted, just move past
+		} else if tv.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
 			tv.CursorPos.Ch++
 			tv.SetCursorShow(tv.CursorPos)
 			tv.lastAutoInsert = 0
 		} else {
 			tv.lastAutoInsert = 0
-			tv.InsertAtCursor([]byte(string(kt.Rune)))
-			if kt.Rune == ' ' {
+			tv.InsertAtCursor([]byte(string(kt.KeyRune())))
+			if kt.KeyRune() == ' ' {
 				tv.CancelComplete()
 			} else {
 				tv.OfferComplete()
 			}
 		}
-		if kt.Rune == '}' || kt.Rune == ')' || kt.Rune == ']' {
+		if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
 			cp := tv.CursorPos
 			np := cp
 			np.Ch--
-			tp, found := tv.Buf.BraceMatch(kt.Rune, np)
+			tp, found := tv.Buf.BraceMatch(kt.KeyRune(), np)
 			if found {
 				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
 				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
@@ -4541,20 +4549,20 @@ func (tv *TextView) KeyInputInsertRune(kt events.Event) {
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
 func (tv *TextView) OpenLink(tl *paint.TextLink) {
-	tl.Widget = tv.This().(gi.Widget)
+	// tl.Widget = tv.This().(gi.Widget)
 	// fmt.Printf("opening link: %v\n", tl.URL)
-	if len(tv.LinkSig.Cons) == 0 {
-		if paint.TextLinkHandler != nil {
-			if paint.TextLinkHandler(*tl) {
-				return
-			}
-			if paint.URLHandler != nil {
-				paint.URLHandler(tl.URL)
-			}
-		}
-		return
-	}
-	tv.LinkSig.Emit(tv.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	// if len(tv.LinkSig.Cons) == 0 {
+	// 	if paint.TextLinkHandler != nil {
+	// 		if paint.TextLinkHandler(*tl) {
+	// 			return
+	// 		}
+	// 		if paint.URLHandler != nil {
+	// 			paint.URLHandler(tl.URL)
+	// 		}
+	// 	}
+	// 	return
+	// }
+	// tv.LinkSig.Emit(tv.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 // LinkAt returns link at given cursor position, if one exists there --
@@ -4600,58 +4608,62 @@ func (tv *TextView) MouseEvent(me events.Event) {
 	if !tv.StateIs(states.Focused) {
 		tv.GrabFocus()
 	}
-	tv.SetFlag(int(TextViewFocusActive))
+	tv.SetFlag(true, TextViewFocusActive)
 	me.SetHandled()
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return
 	}
 	pt := tv.PointToRelPos(me.Pos())
 	newPos := tv.PixelToCursor(pt)
-	switch me.Button {
-	case events.Left:
-		if me.Action == events.Press {
-			me.SetHandled()
+	tv.On(events.MouseDown, func(e events.Event) {
+		if me.MouseButton() == events.Left {
 			if _, got := tv.OpenLinkAt(newPos); got {
 			} else {
 				tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
 				tv.SavePosHistory(tv.CursorPos)
 			}
-		} else if me.Action == events.DoubleClick {
-			me.SetHandled()
-			if tv.HasSelection() {
-				if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
-					sz := tv.Buf.LineLen(tv.SelectReg.Start.Ln)
-					if tv.SelectReg.Start.Ch == 0 && tv.SelectReg.End.Ch == sz {
-						tv.SelectReset()
-					} else { // assume word, go line
-						tv.SelectReg.Start.Ch = 0
-						tv.SelectReg.End.Ch = sz
-					}
-				} else {
+		}
+	})
+	tv.OnDoubleClick(func(e events.Event) {
+		if tv.HasSelection() {
+			if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
+				sz := tv.Buf.LineLen(tv.SelectReg.Start.Ln)
+				if tv.SelectReg.Start.Ch == 0 && tv.SelectReg.End.Ch == sz {
 					tv.SelectReset()
+				} else { // assume word, go line
+					tv.SelectReg.Start.Ch = 0
+					tv.SelectReg.End.Ch = sz
 				}
 			} else {
-				if tv.SelectWord() {
-					tv.CursorPos = tv.SelectReg.Start
-				}
+				tv.SelectReset()
 			}
-			tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+		} else {
+			if tv.SelectWord() {
+				tv.CursorPos = tv.SelectReg.Start
+			}
 		}
-	case events.Middle:
-		if !tv.IsDisabled() && me.Action == events.Press {
-			me.SetHandled()
-			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
-			tv.SavePosHistory(tv.CursorPos)
-			tv.Paste()
-		}
-	case events.Right:
-		if me.Action == events.Press {
-			me.SetHandled()
-			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
-			tv.EmitContextMenuSignal()
-			tv.This().(gi.Widget).ContextMenu()
-		}
-	}
+		tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
+	})
+	/*
+	   case events.Middle:
+
+	   	if !tv.IsDisabled() && me.Action == events.Press {
+	   		me.SetHandled()
+	   		tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
+	   		tv.SavePosHistory(tv.CursorPos)
+	   		tv.Paste()
+	   	}
+
+	   case events.Right:
+
+	   		if me.Action == events.Press {
+	   			me.SetHandled()
+	   			tv.SetCursorFromMouse(pt, newPos, me.SelectMode())
+	   			tv.EmitContextMenuSignal()
+	   			tv.This().(gi.Widget).ContextMenu()
+	   		}
+	   	}
+	*/
 }
 
 // todo: needs this in event filtering update!
@@ -4659,6 +4671,7 @@ func (tv *TextView) MouseEvent(me events.Event) {
 // 	return
 // }
 
+/*
 // MouseMoveEvent
 func (tv *TextView) MouseMoveEvent() {
 	we.AddFunc(events.MouseMove, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -4683,11 +4696,11 @@ func (tv *TextView) MouseMoveEvent() {
 			}
 		}
 		// TODO: figure out how to handle links with new cursor setup
-		if inLink {
-			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
-		} else {
-			goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
-		}
+		// if inLink {
+		// 	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
+		// } else {
+		// 	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
+		// }
 
 	})
 }
@@ -4718,33 +4731,32 @@ func (tv *TextView) MouseFocusEvent() {
 		tv.RefreshIfNeeded()
 	})
 }
+*/
 
 // TextViewEvents sets connections between mouse and key events and actions
 func (tv *TextView) TextViewEvents() {
-	tv.HoverTooltipEvent(we)
-	tv.MouseMoveEvent(we)
-	tv.MouseDragEvent(we)
-	we.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tv := recv.Embed(TypeTextView).(*TextView)
-		me := d.(events.Event)
-		tv.MouseEvent(me)
-	})
-	tv.MouseFocusEvent(we)
-	we.AddFunc(events.KeyChord, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		tv := recv.Embed(TypeTextView).(*TextView)
-		kt := d.(*events.Key)
-		tv.KeyInput(kt)
+	// tv.HoverTooltipEvent(we)
+	// tv.MouseMoveEvent(we)
+	// tv.MouseDragEvent(we)
+	// we.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	tv := recv.Embed(TypeTextView).(*TextView)
+	// 	me := d.(events.Event)
+	// 	tv.MouseEvent(me)
+	// })
+	// tv.MouseFocusEvent(we)
+	tv.OnKeyChord(func(e events.Event) {
+		tv.KeyInput(e)
 	})
 
 	// todo: need to handle this separately!!
-	if dlg, ok := tv.Scene.This().(*gi.Dialog); ok {
-		dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tv, _ := recv.Embed(TypeTextView).(*TextView)
-			if sig == int64(gi.DialogAccepted) {
-				tv.EditDone()
-			}
-		})
-	}
+	// if dlg, ok := tv.Sc.This().(*gi.Dialog); ok {
+	// 	dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	// 		tv, _ := recv.Embed(TypeTextView).(*TextView)
+	// 		if sig == int64(gi.DialogAccepted) {
+	// 			tv.EditDone()
+	// 		}
+	// 	})
+	// }
 }
 
 ////////////////////////////////////////////////////
@@ -4756,7 +4768,7 @@ func (tv *TextView) TextViewEvents() {
 // }
 
 // StyleTextView sets the style of widget
-func (tv *TextView) StyleTextView() {
+func (tv *TextView) StyleTextView(sc *gi.Scene) {
 	tv.StyMu.Lock()
 	defer tv.StyMu.Unlock()
 
@@ -4764,17 +4776,17 @@ func (tv *TextView) StyleTextView() {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
-		win := tv.ParentRenderWin()
-		if win != nil {
-			spnm := tv.CursorSpriteName()
-			win.DeleteSprite(spnm)
-		}
+		// win := tv.ParentRenderWin()
+		// if win != nil {
+		// 	spnm := tv.CursorSpriteName()
+		// 	win.DeleteSprite(spnm)
+		// }
 	}
-	tv.ApplyStyleWidget()
+	tv.ApplyStyleWidget(sc)
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
-	if tv.Buf != nil {
-		tv.Buf.Opts.StyleFromProps(tv.Props)
-	}
+	// if tv.Buf != nil {
+	// 	tv.Buf.Opts.StyleFromProps(tv.Props)
+	// }
 	// if tv.IsDisabled() {
 	// 	if tv.StateIs(states.Selected) {
 	// 		tv.Style = tv.StateStyles[TextViewSel]
@@ -4794,16 +4806,16 @@ func (tv *TextView) StyleTextView() {
 
 // ApplyStyle calls StyleTextView and sets the style
 func (tv *TextView) ApplyStyle(sc *gi.Scene) {
-	tv.SetFlag(int(gi.CanFocus)) // always focusable
-	tv.StyleTextView()
+	// tv.SetFlag(true, gi.CanFocus) // always focusable
+	tv.StyleTextView(sc)
 }
 
 // GetSize
-func (tv *TextView) GetSize(vp *gi.Scene, iter int) {
+func (tv *TextView) GetSize(sc *gi.Scene, iter int) {
 	if iter > 0 {
 		return
 	}
-	tv.InitLayout(vp * Scene)
+	tv.InitLayout(sc)
 	if tv.LinesSize == (image.Point{}) {
 		tv.LayoutAllLines(true)
 	} else {
@@ -4812,14 +4824,10 @@ func (tv *TextView) GetSize(vp *gi.Scene, iter int) {
 }
 
 // DoLayoutn
-func (tv *TextView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	tv.DoLayoutBase(parBBox, iter)
-	for i := 0; i < int(TextViewStatesN); i++ {
-		tv.StateStyles[i].CopyUnitContext(&tv.Style.UnContext)
-	}
-	tv.DoLayoutChildren(iter)
-	if tv.LinesSize == (image.Point{} || tv.NeedsRebuild() || tv.NeedsRefresh() ||
-		tv.NLines != tv.Buf.NumLines()) {
+func (tv *TextView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	tv.DoLayoutBase(sc, parBBox, iter)
+	tv.DoLayoutChildren(sc, iter)
+	if tv.LinesSize == image.ZP || tv.NeedsRebuild() || tv.NeedsRefresh() || tv.NLines != tv.Buf.NumLines() {
 		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
 		return redo
 	}
@@ -4828,7 +4836,7 @@ func (tv *TextView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bo
 }
 
 // Render does some preliminary work and then calls render on children
-func (tv *TextView) Render(vp *gi.Scene) {
+func (tv *TextView) Render(sc *gi.Scene) {
 	// fmt.Printf("tv render: %v\n", tv.Nm)
 	// if tv.NeedsFullReRender() {
 	// 	tv.SetNeedsRefresh()
@@ -4849,11 +4857,10 @@ func (tv *TextView) Render(vp *gi.Scene) {
 		ply := tv.ParentLayout()
 		if ply != nil {
 			tv.ScBBox = ply.ScBBox
-			tv.WinBBox = ply.WinBBox
 		}
 	}
 
-	if tv.PushBounds() {
+	if tv.PushBounds(sc) {
 		tv.RenderAllLinesInBounds()
 		if tv.ScrollToCursorOnRender {
 			tv.ScrollToCursorOnRender = false
@@ -4867,8 +4874,8 @@ func (tv *TextView) Render(vp *gi.Scene) {
 			// fmt.Printf("tv render: %v  stop cursor\n", tv.Nm)
 			tv.StopCursor()
 		}
-		tv.RenderChildren()
-		tv.PopBounds()
+		tv.RenderChildren(sc)
+		tv.PopBounds(sc)
 	} else {
 		// fmt.Printf("tv render: %v  not vis stop cursor\n", tv.Nm)
 		tv.StopCursor()
@@ -4883,20 +4890,20 @@ func (tv *TextView) SetTypeHandlers() {
 // func (tv *TextView) FocusChanged(change gi.FocusChanges) {
 // 	switch change {
 // 	case gi.FocusLost:
-// 		tv.ClearFlag(int(TextViewFocusActive))
+// 		tv.SetFlag(false, TextViewFocusActive))
 // 		// tv.EditDone()
 // 		tv.StopCursor() // make sure no cursor
 // 		tv.UpdateSig()
 // 		goosi.TheApp.HideVirtualKeyboard()
 // 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 // 	case gi.FocusGot:
-// 		tv.SetFlag(int(TextViewFocusActive))
+// 		tv.SetFlag(true, TextViewFocusActive))
 // 		tv.EmitFocusedSignal()
 // 		tv.UpdateSig()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 // 		// fmt.Printf("got focus: %v\n", tv.Nm)
 // 	case gi.FocusInactive:
-// 		tv.ClearFlag(int(TextViewFocusActive))
+// 		tv.SetFlag(false, TextViewFocusActive))
 // 		tv.StopCursor()
 // 		// tv.EditDone()
 // 		// tv.UpdateSig()
@@ -4904,12 +4911,10 @@ func (tv *TextView) SetTypeHandlers() {
 // 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 // 	case gi.FocusActive:
 // 		// fmt.Printf("focus active: %v\n", tv.Nm)
-// 		tv.SetFlag(int(TextViewFocusActive))
+// 		tv.SetFlag(true, TextViewFocusActive))
 // 		// tv.UpdateSig()
 // 		// todo: see about cursor
 // 		tv.StartCursor()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 // 	}
 // }
-
-*/

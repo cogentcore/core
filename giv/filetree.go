@@ -22,10 +22,12 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv/textbuf"
 	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview"
+	"goki.dev/gi/v2/textview/textbuf"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
@@ -36,22 +38,6 @@ import (
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
 )
-
-// DirAndFile returns the final dir and file name.
-func DirAndFile(file string) string {
-	dir, fnm := filepath.Split(file)
-	return filepath.Join(filepath.Base(dir), fnm)
-}
-
-// RelFilePath returns the file name relative to given root file path, if it is
-// under that root -- otherwise it returns the final dir and file name.
-func RelFilePath(file, root string) string {
-	rp, err := filepath.Rel(root, file)
-	if err == nil && !strings.HasPrefix(rp, "..") {
-		return rp
-	}
-	return DirAndFile(file)
-}
 
 const (
 	// FileTreeExtFilesName is the name of the node that represents external files
@@ -397,7 +383,7 @@ func (ft *FileTree) UpdateExtFiles(efn *FileNode) {
 	config := ki.Config{}
 	typ := ft.NodeType
 	for _, f := range ft.ExtFiles {
-		config.Add(typ, DirAndFile(f))
+		config.Add(typ, dirs.DirAndFile(f))
 	}
 	mods, updt := efn.ConfigChildren(config) // NOT unique names
 	if mods {
@@ -434,10 +420,10 @@ type FileNode struct {
 	FPath gi.FileName `json:"-" xml:"-" copy:"-" desc:"full path to this file"`
 
 	// full standard file info about this file
-	Info FileInfo `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`
+	Info filecat.FileInfo `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`
 
 	// file buffer for editing this file
-	Buf *TextBuf `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
+	Buf *textview.TextBuf `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
 
 	// root of the tree -- has global state
 	FRoot *FileTree `json:"-" xml:"-" copy:"-" desc:"root of the tree -- has global state"`
@@ -545,7 +531,7 @@ func (fn *FileNode) MyRelPath() string {
 	if fn.IsIrregular() {
 		return fn.Nm
 	}
-	return RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
+	return dirs.RelFilePath(string(fn.FPath), string(fn.FRoot.FPath))
 }
 
 // ReadDir reads all the files at given directory into this directory node --
@@ -834,7 +820,7 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 			return false, nil
 		}
 	} else {
-		fn.Buf = &TextBuf{}
+		fn.Buf = &textview.TextBuf{}
 		fn.Buf.InitName(fn.Buf, fn.Nm)
 		// fn.Buf.AddFileNode(fn)
 	}
@@ -884,7 +870,7 @@ func (fn *FileNode) FindDirNode(path string) (*FileNode, error) {
 
 // RelPath returns the relative path from node for given full path
 func (fn *FileNode) RelPath(fpath gi.FileName) string {
-	return RelFilePath(string(fpath), string(fn.FPath))
+	return dirs.RelFilePath(string(fpath), string(fn.FPath))
 }
 
 // DirsTo opens all the directories above the given filename, and returns the node
@@ -1250,7 +1236,7 @@ func (fn *FileNode) CopyFileToDir(filename string, perm os.FileMode) {
 	ppath := string(fn.FPath)
 	sfn := filepath.Base(filename)
 	tpath := filepath.Join(ppath, sfn)
-	CopyFile(tpath, filename, perm)
+	filecat.CopyFile(tpath, filename, perm)
 	fn.FRoot.UpdateNewFile(ppath)
 	ofn, ok := fn.FRoot.FindFile(filename)
 	if ok && ofn.Info.Vcs >= vci.Stored {
@@ -1425,14 +1411,14 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 
 // BlameDialog opens a dialog for displaying VCS blame data using TwinTextViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *TwinTextViews {
-	title := "VCS Blame: " + DirAndFile(fname)
+func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.TwinTextViews {
+	title := "VCS Blame: " + dirs.DirAndFile(fname)
 	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title, Ok: true, Cancel: false}, nil)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	tv := frame.InsertNewChild(TwinTextViewsType, prIdx+1, "twin-view").(*TwinTextViews)
+	tv := frame.InsertNewChild(textview.TwinTextViewsType, prIdx+1, "twin-view").(*textview.TwinTextViews)
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))

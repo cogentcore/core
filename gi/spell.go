@@ -4,7 +4,18 @@
 
 package gi
 
-/*
+import (
+	"image"
+	"log"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"goki.dev/glop/dirs"
+	"goki.dev/goosi"
+	"goki.dev/ki/v2"
+	"goki.dev/pi/v2/spell"
+)
 
 // InitSpell tries to load the saved fuzzy.spell model.
 // If unsuccessful tries to create a new model from a text file used as input
@@ -45,7 +56,7 @@ func NewSpellModelFromText() error {
 	file, err := os.Open(bigdatafile)
 	if err != nil {
 		log.Printf("Could not open corpus file: %v. This file is used to create the spelling model.\n", err)
-		PromptDialog(nil, DlgOpts{Title: "Corpus File Not Found", Prompt: "You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on."}, AddOk, NoCancel, nil, nil)
+		PromptDialog(nil, DlgOpts{Title: "Corpus File Not Found", Prompt: "You can build a spelling model to check against by clicking the \"Train\" button and selecting text files to train on.", Ok: true}, nil)
 		return err
 	}
 
@@ -111,7 +122,7 @@ type Spell struct {
 	LastLearned string `desc:"last word learned -- can be undone -- stored in lowercase format"`
 
 	// [view: -] signal for Spell -- see SpellSignals for the types
-	SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
+	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
 
 	// the user's correction selection'
 	Correction string `desc:"the user's correction selection'"`
@@ -121,8 +132,8 @@ type Spell struct {
 }
 
 func (sp *Spell) Disconnect() {
-	sp.Node.Disconnect()
-	sp.SpellSig.DisconnectAll()
+	// sp.Node.Disconnect()
+	// sp.SpellSig.DisconnectAll()
 }
 
 // SpellSignals are signals that are sent by Spell
@@ -155,34 +166,33 @@ func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
 func (sp *Spell) Show(text string, sc *Scene, pt image.Point) {
-	if sc == nil || sc.Win == nil {
-		return
-	}
-	cpop := sc.Win.CurPopup()
-	if PopupIsCorrector(cpop) {
-		sc.Win.SetDelPopup(cpop)
-	}
-	sp.ShowNow(text, sc, pt)
+	// if sc == nil || sc.Win == nil {
+	// 	return
+	// }
+	// cpop := sc.Win.CurPopup()
+	// if PopupIsCorrector(cpop) {
+	// 	sc.Win.SetDelPopup(cpop)
+	// }
+	// sp.ShowNow(text, sc, pt)
 }
 
 // ShowNow actually builds the correction popup menu
 func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
-	if sc == nil || sc.Win == nil {
-		return
-	}
-	cpop := sc.Win.CurPopup()
-	if PopupIsCorrector(cpop) {
-		sc.Win.SetDelPopup(cpop)
-	}
+	// if sc == nil || sc.Win == nil {
+	// 	return
+	// }
+	// cpop := sc.Win.CurPopup()
+	// if PopupIsCorrector(cpop) {
+	// 	sc.Win.SetDelPopup(cpop)
+	// }
 
 	var m Menu
 	var text string
 	if sp.IsLastLearned(word) {
 		text = "unlearn"
-		m.AddButton(ActOpts{Label: text, Data: text},
-			sp, func(recv, send ki.Ki, sig int64, data any) {
-				sp.UnLearnLast()
-			})
+		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+			sp.UnLearnLast()
+		})
 	} else {
 		count := len(sp.Suggest)
 		if count == 1 && sp.Suggest[0] == word {
@@ -190,32 +200,28 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 		}
 		if count == 0 {
 			text = "no suggestion"
-			m.AddButton(ActOpts{Label: text, Data: text},
-				sp, func(recv, send ki.Ki, sig int64, data any) {
-				})
+			m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+			})
 		} else {
 			for i := 0; i < count; i++ {
 				text = sp.Suggest[i]
-				m.AddButton(ActOpts{Label: text, Data: text},
-					sp, func(recv, send ki.Ki, sig int64, data any) {
-						sp.Spell(data.(string))
-					})
+				m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+					sp.Spell(text)
+				})
 			}
 		}
 		m.AddSeparator("")
 		text = "learn"
-		m.AddButton(ActOpts{Label: text, Data: text},
-			sp, func(recv, send ki.Ki, sig int64, data any) {
-				sp.LearnWord()
-			})
+		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+			sp.LearnWord()
+		})
 		text = "ignore"
-		m.AddButton(ActOpts{Label: text, Data: text},
-			sp, func(recv, send ki.Ki, sig int64, data any) {
-				sp.IgnoreWord()
-			})
+		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+			sp.IgnoreWord()
+		})
 	}
-	scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
-	scp.Type = ScCorrector
+	// scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
+	// scp.Type = ScCorrector
 	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
 }
 
@@ -224,7 +230,7 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 func (sp *Spell) Spell(s string) {
 	sp.Cancel()
 	sp.Correction = s
-	sp.SpellSig.Emit(sp.This(), int64(SpellSelect), s)
+	// sp.SpellSig.Emit(sp.This(), int64(SpellSelect), s)
 }
 
 // KeyInput is the opportunity for the spelling correction popup to act on specific key inputs
@@ -242,7 +248,7 @@ func (sp *Spell) KeyInput(kf KeyFuns) bool { // true - caller should set key pro
 func (sp *Spell) LearnWord() {
 	sp.LastLearned = strings.ToLower(sp.Word)
 	spell.LearnWord(sp.Word)
-	sp.SpellSig.Emit(sp.This(), int64(SpellSelect), sp.Word)
+	// sp.SpellSig.Emit(sp.This(), int64(SpellSelect), sp.Word)
 }
 
 // IsLastLearned returns true if given word was the last one learned
@@ -265,23 +271,22 @@ func (sp *Spell) UnLearnLast() {
 // IgnoreWord adds the word to the ignore list
 func (sp *Spell) IgnoreWord() {
 	spell.IgnoreWord(sp.Word)
-	sp.SpellSig.Emit(sp.This(), int64(SpellIgnore), sp.Word)
+	// sp.SpellSig.Emit(sp.This(), int64(SpellIgnore), sp.Word)
 }
 
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction
 // returns true if canceled
 func (sp *Spell) Cancel() bool {
-	if sp.Sc == nil || sp.Sc.Win == nil {
-		return false
-	}
-	cpop := sp.Sc.Win.CurPopup()
-	did := false
-	if PopupIsCorrector(cpop) {
-		did = true
-		sp.Sc.Win.SetDelPopup(cpop)
-	}
-	sp.Sc = nil
-	return did
+	// if sp.Sc == nil || sp.Sc.Win == nil {
+	// 	return false
+	// }
+	// cpop := sp.Sc.Win.CurPopup()
+	// did := false
+	// if PopupIsCorrector(cpop) {
+	// 	did = true
+	// 	sp.Sc.Win.SetDelPopup(cpop)
+	// }
+	// sp.Sc = nil
+	// return did
+	return false
 }
-
-*/

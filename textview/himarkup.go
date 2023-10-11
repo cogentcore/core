@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package textview
 
 import (
 	stdhtml "html"
@@ -27,7 +27,7 @@ import (
 type HiMarkup struct {
 
 	// full info about the file including category etc
-	Info *FileInfo `desc:"full info about the file including category etc"`
+	Info *filecat.FileInfo `desc:"full info about the file including category etc"`
 
 	// syntax highlighting style
 	Style gi.HiStyleName `desc:"syntax highlighting style"`
@@ -73,7 +73,7 @@ func (hm *HiMarkup) UsingPi() bool {
 }
 
 // Init initializes the syntax highlighting for current params
-func (hm *HiMarkup) Init(info *FileInfo, pist *pi.FileStates) {
+func (hm *HiMarkup) Init(info *filecat.FileInfo, pist *pi.FileStates) {
 	hm.Info = info
 	hm.PiState = pist
 
