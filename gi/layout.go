@@ -592,6 +592,9 @@ func (ly *Layout) DoLayoutChildren(sc *Scene, iter int) bool {
 	redo := false
 	for _, kid := range ly.Kids {
 		wi, _ := AsWidget(kid)
+		if wi == nil || wi.This() == nil {
+			continue
+		}
 		if wi.DoLayout(sc, cbb, iter) {
 			redo = true
 		}

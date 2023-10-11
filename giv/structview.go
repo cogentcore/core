@@ -7,6 +7,7 @@ package giv
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -260,6 +261,7 @@ func (sv *StructView) ConfigStructGrid() {
 	sg := sv.StructGrid()
 	config := ki.Config{}
 	// always start fresh!
+	dupeFields := map[string]bool{}
 	sv.FieldViews = make([]ValueView, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
@@ -305,6 +307,11 @@ func (sv *StructView) ConfigStructGrid() {
 				svtyp := svv.WidgetType()
 				// todo: other things with view tag..
 				fnm := field.Name + "." + sfield.Name
+				if _, exists := dupeFields[fnm]; exists {
+					slog.Error("StructView: duplicate field name:", "name:", fnm)
+				} else {
+					dupeFields[fnm] = true
+				}
 				svv.SetTag("label", fnm)
 				labnm := fmt.Sprintf("label-%v", fnm)
 				valnm := fmt.Sprintf("value-%v", fnm)
@@ -318,6 +325,11 @@ func (sv *StructView) ConfigStructGrid() {
 		vv := FieldToValueView(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
+		}
+		if _, exists := dupeFields[field.Name]; exists {
+			slog.Error("StructView: duplicate field name:", "name:", field.Name)
+		} else {
+			dupeFields[field.Name] = true
 		}
 		vvp := fieldVal.Addr()
 		vv.SetStructValue(vvp, sv.Struct, &field, sv.TmpSave, sv.ViewPath)
@@ -344,6 +356,10 @@ func (sv *StructView) ConfigStructGrid() {
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
 			sv.HasDefs = true
+		}
+		if widg.KiType() != vv.WidgetType() {
+			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", widg.KiType().Name, "should be:", vv.WidgetType().Name)
+			break
 		}
 		vv.ConfigWidget(widg)
 		if !sv.IsDisabled() && !inactTag {

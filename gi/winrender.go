@@ -254,6 +254,7 @@ func (w *RenderWin) RenderWindow() {
 
 	if WinRenderTrace {
 		fmt.Println("RenderWindow: doing render:", w.Name)
+		fmt.Println("rebuild:", rebuild, "stageMods:", stageMods, "sceneMods:", sceneMods)
 	}
 
 	if stageMods || rebuild {
