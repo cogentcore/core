@@ -47,6 +47,6 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow1()
 	})
-	NewLabel(sc, "tooltip").SetText(tooltip).SetType(LabelBodyMedium)
+	NewLabel(sc, "text").SetText(tooltip).SetType(LabelBodyMedium)
 	return sc
 }

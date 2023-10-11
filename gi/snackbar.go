@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -69,6 +70,9 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium).
 		AddStyles(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+			if s.Is(states.Selected) {
+				s.Color = colors.Scheme.Select.OnContainer
+			}
 		})
 	if opts.Button != "" || !opts.Icon.IsNil() {
 		NewStretch(sc, "stretch")
