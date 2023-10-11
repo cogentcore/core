@@ -152,7 +152,8 @@ type View struct {
 	CursorMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
 
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
-	HasLinks       bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+	HasLinks bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+
 	lastRecenter   int
 	lastAutoInsert rune
 	lastFilename   gi.FileName
@@ -203,51 +204,6 @@ func (tv *View) ViewStyles() {
 		}
 	})
 }
-
-// ViewSignals are signals that text view can send
-type ViewSignals int32 //enums:enum
-
-const (
-	// ViewDone signal indicates return was pressed and an edit was completed -- data is the text
-	ViewDone ViewSignals = iota
-
-	// ViewSelected signal indicates some text was selected (for Inactive state, selection is via WidgetSig)
-	ViewSelected
-
-	// ViewCursorMoved signal indicates cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos
-	ViewCursorMoved
-
-	// ViewISearch is emitted for every update of interactive search process -- see
-	// ISearch.* members for current state
-	ViewISearch
-
-	// ViewQReplace is emitted for every update of query-replace process -- see
-	// QReplace.* members for current state
-	ViewQReplace
-)
-
-// ViewStates are mutually-exclusive textfield states -- determines appearance
-type ViewStates int32 //enums:enum
-
-const (
-	// ViewActive is the normal state -- there but not being interacted with
-	ViewActive ViewStates = iota
-
-	// ViewFocus states means textvieww is the focus -- will respond to keyboard input
-	ViewFocus
-
-	// ViewInactive means the textview is inactive -- not editable
-	ViewInactive
-
-	// ViewSel means the text region is selected
-	ViewSel
-
-	// ViewHighlight means the text region is highlighted
-	ViewHighlight
-)
-
-// Style selector names for the different states
-var ViewSelectors = []string{":active", ":focus", ":inactive", ":selected", ":highlight"}
 
 // ViewFlags extend NodeBase NodeFlags to hold View state
 type ViewFlags int64 //enums:bitflag
@@ -445,10 +401,10 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 	tv.RenderAllLines()
 }
 
-// ViewBufSigRecv receives a signal from the buffer and updates view accordingly
-func ViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
-	tv := AsView(rvwki)
-	switch BufSignals(sig) {
+// BufSignal receives a signal from the Buf when underlying text
+// is changed.
+func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
+	switch sig {
 	case BufDone:
 	case BufNew:
 		tv.ResetState()
@@ -459,7 +415,6 @@ func ViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
 		}
-		tbe := data.(*textbuf.Edit)
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			// fmt.Printf("tv %v lines insert %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
@@ -478,7 +433,6 @@ func ViewBufSigRecv(rvwki ki.Ki, sbufki ki.Ki, sig int64, data any) {
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
 		}
-		tbe := data.(*textbuf.Edit)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LinesDeleted(tbe)
 		} else {

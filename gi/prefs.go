@@ -30,13 +30,14 @@ import (
 // then if pref info needed.
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
+		fmt.Println("doing init")
 		Prefs.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
 		Prefs.Open()
 		Prefs.Apply()
 		goosi.InitScreenLogicalDPIFunc = Prefs.ApplyDPI // called when screens are initialized
-		// TheViewIFace.HiStyleInit()
+		TheViewIFace.HiStyleInit()
 		WinGeomMgr.NeedToReload() // gets time stamp associated with open, so it doesn't re-open
 		WinGeomMgr.Open()
 	}
@@ -53,6 +54,9 @@ type Preferences struct {
 
 	// the primary color used to generate the color scheme
 	Color color.RGBA `desc:"the primary color used to generate the color scheme"`
+
+	// text highilighting style / theme
+	HiStyle HiStyleName `desc:"text highilighting style / theme"`
 
 	// the density (compactness) of content
 	Density Densities `desc:"the density (compactness) of content"`
@@ -131,6 +135,7 @@ var OverridePrefsColor = false
 func (pf *Preferences) Defaults() {
 	pf.Theme = ThemeAuto
 	pf.Color = color.RGBA{66, 133, 244, 255} // Google Blue (#4285f4)
+	pf.HiStyle = "emacs"                     // todo: "monokai" for dark mode.
 	pf.Density = DensityMedium
 	pf.LogicalDPIScale = 1.0
 	pf.Params.Defaults()
@@ -233,8 +238,11 @@ func (pf *Preferences) Apply() {
 	case ThemeAuto:
 		colors.SetScheme(goosi.TheApp.IsDark())
 	}
+	if pf.HiStyle == "" {
+		pf.HiStyle = "emacs" // todo: need light / dark versions
+	}
 
-	// TheViewIFace.SetHiStyleDefault(pf.Colors.HiStyle)
+	TheViewIFace.SetHiStyleDefault(pf.HiStyle)
 	events.DoubleClickInterval = pf.Params.DoubleClickInterval
 	events.ScrollWheelSpeed = pf.Params.ScrollWheelSpeed
 	LocalMainMenu = pf.Params.LocalMainMenu

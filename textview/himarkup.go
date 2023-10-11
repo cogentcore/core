@@ -7,6 +7,7 @@ package textview
 import (
 	stdhtml "html"
 	"log"
+	"log/slog"
 	"strings"
 
 	"github.com/alecthomas/chroma/v2"
@@ -120,8 +121,16 @@ func (hm *HiMarkup) Init(info *filecat.FileInfo, pist *pi.FileStates) {
 
 // SetHiStyle sets the highlighting style and updates corresponding settings
 func (hm *HiMarkup) SetHiStyle(style gi.HiStyleName) {
+	if style == "" {
+		return
+	}
+	st := histyle.AvailStyle(hm.Style)
+	if st == nil {
+		slog.Error("Highlighting Style not found:", "style", style)
+		return
+	}
 	hm.Style = style
-	hm.HiStyle = histyle.AvailStyle(hm.Style)
+	hm.HiStyle = st
 	hm.CSSProps = hm.HiStyle.ToProps()
 	hm.lastStyle = hm.Style
 }

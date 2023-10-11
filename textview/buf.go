@@ -24,6 +24,7 @@ import (
 	"goki.dev/glop/dirs"
 	"goki.dev/glop/indent"
 	"goki.dev/glop/runes"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
@@ -150,6 +151,9 @@ type Buf struct {
 
 	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *View `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
+
+	// supports standard goosi events sending: Change is sent for BufDone, BufInsert, BufDelete
+	Listeners events.Listeners
 }
 
 func NewBuf() *Buf {
@@ -189,6 +193,24 @@ const (
 	// BufClosed signals that the textbuf was closed
 	BufClosed
 )
+
+// SignalViews sends the given signal and optional edit info
+// to all the Views for this Buf
+func (tb *Buf) SignalViews(sig BufSignals, edit *textbuf.Edit) {
+	for _, vw := range tb.Views {
+		vw.BufSignal(sig, edit)
+	}
+	if sig == BufDone || sig == BufInsert || sig == BufDelete {
+		e := &events.Base{Typ: events.Change}
+		e.Init()
+		tb.Listeners.Call(e)
+	}
+}
+
+// OnChange adds an event listener function for the Change event
+func (tb *Buf) OnChange(fun func(e events.Event)) {
+	tb.Listeners.Add(events.Change, fun)
+}
 
 // BufFlags hold key Buf state
 type BufFlags int64 //enums:bitflag
@@ -278,7 +300,7 @@ func (tb *Buf) EditDone() {
 	tb.AutoSaveDelete()
 	tb.ClearChanged()
 	tb.LinesToBytes()
-	// tb.BufSig.Emit(tb.This(), int64(BufDone), tb.Txt)
+	tb.SignalViews(BufDone, nil)
 }
 
 // Text returns the current text as a []byte array, applying all current
@@ -347,7 +369,7 @@ func (tb *Buf) SetHiStyle(style gi.HiStyleName) {
 
 // Refresh signals any views to refresh views
 func (tb *Buf) Refresh() {
-	// tb.BufSig.Emit(tb.This(), int64(BufNew), tb.Txt)
+	tb.SignalViews(BufNew, nil)
 }
 
 // SetInactive sets the buffer in an inactive state if inactive = true
@@ -641,10 +663,7 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 		}
 		return false // awaiting decisions..
 	}
-	// tb.BufSig.Emit(tb.This(), int64(BufClosed), nil)
-	// for _, tve := range tb.Views {
-	// 	tve.SetBuf(nil) // automatically disconnects signals, views
-	// }
+	tb.SignalViews(BufClosed, nil)
 	tb.NewBuf(1)
 	tb.Filename = ""
 	tb.ClearChanged()
@@ -783,7 +802,7 @@ func (tb *Buf) AppendTextMarkup(text []byte, markup []byte, signal bool) *textbu
 		tb.Markup[ln] = msplt[ln-st]
 	}
 	if signal {
-		// tb.BufSig.Emit(tb.This(), int64(BufInsert), tbe)
+		tb.SignalViews(BufInsert, tbe)
 	}
 	return tbe
 }
@@ -812,7 +831,7 @@ func (tb *Buf) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *te
 	tbe := tb.InsertText(ed, efft, false)
 	tb.Markup[tbe.Reg.Start.Ln] = markup
 	if signal {
-		// tb.BufSig.Emit(tb.This(), int64(BufInsert), tbe)
+		tb.SignalViews(BufInsert, tbe)
 	}
 	return tbe
 }
@@ -1094,7 +1113,7 @@ func (tb *Buf) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		// tb.BufSig.Emit(tb.This(), int64(BufDelete), tbe)
+		tb.SignalViews(BufDelete, tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1207,7 +1226,7 @@ func (tb *Buf) InsertText(st lex.Pos, text []byte, signal bool) *textbuf.Edit {
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		// tb.BufSig.Emit(tb.This(), int64(BufInsert), tbe)
+		tb.SignalViews(BufInsert, tbe)
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1286,7 +1305,7 @@ func (tb *Buf) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 			ie := &textbuf.Edit{}
 			ie.Reg.Start.Ln = nln - 1
 			ie.Reg.End.Ln = re.Reg.End.Ln
-			// tb.BufSig.Emit(tb.This(), int64(BufInsert), ie)
+			tb.SignalViews(BufInsert, ie)
 		} else {
 			tb.Refresh()
 		}
@@ -1807,7 +1826,7 @@ func (tb *Buf) MarkupAllLines(maxLines int) {
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
 	tb.SetFlag(false, BufMarkingUp)
-	// tb.BufSig.Emit(tb.This(), int64(BufMarkUpdt), tb.Txt)
+	tb.SignalViews(BufMarkUpdt, nil)
 }
 
 // MarkupFromTags does syntax highlighting markup using existing HiTags without
@@ -1824,7 +1843,7 @@ func (tb *Buf) MarkupFromTags() {
 	}
 	tb.MarkupMu.Unlock()
 	tb.SetFlag(false, BufMarkingUp)
-	// tb.BufSig.Emit(tb.This(), int64(BufMarkUpdt), tb.Txt)
+	tb.SignalViews(BufMarkUpdt, nil)
 }
 
 // MarkupLines generates markup of given range of lines. end is *inclusive*
@@ -1911,7 +1930,7 @@ func (tb *Buf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				// tb.BufSig.Emit(tb.This(), int64(BufInsert), utbe)
+				tb.SignalViews(BufInsert, utbe)
 			} else {
 				utbe := tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
@@ -1919,7 +1938,7 @@ func (tb *Buf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				// tb.BufSig.Emit(tb.This(), int64(BufDelete), utbe)
+				tb.SignalViews(BufDelete, utbe)
 			}
 		}
 		tb.LinesMu.Lock()
@@ -1975,11 +1994,11 @@ func (tb *Buf) Redo() *textbuf.Edit {
 			if tbe.Delete {
 				tb.DeleteTextImpl(tbe.Reg.Start, tbe.Reg.End)
 				tb.LinesMu.Unlock()
-				// tb.BufSig.Emit(tb.This(), int64(BufDelete), tbe)
+				tb.SignalViews(BufDelete, tbe)
 			} else {
 				tb.InsertTextImpl(tbe.Reg.Start, tbe.ToBytes())
 				tb.LinesMu.Unlock()
-				// tb.BufSig.Emit(tb.This(), int64(BufInsert), tbe)
+				tb.SignalViews(BufInsert, tbe)
 			}
 		}
 		tb.LinesMu.Lock()
