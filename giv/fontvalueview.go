@@ -60,7 +60,7 @@ func (vv *FontValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Tag("desc")
 	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: desc}, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
-			si := TableViewSelectDialogValue(dlg)
+			si := dlg.Data.(int)
 			if si >= 0 {
 				fi := paint.FontLibrary.FontInfo[si]
 				vv.SetValue(fi.Name)
@@ -70,5 +70,5 @@ func (vv *FontValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }

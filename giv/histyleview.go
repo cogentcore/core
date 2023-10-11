@@ -60,7 +60,7 @@ func (vv *HiStyleValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) 
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a HiStyle Highlighting Style", Prompt: desc}, &histyle.StyleNames, cur, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
-			si := SliceViewSelectDialogValue(dlg)
+			si := dlg.Data.(int)
 			if si >= 0 {
 				hs := histyle.StyleNames[si]
 				vv.SetValue(hs)
@@ -70,7 +70,7 @@ func (vv *HiStyleValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) 
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

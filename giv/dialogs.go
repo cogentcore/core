@@ -8,7 +8,6 @@ import (
 	"image/color"
 	"reflect"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -17,7 +16,6 @@ import (
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
 // DlgOpts are the basic dialog options accepted by all giv dialog methods --
@@ -137,16 +135,12 @@ func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Di
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
-	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	// if opts.Inactive {
 	// 	sv.SetState(true, states.Disabled)
 	// }
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetStruct(stru)
-	// dlg.Open(0, 0, avp, func() {
-	// 	MainMenuView(stru, dlg.Win, dlg.Win.MainMenu)
-	// })
 	return dlg
 }
 
@@ -161,18 +155,12 @@ func MapViewDialog(ctx gi.Widget, opts DlgOpts, mp any, fun func(dlg *gi.Dialog)
 	if recyc {
 		return dlg
 	}
-
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
-
 	sv := frame.InsertNewChild(MapViewType, prIdx+1, "map-view").(*MapView)
-	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetMap(mp)
-	// dlg.Open(0, 0, avp, func() {
-	// 	MainMenuView(mp, dlg.Win, dlg.Win.MainMenu)
-	// })
 	return dlg
 }
 
@@ -191,7 +179,6 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	// sv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	sv.SetState(false, states.Disabled)
 	sv.StyleFunc = styleFunc
 	sv.NoAdd = opts.NoAdd
@@ -199,10 +186,6 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
-
-	// dlg.Open(0, 0, avp, func() {
-	// 	MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
-	// })
 	return dlg
 }
 
@@ -226,10 +209,6 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
-
-	// dlg.Open(0, 0, avp, func() {
-	// 	MainMenuView(slice, dlg.Win, dlg.Win.MainMenu)
-	// })
 	return dlg
 }
 
@@ -262,25 +241,14 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slice)
-
-	// sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(SliceViewDoubleClicked) {
-	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-	// 		ddlg.Accept()
-	// 	}
-	// })
+	sv.OnChange(func(e events.Event) {
+		dlg.Data = sv.SelectedIdx
+	})
+	sv.OnDoubleClick(func(e events.Event) {
+		dlg.Data = sv.SelectedIdx
+		dlg.AcceptDialog()
+	})
 	return dlg
-}
-
-// SliceViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func SliceViewSelectDialogValue(dlg *gi.Dialog) int {
-	frame := dlg.Stage.Scene
-	sv := frame.ChildByName("slice-view", 0)
-	if sv != nil {
-		svv := sv.(*SliceView)
-		return svv.SelectedIdx
-	}
-	return -1
 }
 
 // TableViewDialog is for editing fields of a slice-of-struct using a
@@ -308,10 +276,6 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 		sv.SetState(true, states.Disabled)
 	}
 	sv.SetSlice(slcOfStru)
-
-	// dlg.Open(0, 0, avp, func() {
-	// 	MainMenuView(slcOfStru, dlg.Win, dlg.Win.MainMenu)
-	// })
 	return dlg
 }
 
@@ -345,27 +309,14 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slcOfStru)
-
-	// sv.SliceViewSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(SliceViewDoubleClicked) {
-	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-	// 		ddlg.Accept()
-	// 	}
-	// })
-
+	sv.OnChange(func(e events.Event) {
+		dlg.Data = sv.SelectedIdx
+	})
+	sv.OnDoubleClick(func(e events.Event) {
+		dlg.Data = sv.SelectedIdx
+		dlg.AcceptDialog()
+	})
 	return dlg
-}
-
-// TableViewSelectDialogValue gets the index of the selected item (-1 if nothing selected)
-func TableViewSelectDialogValue(dlg *gi.Dialog) int {
-	frame := dlg.Stage.Scene
-	sv := frame.ChildByName("tableview", 0)
-	if sv != nil {
-		svv := sv.(*TableView)
-		rval := svv.SelectedIdx
-		return rval
-	}
-	return -1
 }
 
 // show fonts in a bigger size so you can actually see the differences
@@ -432,23 +383,16 @@ func ColorViewDialog(ctx gi.Widget, opts DlgOpts, clr color.RGBA, fun func(dlg *
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
+	dlg.Stage.ClickOff = true
 
 	sv := frame.InsertNewChild(ColorViewType, prIdx+1, "color-view").(*ColorView)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetColor(clr)
+	sv.OnChange(func(e events.Event) {
+		dlg.Data = sv.Color
+	})
 	return dlg
-}
-
-// ColorViewDialogValue gets the color from the dialog
-func ColorViewDialogValue(dlg *gi.Dialog) color.RGBA {
-	frame := dlg.Stage.Scene
-	cvvvk := frame.ChildByType(ColorViewType, ki.Embeds, 2)
-	if cvvvk != nil {
-		cvvv := cvvvk.(*ColorView)
-		return colors.AsRGBA(cvvv.Color)
-	}
-	return color.RGBA{}
 }
 
 // FileViewDialog is for selecting / manipulating files -- ext is one or more
@@ -471,26 +415,14 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
-
-	// fv.FileSig.Connect(dlg.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if sig == int64(FileViewDoubleClicked) {
-	// 		ddlg := recv.Embed(gi.TypeDialog).(*gi.Dialog)
-	// 		ddlg.Accept()
-	// 	}
-	// })
+	fv.OnChange(func(e events.Event) {
+		dlg.Data = fv.SelectedFile()
+	})
+	fv.OnDoubleClick(func(e events.Event) {
+		dlg.Data = fv.SelectedFile()
+		dlg.AcceptDialog()
+	})
 	return dlg
-}
-
-// FileViewDialogValue gets the full path of selected file
-func FileViewDialogValue(dlg *gi.Dialog) string {
-	frame := dlg.Stage.Scene
-	fvk := frame.ChildByName("file-view", 0)
-	if fvk != nil {
-		fv := fvk.(*FileView)
-		fn := fv.SelectedFile()
-		return fn
-	}
-	return ""
 }
 
 // ArgViewDialog for editing args for a method call in the MethView system

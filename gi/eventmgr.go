@@ -867,7 +867,6 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	// fmt.Println(kf, cs)
 	switch kf {
 	case KeyFunGoGiEditor:
-		// todo:
 		TheViewIFace.GoGiEditor(em.Scene)
 		e.SetHandled()
 	case KeyFunPrefs:

@@ -63,14 +63,14 @@ func (cv *ColorMapView) ChooseColorMap() {
 		if !dlg.Accepted {
 			return
 		}
-		// todo: use data for this!
-		// si := SliceViewSelectDialogValue(ddlg)
-		// if si >= 0 {
-		// 		nmap, ok := colormap.AvailMaps[sl[si]]
-		// 			if ok {
-		// 				cv.SetColorMapAction(nmap)
-		// 			}
-	})
+		si := dlg.Data.(int)
+		if si >= 0 {
+			nmap, ok := colormap.AvailMaps[sl[si]]
+			if ok {
+				cv.SetColorMapAction(nmap)
+			}
+		}
+	}).Run()
 }
 
 func (cv *ColorMapView) HandleColorMapEvents() {
@@ -190,17 +190,14 @@ func (vv *ColorMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog))
 	desc, _ := vv.Tag("desc")
 	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, &sl, cur, nil, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
-			return
+			si := dlg.Data.(int)
+			if si >= 0 {
+				vv.SetValue(sl[si])
+				vv.UpdateWidget()
+			}
 		}
-		// todo: use data
-		// si := SliceViewSelectDialogValue(ddlg)
-		// if si >= 0 {
-		// 	vv.SetValue(sl[si])
-		// 	vv.UpdateWidget()
-		// }
-		//
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }

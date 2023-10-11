@@ -127,7 +127,7 @@ func (vv *KeyMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Tag("desc")
 	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a KeyMap", Prompt: desc}, &gi.AvailKeyMaps, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
-			si := TableViewSelectDialogValue(dlg)
+			si := dlg.Data.(int)
 			if si >= 0 {
 				km := gi.AvailKeyMaps[si]
 				vv.SetValue(km.Name)
@@ -137,5 +137,5 @@ func (vv *KeyMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }
