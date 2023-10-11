@@ -542,7 +542,7 @@ func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 		}
 		nm := "Item_" + strconv.Itoa(i)
 		bt.SetName(nm)
-		bt.Type = ButtonAction
+		bt.Type = ButtonMenu
 		if ics {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)
@@ -554,7 +554,6 @@ func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 		}
 		bt.Data = i // index is the data
 		bt.SetSelected(i == ch.CurIndex)
-		bt.SetAsMenu()
 		idx := i
 		bt.OnClick(func(e events.Event) {
 			ch.SelectItemAction(idx)
