@@ -101,43 +101,6 @@ func (t *ToolBar) AsToolBar() *ToolBar {
 	return t
 }
 
-// ImageType is the [gti.Type] for [Image]
-var ImageType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Image",
-	ShortName:  "gi.Image",
-	IDName:     "image",
-	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Filename", &gti.Field{Name: "Filename", Type: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}}},
-		{"Size", &gti.Field{Name: "Size", Type: "image.Point", Doc: "size of the image", Directives: gti.Directives{}}},
-		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] the bitmap image", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Image{},
-})
-
-// NewImage adds a new [Image] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewImage(par ki.Ki, name ...string) *Image {
-	return par.NewChild(ImageType, name...).(*Image)
-}
-
-// KiType returns the [*gti.Type] of [Image]
-func (t *Image) KiType() *gti.Type {
-	return ImageType
-}
-
-// New returns a new [*Image] value
-func (t *Image) New() ki.Ki {
-	return &Image{}
-}
-
 // ButtonType is the [gti.Type] for [Button]
 var ButtonType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Button",
@@ -205,12 +168,12 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
-// ButtonBoxType is the [gti.Type] for [ButtonBox]
-var ButtonBoxType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ButtonBox",
-	ShortName: "gi.ButtonBox",
-	IDName:    "button-box",
-	Doc:       "ButtonBox is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
+// SwitchesType is the [gti.Type] for [Switches]
+var SwitchesType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Switches",
+	ShortName: "gi.Switches",
+	IDName:    "switches",
+	Doc:       "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -223,46 +186,46 @@ var ButtonBoxType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ButtonBox{},
+	Instance: &Switches{},
 })
 
-// NewButtonBox adds a new [ButtonBox] with the given name
+// NewSwitches adds a new [Switches] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewButtonBox(par ki.Ki, name ...string) *ButtonBox {
-	return par.NewChild(ButtonBoxType, name...).(*ButtonBox)
+func NewSwitches(par ki.Ki, name ...string) *Switches {
+	return par.NewChild(SwitchesType, name...).(*Switches)
 }
 
-// KiType returns the [*gti.Type] of [ButtonBox]
-func (t *ButtonBox) KiType() *gti.Type {
-	return ButtonBoxType
+// KiType returns the [*gti.Type] of [Switches]
+func (t *Switches) KiType() *gti.Type {
+	return SwitchesType
 }
 
-// New returns a new [*ButtonBox] value
-func (t *ButtonBox) New() ki.Ki {
-	return &ButtonBox{}
+// New returns a new [*Switches] value
+func (t *Switches) New() ki.Ki {
+	return &Switches{}
 }
 
-// ButtonBoxEmbedder is an interface that all types that embed ButtonBox satisfy
-type ButtonBoxEmbedder interface {
-	AsButtonBox() *ButtonBox
+// SwitchesEmbedder is an interface that all types that embed Switches satisfy
+type SwitchesEmbedder interface {
+	AsSwitches() *Switches
 }
 
-// AsButtonBox returns the given value as a value of type ButtonBox if the type
-// of the given value embeds ButtonBox, or nil otherwise
-func AsButtonBox(k ki.Ki) *ButtonBox {
+// AsSwitches returns the given value as a value of type Switches if the type
+// of the given value embeds Switches, or nil otherwise
+func AsSwitches(k ki.Ki) *Switches {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(ButtonBoxEmbedder); ok {
-		return t.AsButtonBox()
+	if t, ok := k.(SwitchesEmbedder); ok {
+		return t.AsSwitches()
 	}
 	return nil
 }
 
-// AsButtonBox satisfies the [ButtonBoxEmbedder] interface
-func (t *ButtonBox) AsButtonBox() *ButtonBox {
+// AsSwitches satisfies the [SwitchesEmbedder] interface
+func (t *Switches) AsSwitches() *Switches {
 	return t
 }
 
@@ -462,6 +425,43 @@ func (t *Icon) KiType() *gti.Type {
 // New returns a new [*Icon] value
 func (t *Icon) New() ki.Ki {
 	return &Icon{}
+}
+
+// ImageType is the [gti.Type] for [Image]
+var ImageType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Image",
+	ShortName:  "gi.Image",
+	IDName:     "image",
+	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Filename", &gti.Field{Name: "Filename", Type: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}}},
+		{"Size", &gti.Field{Name: "Size", Type: "image.Point", Doc: "size of the image", Directives: gti.Directives{}}},
+		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] the bitmap image", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Image{},
+})
+
+// NewImage adds a new [Image] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewImage(par ki.Ki, name ...string) *Image {
+	return par.NewChild(ImageType, name...).(*Image)
+}
+
+// KiType returns the [*gti.Type] of [Image]
+func (t *Image) KiType() *gti.Type {
+	return ImageType
+}
+
+// New returns a new [*Image] value
+func (t *Image) New() ki.Ki {
+	return &Image{}
 }
 
 // LabelType is the [gti.Type] for [Label]
@@ -1144,7 +1144,7 @@ var TabType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Tab",
 	ShortName:  "gi.Tab",
 	IDName:     "tab",
-	Doc:        "Tab is a tab button that contains a larger select button\nand a small close button. The Indicator icon is used for\nthe close icon.",
+	Doc:        "Tab is a tab button that contains a larger select button\nand a smaller close button. The Indicator icon is used for\nthe close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
