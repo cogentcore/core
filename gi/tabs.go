@@ -643,6 +643,7 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 			tb.Indicator = icons.Close
 		}
 
+		cls.SetType(ButtonAction)
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
 		cls.SetProp("no-focus", true)
