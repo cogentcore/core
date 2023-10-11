@@ -10,10 +10,11 @@ import "log/slog"
 // what logging and printing messages should be shown. Messages at
 // levels at or above this level will be shown. It should typically
 // be set through xe to the end user's preference. The default user
-// verbosity level is [slog.LevelWarn]. Any updates to this value
-// will be automatically reflected in the behavior of the grog default
-// logger.
-var UserLevel = slog.LevelWarn
+// verbosity level is [slog.LevelInfo]. If the build tag "debug" is
+// specified, it is [slog.LevelDebug]. If the build tag "release" is
+// specified, it is [slog.levelWarn]. Any updates to this value will
+// be automatically reflected in the behavior of the grog default logger.
+var UserLevel = defaultUserLevel
 
 // LevelFromFlags returns the [slog.Level] object corresponding to the given
 // user flag options. The flags correspond to the following values:
