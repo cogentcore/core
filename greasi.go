@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"goki.dev/grease"
+	"goki.dev/grog"
 )
 
 // Run runs the given app with the given default
@@ -30,7 +31,7 @@ func Run[T any, C grease.CmdOrFunc[T]](opts *grease.Options, cfg T, cmds ...C) e
 	if err != nil {
 		err := fmt.Errorf("error getting commands from given commands: %w", err)
 		if opts.Fatal {
-			fmt.Println(grease.ErrorColor("%v", err))
+			grog.PrintlnError(err)
 			os.Exit(1)
 		}
 		return err

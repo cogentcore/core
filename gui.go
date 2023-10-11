@@ -5,93 +5,94 @@
 package greasi
 
 import (
-	"fmt"
-
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/grease"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/grog"
 )
 
-// GUI starts the GUI for the given
-// Grease app, which must be passed as
-// a pointer.
+// GUI starts the GUI for the given Grease app, which must be passed as
+// a pointer. It should typically not be called by end-user code; see [Run].
+
 func GUI[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
-	gimain.Main(func() {
-		MainRun(opts, cfg, cmds...)
+	gimain.Run(func() {
+		App(opts, cfg, cmds...)
 	})
 }
 
-// MainRun does GUI running on main thread
-func MainRun[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
+// App does runs the GUI. It should be called on the main thread.
+// It should typically not be called by end-user code; see [Run].
+func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	gi.SetAppName(opts.AppName)
 	gi.SetAppAbout(opts.AppAbout)
 
-	win := gi.NewMainWindow(opts.AppName, opts.AppTitle, 1024, 768)
-	vp := win.WinViewport2D()
-	updt := vp.UpdateStart()
-	mfr := win.SetMainFrame()
+	sc := gi.StageScene(opts.AppName).SetTitle(opts.AppTitle)
 
-	tb := gi.AddNewToolBar(mfr, "tb")
+	tb := gi.NewToolBar(sc)
 	for _, cmd := range cmds {
 		cmd := cmd
 		if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 			continue
 		}
-		tb.AddAction(gi.ActOpts{
+		tb.AddButton(gi.ActOpts{
 			Name:    cmd.Name,
 			Label:   strcase.ToCamel(cmd.Name),
 			Tooltip: cmd.Doc,
-		}, win.This(), func(recv, send ki.Ki, sig int64, data any) {
+		}, func(bt *gi.Button) {
 			err := cmd.Func(cfg)
 			if err != nil {
-				fmt.Println(err)
+				grog.PrintlnError(err)
 			}
 		})
 	}
 
-	sv := giv.AddNewStructView(mfr, "sv")
-	sv.Viewport = vp
+	sv := giv.NewStructView(sc)
 	sv.SetStruct(cfg)
 
-	// Main Menu
+	gi.NewWindow(sc).Run().Wait()
 
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
+	// TODO: add main menu
+	/*
 
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu.AddAppMenu(win)
+		// Main Menu
 
-	// TODO: finish these functions
-	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
-	fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+		appnm := gi.AppName()
+		mmen := win.MainMenu
+		mmen.ConfigMenus([]string{appnm, "File", "Edit", "Window"})
 
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if grease.ConfigFile != "" {
-				grease.Save(cfg, grease.ConfigFile)
-			}
-		})
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
-		fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
-		})
-	fmen.Menu.AddSeparator("csep")
-	fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			win.CloseReq()
-		})
+		amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
+		amen.Menu.AddAppMenu(win)
 
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu.AddCopyCutPaste(win)
+		// TODO: finish these functions
+		fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
+		fmen.Menu.AddAction(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
+			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
 
-	vp.UpdateEndNoSig(updt)
-	win.StartEventLoop()
+			})
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Open", ShortcutKey: gi.KeyFunMenuOpen},
+			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+			})
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Save", ShortcutKey: gi.KeyFunMenuSave},
+			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+				if grease.ConfigFile != "" {
+					grease.Save(cfg, grease.ConfigFile)
+				}
+			})
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Save As..", ShortcutKey: gi.KeyFunMenuSaveAs},
+			fmen.This(), func(recv, send ki.Ki, sig int64, data any) {
+			})
+		fmen.Menu.AddSeparator("csep")
+		fmen.Menu.AddAction(gi.ActOpts{Label: "Close Window", ShortcutKey: gi.KeyFunWinClose},
+			win.This(), func(recv, send ki.Ki, sig int64, data any) {
+				win.CloseReq()
+			})
+
+		emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
+		emen.Menu.AddCopyCutPaste(win)
+
+		vp.UpdateEndNoSig(updt)
+		win.StartEventLoop()
+	*/
 }
