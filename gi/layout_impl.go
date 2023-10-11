@@ -474,8 +474,12 @@ func LayoutSharedDimImpl(ly *Layout, avail, need, pref, max float32, spc styles.
 		stretchNeed = true // stretch relative to need
 	}
 
-	// SidesTODO: this needs to be set based on layout type
-	pos = spc.Pos().Dim(mat32.X)
+	if ly.Lay == LayoutHoriz || ly.Lay == LayoutHorizFlow {
+		pos = spc.Pos().Dim(mat32.Y)
+	} else {
+		pos = spc.Pos().Dim(mat32.X)
+	}
+
 	size = need
 	if usePref {
 		size = pref
