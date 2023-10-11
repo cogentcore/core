@@ -146,12 +146,12 @@ func (bt *Button) ButtonStyles() {
 		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Padding.Set(units.Em(0.625*Prefs.DensityMul()), units.Em(1.5*Prefs.DensityMul()))
+		s.Padding.Set(units.Em(0.625), units.Em(1.5))
 		if !bt.Icon.IsNil() {
-			s.Padding.Left.SetEm(1 * Prefs.DensityMul())
+			s.Padding.Left.SetEm(1)
 		}
 		if bt.Text == "" {
-			s.Padding.Right.SetEm(1 * Prefs.DensityMul())
+			s.Padding.Right.SetEm(1)
 		}
 		s.Text.Align = styles.AlignCenter
 		s.MaxBoxShadow = styles.BoxShadow1()
@@ -180,7 +180,7 @@ func (bt *Button) ButtonStyles() {
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
 			s.Border.Radius = styles.BorderRadiusExtraSmall
-			s.Padding.Set(units.Dp(6*Prefs.DensityMul()), units.Dp(12*Prefs.DensityMul()))
+			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
 		if bt.Is(ButtonFlagMenu) {

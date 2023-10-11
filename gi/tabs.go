@@ -89,7 +89,7 @@ func (ts *Tabs) OnChildAdded(child ki.Ki) {
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 			s.Margin.Set()
 			s.Padding.Set()
-			// tabs.Spacing.SetDp(4 * Prefs.DensityMul())
+			// tabs.Spacing.SetDp(4)
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 
 			// s.Border.Style.Set(styles.BorderNone)
@@ -551,7 +551,7 @@ func (tb *Tab) TabButtonStyles() {
 		s.Border.Radius.Set()
 		s.Text.Align = styles.AlignCenter
 		s.Margin.Set()
-		s.Padding.Set(units.Dp(8 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8))
 
 		// s.Border.Style.Set(styles.BorderNone)
 		// if tb.StateIs(states.Selected) {

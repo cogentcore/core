@@ -56,7 +56,7 @@ func (fb *FileBrowse) OnInit() {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
-		s.Margin.Set(units.Dp(8 * gi.Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(8 ))
 	})
 }
 

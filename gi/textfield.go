@@ -162,8 +162,8 @@ func (tf *TextField) TextFieldStyles() {
 
 		s.Cursor = cursors.Text
 		s.MinWidth.SetEm(20)
-		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
-		s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(16*Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(1))
+		s.Padding.Set(units.Dp(8), units.Dp(16))
 		if !tf.LeadingIcon.IsNil() {
 			s.Padding.Left.SetDp(12)
 		}
@@ -218,7 +218,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		lead.Type = ButtonAction
 		lead.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)
-			s.Margin.Right.SetDp(16 * Prefs.DensityMul())
+			s.Margin.Right.SetDp(16)
 			s.Color = colors.Scheme.OnSurfaceVariant
 			s.AlignV = styles.AlignMiddle
 		})
@@ -227,7 +227,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 		trail.Type = ButtonAction
 		trail.AddStyles(func(s *styles.Style) {
 			s.Font.Size.SetDp(20)
-			s.Margin.Left.SetDp(16 * Prefs.DensityMul())
+			s.Margin.Left.SetDp(16)
 			s.Color = colors.Scheme.OnSurfaceVariant
 			s.AlignV = styles.AlignMiddle
 		})

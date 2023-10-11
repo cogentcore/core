@@ -51,8 +51,8 @@ func (bb *ButtonBox) ButtonBoxStyles() {
 	bb.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Dp(2))
-		s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))
-		s.Margin.Set(units.Dp(2 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(2))
+		s.Margin.Set(units.Dp(2))
 		s.Text.Align = styles.AlignCenter
 		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		s.Color = colors.Scheme.OnSurface

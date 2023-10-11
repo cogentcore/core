@@ -178,6 +178,9 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	wb.RunStylers()
 	prun.End()
 
+	// we automatically apply Prefs.DensityMul after we run all of the stylers
+	wb.ApplyPrefsDensityMul()
+
 	// note: it is critical to do this styling here so that layout getsizes
 	// has the proper info for laying out items
 	puc := prof.Start("ApplyStyleWidget-SetUnitContext")
@@ -239,6 +242,20 @@ func (wb *WidgetBase) RunStylers() {
 	for _, s := range wb.Stylers {
 		s(&wb.Style)
 	}
+}
+
+// ApplyPrefsDensityMul multiplies all of the margin and padding
+// values for the widget by the result of [Prefs.DensityMul]
+func (wb *WidgetBase) ApplyPrefsDensityMul() {
+	wb.Style.Margin.Top.Val *= Prefs.DensityMul()
+	wb.Style.Margin.Right.Val *= Prefs.DensityMul()
+	wb.Style.Margin.Bottom.Val *= Prefs.DensityMul()
+	wb.Style.Margin.Left.Val *= Prefs.DensityMul()
+
+	wb.Style.Padding.Top.Val *= Prefs.DensityMul()
+	wb.Style.Padding.Right.Val *= Prefs.DensityMul()
+	wb.Style.Padding.Bottom.Val *= Prefs.DensityMul()
+	wb.Style.Padding.Left.Val *= Prefs.DensityMul()
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {

@@ -117,7 +117,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		sr := w.(*gi.Layout)
 		sr.Lay = gi.LayoutHoriz
 		w.AddStyles(func(s *styles.Style) {
-			sr.Spacing.SetDp(4 * gi.Prefs.DensityMul())
+			sr.Spacing.SetDp(4)
 			s.SetStretchMaxWidth()
 		})
 	case "sel": // sel field
