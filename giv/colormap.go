@@ -7,7 +7,6 @@ package giv
 import (
 	"goki.dev/colors/colormap"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -156,22 +155,20 @@ func (vv *ColorMapValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none, click to select)"
 	}
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *ColorMapValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.AddStyles(func(s *styles.Style) {
-		s.Border.Radius = styles.BorderRadiusFull
-	})
-	ac.OnClick(func(e events.Event) {
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()

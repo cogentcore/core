@@ -384,6 +384,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
+		hdr.SetType(gi.ButtonAction)
 		hdr.SetText(field.Name)
 		if fli == tv.SortIdx {
 			if tv.SortDesc {
@@ -789,6 +790,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
+		hdr.SetType(gi.ButtonAction)
 		if fli == fldIdx {
 			if tv.SortIdx == fli {
 				tv.SortDesc = !tv.SortDesc

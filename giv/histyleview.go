@@ -32,18 +32,18 @@ func (vv *HiStyleValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *HiStyleValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.SetProp("border-radius", units.Dp(4))
-	ac.OnClick(func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }

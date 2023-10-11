@@ -17,7 +17,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -67,11 +66,12 @@ func (vv *StructValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
-	ac := vv.Widget.(*gi.Button)
-	ac.Icon = icons.Edit
-	ac.Tooltip, _ = vv.Tag("desc")
-	ac.OnClick(func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Icon = icons.Edit
+	bt.Tooltip, _ = vv.Tag("desc")
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -190,11 +190,12 @@ func (vv *SliceValue) ConfigWidget(widg gi.Widget) {
 		vv.ElType = laser.SliceElType(slci)
 		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
-	ac := vv.Widget.(*gi.Button)
-	ac.Icon = icons.Edit
-	ac.Tooltip, _ = vv.Tag("desc")
-	ac.OnClick(func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Icon = icons.Edit
+	bt.Tooltip, _ = vv.Tag("desc")
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -301,7 +302,7 @@ func (vv *MapValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	mpi := vv.Value.Interface()
 	txt := ""
@@ -310,17 +311,18 @@ func (vv *MapValue) UpdateWidget() {
 	} else {
 		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), laser.MapKeyType(mpi).String(), laser.MapValueType(mpi).String())
 	}
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *MapValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.Icon = icons.Edit
-	ac.Tooltip, _ = vv.Tag("desc")
-	ac.OnClick(func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Icon = icons.Edit
+	bt.Tooltip, _ = vv.Tag("desc")
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -433,30 +435,31 @@ func (vv *KiPtrValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	mb := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	path := "nil"
 	k := vv.KiStruct()
 	if k != nil {
 		path = k.Path()
 	}
-	mb.SetText(path)
+	bt.SetText(path)
 }
 
 func (vv *KiPtrValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	mb := vv.Widget.(*gi.Button)
-	mb.Indicator = icons.KeyboardArrowDown
-	mb.Tooltip, _ = vv.Tag("desc")
-	mb.ResetMenu()
-	mb.Menu.AddButton(gi.ActOpts{Label: "Edit"}, func(bt *gi.Button) {
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Indicator = icons.KeyboardArrowDown
+	bt.Tooltip, _ = vv.Tag("desc")
+	bt.ResetMenu()
+	bt.Menu.AddButton(gi.ActOpts{Label: "Edit"}, func(bt *gi.Button) {
 		k := vv.KiStruct()
 		if k != nil {
-			mb := vv.Widget.(*gi.Button)
-			vv.OpenDialog(mb, nil)
+			bt := vv.Widget.(*gi.Button)
+			vv.OpenDialog(bt, nil)
 		}
 	})
-	mb.Menu.AddButton(gi.ActOpts{Label: "GoGiEditor"}, func(bt *gi.Button) {
+	bt.Menu.AddButton(gi.ActOpts{Label: "GoGiEditor"}, func(bt *gi.Button) {
 		k := vv.KiStruct()
 		if k != nil {
 			GoGiEditorDialog(k)
@@ -1055,19 +1058,19 @@ func (vv *IconValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if icons.Icon(txt).IsNil() {
-		ac.SetIcon("blank")
+		bt.SetIcon("blank")
 	} else {
-		ac.SetIcon(icons.Icon(txt))
+		bt.SetIcon(icons.Icon(txt))
 	}
 	if sntag, ok := vv.Tag("view"); ok {
 		if strings.Contains(sntag, "show-name") {
 			if txt == "" {
 				txt = "none"
 			}
-			ac.SetText(txt)
+			bt.SetText(txt)
 		}
 	}
 }
@@ -1075,12 +1078,10 @@ func (vv *IconValue) UpdateWidget() {
 func (vv *IconValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.SetProp("border-radius", units.Dp(4))
-	ac.SetProp("padding", 0)
-	ac.SetProp("margin", 0)
-	ac.OnClick(func(e events.Event) {
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -1128,18 +1129,18 @@ func (vv *FontValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
-	ac.SetProp("font-family", txt)
-	ac.SetText(txt)
+	bt.SetProp("font-family", txt)
+	bt.SetText(txt)
 }
 
 func (vv *FontValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.SetProp("border-radius", units.Dp(4))
-	ac.OnClick(func(e events.Event) {
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
@@ -1188,21 +1189,22 @@ func (vv *FileValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(click to open file chooser)"
 	}
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *FileValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	ac := vv.Widget.(*gi.Button)
-	ac.OnClick(func(e events.Event) {
-		ac := vv.Widget.(*gi.Button)
-		vv.OpenDialog(ac, nil)
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
+		bt := vv.Widget.(*gi.Button)
+		vv.OpenDialog(bt, nil)
 	})
 	vv.UpdateWidget()
 }

@@ -7,6 +7,7 @@ package giv
 import (
 	"reflect"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -247,12 +248,16 @@ func (mv *MapView) ConfigMapGrid() {
 			// 	mv.SendChange()
 			// })
 		}
-		delact := sg.Child(i*ncol + ncol - 1).(*gi.Button)
-		delact.SetIcon(icons.Delete)
-		delact.Tooltip = "delete item"
-		delact.Data = kv
-		delact.OnClick(func(e events.Event) {
+		delbt := sg.Child(i*ncol + ncol - 1).(*gi.Button)
+		delbt.SetType(gi.ButtonAction)
+		delbt.SetIcon(icons.Delete)
+		delbt.Tooltip = "delete item"
+		delbt.Data = kv
+		delbt.OnClick(func(e events.Event) {
 			mv.MapDelete(kv.Val())
+		})
+		delbt.AddStyles(func(s *styles.Style) {
+			s.Color = colors.Scheme.Error.Base
 		})
 	}
 	sg.UpdateEnd(updt)
