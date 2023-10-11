@@ -1,10 +1,14 @@
-package giv
+// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package textview
 
 import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/textview/textbuf"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"
@@ -79,13 +83,15 @@ func LookupPi(data any, text string, posLn, posCh int) (ld complete.Lookup) {
 
 	ld = lp.Lang.Lookup(sfs, text, lex.Pos{posLn, posCh})
 	if len(ld.Text) > 0 {
-		TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
+		// TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text}, ld.Text, nil)
 		return ld
 	}
 	if ld.Filename != "" {
 		txt := textbuf.FileRegionBytes(ld.Filename, ld.StLine, ld.EdLine, true, 10) // comments, 10 lines back max
+		_ = txt
 		prmpt := fmt.Sprintf("%v [%d:%d]", ld.Filename, ld.StLine, ld.EdLine)
-		TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt}, txt, nil)
+		_ = prmpt
+		// TextViewDialog(nil, DlgOpts{Title: "Lookup: " + text, Prompt: prmpt, Filename: ld.Filename, LineNos: true, Data: prmpt}, txt, nil)
 		return ld
 	}
 

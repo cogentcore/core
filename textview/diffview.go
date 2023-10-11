@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package giv
+package textview
 
 /*
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
@@ -55,7 +55,7 @@ func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Tex
 	if rev_a == "" {
 		rev_a = "HEAD"
 	}
-	return DiffViewDialog(nil, DlgOpts{Title: "DiffVcs: " + DirAndFile(file)}, astr, bstr, file, file, rev_a, rev_b), nil
+	return DiffViewDialog(nil, DlgOpts{Title: "DiffVcs: " + dirs.DirAndFile(file)}, astr, bstr, file, file, rev_a, rev_b), nil
 }
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
@@ -603,7 +603,7 @@ func (dv *DiffView) HasDiffsUpdate(bt *gi.Button) {
 
 func (dv *DiffView) ConfigToolBar() {
 	tb := dv.ToolBar()
-	txta := "A: " + DirAndFile(dv.FileA)
+	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
@@ -626,7 +626,7 @@ func (dv *DiffView) ConfigToolBar() {
 	})
 	gi.NewStretch(tb, "str")
 
-	txtb := "B: " + DirAndFile(dv.FileB)
+	txtb := "B: " + dirs.DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}
@@ -652,13 +652,13 @@ func (dv *DiffView) ConfigToolBar() {
 func (dv *DiffView) SetTextNames() {
 	tb := dv.ToolBar()
 	la := tb.ChildByName("label-a", 0).(*gi.Label)
-	txta := "A: " + DirAndFile(dv.FileA)
+	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
 	}
 	la.SetText(txta)
 	lb := tb.ChildByName("label-b", 4).(*gi.Label)
-	txtb := "B: " + DirAndFile(dv.FileB)
+	txtb := "B: " + dirs.DirAndFile(dv.FileB)
 	if dv.RevB != "" {
 		txtb += ": " + dv.RevB
 	}

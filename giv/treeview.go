@@ -4,6 +4,8 @@
 
 package giv
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"image"

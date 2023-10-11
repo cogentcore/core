@@ -26,6 +26,7 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/complete"
+	"goki.dev/pi/v2/filecat"
 )
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,7 +58,7 @@ type FileView struct {
 	ExtMap map[string]string `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
 
 	// files for current directory
-	Files []*FileInfo `desc:"files for current directory"`
+	Files []*filecat.FileInfo `desc:"files for current directory"`
 
 	// index of currently-selected file in Files list (-1 if none)
 	SelectedIdx int `desc:"index of currently-selected file in Files list (-1 if none)"`
@@ -151,16 +152,16 @@ func (fv *FileView) Disconnect() {
 
 // FileViewFilterFunc is a filtering function for files -- returns true if the
 // file should be visible in the view, and false if not
-type FileViewFilterFunc func(fv *FileView, fi *FileInfo) bool
+type FileViewFilterFunc func(fv *FileView, fi *filecat.FileInfo) bool
 
 // FileViewDirOnlyFilter is a FileViewFilterFunc that only shows directories (folders).
-func FileViewDirOnlyFilter(fv *FileView, fi *FileInfo) bool {
+func FileViewDirOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
 	return fi.IsDir()
 }
 
 // FileViewExtOnlyFilter is a FileViewFilterFunc that only shows files that
 // match the target extensions, and directories.
-func FileViewExtOnlyFilter(fv *FileView, fi *FileInfo) bool {
+func FileViewExtOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
 	if fi.IsDir() {
 		return true
 	}
@@ -192,7 +193,7 @@ func (fv *FileView) SelectedFile() string {
 
 // SelectedFileInfo returns the currently-selected fileinfo, returns
 // false if none
-func (fv *FileView) SelectedFileInfo() (*FileInfo, bool) {
+func (fv *FileView) SelectedFileInfo() (*filecat.FileInfo, bool) {
 	if fv.SelectedIdx < 0 || fv.SelectedIdx >= len(fv.Files) {
 		return nil, false
 	}
@@ -251,7 +252,7 @@ const (
 
 func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
 	// STYTODO: get rid of this and move to OnChildAdded
-	finf, ok := slice.([]*FileInfo)
+	finf, ok := slice.([]*filecat.FileInfo)
 	if ok {
 		wi := widg.AsWidget()
 		if clr, got := FileViewKindColorMap[finf[row].Kind]; got {
@@ -554,7 +555,7 @@ func (fv *FileView) UpdateFiles() {
 		return
 	}
 
-	fv.Files = make([]*FileInfo, 0, 1000)
+	fv.Files = make([]*filecat.FileInfo, 0, 1000)
 	filepath.Walk(effpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			emsg := fmt.Sprintf("Path %q: Error: %v", effpath, err)
@@ -568,7 +569,7 @@ func (fv *FileView) UpdateFiles() {
 		if path == effpath { // proceed..
 			return nil
 		}
-		fi, ferr := NewFileInfo(path)
+		fi, ferr := filecat.NewFileInfo(path)
 		keep := ferr == nil
 		if fv.FilterFunc != nil {
 			keep = fv.FilterFunc(fv, fi)

@@ -20,6 +20,7 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/pi/v2/filecat"
 )
 
 // basicviews contains all the ValueView's for basic builtin types
@@ -994,7 +995,7 @@ func (vv *TimeValueView) TimeVal() *time.Time {
 	switch v := tmi.(type) {
 	case *time.Time:
 		return v
-	case *FileTime:
+	case *filecat.FileTime:
 		return (*time.Time)(v)
 	}
 	return nil

@@ -27,6 +27,7 @@ import (
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
+	"goki.dev/pi/v2/filecat"
 )
 
 func init() {
@@ -71,7 +72,7 @@ func init() {
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(FileTime{})), func() ValueView {
+	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() ValueView {
 		vv := &TimeValueView{}
 		ki.InitNode(vv)
 		return vv
@@ -1077,10 +1078,10 @@ func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
 
 func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
 	// pf.TextViewClipHistMax = TextViewClipHistMax
-	pf.TextBufMaxScopeLines = TextBufMaxScopeLines
-	pf.TextBufDiffRevertLines = TextBufDiffRevertLines
-	pf.TextBufDiffRevertDiffs = TextBufDiffRevertDiffs
-	pf.TextBufMarkupDelayMSec = TextBufMarkupDelayMSec
+	// pf.TextBufMaxScopeLines = TextBufMaxScopeLines
+	// pf.TextBufDiffRevertLines = TextBufDiffRevertLines
+	// pf.TextBufDiffRevertDiffs = TextBufDiffRevertDiffs
+	// pf.TextBufMarkupDelayMSec = TextBufMarkupDelayMSec
 	pf.MapInlineLen = MapInlineLen
 	pf.StructInlineLen = StructInlineLen
 	pf.SliceInlineLen = SliceInlineLen
@@ -1088,10 +1089,10 @@ func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
 
 func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 	// TextViewClipHistMax = pf.TextViewClipHistMax
-	TextBufMaxScopeLines = pf.TextBufMaxScopeLines
-	TextBufDiffRevertLines = pf.TextBufDiffRevertLines
-	TextBufDiffRevertDiffs = pf.TextBufDiffRevertDiffs
-	TextBufMarkupDelayMSec = pf.TextBufMarkupDelayMSec
+	// TextBufMaxScopeLines = pf.TextBufMaxScopeLines
+	// TextBufDiffRevertLines = pf.TextBufDiffRevertLines
+	// TextBufDiffRevertDiffs = pf.TextBufDiffRevertDiffs
+	// TextBufMarkupDelayMSec = pf.TextBufMarkupDelayMSec
 	MapInlineLen = pf.MapInlineLen
 	StructInlineLen = pf.StructInlineLen
 	SliceInlineLen = pf.SliceInlineLen

@@ -8,6 +8,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -147,7 +148,7 @@ func (lv *VCSLogView) TableView() *TableView {
 func (lv *VCSLogView) ConfigToolBar() {
 	tb := lv.ToolBar()
 	if lv.File != "" {
-		gi.NewLabel(tb, "fl", "File: "+DirAndFile(lv.File))
+		gi.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
 		tb.AddSeparator("flsep")
 		cba := gi.NewSwitch(tb, "a-rev")
 		cba.SetText("A Rev: ")
@@ -188,7 +189,7 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	if file == "" {
 		title += "All files"
 	} else {
-		title += DirAndFile(file)
+		title += dirs.DirAndFile(file)
 	}
 	if since != "" {
 		title += " since: " + since
