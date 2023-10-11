@@ -34,7 +34,7 @@ type ColorMapView struct {
 }
 
 func (cv *ColorMapView) OnInit() {
-	cv.ColorMapHandlers()
+	cv.HandleColorMapEvents()
 	// todo: style
 }
 
@@ -73,7 +73,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 	})
 }
 
-func (cv *ColorMapView) ColorMapHandlers() {
+func (cv *ColorMapView) HandleColorMapEvents() {
 	cv.HandleWidgetEvents()
 	cv.OnClick(func(e events.Event) {
 		cv.ChooseColorMap()

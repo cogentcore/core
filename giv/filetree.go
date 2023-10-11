@@ -1739,6 +1739,13 @@ func (ftv *FileTreeView) OnInit() {
 	ftv.SetFlag(true, TreeViewFlagUpdtRoot) // filetree needs this
 	ftv.OpenDepth = 4
 	ftv.Indent.SetEm(1)
+
+	ftv.HandleFileTreeViewEvents()
+	ftv.FileTreeViewStyles()
+}
+
+func (ftv *FileTreeView) FileTreeViewStyles() {
+
 	ftv.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
@@ -1828,11 +1835,7 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	}
 }
 
-func (ftv *FileTreeView) SetTypeHandlers() {
-	ftv.FileTreeViewEvents()
-}
-
-func (ftv *FileTreeView) FileTreeViewEvents() {
+func (ftv *FileTreeView) HandleFileTreeViewEvents() {
 	ftv.On(events.KeyChord, func(e events.Event) {
 		kt := e.(*events.Key)
 		ftv.KeyInput(kt)

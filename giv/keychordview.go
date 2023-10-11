@@ -71,7 +71,7 @@ type KeyChordEdit struct {
 }
 
 func (kc *KeyChordEdit) OnInit() {
-	kc.KeyChordHandlers()
+	kc.HandleKeyChordEvents()
 	kc.KeyChordStyles()
 }
 
@@ -150,7 +150,7 @@ func (kc *KeyChordEdit) HandleKeyChord() {
 // 	kc.LayoutLabel()
 // }
 
-func (kc *KeyChordEdit) KeyChordHandlers() {
+func (kc *KeyChordEdit) HandleKeyChordEvents() {
 	// kc.HoverEvent()
 	// kc.MouseEvent()
 	kc.HandleWidgetEvents()

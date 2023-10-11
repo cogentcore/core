@@ -79,6 +79,11 @@ type FileView struct {
 }
 
 func (fv *FileView) OnInit() {
+	fv.HandleFileViewEvents()
+	fv.FileViewStyles()
+}
+
+func (fv *FileView) FileViewStyles() {
 	fv.Lay = gi.LayoutVert
 	fv.AddStyles(func(s *styles.Style) {
 		fv.Spacing = gi.StdDialogVSpaceUnits
@@ -777,11 +782,7 @@ func (fv *FileView) ApplyStyle(sc *gi.Scene) {
 	sf.StartFocus() // need to call this when window is actually active
 }
 
-func (fv *FileView) SetTypeHandlers() {
-	fv.FileViewEvents()
-}
-
-func (fv *FileView) FileViewEvents() {
+func (fv *FileView) HandleFileViewEvents() {
 	fv.OnKeyChord(func(e events.Event) {
 		fv.KeyInput(e)
 	})
