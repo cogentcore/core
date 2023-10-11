@@ -1780,7 +1780,7 @@ func (ftv *FileTreeView) FileTreeViewStyles() {
 func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
-	case "Parts":
+	case "parts":
 		parts := w.(*gi.Layout)
 		parts.AddStyles(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)

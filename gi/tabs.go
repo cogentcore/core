@@ -567,7 +567,7 @@ func (tb *Tab) TabButtonStyles() {
 func (tb *Tab) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
-	case "Parts":
+	case "parts":
 		w.AddStyles(func(s *styles.Style) {
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
