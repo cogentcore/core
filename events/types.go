@@ -20,7 +20,7 @@ package events
 // to compression, where if the last event added (and not yet
 // processed and therefore removed from the queue) is of the same type
 // then it is replaced with the new one, instead of adding.
-type Types int64 //enums:enum
+type Types int32 //enums:enum
 
 const (
 	// zero value is an unknown type
