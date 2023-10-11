@@ -38,7 +38,7 @@ const (
 // but these are optional and may be required for
 // other uses (e.g., compute shaders).
 // See also InstanceExts, DeviceExts, and ValidationLayers.
-type CPUOptions int //enums:enum
+type CPUOptions int32 //enums:enum
 
 const (
 	// OptRobustBufferAccess specifies that accesses to buffers are bounds-checked against the range of the buffer descriptor (as determined by VkDescriptorBufferInfo::range, VkBufferViewCreateInfo::range, or the size of the buffer). Out of bounds accesses must not cause application termination, and the effects of shader loads, stores, and atomics must conform to an implementation-dependent behavior as described below.

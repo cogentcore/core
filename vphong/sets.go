@@ -5,7 +5,7 @@
 package vphong
 
 // Sets are variable set numbers - must coordinate with System sets!
-type Sets int //enums:enum
+type Sets int32 //enums:enum
 
 const (
 	MtxsSet Sets = iota
