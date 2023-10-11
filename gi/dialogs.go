@@ -212,13 +212,13 @@ func (dlg *Dialog) DefaultStyle() {
 	sc.AddStyles(func(s *styles.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.Border.Radius = styles.BorderRadiusLarge
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
 		sc.Spacing = StdDialogVSpaceUnits
 		s.Border.Style.Set(styles.BorderNone)
 		s.Padding.Set(units.Dp(24))
 		if !st.NewWindow {
+			s.Border.Radius = styles.BorderRadiusLarge
 			s.BoxShadow = styles.BoxShadow3()
 		}
 	})
