@@ -19,6 +19,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/glop/bools"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -112,34 +113,35 @@ func (sv *StructView) SetStruct(st any) {
 	if sv.Struct != st {
 		sv.Changed = false
 		updt = sv.UpdateStart()
-		sv.SetFullReRender()
-		if sv.Struct != nil {
-			if k, ok := sv.Struct.(ki.Ki); ok {
-				// k.NodeSignal().Disconnect(sv.This())
-			}
-		}
+		// todo: do need a disconnect thing when deleted..
+		// if sv.Struct != nil {
+		// 	if k, ok := sv.Struct.(ki.Ki); ok {
+		// 		// k.NodeSignal().Disconnect(sv.This())
+		// 	}
+		// }
 		sv.Struct = st
-		// tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
-		if tp != nil {
-			if sfp, has := ki.SubTypeProps(*tp, "StructViewFields"); has {
-				sv.TypeFieldTags = make(map[string]string)
-				for k, v := range sfp {
-					vs := laser.ToString(v)
-					sv.TypeFieldTags[k] = vs
-				}
-			}
-		}
-		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				// todo: check for delete??
-				svv, _ := recv.Embed(TypeStructView).(*StructView)
-				svv.UpdateFields()
-				svv.ViewSig.Emit(svv.This(), 0, nil)
-			})
-		}
+		// // tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
+		// if tp != nil {
+		// 	if sfp, has := ki.SubTypeProps(*tp, "StructViewFields"); has {
+		// 		sv.TypeFieldTags = make(map[string]string)
+		// 		for k, v := range sfp {
+		// 			vs := laser.ToString(v)
+		// 			sv.TypeFieldTags[k] = vs
+		// 		}
+		// 	}
+		// }
+		// todo: no generic send here.
+		// if k, ok := st.(ki.Ki); ok {
+		// 	k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 		// todo: check for delete??
+		// 		svv, _ := recv.Embed(TypeStructView).(*StructView)
+		// 		svv.UpdateFields()
+		// 		svv.ViewSig.Emit(svv.This(), 0, nil)
+		// 	})
+		// }
 	}
-	sv.Config()
-	sv.UpdateEnd(updt)
+	sv.Config(sv.Sc)
+	sv.UpdateEndLayout(updt)
 }
 
 // UpdateFields updates each of the value-view widgets for the fields --
@@ -149,7 +151,7 @@ func (sv *StructView) UpdateFields() {
 	for _, vv := range sv.FieldViews {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEnd(updt)
+	sv.UpdateEndRender(updt)
 }
 
 // UpdateField updates the value-view widget for the named field
@@ -161,11 +163,11 @@ func (sv *StructView) UpdateField(field string) {
 			break
 		}
 	}
-	sv.UpdateEnd(updt)
+	sv.UpdateEndRender(updt)
 }
 
 // Config configures the view
-func (sv *StructView) ConfigWidget(vp *gi.Scene) {
+func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 	if ks, ok := sv.Struct.(ki.Ki); ok {
 		if ks.Is(ki.Deleted) || ks.Is(ki.Destroyed) {
 			return
@@ -218,11 +220,9 @@ func (sv *StructView) ConfigToolbar() {
 	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip},
-			sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(TypeStructView).(*StructView)
-				svv.UpdateFields()
-			})
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: ttip}, func(act *gi.Button) {
+			sv.UpdateFields()
+		})
 	} else {
 		act := tb.Child(0).(*gi.Button)
 		act.Tooltip = ttip
@@ -235,8 +235,7 @@ func (sv *StructView) ConfigToolbar() {
 		}
 	}
 	if HasToolBarView(sv.Struct) {
-		ToolBarView(sv.Struct, sv.Scene, tb)
-		tb.SetFullReRender()
+		ToolBarView(sv.Struct, sv.Sc, tb)
 	}
 	sv.ToolbarStru = sv.Struct
 }
@@ -332,9 +331,7 @@ func (sv *StructView) ConfigStructGrid() {
 		return true
 	})
 	mods, updt := sg.ConfigChildren(config) // fields could be non-unique with labels..
-	if mods {
-		sg.SetFullReRender()
-	} else {
+	if !mods {
 		updt = sg.UpdateStart()
 	}
 	sv.HasDefs = false
@@ -342,7 +339,7 @@ func (sv *StructView) ConfigStructGrid() {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueViewBase()
 		vvb.ViewPath = sv.ViewPath
-		lbl.Redrawable = true
+		// lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
@@ -350,48 +347,37 @@ func (sv *StructView) ConfigStructGrid() {
 		}
 		vv.ConfigWidget(widg)
 		if !sv.IsDisabled() && !inactTag {
-			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv := recv.Embed(TypeStructView).(*StructView)
-				svv.UpdateFieldAction()
+			vvb.OnChange(func(e events.Event) {
+				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
-				svv.Changed = true
-				if svv.ChangeFlag != nil {
-					svv.ChangeFlag.SetBool(true)
+				sv.Changed = true
+				if sv.ChangeFlag != nil {
+					sv.ChangeFlag.SetBool(true)
 				}
-				vvv := send.(ValueView).AsValueViewBase()
-				if !laser.KindIsBasic(laser.NonPtrValue(vvv.Value).Kind()) {
-					if updtr, ok := svv.Struct.(gi.Updater); ok {
+				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
+					if updtr, ok := sv.Struct.(gi.Updater); ok {
 						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
 						updtr.Update()
 					}
 				}
-				tb := svv.ToolBar()
+				tb := sv.ToolBar()
 				if tb != nil {
 					tb.UpdateButtons()
 				}
-				svv.ViewSig.Emit(svv.This(), 0, nil)
+				sv.SendChange()
 				// vvv, _ := send.Embed(TypeValueViewBase).(*ValueViewBase)
 				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 			})
 		}
 	}
-	sg.UpdateEnd(updt)
+	sg.UpdateEndLayout(updt)
 }
-
-func (sv *StructView) ApplyStyle(sc *gi.Scene) {
-	mvp := sv.Sc
-	if mvp != nil && mvp.IsDoingFullRender() {
-		sv.Config()
-	}
-	sv.Frame.ApplyStyle(sc)
-}
-
 func (sv *StructView) UpdateFieldAction() {
 	if !sv.IsConfiged() {
 		return
 	}
 	if sv.HasViewIfs {
-		sv.Config()
+		sv.Config(sv.Sc)
 	} else if sv.HasDefs {
 		sg := sv.StructGrid()
 		updt := sg.UpdateStart()
@@ -399,20 +385,20 @@ func (sv *StructView) UpdateFieldAction() {
 			lbl := sg.Child(i * 2).(*gi.Label)
 			StructViewFieldDefTag(vv, lbl)
 		}
-		sg.UpdateEnd(updt)
+		sg.UpdateEndRender(updt)
 	}
 }
 
-func (sv *StructView) Render(vp *gi.Scene) {
+func (sv *StructView) Render(sc *gi.Scene) {
 	if sv.IsConfiged() {
 		sv.ToolBar().UpdateButtons()
 	}
-	if win := sv.ParentRenderWin(); win != nil {
-		if !win.Is(WinResizing) {
-			win.MainMenuUpdateActives()
-		}
-	}
-	sv.Frame.Render()
+	// if win := sv.ParentRenderWin(); win != nil {
+	// 	if !win.Is(WinResizing) {
+	// 		win.MainMenuUpdateActives()
+	// 	}
+	// }
+	sv.Frame.Render(sc)
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -449,16 +435,17 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Widget, isInact bo
 // called multiple times for updating as values change.
 // returns true if value is default, and string to add to tooltip for default vals
 func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
-	if dtag, has := vv.Tag("def"); has {
-		hasDef = true
-		isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
-		if isDef {
-			lbl.CurBackgroundColor = gi.Prefs.Colors.Background
-		} else {
-			lbl.CurBackgroundColor = gi.Prefs.Colors.Highlight
-		}
-		return
-	}
+	// todo
+	// if dtag, has := vv.Tag("def"); has {
+	// 	hasDef = true
+	// 	isDef, defStr = StructFieldIsDef(dtag, vv.Val().Interface(), laser.NonPtrValue(vv.Val()).Kind())
+	// 	if isDef {
+	// 		lbl.CurBackgroundColor = gi.Prefs.Colors.Background
+	// 	} else {
+	// 		lbl.CurBackgroundColor = gi.Prefs.Colors.Highlight
+	// 	}
+	// 	return
+	// }
 	return
 }
 

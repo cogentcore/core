@@ -5,49 +5,37 @@
 package giv
 
 import (
-	"bytes"
-	"fmt"
 	"image/color"
-	"io/ioutil"
-	"log"
-	"os"
-	"path/filepath"
-	"regexp"
 	"sync"
 	"time"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv/textbuf"
-	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/styles"
-	"goki.dev/glop/indent"
-	"goki.dev/glop/runes"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/complete"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/pi"
-	"goki.dev/pi/v2/spell"
 	"goki.dev/pi/v2/token"
 )
 
-// TextBufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'
-var TextBufMaxScopeLines = 100
+var (
+	// TextBufMaxScopeLines is the maximum lines to search for a scope marker, e.g. '}'
+	TextBufMaxScopeLines = 100
 
-// TextBufDiffRevertLines is max number of lines to use the
-// diff-based revert, which results in faster reverts but only
-// if the file isn't too big..
-var TextBufDiffRevertLines = 10000
+	// TextBufDiffRevertLines is max number of lines to use the
+	// diff-based revert, which results in faster reverts but only
+	// if the file isn't too big..
+	TextBufDiffRevertLines = 10000
 
-// TextBufDiffRevertDiffs is max number of difference regions
-// to apply for diff-based revert otherwise just reopens file
-var TextBufDiffRevertDiffs = 20
+	// TextBufDiffRevertDiffs is max number of difference regions
+	// to apply for diff-based revert otherwise just reopens file
+	TextBufDiffRevertDiffs = 20
 
-// TextBufMarkupDelayMSec is the number of milliseconds to wait
-// before starting a new background markup process, after
-// text is entered in the line
-var TextBufMarkupDelayMSec = 1000
+	// TextBufMarkupDelayMSec is the number of milliseconds to wait
+	// before starting a new background markup process, after
+	// text is entered in the line
+	TextBufMarkupDelayMSec = 1000
+)
 
 // TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds
 // the raw text lines (in original string and rune formats, and marked-up from
@@ -146,6 +134,34 @@ type TextBuf struct {
 	CurView *TextView `json:"-" xml:"-" desc:"current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always"`
 }
 
+func (tb *TextBuf) Stat() error {
+	return nil
+}
+
+// SetText sets the text to given bytes
+func (tb *TextBuf) SetText(txt []byte) {
+}
+
+func (tb *TextBuf) DeleteText(st, ed lex.Pos, signal bool) *textbuf.Edit {
+	return nil
+}
+
+func (tb *TextBuf) SaveAs(filename gi.FileName) {
+}
+
+func (tb *TextBuf) SetLineColor(ln int, clr color.RGBA) {
+}
+
+func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
+}
+
+func (tb *TextBuf) ReMarkup() {
+}
+
+func (tb *TextBuf) AddTag(ln, st, ed int, tag token.Tokens) {
+}
+
+/*
 func (tb *TextBuf) OnInit() {
 	if tb.Hi.Style != "" {
 		return
@@ -154,11 +170,12 @@ func (tb *TextBuf) OnInit() {
 	tb.Opts.EditorPrefs = gi.Prefs.Editor
 }
 
-func (tb *TextBuf) Disconnect() {
-	tb.Widget.Disconnect()
-	tb.DeleteSpell()
-	tb.DeleteCompleter()
-}
+// todo: need
+// func (tb *TextBuf) Disconnect() {
+// 	tb.Widget.Disconnect()
+// 	tb.DeleteSpell()
+// 	tb.DeleteCompleter()
+// }
 
 var TextBufProps = ki.Props{
 	"CallMethods": ki.PropSlice{
@@ -225,17 +242,17 @@ const (
 // IsChanged indicates if the text has been changed (edited) relative to
 // the original, since last save
 func (tb *TextBuf) IsChanged() bool {
-	return tb.HasFlag(int(TextBufChanged))
+	return tb.Is(TextBufChanged)
 }
 
 // SetChanged marks buffer as changed
 func (tb *TextBuf) SetChanged() {
-	tb.SetFlag(int(TextBufChanged))
+	tb.SetFlag(true, TextBufChanged)
 }
 
 // ClearChanged marks buffer as un-changed
 func (tb *TextBuf) ClearChanged() {
-	tb.ClearFlag(int(TextBufChanged))
+	tb.SetFlag(false, TextBufChanged)
 }
 
 // SetText sets the text to given bytes
@@ -253,7 +270,7 @@ func (tb *TextBuf) SetTextLines(lns [][]byte, cpy bool) {
 	tb.LinesMu.Lock()
 	tb.NLines = len(lns)
 	tb.LinesMu.Unlock()
-	tb.New(tb.NLines)
+	tb.NewBuf(tb.NLines)
 	tb.LinesMu.Lock()
 	bo := 0
 	for ln, txt := range lns {
@@ -2787,3 +2804,5 @@ func init() {
 // func NewTextBuf() *TextBuf {
 // 	return TextBufs.New()
 // }
+
+*/

@@ -525,9 +525,9 @@ func (fn *FileNode) SetClosed() {
 
 // IsChanged returns true if the file is open and has been changed (edited) since last save
 func (fn *FileNode) IsChanged() bool {
-	if fn.Buf != nil && fn.Buf.IsChanged() {
-		return true
-	}
+	// if fn.Buf != nil && fn.Buf.IsChanged() {
+	// 	return true
+	// }
 	return false
 }
 
@@ -835,10 +835,11 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 	} else {
 		fn.Buf = &TextBuf{}
 		fn.Buf.InitName(fn.Buf, fn.Nm)
-		fn.Buf.AddFileNode(fn)
+		// fn.Buf.AddFileNode(fn)
 	}
 	fn.Buf.Hi.Style = FileNodeHiStyle
-	return true, fn.Buf.Open(fn.FPath)
+	// return true, fn.Buf.Open(fn.FPath)
+	return true, nil
 }
 
 // CloseBuf closes the file in its buffer if it is open -- returns true if closed
@@ -848,8 +849,8 @@ func (fn *FileNode) CloseBuf() bool {
 	if fn.Buf == nil {
 		return false
 	}
-	fn.Buf.Close(nil)
-	fn.Buf = nil
+	// fn.Buf.Close(nil)
+	// fn.Buf = nil
 	fn.SetClosed()
 	return true
 }
@@ -1368,9 +1369,9 @@ func (fn *FileNode) RevertVcs() (err error) {
 	} else if fn.Info.Vcs == vci.Added {
 		// do nothing - leave in "added" state
 	}
-	if fn.Buf != nil {
-		fn.Buf.Revert()
-	}
+	// if fn.Buf != nil {
+	// 	fn.Buf.Revert()
+	// }
 	// fn.UpdateSig()
 	// fn.FRoot.UpdateSig()
 	return err
@@ -1388,8 +1389,9 @@ func (fn *FileNode) DiffVcs(rev_a, rev_b string) error {
 	if fn.Info.Vcs == vci.Untracked {
 		return errors.New("file not in vcs repo: " + string(fn.FPath))
 	}
-	_, err := DiffViewDialogFromRevs(nil, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
-	return err
+	// _, err := DiffViewDialogFromRevs(nil, repo, string(fn.FPath), fn.Buf, rev_a, rev_b)
+	// return err
+	return nil
 }
 
 // LogVcs shows the VCS log of commits for this file, optionally with a
@@ -2403,124 +2405,128 @@ func (ftv *FileTreeView) PasteCopyFiles(tdir *FileNode, md mimedata.Mimes) {
 // PasteMimeCopyFilesCheck copies files into given directory node,
 // first checking if any already exist -- if they exist, prompts.
 func (ftv *FileTreeView) PasteMimeCopyFilesCheck(tdir *FileNode, md mimedata.Mimes) {
-	existing, _ := ftv.PasteCheckExisting(tdir, md)
-	if len(existing) > 0 {
-		gi.ChoiceDialog(ftv, gi.DlgOpts{Title: "File(s) Exist in Target Dir, Overwrite?",
-			Prompt: fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing)},
-			[]string{"No, Cancel", "Yes, Overwrite"}, func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					ftv.DropCancel()
-				case 1:
-					ftv.PasteCopyFiles(tdir, md)
-					ftv.DragNDropFinalizeDefMod()
-				}
-			})
-	} else {
-		ftv.PasteCopyFiles(tdir, md)
-		ftv.DragNDropFinalizeDefMod()
-	}
+	// existing, _ := ftv.PasteCheckExisting(tdir, md)
+	// if len(existing) > 0 {
+	// 	gi.ChoiceDialog(ftv, gi.DlgOpts{Title: "File(s) Exist in Target Dir, Overwrite?",
+	// 		Prompt: fmt.Sprintf("File(s): %v exist, do you want to overwrite?", existing)},
+	// 		[]string{"No, Cancel", "Yes, Overwrite"}, func(dlg *gi.Dialog) {
+	// 			switch dlg.Data.(int) {
+	// 			case 0:
+	// 				ftv.DropCancel()
+	// 			case 1:
+	// 				ftv.PasteCopyFiles(tdir, md)
+	// 				ftv.DragNDropFinalizeDefMod()
+	// 			}
+	// 		})
+	// } else {
+	// 	ftv.PasteCopyFiles(tdir, md)
+	// 	ftv.DragNDropFinalizeDefMod()
+	// }
 }
 
 // PasteMime applies a paste / drop of mime data onto this node
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
-	if len(md) == 0 {
-		ftv.DropCancel()
-		return
-	}
-	tfn := ftv.FileNode()
-	if tfn == nil || tfn.IsExternal() {
-		ftv.DropCancel()
-		return
-	}
-	tupdt := ftv.RootView.UpdateStart()
-	defer ftv.RootView.UpdateEnd(tupdt)
-	tpath := string(tfn.FPath)
-	isdir := tfn.IsDir()
-	if isdir {
-		ftv.PasteMimeCopyFilesCheck(tfn, md)
-		return
-	}
-	if len(md) > 3 { // multiple files -- automatically goes into parent dir
+	/*
+		if len(md) == 0 {
+			ftv.DropCancel()
+			return
+		}
+		tfn := ftv.FileNode()
+		if tfn == nil || tfn.IsExternal() {
+			ftv.DropCancel()
+			return
+		}
+		tupdt := ftv.RootView.UpdateStart()
+		defer ftv.RootView.UpdateEnd(tupdt)
+		tpath := string(tfn.FPath)
+		isdir := tfn.IsDir()
+		if isdir {
+			ftv.PasteMimeCopyFilesCheck(tfn, md)
+			return
+		}
+		if len(md) > 3 { // multiple files -- automatically goes into parent dir
+			tdir := AsFileNode(tfn.Parent())
+			ftv.PasteMimeCopyFilesCheck(tdir, md)
+			return
+		}
+		// single file dropped onto a single target file
+		srcpath := ""
+		// intl := ftv.EventMgr.DNDIsInternalSrc() // todo
+		intl := true
+		if intl {
+			srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
+		} else {
+			srcpath = string(md[0].Data) // just file path
+		}
+		fname := filepath.Base(srcpath)
 		tdir := AsFileNode(tfn.Parent())
-		ftv.PasteMimeCopyFilesCheck(tdir, md)
-		return
-	}
-	// single file dropped onto a single target file
-	srcpath := ""
-	// intl := ftv.EventMgr.DNDIsInternalSrc() // todo
-	intl := true
-	if intl {
-		srcpath = string(md[1].Data) // 1 has file path, 0 = ki path, 2 = file data
-	} else {
-		srcpath = string(md[0].Data) // just file path
-	}
-	fname := filepath.Base(srcpath)
-	tdir := AsFileNode(tfn.Parent())
-	existing, sfn := ftv.PasteCheckExisting(tdir, md)
-	mode := os.FileMode(0664)
-	if sfn != nil {
-		mode = sfn.Info.Mode
-	}
-	if len(existing) == 1 && fname == tfn.Nm {
-		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files, or cancel?", tfn.Nm)},
-			[]string{"Overwrite Target", "Diff Files", "Cancel"}, func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					CopyFile(tpath, srcpath, mode)
-					ftv.DragNDropFinalizeDefMod()
-				case 1:
-					DiffFiles(tpath, srcpath)
-					ftv.DropCancel()
-				case 2:
-					ftv.DropCancel()
-				}
-			})
-	} else if len(existing) > 0 {
-		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files, or cancel?", tfn.Nm, fname, fname)},
-			[]string{"Overwrite Target", "Overwrite Existing", "Diff to Target", "Diff to Existing", "Cancel"},
-			func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					CopyFile(tpath, srcpath, mode)
-					ftv.DragNDropFinalizeDefMod()
-				case 1:
-					npath := filepath.Join(string(tdir.FPath), fname)
-					CopyFile(npath, srcpath, mode)
-					ftv.DragNDropFinalizeDefMod()
-				case 2:
-					DiffFiles(tpath, srcpath)
-					ftv.DropCancel()
-				case 3:
-					npath := filepath.Join(string(tdir.FPath), fname)
-					DiffFiles(npath, srcpath)
-					ftv.DropCancel()
-				case 4:
-					ftv.DropCancel()
-				}
-			})
-	} else {
-		gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
-			Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files, or cancel?", tfn.Nm, fname, fname)},
-			[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"}, func(dlg *gi.Dialog) {
-				switch dlg.Data.(int) {
-				case 0:
-					CopyFile(tpath, srcpath, mode)
-					ftv.DragNDropFinalizeDefMod()
-				case 1:
-					tdir.CopyFileToDir(srcpath, mode) // does updating, vcs stuff
-					ftv.DragNDropFinalizeDefMod()
-				case 2:
-					DiffFiles(tpath, srcpath)
-					ftv.DropCancel()
-				case 3:
-					ftv.DropCancel()
-				}
-			})
-	}
+		existing, sfn := ftv.PasteCheckExisting(tdir, md)
+		mode := os.FileMode(0664)
+		if sfn != nil {
+			mode = sfn.Info.Mode
+		}
+		if len(existing) == 1 && fname == tfn.Nm {
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
+				Prompt: fmt.Sprintf("Overwrite target file: %s with source file of same name?, or diff (compare) two files, or cancel?", tfn.Nm)},
+				[]string{"Overwrite Target", "Diff Files", "Cancel"}, func(dlg *gi.Dialog) {
+					switch dlg.Data.(int) {
+					case 0:
+						CopyFile(tpath, srcpath, mode)
+						ftv.DragNDropFinalizeDefMod()
+					case 1:
+						// DiffFiles(tpath, srcpath)
+						ftv.DropCancel()
+					case 2:
+						ftv.DropCancel()
+					}
+				})
+		} else if len(existing) > 0 {
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
+				Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or overwrite existing file with same name as source file (%s), or diff (compare) files, or cancel?", tfn.Nm, fname, fname)},
+				[]string{"Overwrite Target", "Overwrite Existing", "Diff to Target", "Diff to Existing", "Cancel"},
+				func(dlg *gi.Dialog) {
+					switch dlg.Data.(int) {
+					case 0:
+						CopyFile(tpath, srcpath, mode)
+						ftv.DragNDropFinalizeDefMod()
+					case 1:
+						npath := filepath.Join(string(tdir.FPath), fname)
+						CopyFile(npath, srcpath, mode)
+						ftv.DragNDropFinalizeDefMod()
+					case 2:
+						// DiffFiles(tpath, srcpath)
+						ftv.DropCancel()
+					case 3:
+						npath := filepath.Join(string(tdir.FPath), fname)
+						_ = npath
+						// DiffFiles(npath, srcpath)
+						ftv.DropCancel()
+					case 4:
+						ftv.DropCancel()
+					}
+				})
+		} else {
+			gi.ChoiceDialog(nil, gi.DlgOpts{Title: "Overwrite?",
+				Prompt: fmt.Sprintf("Overwrite target file: %s with source file: %s, or copy to: %s in current folder (which doesn't yet exist), or diff (compare) the two files, or cancel?", tfn.Nm, fname, fname)},
+				[]string{"Overwrite Target", "Copy New File", "Diff Files", "Cancel"}, func(dlg *gi.Dialog) {
+					switch dlg.Data.(int) {
+					case 0:
+						CopyFile(tpath, srcpath, mode)
+						ftv.DragNDropFinalizeDefMod()
+					case 1:
+						tdir.CopyFileToDir(srcpath, mode) // does updating, vcs stuff
+						ftv.DragNDropFinalizeDefMod()
+					case 2:
+						// DiffFiles(tpath, srcpath)
+						ftv.DropCancel()
+					case 3:
+						ftv.DropCancel()
+					}
+				})
+		}
+	*/
+
 }
 
 // Dragged is called after target accepts the drop -- we just remove

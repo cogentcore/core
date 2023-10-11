@@ -115,9 +115,9 @@ func (ob *OutBuf) OutToBuf() {
 	mlns := bytes.Join(ob.CurOutMus, lfb)
 	tlns = append(tlns, lfb...)
 	mlns = append(mlns, lfb...)
-	ob.Buf.Undos.Off = true
-	ob.Buf.AppendTextMarkup(tlns, mlns, EditSignal)
-	ob.Buf.AutoScrollViews()
+	// ob.Buf.Undos.Off = true
+	// ob.Buf.AppendTextMarkup(tlns, mlns, EditSignal)
+	// ob.Buf.AutoScrollViews()
 	ob.CurOutLns = make([][]byte, 0, 100)
 	ob.CurOutMus = make([][]byte, 0, 100)
 }
