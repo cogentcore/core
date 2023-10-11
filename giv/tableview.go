@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -425,9 +426,10 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
 			addnm := "add-" + itxt
-			addact := gi.Button{}
-			sgf.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(icons.Add)
+			addbt := gi.Button{}
+			sgf.SetChild(&addbt, cidx, addnm)
+			addbt.SetType(gi.ButtonAction)
+			addbt.SetIcon(icons.Add)
 			cidx++
 		}
 		if !tv.NoDelete {
@@ -435,9 +437,13 @@ func (tv *TableView) ConfigSliceGrid() {
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
 			delnm := "del-" + itxt
-			delact := gi.Button{}
-			sgf.SetChild(&delact, cidx, delnm)
-			delact.SetIcon(icons.Delete)
+			delbt := gi.Button{}
+			sgf.SetChild(&delbt, cidx, delnm)
+			delbt.SetType(gi.ButtonAction)
+			delbt.SetIcon(icons.Delete)
+			delbt.AddStyles(func(s *styles.Style) {
+				s.Color = colors.Scheme.Error.Base
+			})
 			cidx++
 		}
 	}
