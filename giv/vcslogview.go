@@ -8,6 +8,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/vci/v2"
@@ -55,8 +56,8 @@ func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// Config configures to given repo, log and file (file could be empty)
-func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
+// ConfigRepo configures to given repo, log and file (file could be empty)
+func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) {
 	lv.Repo = repo
 	lv.Log = lg
 	lv.File = file
@@ -72,23 +73,21 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 		lv.RevB = ""
 		lv.SetA = true
 		lv.ConfigToolBar()
-		tv.SliceViewSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(SliceViewDoubleClicked) {
-				idx := data.(int)
-				if idx >= 0 && idx < len(lv.Log) {
-					cmt := lv.Log[idx]
-					if lv.File != "" {
-						if lv.SetA {
-							lv.SetRevA(cmt.Rev)
-						} else {
-							lv.SetRevB(cmt.Rev)
-						}
-						lv.ToggleRev()
+		tv.OnDoubleClick(func(e events.Event) {
+			idx := tv.CurIdx
+			if idx >= 0 && idx < len(lv.Log) {
+				cmt := lv.Log[idx]
+				if lv.File != "" {
+					if lv.SetA {
+						lv.SetRevA(cmt.Rev)
+					} else {
+						lv.SetRevB(cmt.Rev)
 					}
-					cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
-					if err == nil {
-						TextViewDialog(lv.Sc, cinfo, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true})
-					}
+					lv.ToggleRev()
+				}
+				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
+				if err == nil {
+					TextViewDialog(lv, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true}, cinfo, nil)
 				}
 			}
 		})
@@ -97,7 +96,7 @@ func (lv *VCSLogView) Config(repo vci.Repo, lg vci.Log, file, since string) {
 	}
 	tv.SetState(true, states.Disabled)
 	tv.SetSlice(&lv.Log)
-	lv.UpdateEnd(updt)
+	lv.UpdateEndLayout(updt)
 }
 
 // SetRevA sets the RevA to use
@@ -150,48 +149,34 @@ func (lv *VCSLogView) ConfigToolBar() {
 	if lv.File != "" {
 		gi.NewLabel(tb, "fl", "File: "+DirAndFile(lv.File))
 		tb.AddSeparator("flsep")
-		cba := gi.NewCheckBox(tb, "a-rev")
+		cba := gi.NewSwitch(tb, "a-rev")
 		cba.SetText("A Rev: ")
 		cba.Tooltip = "If selected, double-clicking in log will set this A Revision to use for Diff"
 		cba.SetState(true, states.Checked)
 		tfa := gi.NewTextField(tb, "a-tf")
 		tfa.SetText(lv.RevA)
-		tfa.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-				lv.RevA = tfa.Text()
-			}
+		tfa.OnChange(func(e events.Event) {
+			lv.RevA = tfa.Text()
 		})
 		tb.AddSeparator("absep")
-		cbb := gi.NewCheckBox(tb, "b-rev")
+		cbb := gi.NewSwitch(tb, "b-rev")
 		cbb.SetText("B Rev: ")
 		cbb.Tooltip = "If selected, double-clicking in log will set this B Revision to use for Diff"
 		tfb := gi.NewTextField(tb, "b-tf")
 		tfb.SetText(lv.RevB)
-		tfb.TextFieldSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-				lv.RevB = tfb.Text()
-			}
+		tfb.OnChange(func(e events.Event) {
+			lv.RevB = tfb.Text()
 		})
 		tb.AddSeparator("dsep")
-		tb.AddButton(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, lv.This(),
-			func(recv, send ki.Ki, sig int64, data any) {
-				lvv := recv.Embed(TypeVCSLogView).(*VCSLogView)
-				DiffViewDialogFromRevs(lvv.Sc, lvv.Repo, lvv.File, nil, lvv.RevA, lvv.RevB)
-			})
-
-		cba.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.ButtonToggled) {
-				lv.SetA = cba.StateIs(states.Checked)
-				cbb.SetState(!lv.SetA, states.Checked)
-				cbb.UpdateSig()
-			}
+		tb.AddButton(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, func(act *gi.Button) {
+			// DiffViewDialogFromRevs(lv.Sc, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
 		})
-		cbb.ButtonSig.Connect(lv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.ButtonToggled) {
-				lv.SetA = !cbb.StateIs(states.Checked)
-				cba.SetState(lv.SetA, states.Checked)
-				cba.UpdateSig()
-			}
+		cba.OnClick(func(e events.Event) {
+			lv.SetA = cba.StateIs(states.Checked)
+		})
+		cbb.OnClick(func(e events.Event) {
+			lv.SetA = !cbb.StateIs(states.Checked)
+			// cba.SetState(lv.SetA, states.Checked)
 		})
 	}
 
@@ -210,11 +195,10 @@ func VCSLogViewDialog(ctx gi.Widget, repo vci.Repo, lg vci.Log, file, since stri
 	}
 	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title}, nil)
 	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx(frame)
+	prIdx := dlg.PromptWidgetIdx()
 
-	lv := frame.InsertNewChild(TypeVCSLogView, prIdx+1, "vcslog").(*VCSLogView)
-	lv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	lv.Config(repo, lg, file, since)
+	lv := frame.InsertNewChild(VCSLogViewType, prIdx+1, "vcslog").(*VCSLogView)
+	lv.ConfigRepo(repo, lg, file, since)
 
 	return dlg
 }

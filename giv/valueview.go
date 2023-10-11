@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"log/slog"
 	"reflect"
 	"strings"
 	"time"
@@ -274,10 +275,6 @@ func ToValueView(it any, tags string) ValueView {
 			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValueView(v.Elem().Interface(), tags)
 		}
-	case nptyp == ki.KiT_Signal:
-		vv := &NilValueView{}
-		ki.InitNode(vv)
-		return vv
 	case vk == reflect.Array:
 		fallthrough
 	case vk == reflect.Slice:
@@ -677,83 +674,78 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 	if vv.This().(ValueView).IsInactive() {
 		return false
 	}
-	rval := false
+	var err error
+	wasSet := false
 	if vv.Owner != nil {
 		switch vv.OwnKind {
 		case reflect.Struct:
-			if kiv, ok := vv.Owner.(ki.Ki); ok {
-				rval = (kiv.SetField(vv.Field.Name, val) == nil)
-
-			} else {
-				rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
-			}
+			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+			wasSet = true
 		case reflect.Map:
-			ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-			if vv.IsMapKey {
-				nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
-				kv := laser.NonPtrValue(vv.Value)
-				cv := ov.MapIndex(kv)    // get current value
-				curnv := ov.MapIndex(nv) // see if new value there already
-				if val != kv.Interface() && !laser.ValueIsZero(curnv) {
-					var vp *gi.Scene
-					if vv.Widget != nil {
-						widg := vv.Widget.AsWidget()
-						vp = widg.Scene
-					}
-					// actually new key and current exists
-					gi.ChoiceDialog(vp,
-						gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
-						[]string{"Cancel Change", "Overwrite"},
-						func(dlg *gi.Dialog) {
-							switch sig {
-							case 0:
-								if vp != nil {
-									vp.SetNeedsFullRender()
-								}
-							case 1:
-								cv := ov.MapIndex(kv)               // get current value
-								ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-								ov.SetMapIndex(nv, cv)              // set new key to current value
-								vv.Value = nv                       // update value to new key
-								vv.This().(ValueView).SaveTmp()
-								vv.SendChange()
-								if vp != nil {
-									vp.SetNeedsFullRender()
-								}
-							}
-						})
-					return false // abort this action right now
-				}
-				ov.SetMapIndex(kv, reflect.Value{}) // delete old key
-				ov.SetMapIndex(nv, cv)              // set new key to current value
-				vv.Value = nv                       // update value to new key
-				rval = true
-			} else {
-				vv.Value = laser.NonPtrValue(reflect.ValueOf(val))
-				if vv.KeyView != nil {
-					ck := laser.NonPtrValue(vv.KeyView.Val()) // current key value
-					laser.SetMapRobust(ov, ck, reflect.ValueOf(val))
-				} else { // static, key not editable?
-					laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value)
-				}
-				rval = true
-			}
+			wasSet, err = vv.SetValueMap(val)
 		case reflect.Slice:
-			rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+			err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
 		}
 		if updtr, ok := vv.Owner.(gi.Updater); ok {
 			// fmt.Printf("updating: %v\n", updtr)
 			updtr.Update()
 		}
 	} else {
-		rval = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+		err = laser.SetRobust(laser.PtrValue(vv.Value).Interface(), val)
+		wasSet = true
 	}
-	if rval {
+	if wasSet {
 		vv.This().(ValueView).SaveTmp()
 	}
 	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
 	vv.SendChange()
-	return rval
+	if err != nil {
+		// todo: snackbar for error?
+		slog.Error(err.Error())
+	}
+	return wasSet
+}
+
+func (vv *ValueViewBase) SetValueMap(val any) (bool, error) {
+	ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
+	wasSet := false
+	var err error
+	if vv.IsMapKey {
+		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
+		kv := laser.NonPtrValue(vv.Value)
+		cv := ov.MapIndex(kv)    // get current value
+		curnv := ov.MapIndex(nv) // see if new value there already
+		if val != kv.Interface() && !laser.ValueIsZero(curnv) {
+			// actually new key and current exists
+			gi.ChoiceDialog(vv.Widget, gi.DlgOpts{Title: "Map Key Conflict", Prompt: fmt.Sprintf("The map key value: %v already exists in the map -- are you sure you want to overwrite the current value?", val)},
+				[]string{"Cancel Change", "Overwrite"}, func(dlg *gi.Dialog) {
+					switch dlg.Data.(int) {
+					case 1:
+						cv := ov.MapIndex(kv)               // get current value
+						ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+						ov.SetMapIndex(nv, cv)              // set new key to current value
+						vv.Value = nv                       // update value to new key
+						vv.This().(ValueView).SaveTmp()
+						vv.SendChange()
+					}
+				})
+			return false, nil // abort this action right now
+		}
+		ov.SetMapIndex(kv, reflect.Value{}) // delete old key
+		ov.SetMapIndex(nv, cv)              // set new key to current value
+		vv.Value = nv                       // update value to new key
+		wasSet = true
+	} else {
+		vv.Value = laser.NonPtrValue(reflect.ValueOf(val))
+		if vv.KeyView != nil {
+			ck := laser.NonPtrValue(vv.KeyView.Val())                 // current key value
+			wasSet = laser.SetMapRobust(ov, ck, reflect.ValueOf(val)) // todo: error
+		} else { // static, key not editable?
+			wasSet = laser.SetMapRobust(ov, laser.NonPtrValue(reflect.ValueOf(vv.Key)), vv.Value) // todo: error
+		}
+		// wasSet = true
+	}
+	return wasSet, err
 }
 
 // OnChange registers given listener function for Change events on ValueView.
@@ -770,7 +762,7 @@ func (vv *ValueViewBase) On(etype events.Types, fun func(e events.Event)) {
 // SendChange sends events.Change event to all listeners registered on this view.
 // This is the primary notification event for all ValueView elements.
 func (vv *ValueViewBase) SendChange() {
-	vv.Send(events.Event, nil)
+	vv.Send(events.Change, nil)
 }
 
 // Send sends an NEW event of given type to this widget,
@@ -1000,13 +992,9 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 		}
 	}
 
-	tf.TextFieldSig.ConnectOnly(func(dlg *gi.Dialog) {
-		if sig == int64(gi.TextFieldDone) || sig == int64(gi.TextFieldDeFocused) {
-			vvv, _ := recv.Embed(TypeValueViewBase).(*ValueViewBase)
-			tf := send.(*gi.TextField)
-			if vvv.SetValue(tf.Text()) {
-				vvv.UpdateWidget() // always update after setting value..
-			}
+	tf.OnChange(func(e events.Event) {
+		if vv.SetValue(tf.Text()) {
+			vv.UpdateWidget() // always update after setting value..
 		}
 	})
 	vv.UpdateWidget()
@@ -1017,26 +1005,26 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
 	// STYTODO: get rid of this
 	nb := widg.AsWidget()
 	if widthtag, ok := vv.Tag("width"); ok {
-		width, ok := laser.ToFloat32(widthtag)
-		if ok {
+		width, err := laser.ToFloat32(widthtag)
+		if err == nil {
 			nb.SetMinPrefWidth(units.Ch(width))
 		}
 	}
 	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, ok := laser.ToFloat32(maxwidthtag)
-		if ok {
+		width, err := laser.ToFloat32(maxwidthtag)
+		if err == nil {
 			nb.SetProp("max-width", units.Ch(width))
 		}
 	}
 	if heighttag, ok := vv.Tag("height"); ok {
-		height, ok := laser.ToFloat32(heighttag)
-		if ok {
+		height, err := laser.ToFloat32(heighttag)
+		if err == nil {
 			nb.SetMinPrefHeight(units.Em(height))
 		}
 	}
 	if maxheighttag, ok := vv.Tag("max-height"); ok {
-		height, ok := laser.ToFloat32(maxheighttag)
-		if ok {
+		height, err := laser.ToFloat32(maxheighttag)
+		if err == nil {
 			nb.SetProp("max-height", units.Em(height))
 		}
 	}
@@ -1049,8 +1037,9 @@ func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
-	return CtxtMenuView(val, inactive, vp, menu)
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, menu *gi.Menu) bool {
+	// return CtxtMenuView(val, inactive, sc, menu)
+	return false
 }
 
 func (vi *ViewIFace) GoGiEditor(obj ki.Ki) {
@@ -1086,7 +1075,7 @@ func (vi *ViewIFace) SetHiStyleDefault(hsty gi.HiStyleName) {
 }
 
 func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
-	pf.TextViewClipHistMax = TextViewClipHistMax
+	// pf.TextViewClipHistMax = TextViewClipHistMax
 	pf.TextBufMaxScopeLines = TextBufMaxScopeLines
 	pf.TextBufDiffRevertLines = TextBufDiffRevertLines
 	pf.TextBufDiffRevertDiffs = TextBufDiffRevertDiffs
@@ -1097,7 +1086,7 @@ func (vi *ViewIFace) PrefsDetDefaults(pf *gi.PrefsDetailed) {
 }
 
 func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
-	TextViewClipHistMax = pf.TextViewClipHistMax
+	// TextViewClipHistMax = pf.TextViewClipHistMax
 	TextBufMaxScopeLines = pf.TextBufMaxScopeLines
 	TextBufDiffRevertLines = pf.TextBufDiffRevertLines
 	TextBufDiffRevertDiffs = pf.TextBufDiffRevertDiffs
@@ -1178,10 +1167,8 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Button)
-	ac.ActionSig.ConnectOnly(func(dlg *gi.Dialog) {
-		vvv, _ := recv.Embed(TypeVersCtrlValueView).(*VersCtrlValueView)
-		ac := vvv.Widget.(*gi.Button)
-		vvv.OpenDialog(ac.Scene, nil, nil)
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
 }
@@ -1195,18 +1182,8 @@ func (vv *VersCtrlValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog))
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
-	var recv gi.Widget
-	if vv.Widget != nil {
-		recv = vv.Widget
-	} else {
-		recv = vp.This().(gi.Widget)
-	}
-	gi.StringsChooserPopup(VersCtrlSystems, cur, recv, func(recv, send ki.Ki, sig int64, data any) {
-		ac := send.(*gi.Button)
+	gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
 		vv.SetValue(ac.Text)
 		vv.UpdateWidget()
-		if dlgRecv != nil && dlgFunc != nil {
-			dlgFunc(dlgRecv, send, int64(gi.DialogAccepted), data)
-		}
 	})
 }
