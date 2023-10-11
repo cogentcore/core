@@ -242,7 +242,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("spinbox value changed to", sb.Value)
 	})
 
-	ch := gi.NewChooser(txrow).SetType(gi.ComboBoxOutlined).SetEditable(true).
+	ch := gi.NewChooser(txrow).SetType(gi.ChooserOutlined).SetEditable(true).
 		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
 	ch.OnChange(func(e events.Event) {
