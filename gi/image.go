@@ -10,6 +10,7 @@ import (
 	"image/png"
 	"io/fs"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/anthonynsimon/bild/clone"
@@ -84,7 +85,7 @@ func (im *Image) SetSize(nwsz image.Point) {
 func (im *Image) OpenImage(filename FileName, width, height float32) error {
 	img, _, err := images.Open(string(filename))
 	if err != nil {
-		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
 	im.Filename = filename
@@ -98,7 +99,7 @@ func (im *Image) OpenImage(filename FileName, width, height float32) error {
 func (im *Image) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
 	img, _, err := images.OpenFS(fsys, string(filename))
 	if err != nil {
-		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
+		slog.Error("gi.Image.OpenImage: could not open", "file", filename, "err", err)
 		return err
 	}
 	im.Filename = filename
@@ -282,7 +283,9 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 //////////////////////////////////////////////////////////////////////////////////
 //  Props
 
-var BitmapProps = ki.Props{
+// TODO: move this to comment directives
+
+var ImageProps = ki.Props{
 	"ToolBar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
