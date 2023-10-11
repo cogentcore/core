@@ -18,7 +18,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview/histyle"
 	"goki.dev/gi/v2/textview/textbuf"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"

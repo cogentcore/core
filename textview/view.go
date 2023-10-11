@@ -19,7 +19,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview/histyle"
 	"goki.dev/gi/v2/textview/textbuf"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
