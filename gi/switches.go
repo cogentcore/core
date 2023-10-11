@@ -9,7 +9,6 @@ import (
 	"image"
 	"slices"
 
-	"goki.dev/colors"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -51,13 +50,8 @@ func (sw *Switches) OnInit() {
 
 func (sw *Switches) SwitchesStyles() {
 	sw.AddStyles(func(s *styles.Style) {
-		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Radius.Set(units.Dp(2))
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
-		s.Text.Align = styles.AlignCenter
-		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-		s.Color = colors.Scheme.OnSurface
 	})
 }
 
@@ -196,6 +190,7 @@ func (sw *Switches) ConfigItems() {
 			s.Tooltip = sw.Tooltips[i]
 		}
 		s.SetProp("index", i)
+		fmt.Println(s)
 		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
@@ -213,7 +208,7 @@ func (sw *Switches) ConfigItems() {
 }
 
 func (sw *Switches) ConfigParts(sc *Scene) {
-	parts := sw.NewParts(LayoutHoriz)
+	parts := sw.NewParts(LayoutVert)
 	if len(sw.Items) == 0 {
 		parts.DeleteChildren(ki.DestroyKids)
 		return
@@ -225,7 +220,8 @@ func (sw *Switches) ConfigParts(sc *Scene) {
 	mods, updt := parts.ConfigChildren(config)
 	if mods || sw.NeedsRebuild() {
 		sw.ConfigItems()
-		sw.UpdateEnd(updt)
+		parts.UpdateEnd(updt)
+		sw.SetNeedsLayout(sc, updt)
 	}
 }
 
