@@ -419,72 +419,55 @@ var GiEditorProps = ki.Props{
 
 // GoGiEditorDialog opens an interactive editor of the given Ki tree, at its
 // root, returns GiEditor and window
-func GoGiEditorDialog(obj ki.Ki) *GiEditor {
-	/* todo
-	width := 1280
-	height := 920
-	wnm := "gogi-editor"
-	wti := "GoGi Editor"
+func GoGiEditorDialog(obj ki.Ki) {
+	if gi.ActivateExistingMainWindow(obj) {
+		return
+	}
+	sc := gi.StageScene("gogi-editor")
+	sc.Title = "GoGi Editor"
 	if obj != nil {
-		wnm += "-" + obj.Name()
-		wti += ": " + obj.Name()
+		sc.Nm += "-" + obj.Name()
+		sc.Title += ": " + obj.Name()
 	}
+	sc.Lay = gi.LayoutVert
 
-	win, recyc := gi.ActivateExistingMainWindow(obj, wnm, wti, width, height)
-	if recyc {
-		mfr, err := win.MainFrame()
-		if err == nil {
-			return mfr.Child(0).(*GiEditor)
-		}
-	}
-
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-	mfr.Lay = gi.LayoutVert
-
-	ge := NewGiEditor(mfr, "editor")
-	ge.Scene = vp
+	ge := NewGiEditor(sc, "editor")
 	ge.SetRoot(obj)
 
-	mmen := win.MainMenu
-	MainMenuView(ge, win, mmen)
+	// mmen := win.MainMenu
+	// MainMenuView(ge, win, mmen)
 
 	tb := ge.ToolBar()
 	tb.UpdateButtons()
 
-	ge.SelectionLoop()
+	// ge.SelectionLoop()
 
-	inClosePrompt := false
-	win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
-		if !ge.Changed {
-			win.Close()
-			return
-		}
-		if inClosePrompt {
-			return
-		}
-		inClosePrompt = true
-		gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
-			Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
-			[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.Dialog) {
-				switch sig {
-				case 0:
-					win.Close()
-				case 1:
-					// default is to do nothing, i.e., cancel
-					inClosePrompt = false
-				}
-			})
-	})
-
-	vp.UpdateEndNoSig(updt)
-	win.GoStartEventLoop() // in a separate goroutine
-	return ge
+	/*
+		inClosePrompt := false
+		win.RenderWin.SetCloseReqFunc(func(w goosi.RenderWin) {
+			if !ge.Changed {
+				win.Close()
+				return
+			}
+			if inClosePrompt {
+				return
+			}
+			inClosePrompt = true
+			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
+				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
+				[]string{"Close Without Saving", "Cancel"}, func(dlg *gi.Dialog) {
+					switch sig {
+					case 0:
+						win.Close()
+					case 1:
+						// default is to do nothing, i.e., cancel
+						inClosePrompt = false
+					}
+				})
+		})
 	*/
-	return nil
 
+	gi.NewWindow(sc).Run()
 }
 
 // SelectionLoop, if [KiRoot] is a [gi.RenderWin], runs a loop in a separate goroutine
