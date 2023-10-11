@@ -37,23 +37,23 @@ type StructView struct {
 	// the struct that we are a view onto
 	Struct any `desc:"the struct that we are a view onto"`
 
-	// ValueView for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView ValueView `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
+	// Value for the struct itself, if this was created within value view framework -- otherwise nil
+	StructValView Value `desc:"Value for the struct itself, if this was created within value view framework -- otherwise nil"`
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
 	Changed bool `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
 
-	// ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
-	ChangeFlag *reflect.Value `json:"-" xml:"-" desc:"ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
+	// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
+	ChangeFlag *reflect.Value `json:"-" xml:"-" desc:"Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
 
-	// ValueView representations of the fields
-	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	// Value representations of the fields
+	FieldViews []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
 
 	// whether to show the toolbar or not
 	ShowToolBar bool `desc:"whether to show the toolbar or not"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -262,7 +262,7 @@ func (sv *StructView) ConfigStructGrid() {
 	config := ki.Config{}
 	// always start fresh!
 	dupeFields := map[string]bool{}
-	sv.FieldViews = make([]ValueView, 0)
+	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		ftags := sv.FieldTags(field)
@@ -297,7 +297,7 @@ func (sv *StructView) ConfigStructGrid() {
 						return true
 					}
 				}
-				svv := FieldToValueView(fvalp, sfield.Name, sfval)
+				svv := FieldToValue(fvalp, sfield.Name, sfval)
 				if svv == nil { // shouldn't happen
 					return true
 				}
@@ -322,7 +322,7 @@ func (sv *StructView) ConfigStructGrid() {
 			})
 			return true
 		}
-		vv := FieldToValueView(sv.Struct, field.Name, fval)
+		vv := FieldToValue(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
 		}
@@ -349,7 +349,7 @@ func (sv *StructView) ConfigStructGrid() {
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := sg.Child(i * 2).(*gi.Label)
-		vvb := vv.AsValueViewBase()
+		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		// lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
@@ -381,7 +381,7 @@ func (sv *StructView) ConfigStructGrid() {
 					tb.UpdateButtons()
 				}
 				sv.SendChange()
-				// vvv, _ := send.Embed(TypeValueViewBase).(*ValueViewBase)
+				// vvv, _ := send.Embed(TypeValueBase).(*ValueBase)
 				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 			})
 		}
@@ -423,8 +423,8 @@ func (sv *StructView) Render(sc *gi.Scene) {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "def" default tags -- if so, needs updating
-func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Widget, isInact bool) (hasDef, inactTag bool) {
-	vvb := vv.AsValueViewBase()
+func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isInact bool) (hasDef, inactTag bool) {
+	vvb := vv.AsValueBase()
 	if lbltag, has := vv.Tag("label"); has {
 		lbl.Text = lbltag
 	} else {
@@ -450,7 +450,7 @@ func StructViewFieldTags(vv ValueView, lbl *gi.Label, widg gi.Widget, isInact bo
 // StructViewFieldDefTag processes the "def" tag for default values -- can be
 // called multiple times for updating as values change.
 // returns true if value is default, and string to add to tooltip for default vals
-func StructViewFieldDefTag(vv ValueView, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
+func StructViewFieldDefTag(vv Value, lbl *gi.Label) (hasDef bool, isDef bool, defStr string) {
 	// todo
 	// if dtag, has := vv.Tag("def"); has {
 	// 	hasDef = true

@@ -19,19 +19,19 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  KeyChordValueView
+//  KeyChordValue
 
-// KeyChordValueView presents an KeyChordEdit for key.Chord
-type KeyChordValueView struct {
-	ValueViewBase
+// KeyChordValue presents an KeyChordEdit for key.Chord
+type KeyChordValue struct {
+	ValueBase
 }
 
-func (vv *KeyChordValueView) WidgetType() *gti.Type {
+func (vv *KeyChordValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = KeyChordEditType
 	return vv.WidgetTyp
 }
 
-func (vv *KeyChordValueView) UpdateWidget() {
+func (vv *KeyChordValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -40,7 +40,7 @@ func (vv *KeyChordValueView) UpdateWidget() {
 	kc.SetText(txt)
 }
 
-func (vv *KeyChordValueView) ConfigWidget(widg gi.Widget) {
+func (vv *KeyChordValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	kc := vv.Widget.(*KeyChordEdit)
@@ -53,7 +53,7 @@ func (vv *KeyChordValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *KeyChordValueView) HasDialog() bool {
+func (vv *KeyChordValue) HasDialog() bool {
 	return false
 }
 

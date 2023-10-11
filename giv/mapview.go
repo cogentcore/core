@@ -28,17 +28,17 @@ type MapView struct {
 	// the map that we are a view onto
 	Map any `desc:"the map that we are a view onto"`
 
-	// ValueView for the map itself, if this was created within value view framework -- otherwise nil
-	MapValView ValueView `desc:"ValueView for the map itself, if this was created within value view framework -- otherwise nil"`
+	// Value for the map itself, if this was created within value view framework -- otherwise nil
+	MapValView Value `desc:"Value for the map itself, if this was created within value view framework -- otherwise nil"`
 
 	// has the map been edited?
 	Changed bool `desc:"has the map been edited?"`
 
-	// ValueView representations of the map keys
-	Keys []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map keys"`
+	// Value representations of the map keys
+	Keys []Value `json:"-" xml:"-" desc:"Value representations of the map keys"`
 
-	// ValueView representations of the map values
-	Values []ValueView `json:"-" xml:"-" desc:"ValueView representations of the map values"`
+	// Value representations of the map values
+	Values []Value `json:"-" xml:"-" desc:"Value representations of the map values"`
 
 	// sort by values instead of keys
 	SortVals bool `desc:"sort by values instead of keys"`
@@ -50,7 +50,7 @@ type MapView struct {
 	NCols int `desc:"the number of columns in the map; do not set externally; generally only access internally"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -135,7 +135,7 @@ func (mv *MapView) KiPropTag() string {
 	if mv.MapValView == nil {
 		return ""
 	}
-	vvb := mv.MapValView.AsValueViewBase()
+	vvb := mv.MapValView.AsValueBase()
 	if vvb.Owner == nil {
 		return ""
 	}
@@ -156,8 +156,8 @@ func (mv *MapView) ConfigMapGrid() {
 	sg := mv.MapGrid()
 	config := ki.Config{}
 	// always start fresh!
-	mv.Keys = make([]ValueView, 0)
-	mv.Values = make([]ValueView, 0)
+	mv.Keys = make([]Value, 0)
+	mv.Values = make([]Value, 0)
 
 	mpv := reflect.ValueOf(mv.Map)
 	mpvnp := laser.NonPtrValue(mpv)
@@ -188,14 +188,14 @@ func (mv *MapView) ConfigMapGrid() {
 
 	keys := laser.MapSort(mv.Map, !mv.SortVals, true) // note: this is a slice of reflect.Value!
 	for _, key := range keys {
-		kv := ToValueView(key.Interface(), "")
+		kv := ToValue(key.Interface(), "")
 		if kv == nil { // shouldn't happen
 			continue
 		}
 		kv.SetMapKey(key, mv.Map, mv.TmpSave)
 
 		val := laser.OnePtrUnderlyingValue(mpvnp.MapIndex(key))
-		vv := ToValueView(val.Interface(), "")
+		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
@@ -223,12 +223,12 @@ func (mv *MapView) ConfigMapGrid() {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
 	for i, vv := range mv.Values {
-		vvb := vv.AsValueViewBase()
+		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		widg := sg.Child(i*ncol + 1).(gi.Widget)
 		kv := mv.Keys[i]
-		kvb := kv.AsValueViewBase()
+		kvb := kv.AsValueBase()
 		kvb.OnChange(func(e events.Event) { mv.SendChange() })
 		kv.ConfigWidget(keyw)
 		vv.ConfigWidget(widg)
@@ -289,7 +289,7 @@ func (mv *MapView) MapChangeValueType(idx int, typ reflect.Type) {
 		evn = laser.CloneToType(typ, cv.Interface())
 	}
 	ov := laser.NonPtrValue(reflect.ValueOf(mv.Map))
-	valv.AsValueViewBase().Value = evn.Elem()
+	valv.AsValueBase().Value = evn.Elem()
 	ov.SetMapIndex(ck, evn.Elem())
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()

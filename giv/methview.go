@@ -54,7 +54,7 @@ type ArgData struct {
 	Val     reflect.Value
 	Name    string
 	Desc    string
-	View    ValueView
+	View    Value
 	Default any
 	Flags   ArgDataFlags
 }
@@ -904,7 +904,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 			ad.SetHasDef()
 		}
 
-		ad.View = ToValueView(ad.Val.Interface(), "")
+		ad.View = ToValue(ad.Val.Interface(), "")
 		ad.View.SetSoloValue(ad.Val)
 		ad.View.SetName(ad.Name)
 		nprompt++ // assume prompt

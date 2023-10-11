@@ -32,9 +32,9 @@ var _ SliceViewer = (*SliceView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type SliceViewStyleFunc func(sv *SliceView, slice any, widg gi.Widget, row int, vv ValueView)
+type SliceViewStyleFunc func(sv *SliceView, slice any, widg gi.Widget, row int, vv Value)
 
-func (sv *SliceView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv ValueView) {
+func (sv *SliceView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value) {
 	if sv.StyleFunc != nil {
 		sv.StyleFunc(sv, svnp.Interface(), widg, idx, vv)
 	}

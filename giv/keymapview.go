@@ -82,20 +82,20 @@ func KeyMapsView(km *gi.KeyMaps) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  KeyMapValueView
+//  KeyMapValue
 
-// KeyMapValueView presents an action for displaying a KeyMapName and selecting
+// KeyMapValue presents an action for displaying a KeyMapName and selecting
 // from chooser
-type KeyMapValueView struct {
-	ValueViewBase
+type KeyMapValue struct {
+	ValueBase
 }
 
-func (vv *KeyMapValueView) WidgetType() *gti.Type {
+func (vv *KeyMapValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *KeyMapValueView) UpdateWidget() {
+func (vv *KeyMapValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -104,7 +104,7 @@ func (vv *KeyMapValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *KeyMapValueView) ConfigWidget(widg gi.Widget) {
+func (vv *KeyMapValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -114,11 +114,11 @@ func (vv *KeyMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *KeyMapValueView) HasDialog() bool {
+func (vv *KeyMapValue) HasDialog() bool {
 	return true
 }
 
-func (vv *KeyMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

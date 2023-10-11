@@ -71,7 +71,7 @@ type SliceViewer interface {
 	SliceGridNeedsUpdate() bool
 
 	// StyleRow calls a custom style function on given row (and field)
-	StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv ValueView)
+	StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value)
 
 	// RowFirstWidget returns the first widget for given row (could be index or
 	// not) -- false if out of range
@@ -139,8 +139,8 @@ type SliceViewBase struct {
 	// [view: -] non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-" desc:"non-ptr reflect.Value of the slice"`
 
-	// [view: -] ValueView for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
+	// [view: -] Value for the slice itself, if this was created within value view framework -- otherwise nil
+	SliceValView Value `copy:"-" view:"-" json:"-" xml:"-" desc:"Value for the slice itself, if this was created within value view framework -- otherwise nil"`
 
 	// [view: -] whether the slice is actually an array -- no modifications -- set by SetSlice
 	isArray bool `copy:"-" view:"-" json:"-" xml:"-" desc:"whether the slice is actually an array -- no modifications -- set by SetSlice"`
@@ -157,8 +157,8 @@ type SliceViewBase struct {
 	// has the slice been edited?
 	Changed bool `desc:"has the slice been edited?"`
 
-	// [view: -] ValueView representations of the slice values
-	Values []ValueView `copy:"-" view:"-" json:"-" xml:"-" desc:"ValueView representations of the slice values"`
+	// [view: -] Value representations of the slice values
+	Values []Value `copy:"-" view:"-" json:"-" xml:"-" desc:"Value representations of the slice values"`
 
 	// whether to show index or not
 	ShowIndex bool `desc:"whether to show index or not"`
@@ -191,7 +191,7 @@ type SliceViewBase struct {
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `copy:"-" json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// [view: -] the slice that we successfully set a toolbar for
 	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-" desc:"the slice that we successfully set a toolbar for"`
@@ -268,7 +268,7 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 		w.AddStyles(func(s *styles.Style) {
 			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4 )
+			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
 		})
 	}
@@ -468,7 +468,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 
 	// at this point, we make one dummy row to get size of widgets
 	val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(0)) // deal with pointer lists
-	vv := ToValueView(val.Interface(), "")
+	vv := ToValue(val.Interface(), "")
 	if vv == nil { // shouldn't happen
 		return
 	}
@@ -628,7 +628,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	if sv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(ki.DestroyKids)
 
-		sv.Values = make([]ValueView, sv.DispRows)
+		sv.Values = make([]Value, sv.DispRows)
 		sg.Kids = make(ki.Slice, nWidg)
 	}
 	sv.ConfigScroll()
@@ -685,9 +685,9 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		si := sv.StartIdx + i // slice idx
 		issel := sv.IdxIsSelected(si)
 		val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
-		var vv ValueView
+		var vv Value
 		if sv.Values[i] == nil {
-			vv = ToValueView(val.Interface(), "")
+			vv = ToValue(val.Interface(), "")
 			sv.Values[i] = vv
 		} else {
 			vv = sv.Values[i]
@@ -743,7 +743,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 					})
 				}
 			} else {
-				vvb := vv.AsValueViewBase()
+				vvb := vv.AsValueBase()
 				vvb.OnChange(func(e events.Event) {
 					sv.SendChange()
 				})
@@ -829,7 +829,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	svnp := sv.SliceNPVal
 
 	if iski && sv.SliceValView != nil {
-		vvb := sv.SliceValView.AsValueViewBase()
+		vvb := sv.SliceValView.AsValueBase()
 		if vvb.Owner != nil {
 			if ownki, ok := vvb.Owner.(ki.Ki); ok {
 				gi.NewKiDialog(sv, gi.DlgOpts{Title: "Slice New", Prompt: "Number and Type of Items to Insert:", Ok: true, Cancel: true},

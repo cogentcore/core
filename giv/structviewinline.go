@@ -25,17 +25,17 @@ type StructViewInline struct {
 	// the struct that we are a view onto
 	Struct any `desc:"the struct that we are a view onto"`
 
-	// ValueView for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView ValueView `desc:"ValueView for the struct itself, if this was created within value view framework -- otherwise nil"`
+	// Value for the struct itself, if this was created within value view framework -- otherwise nil
+	StructValView Value `desc:"Value for the struct itself, if this was created within value view framework -- otherwise nil"`
 
 	// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
 	AddButton bool `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
 
-	// ValueView representations of the fields
-	FieldViews []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	// Value representations of the fields
+	FieldViews []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -84,7 +84,7 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
-	sv.FieldViews = make([]ValueView, 0)
+	sv.FieldViews = make([]Value, 0)
 	laser.FlatFieldsValueFunc(sv.Struct, func(fval any, typ reflect.Type, field reflect.StructField, fieldVal reflect.Value) bool {
 		// todo: check tags, skip various etc
 		vwtag := field.Tag.Get("view")
@@ -98,7 +98,7 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 				return true
 			}
 		}
-		vv := FieldToValueView(sv.Struct, field.Name, fval)
+		vv := FieldToValue(sv.Struct, field.Name, fval)
 		if vv == nil { // shouldn't happen
 			return true
 		}
@@ -120,7 +120,7 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := parts.Child(i * 2).(*gi.Label)
-		vvb := vv.AsValueViewBase()
+		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		widg := parts.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
