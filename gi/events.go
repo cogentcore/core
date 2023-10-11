@@ -78,6 +78,7 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 		e.AsBase().Typ = typ
 	} else {
 		e = &events.Base{Typ: typ}
+		e.Init()
 	}
 	w, ok := wb.This().(Widget)
 	if !ok {

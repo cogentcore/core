@@ -8,6 +8,42 @@ import (
 	"goki.dev/ordmap"
 )
 
+// TwinViewsType is the [gti.Type] for [TwinViews]
+var TwinViewsType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/textview.TwinViews",
+	ShortName:  "textview.TwinViews",
+	IDName:     "twin-views",
+	Doc:        "TwinViews presents two side-by-side View windows in Splits\nthat scroll in sync with each other.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"gi.Splits", &gti.Field{Name: "gi.Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TwinViews{},
+})
+
+// NewTwinViews adds a new [TwinViews] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTwinViews(par ki.Ki, name ...string) *TwinViews {
+	return par.NewChild(TwinViewsType, name...).(*TwinViews)
+}
+
+// KiType returns the [*gti.Type] of [TwinViews]
+func (t *TwinViews) KiType() *gti.Type {
+	return TwinViewsType
+}
+
+// New returns a new [*TwinViews] value
+func (t *TwinViews) New() ki.Ki {
+	return &TwinViews{}
+}
+
 // ViewType is the [gti.Type] for [View]
 var ViewType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/textview.View",
@@ -102,40 +138,4 @@ func AsView(k ki.Ki) *View {
 // AsView satisfies the [ViewEmbedder] interface
 func (t *View) AsView() *View {
 	return t
-}
-
-// TwinViewsType is the [gti.Type] for [TwinViews]
-var TwinViewsType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/textview.TwinViews",
-	ShortName:  "textview.TwinViews",
-	IDName:     "twin-views",
-	Doc:        "TwinViews presents two side-by-side View windows in Splits\nthat scroll in sync with each other.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Splits", &gti.Field{Name: "gi.Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TwinViews{},
-})
-
-// NewTwinViews adds a new [TwinViews] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTwinViews(par ki.Ki, name ...string) *TwinViews {
-	return par.NewChild(TwinViewsType, name...).(*TwinViews)
-}
-
-// KiType returns the [*gti.Type] of [TwinViews]
-func (t *TwinViews) KiType() *gti.Type {
-	return TwinViewsType
-}
-
-// New returns a new [*TwinViews] value
-func (t *TwinViews) New() ki.Ki {
-	return &TwinViews{}
 }

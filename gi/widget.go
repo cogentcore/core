@@ -419,7 +419,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 }
 
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.Is(Invisible) {
+	if wb == nil || wb.This() == nil || wb.Is(Invisible) || wb.Sc == nil {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {

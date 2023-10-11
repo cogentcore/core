@@ -10,6 +10,7 @@ import (
 	"goki.dev/gi/v2/textview"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/goosi"
 )
 
 var samplefile gi.FileName = "sample.go"
@@ -18,6 +19,8 @@ func main() { gimain.Run(app) }
 
 func app() {
 	// gi.LayoutTrace = true
+
+	goosi.ZoomFactor = 2
 
 	gi.SetAppName("textview")
 	gi.SetAppAbout(`This is a demo of the textview.View in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
@@ -30,6 +33,7 @@ func app() {
 	hdrText := `This is a <b>test</b> of the textview.View`
 	title := gi.NewLabel(trow, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
 	title.AddStyles(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 		s.Text.Align = styles.AlignCenter
 		s.Text.AlignV = styles.AlignTop
 	})
@@ -45,7 +49,7 @@ func app() {
 	*/
 
 	// generally need to put text view within its own layout for scrolling
-	txly1 := gi.NewLayout(splt, "view-layout-1")
+	txly1 := gi.NewLayout(sc, "view-layout-1")
 	txly1.AddStyles(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
