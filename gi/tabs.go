@@ -534,6 +534,9 @@ func (tb *Tab) OnInit() {
 
 func (tb *Tab) TabButtonStyles() {
 	tb.AddStyles(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
+		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)
+
 		s.Cursor = cursors.Pointer
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetDp(500)
