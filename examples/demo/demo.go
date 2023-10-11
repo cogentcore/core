@@ -317,6 +317,16 @@ func makeInputs(ts *gi.Tabs) {
 	cheo.Tooltips = fruitDescs
 	cheo.Type = gi.ComboBoxOutlined
 
+	sw := gi.NewSwitches(inputs)
+	sw.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
+	sw.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
+
+	swr := gi.NewSwitches(inputs)
+	sw.Type = gi.SwitchRadioButton
+	swr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
+	swr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
+	swr.Mutex = true
+
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
@@ -331,17 +341,6 @@ func makeInputs(ts *gi.Tabs) {
 
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.3)
 	gi.NewSlider(sliderys).SetDim(mat32.Y).SetValue(0.2).SetState(true, states.Disabled)
-
-	// TODO(kai): add back button boxes to demo
-
-	// bbox := gi.NewButtonBox(inputs, "bbox")
-	// bbox.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
-	// bbox.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
-
-	// bboxr := gi.NewButtonBox(inputs, "bboxr")
-	// bboxr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
-	// bboxr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
-	// bboxr.Mutex = true
 
 	// tbuf := &giv.TextBuf{}
 	// tbuf.InitName(tbuf, "tbuf")
