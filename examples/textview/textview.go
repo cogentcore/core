@@ -51,7 +51,7 @@ func app() {
 	title.SetProp("vertical-align", styles.AlignTop)
 	title.SetProp("font-size", "x-large")
 
-	splt := mfr.NewChild(gi.TypeSplitView, "split-view").(*gi.SplitView)
+	splt := mfr.NewChild(gi.TypeSplits, "split-view").(*gi.Splits)
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
 	splt.SetProp("white-space", styles.WhiteSpacePreWrap)

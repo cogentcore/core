@@ -71,12 +71,12 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 			s.AlignH = styles.AlignCenter
 			s.AlignV = styles.AlignTop
 		})
-	case "splitview":
+	case "splits":
 		split := w.(*gi.Splits)
 		split.Dim = mat32.X
 	}
 	ip, _ := w.IndexInParent()
-	if w.Parent().Name() == "splitview" && ip > 0 {
+	if w.Parent().Name() == "splits" && ip > 0 {
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMax()
 			s.SetMinPrefWidth(units.Ch(20))
@@ -138,7 +138,7 @@ func (fb *FileBrowse) UpdateProj() {
 	mods, updt := fb.StdConfig()
 	fb.SetTitle(fmt.Sprintf("FileBrowse of: %v", fb.ProjRoot)) // todo: get rid of title
 	fb.UpdateFiles()
-	fb.ConfigSplitView()
+	fb.ConfigSplits()
 	fb.ConfigToolbar()
 	if mods {
 		fb.UpdateEnd(updt)
@@ -270,7 +270,7 @@ func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
 	config.Add(gi.ToolBarType, "toolbar")
-	config.Add(gi.TypeSplitView, "splitview")
+	config.Add(gi.TypeSplits, "splits")
 	return config
 }
 
@@ -302,9 +302,9 @@ func (fb *FileBrowse) TitleWidget() (*gi.Label, int) {
 	return fb.Child(idx).(*gi.Label), idx
 }
 
-// SplitView returns the main SplitView
-func (fb *FileBrowse) SplitView() (*gi.Splits, int) {
-	idx, ok := fb.Children().IndexByName("splitview", 2)
+// Splits returns the main Splits
+func (fb *FileBrowse) Splits() (*gi.Splits, int) {
+	idx, ok := fb.Children().IndexByName("splits", 2)
 	if !ok {
 		return nil, -1
 	}
@@ -317,7 +317,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
 		return nil
 	}
-	split, _ := fb.SplitView()
+	split, _ := fb.Splits()
 	stidx := 1 // 0 = file browser -- could be collapsed but always there.
 	if split != nil {
 		svk := split.Child(stidx + idx).Child(0)
@@ -349,8 +349,8 @@ func (fb *FileBrowse) ConfigToolbar() {
 	giv.ToolBarView(fb, fb.Scene, tb)
 }
 
-// SplitViewConfig returns a Config for configuring the SplitView
-func (fb *FileBrowse) SplitViewConfig() ki.Config {
+// SplitsConfig returns a Config for configuring the Splits
+func (fb *FileBrowse) SplitsConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.FrameType, "filetree-fr")
 	for i := 0; i < fb.NTextViews; i++ {
@@ -360,14 +360,14 @@ func (fb *FileBrowse) SplitViewConfig() ki.Config {
 	return config
 }
 
-// ConfigSplitView configures the SplitView.
-func (fb *FileBrowse) ConfigSplitView() {
-	split, _ := fb.SplitView()
+// ConfigSplits configures the Splits.
+func (fb *FileBrowse) ConfigSplits() {
+	split, _ := fb.Splits()
 	if split == nil {
 		return
 	}
 
-	config := fb.SplitViewConfig()
+	config := fb.SplitsConfig()
 	mods, updt := split.ConfigChildren(config)
 	if mods {
 		ftfr := split.Child(0).(*gi.Frame)

@@ -947,7 +947,7 @@ var SplitterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Splitter",
 	ShortName:  "gi.Splitter",
 	IDName:     "splitter",
-	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplitView, with draggable resizing of the splitter -- parent is Parts\nlayout of the SplitView -- based on Slider",
+	Doc:        "Splitter provides the splitter handle and line separating two elements in a\nSplits, with draggable resizing of the splitter -- parent is Parts\nlayout of the Splits -- based on Slider",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SplitterNo", &gti.Field{Name: "SplitterNo", Type: "int", Doc: "splitter number this one is", Directives: gti.Directives{}}},

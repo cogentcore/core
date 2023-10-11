@@ -61,11 +61,11 @@ func (sl *Splits) CopyFieldsFrom(frm any) {
 }
 
 func (sl *Splits) OnInit() {
-	sl.SplitViewHandlers()
-	sl.SplitViewStyles()
+	sl.SplitsHandlers()
+	sl.SplitsStyles()
 }
 
-func (sl *Splits) SplitViewStyles() {
+func (sl *Splits) SplitsStyles() {
 	sl.AddStyles(func(s *styles.Style) {
 		sl.HandleSize.SetDp(10)
 
@@ -295,7 +295,7 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 	}
 }
 
-func (sl *Splits) SplitViewKeys() {
+func (sl *Splits) SplitsKeys() {
 	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
@@ -327,11 +327,11 @@ func (sl *Splits) SplitViewKeys() {
 	})
 }
 
-func (sl *Splits) SplitViewHandlers() {
-	sl.SplitViewKeys()
+func (sl *Splits) SplitsHandlers() {
+	sl.SplitsKeys()
 }
 
-func (sl *Splits) StyleSplitView(sc *Scene) {
+func (sl *Splits) StyleSplits(sc *Scene) {
 	sl.ApplyStyleWidget(sc)
 	// todo: props?
 	// sl.HandleSize.SetFmInheritProp("handle-size", sl.This(), ki.NoInherit, ki.TypeProps)
@@ -341,7 +341,7 @@ func (sl *Splits) StyleSplitView(sc *Scene) {
 func (sl *Splits) ApplyStyle(sc *Scene) {
 	sl.StyMu.Lock()
 
-	sl.StyleSplitView(sc)
+	sl.StyleSplits(sc)
 	sl.UpdateSplits()
 	sl.StyMu.Unlock()
 
@@ -411,7 +411,7 @@ func (sl *Splits) Render(sc *Scene) {
 	}
 }
 
-// func (sl *SplitView) StateIs(states.Focused) bool {
+// func (sl *Splits) StateIs(states.Focused) bool {
 // 	return sl.ContainsFocus() // anyone within us gives us focus..
 // }
 
@@ -421,8 +421,8 @@ func (sl *Splits) Render(sc *Scene) {
 // TODO(kai): decide on splitter structure
 
 // Splitter provides the splitter handle and line separating two elements in a
-// SplitView, with draggable resizing of the splitter -- parent is Parts
-// layout of the SplitView -- based on Slider
+// Splits, with draggable resizing of the splitter -- parent is Parts
+// layout of the Splits -- based on Slider
 type Splitter struct {
 	Slider
 
@@ -556,7 +556,7 @@ func (sr *Splitter) UpdateSplitterPos() {
 	*/
 }
 
-// SplitView returns our parent splits
+// Splits returns our parent splits
 func (sr *Splitter) Splits() *Splits {
 	if sr.Par == nil || sr.Par.Parent() == nil {
 		return nil
