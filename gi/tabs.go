@@ -36,9 +36,6 @@ type Tabs struct {
 	// maximum number of characters to include in tab label -- elides labels that are longer than that
 	MaxChars int `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
 
-	// signal for tab widget -- see TabViewSignals for the types
-	// TabViewSig ki.Signal `copy:"-" json:"-" xml:"-" desc:"signal for tab widget -- see TabViewSignals for the types"`
-
 	// show a new tab button at right of list of tabs
 	NewTabButton bool `desc:"show a new tab button at right of list of tabs"`
 
@@ -57,15 +54,15 @@ func (ts *Tabs) CopyFieldsFrom(frm any) {
 }
 
 func (ts *Tabs) OnInit() {
-	ts.TabViewHandlers()
-	ts.TabViewStyles()
+	ts.TabsHandlers()
+	ts.TabsStyles()
 }
 
-func (ts *Tabs) TabViewHandlers() {
+func (ts *Tabs) TabsHandlers() {
 	ts.LayoutHandlers()
 }
 
-func (ts *Tabs) TabViewStyles() {
+func (ts *Tabs) TabsStyles() {
 	ts.AddStyles(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
@@ -228,7 +225,7 @@ func (ts *Tabs) TabAtIndex(idx int) (*Frame, *Tab, bool) {
 	tb := ts.Tabs()
 	sz := len(*fr.Children())
 	if idx < 0 || idx >= sz {
-		slog.Error("gi.TabView: index out of range for number of tabs", "index", idx, "numTabs", sz)
+		slog.Error("gi.Tabs: index out of range for number of tabs", "index", idx, "numTabs", sz)
 		return nil, nil, false
 	}
 	tab := tb.Child(idx).(*Tab)
@@ -271,7 +268,7 @@ func (ts *Tabs) TabByNameTry(label string) (*Frame, error) {
 	tb := ts.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
-		return nil, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, ts.Path())
+		return nil, fmt.Errorf("gi.Tabs: Tab named %v not found in %v", label, ts.Path())
 	}
 	fr := ts.Frame()
 	frame := fr.Child(idx).(*Frame)
@@ -286,7 +283,7 @@ func (ts *Tabs) TabIndexByName(label string) (int, error) {
 	tb := ts.Tabs()
 	idx, ok := tb.Children().IndexByName(label, 0)
 	if !ok {
-		return -1, fmt.Errorf("gi.TabView: Tab named %v not found in %v", label, ts.Path())
+		return -1, fmt.Errorf("gi.Tabs: Tab named %v not found in %v", label, ts.Path())
 	}
 	return idx, nil
 }
@@ -408,12 +405,12 @@ func (ts *Tabs) ConfigNewTabButton(sc *Scene) bool {
 	}
 }
 
-// TabViewSignals are signals that the TabView can send
-type TabViewSignals int64
+// TabsSignals are signals that the Tabs can send
+type TabsSignals int64
 
 const (
 	// TabSelected indicates tab was selected -- data is the tab index
-	TabSelected TabViewSignals = iota
+	TabSelected TabsSignals = iota
 
 	// TabAdded indicates tab was added -- data is the tab index
 	TabAdded
@@ -421,7 +418,7 @@ const (
 	// TabDeleted indicates tab was deleted -- data is the tab name
 	TabDeleted
 
-	TabViewSignalsN
+	TabsSignalsN
 )
 
 // ConfigWidget initializes the tab widget children if it hasn't been done yet.

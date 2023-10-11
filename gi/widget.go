@@ -166,7 +166,7 @@ type Widget interface {
 	// This does *not* check for ScBBox level visibility, which is a further check.
 	// Non-visible nodes are automatically not rendered and do not get
 	// window events.  The Invisible flag is one key element of the IsVisible
-	// calculus -- it is set by e.g., TabView for invisible tabs, and is also
+	// calculus -- it is set by e.g., Tabs for invisible tabs, and is also
 	// set if a widget is entirely out of render range.  But again, use
 	// IsVisible as the main end-user method.
 	// For robustness, it recursively calls the parent -- this is typically
