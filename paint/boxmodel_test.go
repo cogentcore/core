@@ -12,6 +12,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
 
@@ -35,9 +36,13 @@ func TestBoxModel(t *testing.T) {
 	st := &styles.Style{}
 	st.Defaults()
 	st.Color = colors.Black
-	st.BackgroundColor.SetSolid(colors.Gray)
+	st.BackgroundColor.SetSolid(colors.Green)
+	st.Border.Style.Set(styles.BorderSolid)
+	st.Border.Width.Set(units.Dp(5))
+	st.Border.Color.Set(colors.Red)
+	st.Border.Radius = styles.BorderRadiusFull
 
-	sbg := &colors.Full{Solid: colors.White}
+	sbg := &colors.Full{Solid: colors.Blue}
 
 	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg)
 
