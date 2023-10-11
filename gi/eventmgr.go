@@ -350,7 +350,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		if !cursorSet && wb.Style.Cursor != cursors.None {
 			em.SetCursor(wb.Style.Cursor)
 			cursorSet = true
-			fmt.Println(wb.Style.Cursor, wb)
 		}
 	}
 }

@@ -171,7 +171,6 @@ func (sr *Slider) OnInit() {
 
 func (sr *Slider) SliderStyles() {
 	sr.AddStyles(func(s *styles.Style) {
-		fmt.Println(sr, sr.Type)
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		// we use a different color for the thumb and value color
