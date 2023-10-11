@@ -1735,7 +1735,7 @@ var ValueBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ValueBase",
 	ShortName:  "giv.ValueBase",
 	IDName:     "value-base",
-	Doc:        "ValueBase provides the basis for implementations of the Value\ninterface, representing values in the interface -- it implements a generic\nTextField representation of the string value, and provides the generic\nfallback for everything that doesn't provide a specific Valueer type.",
+	Doc:        "ValueBase provides the basis for implementations of the Value\ninterface, representing values in the interface -- it implements a generic\nTextField representation of the string value, and provides the generic\nfallback for everything that doesn't provide a specific Valuer type.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "reflect.Value", Doc: "the reflect.Value representation of the value", Directives: gti.Directives{}}},
@@ -1748,7 +1748,7 @@ var ValueBaseType = gti.AddType(&gti.Type{
 		{"Key", &gti.Field{Name: "Key", Type: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}}},
 		{"KeyView", &gti.Field{Name: "KeyView", Type: "Value", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
 		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
-		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface", Directives: gti.Directives{}}},
+		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface", Directives: gti.Directives{}}},
 		{"Widget", &gti.Field{Name: "Widget", Type: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
