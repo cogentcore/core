@@ -4,17 +4,8 @@
 
 package main
 
-import (
-	"image"
-
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-)
-
+// TODO: fix
+/*
 // todo: enum field, etc
 
 // A node for testing
@@ -165,3 +156,4 @@ func app() {
 
 	win.StartEventLoop()
 }
+*/

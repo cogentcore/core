@@ -4,24 +4,8 @@
 
 package main
 
-import (
-	"flag"
-	"fmt"
-	"log"
-	"os"
-	"path/filepath"
-	"strconv"
-
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-)
+// TODO: fix
+/*
 
 // FileBrowse is a simple file browser / viewer / editor with a file tree and
 // one or more editor windows.  It is based on an early version of the Gide
@@ -593,3 +577,4 @@ func app() {
 	// above calls will have added to WinWait..
 	gi.WinWait.Wait()
 }
+*/

@@ -4,11 +4,8 @@
 
 package main
 
-import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-)
-
+// TODO: fix
+/*
 func main() { gimain.Run(app) }
 
 func app() {
@@ -143,3 +140,4 @@ func app() {
 	vp.UpdateEndNoSig(updt)
 	win.StartEventLoop()
 }
+*/

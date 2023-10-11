@@ -4,14 +4,8 @@
 
 package main
 
-import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-)
-
+// TODO: fix
+/*
 var samplefile gi.FileName = "sample.go"
 
 func main() { gimain.Run(app) }
@@ -108,3 +102,4 @@ func app() {
 
 	win.StartEventLoop()
 }
+*/

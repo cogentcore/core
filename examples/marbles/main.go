@@ -6,16 +6,8 @@
 
 package main
 
-import (
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/svg"
-)
-
+// TODO: fix
+/*
 var Sc *gi.Scene
 var EqTable *giv.TableView
 var ParamsEdit *giv.StructView
@@ -126,3 +118,4 @@ func app() {
 	Sc.UpdateEndNoSig(updt)
 	win.StartEventLoop()
 }
+*/
