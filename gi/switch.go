@@ -56,11 +56,11 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switch) OnInit() {
-	sw.SwitchHandlers()
+	sw.HandleSwitchEvents()
 	sw.SwitchStyles()
 }
 
-func (sw *Switch) SwitchHandlers() {
+func (sw *Switch) HandleSwitchEvents() {
 	sw.HandleWidgetEvents()
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {

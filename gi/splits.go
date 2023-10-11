@@ -61,7 +61,7 @@ func (sl *Splits) CopyFieldsFrom(frm any) {
 }
 
 func (sl *Splits) OnInit() {
-	sl.SplitsHandlers()
+	sl.HandleSplitsEvents()
 	sl.SplitsStyles()
 }
 
@@ -295,7 +295,7 @@ func (sl *Splits) ConfigSplitters(sc *Scene) {
 	}
 }
 
-func (sl *Splits) SplitsKeys() {
+func (sl *Splits) HandleSplitsKeys() {
 	sl.OnKeyChord(func(e events.Event) {
 		kc := string(e.KeyChord())
 		mod := "Control+"
@@ -327,8 +327,8 @@ func (sl *Splits) SplitsKeys() {
 	})
 }
 
-func (sl *Splits) SplitsHandlers() {
-	sl.SplitsKeys()
+func (sl *Splits) HandleSplitsEvents() {
+	sl.HandleSplitsKeys()
 }
 
 func (sl *Splits) StyleSplits(sc *Scene) {
@@ -434,7 +434,7 @@ type Splitter struct {
 }
 
 func (sr *Splitter) OnInit() {
-	sr.SplitterHandlers()
+	sr.HandleSplitterEvents()
 	sr.SplitterStyles()
 }
 
@@ -568,7 +568,7 @@ func (sr *Splitter) Splits() *Splits {
 	return sli
 }
 
-func (sr *Splitter) SplitterMouse() {
+func (sr *Splitter) HandleSplitterMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
 		// if srr.IsDisabled() {
 		// 	me.SetHandled()
@@ -617,10 +617,10 @@ func (sr *Splitter) SplitterMouse() {
 	// })
 }
 
-func (sr *Splitter) SplitterHandlers() {
-	sr.SliderMouse()
-	sr.SliderKeys()
-	sr.SplitterMouse()
+func (sr *Splitter) HandleSplitterEvents() {
+	sr.HandleSliderMouse()
+	sr.HandleSliderKeys()
+	sr.HandleSplitterMouse()
 }
 
 func (sr *Splitter) Render(sc *Scene) {

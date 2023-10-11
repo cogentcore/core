@@ -54,11 +54,11 @@ func (ts *Tabs) CopyFieldsFrom(frm any) {
 }
 
 func (ts *Tabs) OnInit() {
-	ts.TabsHandlers()
+	ts.HandleTabsEvents()
 	ts.TabsStyles()
 }
 
-func (ts *Tabs) TabsHandlers() {
+func (ts *Tabs) HandleTabsEvents() {
 	ts.HandleLayoutEvents()
 }
 

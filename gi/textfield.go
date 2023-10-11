@@ -147,7 +147,7 @@ func (tf *TextField) CopyFieldsFrom(frm any) {
 }
 
 func (tf *TextField) OnInit() {
-	tf.TextFieldHandlers()
+	tf.HandleTextFieldEvents()
 	tf.TextFieldStyles()
 }
 
@@ -1219,7 +1219,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 // 	tf.UpdateSig()
 // } else {
 
-func (tf *TextField) TextFieldMouse() {
+func (tf *TextField) HandleTextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
 		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
@@ -1272,7 +1272,7 @@ func (tf *TextField) TextFieldMouse() {
 	})
 }
 
-func (tf *TextField) TextFieldKeys() {
+func (tf *TextField) HandleTextFieldKeys() {
 	tf.OnKeyChord(func(e events.Event) {
 		if KeyEventTrace {
 			fmt.Printf("TextField KeyInput: %v\n", tf.Path())
@@ -1424,7 +1424,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 }
 */
 
-func (tf *TextField) TextFieldStateFromFocus() {
+func (tf *TextField) HandleTextFieldStateFromFocus() {
 	tf.OnFocus(func(e events.Event) {
 		if tf.StateIs(states.Disabled) {
 			return
@@ -1450,11 +1450,11 @@ func (tf *TextField) TextFieldStateFromFocus() {
 	})
 }
 
-func (tf *TextField) TextFieldHandlers() {
+func (tf *TextField) HandleTextFieldEvents() {
 	tf.HandleWidgetEvents()
-	tf.TextFieldMouse()
-	tf.TextFieldStateFromFocus()
-	tf.TextFieldKeys()
+	tf.HandleTextFieldMouse()
+	tf.HandleTextFieldStateFromFocus()
+	tf.HandleTextFieldKeys()
 }
 
 func (tf *TextField) ConfigParts(sc *Scene) {
