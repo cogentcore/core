@@ -318,7 +318,7 @@ var IntValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.IntValueView",
 	ShortName:  "giv.IntValueView",
 	IDName:     "int-value-view",
-	Doc:        "IntValueView presents a spinbox",
+	Doc:        "IntValueView presents a spinner",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -351,7 +351,7 @@ var FloatValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FloatValueView",
 	ShortName:  "giv.FloatValueView",
 	IDName:     "float-value-view",
-	Doc:        "FloatValueView presents a spinbox",
+	Doc:        "FloatValueView presents a spinner",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -384,7 +384,7 @@ var EnumValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.EnumValueView",
 	ShortName:  "giv.EnumValueView",
 	IDName:     "enum-value-view",
-	Doc:        "EnumValueView presents a combobox for choosing enums",
+	Doc:        "EnumValueView presents a chooser for choosing enums",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -452,7 +452,7 @@ var TypeValueViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TypeValueView",
 	ShortName:  "giv.TypeValueView",
 	IDName:     "type-value-view",
-	Doc:        "TypeValueView presents a combobox for choosing types",
+	Doc:        "TypeValueView presents a chooser for choosing types",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

@@ -45,14 +45,14 @@ type Scene struct {
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
 
-	// has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene
+	// [view: -] has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene
 	Flags ScFlags
 
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt
 
 	// Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil
-	Decor Layout
+	Decor *Layout
 
 	// [view: -] render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
@@ -60,8 +60,8 @@ type Scene struct {
 	// [view: -] live pixels that we render into
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
 
-	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
-	BgColor colors.Full `desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
+	// [view: -] background color for filling scene -- defaults to transparent so that popups can have rounded corners
+	BgColor colors.Full `view:"-" desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
 
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
@@ -91,8 +91,8 @@ func StageScene(name ...string) *Scene {
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert
-	sc.Decor.InitName(&sc.Decor, "decor")
-	sc.Decor.Lay = LayoutNil
+	// sc.Decor.InitName(sc.Decor, "decor")
+	// sc.Decor.Lay = LayoutNil
 	sc.SetDefaultStyle()
 	return sc
 }
@@ -201,7 +201,10 @@ func (sc *Scene) Delete(destroy bool) {
 
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
-	sc.Decor.DeleteChildren(ki.DestroyKids)
+	if sc.Decor != nil {
+		sc.Decor.DeleteChildren(ki.DestroyKids)
+		sc.Decor = nil
+	}
 	sc.DeleteChildren(ki.DestroyKids)
 }
 

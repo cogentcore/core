@@ -61,7 +61,8 @@ type DlgOpts struct {
 
 // ToGiOpts converts giv opts to gi opts
 func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
-	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: d.Ok, Cancel: d.Cancel}
+	// todo: temporarily enable ok, cancel until click-off etc all working
+	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: true, Cancel: true} // d.Ok, Cancel: d.Cancel}
 }
 
 // TextViewDialog opens a dialog for displaying multi-line text in a
