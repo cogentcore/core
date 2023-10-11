@@ -13,7 +13,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/histyle"
+	"goki.dev/gi/v2/textview/histyle"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"

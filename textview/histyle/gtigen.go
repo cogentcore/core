@@ -8,7 +8,9 @@ import (
 )
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/histyle.Trilean",
+	Name:       "goki.dev/gi/v2/textview/histyle.Trilean",
+	ShortName:  "histyle.Trilean",
+	IDName:     "trilean",
 	Doc:        "Trilean value for StyleEntry value inheritance.",
 	Directives: gti.Directives{},
 
@@ -16,7 +18,9 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/histyle.StyleEntry",
+	Name:       "goki.dev/gi/v2/textview/histyle.StyleEntry",
+	ShortName:  "histyle.StyleEntry",
+	IDName:     "style-entry",
 	Doc:        "StyleEntry is one value in the map of highlight style values",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -33,7 +37,9 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/histyle.Style",
+	Name:       "goki.dev/gi/v2/textview/histyle.Style",
+	ShortName:  "histyle.Style",
+	IDName:     "style",
 	Doc:        "Style is a full style map of styles for different token.Tokens tag values",
 	Directives: gti.Directives{},
 
@@ -41,7 +47,9 @@ var _ = gti.AddType(&gti.Type{
 })
 
 var _ = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/histyle.Styles",
+	Name:       "goki.dev/gi/v2/textview/histyle.Styles",
+	ShortName:  "histyle.Styles",
+	IDName:     "styles",
 	Doc:        "Styles is a collection of styles",
 	Directives: gti.Directives{},
 
