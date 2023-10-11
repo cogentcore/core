@@ -350,7 +350,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		}
 	})
 	// spinbox always gives its focus to textfield
-	sp.On(events.Focus, func(e events.Event) {
+	sp.OnFocus(func(e events.Event) {
 		tf.GrabFocus()
 		tf.Send(events.Focus, e) // sets focused flag
 	})

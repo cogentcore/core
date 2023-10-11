@@ -24,7 +24,7 @@ import (
 type Widget interface {
 	ki.Ki
 
-	// todo: rename .Style to .Styles and AddStyles to Style()
+	// TODO(kai): rename .Style to .Styles and AddStyles to Style()
 
 	// AddStyles sets the styling of the widget by adding a Styler function
 	AddStyles(s Styler) Widget

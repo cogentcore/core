@@ -35,6 +35,11 @@ func (wb *WidgetBase) OnClick(fun func(e events.Event)) Widget {
 	return wb.On(events.Click, fun)
 }
 
+// OnDoubleClick adds an event listener function for [events.DoubleClick] events
+func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) Widget {
+	return wb.On(events.DoubleClick, fun)
+}
+
 // OnChange adds an event listener function for [events.Change] events
 func (wb *WidgetBase) OnChange(fun func(e events.Event)) Widget {
 	return wb.On(events.Change, fun)
@@ -45,9 +50,14 @@ func (wb *WidgetBase) OnKeyChord(fun func(e events.Event)) Widget {
 	return wb.On(events.KeyChord, fun)
 }
 
-// OnDoubleClick adds an event listener function for [events.DoubleClick] events
-func (wb *WidgetBase) OnDoubleClick(fun func(e events.Event)) Widget {
-	return wb.On(events.DoubleClick, fun)
+// OnFocus adds an event listener function for [events.Focus] events
+func (wb *WidgetBase) OnFocus(fun func(e events.Event)) Widget {
+	return wb.On(events.Focus, fun)
+}
+
+// OnFocusLost adds an event listener function for [events.FocusLost] events
+func (wb *WidgetBase) OnFocusLost(fun func(e events.Event)) Widget {
+	return wb.On(events.FocusLost, fun)
 }
 
 // OnSelect adds an event listener function for [events.Select] events
@@ -263,7 +273,7 @@ func (wb *WidgetBase) LongHoverTooltip() {
 
 // WidgetStateFromFocus updates standard State flags based on Focus events
 func (wb *WidgetBase) WidgetStateFromFocus() {
-	wb.On(events.Focus, func(e events.Event) {
+	wb.OnFocus(func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
@@ -272,7 +282,7 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 			wb.SetState(true, states.Focused)
 		}
 	})
-	wb.On(events.FocusLost, func(e events.Event) {
+	wb.OnFocusLost(func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
 		}

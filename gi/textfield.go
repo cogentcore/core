@@ -1422,7 +1422,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 */
 
 func (tf *TextField) TextFieldStateFromFocus() {
-	tf.On(events.Focus, func(e events.Event) {
+	tf.OnFocus(func(e events.Event) {
 		if tf.StateIs(states.Disabled) {
 			return
 		}
@@ -1436,7 +1436,7 @@ func (tf *TextField) TextFieldStateFromFocus() {
 			tf.SetState(true, states.Focused)
 		}
 	})
-	tf.On(events.FocusLost, func(e events.Event) {
+	tf.OnFocusLost(func(e events.Event) {
 		if tf.StateIs(states.Disabled) {
 			return
 		}
