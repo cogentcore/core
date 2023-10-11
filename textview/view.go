@@ -1,4 +1,4 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -37,6 +37,9 @@ import (
 	"goki.dev/pi/v2/pi"
 	"goki.dev/pi/v2/token"
 )
+
+// todo: make it a Layout and handle all the scrollbar stuff internally!
+// could also see about wrapping in a Scene in gide and benchmark that.
 
 // View is a widget for editing multiple lines of text (as compared to
 // TextField for a single line).  The View is driven by a Buf buffer which

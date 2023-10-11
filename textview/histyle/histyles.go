@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"log/slog"
 	"path/filepath"
 	"sort"
 
@@ -142,12 +143,12 @@ func (hs *Styles) SaveAll(dir gi.FileName) {
 func (hs *Styles) OpenDefaults() error {
 	defb, err := content.ReadFile("defaults.histys")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	err = json.Unmarshal(defb, hs)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
 	return err

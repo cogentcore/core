@@ -127,8 +127,9 @@ func (st *MainStage) SetWindowInsets() {
 // only called when !NewWindow
 func (st *MainStage) AddWindowDecor() *MainStage {
 	if st.Back {
-		// todo: NewDecor method on scene
-		// but := NewButton(st.Scene.Decor, "win-back")
+		// sc := st.Scene
+		// parts := sc.NewParts()
+		// but := NewButton(parts, "win-back")
 		// _ = but
 		// todo: do more button config
 	}

@@ -45,9 +45,6 @@ type Scene struct {
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt
 
-	// Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil
-	Decor *Layout
-
 	// [view: -] render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
 
@@ -85,8 +82,6 @@ func StageScene(name ...string) *Scene {
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert
-	// sc.Decor.InitName(sc.Decor, "decor")
-	// sc.Decor.Lay = LayoutNil
 	sc.SetDefaultStyle()
 	return sc
 }
@@ -195,10 +190,6 @@ func (sc *Scene) Delete(destroy bool) {
 
 // DeleteImpl does the deletion, removing Decor and Frame Widgets.
 func (sc *Scene) DeleteImpl() {
-	if sc.Decor != nil {
-		sc.Decor.DeleteChildren(ki.DestroyKids)
-		sc.Decor = nil
-	}
 	sc.DeleteChildren(ki.DestroyKids)
 }
 
