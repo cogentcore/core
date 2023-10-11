@@ -9,12 +9,15 @@ import (
 	"log"
 	"log/slog"
 	"reflect"
+	"strings"
 	"time"
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -23,7 +26,7 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
-// basicviews contains all the Value's for basic builtin types
+// basicvals contains all the Values for basic builtin types
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructValue
@@ -1032,4 +1035,197 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget) {
 		}
 	})
 	vv.UpdateWidget()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  IconValue
+
+// IconValue presents an action for displaying an IconName and selecting
+// icons from IconChooserDialog
+type IconValue struct {
+	ValueBase
+}
+
+func (vv *IconValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *IconValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Button)
+	txt := laser.ToString(vv.Value.Interface())
+	if icons.Icon(txt).IsNil() {
+		ac.SetIcon("blank")
+	} else {
+		ac.SetIcon(icons.Icon(txt))
+	}
+	if sntag, ok := vv.Tag("view"); ok {
+		if strings.Contains(sntag, "show-name") {
+			if txt == "" {
+				txt = "none"
+			}
+			ac.SetText(txt)
+		}
+	}
+}
+
+func (vv *IconValue) ConfigWidget(widg gi.Widget) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+	ac := vv.Widget.(*gi.Button)
+	ac.SetProp("border-radius", units.Dp(4))
+	ac.SetProp("padding", 0)
+	ac.SetProp("margin", 0)
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(ac, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *IconValue) HasDialog() bool {
+	return true
+}
+
+func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
+	desc, _ := vv.Tag("desc")
+	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: desc}, cur, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			si := dlg.Data.(int)
+			if si >= 0 {
+				ic := gi.CurIconList[si]
+				vv.SetValue(ic)
+				vv.UpdateWidget()
+			}
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	}).Run()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  FontValue
+
+// FontValue presents an action for displaying a FontName and selecting
+// fonts from FontChooserDialog
+type FontValue struct {
+	ValueBase
+}
+
+func (vv *FontValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *FontValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Button)
+	txt := laser.ToString(vv.Value.Interface())
+	ac.SetProp("font-family", txt)
+	ac.SetText(txt)
+}
+
+func (vv *FontValue) ConfigWidget(widg gi.Widget) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+	ac := vv.Widget.(*gi.Button)
+	ac.SetProp("border-radius", units.Dp(4))
+	ac.OnClick(func(e events.Event) {
+		vv.OpenDialog(vv.Widget, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *FontValue) HasDialog() bool {
+	return true
+}
+
+func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+	if vv.IsInactive() {
+		return
+	}
+	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
+	desc, _ := vv.Tag("desc")
+	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: desc}, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			si := dlg.Data.(int)
+			if si >= 0 {
+				fi := paint.FontLibrary.FontInfo[si]
+				vv.SetValue(fi.Name)
+				vv.UpdateWidget()
+			}
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	}).Run()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  FileValue
+
+// FileValue presents an action for displaying a FileName and selecting
+// icons from FileChooserDialog
+type FileValue struct {
+	ValueBase
+}
+
+func (vv *FileValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *FileValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	ac := vv.Widget.(*gi.Button)
+	txt := laser.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(click to open file chooser)"
+	}
+	ac.SetText(txt)
+}
+
+func (vv *FileValue) ConfigWidget(widg gi.Widget) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+	ac := vv.Widget.(*gi.Button)
+	ac.OnClick(func(e events.Event) {
+		ac := vv.Widget.(*gi.Button)
+		vv.OpenDialog(ac, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *FileValue) HasDialog() bool {
+	return true
+}
+
+func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := laser.ToString(vv.Value.Interface())
+	ext, _ := vv.Tag("ext")
+	desc, _ := vv.Tag("desc")
+	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: desc}, cur, ext, nil, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			fn := dlg.Data.(string)
+			vv.SetValue(fn)
+			vv.UpdateWidget()
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	}).Run()
 }

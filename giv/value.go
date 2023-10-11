@@ -94,18 +94,18 @@ var (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  Valueer -- an interface for selecting Value GUI representation of types
+//  Valuer -- an interface for selecting Value GUI representation of types
 
-// Valueer interface supplies the appropriate type of Value -- called
+// Valuer interface supplies the appropriate type of Value -- called
 // on a given receiver item if defined for that receiver type (tries both
 // pointer and non-pointer receivers) -- can use this for custom types to
 // provide alternative custom interfaces -- must call Init on Value before
 // returning it
-type Valueer interface {
+type Valuer interface {
 	Value() Value
 }
 
-// example implementation of Valueer interface -- can't implement on
+// example implementation of Valuer interface -- can't implement on
 // non-local types, so all the basic types are handled separately:
 //
 // func (s string) Value() Value {
@@ -114,13 +114,13 @@ type Valueer interface {
 // 	return vv
 // }
 
-// FieldValueer interface supplies the appropriate type of Value for a
+// FieldValuer interface supplies the appropriate type of Value for a
 // given field name and current field value on the receiver parent struct --
 // called on a given receiver struct if defined for that receiver type (tries
 // both pointer and non-pointer receivers) -- if a struct implements this
 // interface, then it is used first for structs -- return nil to fall back on
 // the default ToValue result
-type FieldValueer interface {
+type FieldValuer interface {
 	FieldValue(field string, fval any) Value
 }
 
@@ -133,7 +133,7 @@ type ValueFunc func() Value
 
 // The ValueMap is used to connect type names with corresponding Value
 // representations of those types -- this can be used when it is not possible
-// to use the Valueer interface (e.g., interface methods can only be
+// to use the Valuer interface (e.g., interface methods can only be
 // defined within the package that defines the type -- so we need this for
 // all types in gi which don't know about giv).
 // You must use laser.LongTypeName (full package name + "." . type name) for
@@ -160,7 +160,7 @@ func StructTagVal(key, tags string) string {
 }
 
 // ToValue returns the appropriate Value for given item, based only on
-// its type -- attempts to get the Valueer interface and failing that,
+// its type -- attempts to get the Valuer interface and failing that,
 // falls back on default Kind-based options.  tags are optional tags, e.g.,
 // from the field in a struct, that control the view properties -- see the gi wiki
 // for details on supported tags -- these are NOT set for the view element, only
@@ -173,14 +173,14 @@ func ToValue(it any, tags string) Value {
 		ki.InitNode(vv)
 		return vv
 	}
-	if vv, ok := it.(Valueer); ok {
+	if vv, ok := it.(Valuer); ok {
 		vvo := vv.Value()
 		if vvo != nil {
 			return vvo
 		}
 	}
 	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(Valueer); ok {
+	if vv, ok := laser.PtrInterface(it).(Valuer); ok {
 		vvo := vv.Value()
 		if vvo != nil {
 			return vvo
@@ -351,21 +351,21 @@ func ToValue(it any, tags string) Value {
 }
 
 // FieldToValue returns the appropriate Value for given field on a
-// struct -- attempts to get the FieldValueer interface, and falls back on
+// struct -- attempts to get the FieldValuer interface, and falls back on
 // ToValue otherwise, using field value (fval)
 // gopy:interface=handle
 func FieldToValue(it any, field string, fval any) Value {
 	if it == nil || field == "" {
 		return ToValue(fval, "")
 	}
-	if vv, ok := it.(FieldValueer); ok {
+	if vv, ok := it.(FieldValuer); ok {
 		vvo := vv.FieldValue(field, fval)
 		if vvo != nil {
 			return vvo
 		}
 	}
 	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(FieldValueer); ok {
+	if vv, ok := laser.PtrInterface(it).(FieldValuer); ok {
 		vvo := vv.FieldValue(field, fval)
 		if vvo != nil {
 			return vvo
@@ -401,10 +401,12 @@ func FieldToValue(it any, field string, fval any) Value {
 
 // Value is an interface for managing the GUI representation of values
 // (e.g., fields, map values, slice values) in Views (StructView, MapView,
-// etc).  The different types of Value are for different Kinds of values
-// (bool, float, etc) -- which can have different Kinds of owners.  The
-// ValueBase class supports all the basic fields for managing the owner
-// kinds.
+// etc).  It is a GUI version of the reflect.Value, and uses that for
+// representing the underlying Value being represented graphically.
+// The different types of Value are for different Kinds of values
+// (bool, float, etc) -- which can have different Kinds of owners.
+// The ValueBase class supports all the basic fields for managing
+// the owner kinds.
 type Value interface {
 	ki.Ki
 
@@ -523,7 +525,7 @@ type Value interface {
 // ValueBase provides the basis for implementations of the Value
 // interface, representing values in the interface -- it implements a generic
 // TextField representation of the string value, and provides the generic
-// fallback for everything that doesn't provide a specific Valueer type.
+// fallback for everything that doesn't provide a specific Valuer type.
 type ValueBase struct {
 	ki.Node
 
@@ -557,8 +559,8 @@ type ValueBase struct {
 	// if Owner is a slice, this is the index for the value in the slice
 	Idx int `desc:"if Owner is a slice, this is the index for the value in the slice"`
 
-	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface
-	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface"`
+	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
+	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
 	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
