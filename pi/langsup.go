@@ -15,7 +15,7 @@ import (
 )
 
 // LangFlags are special properties of a given language
-type LangFlags int //enums:enum
+type LangFlags int32 //enums:enum
 
 // LangFlags
 const (

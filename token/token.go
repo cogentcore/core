@@ -23,7 +23,7 @@ import (
 // See http://pygments.org/docs/tokens/ for more docs on the different categories
 //
 // Anything missing should be added via a pull request etc
-type Tokens int //enums:enum
+type Tokens int32 //enums:enum
 
 // CatMap is the map into the category level for each token
 var CatMap map[Tokens]Tokens

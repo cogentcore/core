@@ -13,7 +13,7 @@ import (
 // filecat.Supported are file types that are specifically supported by GoGi
 // and can be processed in one way or another, plus various others
 // that we SHOULD be able to process at some point
-type Supported int //enums:enum
+type Supported int32 //enums:enum
 
 // SupportedMimes maps from the support type into the MimeType info for each
 // supported file type -- the supported MimeType may be just one of

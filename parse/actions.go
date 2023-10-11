@@ -12,7 +12,7 @@ import (
 )
 
 // Actions are parsing actions to perform
-type Actions int //enums:enum
+type Actions int32 //enums:enum
 
 // The parsing acts
 const (
@@ -116,7 +116,7 @@ func (ac Acts) String() string {
 }
 
 // AstActs are actions to perform on the Ast nodes
-type AstActs int //enums:enum
+type AstActs int32 //enums:enum
 
 // The Ast actions
 const (

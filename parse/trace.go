@@ -161,7 +161,7 @@ func (pt *TraceOpts) CopyOpts(ot *TraceOpts) {
 }
 
 // Steps are the different steps of the parsing processing
-type Steps int //enums:enum
+type Steps int32 //enums:enum
 
 // The parsing steps
 const (

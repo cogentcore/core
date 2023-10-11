@@ -5,7 +5,7 @@
 package lex
 
 // Actions are lexing actions to perform
-type Actions int //enums:enum
+type Actions int32 //enums:enum
 
 // The lexical acts
 const (

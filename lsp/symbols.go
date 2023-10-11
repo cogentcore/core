@@ -16,7 +16,7 @@ import (
 
 // SymbolKind is the Language Server Protocol (LSP) SymbolKind, which
 // we map onto the token.Tokens that are used internally.
-type SymbolKind int //enums:enum
+type SymbolKind int32 //enums:enum
 
 // SymbolKind is the list of SymbolKind items from LSP
 const (

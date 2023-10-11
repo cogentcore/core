@@ -15,7 +15,7 @@ import (
 // of these builtin types.
 //
 // See: https://en.wikipedia.org/wiki/List_of_data_structures
-type Kinds int //enums:enum
+type Kinds int32 //enums:enum
 
 // CatMap is the map into the category level for each kind
 var CatMap map[Kinds]Kinds

@@ -10,7 +10,7 @@ import (
 )
 
 // Matches are what kind of lexing matches to make
-type Matches int //enums:enum
+type Matches int32 //enums:enum
 
 // Matching rules
 const (
@@ -45,7 +45,7 @@ const (
 )
 
 // MatchPos are special positions for a match to occur
-type MatchPos int //enums:enum
+type MatchPos int32 //enums:enum
 
 // Matching position rules
 const (
