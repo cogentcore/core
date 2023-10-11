@@ -144,6 +144,7 @@ func (ch *Chooser) ChooserStyles() {
 		}
 		if s.Is(states.Disabled) {
 			s.Color = colors.Scheme.SurfaceContainer
+			s.Cursor = cursors.NotAllowed
 		}
 	})
 }

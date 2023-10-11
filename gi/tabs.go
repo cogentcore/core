@@ -556,6 +556,9 @@ func (tb *Tab) TabButtonStyles() {
 		// 	s.Border.Width.Bottom.SetDp(2)
 		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
+		}
 	})
 }
 

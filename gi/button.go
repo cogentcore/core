@@ -181,6 +181,9 @@ func (bt *Button) ButtonStyles() {
 		if s.Is(states.Hovered) {
 			s.BoxShadow = s.MaxBoxShadow
 		}
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
+		}
 	})
 }
 

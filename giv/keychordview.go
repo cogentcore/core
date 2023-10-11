@@ -82,15 +82,18 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Width.SetCh(20)
-		s.Padding.Set(units.Dp(8 ))
+		s.Padding.Set(units.Dp(8))
 		s.SetStretchMaxWidth()
-		if s.State.Is(states.Selected) {
+		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
 			s.Color = colors.Scheme.Tertiary.OnContainer
 		} else {
 			// STYTODO: get state styles working
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
+		}
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
 		}
 	})
 }

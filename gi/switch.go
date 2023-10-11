@@ -98,6 +98,7 @@ func (sw *Switch) SwitchStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
 			s.Color = colors.Scheme.SurfaceContainer
 		}
 	})
