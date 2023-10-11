@@ -4,14 +4,8 @@
 
 package main
 
-import (
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/ki/v2"
-)
-
+// TODO: fix
+/*
 func main() { gimain.Run(app) }
 
 func app() {
@@ -105,3 +99,4 @@ It appears that the <b>end</b> of one paragraph implies the start of a new one, 
 
 	win.StartEventLoop()
 }
+*/

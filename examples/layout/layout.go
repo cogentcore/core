@@ -4,15 +4,8 @@
 
 package main
 
-import (
-	"fmt"
-
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/units"
-	"goki.dev/mat32/v2"
-)
-
+// TODO: fix
+/*
 func main() { gimain.Run(app) }
 
 func app() {
@@ -163,3 +156,4 @@ func app() {
 
 	win.StartEventLoop()
 }
+*/

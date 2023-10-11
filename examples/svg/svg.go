@@ -4,20 +4,8 @@
 
 package main
 
-import (
-	"fmt"
-
-	"github.com/mitchellh/go-homedir"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/svg"
-)
-
+// TODO: fix
+/*
 func main() { gimain.Run(app) }
 
 var CurFilename = ""
@@ -220,3 +208,4 @@ func app() {
 
 	win.StartEventLoop()
 }
+*/

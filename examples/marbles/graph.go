@@ -6,22 +6,8 @@
 
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"math"
-
-	"math/rand"
-
-	"github.com/Knetic/govaluate"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2"
-	"goki.dev/mat32/v2"
-	"goki.dev/svg"
-)
-
+// TODO: fix
+/*
 // todo: investigate "github.com/antonmedv/expr" instead of govaluate -- much better supported!
 
 var colornames = []string{"black", "red", "blue", "green", "purple", "brown", "orange"}
@@ -552,3 +538,4 @@ func FactorialMemoization(n int) (res float64) {
 	}
 	return 1
 }
+*/

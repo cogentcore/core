@@ -4,16 +4,8 @@
 
 package main
 
-import (
-	"image/color"
-
-	"goki.dev/cam/hsl"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/gimain"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-)
-
+// TODO: fix
+/*
 func main() { gimain.Run(app) }
 
 func app() {
@@ -120,3 +112,4 @@ func app() {
 	vp.UpdateEndNoSig(updt)
 	win.StartEventLoop()
 }
+*/
