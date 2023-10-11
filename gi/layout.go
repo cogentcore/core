@@ -303,8 +303,11 @@ func (ly *Layout) SetSpacing(spc units.Value) *Layout {
 // avail
 func (ly *Layout) AvailSize() mat32.Vec2 {
 	spc := ly.BoxSpace()
-	avail := ly.LayState.Alloc.Size.SubScalar(spc.Right) // spc is for right size space
+	// we only want to subtract pos, not size here
+	// because this is for right and bottom side space
+	avail := ly.LayState.Alloc.Size.Sub(spc.Pos())
 	parni, _ := AsWidget(ly.Par)
+	// SidesTODO: what is the story with this?
 	if parni != nil {
 		// if vp.Sc == nil {
 		// 	// SidesTODO: might not be right
