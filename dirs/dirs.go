@@ -240,3 +240,19 @@ func FileExistsFS(fsys fs.FS, filePath string) (bool, error) {
 	}
 	return false, err
 }
+
+// DirAndFile returns the final dir and file name.
+func DirAndFile(file string) string {
+	dir, fnm := filepath.Split(file)
+	return filepath.Join(filepath.Base(dir), fnm)
+}
+
+// RelFilePath returns the file name relative to given root file path, if it is
+// under that root -- otherwise it returns the final dir and file name.
+func RelFilePath(file, root string) string {
+	rp, err := filepath.Rel(root, file)
+	if err == nil && !strings.HasPrefix(rp, "..") {
+		return rp
+	}
+	return DirAndFile(file)
+}
