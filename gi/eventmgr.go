@@ -254,17 +254,10 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		return
 	}
 
-	cursorSet := false
-
 	var press, move, up Widget
 	for i := n - 1; i >= 0; i-- {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
-		if !cursorSet && wb.Style.Cursor != cursors.None {
-			em.SetCursor(wb.Style.Cursor)
-			cursorSet = true
-			// fmt.Println(wb.Style.Cursor)
-		}
 
 		if !isDrag {
 			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
@@ -344,6 +337,20 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			em.Press.HandleEvent(evi)
 		default:
 			em.Scene.HandleEvent(evi)
+		}
+	}
+
+	// we need to handle cursor after all of the events so that
+	// we get the latest cursor if it changes based on the state
+
+	cursorSet := false
+	for i := n - 1; i >= 0; i-- {
+		w := em.MouseInBBox[i]
+		wb := w.AsWidget()
+		if !cursorSet && wb.Style.Cursor != cursors.None {
+			em.SetCursor(wb.Style.Cursor)
+			cursorSet = true
+			fmt.Println(wb.Style.Cursor, wb)
 		}
 	}
 }

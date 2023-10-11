@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -212,6 +213,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	// if we are disabled, we do not react to any state changes,
 	// and instead always have the same gray colors
 	if s.Is(states.Disabled) {
+		s.Cursor = cursors.NotAllowed
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		s.Color = colors.Scheme.OnSurfaceVariant
 		s.Opacity = 0.38
