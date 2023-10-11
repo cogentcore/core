@@ -56,7 +56,7 @@ func (fb *FileBrowse) OnInit() {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
-		s.Margin.Set(units.Dp(8 ))
+		s.Margin.Set(units.Dp(8))
 	})
 }
 
@@ -512,8 +512,8 @@ func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
 			gi.ChoiceDialog(vp, gi.DlgOpts{Title: "Close Without Saving?",
 				Prompt: "Do you want to save your changes?  If so, Cancel and then Save"},
 				[]string{"Close Without Saving", "Cancel"},
-				win.This(), func(recv, send ki.Ki, sig int64, data any) {
-					switch sig {
+				func(dlg *gi.Dialog) {
+					switch dlg.Data {
 					case 0:
 						w.Close()
 					case 1:
@@ -531,13 +531,13 @@ func NewFileBrowser(path string) (*gi.RenderWin, *FileBrowse) {
 		if !inQuitPrompt {
 			inQuitPrompt = true
 			gi.PromptDialog(vp, gi.DlgOpts{Title: "Really Quit?",
-				Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, fun func(dlg *gi.DialogStage)) *gi.DialogStage {
-					if dlg.Accepted {
-						gi.Quit()
-					} else {
-						inQuitPrompt = false
-					}
-				})
+				Prompt: "Are you <i>sure</i> you want to quit?", Ok: true, Cancel: true}, func(dlg *gi.Dialog) {
+				if dlg.Accepted {
+					gi.Quit()
+				} else {
+					inQuitPrompt = false
+				}
+			})
 		}
 	})
 
