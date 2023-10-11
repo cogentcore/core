@@ -423,7 +423,7 @@ type FileNode struct {
 	Info filecat.FileInfo `json:"-" xml:"-" copy:"-" desc:"full standard file info about this file"`
 
 	// file buffer for editing this file
-	Buf *textview.TextBuf `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
+	Buf *textview.Buf `json:"-" xml:"-" copy:"-" desc:"file buffer for editing this file"`
 
 	// root of the tree -- has global state
 	FRoot *FileTree `json:"-" xml:"-" copy:"-" desc:"root of the tree -- has global state"`
@@ -820,8 +820,7 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 			return false, nil
 		}
 	} else {
-		fn.Buf = &textview.TextBuf{}
-		fn.Buf.InitName(fn.Buf, fn.Nm)
+		fn.Buf = textview.NewBuf()
 		// fn.Buf.AddFileNode(fn)
 	}
 	fn.Buf.Hi.Style = FileNodeHiStyle
@@ -830,7 +829,7 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 }
 
 // CloseBuf closes the file in its buffer if it is open -- returns true if closed
-// Connect to the fn.Buf.TextBufSig and look for the TextBufClosed signal to be
+// Connect to the fn.Buf.BufSig and look for the BufClosed signal to be
 // notified when the buffer is closed.
 func (fn *FileNode) CloseBuf() bool {
 	if fn.Buf == nil {
@@ -1409,16 +1408,16 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 	return lg, nil
 }
 
-// BlameDialog opens a dialog for displaying VCS blame data using TwinTextViews.
+// BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.TwinTextViews {
+func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.TwinViews {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title, Ok: true, Cancel: false}, nil)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	tv := frame.InsertNewChild(textview.TwinTextViewsType, prIdx+1, "twin-view").(*textview.TwinTextViews)
+	tv := frame.InsertNewChild(textview.TwinViewsType, prIdx+1, "twin-view").(*textview.TwinViews)
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
@@ -1444,7 +1443,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.Tw
 	tv.ConfigTexts()
 	tv.SetSplits(.2, .8)
 
-	tva, tvb := tv.TextViews()
+	tva, tvb := tv.Views()
 	tva.AddStyles(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(30)

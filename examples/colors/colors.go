@@ -98,7 +98,7 @@ func app() {
 	amen.Menu.AddAppMenu(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
-	// Linux, RenderWins or Meta for MacOS
+	// Linux, Windows or Meta for MacOS
 
 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
 	emen.Menu = make(gi.MenuStage, 0, 10)

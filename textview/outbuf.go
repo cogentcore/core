@@ -18,7 +18,7 @@ import (
 // and otherwise has the exact same visible bytes as the input
 type OutBufMarkupFunc func(line []byte) []byte
 
-// OutBuf is a TextBuf that records the output from an io.Reader using
+// OutBuf is a Buf that records the output from an io.Reader using
 // bufio.Scanner -- optimized to combine fast chunks of output into
 // large blocks of updating.  Also supports arbitrary markup function
 // that operates on each line of output bytes.
@@ -27,8 +27,8 @@ type OutBuf struct {
 	// the output that we are reading from, as an io.Reader
 	Out io.Reader `desc:"the output that we are reading from, as an io.Reader"`
 
-	// the TextBuf that we output to
-	Buf *TextBuf `desc:"the TextBuf that we output to"`
+	// the Buf that we output to
+	Buf *Buf `desc:"the Buf that we output to"`
 
 	// default 200: how many milliseconds to wait while batching output
 	BatchMSec int `desc:"default 200: how many milliseconds to wait while batching output"`
@@ -53,7 +53,7 @@ type OutBuf struct {
 }
 
 // Init sets the various params and prepares for running
-func (ob *OutBuf) Init(out io.Reader, buf *TextBuf, batchMSec int, markup OutBufMarkupFunc) {
+func (ob *OutBuf) Init(out io.Reader, buf *Buf, batchMSec int, markup OutBufMarkupFunc) {
 	ob.Out = out
 	ob.Buf = buf
 	ob.MarkupFun = markup
@@ -64,7 +64,7 @@ func (ob *OutBuf) Init(out io.Reader, buf *TextBuf, batchMSec int, markup OutBuf
 	}
 }
 
-// MonOut monitors the output and updates the TextBuf
+// MonOut monitors the output and updates the Buf
 func (ob *OutBuf) MonOut() {
 	outscan := bufio.NewScanner(ob.Out) // line at a time
 	ob.CurOutLns = make([][]byte, 0, 100)
@@ -104,7 +104,7 @@ func (ob *OutBuf) MonOut() {
 	ob.OutToBuf()
 }
 
-// OutToBuf sends the current output to TextBuf
+// OutToBuf sends the current output to Buf
 // MUST be called under mutex protection
 func (ob *OutBuf) OutToBuf() {
 	lfb := []byte("\n")

@@ -11,178 +11,178 @@ import (
 	"goki.dev/enums"
 )
 
-var _TextBufSignalsValues = []TextBufSignals{0, 1, 2, 3, 4, 5}
+var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5}
 
-// TextBufSignalsN is the highest valid value
-// for type TextBufSignals, plus one.
-const TextBufSignalsN TextBufSignals = 6
+// BufSignalsN is the highest valid value
+// for type BufSignals, plus one.
+const BufSignalsN BufSignals = 6
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _TextBufSignalsNoOp() {
+func _BufSignalsNoOp() {
 	var x [1]struct{}
-	_ = x[TextBufDone-(0)]
-	_ = x[TextBufNew-(1)]
-	_ = x[TextBufInsert-(2)]
-	_ = x[TextBufDelete-(3)]
-	_ = x[TextBufMarkUpdt-(4)]
-	_ = x[TextBufClosed-(5)]
+	_ = x[BufDone-(0)]
+	_ = x[BufNew-(1)]
+	_ = x[BufInsert-(2)]
+	_ = x[BufDelete-(3)]
+	_ = x[BufMarkUpdt-(4)]
+	_ = x[BufClosed-(5)]
 }
 
-var _TextBufSignalsNameToValueMap = map[string]TextBufSignals{
-	`TextBufDone`:     0,
-	`textbufdone`:     0,
-	`TextBufNew`:      1,
-	`textbufnew`:      1,
-	`TextBufInsert`:   2,
-	`textbufinsert`:   2,
-	`TextBufDelete`:   3,
-	`textbufdelete`:   3,
-	`TextBufMarkUpdt`: 4,
-	`textbufmarkupdt`: 4,
-	`TextBufClosed`:   5,
-	`textbufclosed`:   5,
+var _BufSignalsNameToValueMap = map[string]BufSignals{
+	`BufDone`:     0,
+	`bufdone`:     0,
+	`BufNew`:      1,
+	`bufnew`:      1,
+	`BufInsert`:   2,
+	`bufinsert`:   2,
+	`BufDelete`:   3,
+	`bufdelete`:   3,
+	`BufMarkUpdt`: 4,
+	`bufmarkupdt`: 4,
+	`BufClosed`:   5,
+	`bufclosed`:   5,
 }
 
-var _TextBufSignalsDescMap = map[TextBufSignals]string{
-	0: `TextBufDone means that editing was completed and applied to Txt field -- data is Txt bytes`,
-	1: `TextBufNew signals that entirely new text is present -- all views update -- data is Txt bytes.`,
-	2: `TextBufInsert signals that some text was inserted -- data is textbuf.Edit describing change -- the TextBuf always reflects the current state *after* the edit.`,
-	3: `TextBufDelete signals that some text was deleted -- data is textbuf.Edit describing change -- the TextBuf always reflects the current state *after* the edit.`,
-	4: `TextBufMarkUpdt signals that the Markup text has been updated -- this signal is typically sent from a separate goroutine so should be used with a mutex`,
-	5: `TextBufClosed signals that the textbuf was closed`,
+var _BufSignalsDescMap = map[BufSignals]string{
+	0: `BufDone means that editing was completed and applied to Txt field -- data is Txt bytes`,
+	1: `BufNew signals that entirely new text is present -- all views update -- data is Txt bytes.`,
+	2: `BufInsert signals that some text was inserted -- data is textbuf.Edit describing change -- the Buf always reflects the current state *after* the edit.`,
+	3: `BufDelete signals that some text was deleted -- data is textbuf.Edit describing change -- the Buf always reflects the current state *after* the edit.`,
+	4: `BufMarkUpdt signals that the Markup text has been updated -- this signal is typically sent from a separate goroutine so should be used with a mutex`,
+	5: `BufClosed signals that the textbuf was closed`,
 }
 
-var _TextBufSignalsMap = map[TextBufSignals]string{
-	0: `TextBufDone`,
-	1: `TextBufNew`,
-	2: `TextBufInsert`,
-	3: `TextBufDelete`,
-	4: `TextBufMarkUpdt`,
-	5: `TextBufClosed`,
+var _BufSignalsMap = map[BufSignals]string{
+	0: `BufDone`,
+	1: `BufNew`,
+	2: `BufInsert`,
+	3: `BufDelete`,
+	4: `BufMarkUpdt`,
+	5: `BufClosed`,
 }
 
 // String returns the string representation
-// of this TextBufSignals value.
-func (i TextBufSignals) String() string {
-	if str, ok := _TextBufSignalsMap[i]; ok {
+// of this BufSignals value.
+func (i BufSignals) String() string {
+	if str, ok := _BufSignalsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextBufSignals value from its
+// SetString sets the BufSignals value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *TextBufSignals) SetString(s string) error {
-	if val, ok := _TextBufSignalsNameToValueMap[s]; ok {
+func (i *BufSignals) SetString(s string) error {
+	if val, ok := _BufSignalsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _TextBufSignalsNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _BufSignalsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type TextBufSignals")
+	return errors.New(s + " is not a valid value for type BufSignals")
 }
 
-// Int64 returns the TextBufSignals value as an int64.
-func (i TextBufSignals) Int64() int64 {
+// Int64 returns the BufSignals value as an int64.
+func (i BufSignals) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the TextBufSignals value from an int64.
-func (i *TextBufSignals) SetInt64(in int64) {
-	*i = TextBufSignals(in)
+// SetInt64 sets the BufSignals value from an int64.
+func (i *BufSignals) SetInt64(in int64) {
+	*i = BufSignals(in)
 }
 
-// Desc returns the description of the TextBufSignals value.
-func (i TextBufSignals) Desc() string {
-	if str, ok := _TextBufSignalsDescMap[i]; ok {
+// Desc returns the description of the BufSignals value.
+func (i BufSignals) Desc() string {
+	if str, ok := _BufSignalsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// TextBufSignalsValues returns all possible values
-// for the type TextBufSignals.
-func TextBufSignalsValues() []TextBufSignals {
-	return _TextBufSignalsValues
+// BufSignalsValues returns all possible values
+// for the type BufSignals.
+func BufSignalsValues() []BufSignals {
+	return _BufSignalsValues
 }
 
 // Values returns all possible values
-// for the type TextBufSignals.
-func (i TextBufSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextBufSignalsValues))
-	for i, d := range _TextBufSignalsValues {
+// for the type BufSignals.
+func (i BufSignals) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_BufSignalsValues))
+	for i, d := range _BufSignalsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type TextBufSignals.
-func (i TextBufSignals) IsValid() bool {
-	_, ok := _TextBufSignalsMap[i]
+// valid option for type BufSignals.
+func (i BufSignals) IsValid() bool {
+	_, ok := _BufSignalsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextBufSignals) MarshalText() ([]byte, error) {
+func (i BufSignals) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextBufSignals) UnmarshalText(text []byte) error {
+func (i *BufSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextBufFlagsValues = []TextBufFlags{10, 11, 12, 13}
+var _BufFlagsValues = []BufFlags{10, 11, 12, 13}
 
-// TextBufFlagsN is the highest valid value
-// for type TextBufFlags, plus one.
-const TextBufFlagsN TextBufFlags = 14
+// BufFlagsN is the highest valid value
+// for type BufFlags, plus one.
+const BufFlagsN BufFlags = 14
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _TextBufFlagsNoOp() {
+func _BufFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TextBufAutoSaving-(10)]
-	_ = x[TextBufMarkingUp-(11)]
-	_ = x[TextBufChanged-(12)]
-	_ = x[TextBufFileModOk-(13)]
+	_ = x[BufAutoSaving-(10)]
+	_ = x[BufMarkingUp-(11)]
+	_ = x[BufChanged-(12)]
+	_ = x[BufFileModOk-(13)]
 }
 
-var _TextBufFlagsNameToValueMap = map[string]TextBufFlags{
-	`TextBufAutoSaving`: 10,
-	`textbufautosaving`: 10,
-	`TextBufMarkingUp`:  11,
-	`textbufmarkingup`:  11,
-	`TextBufChanged`:    12,
-	`textbufchanged`:    12,
-	`TextBufFileModOk`:  13,
-	`textbuffilemodok`:  13,
+var _BufFlagsNameToValueMap = map[string]BufFlags{
+	`BufAutoSaving`: 10,
+	`bufautosaving`: 10,
+	`BufMarkingUp`:  11,
+	`bufmarkingup`:  11,
+	`BufChanged`:    12,
+	`bufchanged`:    12,
+	`BufFileModOk`:  13,
+	`buffilemodok`:  13,
 }
 
-var _TextBufFlagsDescMap = map[TextBufFlags]string{
-	10: `TextBufAutoSaving is used in atomically safe way to protect autosaving`,
-	11: `TextBufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	12: `TextBufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
-	13: `TextBufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+var _BufFlagsDescMap = map[BufFlags]string{
+	10: `BufAutoSaving is used in atomically safe way to protect autosaving`,
+	11: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
+	12: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
+	13: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
 }
 
-var _TextBufFlagsMap = map[TextBufFlags]string{
-	10: `TextBufAutoSaving`,
-	11: `TextBufMarkingUp`,
-	12: `TextBufChanged`,
-	13: `TextBufFileModOk`,
+var _BufFlagsMap = map[BufFlags]string{
+	10: `BufAutoSaving`,
+	11: `BufMarkingUp`,
+	12: `BufChanged`,
+	13: `BufFileModOk`,
 }
 
 // String returns the string representation
-// of this TextBufFlags value.
-func (i TextBufFlags) String() string {
+// of this BufFlags value.
+func (i BufFlags) String() string {
 	str := ""
-	for _, ie := range _TextBufFlagsValues {
+	for _, ie := range _BufFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -196,93 +196,93 @@ func (i TextBufFlags) String() string {
 }
 
 // BitIndexString returns the string
-// representation of this TextBufFlags value
+// representation of this BufFlags value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.
-func (i TextBufFlags) BitIndexString() string {
-	if str, ok := _TextBufFlagsMap[i]; ok {
+func (i BufFlags) BitIndexString() string {
+	if str, ok := _BufFlagsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextBufFlags value from its
+// SetString sets the BufFlags value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *TextBufFlags) SetString(s string) error {
+func (i *BufFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the TextBufFlags value from its
+// SetStringOr sets the BufFlags value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *TextBufFlags) SetStringOr(s string) error {
+func (i *BufFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _TextBufFlagsNameToValueMap[flg]; ok {
+		if val, ok := _BufFlagsNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _TextBufFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _BufFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type TextBufFlags")
+			return errors.New(flg + " is not a valid value for type BufFlags")
 		}
 	}
 	return nil
 }
 
-// Int64 returns the TextBufFlags value as an int64.
-func (i TextBufFlags) Int64() int64 {
+// Int64 returns the BufFlags value as an int64.
+func (i BufFlags) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the TextBufFlags value from an int64.
-func (i *TextBufFlags) SetInt64(in int64) {
-	*i = TextBufFlags(in)
+// SetInt64 sets the BufFlags value from an int64.
+func (i *BufFlags) SetInt64(in int64) {
+	*i = BufFlags(in)
 }
 
-// Desc returns the description of the TextBufFlags value.
-func (i TextBufFlags) Desc() string {
-	if str, ok := _TextBufFlagsDescMap[i]; ok {
+// Desc returns the description of the BufFlags value.
+func (i BufFlags) Desc() string {
+	if str, ok := _BufFlagsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// TextBufFlagsValues returns all possible values
-// for the type TextBufFlags.
-func TextBufFlagsValues() []TextBufFlags {
-	return _TextBufFlagsValues
+// BufFlagsValues returns all possible values
+// for the type BufFlags.
+func BufFlagsValues() []BufFlags {
+	return _BufFlagsValues
 }
 
 // Values returns all possible values
-// for the type TextBufFlags.
-func (i TextBufFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextBufFlagsValues))
-	for i, d := range _TextBufFlagsValues {
+// for the type BufFlags.
+func (i BufFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_BufFlagsValues))
+	for i, d := range _BufFlagsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type TextBufFlags.
-func (i TextBufFlags) IsValid() bool {
-	_, ok := _TextBufFlagsMap[i]
+// valid option for type BufFlags.
+func (i BufFlags) IsValid() bool {
+	_, ok := _BufFlagsMap[i]
 	return ok
 }
 
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i TextBufFlags) HasFlag(f enums.BitFlag) bool {
+func (i BufFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *TextBufFlags) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *BufFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -298,318 +298,318 @@ func (i *TextBufFlags) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextBufFlags) MarshalText() ([]byte, error) {
+func (i BufFlags) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextBufFlags) UnmarshalText(text []byte) error {
+func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextViewSignalsValues = []TextViewSignals{0, 1, 2, 3, 4}
+var _ViewSignalsValues = []ViewSignals{0, 1, 2, 3, 4}
 
-// TextViewSignalsN is the highest valid value
-// for type TextViewSignals, plus one.
-const TextViewSignalsN TextViewSignals = 5
+// ViewSignalsN is the highest valid value
+// for type ViewSignals, plus one.
+const ViewSignalsN ViewSignals = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _TextViewSignalsNoOp() {
+func _ViewSignalsNoOp() {
 	var x [1]struct{}
-	_ = x[TextViewDone-(0)]
-	_ = x[TextViewSelected-(1)]
-	_ = x[TextViewCursorMoved-(2)]
-	_ = x[TextViewISearch-(3)]
-	_ = x[TextViewQReplace-(4)]
+	_ = x[ViewDone-(0)]
+	_ = x[ViewSelected-(1)]
+	_ = x[ViewCursorMoved-(2)]
+	_ = x[ViewISearch-(3)]
+	_ = x[ViewQReplace-(4)]
 }
 
-var _TextViewSignalsNameToValueMap = map[string]TextViewSignals{
-	`TextViewDone`:        0,
-	`textviewdone`:        0,
-	`TextViewSelected`:    1,
-	`textviewselected`:    1,
-	`TextViewCursorMoved`: 2,
-	`textviewcursormoved`: 2,
-	`TextViewISearch`:     3,
-	`textviewisearch`:     3,
-	`TextViewQReplace`:    4,
-	`textviewqreplace`:    4,
+var _ViewSignalsNameToValueMap = map[string]ViewSignals{
+	`ViewDone`:        0,
+	`viewdone`:        0,
+	`ViewSelected`:    1,
+	`viewselected`:    1,
+	`ViewCursorMoved`: 2,
+	`viewcursormoved`: 2,
+	`ViewISearch`:     3,
+	`viewisearch`:     3,
+	`ViewQReplace`:    4,
+	`viewqreplace`:    4,
 }
 
-var _TextViewSignalsDescMap = map[TextViewSignals]string{
-	0: `TextViewDone signal indicates return was pressed and an edit was completed -- data is the text`,
-	1: `TextViewSelected signal indicates some text was selected (for Inactive state, selection is via WidgetSig)`,
-	2: `TextViewCursorMoved signal indicates cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos`,
-	3: `TextViewISearch is emitted for every update of interactive search process -- see ISearch.* members for current state`,
-	4: `TextViewQReplace is emitted for every update of query-replace process -- see QReplace.* members for current state`,
+var _ViewSignalsDescMap = map[ViewSignals]string{
+	0: `ViewDone signal indicates return was pressed and an edit was completed -- data is the text`,
+	1: `ViewSelected signal indicates some text was selected (for Inactive state, selection is via WidgetSig)`,
+	2: `ViewCursorMoved signal indicates cursor moved emitted for every cursor movement -- e.g., for displaying cursor pos`,
+	3: `ViewISearch is emitted for every update of interactive search process -- see ISearch.* members for current state`,
+	4: `ViewQReplace is emitted for every update of query-replace process -- see QReplace.* members for current state`,
 }
 
-var _TextViewSignalsMap = map[TextViewSignals]string{
-	0: `TextViewDone`,
-	1: `TextViewSelected`,
-	2: `TextViewCursorMoved`,
-	3: `TextViewISearch`,
-	4: `TextViewQReplace`,
+var _ViewSignalsMap = map[ViewSignals]string{
+	0: `ViewDone`,
+	1: `ViewSelected`,
+	2: `ViewCursorMoved`,
+	3: `ViewISearch`,
+	4: `ViewQReplace`,
 }
 
 // String returns the string representation
-// of this TextViewSignals value.
-func (i TextViewSignals) String() string {
-	if str, ok := _TextViewSignalsMap[i]; ok {
+// of this ViewSignals value.
+func (i ViewSignals) String() string {
+	if str, ok := _ViewSignalsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextViewSignals value from its
+// SetString sets the ViewSignals value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *TextViewSignals) SetString(s string) error {
-	if val, ok := _TextViewSignalsNameToValueMap[s]; ok {
+func (i *ViewSignals) SetString(s string) error {
+	if val, ok := _ViewSignalsNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _TextViewSignalsNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ViewSignalsNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type TextViewSignals")
+	return errors.New(s + " is not a valid value for type ViewSignals")
 }
 
-// Int64 returns the TextViewSignals value as an int64.
-func (i TextViewSignals) Int64() int64 {
+// Int64 returns the ViewSignals value as an int64.
+func (i ViewSignals) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the TextViewSignals value from an int64.
-func (i *TextViewSignals) SetInt64(in int64) {
-	*i = TextViewSignals(in)
+// SetInt64 sets the ViewSignals value from an int64.
+func (i *ViewSignals) SetInt64(in int64) {
+	*i = ViewSignals(in)
 }
 
-// Desc returns the description of the TextViewSignals value.
-func (i TextViewSignals) Desc() string {
-	if str, ok := _TextViewSignalsDescMap[i]; ok {
+// Desc returns the description of the ViewSignals value.
+func (i ViewSignals) Desc() string {
+	if str, ok := _ViewSignalsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// TextViewSignalsValues returns all possible values
-// for the type TextViewSignals.
-func TextViewSignalsValues() []TextViewSignals {
-	return _TextViewSignalsValues
+// ViewSignalsValues returns all possible values
+// for the type ViewSignals.
+func ViewSignalsValues() []ViewSignals {
+	return _ViewSignalsValues
 }
 
 // Values returns all possible values
-// for the type TextViewSignals.
-func (i TextViewSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextViewSignalsValues))
-	for i, d := range _TextViewSignalsValues {
+// for the type ViewSignals.
+func (i ViewSignals) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ViewSignalsValues))
+	for i, d := range _ViewSignalsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type TextViewSignals.
-func (i TextViewSignals) IsValid() bool {
-	_, ok := _TextViewSignalsMap[i]
+// valid option for type ViewSignals.
+func (i ViewSignals) IsValid() bool {
+	_, ok := _ViewSignalsMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextViewSignals) MarshalText() ([]byte, error) {
+func (i ViewSignals) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextViewSignals) UnmarshalText(text []byte) error {
+func (i *ViewSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextViewStatesValues = []TextViewStates{0, 1, 2, 3, 4}
+var _ViewStatesValues = []ViewStates{0, 1, 2, 3, 4}
 
-// TextViewStatesN is the highest valid value
-// for type TextViewStates, plus one.
-const TextViewStatesN TextViewStates = 5
+// ViewStatesN is the highest valid value
+// for type ViewStates, plus one.
+const ViewStatesN ViewStates = 5
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _TextViewStatesNoOp() {
+func _ViewStatesNoOp() {
 	var x [1]struct{}
-	_ = x[TextViewActive-(0)]
-	_ = x[TextViewFocus-(1)]
-	_ = x[TextViewInactive-(2)]
-	_ = x[TextViewSel-(3)]
-	_ = x[TextViewHighlight-(4)]
+	_ = x[ViewActive-(0)]
+	_ = x[ViewFocus-(1)]
+	_ = x[ViewInactive-(2)]
+	_ = x[ViewSel-(3)]
+	_ = x[ViewHighlight-(4)]
 }
 
-var _TextViewStatesNameToValueMap = map[string]TextViewStates{
-	`TextViewActive`:    0,
-	`textviewactive`:    0,
-	`TextViewFocus`:     1,
-	`textviewfocus`:     1,
-	`TextViewInactive`:  2,
-	`textviewinactive`:  2,
-	`TextViewSel`:       3,
-	`textviewsel`:       3,
-	`TextViewHighlight`: 4,
-	`textviewhighlight`: 4,
+var _ViewStatesNameToValueMap = map[string]ViewStates{
+	`ViewActive`:    0,
+	`viewactive`:    0,
+	`ViewFocus`:     1,
+	`viewfocus`:     1,
+	`ViewInactive`:  2,
+	`viewinactive`:  2,
+	`ViewSel`:       3,
+	`viewsel`:       3,
+	`ViewHighlight`: 4,
+	`viewhighlight`: 4,
 }
 
-var _TextViewStatesDescMap = map[TextViewStates]string{
-	0: `TextViewActive is the normal state -- there but not being interacted with`,
-	1: `TextViewFocus states means textvieww is the focus -- will respond to keyboard input`,
-	2: `TextViewInactive means the textview is inactive -- not editable`,
-	3: `TextViewSel means the text region is selected`,
-	4: `TextViewHighlight means the text region is highlighted`,
+var _ViewStatesDescMap = map[ViewStates]string{
+	0: `ViewActive is the normal state -- there but not being interacted with`,
+	1: `ViewFocus states means textvieww is the focus -- will respond to keyboard input`,
+	2: `ViewInactive means the textview is inactive -- not editable`,
+	3: `ViewSel means the text region is selected`,
+	4: `ViewHighlight means the text region is highlighted`,
 }
 
-var _TextViewStatesMap = map[TextViewStates]string{
-	0: `TextViewActive`,
-	1: `TextViewFocus`,
-	2: `TextViewInactive`,
-	3: `TextViewSel`,
-	4: `TextViewHighlight`,
+var _ViewStatesMap = map[ViewStates]string{
+	0: `ViewActive`,
+	1: `ViewFocus`,
+	2: `ViewInactive`,
+	3: `ViewSel`,
+	4: `ViewHighlight`,
 }
 
 // String returns the string representation
-// of this TextViewStates value.
-func (i TextViewStates) String() string {
-	if str, ok := _TextViewStatesMap[i]; ok {
+// of this ViewStates value.
+func (i ViewStates) String() string {
+	if str, ok := _ViewStatesMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextViewStates value from its
+// SetString sets the ViewStates value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *TextViewStates) SetString(s string) error {
-	if val, ok := _TextViewStatesNameToValueMap[s]; ok {
+func (i *ViewStates) SetString(s string) error {
+	if val, ok := _ViewStatesNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _TextViewStatesNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ViewStatesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type TextViewStates")
+	return errors.New(s + " is not a valid value for type ViewStates")
 }
 
-// Int64 returns the TextViewStates value as an int64.
-func (i TextViewStates) Int64() int64 {
+// Int64 returns the ViewStates value as an int64.
+func (i ViewStates) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the TextViewStates value from an int64.
-func (i *TextViewStates) SetInt64(in int64) {
-	*i = TextViewStates(in)
+// SetInt64 sets the ViewStates value from an int64.
+func (i *ViewStates) SetInt64(in int64) {
+	*i = ViewStates(in)
 }
 
-// Desc returns the description of the TextViewStates value.
-func (i TextViewStates) Desc() string {
-	if str, ok := _TextViewStatesDescMap[i]; ok {
+// Desc returns the description of the ViewStates value.
+func (i ViewStates) Desc() string {
+	if str, ok := _ViewStatesDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// TextViewStatesValues returns all possible values
-// for the type TextViewStates.
-func TextViewStatesValues() []TextViewStates {
-	return _TextViewStatesValues
+// ViewStatesValues returns all possible values
+// for the type ViewStates.
+func ViewStatesValues() []ViewStates {
+	return _ViewStatesValues
 }
 
 // Values returns all possible values
-// for the type TextViewStates.
-func (i TextViewStates) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextViewStatesValues))
-	for i, d := range _TextViewStatesValues {
+// for the type ViewStates.
+func (i ViewStates) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ViewStatesValues))
+	for i, d := range _ViewStatesValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type TextViewStates.
-func (i TextViewStates) IsValid() bool {
-	_, ok := _TextViewStatesMap[i]
+// valid option for type ViewStates.
+func (i ViewStates) IsValid() bool {
+	_, ok := _ViewStatesMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextViewStates) MarshalText() ([]byte, error) {
+func (i ViewStates) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextViewStates) UnmarshalText(text []byte) error {
+func (i *ViewStates) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TextViewFlagsValues = []TextViewFlags{10, 11, 12, 13, 14, 15, 16}
+var _ViewFlagsValues = []ViewFlags{10, 11, 12, 13, 14, 15, 16}
 
-// TextViewFlagsN is the highest valid value
-// for type TextViewFlags, plus one.
-const TextViewFlagsN TextViewFlags = 17
+// ViewFlagsN is the highest valid value
+// for type ViewFlags, plus one.
+const ViewFlagsN ViewFlags = 17
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _TextViewFlagsNoOp() {
+func _ViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TextViewNeedsRefresh-(10)]
-	_ = x[TextViewInReLayout-(11)]
-	_ = x[TextViewRenderScrolls-(12)]
-	_ = x[TextViewFocusActive-(13)]
-	_ = x[TextViewHasLineNos-(14)]
-	_ = x[TextViewLastWasTabAI-(15)]
-	_ = x[TextViewLastWasUndo-(16)]
+	_ = x[ViewNeedsRefresh-(10)]
+	_ = x[ViewInReLayout-(11)]
+	_ = x[ViewRenderScrolls-(12)]
+	_ = x[ViewFocusActive-(13)]
+	_ = x[ViewHasLineNos-(14)]
+	_ = x[ViewLastWasTabAI-(15)]
+	_ = x[ViewLastWasUndo-(16)]
 }
 
-var _TextViewFlagsNameToValueMap = map[string]TextViewFlags{
-	`TextViewNeedsRefresh`:  10,
-	`textviewneedsrefresh`:  10,
-	`TextViewInReLayout`:    11,
-	`textviewinrelayout`:    11,
-	`TextViewRenderScrolls`: 12,
-	`textviewrenderscrolls`: 12,
-	`TextViewFocusActive`:   13,
-	`textviewfocusactive`:   13,
-	`TextViewHasLineNos`:    14,
-	`textviewhaslinenos`:    14,
-	`TextViewLastWasTabAI`:  15,
-	`textviewlastwastabai`:  15,
-	`TextViewLastWasUndo`:   16,
-	`textviewlastwasundo`:   16,
+var _ViewFlagsNameToValueMap = map[string]ViewFlags{
+	`ViewNeedsRefresh`:  10,
+	`viewneedsrefresh`:  10,
+	`ViewInReLayout`:    11,
+	`viewinrelayout`:    11,
+	`ViewRenderScrolls`: 12,
+	`viewrenderscrolls`: 12,
+	`ViewFocusActive`:   13,
+	`viewfocusactive`:   13,
+	`ViewHasLineNos`:    14,
+	`viewhaslinenos`:    14,
+	`ViewLastWasTabAI`:  15,
+	`viewlastwastabai`:  15,
+	`ViewLastWasUndo`:   16,
+	`viewlastwasundo`:   16,
 }
 
-var _TextViewFlagsDescMap = map[TextViewFlags]string{
-	10: `TextViewNeedsRefresh indicates when refresh is required`,
-	11: `TextViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
-	12: `TextViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
-	13: `TextViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
-	14: `TextViewHasLineNos indicates that this view has line numbers (per TextBuf option)`,
-	15: `TextViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	16: `TextViewLastWasUndo indicates that last key was an undo`,
+var _ViewFlagsDescMap = map[ViewFlags]string{
+	10: `ViewNeedsRefresh indicates when refresh is required`,
+	11: `ViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
+	12: `ViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
+	13: `ViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
+	14: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
+	15: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	16: `ViewLastWasUndo indicates that last key was an undo`,
 }
 
-var _TextViewFlagsMap = map[TextViewFlags]string{
-	10: `TextViewNeedsRefresh`,
-	11: `TextViewInReLayout`,
-	12: `TextViewRenderScrolls`,
-	13: `TextViewFocusActive`,
-	14: `TextViewHasLineNos`,
-	15: `TextViewLastWasTabAI`,
-	16: `TextViewLastWasUndo`,
+var _ViewFlagsMap = map[ViewFlags]string{
+	10: `ViewNeedsRefresh`,
+	11: `ViewInReLayout`,
+	12: `ViewRenderScrolls`,
+	13: `ViewFocusActive`,
+	14: `ViewHasLineNos`,
+	15: `ViewLastWasTabAI`,
+	16: `ViewLastWasUndo`,
 }
 
 // String returns the string representation
-// of this TextViewFlags value.
-func (i TextViewFlags) String() string {
+// of this ViewFlags value.
+func (i ViewFlags) String() string {
 	str := ""
-	for _, ie := range _TextViewFlagsValues {
+	for _, ie := range _ViewFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
 			if str == "" {
@@ -623,93 +623,93 @@ func (i TextViewFlags) String() string {
 }
 
 // BitIndexString returns the string
-// representation of this TextViewFlags value
+// representation of this ViewFlags value
 // if it is a bit index value
 // (typically an enum constant), and
 // not an actual bit flag value.
-func (i TextViewFlags) BitIndexString() string {
-	if str, ok := _TextViewFlagsMap[i]; ok {
+func (i ViewFlags) BitIndexString() string {
+	if str, ok := _ViewFlagsMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the TextViewFlags value from its
+// SetString sets the ViewFlags value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *TextViewFlags) SetString(s string) error {
+func (i *ViewFlags) SetString(s string) error {
 	*i = 0
 	return i.SetStringOr(s)
 }
 
-// SetStringOr sets the TextViewFlags value from its
+// SetStringOr sets the ViewFlags value from its
 // string representation while preserving any
 // bit flags already set, and returns an
 // error if the string is invalid.
-func (i *TextViewFlags) SetStringOr(s string) error {
+func (i *ViewFlags) SetStringOr(s string) error {
 	flgs := strings.Split(s, "|")
 	for _, flg := range flgs {
-		if val, ok := _TextViewFlagsNameToValueMap[flg]; ok {
+		if val, ok := _ViewFlagsNameToValueMap[flg]; ok {
 			i.SetFlag(true, &val)
-		} else if val, ok := _TextViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+		} else if val, ok := _ViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			return errors.New(flg + " is not a valid value for type TextViewFlags")
+			return errors.New(flg + " is not a valid value for type ViewFlags")
 		}
 	}
 	return nil
 }
 
-// Int64 returns the TextViewFlags value as an int64.
-func (i TextViewFlags) Int64() int64 {
+// Int64 returns the ViewFlags value as an int64.
+func (i ViewFlags) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the TextViewFlags value from an int64.
-func (i *TextViewFlags) SetInt64(in int64) {
-	*i = TextViewFlags(in)
+// SetInt64 sets the ViewFlags value from an int64.
+func (i *ViewFlags) SetInt64(in int64) {
+	*i = ViewFlags(in)
 }
 
-// Desc returns the description of the TextViewFlags value.
-func (i TextViewFlags) Desc() string {
-	if str, ok := _TextViewFlagsDescMap[i]; ok {
+// Desc returns the description of the ViewFlags value.
+func (i ViewFlags) Desc() string {
+	if str, ok := _ViewFlagsDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// TextViewFlagsValues returns all possible values
-// for the type TextViewFlags.
-func TextViewFlagsValues() []TextViewFlags {
-	return _TextViewFlagsValues
+// ViewFlagsValues returns all possible values
+// for the type ViewFlags.
+func ViewFlagsValues() []ViewFlags {
+	return _ViewFlagsValues
 }
 
 // Values returns all possible values
-// for the type TextViewFlags.
-func (i TextViewFlags) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TextViewFlagsValues))
-	for i, d := range _TextViewFlagsValues {
+// for the type ViewFlags.
+func (i ViewFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ViewFlagsValues))
+	for i, d := range _ViewFlagsValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type TextViewFlags.
-func (i TextViewFlags) IsValid() bool {
-	_, ok := _TextViewFlagsMap[i]
+// valid option for type ViewFlags.
+func (i ViewFlags) IsValid() bool {
+	_, ok := _ViewFlagsMap[i]
 	return ok
 }
 
 // HasFlag returns whether these
 // bit flags have the given bit flag set.
-func (i TextViewFlags) HasFlag(f enums.BitFlag) bool {
+func (i ViewFlags) HasFlag(f enums.BitFlag) bool {
 	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
 }
 
 // SetFlag sets the value of the given
 // flags in these flags to the given value.
-func (i *TextViewFlags) SetFlag(on bool, f ...enums.BitFlag) {
+func (i *ViewFlags) SetFlag(on bool, f ...enums.BitFlag) {
 	var mask int64
 	for _, v := range f {
 		mask |= 1 << v.Int64()
@@ -725,11 +725,11 @@ func (i *TextViewFlags) SetFlag(on bool, f ...enums.BitFlag) {
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TextViewFlags) MarshalText() ([]byte, error) {
+func (i ViewFlags) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TextViewFlags) UnmarshalText(text []byte) error {
+func (i *ViewFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }

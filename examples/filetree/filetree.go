@@ -160,13 +160,13 @@ func ProjPathParse(path string) (root, projnm, fnm string, ok bool) {
 //   TextViews
 
 // ActiveTextView returns the currently-active TextView
-func (fb *FileBrowse) ActiveTextView() *giv.TextView {
+func (fb *FileBrowse) ActiveTextView() *textview.View {
 	return fb.TextViewByIndex(fb.ActiveTextViewIdx)
 }
 
 // SetActiveTextView sets the given view index as the currently-active
 // TextView -- returns that textview
-func (fb *FileBrowse) SetActiveTextView(idx int) *giv.TextView {
+func (fb *FileBrowse) SetActiveTextView(idx int) *textview.View {
 	if idx < 0 || idx >= fb.NTextViews {
 		log.Printf("FileBrowse SetActiveTextView: text view index out of range: %v\n", idx)
 		return nil
@@ -183,7 +183,7 @@ func (fb *FileBrowse) SetActiveTextView(idx int) *giv.TextView {
 // NextTextView returns the next text view available for viewing a file and
 // its index -- if the active text view is empty, then it is used, otherwise
 // it is the next one
-func (fb *FileBrowse) NextTextView() (*giv.TextView, int) {
+func (fb *FileBrowse) NextTextView() (*textview.View, int) {
 	av := fb.TextViewByIndex(fb.ActiveTextViewIdx)
 	if av.Buf == nil {
 		return av, fb.ActiveTextViewIdx
@@ -296,7 +296,7 @@ func (fb *FileBrowse) Splits() (*gi.Splits, int) {
 }
 
 // TextViewByIndex returns the TextView by index, nil if not found
-func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
+func (fb *FileBrowse) TextViewByIndex(idx int) *textview.View {
 	if idx < 0 || idx >= fb.NTextViews {
 		log.Printf("FileBrowse: text view index out of range: %v\n", idx)
 		return nil
@@ -309,7 +309,7 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *giv.TextView {
 			log.Printf("FileBrowse: text view not at index: %v\n", idx)
 			return nil
 		}
-		return svk.(*giv.TextView)
+		return svk.(*textview.View)
 	}
 	return nil
 }

@@ -11,8 +11,9 @@ import (
 	"goki.dev/pi/v2/pi"
 )
 
-// Opts contains options for TextBufs -- contains everything necessary to
-// conditionalize editing of a given text file
+// Opts contains options for textview.Bufs
+// Contains everything necessary to conditionalize editing
+// of a given text file.
 type Opts struct {
 
 	// editor prefs from gogi prefs

@@ -14,7 +14,7 @@ import (
 // Edit describes an edit action to a buffer -- this is the data passed
 // via signals to viewers of the buffer.  Actions are only deletions and
 // insertions (a change is a sequence of those, given normal editing
-// processes).  The TextBuf always reflects the current state *after* the edit.
+// processes).  The textview.Buf always reflects the current state *after* the edit.
 type Edit struct {
 
 	// region for the edit (start is same for previous and current, end is in original pre-delete text for a delete, and in new lines data for an insert.  Also contains the Time stamp for this edit.

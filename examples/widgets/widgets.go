@@ -258,7 +258,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	// note: use KeyFunMenu* for standard shortcuts
 	// Command in shortcuts is automatically translated into Control for
-	// Linux, RenderWins or Meta for MacOS
+	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu.AddButton(gi.ActOpts{Label: "New", ShortcutKey: gi.KeyFunMenuNew},
 		rec.This(), func(recv, send ki.Ki, sig int64, data any) {

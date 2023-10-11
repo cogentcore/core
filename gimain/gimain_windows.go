@@ -10,6 +10,6 @@ package gimain
 import "goki.dev/gi/v2/gi"
 
 func init() {
-	gi.DefaultKeyMap = gi.KeyMapName("RenderWinsStd")
+	gi.DefaultKeyMap = gi.KeyMapName("WindowsStd")
 	gi.SetActiveKeyMapName(gi.DefaultKeyMap)
 }

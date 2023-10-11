@@ -19,7 +19,7 @@ var UndoTrace = false
 // is started, for grouping undo events
 var UndoGroupDelayMSec = 250
 
-// Undo is the TextBuf undo manager
+// Undo is the textview.Buf undo manager
 type Undo struct {
 
 	// if true, saving and using undos is turned off (e.g., inactive buffers)
