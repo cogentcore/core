@@ -169,39 +169,39 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 			s.AlignH = styles.AlignLeft
 		})
 
-	slider1 := gi.NewSlider(srow, "slider1").
+	slider0 := gi.NewSlider(srow).
 		SetDim(mat32.X).
 		SetValue(0.5).
 		SetSnap(true).
 		SetTracking(true).
 		SetIcon(icons.RadioButtonChecked)
-	slider1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2))
+	slider0.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2))
+	slider0.OnChange(func(e events.Event) {
+		fmt.Println("slider0", slider0.Value)
+	})
+
+	slider1 := gi.NewSlider(srow).
+		SetDim(mat32.Y).
+		SetTracking(true).
+		SetValue(0.5)
+	slider1.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1))
 	slider1.OnChange(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
 
-	slider2 := gi.NewSlider(srow, "slider2").
-		SetDim(mat32.Y).
-		SetTracking(true).
-		SetValue(0.5)
-	slider2.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1))
-	slider2.OnChange(func(e events.Event) {
-		fmt.Println("slider2", slider2.Value)
-	})
-
-	scrollbar1 := gi.NewSlider(srow, "scrollbar1").
+	scroll0 := gi.NewSlider(srow).
 		SetType(gi.SliderScrollbar).
 		SetDim(mat32.X).
 		SetThumbValue(0.25).
 		SetValue(0.25).
 		SetSnap(true).
 		SetTracking(true)
-	scrollbar1.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1))
-	scrollbar1.OnChange(func(e events.Event) {
-		fmt.Println("scroll1", scrollbar1.Value)
+	scroll0.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1))
+	scroll0.OnChange(func(e events.Event) {
+		fmt.Println("scroll1", scroll0.Value)
 	})
 
-	scrollbar2 := gi.NewSlider(srow, "scrollbar2").
+	scroll1 := gi.NewSlider(srow).
 		SetType(gi.SliderScrollbar).
 		SetDim(mat32.Y).
 		SetThumbValue(10).
@@ -210,9 +210,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetStep(1).
 		SetPageStep(10)
-	scrollbar2.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight()
-	scrollbar2.OnChange(func(e events.Event) {
-		fmt.Println("scroll2", scrollbar2.Value)
+	scroll1.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight()
+	scroll1.OnChange(func(e events.Event) {
+		fmt.Println("scroll1", scroll1.Value)
 	})
 
 	//////////////////////////////////////////
