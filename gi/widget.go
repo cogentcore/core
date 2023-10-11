@@ -27,7 +27,7 @@ type Widget interface {
 	// TODO(kai): rename .Style to .Styles and AddStyles to Style()
 
 	// AddStyles sets the styling of the widget by adding a Styler function
-	AddStyles(s Styler) Widget
+	AddStyles(s func(s *styles.Style)) Widget
 
 	// SetTooltip sets the Tooltip message when hovering over the widget
 	SetTooltip(tt string) Widget
@@ -264,7 +264,7 @@ type WidgetBase struct {
 	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
 
 	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code
-	Stylers []Styler `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code"`
+	Stylers []func(s *styles.Style) `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`

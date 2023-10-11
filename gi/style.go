@@ -41,17 +41,6 @@ import (
 // should look at https://goki.dev/docs/gi/styling.
 var CustomConfigStyles func(w Widget)
 
-// Styler is a fuction that can be used to style an element.
-// They are the building blocks of the GoGi styling system.
-// They can be used as a closure and capture surrounding context,
-// but they are passed the style for convenience and so that they
-// can be used for multiple elements if desired; you can get most
-// of the information you need from the function. A Styler should be
-// added to a widget through the [WidgetBase.AddStyles] method.
-// We use stylers for styling because they give you complete
-// control and full programming logic without any CSS-selector magic.
-type Styler func(s *styles.Style)
-
 func (sc *Scene) SetDefaultStyle() {
 	sc.AddStyles(func(s *styles.Style) {
 		s.Cursor = cursors.Arrow
@@ -69,7 +58,7 @@ func (sc *Scene) SetDefaultStyle() {
 // It should only be done before showing the scene
 // during initial configuration -- otherwise requries
 // a StyMu mutex lock.
-func (wb *WidgetBase) AddStyles(s Styler) Widget {
+func (wb *WidgetBase) AddStyles(s func(s *styles.Style)) Widget {
 	wb.Stylers = append(wb.Stylers, s)
 	return wb.This().(Widget)
 }

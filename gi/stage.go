@@ -311,7 +311,7 @@ func (st *StageBase) SetType(typ StageTypes) Stage {
 		st.Scrim = false
 		st.ClickOff = true
 	case TooltipStage:
-		st.Modal = false
+		st.Modal = true
 		st.Scrim = false
 	case SnackbarStage:
 		st.Modal = false
