@@ -233,6 +233,9 @@ func (sp *Spinner) ConfigParts(sc *Scene) {
 }
 
 func (sp *Spinner) TextField() *TextField {
+	if sp.Parts == nil {
+		return nil
+	}
 	tf, ok := sp.Parts.ChildByName("text-field", 1).(*TextField)
 	if !ok {
 		return nil
