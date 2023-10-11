@@ -29,6 +29,7 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -1754,17 +1755,17 @@ func (ftv *FileTreeView) OnInit() {
 		case "open":
 			s.Font.Style = styles.FontItalic
 		case "untracked":
-			s.Color, _ = colors.FromHex("#808080")
+			s.Color = grr.Must(colors.FromHex("#808080"))
 		case "modified":
-			s.Color, _ = colors.FromHex("#4b7fd1")
+			s.Color = grr.Must(colors.FromHex("#4b7fd1"))
 		case "added":
-			s.Color, _ = colors.FromHex("#008800")
+			s.Color = grr.Must(colors.FromHex("#008800"))
 		case "deleted":
-			s.Color, _ = colors.FromHex("#ff4252")
+			s.Color = grr.Must(colors.FromHex("#ff4252"))
 		case "conflicted":
-			s.Color, _ = colors.FromHex("#ce8020")
+			s.Color = grr.Must(colors.FromHex("#ce8020"))
 		case "updated":
-			s.Color, _ = colors.FromHex("#008060")
+			s.Color = grr.Must(colors.FromHex("#008060"))
 		}
 	})
 }
