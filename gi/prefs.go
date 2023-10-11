@@ -30,7 +30,6 @@ import (
 // then if pref info needed.
 func Init() {
 	if Prefs.LogicalDPIScale == 0 {
-		fmt.Println("doing init")
 		Prefs.Defaults()
 		PrefsDet.Defaults()
 		PrefsDbg.Connect()
