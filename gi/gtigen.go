@@ -101,12 +101,12 @@ func (t *ToolBar) AsToolBar() *ToolBar {
 	return t
 }
 
-// BitmapType is the [gti.Type] for [Bitmap]
-var BitmapType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Bitmap",
-	ShortName:  "gi.Bitmap",
-	IDName:     "bitmap",
-	Doc:        "Bitmap is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
+// ImageType is the [gti.Type] for [Image]
+var ImageType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Image",
+	ShortName:  "gi.Image",
+	IDName:     "image",
+	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}}},
@@ -120,20 +120,20 @@ var BitmapType = gti.AddType(&gti.Type{
 	Instance: &Image{},
 })
 
-// NewBitmap adds a new [Bitmap] with the given name
+// NewImage adds a new [Image] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewBitmap(par ki.Ki, name ...string) *Image {
-	return par.NewChild(BitmapType, name...).(*Image)
+func NewImage(par ki.Ki, name ...string) *Image {
+	return par.NewChild(ImageType, name...).(*Image)
 }
 
-// KiType returns the [*gti.Type] of [Bitmap]
+// KiType returns the [*gti.Type] of [Image]
 func (t *Image) KiType() *gti.Type {
-	return BitmapType
+	return ImageType
 }
 
-// New returns a new [*Bitmap] value
+// New returns a new [*Image] value
 func (t *Image) New() ki.Ki {
 	return &Image{}
 }

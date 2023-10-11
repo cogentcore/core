@@ -97,8 +97,8 @@ func makeHome(ts *gi.Tabs) {
 	// 	)
 	// })
 
-	bmap := gi.NewBitmap(home, "bmap")
-	err := bmap.OpenImage("gopher.png", 300, 300)
+	img := gi.NewImage(home)
+	err := img.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
