@@ -168,67 +168,6 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
-// SwitchesType is the [gti.Type] for [Switches]
-var SwitchesType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.Switches",
-	ShortName: "gi.Switches",
-	IDName:    "switches",
-	Doc:       "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (switch labels)", Directives: gti.Directives{}}},
-		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
-		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", Doc: "make the items mutually exclusive -- checking one turns off all the others", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Switches{},
-})
-
-// NewSwitches adds a new [Switches] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSwitches(par ki.Ki, name ...string) *Switches {
-	return par.NewChild(SwitchesType, name...).(*Switches)
-}
-
-// KiType returns the [*gti.Type] of [Switches]
-func (t *Switches) KiType() *gti.Type {
-	return SwitchesType
-}
-
-// New returns a new [*Switches] value
-func (t *Switches) New() ki.Ki {
-	return &Switches{}
-}
-
-// SwitchesEmbedder is an interface that all types that embed Switches satisfy
-type SwitchesEmbedder interface {
-	AsSwitches() *Switches
-}
-
-// AsSwitches returns the given value as a value of type Switches if the type
-// of the given value embeds Switches, or nil otherwise
-func AsSwitches(k ki.Ki) *Switches {
-	if k == nil || k.This() == nil {
-		return nil
-	}
-	if t, ok := k.(SwitchesEmbedder); ok {
-		return t.AsSwitches()
-	}
-	return nil
-}
-
-// AsSwitches satisfies the [SwitchesEmbedder] interface
-func (t *Switches) AsSwitches() *Switches {
-	return t
-}
-
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Chooser",
@@ -237,13 +176,13 @@ var ChooserType = gti.AddType(&gti.Type{
 	Doc:        "Chooser is for selecting items from a dropdown list, with an optional\nedit TextField for typing directly.\nThe items can be of any type, including enum values -- they are converted\nto strings for the display.  If the items are of type [icons.Icon], then they\nare displayed using icons instead.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "ComboBoxTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}}},
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", Doc: "current selected value", Directives: gti.Directives{}}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
-		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
+		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
 	}),
@@ -1075,6 +1014,68 @@ func (t *Switch) KiType() *gti.Type {
 // New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
+}
+
+// SwitchesType is the [gti.Type] for [Switches]
+var SwitchesType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Switches",
+	ShortName: "gi.Switches",
+	IDName:    "switches",
+	Doc:       "Switches is a widget for containing a set of switches.\nIt can optionally enforce mutual exclusivity (i.e., Radio Buttons).\nThe buttons are all in the Parts of the widget and the Parts layout\ndetermines how they are displayed.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Type", &gti.Field{Name: "Type", Type: "SwitchTypes", Doc: "the type of switches that will be made", Directives: gti.Directives{}}},
+		{"Items", &gti.Field{Name: "Items", Type: "[]string", Doc: "the list of items (switch labels)", Directives: gti.Directives{}}},
+		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", Doc: "an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}}},
+		{"Mutex", &gti.Field{Name: "Mutex", Type: "bool", Doc: "whether to make the items mutually exclusive (checking one turns off all the others)", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Switches{},
+})
+
+// NewSwitches adds a new [Switches] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSwitches(par ki.Ki, name ...string) *Switches {
+	return par.NewChild(SwitchesType, name...).(*Switches)
+}
+
+// KiType returns the [*gti.Type] of [Switches]
+func (t *Switches) KiType() *gti.Type {
+	return SwitchesType
+}
+
+// New returns a new [*Switches] value
+func (t *Switches) New() ki.Ki {
+	return &Switches{}
+}
+
+// SwitchesEmbedder is an interface that all types that embed Switches satisfy
+type SwitchesEmbedder interface {
+	AsSwitches() *Switches
+}
+
+// AsSwitches returns the given value as a value of type Switches if the type
+// of the given value embeds Switches, or nil otherwise
+func AsSwitches(k ki.Ki) *Switches {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(SwitchesEmbedder); ok {
+		return t.AsSwitches()
+	}
+	return nil
+}
+
+// AsSwitches satisfies the [SwitchesEmbedder] interface
+func (t *Switches) AsSwitches() *Switches {
+	return t
 }
 
 // TabsType is the [gti.Type] for [Tabs]

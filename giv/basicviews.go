@@ -656,7 +656,7 @@ func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  EnumValueView
 
-// EnumValueView presents a combobox for choosing enums
+// EnumValueView presents a chooser for choosing enums
 type EnumValueView struct {
 	ValueViewBase
 }
@@ -783,7 +783,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  TypeValueView
 
-// TypeValueView presents a combobox for choosing types
+// TypeValueView presents a chooser for choosing types
 type TypeValueView struct {
 	ValueViewBase
 }

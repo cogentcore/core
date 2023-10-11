@@ -320,109 +320,109 @@ func (i *ButtonFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ComboBoxTypesValues = []ComboBoxTypes{0, 1}
+var _ChooserTypesValues = []ChooserTypes{0, 1}
 
-// ComboBoxTypesN is the highest valid value
-// for type ComboBoxTypes, plus one.
-const ComboBoxTypesN ComboBoxTypes = 2
+// ChooserTypesN is the highest valid value
+// for type ChooserTypes, plus one.
+const ChooserTypesN ChooserTypes = 2
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
-func _ComboBoxTypesNoOp() {
+func _ChooserTypesNoOp() {
 	var x [1]struct{}
-	_ = x[ComboBoxFilled-(0)]
-	_ = x[ComboBoxOutlined-(1)]
+	_ = x[ChooserFilled-(0)]
+	_ = x[ChooserOutlined-(1)]
 }
 
-var _ComboBoxTypesNameToValueMap = map[string]ComboBoxTypes{
-	`ComboBoxFilled`:   0,
-	`comboboxfilled`:   0,
-	`ComboBoxOutlined`: 1,
-	`comboboxoutlined`: 1,
+var _ChooserTypesNameToValueMap = map[string]ChooserTypes{
+	`ChooserFilled`:   0,
+	`chooserfilled`:   0,
+	`ChooserOutlined`: 1,
+	`chooseroutlined`: 1,
 }
 
-var _ComboBoxTypesDescMap = map[ComboBoxTypes]string{
-	0: `ComboBoxFilled represents a filled ComboBox with a background color and a bottom border`,
-	1: `ComboBoxOutlined represents an outlined ComboBox with a border on all sides and no background color`,
+var _ChooserTypesDescMap = map[ChooserTypes]string{
+	0: `ChooserFilled represents a filled Chooser with a background color and a bottom border`,
+	1: `ChooserOutlined represents an outlined Chooser with a border on all sides and no background color`,
 }
 
-var _ComboBoxTypesMap = map[ComboBoxTypes]string{
-	0: `ComboBoxFilled`,
-	1: `ComboBoxOutlined`,
+var _ChooserTypesMap = map[ChooserTypes]string{
+	0: `ChooserFilled`,
+	1: `ChooserOutlined`,
 }
 
 // String returns the string representation
-// of this ComboBoxTypes value.
-func (i ComboBoxTypes) String() string {
-	if str, ok := _ComboBoxTypesMap[i]; ok {
+// of this ChooserTypes value.
+func (i ChooserTypes) String() string {
+	if str, ok := _ChooserTypesMap[i]; ok {
 		return str
 	}
 	return strconv.FormatInt(int64(i), 10)
 }
 
-// SetString sets the ComboBoxTypes value from its
+// SetString sets the ChooserTypes value from its
 // string representation, and returns an
 // error if the string is invalid.
-func (i *ComboBoxTypes) SetString(s string) error {
-	if val, ok := _ComboBoxTypesNameToValueMap[s]; ok {
+func (i *ChooserTypes) SetString(s string) error {
+	if val, ok := _ChooserTypesNameToValueMap[s]; ok {
 		*i = val
 		return nil
 	}
-	if val, ok := _ComboBoxTypesNameToValueMap[strings.ToLower(s)]; ok {
+	if val, ok := _ChooserTypesNameToValueMap[strings.ToLower(s)]; ok {
 		*i = val
 		return nil
 	}
-	return errors.New(s + " is not a valid value for type ComboBoxTypes")
+	return errors.New(s + " is not a valid value for type ChooserTypes")
 }
 
-// Int64 returns the ComboBoxTypes value as an int64.
-func (i ComboBoxTypes) Int64() int64 {
+// Int64 returns the ChooserTypes value as an int64.
+func (i ChooserTypes) Int64() int64 {
 	return int64(i)
 }
 
-// SetInt64 sets the ComboBoxTypes value from an int64.
-func (i *ComboBoxTypes) SetInt64(in int64) {
-	*i = ComboBoxTypes(in)
+// SetInt64 sets the ChooserTypes value from an int64.
+func (i *ChooserTypes) SetInt64(in int64) {
+	*i = ChooserTypes(in)
 }
 
-// Desc returns the description of the ComboBoxTypes value.
-func (i ComboBoxTypes) Desc() string {
-	if str, ok := _ComboBoxTypesDescMap[i]; ok {
+// Desc returns the description of the ChooserTypes value.
+func (i ChooserTypes) Desc() string {
+	if str, ok := _ChooserTypesDescMap[i]; ok {
 		return str
 	}
 	return i.String()
 }
 
-// ComboBoxTypesValues returns all possible values
-// for the type ComboBoxTypes.
-func ComboBoxTypesValues() []ComboBoxTypes {
-	return _ComboBoxTypesValues
+// ChooserTypesValues returns all possible values
+// for the type ChooserTypes.
+func ChooserTypesValues() []ChooserTypes {
+	return _ChooserTypesValues
 }
 
 // Values returns all possible values
-// for the type ComboBoxTypes.
-func (i ComboBoxTypes) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_ComboBoxTypesValues))
-	for i, d := range _ComboBoxTypesValues {
+// for the type ChooserTypes.
+func (i ChooserTypes) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ChooserTypesValues))
+	for i, d := range _ChooserTypesValues {
 		res[i] = d
 	}
 	return res
 }
 
 // IsValid returns whether the value is a
-// valid option for type ComboBoxTypes.
-func (i ComboBoxTypes) IsValid() bool {
-	_, ok := _ComboBoxTypesMap[i]
+// valid option for type ChooserTypes.
+func (i ChooserTypes) IsValid() bool {
+	_, ok := _ChooserTypesMap[i]
 	return ok
 }
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ComboBoxTypes) MarshalText() ([]byte, error) {
+func (i ChooserTypes) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ComboBoxTypes) UnmarshalText(text []byte) error {
+func (i *ChooserTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

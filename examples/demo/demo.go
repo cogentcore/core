@@ -302,7 +302,7 @@ func makeInputs(ts *gi.Tabs) {
 	cho.Text = "Select a fruit"
 	cho.Items = fruits
 	cho.Tooltips = fruitDescs
-	cho.Type = gi.ComboBoxOutlined
+	cho.Type = gi.ChooserOutlined
 
 	chef := gi.NewChooser(inputs)
 	chef.Editable = true
@@ -315,7 +315,7 @@ func makeInputs(ts *gi.Tabs) {
 	cheo.Placeholder = "Select or type a fruit"
 	cheo.Items = fruits
 	cheo.Tooltips = fruitDescs
-	cheo.Type = gi.ComboBoxOutlined
+	cheo.Type = gi.ChooserOutlined
 
 	sw := gi.NewSwitches(inputs)
 	sw.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}

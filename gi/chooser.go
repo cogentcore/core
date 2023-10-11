@@ -34,7 +34,7 @@ type Chooser struct {
 	Button
 
 	// the type of combo box
-	Type ComboBoxTypes `desc:"the type of combo box"`
+	Type ChooserTypes `desc:"the type of combo box"`
 
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
 	Editable bool `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
@@ -53,8 +53,8 @@ type Chooser struct {
 	// items available for selection
 	Items []any `json:"-" xml:"-" desc:"items available for selection"`
 
-	// an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items
-	Tooltips []string `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for combobox items; the indices for tooltips correspond to those for items"`
+	// an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items
+	Tooltips []string `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items"`
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
 	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
@@ -73,32 +73,32 @@ func (ch *Chooser) CopyFieldsFrom(frm any) {
 	ch.MaxLength = fr.MaxLength
 }
 
-// ComboBoxTypes is an enum containing the
+// ChooserTypes is an enum containing the
 // different possible types of combo boxes
-type ComboBoxTypes int //enums:enum
+type ChooserTypes int //enums:enum
 
 const (
-	// ComboBoxFilled represents a filled
-	// ComboBox with a background color
+	// ChooserFilled represents a filled
+	// Chooser with a background color
 	// and a bottom border
-	ComboBoxFilled ComboBoxTypes = iota
-	// ComboBoxOutlined represents an outlined
-	// ComboBox with a border on all sides
+	ChooserFilled ChooserTypes = iota
+	// ChooserOutlined represents an outlined
+	// Chooser with a border on all sides
 	// and no background color
-	ComboBoxOutlined
+	ChooserOutlined
 )
 
 func (ch *Chooser) OnInit() {
-	ch.ComboBoxHandlers()
-	ch.ComboBoxStyles()
+	ch.ChooserHandlers()
+	ch.ChooserStyles()
 }
 
-func (ch *Chooser) ComboBoxHandlers() {
+func (ch *Chooser) ChooserHandlers() {
 	ch.ButtonHandlers()
-	ch.ComboBoxKeys()
+	ch.ChooserKeys()
 }
 
-func (ch *Chooser) ComboBoxStyles() {
+func (ch *Chooser) ChooserStyles() {
 	ch.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
@@ -112,7 +112,7 @@ func (ch *Chooser) ComboBoxStyles() {
 		}
 		s.Color = colors.Scheme.OnSurface
 		switch ch.Type {
-		case ComboBoxFilled:
+		case ChooserFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone)
@@ -127,7 +127,7 @@ func (ch *Chooser) ComboBoxStyles() {
 					s.Border.Color.Bottom = colors.Scheme.Primary.Base
 				}
 			}
-		case ComboBoxOutlined:
+		case ChooserOutlined:
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Width.Set(units.Dp(1))
 			s.Border.Color.Set(colors.Scheme.OnSurfaceVariant)
@@ -170,7 +170,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 	case "text":
 		text := w.(*TextField)
 		text.Placeholder = ch.Placeholder
-		if ch.Type == ComboBoxFilled {
+		if ch.Type == ChooserFilled {
 			text.Type = TextFieldFilled
 		} else {
 			text.Type = TextFieldOutlined
@@ -200,7 +200,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 }
 
 // SetType sets the styling type of the combo box
-func (ch *Chooser) SetType(typ ComboBoxTypes) *Chooser {
+func (ch *Chooser) SetType(typ ChooserTypes) *Chooser {
 	updt := ch.UpdateStart()
 	ch.Type = typ
 	ch.UpdateEndLayout(updt)
@@ -250,7 +250,7 @@ func (ch *Chooser) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
 }
 
 // ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
-// for editable combobox, where textfield then takes up the rest of the space
+// for editable Chooser, where textfield then takes up the rest of the space
 func (ch *Chooser) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) int {
 	needInd := (ch.HasMenu() || defOn) && ch.Indicator != icons.None
 	if !needInd {
@@ -293,7 +293,7 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	}
 }
 
-// TextField returns the text field of an editable combobox, and false if not made
+// TextField returns the text field of an editable Chooser, and false if not made
 func (ch *Chooser) TextField() (*TextField, bool) {
 	tff := ch.Parts.ChildByName("text", 2)
 	if tff == nil {
@@ -517,7 +517,7 @@ func (ch *Chooser) SelectItemAction(idx int) {
 }
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
-// MakeMenuFunc for this combobox.
+// MakeMenuFunc for this Chooser.
 func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 	nitm := len(ch.Items)
 	if ch.Menu == nil {
@@ -562,13 +562,13 @@ func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 	}
 }
 
-func (ch *Chooser) ComboBoxKeys() {
+func (ch *Chooser) ChooserKeys() {
 	ch.OnKeyChord(func(e events.Event) {
 		if ch.StateIs(states.Disabled) {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("ComboBox KeyChordEvent: %v\n", ch.Path())
+			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
 		}
 		kf := KeyFun(e.KeyChord())
 		switch {
@@ -629,7 +629,7 @@ func (ch *Chooser) TextFieldHandlers(tf *TextField) {
 		}
 		if !ch.AllowNew {
 			// TODO: use validation
-			slog.Error("invalid combobox value", "value", text)
+			slog.Error("invalid Chooser value", "value", text)
 			return
 		}
 		ch.Items = append(ch.Items, text)
@@ -639,7 +639,7 @@ func (ch *Chooser) TextFieldHandlers(tf *TextField) {
 }
 
 // CompleteMatch is the [complete.MatchFunc] used for the
-// editable textfield part of the ComboBox (if it exists).
+// editable textfield part of the Chooser (if it exists).
 func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md complete.Matches) {
 	md.Seed = text
 	comps := make(complete.Completions, len(ch.Items))
@@ -658,7 +658,7 @@ func (ch *Chooser) CompleteMatch(data any, text string, posLn, posCh int) (md co
 }
 
 // CompleteEdit is the [complete.EditFunc] used for the
-// editable textfield part of the ComboBox (if it exists).
+// editable textfield part of the Chooser (if it exists).
 func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion complete.Completion, seed string) (ed complete.Edit) {
 	return complete.Edit{
 		NewText:       completion.Text,
