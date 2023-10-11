@@ -24,14 +24,14 @@ import (
 	"golang.org/x/image/math/f64"
 )
 
-// bitmap contains various bitmap-related elements, including the Bitmap node
-// for showing bitmaps, and image processing utilities
+// image contains various image-related elements, including the Image node
+// for showing images, and image processing utilities
 
-// Bitmap is a Widget that is optimized to render a static bitmap image --
+// Image is a Widget that is optimized to render a static bitmap image --
 // it expects to be a terminal node and does NOT call rendering etc on its
 // children.  It is particularly useful for overlays in drag-n-drop uses --
 // can grab the image of another vp and show that
-type Bitmap struct {
+type Image struct {
 	WidgetBase
 
 	// file name of image loaded -- set by OpenImage
@@ -44,22 +44,22 @@ type Bitmap struct {
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
 }
 
-func (bm *Bitmap) CopyFieldsFrom(frm any) {
-	fr := frm.(*Bitmap)
-	bm.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	bm.Size = fr.Size
-	bm.Filename = fr.Filename
+func (im *Image) CopyFieldsFrom(frm any) {
+	fr := frm.(*Image)
+	im.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	im.Size = fr.Size
+	im.Filename = fr.Filename
 }
 
-func (bm *Bitmap) OnInit() {
-	bm.WidgetHandlers()
-	bm.BitmapStyles()
+func (im *Image) OnInit() {
+	im.WidgetHandlers()
+	im.BitmapStyles()
 }
 
-func (bm *Bitmap) BitmapStyles() {
-	bm.AddStyles(func(s *styles.Style) {
-		s.MinWidth.SetDp(float32(bm.Size.X))
-		s.MinHeight.SetDp(float32(bm.Size.Y))
+func (im *Image) BitmapStyles() {
+	im.AddStyles(func(s *styles.Style) {
+		s.MinWidth.SetDp(float32(im.Size.X))
+		s.MinHeight.SetDp(float32(im.Size.Y))
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 	})
 }
@@ -67,56 +67,56 @@ func (bm *Bitmap) BitmapStyles() {
 // SetSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different
-func (bm *Bitmap) SetSize(nwsz image.Point) {
+func (im *Image) SetSize(nwsz image.Point) {
 	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
-	bm.Size = nwsz // always make sure
-	if bm.Pixels != nil && bm.Pixels.Bounds().Size() == nwsz {
+	im.Size = nwsz // always make sure
+	if im.Pixels != nil && im.Pixels.Bounds().Size() == nwsz {
 		return
 	}
-	bm.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	im.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
-func (bm *Bitmap) OpenImage(filename FileName, width, height float32) error {
+func (im *Image) OpenImage(filename FileName, width, height float32) error {
 	img, _, err := images.Open(string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
-	bm.Filename = filename
-	bm.SetImage(img, width, height)
+	im.Filename = filename
+	im.SetImage(img, width, height)
 	return nil
 }
 
 // OpenImageFS opens an image for the bitmap, and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension
-func (bm *Bitmap) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
+func (im *Image) OpenImageFS(fsys fs.FS, filename FileName, width, height float32) error {
 	img, _, err := images.OpenFS(fsys, string(filename))
 	if err != nil {
 		log.Printf("gi.Bitmap.OpenImage -- could not open file: %v, err: %v\n", filename, err)
 		return err
 	}
-	bm.Filename = filename
-	bm.SetImage(img, width, height)
+	im.Filename = filename
+	im.SetImage(img, width, height)
 	return nil
 }
 
 // SetImage sets an image for the bitmap , and resizes to the size of the image
 // or the specified size -- pass 0 for width and/or height to use the actual image size
 // for that dimension.  Copies from given image into internal image for this bitmap.
-func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
-	updt := bm.UpdateStart()
-	defer bm.UpdateEnd(updt)
+func (im *Image) SetImage(img image.Image, width, height float32) {
+	updt := im.UpdateStart()
+	defer im.UpdateEnd(updt)
 
 	sz := img.Bounds().Size()
 	if width <= 0 && height <= 0 {
-		bm.SetSize(sz)
-		draw.Draw(bm.Pixels, bm.Pixels.Bounds(), img, image.Point{}, draw.Src)
+		im.SetSize(sz)
+		draw.Draw(im.Pixels, im.Pixels.Bounds(), img, image.Point{}, draw.Src)
 	} else {
 		tsz := sz
 		transformer := draw.BiLinear
@@ -130,32 +130,32 @@ func (bm *Bitmap) SetImage(img image.Image, width, height float32) {
 			scy = height / float32(sz.Y)
 			tsz.Y = int(height)
 		}
-		bm.SetSize(tsz)
+		im.SetSize(tsz)
 		m := mat32.Scale2D(scx, scy)
 		s2d := f64.Aff3{float64(m.XX), float64(m.XY), float64(m.X0), float64(m.YX), float64(m.YY), float64(m.Y0)}
-		transformer.Transform(bm.Pixels, s2d, img, img.Bounds(), draw.Src, nil)
+		transformer.Transform(im.Pixels, s2d, img, img.Bounds(), draw.Src, nil)
 	}
 }
 
 // GrabRenderFrom grabs the rendered image from given node
-func (bm *Bitmap) GrabRenderFrom(wi Widget) {
+func (im *Image) GrabRenderFrom(wi Widget) {
 	img := GrabRenderFrom(wi)
 	if img != nil {
-		bm.Pixels = img
-		bm.Size = bm.Pixels.Bounds().Size()
+		im.Pixels = img
+		im.Size = im.Pixels.Bounds().Size()
 	}
 }
 
-func (bm *Bitmap) DrawIntoScene(sc *Scene) {
-	if bm.Pixels == nil {
+func (im *Image) DrawIntoScene(sc *Scene) {
+	if im.Pixels == nil {
 		return
 	}
-	pos := bm.LayState.Alloc.Pos.ToPointCeil()
-	max := pos.Add(bm.Size)
+	pos := im.LayState.Alloc.Pos.ToPointCeil()
+	max := pos.Add(im.Size)
 	r := image.Rectangle{Min: pos, Max: max}
 	sp := image.Point{}
-	if bm.Par != nil { // use parents children bbox to determine where we can draw
-		pni, _ := AsWidget(bm.Par)
+	if im.Par != nil { // use parents children bbox to determine where we can draw
+		pni, _ := AsWidget(im.Par)
 		pbb := pni.ChildrenBBoxes(sc)
 		nr := r.Intersect(pbb)
 		sp = nr.Min.Sub(r.Min)
@@ -165,14 +165,14 @@ func (bm *Bitmap) DrawIntoScene(sc *Scene) {
 		}
 		r = nr
 	}
-	draw.Draw(sc.Pixels, r, bm.Pixels, sp, draw.Over)
+	draw.Draw(sc.Pixels, r, im.Pixels, sp, draw.Over)
 }
 
-func (bm *Bitmap) Render(sc *Scene) {
-	if bm.PushBounds(sc) {
-		bm.RenderChildren(sc)
-		bm.DrawIntoScene(bm.Sc)
-		bm.PopBounds(sc)
+func (im *Image) Render(sc *Scene) {
+	if im.PushBounds(sc) {
+		im.RenderChildren(sc)
+		im.DrawIntoScene(im.Sc)
+		im.PopBounds(sc)
 	}
 }
 

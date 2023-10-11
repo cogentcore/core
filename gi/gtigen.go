@@ -117,25 +117,25 @@ var BitmapType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Bitmap{},
+	Instance: &Image{},
 })
 
 // NewBitmap adds a new [Bitmap] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewBitmap(par ki.Ki, name ...string) *Bitmap {
-	return par.NewChild(BitmapType, name...).(*Bitmap)
+func NewBitmap(par ki.Ki, name ...string) *Image {
+	return par.NewChild(BitmapType, name...).(*Image)
 }
 
 // KiType returns the [*gti.Type] of [Bitmap]
-func (t *Bitmap) KiType() *gti.Type {
+func (t *Image) KiType() *gti.Type {
 	return BitmapType
 }
 
 // New returns a new [*Bitmap] value
-func (t *Bitmap) New() ki.Ki {
-	return &Bitmap{}
+func (t *Image) New() ki.Ki {
+	return &Image{}
 }
 
 // ButtonType is the [gti.Type] for [Button]
