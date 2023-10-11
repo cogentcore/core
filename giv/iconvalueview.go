@@ -75,7 +75,7 @@ func (vv *IconValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Tag("desc")
 	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: desc}, cur, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
-			si := SliceViewSelectDialogValue(dlg)
+			si := dlg.Data.(int)
 			if si >= 0 {
 				ic := gi.CurIconList[si]
 				vv.SetValue(ic)
@@ -85,5 +85,5 @@ func (vv *IconValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }

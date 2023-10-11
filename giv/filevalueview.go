@@ -61,12 +61,12 @@ func (vv *FileValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Tag("desc")
 	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: desc}, cur, ext, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
-			fn := FileViewDialogValue(dlg)
+			fn := dlg.Data.(string)
 			vv.SetValue(fn)
 			vv.UpdateWidget()
 		}
 		if fun != nil {
 			fun(dlg)
 		}
-	})
+	}).Run()
 }

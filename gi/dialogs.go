@@ -263,6 +263,7 @@ func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
 		dlg.Cancel()
 	}
 	dlg.Modal(true).NewWindow(false)
+	dlg.Stage.ClickOff = true // by default
 	if fun != nil {
 		dlg.Stage.Scene.OnChange(func(e events.Event) {
 			fun(dlg)

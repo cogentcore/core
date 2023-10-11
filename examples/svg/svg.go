@@ -40,13 +40,10 @@ func OpenSVG(fnm string) {
 	TheSVG.UpdateEnd(updt)
 }
 
-func FileViewOpenSVG(vp *gi.Scene) {
-	giv.FileViewDialog(vp, CurFilename, ".svg", giv.DlgOpts{Title: "Open SVG"}, nil,
-		vp.Win, func(recv, send ki.Ki, sig int64, data any) {
-			if sig == int64(gi.DialogAccepted) {
-				dlg, _ := send.(*gi.DialogStage)
-				OpenSVG(giv.FileViewDialogValue(dlg))
-			}
+func FileViewOpenSVG(ctx gi.Widget) {
+	giv.FileViewDialog(ctx, giv.DlgOpts{Title: "Open SVG"}, CurFilename, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			OpenSVG(dlg.Data.(string))
 		})
 }
 
@@ -84,10 +81,9 @@ func app() {
 	svge.SetStretchMaxWidth()
 	svge.SetStretchMaxHeight()
 
-	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, win.This(),
-		func(recv, send ki.Ki, sig int64, data any) {
-			FileViewOpenSVG(vp)
-		})
+	loads := tbar.AddButton(gi.ActOpts{Label: "Open SVG", Icon: icons.FileOpen}, func(act *gi.Button) {
+		FileViewOpenSVG(act)
+	})
 	loads.StartFocus()
 
 	fnm := gi.NewTextField(tbar, "cur-fname")
@@ -188,10 +184,9 @@ func app() {
 	// Linux, RenderWins or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu = make(gi.MenuStage, 0, 10)
-	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", Shortcut: "Command+O"},
-		win.This(), func(recv, send ki.Ki, sig int64, data any) {
-			FileViewOpenSVG(vp)
-		})
+	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", Shortcut: "Command+O"}, func(act *gi.Button) {
+		FileViewOpenSVG(act)
+	})
 	fmen.Menu.AddSeparator("csep")
 	fmen.Menu.AddButton(gi.ActOpts{Label: "Close RenderWin", Shortcut: "Command+W"},
 		win.This(), func(recv, send ki.Ki, sig int64, data any) {

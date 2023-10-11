@@ -88,13 +88,15 @@ func (vv *StructValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		desc = ""
 	}
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), nil)
-	svk := dlg.Stage.Scene.ChildByType(StructViewType, ki.Embeds, 2)
-	if svk != nil {
-		sv := svk.(*StructView)
-		sv.StructValView = vv
-		// no need to connect ViewSig
-	}
+	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			vv.UpdateWidget()
+			vv.SendChange()
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	}).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -212,27 +214,26 @@ func (vv *SliceValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	inact := vv.This().(ValueView).IsInactive()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		dlg := TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
-		svk := dlg.Stage.Scene.ChildByType(TableViewType, ki.Embeds, 2)
-		if svk != nil {
-			sv := svk.(*TableView)
-			sv.SliceValView = vv
-			sv.OnChange(func(e events.Event) {
+		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
-			})
-		}
+			}
+			if fun != nil {
+				fun(dlg)
+			}
+
+		}).Run()
 	} else {
-		dlg := SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, nil)
-		svk := dlg.Stage.Scene.ChildByType(SliceViewType, ki.Embeds, 2)
-		if svk != nil {
-			sv := svk.(*SliceView)
-			sv.SliceValView = vv
-			sv.OnChange(func(e events.Event) {
+		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
-			})
-		}
+			}
+			if fun != nil {
+				fun(dlg)
+			}
+		}).Run()
 	}
 }
 
@@ -333,16 +334,15 @@ func (vv *MapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Tag("desc")
 	mpi := vv.Value.Interface()
 	inact := vv.This().(ValueView).IsInactive()
-	dlg := MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, mpi, fun)
-	mvk := dlg.Stage.Scene.ChildByType(MapViewType, ki.Embeds, 2)
-	if mvk != nil {
-		mv := mvk.(*MapView)
-		mv.MapValView = vv
-		mv.OnChange(func(e events.Event) {
+	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
-		})
-	}
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	}).Run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -477,7 +477,15 @@ func (vv *KiPtrValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Tag("desc")
 	inact := vv.This().(ValueView).IsInactive()
-	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, k, fun)
+	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
+		if dlg.Accepted {
+			vv.UpdateWidget()
+			vv.SendChange()
+		}
+		if fun != nil {
+			fun(dlg)
+		}
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
