@@ -41,12 +41,16 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := StageScene(w.Name() + "-tooltip")
 	sc.Geom.Pos = pos
 	sc.AddStyles(func(s *styles.Style) {
+		s.MaxWidth.SetEm(20)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.Set(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
 		s.Color = colors.Scheme.InverseOnSurface
 		s.BoxShadow = styles.BoxShadow1()
 	})
-	NewLabel(sc, "text").SetText(tooltip).SetType(LabelBodyMedium)
+	NewLabel(sc, "text").SetText(tooltip).SetType(LabelBodyMedium).
+		AddStyles(func(s *styles.Style) {
+			s.MaxWidth.SetEm(20)
+		})
 	return sc
 }
