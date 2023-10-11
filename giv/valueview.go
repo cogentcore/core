@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/histyle"
 	"goki.dev/girl/states"
@@ -185,6 +186,17 @@ func ToValueView(it any, tags string) ValueView {
 		}
 	}
 
+	if _, ok := it.(enums.BitFlag); ok {
+		vv := &BitFlagView{}
+		ki.InitNode(vv)
+		return vv
+	}
+	if _, ok := it.(enums.Enum); ok {
+		vv := &EnumValueView{}
+		ki.InitNode(vv)
+		return vv
+	}
+
 	typ := reflect.TypeOf(it)
 	nptyp := laser.NonPtrType(typ)
 	vk := typ.Kind()
@@ -225,17 +237,6 @@ func ToValueView(it any, tags string) ValueView {
 
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
-		// if kit.Enums.TypeRegistered(nptyp) {
-		// 	if kit.Enums.IsBitFlag(nptyp) {
-		// 		vv := &BitFlagView{}
-		// 		ki.InitNode(vv)
-		// 		return vv
-		// 	} else {
-		// 		vv := &EnumValueView{}
-		// 		ki.InitNode(vv)
-		// 		return vv
-		// 	}
-		// } else
 		if _, ok := it.(fmt.Stringer); ok { // use stringer
 			vv := &ValueViewBase{}
 			ki.InitNode(vv)
