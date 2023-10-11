@@ -375,8 +375,10 @@ func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 func (sp *Spinner) Render(sc *Scene) {
 	if sp.PushBounds(sc) {
-		tf := sp.Parts.ChildByName("text-field", 2).(*TextField)
-		tf.SetSelected(sp.StateIs(states.Selected))
+		tf := sp.TextField()
+		if tf != nil {
+			tf.SetSelected(sp.StateIs(states.Selected))
+		}
 		sp.RenderChildren(sc)
 		sp.RenderParts(sc)
 		sp.PopBounds(sc)
