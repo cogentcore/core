@@ -78,11 +78,11 @@ func (sp *Spinner) CopyFieldsFrom(frm any) {
 }
 
 func (sp *Spinner) OnInit() {
-	sp.SpinBoxHandlers()
-	sp.SpinBoxStyles()
+	sp.SpinnerHandlers()
+	sp.SpinnerStyles()
 }
 
-func (sp *Spinner) SpinBoxStyles() {
+func (sp *Spinner) SpinnerStyles() {
 	sp.Step = 0.1
 	sp.PageStep = 0.2
 	sp.Max = 1.0
@@ -167,14 +167,14 @@ func (sp *Spinner) SetMinMax(hasMin bool, min float32, hasMax bool, max float32)
 	sp.HasMax = hasMax
 	sp.Max = max
 	if sp.Max < sp.Min {
-		slog.Warn("gi.SpinBox.SetMinMax: max was less than min; disabling limits")
+		slog.Warn("gi.Spinner.SetMinMax: max was less than min; disabling limits")
 		sp.HasMax = false
 		sp.HasMin = false
 	}
 	return sp
 }
 
-// SetStep sets the step (increment) value of the spinbox
+// SetStep sets the step (increment) value of the Spinner
 func (sp *Spinner) SetStep(step float32) *Spinner {
 	sp.Step = step
 	return sp
@@ -283,12 +283,12 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sp *Spinner) SpinBoxHandlers() {
+func (sp *Spinner) SpinnerHandlers() {
 	sp.WidgetHandlers()
-	sp.SpinBoxScroll()
+	sp.SpinnerScroll()
 }
 
-func (sp *Spinner) SpinBoxScroll() {
+func (sp *Spinner) SpinnerScroll() {
 	sp.On(events.Scroll, func(e events.Event) {
 		if sp.StateIs(states.Disabled) || !sp.StateIs(states.Focused) {
 			return
@@ -299,7 +299,7 @@ func (sp *Spinner) SpinBoxScroll() {
 	})
 }
 
-// TextFieldHandlers adds the spinbox textfield handlers for the given textfield
+// TextFieldHandlers adds the Spinner textfield handlers for the given textfield
 func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 	tf.On(events.Select, func(e events.Event) {
 		if sp.IsDisabled() {
@@ -321,7 +321,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		val, err := sp.StringToVal(text)
 		if err != nil {
 			// TODO: use validation
-			slog.Error("invalid spinbox value", "value", text, "err", err)
+			slog.Error("invalid Spinner value", "value", text, "err", err)
 			return
 		}
 		sp.SetValueAction(val)
@@ -331,7 +331,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("SpinBox KeyChordEvent: %v\n", sp.Path())
+			fmt.Printf("Spinner KeyChordEvent: %v\n", sp.Path())
 		}
 		kf := KeyFun(e.KeyChord())
 		switch {
@@ -349,7 +349,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 			sp.PageIncrValue(-1)
 		}
 	})
-	// spinbox always gives its focus to textfield
+	// Spinner always gives its focus to textfield
 	sp.OnFocus(func(e events.Event) {
 		tf.GrabFocus()
 		tf.Send(events.Focus, e) // sets focused flag

@@ -1397,7 +1397,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 		// tf.CursorEnd()
 		// tf.EmitFocusedSignal()
 		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+		if _, ok := tf.Parent().Parent().(*Spinner); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)
@@ -1411,7 +1411,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 		tf.SetState(true, states.Focused)
 		tf.ScrollToMe()
 		tf.ApplyStyleUpdate(tf.Sc)
-		if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+		if _, ok := tf.Parent().Parent().(*Spinner); ok {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 		} else {
 			goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)

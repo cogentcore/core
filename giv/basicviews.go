@@ -520,7 +520,7 @@ func (vv *BoolValueView) ConfigWidget(widg gi.Widget) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  IntValueView
 
-// IntValueView presents a spinbox
+// IntValueView presents a spinner
 type IntValueView struct {
 	ValueViewBase
 }
@@ -590,7 +590,7 @@ func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 ////////////////////////////////////////////////////////////////////////////////////////
 //  FloatValueView
 
-// FloatValueView presents a spinbox
+// FloatValueView presents a spinner
 type FloatValueView struct {
 	ValueViewBase
 }
