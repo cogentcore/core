@@ -26,7 +26,7 @@ import (
 )
 
 // Trilean value for StyleEntry value inheritance.
-type Trilean uint8 //enums:enum
+type Trilean int32 //enums:enum
 
 const (
 	Pass Trilean = iota
