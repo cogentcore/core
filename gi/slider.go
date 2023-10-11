@@ -664,52 +664,75 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 
 	// SidesTODO: look here if slider borders break
 
-	// pc.StrokeStyle.SetColor(&st.Border.Color)
-	// pc.StrokeStyle.Width = st.Border.Width
+	if sr.Type == SliderScrollbar {
+		// pc.StrokeStyle.SetColor(&st.Border.Color)
+		// pc.StrokeStyle.Width = st.Border.Width
+		bg := st.BackgroundColor
+		if bg.IsNil() {
+			bg = sr.ParentBackgroundColor()
+		}
+		pc.FillStyle.SetFullColor(&bg)
 
-	// need to apply state layer
-	ebg := st.StateBackgroundColor(st.BackgroundColor)
-	pc.FillStyle.SetFullColor(&ebg)
+		// scrollbar is basic box in content size
+		spc := st.BoxSpace()
+		pos := sr.LayState.Alloc.Pos.Add(spc.Pos())
+		sz := sr.LayState.Alloc.Size.Sub(spc.Size())
 
-	// layout is as follows, for width dimension
-	// |      bw             bw     |
-	// |      | pad |  | pad |      |
-	// |  |        thumb         |  |
-	// |    spc    | | <- ctr
-	//
-	// for length: | spc | ht | <-start of slider
+		sr.RenderBoxImpl(sc, pos, sz, st.Border) // surround box
+		pos.SetAddDim(sr.Dim, sr.Pos)            // start of thumb
+		sz.SetDim(sr.Dim, sr.ThSize)
+		pc.FillStyle.SetFullColor(&sr.ValueColor)
+		sr.RenderBoxImpl(sc, pos, sz, st.Border)
 
-	spc := st.BoxSpace()
-	pos := sr.LayState.Alloc.Pos
-	sz := sr.LayState.Alloc.Size
-	bpos := pos // box pos
-	bsz := sz
-	tpos := pos // thumb pos
-
-	ht := 0.5 * sr.ThSize
-
-	odim := mat32.OtherDim(sr.Dim)
-	bpos.SetAddDim(odim, spc.Pos().Dim(odim))
-	bsz.SetSubDim(odim, spc.Size().Dim(odim))
-	bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
-	bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
-	sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
-
-	bsz.SetDim(sr.Dim, sr.Pos)
-	pc.FillStyle.SetFullColor(&sr.ValueColor)
-	sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
-
-	tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
-	tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
-	pc.FillStyle.SetFullColor(&sr.ThumbColor)
-
-	if sr.Icon.IsValid() && sr.Parts.HasChildren() {
 		sr.RenderUnlock(rs)
-		sr.Parts.Render(sc)
 	} else {
-		pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
-		pc.FillStrokeClear(rs)
-		sr.RenderUnlock(rs)
+		// pc.StrokeStyle.SetColor(&st.Border.Color)
+		// pc.StrokeStyle.Width = st.Border.Width
+
+		// need to apply state layer
+		ebg := st.StateBackgroundColor(st.BackgroundColor)
+		pc.FillStyle.SetFullColor(&ebg)
+
+		// layout is as follows, for width dimension
+		// |      bw             bw     |
+		// |      | pad |  | pad |      |
+		// |  |        thumb         |  |
+		// |    spc    | | <- ctr
+		//
+		// for length: | spc | ht | <-start of slider
+
+		spc := st.BoxSpace()
+		pos := sr.LayState.Alloc.Pos
+		sz := sr.LayState.Alloc.Size
+		bpos := pos // box pos
+		bsz := sz
+		tpos := pos // thumb pos
+
+		ht := 0.5 * sr.ThSize
+
+		odim := mat32.OtherDim(sr.Dim)
+		bpos.SetAddDim(odim, spc.Pos().Dim(odim))
+		bsz.SetSubDim(odim, spc.Size().Dim(odim))
+		bpos.SetAddDim(sr.Dim, spc.Pos().Dim(odim)+ht)
+		bsz.SetSubDim(sr.Dim, spc.Size().Dim(odim)+2*ht)
+		sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+
+		bsz.SetDim(sr.Dim, sr.Pos)
+		pc.FillStyle.SetFullColor(&sr.ValueColor)
+		sr.RenderBoxImpl(sc, bpos, bsz, st.Border)
+
+		tpos.SetDim(sr.Dim, bpos.Dim(sr.Dim)+sr.Pos)
+		tpos.SetAddDim(odim, 0.5*sz.Dim(odim)) // ctr
+		pc.FillStyle.SetFullColor(&sr.ThumbColor)
+
+		if sr.Icon.IsValid() && sr.Parts.HasChildren() {
+			sr.RenderUnlock(rs)
+			sr.Parts.Render(sc)
+		} else {
+			pc.DrawCircle(rs, tpos.X, tpos.Y, ht)
+			pc.FillStrokeClear(rs)
+			sr.RenderUnlock(rs)
+		}
 	}
 }
 
