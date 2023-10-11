@@ -109,8 +109,8 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 			s.Color = colors.Scheme.Primary.Base
 			// switches need to be bigger
 			if sw.Type == SwitchSwitch {
-				s.Width.SetEm(2.5)
-				s.Height.SetEm(2.5)
+				s.Width.SetEm(3)
+				s.Height.SetEm(3)
 			} else {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
@@ -120,8 +120,8 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 		w.AddStyles(func(s *styles.Style) {
 			// switches need to be bigger
 			if sw.Type == SwitchSwitch {
-				s.Width.SetEm(2.5)
-				s.Height.SetEm(2.5)
+				s.Width.SetEm(3)
+				s.Height.SetEm(3)
 			} else {
 				s.Width.SetEm(1.5)
 				s.Height.SetEm(1.5)
