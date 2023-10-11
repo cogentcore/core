@@ -126,7 +126,7 @@ func (sp *Spell) Disconnect() {
 }
 
 // SpellSignals are signals that are sent by Spell
-type SpellSignals int64 //enums:enum
+type SpellSignals int32 //enums:enum
 
 const (
 	// SpellSelect means the user chose one of the possible corrections

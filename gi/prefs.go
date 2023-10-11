@@ -486,7 +486,7 @@ var PreferencesProps = ki.Props{
 
 // Densities is an enum representing the different
 // density options in user preferences
-type Densities int //enums:enum -trimprefix Density
+type Densities int32 //enums:enum -trimprefix Density
 
 const (
 	// DensityCompact represents a compact density

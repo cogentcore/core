@@ -257,7 +257,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 
 // TextFieldTypes is an enum containing the
 // different possible types of text fields
-type TextFieldTypes int //enums:enum
+type TextFieldTypes int32 //enums:enum
 
 const (
 	// TextFieldFilled represents a filled

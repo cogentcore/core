@@ -52,7 +52,7 @@ func (lb *Label) CopyFieldsFrom(frm any) {
 
 // LabelTypes is an enum containing the different
 // possible types of labels
-type LabelTypes int //enums:enum
+type LabelTypes int32 //enums:enum
 
 const (
 	// LabelDisplayLarge is a large, short, and important

@@ -192,7 +192,7 @@ func (tv *TextView) TextViewStyles() {
 }
 
 // TextViewSignals are signals that text view can send
-type TextViewSignals int64 //enums:enum
+type TextViewSignals int32 //enums:enum
 
 const (
 	// TextViewDone signal indicates return was pressed and an edit was completed -- data is the text
