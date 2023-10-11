@@ -351,7 +351,7 @@ var FileInfoProps = ki.Props{
 // 	"github.com/djherbis/times"
 
 // FileTime provides a default String format for file modification times, and
-// other useful methods -- will plug into ValueView with date / time editor.
+// other useful methods -- will plug into Value with date / time editor.
 type FileTime time.Time
 
 // Int satisfies the ints.Inter interface for sorting etc
