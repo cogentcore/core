@@ -274,9 +274,8 @@ func makeInputs(ts *gi.Tabs) {
 
 	spinners := gi.NewLayout(inputs, "spinners").SetLayout(gi.LayoutHoriz)
 
-	// TODO(kai): add back set value calls here
-	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100)      //.SetValue(15)
-	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255) //.SetValue(44)
+	gi.NewSpinner(spinners).SetStep(5).SetMin(-50).SetMax(100).SetValue(15)
+	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
 	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
 	choosers.AddStyles(func(s *styles.Style) {
