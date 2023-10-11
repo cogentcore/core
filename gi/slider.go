@@ -179,9 +179,6 @@ func (sr *Slider) SliderStyles() {
 		s.Color = colors.Scheme.Primary.On
 
 		if sr.Type == SliderSlider {
-			// sr.ThumbSize = units.Em(1.5)
-			// sr.ThSize = 25.0
-			// sr.ThSizeReal = sr.ThSize
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
