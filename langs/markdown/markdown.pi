@@ -6,57 +6,57 @@
     "Kids": [
       {
         "n": 26,
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "InCode",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "InLinkAttr",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "InLinkAddr",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "InLinkTag",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "LetterText",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "CodeStart",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "HeadPound",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemCheck",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemStar",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemPlus",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemMinus",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "NumList",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "CommentStart",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "QuotePara",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "BoldStars",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "BoldUnders",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemStarSub",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemPlusSub",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "ItemMinusSub",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "LinkTag",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "BacktickCode",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "Quote_021",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "Apostrophe",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "EmphStar",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "EmphUnder",
-        "type": "lex.Rule",
+        "type": "goki.dev/pi/v2/lex.Rule",
         "name": "AnyText"
       },
       {
@@ -66,9 +66,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "CodeEnd",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "AnyCode"
           },
           {
@@ -134,9 +134,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "EndLinkAttr",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "AnyLinkAttr"
           },
           {
@@ -201,11 +201,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "LinkAttr",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "EndLinkAddr",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "AnyLinkAddr"
           },
           {
@@ -292,11 +292,11 @@
         "Kids": [
           {
             "n": 3,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "LinkAddr",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "EndLinkTag",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "AnyLinkTag"
           },
           {
@@ -403,9 +403,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "CodeLang",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "CodePlain"
           },
           {
@@ -473,9 +473,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "HeadPound2",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "Heading"
           },
           {
@@ -485,9 +485,9 @@
             "Kids": [
               {
                 "n": 2,
-                "type": "lex.Rule",
+                "type": "goki.dev/pi/v2/lex.Rule",
                 "name": "HeadPound3",
-                "type": "lex.Rule",
+                "type": "goki.dev/pi/v2/lex.Rule",
                 "name": "SubHeading"
               },
               {
@@ -497,7 +497,7 @@
                 "Kids": [
                   {
                     "n": 1,
-                    "type": "lex.Rule",
+                    "type": "goki.dev/pi/v2/lex.Rule",
                     "name": "SubSubHeading"
                   },
                   {
@@ -609,9 +609,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "ItemCheckDone",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "ItemCheckTodo"
           },
           {
@@ -795,7 +795,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "BoldText"
           },
           {
@@ -841,7 +841,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "BoldText"
           },
           {
@@ -1008,9 +1008,9 @@
         "Kids": [
           {
             "n": 2,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "QuoteSingle",
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "Apost"
           },
           {
@@ -1074,7 +1074,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "EmphText"
           },
           {
@@ -1120,7 +1120,7 @@
         "Kids": [
           {
             "n": 1,
-            "type": "lex.Rule",
+            "type": "goki.dev/pi/v2/lex.Rule",
             "name": "EmphUnder"
           },
           {
