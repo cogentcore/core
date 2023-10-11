@@ -612,7 +612,18 @@ func (ch *Chooser) ChooserKeys() {
 			// if !(kt.Rune == ' ' && chb.Sc.Type == ScCompleter) {
 			e.SetHandled()
 			ch.Send(events.Click, e)
-			// }
+		// }
+		default:
+			tf, ok := ch.TextField()
+			if !ok {
+				break
+			}
+			// if we start typing, we focus the text field
+			if !tf.StateIs(states.Focused) {
+				tf.GrabFocus()
+				tf.Send(events.Focus, e)
+				tf.Send(events.KeyChord, e)
+			}
 		}
 	})
 }
