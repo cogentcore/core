@@ -53,7 +53,7 @@ func (im *Image) CopyFieldsFrom(frm any) {
 }
 
 func (im *Image) OnInit() {
-	im.WidgetHandlers()
+	im.HandleWidgetEvents()
 	im.BitmapStyles()
 }
 

@@ -89,13 +89,13 @@ const (
 )
 
 func (ch *Chooser) OnInit() {
-	ch.ChooserHandlers()
+	ch.HandleChooserEvents()
 	ch.ChooserStyles()
 }
 
-func (ch *Chooser) ChooserHandlers() {
-	ch.ButtonHandlers()
-	ch.ChooserKeys()
+func (ch *Chooser) HandleChooserEvents() {
+	ch.HandleButtonEvents()
+	ch.HandleChooserKeys()
 }
 
 func (ch *Chooser) ChooserStyles() {
@@ -562,7 +562,7 @@ func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 	}
 }
 
-func (ch *Chooser) ChooserKeys() {
+func (ch *Chooser) HandleChooserKeys() {
 	ch.OnKeyChord(func(e events.Event) {
 		if ch.StateIs(states.Disabled) {
 			return

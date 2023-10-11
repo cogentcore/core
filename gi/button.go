@@ -126,7 +126,7 @@ const (
 )
 
 func (bt *Button) OnInit() {
-	bt.ButtonHandlers()
+	bt.HandleButtonEvents()
 	bt.ButtonStyles()
 }
 
@@ -363,7 +363,7 @@ func (bt *Button) ConfigPartsIndicator(indIdx int) {
 //////////////////////////////////////////////////////////////////
 //		Events
 
-func (bt *Button) ClickMenu() {
+func (bt *Button) HandleClickMenu() {
 	bt.OnClick(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
@@ -372,7 +372,7 @@ func (bt *Button) ClickMenu() {
 	})
 }
 
-func (bt *Button) ClickDismissMenu() {
+func (bt *Button) HandleClickDismissMenu() {
 	bt.OnClick(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
@@ -408,7 +408,7 @@ func (bt *Button) ShortcutTooltip() string {
 	return res
 }
 
-func (bt *Button) LongHoverTooltip() {
+func (bt *Button) HandleLongHoverTooltip() {
 	bt.On(events.LongHoverStart, func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
@@ -422,11 +422,11 @@ func (bt *Button) LongHoverTooltip() {
 	})
 }
 
-func (bt *Button) ButtonHandlers() {
-	bt.WidgetHandlers()
-	bt.LongHoverTooltip()
-	bt.ClickMenu()
-	bt.ClickOnEnterSpace()
+func (bt *Button) HandleButtonEvents() {
+	bt.HandleWidgetEvents()
+	bt.HandleLongHoverTooltip()
+	bt.HandleClickMenu()
+	bt.HandleClickOnEnterSpace()
 }
 
 func (bt *Button) ConfigWidget(sc *Scene) {

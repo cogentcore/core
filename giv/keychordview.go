@@ -153,7 +153,7 @@ func (kc *KeyChordEdit) HandleKeyChord() {
 func (kc *KeyChordEdit) KeyChordHandlers() {
 	// kc.HoverEvent()
 	// kc.MouseEvent()
-	kc.WidgetHandlers()
+	kc.HandleWidgetEvents()
 	kc.HandleKeyChord()
 }
 

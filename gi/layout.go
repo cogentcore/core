@@ -213,7 +213,7 @@ func (ly *Layout) CopyFieldsFrom(frm any) {
 
 func (ly *Layout) OnInit() {
 	ly.LayoutStyles()
-	ly.LayoutHandlers()
+	ly.HandleLayoutEvents()
 }
 
 func (ly *Layout) LayoutStyles() {
@@ -225,10 +225,10 @@ func (ly *Layout) LayoutStyles() {
 	})
 }
 
-func (ly *Layout) LayoutHandlers() {
-	ly.LayoutKeys()
-	ly.LayoutScrollEvents()
-	ly.WidgetHandlers()
+func (ly *Layout) HandleLayoutEvents() {
+	ly.HandleWidgetEvents()
+	ly.HandleLayoutKeys()
+	ly.HandleLayoutScrollEvents()
 }
 
 // Layouts are the different types of layouts
@@ -973,10 +973,10 @@ func (ly *Layout) ClosePopup() bool {
 // in terms of number of items.
 var LayoutPageSteps = 10
 
-// LayoutKeys handles all key events for navigating focus within a Layout
+// HandleLayoutKeys handles all key events for navigating focus within a Layout
 // Typically this is done by the parent Scene level layout, but can be
 // done by default if FocusWithinable Ability is set.
-func (ly *Layout) LayoutKeys() {
+func (ly *Layout) HandleLayoutKeys() {
 	ly.OnKeyChord(func(e events.Event) {
 		ly.LayoutKeysImpl(e)
 	})
@@ -1151,9 +1151,9 @@ func ChildByLabelStartsCanFocus(ly *Layout, name string, after ki.Ki) (ki.Ki, bo
 	return nil, false
 }
 
-// LayoutScrollEvents registers scrolling-related mouse events processed by
+// HandleLayoutScrollEvents registers scrolling-related mouse events processed by
 // Layout -- most subclasses of Layout will want these..
-func (ly *Layout) LayoutScrollEvents() {
+func (ly *Layout) HandleLayoutScrollEvents() {
 	ly.On(events.Scroll, func(e events.Event) {
 		// fmt.Println("event")
 		ly.ScrollDelta(e)
@@ -1302,9 +1302,9 @@ func (ly *Layout) Render(sc *Scene) {
 }
 
 func (ly *Layout) SetTypeHandlers() {
-	ly.WidgetHandlers()
-	ly.LayoutScrollEvents()
-	ly.LayoutKeys()
+	ly.HandleWidgetEvents()
+	ly.HandleLayoutScrollEvents()
+	ly.HandleLayoutKeys()
 }
 
 ///////////////////////////////////////////////////////////

@@ -61,8 +61,8 @@ func (sw *Switch) OnInit() {
 }
 
 func (sw *Switch) SwitchHandlers() {
-	sw.WidgetHandlers()
-	sw.ClickOnEnterSpace()
+	sw.HandleWidgetEvents()
+	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		if sw.StateIs(states.Disabled) {
 			return

@@ -1451,7 +1451,7 @@ func (tf *TextField) TextFieldStateFromFocus() {
 }
 
 func (tf *TextField) TextFieldHandlers() {
-	tf.WidgetHandlers()
+	tf.HandleWidgetEvents()
 	tf.TextFieldMouse()
 	tf.TextFieldStateFromFocus()
 	tf.TextFieldKeys()

@@ -107,8 +107,7 @@ const (
 )
 
 func (lb *Label) OnInit() {
-	lb.WidgetHandlers()
-	lb.LabelHandlers()
+	lb.HandleLabelEvents()
 	lb.LabelStyles()
 }
 
@@ -267,14 +266,15 @@ func (lb *Label) OpenLink(tl *paint.TextLink) {
 // 	// }
 // }
 
-func (lb *Label) LabelHandlers() {
-	lb.LabelLongHover()
-	lb.LabelClick()
-	lb.LabelMouseMove()
-	lb.LabelKeys()
+func (lb *Label) HandleLabelEvents() {
+	lb.HandleWidgetEvents()
+	lb.HandleLabelLongHover()
+	lb.HandleLabelClick()
+	lb.HandleLabelMouseMove()
+	lb.HandleLabelKeys()
 }
 
-func (lb *Label) LabelLongHover() {
+func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
 		if lb.StateIs(states.Disabled) {
 			return
@@ -306,7 +306,7 @@ func (lb *Label) LabelLongHover() {
 	})
 }
 
-func (lb *Label) LabelClick() {
+func (lb *Label) HandleLabelClick() {
 	lb.OnClick(func(e events.Event) {
 		if lb.StateIs(states.Disabled) {
 			return
@@ -336,7 +336,7 @@ func (lb *Label) LabelClick() {
 	})
 }
 
-func (lb *Label) LabelMouseMove() {
+func (lb *Label) HandleLabelMouseMove() {
 	lb.On(events.MouseMove, func(e events.Event) {
 		pos := lb.RenderPos
 		inLink := false
@@ -359,7 +359,7 @@ func (lb *Label) LabelMouseMove() {
 	})
 }
 
-func (lb *Label) LabelKeys() {
+func (lb *Label) HandleLabelKeys() {
 	lb.OnKeyChord(func(e events.Event) {
 		// TODO(kai): get label copying working
 		fmt.Println("kc", e)

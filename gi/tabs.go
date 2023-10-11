@@ -59,7 +59,7 @@ func (ts *Tabs) OnInit() {
 }
 
 func (ts *Tabs) TabsHandlers() {
-	ts.LayoutHandlers()
+	ts.HandleLayoutEvents()
 }
 
 func (ts *Tabs) TabsStyles() {
@@ -525,7 +525,7 @@ type Tab struct {
 }
 
 func (tb *Tab) OnInit() {
-	tb.ButtonHandlers()
+	tb.HandleButtonEvents()
 	tb.TabButtonStyles()
 }
 

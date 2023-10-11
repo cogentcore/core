@@ -34,7 +34,7 @@ func (fr *Frame) CopyFieldsFrom(frm any) {
 }
 
 func (fr *Frame) OnInit() {
-	fr.LayoutHandlers()
+	fr.HandleLayoutEvents()
 	fr.FrameStyles()
 }
 

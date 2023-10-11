@@ -287,7 +287,7 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 }
 
 func (sp *Spinner) SpinnerHandlers() {
-	sp.WidgetHandlers()
+	sp.HandleWidgetEvents()
 	sp.SpinnerScroll()
 }
 
