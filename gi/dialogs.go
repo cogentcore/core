@@ -384,7 +384,7 @@ func NewKiDialog(ctx Widget, opts DlgOpts, typ *gti.Type, fun func(dlg *Dialog))
 
 	NewLabel(nrow, "n-label").SetText("Number:  ")
 
-	nsb := NewSpinBox(nrow, "n-field")
+	nsb := NewSpinner(nrow, "n-field")
 	nsb.SetMin(1)
 	nsb.Value = 1
 	nsb.Step = 1

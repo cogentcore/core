@@ -872,12 +872,12 @@ func (t *Slider) AsSlider() *Slider {
 	return t
 }
 
-// SpinBoxType is the [gti.Type] for [SpinBox]
-var SpinBoxType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.SpinBox",
-	ShortName: "gi.SpinBox",
-	IDName:    "spin-box",
-	Doc:       "SpinBox combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
+// SpinnerType is the [gti.Type] for [Spinner]
+var SpinnerType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Spinner",
+	ShortName: "gi.Spinner",
+	IDName:    "spinner",
+	Doc:       "Spinner combines a TextField with up / down buttons for incrementing /\ndecrementing values -- all configured within the Parts of the widget",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -898,46 +898,46 @@ var SpinBoxType = gti.AddType(&gti.Type{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SpinBox{},
+	Instance: &Spinner{},
 })
 
-// NewSpinBox adds a new [SpinBox] with the given name
+// NewSpinner adds a new [Spinner] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSpinBox(par ki.Ki, name ...string) *SpinBox {
-	return par.NewChild(SpinBoxType, name...).(*SpinBox)
+func NewSpinner(par ki.Ki, name ...string) *Spinner {
+	return par.NewChild(SpinnerType, name...).(*Spinner)
 }
 
-// KiType returns the [*gti.Type] of [SpinBox]
-func (t *SpinBox) KiType() *gti.Type {
-	return SpinBoxType
+// KiType returns the [*gti.Type] of [Spinner]
+func (t *Spinner) KiType() *gti.Type {
+	return SpinnerType
 }
 
-// New returns a new [*SpinBox] value
-func (t *SpinBox) New() ki.Ki {
-	return &SpinBox{}
+// New returns a new [*Spinner] value
+func (t *Spinner) New() ki.Ki {
+	return &Spinner{}
 }
 
-// SpinBoxEmbedder is an interface that all types that embed SpinBox satisfy
-type SpinBoxEmbedder interface {
-	AsSpinBox() *SpinBox
+// SpinnerEmbedder is an interface that all types that embed Spinner satisfy
+type SpinnerEmbedder interface {
+	AsSpinner() *Spinner
 }
 
-// AsSpinBox returns the given value as a value of type SpinBox if the type
-// of the given value embeds SpinBox, or nil otherwise
-func AsSpinBox(k ki.Ki) *SpinBox {
+// AsSpinner returns the given value as a value of type Spinner if the type
+// of the given value embeds Spinner, or nil otherwise
+func AsSpinner(k ki.Ki) *Spinner {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(SpinBoxEmbedder); ok {
-		return t.AsSpinBox()
+	if t, ok := k.(SpinnerEmbedder); ok {
+		return t.AsSpinner()
 	}
 	return nil
 }
 
-// AsSpinBox satisfies the [SpinBoxEmbedder] interface
-func (t *SpinBox) AsSpinBox() *SpinBox {
+// AsSpinner satisfies the [SpinnerEmbedder] interface
+func (t *Spinner) AsSpinner() *Spinner {
 	return t
 }
 

@@ -1428,7 +1428,7 @@ func (tf *TextField) TextFieldStateFromFocus() {
 		}
 		if tf.AbilityIs(abilities.Focusable) {
 			tf.ScrollToMe()
-			if _, ok := tf.Parent().Parent().(*SpinBox); ok {
+			if _, ok := tf.Parent().Parent().(*Spinner); ok {
 				goosi.TheApp.ShowVirtualKeyboard(goosi.NumberKeyboard)
 			} else {
 				goosi.TheApp.ShowVirtualKeyboard(goosi.SingleLineKeyboard)

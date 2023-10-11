@@ -22,9 +22,9 @@ func main() { gimain.Run(app) }
 
 var CurFilename = ""
 var TheSVG *svg.Editor
-var TheZoom *gi.SpinBox
-var TheTransX *gi.SpinBox
-var TheTransY *gi.SpinBox
+var TheZoom *gi.Spinner
+var TheTransX *gi.Spinner
+var TheTransY *gi.Spinner
 var TheFile *gi.TextField
 
 func SetZoom(zf float32) {
@@ -127,7 +127,7 @@ func app() {
 	zoom.Tooltip = "zoom scaling factor -- can use mouse scrollwheel to zoom as well"
 	TheZoom = zoom
 	zoom.SpinBoxSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
-		sp := send.(*gi.SpinBox)
+		sp := send.(*gi.Spinner)
 		SetZoom(sp.Value)
 		win.FullReRender()
 	})

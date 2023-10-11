@@ -21,11 +21,11 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// SpinBox combines a TextField with up / down buttons for incrementing /
+// Spinner combines a TextField with up / down buttons for incrementing /
 // decrementing values -- all configured within the Parts of the widget
 //
 //goki:embedder
-type SpinBox struct {
+type Spinner struct {
 	WidgetBase
 
 	// current value
@@ -62,37 +62,37 @@ type SpinBox struct {
 	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to [icons.Remove]"`
 }
 
-func (sb *SpinBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*SpinBox)
-	sb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sb.Value = fr.Value
-	sb.HasMin = fr.HasMin
-	sb.Min = fr.Min
-	sb.HasMax = fr.HasMax
-	sb.Max = fr.Max
-	sb.Step = fr.Step
-	sb.PageStep = fr.PageStep
-	sb.Prec = fr.Prec
-	sb.UpIcon = fr.UpIcon
-	sb.DownIcon = fr.DownIcon
+func (sp *Spinner) CopyFieldsFrom(frm any) {
+	fr := frm.(*Spinner)
+	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sp.Value = fr.Value
+	sp.HasMin = fr.HasMin
+	sp.Min = fr.Min
+	sp.HasMax = fr.HasMax
+	sp.Max = fr.Max
+	sp.Step = fr.Step
+	sp.PageStep = fr.PageStep
+	sp.Prec = fr.Prec
+	sp.UpIcon = fr.UpIcon
+	sp.DownIcon = fr.DownIcon
 }
 
-func (sb *SpinBox) OnInit() {
-	sb.SpinBoxHandlers()
-	sb.SpinBoxStyles()
+func (sp *Spinner) OnInit() {
+	sp.SpinBoxHandlers()
+	sp.SpinBoxStyles()
 }
 
-func (sb *SpinBox) SpinBoxStyles() {
-	sb.Step = 0.1
-	sb.PageStep = 0.2
-	sb.Max = 1.0
-	sb.Prec = 6
-	sb.AddStyles(func(s *styles.Style) {
+func (sp *Spinner) SpinBoxStyles() {
+	sp.Step = 0.1
+	sp.PageStep = 0.2
+	sp.Max = 1.0
+	sp.Prec = 6
+	sp.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 	})
 }
 
-func (sb *SpinBox) OnChildAdded(child ki.Ki) {
+func (sp *Spinner) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "parts":
@@ -101,22 +101,22 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 		})
 	case "text-field":
 		tf := w.(*TextField)
-		tf.SetText(sb.ValToString(sb.Value))
-		tf.SetState(sb.IsDisabled(), states.Disabled)
-		sb.TextFieldHandlers(tf)
+		tf.SetText(sp.ValToString(sp.Value))
+		tf.SetState(sp.IsDisabled(), states.Disabled)
+		sp.TextFieldHandlers(tf)
 		tf.AddStyles(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(3))
 		})
 	case "up":
 		up := w.(*Button)
 		up.Type = ButtonAction
-		if sb.UpIcon.IsNil() {
-			sb.UpIcon = icons.Add
+		if sp.UpIcon.IsNil() {
+			sp.UpIcon = icons.Add
 		}
-		up.SetIcon(sb.UpIcon)
-		w.SetState(sb.IsDisabled(), states.Disabled)
+		up.SetIcon(sp.UpIcon)
+		w.SetState(sp.IsDisabled(), states.Disabled)
 		up.OnClick(func(e events.Event) {
-			sb.IncrValue(1)
+			sp.IncrValue(1)
 		})
 		up.AddStyles(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
@@ -125,13 +125,13 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 	case "down":
 		down := w.(*Button)
 		down.Type = ButtonAction
-		if sb.DownIcon.IsNil() {
-			sb.DownIcon = icons.Remove
+		if sp.DownIcon.IsNil() {
+			sp.DownIcon = icons.Remove
 		}
-		down.SetIcon(sb.DownIcon)
-		w.SetState(sb.IsDisabled(), states.Disabled)
+		down.SetIcon(sp.DownIcon)
+		w.SetState(sp.IsDisabled(), states.Disabled)
 		down.OnClick(func(e events.Event) {
-			sb.IncrValue(-1)
+			sp.IncrValue(-1)
 		})
 		down.AddStyles(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
@@ -141,99 +141,99 @@ func (sb *SpinBox) OnChildAdded(child ki.Ki) {
 }
 
 // SetMin sets the min limits on the value
-func (sb *SpinBox) SetMin(min float32) *SpinBox {
-	sb.HasMin = true
-	sb.Min = min
-	return sb
+func (sp *Spinner) SetMin(min float32) *Spinner {
+	sp.HasMin = true
+	sp.Min = min
+	return sp
 }
 
 // SetMax sets the max limits on the value
-func (sb *SpinBox) SetMax(max float32) *SpinBox {
-	sb.HasMax = true
-	sb.Max = max
-	return sb
+func (sp *Spinner) SetMax(max float32) *Spinner {
+	sp.HasMax = true
+	sp.Max = max
+	return sp
 }
 
 // SetMax sets the format of the spin box
-func (sb *SpinBox) SetFormat(format string) *SpinBox {
-	sb.Format = format
-	return sb
+func (sp *Spinner) SetFormat(format string) *Spinner {
+	sp.Format = format
+	return sp
 }
 
 // SetMinMax sets the min and max limits on the value
-func (sb *SpinBox) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *SpinBox {
-	sb.HasMin = hasMin
-	sb.Min = min
-	sb.HasMax = hasMax
-	sb.Max = max
-	if sb.Max < sb.Min {
+func (sp *Spinner) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *Spinner {
+	sp.HasMin = hasMin
+	sp.Min = min
+	sp.HasMax = hasMax
+	sp.Max = max
+	if sp.Max < sp.Min {
 		slog.Warn("gi.SpinBox.SetMinMax: max was less than min; disabling limits")
-		sb.HasMax = false
-		sb.HasMin = false
+		sp.HasMax = false
+		sp.HasMin = false
 	}
-	return sb
+	return sp
 }
 
 // SetStep sets the step (increment) value of the spinbox
-func (sb *SpinBox) SetStep(step float32) *SpinBox {
-	sb.Step = step
-	return sb
+func (sp *Spinner) SetStep(step float32) *Spinner {
+	sp.Step = step
+	return sp
 }
 
 // SetValue sets the value, enforcing any limits, and updates the display
-func (sb *SpinBox) SetValue(val float32) *SpinBox {
-	updt := sb.UpdateStart()
-	defer sb.UpdateEndRender(updt)
-	sb.Value = val
-	if sb.HasMax {
-		sb.Value = mat32.Min(sb.Value, sb.Max)
+func (sp *Spinner) SetValue(val float32) *Spinner {
+	updt := sp.UpdateStart()
+	defer sp.UpdateEndRender(updt)
+	sp.Value = val
+	if sp.HasMax {
+		sp.Value = mat32.Min(sp.Value, sp.Max)
 	}
-	if sb.HasMin {
-		sb.Value = mat32.Max(sb.Value, sb.Min)
+	if sp.HasMin {
+		sp.Value = mat32.Max(sp.Value, sp.Min)
 	}
-	sb.Value = mat32.Truncate(sb.Value, sb.Prec)
-	tf := sb.TextField()
+	sp.Value = mat32.Truncate(sp.Value, sp.Prec)
+	tf := sp.TextField()
 	if tf != nil {
-		tf.SetText(sb.ValToString(sb.Value))
+		tf.SetText(sp.ValToString(sp.Value))
 	}
-	return sb
+	return sp
 }
 
 // SetValueAction calls SetValue and also emits the signal
-func (sb *SpinBox) SetValueAction(val float32) *SpinBox {
-	sb.SetValue(val)
-	sb.SendChange()
-	return sb
+func (sp *Spinner) SetValueAction(val float32) *Spinner {
+	sp.SetValue(val)
+	sp.SendChange()
+	return sp
 }
 
 // IncrValue increments the value by given number of steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sb *SpinBox) IncrValue(steps float32) *SpinBox {
-	val := sb.Value + steps*sb.Step
-	val = mat32.IntMultiple(val, sb.Step)
-	return sb.SetValueAction(val)
+func (sp *Spinner) IncrValue(steps float32) *Spinner {
+	val := sp.Value + steps*sp.Step
+	val = mat32.IntMultiple(val, sp.Step)
+	return sp.SetValueAction(val)
 }
 
 // PageIncrValue increments the value by given number of page steps (+ or -),
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
-func (sb *SpinBox) PageIncrValue(steps float32) *SpinBox {
-	val := sb.Value + steps*sb.PageStep
-	val = mat32.IntMultiple(val, sb.PageStep)
-	return sb.SetValueAction(val)
+func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
+	val := sp.Value + steps*sp.PageStep
+	val = mat32.IntMultiple(val, sp.PageStep)
+	return sp.SetValueAction(val)
 }
 
-func (sb *SpinBox) ConfigParts(sc *Scene) {
+func (sp *Spinner) ConfigParts(sc *Scene) {
 	config := ki.Config{}
 	config.Add(ButtonType, "down")
 	config.Add(TextFieldType, "text-field")
 	config.Add(ButtonType, "up")
-	sb.ConfigPartsImpl(sc, config, LayoutHoriz)
+	sp.ConfigPartsImpl(sc, config, LayoutHoriz)
 }
 
-func (sb *SpinBox) TextField() *TextField {
-	tf, ok := sb.Parts.ChildByName("text-field", 1).(*TextField)
+func (sp *Spinner) TextField() *TextField {
+	tf, ok := sp.Parts.ChildByName("text-field", 1).(*TextField)
 	if !ok {
 		return nil
 	}
@@ -241,11 +241,11 @@ func (sb *SpinBox) TextField() *TextField {
 }
 
 // FormatIsInt returns true if the format string requires an integer value
-func (sb *SpinBox) FormatIsInt() bool {
-	if sb.Format == "" {
+func (sp *Spinner) FormatIsInt() bool {
+	if sp.Format == "" {
 		return false
 	}
-	fc := sb.Format[len(sb.Format)-1]
+	fc := sp.Format[len(sp.Format)-1]
 	switch fc {
 	case 'd', 'b', 'c', 'o', 'O', 'q', 'x', 'X', 'U':
 		return true
@@ -254,21 +254,21 @@ func (sb *SpinBox) FormatIsInt() bool {
 }
 
 // ValToString converts the value to the string representation thereof
-func (sb *SpinBox) ValToString(val float32) string {
-	if sb.Format == "" {
+func (sp *Spinner) ValToString(val float32) string {
+	if sp.Format == "" {
 		return fmt.Sprintf("%g", val)
 	}
-	if sb.FormatIsInt() {
-		return fmt.Sprintf(sb.Format, int64(val))
+	if sp.FormatIsInt() {
+		return fmt.Sprintf(sp.Format, int64(val))
 	}
-	return fmt.Sprintf(sb.Format, val)
+	return fmt.Sprintf(sp.Format, val)
 }
 
 // StringToVal converts the string field back to float value
-func (sb *SpinBox) StringToVal(str string) (float32, error) {
+func (sp *Spinner) StringToVal(str string) (float32, error) {
 	var fval float32
 	var err error
-	if sb.FormatIsInt() {
+	if sp.FormatIsInt() {
 		var iv int64
 		iv, err = strconv.ParseInt(str, 0, 64)
 		fval = float32(iv)
@@ -283,99 +283,99 @@ func (sb *SpinBox) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sb *SpinBox) SpinBoxHandlers() {
-	sb.WidgetHandlers()
-	sb.SpinBoxScroll()
+func (sp *Spinner) SpinBoxHandlers() {
+	sp.WidgetHandlers()
+	sp.SpinBoxScroll()
 }
 
-func (sb *SpinBox) SpinBoxScroll() {
-	sb.On(events.Scroll, func(e events.Event) {
-		if sb.StateIs(states.Disabled) || !sb.StateIs(states.Focused) {
+func (sp *Spinner) SpinBoxScroll() {
+	sp.On(events.Scroll, func(e events.Event) {
+		if sp.StateIs(states.Disabled) || !sp.StateIs(states.Focused) {
 			return
 		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		sb.IncrValue(float32(se.DimDelta(mat32.Y)))
+		sp.IncrValue(float32(se.DimDelta(mat32.Y)))
 	})
 }
 
 // TextFieldHandlers adds the spinbox textfield handlers for the given textfield
-func (sb *SpinBox) TextFieldHandlers(tf *TextField) {
+func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 	tf.On(events.Select, func(e events.Event) {
-		if sb.IsDisabled() {
+		if sp.IsDisabled() {
 			return
 		}
-		sb.SetSelected(!sb.StateIs(states.Selected))
-		sb.Send(events.Select, e)
+		sp.SetSelected(!sp.StateIs(states.Selected))
+		sp.Send(events.Select, e)
 	})
 	// TODO(kai): improve spin box focus handling
 	// tf.OnClick(func(e events.Event) {
-	// 	if sb.IsDisabled() {
+	// 	if sp.IsDisabled() {
 	// 		return
 	// 	}
-	// 	sb.SetState(true, states.Focused)
-	// 	sb.HandleEvent(e)
+	// 	sp.SetState(true, states.Focused)
+	// 	sp.HandleEvent(e)
 	// })
 	tf.OnChange(func(e events.Event) {
 		text := tf.Text()
-		val, err := sb.StringToVal(text)
+		val, err := sp.StringToVal(text)
 		if err != nil {
 			// TODO: use validation
 			slog.Error("invalid spinbox value", "value", text, "err", err)
 			return
 		}
-		sb.SetValueAction(val)
+		sp.SetValueAction(val)
 	})
 	tf.OnKeyChord(func(e events.Event) {
-		if sb.StateIs(states.Disabled) {
+		if sp.StateIs(states.Disabled) {
 			return
 		}
 		if KeyEventTrace {
-			fmt.Printf("SpinBox KeyChordEvent: %v\n", sb.Path())
+			fmt.Printf("SpinBox KeyChordEvent: %v\n", sp.Path())
 		}
 		kf := KeyFun(e.KeyChord())
 		switch {
 		case kf == KeyFunMoveUp:
 			e.SetHandled()
-			sb.IncrValue(1)
+			sp.IncrValue(1)
 		case kf == KeyFunMoveDown:
 			e.SetHandled()
-			sb.IncrValue(-1)
+			sp.IncrValue(-1)
 		case kf == KeyFunPageUp:
 			e.SetHandled()
-			sb.PageIncrValue(1)
+			sp.PageIncrValue(1)
 		case kf == KeyFunPageDown:
 			e.SetHandled()
-			sb.PageIncrValue(-1)
+			sp.PageIncrValue(-1)
 		}
 	})
 	// spinbox always gives its focus to textfield
-	sb.On(events.Focus, func(e events.Event) {
+	sp.On(events.Focus, func(e events.Event) {
 		tf.GrabFocus()
 		tf.Send(events.Focus, e) // sets focused flag
 	})
 }
 
-func (sb *SpinBox) ConfigWidget(sc *Scene) {
-	sb.ConfigParts(sc)
+func (sp *Spinner) ConfigWidget(sc *Scene) {
+	sp.ConfigParts(sc)
 }
 
-func (sb *SpinBox) GetSize(sc *Scene, iter int) {
-	sb.GetSizeParts(sc, iter)
+func (sp *Spinner) GetSize(sc *Scene, iter int) {
+	sp.GetSizeParts(sc, iter)
 }
 
-func (sb *SpinBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sb.DoLayoutBase(sc, parBBox, iter)
-	sb.DoLayoutParts(sc, parBBox, iter)
-	return sb.DoLayoutChildren(sc, iter)
+func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
+	sp.DoLayoutBase(sc, parBBox, iter)
+	sp.DoLayoutParts(sc, parBBox, iter)
+	return sp.DoLayoutChildren(sc, iter)
 }
 
-func (sb *SpinBox) Render(sc *Scene) {
-	if sb.PushBounds(sc) {
-		tf := sb.Parts.ChildByName("text-field", 2).(*TextField)
-		tf.SetSelected(sb.StateIs(states.Selected))
-		sb.RenderChildren(sc)
-		sb.RenderParts(sc)
-		sb.PopBounds(sc)
+func (sp *Spinner) Render(sc *Scene) {
+	if sp.PushBounds(sc) {
+		tf := sp.Parts.ChildByName("text-field", 2).(*TextField)
+		tf.SetSelected(sp.StateIs(states.Selected))
+		sp.RenderChildren(sc)
+		sp.RenderParts(sc)
+		sp.PopBounds(sc)
 	}
 }
