@@ -31,7 +31,6 @@ func app() {
 	sc := gi.StageScene("gogi-demo").SetTitle("GoGi Demo")
 
 	ts := gi.NewTabs(sc)
-	ts.NoDeleteTabs = true
 	ts.NewTabButton = true
 
 	makeHome(ts)

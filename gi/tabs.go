@@ -39,8 +39,8 @@ type Tabs struct {
 	// show a new tab button at right of list of tabs
 	NewTabButton bool `desc:"show a new tab button at right of list of tabs"`
 
-	// if true, tabs are not user-deleteable
-	NoDeleteTabs bool `desc:"if true, tabs are not user-deleteable"`
+	// if true, tabs are user-deleteable (true by default)
+	DeleteTabButtons bool `desc:"if true, tabs are user-deleteable (true by default)"`
 
 	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
@@ -54,6 +54,7 @@ func (ts *Tabs) CopyFieldsFrom(frm any) {
 }
 
 func (ts *Tabs) OnInit() {
+	ts.DeleteTabButtons = true
 	ts.HandleTabsEvents()
 	ts.TabsStyles()
 }
@@ -187,7 +188,7 @@ func (ts *Tabs) InsertTabOnlyAt(frame *Frame, label string, idx int, name ...str
 	tab := tb.InsertNewChild(TabType, idx, nm).(*Tab)
 	tab.Data = idx
 	tab.Tooltip = label
-	tab.NoDelete = ts.NoDeleteTabs
+	tab.DeleteButton = ts.DeleteTabButtons
 	tab.SetText(label)
 	tab.OnClick(func(e events.Event) {
 		ts.SelectTabIndex(idx)
@@ -520,11 +521,12 @@ func (ts *Tabs) Render(sc *Scene) {
 type Tab struct {
 	Button
 
-	// if true, this tab does not have the delete button avail
-	NoDelete bool `desc:"if true, this tab does not have the delete button avail"`
+	// if true, this tab has a delete button (true by default)
+	DeleteButton bool `desc:"if true, this tab has a delete button (true by default)"`
 }
 
 func (tb *Tab) OnInit() {
+	tb.DeleteButton = true
 	tb.HandleButtonEvents()
 	tb.TabButtonStyles()
 }
@@ -620,7 +622,7 @@ func (tb *Tab) Tabs() *Tabs {
 }
 
 func (tb *Tab) ConfigParts(sc *Scene) {
-	if !tb.NoDelete {
+	if tb.DeleteButton {
 		tb.ConfigPartsDeleteButton(sc)
 		return
 	}
