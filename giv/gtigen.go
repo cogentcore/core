@@ -788,85 +788,6 @@ func (t *ColorNameValueView) New() ki.Ki {
 	return &ColorNameValueView{}
 }
 
-// DiffViewType is the [gti.Type] for [DiffView]
-var DiffViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.DiffView",
-	ShortName:  "giv.DiffView",
-	IDName:     "diff-view",
-	Doc:        "DiffView presents two side-by-side TextView windows showing the differences\nbetween two files (represented as lines of strings).",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FileA", &gti.Field{Name: "FileA", Type: "string", Doc: "first file name being compared", Directives: gti.Directives{}}},
-		{"FileB", &gti.Field{Name: "FileB", Type: "string", Doc: "second file name being compared", Directives: gti.Directives{}}},
-		{"RevA", &gti.Field{Name: "RevA", Type: "string", Doc: "revision for first file, if relevant", Directives: gti.Directives{}}},
-		{"RevB", &gti.Field{Name: "RevB", Type: "string", Doc: "revision for second file, if relevant", Directives: gti.Directives{}}},
-		{"Diffs", &gti.Field{Name: "Diffs", Type: "textbuf.Diffs", Doc: "the diff records", Directives: gti.Directives{}}},
-		{"BufA", &gti.Field{Name: "BufA", Type: "*TextBuf", Doc: "textbuf for A", Directives: gti.Directives{}}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*TextBuf", Doc: "textbuf for B", Directives: gti.Directives{}}},
-		{"AlignD", &gti.Field{Name: "AlignD", Type: "textbuf.Diffs", Doc: "aligned diffs records diff for aligned lines", Directives: gti.Directives{}}},
-		{"EditA", &gti.Field{Name: "EditA", Type: "textbuf.Diffs", Doc: "edit diffs records aligned diffs with edits applied", Directives: gti.Directives{}}},
-		{"EditB", &gti.Field{Name: "EditB", Type: "textbuf.Diffs", Doc: "edit diffs records aligned diffs with edits applied", Directives: gti.Directives{}}},
-		{"UndoA", &gti.Field{Name: "UndoA", Type: "textbuf.Diffs", Doc: "undo diffs records aligned diffs with edits applied", Directives: gti.Directives{}}},
-		{"UndoB", &gti.Field{Name: "UndoB", Type: "textbuf.Diffs", Doc: "undo diffs records aligned diffs with edits applied", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &DiffView{},
-})
-
-// NewDiffView adds a new [DiffView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewDiffView(par ki.Ki, name ...string) *DiffView {
-	return par.NewChild(DiffViewType, name...).(*DiffView)
-}
-
-// KiType returns the [*gti.Type] of [DiffView]
-func (t *DiffView) KiType() *gti.Type {
-	return DiffViewType
-}
-
-// New returns a new [*DiffView] value
-func (t *DiffView) New() ki.Ki {
-	return &DiffView{}
-}
-
-// DiffTextViewType is the [gti.Type] for [DiffTextView]
-var DiffTextViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.DiffTextView",
-	ShortName:  "giv.DiffTextView",
-	IDName:     "diff-text-view",
-	Doc:        "DiffTextView supports double-click based application of edits from one\nbuffer to the other.",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TextView", &gti.Field{Name: "TextView", Type: "TextView", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &DiffTextView{},
-})
-
-// NewDiffTextView adds a new [DiffTextView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewDiffTextView(par ki.Ki, name ...string) *DiffTextView {
-	return par.NewChild(DiffTextViewType, name...).(*DiffTextView)
-}
-
-// KiType returns the [*gti.Type] of [DiffTextView]
-func (t *DiffTextView) KiType() *gti.Type {
-	return DiffTextViewType
-}
-
-// New returns a new [*DiffTextView] value
-func (t *DiffTextView) New() ki.Ki {
-	return &DiffTextView{}
-}
-
 // FileTreeType is the [gti.Type] for [FileTree]
 var FileTreeType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FileTree",
@@ -1812,44 +1733,7 @@ var TextViewType = gti.AddType(&gti.Type{
 	Doc:        "TextView is a widget for editing multiple lines of text (as compared to\nTextField for a single line).  The View is driven by a TextBuf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the TextView should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Buf", &gti.Field{Name: "Buf", Type: "*TextBuf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}}},
-		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
-		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}}},
-		{"LineNumberColor", &gti.Field{Name: "LineNumberColor", Type: "colors.Full", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
-		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "colors.Full", Doc: "the color used for the user text selection background color; this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
-		{"HighlightColor", &gti.Field{Name: "HighlightColor", Type: "colors.Full", Doc: "the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
-		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "colors.Full", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
-		{"NLines", &gti.Field{Name: "NLines", Type: "int", Doc: "number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc", Directives: gti.Directives{}}},
-		{"Renders", &gti.Field{Name: "Renders", Type: "[]paint.Text", Doc: "renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)", Directives: gti.Directives{}}},
-		{"Offs", &gti.Field{Name: "Offs", Type: "[]float32", Doc: "starting offsets for top of each line", Directives: gti.Directives{}}},
-		{"LineNoDigs", &gti.Field{Name: "LineNoDigs", Type: "int", Doc: "number of line number digits needed", Directives: gti.Directives{}}},
-		{"LineNoOff", &gti.Field{Name: "LineNoOff", Type: "float32", Doc: "horizontal offset for start of text after line numbers", Directives: gti.Directives{}}},
-		{"LineNoRender", &gti.Field{Name: "LineNoRender", Type: "paint.Text", Doc: "render for line numbers", Directives: gti.Directives{}}},
-		{"LinesSize", &gti.Field{Name: "LinesSize", Type: "image.Point", Doc: "total size of all lines as rendered", Directives: gti.Directives{}}},
-		{"RenderSz", &gti.Field{Name: "RenderSz", Type: "mat32.Vec2", Doc: "size params to use in render call", Directives: gti.Directives{}}},
-		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "lex.Pos", Doc: "current cursor position", Directives: gti.Directives{}}},
-		{"CursorCol", &gti.Field{Name: "CursorCol", Type: "int", Doc: "desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns", Directives: gti.Directives{}}},
-		{"ScrollToCursorOnRender", &gti.Field{Name: "ScrollToCursorOnRender", Type: "bool", Doc: "if true, scroll screen to cursor on next render", Directives: gti.Directives{}}},
-		{"ScrollToCursorPos", &gti.Field{Name: "ScrollToCursorPos", Type: "lex.Pos", Doc: "cursor position to scroll to", Directives: gti.Directives{}}},
-		{"PosHistIdx", &gti.Field{Name: "PosHistIdx", Type: "int", Doc: "current index within PosHistory", Directives: gti.Directives{}}},
-		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "lex.Pos", Doc: "starting point for selection -- will either be the start or end of selected region depending on subsequent selection.", Directives: gti.Directives{}}},
-		{"SelectReg", &gti.Field{Name: "SelectReg", Type: "textbuf.Region", Doc: "current selection region", Directives: gti.Directives{}}},
-		{"PrevSelectReg", &gti.Field{Name: "PrevSelectReg", Type: "textbuf.Region", Doc: "previous selection region, that was actually rendered -- needed to update render", Directives: gti.Directives{}}},
-		{"Highlights", &gti.Field{Name: "Highlights", Type: "[]textbuf.Region", Doc: "highlighted regions, e.g., for search results", Directives: gti.Directives{}}},
-		{"Scopelights", &gti.Field{Name: "Scopelights", Type: "[]textbuf.Region", Doc: "highlighted regions, specific to scope markers", Directives: gti.Directives{}}},
-		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}}},
-		{"ForceComplete", &gti.Field{Name: "ForceComplete", Type: "bool", Doc: "if true, complete regardless of any disqualifying reasons", Directives: gti.Directives{}}},
-		{"ISearch", &gti.Field{Name: "ISearch", Type: "ISearch", Doc: "interactive search data", Directives: gti.Directives{}}},
-		{"QReplace", &gti.Field{Name: "QReplace", Type: "QReplace", Doc: "query replace data", Directives: gti.Directives{}}},
-		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}}},
-		{"LineHeight", &gti.Field{Name: "LineHeight", Type: "float32", Doc: "line height, cached during styling", Directives: gti.Directives{}}},
-		{"VisSize", &gti.Field{Name: "VisSize", Type: "image.Point", Doc: "height in lines and width in chars of the visible area", Directives: gti.Directives{}}},
-		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}}},
-		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", Doc: "[view: -] mutex protecting cursor rendering -- shared between blink and main code", Directives: gti.Directives{}}},
-		{"HasLinks", &gti.Field{Name: "HasLinks", Type: "bool", Doc: "at least one of the renders has links -- determines if we set the cursor for hand movements", Directives: gti.Directives{}}},
-		{"lastRecenter", &gti.Field{Name: "lastRecenter", Type: "int", Doc: "", Directives: gti.Directives{}}},
-		{"lastAutoInsert", &gti.Field{Name: "lastAutoInsert", Type: "rune", Doc: "", Directives: gti.Directives{}}},
-		{"lastFilename", &gti.Field{Name: "lastFilename", Type: "gi.FileName", Doc: "", Directives: gti.Directives{}}},
+		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "lex.Pos", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
@@ -1878,11 +1762,13 @@ func (t *TextView) New() ki.Ki {
 
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.TreeView",
-	ShortName:  "giv.TreeView",
-	IDName:     "tree-view",
-	Doc:        "TreeView provides a graphical representation of source tree structure\n(which can be any type of Ki nodes), providing full manipulation abilities\nof that source tree (move, cut, add, etc) through drag-n-drop and\ncut/copy/paste and menu actions.\n\nThere are special style Props interpreted by these nodes:\n  - no-templates -- if present (assumed to be true) then style templates are\n    not used to optimize rendering speed.  Set this for nodes that have\n    styling applied differentially to individual nodes (e.g., FileNode).",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/giv.TreeView",
+	ShortName: "giv.TreeView",
+	IDName:    "tree-view",
+	Doc:       "TreeView provides a graphical representation of source tree structure\n(which can be any type of Ki nodes), providing full manipulation abilities\nof that source tree (move, cut, add, etc) through drag-n-drop and\ncut/copy/paste and menu actions.\n\nThere are special style Props interpreted by these nodes:\n  - no-templates -- if present (assumed to be true) then style templates are\n    not used to optimize rendering speed.  Set this for nodes that have\n    styling applied differentially to individual nodes (e.g., FileNode).",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SrcNode", &gti.Field{Name: "SrcNode", Type: "ki.Ki", Doc: "Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}}},
 		{"ShowViewCtxtMenu", &gti.Field{Name: "ShowViewCtxtMenu", Type: "bool", Doc: "if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?", Directives: gti.Directives{}}},
@@ -1916,6 +1802,28 @@ func (t *TreeView) KiType() *gti.Type {
 // New returns a new [*TreeView] value
 func (t *TreeView) New() ki.Ki {
 	return &TreeView{}
+}
+
+// TreeViewEmbedder is an interface that all types that embed TreeView satisfy
+type TreeViewEmbedder interface {
+	AsTreeView() *TreeView
+}
+
+// AsTreeView returns the given value as a value of type TreeView if the type
+// of the given value embeds TreeView, or nil otherwise
+func AsTreeView(k ki.Ki) *TreeView {
+	if k == nil || k.This() == nil {
+		return nil
+	}
+	if t, ok := k.(TreeViewEmbedder); ok {
+		return t.AsTreeView()
+	}
+	return nil
+}
+
+// AsTreeView satisfies the [TreeViewEmbedder] interface
+func (t *TreeView) AsTreeView() *TreeView {
+	return t
 }
 
 // TwinTextViewsType is the [gti.Type] for [TwinTextViews]

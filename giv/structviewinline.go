@@ -10,6 +10,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
@@ -49,8 +50,6 @@ type StructViewInline struct {
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
-		label := w.(*gi.Label)
-		label.Redrawable = true
 		w.AddStyles(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
@@ -64,21 +63,21 @@ func (sv *StructViewInline) SetStruct(st any) {
 	if sv.Struct != st {
 		updt = sv.UpdateStart()
 		sv.Struct = st
-		if k, ok := st.(ki.Ki); ok {
-			k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
-				svv.UpdateFields() // this never gets called, per below!
-				// fmt.Printf("struct view inline ki update values\n")
-				svv.ViewSig.Emit(svv.This(), 0, k)
-			})
-		}
+		// if k, ok := st.(ki.Ki); ok {
+		// 	k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// 		svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
+		// 		svv.UpdateFields() // this never gets called, per below!
+		// 		// fmt.Printf("struct view inline ki update values\n")
+		// 		svv.ViewSig.Emit(svv.This(), 0, k)
+		// 	})
+		// }
 	}
-	sv.ConfigParts(vp)
+	sv.ConfigParts(sv.Sc)
 	sv.UpdateEnd(updt)
 }
 
 // ConfigParts configures Parts for the current struct
-func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
+func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
@@ -117,7 +116,7 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
-	mods, updt := parts.ConfigChildren(config)
+	_, updt := parts.ConfigChildren(config)
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := parts.Child(i * 2).(*gi.Label)
@@ -130,16 +129,14 @@ func (sv *StructViewInline) ConfigParts(vp *gi.Scene) {
 		}
 		vv.ConfigWidget(widg)
 		if !sv.IsDisabled() && !inactTag {
-			vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(TypeStructViewInline).(*StructViewInline)
-				svv.UpdateFieldAction()
-				// note: updating here is redundant
-				svv.ViewSig.Emit(svv.This(), 0, nil)
+			vvb.OnChange(func(e events.Event) {
+				sv.UpdateFieldAction()
+				sv.SendChange()
 			})
 		}
 	}
 	parts.UpdateEnd(updt)
-	sv.UpdateEndLayout(sc, updt)
+	sv.UpdateEndLayout(updt)
 }
 
 func (sv *StructViewInline) UpdateFields() {
@@ -147,30 +144,18 @@ func (sv *StructViewInline) UpdateFields() {
 	for _, vv := range sv.FieldViews {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEnd(updt)
+	sv.UpdateEndRender(updt)
 }
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
-		sv.ConfigParts(vp)
+		sv.ConfigParts(sv.Sc)
 	} else if sv.HasDefs {
 		updt := sv.UpdateStart()
-		sv.SetFullReRender() // key to regen
 		for i, vv := range sv.FieldViews {
 			lbl := sv.Parts.Child(i * 2).(*gi.Label)
 			StructViewFieldDefTag(vv, lbl)
 		}
-		sv.UpdateEnd(updt)
-	}
-}
-
-func (sv *StructViewInline) Render(vp *gi.Scene) {
-	if sv.FullReRenderIfNeeded() {
-		return
-	}
-	if sv.PushBounds() {
-		sv.RenderParts()
-		sv.RenderChildren()
-		sv.PopBounds()
+		sv.UpdateEndRender(updt)
 	}
 }

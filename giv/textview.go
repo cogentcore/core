@@ -5,38 +5,8 @@
 package giv
 
 import (
-	"fmt"
-	"image"
-	"image/color"
-	"image/draw"
-	"log"
-	"strings"
-	"sync"
-	"time"
-	"unicode"
-
-	"goki.dev/colors"
-	"goki.dev/cursors"
-	"goki.dev/gi/v2/giv/textbuf"
-	"goki.dev/gi/v2/histyle"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/goosi"
-	"goki.dev/laser"
-	"goki.dev/mat32/v2"
-
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/units"
-	"goki.dev/glop/indent"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/pi"
-	"goki.dev/pi/v2/token"
 )
 
 // TextView is a widget for editing multiple lines of text (as compared to
@@ -48,6 +18,24 @@ import (
 type TextView struct {
 	gi.WidgetBase
 
+	CursorPos lex.Pos
+}
+
+func (tv *TextView) SetBuf(buf *TextBuf) {
+}
+
+func (tv *TextView) SetCursorShow(pos lex.Pos) {
+}
+
+func (tv *TextView) ScrollToVertCenter(pos int) bool {
+	return true
+}
+
+func (tv *TextView) ScrollCursorToVertCenter() bool {
+	return true
+}
+
+/*
 	// the text buffer that we're editing
 	Buf *TextBuf `json:"-" xml:"-" desc:"the text buffer that we're editing"`
 
@@ -4923,3 +4911,5 @@ func (tv *TextView) SetTypeHandlers() {
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 // 	}
 // }
+
+*/
