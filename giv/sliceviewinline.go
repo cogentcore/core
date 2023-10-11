@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -87,17 +88,17 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 		if sv.SliceValView != nil {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
 		}
-		sv.SetFullReRender()
 	}
 	sv.UpdateFromSlice()
-	sv.UpdateEnd(updt)
+	sv.UpdateEndLayout(updt)
 }
 
 // ConfigParts configures Parts for the current slice
-func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
+func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
+	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
 	sv.Values = make([]ValueView, 0)
@@ -124,17 +125,14 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 		config.Add(gi.ButtonType, "add-action")
 	}
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := sv.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	if !mods {
-		updt = sv.Parts.UpdateStart()
+		updt = parts.UpdateStart()
 	}
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueViewBase()
-		vvb.ViewSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-			svv.SetChanged()
-		})
-		widg := sv.Parts.Child(i).(gi.Widget)
+		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
+		widg := parts.Child(i).(gi.Widget)
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
@@ -144,51 +142,51 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		adack, err := sv.Parts.Children().ElemFromEndTry(1)
+		adack, err := parts.Children().ElemFromEndTry(1)
 		if err == nil {
 			adac := adack.(*gi.Button)
 			adac.SetIcon(icons.Add)
 			adac.Tooltip = "add an element to the slice"
-			adac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-				svv.SliceNewAt(-1, true)
+			adac.OnChange(func(e events.Event) {
+				sv.SliceNewAt(-1)
 			})
 		}
 	}
-	edack, err := sv.Parts.Children().ElemFromEndTry(0)
+	edack, err := parts.Children().ElemFromEndTry(0)
 	if err == nil {
 		edac := edack.(*gi.Button)
 		edac.SetIcon(icons.Edit)
 		edac.Tooltip = "edit slice in a dialog window"
-		edac.ActionSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			svv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-			vpath := svv.ViewPath
+		edac.OnClick(func(e events.Event) {
+			vpath := sv.ViewPath
 			title := ""
-			if svv.SliceValView != nil {
+			if sv.SliceValView != nil {
 				newPath := ""
 				isZero := false
-				title, newPath, isZero = svv.SliceValView.AsValueViewBase().Label()
+				title, newPath, isZero = sv.SliceValView.AsValueViewBase().Label()
 				if isZero {
 					return
 				}
-				vpath = svv.ViewPath + "/" + newPath
+				vpath = sv.ViewPath + "/" + newPath
 			} else {
-				elType := laser.NonPtrType(reflect.TypeOf(svv.Slice).Elem().Elem())
+				elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
 				title = "Slice of " + laser.NonPtrType(elType).Name()
 			}
-			dlg := SliceViewDialog(svv.Scene, svv.Slice, DlgOpts{Title: title, TmpSave: svv.TmpSave, ViewPath: vpath}, nil, nil, nil)
-			svvvk := dlg.Stage.Scene.ChildByType(TypeSliceView, ki.Embeds, 2)
-			if svvvk != nil {
-				svvv := svvvk.(*SliceView)
-				svvv.SliceValView = svv.SliceValView
-				// svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				// 	svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-				// 	svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
-				// })
-			}
+			SliceViewDialog(sv, DlgOpts{Title: title, TmpSave: sv.TmpSave, ViewPath: vpath}, sv.Slice, nil, nil)
+			// todo: seems very bad:
+			// svvvk := dlg.Stage.Scene.ChildByType(TypeSliceView, ki.Embeds, 2)
+			// if svvvk != nil {
+			// 	svvv := svvvk.(*SliceView)
+			// 	svvv.SliceValView = sv.SliceValView
+			// 	// svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
+			// 	// 	svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
+			// 	// 	svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
+			// 	// })
+			// }
 		})
 	}
-	sv.Parts.UpdateEnd(updt)
+	parts.UpdateEndLayout(updt)
+	sv.SetNeedsLayout(sc, updt)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -197,18 +195,18 @@ func (sv *SliceViewInline) ConfigParts(vp *gi.Scene) {
 // types of changes, so this is just generic.
 func (sv *SliceViewInline) SetChanged() {
 	sv.Changed = true
-	sv.ViewSig.Emit(sv.This(), 0, nil)
+	sv.SendChange()
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
-func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
+func (sv *SliceViewInline) SliceNewAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
 
 	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
+	defer sv.UpdateEndLayout(updt)
 
 	laser.SliceNewAt(sv.Slice, idx)
 
@@ -216,14 +214,11 @@ func (sv *SliceViewInline) SliceNewAt(idx int, reconfig bool) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	if reconfig {
-		sv.SetFullReRender()
-		sv.UpdateFromSlice()
-	}
+	sv.UpdateFromSlice()
 }
 
 func (sv *SliceViewInline) UpdateFromSlice() {
-	sv.ConfigParts(vp)
+	sv.ConfigParts(sv.Sc)
 }
 
 func (sv *SliceViewInline) UpdateValues() {
@@ -231,22 +226,19 @@ func (sv *SliceViewInline) UpdateValues() {
 	for _, vv := range sv.Values {
 		vv.UpdateWidget()
 	}
-	sv.UpdateEnd(updt)
+	sv.UpdateEndRender(updt)
 }
 
-func (sv *SliceViewInline) ApplyStyle(sc *gi.Scene) {
-	sv.ConfigParts(vp)
-	sv.WidgetBase.ApplyStyle(sc)
-}
+// func (sv *SliceViewInline) ApplyStyle(sc *gi.Scene) {
+// 	sv.ConfigParts(sc)
+// 	sv.WidgetBase.ApplyStyle(sc)
+// }
 
-func (sv *SliceViewInline) Render(vp *gi.Scene) {
-	if sv.FullReRenderIfNeeded() {
-		return
-	}
-	if sv.PushBounds() {
-		sv.ConfigParts(vp)
-		sv.RenderParts()
-		sv.RenderChildren()
-		sv.PopBounds()
+func (sv *SliceViewInline) Render(sc *gi.Scene) {
+	if sv.PushBounds(sc) {
+		sv.ConfigParts(sc)
+		sv.RenderParts(sc)
+		sv.RenderChildren(sc)
+		sv.PopBounds(sc)
 	}
 }

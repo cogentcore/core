@@ -170,6 +170,7 @@ func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 		})
 	}
 	parts.UpdateEndLayout(updt)
+	mv.SetNeedsLayout(sc, updt)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the

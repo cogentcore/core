@@ -8,9 +8,7 @@ import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
-	"goki.dev/ki/v2"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -38,79 +36,54 @@ func (sve *Editor) CopyFieldsFrom(frm any) {
 	sve.SetDragCursor = fr.SetDragCursor
 }
 
-// EditorEvents handles svg editing events
-func (sve *Editor) EditorEvents() {
-	svewe.AddFunc(events.MouseDrag, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		me.SetHandled()
-		ssvg := sve
-		if ssvg.HasFlag(NodeDragging) {
-			if !ssvg.SetDragCursor {
-				goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Push(cursor.HandOpen)
-				ssvg.SetDragCursor = true
-			}
-			del := me.Pos().Sub(me.From)
-			ssvg.Trans.X += float32(del.X)
-			ssvg.Trans.Y += float32(del.Y)
-			ssvg.SetTransform()
-			// ssvg.SetFullReRender()
-			// ssvg.UpdateSig()
-		} else {
-			if ssvg.SetDragCursor {
-				goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
-				ssvg.SetDragCursor = false
-			}
-		}
+func (sve *Editor) OnInit() {
+	// todo: abilities include draggable
+	sve.HandleEditorEvents()
+}
 
+// HandleEditorEvents handles svg editing events
+func (sve *Editor) HandleEditorEvents() {
+	sve.On(events.DragMove, func(e events.Event) {
+		e.SetHandled()
+		del := e.PrevDelta()
+		sve.Trans.X += float32(del.X)
+		sve.Trans.Y += float32(del.Y)
+		sve.SetTransform()
 	})
-	svewe.AddFunc(events.Scroll, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(*events.Scroll)
-		me.SetHandled()
-		ssvg := sve
-		if ssvg.SetDragCursor {
-			goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
-			ssvg.SetDragCursor = false
+	sve.On(events.Scroll, func(e events.Event) {
+		e.SetHandled()
+		sve.InitScale()
+		// todo:
+		// sve.Scale += float32(e.ScrollDelta(mat32.Y)) / 20
+		if sve.Scale <= 0 {
+			sve.Scale = 0.01
 		}
-		ssvg.InitScale()
-		ssvg.Scale += float32(me.NonZeroDelta(false)) / 20
-		if ssvg.Scale <= 0 {
-			ssvg.Scale = 0.01
-		}
-		ssvg.SetTransform()
+		sve.SetTransform()
 		// ssvg.SetFullReRender()
 		// ssvg.UpdateSig()
 	})
-	svewe.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		ssvg := sve
-		if ssvg.SetDragCursor {
-			goosi.TheApp.Cursor(ssvg.ParentRenderWin().RenderWin).Pop()
-			ssvg.SetDragCursor = false
-		}
-		obj := ssvg.FirstContainingPoint(me.Pos(), true)
-		_ = obj
-		if me.Action == events.Release && me.Button == events.Right {
-			me.SetHandled()
-			// if obj != nil {
-			// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
-			// }
-		}
-	})
-	svewe.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		me.SetHandled()
-		ssvg := sve
-		obj := ssvg.FirstContainingPoint(me.Pos(), true)
-		if obj != nil {
-			pos := me.Pos()
-			ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
-			PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Sc, ttxt)
-		}
-	})
-}
-
-func (sve *Editor) SetTypeHandlers() {
-	sve.EditorEvents()
+	// todo: context menu
+	// sve.OnAddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	obj := sve.FirstContainingPoint(e.Pos(), true)
+	// 	_ = obj
+	// 	if e.Action == events.Release && e.Button == events.Right {
+	// 		e.SetHandled()
+	// 		// if obj != nil {
+	// 		// 	giv.StructViewDialog(ssvg.Scene, obj, giv.DlgOpts{Title: "SVG Element View"}, nil, nil)
+	// 		// }
+	// 	}
+	// })
+	// sve.AddFunc(events.LongHoverStart, RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	e := d.(events.Event)
+	// 	e.SetHandled()
+	// 	sve := sve
+	// 	obj := sve.FirstContainingPoint(e.Pos(), true)
+	// 	if obj != nil {
+	// 		pos := e.Pos()
+	// 		ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
+	// 		PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Sc, ttxt)
+	// 	}
+	// })
 }
 
 // InitScale ensures that Scale is initialized and non-zero
@@ -118,7 +91,7 @@ func (sve *Editor) InitScale() {
 	if sve.Scale == 0 {
 		mvp := sve.Sc
 		if mvp != nil {
-			sve.Scale = sve.ParentRenderWin().LogicalDPI() / 96.0
+			sve.Scale = 1 // todo: sve.ParentRenderWin().LogicalDPI() / 96.0
 		} else {
 			sve.Scale = 1
 		}

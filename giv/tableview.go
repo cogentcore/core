@@ -17,8 +17,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
-	"goki.dev/goosi/cursor"
+	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
@@ -175,10 +174,9 @@ func (tv *TableView) SetSlice(sl any) {
 	updt := tv.UpdateStart()
 	tv.ResetSelectedIdxs()
 	tv.SelectMode = false
-	tv.SetFullReRender()
 
-	tv.Config()
-	tv.UpdateEnd(updt)
+	tv.Config(tv.Sc)
+	tv.UpdateEndLayout(updt)
 }
 
 // StructType sets the StruType and returns the type of the struct within the
@@ -250,8 +248,7 @@ func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
 	if mods {
-		tv.SetFullReRender()
-		tv.UpdateEnd(updt)
+		tv.UpdateEndLayout(updt)
 	}
 }
 
@@ -347,7 +344,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	gl := tv.GridLayout()
 	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
-	gconfig.Add(gi.TypeScrollBar, "scrollbar")
+	gconfig.Add(gi.SliderType, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
 
 	sgf = tv.This().(SliceViewer).SliceGrid()
@@ -395,17 +392,13 @@ func (tv *TableView) ConfigSliceGrid() {
 				hdr.SetIcon(icons.KeyboardArrowUp)
 			}
 		}
-		hdr.Data = fli
 		hdr.Tooltip = field.Name + " (click to sort by)"
 		dsc := field.Tag.Get("desc")
 		if dsc != "" {
 			hdr.Tooltip += ": " + dsc
 		}
-		hdr.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(TableViewType).(*TableView)
-			act := send.(*gi.Button)
-			fldIdx := act.Data.(int)
-			tvv.SortSliceAction(fldIdx)
+		hdr.OnClick(func(e events.Event) {
+			tv.SortSliceAction(fli)
 		})
 
 		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
@@ -488,8 +481,8 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	}
 	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
 
-	mvp := tv.Sc
-	if mvp != nil && mvp.HasFlag(int(gi.ScFlagPrefSizing)) {
+	sc := tv.Sc
+	if sc != nil && sc.Is(gi.ScPrefSizing) {
 		tv.VisRows = min(gi.LayoutPrefMaxRows, tv.SliceSize)
 		tv.LayoutHeight = float32(tv.VisRows) * tv.RowHeight
 	} else {
@@ -556,11 +549,8 @@ func (tv *TableView) UpdateSliceGrid() {
 		return
 	}
 
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-
 	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
+	defer sg.UpdateEndLayout(updt)
 
 	if laser.AnyIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -593,6 +583,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	tv.UpdateStartIdx()
 
 	for i := 0; i < tv.DispRows; i++ {
+		i := i
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx
 		issel := tv.IdxIsSelected(si)
@@ -609,17 +600,8 @@ func (tv *TableView) UpdateSliceGrid() {
 			} else {
 				idxlab = &gi.Label{}
 				sg.SetChild(idxlab, ridx, labnm)
-				idxlab.SetProp("tv-row", i)
-				idxlab.Selectable = true
-				idxlab.Redrawable = true
-				idxlab.Style.Template = "giv.TableView.IndexLabel"
-				idxlab.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					if sig == int64(gi.WidgetSelected) {
-						wbb := send.(gi.Widget).AsWidget()
-						row := wbb.Prop("tv-row").(int)
-						tvv := recv.Embed(TableViewType).(*TableView)
-						tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
-					}
+				idxlab.OnSelect(func(e events.Event) {
+					tv.UpdateSelectRow(i, idxlab.StateIs(states.Selected))
 				})
 			}
 			idxlab.SetSelected(issel)
@@ -634,6 +616,7 @@ func (tv *TableView) UpdateSliceGrid() {
 			}
 		}
 		for fli := 0; fli < tv.NVisFields; fli++ {
+			fli := fli
 			field := tv.VisFields[fli]
 			fval := val.Elem().FieldByIndex(field.Index)
 			vvi := i*tv.NVisFields + fli
@@ -673,28 +656,18 @@ func (tv *TableView) UpdateSliceGrid() {
 				if wb != nil {
 					// totally not worth it now:
 					// wb.Sty.Template = "giv.TableViewView.ItemWidget." + vtyp.Name()
-					wb.SetProp("tv-row", i)
-					wb.ClearSelected()
-					wb.WidgetSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						if sig == int64(gi.WidgetSelected) { // || sig == int64(gi.WidgetFocused) {
-							wbb := send.(gi.Widget).AsWidget()
-							row := wbb.Prop("tv-row").(int)
-							tvv := recv.Embed(TableViewType).(*TableView)
-							// if sig != int64(gi.WidgetFocused) || !tvv.InFocusGrab {
-							tvv.UpdateSelectRow(row, wbb.StateIs(states.Selected))
-							// }
-						}
+					wb.SetState(false, states.Selected)
+					wb.OnSelect(func(e events.Event) {
+						tv.UpdateSelectRow(i, wb.StateIs(states.Selected))
 					})
 				}
 				if tv.IsDisabled() {
 					widg.AsWidget().SetState(true, states.Disabled)
 				} else {
 					vvb := vv.AsValueViewBase()
-					vvb.ViewSig.ConnectOnly(tv.This(), // todo: do we need this?
-						func(recv, send ki.Ki, sig int64, data any) {
-							tvv, _ := recv.Embed(TableViewType).(*TableView)
-							tvv.SetChanged()
-						})
+					vvb.OnChange(func(e events.Event) {
+						tv.SetChanged()
+					})
 				}
 			}
 			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
@@ -709,12 +682,8 @@ func (tv *TableView) UpdateSliceGrid() {
 					sg.SetChild(&addact, cidx, addnm)
 					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
-					addact.Data = i
-					addact.Style.Template = "giv.TableView.AddButton"
-					addact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						act := send.(*gi.Button)
-						tvv := recv.Embed(TableViewType).(*TableView)
-						tvv.SliceNewAtRow(act.Data.(int) + 1)
+					addact.OnClick(func(e events.Event) {
+						tv.SliceNewAtRow(i + 1)
 					})
 				}
 				cidx++
@@ -726,12 +695,9 @@ func (tv *TableView) UpdateSliceGrid() {
 					sg.SetChild(&delact, cidx, delnm)
 					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
-					delact.Data = i
-					delact.Style.Template = "giv.TableView.DelAction"
-					delact.ActionSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-						act := send.(*gi.Button)
-						tvv := recv.Embed(TableViewType).(*TableView)
-						tvv.SliceDeleteAtRow(act.Data.(int), true)
+
+					delact.OnClick(func(e events.Event) {
+						tv.SliceDeleteAtRow(i, true)
 					})
 				}
 				cidx++
@@ -757,11 +723,8 @@ func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int,
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (tv *TableView) SliceNewAt(idx int) {
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-
 	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceNewAtSel(idx)
 	laser.SliceNewAt(tv.Slice, idx)
@@ -775,12 +738,8 @@ func (tv *TableView) SliceNewAt(idx int) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
-	tv.SetFullReRender()
-	tv.ScrollBar().SetFullReRender()
 	tv.This().(SliceViewer).LayoutSliceGrid()
 	tv.This().(SliceViewer).UpdateSliceGrid()
-	tv.ViewSig.Emit(tv.This(), 0, nil)
-	tv.SliceViewSig.Emit(tv.This(), int64(SliceViewInserted), idx)
 }
 
 // SliceDeleteAt deletes element at given index from slice -- doupdt means
@@ -789,11 +748,8 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	if idx < 0 || idx >= tv.SliceSize {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-
 	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	tv.SliceDeleteAtSel(idx)
 
@@ -806,13 +762,9 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 	}
 	tv.SetChanged()
 	if doupdt {
-		tv.SetFullReRender()
-		tv.ScrollBar().SetFullReRender()
 		tv.This().(SliceViewer).LayoutSliceGrid()
 		tv.This().(SliceViewer).UpdateSliceGrid()
 	}
-	tv.ViewSig.Emit(tv.This(), 0, nil)
-	tv.SliceViewSig.Emit(tv.This(), int64(SliceViewDeleted), idx)
 }
 
 // SortSlice sorts the slice according to current settings
@@ -827,15 +779,10 @@ func (tv *TableView) SortSlice() {
 // SortSliceAction sorts the slice for given field index -- toggles ascending
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
-	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).Push(cursor.Wait)
-	defer goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).Pop()
-
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
-
 	updt := tv.UpdateStart()
+	defer tv.UpdateEndRender(updt)
+
 	sgh := tv.SliceHeader()
-	sgh.SetFullReRender()
 	_, idxOff := tv.RowWidgetNs()
 
 	ascending := true
@@ -862,7 +809,6 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
 	tv.UpdateSliceGrid()
-	tv.UpdateEnd(updt)
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -884,17 +830,13 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"},
-			tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-				tvv := recv.Embed(TableViewType).(*TableView)
-				tvv.UpdateSliceGrid()
-			})
+		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"}, func(act *gi.Button) {
+			tv.UpdateSliceGrid()
+		})
 		if ndef > 1 {
-			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"},
-				tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					tvv := recv.Embed(TableViewType).(*TableView)
-					tvv.SliceNewAt(-1)
-				})
+			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"}, func(act *gi.Button) {
+				tv.SliceNewAt(-1)
+			})
 		}
 	}
 	sz := len(*tb.Children())
@@ -905,7 +847,6 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if HasToolBarView(tv.Slice) {
 		ToolBarView(tv.Slice, tv.Sc, tb)
-		tb.SetFullReRender()
 	}
 	tv.ToolbarSlice = tv.Slice
 }
@@ -1013,8 +954,8 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 	if row < 0 {
 		return
 	}
-	wupdt := tv.TopUpdateStart()
-	defer tv.TopUpdateEnd(wupdt)
+	updt := tv.UpdateStart()
+	defer tv.UpdateEnd(updt)
 
 	sg := tv.SliceGrid()
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -1087,7 +1028,7 @@ func (tv *TableView) EditIdx(idx int) {
 	if lbl != "" {
 		tynm += ": " + lbl
 	}
-	StructViewDialog(tv.Scene, stru, DlgOpts{Title: tynm}, nil, nil)
+	StructViewDialog(tv, DlgOpts{Title: tynm}, stru, nil)
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
@@ -1096,9 +1037,7 @@ func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
 	}
 	tv.SliceViewBase.StdCtxtMenu(m, idx)
 	m.AddSeparator("sep-edit")
-	m.AddButton(gi.ActOpts{Label: "Edit", Data: idx},
-		tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			tvv := recv.Embed(TableViewType).(*TableView)
-			tvv.EditIdx(data.(int))
-		})
+	m.AddButton(gi.ActOpts{Label: "Edit", Data: idx}, func(act *gi.Button) {
+		tv.EditIdx(idx)
+	})
 }
