@@ -771,7 +771,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	// cb.ConfigParts(sc)
 	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
-	// 	cbb := vvv.Widget.(*gi.ButtonBox)
+	// 	cbb := vvv.Widget.(*gi.Switches)
 	// 	etyp := vvv.EnumType()
 	// 	val := cbb.BitFlagsValue(etyp)
 	// 	vvv.SetEnumValueFromInt(val)
