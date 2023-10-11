@@ -868,10 +868,10 @@ func (em *EventMgr) ManagerKeyChordEvents(e events.Event) {
 	switch kf {
 	case KeyFunGoGiEditor:
 		// todo:
-		// TheViewIFace.GoGiEditor(em.Master.EventTopNode())
+		TheViewIFace.GoGiEditor(em.Scene)
 		e.SetHandled()
 	case KeyFunPrefs:
-		// TheViewIFace.PrefsView(&Prefs)
+		TheViewIFace.PrefsView(&Prefs)
 		e.SetHandled()
 	case KeyFunWinClose:
 		win.CloseReq()
