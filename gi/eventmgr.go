@@ -259,6 +259,10 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
 
+		if wb.StateIs(states.Disabled) {
+			continue
+		}
+
 		if !isDrag {
 			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
 		}
@@ -477,7 +481,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	w.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.StateIs(states.Disabled) {
+		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 			return ki.Break
 		}
 		if !wb.PosInBBox(pos) {
