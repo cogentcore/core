@@ -721,7 +721,7 @@ type BitFlagView struct {
 }
 
 func (vv *BitFlagView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonBoxType
+	vv.WidgetTyp = gi.SwitchesType
 	return vv.WidgetTyp
 }
 
@@ -745,7 +745,7 @@ func (vv *BitFlagView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	bb := vv.Widget.(*gi.ButtonBox)
+	bb := vv.Widget.(*gi.Switches)
 	_ = bb
 	npv := laser.NonPtrValue(vv.Value)
 	iv, err := laser.ToInt(npv.Interface())
@@ -758,7 +758,7 @@ func (vv *BitFlagView) UpdateWidget() {
 
 func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
-	cb := vv.Widget.(*gi.ButtonBox)
+	cb := vv.Widget.(*gi.Switches)
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Tag("desc")

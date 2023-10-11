@@ -17,13 +17,13 @@ import (
 	"goki.dev/ki/v2"
 )
 
-// ButtonBox is a widget for containing a set of switches.
+// Switches is a widget for containing a set of switches.
 // It can optionally enforce mutual exclusivity (i.e., Radio Buttons).
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
 //
 //goki:embedder
-type ButtonBox struct {
+type Switches struct {
 	WidgetBase
 
 	// the list of items (switch labels)
@@ -36,19 +36,19 @@ type ButtonBox struct {
 	Mutex bool `desc:"make the items mutually exclusive -- checking one turns off all the others"`
 }
 
-func (bb *ButtonBox) CopyFieldsFrom(frm any) {
-	fr := frm.(*ButtonBox)
-	bb.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	bb.Items = slices.Clone(fr.Items)
+func (sw *Switches) CopyFieldsFrom(frm any) {
+	fr := frm.(*Switches)
+	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sw.Items = slices.Clone(fr.Items)
 }
 
-func (bb *ButtonBox) OnInit() {
-	bb.WidgetHandlers()
-	bb.ButtonBoxStyles()
+func (sw *Switches) OnInit() {
+	sw.WidgetHandlers()
+	sw.ButtonBoxStyles()
 }
 
-func (bb *ButtonBox) ButtonBoxStyles() {
-	bb.AddStyles(func(s *styles.Style) {
+func (sw *Switches) ButtonBoxStyles() {
+	sw.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Dp(2))
 		s.Padding.Set(units.Dp(2))
@@ -62,70 +62,70 @@ func (bb *ButtonBox) ButtonBoxStyles() {
 // SelectItem activates a given item but does NOT emit the ButtonSig signal.
 // See SelectItemAction for signal emitting version.
 // returns error if index is out of range.
-func (bb *ButtonBox) SelectItem(idx int) error {
-	if idx >= bb.Parts.NumChildren() || idx < 0 {
+func (sw *Switches) SelectItem(idx int) error {
+	if idx >= sw.Parts.NumChildren() || idx < 0 {
 		return fmt.Errorf("gi.ButtonBox: SelectItem, index out of range: %v", idx)
 	}
-	updt := bb.UpdateStart()
-	if bb.Mutex {
-		bb.UnCheckAllBut(idx)
+	updt := sw.UpdateStart()
+	if sw.Mutex {
+		sw.UnCheckAllBut(idx)
 	}
-	cb := bb.Parts.Child(idx).(*Switch)
+	cb := sw.Parts.Child(idx).(*Switch)
 	cb.SetState(true, states.Checked)
-	bb.UpdateEnd(updt)
+	sw.UpdateEnd(updt)
 	return nil
 }
 
 // SelectItemAction activates a given item and emits the ButtonSig signal.
 // This is mainly for Mutex use.
 // returns error if index is out of range.
-func (bb *ButtonBox) SelectItemAction(idx int) error {
-	updt := bb.UpdateStart()
-	defer bb.UpdateEnd(updt)
+func (sw *Switches) SelectItemAction(idx int) error {
+	updt := sw.UpdateStart()
+	defer sw.UpdateEnd(updt)
 
-	err := bb.SelectItem(idx)
+	err := sw.SelectItem(idx)
 	if err != nil {
 		return err
 	}
-	// cb := bb.Parts.Child(idx).(*CheckBox)
-	// bb.ButtonSig.Emit(bb.This(), int64(idx), cb.Text)
+	// cb := sw.Parts.Child(idx).(*CheckBox)
+	// sw.ButtonSig.Emit(sw.This(), int64(idx), cb.Text)
 	return nil
 }
 
 // UnCheckAll unchecks all buttons
-func (bb *ButtonBox) UnCheckAll() {
-	updt := bb.UpdateStart()
-	for _, cbi := range *bb.Parts.Children() {
+func (sw *Switches) UnCheckAll() {
+	updt := sw.UpdateStart()
+	for _, cbi := range *sw.Parts.Children() {
 		cb := cbi.(*Switch)
 		cb.SetState(false, states.Checked)
 	}
-	bb.UpdateEnd(updt)
+	sw.UpdateEnd(updt)
 }
 
 // UnCheckAllBut unchecks all buttons except given one
-func (bb *ButtonBox) UnCheckAllBut(idx int) {
-	updt := bb.UpdateStart()
-	for i, cbi := range *bb.Parts.Children() {
+func (sw *Switches) UnCheckAllBut(idx int) {
+	updt := sw.UpdateStart()
+	for i, cbi := range *sw.Parts.Children() {
 		if i == idx {
 			continue
 		}
 		cb := cbi.(*Switch)
 		cb.SetState(false, states.Checked)
 	}
-	bb.UpdateEnd(updt)
+	sw.UpdateEnd(updt)
 }
 
 // ItemsFromStringList sets the Items list from a list of string values -- if
 // setFirst then set current item to the first item in the list, and maxLen if
 // > 0 auto-sets the width of the button to the contents, with the given upper
 // limit
-func (bb *ButtonBox) ItemsFromStringList(el []string) {
+func (sw *Switches) ItemsFromStringList(el []string) {
 	sz := len(el)
 	if sz == 0 {
 		return
 	}
-	bb.Items = make([]string, sz)
-	copy(bb.Items, el)
+	sw.Items = make([]string, sz)
+	copy(sw.Items, el)
 }
 
 // todo:
@@ -133,33 +133,33 @@ func (bb *ButtonBox) ItemsFromStringList(el []string) {
 // ItemsFromEnumList sets the Items list from a list of enum values (see
 // kit.EnumRegistry)
 /*
-func (bb *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
+func (sw *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
 	sz := len(el)
 	if sz == 0 {
 		return
 	}
-	bb.Items = make([]string, sz)
-	bb.Tooltips = make([]string, sz)
+	sw.Items = make([]string, sz)
+	sw.Tooltips = make([]string, sz)
 	for i, enum := range el {
-		bb.Items[i] = enum.Name
-		bb.Tooltips[i] = enum.Desc
+		sw.Items[i] = enum.Name
+		sw.Tooltips[i] = enum.Desc
 	}
 }
 
 // ItemsFromEnum sets the Items list from an enum type, which must be
 // registered on kit.EnumRegistry.
-func (bb *ButtonBox) ItemsFromEnum(enumtyp reflect.Type) {
-	bb.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true))
+func (sw *ButtonBox) ItemsFromEnum(enumtyp reflect.Type) {
+	sw.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true))
 }
 
 // UpdateFromBitFlags sets the button checked state from a registered
 // BitFlag Enum type (see kit.EnumRegistry) with given value
-func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
+func (sw *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := max(len(els), bb.Parts.NumChildren())
+	mx := max(len(els), sw.Parts.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := bb.Parts.Child(i)
+		cbi := sw.Parts.Child(i)
 		cb := cbi.(*CheckBox)
 		on := bitflag.Has(val, int(ev.Value))
 		cb.SetState(on, states.Checked)
@@ -168,13 +168,13 @@ func (bb *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 
 // BitFlagsValue returns the int64 value for all checkboxes from given
 // BitFlag Enum type (see kit.EnumRegistry) with given value
-func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
+func (sw *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 	val := int64(0)
 	els := kit.Enums.TypeValues(enumtyp, true)
-	mx := max(len(els), bb.Parts.NumChildren())
+	mx := max(len(els), sw.Parts.NumChildren())
 	for i := 0; i < mx; i++ {
 		ev := els[i]
-		cbi := bb.Parts.Child(i)
+		cbi := sw.Parts.Child(i)
 		cb := cbi.(*CheckBox)
 		if cb.StateIs(states.Checked) {
 			bitflag.Set(&val, int(ev.Value))
@@ -184,79 +184,79 @@ func (bb *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
 }
 */
 
-func (bb *ButtonBox) ConfigItems() {
-	for i, cbi := range *bb.Parts.Children() {
+func (sw *Switches) ConfigItems() {
+	for i, cbi := range *sw.Parts.Children() {
 		cb := cbi.(*Switch)
-		lbl := bb.Items[i]
+		lbl := sw.Items[i]
 		cb.SetText(lbl)
-		if len(bb.Tooltips) > i {
-			cb.Tooltip = bb.Tooltips[i]
+		if len(sw.Tooltips) > i {
+			cb.Tooltip = sw.Tooltips[i]
 		}
-		if bb.Mutex {
+		if sw.Mutex {
 			cb.IconOn = icons.RadioButtonChecked
 			cb.IconOff = icons.RadioButtonUnchecked
 		}
 		cb.SetProp("index", i)
-		// cb.ButtonSig.Connect(bb.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
 		// 	}
-		// 	bbb := AsButtonBox(recv)
-		// 	cbb := send.(*CheckBox)
-		// 	idx := cbb.Prop("index").(int)
-		// 	ischk := cbb.StateIs(states.Checked)
-		// 	if bbb.Mutex && ischk {
-		// 		bbb.UnCheckAllBut(idx)
+		// 	swb := AsButtonBox(recv)
+		// 	csw := send.(*CheckBox)
+		// 	idx := csw.Prop("index").(int)
+		// 	ischk := csw.StateIs(states.Checked)
+		// 	if swb.Mutex && ischk {
+		// 		swb.UnCheckAllBut(idx)
 		// 	}
-		// 	bbb.ButtonSig.Emit(bbb.This(), int64(idx), cbb.Text)
+		// 	swb.ButtonSig.Emit(swb.This(), int64(idx), csw.Text)
 		// })
 	}
 }
 
-func (bb *ButtonBox) ConfigParts(sc *Scene) {
-	if len(bb.Items) == 0 {
-		bb.Parts.DeleteChildren(ki.DestroyKids)
+func (sw *Switches) ConfigParts(sc *Scene) {
+	if len(sw.Items) == 0 {
+		sw.Parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := ki.Config{}
-	for _, lb := range bb.Items {
+	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)
 	}
-	mods, updt := bb.Parts.ConfigChildren(config)
-	if mods || bb.NeedsRebuild() {
-		bb.ConfigItems()
-		bb.UpdateEnd(updt)
+	mods, updt := sw.Parts.ConfigChildren(config)
+	if mods || sw.NeedsRebuild() {
+		sw.ConfigItems()
+		sw.UpdateEnd(updt)
 	}
 }
 
-func (bb *ButtonBox) ConfigWidget(sc *Scene) {
-	bb.ConfigParts(sc)
+func (sw *Switches) ConfigWidget(sc *Scene) {
+	sw.ConfigParts(sc)
 }
 
-func (bb *ButtonBox) ApplyStyle(sc *Scene) {
-	bb.StyMu.Lock()
-	bb.ApplyStyleWidget(sc)
-	bb.StyMu.Unlock()
-	// bb.ConfigParts(sc) // todo: no config in styling!?
+func (sw *Switches) ApplyStyle(sc *Scene) {
+	sw.StyMu.Lock()
+	sw.ApplyStyleWidget(sc)
+	sw.StyMu.Unlock()
+	// sw.ConfigParts(sc) // todo: no config in styling!?
 }
 
-func (bb *ButtonBox) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	bb.DoLayoutBase(sc, parBBox, iter)
-	bb.DoLayoutParts(sc, parBBox, iter)
-	return bb.DoLayoutChildren(sc, iter)
+func (sw *Switches) DoLayout(sc *Scene, parswox image.Rectangle, iter int) bool {
+	sw.DoLayoutBase(sc, parswox, iter)
+	sw.DoLayoutParts(sc, parswox, iter)
+	return sw.DoLayoutChildren(sc, iter)
 }
 
-func (bb *ButtonBox) RenderButtonBox(sc *Scene) {
-	rs, _, st := bb.RenderLock(sc)
-	bb.RenderStdBox(sc, st)
-	bb.RenderUnlock(rs)
+func (sw *Switches) RenderButtonBox(sc *Scene) {
+	rs, _, st := sw.RenderLock(sc)
+	sw.RenderStdBox(sc, st)
+	sw.RenderUnlock(rs)
 }
 
-func (bb *ButtonBox) Render(sc *Scene) {
-	if bb.PushBounds(sc) {
-		bb.RenderButtonBox(sc)
-		bb.RenderParts(sc)
-		bb.RenderChildren(sc)
-		bb.PopBounds(sc)
+func (sw *Switches) Render(sc *Scene) {
+	if sw.PushBounds(sc) {
+		sw.RenderButtonBox(sc)
+		sw.RenderParts(sc)
+		sw.RenderChildren(sc)
+		sw.PopBounds(sc)
 	}
 }
