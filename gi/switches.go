@@ -213,15 +213,16 @@ func (sw *Switches) ConfigItems() {
 }
 
 func (sw *Switches) ConfigParts(sc *Scene) {
+	parts := sw.NewParts(LayoutHoriz)
 	if len(sw.Items) == 0 {
-		sw.Parts.DeleteChildren(ki.DestroyKids)
+		parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
 	config := ki.Config{}
 	for _, lb := range sw.Items {
 		config.Add(SwitchType, lb)
 	}
-	mods, updt := sw.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	if mods || sw.NeedsRebuild() {
 		sw.ConfigItems()
 		sw.UpdateEnd(updt)
