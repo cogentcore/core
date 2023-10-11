@@ -2281,20 +2281,20 @@ func _StageTypesNoOp() {
 }
 
 var _StageTypesNameToValueMap = map[string]StageTypes{
-	`WindowStage`:   0,
-	`windowstage`:   0,
-	`DialogStage`:   1,
-	`dialogstage`:   1,
-	`SheetStage`:    2,
-	`sheetstage`:    2,
-	`MenuStage`:     3,
-	`menustage`:     3,
-	`TooltipStage`:  4,
-	`tooltipstage`:  4,
-	`SnackbarStage`: 5,
-	`snackbarstage`: 5,
-	`ChooserStage`:  6,
-	`chooserstage`:  6,
+	`WindowStage`:    0,
+	`windowstage`:    0,
+	`DialogStage`:    1,
+	`dialogstage`:    1,
+	`SheetStage`:     2,
+	`sheetstage`:     2,
+	`MenuStage`:      3,
+	`menustage`:      3,
+	`TooltipStage`:   4,
+	`tooltipstage`:   4,
+	`SnackbarStage`:  5,
+	`snackbarstage`:  5,
+	`CompleterStage`: 6,
+	`completerstage`: 6,
 }
 
 var _StageTypesDescMap = map[StageTypes]string{
@@ -2304,7 +2304,7 @@ var _StageTypesDescMap = map[StageTypes]string{
 	3: `MenuStage is a PopupStage that displays a Scene with Action Widgets overlaid on a MainStage. It is typically Modal and ClickOff, and closes when an Action is selected.`,
 	4: `TooltipStage is a PopupStage that displays a Scene with extra info overlaid on a MainStage. It is typically ClickOff and not Modal.`,
 	5: `SnackbarStage is a PopupStage displays a Scene with info and typically an additional optional Action, usually displayed at the bottom. It is typically not ClickOff or Modal, but has a timeout.`,
-	6: `ChooserStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
+	6: `CompleterStage is a PopupStage that displays a Scene with text completions, spelling corrections, or other such dynamic info. It is typically ClickOff, not Modal, dynamically updating, and closes when something is selected or typing renders it no longer relevant.`,
 }
 
 var _StageTypesMap = map[StageTypes]string{
@@ -2314,7 +2314,7 @@ var _StageTypesMap = map[StageTypes]string{
 	3: `MenuStage`,
 	4: `TooltipStage`,
 	5: `SnackbarStage`,
-	6: `ChooserStage`,
+	6: `CompleterStage`,
 }
 
 // String returns the string representation

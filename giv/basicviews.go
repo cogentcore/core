@@ -526,7 +526,7 @@ type IntValueView struct {
 }
 
 func (vv *IntValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SpinBoxType
+	vv.WidgetTyp = gi.SpinnerType
 	return vv.WidgetTyp
 }
 
@@ -534,7 +534,7 @@ func (vv *IntValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.SpinBox)
+	sb := vv.Widget.(*gi.Spinner)
 	npv := laser.NonPtrValue(vv.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
 	if err != nil {
@@ -545,7 +545,7 @@ func (vv *IntValueView) UpdateWidget() {
 func (vv *IntValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	sb := vv.Widget.(*gi.SpinBox)
+	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sb.Step = 1.0
@@ -596,7 +596,7 @@ type FloatValueView struct {
 }
 
 func (vv *FloatValueView) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.SpinBoxType
+	vv.WidgetTyp = gi.SpinnerType
 	return vv.WidgetTyp
 }
 
@@ -604,7 +604,7 @@ func (vv *FloatValueView) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.SpinBox)
+	sb := vv.Widget.(*gi.Spinner)
 	npv := laser.NonPtrValue(vv.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
 	if err != nil {
@@ -615,7 +615,7 @@ func (vv *FloatValueView) UpdateWidget() {
 func (vv *FloatValueView) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	sb := vv.Widget.(*gi.SpinBox)
+	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Tag("desc")
 	sb.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
 	sb.Step = 1.0
