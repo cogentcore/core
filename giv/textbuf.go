@@ -190,7 +190,7 @@ var TextBufProps = ki.Props{
 }
 
 // TextBufSignals are signals that text buffer can send
-type TextBufSignals int64 //enums:enum
+type TextBufSignals int32 //enums:enum
 
 const (
 	// TextBufDone means that editing was completed and applied to Txt field

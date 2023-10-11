@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -85,7 +83,6 @@ func (sw *Switch) SwitchHandlers() {
 
 func (sw *Switch) SwitchStyles() {
 	sw.AddStyles(func(s *styles.Style) {
-		fmt.Println("s", sw)
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft

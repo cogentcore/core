@@ -388,7 +388,7 @@ func (tv *TreeView) RootIsInactive() bool {
 // TreeViewSignals are signals that treeview can send -- these are all sent
 // from the root tree view widget node, with data being the relevant node
 // widget
-type TreeViewSignals int64 //enums:enum
+type TreeViewSignals int32 //enums:enum
 
 const (
 	// node was selected

@@ -190,7 +190,6 @@ func (sw *Switches) ConfigItems() {
 			s.Tooltip = sw.Tooltips[i]
 		}
 		s.SetProp("index", i)
-		fmt.Println(s)
 		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
