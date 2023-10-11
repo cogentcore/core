@@ -208,6 +208,9 @@ func GoCmdAt(c *config.Config, at string, subcmd string, srcs []string, env map[
 	cargs := []string{subcmd}
 	// cmd := exec.Command("go", subcmd)
 	tags := c.Build.Tags
+	if c.Build.Debug {
+		tags = append(tags, "debug")
+	}
 	if len(tags) > 0 {
 		cargs = append(cargs, "-tags", strings.Join(tags, ","))
 	}

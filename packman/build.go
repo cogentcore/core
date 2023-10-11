@@ -81,8 +81,12 @@ func BuildDesktop(c *config.Config, platform config.Platform) error {
 	if platform.OS == "windows" {
 		c.Build.Output += ".exe"
 	}
+	tags := []string{"build", "-o", c.Build.Output, origPkg}
+	if c.Build.Debug {
+		tags = append(tags, "-tags debug")
+	}
 
-	err := xc.Run("go", "build", "-o", c.Build.Output, origPkg)
+	err := xc.Run("go", tags...)
 	if err != nil {
 		return fmt.Errorf("error building for platform %s/%s: %w", platform.OS, platform.Arch, err)
 	}
