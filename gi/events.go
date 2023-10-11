@@ -165,8 +165,8 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 			return
 		}
 		// if we are not double clickable, we just treat
-		// it as a click event
-		if !wb.AbilityIs(abilities.DoubleClickable) {
+		// it as a click event (as long as we are pressable)
+		if !wb.AbilityIs(abilities.DoubleClickable) && wb.Style.Abilities.IsPressable() {
 			wb.Send(events.Click, e)
 		}
 	})
