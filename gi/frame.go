@@ -9,7 +9,6 @@ import (
 	"log"
 
 	"goki.dev/colors"
-	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -44,7 +43,6 @@ func (fr *Frame) FrameStyles() {
 		// note: using Pressable here so we get clicks, but don't change to Active state.
 		// getting clicks allows us to clear focus on click.
 		s.SetAbilities(true, abilities.Pressable, abilities.FocusWithinable)
-		s.Cursor = cursors.Arrow
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Dp(2))

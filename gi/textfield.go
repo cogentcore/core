@@ -184,7 +184,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
 			s.MaxBorder.Color.Bottom = colors.Scheme.Primary.Base
-			if tf.StateIs(states.Focused) {
+			if s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Bottom = units.Dp(1)
@@ -197,15 +197,18 @@ func (tf *TextField) TextFieldStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Set(units.Dp(2))
 			s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
-			if tf.StateIs(states.Focused) {
+			if s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Set(units.Dp(1))
 				s.Border.Color.Set(colors.Scheme.Outline)
 			}
 		}
-		if tf.StateIs(states.Selected) {
+		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+		}
+		if s.Is(states.Disabled) {
+			s.Cursor = cursors.NotAllowed
 		}
 	})
 }

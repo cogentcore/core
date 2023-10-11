@@ -53,8 +53,11 @@ var CustomConfigStyles func(w Widget)
 type Styler func(s *styles.Style)
 
 func (sc *Scene) SetDefaultStyle() {
-	sc.Style.BackgroundColor.SetSolid(colors.Scheme.Background)
-	sc.Style.Color = colors.Scheme.OnBackground
+	sc.AddStyles(func(s *styles.Style) {
+		s.Cursor = cursors.Arrow
+		s.BackgroundColor.SetSolid(colors.Scheme.Background)
+		s.Color = colors.Scheme.OnBackground
+	})
 }
 
 ////////////////////////////////////////////////////////////////////

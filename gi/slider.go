@@ -214,6 +214,8 @@ func (sr *Slider) SliderStyles() {
 			s.Cursor = cursors.Grabbing
 		case s.Is(states.Active):
 			s.Cursor = cursors.Grabbing
+		case s.Is(states.Disabled):
+			s.Cursor = cursors.NotAllowed
 		}
 	})
 }
