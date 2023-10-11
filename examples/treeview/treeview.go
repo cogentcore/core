@@ -115,7 +115,7 @@ func app() {
 	lab1.SetProp("text-align", "center")
 	gi.NewStretch(trow, "str2")
 
-	split := gi.NewSplitView(mfr, "split")
+	split := gi.NewSplits(mfr, "split")
 	split.Dim = mat32.X
 
 	tvfr := gi.NewFrame(split, "tvfr", gi.LayoutHoriz)

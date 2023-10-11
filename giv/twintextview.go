@@ -16,7 +16,7 @@ import (
 ///////////////////////////////////////////////////////////////////
 // TwinTextViews
 
-// TwinTextViews presents two side-by-side TextView windows in SplitView
+// TwinTextViews presents two side-by-side TextView windows in Splits
 // that scroll in sync with each other.
 type TwinTextViews struct {
 	gi.Splits

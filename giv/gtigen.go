@@ -1923,14 +1923,14 @@ var TwinTextViewsType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TwinTextViews",
 	ShortName:  "giv.TwinTextViews",
 	IDName:     "twin-text-views",
-	Doc:        "TwinTextViews presents two side-by-side TextView windows in SplitView\nthat scroll in sync with each other.",
+	Doc:        "TwinTextViews presents two side-by-side TextView windows in Splits\nthat scroll in sync with each other.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"BufA", &gti.Field{Name: "BufA", Type: "*TextBuf", Doc: "textbuf for A", Directives: gti.Directives{}}},
 		{"BufB", &gti.Field{Name: "BufB", Type: "*TextBuf", Doc: "textbuf for B", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.SplitView", &gti.Field{Name: "gi.SplitView", Type: "gi.SplitView", Doc: "", Directives: gti.Directives{}}},
+		{"gi.Splits", &gti.Field{Name: "gi.Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TwinTextViews{},

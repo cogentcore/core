@@ -200,7 +200,7 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	config.Add(gi.SplitsType, "splits")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
-	ge.ConfigSplitView()
+	ge.ConfigSplits()
 	ge.ConfigToolbar()
 	if mods {
 		ge.UpdateEnd(updt)
@@ -218,19 +218,19 @@ func (ge *GiEditor) TitleWidget() *gi.Label {
 	return ge.ChildByName("title", 0).(*gi.Label)
 }
 
-// SplitView returns the main SplitView
-func (ge *GiEditor) SplitView() *gi.Splits {
-	return ge.ChildByName("splitview", 2).(*gi.Splits)
+// Splits returns the main Splits
+func (ge *GiEditor) Splits() *gi.Splits {
+	return ge.ChildByName("splits", 2).(*gi.Splits)
 }
 
 // TreeView returns the main TreeView
 func (ge *GiEditor) TreeView() *TreeView {
-	return ge.SplitView().Child(0).Child(0).(*TreeView)
+	return ge.Splits().Child(0).Child(0).(*TreeView)
 }
 
 // StructView returns the main StructView
 func (ge *GiEditor) StructView() *StructView {
-	return ge.SplitView().Child(1).(*StructView)
+	return ge.Splits().Child(1).(*StructView)
 }
 
 // ToolBar returns the toolbar widget
@@ -248,12 +248,12 @@ func (ge *GiEditor) ConfigToolbar() {
 	ToolBarView(ge, ge.Sc, tb)
 }
 
-// ConfigSplitView configures the SplitView.
-func (ge *GiEditor) ConfigSplitView() {
+// ConfigSplits configures the Splits.
+func (ge *GiEditor) ConfigSplits() {
 	if ge.KiRoot == nil {
 		return
 	}
-	split := ge.SplitView()
+	split := ge.Splits()
 	// split.Dim = mat32.Y
 	split.Dim = mat32.X
 
