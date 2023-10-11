@@ -133,20 +133,22 @@ func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 	}
 	adack, err := parts.Children().ElemFromEndTry(1)
 	if err == nil {
-		adac := adack.(*gi.Button)
-		adac.SetIcon(icons.Add)
-		adac.Tooltip = "add an entry to the map"
-		adac.OnClick(func(e events.Event) {
+		adbt := adack.(*gi.Button)
+		adbt.SetType(gi.ButtonTonal)
+		adbt.SetIcon(icons.Add)
+		adbt.Tooltip = "add an entry to the map"
+		adbt.OnClick(func(e events.Event) {
 			mv.MapAdd()
 		})
 
 	}
 	edack, err := parts.Children().ElemFromEndTry(0)
 	if err == nil {
-		edac := edack.(*gi.Button)
-		edac.SetIcon(icons.Edit)
-		edac.Tooltip = "map edit dialog"
-		edac.OnClick(func(e events.Event) {
+		edbt := edack.(*gi.Button)
+		edbt.SetType(gi.ButtonTonal)
+		edbt.SetIcon(icons.Edit)
+		edbt.Tooltip = "map edit dialog"
+		edbt.OnClick(func(e events.Event) {
 			vpath := mv.ViewPath
 			title := ""
 			if mv.MapValView != nil {

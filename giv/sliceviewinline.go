@@ -142,22 +142,24 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		adack, err := parts.Children().ElemFromEndTry(1)
+		adbti, err := parts.Children().ElemFromEndTry(1)
 		if err == nil {
-			adac := adack.(*gi.Button)
-			adac.SetIcon(icons.Add)
-			adac.Tooltip = "add an element to the slice"
-			adac.OnChange(func(e events.Event) {
+			adbt := adbti.(*gi.Button)
+			adbt.SetType(gi.ButtonTonal)
+			adbt.SetIcon(icons.Add)
+			adbt.Tooltip = "add an element to the slice"
+			adbt.OnChange(func(e events.Event) {
 				sv.SliceNewAt(-1)
 			})
 		}
 	}
-	edack, err := parts.Children().ElemFromEndTry(0)
+	edbti, err := parts.Children().ElemFromEndTry(0)
 	if err == nil {
-		edac := edack.(*gi.Button)
-		edac.SetIcon(icons.Edit)
-		edac.Tooltip = "edit slice in a dialog window"
-		edac.OnClick(func(e events.Event) {
+		edbt := edbti.(*gi.Button)
+		edbt.SetType(gi.ButtonTonal)
+		edbt.SetIcon(icons.Edit)
+		edbt.Tooltip = "edit slice in a dialog window"
+		edbt.OnClick(func(e events.Event) {
 			vpath := sv.ViewPath
 			title := ""
 			if sv.SliceValView != nil {

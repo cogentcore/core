@@ -543,6 +543,7 @@ func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
 
 	bt.SetText("Edit Color")
@@ -621,9 +622,7 @@ func (vv *ColorNameValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
-	bt.AddStyles(func(s *styles.Style) {
-		s.Border.Radius = styles.BorderRadiusFull
-	})
+	bt.SetType(gi.ButtonTonal)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})

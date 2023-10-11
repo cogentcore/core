@@ -1160,18 +1160,19 @@ func (vv *VersCtrlValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	ac := vv.Widget.(*gi.Button)
+	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if txt == "" {
 		txt = "(none)"
 	}
-	ac.SetText(txt)
+	bt.SetText(txt)
 }
 
 func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
-	ac := vv.Widget.(*gi.Button)
-	ac.OnClick(func(e events.Event) {
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
 	vv.UpdateWidget()
