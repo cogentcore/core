@@ -44,7 +44,7 @@ func (ic *Icon) CopyFieldsFrom(frm any) {
 }
 
 func (ic *Icon) OnInit() {
-	ic.WidgetHandlers()
+	ic.HandleWidgetEvents()
 	ic.IconStyles()
 }
 

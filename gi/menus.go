@@ -351,7 +351,7 @@ func NewMenuScene(menu Menu, name string) *Scene {
 			bt.Type = ButtonMenu
 			if bt.Menu == nil {
 				cb.Listeners[events.Click] = wb.Listeners[events.Click]
-				bt.ClickDismissMenu()
+				bt.HandleClickDismissMenu()
 			}
 		}
 		cb.Sc = msc

@@ -109,11 +109,11 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	}
 }
 
-// WidgetHandlers adds the default events for Widget objects.
-func (wb *WidgetBase) WidgetHandlers() {
-	wb.WidgetStateFromMouse()
-	wb.LongHoverTooltip()
-	wb.WidgetStateFromFocus()
+// HandleWidgetEvents adds the default events for Widget objects.
+func (wb *WidgetBase) HandleWidgetEvents() {
+	wb.HandleWidgetStateFromMouse()
+	wb.HandleLongHoverTooltip()
+	wb.HandleWidgetStateFromFocus()
 }
 
 // PosInBBox returns true if given position is within
@@ -124,11 +124,11 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	return pos.In(wb.ScBBox)
 }
 
-// WidgetStateFromMouse updates all standard State flags based on mouse events,
+// HandleWidgetStateFromMouse updates all standard State flags based on mouse events,
 // such as MouseDown / Up -> Active and MouseEnter / Leave -> Hovered.
 // None of these "consume" the event by setting Handled flag, as they are
 // designed to work in conjunction with more specific handlers.
-func (wb *WidgetBase) WidgetStateFromMouse() {
+func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	wb.On(events.MouseDown, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
@@ -245,9 +245,9 @@ func (wb *WidgetBase) WidgetStateFromMouse() {
 // 			bb.UpdateSig()
 // 		}
 
-// LongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
+// HandleLongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
 // Most widgets should call this as part of their event handler methods.
-func (wb *WidgetBase) LongHoverTooltip() {
+func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongHoverStart, func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
@@ -271,8 +271,8 @@ func (wb *WidgetBase) LongHoverTooltip() {
 	})
 }
 
-// WidgetStateFromFocus updates standard State flags based on Focus events
-func (wb *WidgetBase) WidgetStateFromFocus() {
+// HandleWidgetStateFromFocus updates standard State flags based on Focus events
+func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	wb.OnFocus(func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return
@@ -292,9 +292,9 @@ func (wb *WidgetBase) WidgetStateFromFocus() {
 	})
 }
 
-// ClickOnEnterSpace adds key event handler for Enter or Space
+// HandleClickOnEnterSpace adds key event handler for Enter or Space
 // to generate a Click action
-func (wb *WidgetBase) ClickOnEnterSpace() {
+func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
 		if wb.StateIs(states.Disabled) {
 			return

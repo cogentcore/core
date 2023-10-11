@@ -575,7 +575,7 @@ func (sr *Slider) SliderKeys() {
 }
 
 func (sr *Slider) SliderHandlers() {
-	sr.WidgetHandlers()
+	sr.HandleWidgetEvents()
 	sr.SliderMouse()
 	sr.SliderKeys()
 }

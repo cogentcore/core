@@ -74,7 +74,7 @@ func (cv *ColorMapView) ChooseColorMap() {
 }
 
 func (cv *ColorMapView) ColorMapHandlers() {
-	cv.WidgetHandlers()
+	cv.HandleWidgetEvents()
 	cv.OnClick(func(e events.Event) {
 		cv.ChooseColorMap()
 	})

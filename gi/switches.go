@@ -44,7 +44,7 @@ func (sw *Switches) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switches) OnInit() {
-	sw.WidgetHandlers()
+	sw.HandleWidgetEvents()
 	sw.SwitchesStyles()
 }
 

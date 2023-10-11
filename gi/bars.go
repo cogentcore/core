@@ -39,7 +39,7 @@ func (mb *MenuBar) CopyFieldsFrom(frm any) {
 }
 
 func (mb *MenuBar) OnInit() {
-	mb.LayoutHandlers()
+	mb.HandleLayoutEvents()
 	mb.MenuBarStyles()
 }
 
@@ -326,7 +326,7 @@ func (tb *ToolBar) CopyFieldsFrom(frm any) {
 
 func (tb *ToolBar) OnInit() {
 	tb.ToolBarStyles()
-	tb.LayoutHandlers()
+	tb.HandleLayoutEvents()
 }
 
 func (tb *ToolBar) ToolBarStyles() {
