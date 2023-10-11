@@ -140,9 +140,10 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	cmgr := &st.Main.PopupMgr
 	cmgr.Push(st)
-
 	sc := st.Scene
-	sz := sc.PrefSize(ms.Geom.Size)
+	maxSz := ms.Geom.Size
+
+	sz := sc.PrefSize(maxSz)
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
 	fontHt := 16
 	if sc.Style.Font.Face != nil {
@@ -154,8 +155,16 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		sz.X += scrollWd * 2
 		maxht := int(MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)
-
+	case SnackbarStage:
+		b := ms.Geom.Bounds()
+		// Go in the middle [(max - min) / 2], and then subtract
+		// half of the size because we are specifying starting point,
+		// not the center. This results in us being centered.
+		sc.Geom.Pos.X = (b.Max.X - b.Min.X - sz.X) / 2
+		// get enough space to fit plus 10 extra pixels of margin
+		sc.Geom.Pos.Y = b.Max.Y - sz.Y - 10
 	}
+
 	sc.Geom.Size = sz
 	sc.FitInWindow(ms.Geom) // does resize
 
