@@ -6112,7 +6112,7 @@
       "Underline": "Pass",
       "NoInherit": false
     },
-    "Other": {
+    "None": {
       "Color": {
         "R": 0,
         "G": 0,
@@ -22206,7 +22206,7 @@
       "Underline": "Pass",
       "NoInherit": false
     },
-    "Other": {
+    "None": {
       "Color": {
         "R": 203,
         "G": 75,
@@ -23144,7 +23144,7 @@
       "Underline": "Pass",
       "NoInherit": false
     },
-    "Other": {
+    "None": {
       "Color": {
         "R": 215,
         "G": 95,
@@ -23868,7 +23868,7 @@
       "Underline": "Pass",
       "NoInherit": false
     },
-    "NameKeyword": {
+    "Keyword": {
       "Color": {
         "R": 255,
         "G": 255,
@@ -25526,7 +25526,7 @@
       "Underline": "Pass",
       "NoInherit": false
     },
-    "Other": {
+    "None": {
       "Color": {
         "R": 0,
         "G": 0,
