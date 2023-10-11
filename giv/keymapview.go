@@ -24,7 +24,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	sc.Data = km
 
 	sc.AddStyles(func(s *styles.Style) {
-		s.Margin.Set(units.Dp(8 * gi.Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(8))
 	})
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)

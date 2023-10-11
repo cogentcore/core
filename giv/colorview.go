@@ -94,7 +94,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 			s.Width.SetCh(20)
 			s.MinHeight.SetEm(1)
 			s.Height.SetEm(1)
-			s.Margin.Set(units.Dp(6 * gi.Prefs.DensityMul()))
+			s.Margin.Set(units.Dp(6))
 		})
 	}
 	if child.Parent().Name() == "palette" {

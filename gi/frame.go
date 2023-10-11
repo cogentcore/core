@@ -47,7 +47,7 @@ func (fr *Frame) FrameStyles() {
 		s.Cursor = cursors.Arrow
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
-		s.Padding.Set(units.Dp(2 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(2))
 		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		s.Color = colors.Scheme.OnSurface
 		// we never want state layers and borders on frames

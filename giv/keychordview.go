@@ -82,7 +82,7 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Width.SetCh(20)
-		s.Padding.Set(units.Dp(8 * gi.Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(8 ))
 		s.SetStretchMaxWidth()
 		if s.State.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)

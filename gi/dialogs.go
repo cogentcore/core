@@ -122,7 +122,7 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 	bb := NewLayout(dlg.Stage.Scene, "buttons").
 		SetLayout(LayoutHoriz)
 	bb.AddStyles(func(s *styles.Style) {
-		bb.Spacing.SetDp(8 * Prefs.DensityMul())
+		bb.Spacing.SetDp(8)
 		s.SetStretchMaxWidth()
 	})
 	dlg.ButtonBox = bb
@@ -217,7 +217,7 @@ func (dlg *Dialog) DefaultStyle() {
 		s.Color = colors.Scheme.OnSurface
 		sc.Spacing = StdDialogVSpaceUnits
 		s.Border.Style.Set(styles.BorderNone)
-		s.Padding.Set(units.Dp(24 * Prefs.DensityMul()))
+		s.Padding.Set(units.Dp(24))
 		if !st.NewWindow {
 			s.BoxShadow = styles.BoxShadow3()
 		}

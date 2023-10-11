@@ -268,7 +268,7 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 		w.AddStyles(func(s *styles.Style) {
 			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4 * gi.Prefs.DensityMul())
+			s.Padding.Right.SetDp(4 )
 			s.Text.Align = styles.AlignRight
 		})
 	}

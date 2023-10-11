@@ -87,8 +87,8 @@ func (sw *Switch) SwitchStyles() {
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
-		s.Margin.Set(units.Dp(1 * Prefs.DensityMul()))
-		s.Padding.Set(units.Dp(1 * Prefs.DensityMul()))
+		s.Margin.Set(units.Dp(1))
+		s.Padding.Set(units.Dp(1))
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 
 		if s.Is(states.Selected) {

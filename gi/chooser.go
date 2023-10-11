@@ -105,10 +105,10 @@ func (ch *Chooser) ComboBoxStyles() {
 		s.Text.Align = styles.AlignCenter
 		if ch.Editable {
 			s.Padding.Set()
-			s.Padding.Right.SetDp(16 * Prefs.DensityMul())
+			s.Padding.Right.SetDp(16)
 		} else {
 			s.Border.Radius = styles.BorderRadiusExtraSmall
-			s.Padding.Set(units.Dp(8*Prefs.DensityMul()), units.Dp(16*Prefs.DensityMul()))
+			s.Padding.Set(units.Dp(8), units.Dp(16))
 		}
 		s.Color = colors.Scheme.OnSurface
 		switch ch.Type {
@@ -188,7 +188,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 			if ch.Editable {
 				s.Width.SetDp(0)
 			} else {
-				s.Width.SetDp(16 * Prefs.DensityMul())
+				s.Width.SetDp(16)
 			}
 		})
 	case "indicator":
