@@ -10,7 +10,7 @@ package gimain
 import (
 	"sync/atomic"
 
-	// "goki.dev/gi/v2/giv"
+	_ "goki.dev/gi/v2/giv"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi"
