@@ -317,6 +317,8 @@ func makeInputs(ts *gi.Tabs) {
 	cheo.Tooltips = fruitDescs
 	cheo.Type = gi.ChooserOutlined
 
+	gi.NewSwitch(inputs).SetText("Toggle")
+
 	sw := gi.NewSwitches(inputs)
 	sw.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
 	sw.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
