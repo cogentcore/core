@@ -42,6 +42,8 @@ func TestBoxModel(t *testing.T) {
 	st.Border.Color.Set(colors.Red)
 	st.Border.Radius = styles.BorderRadiusFull
 
+	st.ToDots()
+
 	sbg := &colors.Full{Solid: colors.Blue}
 
 	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg)
