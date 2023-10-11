@@ -28,7 +28,7 @@ func NewOpVals(l, m, s, lm, grey float32) OpVals {
 // Opponents enumerates the three primary opponency channels:
 // WhiteBlack, RedGreen, BlueYellow
 // using colloquial "everyday" terms.
-type Opponents int //enums:enum
+type Opponents int32 //enums:enum
 
 const (
 	// White vs. Black greyscale
