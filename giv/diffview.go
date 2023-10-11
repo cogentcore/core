@@ -4,25 +4,7 @@
 
 package giv
 
-import (
-	"bytes"
-	"io/ioutil"
-	"log"
-	"strings"
-
-	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv/textbuf"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-	"goki.dev/pi/v2/lex"
-	"goki.dev/pi/v2/token"
-	"goki.dev/vci/v2"
-)
-
+/*
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
 // in a DiffViewDialog
 func DiffFiles(afile, bfile string) (*DiffView, error) {
@@ -839,3 +821,5 @@ func (tv *DiffTextView) TextViewEvents() {
 		tv.KeyInput(kt)
 	})
 }
+
+*/
