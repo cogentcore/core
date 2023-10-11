@@ -77,7 +77,7 @@ func (tv *TreeView) OnInit() {
 	tv.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Margin.Set()
-		s.Padding.Set(units.Dp(4 ))
+		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		if s.State.Is(states.Selected) {
@@ -2086,6 +2086,10 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 
 	rn := tv.RootView
+	if rn == nil {
+		fmt.Println(tv, "root is nil")
+		return false
+	}
 	// our alloc size is root's size minus our total indentation
 	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X

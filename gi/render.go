@@ -249,6 +249,9 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 		parBBox = sc.Pixels.Bounds()
 	}
 	wi := wb.This().(Widget)
+	if wi == nil {
+		return
+	}
 	redo := wi.DoLayout(sc, parBBox, 0) // important to use interface version to get interface!
 	if redo {
 		if LayoutTrace {
@@ -315,6 +318,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	switch {
 	case rc.HasFlag(RenderRebuild):
+		// fmt.Println("rebuild")
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.DoRebuild()
 		sc.SetFlag(true, ScImageUpdated)

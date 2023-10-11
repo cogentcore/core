@@ -35,18 +35,12 @@ import (
 type Scene struct {
 	Frame
 
-	// name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.
-	Nm string
-
 	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
 	Title string
 
 	// Data is the optional data value being represented by this scene.
 	// Used e.g., for recycling views of a given item instead of creating new one.
 	Data any
-
-	// [view: -] has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene
-	Flags ScFlags
 
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt

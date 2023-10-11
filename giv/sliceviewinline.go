@@ -236,7 +236,6 @@ func (sv *SliceViewInline) UpdateValues() {
 
 func (sv *SliceViewInline) Render(sc *gi.Scene) {
 	if sv.PushBounds(sc) {
-		sv.ConfigParts(sc)
 		sv.RenderParts(sc)
 		sv.RenderChildren(sc)
 		sv.PopBounds(sc)
