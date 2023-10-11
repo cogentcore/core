@@ -22,8 +22,8 @@ import (
 	"goki.dev/pi/v2/token"
 )
 
-// HiMarkup manages the syntax highlighting state for TextBuf
-// it uses Pi if available, otherwise falls back on chroma
+// HiMarkup manages the syntax highlighting state for Buf.
+// It uses Pi if available, otherwise falls back on chroma
 type HiMarkup struct {
 
 	// full info about the file including category etc

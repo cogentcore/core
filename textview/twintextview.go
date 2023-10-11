@@ -13,22 +13,19 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-///////////////////////////////////////////////////////////////////
-// TwinTextViews
-
-// TwinTextViews presents two side-by-side TextView windows in Splits
+// TwinViews presents two side-by-side View windows in Splits
 // that scroll in sync with each other.
-type TwinTextViews struct {
+type TwinViews struct {
 	gi.Splits
 
 	// textbuf for A
-	BufA *TextBuf `json:"-" xml:"-" desc:"textbuf for A"`
+	BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
 
 	// textbuf for B
-	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"`
+	BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
 }
 
-func (tv *TwinTextViews) OnInit() {
+func (tv *TwinViews) OnInit() {
 	tv.Dim = mat32.X
 	tv.AddStyles(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
@@ -37,7 +34,7 @@ func (tv *TwinTextViews) OnInit() {
 	})
 }
 
-func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
+func (tv *TwinViews) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "text-a-lay", "text-b-lay":
@@ -53,19 +50,17 @@ func (tv *TwinTextViews) OnChildAdded(child ki.Ki) {
 	}
 }
 
-// MakeBufs ensures that the TextBufs are made, if nil
-func (tv *TwinTextViews) MakeBufs() {
+// MakeBufs ensures that the Bufs are made, if nil
+func (tv *TwinViews) MakeBufs() {
 	if tv.BufA != nil {
 		return
 	}
-	tv.BufA = &TextBuf{}
-	tv.BufA.InitName(tv.BufA, "buf-a")
-	tv.BufB = &TextBuf{}
-	tv.BufB.InitName(tv.BufB, "buf-b")
+	tv.BufA = NewBuf()
+	tv.BufB = NewBuf()
 }
 
 // SetFiles sets files for each text buf
-func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
+func (tv *TwinViews) SetFiles(fileA, fileB string, lineNos bool) {
 	tv.MakeBufs()
 	tv.BufA.Filename = gi.FileName(fileA)
 	tv.BufA.Opts.LineNos = lineNos
@@ -75,18 +70,18 @@ func (tv *TwinTextViews) SetFiles(fileA, fileB string, lineNos bool) {
 	tv.BufB.Stat() // update markup
 }
 
-func (tv *TwinTextViews) ConfigTexts() {
+func (tv *TwinViews) ConfigTexts() {
 	tv.MakeBufs()
 	config := ki.Config{}
 	config.Add(gi.LayoutType, "text-a-lay")
 	config.Add(gi.LayoutType, "text-b-lay")
 	mods, updt := tv.ConfigChildren(config)
-	al, bl := tv.TextViewLays()
+	al, bl := tv.ViewLays()
 	if !mods {
 		updt = tv.UpdateStart()
 	} else {
-		av := NewTextView(al, "text-a")
-		bv := NewTextView(bl, "text-b")
+		av := NewView(al, "text-a")
+		bv := NewView(bl, "text-b")
 		av.SetBuf(tv.BufA)
 		bv.SetBuf(tv.BufB)
 
@@ -107,17 +102,17 @@ func (tv *TwinTextViews) ConfigTexts() {
 	tv.UpdateEnd(updt)
 }
 
-// TextViewLays returns the two layouts that control the two textviews
-func (tv *TwinTextViews) TextViewLays() (*gi.Layout, *gi.Layout) {
+// ViewLays returns the two layouts that control the two textviews
+func (tv *TwinViews) ViewLays() (*gi.Layout, *gi.Layout) {
 	a := tv.Child(0).(*gi.Layout)
 	b := tv.Child(1).(*gi.Layout)
 	return a, b
 }
 
-// TextViews returns the two textviews
-func (tv *TwinTextViews) TextViews() (*TextView, *TextView) {
-	a, b := tv.TextViewLays()
-	av := a.Child(0).(*TextView)
-	bv := b.Child(0).(*TextView)
+// Views returns the two textviews
+func (tv *TwinViews) Views() (*View, *View) {
+	a, b := tv.ViewLays()
+	av := a.Child(0).(*View)
+	bv := b.Child(0).(*View)
 	return av, bv
 }

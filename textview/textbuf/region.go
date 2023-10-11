@@ -14,7 +14,7 @@ import (
 )
 
 // Region represents a text region as a start / end position, and includes
-// a Time stamp for when the region was created as valid positions into the TextBuf.
+// a Time stamp for when the region was created as valid positions into the textview.Buf.
 // The character end position is an *exclusive* position (i.e., the region ends at
 // the character just prior to that character) but the lines are always *inclusive*
 // (i.e., it is the actual line, not the next line).

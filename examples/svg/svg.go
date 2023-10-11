@@ -181,7 +181,7 @@ func app() {
 	emen.Menu.AddCopyCutPaste(win)
 
 	// note: Command in shortcuts is automatically translated into Control for
-	// Linux, RenderWins or Meta for MacOS
+	// Linux, Windows or Meta for MacOS
 	fmen := win.MainMenu.ChildByName("File", 0).(*gi.Button)
 	fmen.Menu = make(gi.MenuStage, 0, 10)
 	fmen.Menu.AddButton(gi.ActOpts{Label: "Open", Shortcut: "Command+O"}, func(act *gi.Button) {

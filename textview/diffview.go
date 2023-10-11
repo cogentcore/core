@@ -28,7 +28,7 @@ func DiffFiles(afile, bfile string) (*DiffView, error) {
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *TextBuf, rev_a, rev_b string) (*DiffView, error) {
+func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Buf, rev_a, rev_b string) (*DiffView, error) {
 	var astr, bstr []string
 	if rev_b == "" { // default to current file
 		if fbuf != nil {
@@ -100,10 +100,10 @@ type DiffView struct {
 	Diffs textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`
 
 	// textbuf for A
-	BufA *TextBuf `json:"-" xml:"-" desc:"textbuf for A"`
+	BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
 
 	// textbuf for B
-	BufB *TextBuf `json:"-" xml:"-" desc:"textbuf for B"`
+	BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
 
 	// aligned diffs records diff for aligned lines
 	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
@@ -697,9 +697,9 @@ func (dv *DiffView) TextViews() (*DiffTextView, *DiffTextView) {
 func (dv *DiffView) ConfigTexts() {
 	lay := dv.DiffLay()
 	if dv.BufA == nil {
-		dv.BufA = &TextBuf{}
+		dv.BufA = &Buf{}
 		dv.BufA.InitName(dv.BufA, "diff-buf-a")
-		dv.BufB = &TextBuf{}
+		dv.BufB = &Buf{}
 		dv.BufB.InitName(dv.BufB, "diff-buf-b")
 	}
 	dv.BufA.Filename = gi.FileName(dv.FileA)
@@ -767,7 +767,7 @@ var DiffViewProps = ki.Props{
 // DiffTextView supports double-click based application of edits from one
 // buffer to the other.
 type DiffTextView struct {
-	TextView
+	View
 }
 
 func (tv *DiffTextView) OnInit() {
@@ -804,7 +804,7 @@ func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
 		me.SetHandled()
 		return
 	}
-	tv.TextView.MouseEvent(me)
+	tv.View.MouseEvent(me)
 }
 
 // TextViewEvents sets connections between mouse and key events and actions

@@ -8,113 +8,17 @@ import (
 	"goki.dev/ordmap"
 )
 
-// TextBufType is the [gti.Type] for [TextBuf]
-var TextBufType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/textview.TextBuf",
-	ShortName:  "textview.TextBuf",
-	IDName:     "text-buf",
-	Doc:        "TextBuf is a buffer of text, which can be viewed by TextView(s).  It holds\nthe raw text lines (in original string and rune formats, and marked-up from\nsyntax highlighting), and sends signals for making edits to the text and\ncoordinating those edits across multiple views.  Views always only view a\nsingle buffer, so they directly call methods on the buffer to drive\nupdates, which are then broadcast.  It also has methods for loading and\nsaving buffers to files.  Unlike GUI Widgets, its methods are generally\nsignaling, without an explicit Action suffix.  Internally, the buffer\nrepresents new lines using \\n = LF, but saving and loading can deal with\nRenderWins/DOS CRLF format.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Txt", &gti.Field{Name: "Txt", Type: "[]byte", Doc: "the current value of the entire text being edited -- using []byte slice for greater efficiency", Directives: gti.Directives{}}},
-		{"Autosave", &gti.Field{Name: "Autosave", Type: "bool", Doc: "if true, auto-save file after changes (in a separate routine)", Directives: gti.Directives{}}},
-		{"Opts", &gti.Field{Name: "Opts", Type: "textbuf.Opts", Doc: "options for how text editing / viewing works", Directives: gti.Directives{}}},
-		{"Filename", &gti.Field{Name: "Filename", Type: "gi.FileName", Doc: "filename of file last loaded or saved", Directives: gti.Directives{}}},
-		{"Info", &gti.Field{Name: "Info", Type: "filecat.FileInfo", Doc: "full info about file", Directives: gti.Directives{}}},
-		{"PiState", &gti.Field{Name: "PiState", Type: "pi.FileStates", Doc: "Pi parsing state info for file", Directives: gti.Directives{}}},
-		{"Hi", &gti.Field{Name: "Hi", Type: "HiMarkup", Doc: "syntax highlighting markup parameters (language, style, etc)", Directives: gti.Directives{}}},
-		{"NLines", &gti.Field{Name: "NLines", Type: "int", Doc: "number of lines", Directives: gti.Directives{}}},
-		{"LineIcons", &gti.Field{Name: "LineIcons", Type: "map[int]icons.Icon", Doc: "icons for given lines -- use SetLineIcon and DeleteLineIcon", Directives: gti.Directives{}}},
-		{"LineColors", &gti.Field{Name: "LineColors", Type: "map[int]color.RGBA", Doc: "special line number colors given lines -- use SetLineColor and DeleteLineColor", Directives: gti.Directives{}}},
-		{"Icons", &gti.Field{Name: "Icons", Type: "map[icons.Icon]*gi.Icon", Doc: "icons for each LineIcons being used", Directives: gti.Directives{}}},
-		{"Lines", &gti.Field{Name: "Lines", Type: "[][]rune", Doc: "the live lines of text being edited, with latest modifications -- encoded as runes per line, which is necessary for one-to-one rune / glyph rendering correspondence -- all TextPos positions etc are in *rune* indexes, not byte indexes!", Directives: gti.Directives{}}},
-		{"LineBytes", &gti.Field{Name: "LineBytes", Type: "[][]byte", Doc: "the live lines of text being edited, with latest modifications -- encoded in bytes per line translated from Lines, and used for input to markup -- essential to use Lines and not LineBytes when dealing with TextPos positions, which are in runes", Directives: gti.Directives{}}},
-		{"Tags", &gti.Field{Name: "Tags", Type: "[]lex.Line", Doc: "", Directives: gti.Directives{}}},
-		{"HiTags", &gti.Field{Name: "HiTags", Type: "[]lex.Line", Doc: "", Directives: gti.Directives{}}},
-		{"Markup", &gti.Field{Name: "Markup", Type: "[][]byte", Doc: "marked-up version of the edit text lines, after being run through the syntax highlighting process etc -- this is what is actually rendered", Directives: gti.Directives{}}},
-		{"MarkupEdits", &gti.Field{Name: "MarkupEdits", Type: "[]*textbuf.Edit", Doc: "edits that have been made since last full markup", Directives: gti.Directives{}}},
-		{"ByteOffs", &gti.Field{Name: "ByteOffs", Type: "[]int", Doc: "offsets for start of each line in Txt []byte slice -- this is NOT updated with edits -- call SetByteOffs to set it when needed -- used for re-generating the Txt in LinesToBytes, and set on initial open in BytesToLines", Directives: gti.Directives{}}},
-		{"TotalBytes", &gti.Field{Name: "TotalBytes", Type: "int", Doc: "total bytes in document -- see ByteOffs for when it is updated", Directives: gti.Directives{}}},
-		{"LinesMu", &gti.Field{Name: "LinesMu", Type: "sync.RWMutex", Doc: "mutex for updating lines", Directives: gti.Directives{}}},
-		{"MarkupMu", &gti.Field{Name: "MarkupMu", Type: "sync.RWMutex", Doc: "mutex for updating markup", Directives: gti.Directives{}}},
-		{"MarkupDelayTimer", &gti.Field{Name: "MarkupDelayTimer", Type: "*time.Timer", Doc: "markup delay timer", Directives: gti.Directives{}}},
-		{"MarkupDelayMu", &gti.Field{Name: "MarkupDelayMu", Type: "sync.Mutex", Doc: "mutex for updating markup delay timer", Directives: gti.Directives{}}},
-		{"Views", &gti.Field{Name: "Views", Type: "[]*TextView", Doc: "the TextViews that are currently viewing this buffer", Directives: gti.Directives{}}},
-		{"Undos", &gti.Field{Name: "Undos", Type: "textbuf.Undo", Doc: "undo manager", Directives: gti.Directives{}}},
-		{"PosHistory", &gti.Field{Name: "PosHistory", Type: "[]lex.Pos", Doc: "history of cursor positions -- can move back through them", Directives: gti.Directives{}}},
-		{"Complete", &gti.Field{Name: "Complete", Type: "*gi.Complete", Doc: "functions and data for text completion", Directives: gti.Directives{}}},
-		{"Spell", &gti.Field{Name: "Spell", Type: "*gi.Spell", Doc: "functions and data for spelling correction", Directives: gti.Directives{}}},
-		{"CurView", &gti.Field{Name: "CurView", Type: "*TextView", Doc: "current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TextBuf{},
-})
-
-// NewTextBuf adds a new [TextBuf] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTextBuf(par ki.Ki, name ...string) *TextBuf {
-	return par.NewChild(TextBufType, name...).(*TextBuf)
-}
-
-// KiType returns the [*gti.Type] of [TextBuf]
-func (t *TextBuf) KiType() *gti.Type {
-	return TextBufType
-}
-
-// New returns a new [*TextBuf] value
-func (t *TextBuf) New() ki.Ki {
-	return &TextBuf{}
-}
-
-// TextBufListType is the [gti.Type] for [TextBufList]
-var TextBufListType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/textview.TextBufList",
-	ShortName:  "textview.TextBufList",
-	IDName:     "text-buf-list",
-	Doc:        "TextBufList is a list of text buffers, as a ki.Node, with buffers as children",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TextBufList{},
-})
-
-// NewTextBufList adds a new [TextBufList] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTextBufList(par ki.Ki, name ...string) *TextBufList {
-	return par.NewChild(TextBufListType, name...).(*TextBufList)
-}
-
-// KiType returns the [*gti.Type] of [TextBufList]
-func (t *TextBufList) KiType() *gti.Type {
-	return TextBufListType
-}
-
-// New returns a new [*TextBufList] value
-func (t *TextBufList) New() ki.Ki {
-	return &TextBufList{}
-}
-
-// TextViewType is the [gti.Type] for [TextView]
-var TextViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/textview.TextView",
-	ShortName: "textview.TextView",
-	IDName:    "text-view",
-	Doc:       "TextView is a widget for editing multiple lines of text (as compared to\nTextField for a single line).  The View is driven by a TextBuf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the TextView should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
+// ViewType is the [gti.Type] for [View]
+var ViewType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/textview.View",
+	ShortName: "textview.View",
+	IDName:    "view",
+	Doc:       "View is a widget for editing multiple lines of text (as compared to\nTextField for a single line).  The View is driven by a Buf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the View should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Buf", &gti.Field{Name: "Buf", Type: "*TextBuf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*Buf", Doc: "the text buffer that we're editing", Directives: gti.Directives{}}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}}},
 		{"CursorWidth", &gti.Field{Name: "CursorWidth", Type: "units.Value", Doc: "width of cursor -- set from cursor-width property (inherited)", Directives: gti.Directives{}}},
 		{"LineNumberColor", &gti.Field{Name: "LineNumberColor", Type: "colors.Full", Doc: "the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties", Directives: gti.Directives{}}},
@@ -157,81 +61,81 @@ var TextViewType = gti.AddType(&gti.Type{
 		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TextView{},
+	Instance: &View{},
 })
 
-// NewTextView adds a new [TextView] with the given name
+// NewView adds a new [View] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTextView(par ki.Ki, name ...string) *TextView {
-	return par.NewChild(TextViewType, name...).(*TextView)
+func NewView(par ki.Ki, name ...string) *View {
+	return par.NewChild(ViewType, name...).(*View)
 }
 
-// KiType returns the [*gti.Type] of [TextView]
-func (t *TextView) KiType() *gti.Type {
-	return TextViewType
+// KiType returns the [*gti.Type] of [View]
+func (t *View) KiType() *gti.Type {
+	return ViewType
 }
 
-// New returns a new [*TextView] value
-func (t *TextView) New() ki.Ki {
-	return &TextView{}
+// New returns a new [*View] value
+func (t *View) New() ki.Ki {
+	return &View{}
 }
 
-// TextViewEmbedder is an interface that all types that embed TextView satisfy
-type TextViewEmbedder interface {
-	AsTextView() *TextView
+// ViewEmbedder is an interface that all types that embed View satisfy
+type ViewEmbedder interface {
+	AsView() *View
 }
 
-// AsTextView returns the given value as a value of type TextView if the type
-// of the given value embeds TextView, or nil otherwise
-func AsTextView(k ki.Ki) *TextView {
+// AsView returns the given value as a value of type View if the type
+// of the given value embeds View, or nil otherwise
+func AsView(k ki.Ki) *View {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(TextViewEmbedder); ok {
-		return t.AsTextView()
+	if t, ok := k.(ViewEmbedder); ok {
+		return t.AsView()
 	}
 	return nil
 }
 
-// AsTextView satisfies the [TextViewEmbedder] interface
-func (t *TextView) AsTextView() *TextView {
+// AsView satisfies the [ViewEmbedder] interface
+func (t *View) AsView() *View {
 	return t
 }
 
-// TwinTextViewsType is the [gti.Type] for [TwinTextViews]
-var TwinTextViewsType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/textview.TwinTextViews",
-	ShortName:  "textview.TwinTextViews",
-	IDName:     "twin-text-views",
-	Doc:        "TwinTextViews presents two side-by-side TextView windows in Splits\nthat scroll in sync with each other.",
+// TwinViewsType is the [gti.Type] for [TwinViews]
+var TwinViewsType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/textview.TwinViews",
+	ShortName:  "textview.TwinViews",
+	IDName:     "twin-views",
+	Doc:        "TwinViews presents two side-by-side View windows in Splits\nthat scroll in sync with each other.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"BufA", &gti.Field{Name: "BufA", Type: "*TextBuf", Doc: "textbuf for A", Directives: gti.Directives{}}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*TextBuf", Doc: "textbuf for B", Directives: gti.Directives{}}},
+		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"gi.Splits", &gti.Field{Name: "gi.Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TwinTextViews{},
+	Instance: &TwinViews{},
 })
 
-// NewTwinTextViews adds a new [TwinTextViews] with the given name
+// NewTwinViews adds a new [TwinViews] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTwinTextViews(par ki.Ki, name ...string) *TwinTextViews {
-	return par.NewChild(TwinTextViewsType, name...).(*TwinTextViews)
+func NewTwinViews(par ki.Ki, name ...string) *TwinViews {
+	return par.NewChild(TwinViewsType, name...).(*TwinViews)
 }
 
-// KiType returns the [*gti.Type] of [TwinTextViews]
-func (t *TwinTextViews) KiType() *gti.Type {
-	return TwinTextViewsType
+// KiType returns the [*gti.Type] of [TwinViews]
+func (t *TwinViews) KiType() *gti.Type {
+	return TwinViewsType
 }
 
-// New returns a new [*TwinTextViews] value
-func (t *TwinTextViews) New() ki.Ki {
-	return &TwinTextViews{}
+// New returns a new [*TwinViews] value
+func (t *TwinViews) New() ki.Ki {
+	return &TwinViews{}
 }

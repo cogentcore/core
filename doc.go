@@ -22,7 +22,7 @@ All of the code is in the sub-packages within this repository:
 
 * gi3d: 3D rendering of a Scene within 2D windows -- full interactive 3D scenegraph.
 
-* histyle: text syntax-based highlighting styles -- used in giv.TextView
+* histyle: text syntax-based highlighting styles -- used in textview.View
 
   - oswin: OS-specific framework for low-level rendering, event interface,
     including GPU abstraction (OpenGL for now, ultimately Vulcan)
