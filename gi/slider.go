@@ -182,14 +182,6 @@ func (sr *Slider) SliderStyles() {
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
-
-			if sr.Dim == mat32.X {
-				s.Width.SetEm(20)
-				s.Height.SetDp(4)
-			} else {
-				s.Height.SetEm(20)
-				s.Width.SetDp(4)
-			}
 		} else {
 			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
 			sr.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
@@ -202,6 +194,14 @@ func (sr *Slider) SliderStyles() {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
+
+		if sr.Dim == mat32.X {
+			s.Width.SetEm(20)
+			s.Height.SetDp(4)
+		} else {
+			s.Height.SetEm(20)
+			s.Width.SetDp(4)
+		}
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull

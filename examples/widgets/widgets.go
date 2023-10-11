@@ -175,7 +175,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetSnap(true).
 		SetTracking(true).
 		SetIcon(icons.RadioButtonChecked)
-	slider0.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(2))
 	slider0.OnChange(func(e events.Event) {
 		fmt.Println("slider0", slider0.Value)
 	})
@@ -184,7 +183,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetDim(mat32.Y).
 		SetTracking(true).
 		SetValue(0.5)
-	slider1.SetStretchMaxHeight().SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1))
 	slider1.OnChange(func(e events.Event) {
 		fmt.Println("slider1", slider1.Value)
 	})
@@ -196,9 +194,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetValue(0.25).
 		SetSnap(true).
 		SetTracking(true)
-	scroll0.SetMinPrefWidth(units.Em(20)).SetMinPrefHeight(units.Em(1))
 	scroll0.OnChange(func(e events.Event) {
-		fmt.Println("scroll1", scroll0.Value)
+		fmt.Println("scroll0", scroll0.Value)
 	})
 
 	scroll1 := gi.NewSlider(srow).
@@ -210,7 +207,6 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetStep(1).
 		SetPageStep(10)
-	scroll1.SetMinPrefHeight(units.Em(10)).SetMinPrefWidth(units.Em(1)).SetStretchMaxHeight()
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})
