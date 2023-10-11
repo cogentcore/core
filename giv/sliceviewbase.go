@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
@@ -493,17 +494,21 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 		if !sv.NoAdd {
 			cidx++
 			addnm := fmt.Sprintf("add-%v", itxt)
-			addact := gi.Button{}
-			sg.SetChild(&addact, cidx, addnm)
-			addact.SetIcon(icons.Add)
+			addbt := gi.Button{}
+			sg.SetChild(&addbt, cidx, addnm)
+			addbt.SetType(gi.ButtonAction)
+			addbt.SetIcon(icons.Add)
 		}
 		if !sv.NoDelete {
 			cidx++
 			delnm := fmt.Sprintf("del-%v", itxt)
-			delact := gi.Button{}
-			sg.SetChild(&delact, cidx, delnm)
-
-			delact.SetIcon(icons.Delete)
+			delbt := gi.Button{}
+			sg.SetChild(&delbt, cidx, delnm)
+			delbt.SetType(gi.ButtonAction)
+			delbt.SetIcon(icons.Delete)
+			delbt.AddStyles(func(s *styles.Style) {
+				s.Color = colors.Scheme.Error.Base
+			})
 		}
 	}
 	sv.ConfigScroll()
