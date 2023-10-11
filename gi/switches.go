@@ -46,10 +46,10 @@ func (sw *Switches) CopyFieldsFrom(frm any) {
 
 func (sw *Switches) OnInit() {
 	sw.WidgetHandlers()
-	sw.ButtonBoxStyles()
+	sw.SwitchesStyles()
 }
 
-func (sw *Switches) ButtonBoxStyles() {
+func (sw *Switches) SwitchesStyles() {
 	sw.AddStyles(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set(units.Dp(2))
@@ -66,7 +66,7 @@ func (sw *Switches) ButtonBoxStyles() {
 // returns error if index is out of range.
 func (sw *Switches) SelectItem(idx int) error {
 	if idx >= sw.Parts.NumChildren() || idx < 0 {
-		return fmt.Errorf("gi.ButtonBox: SelectItem, index out of range: %v", idx)
+		return fmt.Errorf("gi.Switches: SelectItem, index out of range: %v", idx)
 	}
 	updt := sw.UpdateStart()
 	if sw.Mutex {
@@ -135,7 +135,7 @@ func (sw *Switches) ItemsFromStringList(el []string) {
 // ItemsFromEnumList sets the Items list from a list of enum values (see
 // kit.EnumRegistry)
 /*
-func (sw *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
+func (sw *Switches) ItemsFromEnumList(el []kit.EnumValue) {
 	sz := len(el)
 	if sz == 0 {
 		return
@@ -150,13 +150,13 @@ func (sw *ButtonBox) ItemsFromEnumList(el []kit.EnumValue) {
 
 // ItemsFromEnum sets the Items list from an enum type, which must be
 // registered on kit.EnumRegistry.
-func (sw *ButtonBox) ItemsFromEnum(enumtyp reflect.Type) {
+func (sw *Switches) ItemsFromEnum(enumtyp reflect.Type) {
 	sw.ItemsFromEnumList(kit.Enums.TypeValues(enumtyp, true))
 }
 
 // UpdateFromBitFlags sets the button checked state from a registered
 // BitFlag Enum type (see kit.EnumRegistry) with given value
-func (sw *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
+func (sw *Switches) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 	els := kit.Enums.TypeValues(enumtyp, true)
 	mx := max(len(els), sw.Parts.NumChildren())
 	for i := 0; i < mx; i++ {
@@ -170,7 +170,7 @@ func (sw *ButtonBox) UpdateFromBitFlags(enumtyp reflect.Type, val int64) {
 
 // BitFlagsValue returns the int64 value for all checkboxes from given
 // BitFlag Enum type (see kit.EnumRegistry) with given value
-func (sw *ButtonBox) BitFlagsValue(enumtyp reflect.Type) int64 {
+func (sw *Switches) BitFlagsValue(enumtyp reflect.Type) int64 {
 	val := int64(0)
 	els := kit.Enums.TypeValues(enumtyp, true)
 	mx := max(len(els), sw.Parts.NumChildren())
@@ -200,7 +200,7 @@ func (sw *Switches) ConfigItems() {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
 		// 	}
-		// 	swb := AsButtonBox(recv)
+		// 	swb := AsSwitches(recv)
 		// 	csw := send.(*CheckBox)
 		// 	idx := csw.Prop("index").(int)
 		// 	ischk := csw.StateIs(states.Checked)
@@ -246,7 +246,7 @@ func (sw *Switches) DoLayout(sc *Scene, parswox image.Rectangle, iter int) bool 
 	return sw.DoLayoutChildren(sc, iter)
 }
 
-func (sw *Switches) RenderButtonBox(sc *Scene) {
+func (sw *Switches) RenderSwitches(sc *Scene) {
 	rs, _, st := sw.RenderLock(sc)
 	sw.RenderStdBox(sc, st)
 	sw.RenderUnlock(rs)
@@ -254,7 +254,7 @@ func (sw *Switches) RenderButtonBox(sc *Scene) {
 
 func (sw *Switches) Render(sc *Scene) {
 	if sw.PushBounds(sc) {
-		sw.RenderButtonBox(sc)
+		sw.RenderSwitches(sc)
 		sw.RenderParts(sc)
 		sw.RenderChildren(sc)
 		sw.PopBounds(sc)
