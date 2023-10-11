@@ -600,6 +600,12 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 			s.Border.Radius = styles.BorderRadiusFull
 			s.BackgroundColor.SetSolid(colors.Transparent)
+			// if we have some state, we amplify it so we
+			// are clearly distinguishable from our parent button
+			// TODO: get this working
+			if s.StateLayer > 0 {
+				s.StateLayer += 0.12
+			}
 		})
 	case "sc-stretch":
 		w.AddStyles(func(s *styles.Style) {
