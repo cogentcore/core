@@ -86,7 +86,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//      Buttons
 
 	gi.NewSpace(scene, "blspc")
-	gi.NewLabel(gi.NewLayout(scene, "blrow").SetLayout(gi.LayoutHoriz), "blab").
+	gi.NewLabel(scene, "blab").
 		SetText("Buttons:")
 
 	brow := gi.NewLayout(scene, "brow").
