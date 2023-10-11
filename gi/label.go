@@ -210,9 +210,6 @@ func (lb *Label) LabelStyles() {
 // the background -- sampling from actual if none is set).
 func (lb *Label) SetText(txt string) *Label {
 	updt := lb.UpdateStart()
-	// if lb.Text != "" { // not good to automate this -- better to use docs -- bg can be bad
-	// 	lb.Redrawable = true
-	// }
 
 	lb.StyMu.RLock()
 	lb.Text = txt
