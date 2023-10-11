@@ -453,7 +453,7 @@ func (fv *FileView) WatchWatcher() {
 	}()
 }
 
-// PathField returns the ComboBox of the path
+// PathField returns the chooser of the path
 func (fv *FileView) PathField() *gi.Chooser {
 	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
 	return pr.ChildByName("path", 1).(*gi.Chooser)

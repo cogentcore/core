@@ -189,7 +189,7 @@ func (tv *TextView) TextViewStyles() {
 		s.Border.Style.Set(styles.BorderNone) // don't render our own border
 		s.Border.Radius = styles.BorderRadiusLarge
 		s.Margin.Set()
-		s.Padding.Set(units.Dp(4 ))
+		s.Padding.Set(units.Dp(4))
 		s.AlignV = styles.AlignTop
 		s.Text.Align = styles.AlignLeft
 		s.Text.TabSize = 4
@@ -1896,7 +1896,7 @@ func (tv *TextView) QReplaceSig() {
 	tv.TextViewSig.Emit(tv.This(), int64(TextViewQReplace), tv.CursorPos)
 }
 
-// QReplaceDialog prompts the user for a query-replace items, with comboboxes with history
+// QReplaceDialog prompts the user for a query-replace items, with choosers with history
 func QReplaceDialog(ctx gi.Widget, opts gi.DlgOpts, find string, lexitems bool, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg := gi.NewStdDialog(ctx, opts, fun)
 
