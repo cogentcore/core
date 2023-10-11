@@ -518,7 +518,7 @@ func (ts *Tabs) Render(sc *Scene) {
 // Tab
 
 // Tab is a tab button that contains a larger select button
-// and a small close button. The Indicator icon is used for
+// and a smaller close button. The Indicator icon is used for
 // the close icon.
 type Tab struct {
 	Button
