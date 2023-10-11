@@ -78,7 +78,7 @@ func (sp *Spinner) CopyFieldsFrom(frm any) {
 }
 
 func (sp *Spinner) OnInit() {
-	sp.SpinnerHandlers()
+	sp.HandleSpinnerEvents()
 	sp.SpinnerStyles()
 }
 
@@ -286,12 +286,12 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 	return fval, err
 }
 
-func (sp *Spinner) SpinnerHandlers() {
+func (sp *Spinner) HandleSpinnerEvents() {
 	sp.HandleWidgetEvents()
-	sp.SpinnerScroll()
+	sp.HandleSpinnerScroll()
 }
 
-func (sp *Spinner) SpinnerScroll() {
+func (sp *Spinner) HandleSpinnerScroll() {
 	sp.On(events.Scroll, func(e events.Event) {
 		if sp.StateIs(states.Disabled) || !sp.StateIs(states.Focused) {
 			return

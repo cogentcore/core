@@ -165,7 +165,7 @@ func (sr *Slider) OnInit() {
 	sr.ThumbSize = units.Em(1.5)
 	sr.ThSize = 25.0
 	sr.ThSizeReal = sr.ThSize
-	sr.SliderHandlers()
+	sr.HandleSliderEvents()
 	sr.SliderStyles()
 }
 
@@ -474,7 +474,7 @@ func (sr *Slider) PointToRelPos(pt image.Point) image.Point {
 	return pt.Sub(sr.ScBBox.Min)
 }
 
-func (sr *Slider) SliderMouse() {
+func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
 		if sr.StateIs(states.Disabled) {
 			return
@@ -530,7 +530,7 @@ func (sr *Slider) SliderMouse() {
 	})
 }
 
-func (sr *Slider) SliderKeys() {
+func (sr *Slider) HandleSliderKeys() {
 	sr.OnKeyChord(func(e events.Event) {
 		if sr.StateIs(states.Disabled) {
 			return
@@ -574,10 +574,10 @@ func (sr *Slider) SliderKeys() {
 	})
 }
 
-func (sr *Slider) SliderHandlers() {
+func (sr *Slider) HandleSliderEvents() {
 	sr.HandleWidgetEvents()
-	sr.SliderMouse()
-	sr.SliderKeys()
+	sr.HandleSliderMouse()
+	sr.HandleSliderKeys()
 }
 
 ///////////////////////////////////////////////////////////
