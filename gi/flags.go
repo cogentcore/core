@@ -22,7 +22,7 @@ const (
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
 	// Invisible means that the node has been marked as invisible by a parent
-	// that has switch-like powers (e.g., layout stacked / tabview or splitter
+	// that has switch-like powers (e.g., layout stacked / tabs or splitter
 	// panel that has been collapsed).  This flag is propagated down to all
 	// child nodes, and rendering or other interaction / update routines
 	// should not run when this flag is set (PushBounds does this for most
