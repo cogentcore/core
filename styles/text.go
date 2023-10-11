@@ -207,11 +207,7 @@ const (
 // HasWordWrap returns true if current white space option supports word wrap
 func (ts *Text) HasWordWrap() bool {
 	switch ts.WhiteSpace {
-	case WhiteSpaceNormal:
-		fallthrough
-	case WhiteSpacePreLine:
-		fallthrough
-	case WhiteSpacePreWrap:
+	case WhiteSpaceNormal, WhiteSpacePreLine, WhiteSpacePreWrap:
 		return true
 	default:
 		return false
@@ -223,9 +219,7 @@ func (ts *Text) HasWordWrap() bool {
 // intermediate)
 func (ts *Text) HasPre() bool {
 	switch ts.WhiteSpace {
-	case WhiteSpaceNormal:
-		fallthrough
-	case WhiteSpaceNowrap:
+	case WhiteSpaceNormal, WhiteSpaceNowrap:
 		return false
 	default:
 		return true
