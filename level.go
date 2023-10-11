@@ -21,7 +21,7 @@ var UserLevel = defaultUserLevel
 //   - vv: [slog.LevelDebug]
 //   - v: [slog.LevelInfo]
 //   - q: [slog.LevelError]
-//   - (default: [slog.LevelWarn])
+//   - (default: same as the default for [UserLevel])
 //
 // The flags are evaluated in that order, so, for example, if both
 // vv and q are specified, it will still return [Debug].
@@ -34,6 +34,6 @@ func LevelFromFlags(vv, v, q bool) slog.Level {
 	case q:
 		return slog.LevelError
 	default:
-		return slog.LevelWarn
+		return defaultUserLevel
 	}
 }
