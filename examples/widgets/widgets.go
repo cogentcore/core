@@ -237,16 +237,16 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("Text:", edit1.Text())
 	})
 
-	sb := gi.NewSpinBox(txrow).SetMax(1000).SetMin(-1000).SetStep(5)
+	sb := gi.NewSpinner(txrow).SetMax(1000).SetMin(-1000).SetStep(5)
 	sb.OnChange(func(e events.Event) {
 		fmt.Println("spinbox value changed to", sb.Value)
 	})
 
-	cb := gi.NewComboBox(txrow, "combo").SetType(gi.ComboBoxOutlined).SetEditable(true).
+	ch := gi.NewChooser(txrow).SetType(gi.ComboBoxOutlined).SetEditable(true).
 		ItemsFromTypes(gti.AllEmbeddersOf(gi.WidgetBaseType), true, true, 50)
 	// ItemsFromEnum(gi.ButtonTypesN, true, 50)
-	cb.OnChange(func(e events.Event) {
-		fmt.Printf("ComboBox selected index: %d data: %v\n", cb.CurIndex, cb.CurVal)
+	ch.OnChange(func(e events.Event) {
+		fmt.Printf("ComboBox selected index: %d data: %v\n", ch.CurIndex, ch.CurVal)
 	})
 
 	//////////////////////////////////////////
