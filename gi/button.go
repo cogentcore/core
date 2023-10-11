@@ -112,27 +112,17 @@ const (
 	ButtonText
 	// ButtonAction is a simple button that typically serves
 	// as a simple action among a series of other buttons
-	// (eg: in a toolbar or menu), or as a part of another widget,
-	// like a spinbox or snackbar. It has no border, background color,
+	// (eg: in a toolbar), or as a part of another widget,
+	// like a spinner or snackbar. It has no border, background color,
 	// or shadow when not being interacted with. It inherits the text
 	// color of its parent, and it renders a background when
 	// hovered/focused/active. you must ensure it stands out from the
 	// surrounding context  sufficiently. It is equivalent to Material Design's
 	// icon button, but it can also contain text and other things (and frequently does).
 	ButtonAction
-)
-
-// TODO(kai): the difference between ButtonFlagMenu and HasMenu is documented
-// inconsistently, so we need to reach a clear decision on what they are an
-// whether we need ButtonFlags
-
-// ButtonFlags extend WidgetFlags to hold button state
-type ButtonFlags WidgetFlags //enums:bitflag
-
-const (
-	// Menu flag means that the button is a menu item itself
-	// (not that it has a menu; see [Button.HasMenu])
-	ButtonFlagMenu ButtonFlags = ButtonFlags(WidgetFlagsN) + iota
+	// ButtonMenu is similar to [ButtonAction], but it is only
+	// for buttons located in popup menus.
+	ButtonMenu
 )
 
 func (bt *Button) OnInit() {
@@ -182,10 +172,11 @@ func (bt *Button) ButtonStyles() {
 			s.Border.Radius = styles.BorderRadiusExtraSmall
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
-		}
-		if bt.Is(ButtonFlagMenu) {
+		case ButtonMenu:
 			s.SetStretchMaxWidth() // need to go to edge of menu
 			s.Border.Radius = styles.BorderRadiusNone
+			s.Padding.Set(units.Dp(6), units.Dp(12))
+			s.MaxBoxShadow = styles.BoxShadow0()
 		}
 		if s.Is(states.Hovered) {
 			s.BoxShadow = s.MaxBoxShadow
@@ -232,19 +223,6 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignBottom
 		})
 	}
-}
-
-// see menus.go for MakeMenuFunc, etc
-
-// SetAsMenu ensures that this functions as a menu even before menu items are added
-func (bt *Button) SetAsMenu() {
-	bt.SetFlag(true, ButtonFlagMenu)
-}
-
-// SetAsButton clears the explicit ButtonFlagMenu -- if there are menu items
-// or a menu function then it will still behave as a menu
-func (bt *Button) SetAsButton() {
-	bt.SetFlag(false, ButtonFlagMenu)
 }
 
 // SetType sets the styling type of the button
@@ -318,10 +296,9 @@ func (bt *Button) SetIcon(iconName icons.Icon) *Button {
 	return bt
 }
 
-// HasMenu returns true if there is a menu or menu-making function set, or the
-// explicit ButtonFlagMenu has been set
+// HasMenu returns true if the button has a menu that pops up when it is clicked
+// (not that it is in a menu itself; see [ButtonMenu])
 func (bt *Button) HasMenu() bool {
-	// we're not even using ButtonFlagMenu!
 	return bt.MakeMenuFunc != nil || len(bt.Menu) > 0
 }
 
@@ -456,7 +433,7 @@ func (bt *Button) ConfigWidget(sc *Scene) {
 func (bt *Button) ConfigParts(sc *Scene) {
 	parts := bt.NewParts(LayoutHoriz)
 	if bt.HasMenu() && bt.Icon.IsNil() && bt.Indicator.IsNil() {
-		if bt.Is(ButtonFlagMenu) {
+		if bt.Type == ButtonMenu {
 			bt.Indicator = icons.KeyboardArrowRight
 		} else {
 			bt.Icon = icons.Menu
@@ -466,7 +443,7 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	icIdx, lbIdx := bt.ConfigPartsIconLabel(&config, bt.Icon, bt.Text)
 	indIdx := bt.ConfigPartsAddIndicator(&config, false) // default off
 	scIdx := -1
-	if bt.Is(ButtonFlagMenu) {
+	if bt.Type == ButtonMenu {
 		if indIdx < 0 && bt.Shortcut != "" {
 			scIdx = bt.ConfigPartsAddShortcut(&config)
 		} else if bt.Shortcut != "" {

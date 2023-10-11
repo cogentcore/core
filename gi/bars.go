@@ -190,9 +190,9 @@ func (mb *MenuBar) ConfigMenus(menus []string) {
 	for i, m := range menus {
 		mi := mb.Kids[i]
 		if mi.KiType().HasEmbed(ButtonType) {
-			ac := AsButton(mi)
-			ac.SetText(m)
-			ac.SetAsMenu()
+			bt := AsButton(mi)
+			bt.SetText(m)
+			bt.Type = ButtonMenu
 		}
 	}
 	mb.UpdateEnd(updt)

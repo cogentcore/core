@@ -12,11 +12,11 @@ import (
 	"goki.dev/ki/v2"
 )
 
-var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5}
+var _ButtonTypesValues = []ButtonTypes{0, 1, 2, 3, 4, 5, 6}
 
 // ButtonTypesN is the highest valid value
 // for type ButtonTypes, plus one.
-const ButtonTypesN ButtonTypes = 6
+const ButtonTypesN ButtonTypes = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -28,6 +28,7 @@ func _ButtonTypesNoOp() {
 	_ = x[ButtonOutlined-(3)]
 	_ = x[ButtonText-(4)]
 	_ = x[ButtonAction-(5)]
+	_ = x[ButtonMenu-(6)]
 }
 
 var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
@@ -43,6 +44,8 @@ var _ButtonTypesNameToValueMap = map[string]ButtonTypes{
 	`text`:     4,
 	`Action`:   5,
 	`action`:   5,
+	`Menu`:     6,
+	`menu`:     6,
 }
 
 var _ButtonTypesDescMap = map[ButtonTypes]string{
@@ -51,7 +54,8 @@ var _ButtonTypesDescMap = map[ButtonTypes]string{
 	2: `ButtonElevated is an elevated button with a light background color and a shadow. It is equivalent to Material Design&#39;s elevated button.`,
 	3: `ButtonOutlined is an outlined button that is used for secondary actions that are still important. It is equivalent to Material Design&#39;s outlined button.`,
 	4: `ButtonText is a low-importance button with no border, background color, or shadow when not being interacted with. It renders primary-colored text, and it renders a background color and shadow when hovered/focused/active. It should only be used for low emphasis actions, and you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s text button, but it can also contain icons and other things.`,
-	5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar or menu), or as a part of another widget, like a spinbox or snackbar. It has no border, background color, or shadow when not being interacted with. It inherits the text color of its parent, and it renders a background when hovered/focused/active. you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`,
+	5: `ButtonAction is a simple button that typically serves as a simple action among a series of other buttons (eg: in a toolbar), or as a part of another widget, like a spinner or snackbar. It has no border, background color, or shadow when not being interacted with. It inherits the text color of its parent, and it renders a background when hovered/focused/active. you must ensure it stands out from the surrounding context sufficiently. It is equivalent to Material Design&#39;s icon button, but it can also contain text and other things (and frequently does).`,
+	6: `ButtonMenu is similar to [ButtonAction], but it is only for buttons located in popup menus.`,
 }
 
 var _ButtonTypesMap = map[ButtonTypes]string{
@@ -61,6 +65,7 @@ var _ButtonTypesMap = map[ButtonTypes]string{
 	3: `Outlined`,
 	4: `Text`,
 	5: `Action`,
+	6: `Menu`,
 }
 
 // String returns the string representation
@@ -135,188 +140,6 @@ func (i ButtonTypes) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *ButtonTypes) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _ButtonFlagsValues = []ButtonFlags{10}
-
-// ButtonFlagsN is the highest valid value
-// for type ButtonFlags, plus one.
-const ButtonFlagsN ButtonFlags = 11
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _ButtonFlagsNoOp() {
-	var x [1]struct{}
-	_ = x[ButtonFlagMenu-(10)]
-}
-
-var _ButtonFlagsNameToValueMap = map[string]ButtonFlags{
-	`ButtonFlagMenu`: 10,
-	`buttonflagmenu`: 10,
-}
-
-var _ButtonFlagsDescMap = map[ButtonFlags]string{
-	10: `Menu flag means that the button is a menu item itself (not that it has a menu; see [Button.HasMenu])`,
-}
-
-var _ButtonFlagsMap = map[ButtonFlags]string{
-	10: `ButtonFlagMenu`,
-}
-
-// String returns the string representation
-// of this ButtonFlags value.
-func (i ButtonFlags) String() string {
-	str := ""
-	for _, ie := range WidgetFlagsValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	for _, ie := range _ButtonFlagsValues {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
-	return str
-}
-
-// BitIndexString returns the string
-// representation of this ButtonFlags value
-// if it is a bit index value
-// (typically an enum constant), and
-// not an actual bit flag value.
-func (i ButtonFlags) BitIndexString() string {
-	if str, ok := _ButtonFlagsMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).BitIndexString()
-}
-
-// SetString sets the ButtonFlags value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *ButtonFlags) SetString(s string) error {
-	*i = 0
-	return i.SetStringOr(s)
-}
-
-// SetStringOr sets the ButtonFlags value from its
-// string representation while preserving any
-// bit flags already set, and returns an
-// error if the string is invalid.
-func (i *ButtonFlags) SetStringOr(s string) error {
-	flgs := strings.Split(s, "|")
-	for _, flg := range flgs {
-		if val, ok := _ButtonFlagsNameToValueMap[flg]; ok {
-			i.SetFlag(true, &val)
-		} else if val, ok := _ButtonFlagsNameToValueMap[strings.ToLower(flg)]; ok {
-			i.SetFlag(true, &val)
-		} else {
-			err := (*WidgetFlags)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-// Int64 returns the ButtonFlags value as an int64.
-func (i ButtonFlags) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the ButtonFlags value from an int64.
-func (i *ButtonFlags) SetInt64(in int64) {
-	*i = ButtonFlags(in)
-}
-
-// Desc returns the description of the ButtonFlags value.
-func (i ButtonFlags) Desc() string {
-	if str, ok := _ButtonFlagsDescMap[i]; ok {
-		return str
-	}
-	return WidgetFlags(i).Desc()
-}
-
-// ButtonFlagsValues returns all possible values
-// for the type ButtonFlags.
-func ButtonFlagsValues() []ButtonFlags {
-	es := WidgetFlagsValues()
-	res := make([]ButtonFlags, len(es))
-	for i, e := range es {
-		res[i] = ButtonFlags(e)
-	}
-	res = append(res, _ButtonFlagsValues...)
-	return res
-}
-
-// Values returns all possible values
-// for the type ButtonFlags.
-func (i ButtonFlags) Values() []enums.Enum {
-	es := WidgetFlagsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_ButtonFlagsValues))
-	for i, d := range es {
-		res[i] = d
-	}
-	for i, d := range _ButtonFlagsValues {
-		res[i+les] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type ButtonFlags.
-func (i ButtonFlags) IsValid() bool {
-	_, ok := _ButtonFlagsMap[i]
-	if !ok {
-		return WidgetFlags(i).IsValid()
-	}
-	return ok
-}
-
-// HasFlag returns whether these
-// bit flags have the given bit flag set.
-func (i ButtonFlags) HasFlag(f enums.BitFlag) bool {
-	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
-}
-
-// SetFlag sets the value of the given
-// flags in these flags to the given value.
-func (i *ButtonFlags) SetFlag(on bool, f ...enums.BitFlag) {
-	var mask int64
-	for _, v := range f {
-		mask |= 1 << v.Int64()
-	}
-	in := int64(*i)
-	if on {
-		in |= mask
-		atomic.StoreInt64((*int64)(i), in)
-	} else {
-		in &^= mask
-		atomic.StoreInt64((*int64)(i), in)
-	}
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i ButtonFlags) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *ButtonFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 

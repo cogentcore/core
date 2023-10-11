@@ -56,7 +56,7 @@ func (m *Menu) SetButton(bt *Button, opts ActOpts, fun func(bt *Button)) {
 		nm = string(opts.Icon)
 	}
 	bt.InitName(bt, nm)
-	bt.Type = ButtonAction
+	bt.Type = ButtonMenu
 	bt.Text = opts.Label
 	bt.Tooltip = opts.Tooltip
 	bt.Icon = icons.Icon(opts.Icon)
@@ -67,7 +67,6 @@ func (m *Menu) SetButton(bt *Button, opts ActOpts, fun func(bt *Button)) {
 	}
 	bt.Data = opts.Data
 	bt.UpdateFunc = opts.UpdateFunc
-	bt.SetAsMenu()
 	if fun != nil {
 		bt.OnClick(func(e events.Event) {
 			fun(bt)
@@ -349,7 +348,7 @@ func NewMenuScene(menu Menu, name string) *Scene {
 		cl := wi.Clone().This().(Widget)
 		cb := cl.AsWidget()
 		if bt, ok := cl.(*Button); ok {
-			bt.SetAsMenu()
+			bt.Type = ButtonMenu
 			if bt.Menu == nil {
 				cb.Listeners[events.Click] = wb.Listeners[events.Click]
 				bt.ClickDismissMenu()
@@ -457,7 +456,7 @@ func SubStringsChooserPopup(strs [][]string, curSel string, ctx Widget, fun func
 		}
 		s1 := ss[0]
 		sm := menu.AddButton(ActOpts{Label: s1}, nil)
-		sm.SetAsMenu()
+		sm.Type = ButtonMenu
 		for i := 1; i < sz; i++ {
 			it := ss[i]
 			cnm := s1 + ": " + it
