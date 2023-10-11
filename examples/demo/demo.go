@@ -332,7 +332,7 @@ func makeInputs(ts *gi.Tabs) {
 
 	// clr := colors.Tan
 
-	// colorvv := giv.ToValueView(&clr, "")
+	// colorvv := giv.ToValue(&clr, "")
 	// colorvv.SetSoloValue(reflect.ValueOf(&clr))
 	// cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Widget)
 	// colorvv.ConfigWidget(cvvw)

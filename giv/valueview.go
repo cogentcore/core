@@ -32,48 +32,48 @@ import (
 
 func init() {
 	gi.TheViewIFace = &ViewIFace{}
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() ValueView {
-		vv := &IconValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() Value {
+		vv := &IconValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() ValueView {
-		vv := &FontValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() Value {
+		vv := &FontValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() ValueView {
-		vv := &FileValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() Value {
+		vv := &FileValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() ValueView {
-		vv := &KeyMapValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() Value {
+		vv := &KeyMapValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() ValueView {
-		vv := &ColorNameValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
+		vv := &ColorNameValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() ValueView {
-		vv := &KeyChordValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() Value {
+		vv := &KeyChordValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() ValueView {
-		vv := &HiStyleValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() Value {
+		vv := &HiStyleValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() ValueView {
-		vv := &TimeValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() Value {
+		vv := &TimeValue{}
 		ki.InitNode(vv)
 		return vv
 	})
-	ValueViewMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() ValueView {
-		vv := &TimeValueView{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() Value {
+		vv := &TimeValue{}
 		ki.InitNode(vv)
 		return vv
 	})
@@ -94,60 +94,60 @@ var (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ValueViewer -- an interface for selecting ValueView GUI representation of types
+//  Valueer -- an interface for selecting Value GUI representation of types
 
-// ValueViewer interface supplies the appropriate type of ValueView -- called
+// Valueer interface supplies the appropriate type of Value -- called
 // on a given receiver item if defined for that receiver type (tries both
 // pointer and non-pointer receivers) -- can use this for custom types to
-// provide alternative custom interfaces -- must call Init on ValueView before
+// provide alternative custom interfaces -- must call Init on Value before
 // returning it
-type ValueViewer interface {
-	ValueView() ValueView
+type Valueer interface {
+	Value() Value
 }
 
-// example implementation of ValueViewer interface -- can't implement on
+// example implementation of Valueer interface -- can't implement on
 // non-local types, so all the basic types are handled separately:
 //
-// func (s string) ValueView() ValueView {
-// 	vv := &ValueViewBase{}
+// func (s string) Value() Value {
+// 	vv := &ValueBase{}
 // 	ki.InitNode(vv)
 // 	return vv
 // }
 
-// FieldValueViewer interface supplies the appropriate type of ValueView for a
+// FieldValueer interface supplies the appropriate type of Value for a
 // given field name and current field value on the receiver parent struct --
 // called on a given receiver struct if defined for that receiver type (tries
 // both pointer and non-pointer receivers) -- if a struct implements this
 // interface, then it is used first for structs -- return nil to fall back on
-// the default ToValueView result
-type FieldValueViewer interface {
-	FieldValueView(field string, fval any) ValueView
+// the default ToValue result
+type FieldValueer interface {
+	FieldValue(field string, fval any) Value
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ValueViewMap -- alternative way to connect value view with type
+//  ValueMap -- alternative way to connect value view with type
 
-// ValueViewFunc is a function that returns a new initialized ValueView
-// of an appropriate type as registered in the ValueViewMap
-type ValueViewFunc func() ValueView
+// ValueFunc is a function that returns a new initialized Value
+// of an appropriate type as registered in the ValueMap
+type ValueFunc func() Value
 
-// The ValueViewMap is used to connect type names with corresponding ValueView
+// The ValueMap is used to connect type names with corresponding Value
 // representations of those types -- this can be used when it is not possible
-// to use the ValueViewer interface (e.g., interface methods can only be
+// to use the Valueer interface (e.g., interface methods can only be
 // defined within the package that defines the type -- so we need this for
 // all types in gi which don't know about giv).
 // You must use laser.LongTypeName (full package name + "." . type name) for
 // the type name, as that is how it will be looked up.
-var ValueViewMap map[string]ValueViewFunc
+var ValueMap map[string]ValueFunc
 
-// ValueViewMapAdd adds a ValueViewFunc for a given type name.
+// ValueMapAdd adds a ValueFunc for a given type name.
 // You must use laser.LongTypeName (full package name + "." . type name) for
 // the type name, as that is how it will be looked up.
-func ValueViewMapAdd(typeNm string, fun ValueViewFunc) {
-	if ValueViewMap == nil {
-		ValueViewMap = make(map[string]ValueViewFunc)
+func ValueMapAdd(typeNm string, fun ValueFunc) {
+	if ValueMap == nil {
+		ValueMap = make(map[string]ValueFunc)
 	}
-	ValueViewMap[typeNm] = fun
+	ValueMap[typeNm] = fun
 }
 
 // StructTagVal returns the value for given key in given struct tag string
@@ -159,29 +159,29 @@ func StructTagVal(key, tags string) string {
 	return val
 }
 
-// ToValueView returns the appropriate ValueView for given item, based only on
-// its type -- attempts to get the ValueViewer interface and failing that,
+// ToValue returns the appropriate Value for given item, based only on
+// its type -- attempts to get the Valueer interface and failing that,
 // falls back on default Kind-based options.  tags are optional tags, e.g.,
 // from the field in a struct, that control the view properties -- see the gi wiki
 // for details on supported tags -- these are NOT set for the view element, only
 // used for options that affect what kind of view to create.
-// See FieldToValueView for version that takes into account the properties of the owner.
+// See FieldToValue for version that takes into account the properties of the owner.
 // gopy:interface=handle
-func ToValueView(it any, tags string) ValueView {
+func ToValue(it any, tags string) Value {
 	if it == nil {
-		vv := &ValueViewBase{}
+		vv := &ValueBase{}
 		ki.InitNode(vv)
 		return vv
 	}
-	if vv, ok := it.(ValueViewer); ok {
-		vvo := vv.ValueView()
+	if vv, ok := it.(Valueer); ok {
+		vvo := vv.Value()
 		if vvo != nil {
 			return vvo
 		}
 	}
 	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(ValueViewer); ok {
-		vvo := vv.ValueView()
+	if vv, ok := laser.PtrInterface(it).(Valueer); ok {
+		vvo := vv.Value()
 		if vvo != nil {
 			return vvo
 		}
@@ -193,7 +193,7 @@ func ToValueView(it any, tags string) ValueView {
 		return vv
 	}
 	if _, ok := it.(enums.Enum); ok {
-		vv := &EnumValueView{}
+		vv := &EnumValue{}
 		ki.InitNode(vv)
 		return vv
 	}
@@ -204,7 +204,7 @@ func ToValueView(it any, tags string) ValueView {
 	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
 
 	nptypnm := laser.LongTypeName(nptyp)
-	if vvf, has := ValueViewMap[nptypnm]; has {
+	if vvf, has := ValueMap[nptypnm]; has {
 		vv := vvf()
 		return vv
 	}
@@ -239,35 +239,35 @@ func ToValueView(it any, tags string) ValueView {
 	switch {
 	case vk >= reflect.Int && vk <= reflect.Uint64:
 		if _, ok := it.(fmt.Stringer); ok { // use stringer
-			vv := &ValueViewBase{}
+			vv := &ValueBase{}
 			ki.InitNode(vv)
 			return vv
 		} else {
-			vv := &IntValueView{}
+			vv := &IntValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Bool:
-		vv := &BoolValueView{}
+		vv := &BoolValue{}
 		ki.InitNode(vv)
 		return vv
 	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		vv := &FloatValueView{} // handles step, min / max etc
+		vv := &FloatValue{} // handles step, min / max etc
 		ki.InitNode(vv)
 		return vv
 	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
 		// todo: special edit with 2 fields..
-		vv := &ValueViewBase{}
+		vv := &ValueBase{}
 		ki.InitNode(vv)
 		return vv
 	case vk == reflect.Ptr:
 		if ki.IsKi(nptyp) {
-			vv := &KiPtrValueView{}
+			vv := &KiPtrValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 		if laser.AnyIsNil(it) {
-			vv := &NilValueView{}
+			vv := &NilValue{}
 			ki.InitNode(vv)
 			return vv
 		}
@@ -275,7 +275,7 @@ func ToValueView(it any, tags string) ValueView {
 		if !laser.ValueIsZero(v) {
 			// note: interfaces go here:
 			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
-			return ToValueView(v.Elem().Interface(), tags)
+			return ToValue(v.Elem().Interface(), tags)
 		}
 	case vk == reflect.Array:
 		fallthrough
@@ -284,22 +284,22 @@ func ToValueView(it any, tags string) ValueView {
 		sz := v.Len()
 		eltyp := laser.SliceElType(it)
 		if _, ok := it.([]byte); ok {
-			vv := &ByteSliceValueView{}
+			vv := &ByteSliceValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 		if _, ok := it.([]rune); ok {
-			vv := &RuneSliceValueView{}
+			vv := &RuneSliceValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
 		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
-			vv := &SliceInlineValueView{}
+			vv := &SliceInlineValue{}
 			ki.InitNode(vv)
 			return vv
 		} else {
-			vv := &SliceValueView{}
+			vv := &SliceValue{}
 			ki.InitNode(vv)
 			return vv
 		}
@@ -308,28 +308,28 @@ func ToValueView(it any, tags string) ValueView {
 		sz := v.Len()
 		sz = laser.MapStructElsN(it)
 		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
-			vv := &MapInlineValueView{}
+			vv := &MapInlineValue{}
 			ki.InitNode(vv)
 			return vv
 		} else {
-			vv := &MapValueView{}
+			vv := &MapValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 	case vk == reflect.Struct:
 		// note: we need to handle these here b/c cannot define new methods for gi types
 		if nptyp == laser.TypeFor[color.RGBA]() {
-			vv := &ColorValueView{}
+			vv := &ColorValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 		nfld := laser.AllFieldsN(nptyp)
 		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
-			vv := &StructInlineValueView{}
+			vv := &StructInlineValue{}
 			ki.InitNode(vv)
 			return vv
 		} else {
-			vv := &StructValueView{}
+			vv := &StructValue{}
 			ki.InitNode(vv)
 			return vv
 		}
@@ -339,34 +339,34 @@ func ToValueView(it any, tags string) ValueView {
 		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
 		switch {
 		case nptyp == laser.TypeFor[reflect.Type]():
-			vv := &TypeValueView{}
+			vv := &TypeValue{}
 			ki.InitNode(vv)
 			return vv
 		}
 	}
 	// fallback.
-	vv := &ValueViewBase{}
+	vv := &ValueBase{}
 	ki.InitNode(vv)
 	return vv
 }
 
-// FieldToValueView returns the appropriate ValueView for given field on a
-// struct -- attempts to get the FieldValueViewer interface, and falls back on
-// ToValueView otherwise, using field value (fval)
+// FieldToValue returns the appropriate Value for given field on a
+// struct -- attempts to get the FieldValueer interface, and falls back on
+// ToValue otherwise, using field value (fval)
 // gopy:interface=handle
-func FieldToValueView(it any, field string, fval any) ValueView {
+func FieldToValue(it any, field string, fval any) Value {
 	if it == nil || field == "" {
-		return ToValueView(fval, "")
+		return ToValue(fval, "")
 	}
-	if vv, ok := it.(FieldValueViewer); ok {
-		vvo := vv.FieldValueView(field, fval)
+	if vv, ok := it.(FieldValueer); ok {
+		vvo := vv.FieldValue(field, fval)
 		if vvo != nil {
 			return vvo
 		}
 	}
 	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(FieldValueViewer); ok {
-		vvo := vv.FieldValueView(field, fval)
+	if vv, ok := laser.PtrInterface(it).(FieldValueer); ok {
+		vvo := vv.FieldValue(field, fval)
 		if vvo != nil {
 			return vvo
 		}
@@ -384,7 +384,7 @@ func FieldToValueView(it any, field string, fval any) ValueView {
 				ki.InitNode(vv)
 				return vv
 			} else {
-				vv := &EnumValueView{}
+				vv := &EnumValue{}
 				vv.AltType = et
 				ki.InitNode(vv)
 				return vv
@@ -394,37 +394,37 @@ func FieldToValueView(it any, field string, fval any) ValueView {
 
 	ftyp, ok := nptyp.FieldByName(field)
 	if ok {
-		return ToValueView(fval, string(ftyp.Tag))
+		return ToValue(fval, string(ftyp.Tag))
 	}
-	return ToValueView(fval, "")
+	return ToValue(fval, "")
 }
 
-// ValueView is an interface for managing the GUI representation of values
+// Value is an interface for managing the GUI representation of values
 // (e.g., fields, map values, slice values) in Views (StructView, MapView,
-// etc).  The different types of ValueView are for different Kinds of values
+// etc).  The different types of Value are for different Kinds of values
 // (bool, float, etc) -- which can have different Kinds of owners.  The
-// ValueViewBase class supports all the basic fields for managing the owner
+// ValueBase class supports all the basic fields for managing the owner
 // kinds.
-type ValueView interface {
+type Value interface {
 	ki.Ki
 
-	// AsValueViewBase gives access to the basic data fields so that the
+	// AsValueBase gives access to the basic data fields so that the
 	// interface doesn't need to provide accessors for them.
-	AsValueViewBase() *ValueViewBase
+	AsValueBase() *ValueBase
 
 	// SetStructValue sets the value, owner and field information for a struct field.
-	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave ValueView, viewPath string)
+	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string)
 
 	// SetMapKey sets the key value and owner for a map key.
-	SetMapKey(val reflect.Value, owner any, tmpSave ValueView)
+	SetMapKey(val reflect.Value, owner any, tmpSave Value)
 
 	// SetMapValue sets the value, owner and map key information for a map
-	// element -- needs pointer to ValueView representation of key to track
+	// element -- needs pointer to Value representation of key to track
 	// current key value.
-	SetMapValue(val reflect.Value, owner any, key any, keyView ValueView, tmpSave ValueView, viewPath string)
+	SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string)
 
 	// SetSliceValue sets the value, owner and index information for a slice element.
-	SetSliceValue(val reflect.Value, owner any, idx int, tmpSave ValueView, viewPath string)
+	SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string)
 
 	// SetSoloValue sets the value for a singleton standalone value
 	// (e.g., for arg values).
@@ -476,11 +476,11 @@ type ValueView interface {
 	SetValue(val any) bool
 
 	// SendChange sends events.Change event to all listeners registered on this view.
-	// This is the primary notification event for all ValueView elements.
+	// This is the primary notification event for all Value elements.
 	SendChange()
 
-	// OnChange registers given listener function for Change events on ValueView.
-	// This is the primary notification event for all ValueView elements.
+	// OnChange registers given listener function for Change events on Value.
+	// This is the primary notification event for all Value elements.
 	OnChange(fun func(e events.Event))
 
 	// SetTags sets tags for this valueview, for non-struct values, to
@@ -505,7 +505,7 @@ type ValueView interface {
 
 	// SaveTmp saves a temporary copy of a struct to a map -- map values must
 	// be explicitly re-saved and cannot be directly written to by the value
-	// elements -- each ValueView has a pointer to any parent ValueView that
+	// elements -- each Value has a pointer to any parent Value that
 	// might need to be saved after SetValue -- SaveTmp called automatically
 	// in SetValue but other cases that use something different need to call
 	// it explicitly.
@@ -514,17 +514,17 @@ type ValueView interface {
 
 // note: could have a more efficient way to represent the different owner type
 // data (Key vs. Field vs. Idx), instead of just having everything for
-// everything.  However, ValueView itself gets customized for different target
+// everything.  However, Value itself gets customized for different target
 // value types, and those are orthogonal to the owner type, so need a separate
-// ValueViewOwner class that encodes these options more efficiently -- but
+// ValueOwner class that encodes these options more efficiently -- but
 // that introduces another struct alloc and pointer -- not clear if it is
 // worth it..
 
-// ValueViewBase provides the basis for implementations of the ValueView
+// ValueBase provides the basis for implementations of the Value
 // interface, representing values in the interface -- it implements a generic
 // TextField representation of the string value, and provides the generic
-// fallback for everything that doesn't provide a specific ValueViewer type.
-type ValueViewBase struct {
+// fallback for everything that doesn't provide a specific Valueer type.
+type ValueBase struct {
 	ki.Node
 
 	// the reflect.Value representation of the value
@@ -552,13 +552,13 @@ type ValueViewBase struct {
 	Key any `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
 
 	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
-	KeyView ValueView `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
+	KeyView Value `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
 
 	// if Owner is a slice, this is the index for the value in the slice
 	Idx int `desc:"if Owner is a slice, this is the index for the value in the slice"`
 
-	// type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface
-	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface"`
+	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface
+	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
 	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
@@ -568,14 +568,14 @@ type ValueViewBase struct {
 	Listeners events.Listeners
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 }
 
-func (vv *ValueViewBase) AsValueViewBase() *ValueViewBase {
+func (vv *ValueBase) AsValueBase() *ValueBase {
 	return vv
 }
 
-func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave ValueView, viewPath string) {
+func (vv *ValueBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
 	vv.Owner = owner
@@ -585,7 +585,7 @@ func (vv *ValueViewBase) SetStructValue(val reflect.Value, owner any, field *ref
 	vv.SetName(field.Name)
 }
 
-func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner any, tmpSave ValueView) {
+func (vv *ValueBase) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
 	vv.OwnKind = reflect.Map
 	vv.IsMapKey = true
 	vv.Value = key
@@ -594,7 +594,7 @@ func (vv *ValueViewBase) SetMapKey(key reflect.Value, owner any, tmpSave ValueVi
 	vv.SetName(laser.ToString(key.Interface()))
 }
 
-func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner any, key any, keyView ValueView, tmpSave ValueView, viewPath string) {
+func (vv *ValueBase) SetMapValue(val reflect.Value, owner any, key any, keyView Value, tmpSave Value, viewPath string) {
 	vv.OwnKind = reflect.Map
 	vv.Value = val
 	vv.Owner = owner
@@ -606,7 +606,7 @@ func (vv *ValueViewBase) SetMapValue(val reflect.Value, owner any, key any, keyV
 	vv.SetName(keystr)
 }
 
-func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave ValueView, viewPath string) {
+func (vv *ValueBase) SetSliceValue(val reflect.Value, owner any, idx int, tmpSave Value, viewPath string) {
 	vv.OwnKind = reflect.Slice
 	vv.Value = val
 	vv.Owner = owner
@@ -628,7 +628,7 @@ func (vv *ValueViewBase) SetSliceValue(val reflect.Value, owner any, idx int, tm
 
 // SetSoloValue sets the value for a singleton standalone value
 // (e.g., for arg values).
-func (vv *ValueViewBase) SetSoloValue(val reflect.Value) {
+func (vv *ValueBase) SetSoloValue(val reflect.Value) {
 	vv.OwnKind = reflect.Invalid
 	vv.Value = val
 }
@@ -638,17 +638,17 @@ func (vv *ValueViewBase) SetSoloValue(val reflect.Value) {
 // for now, this cannot be a method because gopy doesn't find the
 // key comment below that tells it what to do with the interface
 // gopy:interface=handle
-func SetSoloValueIface(vv *ValueViewBase, val any) {
+func SetSoloValueIface(vv *ValueBase, val any) {
 	vv.OwnKind = reflect.Invalid
 	vv.Value = reflect.ValueOf(val)
 }
 
 // we have this one accessor b/c it is more useful for outside consumers vs. internal usage
-func (vv *ValueViewBase) OwnerKind() reflect.Kind {
+func (vv *ValueBase) OwnerKind() reflect.Kind {
 	return vv.OwnKind
 }
 
-func (vv *ValueViewBase) IsInactive() bool {
+func (vv *ValueBase) IsInactive() bool {
 	if vv.OwnKind == reflect.Struct {
 		if _, ok := vv.Tag("inactive"); ok {
 			return true
@@ -661,19 +661,19 @@ func (vv *ValueViewBase) IsInactive() bool {
 	return false
 }
 
-func (vv *ValueViewBase) HasDialog() bool {
+func (vv *ValueBase) HasDialog() bool {
 	return false
 }
 
-func (vv *ValueViewBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ValueBase) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 }
 
-func (vv *ValueViewBase) Val() reflect.Value {
+func (vv *ValueBase) Val() reflect.Value {
 	return vv.Value
 }
 
-func (vv *ValueViewBase) SetValue(val any) bool {
-	if vv.This().(ValueView).IsInactive() {
+func (vv *ValueBase) SetValue(val any) bool {
+	if vv.This().(Value).IsInactive() {
 		return false
 	}
 	var err error
@@ -697,7 +697,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 		wasSet = true
 	}
 	if wasSet {
-		vv.This().(ValueView).SaveTmp()
+		vv.This().(Value).SaveTmp()
 	}
 	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
 	vv.SendChange()
@@ -708,7 +708,7 @@ func (vv *ValueViewBase) SetValue(val any) bool {
 	return wasSet
 }
 
-func (vv *ValueViewBase) SetValueMap(val any) (bool, error) {
+func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 	ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
 	wasSet := false
 	var err error
@@ -727,7 +727,7 @@ func (vv *ValueViewBase) SetValueMap(val any) (bool, error) {
 						ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 						ov.SetMapIndex(nv, cv)              // set new key to current value
 						vv.Value = nv                       // update value to new key
-						vv.This().(ValueView).SaveTmp()
+						vv.This().(Value).SaveTmp()
 						vv.SendChange()
 					}
 				})
@@ -750,20 +750,20 @@ func (vv *ValueViewBase) SetValueMap(val any) (bool, error) {
 	return wasSet, err
 }
 
-// OnChange registers given listener function for Change events on ValueView.
-// This is the primary notification event for all ValueView elements.
-func (vv *ValueViewBase) OnChange(fun func(e events.Event)) {
+// OnChange registers given listener function for Change events on Value.
+// This is the primary notification event for all Value elements.
+func (vv *ValueBase) OnChange(fun func(e events.Event)) {
 	vv.On(events.Change, fun)
 }
 
 // On adds an event listener function for the given event type
-func (vv *ValueViewBase) On(etype events.Types, fun func(e events.Event)) {
+func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
 	vv.Listeners.Add(etype, fun)
 }
 
 // SendChange sends events.Change event to all listeners registered on this view.
-// This is the primary notification event for all ValueView elements.
-func (vv *ValueViewBase) SendChange() {
+// This is the primary notification event for all Value elements.
+func (vv *ValueBase) SendChange() {
 	vv.Send(events.Change, nil)
 }
 
@@ -773,7 +773,7 @@ func (vv *ValueViewBase) SendChange() {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (vv *ValueViewBase) Send(typ events.Types, orig events.Event) {
+func (vv *ValueBase) Send(typ events.Types, orig events.Event) {
 	var e events.Event
 	if orig != nil {
 		e = orig.Clone()
@@ -788,18 +788,18 @@ func (vv *ValueViewBase) Send(typ events.Types, orig events.Event) {
 // It also checks if the State has changed and calls ApplyStyle if so.
 // If more significant Config level changes are needed due to an event,
 // the event handler must do this itself.
-func (vv *ValueViewBase) HandleEvent(ev events.Event) {
+func (vv *ValueBase) HandleEvent(ev events.Event) {
 	if gi.EventTrace {
-		fmt.Println("Event to ValueView:", vv.String(), ev.String())
+		fmt.Println("Event to Value:", vv.String(), ev.String())
 	}
 	vv.Listeners.Call(ev)
 }
 
-func (vv *ValueViewBase) SaveTmp() {
+func (vv *ValueBase) SaveTmp() {
 	if vv.TmpSave == nil {
 		return
 	}
-	if vv.TmpSave == vv.This().(ValueView) {
+	if vv.TmpSave == vv.This().(Value) {
 		// if we are a map value, of a struct value, we save our value
 		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.IsMapKey {
 			if laser.NonPtrValue(vv.Value).Kind() == reflect.Struct {
@@ -818,9 +818,9 @@ func (vv *ValueViewBase) SaveTmp() {
 	}
 }
 
-func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
+func (vv *ValueBase) CreateTempIfNotPtr() bool {
 	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
-		vv.TmpSave = vv.This().(ValueView) // we are it!
+		vv.TmpSave = vv.This().(Value) // we are it!
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)
 		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
@@ -831,7 +831,7 @@ func (vv *ValueViewBase) CreateTempIfNotPtr() bool {
 	return false
 }
 
-func (vv *ValueViewBase) SetTags(tags map[string]string) {
+func (vv *ValueBase) SetTags(tags map[string]string) {
 	if vv.Tags == nil {
 		vv.Tags = make(map[string]string, len(tags))
 	}
@@ -840,14 +840,14 @@ func (vv *ValueViewBase) SetTags(tags map[string]string) {
 	}
 }
 
-func (vv *ValueViewBase) SetTag(tag, value string) {
+func (vv *ValueBase) SetTag(tag, value string) {
 	if vv.Tags == nil {
 		vv.Tags = make(map[string]string, 10)
 	}
 	vv.Tags[tag] = value
 }
 
-func (vv *ValueViewBase) Tag(tag string) (string, bool) {
+func (vv *ValueBase) Tag(tag string) (string, bool) {
 	if vv.Tags != nil {
 		if tv, ok := vv.Tags[tag]; ok {
 			return tv, ok
@@ -859,7 +859,7 @@ func (vv *ValueViewBase) Tag(tag string) (string, bool) {
 	return vv.Field.Tag.Lookup(tag)
 }
 
-func (vv *ValueViewBase) AllTags() map[string]string {
+func (vv *ValueBase) AllTags() map[string]string {
 	rvt := make(map[string]string)
 	if vv.Tags != nil {
 		for key, val := range vv.Tags {
@@ -878,7 +878,7 @@ func (vv *ValueViewBase) AllTags() map[string]string {
 
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
-func (vv *ValueViewBase) OwnerLabel() string {
+func (vv *ValueBase) OwnerLabel() string {
 	if vv.Owner == nil {
 		return ""
 	}
@@ -923,7 +923,7 @@ func (vv *ValueViewBase) OwnerLabel() string {
 // newPath returns just what should be added to a ViewPath
 // also includes zero value check reported in the isZero bool, which
 // can be used for not proceeding in case of non-value-based types.
-func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
+func (vv *ValueBase) Label() (label, newPath string, isZero bool) {
 	lbl := ""
 	var npt reflect.Type
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
@@ -946,14 +946,14 @@ func (vv *ValueViewBase) Label() (label, newPath string, isZero bool) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//   Base Widget Functions -- these are typically redefined in ValueView subtypes
+//   Base Widget Functions -- these are typically redefined in Value subtypes
 
-func (vv *ValueViewBase) WidgetType() *gti.Type {
+func (vv *ValueBase) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.TextFieldType
 	return vv.WidgetTyp
 }
 
-func (vv *ValueViewBase) UpdateWidget() {
+func (vv *ValueBase) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -968,7 +968,7 @@ func (vv *ValueViewBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
+func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf, ok := vv.Widget.(*gi.TextField)
@@ -977,7 +977,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Tag("desc")
-	tf.SetState(vv.This().(ValueView).IsInactive(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -988,7 +988,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 		in = append(in, reflect.ValueOf(completetag)) // pass tag value - object may doing completion on multiple fields
 		cmpfv := reflect.ValueOf(vv.Owner).MethodByName("SetCompleter")
 		if laser.ValueIsZero(cmpfv) {
-			log.Printf("giv.ValueViewBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
+			log.Printf("giv.ValueBase: programmer error -- SetCompleter method not found in type: %T\n", vv.Owner)
 		} else {
 			cmpfv.Call(in)
 		}
@@ -1003,7 +1003,7 @@ func (vv *ValueViewBase) ConfigWidget(widg gi.Widget) {
 }
 
 // StdConfigWidget does all of the standard widget configuration tag options
-func (vv *ValueViewBase) StdConfigWidget(widg gi.Widget) {
+func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 	// STYTODO: get rid of this
 	nb := widg.AsWidget()
 	if widthtag, ok := vv.Tag("width"); ok {
@@ -1103,7 +1103,7 @@ func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  VersCtrlValueView
+//  VersCtrlValue
 
 // VersCtrlSystems is a list of supported Version Control Systems.
 // These must match the VCS Types from goki/pi/vci which in turn
@@ -1136,25 +1136,25 @@ func VersCtrlNameProper(vc string) VersCtrlName {
 	return ""
 }
 
-// ValueView registers VersCtrlValueView as the viewer of VersCtrlName
-func (kn VersCtrlName) ValueView() ValueView {
-	vv := &VersCtrlValueView{}
+// Value registers VersCtrlValue as the viewer of VersCtrlName
+func (kn VersCtrlName) Value() Value {
+	vv := &VersCtrlValue{}
 	ki.InitNode(vv)
 	return vv
 }
 
-// VersCtrlValueView presents an action for displaying an VersCtrlName and selecting
+// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
 // from StringPopup
-type VersCtrlValueView struct {
-	ValueViewBase
+type VersCtrlValue struct {
+	ValueBase
 }
 
-func (vv *VersCtrlValueView) WidgetType() *gti.Type {
+func (vv *VersCtrlValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *VersCtrlValueView) UpdateWidget() {
+func (vv *VersCtrlValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -1166,7 +1166,7 @@ func (vv *VersCtrlValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
+func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	ac := vv.Widget.(*gi.Button)
 	ac.OnClick(func(e events.Event) {
@@ -1175,11 +1175,11 @@ func (vv *VersCtrlValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *VersCtrlValueView) HasDialog() bool {
+func (vv *VersCtrlValue) HasDialog() bool {
 	return true
 }
 
-func (vv *VersCtrlValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

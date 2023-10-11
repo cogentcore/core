@@ -14,20 +14,20 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  FontValueView
+//  FontValue
 
-// FontValueView presents an action for displaying a FontName and selecting
+// FontValue presents an action for displaying a FontName and selecting
 // fonts from FontChooserDialog
-type FontValueView struct {
-	ValueViewBase
+type FontValue struct {
+	ValueBase
 }
 
-func (vv *FontValueView) WidgetType() *gti.Type {
+func (vv *FontValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *FontValueView) UpdateWidget() {
+func (vv *FontValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (vv *FontValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
+func (vv *FontValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -48,11 +48,11 @@ func (vv *FontValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *FontValueView) HasDialog() bool {
+func (vv *FontValue) HasDialog() bool {
 	return true
 }
 
-func (vv *FontValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

@@ -250,7 +250,7 @@ const (
 	FileViewSignalsN
 )
 
-func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
+func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value) {
 	// STYTODO: get rid of this and move to OnChildAdded
 	finf, ok := slice.([]*filecat.FileInfo)
 	if ok {

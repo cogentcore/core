@@ -16,20 +16,20 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  IconValueView
+//  IconValue
 
-// IconValueView presents an action for displaying an IconName and selecting
+// IconValue presents an action for displaying an IconName and selecting
 // icons from IconChooserDialog
-type IconValueView struct {
-	ValueViewBase
+type IconValue struct {
+	ValueBase
 }
 
-func (vv *IconValueView) WidgetType() *gti.Type {
+func (vv *IconValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *IconValueView) UpdateWidget() {
+func (vv *IconValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -50,7 +50,7 @@ func (vv *IconValueView) UpdateWidget() {
 	}
 }
 
-func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
+func (vv *IconValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -63,11 +63,11 @@ func (vv *IconValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *IconValueView) HasDialog() bool {
+func (vv *IconValue) HasDialog() bool {
 	return true
 }
 
-func (vv *IconValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

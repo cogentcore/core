@@ -12,20 +12,20 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  FileValueView
+//  FileValue
 
-// FileValueView presents an action for displaying a FileName and selecting
+// FileValue presents an action for displaying a FileName and selecting
 // icons from FileChooserDialog
-type FileValueView struct {
-	ValueViewBase
+type FileValue struct {
+	ValueBase
 }
 
-func (vv *FileValueView) WidgetType() *gti.Type {
+func (vv *FileValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *FileValueView) UpdateWidget() {
+func (vv *FileValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (vv *FileValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
+func (vv *FileValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -48,11 +48,11 @@ func (vv *FileValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *FileValueView) HasDialog() bool {
+func (vv *FileValue) HasDialog() bool {
 	return true
 }
 
-func (vv *FileValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

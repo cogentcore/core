@@ -12,7 +12,7 @@ This editor allows you to interactively build new GUI designs, and save / load t
 
 The left panel shows the `TreeView` representation of the 2D scenegraph underlying the widgets demo.  You can click on the various nodes and see / edit all the properties in the right panel, which is showing a `StructView` property editor for the selected node.
 
-This editor demonstrates the `ValueView` framework that manages the mapping of arbitrary values using the `reflect.Value` system, to editable GUI representations of those values, as then used in larger-scale views such as the `StructView`.  This editor is fully generic and available for editing any kind of content -- thus providing a basic default gui for interacting with native Go datastructures.
+This editor demonstrates the `Value` framework that manages the mapping of arbitrary values using the `reflect.Value` system, to editable GUI representations of those values, as then used in larger-scale views such as the `StructView`.  This editor is fully generic and available for editing any kind of content -- thus providing a basic default gui for interacting with native Go datastructures.
 
 Here are some fun things to try:
 
@@ -46,6 +46,6 @@ Because everything is just rendered directly, it is easy to adjust the scale. Us
 
 ## Summary
 
-The `ValueView` generic relfection-based gui supports all the above functionality with essentially no additional code.  Thus, the system is highly efficient and elegant, and leverages the power of the Go reflection system to minimize the additional coding necessary to interact with Go data structures.
+The `Value` generic relfection-based gui supports all the above functionality with essentially no additional code.  Thus, the system is highly efficient and elegant, and leverages the power of the Go reflection system to minimize the additional coding necessary to interact with Go data structures.
 
 

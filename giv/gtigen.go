@@ -45,78 +45,78 @@ func (t *ArgView) New() ki.Ki {
 	return &ArgView{}
 }
 
-// StructValueViewType is the [gti.Type] for [StructValueView]
-var StructValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.StructValueView",
-	ShortName:  "giv.StructValueView",
-	IDName:     "struct-value-view",
-	Doc:        "StructValueView presents a button to edit the struct",
+// StructValueType is the [gti.Type] for [StructValue]
+var StructValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.StructValue",
+	ShortName:  "giv.StructValue",
+	IDName:     "struct-value",
+	Doc:        "StructValue presents a button to edit the struct",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &StructValueView{},
+	Instance: &StructValue{},
 })
 
-// NewStructValueView adds a new [StructValueView] with the given name
+// NewStructValue adds a new [StructValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStructValueView(par ki.Ki, name ...string) *StructValueView {
-	return par.NewChild(StructValueViewType, name...).(*StructValueView)
+func NewStructValue(par ki.Ki, name ...string) *StructValue {
+	return par.NewChild(StructValueType, name...).(*StructValue)
 }
 
-// KiType returns the [*gti.Type] of [StructValueView]
-func (t *StructValueView) KiType() *gti.Type {
-	return StructValueViewType
+// KiType returns the [*gti.Type] of [StructValue]
+func (t *StructValue) KiType() *gti.Type {
+	return StructValueType
 }
 
-// New returns a new [*StructValueView] value
-func (t *StructValueView) New() ki.Ki {
-	return &StructValueView{}
+// New returns a new [*StructValue] value
+func (t *StructValue) New() ki.Ki {
+	return &StructValue{}
 }
 
-// StructInlineValueViewType is the [gti.Type] for [StructInlineValueView]
-var StructInlineValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.StructInlineValueView",
-	ShortName:  "giv.StructInlineValueView",
-	IDName:     "struct-inline-value-view",
-	Doc:        "StructInlineValueView presents a StructViewInline for a struct",
+// StructInlineValueType is the [gti.Type] for [StructInlineValue]
+var StructInlineValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.StructInlineValue",
+	ShortName:  "giv.StructInlineValue",
+	IDName:     "struct-inline-value",
+	Doc:        "StructInlineValue presents a StructViewInline for a struct",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &StructInlineValueView{},
+	Instance: &StructInlineValue{},
 })
 
-// NewStructInlineValueView adds a new [StructInlineValueView] with the given name
+// NewStructInlineValue adds a new [StructInlineValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewStructInlineValueView(par ki.Ki, name ...string) *StructInlineValueView {
-	return par.NewChild(StructInlineValueViewType, name...).(*StructInlineValueView)
+func NewStructInlineValue(par ki.Ki, name ...string) *StructInlineValue {
+	return par.NewChild(StructInlineValueType, name...).(*StructInlineValue)
 }
 
-// KiType returns the [*gti.Type] of [StructInlineValueView]
-func (t *StructInlineValueView) KiType() *gti.Type {
-	return StructInlineValueViewType
+// KiType returns the [*gti.Type] of [StructInlineValue]
+func (t *StructInlineValue) KiType() *gti.Type {
+	return StructInlineValueType
 }
 
-// New returns a new [*StructInlineValueView] value
-func (t *StructInlineValueView) New() ki.Ki {
-	return &StructInlineValueView{}
+// New returns a new [*StructInlineValue] value
+func (t *StructInlineValue) New() ki.Ki {
+	return &StructInlineValue{}
 }
 
-// SliceValueViewType is the [gti.Type] for [SliceValueView]
-var SliceValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.SliceValueView",
-	ShortName:  "giv.SliceValueView",
-	IDName:     "slice-value-view",
-	Doc:        "SliceValueView presents a button to edit slices",
+// SliceValueType is the [gti.Type] for [SliceValue]
+var SliceValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.SliceValue",
+	ShortName:  "giv.SliceValue",
+	IDName:     "slice-value",
+	Doc:        "SliceValue presents a button to edit slices",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", Doc: "", Directives: gti.Directives{}}},
@@ -124,292 +124,292 @@ var SliceValueViewType = gti.AddType(&gti.Type{
 		{"ElIsStruct", &gti.Field{Name: "ElIsStruct", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SliceValueView{},
+	Instance: &SliceValue{},
 })
 
-// NewSliceValueView adds a new [SliceValueView] with the given name
+// NewSliceValue adds a new [SliceValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSliceValueView(par ki.Ki, name ...string) *SliceValueView {
-	return par.NewChild(SliceValueViewType, name...).(*SliceValueView)
+func NewSliceValue(par ki.Ki, name ...string) *SliceValue {
+	return par.NewChild(SliceValueType, name...).(*SliceValue)
 }
 
-// KiType returns the [*gti.Type] of [SliceValueView]
-func (t *SliceValueView) KiType() *gti.Type {
-	return SliceValueViewType
+// KiType returns the [*gti.Type] of [SliceValue]
+func (t *SliceValue) KiType() *gti.Type {
+	return SliceValueType
 }
 
-// New returns a new [*SliceValueView] value
-func (t *SliceValueView) New() ki.Ki {
-	return &SliceValueView{}
+// New returns a new [*SliceValue] value
+func (t *SliceValue) New() ki.Ki {
+	return &SliceValue{}
 }
 
-// SliceInlineValueViewType is the [gti.Type] for [SliceInlineValueView]
-var SliceInlineValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.SliceInlineValueView",
-	ShortName:  "giv.SliceInlineValueView",
-	IDName:     "slice-inline-value-view",
-	Doc:        "SliceInlineValueView presents a SliceViewInline for a map",
+// SliceInlineValueType is the [gti.Type] for [SliceInlineValue]
+var SliceInlineValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.SliceInlineValue",
+	ShortName:  "giv.SliceInlineValue",
+	IDName:     "slice-inline-value",
+	Doc:        "SliceInlineValue presents a SliceViewInline for a map",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SliceInlineValueView{},
+	Instance: &SliceInlineValue{},
 })
 
-// NewSliceInlineValueView adds a new [SliceInlineValueView] with the given name
+// NewSliceInlineValue adds a new [SliceInlineValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSliceInlineValueView(par ki.Ki, name ...string) *SliceInlineValueView {
-	return par.NewChild(SliceInlineValueViewType, name...).(*SliceInlineValueView)
+func NewSliceInlineValue(par ki.Ki, name ...string) *SliceInlineValue {
+	return par.NewChild(SliceInlineValueType, name...).(*SliceInlineValue)
 }
 
-// KiType returns the [*gti.Type] of [SliceInlineValueView]
-func (t *SliceInlineValueView) KiType() *gti.Type {
-	return SliceInlineValueViewType
+// KiType returns the [*gti.Type] of [SliceInlineValue]
+func (t *SliceInlineValue) KiType() *gti.Type {
+	return SliceInlineValueType
 }
 
-// New returns a new [*SliceInlineValueView] value
-func (t *SliceInlineValueView) New() ki.Ki {
-	return &SliceInlineValueView{}
+// New returns a new [*SliceInlineValue] value
+func (t *SliceInlineValue) New() ki.Ki {
+	return &SliceInlineValue{}
 }
 
-// MapValueViewType is the [gti.Type] for [MapValueView]
-var MapValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.MapValueView",
-	ShortName:  "giv.MapValueView",
-	IDName:     "map-value-view",
-	Doc:        "MapValueView presents a button to edit maps",
+// MapValueType is the [gti.Type] for [MapValue]
+var MapValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.MapValue",
+	ShortName:  "giv.MapValue",
+	IDName:     "map-value",
+	Doc:        "MapValue presents a button to edit maps",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &MapValueView{},
+	Instance: &MapValue{},
 })
 
-// NewMapValueView adds a new [MapValueView] with the given name
+// NewMapValue adds a new [MapValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewMapValueView(par ki.Ki, name ...string) *MapValueView {
-	return par.NewChild(MapValueViewType, name...).(*MapValueView)
+func NewMapValue(par ki.Ki, name ...string) *MapValue {
+	return par.NewChild(MapValueType, name...).(*MapValue)
 }
 
-// KiType returns the [*gti.Type] of [MapValueView]
-func (t *MapValueView) KiType() *gti.Type {
-	return MapValueViewType
+// KiType returns the [*gti.Type] of [MapValue]
+func (t *MapValue) KiType() *gti.Type {
+	return MapValueType
 }
 
-// New returns a new [*MapValueView] value
-func (t *MapValueView) New() ki.Ki {
-	return &MapValueView{}
+// New returns a new [*MapValue] value
+func (t *MapValue) New() ki.Ki {
+	return &MapValue{}
 }
 
-// MapInlineValueViewType is the [gti.Type] for [MapInlineValueView]
-var MapInlineValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.MapInlineValueView",
-	ShortName:  "giv.MapInlineValueView",
-	IDName:     "map-inline-value-view",
-	Doc:        "MapInlineValueView presents a MapViewInline for a map",
+// MapInlineValueType is the [gti.Type] for [MapInlineValue]
+var MapInlineValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.MapInlineValue",
+	ShortName:  "giv.MapInlineValue",
+	IDName:     "map-inline-value",
+	Doc:        "MapInlineValue presents a MapViewInline for a map",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &MapInlineValueView{},
+	Instance: &MapInlineValue{},
 })
 
-// NewMapInlineValueView adds a new [MapInlineValueView] with the given name
+// NewMapInlineValue adds a new [MapInlineValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewMapInlineValueView(par ki.Ki, name ...string) *MapInlineValueView {
-	return par.NewChild(MapInlineValueViewType, name...).(*MapInlineValueView)
+func NewMapInlineValue(par ki.Ki, name ...string) *MapInlineValue {
+	return par.NewChild(MapInlineValueType, name...).(*MapInlineValue)
 }
 
-// KiType returns the [*gti.Type] of [MapInlineValueView]
-func (t *MapInlineValueView) KiType() *gti.Type {
-	return MapInlineValueViewType
+// KiType returns the [*gti.Type] of [MapInlineValue]
+func (t *MapInlineValue) KiType() *gti.Type {
+	return MapInlineValueType
 }
 
-// New returns a new [*MapInlineValueView] value
-func (t *MapInlineValueView) New() ki.Ki {
-	return &MapInlineValueView{}
+// New returns a new [*MapInlineValue] value
+func (t *MapInlineValue) New() ki.Ki {
+	return &MapInlineValue{}
 }
 
-// KiPtrValueViewType is the [gti.Type] for [KiPtrValueView]
-var KiPtrValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.KiPtrValueView",
-	ShortName:  "giv.KiPtrValueView",
-	IDName:     "ki-ptr-value-view",
-	Doc:        "KiPtrValueView provides a chooser for pointers to Ki objects",
+// KiPtrValueType is the [gti.Type] for [KiPtrValue]
+var KiPtrValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.KiPtrValue",
+	ShortName:  "giv.KiPtrValue",
+	IDName:     "ki-ptr-value",
+	Doc:        "KiPtrValue provides a chooser for pointers to Ki objects",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &KiPtrValueView{},
+	Instance: &KiPtrValue{},
 })
 
-// NewKiPtrValueView adds a new [KiPtrValueView] with the given name
+// NewKiPtrValue adds a new [KiPtrValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewKiPtrValueView(par ki.Ki, name ...string) *KiPtrValueView {
-	return par.NewChild(KiPtrValueViewType, name...).(*KiPtrValueView)
+func NewKiPtrValue(par ki.Ki, name ...string) *KiPtrValue {
+	return par.NewChild(KiPtrValueType, name...).(*KiPtrValue)
 }
 
-// KiType returns the [*gti.Type] of [KiPtrValueView]
-func (t *KiPtrValueView) KiType() *gti.Type {
-	return KiPtrValueViewType
+// KiType returns the [*gti.Type] of [KiPtrValue]
+func (t *KiPtrValue) KiType() *gti.Type {
+	return KiPtrValueType
 }
 
-// New returns a new [*KiPtrValueView] value
-func (t *KiPtrValueView) New() ki.Ki {
-	return &KiPtrValueView{}
+// New returns a new [*KiPtrValue] value
+func (t *KiPtrValue) New() ki.Ki {
+	return &KiPtrValue{}
 }
 
-// BoolValueViewType is the [gti.Type] for [BoolValueView]
-var BoolValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.BoolValueView",
-	ShortName:  "giv.BoolValueView",
-	IDName:     "bool-value-view",
-	Doc:        "BoolValueView presents a checkbox for a boolean",
+// BoolValueType is the [gti.Type] for [BoolValue]
+var BoolValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.BoolValue",
+	ShortName:  "giv.BoolValue",
+	IDName:     "bool-value",
+	Doc:        "BoolValue presents a checkbox for a boolean",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &BoolValueView{},
+	Instance: &BoolValue{},
 })
 
-// NewBoolValueView adds a new [BoolValueView] with the given name
+// NewBoolValue adds a new [BoolValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewBoolValueView(par ki.Ki, name ...string) *BoolValueView {
-	return par.NewChild(BoolValueViewType, name...).(*BoolValueView)
+func NewBoolValue(par ki.Ki, name ...string) *BoolValue {
+	return par.NewChild(BoolValueType, name...).(*BoolValue)
 }
 
-// KiType returns the [*gti.Type] of [BoolValueView]
-func (t *BoolValueView) KiType() *gti.Type {
-	return BoolValueViewType
+// KiType returns the [*gti.Type] of [BoolValue]
+func (t *BoolValue) KiType() *gti.Type {
+	return BoolValueType
 }
 
-// New returns a new [*BoolValueView] value
-func (t *BoolValueView) New() ki.Ki {
-	return &BoolValueView{}
+// New returns a new [*BoolValue] value
+func (t *BoolValue) New() ki.Ki {
+	return &BoolValue{}
 }
 
-// IntValueViewType is the [gti.Type] for [IntValueView]
-var IntValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.IntValueView",
-	ShortName:  "giv.IntValueView",
-	IDName:     "int-value-view",
-	Doc:        "IntValueView presents a spinner",
+// IntValueType is the [gti.Type] for [IntValue]
+var IntValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.IntValue",
+	ShortName:  "giv.IntValue",
+	IDName:     "int-value",
+	Doc:        "IntValue presents a spinner",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &IntValueView{},
+	Instance: &IntValue{},
 })
 
-// NewIntValueView adds a new [IntValueView] with the given name
+// NewIntValue adds a new [IntValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewIntValueView(par ki.Ki, name ...string) *IntValueView {
-	return par.NewChild(IntValueViewType, name...).(*IntValueView)
+func NewIntValue(par ki.Ki, name ...string) *IntValue {
+	return par.NewChild(IntValueType, name...).(*IntValue)
 }
 
-// KiType returns the [*gti.Type] of [IntValueView]
-func (t *IntValueView) KiType() *gti.Type {
-	return IntValueViewType
+// KiType returns the [*gti.Type] of [IntValue]
+func (t *IntValue) KiType() *gti.Type {
+	return IntValueType
 }
 
-// New returns a new [*IntValueView] value
-func (t *IntValueView) New() ki.Ki {
-	return &IntValueView{}
+// New returns a new [*IntValue] value
+func (t *IntValue) New() ki.Ki {
+	return &IntValue{}
 }
 
-// FloatValueViewType is the [gti.Type] for [FloatValueView]
-var FloatValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FloatValueView",
-	ShortName:  "giv.FloatValueView",
-	IDName:     "float-value-view",
-	Doc:        "FloatValueView presents a spinner",
+// FloatValueType is the [gti.Type] for [FloatValue]
+var FloatValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.FloatValue",
+	ShortName:  "giv.FloatValue",
+	IDName:     "float-value",
+	Doc:        "FloatValue presents a spinner",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FloatValueView{},
+	Instance: &FloatValue{},
 })
 
-// NewFloatValueView adds a new [FloatValueView] with the given name
+// NewFloatValue adds a new [FloatValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFloatValueView(par ki.Ki, name ...string) *FloatValueView {
-	return par.NewChild(FloatValueViewType, name...).(*FloatValueView)
+func NewFloatValue(par ki.Ki, name ...string) *FloatValue {
+	return par.NewChild(FloatValueType, name...).(*FloatValue)
 }
 
-// KiType returns the [*gti.Type] of [FloatValueView]
-func (t *FloatValueView) KiType() *gti.Type {
-	return FloatValueViewType
+// KiType returns the [*gti.Type] of [FloatValue]
+func (t *FloatValue) KiType() *gti.Type {
+	return FloatValueType
 }
 
-// New returns a new [*FloatValueView] value
-func (t *FloatValueView) New() ki.Ki {
-	return &FloatValueView{}
+// New returns a new [*FloatValue] value
+func (t *FloatValue) New() ki.Ki {
+	return &FloatValue{}
 }
 
-// EnumValueViewType is the [gti.Type] for [EnumValueView]
-var EnumValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.EnumValueView",
-	ShortName:  "giv.EnumValueView",
-	IDName:     "enum-value-view",
-	Doc:        "EnumValueView presents a chooser for choosing enums",
+// EnumValueType is the [gti.Type] for [EnumValue]
+var EnumValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.EnumValue",
+	ShortName:  "giv.EnumValue",
+	IDName:     "enum-value",
+	Doc:        "EnumValue presents a chooser for choosing enums",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &EnumValueView{},
+	Instance: &EnumValue{},
 })
 
-// NewEnumValueView adds a new [EnumValueView] with the given name
+// NewEnumValue adds a new [EnumValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewEnumValueView(par ki.Ki, name ...string) *EnumValueView {
-	return par.NewChild(EnumValueViewType, name...).(*EnumValueView)
+func NewEnumValue(par ki.Ki, name ...string) *EnumValue {
+	return par.NewChild(EnumValueType, name...).(*EnumValue)
 }
 
-// KiType returns the [*gti.Type] of [EnumValueView]
-func (t *EnumValueView) KiType() *gti.Type {
-	return EnumValueViewType
+// KiType returns the [*gti.Type] of [EnumValue]
+func (t *EnumValue) KiType() *gti.Type {
+	return EnumValueType
 }
 
-// New returns a new [*EnumValueView] value
-func (t *EnumValueView) New() ki.Ki {
-	return &EnumValueView{}
+// New returns a new [*EnumValue] value
+func (t *EnumValue) New() ki.Ki {
+	return &EnumValue{}
 }
 
 // BitFlagViewType is the [gti.Type] for [BitFlagView]
@@ -423,7 +423,7 @@ var BitFlagViewType = gti.AddType(&gti.Type{
 		{"AltType", &gti.Field{Name: "AltType", Type: "reflect.Type", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &BitFlagView{},
@@ -447,169 +447,169 @@ func (t *BitFlagView) New() ki.Ki {
 	return &BitFlagView{}
 }
 
-// TypeValueViewType is the [gti.Type] for [TypeValueView]
-var TypeValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.TypeValueView",
-	ShortName:  "giv.TypeValueView",
-	IDName:     "type-value-view",
-	Doc:        "TypeValueView presents a chooser for choosing types",
+// TypeValueType is the [gti.Type] for [TypeValue]
+var TypeValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.TypeValue",
+	ShortName:  "giv.TypeValue",
+	IDName:     "type-value",
+	Doc:        "TypeValue presents a chooser for choosing types",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TypeValueView{},
+	Instance: &TypeValue{},
 })
 
-// NewTypeValueView adds a new [TypeValueView] with the given name
+// NewTypeValue adds a new [TypeValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTypeValueView(par ki.Ki, name ...string) *TypeValueView {
-	return par.NewChild(TypeValueViewType, name...).(*TypeValueView)
+func NewTypeValue(par ki.Ki, name ...string) *TypeValue {
+	return par.NewChild(TypeValueType, name...).(*TypeValue)
 }
 
-// KiType returns the [*gti.Type] of [TypeValueView]
-func (t *TypeValueView) KiType() *gti.Type {
-	return TypeValueViewType
+// KiType returns the [*gti.Type] of [TypeValue]
+func (t *TypeValue) KiType() *gti.Type {
+	return TypeValueType
 }
 
-// New returns a new [*TypeValueView] value
-func (t *TypeValueView) New() ki.Ki {
-	return &TypeValueView{}
+// New returns a new [*TypeValue] value
+func (t *TypeValue) New() ki.Ki {
+	return &TypeValue{}
 }
 
-// ByteSliceValueViewType is the [gti.Type] for [ByteSliceValueView]
-var ByteSliceValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ByteSliceValueView",
-	ShortName:  "giv.ByteSliceValueView",
-	IDName:     "byte-slice-value-view",
-	Doc:        "ByteSliceValueView presents a textfield of the bytes",
+// ByteSliceValueType is the [gti.Type] for [ByteSliceValue]
+var ByteSliceValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.ByteSliceValue",
+	ShortName:  "giv.ByteSliceValue",
+	IDName:     "byte-slice-value",
+	Doc:        "ByteSliceValue presents a textfield of the bytes",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ByteSliceValueView{},
+	Instance: &ByteSliceValue{},
 })
 
-// NewByteSliceValueView adds a new [ByteSliceValueView] with the given name
+// NewByteSliceValue adds a new [ByteSliceValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewByteSliceValueView(par ki.Ki, name ...string) *ByteSliceValueView {
-	return par.NewChild(ByteSliceValueViewType, name...).(*ByteSliceValueView)
+func NewByteSliceValue(par ki.Ki, name ...string) *ByteSliceValue {
+	return par.NewChild(ByteSliceValueType, name...).(*ByteSliceValue)
 }
 
-// KiType returns the [*gti.Type] of [ByteSliceValueView]
-func (t *ByteSliceValueView) KiType() *gti.Type {
-	return ByteSliceValueViewType
+// KiType returns the [*gti.Type] of [ByteSliceValue]
+func (t *ByteSliceValue) KiType() *gti.Type {
+	return ByteSliceValueType
 }
 
-// New returns a new [*ByteSliceValueView] value
-func (t *ByteSliceValueView) New() ki.Ki {
-	return &ByteSliceValueView{}
+// New returns a new [*ByteSliceValue] value
+func (t *ByteSliceValue) New() ki.Ki {
+	return &ByteSliceValue{}
 }
 
-// RuneSliceValueViewType is the [gti.Type] for [RuneSliceValueView]
-var RuneSliceValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.RuneSliceValueView",
-	ShortName:  "giv.RuneSliceValueView",
-	IDName:     "rune-slice-value-view",
-	Doc:        "RuneSliceValueView presents a textfield of the bytes",
+// RuneSliceValueType is the [gti.Type] for [RuneSliceValue]
+var RuneSliceValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.RuneSliceValue",
+	ShortName:  "giv.RuneSliceValue",
+	IDName:     "rune-slice-value",
+	Doc:        "RuneSliceValue presents a textfield of the bytes",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &RuneSliceValueView{},
+	Instance: &RuneSliceValue{},
 })
 
-// NewRuneSliceValueView adds a new [RuneSliceValueView] with the given name
+// NewRuneSliceValue adds a new [RuneSliceValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewRuneSliceValueView(par ki.Ki, name ...string) *RuneSliceValueView {
-	return par.NewChild(RuneSliceValueViewType, name...).(*RuneSliceValueView)
+func NewRuneSliceValue(par ki.Ki, name ...string) *RuneSliceValue {
+	return par.NewChild(RuneSliceValueType, name...).(*RuneSliceValue)
 }
 
-// KiType returns the [*gti.Type] of [RuneSliceValueView]
-func (t *RuneSliceValueView) KiType() *gti.Type {
-	return RuneSliceValueViewType
+// KiType returns the [*gti.Type] of [RuneSliceValue]
+func (t *RuneSliceValue) KiType() *gti.Type {
+	return RuneSliceValueType
 }
 
-// New returns a new [*RuneSliceValueView] value
-func (t *RuneSliceValueView) New() ki.Ki {
-	return &RuneSliceValueView{}
+// New returns a new [*RuneSliceValue] value
+func (t *RuneSliceValue) New() ki.Ki {
+	return &RuneSliceValue{}
 }
 
-// NilValueViewType is the [gti.Type] for [NilValueView]
-var NilValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.NilValueView",
-	ShortName:  "giv.NilValueView",
-	IDName:     "nil-value-view",
-	Doc:        "NilValueView presents a label saying 'nil' -- for any nil or otherwise unrepresentable items",
+// NilValueType is the [gti.Type] for [NilValue]
+var NilValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.NilValue",
+	ShortName:  "giv.NilValue",
+	IDName:     "nil-value",
+	Doc:        "NilValue presents a label saying 'nil' -- for any nil or otherwise unrepresentable items",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &NilValueView{},
+	Instance: &NilValue{},
 })
 
-// NewNilValueView adds a new [NilValueView] with the given name
+// NewNilValue adds a new [NilValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewNilValueView(par ki.Ki, name ...string) *NilValueView {
-	return par.NewChild(NilValueViewType, name...).(*NilValueView)
+func NewNilValue(par ki.Ki, name ...string) *NilValue {
+	return par.NewChild(NilValueType, name...).(*NilValue)
 }
 
-// KiType returns the [*gti.Type] of [NilValueView]
-func (t *NilValueView) KiType() *gti.Type {
-	return NilValueViewType
+// KiType returns the [*gti.Type] of [NilValue]
+func (t *NilValue) KiType() *gti.Type {
+	return NilValueType
 }
 
-// New returns a new [*NilValueView] value
-func (t *NilValueView) New() ki.Ki {
-	return &NilValueView{}
+// New returns a new [*NilValue] value
+func (t *NilValue) New() ki.Ki {
+	return &NilValue{}
 }
 
-// TimeValueViewType is the [gti.Type] for [TimeValueView]
-var TimeValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.TimeValueView",
-	ShortName:  "giv.TimeValueView",
-	IDName:     "time-value-view",
-	Doc:        "TimeValueView presents a text field for a time",
+// TimeValueType is the [gti.Type] for [TimeValue]
+var TimeValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.TimeValue",
+	ShortName:  "giv.TimeValue",
+	IDName:     "time-value",
+	Doc:        "TimeValue presents a text field for a time",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TimeValueView{},
+	Instance: &TimeValue{},
 })
 
-// NewTimeValueView adds a new [TimeValueView] with the given name
+// NewTimeValue adds a new [TimeValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTimeValueView(par ki.Ki, name ...string) *TimeValueView {
-	return par.NewChild(TimeValueViewType, name...).(*TimeValueView)
+func NewTimeValue(par ki.Ki, name ...string) *TimeValue {
+	return par.NewChild(TimeValueType, name...).(*TimeValue)
 }
 
-// KiType returns the [*gti.Type] of [TimeValueView]
-func (t *TimeValueView) KiType() *gti.Type {
-	return TimeValueViewType
+// KiType returns the [*gti.Type] of [TimeValue]
+func (t *TimeValue) KiType() *gti.Type {
+	return TimeValueType
 }
 
-// New returns a new [*TimeValueView] value
-func (t *TimeValueView) New() ki.Ki {
-	return &TimeValueView{}
+// New returns a new [*TimeValue] value
+func (t *TimeValue) New() ki.Ki {
+	return &TimeValue{}
 }
 
 // ColorMapViewType is the [gti.Type] for [ColorMapView]
@@ -617,7 +617,7 @@ var ColorMapViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorMapView",
 	ShortName:  "giv.ColorMapView",
 	IDName:     "color-map-view",
-	Doc:        "ColorMapView is a widget that displays a ColorMap.\nNote that this is not a ValueView widget",
+	Doc:        "ColorMapView is a widget that displays a ColorMap.\nNote that this is not a Value widget",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Orient", &gti.Field{Name: "Orient", Type: "mat32.Dims", Doc: "orientation along which to display the spectrum", Directives: gti.Directives{}}},
@@ -648,37 +648,37 @@ func (t *ColorMapView) New() ki.Ki {
 	return &ColorMapView{}
 }
 
-// ColorMapValueViewType is the [gti.Type] for [ColorMapValueView]
-var ColorMapValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ColorMapValueView",
-	ShortName:  "giv.ColorMapValueView",
-	IDName:     "color-map-value-view",
-	Doc:        "ColorMapValueView presents an button for displaying a ColorMapName and selecting\nmeshes from a ChooserDialog",
+// ColorMapValueType is the [gti.Type] for [ColorMapValue]
+var ColorMapValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.ColorMapValue",
+	ShortName:  "giv.ColorMapValue",
+	IDName:     "color-map-value",
+	Doc:        "ColorMapValue presents an button for displaying a ColorMapName and selecting\nmeshes from a ChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ColorMapValueView{},
+	Instance: &ColorMapValue{},
 })
 
-// NewColorMapValueView adds a new [ColorMapValueView] with the given name
+// NewColorMapValue adds a new [ColorMapValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewColorMapValueView(par ki.Ki, name ...string) *ColorMapValueView {
-	return par.NewChild(ColorMapValueViewType, name...).(*ColorMapValueView)
+func NewColorMapValue(par ki.Ki, name ...string) *ColorMapValue {
+	return par.NewChild(ColorMapValueType, name...).(*ColorMapValue)
 }
 
-// KiType returns the [*gti.Type] of [ColorMapValueView]
-func (t *ColorMapValueView) KiType() *gti.Type {
-	return ColorMapValueViewType
+// KiType returns the [*gti.Type] of [ColorMapValue]
+func (t *ColorMapValue) KiType() *gti.Type {
+	return ColorMapValueType
 }
 
-// New returns a new [*ColorMapValueView] value
-func (t *ColorMapValueView) New() ki.Ki {
-	return &ColorMapValueView{}
+// New returns a new [*ColorMapValue] value
+func (t *ColorMapValue) New() ki.Ki {
+	return &ColorMapValue{}
 }
 
 // ColorViewType is the [gti.Type] for [ColorView]
@@ -690,9 +690,9 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Color", &gti.Field{Name: "Color", Type: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}}},
-		{"NumView", &gti.Field{Name: "NumView", Type: "ValueView", Doc: "inline struct view of the numbers", Directives: gti.Directives{}}},
+		{"NumView", &gti.Field{Name: "NumView", Type: "Value", Doc: "inline struct view of the numbers", Directives: gti.Directives{}}},
 		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -720,72 +720,72 @@ func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
 }
 
-// ColorValueViewType is the [gti.Type] for [ColorValueView]
-var ColorValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ColorValueView",
-	ShortName:  "giv.ColorValueView",
-	IDName:     "color-value-view",
-	Doc:        "ColorValueView presents a StructViewInline for a struct plus a ColorView button..",
+// ColorValueType is the [gti.Type] for [ColorValue]
+var ColorValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.ColorValue",
+	ShortName:  "giv.ColorValue",
+	IDName:     "color-value",
+	Doc:        "ColorValue presents a StructViewInline for a struct plus a ColorView button..",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"TmpColor", &gti.Field{Name: "TmpColor", Type: "color.RGBA", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ColorValueView{},
+	Instance: &ColorValue{},
 })
 
-// NewColorValueView adds a new [ColorValueView] with the given name
+// NewColorValue adds a new [ColorValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewColorValueView(par ki.Ki, name ...string) *ColorValueView {
-	return par.NewChild(ColorValueViewType, name...).(*ColorValueView)
+func NewColorValue(par ki.Ki, name ...string) *ColorValue {
+	return par.NewChild(ColorValueType, name...).(*ColorValue)
 }
 
-// KiType returns the [*gti.Type] of [ColorValueView]
-func (t *ColorValueView) KiType() *gti.Type {
-	return ColorValueViewType
+// KiType returns the [*gti.Type] of [ColorValue]
+func (t *ColorValue) KiType() *gti.Type {
+	return ColorValueType
 }
 
-// New returns a new [*ColorValueView] value
-func (t *ColorValueView) New() ki.Ki {
-	return &ColorValueView{}
+// New returns a new [*ColorValue] value
+func (t *ColorValue) New() ki.Ki {
+	return &ColorValue{}
 }
 
-// ColorNameValueViewType is the [gti.Type] for [ColorNameValueView]
-var ColorNameValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ColorNameValueView",
-	ShortName:  "giv.ColorNameValueView",
-	IDName:     "color-name-value-view",
-	Doc:        "ColorNameValueView presents an button for displaying a ColorNameName and selecting\nmeshes from a ChooserDialog",
+// ColorNameValueType is the [gti.Type] for [ColorNameValue]
+var ColorNameValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.ColorNameValue",
+	ShortName:  "giv.ColorNameValue",
+	IDName:     "color-name-value",
+	Doc:        "ColorNameValue presents an button for displaying a ColorNameName and selecting\nmeshes from a ChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ColorNameValueView{},
+	Instance: &ColorNameValue{},
 })
 
-// NewColorNameValueView adds a new [ColorNameValueView] with the given name
+// NewColorNameValue adds a new [ColorNameValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewColorNameValueView(par ki.Ki, name ...string) *ColorNameValueView {
-	return par.NewChild(ColorNameValueViewType, name...).(*ColorNameValueView)
+func NewColorNameValue(par ki.Ki, name ...string) *ColorNameValue {
+	return par.NewChild(ColorNameValueType, name...).(*ColorNameValue)
 }
 
-// KiType returns the [*gti.Type] of [ColorNameValueView]
-func (t *ColorNameValueView) KiType() *gti.Type {
-	return ColorNameValueViewType
+// KiType returns the [*gti.Type] of [ColorNameValue]
+func (t *ColorNameValue) KiType() *gti.Type {
+	return ColorNameValueType
 }
 
-// New returns a new [*ColorNameValueView] value
-func (t *ColorNameValueView) New() ki.Ki {
-	return &ColorNameValueView{}
+// New returns a new [*ColorNameValue] value
+func (t *ColorNameValue) New() ki.Ki {
+	return &ColorNameValue{}
 }
 
 // FileTreeType is the [gti.Type] for [FileTree]
@@ -954,37 +954,37 @@ func (t *FileTreeView) AsFileTreeView() *FileTreeView {
 	return t
 }
 
-// FileValueViewType is the [gti.Type] for [FileValueView]
-var FileValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FileValueView",
-	ShortName:  "giv.FileValueView",
-	IDName:     "file-value-view",
-	Doc:        "FileValueView presents an action for displaying a FileName and selecting\nicons from FileChooserDialog",
+// FileValueType is the [gti.Type] for [FileValue]
+var FileValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.FileValue",
+	ShortName:  "giv.FileValue",
+	IDName:     "file-value",
+	Doc:        "FileValue presents an action for displaying a FileName and selecting\nicons from FileChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FileValueView{},
+	Instance: &FileValue{},
 })
 
-// NewFileValueView adds a new [FileValueView] with the given name
+// NewFileValue adds a new [FileValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFileValueView(par ki.Ki, name ...string) *FileValueView {
-	return par.NewChild(FileValueViewType, name...).(*FileValueView)
+func NewFileValue(par ki.Ki, name ...string) *FileValue {
+	return par.NewChild(FileValueType, name...).(*FileValue)
 }
 
-// KiType returns the [*gti.Type] of [FileValueView]
-func (t *FileValueView) KiType() *gti.Type {
-	return FileValueViewType
+// KiType returns the [*gti.Type] of [FileValue]
+func (t *FileValue) KiType() *gti.Type {
+	return FileValueType
 }
 
-// New returns a new [*FileValueView] value
-func (t *FileValueView) New() ki.Ki {
-	return &FileValueView{}
+// New returns a new [*FileValue] value
+func (t *FileValue) New() ki.Ki {
+	return &FileValue{}
 }
 
 // FileViewType is the [gti.Type] for [FileView]
@@ -1032,37 +1032,37 @@ func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
 
-// FontValueViewType is the [gti.Type] for [FontValueView]
-var FontValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FontValueView",
-	ShortName:  "giv.FontValueView",
-	IDName:     "font-value-view",
-	Doc:        "FontValueView presents an action for displaying a FontName and selecting\nfonts from FontChooserDialog",
+// FontValueType is the [gti.Type] for [FontValue]
+var FontValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.FontValue",
+	ShortName:  "giv.FontValue",
+	IDName:     "font-value",
+	Doc:        "FontValue presents an action for displaying a FontName and selecting\nfonts from FontChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FontValueView{},
+	Instance: &FontValue{},
 })
 
-// NewFontValueView adds a new [FontValueView] with the given name
+// NewFontValue adds a new [FontValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFontValueView(par ki.Ki, name ...string) *FontValueView {
-	return par.NewChild(FontValueViewType, name...).(*FontValueView)
+func NewFontValue(par ki.Ki, name ...string) *FontValue {
+	return par.NewChild(FontValueType, name...).(*FontValue)
 }
 
-// KiType returns the [*gti.Type] of [FontValueView]
-func (t *FontValueView) KiType() *gti.Type {
-	return FontValueViewType
+// KiType returns the [*gti.Type] of [FontValue]
+func (t *FontValue) KiType() *gti.Type {
+	return FontValueType
 }
 
-// New returns a new [*FontValueView] value
-func (t *FontValueView) New() ki.Ki {
-	return &FontValueView{}
+// New returns a new [*FontValue] value
+func (t *FontValue) New() ki.Ki {
+	return &FontValue{}
 }
 
 // GiEditorType is the [gti.Type] for [GiEditor]
@@ -1102,103 +1102,103 @@ func (t *GiEditor) New() ki.Ki {
 	return &GiEditor{}
 }
 
-// HiStyleValueViewType is the [gti.Type] for [HiStyleValueView]
-var HiStyleValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.HiStyleValueView",
-	ShortName:  "giv.HiStyleValueView",
-	IDName:     "hi-style-value-view",
-	Doc:        "HiStyleValueView presents an action for displaying a mat32.Y and selecting\nfrom styles",
+// HiStyleValueType is the [gti.Type] for [HiStyleValue]
+var HiStyleValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.HiStyleValue",
+	ShortName:  "giv.HiStyleValue",
+	IDName:     "hi-style-value",
+	Doc:        "HiStyleValue presents an action for displaying a mat32.Y and selecting\nfrom styles",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &HiStyleValueView{},
+	Instance: &HiStyleValue{},
 })
 
-// NewHiStyleValueView adds a new [HiStyleValueView] with the given name
+// NewHiStyleValue adds a new [HiStyleValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewHiStyleValueView(par ki.Ki, name ...string) *HiStyleValueView {
-	return par.NewChild(HiStyleValueViewType, name...).(*HiStyleValueView)
+func NewHiStyleValue(par ki.Ki, name ...string) *HiStyleValue {
+	return par.NewChild(HiStyleValueType, name...).(*HiStyleValue)
 }
 
-// KiType returns the [*gti.Type] of [HiStyleValueView]
-func (t *HiStyleValueView) KiType() *gti.Type {
-	return HiStyleValueViewType
+// KiType returns the [*gti.Type] of [HiStyleValue]
+func (t *HiStyleValue) KiType() *gti.Type {
+	return HiStyleValueType
 }
 
-// New returns a new [*HiStyleValueView] value
-func (t *HiStyleValueView) New() ki.Ki {
-	return &HiStyleValueView{}
+// New returns a new [*HiStyleValue] value
+func (t *HiStyleValue) New() ki.Ki {
+	return &HiStyleValue{}
 }
 
-// IconValueViewType is the [gti.Type] for [IconValueView]
-var IconValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.IconValueView",
-	ShortName:  "giv.IconValueView",
-	IDName:     "icon-value-view",
-	Doc:        "IconValueView presents an action for displaying an IconName and selecting\nicons from IconChooserDialog",
+// IconValueType is the [gti.Type] for [IconValue]
+var IconValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.IconValue",
+	ShortName:  "giv.IconValue",
+	IDName:     "icon-value",
+	Doc:        "IconValue presents an action for displaying an IconName and selecting\nicons from IconChooserDialog",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &IconValueView{},
+	Instance: &IconValue{},
 })
 
-// NewIconValueView adds a new [IconValueView] with the given name
+// NewIconValue adds a new [IconValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewIconValueView(par ki.Ki, name ...string) *IconValueView {
-	return par.NewChild(IconValueViewType, name...).(*IconValueView)
+func NewIconValue(par ki.Ki, name ...string) *IconValue {
+	return par.NewChild(IconValueType, name...).(*IconValue)
 }
 
-// KiType returns the [*gti.Type] of [IconValueView]
-func (t *IconValueView) KiType() *gti.Type {
-	return IconValueViewType
+// KiType returns the [*gti.Type] of [IconValue]
+func (t *IconValue) KiType() *gti.Type {
+	return IconValueType
 }
 
-// New returns a new [*IconValueView] value
-func (t *IconValueView) New() ki.Ki {
-	return &IconValueView{}
+// New returns a new [*IconValue] value
+func (t *IconValue) New() ki.Ki {
+	return &IconValue{}
 }
 
-// KeyChordValueViewType is the [gti.Type] for [KeyChordValueView]
-var KeyChordValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.KeyChordValueView",
-	ShortName:  "giv.KeyChordValueView",
-	IDName:     "key-chord-value-view",
-	Doc:        "KeyChordValueView presents an KeyChordEdit for key.Chord",
+// KeyChordValueType is the [gti.Type] for [KeyChordValue]
+var KeyChordValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.KeyChordValue",
+	ShortName:  "giv.KeyChordValue",
+	IDName:     "key-chord-value",
+	Doc:        "KeyChordValue presents an KeyChordEdit for key.Chord",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &KeyChordValueView{},
+	Instance: &KeyChordValue{},
 })
 
-// NewKeyChordValueView adds a new [KeyChordValueView] with the given name
+// NewKeyChordValue adds a new [KeyChordValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewKeyChordValueView(par ki.Ki, name ...string) *KeyChordValueView {
-	return par.NewChild(KeyChordValueViewType, name...).(*KeyChordValueView)
+func NewKeyChordValue(par ki.Ki, name ...string) *KeyChordValue {
+	return par.NewChild(KeyChordValueType, name...).(*KeyChordValue)
 }
 
-// KiType returns the [*gti.Type] of [KeyChordValueView]
-func (t *KeyChordValueView) KiType() *gti.Type {
-	return KeyChordValueViewType
+// KiType returns the [*gti.Type] of [KeyChordValue]
+func (t *KeyChordValue) KiType() *gti.Type {
+	return KeyChordValueType
 }
 
-// New returns a new [*KeyChordValueView] value
-func (t *KeyChordValueView) New() ki.Ki {
-	return &KeyChordValueView{}
+// New returns a new [*KeyChordValue] value
+func (t *KeyChordValue) New() ki.Ki {
+	return &KeyChordValue{}
 }
 
 // KeyChordEditType is the [gti.Type] for [KeyChordEdit]
@@ -1236,37 +1236,37 @@ func (t *KeyChordEdit) New() ki.Ki {
 	return &KeyChordEdit{}
 }
 
-// KeyMapValueViewType is the [gti.Type] for [KeyMapValueView]
-var KeyMapValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.KeyMapValueView",
-	ShortName:  "giv.KeyMapValueView",
-	IDName:     "key-map-value-view",
-	Doc:        "KeyMapValueView presents an action for displaying a KeyMapName and selecting\nfrom chooser",
+// KeyMapValueType is the [gti.Type] for [KeyMapValue]
+var KeyMapValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.KeyMapValue",
+	ShortName:  "giv.KeyMapValue",
+	IDName:     "key-map-value",
+	Doc:        "KeyMapValue presents an action for displaying a KeyMapName and selecting\nfrom chooser",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &KeyMapValueView{},
+	Instance: &KeyMapValue{},
 })
 
-// NewKeyMapValueView adds a new [KeyMapValueView] with the given name
+// NewKeyMapValue adds a new [KeyMapValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewKeyMapValueView(par ki.Ki, name ...string) *KeyMapValueView {
-	return par.NewChild(KeyMapValueViewType, name...).(*KeyMapValueView)
+func NewKeyMapValue(par ki.Ki, name ...string) *KeyMapValue {
+	return par.NewChild(KeyMapValueType, name...).(*KeyMapValue)
 }
 
-// KiType returns the [*gti.Type] of [KeyMapValueView]
-func (t *KeyMapValueView) KiType() *gti.Type {
-	return KeyMapValueViewType
+// KiType returns the [*gti.Type] of [KeyMapValue]
+func (t *KeyMapValue) KiType() *gti.Type {
+	return KeyMapValueType
 }
 
-// New returns a new [*KeyMapValueView] value
-func (t *KeyMapValueView) New() ki.Ki {
-	return &KeyMapValueView{}
+// New returns a new [*KeyMapValue] value
+func (t *KeyMapValue) New() ki.Ki {
+	return &KeyMapValue{}
 }
 
 // MapViewType is the [gti.Type] for [MapView]
@@ -1278,14 +1278,14 @@ var MapViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Map", &gti.Field{Name: "Map", Type: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}}},
-		{"MapValView", &gti.Field{Name: "MapValView", Type: "ValueView", Doc: "ValueView for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"MapValView", &gti.Field{Name: "MapValView", Type: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}}},
-		{"Keys", &gti.Field{Name: "Keys", Type: "[]ValueView", Doc: "ValueView representations of the map keys", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]ValueView", Doc: "ValueView representations of the map values", Directives: gti.Directives{}}},
+		{"Keys", &gti.Field{Name: "Keys", Type: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the map values", Directives: gti.Directives{}}},
 		{"SortVals", &gti.Field{Name: "SortVals", Type: "bool", Doc: "sort by values instead of keys", Directives: gti.Directives{}}},
 		{"ShowToolBar", &gti.Field{Name: "ShowToolBar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
 		{"NCols", &gti.Field{Name: "NCols", Type: "int", Doc: "the number of columns in the map; do not set externally; generally only access internally", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}}},
 	}),
@@ -1323,11 +1323,11 @@ var MapViewInlineType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Map", &gti.Field{Name: "Map", Type: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}}},
-		{"MapValView", &gti.Field{Name: "MapValView", Type: "ValueView", Doc: "ValueView for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"MapValView", &gti.Field{Name: "MapValView", Type: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}}},
-		{"Keys", &gti.Field{Name: "Keys", Type: "[]ValueView", Doc: "ValueView representations of the map keys", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]ValueView", Doc: "ValueView representations of the fields", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"Keys", &gti.Field{Name: "Keys", Type: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1401,13 +1401,13 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "[view: -] the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}}},
 		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", Doc: "[view: -] optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}}},
 		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", Doc: "[view: -] non-ptr reflect.Value of the slice", Directives: gti.Directives{}}},
-		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "ValueView", Doc: "[view: -] ValueView for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "[view: -] Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"isArray", &gti.Field{Name: "isArray", Type: "bool", Doc: "[view: -] whether the slice is actually an array -- no modifications -- set by SetSlice", Directives: gti.Directives{}}},
 		{"NoAdd", &gti.Field{Name: "NoAdd", Type: "bool", Doc: "if true, user cannot add elements to the slice", Directives: gti.Directives{}}},
 		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, user cannot delete elements from the slice", Directives: gti.Directives{}}},
 		{"ShowViewCtxtMenu", &gti.Field{Name: "ShowViewCtxtMenu", Type: "bool", Doc: "if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]ValueView", Doc: "[view: -] ValueView representations of the slice values", Directives: gti.Directives{}}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "[view: -] Value representations of the slice values", Directives: gti.Directives{}}},
 		{"ShowIndex", &gti.Field{Name: "ShowIndex", Type: "bool", Doc: "whether to show index or not", Directives: gti.Directives{}}},
 		{"ShowToolBar", &gti.Field{Name: "ShowToolBar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
 		{"InactKeyNav", &gti.Field{Name: "InactKeyNav", Type: "bool", Doc: "support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events", Directives: gti.Directives{}}},
@@ -1418,7 +1418,7 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"SelectedIdxs", &gti.Field{Name: "SelectedIdxs", Type: "map[int]struct{}", Doc: "list of currently-selected slice indexes", Directives: gti.Directives{}}},
 		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", Doc: "[view: -] the slice that we successfully set a toolbar for", Directives: gti.Directives{}}},
 		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", Doc: "size of slice", Directives: gti.Directives{}}},
 		{"DispRows", &gti.Field{Name: "DispRows", Type: "int", Doc: "actual number of rows displayed = min(VisRows, SliceSize)", Directives: gti.Directives{}}},
@@ -1465,12 +1465,12 @@ var SliceViewInlineType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "the slice that we are a view onto", Directives: gti.Directives{}}},
-		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "ValueView", Doc: "ValueView for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", Doc: "whether the slice is actually an array -- no modifications", Directives: gti.Directives{}}},
 		{"IsFixedLen", &gti.Field{Name: "IsFixedLen", Type: "bool", Doc: "whether the slice has a fixed-len flag on it", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]ValueView", Doc: "ValueView representations of the fields", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1507,12 +1507,12 @@ var StructViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Struct", &gti.Field{Name: "Struct", Type: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}}},
-		{"StructValView", &gti.Field{Name: "StructValView", Type: "ValueView", Doc: "ValueView for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"StructValView", &gti.Field{Name: "StructValView", Type: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}}},
-		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", Doc: "ValueView for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}}},
-		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]ValueView", Doc: "ValueView representations of the fields", Directives: gti.Directives{}}},
+		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}}},
+		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
 		{"ShowToolBar", &gti.Field{Name: "ShowToolBar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 		{"ToolbarStru", &gti.Field{Name: "ToolbarStru", Type: "any", Doc: "the struct that we successfully set a toolbar for", Directives: gti.Directives{}}},
 		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
@@ -1553,10 +1553,10 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Struct", &gti.Field{Name: "Struct", Type: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}}},
-		{"StructValView", &gti.Field{Name: "StructValView", Type: "ValueView", Doc: "ValueView for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"StructValView", &gti.Field{Name: "StructValView", Type: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"AddButton", &gti.Field{Name: "AddButton", Type: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}}},
-		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]ValueView", Doc: "ValueView representations of the fields", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "[view: inactive] if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
 		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}}},
@@ -1730,12 +1730,12 @@ func (t *TreeView) AsTreeView() *TreeView {
 	return t
 }
 
-// ValueViewBaseType is the [gti.Type] for [ValueViewBase]
-var ValueViewBaseType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.ValueViewBase",
-	ShortName:  "giv.ValueViewBase",
-	IDName:     "value-view-base",
-	Doc:        "ValueViewBase provides the basis for implementations of the ValueView\ninterface, representing values in the interface -- it implements a generic\nTextField representation of the string value, and provides the generic\nfallback for everything that doesn't provide a specific ValueViewer type.",
+// ValueBaseType is the [gti.Type] for [ValueBase]
+var ValueBaseType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.ValueBase",
+	ShortName:  "giv.ValueBase",
+	IDName:     "value-base",
+	Doc:        "ValueBase provides the basis for implementations of the Value\ninterface, representing values in the interface -- it implements a generic\nTextField representation of the string value, and provides the generic\nfallback for everything that doesn't provide a specific Valueer type.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Value", &gti.Field{Name: "Value", Type: "reflect.Value", Doc: "the reflect.Value representation of the value", Directives: gti.Directives{}}},
@@ -1746,69 +1746,69 @@ var ValueViewBaseType = gti.AddType(&gti.Type{
 		{"Field", &gti.Field{Name: "Field", Type: "*reflect.StructField", Doc: "if Owner is a struct, this is the reflect.StructField associated with the value", Directives: gti.Directives{}}},
 		{"Tags", &gti.Field{Name: "Tags", Type: "map[string]string", Doc: "set of tags that can be set to customize interface for different types of values -- only source for non-structfield values", Directives: gti.Directives{}}},
 		{"Key", &gti.Field{Name: "Key", Type: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}}},
-		{"KeyView", &gti.Field{Name: "KeyView", Type: "ValueView", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
+		{"KeyView", &gti.Field{Name: "KeyView", Type: "Value", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
 		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
-		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the ValueView type and reflect.Value type -- see ValueViewer interface", Directives: gti.Directives{}}},
+		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valueer interface", Directives: gti.Directives{}}},
 		{"Widget", &gti.Field{Name: "Widget", Type: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "ValueView", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ValueViewBase{},
+	Instance: &ValueBase{},
 })
 
-// NewValueViewBase adds a new [ValueViewBase] with the given name
+// NewValueBase adds a new [ValueBase] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewValueViewBase(par ki.Ki, name ...string) *ValueViewBase {
-	return par.NewChild(ValueViewBaseType, name...).(*ValueViewBase)
+func NewValueBase(par ki.Ki, name ...string) *ValueBase {
+	return par.NewChild(ValueBaseType, name...).(*ValueBase)
 }
 
-// KiType returns the [*gti.Type] of [ValueViewBase]
-func (t *ValueViewBase) KiType() *gti.Type {
-	return ValueViewBaseType
+// KiType returns the [*gti.Type] of [ValueBase]
+func (t *ValueBase) KiType() *gti.Type {
+	return ValueBaseType
 }
 
-// New returns a new [*ValueViewBase] value
-func (t *ValueViewBase) New() ki.Ki {
-	return &ValueViewBase{}
+// New returns a new [*ValueBase] value
+func (t *ValueBase) New() ki.Ki {
+	return &ValueBase{}
 }
 
-// VersCtrlValueViewType is the [gti.Type] for [VersCtrlValueView]
-var VersCtrlValueViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.VersCtrlValueView",
-	ShortName:  "giv.VersCtrlValueView",
-	IDName:     "vers-ctrl-value-view",
-	Doc:        "VersCtrlValueView presents an action for displaying an VersCtrlName and selecting\nfrom StringPopup",
+// VersCtrlValueType is the [gti.Type] for [VersCtrlValue]
+var VersCtrlValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.VersCtrlValue",
+	ShortName:  "giv.VersCtrlValue",
+	IDName:     "vers-ctrl-value",
+	Doc:        "VersCtrlValue presents an action for displaying an VersCtrlName and selecting\nfrom StringPopup",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueViewBase", &gti.Field{Name: "ValueViewBase", Type: "ValueViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &VersCtrlValueView{},
+	Instance: &VersCtrlValue{},
 })
 
-// NewVersCtrlValueView adds a new [VersCtrlValueView] with the given name
+// NewVersCtrlValue adds a new [VersCtrlValue] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewVersCtrlValueView(par ki.Ki, name ...string) *VersCtrlValueView {
-	return par.NewChild(VersCtrlValueViewType, name...).(*VersCtrlValueView)
+func NewVersCtrlValue(par ki.Ki, name ...string) *VersCtrlValue {
+	return par.NewChild(VersCtrlValueType, name...).(*VersCtrlValue)
 }
 
-// KiType returns the [*gti.Type] of [VersCtrlValueView]
-func (t *VersCtrlValueView) KiType() *gti.Type {
-	return VersCtrlValueViewType
+// KiType returns the [*gti.Type] of [VersCtrlValue]
+func (t *VersCtrlValue) KiType() *gti.Type {
+	return VersCtrlValueType
 }
 
-// New returns a new [*VersCtrlValueView] value
-func (t *VersCtrlValueView) New() ki.Ki {
-	return &VersCtrlValueView{}
+// New returns a new [*VersCtrlValue] value
+func (t *VersCtrlValue) New() ki.Ki {
+	return &VersCtrlValue{}
 }
 
 // VCSLogViewType is the [gti.Type] for [VCSLogView]

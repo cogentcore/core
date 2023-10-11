@@ -15,20 +15,20 @@ import (
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  HiStyleValueView
+//  HiStyleValue
 
-// HiStyleValueView presents an action for displaying a mat32.Y and selecting
+// HiStyleValue presents an action for displaying a mat32.Y and selecting
 // from styles
-type HiStyleValueView struct {
-	ValueViewBase
+type HiStyleValue struct {
+	ValueBase
 }
 
-func (vv *HiStyleValueView) WidgetType() *gti.Type {
+func (vv *HiStyleValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *HiStyleValueView) UpdateWidget() {
+func (vv *HiStyleValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (vv *HiStyleValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *HiStyleValueView) ConfigWidget(widg gi.Widget) {
+func (vv *HiStyleValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -48,11 +48,11 @@ func (vv *HiStyleValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *HiStyleValueView) HasDialog() bool {
+func (vv *HiStyleValue) HasDialog() bool {
 	return true
 }
 
-func (vv *HiStyleValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *HiStyleValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

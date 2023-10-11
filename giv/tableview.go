@@ -69,7 +69,7 @@ var _ SliceViewer = (*TableView)(nil)
 // configuration of elements in the view.  If style properties are set
 // then you must call widg.AsNode2dD().SetFullReRender() to trigger
 // re-styling during re-render
-type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView)
+type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value)
 
 func (tv *TableView) OnInit() {
 	tv.Lay = gi.LayoutVert
@@ -132,7 +132,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
 		w.AddStyles(func(s *styles.Style) {
 			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4 )
+			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
 		})
 	}
@@ -404,7 +404,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
 		stru := val.Interface()
 		fval := val.Elem().FieldByIndex(field.Index)
-		vv := ToValueView(fval.Interface(), "")
+		vv := ToValue(fval.Interface(), "")
 		if vv == nil { // shouldn't happen
 			continue
 		}
@@ -500,7 +500,7 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if tv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(ki.DestroyKids)
 
-		tv.Values = make([]ValueView, tv.NVisFields*tv.DispRows)
+		tv.Values = make([]Value, tv.NVisFields*tv.DispRows)
 		sg.Kids = make(ki.Slice, nWidg)
 	}
 	tv.ConfigScroll()
@@ -620,19 +620,19 @@ func (tv *TableView) UpdateSliceGrid() {
 			field := tv.VisFields[fli]
 			fval := val.Elem().FieldByIndex(field.Index)
 			vvi := i*tv.NVisFields + fli
-			var vv ValueView
+			var vv Value
 			if tv.Values[vvi] == nil {
 				tags := ""
 				if fval.Kind() == reflect.Slice || fval.Kind() == reflect.Map {
 					tags = `view:"no-inline"`
 				}
-				vv = ToValueView(fval.Interface(), tags)
+				vv = ToValue(fval.Interface(), tags)
 				tv.Values[vvi] = vv
 			} else {
 				vv = tv.Values[vvi]
 			}
 			if vv == nil {
-				fmt.Printf("field: %v %v has nil valueview: %v -- should not happen -- fix ToValueView\n", fli, field.Name, fval.String())
+				fmt.Printf("field: %v %v has nil valueview: %v -- should not happen -- fix ToValue\n", fli, field.Name, fval.String())
 				continue
 			}
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
@@ -664,7 +664,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				if tv.IsDisabled() {
 					widg.AsWidget().SetState(true, states.Disabled)
 				} else {
-					vvb := vv.AsValueViewBase()
+					vvb := vv.AsValueBase()
 					vvb.OnChange(func(e events.Event) {
 						tv.SetChanged()
 					})
@@ -714,7 +714,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	tv.UpdateScroll()
 }
 
-func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv ValueView) {
+func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value) {
 	if tv.StyleFunc != nil {
 		tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
 	}

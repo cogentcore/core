@@ -39,7 +39,7 @@ type DlgOpts struct {
 	Data any `desc:"if non-nil, this is data that identifies what the dialog is about -- if an existing dialog for such data is already in place, then it is shown instead of making a new one"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -336,7 +336,7 @@ func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *g
 	return dlg
 }
 
-func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv ValueView) {
+func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value) {
 	if col != 4 {
 		return
 	}
@@ -366,7 +366,7 @@ func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(d
 	return dlg
 }
 
-func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv ValueView) {
+func IconChooserStyleFunc(sv *SliceView, slice any, widg gi.Widget, row int, vv Value) {
 	ic, ok := slice.([]icons.Icon)
 	if ok {
 		widg.(*gi.Button).SetText(string(ic[row]))

@@ -37,13 +37,13 @@ type ColorView struct {
 	Color color.RGBA `desc:"the color that we view"`
 
 	// inline struct view of the numbers
-	NumView ValueView `desc:"inline struct view of the numbers"`
+	NumView Value `desc:"inline struct view of the numbers"`
 
 	// the color that we view, in HSLA form
 	ColorHSLA hsl.HSL `desc:"the color that we view, in HSLA form"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -129,12 +129,12 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
 	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
 
-	cv.NumView = ToValueView(&cv.Color, "")
+	cv.NumView = ToValue(&cv.Color, "")
 	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
 	vtyp := cv.NumView.WidgetType()
 	widg := nl.NewChild(vtyp, "nums").(gi.Widget)
 	cv.NumView.ConfigWidget(widg)
-	vvb := cv.NumView.AsValueViewBase()
+	vvb := cv.NumView.AsValueBase()
 	vvb.OnChange(func(e events.Event) {
 		cv.UpdateSliderGrid()
 		cv.SendChange()
@@ -467,17 +467,17 @@ func (cv *ColorView) UpdateNums() {
 // }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ColorValueView
+//  ColorValue
 
-// ColorValueView presents a StructViewInline for a struct plus a ColorView button..
-type ColorValueView struct {
-	ValueViewBase
+// ColorValue presents a StructViewInline for a struct plus a ColorView button..
+type ColorValue struct {
+	ValueBase
 	TmpColor color.RGBA
 }
 
 // Color returns a standardized color value from whatever value is represented
 // internally
-func (vv *ColorValueView) Color() (*color.RGBA, bool) {
+func (vv *ColorValue) Color() (*color.RGBA, bool) {
 	ok := true
 	clri := vv.Value.Interface()
 	clr := &vv.TmpColor
@@ -499,14 +499,14 @@ func (vv *ColorValueView) Color() (*color.RGBA, bool) {
 		}
 	default:
 		ok = false
-		log.Printf("ColorValueView: could not get color value from type: %T val: %+v\n", c, c)
+		log.Printf("ColorValue: could not get color value from type: %T val: %+v\n", c, c)
 	}
 	return clr, ok
 }
 
 // SetColor sets color value from a standard color value -- more robust than
 // plain SetValue
-func (vv *ColorValueView) SetColor(clr color.RGBA) {
+func (vv *ColorValue) SetColor(clr color.RGBA) {
 	clri := vv.Value.Interface()
 	switch c := clri.(type) {
 	case color.RGBA:
@@ -522,16 +522,16 @@ func (vv *ColorValueView) SetColor(clr color.RGBA) {
 			vv.SetValue((color.Color)(clr))
 		}
 	default:
-		log.Printf("ColorValueView: could not set color value from type: %T val: %+v\n", c, c)
+		log.Printf("ColorValue: could not set color value from type: %T val: %+v\n", c, c)
 	}
 }
 
-func (vv *ColorValueView) WidgetType() *gti.Type {
+func (vv *ColorValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *ColorValueView) UpdateWidget() {
+func (vv *ColorValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -539,7 +539,7 @@ func (vv *ColorValueView) UpdateWidget() {
 	bt.UpdateSig()
 }
 
-func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
+func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -562,11 +562,11 @@ func (vv *ColorValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorValueView) HasButton() bool {
+func (vv *ColorValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if laser.ValueIsZero(vv.Value) || laser.ValueIsZero(laser.NonPtrValue(vv.Value)) {
 		return
 	}
@@ -592,20 +592,20 @@ func (vv *ColorValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ColorNameValueView
+//  ColorNameValue
 
-// ColorNameValueView presents an button for displaying a ColorNameName and selecting
+// ColorNameValue presents an button for displaying a ColorNameName and selecting
 // meshes from a ChooserDialog
-type ColorNameValueView struct {
-	ValueViewBase
+type ColorNameValue struct {
+	ValueBase
 }
 
-func (vv *ColorNameValueView) WidgetType() *gti.Type {
+func (vv *ColorNameValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *ColorNameValueView) UpdateWidget() {
+func (vv *ColorNameValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -617,7 +617,7 @@ func (vv *ColorNameValueView) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
+func (vv *ColorNameValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -630,11 +630,11 @@ func (vv *ColorNameValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorNameValueView) HasButton() bool {
+func (vv *ColorNameValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorNameValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}

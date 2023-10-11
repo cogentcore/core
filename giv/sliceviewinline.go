@@ -27,8 +27,8 @@ type SliceViewInline struct {
 	// the slice that we are a view onto
 	Slice any `desc:"the slice that we are a view onto"`
 
-	// ValueView for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView ValueView `desc:"ValueView for the slice itself, if this was created within value view framework -- otherwise nil"`
+	// Value for the slice itself, if this was created within value view framework -- otherwise nil
+	SliceValView Value `desc:"Value for the slice itself, if this was created within value view framework -- otherwise nil"`
 
 	// whether the slice is actually an array -- no modifications
 	IsArray bool `desc:"whether the slice is actually an array -- no modifications"`
@@ -39,11 +39,11 @@ type SliceViewInline struct {
 	// has the slice been edited?
 	Changed bool `desc:"has the slice been edited?"`
 
-	// ValueView representations of the fields
-	Values []ValueView `json:"-" xml:"-" desc:"ValueView representations of the fields"`
+	// Value representations of the fields
+	Values []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave ValueView `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
@@ -101,7 +101,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
-	sv.Values = make([]ValueView, 0)
+	sv.Values = make([]Value, 0)
 
 	mv := reflect.ValueOf(sv.Slice)
 	mvnp := laser.NonPtrValue(mv)
@@ -109,7 +109,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 	sz := min(mvnp.Len(), SliceInlineLen)
 	for i := 0; i < sz; i++ {
 		val := laser.OnePtrUnderlyingValue(mvnp.Index(i)) // deal with pointer lists
-		vv := ToValueView(val.Interface(), "")
+		vv := ToValue(val.Interface(), "")
 		if vv == nil { // shouldn't happen
 			fmt.Printf("nil value view!\n")
 			continue
@@ -130,7 +130,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		updt = parts.UpdateStart()
 	}
 	for i, vv := range sv.Values {
-		vvb := vv.AsValueViewBase()
+		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
 		widg := parts.Child(i).(gi.Widget)
 		if sv.SliceValView != nil {
@@ -163,7 +163,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 			if sv.SliceValView != nil {
 				newPath := ""
 				isZero := false
-				title, newPath, isZero = sv.SliceValView.AsValueViewBase().Label()
+				title, newPath, isZero = sv.SliceValView.AsValueBase().Label()
 				if isZero {
 					return
 				}

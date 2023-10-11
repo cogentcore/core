@@ -68,7 +68,7 @@ There are three main types of 2D nodes:
 General Widget method conventions:
 * `SetValue` kinds of methods are wrapped in `UpdateStart` / `End`, but do NOT emit a signal.
 * `SetValueAction` calls `SetValue` and emits the signal.
-This allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  `ValueView` in particular requires this kind of behavior.
+This allows other users of the widget that also recv the signal to not trigger themselves, but typically you want the update, so it makes sense to have that in the basic version.  `Value` in particular requires this kind of behavior.
 
 The best way to see how the system works are in the `examples` directory, and by interactively modifying any existing gui using the interactive reflective editor via `Control+Alt+I`.
 

@@ -11,24 +11,24 @@ data, including structs, maps, slices, and the primitive data elements
 and GUI representation thereof, where the models are the Go data elements themselves.
 
 This provides automatic, powerful GUI access to essentially any data in any
-other Go package.  Furthermore, the ValueView framework allows for easy
+other Go package.  Furthermore, the Value framework allows for easy
 customization and extension of the GUI representation, based on the classic Go
-"Stringer"-like interface paradigm -- simply define a ValueView() method on
-any type, returning giv.ValueView that manages the interface between data
+"Stringer"-like interface paradigm -- simply define a Value() method on
+any type, returning giv.Value that manages the interface between data
 structures and GUI representations.
 
 See the wiki at: https://goki.dev/gi/v2/wiki/Views for more extensive docs.
 
 Some of the most important view elements are:
 
-# ValueView
+# Value
 
-The ValueView provides a common API for representing values (int, string, etc)
+The Value provides a common API for representing values (int, string, etc)
 in the GUI, and are used by more complex views (StructView, MapView,
 SliceView, etc) to represents the elements of those data structures.
 
 Do Ctrl+Alt+I in any window to pull up the GoGiEditor which will show you ample
-examples of the ValueView interface in action, and also allow you to customize
+examples of the Value interface in action, and also allow you to customize
 your GUI.
 
 # TreeView

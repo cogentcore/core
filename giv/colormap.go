@@ -22,7 +22,7 @@ type ColorMapName string
 //  ColorMapView
 
 // ColorMapView is a widget that displays a ColorMap.
-// Note that this is not a ValueView widget
+// Note that this is not a Value widget
 type ColorMapView struct {
 	gi.WidgetBase
 
@@ -132,27 +132,27 @@ func (cv *ColorMapView) Render(sc *gi.Scene) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-//  ColorMapValueView
+//  ColorMapValue
 
-// ValueView registers ColorMapValueView as the viewer of ColorMapName
-func (mn ColorMapName) ValueView() ValueView {
-	vv := &ColorMapValueView{}
+// Value registers ColorMapValue as the viewer of ColorMapName
+func (mn ColorMapName) Value() Value {
+	vv := &ColorMapValue{}
 	ki.InitNode(vv)
 	return vv
 }
 
-// ColorMapValueView presents an button for displaying a ColorMapName and selecting
+// ColorMapValue presents an button for displaying a ColorMapName and selecting
 // meshes from a ChooserDialog
-type ColorMapValueView struct {
-	ValueViewBase
+type ColorMapValue struct {
+	ValueBase
 }
 
-func (vv *ColorMapValueView) WidgetType() *gti.Type {
+func (vv *ColorMapValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ButtonType
 	return vv.WidgetTyp
 }
 
-func (vv *ColorMapValueView) UpdateWidget() {
+func (vv *ColorMapValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -164,7 +164,7 @@ func (vv *ColorMapValueView) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
+func (vv *ColorMapValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ac := vv.Widget.(*gi.Button)
@@ -177,11 +177,11 @@ func (vv *ColorMapValueView) ConfigWidget(widg gi.Widget) {
 	vv.UpdateWidget()
 }
 
-func (vv *ColorMapValueView) HasButton() bool {
+func (vv *ColorMapValue) HasButton() bool {
 	return true
 }
 
-func (vv *ColorMapValueView) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
