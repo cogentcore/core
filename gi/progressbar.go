@@ -7,7 +7,9 @@ package gi
 import (
 	"sync"
 
+	"goki.dev/colors"
 	"goki.dev/girl/states"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
@@ -38,15 +40,36 @@ func (pb *ProgressBar) CopyFieldsFrom(frm any) {
 }
 
 func (pb *ProgressBar) OnInit() {
-	pb.Slider.OnInit() // use same handlers etc
-
 	pb.Type = SliderScrollbar
 	pb.Dim = mat32.X
 	pb.ValThumb = true
 	pb.ThumbVal = 1
 	pb.Value = 0
 	pb.ThumbSize = units.Ex(1)
+	pb.Max = 1.0
 	pb.SetState(true, states.ReadOnly)
+
+	pb.HandleWidgetEvents()
+	pb.ProgressBarStyles()
+}
+
+func (pb *ProgressBar) ProgressBarStyles() {
+	pb.AddStyles(func(s *styles.Style) {
+		pb.ValueColor.SetSolid(colors.Scheme.Primary.Base)
+		pb.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
+
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+
+		s.Padding.Set()
+
+		if pb.Dim == mat32.X {
+			s.Width.SetEm(20)
+			s.Height.SetDp(1)
+		} else {
+			s.Height.SetEm(20)
+			s.Width.SetDp(1)
+		}
+	})
 }
 
 func ProgressDefaultInc(max int) int {
