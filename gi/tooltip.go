@@ -39,7 +39,7 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 // given tooltip at the given position.
 func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := StageScene(w.Name() + "-tooltip")
-	sc.Geom.Pos = pos
+	sc.Geom.Pos = pos.Add(image.Pt(20, 20))
 	sc.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetEm(20)
 		s.Border.Radius = styles.BorderRadiusExtraSmall
