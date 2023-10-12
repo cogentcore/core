@@ -6,12 +6,14 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -67,6 +69,13 @@ func makeHome(ts *gi.Tabs) {
 			pbar.ProgStep()
 		}
 	}()
+
+	clr := colors.Tan
+
+	colorvv := giv.ToValue(&clr, "")
+	colorvv.SetSoloValue(reflect.ValueOf(&clr))
+	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
+	colorvv.ConfigWidget(cvvw)
 
 	// bt := gi.NewButton(home, "bt")
 	// bt.Text = "Big Shadow"
@@ -329,13 +338,6 @@ func makeInputs(ts *gi.Tabs) {
 
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
-
-	// clr := colors.Tan
-
-	// colorvv := giv.ToValue(&clr, "")
-	// colorvv.SetSoloValue(reflect.ValueOf(&clr))
-	// cvvw := inputs.NewChild(colorvv.WidgetType(), "cvvw").(gi.Widget)
-	// colorvv.ConfigWidget(cvvw)
 
 	sliderys := gi.NewLayout(inputs, "sliderys").SetLayout(gi.LayoutHorizFlow)
 
