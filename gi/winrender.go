@@ -247,7 +247,8 @@ func (w *RenderWin) RenderWindow() {
 	}()
 
 	stageMods, sceneMods := w.StageMgr.UpdateAll() // handles all Scene / Widget updates!
-	if !rebuild && !stageMods && !sceneMods {      // nothing to do!
+	top := w.StageMgr.Top().AsMain()
+	if !top.Sprites.Modified && !rebuild && !stageMods && !sceneMods { // nothing to do!
 		// fmt.Println("no mods") // note: get a ton of these..
 		return
 	}

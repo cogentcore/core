@@ -788,7 +788,7 @@ func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
 		tv.TextView.MouseEvent(me)
 		return
 	}
-	pt := tv.PointToRelPos(me.Pos())
+	pt := tv.PointToRelPos(me.LocalPos())
 	if pt.X >= 0 && pt.X < int(tv.LineNoOff) {
 		newPos := tv.PixelToCursor(pt)
 		ln := newPos.Ln

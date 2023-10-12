@@ -477,7 +477,7 @@ func (sr *Slider) HandleSliderMouse() {
 		if sr.StateIs(states.Disabled) {
 			return
 		}
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.Pos())
+		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
 		st := &sr.Style
 		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
 		if sr.Dim == mat32.X {
@@ -493,6 +493,7 @@ func (sr *Slider) HandleSliderMouse() {
 			return
 		}
 		del := e.StartDelta()
+		// fmt.Println("start:", e.StartPos(), "pos:", e.Pos(), "del:", del)
 		if sr.Dim == mat32.X {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
 		} else {
@@ -503,7 +504,7 @@ func (sr *Slider) HandleSliderMouse() {
 		if sr.StateIs(states.Disabled) {
 			return
 		}
-		ed := sr.This().(SliderPositioner).PointToRelPos(e.Pos())
+		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
 		st := &sr.Style
 		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
 		if sr.Dim == mat32.X {

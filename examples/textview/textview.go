@@ -13,12 +13,14 @@ import (
 	"goki.dev/goosi"
 )
 
-var samplefile gi.FileName = "sample.go"
+// var samplefile gi.FileName = "sample.go"
+var samplefile gi.FileName = "../../Makefile"
 
 func main() { gimain.Run(app) }
 
 func app() {
 	// gi.LayoutTrace = true
+	// gi.EventTrace = true
 
 	goosi.ZoomFactor = 2
 
@@ -75,7 +77,7 @@ func app() {
 	txed1.SetBuf(txbuf)
 	// txed2.SetBuf(txbuf)
 
-	txbuf.Hi.Lang = "Go"
+	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
 	txbuf.Open(samplefile)
 
 	// // main menu

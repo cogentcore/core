@@ -64,7 +64,7 @@ func (sve *Editor) HandleEditorEvents() {
 	})
 	// todo: context menu
 	// sve.OnAddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-	// 	obj := sve.FirstContainingPoint(e.Pos(), true)
+	// 	obj := sve.FirstContainingPoint(e.LocalPos(), true)
 	// 	_ = obj
 	// 	if e.Action == events.Release && e.Button == events.Right {
 	// 		e.SetHandled()
@@ -77,9 +77,9 @@ func (sve *Editor) HandleEditorEvents() {
 	// 	e := d.(events.Event)
 	// 	e.SetHandled()
 	// 	sve := sve
-	// 	obj := sve.FirstContainingPoint(e.Pos(), true)
+	// 	obj := sve.FirstContainingPoint(e.LocalPos(), true)
 	// 	if obj != nil {
-	// 		pos := e.Pos()
+	// 		pos := e.LocalPos()
 	// 		ttxt := fmt.Sprintf("element name: %v -- use right mouse click to edit", obj.Name())
 	// 		PopupTooltip(obj.Name(), pos.X, pos.Y, sve.Sc, ttxt)
 	// 	}

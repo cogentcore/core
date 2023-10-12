@@ -1819,7 +1819,7 @@ func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 	// if de.Mod == events.DropLink {
 	// 	de.Mod = events.DropCopy // link not supported -- revert to copy
 	// }
-	// idx, ok := sv.IdxFromPos(de.Pos().Y)
+	// idx, ok := sv.IdxFromPos(de.LocalPos().Y)
 	// if ok {
 	// 	de.SetHandled()
 	// 	sv.CurIdx = idx

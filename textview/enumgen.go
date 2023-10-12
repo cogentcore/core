@@ -307,11 +307,11 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ViewFlagsValues = []ViewFlags{10, 11, 12, 13, 14, 15, 16}
+var _ViewFlagsValues = []ViewFlags{10, 11, 12, 13, 14, 15}
 
 // ViewFlagsN is the highest valid value
 // for type ViewFlags, plus one.
-const ViewFlagsN ViewFlags = 17
+const ViewFlagsN ViewFlags = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -320,10 +320,9 @@ func _ViewFlagsNoOp() {
 	_ = x[ViewNeedsRefresh-(10)]
 	_ = x[ViewInReLayout-(11)]
 	_ = x[ViewRenderScrolls-(12)]
-	_ = x[ViewFocusActive-(13)]
-	_ = x[ViewHasLineNos-(14)]
-	_ = x[ViewLastWasTabAI-(15)]
-	_ = x[ViewLastWasUndo-(16)]
+	_ = x[ViewHasLineNos-(13)]
+	_ = x[ViewLastWasTabAI-(14)]
+	_ = x[ViewLastWasUndo-(15)]
 }
 
 var _ViewFlagsNameToValueMap = map[string]ViewFlags{
@@ -333,34 +332,30 @@ var _ViewFlagsNameToValueMap = map[string]ViewFlags{
 	`viewinrelayout`:    11,
 	`ViewRenderScrolls`: 12,
 	`viewrenderscrolls`: 12,
-	`ViewFocusActive`:   13,
-	`viewfocusactive`:   13,
-	`ViewHasLineNos`:    14,
-	`viewhaslinenos`:    14,
-	`ViewLastWasTabAI`:  15,
-	`viewlastwastabai`:  15,
-	`ViewLastWasUndo`:   16,
-	`viewlastwasundo`:   16,
+	`ViewHasLineNos`:    13,
+	`viewhaslinenos`:    13,
+	`ViewLastWasTabAI`:  14,
+	`viewlastwastabai`:  14,
+	`ViewLastWasUndo`:   15,
+	`viewlastwasundo`:   15,
 }
 
 var _ViewFlagsDescMap = map[ViewFlags]string{
 	10: `ViewNeedsRefresh indicates when refresh is required`,
 	11: `ViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
 	12: `ViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
-	13: `ViewFocusActive is set if the keyboard focus is active -- when we lose active focus we apply changes`,
-	14: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
-	15: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	16: `ViewLastWasUndo indicates that last key was an undo`,
+	13: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
+	14: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	15: `ViewLastWasUndo indicates that last key was an undo`,
 }
 
 var _ViewFlagsMap = map[ViewFlags]string{
 	10: `ViewNeedsRefresh`,
 	11: `ViewInReLayout`,
 	12: `ViewRenderScrolls`,
-	13: `ViewFocusActive`,
-	14: `ViewHasLineNos`,
-	15: `ViewLastWasTabAI`,
-	16: `ViewLastWasUndo`,
+	13: `ViewHasLineNos`,
+	14: `ViewLastWasTabAI`,
+	15: `ViewLastWasUndo`,
 }
 
 // String returns the string representation
