@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -55,17 +56,17 @@ func makeHome(ts *gi.Tabs) {
 
 	gi.NewLabel(home).SetType(gi.LabelBodyLarge).SetText("A demonstration of the <i>various</i> features of the <u>GoGi</u> 2D and 3D Go GUI <b>framework.</b>")
 
-	// pbar := gi.NewProgressBar(home, "pbar")
-	// pbar.Start(100)
-	// go func() {
-	// 	for {
-	// 		if pbar.ProgCur >= pbar.ProgMax {
-	// 			pbar.Start(100)
-	// 		}
-	// 		time.Sleep(100 * time.Millisecond)
-	// 		pbar.ProgStep()
-	// 	}
-	// }()
+	pbar := gi.NewProgressBar(home)
+	pbar.Start(100)
+	go func() {
+		for {
+			if pbar.ProgCur >= pbar.ProgMax {
+				pbar.Start(100)
+			}
+			time.Sleep(100 * time.Millisecond)
+			pbar.ProgStep()
+		}
+	}()
 
 	// bt := gi.NewButton(home, "bt")
 	// bt.Text = "Big Shadow"
