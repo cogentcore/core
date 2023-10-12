@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"reflect"
+	"log/slog"
 	"sort"
 
 	"goki.dev/cam/hsl"
@@ -35,9 +35,6 @@ type ColorView struct {
 
 	// the color that we view
 	Color color.RGBA `desc:"the color that we view"`
-
-	// inline struct view of the numbers
-	NumView Value `desc:"inline struct view of the numbers"`
 
 	// the color that we view, in HSLA form
 	ColorHSLA hsl.HSL `desc:"the color that we view, in HSLA form"`
@@ -128,17 +125,6 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	updt := cv.UpdateStart()
 	vl := gi.NewLayout(cv, "slider-lay").SetLayout(gi.LayoutHoriz)
 	nl := gi.NewLayout(cv, "num-lay").SetLayout(gi.LayoutVert)
-
-	cv.NumView = ToValue(&cv.Color, "")
-	cv.NumView.SetSoloValue(reflect.ValueOf(&cv.Color))
-	vtyp := cv.NumView.WidgetType()
-	widg := nl.NewChild(vtyp, "nums").(gi.Widget)
-	cv.NumView.ConfigWidget(widg)
-	vvb := cv.NumView.AsValueBase()
-	vvb.OnChange(func(e events.Event) {
-		cv.UpdateSliderGrid()
-		cv.SendChange()
-	})
 
 	rgbalay := gi.NewLayout(nl, "nums-rgba-lay").SetLayout(gi.LayoutHoriz)
 
@@ -322,6 +308,9 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.OnChange(func(e events.Event) {
+		if sl.Value == 255 {
+			fmt.Println("rgb slider change", sl.Value, sl)
+		}
 		updt := cv.UpdateStart()
 		cv.SetRGBValue(sl.Value, rgb)
 		cv.UpdateEndRender(updt)
@@ -460,7 +449,7 @@ func (cv *ColorView) UpdateNums() {
 
 // func (cv *ColorView) Render(sc *gi.Scene) {
 // 	if cv.PushBounds(sc) {
-// 		cv.RenderFrame(sc)
+// 		cv.FrameStdRender(sc)
 // 		cv.RenderChildren(sc)
 // 		cv.PopBounds(sc)
 // 	}
@@ -499,7 +488,8 @@ func (vv *ColorValue) Color() (*color.RGBA, bool) {
 		}
 	default:
 		ok = false
-		log.Printf("ColorValue: could not get color value from type: %T val: %+v\n", c, c)
+		// todo: validation
+		slog.Error(fmt.Sprintf("ColorValue: could not get color value from type: %T val: %+v\n", c, c))
 	}
 	return clr, ok
 }
