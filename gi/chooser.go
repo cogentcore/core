@@ -514,7 +514,6 @@ func (ch *Chooser) SelectItemAction(idx int) {
 		return
 	}
 	ch.SelectItem(idx)
-	fmt.Println("ch select", idx, ch.CurVal)
 	ch.SendChange()
 }
 

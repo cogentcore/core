@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -83,7 +82,6 @@ func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
 
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
-	fmt.Println("svi cp", sv.Struct)
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
@@ -122,7 +120,6 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
-	fmt.Println("svi cfg", config)
 	mods, updt := parts.ConfigChildren(config)
 	if !mods {
 		updt = parts.UpdateStart()
@@ -137,7 +134,6 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 		if hasDef {
 			sv.HasDefs = true
 		}
-		fmt.Println("svi cfg vv", vv)
 		vv.ConfigWidget(widg)
 		if !sv.IsDisabled() && !inactTag {
 			vvb.OnChange(func(e events.Event) {
@@ -152,7 +148,6 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 			})
 		}
 	}
-	fmt.Println("cvi cp up")
 	parts.UpdateEnd(updt)
 	sv.SetNeedsLayout(sc, updt)
 }
