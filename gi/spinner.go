@@ -121,6 +121,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		up.AddStyles(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
+			s.Padding.Set(units.Dp(4))
 		})
 	case "down":
 		down := w.(*Button)
@@ -136,6 +137,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		down.AddStyles(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
+			s.Padding.Set(units.Dp(4))
 		})
 	}
 }
