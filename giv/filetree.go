@@ -1739,7 +1739,7 @@ func (ftv *FileTreeView) FileTreeViewStyles() {
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		if ftv.StateIs(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 		switch ftv.Class {
 		case "exec":
