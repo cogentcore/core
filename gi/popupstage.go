@@ -142,7 +142,13 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	sc := st.Scene
 	maxSz := msc.Geom.Size
 
+	if st.Type == TooltipStage {
+		maxSz.X /= 2
+	}
+
+	sc.Geom.Size = maxSz
 	sz := sc.PrefSize(maxSz)
+	// fmt.Println(sz, maxSz)
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
 	fontHt := 16
 	if sc.Style.Font.Face != nil {
@@ -156,6 +162,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
 		b := msc.Geom.Bounds()
+		sz.X = max(int(0.8*float32(maxSz.X)), sz.X)
 		// Go in the middle [(max - min) / 2], and then subtract
 		// half of the size because we are specifying starting point,
 		// not the center. This results in us being centered.

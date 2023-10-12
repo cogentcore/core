@@ -177,7 +177,6 @@ func (wb *WidgetBase) GetSizeSubSpace() mat32.Vec2 {
 
 // GetSizeParts sets our size from those of our parts -- default..
 func (wb *WidgetBase) GetSizeParts(sc *Scene, iter int) {
-	wb.InitLayout(sc)
 	if wb.Parts == nil {
 		return
 	}
@@ -190,6 +189,8 @@ func (wb *WidgetBase) GetSizeParts(sc *Scene, iter int) {
 }
 
 func (wb *WidgetBase) GetSize(sc *Scene, iter int) {
+	wb.InitLayout(sc)
+	wb.GetSizeFromWH(2, 2)
 	wb.GetSizeParts(sc, iter)
 }
 
