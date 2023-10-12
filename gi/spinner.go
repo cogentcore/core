@@ -78,17 +78,19 @@ func (sp *Spinner) CopyFieldsFrom(frm any) {
 }
 
 func (sp *Spinner) OnInit() {
+	sp.Step = 0.1
+	sp.PageStep = 0.2
+	sp.Max = 1.0
+	sp.Prec = 6
 	sp.HandleSpinnerEvents()
 	sp.SpinnerStyles()
 }
 
 func (sp *Spinner) SpinnerStyles() {
-	sp.Step = 0.1
-	sp.PageStep = 0.2
-	sp.Max = 1.0
-	sp.Prec = 6
 	sp.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
+		s.SetFixedWidth(units.Em(5))
+		s.SetFixedHeight(units.Em(5))
 	})
 }
 
@@ -364,6 +366,7 @@ func (sp *Spinner) ConfigWidget(sc *Scene) {
 }
 
 func (sp *Spinner) GetSize(sc *Scene, iter int) {
+	sp.InitLayout(sc)
 	sp.GetSizeParts(sc, iter)
 }
 
@@ -374,7 +377,13 @@ func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 }
 
 func (sp *Spinner) Render(sc *Scene) {
+	if sp.Name() == "value-H" {
+		fmt.Println("RENDER", sp.BBox)
+	}
 	if sp.PushBounds(sc) {
+		if sp.Name() == "value-H" {
+			fmt.Println("PUSH")
+		}
 		tf := sp.TextField()
 		if tf != nil {
 			tf.SetSelected(sp.StateIs(states.Selected))
