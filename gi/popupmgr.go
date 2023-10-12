@@ -55,7 +55,11 @@ func (pm *PopupStageMgr) HandleEvent(evi events.Event) {
 			if evi.Type() == events.MouseUp {
 				pm.PopDelete()
 				// todo: could mark as Handled to absorb
+				if tb.Modal {
+					evi.SetHandled()
+				}
 			}
+			return
 		}
 		if tb.Modal { // absorb any other events!
 			evi.SetHandled()
