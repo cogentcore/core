@@ -8,7 +8,6 @@ import (
 	"image"
 	"log"
 
-	"goki.dev/colors"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -46,8 +45,6 @@ func (fr *Frame) FrameStyles() {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Dp(2))
-		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-		s.Color = colors.Scheme.OnSurface
 		// we never want state layers and borders on frames
 		s.StateLayer = 0
 		s.MaxBorder = styles.Border{}
