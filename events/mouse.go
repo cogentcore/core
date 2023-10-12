@@ -108,6 +108,10 @@ type MouseScroll struct {
 	Delta image.Point
 }
 
+func (ev *MouseScroll) String() string {
+	return fmt.Sprintf("%v{Delta: %v, Pos: %v, Mods: %v, Time: %v}", ev.Type(), ev.Delta, ev.Where, key.ModsString(ev.Mods), ev.Time())
+}
+
 func NewScroll(where, delta image.Point, mods key.Modifiers) *MouseScroll {
 	ev := &MouseScroll{}
 	ev.Typ = Scroll
@@ -123,9 +127,10 @@ func NewScroll(where, delta image.Point, mods key.Modifiers) *MouseScroll {
 // scroll wheels only report Y deltas.
 func (ev MouseScroll) DimDelta(dim mat32.Dims) int {
 	if dim == mat32.X {
-		if ev.Delta.X == 0 {
-			return ev.Delta.Y
-		}
+		// TODO(kai): remove this function unless we are adding back this
+		// if ev.Delta.X == 0 {
+		// 	return ev.Delta.Y
+		// }
 		return ev.Delta.X
 	}
 	return ev.Delta.Y
