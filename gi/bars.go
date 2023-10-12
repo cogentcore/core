@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 
-	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -46,8 +45,7 @@ func (mb *MenuBar) OnInit() {
 func (mb *MenuBar) MenuBarStyles() {
 	mb.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-		s.Color = colors.Scheme.OnSurface
+		s.StateLayer += 0.06
 	})
 }
 
@@ -333,9 +331,9 @@ func (tb *ToolBar) ToolBarStyles() {
 	tb.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
+		s.StateLayer += 0.06
 		s.Margin.Set(units.Dp(4))
-		s.Padding.SetHoriz(units.Dp(12))
+		s.Padding.SetHoriz(units.Dp(16))
 	})
 }
 
