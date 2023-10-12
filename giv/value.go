@@ -479,7 +479,8 @@ type Value interface {
 
 	// SendChange sends events.Change event to all listeners registered on this view.
 	// This is the primary notification event for all Value elements.
-	SendChange()
+	// It takes an optional original event to base the event on.
+	SendChange(orig ...events.Event)
 
 	// OnChange registers given listener function for Change events on Value.
 	// This is the primary notification event for all Value elements.
@@ -764,9 +765,10 @@ func (vv *ValueBase) On(etype events.Types, fun func(e events.Event)) {
 }
 
 // SendChange sends events.Change event to all listeners registered on this view.
-// This is the primary notification event for all Value elements.
-func (vv *ValueBase) SendChange() {
-	vv.Send(events.Change, nil)
+// This is the primary notification event for all Value elements. It takes
+// an optional original event to base the event on.
+func (vv *ValueBase) SendChange(orig ...events.Event) {
+	vv.Send(events.Change, orig...)
 }
 
 // Send sends an NEW event of given type to this widget,
@@ -777,7 +779,7 @@ func (vv *ValueBase) SendChange() {
 // call HandleEvent directly for any existing events.
 func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
-	if len(orig) > 0 {
+	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
 		e.AsBase().Typ = typ
 	} else {

@@ -270,12 +270,12 @@ func (sr *Slider) SizeFromAlloc() {
 
 // SendChanged sends a Changed message if given new value is
 // different from the existing Value.
-func (sr *Slider) SendChanged(e events.Event) bool {
+func (sr *Slider) SendChanged(e ...events.Event) bool {
 	if sr.Value == sr.LastValue {
 		return false
 	}
 	sr.LastValue = sr.Value
-	sr.Send(events.Change, e)
+	sr.Send(events.Change, e...)
 	return true
 }
 
@@ -313,7 +313,7 @@ func (sr *Slider) SetSliderPos(pos float32) {
 func (sr *Slider) SetSliderPosAction(pos float32) {
 	sr.SetSliderPos(pos)
 	if sr.Tracking && mat32.Abs(sr.LastValue-sr.Value) > sr.TrackThr {
-		sr.SendChanged(nil)
+		sr.SendChanged()
 	}
 }
 
