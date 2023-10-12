@@ -676,6 +676,10 @@ type EnumValue struct {
 	ValueBase
 }
 
+func (vv *EnumValue) OnChildAdded(child ki.Ki) {
+	fmt.Println("evv oca", child)
+}
+
 func (vv *EnumValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = gi.ChooserType
 	return vv.WidgetTyp
@@ -697,30 +701,32 @@ func (vv *EnumValue) SetEnumValueFromInt(ival int64) bool {
 }
 
 func (vv *EnumValue) UpdateWidget() {
+	fmt.Println("evv wupdt")
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*gi.Chooser)
+	ch := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
 	iv, err := laser.ToInt(npv.Interface())
 	if err != nil {
-		sb.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
+		ch.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
 	}
 }
 
 func (vv *EnumValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
-	cb := vv.Widget.(*gi.Chooser)
-	cb.Tooltip, _ = vv.Tag("desc")
-	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	ch := vv.Widget.(*gi.Chooser)
+	ch.Tooltip, _ = vv.Tag("desc")
+	ch.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 
 	ev := vv.EnumValue()
-	cb.ItemsFromEnum(ev, false, 50)
-	cb.OnChange(func(e events.Event) {
-		cval := cb.CurVal.(enums.Enum)
+	ch.ItemsFromEnum(ev, false, 50)
+	ch.OnChange(func(e events.Event) {
+		fmt.Println("evv ch change", ch.CurVal)
+		cval := ch.CurVal.(enums.Enum)
 		if vv.SetEnumValueFromInt(cval.Int64()) { // todo: using index
-			vv.UpdateWidget()
+			fmt.Println("evv got", ch.CurVal)
 		}
 	})
 	vv.UpdateWidget()
