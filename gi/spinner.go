@@ -89,7 +89,6 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
-		s.SetMinPrefWidth(units.Em(5))
 	})
 }
 
@@ -365,7 +364,6 @@ func (sp *Spinner) ConfigWidget(sc *Scene) {
 }
 
 func (sp *Spinner) GetSize(sc *Scene, iter int) {
-	sp.InitLayout(sc)
 	sp.GetSizeParts(sc, iter)
 }
 
@@ -376,13 +374,7 @@ func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 }
 
 func (sp *Spinner) Render(sc *Scene) {
-	if sp.Name() == "value-H" {
-		fmt.Println("RENDER", sp.BBox)
-	}
 	if sp.PushBounds(sc) {
-		if sp.Name() == "value-H" {
-			fmt.Println("PUSH")
-		}
 		tf := sp.TextField()
 		if tf != nil {
 			tf.SetSelected(sp.StateIs(states.Selected))

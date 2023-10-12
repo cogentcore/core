@@ -275,7 +275,6 @@ func (sr *Slider) SendChanged(e ...events.Event) bool {
 		return false
 	}
 	sr.LastValue = sr.Value
-	fmt.Println("sl val", sr.Value)
 	sr.Send(events.Change, e...)
 	return true
 }
