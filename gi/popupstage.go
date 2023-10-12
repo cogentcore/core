@@ -109,8 +109,6 @@ func NewPopupStage(typ StageTypes, sc *Scene, ctx Widget) *PopupStage {
 
 	switch typ {
 	case MenuStage:
-		st.Modal = true
-		st.ClickOff = true
 		MenuSceneConfigStyles(sc)
 	}
 
@@ -136,12 +134,13 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	mm.RenderCtx.Mu.RLock()
 	defer mm.RenderCtx.Mu.RUnlock()
 
-	ms := st.Main.Scene
+	ms := mm.Top().AsMain() // main stage -- put all popups here
+	msc := ms.Scene
 
-	cmgr := &st.Main.PopupMgr
+	cmgr := &ms.PopupMgr
 	cmgr.Push(st)
 	sc := st.Scene
-	maxSz := ms.Geom.Size
+	maxSz := msc.Geom.Size
 
 	sz := sc.PrefSize(maxSz)
 	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
@@ -156,7 +155,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 		maxht := int(MenuMaxHeight * fontHt)
 		sz.Y = min(maxht, sz.Y)
 	case SnackbarStage:
-		b := ms.Geom.Bounds()
+		b := msc.Geom.Bounds()
 		// Go in the middle [(max - min) / 2], and then subtract
 		// half of the size because we are specifying starting point,
 		// not the center. This results in us being centered.
@@ -166,7 +165,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	}
 
 	sc.Geom.Size = sz
-	sc.FitInWindow(ms.Geom) // does resize
+	sc.FitInWindow(msc.Geom) // does resize
 
 	sc.EventMgr.InitialFocus()
 

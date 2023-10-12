@@ -295,7 +295,12 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			}
 		}
 		em.Hovers = em.UpdateHovers(hovs, em.Hovers, evi, events.MouseEnter, events.MouseLeave)
-		em.HandleLongHover(evi)
+		if em.MainStageMgr() != nil && em.MainStageMgr().Top() != nil {
+			top := em.MainStageMgr().Top().AsMain()
+			if top != nil && top.Scene != nil {
+				top.Scene.EventMgr.HandleLongHover(evi, em.TopLongHover())
+			}
+		}
 	case events.MouseDrag:
 		switch {
 		case em.Drag != nil:
@@ -390,22 +395,8 @@ func (em *EventMgr) UpdateHovers(hov, prev []Widget, evi events.Event, enter, le
 	return hov
 }
 
-// HandleLongHover handles long hover events
-func (em *EventMgr) HandleLongHover(evi events.Event) {
-	em.TimerMu.Lock()
-	defer em.TimerMu.Unlock()
-
-	clearLongHover := func() {
-		if em.LongHoverTimer != nil {
-			em.LongHoverTimer.Stop() // TODO: do we need to close this?
-			em.LongHoverTimer = nil
-		}
-		em.LongHoverWidget = nil
-		em.LongHoverPos = image.Point{}
-	}
-
-	// we only care about the deepest (latest in stack)
-	// element that can be long hovered
+// TopLongHover returns the top-most LongHoverable among the Hovers
+func (em *EventMgr) TopLongHover() Widget {
 	var deep Widget
 	for i := len(em.Hovers) - 1; i >= 0; i-- {
 		h := em.Hovers[i]
@@ -414,10 +405,35 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 			break
 		}
 	}
+	return deep
+}
+
+// HandleLongHover handles long hover events
+func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
+	em.TimerMu.Lock()
+	defer em.TimerMu.Unlock()
+
+	// fmt.Println("em:", em.Scene.Name())
+
+	clearLongHover := func() {
+		if em.LongHoverTimer != nil {
+			em.LongHoverTimer.Stop() // TODO: do we need to close this?
+			em.LongHoverTimer = nil
+		}
+		em.LongHoverWidget = nil
+		em.LongHoverPos = image.Point{}
+		// fmt.Println("cleared hover")
+	}
+
+	cpos := evi.Pos()
+	dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
+	// fmt.Println("dist:", dst)
 
 	// we have no long hovers, so we must be done
 	if deep == nil {
+		// fmt.Println("no deep")
 		if em.LongHoverWidget == nil {
+			// fmt.Println("no lhw")
 			return
 		}
 		// if we have already finished the timer, then we have already
@@ -426,16 +442,16 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 			em.LongHoverWidget.Send(events.LongHoverEnd, evi)
 		}
 		clearLongHover()
+		// fmt.Println("cleared")
 		return
 	}
 
 	// we still have the current one, so there is nothing to do
 	// but make sure our position hasn't changed too much
 	if deep == em.LongHoverWidget {
-		cpos := evi.Pos()
-		dst := int(mat32.Hypot(float32(em.LongHoverPos.X-cpos.X), float32(em.LongHoverPos.Y-cpos.Y)))
 		// if we haven't gone too far, we have nothing to do
 		if dst <= LongHoverStopDist {
+			// fmt.Println("bail on dist:", dst)
 			return
 		}
 		// If we have gone too far, we are done with the long hover and
@@ -446,12 +462,14 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 		// the solution to https://github.com/goki/gi/issues/553
 		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
 		clearLongHover()
+		// fmt.Println("fallthrough after clear")
 	}
 
 	// if we have changed and still have the timer, we never
 	// sent a start event, so we just bail
 	if em.LongHoverTimer != nil {
 		clearLongHover()
+		// fmt.Println("timer non-nil, cleared")
 		return
 	}
 
@@ -460,10 +478,13 @@ func (em *EventMgr) HandleLongHover(evi events.Event) {
 	if em.LongHoverWidget != nil {
 		em.LongHoverWidget.Send(events.LongHoverEnd, evi)
 		clearLongHover()
+		// fmt.Println("lhw, send end, cleared")
+		return
 	}
 
 	// now we can set it to our new widget
 	em.LongHoverWidget = deep
+	// fmt.Println("setting new:", deep)
 	em.LongHoverPos = evi.Pos()
 	em.LongHoverTimer = time.AfterFunc(LongHoverTime, func() {
 		em.TimerMu.Lock()

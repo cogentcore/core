@@ -263,12 +263,12 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		if wb.StateIs(states.Disabled) {
 			return
 		}
-		mstg := wb.Sc.MainStage()
-		if mstg == nil {
-			slog.Error("nil main stage in long hover end tooltip event", "widget", wb)
-			return
+		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
+			top := wb.Sc.MainStageMgr().Top()
+			if top != nil && top.AsMain() != nil {
+				top.AsMain().PopupMgr.PopDeleteType(TooltipStage)
+			}
 		}
-		mstg.PopupMgr.PopDeleteType(TooltipStage)
 	})
 }
 
