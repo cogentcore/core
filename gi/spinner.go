@@ -89,8 +89,7 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
-		s.SetFixedWidth(units.Em(5))
-		s.SetFixedHeight(units.Em(5))
+		s.SetMinPrefWidth(units.Em(5))
 	})
 }
 
