@@ -514,7 +514,6 @@ func (ch *Chooser) SelectItemAction(idx int) {
 		return
 	}
 	ch.SelectItem(idx)
-	ch.SendChange()
 }
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
@@ -634,7 +633,7 @@ func (ch *Chooser) TextFieldHandlers(tf *TextField) {
 		for idx, item := range ch.Items {
 			if text == ToLabel(item) {
 				ch.SetCurIndex(idx)
-				ch.SendChange()
+				ch.SendChange(e)
 				return
 			}
 		}
@@ -645,7 +644,7 @@ func (ch *Chooser) TextFieldHandlers(tf *TextField) {
 		}
 		ch.Items = append(ch.Items, text)
 		ch.SetCurIndex(len(ch.Items) - 1)
-		ch.SendChange()
+		ch.SendChange(e)
 	})
 }
 
