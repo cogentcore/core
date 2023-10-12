@@ -15,6 +15,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
+	"github.com/fatih/camelcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -428,7 +429,8 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isInact bool) 
 	if lbltag, has := vv.Tag("label"); has {
 		lbl.Text = lbltag
 	} else {
-		lbl.Text = vvb.Field.Name
+		words := camelcase.Split(vvb.Field.Name)
+		lbl.Text = strings.Join(words, " ")
 	}
 	if _, has := vv.Tag("inactive"); has {
 		inactTag = true
