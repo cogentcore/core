@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -21,7 +20,7 @@ import (
 // properties -- constructs widgets in Parts to show the field names and
 // editor fields for each field
 type StructViewInline struct {
-	gi.WidgetBase
+	gi.Frame
 
 	// the struct that we are a view onto
 	Struct any `desc:"the struct that we are a view onto"`
@@ -50,7 +49,7 @@ type StructViewInline struct {
 
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	if w.Parent().Name() == "Parts" && strings.HasPrefix(w.Name(), "label-") {
+	if strings.HasPrefix(w.Name(), "label-") {
 		w.AddStyles(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
@@ -73,20 +72,19 @@ func (sv *StructViewInline) SetStruct(st any) {
 		// 	})
 		// }
 	}
-	sv.ConfigParts(sv.Sc)
+	sv.Config(sv.Sc)
 	sv.UpdateEnd(updt)
 }
 
 func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
-	sv.ConfigParts(sc)
+	sv.ConfigStructGrid(sc)
 }
 
-// ConfigParts configures Parts for the current struct
-func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
+// ConfigStructGrid configures the struct grid for the current struct
+func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) {
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
-	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
 	sv.FieldViews = make([]Value, 0)
@@ -121,16 +119,16 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
-	mods, updt := parts.ConfigChildren(config)
+	mods, updt := sv.ConfigChildren(config)
 	if !mods {
-		updt = parts.UpdateStart()
+		updt = sv.UpdateStart()
 	}
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
-		lbl := parts.Child(i * 2).(*gi.Label)
+		lbl := sv.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		widg := parts.Child((i * 2) + 1).(gi.Widget)
+		widg := sv.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
@@ -149,7 +147,7 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 			})
 		}
 	}
-	parts.UpdateEnd(updt)
+	sv.UpdateEnd(updt)
 	sv.SetNeedsLayout(sc, updt)
 }
 
@@ -163,11 +161,11 @@ func (sv *StructViewInline) UpdateFields() {
 
 func (sv *StructViewInline) UpdateFieldAction() {
 	if sv.HasViewIfs {
-		sv.ConfigParts(sv.Sc)
+		sv.ConfigStructGrid(sv.Sc)
 	} else if sv.HasDefs {
 		updt := sv.UpdateStart()
 		for i, vv := range sv.FieldViews {
-			lbl := sv.Parts.Child(i * 2).(*gi.Label)
+			lbl := sv.Child(i * 2).(*gi.Label)
 			StructViewFieldDefTag(vv, lbl)
 		}
 		sv.UpdateEndRender(updt)
@@ -176,9 +174,6 @@ func (sv *StructViewInline) UpdateFieldAction() {
 
 func (sv *StructViewInline) Render(sc *gi.Scene) {
 	if sv.PushBounds(sc) {
-		fmt.Println(sv.Parts.Kids)
-		sv.RenderParts(sc)
-		sv.RenderChildren(sc)
-		sv.PopBounds(sc)
+		sv.Frame.Render(sc)
 	}
 }
