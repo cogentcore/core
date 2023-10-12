@@ -6,7 +6,7 @@ package paint
 
 import (
 	"image"
-	"log"
+	"log/slog"
 	"sync"
 
 	"github.com/srwiley/rasterx"
@@ -121,7 +121,7 @@ func (rs *State) PushXFormLock(xf mat32.Mat2) {
 func (rs *State) PopXForm() {
 	sz := len(rs.XFormStack)
 	if sz == 0 {
-		log.Printf("gi.State PopXForm: stack is empty -- programmer error\n")
+		slog.Error("programmer error: paint.State.PopXForm: stack is empty")
 		rs.XForm = mat32.Identity2D()
 		return
 	}
@@ -176,7 +176,7 @@ func (rs *State) PopBounds() {
 
 	sz := len(rs.BoundsStack)
 	if sz == 0 {
-		log.Printf("gi.State PopBounds: stack is empty -- programmer error\n")
+		slog.Error("programmer error: paint.State.PopBounds: stack is empty")
 		rs.Bounds = rs.Image.Bounds()
 		return
 	}
@@ -199,7 +199,7 @@ func (rs *State) PushClip() {
 func (rs *State) PopClip() {
 	sz := len(rs.ClipStack)
 	if sz == 0 {
-		log.Printf("gi.State PopClip: stack is empty -- programmer error\n")
+		slog.Error("programmer error: paint.State.PopClip: stack is empty")
 		rs.Mask = nil // implied
 		return
 	}
