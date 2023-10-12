@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -175,6 +176,7 @@ func (sv *StructViewInline) UpdateFieldAction() {
 
 func (sv *StructViewInline) Render(sc *gi.Scene) {
 	if sv.PushBounds(sc) {
+		fmt.Println(sv.Parts.Kids)
 		sv.RenderParts(sc)
 		sv.RenderChildren(sc)
 		sv.PopBounds(sc)

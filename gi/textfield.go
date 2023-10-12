@@ -161,7 +161,7 @@ func (tf *TextField) TextFieldStyles() {
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
-		s.MinWidth.SetEm(20)
+		s.SetMinPrefWidth(units.Em(10))
 		s.Margin.Set(units.Dp(1))
 		s.Padding.Set(units.Dp(8), units.Dp(16))
 		if !tf.LeadingIcon.IsNil() {
