@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"fmt"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
 )
@@ -27,7 +25,6 @@ func PrefsView(pf *gi.Preferences) {
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
-		fmt.Println("pfv change")
 		pf.UpdateAll()
 	})
 
