@@ -18,6 +18,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
+	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -115,6 +116,7 @@ func (cv *ColorView) SetColor(clr color.Color) {
 	cv.ColorHSLA = hsl.FromColor(clr)
 	cv.ColorHSLA.Round()
 	cv.UpdateEndRender(updt)
+	cv.SendChange()
 }
 
 // Config configures a standard setup of entire view
@@ -131,11 +133,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	nrgba := NewStructViewInline(rgbalay, "nums-rgba")
 	nrgba.SetStruct(&cv.Color)
 	nrgba.OnChange(func(e events.Event) {
-		updt := cv.UpdateStart()
-		cv.ColorHSLA = hsl.FromColor(cv.Color)
-		cv.ColorHSLA.Round()
-		cv.UpdateEndRender(updt)
-		cv.SendChange()
+		cv.SetColor(cv.Color)
 	})
 
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
@@ -163,10 +161,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	nhsla := NewStructViewInline(hslalay, "nums-hsla")
 	nhsla.SetStruct(&cv.ColorHSLA)
 	nhsla.OnChange(func(e events.Event) {
-		updt := cv.UpdateStart()
-		cv.Color = cv.ColorHSLA.AsRGBA()
-		cv.UpdateEndRender(updt)
-		cv.SendChange()
+		cv.SetColor(cv.ColorHSLA)
 	})
 
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
@@ -196,16 +191,7 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hex := gi.NewTextField(hexlay, "nums-hex")
 	hex.Tooltip = "The color in hexadecimal form"
 	hex.OnChange(func(e events.Event) {
-		updt := cv.UpdateStart()
-		clr, err := colors.FromHex(hex.Text())
-		if err != nil {
-			log.Println("color view: error parsing hex '"+hex.Text()+"':", err)
-		}
-		cv.Color = clr
-		cv.ColorHSLA = hsl.FromColor(cv.Color)
-		cv.ColorHSLA.Round()
-		cv.Send(events.Change, e)
-		cv.UpdateEnd(updt)
+		cv.SetColor(grr.Log(colors.FromHex(hex.Text())))
 	})
 
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
@@ -292,11 +278,6 @@ func (cv *ColorView) SetRGBValue(val float32, rgb int) {
 	case 3:
 		cv.Color.A = uint8(val)
 	}
-	cv.ColorHSLA = hsl.FromColor(cv.Color)
-	cv.ColorHSLA.Round()
-	if cv.TmpSave != nil {
-		cv.TmpSave.SaveTmp()
-	}
 }
 
 func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
@@ -309,10 +290,8 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.TrackThr = 1
 	cv.UpdateRGBSlider(sl, rgb)
 	sl.OnChange(func(e events.Event) {
-		updt := cv.UpdateStart()
 		cv.SetRGBValue(sl.Value, rgb)
-		cv.UpdateEndRender(updt)
-		cv.SendChange()
+		cv.SetColor(cv.Color)
 	})
 }
 
@@ -330,20 +309,13 @@ func (cv *ColorView) UpdateRGBSlider(sl *gi.Slider, rgb int) {
 }
 
 func (cv *ColorView) SetHSLValue(val float32, hsln int) {
-	hsla := hsl.FromColor(cv.Color)
 	switch hsln {
 	case 0:
-		hsla.H = val
+		cv.ColorHSLA.H = val
 	case 1:
-		hsla.S = val / 360.0
+		cv.ColorHSLA.S = val / 360.0
 	case 2:
-		hsla.L = val / 360.0
-	}
-	hsla.Round()
-	cv.ColorHSLA = hsla
-	cv.Color = hsla.AsRGBA()
-	if cv.TmpSave != nil {
-		cv.TmpSave.SaveTmp()
+		cv.ColorHSLA.L = val / 360.0
 	}
 }
 
@@ -356,10 +328,8 @@ func (cv *ColorView) ConfigHSLSlider(sl *gi.Slider, hsl int) {
 	sl.Tracking = true
 	sl.TrackThr = 1
 	sl.OnChange(func(e events.Event) {
-		updt := cv.UpdateStart()
 		cv.SetHSLValue(sl.Value, hsl)
-		cv.UpdateEndRender(updt)
-		cv.SendChange()
+		cv.SetColor(cv.ColorHSLA)
 	})
 }
 
@@ -398,12 +368,7 @@ func (cv *ColorView) ConfigPalette() {
 		cbt.Tooltip = cn
 		cbt.SetText("  ")
 		cbt.OnChange(func(e events.Event) {
-			updt := cv.UpdateStart()
-			cv.Color, _ = colors.FromName(cbt.Nm)
-			cv.ColorHSLA = hsl.FromColor(cv.Color)
-			cv.ColorHSLA.Round()
-			cv.UpdateEndRender(updt)
-			cv.SendChange()
+			cv.SetColor(grr.Log(colors.FromName(cbt.Name())))
 		})
 	}
 }
@@ -546,6 +511,7 @@ func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
 		// so that it can be seen
 		dclr := colors.SetAF32(clr, 1)
 		s.BackgroundColor.SetSolid(dclr)
+		// TODO: use hct contrast color
 		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 	})
 	vv.UpdateWidget()
