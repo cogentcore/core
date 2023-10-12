@@ -337,12 +337,7 @@ func makeInputs(ts *gi.Tabs) {
 	swr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
 	swr.Mutex = true
 
-	sl := gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
-	fmt.Println("slae")
-	sl.OnChange(func(e events.Event) {
-		fmt.Println("sl change", sl.Value)
-	})
-
+	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
 
 	sliderys := gi.NewLayout(inputs, "sliderys").SetLayout(gi.LayoutHorizFlow)

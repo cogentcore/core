@@ -309,9 +309,6 @@ func (cv *ColorView) ConfigRGBSlider(sl *gi.Slider, rgb int) {
 	sl.TrackThr = 1
 	cv.UpdateRGBSlider(sl, rgb)
 	sl.OnChange(func(e events.Event) {
-		fmt.Println("rgb slider change", sl.Value, sl)
-		if sl.Value == 255 {
-		}
 		updt := cv.UpdateStart()
 		cv.SetRGBValue(sl.Value, rgb)
 		cv.UpdateEndRender(updt)
