@@ -246,7 +246,8 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	if pwi != nil {
 		parBBox = pwi.ChildrenBBoxes(sc)
 	} else {
-		parBBox = sc.Pixels.Bounds()
+		parBBox = image.Rectangle{Max: sc.Geom.Size} // sc.Pixels.Bounds()
+		// fmt.Println("parBBox:", parBBox)
 	}
 	wi := wb.This().(Widget)
 	if wi == nil {
@@ -265,12 +266,17 @@ func (wb *WidgetBase) DoLayoutTree(sc *Scene) {
 	pr.End()
 }
 
-// LayoutRenderScene does a layout and render of the tree:
-// GetSize, DoLayout, Render.  Needed after Config.
-func (sc *Scene) LayoutRenderScene() {
+// LayoutScene does a layout of the tree: GetSize, DoLayout.
+func (sc *Scene) LayoutScene() {
 	sc.GetSizeTree(sc, 0)
 	sc.LayState.Alloc.Size = mat32.NewVec2FmPoint(sc.Geom.Size)
 	sc.DoLayoutTree(sc)
+}
+
+// LayoutRenderScene does a layout and render of the tree:
+// GetSize, DoLayout, Render.  Needed after Config.
+func (sc *Scene) LayoutRenderScene() {
+	sc.LayoutScene()
 	sc.Render(sc)
 }
 
@@ -404,9 +410,14 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 	sc.SetFlag(true, ScPrefSizing)
 	sc.ConfigScene()
 
-	sc.ApplyStyleTree(sc) // sufficient to get sizes
-	sc.LayState.Alloc.Size.SetPoint(initSz)
-	sc.GetSizeTree(sc, 0) // collect sizes
+	sc.Geom.Size = initSz
+	for i := 0; i < 2; i++ {
+		sc.ApplyStyleTree(sc) // sufficient to get sizes
+		sc.LayState.Alloc.Size.SetPoint(initSz)
+		sc.GetSizeTree(sc, 0) // collect sizes
+		sc.LayState.Alloc.Size.SetPoint(initSz)
+		sc.DoLayoutTree(sc)
+	}
 
 	sc.SetFlag(false, ScPrefSizing)
 

@@ -100,8 +100,9 @@ func GatherSizes(ly *Layout) {
 	sumPref, sumNeed, maxPref, maxNeed := GatherSizesSumMax(ly)
 
 	prefSizing := false
-	mvp := ly.Sc
-	if mvp != nil && mvp.Is(ScPrefSizing) {
+	sc := ly.Sc
+	if sc != nil && sc.Is(ScPrefSizing) {
+		// fmt.Println("pref!")
 		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 
@@ -380,8 +381,8 @@ func GatherSizesGrid(ly *Layout) {
 	}
 
 	prefSizing := false
-	mvp := ly.Sc
-	if mvp != nil && mvp.Is(ScPrefSizing) {
+	sc := ly.Sc
+	if sc != nil && sc.Is(ScPrefSizing) {
 		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
 	}
 

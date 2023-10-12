@@ -1226,11 +1226,9 @@ func (ly *Layout) GetSize(sc *Scene, iter int) {
 }
 
 func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	//if iter > 0 {
-	//	if LayoutTrace {
-	//		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
-	//	}
-	//}
+	if iter > 0 && LayoutTrace {
+		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
+	}
 	ly.DoLayoutBase(sc, parBBox, iter)
 	redo := false
 	switch ly.Lay {
@@ -1325,6 +1323,8 @@ type Stretch struct {
 
 func (st *Stretch) OnInit() {
 	st.AddStyles(func(s *styles.Style) {
+		s.SetMinPrefHeight(units.Ch(1))
+		s.SetMinPrefWidth(units.Em(1))
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 	})

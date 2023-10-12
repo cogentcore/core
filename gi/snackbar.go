@@ -65,7 +65,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.BoxShadow = styles.BoxShadow3()
 		s.AlignV = styles.AlignMiddle
 		sc.Spacing.SetDp(12)
-		s.Width.SetDot(0.8 * float32(wsc.Geom.Size.X))
+		s.SetStretchMaxWidth()
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium).
 		AddStyles(func(s *styles.Style) {

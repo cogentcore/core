@@ -392,6 +392,9 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
+	if LayoutTrace {
+		fmt.Println("Label:", lb.Nm, "LayoutLabel Size:", sz)
+	}
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
@@ -411,6 +414,9 @@ func (lb *Label) GetSize(sc *Scene, iter int) {
 		sz := lb.LayState.Size.Pref // SizePrefOrMax()
 		sz = sz.Max(lb.TextRender.Size)
 		lb.GetSizeFromWH(sz.X, sz.Y)
+		if LayoutTrace {
+			fmt.Println("Label:", lb.Nm, "GetSize:", sz)
+		}
 	}
 }
 
