@@ -182,16 +182,17 @@ func (sr *Slider) SliderStyles() {
 			sr.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 			sr.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 			s.Padding.Set(units.Dp(8))
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceVariant)
 		} else {
 			sr.ValueColor.SetSolid(colors.Scheme.OutlineVariant)
 			sr.ThumbColor.SetSolid(colors.Scheme.OutlineVariant)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		}
 
 		sr.ValueColor = s.StateBackgroundColor(sr.ValueColor)
 		sr.ThumbColor = s.StateBackgroundColor(sr.ThumbColor)
 
 		s.Color = colors.Scheme.OnSurface
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
