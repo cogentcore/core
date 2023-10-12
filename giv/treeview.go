@@ -83,7 +83,7 @@ func (tv *TreeView) OnInit() {
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		if s.State.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Tertiary.Container)
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 	})
 }
