@@ -73,7 +73,7 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) Widget {
 // call HandleEvent directly for any existing events.
 func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
-	if len(orig) > 0 {
+	if len(orig) > 0 && orig[0] != nil {
 		e = orig[0].Clone()
 		e.AsBase().Typ = typ
 	} else {
