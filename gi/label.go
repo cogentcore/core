@@ -285,7 +285,7 @@ func (lb *Label) HandleLabelLongHover() {
 		// 	for ti := range llb.TextRender.Links {
 		// 		tl := &llb.TextRender.Links[ti]
 		// 		tlb := tl.Bounds(&llb.TextRender, pos)
-		// 		if me.Pos().In(tlb) {
+		// 		if me.LocalPos().In(tlb) {
 		// 			PopupTooltip(tl.URL, tlb.Max.X, tlb.Max.Y, llb.Sc, llb.Nm)
 		// 			me.SetHandled()
 		// 			return
@@ -319,7 +319,7 @@ func (lb *Label) HandleLabelClick() {
 		for ti := range lb.TextRender.Links {
 			tl := &lb.TextRender.Links[ti]
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if e.Pos().In(tlb) {
+			if e.LocalPos().In(tlb) {
 				lb.OpenLink(tl)
 				e.SetHandled()
 				return
@@ -342,7 +342,7 @@ func (lb *Label) HandleLabelMouseMove() {
 		inLink := false
 		for _, tl := range lb.TextRender.Links {
 			tlb := tl.Bounds(&lb.TextRender, pos)
-			if e.Pos().In(tlb) {
+			if e.LocalPos().In(tlb) {
 				inLink = true
 				break
 			}

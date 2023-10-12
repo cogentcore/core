@@ -155,7 +155,7 @@ func (tf *TextField) TextFieldStyles() {
 	// TOOD: figure out how to have primary cursor color
 	tf.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		tf.CursorWidth.SetDp(1)
+		tf.CursorWidth.SetDp(2)
 		tf.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
@@ -1221,17 +1221,20 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 
 func (tf *TextField) HandleTextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
-		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
+		if tf.IsDisabled() {
+			return
+		}
+		if !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
 		}
 		e.SetHandled()
 		switch e.MouseButton() {
 		case events.Left:
-			pt := tf.PointToRelPos(e.Pos())
+			pt := tf.PointToRelPos(e.LocalPos())
 			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
 		case events.Middle:
 			e.SetHandled()
-			pt := tf.PointToRelPos(e.Pos())
+			pt := tf.PointToRelPos(e.LocalPos())
 			tf.SetCursorFromPixel(float32(pt.X), e.SelectMode())
 			tf.Paste()
 		}
@@ -1244,6 +1247,9 @@ func (tf *TextField) HandleTextFieldMouse() {
 		tf.Send(events.Focus, e) // sets focused flag
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
+		if tf.IsDisabled() {
+			return
+		}
 		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
 			tf.Send(events.Focus, e) // sets focused flag
@@ -1260,14 +1266,14 @@ func (tf *TextField) HandleTextFieldMouse() {
 		}
 	})
 	tf.On(events.SlideMove, func(e events.Event) {
-		if tf.StateIs(states.Disabled) {
+		if tf.IsDisabled() {
 			return
 		}
 		e.SetHandled()
 		if !tf.SelectMode {
 			tf.SelectModeToggle()
 		}
-		pt := tf.PointToRelPos(e.Pos())
+		pt := tf.PointToRelPos(e.LocalPos())
 		tf.SetCursorFromPixel(float32(pt.X), events.SelectOne)
 	})
 }
