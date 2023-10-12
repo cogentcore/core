@@ -624,11 +624,11 @@ func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	// fmt.Println("set focus:", w)
 
 	if cfoc != nil {
-		cfoc.Send(events.FocusLost, nil)
+		cfoc.Send(events.FocusLost)
 	}
 	em.Focus = w
 	if sendEvent && w != nil {
-		w.Send(events.Focus, nil)
+		w.Send(events.Focus)
 	}
 	return true
 }
@@ -835,7 +835,7 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 			if EventTrace {
 				fmt.Printf("ClearNonFocus: had focus: %v\n", wb.Path())
 			}
-			wi.Send(events.FocusLost, nil)
+			wi.Send(events.FocusLost)
 		}
 		return ki.Continue
 	})
@@ -1002,7 +1002,7 @@ func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v, button: %v triggered\n", chord, sa.Text)
 	}
-	sa.Send(events.Click, nil)
+	sa.Send(events.Click)
 	return true
 }
 

@@ -1237,7 +1237,7 @@ func (sv *SliceViewBase) MoveDownAction(selMode events.SelectModes) int {
 	nidx := sv.MoveDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.Send(events.Select, nil) // todo: need to do this for the item?
+		sv.Send(events.Select) // todo: need to do this for the item?
 	}
 	return nidx
 }
@@ -1260,7 +1260,7 @@ func (sv *SliceViewBase) MoveUpAction(selMode events.SelectModes) int {
 	nidx := sv.MoveUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.Send(events.Select, nil)
+		sv.Send(events.Select)
 	}
 	return nidx
 }
@@ -1284,7 +1284,7 @@ func (sv *SliceViewBase) MovePageDownAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageDown(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.Send(events.Select, nil)
+		sv.Send(events.Select)
 	}
 	return nidx
 }
@@ -1308,7 +1308,7 @@ func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 	nidx := sv.MovePageUp(selMode)
 	if nidx >= 0 {
 		sv.ScrollToIdx(nidx)
-		sv.Send(events.Select, nil)
+		sv.Send(events.Select)
 	}
 	return nidx
 }
@@ -1369,7 +1369,7 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 		}
-		sv.Send(events.Select, nil)
+		sv.Send(events.Select)
 	} else {
 		selMode := events.SelectOne
 		em := sv.EventMgr()
@@ -1488,13 +1488,13 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
 		}
-		sv.Send(events.Select, nil) //  sv.SelectedIdx)
+		sv.Send(events.Select) //  sv.SelectedIdx)
 	case events.ExtendContinuous:
 		if len(sv.SelectedIdxs) == 0 {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
-			sv.Send(events.Select, nil) //  sv.SelectedIdx)
+			sv.Send(events.Select) //  sv.SelectedIdx)
 		} else {
 			minIdx := -1
 			maxIdx := 0
@@ -1521,17 +1521,17 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 				}
 			}
 			sv.IdxGrabFocus(idx)
-			sv.Send(events.Select, nil) //  sv.SelectedIdx)
+			sv.Send(events.Select) //  sv.SelectedIdx)
 		}
 	case events.ExtendOne:
 		if sv.IdxIsSelected(idx) {
 			sv.UnselectIdxAction(idx)
-			sv.Send(events.Select, nil) //  sv.SelectedIdx)
+			sv.Send(events.Select) //  sv.SelectedIdx)
 		} else {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 			sv.IdxGrabFocus(idx)
-			sv.Send(events.Select, nil) //  sv.SelectedIdx)
+			sv.Send(events.Select) //  sv.SelectedIdx)
 		}
 	case events.Unselect:
 		sv.SelectedIdx = idx

@@ -708,7 +708,7 @@ func (fv *FileView) SetSelFileAction(sel string) {
 	fv.SelectedIdx = sv.SelectedIdx
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.Send(events.Select, nil) // receiver needs to get selectedFile
+	fv.Send(events.Select) // receiver needs to get selectedFile
 	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
@@ -724,7 +724,7 @@ func (fv *FileView) FileSelectAction(idx int) {
 	fv.SelFile = fi.Name
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
-	fv.Send(events.Select, nil)
+	fv.Send(events.Select)
 	// fv.WidgetSig.Emit(fv.This(), int64(gi.WidgetSelected), fv.SelectedFile())
 }
 
