@@ -775,10 +775,10 @@ func (vv *ValueBase) SendChange() {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (vv *ValueBase) Send(typ events.Types, orig events.Event) {
+func (vv *ValueBase) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
-	if orig != nil {
-		e = orig.Clone()
+	if len(orig) > 0 {
+		e = orig[0].Clone()
 		e.AsBase().Typ = typ
 	} else {
 		e = &events.Base{Typ: typ}
