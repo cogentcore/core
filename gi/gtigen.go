@@ -680,6 +680,44 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// ProgressBarType is the [gti.Type] for [ProgressBar]
+var ProgressBarType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.ProgressBar",
+	ShortName:  "gi.ProgressBar",
+	IDName:     "progress-bar",
+	Doc:        "ProgressBar is a progress bar that fills up bar as progress continues.\nCall Start with a maximum value to work toward, and ProgStep each time\na progress step has been accomplished -- increments the ProgCur by one\nand display is updated every ProgInc such steps.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ProgMax", &gti.Field{Name: "ProgMax", Type: "int", Doc: "maximum amount of progress to be achieved", Directives: gti.Directives{}}},
+		{"ProgInc", &gti.Field{Name: "ProgInc", Type: "int", Doc: "progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten", Directives: gti.Directives{}}},
+		{"ProgCur", &gti.Field{Name: "ProgCur", Type: "int", Doc: "current progress level", Directives: gti.Directives{}}},
+		{"ProgMu", &gti.Field{Name: "ProgMu", Type: "sync.Mutex", Doc: "mutex for updating progress", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Slider", &gti.Field{Name: "Slider", Type: "Slider", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &ProgressBar{},
+})
+
+// NewProgressBar adds a new [ProgressBar] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewProgressBar(par ki.Ki, name ...string) *ProgressBar {
+	return par.NewChild(ProgressBarType, name...).(*ProgressBar)
+}
+
+// KiType returns the [*gti.Type] of [ProgressBar]
+func (t *ProgressBar) KiType() *gti.Type {
+	return ProgressBarType
+}
+
+// New returns a new [*ProgressBar] value
+func (t *ProgressBar) New() ki.Ki {
+	return &ProgressBar{}
+}
+
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Scene",
@@ -688,12 +726,9 @@ var SceneType = gti.AddType(&gti.Type{
 	Doc:        "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context (e.g., bounding boxes\nand pointer to current parent Stage), so",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Nm", &gti.Field{Name: "Nm", Type: "string", Doc: "name of scene.  User-created scenes can be stored in the global SceneLibrary by name, in which case they must be unique.", Directives: gti.Directives{}}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}}},
-		{"Flags", &gti.Field{Name: "Flags", Type: "ScFlags", Doc: "[view: -] has critical state information signaling when rendering, styling etc need to be done, and also indicates type of scene", Directives: gti.Directives{}}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}}},
-		{"Decor", &gti.Field{Name: "Decor", Type: "*Layout", Doc: "Extra decoration, configured by the outer Stage container.  Can be positioned anywhere -- typically uses LayoutNil", Directives: gti.Directives{}}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "paint.State", Doc: "[view: -] render state for rendering", Directives: gti.Directives{}}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", Doc: "[view: -] live pixels that we render into", Directives: gti.Directives{}}},
 		{"BgColor", &gti.Field{Name: "BgColor", Type: "colors.Full", Doc: "[view: -] background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}}},
@@ -809,6 +844,47 @@ func AsSlider(k ki.Ki) *Slider {
 // AsSlider satisfies the [SliderEmbedder] interface
 func (t *Slider) AsSlider() *Slider {
 	return t
+}
+
+// SpellType is the [gti.Type] for [Spell]
+var SpellType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Spell",
+	ShortName:  "gi.Spell",
+	IDName:     "spell",
+	Doc:        "Spell",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SrcLn", &gti.Field{Name: "SrcLn", Type: "int", Doc: "line number in source that spelling is operating on, if relevant", Directives: gti.Directives{}}},
+		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", Doc: "character position in source that spelling is operating on (start of word to be corrected)", Directives: gti.Directives{}}},
+		{"Suggest", &gti.Field{Name: "Suggest", Type: "[]string", Doc: "list of suggested corrections", Directives: gti.Directives{}}},
+		{"Word", &gti.Field{Name: "Word", Type: "string", Doc: "word being checked", Directives: gti.Directives{}}},
+		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}}},
+		{"Correction", &gti.Field{Name: "Correction", Type: "string", Doc: "the user's correction selection'", Directives: gti.Directives{}}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Spell{},
+})
+
+// NewSpell adds a new [Spell] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSpell(par ki.Ki, name ...string) *Spell {
+	return par.NewChild(SpellType, name...).(*Spell)
+}
+
+// KiType returns the [*gti.Type] of [Spell]
+func (t *Spell) KiType() *gti.Type {
+	return SpellType
+}
+
+// New returns a new [*Spell] value
+func (t *Spell) New() ki.Ki {
+	return &Spell{}
 }
 
 // SpinnerType is the [gti.Type] for [Spinner]
@@ -1090,7 +1166,7 @@ var TabsType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}}},
-		{"NoDeleteTabs", &gti.Field{Name: "NoDeleteTabs", Type: "bool", Doc: "if true, tabs are not user-deleteable", Directives: gti.Directives{}}},
+		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", Doc: "if true, tabs are user-deleteable (true by default)", Directives: gti.Directives{}}},
 		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", Doc: "[view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1148,7 +1224,7 @@ var TabType = gti.AddType(&gti.Type{
 	Doc:        "Tab is a tab button that contains a larger select button\nand a smaller close button. The Indicator icon is used for\nthe close icon.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, this tab does not have the delete button avail", Directives: gti.Directives{}}},
+		{"DeleteButton", &gti.Field{Name: "DeleteButton", Type: "bool", Doc: "if true, this tab has a delete button (true by default)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
