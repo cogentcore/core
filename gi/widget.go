@@ -139,7 +139,7 @@ type Widget interface {
 	// Send sends an event of given type to this widget,
 	// optionally starting from values in the given original event
 	// (recommended to include where possible).
-	Send(ev events.Types, orig events.Event)
+	Send(ev events.Types, orig ...events.Event)
 
 	// MakeContextMenu creates the context menu items (typically Action
 	// elements, but it can be anything) for a given widget, typically

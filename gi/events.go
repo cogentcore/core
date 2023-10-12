@@ -71,10 +71,10 @@ func (wb *WidgetBase) OnSelect(fun func(e events.Event)) Widget {
 // Do NOT send an existing event using this method if you
 // want the Handled state to persist throughout the call chain;
 // call HandleEvent directly for any existing events.
-func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
+func (wb *WidgetBase) Send(typ events.Types, orig ...events.Event) {
 	var e events.Event
-	if orig != nil {
-		e = orig.Clone()
+	if len(orig) > 0 {
+		e = orig[0].Clone()
 		e.AsBase().Typ = typ
 	} else {
 		e = &events.Base{Typ: typ}
@@ -88,9 +88,10 @@ func (wb *WidgetBase) Send(typ events.Types, orig events.Event) {
 }
 
 // SendChange sends the events.Change event, which is widely used to signal
-// updating for most widgets
-func (wb *WidgetBase) SendChange() {
-	wb.Send(events.Change, nil)
+// updating for most widgets. It takes the event that the new change event
+// is derived from, if any.
+func (wb *WidgetBase) SendChange(orig ...events.Event) {
+	wb.Send(events.Change, orig...)
 }
 
 // HandleEvent sends the given event to all Listeners for that event type.
