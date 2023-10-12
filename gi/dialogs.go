@@ -89,12 +89,17 @@ func (dlg *Dialog) Prompt(prompt string) *Dialog {
 }
 
 // PromptWidgetIdx returns the prompt label widget index,
-// for adding additional elements below the prompt.
-// Returns -1 if not found.
+// for adding additional elements below the prompt. If it
+// is not found, it returns the title label widget index.
+// If neither are found, it returns -1.
 func (dlg *Dialog) PromptWidgetIdx() int {
-	idx, ok := dlg.Stage.Scene.Children().IndexByName("prompt", 0)
+	idx, ok := dlg.Stage.Scene.Children().IndexByName("prompt", 1)
 	if !ok {
-		return -1
+		idx, ok := dlg.Stage.Scene.Children().IndexByName("title", 0)
+		if !ok {
+			return -1
+		}
+		return idx
 	}
 	return idx
 }
