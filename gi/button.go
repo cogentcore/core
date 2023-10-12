@@ -169,8 +169,6 @@ func (bt *Button) ButtonStyles() {
 		case ButtonText:
 			s.Color = colors.Scheme.Primary.Base
 		case ButtonAction:
-			s.Border.Radius = styles.BorderRadiusExtraSmall
-			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		case ButtonMenu:
 			s.SetStretchMaxWidth() // need to go to edge of menu
