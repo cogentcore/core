@@ -266,7 +266,6 @@ func (sr *Slider) SizeFromAlloc() {
 		sr.Size -= sr.ThSize // half on each side
 	}
 	sr.UpdatePosFromValue(sr.Value)
-	sr.SlideStartPos = sr.Pos
 }
 
 // SendChanged sends a Changed message if given new value is
@@ -347,7 +346,6 @@ func (sr *Slider) SetValue(val float32) *Slider {
 	if sr.Value != val {
 		sr.Value = val
 		sr.UpdatePosFromValue(val)
-		sr.SlideStartPos = sr.Pos
 	}
 	sr.UpdateEndRender(updt)
 	return sr
@@ -493,7 +491,6 @@ func (sr *Slider) HandleSliderMouse() {
 			return
 		}
 		del := e.StartDelta()
-		// fmt.Println("start:", e.StartPos(), "pos:", e.Pos(), "del:", del)
 		if sr.Dim == mat32.X {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
 		} else {
@@ -512,7 +509,6 @@ func (sr *Slider) HandleSliderMouse() {
 		} else {
 			sr.SetSliderPosAction(float32(ed.Y) - spc)
 		}
-		sr.SlideStartPos = sr.Pos
 	})
 	sr.On(events.Scroll, func(e events.Event) {
 		if sr.StateIs(states.Disabled) {
@@ -521,11 +517,10 @@ func (sr *Slider) HandleSliderMouse() {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		if sr.Dim == mat32.X {
-			sr.SetSliderPosAction(sr.SlideStartPos - float32(se.DimDelta(mat32.X)))
+			sr.SetSliderPosAction(sr.Pos - float32(se.DimDelta(mat32.X)))
 		} else {
-			sr.SetSliderPosAction(sr.SlideStartPos - float32(se.DimDelta(mat32.Y)))
+			sr.SetSliderPosAction(sr.Pos - float32(se.DimDelta(mat32.Y)))
 		}
-		sr.SlideStartPos = sr.Pos
 	})
 }
 
