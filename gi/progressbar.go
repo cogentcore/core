@@ -45,8 +45,13 @@ func (pb *ProgressBar) OnInit() {
 	pb.ValThumb = true
 	pb.ThumbVal = 1
 	pb.Value = 0
-	pb.ThumbSize = units.Ex(1)
+	pb.Step = 0.1
+	pb.PageStep = 0.2
 	pb.Max = 1.0
+	pb.Prec = 9
+	pb.ThumbSize = units.Dp(4)
+	pb.ThSize = 25.0
+	pb.ThSizeReal = pb.ThSize
 	pb.SetState(true, states.ReadOnly)
 
 	pb.HandleWidgetEvents()
@@ -64,10 +69,10 @@ func (pb *ProgressBar) ProgressBarStyles() {
 
 		if pb.Dim == mat32.X {
 			s.Width.SetEm(20)
-			s.Height.SetDp(1)
+			s.Height.SetDp(4)
 		} else {
 			s.Height.SetEm(20)
-			s.Width.SetDp(1)
+			s.Width.SetDp(4)
 		}
 	})
 }
