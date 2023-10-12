@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -76,8 +77,13 @@ func (sv *StructViewInline) SetStruct(st any) {
 	sv.UpdateEnd(updt)
 }
 
+func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
+	sv.ConfigParts(sc)
+}
+
 // ConfigParts configures Parts for the current struct
 func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
+	fmt.Println("svi cp", sv.Struct)
 	if laser.AnyIsNil(sv.Struct) {
 		return
 	}
@@ -116,7 +122,11 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 	if sv.AddButton {
 		config.Add(gi.ButtonType, "edit-action")
 	}
-	_, updt := parts.ConfigChildren(config)
+	fmt.Println("svi cfg", config)
+	mods, updt := parts.ConfigChildren(config)
+	if !mods {
+		updt = parts.UpdateStart()
+	}
 	sv.HasDefs = false
 	for i, vv := range sv.FieldViews {
 		lbl := parts.Child(i * 2).(*gi.Label)
@@ -127,16 +137,24 @@ func (sv *StructViewInline) ConfigParts(sc *gi.Scene) {
 		if hasDef {
 			sv.HasDefs = true
 		}
+		fmt.Println("svi cfg vv", vv)
 		vv.ConfigWidget(widg)
 		if !sv.IsDisabled() && !inactTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
-				sv.SendChange()
+				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {
+					if updtr, ok := sv.Struct.(gi.Updater); ok {
+						// fmt.Printf("updating: %v kind: %v\n", updtr, vvv.Value.Kind())
+						updtr.Update()
+					}
+				}
+				sv.SendChange(e)
 			})
 		}
 	}
+	fmt.Println("cvi cp up")
 	parts.UpdateEnd(updt)
-	sv.UpdateEndLayout(updt)
+	sv.SetNeedsLayout(sc, updt)
 }
 
 func (sv *StructViewInline) UpdateFields() {

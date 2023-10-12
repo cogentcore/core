@@ -352,7 +352,6 @@ func (sv *StructView) ConfigStructGrid() {
 		lbl := sg.Child(i * 2).(*gi.Label)
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
-		// lbl.Redrawable = true
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
 		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
 		if hasDef {
@@ -381,7 +380,7 @@ func (sv *StructView) ConfigStructGrid() {
 				if tb != nil {
 					tb.UpdateButtons()
 				}
-				sv.SendChange()
+				sv.SendChange(e)
 				// vvv, _ := send.Embed(TypeValueBase).(*ValueBase)
 				// fmt.Printf("sview got edit from vv %v field: %v\n", vvv.Nm, vvv.Field.Name)
 			})
