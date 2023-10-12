@@ -28,6 +28,7 @@ func PrefsView(pf *gi.Preferences) {
 	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
 		fmt.Println("pfv change")
+		pf.UpdateAll()
 	})
 
 	/*

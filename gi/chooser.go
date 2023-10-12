@@ -514,6 +514,8 @@ func (ch *Chooser) SelectItemAction(idx int) {
 		return
 	}
 	ch.SelectItem(idx)
+	fmt.Println("ch select", idx, ch.CurVal)
+	ch.SendChange()
 }
 
 // MakeItemsMenu makes menu of all the items.  It is set as the
