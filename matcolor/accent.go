@@ -10,16 +10,16 @@ import "image/color"
 type Accent struct {
 
 	// Base is the base color
-	Base color.RGBA `desc:"Base is the base color"`
+	Base color.RGBA
 
-	// On is the color applied to content on top of [Accent.Base]
-	On color.RGBA `desc:"On is the color applied to content on top of [Accent.Base]"`
+	// On is the color applied to content on top of
+	On color.RGBA
 
-	// Container is the color applied to elements with less emphasis than [Accent.Base]
-	Container color.RGBA `desc:"Container is the color applied to elements with less emphasis than [Accent.Base]"`
+	// Container is the color applied to elements with less emphasis than
+	Container color.RGBA
 
-	// OnContainer is the color applied to content on top of [Accent.Container]
-	OnContainer color.RGBA `desc:"OnContainer is the color applied to content on top of [Accent.Container]"`
+	// OnContainer is the color applied to content on top of
+	OnContainer color.RGBA
 }
 
 // NewAccentLight returns a new light theme [Accent] from the given [Tones]

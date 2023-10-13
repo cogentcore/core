@@ -11,91 +11,91 @@ import "image/color"
 type Scheme struct {
 
 	// Primary is the primary color applied to important elements
-	Primary Accent `desc:"Primary is the primary color applied to important elements"`
+	Primary Accent
 
 	// Secondary is the secondary color applied to less important elements
-	Secondary Accent `desc:"Secondary is the secondary color applied to less important elements"`
+	Secondary Accent
 
 	// Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors
-	Tertiary Accent `desc:"Tertiary is the tertiary color applied as an accent to highlight elements and create contrast between other colors"`
+	Tertiary Accent
 
 	// Select is the selection color applied to selected or highlighted elements and text
-	Select Accent `desc:"Select is the selection color applied to selected or highlighted elements and text"`
+	Select Accent
 
 	// Error is the error color applied to elements that indicate an error or danger
-	Error Accent `desc:"Error is the error color applied to elements that indicate an error or danger"`
+	Error Accent
 
 	// Success is the color applied to elements that indicate success
-	Success Accent `desc:"Success is the color applied to elements that indicate success"`
+	Success Accent
 
 	// Warn is the color applied to elements that indicate a warning
-	Warn Accent `desc:"Warn is the color applied to elements that indicate a warning"`
+	Warn Accent
 
 	// an optional map of custom accent colors
-	Custom map[string]Accent `desc:"an optional map of custom accent colors"`
+	Custom map[string]Accent
 
 	// SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)
-	SurfaceDim color.RGBA `desc:"SurfaceDim is the color applied to elements that will always have the dimmest surface color (see Surface for more information)"`
+	SurfaceDim color.RGBA
 
 	// Surface is the color applied to contained areas, like the background of an app
-	Surface color.RGBA `desc:"Surface is the color applied to contained areas, like the background of an app"`
+	Surface color.RGBA
 
 	// SurfaceBright is the color applied to elements that will always have the brightest surface color (see Surface for more information)
-	SurfaceBright color.RGBA `desc:"SurfaceBright is the color applied to elements that will always have the brightest surface color (see Surface for more information)"`
+	SurfaceBright color.RGBA
 
 	// SurfaceContainerLowest is the color applied to surface container elements that have the lowest emphasis (see SurfaceContainer for more information)
-	SurfaceContainerLowest color.RGBA `desc:"SurfaceContainerLowest is the color applied to surface container elements that have the lowest emphasis (see SurfaceContainer for more information)"`
+	SurfaceContainerLowest color.RGBA
 
 	// SurfaceContainerLow is the color applied to surface container elements that have lower emphasis (see SurfaceContainer for more information)
-	SurfaceContainerLow color.RGBA `desc:"SurfaceContainerLow is the color applied to surface container elements that have lower emphasis (see SurfaceContainer for more information)"`
+	SurfaceContainerLow color.RGBA
 
 	// SurfaceContainer is the color applied to container elements that contrast elements with the surface color
-	SurfaceContainer color.RGBA `desc:"SurfaceContainer is the color applied to container elements that contrast elements with the surface color"`
+	SurfaceContainer color.RGBA
 
 	// SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)
-	SurfaceContainerHigh color.RGBA `desc:"SurfaceContainerHigh is the color applied to surface container elements that have higher emphasis (see SurfaceContainer for more information)"`
+	SurfaceContainerHigh color.RGBA
 
 	// SurfaceContainerHighest is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)
-	SurfaceContainerHighest color.RGBA `desc:"SurfaceContainerHighest is the color applied to surface container elements that have the highest emphasis (see SurfaceContainer for more information)"`
+	SurfaceContainerHighest color.RGBA
 
 	// SurfaceVariant is the color applied to contained areas that contrast standard Surface elements
-	SurfaceVariant color.RGBA `desc:"SurfaceVariant is the color applied to contained areas that contrast standard Surface elements"`
+	SurfaceVariant color.RGBA
 
 	// OnSurface is the color applied to content on top of Surface elements
-	OnSurface color.RGBA `desc:"OnSurface is the color applied to content on top of Surface elements"`
+	OnSurface color.RGBA
 
 	// OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements
-	OnSurfaceVariant color.RGBA `desc:"OnSurfaceVariant is the color applied to content on top of SurfaceVariant elements"`
+	OnSurfaceVariant color.RGBA
 
 	// InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect
-	InverseSurface color.RGBA `desc:"InverseSurface is the color applied to elements to make them the reverse color of the surrounding elements and create a contrasting effect"`
+	InverseSurface color.RGBA
 
 	// InverseOnSurface is the color applied to content on top of InverseSurface
-	InverseOnSurface color.RGBA `desc:"InverseOnSurface is the color applied to content on top of InverseSurface"`
+	InverseOnSurface color.RGBA
 
 	// InversePrimary is the color applied to interactive elements on top of InverseSurface
-	InversePrimary color.RGBA `desc:"InversePrimary is the color applied to interactive elements on top of InverseSurface"`
+	InversePrimary color.RGBA
 
 	// Background is the color applied to the background of the app and other low-emphasis areas
-	Background color.RGBA `desc:"Background is the color applied to the background of the app and other low-emphasis areas"`
+	Background color.RGBA
 
 	// OnBackground is the color applied to content on top of Background
-	OnBackground color.RGBA `desc:"OnBackground is the color applied to content on top of Background"`
+	OnBackground color.RGBA
 
 	// Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast
-	Outline color.RGBA `desc:"Outline is the color applied to borders to create emphasized boundaries that need to have sufficient contrast"`
+	Outline color.RGBA
 
 	// OutlineVariant is the color applied to create decorative boundaries
-	OutlineVariant color.RGBA `desc:"OutlineVariant is the color applied to create decorative boundaries"`
+	OutlineVariant color.RGBA
 
 	// Shadow is the color applied to shadows
-	Shadow color.RGBA `desc:"Shadow is the color applied to shadows"`
+	Shadow color.RGBA
 
 	// SurfaceTint is the color applied to tint surfaces
-	SurfaceTint color.RGBA `desc:"SurfaceTint is the color applied to tint surfaces"`
+	SurfaceTint color.RGBA
 
 	// Scrim is the color applied to scrims (semi-transparent overlays)
-	Scrim color.RGBA `desc:"Scrim is the color applied to scrims (semi-transparent overlays)"`
+	Scrim color.RGBA
 
 	// // PrimaryFixed is a primary fill color that stays the same regardless of color scheme type (light/dark)
 	// PrimaryFixed color.RGBA `desc:"PrimaryFixed is a primary fill color that stays the same regardless of color scheme type (light/dark)"`

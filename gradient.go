@@ -21,31 +21,31 @@ import (
 type Gradient struct {
 
 	// whether the gradient is a radial gradient (as opposed to a linear one)
-	Radial bool `desc:"whether the gradient is a radial gradient (as opposed to a linear one)"`
+	Radial bool
 
 	// the bounds for linear gradients (x1, y1, x2, and y2 in SVG)
-	Bounds mat32.Box2 `desc:"the bounds for linear gradients (x1, y1, x2, and y2 in SVG)"`
+	Bounds mat32.Box2
 
 	// the center point for radial gradients (cx and cy in SVG)
-	Center mat32.Vec2 `desc:"the center point for radial gradients (cx and cy in SVG)"`
+	Center mat32.Vec2
 
 	// the focal point for radial gradients (fx and fy in SVG)
-	Focal mat32.Vec2 `desc:"the focal point for radial gradients (fx and fy in SVG)"`
+	Focal mat32.Vec2
 
 	// the radius for radial gradients (r in SVG)
-	Radius float32 `desc:"the radius for radial gradients (r in SVG)"`
+	Radius float32
 
 	// the stops of the gradient
-	Stops []GradientStop `desc:"the stops of the gradient"`
+	Stops []GradientStop
 
 	// the matrix for the gradient
-	Matrix mat32.Mat2 `desc:"the matrix for the gradient"`
+	Matrix mat32.Mat2
 
 	// the spread methods for the gradient
-	Spread SpreadMethods `desc:"the spread methods for the gradient"`
+	Spread SpreadMethods
 
 	// the units for the gradient
-	Units GradientUnits `desc:"the units for the gradient"`
+	Units GradientUnits
 }
 
 // GradientStop represents a gradient stop in the SVG 2.0 gradient specification

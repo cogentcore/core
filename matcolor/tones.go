@@ -15,10 +15,10 @@ import (
 type Tones struct {
 
 	// the key color used to generate these tones
-	Key color.RGBA `desc:"the key color used to generate these tones"`
+	Key color.RGBA
 
 	// the cached map of tonal color values
-	Tones map[int]color.RGBA `desc:"the cached map of tonal color values"`
+	Tones map[int]color.RGBA
 }
 
 // NewTones returns a new set of [Tones]

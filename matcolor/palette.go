@@ -10,34 +10,34 @@ package matcolor
 type Palette struct {
 
 	// the tones for the primary key color
-	Primary Tones `desc:"the tones for the primary key color"`
+	Primary Tones
 
 	// the tones for the secondary key color
-	Secondary Tones `desc:"the tones for the secondary key color"`
+	Secondary Tones
 
 	// the tones for the tertiary key color
-	Tertiary Tones `desc:"the tones for the tertiary key color"`
+	Tertiary Tones
 
 	// the tones for the select key color
-	Select Tones `desc:"the tones for the select key color"`
+	Select Tones
 
 	// the tones for the error key color
-	Error Tones `desc:"the tones for the error key color"`
+	Error Tones
 
 	// the tones for the success key color
-	Success Tones `desc:"the tones for the success key color"`
+	Success Tones
 
 	// the tones for the warn key color
-	Warn Tones `desc:"the tones for the warn key color"`
+	Warn Tones
 
 	// the tones for the neutral key color
-	Neutral Tones `desc:"the tones for the neutral key color"`
+	Neutral Tones
 
 	// the tones for the neutral variant key color
-	NeutralVariant Tones `desc:"the tones for the neutral variant key color"`
+	NeutralVariant Tones
 
 	// an optional map of tones for custom accent key colors
-	Custom map[string]Tones `desc:"an optional map of tones for custom accent key colors"`
+	Custom map[string]Tones
 }
 
 // NewPalette creates a new [Palette] from the given key colors.

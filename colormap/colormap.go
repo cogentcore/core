@@ -18,13 +18,13 @@ type Map struct {
 	Name string
 
 	// color to display for invalid numbers (e.g., NaN)
-	NoColor color.RGBA `desc:"color to display for invalid numbers (e.g., NaN)"`
+	NoColor color.RGBA
 
 	// list of colors to interpolate between
-	Colors []color.RGBA `desc:"list of colors to interpolate between"`
+	Colors []color.RGBA
 
 	// if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex
-	Indexed bool `desc:"if true, this map should be used as an indexed list instead of interpolating a normalized floating point value: requires caller to check this flag and pass int indexes instead of normalized values to MapIndex"`
+	Indexed bool
 }
 
 // Map returns color for normalized value in range 0-1.  NaN returns NoColor
