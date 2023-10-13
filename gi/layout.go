@@ -544,7 +544,7 @@ func (ly *Layout) ScrollDelta(e events.Event) {
 	del.Y = se.DimDelta(mat32.Y)
 	fdel := mat32.NewVec2FmPoint(del)
 
-	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt says: use vert for other diension
+	hasShift := e.HasAnyModifier(key.Shift, key.Alt) // shift or alt indicates to scroll horizontally
 	if hasShift {
 		if !ly.HasScroll[mat32.X] { // if we have shift, we can only horizontal scroll
 			e.SetHandled()
