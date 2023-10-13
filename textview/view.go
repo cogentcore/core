@@ -167,7 +167,7 @@ func (tv *View) OnInit() {
 func (tv *View) ViewStyles() {
 	tv.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		tv.CursorWidth.SetDp(2)
+		tv.CursorWidth.SetDp(1)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
 		tv.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tv.HighlightColor.SetSolid(colors.Orange)
