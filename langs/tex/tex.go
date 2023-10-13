@@ -26,7 +26,7 @@ type TexLang struct {
 	Pr *pi.Parser
 
 	// bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate
-	Bibs bibtex.Files `desc:"bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate"`
+	Bibs bibtex.Files
 }
 
 // TheTexLang is the instance variable providing support for the Go language

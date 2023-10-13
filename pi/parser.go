@@ -23,22 +23,22 @@ import (
 type Parser struct {
 
 	// lexer rules for first pass of lexing file
-	Lexer lex.Rule `desc:"lexer rules for first pass of lexing file"`
+	Lexer lex.Rule
 
 	// second pass after lexing -- computes nesting depth and EOS finding
-	PassTwo lex.PassTwo `desc:"second pass after lexing -- computes nesting depth and EOS finding"`
+	PassTwo lex.PassTwo
 
 	// parser rules for parsing lexed tokens
-	Parser parse.Rule `desc:"parser rules for parsing lexed tokens"`
+	Parser parse.Rule
 
 	// file name for overall parser (not file being parsed!)
-	Filename string `desc:"file name for overall parser (not file being parsed!)"`
+	Filename string
 
 	// if true, reports errors after parsing, to stdout
-	ReportErrs bool `desc:"if true, reports errors after parsing, to stdout"`
+	ReportErrs bool
 
 	// when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files
-	ModTime time.Time `json:"-" xml:"-" desc:"when loaded from file, this is the modification time of the parser -- re-processes cache if parser is newer than cached files"`
+	ModTime time.Time `json:"-" xml:"-"`
 }
 
 // Init initializes the parser -- must be called after creation

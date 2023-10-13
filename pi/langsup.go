@@ -40,25 +40,25 @@ const (
 type LangProps struct {
 
 	// language -- must be a supported one from Supported list
-	Sup filecat.Supported `desc:"language -- must be a supported one from Supported list"`
+	Sup filecat.Supported
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
-	CommentLn string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+	CommentLn string
 
 	// character(s) that start a multi-line comment or one that requires both start and end
-	CommentSt string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+	CommentSt string
 
 	// character(s) that end a multi-line comment or one that requires both start and end
-	CommentEd string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+	CommentEd string
 
 	// special properties for this language -- as an explicit list of options to make them easier to see and set in defaults
-	Flags []LangFlags `desc:"special properties for this language -- as an explicit list of options to make them easier to see and set in defaults"`
+	Flags []LangFlags
 
 	// Lang interface for this language
-	Lang Lang `json:"-" xml:"-" desc:"Lang interface for this language"`
+	Lang Lang `json:"-" xml:"-"`
 
 	// parser for this language -- initialized in OpenStd
-	Parser *Parser `json:"-" xml:"-" desc:"parser for this language -- initialized in OpenStd"`
+	Parser *Parser `json:"-" xml:"-"`
 }
 
 // HasFlag returns true if given flag is set in Flags

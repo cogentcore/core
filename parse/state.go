@@ -15,35 +15,35 @@ import (
 // parse.State is the state maintained for parsing
 type State struct {
 
-	// [view: no-inline] source and lexed version of source we're parsing
-	Src *lex.File `view:"no-inline" desc:"source and lexed version of source we're parsing"`
+	// source and lexed version of source we're parsing
+	Src *lex.File `view:"no-inline"`
 
 	// tracing for this parser
-	Trace TraceOpts `desc:"tracing for this parser"`
+	Trace TraceOpts
 
 	// root of the Ast abstract syntax tree we're updating
-	Ast *Ast `desc:"root of the Ast abstract syntax tree we're updating"`
+	Ast *Ast
 
 	// symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that
-	Syms syms.SymMap `desc:"symbol map that everything gets added to from current file of parsing -- typically best for subsequent management to just have a single outer-most scoping symbol here (e.g., in Go it is the package), and then everything is a child under that"`
+	Syms syms.SymMap
 
 	// stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself
-	Scopes syms.SymStack `desc:"stack of scope(s) added to FileSyms e.g., package, library, module-level elements of which this file is a part -- these are reset at the start and must be added by parsing actions within the file itself"`
+	Scopes syms.SymStack
 
 	// the current lex token position
-	Pos lex.Pos `desc:"the current lex token position"`
+	Pos lex.Pos
 
-	// [view: no-inline] any error messages accumulated during parsing specifically
-	Errs lex.ErrorList `view:"no-inline" desc:"any error messages accumulated during parsing specifically"`
+	// any error messages accumulated during parsing specifically
+	Errs lex.ErrorList `view:"no-inline"`
 
-	// [view: no-inline] rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
-	Matches [][]MatchStack `view:"no-inline" desc:"rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims"`
+	// rules that matched and ran at each point, in 1-to-1 correspondence with the Src.Lex tokens for the lines and char pos dims
+	Matches [][]MatchStack `view:"no-inline"`
 
-	// [view: no-inline] rules that did NOT match -- represented as a map by scope of a RuleSet
-	NonMatches ScopeRuleSet `view:"no-inline" desc:"rules that did NOT match -- represented as a map by scope of a RuleSet"`
+	// rules that did NOT match -- represented as a map by scope of a RuleSet
+	NonMatches ScopeRuleSet `view:"no-inline"`
 
-	// [view: no-inline] stack for context-sensitive rules
-	Stack lex.Stack `view:"no-inline" desc:"stack for context-sensitive rules"`
+	// stack for context-sensitive rules
+	Stack lex.Stack `view:"no-inline"`
 }
 
 // Init initializes the state at start of parsing
@@ -260,13 +260,13 @@ func (ps *State) AddAst(parAst *Ast, rule string, reg lex.Reg) *Ast {
 type MatchState struct {
 
 	// rule that either matched or ran here
-	Rule *Rule `desc:"rule that either matched or ran here"`
+	Rule *Rule
 
 	// scope for match
-	Scope lex.Reg `desc:"scope for match"`
+	Scope lex.Reg
 
 	// regions of match for each sub-region
-	Regs Matches `desc:"regions of match for each sub-region"`
+	Regs Matches
 }
 
 // String is fmt.Stringer

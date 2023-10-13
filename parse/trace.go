@@ -16,40 +16,40 @@ import (
 type TraceOpts struct {
 
 	// perform tracing
-	On bool `desc:"perform tracing"`
+	On bool
 
 	// trace specific named rules here (space separated) -- if blank, then all rules are traced
-	Rules string `width:"50" desc:"trace specific named rules here (space separated) -- if blank, then all rules are traced"`
+	Rules string `width:"50"`
 
 	// trace full rule matches -- when a rule fully matches
-	Match bool `desc:"trace full rule matches -- when a rule fully matches"`
+	Match bool
 
 	// trace sub-rule matches -- when the parts of each rule match
-	SubMatch bool `desc:"trace sub-rule matches -- when the parts of each rule match"`
+	SubMatch bool
 
 	// trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)
-	NoMatch bool `desc:"trace sub-rule non-matches -- why a rule doesn't match -- which terminates the matching process at first non-match (can be a lot of info)"`
+	NoMatch bool
 
 	// trace progress running through each of the sub-rules when a rule has matched and is 'running'
-	Run bool `desc:"trace progress running through each of the sub-rules when a rule has matched and is 'running'"`
+	Run bool
 
 	// trace actions performed by running rules
-	RunAct bool `desc:"trace actions performed by running rules"`
+	RunAct bool
 
 	// if true, shows the full scope source for every trace statement
-	ScopeSrc bool `desc:"if true, shows the full scope source for every trace statement"`
+	ScopeSrc bool
 
 	// for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one
-	FullStackOut bool `desc:"for the ParseOut display, whether to display the full stack of rules at each position, or just the deepest one"`
+	FullStackOut bool
 
-	// [view: -] list of rules
-	RulesList []string `view:"-" json:"-" xml:"-" desc:"list of rules"`
+	// list of rules
+	RulesList []string `view:"-" json:"-" xml:"-"`
 
-	// [view: -] trace output is written here, connected via os.Pipe to OutRead
-	OutWrite *os.File `view:"-" json:"-" xml:"-" desc:"trace output is written here, connected via os.Pipe to OutRead"`
+	// trace output is written here, connected via os.Pipe to OutRead
+	OutWrite *os.File `view:"-" json:"-" xml:"-"`
 
-	// [view: -] trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
-	OutRead *os.File `view:"-" json:"-" xml:"-" desc:"trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output"`
+	// trace output is read here -- can connect this to a TextBuf via giv.OutBuf to monitor tracing output
+	OutRead *os.File `view:"-" json:"-" xml:"-"`
 }
 
 // Init intializes tracer after any changes -- opens pipe if not already open

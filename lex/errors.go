@@ -27,19 +27,19 @@ import (
 type Error struct {
 
 	// position where the error occurred in the source
-	Pos Pos `desc:"position where the error occurred in the source"`
+	Pos Pos
 
 	// full filename with path
-	Filename string `desc:"full filename with path"`
+	Filename string
 
 	// brief error message
-	Msg string `desc:"brief error message"`
+	Msg string
 
 	// line of source where error was
-	Src string `desc:"line of source where error was"`
+	Src string
 
 	// lexer or parser rule that emitted the error
-	Rule ki.Ki `desc:"lexer or parser rule that emitted the error"`
+	Rule ki.Ki
 }
 
 // Error implements the error interface -- gives the minimal version of error string

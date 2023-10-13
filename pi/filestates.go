@@ -17,31 +17,31 @@ import (
 type FileStates struct {
 
 	// the filename
-	Filename string `desc:"the filename"`
+	Filename string
 
 	// the supported file type, if supported (typically only supported files are processed)
-	Sup filecat.Supported `desc:"the supported file type, if supported (typically only supported files are processed)"`
+	Sup filecat.Supported
 
 	// base path for reporting file names -- this must be set externally e.g., by gide for the project root path
-	BasePath string `desc:"base path for reporting file names -- this must be set externally e.g., by gide for the project root path"`
+	BasePath string
 
 	// index of the state that is done
-	DoneIdx int `desc:"index of the state that is done"`
+	DoneIdx int
 
 	// one filestate
-	FsA FileState `desc:"one filestate"`
+	FsA FileState
 
 	// one filestate
-	FsB FileState `desc:"one filestate"`
+	FsB FileState
 
 	// mutex locking the switching of Done vs. Proc states
-	SwitchMu sync.Mutex `desc:"mutex locking the switching of Done vs. Proc states"`
+	SwitchMu sync.Mutex
 
 	// mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching
-	ProcMu sync.Mutex `desc:"mutex locking the parsing of Proc state -- reading states can happen fine with this locked, but no switching"`
+	ProcMu sync.Mutex
 
 	// extra meta data associated with this FileStates
-	Meta map[string]string `desc:"extra meta data associated with this FileStates"`
+	Meta map[string]string
 }
 
 // NewFileStates returns a new FileStates for given filename, basepath,

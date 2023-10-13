@@ -22,19 +22,19 @@ import (
 type Completion struct {
 
 	// completion text -- what will actually be inserted if selected
-	Text string `desc:"completion text -- what will actually be inserted if selected"`
+	Text string
 
 	// label to show the user -- only used for menu display if non-empty -- otherwise Text is used
-	Label string `desc:"label to show the user -- only used for menu display if non-empty -- otherwise Text is used"`
+	Label string
 
 	// icon name
-	Icon string `desc:"icon name"`
+	Icon string
 
 	// extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI
-	Desc string `desc:"extra information, e.g. detailed description, type, arguments, etc; not currently used in Pi, but is used for tooltips in GUI"`
+	Desc string
 
 	// lang specific or other, e.g. class or type
-	Extra map[string]string `desc:"lang specific or other, e.g. class or type"`
+	Extra map[string]string
 }
 
 // Completions is a full list (slice) of completion options
@@ -45,26 +45,26 @@ type Completions []Completion
 type Matches struct {
 
 	// the matches based on seed
-	Matches Completions `desc:"the matches based on seed"`
+	Matches Completions
 
 	// seed is the prefix we use to find possible completions
-	Seed string `desc:"seed is the prefix we use to find possible completions"`
+	Seed string
 }
 
 // Lookup is used for returning lookup results
 type Lookup struct {
 
 	// if non-empty, the result is to view this file (full path)
-	Filename string `desc:"if non-empty, the result is to view this file (full path)"`
+	Filename string
 
 	// starting line number within file to display
-	StLine int `desc:"starting line number within file to display"`
+	StLine int
 
 	// ending line number within file
-	EdLine int `desc:"ending line number within file"`
+	EdLine int
 
 	// if filename is empty, this is raw text to display for lookup result
-	Text []byte `desc:"if filename is empty, this is raw text to display for lookup result"`
+	Text []byte
 }
 
 // SetFile sets file info
@@ -79,13 +79,13 @@ func (lk *Lookup) SetFile(fname string, st, ed int) {
 type Edit struct {
 
 	// completion text after special edits
-	NewText string `desc:"completion text after special edits"`
+	NewText string
 
 	// number of runes, past the cursor, to delete, if any
-	ForwardDelete int `desc:"number of runes, past the cursor, to delete, if any"`
+	ForwardDelete int
 
 	// cursor adjustment if cursor should be placed in a location other than at end of newText
-	CursorAdjust int `desc:"cursor adjustment if cursor should be placed in a location other than at end of newText"`
+	CursorAdjust int
 }
 
 // MatchFunc is the function called to get the list of possible completions

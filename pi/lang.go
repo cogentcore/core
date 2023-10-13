@@ -113,11 +113,11 @@ type Lang interface {
 type LangDirOpts struct {
 
 	// process subdirectories -- otherwise not
-	Subdirs bool `desc:"process subdirectories -- otherwise not"`
+	Subdirs bool
 
 	// rebuild the symbols by reprocessing from scratch instead of using cache
-	Rebuild bool `desc:"rebuild the symbols by reprocessing from scratch instead of using cache"`
+	Rebuild bool
 
 	// do not update the cache with results from processing
-	Nocache bool `desc:"do not update the cache with results from processing"`
+	Nocache bool
 }

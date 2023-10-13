@@ -29,37 +29,37 @@ import (
 type FileState struct {
 
 	// the source to be parsed -- also holds the full lexed tokens
-	Src lex.File `json:"-" xml:"-" desc:"the source to be parsed -- also holds the full lexed tokens"`
+	Src lex.File `json:"-" xml:"-"`
 
 	// state for lexing
-	LexState lex.State `json:"_" xml:"-" desc:"state for lexing"`
+	LexState lex.State `json:"_" xml:"-"`
 
 	// state for second pass nesting depth and EOS matching
-	TwoState lex.TwoState `json:"-" xml:"-" desc:"state for second pass nesting depth and EOS matching"`
+	TwoState lex.TwoState `json:"-" xml:"-"`
 
 	// state for parsing
-	ParseState parse.State `json:"-" xml:"-" desc:"state for parsing"`
+	ParseState parse.State `json:"-" xml:"-"`
 
 	// ast output tree from parsing
-	Ast parse.Ast `json:"-" xml:"-" desc:"ast output tree from parsing"`
+	Ast parse.Ast `json:"-" xml:"-"`
 
 	// symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface.
-	Syms syms.SymMap `json:"-" xml:"-" desc:"symbols contained within this file -- initialized at start of parsing and created by AddSymbol or PushNewScope actions.  These are then processed after parsing by the language-specific code, via Lang interface."`
+	Syms syms.SymMap `json:"-" xml:"-"`
 
 	// External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code.
-	ExtSyms syms.SymMap `json:"-" xml:"-" desc:"External symbols that are entirely maintained in a language-specific way by the Lang interface code.  These are only here as a convenience and are not accessed in any way by the language-general pi code."`
+	ExtSyms syms.SymMap `json:"-" xml:"-"`
 
-	// [view: -] mutex protecting updates / reading of Syms symbols
-	SymsMu sync.RWMutex `view:"-" json:"-" xml:"-" desc:"mutex protecting updates / reading of Syms symbols"`
+	// mutex protecting updates / reading of Syms symbols
+	SymsMu sync.RWMutex `view:"-" json:"-" xml:"-"`
 
-	// [view: -] waitgroup for coordinating processing of other items
-	WaitGp sync.WaitGroup `view:"-" json:"-" xml:"-" desc:"waitgroup for coordinating processing of other items"`
+	// waitgroup for coordinating processing of other items
+	WaitGp sync.WaitGroup `view:"-" json:"-" xml:"-"`
 
-	// [view: -] anonymous counter -- counts up
-	AnonCtr int `view:"-" json:"-" xml:"-" desc:"anonymous counter -- counts up "`
+	// anonymous counter -- counts up
+	AnonCtr int `view:"-" json:"-" xml:"-"`
 
-	// [view: -] path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread
-	PathMap sync.Map `view:"-" json:"-" xml:"-" desc:"path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread"`
+	// path mapping cache -- for other files referred to by this file, this stores the full path associated with a logical path (e.g., in go, the logical import path -> local path with actual files) -- protected for access from any thread
+	PathMap sync.Map `view:"-" json:"-" xml:"-"`
 }
 
 // Init initializes the file state

@@ -25,16 +25,16 @@ type Ast struct {
 	ki.Node
 
 	// region in source lexical tokens corresponding to this Ast node -- Ch = index in lex lines
-	TokReg lex.Reg `desc:"region in source lexical tokens corresponding to this Ast node -- Ch = index in lex lines"`
+	TokReg lex.Reg
 
 	// region in source file corresponding to this Ast node
-	SrcReg lex.Reg `desc:"region in source file corresponding to this Ast node"`
+	SrcReg lex.Reg
 
 	// source code corresponding to this Ast node
-	Src string `desc:"source code corresponding to this Ast node"`
+	Src string
 
 	// stack of symbols created for this node
-	Syms syms.SymStack `desc:"stack of symbols created for this node"`
+	Syms syms.SymStack
 }
 
 // ChildAst returns the Child at given index as an Ast.

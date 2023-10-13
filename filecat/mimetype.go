@@ -130,16 +130,16 @@ var ExtMimeMap = map[string]string{}
 type MimeType struct {
 
 	// mimetype string: type/subtype
-	Mime string `desc:"mimetype string: type/subtype"`
+	Mime string
 
 	// file extensions associated with this file type
-	Exts []string `desc:"file extensions associated with this file type"`
+	Exts []string
 
 	// category of file
-	Cat Cat `desc:"category of file"`
+	Cat Cat
 
 	// if supported, the name of the supported file type, else NoSupport
-	Sup Supported `desc:"if supported, the name of the supported file type, else NoSupport"`
+	Sup Supported
 }
 
 // CustomMimes can be set by other apps to contain custom mime types that

@@ -25,38 +25,38 @@ import (
 // including icon, mimetype, etc
 type FileInfo struct {
 
-	// [tableview: no-header] icon for file
-	Ic icons.Icon `tableview:"no-header" desc:"icon for file"`
+	// icon for file
+	Ic icons.Icon `tableview:"no-header"`
 
 	// name of the file, without any path
-	Name string `width:"40" desc:"name of the file, without any path"`
+	Name string `width:"40"`
 
 	// size of the file in bytes
-	Size FileSize `desc:"size of the file in bytes"`
+	Size FileSize
 
 	// type of file / directory -- shorter, more user-friendly version of mime type, based on category
-	Kind string `width:"20" max-width:"20" desc:"type of file / directory -- shorter, more user-friendly version of mime type, based on category"`
+	Kind string `width:"20" max-width:"20"`
 
-	// [tableview: -] full official mime type of the contents
-	Mime string `tableview:"-" desc:"full official mime type of the contents"`
+	// full official mime type of the contents
+	Mime string `tableview:"-"`
 
-	// [tableview: -] functional category of the file, based on mime data etc
-	Cat Cat `tableview:"-" desc:"functional category of the file, based on mime data etc"`
+	// functional category of the file, based on mime data etc
+	Cat Cat `tableview:"-"`
 
-	// [tableview: -] supported file type
-	Sup Supported `tableview:"-" desc:"supported file type"`
+	// supported file type
+	Sup Supported `tableview:"-"`
 
 	// file mode bits
-	Mode os.FileMode `desc:"file mode bits"`
+	Mode os.FileMode
 
 	// time that contents (only) were last modified
-	ModTime FileTime `desc:"time that contents (only) were last modified"`
+	ModTime FileTime
 
-	// [tableview: -] version control system status, when enabled
-	Vcs vci.FileStatus `tableview:"-" desc:"version control system status, when enabled"`
+	// version control system status, when enabled
+	Vcs vci.FileStatus `tableview:"-"`
 
-	// [tableview: -] full path to file, including name -- for file functions
-	Path string `tableview:"-" desc:"full path to file, including name -- for file functions"`
+	// full path to file, including name -- for file functions
+	Path string `tableview:"-"`
 }
 
 func NewFileInfo(fname string) (*FileInfo, error) {

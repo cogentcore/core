@@ -80,10 +80,10 @@ func (ps *Pos) FromString(link string) bool {
 type Reg struct {
 
 	// starting position of region
-	St Pos `desc:"starting position of region"`
+	St Pos
 
 	// ending position of region
-	Ed Pos `desc:"ending position of region"`
+	Ed Pos
 }
 
 // RegZero is the zero region

@@ -28,7 +28,7 @@ type MarkdownLang struct {
 	Pr *pi.Parser
 
 	// bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate
-	Bibs bibtex.Files `desc:"bibliography files that have been loaded, keyed by file path from bibfile metadata stored in filestate"`
+	Bibs bibtex.Files
 }
 
 // TheMarkdownLang is the instance variable providing support for the Markdown language

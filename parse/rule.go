@@ -62,49 +62,49 @@ type Rule struct {
 	ki.Node
 
 	// disable this rule -- useful for testing and exploration
-	Off bool `desc:"disable this rule -- useful for testing and exploration"`
+	Off bool
 
 	// description / comments about this rule
-	Desc string `desc:"description / comments about this rule"`
+	Desc string
 
 	// the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -
-	Rule string `desc:"the rule as a space-separated list of rule names and token(s) -- use single quotes around 'tokens' (using token.Tokens names or symbols). For keywords use 'key:keyword'.  All tokens are matched at the same nesting depth as the start of the scope of this rule, unless they have a +D relative depth value differential before the token.  Use @ prefix for a sub-rule to require that rule to match -- by default explicit tokens are used if available, and then only the first sub-rule failing that.  Use ! by itself to define start of an exclusionary rule -- doesn't match when those rule elements DO match.  Use : prefix for a special group node that matches a single token at start of scope, and then defers to the child rules to perform full match -- this is used for FirstTokMap when there are multiple versions of a given keyword rule.  Use - prefix for tokens anchored by the end (next token) instead of the previous one -- typically just for token prior to 'EOS' but also a block of tokens that need to go backward in the middle of a sequence to avoid ambiguity can be marked with -"`
+	Rule string
 
 	// if present, this rule only fires if stack has this on it
-	StackMatch string `desc:"if present, this rule only fires if stack has this on it"`
+	StackMatch string
 
 	// what action should be take for this node when it matches
-	Ast AstActs `desc:"what action should be take for this node when it matches"`
+	Ast AstActs
 
 	// actions to perform based on parsed Ast tree data, when this rule is done executing
-	Acts Acts `desc:"actions to perform based on parsed Ast tree data, when this rule is done executing"`
+	Acts Acts
 
 	// for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens
-	OptTokMap bool `desc:"for group-level rules having lots of children and lots of recursiveness, and also of high-frequency, when we first encounter such a rule, make a map of all the tokens in the entire scope, and use that for a first-pass rejection on matching tokens"`
+	OptTokMap bool
 
 	// for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case
-	FirstTokMap bool `desc:"for group-level rules with a number of rules that match based on first tokens / keywords, build map to directly go to that rule -- must also organize all of these rules sequentially from the start -- if no match, goes directly to first non-lookup case"`
+	FirstTokMap bool
 
 	// rule elements compiled from Rule string
-	Rules RuleList `json:"-" xml:"-" desc:"rule elements compiled from Rule string"`
+	Rules RuleList `json:"-" xml:"-"`
 
 	// strategic matching order for matching the rules
-	Order []int `inactive:"+" json:"-" xml:"-" desc:"strategic matching order for matching the rules"`
+	Order []int `inactive:"+" json:"-" xml:"-"`
 
 	// map from first tokens / keywords to rules for FirstTokMap case
-	FiTokMap map[string]*Rule `inactive:"+" json:"-" xml:"-" desc:"map from first tokens / keywords to rules for FirstTokMap case"`
+	FiTokMap map[string]*Rule `inactive:"+" json:"-" xml:"-"`
 
 	// for FirstTokMap, the start of the else cases not covered by the map
-	FiTokElseIdx int `inactive:"+" json:"-" xml:"-" desc:"for FirstTokMap, the start of the else cases not covered by the map"`
+	FiTokElseIdx int `inactive:"+" json:"-" xml:"-"`
 
 	// exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules
-	ExclKeyIdx int `inactive:"+" json:"-" xml:"-" desc:"exclusionary key index -- this is the token in Rules that we need to exclude matches for using ExclFwd and ExclRev rules"`
+	ExclKeyIdx int `inactive:"+" json:"-" xml:"-"`
 
 	// exclusionary forward-search rule elements compiled from Rule string
-	ExclFwd RuleList `inactive:"+" json:"-" xml:"-" desc:"exclusionary forward-search rule elements compiled from Rule string"`
+	ExclFwd RuleList `inactive:"+" json:"-" xml:"-"`
 
 	// exclusionary reverse-search rule elements compiled from Rule string
-	ExclRev RuleList `inactive:"+" json:"-" xml:"-" desc:"exclusionary reverse-search rule elements compiled from Rule string"`
+	ExclRev RuleList `inactive:"+" json:"-" xml:"-"`
 }
 
 // RuleFlags define bitflags for rule options compiled from rule syntax
@@ -170,22 +170,22 @@ var _ Parser = (*Rule)(nil)
 type RuleEl struct {
 
 	// sub-rule for this position -- nil if token
-	Rule *Rule `desc:"sub-rule for this position -- nil if token"`
+	Rule *Rule
 
 	// token, None if rule
-	Tok token.KeyToken `desc:"token, None if rule"`
+	Tok token.KeyToken
 
 	// start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching
-	StInc int `desc:"start increment for matching -- this is the number of non-optional, non-match items between (start | last match) and this item -- increments start region for matching"`
+	StInc int
 
 	// if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match
-	Match bool `desc:"if true, this rule must match for rule to fire -- by default only tokens and, failing that, the first sub-rule is used for matching -- use @ to require a match"`
+	Match bool
 
 	// this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix
-	Opt bool `desc:"this rule is optional -- will absorb tokens if they exist -- indicated with ? prefix"`
+	Opt bool
 
 	// match this rule working backward from the next token -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other FmNext elements and is ignored if at the very end
-	FmNext bool `desc:"match this rule working backward from the next token -- triggered by - (minus) prefix and optimizes cases where there can be a lot of tokens going forward but few going from end -- must be anchored by a terminal EOS or other FmNext elements and is ignored if at the very end"`
+	FmNext bool
 }
 
 func (re RuleEl) IsRule() bool {

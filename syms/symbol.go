@@ -48,40 +48,40 @@ import (
 type Symbol struct {
 
 	// name of the symbol
-	Name string `desc:"name of the symbol"`
+	Name string
 
 	// additional detail and specification of the symbol -- e.g. if a function, the signature of the function
-	Detail string `desc:"additional detail and specification of the symbol -- e.g. if a function, the signature of the function"`
+	Detail string
 
 	// lexical kind of symbol, using token.Tokens list
-	Kind token.Tokens `desc:"lexical kind of symbol, using token.Tokens list"`
+	Kind token.Tokens
 
 	// Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type
-	Type string `desc:"Type name for this symbol -- if it is a type, this is its corresponding type representation -- if it is a variable then this is its type"`
+	Type string
 
 	// index for ordering children within a given scope, e.g., fields in a struct / class
-	Index int `desc:"index for ordering children within a given scope, e.g., fields in a struct / class"`
+	Index int
 
 	// full filename / URI of source
-	Filename string `desc:"full filename / URI of source"`
+	Filename string
 
 	// region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it
-	Region lex.Reg `desc:"region in source encompassing this item -- if = RegZero then this is a temp symbol and children are not added to it"`
+	Region lex.Reg
 
 	// region that should be selected when activated, etc
-	SelectReg lex.Reg `desc:"region that should be selected when activated, etc"`
+	SelectReg lex.Reg
 
 	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
-	Scopes SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
+	Scopes SymNames
 
 	// children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc
-	Children SymMap `desc:"children of this symbol -- this includes e.g., methods and fields of classes / structs / types, and all elements within packages, etc"`
+	Children SymMap
 
 	// types defined within the scope of this symbol
-	Types TypeMap `desc:"types defined within the scope of this symbol"`
+	Types TypeMap
 
 	// Ast node that created this symbol -- only valid during parsing
-	Ast ki.Ki `json:"-" xml:"-" desc:"Ast node that created this symbol -- only valid during parsing"`
+	Ast ki.Ki `json:"-" xml:"-"`
 }
 
 // NewSymbol returns a new symbol with the basic info filled in -- SelectReg defaults to Region

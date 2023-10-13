@@ -21,40 +21,40 @@ import (
 type Type struct {
 
 	// name of the type -- can be the name of a field or the role for a type element
-	Name string `desc:"name of the type -- can be the name of a field or the role for a type element"`
+	Name string
 
 	// kind of type -- overall nature of the type
-	Kind Kinds `desc:"kind of type -- overall nature of the type"`
+	Kind Kinds
 
 	// documentation about this type, extracted from code
-	Desc string `desc:"documentation about this type, extracted from code"`
+	Desc string
 
 	// set to true after type has been initialized during post-parse processing
-	Inited bool `inactive:"-" desc:"set to true after type has been initialized during post-parse processing"`
+	Inited bool `inactive:"-"`
 
 	// elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)
-	Els TypeEls `desc:"elements of this type -- ordering and meaning varies depending on the Kind of type -- for Primitive types this is the parent type, for Composite types it describes the key elements of the type: Tuple = each element's type; Array = type of elements; Struct = each field, etc (see docs for each in Kinds)"`
+	Els TypeEls
 
 	// methods defined for this type
-	Meths TypeMap `desc:"methods defined for this type"`
+	Meths TypeMap
 
-	// for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])
-	Size []int `desc:"for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is [0] (including receiver param for methods) and return vals is [1])"`
+	// for primitive types, this is the number of bytes, for composite types, it is the number of elements, which can be multi-dimensional (e.g., for functions, number of params is (including receiver param for methods) and return vals is )
+	Size []int
 
 	// full filename / URI of source where type is defined (may be empty for auto types)
-	Filename string `desc:"full filename / URI of source where type is defined (may be empty for auto types)"`
+	Filename string
 
 	// region in source encompassing this type
-	Region lex.Reg `desc:"region in source encompassing this type"`
+	Region lex.Reg
 
 	// relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc..
-	Scopes SymNames `desc:"relevant scoping / parent symbols, e.g., namespace, package, module, class, function, etc.."`
+	Scopes SymNames
 
 	// additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property
-	Props ki.Props `desc:"additional type properties, such as const, virtual, static -- these are just recorded textually and not systematized to keep things open-ended -- many of the most important properties can be inferred from the Kind property"`
+	Props ki.Props
 
 	// Ast node that corresponds to this type -- only valid during parsing
-	Ast ki.Ki `json:"-" xml:"-" desc:"Ast node that corresponds to this type -- only valid during parsing"`
+	Ast ki.Ki `json:"-" xml:"-"`
 }
 
 // NewType returns a new Type struct initialized with given name and kind
@@ -218,10 +218,10 @@ func (ty *Type) WriteDoc(out io.Writer, depth int) {
 type TypeEl struct {
 
 	// element name -- e.g., field name for struct, or functional name for other types
-	Name string `desc:"element name -- e.g., field name for struct, or functional name for other types"`
+	Name string
 
 	// type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate
-	Type string `desc:"type name -- looked up on relevant lists -- includes scoping / package / namespace name as appropriate"`
+	Type string
 }
 
 // String() satisfies the fmt.Stringer interface
