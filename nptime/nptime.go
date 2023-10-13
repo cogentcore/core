@@ -18,10 +18,10 @@ import "time"
 type Time struct {
 
 	// time.Time.Unix() seconds since 1970
-	Sec int64 `desc:"time.Time.Unix() seconds since 1970"`
+	Sec int64
 
 	// time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()
-	NSec uint32 `desc:"time.Time.Nanosecond() -- nanosecond offset within second, *not* UnixNano()"`
+	NSec uint32
 }
 
 // TimeZero is the uninitialized zero time value -- use to check whether
