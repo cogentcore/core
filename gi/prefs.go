@@ -46,6 +46,8 @@ func Init() {
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info.
+//
+//gti:add
 type Preferences struct {
 
 	// the color theme
@@ -529,6 +531,8 @@ func (pf *Preferences) DensityMul() float32 {
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
+//
+//gti:add
 type ScreenPrefs struct {
 
 	// [min: 0.1] [step: 0.1] overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
@@ -536,6 +540,8 @@ type ScreenPrefs struct {
 }
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
+//
+//gti:add
 type ParamPrefs struct {
 
 	// [min: 100] [step: 50] the maximum time interval in msec between button press events to count as a double-click
@@ -575,6 +581,8 @@ func (pf *ParamPrefs) Defaults() {
 }
 
 // User basic user information that might be needed for different apps
+//
+//gti:add
 type User struct {
 	user.User
 
@@ -758,8 +766,12 @@ func OpenPaths() {
 //////////////////////////////////////////////////////////////////
 //  PrefsDetailed
 
+// TODO: make all of the MSec things time.Duration
+
 // PrefsDetailed are more detailed params not usually customized, but
 // available for those who really care..
+//
+//gti:add
 type PrefsDetailed struct {
 
 	// [def: 30] [min: 5] [step: 1] the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
