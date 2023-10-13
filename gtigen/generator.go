@@ -327,13 +327,14 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		} else {
 			// if we have no name, fall back on type name
 			name = tn
-			// we must get rid of any package name, as field
-			// names never have package names
-			li := strings.LastIndex(name, ".")
-			if li >= 0 {
-				name = name[:li]
-			}
 		}
+		// we must get rid of any package name, as field
+		// names never have package names
+		li := strings.LastIndex(name, ".")
+		if li >= 0 {
+			name = name[li+1:] // need to get rid of .
+		}
+
 		dirs := gti.Directives{}
 		if field.Doc != nil {
 			lcfg := &Config{}
