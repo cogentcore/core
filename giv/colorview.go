@@ -528,7 +528,7 @@ func (vv *ColorValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	dclr := color.RGBA{}
 	clr, ok := vv.Color()
 	if ok && clr != nil {
@@ -611,7 +611,7 @@ func (vv *ColorNameValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 			curRow = i
 		}
 	}
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	TableViewSelectDialog(ctx, DlgOpts{Title: "Select a Color Name", Prompt: desc}, &sl, curRow, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)

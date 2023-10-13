@@ -442,7 +442,7 @@ func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isInact bool) 
 	}
 	defStr := ""
 	hasDef, _, defStr = StructViewFieldDefTag(vv, lbl)
-	if ttip, has := vv.Tag("desc"); has {
+	if ttip, has := vvb.Desc(); has {
 		lbl.Tooltip = defStr + ttip
 	}
 	return

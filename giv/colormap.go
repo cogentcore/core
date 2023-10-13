@@ -184,7 +184,7 @@ func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	sl := colormap.AvailMapsList()
 	cur := laser.ToString(vv.Value.Interface())
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	SliceViewSelectDialog(ctx, DlgOpts{Title: "Select a ColorMap", Prompt: desc}, &sl, cur, nil, func(dlg *gi.Dialog) {
 		if !dlg.Accepted {
 			si := dlg.Data.(int)
