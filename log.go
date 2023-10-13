@@ -8,19 +8,19 @@ package vci
 type Commit struct {
 
 	// revision number / hash code / unique id
-	Rev string `desc:"revision number / hash code / unique id"`
+	Rev string
 
 	// date (author's time) when comitted
-	Date string `desc:"date (author's time) when comitted"`
+	Date string
 
 	// author's name
-	Author string `desc:"author's name"`
+	Author string
 
 	// author's email
-	Email string `desc:"author's email"`
+	Email string
 
 	// message / subject line for commit
-	Message string `width:"100" desc:"message / subject line for commit"`
+	Message string `width:"100"`
 }
 
 // Log is the listing of commits
