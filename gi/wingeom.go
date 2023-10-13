@@ -38,31 +38,31 @@ type WinGeomPrefs map[string]map[string]RenderWinGeom
 type WinGeomPrefsMgr struct {
 
 	// the full set of window geometries
-	Geoms WinGeomPrefs `desc:"the full set of window geometries"`
+	Geoms WinGeomPrefs
 
 	// temporary cached geometries -- saved to Geoms after SaveDelay
-	Cache WinGeomPrefs `desc:"temporary cached geometries -- saved to Geoms after SaveDelay"`
+	Cache WinGeomPrefs
 
 	// base name of the preferences file in GoGi prefs directory
-	FileName string `desc:"base name of the preferences file in GoGi prefs directory"`
+	FileName string
 
 	// when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying
-	LastSave time.Time `desc:"when prefs were last saved -- if we weren't the last to save, then we need to re-open before modifying"`
+	LastSave time.Time
 
 	// if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block
-	SettingNoSave bool `desc:"if true, we are setting geometry so don't save -- caller must call SettingStart() SettingEnd() to block"`
+	SettingNoSave bool
 
 	// read-write mutex that protects updating of WinGeomPrefs
-	Mu sync.RWMutex `desc:"read-write mutex that protects updating of WinGeomPrefs"`
+	Mu sync.RWMutex
 
 	// wait time before trying to lock file again
-	LockSleep time.Duration `desc:"wait time before trying to lock file again"`
+	LockSleep time.Duration
 
 	// wait time before saving the Cache into Geoms
-	SaveDelay time.Duration `desc:"wait time before saving the Cache into Geoms"`
+	SaveDelay time.Duration
 
 	// timer for delayed save
-	saveTimer *time.Timer `desc:"timer for delayed save"`
+	saveTimer *time.Timer
 }
 
 // Init does initialization if not yet initialized

@@ -32,31 +32,31 @@ type Button struct {
 	WidgetBase
 
 	// the type of button
-	Type ButtonTypes `desc:"the type of button"`
+	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
-	Text string `xml:"text" desc:"label for the button -- if blank then no label is presented"`
+	Text string `xml:"text"`
 
-	// [view: show-name] optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
-	Icon icons.Icon `xml:"icon" view:"show-name" desc:"optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present"`
+	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
+	Icon icons.Icon `xml:"icon" view:"show-name"`
 
-	// [view: show-name] name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
-	Indicator icons.Icon `xml:"indicator" view:"show-name" desc:"name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set"`
+	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
+	Indicator icons.Icon `xml:"indicator" view:"show-name"`
 
 	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
-	Shortcut key.Chord `xml:"shortcut" desc:"optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set."`
+	Shortcut key.Chord `xml:"shortcut"`
 
 	// the menu items for this menu -- typically add Button elements for menus, along with separators
-	Menu Menu `desc:"the menu items for this menu -- typically add Button elements for menus, along with separators"`
+	Menu Menu
 
-	// [view: -] set this to make a menu on demand -- if set then this button acts like a menu button
-	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-" desc:"set this to make a menu on demand -- if set then this button acts like a menu button"`
+	// set this to make a menu on demand -- if set then this button acts like a menu button
+	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] optional data that is sent with events to identify the button
-	Data any `json:"-" xml:"-" view:"-" desc:"optional data that is sent with events to identify the button"`
+	// optional data that is sent with events to identify the button
+	Data any `json:"-" xml:"-" view:"-"`
 
-	// [view: -] optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing
-	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-" desc:"optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing"`
+	// optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing
+	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {

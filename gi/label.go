@@ -29,19 +29,19 @@ type Label struct {
 	WidgetBase
 
 	// label to display
-	Text string `xml:"text" desc:"label to display"`
+	Text string `xml:"text"`
 
 	// the type of label
-	Type LabelTypes `desc:"the type of label"`
+	Type LabelTypes
 
 	// [view: -] signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler
 	// LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// render data for text label
-	TextRender paint.Text `copy:"-" xml:"-" json:"-" desc:"render data for text label"`
+	TextRender paint.Text `copy:"-" xml:"-" json:"-"`
 
 	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
-	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" desc:"position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc."`
+	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-"`
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {

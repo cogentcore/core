@@ -67,7 +67,7 @@ type KeyChordEdit struct {
 	gi.Label
 
 	// true if the keyboard focus is active or not -- when we lose active focus we apply changes
-	FocusActive bool `json:"-" xml:"-" desc:"true if the keyboard focus is active or not -- when we lose active focus we apply changes"`
+	FocusActive bool `json:"-" xml:"-"`
 }
 
 func (kc *KeyChordEdit) OnInit() {

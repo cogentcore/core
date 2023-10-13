@@ -25,31 +25,31 @@ type OutBufMarkupFunc func(line []byte) []byte
 type OutBuf struct {
 
 	// the output that we are reading from, as an io.Reader
-	Out io.Reader `desc:"the output that we are reading from, as an io.Reader"`
+	Out io.Reader
 
 	// the Buf that we output to
-	Buf *Buf `desc:"the Buf that we output to"`
+	Buf *Buf
 
 	// default 200: how many milliseconds to wait while batching output
-	BatchMSec int `desc:"default 200: how many milliseconds to wait while batching output"`
+	BatchMSec int
 
 	// optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input
-	MarkupFun OutBufMarkupFunc `desc:"optional markup function that adds html tags to given line of output -- essential that it ONLY adds tags, and otherwise has the exact same visible bytes as the input"`
+	MarkupFun OutBufMarkupFunc
 
 	// current buffered output raw lines -- not yet sent to Buf
-	CurOutLns [][]byte `desc:"current buffered output raw lines -- not yet sent to Buf"`
+	CurOutLns [][]byte
 
 	// current buffered output markup lines -- not yet sent to Buf
-	CurOutMus [][]byte `desc:"current buffered output markup lines -- not yet sent to Buf"`
+	CurOutMus [][]byte
 
 	// mutex protecting updating of CurOutLns and Buf, and timer
-	Mu sync.Mutex `desc:"mutex protecting updating of CurOutLns and Buf, and timer"`
+	Mu sync.Mutex
 
 	// time when last output was sent to buffer
-	LastOut time.Time `desc:"time when last output was sent to buffer"`
+	LastOut time.Time
 
 	// time.AfterFunc that is started after new input is received and not immediately output -- ensures that it will get output if no further burst happens
-	AfterTimer *time.Timer `desc:"time.AfterFunc that is started after new input is received and not immediately output -- ensures that it will get output if no further burst happens"`
+	AfterTimer *time.Timer
 }
 
 // Init sets the various params and prepares for running

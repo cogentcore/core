@@ -34,16 +34,16 @@ type Tabs struct {
 	Layout
 
 	// maximum number of characters to include in tab label -- elides labels that are longer than that
-	MaxChars int `desc:"maximum number of characters to include in tab label -- elides labels that are longer than that"`
+	MaxChars int
 
 	// show a new tab button at right of list of tabs
-	NewTabButton bool `desc:"show a new tab button at right of list of tabs"`
+	NewTabButton bool
 
 	// if true, tabs are user-deleteable (true by default)
-	DeleteTabButtons bool `desc:"if true, tabs are user-deleteable (true by default)"`
+	DeleteTabButtons bool
 
-	// [view: -] mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
-	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection"`
+	// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
+	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 func (ts *Tabs) CopyFieldsFrom(frm any) {
@@ -522,7 +522,7 @@ type Tab struct {
 	Button
 
 	// if true, this tab has a delete button (true by default)
-	DeleteButton bool `desc:"if true, this tab has a delete button (true by default)"`
+	DeleteButton bool
 }
 
 func (tb *Tab) OnInit() {

@@ -46,13 +46,13 @@ type TextField struct {
 	WidgetBase
 
 	// the last saved value of the text string being edited
-	Txt string `json:"-" xml:"text" desc:"the last saved value of the text string being edited"`
+	Txt string `json:"-" xml:"text"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
-	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Placeholder string `json:"-" xml:"placeholder"`
 
 	// functions and data for textfield completion
-	Complete *Complete `copy:"-" json:"-" xml:"-" desc:"functions and data for textfield completion"`
+	Complete *Complete `copy:"-" json:"-" xml:"-"`
 
 	// replace displayed characters with bullets to conceal text
 	NoEcho bool
@@ -64,73 +64,73 @@ type TextField struct {
 	TrailingIcon icons.Icon
 
 	// width of cursor -- set from cursor-width property (inherited)
-	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	CursorWidth units.Value `xml:"cursor-width"`
 
 	// the type of the text field
-	Type TextFieldTypes `desc:"the type of the text field"`
+	Type TextFieldTypes
 
 	// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
-	PlaceholderColor color.RGBA `desc:"the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color"`
+	PlaceholderColor color.RGBA
 
 	// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
-	SelectColor colors.Full `desc:"the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties"`
+	SelectColor colors.Full
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor colors.Full `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
+	CursorColor colors.Full
 
 	// true if the text has been edited relative to the original
-	Edited bool `json:"-" xml:"-" desc:"true if the text has been edited relative to the original"`
+	Edited bool `json:"-" xml:"-"`
 
 	// the live text string being edited, with latest modifications -- encoded as runes
-	EditTxt []rune `json:"-" xml:"-" desc:"the live text string being edited, with latest modifications -- encoded as runes"`
+	EditTxt []rune `json:"-" xml:"-"`
 
 	// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
-	MaxWidthReq int `desc:"maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override"`
+	MaxWidthReq int
 
 	// effective position with any leading icon space added
-	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective position with any leading icon space added"`
+	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-"`
 
 	// effective size, subtracting any leading and trailing icon space
-	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"effective size, subtracting any leading and trailing icon space"`
+	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
 
 	// starting display position in the string
-	StartPos int `copy:"-" json:"-" xml:"-" desc:"starting display position in the string"`
+	StartPos int `copy:"-" json:"-" xml:"-"`
 
 	// ending display position in the string
-	EndPos int `copy:"-" json:"-" xml:"-" desc:"ending display position in the string"`
+	EndPos int `copy:"-" json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos int `copy:"-" json:"-" xml:"-" desc:"current cursor position"`
+	CursorPos int `copy:"-" json:"-" xml:"-"`
 
 	// approximate number of chars that can be displayed at any time -- computed from font size etc
-	CharWidth int `copy:"-" json:"-" xml:"-" desc:"approximate number of chars that can be displayed at any time -- computed from font size etc"`
+	CharWidth int `copy:"-" json:"-" xml:"-"`
 
 	// starting position of selection in the string
-	SelectStart int `copy:"-" json:"-" xml:"-" desc:"starting position of selection in the string"`
+	SelectStart int `copy:"-" json:"-" xml:"-"`
 
 	// ending position of selection in the string
-	SelectEnd int `copy:"-" json:"-" xml:"-" desc:"ending position of selection in the string"`
+	SelectEnd int `copy:"-" json:"-" xml:"-"`
 
 	// initial selection position -- where it started
-	SelectInit int `copy:"-" json:"-" xml:"-" desc:"initial selection position -- where it started"`
+	SelectInit int `copy:"-" json:"-" xml:"-"`
 
 	// if true, select text as cursor moves
-	SelectMode bool `copy:"-" json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	SelectMode bool `copy:"-" json:"-" xml:"-"`
 
 	// render version of entire text, for sizing
-	RenderAll paint.Text `copy:"-" json:"-" xml:"-" desc:"render version of entire text, for sizing"`
+	RenderAll paint.Text `copy:"-" json:"-" xml:"-"`
 
 	// render version of just visible text
-	RenderVis paint.Text `copy:"-" json:"-" xml:"-" desc:"render version of just visible text"`
+	RenderVis paint.Text `copy:"-" json:"-" xml:"-"`
 
 	// font height, cached during styling
-	FontHeight float32 `copy:"-" json:"-" xml:"-" desc:"font height, cached during styling"`
+	FontHeight float32 `copy:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
-	BlinkOn bool `copy:"-" json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	BlinkOn bool `copy:"-" json:"-" xml:"-"`
 
-	// [view: -] mutex for updating cursor between blinker and field
-	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" desc:"mutex for updating cursor between blinker and field"`
+	// mutex for updating cursor between blinker and field
+	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 func (tf *TextField) CopyFieldsFrom(frm any) {

@@ -60,25 +60,25 @@ func (tv *View) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) 
 type ISearch struct {
 
 	// if true, in interactive search mode
-	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	On bool `json:"-" xml:"-"`
 
 	// current interactive search string
-	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+	Find string `json:"-" xml:"-"`
 
 	// pay attention to case in isearch -- triggered by typing an upper-case letter
-	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	UseCase bool `json:"-" xml:"-"`
 
 	// current search matches
-	Matches []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
+	Matches []textbuf.Match `json:"-" xml:"-"`
 
 	// position within isearch matches
-	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+	Pos int `json:"-" xml:"-"`
 
 	// position in search list from previous search
-	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	StartPos lex.Pos `json:"-" xml:"-"`
 }
 
 // ViewMaxFindHighlights is the maximum number of regions to highlight on find
@@ -250,31 +250,31 @@ func (tv *View) ISearchCancel() {
 type QReplace struct {
 
 	// if true, in interactive search mode
-	On bool `json:"-" xml:"-" desc:"if true, in interactive search mode"`
+	On bool `json:"-" xml:"-"`
 
 	// current interactive search string
-	Find string `json:"-" xml:"-" desc:"current interactive search string"`
+	Find string `json:"-" xml:"-"`
 
 	// current interactive search string
-	Replace string `json:"-" xml:"-" desc:"current interactive search string"`
+	Replace string `json:"-" xml:"-"`
 
 	// pay attention to case in isearch -- triggered by typing an upper-case letter
-	UseCase bool `json:"-" xml:"-" desc:"pay attention to case in isearch -- triggered by typing an upper-case letter"`
+	UseCase bool `json:"-" xml:"-"`
 
 	// search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i
-	LexItems bool `json:"-" xml:"-" desc:"search only as entire lexically-tagged item boundaries -- key for replacing short local variables like i"`
+	LexItems bool `json:"-" xml:"-"`
 
 	// current search matches
-	Matches []textbuf.Match `json:"-" xml:"-" desc:"current search matches"`
+	Matches []textbuf.Match `json:"-" xml:"-"`
 
 	// position within isearch matches
-	Pos int `json:"-" xml:"-" desc:"position within isearch matches"`
+	Pos int `json:"-" xml:"-"`
 
 	// position in search list from previous search
-	PrevPos int `json:"-" xml:"-" desc:"position in search list from previous search"`
+	PrevPos int `json:"-" xml:"-"`
 
 	// starting position for search -- returns there after on cancel
-	StartPos lex.Pos `json:"-" xml:"-" desc:"starting position for search -- returns there after on cancel"`
+	StartPos lex.Pos `json:"-" xml:"-"`
 }
 
 // PrevQReplaceFinds are the previous QReplace strings

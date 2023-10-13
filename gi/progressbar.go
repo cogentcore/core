@@ -22,16 +22,16 @@ type ProgressBar struct {
 	Slider
 
 	// maximum amount of progress to be achieved
-	ProgMax int `desc:"maximum amount of progress to be achieved"`
+	ProgMax int
 
 	// progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten
-	ProgInc int `desc:"progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten"`
+	ProgInc int
 
 	// current progress level
-	ProgCur int `desc:"current progress level"`
+	ProgCur int
 
 	// mutex for updating progress
-	ProgMu sync.Mutex `desc:"mutex for updating progress"`
+	ProgMu sync.Mutex
 }
 
 func (pb *ProgressBar) CopyFieldsFrom(frm any) {

@@ -23,19 +23,19 @@ import (
 type Sprite struct {
 
 	// whether this sprite is active now or not
-	On bool `desc:"whether this sprite is active now or not"`
+	On bool
 
 	// unique name of sprite
-	Name string `desc:"unique name of sprite"`
+	Name string
 
 	// properties for sprite -- allows user-extensible data
-	Props ki.Props `desc:"properties for sprite -- allows user-extensible data"`
+	Props ki.Props
 
 	// position and size of the image within the overlay window texture
-	Geom mat32.Geom2DInt `desc:"position and size of the image within the overlay window texture"`
+	Geom mat32.Geom2DInt
 
 	// pixels to render -- should be same size as Geom.Size
-	Pixels *image.RGBA `desc:"pixels to render -- should be same size as Geom.Size"`
+	Pixels *image.RGBA
 }
 
 // NewSprite returns a new sprite with given name, which must remain
@@ -125,16 +125,16 @@ func (sp *Sprite) GrabRenderFrom(wi Widget) {
 type Sprites struct {
 
 	// map of uniquely named sprites
-	Names ordmap.Map[string, *Sprite] `desc:"map of uniquely named sprites"`
+	Names ordmap.Map[string, *Sprite]
 
 	// allocation of sprites by size for rendering
-	SzAlloc szalloc.SzAlloc `desc:"allocation of sprites by size for rendering"`
+	SzAlloc szalloc.SzAlloc
 
 	// set to true if sprites have been modified since last config
-	Modified bool `desc:"set to true if sprites have been modified since last config"`
+	Modified bool
 
 	// number of active sprites
-	Active int `desc:"number of active sprites"`
+	Active int
 }
 
 func (ss *Sprites) Init() {

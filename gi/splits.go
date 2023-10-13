@@ -39,16 +39,16 @@ type Splits struct {
 	WidgetBase
 
 	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
-	HandleSize units.Value `xml:"handle-size" desc:"size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this"`
+	HandleSize units.Value `xml:"handle-size"`
 
 	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
-	Splits []float32 `desc:"proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element"`
+	Splits []float32
 
 	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
-	SavedSplits []float32 `desc:"A saved version of the splits which can be restored -- for dynamic collapse / expand operations"`
+	SavedSplits []float32
 
 	// dimension along which to split the space
-	Dim mat32.Dims `desc:"dimension along which to split the space"`
+	Dim mat32.Dims
 }
 
 func (sl *Splits) CopyFieldsFrom(frm any) {
@@ -427,10 +427,10 @@ type Splitter struct {
 	Slider
 
 	// splitter number this one is
-	SplitterNo int `desc:"splitter number this one is"`
+	SplitterNo int
 
 	// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
-	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself"`
+	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 }
 
 func (sr *Splitter) OnInit() {

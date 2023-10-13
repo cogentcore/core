@@ -25,16 +25,16 @@ type Switches struct {
 	WidgetBase
 
 	// the type of switches that will be made
-	Type SwitchTypes `desc:"the type of switches that will be made"`
+	Type SwitchTypes
 
 	// the list of items (switch labels)
-	Items []string `desc:"the list of items (switch labels)"`
+	Items []string
 
 	// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
-	Tooltips []string `desc:"an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items"`
+	Tooltips []string
 
 	// whether to make the items mutually exclusive (checking one turns off all the others)
-	Mutex bool `desc:"whether to make the items mutually exclusive (checking one turns off all the others)"`
+	Mutex bool
 }
 
 func (sw *Switches) CopyFieldsFrom(frm any) {

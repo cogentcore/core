@@ -36,13 +36,13 @@ type Image struct {
 	WidgetBase
 
 	// file name of image loaded -- set by OpenImage
-	Filename FileName `desc:"file name of image loaded -- set by OpenImage"`
+	Filename FileName
 
 	// size of the image
-	Size image.Point `desc:"size of the image"`
+	Size image.Point
 
-	// [view: -] the bitmap image
-	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-" desc:"the bitmap image"`
+	// the bitmap image
+	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-"`
 }
 
 func (im *Image) CopyFieldsFrom(frm any) {

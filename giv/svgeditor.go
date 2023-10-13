@@ -19,13 +19,13 @@ type Editor struct {
 	gi.WidgetBase
 
 	// view translation offset (from dragging)
-	Trans mat32.Vec2 `desc:"view translation offset (from dragging)"`
+	Trans mat32.Vec2
 
 	// view scaling (from zooming)
-	Scale float32 `desc:"view scaling (from zooming)"`
+	Scale float32
 
-	// [view: -] has dragging cursor been set yet?
-	SetDragCursor bool `view:"-" desc:"has dragging cursor been set yet?"`
+	// has dragging cursor been set yet?
+	SetDragCursor bool `view:"-"`
 }
 
 func (sve *Editor) CopyFieldsFrom(frm any) {

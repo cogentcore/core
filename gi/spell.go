@@ -107,28 +107,28 @@ type Spell struct {
 	ki.Node
 
 	// line number in source that spelling is operating on, if relevant
-	SrcLn int `desc:"line number in source that spelling is operating on, if relevant"`
+	SrcLn int
 
 	// character position in source that spelling is operating on (start of word to be corrected)
-	SrcCh int `desc:"character position in source that spelling is operating on (start of word to be corrected)"`
+	SrcCh int
 
 	// list of suggested corrections
-	Suggest []string `desc:"list of suggested corrections"`
+	Suggest []string
 
 	// word being checked
-	Word string `desc:"word being checked"`
+	Word string
 
 	// last word learned -- can be undone -- stored in lowercase format
-	LastLearned string `desc:"last word learned -- can be undone -- stored in lowercase format"`
+	LastLearned string
 
 	// [view: -] signal for Spell -- see SpellSignals for the types
 	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
 
 	// the user's correction selection'
-	Correction string `desc:"the user's correction selection'"`
+	Correction string
 
 	// the scene where the current popup menu is presented
-	Sc *Scene `desc:"the scene where the current popup menu is presented"`
+	Sc *Scene
 }
 
 func (sp *Spell) Disconnect() {

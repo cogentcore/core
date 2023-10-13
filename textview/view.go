@@ -40,109 +40,109 @@ type View struct {
 	gi.WidgetBase
 
 	// the text buffer that we're editing
-	Buf *Buf `json:"-" xml:"-" desc:"the text buffer that we're editing"`
+	Buf *Buf `json:"-" xml:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
-	Placeholder string `json:"-" xml:"placeholder" desc:"text that is displayed when the field is empty, in a lower-contrast manner"`
+	Placeholder string `json:"-" xml:"placeholder"`
 
 	// width of cursor -- set from cursor-width property (inherited)
-	CursorWidth units.Value `xml:"cursor-width" desc:"width of cursor -- set from cursor-width property (inherited)"`
+	CursorWidth units.Value `xml:"cursor-width"`
 
 	// the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties
-	LineNumberColor colors.Full `desc:"the color used for the side bar containing the line numbers; this should be set in Stylers like all other style properties"`
+	LineNumberColor colors.Full
 
 	// the color used for the user text selection background color; this should be set in Stylers like all other style properties
-	SelectColor colors.Full `desc:"the color used for the user text selection background color; this should be set in Stylers like all other style properties"`
+	SelectColor colors.Full
 
 	// the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties
-	HighlightColor colors.Full `desc:"the color used for the text highlight background color (like in find); this should be set in Stylers like all other style properties"`
+	HighlightColor colors.Full
 
 	// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
-	CursorColor colors.Full `desc:"the color used for the text field cursor (caret); this should be set in Stylers like all other style properties"`
+	CursorColor colors.Full
 
 	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
-	NLines int `json:"-" xml:"-" desc:"number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc"`
+	NLines int `json:"-" xml:"-"`
 
 	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
-	Renders []paint.Text `json:"-" xml:"-" desc:"renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)"`
+	Renders []paint.Text `json:"-" xml:"-"`
 
 	// starting offsets for top of each line
-	Offs []float32 `json:"-" xml:"-" desc:"starting offsets for top of each line"`
+	Offs []float32 `json:"-" xml:"-"`
 
 	// number of line number digits needed
-	LineNoDigs int `json:"-" xml:"-" desc:"number of line number digits needed"`
+	LineNoDigs int `json:"-" xml:"-"`
 
 	// horizontal offset for start of text after line numbers
-	LineNoOff float32 `json:"-" xml:"-" desc:"horizontal offset for start of text after line numbers"`
+	LineNoOff float32 `json:"-" xml:"-"`
 
 	// render for line numbers
-	LineNoRender paint.Text `json:"-" xml:"-" desc:"render for line numbers"`
+	LineNoRender paint.Text `json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize image.Point `json:"-" xml:"-" desc:"total size of all lines as rendered"`
+	LinesSize image.Point `json:"-" xml:"-"`
 
 	// size params to use in render call
-	RenderSz mat32.Vec2 `json:"-" xml:"-" desc:"size params to use in render call"`
+	RenderSz mat32.Vec2 `json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos lex.Pos `json:"-" xml:"-" desc:"current cursor position"`
+	CursorPos lex.Pos `json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
-	CursorCol int `json:"-" xml:"-" desc:"desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns"`
+	CursorCol int `json:"-" xml:"-"`
 
 	// if true, scroll screen to cursor on next render
-	ScrollToCursorOnRender bool `json:"-" xml:"-" desc:"if true, scroll screen to cursor on next render"`
+	ScrollToCursorOnRender bool `json:"-" xml:"-"`
 
 	// cursor position to scroll to
-	ScrollToCursorPos lex.Pos `json:"-" xml:"-" desc:"cursor position to scroll to"`
+	ScrollToCursorPos lex.Pos `json:"-" xml:"-"`
 
 	// current index within PosHistory
-	PosHistIdx int `json:"-" xml:"-" desc:"current index within PosHistory"`
+	PosHistIdx int `json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectStart lex.Pos `json:"-" xml:"-" desc:"starting point for selection -- will either be the start or end of selected region depending on subsequent selection."`
+	SelectStart lex.Pos `json:"-" xml:"-"`
 
 	// current selection region
-	SelectReg textbuf.Region `json:"-" xml:"-" desc:"current selection region"`
+	SelectReg textbuf.Region `json:"-" xml:"-"`
 
 	// previous selection region, that was actually rendered -- needed to update render
-	PrevSelectReg textbuf.Region `json:"-" xml:"-" desc:"previous selection region, that was actually rendered -- needed to update render"`
+	PrevSelectReg textbuf.Region `json:"-" xml:"-"`
 
 	// highlighted regions, e.g., for search results
-	Highlights []textbuf.Region `json:"-" xml:"-" desc:"highlighted regions, e.g., for search results"`
+	Highlights []textbuf.Region `json:"-" xml:"-"`
 
 	// highlighted regions, specific to scope markers
-	Scopelights []textbuf.Region `json:"-" xml:"-" desc:"highlighted regions, specific to scope markers"`
+	Scopelights []textbuf.Region `json:"-" xml:"-"`
 
 	// if true, select text as cursor moves
-	SelectMode bool `json:"-" xml:"-" desc:"if true, select text as cursor moves"`
+	SelectMode bool `json:"-" xml:"-"`
 
 	// if true, complete regardless of any disqualifying reasons
-	ForceComplete bool `json:"-" xml:"-" desc:"if true, complete regardless of any disqualifying reasons"`
+	ForceComplete bool `json:"-" xml:"-"`
 
 	// interactive search data
-	ISearch ISearch `json:"-" xml:"-" desc:"interactive search data"`
+	ISearch ISearch `json:"-" xml:"-"`
 
 	// query replace data
-	QReplace QReplace `json:"-" xml:"-" desc:"query replace data"`
+	QReplace QReplace `json:"-" xml:"-"`
 
 	// font height, cached during styling
-	FontHeight float32 `json:"-" xml:"-" desc:"font height, cached during styling"`
+	FontHeight float32 `json:"-" xml:"-"`
 
 	// line height, cached during styling
-	LineHeight float32 `json:"-" xml:"-" desc:"line height, cached during styling"`
+	LineHeight float32 `json:"-" xml:"-"`
 
 	// height in lines and width in chars of the visible area
-	VisSize image.Point `json:"-" xml:"-" desc:"height in lines and width in chars of the visible area"`
+	VisSize image.Point `json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
-	BlinkOn bool `json:"-" xml:"-" desc:"oscillates between on and off for blinking"`
+	BlinkOn bool `json:"-" xml:"-"`
 
-	// [view: -] mutex protecting cursor rendering -- shared between blink and main code
-	CursorMu sync.Mutex `json:"-" xml:"-" view:"-" desc:"mutex protecting cursor rendering -- shared between blink and main code"`
+	// mutex protecting cursor rendering -- shared between blink and main code
+	CursorMu sync.Mutex `json:"-" xml:"-" view:"-"`
 
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
-	HasLinks bool `json:"-" xml:"-" desc:"at least one of the renders has links -- determines if we set the cursor for hand movements"`
+	HasLinks bool `json:"-" xml:"-"`
 
 	lastRecenter   int
 	lastAutoInsert rune

@@ -41,26 +41,26 @@ import (
 type TableView struct {
 	SliceViewBase
 
-	// [view: -] optional styling function
-	StyleFunc TableViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	// optional styling function
+	StyleFunc TableViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// [view: -] current selection field -- initially select value in this field
-	SelField string `copy:"-" view:"-" json:"-" xml:"-" desc:"current selection field -- initially select value in this field"`
+	// current selection field -- initially select value in this field
+	SelField string `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// current sort index
-	SortIdx int `desc:"current sort index"`
+	SortIdx int
 
 	// whether current sort order is descending
-	SortDesc bool `desc:"whether current sort order is descending"`
+	SortDesc bool
 
-	// [view: -] struct type for each row
-	StruType reflect.Type `copy:"-" view:"-" json:"-" xml:"-" desc:"struct type for each row"`
+	// struct type for each row
+	StruType reflect.Type `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// [view: -] the visible fields
-	VisFields []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-" desc:"the visible fields"`
+	// the visible fields
+	VisFields []reflect.StructField `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// [view: -] number of visible fields
-	NVisFields int `copy:"-" view:"-" json:"-" xml:"-" desc:"number of visible fields"`
+	// number of visible fields
+	NVisFields int `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl

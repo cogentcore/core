@@ -21,13 +21,13 @@ import (
 type Region struct {
 
 	// starting position
-	Start lex.Pos `desc:"starting position"`
+	Start lex.Pos
 
 	// ending position: line number is *inclusive* but character position is *exclusive* (-1)
-	End lex.Pos `desc:"ending position: line number is *inclusive* but character position is *exclusive* (-1)"`
+	End lex.Pos
 
 	// time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)
-	Time nptime.Time `desc:"time when region was set -- needed for updating locations in the text based on time stamp (using efficient non-pointer time)"`
+	Time nptime.Time
 }
 
 // RegionNil is the empty (zero) text region -- all zeros

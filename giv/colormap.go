@@ -26,10 +26,10 @@ type ColorMapView struct {
 	gi.WidgetBase
 
 	// orientation along which to display the spectrum
-	Orient mat32.Dims `desc:"orientation along which to display the spectrum"`
+	Orient mat32.Dims
 
 	// the colormap that we view
-	Map *colormap.Map `desc:"the colormap that we view"`
+	Map *colormap.Map
 }
 
 func (cv *ColorMapView) OnInit() {

@@ -37,10 +37,10 @@ type MainStage struct {
 	StageMgr *MainStageMgr
 
 	// sprites are named images that are rendered last overlaying everything else.
-	Sprites Sprites `json:"-" xml:"-" desc:"sprites are named images that are rendered last overlaying everything else."`
+	Sprites Sprites `json:"-" xml:"-"`
 
 	// name of sprite that is being dragged -- sprite event function is responsible for setting this.
-	SpriteDragging string `json:"-" xml:"-" desc:"name of sprite that is being dragged -- sprite event function is responsible for setting this."`
+	SpriteDragging string `json:"-" xml:"-"`
 }
 
 // AsMain returns this stage as a MainStage (for Main Window, Dialog, Sheet) types.

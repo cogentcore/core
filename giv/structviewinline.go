@@ -23,28 +23,28 @@ type StructViewInline struct {
 	gi.Frame
 
 	// the struct that we are a view onto
-	Struct any `desc:"the struct that we are a view onto"`
+	Struct any
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView Value `desc:"Value for the struct itself, if this was created within value view framework -- otherwise nil"`
+	StructValView Value
 
 	// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
-	AddButton bool `desc:"if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'"`
+	AddButton bool
 
 	// Value representations of the fields
-	FieldViews []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
+	FieldViews []Value `json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 
-	// [view: inactive] if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" view:"inactive" desc:"if true, some fields have default values -- update labels when values change"`
+	// if true, some fields have default values -- update labels when values change
+	HasDefs bool `json:"-" xml:"-" view:"inactive"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
+	HasViewIfs bool `json:"-" xml:"-" inactive:"+"`
 }
 
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {

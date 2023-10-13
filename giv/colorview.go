@@ -35,16 +35,16 @@ type ColorView struct {
 	gi.Frame
 
 	// the color that we view
-	Color color.RGBA `desc:"the color that we view"`
+	Color color.RGBA
 
 	// the color that we view, in HSLA form
-	ColorHSLA hsl.HSL `desc:"the color that we view, in HSLA form"`
+	ColorHSLA hsl.HSL
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 }
 
 func (cv *ColorView) OnInit() {

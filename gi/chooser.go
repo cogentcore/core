@@ -34,33 +34,33 @@ type Chooser struct {
 	Button
 
 	// the type of combo box
-	Type ChooserTypes `desc:"the type of combo box"`
+	Type ChooserTypes
 
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
-	Editable bool `xml:"editable" desc:"provide a text field for editing the value, or just a button for selecting items?  Set the editable property"`
+	Editable bool `xml:"editable"`
 
 	// TODO(kai): implement AllowNew button
 
 	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
-	AllowNew bool `desc:"whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu"`
+	AllowNew bool
 
 	// current selected value
-	CurVal any `json:"-" xml:"-" desc:"current selected value"`
+	CurVal any `json:"-" xml:"-"`
 
 	// current index in list of possible items
-	CurIndex int `json:"-" xml:"-" desc:"current index in list of possible items"`
+	CurIndex int `json:"-" xml:"-"`
 
 	// items available for selection
-	Items []any `json:"-" xml:"-" desc:"items available for selection"`
+	Items []any `json:"-" xml:"-"`
 
 	// an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items
-	Tooltips []string `json:"-" xml:"-" desc:"an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items"`
+	Tooltips []string `json:"-" xml:"-"`
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
-	Placeholder string `desc:"if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner"`
+	Placeholder string
 
 	// maximum label length (in runes)
-	MaxLength int `desc:"maximum label length (in runes)"`
+	MaxLength int
 }
 
 func (ch *Chooser) CopyFieldsFrom(frm any) {

@@ -59,7 +59,7 @@ type EventMgr struct {
 	Scene *Scene
 
 	// mutex that protects timer variable updates (e.g., hover AfterFunc's)
-	TimerMu sync.Mutex `desc:"mutex that protects timer variable updates (e.g., hover AfterFunc's)"`
+	TimerMu sync.Mutex
 
 	// stack of widgets with mouse pointer in BBox, and are not Disabled
 	MouseInBBox []Widget
@@ -104,10 +104,10 @@ type EventMgr struct {
 	FocusWithinStack []Widget
 
 	// Last Select Mode from most recent Mouse, Keyboard events
-	LastSelMode events.SelectModes `desc:"Last Select Mode from most recent Mouse, Keyboard events"`
+	LastSelMode events.SelectModes
 
 	// currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)
-	Shortcuts Shortcuts `json:"-" xml:"-" desc:"currently active shortcuts for this window (shortcuts are always window-wide -- use widget key event processing for more local key functions)"`
+	Shortcuts Shortcuts `json:"-" xml:"-"`
 
 	// stage of DND process
 	// DNDStage DNDStages `desc:"stage of DND process"`

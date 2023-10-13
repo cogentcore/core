@@ -36,40 +36,40 @@ type StructView struct {
 	gi.Frame
 
 	// the struct that we are a view onto
-	Struct any `desc:"the struct that we are a view onto"`
+	Struct any
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
-	StructValView Value `desc:"Value for the struct itself, if this was created within value view framework -- otherwise nil"`
+	StructValView Value
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
-	Changed bool `desc:"has the value of any field changed?  updated by the ViewSig signals from fields"`
+	Changed bool
 
 	// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
-	ChangeFlag *reflect.Value `json:"-" xml:"-" desc:"Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values."`
+	ChangeFlag *reflect.Value `json:"-" xml:"-"`
 
 	// Value representations of the fields
-	FieldViews []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
+	FieldViews []Value `json:"-" xml:"-"`
 
 	// whether to show the toolbar or not
-	ShowToolBar bool `desc:"whether to show the toolbar or not"`
+	ShowToolBar bool
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 
 	// the struct that we successfully set a toolbar for
-	ToolbarStru any `desc:"the struct that we successfully set a toolbar for"`
+	ToolbarStru any
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have default values -- update labels when values change"`
+	HasDefs bool `json:"-" xml:"-" inactive:"+"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" inactive:"+" desc:"if true, some fields have viewif conditional view tags -- update after.."`
+	HasViewIfs bool `json:"-" xml:"-" inactive:"+"`
 
 	// extra tags by field name -- from type properties
-	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+" desc:"extra tags by field name -- from type properties"`
+	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+"`
 }
 
 func (sv *StructView) OnInit() {
@@ -648,16 +648,16 @@ func StructViewIf(viewif string, field reflect.StructField, stru any) bool {
 type StructFieldVals struct {
 
 	// path of field.field parent fields to this field
-	Path string `desc:"path of field.field parent fields to this field"`
+	Path string
 
 	// type information for field
-	Field reflect.StructField `desc:"type information for field"`
+	Field reflect.StructField
 
 	// value of field (as a pointer)
-	Val reflect.Value `desc:"value of field (as a pointer)"`
+	Val reflect.Value
 
 	// def tag information for default values
-	Defs string `desc:"def tag information for default values"`
+	Defs string
 }
 
 // StructNonDefFields processses "def" tag for default value(s)
