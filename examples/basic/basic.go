@@ -16,13 +16,13 @@ import (
 type Config struct {
 
 	// the name of the user
-	Name string `flag:"name,nm,n" desc:"the name of the user"`
+	Name string `flag:"name,nm,n"`
 
 	// the age of the user
-	Age int `desc:"the age of the user"`
+	Age int
 
 	// whether the user likes Go
-	LikesGo bool `desc:"whether the user likes Go"`
+	LikesGo bool
 
 	Build BuildConfig `cmd:"build"`
 
@@ -30,28 +30,28 @@ type Config struct {
 	Client Client
 
 	// the directory to build in
-	Dir string `desc:"the directory to build in"`
+	Dir string
 }
 
 type BuildConfig struct {
 
 	// the target platform to build for
-	Target string `flag:"target,build-target" posarg:"0" desc:"the target platform to build for"`
+	Target string `flag:"target,build-target" posarg:"0"`
 
 	// the platform to build the executable for
-	Platform string `posarg:"1" required:"-" desc:"the platform to build the executable for"`
+	Platform string `posarg:"1" required:"-"`
 }
 
 type Server struct {
 
 	// the server platform
-	Platform string `desc:"the server platform"`
+	Platform string
 }
 
 type Client struct {
 
 	// the client platform
-	Platform string `nest:"-" desc:"the client platform"`
+	Platform string `nest:"-"`
 }
 
 // Build builds the app for the config platform and target. It builds apps
