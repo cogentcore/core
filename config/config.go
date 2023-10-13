@@ -31,7 +31,7 @@ type Config struct {
 	// the description of the project
 	Desc string
 
-	// [def: v0.0.0]
+	// the version of the project
 	Version string `cmd:"set-version" posarg:"0" def:"v0.0.0"`
 
 	// TODO: add def TypeApp for type once fix SetString
@@ -39,26 +39,26 @@ type Config struct {
 	// the type of the project (app/library)
 	Type Types
 
-	// [view: add-fields]
+	// the configuration options for the build, install, and run commands
 	Build Build `cmd:"build,install,run" view:"add-fields"`
 
-	// [view: add-fields]
+	// the configuration options for the setup command
 	Setup Setup `cmd:"setup" view:"add-fields"`
 
-	// [view: add-fields]
+	// the configuration options for the log command
 	Log Log `cmd:"log" view:"add-fields"`
 
-	// [view: add-fields]
+	// the configuration options for the release command
 	Release Release `cmd:"release" view:"add-fields"`
 
-	// [view: add-fields]
+	// the configuration options for the generate command
 	Generate Generate `cmd:"generate" view:"add-fields"`
 }
 
 //gti:add
 type Build struct {
 
-	// [def: .]
+	// the path of the package to build
 	Package string `def:"." posarg:"0" required:"-"`
 
 	// the target platforms to build executables for
@@ -100,13 +100,13 @@ type Build struct {
 	// print the name of the temporary work directory and do not delete it when exiting
 	Work bool
 
-	// [def: 13.0]
+	// the minimal version of the iOS SDK to compile against
 	IOSVersion string `def:"13.0"`
 
-	// [def: 23] [min: 23]
+	// the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)
 	AndroidMinSDK int `def:"23" min:"23"`
 
-	// [def: 29]
+	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
 	AndroidTargetSDK int `def:"29"`
 }
 
@@ -120,22 +120,23 @@ type Setup struct {
 //gti:add
 type Log struct {
 
-	// [def: android]
+	// the target platform to view the logs for (ios or android)
 	Target string `def:"android"`
 
-	// [def: false]
+	// whether to keep the previous log messages or clear them
 	Keep bool `def:"false"`
 
-	// [def: F]
+	// messages not generated from your app equal to or above this log level will be shown
 	All string `def:"F"`
 }
 
+//gti:add
 type Release struct {
 
-	// [def: version.go]
+	// the Go file to store version information in
 	VersionFile string `def:"version.go"`
 
-	// [def: main]
+	// the Go package in which the version file will be stored
 	Package string `def:"main"`
 }
 
@@ -148,13 +149,13 @@ type Generate struct {
 	// the generation configuration options passed to gtigen
 	Gtigen gtigen.Config
 
-	// [def: .]
+	// the source directory to run generate on (can be multiple through ./...)
 	Dir string `def:"." posarg:"0" required:"-" nest:"-"`
 
-	// [def: gokigen.go]
+	// the output file location relative to the package on which generate is being called
 	Output string `def:"gokigen.go"`
 
-	// [def: true]
+	// whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)
 	AddKiTypes bool `def:"true"`
 }
 
