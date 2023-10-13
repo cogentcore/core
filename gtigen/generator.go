@@ -219,7 +219,6 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 					emblist.List = append(emblist.List, field)
 					st.Fields.List = slices.Delete(st.Fields.List, i+delOff, i+1+delOff) // we need to add delOff to correctly handle situations where we delete multiple times and our indices become inaccurate
 					delOff--                                                             // we have deleted so we need to update offset
-					field.Names = append(field.Names, ast.NewIdent(types.ExprString(field.Type)))
 				}
 			}
 
@@ -327,14 +326,13 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		} else {
 			// if we have no name, fall back on type name
 			name = tn
+			// we must get rid of any package name, as field
+			// names never have package names
+			li := strings.LastIndex(name, ".")
+			if li >= 0 {
+				name = name[li+1:] // need to get rid of .
+			}
 		}
-		// we must get rid of any package name, as field
-		// names never have package names
-		li := strings.LastIndex(name, ".")
-		if li >= 0 {
-			name = name[li+1:] // need to get rid of .
-		}
-
 		dirs := gti.Directives{}
 		if field.Doc != nil {
 			lcfg := &Config{}
