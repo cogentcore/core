@@ -4,6 +4,8 @@
 
 package grease
 
+//go:generate gtigen
+
 import (
 	"errors"
 	"fmt"
@@ -31,28 +33,28 @@ var ConfigFiles []string
 // In almost all circumstances, it should only be used internally
 // and not by end-user code.
 type MetaConfig struct {
-	// Config is the file name of the config file to load
+	// the file name of the config file to load
 	Config string `flag:"cfg,config"`
 
-	// Help is whether to display a help message
+	// whether to display a help message
 	Help bool `flag:"h,help"`
 
-	// HelpCmd is the name of the command to display
+	// the name of the command to display
 	// help information for. It is only applicable to the
 	// help command, but it is enabled for all commands so
 	// that it can consume all positional arguments to prevent
 	// errors about unused arguments.
 	HelpCmd string `posarg:"all"`
 
-	// Verbose is whether to run the command in verbose mode
+	// whether to run the command in verbose mode
 	// and print more information
 	Verbose bool `flag:"v,verbose"`
 
-	// Verbose is whether to run the command in very verbose mode
+	// whether to run the command in very verbose mode
 	// and print as much information as possible
 	VeryVerbose bool `flag:"vv,very-verbose"`
 
-	// Quiet is whether to run the command in quiet mode
+	// whether to run the command in quiet mode
 	// and print less information
 	Quiet bool `flag:"q,quiet"`
 }
@@ -64,13 +66,31 @@ type MetaConfig struct {
 // causes problems with the HelpCmd field capturing
 // everything, so it easier to just add through a separate struct.
 // TODO: maybe improve the structure of this
+// TODO: can we get HelpCmd to display correctly in usage?
+//
+//gti:add
 type metaConfigFields struct {
-	Help        bool   `flag:"h,help"`
-	HelpCmd     string `cmd:"help" posarg:"all"` // TODO: can we get this to display correctly in usage?
-	Config      string `flag:"cfg,config"`
-	Verbose     bool   `flag:"v,verbose"`
-	VeryVerbose bool   `flag:"vv,very-verbose"`
-	Quiet       bool   `flag:"q,quiet"`
+	// the file name of the config file to load
+	Config string `flag:"cfg,config"`
+
+	// whether to display a help message
+	Help bool `flag:"h,help"`
+
+	// the name of the command to display
+	// help information for.
+	HelpCmd string `cmd:"help" posarg:"all"`
+
+	// whether to run the command in verbose mode
+	// and print more information
+	Verbose bool `flag:"v,verbose"`
+
+	// whether to run the command in very verbose mode
+	// and print as much information as possible
+	VeryVerbose bool `flag:"vv,very-verbose"`
+
+	// whether to run the command in quiet mode
+	// and print less information
+	Quiet bool `flag:"q,quiet"`
 }
 
 // AddMetaConfigFields adds meta fields that control the config process
