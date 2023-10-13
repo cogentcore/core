@@ -910,9 +910,7 @@ func (vv *ValueBase) Desc() (string, bool) {
 // extractField recursively attempts to extract the [gti.Field]
 // with the given name from the given struct [reflect.Value].
 func extractField(v reflect.Value, field string) *gti.Field {
-	fmt.Println("looking for", v)
 	typ := gti.TypeByName(gti.TypeName(v.Type()))
-	fmt.Println(field, typ, v.Type(), gti.TypeName(v.Type()))
 	// if we are not in the gti registry, there is nothing that we can do
 	if typ == nil {
 		return nil
