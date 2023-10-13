@@ -65,6 +65,11 @@ func (pb *ProgressBar) ProgressBarStyles() {
 
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
 
+		s.Color = colors.Scheme.OnSurface
+
+		pb.StyleBox.Defaults()
+		pb.StyleBox.Border.Style.Set(styles.BorderNone)
+
 		s.Padding.Set()
 
 		if pb.Dim == mat32.X {
