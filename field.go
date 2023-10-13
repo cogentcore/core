@@ -26,6 +26,8 @@ type Field struct {
 	Field reflect.StructField
 	// Value is the reflect value of the settable pointer to this field
 	Value reflect.Value
+	// Struct is the parent struct that contains this field
+	Struct reflect.Value
 	// Name is the fully qualified, nested name of this field (eg: A.B.C).
 	// It is as it appears in code, and is NOT transformed something like kebab-case.
 	Name string
@@ -125,10 +127,11 @@ func AddFieldsImpl(obj any, path string, cmdPath string, allFields *Fields, used
 		}
 
 		nf := &Field{
-			Field: f,
-			Value: pval,
-			Name:  name,
-			Names: names,
+			Field:  f,
+			Value:  pval,
+			Struct: ov,
+			Name:   name,
+			Names:  names,
 		}
 		for i, name := range names {
 			name := strcase.ToCamel(name)        // everybody is in camel for naming conflict check

@@ -14,6 +14,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/grog"
+	"goki.dev/gti"
 )
 
 // Indent is the value used for indentation in [Usage].
@@ -186,9 +187,9 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		}
 		b.WriteString(" " + grog.SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
-		desc, hast := f.Field.Tag.Lookup("desc")
-		if hast && desc != "" {
-			b.WriteString(Indent + Indent + strings.ReplaceAll(desc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
+		field := gti.GetField(f.Struct, f.Field.Name)
+		if field != nil {
+			b.WriteString(Indent + Indent + strings.ReplaceAll(field.Doc, "\n", "\n"+Indent+Indent)) // need to put two indents on every newline for formatting
 			def, ok := f.Field.Tag.Lookup("def")
 			if ok && def != "" {
 				b.WriteString(fmt.Sprintf(" (default: %s)", def))
