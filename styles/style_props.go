@@ -410,6 +410,41 @@ var StyleFontFuncs = map[string]StyleFunc{
 	},
 }
 
+// StyleFontRenderFuncs are _extra_ functions for styling
+// the FontRender object in addition to base Font
+var StyleFontRenderFuncs = map[string]StyleFunc{
+	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		fs := obj.(*FontRender)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.Color = par.(*FontRender).Color
+			} else if init {
+				fs.Color = colors.Black
+			}
+			return
+		}
+		base := colors.Black
+		if ctxt != nil {
+			base = ctxt.Base()
+		}
+		fs.Color = grr.Log(colors.FromAny(val, base))
+	},
+	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
+		fs := obj.(*FontRender)
+		if inh, init := StyleInhInit(val, par); inh || init {
+			if inh {
+				fs.BackgroundColor = par.(*FontRender).BackgroundColor
+			} else if init {
+				fs.BackgroundColor = colors.Full{}
+			}
+			return
+		}
+		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
+	},
+	"opacity": StyleFuncFloat(float32(1),
+		func(obj *FontRender) *float32 { return &obj.Opacity }),
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 //  Text
 

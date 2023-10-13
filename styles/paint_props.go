@@ -215,31 +215,3 @@ func ParseDashesString(str string) []float64 {
 	}
 	return dl
 }
-
-// StyleFontRenderFuncs are functions for styling the FontStyle fields beyond Font
-var StyleFontRenderFuncs = map[string]StyleFunc{
-	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.Color = par.(*FontRender).Color
-			} else if init {
-				fs.Color = colors.Black
-			}
-			return
-		}
-		fs.Color = grr.Log(colors.FromAny(val, ctxt.Base()))
-	},
-	"background-color": func(obj any, key string, val any, par any, ctxt colors.Context) {
-		fs := obj.(*FontRender)
-		if inh, init := StyleInhInit(val, par); inh || init {
-			if inh {
-				fs.BackgroundColor = par.(*FontRender).BackgroundColor
-			} else if init {
-				fs.BackgroundColor = colors.Full{}
-			}
-			return
-		}
-		grr.Log0(fs.BackgroundColor.SetAny(val, ctxt))
-	},
-}

@@ -463,3 +463,30 @@ func (fr *FontRender) InheritFields(par *FontRender) {
 	fr.Opacity = par.Opacity
 	fr.Font.InheritFields(&par.Font)
 }
+
+// SetStyleProps sets font style values based on given property map (name:
+// value pairs), inheriting elements as appropriate from parent, and also
+// having a default style for the "initial" setting.
+func (fr *FontRender) SetStyleProps(parent *FontRender, props map[string]any, ctxt colors.Context) {
+	var pfont *Font
+	if parent != nil {
+		pfont = &parent.Font
+	}
+	fr.Font.StyleFromProps(pfont, props, ctxt)
+	fr.StyleRenderFromProps(parent, props, ctxt)
+	fr.SetStylePost(props)
+}
+
+func (fs *FontRender) StyleRenderFromProps(par *FontRender, props map[string]any, ctxt colors.Context) {
+	for key, val := range props {
+		if len(key) == 0 {
+			continue
+		}
+		if key[0] == '#' || key[0] == '.' || key[0] == ':' || key[0] == '_' {
+			continue
+		}
+		if sfunc, ok := StyleFontRenderFuncs[key]; ok {
+			sfunc(fs, key, val, par, ctxt)
+		}
+	}
+}

@@ -15,6 +15,7 @@ import (
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 	"goki.dev/laser"
 )
 
@@ -348,6 +349,10 @@ func SubProps(prp map[string]any, selector string) (map[string]any, bool) {
 	spm, ok := sp.(map[string]any)
 	if ok {
 		return spm, true
+	}
+	kpm, ok := sp.(ki.Props)
+	if ok {
+		return kpm, true
 	}
 	return nil, false
 }

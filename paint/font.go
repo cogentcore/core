@@ -15,6 +15,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/ki/v2"
 	"golang.org/x/image/font/opentype"
 )
 
@@ -104,10 +105,16 @@ func FontStyleCSS(fs *styles.FontRender, tag string, cssAgg map[string]any, unit
 		return false
 	}
 	pmap, ok := tp.(map[string]any) // must be a props map
-	if !ok {
-		return false
+	if ok {
+		fs.SetStyleProps(nil, pmap, ctxt)
+		OpenFont(fs, unit)
+		return true
 	}
-	fs.SetStyleProps(nil, pmap, ctxt)
-	OpenFont(fs, unit)
-	return true
+	kmap, ok := tp.(ki.Props) // must be a props map
+	if ok {
+		fs.SetStyleProps(nil, kmap, ctxt)
+		OpenFont(fs, unit)
+		return true
+	}
+	return false
 }
