@@ -8972,5 +8972,4 @@ const (
 
 	// ZoomOutMap is https://github.com/goki/icons/blob/main/svg/zoom_out_map.svg
 	ZoomOutMap Icon = "zoom_out_map"
-
 )
