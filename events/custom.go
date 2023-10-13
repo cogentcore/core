@@ -15,7 +15,7 @@ type CustomEvent struct {
 	Base
 
 	// set to true if position is available
-	PosAvail bool `desc:"set to true if position is available"`
+	PosAvail bool
 }
 
 func (ce CustomEvent) String() string {
