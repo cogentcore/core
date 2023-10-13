@@ -34,37 +34,37 @@ var content embed.FS
 type Anim struct {
 
 	// run the animation
-	On bool `desc:"run the animation"`
+	On bool
 
-	// [min: 0.01] [step: 0.01] angular speed (in radians)
-	Speed float32 `min:"0.01" step:"0.01" desc:"angular speed (in radians)"`
+	// angular speed (in radians)
+	Speed float32 `min:"0.01" step:"0.01"`
 
 	// animate the torus
-	DoTorus bool `desc:"animate the torus"`
+	DoTorus bool
 
 	// animate the gopher
-	DoGopher bool `desc:"animate the gopher"`
+	DoGopher bool
 
 	// current angle
-	Ang float32 `inactive:"+" desc:"current angle"`
+	Ang float32 `inactive:"+"`
 
-	// [view: -] the time.Ticker for animating the scene
-	Ticker *time.Ticker `view:"-" desc:"the time.Ticker for animating the scene"`
+	// the time.Ticker for animating the scene
+	Ticker *time.Ticker `view:"-"`
 
 	// the scene
-	Scene *gi3d.Scene `desc:"the scene"`
+	Scene *gi3d.Scene
 
 	// the torus
-	Torus *gi3d.Solid `desc:"the torus"`
+	Torus *gi3d.Solid
 
 	// the gopher
-	Gopher *gi3d.Group `desc:"the gopher"`
+	Gopher *gi3d.Group
 
 	// original position
-	TorusPosOrig mat32.Vec3 `desc:"original position"`
+	TorusPosOrig mat32.Vec3
 
 	// original position
-	GopherPosOrig mat32.Vec3 `desc:"original position"`
+	GopherPosOrig mat32.Vec3
 }
 
 // Start starts the animation ticker timer -- if on is true, then

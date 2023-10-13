@@ -70,28 +70,28 @@ type Mesh interface {
 type MeshBase struct {
 
 	// name of mesh -- meshes are linked to Solids by name so this matters
-	Nm string `desc:"name of mesh -- meshes are linked to Solids by name so this matters"`
+	Nm string
 
 	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
-	NVtx int `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called"`
+	NVtx int
 
 	// number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called
-	NIdx int `desc:"number of indexes, as mat32.ArrayU32 -- only valid after Sizes() has been called"`
+	NIdx int
 
 	// has per-vertex colors, as mat32.Vec4 per vertex
-	Color bool `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
+	Color bool
 
 	// if true, this mesh changes frequently -- otherwise considered to be static
-	Dynamic bool `desc:"if true, this mesh changes frequently -- otherwise considered to be static"`
+	Dynamic bool
 
 	// set to true if color has transparency -- not worth checking manually
-	Trans bool `desc:"set to true if color has transparency -- not worth checking manually"`
+	Trans bool
 
 	// computed bounding-box and other gross solid properties
-	BBox BBox `desc:"computed bounding-box and other gross solid properties"`
+	BBox BBox
 
-	// [view: -] mutex on bbox access
-	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on bbox access"`
+	// mutex on bbox access
+	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"`
 }
 
 var TypeMeshBase = kit.Types.AddType(&MeshBase{}, nil)

@@ -44,13 +44,13 @@ var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 type SelParams struct {
 
 	// name of color to use for selection box (default yellow)
-	Color gi.ColorName `desc:"name of color to use for selection box (default yellow)"`
+	Color gi.ColorName
 
 	// width of the box lines (.01 default)
-	Width float32 `desc:"width of the box lines (.01 default)"`
+	Width float32
 
 	// radius of the manipulation control point spheres
-	Radius float32 `desc:"radius of the manipulation control point spheres"`
+	Radius float32
 }
 
 func (sp *SelParams) Defaults() {

@@ -16,31 +16,31 @@ import (
 type Pose struct {
 
 	// position of center of element (relative to parent)
-	Pos mat32.Vec3 `desc:"position of center of element (relative to parent)"`
+	Pos mat32.Vec3
 
 	// scale (relative to parent)
-	Scale mat32.Vec3 `desc:"scale (relative to parent)"`
+	Scale mat32.Vec3
 
 	// Node rotation specified as a Quat (relative to parent)
-	Quat mat32.Quat `desc:"Node rotation specified as a Quat (relative to parent)"`
+	Quat mat32.Quat
 
-	// [view: -] Local matrix. Contains all position/rotation/scale information (relative to parent)
-	Matrix mat32.Mat4 `view:"-" desc:"Local matrix. Contains all position/rotation/scale information (relative to parent)"`
+	// Local matrix. Contains all position/rotation/scale information (relative to parent)
+	Matrix mat32.Mat4 `view:"-"`
 
-	// [view: -] Parent's world matrix -- we cache this so that we can independently update our own matrix
-	ParMatrix mat32.Mat4 `view:"-" desc:"Parent's world matrix -- we cache this so that we can independently update our own matrix"`
+	// Parent's world matrix -- we cache this so that we can independently update our own matrix
+	ParMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
-	WorldMatrix mat32.Mat4 `view:"-" desc:"World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)"`
+	// World matrix. Contains all absolute position/rotation/scale information (i.e. relative to very top parent, generally the scene)
+	WorldMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] model * view matrix -- tranforms into camera-centered coords
-	MVMatrix mat32.Mat4 `view:"-" desc:"model * view matrix -- tranforms into camera-centered coords"`
+	// model * view matrix -- tranforms into camera-centered coords
+	MVMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] model * view * projection matrix -- full final render matrix
-	MVPMatrix mat32.Mat4 `view:"-" desc:"model * view * projection matrix -- full final render matrix"`
+	// model * view * projection matrix -- full final render matrix
+	MVPMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
-	NormMatrix mat32.Mat3 `view:"-" desc:"normal matrix has no offsets, for normal vector rotation only, based on MVMatrix"`
+	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
+	NormMatrix mat32.Mat3 `view:"-"`
 }
 
 var TypePose = kit.Types.AddType(&Pose{}, PoseProps)

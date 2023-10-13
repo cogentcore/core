@@ -12,16 +12,16 @@ import (
 type BBox struct {
 
 	// bounding box in local coords
-	BBox mat32.Box3 `desc:"bounding box in local coords"`
+	BBox mat32.Box3
 
 	// bounding sphere in local coords
-	BSphere mat32.Sphere `desc:"bounding sphere in local coords"`
+	BSphere mat32.Sphere
 
 	// area
-	Area float32 `desc:"area"`
+	Area float32
 
 	// volume
-	Volume float32 `desc:"volume"`
+	Volume float32
 }
 
 // SetBounds sets BBox from min, max and updates other factors based on that

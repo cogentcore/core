@@ -37,19 +37,19 @@ type Text2D struct {
 	Solid
 
 	// the text string to display
-	Text string `desc:"the text string to display"`
+	Text string
 
 	// styling settings for the text
-	Sty gist.Style `json:"-" xml:"-" desc:"styling settings for the text"`
+	Sty gist.Style `json:"-" xml:"-"`
 
 	// position offset of start of text rendering relative to upper-left corner
-	TxtPos mat32.Vec2 `xml:"-" json:"-" desc:"position offset of start of text rendering relative to upper-left corner"`
+	TxtPos mat32.Vec2 `xml:"-" json:"-"`
 
-	// [view: -] render data for text label
-	TxtRender girl.Text `view:"-" xml:"-" json:"-" desc:"render data for text label"`
+	// render data for text label
+	TxtRender girl.Text `view:"-" xml:"-" json:"-"`
 
-	// [view: -] render state for rendering text
-	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering text"`
+	// render state for rendering text
+	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 var TypeText2D = kit.Types.AddType(&Text2D{}, Text2DProps)

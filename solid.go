@@ -22,13 +22,13 @@ type Solid struct {
 	Node3DBase
 
 	// name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene
-	Mesh MeshName `desc:"name of the mesh shape information used for rendering this solid -- all meshes are collected on the Scene"`
+	Mesh MeshName
 
-	// [view: add-fields] material properties of the surface (color, shininess, texture, etc)
-	Mat Material `view:"add-fields" desc:"material properties of the surface (color, shininess, texture, etc)"`
+	// material properties of the surface (color, shininess, texture, etc)
+	Mat Material `view:"add-fields"`
 
-	// [view: -] cached pointer to mesh
-	MeshPtr Mesh `view:"-" desc:"cached pointer to mesh"`
+	// cached pointer to mesh
+	MeshPtr Mesh `view:"-"`
 }
 
 var TypeSolid = kit.Types.AddType(&Solid{}, SolidProps)

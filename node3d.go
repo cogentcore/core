@@ -128,19 +128,19 @@ type Node3DBase struct {
 	gi.NodeBase
 
 	// complete specification of position and orientation
-	Pose Pose `desc:"complete specification of position and orientation"`
+	Pose Pose
 
-	// [view: -] mutex on pose access -- needed for parallel updating
-	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on pose access -- needed for parallel updating"`
+	// mutex on pose access -- needed for parallel updating
+	PoseMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"`
 
 	// mesh-based local bounding box (aggregated for groups)
-	MeshBBox BBox `desc:"mesh-based local bounding box (aggregated for groups)"`
+	MeshBBox BBox
 
 	// world coordinates bounding box
-	WorldBBox BBox `desc:"world coordinates bounding box"`
+	WorldBBox BBox
 
 	// normalized display coordinates bounding box, used for frustrum clipping
-	NDCBBox mat32.Box3 `desc:"normalized display coordinates bounding box, used for frustrum clipping"`
+	NDCBBox mat32.Box3
 }
 
 var TypeNode3DBase = kit.Types.AddType(&Node3DBase{}, Node3DBaseProps)

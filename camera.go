@@ -18,46 +18,46 @@ import (
 type Camera struct {
 
 	// overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction
-	Pose Pose `desc:"overall orientation and direction of the camera, relative to pointing at negative Z axis with up (positive Y) direction"`
+	Pose Pose
 
 	// mutex protecting camera data
-	CamMu sync.RWMutex `desc:"mutex protecting camera data"`
+	CamMu sync.RWMutex
 
 	// target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method
-	Target mat32.Vec3 `desc:"target location for the camera -- where it is pointing at -- defaults to the origin, but moves with panning movements, and is reset by a call to LookAt method"`
+	Target mat32.Vec3
 
 	// up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method
-	UpDir mat32.Vec3 `desc:"up direction for camera -- which way is up -- defaults to positive Y axis, and is reset by call to LookAt method"`
+	UpDir mat32.Vec3
 
 	// default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far).
-	Ortho bool `desc:"default is a Perspective camera -- set this to make it Orthographic instead, in which case the view includes the volume specified by the Near - Far distance (i.e., you probably want to decrease Far)."`
+	Ortho bool
 
 	// field of view in degrees
-	FOV float32 `desc:"field of view in degrees "`
+	FOV float32
 
 	// aspect ratio (width/height)
-	Aspect float32 `desc:"aspect ratio (width/height)"`
+	Aspect float32
 
 	// near plane z coordinate
-	Near float32 `desc:"near plane z coordinate"`
+	Near float32
 
 	// far plane z coordinate
-	Far float32 `desc:"far plane z coordinate"`
+	Far float32
 
-	// [view: -] view matrix (inverse of the Pose.Matrix)
-	ViewMatrix mat32.Mat4 `view:"-" desc:"view matrix (inverse of the Pose.Matrix)"`
+	// view matrix (inverse of the Pose.Matrix)
+	ViewMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] projection matrix, defining the camera perspective / ortho transform
-	PrjnMatrix mat32.Mat4 `view:"-" desc:"projection matrix, defining the camera perspective / ortho transform"`
+	// projection matrix, defining the camera perspective / ortho transform
+	PrjnMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
-	VkPrjnMatrix mat32.Mat4 `view:"-" desc:"vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math"`
+	// vulkan projection matrix -- required for vgpu -- produces same effect as PrjnMatrix, which should be used for all other math
+	VkPrjnMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] inverse of the projection matrix
-	InvPrjnMatrix mat32.Mat4 `view:"-" desc:"inverse of the projection matrix"`
+	// inverse of the projection matrix
+	InvPrjnMatrix mat32.Mat4 `view:"-"`
 
-	// [view: -] frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
-	Frustum *mat32.Frustum `view:"-" desc:"frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape"`
+	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
+	Frustum *mat32.Frustum `view:"-"`
 }
 
 var TypeCamera = kit.Types.AddType(&Camera{}, CameraProps)

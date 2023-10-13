@@ -30,16 +30,16 @@ type Lines struct {
 	MeshBase
 
 	// line points (must be 2 or more)
-	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
+	Points []mat32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width mat32.Vec2 `desc:"line width, Y = height perpendicular to line direction, and X = depth"`
+	Width mat32.Vec2
 
 	// optional colors for each point -- actual color interpolates between
-	Colors []color.RGBA `desc:"optional colors for each point -- actual color interpolates between"`
+	Colors []color.RGBA
 
 	// if true, connect the first and last points to form a closed shape
-	Closed bool `desc:"if true, connect the first and last points to form a closed shape"`
+	Closed bool
 }
 
 var TypeLines = kit.Types.AddType(&Lines{}, nil)

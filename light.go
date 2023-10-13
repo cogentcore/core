@@ -28,16 +28,16 @@ type Light interface {
 type LightBase struct {
 
 	// name of light -- lights accessed by name so it matters
-	Nm string `desc:"name of light -- lights accessed by name so it matters"`
+	Nm string
 
 	// whether light is on or off
-	On bool `desc:"whether light is on or off"`
+	On bool
 
-	// [min: 0] [step: 0.1] brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
-	Lumns float32 `min:"0" step:"0.1" desc:"brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness"`
+	// brightness / intensity / strength of the light, in normalized 0-1 units -- just multiplies the color, and is convenient for easily modulating overall brightness
+	Lumns float32 `min:"0" step:"0.1"`
 
 	// color of light a full intensity
-	Clr color.RGBA `desc:"color of light a full intensity"`
+	Clr color.RGBA
 }
 
 var TypeLightBase = kit.Types.AddType(&LightBase{}, nil)
@@ -84,7 +84,7 @@ type DirLight struct {
 	LightBase
 
 	// position of direct light -- assumed to point at the origin so this determines direction
-	Pos mat32.Vec3 `desc:"position of direct light -- assumed to point at the origin so this determines direction"`
+	Pos mat32.Vec3
 }
 
 var TypeDirLight = kit.Types.AddType(&DirLight{}, nil)
@@ -115,13 +115,13 @@ type PointLight struct {
 	LightBase
 
 	// position of light in world coordinates
-	Pos mat32.Vec3 `desc:"position of light in world coordinates"`
+	Pos mat32.Vec3
 
 	// Distance linear decay factor -- defaults to .1
-	LinDecay float32 `desc:"Distance linear decay factor -- defaults to .1"`
+	LinDecay float32
 
 	// Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances
-	QuadDecay float32 `desc:"Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
+	QuadDecay float32
 }
 
 var TypePointLight = kit.Types.AddType(&PointLight{}, nil)
@@ -154,16 +154,16 @@ type SpotLight struct {
 	Pose Pose // position and orientation
 
 	// Angular decay factor -- defaults to 15
-	AngDecay float32 `desc:"Angular decay factor -- defaults to 15"`
+	AngDecay float32
 
-	// [min: 1] [max: 90] Cut off angle (in degrees) -- defaults to 45 -- max of 90
-	CutoffAngle float32 `max:"90" min:"1" desc:"Cut off angle (in degrees) -- defaults to 45 -- max of 90"`
+	// Cut off angle (in degrees) -- defaults to 45 -- max of 90
+	CutoffAngle float32 `max:"90" min:"1"`
 
 	// Distance linear decay factor -- defaults to .01
-	LinDecay float32 `desc:"Distance linear decay factor -- defaults to .01"`
+	LinDecay float32
 
 	// Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances
-	QuadDecay float32 `desc:"Distance quadratic decay factor -- defaults to .001 -- dominates at longer distances"`
+	QuadDecay float32
 }
 
 var TypeSpotLight = kit.Types.AddType(&SpotLight{}, nil)

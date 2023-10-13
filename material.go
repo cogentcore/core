@@ -16,10 +16,10 @@ import (
 type Tiling struct {
 
 	// how often to repeat the texture in each direction
-	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
+	Repeat mat32.Vec2
 
 	// offset for when to start the texure in each direction
-	Off mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
+	Off mat32.Vec2
 }
 
 // Defaults sets default tiling params if not yet initialized
@@ -38,34 +38,34 @@ func (tl *Tiling) Defaults() {
 type Material struct {
 
 	// prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering
-	Color color.RGBA `xml:"color" desc:"prop: color = main color of surface, used for both ambient and diffuse color in standard Phong model -- alpha component determines transparency -- note that transparent objects require more complex rendering"`
+	Color color.RGBA `xml:"color"`
 
 	// prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object
-	Emissive color.RGBA `xml:"emissive" desc:"prop: emissive = color that surface emits independent of any lighting -- i.e., glow -- can be used for marking lights with an object"`
+	Emissive color.RGBA `xml:"emissive"`
 
 	// prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect.
-	Shiny float32 `xml:"shiny" desc:"prop: shiny = specular shininess factor -- how focally vs. broad the surface shines back directional light -- this is an exponential factor, with 0 = very broad diffuse reflection, and higher values (typically max of 128 or so but can go higher) having a smaller more focal specular reflection.  Also set Reflective factor to change overall shininess effect."`
+	Shiny float32 `xml:"shiny"`
 
 	// prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light.
-	Reflective float32 `xml:"reflective" desc:"prop: reflective = specular reflectiveness factor -- how much it shines back directional light.  The specular reflection color is always white * the incoming light."`
+	Reflective float32 `xml:"reflective"`
 
 	// prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters
-	Bright float32 `xml:"bright" desc:"prop: bright = overall multiplier on final computed color value -- can be used to tune the overall brightness of various surfaces relative to each other for a given set of lighting parameters"`
+	Bright float32 `xml:"bright"`
 
 	// prop: texture = texture to provide color for the surface
-	Texture TexName `xml:"texture" desc:"prop: texture = texture to provide color for the surface"`
+	Texture TexName `xml:"texture"`
 
-	// [view: inline] [viewif: Texture!=''] texture tiling parameters -- repeat and offset
-	Tiling Tiling `view:"inline" viewif:"Texture!=''" desc:"texture tiling parameters -- repeat and offset"`
+	// texture tiling parameters -- repeat and offset
+	Tiling Tiling `view:"inline" viewif:"Texture!=''"`
 
 	// prop: cull-back = cull the back-facing surfaces
-	CullBack bool `xml:"cull-back" desc:"prop: cull-back = cull the back-facing surfaces"`
+	CullBack bool `xml:"cull-back"`
 
 	// prop: cull-front = cull the front-facing surfaces
-	CullFront bool `xml:"cull-front" desc:"prop: cull-front = cull the front-facing surfaces"`
+	CullFront bool `xml:"cull-front"`
 
-	// [view: -] pointer to texture
-	TexPtr Texture `view:"-" desc:"pointer to texture"`
+	// pointer to texture
+	TexPtr Texture `view:"-"`
 }
 
 // Defaults sets default surface parameters

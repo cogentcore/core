@@ -48,13 +48,13 @@ type Texture interface {
 type TextureBase struct {
 
 	// name of the texture -- textures are connected to material by name
-	Nm string `desc:"name of the texture -- textures are connected to material by name"`
+	Nm string
 
 	// set to true if texture has transparency
-	Trans bool `desc:"set to true if texture has transparency"`
+	Trans bool
 
 	// cached image
-	Img *image.RGBA `desc:"cached image"`
+	Img *image.RGBA
 }
 
 var TypeTextureBase = kit.Types.AddType(&TextureBase{}, nil)
@@ -91,10 +91,10 @@ type TextureFile struct {
 	TextureBase
 
 	// filesystem for embedded etc
-	FSys fs.FS `desc:"filesystem for embedded etc"`
+	FSys fs.FS
 
 	// filename for the texture
-	File gi.FileName `desc:"filename for the texture"`
+	File gi.FileName
 }
 
 var TypeTextureFile = kit.Types.AddType(&TextureFile{}, nil)
