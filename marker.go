@@ -15,34 +15,34 @@ type Marker struct {
 	NodeBase
 
 	// reference position to align the vertex position with, specified in ViewBox coordinates
-	RefPos mat32.Vec2 `xml:"{refX,refY}" desc:"reference position to align the vertex position with, specified in ViewBox coordinates"`
+	RefPos mat32.Vec2 `xml:"{refX,refY}"`
 
 	// size of marker to render, in Units units
-	Size mat32.Vec2 `xml:"{markerWidth,markerHeight}" desc:"size of marker to render, in Units units"`
+	Size mat32.Vec2 `xml:"{markerWidth,markerHeight}"`
 
 	// units to use
-	Units MarkerUnits `xml:"markerUnits" desc:"units to use"`
+	Units MarkerUnits `xml:"markerUnits"`
 
 	// viewbox defines the internal coordinate system for the drawing elements within the marker
-	ViewBox ViewBox `desc:"viewbox defines the internal coordinate system for the drawing elements within the marker"`
+	ViewBox ViewBox
 
 	// orientation of the marker -- either 'auto' or an angle
-	Orient string `xml:"orient" desc:"orientation of the marker -- either 'auto' or an angle"`
+	Orient string `xml:"orient"`
 
 	// current vertex position
-	VertexPos mat32.Vec2 `desc:"current vertex position"`
+	VertexPos mat32.Vec2
 
 	// current vertex angle in radians
-	VertexAngle float32 `desc:"current vertex angle in radians"`
+	VertexAngle float32
 
 	// current stroke width
-	StrokeWidth float32 `desc:"current stroke width"`
+	StrokeWidth float32
 
 	// net transform computed from settings and current values -- applied prior to rendering
-	XForm mat32.Mat2 `desc:"net transform computed from settings and current values -- applied prior to rendering"`
+	XForm mat32.Mat2
 
 	// effective size for actual rendering
-	EffSize mat32.Vec2 `desc:"effective size for actual rendering"`
+	EffSize mat32.Vec2
 }
 
 func (g *Marker) SVGName() string { return "marker" }

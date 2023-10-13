@@ -14,10 +14,10 @@ type Ellipse struct {
 	NodeBase
 
 	// position of the center of the ellipse
-	Pos mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the ellipse"`
+	Pos mat32.Vec2 `xml:"{cx,cy}"`
 
 	// radii of the ellipse in the horizontal, vertical axes
-	Radii mat32.Vec2 `xml:"{rx,ry}" desc:"radii of the ellipse in the horizontal, vertical axes"`
+	Radii mat32.Vec2 `xml:"{rx,ry}"`
 }
 
 // AddNewEllipse adds a new button to given parent node, with given name, pos and radii.

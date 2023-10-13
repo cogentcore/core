@@ -14,10 +14,10 @@ type Line struct {
 	NodeBase
 
 	// position of the start of the line
-	Start mat32.Vec2 `xml:"{x1,y1}" desc:"position of the start of the line"`
+	Start mat32.Vec2 `xml:"{x1,y1}"`
 
 	// position of the end of the line
-	End mat32.Vec2 `xml:"{x2,y2}" desc:"position of the end of the line"`
+	End mat32.Vec2 `xml:"{x2,y2}"`
 }
 
 // AddNewLine adds a new line to given parent node, with given name, st and end.

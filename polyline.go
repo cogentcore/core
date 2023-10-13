@@ -14,7 +14,7 @@ type Polyline struct {
 	NodeBase
 
 	// the coordinates to draw -- does a moveto on the first, then lineto for all the rest
-	Points []mat32.Vec2 `xml:"points" desc:"the coordinates to draw -- does a moveto on the first, then lineto for all the rest"`
+	Points []mat32.Vec2 `xml:"points"`
 }
 
 // AddNewPolyline adds a new polyline to given parent node, with given name and points.

@@ -83,22 +83,22 @@ type NodeBase struct {
 	ki.Node
 
 	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
-	Class string `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
+	Class string
 
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
+	CSS ki.Props `xml:"css"`
 
-	// [view: no-inline] aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
+	// aggregated css properties from all higher nodes down to me
+	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline"`
 
 	// bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion.
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"bounding box for the node within the SVG Pixels image -- this one can be outside the visible range of the SVG image -- VpBBox is intersected and only shows visible portion."`
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// visible bounding box for the node intersected with the SVG image geometry
-	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"visible bounding box for the node intersected with the SVG image geometry"`
+	VisBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// paint style information for this node
-	Paint paint.Paint `json:"-" xml:"-" desc:"paint style information for this node"`
+	Paint paint.Paint `json:"-" xml:"-"`
 }
 
 func (g *NodeBase) CopyFieldsFrom(frm any) {

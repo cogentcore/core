@@ -16,13 +16,13 @@ type Rect struct {
 	NodeBase
 
 	// position of the top-left of the rectangle
-	Pos mat32.Vec2 `xml:"{x,y}" desc:"position of the top-left of the rectangle"`
+	Pos mat32.Vec2 `xml:"{x,y}"`
 
 	// size of the rectangle
-	Size mat32.Vec2 `xml:"{width,height}" desc:"size of the rectangle"`
+	Size mat32.Vec2 `xml:"{width,height}"`
 
 	// radii for curved corners, as a proportion of width, height
-	Radius mat32.Vec2 `xml:"{rx,ry}" desc:"radii for curved corners, as a proportion of width, height"`
+	Radius mat32.Vec2 `xml:"{rx,ry}"`
 }
 
 // AddNewRect adds a new rectangle to given parent node, with given name, pos, and size.

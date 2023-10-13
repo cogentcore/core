@@ -14,10 +14,10 @@ type Circle struct {
 	NodeBase
 
 	// position of the center of the circle
-	Pos mat32.Vec2 `xml:"{cx,cy}" desc:"position of the center of the circle"`
+	Pos mat32.Vec2 `xml:"{cx,cy}"`
 
 	// radius of the circle
-	Radius float32 `xml:"r" desc:"radius of the circle"`
+	Radius float32 `xml:"r"`
 }
 
 // AddNewCircle adds a new button to given parent node, with given name, x,y pos, and radius.

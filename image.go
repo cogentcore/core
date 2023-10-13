@@ -21,19 +21,19 @@ type Image struct {
 	NodeBase
 
 	// position of the top-left of the image
-	Pos mat32.Vec2 `xml:"{x,y}" desc:"position of the top-left of the image"`
+	Pos mat32.Vec2 `xml:"{x,y}"`
 
 	// rendered size of the image (imposes a scaling on image when it is rendered)
-	Size mat32.Vec2 `xml:"{width,height}" desc:"rendered size of the image (imposes a scaling on image when it is rendered)"`
+	Size mat32.Vec2 `xml:"{width,height}"`
 
 	// directs resize operations to preserve aspect ratio
-	PreserveAspectRatio bool `xml:"preserveAspectRatio" desc:"directs resize operations to preserve aspect ratio"`
+	PreserveAspectRatio bool `xml:"preserveAspectRatio"`
 
 	// file name of image loaded -- set by OpenImage
-	Filename string `desc:"file name of image loaded -- set by OpenImage"`
+	Filename string
 
-	// [view: -] the image pixels
-	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-" desc:"the image pixels"`
+	// the image pixels
+	Pixels *image.RGBA `copy:"-" xml:"-" json:"-" view:"-"`
 }
 
 // AddNewImage adds a new image to given parent node, with given name and pos

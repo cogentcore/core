@@ -28,10 +28,10 @@ type SVG struct {
 	Name string
 
 	// the title of the svg
-	Title string `xml:"title" desc:"the title of the svg"`
+	Title string `xml:"title"`
 
 	// the description of the svg
-	Desc string `xml:"desc" desc:"the description of the svg"`
+	Desc string `xml:"desc"`
 
 	// fill the viewport with background-color
 	Fill bool
@@ -46,37 +46,37 @@ type SVG struct {
 	Geom mat32.Geom2DInt
 
 	// physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata
-	PhysWidth units.Value `desc:"physical width of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
+	PhysWidth units.Value
 
 	// physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata
-	PhysHeight units.Value `desc:"physical height of the drawing, e.g., when printed -- does not affect rendering -- metadata"`
+	PhysHeight units.Value
 
 	// prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size
-	Norm bool `desc:"prop: norm = install a transform that renormalizes so that the specified ViewBox exactly fits within the allocated SVG size"`
+	Norm bool
 
 	// prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default
-	InvertY bool `desc:"prop: invert-y = when doing Norm transform, also flip the Y axis so that the smallest Y value is at the bottom of the SVG box, instead of being at the top as it is by default"`
+	InvertY bool
 
-	// [view: -] render state for rendering
-	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	// render state for rendering
+	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] live pixels that we render into
-	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
+	// live pixels that we render into
+	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-"`
 
 	// all defs defined elements go here (gradients, symbols, etc)
-	Defs Group `desc:"all defs defined elements go here (gradients, symbols, etc)"`
+	Defs Group
 
 	// root of the svg tree -- top-level viewbox and paint style here
-	Root SVGNode `desc:"root of the svg tree -- top-level viewbox and paint style here"`
+	Root SVGNode
 
-	// [view: -] map of def names to index -- uses starting index to find element -- always updated after each search
-	DefIdxs map[string]int `view:"-" json:"-" xml:"-" desc:"map of def names to index -- uses starting index to find element -- always updated after each search"`
+	// map of def names to index -- uses starting index to find element -- always updated after each search
+	DefIdxs map[string]int `view:"-" json:"-" xml:"-"`
 
-	// [view: -] map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
-	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-" desc:"map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds"`
+	// map of unique numeric ids for all elements -- used for allocating new unique id numbers, appended to end of elements -- see NewUniqueId, GatherIds
+	UniqueIds map[int]struct{} `view:"-" json:"-" xml:"-"`
 
-	// [view: -] mutex for protecting rendering
-	RenderMu sync.Mutex `view:"-" json:"-" xml:"-" desc:"mutex for protecting rendering"`
+	// mutex for protecting rendering
+	RenderMu sync.Mutex `view:"-" json:"-" xml:"-"`
 }
 
 // NewSVG creates a SVG with Pixels Image of the specified width and height
@@ -316,7 +316,7 @@ type SVGNode struct {
 	Group
 
 	// viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering
-	ViewBox ViewBox `desc:"viewbox defines the coordinate system for the drawing -- these units are mapped into the screen space allocated for the SVG during rendering"`
+	ViewBox ViewBox
 }
 
 func (g *SVGNode) CopyFieldsFrom(frm any) {

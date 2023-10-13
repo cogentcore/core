@@ -22,10 +22,10 @@ type Gradient struct {
 	NodeBase
 
 	// the color gradient
-	Grad colors.Full `desc:"the color gradient"`
+	Grad colors.Full
 
 	// name of another gradient to get stops from
-	StopsName string `desc:"name of another gradient to get stops from"`
+	StopsName string
 }
 
 func (gr *Gradient) CopyFieldsFrom(frm any) {

@@ -20,43 +20,43 @@ type Text struct {
 	NodeBase
 
 	// position of the left, baseline of the text
-	Pos mat32.Vec2 `xml:"{x,y}" desc:"position of the left, baseline of the text"`
+	Pos mat32.Vec2 `xml:"{x,y}"`
 
 	// width of text to render if using word-wrapping
-	Width float32 `xml:"width" desc:"width of text to render if using word-wrapping"`
+	Width float32 `xml:"width"`
 
 	// text string to render
-	Text string `xml:"text" desc:"text string to render"`
+	Text string `xml:"text"`
 
 	// render version of text
-	TextRender paint.Text `xml:"-" json:"-" desc:"render version of text"`
+	TextRender paint.Text `xml:"-" json:"-"`
 
 	// character positions along X axis, if specified
-	CharPosX []float32 `desc:"character positions along X axis, if specified"`
+	CharPosX []float32
 
 	// character positions along Y axis, if specified
-	CharPosY []float32 `desc:"character positions along Y axis, if specified"`
+	CharPosY []float32
 
 	// character delta-positions along X axis, if specified
-	CharPosDX []float32 `desc:"character delta-positions along X axis, if specified"`
+	CharPosDX []float32
 
 	// character delta-positions along Y axis, if specified
-	CharPosDY []float32 `desc:"character delta-positions along Y axis, if specified"`
+	CharPosDY []float32
 
 	// character rotations, if specified
-	CharRots []float32 `desc:"character rotations, if specified"`
+	CharRots []float32
 
 	// author's computed text length, if specified -- we attempt to match
-	TextLength float32 `desc:"author's computed text length, if specified -- we attempt to match"`
+	TextLength float32
 
 	// in attempting to match TextLength, should we adjust glyphs in addition to spacing?
-	AdjustGlyphs bool `desc:"in attempting to match TextLength, should we adjust glyphs in addition to spacing?"`
+	AdjustGlyphs bool
 
 	// last text render position -- lower-left baseline of start
-	LastPos mat32.Vec2 `xml:"-" json:"-" desc:"last text render position -- lower-left baseline of start"`
+	LastPos mat32.Vec2 `xml:"-" json:"-"`
 
 	// last actual bounding box in display units (dots)
-	LastBBox mat32.Box2 `xml:"-" json:"-" desc:"last actual bounding box in display units (dots)"`
+	LastBBox mat32.Box2 `xml:"-" json:"-"`
 }
 
 // AddNewText adds a new text to given parent node, with given name, pos and text.
