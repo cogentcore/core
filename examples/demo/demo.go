@@ -212,12 +212,17 @@ func makeButtons(ts *gi.Tabs) {
 
 	ics := []icons.Icon{
 		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite, icons.PlayArrow,
-		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh, icons.Stop,
-		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort, icons.Details,
-		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith, icons.DateRange,
+		icons.Add, icons.Delete, icons.ArrowBack, icons.Info, icons.Refresh, icons.VideoCall,
+		icons.Menu, icons.Settings, icons.AccountCircle, icons.Download, icons.Sort, icons.DateRange,
+		icons.Undo, icons.OpenInFull, icons.IosShare, icons.LibraryAdd, icons.OpenWith,
 	}
 
 	for _, typ := range gi.ButtonTypesValues() {
+		// not really a real button, so not worth including in demo
+		if typ == gi.ButtonMenu {
+			continue
+		}
+
 		s := strings.TrimPrefix(typ.String(), "Button")
 		sl := strings.ToLower(s)
 		art := "A "
