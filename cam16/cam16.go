@@ -30,22 +30,22 @@ import (
 type CAM struct {
 
 	// hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)
-	Hue float32 `desc:"hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)"`
+	Hue float32
 
 	// chroma (C) is the colorfulness or saturation of the color -- greyscale colors have no chroma, and fully saturated ones have high chroma
-	Chroma float32 `desc:"chroma (C) is the colorfulness or saturation of the color -- greyscale colors have no chroma, and fully saturated ones have high chroma"`
+	Chroma float32
 
 	// colorfulness (M) is the absolute chromatic intensity
-	Colorfulness float32 `desc:"colorfulness (M) is the absolute chromatic intensity"`
+	Colorfulness float32
 
 	// saturation (s) is the colorfulness relative to brightness
-	Saturation float32 `desc:"saturation (s) is the colorfulness relative to brightness"`
+	Saturation float32
 
 	// brightness (Q) is the apparent amount of light from the color, which is not a simple function of actual light energy emitted
-	Brightness float32 `desc:"brightness (Q) is the apparent amount of light from the color, which is not a simple function of actual light energy emitted"`
+	Brightness float32
 
 	// lightness (J) is the brightness relative to a reference white, which varies as a function of chroma and hue
-	Lightness float32 `desc:"lightness (J) is the brightness relative to a reference white, which varies as a function of chroma and hue"`
+	Lightness float32
 }
 
 // UCS returns the CAM16-UCS components based on the the CAM values

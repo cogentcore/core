@@ -10,13 +10,13 @@ package lms
 type OpVals struct {
 
 	// red vs. green (long vs. medium)
-	RedGreen float32 `desc:"red vs. green (long vs. medium)"`
+	RedGreen float32
 
 	// blue vs. yellow (short vs. avg(long, medium))
-	BlueYellow float32 `desc:"blue vs. yellow (short vs. avg(long, medium))"`
+	BlueYellow float32
 
 	// greyscale luminance channel -- typically use L* from LAB as best
-	Grey float32 `desc:"greyscale luminance channel -- typically use L* from LAB as best"`
+	Grey float32
 }
 
 // NewOpVals returns a new opponent color values from values representing

@@ -32,17 +32,17 @@ import (
 // colors will appear as in different lighting environments.
 type HCT struct {
 
-	// [min: 0] [max: 360] hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)
-	Hue float32 `min:"0" max:"360" desc:"hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)"`
+	// hue (h) is the spectral identity of the color (red, green, blue etc) in degrees (0-360)
+	Hue float32 `min:"0" max:"360"`
 
-	// [min: 0] [max: 150] chroma (C) is the colorfulness or saturation of the color -- greyscale colors have no chroma, and fully saturated ones have high chroma.  The maximum varies as a function of hue and tone, but 150 is an upper bound.
-	Chroma float32 `min:"0" max:"150" desc:"chroma (C) is the colorfulness or saturation of the color -- greyscale colors have no chroma, and fully saturated ones have high chroma.  The maximum varies as a function of hue and tone, but 150 is an upper bound."`
+	// chroma (C) is the colorfulness or saturation of the color -- greyscale colors have no chroma, and fully saturated ones have high chroma.  The maximum varies as a function of hue and tone, but 150 is an upper bound.
+	Chroma float32 `min:"0" max:"150"`
 
-	// [min: 0] [max: 100] tone is the L* component from the LAB (L*a*b*) color system, which is linear in human perception of lightness
-	Tone float32 `min:"0" max:"100" desc:"tone is the L* component from the LAB (L*a*b*) color system, which is linear in human perception of lightness"`
+	// tone is the L* component from the LAB (L*a*b*) color system, which is linear in human perception of lightness
+	Tone float32 `min:"0" max:"100"`
 
 	// sRGB standard gamma-corrected 0-1 normalized RGB representation of the color.  Critically, components are not premultiplied by alpha
-	R, G, B, A float32 `desc:"sRGB standard gamma-corrected 0-1 normalized RGB representation of the color.  Critically, components are not premultiplied by alpha"`
+	R, G, B, A float32
 }
 
 // New returns a new HCT representation for given parameters:

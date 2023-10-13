@@ -30,55 +30,55 @@ import (
 type View struct {
 
 	// white point illumination -- typically cie.WhiteD65
-	WhitePoint mat32.Vec3 `desc:"white point illumination -- typically cie.WhiteD65"`
+	WhitePoint mat32.Vec3
 
-	// [def: 200] the ambient light strength in lux
-	Luminance float32 `def:"200" desc:"the ambient light strength in lux"`
+	// the ambient light strength in lux
+	Luminance float32 `def:"200"`
 
-	// [def: 50] the average luminance of 10 degrees around the color in question
-	BgLuminance float32 `def:"50" desc:"the average luminance of 10 degrees around the color in question"`
+	// the average luminance of 10 degrees around the color in question
+	BgLuminance float32 `def:"50"`
 
-	// [def: 2] the brightness of the entire environment
-	Surround float32 `def:"2" desc:"the brightness of the entire environment"`
+	// the brightness of the entire environment
+	Surround float32 `def:"2"`
 
-	// [def: false] whether the person's eyes have adapted to the lighting
-	Adapted bool `def:"false" desc:"whether the person's eyes have adapted to the lighting"`
+	// whether the person's eyes have adapted to the lighting
+	Adapted bool `def:"false"`
 
-	// [view: -] computed from Luminance
-	AdaptingLuminance float32 `view:"-" desc:"computed from Luminance"`
+	// computed from Luminance
+	AdaptingLuminance float32 `view:"-"`
 
-	// [view: -]
+	//
 	BgYToWhiteY float32 `view:"-"`
 
-	// [view: -]
+	//
 	AW float32 `view:"-"`
 
-	// [view: -] luminance level induction factor
-	NBB float32 `view:"-" desc:"luminance level induction factor"`
+	// luminance level induction factor
+	NBB float32 `view:"-"`
 
-	// [view: -] luminance level induction factor
-	NCB float32 `view:"-" desc:"luminance level induction factor"`
+	// luminance level induction factor
+	NCB float32 `view:"-"`
 
-	// [view: -] exponential nonlinearity
-	C float32 `view:"-" desc:"exponential nonlinearity"`
+	// exponential nonlinearity
+	C float32 `view:"-"`
 
-	// [view: -] chromatic induction factor
-	NC float32 `view:"-" desc:"chromatic induction factor"`
+	// chromatic induction factor
+	NC float32 `view:"-"`
 
-	// [view: -] luminance-level adaptation factor, based on the HuntLiLuo03 equations
-	FL float32 `view:"-" desc:"luminance-level adaptation factor, based on the HuntLiLuo03 equations"`
+	// luminance-level adaptation factor, based on the HuntLiLuo03 equations
+	FL float32 `view:"-"`
 
-	// [view: -] FL to the 1/4 power
-	FLRoot float32 `view:"-" desc:"FL to the 1/4 power"`
+	// FL to the 1/4 power
+	FLRoot float32 `view:"-"`
 
-	// [view: -]
-	Z float32 `view:"-" desc:"base exponential nonlinearity`
+	// base exponential nonlinearity
+	Z float32 `view:"-"`
 
-	// [view: -]
-	DRGBInverse mat32.Vec3 `view:"-" desc:"inverse of the RGBD factors`
+	// inverse of the RGBD factors
+	DRGBInverse mat32.Vec3 `view:"-"`
 
-	// [view: -] cone responses to white point, adjusted for discounting
-	RGBD mat32.Vec3 `view:"-" desc:"cone responses to white point, adjusted for discounting"`
+	// cone responses to white point, adjusted for discounting
+	RGBD mat32.Vec3 `view:"-"`
 }
 
 // NewView returns a new view with all parameters initialized based on given major params

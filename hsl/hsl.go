@@ -18,17 +18,17 @@ import (
 // When converting to RGBA, alpha multiplies the RGB components.
 type HSL struct {
 
-	// [min: 0] [max: 360] [step: 5] the hue of the color
-	H float32 `min:"0" max:"360" step:"5" desc:"the hue of the color"`
+	// the hue of the color
+	H float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 1] [step: 0.05] the saturation of the color
-	S float32 `min:"0" max:"1" step:"0.05" desc:"the saturation of the color"`
+	// the saturation of the color
+	S float32 `min:"0" max:"1" step:"0.05"`
 
-	// [min: 0] [max: 1] [step: 0.05] the luminance (lightness) of the color
-	L float32 `min:"0" max:"1" step:"0.05" desc:"the luminance (lightness) of the color"`
+	// the luminance (lightness) of the color
+	L float32 `min:"0" max:"1" step:"0.05"`
 
-	// [min: 0] [max: 1] [step: 0.05] the transparency of the color
-	A float32 `min:"0" max:"1" step:"0.05" desc:"the transparency of the color"`
+	// the transparency of the color
+	A float32 `min:"0" max:"1" step:"0.05"`
 }
 
 // New returns a new HSL representation for given parameters:
