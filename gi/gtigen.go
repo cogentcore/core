@@ -234,7 +234,7 @@ var CompleteType = gti.AddType(&gti.Type{
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Complete{},
@@ -863,7 +863,7 @@ var SpellType = gti.AddType(&gti.Type{
 		{"Sc", &gti.Field{Name: "Sc", Type: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Spell{},
@@ -1365,7 +1365,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", Doc: "[view: -] mutex protecting the BBox fields", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &WidgetBase{},
