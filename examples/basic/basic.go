@@ -16,16 +16,16 @@ import (
 type Config struct {
 
 	// the name of the user
-	Name string `desc:"the name of the user"`
+	Name string
 
 	// the age of the user
-	Age int `desc:"the age of the user"`
+	Age int
 
 	// whether the user likes Go
-	LikesGo bool `desc:"whether the user likes Go"`
+	LikesGo bool
 
 	// the target platform to build for
-	BuildTarget string `desc:"the target platform to build for"`
+	BuildTarget string
 }
 
 // Build builds the app for the config build target.
