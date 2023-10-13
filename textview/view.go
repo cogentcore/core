@@ -367,6 +367,7 @@ func (tv *View) LinesInserted(tbe *textbuf.Edit) {
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 	// tv.RenderAllLines()
+	tv.UpdateSig()
 }
 
 // LinesDeleted deletes lines of text and reformats remaining one
@@ -382,6 +383,7 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
 	// tv.RenderAllLines()
+	tv.UpdateSig()
 }
 
 // BufSignal receives a signal from the Buf when underlying text

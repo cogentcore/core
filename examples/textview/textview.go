@@ -40,18 +40,18 @@ func app() {
 		s.Text.AlignV = styles.AlignTop
 	})
 
-	/*
-		splt := gi.NewSplits(sc, "split-view")
-		splt.SetSplits(.5, .5)
-		// these are all inherited so we can put them at the top "editor panel" level
-		splt.SetProp("white-space", styles.WhiteSpacePreWrap)
-		splt.SetProp("tab-size", 4)
-		splt.SetProp("font-family", gi.Prefs.MonoFont)
-		splt.SetProp("line-height", 1.1)
-	*/
+	splt := gi.NewSplits(sc, "split-view")
+	splt.SetSplits(.5, .5)
+	// these are all inherited so we can put them at the top "editor panel" level
+	splt.AddStyles(func(s *styles.Style) {
+		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+		s.Text.TabSize = 4
+		s.Font.Family = string(gi.Prefs.MonoFont)
+		// s.Text.LineHeight = units.Dot(1.1)
+	})
 
 	// generally need to put text view within its own layout for scrolling
-	txly1 := gi.NewLayout(sc, "view-layout-1")
+	txly1 := gi.NewLayout(splt, "view-layout-1")
 	txly1.AddStyles(func(s *styles.Style) {
 		s.SetStretchMaxWidth()
 		s.SetStretchMaxHeight()
@@ -60,22 +60,20 @@ func app() {
 	})
 
 	txed1 := textview.NewView(txly1, "textview-1")
-	_ = txed1
 
-	/*
-		// generally need to put text view within its own layout for scrolling
-		txly2 := splt.NewChild(gi.LayoutType, "view-layout-2").(*gi.Layout)
-		txly2.SetStretchMaxWidth()
-		txly2.SetStretchMaxHeight()
-		txly2.SetMinPrefWidth(units.Ch(20))
-		txly2.SetMinPrefHeight(units.Ch(10))
-
-		txed2 := textview.NewView(txly1, "textview-2")
-	*/
+	// generally need to put text view within its own layout for scrolling
+	txly2 := gi.NewLayout(splt, "view-layout-2")
+	txly2.AddStyles(func(s *styles.Style) {
+		s.SetStretchMaxWidth()
+		s.SetStretchMaxHeight()
+		s.SetMinPrefWidth(units.Ch(20))
+		s.SetMinPrefHeight(units.Ch(10))
+	})
+	txed2 := textview.NewView(txly2, "textview-2")
 
 	txbuf := textview.NewBuf()
 	txed1.SetBuf(txbuf)
-	// txed2.SetBuf(txbuf)
+	txed2.SetBuf(txbuf)
 
 	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
 	txbuf.Open(samplefile)
