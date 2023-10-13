@@ -26,7 +26,7 @@ var _ = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Color", &gti.Field{Name: "Color", Type: "color.RGBA", Doc: "text color", Directives: gti.Directives{}}},
 		{"Background", &gti.Field{Name: "Background", Type: "color.RGBA", Doc: "background color", Directives: gti.Directives{}}},
-		{"Border", &gti.Field{Name: "Border", Type: "color.RGBA", Doc: "[view: -] border color? not sure what this is -- not really used", Directives: gti.Directives{}}},
+		{"Border", &gti.Field{Name: "Border", Type: "color.RGBA", Doc: "border color? not sure what this is -- not really used", Directives: gti.Directives{}}},
 		{"Bold", &gti.Field{Name: "Bold", Type: "Trilean", Doc: "bold font", Directives: gti.Directives{}}},
 		{"Italic", &gti.Field{Name: "Italic", Type: "Trilean", Doc: "italic font", Directives: gti.Directives{}}},
 		{"Underline", &gti.Field{Name: "Underline", Type: "Trilean", Doc: "underline", Directives: gti.Directives{}}},
