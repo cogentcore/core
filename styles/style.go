@@ -357,20 +357,31 @@ var StyleDefault Style
 
 // StateBackgroundColor returns the stateful, effective version of
 // the given background color by applying [Style.StateLayer] based on
-// [Style.Color]. It does not modify the underlying style object.
+// [Style.Color]. It also applies [Style.Opacity] to the color. It
+// does not modify the underlying style object.
 func (s *Style) StateBackgroundColor(bg colors.Full) colors.Full {
-	if s.StateLayer <= 0 {
+	if s.StateLayer <= 0 && s.Opacity >= 1 {
 		return bg
 	}
 	if bg.Gradient == nil {
-		bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(s.Color, s.StateLayer))
+		if s.StateLayer > 0 {
+			bg.Solid = colors.AlphaBlend(bg.Solid, colors.SetAF32(s.Color, s.StateLayer))
+		}
+		if s.Opacity < 1 {
+			bg.Solid = colors.SetA(bg.Solid, uint8(s.Opacity*255)*bg.Solid.A)
+		}
 		return bg
 	}
 	// still need to copy because underlying gradient isn't automatically copied
 	res := colors.Full{}
 	res.CopyFrom(&bg)
 	for i, stop := range res.Gradient.Stops {
-		res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(s.Color, s.StateLayer))
+		if s.StateLayer > 0 {
+			res.Gradient.Stops[i].Color = colors.AlphaBlend(stop.Color, colors.SetAF32(s.Color, s.StateLayer))
+		}
+		if s.Opacity < 1 {
+			res.Gradient.Stops[i].Color = colors.SetA(stop.Color, uint8(s.Opacity*255)*stop.Color.A)
+		}
 	}
 	return res
 }
