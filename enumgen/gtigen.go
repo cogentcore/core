@@ -7,6 +7,32 @@ import (
 	"goki.dev/ordmap"
 )
 
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/enums/enumgen.Config",
+	ShortName: "enumgen.Config",
+	IDName:    "config",
+	Doc:       "Config contains the configuration information\nused by enumgen",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Dir", &gti.Field{Name: "Dir", Type: "string", Doc: "the source directory to run enumgen on (can be set to multiple through paths like ./...)", Directives: gti.Directives{}}},
+		{"Output", &gti.Field{Name: "Output", Type: "string", Doc: "the output file location relative to the package on which enumgen is being called", Directives: gti.Directives{}}},
+		{"Transform", &gti.Field{Name: "Transform", Type: "string", Doc: "if specified, the enum item transformation method (eg: snake, kebab, lower)", Directives: gti.Directives{}}},
+		{"TrimPrefix", &gti.Field{Name: "TrimPrefix", Type: "string", Doc: "if specified, a comma-separated list of prefixes to trim from each item", Directives: gti.Directives{}}},
+		{"AddPrefix", &gti.Field{Name: "AddPrefix", Type: "string", Doc: "if specified, the prefix to add to each item", Directives: gti.Directives{}}},
+		{"LineComment", &gti.Field{Name: "LineComment", Type: "bool", Doc: "whether to use line comment text as printed text when present", Directives: gti.Directives{}}},
+		{"AcceptLower", &gti.Field{Name: "AcceptLower", Type: "bool", Doc: "whether to accept lowercase versions of enum names in SetString", Directives: gti.Directives{}}},
+		{"Text", &gti.Field{Name: "Text", Type: "bool", Doc: "whether to generate text marshaling methods", Directives: gti.Directives{}}},
+		{"JSON", &gti.Field{Name: "JSON", Type: "bool", Doc: "whether to generate JSON marshaling methods (note that text marshaling methods will also work for JSON, so this should be unnecessary in almost all cases; see the text option)", Directives: gti.Directives{}}},
+		{"YAML", &gti.Field{Name: "YAML", Type: "bool", Doc: "whether to generate YAML marshaling methods", Directives: gti.Directives{}}},
+		{"SQL", &gti.Field{Name: "SQL", Type: "bool", Doc: "whether to generate methods that implement the SQL Scanner and Valuer interfaces", Directives: gti.Directives{}}},
+		{"GQL", &gti.Field{Name: "GQL", Type: "bool", Doc: "whether to generate GraphQL marshaling methods for gqlgen", Directives: gti.Directives{}}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
 var _ = gti.AddFunc(&gti.Func{
 	Name: "goki.dev/enums/enumgen.Generate",
 	Doc:  "Generate generates enum methods, using the\nconfiguration information, loading the packages from the\nconfiguration source directory, and writing the result\nto the configuration output file.\n\nIt is a simple entry point to enumgen that does all\nof the steps; for more specific functionality, create\na new [Generator] with [NewGenerator] and call methods on it.",

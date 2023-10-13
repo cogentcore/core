@@ -13,6 +13,8 @@ package enumgen
 
 // Config contains the configuration information
 // used by enumgen
+//
+//gti:add
 type Config struct {
 
 	// the source directory to run enumgen on (can be set to multiple through paths like ./...)
