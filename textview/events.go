@@ -67,7 +67,6 @@ func (tv *View) ShiftSelectExtend(kt events.Event) {
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
 	}
-	// tv.RenderSelectLines()
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
@@ -390,7 +389,7 @@ func (tv *View) KeyInput(kt events.Event) {
 			} else {
 				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Style.Text.TabSize))
 			}
-			tv.UpdateEnd(updt)
+			tv.UpdateEndRender(updt)
 			tv.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunFocusPrev: // shift-tab
@@ -516,11 +515,6 @@ func (tv *View) KeyInputInsertRune(kt events.Event) {
 			if found {
 				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
 				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
-				if tv.CursorPos.Ln < tp.Ln {
-					tv.RenderLines(cp.Ln, tp.Ln)
-				} else {
-					tv.RenderLines(tp.Ln, cp.Ln)
-				}
 			}
 		}
 	}
@@ -643,7 +637,6 @@ func (tv *View) HandleViewMouse() {
 				tv.CursorPos = tv.SelectReg.Start
 			}
 		}
-		// tv.RenderLines(tv.CursorPos.Ln, tv.CursorPos.Ln)
 	})
 	tv.On(events.SlideMove, func(e events.Event) {
 		if tv.StateIs(states.Disabled) {
@@ -717,8 +710,7 @@ func (tv *View) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode event
 		}
 		tv.SetCursor(newPos)
 		tv.SelectRegUpdate(tv.CursorPos)
-		// tv.RenderSelectLines()
-		// tv.RenderCursor(true)
+		tv.RenderCursor(true)
 		return
 	}
 
@@ -743,7 +735,6 @@ func (tv *View) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode event
 		} else {
 			tv.ScrollCursorToCenterIfHidden()
 		}
-		// tv.RenderSelectLines()
 	} else if tv.HasSelection() {
 		ln := tv.CursorPos.Ln
 		ch := tv.CursorPos.Ch

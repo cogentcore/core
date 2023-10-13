@@ -214,18 +214,12 @@ func (tv *View) SpellCheck(reg *textbuf.Edit) bool {
 	sugs, knwn := tv.Buf.Spell.CheckWord(lwb)
 	if knwn {
 		tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
-		ln := reg.Reg.Start.Ln
-		tv.LayoutLines(ln, ln, false)
-		tv.RenderLines(ln, ln)
 		return false
 	}
 	// fmt.Printf("spell err: %s\n", wb)
 	tv.Buf.Spell.SetWord(wb, sugs, reg.Reg.Start.Ln, reg.Reg.Start.Ch)
 	tv.Buf.RemoveTag(reg.Reg.Start, token.TextSpellErr)
 	tv.Buf.AddTagEdit(reg, token.TextSpellErr)
-	ln := reg.Reg.Start.Ln
-	tv.LayoutLines(ln, ln, false)
-	tv.RenderLines(ln, ln)
 	return true
 }
 

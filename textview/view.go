@@ -167,7 +167,7 @@ func (tv *View) OnInit() {
 func (tv *View) ViewStyles() {
 	tv.AddStyles(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		tv.CursorWidth.SetDp(1)
+		tv.CursorWidth.SetDp(2)
 		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
 		tv.SelectColor.SetSolid(colors.Scheme.Select.Container)
 		tv.HighlightColor.SetSolid(colors.Orange)
@@ -237,7 +237,7 @@ func (tv *View) Refresh() {
 		return
 	}
 	tv.LayoutAllLines(false)
-	tv.RenderAllLines()
+	tv.UpdateSig()
 	tv.ClearNeedsRefresh()
 }
 
@@ -366,7 +366,6 @@ func (tv *View) LinesInserted(tbe *textbuf.Edit) {
 	tv.NLines += nsz
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
-	// tv.RenderAllLines()
 	tv.UpdateSig()
 }
 
@@ -382,7 +381,6 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 	tv.NLines -= dsz
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
-	// tv.RenderAllLines()
 	tv.UpdateSig()
 }
 
