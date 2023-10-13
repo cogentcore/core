@@ -194,6 +194,7 @@ func (sr *Slider) SliderStyles() {
 
 		s.Color = colors.Scheme.OnSurface
 
+		sr.StyleBox.Defaults()
 		sr.StyleBox.Border.Style.Set(styles.BorderNone)
 
 		if sr.Dim == mat32.X {
