@@ -37,10 +37,10 @@ type KeyVal[K comparable, V any] struct {
 type Map[K comparable, V any] struct {
 
 	// ordered list of values and associated keys -- in order added
-	Order []KeyVal[K, V] `desc:"ordered list of values and associated keys -- in order added"`
+	Order []KeyVal[K, V]
 
 	// key to index mapping
-	Map map[K]int `desc:"key to index mapping"`
+	Map map[K]int
 }
 
 // New returns a new ordered map
