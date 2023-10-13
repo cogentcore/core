@@ -63,16 +63,16 @@ type Border struct {
 type Border struct {
 
 	// prop: border-style = how to draw the border
-	Style Sides[BorderStyles] `xml:"style" desc:"prop: border-style = how to draw the border"`
+	Style Sides[BorderStyles] `xml:"style"`
 
 	// prop: border-width = width of the border
-	Width SideValues `xml:"width" desc:"prop: border-width = width of the border"`
+	Width SideValues `xml:"width"`
 
 	// prop: border-radius = rounding of the corners
-	Radius SideValues `xml:"radius" desc:"prop: border-radius = rounding of the corners"`
+	Radius SideValues `xml:"radius"`
 
 	// prop: border-color = color of the border
-	Color SideColors `xml:"color" desc:"prop: border-color = color of the border"`
+	Color SideColors `xml:"color"`
 }
 
 // ToDots runs ToDots on unit values, to compile down to raw pixels
@@ -131,22 +131,22 @@ var (
 type Shadow struct {
 
 	// prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side
-	HOffset units.Value `xml:".h-offset" desc:"prop: .h-offset = horizontal offset of shadow -- positive = right side, negative = left side"`
+	HOffset units.Value `xml:".h-offset"`
 
 	// prop: .v-offset = vertical offset of shadow -- positive = below, negative = above
-	VOffset units.Value `xml:".v-offset" desc:"prop: .v-offset = vertical offset of shadow -- positive = below, negative = above"`
+	VOffset units.Value `xml:".v-offset"`
 
 	// prop: .blur = blur radius -- higher numbers = more blurry
-	Blur units.Value `xml:".blur" desc:"prop: .blur = blur radius -- higher numbers = more blurry"`
+	Blur units.Value `xml:".blur"`
 
 	// prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size
-	Spread units.Value `xml:".spread" desc:"prop: .spread = spread radius -- positive number increases size of shadow, negative decreases size"`
+	Spread units.Value `xml:".spread"`
 
 	// prop: .color = color of the shadow
-	Color color.RGBA `xml:".color" desc:"prop: .color = color of the shadow"`
+	Color color.RGBA `xml:".color"`
 
 	// prop: .inset = shadow is inset within box instead of outset outside of box
-	Inset bool `xml:".inset" desc:"prop: .inset = shadow is inset within box instead of outset outside of box"`
+	Inset bool `xml:".inset"`
 }
 
 func (s *Shadow) HasShadow() bool {

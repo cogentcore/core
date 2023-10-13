@@ -21,28 +21,28 @@ import (
 type Rune struct {
 
 	// fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms
-	Face font.Face `json:"-" xml:"-" desc:"fully-specified font rendering info, includes fully computed font size -- this is exactly what will be drawn -- no further transforms"`
+	Face font.Face `json:"-" xml:"-"`
 
 	// color to draw characters in
-	Color color.Color `json:"-" xml:"-" desc:"color to draw characters in"`
+	Color color.Color `json:"-" xml:"-"`
 
 	// background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background
-	BackgroundColor color.Color `json:"-" xml:"-" desc:"background color to fill background of color -- for highlighting, <mark> tag, etc -- unlike Face, Color, this must be non-nil for every case that uses it, as nil is also used for default transparent background"`
+	BackgroundColor color.Color `json:"-" xml:"-"`
 
 	// additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)
-	Deco styles.TextDecorations `desc:"additional decoration to apply -- underline, strike-through, etc -- also used for encoding a few special layout hints to pass info from styling tags to separate layout algorithms (e.g., &lt;P&gt; vs &lt;BR&gt;)"`
+	Deco styles.TextDecorations
 
 	// relative position from start of Text for the lower-left baseline rendering position of the font character
-	RelPos mat32.Vec2 `desc:"relative position from start of Text for the lower-left baseline rendering position of the font character"`
+	RelPos mat32.Vec2
 
 	// size of the rune itself, exclusive of spacing that might surround it
-	Size mat32.Vec2 `desc:"size of the rune itself, exclusive of spacing that might surround it"`
+	Size mat32.Vec2
 
 	// rotation in radians for this character, relative to its lower-left baseline rendering position
-	RotRad float32 `desc:"rotation in radians for this character, relative to its lower-left baseline rendering position"`
+	RotRad float32
 
 	// scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling
-	ScaleX float32 `desc:"scaling of the X dimension, in case of non-uniform scaling, 0 = no separate scaling"`
+	ScaleX float32
 }
 
 // HasNil returns error if any of the key info (face, color) is nil -- only

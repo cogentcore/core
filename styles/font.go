@@ -22,34 +22,34 @@ import (
 type Font struct {
 
 	// prop: font-size (inherited) = size of font to render -- convert to points when getting font to use
-	Size units.Value `xml:"font-size" inherit:"true" desc:"prop: font-size (inherited) = size of font to render -- convert to points when getting font to use"`
+	Size units.Value `xml:"font-size" inherit:"true"`
 
 	// prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse
-	Family string `xml:"font-family" inherit:"true" desc:"prop: font-family = font family -- ordered list of comma-separated names from more general to more specific to use -- use split on , to parse"`
+	Family string `xml:"font-family" inherit:"true"`
 
 	// prop: font-style (inherited) = style -- normal, italic, etc
-	Style FontStyles `xml:"font-style" inherit:"true" desc:"prop: font-style (inherited) = style -- normal, italic, etc"`
+	Style FontStyles `xml:"font-style" inherit:"true"`
 
 	// prop: font-weight (inherited) = weight: normal, bold, etc
-	Weight FontWeights `xml:"font-weight" inherit:"true" desc:"prop: font-weight (inherited) = weight: normal, bold, etc"`
+	Weight FontWeights `xml:"font-weight" inherit:"true"`
 
 	// prop: font-stretch = font stretch / condense options
-	Stretch FontStretch `xml:"font-stretch" inherit:"true" desc:"prop: font-stretch = font stretch / condense options"`
+	Stretch FontStretch `xml:"font-stretch" inherit:"true"`
 
 	// prop: font-variant = normal or small caps
-	Variant FontVariants `xml:"font-variant" inherit:"true" desc:"prop: font-variant = normal or small caps"`
+	Variant FontVariants `xml:"font-variant" inherit:"true"`
 
 	// prop: text-decoration = underline, line-through, etc -- not inherited
-	Deco TextDecorations `xml:"text-decoration" desc:"prop: text-decoration = underline, line-through, etc -- not inherited"`
+	Deco TextDecorations `xml:"text-decoration"`
 
 	// prop: baseline-shift = super / sub script -- not inherited
-	Shift BaselineShifts `xml:"baseline-shift" desc:"prop: baseline-shift = super / sub script -- not inherited"`
+	Shift BaselineShifts `xml:"baseline-shift"`
 
-	// [view: -] full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
-	Face *FontFace `view:"-" desc:"full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts"`
+	// full font information including enhanced metrics and actual font codes for drawing text -- this is a pointer into FontLibrary of loaded fonts
+	Face *FontFace `view:"-"`
 
 	// Rem size of font -- 12pt converted to same effective DPI as above measurements
-	Rem float32 `desc:"Rem size of font -- 12pt converted to same effective DPI as above measurements"`
+	Rem float32
 }
 
 func (fs *Font) Defaults() {
@@ -431,13 +431,13 @@ type FontRender struct {
 	Font
 
 	// prop: color (inherited) = text color -- also defines the currentColor variable value
-	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	Color color.RGBA `xml:"color" inherit:"true"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	BackgroundColor colors.Full `xml:"background-color"`
 
 	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
-	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to the foreground and background of this element and all of its children"`
+	Opacity float32 `xml:"opacity"`
 }
 
 // FontRender returns the font-rendering-related

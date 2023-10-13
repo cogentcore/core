@@ -17,37 +17,37 @@ import (
 type Paint struct {
 
 	// prop: display:none -- node and everything below it are off, non-rendering
-	Off bool `desc:"prop: display:none -- node and everything below it are off, non-rendering"`
+	Off bool
 
 	// todo big enum of how to display item -- controls layout etc
-	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Display bool `xml:"display"`
 
 	// stroke (line drawing) parameters
-	StrokeStyle Stroke `desc:"stroke (line drawing) parameters"`
+	StrokeStyle Stroke
 
 	// fill (region filling) parameters
-	FillStyle Fill `desc:"fill (region filling) parameters"`
+	FillStyle Fill
 
 	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
-	FontStyle FontRender `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	FontStyle FontRender
 
 	// font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed
-	TextStyle Text `desc:"font also has global opacity setting, along with generic color, background-color settings, which can be copied into stroke / fill as needed"`
+	TextStyle Text
 
 	// prop: vector-effect = various rendering special effects settings
-	VecEff VectorEffects `xml:"vector-effect" desc:"prop: vector-effect = various rendering special effects settings"`
+	VecEff VectorEffects `xml:"vector-effect"`
 
 	// prop: transform = our additions to transform -- pushed to render state
-	XForm mat32.Mat2 `xml:"transform" desc:"prop: transform = our additions to transform -- pushed to render state"`
+	XForm mat32.Mat2 `xml:"transform"`
 
 	// units context -- parameters necessary for anchoring relative units
-	UnContext units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	UnContext units.Context `xml:"-"`
 
 	// have the styles already been set?
-	StyleSet bool `desc:"have the styles already been set?"`
+	StyleSet bool
 
 	// set to true if parent node has no props -- allows optimization of styling
-	PropsNil   bool `desc:"set to true if parent node has no props -- allows optimization of styling"`
+	PropsNil   bool
 	dotsSet    bool
 	lastUnCtxt units.Context
 }
@@ -179,16 +179,16 @@ const (
 type Fill struct {
 
 	// is fill active -- if property is none then false
-	On bool `desc:"is fill active -- if property is none then false"`
+	On bool
 
 	// prop: fill = fill color specification
-	Color colors.Full `xml:"fill" desc:"prop: fill = fill color specification"`
+	Color colors.Full `xml:"fill"`
 
 	// prop: fill-opacity = global alpha opacity / transparency factor
-	Opacity float32 `xml:"fill-opacity" desc:"prop: fill-opacity = global alpha opacity / transparency factor"`
+	Opacity float32 `xml:"fill-opacity"`
 
 	// prop: fill-rule = rule for how to fill more complex shapes with crossing lines
-	Rule FillRules `xml:"fill-rule" desc:"prop: fill-rule = rule for how to fill more complex shapes with crossing lines"`
+	Rule FillRules `xml:"fill-rule"`
 }
 
 // Defaults initializes default values for paint fill
@@ -267,31 +267,31 @@ const (
 type Stroke struct {
 
 	// is stroke active -- if property is none then false
-	On bool `desc:"is stroke active -- if property is none then false"`
+	On bool
 
 	// prop: stroke = stroke color specification
-	Color colors.Full `xml:"stroke" desc:"prop: stroke = stroke color specification"`
+	Color colors.Full `xml:"stroke"`
 
 	// prop: stroke-opacity = global alpha opacity / transparency factor
-	Opacity float32 `xml:"stroke-opacity" desc:"prop: stroke-opacity = global alpha opacity / transparency factor"`
+	Opacity float32 `xml:"stroke-opacity"`
 
 	// prop: stroke-width = line width
-	Width units.Value `xml:"stroke-width" desc:"prop: stroke-width = line width"`
+	Width units.Value `xml:"stroke-width"`
 
 	// prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard
-	MinWidth units.Value `xml:"stroke-min-width" desc:"prop: stroke-min-width = minimum line width used for rendering -- if width is > 0, then this is the smallest line width -- this value is NOT subject to transforms so is in absolute dot values, and is ignored if vector-effects non-scaling-stroke is used -- this is an extension of the SVG / CSS standard"`
+	MinWidth units.Value `xml:"stroke-min-width"`
 
-	// prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
-	Dashes []float64 `xml:"stroke-dasharray" desc:"prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., [4 4] = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units."`
+	// prop: stroke-dasharray = dash pattern, in terms of alternating on and off distances -- e.g., = 4 pixels on, 4 pixels off.  Currently only supporting raw pixel numbers, but in principle should support units.
+	Dashes []float64 `xml:"stroke-dasharray"`
 
 	// prop: stroke-linecap = how to draw the end cap of lines
-	Cap LineCaps `xml:"stroke-linecap" desc:"prop: stroke-linecap = how to draw the end cap of lines"`
+	Cap LineCaps `xml:"stroke-linecap"`
 
 	// prop: stroke-linejoin = how to join line segments
-	Join LineJoins `xml:"stroke-linejoin" desc:"prop: stroke-linejoin = how to join line segments"`
+	Join LineJoins `xml:"stroke-linejoin"`
 
-	// [min: 1] prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
-	MiterLimit float32 `xml:"stroke-miterlimit" min:"1" desc:"prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger"`
+	// prop: stroke-miterlimit = limit of how far to miter -- must be 1 or larger
+	MiterLimit float32 `xml:"stroke-miterlimit" min:"1"`
 }
 
 // Defaults initializes default values for paint stroke

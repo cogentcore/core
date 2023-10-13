@@ -19,61 +19,61 @@ import (
 type State struct {
 
 	// communal painter -- for widgets -- SVG have their own
-	Paint Paint `desc:"communal painter -- for widgets -- SVG have their own"`
+	Paint Paint
 
 	// current transform
-	XForm mat32.Mat2 `desc:"current transform"`
+	XForm mat32.Mat2
 
 	// current path
-	Path rasterx.Path `desc:"current path"`
+	Path rasterx.Path
 
 	// rasterizer -- stroke / fill rendering engine from rasterx
-	Raster *rasterx.Dasher `desc:"rasterizer -- stroke / fill rendering engine from rasterx"`
+	Raster *rasterx.Dasher
 
 	// scanner for scanx
-	Scanner *scanx.Scanner `desc:"scanner for scanx"`
+	Scanner *scanx.Scanner
 
 	// spanner for scanx
-	ImgSpanner *scanx.ImgSpanner `desc:"spanner for scanx"`
+	ImgSpanner *scanx.ImgSpanner
 
 	// starting point, for close path
-	Start mat32.Vec2 `desc:"starting point, for close path"`
+	Start mat32.Vec2
 
 	// current point
-	Current mat32.Vec2 `desc:"current point"`
+	Current mat32.Vec2
 
 	// is current point current?
-	HasCurrent bool `desc:"is current point current?"`
+	HasCurrent bool
 
 	// pointer to image to render into
-	Image *image.RGBA `desc:"pointer to image to render into"`
+	Image *image.RGBA
 
 	// current mask
-	Mask *image.Alpha `desc:"current mask"`
+	Mask *image.Alpha
 
 	// boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing
-	Bounds image.Rectangle `desc:"boundaries to restrict drawing to -- much faster than clip mask for basic square region exclusion -- used for restricting drawing"`
+	Bounds image.Rectangle
 
 	// bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects
-	LastRenderBBox image.Rectangle `desc:"bounding box of last object rendered -- computed by renderer during Fill or Stroke, grabbed by SVG objects"`
+	LastRenderBBox image.Rectangle
 
 	// stack of transforms
-	XFormStack []mat32.Mat2 `desc:"stack of transforms"`
+	XFormStack []mat32.Mat2
 
 	// stack of bounds -- every render starts with a push onto this stack, and finishes with a pop
-	BoundsStack []image.Rectangle `desc:"stack of bounds -- every render starts with a push onto this stack, and finishes with a pop"`
+	BoundsStack []image.Rectangle
 
 	// stack of clips, if needed
-	ClipStack []*image.Alpha `desc:"stack of clips, if needed"`
+	ClipStack []*image.Alpha
 
 	// backup of paint -- don't need a full stack but sometimes safer to backup and restore
-	PaintBack Paint `desc:"backup of paint -- don't need a full stack but sometimes safer to backup and restore"`
+	PaintBack Paint
 
 	// mutex for overall rendering
-	RenderMu sync.Mutex `desc:"mutex for overall rendering"`
+	RenderMu sync.Mutex
 
 	// mutex for final rasterx rendering -- only one at a time
-	RasterMu sync.Mutex `desc:"mutex for final rasterx rendering -- only one at a time"`
+	RasterMu sync.Mutex
 }
 
 // Init initializes State -- must be called whenever image size changes

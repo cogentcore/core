@@ -238,13 +238,13 @@ const (
 type SizePrefs struct {
 
 	// minimum size needed -- set to at least computed allocsize
-	Need mat32.Vec2 `desc:"minimum size needed -- set to at least computed allocsize"`
+	Need mat32.Vec2
 
 	// preferred size -- start here for layout
-	Pref mat32.Vec2 `desc:"preferred size -- start here for layout"`
+	Pref mat32.Vec2
 
 	// maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch
-	Max mat32.Vec2 `desc:"maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch"`
+	Max mat32.Vec2
 }
 
 // return true if Max < 0 meaning can stretch infinitely along given dimension

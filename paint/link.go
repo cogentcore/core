@@ -14,25 +14,25 @@ import (
 type TextLink struct {
 
 	// text label for the link
-	Label string `desc:"text label for the link"`
+	Label string
 
 	// full URL for the link
-	URL string `desc:"full URL for the link"`
+	URL string
 
 	// properties defined for the link
-	Props map[string]any `desc:"properties defined for the link"`
+	Props map[string]any
 
 	// span index where link starts
-	StartSpan int `desc:"span index where link starts"`
+	StartSpan int
 
 	// index in StartSpan where link starts
-	StartIdx int `desc:"index in StartSpan where link starts"`
+	StartIdx int
 
 	// span index where link ends (can be same as EndSpan)
-	EndSpan int `desc:"span index where link ends (can be same as EndSpan)"`
+	EndSpan int
 
 	// index in EndSpan where link ends (index of last rune in label)
-	EndIdx int `desc:"index in EndSpan where link ends (index of last rune in label)"`
+	EndIdx int
 
 	// the widget that owns this text link -- only set prior to passing off to handler function
 	// Widget ki.Ki `desc:"the widget that owns this text link -- only set prior to passing off to handler function"`

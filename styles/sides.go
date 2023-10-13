@@ -25,16 +25,16 @@ import (
 type Sides[T any] struct {
 
 	// top/top-left value
-	Top T `xml:"top" desc:"top/top-left value"`
+	Top T `xml:"top"`
 
 	// right/top-right value
-	Right T `xml:"right" desc:"right/top-right value"`
+	Right T `xml:"right"`
 
 	// bottom/bottom-right value
-	Bottom T `xml:"bottom" desc:"bottom/bottom-right value"`
+	Bottom T `xml:"bottom"`
 
 	// left/bottom-left value
-	Left T `xml:"left" desc:"left/bottom-left value"`
+	Left T `xml:"left"`
 }
 
 // NewSides is a helper that creates new sides/corners of the given type

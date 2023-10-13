@@ -39,19 +39,19 @@ var loadFontMu sync.RWMutex
 type FontInfo struct {
 
 	// official regularized name of font
-	Name string `desc:"official regularized name of font"`
+	Name string
 
 	// stretch: normal, expanded, condensed, etc
-	Stretch styles.FontStretch `xml:"stretch" desc:"stretch: normal, expanded, condensed, etc"`
+	Stretch styles.FontStretch `xml:"stretch"`
 
 	// weight: normal, bold, etc
-	Weight styles.FontWeights `xml:"weight" desc:"weight: normal, bold, etc"`
+	Weight styles.FontWeights `xml:"weight"`
 
 	// style -- normal, italic, etc
-	Style styles.FontStyles `xml:"style" desc:"style -- normal, italic, etc"`
+	Style styles.FontStyles `xml:"style"`
 
 	// example text -- styled according to font params in chooser
-	Example string `desc:"example text -- styled according to font params in chooser"`
+	Example string
 }
 
 // Label satisfies the Labeler interface
@@ -68,16 +68,16 @@ func (fi FontInfo) Label() string {
 type FontLib struct {
 
 	// list of font paths to search for fonts
-	FontPaths []string `desc:"list of font paths to search for fonts"`
+	FontPaths []string
 
 	// map of font name to path to file
-	FontsAvail map[string]string `desc:"map of font name to path to file"`
+	FontsAvail map[string]string
 
 	// information about each font -- this list should be used for selecting valid regularized font names
-	FontInfo []FontInfo `desc:"information about each font -- this list should be used for selecting valid regularized font names"`
+	FontInfo []FontInfo
 
 	// double-map of cached fonts, by font name and then integer font size within that
-	Faces map[string]map[int]*styles.FontFace `desc:"double-map of cached fonts, by font name and then integer font size within that"`
+	Faces map[string]map[int]*styles.FontFace
 }
 
 // FontLibrary is the gi font library, initialized from fonts available on font paths

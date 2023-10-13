@@ -43,13 +43,13 @@ type Text struct {
 	Spans []Span
 
 	// last size of overall rendered text
-	Size mat32.Vec2 `desc:"last size of overall rendered text"`
+	Size mat32.Vec2
 
 	// where relevant, this is the (default, dominant) text direction for the span
-	Dir styles.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Dir styles.TextDirections
 
 	// hyperlinks within rendered text
-	Links []TextLink `desc:"hyperlinks within rendered text"`
+	Links []TextLink
 }
 
 // InsertSpan inserts a new span at given index

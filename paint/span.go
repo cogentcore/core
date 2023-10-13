@@ -32,22 +32,22 @@ import (
 type Span struct {
 
 	// text as runes
-	Text []rune `desc:"text as runes"`
+	Text []rune
 
 	// render info for each rune in one-to-one correspondence
-	Render []Rune `desc:"render info for each rune in one-to-one correspondence"`
+	Render []Rune
 
 	// position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position
-	RelPos mat32.Vec2 `desc:"position for start of text relative to an absolute coordinate that is provided at the time of rendering -- this typically includes the baseline offset to align all rune rendering there -- individual rune RelPos are added to this plus the render-time offset to get the final position"`
+	RelPos mat32.Vec2
 
 	// rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates
-	LastPos mat32.Vec2 `desc:"rune position for further edge of last rune -- for standard flat strings this is the overall length of the string -- used for size / layout computations -- you do not add RelPos to this -- it is in same Text relative coordinates"`
+	LastPos mat32.Vec2
 
 	// where relevant, this is the (default, dominant) text direction for the span
-	Dir styles.TextDirections `desc:"where relevant, this is the (default, dominant) text direction for the span"`
+	Dir styles.TextDirections
 
 	// mask of decorations that have been set on this span -- optimizes rendering passes
-	HasDeco styles.TextDecorations `desc:"mask of decorations that have been set on this span -- optimizes rendering passes"`
+	HasDeco styles.TextDecorations
 }
 
 // Init initializes a new span with given capacity

@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"goki.dev/laser"
 	"log/slog"
+
+	"goki.dev/laser"
 	"golang.org/x/image/math/fixed"
 )
 
@@ -17,16 +18,16 @@ import (
 type Value struct {
 
 	// the value in terms of the specified unit
-	Val float32 `label:"Value" desc:"the value in terms of the specified unit"`
+	Val float32 `label:"Value"`
 
 	// the unit used for the value
-	Un Units `label:"Unit" desc:"the unit used for the value"`
+	Un Units `label:"Unit"`
 
 	// the computed value in raw pixels (dots in DPI)
-	Dots float32 `inactive:"+" desc:"the computed value in raw pixels (dots in DPI)"`
+	Dots float32 `inactive:"+"`
 
 	// function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used
-	DotsFunc func(uc *Context) float32 `desc:"function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used"`
+	DotsFunc func(uc *Context) float32
 }
 
 // New creates a new value with the given unit type

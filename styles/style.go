@@ -44,121 +44,121 @@ type Style struct {
 	Abilities abilities.Abilities
 
 	// todo big enum of how to display item -- controls layout etc
-	Display bool `xml:"display" desc:"todo big enum of how to display item -- controls layout etc"`
+	Display bool `xml:"display"`
 
 	// is the item visible or not
-	Visible bool `xml:"visible" desc:"is the item visible or not"`
+	Visible bool `xml:"visible"`
 
 	// make a control inactive so it does not respond to input
-	Inactive bool `xml:"inactive" desc:"make a control inactive so it does not respond to input"`
+	Inactive bool `xml:"inactive"`
 
 	// the cursor to switch to upon hovering over the element (inherited)
-	Cursor cursors.Cursor `desc:"the cursor to switch to upon hovering over the element (inherited)"`
+	Cursor cursors.Cursor
 
 	// prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor
-	ZIndex int `xml:"z-index" desc:"prop: z-index = ordering factor for rendering depth -- lower numbers rendered first -- sort children according to this factor"`
+	ZIndex int `xml:"z-index"`
 
 	// prop: horizontal-align specifies the horizontal alignment of widget elements within a *vertical* layout container (has no effect within horizontal layouts -- use space / stretch elements instead).  For text layout, use text-align. This is not a standard css property.
-	AlignH Align `xml:"horizontal-align" desc:"prop: horizontal-align specifies the horizontal alignment of widget elements within a *vertical* layout container (has no effect within horizontal layouts -- use space / stretch elements instead).  For text layout, use text-align. This is not a standard css property."`
+	AlignH Align `xml:"horizontal-align"`
 
 	// prop: vertical-align specifies the vertical alignment of widget elements within a *horizontal* layout container (has no effect within vertical layouts -- use space / stretch elements instead).  For text layout, use text-vertical-align.  This is not a standard css property
-	AlignV Align `xml:"vertical-align" desc:"prop: vertical-align specifies the vertical alignment of widget elements within a *horizontal* layout container (has no effect within vertical layouts -- use space / stretch elements instead).  For text layout, use text-vertical-align.  This is not a standard css property"`
+	AlignV Align `xml:"vertical-align"`
 
 	// prop: x = horizontal position -- often superseded by layout but otherwise used
-	PosX units.Value `xml:"x" desc:"prop: x = horizontal position -- often superseded by layout but otherwise used"`
+	PosX units.Value `xml:"x"`
 
 	// prop: y = vertical position -- often superseded by layout but otherwise used
-	PosY units.Value `xml:"y" desc:"prop: y = vertical position -- often superseded by layout but otherwise used"`
+	PosY units.Value `xml:"y"`
 
 	// prop: width = specified size of element -- 0 if not specified
-	Width units.Value `xml:"width" desc:"prop: width = specified size of element -- 0 if not specified"`
+	Width units.Value `xml:"width"`
 
 	// prop: height = specified size of element -- 0 if not specified
-	Height units.Value `xml:"height" desc:"prop: height = specified size of element -- 0 if not specified"`
+	Height units.Value `xml:"height"`
 
 	// prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch
-	MaxWidth units.Value `xml:"max-width" desc:"prop: max-width = specified maximum size of element -- 0  means just use other values, negative means stretch"`
+	MaxWidth units.Value `xml:"max-width"`
 
 	// prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch
-	MaxHeight units.Value `xml:"max-height" desc:"prop: max-height = specified maximum size of element -- 0 means just use other values, negative means stretch"`
+	MaxHeight units.Value `xml:"max-height"`
 
 	// prop: min-width = specified minimum size of element -- 0 if not specified
-	MinWidth units.Value `xml:"min-width" desc:"prop: min-width = specified minimum size of element -- 0 if not specified"`
+	MinWidth units.Value `xml:"min-width"`
 
 	// prop: min-height = specified minimum size of element -- 0 if not specified
-	MinHeight units.Value `xml:"min-height" desc:"prop: min-height = specified minimum size of element -- 0 if not specified"`
+	MinHeight units.Value `xml:"min-height"`
 
 	// prop: margin = outer-most transparent space around box element
-	Margin SideValues `xml:"margin" desc:"prop: margin = outer-most transparent space around box element"`
+	Margin SideValues `xml:"margin"`
 
 	// prop: padding = transparent space around central content of box
-	Padding SideValues `xml:"padding" desc:"prop: padding = transparent space around central content of box"`
+	Padding SideValues `xml:"padding"`
 
 	// prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values
-	Overflow Overflow `xml:"overflow" desc:"prop: overflow = what to do with content that overflows -- default is Auto add of scrollbars as needed -- todo: can have separate -x -y values"`
+	Overflow Overflow `xml:"overflow"`
 
 	// prop: columns = number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions
-	Columns int `xml:"columns" alt:"grid-cols" desc:"prop: columns = number of columns to use in a grid layout -- used as a constraint in layout if individual elements do not specify their row, column positions"`
+	Columns int `xml:"columns" alt:"grid-cols"`
 
 	// prop: row = specifies the row that this element should appear within a grid layout
-	Row int `xml:"row" desc:"prop: row = specifies the row that this element should appear within a grid layout"`
+	Row int `xml:"row"`
 
 	// prop: col = specifies the column that this element should appear within a grid layout
-	Col int `xml:"col" desc:"prop: col = specifies the column that this element should appear within a grid layout"`
+	Col int `xml:"col"`
 
 	// prop: row-span = specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)
-	RowSpan int `xml:"row-span" desc:"prop: row-span = specifies the number of sequential rows that this element should occupy within a grid layout (todo: not currently supported)"`
+	RowSpan int `xml:"row-span"`
 
 	// prop: col-span = specifies the number of sequential columns that this element should occupy within a grid layout
-	ColSpan int `xml:"col-span" desc:"prop: col-span = specifies the number of sequential columns that this element should occupy within a grid layout"`
+	ColSpan int `xml:"col-span"`
 
 	// prop: scrollbar-width = width of a layout scrollbar
-	ScrollBarWidth units.Value `xml:"scrollbar-width" desc:"prop: scrollbar-width = width of a layout scrollbar"`
+	ScrollBarWidth units.Value `xml:"scrollbar-width"`
 
 	// prop: color (inherited) = text color -- also defines the currentColor variable value
-	Color color.RGBA `xml:"color" inherit:"true" desc:"prop: color (inherited) = text color -- also defines the currentColor variable value"`
+	Color color.RGBA `xml:"color" inherit:"true"`
 
 	// prop: background-color = background color -- not inherited, transparent by default
-	BackgroundColor colors.Full `xml:"background-color" desc:"prop: background-color = background color -- not inherited, transparent by default"`
+	BackgroundColor colors.Full `xml:"background-color"`
 
 	// prop: opacity = alpha value to apply to the foreground and background of this element and all of its children
-	Opacity float32 `xml:"opacity" desc:"prop: opacity = alpha value to apply to the foreground and background of this element and all of its children"`
+	Opacity float32 `xml:"opacity"`
 
-	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color [Style.Color]. It is automatically set based on [Style.State], but can be overridden in stylers.
-	StateLayer float32 `desc:"StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color [Style.Color]. It is automatically set based on [Style.State], but can be overridden in stylers."`
+	// StateLayer, if above zero, indicates to create a state layer over the element with this much opacity (on a scale of 0-1) and the color . It is automatically set based on , but can be overridden in stylers.
+	StateLayer float32
 
 	// border around the box element
-	Border Border `xml:"border" desc:"border around the box element"`
+	Border Border `xml:"border"`
 
 	// MaxBorder is the largest border that will ever be rendered around the element, the size of which is used for computing the effective margin to allocate for the element
-	MaxBorder Border `desc:"MaxBorder is the largest border that will ever be rendered around the element, the size of which is used for computing the effective margin to allocate for the element"`
+	MaxBorder Border
 
 	// prop: box-shadow = the box shadows to render around box (can have multiple)
-	BoxShadow []Shadow `xml:"box-shadow" desc:"prop: box-shadow = the box shadows to render around box (can have multiple)"`
+	BoxShadow []Shadow `xml:"box-shadow"`
 
 	// MaxBoxShadow contains the largest shadows that will ever be rendered around the element, the size of which are used for computing the effective margin to allocate for the element
-	MaxBoxShadow []Shadow `desc:"MaxBoxShadow contains the largest shadows that will ever be rendered around the element, the size of which are used for computing the effective margin to allocate for the element"`
+	MaxBoxShadow []Shadow
 
 	// font parameters -- no xml prefix -- also has color, background-color
-	Font Font `desc:"font parameters -- no xml prefix -- also has color, background-color"`
+	Font Font
 
 	// text parameters -- no xml prefix
-	Text Text `desc:"text parameters -- no xml prefix"`
+	Text Text
 
 	// prop: outline = draw an outline around an element -- mostly same styles as border -- default to none
-	Outline Border `xml:"outline" desc:"prop: outline = draw an outline around an element -- mostly same styles as border -- default to none"`
+	Outline Border `xml:"outline"`
 
 	// prop: pointer-events = does this element respond to pointer events -- default is true
-	PointerEvents bool `xml:"pointer-events" desc:"prop: pointer-events = does this element respond to pointer events -- default is true"`
+	PointerEvents bool `xml:"pointer-events"`
 
 	// units context -- parameters necessary for anchoring relative units
-	UnContext units.Context `xml:"-" desc:"units context -- parameters necessary for anchoring relative units"`
+	UnContext units.Context `xml:"-"`
 
 	// has this style been set from object values yet?
-	IsSet bool `desc:"has this style been set from object values yet?"`
+	IsSet bool
 
 	// set to true if parent node has no props -- allows optimization of styling
-	PropsNil   bool `desc:"set to true if parent node has no props -- allows optimization of styling"`
+	PropsNil   bool
 	dotsSet    bool
 	lastUnCtxt units.Context
 }

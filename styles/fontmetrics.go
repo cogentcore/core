@@ -14,16 +14,16 @@ import (
 type FontFace struct {
 
 	// The full FaceName that the font is accessed by
-	Name string `desc:"The full FaceName that the font is accessed by"`
+	Name string
 
 	// The integer font size in raw dots
-	Size int `desc:"The integer font size in raw dots"`
+	Size int
 
 	// The system image.Font font rendering interface
-	Face font.Face `desc:"The system image.Font font rendering interface"`
+	Face font.Face
 
 	// enhanced metric information for the font
-	Metrics FontMetrics `desc:"enhanced metric information for the font"`
+	Metrics FontMetrics
 }
 
 // NewFontFace returns a new font face
@@ -39,16 +39,16 @@ func NewFontFace(nm string, sz int, face font.Face) *FontFace {
 type FontMetrics struct {
 
 	// reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing
-	Height float32 `desc:"reference 1.0 spacing line height of font in dots -- computed from font as ascent + descent + lineGap, where lineGap is specified by the font as the recommended line spacing"`
+	Height float32
 
 	// Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font
-	Em float32 `desc:"Em size of font -- this is NOT actually the width of the letter M, but rather the specified point size of the font (in actual display dots, not points) -- it does NOT include the descender and will not fit the entire height of the font"`
+	Em float32
 
 	// Ex size of font -- this is the actual height of the letter x in the font
-	Ex float32 `desc:"Ex size of font -- this is the actual height of the letter x in the font"`
+	Ex float32
 
 	// Ch size of font -- this is the actual width of the 0 glyph in the font
-	Ch float32 `desc:"Ch size of font -- this is the actual width of the 0 glyph in the font"`
+	Ch float32
 }
 
 // ComputeMetrics computes the Height, Em, Ex, Ch and Rem metrics associated
