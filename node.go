@@ -30,31 +30,31 @@ import (
 type Node struct {
 
 	// Ki.Name() user-supplied name of this node -- can be empty or non-unique
-	Nm string `copy:"-" label:"Name" desc:"Ki.Name() user-supplied name of this node -- can be empty or non-unique"`
+	Nm string `copy:"-" label:"Name"`
 
-	// [tableview: -] bit flags for internal node state -- can extend this using enums package
-	Flags Flags `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3" desc:"bit flags for internal node state -- can extend this using enums package"`
+	// bit flags for internal node state -- can extend this using enums package
+	Flags Flags `tableview:"-" copy:"-" json:"-" xml:"-" max-width:"80" height:"3"`
 
-	// [tableview: -] Ki.Properties() property map for arbitrary extensible properties, including style properties
-	Props Props `tableview:"-" xml:"-" copy:"-" label:"Properties" desc:"Ki.Properties() property map for arbitrary extensible properties, including style properties"`
+	// Ki.Properties() property map for arbitrary extensible properties, including style properties
+	Props Props `tableview:"-" xml:"-" copy:"-" label:"Properties"`
 
-	// [view: -] [tableview: -] Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent
-	Par Ki `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-" desc:"Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent"`
+	// Ki.Parent() parent of this node -- set automatically when this node is added as a child of parent
+	Par Ki `tableview:"-" copy:"-" json:"-" xml:"-" label:"Parent" view:"-"`
 
-	// [tableview: -] Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
-	Kids Slice `tableview:"-" copy:"-" label:"Children" desc:"Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage"`
+	// Ki.Children() list of children of this node -- all are set to have this node as their parent -- can reorder etc but generally use Ki Node methods to Add / Delete to ensure proper usage
+	Kids Slice `tableview:"-" copy:"-" label:"Children"`
 
-	// [view: -] we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
-	Ths Ki `copy:"-" json:"-" xml:"-" view:"-" desc:"we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access."`
+	// we need a pointer to ourselves as a Ki, which can always be used to extract the true underlying type of object when Node is embedded in other structs -- function receivers do not have this ability so this is necessary.  This is set to nil when deleted.  Typically use This() convenience accessor which protects against concurrent access.
+	Ths Ki `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] the number of children that have ever been added to this node, which is used for unique naming
-	NumLifetimeKids uint64 `copy:"-" json:"-" xml:"-" view:"-" desc:"the number of children that have ever been added to this node, which is used for unique naming"`
+	// the number of children that have ever been added to this node, which is used for unique naming
+	NumLifetimeKids uint64 `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
-	index int `copy:"-" json:"-" xml:"-" view:"-" desc:"last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method"`
+	// last value of our index -- used as a starting point for finding us in our parent next time -- is not guaranteed to be accurate!  use IndexInParent() method
+	index int `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function
-	depth int `copy:"-" json:"-" xml:"-" view:"-" desc:"optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function"`
+	// optional depth parameter of this node -- only valid during specific contexts, not generally -- e.g., used in WalkBreadth function
+	depth int `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 // check implementation of [Ki] interface
