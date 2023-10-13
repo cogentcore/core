@@ -21,7 +21,7 @@ var ArgViewType = gti.AddType(&gti.Type{
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ArgView{},
@@ -612,6 +612,105 @@ func (t *TimeValue) New() ki.Ki {
 	return &TimeValue{}
 }
 
+// IconValueType is the [gti.Type] for [IconValue]
+var IconValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.IconValue",
+	ShortName:  "giv.IconValue",
+	IDName:     "icon-value",
+	Doc:        "IconValue presents an action for displaying an IconName and selecting\nicons from IconChooserDialog",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &IconValue{},
+})
+
+// NewIconValue adds a new [IconValue] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewIconValue(par ki.Ki, name ...string) *IconValue {
+	return par.NewChild(IconValueType, name...).(*IconValue)
+}
+
+// KiType returns the [*gti.Type] of [IconValue]
+func (t *IconValue) KiType() *gti.Type {
+	return IconValueType
+}
+
+// New returns a new [*IconValue] value
+func (t *IconValue) New() ki.Ki {
+	return &IconValue{}
+}
+
+// FontValueType is the [gti.Type] for [FontValue]
+var FontValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.FontValue",
+	ShortName:  "giv.FontValue",
+	IDName:     "font-value",
+	Doc:        "FontValue presents an action for displaying a FontName and selecting\nfonts from FontChooserDialog",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &FontValue{},
+})
+
+// NewFontValue adds a new [FontValue] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewFontValue(par ki.Ki, name ...string) *FontValue {
+	return par.NewChild(FontValueType, name...).(*FontValue)
+}
+
+// KiType returns the [*gti.Type] of [FontValue]
+func (t *FontValue) KiType() *gti.Type {
+	return FontValueType
+}
+
+// New returns a new [*FontValue] value
+func (t *FontValue) New() ki.Ki {
+	return &FontValue{}
+}
+
+// FileValueType is the [gti.Type] for [FileValue]
+var FileValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.FileValue",
+	ShortName:  "giv.FileValue",
+	IDName:     "file-value",
+	Doc:        "FileValue presents an action for displaying a FileName and selecting\nicons from FileChooserDialog",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &FileValue{},
+})
+
+// NewFileValue adds a new [FileValue] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewFileValue(par ki.Ki, name ...string) *FileValue {
+	return par.NewChild(FileValueType, name...).(*FileValue)
+}
+
+// KiType returns the [*gti.Type] of [FileValue]
+func (t *FileValue) KiType() *gti.Type {
+	return FileValueType
+}
+
+// New returns a new [*FileValue] value
+func (t *FileValue) New() ki.Ki {
+	return &FileValue{}
+}
+
 // ColorMapViewType is the [gti.Type] for [ColorMapView]
 var ColorMapViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorMapView",
@@ -624,7 +723,7 @@ var ColorMapViewType = gti.AddType(&gti.Type{
 		{"Map", &gti.Field{Name: "Map", Type: "*colormap.Map", Doc: "the colormap that we view", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorMapView{},
@@ -690,13 +789,12 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Color", &gti.Field{Name: "Color", Type: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}}},
-		{"NumView", &gti.Field{Name: "NumView", Type: "Value", Doc: "inline struct view of the numbers", Directives: gti.Directives{}}},
 		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorView{},
@@ -799,14 +897,14 @@ var FileTreeType = gti.AddType(&gti.Type{
 		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}}},
 		{"Dirs", &gti.Field{Name: "Dirs", Type: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}}},
 		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", Doc: "if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed", Directives: gti.Directives{}}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "*gti.Type", Doc: "[view: -] type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}}},
+		{"NodeType", &gti.Field{Name: "NodeType", Type: "*gti.Type", Doc: "type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}}},
 		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "[view: -] change notify for all dirs", Directives: gti.Directives{}}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "[view: -] channel to close watcher watcher", Directives: gti.Directives{}}},
-		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", Doc: "[view: -] map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}}},
-		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", Doc: "[view: -] last path updated by watcher", Directives: gti.Directives{}}},
-		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", Doc: "[view: -] timestamp of last update", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "[view: -] Update mutex", Directives: gti.Directives{}}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}}},
+		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}}},
+		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}}},
+		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FileNode", &gti.Field{Name: "FileNode", Type: "FileNode", Doc: "", Directives: gti.Directives{}}},
@@ -845,13 +943,13 @@ var FileNodeType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FPath", &gti.Field{Name: "FPath", Type: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}}},
 		{"Info", &gti.Field{Name: "Info", Type: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}}},
-		{"Buf", &gti.Field{Name: "Buf", Type: "*textview.TextBuf", Doc: "file buffer for editing this file", Directives: gti.Directives{}}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*textview.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}}},
 		{"FRoot", &gti.Field{Name: "FRoot", Type: "*FileTree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}}},
 		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "vci.Repo", Doc: "version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}}},
 		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileNode{},
@@ -954,39 +1052,6 @@ func (t *FileTreeView) AsFileTreeView() *FileTreeView {
 	return t
 }
 
-// FileValueType is the [gti.Type] for [FileValue]
-var FileValueType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FileValue",
-	ShortName:  "giv.FileValue",
-	IDName:     "file-value",
-	Doc:        "FileValue presents an action for displaying a FileName and selecting\nicons from FileChooserDialog",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FileValue{},
-})
-
-// NewFileValue adds a new [FileValue] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFileValue(par ki.Ki, name ...string) *FileValue {
-	return par.NewChild(FileValueType, name...).(*FileValue)
-}
-
-// KiType returns the [*gti.Type] of [FileValue]
-func (t *FileValue) KiType() *gti.Type {
-	return FileValueType
-}
-
-// New returns a new [*FileValue] value
-func (t *FileValue) New() ki.Ki {
-	return &FileValue{}
-}
-
 // FileViewType is the [gti.Type] for [FileView]
 var FileViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FileView",
@@ -998,17 +1063,17 @@ var FileViewType = gti.AddType(&gti.Type{
 		{"DirPath", &gti.Field{Name: "DirPath", Type: "string", Doc: "path to directory of files to display", Directives: gti.Directives{}}},
 		{"SelFile", &gti.Field{Name: "SelFile", Type: "string", Doc: "selected file", Directives: gti.Directives{}}},
 		{"Ext", &gti.Field{Name: "Ext", Type: "string", Doc: "target extension(s) (comma separated if multiple, including initial .), if any", Directives: gti.Directives{}}},
-		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "FileViewFilterFunc", Doc: "[view: -] optional styling function", Directives: gti.Directives{}}},
+		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
 		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}}},
 		{"Files", &gti.Field{Name: "Files", Type: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}}},
 		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "[view: -] change notify for current dir", Directives: gti.Directives{}}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "[view: -] channel to close watcher watcher", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "[view: -] UpdateFiles mutex", Directives: gti.Directives{}}},
-		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", Doc: "[view: -] Previous path that was processed via UpdateFiles", Directives: gti.Directives{}}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}}},
+		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", Doc: "Previous path that was processed via UpdateFiles", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileView{},
@@ -1032,39 +1097,6 @@ func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
 
-// FontValueType is the [gti.Type] for [FontValue]
-var FontValueType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.FontValue",
-	ShortName:  "giv.FontValue",
-	IDName:     "font-value",
-	Doc:        "FontValue presents an action for displaying a FontName and selecting\nfonts from FontChooserDialog",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &FontValue{},
-})
-
-// NewFontValue adds a new [FontValue] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewFontValue(par ki.Ki, name ...string) *FontValue {
-	return par.NewChild(FontValueType, name...).(*FontValue)
-}
-
-// KiType returns the [*gti.Type] of [FontValue]
-func (t *FontValue) KiType() *gti.Type {
-	return FontValueType
-}
-
-// New returns a new [*FontValue] value
-func (t *FontValue) New() ki.Ki {
-	return &FontValue{}
-}
-
 // GiEditorType is the [gti.Type] for [GiEditor]
 var GiEditorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.GiEditor",
@@ -1078,7 +1110,7 @@ var GiEditorType = gti.AddType(&gti.Type{
 		{"Filename", &gti.Field{Name: "Filename", Type: "gi.FileName", Doc: "current filename for saving / loading", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &GiEditor{},
@@ -1135,39 +1167,6 @@ func (t *HiStyleValue) New() ki.Ki {
 	return &HiStyleValue{}
 }
 
-// IconValueType is the [gti.Type] for [IconValue]
-var IconValueType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.IconValue",
-	ShortName:  "giv.IconValue",
-	IDName:     "icon-value",
-	Doc:        "IconValue presents an action for displaying an IconName and selecting\nicons from IconChooserDialog",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &IconValue{},
-})
-
-// NewIconValue adds a new [IconValue] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewIconValue(par ki.Ki, name ...string) *IconValue {
-	return par.NewChild(IconValueType, name...).(*IconValue)
-}
-
-// KiType returns the [*gti.Type] of [IconValue]
-func (t *IconValue) KiType() *gti.Type {
-	return IconValueType
-}
-
-// New returns a new [*IconValue] value
-func (t *IconValue) New() ki.Ki {
-	return &IconValue{}
-}
-
 // KeyChordValueType is the [gti.Type] for [KeyChordValue]
 var KeyChordValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.KeyChordValue",
@@ -1212,7 +1211,7 @@ var KeyChordEditType = gti.AddType(&gti.Type{
 		{"FocusActive", &gti.Field{Name: "FocusActive", Type: "bool", Doc: "true if the keyboard focus is active or not -- when we lose active focus we apply changes", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Label", &gti.Field{Name: "gi.Label", Type: "gi.Label", Doc: "", Directives: gti.Directives{}}},
+		{"Label", &gti.Field{Name: "Label", Type: "gi.Label", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &KeyChordEdit{},
@@ -1290,7 +1289,7 @@ var MapViewType = gti.AddType(&gti.Type{
 		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapView{},
@@ -1331,7 +1330,7 @@ var MapViewInlineType = gti.AddType(&gti.Type{
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapViewInline{},
@@ -1363,7 +1362,7 @@ var SliceViewType = gti.AddType(&gti.Type{
 	Doc:        "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to Inactive for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "SliceViewStyleFunc", Doc: "[view: -] optional styling function", Directives: gti.Directives{}}},
+		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "SliceViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "SliceViewBase", Doc: "", Directives: gti.Directives{}}},
@@ -1398,20 +1397,20 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to Inactive for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.\nAutomatically has a toolbar with Slice ToolBar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "[view: -] the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}}},
-		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", Doc: "[view: -] optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}}},
-		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", Doc: "[view: -] non-ptr reflect.Value of the slice", Directives: gti.Directives{}}},
-		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "[view: -] Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"isArray", &gti.Field{Name: "isArray", Type: "bool", Doc: "[view: -] whether the slice is actually an array -- no modifications -- set by SetSlice", Directives: gti.Directives{}}},
+		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}}},
+		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", Doc: "optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}}},
+		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", Doc: "non-ptr reflect.Value of the slice", Directives: gti.Directives{}}},
+		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
+		{"isArray", &gti.Field{Name: "isArray", Type: "bool", Doc: "whether the slice is actually an array -- no modifications -- set by SetSlice", Directives: gti.Directives{}}},
 		{"NoAdd", &gti.Field{Name: "NoAdd", Type: "bool", Doc: "if true, user cannot add elements to the slice", Directives: gti.Directives{}}},
 		{"NoDelete", &gti.Field{Name: "NoDelete", Type: "bool", Doc: "if true, user cannot delete elements from the slice", Directives: gti.Directives{}}},
 		{"ShowViewCtxtMenu", &gti.Field{Name: "ShowViewCtxtMenu", Type: "bool", Doc: "if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "[view: -] Value representations of the slice values", Directives: gti.Directives{}}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the slice values", Directives: gti.Directives{}}},
 		{"ShowIndex", &gti.Field{Name: "ShowIndex", Type: "bool", Doc: "whether to show index or not", Directives: gti.Directives{}}},
 		{"ShowToolBar", &gti.Field{Name: "ShowToolBar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
 		{"InactKeyNav", &gti.Field{Name: "InactKeyNav", Type: "bool", Doc: "support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events", Directives: gti.Directives{}}},
-		{"SelVal", &gti.Field{Name: "SelVal", Type: "any", Doc: "[view: -] current selection value -- initially select this value if set", Directives: gti.Directives{}}},
+		{"SelVal", &gti.Field{Name: "SelVal", Type: "any", Doc: "current selection value -- initially select this value if set", Directives: gti.Directives{}}},
 		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", Doc: "index of currently-selected item, in Inactive mode only", Directives: gti.Directives{}}},
 		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", Doc: "editing-mode select rows mode", Directives: gti.Directives{}}},
 		{"InactMultiSel", &gti.Field{Name: "InactMultiSel", Type: "bool", Doc: "if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported", Directives: gti.Directives{}}},
@@ -1419,20 +1418,20 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", Doc: "[view: -] the slice that we successfully set a toolbar for", Directives: gti.Directives{}}},
+		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", Doc: "the slice that we successfully set a toolbar for", Directives: gti.Directives{}}},
 		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", Doc: "size of slice", Directives: gti.Directives{}}},
 		{"DispRows", &gti.Field{Name: "DispRows", Type: "int", Doc: "actual number of rows displayed = min(VisRows, SliceSize)", Directives: gti.Directives{}}},
 		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}}},
 		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", Doc: "height of a single row", Directives: gti.Directives{}}},
 		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}}},
-		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", Doc: "[view: -] the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}}},
-		{"RenderedRows", &gti.Field{Name: "RenderedRows", Type: "int", Doc: "[view: -] the number of rows rendered -- determines update", Directives: gti.Directives{}}},
-		{"InFocusGrab", &gti.Field{Name: "InFocusGrab", Type: "bool", Doc: "[view: -] guard for recursive focus grabbing", Directives: gti.Directives{}}},
-		{"InFullRebuild", &gti.Field{Name: "InFullRebuild", Type: "bool", Doc: "[view: -] guard for recursive rebuild", Directives: gti.Directives{}}},
-		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", Doc: "[view: -] temp idx state for e.g., dnd", Directives: gti.Directives{}}},
+		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", Doc: "the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}}},
+		{"RenderedRows", &gti.Field{Name: "RenderedRows", Type: "int", Doc: "the number of rows rendered -- determines update", Directives: gti.Directives{}}},
+		{"InFocusGrab", &gti.Field{Name: "InFocusGrab", Type: "bool", Doc: "guard for recursive focus grabbing", Directives: gti.Directives{}}},
+		{"InFullRebuild", &gti.Field{Name: "InFullRebuild", Type: "bool", Doc: "guard for recursive rebuild", Directives: gti.Directives{}}},
+		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceViewBase{},
@@ -1474,7 +1473,7 @@ var SliceViewInlineType = gti.AddType(&gti.Type{
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceViewInline{},
@@ -1520,7 +1519,7 @@ var StructViewType = gti.AddType(&gti.Type{
 		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Frame", &gti.Field{Name: "gi.Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructView{},
@@ -1558,11 +1557,11 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "[view: inactive] if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
 		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructViewInline{},
@@ -1596,10 +1595,10 @@ var EditorType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Trans", &gti.Field{Name: "Trans", Type: "mat32.Vec2", Doc: "view translation offset (from dragging)", Directives: gti.Directives{}}},
 		{"Scale", &gti.Field{Name: "Scale", Type: "float32", Doc: "view scaling (from zooming)", Directives: gti.Directives{}}},
-		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", Doc: "[view: -] has dragging cursor been set yet?", Directives: gti.Directives{}}},
+		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Editor{},
@@ -1631,13 +1630,13 @@ var TableViewType = gti.AddType(&gti.Type{
 	Doc:        "TableView represents a slice-of-structs as a table, where the fields are\nthe columns, within an overall frame.  It has two modes, determined by\nInactive flag: if Inactive, it functions as a mutually-exclusive item\nselector, highlighting the selected row and emitting a WidgetSig\nWidgetSelected signal, and TableViewDoubleClick for double clicks (can be\nused for closing dialogs).  If !Inactive, it is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop, reporting each action\ntaken using the TableViewSig signals\nAutomatically has a toolbar with Slice ToolBar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "TableViewStyleFunc", Doc: "[view: -] optional styling function", Directives: gti.Directives{}}},
-		{"SelField", &gti.Field{Name: "SelField", Type: "string", Doc: "[view: -] current selection field -- initially select value in this field", Directives: gti.Directives{}}},
+		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "TableViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
+		{"SelField", &gti.Field{Name: "SelField", Type: "string", Doc: "current selection field -- initially select value in this field", Directives: gti.Directives{}}},
 		{"SortIdx", &gti.Field{Name: "SortIdx", Type: "int", Doc: "current sort index", Directives: gti.Directives{}}},
 		{"SortDesc", &gti.Field{Name: "SortDesc", Type: "bool", Doc: "whether current sort order is descending", Directives: gti.Directives{}}},
-		{"StruType", &gti.Field{Name: "StruType", Type: "reflect.Type", Doc: "[view: -] struct type for each row", Directives: gti.Directives{}}},
-		{"VisFields", &gti.Field{Name: "VisFields", Type: "[]reflect.StructField", Doc: "[view: -] the visible fields", Directives: gti.Directives{}}},
-		{"NVisFields", &gti.Field{Name: "NVisFields", Type: "int", Doc: "[view: -] number of visible fields", Directives: gti.Directives{}}},
+		{"StruType", &gti.Field{Name: "StruType", Type: "reflect.Type", Doc: "struct type for each row", Directives: gti.Directives{}}},
+		{"VisFields", &gti.Field{Name: "VisFields", Type: "[]reflect.StructField", Doc: "the visible fields", Directives: gti.Directives{}}},
+		{"NVisFields", &gti.Field{Name: "NVisFields", Type: "int", Doc: "number of visible fields", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "SliceViewBase", Doc: "", Directives: gti.Directives{}}},
@@ -1680,11 +1679,11 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"Indent", &gti.Field{Name: "Indent", Type: "units.Value", Doc: "styled amount to indent children relative to this node", Directives: gti.Directives{}}},
 		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", Doc: "styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4.", Directives: gti.Directives{}}},
 		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "mat32.Vec2", Doc: "just the size of our widget -- our alloc includes all of our children, but we only draw us", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "[view: show-name] optional icon, displayed to the the left of the text label", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}}},
 		{"RootView", &gti.Field{Name: "RootView", Type: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.WidgetBase", &gti.Field{Name: "gi.WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TreeView{},
@@ -1745,6 +1744,8 @@ var ValueBaseType = gti.AddType(&gti.Type{
 		{"Owner", &gti.Field{Name: "Owner", Type: "any", Doc: "the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating", Directives: gti.Directives{}}},
 		{"Field", &gti.Field{Name: "Field", Type: "*reflect.StructField", Doc: "if Owner is a struct, this is the reflect.StructField associated with the value", Directives: gti.Directives{}}},
 		{"Tags", &gti.Field{Name: "Tags", Type: "map[string]string", Doc: "set of tags that can be set to customize interface for different types of values -- only source for non-structfield values", Directives: gti.Directives{}}},
+		{"HasSavedDesc", &gti.Field{Name: "HasSavedDesc", Type: "bool", Doc: "whether SavedDesc is applicable", Directives: gti.Directives{}}},
+		{"SavedDesc", &gti.Field{Name: "SavedDesc", Type: "string", Doc: "a saved version of the description for the value, if HasSavedDesc is true", Directives: gti.Directives{}}},
 		{"Key", &gti.Field{Name: "Key", Type: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}}},
 		{"KeyView", &gti.Field{Name: "KeyView", Type: "Value", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
 		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
@@ -1754,7 +1755,7 @@ var ValueBaseType = gti.AddType(&gti.Type{
 		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ki.Node", &gti.Field{Name: "ki.Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ValueBase{},
@@ -1828,7 +1829,7 @@ var VCSLogViewType = gti.AddType(&gti.Type{
 		{"SetA", &gti.Field{Name: "SetA", Type: "bool", Doc: "double-click will set the A revision -- else B", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"gi.Layout", &gti.Field{Name: "gi.Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &VCSLogView{},
