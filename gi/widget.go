@@ -241,58 +241,58 @@ type WidgetBase struct {
 	// todo: remove CSS stuff from here??
 
 	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
-	Class string `desc:"user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard"`
+	Class string
 
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props `xml:"css" desc:"cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type"`
+	CSS ki.Props `xml:"css"`
 
-	// [view: no-inline] aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" desc:"aggregated css properties from all higher nodes down to me"`
+	// aggregated css properties from all higher nodes down to me
+	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline"`
 
 	// todo: need to fully revisit scrolling logic!
 
 	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is"`
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations"`
+	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
-	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" desc:"2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping"`
+	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// text for tooltip for this widget -- can use HTML formatting
-	Tooltip string `desc:"text for tooltip for this widget -- can use HTML formatting"`
+	Tooltip string
 
 	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `json:"-" xml:"-" copy:"-" desc:"a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using AddStyles, which can be called by end-user and internal code"`
+	Stylers []func(s *styles.Style) `json:"-" xml:"-" copy:"-"`
 
 	// override the computed styles and allow directly editing Style
-	OverrideStyle bool `json:"-" xml:"-" desc:"override the computed styles and allow directly editing Style"`
+	OverrideStyle bool `json:"-" xml:"-"`
 
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Style styles.Style `json:"-" xml:"-" desc:"styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)"`
+	Style styles.Style `json:"-" xml:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-	Parts *Layout `json:"-" xml:"-" view-closed:"true" desc:"a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved"`
+	Parts *Layout `json:"-" xml:"-" view-closed:"true"`
 
 	// all the layout state information for this widget
-	LayState LayoutState `copy:"-" json:"-" xml:"-" desc:"all the layout state information for this widget"`
+	LayState LayoutState `copy:"-" json:"-" xml:"-"`
 
-	// [view: -] optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
-	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate"`
+	// optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
+	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
-	Sc *Scene `copy:"-" json:"-" xml:"-" desc:"parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config."`
+	Sc *Scene `copy:"-" json:"-" xml:"-"`
 
-	// [view: -] mutex protecting the Style field
-	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the Style field"`
+	// mutex protecting the Style field
+	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// [view: -] mutex protecting the BBox fields
-	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" desc:"mutex protecting the BBox fields"`
+	// mutex protecting the BBox fields
+	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
 func (wb *WidgetBase) OnInit() {
