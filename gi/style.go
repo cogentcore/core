@@ -210,19 +210,19 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	if s.Is(states.Disabled) {
 		s.Cursor = cursors.NotAllowed
 		s.Opacity = 0.38
-	} else {
-		s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
-		// default to state layer associated with the state,
-		// which the developer can override in their stylers
-		s.StateLayer = s.State.StateLayer()
+		return
+	}
+	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
+	// default to state layer associated with the state,
+	// which the developer can override in their stylers
+	s.StateLayer = s.State.StateLayer()
 
-		if s.Is(states.Focused) {
-			s.Border = s.MaxBorder
-		}
-		if s.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-			s.Color = colors.Scheme.Select.OnContainer
-		}
+	if s.Is(states.Focused) {
+		s.Border = s.MaxBorder
+	}
+	if s.Is(states.Selected) {
+		s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+		s.Color = colors.Scheme.Select.OnContainer
 	}
 }
 
