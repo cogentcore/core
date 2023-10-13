@@ -906,39 +906,13 @@ func (vv *ValueBase) Desc() (string, bool) {
 	}
 	// otherwise, we get our field documentation in our parent
 	rval := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-	f := extractField(rval, vv.Field.Name)
+	f := gti.GetField(rval, vv.Field.Name)
 	if f == nil {
 		return "", false
 	}
 	vv.HasSavedDesc = true
 	vv.SavedDesc = f.Doc
 	return f.Doc, true
-}
-
-// extractField recursively attempts to extract the [gti.Field]
-// with the given name from the given struct [reflect.Value].
-func extractField(v reflect.Value, field string) *gti.Field {
-	typ := gti.TypeByName(gti.TypeName(v.Type()))
-	// if we are not in the gti registry, there is nothing that we can do
-	if typ == nil {
-		return nil
-	}
-	f := typ.Fields.ValByKey(field)
-	// we have successfully gotten the field
-	if f != nil {
-		return f
-	}
-	// otherwise, we go through all of the embeds and call extractField recursively on them
-	for _, kv := range typ.Embeds.Order {
-		e := kv.Val
-		rf := v.FieldByName(e.Name)
-		f := extractField(rf, field)
-		// we have successfully gotten the field
-		if f != nil {
-			return f
-		}
-	}
-	return nil
 }
 
 // OwnerLabel returns some extra info about the owner of this value view
