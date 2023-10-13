@@ -30,7 +30,6 @@ func (tv *View) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Matc
 	_, matches := tv.Buf.Search([]byte(find), !useCase, lexItems)
 	if len(matches) == 0 {
 		tv.Highlights = nil
-		tv.RenderAllLines()
 		return matches, false
 	}
 	hi := make([]textbuf.Region, len(matches))
@@ -41,7 +40,6 @@ func (tv *View) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Matc
 		}
 	}
 	tv.Highlights = hi
-	tv.RenderAllLines()
 	return matches, true
 }
 
@@ -120,7 +118,6 @@ func (tv *View) ISearchSelectMatch(midx int) {
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
-	// tv.RenderSelectLines()
 	tv.ISearchSig()
 }
 
@@ -238,7 +235,6 @@ func (tv *View) ISearchCancel() {
 	tv.ISearch.Matches = nil
 	tv.Highlights = nil
 	tv.SavePosHistory(tv.CursorPos)
-	tv.RenderAllLines()
 	tv.SelectReset()
 	tv.ISearchSig()
 }
@@ -405,7 +401,6 @@ func (tv *View) QReplaceSelectMatch(midx int) {
 	tv.SetCursor(pos)
 	tv.SavePosHistory(tv.CursorPos)
 	tv.ScrollCursorToCenterIfHidden()
-	// tv.RenderSelectLines()
 	tv.QReplaceSig()
 }
 
@@ -476,7 +471,6 @@ func (tv *View) QReplaceCancel() {
 	tv.QReplace.Matches = nil
 	tv.Highlights = nil
 	tv.SavePosHistory(tv.CursorPos)
-	tv.RenderAllLines()
 	tv.SelectReset()
 	tv.QReplaceSig()
 }
@@ -496,6 +490,5 @@ func (tv *View) EscPressed() {
 		tv.SelectReset()
 	default:
 		tv.Highlights = nil
-		tv.RenderAllLines()
 	}
 }

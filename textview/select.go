@@ -68,7 +68,6 @@ func (tv *View) SelectAll() {
 	defer tv.UpdateEndRender(updt)
 	tv.SelectReg.Start = lex.PosZero
 	tv.SelectReg.End = tv.Buf.EndPos()
-	// tv.RenderAllLines()
 }
 
 // WordBefore returns the word before the lex.Pos
@@ -252,22 +251,12 @@ func (tv *View) SelectReset() {
 	if !tv.HasSelection() {
 		return
 	}
-	stln := tv.SelectReg.Start.Ln
-	edln := tv.SelectReg.End.Ln
 	tv.SelectReg = textbuf.RegionNil
 	tv.PrevSelectReg = textbuf.RegionNil
-	tv.RenderLines(stln, edln)
 }
 
 // RenderSelectLines renders the lines within the current selection region
 func (tv *View) RenderSelectLines() {
-	if tv.PrevSelectReg == textbuf.RegionNil {
-		tv.RenderLines(tv.SelectReg.Start.Ln, tv.SelectReg.End.Ln)
-	} else {
-		stln := min(tv.SelectReg.Start.Ln, tv.PrevSelectReg.Start.Ln)
-		edln := max(tv.SelectReg.End.Ln, tv.PrevSelectReg.End.Ln)
-		tv.RenderLines(stln, edln)
-	}
 	tv.PrevSelectReg = tv.SelectReg
 }
 

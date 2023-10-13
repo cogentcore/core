@@ -800,7 +800,6 @@ func (tv *DiffTextView) HandleDoubleClick(me events.Event) {
 				dv.ApplyDiff(1, ln)
 			}
 		}
-		tv.RenderLines(ln, ln)
 		me.SetHandled()
 		return
 	}
