@@ -320,10 +320,19 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		return res, nil
 	}
 	for _, field := range list.List {
-		// if we have no name, fall back on type name
-		name := fmt.Sprintf("%v", field.Type)
+		tn := types.ExprString(field.Type)
+		name := ""
 		if len(field.Names) > 0 {
 			name = field.Names[0].Name
+		} else {
+			// if we have no name, fall back on type name
+			name = tn
+			// we must get rid of any package name, as field
+			// names never have package names
+			li := strings.LastIndex(name, ".")
+			if li >= 0 {
+				name = name[:li]
+			}
 		}
 		dirs := gti.Directives{}
 		if field.Doc != nil {
@@ -337,7 +346,7 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		}
 		fo := &gti.Field{
 			Name:       name,
-			Type:       types.ExprString(field.Type),
+			Type:       tn,
 			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
 		}
