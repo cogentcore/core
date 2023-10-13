@@ -96,6 +96,34 @@ func AllEmbeddersOf(typ *Type) []*Type {
 	return typs
 }
 
+// GetField recursively attempts to extract the [gti.Field]
+// with the given name from the given struct [reflect.Value],
+// by searching through all of the embeds if it can not find
+// it directly in the struct.
+func GetField(val reflect.Value, field string) *Field {
+	typ := TypeByName(TypeName(val.Type()))
+	// if we are not in the gti registry, there is nothing that we can do
+	if typ == nil {
+		return nil
+	}
+	f := typ.Fields.ValByKey(field)
+	// we have successfully gotten the field
+	if f != nil {
+		return f
+	}
+	// otherwise, we go through all of the embeds and call GetField recursively on them
+	for _, kv := range typ.Embeds.Order {
+		e := kv.Val
+		rf := val.FieldByName(e.Name)
+		f := GetField(rf, field)
+		// we have successfully gotten the field
+		if f != nil {
+			return f
+		}
+	}
+	return nil
+}
+
 // ShortTypeName returns the short version of a package-qualified type name
 // which just has the last element of the path.  This is what is used in
 // standard Go programming, and is is used for the key to lookup reflect.Type
