@@ -890,12 +890,18 @@ func (vv *ValueBase) AllTags() map[string]string {
 // documentation of the value through gti. If this value's type/field has not
 // been added to gti, Desc returns "", false.
 func (vv *ValueBase) Desc() (string, bool) {
+	if vv.HasSavedDesc {
+		return vv.SavedDesc, true
+	}
+
 	// if we are not part of a struct, we just get the documentation for our type
 	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
 		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
 		if typ == nil {
 			return "", false
 		}
+		vv.HasSavedDesc = true
+		vv.SavedDesc = typ.Doc
 		return typ.Doc, true
 	}
 	// otherwise, we get our field documentation in our parent
@@ -904,6 +910,8 @@ func (vv *ValueBase) Desc() (string, bool) {
 	if f == nil {
 		return "", false
 	}
+	vv.HasSavedDesc = true
+	vv.SavedDesc = f.Doc
 	return f.Doc, true
 }
 
