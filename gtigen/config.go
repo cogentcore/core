@@ -10,32 +10,32 @@ import "text/template"
 // used by gtigen
 type Config struct {
 
-	// [def: .] the source directory to run gtigen on (can be set to multiple through paths like ./...)
-	Dir string `def:"." posarg:"0" required:"-" desc:"the source directory to run gtigen on (can be set to multiple through paths like ./...)"`
+	// the source directory to run gtigen on (can be set to multiple through paths like ./...)
+	Dir string `def:"." posarg:"0" required:"-"`
 
-	// [def: gtigen.go] the output file location relative to the package on which gtigen is being called
-	Output string `def:"gtigen.go" desc:"the output file location relative to the package on which gtigen is being called"`
+	// the output file location relative to the package on which gtigen is being called
+	Output string `def:"gtigen.go"`
 
 	// whether to add types to gtigen by default
-	AddTypes bool `desc:"whether to add types to gtigen by default"`
+	AddTypes bool
 
 	// whether to add methods to gtigen by default
-	AddMethods bool `desc:"whether to add methods to gtigen by default"`
+	AddMethods bool
 
 	// whether to add functions to gtigen by default
-	AddFuncs bool `desc:"whether to add functions to gtigen by default"`
+	AddFuncs bool
 
 	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it (note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should)
-	InterfaceConfigs map[string]*Config `desc:"a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it (note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should)"`
+	InterfaceConfigs map[string]*Config
 
 	// whether to generate an instance of the type(s)
-	Instance bool `desc:"whether to generate an instance of the type(s)"`
+	Instance bool
 
 	// whether to generate a global type variable of the form 'TypeNameType'
-	TypeVar bool `desc:"whether to generate a global type variable of the form 'TypeNameType'"`
+	TypeVar bool
 
 	// TODO: should this be called TypeTemplates and should there be a Func/Method Templates?
 
 	// a slice of templates to execute on each type being added; the template data is of the type gtigen.Type
-	Templates []*template.Template `desc:"a slice of templates to execute on each type being added; the template data is of the type gtigen.Type"`
+	Templates []*template.Template
 }

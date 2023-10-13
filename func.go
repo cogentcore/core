@@ -24,7 +24,7 @@ type Func struct {
 	Returns *Fields
 
 	// unique type ID number
-	ID uint64 `desc:"unique type ID number"`
+	ID uint64
 }
 
 // Method represents a method
