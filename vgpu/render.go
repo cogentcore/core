@@ -24,43 +24,43 @@ import (
 type Render struct {
 
 	// system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc
-	Sys *System `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
+	Sys *System
 
 	// the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface
-	Dev vk.Device `desc:"the device we're associated with -- this must be the same device that owns the Framebuffer -- e.g., the Surface"`
+	Dev vk.Device
 
 	// image format information for the framebuffer we render to
-	Format ImageFormat `desc:"image format information for the framebuffer we render to"`
+	Format ImageFormat
 
 	// the associated depth buffer, if set
-	Depth Image `desc:"the associated depth buffer, if set"`
+	Depth Image
 
 	// is true if configured with depth buffer
-	HasDepth bool `desc:"is true if configured with depth buffer"`
+	HasDepth bool
 
 	// for multisampling, this is the multisampled image that is the actual render target
-	Multi Image `desc:"for multisampling, this is the multisampled image that is the actual render target"`
+	Multi Image
 
 	// is true if multsampled image configured
-	HasMulti bool `desc:"is true if multsampled image configured"`
+	HasMulti bool
 
 	// host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged.
-	Grab Image `desc:"host-accessible image that is used to transfer back from a render color attachment to host memory -- requires a different format than color attachment, and is ImageOnHostOnly flagged."`
+	Grab Image
 
 	// host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image
-	GrabDepth MemBuff `desc:"host-accessible buffer for grabbing the depth map -- must go to a buffer and not an image"`
+	GrabDepth MemBuff
 
 	// set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)
-	NotSurface bool `desc:"set this to true if it is not using a Surface render target (i.e., it is a RenderFrame)"`
+	NotSurface bool
 
 	// values for clearing image when starting render pass
-	ClearVals []vk.ClearValue `desc:"values for clearing image when starting render pass"`
+	ClearVals []vk.ClearValue
 
 	// the vulkan renderpass config that clears target first
-	VkClearPass vk.RenderPass `desc:"the vulkan renderpass config that clears target first"`
+	VkClearPass vk.RenderPass
 
 	// the vulkan renderpass config that does not clear target first (loads previous)
-	VkLoadPass vk.RenderPass `desc:"the vulkan renderpass config that does not clear target first (loads previous)"`
+	VkLoadPass vk.RenderPass
 }
 
 func (rp *Render) Destroy() {

@@ -15,25 +15,25 @@ type Sphere struct {
 	ShapeBase
 
 	// radius of the sphere
-	Radius float32 `desc:"radius of the sphere"`
+	Radius float32
 
-	// [min: 3] number of segments around the width of the sphere (32 is reasonable default for full circle)
-	WidthSegs int `min:"3" desc:"number of segments around the width of the sphere (32 is reasonable default for full circle)"`
+	// number of segments around the width of the sphere (32 is reasonable default for full circle)
+	WidthSegs int `min:"3"`
 
-	// [min: 3] number of height segments (32 is reasonable default for full height)
-	HeightSegs int `min:"3" desc:"number of height segments (32 is reasonable default for full height)"`
+	// number of height segments (32 is reasonable default for full height)
+	HeightSegs int `min:"3"`
 
-	// [min: 0] [max: 360] [step: 5] starting radial angle in degrees, relative to -1,0,0 left side starting point
-	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees, relative to -1,0,0 left side starting point"`
+	// starting radial angle in degrees, relative to -1,0,0 left side starting point
+	AngStart float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)
-	AngLen float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
+	// total radial angle to generate in degrees (max = 360)
+	AngLen float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 180] [step: 5] starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
-	ElevStart float32 `min:"0" max:"180" step:"5" desc:"starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom"`
+	// starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom
+	ElevStart float32 `min:"0" max:"180" step:"5"`
 
-	// [min: 0] [max: 180] [step: 5] total angle to generate in degrees (max = 180)
-	ElevLen float32 `min:"0" max:"180" step:"5" desc:"total angle to generate in degrees (max = 180)"`
+	// total angle to generate in degrees (max = 180)
+	ElevLen float32 `min:"0" max:"180" step:"5"`
 }
 
 // NewSphere returns a Sphere shape with given size

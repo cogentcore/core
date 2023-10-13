@@ -33,40 +33,40 @@ const MaxLights = 8
 type Phong struct {
 
 	// number of each type of light
-	NLights NLights `desc:"number of each type of light"`
+	NLights NLights
 
 	// ambient lights
-	Ambient [MaxLights]AmbientLight `desc:"ambient lights"`
+	Ambient [MaxLights]AmbientLight
 
 	// directional lights
-	Dir [MaxLights]DirLight `desc:"directional lights"`
+	Dir [MaxLights]DirLight
 
 	// point lights
-	Point [MaxLights]PointLight `desc:"point lights"`
+	Point [MaxLights]PointLight
 
 	// spot lights
-	Spot [MaxLights]SpotLight `desc:"spot lights"`
+	Spot [MaxLights]SpotLight
 
-	// [def: false] render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
-	Wireframe bool `def:"false" desc:"render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system"`
+	// render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system
+	Wireframe bool `def:"false"`
 
 	// state for current rendering
-	Cur CurRender `desc:"state for current rendering"`
+	Cur CurRender
 
 	// meshes -- holds all the mesh data -- must be configured prior to rendering
-	Meshes ordmap.Map[string, *Mesh] `desc:"meshes -- holds all the mesh data -- must be configured prior to rendering"`
+	Meshes ordmap.Map[string, *Mesh]
 
 	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
-	Textures ordmap.Map[string, *Texture] `desc:"textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability"`
+	Textures ordmap.Map[string, *Texture]
 
 	// colors, optionally available for looking up by name -- not used directly in rendering
-	Colors ordmap.Map[string, *Colors] `desc:"colors, optionally available for looking up by name -- not used directly in rendering"`
+	Colors ordmap.Map[string, *Colors]
 
 	// rendering system
-	Sys vgpu.System `desc:"rendering system"`
+	Sys vgpu.System
 
-	// [view: -] mutex on updating
-	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-" desc:"mutex on updating"`
+	// mutex on updating
+	UpdtMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-"`
 }
 
 func (ph *Phong) Destroy() {

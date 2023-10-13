@@ -29,7 +29,7 @@ func (nl *NLights) Reset() {
 type AmbientLight struct {
 
 	// color of light -- multiplies ambient color of materials
-	Color mat32.Vec3 `desc:"color of light -- multiplies ambient color of materials"`
+	Color mat32.Vec3
 	pad0  float32
 }
 
@@ -40,11 +40,11 @@ type AmbientLight struct {
 type DirLight struct {
 
 	// color of light at full intensity
-	Color mat32.Vec3 `desc:"color of light at full intensity"`
+	Color mat32.Vec3
 	pad0  float32
 
 	// position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector.
-	Pos  mat32.Vec3 `desc:"position of light vector -- think of it shining down from this position toward the origin, i.e., the negation of this position is the vector."`
+	Pos  mat32.Vec3
 	pad1 float32
 }
 
@@ -54,15 +54,15 @@ type DirLight struct {
 type PointLight struct {
 
 	// color of light a full intensity
-	Color mat32.Vec3 `desc:"color of light a full intensity"`
+	Color mat32.Vec3
 	pad0  float32
 
 	// position of light in world coordinates
-	Pos  mat32.Vec3 `desc:"position of light in world coordinates"`
+	Pos  mat32.Vec3
 	pad1 float32
 
 	// X = Linear, Y = Quad: Distance linear decay factor -- defaults to .1; Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances
-	Decay mat32.Vec3 `desc:"X = Linear, Y = Quad: Distance linear decay factor -- defaults to .1; Distance quadratic decay factor -- defaults to .01 -- dominates at longer distances"`
+	Decay mat32.Vec3
 	pad2  float32
 }
 
@@ -74,19 +74,19 @@ type PointLight struct {
 type SpotLight struct {
 
 	// color of light a full intensity
-	Color mat32.Vec3 `desc:"color of light a full intensity"`
+	Color mat32.Vec3
 	pad0  float32
 
 	// position of light in world coordinates
-	Pos  mat32.Vec3 `desc:"position of light in world coordinates"`
+	Pos  mat32.Vec3
 	pad1 float32
 
 	// direction of light vector
-	Dir  mat32.Vec3 `desc:"direction of light vector"`
+	Dir  mat32.Vec3
 	pad2 float32
 
 	// X = Angular Decay, Y = CutAngle, Z = LinDecay, W = QuadDecay: Angular decay factor -- defaults to 15; Cut off angle (in degrees) -- defaults to 45 -- max of 90; Distance linear decay factor -- defaults to 1; Distance quadratic decay factor -- defaults to 1 -- dominates at longer distances
-	Decay mat32.Vec4 `desc:"X = Angular Decay, Y = CutAngle, Z = LinDecay, W = QuadDecay: Angular decay factor -- defaults to 15; Cut off angle (in degrees) -- defaults to 45 -- max of 90; Distance linear decay factor -- defaults to 1; Distance quadratic decay factor -- defaults to 1 -- dominates at longer distances"`
+	Decay mat32.Vec4
 }
 
 // ConfigLights configures the rendering for the lights that have been added.

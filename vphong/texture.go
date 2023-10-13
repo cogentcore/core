@@ -166,10 +166,10 @@ func (ph *Phong) UseFullTexture() {
 type TexPars struct {
 
 	// how often to repeat the texture in each direction
-	Repeat mat32.Vec2 `desc:"how often to repeat the texture in each direction"`
+	Repeat mat32.Vec2
 
 	// offset for when to start the texure in each direction
-	Off mat32.Vec2 `desc:"offset for when to start the texure in each direction"`
+	Off mat32.Vec2
 }
 
 func (tp *TexPars) Set(rpt, off mat32.Vec2) {

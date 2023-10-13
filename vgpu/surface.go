@@ -19,40 +19,40 @@ import (
 type Surface struct {
 
 	// pointer to gpu device, for convenience
-	GPU *GPU `desc:"pointer to gpu device, for convenience"`
+	GPU *GPU
 
 	// device for this surface -- each window surface has its own device, configured for that surface
-	Device Device `desc:"device for this surface -- each window surface has its own device, configured for that surface"`
+	Device Device
 
 	// the Render for this Surface, typically from a System
-	Render *Render `desc:"the Render for this Surface, typically from a System"`
+	Render *Render
 
 	// has the current swapchain image format and dimensions
-	Format ImageFormat `desc:"has the current swapchain image format and dimensions"`
+	Format ImageFormat
 
 	// ordered list of surface formats to select
-	DesiredFormats []vk.Format `desc:"ordered list of surface formats to select"`
+	DesiredFormats []vk.Format
 
 	// number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number
-	NFrames int `desc:"number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number"`
+	NFrames int
 
 	// Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames
-	Frames []*Framebuffer `desc:"Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames"`
+	Frames []*Framebuffer
 
-	// [view: -] vulkan handle for surface
-	Surface vk.Surface `view:"-" desc:"vulkan handle for surface"`
+	// vulkan handle for surface
+	Surface vk.Surface `view:"-"`
 
-	// [view: -] vulkan handle for swapchain
-	Swapchain vk.Swapchain `view:"-" desc:"vulkan handle for swapchain"`
+	// vulkan handle for swapchain
+	Swapchain vk.Swapchain `view:"-"`
 
-	// [view: -] semaphore used internally for waiting on acquisition of next frame
-	ImageAcquired vk.Semaphore `view:"-" desc:"semaphore used internally for waiting on acquisition of next frame"`
+	// semaphore used internally for waiting on acquisition of next frame
+	ImageAcquired vk.Semaphore `view:"-"`
 
-	// [view: -] semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
-	RenderDone vk.Semaphore `view:"-" desc:"semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method"`
+	// semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method
+	RenderDone vk.Semaphore `view:"-"`
 
-	// [view: -] fence for rendering command running
-	RenderFence vk.Fence `view:"-" desc:"fence for rendering command running"`
+	// fence for rendering command running
+	RenderFence vk.Fence `view:"-"`
 }
 
 // NewSurface returns a new surface initialized for given GPU and vulkan

@@ -37,16 +37,16 @@ type MemReg struct {
 type VarMem struct {
 
 	// variable -- all Vals of given Var are stored in the same Buffer
-	Var *Var `desc:"variable -- all Vals of given Var are stored in the same Buffer"`
+	Var *Var
 
 	// index into storage buffer array holding this value
-	Buff int `desc:"index into storage buffer array holding this value"`
+	Buff int
 
 	// total size needed for this value, excluding alignment padding
-	Size int `desc:"total size needed for this value, excluding alignment padding"`
+	Size int
 
 	// allocated offset within storage buffer for start of Var memory
-	Offset int `desc:"allocated offset within storage buffer for start of Var memory"`
+	Offset int
 }
 
 // Memory manages memory for the GPU, using separate buffers for
@@ -56,22 +56,22 @@ type Memory struct {
 	GPU *GPU
 
 	// logical device that this memory is managed for -- set from System
-	Device Device `desc:"logical device that this memory is managed for -- set from System"`
+	Device Device
 
 	// command pool for memory transfers
-	CmdPool CmdPool `desc:"command pool for memory transfers"`
+	CmdPool CmdPool
 
 	// Vars variables used in shaders, which manage associated Vals containing specific value instances of each var
-	Vars Vars `desc:"Vars variables used in shaders, which manage associated Vals containing specific value instances of each var"`
+	Vars Vars
 
 	// memory buffers, organized by different Roles of vars.  Storage is managed separately in StorageBuffs
-	Buffs [BuffTypesN]*MemBuff `desc:"memory buffers, organized by different Roles of vars.  Storage is managed separately in StorageBuffs"`
+	Buffs [BuffTypesN]*MemBuff
 
 	// memory buffers for storage -- vals are allocated to buffers during AllocHost, grouping based on what fits within GPU limits
-	StorageBuffs []*MemBuff `desc:"memory buffers for storage -- vals are allocated to buffers during AllocHost, grouping based on what fits within GPU limits"`
+	StorageBuffs []*MemBuff
 
 	// memory allocation records for storage buffer allocation, per variable
-	StorageMems []*VarMem `desc:"memory allocation records for storage buffer allocation, per variable"`
+	StorageMems []*VarMem
 }
 
 // Init configures the Memory for use with given gpu, device, and associated queueindex

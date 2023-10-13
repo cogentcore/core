@@ -20,16 +20,16 @@ type Lines struct {
 	ShapeBase
 
 	// line points (must be 2 or more)
-	Points []mat32.Vec3 `desc:"line points (must be 2 or more)"`
+	Points []mat32.Vec3
 
 	// line width, Y = height perpendicular to line direction, and X = depth
-	Width mat32.Vec2 `desc:"line width, Y = height perpendicular to line direction, and X = depth"`
+	Width mat32.Vec2
 
 	// optional colors for each point -- actual color interpolates between
-	Colors []color.Color `desc:"optional colors for each point -- actual color interpolates between"`
+	Colors []color.Color
 
 	// if true, connect the first and last points to form a closed shape
-	Closed bool `desc:"if true, connect the first and last points to form a closed shape"`
+	Closed bool
 }
 
 // NewLines returns a Lines shape with given size

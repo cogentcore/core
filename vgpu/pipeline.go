@@ -23,25 +23,25 @@ import (
 type Pipeline struct {
 
 	// unique name of this pipeline
-	Name string `desc:"unique name of this pipeline"`
+	Name string
 
 	// system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc
-	Sys *System `desc:"system that we belong to and manages all shared resources (Memory, Vars, Vals, etc), etc"`
+	Sys *System
 
 	// shaders in order added -- should be execution order
-	Shaders []*Shader `desc:"shaders in order added -- should be execution order"`
+	Shaders []*Shader
 
 	// shaders loaded for this pipeline
-	ShaderMap map[string]*Shader `desc:"shaders loaded for this pipeline"`
+	ShaderMap map[string]*Shader
 
 	// vulkan pipeline configuration options
-	VkConfig vk.GraphicsPipelineCreateInfo `desc:"vulkan pipeline configuration options"`
+	VkConfig vk.GraphicsPipelineCreateInfo
 
 	// the created vulkan pipeline
-	VkPipeline vk.Pipeline `desc:"the created vulkan pipeline"`
+	VkPipeline vk.Pipeline
 
 	// cache
-	VkCache vk.PipelineCache `desc:"cache"`
+	VkCache vk.PipelineCache
 }
 
 // Vars returns a pointer to the vars for this pipeline, which has vals within it

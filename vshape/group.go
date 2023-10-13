@@ -11,7 +11,7 @@ type ShapeGroup struct {
 	ShapeBase
 
 	// list of shapes in group
-	Shapes []Shape `desc:"list of shapes in group"`
+	Shapes []Shape
 }
 
 // N returns number of vertex, index points in this shape element.

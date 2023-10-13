@@ -14,19 +14,19 @@ type Plane struct {
 	ShapeBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
-	NormAxis mat32.Dims `desc:"axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis."`
+	NormAxis mat32.Dims
 
 	// if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true
-	NormNeg bool `desc:"if false, the plane normal facing in the positive direction along specified NormAxis, otherwise it faces in the negative if true"`
+	NormNeg bool
 
 	// 2D size of plane
-	Size mat32.Vec2 `desc:"2D size of plane"`
+	Size mat32.Vec2
 
 	// number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec2i `desc:"number of segments to divide plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
+	Segs mat32.Vec2i
 
 	// offset from origin along direction of normal to the plane
-	Offset float32 `desc:"offset from origin along direction of normal to the plane"`
+	Offset float32
 }
 
 // NewPlane returns a Plane shape with given size

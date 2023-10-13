@@ -18,13 +18,13 @@ import (
 type Mesh struct {
 
 	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates
-	NVtx int `desc:"number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates"`
+	NVtx int
 
 	// number of indexes, as mat32.ArrayU32
-	NIdx int `desc:"number of indexes, as mat32.ArrayU32"`
+	NIdx int
 
 	// has per-vertex colors, as mat32.Vec4 per vertex
-	HasColor bool `desc:"has per-vertex colors, as mat32.Vec4 per vertex"`
+	HasColor bool
 }
 
 // ConfigMeshes configures vals for meshes -- this is the first of

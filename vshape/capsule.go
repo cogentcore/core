@@ -13,28 +13,28 @@ type Capsule struct {
 	ShapeBase
 
 	// height of the cylinder portion
-	Height float32 `desc:"height of the cylinder portion"`
+	Height float32
 
 	// radius of the top -- set to 0 to omit top cap
-	TopRad float32 `desc:"radius of the top -- set to 0 to omit top cap"`
+	TopRad float32
 
 	// radius of the bottom -- set to 0 to omit bottom cap
-	BotRad float32 `desc:"radius of the bottom -- set to 0 to omit bottom cap"`
+	BotRad float32
 
-	// [min: 1] number of radial segments (32 is a reasonable default for full circle)
-	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
+	// number of radial segments (32 is a reasonable default for full circle)
+	RadialSegs int `min:"1"`
 
 	// number of height segments
-	HeightSegs int `desc:"number of height segments"`
+	HeightSegs int
 
 	// number of segments in the hemisphere cap ends (16 is a reasonable default)
-	CapSegs int `desc:"number of segments in the hemisphere cap ends (16 is a reasonable default)"`
+	CapSegs int
 
-	// [min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point
-	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
+	// starting angle in degrees, relative to -1,0,0 left side starting point
+	AngStart float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)
-	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
+	// total angle to generate in degrees (max 360)
+	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
 // NewCapsule returns a Capsule shape with given radius, height,

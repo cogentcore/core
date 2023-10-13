@@ -13,7 +13,7 @@ type Texture struct {
 	Image
 
 	// sampler for image
-	Sampler `desc:"sampler for image"`
+	Sampler
 }
 
 func (tx *Texture) Defaults() {
@@ -42,19 +42,19 @@ type Sampler struct {
 	Name string
 
 	// for U (horizontal) axis -- what to do when going off the edge
-	UMode SamplerModes `desc:"for U (horizontal) axis -- what to do when going off the edge"`
+	UMode SamplerModes
 
 	// for V (vertical) axis -- what to do when going off the edge
-	VMode SamplerModes `desc:"for V (vertical) axis -- what to do when going off the edge"`
+	VMode SamplerModes
 
 	// for W (horizontal) axis -- what to do when going off the edge
-	WMode SamplerModes `desc:"for W (horizontal) axis -- what to do when going off the edge"`
+	WMode SamplerModes
 
 	// border color for Clamp modes
-	Border BorderColors `desc:"border color for Clamp modes"`
+	Border BorderColors
 
 	// the vulkan sampler
-	VkSampler vk.Sampler `desc:"the vulkan sampler"`
+	VkSampler vk.Sampler
 }
 
 func (sm *Sampler) Defaults() {

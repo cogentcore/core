@@ -118,16 +118,16 @@ func ImageToRGBA(img image.Image) *image.RGBA {
 type ImageFormat struct {
 
 	// Size of image
-	Size image.Point `desc:"Size of image"`
+	Size image.Point
 
 	// Image format -- FormatR8g8b8a8Srgb is a standard default
-	Format vk.Format `desc:"Image format -- FormatR8g8b8a8Srgb is a standard default"`
+	Format vk.Format
 
 	// number of samples -- set higher for Framebuffer rendering but otherwise default of SampleCount1Bit
-	Samples vk.SampleCountFlagBits `desc:"number of samples -- set higher for Framebuffer rendering but otherwise default of SampleCount1Bit"`
+	Samples vk.SampleCountFlagBits
 
 	// number of layers for texture arrays
-	Layers int `desc:"number of layers for texture arrays"`
+	Layers int
 }
 
 // NewImageFormat returns a new ImageFormat with default format and given size
@@ -284,31 +284,31 @@ func (im *ImageFormat) Stride() int {
 type Image struct {
 
 	// name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty
-	Name string `desc:"name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty"`
+	Name string
 
 	// bit flags for image state, for indicating nature of ownership and state
-	Flags ImageFlags `desc:"bit flags for image state, for indicating nature of ownership and state"`
+	Flags ImageFlags
 
 	// format & size of image
-	Format ImageFormat `desc:"format & size of image"`
+	Format ImageFormat
 
-	// [view: -] vulkan image handle, in device memory
-	Image vk.Image `view:"-" desc:"vulkan image handle, in device memory"`
+	// vulkan image handle, in device memory
+	Image vk.Image `view:"-"`
 
-	// [view: -] vulkan image view
-	View vk.ImageView `view:"-" desc:"vulkan image view"`
+	// vulkan image view
+	View vk.ImageView `view:"-"`
 
-	// [view: -] memory for image when we allocate it
-	Mem vk.DeviceMemory `view:"-" desc:"memory for image when we allocate it"`
+	// memory for image when we allocate it
+	Mem vk.DeviceMemory `view:"-"`
 
-	// [view: -] keep track of device for destroying view
-	Dev vk.Device `view:"-" desc:"keep track of device for destroying view"`
+	// keep track of device for destroying view
+	Dev vk.Device `view:"-"`
 
 	// host memory buffer representation of the image
-	Host HostImage `desc:"host memory buffer representation of the image"`
+	Host HostImage
 
 	// pointer to our GPU
-	GPU *GPU `desc:"pointer to our GPU"`
+	GPU *GPU
 }
 
 // HasFlag checks if flag is set
@@ -910,19 +910,19 @@ func (im *Image) Transition(cmd vk.CommandBuffer, format vk.Format, oldLayout, n
 type HostImage struct {
 
 	// size in bytes allocated for host representation of image
-	Size int `desc:"size in bytes allocated for host representation of image"`
+	Size int
 
-	// [view: -] buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
-	Buff vk.Buffer `view:"-" desc:"buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)"`
+	// buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)
+	Buff vk.Buffer `view:"-"`
 
 	// offset into host buffer, when Buff is Memory managed
-	Offset int `desc:"offset into host buffer, when Buff is Memory managed"`
+	Offset int
 
-	// [view: -] host CPU-visible memory, for staging, when we manage our own memory
-	Mem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging, when we manage our own memory"`
+	// host CPU-visible memory, for staging, when we manage our own memory
+	Mem vk.DeviceMemory `view:"-"`
 
-	// [view: -] memory mapped pointer into host memory -- remains mapped
-	Ptr unsafe.Pointer `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
+	// memory mapped pointer into host memory -- remains mapped
+	Ptr unsafe.Pointer `view:"-"`
 }
 
 func (hi *HostImage) SetNil() {

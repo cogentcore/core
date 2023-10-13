@@ -25,31 +25,31 @@ import (
 type Val struct {
 
 	// name of this value, named by default as the variable name_idx
-	Name string `desc:"name of this value, named by default as the variable name_idx"`
+	Name string
 
 	// index of this value within the Var list of values
-	Idx int `desc:"index of this value within the Var list of values"`
+	Idx int
 
 	// actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set.
-	N int `desc:"actual number of elements in an array -- 1 means scalar / singular value.  If 0, this is a dynamically sized item and the size must be set."`
+	N int
 
 	// offset in bytes from start of memory buffer
-	Offset int `desc:"offset in bytes from start of memory buffer"`
+	Offset int
 
 	// val state flags
-	Flags ValFlags `desc:"val state flags"`
+	Flags ValFlags
 
 	// if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy.
-	ElSize int `desc:"if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy."`
+	ElSize int
 
 	// total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding
-	AllocSize int `desc:"total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding"`
+	AllocSize int
 
 	// for Texture Var roles, this is the Texture
-	Texture *Texture `desc:"for Texture Var roles, this is the Texture"`
+	Texture *Texture
 
-	// [view: -] pointer to the start of the staging memory for this value
-	MemPtr unsafe.Pointer `view:"-" desc:"pointer to the start of the staging memory for this value"`
+	// pointer to the start of the staging memory for this value
+	MemPtr unsafe.Pointer `view:"-"`
 }
 
 // HasFlag checks if flag is set
@@ -274,16 +274,16 @@ func (vl *Val) MemReg(vr *Var) MemReg {
 type Vals struct {
 
 	// values in indexed order
-	Vals []*Val `desc:"values in indexed order"`
+	Vals []*Val
 
 	// map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique
-	NameMap map[string]*Val `desc:"map of vals by name -- only for specifically named vals vs. generically allocated ones -- names must be unique"`
+	NameMap map[string]*Val
 
 	// for texture values, this allocates textures to texture arrays by size -- used if On flag is set -- must call AllocTexBySize to allocate after ConfigGoImage is called on all vals.  Then call SetGoImage method on Vals to set the Go Image for each val -- this automatically redirects to the group allocated images.
-	TexSzAlloc szalloc.SzAlloc `desc:"for texture values, this allocates textures to texture arrays by size -- used if On flag is set -- must call AllocTexBySize to allocate after ConfigGoImage is called on all vals.  Then call SetGoImage method on Vals to set the Go Image for each val -- this automatically redirects to the group allocated images."`
+	TexSzAlloc szalloc.SzAlloc
 
 	// for texture values, if AllocTexBySize is called, these are the actual allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs.
-	GpTexVals []*Val `desc:"for texture values, if AllocTexBySize is called, these are the actual allocated image arrays that hold the grouped images (size = TexSzAlloc.GpAllocs."`
+	GpTexVals []*Val
 }
 
 // ConfigVals configures given number of values in the list for given variable.

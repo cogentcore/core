@@ -20,46 +20,46 @@ import (
 type System struct {
 
 	// optional name of this System
-	Name string `desc:"optional name of this System"`
+	Name string
 
 	// gpu device
-	GPU *GPU `desc:"gpu device"`
+	GPU *GPU
 
 	// logical device for this System, which is a non-owned copy of either Surface or RenderFrame device
-	Device Device `desc:"logical device for this System, which is a non-owned copy of either Surface or RenderFrame device"`
+	Device Device
 
 	// cmd pool specific to this system
-	CmdPool CmdPool `desc:"cmd pool specific to this system"`
+	CmdPool CmdPool
 
 	// if true, this is a compute system -- otherwise is graphics
-	Compute bool `desc:"if true, this is a compute system -- otherwise is graphics"`
+	Compute bool
 
 	// if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type
-	StaticVars bool `desc:"if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type"`
+	StaticVars bool
 
 	// all pipelines
-	Pipelines []*Pipeline `desc:"all pipelines"`
+	Pipelines []*Pipeline
 
 	// map of all pipelines -- names must be unique
-	PipelineMap map[string]*Pipeline `desc:"map of all pipelines -- names must be unique"`
+	PipelineMap map[string]*Pipeline
 
 	// map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream
-	Events map[string]vk.Event `desc:"map of events for synchronizing processing within a single command stream -- this is the best method for compute shaders to coordinate within a given sequence of shader runs in a single command stream"`
+	Events map[string]vk.Event
 
 	// map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible.
-	Semaphores map[string]vk.Semaphore `desc:"map of semaphores for GPU-side sync between different submitted commands -- names must be unique -- note: better to use Events within one command if possible."`
+	Semaphores map[string]vk.Semaphore
 
 	// map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case
-	Fences map[string]vk.Fence `desc:"map of fences for CPU-GPU sync -- names must be unique.  WaitIdle implictly uses a fence so it is not essential to use this for simple wait case"`
+	Fences map[string]vk.Fence
 
 	// map of command buffers, for persistent recorded commands -- names must be unique
-	CmdBuffs map[string]vk.CommandBuffer `desc:"map of command buffers, for persistent recorded commands -- names must be unique"`
+	CmdBuffs map[string]vk.CommandBuffer
 
 	// manages all the memory for all the Vals
-	Mem Memory `desc:"manages all the memory for all the Vals"`
+	Mem Memory
 
 	// renderpass with depth buffer for this system
-	Render Render `desc:"renderpass with depth buffer for this system"`
+	Render Render
 }
 
 // InitGraphics initializes the System for graphics use, using

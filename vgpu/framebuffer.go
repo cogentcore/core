@@ -12,19 +12,19 @@ import (
 type Framebuffer struct {
 
 	// target framebuffer format -- if multisampling is active then Image has samples = 1, Render.Multi has full samples
-	Format ImageFormat `desc:"target framebuffer format -- if multisampling is active then Image has samples = 1, Render.Multi has full samples"`
+	Format ImageFormat
 
 	// the image behind the framebuffer, includes the format -- this
-	Image Image `desc:"the image behind the framebuffer, includes the format -- this "`
+	Image Image
 
 	// pointer to the associated renderpass and depth buffer
-	Render *Render `desc:"pointer to the associated renderpass and depth buffer"`
+	Render *Render
 
 	// vulkan framebuffer
-	Framebuffer vk.Framebuffer `desc:"vulkan framebuffer"`
+	Framebuffer vk.Framebuffer
 
 	// has this framebuffer been cleared yet?  if not, must be prior to use as a non-clearing Load case
-	HasCleared bool `desc:"has this framebuffer been cleared yet?  if not, must be prior to use as a non-clearing Load case"`
+	HasCleared bool
 }
 
 // ConfigSurfaceImage configures settings for given existing surface image

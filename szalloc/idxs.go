@@ -15,13 +15,13 @@ import (
 type Idxs struct {
 
 	// percent size of this image relative to max size allocated
-	PctSize mat32.Vec2 `desc:"percent size of this image relative to max size allocated"`
+	PctSize mat32.Vec2
 
 	// group index
-	GpIdx int `desc:"group index"`
+	GpIdx int
 
 	// item index within group (e.g., Layer)
-	ItemIdx int `desc:"item index within group (e.g., Layer)"`
+	ItemIdx int
 }
 
 func NewIdxs(gpi, itmi int, sz, mxsz image.Point) *Idxs {

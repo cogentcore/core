@@ -41,58 +41,58 @@ var DefaultOpts *GPUOpts
 type GPU struct {
 
 	// handle for the vulkan driver instance
-	Instance vk.Instance `desc:"handle for the vulkan driver instance"`
+	Instance vk.Instance
 
 	// handle for the vulkan physical GPU hardware
-	GPU vk.PhysicalDevice `desc:"handle for the vulkan physical GPU hardware"`
+	GPU vk.PhysicalDevice
 
 	// options passed in during config
-	UserOpts *GPUOpts `desc:"options passed in during config"`
+	UserOpts *GPUOpts
 
 	// set of enabled options set post-Config
-	EnabledOpts GPUOpts `desc:"set of enabled options set post-Config"`
+	EnabledOpts GPUOpts
 
 	// name of the physical GPU device
-	DeviceName string `desc:"name of the physical GPU device"`
+	DeviceName string
 
 	// name of application -- set during Config and used in init of GPU
-	AppName string `desc:"name of application -- set during Config and used in init of GPU"`
+	AppName string
 
 	// version of vulkan API to target
-	APIVersion vk.Version `desc:"version of vulkan API to target"`
+	APIVersion vk.Version
 
 	// version of application -- optional
-	AppVersion vk.Version `desc:"version of application -- optional"`
+	AppVersion vk.Version
 
 	// use Add method to add required instance extentions prior to calling Config
-	InstanceExts []string `desc:"use Add method to add required instance extentions prior to calling Config"`
+	InstanceExts []string
 
 	// use Add method to add required device extentions prior to calling Config
-	DeviceExts []string `desc:"use Add method to add required device extentions prior to calling Config"`
+	DeviceExts []string
 
 	// set Add method to add required validation layers prior to calling Config
-	ValidationLayers []string `desc:"set Add method to add required validation layers prior to calling Config"`
+	ValidationLayers []string
 
 	// physical device features required -- set per platform as needed
-	DeviceFeaturesNeeded *vk.PhysicalDeviceVulkan12Features `desc:"physical device features required -- set per platform as needed"`
+	DeviceFeaturesNeeded *vk.PhysicalDeviceVulkan12Features
 
 	// this is used for computing, not graphics
-	Compute bool `desc:"this is used for computing, not graphics"`
+	Compute bool
 
 	// our custom debug callback
-	DebugCallback vk.DebugReportCallback `desc:"our custom debug callback"`
+	DebugCallback vk.DebugReportCallback
 
 	// properties of physical hardware -- populated after Config
-	GPUProps vk.PhysicalDeviceProperties `desc:"properties of physical hardware -- populated after Config"`
+	GPUProps vk.PhysicalDeviceProperties
 
 	// features of physical hardware -- populated after Config
-	GPUFeats vk.PhysicalDeviceFeatures `desc:"features of physical hardware -- populated after Config"`
+	GPUFeats vk.PhysicalDeviceFeatures
 
 	// properties of device memory -- populated after Config
-	MemoryProps vk.PhysicalDeviceMemoryProperties `desc:"properties of device memory -- populated after Config"`
+	MemoryProps vk.PhysicalDeviceMemoryProperties
 
-	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
-	MaxComputeWorkGroupCount1D int `desc:"maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values."`
+	// maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.
+	MaxComputeWorkGroupCount1D int
 }
 
 // InitNoDisplay initializes vulkan system for a purely compute-based

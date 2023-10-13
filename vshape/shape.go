@@ -31,16 +31,16 @@ type Shape interface {
 type ShapeBase struct {
 
 	// vertex offset, in points
-	VtxOff int `desc:"vertex offset, in points"`
+	VtxOff int
 
 	// index offset, in points
-	IdxOff int `desc:"index offset, in points"`
+	IdxOff int
 
 	// cubic bounding box in local coords
-	CBBox mat32.Box3 `desc:"cubic bounding box in local coords"`
+	CBBox mat32.Box3
 
 	// all shapes take a 3D position offset to enable composition
-	Pos mat32.Vec3 `desc:"all shapes take a 3D position offset to enable composition"`
+	Pos mat32.Vec3
 }
 
 // Offs returns starting offset for verticies, indexes in full shape array,

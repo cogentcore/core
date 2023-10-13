@@ -11,10 +11,10 @@ type Box struct {
 	ShapeBase
 
 	// size along each dimension
-	Size mat32.Vec3 `desc:"size along each dimension"`
+	Size mat32.Vec3
 
 	// number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1
-	Segs mat32.Vec3i `desc:"number of segments to divide each plane into (enforced to be at least 1) -- may potentially increase rendering quality to have > 1"`
+	Segs mat32.Vec3i
 }
 
 // NewBox returns a Box shape with given size

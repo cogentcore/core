@@ -17,31 +17,31 @@ type MemBuff struct {
 	GPU *GPU
 
 	// type of memory in this buffer
-	Type BuffTypes `desc:"type of memory in this buffer"`
+	Type BuffTypes
 
 	// allocated buffer size
-	Size int `desc:"allocated buffer size"`
+	Size int
 
-	// [view: -] logical descriptor for host CPU-visible memory, for staging
-	Host vk.Buffer `view:"-" desc:"logical descriptor for host CPU-visible memory, for staging"`
+	// logical descriptor for host CPU-visible memory, for staging
+	Host vk.Buffer `view:"-"`
 
-	// [view: -] host CPU-visible memory, for staging
-	HostMem vk.DeviceMemory `view:"-" desc:"host CPU-visible memory, for staging"`
+	// host CPU-visible memory, for staging
+	HostMem vk.DeviceMemory `view:"-"`
 
-	// [view: -] logical descriptor for device GPU-local memory, for computation
-	Dev vk.Buffer `view:"-" desc:"logical descriptor for device GPU-local memory, for computation"`
+	// logical descriptor for device GPU-local memory, for computation
+	Dev vk.Buffer `view:"-"`
 
-	// [view: -] device GPU-local memory, for computation
-	DevMem vk.DeviceMemory `view:"-" desc:"device GPU-local memory, for computation"`
+	// device GPU-local memory, for computation
+	DevMem vk.DeviceMemory `view:"-"`
 
-	// [view: -] memory mapped pointer into host memory -- remains mapped
-	HostPtr unsafe.Pointer `view:"-" desc:"memory mapped pointer into host memory -- remains mapped"`
+	// memory mapped pointer into host memory -- remains mapped
+	HostPtr unsafe.Pointer `view:"-"`
 
 	// alignment of offsets into this buffer
-	AlignBytes int `desc:"alignment of offsets into this buffer"`
+	AlignBytes int
 
 	// true if memory has been allocated, copied, transfered
-	Active bool `inactive:"+" desc:"true if memory has been allocated, copied, transfered"`
+	Active bool `inactive:"+"`
 }
 
 // AllocHost allocates memory for this buffer of given size in bytes,

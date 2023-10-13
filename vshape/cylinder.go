@@ -15,31 +15,31 @@ type Cylinder struct {
 	ShapeBase
 
 	// height of the cylinder
-	Height float32 `desc:"height of the cylinder"`
+	Height float32
 
 	// radius of the top -- set to 0 for a cone
-	TopRad float32 `desc:"radius of the top -- set to 0 for a cone"`
+	TopRad float32
 
 	// radius of the bottom
-	BotRad float32 `desc:"radius of the bottom"`
+	BotRad float32
 
-	// [min: 1] number of radial segments (32 is a reasonable default for full circle)
-	RadialSegs int `min:"1" desc:"number of radial segments (32 is a reasonable default for full circle)"`
+	// number of radial segments (32 is a reasonable default for full circle)
+	RadialSegs int `min:"1"`
 
 	// number of height segments
-	HeightSegs int `desc:"number of height segments"`
+	HeightSegs int
 
 	// render the top disc
-	Top bool `desc:"render the top disc"`
+	Top bool
 
 	// render the bottom disc
-	Bottom bool `desc:"render the bottom disc"`
+	Bottom bool
 
-	// [min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point
-	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting angle in degrees, relative to -1,0,0 left side starting point"`
+	// starting angle in degrees, relative to -1,0,0 left side starting point
+	AngStart float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)
-	AngLen float32 `min:"0" max:"360" step:"5" desc:"total angle to generate in degrees (max 360)"`
+	// total angle to generate in degrees (max 360)
+	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
 // NewCylinder returns a Cylinder shape with given radius, height,

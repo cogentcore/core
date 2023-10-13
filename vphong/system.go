@@ -22,28 +22,28 @@ var content embed.FS
 type CurRender struct {
 
 	// index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info
-	DescIdx int `desc:"index of descriptor collection to use -- for threaded / parallel rendering -- see vgup.Vars NDescs for more info"`
+	DescIdx int
 
 	// a texture was selected -- if true, overrides other options
-	UseTexture bool `desc:"a texture was selected -- if true, overrides other options"`
+	UseTexture bool
 
 	// a per-vertex color was selected
-	UseVtxColor bool `desc:"a per-vertex color was selected"`
+	UseVtxColor bool
 
 	// current model pose matrix
-	ModelMtx mat32.Mat4 `desc:"current model pose matrix"`
+	ModelMtx mat32.Mat4
 
 	// camera view and projection matrixes
-	VPMtx Mtxs `desc:"camera view and projection matrixes"`
+	VPMtx Mtxs
 
 	// current color surface properties
-	Color Colors `desc:"current color surface properties"`
+	Color Colors
 
 	// texture parameters -- repeat, offset
-	TexPars TexPars `desc:"texture parameters -- repeat, offset"`
+	TexPars TexPars
 
 	// index of currently-selected texture
-	TexIdx int `desc:"index of currently-selected texture"`
+	TexIdx int
 }
 
 // PushU is the push constants structure, holding everything that
@@ -51,13 +51,13 @@ type CurRender struct {
 type PushU struct {
 
 	// Model Matrix: poses object in world coordinates
-	ModelMtx mat32.Mat4 `desc:"Model Matrix: poses object in world coordinates"`
+	ModelMtx mat32.Mat4
 
 	// surface colors
-	Color Colors `desc:"surface colors"`
+	Color Colors
 
 	// texture parameters
-	Tex TexPars `desc:"texture parameters"`
+	Tex TexPars
 }
 
 // NewPush generates a new Push object based on current render settings

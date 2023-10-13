@@ -16,22 +16,22 @@ type Torus struct {
 	ShapeBase
 
 	// larger radius of the torus ring
-	Radius float32 `desc:"larger radius of the torus ring"`
+	Radius float32
 
 	// radius of the solid tube
-	TubeRadius float32 `desc:"radius of the solid tube"`
+	TubeRadius float32
 
-	// [min: 1] number of segments around the radius of the torus (32 is reasonable default for full circle)
-	RadialSegs int `min:"1" desc:"number of segments around the radius of the torus (32 is reasonable default for full circle)"`
+	// number of segments around the radius of the torus (32 is reasonable default for full circle)
+	RadialSegs int `min:"1"`
 
-	// [min: 1] number of segments for the tube itself (32 is reasonable default for full height)
-	TubeSegs int `min:"1" desc:"number of segments for the tube itself (32 is reasonable default for full height)"`
+	// number of segments for the tube itself (32 is reasonable default for full height)
+	TubeSegs int `min:"1"`
 
-	// [min: 0] [max: 360] [step: 5] starting radial angle in degrees relative to 1,0,0 starting point
-	AngStart float32 `min:"0" max:"360" step:"5" desc:"starting radial angle in degrees relative to 1,0,0 starting point"`
+	// starting radial angle in degrees relative to 1,0,0 starting point
+	AngStart float32 `min:"0" max:"360" step:"5"`
 
-	// [min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)
-	AngLen float32 `min:"0" max:"360" step:"5" desc:"total radial angle to generate in degrees (max = 360)"`
+	// total radial angle to generate in degrees (max = 360)
+	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
 // NewTorus returns a Torus mesh with the specified outer ring radius,
