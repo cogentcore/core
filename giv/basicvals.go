@@ -69,7 +69,7 @@ func (vv *StructValue) ConfigWidget(widg gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Tag("desc")
+	bt.Tooltip, _ = vv.Desc()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -87,7 +87,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	opv := laser.OnePtrUnderlyingValue(vv.Value)
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	if desc == "list" { // todo: not sure where this comes from but it is uninformative
 		desc = ""
 	}
@@ -133,7 +133,7 @@ func (vv *StructInlineValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
-	sv.Tooltip, _ = vv.Tag("desc")
+	sv.Tooltip, _ = vv.Desc()
 	sv.StructValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -193,7 +193,7 @@ func (vv *SliceValue) ConfigWidget(widg gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Tag("desc")
+	bt.Tooltip, _ = vv.Desc()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -210,7 +210,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
 		log.Printf("giv.SliceValue: Cannot view slices with non-pointer struct elements\n")
@@ -272,7 +272,7 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
-	sv.Tooltip, _ = vv.Tag("desc")
+	sv.Tooltip, _ = vv.Desc()
 	sv.SliceValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -320,7 +320,7 @@ func (vv *MapValue) ConfigWidget(widg gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
-	bt.Tooltip, _ = vv.Tag("desc")
+	bt.Tooltip, _ = vv.Desc()
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -337,7 +337,7 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	mpi := vv.Value.Interface()
 	inact := vv.This().(Value).IsInactive()
 	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
@@ -381,7 +381,7 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
-	sv.Tooltip, _ = vv.Tag("desc")
+	sv.Tooltip, _ = vv.Desc()
 	sv.MapValView = vv
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
@@ -450,7 +450,7 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget) {
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Indicator = icons.KeyboardArrowDown
-	bt.Tooltip, _ = vv.Tag("desc")
+	bt.Tooltip, _ = vv.Desc()
 	bt.ResetMenu()
 	bt.Menu.AddButton(gi.ActOpts{Label: "Edit"}, func(bt *gi.Button) {
 		k := vv.KiStruct()
@@ -482,7 +482,7 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	vpath := vv.ViewPath + "/" + newPath
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	inact := vv.This().(Value).IsInactive()
 	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
@@ -522,7 +522,7 @@ func (vv *BoolValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
-	cb.Tooltip, _ = vv.Tag("desc")
+	cb.Tooltip, _ = vv.Desc()
 	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	cb.OnChange(func(e events.Event) {
 		if vv.SetValue(cb.StateIs(states.Checked)) {
@@ -561,7 +561,7 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip, _ = vv.Tag("desc")
+	sb.Tooltip, _ = vv.Desc()
 	sb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -631,7 +631,7 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
-	sb.Tooltip, _ = vv.Tag("desc")
+	sb.Tooltip, _ = vv.Desc()
 	sb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
@@ -712,7 +712,7 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
-	ch.Tooltip, _ = vv.Tag("desc")
+	ch.Tooltip, _ = vv.Desc()
 	ch.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 
 	ev := vv.EnumValue()
@@ -774,7 +774,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	cb := vv.Widget.(*gi.Switches)
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
-	cb.Tooltip, _ = vv.Tag("desc")
+	cb.Tooltip, _ = vv.Desc()
 	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 
 	// todo!
@@ -822,7 +822,7 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
-	cb.Tooltip, _ = vv.Tag("desc")
+	cb.Tooltip, _ = vv.Desc()
 	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 
 	typEmbeds := ki.NodeType
@@ -882,7 +882,7 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip, _ = vv.Tag("desc")
+	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.AddStyles(func(s *styles.Style) {
@@ -927,7 +927,7 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
-	tf.Tooltip, _ = vv.Tag("desc")
+	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	tf.AddStyles(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -974,7 +974,7 @@ func (vv *NilValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
-	sb.Tooltip, _ = vv.Tag("desc")
+	sb.Tooltip, _ = vv.Desc()
 	vv.UpdateWidget()
 }
 
@@ -1019,7 +1019,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
-	tf.Tooltip, _ = vv.Tag("desc")
+	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	tf.AddStyles(func(s *styles.Style) {
 		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
@@ -1093,7 +1093,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	IconChooserDialog(ctx, DlgOpts{Title: "Select an Icon", Prompt: desc}, cur, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
@@ -1153,7 +1153,7 @@ func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		return
 	}
 	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	FontChooserDialog(ctx, DlgOpts{Title: "Select a Font", Prompt: desc}, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
@@ -1217,7 +1217,7 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	cur := laser.ToString(vv.Value.Interface())
 	ext, _ := vv.Tag("ext")
-	desc, _ := vv.Tag("desc")
+	desc, _ := vv.Desc()
 	FileViewDialog(ctx, DlgOpts{Title: vv.Name(), Prompt: desc}, cur, ext, nil, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			fn := dlg.Data.(string)

@@ -551,6 +551,12 @@ type ValueBase struct {
 	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
 	Tags map[string]string `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
 
+	// whether SavedDesc is applicable
+	HasSavedDesc bool `desc:"whether SavedDesc is applicable"`
+
+	// a saved version of the description for the value, if HasSavedDesc is true
+	SavedDesc string `desc:"a saved version of the description for the value, if HasSavedDesc is true"`
+
 	// if Owner is a map, and this is a value, this is the key for this value in the map
 	Key any `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
 
@@ -880,6 +886,55 @@ func (vv *ValueBase) AllTags() map[string]string {
 	return rvt
 }
 
+// Desc returns the string description for this value, gotten from the code
+// documentation of the value through gti. If this value's type/field has not
+// been added to gti, Desc returns "", false.
+func (vv *ValueBase) Desc() (string, bool) {
+	// if we are not part of a struct, we just get the documentation for our type
+	if !(vv.Owner != nil && vv.OwnKind == reflect.Struct) {
+		typ := gti.TypeByName(gti.TypeName(vv.Value.Type()))
+		if typ == nil {
+			return "", false
+		}
+		return typ.Doc, true
+	}
+	// otherwise, we get our field documentation in our parent
+	rval := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
+	f := extractField(rval, vv.Field.Name)
+	if f == nil {
+		return "", false
+	}
+	return f.Doc, true
+}
+
+// extractField recursively attempts to extract the [gti.Field]
+// with the given name from the given struct [reflect.Value].
+func extractField(v reflect.Value, field string) *gti.Field {
+	fmt.Println("looking for", v)
+	typ := gti.TypeByName(gti.TypeName(v.Type()))
+	fmt.Println(field, typ, v.Type(), gti.TypeName(v.Type()))
+	// if we are not in the gti registry, there is nothing that we can do
+	if typ == nil {
+		return nil
+	}
+	f := typ.Fields.ValByKey(field)
+	// we have successfully gotten the field
+	if f != nil {
+		return f
+	}
+	// otherwise, we go through all of the embeds and call extractField recursively on them
+	for _, kv := range typ.Embeds.Order {
+		e := kv.Val
+		rf := v.FieldByName(e.Name)
+		f := extractField(rf, field)
+		// we have successfully gotten the field
+		if f != nil {
+			return f
+		}
+	}
+	return nil
+}
+
 // OwnerLabel returns some extra info about the owner of this value view
 // which is useful to put in title of our object
 func (vv *ValueBase) OwnerLabel() string {
@@ -980,7 +1035,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
 		return
 	}
 	tf.SetStretchMaxWidth()
-	tf.Tooltip, _ = vv.Tag("desc")
+	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.AddStyles(func(s *styles.Style) {
