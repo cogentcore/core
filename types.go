@@ -99,7 +99,8 @@ func AllEmbeddersOf(typ *Type) []*Type {
 // GetField recursively attempts to extract the [gti.Field]
 // with the given name from the given struct [reflect.Value],
 // by searching through all of the embeds if it can not find
-// it directly in the struct.
+// it directly in the struct. The given value should be a real,
+// concrete struct value, not a pointer to it (see [laser.NonPtrValue])
 func GetField(val reflect.Value, field string) *Field {
 	typ := TypeByName(TypeName(val.Type()))
 	// if we are not in the gti registry, there is nothing that we can do
