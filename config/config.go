@@ -21,6 +21,8 @@ import (
 // Config is the main config struct
 // that contains all of the configuration
 // options for the GoKi tool
+//
+//gti:add
 type Config struct {
 
 	// the name of the project
@@ -29,7 +31,7 @@ type Config struct {
 	// the description of the project
 	Desc string
 
-	// the version of the project
+	// [def: v0.0.0]
 	Version string `cmd:"set-version" posarg:"0" def:"v0.0.0"`
 
 	// TODO: add def TypeApp for type once fix SetString
@@ -37,25 +39,26 @@ type Config struct {
 	// the type of the project (app/library)
 	Type Types
 
-	// the configuration options for the build, install, and run commands
+	// [view: add-fields]
 	Build Build `cmd:"build,install,run" view:"add-fields"`
 
-	// the configuration options for the setup command
+	// [view: add-fields]
 	Setup Setup `cmd:"setup" view:"add-fields"`
 
-	// the configuration options for the log command
+	// [view: add-fields]
 	Log Log `cmd:"log" view:"add-fields"`
 
-	// the configuration options for the release command
+	// [view: add-fields]
 	Release Release `cmd:"release" view:"add-fields"`
 
-	// the configuration options for the generate command
+	// [view: add-fields]
 	Generate Generate `cmd:"generate" view:"add-fields"`
 }
 
+//gti:add
 type Build struct {
 
-	// the path of the package to build
+	// [def: .]
 	Package string `def:"." posarg:"0" required:"-"`
 
 	// the target platforms to build executables for
@@ -97,43 +100,46 @@ type Build struct {
 	// print the name of the temporary work directory and do not delete it when exiting
 	Work bool
 
-	// the minimal version of the iOS SDK to compile against
+	// [def: 13.0]
 	IOSVersion string `def:"13.0"`
 
-	// the minimum supported Android SDK (uses-sdk/android:minSdkVersion in AndroidManifest.xml)
+	// [def: 23] [min: 23]
 	AndroidMinSDK int `def:"23" min:"23"`
 
-	// the target Android SDK version (uses-sdk/android:targetSdkVersion in AndroidManifest.xml)
+	// [def: 29]
 	AndroidTargetSDK int `def:"29"`
 }
 
+//gti:add
 type Setup struct {
 
 	// the platform to set things up for
 	Platform Platform `posarg:"0"`
 }
 
+//gti:add
 type Log struct {
 
-	// the target platform to view the logs for (ios or android)
+	// [def: android]
 	Target string `def:"android"`
 
-	// whether to keep the previous log messages or clear them
+	// [def: false]
 	Keep bool `def:"false"`
 
-	// messages not generated from your app equal to or above this log level will be shown
+	// [def: F]
 	All string `def:"F"`
 }
 
 type Release struct {
 
-	// the Go file to store version information in
+	// [def: version.go]
 	VersionFile string `def:"version.go"`
 
-	// the Go package in which the version file will be stored
+	// [def: main]
 	Package string `def:"main"`
 }
 
+//gti:add
 type Generate struct {
 
 	// the enum generation configuration options passed to enumgen
@@ -142,13 +148,13 @@ type Generate struct {
 	// the generation configuration options passed to gtigen
 	Gtigen gtigen.Config
 
-	// the source directory to run generate on (can be multiple through ./...)
+	// [def: .]
 	Dir string `def:"." posarg:"0" required:"-" nest:"-"`
 
-	// the output file location relative to the package on which generate is being called
+	// [def: gokigen.go]
 	Output string `def:"gokigen.go"`
 
-	// whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)
+	// [def: true]
 	AddKiTypes bool `def:"true"`
 }
 
