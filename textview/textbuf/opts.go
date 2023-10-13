@@ -17,16 +17,16 @@ import (
 type Opts struct {
 
 	// editor prefs from gogi prefs
-	gi.EditorPrefs `desc:"editor prefs from gogi prefs"`
+	gi.EditorPrefs
 
 	// character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used
-	CommentLn string `desc:"character(s) that start a single-line comment -- if empty then multi-line comment syntax will be used"`
+	CommentLn string
 
 	// character(s) that start a multi-line comment or one that requires both start and end
-	CommentSt string `desc:"character(s) that start a multi-line comment or one that requires both start and end"`
+	CommentSt string
 
 	// character(s) that end a multi-line comment or one that requires both start and end
-	CommentEd string `desc:"character(s) that end a multi-line comment or one that requires both start and end"`
+	CommentEd string
 }
 
 // CommentStrs returns the comment start and end strings, using line-based CommentLn first if set

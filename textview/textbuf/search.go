@@ -21,10 +21,10 @@ import (
 type Match struct {
 
 	// region surrounding the match -- column positions are in runes, not bytes
-	Reg Region `desc:"region surrounding the match -- column positions are in runes, not bytes"`
+	Reg Region
 
 	// text surrounding the match, at most FileSearchContext on either side (within a single line)
-	Text []byte `desc:"text surrounding the match, at most FileSearchContext on either side (within a single line)"`
+	Text []byte
 }
 
 // SearchContext is how much text to include on either side of the search match

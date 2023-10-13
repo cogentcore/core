@@ -27,37 +27,37 @@ type MapView struct {
 	gi.Frame
 
 	// the map that we are a view onto
-	Map any `desc:"the map that we are a view onto"`
+	Map any
 
 	// Value for the map itself, if this was created within value view framework -- otherwise nil
-	MapValView Value `desc:"Value for the map itself, if this was created within value view framework -- otherwise nil"`
+	MapValView Value
 
 	// has the map been edited?
-	Changed bool `desc:"has the map been edited?"`
+	Changed bool
 
 	// Value representations of the map keys
-	Keys []Value `json:"-" xml:"-" desc:"Value representations of the map keys"`
+	Keys []Value `json:"-" xml:"-"`
 
 	// Value representations of the map values
-	Values []Value `json:"-" xml:"-" desc:"Value representations of the map values"`
+	Values []Value `json:"-" xml:"-"`
 
 	// sort by values instead of keys
-	SortVals bool `desc:"sort by values instead of keys"`
+	SortVals bool
 
 	// whether to show the toolbar or not
-	ShowToolBar bool `desc:"whether to show the toolbar or not"`
+	ShowToolBar bool
 
 	// the number of columns in the map; do not set externally; generally only access internally
-	NCols int `desc:"the number of columns in the map; do not set externally; generally only access internally"`
+	NCols int
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 
 	// the map that we successfully set a toolbar for
-	ToolbarMap any `desc:"the map that we successfully set a toolbar for"`
+	ToolbarMap any
 }
 
 func (mv *MapView) OnInit() {

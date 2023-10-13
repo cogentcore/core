@@ -29,37 +29,37 @@ type Spinner struct {
 	WidgetBase
 
 	// current value
-	Value float32 `xml:"value" desc:"current value"`
+	Value float32 `xml:"value"`
 
 	// is there a minimum value to enforce
-	HasMin bool `xml:"has-min" desc:"is there a minimum value to enforce"`
+	HasMin bool `xml:"has-min"`
 
 	// minimum value in range
-	Min float32 `xml:"min" desc:"minimum value in range"`
+	Min float32 `xml:"min"`
 
 	// is there a maximumvalue to enforce
-	HasMax bool `xml:"has-max" desc:"is there a maximumvalue to enforce"`
+	HasMax bool `xml:"has-max"`
 
 	// maximum value in range
-	Max float32 `xml:"max" desc:"maximum value in range"`
+	Max float32 `xml:"max"`
 
 	// smallest step size to increment
-	Step float32 `xml:"step" desc:"smallest step size to increment"`
+	Step float32 `xml:"step"`
 
 	// larger PageUp / Dn step size
-	PageStep float32 `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	PageStep float32 `xml:"pagestep"`
 
 	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
-	Prec int `desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Prec int
 
 	// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
-	Format string `xml:"format" desc:"prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing"`
+	Format string `xml:"format"`
 
-	// [view: show-name] icon to use for up button -- defaults to [icons.Add]
-	UpIcon icons.Icon `view:"show-name" desc:"icon to use for up button -- defaults to [icons.Add]"`
+	// icon to use for up button -- defaults to
+	UpIcon icons.Icon `view:"show-name"`
 
-	// [view: show-name] icon to use for down button -- defaults to [icons.Remove]
-	DownIcon icons.Icon `view:"show-name" desc:"icon to use for down button -- defaults to [icons.Remove]"`
+	// icon to use for down button -- defaults to
+	DownIcon icons.Icon `view:"show-name"`
 }
 
 func (sp *Spinner) CopyFieldsFrom(frm any) {

@@ -22,16 +22,16 @@ type Switch struct {
 	WidgetBase
 
 	// the type of switch that this is
-	Type SwitchTypes `desc:"the type of switch that this is"`
+	Type SwitchTypes
 
 	// the label text for the switch
-	Text string `desc:"the label text for the switch"`
+	Text string
 
-	// [view: show-name] icon to use for the on, checked state of the switch
-	IconOn icons.Icon `view:"show-name" desc:"icon to use for the on, checked state of the switch"`
+	// icon to use for the on, checked state of the switch
+	IconOn icons.Icon `view:"show-name"`
 
-	// [view: show-name] icon to use for the off, unchecked state of the switch
-	IconOff icons.Icon `view:"show-name" desc:"icon to use for the off, unchecked state of the switch"`
+	// icon to use for the off, unchecked state of the switch
+	IconOff icons.Icon `view:"show-name"`
 }
 
 // SwitchTypes contains the different types of [Switch]es

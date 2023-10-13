@@ -25,28 +25,28 @@ type SliceViewInline struct {
 	gi.WidgetBase
 
 	// the slice that we are a view onto
-	Slice any `desc:"the slice that we are a view onto"`
+	Slice any
 
 	// Value for the slice itself, if this was created within value view framework -- otherwise nil
-	SliceValView Value `desc:"Value for the slice itself, if this was created within value view framework -- otherwise nil"`
+	SliceValView Value
 
 	// whether the slice is actually an array -- no modifications
-	IsArray bool `desc:"whether the slice is actually an array -- no modifications"`
+	IsArray bool
 
 	// whether the slice has a fixed-len flag on it
-	IsFixedLen bool `desc:"whether the slice has a fixed-len flag on it"`
+	IsFixedLen bool
 
 	// has the slice been edited?
-	Changed bool `desc:"has the slice been edited?"`
+	Changed bool
 
 	// Value representations of the fields
-	Values []Value `json:"-" xml:"-" desc:"Value representations of the fields"`
+	Values []Value `json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-" desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value `json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 }
 
 func (sv *SliceViewInline) OnInit() {

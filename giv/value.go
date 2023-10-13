@@ -531,53 +531,53 @@ type ValueBase struct {
 	ki.Node
 
 	// the reflect.Value representation of the value
-	Value reflect.Value `desc:"the reflect.Value representation of the value"`
+	Value reflect.Value
 
 	// kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
-	OwnKind reflect.Kind `desc:"kind of owner that we have -- reflect.Struct, .Map, .Slice are supported"`
+	OwnKind reflect.Kind
 
 	// for OwnKind = Map, this value represents the Key -- otherwise the Value
-	IsMapKey bool `desc:"for OwnKind = Map, this value represents the Key -- otherwise the Value"`
+	IsMapKey bool
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 
 	// the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating
-	Owner any `desc:"the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating"`
+	Owner any
 
 	// if Owner is a struct, this is the reflect.StructField associated with the value
-	Field *reflect.StructField `desc:"if Owner is a struct, this is the reflect.StructField associated with the value"`
+	Field *reflect.StructField
 
 	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
-	Tags map[string]string `desc:"set of tags that can be set to customize interface for different types of values -- only source for non-structfield values"`
+	Tags map[string]string
 
 	// whether SavedDesc is applicable
-	HasSavedDesc bool `desc:"whether SavedDesc is applicable"`
+	HasSavedDesc bool
 
 	// a saved version of the description for the value, if HasSavedDesc is true
-	SavedDesc string `desc:"a saved version of the description for the value, if HasSavedDesc is true"`
+	SavedDesc string
 
 	// if Owner is a map, and this is a value, this is the key for this value in the map
-	Key any `desc:"if Owner is a map, and this is a value, this is the key for this value in the map"`
+	Key any
 
 	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
-	KeyView Value `desc:"if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited"`
+	KeyView Value
 
 	// if Owner is a slice, this is the index for the value in the slice
-	Idx int `desc:"if Owner is a slice, this is the index for the value in the slice"`
+	Idx int
 
 	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
-	WidgetTyp *gti.Type `desc:"type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface"`
+	WidgetTyp *gti.Type
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
-	Widget gi.Widget `desc:"the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget"`
+	Widget gi.Widget
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
 	Listeners events.Listeners
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `desc:"value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent"`
+	TmpSave Value
 }
 
 func (vv *ValueBase) AsValueBase() *ValueBase {

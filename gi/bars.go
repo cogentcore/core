@@ -25,10 +25,10 @@ type MenuBar struct {
 	Layout
 
 	// is this the main menu bar for a window?  controls whether displayed on macOS
-	MainMenu bool `desc:"is this the main menu bar for a window?  controls whether displayed on macOS"`
+	MainMenu bool
 
 	// map of main menu items for callback from OS main menu (MacOS specific)
-	OSMainMenus map[string]*Button `json:"-" xml:"-" desc:"map of main menu items for callback from OS main menu (MacOS specific)"`
+	OSMainMenus map[string]*Button `json:"-" xml:"-"`
 }
 
 func (mb *MenuBar) CopyFieldsFrom(frm any) {

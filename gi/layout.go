@@ -36,19 +36,19 @@ var (
 type LayoutAllocs struct {
 
 	// allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes
-	Size mat32.Vec2 `desc:"allocated size of this item, by the parent layout -- also used temporarily during size process to hold computed size constraints based on content in terminal nodes"`
+	Size mat32.Vec2
 
 	// position of this item, computed by adding in the PosRel to parent position
-	Pos mat32.Vec2 `desc:"position of this item, computed by adding in the PosRel to parent position"`
+	Pos mat32.Vec2
 
 	// allocated relative position of this item, computed by the parent layout
-	PosRel mat32.Vec2 `desc:"allocated relative position of this item, computed by the parent layout"`
+	PosRel mat32.Vec2
 
 	// original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size
-	SizeOrig mat32.Vec2 `desc:"original copy of allocated size of this item, by the parent layout -- some widgets will resize themselves within a given layout (e.g., a TextView), but still need access to their original allocated size"`
+	SizeOrig mat32.Vec2
 
 	// original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos
-	PosOrig mat32.Vec2 `desc:"original copy of allocated relative position of this item, by the parent layout -- need for scrolling which can update AllocPos"`
+	PosOrig mat32.Vec2
 }
 
 // Reset is called at start of layout process -- resets all values back to 0
@@ -63,10 +63,10 @@ func (la *LayoutAllocs) Reset() {
 type LayoutState struct {
 
 	// size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it
-	Size styles.SizePrefs `desc:"size constraints for this item -- set from layout style at start of layout process and then updated for Layout nodes to fit everything within it"`
+	Size styles.SizePrefs
 
 	// allocated size and position -- set by parent Layout
-	Alloc LayoutAllocs `desc:"allocated size and position -- set by parent Layout"`
+	Alloc LayoutAllocs
 }
 
 // todo: not using yet:
@@ -151,52 +151,52 @@ type Layout struct {
 	WidgetBase
 
 	// type of layout to use
-	Lay Layouts `xml:"lay" desc:"type of layout to use"`
+	Lay Layouts `xml:"lay"`
 
 	// extra space to add between elements in the layout
-	Spacing units.Value `xml:"spacing" desc:"extra space to add between elements in the layout"`
+	Spacing units.Value `xml:"spacing"`
 
 	// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
-	StackTop int `desc:"for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered"`
+	StackTop int
 
 	// for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
-	StackTopOnly bool `desc:"for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't"`
+	StackTopOnly bool
 
 	// total max size of children as laid out
-	ChildSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"total max size of children as laid out"`
+	ChildSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
 
 	// extra size in each dim due to scrollbars we add
-	ExtraSize mat32.Vec2 `copy:"-" json:"-" xml:"-" desc:"extra size in each dim due to scrollbars we add"`
+	ExtraSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
 
 	// whether scrollbar is used for given dim
-	HasScroll [2]bool `copy:"-" json:"-" xml:"-" desc:"whether scrollbar is used for given dim"`
+	HasScroll [2]bool `copy:"-" json:"-" xml:"-"`
 
 	// scroll bars -- we fully manage them as needed
-	Scrolls [2]*Slider `copy:"-" json:"-" xml:"-" desc:"scroll bars -- we fully manage them as needed"`
+	Scrolls [2]*Slider `copy:"-" json:"-" xml:"-"`
 
 	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
-	GridSize image.Point `copy:"-" json:"-" xml:"-" desc:"computed size of a grid layout based on all the constraints -- computed during GetSize pass"`
+	GridSize image.Point `copy:"-" json:"-" xml:"-"`
 
-	// grid data for rows in [0] and cols in [1]
-	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-" desc:"grid data for rows in [0] and cols in [1]"`
+	// grid data for rows in and cols in
+	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-"`
 
 	// line breaks for flow layout
-	FlowBreaks []int `copy:"-" json:"-" xml:"-" desc:"line breaks for flow layout"`
+	FlowBreaks []int `copy:"-" json:"-" xml:"-"`
 
 	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-	NeedsRedo bool `copy:"-" json:"-" xml:"-" desc:"true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration"`
+	NeedsRedo bool `copy:"-" json:"-" xml:"-"`
 
 	// accumulated name to search for when keys are typed
-	FocusName string `copy:"-" json:"-" xml:"-" desc:"accumulated name to search for when keys are typed"`
+	FocusName string `copy:"-" json:"-" xml:"-"`
 
 	// time of last focus name event -- for timeout
-	FocusNameTime time.Time `copy:"-" json:"-" xml:"-" desc:"time of last focus name event -- for timeout"`
+	FocusNameTime time.Time `copy:"-" json:"-" xml:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-" desc:"last element focused on -- used as a starting point if name is the same"`
+	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-"`
 
 	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
-	ScrollsOff bool `copy:"-" json:"-" xml:"-" desc:"scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible"`
+	ScrollsOff bool `copy:"-" json:"-" xml:"-"`
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {

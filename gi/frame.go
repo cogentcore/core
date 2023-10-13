@@ -19,7 +19,7 @@ type Frame struct {
 	Layout
 
 	// options for striped backgrounds -- rendered as darker bands relative to background color
-	Stripes Stripes `desc:"options for striped backgrounds -- rendered as darker bands relative to background color"`
+	Stripes Stripes
 }
 
 func (fr *Frame) CopyFieldsFrom(frm any) {

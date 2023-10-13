@@ -37,8 +37,8 @@ type StageMgrBase struct {
 	// This is cleared by the RenderWin each render cycle.
 	Modified bool
 
-	// [view: -] mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
-	Mu sync.RWMutex `view:"-" desc:"mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read"`
+	// mutex protecting reading / updating of the Stack -- destructive stack updating gets a Write lock, else Read
+	Mu sync.RWMutex `view:"-"`
 }
 
 // Top returns the top-most Stage in the Stack, under Read Lock

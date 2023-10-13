@@ -43,19 +43,19 @@ var DefaultRawInterval = 50
 type Rec struct {
 
 	// description of this action, for user to see
-	Action string `desc:"description of this action, for user to see"`
+	Action string
 
 	// action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action
-	Data string `desc:"action data, encoded however you want -- some undo records can just be about this action data that can be interpeted to Undo / Redo a non-state-changing action"`
+	Data string
 
 	// if present, then direct save of full state -- do this at intervals to speed up computing prior states
-	Raw []string `desc:"if present, then direct save of full state -- do this at intervals to speed up computing prior states"`
+	Raw []string
 
 	// patch to get from previous record to this one
-	Patch textbuf.Patch `desc:"patch to get from previous record to this one"`
+	Patch textbuf.Patch
 
 	// this record is an UndoSave, when Undo first called from end of stack
-	UndoSave bool `desc:"this record is an UndoSave, when Undo first called from end of stack"`
+	UndoSave bool
 }
 
 // Init sets the action and data in a record -- overwriting any prior values
@@ -71,16 +71,16 @@ func (rc *Rec) Init(action, data string) {
 type Mgr struct {
 
 	// current index in the undo records -- this is the record that will be undone if user hits undo
-	Idx int `desc:"current index in the undo records -- this is the record that will be undone if user hits undo"`
+	Idx int
 
 	// the list of saved state / action records
-	Recs []*Rec `desc:"the list of saved state / action records"`
+	Recs []*Rec
 
 	// interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs.
-	RawInterval int `desc:"interval for saving raw data -- need to do this at some interval to prevent having it take too long to compute patches from all the diffs."`
+	RawInterval int
 
 	// mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI
-	Mu sync.Mutex `desc:"mutex that protects updates -- we do diff computation as a separate goroutine so it is instant from perspective of UI"`
+	Mu sync.Mutex
 }
 
 // RecState returns the state for given index, reconstructing from diffs

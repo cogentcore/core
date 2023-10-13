@@ -20,25 +20,25 @@ type VCSLogView struct {
 	gi.Layout
 
 	// current log
-	Log vci.Log `desc:"current log"`
+	Log vci.Log
 
 	// file that this is a log of -- if blank then it is entire repository
-	File string `desc:"file that this is a log of -- if blank then it is entire repository"`
+	File string
 
 	// date expression for how long ago to include log entries from
-	Since string `desc:"date expression for how long ago to include log entries from"`
+	Since string
 
 	// version control system repository
-	Repo vci.Repo `json:"-" xml:"-" copy:"-" desc:"version control system repository"`
+	Repo vci.Repo `json:"-" xml:"-" copy:"-"`
 
 	// revision A -- defaults to HEAD
-	RevA string `desc:"revision A -- defaults to HEAD"`
+	RevA string
 
 	// revision B -- blank means current working copy
-	RevB string `desc:"revision B -- blank means current working copy"`
+	RevB string
 
 	// double-click will set the A revision -- else B
-	SetA bool `desc:"double-click will set the A revision -- else B"`
+	SetA bool
 }
 
 func (lv *VCSLogView) OnInit() {

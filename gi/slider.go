@@ -41,86 +41,86 @@ type Slider struct {
 	WidgetBase
 
 	// the type of the slider
-	Type SliderTypes `desc:"the type of the slider"`
+	Type SliderTypes
 
 	// current value
-	Value float32 `xml:"value" desc:"current value"`
+	Value float32 `xml:"value"`
 
 	// dimension along which the slider slides
-	Dim mat32.Dims `desc:"dimension along which the slider slides"`
+	Dim mat32.Dims
 
 	// minimum value in range
-	Min float32 `xml:"min" desc:"minimum value in range"`
+	Min float32 `xml:"min"`
 
 	// maximum value in range
-	Max float32 `xml:"max" desc:"maximum value in range"`
+	Max float32 `xml:"max"`
 
 	// smallest step size to increment
-	Step float32 `xml:"step" desc:"smallest step size to increment"`
+	Step float32 `xml:"step"`
 
 	// larger PageUp / Dn step size
-	PageStep float32 `xml:"pagestep" desc:"larger PageUp / Dn step size"`
+	PageStep float32 `xml:"pagestep"`
 
 	// todo: shouldn't this be a units guy:?
 
 	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
-	ValThumb bool `xml:"val-thumb" alt:"prop-thumb" desc:"if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed"`
+	ValThumb bool `xml:"val-thumb" alt:"prop-thumb"`
 
 	// value that the thumb represents, in the same units
-	ThumbVal float32 `xml:"thumb-val" desc:"value that the thumb represents, in the same units"`
+	ThumbVal float32 `xml:"thumb-val"`
 
 	// styled fixed size of the thumb -- only if not doing ValThumb
-	ThumbSize units.Value `xml:"thumb-size" desc:"styled fixed size of the thumb -- only if not doing ValThumb"`
+	ThumbSize units.Value `xml:"thumb-size"`
 
-	// [view: show-name] optional icon for the dragging knob
-	Icon icons.Icon `view:"show-name" desc:"optional icon for the dragging knob"`
+	// optional icon for the dragging knob
+	Icon icons.Icon `view:"show-name"`
 
 	// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
-	Tracking bool `xml:"tracking" desc:"if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change"`
+	Tracking bool `xml:"tracking"`
 
 	// threshold for amount of change in scroll value before emitting a signal in Tracking mode
-	TrackThr float32 `xml:"track-thr" desc:"threshold for amount of change in scroll value before emitting a signal in Tracking mode"`
+	TrackThr float32 `xml:"track-thr"`
 
 	// snap the values to Step size increments
-	Snap bool `xml:"snap" desc:"snap the values to Step size increments"`
+	Snap bool `xml:"snap"`
 
 	// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
-	Off bool `desc:"can turn off e.g., scrollbar rendering with this flag -- just prevents rendering"`
+	Off bool
 
 	// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
-	Prec int `xml:"prec" desc:"specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions"`
+	Prec int `xml:"prec"`
 
 	// TODO: make value and thumb full style objects
 
 	// the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is
-	ValueColor colors.Full `desc:"the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is"`
+	ValueColor colors.Full
 
 	// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
-	ThumbColor colors.Full `desc:"the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is"`
+	ThumbColor colors.Full
 
 	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
-	StyleBox styles.Style `desc:"an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering"`
+	StyleBox styles.Style
 
 	//////////////////////////////////////////////////////////////////
 	// 	Computed values below
 
 	// logical position of the slider relative to Size
-	Pos float32 `inactive:"+" desc:"logical position of the slider relative to Size"`
+	Pos float32 `inactive:"+"`
 
 	// previous emitted value - don't re-emit if it is the same
-	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-" desc:"previous emitted value - don't re-emit if it is the same"`
+	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-"`
 
 	// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
-	Size float32 `inactive:"+" desc:"computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation"`
+	Size float32 `inactive:"+"`
 
 	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-	ThSize float32 `inactive:"+" desc:"computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize"`
+	ThSize float32 `inactive:"+"`
 
 	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-	ThSizeReal float32 `inactive:"+" desc:"computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value"`
+	ThSizeReal float32 `inactive:"+"`
 
 	// underlying drag position of slider -- not subject to snapping
-	SlideStartPos float32 `inactive:"+" desc:"underlying drag position of slider -- not subject to snapping"`
+	SlideStartPos float32 `inactive:"+"`
 }
 
 // SliderTypes are the different types of sliders

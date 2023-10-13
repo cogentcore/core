@@ -23,22 +23,22 @@ var UndoGroupDelayMSec = 250
 type Undo struct {
 
 	// if true, saving and using undos is turned off (e.g., inactive buffers)
-	Off bool `desc:"if true, saving and using undos is turned off (e.g., inactive buffers)"`
+	Off bool
 
 	// undo stack of edits
-	Stack []*Edit `desc:"undo stack of edits"`
+	Stack []*Edit
 
 	// undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo
-	UndoStack []*Edit `desc:"undo stack of *undo* edits -- added to whenever an Undo is done -- for emacs-style undo"`
+	UndoStack []*Edit
 
 	// undo position in stack
-	Pos int `desc:"undo position in stack"`
+	Pos int
 
 	// group counter
-	Group int `desc:"group counter"`
+	Group int
 
 	// mutex protecting all updates
-	Mu sync.Mutex `json:"-" xml:"-" desc:"mutex protecting all updates"`
+	Mu sync.Mutex `json:"-" xml:"-"`
 }
 
 // NewGroup increments the Group counter so subsequent undos will be grouped separately

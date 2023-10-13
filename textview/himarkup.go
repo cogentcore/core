@@ -28,34 +28,34 @@ import (
 type HiMarkup struct {
 
 	// full info about the file including category etc
-	Info *filecat.FileInfo `desc:"full info about the file including category etc"`
+	Info *filecat.FileInfo
 
 	// syntax highlighting style
-	Style gi.HiStyleName `desc:"syntax highlighting style"`
+	Style gi.HiStyleName
 
 	// chroma-based language name for syntax highlighting the code
-	Lang string `desc:"chroma-based language name for syntax highlighting the code"`
+	Lang string
 
 	// true if both lang and style are set
-	Has bool `desc:"true if both lang and style are set"`
+	Has bool
 
 	// tab size, in chars
-	TabSize int `desc:"tab size, in chars"`
+	TabSize int
 
 	// Commpiled CSS properties for given highlighting style
-	CSSProps ki.Props `json:"-" xml:"-" desc:"Commpiled CSS properties for given highlighting style"`
+	CSSProps ki.Props `json:"-" xml:"-"`
 
 	// pi parser state info
-	PiState *pi.FileStates `desc:"pi parser state info"`
+	PiState *pi.FileStates
 
 	// if supported, this is the pi Lang support for parsing
-	PiLang pi.Lang `desc:"if supported, this is the pi Lang support for parsing"`
+	PiLang pi.Lang
 
 	// current highlighting style
-	HiStyle *histyle.Style `desc:"current highlighting style"`
+	HiStyle *histyle.Style
 
 	// external toggle to turn off automatic highlighting
-	Off       bool `desc:"external toggle to turn off automatic highlighting"`
+	Off       bool
 	lastLang  string
 	lastStyle gi.HiStyleName
 	lexer     chroma.Lexer

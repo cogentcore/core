@@ -26,13 +26,13 @@ type GiEditor struct {
 	gi.Frame
 
 	// root of tree being edited
-	KiRoot ki.Ki `desc:"root of tree being edited"`
+	KiRoot ki.Ki
 
 	// has the root changed via gui actions?  updated from treeview and structview for changes
-	Changed bool `desc:"has the root changed via gui actions?  updated from treeview and structview for changes"`
+	Changed bool
 
 	// current filename for saving / loading
-	Filename gi.FileName `desc:"current filename for saving / loading"`
+	Filename gi.FileName
 }
 
 func (ge *GiEditor) OnInit() {

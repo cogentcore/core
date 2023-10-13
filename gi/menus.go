@@ -581,7 +581,7 @@ type Separator struct {
 	WidgetBase
 
 	// is this a horizontal separator -- otherwise vertical
-	Horiz bool `xml:"horiz" desc:"is this a horizontal separator -- otherwise vertical"`
+	Horiz bool `xml:"horiz"`
 }
 
 func (sp *Separator) OnInit() {

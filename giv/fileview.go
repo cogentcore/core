@@ -43,40 +43,40 @@ type FileView struct {
 	gi.Frame
 
 	// path to directory of files to display
-	DirPath string `desc:"path to directory of files to display"`
+	DirPath string
 
 	// selected file
-	SelFile string `desc:"selected file"`
+	SelFile string
 
 	// target extension(s) (comma separated if multiple, including initial .), if any
-	Ext string `desc:"target extension(s) (comma separated if multiple, including initial .), if any"`
+	Ext string
 
-	// [view: -] optional styling function
-	FilterFunc FileViewFilterFunc `view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	// optional styling function
+	FilterFunc FileViewFilterFunc `view:"-" json:"-" xml:"-"`
 
 	// map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
-	ExtMap map[string]string `desc:"map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value"`
+	ExtMap map[string]string
 
 	// files for current directory
-	Files []*filecat.FileInfo `desc:"files for current directory"`
+	Files []*filecat.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
-	SelectedIdx int `desc:"index of currently-selected file in Files list (-1 if none)"`
+	SelectedIdx int
 
 	// signal for file actions
 	// FileSig ki.Signal `desc:"signal for file actions"`
 
-	// [view: -] change notify for current dir
-	Watcher *fsnotify.Watcher `view:"-" desc:"change notify for current dir"`
+	// change notify for current dir
+	Watcher *fsnotify.Watcher `view:"-"`
 
-	// [view: -] channel to close watcher watcher
-	DoneWatcher chan bool `view:"-" desc:"channel to close watcher watcher"`
+	// channel to close watcher watcher
+	DoneWatcher chan bool `view:"-"`
 
-	// [view: -] UpdateFiles mutex
-	UpdtMu sync.Mutex `view:"-" desc:"UpdateFiles mutex"`
+	// UpdateFiles mutex
+	UpdtMu sync.Mutex `view:"-"`
 
-	// [view: -] Previous path that was processed via UpdateFiles
-	PrevPath string `view:"-" desc:"Previous path that was processed via UpdateFiles"`
+	// Previous path that was processed via UpdateFiles
+	PrevPath string `view:"-"`
 }
 
 func (fv *FileView) OnInit() {

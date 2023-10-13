@@ -47,25 +47,25 @@ func (t Trilean) Prefix(s string) string {
 type StyleEntry struct {
 
 	// text color
-	Color color.RGBA `desc:"text color"`
+	Color color.RGBA
 
 	// background color
-	Background color.RGBA `desc:"background color"`
+	Background color.RGBA
 
-	// [view: -] border color? not sure what this is -- not really used
-	Border color.RGBA `view:"-" desc:"border color? not sure what this is -- not really used"`
+	// border color? not sure what this is -- not really used
+	Border color.RGBA `view:"-"`
 
 	// bold font
-	Bold Trilean `desc:"bold font"`
+	Bold Trilean
 
 	// italic font
-	Italic Trilean `desc:"italic font"`
+	Italic Trilean
 
 	// underline
-	Underline Trilean `desc:"underline"`
+	Underline Trilean
 
 	// don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited
-	NoInherit bool `desc:"don't inherit these settings from sub-category or category levels -- otherwise everything with a Pass is inherited"`
+	NoInherit bool
 }
 
 // // FromChroma copies styles from chroma

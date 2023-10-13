@@ -21,8 +21,8 @@ import (
 type SliceView struct {
 	SliceViewBase
 
-	// [view: -] optional styling function
-	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-" desc:"optional styling function"`
+	// optional styling function
+	StyleFunc SliceViewStyleFunc `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
 // check for interface impl

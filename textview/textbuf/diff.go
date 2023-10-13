@@ -93,10 +93,10 @@ func DiffLinesUnified(astr, bstr []string, context int, afile, adate, bfile, bda
 type PatchRec struct {
 
 	// diff operation: 'r', 'd', 'i', 'e'
-	Op difflib.OpCode `desc:"diff operation: 'r', 'd', 'i', 'e'"`
+	Op difflib.OpCode
 
 	// lines from B buffer needed for 'r' and 'i' operations
-	Blines []string `desc:"lines from B buffer needed for 'r' and 'i' operations"`
+	Blines []string
 }
 
 // Patch is a collection of patch records needed to turn original a buffer into b

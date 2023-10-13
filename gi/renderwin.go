@@ -78,10 +78,10 @@ type RenderWin struct {
 	Name string
 
 	// displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc
-	Title string `desc:"displayed name of window, for window manager etc -- window object name is the internal handle and is used for tracking property info etc"`
+	Title string
 
 	// OS-specific window interface -- handles all the os-specific functions, including delivering events etc
-	GoosiWin goosi.Window `json:"-" xml:"-" desc:"OS-specific window interface -- handles all the os-specific functions, including delivering events etc"`
+	GoosiWin goosi.Window `json:"-" xml:"-"`
 
 	// MainStageMgr controlling the MainStage elements in this window.
 	// The Render Context in this manager is the original source for all Stages
@@ -92,7 +92,7 @@ type RenderWin struct {
 	RenderScenes RenderScenes
 
 	// main menu -- is first element of Scene always -- leave empty to not render.  On MacOS, this drives screen main menu
-	MainMenu *MenuBar `json:"-" xml:"-" desc:"main menu -- is first element of Scene always -- leave empty to not render.  On MacOS, this drives screen main menu"`
+	MainMenu *MenuBar `json:"-" xml:"-"`
 
 	// below are internal vars used during the event loop
 
@@ -101,10 +101,10 @@ type RenderWin struct {
 	// todo: these are bad:
 
 	// the currently selected widget through the inspect editor selection mode
-	SelectedWidget *WidgetBase `desc:"the currently selected widget through the inspect editor selection mode"`
+	SelectedWidget *WidgetBase
 
 	// the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting
-	SelectedWidgetChan chan *WidgetBase `desc:"the channel on which the selected widget through the inspect editor selection mode is transmitted to the inspect editor after the user is done selecting"`
+	SelectedWidgetChan chan *WidgetBase
 
 	// todo: need some other way of freeing GPU resources -- this is not clean:
 	// // the phongs for the window

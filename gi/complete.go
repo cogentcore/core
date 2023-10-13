@@ -31,34 +31,34 @@ type Complete struct {
 	ki.Node
 
 	// function to get the list of possible completions
-	MatchFunc complete.MatchFunc `desc:"function to get the list of possible completions"`
+	MatchFunc complete.MatchFunc
 
 	// function to get the text to show for lookup
-	LookupFunc complete.LookupFunc `desc:"function to get the text to show for lookup"`
+	LookupFunc complete.LookupFunc
 
 	// function to edit text using the selected completion
-	EditFunc complete.EditFunc `desc:"function to edit text using the selected completion"`
+	EditFunc complete.EditFunc
 
 	// the object that implements complete.Func
-	Context any `desc:"the object that implements complete.Func"`
+	Context any
 
 	// line number in source that completion is operating on, if relevant
-	SrcLn int `desc:"line number in source that completion is operating on, if relevant"`
+	SrcLn int
 
 	// character position in source that completion is operating on
-	SrcCh int `desc:"character position in source that completion is operating on"`
+	SrcCh int
 
 	// the list of potential completions
-	Completions complete.Completions `desc:"the list of potential completions"`
+	Completions complete.Completions
 
 	// current completion seed
-	Seed string `desc:"current completion seed"`
+	Seed string
 
 	// the user's completion selection'
-	Completion string `desc:"the user's completion selection'"`
+	Completion string
 
 	// the scene where the current popup menu is presented
-	Sc         *Scene `desc:"the scene where the current popup menu is presented"`
+	Sc         *Scene
 	DelayTimer *time.Timer
 	DelayMu    sync.Mutex
 	ShowMu     sync.Mutex

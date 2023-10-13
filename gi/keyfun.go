@@ -162,10 +162,10 @@ func KeyFun(chord key.Chord) KeyFuns {
 type KeyMapItem struct {
 
 	// the key chord that activates a function
-	Key key.Chord `desc:"the key chord that activates a function"`
+	Key key.Chord
 
 	// the function of that key
-	Fun KeyFuns `desc:"the function of that key"`
+	Fun KeyFuns
 }
 
 // ToSlice copies this keymap to a slice of KeyMapItem's
@@ -268,13 +268,13 @@ var DefaultKeyMap = KeyMapName("MacEmacs")
 type KeyMapsItem struct {
 
 	// name of keymap
-	Name string `width:"20" desc:"name of keymap"`
+	Name string `width:"20"`
 
 	// description of keymap -- good idea to include source it was derived from
-	Desc string `desc:"description of keymap -- good idea to include source it was derived from"`
+	Desc string
 
 	// to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu
-	Map KeyMap `desc:"to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu"`
+	Map KeyMap
 }
 
 // Label satisfies the Labeler interface

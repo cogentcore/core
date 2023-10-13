@@ -45,30 +45,30 @@ type Scene struct {
 	// Size and position relative to overall rendering context.
 	Geom mat32.Geom2DInt
 
-	// [view: -] render state for rendering
-	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" desc:"render state for rendering"`
+	// render state for rendering
+	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] live pixels that we render into
-	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"live pixels that we render into"`
+	// live pixels that we render into
+	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-"`
 
-	// [view: -] background color for filling scene -- defaults to transparent so that popups can have rounded corners
-	BgColor colors.Full `view:"-" desc:"background color for filling scene -- defaults to transparent so that popups can have rounded corners"`
+	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
+	BgColor colors.Full `view:"-"`
 
 	// event manager for this scene
-	EventMgr EventMgr `copy:"-" json:"-" xml:"-" desc:"event manager for this scene"`
+	EventMgr EventMgr `copy:"-" json:"-" xml:"-"`
 
 	// current stage in which this Scene is set
-	Stage Stage `copy:"-" json:"-" xml:"-" desc:"current stage in which this Scene is set"`
+	Stage Stage `copy:"-" json:"-" xml:"-"`
 
-	// [view: -] Current color in styling -- used for relative color names
-	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" desc:"Current color in styling -- used for relative color names"`
+	// Current color in styling -- used for relative color names
+	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-"`
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
 	LastRender RenderParams
 
-	// [view: -] StyleMu is RW mutex protecting access to Style-related global vars
-	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" desc:"StyleMu is RW mutex protecting access to Style-related global vars"`
+	// StyleMu is RW mutex protecting access to Style-related global vars
+	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 // StageScene creates a new Scene that will serve as the contents of a Stage

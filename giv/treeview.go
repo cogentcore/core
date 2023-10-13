@@ -44,28 +44,28 @@ type TreeView struct {
 	gi.WidgetBase
 
 	// Ki Node that this widget is viewing in the tree -- the source
-	SrcNode ki.Ki `copy:"-" json:"-" xml:"-" desc:"Ki Node that this widget is viewing in the tree -- the source"`
+	SrcNode ki.Ki `copy:"-" json:"-" xml:"-"`
 
 	// if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?
-	ShowViewCtxtMenu bool `desc:"if the object we're viewing has its own CtxtMenu property defined, should we also still show the view's own context menu?"`
+	ShowViewCtxtMenu bool
 
 	// linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses
-	ViewIdx int `desc:"linear index of this node within the entire tree -- updated on full rebuilds and may sometimes be off, but close enough for expected uses"`
+	ViewIdx int
 
 	// styled amount to indent children relative to this node
-	Indent units.Value `xml:"indent" desc:"styled amount to indent children relative to this node"`
+	Indent units.Value `xml:"indent"`
 
 	// styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4.
-	OpenDepth int `xml:"open-depth" desc:"styled depth for nodes be initialized as open -- nodes beyond this depth will be initialized as closed.  initial default is 4."`
+	OpenDepth int `xml:"open-depth"`
 
 	// just the size of our widget -- our alloc includes all of our children, but we only draw us
-	WidgetSize mat32.Vec2 `desc:"just the size of our widget -- our alloc includes all of our children, but we only draw us"`
+	WidgetSize mat32.Vec2
 
-	// [view: show-name] optional icon, displayed to the the left of the text label
-	Icon icons.Icon `json:"-" xml:"icon" view:"show-name" desc:"optional icon, displayed to the the left of the text label"`
+	// optional icon, displayed to the the left of the text label
+	Icon icons.Icon `json:"-" xml:"icon" view:"show-name"`
 
 	// cached root of the view
-	RootView *TreeView `json:"-" xml:"-" desc:"cached root of the view"`
+	RootView *TreeView `json:"-" xml:"-"`
 }
 
 // We do this instead of direct setting in TreeViewType declaration

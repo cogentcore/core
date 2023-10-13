@@ -20,16 +20,16 @@ type ArgView struct {
 	gi.Frame
 
 	// the args that we are a view onto
-	Args []ArgData `desc:"the args that we are a view onto"`
+	Args []ArgData
 
 	// title / prompt to show above the editor fields
-	Title string `desc:"title / prompt to show above the editor fields"`
+	Title string
 
 	// signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update
 	// ViewSig ki.Signal `json:"-" xml:"-" desc:"signal for valueview -- only one signal sent when a value has been set -- all related value views interconnect with each other to update when others update"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
-	ViewPath string `desc:"a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows"`
+	ViewPath string
 }
 
 func (av *ArgView) OnInit() {

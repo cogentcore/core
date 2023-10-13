@@ -19,10 +19,10 @@ type TwinViews struct {
 	gi.Splits
 
 	// textbuf for A
-	BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
+	BufA *Buf `json:"-" xml:"-"`
 
 	// textbuf for B
-	BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
+	BufB *Buf `json:"-" xml:"-"`
 }
 
 func (tv *TwinViews) OnInit() {
