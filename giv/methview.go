@@ -104,9 +104,15 @@ func ToolBarView(val any, tb *gi.ToolBar) bool {
 			continue
 		}
 		gotAny = true
+		if opts.SepBefore {
+			tb.AddSeparator()
+		}
 		tb.AddButton(gi.ActOpts{Label: opts.Label, Icon: opts.Icon, Tooltip: opts.Tooltip}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
 		})
+		if opts.SepAfter {
+			tb.AddSeparator()
+		}
 	}
 	return gotAny
 }
