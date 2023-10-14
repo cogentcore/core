@@ -153,7 +153,7 @@ func (pf *Preferences) Defaults() {
 // UpdateAll updates all open windows with current preferences -- triggers
 // rebuild of default styles.
 //
-//gi:toolbar
+//gi:toolbar -icon refresh
 func (pf *Preferences) UpdateAll() {
 	goosi.ZoomFactor = 1 // reset so saved dpi is used
 	pf.Apply()
@@ -319,7 +319,7 @@ func (pf *Preferences) ApplyDPI() {
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 //
-//gi:toolbar -sep-before
+//gi:toolbar -sep-before -zoom_in
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
@@ -340,7 +340,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 
 // ScreenInfo returns screen info for all screens on the console.
 //
-//gi:toolbar
+//gi:toolbar -icon info
 func (pf *Preferences) ScreenInfo() string {
 	ns := goosi.TheApp.NScreens()
 	scinfo := ""
@@ -356,7 +356,7 @@ func (pf *Preferences) ScreenInfo() string {
 
 // VersionInfo returns GoGi version information
 //
-//gi:toolbar
+//gi:toolbar -icon info
 func (pf *Preferences) VersionInfo() string {
 	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
 	return vinfo
@@ -373,7 +373,7 @@ func (pf *Preferences) DeleteSavedRenderWinGeoms() {
 // load from other files, etc.  Current avail keymaps are saved and loaded
 // with preferences automatically.
 //
-//gi:toolbar -sep-before
+//gi:toolbar -sep-before -icon keyboard
 func (pf *Preferences) EditKeyMaps() {
 	pf.SaveKeyMaps = true
 	pf.Changed = true
@@ -382,14 +382,14 @@ func (pf *Preferences) EditKeyMaps() {
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
 //
-//gi:toolbar
+//gi:toolbar -icon ink_highlighter
 func (pf *Preferences) EditHiStyles() {
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
 // EditDetailed opens the PrefsDetView editor to edit detailed params
 //
-//gi:toolbar
+//gi:toolbar -icon description
 func (pf *Preferences) EditDetailed() {
 	pf.SaveDetailed = true
 	pf.Changed = true
@@ -398,7 +398,7 @@ func (pf *Preferences) EditDetailed() {
 
 // EditDebug opens the PrefsDbgView editor to edit debugging params
 //
-//gi:toolbar
+//gi:toolbar -icon bug_report
 func (pf *Preferences) EditDebug() {
 	TheViewIFace.PrefsDbgView(&PrefsDbg)
 }
