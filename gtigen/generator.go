@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
-	"log"
+	"os"
 	"slices"
 	"strings"
 	"text/template"
@@ -427,7 +427,8 @@ func (g *Generator) Generate() (bool, error) {
 func (g *Generator) ExecTmpl(t *template.Template, data any) {
 	err := t.Execute(&g.Buf, data)
 	if err != nil {
-		log.Fatalf("programmer error: internal error: error executing template: %v", err)
+		slog.Error("programmer error: internal error: error executing template", "err", err)
+		os.Exit(1)
 	}
 }
 
