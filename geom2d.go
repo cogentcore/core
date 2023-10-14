@@ -41,17 +41,20 @@ func (gm *Geom2DInt) SetRect(r image.Rectangle) {
 func FitGeomInWindow(stPos, stSz, winPos, winSz int) (pos, sz int) {
 	pos = stPos
 	sz = stSz
+	// we go through two iterations: one to fix our position and one to fix
+	// our size. this ensures that we adjust position and not size if we can,
+	// but we still always end up with valid dimensions by using size as a fallback.
 	if pos < winPos {
 		pos = winPos
 	}
-	if pos+sz > winSz {
-		pos = winSz - sz
+	if pos+sz > winPos+winSz { // our max > window max
+		pos = winPos + winSz - sz // window max - our size
 	}
 	if pos < winPos {
 		pos = winPos
 	}
-	if pos+sz > winSz {
-		sz = winSz - winPos
+	if pos+sz > winPos+winSz { // our max > window max
+		sz = winSz + winPos - pos // window max - our min
 	}
 	return
 }
