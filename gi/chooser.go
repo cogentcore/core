@@ -113,7 +113,7 @@ func (ch *Chooser) ChooserStyles() {
 		s.Color = colors.Scheme.OnSurface
 		switch ch.Type {
 		case ChooserFilled:
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHighest)
+			s.StateLayer += 0.06
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Style.Bottom = styles.BorderSolid
@@ -143,7 +143,6 @@ func (ch *Chooser) ChooserStyles() {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
 		}
 		if s.Is(states.Disabled) {
-			s.Color = colors.Scheme.SurfaceContainer
 			s.Cursor = cursors.NotAllowed
 		}
 	})

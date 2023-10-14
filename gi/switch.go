@@ -96,7 +96,6 @@ func (sw *Switch) SwitchStyles() {
 		}
 		if s.Is(states.Disabled) {
 			s.Cursor = cursors.NotAllowed
-			s.Color = colors.Scheme.SurfaceContainer
 		}
 	})
 }

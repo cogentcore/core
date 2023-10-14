@@ -215,7 +215,7 @@ func (dlg *Dialog) DefaultStyle() {
 	st := dlg.Stage
 	sc := st.Scene
 	sc.Style(func(s *styles.Style) {
-		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
+		// material likes SurfaceVariant here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface

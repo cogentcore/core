@@ -161,7 +161,6 @@ func (bt *Button) ButtonStyles() {
 			s.MaxBoxShadow = styles.BoxShadow2()
 			s.BoxShadow = styles.BoxShadow1()
 		case ButtonOutlined:
-			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 			s.Color = colors.Scheme.Primary.Base
 			s.Border.Style.Set(styles.BorderSolid)
 			s.Border.Color.Set(colors.Scheme.Outline)
