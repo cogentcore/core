@@ -321,6 +321,7 @@ func (pf *Preferences) ApplyDPI() {
 //
 //gi:toolbar -sep-before -icon zoom_in
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
+	fmt.Println("SaveZoom: forCurrentScreen =", forCurrentScreen)
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
 		sp, ok := pf.ScreenPrefs[sc.Name]
