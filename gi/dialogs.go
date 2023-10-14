@@ -64,7 +64,7 @@ func (dlg *Dialog) Title(title ...string) *Dialog {
 		dlg.Stage.Title = title[0]
 	}
 	NewLabel(dlg.Stage.Scene, "title").SetText(dlg.Stage.Title).
-		SetType(LabelHeadlineSmall).AddStyles(func(s *styles.Style) {
+		SetType(LabelHeadlineSmall).Style(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.AlignH = styles.AlignCenter
 		s.AlignV = styles.AlignTop
@@ -76,7 +76,7 @@ func (dlg *Dialog) Title(title ...string) *Dialog {
 // Prompt adds given prompt to dialog.
 func (dlg *Dialog) Prompt(prompt string) *Dialog {
 	NewLabel(dlg.Stage.Scene, "prompt").SetText(prompt).
-		SetType(LabelBodyMedium).AddStyles(func(s *styles.Style) {
+		SetType(LabelBodyMedium).Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.MaxWidth.SetDp(-1)
 		s.Width.SetCh(30)
@@ -126,7 +126,7 @@ func (dlg *Dialog) ConfigButtonBox() *Layout {
 	}
 	bb := NewLayout(dlg.Stage.Scene, "buttons").
 		SetLayout(LayoutHoriz)
-	bb.AddStyles(func(s *styles.Style) {
+	bb.Style(func(s *styles.Style) {
 		bb.Spacing.SetDp(8)
 		s.SetStretchMaxWidth()
 	})
@@ -214,7 +214,7 @@ func (dlg *Dialog) Close() {
 func (dlg *Dialog) DefaultStyle() {
 	st := dlg.Stage
 	sc := st.Scene
-	sc.AddStyles(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		// s.Border.Radius = styles.BorderRadiusExtraLarge

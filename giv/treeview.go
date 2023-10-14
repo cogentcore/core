@@ -74,7 +74,7 @@ func init() {
 
 func (tv *TreeView) OnInit() {
 	tv.Indent.SetEm(1)
-	tv.AddStyles(func(s *styles.Style) {
+	tv.Style(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
@@ -91,11 +91,11 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 	switch w.Name() {
 	case "parts":
 		parts := w.(*gi.Layout)
-		parts.AddStyles(func(s *styles.Style) {
+		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
 		})
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -105,7 +105,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		cb := w.(*gi.Switch)
 		cb.IconOn = icons.KeyboardArrowDown
 		cb.IconOff = icons.KeyboardArrowRight
-		cb.AddStyles(func(s *styles.Style) {
+		cb.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MaxWidth.SetEm(1.5)
@@ -113,11 +113,11 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "space":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "label":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MinWidth.SetCh(16)

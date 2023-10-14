@@ -64,7 +64,7 @@ func (ts *Tabs) HandleTabsEvents() {
 }
 
 func (ts *Tabs) TabsStyles() {
-	ts.AddStyles(func(s *styles.Style) {
+	ts.Style(func(s *styles.Style) {
 		// need border for separators (see RenderTabSeps)
 		// TODO: maybe better solution for tab sep styles?
 		s.Border.Style.Set(styles.BorderSolid)
@@ -81,7 +81,7 @@ func (ts *Tabs) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "tabs":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
 			s.Height.SetEm(1.8)
 			s.Overflow = styles.OverflowHidden // no scrollbars!
@@ -98,7 +98,7 @@ func (ts *Tabs) OnChildAdded(child ki.Ki) {
 	case "frame":
 		frame := w.(*Frame)
 		frame.StackTopOnly = true // key for allowing each tab to have its own size
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(10))
 			s.SetMinPrefHeight(units.Em(6))
 			s.SetStretchMax()
@@ -532,7 +532,7 @@ func (tb *Tab) OnInit() {
 }
 
 func (tb *Tab) TabButtonStyles() {
-	tb.AddStyles(func(s *styles.Style) {
+	tb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)
 
@@ -568,11 +568,11 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "parts":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -581,18 +581,18 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 	case "label":
 		label := w.(*Label)
 		label.Type = LabelTitleSmall
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "close-stretch":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetCh(1)
 		})
 	case "close":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEx(0.5)
 			s.Height.SetEx(0.5)
 			s.Margin.Set()
@@ -608,11 +608,11 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 			}
 		})
 	case "sc-stretch":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetCh(2)
 		})
 	case "shortcut":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})

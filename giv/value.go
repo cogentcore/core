@@ -1018,7 +1018,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
 	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
-	tf.AddStyles(func(s *styles.Style) {
+	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 	})
 	if completetag, ok := vv.Tag("complete"); ok {

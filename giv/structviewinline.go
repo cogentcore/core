@@ -50,7 +50,7 @@ type StructViewInline struct {
 func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	if strings.HasPrefix(w.Name(), "label-") {
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
 	}

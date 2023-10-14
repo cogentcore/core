@@ -58,7 +58,7 @@ func (im *Image) OnInit() {
 }
 
 func (im *Image) BitmapStyles() {
-	im.AddStyles(func(s *styles.Style) {
+	im.Style(func(s *styles.Style) {
 		s.MinWidth.SetDp(float32(im.Size.X))
 		s.MinHeight.SetDp(float32(im.Size.Y))
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)

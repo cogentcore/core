@@ -36,7 +36,7 @@ type FileBrowse struct {
 }
 
 func (fb *FileBrowse) OnInit() {
-	fb.AddStyles(func(s *styles.Style) {
+	fb.Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
@@ -50,7 +50,7 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 	case "title":
 		title := w.(*gi.Label)
 		title.Type = gi.LabelHeadlineSmall
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
 			s.AlignH = styles.AlignCenter
 			s.AlignV = styles.AlignTop
@@ -61,7 +61,7 @@ func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 	}
 	ip, _ := w.IndexInParent()
 	if w.Parent().Name() == "splits" && ip > 0 {
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 			s.SetMinPrefWidth(units.Ch(20))
 			s.SetMinPrefHeight(units.Ch(10))

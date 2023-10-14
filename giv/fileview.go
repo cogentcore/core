@@ -86,7 +86,7 @@ func (fv *FileView) OnInit() {
 
 func (fv *FileView) FileViewStyles() {
 	fv.Lay = gi.LayoutVert
-	fv.AddStyles(func(s *styles.Style) {
+	fv.Style(func(s *styles.Style) {
 		fv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -98,7 +98,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 	case "files-row":
 		fr := w.(*gi.Layout)
 		fr.Lay = gi.LayoutHoriz
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 		})
 	case "favs-view":
@@ -107,7 +107,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		fv.InactKeyNav = false // can only have one active -- files..
 		fv.ShowToolbar = false
 		fv.SetState(true, states.Disabled) // select only
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxHeight()
 			s.MaxWidth.SetDp(0) // no stretch
 		})
@@ -116,23 +116,23 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		fv.ShowIndex = false // no index
 		fv.ShowToolbar = false
 		fv.SetState(true, states.Disabled) // select only
-		fv.AddStyles(func(s *styles.Style) {
+		fv.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 		})
 	case "sel-row":
 		sr := w.(*gi.Layout)
 		sr.Lay = gi.LayoutHoriz
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			sr.Spacing.SetDp(4)
 			s.SetStretchMaxWidth()
 		})
 	case "sel": // sel field
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Ch(60))
 			s.SetStretchMaxWidth()
 		})
 	case "ext-label":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Ch(10))
 		})
 	}

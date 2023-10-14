@@ -49,7 +49,7 @@ func (sw *Switches) OnInit() {
 }
 
 func (sw *Switches) SwitchesStyles() {
-	sw.AddStyles(func(s *styles.Style) {
+	sw.Style(func(s *styles.Style) {
 		s.Padding.Set(units.Dp(2))
 		s.Margin.Set(units.Dp(2))
 	})

@@ -36,7 +36,7 @@ type GiEditor struct {
 }
 
 func (ge *GiEditor) OnInit() {
-	ge.AddStyles(func(s *styles.Style) {
+	ge.Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
@@ -50,7 +50,7 @@ func (ge *GiEditor) OnChildAdded(child ki.Ki) {
 	case "title":
 		title := w.(*gi.Label)
 		title.Type = gi.LabelHeadlineSmall
-		title.AddStyles(func(s *styles.Style) {
+		title.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
 			s.AlignH = styles.AlignCenter
 			s.AlignV = styles.AlignTop

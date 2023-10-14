@@ -66,7 +66,7 @@ func (sl *Splits) OnInit() {
 }
 
 func (sl *Splits) SplitsStyles() {
-	sl.AddStyles(func(s *styles.Style) {
+	sl.Style(func(s *styles.Style) {
 		sl.HandleSize.SetDp(10)
 
 		s.MaxWidth.SetDp(-1)
@@ -449,7 +449,7 @@ func (sr *Splitter) SplitterStyles() {
 	sr.Prec = 4
 	sr.SetFlag(true, InstaDrag)
 
-	sr.AddStyles(func(s *styles.Style) {
+	sr.Style(func(s *styles.Style) {
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(6))
 		s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
@@ -471,7 +471,7 @@ func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon":
-		// w.AddStyles(func(s *styles.Style) {
+		// w.Style(func(s *styles.Style) {
 		// 	s.MaxWidth.SetEm(1)
 		// 	s.MaxHeight.SetEm(5)
 		// 	s.MinWidth.SetEm(1)

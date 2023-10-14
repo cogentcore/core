@@ -122,7 +122,7 @@ type DiffView struct {
 }
 
 func (dv *DiffView) OnInit() {
-	dv.AddStyles(func(s *styles.Style) {
+	dv.Style(func(s *styles.Style) {
 		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
@@ -133,23 +133,23 @@ func (dv *DiffView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "text-a-lay", "text-b-lay":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 			s.SetMinPrefWidth(units.Ch(80))
 			s.SetMinPrefHeight(units.Em(40))
 		})
 	case "text-a", "text-b":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Font.Family = string(gi.Prefs.MonoFont)
 		})
 	case "toolbar":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
 		})
 	case "diff-lay":
 		df := w.(*gi.Layout)
 		df.Lay = gi.LayoutHoriz
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 		})
 	}

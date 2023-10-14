@@ -114,7 +114,7 @@ func (st *MainStage) SetWindowInsets() {
 	}
 	insets := st.StageMgr.RenderWin.GoosiWin.Insets()
 	// fmt.Println(insets)
-	st.Scene.AddStyles(func(s *styles.Style) {
+	st.Scene.Style(func(s *styles.Style) {
 		s.Padding.Set(
 			units.Dot(insets.Top),
 			units.Dot(insets.Right),

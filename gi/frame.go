@@ -38,7 +38,7 @@ func (fr *Frame) OnInit() {
 }
 
 func (fr *Frame) FrameStyles() {
-	fr.AddStyles(func(s *styles.Style) {
+	fr.Style(func(s *styles.Style) {
 		// note: using Pressable here so we get clicks, but don't change to Active state.
 		// getting clicks allows us to clear focus on click.
 		s.SetAbilities(true, abilities.Pressable, abilities.FocusWithinable)

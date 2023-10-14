@@ -87,7 +87,7 @@ func (sp *Spinner) OnInit() {
 }
 
 func (sp *Spinner) SpinnerStyles() {
-	sp.AddStyles(func(s *styles.Style) {
+	sp.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 	})
 }
@@ -96,7 +96,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "parts":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "text-field":
@@ -104,7 +104,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		tf.SetText(sp.ValToString(sp.Value))
 		tf.SetState(sp.IsDisabled(), states.Disabled)
 		sp.TextFieldHandlers(tf)
-		tf.AddStyles(func(s *styles.Style) {
+		tf.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(3))
 		})
 	case "up":
@@ -118,7 +118,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		up.OnClick(func(e events.Event) {
 			sp.IncrValue(1)
 		})
-		up.AddStyles(func(s *styles.Style) {
+		up.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
 			s.Padding.Set(units.Dp(4))
@@ -134,7 +134,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		down.OnClick(func(e events.Event) {
 			sp.IncrValue(-1)
 		})
-		down.AddStyles(func(s *styles.Style) {
+		down.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Focusable)
 			s.Font.Size.SetDp(18)
 			s.Padding.Set(units.Dp(4))

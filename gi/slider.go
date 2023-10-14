@@ -170,7 +170,7 @@ func (sr *Slider) OnInit() {
 }
 
 func (sr *Slider) SliderStyles() {
-	sr.AddStyles(func(s *styles.Style) {
+	sr.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 
 		// we use a different color for the thumb and value color
@@ -223,7 +223,7 @@ func (sr *Slider) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
