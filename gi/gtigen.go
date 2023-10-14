@@ -48,7 +48,7 @@ func (t *MenuBar) New() ki.Ki {
 var ToolbarType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Toolbar",
 	ShortName: "gi.Toolbar",
-	IDName:    "tool-bar",
+	IDName:    "toolbar",
 	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
