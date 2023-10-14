@@ -150,6 +150,30 @@ func (pf *Preferences) Defaults() {
 	pf.UpdateUser()
 }
 
+// UpdateAll updates all open windows with current preferences -- triggers
+// rebuild of default styles.
+//
+//gi:toolbar
+func (pf *Preferences) UpdateAll() {
+	goosi.ZoomFactor = 1 // reset so saved dpi is used
+	pf.Apply()
+
+	styles.RebuildDefaultStyles = true
+	colors.FullCache = nil
+	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
+	// 	w.SetSize(w.RenderWin.Size())
+	// }
+	// needs another pass through to get it right..
+	// for _, w := range AllRenderWins {
+	// 	w.FullReRender()
+	// }
+	styles.RebuildDefaultStyles = false
+	// and another without rebuilding?  yep all are required
+	// for _, w := range AllRenderWins {
+	// 	w.FullReRender()
+	// }
+}
+
 // PrefsFileName is the name of the preferences file in GoGi prefs directory
 var PrefsFileName = "prefs.json"
 
@@ -206,7 +230,8 @@ func (pf *Preferences) Save() error {
 
 // TODO: need to handle auto theme and set things correctly
 
-// LightMode sets the color theme to light mode
+// LightMode sets the color theme to light mode. It automatically
+// saves the preferences and updates all of the windows.
 //
 //gi:toolbar -sep-before
 func (pf *Preferences) LightMode() {
@@ -216,7 +241,10 @@ func (pf *Preferences) LightMode() {
 	pf.UpdateAll()
 }
 
-// DarkMode sets colors to dark mode
+// DarkMode sets the color theme to dark mode. It automatically
+// saves the preferences and updates all of the windows.
+//
+//gi:toolbar
 func (pf *Preferences) DarkMode() {
 	pf.Theme = ThemeDark
 	colors.SetScheme(true)
@@ -288,50 +316,10 @@ func (pf *Preferences) ApplyDPI() {
 	}
 }
 
-// UpdateAll updates all open windows with current preferences -- triggers
-// rebuild of default styles.
-func (pf *Preferences) UpdateAll() {
-	goosi.ZoomFactor = 1 // reset so saved dpi is used
-	pf.Apply()
-
-	styles.RebuildDefaultStyles = true
-	colors.FullCache = nil
-	// for _, w := range AllRenderWins {  // no need and just messes stuff up!
-	// 	w.SetSize(w.RenderWin.Size())
-	// }
-	// needs another pass through to get it right..
-	// for _, w := range AllRenderWins {
-	// 	w.FullReRender()
-	// }
-	styles.RebuildDefaultStyles = false
-	// and another without rebuilding?  yep all are required
-	// for _, w := range AllRenderWins {
-	// 	w.FullReRender()
-	// }
-}
-
-// ScreenInfo returns screen info for all screens on the console.
-func (pf *Preferences) ScreenInfo() string {
-	ns := goosi.TheApp.NScreens()
-	scinfo := ""
-	for i := 0; i < ns; i++ {
-		sc := goosi.TheApp.Screen(i)
-		if i > 0 {
-			scinfo += "<br><br>\n"
-		}
-		scinfo += fmt.Sprintf("Screen number: %v Name: %v<br>\n    Geom: %v, DevPixRatio: %v<br>\n    Pixels: %v, Physical size: %v mm<br>\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v<br>\n    Depth: %v, Refresh rate: %v<br>\n    Orientation: %v, Native orientation: %v, Primary orientation: %v<br>\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
-	}
-	return scinfo
-}
-
-// VersionInfo returns GoGi version information
-func (pf *Preferences) VersionInfo() string {
-	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
-	return vinfo
-}
-
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
+//
+//gi:toolbar -sep-before
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
@@ -350,6 +338,30 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	pf.Save()
 }
 
+// ScreenInfo returns screen info for all screens on the console.
+//
+//gi:toolbar
+func (pf *Preferences) ScreenInfo() string {
+	ns := goosi.TheApp.NScreens()
+	scinfo := ""
+	for i := 0; i < ns; i++ {
+		sc := goosi.TheApp.Screen(i)
+		if i > 0 {
+			scinfo += "<br><br>\n"
+		}
+		scinfo += fmt.Sprintf("Screen number: %v Name: %v<br>\n    Geom: %v, DevPixRatio: %v<br>\n    Pixels: %v, Physical size: %v mm<br>\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v<br>\n    Depth: %v, Refresh rate: %v<br>\n    Orientation: %v, Native orientation: %v, Primary orientation: %v<br>\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
+	}
+	return scinfo
+}
+
+// VersionInfo returns GoGi version information
+//
+//gi:toolbar
+func (pf *Preferences) VersionInfo() string {
+	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
+	return vinfo
+}
+
 // DeleteSavedRenderWinGeoms deletes the file that saves the position and size of
 // each window, by screen, and clear current in-memory cache.  You shouldn't
 // need to use this but sometimes useful for testing.
@@ -360,6 +372,8 @@ func (pf *Preferences) DeleteSavedRenderWinGeoms() {
 // EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /
 // load from other files, etc.  Current avail keymaps are saved and loaded
 // with preferences automatically.
+//
+//gi:toolbar -sep-before
 func (pf *Preferences) EditKeyMaps() {
 	pf.SaveKeyMaps = true
 	pf.Changed = true
@@ -367,11 +381,15 @@ func (pf *Preferences) EditKeyMaps() {
 }
 
 // EditHiStyles opens the HiStyleView editor to customize highlighting styles
+//
+//gi:toolbar
 func (pf *Preferences) EditHiStyles() {
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
 // EditDetailed opens the PrefsDetView editor to edit detailed params
+//
+//gi:toolbar
 func (pf *Preferences) EditDetailed() {
 	pf.SaveDetailed = true
 	pf.Changed = true
@@ -379,6 +397,8 @@ func (pf *Preferences) EditDetailed() {
 }
 
 // EditDebug opens the PrefsDbgView editor to edit debugging params
+//
+//gi:toolbar
 func (pf *Preferences) EditDebug() {
 	TheViewIFace.PrefsDbgView(&PrefsDbg)
 }
