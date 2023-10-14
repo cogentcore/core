@@ -154,10 +154,6 @@ func (ad *ArgData) HasValSet() bool {
 	return ad.Flags.HasFlag(ArgDataValSet)
 }
 
-func CallMethod(val any, method string, vp *gi.Scene) bool {
-	return false
-}
-
 /*  todo: this needs a full rewrite in light of gti etc.
 
 // MainMenuView configures the given MenuBar according to the "MainMenu"
@@ -336,42 +332,27 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	}
 	return rval
 }
+*/
 
 //////////////////////////////////////////////////////////////////////////////////
 //    CallMethod -- auto gui
 
-// CallMethod calls given method on given object val, using GUI interface to
-// prompt for args.  This only works for methods that have been configured
-// either on the CallMethods list or any of the Toolbar, MainMenu, or CtxtMenu
-// lists (in that order).  List of available methods is cached in type
-// properties after first call.
+// CallMethod calls the method with the given name on the given object value,
+// with the given method configuration information. It uses a GUI interface to
+// prompt for args.
 // gopy:interface=handle
-func CallMethod(val any, method string, vp *gi.Scene) bool {
-	tpp, vtyp, ok := MethodViewTypeProps(val)
-	if !ok {
-		MethodViewErr(vtyp, fmt.Sprintf("Type: %v properties not found for CallMethod -- need to register type using kit.AddType\n", vtyp.String()))
-		return false
-	}
-	cmp, ok := ki.SubTypeProps(tpp, MethodViewCallMethsProp)
-	if !ok {
-		cmp = MethodViewCompileMeths(val, vp)
-	}
+func CallMethod(val any, method string, cfg *MethodConfig) bool {
+	rval := reflect.ValueOf(val)
+	met := rval.MethodByName(method)
+	_ = met
 
-	acp, has := cmp[method]
-	if !has {
-		MethodViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type properties -- add to CallMethods to make available for CallMethod\n", method))
-		return false
-	}
-	ac, ok := acp.(*gi.Button)
-	if !ok {
-		MethodViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Button -- should be!\n", method))
-		return false
-	}
-
-	MethodViewSetActionData(ac, val, vp)
-	ac.Trigger()
+	sc := gi.NewScene(strcase.ToKebab(method) + "-arg-view")
+	av := NewArgView(sc)
+	av.SetArgs(nil)
 	return true
 }
+
+/*
 
 // MethodViewSetActionData sets the MethodViewData associated with the given action
 // with values updated from the given val and scene
@@ -462,9 +443,9 @@ func MethodViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.S
 // MethodViewErr is error logging function for MethodView system, showing the type info
 func MethodViewErr(vtyp reflect.Type, msg string) {
 	if vtyp != nil {
-		log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
+		slog.Error("giv.MethodView", "type", vtyp.String(), "debug error", msg)
 	} else {
-		log.Printf("giv.MethodView debug error: %v\n", msg)
+		slog.Error("giv.MethodView", "debug error", msg)
 	}
 }
 
@@ -784,34 +765,34 @@ type MethodViewData struct {
 	MethTyp reflect.Method
 
 	// names and other properties of args, in one-to-one with method args
-	ArgProps ki.PropSlice `desc:"names and other properties of args, in one-to-one with method args"`
+	ArgProps ki.PropSlice
 
 	// props for special action types, e.g., FileView
-	SpecProps ki.Props `desc:"props for special action types, e.g., FileView"`
+	SpecProps ki.Props
 
 	// prompt shown in arg dialog or confirm prompt dialog
-	Desc string `desc:"prompt shown in arg dialog or confirm prompt dialog"`
+	Desc string
 
 	// update function defined in properties -- called by our wrapper update function
-	UpdateFunc ActionUpdateFunc `desc:"update function defined in properties -- called by our wrapper update function"`
+	UpdateFunc ActionUpdateFunc
 
 	// value for submenu generation as a literal slice of items of appropriate type for method being called
-	SubMenuSlice any `desc:"value for submenu generation as a literal slice of items of appropriate type for method being called"`
+	SubMenuSlice any
 
 	// value for submenu generation as name of field on obj
-	SubMenuField string `desc:"value for submenu generation as name of field on obj"`
+	SubMenuField string
 
-	// function that will generate submenu items, as []string slice
-	SubMenuFunc SubMenuFunc `desc:"function that will generate submenu items, as []string slice"`
+	// function that will generate submenu items, as string slice
+	SubMenuFunc SubMenuFunc
 
-	// function that will generate sub-submenu items, as [][]string slice
-	SubSubMenuFunc SubSubMenuFunc `desc:"function that will generate sub-submenu items, as [][]string slice"`
+	// function that will generate sub-submenu items, as string slice
+	SubSubMenuFunc SubSubMenuFunc
 
 	// value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
-	SubMenuVal any `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
+	SubMenuVal any
 
 	// key function that we emit, if MethodViewKeyFun type
-	KeyFun gi.KeyFuns `desc:"key function that we emit, if MethodViewKeyFun type"`
+	KeyFun gi.KeyFuns
 	Flags  MethodViewFlags
 }
 
@@ -1166,5 +1147,4 @@ func (md *MethodViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isS
 		*m = append(*m, nac)
 	}
 }
-
 */
