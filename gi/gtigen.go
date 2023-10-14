@@ -675,10 +675,14 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
+		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 })
 
@@ -1483,7 +1487,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}}},
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}}},
-		{"Style", &gti.Field{Name: "Style", Type: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
+		{"Styles", &gti.Field{Name: "Styles", Type: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}}},
 		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}}},

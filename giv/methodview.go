@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
-	"strings"
 
+	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events/key"
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -46,30 +47,30 @@ type ShortcutFunc func(it any, act *gi.Button) key.Chord
 // first argument is the object on which the method is defined (receiver)
 type LabelFunc func(it any, act *gi.Button) string
 
-// ToolbarOpts contains the options for a toolbar button. These are the
-// options passed to the `gi:toolbar` comment directive.
+// MethodConfig contains the configuration options for a method button in a toolbar or menubar.
+// These are the configuration options passed to the `gi:toolbar` and `gi:menubar` comment directives.
 //
 //gti:add
-type ToolbarOpts struct {
-	// Label is the label for the toolbar button.
+type MethodConfig struct {
+	// Label is the label for the method button.
 	// It defaults to the sentence case version of the
 	// name of the function.
 	Label string
-	// Icon is the icon for the toolbar button. If there
+	// Icon is the icon for the method button. If there
 	// is an icon with the same name as the function, it
 	// defaults to that icon.
 	Icon icons.Icon
-	// Tooltip is the tooltip for the toolbar button.
+	// Tooltip is the tooltip for the method button.
 	// It defaults to the documentation for the function.
 	Tooltip string
-	// SepBefore is whether to insert a separator before the toolbar button.
+	// SepBefore is whether to insert a separator before the method button.
 	SepBefore bool
-	// SepAfter is whether to insert a separator after the toolbar button.
+	// SepAfter is whether to insert a separator after the method button.
 	SepAfter bool
 }
 
-// ToolbarView adds the toolbar buttons for the given value to the given toolbar.
-// It returns whether any toolbar buttons were added.
+// ToolbarView adds the method buttons for the given value to the given toolbar.
+// It returns whether any method buttons were added.
 func ToolbarView(val any, tb *gi.Toolbar) bool {
 	typ := gti.TypeByValue(val)
 	if typ == nil {
@@ -88,13 +89,13 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		if tbDir == nil {
 			continue
 		}
-		opts := &ToolbarOpts{
-			Label:   met.Name,
+		opts := &MethodConfig{
+			Label:   sentencecase.Of(met.Name),
 			Tooltip: met.Doc,
 		}
 		// we default to the icon with the same name as
 		// the method, if it exists
-		ic := icons.Icon(strings.ToLower(met.Name))
+		ic := icons.Icon(strcase.ToSnake(met.Name))
 		if ic.IsValid() {
 			opts.Icon = ic
 		}

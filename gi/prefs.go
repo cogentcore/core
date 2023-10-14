@@ -182,7 +182,7 @@ func (pf *Preferences) Open() error {
 // Save Preferences to GoGi standard prefs directory
 //
 //gti:add
-//gi:toolbar
+//gi:toolbar -sep-before
 func (pf *Preferences) Save() error {
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
@@ -208,6 +208,9 @@ func (pf *Preferences) Save() error {
 // TODO: need to handle auto theme and set things correctly
 
 // LightMode sets the color theme to light mode
+//
+//gti:add
+//gi:toolbar -sep-before
 func (pf *Preferences) LightMode() {
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
