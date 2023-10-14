@@ -63,7 +63,7 @@ func ToolBarView(val any, tb *gi.ToolBar) bool {
 			continue
 		}
 		gotAny = true
-		tb.AddButton(gi.ActOpts{Label: met.Name}, func(bt *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: met.Name, Tooltip: met.Doc}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
 		})
 	}
