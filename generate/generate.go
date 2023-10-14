@@ -108,6 +108,8 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 //
 //gti:add
 func Generate(cfg *config.Config) error {
+	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
+
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
 	if cfg.Generate.AddKiTypes {
 		cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
