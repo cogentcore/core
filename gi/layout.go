@@ -365,7 +365,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sr := ly.Scrolls[d]
 		sr.InitName(sr, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sr, ly.This())
-		// sb.SetFlag(true, ki.Field)
+		sb.SetFlag(true, ki.Field)
 		sr.SetType(SliderScrollbar)
 		sr.Sc = sc
 		sr.Dim = d

@@ -318,8 +318,6 @@ func (tv *View) LinesInserted(tbe *textbuf.Edit) {
 	tv.Offs = nof
 
 	tv.NLines += nsz
-
-	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
 	tv.SetNeedsLayout()
 }
 
@@ -333,8 +331,6 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 	tv.Offs = append(tv.Offs[:stln], tv.Offs[edln:]...)
 
 	tv.NLines -= dsz
-
-	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
 	tv.SetNeedsLayout()
 }
 
@@ -347,6 +343,8 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		tv.ResetState()
 		tv.SetNeedsLayout()
 		tv.SetCursorShow(tv.CursorPos)
+	case BufMods:
+		tv.SetNeedsLayout()
 	case BufInsert:
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
@@ -354,20 +352,18 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			// fmt.Printf("tv %v lines insert %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
-			tv.LinesInserted(tbe)
+			tv.LinesInserted(tbe) // triggers full layout
 		} else {
-			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
-			tv.SetNeedsRender()
+			tv.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
 		}
 	case BufDelete:
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
 			return
 		}
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.LinesDeleted(tbe)
+			tv.LinesDeleted(tbe) // triggers full layout
 		} else {
-			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, true)
-			tv.SetNeedsRender()
+			tv.LayoutLine(tbe.Reg.Start.Ln)
 		}
 	case BufMarkUpdt:
 		tv.SetNeedsLayout() // comes from another goroutine
