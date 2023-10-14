@@ -283,7 +283,7 @@ func (sv *SVG) SetDPIXForm(logicalDPI float32) {
 
 var SVGProps = ki.Props{
 	ki.EnumTypeFlag: TypeSVGFlags,
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"OpenXML", ki.Props{
 			"label": "Open...",
 			"desc":  "Open SVG XML-formatted file",

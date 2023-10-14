@@ -204,9 +204,9 @@ func (g *Image) ReadGeom(sv *SVG, dat []float32) {
 }
 
 /*
-// ImageProps define the ToolBar for images
+// ImageProps define the Toolbar for images
 var ImageProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open image file for this image node, rescaling to given size -- use 0, 0 to use native image size.",
 			"icon": icons.FileOpen,
