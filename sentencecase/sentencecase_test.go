@@ -5,13 +5,15 @@
 package sentencecase
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestSentenceCase(t *testing.T) {
 	AddProperNouns("Google")
-	src := "ThisIsAStringInSentenceCaseThatIWroteWithTheHelpOfURLsAndGoogle"
+	src := "ThisIsAStringInSentenceCaseThatIWroteInTheUSAWithTheHelpOfGoogle"
+	want := "This is a string in sentence case that I wrote in the USA with the help of Google"
 	have := Of(src)
-	fmt.Println(have)
+	if have != want {
+		t.Errorf("sentence case of \n%s\nwas\n%s\nbut wanted\n%s", src, have, want)
+	}
 }

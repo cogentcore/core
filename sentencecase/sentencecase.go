@@ -5,7 +5,7 @@
 // Package sentencecase converts CamelCase strings to sentence case.
 // An example of a string in sentence case is:
 //
-//	This is a string in sentence case that I wrote with the help of URLs and Google
+//	This is a string in sentence case that I wrote in the USA with the help of Google
 package sentencecase
 
 import (
@@ -16,16 +16,16 @@ import (
 )
 
 // ProperNouns is a set-style map that contains all of the proper
-// nouns that will not be lowercased (such as Google or Pike). Proper
-// nouns should be specified in their CamelCase form (Google, Pike, etc).
+// nouns that will not be lowercased (such as Google or Thompson). Proper
+// nouns should be specified in their CamelCase form (Google, Thompson, etc).
 // Proper nouns should be added to this map through [AddProperNouns].
 // By default, this map contains nothing.
 var ProperNouns = map[string]struct{}{}
 
-// AddProperNouns adds the given proper nouns (such as Google or Pike)
+// AddProperNouns adds the given proper nouns (such as Google or Thompson)
 // to [ProperNouns]. It is the way that end-user code should specify proper nouns.
 // Proper nouns will not be lowercased when converting to sentence case. Proper
-// nouns should be specified in their CamelCase form (Google, Pike, etc).
+// nouns should be specified in their CamelCase form (Google, Thompson, etc).
 func AddProperNouns(nouns ...string) {
 	for _, noun := range nouns {
 		ProperNouns[noun] = struct{}{}
@@ -38,7 +38,7 @@ func AddProperNouns(nouns ...string) {
 //
 // An example of a string in sentence case is:
 //
-//	This is a string in sentence case that I wrote with the help of URLs and Google
+//	This is a string in sentence case that I wrote in the USA with the help of Google
 func Of(s string) string {
 	words := camelcase.Split(s)
 	for i, word := range words {
