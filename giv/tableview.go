@@ -838,7 +838,7 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Label: "UpdtView", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"}, func(act *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: "Update View", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"}, func(act *gi.Button) {
 			tv.UpdateSliceGrid()
 		})
 		if ndef > 1 {
