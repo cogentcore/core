@@ -673,13 +673,46 @@ var _ = gti.AddType(&gti.Type{
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"UpdateAll", &gti.Method{Name: "UpdateAll", Doc: "UpdateAll updates all open windows with current preferences -- triggers\nrebuild of default styles.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
-		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode", Directives: gti.Directives{
+		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", Doc: "", Directives: gti.Directives{}}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the console.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		})}},
+		{"VersionInfo", &gti.Method{Name: "VersionInfo", Doc: "VersionInfo returns GoGi version information", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		})}},
+		{"EditKeyMaps", &gti.Method{Name: "EditKeyMaps", Doc: "EditKeyMaps opens the KeyMapsView editor to create new keymaps / save /\nload from other files, etc.  Current avail keymaps are saved and loaded\nwith preferences automatically.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditHiStyles", &gti.Method{Name: "EditHiStyles", Doc: "EditHiStyles opens the HiStyleView editor to customize highlighting styles", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditDetailed", &gti.Method{Name: "EditDetailed", Doc: "EditDetailed opens the PrefsDetView editor to edit detailed params", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditDebug", &gti.Method{Name: "EditDebug", Doc: "EditDebug opens the PrefsDbgView editor to edit debugging params", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 })

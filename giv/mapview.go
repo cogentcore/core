@@ -360,7 +360,7 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Label: "Update View", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"}, func(act *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: "Update view", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"}, func(act *gi.Button) {
 			mv.UpdateValues()
 		})
 		tb.AddButton(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"}, func(act *gi.Button) {
