@@ -507,7 +507,7 @@ func ccc() {
 	} else if sf, ok := pv.(func(it interface{}, act *gi.Button) key.Chord); ok {
 		ac.Shortcut = sf(md.Val, ac)
 	} else {
-		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
+		MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
 	}
 }
 
