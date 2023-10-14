@@ -997,9 +997,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	if HasToolBarView(sv.Slice) {
-		ToolBarView(sv.Slice, sv.Sc, tb)
-	}
+	ToolBarView(sv.Slice, tb)
 	sv.ToolbarSlice = sv.Slice
 }
 

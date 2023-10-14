@@ -378,9 +378,7 @@ func (mv *MapView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	if HasToolBarView(mv.Map) {
-		ToolBarView(mv.Map, mv.Sc, tb)
-	}
+	ToolBarView(mv.Map, tb)
 	mv.ToolbarMap = mv.Map
 }
 

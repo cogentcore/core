@@ -188,10 +188,7 @@ func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 
 // IsConfiged returns true if the widget is fully configured
 func (sv *StructView) IsConfiged() bool {
-	if len(sv.Kids) == 0 {
-		return false
-	}
-	return true
+	return len(sv.Kids) != 0
 }
 
 // StructGrid returns the grid layout widget, which contains all the fields and values
@@ -236,9 +233,7 @@ func (sv *StructView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	if HasToolBarView(sv.Struct) {
-		ToolBarView(sv.Struct, sv.Sc, tb)
-	}
+	ToolBarView(sv.Struct, tb)
 	sv.ToolbarStru = sv.Struct
 }
 

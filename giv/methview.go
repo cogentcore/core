@@ -5,10 +5,12 @@
 package giv
 
 import (
+	"fmt"
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events/key"
+	"goki.dev/gti"
 )
 
 // these are special menus that we ignore
@@ -40,12 +42,32 @@ type ShortcutFunc func(it any, act *gi.Button) key.Chord
 // first argument is the object on which the method is defined (receiver)
 type LabelFunc func(it any, act *gi.Button) string
 
-func HasToolBarView(val any) bool {
-	return false
-}
-
-func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
-	return false
+// ToolBarView adds the toolbar buttons for the given value to the given toolbar.
+// It returns whether any toolbar buttons were added.
+func ToolBarView(val any, tb *gi.ToolBar) bool {
+	typ := gti.TypeByValue(val)
+	if typ == nil {
+		return false
+	}
+	gotAny := false
+	for _, kv := range typ.Methods.Order {
+		met := kv.Val
+		gotTbDir := false
+		for _, dir := range met.Directives {
+			if dir.Tool == "gi" && dir.Directive == "toolbar" {
+				gotTbDir = true
+				break
+			}
+		}
+		if !gotTbDir {
+			continue
+		}
+		gotAny = true
+		tb.AddButton(gi.ActOpts{Name: met.Name}, func(bt *gi.Button) {
+			fmt.Println(met.Name, "clicked")
+		})
+	}
+	return gotAny
 }
 
 // ArgData contains the relevant data for each arg, including the
