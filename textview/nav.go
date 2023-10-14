@@ -944,7 +944,7 @@ func (tv *View) ScrollToLeft(pos int) bool {
 func (tv *View) ScrollCursorToLeft() bool {
 	_, ri, _ := tv.WrappedLineNo(tv.CursorPos)
 	if ri <= 0 {
-		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Style.BoxSpace().Left) - 2)
+		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Styles.BoxSpace().Left) - 2)
 	}
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollToLeft(curBBox.Min.X)

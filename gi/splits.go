@@ -581,7 +581,7 @@ func (sr *Splitter) HandleSplitterMouse() {
 		}
 		e.SetHandled()
 		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
-		st := &sr.Style
+		st := &sr.Styles
 		// SidesTODO: unsure about dim
 		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSize
 		if sr.Dim == mat32.X {

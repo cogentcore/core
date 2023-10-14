@@ -332,8 +332,8 @@ func (ly *Layout) ManageOverflow(sc *Scene) {
 		ly.HasScroll[d] = false
 	}
 
-	if ly.Style.Overflow != styles.OverflowHidden {
-		sbw := ly.Style.ScrollBarWidth.Dots
+	if ly.Styles.Overflow != styles.OverflowHidden {
+		sbw := ly.Styles.ScrollBarWidth.Dots
 		for d := mat32.X; d <= mat32.Y; d++ {
 			odim := mat32.OtherDim(d)
 			if ly.ChildSize.Dim(d) > (avail.Dim(d) + 2.0) { // overflowing -- allow some margin
@@ -383,15 +383,15 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	avail := ly.AvailSize().Sub(spc.Size())
 	sb := ly.Scrolls[d]
 	if d == mat32.X {
-		sb.SetFixedHeight(ly.Style.ScrollBarWidth)
+		sb.SetFixedHeight(ly.Styles.ScrollBarWidth)
 		sb.SetFixedWidth(units.Dot(avail.Dim(d)))
 	} else {
-		sb.SetFixedWidth(ly.Style.ScrollBarWidth)
+		sb.SetFixedWidth(ly.Styles.ScrollBarWidth)
 		sb.SetFixedHeight(units.Dot(avail.Dim(d)))
 	}
 	sb.ApplyStyle(sc)
 	sb.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
-	sb.Step = ly.Style.Font.Size.Dots                  // step by lines
+	sb.Step = ly.Styles.Font.Size.Dots                  // step by lines
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
 	sb.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
 	sb.TrackThr = 1
@@ -421,10 +421,10 @@ func (ly *Layout) DeactivateScroll(sb *Slider) {
 
 // LayoutScrolls arranges scrollbars
 func (ly *Layout) LayoutScrolls(sc *Scene) {
-	sbw := ly.Style.ScrollBarWidth.Dots
+	sbw := ly.Styles.ScrollBarWidth.Dots
 
 	spc := ly.BoxSpace()
-	pad := ly.Style.Padding.Dots()
+	pad := ly.Styles.Padding.Dots()
 	avail := ly.AvailSize()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		odim := mat32.OtherDim(d)
@@ -662,7 +662,7 @@ func (ly *Layout) AutoScrollDim(dim mat32.Dims, st, pos int) bool {
 	scrange := sc.Max - sc.ThumbVal // amount that can be scrolled
 	vissz := sc.ThumbVal            // amount visible
 
-	h := ly.Style.Font.Size.Dots
+	h := ly.Styles.Font.Size.Dots
 	dst := h * AutoScrollRate
 
 	mind := max(0, pos-st)
@@ -736,7 +736,7 @@ func (ly *Layout) ScrollToBoxDim(dim mat32.Dims, minBox, maxBox int) bool {
 		return false
 	}
 
-	h := ly.Style.Font.Size.Dots
+	h := ly.Styles.Font.Size.Dots
 
 	if minBox < vpMin { // favors scrolling to start
 		trg := sc.Value + float32(minBox-vpMin) - h
@@ -914,7 +914,7 @@ func (ly *Layout) FocusNextChild(updn bool) bool {
 	cur := em.Focus
 	nxti := idx + 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx + ly.Style.Columns
+		nxti = idx + ly.Styles.Columns
 	}
 	did := false
 	if nxti < sz {
@@ -950,7 +950,7 @@ func (ly *Layout) FocusPrevChild(updn bool) bool {
 	cur := em.Focus
 	nxti := idx - 1
 	if ly.Lay == LayoutGrid && updn {
-		nxti = idx - ly.Style.Columns
+		nxti = idx - ly.Styles.Columns
 	}
 	did := false
 	if nxti >= 0 {
@@ -1206,7 +1206,7 @@ func (ly *Layout) StyleToDots(uc *units.Context) {
 // StyleLayout does layout styling -- it sets the StyMu Lock
 func (ly *Layout) StyleLayout(sc *Scene) {
 	ly.ApplyStyleWidget(sc)
-	ly.StyleToDots(&ly.Style.UnContext)
+	ly.StyleToDots(&ly.Styles.UnContext)
 }
 
 func (ly *Layout) ApplyStyle(sc *Scene) {

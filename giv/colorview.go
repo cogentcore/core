@@ -393,7 +393,7 @@ func (cv *ColorView) UpdateImpl() {
 // UpdateValueFrame updates the value frame of the color view
 // that displays the color.
 func (cv *ColorView) UpdateValueFrame() {
-	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Style.BackgroundColor.Solid = cv.Color // direct copy
+	cv.SliderLay().ChildByName("value", 0).(*gi.Frame).Styles.BackgroundColor.Solid = cv.Color // direct copy
 }
 
 // UpdateNums updates the values of the number inputs

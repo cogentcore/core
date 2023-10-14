@@ -519,10 +519,10 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
 	sb.Dim = mat32.Y
 	sb.Tracking = true
-	if sv.Style.ScrollBarWidth.Dots == 0 {
+	if sv.Styles.ScrollBarWidth.Dots == 0 {
 		sb.SetFixedWidth(units.Dp(16))
 	} else {
-		sb.SetFixedWidth(sv.Style.ScrollBarWidth)
+		sb.SetFixedWidth(sv.Styles.ScrollBarWidth)
 	}
 	sb.SetStretchMaxHeight()
 	sb.Min = 0
@@ -576,7 +576,7 @@ func (sv *SliceViewBase) AvailHeight() float32 {
 	if sgHt == 0 {
 		return 0
 	}
-	sgHt -= sg.ExtraSize.Y + sg.Style.BoxSpace().Size().Y
+	sgHt -= sg.ExtraSize.Y + sg.Styles.BoxSpace().Size().Y
 	return sgHt
 }
 
@@ -609,10 +609,10 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if sv.Style.Font.Face == nil {
-		sv.Style.Font = paint.OpenFont(sv.Style.FontRender(), &sv.Style.UnContext)
+	if sv.Styles.Font.Face == nil {
+		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
 	}
-	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Style.Font.Face.Metrics.Height)
+	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Styles.Font.Face.Metrics.Height)
 
 	sc := sv.Sc
 	if sc != nil && sc.Is(gi.ScPrefSizing) {

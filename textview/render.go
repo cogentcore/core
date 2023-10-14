@@ -71,7 +71,7 @@ func (tv *View) CharStartPos(pos lex.Pos) mat32.Vec2 {
 			return spos
 		}
 	} else {
-		spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Style.Font.Face.Face.Metrics().Descent)
+		spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Styles.Font.Face.Face.Metrics().Descent)
 	}
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -98,7 +98,7 @@ func (tv *View) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	// 	spos.X += tv.LineNoOff
 	// 	return spos
 	// }
-	spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Style.Font.Face.Face.Metrics().Descent)
+	spos.Y += tv.Offs[pos.Ln] + mat32.FromFixed(tv.Styles.Font.Face.Face.Metrics().Descent)
 	spos.X += tv.LineNoOff
 	if len(tv.Renders[pos.Ln].Spans) > 0 {
 		// note: Y from rune pos is baseline
@@ -134,7 +134,7 @@ func (tv *View) RenderDepthBg(stln, edln int) {
 	}
 	tv.Buf.MarkupMu.RLock() // needed for HiTags access
 	defer tv.Buf.MarkupMu.RUnlock()
-	sty := &tv.Style
+	sty := &tv.Styles
 	cspec := sty.BackgroundColor
 	bg := cspec.Solid
 	// STYTODO: fix textview colors
@@ -215,7 +215,7 @@ func (tv *View) RenderScopelights(stln, edln int) {
 
 // RenderRegionBox renders a region in background color according to given background color
 func (tv *View) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
-	tv.RenderRegionBoxSty(reg, &tv.Style, bgclr)
+	tv.RenderRegionBoxSty(reg, &tv.Styles, bgclr)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
@@ -283,7 +283,7 @@ func (tv *View) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.F
 
 // RenderStartPos is absolute rendering start position from our allocpos
 func (tv *View) RenderStartPos() mat32.Vec2 {
-	st := &tv.Style
+	st := &tv.Styles
 	spc := st.BoxSpace()
 	pos := tv.LayState.Alloc.Pos.Add(spc.Pos())
 	delta := mat32.NewVec2FmPoint(tv.LayoutScrollDelta((image.Point{})))
@@ -297,7 +297,7 @@ func (tv *View) RenderAllLinesInBounds() {
 	rs := &tv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
-	sty := &tv.Style
+	sty := &tv.Styles
 	pos := mat32.NewVec2FmPoint(tv.ScBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
@@ -362,7 +362,7 @@ func (tv *View) RenderLineNosBoxAll() {
 	}
 	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
-	sty := &tv.Style
+	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	spos := mat32.NewVec2FmPoint(tv.ScBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
@@ -378,7 +378,7 @@ func (tv *View) RenderLineNosBox(st, ed int) {
 	}
 	rs := &tv.Sc.RenderState
 	pc := &rs.Paint
-	sty := &tv.Style
+	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	spos := tv.CharStartPos(lex.Pos{Ln: st})
 	spos.X = float32(tv.ScBBox.Min.X)
@@ -400,7 +400,7 @@ func (tv *View) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	}
 
 	sc := tv.Sc
-	sty := &tv.Style
+	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	fst := sty.FontRender()
 	rs := &sc.RenderState
@@ -492,7 +492,7 @@ func (tv *View) RenderLines(st, ed int) bool {
 	}
 	sc := tv.Sc
 	updt := tv.UpdateStart()
-	sty := &tv.Style
+	sty := &tv.Styles
 	rs := &sc.RenderState
 	pc := &rs.Paint
 	pos := tv.RenderStartPos()
@@ -618,7 +618,7 @@ func (tv *View) PixelToCursor(pt image.Point) lex.Pos {
 	if tv.NLines == 0 {
 		return lex.PosZero
 	}
-	sty := &tv.Style
+	sty := &tv.Styles
 	yoff := float32(tv.ScBBox.Min.Y)
 	stln := tv.FirstVisibleLine(0)
 	cln := stln

@@ -104,9 +104,9 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 			fmt.Println("Event to Widget:", wb.Path(), ev.String())
 		}
 	}
-	state := wb.Style.State
+	state := wb.Styles.State
 	wb.Listeners.Call(ev)
-	if wb.Style.State != state {
+	if wb.Styles.State != state {
 		wb.ApplyStyleUpdate(wb.Sc)
 	}
 }
@@ -168,7 +168,7 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 		}
 		// if we are not double clickable, we just treat
 		// it as a click event (as long as we are pressable)
-		if !wb.AbilityIs(abilities.DoubleClickable) && wb.Style.Abilities.IsPressable() {
+		if !wb.AbilityIs(abilities.DoubleClickable) && wb.Styles.Abilities.IsPressable() {
 			wb.Send(events.Click, e)
 		}
 	})

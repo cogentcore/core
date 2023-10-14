@@ -103,7 +103,7 @@ func GatherSizes(ly *Layout) {
 	sc := ly.Sc
 	if sc != nil && sc.Is(ScPrefSizing) {
 		// fmt.Println("pref!")
-		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
+		prefSizing = ly.Styles.Overflow == styles.OverflowScroll // special case
 	}
 
 	for d := mat32.X; d <= mat32.Y; d++ {
@@ -263,7 +263,7 @@ func GatherSizesGrid(ly *Layout) {
 		return
 	}
 
-	cols := ly.Style.Columns
+	cols := ly.Styles.Columns
 	rows := 0
 
 	sz := len(ly.Kids)
@@ -277,7 +277,7 @@ func GatherSizesGrid(ly *Layout) {
 			continue
 		}
 		ni.StyMu.RLock()
-		st := &ni.Style
+		st := &ni.Styles
 		ni.StyMu.RUnlock()
 		if st.Col > 0 {
 			cols = max(cols, st.Col+st.ColSpan)
@@ -330,7 +330,7 @@ func GatherSizesGrid(ly *Layout) {
 		}
 		ni.LayState.UpdateSizes()
 		ni.StyMu.RLock()
-		st := &ni.Style
+		st := &ni.Styles
 		ni.StyMu.RUnlock()
 		if st.Col > 0 {
 			col = st.Col
@@ -383,12 +383,12 @@ func GatherSizesGrid(ly *Layout) {
 	prefSizing := false
 	sc := ly.Sc
 	if sc != nil && sc.Is(ScPrefSizing) {
-		prefSizing = ly.Style.Overflow == styles.OverflowScroll // special case
+		prefSizing = ly.Styles.Overflow == styles.OverflowScroll // special case
 	}
 
 	// if there aren't existing prefs, we need to compute size
 	if prefSizing || ly.LayState.Size.Pref.X == 0 || ly.LayState.Size.Pref.Y == 0 {
-		sbw := ly.Style.ScrollBarWidth.Dots
+		sbw := ly.Styles.ScrollBarWidth.Dots
 		maxRow := len(ly.GridData[Row])
 		maxCol := len(ly.GridData[Col])
 		if prefSizing {
@@ -521,7 +521,7 @@ func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 			continue
 		}
 		ni.StyMu.RLock()
-		al := ni.Style.AlignDim(dim)
+		al := ni.Styles.AlignDim(dim)
 		ni.StyMu.RUnlock()
 		pref := ni.LayState.Size.Pref.Dim(dim)
 		need := ni.LayState.Size.Need.Dim(dim)
@@ -541,7 +541,7 @@ func LayoutAlongDim(ly *Layout, dim mat32.Dims) {
 	}
 
 	elspc := float32(sz-1) * ly.Spacing.Dots
-	al := ly.Style.AlignDim(dim)
+	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
@@ -711,7 +711,7 @@ func LayoutFlow(ly *Layout, dim mat32.Dims, iter int) bool {
 				continue
 			}
 			ni.StyMu.RLock()
-			al := ni.Style.AlignDim(odim)
+			al := ni.Styles.AlignDim(odim)
 			ni.StyMu.RUnlock()
 			pref := ni.LayState.Size.Pref.Dim(odim)
 			need := ni.LayState.Size.Need.Dim(odim)
@@ -747,7 +747,7 @@ func LayoutGridDim(ly *Layout, rowcol RowCol, dim mat32.Dims) {
 		return
 	}
 	elspc := float32(sz-1) * ly.Spacing.Dots
-	al := ly.Style.AlignDim(dim)
+	al := ly.Styles.AlignDim(dim)
 	spc := ly.BoxSpace()
 	exspc := spc.Size().Dim(dim) + elspc
 	avail := ly.LayState.Alloc.Size.Dim(dim) - exspc
@@ -868,7 +868,7 @@ func LayoutGridLay(ly *Layout) {
 		}
 
 		ni.StyMu.RLock()
-		st := &ni.Style
+		st := &ni.Styles
 		ni.StyMu.RUnlock()
 		if st.Col > 0 {
 			col = st.Col

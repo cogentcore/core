@@ -84,7 +84,7 @@ func (wb *WidgetBase) AddStyles(s func(s *styles.Style)) Widget {
 // ActiveStyle satisfies the ActiveStyler interface
 // and returns the active style of the widget
 func (wb *WidgetBase) ActiveStyle() *styles.Style {
-	return &wb.Style
+	return &wb.Styles
 }
 
 // StyleRLock does a read-lock for reading the style
@@ -100,7 +100,7 @@ func (wb *WidgetBase) StyleRUnlock() {
 // BoxSpace returns the style BoxSpace value under read lock
 func (wb *WidgetBase) BoxSpace() styles.SideFloats {
 	wb.StyMu.RLock()
-	bs := wb.Style.BoxSpace()
+	bs := wb.Styles.BoxSpace()
 	wb.StyMu.RUnlock()
 	return bs
 }
@@ -161,7 +161,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	pin := prof.Start("ApplyStyleWidget-Inherit")
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
-		wb.Style.InheritFields(parSty)
+		wb.Styles.InheritFields(parSty)
 		// wb.ParentStyleRUnlock()
 	}
 	pin.End()
@@ -176,14 +176,14 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	// note: it is critical to do this styling here so that layout getsizes
 	// has the proper info for laying out items
 	puc := prof.Start("ApplyStyleWidget-SetUnitContext")
-	SetUnitContext(&wb.Style, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
+	SetUnitContext(&wb.Styles, wb.Sc, mat32.Vec2{}, mat32.Vec2{})
 	puc.End()
 
 	psc := prof.Start("ApplyStyleWidget-SetCurrentColor")
-	if wb.Style.Inactive { // inactive can only set, not clear
+	if wb.Styles.Inactive { // inactive can only set, not clear
 		wb.SetState(true, states.Disabled)
 	}
-	sc.SetCurrentColor(wb.Style.Color)
+	sc.SetCurrentColor(wb.Styles.Color)
 
 	wb.ApplyStyleParts(sc)
 
@@ -194,7 +194,7 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 // styles to the widget. It is called automatically in [ApplyStyleWidget]
 // and should not need to be called by end-user code.
 func (wb *WidgetBase) DefaultStyleWidget() {
-	s := &wb.Style
+	s := &wb.Styles
 
 	state := s.State
 	*s = styles.Style{}
@@ -230,22 +230,22 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 // the StyleFuncs field in sequential ascending order.
 func (wb *WidgetBase) RunStylers() {
 	for _, s := range wb.Stylers {
-		s(&wb.Style)
+		s(&wb.Styles)
 	}
 }
 
 // ApplyPrefsDensityMul multiplies all of the margin and padding
 // values for the widget by the result of [Prefs.DensityMul]
 func (wb *WidgetBase) ApplyPrefsDensityMul() {
-	wb.Style.Margin.Top.Val *= Prefs.DensityMul()
-	wb.Style.Margin.Right.Val *= Prefs.DensityMul()
-	wb.Style.Margin.Bottom.Val *= Prefs.DensityMul()
-	wb.Style.Margin.Left.Val *= Prefs.DensityMul()
+	wb.Styles.Margin.Top.Val *= Prefs.DensityMul()
+	wb.Styles.Margin.Right.Val *= Prefs.DensityMul()
+	wb.Styles.Margin.Bottom.Val *= Prefs.DensityMul()
+	wb.Styles.Margin.Left.Val *= Prefs.DensityMul()
 
-	wb.Style.Padding.Top.Val *= Prefs.DensityMul()
-	wb.Style.Padding.Right.Val *= Prefs.DensityMul()
-	wb.Style.Padding.Bottom.Val *= Prefs.DensityMul()
-	wb.Style.Padding.Left.Val *= Prefs.DensityMul()
+	wb.Styles.Padding.Top.Val *= Prefs.DensityMul()
+	wb.Styles.Padding.Right.Val *= Prefs.DensityMul()
+	wb.Styles.Padding.Bottom.Val *= Prefs.DensityMul()
+	wb.Styles.Padding.Left.Val *= Prefs.DensityMul()
 }
 
 func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
@@ -297,7 +297,7 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		// if we have a color or a state layer, we are a relevant breakpoint
-		return !p.Style.BackgroundColor.IsNil() || p.Style.StateLayer > 0
+		return !p.Styles.BackgroundColor.IsNil() || p.Styles.StateLayer > 0
 	})
 	if pwb == nil {
 		return colors.Full{}
@@ -305,11 +305,11 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// If we don't have a background color ourselves (but we have a state layer),
 	// we recursively get our parent's background color and apply our state layer
 	// to it. This makes state layers work on transparent elements.
-	if pwb.Style.BackgroundColor.IsNil() {
-		return pwb.Style.StateBackgroundColor(pwb.ParentBackgroundColor())
+	if pwb.Styles.BackgroundColor.IsNil() {
+		return pwb.Styles.StateBackgroundColor(pwb.ParentBackgroundColor())
 	}
 	// Otherwise, we can directly apply the state layer to our background color
-	return pwb.Style.StateBackgroundColor(pwb.Style.BackgroundColor)
+	return pwb.Styles.StateBackgroundColor(pwb.Styles.BackgroundColor)
 }
 
 /////////////////////////////////////////////////////////////////

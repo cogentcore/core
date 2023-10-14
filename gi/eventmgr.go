@@ -268,15 +268,15 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		}
 		switch et {
 		case events.MouseMove:
-			if move == nil && wb.Style.Abilities.IsHoverable() {
+			if move == nil && wb.Styles.Abilities.IsHoverable() {
 				move = w
 			}
 		case events.MouseDown:
-			if press == nil && wb.Style.Abilities.IsPressable() {
+			if press == nil && wb.Styles.Abilities.IsPressable() {
 				press = w
 			}
 		case events.MouseUp:
-			if up == nil && wb.Style.Abilities.IsPressable() {
+			if up == nil && wb.Styles.Abilities.IsPressable() {
 				up = w
 			}
 		}
@@ -290,7 +290,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
 		for _, w := range em.MouseInBBox { // requires forward iter through em.MouseInBBox
 			wb := w.AsWidget()
-			if wb.Style.Abilities.IsHoverable() {
+			if wb.Styles.Abilities.IsHoverable() {
 				hovs = append(hovs, w)
 			}
 		}
@@ -356,8 +356,8 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	for i := n - 1; i >= 0; i-- {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
-		if !cursorSet && wb.Style.Cursor != cursors.None {
-			em.SetCursor(wb.Style.Cursor)
+		if !cursorSet && wb.Styles.Cursor != cursors.None {
+			em.SetCursor(wb.Styles.Cursor)
 			cursorSet = true
 		}
 	}

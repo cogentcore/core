@@ -150,7 +150,7 @@ func (wb *WidgetBase) PointToRelPos(pt image.Point) image.Point {
 
 // set our LayState.Alloc.Size from constraints
 func (wb *WidgetBase) GetSizeFromWH(w, h float32) {
-	st := &wb.Style
+	st := &wb.Styles
 	if st.Width.Dots > 0 {
 		w = mat32.Max(st.Width.Dots, w)
 	}
@@ -221,7 +221,7 @@ func (wb *WidgetBase) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) boo
 func (wb *WidgetBase) InitLayout(sc *Scene) bool {
 	wb.StyMu.Lock()
 	defer wb.StyMu.Unlock()
-	wb.LayState.SetFromStyle(&wb.Style)
+	wb.LayState.SetFromStyle(&wb.Styles)
 	return false
 }
 
@@ -241,7 +241,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int)
 	psize := wb.AddParentPos()
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	// this is the one point when Style Dots are actually computed!
-	SetUnitContext(&wb.Style, sc, wb.NodeSize(), psize) // update units with final layout
+	SetUnitContext(&wb.Styles, sc, wb.NodeSize(), psize) // update units with final layout
 	wb.BBox = wi.BBoxes()                               // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox

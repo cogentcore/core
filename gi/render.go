@@ -434,8 +434,8 @@ func (sc *Scene) PrefSize(initSz image.Point) image.Point {
 
 	vpsz := sc.LayState.Size.Pref.ToPoint()
 	// also take into account min size pref
-	stw := int(sc.Style.MinWidth.Dots)
-	sth := int(sc.Style.MinHeight.Dots)
+	stw := int(sc.Styles.MinWidth.Dots)
+	sth := int(sc.Styles.MinHeight.Dots)
 	// fmt.Printf("dlg stw %v sth %v dpi %v vpsz: %v\n", stw, sth, dlg.Sty.UnContext.DPI, vpsz)
 	vpsz.X = max(vpsz.X, stw)
 	vpsz.Y = max(vpsz.Y, sth)
@@ -540,7 +540,7 @@ func (wb *WidgetBase) RenderLock(sc *Scene) (*paint.State, *paint.Paint, *styles
 	wb.StyMu.RLock()
 	rs := &sc.RenderState
 	rs.Lock()
-	return rs, &rs.Paint, &wb.Style
+	return rs, &rs.Paint, &wb.Styles
 }
 
 // RenderUnlock unlocks paint.State and style
