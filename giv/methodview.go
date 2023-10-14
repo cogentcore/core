@@ -64,6 +64,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			continue
 		}
 		cfg := &MethodConfig{
+			Name:    met.Name,
 			Label:   sentencecase.Of(met.Name),
 			Tooltip: met.Doc,
 			Args:    met.Args,
@@ -97,15 +98,23 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 // ArgConfig contains the relevant configuration information for each arg,
 // including the reflect.Value, name, optional description, and default value
 type ArgConfig struct {
-	Val     reflect.Value
-	Name    string
-	Desc    string
-	View    Value
+	// Name is the actual name of the arg in code
+	Name string
+	// Label is the user-friendly label name for the arg.
+	// It defaults to the sentence case version of Name.
+	Label string
+	// Doc is the documentation for the argument
+	Doc string
+	// Val is the reflect.Value of the argument
+	Val reflect.Value
+	// View is the [Value] view associated with the argument
+	View Value
+	// Default, if non-nil, is the default value for the argument
 	Default any
 }
 
 // CallMethod calls the method with the given configuration information on the
-// given object value, using a GUI interface to prompt for args. It uses the
+// given object value, using a GUI interface to prompt for any args. It uses the
 // given context widget for context information for the GUI interface.
 // gopy:interface=handle
 func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
@@ -118,6 +127,8 @@ func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
 	return true
 }
 
+// ArgConfigsFromMethod returns the appropriate [ArgConfig] objects for the given
+// method on the given value.
 func ArgConfigsFromMethod(val any, met *MethodConfig) []ArgConfig {
 	rval := reflect.ValueOf(val)
 	rmet := rval.MethodByName(met.Name)
@@ -127,8 +138,9 @@ func ArgConfigsFromMethod(val any, met *MethodConfig) []ArgConfig {
 	for i, kv := range met.Args.Order {
 		arg := kv.Val
 		ra := ArgConfig{
-			Name: arg.Name,
-			Desc: arg.Doc,
+			Name:  arg.Name,
+			Label: sentencecase.Of(arg.Name),
+			Doc:   arg.Doc,
 		}
 
 		atyp := mtyp.In(i)

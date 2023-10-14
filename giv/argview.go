@@ -6,7 +6,6 @@ package giv
 
 import (
 	"github.com/iancoleman/strcase"
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -36,8 +35,6 @@ func (av *ArgView) OnInit() {
 	av.Lay = gi.LayoutVert
 	av.Style(func(s *styles.Style) {
 		av.Spacing = gi.StdDialogVSpaceUnits
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		s.Color = colors.Scheme.OnBackground
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 	})
@@ -157,8 +154,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		// 	// note: updating here is redundant -- relevant field will have already updated
 		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
 		// })
-		lbl.Text = ac.Name
-		lbl.Tooltip = ac.Desc
+		lbl.Text = ac.Label
+		lbl.Tooltip = ac.Doc
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
 		ac.View.ConfigWidget(widg)
 	}

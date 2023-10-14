@@ -37,8 +37,6 @@ type FileBrowse struct {
 
 func (fb *FileBrowse) OnInit() {
 	fb.Style(func(s *styles.Style) {
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 		s.Margin.Set(units.Dp(8))
 	})

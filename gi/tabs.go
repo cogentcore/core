@@ -70,7 +70,6 @@ func (ts *Tabs) TabsStyles() {
 		s.Border.Style.Set(styles.BorderSolid)
 		s.Border.Width.Set(units.Dp(1))
 		s.Border.Color.Set(colors.Scheme.OutlineVariant)
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 		s.Color = colors.Scheme.OnBackground
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
