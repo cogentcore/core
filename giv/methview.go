@@ -6,11 +6,14 @@ package giv
 
 import (
 	"fmt"
+	"log/slog"
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events/key"
+	"goki.dev/grease"
 	"goki.dev/gti"
+	"goki.dev/icons"
 )
 
 // these are special menus that we ignore
@@ -42,6 +45,26 @@ type ShortcutFunc func(it any, act *gi.Button) key.Chord
 // first argument is the object on which the method is defined (receiver)
 type LabelFunc func(it any, act *gi.Button) string
 
+// ToolbarOpts contains the options for a toolbar button. These are the
+// options passed to the `gi:toolbar` comment directive.
+//
+//gti:add
+type ToolbarOpts struct {
+	// Label is the label for the toolbar button.
+	// It defaults to the sentence case version of the
+	// name of the function.
+	Label string
+	// Icon is the icon for the toolbar button.
+	Icon icons.Icon
+	// Tooltip is the tooltip for the toolbar button.
+	// It defaults to the documentation for the function.
+	Tooltip string
+	// SepBefore is whether to insert a separator before the toolbar button.
+	SepBefore bool
+	// SepAfter is whether to insert a separator after the toolbar button.
+	SepAfter bool
+}
+
 // ToolBarView adds the toolbar buttons for the given value to the given toolbar.
 // It returns whether any toolbar buttons were added.
 func ToolBarView(val any, tb *gi.ToolBar) bool {
@@ -52,18 +75,27 @@ func ToolBarView(val any, tb *gi.ToolBar) bool {
 	gotAny := false
 	for _, kv := range typ.Methods.Order {
 		met := kv.Val
-		gotTbDir := false
+		var tbDir *gti.Directive
 		for _, dir := range met.Directives {
 			if dir.Tool == "gi" && dir.Directive == "toolbar" {
-				gotTbDir = true
+				tbDir = dir
 				break
 			}
 		}
-		if !gotTbDir {
+		if tbDir == nil {
+			continue
+		}
+		opts := &ToolbarOpts{
+			Label:   met.Name,
+			Tooltip: met.Doc,
+		}
+		_, err := grease.SetFromArgs(opts, tbDir.Args, grease.ErrNotFound)
+		if err != nil {
+			slog.Error("programmer error: error while parsing args to `gi:toolbar` comment directive", "err", err.Error())
 			continue
 		}
 		gotAny = true
-		tb.AddButton(gi.ActOpts{Label: met.Name, Tooltip: met.Doc}, func(bt *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: opts.Label, Icon: opts.Icon, Tooltip: opts.Tooltip}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
 		})
 	}
