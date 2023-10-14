@@ -169,7 +169,7 @@ func (tv *TreeView) SetSrcNode(sk ki.Ki, tvIdx *int, init bool, depth int) {
 func (tv *TreeView) ReSync() {
 	tvIdx := tv.ViewIdx
 	tv.SyncToSrc(&tvIdx, false, 0)
-	tv.UpdateSig()
+	tv.SetNeedsRender()
 }
 
 // SyncToSrc updates the view tree to match the source tree, using
@@ -276,7 +276,7 @@ func SrcNodeSignalFunc(tvki, send ki.Ki, sig int64, data any) {
 		// 	}
 		// 	tv.SyncToSrc(&tvIdx, false, 0)
 		// } else {
-		tv.UpdateSig()
+		tv.SetNeedsRender()
 		// }
 	}
 }
@@ -551,7 +551,7 @@ func (tv *TreeView) Select() {
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
 		tv.SetSelectedViews(sl)
-		tv.UpdateSig()
+		tv.SetNeedsRender()
 	}
 }
 
@@ -569,7 +569,7 @@ func (tv *TreeView) Unselect() {
 			}
 		}
 		tv.SetSelectedViews(sl)
-		tv.UpdateSig()
+		tv.SetNeedsRender()
 	}
 }
 
@@ -583,7 +583,7 @@ func (tv *TreeView) UnselectAll() {
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		v.ClearSelected()
-		v.UpdateSig()
+		v.SetNeedsRender()
 	}
 	tv.UpdateEndRender(updt)
 	// tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewAllUnselected), tv.This())
@@ -1563,7 +1563,7 @@ func (tv *TreeView) Dragged(de events.Event) {
 				psplt := strings.Split(path, "/")
 				orgnm := psplt[len(psplt)-1]
 				sn.SetName(orgnm)
-				sn.UpdateSig()
+				sn.SetNeedsRender()
 			}
 		}
 	}
@@ -2228,7 +2228,7 @@ func (tv *TreeView) Render(sc *gi.Scene) {
 // func (tv *TreeView) FocusChanged(change gi.FocusChanges) {
 // 	switch change {
 // 	case gi.FocusLost:
-// 		tv.UpdateSig()
+// 		tv.SetNeedsRender()
 // 	case gi.FocusGot:
 // 		if tv.This() == tv.RootView.This() {
 // 			sl := tv.SelectedViews()
@@ -2242,7 +2242,7 @@ func (tv *TreeView) Render(sc *gi.Scene) {
 // 		}
 // 		tv.ScrollToMe()
 // 		tv.EmitFocusedSignal()
-// 		tv.UpdateSig()
+// 		tv.SetNeedsRender()
 // 	case gi.FocusInactive: // don't care..
 // 	case gi.FocusActive:
 // 	}

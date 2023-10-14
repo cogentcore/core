@@ -37,7 +37,7 @@ import (
 //
 //goki:embedder
 type View struct {
-	gi.WidgetBase
+	gi.Layout
 
 	// the text buffer that we're editing
 	Buf *Buf `json:"-" xml:"-"`
@@ -66,7 +66,7 @@ type View struct {
 	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
 	Renders []paint.Text `json:"-" xml:"-"`
 
-	// starting offsets for top of each line
+	// starting render offsets for top of each line
 	Offs []float32 `json:"-" xml:"-"`
 
 	// number of line number digits needed
@@ -77,12 +77,6 @@ type View struct {
 
 	// render for line numbers
 	LineNoRender paint.Text `json:"-" xml:"-"`
-
-	// total size of all lines as rendered
-	LinesSize image.Point `json:"-" xml:"-"`
-
-	// size params to use in render call
-	RenderSz mat32.Vec2 `json:"-" xml:"-"`
 
 	// current cursor position
 	CursorPos lex.Pos `json:"-" xml:"-"`
@@ -133,7 +127,18 @@ type View struct {
 	LineHeight float32 `json:"-" xml:"-"`
 
 	// height in lines and width in chars of the visible area
-	VisSize image.Point `json:"-" xml:"-"`
+	NLinesChars image.Point `json:"-" xml:"-"`
+
+	// total size of all lines as rendered
+	LinesSize mat32.Vec2 `json:"-" xml:"-"`
+
+	// TotalSize = LinesSize plus extra space and line numbers etc
+	TotalSize mat32.Vec2 `json:"-" xml:"-"`
+
+	// LineLayoutSize is LayState.Alloc.Size subtracting
+	// extra space and line numbers -- this is what
+	// LayoutStdLR sees for laying out each line
+	LineLayoutSize mat32.Vec2 `json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `json:"-" xml:"-"`
@@ -196,21 +201,12 @@ func (tv *View) ViewStyles() {
 	})
 }
 
-// ViewFlags extend NodeBase NodeFlags to hold View state
+// ViewFlags extend WidgetFlags to hold textview.View state
 type ViewFlags int64 //enums:bitflag
 
 const (
-	// ViewNeedsRefresh indicates when refresh is required
-	ViewNeedsRefresh ViewFlags = ViewFlags(gi.WidgetFlagsN) + iota
-
-	// ViewInReLayout indicates that we are currently resizing ourselves via parent layout
-	ViewInReLayout
-
-	// ViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender
-	ViewRenderScrolls
-
 	// ViewHasLineNos indicates that this view has line numbers (per Buf option)
-	ViewHasLineNos
+	ViewHasLineNos ViewFlags = ViewFlags(gi.WidgetFlagsN) + iota
 
 	// ViewLastWasTabAI indicates that last key was a Tab auto-indent
 	ViewLastWasTabAI
@@ -228,19 +224,6 @@ func (tv *View) EditDone() {
 	tv.ClearSelected()
 }
 
-// Refresh re-displays everything anew from the buffer
-func (tv *View) Refresh() {
-	if tv == nil || tv.This() == nil {
-		return
-	}
-	if !tv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	tv.LayoutAllLines(false)
-	tv.UpdateSig()
-	tv.ClearNeedsRefresh()
-}
-
 // Remarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
@@ -249,33 +232,6 @@ func (tv *View) ReMarkup() {
 		return
 	}
 	tv.Buf.ReMarkup()
-}
-
-// NeedsRefresh checks if a refresh is required -- atomically safe for other
-// routines to set the NeedsRefresh flag
-func (tv *View) NeedsRefresh() bool {
-	return tv.Is(ViewNeedsRefresh)
-}
-
-// SetNeedsRefresh flags that a refresh is required -- atomically safe for
-// other routines to call this
-func (tv *View) SetNeedsRefresh() {
-	tv.SetFlag(true, ViewNeedsRefresh)
-}
-
-// ClearNeedsRefresh clears needs refresh flag -- atomically safe
-func (tv *View) ClearNeedsRefresh() {
-	tv.SetFlag(false, ViewNeedsRefresh)
-}
-
-// RefreshIfNeeded re-displays everything if SetNeedsRefresh was called --
-// returns true if refreshed
-func (tv *View) RefreshIfNeeded() bool {
-	if tv.NeedsRefresh() {
-		tv.Refresh()
-		return true
-	}
-	return false
 }
 
 // IsChanged returns true if buffer was changed (edited)
@@ -336,9 +292,7 @@ func (tv *View) SetBuf(buf *Buf) {
 			tv.PosHistIdx = bhl - 1
 		}
 	}
-	tv.LayoutAllLines(false)
-	tv.UpdateSig()
-	tv.SetCursorShow(tv.CursorPos)
+	tv.SetNeedsLayout()
 }
 
 // LinesInserted inserts new lines of text and reformats them
@@ -366,7 +320,7 @@ func (tv *View) LinesInserted(tbe *textbuf.Edit) {
 	tv.NLines += nsz
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
-	tv.UpdateSig()
+	tv.SetNeedsLayout()
 }
 
 // LinesDeleted deletes lines of text and reformats remaining one
@@ -381,7 +335,7 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 	tv.NLines -= dsz
 
 	tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.Start.Ln, true)
-	tv.UpdateSig()
+	tv.SetNeedsLayout()
 }
 
 // BufSignal receives a signal from the Buf when underlying text
@@ -391,8 +345,7 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	case BufDone:
 	case BufNew:
 		tv.ResetState()
-		tv.SetNeedsRefresh() // in case not visible
-		tv.Refresh()
+		tv.SetNeedsLayout()
 		tv.SetCursorShow(tv.CursorPos)
 	case BufInsert:
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
@@ -403,14 +356,8 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 			// fmt.Printf("tv %v lines insert %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
 			tv.LinesInserted(tbe)
 		} else {
-			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
-			if rerend {
-				// fmt.Printf("tv %v line insert rerend %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
-				tv.RenderAllLines()
-			} else {
-				// fmt.Printf("tv %v line insert no rerend %v - %v.  markup: %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End, len(tv.Buf.HiTags[tbe.Reg.Start.Ln]))
-				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
-			}
+			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, false)
+			tv.SetNeedsRender()
 		}
 	case BufDelete:
 		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
@@ -419,15 +366,11 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
 			tv.LinesDeleted(tbe)
 		} else {
-			rerend := tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, true)
-			if rerend {
-				tv.RenderAllLines()
-			} else {
-				tv.RenderLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln)
-			}
+			tv.LayoutLines(tbe.Reg.Start.Ln, tbe.Reg.End.Ln, true)
+			tv.SetNeedsRender()
 		}
 	case BufMarkUpdt:
-		tv.SetNeedsRefresh() // comes from another goroutine
+		tv.SetNeedsLayout() // comes from another goroutine
 	case BufClosed:
 		tv.SetBuf(nil)
 	}
@@ -490,11 +433,6 @@ func (tv *View) StyleView(sc *gi.Scene) {
 		if tv.Buf != nil {
 			tv.Buf.SetHiStyle(histyle.StyleDefault)
 		}
-		// win := tv.ParentRenderWin()
-		// if win != nil {
-		// 	spnm := tv.CursorSpriteName()
-		// 	win.DeleteSprite(spnm)
-		// }
 	}
 	tv.ApplyStyleWidget(sc)
 	tv.CursorWidth.ToDots(&tv.Style.UnContext)
@@ -504,32 +442,10 @@ func (tv *View) StyleView(sc *gi.Scene) {
 func (tv *View) ApplyStyle(sc *gi.Scene) {
 	// tv.SetFlag(true, gi.CanFocus) // always focusable
 	tv.StyleView(sc)
+	tv.StyleSizes()
 }
 
-// GetSize
-func (tv *View) GetSize(sc *gi.Scene, iter int) {
-	if iter > 0 {
-		return
-	}
-	tv.InitLayout(sc)
-	if tv.LinesSize == (image.Point{}) {
-		tv.LayoutAllLines(true)
-	} else {
-		tv.SetSize()
-	}
-}
-
-// DoLayoutn
-func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	tv.DoLayoutBase(sc, parBBox, iter)
-	tv.DoLayoutChildren(sc, iter)
-	if tv.LinesSize == image.ZP || tv.NeedsRebuild() || tv.NeedsRefresh() || tv.NLines != tv.Buf.NumLines() {
-		redo := tv.LayoutAllLines(true) // is our size now different?  if so iterate..
-		return redo
-	}
-	tv.SetSize()
-	return false
-}
+// todo: virtual keyboard stuff
 
 // FocusChanged appropriate actions for various types of focus changes
 // func (tv *View) FocusChanged(change gi.FocusChanges) {
@@ -538,26 +454,26 @@ func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 // 		tv.SetFlag(false, ViewFocusActive))
 // 		// tv.EditDone()
 // 		tv.StopCursor() // make sure no cursor
-// 		tv.UpdateSig()
+// 		tv.SetNeedsRender()
 // 		goosi.TheApp.HideVirtualKeyboard()
 // 		// fmt.Printf("lost focus: %v\n", tv.Nm)
 // 	case gi.FocusGot:
 // 		tv.SetFlag(true, ViewFocusActive))
 // 		tv.EmitFocusedSignal()
-// 		tv.UpdateSig()
+// 		tv.SetNeedsRender()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 // 		// fmt.Printf("got focus: %v\n", tv.Nm)
 // 	case gi.FocusInactive:
 // 		tv.SetFlag(false, ViewFocusActive))
 // 		tv.StopCursor()
 // 		// tv.EditDone()
-// 		// tv.UpdateSig()
+// 		// tv.SetNeedsRender()
 // 		goosi.TheApp.HideVirtualKeyboard()
 // 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
 // 	case gi.FocusActive:
 // 		// fmt.Printf("focus active: %v\n", tv.Nm)
 // 		tv.SetFlag(true, ViewFocusActive))
-// 		// tv.UpdateSig()
+// 		// tv.SetNeedsRender()
 // 		// todo: see about cursor
 // 		tv.StartCursor()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)

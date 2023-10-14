@@ -63,7 +63,7 @@ func (ge *GiEditor) Update() {
 	if ge.KiRoot == nil {
 		return
 	}
-	// ge.KiRoot.UpdateSig()
+	// ge.KiRoot.SetNeedsRender()
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
@@ -87,7 +87,7 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 	// ge.KiRoot.SaveJSON(string(filename))
 	ge.Changed = false
 	ge.Filename = filename
-	ge.UpdateSig() // notify our editor
+	ge.SetNeedsRender() // notify our editor
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
@@ -97,7 +97,7 @@ func (ge *GiEditor) Open(filename gi.FileName) {
 	}
 	// ge.KiRoot.OpenJSON(string(filename))
 	ge.Filename = filename
-	ge.UpdateSig() // notify our editor
+	ge.SetNeedsRender() // notify our editor
 }
 
 // EditColorScheme pulls up a window to edit the current color scheme

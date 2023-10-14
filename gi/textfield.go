@@ -1216,7 +1216,7 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 // if tf.IsDisabled() {
 // 	tf.SetSelected(!tf.StateIs(states.Selected))
 // 	tf.EmitSelectedSignal()
-// 	tf.UpdateSig()
+// 	tf.SetNeedsRender()
 // } else {
 
 func (tf *TextField) HandleTextFieldMouse() {
@@ -1498,7 +1498,7 @@ func (tf *TextField) ConfigParts(sc *Scene) {
 			trailIcon.SetIcon(tf.TrailingIcon)
 		}
 		parts.UpdateEnd(updt)
-		tf.SetNeedsLayout(sc, updt)
+		tf.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 

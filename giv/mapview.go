@@ -219,7 +219,7 @@ func (mv *MapView) ConfigMapGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config)
 	if mods {
-		sg.SetNeedsLayout(sc, updt)
+		sg.SetNeedsLayoutUpdate(sc, updt)
 	} else {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}

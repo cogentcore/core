@@ -171,26 +171,30 @@ const (
 	// -- data is Txt bytes
 	BufDone BufSignals = iota
 
-	// BufNew signals that entirely new text is present -- all views
-	// update -- data is Txt bytes.
+	// BufNew signals that entirely new text is present.
+	// All views should do full layout update.
 	BufNew
 
-	// BufInsert signals that some text was inserted -- data is
-	// textbuf.Edit describing change -- the Buf always reflects the
-	// current state *after* the edit.
+	// BufMods signals that potentially diffuse modifications
+	// have been made.  Views should do a Layout and Render.
+	BufMods
+
+	// BufInsert signals that some text was inserted.
+	// data is textbuf.Edit describing change.
+	// The Buf always reflects the current state *after* the edit.
 	BufInsert
 
-	// BufDelete signals that some text was deleted -- data is
-	// textbuf.Edit describing change -- the Buf always reflects the
-	// current state *after* the edit.
+	// BufDelete signals that some text was deleted.
+	// data is textbuf.Edit describing change.
+	// The Buf always reflects the current state *after* the edit.
 	BufDelete
 
-	// BufMarkUpdt signals that the Markup text has been updated -- this
-	// signal is typically sent from a separate goroutine so should be used
-	// with a mutex
+	// BufMarkUpdt signals that the Markup text has been updated
+	// This signal is typically sent from a separate goroutine,
+	// so should be used with a mutex
 	BufMarkUpdt
 
-	// BufClosed signals that the textbuf was closed
+	// BufClosed signals that the textbuf was closed.
 	BufClosed
 )
 
@@ -262,7 +266,7 @@ func (tb *Buf) SetText(txt []byte) {
 	tb.Txt = txt
 	tb.BytesToLines()
 	tb.InitialMarkup()
-	tb.Refresh()
+	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 }
 
@@ -291,7 +295,7 @@ func (tb *Buf) SetTextLines(lns [][]byte, cpy bool) {
 	tb.LinesMu.Unlock()
 	tb.LinesToBytes()
 	tb.InitialMarkup()
-	tb.Refresh()
+	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 }
 
@@ -367,9 +371,10 @@ func (tb *Buf) SetHiStyle(style gi.HiStyleName) {
 	tb.MarkupMu.Unlock()
 }
 
-// Refresh signals any views to refresh views
-func (tb *Buf) Refresh() {
-	tb.SignalViews(BufNew, nil)
+// SignalMods sends the BufMods signal for misc, potentially
+// widespread modifications to buffer.
+func (tb *Buf) SignalMods() {
+	tb.SignalViews(BufMods, nil)
 }
 
 // SetInactive sets the buffer in an inactive state if inactive = true
@@ -413,7 +418,7 @@ func (tb *Buf) NewBuf(nlines int) {
 
 	tb.MarkupMu.Unlock()
 	tb.LinesMu.Unlock()
-	tb.Refresh()
+	tb.SignalViews(BufNew, nil)
 }
 
 // Stat gets info about the file, including highlighting language
@@ -483,7 +488,7 @@ func (tb *Buf) Open(filename gi.FileName) error {
 		return err
 	}
 	tb.InitialMarkup()
-	tb.Refresh()
+	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 	return nil
 }
@@ -538,7 +543,7 @@ func (tb *Buf) Revert() bool {
 	}
 	tb.ClearChanged()
 	tb.AutoSaveDelete()
-	tb.Refresh()
+	tb.SignalViews(BufNew, nil)
 	tb.ReMarkup()
 	return true
 }
@@ -676,16 +681,18 @@ func (tb *Buf) Close(afterFun func(canceled bool)) bool {
 ////////////////////////////////////////////////////////////////////////////////////////
 //		AutoSave
 
-// AutoSaveOff turns off autosave and returns the prior state of Autosave flag --
-// call AutoSaveRestore with rval when done -- good idea to turn autosave off
-// for anything that does a block of updates
+// AutoSaveOff turns off autosave and returns the
+// prior state of Autosave flag.
+// Call AutoSaveRestore with rval when done.
+// See BatchUpdate methods for auto-use of this.
 func (tb *Buf) AutoSaveOff() bool {
 	asv := tb.Autosave
 	tb.Autosave = false
 	return asv
 }
 
-// AutoSaveRestore restores prior Autosave setting, from AutoSaveOff()
+// AutoSaveRestore restores prior Autosave setting,
+// from AutoSaveOff
 func (tb *Buf) AutoSaveRestore(asv bool) {
 	tb.Autosave = asv
 }
@@ -874,41 +881,18 @@ func (tb *Buf) AutoScrollViews() {
 	}
 }
 
-// RefreshViews does a refresh draw on all views
-func (tb *Buf) RefreshViews() {
-	for _, tv := range tb.Views {
-		if tv != nil && tv.This() != nil {
-			tv.Refresh()
-		}
-	}
-}
-
-// BatchUpdateStart call this when starting a batch of updates to the buffer --
-// it blocks the window updates for views until all the updates are done,
-// and calls AutoSaveOff.  Calls UpdateStart on Buf too.
-// Returns buf updt, win updt and autosave restore state.
-// Must call BatchUpdateEnd at end with the result of this call.
-func (tb *Buf) BatchUpdateStart() (winUpdt, autoSave bool) {
+// BatchUpdateStart call this when starting a batch of updates.
+// It calls AutoSaveOff and returns the prior state of that flag
+// which must be restored using BatchUpdateEnd.
+func (tb *Buf) BatchUpdateStart() (autoSave bool) {
 	tb.Undos.NewGroup()
 	autoSave = tb.AutoSaveOff()
-	winUpdt = false
-	vp := tb.SceneFromView()
-	if vp == nil {
-		return
-	}
-	winUpdt = vp.UpdateStart()
 	return
 }
 
 // BatchUpdateEnd call to complete BatchUpdateStart
-func (tb *Buf) BatchUpdateEnd(winUpdt, autoSave bool) {
+func (tb *Buf) BatchUpdateEnd(autoSave bool) {
 	tb.AutoSaveRestore(autoSave)
-	if winUpdt {
-		vp := tb.SceneFromView()
-		if vp != nil {
-			vp.UpdateEnd(winUpdt)
-		}
-	}
 }
 
 // AddFileNode adds the FileNode to the list or receivers of changes to buffer
@@ -1175,7 +1159,7 @@ func (tb *Buf) DeleteTextRect(st, ed lex.Pos, signal bool) *textbuf.Edit {
 	tb.SaveUndo(tbe)
 	tb.LinesMu.Unlock()
 	if signal {
-		tb.Refresh()
+		tb.SignalMods()
 	}
 	if tb.Autosave {
 		go tb.AutoSave()
@@ -1307,7 +1291,7 @@ func (tb *Buf) InsertTextRect(tbe *textbuf.Edit, signal bool) *textbuf.Edit {
 			ie.Reg.End.Ln = re.Reg.End.Ln
 			tb.SignalViews(BufInsert, ie)
 		} else {
-			tb.Refresh()
+			tb.SignalMods()
 		}
 	}
 	if tb.Autosave {
@@ -1899,8 +1883,8 @@ func (tb *Buf) Undo() *textbuf.Edit {
 		tb.AutoSaveDelete()
 		return nil
 	}
-	scUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(scUpdt, autoSave)
+	autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(autoSave)
 	stgp := tbe.Group
 	last := tbe
 	for {
@@ -1912,7 +1896,7 @@ func (tb *Buf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.Refresh()
+				tb.SignalMods()
 			} else {
 				utbe := tb.DeleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
 				utbe.Group = stgp + tbe.Group
@@ -1920,7 +1904,7 @@ func (tb *Buf) Undo() *textbuf.Edit {
 					tb.Undos.SaveUndo(utbe)
 				}
 				tb.LinesMu.Unlock()
-				tb.Refresh()
+				tb.SignalMods()
 			}
 		} else {
 			if tbe.Delete {
@@ -1975,8 +1959,8 @@ func (tb *Buf) Redo() *textbuf.Edit {
 		tb.LinesMu.Unlock()
 		return nil
 	}
-	scUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(scUpdt, autoSave)
+	autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(autoSave)
 	stgp := tbe.Group
 	last := tbe
 	for {
@@ -1984,11 +1968,11 @@ func (tb *Buf) Redo() *textbuf.Edit {
 			if tbe.Delete {
 				tb.DeleteTextRectImpl(tbe.Reg.Start, tbe.Reg.End)
 				tb.LinesMu.Unlock()
-				tb.Refresh()
+				tb.SignalMods()
 			} else {
 				tb.InsertTextRectImpl(tbe)
 				tb.LinesMu.Unlock()
-				tb.Refresh()
+				tb.SignalMods()
 			}
 		} else {
 			if tbe.Delete {
@@ -2293,8 +2277,8 @@ func (tb *Buf) AutoIndent(ln int) (tbe *textbuf.Edit, indLev, chPos int) {
 
 // AutoIndentRegion does auto-indent over given region -- end is *exclusive*
 func (tb *Buf) AutoIndentRegion(st, ed int) {
-	scUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(scUpdt, autoSave)
+	autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(autoSave)
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
@@ -2345,8 +2329,8 @@ func (tb *Buf) LineCommented(ln int) bool {
 
 // CommentRegion inserts comment marker on given lines -- end is *exclusive*
 func (tb *Buf) CommentRegion(st, ed int) {
-	scUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(scUpdt, autoSave)
+	autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(autoSave)
 
 	tabSz := tb.Opts.TabSize
 
@@ -2409,7 +2393,7 @@ func (tb *Buf) CommentRegion(st, ed int) {
 // separated by blank lines, into a single line per paragraph,
 // within the given line regions -- edLn is *inclusive*
 func (tb *Buf) JoinParaLines(stLn, edLn int) {
-	scUpdt, autoSave := tb.BatchUpdateStart()
+	autoSave := tb.BatchUpdateStart()
 
 	curEd := edLn                      // current end of region being joined == last blank line
 	for ln := edLn; ln >= stLn; ln-- { // reverse order
@@ -2433,8 +2417,8 @@ func (tb *Buf) JoinParaLines(stLn, edLn int) {
 			curEd = ln
 		}
 	}
-	tb.BatchUpdateEnd(scUpdt, autoSave)
-	tb.Refresh()
+	tb.BatchUpdateEnd(autoSave)
+	tb.SignalMods()
 }
 
 // TabsToSpaces replaces tabs with spaces in given line.
@@ -2466,15 +2450,15 @@ func (tb *Buf) TabsToSpaces(ln int) {
 
 // TabsToSpacesRegion replaces tabs with spaces over given region -- end is *exclusive*
 func (tb *Buf) TabsToSpacesRegion(st, ed int) {
-	scUpdt, autoSave := tb.BatchUpdateStart()
+	autoSave := tb.BatchUpdateStart()
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
 		}
 		tb.TabsToSpaces(ln)
 	}
-	tb.BatchUpdateEnd(scUpdt, autoSave)
-	tb.Refresh()
+	tb.BatchUpdateEnd(autoSave)
+	tb.SignalMods()
 }
 
 // SpacesToTabs replaces spaces with tabs in given line.
@@ -2512,15 +2496,15 @@ func (tb *Buf) SpacesToTabs(ln int) {
 
 // SpacesToTabsRegion replaces tabs with spaces over given region -- end is *exclusive*
 func (tb *Buf) SpacesToTabsRegion(st, ed int) {
-	scUpdt, autoSave := tb.BatchUpdateStart()
+	autoSave := tb.BatchUpdateStart()
 	for ln := st; ln < ed; ln++ {
 		if ln >= tb.NLines {
 			break
 		}
 		tb.SpacesToTabs(ln)
 	}
-	tb.BatchUpdateEnd(scUpdt, autoSave)
-	tb.Refresh()
+	tb.BatchUpdateEnd(autoSave)
+	tb.SignalMods()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2745,8 +2729,8 @@ func (tb *Buf) DiffBufsUnified(ob *Buf, context int) []byte {
 // determines whether each patch is signaled -- if an overall signal will be
 // sent at the end, then that would not be necessary (typical)
 func (tb *Buf) PatchFromBuf(ob *Buf, diffs textbuf.Diffs, signal bool) bool {
-	scUpdt, autoSave := tb.BatchUpdateStart()
-	defer tb.BatchUpdateEnd(scUpdt, autoSave)
+	autoSave := tb.BatchUpdateStart()
+	defer tb.BatchUpdateEnd(autoSave)
 
 	sz := len(diffs)
 	mods := false

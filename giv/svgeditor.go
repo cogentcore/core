@@ -60,7 +60,7 @@ func (sve *Editor) HandleEditorEvents() {
 		}
 		sve.SetTransform()
 		// ssvg.SetFullReRender()
-		// ssvg.UpdateSig()
+		// ssvg.SetNeedsRender()
 	})
 	// todo: context menu
 	// sve.OnAddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {

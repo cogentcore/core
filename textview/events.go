@@ -75,11 +75,8 @@ func (tv *View) KeyInput(kt events.Event) {
 		fmt.Printf("View KeyInput: %v\n", tv.Path())
 	}
 	kf := gi.KeyFun(kt.KeyChord())
-	// win := tv.ParentRenderWin()
-	// tv.ClearScopelights()
-	//
-	// tv.RefreshIfNeeded()
-	//
+
+	// todo:
 	// cpop := win.CurPopup()
 	// if gi.PopupIsCompleter(cpop) {
 	// 	setprocessed := tv.Buf.Complete.KeyInput(kf)
@@ -352,7 +349,6 @@ func (tv *View) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if tv.Buf.Opts.AutoIndent {
-				scUpdt, autoSave := tv.Buf.BatchUpdateStart()
 				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
 					// only re-indent current line for supported types
@@ -368,7 +364,6 @@ func (tv *View) KeyInput(kt events.Event) {
 				if tbe != nil {
 					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
-				tv.Buf.BatchUpdateEnd(scUpdt, autoSave)
 			} else {
 				tv.InsertAtCursor([]byte("\n"))
 			}
@@ -423,9 +418,6 @@ func (tv *View) KeyInput(kt events.Event) {
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
 func (tv *View) KeyInputInsertBra(kt events.Event) {
-	scUpdt, autoSave := tv.Buf.BatchUpdateStart()
-	defer tv.Buf.BatchUpdateEnd(scUpdt, autoSave)
-
 	pos := tv.CursorPos
 	match := true
 	newLine := false
@@ -487,13 +479,11 @@ func (tv *View) KeyInputInsertRune(kt events.Event) {
 		} else if kt.KeyRune() == '}' && tv.Buf.Opts.AutoIndent && tv.CursorPos.Ch == tv.Buf.LineLen(tv.CursorPos.Ln) {
 			tv.CancelComplete()
 			tv.lastAutoInsert = 0
-			scUpdt, autoSave := tv.Buf.BatchUpdateStart()
 			tv.InsertAtCursor([]byte(string(kt.KeyRune())))
 			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
 			if tbe != nil {
 				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
-			tv.Buf.BatchUpdateEnd(scUpdt, autoSave)
 		} else if tv.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
 			tv.CursorPos.Ch++
 			tv.SetCursorShow(tv.CursorPos)

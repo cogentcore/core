@@ -15,17 +15,39 @@ import (
 	"goki.dev/pi/v2/lex"
 )
 
-// ReCaseSelection changes the case of the currently-selected text.
-// Returns the new text -- empty if nothing selected.
-func (tv *View) ReCaseSelection(c textbuf.Cases) string {
-	if !tv.HasSelection() {
-		return ""
-	}
-	sel := tv.Selection()
-	nstr := textbuf.ReCaseString(string(sel.ToBytes()), c)
-	tv.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
-	return nstr
+//////////////////////////////////////////////////////////
+// 	Regions
+
+// HighlightRegion creates a new highlighted region,
+// triggers updating.
+func (tv *View) HighlightRegion(reg textbuf.Region) {
+	tv.Highlights = []textbuf.Region{reg}
+	tv.SetNeedsRender()
 }
+
+// ClearHighlights clears the Highlights slice of all regions
+func (tv *View) ClearHighlights() {
+	if len(tv.Highlights) == 0 {
+		return
+	}
+	tv.Highlights = tv.Highlights[:0]
+	tv.SetNeedsRender()
+}
+
+// ClearScopelights clears the Highlights slice of all regions
+func (tv *View) ClearScopelights() {
+	if len(tv.Scopelights) == 0 {
+		return
+	}
+	updt := tv.UpdateStart()
+	defer tv.UpdateEndRender(updt)
+	sl := make([]textbuf.Region, len(tv.Scopelights))
+	copy(sl, tv.Scopelights)
+	tv.Scopelights = tv.Scopelights[:0]
+}
+
+//////////////////////////////////////////////////////////
+// 	Selection
 
 // ClearSelected resets both the global selected flag and any current selection
 func (tv *View) ClearSelected() {
@@ -475,6 +497,18 @@ func (tv *View) PasteRect() {
 	tv.SetCursorShow(pos)
 	tv.SetCursorCol(tv.CursorPos)
 	tv.SavePosHistory(tv.CursorPos)
+}
+
+// ReCaseSelection changes the case of the currently-selected text.
+// Returns the new text -- empty if nothing selected.
+func (tv *View) ReCaseSelection(c textbuf.Cases) string {
+	if !tv.HasSelection() {
+		return ""
+	}
+	sel := tv.Selection()
+	nstr := textbuf.ReCaseString(string(sel.ToBytes()), c)
+	tv.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
+	return nstr
 }
 
 ///////////////////////////////////////////////////////////

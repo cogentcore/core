@@ -220,7 +220,7 @@ func (sw *Switches) ConfigParts(sc *Scene) {
 	if mods || sw.NeedsRebuild() {
 		sw.ConfigItems()
 		parts.UpdateEnd(updt)
-		sw.SetNeedsLayout(sc, updt)
+		sw.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 
