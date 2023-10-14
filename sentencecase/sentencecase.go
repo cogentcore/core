@@ -42,15 +42,25 @@ func AddProperNouns(nouns ...string) {
 func Of(s string) string {
 	words := camelcase.Split(s)
 	for i, word := range words {
-		// the first word and "I" are always capitalized
-		if i == 0 || word == "I" {
+		// "I" is always capitalized
+		if word == "I" {
 			continue
 		}
-		// proper nouns are always capitalized
+		// the first letter of proper nouns is always capitalized
 		if _, ok := ProperNouns[word]; ok {
 			continue
 		}
 		r := []rune(word)
+		// the first letter of the first word is always capitalized
+		// (and could be not capitalized in lowerCamelCase, so we need
+		// to ensure that it is capitalized)
+		if i == 0 {
+			if len(r) > 0 {
+				r[0] = unicode.ToUpper(r[0])
+				words[i] = string(r)
+			}
+			continue
+		}
 		// if there are multiple capital letters in a row, we assume
 		// that it is an abbreviation
 		if len(r) > 1 && unicode.IsUpper(r[1]) {

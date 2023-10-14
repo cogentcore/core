@@ -10,7 +10,7 @@ import (
 
 func TestSentenceCase(t *testing.T) {
 	AddProperNouns("Google")
-	src := "ThisIsAStringInSentenceCaseThatIWroteInTheUSAWithTheHelpOfGoogle"
+	src := "thisIsAStringInSentenceCaseThatIWroteInTheUSAWithTheHelpOfGoogle"
 	want := "This is a string in sentence case that I wrote in the USA with the help of Google"
 	have := Of(src)
 	if have != want {
