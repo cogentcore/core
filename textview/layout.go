@@ -143,14 +143,11 @@ func (tv *View) LayoutAllLines() {
 	// todo: add extra half to bottom of size?
 }
 
-// todo: don't do dynamic resizing here -- just set flag!
-
-// LayoutLines generates render of given range of lines (including
-// highlighting). end is *inclusive* line.  isDel means this is a delete and
-// thus offsets for all higher lines need to be recomputed.  returns true if
-// overall number of effective lines (e.g., from word-wrap) is now different
-// than before, and thus a full re-render is needed.
-func (tv *View) LayoutLines(st, ed int, isDel bool) bool {
+// LayoutLine generates render of given line (including highlighting).
+// If the line with exceeds the current maximum, or the number of effective
+// lines (e.g., from word-wrap) is different, then SetNeedsLayout is called
+// and it returns true.
+func (tv *View) LayoutLine(ln int) bool {
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return false
 	}
@@ -158,36 +155,28 @@ func (tv *View) LayoutLines(st, ed int, isDel bool) bool {
 	fst := sty.FontRender()
 	fst.BackgroundColor.SetSolid(nil)
 	mxwd := float32(tv.LinesSize.X)
-	rerend := false
+	needLay := false
 
 	tv.Buf.MarkupMu.RLock()
-	for ln := st; ln <= ed; ln++ {
-		curspans := len(tv.Renders[ln].Spans)
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.LineLayoutSize)
-		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
-			tv.HasLinks = true
-		}
-		nwspans := len(tv.Renders[ln].Spans)
-		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
-			rerend = true
-		}
-		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
+	curspans := len(tv.Renders[ln].Spans)
+	tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
+	tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.LineLayoutSize)
+	if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
+		tv.HasLinks = true
+	}
+	nwspans := len(tv.Renders[ln].Spans)
+	if nwspans != curspans && (nwspans > 1 || curspans > 1) {
+		needLay = true
+	}
+	if tv.Renders[ln].Size.X > mxwd {
+		needLay = true
 	}
 	tv.Buf.MarkupMu.RUnlock()
 
-	// update all offsets to end of text
-	if rerend || isDel || st != ed {
-		ofst := st - 1
-		if ofst < 0 {
-			ofst = 0
-		}
-		off := tv.Offs[ofst]
-		for ln := ofst; ln < tv.NLines; ln++ {
-			tv.Offs[ln] = off
-			lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-			off += lsz
-		}
+	if needLay {
+		tv.SetNeedsLayout()
+	} else {
+		tv.SetNeedsRender()
 	}
-	return rerend
+	return needLay
 }
