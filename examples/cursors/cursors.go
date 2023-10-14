@@ -12,7 +12,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	scene := gi.StageScene().SetTitle("Cursors")
+	scene := gi.NewScene().SetTitle("Cursors")
 	gi.NewLabel(scene).SetText("The GoGi Standard Cursors").SetType(gi.LabelHeadlineSmall)
 	gi.NewWindow(scene).Run().Wait()
 }

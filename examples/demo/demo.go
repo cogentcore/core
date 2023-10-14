@@ -31,7 +31,7 @@ func app() {
 
 	goosi.ZoomFactor = 2
 
-	sc := gi.StageScene("gogi-demo").SetTitle("GoGi Demo")
+	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
 
 	ts := gi.NewTabs(sc)
 	ts.NewTabButton = true

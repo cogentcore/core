@@ -54,7 +54,7 @@ func NewSnackbar(w Widget, opts SnackbarOpts) *PopupStage {
 // NewSnackbarScene returns a new snackbar scene based on the given context widget
 // and options.
 func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
-	sc := StageScene(w.Name() + "-snackbar")
+	sc := NewScene(w.Name() + "-snackbar")
 	sc.SetLayout(LayoutHoriz)
 	wsc := w.AsWidget().Sc
 	sc.AddStyles(func(s *styles.Style) {

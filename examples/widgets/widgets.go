@@ -39,7 +39,7 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	scene := gi.StageScene("widgets").SetTitle("GoGi Widgets Demo")
+	scene := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
 	tbar := gi.NewToolbar(scene, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
 	tbar.AddButton(gi.ActOpts{Label: "Button 1", Data: 1}, func(act *gi.Button) {
@@ -103,7 +103,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 
 	b1.OnClick(func(e events.Event) {
 		fmt.Printf("Button1 clicked\n")
-		gi.NewDialog(gi.StageScene("dlg"), b1).
+		gi.NewDialog(gi.NewScene("dlg"), b1).
 			Title("Test Dialog").Prompt("This is a prompt").
 			Modal(true).NewWindow(true).OkCancel().Run()
 

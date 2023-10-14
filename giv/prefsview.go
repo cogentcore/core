@@ -16,7 +16,7 @@ func PrefsView(pf *gi.Preferences) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	sc := gi.StageScene("gogi-prefs")
+	sc := gi.NewScene("gogi-prefs")
 	sc.Title = "GoGi Preferences"
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
@@ -74,7 +74,7 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		return
 	}
 
-	sc := gi.StageScene("gogi-prefs-det")
+	sc := gi.NewScene("gogi-prefs-det")
 	sc.Title = "GoGi Detailed Preferences"
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
@@ -126,7 +126,7 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	if gi.ActivateExistingMainWindow(pf) {
 		return
 	}
-	sc := gi.StageScene("gogi-prefs-dbg")
+	sc := gi.NewScene("gogi-prefs-dbg")
 	sc.Title = "GoGi Debugging Preferences"
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf

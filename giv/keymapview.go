@@ -18,7 +18,7 @@ func KeyMapsView(km *gi.KeyMaps) {
 	if gi.ActivateExistingMainWindow(km) {
 		return
 	}
-	sc := gi.StageScene("gogi-key-maps")
+	sc := gi.NewScene("gogi-key-maps")
 	sc.Title = "Available Key Maps: Duplicate an existing map (using Ctxt Menu) as starting point for creating a custom map"
 	sc.Lay = gi.LayoutVert
 	sc.Data = km

@@ -106,7 +106,7 @@ func (ge *GiEditor) EditColorScheme() {
 		return
 	}
 
-	sc := gi.StageScene("gogi-color-scheme")
+	sc := gi.NewScene("gogi-color-scheme")
 	sc.Title = "GoGi Color Scheme"
 	sc.Lay = gi.LayoutVert
 	sc.Data = &colors.Schemes
@@ -423,7 +423,7 @@ func GoGiEditorDialog(obj ki.Ki) {
 	if gi.ActivateExistingMainWindow(obj) {
 		return
 	}
-	sc := gi.StageScene("gogi-editor")
+	sc := gi.NewScene("gogi-editor")
 	sc.Title = "GoGi Editor"
 	if obj != nil {
 		sc.Nm += "-" + obj.Name()
