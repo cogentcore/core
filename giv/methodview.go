@@ -27,18 +27,18 @@ var specialMenus = map[string]struct{}{
 type ActionUpdateFunc func(it any, act *gi.Button)
 
 // SubMenuFunc is a function that returns a string slice of submenu items
-// used in MethView submenu-func option
+// used in MethodView submenu-func option
 // first argument is the object on which the method is defined (receiver)
 type SubMenuFunc func(it any, vp *gi.Scene) []string
 
 // SubSubMenuFunc is a function that returns a slice of string slices
 // to create submenu items each having their own submenus.
-// used in MethView submenu-func option
+// used in MethodView submenu-func option
 // first argument is the object on which the method is defined (receiver)
 type SubSubMenuFunc func(it any, vp *gi.Scene) [][]string
 
 // ShortcutFunc is a function that returns a key.Chord string for a shortcut
-// used in MethView shortcut-func option
+// used in MethodView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
 type ShortcutFunc func(it any, act *gi.Button) key.Chord
 
@@ -167,7 +167,7 @@ func CallMethod(val any, method string, vp *gi.Scene) bool {
 // programmer errors sent to log).
 // gopy:interface=handle
 func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
-	tpp, vtyp, ok := MethViewTypeProps(val)
+	tpp, vtyp, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
@@ -206,7 +206,7 @@ func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 				} else if ms == "Copy Cut Paste Dupe" {
 					ma.Menu.AddCopyCutPasteDupe(win)
 				} else {
-					MethViewErr(vtyp, fmt.Sprintf("Unrecognized Edit menu special string: %v -- `Copy Cut Paste` is standard", ms))
+					MethodViewErr(vtyp, fmt.Sprintf("Unrecognized Edit menu special string: %v -- `Copy Cut Paste` is standard", ms))
 				}
 				continue
 			}
@@ -216,7 +216,7 @@ func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 				if ms == "RenderWins" {
 					// automatic
 				} else {
-					MethViewErr(vtyp, fmt.Sprintf("Unrecognized RenderWin menu special string: %v -- `RenderWins` is standard", ms))
+					MethodViewErr(vtyp, fmt.Sprintf("Unrecognized RenderWin menu special string: %v -- `RenderWins` is standard", ms))
 				}
 				continue
 			}
@@ -233,7 +233,7 @@ func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 // HasToolbarView returns true if given val has a Toolbar type property
 // registered -- call this to check before then calling ToolbarView.
 func HasToolbarView(val any) bool {
-	tpp, _, ok := MethViewTypeProps(val)
+	tpp, _, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
@@ -248,7 +248,7 @@ func HasToolbarView(val any) bool {
 // toolbar defined for this type, or on errors (which are programmer errors
 // sent to log).
 func ToolbarView(val any, vp *gi.Scene, tb *gi.Toolbar) bool {
-	tpp, vtyp, ok := MethViewTypeProps(val)
+	tpp, vtyp, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
@@ -260,7 +260,7 @@ func ToolbarView(val any, vp *gi.Scene, tb *gi.Toolbar) bool {
 	if vp == nil {
 		vp = tb.ParentScene()
 		if vp == nil {
-			MethViewErr(vtyp, "Scene is nil in ToolbarView config -- must set scene in widget prior to calling this method!")
+			MethodViewErr(vtyp, "Scene is nil in ToolbarView config -- must set scene in widget prior to calling this method!")
 		}
 		return false
 	}
@@ -298,7 +298,7 @@ func ToolbarView(val any, vp *gi.Scene, tb *gi.Toolbar) bool {
 // context menu defined for this type, or on errors (which are programmer
 // errors sent to log).
 func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
-	tpp, vtyp, ok := MethViewTypeProps(val)
+	tpp, vtyp, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
@@ -317,7 +317,7 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	}
 
 	if vp == nil {
-		MethViewErr(vtyp, "Scene is nil in CtxtMenuView config -- must set scene in widget prior to calling this method!")
+		MethodViewErr(vtyp, "Scene is nil in CtxtMenuView config -- must set scene in widget prior to calling this method!")
 		return false
 	}
 
@@ -346,57 +346,57 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 // properties after first call.
 // gopy:interface=handle
 func CallMethod(val any, method string, vp *gi.Scene) bool {
-	tpp, vtyp, ok := MethViewTypeProps(val)
+	tpp, vtyp, ok := MethodViewTypeProps(val)
 	if !ok {
-		MethViewErr(vtyp, fmt.Sprintf("Type: %v properties not found for CallMethod -- need to register type using kit.AddType\n", vtyp.String()))
+		MethodViewErr(vtyp, fmt.Sprintf("Type: %v properties not found for CallMethod -- need to register type using kit.AddType\n", vtyp.String()))
 		return false
 	}
 	cmp, ok := ki.SubTypeProps(tpp, MethodViewCallMethsProp)
 	if !ok {
-		cmp = MethViewCompileMeths(val, vp)
+		cmp = MethodViewCompileMeths(val, vp)
 	}
 
 	acp, has := cmp[method]
 	if !has {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type properties -- add to CallMethods to make available for CallMethod\n", method))
+		MethodViewErr(vtyp, fmt.Sprintf("Method: %v not found among all different methods registered on type properties -- add to CallMethods to make available for CallMethod\n", method))
 		return false
 	}
 	ac, ok := acp.(*gi.Button)
 	if !ok {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Button -- should be!\n", method))
+		MethodViewErr(vtyp, fmt.Sprintf("Method: %v not a gi.Button -- should be!\n", method))
 		return false
 	}
 
-	MethViewSetActionData(ac, val, vp)
+	MethodViewSetActionData(ac, val, vp)
 	ac.Trigger()
 	return true
 }
 
-// MethViewSetActionData sets the MethViewData associated with the given action
+// MethodViewSetActionData sets the MethodViewData associated with the given action
 // with values updated from the given val and scene
-func MethViewSetActionData(ac *gi.Button, val any, vp *gi.Scene) {
+func MethodViewSetActionData(ac *gi.Button, val any, vp *gi.Scene) {
 	if ac.Data == nil {
-		fmt.Printf("giv.MethView no MethViewData on action: %v\n", ac.Nm)
+		fmt.Printf("giv.MethodView no MethodViewData on action: %v\n", ac.Nm)
 		return
 	}
-	md := ac.Data.(*MethViewData)
+	md := ac.Data.(*MethodViewData)
 	md.Val = val
 	md.ValVal = reflect.ValueOf(val)
 	md.Sc = vp
 	md.MethVal = md.ValVal.MethodByName(md.Method)
 	if len(ac.ActionSig.Cons) == 0 {
-		fmt.Printf("giv.MethView CallMethod had no connections: %v\n", ac.Nm)
-		ac.ActionSig.Connect(vp.This(), MethViewCall)
+		fmt.Printf("giv.MethodView CallMethod had no connections: %v\n", ac.Nm)
+		ac.ActionSig.Connect(vp.This(), MethodViewCall)
 	}
 }
 
 var compileMethsOrder = []string{"CallMethods", "Toolbar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
 
-// MethViewCompileMeths gets all methods either on the CallMethods list or any
+// MethodViewCompileMeths gets all methods either on the CallMethods list or any
 // of the Toolbar, MainMenu, or CtxtMenu lists (in that order).  Returns
 // property list of them, which are just names -> Actions
-func MethViewCompileMeths(val any, vp *gi.Scene) ki.Props {
-	tpp, vtyp, ok := MethViewTypeProps(val)
+func MethodViewCompileMeths(val any, vp *gi.Scene) ki.Props {
+	tpp, vtyp, ok := MethodViewTypeProps(val)
 	if !ok {
 		return nil
 	}
@@ -406,16 +406,16 @@ func MethViewCompileMeths(val any, vp *gi.Scene) ki.Props {
 		if !got {
 			continue
 		}
-		MethViewCompileActions(cmp, val, vtyp, vp, "", tp)
+		MethodViewCompileActions(cmp, val, vtyp, vp, "", tp)
 	}
 	// kit.SetTypeProp(tpp, MethodViewCallMethsProp, cmp)
 	return cmp
 }
 
-// MethViewCompileActions processes properties for parent action pa for
+// MethodViewCompileActions processes properties for parent action pa for
 // overall object val of given type -- could have a sub-menu of further
 // actions or might just be a single action
-func MethViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Scene, pnm string, pp any) bool {
+func MethodViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Scene, pnm string, pp any) bool {
 	rval := true
 	if pv, ok := pp.(ki.PropSlice); ok {
 		for _, mm := range pv {
@@ -423,7 +423,7 @@ func MethViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Sce
 			if strings.HasPrefix(mm.Name, "sep-") || isspec {
 				continue
 			} else {
-				rv := MethViewCompileActions(cmp, val, vtyp, vp, mm.Name, mm.Value)
+				rv := MethodViewCompileActions(cmp, val, vtyp, vp, mm.Name, mm.Value)
 				if !rv {
 					rval = false
 				}
@@ -458,8 +458,8 @@ func MethViewCompileActions(cmp ki.Props, val any, vtyp reflect.Type, vp *gi.Sce
 //////////////////////////////////////////////////////////////////////////////////
 //    Utils
 
-// MethViewErr is error logging function for MethView system, showing the type info
-func MethViewErr(vtyp reflect.Type, msg string) {
+// MethodViewErr is error logging function for MethodView system, showing the type info
+func MethodViewErr(vtyp reflect.Type, msg string) {
 	if vtyp != nil {
 		log.Printf("giv.MethodView for type: %v: debug error: %v\n", vtyp.String(), msg)
 	} else {
@@ -467,9 +467,9 @@ func MethViewErr(vtyp reflect.Type, msg string) {
 	}
 }
 
-// MethViewTypeProps gets props, typ of val, returns false if not found or
+// MethodViewTypeProps gets props, typ of val, returns false if not found or
 // other err
-func MethViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
+func MethodViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
 	if laser.AnyIsNil(val) {
 		return nil, nil, false
 	}
@@ -484,7 +484,7 @@ func MethViewTypeProps(val any) (ki.Props, reflect.Type, bool) {
 // HasMainMenuView returns true if given val has a MainMenu type property
 // registered -- call this to check before then calling MainMenuView
 func HasMainMenuView(val any) bool {
-	tpp, _, ok := MethViewTypeProps(val)
+	tpp, _, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
@@ -492,20 +492,20 @@ func HasMainMenuView(val any) bool {
 	return ok
 }
 
-// MethViewNoUpdateAfterProp returns true if given val has a top-level "MethViewNoUpdateAfter"
+// MethodViewNoUpdateAfterProp returns true if given val has a top-level "MethodViewNoUpdateAfter"
 // type property registered -- some types generically want that and it is much easier to
 // just specify once instead of every time..
-func MethViewNoUpdateAfterProp(val any) bool {
-	tpp, _, ok := MethViewTypeProps(val)
+func MethodViewNoUpdateAfterProp(val any) bool {
+	tpp, _, ok := MethodViewTypeProps(val)
 	if !ok {
 		return false
 	}
-	// _, nua := kit.TypeProp(tpp, "MethViewNoUpdateAfter")
+	// _, nua := kit.TypeProp(tpp, "MethodViewNoUpdateAfter")
 	// return nua
 }
 
 // This is the name of the property that holds cached map of compiled callable methods
-var MethodViewCallMethsProp = "__MethViewCallMeths"
+var MethodViewCallMethsProp = "__MethodViewCallMeths"
 
 //////////////////////////////////////////////////////////////////////////////////
 //    ActionsView
@@ -570,26 +570,26 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 	methNm := ac.Nm
 	methTyp, hasmeth := vtyp.MethodByName(methNm)
 	if !nometh && !hasmeth {
-		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- not found in type", methNm))
+		MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- not found in type", methNm))
 		return false
 	}
 	valval := reflect.ValueOf(val)
 	methVal := valval.MethodByName(methNm)
 	if !nometh && (laser.ValueIsZero(methVal) || methVal.IsNil()) {
-		MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- method value not valid", methNm))
+		MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v -- method value not valid", methNm))
 		return false
 	}
 
 	rval := true
-	md := &MethViewData{Val: val, ValVal: valval, Sc: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
+	md := &MethodViewData{Val: val, ValVal: valval, Sc: vp, Method: methNm, MethVal: methVal, MethTyp: methTyp}
 	ac.Data = md
 
-	if MethViewNoUpdateAfterProp(val) {
-		// bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+	if MethodViewNoUpdateAfterProp(val) {
+		// bitflag.Set32((*int32)(&md.Flags), int(MethodViewNoUpdateAfter))
 	}
 
 	if props == nil {
-		ac.ActionSig.Connect(vp.This(), MethViewCall)
+		ac.ActionSig.Connect(vp.This(), MethodViewCall)
 		return true
 	}
 	for pk, pv := range props {
@@ -606,13 +606,13 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 			} else if sf, ok := pv.(func(it any, act *gi.Button) key.Chord); ok {
 				ac.Shortcut = sf(md.Val, ac)
 			} else {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, shortcut-func must be of type ShortcutFunc", methNm))
 			}
 		case "keyfun":
 			if kf, ok := pv.(gi.KeyFuns); ok {
 				ac.Shortcut = gi.ShortcutForFun(kf)
 				md.KeyFun = kf
-				// bitflag.Set32((*int32)(&md.Flags), int(MethViewKeyFun))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewKeyFun))
 			}
 		case "label":
 			ac.Text = laser.ToString(pv)
@@ -623,7 +623,7 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 			} else if sf, ok := pv.(func(it any, act *gi.Button) string); ok {
 				ac.Text = sf(md.Val, ac)
 			} else {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, label-func must be of type LabelFunc", methNm))
 			}
 		case "icon":
 			ac.Icon = icons.Icon(laser.ToString(pv))
@@ -631,59 +631,59 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 			md.Desc = laser.ToString(pv)
 			ac.Tooltip = md.Desc
 		case "confirm":
-			// bitflag.Set32((*int32)(&md.Flags), int(MethViewConfirm))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethodViewConfirm))
 		case "show-return":
-			// bitflag.Set32((*int32)(&md.Flags), int(MethViewShowReturn))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethodViewShowReturn))
 		case "no-update-after":
-			// bitflag.Set32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
-		case "update-after": // if MethViewNoUpdateAfterProp was set above
-			// bitflag.Clear32((*int32)(&md.Flags), int(MethViewNoUpdateAfter))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethodViewNoUpdateAfter))
+		case "update-after": // if MethodViewNoUpdateAfterProp was set above
+			// bitflag.Clear32((*int32)(&md.Flags), int(MethodViewNoUpdateAfter))
 		case "updtfunc":
 			if uf, ok := pv.(ActionUpdateFunc); ok {
 				md.UpdateFunc = uf
-				ac.UpdateFunc = MethViewUpdateFunc
+				ac.UpdateFunc = MethodViewUpdateFunc
 			} else if uf, ok := pv.(func(it any, act *gi.Button)); ok {
 				md.UpdateFunc = ActionUpdateFunc(uf)
-				ac.UpdateFunc = MethViewUpdateFunc
+				ac.UpdateFunc = MethodViewUpdateFunc
 			} else {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, updtfunc must be of type ActionUpdateFunc", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, updtfunc must be of type ActionUpdateFunc", methNm))
 			}
 		case "submenu":
-			ac.MakeMenuFunc = MethViewSubMenuFunc
+			ac.MakeMenuFunc = MethodViewSubMenuFunc
 			if pvs, ok := pv.(string); ok { // field name
 				md.SubMenuField = pvs
 			} else {
 				md.SubMenuSlice = pv
 			}
-			// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+			// bitflag.Set32((*int32)(&md.Flags), int(MethodViewHasSubMenu))
 		case "submenu-func":
 			if sf, ok := pv.(SubMenuFunc); ok {
-				ac.MakeMenuFunc = MethViewSubMenuFunc
+				ac.MakeMenuFunc = MethodViewSubMenuFunc
 				md.SubMenuFunc = sf
-				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewHasSubMenu))
 			} else if sf, ok := pv.(func(it any, vp *gi.Scene) []string); ok {
-				ac.MakeMenuFunc = MethViewSubMenuFunc
+				ac.MakeMenuFunc = MethodViewSubMenuFunc
 				md.SubMenuFunc = SubMenuFunc(sf)
-				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewHasSubMenu))
 			} else {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, submenu-func must be of type SubMenuFunc", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, submenu-func must be of type SubMenuFunc", methNm))
 			}
 		case "subsubmenu-func":
 			if sf, ok := pv.(SubSubMenuFunc); ok {
-				ac.MakeMenuFunc = MethViewSubMenuFunc
+				ac.MakeMenuFunc = MethodViewSubMenuFunc
 				md.SubSubMenuFunc = sf
-				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewHasSubMenu))
 			} else if sf, ok := pv.(func(it any, vp *gi.Scene) [][]string); ok {
-				ac.MakeMenuFunc = MethViewSubMenuFunc
+				ac.MakeMenuFunc = MethodViewSubMenuFunc
 				md.SubSubMenuFunc = SubSubMenuFunc(sf)
-				// bitflag.Set32((*int32)(&md.Flags), int(MethViewHasSubMenu))
+				// bitflag.Set32((*int32)(&md.Flags), int(MethodViewHasSubMenu))
 			} else {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, subsubmenu-func must be of type SubMenuFunc", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, subsubmenu-func must be of type SubMenuFunc", methNm))
 			}
 		case "Args":
 			argv, ok := pv.(ki.PropSlice)
 			if !ok {
-				MethViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, Args property must be of type ki.PropSlice, containing names and other properties for each arg", methNm))
+				MethodViewErr(vtyp, fmt.Sprintf("ActionView for Method: %v, Args property must be of type ki.PropSlice, containing names and other properties for each arg", methNm))
 				rval = false
 			} else {
 				if ActionViewArgsValidate(md, vtyp, methTyp, argv) {
@@ -697,23 +697,23 @@ func ActionView(val any, vtyp reflect.Type, vp *gi.Scene, ac *gi.Button, props k
 	if !rval {
 		return false
 	}
-	// if !bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) {
-	// 	ac.ActionSig.Connect(vp.This(), MethViewCall)
+	// if !bitflag.Has32((int32)(md.Flags), int(MethodViewHasSubMenu)) {
+	// 	ac.ActionSig.Connect(vp.This(), MethodViewCall)
 	// }
 	return true
 }
 
 // ActionViewArgsValidate validates the Args properties relative to number of args on type
-func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Method, argprops ki.PropSlice) bool {
+func ActionViewArgsValidate(md *MethodViewData, vtyp reflect.Type, meth reflect.Method, argprops ki.PropSlice) bool {
 	mtyp := meth.Type
 	narg := mtyp.NumIn()
 	apsz := len(argprops)
 	if narg-1 != apsz {
-		MethViewErr(vtyp, fmt.Sprintf("Method: %v takes %v args (beyond the receiver), but Args properties only has %v", meth.Name, narg-1, apsz))
+		MethodViewErr(vtyp, fmt.Sprintf("Method: %v takes %v args (beyond the receiver), but Args properties only has %v", meth.Name, narg-1, apsz))
 		return false
 	}
-	// if bitflag.Has32((int32)(md.Flags), int(MethViewHasSubMenu)) && apsz != 1 {
-	// 	MethViewErr(vtyp, fmt.Sprintf("Method: %v has a submenu of values to use as the one arg for it, but it takes %v args (beyond the receiver) -- should only take 1", meth.Name, narg-1))
+	// if bitflag.Has32((int32)(md.Flags), int(MethodViewHasSubMenu)) && apsz != 1 {
+	// 	MethodViewErr(vtyp, fmt.Sprintf("Method: %v has a submenu of values to use as the one arg for it, but it takes %v args (beyond the receiver) -- should only take 1", meth.Name, narg-1))
 	// 	return false
 	// }
 
@@ -723,44 +723,44 @@ func ActionViewArgsValidate(md *MethViewData, vtyp reflect.Type, meth reflect.Me
 //////////////////////////////////////////////////////////////////////////////////
 //    Method Callbacks -- called when Action fires
 
-// MethViewFlags define bitflags for method view action options
-type MethViewFlags int64 //enums:bitflag
+// MethodViewFlags define bitflags for method view action options
+type MethodViewFlags int64 //enums:bitflag
 
 const (
-	// MethViewConfirm confirms action before proceeding
-	MethViewConfirm MethViewFlags = iota
+	// MethodViewConfirm confirms action before proceeding
+	MethodViewConfirm MethodViewFlags = iota
 
-	// MethViewShowReturn shows the return value from the method
-	MethViewShowReturn
+	// MethodViewShowReturn shows the return value from the method
+	MethodViewShowReturn
 
-	// MethViewNoUpdateAfter means do not update window after method runs (default is to do so)
-	MethViewNoUpdateAfter
+	// MethodViewNoUpdateAfter means do not update window after method runs (default is to do so)
+	MethodViewNoUpdateAfter
 
-	// MethViewHasSubMenu means that this action has a submenu option --
+	// MethodViewHasSubMenu means that this action has a submenu option --
 	// argument values will be selected from the auto-generated submenu
-	MethViewHasSubMenu
+	MethodViewHasSubMenu
 
-	// MethViewHasSubMenuVal means that this action was called using a submenu
+	// MethodViewHasSubMenuVal means that this action was called using a submenu
 	// and the SubMenuVal has the selected value
-	MethViewHasSubMenuVal
+	MethodViewHasSubMenuVal
 
-	// MethViewKeyFun means this action's only function is to emit the key fun
-	MethViewKeyFun
+	// MethodViewKeyFun means this action's only function is to emit the key fun
+	MethodViewKeyFun
 )
 
 // SubMenuFunc is a function that returns a string slice of submenu items
-// used in MethView submenu-func option
+// used in MethodView submenu-func option
 // first argument is the object on which the method is defined (receiver)
 type SubMenuFunc func(it any, vp *gi.Scene) []string
 
 // SubSubMenuFunc is a function that returns a slice of string slices
 // to create submenu items each having their own submenus.
-// used in MethView submenu-func option
+// used in MethodView submenu-func option
 // first argument is the object on which the method is defined (receiver)
 type SubSubMenuFunc func(it any, vp *gi.Scene) [][]string
 
 // ShortcutFunc is a function that returns a key.Chord string for a shortcut
-// used in MethView shortcut-func option
+// used in MethodView shortcut-func option
 // first argument is the object on which the method is defined (receiver)
 type ShortcutFunc func(it any, act *gi.Button) key.Chord
 
@@ -772,9 +772,9 @@ type LabelFunc func(it any, act *gi.Button) string
 // first argument is the object on which the method is defined (receiver)
 type ActionUpdateFunc func(it any, act *gi.Button)
 
-// MethViewData is set to the Action.Data field for all MethView actions,
+// MethodViewData is set to the Action.Data field for all MethodView actions,
 // containing info needed to actually call the Method on value Val.
-type MethViewData struct {
+type MethodViewData struct {
 	Val     any
 	ValVal  reflect.Value
 	Sc      *gi.Scene
@@ -809,33 +809,33 @@ type MethViewData struct {
 	// value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method
 	SubMenuVal any `desc:"value that the user selected from submenu for this action -- this should be assigned to the first (only) arg of the method"`
 
-	// key function that we emit, if MethViewKeyFun type
-	KeyFun gi.KeyFuns `desc:"key function that we emit, if MethViewKeyFun type"`
-	Flags  MethViewFlags
+	// key function that we emit, if MethodViewKeyFun type
+	KeyFun gi.KeyFuns `desc:"key function that we emit, if MethodViewKeyFun type"`
+	Flags  MethodViewFlags
 }
 
-func (md *MethViewData) MethName() string {
+func (md *MethodViewData) MethName() string {
 	typnm := laser.ShortTypeName(md.ValVal.Type())
 	methnm := typnm + ":" + md.Method
 	return methnm
 }
 
-// MethViewCall is the receiver func for MethView actions that call a method
-// -- it uses the MethViewData to call the target method.
-func MethViewCall(recv, send ki.Ki, sig int64, data any) {
+// MethodViewCall is the receiver func for MethodView actions that call a method
+// -- it uses the MethodViewData to call the target method.
+func MethodViewCall(recv, send ki.Ki, sig int64, data any) {
 	ac := send.(*gi.Button)
-	md := ac.Data.(*MethViewData)
+	md := ac.Data.(*MethodViewData)
 	if md.ArgProps == nil { // no args -- just call
-		MethViewCallNoArgPrompt(ac, md, nil)
+		MethodViewCallNoArgPrompt(ac, md, nil)
 		return
 	}
 	// need to prompt for args
-	ads, args, nprompt, ok := MethViewArgData(md)
+	ads, args, nprompt, ok := MethodViewArgData(md)
 	if !ok {
 		return
 	}
 	if nprompt == 0 {
-		MethViewCallNoArgPrompt(ac, md, args)
+		MethodViewCallNoArgPrompt(ac, md, args)
 		return
 	}
 	// check for single arg with action -- do action directly
@@ -851,7 +851,7 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 		if ad.View.HasDialog() {
 			ad.View.OpenDialog(ad.View.Widget, func(dlg *gi.Dialog) {
 				if dlg.Accepted {
-					MethViewCallMeth(md, args)
+					MethodViewCallMeth(md, args)
 				}
 			})
 			return
@@ -862,35 +862,35 @@ func MethViewCall(recv, send ki.Ki, sig int64, data any) {
 		md.Sc.This(), func(recv, send ki.Ki, sig int64, data any) {
 			if sig == int64(gi.DialogAccepted) {
 				// ddlg := send.Embed(gi.TypeDialog).(*gi.Dialog)
-				MethViewCallMeth(md, args)
+				MethodViewCallMeth(md, args)
 			}
 		})
 }
 
-// MethViewCallNoArgPrompt calls the method in case where there is no
+// MethodViewCallNoArgPrompt calls the method in case where there is no
 // prompting otherwise of the user for arg values -- checks for Confirm case
 // or otherwise directly calls method
-func MethViewCallNoArgPrompt(ac *gi.Button, md *MethViewData, args []reflect.Value) {
-	// if bitflag.Has32(int32(md.Flags), int(MethViewKeyFun)) {
+func MethodViewCallNoArgPrompt(ac *gi.Button, md *MethodViewData, args []reflect.Value) {
+	// if bitflag.Has32(int32(md.Flags), int(MethodViewKeyFun)) {
 	// 	if md.Sc != nil && md.Sc.Win != nil {
 	// 		md.Sc.Win.EventMgr.SendKeyFunEvent(md.KeyFun, false)
 	// 	}
 	// 	return
 	// }
-	// if bitflag.Has32(int32(md.Flags), int(MethViewConfirm)) {
+	// if bitflag.Has32(int32(md.Flags), int(MethodViewConfirm)) {
 	// 	gi.PromptDialog(md.Sc, gi.DlgOpts{Title: ac.Text, Prompt: md.Desc, Ok: true, Cancel: true}, func(act *gi.Button) {
 	// 			if sig == int64(gi.DialogAccepted) {
-	// 				MethViewCallMeth(md, args)
+	// 				MethodViewCallMeth(md, args)
 	// 			}
 	// 		})
 	// } else {
-	// 	MethViewCallMeth(md, args)
+	// 	MethodViewCallMeth(md, args)
 	// }
 }
 
-// MethViewCallMeth calls the method with given args, and processes the
-// results as specified in the MethViewData.
-func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
+// MethodViewCallMeth calls the method with given args, and processes the
+// results as specified in the MethodViewData.
+func MethodViewCallMeth(md *MethodViewData, args []reflect.Value) {
 	rv := md.MethVal.Call(args)
 	methnm := md.MethName()
 	mtyp := md.MethTyp.Type
@@ -901,18 +901,18 @@ func MethViewCallMeth(md *MethViewData, args []reflect.Value) {
 		MethArgHist[argnm] = args[ai].Interface()
 	}
 
-	// if !bitflag.Has32(int32(md.Flags), int(MethViewNoUpdateAfter)) {
+	// if !bitflag.Has32(int32(md.Flags), int(MethodViewNoUpdateAfter)) {
 	// 	md.Sc.SetNeedsFullRender() // always update after all methods -- almost always want that
 	// }
-	// if bitflag.Has32(int32(md.Flags), int(MethViewShowReturn)) {
+	// if bitflag.Has32(int32(md.Flags), int(MethodViewShowReturn)) {
 	// 	if len(rv) >= 1 {
-	// 		MethViewShowValue(md.Sc, rv[0], md.Method+" Result", "")
+	// 		MethodViewShowValue(md.Sc, rv[0], md.Method+" Result", "")
 	// 	}
 	// }
 }
 
-// MethViewShowValue displays a value in a dialog window (e.g., for MethViewShowReturn)
-func MethViewShowValue(ctx gi.Widget, val reflect.Value, title, prompt string) {
+// MethodViewShowValue displays a value in a dialog window (e.g., for MethodViewShowReturn)
+func MethodViewShowValue(ctx gi.Widget, val reflect.Value, title, prompt string) {
 	if laser.ValueIsZero(val) {
 		return
 	}
@@ -944,10 +944,10 @@ func MethViewShowValue(ctx gi.Widget, val reflect.Value, title, prompt string) {
 // for next time the method is called.  Key is type:method name
 var MethArgHist = map[string]any{}
 
-// MethViewArgData gets the arg data for the method args, returns false if
+// MethodViewArgData gets the arg data for the method args, returns false if
 // errors -- nprompt is the number of args that require prompting from the
 // user (minus any cases with value: set directly)
-func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, nprompt int, ok bool) {
+func MethodViewArgData(md *MethodViewData) (ads []ArgData, args []reflect.Value, nprompt int, ok bool) {
 	mtyp := md.MethTyp.Type
 	narg := mtyp.NumIn() - 1
 	ads = make([]ArgData, narg)
@@ -996,7 +996,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 					nprompt--
 				case "default-field":
 					field := pv.(string)
-					if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
+					if flv, ok := MethodViewFieldValue(md.ValVal, field); ok {
 						ad.Default = flv.Interface()
 						ad.SetHasDef()
 					}
@@ -1006,7 +1006,7 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 			}
 		}
 
-		if md.Flags.HasFlag(MethViewHasSubMenuVal) {
+		if md.Flags.HasFlag(MethodViewHasSubMenuVal) {
 			ad.Default = md.SubMenuVal
 			ad.SetHasDef()
 			ad.Flags.HasFlag(ArgDataValSet)
@@ -1020,8 +1020,8 @@ func MethViewArgData(md *MethViewData) (ads []ArgData, args []reflect.Value, npr
 	return
 }
 
-// MethViewArgDefaultVal returns the default value of the given argument index
-func MethViewArgDefaultVal(md *MethViewData, ai int) (any, bool) {
+// MethodViewArgDefaultVal returns the default value of the given argument index
+func MethodViewArgDefaultVal(md *MethodViewData, ai int) (any, bool) {
 	aps := &md.ArgProps[ai]
 	var def any
 	got := false
@@ -1038,7 +1038,7 @@ func MethViewArgDefaultVal(md *MethViewData, ai int) (any, bool) {
 				got = true
 			case "default-field":
 				field := pv.(string)
-				if flv, ok := MethViewFieldValue(md.ValVal, field); ok {
+				if flv, ok := MethodViewFieldValue(md.ValVal, field); ok {
 					def = flv.Interface()
 					got = true
 				}
@@ -1048,37 +1048,37 @@ func MethViewArgDefaultVal(md *MethViewData, ai int) (any, bool) {
 	return def, got
 }
 
-// MethViewFieldValue returns a reflect.Value for the given field name,
+// MethodViewFieldValue returns a reflect.Value for the given field name,
 // checking safely (false if not found)
-func MethViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool) {
+func MethodViewFieldValue(vval reflect.Value, field string) (*reflect.Value, bool) {
 	fv, ok := laser.FieldValueByPath(laser.NonPtrValue(vval).Interface(), field)
 	if !ok {
-		log.Printf("giv.MethViewFieldValue: Could not find field %v in type: %v\n", field, vval.Type().String())
+		log.Printf("giv.MethodViewFieldValue: Could not find field %v in type: %v\n", field, vval.Type().String())
 		return nil, false
 	}
 	return &fv, true
 }
 
-// MethViewUpdateFunc is general Action.UpdateFunc that then calls any
-// MethViewData.UpdateFunc from its data
-func MethViewUpdateFunc(act *gi.Button) {
-	md := act.Data.(*MethViewData)
+// MethodViewUpdateFunc is general Action.UpdateFunc that then calls any
+// MethodViewData.UpdateFunc from its data
+func MethodViewUpdateFunc(act *gi.Button) {
+	md := act.Data.(*MethodViewData)
 	if md.UpdateFunc != nil && md.Val != nil {
 		md.UpdateFunc(md.Val, act)
 	}
 }
 
-// MethViewSubMenuFunc is a MakeMenuFunc for items that have submenus
-func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
+// MethodViewSubMenuFunc is a MakeMenuFunc for items that have submenus
+func MethodViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	ac := aki.(*gi.Button)
-	md := ac.Data.(*MethViewData)
+	md := ac.Data.(*MethodViewData)
 	smd := md.SubMenuSlice
 	if md.SubMenuFunc != nil {
 		smd = md.SubMenuFunc(md.Val, md.Sc)
 	} else if md.SubSubMenuFunc != nil {
 		smd = md.SubSubMenuFunc(md.Val, md.Sc)
 	} else if md.SubMenuField != "" {
-		if flv, ok := MethViewFieldValue(md.ValVal, md.SubMenuField); ok {
+		if flv, ok := MethodViewFieldValue(md.ValVal, md.SubMenuField); ok {
 			smd = flv.Interface()
 		}
 	}
@@ -1087,11 +1087,11 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	}
 	sltp := laser.NonPtrType(reflect.TypeOf(smd))
 	if sltp.Kind() != reflect.Slice && sltp.Kind() != reflect.Array {
-		log.Printf("giv.MethViewSubMenuFunc: submenu data must be a slice or array, not: %v\n", sltp.String())
+		log.Printf("giv.MethodViewSubMenuFunc: submenu data must be a slice or array, not: %v\n", sltp.String())
 		return
 	}
 
-	def, gotDef := MethViewArgDefaultVal(md, 0) // assume first
+	def, gotDef := MethodViewArgDefaultVal(md, 0) // assume first
 	defstr := ""
 	if gotDef {
 		defstr = laser.ToString(def)
@@ -1103,7 +1103,7 @@ func MethViewSubMenuFunc(aki ki.Ki, m *gi.Menu) {
 	md.Sc.Win.MainMenuUpdated()
 }
 
-func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
+func (md *MethodViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub bool, defstr string, gotDef bool) {
 	sz := mvnp.Len()
 	if sz == 0 {
 		return
@@ -1148,7 +1148,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 		nac.InitName(nac, nm)
 		nac.Text = nm
 		nac.SetAsMenu()
-		nac.ActionSig.Connect(md.Sc.This(), MethViewCall)
+		nac.ActionSig.Connect(md.Sc.This(), MethodViewCall)
 		nd := *md // copy
 		if isSub {
 			nd.SubMenuVal = subMenuName + nm // qualified name
@@ -1160,7 +1160,7 @@ func (md *MethViewData) MakeMenuSliceValue(mvnp reflect.Value, m *gi.Menu, isSub
 				nac.SetSelected()
 			}
 		}
-		nd.Flags.SetFlag(true, MethViewHasSubMenuVal)
+		nd.Flags.SetFlag(true, MethodViewHasSubMenuVal)
 		nac.Data = &nd
 		*m = append(*m, nac)
 	}

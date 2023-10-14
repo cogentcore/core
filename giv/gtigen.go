@@ -13,7 +13,7 @@ var ArgViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ArgView",
 	ShortName:  "giv.ArgView",
 	IDName:     "arg-view",
-	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethView\nframework.",
+	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Args", &gti.Field{Name: "Args", Type: "[]ArgData", Doc: "the args that we are a view onto", Directives: gti.Directives{}}},

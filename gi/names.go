@@ -16,7 +16,7 @@ type FontName string
 
 // FileName is used to specify an filename (including path) -- automatically
 // opens the FileView dialog using Value system.  Use this for any method
-// args that are filenames to trigger use of FileViewDialog under MethView
+// args that are filenames to trigger use of FileViewDialog under MethodView
 // automatic method calling.
 type FileName string
 
