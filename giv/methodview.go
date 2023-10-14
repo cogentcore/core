@@ -89,7 +89,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		if tbDir == nil {
 			continue
 		}
-		opts := &MethodConfig{
+		cfg := &MethodConfig{
 			Label:   sentencecase.Of(met.Name),
 			Tooltip: met.Doc,
 		}
@@ -97,21 +97,22 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		// the method, if it exists
 		ic := icons.Icon(strcase.ToSnake(met.Name))
 		if ic.IsValid() {
-			opts.Icon = ic
+			cfg.Icon = ic
 		}
-		_, err := grease.SetFromArgs(opts, tbDir.Args, grease.ErrNotFound)
+		_, err := grease.SetFromArgs(cfg, tbDir.Args, grease.ErrNotFound)
 		if err != nil {
 			slog.Error("programmer error: error while parsing args to `gi:toolbar` comment directive", "err", err.Error())
 			continue
 		}
 		gotAny = true
-		if opts.SepBefore {
+		if cfg.SepBefore {
 			tb.AddSeparator()
 		}
-		tb.AddButton(gi.ActOpts{Label: opts.Label, Icon: opts.Icon, Tooltip: opts.Tooltip}, func(bt *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Tooltip}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
+			CallMethod(tb, val, met.Name, cfg)
 		})
-		if opts.SepAfter {
+		if cfg.SepAfter {
 			tb.AddSeparator()
 		}
 	}
@@ -339,16 +340,17 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 
 // CallMethod calls the method with the given name on the given object value,
 // with the given method configuration information. It uses a GUI interface to
-// prompt for args.
+// prompt for args, and it uses the given context widget for context information
+// for that GUI interface.
 // gopy:interface=handle
-func CallMethod(val any, method string, cfg *MethodConfig) bool {
+func CallMethod(ctx gi.Widget, val any, method string, cfg *MethodConfig) bool {
 	rval := reflect.ValueOf(val)
 	met := rval.MethodByName(method)
 	_ = met
 
-	sc := gi.NewScene(strcase.ToKebab(method) + "-arg-view")
-	av := NewArgView(sc)
-	av.SetArgs(nil)
+	ArgViewDialog(ctx, DlgOpts{Title: cfg.Label, Prompt: cfg.Tooltip, Ok: true, Cancel: true}, []ArgData{}, func(dlg *gi.Dialog) {
+		fmt.Println("dialog closed")
+	}).Run()
 	return true
 }
 
