@@ -54,14 +54,13 @@ func (im *Image) CopyFieldsFrom(frm any) {
 
 func (im *Image) OnInit() {
 	im.HandleWidgetEvents()
-	im.BitmapStyles()
+	im.ImageStyles()
 }
 
-func (im *Image) BitmapStyles() {
+func (im *Image) ImageStyles() {
 	im.Style(func(s *styles.Style) {
 		s.MinWidth.SetDp(float32(im.Size.X))
 		s.MinHeight.SetDp(float32(im.Size.Y))
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
 	})
 }
 

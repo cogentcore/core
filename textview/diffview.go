@@ -123,8 +123,6 @@ type DiffView struct {
 
 func (dv *DiffView) OnInit() {
 	dv.Style(func(s *styles.Style) {
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 	})
 }

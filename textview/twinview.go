@@ -5,7 +5,6 @@
 package textview
 
 import (
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -28,8 +27,6 @@ type TwinViews struct {
 func (tv *TwinViews) OnInit() {
 	tv.Dim = mat32.X
 	tv.Style(func(s *styles.Style) {
-		s.BackgroundColor.SetSolid(colors.Scheme.Background)
-		s.Color = colors.Scheme.OnBackground
 		s.SetStretchMax()
 	})
 }
