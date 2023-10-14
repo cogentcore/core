@@ -20,7 +20,8 @@ import (
 	"go/token"
 	"go/types"
 	"html"
-	"log"
+	"log/slog"
+	"os"
 	"strings"
 	"text/template"
 
@@ -309,7 +310,8 @@ func (g *Generator) GenDecl(node ast.Node, file *ast.File, typ *Type) ([]Value, 
 func (g *Generator) ExecTmpl(t *template.Template, typ *Type) {
 	err := t.Execute(&g.Buf, typ)
 	if err != nil {
-		log.Fatalf("programmer error: internal error: error executing template: %v", err)
+		slog.Error("programmer error: internal error: error executing template", "err", err)
+		os.Exit(1)
 	}
 }
 
