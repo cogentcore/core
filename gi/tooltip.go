@@ -8,6 +8,7 @@ import (
 	"image"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 )
@@ -52,6 +53,9 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 		Style(func(s *styles.Style) {
 			s.MaxWidth = units.Em(30)
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
+			if s.Is(states.Selected) {
+				s.Color = colors.Scheme.Select.OnContainer
+			}
 		})
 	return sc
 }
