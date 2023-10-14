@@ -671,8 +671,15 @@ var _ = gti.AddType(&gti.Type{
 		{"ColorFilename", &gti.Field{Name: "ColorFilename", Type: "FileName", Doc: "filename for saving / loading colors", Directives: gti.Directives{}}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}}},
 	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
+		})}},
+	}),
 })
 
 var _ = gti.AddType(&gti.Type{
