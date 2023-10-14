@@ -21,27 +21,16 @@ import (
 )
 
 // ViewEvents sets connections between mouse and key events and actions
-func (tv *View) HandleViewEvents() {
-	tv.HandleViewKeyChord()
-	tv.HandleViewMouse()
-	tv.HandleWidgetStateFromMouse()
-	tv.HandleWidgetStateFromFocus()
-
-	// todo: need to handle this separately!!
-	// if dlg, ok := tv.Sc.This().(*gi.Dialog); ok {
-	// 	dlg.DialogSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 		tv, _ := recv.Embed(TypeView).(*View)
-	// 		if sig == int64(gi.DialogAccepted) {
-	// 			tv.EditDone()
-	// 		}
-	// 	})
-	// }
+func (tv *View) HandleTextViewEvents() {
+	tv.HandleLayoutEvents()
+	tv.HandleTextViewKeyChord()
+	tv.HandleTextViewMouse()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (tv *View) HandleViewKeyChord() {
+func (tv *View) HandleTextViewKeyChord() {
 	tv.OnKeyChord(func(e events.Event) {
 		tv.KeyInput(e)
 	})
@@ -569,8 +558,8 @@ func (tv *View) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	return tl, ok
 }
 
-// HandleViewMouse handles mouse events.Event
-func (tv *View) HandleViewMouse() {
+// HandleTextViewMouse handles mouse events.Event
+func (tv *View) HandleTextViewMouse() {
 	tv.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if tv.StateIs(states.Disabled) {
 			return

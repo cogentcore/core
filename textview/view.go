@@ -165,7 +165,7 @@ func NewViewLayout(parent ki.Ki, name string) (*View, *gi.Layout) {
 }
 
 func (tv *View) OnInit() {
-	tv.HandleViewEvents()
+	tv.HandleTextViewEvents()
 	tv.ViewStyles()
 }
 
