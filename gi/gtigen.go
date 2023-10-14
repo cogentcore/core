@@ -854,11 +854,13 @@ func (t *ProgressBar) New() ki.Ki {
 
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Scene",
-	ShortName:  "gi.Scene",
-	IDName:     "scene",
-	Doc:        "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context (e.g., bounding boxes\nand pointer to current parent Stage), so",
-	Directives: gti.Directives{},
+	Name:      "goki.dev/gi/v2/gi.Scene",
+	ShortName: "gi.Scene",
+	IDName:    "scene",
+	Doc:       "Scene contains a Widget tree, rooted in an embedded Frame layout,\nwhich renders into its Pixels image.\nThe Scene is set in a Stage (pointer retained in Scene).\nStage has a StageMgr manager for controlling things like Popups\n(Menus and Dialogs, etc).\n\nEach Scene and Widget tree contains state specific to its particular usage\nwithin a given Stage and overall rendering context (e.g., bounding boxes\nand pointer to current parent Stage), so [TODO(rcoreilly): you need to finish this]",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}}},
@@ -878,14 +880,6 @@ var SceneType = gti.AddType(&gti.Type{
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Scene{},
 })
-
-// NewScene adds a new [Scene] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewScene(par ki.Ki, name ...string) *Scene {
-	return par.NewChild(SceneType, name...).(*Scene)
-}
 
 // KiType returns the [*gti.Type] of [Scene]
 func (t *Scene) KiType() *gti.Type {
