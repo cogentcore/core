@@ -431,7 +431,7 @@ func (tv *View) StyleView(sc *gi.Scene) {
 		}
 	}
 	tv.ApplyStyleWidget(sc)
-	tv.CursorWidth.ToDots(&tv.Style.UnContext)
+	tv.CursorWidth.ToDots(&tv.Styles.UnContext)
 }
 
 // ApplyStyle calls StyleView and sets the style

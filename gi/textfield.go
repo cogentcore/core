@@ -849,7 +849,7 @@ func (tf *TextField) StartCharPos(idx int) float32 {
 // not in visible range, position will be out of range too).
 // if wincoords is true, then adds window box offset -- for cursor, popups
 func (tf *TextField) CharStartPos(charidx int, wincoords bool) mat32.Vec2 {
-	st := &tf.Style
+	st := &tf.Styles
 	spc := st.BoxSpace()
 	pos := tf.EffPos.Add(spc.Pos())
 	if wincoords {
@@ -1045,7 +1045,7 @@ func (tf *TextField) RenderSelect(sc *Scene) {
 
 // AutoScroll scrolls the starting position to keep the cursor visible
 func (tf *TextField) AutoScroll() {
-	st := &tf.Style
+	st := &tf.Styles
 
 	tf.UpdateRenderAll()
 
@@ -1134,7 +1134,7 @@ func (tf *TextField) AutoScroll() {
 
 // PixelToCursor finds the cursor position that corresponds to the given pixel location
 func (tf *TextField) PixelToCursor(pixOff float32) int {
-	st := &tf.Style
+	st := &tf.Styles
 
 	spc := st.BoxSpace()
 	px := pixOff - spc.Pos().X
@@ -1516,7 +1516,7 @@ func (tf *TextField) StyleTextField(sc *Scene) {
 	tf.StyMu.Lock()
 	tf.SetCanFocusIfActive()
 	tf.ApplyStyleWidget(sc)
-	tf.CursorWidth.ToDots(&tf.Style.UnContext)
+	tf.CursorWidth.ToDots(&tf.Styles.UnContext)
 	tf.StyMu.Unlock()
 }
 
@@ -1525,7 +1525,7 @@ func (tf *TextField) ApplyStyle(sc *Scene) {
 }
 
 func (tf *TextField) UpdateRenderAll() bool {
-	st := &tf.Style
+	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	txt := tf.EditTxt
 	if tf.NoEcho {
@@ -1593,7 +1593,7 @@ func (tf *TextField) RenderTextField(sc *Scene) {
 	tf.SetEffPosAndSize()
 
 	tf.AutoScroll() // inits paint with our style
-	st := &tf.Style
+	st := &tf.Styles
 	st.Font = paint.OpenFont(st.FontRender(), &st.UnContext)
 	tf.RenderStdBox(sc, st)
 	cur := tf.EditTxt[tf.StartPos:tf.EndPos]

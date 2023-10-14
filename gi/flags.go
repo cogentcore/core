@@ -45,7 +45,7 @@ func (wb *WidgetBase) SetSelected(sel bool) {
 
 // CanFocus checks if this node can receive keyboard focus
 func (wb *WidgetBase) CanFocus() bool {
-	return wb.Style.Abilities.HasFlag(abilities.Focusable)
+	return wb.Styles.Abilities.HasFlag(abilities.Focusable)
 }
 
 // SetCanFocusIfActive sets CanFocus flag only if node is active (inactive

@@ -2006,7 +2006,7 @@ func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
 	// } else {
 	// 	tv.Scene = tv.ParentScene()
 	// }
-	tv.Style.Defaults()
+	tv.Styles.Defaults()
 	tv.LayState.Defaults() // doesn't overwrite
 	tv.ConfigParts(sc)
 	// tv.ConnectToScene()
@@ -2031,8 +2031,8 @@ func (tv *TreeView) StyleTreeView() {
 	// if hasTempl && saveTempl {
 	// 	tv.Style.SaveTemplate()
 	// }
-	tv.Indent.ToDots(&tv.Style.UnContext)
-	tv.Parts.Style.InheritFields(&tv.Style)
+	tv.Indent.ToDots(&tv.Styles.UnContext)
+	tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.StyMu.Unlock()
 	tv.ConfigParts(sc)
 }
@@ -2071,7 +2071,7 @@ func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 
 func (tv *TreeView) DoLayoutParts(parBBox image.Rectangle, iter int) {
 	sc := tv.Sc
-	spc := tv.Style.BoxSpace()
+	spc := tv.Styles.BoxSpace()
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
 	tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
 	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
@@ -2095,7 +2095,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
 
 	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.Style, tv.Sc, tv.NodeSize(), psize) // update units with final layout
+	gi.SetUnitContext(&tv.Styles, tv.Sc, tv.NodeSize(), psize) // update units with final layout
 	tv.BBox = tv.This().(gi.Widget).BBoxes()                  // only compute once, at this point
 	tv.This().(gi.Widget).ComputeBBoxes(sc, parBBox, image.Point{})
 

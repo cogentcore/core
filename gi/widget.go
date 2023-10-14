@@ -270,7 +270,7 @@ type WidgetBase struct {
 	OverrideStyle bool `json:"-" xml:"-"`
 
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Style styles.Style `json:"-" xml:"-"`
+	Styles styles.Style `json:"-" xml:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
@@ -330,7 +330,7 @@ func (wb *WidgetBase) CopyFieldsFrom(frm any) {
 	wb.Class = fr.Class
 	wb.CSS.CopyFrom(fr.CSS, true)
 	wb.Tooltip = fr.Tooltip
-	wb.Style.CopyFrom(&fr.Style)
+	wb.Styles.CopyFrom(&fr.Styles)
 }
 
 func (wb *WidgetBase) BaseType() *gti.Type {
@@ -338,21 +338,21 @@ func (wb *WidgetBase) BaseType() *gti.Type {
 }
 
 func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
-	return wb.Style.State.HasFlag(flag)
+	return wb.Styles.State.HasFlag(flag)
 }
 
 func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
-	return wb.Style.Abilities.HasFlag(flag)
+	return wb.Styles.Abilities.HasFlag(flag)
 }
 
 // SetState sets the given [styles.Style.State] flags
 func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) {
-	wb.Style.State.SetFlag(on, state...)
+	wb.Styles.State.SetFlag(on, state...)
 }
 
 // SetAbilities sets the [styles.Style.Abilities] flags
 func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) {
-	wb.Style.Abilities.SetFlag(on, able...)
+	wb.Styles.Abilities.SetFlag(on, able...)
 }
 
 func (wb *WidgetBase) SetTooltip(tt string) Widget {

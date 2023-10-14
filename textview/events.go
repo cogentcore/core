@@ -371,7 +371,7 @@ func (tv *View) KeyInput(kt events.Event) {
 				tv.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Style.Text.TabSize))
+				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Styles.Text.TabSize))
 			}
 			tv.UpdateEndRender(updt)
 			tv.ISpellKeyInput(kt)
@@ -381,10 +381,10 @@ func (tv *View) KeyInput(kt events.Event) {
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
 			if tv.CursorPos.Ch > 0 {
-				ind, _ := lex.LineIndent(tv.Buf.Line(tv.CursorPos.Ln), tv.Style.Text.TabSize)
+				ind, _ := lex.LineIndent(tv.Buf.Line(tv.CursorPos.Ln), tv.Styles.Text.TabSize)
 				if ind > 0 {
 					tv.Buf.IndentLine(tv.CursorPos.Ln, ind-1)
-					intxt := indent.Bytes(tv.Buf.Opts.IndentChar(), ind-1, tv.Style.Text.TabSize)
+					intxt := indent.Bytes(tv.Buf.Opts.IndentChar(), ind-1, tv.Styles.Text.TabSize)
 					npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: len(intxt)}
 					tv.SetCursorShow(npos)
 				}

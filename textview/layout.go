@@ -14,7 +14,7 @@ import (
 
 // StyleSizes gets the size info based on Style settings.
 func (tv *View) StyleSizes() {
-	sty := &tv.Style
+	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
 	tv.FontHeight = sty.Font.Face.Metrics.Height
@@ -37,7 +37,7 @@ func (tv *View) StyleSizes() {
 // UpdateFromAlloc updates size info based on allocated size:
 // NLinesChars, LineNoOff, LineLayoutSize
 func (tv *View) UpdateFromAlloc() {
-	sty := &tv.Style
+	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	asz := tv.LayState.Alloc.SizeOrig
 	nv := mat32.Vec2{}
@@ -85,7 +85,7 @@ func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
 func (tv *View) LayoutAllLines() {
-	if tv.LineLayoutSize == mat32.Vec2Zero || tv.Style.Font.Size.Val == 0 {
+	if tv.LineLayoutSize == mat32.Vec2Zero || tv.Styles.Font.Size.Val == 0 {
 		return
 	}
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
@@ -93,7 +93,7 @@ func (tv *View) LayoutAllLines() {
 	}
 	tv.lastFilename = tv.Buf.Filename
 
-	tv.Buf.Hi.TabSize = tv.Style.Text.TabSize
+	tv.Buf.Hi.TabSize = tv.Styles.Text.TabSize
 	tv.HiStyle()
 	// fmt.Printf("layout all: %v\n", tv.Nm)
 
@@ -113,7 +113,7 @@ func (tv *View) LayoutAllLines() {
 	sz := tv.LineLayoutSize
 	// fmt.Println("LineLayoutSize:", sz)
 
-	sty := &tv.Style
+	sty := &tv.Styles
 	fst := sty.FontRender()
 	fst.BackgroundColor.SetSolid(nil)
 	off := float32(0)
@@ -151,7 +151,7 @@ func (tv *View) LayoutLine(ln int) bool {
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return false
 	}
-	sty := &tv.Style
+	sty := &tv.Styles
 	fst := sty.FontRender()
 	fst.BackgroundColor.SetSolid(nil)
 	mxwd := float32(tv.LinesSize.X)

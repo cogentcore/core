@@ -329,7 +329,7 @@ var FontChooserSizeDots = 18
 // so they are updated with that
 func FontChooserDialog(ctx gi.Widget, opts DlgOpts, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	wb := ctx.AsWidget()
-	FontChooserSizeDots = int(wb.Style.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
+	FontChooserSizeDots = int(wb.Styles.UnContext.ToDots(float32(FontChooserSize), units.UnitPt))
 	paint.FontLibrary.OpenAllFonts(FontChooserSizeDots)
 	dlg := TableViewSelectDialog(ctx, opts, &paint.FontLibrary.FontInfo, -1, FontInfoStyleFunc, fun)
 	return dlg

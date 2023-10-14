@@ -1022,7 +1022,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget) {
 	tf.Tooltip, _ = vv.Desc()
 	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	tf.AddStyles(func(s *styles.Style) {
-		tf.Style.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
+		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
 	tf.OnChange(func(e events.Event) {
 		nt, err := time.Parse(DefaultTimeFormat, tf.Text())

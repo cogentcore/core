@@ -483,10 +483,10 @@ func (tv *TableView) LayoutSliceGrid() bool {
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
 		tv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
 	}
-	if tv.Style.Font.Face == nil {
-		tv.Style.Font = paint.OpenFont(tv.Style.FontRender(), &tv.Style.UnContext)
+	if tv.Styles.Font.Face == nil {
+		tv.Styles.Font = paint.OpenFont(tv.Styles.FontRender(), &tv.Styles.UnContext)
 	}
-	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Style.Font.Face.Metrics.Height)
+	tv.RowHeight = mat32.Max(tv.RowHeight, tv.Styles.Font.Face.Metrics.Height)
 
 	sc := tv.Sc
 	if sc != nil && sc.Is(gi.ScPrefSizing) {

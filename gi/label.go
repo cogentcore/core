@@ -213,9 +213,9 @@ func (lb *Label) SetText(txt string) *Label {
 	lb.StyMu.RLock()
 	lb.Text = txt
 	if lb.Text == "" {
-		lb.TextRender.SetHTML(" ", lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.TextRender.SetHTML(" ", lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
 	} else {
-		lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+		lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
 	}
 	spc := lb.BoxSpace()
 	sz := lb.LayState.Alloc.Size
@@ -225,7 +225,7 @@ func (lb *Label) SetText(txt string) *Label {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
+	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 	lb.StyMu.RUnlock()
 	lb.UpdateEnd(updt)
 	return lb
@@ -389,7 +389,7 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	lb.StyMu.RLock()
 	defer lb.StyMu.RUnlock()
 
-	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
+	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
 	spc := lb.BoxSpace()
 	sz := lb.LayState.SizePrefOrMax()
 	if LayoutTrace {
@@ -398,7 +398,7 @@ func (lb *Label) LayoutLabel(sc *Scene) {
 	if !sz.IsNil() {
 		sz.SetSub(spc.Size())
 	}
-	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
+	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 }
 
 func (lb *Label) ApplyStyle(sc *Scene) {
@@ -407,7 +407,7 @@ func (lb *Label) ApplyStyle(sc *Scene) {
 }
 
 func (lb *Label) GetSize(sc *Scene, iter int) {
-	if iter > 0 && lb.Style.Text.HasWordWrap() {
+	if iter > 0 && lb.Styles.Text.HasWordWrap() {
 		return // already updated in previous iter, don't redo!
 	} else {
 		lb.InitLayout(sc)
@@ -424,11 +424,11 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	lb.DoLayoutBase(sc, parBBox, iter)
 	lb.DoLayoutChildren(sc, iter) // todo: maybe shouldn't call this on known terminals?
 	sz := lb.GetSizeSubSpace()
-	lb.TextRender.SetHTML(lb.Text, lb.Style.FontRender(), &lb.Style.Text, &lb.Style.UnContext, lb.CSSAgg)
-	lb.TextRender.LayoutStdLR(&lb.Style.Text, lb.Style.FontRender(), &lb.Style.UnContext, sz)
-	if lb.Style.Text.HasWordWrap() {
+	lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
+	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
+	if lb.Styles.Text.HasWordWrap() {
 		if lb.TextRender.Size.Y < (sz.Y - 1) { // allow for numerical issues
-			lb.LayState.SetFromStyle(&lb.Style) // todo: revisit!!
+			lb.LayState.SetFromStyle(&lb.Styles) // todo: revisit!!
 			lb.GetSizeFromWH(lb.TextRender.Size.X, lb.TextRender.Size.Y)
 			return true // needs a redo!
 		}
@@ -438,7 +438,7 @@ func (lb *Label) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 
 func (lb *Label) TextPos() mat32.Vec2 {
 	lb.StyMu.RLock()
-	pos := lb.LayState.Alloc.Pos.Add(lb.Style.BoxSpace().Pos())
+	pos := lb.LayState.Alloc.Pos.Add(lb.Styles.BoxSpace().Pos())
 	lb.StyMu.RUnlock()
 	return pos
 }

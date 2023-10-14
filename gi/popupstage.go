@@ -149,10 +149,10 @@ func (st *PopupStage) RunPopup() *PopupStage {
 	sc.Geom.Size = maxSz
 	sz := sc.PrefSize(maxSz)
 	// fmt.Println(sz, maxSz)
-	scrollWd := int(sc.Style.ScrollBarWidth.Dots)
+	scrollWd := int(sc.Styles.ScrollBarWidth.Dots)
 	fontHt := 16
-	if sc.Style.Font.Face != nil {
-		fontHt = int(sc.Style.Font.Face.Metrics.Height)
+	if sc.Styles.Font.Face != nil {
+		fontHt = int(sc.Styles.Font.Face.Metrics.Height)
 	}
 
 	switch st.Type {

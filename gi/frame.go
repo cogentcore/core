@@ -73,7 +73,7 @@ func (fr *Frame) FrameStdRender(sc *Scene) {
 }
 
 func (fr *Frame) RenderStripes(sc *Scene) {
-	st := &fr.Style
+	st := &fr.Styles
 	rs := &sc.RenderState
 	pc := &rs.Paint
 
