@@ -10,6 +10,8 @@ import (
 	"image/color"
 	"io/ioutil"
 	"log"
+	"log/slog"
+	"os"
 	"os/user"
 	"path/filepath"
 	"time"
@@ -180,18 +182,18 @@ func (pf *Preferences) Open() error {
 // Save Preferences to GoGi standard prefs directory
 //
 //gti:add
-//gi:toolbar -icon save
+//gi:toolbar
 func (pf *Preferences) Save() error {
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 		return err
 	}
-	err = ioutil.WriteFile(pnm, b, 0644)
+	err = os.WriteFile(pnm, b, 0644)
 	if err != nil {
-		log.Println(err)
+		slog.Error(err.Error())
 	}
 	if pf.SaveKeyMaps {
 		AvailKeyMaps.SavePrefs()

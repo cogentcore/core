@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"strings"
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events/key"
@@ -54,7 +55,9 @@ type ToolbarOpts struct {
 	// It defaults to the sentence case version of the
 	// name of the function.
 	Label string
-	// Icon is the icon for the toolbar button.
+	// Icon is the icon for the toolbar button. If there
+	// is an icon with the same name as the function, it
+	// defaults to that icon.
 	Icon icons.Icon
 	// Tooltip is the tooltip for the toolbar button.
 	// It defaults to the documentation for the function.
@@ -88,6 +91,12 @@ func ToolBarView(val any, tb *gi.ToolBar) bool {
 		opts := &ToolbarOpts{
 			Label:   met.Name,
 			Tooltip: met.Doc,
+		}
+		// we default to the icon with the same name as
+		// the method, if it exists
+		ic := icons.Icon(strings.ToLower(met.Name))
+		if ic.IsValid() {
+			opts.Icon = ic
 		}
 		_, err := grease.SetFromArgs(opts, tbDir.Args, grease.ErrNotFound)
 		if err != nil {
