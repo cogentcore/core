@@ -52,6 +52,8 @@ type LabelFunc func(it any, act *gi.Button) string
 //
 //gti:add
 type MethodConfig struct {
+	// Name is the actual name in code of the function to call.
+	Name string
 	// Label is the label for the method button.
 	// It defaults to the sentence case version of the
 	// name of the function.
@@ -315,30 +317,39 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 //////////////////////////////////////////////////////////////////////////////////
 //    CallMethod -- auto gui
 
-// CallMethod calls the method with the given name on the given object value,
-// with the given method configuration information. It uses a GUI interface to
-// prompt for args, and it uses the given context widget for context information
-// for that GUI interface.
+// CallMethod calls the method with the given configuration information on the
+// given object value, using a GUI interface to prompt for args. It uses the
+// given context widget for context information for the GUI interface.
 // gopy:interface=handle
-func CallMethod(ctx gi.Widget, val any, method string, cfg *MethodConfig) bool {
-	rval := reflect.ValueOf(val)
-	met := rval.MethodByName(method)
-	_ = met
-
-	ArgViewDialog(ctx, DlgOpts{Title: cfg.Label, Prompt: cfg.Tooltip, Ok: true, Cancel: true}, ArgConfigsFromMethod(method, cfg), func(dlg *gi.Dialog) {
-		fmt.Println("dialog closed")
-	}).Run()
+func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
+	ArgViewDialog(
+		ctx,
+		DlgOpts{Title: met.Label, Prompt: met.Tooltip, Ok: true, Cancel: true},
+		ArgConfigsFromMethod(val, met), func(dlg *gi.Dialog) {
+			fmt.Println("dialog closed")
+		}).Run()
 	return true
 }
 
-func ArgConfigsFromMethod(method string, cfg *MethodConfig) []ArgConfig {
-	res := make([]ArgConfig, cfg.Args.Len())
-	for i, kv := range cfg.Args.Order {
+func ArgConfigsFromMethod(val any, met *MethodConfig) []ArgConfig {
+	rval := reflect.ValueOf(val)
+	rmet := rval.MethodByName(met.Name)
+	mtyp := rmet.Type()
+
+	res := make([]ArgConfig, met.Args.Len())
+	for i, kv := range met.Args.Order {
 		arg := kv.Val
 		ra := ArgConfig{
 			Name: arg.Name,
 			Desc: arg.Doc,
 		}
+
+		atyp := mtyp.In(i)
+		ra.Val = reflect.New(atyp)
+
+		ra.View = ToValue(ra.Val.Interface(), "")
+		ra.View.SetSoloValue(ra.Val)
+		ra.View.SetName(ra.Name)
 		res[i] = ra
 	}
 	return res
