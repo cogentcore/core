@@ -43,7 +43,7 @@ func (mb *MenuBar) OnInit() {
 }
 
 func (mb *MenuBar) MenuBarStyles() {
-	mb.AddStyles(func(s *styles.Style) {
+	mb.Style(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.StateLayer += 0.06
 	})
@@ -328,7 +328,7 @@ func (tb *Toolbar) OnInit() {
 }
 
 func (tb *Toolbar) ToolbarStyles() {
-	tb.AddStyles(func(s *styles.Style) {
+	tb.Style(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
 		s.StateLayer += 0.06

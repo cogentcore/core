@@ -34,7 +34,7 @@ func app() {
 
 	hdrText := `This is a <b>test</b> of the textview.View`
 	title := gi.NewLabel(trow, "title").SetText(hdrText).SetType(gi.LabelHeadlineSmall)
-	title.AddStyles(func(s *styles.Style) {
+	title.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 		s.Text.Align = styles.AlignCenter
 		s.Text.AlignV = styles.AlignTop
@@ -43,7 +43,7 @@ func app() {
 	splt := gi.NewSplits(sc, "split-view")
 	splt.SetSplits(.5, .5)
 	// these are all inherited so we can put them at the top "editor panel" level
-	splt.AddStyles(func(s *styles.Style) {
+	splt.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePreWrap
 		s.Text.TabSize = 4
 		s.Font.Family = string(gi.Prefs.MonoFont)
@@ -53,14 +53,14 @@ func app() {
 	// generally need to put text view within its own layout for scrolling
 
 	txed1 := textview.NewView(splt, "textview-1")
-	txed1.AddStyles(func(s *styles.Style) {
+	txed1.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
 
 	txed2 := textview.NewView(splt, "textview-2")
-	txed2.AddStyles(func(s *styles.Style) {
+	txed2.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))

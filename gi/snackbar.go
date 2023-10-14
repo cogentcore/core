@@ -57,7 +57,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	sc := NewScene(w.Name() + "-snackbar")
 	sc.SetLayout(LayoutHoriz)
 	wsc := w.AsWidget().Sc
-	sc.AddStyles(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.Padding.SetHoriz(units.Dp(8))
 		s.BackgroundColor.SetSolid(colors.Scheme.InverseSurface)
@@ -68,7 +68,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.SetStretchMaxWidth()
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium).
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			if s.Is(states.Selected) {
 				s.Color = colors.Scheme.Select.OnContainer
@@ -79,7 +79,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	}
 	if opts.Button != "" {
 		bt := NewButton(sc, "button").SetType(ButtonText).SetText(opts.Button)
-		bt.AddStyles(func(s *styles.Style) {
+		bt.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.InversePrimary
 		})
 		bt.OnClick(func(e events.Event) {
@@ -91,7 +91,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 	}
 	if !opts.Icon.IsNil() {
 		ic := NewButton(sc, "icon").SetType(ButtonAction).SetIcon(opts.Icon)
-		ic.AddStyles(func(s *styles.Style) {
+		ic.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.InverseOnSurface
 		})
 		ic.OnClick(func(e events.Event) {

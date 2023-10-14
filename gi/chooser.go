@@ -99,7 +99,7 @@ func (ch *Chooser) HandleChooserEvents() {
 }
 
 func (ch *Chooser) ChooserStyles() {
-	ch.AddStyles(func(s *styles.Style) {
+	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
@@ -153,12 +153,12 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "label":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Margin.Set()
@@ -177,7 +177,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 			text.Type = TextFieldOutlined
 		}
 		ch.TextFieldHandlers(text)
-		text.AddStyles(func(s *styles.Style) {
+		text.Style(func(s *styles.Style) {
 			s.Border.Style.Set(styles.BorderNone)
 			s.Border.Width.Set()
 			if ch.MaxLength > 0 {
@@ -185,7 +185,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 			}
 		})
 	case "ind-stretch":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			if ch.Editable {
 				s.Width.SetDp(0)
 			} else {
@@ -193,7 +193,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 			}
 		})
 	case "indicator":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Font.Size.SetDp(16)
 			s.AlignV = styles.AlignMiddle
 		})

@@ -40,7 +40,7 @@ func NewTooltipText(w Widget, tooltip string, pos image.Point) *PopupStage {
 func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 	sc := NewScene(w.Name() + "-tooltip")
 	sc.Geom.Pos = pos.Add(image.Pt(20, 20))
-	sc.AddStyles(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		s.Border.Radius = styles.BorderRadiusExtraSmall
 		s.SetStretchMaxHeight()
 		s.Padding.Set(units.Dp(8))
@@ -49,7 +49,7 @@ func NewTooltipScene(w Widget, tooltip string, pos image.Point) *Scene {
 		s.BoxShadow = styles.BoxShadow1()
 	})
 	NewLabel(sc, "text").SetType(LabelBodyMedium).SetText(tooltip).
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.MaxWidth = units.Em(30)
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		})

@@ -113,7 +113,7 @@ func (lb *Label) OnInit() {
 
 func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
-	lb.AddStyles(func(s *styles.Style) {
+	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
 		s.Cursor = cursors.Text
 

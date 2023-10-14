@@ -63,7 +63,7 @@ type MapView struct {
 func (mv *MapView) OnInit() {
 	mv.ShowToolbar = true
 	mv.Lay = gi.LayoutVert
-	mv.AddStyles(func(s *styles.Style) {
+	mv.Style(func(s *styles.Style) {
 		mv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -76,7 +76,7 @@ func (mv *MapView) OnChildAdded(child ki.Ki) {
 		mg := w.(*gi.Frame)
 		mg.Lay = gi.LayoutGrid
 		mg.Stripes = gi.RowStripes
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			// setting a pref here is key for giving it a scrollbar in larger context
 			s.SetMinPrefHeight(units.Em(1.5))
 			s.SetMinPrefWidth(units.Em(10))
@@ -256,7 +256,7 @@ func (mv *MapView) ConfigMapGrid() {
 		delbt.OnClick(func(e events.Event) {
 			mv.MapDelete(kv.Val())
 		})
-		delbt.AddStyles(func(s *styles.Style) {
+		delbt.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Error.Base
 		})
 	}

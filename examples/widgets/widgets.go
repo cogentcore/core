@@ -74,7 +74,7 @@ func app() {
 See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> for detailed info and things to try.`).
 		SetType(gi.LabelHeadlineSmall).
 		SetStretchMax().
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.Text.WhiteSpace = styles.WhiteSpaceNormal
 			s.Text.Align = styles.AlignCenter
 			s.Text.AlignV = styles.AlignCenter
@@ -96,7 +96,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	b1 := gi.NewButton(brow, "button1").
 		SetIcon(icons.OpenInNew).
 		SetTooltip("press this <i>button</i> to pop up a dialog box").
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.Width = units.Em(1.5)
 			s.Height = units.Em(1.5)
 		}).(*gi.Button)
@@ -165,7 +165,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	srow := gi.NewLayout(scene, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
 
@@ -226,7 +226,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetPlaceholder("Enter text here...").
 		AddClearButton().
 		// SetTypePassword().
-		AddStyles(func(s *styles.Style) {
+		Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(20))
 		}).(*gi.TextField)
 	edit1.OnChange(func(e events.Event) {

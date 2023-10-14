@@ -82,7 +82,7 @@ func (sw *Switch) HandleSwitchEvents() {
 }
 
 func (sw *Switch) SwitchStyles() {
-	sw.AddStyles(func(s *styles.Style) {
+	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignLeft
@@ -105,7 +105,7 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon0": // on
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
 			// switches need to be bigger
 			if sw.Type == SwitchSwitch {
@@ -117,7 +117,7 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 			}
 		})
 	case "icon1": // off
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			// switches need to be bigger
 			if sw.Type == SwitchSwitch {
 				s.Width.SetEm(3)
@@ -128,11 +128,11 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 			}
 		})
 	case "space":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetCh(0.1)
 		})
 	case "label":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Margin.Set()

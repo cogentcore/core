@@ -217,7 +217,7 @@ func (ly *Layout) OnInit() {
 }
 
 func (ly *Layout) LayoutStyles() {
-	ly.AddStyles(func(s *styles.Style) {
+	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		// we never want state layers and borders on layouts
 		s.StateLayer = 0
@@ -365,7 +365,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sr := ly.Scrolls[d]
 		sr.InitName(sr, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sr, ly.This())
-		sb.SetFlag(true, ki.Field)
+		sr.SetFlag(true, ki.Field)
 		sr.SetType(SliderScrollbar)
 		sr.Sc = sc
 		sr.Dim = d
@@ -391,7 +391,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 	}
 	sb.ApplyStyle(sc)
 	sb.Max = ly.ChildSize.Dim(d) + ly.ExtraSize.Dim(d) // only scrollbar
-	sb.Step = ly.Styles.Font.Size.Dots                  // step by lines
+	sb.Step = ly.Styles.Font.Size.Dots                 // step by lines
 	sb.PageStep = 10.0 * sb.Step                       // todo: more dynamic
 	sb.ThumbVal = avail.Dim(d) - spc.Size().Dim(d)/2
 	sb.TrackThr = 1
@@ -1322,7 +1322,7 @@ type Stretch struct {
 }
 
 func (st *Stretch) OnInit() {
-	st.AddStyles(func(s *styles.Style) {
+	st.Style(func(s *styles.Style) {
 		s.SetMinPrefHeight(units.Ch(1))
 		s.SetMinPrefWidth(units.Em(1))
 		s.MaxWidth.SetDp(-1)
@@ -1352,7 +1352,7 @@ type Space struct {
 var _ Widget = (*Space)(nil)
 
 func (sp *Space) OnInit() {
-	sp.AddStyles(func(s *styles.Style) {
+	sp.Style(func(s *styles.Style) {
 		s.Width.SetCh(1)
 		s.Height.SetEm(1)
 	})

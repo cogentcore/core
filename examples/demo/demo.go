@@ -48,7 +48,7 @@ func app() {
 func makeHome(ts *gi.Tabs) {
 	home := ts.NewTab("Home")
 	home.Lay = gi.LayoutVert
-	home.AddStyles(func(s *styles.Style) {
+	home.Style(func(s *styles.Style) {
 		home.Spacing.SetEx(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.SetDp(-1)
@@ -80,7 +80,7 @@ func makeHome(ts *gi.Tabs) {
 
 	// bt := gi.NewButton(home, "bt")
 	// bt.Text = "Big Shadow"
-	// bt.AddStyles(func(s *styles.Style) {
+	// bt.Style(func(s *styles.Style) {
 	// 	bt.Style.AddBoxShadow(
 	// 		styles.Shadow{
 	// 			HOffset: units.Dp(20),
@@ -116,7 +116,7 @@ func makeHome(ts *gi.Tabs) {
 func makeText(ts *gi.Tabs) {
 	text := ts.NewTab("Text")
 	text.Lay = gi.LayoutVert
-	text.AddStyles(func(s *styles.Style) {
+	text.Style(func(s *styles.Style) {
 		text.Spacing.SetEx(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.SetDp(-1)
@@ -136,7 +136,7 @@ func makeText(ts *gi.Tabs) {
 func makeButtons(ts *gi.Tabs) {
 	buttons := ts.NewTab("Buttons")
 	buttons.Lay = gi.LayoutVert
-	buttons.AddStyles(func(s *styles.Style) {
+	buttons.Style(func(s *styles.Style) {
 		buttons.Spacing.SetEx(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.SetDp(-1)
@@ -151,19 +151,19 @@ func makeButtons(ts *gi.Tabs) {
 	gi.NewLabel(buttons).SetType(gi.LabelHeadlineSmall).SetText("Standard Buttons")
 
 	brow := gi.NewLayout(buttons, "brow").SetLayout(gi.LayoutHorizFlow)
-	brow.AddStyles(func(s *styles.Style) {
+	brow.Style(func(s *styles.Style) {
 		brow.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
 	browt := gi.NewLayout(buttons, "browt").SetLayout(gi.LayoutHorizFlow)
-	browt.AddStyles(func(s *styles.Style) {
+	browt.Style(func(s *styles.Style) {
 		browt.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
 	browi := gi.NewLayout(buttons, "browi").SetLayout(gi.LayoutHorizFlow)
-	browi.AddStyles(func(s *styles.Style) {
+	browi.Style(func(s *styles.Style) {
 		browi.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
@@ -172,19 +172,19 @@ func makeButtons(ts *gi.Tabs) {
 	mbtitle.Type = gi.LabelHeadlineSmall
 
 	mbrow := gi.NewLayout(buttons, "mbrow").SetLayout(gi.LayoutHorizFlow)
-	mbrow.AddStyles(func(s *styles.Style) {
+	mbrow.Style(func(s *styles.Style) {
 		mbrow.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
 	mbrowt := gi.NewLayout(buttons, "mbrowt").SetLayout(gi.LayoutHorizFlow)
-	mbrowt.AddStyles(func(s *styles.Style) {
+	mbrowt.Style(func(s *styles.Style) {
 		mbrowt.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
 
 	mbrowi := gi.NewLayout(buttons, "mbrowi").SetLayout(gi.LayoutHorizFlow)
-	mbrowi.AddStyles(func(s *styles.Style) {
+	mbrowi.Style(func(s *styles.Style) {
 		mbrowi.Spacing.SetEm(1)
 		s.MaxWidth.SetDp(-1)
 	})
@@ -266,7 +266,7 @@ func makeButtons(ts *gi.Tabs) {
 func makeInputs(ts *gi.Tabs) {
 	inputs := ts.NewTab("Inputs")
 	inputs.Lay = gi.LayoutVert
-	inputs.AddStyles(func(s *styles.Style) {
+	inputs.Style(func(s *styles.Style) {
 		inputs.Spacing.SetEx(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.SetDp(-1)
@@ -293,7 +293,7 @@ func makeInputs(ts *gi.Tabs) {
 	gi.NewSpinner(spinners).SetFormat("%#X").SetStep(1).SetMax(255).SetValue(44)
 
 	choosers := gi.NewLayout(inputs, "choosers").SetLayout(gi.LayoutHoriz)
-	choosers.AddStyles(func(s *styles.Style) {
+	choosers.Style(func(s *styles.Style) {
 		choosers.Spacing.SetEm(0.5)
 	})
 
@@ -357,7 +357,7 @@ func makeInputs(ts *gi.Tabs) {
 
 	// tview := giv.NewTextView(inputs, "tview")
 	// tview.SetBuf(tbuf)
-	// tview.AddStyles(func(s *styles.Style) {
+	// tview.Style(func(s *styles.Style) {
 	// 	s.MaxWidth.SetDp(500)
 	// 	s.MaxHeight.SetDp(300)
 	// })
@@ -366,7 +366,7 @@ func makeInputs(ts *gi.Tabs) {
 func makeLayouts(ts *gi.Tabs) {
 	layouts := ts.NewTab("Layouts")
 	layouts.Lay = gi.LayoutVert
-	layouts.AddStyles(func(s *styles.Style) {
+	layouts.Style(func(s *styles.Style) {
 		layouts.Spacing.SetEx(1)
 		s.Padding.Set(units.Dp(8))
 		s.MaxWidth.SetDp(-1)
@@ -374,14 +374,14 @@ func makeLayouts(ts *gi.Tabs) {
 	})
 
 	vw := gi.NewLabel(layouts, "vw", "50vw")
-	vw.AddStyles(func(s *styles.Style) {
+	vw.Style(func(s *styles.Style) {
 		s.Width = units.Vw(50)
 		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Base)
 		s.Color = colors.Scheme.Primary.On
 	})
 
 	pw := gi.NewLabel(layouts, "pw", "50pw")
-	pw.AddStyles(func(s *styles.Style) {
+	pw.Style(func(s *styles.Style) {
 		s.Width = units.Pw(50)
 		s.BackgroundColor.SetSolid(colors.Scheme.Primary.Container)
 		s.Color = colors.Scheme.Primary.OnContainer

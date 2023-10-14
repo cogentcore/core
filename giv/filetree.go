@@ -1444,12 +1444,12 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.Tw
 	tv.SetSplits(.2, .8)
 
 	tva, tvb := tv.Views()
-	tva.AddStyles(func(s *styles.Style) {
+	tva.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(30)
 		s.Height.SetEm(40)
 	})
-	tvb.AddStyles(func(s *styles.Style) {
+	tvb.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(80)
 		s.Height.SetEm(40)
@@ -1731,7 +1731,7 @@ func (ftv *FileTreeView) OnInit() {
 
 func (ftv *FileTreeView) FileTreeViewStyles() {
 
-	ftv.AddStyles(func(s *styles.Style) {
+	ftv.Style(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
 		s.Margin.Set()
@@ -1767,11 +1767,11 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 	switch w.Name() {
 	case "parts":
 		parts := w.(*gi.Layout)
-		parts.AddStyles(func(s *styles.Style) {
+		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
 		})
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -1781,7 +1781,7 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 		cb := w.(*gi.Switch)
 		cb.IconOn = icons.FolderOpen
 		cb.IconOff = icons.Folder
-		cb.AddStyles(func(s *styles.Style) {
+		cb.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MaxWidth.SetEm(1.5)
@@ -1789,11 +1789,11 @@ func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "space":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "label":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MinWidth.SetCh(16)

@@ -75,7 +75,7 @@ type StructView struct {
 func (sv *StructView) OnInit() {
 	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
-	sv.AddStyles(func(s *styles.Style) {
+	sv.Style(func(s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -85,14 +85,14 @@ func (sv *StructView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "toolbar":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
 		})
 	case "struct-grid":
 		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			// setting a pref here is key for giving it a scrollbar in larger context
 			s.SetMinPrefHeight(units.Em(1.5))
 			s.SetMinPrefWidth(units.Em(10))
@@ -102,7 +102,7 @@ func (sv *StructView) OnChildAdded(child ki.Ki) {
 		})
 	}
 	if w.Parent().Name() == "struct-grid" {
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.AlignH = styles.AlignLeft
 		})
 	}

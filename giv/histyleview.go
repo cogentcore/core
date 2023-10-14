@@ -88,7 +88,7 @@ func HiStylesView(st *histyle.Styles) {
 	sc.Data = st
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title)
-	title.AddStyles(func(s *styles.Style) {
+	title.Style(func(s *styles.Style) {
 		s.SetMinPrefWidth(units.Ch(30)) // need for wrap
 		s.SetStretchMaxWidth()
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap
@@ -96,7 +96,7 @@ func HiStylesView(st *histyle.Styles) {
 
 	tv := NewMapView(sc, "tv")
 	tv.SetMap(st)
-	tv.AddStyles(func(s *styles.Style) {
+	tv.Style(func(s *styles.Style) {
 		tv.SetStretchMax()
 	})
 

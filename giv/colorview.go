@@ -49,7 +49,7 @@ type ColorView struct {
 
 func (cv *ColorView) OnInit() {
 	cv.Lay = gi.LayoutVert
-	cv.AddStyles(func(s *styles.Style) {
+	cv.Style(func(s *styles.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
 }
@@ -58,36 +58,36 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "value":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetEm(6)
 			s.MinHeight.SetEm(6)
 			s.Border.Radius = styles.BorderRadiusFull
 			s.BackgroundColor.SetSolid(cv.Color)
 		})
 	case "slider-grid":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Columns = 4
 		})
 	case "hexlbl":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "palette":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Columns = 25
 		})
 	case "nums-hex":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetCh(20)
 		})
 	case "num-lay":
 		vl := w.(*gi.Layout)
-		vl.AddStyles(func(s *styles.Style) {
+		vl.Style(func(s *styles.Style) {
 			vl.Spacing = gi.StdDialogVSpaceUnits
 		})
 	}
 	if sl, ok := w.(*gi.Slider); ok {
-		sl.AddStyles(func(s *styles.Style) {
+		sl.Style(func(s *styles.Style) {
 			s.MinWidth.SetCh(20)
 			s.Width.SetCh(20)
 			s.MinHeight.SetEm(1)
@@ -97,7 +97,7 @@ func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	}
 	if child.Parent().Name() == "palette" {
 		if cbt, ok := w.(*gi.Button); ok {
-			cbt.AddStyles(func(s *styles.Style) {
+			cbt.Style(func(s *styles.Style) {
 				c := colornames.Map[cbt.Name()]
 
 				s.BackgroundColor.SetSolid(c)
@@ -505,7 +505,7 @@ func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
-	bt.AddStyles(func(s *styles.Style) {
+	bt.Style(func(s *styles.Style) {
 		clr, _ := vv.Color()
 		// we need to display button as non-transparent
 		// so that it can be seen

@@ -23,12 +23,12 @@ func KeyMapsView(km *gi.KeyMaps) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = km
 
-	sc.AddStyles(func(s *styles.Style) {
+	sc.Style(func(s *styles.Style) {
 		s.Margin.Set(units.Dp(8))
 	})
 
 	title := gi.NewLabel(sc, "title").SetText(sc.Title).SetType(gi.LabelHeadlineSmall)
-	title.AddStyles(func(s *styles.Style) {
+	title.Style(func(s *styles.Style) {
 		s.Width.SetCh(30) // need for wrap
 		s.SetStretchMaxWidth()
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal // wrap

@@ -74,7 +74,7 @@ type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col 
 
 func (tv *TableView) OnInit() {
 	tv.Lay = gi.LayoutVert
-	tv.AddStyles(func(s *styles.Style) {
+	tv.Style(func(s *styles.Style) {
 		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -86,7 +86,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 	case "frame": // slice frame
 		sf := w.(*gi.Frame)
 		sf.Lay = gi.LayoutVert
-		sf.AddStyles(func(s *styles.Style) {
+		sf.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Ch(20))
 			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			s.SetStretchMax()                  // for this to work, ALL layers above need it too
@@ -97,21 +97,21 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 	case "header": // slice header
 		sh := w.(*gi.Toolbar)
 		sh.Lay = gi.LayoutHoriz
-		sh.AddStyles(func(s *styles.Style) {
+		sh.Style(func(s *styles.Style) {
 			sh.Spacing.SetDp(0)
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
 	case "grid-lay": // grid layout
 		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
 	case "grid": // slice grid
 		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
-		sg.AddStyles(func(s *styles.Style) {
+		sg.Style(func(s *styles.Style) {
 			// this causes everything to get off, especially resizing: not taking it into account presumably:
 			// sg.Spacing = gi.StdDialogVSpaceUnits
 
@@ -124,14 +124,14 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 	}
 	// STYTODO: set header sizes here (see LayoutHeader)
 	// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
-	// 	w.AddStyles(func(s *styles.Style) {
+	// 	w.Style(func(s *styles.Style) {
 	// 		spc := tv.SliceHeader().Spacing.Dots
 	// 		ip, _ := w.IndexInParent()
 	// 		s.SetMinPrefWidth(units.Dot())
 	// 	})
 	// }
 	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetEm(1.5)
 			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
@@ -441,7 +441,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			sgf.SetChild(&delbt, cidx, delnm)
 			delbt.SetType(gi.ButtonAction)
 			delbt.SetIcon(icons.Delete)
-			delbt.AddStyles(func(s *styles.Style) {
+			delbt.Style(func(s *styles.Style) {
 				s.Color = colors.Scheme.Error.Base
 			})
 			cidx++

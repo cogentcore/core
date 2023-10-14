@@ -131,7 +131,7 @@ func (bt *Button) OnInit() {
 }
 
 func (bt *Button) ButtonStyles() {
-	bt.AddStyles(func(s *styles.Style) {
+	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
@@ -189,21 +189,21 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
 	switch w.Name() {
 	case "icon":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
 	case "space":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
 	case "label":
 		label := w.(*Label)
 		label.Type = LabelLabelLarge
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
@@ -212,11 +212,11 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 			s.AlignV = styles.AlignMiddle
 		})
 	case "ind-stretch":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
 	case "indicator":
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()

@@ -237,7 +237,7 @@ func (sv *SliceViewBase) OnInit() {
 	sv.HandleSliceViewEvents()
 
 	sv.Lay = gi.LayoutVert
-	sv.AddStyles(func(s *styles.Style) {
+	sv.Style(func(s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -249,14 +249,14 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	case "grid-lay": // grid layout
 		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
 	case "grid": // slice grid
 		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
-		sg.AddStyles(func(s *styles.Style) {
+		sg.Style(func(s *styles.Style) {
 			nWidgPerRow, _ := sv.RowWidgetNs()
 			s.Columns = nWidgPerRow
 			// setting a pref here is key for giving it a scrollbar in larger context
@@ -267,7 +267,7 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 		})
 	}
 	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.AddStyles(func(s *styles.Style) {
+		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetEm(1.5)
 			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
@@ -506,7 +506,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			sg.SetChild(&delbt, cidx, delnm)
 			delbt.SetType(gi.ButtonAction)
 			delbt.SetIcon(icons.Delete)
-			delbt.AddStyles(func(s *styles.Style) {
+			delbt.Style(func(s *styles.Style) {
 				s.Color = colors.Scheme.Error.Base
 			})
 		}

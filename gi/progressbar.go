@@ -59,7 +59,7 @@ func (pb *ProgressBar) OnInit() {
 }
 
 func (pb *ProgressBar) ProgressBarStyles() {
-	pb.AddStyles(func(s *styles.Style) {
+	pb.Style(func(s *styles.Style) {
 		pb.ValueColor.SetSolid(colors.Scheme.Primary.Base)
 		pb.ThumbColor.SetSolid(colors.Scheme.Primary.Base)
 

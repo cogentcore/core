@@ -76,7 +76,7 @@ func (kc *KeyChordEdit) OnInit() {
 }
 
 func (kc *KeyChordEdit) KeyChordStyles() {
-	kc.AddStyles(func(s *styles.Style) {
+	kc.Style(func(s *styles.Style) {
 		s.Cursor = cursors.Pointer
 		s.AlignV = styles.AlignTop
 		s.Border.Style.Set(styles.BorderNone)
