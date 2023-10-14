@@ -20,7 +20,7 @@ type ArgView struct {
 	gi.Frame
 
 	// the args that we are a view onto
-	Args []ArgData
+	Args []ArgConfig
 
 	// title / prompt to show above the editor fields
 	Title string
@@ -76,7 +76,7 @@ func (av *ArgView) OnChildAdded(child ki.Ki) {
 
 // SetArgs sets the source args that we are viewing -- rebuilds the children
 // to represent
-func (av *ArgView) SetArgs(arg []ArgData) {
+func (av *ArgView) SetArgs(arg []ArgConfig) {
 	updt := false
 	updt = av.UpdateStart()
 	av.Args = arg
@@ -128,12 +128,12 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
 	for i := range av.Args {
-		ad := &av.Args[i]
-		if ad.HasValSet() {
+		ac := &av.Args[i]
+		if ac.Default != nil {
 			continue
 		}
-		vtyp := ad.View.WidgetType()
-		knm := strcase.ToKebab(ad.Name)
+		vtyp := ac.View.WidgetType()
+		knm := strcase.ToKebab(ac.Name)
 		labnm := "label-" + knm
 		valnm := "value-" + knm
 		config.Add(gi.LabelType, labnm)
@@ -146,8 +146,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i := range av.Args {
-		ad := &av.Args[i]
-		if ad.HasValSet() {
+		ac := &av.Args[i]
+		if ac.Default != nil {
 			continue
 		}
 		lbl := sg.Child(i * 2).(*gi.Label)
@@ -157,10 +157,10 @@ func (av *ArgView) ConfigArgsGrid() {
 		// 	// note: updating here is redundant -- relevant field will have already updated
 		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
 		// })
-		lbl.Text = ad.Name
-		lbl.Tooltip = ad.Desc
+		lbl.Text = ac.Name
+		lbl.Tooltip = ac.Desc
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		ad.View.ConfigWidget(widg)
+		ac.View.ConfigWidget(widg)
 	}
 	sg.UpdateEnd(updt)
 }
