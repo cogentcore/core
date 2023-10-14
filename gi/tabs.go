@@ -88,7 +88,7 @@ func (ts *Tabs) OnChildAdded(child ki.Ki) {
 			s.Margin.Set()
 			s.Padding.Set()
 			// tabs.Spacing.SetDp(4)
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			s.StateLayer += 0.06
 
 			// s.Border.Style.Set(styles.BorderNone)
 			// s.Border.Style.Bottom = styles.BorderSolid
@@ -543,9 +543,6 @@ func (tb *Tab) TabButtonStyles() {
 
 		// s.Border.Style.Right = styles.BorderSolid
 		// s.Border.Width.Right.SetDp(1)
-
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-		s.Color = colors.Scheme.OnSurface
 
 		s.Border.Radius.Set()
 		s.Text.Align = styles.AlignCenter
