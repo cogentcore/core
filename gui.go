@@ -28,7 +28,7 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 	gi.SetAppName(opts.AppName)
 	gi.SetAppAbout(opts.AppAbout)
 
-	sc := gi.StageScene(opts.AppName).SetTitle(opts.AppTitle)
+	sc := gi.NewScene(opts.AppName).SetTitle(opts.AppTitle)
 
 	tb := gi.NewToolbar(sc)
 	for _, cmd := range cmds {
