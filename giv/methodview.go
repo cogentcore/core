@@ -15,6 +15,7 @@ import (
 	"goki.dev/grease"
 	"goki.dev/gti"
 	"goki.dev/icons"
+	"goki.dev/laser"
 )
 
 // MethodConfig contains the configuration options for a method button in a toolbar or menubar.
@@ -118,22 +119,30 @@ type ArgConfig struct {
 // given context widget for context information for the GUI interface.
 // gopy:interface=handle
 func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
+	rval := reflect.ValueOf(val)
+	rmet := rval.MethodByName(met.Name)
+
+	if met.Args.Len() == 0 {
+		rmet.Call(nil)
+		return true
+	}
+	args := ArgConfigsFromMethod(val, met, rmet)
 	ArgViewDialog(
 		ctx,
 		DlgOpts{Title: met.Label, Prompt: met.Tooltip, Ok: true, Cancel: true},
-		ArgConfigsFromMethod(val, met), func(dlg *gi.Dialog) {
-			fmt.Println("dialog closed")
+		args, func(dlg *gi.Dialog) {
+			rargs := make([]reflect.Value, len(args))
+			for i, arg := range args {
+				rargs[i] = laser.NonPtrValue(arg.Val)
+			}
+			rmet.Call(rargs)
 		}).Run()
 	return true
 }
 
 // ArgConfigsFromMethod returns the appropriate [ArgConfig] objects for the given
-// method on the given value.
-func ArgConfigsFromMethod(val any, met *MethodConfig) []ArgConfig {
-	rval := reflect.ValueOf(val)
-	rmet := rval.MethodByName(met.Name)
-	mtyp := rmet.Type()
-
+// method on the given value. It also takes the method as a [reflect.Value].
+func ArgConfigsFromMethod(val any, met *MethodConfig, rmet reflect.Value) []ArgConfig {
 	res := make([]ArgConfig, met.Args.Len())
 	for i, kv := range met.Args.Order {
 		arg := kv.Val
@@ -143,7 +152,7 @@ func ArgConfigsFromMethod(val any, met *MethodConfig) []ArgConfig {
 			Doc:   arg.Doc,
 		}
 
-		atyp := mtyp.In(i)
+		atyp := rmet.Type().In(i)
 		ra.Val = reflect.New(atyp)
 
 		ra.View = ToValue(ra.Val.Interface(), "")
