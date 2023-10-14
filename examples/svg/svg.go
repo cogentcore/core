@@ -62,7 +62,7 @@ func app() {
 
 	mfr := win.SetMainFrame()
 
-	tbar := gi.NewToolBar(mfr, "tbar")
+	tbar := gi.NewToolbar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
 	svgrow := gi.NewLayout(mfr, "svgrow", gi.LayoutHoriz)

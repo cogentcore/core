@@ -308,26 +308,26 @@ func (mb *MenuBar) MainMenuUpdateActives(win *RenderWin) {
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// ToolBar
+// Toolbar
 
-// ToolBar is a [Frame] that is useful for holding [Button]s that do things.
+// Toolbar is a [Frame] that is useful for holding [Button]s that do things.
 //
 //goki:embedder
-type ToolBar struct {
+type Toolbar struct {
 	Frame
 }
 
-func (tb *ToolBar) CopyFieldsFrom(frm any) {
-	fr := frm.(*ToolBar)
+func (tb *Toolbar) CopyFieldsFrom(frm any) {
+	fr := frm.(*Toolbar)
 	tb.Frame.CopyFieldsFrom(&fr.Frame)
 }
 
-func (tb *ToolBar) OnInit() {
-	tb.ToolBarStyles()
+func (tb *Toolbar) OnInit() {
+	tb.ToolbarStyles()
 	tb.HandleLayoutEvents()
 }
 
-func (tb *ToolBar) ToolBarStyles() {
+func (tb *Toolbar) ToolbarStyles() {
 	tb.AddStyles(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
@@ -342,7 +342,7 @@ func (tb *ToolBar) ToolBarStyles() {
 // data which is stored on the button and then passed in the button signal.
 // Optional updateFunc is a function called prior to showing the menu to
 // update the buttons (enabled or not typically).
-func (tb *ToolBar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
+func (tb *Toolbar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
 	nm := opts.Name
 	if nm == "" {
 		nm = opts.Label
@@ -373,14 +373,14 @@ func (tb *ToolBar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
 // sets its orientation depending on the layout of the toolbar. The
 // name does not need to be specified, and will default to "separator-"
 // plus the [ki.Ki.NumLifetimeChildren] of the toolbar.
-func (tb *ToolBar) AddSeparator(name ...string) *Separator {
+func (tb *Toolbar) AddSeparator(name ...string) *Separator {
 	sp := NewSeparator(tb, name...)
 	sp.Horiz = tb.Lay != LayoutHoriz
 	return sp
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
-func (tb *ToolBar) SetShortcuts() {
+func (tb *Toolbar) SetShortcuts() {
 	em := tb.EventMgr()
 	if em == nil {
 		return
@@ -393,13 +393,13 @@ func (tb *ToolBar) SetShortcuts() {
 	}
 }
 
-func (tb *ToolBar) Destroy() {
+func (tb *Toolbar) Destroy() {
 	tb.DeleteShortcuts()
 	tb.Frame.Destroy()
 }
 
 // DeleteShortcuts deletes the shortcuts -- called when destroyed
-func (tb *ToolBar) DeleteShortcuts() {
+func (tb *Toolbar) DeleteShortcuts() {
 	em := tb.EventMgr()
 	if em == nil {
 		return
@@ -414,7 +414,7 @@ func (tb *ToolBar) DeleteShortcuts() {
 
 // UpdateButtons calls UpdateFunc on all buttons in toolbar -- individual
 // menus are automatically updated just prior to menu popup
-func (tb *ToolBar) UpdateButtons() {
+func (tb *Toolbar) UpdateButtons() {
 	if tb == nil {
 		return
 	}
@@ -432,7 +432,7 @@ func (tb *ToolBar) UpdateButtons() {
 // given name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
 // is empty)) -- returns false if not found
-func (tb *ToolBar) FindButtonByName(name string) (*Button, bool) {
+func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
 	for _, mi := range tb.Kids {
 		if mi.KiType().HasEmbed(ButtonType) {
 			ac := AsButton(mi)

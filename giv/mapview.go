@@ -21,7 +21,7 @@ import (
 // MapView represents a map, creating a property editor of the values --
 // constructs Children widgets to show the key / value pairs, within an
 // overall frame.
-// Automatically has a toolbar with Map ToolBar props if defined
+// Automatically has a toolbar with Map Toolbar props if defined
 // set prop toolbar = false to turn off
 type MapView struct {
 	gi.Frame
@@ -45,7 +45,7 @@ type MapView struct {
 	SortVals bool
 
 	// whether to show the toolbar or not
-	ShowToolBar bool
+	ShowToolbar bool
 
 	// the number of columns in the map; do not set externally; generally only access internally
 	NCols int
@@ -61,7 +61,7 @@ type MapView struct {
 }
 
 func (mv *MapView) OnInit() {
-	mv.ShowToolBar = true
+	mv.ShowToolbar = true
 	mv.Lay = gi.LayoutVert
 	mv.AddStyles(func(s *styles.Style) {
 		mv.Spacing = gi.StdDialogVSpaceUnits
@@ -106,7 +106,7 @@ func (mv *MapView) UpdateValues() {
 func (mv *MapView) ConfigWidget(sc *gi.Scene) {
 	mv.Sc = sc
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.FrameType, "map-grid")
 	mods, updt := mv.ConfigChildren(config)
 	mv.ConfigMapGrid()
@@ -126,9 +126,9 @@ func (mv *MapView) MapGrid() *gi.Frame {
 	return mv.ChildByName("map-grid", 0).(*gi.Frame)
 }
 
-// ToolBar returns the toolbar widget
-func (mv *MapView) ToolBar() *gi.ToolBar {
-	return mv.ChildByName("toolbar", 0).(*gi.ToolBar)
+// Toolbar returns the toolbar widget
+func (mv *MapView) Toolbar() *gi.Toolbar {
+	return mv.ChildByName("toolbar", 0).(*gi.Toolbar)
 }
 
 // KiPropTag returns the PropTag value from Ki owner of this map, if it is..
@@ -269,7 +269,7 @@ func (mv *MapView) ConfigMapGrid() {
 func (mv *MapView) SetChanged() {
 	mv.Changed = true
 	mv.SendChange()
-	mv.ToolBar().UpdateButtons() // nil safe
+	mv.Toolbar().UpdateButtons() // nil safe
 }
 
 // MapChangeValueType changes the type of the value for given map element at
@@ -349,11 +349,11 @@ func (mv *MapView) ConfigToolbar() {
 	if &mv.ToolbarMap == &mv.Map { // maps are not comparable
 		return
 	}
-	if !mv.ShowToolBar {
+	if !mv.ShowToolbar {
 		mv.ToolbarMap = mv.Map
 		return
 	}
-	tb := mv.ToolBar()
+	tb := mv.Toolbar()
 	ndef := 3 // number of default actions
 	if mv.IsDisabled() {
 		ndef = 2
@@ -378,13 +378,13 @@ func (mv *MapView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolBarView(mv.Map, tb)
+	ToolbarView(mv.Map, tb)
 	mv.ToolbarMap = mv.Map
 }
 
 func (mv *MapView) Render(sc *gi.Scene) {
 	if mv.IsConfiged() {
-		mv.ToolBar().UpdateButtons() // nil safe..
+		mv.Toolbar().UpdateButtons() // nil safe..
 	}
 	// if win := mv.ParentRenderWin(); win != nil {
 	// 	if !win.Is(WinResizing) {

@@ -44,12 +44,12 @@ func (t *MenuBar) New() ki.Ki {
 	return &MenuBar{}
 }
 
-// ToolBarType is the [gti.Type] for [ToolBar]
-var ToolBarType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/gi.ToolBar",
-	ShortName: "gi.ToolBar",
+// ToolbarType is the [gti.Type] for [Toolbar]
+var ToolbarType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Toolbar",
+	ShortName: "gi.Toolbar",
 	IDName:    "tool-bar",
-	Doc:       "ToolBar is a [Frame] that is useful for holding [Button]s that do things.",
+	Doc:       "Toolbar is a [Frame] that is useful for holding [Button]s that do things.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -58,46 +58,46 @@ var ToolBarType = gti.AddType(&gti.Type{
 		{"Frame", &gti.Field{Name: "Frame", Type: "Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &ToolBar{},
+	Instance: &Toolbar{},
 })
 
-// NewToolBar adds a new [ToolBar] with the given name
+// NewToolbar adds a new [Toolbar] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewToolBar(par ki.Ki, name ...string) *ToolBar {
-	return par.NewChild(ToolBarType, name...).(*ToolBar)
+func NewToolbar(par ki.Ki, name ...string) *Toolbar {
+	return par.NewChild(ToolbarType, name...).(*Toolbar)
 }
 
-// KiType returns the [*gti.Type] of [ToolBar]
-func (t *ToolBar) KiType() *gti.Type {
-	return ToolBarType
+// KiType returns the [*gti.Type] of [Toolbar]
+func (t *Toolbar) KiType() *gti.Type {
+	return ToolbarType
 }
 
-// New returns a new [*ToolBar] value
-func (t *ToolBar) New() ki.Ki {
-	return &ToolBar{}
+// New returns a new [*Toolbar] value
+func (t *Toolbar) New() ki.Ki {
+	return &Toolbar{}
 }
 
-// ToolBarEmbedder is an interface that all types that embed ToolBar satisfy
-type ToolBarEmbedder interface {
-	AsToolBar() *ToolBar
+// ToolbarEmbedder is an interface that all types that embed Toolbar satisfy
+type ToolbarEmbedder interface {
+	AsToolbar() *Toolbar
 }
 
-// AsToolBar returns the given value as a value of type ToolBar if the type
-// of the given value embeds ToolBar, or nil otherwise
-func AsToolBar(k ki.Ki) *ToolBar {
+// AsToolbar returns the given value as a value of type Toolbar if the type
+// of the given value embeds Toolbar, or nil otherwise
+func AsToolbar(k ki.Ki) *Toolbar {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(ToolBarEmbedder); ok {
-		return t.AsToolBar()
+	if t, ok := k.(ToolbarEmbedder); ok {
+		return t.AsToolbar()
 	}
 	return nil
 }
 
-// AsToolBar satisfies the [ToolBarEmbedder] interface
-func (t *ToolBar) AsToolBar() *ToolBar {
+// AsToolbar satisfies the [ToolbarEmbedder] interface
+func (t *Toolbar) AsToolbar() *Toolbar {
 	return t
 }
 
@@ -115,7 +115,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "Menu", Doc: "the menu items for this menu -- typically add Button elements for menus, along with separators", Directives: gti.Directives{}}},
 		{"MakeMenuFunc", &gti.Field{Name: "MakeMenuFunc", Type: "MakeMenuFunc", Doc: "set this to make a menu on demand -- if set then this button acts like a menu button", Directives: gti.Directives{}}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}}},

@@ -253,7 +253,7 @@ func (fb *FileBrowse) Defaults() {
 func (fb *FileBrowse) StdFrameConfig() ki.Config {
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.TypeSplits, "splits")
 	return config
 }
@@ -314,23 +314,23 @@ func (fb *FileBrowse) TextViewByIndex(idx int) *textview.View {
 	return nil
 }
 
-// ToolBar returns the toolbar widget
-func (fb *FileBrowse) ToolBar() *gi.ToolBar {
+// Toolbar returns the toolbar widget
+func (fb *FileBrowse) Toolbar() *gi.Toolbar {
 	idx, ok := fb.Children().IndexByName("toolbar", 1)
 	if !ok {
 		return nil
 	}
-	return fb.Child(idx).(*gi.ToolBar)
+	return fb.Child(idx).(*gi.Toolbar)
 }
 
 // ConfigToolbar adds a FileBrowse toolbar.
 func (fb *FileBrowse) ConfigToolbar() {
-	tb := fb.ToolBar()
+	tb := fb.Toolbar()
 	if tb.HasChildren() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	giv.ToolBarView(fb, fb.Scene, tb)
+	giv.ToolbarView(fb, fb.Scene, tb)
 }
 
 // SplitsConfig returns a Config for configuring the Splits
@@ -412,7 +412,7 @@ func (fb *FileBrowse) FileNodeClosed(fn *giv.FileNode, tvn *giv.FileTreeView) {
 }
 
 func (fb *FileBrowse) Render(vp *Scene) {
-	fb.ToolBar().UpdateButtons()
+	fb.Toolbar().UpdateButtons()
 	if win := fb.ParentRenderWin(); win != nil {
 		if !win.Is(WinResizing) {
 			win.MainMenuUpdateActives()
@@ -422,7 +422,7 @@ func (fb *FileBrowse) Render(vp *Scene) {
 }
 
 var FileBrowseProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"UpdateFiles", ki.Props{
 			"shortcut": "Command+U",
 			"icon":     icons.Refresh,

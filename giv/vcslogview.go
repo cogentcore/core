@@ -65,7 +65,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	lv.Since = since
 	lv.Lay = gi.LayoutVert
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(TableViewType, "log")
 	mods, updt := lv.ConfigChildren(config)
 	tv := lv.TableView()
@@ -73,7 +73,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 		lv.RevA = "HEAD"
 		lv.RevB = ""
 		lv.SetA = true
-		lv.ConfigToolBar()
+		lv.ConfigToolbar()
 		tv.OnDoubleClick(func(e events.Event) {
 			idx := tv.CurIdx
 			if idx >= 0 && idx < len(lv.Log) {
@@ -103,7 +103,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 // SetRevA sets the RevA to use
 func (lv *VCSLogView) SetRevA(rev string) {
 	lv.RevA = rev
-	tb := lv.ToolBar()
+	tb := lv.Toolbar()
 	tfi := tb.ChildByName("a-tf", 2)
 	if tfi == nil {
 		return
@@ -114,7 +114,7 @@ func (lv *VCSLogView) SetRevA(rev string) {
 // SetRevB sets the RevB to use
 func (lv *VCSLogView) SetRevB(rev string) {
 	lv.RevB = rev
-	tb := lv.ToolBar()
+	tb := lv.Toolbar()
 	tfi := tb.ChildByName("b-tf", 2)
 	if tfi == nil {
 		return
@@ -124,7 +124,7 @@ func (lv *VCSLogView) SetRevB(rev string) {
 
 // ToggleRev switches the active revision to set
 func (lv *VCSLogView) ToggleRev() {
-	tb := lv.ToolBar()
+	tb := lv.Toolbar()
 	updt := tb.UpdateStart()
 	cba := tb.ChildByName("a-rev", 2).(*gi.Switch)
 	cbb := tb.ChildByName("b-rev", 2).(*gi.Switch)
@@ -134,9 +134,9 @@ func (lv *VCSLogView) ToggleRev() {
 	tb.UpdateEnd(updt)
 }
 
-// ToolBar returns the toolbar
-func (lv *VCSLogView) ToolBar() *gi.ToolBar {
-	return lv.ChildByName("toolbar", 0).(*gi.ToolBar)
+// Toolbar returns the toolbar
+func (lv *VCSLogView) Toolbar() *gi.Toolbar {
+	return lv.ChildByName("toolbar", 0).(*gi.Toolbar)
 }
 
 // TableView returns the tableview
@@ -144,9 +144,9 @@ func (lv *VCSLogView) TableView() *TableView {
 	return lv.ChildByName("log", 1).(*TableView)
 }
 
-// ConfigToolBar
-func (lv *VCSLogView) ConfigToolBar() {
-	tb := lv.ToolBar()
+// ConfigToolbar
+func (lv *VCSLogView) ConfigToolbar() {
+	tb := lv.Toolbar()
 	if lv.File != "" {
 		gi.NewLabel(tb, "fl", "File: "+dirs.DirAndFile(lv.File))
 		tb.AddSeparator("flsep")

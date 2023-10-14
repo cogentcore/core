@@ -126,7 +126,7 @@ type SliceViewer interface {
 // list of items, and supports row selection, copy / paste, Drag-n-Drop, etc.
 // Set to Inactive for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
-// Automatically has a toolbar with Slice ToolBar props if defined
+// Automatically has a toolbar with Slice Toolbar props if defined
 // set prop toolbar = false to turn off
 type SliceViewBase struct {
 	gi.Frame
@@ -165,7 +165,7 @@ type SliceViewBase struct {
 	ShowIndex bool
 
 	// whether to show the toolbar or not
-	ShowToolBar bool
+	ShowToolbar bool
 
 	// support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
 	InactKeyNav bool
@@ -231,7 +231,7 @@ type SliceViewBase struct {
 func (sv *SliceViewBase) OnInit() {
 	sv.SelectMode = false
 	sv.ShowIndex = true
-	sv.ShowToolBar = true
+	sv.ShowToolbar = true
 	sv.InactKeyNav = true
 
 	sv.HandleSliceViewEvents()
@@ -345,7 +345,7 @@ func (sv *SliceViewBase) UpdateValues() {
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
 	mods, updt := sv.ConfigChildren(config)
 
@@ -386,13 +386,13 @@ func (sv *SliceViewBase) ScrollBar() *gi.Slider {
 	return sv.GridLayout().ChildByName("scrollbar", 1).(*gi.Slider)
 }
 
-// ToolBar returns the toolbar widget
-func (sv *SliceViewBase) ToolBar() *gi.ToolBar {
+// Toolbar returns the toolbar widget
+func (sv *SliceViewBase) Toolbar() *gi.Toolbar {
 	tbi := sv.ChildByName("toolbar", 1)
 	if tbi == nil {
 		return nil
 	}
-	return tbi.(*gi.ToolBar)
+	return tbi.(*gi.Toolbar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -802,7 +802,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 func (sv *SliceViewBase) SetChanged() {
 	sv.Changed = true
 	sv.SendChange()
-	sv.ToolBar().UpdateButtons() // nil safe
+	sv.Toolbar().UpdateButtons() // nil safe
 }
 
 // SliceNewAtRow inserts a new blank element at given display row
@@ -969,11 +969,11 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	if sv.ToolbarSlice == sv.Slice {
 		return
 	}
-	if !sv.ShowToolBar {
+	if !sv.ShowToolbar {
 		sv.ToolbarSlice = sv.Slice
 		return
 	}
-	tb := sv.ToolBar()
+	tb := sv.Toolbar()
 	ndef := 2 // number of default actions
 	if sv.isArray || sv.IsDisabled() || sv.NoAdd {
 		ndef = 1
@@ -997,7 +997,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolBarView(sv.Slice, tb)
+	ToolbarView(sv.Slice, tb)
 	sv.ToolbarSlice = sv.Slice
 }
 
@@ -1021,7 +1021,7 @@ func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
 }
 
 func (sv *SliceViewBase) Render(sc *gi.Scene) {
-	sv.ToolBar().UpdateButtons()
+	sv.Toolbar().UpdateButtons()
 	if sv.PushBounds(sc) {
 		sv.FrameStdRender(sc)
 		sv.RenderScrolls(sc)

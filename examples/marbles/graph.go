@@ -25,9 +25,9 @@ type Graph struct {
 // Gr is current graph
 var Gr Graph
 
-// GraphProps define the ToolBar for overall app
+// GraphProps define the Toolbar for overall app
 var GraphProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open...",
 			"desc":  "Opens line equations and params from a .json file.",
@@ -185,9 +185,9 @@ func (ln *Line) Eval(x float32) float32 {
 // Lines is a collection of lines
 type Lines []*Line
 
-// LinesProps define the ToolBar for lines
+// LinesProps define the Toolbar for lines
 var LinesProps = ki.Props{
-	// "ToolBar": ki.PropSlice{
+	// "Toolbar": ki.PropSlice{
 	// 	{"OpenJSON", ki.Props{
 	// 		"label": "Open...",
 	// 		"desc":  "opens equations from a .json file.",

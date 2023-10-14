@@ -186,7 +186,7 @@ func Init() {
 	MergeAvailStyles()
 }
 
-// StylesProps define the ToolBar and MenuBar for view
+// StylesProps define the Toolbar and MenuBar for view
 var StylesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -230,7 +230,7 @@ var StylesProps = ki.Props{
 		{"Edit", "Copy Cut Paste Dupe"},
 		{"RenderWin", "RenderWins"},
 	},
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Add", ki.Props{ // note: overrides default Add
 			"desc": "Add a new style to the list.",
 			"icon": icons.Add,

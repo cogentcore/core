@@ -396,7 +396,7 @@ func (pf *Preferences) PrefFontFamily() string {
 	return string(pf.FontFamily)
 }
 
-// PreferencesProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsView
+// PreferencesProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsView
 var PreferencesProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -434,7 +434,7 @@ var PreferencesProps = ki.Props{
 		{"Edit", "Copy Cut Paste"},
 		{"RenderWin", "RenderWins"},
 	},
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"UpdateAll", ki.Props{
 			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
 			"icon": icons.Refresh,
@@ -940,7 +940,7 @@ func (pf *PrefsDetailed) Apply() {
 	// SliceInlineLen
 }
 
-// PrefsDetailedProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsDetView
+// PrefsDetailedProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsDetView
 var PrefsDetailedProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -961,7 +961,7 @@ var PrefsDetailedProps = ki.Props{
 		{"Edit", "Copy Cut Paste"},
 		{"RenderWin", "RenderWins"},
 	},
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Apply", ki.Props{
 			"desc": "Apply parameters to affect actual behavior.",
 			"icon": icons.Refresh,
@@ -1031,9 +1031,9 @@ type PrefsDebug struct {
 // PrefsDbg are the overall debugging preferences
 var PrefsDbg = PrefsDebug{}
 
-// PrefsDebugProps define the ToolBar and MenuBar for StructView, e.g., giv.PrefsDbgView
+// PrefsDebugProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsDbgView
 var PrefsDebugProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Profile", ki.Props{
 			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
 			"icon": icons.LabProfile,

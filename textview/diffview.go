@@ -251,7 +251,7 @@ func (dv *DiffView) SaveFileA(fname gi.FileName) {
 	dv.RemoveAlignsB()
 	dv.ResetDiffs()
 	dv.BufA.SaveAs(fname)
-	dv.UpdateToolBar()
+	dv.UpdateToolbar()
 }
 
 // RemoveAlignsB removes extra blank text lines added to align with A
@@ -280,7 +280,7 @@ func (dv *DiffView) SaveFileB(fname gi.FileName) {
 	dv.RemoveAlignsB()
 	dv.ResetDiffs()
 	dv.BufB.SaveAs(fname)
-	dv.UpdateToolBar()
+	dv.UpdateToolbar()
 }
 
 // DiffStrings computes differences between two lines-of-strings and displays in
@@ -502,7 +502,7 @@ func (dv *DiffView) ApplyDiff(ab int, line int) bool {
 			}
 		}
 	}
-	dv.UpdateToolBar()
+	dv.UpdateToolbar()
 	return true
 }
 
@@ -570,20 +570,20 @@ func (dv *DiffView) UndoDiff(ab int) {
 		}
 	}
 	tv.Undo()
-	dv.UpdateToolBar()
+	dv.UpdateToolbar()
 }
 
 func (dv *DiffView) ConfigWidget(vp *gi.Scene) {
 	dv.Lay = gi.LayoutVert
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.LayoutType, "diff-lay")
 	mods, updt := dv.ConfigChildren(config)
 	if !mods {
 		updt = dv.UpdateStart()
 		dv.SetTextNames()
 	} else {
-		dv.ConfigToolBar()
+		dv.ConfigToolbar()
 		dv.ConfigTexts()
 	}
 	dv.UpdateEnd(updt)
@@ -601,8 +601,8 @@ func (dv *DiffView) HasDiffsUpdate(bt *gi.Button) {
 	bt.SetEnabledStateUpdt(len(dv.AlignD) > 1) // always has at least 1
 }
 
-func (dv *DiffView) ConfigToolBar() {
-	tb := dv.ToolBar()
+func (dv *DiffView) ConfigToolbar() {
+	tb := dv.Toolbar()
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
 		txta += ": " + dv.RevA
@@ -650,7 +650,7 @@ func (dv *DiffView) ConfigToolBar() {
 }
 
 func (dv *DiffView) SetTextNames() {
-	tb := dv.ToolBar()
+	tb := dv.Toolbar()
 	la := tb.ChildByName("label-a", 0).(*gi.Label)
 	txta := "A: " + dirs.DirAndFile(dv.FileA)
 	if dv.RevA != "" {
@@ -665,13 +665,13 @@ func (dv *DiffView) SetTextNames() {
 	lb.SetText(txtb)
 }
 
-func (dv *DiffView) UpdateToolBar() {
-	tb := dv.ToolBar()
+func (dv *DiffView) UpdateToolbar() {
+	tb := dv.Toolbar()
 	tb.UpdateButtons()
 }
 
-func (dv *DiffView) ToolBar() *gi.ToolBar {
-	tb := dv.ChildByName("toolbar", 1).(*gi.ToolBar)
+func (dv *DiffView) Toolbar() *gi.Toolbar {
+	tb := dv.ChildByName("toolbar", 1).(*gi.Toolbar)
 	return tb
 }
 
