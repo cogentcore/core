@@ -63,8 +63,8 @@ func ToolBarView(val any, tb *gi.ToolBar) bool {
 			continue
 		}
 		gotAny = true
-		tb.AddButton(gi.ActOpts{Name: met.Name}, func(bt *gi.Button) {
-			fmt.Println(met.Name, "clicked")
+		tb.AddButton(gi.ActOpts{Label: met.Name}, func(bt *gi.Button) {
+			fmt.Println("calling method", met.Name)
 		})
 	}
 	return gotAny
