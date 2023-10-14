@@ -82,7 +82,7 @@ func HiStylesView(st *histyle.Styles) {
 		return
 	}
 
-	sc := gi.StageScene("hi-styles")
+	sc := gi.NewScene("hi-styles")
 	sc.Title = "Hilighting Styles: use ViewStd to see builtin ones -- can add and customize -- save ones from standard and load into custom to modify standards."
 	sc.Lay = gi.LayoutVert
 	sc.Data = st

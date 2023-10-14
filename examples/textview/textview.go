@@ -27,7 +27,7 @@ func app() {
 	gi.SetAppName("textview")
 	gi.SetAppAbout(`This is a demo of the textview.View in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	sc := gi.StageScene("gogi-textview-test").SetTitle("GoGi textview.View Test")
+	sc := gi.NewScene("gogi-textview-test").SetTitle("GoGi textview.View Test")
 
 	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()

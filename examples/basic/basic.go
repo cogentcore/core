@@ -17,7 +17,7 @@ func app() {
 	gi.LayoutTrace = true
 	gi.RenderTrace = true
 
-	scene := gi.StageScene().SetTitle("Basic")
+	scene := gi.NewScene().SetTitle("Basic")
 	gi.NewLabel(scene).SetText("Hello, World!")
 
 	gi.NewButton(scene).

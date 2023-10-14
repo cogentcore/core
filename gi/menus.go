@@ -337,7 +337,7 @@ var MenuMaxHeight = 30
 
 // NewMenuScene constructs a Scene for displaying the given Menu.
 func NewMenuScene(menu Menu, name string) *Scene {
-	msc := StageScene(name + "-menu")
+	msc := NewScene(name + "-menu")
 	MenuSceneConfigStyles(msc)
 	hasSelected := false
 	for _, ac := range menu {

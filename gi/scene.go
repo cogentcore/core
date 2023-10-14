@@ -73,14 +73,26 @@ type Scene struct {
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
-// StageScene creates a new Scene that will serve as the contents of a Stage
+// NewScene creates a new Scene that will serve as the content of a Stage
 // (e.g., a Window, Dialog, etc).  Scenes can also be added as part of the
 // Widget tree within another Scene, where they provide an optimized rendering
-// context for areas that tend to update frequently -- use NewScene with a
+// context for areas that tend to update frequently -- use NewSubScene with a
 // parent argument for that. If no name is provided, it defaults to "scene".
-func StageScene(name ...string) *Scene {
+func NewScene(name ...string) *Scene {
 	sc := &Scene{}
 	sc.InitName(sc, name...)
+	sc.EventMgr.Scene = sc
+	sc.BgColor.SetSolid(colors.Transparent)
+	sc.Lay = LayoutVert
+	sc.SetDefaultStyle()
+	return sc
+}
+
+// NewSubScene creates a new [Scene] that will serve as a sub-scene of another [Scene].
+// Scenes can also be added as the content of a [Stage] (without a parent) through the
+// [NewScene] function. If no name is provided, it defaults to "scene".
+func NewSubScene(par ki.Ki, name ...string) *Scene {
+	sc := par.NewChild(SceneType, name...).(*Scene)
 	sc.EventMgr.Scene = sc
 	sc.BgColor.SetSolid(colors.Transparent)
 	sc.Lay = LayoutVert

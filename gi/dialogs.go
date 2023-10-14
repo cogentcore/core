@@ -254,7 +254,7 @@ type DlgOpts struct {
 // Context provides the relevant source context opening the dialog,
 // for positioning and constructing the dialog.
 func NewStdDialog(ctx Widget, opts DlgOpts, fun func(dlg *Dialog)) *Dialog {
-	dlg := NewDialog(StageScene("std-dialog"), ctx)
+	dlg := NewDialog(NewScene("std-dialog"), ctx)
 	if opts.Title != "" {
 		dlg.Title(opts.Title)
 	}
