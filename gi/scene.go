@@ -31,7 +31,9 @@ import (
 //
 // Each Scene and Widget tree contains state specific to its particular usage
 // within a given Stage and overall rendering context (e.g., bounding boxes
-// and pointer to current parent Stage), so
+// and pointer to current parent Stage), so [TODO(rcoreilly): you need to finish this]
+//
+//goki:no-new
 type Scene struct {
 	Frame
 
