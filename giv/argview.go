@@ -141,7 +141,7 @@ func (av *ArgView) ConfigArgsGrid() {
 	}
 	mods, updt := sg.ConfigChildren(config) // not sure if always unique?
 	if mods {
-		av.SetNeedsLayout(av.Sc, updt)
+		av.SetNeedsLayoutUpdate(av.Sc, updt)
 	} else {
 		updt = sg.UpdateStart()
 	}

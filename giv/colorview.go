@@ -489,7 +489,7 @@ func (vv *ColorValue) UpdateWidget() {
 		return
 	}
 	bt := vv.Widget.(*gi.Button)
-	bt.UpdateSig()
+	bt.SetNeedsRender()
 }
 
 func (vv *ColorValue) ConfigWidget(widg gi.Widget) {

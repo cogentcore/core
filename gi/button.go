@@ -457,7 +457,7 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	bt.ConfigPartsShortcut(scIdx)
 	if mods {
 		parts.UpdateEnd(updt)
-		bt.SetNeedsLayout(sc, updt)
+		bt.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 

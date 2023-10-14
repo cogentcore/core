@@ -290,7 +290,7 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	}
 	if mods {
 		parts.UpdateEnd(updt)
-		ch.SetNeedsLayout(sc, updt)
+		ch.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 

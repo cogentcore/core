@@ -148,7 +148,7 @@ func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) {
 		}
 	}
 	sv.UpdateEnd(updt)
-	sv.SetNeedsLayout(sc, updt)
+	sv.SetNeedsLayoutUpdate(sc, updt)
 }
 
 func (sv *StructViewInline) UpdateFields() {

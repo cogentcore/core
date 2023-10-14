@@ -145,7 +145,7 @@ The computing of actual style sizes in terms of dots, which happens in `SetUnitC
 
 * fix all `Set..`, `...Action` state-changing methods to detect whether Config, layout, or just render is needed.  Also add return val so chain-based setting works.
 
-* in general, "SetNeedsFullReRender" -> SetNeedsLayout(vp, updt) or true
+* in general, "SetNeedsFullReRender" -> SetNeedsLayout() or true
 
 * TextField:KeyChord -- need dialog!  should have a better mech for this.
 

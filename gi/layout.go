@@ -322,7 +322,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 func (ly *Layout) ManageOverflow(sc *Scene) {
 	// wasscof := ly.ScrollsOff
 	ly.ScrollsOff = false
-	if len(ly.Kids) == 0 || ly.Lay == LayoutNil {
+	if ly.Lay == LayoutNil {
 		return
 	}
 	avail := ly.AvailSize()
@@ -375,7 +375,7 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sr.OnChange(func(e events.Event) {
 			e.SetHandled()
 			// fmt.Println("change event")
-			ly.SetNeedsLayout(sc, true)
+			ly.SetNeedsLayout()
 			ly.LayoutScrollTree(sc)
 		})
 	}
@@ -509,7 +509,7 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 		sb := ly.Scrolls[dim]
 		nval := sb.Value + delta
 		sb.SetValue(nval)
-		ly.SetNeedsLayout(ly.Sc, true)
+		ly.SetNeedsLayoutUpdate(ly.Sc, true)
 	}
 }
 
@@ -519,7 +519,7 @@ func (ly *Layout) ScrollActionPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
 		sb := ly.Scrolls[dim]
 		sb.SetValue(pos)
-		ly.SetNeedsLayout(ly.Sc, true)
+		ly.SetNeedsLayout()
 	}
 }
 
@@ -529,7 +529,7 @@ func (ly *Layout) ScrollToPos(dim mat32.Dims, pos float32) {
 	if ly.HasScroll[dim] {
 		sb := ly.Scrolls[dim]
 		sb.SetValue(pos)
-		ly.SetNeedsLayout(ly.Sc, true)
+		ly.SetNeedsLayout()
 	}
 }
 
