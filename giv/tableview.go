@@ -36,7 +36,7 @@ import (
 // used for closing dialogs).  If !Inactive, it is a full-featured editor with
 // multiple-selection, cut-and-paste, and drag-and-drop, reporting each action
 // taken using the TableViewSig signals
-// Automatically has a toolbar with Slice ToolBar props if defined
+// Automatically has a toolbar with Slice Toolbar props if defined
 // set prop toolbar = false to turn off
 type TableView struct {
 	SliceViewBase
@@ -95,7 +95,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 			s.Padding.Set()
 		})
 	case "header": // slice header
-		sh := w.(*gi.ToolBar)
+		sh := w.(*gi.Toolbar)
 		sh.Lay = gi.LayoutHoriz
 		sh.AddStyles(func(s *styles.Style) {
 			sh.Spacing.SetDp(0)
@@ -243,7 +243,7 @@ func (tv *TableView) IsConfiged() bool {
 // Config configures the view
 func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.FrameType, "frame")
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
@@ -282,13 +282,13 @@ func (tv *TableView) ScrollBar() *gi.Slider {
 }
 
 // SliceHeader returns the Toolbar header for slice grid
-func (tv *TableView) SliceHeader() *gi.ToolBar {
-	return tv.SliceFrame().Child(0).(*gi.ToolBar)
+func (tv *TableView) SliceHeader() *gi.Toolbar {
+	return tv.SliceFrame().Child(0).(*gi.Toolbar)
 }
 
-// ToolBar returns the toolbar widget
-func (tv *TableView) ToolBar() *gi.ToolBar {
-	return tv.ChildByName("toolbar", 0).(*gi.ToolBar)
+// Toolbar returns the toolbar widget
+func (tv *TableView) Toolbar() *gi.Toolbar {
+	return tv.ChildByName("toolbar", 0).(*gi.Toolbar)
 }
 
 // RowWidgetNs returns number of widgets per row and offset for index label
@@ -336,7 +336,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
 
 	sgcfg := ki.Config{}
-	sgcfg.Add(gi.ToolBarType, "header")
+	sgcfg.Add(gi.ToolbarType, "header")
 	sgcfg.Add(gi.LayoutType, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 
@@ -827,11 +827,11 @@ func (tv *TableView) ConfigToolbar() {
 	if tv.ToolbarSlice == tv.Slice {
 		return
 	}
-	if !tv.ShowToolBar {
+	if !tv.ShowToolbar {
 		tv.ToolbarSlice = tv.Slice
 		return
 	}
-	tb := tv.ToolBar()
+	tb := tv.Toolbar()
 	ndef := 2 // number of default actions
 	if tv.isArray || tv.IsDisabled() || tv.NoAdd {
 		ndef = 1
@@ -853,7 +853,7 @@ func (tv *TableView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolBarView(tv.Slice, tb)
+	ToolbarView(tv.Slice, tb)
 	tv.ToolbarSlice = tv.Slice
 }
 

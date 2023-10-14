@@ -41,7 +41,7 @@ func app() {
 
 	scene := gi.StageScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	tbar := gi.NewToolBar(scene, "tbar").SetStretchMaxWidth().(*gi.ToolBar)
+	tbar := gi.NewToolbar(scene, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
 	tbar.AddButton(gi.ActOpts{Label: "Button 1", Data: 1}, func(act *gi.Button) {
 		fmt.Println("Toolbar Button 1")
 		gi.NewSnackbar(tbar, gi.SnackbarOpts{

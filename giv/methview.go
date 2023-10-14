@@ -68,9 +68,9 @@ type ToolbarOpts struct {
 	SepAfter bool
 }
 
-// ToolBarView adds the toolbar buttons for the given value to the given toolbar.
+// ToolbarView adds the toolbar buttons for the given value to the given toolbar.
 // It returns whether any toolbar buttons were added.
-func ToolBarView(val any, tb *gi.ToolBar) bool {
+func ToolbarView(val any, tb *gi.Toolbar) bool {
 	typ := gti.TypeByValue(val)
 	if typ == nil {
 		return false
@@ -230,29 +230,29 @@ func MainMenuView(val any, win *gi.RenderWin, mbar *gi.MenuBar) bool {
 	return rval
 }
 
-// HasToolBarView returns true if given val has a ToolBar type property
-// registered -- call this to check before then calling ToolBarView.
-func HasToolBarView(val any) bool {
+// HasToolbarView returns true if given val has a Toolbar type property
+// registered -- call this to check before then calling ToolbarView.
+func HasToolbarView(val any) bool {
 	tpp, _, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
 	}
-	_, ok = ki.SliceTypeProps(tpp, "ToolBar")
+	_, ok = ki.SliceTypeProps(tpp, "Toolbar")
 	return ok
 }
 
-// ToolBarView configures ToolBar according to the "ToolBar" properties
+// ToolbarView configures Toolbar according to the "Toolbar" properties
 // registered on the type for given value element, through the kit.AddType
 // method.  See https://goki.dev/gi/v2/wiki/Views for full details on
 // formats and options for configuring the menu.  Returns false if there is no
 // toolbar defined for this type, or on errors (which are programmer errors
 // sent to log).
-func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
+func ToolbarView(val any, vp *gi.Scene, tb *gi.Toolbar) bool {
 	tpp, vtyp, ok := MethViewTypeProps(val)
 	if !ok {
 		return false
 	}
-	tp, ok := ki.SliceTypeProps(tpp, "ToolBar")
+	tp, ok := ki.SliceTypeProps(tpp, "Toolbar")
 	if !ok {
 		return false
 	}
@@ -260,7 +260,7 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 	if vp == nil {
 		vp = tb.ParentScene()
 		if vp == nil {
-			MethViewErr(vtyp, "Scene is nil in ToolBarView config -- must set scene in widget prior to calling this method!")
+			MethViewErr(vtyp, "Scene is nil in ToolbarView config -- must set scene in widget prior to calling this method!")
 		}
 		return false
 	}
@@ -275,7 +275,7 @@ func ToolBarView(val any, vp *gi.Scene, tb *gi.ToolBar) bool {
 		var ac *gi.Button
 		if aci := tb.ChildByName(te.Name, 0); aci != nil { // allows overriding of defaults etc
 			ac = aci.(*gi.Button)
-			//			fmt.Printf("ToolBar action override: %v\n", ac.Nm)
+			//			fmt.Printf("Toolbar action override: %v\n", ac.Nm)
 			ac.ActionSig.DisconnectAll()
 		} else {
 			ac = tb.NewChild(gi.ButtonType, te.Name).(*gi.Button)
@@ -341,7 +341,7 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 
 // CallMethod calls given method on given object val, using GUI interface to
 // prompt for args.  This only works for methods that have been configured
-// either on the CallMethods list or any of the ToolBar, MainMenu, or CtxtMenu
+// either on the CallMethods list or any of the Toolbar, MainMenu, or CtxtMenu
 // lists (in that order).  List of available methods is cached in type
 // properties after first call.
 // gopy:interface=handle
@@ -390,10 +390,10 @@ func MethViewSetActionData(ac *gi.Button, val any, vp *gi.Scene) {
 	}
 }
 
-var compileMethsOrder = []string{"CallMethods", "ToolBar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
+var compileMethsOrder = []string{"CallMethods", "Toolbar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
 
 // MethViewCompileMeths gets all methods either on the CallMethods list or any
-// of the ToolBar, MainMenu, or CtxtMenu lists (in that order).  Returns
+// of the Toolbar, MainMenu, or CtxtMenu lists (in that order).  Returns
 // property list of them, which are just names -> Actions
 func MethViewCompileMeths(val any, vp *gi.Scene) ki.Props {
 	tpp, vtyp, ok := MethViewTypeProps(val)

@@ -331,7 +331,7 @@ var Props = map[token.Tokens]ki.Props{
 	},
 }
 
-// StyleProps define the ToolBar and MenuBar for view
+// StyleProps define the Toolbar and MenuBar for view
 var StyleProps = ki.Props{
 	"MainMenu": ki.PropSlice{
 		{"AppMenu", ki.BlankProp{}},
@@ -360,7 +360,7 @@ var StyleProps = ki.Props{
 		{"Edit", "Copy Cut Paste Dupe"},
 		{"RenderWin", "RenderWins"},
 	},
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"OpenJSON", ki.Props{
 			"label": "Open from file",
 			"icon":  icons.FileOpen,

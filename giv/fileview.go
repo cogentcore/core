@@ -105,7 +105,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 		fv := w.(*TableView)
 		fv.ShowIndex = false
 		fv.InactKeyNav = false // can only have one active -- files..
-		fv.ShowToolBar = false
+		fv.ShowToolbar = false
 		fv.SetState(true, states.Disabled) // select only
 		w.AddStyles(func(s *styles.Style) {
 			s.SetStretchMaxHeight()
@@ -114,7 +114,7 @@ func (fv *FileView) OnChildAdded(child ki.Ki) {
 	case "files-view":
 		fv := w.(*TableView)
 		fv.ShowIndex = false // no index
-		fv.ShowToolBar = false
+		fv.ShowToolbar = false
 		fv.SetState(true, states.Disabled) // select only
 		fv.AddStyles(func(s *styles.Style) {
 			s.SetStretchMax()
@@ -284,7 +284,7 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 // Config configures the view
 func (fv *FileView) ConfigWidget(vp *gi.Scene) {
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "path-tbar")
+	config.Add(gi.ToolbarType, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
 	config.Add(gi.LayoutType, "sel-row")
 	mods, updt := fv.ConfigChildren(config)
@@ -298,7 +298,7 @@ func (fv *FileView) ConfigWidget(vp *gi.Scene) {
 }
 
 func (fv *FileView) ConfigPathBar() {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.Toolbar)
 	if pr.HasChildren() {
 		return
 	}
@@ -461,7 +461,7 @@ func (fv *FileView) WatchWatcher() {
 
 // PathField returns the chooser of the path
 func (fv *FileView) PathField() *gi.Chooser {
-	pr := fv.ChildByName("path-tbar", 0).(*gi.ToolBar)
+	pr := fv.ChildByName("path-tbar", 0).(*gi.Toolbar)
 	return pr.ChildByName("path", 1).(*gi.Chooser)
 }
 

@@ -196,7 +196,7 @@ func (ge *GiEditor) ConfigWidget(sc *gi.Scene) {
 	ge.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := ki.Config{}
 	config.Add(gi.LabelType, "title")
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.SplitsType, "splits")
 	mods, updt := ge.ConfigChildren(config)
 	ge.SetTitle(fmt.Sprintf("GoGi Editor of Ki Node Tree: %v", ge.KiRoot.Name()))
@@ -233,19 +233,19 @@ func (ge *GiEditor) StructView() *StructView {
 	return ge.Splits().Child(1).(*StructView)
 }
 
-// ToolBar returns the toolbar widget
-func (ge *GiEditor) ToolBar() *gi.ToolBar {
-	return ge.ChildByName("toolbar", 1).(*gi.ToolBar)
+// Toolbar returns the toolbar widget
+func (ge *GiEditor) Toolbar() *gi.Toolbar {
+	return ge.ChildByName("toolbar", 1).(*gi.Toolbar)
 }
 
 // ConfigToolbar adds a GiEditor toolbar.
 func (ge *GiEditor) ConfigToolbar() {
-	tb := ge.ToolBar()
+	tb := ge.Toolbar()
 	if tb != nil && tb.HasChildren() {
 		return
 	}
 	tb.SetStretchMaxWidth()
-	ToolBarView(ge, tb)
+	ToolbarView(ge, tb)
 }
 
 // ConfigSplits configures the Splits.
@@ -291,11 +291,11 @@ func (ge *GiEditor) ConfigSplits() {
 
 func (ge *GiEditor) SetChanged() {
 	ge.Changed = true
-	ge.ToolBar().UpdateButtons() // nil safe
+	ge.Toolbar().UpdateButtons() // nil safe
 }
 
 func (ge *GiEditor) Render(sc *gi.Scene) {
-	ge.ToolBar().UpdateButtons()
+	ge.Toolbar().UpdateButtons()
 	// if win := ge.ParentRenderWin(); win != nil {
 	// 	if !win.Is(WinResizing) {
 	// 		win.MainMenuUpdateActives()
@@ -305,7 +305,7 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 var GiEditorProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
 			"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
@@ -437,7 +437,7 @@ func GoGiEditorDialog(obj ki.Ki) {
 	// mmen := win.MainMenu
 	// MainMenuView(ge, win, mmen)
 
-	tb := ge.ToolBar()
+	tb := ge.Toolbar()
 	tb.UpdateButtons()
 
 	// ge.SelectionLoop()

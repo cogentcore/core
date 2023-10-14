@@ -43,7 +43,7 @@ type Button struct {
 	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`
 
-	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in ToolBar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
+	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut"`
 
 	// the menu items for this menu -- typically add Button elements for menus, along with separators

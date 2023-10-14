@@ -286,7 +286,7 @@ func ImageResizeMax(img image.Image, maxSz int) image.Image {
 // TODO: move this to comment directives
 
 var ImageProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"OpenImage", ki.Props{
 			"desc": "Open an image for this bitmap.  if width and/or height is > 0, then image is rescaled to that dimension, preserving aspect ratio if other one is not set",
 			"icon": icons.FileOpen,

@@ -30,7 +30,7 @@ import (
 // StructView represents a struct, creating a property editor of the fields --
 // constructs Children widgets to show the field names and editor fields for
 // each field, within an overall frame.
-// Automatically has a toolbar with Struct ToolBar props if defined
+// Automatically has a toolbar with Struct Toolbar props if defined
 // set prop toolbar = false to turn off
 type StructView struct {
 	gi.Frame
@@ -51,7 +51,7 @@ type StructView struct {
 	FieldViews []Value `json:"-" xml:"-"`
 
 	// whether to show the toolbar or not
-	ShowToolBar bool
+	ShowToolbar bool
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
@@ -73,7 +73,7 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
-	sv.ShowToolBar = true
+	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
 	sv.AddStyles(func(s *styles.Style) {
 		sv.Spacing = gi.StdDialogVSpaceUnits
@@ -176,7 +176,7 @@ func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 		}
 	}
 	config := ki.Config{}
-	config.Add(gi.ToolBarType, "toolbar")
+	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.FrameType, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
 	sv.ConfigStructGrid()
@@ -196,12 +196,12 @@ func (sv *StructView) StructGrid() *gi.Frame {
 	return sv.ChildByName("struct-grid", 2).(*gi.Frame)
 }
 
-// ToolBar returns the toolbar widget
-func (sv *StructView) ToolBar() *gi.ToolBar {
-	return sv.ChildByName("toolbar", 1).(*gi.ToolBar)
+// Toolbar returns the toolbar widget
+func (sv *StructView) Toolbar() *gi.Toolbar {
+	return sv.ChildByName("toolbar", 1).(*gi.Toolbar)
 }
 
-// ConfigToolbar adds a toolbar based on the methview ToolBarView function, if
+// ConfigToolbar adds a toolbar based on the methview ToolbarView function, if
 // one has been defined for this struct type through its registered type
 // properties.
 func (sv *StructView) ConfigToolbar() {
@@ -211,11 +211,11 @@ func (sv *StructView) ConfigToolbar() {
 	if sv.ToolbarStru == sv.Struct {
 		return
 	}
-	if !sv.ShowToolBar {
+	if !sv.ShowToolbar {
 		sv.ToolbarStru = sv.Struct
 		return
 	}
-	tb := sv.ToolBar()
+	tb := sv.Toolbar()
 	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
@@ -233,7 +233,7 @@ func (sv *StructView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	ToolBarView(sv.Struct, tb)
+	ToolbarView(sv.Struct, tb)
 	sv.ToolbarStru = sv.Struct
 }
 
@@ -371,7 +371,7 @@ func (sv *StructView) ConfigStructGrid() {
 						updtr.Update()
 					}
 				}
-				tb := sv.ToolBar()
+				tb := sv.Toolbar()
 				if tb != nil {
 					tb.UpdateButtons()
 				}
@@ -402,7 +402,7 @@ func (sv *StructView) UpdateFieldAction() {
 
 func (sv *StructView) Render(sc *gi.Scene) {
 	if sv.IsConfiged() {
-		sv.ToolBar().UpdateButtons()
+		sv.Toolbar().UpdateButtons()
 	}
 	// if win := sv.ParentRenderWin(); win != nil {
 	// 	if !win.Is(WinResizing) {
