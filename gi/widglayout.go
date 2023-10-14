@@ -242,7 +242,7 @@ func (wb *WidgetBase) DoLayoutBase(sc *Scene, parBBox image.Rectangle, iter int)
 	wb.LayState.Alloc.PosOrig = wb.LayState.Alloc.Pos
 	// this is the one point when Style Dots are actually computed!
 	SetUnitContext(&wb.Styles, sc, wb.NodeSize(), psize) // update units with final layout
-	wb.BBox = wi.BBoxes()                               // only compute once, at this point
+	wb.BBox = wi.BBoxes()                                // only compute once, at this point
 	// note: if other styles are maintained, they also need to be updated!
 	wi.ComputeBBoxes(sc, parBBox, image.Point{}) // other bboxes from BBox
 	if LayoutTrace {

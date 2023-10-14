@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -20,20 +19,14 @@ import (
 
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/textview"
 	"goki.dev/gi/v2/textview/histyle"
 	"goki.dev/gi/v2/textview/textbuf"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/mimedata"
-	"goki.dev/grr"
 	"goki.dev/gti"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/vci/v2"
@@ -1715,6 +1708,7 @@ type FileTreeView struct {
 	TreeView
 }
 
+/*
 // exists for same reason as TreeView one (init cycle)
 func init() {
 	// kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
@@ -1820,12 +1814,12 @@ func (ftv *FileTreeView) UpdateAllFiles() {
 	}
 }
 
+
 func (ftv *FileTreeView) HandleFileTreeViewEvents() {
 	ftv.On(events.KeyChord, func(e events.Event) {
 		kt := e.(*events.Key)
 		ftv.KeyInput(kt)
 	})
-	/*
 		ftvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 			de := d.(events.Event)
 			tvvi := recv.Embed(TypeFileTreeView)
@@ -1860,7 +1854,6 @@ func (ftv *FileTreeView) HandleFileTreeViewEvents() {
 				tvv.Open()
 			}
 		})
-	*/
 	if ftv.HasChildren() {
 		if wb, ok := ftv.BranchPart(); ok {
 			wb.OnClick(func(e events.Event) {
@@ -2282,7 +2275,7 @@ func (ftv *FileTreeView) MimeData(md *mimedata.Mimes) {
 // Cut copies to clip.Board and deletes selected items
 // satisfies gi.Clipper interface and can be overridden by subtypes
 func (ftv *FileTreeView) Cut() {
-	if ftv.IsRootOrField("Cut") {
+	if ftv.IsRoot("Cut") {
 		return
 	}
 	ftv.Copy(false)
@@ -2416,7 +2409,6 @@ func (ftv *FileTreeView) PasteMimeCopyFilesCheck(tdir *FileNode, md mimedata.Mim
 // PasteMime applies a paste / drop of mime data onto this node
 // always does a copy of files into / onto target
 func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
-	/*
 		if len(md) == 0 {
 			ftv.DropCancel()
 			return
@@ -2514,7 +2506,6 @@ func (ftv *FileTreeView) PasteMime(md mimedata.Mimes) {
 					}
 				})
 		}
-	*/
 
 }
 
@@ -2531,7 +2522,7 @@ func (ftv *FileTreeView) Dragged(de events.Event) {
 	if tfn == nil || tfn.IsExternal() {
 		return
 	}
-	/*  // todo
+	// todo
 	md := de.Data
 	nf := len(md) / 3 // always internal
 	for i := 0; i < nf; i++ {
@@ -2548,7 +2539,6 @@ func (ftv *FileTreeView) Dragged(de events.Event) {
 		// fmt.Printf("dnd deleting: %v  path: %v\n", sfn.Path(), sfn.FPath)
 		sfn.DeleteFile()
 	}
-	*/
 }
 
 // FileTreeInactiveExternFunc is an ActionUpdateFunc that inactivates action if node is external
@@ -2803,3 +2793,4 @@ func (ft *FileTreeView) ApplyStyle(sc *gi.Scene) {
 		ft.StyleTreeView()
 	}
 }
+*/
