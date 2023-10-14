@@ -291,7 +291,9 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 		method.Returns = rets
 
 		typ := fd.Recv.List[0].Type
-		typnm := FullName(g.Pkg, fmt.Sprintf("%v", typ))
+		// get rid of any pointer receiver
+		tnm := strings.TrimPrefix(types.ExprString(typ), "*")
+		typnm := FullName(g.Pkg, tnm)
 		g.Methods.Add(typnm, append(g.Methods.ValByKey(typnm), method))
 	}
 

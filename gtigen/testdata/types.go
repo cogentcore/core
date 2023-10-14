@@ -28,7 +28,7 @@ func (p Person) String() string { return p.Name }
 // It contains the name of the person and their age.
 //
 //gi:toolbar -name ShowIntroduction -icon play -show-result -confirm
-func (p Person) Introduction() string {
+func (p *Person) Introduction() string {
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
 
