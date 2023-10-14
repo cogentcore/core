@@ -29,6 +29,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 		"KiPkg":             KiPkg,
 	}).Parse(
 	`
+	{{if not (HasNoNewDirective .)}}
 	// New{{.Name}} adds a new [{{.Name}}] with the given name
 	// to the given parent. If the name is unspecified, it defaults
 	// to the ID (kebab-case) name of the type, plus the
@@ -36,18 +37,17 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	func New{{.Name}}(par {{KiPkg .}}Ki, name ...string) *{{.Name}} {
 		return par.NewChild({{.Name}}Type, name...).(*{{.Name}})
 	}
+	{{end}}
 
 	// KiType returns the [*gti.Type] of [{{.Name}}]
 	func (t *{{.Name}}) KiType() *gti.Type {
 		return {{.Name}}Type
 	}
 
-	{{if not (HasNoNewDirective .)}}
 	// New returns a new [*{{.Name}}] value
 	func (t *{{.Name}}) New() {{KiPkg .}}Ki {
 		return &{{.Name}}{}
 	}
-	{{end}}
 	
 	{{if HasEmbedDirective .}}
 	// {{.Name}}Embedder is an interface that all types that embed {{.Name}} satisfy
