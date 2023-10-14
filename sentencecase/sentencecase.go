@@ -5,7 +5,7 @@
 // Package sentencecase converts CamelCase strings to sentence case.
 // An example of a string in sentence case is:
 //
-//	This is a string in sentence case that I wrote with the help of URLs and Google.
+//	This is a string in sentence case that I wrote with the help of URLs and Google
 package sentencecase
 
 import (
@@ -38,7 +38,7 @@ func AddProperNouns(nouns ...string) {
 //
 // An example of a string in sentence case is:
 //
-//	This is a string in sentence case that I wrote with the help of URLs and Google.
+//	This is a string in sentence case that I wrote with the help of URLs and Google
 func Of(s string) string {
 	words := camelcase.Split(s)
 	for i, word := range words {
@@ -47,7 +47,7 @@ func Of(s string) string {
 			continue
 		}
 		// proper nouns are always capitalized
-		if _, ok := ProperNouns[s]; ok {
+		if _, ok := ProperNouns[word]; ok {
 			continue
 		}
 		r := []rune(word)
