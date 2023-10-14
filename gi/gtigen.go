@@ -674,13 +674,11 @@ var _ = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
 		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode", Directives: gti.Directives{
-			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
