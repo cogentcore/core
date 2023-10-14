@@ -51,25 +51,20 @@ func app() {
 	})
 
 	// generally need to put text view within its own layout for scrolling
-	txly1 := gi.NewLayout(splt, "view-layout-1")
-	txly1.AddStyles(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.SetStretchMaxHeight()
+
+	txed1 := textview.NewView(splt, "textview-1")
+	txed1.AddStyles(func(s *styles.Style) {
+		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
 
-	txed1 := textview.NewView(txly1, "textview-1")
-
-	// generally need to put text view within its own layout for scrolling
-	txly2 := gi.NewLayout(splt, "view-layout-2")
-	txly2.AddStyles(func(s *styles.Style) {
-		s.SetStretchMaxWidth()
-		s.SetStretchMaxHeight()
+	txed2 := textview.NewView(splt, "textview-2")
+	txed2.AddStyles(func(s *styles.Style) {
+		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
-	txed2 := textview.NewView(txly2, "textview-2")
 
 	txbuf := textview.NewBuf()
 	txed1.SetBuf(txbuf)

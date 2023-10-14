@@ -118,7 +118,7 @@ func (kc *KeyChordEdit) HandleMouseEvent() {
 					kcc.GrabFocus()
 				}
 				kcc.EmitSelectedSignal()
-				kcc.UpdateSig()
+				kcc.SetNeedsRender()
 			}
 		}
 		if me.Action == events.Release && me.Button == events.Right {
@@ -163,18 +163,18 @@ func (kc *KeyChordEdit) HandleKeyChordEvents() {
 // 		kc.FocusActive = false
 // 		kc.ClearSelected()
 //		   kc.SendChange()
-// 		kc.UpdateSig()
+// 		kc.SetNeedsRender()
 // 	case gi.FocusGot:
 // 		kc.FocusActive = true
 // 		kc.SetSelected(true)
 // 		kc.ScrollToMe()
 // 		kc.EmitFocusedSignal()
-// 		kc.UpdateSig()
+// 		kc.SetNeedsRender()
 // 	case gi.FocusInactive:
 // 		kc.FocusActive = false
 // 		kc.ClearSelected()
 // 		kc.ChordUpdated()
-// 		kc.UpdateSig()
+// 		kc.SetNeedsRender()
 // 	case gi.FocusActive:
 // 		// we don't re-activate on keypress here, so that you don't end up stuck
 // 		// on a given keychord

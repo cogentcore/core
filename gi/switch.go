@@ -234,7 +234,7 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	}
 	if mods {
 		parts.UpdateEnd(updt)
-		sw.SetNeedsLayout(sc, updt)
+		sw.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 

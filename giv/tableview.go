@@ -973,14 +973,14 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 		if sg.Kids.IsValidIndex(seldx) == nil {
 			widg := sg.Child(seldx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.UpdateSig()
+			widg.SetNeedsRender()
 		}
 	}
 	if tv.ShowIndex {
 		if sg.Kids.IsValidIndex(ridx) == nil {
 			widg := sg.Child(ridx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.UpdateSig()
+			widg.SetNeedsRender()
 		}
 	}
 }

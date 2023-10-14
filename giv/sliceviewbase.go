@@ -1331,13 +1331,13 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
 			widg := sg.Child(rowidx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.UpdateSig()
+			widg.SetNeedsRender()
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
 		widg := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
 		widg.SetSelected(sel)
-		widg.UpdateSig()
+		widg.SetNeedsRender()
 	}
 }
 

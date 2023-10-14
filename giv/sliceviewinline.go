@@ -188,7 +188,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		})
 	}
 	parts.UpdateEndLayout(updt)
-	sv.SetNeedsLayout(sc, updt)
+	sv.SetNeedsLayoutUpdate(sc, updt)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the

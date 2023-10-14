@@ -751,8 +751,8 @@ func (fn *FileNode) UpdateNode() error {
 		if repo != nil {
 			fn.Info.Vcs, _ = repo.Status(string(fn.FPath))
 		}
-		// fn.UpdateSig()
-		// fn.FRoot.UpdateSig()
+		// fn.SetNeedsRender()
+		// fn.FRoot.SetNeedsRender()
 	}
 	return nil
 }
@@ -779,7 +779,7 @@ func (fn *FileNode) SortBy(modTime bool) {
 	fn.FRoot.SetDirSortBy(fn.FPath, modTime)
 	fn.UpdateNode()
 	// todo:
-	// fn.UpdateSig() // make sure
+	// fn.SetNeedsRender() // make sure
 }
 
 // OpenAll opens all directories under this one
@@ -1177,7 +1177,7 @@ func (fn *FileNode) RenameFile(newpath string) (err error) {
 	if stored {
 		fn.AddToVcs()
 	} else {
-		// fn.UpdateSig() // todo
+		// fn.SetNeedsRender() // todo
 		fn.FRoot.UpdateDir() // need full update
 	}
 	return err
@@ -1294,8 +1294,8 @@ func (fn *FileNode) AddToVcs() {
 	err := repo.Add(string(fn.FPath))
 	if err == nil {
 		fn.Info.Vcs = vci.Added
-		// fn.UpdateSig()
-		// fn.FRoot.UpdateSig()
+		// fn.SetNeedsRender()
+		// fn.FRoot.SetNeedsRender()
 		return
 	}
 	fmt.Println(err)
@@ -1311,8 +1311,8 @@ func (fn *FileNode) DeleteFromVcs() {
 	err := repo.DeleteRemote(string(fn.FPath))
 	if fn != nil && err == nil {
 		fn.Info.Vcs = vci.Deleted
-		// fn.UpdateSig()
-		// fn.FRoot.UpdateSig()
+		// fn.SetNeedsRender()
+		// fn.FRoot.SetNeedsRender()
 		return
 	}
 	fmt.Println(err)
@@ -1332,8 +1332,8 @@ func (fn *FileNode) CommitToVcs(message string) (err error) {
 		return err
 	}
 	fn.Info.Vcs = vci.Stored
-	// fn.UpdateSig()
-	// fn.FRoot.UpdateSig()
+	// fn.SetNeedsRender()
+	// fn.FRoot.SetNeedsRender()
 	return err
 }
 
@@ -1358,8 +1358,8 @@ func (fn *FileNode) RevertVcs() (err error) {
 	// if fn.Buf != nil {
 	// 	fn.Buf.Revert()
 	// }
-	// fn.UpdateSig()
-	// fn.FRoot.UpdateSig()
+	// fn.SetNeedsRender()
+	// fn.FRoot.SetNeedsRender()
 	return err
 }
 

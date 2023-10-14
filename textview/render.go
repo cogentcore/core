@@ -8,15 +8,10 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
-	"log"
-	"sync"
-	"time"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/textview/textbuf"
-	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/ki/v2"
@@ -24,37 +19,11 @@ import (
 	"goki.dev/pi/v2/lex"
 )
 
-// todo: should we try to optimize rendering parts when they change
-// e.g., RenderSelectLines or just do the full update whenever anything
-// changes?  The problem is that we'd have to tell the renderwin
-// to upload but not call our render function..
-// just probably not worth it.
+// Rendering Notes: all rendering is done in Render call.
+// Layout must be called whenever content changes across
+// lines.
 
-// Render does some preliminary work and then calls render on children
 func (tv *View) Render(sc *gi.Scene) {
-	// fmt.Printf("tv render: %v\n", tv.Nm)
-	// if tv.NeedsFullReRender() {
-	// 	tv.SetNeedsRefresh()
-	// }
-	// if tv.FullReRenderIfNeeded() {
-	// 	return
-	// }
-	//
-	// if tv.Buf != nil && (tv.NLines != tv.Buf.NumLines() || tv.NeedsRefresh()) {
-	// 	tv.LayoutAllLines(false)
-	// 	if tv.NeedsRefresh() {
-	// 		tv.ClearNeedsRefresh()
-	// 	}
-	// }
-
-	tv.VisSizes()
-	if tv.NLines == 0 {
-		ply := tv.ParentLayout()
-		if ply != nil {
-			tv.ScBBox = ply.ScBBox
-		}
-	}
-
 	if tv.PushBounds(sc) {
 		tv.RenderAllLinesInBounds()
 		if tv.ScrollToCursorOnRender {
@@ -65,58 +34,14 @@ func (tv *View) Render(sc *gi.Scene) {
 		if tv.StateIs(states.Focused) {
 			tv.StartCursor()
 		} else {
-			// fmt.Printf("tv render: %v  stop cursor\n", tv.Nm)
 			tv.StopCursor()
 		}
 		tv.RenderChildren(sc)
+		tv.RenderScrolls(sc)
 		tv.PopBounds(sc)
 	} else {
-		// fmt.Printf("tv render: %v  not vis stop cursor\n", tv.Nm)
 		tv.StopCursor()
 	}
-}
-
-// ParentLayout returns our parent layout.
-// we ensure this is our immediate parent which is necessary for textview
-func (tv *View) ParentLayout() *gi.Layout {
-	if tv.Par == nil {
-		return nil
-	}
-	return gi.AsLayout(tv.Par)
-}
-
-// RenderSize is the size we should pass to text rendering, based on alloc
-func (tv *View) RenderSize() mat32.Vec2 {
-	spc := tv.Style.BoxSpace()
-	if tv.Par == nil {
-		return mat32.Vec2Zero
-	}
-	parw := tv.ParentLayout()
-	if parw == nil {
-		log.Printf("giv.View Programmer Error: A View MUST be located within a parent Layout object -- instead parent is %v at: %v\n", tv.Par.KiType(), tv.Path())
-		return mat32.Vec2Zero
-	}
-	paloc := parw.LayState.Alloc.SizeOrig
-	if !paloc.IsNil() {
-		// fmt.Printf("paloc: %v, psc: %v  lineonoff: %v\n", paloc, parw.ScBBox, tv.LineNoOff)
-		tv.RenderSz = paloc.Sub(parw.ExtraSize).Sub(spc.Size())
-		// SidesTODO: this is sketchy
-		tv.RenderSz.X -= spc.Size().X / 2 // extra space
-		// fmt.Printf("alloc rendersz: %v\n", tv.RenderSz)
-	} else {
-		sz := tv.LayState.Alloc.SizeOrig
-		if sz.IsNil() {
-			sz = tv.LayState.SizePrefOrMax()
-		}
-		if !sz.IsNil() {
-			sz.SetSub(spc.Size())
-		}
-		tv.RenderSz = sz
-		// fmt.Printf("fallback rendersz: %v\n", tv.RenderSz)
-	}
-	tv.RenderSz.X -= tv.LineNoOff
-	// fmt.Printf("rendersz: %v\n", tv.RenderSz)
-	return tv.RenderSz
 }
 
 // HiStyle applies the highlighting styles from buffer markup style
@@ -131,185 +56,6 @@ func (tv *View) HiStyle() {
 			tv.SetProp(ky, vl)
 		}
 	}
-}
-
-// LayoutAllLines generates TextRenders of lines from our Buf, from the
-// Markup version of the source, and returns whether the current rendered size
-// is different from what it was previously
-func (tv *View) LayoutAllLines(inLayout bool) bool {
-	if inLayout && tv.Is(ViewInReLayout) {
-		return false
-	}
-	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
-		tv.NLines = 0
-		return tv.ResizeIfNeeded(image.Point{})
-	}
-	tv.StyMu.RLock()
-	needSty := tv.Style.Font.Size.Val == 0
-	tv.StyMu.RUnlock()
-	if needSty {
-		// fmt.Print("textview: no style\n")
-		return false
-		// tv.StyleView() // this fails on mac
-	}
-	tv.lastFilename = tv.Buf.Filename
-
-	tv.Buf.Hi.TabSize = tv.Style.Text.TabSize
-	tv.HiStyle()
-	// fmt.Printf("layout all: %v\n", tv.Nm)
-
-	tv.NLines = tv.Buf.NumLines()
-	nln := tv.NLines
-	if cap(tv.Renders) >= nln {
-		tv.Renders = tv.Renders[:nln]
-	} else {
-		tv.Renders = make([]paint.Text, nln)
-	}
-	if cap(tv.Offs) >= nln {
-		tv.Offs = tv.Offs[:nln]
-	} else {
-		tv.Offs = make([]float32, nln)
-	}
-
-	tv.VisSizes()
-	sz := tv.RenderSz
-
-	// fmt.Printf("rendersize: %v\n", sz)
-	sty := &tv.Style
-	fst := sty.FontRender()
-	fst.BackgroundColor.SetSolid(nil)
-	off := float32(0)
-	mxwd := sz.X // always start with our render size
-
-	tv.Buf.MarkupMu.RLock()
-	tv.HasLinks = false
-	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
-		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
-			tv.HasLinks = true
-		}
-		tv.Offs[ln] = off
-		lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-		off += lsz
-		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
-	}
-	tv.Buf.MarkupMu.RUnlock()
-
-	extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-	nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
-	// fmt.Printf("lay lines: diff: %v  old: %v  new: %v\n", diff, tv.LinesSize, nwSz)
-	if inLayout {
-		tv.LinesSize = nwSz
-		return tv.SetSize()
-	}
-	return tv.ResizeIfNeeded(nwSz)
-}
-
-// SetSize updates our size only if larger than our allocation
-func (tv *View) SetSize() bool {
-	sty := &tv.Style
-	spc := sty.BoxSpace()
-	rndsz := tv.RenderSz
-	rndsz.X += tv.LineNoOff
-	netsz := mat32.Vec2{float32(tv.LinesSize.X) + tv.LineNoOff, float32(tv.LinesSize.Y)}
-	cursz := tv.LayState.Alloc.Size.Sub(spc.Size())
-	if cursz.X < 10 || cursz.Y < 10 {
-		nwsz := netsz.Max(rndsz)
-		tv.GetSizeFromWH(nwsz.X, nwsz.Y)
-		tv.LayState.Size.Need = tv.LayState.Alloc.Size
-		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
-		return true
-	}
-	nwsz := netsz.Max(rndsz)
-	alloc := tv.LayState.Alloc.Size
-	tv.GetSizeFromWH(nwsz.X, nwsz.Y)
-	if alloc != tv.LayState.Alloc.Size {
-		tv.LayState.Size.Need = tv.LayState.Alloc.Size
-		tv.LayState.Size.Pref = tv.LayState.Alloc.Size
-		return true
-	}
-	// fmt.Printf("NO resize: netsz: %v  cursz: %v rndsz: %v\n", netsz, cursz, rndsz)
-	return false
-}
-
-// ResizeIfNeeded resizes the edit area if different from current setting --
-// returns true if resizing was performed
-func (tv *View) ResizeIfNeeded(nwSz image.Point) bool {
-	if nwSz == tv.LinesSize {
-		return false
-	}
-	// fmt.Printf("%v needs resize: %v\n", tv.Nm, nwSz)
-	tv.LinesSize = nwSz
-	diff := tv.SetSize()
-	if !diff {
-		// fmt.Printf("%v resize no setsize: %v\n", tv.Nm, nwSz)
-		return false
-	}
-	ly := tv.ParentLayout()
-	if ly != nil {
-		tv.SetFlag(true, ViewInReLayout)
-		gi.GatherSizes(ly) // can't call GetSize b/c that resets layout
-		ly.DoLayoutTree(tv.Sc)
-		tv.SetFlag(true, ViewRenderScrolls)
-		tv.SetFlag(false, ViewInReLayout)
-		// fmt.Printf("resized: %v\n", tv.LayState.Alloc.Size)
-	}
-	return true
-}
-
-// LayoutLines generates render of given range of lines (including
-// highlighting). end is *inclusive* line.  isDel means this is a delete and
-// thus offsets for all higher lines need to be recomputed.  returns true if
-// overall number of effective lines (e.g., from word-wrap) is now different
-// than before, and thus a full re-render is needed.
-func (tv *View) LayoutLines(st, ed int, isDel bool) bool {
-	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
-		return false
-	}
-	sty := &tv.Style
-	fst := sty.FontRender()
-	fst.BackgroundColor.SetSolid(nil)
-	mxwd := float32(tv.LinesSize.X)
-	rerend := false
-
-	tv.Buf.MarkupMu.RLock()
-	for ln := st; ln <= ed; ln++ {
-		curspans := len(tv.Renders[ln].Spans)
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.RenderSz)
-		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
-			tv.HasLinks = true
-		}
-		nwspans := len(tv.Renders[ln].Spans)
-		if nwspans != curspans && (nwspans > 1 || curspans > 1) {
-			rerend = true
-		}
-		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
-	}
-	tv.Buf.MarkupMu.RUnlock()
-
-	// update all offsets to end of text
-	if rerend || isDel || st != ed {
-		ofst := st - 1
-		if ofst < 0 {
-			ofst = 0
-		}
-		off := tv.Offs[ofst]
-		for ln := ofst; ln < tv.NLines; ln++ {
-			tv.Offs[ln] = off
-			lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
-			off += lsz
-		}
-		extraHalf := tv.LineHeight * 0.5 * float32(tv.VisSize.Y)
-		nwSz := mat32.Vec2{mxwd, off + extraHalf}.ToPointCeil()
-		tv.ResizeIfNeeded(nwSz)
-	} else {
-		nwSz := mat32.Vec2{mxwd, 0}.ToPointCeil()
-		nwSz.Y = tv.LinesSize.Y
-		tv.ResizeIfNeeded(nwSz)
-	}
-	return rerend
 }
 
 // CharStartPos returns the starting (top left) render coords for the given
@@ -362,161 +108,6 @@ func (tv *View) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	}
 	spos.Y += tv.LineHeight // end of that line
 	return spos
-}
-
-// ViewBlinkMu is mutex protecting ViewBlink updating and access
-var ViewBlinkMu sync.Mutex
-
-// ViewBlinker is the time.Ticker for blinking cursors for text fields,
-// only one of which can be active at at a time
-var ViewBlinker *time.Ticker
-
-// BlinkingView is the text field that is blinking
-var BlinkingView *View
-
-// ViewSpriteName is the name of the window sprite used for the cursor
-var ViewSpriteName = "textview.View.Cursor"
-
-// ViewBlink is function that blinks text field cursor
-func ViewBlink() {
-	for {
-		ViewBlinkMu.Lock()
-		if ViewBlinker == nil {
-			ViewBlinkMu.Unlock()
-			return // shutdown..
-		}
-		ViewBlinkMu.Unlock()
-		<-ViewBlinker.C
-		ViewBlinkMu.Lock()
-		if BlinkingView == nil || BlinkingView.This() == nil {
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		if BlinkingView.Is(ki.Destroyed) || BlinkingView.Is(ki.Deleted) {
-			BlinkingView = nil
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		tv := BlinkingView
-		if tv.Sc == nil || !tv.StateIs(states.Focused) || !tv.This().(gi.Widget).IsVisible() {
-			tv.RenderCursor(false)
-			BlinkingView = nil
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		tv.BlinkOn = !tv.BlinkOn
-		tv.RenderCursor(tv.BlinkOn)
-		ViewBlinkMu.Unlock()
-	}
-}
-
-// StartCursor starts the cursor blinking and renders it
-func (tv *View) StartCursor() {
-	if tv == nil || tv.This() == nil {
-		return
-	}
-	if !tv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	tv.BlinkOn = true
-	if gi.CursorBlinkTime == 0 {
-		tv.RenderCursor(true)
-		return
-	}
-	ViewBlinkMu.Lock()
-	if ViewBlinker == nil {
-		ViewBlinker = time.NewTicker(gi.CursorBlinkTime)
-		go ViewBlink()
-	}
-	tv.BlinkOn = true
-	tv.RenderCursor(true)
-	BlinkingView = tv
-	ViewBlinkMu.Unlock()
-}
-
-// StopCursor stops the cursor from blinking
-func (tv *View) StopCursor() {
-	if tv == nil || tv.This() == nil {
-		return
-	}
-	if !tv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	tv.RenderCursor(false)
-	ViewBlinkMu.Lock()
-	if BlinkingView == tv {
-		BlinkingView = nil
-	}
-	ViewBlinkMu.Unlock()
-}
-
-// CursorBBox returns a bounding-box for a cursor at given position
-func (tv *View) CursorBBox(pos lex.Pos) image.Rectangle {
-	cpos := tv.CharStartPos(pos)
-	cbmin := cpos.SubScalar(tv.CursorWidth.Dots)
-	cbmax := cpos.AddScalar(tv.CursorWidth.Dots)
-	cbmax.Y += tv.FontHeight
-	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
-	return curBBox
-}
-
-// RenderCursor renders the cursor on or off, as a sprite that is either on or off
-func (tv *View) RenderCursor(on bool) {
-	if tv == nil || tv.This() == nil {
-		return
-	}
-	if !tv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	if tv.Renders == nil {
-		return
-	}
-	tv.CursorMu.Lock()
-	defer tv.CursorMu.Unlock()
-
-	sp := tv.CursorSprite(on)
-	if sp == nil {
-		return
-	}
-	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
-}
-
-// CursorSpriteName returns the name of the cursor sprite
-func (tv *View) CursorSpriteName() string {
-	spnm := fmt.Sprintf("%v-%v", ViewSpriteName, tv.FontHeight)
-	return spnm
-}
-
-// CursorSprite returns the sprite for the cursor, which is
-// only rendered once with a vertical bar, and just activated and inactivated
-// depending on render status.
-func (tv *View) CursorSprite(on bool) *gi.Sprite {
-	sc := tv.Sc
-	if sc == nil {
-		return nil
-	}
-	ms := sc.MainStage()
-	if ms == nil {
-		return nil // only MainStage has sprites
-	}
-	spnm := tv.CursorSpriteName()
-	sp, ok := ms.Sprites.SpriteByName(spnm)
-	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(tv.CursorWidth.Dots)), int(mat32.Ceil(tv.FontHeight))}
-		if bbsz.X < 2 { // at least 2
-			bbsz.X = 2
-		}
-		sp = gi.NewSprite(spnm, bbsz, image.Point{})
-		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{tv.CursorColor.Solid}, image.Point{}, draw.Src)
-		ms.Sprites.Add(sp)
-	}
-	if on {
-		ms.Sprites.ActivateSprite(sp.Name)
-	} else {
-		ms.Sprites.InactivateSprite(sp.Name)
-	}
-	return sp
 }
 
 // ViewDepthOffsets are changes in color values from default background for different
@@ -622,46 +213,6 @@ func (tv *View) RenderScopelights(stln, edln int) {
 	}
 }
 
-// UpdateHighlights re-renders lines from previous highlights and current
-// highlights -- assumed to be within a window update block
-func (tv *View) UpdateHighlights(prev []textbuf.Region) {
-	for _, ph := range prev {
-		ph := tv.Buf.AdjustReg(ph)
-		tv.RenderLines(ph.Start.Ln, ph.End.Ln)
-	}
-	for _, ch := range tv.Highlights {
-		ch := tv.Buf.AdjustReg(ch)
-		tv.RenderLines(ch.Start.Ln, ch.End.Ln)
-	}
-}
-
-// ClearHighlights clears the Highlights slice of all regions
-func (tv *View) ClearHighlights() {
-	if len(tv.Highlights) == 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	tv.Highlights = tv.Highlights[:0]
-	// tv.RenderAllLines()
-}
-
-// ClearScopelights clears the Highlights slice of all regions
-func (tv *View) ClearScopelights() {
-	if len(tv.Scopelights) == 0 {
-		return
-	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	sl := make([]textbuf.Region, len(tv.Scopelights))
-	copy(sl, tv.Scopelights)
-	tv.Scopelights = tv.Scopelights[:0]
-	for _, si := range sl {
-		ln := si.Start.Ln
-		tv.RenderLines(ln, ln)
-	}
-}
-
 // RenderRegionBox renders a region in background color according to given background color
 func (tv *View) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
 	tv.RenderRegionBoxSty(reg, &tv.Style, bgclr)
@@ -735,74 +286,18 @@ func (tv *View) RenderStartPos() mat32.Vec2 {
 	st := &tv.Style
 	spc := st.BoxSpace()
 	pos := tv.LayState.Alloc.Pos.Add(spc.Pos())
+	delta := mat32.NewVec2FmPoint(tv.LayoutScrollDelta((image.Point{})))
+	pos = pos.Add(delta)
 	return pos
-}
-
-// VisSizes computes the visible size of view given current parameters
-func (tv *View) VisSizes() {
-	if tv.Style.Font.Size.Val == 0 { // called under lock
-		fmt.Println("style in size - shouldn't happen")
-		tv.StyleView(tv.Sc)
-	}
-	sty := &tv.Style
-	spc := sty.BoxSpace()
-	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
-	tv.FontHeight = sty.Font.Face.Metrics.Height
-	tv.LineHeight = sty.Text.EffLineHeight(tv.FontHeight)
-	sz := tv.ScBBox.Size()
-	if sz == (image.Point{}) {
-		tv.VisSize.Y = 40
-		tv.VisSize.X = 80
-	} else {
-		tv.VisSize.Y = int(mat32.Floor(float32(sz.Y) / tv.LineHeight))
-		tv.VisSize.X = int(mat32.Floor(float32(sz.X) / sty.Font.Face.Metrics.Ch))
-	}
-	tv.LineNoDigs = max(1+int(mat32.Log10(float32(tv.NLines))), 3)
-	lno := true
-	if tv.Buf != nil {
-		lno = tv.Buf.Opts.LineNos
-	}
-	if lno {
-		tv.SetFlag(true, ViewHasLineNos)
-		// SidesTODO: this is sketchy
-		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
-	} else {
-		tv.SetFlag(false, ViewHasLineNos)
-		tv.LineNoOff = 0
-	}
-	tv.RenderSize()
-}
-
-// todo: don't do this:
-
-// RenderAllLines displays all the visible lines on the screen -- this is
-// called outside of update process and has its own bounds check and updating
-func (tv *View) RenderAllLines() {
-	if tv == nil || tv.This() == nil {
-		return
-	}
-	if !tv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	rs := &tv.Sc.RenderState
-	rs.PushBounds(tv.ScBBox)
-	updt := tv.UpdateStart()
-	tv.RenderAllLinesInBounds()
-	tv.PopBounds(tv.Sc)
-	// tv.Sc.This().(gi.Scene).ScUploadRegion(tv.ScBBox, tv.ScBBox)
-	tv.RenderScrolls()
-	tv.UpdateEnd(updt)
 }
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
 // after PushBounds has already been called
 func (tv *View) RenderAllLinesInBounds() {
-	// fmt.Printf("render all: %v\n", tv.Nm)
 	rs := &tv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
 	sty := &tv.Style
-	tv.VisSizes()
 	pos := mat32.NewVec2FmPoint(tv.ScBBox.Min)
 	epos := mat32.NewVec2FmPoint(tv.ScBBox.Max)
 	pc.FillBox(rs, pos, epos.Sub(pos), &sty.BackgroundColor)
@@ -977,17 +472,6 @@ func (tv *View) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	// }
 }
 
-// RenderScrolls renders scrollbars if needed
-func (tv *View) RenderScrolls() {
-	if tv.Is(ViewRenderScrolls) {
-		ly := tv.ParentLayout()
-		if ly != nil {
-			ly.ReRenderScrolls(tv.Sc)
-		}
-		tv.SetFlag(false, ViewRenderScrolls)
-	}
-}
-
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
 func (tv *View) RenderLines(st, ed int) bool {
@@ -1079,7 +563,6 @@ func (tv *View) RenderLines(st, ed int) bool {
 		// sc.This().(gi.Scene).ScUploadRegion(tBBox, tScBBox)
 	}
 	tv.PopBounds(sc)
-	tv.RenderScrolls()
 	tv.UpdateEnd(updt)
 	return true
 }
