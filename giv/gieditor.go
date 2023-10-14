@@ -282,8 +282,8 @@ func (ge *GiEditor) ConfigSplits() {
 		// })
 		split.SetSplits(.3, .7)
 	}
-	tv := ge.TreeView()
-	tv.SetRootNode(ge.KiRoot)
+	// tv := ge.TreeView()
+	// tv.SetRootNode(ge.KiRoot)
 	sv := ge.StructView()
 	sv.SetStruct(ge.KiRoot)
 }
