@@ -14,7 +14,7 @@ import (
 )
 
 // ArgView represents a slice of reflect.Value's and associated names, for the
-// purpose of supplying arguments to methods called via the MethView
+// purpose of supplying arguments to methods called via the MethodView
 // framework.
 type ArgView struct {
 	gi.Frame

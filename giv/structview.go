@@ -201,7 +201,7 @@ func (sv *StructView) Toolbar() *gi.Toolbar {
 	return sv.ChildByName("toolbar", 1).(*gi.Toolbar)
 }
 
-// ConfigToolbar adds a toolbar based on the methview ToolbarView function, if
+// ConfigToolbar adds a toolbar based on the methodview ToolbarView function, if
 // one has been defined for this struct type through its registered type
 // properties.
 func (sv *StructView) ConfigToolbar() {
