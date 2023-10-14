@@ -600,7 +600,7 @@ func (sr *Slider) ConfigParts(sc *Scene) {
 	}
 	if mods {
 		parts.UpdateEndLayout(updt)
-		sr.SetNeedsLayout(sc, updt)
+		sr.SetNeedsLayoutUpdate(sc, updt)
 	}
 }
 

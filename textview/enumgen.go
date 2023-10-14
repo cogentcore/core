@@ -11,11 +11,11 @@ import (
 	"goki.dev/enums"
 )
 
-var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5}
+var _BufSignalsValues = []BufSignals{0, 1, 2, 3, 4, 5, 6}
 
 // BufSignalsN is the highest valid value
 // for type BufSignals, plus one.
-const BufSignalsN BufSignals = 6
+const BufSignalsN BufSignals = 7
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -23,10 +23,11 @@ func _BufSignalsNoOp() {
 	var x [1]struct{}
 	_ = x[BufDone-(0)]
 	_ = x[BufNew-(1)]
-	_ = x[BufInsert-(2)]
-	_ = x[BufDelete-(3)]
-	_ = x[BufMarkUpdt-(4)]
-	_ = x[BufClosed-(5)]
+	_ = x[BufMods-(2)]
+	_ = x[BufInsert-(3)]
+	_ = x[BufDelete-(4)]
+	_ = x[BufMarkUpdt-(5)]
+	_ = x[BufClosed-(6)]
 }
 
 var _BufSignalsNameToValueMap = map[string]BufSignals{
@@ -34,32 +35,36 @@ var _BufSignalsNameToValueMap = map[string]BufSignals{
 	`bufdone`:     0,
 	`BufNew`:      1,
 	`bufnew`:      1,
-	`BufInsert`:   2,
-	`bufinsert`:   2,
-	`BufDelete`:   3,
-	`bufdelete`:   3,
-	`BufMarkUpdt`: 4,
-	`bufmarkupdt`: 4,
-	`BufClosed`:   5,
-	`bufclosed`:   5,
+	`BufMods`:     2,
+	`bufmods`:     2,
+	`BufInsert`:   3,
+	`bufinsert`:   3,
+	`BufDelete`:   4,
+	`bufdelete`:   4,
+	`BufMarkUpdt`: 5,
+	`bufmarkupdt`: 5,
+	`BufClosed`:   6,
+	`bufclosed`:   6,
 }
 
 var _BufSignalsDescMap = map[BufSignals]string{
 	0: `BufDone means that editing was completed and applied to Txt field -- data is Txt bytes`,
-	1: `BufNew signals that entirely new text is present -- all views update -- data is Txt bytes.`,
-	2: `BufInsert signals that some text was inserted -- data is textbuf.Edit describing change -- the Buf always reflects the current state *after* the edit.`,
-	3: `BufDelete signals that some text was deleted -- data is textbuf.Edit describing change -- the Buf always reflects the current state *after* the edit.`,
-	4: `BufMarkUpdt signals that the Markup text has been updated -- this signal is typically sent from a separate goroutine so should be used with a mutex`,
-	5: `BufClosed signals that the textbuf was closed`,
+	1: `BufNew signals that entirely new text is present. All views should do full layout update.`,
+	2: `BufMods signals that potentially diffuse modifications have been made. Views should do a Layout and Render.`,
+	3: `BufInsert signals that some text was inserted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`,
+	4: `BufDelete signals that some text was deleted. data is textbuf.Edit describing change. The Buf always reflects the current state *after* the edit.`,
+	5: `BufMarkUpdt signals that the Markup text has been updated This signal is typically sent from a separate goroutine, so should be used with a mutex`,
+	6: `BufClosed signals that the textbuf was closed.`,
 }
 
 var _BufSignalsMap = map[BufSignals]string{
 	0: `BufDone`,
 	1: `BufNew`,
-	2: `BufInsert`,
-	3: `BufDelete`,
-	4: `BufMarkUpdt`,
-	5: `BufClosed`,
+	2: `BufMods`,
+	3: `BufInsert`,
+	4: `BufDelete`,
+	5: `BufMarkUpdt`,
+	6: `BufClosed`,
 }
 
 // String returns the string representation
@@ -307,55 +312,40 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ViewFlagsValues = []ViewFlags{10, 11, 12, 13, 14, 15}
+var _ViewFlagsValues = []ViewFlags{10, 11, 12}
 
 // ViewFlagsN is the highest valid value
 // for type ViewFlags, plus one.
-const ViewFlagsN ViewFlags = 16
+const ViewFlagsN ViewFlags = 13
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ViewNeedsRefresh-(10)]
-	_ = x[ViewInReLayout-(11)]
-	_ = x[ViewRenderScrolls-(12)]
-	_ = x[ViewHasLineNos-(13)]
-	_ = x[ViewLastWasTabAI-(14)]
-	_ = x[ViewLastWasUndo-(15)]
+	_ = x[ViewHasLineNos-(10)]
+	_ = x[ViewLastWasTabAI-(11)]
+	_ = x[ViewLastWasUndo-(12)]
 }
 
 var _ViewFlagsNameToValueMap = map[string]ViewFlags{
-	`ViewNeedsRefresh`:  10,
-	`viewneedsrefresh`:  10,
-	`ViewInReLayout`:    11,
-	`viewinrelayout`:    11,
-	`ViewRenderScrolls`: 12,
-	`viewrenderscrolls`: 12,
-	`ViewHasLineNos`:    13,
-	`viewhaslinenos`:    13,
-	`ViewLastWasTabAI`:  14,
-	`viewlastwastabai`:  14,
-	`ViewLastWasUndo`:   15,
-	`viewlastwasundo`:   15,
+	`ViewHasLineNos`:   10,
+	`viewhaslinenos`:   10,
+	`ViewLastWasTabAI`: 11,
+	`viewlastwastabai`: 11,
+	`ViewLastWasUndo`:  12,
+	`viewlastwasundo`:  12,
 }
 
 var _ViewFlagsDescMap = map[ViewFlags]string{
-	10: `ViewNeedsRefresh indicates when refresh is required`,
-	11: `ViewInReLayout indicates that we are currently resizing ourselves via parent layout`,
-	12: `ViewRenderScrolls indicates that parent layout scrollbars need to be re-rendered at next rerender`,
-	13: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
-	14: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	15: `ViewLastWasUndo indicates that last key was an undo`,
+	10: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
+	11: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	12: `ViewLastWasUndo indicates that last key was an undo`,
 }
 
 var _ViewFlagsMap = map[ViewFlags]string{
-	10: `ViewNeedsRefresh`,
-	11: `ViewInReLayout`,
-	12: `ViewRenderScrolls`,
-	13: `ViewHasLineNos`,
-	14: `ViewLastWasTabAI`,
-	15: `ViewLastWasUndo`,
+	10: `ViewHasLineNos`,
+	11: `ViewLastWasTabAI`,
+	12: `ViewLastWasUndo`,
 }
 
 // String returns the string representation

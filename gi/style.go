@@ -253,7 +253,7 @@ func (wb *WidgetBase) ApplyStyleUpdate(sc *Scene) {
 	updt := wb.UpdateStart()
 	wi.ApplyStyle(sc)
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRender(sc, updt)
+	wb.SetNeedsRenderUpdate(sc, updt)
 }
 
 func (wb *WidgetBase) ApplyStyle(sc *Scene) {

@@ -574,7 +574,7 @@ func (sr *Splitter) HandleSplitterMouse() {
 		// 	me.SetHandled()
 		// 	srr.SetSelected(!srr.StateIs(states.Selected))
 		// 	srr.EmitSelectedSignal()
-		// 	srr.UpdateSig()
+		// 	srr.SetNeedsRender()
 		// } else {
 		if e.MouseButton() != events.Left {
 			return
@@ -641,10 +641,10 @@ func (sr *Splitter) Render(sc *Scene) {
 				// win.ActivateSprite(spnm)
 			}
 			sr.UpdateSplitterPos()
-			win.UpdateSig()
+			win.SetNeedsRender()
 		} else {
 			if win.DeleteSprite(spnm) {
-				win.UpdateSig()
+				win.SetNeedsRender()
 			}
 			sr.UpdateSplitterPos()
 			if sr.PushBounds(sc) {

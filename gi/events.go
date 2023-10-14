@@ -244,7 +244,7 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 // 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
 // 			bb.SetSelected(!bb.StateIs(states.Selected))
 // 			// bb.EmitSelectedSignal()
-// 			bb.UpdateSig()
+// 			bb.SetNeedsRender()
 // 		}
 
 // HandleLongHoverTooltip listens for LongHoverEvent and pops up a tooltip.

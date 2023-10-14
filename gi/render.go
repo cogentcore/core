@@ -86,20 +86,24 @@ import (
 //
 // ki Signals in general should not be used
 
-// UpdateSig just sets NeedsRender flag
-// This will drive updating of the node on the next DoUpdate pass.
-func (wb *WidgetBase) UpdateSig() {
-	wb.SetNeedsRender(wb.Sc, true)
-}
+// note: SetNeedsRender() is now SetNeedsRender()
 
 // SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
-// if updt is true.  See UpdateEndRender for convenience method.
-// This should be called after widget state changes that don't need styling,
-// e.g., in event handlers or other update code,
-// _after_ calling UpdateEnd(updt) and passing
+// triggering a render of this widget on the next window update.
+// Also sets a Field Parent NeedsRender too.
+func (wb *WidgetBase) SetNeedsRender() {
+	wb.SetNeedsRenderUpdate(wb.Sc, true)
+}
+
+// SetNeedsRenderUpdate sets the NeedsRender and Scene
+// NeedsRender flags, if updt is true.
+// See UpdateEndRender for convenience method.
+// This should be called after widget state changes
+// that don't need styling, e.g., in event handlers
+// or other update code, _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsRender(sc *Scene, updt bool) {
-	if !updt {
+func (wb *WidgetBase) SetNeedsRenderUpdate(sc *Scene, updt bool) {
+	if !updt || sc == nil {
 		return
 	}
 	if UpdateTrace {
@@ -127,17 +131,23 @@ func (wb *WidgetBase) UpdateEndRender(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsRender(wb.Sc, updt)
+	wb.SetNeedsRenderUpdate(wb.Sc, updt)
 }
 
 // note: this is replacement for "SetNeedsFullReRender()" call:
 
-// SetNeedsLayout sets the ScNeedsLayout flag if updt is true.
-// See UpdateEndLayout for convenience method.
+// SetNeedsLayout sets the ScNeedsLayout flag.
+// Use this when a change definitely requires a new Layout.
+func (wb *WidgetBase) SetNeedsLayout() {
+	wb.SetNeedsLayoutUpdate(wb.Sc, true)
+}
+
+// SetNeedsLayoutUpdate sets the ScNeedsLayout flag
+// if updt is true. See UpdateEndLayout for convenience method.
 // This should be called after widget Config call
 // _after_ calling UpdateEnd(updt) and passing
 // that same updt flag from UpdateStart.
-func (wb *WidgetBase) SetNeedsLayout(sc *Scene, updt bool) {
+func (wb *WidgetBase) SetNeedsLayoutUpdate(sc *Scene, updt bool) {
 	if !updt || sc == nil {
 		return
 	}
@@ -156,10 +166,11 @@ func (wb *WidgetBase) UpdateEndLayout(updt bool) {
 		return
 	}
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(wb.Sc, updt)
+	wb.SetNeedsLayoutUpdate(wb.Sc, updt)
 }
 
-// NeedsRebuild returns true if the RenderContext indicates a full rebuild is needed
+// NeedsRebuild returns true if the RenderContext indicates
+// a full rebuild is needed.
 func (wb *WidgetBase) NeedsRebuild() bool {
 	if wb.This() == nil || wb.Sc == nil || wb.Sc.Stage == nil {
 		return false

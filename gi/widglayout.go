@@ -52,7 +52,7 @@ func (wb *WidgetBase) Config(sc *Scene) {
 	wb.Sc = sc
 	wi.ConfigWidget(sc) // where everything actually happens
 	wb.UpdateEnd(updt)
-	wb.SetNeedsLayout(sc, updt)
+	wb.SetNeedsLayoutUpdate(sc, updt)
 }
 
 func (wb *WidgetBase) ConfigWidget(sc *Scene) {
@@ -71,7 +71,7 @@ func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) 
 		return
 	}
 	parts.UpdateEnd(updt)
-	wb.SetNeedsLayout(sc, updt)
+	wb.SetNeedsLayoutUpdate(sc, updt)
 }
 
 ////////////////////////////////////////////////////////////////////
