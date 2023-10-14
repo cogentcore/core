@@ -67,8 +67,6 @@ func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	tv.DoLayoutBase(sc, parBBox, iter)
 	spc := tv.BoxSpace()
 	tv.ChildSize = tv.LayState.Size.Need.Sub(spc.Size()) // we are what we need
-	avail := tv.AvailSize()
-	// fmt.Println("Childsize:", tv.ChildSize, "avail:", avail)
 
 	tv.ManageOverflow(sc)
 	tv.NeedsRedo = tv.DoLayoutChildren(sc, iter)
