@@ -42,6 +42,8 @@ type MethodConfig struct {
 	SepAfter bool
 	// Args are the arguments to the method
 	Args *gti.Fields
+	// Returns are the return values of the method
+	Returns *gti.Fields
 }
 
 // ToolbarView adds the method buttons for the given value to the given toolbar.
@@ -69,6 +71,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			Label:   sentencecase.Of(met.Name),
 			Tooltip: met.Doc,
 			Args:    met.Args,
+			Returns: met.Returns,
 		}
 		// we default to the icon with the same name as
 		// the method, if it exists
@@ -118,13 +121,13 @@ type ArgConfig struct {
 // given object value, using a GUI interface to prompt for any args. It uses the
 // given context widget for context information for the GUI interface.
 // gopy:interface=handle
-func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
+func CallMethod(ctx gi.Widget, val any, met *MethodConfig) {
 	rval := reflect.ValueOf(val)
 	rmet := rval.MethodByName(met.Name)
 
 	if met.Args.Len() == 0 {
 		rmet.Call(nil)
-		return true
+		return
 	}
 	args := ArgConfigsFromMethod(val, met, rmet)
 	ArgViewDialog(
@@ -137,7 +140,6 @@ func CallMethod(ctx gi.Widget, val any, met *MethodConfig) bool {
 			}
 			rmet.Call(rargs)
 		}).Run()
-	return true
 }
 
 // ArgConfigsFromMethod returns the appropriate [ArgConfig] objects for the given
