@@ -39,7 +39,7 @@ func app() {
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
 
-	tbar := gi.AddNewToolBar(mfr, "tbar")
+	tbar := gi.AddNewToolbar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
 	//////////////////////////////////////////

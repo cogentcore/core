@@ -672,10 +672,10 @@ func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
 	return objs
 }
 
-// SceneProps define the ToolBar and MenuBar for StructView
+// SceneProps define the Toolbar and MenuBar for StructView
 var SceneProps = ki.Props{
 	ki.EnumTypeFlag: TypeSceneFlags,
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Update", ki.Props{
 			"icon": icons.Refresh,
 		}},

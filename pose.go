@@ -211,9 +211,9 @@ func (ps *Pose) WorldScale() mat32.Vec3 {
 	return scale
 }
 
-// PoseProps define the ToolBar and MenuBar for StructView
+// PoseProps define the Toolbar and MenuBar for StructView
 var PoseProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"GenGoSet", ki.Props{
 			"label":       "Go Code",
 			"desc":        "returns Go Code that sets the current Pose, based on given path to Pose.",

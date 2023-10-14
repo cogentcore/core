@@ -33,7 +33,7 @@ func (sv *SceneView) Config() {
 	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
 	config := kit.TypeAndNameList{}
 	config.Add(TypeScene, "scene")
-	config.Add(gi.TypeToolBar, "tbar")
+	config.Add(gi.TypeToolbar, "tbar")
 	mods, updt := sv.ConfigChildren(config)
 	if mods {
 		sc := sv.Scene()
@@ -57,12 +57,12 @@ func (sv *SceneView) Scene() *Scene {
 	return sv.ChildByName("scene", 0).(*Scene)
 }
 
-func (sv *SceneView) Toolbar() *gi.ToolBar {
+func (sv *SceneView) Toolbar() *gi.Toolbar {
 	tbi := sv.ChildByName("tbar", 1)
 	if tbi == nil {
 		return nil
 	}
-	return tbi.(*gi.ToolBar)
+	return tbi.(*gi.Toolbar)
 }
 
 func (sv *SceneView) ToolbarConfig() {

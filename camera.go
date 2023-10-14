@@ -279,9 +279,9 @@ func (cm *Camera) ZoomTo(pt, size image.Point, zoomPct float32) {
 	cm.TargetFmView()
 }
 
-// CameraProps define the ToolBar and MenuBar for StructView
+// CameraProps define the Toolbar and MenuBar for StructView
 var CameraProps = ki.Props{
-	"ToolBar": ki.PropSlice{
+	"Toolbar": ki.PropSlice{
 		{"Defaults", ki.Props{
 			"label": "Defaults",
 			"icon":  icons.DeviceReset,
