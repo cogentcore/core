@@ -67,6 +67,8 @@ type MethodConfig struct {
 	SepBefore bool
 	// SepAfter is whether to insert a separator after the method button.
 	SepAfter bool
+	// Args are the arguments to the method
+	Args *gti.Fields
 }
 
 // ToolbarView adds the method buttons for the given value to the given toolbar.
@@ -92,6 +94,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		cfg := &MethodConfig{
 			Label:   sentencecase.Of(met.Name),
 			Tooltip: met.Doc,
+			Args:    met.Args,
 		}
 		// we default to the icon with the same name as
 		// the method, if it exists
@@ -119,40 +122,14 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 	return gotAny
 }
 
-// ArgData contains the relevant data for each arg, including the
-// reflect.Value, name, optional description, and default value
-type ArgData struct {
+// ArgConfig contains the relevant configuration information for each arg,
+// including the reflect.Value, name, optional description, and default value
+type ArgConfig struct {
 	Val     reflect.Value
 	Name    string
 	Desc    string
 	View    Value
 	Default any
-	Flags   ArgDataFlags
-}
-
-// ArgDataFlags define bitflags for method view action options
-type ArgDataFlags int64 //enums:bitflag
-
-const (
-	// ArgDataHasDef means that there was a Default value set
-	ArgDataHasDef ArgDataFlags = iota
-
-	// ArgDataValSet means that there is a fixed value for this arg, given in
-	// the config props and set in the Default, so it does not need to be
-	// prompted for
-	ArgDataValSet
-)
-
-func (ad *ArgData) HasDef() bool {
-	return ad.Flags.HasFlag(ArgDataHasDef)
-}
-
-func (ad *ArgData) SetHasDef() {
-	ad.Flags.SetFlag(true, ArgDataHasDef)
-}
-
-func (ad *ArgData) HasValSet() bool {
-	return ad.Flags.HasFlag(ArgDataValSet)
 }
 
 /*  todo: this needs a full rewrite in light of gti etc.
@@ -348,10 +325,23 @@ func CallMethod(ctx gi.Widget, val any, method string, cfg *MethodConfig) bool {
 	met := rval.MethodByName(method)
 	_ = met
 
-	ArgViewDialog(ctx, DlgOpts{Title: cfg.Label, Prompt: cfg.Tooltip, Ok: true, Cancel: true}, []ArgData{}, func(dlg *gi.Dialog) {
+	ArgViewDialog(ctx, DlgOpts{Title: cfg.Label, Prompt: cfg.Tooltip, Ok: true, Cancel: true}, ArgConfigsFromMethod(method, cfg), func(dlg *gi.Dialog) {
 		fmt.Println("dialog closed")
 	}).Run()
 	return true
+}
+
+func ArgConfigsFromMethod(method string, cfg *MethodConfig) []ArgConfig {
+	res := make([]ArgConfig, cfg.Args.Len())
+	for i, kv := range cfg.Args.Order {
+		arg := kv.Val
+		ra := ArgConfig{
+			Name: arg.Name,
+			Desc: arg.Doc,
+		}
+		res[i] = ra
+	}
+	return res
 }
 
 /*

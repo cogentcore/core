@@ -16,7 +16,7 @@ var ArgViewType = gti.AddType(&gti.Type{
 	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Args", &gti.Field{Name: "Args", Type: "[]ArgData", Doc: "the args that we are a view onto", Directives: gti.Directives{}}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]ArgConfig", Doc: "the args that we are a view onto", Directives: gti.Directives{}}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title / prompt to show above the editor fields", Directives: gti.Directives{}}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
 	}),
@@ -1353,6 +1353,26 @@ func (t *MapViewInline) KiType() *gti.Type {
 func (t *MapViewInline) New() ki.Ki {
 	return &MapViewInline{}
 }
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/giv.MethodConfig",
+	ShortName: "giv.MethodConfig",
+	IDName:    "method-config",
+	Doc:       "MethodConfig contains the configuration options for a method button in a toolbar or menubar.\nThese are the configuration options passed to the `gi:toolbar` and `gi:menubar` comment directives.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Label", &gti.Field{Name: "Label", Type: "string", Doc: "Label is the label for the method button.\nIt defaults to the sentence case version of the\nname of the function.", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "Icon is the icon for the method button. If there\nis an icon with the same name as the function, it\ndefaults to that icon.", Directives: gti.Directives{}}},
+		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "Tooltip is the tooltip for the method button.\nIt defaults to the documentation for the function.", Directives: gti.Directives{}}},
+		{"SepBefore", &gti.Field{Name: "SepBefore", Type: "bool", Doc: "SepBefore is whether to insert a separator before the method button.", Directives: gti.Directives{}}},
+		{"SepAfter", &gti.Field{Name: "SepAfter", Type: "bool", Doc: "SepAfter is whether to insert a separator after the method button.", Directives: gti.Directives{}}},
+		{"Args", &gti.Field{Name: "Args", Type: "*gti.Fields", Doc: "Args are the arguments to the method", Directives: gti.Directives{}}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
 
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{
