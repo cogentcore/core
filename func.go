@@ -17,10 +17,10 @@ type Func struct {
 	// Directives has the parsed comment directives
 	Directives Directives
 
-	// Args are arguments to the method
+	// Args are arguments to the function
 	Args *Fields
 
-	// Returns are return values of the method
+	// Returns are return values of the function
 	Returns *Fields
 
 	// unique type ID number
@@ -38,10 +38,10 @@ type Method struct {
 	// Directives has the parsed comment directives
 	Directives Directives
 
-	// Args are arguments to the function
+	// Args are arguments to the method
 	Args *Fields
 
-	// Returns are return values of the function
+	// Returns are return values of the method
 	Returns *Fields
 }
 
