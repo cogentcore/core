@@ -28,7 +28,7 @@ func TestGeom2DFitIn(t *testing.T) {
 		t.Errorf("150, 300, 0, 200 (wanted 0, 200 but got %d, %d)", p, s)
 	}
 	p, s = FitGeomInWindow(150, 300, 50, 200)
-	if p != 50 || s != 150 {
-		t.Errorf("150, 300, 50, 200 (wanted 50, 150 but got %d, %d)", p, s)
+	if p != 50 || s != 200 {
+		t.Errorf("150, 300, 50, 200 (wanted 50, 200 but got %d, %d)", p, s)
 	}
 }
