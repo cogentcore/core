@@ -853,9 +853,7 @@ func (tv *TableView) ConfigToolbar() {
 			tb.DeleteChildAtIndex(i, ki.DestroyKids)
 		}
 	}
-	if HasToolBarView(tv.Slice) {
-		ToolBarView(tv.Slice, tv.Sc, tb)
-	}
+	ToolBarView(tv.Slice, tb)
 	tv.ToolbarSlice = tv.Slice
 }
 
