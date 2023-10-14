@@ -375,9 +375,17 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, has
 		if dir == nil {
 			continue
 		}
+		hasAddAlias := slices.ContainsFunc(AddDirectives, func(d *gti.Directive) bool {
+			return d.Tool == dir.Tool && d.Directive == dir.Directive
+		})
+		if (dir.Tool == "gti" && dir.Directive == "add") || hasAddAlias {
+			hasAdd = true
+		}
 		if dir.Tool == "gti" {
-			if dir.Directive == "add" {
-				hasAdd = true
+			if dir.Directive == "skip" {
+				hasSkip = true
+			}
+			if dir.Directive == "add" || dir.Directive == "skip" {
 				leftovers, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
 				if err != nil {
 					return nil, false, false, fmt.Errorf("error setting config info from comment directive args: %w (from directive %q)", err, c.Text)
@@ -385,8 +393,6 @@ func LoadFromComment(c *ast.CommentGroup, cfg *Config) (dirs gti.Directives, has
 				if len(leftovers) > 0 {
 					return nil, false, false, fmt.Errorf("expected 0 positional arguments but got %d (list: %v) (from directive %q)", len(leftovers), leftovers, c.Text)
 				}
-			} else if dir.Directive == "skip" {
-				hasSkip = true
 			} else {
 				return nil, false, false, fmt.Errorf("unrecognized gti directive %q (from %q)", dir.Directive, c.Text)
 			}
