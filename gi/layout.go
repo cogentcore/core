@@ -365,13 +365,17 @@ func (ly *Layout) SetScroll(sc *Scene, d mat32.Dims) {
 		sr := ly.Scrolls[d]
 		sr.InitName(sr, fmt.Sprintf("Scroll%v", d))
 		ki.SetParent(sr, ly.This())
-		sr.SetFlag(true, ki.Field)
+		// sr.SetFlag(true, ki.Field) // note: do not turn on -- breaks pos
 		sr.SetType(SliderScrollbar)
 		sr.Sc = sc
 		sr.Dim = d
 		sr.Config(sc)
 		sr.Tracking = true
 		sr.Min = 0.0
+		sr.Style(func(s *styles.Style) {
+			s.Padding.Set(units.Dp(0))
+			s.Margin.Set(units.Dp(0))
+		})
 		sr.OnChange(func(e events.Event) {
 			e.SetHandled()
 			// fmt.Println("change event")
@@ -425,16 +429,17 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 
 	spc := ly.BoxSpace()
 	pad := ly.Styles.Padding.Dots()
+	marg := ly.Styles.Margin.Dots()
 	avail := ly.AvailSize()
 	for d := mat32.X; d <= mat32.Y; d++ {
 		odim := mat32.OtherDim(d)
 		var opad float32
 		if odim == mat32.X {
-			opad = pad.Right
+			opad = pad.Right + marg.Right
 		} else {
-			opad = pad.Bottom
+			opad = pad.Bottom + marg.Bottom
 		}
-		opad = 0 // todo: temporary override until we get this fixed.
+		// opad = 0// todo: temporary override until we get this fixed.
 		// if opad > 0 {
 		// 	fmt.Println(ly, "opad: ", odim, opad)
 		// }
@@ -443,7 +448,7 @@ func (ly *Layout) LayoutScrolls(sc *Scene) {
 			sb.GetSize(sc, 0)
 			sb.LayState.Alloc.PosRel.SetDim(d, spc.Pos().Dim(d))
 
-			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw-2.0-opad)
+			sb.LayState.Alloc.PosRel.SetDim(odim, avail.Dim(odim)-sbw+2+opad)
 			// SidesTODO: not sure about this
 			sb.LayState.Alloc.Size.SetDim(d, avail.Dim(d)-spc.Size().Dim(d)/2)
 			if ly.HasScroll[odim] { // make room for other
