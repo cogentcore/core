@@ -149,7 +149,7 @@ type Buf struct {
 	// functions and data for spelling correction
 	Spell *gi.Spell `json:"-" xml:"-"`
 
-	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
+	// current text editor -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
 	CurView *Editor `json:"-" xml:"-"`
 
 	// supports standard goosi events sending: Change is sent for BufDone, BufInsert, BufDelete
@@ -854,8 +854,8 @@ func (tb *Buf) AddView(vw *Editor) {
 
 // DeleteView removes given viewer from our buffer
 func (tb *Buf) DeleteView(vw *Editor) {
-	for i, tve := range tb.Views {
-		if tve == vw {
+	for i, ede := range tb.Views {
+		if ede == vw {
 			tb.Views = append(tb.Views[:i], tb.Views[i+1:]...)
 			break
 		}
@@ -863,7 +863,7 @@ func (tb *Buf) DeleteView(vw *Editor) {
 	// tb.BufSig.Disconnect(vw.This())
 }
 
-// SceneFromView returns Scene from textview, if avail
+// SceneFromView returns Scene from text editor, if avail
 func (tb *Buf) SceneFromView() *gi.Scene {
 	// if len(tb.Views) > 0 {
 	// 	return tb.Views[0].Scene
@@ -873,10 +873,10 @@ func (tb *Buf) SceneFromView() *gi.Scene {
 
 // AutoscrollViews ensures that views are always viewing the end of the buffer
 func (tb *Buf) AutoScrollViews() {
-	for _, tv := range tb.Views {
-		if tv != nil && tv.This() != nil {
-			tv.CursorPos = tb.EndPos()
-			tv.ScrollCursorInView()
+	for _, ed := range tb.Views {
+		if ed != nil && ed.This() != nil {
+			ed.CursorPos = tb.EndPos()
+			ed.ScrollCursorInView()
 		}
 	}
 }

@@ -13,133 +13,133 @@ import (
 )
 
 // StyleSizes gets the size info based on Style settings.
-func (tv *Editor) StyleSizes() {
-	sty := &tv.Styles
+func (ed *Editor) StyleSizes() {
+	sty := &ed.Styles
 	spc := sty.BoxSpace()
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
-	tv.FontHeight = sty.Font.Face.Metrics.Height
-	tv.LineHeight = sty.Text.EffLineHeight(tv.FontHeight)
-	tv.LineNoDigs = max(1+int(mat32.Log10(float32(tv.NLines))), 3)
+	ed.FontHeight = sty.Font.Face.Metrics.Height
+	ed.LineHeight = sty.Text.EffLineHeight(ed.FontHeight)
+	ed.LineNoDigs = max(1+int(mat32.Log10(float32(ed.NLines))), 3)
 	lno := true
-	if tv.Buf != nil {
-		lno = tv.Buf.Opts.LineNos
+	if ed.Buf != nil {
+		lno = ed.Buf.Opts.LineNos
 	}
 	if lno {
-		tv.SetFlag(true, ViewHasLineNos)
+		ed.SetFlag(true, ViewHasLineNos)
 		// SidesTODO: this is sketchy
-		tv.LineNoOff = float32(tv.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
+		ed.LineNoOff = float32(ed.LineNoDigs+3)*sty.Font.Face.Metrics.Ch + spc.Left // space for icon
 	} else {
-		tv.SetFlag(false, ViewHasLineNos)
-		tv.LineNoOff = 0
+		ed.SetFlag(false, ViewHasLineNos)
+		ed.LineNoOff = 0
 	}
 }
 
 // UpdateFromAlloc updates size info based on allocated size:
 // NLinesChars, LineNoOff, LineLayoutSize
-func (tv *Editor) UpdateFromAlloc() {
-	sty := &tv.Styles
+func (ed *Editor) UpdateFromAlloc() {
+	sty := &ed.Styles
 	spc := sty.BoxSpace()
-	asz := tv.LayState.Alloc.SizeOrig
+	asz := ed.LayState.Alloc.SizeOrig
 	nv := mat32.Vec2{}
 	if asz == nv {
-		tv.NLinesChars.Y = 40
-		tv.NLinesChars.X = 80
+		ed.NLinesChars.Y = 40
+		ed.NLinesChars.X = 80
 	} else {
-		tv.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / tv.LineHeight))
-		tv.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
+		ed.NLinesChars.Y = int(mat32.Floor(float32(asz.Y) / ed.LineHeight))
+		ed.NLinesChars.X = int(mat32.Floor(float32(asz.X) / sty.Font.Face.Metrics.Ch))
 	}
-	tv.LineLayoutSize = asz.Sub(tv.ExtraSize).Sub(spc.Size())
-	tv.LineLayoutSize.X -= tv.LineNoOff
+	ed.LineLayoutSize = asz.Sub(ed.ExtraSize).Sub(spc.Size())
+	ed.LineLayoutSize.X -= ed.LineNoOff
 	// SidesTODO: this is sketchy
-	// tv.LineLayoutSize.X -= spc.Size().X / 2 // extra space for word wrap
+	// ed.LineLayoutSize.X -= spc.Size().X / 2 // extra space for word wrap
 }
 
-func (tv *Editor) GetSize(sc *gi.Scene, iter int) {
-	tv.InitLayout(sc)
-	tv.LayoutAllLines()
-	tv.LayState.Size.Need = tv.TotalSize
-	tv.LayState.Size.Pref = tv.LayState.Size.Need
-	// fmt.Println("GetSize: need:", tv.LayState.Size.Need)
+func (ed *Editor) GetSize(sc *gi.Scene, iter int) {
+	ed.InitLayout(sc)
+	ed.LayoutAllLines()
+	ed.LayState.Size.Need = ed.TotalSize
+	ed.LayState.Size.Pref = ed.LayState.Size.Need
+	// fmt.Println("GetSize: need:", ed.LayState.Size.Need)
 }
 
-func (tv *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	tv.NeedsRedo = false
-	tv.DoLayoutBase(sc, parBBox, iter)
-	spc := tv.BoxSpace()
-	tv.ChildSize = tv.LayState.Size.Need.Sub(spc.Size()) // we are what we need
+func (ed *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	ed.NeedsRedo = false
+	ed.DoLayoutBase(sc, parBBox, iter)
+	spc := ed.BoxSpace()
+	ed.ChildSize = ed.LayState.Size.Need.Sub(spc.Size()) // we are what we need
 
-	tv.ManageOverflow(sc)
-	tv.NeedsRedo = tv.DoLayoutChildren(sc, iter)
+	ed.ManageOverflow(sc)
+	ed.NeedsRedo = ed.DoLayoutChildren(sc, iter)
 	// generally no kids here..
-	if !tv.NeedsRedo || iter == 1 {
-		delta := tv.LayoutScrollDelta((image.Point{}))
+	if !ed.NeedsRedo || iter == 1 {
+		delta := ed.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
-			tv.LayoutScrollChildren(sc, delta) // move is a separate step
+			ed.LayoutScrollChildren(sc, delta) // move is a separate step
 		}
 	}
-	tv.UpdateFromAlloc()
-	return tv.NeedsRedo
+	ed.UpdateFromAlloc()
+	return ed.NeedsRedo
 }
 
 // LayoutAllLines generates TextRenders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
-func (tv *Editor) LayoutAllLines() {
-	if tv.LineLayoutSize == mat32.Vec2Zero || tv.Styles.Font.Size.Val == 0 {
+func (ed *Editor) LayoutAllLines() {
+	if ed.LineLayoutSize == mat32.Vec2Zero || ed.Styles.Font.Size.Val == 0 {
 		return
 	}
-	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
-		tv.NLines = 0
+	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
+		ed.NLines = 0
 	}
-	tv.lastFilename = tv.Buf.Filename
+	ed.lastFilename = ed.Buf.Filename
 
-	tv.Buf.Hi.TabSize = tv.Styles.Text.TabSize
-	tv.HiStyle()
-	// fmt.Printf("layout all: %v\n", tv.Nm)
+	ed.Buf.Hi.TabSize = ed.Styles.Text.TabSize
+	ed.HiStyle()
+	// fmt.Printf("layout all: %v\n", ed.Nm)
 
-	tv.NLines = tv.Buf.NumLines()
-	nln := tv.NLines
-	if cap(tv.Renders) >= nln {
-		tv.Renders = tv.Renders[:nln]
+	ed.NLines = ed.Buf.NumLines()
+	nln := ed.NLines
+	if cap(ed.Renders) >= nln {
+		ed.Renders = ed.Renders[:nln]
 	} else {
-		tv.Renders = make([]paint.Text, nln)
+		ed.Renders = make([]paint.Text, nln)
 	}
-	if cap(tv.Offs) >= nln {
-		tv.Offs = tv.Offs[:nln]
+	if cap(ed.Offs) >= nln {
+		ed.Offs = ed.Offs[:nln]
 	} else {
-		tv.Offs = make([]float32, nln)
+		ed.Offs = make([]float32, nln)
 	}
 
-	sz := tv.LineLayoutSize
+	sz := ed.LineLayoutSize
 	// fmt.Println("LineLayoutSize:", sz)
 
-	sty := &tv.Styles
+	sty := &ed.Styles
 	fst := sty.FontRender()
 	fst.BackgroundColor.SetSolid(nil)
 	off := float32(0)
 	mxwd := sz.X // always start with our render size
 
-	tv.Buf.MarkupMu.RLock()
-	tv.HasLinks = false
+	ed.Buf.MarkupMu.RLock()
+	ed.HasLinks = false
 	for ln := 0; ln < nln; ln++ {
-		tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-		tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
-		if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
-			tv.HasLinks = true
+		ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.CSS)
+		ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, sz)
+		if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
+			ed.HasLinks = true
 		}
-		tv.Offs[ln] = off
-		lsz := mat32.Max(tv.Renders[ln].Size.Y, tv.LineHeight)
+		ed.Offs[ln] = off
+		lsz := mat32.Max(ed.Renders[ln].Size.Y, ed.LineHeight)
 		off += lsz
-		mxwd = mat32.Max(mxwd, tv.Renders[ln].Size.X)
+		mxwd = mat32.Max(mxwd, ed.Renders[ln].Size.X)
 	}
-	tv.Buf.MarkupMu.RUnlock()
+	ed.Buf.MarkupMu.RUnlock()
 
-	tv.LinesSize = mat32.Vec2{mxwd, off}
+	ed.LinesSize = mat32.Vec2{mxwd, off}
 
 	spc := sty.BoxSpace()
-	tv.TotalSize = tv.LinesSize.Add(spc.Size())
-	tv.TotalSize.X += tv.LineNoOff
-	// extraHalf := tv.LineHeight * 0.5 * float32(tv.NLinesChars.Y)
+	ed.TotalSize = ed.LinesSize.Add(spc.Size())
+	ed.TotalSize.X += ed.LineNoOff
+	// extraHalf := ed.LineHeight * 0.5 * float32(ed.NLinesChars.Y)
 	// todo: add extra half to bottom of size?
 }
 
@@ -147,36 +147,36 @@ func (tv *Editor) LayoutAllLines() {
 // If the line with exceeds the current maximum, or the number of effective
 // lines (e.g., from word-wrap) is different, then SetNeedsLayout is called
 // and it returns true.
-func (tv *Editor) LayoutLine(ln int) bool {
-	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
+func (ed *Editor) LayoutLine(ln int) bool {
+	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
 		return false
 	}
-	sty := &tv.Styles
+	sty := &ed.Styles
 	fst := sty.FontRender()
 	fst.BackgroundColor.SetSolid(nil)
-	mxwd := float32(tv.LinesSize.X)
+	mxwd := float32(ed.LinesSize.X)
 	needLay := false
 
-	tv.Buf.MarkupMu.RLock()
-	curspans := len(tv.Renders[ln].Spans)
-	tv.Renders[ln].SetHTMLPre(tv.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, tv.CSS)
-	tv.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, tv.LineLayoutSize)
-	if !tv.HasLinks && len(tv.Renders[ln].Links) > 0 {
-		tv.HasLinks = true
+	ed.Buf.MarkupMu.RLock()
+	curspans := len(ed.Renders[ln].Spans)
+	ed.Renders[ln].SetHTMLPre(ed.Buf.Markup[ln], fst, &sty.Text, &sty.UnContext, ed.CSS)
+	ed.Renders[ln].LayoutStdLR(&sty.Text, sty.FontRender(), &sty.UnContext, ed.LineLayoutSize)
+	if !ed.HasLinks && len(ed.Renders[ln].Links) > 0 {
+		ed.HasLinks = true
 	}
-	nwspans := len(tv.Renders[ln].Spans)
+	nwspans := len(ed.Renders[ln].Spans)
 	if nwspans != curspans && (nwspans > 1 || curspans > 1) {
 		needLay = true
 	}
-	if tv.Renders[ln].Size.X > mxwd {
+	if ed.Renders[ln].Size.X > mxwd {
 		needLay = true
 	}
-	tv.Buf.MarkupMu.RUnlock()
+	ed.Buf.MarkupMu.RUnlock()
 
 	if needLay {
-		tv.SetNeedsLayout()
+		ed.SetNeedsLayout()
 	} else {
-		tv.SetNeedsRender()
+		ed.SetNeedsRender()
 	}
 	return needLay
 }

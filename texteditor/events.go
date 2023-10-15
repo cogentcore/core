@@ -21,61 +21,61 @@ import (
 )
 
 // ViewEvents sets connections between mouse and key events and actions
-func (tv *Editor) HandleTextViewEvents() {
-	tv.HandleLayoutEvents()
-	tv.HandleTextViewKeyChord()
-	tv.HandleTextViewMouse()
+func (ed *Editor) HandleTextViewEvents() {
+	ed.HandleLayoutEvents()
+	ed.HandleTextViewKeyChord()
+	ed.HandleTextViewMouse()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (tv *Editor) HandleTextViewKeyChord() {
-	tv.OnKeyChord(func(e events.Event) {
-		tv.KeyInput(e)
+func (ed *Editor) HandleTextViewKeyChord() {
+	ed.OnKeyChord(func(e events.Event) {
+		ed.KeyInput(e)
 	})
 }
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
-func (tv *Editor) ShiftSelect(kt events.Event) {
+func (ed *Editor) ShiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		if tv.SelectReg == textbuf.RegionNil {
-			tv.SelectStart = tv.CursorPos
+		if ed.SelectReg == textbuf.RegionNil {
+			ed.SelectStart = ed.CursorPos
 		}
 	} else {
-		tv.SelectReg = textbuf.RegionNil
+		ed.SelectReg = textbuf.RegionNil
 	}
 }
 
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
-func (tv *Editor) ShiftSelectExtend(kt events.Event) {
+func (ed *Editor) ShiftSelectExtend(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
-		tv.SelectRegUpdate(tv.CursorPos)
+		ed.SelectRegUpdate(ed.CursorPos)
 	}
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tv *Editor) KeyInput(kt events.Event) {
+func (ed *Editor) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
-		fmt.Printf("View KeyInput: %v\n", tv.Path())
+		fmt.Printf("View KeyInput: %v\n", ed.Path())
 	}
 	kf := gi.KeyFun(kt.KeyChord())
 
 	// todo:
 	// cpop := win.CurPopup()
 	// if gi.PopupIsCompleter(cpop) {
-	// 	setprocessed := tv.Buf.Complete.KeyInput(kf)
+	// 	setprocessed := ed.Buf.Complete.KeyInput(kf)
 	// 	if setprocessed {
 	// 		kt.SetHandled()
 	// 	}
 	// }
 	//
 	// if gi.PopupIsCorrector(cpop) {
-	// 	setprocessed := tv.Buf.Spell.KeyInput(kf)
+	// 	setprocessed := ed.Buf.Spell.KeyInput(kf)
 	// 	if setprocessed {
 	// 		kt.SetHandled()
 	// 	}
@@ -84,26 +84,26 @@ func (tv *Editor) KeyInput(kt events.Event) {
 	if kt.IsHandled() {
 		return
 	}
-	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
+	if ed.Buf == nil || ed.Buf.NumLines() == 0 {
 		return
 	}
 
 	// cancelAll cancels search, completer, and..
 	cancelAll := func() {
-		tv.CancelComplete()
-		tv.CancelCorrect()
-		tv.ISearchCancel()
-		tv.QReplaceCancel()
-		tv.lastAutoInsert = 0
+		ed.CancelComplete()
+		ed.CancelCorrect()
+		ed.ISearchCancel()
+		ed.QReplaceCancel()
+		ed.lastAutoInsert = 0
 	}
 
 	if kf != gi.KeyFunRecenter { // always start at centering
-		tv.lastRecenter = 0
+		ed.lastRecenter = 0
 	}
 
-	if kf != gi.KeyFunUndo && tv.Is(ViewLastWasUndo) {
-		tv.Buf.EmacsUndoSave()
-		tv.SetFlag(false, ViewLastWasUndo)
+	if kf != gi.KeyFunUndo && ed.Is(ViewLastWasUndo) {
+		ed.Buf.EmacsUndoSave()
+		ed.SetFlag(false, ViewLastWasUndo)
 	}
 
 	gotTabAI := false // got auto-indent tab this time
@@ -113,308 +113,308 @@ func (tv *Editor) KeyInput(kt events.Event) {
 	case gi.KeyFunMoveRight:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorForward(1)
-		tv.ShiftSelectExtend(kt)
-		tv.ISpellKeyInput(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorForward(1)
+		ed.ShiftSelectExtend(kt)
+		ed.ISpellKeyInput(kt)
 	case gi.KeyFunWordRight:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorForwardWord(1)
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorForwardWord(1)
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunMoveLeft:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorBackward(1)
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorBackward(1)
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunWordLeft:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorBackwardWord(1)
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorBackwardWord(1)
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunMoveUp:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorUp(1)
-		tv.ShiftSelectExtend(kt)
-		tv.ISpellKeyInput(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorUp(1)
+		ed.ShiftSelectExtend(kt)
+		ed.ISpellKeyInput(kt)
 	case gi.KeyFunMoveDown:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorDown(1)
-		tv.ShiftSelectExtend(kt)
-		tv.ISpellKeyInput(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorDown(1)
+		ed.ShiftSelectExtend(kt)
+		ed.ISpellKeyInput(kt)
 	case gi.KeyFunPageUp:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorPageUp(1)
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorPageUp(1)
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunPageDown:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorPageDown(1)
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorPageDown(1)
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunHome:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorStartLine()
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorStartLine()
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunEnd:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorEndLine()
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorEndLine()
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunDocHome:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorStartDoc()
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorStartDoc()
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunDocEnd:
 		cancelAll()
 		kt.SetHandled()
-		tv.ShiftSelect(kt)
-		tv.CursorEndDoc()
-		tv.ShiftSelectExtend(kt)
+		ed.ShiftSelect(kt)
+		ed.CursorEndDoc()
+		ed.ShiftSelectExtend(kt)
 	case gi.KeyFunRecenter:
 		cancelAll()
 		kt.SetHandled()
-		tv.ReMarkup()
-		tv.CursorRecenter()
+		ed.ReMarkup()
+		ed.CursorRecenter()
 	case gi.KeyFunSelectMode:
 		cancelAll()
 		kt.SetHandled()
-		tv.SelectModeToggle()
+		ed.SelectModeToggle()
 	case gi.KeyFunCancelSelect:
-		tv.CancelComplete()
+		ed.CancelComplete()
 		kt.SetHandled()
-		tv.EscPressed() // generic cancel
+		ed.EscPressed() // generic cancel
 	case gi.KeyFunSelectAll:
 		cancelAll()
 		kt.SetHandled()
-		tv.SelectAll()
+		ed.SelectAll()
 	case gi.KeyFunCopy:
 		cancelAll()
 		kt.SetHandled()
-		tv.Copy(true) // reset
+		ed.Copy(true) // reset
 	case gi.KeyFunSearch:
 		kt.SetHandled()
-		tv.QReplaceCancel()
-		tv.CancelComplete()
-		tv.ISearchStart()
+		ed.QReplaceCancel()
+		ed.CancelComplete()
+		ed.ISearchStart()
 	case gi.KeyFunAbort:
 		cancelAll()
 		kt.SetHandled()
-		tv.EscPressed()
+		ed.EscPressed()
 	case gi.KeyFunJump:
 		cancelAll()
 		kt.SetHandled()
-		tv.JumpToLinePrompt()
+		ed.JumpToLinePrompt()
 	case gi.KeyFunHistPrev:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorToHistPrev()
+		ed.CursorToHistPrev()
 	case gi.KeyFunHistNext:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorToHistNext()
+		ed.CursorToHistNext()
 	case gi.KeyFunLookup:
 		cancelAll()
 		kt.SetHandled()
-		tv.Lookup()
+		ed.Lookup()
 	}
-	if tv.IsDisabled() {
+	if ed.IsDisabled() {
 		switch {
 		case kf == gi.KeyFunFocusNext: // tab
 			kt.SetHandled()
-			tv.CursorNextLink(true)
+			ed.CursorNextLink(true)
 		case kf == gi.KeyFunFocusPrev: // tab
 			kt.SetHandled()
-			tv.CursorPrevLink(true)
-		case kf == gi.KeyFunNil && tv.ISearch.On:
+			ed.CursorPrevLink(true)
+		case kf == gi.KeyFunNil && ed.ISearch.On:
 			if unicode.IsPrint(kt.KeyRune()) && !kt.HasAnyModifier(key.Control, key.Meta) {
-				tv.ISearchKeyInput(kt)
+				ed.ISearchKeyInput(kt)
 			}
 		case kt.KeyRune() == ' ' || kf == gi.KeyFunAccept || kf == gi.KeyFunEnter:
 			kt.SetHandled()
-			tv.CursorPos.Ch--
-			tv.CursorNextLink(true) // todo: cursorcurlink
-			tv.OpenLinkAt(tv.CursorPos)
+			ed.CursorPos.Ch--
+			ed.CursorNextLink(true) // todo: cursorcurlink
+			ed.OpenLinkAt(ed.CursorPos)
 		}
 		return
 	}
 	if kt.IsHandled() {
-		tv.SetFlag(gotTabAI, ViewLastWasTabAI)
+		ed.SetFlag(gotTabAI, ViewLastWasTabAI)
 		return
 	}
 	switch kf {
 	case gi.KeyFunReplace:
 		kt.SetHandled()
-		tv.CancelComplete()
-		tv.ISearchCancel()
-		tv.QReplacePrompt()
+		ed.CancelComplete()
+		ed.ISearchCancel()
+		ed.QReplacePrompt()
 	// case gi.KeyFunAccept: // ctrl+enter
-	// 	tv.ISearchCancel()
-	// 	tv.QReplaceCancel()
+	// 	ed.ISearchCancel()
+	// 	ed.QReplaceCancel()
 	// 	kt.SetHandled()
-	// 	tv.FocusNext()
+	// 	ed.FocusNext()
 	case gi.KeyFunBackspace:
 		// todo: previous item in qreplace
-		if tv.ISearch.On {
-			tv.ISearchBackspace()
+		if ed.ISearch.On {
+			ed.ISearchBackspace()
 		} else {
 			kt.SetHandled()
-			tv.CursorBackspace(1)
-			tv.ISpellKeyInput(kt)
-			tv.OfferComplete()
+			ed.CursorBackspace(1)
+			ed.ISpellKeyInput(kt)
+			ed.OfferComplete()
 		}
 	case gi.KeyFunKill:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorKill()
+		ed.CursorKill()
 	case gi.KeyFunDelete:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorDelete(1)
-		tv.ISpellKeyInput(kt)
+		ed.CursorDelete(1)
+		ed.ISpellKeyInput(kt)
 	case gi.KeyFunBackspaceWord:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorBackspaceWord(1)
+		ed.CursorBackspaceWord(1)
 	case gi.KeyFunDeleteWord:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorDeleteWord(1)
+		ed.CursorDeleteWord(1)
 	case gi.KeyFunCut:
 		cancelAll()
 		kt.SetHandled()
-		tv.Cut()
+		ed.Cut()
 	case gi.KeyFunPaste:
 		cancelAll()
 		kt.SetHandled()
-		tv.Paste()
+		ed.Paste()
 	case gi.KeyFunTranspose:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorTranspose()
+		ed.CursorTranspose()
 	case gi.KeyFunTransposeWord:
 		cancelAll()
 		kt.SetHandled()
-		tv.CursorTransposeWord()
+		ed.CursorTransposeWord()
 	case gi.KeyFunPasteHist:
 		cancelAll()
 		kt.SetHandled()
-		tv.PasteHist()
+		ed.PasteHist()
 	case gi.KeyFunUndo:
 		cancelAll()
 		kt.SetHandled()
-		tv.Undo()
-		tv.SetFlag(true, ViewLastWasUndo)
+		ed.Undo()
+		ed.SetFlag(true, ViewLastWasUndo)
 	case gi.KeyFunRedo:
 		cancelAll()
 		kt.SetHandled()
-		tv.Redo()
+		ed.Redo()
 	case gi.KeyFunComplete:
-		tv.ISearchCancel()
+		ed.ISearchCancel()
 		kt.SetHandled()
-		if tv.Buf.IsSpellEnabled(tv.CursorPos) {
-			tv.OfferCorrect()
+		if ed.Buf.IsSpellEnabled(ed.CursorPos) {
+			ed.OfferCorrect()
 		} else {
-			tv.ForceComplete = true
-			tv.OfferComplete()
-			tv.ForceComplete = false
+			ed.ForceComplete = true
+			ed.OfferComplete()
+			ed.ForceComplete = false
 		}
 	case gi.KeyFunEnter:
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			if tv.Buf.Opts.AutoIndent {
-				lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
+			if ed.Buf.Opts.AutoIndent {
+				lp, _ := pi.LangSupport.Props(ed.Buf.PiState.Sup)
 				if lp != nil && lp.Lang != nil && lp.HasFlag(pi.ReAutoIndent) {
 					// only re-indent current line for supported types
-					tbe, _, _ := tv.Buf.AutoIndent(tv.CursorPos.Ln) // reindent current line
+					tbe, _, _ := ed.Buf.AutoIndent(ed.CursorPos.Ln) // reindent current line
 					if tbe != nil {
 						// go back to end of line!
-						npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: tv.Buf.LineLen(tv.CursorPos.Ln)}
-						tv.SetCursor(npos)
+						npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: ed.Buf.LineLen(ed.CursorPos.Ln)}
+						ed.SetCursor(npos)
 					}
 				}
-				tv.InsertAtCursor([]byte("\n"))
-				tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+				ed.InsertAtCursor([]byte("\n"))
+				tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
 				if tbe != nil {
-					tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+					ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 				}
 			} else {
-				tv.InsertAtCursor([]byte("\n"))
+				ed.InsertAtCursor([]byte("\n"))
 			}
-			tv.ISpellKeyInput(kt)
+			ed.ISpellKeyInput(kt)
 		}
 		// todo: KeFunFocusPrev -- unindent
 	case gi.KeyFunFocusNext: // tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			updt := tv.UpdateStart()
-			lasttab := tv.Is(ViewLastWasTabAI)
-			if !lasttab && tv.CursorPos.Ch == 0 && tv.Buf.Opts.AutoIndent {
-				_, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
-				tv.CursorPos.Ch = cpos
-				tv.RenderCursor(true)
+			updt := ed.UpdateStart()
+			lasttab := ed.Is(ViewLastWasTabAI)
+			if !lasttab && ed.CursorPos.Ch == 0 && ed.Buf.Opts.AutoIndent {
+				_, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
+				ed.CursorPos.Ch = cpos
+				ed.RenderCursor(true)
 				gotTabAI = true
 			} else {
-				tv.InsertAtCursor(indent.Bytes(tv.Buf.Opts.IndentChar(), 1, tv.Styles.Text.TabSize))
+				ed.InsertAtCursor(indent.Bytes(ed.Buf.Opts.IndentChar(), 1, ed.Styles.Text.TabSize))
 			}
-			tv.UpdateEndRender(updt)
-			tv.ISpellKeyInput(kt)
+			ed.UpdateEndRender(updt)
+			ed.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunFocusPrev: // shift-tab
 		cancelAll()
 		if !kt.HasAnyModifier(key.Control, key.Meta) {
 			kt.SetHandled()
-			if tv.CursorPos.Ch > 0 {
-				ind, _ := lex.LineIndent(tv.Buf.Line(tv.CursorPos.Ln), tv.Styles.Text.TabSize)
+			if ed.CursorPos.Ch > 0 {
+				ind, _ := lex.LineIndent(ed.Buf.Line(ed.CursorPos.Ln), ed.Styles.Text.TabSize)
 				if ind > 0 {
-					tv.Buf.IndentLine(tv.CursorPos.Ln, ind-1)
-					intxt := indent.Bytes(tv.Buf.Opts.IndentChar(), ind-1, tv.Styles.Text.TabSize)
-					npos := lex.Pos{Ln: tv.CursorPos.Ln, Ch: len(intxt)}
-					tv.SetCursorShow(npos)
+					ed.Buf.IndentLine(ed.CursorPos.Ln, ind-1)
+					intxt := indent.Bytes(ed.Buf.Opts.IndentChar(), ind-1, ed.Styles.Text.TabSize)
+					npos := lex.Pos{Ln: ed.CursorPos.Ln, Ch: len(intxt)}
+					ed.SetCursorShow(npos)
 				}
 			}
-			tv.ISpellKeyInput(kt)
+			ed.ISpellKeyInput(kt)
 		}
 	case gi.KeyFunNil:
 		if unicode.IsPrint(kt.KeyRune()) {
 			if !kt.HasAnyModifier(key.Control, key.Meta) {
-				tv.KeyInputInsertRune(kt)
+				ed.KeyInputInsertRune(kt)
 			}
 		}
 		if unicode.IsSpace(kt.KeyRune()) {
-			tv.ForceComplete = false
+			ed.ForceComplete = false
 		}
-		tv.ISpellKeyInput(kt)
+		ed.ISpellKeyInput(kt)
 	}
-	tv.SetFlag(gotTabAI, ViewLastWasTabAI)
+	ed.SetFlag(gotTabAI, ViewLastWasTabAI)
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
-func (tv *Editor) KeyInputInsertBra(kt events.Event) {
-	pos := tv.CursorPos
+func (ed *Editor) KeyInputInsertBra(kt events.Event) {
+	pos := ed.CursorPos
 	match := true
 	newLine := false
-	curLn := tv.Buf.Line(pos.Ln)
+	curLn := ed.Buf.Line(pos.Ln)
 	lnLen := len(curLn)
-	lp, _ := pi.LangSupport.Props(tv.Buf.PiState.Sup)
+	lp, _ := pi.LangSupport.Props(ed.Buf.PiState.Sup)
 	if lp != nil && lp.Lang != nil {
-		match, newLine = lp.Lang.AutoBracket(&tv.Buf.PiState, kt.KeyRune(), pos, curLn)
+		match, newLine = lp.Lang.AutoBracket(&ed.Buf.PiState, kt.KeyRune(), pos, curLn)
 	} else {
 		if kt.KeyRune() == '{' {
 			if pos.Ch == lnLen {
@@ -431,69 +431,69 @@ func (tv *Editor) KeyInputInsertBra(kt events.Event) {
 	}
 	if match {
 		ket, _ := lex.BracePair(kt.KeyRune())
-		if newLine && tv.Buf.Opts.AutoIndent {
-			tv.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
-			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+		if newLine && ed.Buf.Opts.AutoIndent {
+			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + "\n"))
+			tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
 				pos = lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos}
-				tv.SetCursorShow(pos)
+				ed.SetCursorShow(pos)
 			}
-			tv.InsertAtCursor([]byte("\n" + string(ket)))
-			tv.Buf.AutoIndent(tv.CursorPos.Ln)
+			ed.InsertAtCursor([]byte("\n" + string(ket)))
+			ed.Buf.AutoIndent(ed.CursorPos.Ln)
 		} else {
-			tv.InsertAtCursor([]byte(string(kt.KeyRune()) + string(ket)))
+			ed.InsertAtCursor([]byte(string(kt.KeyRune()) + string(ket)))
 			pos.Ch++
 		}
-		tv.lastAutoInsert = ket
+		ed.lastAutoInsert = ket
 	} else {
-		tv.InsertAtCursor([]byte(string(kt.KeyRune())))
+		ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 		pos.Ch++
 	}
-	tv.SetCursorShow(pos)
-	tv.SetCursorCol(tv.CursorPos)
+	ed.SetCursorShow(pos)
+	ed.SetCursorCol(ed.CursorPos)
 }
 
 // KeyInputInsertRune handles the insertion of a typed character
-func (tv *Editor) KeyInputInsertRune(kt events.Event) {
+func (ed *Editor) KeyInputInsertRune(kt events.Event) {
 	kt.SetHandled()
-	if tv.ISearch.On {
-		tv.CancelComplete()
-		tv.ISearchKeyInput(kt)
-	} else if tv.QReplace.On {
-		tv.CancelComplete()
-		tv.QReplaceKeyInput(kt)
+	if ed.ISearch.On {
+		ed.CancelComplete()
+		ed.ISearchKeyInput(kt)
+	} else if ed.QReplace.On {
+		ed.CancelComplete()
+		ed.QReplaceKeyInput(kt)
 	} else {
 		if kt.KeyRune() == '{' || kt.KeyRune() == '(' || kt.KeyRune() == '[' {
-			tv.KeyInputInsertBra(kt)
-		} else if kt.KeyRune() == '}' && tv.Buf.Opts.AutoIndent && tv.CursorPos.Ch == tv.Buf.LineLen(tv.CursorPos.Ln) {
-			tv.CancelComplete()
-			tv.lastAutoInsert = 0
-			tv.InsertAtCursor([]byte(string(kt.KeyRune())))
-			tbe, _, cpos := tv.Buf.AutoIndent(tv.CursorPos.Ln)
+			ed.KeyInputInsertBra(kt)
+		} else if kt.KeyRune() == '}' && ed.Buf.Opts.AutoIndent && ed.CursorPos.Ch == ed.Buf.LineLen(ed.CursorPos.Ln) {
+			ed.CancelComplete()
+			ed.lastAutoInsert = 0
+			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
+			tbe, _, cpos := ed.Buf.AutoIndent(ed.CursorPos.Ln)
 			if tbe != nil {
-				tv.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
+				ed.SetCursorShow(lex.Pos{Ln: tbe.Reg.End.Ln, Ch: cpos})
 			}
-		} else if tv.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
-			tv.CursorPos.Ch++
-			tv.SetCursorShow(tv.CursorPos)
-			tv.lastAutoInsert = 0
+		} else if ed.lastAutoInsert == kt.KeyRune() { // if we type what we just inserted, just move past
+			ed.CursorPos.Ch++
+			ed.SetCursorShow(ed.CursorPos)
+			ed.lastAutoInsert = 0
 		} else {
-			tv.lastAutoInsert = 0
-			tv.InsertAtCursor([]byte(string(kt.KeyRune())))
+			ed.lastAutoInsert = 0
+			ed.InsertAtCursor([]byte(string(kt.KeyRune())))
 			if kt.KeyRune() == ' ' {
-				tv.CancelComplete()
+				ed.CancelComplete()
 			} else {
-				tv.OfferComplete()
+				ed.OfferComplete()
 			}
 		}
 		if kt.KeyRune() == '}' || kt.KeyRune() == ')' || kt.KeyRune() == ']' {
-			cp := tv.CursorPos
+			cp := ed.CursorPos
 			np := cp
 			np.Ch--
-			tp, found := tv.Buf.BraceMatch(kt.KeyRune(), np)
+			tp, found := ed.Buf.BraceMatch(kt.KeyRune(), np)
 			if found {
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
-				tv.Scopelights = append(tv.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(tp, lex.Pos{tp.Ln, tp.Ch + 1}))
+				ed.Scopelights = append(ed.Scopelights, textbuf.NewRegionPos(np, lex.Pos{cp.Ln, cp.Ch}))
 			}
 		}
 	}
@@ -503,10 +503,10 @@ func (tv *Editor) KeyInputInsertRune(kt events.Event) {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (tv *Editor) OpenLink(tl *paint.TextLink) {
-	// tl.Widget = tv.This().(gi.Widget)
+func (ed *Editor) OpenLink(tl *paint.TextLink) {
+	// tl.Widget = ed.This().(gi.Widget)
 	// fmt.Printf("opening link: %v\n", tl.URL)
-	// if len(tv.LinkSig.Cons) == 0 {
+	// if len(ed.LinkSig.Cons) == 0 {
 	// 	if paint.TextLinkHandler != nil {
 	// 		if paint.TextLinkHandler(*tl) {
 	// 			return
@@ -517,20 +517,20 @@ func (tv *Editor) OpenLink(tl *paint.TextLink) {
 	// 	}
 	// 	return
 	// }
-	// tv.LinkSig.Emit(tv.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
+	// ed.LinkSig.Emit(ed.This(), 0, tl.URL) // todo: could potentially signal different target=_blank kinds of options here with the sig
 }
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (tv *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
-	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
+func (ed *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+	if !(pos.Ln < len(ed.Renders) && len(ed.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
-	cpos := tv.CharStartPos(pos).ToPointCeil()
+	cpos := ed.CharStartPos(pos).ToPointCeil()
 	cpos.Y += 2
 	cpos.X += 2
-	lpos := tv.CharStartPos(lex.Pos{Ln: pos.Ln})
-	rend := &tv.Renders[pos.Ln]
+	lpos := ed.CharStartPos(lex.Pos{Ln: pos.Ln})
+	rend := &ed.Renders[pos.Ln]
 	for ti := range rend.Links {
 		tl := &rend.Links[ti]
 		tlb := tl.Bounds(rend, lpos)
@@ -543,115 +543,115 @@ func (tv *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (tv *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
-	tl, ok := tv.LinkAt(pos)
+func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+	tl, ok := ed.LinkAt(pos)
 	if ok {
-		rend := &tv.Renders[pos.Ln]
+		rend := &ed.Renders[pos.Ln]
 		st, _ := rend.SpanPosToRuneIdx(tl.StartSpan, tl.StartIdx)
-		ed, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
-		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, ed)
-		tv.HighlightRegion(reg)
-		tv.SetCursorShow(pos)
-		tv.SavePosHistory(tv.CursorPos)
-		tv.OpenLink(tl)
+		end, _ := rend.SpanPosToRuneIdx(tl.EndSpan, tl.EndIdx)
+		reg := textbuf.NewRegion(pos.Ln, st, pos.Ln, end)
+		ed.HighlightRegion(reg)
+		ed.SetCursorShow(pos)
+		ed.SavePosHistory(ed.CursorPos)
+		ed.OpenLink(tl)
 	}
 	return tl, ok
 }
 
 // HandleTextViewMouse handles mouse events.Event
-func (tv *Editor) HandleTextViewMouse() {
-	tv.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
-		if tv.StateIs(states.Disabled) {
+func (ed *Editor) HandleTextViewMouse() {
+	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
+		if ed.StateIs(states.Disabled) {
 			return
 		}
-		if !tv.StateIs(states.Focused) {
-			tv.GrabFocus()
+		if !ed.StateIs(states.Focused) {
+			ed.GrabFocus()
 		}
-		pt := tv.PointToRelPos(e.LocalPos())
-		newPos := tv.PixelToCursor(pt)
+		pt := ed.PointToRelPos(e.LocalPos())
+		newPos := ed.PixelToCursor(pt)
 		switch e.MouseButton() {
 		case events.Left:
-			tv.SetState(true, states.Focused)
-			if _, got := tv.OpenLinkAt(newPos); got {
+			ed.SetState(true, states.Focused)
+			if _, got := ed.OpenLinkAt(newPos); got {
 			} else {
-				tv.SetCursorFromMouse(pt, newPos, e.SelectMode())
-				tv.SavePosHistory(tv.CursorPos)
+				ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
+				ed.SavePosHistory(ed.CursorPos)
 			}
 		case events.Middle:
-			if !tv.IsDisabled() {
-				tv.SetCursorFromMouse(pt, newPos, e.SelectMode())
-				tv.SavePosHistory(tv.CursorPos)
-				tv.Paste()
+			if !ed.IsDisabled() {
+				ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
+				ed.SavePosHistory(ed.CursorPos)
+				ed.Paste()
 			}
 		case events.Right:
-			tv.SetCursorFromMouse(pt, newPos, e.SelectMode())
-			// tv.EmitContextMenuSignal()
-			tv.This().(gi.Widget).ContextMenu()
+			ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
+			// ed.EmitContextMenuSignal()
+			ed.This().(gi.Widget).ContextMenu()
 
 		}
 	})
-	tv.OnDoubleClick(func(e events.Event) {
-		if tv.StateIs(states.Disabled) {
+	ed.OnDoubleClick(func(e events.Event) {
+		if ed.StateIs(states.Disabled) {
 			return
 		}
-		if !tv.StateIs(states.Focused) {
-			tv.GrabFocus()
-			tv.Send(events.Focus, e) // sets focused flag
+		if !ed.StateIs(states.Focused) {
+			ed.GrabFocus()
+			ed.Send(events.Focus, e) // sets focused flag
 		}
 		e.SetHandled()
-		if tv.HasSelection() {
-			if tv.SelectReg.Start.Ln == tv.SelectReg.End.Ln {
-				sz := tv.Buf.LineLen(tv.SelectReg.Start.Ln)
-				if tv.SelectReg.Start.Ch == 0 && tv.SelectReg.End.Ch == sz {
-					tv.SelectReset()
+		if ed.HasSelection() {
+			if ed.SelectReg.Start.Ln == ed.SelectReg.End.Ln {
+				sz := ed.Buf.LineLen(ed.SelectReg.Start.Ln)
+				if ed.SelectReg.Start.Ch == 0 && ed.SelectReg.End.Ch == sz {
+					ed.SelectReset()
 				} else { // assume word, go line
-					tv.SelectReg.Start.Ch = 0
-					tv.SelectReg.End.Ch = sz
+					ed.SelectReg.Start.Ch = 0
+					ed.SelectReg.End.Ch = sz
 				}
 			} else {
-				tv.SelectReset()
+				ed.SelectReset()
 			}
 		} else {
-			if tv.SelectWord() {
-				tv.CursorPos = tv.SelectReg.Start
+			if ed.SelectWord() {
+				ed.CursorPos = ed.SelectReg.Start
 			}
 		}
 	})
-	tv.On(events.SlideMove, func(e events.Event) {
-		if tv.StateIs(states.Disabled) {
+	ed.On(events.SlideMove, func(e events.Event) {
+		if ed.StateIs(states.Disabled) {
 			return
 		}
 		e.SetHandled()
-		if !tv.SelectMode {
-			tv.SelectModeToggle()
+		if !ed.SelectMode {
+			ed.SelectModeToggle()
 		}
-		pt := tv.PointToRelPos(e.LocalPos())
-		newPos := tv.PixelToCursor(pt)
-		tv.SetCursorFromMouse(pt, newPos, events.SelectOne)
+		pt := ed.PointToRelPos(e.LocalPos())
+		newPos := ed.PixelToCursor(pt)
+		ed.SetCursorFromMouse(pt, newPos, events.SelectOne)
 	})
 }
 
 // todo: needs this in event filtering update!
-// if !tv.HasLinks {
+// if !ed.HasLinks {
 // 	return
 // }
 
 /*
 // MouseMoveEvent
-func (tv *View) MouseMoveEvent() {
+func (ed *View) MouseMoveEvent() {
 	we.AddFunc(events.MouseMove, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
 		me := d.(events.Event)
 		me.SetHandled()
-		tvv := recv.Embed(TypeView).(*View)
-		pt := tv.PointToRelPos(me.LocalPos())
-		mpos := tvv.PixelToCursor(pt)
-		if mpos.Ln >= tvv.NLines {
+		edv := recv.Embed(TypeView).(*View)
+		pt := ed.PointToRelPos(me.LocalPos())
+		mpos := edv.PixelToCursor(pt)
+		if mpos.Ln >= edv.NLines {
 			return
 		}
-		pos := tv.RenderStartPos()
-		pos.Y += tv.Offs[mpos.Ln]
-		pos.X += tv.LineNoOff
-		rend := &tvv.Renders[mpos.Ln]
+		pos := ed.RenderStartPos()
+		pos.Y += ed.Offs[mpos.Ln]
+		pos.X += ed.LineNoOff
+		rend := &edv.Renders[mpos.Ln]
 		inLink := false
 		for _, tl := range rend.Links {
 			tlb := tl.Bounds(rend, pos)
@@ -662,9 +662,9 @@ func (tv *View) MouseMoveEvent() {
 		}
 		// TODO: figure out how to handle links with new cursor setup
 		// if inLink {
-		// 	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
+		// 	goosi.TheApp.Cursor(ed.ParentRenderWin().RenderWin).PushIfNot(cursors.Pointer)
 		// } else {
-		// 	goosi.TheApp.Cursor(tv.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
+		// 	goosi.TheApp.Cursor(ed.ParentRenderWin().RenderWin).PopIf(cursors.Pointer)
 		// }
 
 	})
@@ -674,51 +674,51 @@ func (tv *View) MouseMoveEvent() {
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (tv *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
-	oldPos := tv.CursorPos
+func (ed *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
+	oldPos := ed.CursorPos
 	if newPos == oldPos {
 		return
 	}
 	//	fmt.Printf("set cursor fm mouse: %v\n", newPos)
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 
-	if !tv.SelectMode && selMode == events.ExtendContinuous {
-		if tv.SelectReg == textbuf.RegionNil {
-			tv.SelectStart = tv.CursorPos
+	if !ed.SelectMode && selMode == events.ExtendContinuous {
+		if ed.SelectReg == textbuf.RegionNil {
+			ed.SelectStart = ed.CursorPos
 		}
-		tv.SetCursor(newPos)
-		tv.SelectRegUpdate(tv.CursorPos)
-		tv.RenderCursor(true)
+		ed.SetCursor(newPos)
+		ed.SelectRegUpdate(ed.CursorPos)
+		ed.RenderCursor(true)
 		return
 	}
 
-	tv.SetCursor(newPos)
-	if tv.SelectMode || selMode != events.SelectOne {
-		if !tv.SelectMode && selMode != events.SelectOne {
-			tv.SelectMode = true
-			tv.SelectStart = newPos
-			tv.SelectRegUpdate(tv.CursorPos)
+	ed.SetCursor(newPos)
+	if ed.SelectMode || selMode != events.SelectOne {
+		if !ed.SelectMode && selMode != events.SelectOne {
+			ed.SelectMode = true
+			ed.SelectStart = newPos
+			ed.SelectRegUpdate(ed.CursorPos)
 		}
-		if !tv.StateIs(states.Sliding) && selMode == events.SelectOne {
-			ln := tv.CursorPos.Ln
-			ch := tv.CursorPos.Ch
-			if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
-				tv.SelectReset()
+		if !ed.StateIs(states.Sliding) && selMode == events.SelectOne {
+			ln := ed.CursorPos.Ln
+			ch := ed.CursorPos.Ch
+			if ln != ed.SelectReg.Start.Ln || ch < ed.SelectReg.Start.Ch || ch > ed.SelectReg.End.Ch {
+				ed.SelectReset()
 			}
 		} else {
-			tv.SelectRegUpdate(tv.CursorPos)
+			ed.SelectRegUpdate(ed.CursorPos)
 		}
-		if tv.StateIs(states.Sliding) {
-			tv.AutoScroll(pt.Add(tv.ScBBox.Min))
+		if ed.StateIs(states.Sliding) {
+			ed.AutoScroll(pt.Add(ed.ScBBox.Min))
 		} else {
-			tv.ScrollCursorToCenterIfHidden()
+			ed.ScrollCursorToCenterIfHidden()
 		}
-	} else if tv.HasSelection() {
-		ln := tv.CursorPos.Ln
-		ch := tv.CursorPos.Ch
-		if ln != tv.SelectReg.Start.Ln || ch < tv.SelectReg.Start.Ch || ch > tv.SelectReg.End.Ch {
-			tv.SelectReset()
+	} else if ed.HasSelection() {
+		ln := ed.CursorPos.Ln
+		ch := ed.CursorPos.Ch
+		if ln != ed.SelectReg.Start.Ln || ch < ed.SelectReg.Start.Ch || ch > ed.SelectReg.End.Ch {
+			ed.SelectReset()
 		}
 	}
 }

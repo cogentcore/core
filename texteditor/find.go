@@ -21,15 +21,15 @@ import (
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (tv *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Match, bool) {
+func (ed *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Match, bool) {
 	fsz := len(find)
 	if fsz == 0 {
-		tv.Highlights = nil
+		ed.Highlights = nil
 		return nil, false
 	}
-	_, matches := tv.Buf.Search([]byte(find), !useCase, lexItems)
+	_, matches := ed.Buf.Search([]byte(find), !useCase, lexItems)
 	if len(matches) == 0 {
-		tv.Highlights = nil
+		ed.Highlights = nil
 		return matches, false
 	}
 	hi := make([]textbuf.Region, len(matches))
@@ -39,14 +39,14 @@ func (tv *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Ma
 			break
 		}
 	}
-	tv.Highlights = hi
+	ed.Highlights = hi
 	return matches, true
 }
 
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (tv *Editor) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
+func (ed *Editor) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
 	for i, m := range matches {
-		reg := tv.Buf.AdjustReg(m.Reg)
+		reg := ed.Buf.AdjustReg(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
 			return i, true
 		}
@@ -86,157 +86,157 @@ var ViewMaxFindHighlights = 1000
 var PrevISearchString string
 
 // ISearchMatches finds ISearch matches -- returns true if there are any
-func (tv *Editor) ISearchMatches() bool {
+func (ed *Editor) ISearchMatches() bool {
 	got := false
-	tv.ISearch.Matches, got = tv.FindMatches(tv.ISearch.Find, tv.ISearch.UseCase, false)
+	ed.ISearch.Matches, got = ed.FindMatches(ed.ISearch.Find, ed.ISearch.UseCase, false)
 	return got
 }
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (tv *Editor) ISearchNextMatch(cpos lex.Pos) bool {
-	if len(tv.ISearch.Matches) == 0 {
-		tv.ISearchSig()
+func (ed *Editor) ISearchNextMatch(cpos lex.Pos) bool {
+	if len(ed.ISearch.Matches) == 0 {
+		ed.ISearchSig()
 		return false
 	}
-	tv.ISearch.Pos, _ = tv.MatchFromPos(tv.ISearch.Matches, cpos)
-	tv.ISearchSelectMatch(tv.ISearch.Pos)
+	ed.ISearch.Pos, _ = ed.MatchFromPos(ed.ISearch.Matches, cpos)
+	ed.ISearchSelectMatch(ed.ISearch.Pos)
 	return true
 }
 
-// ISearchSelectMatch selects match at given match index (e.g., tv.ISearch.Pos)
-func (tv *Editor) ISearchSelectMatch(midx int) {
-	nm := len(tv.ISearch.Matches)
+// ISearchSelectMatch selects match at given match index (e.g., ed.ISearch.Pos)
+func (ed *Editor) ISearchSelectMatch(midx int) {
+	nm := len(ed.ISearch.Matches)
 	if midx >= nm {
-		tv.ISearchSig()
+		ed.ISearchSig()
 		return
 	}
-	m := tv.ISearch.Matches[midx]
-	reg := tv.Buf.AdjustReg(m.Reg)
+	m := ed.ISearch.Matches[midx]
+	reg := ed.Buf.AdjustReg(m.Reg)
 	pos := reg.Start
-	tv.SelectReg = reg
-	tv.SetCursor(pos)
-	tv.SavePosHistory(tv.CursorPos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.ISearchSig()
+	ed.SelectReg = reg
+	ed.SetCursor(pos)
+	ed.SavePosHistory(ed.CursorPos)
+	ed.ScrollCursorToCenterIfHidden()
+	ed.ISearchSig()
 }
 
 // ISearchSig sends the signal that ISearch is updated
-func (tv *Editor) ISearchSig() {
-	// tv.ViewSig.Emit(tv.This(), int64(ViewISearch), tv.CursorPos)
+func (ed *Editor) ISearchSig() {
+	// ed.ViewSig.Emit(ed.This(), int64(ViewISearch), ed.CursorPos)
 }
 
 // ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
-func (tv *Editor) ISearchStart() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	if tv.ISearch.On {
-		if tv.ISearch.Find != "" { // already searching -- find next
-			sz := len(tv.ISearch.Matches)
+func (ed *Editor) ISearchStart() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	if ed.ISearch.On {
+		if ed.ISearch.Find != "" { // already searching -- find next
+			sz := len(ed.ISearch.Matches)
 			if sz > 0 {
-				if tv.ISearch.Pos < sz-1 {
-					tv.ISearch.Pos++
+				if ed.ISearch.Pos < sz-1 {
+					ed.ISearch.Pos++
 				} else {
-					tv.ISearch.Pos = 0
+					ed.ISearch.Pos = 0
 				}
-				tv.ISearchSelectMatch(tv.ISearch.Pos)
+				ed.ISearchSelectMatch(ed.ISearch.Pos)
 			}
 		} else { // restore prev
 			if PrevISearchString != "" {
-				tv.ISearch.Find = PrevISearchString
-				tv.ISearch.UseCase = lex.HasUpperCase(tv.ISearch.Find)
-				tv.ISearchMatches()
-				tv.ISearchNextMatch(tv.CursorPos)
-				tv.ISearch.StartPos = tv.CursorPos
+				ed.ISearch.Find = PrevISearchString
+				ed.ISearch.UseCase = lex.HasUpperCase(ed.ISearch.Find)
+				ed.ISearchMatches()
+				ed.ISearchNextMatch(ed.CursorPos)
+				ed.ISearch.StartPos = ed.CursorPos
 			}
 			// nothing..
 		}
 	} else {
-		tv.ISearch.On = true
-		tv.ISearch.Find = ""
-		tv.ISearch.StartPos = tv.CursorPos
-		tv.ISearch.UseCase = false
-		tv.ISearch.Matches = nil
-		tv.SelectReset()
-		tv.ISearch.Pos = -1
-		tv.ISearchSig()
+		ed.ISearch.On = true
+		ed.ISearch.Find = ""
+		ed.ISearch.StartPos = ed.CursorPos
+		ed.ISearch.UseCase = false
+		ed.ISearch.Matches = nil
+		ed.SelectReset()
+		ed.ISearch.Pos = -1
+		ed.ISearchSig()
 	}
 }
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *Editor) ISearchKeyInput(kt events.Event) {
+func (ed *Editor) ISearchKeyInput(kt events.Event) {
 	r := kt.KeyRune()
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	// if tv.ISearch.Find == PrevISearchString { // undo starting point
-	// 	tv.ISearch.Find = ""
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	// if ed.ISearch.Find == PrevISearchString { // undo starting point
+	// 	ed.ISearch.Find = ""
 	// }
 	if unicode.IsUpper(r) { // todo: more complex
-		tv.ISearch.UseCase = true
+		ed.ISearch.UseCase = true
 	}
-	tv.ISearch.Find += string(r)
-	tv.ISearchMatches()
-	sz := len(tv.ISearch.Matches)
+	ed.ISearch.Find += string(r)
+	ed.ISearchMatches()
+	sz := len(ed.ISearch.Matches)
 	if sz == 0 {
-		tv.ISearch.Pos = -1
-		tv.ISearchSig()
+		ed.ISearch.Pos = -1
+		ed.ISearchSig()
 		return
 	}
-	tv.ISearchNextMatch(tv.CursorPos)
+	ed.ISearchNextMatch(ed.CursorPos)
 }
 
 // ISearchBackspace gets rid of one item in search string
-func (tv *Editor) ISearchBackspace() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	if tv.ISearch.Find == PrevISearchString { // undo starting point
-		tv.ISearch.Find = ""
-		tv.ISearch.UseCase = false
-		tv.ISearch.Matches = nil
-		tv.SelectReset()
-		tv.ISearch.Pos = -1
-		tv.ISearchSig()
+func (ed *Editor) ISearchBackspace() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	if ed.ISearch.Find == PrevISearchString { // undo starting point
+		ed.ISearch.Find = ""
+		ed.ISearch.UseCase = false
+		ed.ISearch.Matches = nil
+		ed.SelectReset()
+		ed.ISearch.Pos = -1
+		ed.ISearchSig()
 		return
 	}
-	if len(tv.ISearch.Find) <= 1 {
-		tv.SelectReset()
-		tv.ISearch.Find = ""
-		tv.ISearch.UseCase = false
+	if len(ed.ISearch.Find) <= 1 {
+		ed.SelectReset()
+		ed.ISearch.Find = ""
+		ed.ISearch.UseCase = false
 		return
 	}
-	tv.ISearch.Find = tv.ISearch.Find[:len(tv.ISearch.Find)-1]
-	tv.ISearchMatches()
-	sz := len(tv.ISearch.Matches)
+	ed.ISearch.Find = ed.ISearch.Find[:len(ed.ISearch.Find)-1]
+	ed.ISearchMatches()
+	sz := len(ed.ISearch.Matches)
 	if sz == 0 {
-		tv.ISearch.Pos = -1
-		tv.ISearchSig()
+		ed.ISearch.Pos = -1
+		ed.ISearchSig()
 		return
 	}
-	tv.ISearchNextMatch(tv.CursorPos)
+	ed.ISearchNextMatch(ed.CursorPos)
 }
 
 // ISearchCancel cancels ISearch mode
-func (tv *Editor) ISearchCancel() {
-	if !tv.ISearch.On {
+func (ed *Editor) ISearchCancel() {
+	if !ed.ISearch.On {
 		return
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	if tv.ISearch.Find != "" {
-		PrevISearchString = tv.ISearch.Find
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	if ed.ISearch.Find != "" {
+		PrevISearchString = ed.ISearch.Find
 	}
-	tv.ISearch.PrevPos = tv.ISearch.Pos
-	tv.ISearch.Find = ""
-	tv.ISearch.UseCase = false
-	tv.ISearch.On = false
-	tv.ISearch.Pos = -1
-	tv.ISearch.Matches = nil
-	tv.Highlights = nil
-	tv.SavePosHistory(tv.CursorPos)
-	tv.SelectReset()
-	tv.ISearchSig()
+	ed.ISearch.PrevPos = ed.ISearch.Pos
+	ed.ISearch.Find = ""
+	ed.ISearch.UseCase = false
+	ed.ISearch.On = false
+	ed.ISearch.Pos = -1
+	ed.ISearch.Matches = nil
+	ed.Highlights = nil
+	ed.SavePosHistory(ed.CursorPos)
+	ed.SelectReset()
+	ed.ISearchSig()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -280,8 +280,8 @@ var PrevQReplaceFinds []string
 var PrevQReplaceRepls []string
 
 // QReplaceSig sends the signal that QReplace is updated
-func (tv *Editor) QReplaceSig() {
-	// tv.ViewSig.Emit(tv.This(), int64(ViewQReplace), tv.CursorPos)
+func (ed *Editor) QReplaceSig() {
+	// ed.ViewSig.Emit(ed.This(), int64(ViewQReplace), ed.CursorPos)
 }
 
 // QReplaceDialog prompts the user for a query-replace items, with choosers with history
@@ -334,161 +334,161 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
 // user for items to search etc
-func (tv *Editor) QReplacePrompt() {
+func (ed *Editor) QReplacePrompt() {
 	find := ""
-	if tv.HasSelection() {
-		find = string(tv.Selection().ToBytes())
+	if ed.HasSelection() {
+		find = string(ed.Selection().ToBytes())
 	}
-	QReplaceDialog(tv, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, tv.QReplace.LexItems, func(dlg *gi.Dialog) {
+	QReplaceDialog(ed, gi.DlgOpts{Title: "Query-Replace", Prompt: "Enter strings for find and replace, then select Ok -- with dialog dismissed press <b>y</b> to replace current match, <b>n</b> to skip, <b>Enter</b> or <b>q</b> to quit, <b>!</b> to replace-all remaining"}, find, ed.QReplace.LexItems, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			find, repl, lexItems := QReplaceDialogValues(dlg)
-			tv.QReplaceStart(find, repl, lexItems)
+			ed.QReplaceStart(find, repl, lexItems)
 		}
 	})
 }
 
 // QReplaceStart starts query-replace using given find, replace strings
-func (tv *Editor) QReplaceStart(find, repl string, lexItems bool) {
-	tv.QReplace.On = true
-	tv.QReplace.Find = find
-	tv.QReplace.Replace = repl
-	tv.QReplace.LexItems = lexItems
-	tv.QReplace.StartPos = tv.CursorPos
-	tv.QReplace.UseCase = lex.HasUpperCase(find)
-	tv.QReplace.Matches = nil
-	tv.QReplace.Pos = -1
+func (ed *Editor) QReplaceStart(find, repl string, lexItems bool) {
+	ed.QReplace.On = true
+	ed.QReplace.Find = find
+	ed.QReplace.Replace = repl
+	ed.QReplace.LexItems = lexItems
+	ed.QReplace.StartPos = ed.CursorPos
+	ed.QReplace.UseCase = lex.HasUpperCase(find)
+	ed.QReplace.Matches = nil
+	ed.QReplace.Pos = -1
 
 	gi.StringsInsertFirstUnique(&PrevQReplaceFinds, find, gi.Prefs.Params.SavedPathsMax)
 	gi.StringsInsertFirstUnique(&PrevQReplaceRepls, repl, gi.Prefs.Params.SavedPathsMax)
 
-	tv.QReplaceMatches()
-	tv.QReplace.Pos, _ = tv.MatchFromPos(tv.QReplace.Matches, tv.CursorPos)
-	tv.QReplaceSelectMatch(tv.QReplace.Pos)
-	tv.QReplaceSig()
+	ed.QReplaceMatches()
+	ed.QReplace.Pos, _ = ed.MatchFromPos(ed.QReplace.Matches, ed.CursorPos)
+	ed.QReplaceSelectMatch(ed.QReplace.Pos)
+	ed.QReplaceSig()
 }
 
 // QReplaceMatches finds QReplace matches -- returns true if there are any
-func (tv *Editor) QReplaceMatches() bool {
+func (ed *Editor) QReplaceMatches() bool {
 	got := false
-	tv.QReplace.Matches, got = tv.FindMatches(tv.QReplace.Find, tv.QReplace.UseCase, tv.QReplace.LexItems)
+	ed.QReplace.Matches, got = ed.FindMatches(ed.QReplace.Find, ed.QReplace.UseCase, ed.QReplace.LexItems)
 	return got
 }
 
 // QReplaceNextMatch finds next match using, QReplace.Pos and highlights it, etc
-func (tv *Editor) QReplaceNextMatch() bool {
-	nm := len(tv.QReplace.Matches)
+func (ed *Editor) QReplaceNextMatch() bool {
+	nm := len(ed.QReplace.Matches)
 	if nm == 0 {
 		return false
 	}
-	tv.QReplace.Pos++
-	if tv.QReplace.Pos >= nm {
+	ed.QReplace.Pos++
+	if ed.QReplace.Pos >= nm {
 		return false
 	}
-	tv.QReplaceSelectMatch(tv.QReplace.Pos)
+	ed.QReplaceSelectMatch(ed.QReplace.Pos)
 	return true
 }
 
-// QReplaceSelectMatch selects match at given match index (e.g., tv.QReplace.Pos)
-func (tv *Editor) QReplaceSelectMatch(midx int) {
-	nm := len(tv.QReplace.Matches)
+// QReplaceSelectMatch selects match at given match index (e.g., ed.QReplace.Pos)
+func (ed *Editor) QReplaceSelectMatch(midx int) {
+	nm := len(ed.QReplace.Matches)
 	if midx >= nm {
 		return
 	}
-	m := tv.QReplace.Matches[midx]
-	reg := tv.Buf.AdjustReg(m.Reg)
+	m := ed.QReplace.Matches[midx]
+	reg := ed.Buf.AdjustReg(m.Reg)
 	pos := reg.Start
-	tv.SelectReg = reg
-	tv.SetCursor(pos)
-	tv.SavePosHistory(tv.CursorPos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.QReplaceSig()
+	ed.SelectReg = reg
+	ed.SetCursor(pos)
+	ed.SavePosHistory(ed.CursorPos)
+	ed.ScrollCursorToCenterIfHidden()
+	ed.QReplaceSig()
 }
 
-// QReplaceReplace replaces at given match index (e.g., tv.QReplace.Pos)
-func (tv *Editor) QReplaceReplace(midx int) {
-	nm := len(tv.QReplace.Matches)
+// QReplaceReplace replaces at given match index (e.g., ed.QReplace.Pos)
+func (ed *Editor) QReplaceReplace(midx int) {
+	nm := len(ed.QReplace.Matches)
 	if midx >= nm {
 		return
 	}
-	m := tv.QReplace.Matches[midx]
-	rep := tv.QReplace.Replace
-	reg := tv.Buf.AdjustReg(m.Reg)
+	m := ed.QReplace.Matches[midx]
+	rep := ed.QReplace.Replace
+	reg := ed.Buf.AdjustReg(m.Reg)
 	pos := reg.Start
 	// last arg is matchCase, only if not using case to match and rep is also lower case
-	matchCase := !tv.QReplace.UseCase && !lex.HasUpperCase(rep)
-	tv.Buf.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
-	tv.Highlights[midx] = textbuf.RegionNil
-	tv.SetCursor(pos)
-	tv.SavePosHistory(tv.CursorPos)
-	tv.ScrollCursorToCenterIfHidden()
-	tv.QReplaceSig()
+	matchCase := !ed.QReplace.UseCase && !lex.HasUpperCase(rep)
+	ed.Buf.ReplaceText(reg.Start, reg.End, pos, rep, EditSignal, matchCase)
+	ed.Highlights[midx] = textbuf.RegionNil
+	ed.SetCursor(pos)
+	ed.SavePosHistory(ed.CursorPos)
+	ed.ScrollCursorToCenterIfHidden()
+	ed.QReplaceSig()
 }
 
 // QReplaceReplaceAll replaces all remaining from index
-func (tv *Editor) QReplaceReplaceAll(midx int) {
-	nm := len(tv.QReplace.Matches)
+func (ed *Editor) QReplaceReplaceAll(midx int) {
+	nm := len(ed.QReplace.Matches)
 	if midx >= nm {
 		return
 	}
 	for mi := midx; mi < nm; mi++ {
-		tv.QReplaceReplace(mi)
+		ed.QReplaceReplace(mi)
 	}
 }
 
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *Editor) QReplaceKeyInput(kt events.Event) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+func (ed *Editor) QReplaceKeyInput(kt events.Event) {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 
 	switch {
 	case kt.KeyRune() == 'y':
-		tv.QReplaceReplace(tv.QReplace.Pos)
-		if !tv.QReplaceNextMatch() {
-			tv.QReplaceCancel()
+		ed.QReplaceReplace(ed.QReplace.Pos)
+		if !ed.QReplaceNextMatch() {
+			ed.QReplaceCancel()
 		}
 	case kt.KeyRune() == 'n':
-		if !tv.QReplaceNextMatch() {
-			tv.QReplaceCancel()
+		if !ed.QReplaceNextMatch() {
+			ed.QReplaceCancel()
 		}
 	case kt.KeyRune() == 'q' || kt.KeyChord() == "ReturnEnter":
-		tv.QReplaceCancel()
+		ed.QReplaceCancel()
 	case kt.KeyRune() == '!':
-		tv.QReplaceReplaceAll(tv.QReplace.Pos)
-		tv.QReplaceCancel()
+		ed.QReplaceReplaceAll(ed.QReplace.Pos)
+		ed.QReplaceCancel()
 	}
 }
 
 // QReplaceCancel cancels QReplace mode
-func (tv *Editor) QReplaceCancel() {
-	if !tv.QReplace.On {
+func (ed *Editor) QReplaceCancel() {
+	if !ed.QReplace.On {
 		return
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	tv.QReplace.On = false
-	tv.QReplace.Pos = -1
-	tv.QReplace.Matches = nil
-	tv.Highlights = nil
-	tv.SavePosHistory(tv.CursorPos)
-	tv.SelectReset()
-	tv.QReplaceSig()
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	ed.QReplace.On = false
+	ed.QReplace.Pos = -1
+	ed.QReplace.Matches = nil
+	ed.Highlights = nil
+	ed.SavePosHistory(ed.CursorPos)
+	ed.SelectReset()
+	ed.QReplaceSig()
 }
 
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
-func (tv *Editor) EscPressed() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+func (ed *Editor) EscPressed() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 	switch {
-	case tv.ISearch.On:
-		tv.ISearchCancel()
-		tv.SetCursorShow(tv.ISearch.StartPos)
-	case tv.QReplace.On:
-		tv.QReplaceCancel()
-		tv.SetCursorShow(tv.ISearch.StartPos)
-	case tv.HasSelection():
-		tv.SelectReset()
+	case ed.ISearch.On:
+		ed.ISearchCancel()
+		ed.SetCursorShow(ed.ISearch.StartPos)
+	case ed.QReplace.On:
+		ed.QReplaceCancel()
+		ed.SetCursorShow(ed.ISearch.StartPos)
+	case ed.HasSelection():
+		ed.SelectReset()
 	default:
-		tv.Highlights = nil
+		ed.Highlights = nil
 	}
 }

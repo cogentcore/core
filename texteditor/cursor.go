@@ -29,7 +29,7 @@ var ViewBlinker *time.Ticker
 var BlinkingView *Editor
 
 // ViewSpriteName is the name of the window sprite used for the cursor
-var ViewSpriteName = "textview.View.Cursor"
+var ViewSpriteName = "texteditor.Editor.Cursor"
 
 // ViewBlink is function that blinks text field cursor
 func ViewBlink() {
@@ -51,30 +51,30 @@ func ViewBlink() {
 			ViewBlinkMu.Unlock()
 			continue
 		}
-		tv := BlinkingView
-		if tv.Sc == nil || !tv.StateIs(states.Focused) || !tv.This().(gi.Widget).IsVisible() {
-			tv.RenderCursor(false)
+		ed := BlinkingView
+		if ed.Sc == nil || !ed.StateIs(states.Focused) || !ed.This().(gi.Widget).IsVisible() {
+			ed.RenderCursor(false)
 			BlinkingView = nil
 			ViewBlinkMu.Unlock()
 			continue
 		}
-		tv.BlinkOn = !tv.BlinkOn
-		tv.RenderCursor(tv.BlinkOn)
+		ed.BlinkOn = !ed.BlinkOn
+		ed.RenderCursor(ed.BlinkOn)
 		ViewBlinkMu.Unlock()
 	}
 }
 
 // StartCursor starts the cursor blinking and renders it
-func (tv *Editor) StartCursor() {
-	if tv == nil || tv.This() == nil {
+func (ed *Editor) StartCursor() {
+	if ed == nil || ed.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Widget).IsVisible() {
+	if !ed.This().(gi.Widget).IsVisible() {
 		return
 	}
-	tv.BlinkOn = true
+	ed.BlinkOn = true
 	if gi.CursorBlinkTime == 0 {
-		tv.RenderCursor(true)
+		ed.RenderCursor(true)
 		return
 	}
 	ViewBlinkMu.Lock()
@@ -82,70 +82,70 @@ func (tv *Editor) StartCursor() {
 		ViewBlinker = time.NewTicker(gi.CursorBlinkTime)
 		go ViewBlink()
 	}
-	tv.BlinkOn = true
-	tv.RenderCursor(true)
-	BlinkingView = tv
+	ed.BlinkOn = true
+	ed.RenderCursor(true)
+	BlinkingView = ed
 	ViewBlinkMu.Unlock()
 }
 
 // StopCursor stops the cursor from blinking
-func (tv *Editor) StopCursor() {
-	if tv == nil || tv.This() == nil {
+func (ed *Editor) StopCursor() {
+	if ed == nil || ed.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Widget).IsVisible() {
+	if !ed.This().(gi.Widget).IsVisible() {
 		return
 	}
-	tv.RenderCursor(false)
+	ed.RenderCursor(false)
 	ViewBlinkMu.Lock()
-	if BlinkingView == tv {
+	if BlinkingView == ed {
 		BlinkingView = nil
 	}
 	ViewBlinkMu.Unlock()
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
-func (tv *Editor) CursorBBox(pos lex.Pos) image.Rectangle {
-	cpos := tv.CharStartPos(pos)
-	cbmin := cpos.SubScalar(tv.CursorWidth.Dots)
-	cbmax := cpos.AddScalar(tv.CursorWidth.Dots)
-	cbmax.Y += tv.FontHeight
+func (ed *Editor) CursorBBox(pos lex.Pos) image.Rectangle {
+	cpos := ed.CharStartPos(pos)
+	cbmin := cpos.SubScalar(ed.CursorWidth.Dots)
+	cbmax := cpos.AddScalar(ed.CursorWidth.Dots)
+	cbmax.Y += ed.FontHeight
 	curBBox := image.Rectangle{cbmin.ToPointFloor(), cbmax.ToPointCeil()}
 	return curBBox
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
-func (tv *Editor) RenderCursor(on bool) {
-	if tv == nil || tv.This() == nil {
+func (ed *Editor) RenderCursor(on bool) {
+	if ed == nil || ed.This() == nil {
 		return
 	}
-	if !tv.This().(gi.Widget).IsVisible() {
+	if !ed.This().(gi.Widget).IsVisible() {
 		return
 	}
-	if tv.Renders == nil {
+	if ed.Renders == nil {
 		return
 	}
-	tv.CursorMu.Lock()
-	defer tv.CursorMu.Unlock()
+	ed.CursorMu.Lock()
+	defer ed.CursorMu.Unlock()
 
-	sp := tv.CursorSprite(on)
+	sp := ed.CursorSprite(on)
 	if sp == nil {
 		return
 	}
-	sp.Geom.Pos = tv.CharStartPos(tv.CursorPos).ToPointFloor()
+	sp.Geom.Pos = ed.CharStartPos(ed.CursorPos).ToPointFloor()
 }
 
 // CursorSpriteName returns the name of the cursor sprite
-func (tv *Editor) CursorSpriteName() string {
-	spnm := fmt.Sprintf("%v-%v", ViewSpriteName, tv.FontHeight)
+func (ed *Editor) CursorSpriteName() string {
+	spnm := fmt.Sprintf("%v-%v", ViewSpriteName, ed.FontHeight)
 	return spnm
 }
 
 // CursorSprite returns the sprite for the cursor, which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
-func (tv *Editor) CursorSprite(on bool) *gi.Sprite {
-	sc := tv.Sc
+func (ed *Editor) CursorSprite(on bool) *gi.Sprite {
+	sc := ed.Sc
 	if sc == nil {
 		return nil
 	}
@@ -153,16 +153,16 @@ func (tv *Editor) CursorSprite(on bool) *gi.Sprite {
 	if ms == nil {
 		return nil // only MainStage has sprites
 	}
-	spnm := tv.CursorSpriteName()
+	spnm := ed.CursorSpriteName()
 	sp, ok := ms.Sprites.SpriteByName(spnm)
 	if !ok {
-		bbsz := image.Point{int(mat32.Ceil(tv.CursorWidth.Dots)), int(mat32.Ceil(tv.FontHeight))}
+		bbsz := image.Point{int(mat32.Ceil(ed.CursorWidth.Dots)), int(mat32.Ceil(ed.FontHeight))}
 		if bbsz.X < 2 { // at least 2
 			bbsz.X = 2
 		}
 		sp = gi.NewSprite(spnm, bbsz, image.Point{})
 		ibox := sp.Pixels.Bounds()
-		draw.Draw(sp.Pixels, ibox, &image.Uniform{tv.CursorColor.Solid}, image.Point{}, draw.Src)
+		draw.Draw(sp.Pixels, ibox, &image.Uniform{ed.CursorColor.Solid}, image.Point{}, draw.Src)
 		ms.Sprites.Add(sp)
 	}
 	if on {

@@ -12,9 +12,9 @@ import (
 	"goki.dev/mat32/v2"
 )
 
-// TwinViews presents two side-by-side View windows in Splits
+// TwinEditors presents two side-by-side [Editor]s in [gi.Splits]
 // that scroll in sync with each other.
-type TwinViews struct {
+type TwinEditors struct {
 	gi.Splits
 
 	// textbuf for A
@@ -24,14 +24,14 @@ type TwinViews struct {
 	BufB *Buf `json:"-" xml:"-"`
 }
 
-func (tv *TwinViews) OnInit() {
-	tv.Dim = mat32.X
-	tv.Style(func(s *styles.Style) {
+func (te *TwinEditors) OnInit() {
+	te.Dim = mat32.X
+	te.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
 }
 
-func (tv *TwinViews) OnChildAdded(child ki.Ki) {
+func (te *TwinEditors) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
 	switch w.Name() {
 	case "text-a-lay", "text-b-lay":
@@ -48,67 +48,67 @@ func (tv *TwinViews) OnChildAdded(child ki.Ki) {
 }
 
 // MakeBufs ensures that the Bufs are made, if nil
-func (tv *TwinViews) MakeBufs() {
-	if tv.BufA != nil {
+func (te *TwinEditors) MakeBufs() {
+	if te.BufA != nil {
 		return
 	}
-	tv.BufA = NewBuf()
-	tv.BufB = NewBuf()
+	te.BufA = NewBuf()
+	te.BufB = NewBuf()
 }
 
 // SetFiles sets files for each text buf
-func (tv *TwinViews) SetFiles(fileA, fileB string, lineNos bool) {
-	tv.MakeBufs()
-	tv.BufA.Filename = gi.FileName(fileA)
-	tv.BufA.Opts.LineNos = lineNos
-	tv.BufA.Stat() // update markup
-	tv.BufB.Filename = gi.FileName(fileB)
-	tv.BufB.Opts.LineNos = lineNos
-	tv.BufB.Stat() // update markup
+func (te *TwinEditors) SetFiles(fileA, fileB string, lineNos bool) {
+	te.MakeBufs()
+	te.BufA.Filename = gi.FileName(fileA)
+	te.BufA.Opts.LineNos = lineNos
+	te.BufA.Stat() // update markup
+	te.BufB.Filename = gi.FileName(fileB)
+	te.BufB.Opts.LineNos = lineNos
+	te.BufB.Stat() // update markup
 }
 
-func (tv *TwinViews) ConfigTexts() {
-	tv.MakeBufs()
+func (te *TwinEditors) ConfigTexts() {
+	te.MakeBufs()
 	config := ki.Config{}
 	config.Add(gi.LayoutType, "text-a-lay")
 	config.Add(gi.LayoutType, "text-b-lay")
-	mods, updt := tv.ConfigChildren(config)
-	al, bl := tv.ViewLays()
+	mods, updt := te.ConfigChildren(config)
+	al, bl := te.ViewLays()
 	if !mods {
-		updt = tv.UpdateStart()
+		updt = te.UpdateStart()
 	} else {
 		av := NewView(al, "text-a")
 		bv := NewView(bl, "text-b")
-		av.SetBuf(tv.BufA)
-		bv.SetBuf(tv.BufB)
+		av.SetBuf(te.BufA)
+		bv.SetBuf(te.BufB)
 
 		// sync scrolling
-		// al.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// al.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	dm := mat32.Dims(sig)
 		// 	if dm == mat32.Y {
 		// 		bl.ScrollToPos(dm, data.(float32))
 		// 	}
 		// })
-		// bl.ScrollSig.Connect(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		// bl.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	dm := mat32.Dims(sig)
 		// 	if dm == mat32.Y {
 		// 		al.ScrollToPos(dm, data.(float32))
 		// 	}
 		// })
 	}
-	tv.UpdateEnd(updt)
+	te.UpdateEnd(updt)
 }
 
-// ViewLays returns the two layouts that control the two textviews
-func (tv *TwinViews) ViewLays() (*gi.Layout, *gi.Layout) {
-	a := tv.Child(0).(*gi.Layout)
-	b := tv.Child(1).(*gi.Layout)
+// ViewLays returns the two layouts that control the two texteiews
+func (te *TwinEditors) ViewLays() (*gi.Layout, *gi.Layout) {
+	a := te.Child(0).(*gi.Layout)
+	b := te.Child(1).(*gi.Layout)
 	return a, b
 }
 
-// Views returns the two textviews
-func (tv *TwinViews) Views() (*Editor, *Editor) {
-	a, b := tv.ViewLays()
+// Views returns the two texteiews
+func (te *TwinEditors) Views() (*Editor, *Editor) {
+	a, b := te.ViewLays()
 	av := a.Child(0).(*Editor)
 	bv := b.Child(0).(*Editor)
 	return av, bv

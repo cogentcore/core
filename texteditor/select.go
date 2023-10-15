@@ -20,44 +20,44 @@ import (
 
 // HighlightRegion creates a new highlighted region,
 // triggers updating.
-func (tv *Editor) HighlightRegion(reg textbuf.Region) {
-	tv.Highlights = []textbuf.Region{reg}
-	tv.SetNeedsRender()
+func (ed *Editor) HighlightRegion(reg textbuf.Region) {
+	ed.Highlights = []textbuf.Region{reg}
+	ed.SetNeedsRender()
 }
 
 // ClearHighlights clears the Highlights slice of all regions
-func (tv *Editor) ClearHighlights() {
-	if len(tv.Highlights) == 0 {
+func (ed *Editor) ClearHighlights() {
+	if len(ed.Highlights) == 0 {
 		return
 	}
-	tv.Highlights = tv.Highlights[:0]
-	tv.SetNeedsRender()
+	ed.Highlights = ed.Highlights[:0]
+	ed.SetNeedsRender()
 }
 
 // ClearScopelights clears the Highlights slice of all regions
-func (tv *Editor) ClearScopelights() {
-	if len(tv.Scopelights) == 0 {
+func (ed *Editor) ClearScopelights() {
+	if len(ed.Scopelights) == 0 {
 		return
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	sl := make([]textbuf.Region, len(tv.Scopelights))
-	copy(sl, tv.Scopelights)
-	tv.Scopelights = tv.Scopelights[:0]
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	sl := make([]textbuf.Region, len(ed.Scopelights))
+	copy(sl, ed.Scopelights)
+	ed.Scopelights = ed.Scopelights[:0]
 }
 
 //////////////////////////////////////////////////////////
 // 	Selection
 
 // ClearSelected resets both the global selected flag and any current selection
-func (tv *Editor) ClearSelected() {
-	// tv.WidgetBase.ClearSelected()
-	tv.SelectReset()
+func (ed *Editor) ClearSelected() {
+	// ed.WidgetBase.ClearSelected()
+	ed.SelectReset()
 }
 
 // HasSelection returns whether there is a selected region of text
-func (tv *Editor) HasSelection() bool {
-	if tv.SelectReg.Start.IsLess(tv.SelectReg.End) {
+func (ed *Editor) HasSelection() bool {
+	if ed.SelectReg.Start.IsLess(ed.SelectReg.End) {
 		return true
 	}
 	return false
@@ -65,37 +65,37 @@ func (tv *Editor) HasSelection() bool {
 
 // Selection returns the currently selected text as a textbuf.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
-func (tv *Editor) Selection() *textbuf.Edit {
-	if tv.HasSelection() {
-		return tv.Buf.Region(tv.SelectReg.Start, tv.SelectReg.End)
+func (ed *Editor) Selection() *textbuf.Edit {
+	if ed.HasSelection() {
+		return ed.Buf.Region(ed.SelectReg.Start, ed.SelectReg.End)
 	}
 	return nil
 }
 
 // SelectModeToggle toggles the SelectMode, updating selection with cursor movement
-func (tv *Editor) SelectModeToggle() {
-	if tv.SelectMode {
-		tv.SelectMode = false
+func (ed *Editor) SelectModeToggle() {
+	if ed.SelectMode {
+		ed.SelectMode = false
 	} else {
-		tv.SelectMode = true
-		tv.SelectStart = tv.CursorPos
-		tv.SelectRegUpdate(tv.CursorPos)
+		ed.SelectMode = true
+		ed.SelectStart = ed.CursorPos
+		ed.SelectRegUpdate(ed.CursorPos)
 	}
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 }
 
 // SelectAll selects all the text
-func (tv *Editor) SelectAll() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	tv.SelectReg.Start = lex.PosZero
-	tv.SelectReg.End = tv.Buf.EndPos()
+func (ed *Editor) SelectAll() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	ed.SelectReg.Start = lex.PosZero
+	ed.SelectReg.End = ed.Buf.EndPos()
 }
 
 // WordBefore returns the word before the lex.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (tv *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
-	txt := tv.Buf.Line(tp.Ln)
+func (ed *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
+	txt := ed.Buf.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
 	st := ch
@@ -112,15 +112,15 @@ func (tv *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 		}
 	}
 	if st != ch {
-		return tv.Buf.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
+		return ed.Buf.Region(lex.Pos{Ln: tp.Ln, Ch: st}, tp)
 	}
 	return nil
 }
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *Editor) IsWordStart(tp lex.Pos) bool {
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
+func (ed *Editor) IsWordStart(tp lex.Pos) bool {
+	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -145,8 +145,8 @@ func (tv *Editor) IsWordStart(tp lex.Pos) bool {
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *Editor) IsWordEnd(tp lex.Pos) bool {
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
+func (ed *Editor) IsWordEnd(tp lex.Pos) bool {
+	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
@@ -176,8 +176,8 @@ func (tv *Editor) IsWordEnd(tp lex.Pos) bool {
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (tv *Editor) IsWordMiddle(tp lex.Pos) bool {
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
+func (ed *Editor) IsWordMiddle(tp lex.Pos) bool {
+	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
 		return false
@@ -198,28 +198,28 @@ func (tv *Editor) IsWordMiddle(tp lex.Pos) bool {
 
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
-func (tv *Editor) SelectWord() bool {
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
+func (ed *Editor) SelectWord() bool {
+	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return false
 	}
-	reg := tv.WordAt()
-	tv.SelectReg = reg
-	tv.SelectStart = tv.SelectReg.Start
+	reg := ed.WordAt()
+	ed.SelectReg = reg
+	ed.SelectStart = ed.SelectReg.Start
 	return true
 }
 
 // WordAt finds the region of the word at the current cursor position
-func (tv *Editor) WordAt() (reg textbuf.Region) {
-	reg.Start = tv.CursorPos
-	reg.End = tv.CursorPos
-	txt := tv.Buf.Line(tv.CursorPos.Ln)
+func (ed *Editor) WordAt() (reg textbuf.Region) {
+	reg.Start = ed.CursorPos
+	reg.End = ed.CursorPos
+	txt := ed.Buf.Line(ed.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
 		return reg
 	}
-	sch := min(tv.CursorPos.Ch, sz-1)
+	sch := min(ed.CursorPos.Ch, sz-1)
 	if !lex.IsWordBreak(txt[sch], rune(-1)) {
 		for sch > 0 {
 			r2 := rune(-1)
@@ -232,7 +232,7 @@ func (tv *Editor) WordAt() (reg textbuf.Region) {
 			sch--
 		}
 		reg.Start.Ch = sch
-		ech := tv.CursorPos.Ch + 1
+		ech := ed.CursorPos.Ch + 1
 		for ech < sz {
 			r2 := rune(-1)
 			if ech < sz-1 {
@@ -245,7 +245,7 @@ func (tv *Editor) WordAt() (reg textbuf.Region) {
 		}
 		reg.End.Ch = ech
 	} else { // keep the space start -- go to next space..
-		ech := tv.CursorPos.Ch + 1
+		ech := ed.CursorPos.Ch + 1
 		for ech < sz {
 			if !lex.IsWordBreak(txt[ech], rune(-1)) {
 				break
@@ -268,18 +268,18 @@ func (tv *Editor) WordAt() (reg textbuf.Region) {
 }
 
 // SelectReset resets the selection
-func (tv *Editor) SelectReset() {
-	tv.SelectMode = false
-	if !tv.HasSelection() {
+func (ed *Editor) SelectReset() {
+	ed.SelectMode = false
+	if !ed.HasSelection() {
 		return
 	}
-	tv.SelectReg = textbuf.RegionNil
-	tv.PrevSelectReg = textbuf.RegionNil
+	ed.SelectReg = textbuf.RegionNil
+	ed.PrevSelectReg = textbuf.RegionNil
 }
 
 // RenderSelectLines renders the lines within the current selection region
-func (tv *Editor) RenderSelectLines() {
-	tv.PrevSelectReg = tv.SelectReg
+func (ed *Editor) RenderSelectLines() {
+	ed.PrevSelectReg = ed.SelectReg
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -334,91 +334,91 @@ func ViewClipHistChooseList() []string {
 }
 
 // PasteHist presents a chooser of clip history items, pastes into text if selected
-func (tv *Editor) PasteHist() {
+func (ed *Editor) PasteHist() {
 	if ViewClipHistory == nil {
 		return
 	}
 	cl := ViewClipHistChooseList()
-	gi.StringsChooserPopup(cl, "", tv, func(ac *gi.Button) {
+	gi.StringsChooserPopup(cl, "", ed, func(ac *gi.Button) {
 		idx := ac.Data.(int)
 		clip := ViewClipHistory[idx]
 		if clip != nil {
-			updt := tv.UpdateStart()
-			defer tv.UpdateEndRender(updt)
-			tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
-			tv.InsertAtCursor(clip)
-			tv.SavePosHistory(tv.CursorPos)
+			updt := ed.UpdateStart()
+			defer ed.UpdateEndRender(updt)
+			ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
+			ed.InsertAtCursor(clip)
+			ed.SavePosHistory(ed.CursorPos)
 		}
 	})
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (tv *Editor) Cut() *textbuf.Edit {
-	if !tv.HasSelection() {
+func (ed *Editor) Cut() *textbuf.Edit {
+	if !ed.HasSelection() {
 		return nil
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	org := tv.SelectReg.Start
-	cut := tv.DeleteSelection()
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	org := ed.SelectReg.Start
+	cut := ed.DeleteSelection()
 	if cut != nil {
 		cb := cut.ToBytes()
-		tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
+		ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 		ViewClipHistAdd(cb)
 	}
-	tv.SetCursorShow(org)
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SetCursorShow(org)
+	ed.SavePosHistory(ed.CursorPos)
 	return cut
 }
 
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textbuf.Edit (nil if none)
-func (tv *Editor) DeleteSelection() *textbuf.Edit {
-	tbe := tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
-	tv.SelectReset()
+func (ed *Editor) DeleteSelection() *textbuf.Edit {
+	tbe := ed.Buf.DeleteText(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
+	ed.SelectReset()
 	return tbe
 }
 
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (tv *Editor) Copy(reset bool) *textbuf.Edit {
-	tbe := tv.Selection()
+func (ed *Editor) Copy(reset bool) *textbuf.Edit {
+	tbe := ed.Selection()
 	if tbe == nil {
 		return nil
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
 	ViewClipHistAdd(cb)
-	tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
+	ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 	if reset {
-		tv.SelectReset()
+		ed.SelectReset()
 	}
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 	return tbe
 }
 
 // Paste inserts text from the clipboard at current cursor position
-func (tv *Editor) Paste() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	data := tv.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
+func (ed *Editor) Paste() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	data := ed.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
 	if data != nil {
-		tv.InsertAtCursor(data.TypeData(filecat.TextPlain))
-		tv.SavePosHistory(tv.CursorPos)
+		ed.InsertAtCursor(data.TypeData(filecat.TextPlain))
+		ed.SavePosHistory(ed.CursorPos)
 	}
 }
 
 // InsertAtCursor inserts given text at current cursor position
-func (tv *Editor) InsertAtCursor(txt []byte) {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+func (ed *Editor) InsertAtCursor(txt []byte) {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 
-	if tv.HasSelection() {
-		tbe := tv.DeleteSelection()
-		tv.CursorPos = tbe.AdjustPos(tv.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
+	if ed.HasSelection() {
+		tbe := ed.DeleteSelection()
+		ed.CursorPos = tbe.AdjustPos(ed.CursorPos, textbuf.AdjustPosDelStart) // move to start if in reg
 	}
-	tbe := tv.Buf.InsertText(tv.CursorPos, txt, EditSignal)
+	tbe := ed.Buf.InsertText(ed.CursorPos, txt, EditSignal)
 	if tbe == nil {
 		return
 	}
@@ -426,8 +426,8 @@ func (tv *Editor) InsertAtCursor(txt []byte) {
 	if len(txt) == 1 && txt[0] == '\n' {
 		pos.Ch = 0 // sometimes it doesn't go to the start..
 	}
-	tv.SetCursorShow(pos)
-	tv.SetCursorCol(tv.CursorPos)
+	ed.SetCursorShow(pos)
+	ed.SetCursorCol(ed.CursorPos)
 }
 
 ///////////////////////////////////////////////////////////
@@ -440,74 +440,74 @@ var ViewClipRect *textbuf.Edit
 
 // CutRect cuts rectangle defined by selected text (upper left to lower right)
 // and adds it to the clipboard, also returns cut text.
-func (tv *Editor) CutRect() *textbuf.Edit {
-	if !tv.HasSelection() {
+func (ed *Editor) CutRect() *textbuf.Edit {
+	if !ed.HasSelection() {
 		return nil
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
-	npos := lex.Pos{Ln: tv.SelectReg.End.Ln, Ch: tv.SelectReg.Start.Ch}
-	cut := tv.Buf.DeleteTextRect(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
+	npos := lex.Pos{Ln: ed.SelectReg.End.Ln, Ch: ed.SelectReg.Start.Ch}
+	cut := ed.Buf.DeleteTextRect(ed.SelectReg.Start, ed.SelectReg.End, EditSignal)
 	if cut != nil {
 		cb := cut.ToBytes()
-		tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
+		ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 		ViewClipRect = cut
 	}
-	tv.SetCursorShow(npos)
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SetCursorShow(npos)
+	ed.SavePosHistory(ed.CursorPos)
 	return cut
 }
 
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (tv *Editor) CopyRect(reset bool) *textbuf.Edit {
-	tbe := tv.Buf.RegionRect(tv.SelectReg.Start, tv.SelectReg.End)
+func (ed *Editor) CopyRect(reset bool) *textbuf.Edit {
+	tbe := ed.Buf.RegionRect(ed.SelectReg.Start, ed.SelectReg.End)
 	if tbe == nil {
 		return nil
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 	cb := tbe.ToBytes()
-	tv.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
+	ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(cb))
 	ViewClipRect = tbe
 	if reset {
-		tv.SelectReset()
+		ed.SelectReset()
 	}
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 	return tbe
 }
 
 // PasteRect inserts text from the clipboard at current cursor position
-func (tv *Editor) PasteRect() {
+func (ed *Editor) PasteRect() {
 	if ViewClipRect == nil {
 		return
 	}
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 	ce := ViewClipRect.Clone()
 	nl := ce.Reg.End.Ln - ce.Reg.Start.Ln
 	nch := ce.Reg.End.Ch - ce.Reg.Start.Ch
-	ce.Reg.Start.Ln = tv.CursorPos.Ln
-	ce.Reg.End.Ln = tv.CursorPos.Ln + nl
-	ce.Reg.Start.Ch = tv.CursorPos.Ch
-	ce.Reg.End.Ch = tv.CursorPos.Ch + nch
-	tbe := tv.Buf.InsertTextRect(ce, EditSignal)
+	ce.Reg.Start.Ln = ed.CursorPos.Ln
+	ce.Reg.End.Ln = ed.CursorPos.Ln + nl
+	ce.Reg.Start.Ch = ed.CursorPos.Ch
+	ce.Reg.End.Ch = ed.CursorPos.Ch + nch
+	tbe := ed.Buf.InsertTextRect(ce, EditSignal)
 
 	pos := tbe.Reg.End
-	tv.SetCursorShow(pos)
-	tv.SetCursorCol(tv.CursorPos)
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SetCursorShow(pos)
+	ed.SetCursorCol(ed.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 }
 
 // ReCaseSelection changes the case of the currently-selected text.
 // Returns the new text -- empty if nothing selected.
-func (tv *Editor) ReCaseSelection(c textbuf.Cases) string {
-	if !tv.HasSelection() {
+func (ed *Editor) ReCaseSelection(c textbuf.Cases) string {
+	if !ed.HasSelection() {
 		return ""
 	}
-	sel := tv.Selection()
+	sel := ed.Selection()
 	nstr := textbuf.ReCaseString(string(sel.ToBytes()), c)
-	tv.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
+	ed.Buf.ReplaceText(sel.Reg.Start, sel.Reg.End, sel.Reg.Start, nstr, EditSignal, ReplaceNoMatchCase)
 	return nstr
 }
 
@@ -515,20 +515,20 @@ func (tv *Editor) ReCaseSelection(c textbuf.Cases) string {
 //  Context Menu
 
 // ContextMenu displays the context menu with options dependent on situation
-func (tv *Editor) ContextMenu() {
-	if !tv.HasSelection() && tv.Buf.IsSpellEnabled(tv.CursorPos) {
-		if tv.Buf.Spell != nil {
-			if tv.OfferCorrect() {
+func (ed *Editor) ContextMenu() {
+	if !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
+		if ed.Buf.Spell != nil {
+			if ed.OfferCorrect() {
 				return
 			}
 		}
 	}
-	tv.WidgetBase.ContextMenu()
+	ed.WidgetBase.ContextMenu()
 }
 
 // ContextMenuPos returns the position of the context menu
-func (tv *Editor) ContextMenuPos() (pos image.Point) {
-	em := tv.EventMgr()
+func (ed *Editor) ContextMenuPos() (pos image.Point) {
+	em := ed.EventMgr()
 	_ = em
 	// if em != nil {
 	// 	return em.LastMousePos
@@ -536,24 +536,24 @@ func (tv *Editor) ContextMenuPos() (pos image.Point) {
 	return image.Point{100, 100}
 }
 
-// MakeContextMenu builds the textview context menu
-func (tv *Editor) MakeContextMenu(m *gi.Menu) {
+// MakeContextMenu builds the text editor context menu
+func (ed *Editor) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddButton(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
-		tv.Copy(true)
+		ed.Copy(true)
 	})
-	ac.SetEnabledState(tv.HasSelection())
-	if !tv.IsDisabled() {
+	ac.SetEnabledState(ed.HasSelection())
+	if !ed.IsDisabled() {
 		ac = m.AddButton(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut}, func(act *gi.Button) {
-			tv.Cut()
+			ed.Cut()
 		})
-		ac.SetEnabledState(tv.HasSelection())
+		ac.SetEnabledState(ed.HasSelection())
 		ac = m.AddButton(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste}, func(act *gi.Button) {
-			tv.Paste()
+			ed.Paste()
 		})
-		ac.SetState(tv.EventMgr().ClipBoard().IsEmpty(), states.Disabled)
+		ac.SetState(ed.EventMgr().ClipBoard().IsEmpty(), states.Disabled)
 	} else {
 		ac = m.AddButton(gi.ActOpts{Label: "Clear"}, func(act *gi.Button) {
-			tv.Clear()
+			ed.Clear()
 		})
 	}
 }

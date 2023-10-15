@@ -1403,14 +1403,14 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinViews {
+func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinEditors {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title, Ok: true, Cancel: false}, nil)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	tv := frame.InsertNewChild(texteditor.TwinViewsType, prIdx+1, "twin-view").(*texteditor.TwinViews)
+	tv := frame.InsertNewChild(texteditor.TwinViewsType, prIdx+1, "twin-view").(*texteditor.TwinEditors)
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))

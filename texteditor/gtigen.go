@@ -23,25 +23,25 @@ var TwinViewsType = gti.AddType(&gti.Type{
 		{"Splits", &gti.Field{Name: "Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TwinViews{},
+	Instance: &TwinEditors{},
 })
 
 // NewTwinViews adds a new [TwinViews] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTwinViews(par ki.Ki, name ...string) *TwinViews {
-	return par.NewChild(TwinViewsType, name...).(*TwinViews)
+func NewTwinViews(par ki.Ki, name ...string) *TwinEditors {
+	return par.NewChild(TwinViewsType, name...).(*TwinEditors)
 }
 
 // KiType returns the [*gti.Type] of [TwinViews]
-func (t *TwinViews) KiType() *gti.Type {
+func (t *TwinEditors) KiType() *gti.Type {
 	return TwinViewsType
 }
 
 // New returns a new [*TwinViews] value
-func (t *TwinViews) New() ki.Ki {
-	return &TwinViews{}
+func (t *TwinEditors) New() ki.Ki {
+	return &TwinEditors{}
 }
 
 // ViewType is the [gti.Type] for [View]
