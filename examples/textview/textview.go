@@ -14,7 +14,7 @@ import (
 )
 
 // var samplefile gi.FileName = "sample.go"
-var samplefile gi.FileName = "../../Makefile"
+var samplefile gi.FileName = "../../README.md"
 
 func main() { gimain.Run(app) }
 
@@ -70,25 +70,8 @@ func app() {
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
-	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
+	txbuf.Hi.Lang = "Markdown" // "Go" // "Markdown"
 	txbuf.Open(samplefile)
-
-	// // main menu
-	// appnm := gi.AppName()
-	// mmen := win.MainMenu
-	// mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
-	//
-	// amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	// amen.Menu = make(gi.MenuStage, 0, 10)
-	// amen.Menu.AddAppMenu(win)
-	//
-	// emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	// emen.Menu = make(gi.MenuStage, 0, 10)
-	// emen.Menu.AddCopyCutPaste(win)
-	//
-	// win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-	// 	go gi.Quit() // once main window is closed, quit
-	// })
 
 	gi.NewWindow(sc).Run().Wait()
 }

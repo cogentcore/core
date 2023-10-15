@@ -10,6 +10,7 @@ import (
 	"goki.dev/enums"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 )
 
@@ -38,9 +39,22 @@ const (
 	InstaDrag
 )
 
-// SetSelected sets the selected flag to given value
+// SetSelected sets the Selected flag to given value
 func (wb *WidgetBase) SetSelected(sel bool) {
 	wb.SetState(sel, states.Selected)
+}
+
+// SetSelectedAction sets the Selected state flag
+// to given value and Sends an events.Select event.
+// Only if current selected state is different.
+func (wb *WidgetBase) SetSelectedAction(sel bool) bool {
+	csel := wb.StateIs(states.Selected)
+	if csel == sel {
+		return false
+	}
+	wb.SetState(sel, states.Selected)
+	wb.Send(events.Select, nil)
+	return true
 }
 
 // CanFocus checks if this node can receive keyboard focus

@@ -369,202 +369,41 @@ func (i *DirFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TreeViewSignalsValues = []TreeViewSignals{0, 1, 2, 3, 4, 5, 6, 7, 8}
-
-// TreeViewSignalsN is the highest valid value
-// for type TreeViewSignals, plus one.
-const TreeViewSignalsN TreeViewSignals = 9
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TreeViewSignalsNoOp() {
-	var x [1]struct{}
-	_ = x[TreeViewSelected-(0)]
-	_ = x[TreeViewUnselected-(1)]
-	_ = x[TreeViewAllSelected-(2)]
-	_ = x[TreeViewAllUnselected-(3)]
-	_ = x[TreeViewOpened-(4)]
-	_ = x[TreeViewClosed-(5)]
-	_ = x[TreeViewChanged-(6)]
-	_ = x[TreeViewInserted-(7)]
-	_ = x[TreeViewDeleted-(8)]
-}
-
-var _TreeViewSignalsNameToValueMap = map[string]TreeViewSignals{
-	`TreeViewSelected`:      0,
-	`treeviewselected`:      0,
-	`TreeViewUnselected`:    1,
-	`treeviewunselected`:    1,
-	`TreeViewAllSelected`:   2,
-	`treeviewallselected`:   2,
-	`TreeViewAllUnselected`: 3,
-	`treeviewallunselected`: 3,
-	`TreeViewOpened`:        4,
-	`treeviewopened`:        4,
-	`TreeViewClosed`:        5,
-	`treeviewclosed`:        5,
-	`TreeViewChanged`:       6,
-	`treeviewchanged`:       6,
-	`TreeViewInserted`:      7,
-	`treeviewinserted`:      7,
-	`TreeViewDeleted`:       8,
-	`treeviewdeleted`:       8,
-}
-
-var _TreeViewSignalsDescMap = map[TreeViewSignals]string{
-	0: `node was selected`,
-	1: `TreeView unselected`,
-	2: `TreeView all items were selected`,
-	3: `TreeView all items were unselected`,
-	4: `closed TreeView was opened`,
-	5: `open TreeView was closed -- children not visible`,
-	6: `means that some kind of edit operation has taken place by the user via the gui -- we don&#39;t track the details, just that changes have happened`,
-	7: `a node was inserted into the tree (Paste, DND) in this case, the data is the *source node* that was inserted`,
-	8: `a node was deleted from the tree (Cut, DND Move)`,
-}
-
-var _TreeViewSignalsMap = map[TreeViewSignals]string{
-	0: `TreeViewSelected`,
-	1: `TreeViewUnselected`,
-	2: `TreeViewAllSelected`,
-	3: `TreeViewAllUnselected`,
-	4: `TreeViewOpened`,
-	5: `TreeViewClosed`,
-	6: `TreeViewChanged`,
-	7: `TreeViewInserted`,
-	8: `TreeViewDeleted`,
-}
-
-// String returns the string representation
-// of this TreeViewSignals value.
-func (i TreeViewSignals) String() string {
-	if str, ok := _TreeViewSignalsMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the TreeViewSignals value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *TreeViewSignals) SetString(s string) error {
-	if val, ok := _TreeViewSignalsNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TreeViewSignalsNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type TreeViewSignals")
-}
-
-// Int64 returns the TreeViewSignals value as an int64.
-func (i TreeViewSignals) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the TreeViewSignals value from an int64.
-func (i *TreeViewSignals) SetInt64(in int64) {
-	*i = TreeViewSignals(in)
-}
-
-// Desc returns the description of the TreeViewSignals value.
-func (i TreeViewSignals) Desc() string {
-	if str, ok := _TreeViewSignalsDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// TreeViewSignalsValues returns all possible values
-// for the type TreeViewSignals.
-func TreeViewSignalsValues() []TreeViewSignals {
-	return _TreeViewSignalsValues
-}
-
-// Values returns all possible values
-// for the type TreeViewSignals.
-func (i TreeViewSignals) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TreeViewSignalsValues))
-	for i, d := range _TreeViewSignalsValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TreeViewSignals.
-func (i TreeViewSignals) IsValid() bool {
-	_, ok := _TreeViewSignalsMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TreeViewSignals) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TreeViewSignals) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _TreeViewFlagsValues = []TreeViewFlags{10, 11, 12, 13}
+var _TreeViewFlagsValues = []TreeViewFlags{10, 11}
 
 // TreeViewFlagsN is the highest valid value
 // for type TreeViewFlags, plus one.
-const TreeViewFlagsN TreeViewFlags = 14
+const TreeViewFlagsN TreeViewFlags = 12
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TreeViewFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[TreeViewFlagClosed-(10)]
-	_ = x[TreeViewFlagChanged-(11)]
-	_ = x[TreeViewFlagNoTemplate-(12)]
-	_ = x[TreeViewFlagUpdtRoot-(13)]
+	_ = x[TreeViewFlagSelectMode-(11)]
 }
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
 	`TreeViewFlagClosed`:     10,
 	`treeviewflagclosed`:     10,
-	`TreeViewFlagChanged`:    11,
-	`treeviewflagchanged`:    11,
-	`TreeViewFlagNoTemplate`: 12,
-	`treeviewflagnotemplate`: 12,
-	`TreeViewFlagUpdtRoot`:   13,
-	`treeviewflagupdtroot`:   13,
+	`TreeViewFlagSelectMode`: 11,
+	`treeviewflagselectmode`: 11,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
-	10: `TreeViewFlagClosed means node is toggled closed (children not visible)`,
-	11: `TreeViewFlagChanged is updated on the root node whenever a gui edit is made through the tree view on the tree -- this does not track any other changes that might have occurred in the tree itself. Also emits a TreeViewChanged signal on the root node.`,
-	12: `TreeViewFlagNoTemplate -- this node is not using a style template -- should be restyled on any full re-render change`,
-	13: `TreeViewFlagUpdtRoot -- for any update signal that comes from the source root node, do a full update of the treeview. This increases responsiveness of the updating and makes it easy to trigger a full update by updating the root node, but can be slower when not needed`,
+	10: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
+	11: `This flag on the Root node determines whether keyboard movements update selection or not.`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
 	10: `TreeViewFlagClosed`,
-	11: `TreeViewFlagChanged`,
-	12: `TreeViewFlagNoTemplate`,
-	13: `TreeViewFlagUpdtRoot`,
+	11: `TreeViewFlagSelectMode`,
 }
 
 // String returns the string representation
 // of this TreeViewFlags value.
 func (i TreeViewFlags) String() string {
 	str := ""
-	for _, ie := range ki.FlagsValues() {
-		if i.HasFlag(ie) {
-			ies := ie.BitIndexString()
-			if str == "" {
-				str = ies
-			} else {
-				str += "|" + ies
-			}
-		}
-	}
 	for _, ie := range _TreeViewFlagsValues {
 		if i.HasFlag(ie) {
 			ies := ie.BitIndexString()
@@ -587,7 +426,7 @@ func (i TreeViewFlags) BitIndexString() string {
 	if str, ok := _TreeViewFlagsMap[i]; ok {
 		return str
 	}
-	return ki.Flags(i).BitIndexString()
+	return strconv.FormatInt(int64(i), 10)
 }
 
 // SetString sets the TreeViewFlags value from its
@@ -610,10 +449,7 @@ func (i *TreeViewFlags) SetStringOr(s string) error {
 		} else if val, ok := _TreeViewFlagsNameToValueMap[strings.ToLower(flg)]; ok {
 			i.SetFlag(true, &val)
 		} else {
-			err := (*ki.Flags)(i).SetStringOr(flg)
-			if err != nil {
-				return err
-			}
+			return errors.New(flg + " is not a valid value for type TreeViewFlags")
 		}
 	}
 	return nil
@@ -634,32 +470,21 @@ func (i TreeViewFlags) Desc() string {
 	if str, ok := _TreeViewFlagsDescMap[i]; ok {
 		return str
 	}
-	return ki.Flags(i).Desc()
+	return i.String()
 }
 
 // TreeViewFlagsValues returns all possible values
 // for the type TreeViewFlags.
 func TreeViewFlagsValues() []TreeViewFlags {
-	es := ki.FlagsValues()
-	res := make([]TreeViewFlags, len(es))
-	for i, e := range es {
-		res[i] = TreeViewFlags(e)
-	}
-	res = append(res, _TreeViewFlagsValues...)
-	return res
+	return _TreeViewFlagsValues
 }
 
 // Values returns all possible values
 // for the type TreeViewFlags.
 func (i TreeViewFlags) Values() []enums.Enum {
-	es := ki.FlagsValues()
-	les := len(es)
-	res := make([]enums.Enum, les+len(_TreeViewFlagsValues))
-	for i, d := range es {
-		res[i] = d
-	}
+	res := make([]enums.Enum, len(_TreeViewFlagsValues))
 	for i, d := range _TreeViewFlagsValues {
-		res[i+les] = d
+		res[i] = d
 	}
 	return res
 }
@@ -668,9 +493,6 @@ func (i TreeViewFlags) Values() []enums.Enum {
 // valid option for type TreeViewFlags.
 func (i TreeViewFlags) IsValid() bool {
 	_, ok := _TreeViewFlagsMap[i]
-	if !ok {
-		return ki.Flags(i).IsValid()
-	}
 	return ok
 }
 
@@ -704,121 +526,5 @@ func (i TreeViewFlags) MarshalText() ([]byte, error) {
 
 // UnmarshalText implements the [encoding.TextUnmarshaler] interface.
 func (i *TreeViewFlags) UnmarshalText(text []byte) error {
-	return i.SetString(string(text))
-}
-
-var _TreeViewStatesValues = []TreeViewStates{0, 1, 2, 3}
-
-// TreeViewStatesN is the highest valid value
-// for type TreeViewStates, plus one.
-const TreeViewStatesN TreeViewStates = 4
-
-// An "invalid array index" compiler error signifies that the constant values have changed.
-// Re-run the enumgen command to generate them again.
-func _TreeViewStatesNoOp() {
-	var x [1]struct{}
-	_ = x[TreeViewActive-(0)]
-	_ = x[TreeViewSel-(1)]
-	_ = x[TreeViewFocus-(2)]
-	_ = x[TreeViewInactive-(3)]
-}
-
-var _TreeViewStatesNameToValueMap = map[string]TreeViewStates{
-	`TreeViewActive`:   0,
-	`treeviewactive`:   0,
-	`TreeViewSel`:      1,
-	`treeviewsel`:      1,
-	`TreeViewFocus`:    2,
-	`treeviewfocus`:    2,
-	`TreeViewInactive`: 3,
-	`treeviewinactive`: 3,
-}
-
-var _TreeViewStatesDescMap = map[TreeViewStates]string{
-	0: `TreeViewActive is normal state -- there but not being interacted with`,
-	1: `TreeViewSel is selected`,
-	2: `TreeViewFocus is in focus -- will respond to keyboard input`,
-	3: `TreeViewInactive is inactive -- if SrcNode is nil, or source has &#34;inactive&#34; property set, or treeview node has inactive property set directly`,
-}
-
-var _TreeViewStatesMap = map[TreeViewStates]string{
-	0: `TreeViewActive`,
-	1: `TreeViewSel`,
-	2: `TreeViewFocus`,
-	3: `TreeViewInactive`,
-}
-
-// String returns the string representation
-// of this TreeViewStates value.
-func (i TreeViewStates) String() string {
-	if str, ok := _TreeViewStatesMap[i]; ok {
-		return str
-	}
-	return strconv.FormatInt(int64(i), 10)
-}
-
-// SetString sets the TreeViewStates value from its
-// string representation, and returns an
-// error if the string is invalid.
-func (i *TreeViewStates) SetString(s string) error {
-	if val, ok := _TreeViewStatesNameToValueMap[s]; ok {
-		*i = val
-		return nil
-	}
-	if val, ok := _TreeViewStatesNameToValueMap[strings.ToLower(s)]; ok {
-		*i = val
-		return nil
-	}
-	return errors.New(s + " is not a valid value for type TreeViewStates")
-}
-
-// Int64 returns the TreeViewStates value as an int64.
-func (i TreeViewStates) Int64() int64 {
-	return int64(i)
-}
-
-// SetInt64 sets the TreeViewStates value from an int64.
-func (i *TreeViewStates) SetInt64(in int64) {
-	*i = TreeViewStates(in)
-}
-
-// Desc returns the description of the TreeViewStates value.
-func (i TreeViewStates) Desc() string {
-	if str, ok := _TreeViewStatesDescMap[i]; ok {
-		return str
-	}
-	return i.String()
-}
-
-// TreeViewStatesValues returns all possible values
-// for the type TreeViewStates.
-func TreeViewStatesValues() []TreeViewStates {
-	return _TreeViewStatesValues
-}
-
-// Values returns all possible values
-// for the type TreeViewStates.
-func (i TreeViewStates) Values() []enums.Enum {
-	res := make([]enums.Enum, len(_TreeViewStatesValues))
-	for i, d := range _TreeViewStatesValues {
-		res[i] = d
-	}
-	return res
-}
-
-// IsValid returns whether the value is a
-// valid option for type TreeViewStates.
-func (i TreeViewStates) IsValid() bool {
-	_, ok := _TreeViewStatesMap[i]
-	return ok
-}
-
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (i TreeViewStates) MarshalText() ([]byte, error) {
-	return []byte(i.String()), nil
-}
-
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-func (i *TreeViewStates) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
