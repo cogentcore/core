@@ -1584,11 +1584,6 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	tv.BBox = wi.BBoxes()
 	wi.ComputeBBoxes(sc, parBBox, image.Point{})
 
-	if gi.LayoutTrace {
-		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
-	}
-
 	tv.DoLayoutParts(sc, parBBox, iter) // use OUR version
 	h := mat32.Ceil(tv.WidgetSize.Y)
 	if !tv.IsClosed() {
@@ -1605,12 +1600,19 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
 		}
 	}
-	return tv.DoLayoutChildren(sc, iter)
+	redo := tv.DoLayoutChildren(sc, iter)
+	// once layout is done, we can get our reg size back
+	tv.LayState.Alloc.Size = tv.WidgetSize
+	if gi.LayoutTrace {
+		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
+	}
+	return redo
 }
 
 func (tv *TreeView) BBoxes() image.Rectangle {
 	// we have unusual situation of bbox != alloc
-	tp := tv.LayState.Alloc.PosOrig.ToPointFloor()
+	tp := tv.LayState.Alloc.Pos.ToPointFloor()
 	ts := tv.WidgetSize.ToPointCeil()
 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
 }
@@ -1643,36 +1645,8 @@ func (tv *TreeView) IsVisible() bool {
 	return tv.RootView.Par.This().(gi.Widget).IsVisible()
 }
 
-// func (tv *TreeView) PushBounds(sc *gi.Scene) bool {
-// 	if tv == nil || tv.This() == nil {
-// 		return false
-// 	}
-// 	if !tv.This().(gi.Widget).IsVisible() {
-// 		return false
-// 	}
-// 	if tv.ScBBox.Empty() {
-// 		return false
-// 	}
-// 	rs := sc.RenderState
-// 	rs.PushBounds(tv.ScBBox)
-// 	if gi.RenderTrace {
-// 		fmt.Printf("Render: %v at %v\n", tv.Path(), tv.ScBBox)
-// 	}
-// 	return true
-// }
-
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, _, st := tv.RenderLock(sc)
-	// pc.FontStyle = *st.FontRender()
-	// bg := st.BackgroundColor
-	// if bg.IsNil() {
-	// 	bg = tv.ParentBackgroundColor()
-	// }
-	// bg.SetSolid(colors.Black)
-	// pc.FillStyle.SetFullColor(&bg)
-	// pos := tv.LayState.Alloc.Pos
-	// sz := tv.WidgetSize
-	// pc.DrawBox(rs, pos, sz, st.Border)
 	tv.RenderStdBox(sc, st)
 	tv.RenderUnlock(rs)
 }
@@ -1685,10 +1659,11 @@ func (tv *TreeView) Render(sc *gi.Scene) {
 		// tv.UpdateInactive() // todo:
 		tv.RenderNode(sc)
 		tv.RenderParts(sc)
-		tv.RenderChildren(sc)
 		tv.PopBounds(sc)
 	}
-	// we always have to render our kids b/c we could be out of scope but they could be in!
+	// we always have to render our kids b/c
+	// we could be out of scope but they could be in!
+	tv.RenderChildren(sc)
 }
 
 //
