@@ -95,7 +95,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 		s.Height.SetEm(40)
 		s.SetStretchMax()
 	})
-	tv := texteditor.NewView(tlv, "text-view")
+	tv := texteditor.NewEditor(tlv, "text-view")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetState(true, states.Disabled)
 	tv.SetBuf(tb)

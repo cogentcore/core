@@ -17,7 +17,7 @@ type TextEditorValue struct {
 }
 
 func (vv *TextEditorValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = texteditor.ViewType
+	vv.WidgetTyp = texteditor.EditorType
 	return vv.WidgetTyp
 }
 

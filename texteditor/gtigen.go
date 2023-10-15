@@ -8,12 +8,12 @@ import (
 	"goki.dev/ordmap"
 )
 
-// TwinViewsType is the [gti.Type] for [TwinViews]
-var TwinViewsType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/textview.TwinViews",
-	ShortName:  "textview.TwinViews",
-	IDName:     "twin-views",
-	Doc:        "TwinViews presents two side-by-side View windows in Splits\nthat scroll in sync with each other.",
+// TwinEditorsType is the [gti.Type] for [TwinEditors]
+var TwinEditorsType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/texteditor.TwinEditors",
+	ShortName:  "texteditor.TwinEditors",
+	IDName:     "twin-editors",
+	Doc:        "TwinEditors presents two side-by-side [Editor]s in [gi.Splits]\nthat scroll in sync with each other.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
@@ -26,30 +26,30 @@ var TwinViewsType = gti.AddType(&gti.Type{
 	Instance: &TwinEditors{},
 })
 
-// NewTwinViews adds a new [TwinViews] with the given name
+// NewTwinEditors adds a new [TwinEditors] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTwinViews(par ki.Ki, name ...string) *TwinEditors {
-	return par.NewChild(TwinViewsType, name...).(*TwinEditors)
+func NewTwinEditors(par ki.Ki, name ...string) *TwinEditors {
+	return par.NewChild(TwinEditorsType, name...).(*TwinEditors)
 }
 
-// KiType returns the [*gti.Type] of [TwinViews]
+// KiType returns the [*gti.Type] of [TwinEditors]
 func (t *TwinEditors) KiType() *gti.Type {
-	return TwinViewsType
+	return TwinEditorsType
 }
 
-// New returns a new [*TwinViews] value
+// New returns a new [*TwinEditors] value
 func (t *TwinEditors) New() ki.Ki {
 	return &TwinEditors{}
 }
 
-// ViewType is the [gti.Type] for [View]
-var ViewType = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/textview.View",
-	ShortName: "textview.View",
-	IDName:    "view",
-	Doc:       "View is a widget for editing multiple lines of text (as compared to\nTextField for a single line).  The View is driven by a Buf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the View should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
+// EditorType is the [gti.Type] for [Editor]
+var EditorType = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/texteditor.Editor",
+	ShortName: "texteditor.Editor",
+	IDName:    "editor",
+	Doc:       "Editor is a widget for editing multiple lines of text (as compared to\n[gi.TextField] for a single line).  The Editor is driven by a Buf buffer which\ncontains all the text, and manages all the edits, sending update signals\nout to the views -- multiple views can be attached to a given buffer.  All\nupdating in the Editor should be within a single goroutine -- it would\nrequire extensive protections throughout code otherwise.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
@@ -101,42 +101,42 @@ var ViewType = gti.AddType(&gti.Type{
 	Instance: &Editor{},
 })
 
-// NewView adds a new [View] with the given name
+// NewEditor adds a new [Editor] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewView(par ki.Ki, name ...string) *Editor {
-	return par.NewChild(ViewType, name...).(*Editor)
+func NewEditor(par ki.Ki, name ...string) *Editor {
+	return par.NewChild(EditorType, name...).(*Editor)
 }
 
-// KiType returns the [*gti.Type] of [View]
+// KiType returns the [*gti.Type] of [Editor]
 func (t *Editor) KiType() *gti.Type {
-	return ViewType
+	return EditorType
 }
 
-// New returns a new [*View] value
+// New returns a new [*Editor] value
 func (t *Editor) New() ki.Ki {
 	return &Editor{}
 }
 
-// ViewEmbedder is an interface that all types that embed View satisfy
-type ViewEmbedder interface {
-	AsView() *Editor
+// EditorEmbedder is an interface that all types that embed Editor satisfy
+type EditorEmbedder interface {
+	AsEditor() *Editor
 }
 
-// AsView returns the given value as a value of type View if the type
-// of the given value embeds View, or nil otherwise
-func AsView(k ki.Ki) *Editor {
+// AsEditor returns the given value as a value of type Editor if the type
+// of the given value embeds Editor, or nil otherwise
+func AsEditor(k ki.Ki) *Editor {
 	if k == nil || k.This() == nil {
 		return nil
 	}
-	if t, ok := k.(ViewEmbedder); ok {
-		return t.AsView()
+	if t, ok := k.(EditorEmbedder); ok {
+		return t.AsEditor()
 	}
 	return nil
 }
 
-// AsView satisfies the [ViewEmbedder] interface
-func (t *Editor) AsView() *Editor {
+// AsEditor satisfies the [EditorEmbedder] interface
+func (t *Editor) AsEditor() *Editor {
 	return t
 }
