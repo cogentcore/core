@@ -78,7 +78,7 @@ func (ts *Tabs) TabsStyles() {
 
 func (ts *Tabs) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(ts) {
 	case "tabs":
 		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()
@@ -562,19 +562,19 @@ func (tb *Tab) TabButtonStyles() {
 
 func (tb *Tab) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(tb) {
 	case "parts":
 		w.Style(func(s *styles.Style) {
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
-	case "icon":
+	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "label":
+	case "parts/label":
 		label := w.(*Label)
 		label.Type = LabelTitleSmall
 		w.Style(func(s *styles.Style) {
@@ -583,11 +583,11 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "close-stretch":
+	case "parts/close-stretch":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetCh(1)
 		})
-	case "close":
+	case "parts/close":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEx(0.5)
 			s.Height.SetEx(0.5)
@@ -603,11 +603,11 @@ func (tb *Tab) OnChildAdded(child ki.Ki) {
 				s.StateLayer += 0.12
 			}
 		})
-	case "sc-stretch":
+	case "parts/sc-stretch":
 		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetCh(2)
 		})
-	case "shortcut":
+	case "parts/shortcut":
 		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()

@@ -94,12 +94,12 @@ func (sp *Spinner) SpinnerStyles() {
 
 func (sp *Spinner) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "parts":
+	switch w.PathFrom(sp) {
+	case "parts/parts":
 		w.Style(func(s *styles.Style) {
 			s.AlignV = styles.AlignMiddle
 		})
-	case "text-field":
+	case "parts/text-field":
 		tf := w.(*TextField)
 		tf.SetText(sp.ValToString(sp.Value))
 		tf.SetState(sp.IsDisabled(), states.Disabled)
@@ -107,7 +107,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 		tf.Style(func(s *styles.Style) {
 			s.SetMinPrefWidth(units.Em(3))
 		})
-	case "up":
+	case "parts/up":
 		up := w.(*Button)
 		up.Type = ButtonAction
 		if sp.UpIcon.IsNil() {
@@ -123,7 +123,7 @@ func (sp *Spinner) OnChildAdded(child ki.Ki) {
 			s.Font.Size.SetDp(18)
 			s.Padding.Set(units.Dp(4))
 		})
-	case "down":
+	case "parts/down":
 		down := w.(*Button)
 		down.Type = ButtonAction
 		if sp.DownIcon.IsNil() {

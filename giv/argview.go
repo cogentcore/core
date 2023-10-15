@@ -42,7 +42,7 @@ func (av *ArgView) OnInit() {
 
 func (av *ArgView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(av) {
 	case "title":
 		title := w.(*gi.Label)
 		title.Type = gi.LabelTitleLarge

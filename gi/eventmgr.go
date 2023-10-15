@@ -281,7 +281,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	case events.MouseDown:
 		if press != nil {
 			em.Press = press
-			fmt.Println("press:", press)
 		}
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
@@ -330,7 +329,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
 		case em.Press == up && up != nil:
-			fmt.Println("click:", up)
 			up.Send(events.Click, evi)
 		}
 		em.Press = nil

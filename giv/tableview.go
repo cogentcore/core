@@ -82,7 +82,7 @@ func (tv *TableView) OnInit() {
 
 func (tv *TableView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(tv) {
 	case "frame": // slice frame
 		sf := w.(*gi.Frame)
 		sf.Lay = gi.LayoutVert
@@ -107,7 +107,7 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 		w.Style(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
-	case "grid": // slice grid
+	case "grid-lay/grid": // slice grid
 		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes

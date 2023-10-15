@@ -115,8 +115,8 @@ func (sw *Switch) SwitchStyles() {
 
 func (sw *Switch) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "icon0": // on
+	switch w.PathFrom(sw) {
+	case "parts/stack/icon0": // on
 		w.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
 			// switches need to be bigger
@@ -128,7 +128,7 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 				s.Height.SetEm(1.5)
 			}
 		})
-	case "icon1": // off
+	case "parts/stack/icon1": // off
 		w.Style(func(s *styles.Style) {
 			// switches need to be bigger
 			if sw.Type == SwitchSwitch {
@@ -139,11 +139,12 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 				s.Height.SetEm(1.5)
 			}
 		})
-	case "space":
+	// todo: disabled?
+	case "parts/space":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetCh(0.1)
 		})
-	case "label":
+	case "parts/label":
 		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None

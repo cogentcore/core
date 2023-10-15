@@ -129,7 +129,7 @@ func (dv *DiffView) OnInit() {
 
 func (dv *DiffView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom() {
 	case "text-a-lay", "text-b-lay":
 		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()

@@ -215,8 +215,8 @@ func (tf *TextField) TextFieldStyles() {
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "lead-icon":
+	switch w.PathFrom(tf) {
+	case "parts/lead-icon":
 		lead := w.(*Button)
 		lead.Type = ButtonAction
 		lead.Style(func(s *styles.Style) {
@@ -225,7 +225,7 @@ func (tf *TextField) OnChildAdded(child ki.Ki) {
 			s.Color = colors.Scheme.OnSurfaceVariant
 			s.AlignV = styles.AlignMiddle
 		})
-	case "trail-icon":
+	case "parts/trail-icon":
 		trail := w.(*Button)
 		trail.Type = ButtonAction
 		trail.Style(func(s *styles.Style) {

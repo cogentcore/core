@@ -33,15 +33,12 @@ func (te *TwinEditors) OnInit() {
 
 func (te *TwinEditors) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
-	case "text-a-lay", "text-b-lay":
+	switch w.PathFrom(te) {
+	case "text-a", "text-b":
 		w.Style(func(s *styles.Style) {
 			s.SetStretchMax()
 			s.SetMinPrefWidth(units.Ch(80))
 			s.SetMinPrefHeight(units.Em(40))
-		})
-	case "text-a", "text-b":
-		w.Style(func(s *styles.Style) {
 			s.Font.Family = string(gi.Prefs.MonoFont)
 		})
 	}
@@ -70,17 +67,15 @@ func (te *TwinEditors) SetFiles(fileA, fileB string, lineNos bool) {
 func (te *TwinEditors) ConfigTexts() {
 	te.MakeBufs()
 	config := ki.Config{}
-	config.Add(gi.LayoutType, "text-a-lay")
-	config.Add(gi.LayoutType, "text-b-lay")
+	config.Add(EditorType, "text-a")
+	config.Add(EditorType, "text-b")
 	mods, updt := te.ConfigChildren(config)
-	al, bl := te.ViewLays()
 	if !mods {
 		updt = te.UpdateStart()
 	} else {
-		av := NewEditor(al, "text-a")
-		bv := NewEditor(bl, "text-b")
-		av.SetBuf(te.BufA)
-		bv.SetBuf(te.BufB)
+		ae, be := te.Editors()
+		ae.SetBuf(te.BufA)
+		be.SetBuf(te.BufB)
 
 		// sync scrolling
 		// al.ScrollSig.Connect(te.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -99,17 +94,9 @@ func (te *TwinEditors) ConfigTexts() {
 	te.UpdateEnd(updt)
 }
 
-// ViewLays returns the two layouts that control the two texteiews
-func (te *TwinEditors) ViewLays() (*gi.Layout, *gi.Layout) {
-	a := te.Child(0).(*gi.Layout)
-	b := te.Child(1).(*gi.Layout)
-	return a, b
-}
-
-// Views returns the two texteiews
-func (te *TwinEditors) Views() (*Editor, *Editor) {
-	a, b := te.ViewLays()
-	av := a.Child(0).(*Editor)
-	bv := b.Child(0).(*Editor)
-	return av, bv
+// Editors returns the two text Editors
+func (te *TwinEditors) Editors() (*Editor, *Editor) {
+	ae := te.Child(0).(*Editor)
+	be := te.Child(1).(*Editor)
+	return ae, be
 }

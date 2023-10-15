@@ -49,7 +49,7 @@ func (lv *VCSLogView) OnInit() {
 
 func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(lv) {
 	case "a-tf", "b-tf":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(12)

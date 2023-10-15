@@ -57,7 +57,7 @@ func (sv *SliceViewInline) OnInit() {
 
 func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(sv) {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Lay = gi.LayoutHoriz

@@ -150,13 +150,13 @@ func (ch *Chooser) ChooserStyles() {
 
 func (ch *Chooser) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "icon":
+	switch w.PathFrom(ch) {
+	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "label":
+	case "parts/label":
 		w.Style(func(s *styles.Style) {
 			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 			s.Cursor = cursors.None
@@ -167,7 +167,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
 			}
 		})
-	case "text":
+	case "parts/text":
 		text := w.(*TextField)
 		text.Placeholder = ch.Placeholder
 		if ch.Type == ChooserFilled {
@@ -183,7 +183,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
 			}
 		})
-	case "ind-stretch":
+	case "parts/ind-stretch":
 		w.Style(func(s *styles.Style) {
 			if ch.Editable {
 				s.Width.SetDp(0)
@@ -191,7 +191,7 @@ func (ch *Chooser) OnChildAdded(child ki.Ki) {
 				s.Width.SetDp(16)
 			}
 		})
-	case "indicator":
+	case "parts/indicator":
 		w.Style(func(s *styles.Style) {
 			s.Font.Size.SetDp(16)
 			s.AlignV = styles.AlignMiddle
