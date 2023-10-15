@@ -13,8 +13,18 @@ import "goki.dev/enums"
 type States int64 //enums:bitflag
 
 const (
-	// Disabled elements cannot be interacted with or selected, but do display.
+	// Disabled elements cannot be interacted with or selected,
+	// but do display.
 	Disabled States = iota
+
+	// Invisible elements are not displayed, and thus do not present
+	// a target for GUI events.  It is identical to css display:none.
+	// This can also be set when the item is out of visible display
+	// as in scrolling or collapsing elements.
+	// Elements can be made visible by toggling this flag and thus
+	// in general should be constructed and styled, but a new layout
+	// step must generally be taken after visibility status has changed.
+	Invisible
 
 	// ReadOnly elements cannot be changed, but can be selected.
 	ReadOnly

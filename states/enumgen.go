@@ -11,125 +11,130 @@ import (
 	"goki.dev/enums"
 )
 
-var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19}
+var _StatesValues = []States{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 // StatesN is the highest valid value
 // for type States, plus one.
-const StatesN States = 20
+const StatesN States = 21
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _StatesNoOp() {
 	var x [1]struct{}
 	_ = x[Disabled-(0)]
-	_ = x[ReadOnly-(1)]
-	_ = x[Selected-(2)]
-	_ = x[Active-(3)]
-	_ = x[Dragging-(4)]
-	_ = x[Sliding-(5)]
-	_ = x[Scrolling-(6)]
-	_ = x[Focused-(7)]
-	_ = x[FocusedWithin-(8)]
-	_ = x[Checked-(9)]
-	_ = x[Hovered-(10)]
-	_ = x[LongHovered-(11)]
-	_ = x[DragHovered-(12)]
-	_ = x[DropOK-(13)]
-	_ = x[Invalid-(14)]
-	_ = x[Required-(15)]
-	_ = x[Blank-(16)]
-	_ = x[Link-(17)]
-	_ = x[Visited-(18)]
-	_ = x[AnyLink-(19)]
+	_ = x[Invisible-(1)]
+	_ = x[ReadOnly-(2)]
+	_ = x[Selected-(3)]
+	_ = x[Active-(4)]
+	_ = x[Dragging-(5)]
+	_ = x[Sliding-(6)]
+	_ = x[Scrolling-(7)]
+	_ = x[Focused-(8)]
+	_ = x[FocusedWithin-(9)]
+	_ = x[Checked-(10)]
+	_ = x[Hovered-(11)]
+	_ = x[LongHovered-(12)]
+	_ = x[DragHovered-(13)]
+	_ = x[DropOK-(14)]
+	_ = x[Invalid-(15)]
+	_ = x[Required-(16)]
+	_ = x[Blank-(17)]
+	_ = x[Link-(18)]
+	_ = x[Visited-(19)]
+	_ = x[AnyLink-(20)]
 }
 
 var _StatesNameToValueMap = map[string]States{
 	`Disabled`:      0,
 	`disabled`:      0,
-	`ReadOnly`:      1,
-	`readonly`:      1,
-	`Selected`:      2,
-	`selected`:      2,
-	`Active`:        3,
-	`active`:        3,
-	`Dragging`:      4,
-	`dragging`:      4,
-	`Sliding`:       5,
-	`sliding`:       5,
-	`Scrolling`:     6,
-	`scrolling`:     6,
-	`Focused`:       7,
-	`focused`:       7,
-	`FocusedWithin`: 8,
-	`focusedwithin`: 8,
-	`Checked`:       9,
-	`checked`:       9,
-	`Hovered`:       10,
-	`hovered`:       10,
-	`LongHovered`:   11,
-	`longhovered`:   11,
-	`DragHovered`:   12,
-	`draghovered`:   12,
-	`DropOK`:        13,
-	`dropok`:        13,
-	`Invalid`:       14,
-	`invalid`:       14,
-	`Required`:      15,
-	`required`:      15,
-	`Blank`:         16,
-	`blank`:         16,
-	`Link`:          17,
-	`link`:          17,
-	`Visited`:       18,
-	`visited`:       18,
-	`AnyLink`:       19,
-	`anylink`:       19,
+	`Invisible`:     1,
+	`invisible`:     1,
+	`ReadOnly`:      2,
+	`readonly`:      2,
+	`Selected`:      3,
+	`selected`:      3,
+	`Active`:        4,
+	`active`:        4,
+	`Dragging`:      5,
+	`dragging`:      5,
+	`Sliding`:       6,
+	`sliding`:       6,
+	`Scrolling`:     7,
+	`scrolling`:     7,
+	`Focused`:       8,
+	`focused`:       8,
+	`FocusedWithin`: 9,
+	`focusedwithin`: 9,
+	`Checked`:       10,
+	`checked`:       10,
+	`Hovered`:       11,
+	`hovered`:       11,
+	`LongHovered`:   12,
+	`longhovered`:   12,
+	`DragHovered`:   13,
+	`draghovered`:   13,
+	`DropOK`:        14,
+	`dropok`:        14,
+	`Invalid`:       15,
+	`invalid`:       15,
+	`Required`:      16,
+	`required`:      16,
+	`Blank`:         17,
+	`blank`:         17,
+	`Link`:          18,
+	`link`:          18,
+	`Visited`:       19,
+	`visited`:       19,
+	`AnyLink`:       20,
+	`anylink`:       20,
 }
 
 var _StatesDescMap = map[States]string{
 	0:  `Disabled elements cannot be interacted with or selected, but do display.`,
-	1:  `ReadOnly elements cannot be changed, but can be selected.`,
-	2:  `Selected elements have been marked for clipboard or other such actions.`,
-	3:  `Active elements are currently being interacted with, usually involving a mouse button being pressed in the element. A text field will be active while being clicked on, and this can also result in a Focused state. If further movement happens, an element can also end up being Dragged or Sliding.`,
-	4:  `Dragging means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove), as part of a drag-n-drop sequence.`,
-	5:  `Sliding means this element is currently being manipulated via mouse to change the slider state, which will continue until the mouse is released, even if it goes off the element. It should also still be Active.`,
-	6:  `Scrolling means this element is currently being scrolled.`,
-	7:  `Focused elements receive keyboard input.`,
-	8:  `FocusedWithin elements have a Focused element within them, including self.`,
-	9:  `Checked is for check boxes or radio buttons or other similar state.`,
-	10: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
-	11: `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
-	12: `DragHovered indicates that a mouse pointer has entered the space over an element, during a drag-n-drop sequence. This makes it a candidate for a potential drop target. See DropOK for state in relation to that.`,
-	13: `DropOK indicates that a DragHovered element is OK to receive a Drop from the current Dragged item, subject also to the Droppable ability.`,
-	14: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
-	15: `Required indicates that the element must be set by the user`,
-	16: `Blank indicates that the element has yet to be set by user`,
-	17: `Link indicates a URL link that has not been visited yet`,
-	18: `Visited indicates a URL link that has been visited`,
-	19: `AnyLink is either Link or Visited`,
+	1:  `Invisible elements are not displayed, and thus do not present a target for GUI events. It is identical to css display:none. This can also be set when the item is out of visible display as in scrolling or collapsing elements. Elements can be made visible by toggling this flag and thus in general should be constructed and styled, but a new layout step must generally be taken after visibility status has changed.`,
+	2:  `ReadOnly elements cannot be changed, but can be selected.`,
+	3:  `Selected elements have been marked for clipboard or other such actions.`,
+	4:  `Active elements are currently being interacted with, usually involving a mouse button being pressed in the element. A text field will be active while being clicked on, and this can also result in a Focused state. If further movement happens, an element can also end up being Dragged or Sliding.`,
+	5:  `Dragging means this element is currently being dragged by the mouse (i.e., a MouseDown event followed by MouseMove), as part of a drag-n-drop sequence.`,
+	6:  `Sliding means this element is currently being manipulated via mouse to change the slider state, which will continue until the mouse is released, even if it goes off the element. It should also still be Active.`,
+	7:  `Scrolling means this element is currently being scrolled.`,
+	8:  `Focused elements receive keyboard input.`,
+	9:  `FocusedWithin elements have a Focused element within them, including self.`,
+	10: `Checked is for check boxes or radio buttons or other similar state.`,
+	11: `Hovered indicates that a mouse pointer has entered the space over an element, but it is not Active (nor DragHovered).`,
+	12: `LongHovered indicates a Hover that persists without significant movement for a minimum period of time (e.g., 500 msec), which typically triggers a tooltip popup.`,
+	13: `DragHovered indicates that a mouse pointer has entered the space over an element, during a drag-n-drop sequence. This makes it a candidate for a potential drop target. See DropOK for state in relation to that.`,
+	14: `DropOK indicates that a DragHovered element is OK to receive a Drop from the current Dragged item, subject also to the Droppable ability.`,
+	15: `Invalid indicates that the element has invalid input and needs to be corrected by the user`,
+	16: `Required indicates that the element must be set by the user`,
+	17: `Blank indicates that the element has yet to be set by user`,
+	18: `Link indicates a URL link that has not been visited yet`,
+	19: `Visited indicates a URL link that has been visited`,
+	20: `AnyLink is either Link or Visited`,
 }
 
 var _StatesMap = map[States]string{
 	0:  `Disabled`,
-	1:  `ReadOnly`,
-	2:  `Selected`,
-	3:  `Active`,
-	4:  `Dragging`,
-	5:  `Sliding`,
-	6:  `Scrolling`,
-	7:  `Focused`,
-	8:  `FocusedWithin`,
-	9:  `Checked`,
-	10: `Hovered`,
-	11: `LongHovered`,
-	12: `DragHovered`,
-	13: `DropOK`,
-	14: `Invalid`,
-	15: `Required`,
-	16: `Blank`,
-	17: `Link`,
-	18: `Visited`,
-	19: `AnyLink`,
+	1:  `Invisible`,
+	2:  `ReadOnly`,
+	3:  `Selected`,
+	4:  `Active`,
+	5:  `Dragging`,
+	6:  `Sliding`,
+	7:  `Scrolling`,
+	8:  `Focused`,
+	9:  `FocusedWithin`,
+	10: `Checked`,
+	11: `Hovered`,
+	12: `LongHovered`,
+	13: `DragHovered`,
+	14: `DropOK`,
+	15: `Invalid`,
+	16: `Required`,
+	17: `Blank`,
+	18: `Link`,
+	19: `Visited`,
+	20: `AnyLink`,
 }
 
 // String returns the string representation
