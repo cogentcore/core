@@ -72,32 +72,8 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 	gotAny := false
 	for _, kv := range typ.Methods.Order {
 		met := kv.Val
-		var tbDir *gti.Directive
-		for _, dir := range met.Directives {
-			if dir.Tool == "gi" && dir.Directive == "toolbar" {
-				tbDir = dir
-				break
-			}
-		}
-		if tbDir == nil {
-			continue
-		}
-		cfg := &FuncConfig{
-			Name:    met.Name,
-			Label:   sentencecase.Of(met.Name),
-			Doc:     met.Doc,
-			Args:    met.Args,
-			Returns: met.Returns,
-		}
-		// we default to the icon with the same name as
-		// the method, if it exists
-		ic := icons.Icon(strcase.ToSnake(met.Name))
-		if ic.IsValid() {
-			cfg.Icon = ic
-		}
-		_, err := grease.SetFromArgs(cfg, tbDir.Args, grease.ErrNotFound)
-		if err != nil {
-			slog.Error("programmer error: error while parsing args to `gi:toolbar` comment directive", "err", err.Error())
+		cfg := ConfigForMethod(met, "toolbar")
+		if cfg == nil { // not in toolbar
 			continue
 		}
 		gotAny = true
@@ -114,6 +90,66 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		}
 	}
 	return gotAny
+}
+
+// ConfigForFunc returns the default [FuncConfig] for the given [gti.Func].
+// It is a wrapper on [ConfigForMethod]; see it for more information.
+func ConfigForFunc(fun *gti.Func) *FuncConfig {
+	return ConfigForMethod(&gti.Method{
+		Name:       fun.Name,
+		Doc:        fun.Doc,
+		Directives: fun.Directives,
+		Args:       fun.Args,
+		Returns:    fun.Returns,
+	})
+}
+
+// ConfigForMethod returns the default [FuncConfig] for the given [gti.Method].
+// If a directive is passed, it indicates what comment directive is allowed to
+// specify the configuration information and indicate that the function should
+// be included. For example, if "toolbar" is passed, then a function not decorated
+// with the directive "gi:toolbar" will result in a nil return value, and otherwise,
+// the configuration information will be read from that directive. If no directive
+// is passed, it defaults to "func", and is not required (so something can be undecorated
+// and it will still return the config object, just without reading it from any directive).
+// This means that passing an explicit "func" is different because it makes it required.
+func ConfigForMethod(met *gti.Method, directive ...string) *FuncConfig {
+	var dir *gti.Directive
+	want := "func"
+	if len(directive) > 0 {
+		want = directive[0]
+	}
+	for _, d := range met.Directives {
+		if d.Tool == "gi" && d.Directive == want {
+			dir = d
+			break
+		}
+	}
+	// mandatory if specified
+	if dir == nil && len(directive) > 0 {
+		return nil
+	}
+	cfg := &FuncConfig{
+		Name:    met.Name,
+		Label:   sentencecase.Of(met.Name),
+		Doc:     met.Doc,
+		Args:    met.Args,
+		Returns: met.Returns,
+	}
+	// we default to the icon with the same name as
+	// the method, if it exists
+	ic := icons.Icon(strcase.ToSnake(met.Name))
+	if ic.IsValid() {
+		cfg.Icon = ic
+	}
+	if dir != nil {
+		_, err := grease.SetFromArgs(cfg, dir.Args, grease.ErrNotFound)
+		if err != nil {
+			slog.Error(`programmer error: error while parsing args to gi function comment directive`, "directive", dir, "err", err)
+			return nil
+		}
+	}
+	return cfg
 }
 
 // ArgConfig contains the relevant configuration information for each arg,
