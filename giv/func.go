@@ -218,7 +218,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 			if !c.ShowResult {
 				return
 			}
-			ReturnsDialog(ctx, rets, c).Run()
+			ShowReturnsDialog(ctx, rets, c)
 			return
 		}
 		gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
@@ -230,7 +230,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 				if !c.ShowResult {
 					return
 				}
-				ReturnsDialog(ctx, rets, c).Run()
+				ShowReturnsDialog(ctx, rets, c)
 			}).Run()
 		return
 	}
@@ -253,7 +253,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 				if !c.ShowResult {
 					return
 				}
-				ReturnsDialog(ctx, rets, c).Run()
+				ShowReturnsDialog(ctx, rets, c)
 			}
 			gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
 				func(dlg *gi.Dialog) {
@@ -264,7 +264,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 					if !c.ShowResult {
 						return
 					}
-					ReturnsDialog(ctx, rets, c).Run()
+					ShowReturnsDialog(ctx, rets, c)
 				}).Run()
 		},
 	).Run()
@@ -316,12 +316,13 @@ func ReturnsForFunc(rets []reflect.Value, cfg *FuncConfig) []ArgConfig {
 	return res
 }
 
-// ReturnsDialog returns a dialog displaying the given function return
+// ShowReturnsDialog runs a dialog displaying the given function return
 // values based on the given configuration information and context widget.
-func ReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) *gi.Dialog {
+func ShowReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) {
 	if len(rets) == 0 {
-		return gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + " succeeded", Prompt: cfg.Doc, Ok: true}, nil)
+		gi.NewSnackbar(ctx, gi.SnackbarOpts{Text: cfg.Label + " succeeded"}).Run()
+		return
 	}
 	ac := ReturnsForFunc(rets, cfg)
-	return ArgViewDialog(ctx, DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true}, ac, nil)
+	ArgViewDialog(ctx, DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true}, ac, nil).Run()
 }
