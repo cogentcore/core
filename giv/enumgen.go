@@ -369,35 +369,35 @@ func (i *DirFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TreeViewFlagsValues = []TreeViewFlags{10, 11}
+var _TreeViewFlagsValues = []TreeViewFlags{9, 10}
 
 // TreeViewFlagsN is the highest valid value
 // for type TreeViewFlags, plus one.
-const TreeViewFlagsN TreeViewFlags = 12
+const TreeViewFlagsN TreeViewFlags = 11
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _TreeViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[TreeViewFlagClosed-(10)]
-	_ = x[TreeViewFlagSelectMode-(11)]
+	_ = x[TreeViewFlagClosed-(9)]
+	_ = x[TreeViewFlagSelectMode-(10)]
 }
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
-	`TreeViewFlagClosed`:     10,
-	`treeviewflagclosed`:     10,
-	`TreeViewFlagSelectMode`: 11,
-	`treeviewflagselectmode`: 11,
+	`TreeViewFlagClosed`:     9,
+	`treeviewflagclosed`:     9,
+	`TreeViewFlagSelectMode`: 10,
+	`treeviewflagselectmode`: 10,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
-	10: `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
-	11: `This flag on the Root node determines whether keyboard movements update selection or not.`,
+	9:  `TreeViewFlagClosed means node is toggled closed (children not visible) Otherwise Open.`,
+	10: `This flag on the Root node determines whether keyboard movements update selection or not.`,
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
-	10: `TreeViewFlagClosed`,
-	11: `TreeViewFlagSelectMode`,
+	9:  `TreeViewFlagClosed`,
+	10: `TreeViewFlagSelectMode`,
 }
 
 // String returns the string representation

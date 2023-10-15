@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"goki.dev/enums"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -163,10 +164,9 @@ type Widget interface {
 	// for their visibility status as well, which is available always.
 	// This does *not* check for ScBBox level visibility, which is a further check.
 	// Non-visible nodes are automatically not rendered and do not get
-	// window events.  The Invisible flag is one key element of the IsVisible
+	// window events.  The Invisible states flag is a key element of the IsVisible
 	// calculus -- it is set by e.g., Tabs for invisible tabs, and is also
-	// set if a widget is entirely out of render range.  But again, use
-	// IsVisible as the main end-user method.
+	// set if a widget is entirely out of render range.
 	// For robustness, it recursively calls the parent -- this is typically
 	// a short path -- propagating the Invisible flag properly can be
 	// very challenging without mistakenly overwriting invisibility at various
@@ -417,7 +417,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 }
 
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.Is(Invisible) || wb.Sc == nil {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.StateIs(states.Invisible) || wb.Sc == nil {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {

@@ -142,45 +142,45 @@ func (i *BufSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _BufFlagsValues = []BufFlags{10, 11, 12, 13}
+var _BufFlagsValues = []BufFlags{9, 10, 11, 12}
 
 // BufFlagsN is the highest valid value
 // for type BufFlags, plus one.
-const BufFlagsN BufFlags = 14
+const BufFlagsN BufFlags = 13
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _BufFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[BufAutoSaving-(10)]
-	_ = x[BufMarkingUp-(11)]
-	_ = x[BufChanged-(12)]
-	_ = x[BufFileModOk-(13)]
+	_ = x[BufAutoSaving-(9)]
+	_ = x[BufMarkingUp-(10)]
+	_ = x[BufChanged-(11)]
+	_ = x[BufFileModOk-(12)]
 }
 
 var _BufFlagsNameToValueMap = map[string]BufFlags{
-	`BufAutoSaving`: 10,
-	`bufautosaving`: 10,
-	`BufMarkingUp`:  11,
-	`bufmarkingup`:  11,
-	`BufChanged`:    12,
-	`bufchanged`:    12,
-	`BufFileModOk`:  13,
-	`buffilemodok`:  13,
+	`BufAutoSaving`: 9,
+	`bufautosaving`: 9,
+	`BufMarkingUp`:  10,
+	`bufmarkingup`:  10,
+	`BufChanged`:    11,
+	`bufchanged`:    11,
+	`BufFileModOk`:  12,
+	`buffilemodok`:  12,
 }
 
 var _BufFlagsDescMap = map[BufFlags]string{
-	10: `BufAutoSaving is used in atomically safe way to protect autosaving`,
-	11: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
-	12: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
-	13: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
+	9:  `BufAutoSaving is used in atomically safe way to protect autosaving`,
+	10: `BufMarkingUp indicates current markup operation in progress -- don&#39;t redo`,
+	11: `BufChanged indicates if the text has been changed (edited) relative to the original, since last save`,
+	12: `BufFileModOk have already asked about fact that file has changed since being opened, user is ok`,
 }
 
 var _BufFlagsMap = map[BufFlags]string{
-	10: `BufAutoSaving`,
-	11: `BufMarkingUp`,
-	12: `BufChanged`,
-	13: `BufFileModOk`,
+	9:  `BufAutoSaving`,
+	10: `BufMarkingUp`,
+	11: `BufChanged`,
+	12: `BufFileModOk`,
 }
 
 // String returns the string representation
@@ -312,40 +312,40 @@ func (i *BufFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ViewFlagsValues = []ViewFlags{10, 11, 12}
+var _ViewFlagsValues = []ViewFlags{9, 10, 11}
 
 // ViewFlagsN is the highest valid value
 // for type ViewFlags, plus one.
-const ViewFlagsN ViewFlags = 13
+const ViewFlagsN ViewFlags = 12
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ViewFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ViewHasLineNos-(10)]
-	_ = x[ViewLastWasTabAI-(11)]
-	_ = x[ViewLastWasUndo-(12)]
+	_ = x[ViewHasLineNos-(9)]
+	_ = x[ViewLastWasTabAI-(10)]
+	_ = x[ViewLastWasUndo-(11)]
 }
 
 var _ViewFlagsNameToValueMap = map[string]ViewFlags{
-	`ViewHasLineNos`:   10,
-	`viewhaslinenos`:   10,
-	`ViewLastWasTabAI`: 11,
-	`viewlastwastabai`: 11,
-	`ViewLastWasUndo`:  12,
-	`viewlastwasundo`:  12,
+	`ViewHasLineNos`:   9,
+	`viewhaslinenos`:   9,
+	`ViewLastWasTabAI`: 10,
+	`viewlastwastabai`: 10,
+	`ViewLastWasUndo`:  11,
+	`viewlastwasundo`:  11,
 }
 
 var _ViewFlagsDescMap = map[ViewFlags]string{
-	10: `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
-	11: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
-	12: `ViewLastWasUndo indicates that last key was an undo`,
+	9:  `ViewHasLineNos indicates that this view has line numbers (per Buf option)`,
+	10: `ViewLastWasTabAI indicates that last key was a Tab auto-indent`,
+	11: `ViewLastWasUndo indicates that last key was an undo`,
 }
 
 var _ViewFlagsMap = map[ViewFlags]string{
-	10: `ViewHasLineNos`,
-	11: `ViewLastWasTabAI`,
-	12: `ViewLastWasUndo`,
+	9:  `ViewHasLineNos`,
+	10: `ViewLastWasTabAI`,
+	11: `ViewLastWasUndo`,
 }
 
 // String returns the string representation
