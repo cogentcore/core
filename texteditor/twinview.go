@@ -77,8 +77,8 @@ func (te *TwinEditors) ConfigTexts() {
 	if !mods {
 		updt = te.UpdateStart()
 	} else {
-		av := NewView(al, "text-a")
-		bv := NewView(bl, "text-b")
+		av := NewEditor(al, "text-a")
+		bv := NewEditor(bl, "text-b")
 		av.SetBuf(te.BufA)
 		bv.SetBuf(te.BufB)
 

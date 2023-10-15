@@ -52,14 +52,14 @@ func app() {
 
 	// generally need to put text view within its own layout for scrolling
 
-	txed1 := texteditor.NewView(splt, "texteditor-1")
+	txed1 := texteditor.NewEditor(splt, "texteditor-1")
 	txed1.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
 
-	txed2 := texteditor.NewView(splt, "texteditor-2")
+	txed2 := texteditor.NewEditor(splt, "texteditor-2")
 	txed2.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))

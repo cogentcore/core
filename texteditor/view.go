@@ -160,7 +160,7 @@ type Editor struct {
 // the scrollbars.
 func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 	ly := parent.NewChild(gi.LayoutType, name+"-lay").(*gi.Layout)
-	ed := NewView(ly, name)
+	ed := NewEditor(ly, name)
 	return ed, ly
 }
 
