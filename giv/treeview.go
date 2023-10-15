@@ -120,6 +120,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		})
 	case "branch":
 		cb := w.(*gi.Switch)
+		cb.Type = gi.SwitchCheckbox
 		cb.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen //
 		cb.IconOff = icons.KeyboardArrowRight // icons.Folder    //
 		cb.IconDisab = icons.Blank
@@ -128,8 +129,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.BackgroundColor.SetSolid(colors.Transparent)
 			s.Margin.Set()
 			s.Padding.Set()
-			s.Width.SetEm(.4)
-			s.Height.SetEm(.4)
+			s.Width.SetEm(1)
+			s.Height.SetEm(1)
 			s.AlignV = styles.AlignMiddle
 		})
 		cb.OnClick(func(e events.Event) {
