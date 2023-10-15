@@ -62,7 +62,9 @@ func app() {
 	tv := giv.NewTreeView(tvfr, "tv")
 	tv.RootView = tv
 
-	MakeTree(tv, 0, 1, 5)
+	depth := 1 // small tree for testing
+	// depth := 10 // big tree
+	MakeTree(tv, 0, depth, 5)
 
 	_ = svfr
 	// sv := giv.NewStructView(svfr, "sv")
