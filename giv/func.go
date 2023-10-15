@@ -27,6 +27,14 @@ import (
 //
 //gti:add
 type FuncConfig struct {
+	// If non-nil, Parent is the parent menu to place this function
+	// in when creating a toolbar or a menubar. If the specified parent
+	// function does not exist, an artificial parent toolbar/menubar
+	// button will be created to store this function. That artificial
+	// parent button will have the configuration information specified here.
+	// If no artificial parent is needed, the only applicable part of the
+	// configuration information specified here is [FuncConfig.Name].
+	Parent *FuncConfig
 	// Name is the actual name in code of the function.
 	Name string
 	// Label is the user-friendly label for the function button.
@@ -75,6 +83,13 @@ type FuncConfig struct {
 	Args *gti.Fields
 	// Returns are the return values of the function. They are set automatically.
 	Returns *gti.Fields
+}
+
+// SetString sets the name of the FuncConfig. It exists to support
+// "-parent" config options (instead of "-parent-name")
+func (fc *FuncConfig) SetString(str string) error {
+	fc.Name = str
+	return nil
 }
 
 // ToolbarView adds the method buttons for the given value to the given toolbar.
