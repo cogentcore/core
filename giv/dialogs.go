@@ -66,16 +66,16 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 	return gi.DlgOpts{Title: d.Title, Prompt: d.Prompt, Ok: true, Cancel: true} // d.Ok, Cancel: d.Cancel}
 }
 
-// TextViewDialog opens a dialog for displaying multi-line text in a
+// TextEditorDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.Editor {
+func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.Editor {
 	var dlg *gi.Dialog
 	if opts.Data != nil {
 		recyc := false
 		dlg, recyc = gi.RecycleStdDialog(ctx, opts.ToGiOpts(), opts.Data, fun)
 		if recyc {
-			return TextViewDialogTextView(dlg)
+			return TextEditorDialogTextEditor(dlg)
 		}
 	} else {
 		dlg = gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
@@ -95,7 +95,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 		s.Height.SetEm(40)
 		s.SetStretchMax()
 	})
-	tv := texteditor.NewEditor(tlv, "text-view")
+	tv := texteditor.NewEditor(tlv, "text-editor")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetState(true, states.Disabled)
 	tv.SetBuf(tb)
@@ -114,11 +114,11 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 	return tv
 }
 
-// TextViewDialogTextView returns the text view from a TextViewDialog
-func TextViewDialogTextView(dlg *gi.Dialog) *texteditor.Editor {
+// TextEditorDialogTextEditor returns the text view from a TextViewDialog
+func TextEditorDialogTextEditor(dlg *gi.Dialog) *texteditor.Editor {
 	frame := dlg.Stage.Scene
 	tlv := frame.ChildByName("text-lay", 2)
-	tv := tlv.ChildByName("text-view", 0)
+	tv := tlv.ChildByName("text-editor", 0)
 	return tv.(*texteditor.Editor)
 }
 

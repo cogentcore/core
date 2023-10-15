@@ -88,7 +88,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 				}
 				cinfo, err := lv.Repo.CommitDesc(cmt.Rev, false)
 				if err == nil {
-					TextViewDialog(lv, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true}, cinfo, nil)
+					TextEditorDialog(lv, DlgOpts{Title: "Commit Info: " + cmt.Rev, Ok: true}, cinfo, nil)
 				}
 			}
 		})
