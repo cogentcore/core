@@ -341,7 +341,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 
 // ScreenInfo returns screen info for all screens on the console.
 //
-//gi:toolbar -icon info
+//gi:toolbar -icon info -show-result
 func (pf *Preferences) ScreenInfo() string {
 	ns := goosi.TheApp.NScreens()
 	scinfo := ""
@@ -357,7 +357,7 @@ func (pf *Preferences) ScreenInfo() string {
 
 // VersionInfo returns GoGi version information
 //
-//gi:toolbar -icon info
+//gi:toolbar -icon info -show-result
 func (pf *Preferences) VersionInfo() string {
 	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
 	return vinfo
