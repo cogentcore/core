@@ -154,29 +154,29 @@ type Editor struct {
 	lastFilename   gi.FileName
 }
 
-// NewViewLayout adds a new layout with textview
+// NewViewLayout adds a new layout with text editor
 // to given parent node, with given name.  Layout adds "-lay" suffix.
-// Textview should always have a parent Layout to manage
+// Texediew should always have a parent Layout to manage
 // the scrollbars.
 func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 	ly := parent.NewChild(gi.LayoutType, name+"-lay").(*gi.Layout)
-	tv := NewView(ly, name)
-	return tv, ly
+	ed := NewView(ly, name)
+	return ed, ly
 }
 
-func (tv *Editor) OnInit() {
-	tv.HandleTextViewEvents()
-	tv.ViewStyles()
+func (ed *Editor) OnInit() {
+	ed.HandleTextViewEvents()
+	ed.ViewStyles()
 }
 
-func (tv *Editor) ViewStyles() {
-	tv.Style(func(s *styles.Style) {
+func (ed *Editor) ViewStyles() {
+	ed.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
-		tv.CursorWidth.SetDp(1)
-		tv.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
-		tv.SelectColor.SetSolid(colors.Scheme.Select.Container)
-		tv.HighlightColor.SetSolid(colors.Orange)
-		tv.CursorColor.SetSolid(colors.Scheme.Primary.Base)
+		ed.CursorWidth.SetDp(1)
+		ed.LineNumberColor.SetSolid(colors.Scheme.SurfaceContainer)
+		ed.SelectColor.SetSolid(colors.Scheme.Select.Container)
+		ed.HighlightColor.SetSolid(colors.Orange)
+		ed.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
 		s.Cursor = cursors.Text
 		if gi.Prefs.Editor.WordWrap {
@@ -201,7 +201,7 @@ func (tv *Editor) ViewStyles() {
 	})
 }
 
-// ViewFlags extend WidgetFlags to hold textview.View state
+// ViewFlags extend WidgetFlags to hold text editor.View state
 type ViewFlags int64 //enums:bitflag
 
 const (
@@ -217,158 +217,158 @@ const (
 
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
-func (tv *Editor) EditDone() {
-	if tv.Buf != nil {
-		tv.Buf.EditDone()
+func (ed *Editor) EditDone() {
+	if ed.Buf != nil {
+		ed.Buf.EditDone()
 	}
-	tv.ClearSelected()
+	ed.ClearSelected()
 }
 
 // Remarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
-func (tv *Editor) ReMarkup() {
-	if tv.Buf == nil {
+func (ed *Editor) ReMarkup() {
+	if ed.Buf == nil {
 		return
 	}
-	tv.Buf.ReMarkup()
+	ed.Buf.ReMarkup()
 }
 
 // IsChanged returns true if buffer was changed (edited)
-func (tv *Editor) IsChanged() bool {
-	if tv.Buf != nil && tv.Buf.IsChanged() {
+func (ed *Editor) IsChanged() bool {
+	if ed.Buf != nil && ed.Buf.IsChanged() {
 		return true
 	}
 	return false
 }
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
-func (tv *Editor) HasLineNos() bool {
-	return tv.Is(ViewHasLineNos)
+func (ed *Editor) HasLineNos() bool {
+	return ed.Is(ViewHasLineNos)
 }
 
 // Clear resets all the text in the buffer for this view
-func (tv *Editor) Clear() {
-	if tv.Buf == nil {
+func (ed *Editor) Clear() {
+	if ed.Buf == nil {
 		return
 	}
-	tv.Buf.NewBuf(0)
+	ed.Buf.NewBuf(0)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //  Buffer communication
 
 // ResetState resets all the random state variables, when opening a new buffer etc
-func (tv *Editor) ResetState() {
-	tv.SelectReset()
-	tv.Highlights = nil
-	tv.ISearch.On = false
-	tv.QReplace.On = false
-	if tv.Buf == nil || tv.lastFilename != tv.Buf.Filename { // don't reset if reopening..
-		tv.CursorPos = lex.Pos{}
+func (ed *Editor) ResetState() {
+	ed.SelectReset()
+	ed.Highlights = nil
+	ed.ISearch.On = false
+	ed.QReplace.On = false
+	if ed.Buf == nil || ed.lastFilename != ed.Buf.Filename { // don't reset if reopening..
+		ed.CursorPos = lex.Pos{}
 	}
-	if tv.Buf != nil {
-		tv.Buf.SetInactive(tv.IsDisabled())
+	if ed.Buf != nil {
+		ed.Buf.SetInactive(ed.IsDisabled())
 	}
 }
 
 // SetBuf sets the Buf that this is a view of, and interconnects their signals
-func (tv *Editor) SetBuf(buf *Buf) {
-	if buf != nil && tv.Buf == buf {
+func (ed *Editor) SetBuf(buf *Buf) {
+	if buf != nil && ed.Buf == buf {
 		return
 	}
 	// had := false
-	if tv.Buf != nil {
+	if ed.Buf != nil {
 		// had = true
-		tv.Buf.DeleteView(tv)
+		ed.Buf.DeleteView(ed)
 	}
-	tv.Buf = buf
-	tv.ResetState()
+	ed.Buf = buf
+	ed.ResetState()
 	if buf != nil {
-		buf.AddView(tv)
+		buf.AddView(ed)
 		bhl := len(buf.PosHistory)
 		if bhl > 0 {
-			tv.CursorPos = buf.PosHistory[bhl-1]
-			tv.PosHistIdx = bhl - 1
+			ed.CursorPos = buf.PosHistory[bhl-1]
+			ed.PosHistIdx = bhl - 1
 		}
 	}
-	tv.SetNeedsLayout()
+	ed.SetNeedsLayout()
 }
 
 // LinesInserted inserts new lines of text and reformats them
-func (tv *Editor) LinesInserted(tbe *textbuf.Edit) {
+func (ed *Editor) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
-	if stln > len(tv.Renders) { // invalid
+	if stln > len(ed.Renders) { // invalid
 		return
 	}
 
 	// Renders
 	tmprn := make([]paint.Text, nsz)
-	nrn := append(tv.Renders, tmprn...)
+	nrn := append(ed.Renders, tmprn...)
 	copy(nrn[stln+nsz:], nrn[stln:])
 	copy(nrn[stln:], tmprn)
-	tv.Renders = nrn
+	ed.Renders = nrn
 
 	// Offs
 	tmpof := make([]float32, nsz)
-	nof := append(tv.Offs, tmpof...)
+	nof := append(ed.Offs, tmpof...)
 	copy(nof[stln+nsz:], nof[stln:])
 	copy(nof[stln:], tmpof)
-	tv.Offs = nof
+	ed.Offs = nof
 
-	tv.NLines += nsz
-	tv.SetNeedsLayout()
+	ed.NLines += nsz
+	ed.SetNeedsLayout()
 }
 
 // LinesDeleted deletes lines of text and reformats remaining one
-func (tv *Editor) LinesDeleted(tbe *textbuf.Edit) {
+func (ed *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
 
-	tv.Renders = append(tv.Renders[:stln], tv.Renders[edln:]...)
-	tv.Offs = append(tv.Offs[:stln], tv.Offs[edln:]...)
+	ed.Renders = append(ed.Renders[:stln], ed.Renders[edln:]...)
+	ed.Offs = append(ed.Offs[:stln], ed.Offs[edln:]...)
 
-	tv.NLines -= dsz
-	tv.SetNeedsLayout()
+	ed.NLines -= dsz
+	ed.SetNeedsLayout()
 }
 
 // BufSignal receives a signal from the Buf when underlying text
 // is changed.
-func (tv *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
+func (ed *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	switch sig {
 	case BufDone:
 	case BufNew:
-		tv.ResetState()
-		tv.SetNeedsLayout()
-		tv.SetCursorShow(tv.CursorPos)
+		ed.ResetState()
+		ed.SetNeedsLayout()
+		ed.SetCursorShow(ed.CursorPos)
 	case BufMods:
-		tv.SetNeedsLayout()
+		ed.SetNeedsLayout()
 	case BufInsert:
-		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
+		if ed.Renders == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
-		// fmt.Printf("tv %v got %v\n", tv.Nm, tbe.Reg.Start)
+		// fmt.Printf("ed %v got %v\n", ed.Nm, tbe.Reg.Start)
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			// fmt.Printf("tv %v lines insert %v - %v\n", tv.Nm, tbe.Reg.Start, tbe.Reg.End)
-			tv.LinesInserted(tbe) // triggers full layout
+			// fmt.Printf("ed %v lines insert %v - %v\n", ed.Nm, tbe.Reg.Start, tbe.Reg.End)
+			ed.LinesInserted(tbe) // triggers full layout
 		} else {
-			tv.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
+			ed.LayoutLine(tbe.Reg.Start.Ln) // triggers layout if line width exceeds
 		}
 	case BufDelete:
-		if tv.Renders == nil || !tv.This().(gi.Widget).IsVisible() {
+		if ed.Renders == nil || !ed.This().(gi.Widget).IsVisible() {
 			return
 		}
 		if tbe.Reg.Start.Ln != tbe.Reg.End.Ln {
-			tv.LinesDeleted(tbe) // triggers full layout
+			ed.LinesDeleted(tbe) // triggers full layout
 		} else {
-			tv.LayoutLine(tbe.Reg.Start.Ln)
+			ed.LayoutLine(tbe.Reg.Start.Ln)
 		}
 	case BufMarkUpdt:
-		tv.SetNeedsLayout() // comes from another goroutine
+		ed.SetNeedsLayout() // comes from another goroutine
 	case BufClosed:
-		tv.SetBuf(nil)
+		ed.SetBuf(nil)
 	}
 }
 
@@ -376,102 +376,102 @@ func (tv *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 //    Undo / Redo
 
 // Undo undoes previous action
-func (tv *Editor) Undo() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+func (ed *Editor) Undo() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 
-	tbe := tv.Buf.Undo()
+	tbe := ed.Buf.Undo()
 	if tbe != nil {
 		if tbe.Delete { // now an insert
-			tv.SetCursorShow(tbe.Reg.End)
+			ed.SetCursorShow(tbe.Reg.End)
 		} else {
-			tv.SetCursorShow(tbe.Reg.Start)
+			ed.SetCursorShow(tbe.Reg.Start)
 		}
 	} else {
-		tv.CursorMovedSig() // updates status..
-		tv.ScrollCursorToCenterIfHidden()
+		ed.CursorMovedSig() // updates status..
+		ed.ScrollCursorToCenterIfHidden()
 	}
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 }
 
 // Redo redoes previously undone action
-func (tv *Editor) Redo() {
-	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+func (ed *Editor) Redo() {
+	updt := ed.UpdateStart()
+	defer ed.UpdateEndRender(updt)
 
-	tbe := tv.Buf.Redo()
+	tbe := ed.Buf.Redo()
 	if tbe != nil {
 		if tbe.Delete {
-			tv.SetCursorShow(tbe.Reg.Start)
+			ed.SetCursorShow(tbe.Reg.Start)
 		} else {
-			tv.SetCursorShow(tbe.Reg.End)
+			ed.SetCursorShow(tbe.Reg.End)
 		}
 	} else {
-		tv.ScrollCursorToCenterIfHidden()
+		ed.ScrollCursorToCenterIfHidden()
 	}
-	tv.SavePosHistory(tv.CursorPos)
+	ed.SavePosHistory(ed.CursorPos)
 }
 
 ////////////////////////////////////////////////////
 //  Widget Interface
 
 // Config calls Init on widget
-// func (tv *View) ConfigWidget(vp *gi.Scene) {
+// func (ed *View) ConfigWidget(vp *gi.Scene) {
 //
 // }
 
 // StyleView sets the style of widget
-func (tv *Editor) StyleView(sc *gi.Scene) {
-	tv.StyMu.Lock()
-	defer tv.StyMu.Unlock()
+func (ed *Editor) StyleView(sc *gi.Scene) {
+	ed.StyMu.Lock()
+	defer ed.StyMu.Unlock()
 
-	if tv.NeedsRebuild() {
-		if tv.Buf != nil {
-			tv.Buf.SetHiStyle(histyle.StyleDefault)
+	if ed.NeedsRebuild() {
+		if ed.Buf != nil {
+			ed.Buf.SetHiStyle(histyle.StyleDefault)
 		}
 	}
-	tv.ApplyStyleWidget(sc)
-	tv.CursorWidth.ToDots(&tv.Styles.UnContext)
+	ed.ApplyStyleWidget(sc)
+	ed.CursorWidth.ToDots(&ed.Styles.UnContext)
 }
 
 // ApplyStyle calls StyleView and sets the style
-func (tv *Editor) ApplyStyle(sc *gi.Scene) {
-	// tv.SetFlag(true, gi.CanFocus) // always focusable
-	tv.StyleView(sc)
-	tv.StyleSizes()
+func (ed *Editor) ApplyStyle(sc *gi.Scene) {
+	// ed.SetFlag(true, gi.CanFocus) // always focusable
+	ed.StyleView(sc)
+	ed.StyleSizes()
 }
 
 // todo: virtual keyboard stuff
 
 // FocusChanged appropriate actions for various types of focus changes
-// func (tv *View) FocusChanged(change gi.FocusChanges) {
+// func (ed *View) FocusChanged(change gi.FocusChanges) {
 // 	switch change {
 // 	case gi.FocusLost:
-// 		tv.SetFlag(false, ViewFocusActive))
-// 		// tv.EditDone()
-// 		tv.StopCursor() // make sure no cursor
-// 		tv.SetNeedsRender()
+// 		ed.SetFlag(false, ViewFocusActive))
+// 		// ed.EditDone()
+// 		ed.StopCursor() // make sure no cursor
+// 		ed.SetNeedsRender()
 // 		goosi.TheApp.HideVirtualKeyboard()
-// 		// fmt.Printf("lost focus: %v\n", tv.Nm)
+// 		// fmt.Printf("lost focus: %v\n", ed.Nm)
 // 	case gi.FocusGot:
-// 		tv.SetFlag(true, ViewFocusActive))
-// 		tv.EmitFocusedSignal()
-// 		tv.SetNeedsRender()
+// 		ed.SetFlag(true, ViewFocusActive))
+// 		ed.EmitFocusedSignal()
+// 		ed.SetNeedsRender()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
-// 		// fmt.Printf("got focus: %v\n", tv.Nm)
+// 		// fmt.Printf("got focus: %v\n", ed.Nm)
 // 	case gi.FocusInactive:
-// 		tv.SetFlag(false, ViewFocusActive))
-// 		tv.StopCursor()
-// 		// tv.EditDone()
-// 		// tv.SetNeedsRender()
+// 		ed.SetFlag(false, ViewFocusActive))
+// 		ed.StopCursor()
+// 		// ed.EditDone()
+// 		// ed.SetNeedsRender()
 // 		goosi.TheApp.HideVirtualKeyboard()
-// 		// fmt.Printf("focus inactive: %v\n", tv.Nm)
+// 		// fmt.Printf("focus inactive: %v\n", ed.Nm)
 // 	case gi.FocusActive:
-// 		// fmt.Printf("focus active: %v\n", tv.Nm)
-// 		tv.SetFlag(true, ViewFocusActive))
-// 		// tv.SetNeedsRender()
+// 		// fmt.Printf("focus active: %v\n", ed.Nm)
+// 		ed.SetFlag(true, ViewFocusActive))
+// 		// ed.SetNeedsRender()
 // 		// todo: see about cursor
-// 		tv.StartCursor()
+// 		ed.StartCursor()
 // 		goosi.TheApp.ShowVirtualKeyboard(goosi.DefaultKeyboard)
 // 	}
 // }
