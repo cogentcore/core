@@ -11,6 +11,7 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/grease"
 	"goki.dev/gti"
@@ -40,9 +41,14 @@ type MethodConfig struct {
 	SepBefore bool
 	// SepAfter is whether to insert a separator after the method button.
 	SepAfter bool
-	// Args are the arguments to the method
+	// ShowResult is whether to display the result (return values) of the method
+	// after it is called. If this is set to true and there are no return values,
+	// it displays a message that the method was successful.
+	ShowResult bool
+
+	// Args are the arguments to the method. They are set automatically.
 	Args *gti.Fields
-	// Returns are the return values of the method
+	// Returns are the return values of the method. They are set automatically.
 	Returns *gti.Fields
 }
 
@@ -126,25 +132,38 @@ func CallMethod(ctx gi.Widget, val any, met *MethodConfig) {
 	rmet := rval.MethodByName(met.Name)
 
 	if met.Args.Len() == 0 {
-		rmet.Call(nil)
+		rets := rmet.Call(nil)
+		if !met.ShowResult {
+			return
+		}
+
+		ac := ReturnsForMethod(met, rets)
+		ArgViewDialog(
+			ctx,
+			DlgOpts{Title: "Result: " + met.Label, Prompt: met.Tooltip, Ok: true},
+			ac,
+			func(dlg *gi.Dialog) {},
+		).Run()
 		return
 	}
-	args := ArgConfigsFromMethod(val, met, rmet)
+	args := ArgsForMethod(met, rmet)
 	ArgViewDialog(
 		ctx,
-		DlgOpts{Title: met.Label, Prompt: met.Tooltip, Ok: true, Cancel: true},
-		args, func(dlg *gi.Dialog) {
+		DlgOpts{Title: "Call: " + met.Label, Prompt: met.Tooltip, Ok: true, Cancel: true},
+		args,
+		func(dlg *gi.Dialog) {
 			rargs := make([]reflect.Value, len(args))
 			for i, arg := range args {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
 			rmet.Call(rargs)
-		}).Run()
+		},
+	).Run()
 }
 
-// ArgConfigsFromMethod returns the appropriate [ArgConfig] objects for the given
-// method on the given value. It also takes the method as a [reflect.Value].
-func ArgConfigsFromMethod(val any, met *MethodConfig, rmet reflect.Value) []ArgConfig {
+// ArgsForMethod returns the appropriate [ArgConfig] objects for the arguments
+// of the method with the given configuration information and [reflect.Value].
+func ArgsForMethod(met *MethodConfig, rmet reflect.Value) []ArgConfig {
 	res := make([]ArgConfig, met.Args.Len())
 	for i, kv := range met.Args.Order {
 		arg := kv.Val
@@ -160,6 +179,29 @@ func ArgConfigsFromMethod(val any, met *MethodConfig, rmet reflect.Value) []ArgC
 		ra.View = ToValue(ra.Val.Interface(), "")
 		ra.View.SetSoloValue(ra.Val)
 		ra.View.SetName(ra.Name)
+		res[i] = ra
+	}
+	return res
+}
+
+// ReturnsForMethod returns the appropriate [ArgConfig] objects for the given
+// return values from the method with the given configuration information.
+func ReturnsForMethod(met *MethodConfig, rets []reflect.Value) []ArgConfig {
+	res := make([]ArgConfig, met.Returns.Len())
+	for i, kv := range met.Returns.Order {
+		ret := kv.Val
+		ra := ArgConfig{
+			Name:  ret.Name,
+			Label: sentencecase.Of(ret.Name),
+			Doc:   ret.Doc,
+		}
+
+		ra.Val = rets[i]
+
+		ra.View = ToValue(ra.Val.Interface(), "")
+		ra.View.SetSoloValue(ra.Val)
+		ra.View.SetName(ra.Name)
+		ra.View.SetFlag(true, states.ReadOnly)
 		res[i] = ra
 	}
 	return res
