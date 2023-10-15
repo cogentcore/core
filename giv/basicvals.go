@@ -213,7 +213,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	desc, _ := vv.Desc()
 	vvp := laser.OnePtrValue(vv.Value)
 	if vvp.Kind() != reflect.Ptr {
-		log.Printf("giv.SliceValue: Cannot view slices with non-pointer struct elements\n")
+		slog.Error("giv.SliceValue: Cannot view slices with non-pointer struct elements")
 		return
 	}
 	inact := vv.This().(Value).IsInactive()
