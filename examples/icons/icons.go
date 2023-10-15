@@ -4,14 +4,26 @@
 
 package main
 
-// TODO: fix
-/*
+import (
+	"path/filepath"
+	"strings"
+
+	"goki.dev/colors"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/glop/dirs"
+	"goki.dev/goosi"
+	"goki.dev/icons"
+)
+
 func main() { gimain.Run(app) }
 
 func app() {
-	width := 1024
-	height := 768
 	nColumns := 5
+
+	goosi.ZoomFactor = 2
 
 	gi.SetAppName("icons")
 	gi.SetAppAbout(`This is a demo of the icons in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
@@ -19,85 +31,42 @@ func app() {
 	// note: can add a path to view other icon sets
 	// svg.CurIconSet.OpenIconsFromPath("/Users/oreilly/github/inkscape/share/icons/multicolor/symbolic/actions")
 
-	win := gi.NewMainRenderWin("gogi-icons-demo", "GoGi Icons", width, height)
+	sc := gi.NewScene("gogi-icons-demo").SetTitle("GoGi Icons")
 
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-
-	row1 := gi.NewLayout(mfr, "row1", gi.LayoutHoriz)
-	row1.SetProp("margin", units.Dp(2))
-	row1.SetStretchMaxWidth()
-
-	spc := gi.NewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.Em(2))
-
-	gi.NewStretch(row1, "str1")
-	lab1 := gi.NewLabel(row1, "lab1", "These are all of the GoGi Icons")
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
-	gi.NewStretch(row1, "str2")
-
-	grid := gi.NewFrame(mfr, "grid", gi.LayoutGrid)
-	grid.Stripes = gi.RowStripes
-	grid.SetProp("columns", nColumns)
-	grid.SetProp("horizontal-align", "center")
-	grid.SetProp("margin", units.Dp(1))
-	// grid.SetProp("spacing", units.Dp(1))
-	grid.SetStretchMaxWidth()
-	grid.SetStretchMaxHeight()
-
-	il := gi.TheIconMgr.IconList(true)
-
-	for _, icnm := range il {
-		icnms := string(icnm)
-		if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
-			continue
-		}
-		vb := gi.NewLayout(grid, "vb", gi.LayoutVert)
-		vb.SetProp("max-width", "19vw")
-		vb.SetProp("overflow", "hidden")
-		gi.NewLabel(vb, "lab1", icnms)
-
-		smico := gi.NewIcon(vb, icnms, icnm)
-		smico.SetMinPrefWidth(units.Dp(24))
-		smico.SetMinPrefHeight(units.Dp(24))
-		smico.SetProp("background-color", colors.Transparent)
-		smico.SetProp("fill", colors.Scheme.OnBackground)
-		smico.SetProp("stroke", colors.Scheme.OnBackground)
-		// smico.SetProp("horizontal-align", gi.AlignLeft)
-
-		// ico := gi.NewIcon(vb, icnms+"_big", icnms)
-		// ico.SetMinPrefWidth(units.Dp(100))
-		// ico.SetMinPrefHeight(units.Dp(100))
-		// ico.SetProp("background-color", colors.Transparent)
-		// ico.SetProp("fill", "#88F")
-		// ico.SetProp("stroke", "black")
-		// ico.SetProp("horizontal-align", gi.AlignLeft)
-	}
-
-	// main menu
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu = make(gi.MenuStage, 0, 10)
-	amen.Menu.AddAppMenu(win)
-
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu = make(gi.MenuStage, 0, 10)
-	emen.Menu.AddCopyCutPaste(win)
-
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		go gi.Quit() // once main window is closed, quit
+	grid := gi.NewFrame(sc, "grid").SetLayout(gi.LayoutGrid)
+	grid.Style(func(s *styles.Style) {
+		// grid.Stripes = gi.RowStripes
+		s.Columns = nColumns
+		s.AlignH = styles.AlignCenter
+		s.Margin.Set(units.Dp(1))
+		s.SetStretchMax()
 	})
 
-	win.MainMenuUpdated()
+	// il := gi.TheIconMgr.IconList(true)
 
-	vp.UpdateEndNoSig(updt)
+	icnms := dirs.ExtFileNamesFS(icons.Icons, "svg", ".svg")
+	for _, icnm := range icnms {
+		// if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
+		// 	continue
+		// }
+		// fmt.Println(icnm)
+		vb := gi.NewLayout(grid, "vb").SetLayout(gi.LayoutVert)
+		vb.Style(func(s *styles.Style) {
+			s.MaxWidth = units.Em(15)
+			// s.Overflow = OverflowHidden
+		})
+		gi.NewLabel(vb, "lab1").SetText(strings.TrimSuffix(icnm, ".svg"))
 
-	win.StartEventLoop()
+		smico := gi.NewIcon(vb, icnm)
+		smico.SetIcon(icons.Icon(filepath.Join("svg", icnm)))
+		smico.Style(func(s *styles.Style) {
+			s.SetMinPrefWidth(units.Dp(24))
+			s.SetMinPrefHeight(units.Dp(24))
+			s.BackgroundColor.SetSolid(colors.Transparent)
+			// s.Setico.SetProp("fill", colors.Scheme.OnBackground)
+			s.Color = colors.Scheme.OnBackground
+		})
+	}
+
+	gi.NewWindow(sc).Run().Wait()
 }
-*/
