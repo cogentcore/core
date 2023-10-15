@@ -125,13 +125,17 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		cb.IconOff = icons.KeyboardArrowRight // icons.Folder    //
 		cb.IconDisab = icons.Blank
 		cb.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.Secondary.OnContainer
-			s.BackgroundColor.SetSolid(colors.Transparent)
+			s.Color = colors.Scheme.Primary.Base
 			s.Margin.Set()
 			s.Padding.Set()
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.AlignV = styles.AlignMiddle
+			// we don't need to visibly tell the user that we are disabled;
+			// the lack of an icon accomplishes that
+			if s.Is(states.Disabled) {
+				s.Opacity = 1
+			}
 		})
 		cb.OnClick(func(e events.Event) {
 			if cb.StateIs(states.Checked) {

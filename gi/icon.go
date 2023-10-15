@@ -7,7 +7,7 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
+	"log/slog"
 
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
@@ -61,31 +61,29 @@ func (ic *Icon) IconStyles() {
 // message if not found etc, and returning true if a new icon was actually set
 // -- does nothing if IconName is already == icon name and has children, and deletes
 // children if name is nil / none (both cases return false for new icon)
-func (ic *Icon) SetIcon(name icons.Icon) (bool, error) {
-	if name.IsNil() {
+func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
+	if icon.IsNil() {
 		ic.SVG.DeleteAll()
 		ic.Config(ic.Sc)
 		return false, nil
 	}
-	if ic.SVG.Root.HasChildren() && ic.IconName == name {
+	if ic.SVG.Root.HasChildren() && ic.IconName == icon {
 		return false, nil
 	}
-	fnm := name.Filename()
+	fnm := icon.Filename()
 	ic.SVG.Config(2, 2)
-	err := ic.SVG.OpenFS(icons.Icons, fnm)
-	if err != nil {
-		log.Println("error opening icon named:", fnm, err)
+	if icon != icons.Blank {
+		err := ic.SVG.OpenFS(icons.Icons, fnm)
+		if err != nil {
+			slog.Error("error opening icon named", "name", fnm, "err", err)
+			ic.Config(ic.Sc)
+			return false, err
+		}
 	}
-	// pr := prof.Start("IconSetIcon")
-	// pr.End()
-	// err := TheIconMgr.SetIcon(ic, name)
-	if err == nil {
-		ic.IconName = name
-		ic.Config(ic.Sc)
-		return true, nil
-	}
+	ic.IconName = icon
 	ic.Config(ic.Sc)
-	return false, err
+	return true, nil
+
 }
 
 func (ic *Icon) GetSize(sc *Scene, iter int) {
