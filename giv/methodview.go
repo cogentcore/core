@@ -102,7 +102,8 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		}
 		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
-			CallFunc(tb, val, cfg)
+			rfun := reflect.ValueOf(val).MethodByName(met.Name)
+			CallReflectFunc(tb, rfun, cfg)
 		})
 		if cfg.SepAfter {
 			tb.AddSeparator()
@@ -137,7 +138,12 @@ type ArgConfig struct {
 //gopy:interface=handle
 func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
 	rfun := reflect.ValueOf(fun)
+	CallReflectFunc(ctx, rfun, cfg)
+}
 
+// CallReflectFunc is the same as [CallFunc], but it takes a [reflect.Value] for
+// the function instead of an `any`
+func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 	if cfg.Args.Len() == 0 {
 		rets := rfun.Call(nil)
 		if !cfg.ShowResult {
@@ -147,7 +153,7 @@ func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
 		ac := ReturnsForFunc(cfg, rets)
 		ArgViewDialog(
 			ctx,
-			DlgOpts{Title: "Result: " + cfg.Label, Prompt: cfg.Doc, Ok: true},
+			DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true},
 			ac,
 			func(dlg *gi.Dialog) {},
 		).Run()
@@ -156,7 +162,7 @@ func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
 	args := ArgsForFunc(rfun, cfg)
 	ArgViewDialog(
 		ctx,
-		DlgOpts{Title: "Call: " + cfg.Label, Prompt: cfg.Doc, Ok: true, Cancel: true},
+		DlgOpts{Title: cfg.Label, Prompt: cfg.Doc, Ok: true, Cancel: true},
 		args,
 		func(dlg *gi.Dialog) {
 			rargs := make([]reflect.Value, len(args))
