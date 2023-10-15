@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
+	"goki.dev/goosi/events/key"
 	"goki.dev/grease"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -55,6 +56,10 @@ type FuncConfig struct {
 	// after it is called. If this is set to true and there are no return values,
 	// it displays a message that the method was successful.
 	ShowResult bool
+	// Shortcut is the keyboard shortcut that triggers the function button
+	Shortcut key.Chord
+	// ShortcutKey is the keyboard shortcut function that triggers the function button
+	ShortcutKey gi.KeyFuns
 	// UpdateMethod, when specified on a method, is the name of a method on the same
 	// type this method is on to call with the function button whenever it is updated.
 	// See [FuncConfig.UpdateFunc] for more information.
@@ -90,7 +95,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		if cfg.SepBefore {
 			tb.AddSeparator()
 		}
-		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc}, func(bt *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}, func(bt *gi.Button) {
 			rfun := reflect.ValueOf(val).MethodByName(met.Name)
 			CallReflectFunc(bt, rfun, cfg)
 		})
