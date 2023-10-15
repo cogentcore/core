@@ -5,9 +5,11 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"reflect"
 	"runtime"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
@@ -33,7 +35,13 @@ type FuncConfig struct {
 	// button will be created to store this function. That artificial
 	// parent button will have the configuration information specified here.
 	// If no artificial parent is needed, the only applicable part of the
-	// configuration information specified here is [FuncConfig.Name].
+	// configuration information specified here is [FuncConfig.Name]. The
+	// name of the parent specified in [FuncConfig.Name] should be in
+	// slash-separated path format (for example, if you want to put
+	// something in the Export menu, which is in the File menu, you would
+	// specify [FuncConfig.Parent.Name] as "File/Export". When using a comment
+	// directive, the parent name can be specified directly through the "-parent"
+	// flag, instead of using "-parent-name".
 	Parent *FuncConfig
 	// Name is the actual name in code of the function.
 	Name string
@@ -99,26 +107,59 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 	if typ == nil {
 		return false
 	}
-	gotAny := false
+	// map key is depth (eg: File = 0, File/Export = 1, File/Export/PNG = 2)
+	cfgs := map[int][]*FuncConfig{}
 	for _, kv := range typ.Methods.Order {
 		met := kv.Val
 		cfg := ConfigForMethod(met, "toolbar")
 		if cfg == nil { // not in toolbar
 			continue
 		}
-		gotAny = true
-		if cfg.SepBefore {
-			tb.AddSeparator()
+		// no parent => depth 0
+		if cfg.Parent == nil {
+			cfgs[0] = append(cfgs[0], cfg)
+			continue
 		}
-		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}, func(bt *gi.Button) {
-			rfun := reflect.ValueOf(val).MethodByName(met.Name)
-			CallReflectFunc(bt, rfun, cfg)
-		})
-		if cfg.SepAfter {
-			tb.AddSeparator()
+		// each slash is 1 higher depth, and no slashes is still 1 depth, as it indicates 1 parent
+		depth := 1 + strings.Count(cfg.Parent.Name, "/")
+		cfgs[depth] = append(cfgs[depth], cfg)
+	}
+	if len(cfgs) == 0 {
+		return false
+	}
+	fmt.Println(cfgs)
+	for depth, cs := range cfgs {
+		for _, cfg := range cs {
+			cfg := cfg
+			fmt.Println(cfg.Name, depth)
+
+			ao := gi.ActOpts{Name: cfg.Name, Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}
+			btf := func(bt *gi.Button) {
+				rfun := reflect.ValueOf(val).MethodByName(cfg.Name)
+				CallReflectFunc(bt, rfun, cfg)
+			}
+			// if no depth, we go straight in toolbar
+			if depth == 0 {
+				if cfg.SepBefore {
+					tb.AddSeparator()
+				}
+				tb.AddButton(ao, btf)
+				if cfg.SepAfter {
+					tb.AddSeparator()
+				}
+				continue
+			}
+			fmt.Println(tb.Kids)
+			// otherwise, we have to find our parent
+			par := tb.FindPath(cfg.Parent.Name)
+			if par == nil {
+				slog.Error("programmer error: giv.ToolbarView: parent path specified in gi:toolbar comment directive could not be found", "method", cfg.Name, "parentPath", cfg.Parent.Name, "methodReceiverType", reflect.TypeOf(val))
+				continue
+			}
+			fmt.Println(par)
 		}
 	}
-	return gotAny
+	return true
 }
 
 // ConfigForFunc returns the default [FuncConfig] for the given [gti.Func].

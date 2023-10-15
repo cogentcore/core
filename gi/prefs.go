@@ -341,7 +341,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 
 // ScreenInfo returns screen info for all screens on the device
 //
-//gi:toolbar -icon info -show-result
+//gi:toolbar -icon info -show-result -parent Info
 func (pf *Preferences) ScreenInfo() string {
 	ns := goosi.TheApp.NScreens()
 	scinfo := ""

@@ -693,7 +693,7 @@ var _ = gti.AddType(&gti.Type{
 			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the device", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result", "-parent", "Info"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
 		})}},
