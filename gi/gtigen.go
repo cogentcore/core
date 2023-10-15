@@ -693,12 +693,12 @@ var _ = gti.AddType(&gti.Type{
 			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the console.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
 		})}},
 		{"VersionInfo", &gti.Method{Name: "VersionInfo", Doc: "VersionInfo returns GoGi version information", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
 		})}},
