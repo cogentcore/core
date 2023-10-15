@@ -339,7 +339,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	pf.Save()
 }
 
-// ScreenInfo returns screen info for all screens on the console.
+// ScreenInfo returns screen info for all screens on the device
 //
 //gi:toolbar -icon info -show-result
 func (pf *Preferences) ScreenInfo() string {
@@ -348,9 +348,9 @@ func (pf *Preferences) ScreenInfo() string {
 	for i := 0; i < ns; i++ {
 		sc := goosi.TheApp.Screen(i)
 		if i > 0 {
-			scinfo += "<br><br>\n"
+			scinfo += "\n"
 		}
-		scinfo += fmt.Sprintf("Screen number: %v Name: %v<br>\n    Geom: %v, DevPixRatio: %v<br>\n    Pixels: %v, Physical size: %v mm<br>\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v<br>\n    Depth: %v, Refresh rate: %v<br>\n    Orientation: %v, Native orientation: %v, Primary orientation: %v<br>\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
+		scinfo += fmt.Sprintf("Screen number: %v Name: %v\n    Geom: %v, DevPixRatio: %v\n    Pixels: %v, Physical size: %v mm\n    Logical DPI: %v, Physical DPI: %v, Logical DPI scale: %v\n    Depth: %v, Refresh rate: %v\n    Orientation: %v, Native orientation: %v, Primary orientation: %v\n", i, sc.Name, sc.Geometry, sc.DevicePixelRatio, sc.PixSize, sc.PhysicalSize, sc.LogicalDPI, sc.PhysicalDPI, sc.LogicalDPI/sc.PhysicalDPI, sc.Depth, sc.RefreshRate, sc.Orientation, sc.NativeOrientation, sc.PrimaryOrientation)
 	}
 	return scinfo
 }
@@ -359,7 +359,7 @@ func (pf *Preferences) ScreenInfo() string {
 //
 //gi:toolbar -icon info -show-result
 func (pf *Preferences) VersionInfo() string {
-	vinfo := Version + " date: " + VersionDate + " UTC; git commit-1: " + GitCommit
+	vinfo := "Version: " + Version + "\nDate: " + VersionDate + " UTC\nGit commit: " + GitCommit
 	return vinfo
 }
 
