@@ -25,7 +25,7 @@ func (vv *TextValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*texteditor.View)
+	sb := vv.Widget.(*texteditor.Editor)
 	npv := laser.NonPtrValue(vv.Value)
 	sb.Buf.SetText([]byte(npv.String()))
 }
@@ -37,7 +37,7 @@ func (vv *TextValue) ConfigWidget(widg gi.Widget) {
 	tb := texteditor.NewBuf()
 	tb.Stat()
 
-	tv := widg.(*texteditor.View)
+	tv := widg.(*texteditor.Editor)
 	tv.SetBuf(tb)
 
 	vv.UpdateWidget()

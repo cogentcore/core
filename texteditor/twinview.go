@@ -107,9 +107,9 @@ func (tv *TwinViews) ViewLays() (*gi.Layout, *gi.Layout) {
 }
 
 // Views returns the two textviews
-func (tv *TwinViews) Views() (*View, *View) {
+func (tv *TwinViews) Views() (*Editor, *Editor) {
 	a, b := tv.ViewLays()
-	av := a.Child(0).(*View)
-	bv := b.Child(0).(*View)
+	av := a.Child(0).(*Editor)
+	bv := b.Child(0).(*Editor)
 	return av, bv
 }

@@ -20,13 +20,13 @@ import (
 
 // HighlightRegion creates a new highlighted region,
 // triggers updating.
-func (tv *View) HighlightRegion(reg textbuf.Region) {
+func (tv *Editor) HighlightRegion(reg textbuf.Region) {
 	tv.Highlights = []textbuf.Region{reg}
 	tv.SetNeedsRender()
 }
 
 // ClearHighlights clears the Highlights slice of all regions
-func (tv *View) ClearHighlights() {
+func (tv *Editor) ClearHighlights() {
 	if len(tv.Highlights) == 0 {
 		return
 	}
@@ -35,7 +35,7 @@ func (tv *View) ClearHighlights() {
 }
 
 // ClearScopelights clears the Highlights slice of all regions
-func (tv *View) ClearScopelights() {
+func (tv *Editor) ClearScopelights() {
 	if len(tv.Scopelights) == 0 {
 		return
 	}
@@ -50,13 +50,13 @@ func (tv *View) ClearScopelights() {
 // 	Selection
 
 // ClearSelected resets both the global selected flag and any current selection
-func (tv *View) ClearSelected() {
+func (tv *Editor) ClearSelected() {
 	// tv.WidgetBase.ClearSelected()
 	tv.SelectReset()
 }
 
 // HasSelection returns whether there is a selected region of text
-func (tv *View) HasSelection() bool {
+func (tv *Editor) HasSelection() bool {
 	if tv.SelectReg.Start.IsLess(tv.SelectReg.End) {
 		return true
 	}
@@ -65,7 +65,7 @@ func (tv *View) HasSelection() bool {
 
 // Selection returns the currently selected text as a textbuf.Edit, which
 // captures start, end, and full lines in between -- nil if no selection
-func (tv *View) Selection() *textbuf.Edit {
+func (tv *Editor) Selection() *textbuf.Edit {
 	if tv.HasSelection() {
 		return tv.Buf.Region(tv.SelectReg.Start, tv.SelectReg.End)
 	}
@@ -73,7 +73,7 @@ func (tv *View) Selection() *textbuf.Edit {
 }
 
 // SelectModeToggle toggles the SelectMode, updating selection with cursor movement
-func (tv *View) SelectModeToggle() {
+func (tv *Editor) SelectModeToggle() {
 	if tv.SelectMode {
 		tv.SelectMode = false
 	} else {
@@ -85,7 +85,7 @@ func (tv *View) SelectModeToggle() {
 }
 
 // SelectAll selects all the text
-func (tv *View) SelectAll() {
+func (tv *Editor) SelectAll() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.SelectReg.Start = lex.PosZero
@@ -94,7 +94,7 @@ func (tv *View) SelectAll() {
 
 // WordBefore returns the word before the lex.Pos
 // uses IsWordBreak to determine the bounds of the word
-func (tv *View) WordBefore(tp lex.Pos) *textbuf.Edit {
+func (tv *Editor) WordBefore(tp lex.Pos) *textbuf.Edit {
 	txt := tv.Buf.Line(tp.Ln)
 	ch := tp.Ch
 	ch = min(ch, len(txt))
@@ -119,7 +119,7 @@ func (tv *View) WordBefore(tp lex.Pos) *textbuf.Edit {
 
 // IsWordStart returns true if the cursor is just before the start of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *View) IsWordStart(tp lex.Pos) bool {
+func (tv *Editor) IsWordStart(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -145,7 +145,7 @@ func (tv *View) IsWordStart(tp lex.Pos) bool {
 
 // IsWordEnd returns true if the cursor is just past the last letter of a word
 // word is a string of characters none of which are classified as a word break
-func (tv *View) IsWordEnd(tp lex.Pos) bool {
+func (tv *Editor) IsWordEnd(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -176,7 +176,7 @@ func (tv *View) IsWordEnd(tp lex.Pos) bool {
 // IsWordMiddle - returns true if the cursor is anywhere inside a word,
 // i.e. the character before the cursor and the one after the cursor
 // are not classified as word break characters
-func (tv *View) IsWordMiddle(tp lex.Pos) bool {
+func (tv *Editor) IsWordMiddle(tp lex.Pos) bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz < 2 {
@@ -198,7 +198,7 @@ func (tv *View) IsWordMiddle(tp lex.Pos) bool {
 
 // SelectWord selects the word (whitespace, punctuation delimited) that the cursor is on
 // returns true if word selected
-func (tv *View) SelectWord() bool {
+func (tv *Editor) SelectWord() bool {
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
 	sz := len(txt)
 	if sz == 0 {
@@ -211,7 +211,7 @@ func (tv *View) SelectWord() bool {
 }
 
 // WordAt finds the region of the word at the current cursor position
-func (tv *View) WordAt() (reg textbuf.Region) {
+func (tv *Editor) WordAt() (reg textbuf.Region) {
 	reg.Start = tv.CursorPos
 	reg.End = tv.CursorPos
 	txt := tv.Buf.Line(tv.CursorPos.Ln)
@@ -268,7 +268,7 @@ func (tv *View) WordAt() (reg textbuf.Region) {
 }
 
 // SelectReset resets the selection
-func (tv *View) SelectReset() {
+func (tv *Editor) SelectReset() {
 	tv.SelectMode = false
 	if !tv.HasSelection() {
 		return
@@ -278,7 +278,7 @@ func (tv *View) SelectReset() {
 }
 
 // RenderSelectLines renders the lines within the current selection region
-func (tv *View) RenderSelectLines() {
+func (tv *Editor) RenderSelectLines() {
 	tv.PrevSelectReg = tv.SelectReg
 }
 
@@ -334,7 +334,7 @@ func ViewClipHistChooseList() []string {
 }
 
 // PasteHist presents a chooser of clip history items, pastes into text if selected
-func (tv *View) PasteHist() {
+func (tv *Editor) PasteHist() {
 	if ViewClipHistory == nil {
 		return
 	}
@@ -353,7 +353,7 @@ func (tv *View) PasteHist() {
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
-func (tv *View) Cut() *textbuf.Edit {
+func (tv *Editor) Cut() *textbuf.Edit {
 	if !tv.HasSelection() {
 		return nil
 	}
@@ -373,7 +373,7 @@ func (tv *View) Cut() *textbuf.Edit {
 
 // DeleteSelection deletes any selected text, without adding to clipboard --
 // returns text deleted as textbuf.Edit (nil if none)
-func (tv *View) DeleteSelection() *textbuf.Edit {
+func (tv *Editor) DeleteSelection() *textbuf.Edit {
 	tbe := tv.Buf.DeleteText(tv.SelectReg.Start, tv.SelectReg.End, EditSignal)
 	tv.SelectReset()
 	return tbe
@@ -381,7 +381,7 @@ func (tv *View) DeleteSelection() *textbuf.Edit {
 
 // Copy copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (tv *View) Copy(reset bool) *textbuf.Edit {
+func (tv *Editor) Copy(reset bool) *textbuf.Edit {
 	tbe := tv.Selection()
 	if tbe == nil {
 		return nil
@@ -399,7 +399,7 @@ func (tv *View) Copy(reset bool) *textbuf.Edit {
 }
 
 // Paste inserts text from the clipboard at current cursor position
-func (tv *View) Paste() {
+func (tv *Editor) Paste() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	data := tv.EventMgr().ClipBoard().Read([]string{filecat.TextPlain})
@@ -410,7 +410,7 @@ func (tv *View) Paste() {
 }
 
 // InsertAtCursor inserts given text at current cursor position
-func (tv *View) InsertAtCursor(txt []byte) {
+func (tv *Editor) InsertAtCursor(txt []byte) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 
@@ -440,7 +440,7 @@ var ViewClipRect *textbuf.Edit
 
 // CutRect cuts rectangle defined by selected text (upper left to lower right)
 // and adds it to the clipboard, also returns cut text.
-func (tv *View) CutRect() *textbuf.Edit {
+func (tv *Editor) CutRect() *textbuf.Edit {
 	if !tv.HasSelection() {
 		return nil
 	}
@@ -460,7 +460,7 @@ func (tv *View) CutRect() *textbuf.Edit {
 
 // CopyRect copies any selected text to the clipboard, and returns that text,
 // optionally resetting the current selection
-func (tv *View) CopyRect(reset bool) *textbuf.Edit {
+func (tv *Editor) CopyRect(reset bool) *textbuf.Edit {
 	tbe := tv.Buf.RegionRect(tv.SelectReg.Start, tv.SelectReg.End)
 	if tbe == nil {
 		return nil
@@ -478,7 +478,7 @@ func (tv *View) CopyRect(reset bool) *textbuf.Edit {
 }
 
 // PasteRect inserts text from the clipboard at current cursor position
-func (tv *View) PasteRect() {
+func (tv *Editor) PasteRect() {
 	if ViewClipRect == nil {
 		return
 	}
@@ -501,7 +501,7 @@ func (tv *View) PasteRect() {
 
 // ReCaseSelection changes the case of the currently-selected text.
 // Returns the new text -- empty if nothing selected.
-func (tv *View) ReCaseSelection(c textbuf.Cases) string {
+func (tv *Editor) ReCaseSelection(c textbuf.Cases) string {
 	if !tv.HasSelection() {
 		return ""
 	}
@@ -515,7 +515,7 @@ func (tv *View) ReCaseSelection(c textbuf.Cases) string {
 //  Context Menu
 
 // ContextMenu displays the context menu with options dependent on situation
-func (tv *View) ContextMenu() {
+func (tv *Editor) ContextMenu() {
 	if !tv.HasSelection() && tv.Buf.IsSpellEnabled(tv.CursorPos) {
 		if tv.Buf.Spell != nil {
 			if tv.OfferCorrect() {
@@ -527,7 +527,7 @@ func (tv *View) ContextMenu() {
 }
 
 // ContextMenuPos returns the position of the context menu
-func (tv *View) ContextMenuPos() (pos image.Point) {
+func (tv *Editor) ContextMenuPos() (pos image.Point) {
 	em := tv.EventMgr()
 	_ = em
 	// if em != nil {
@@ -537,7 +537,7 @@ func (tv *View) ContextMenuPos() (pos image.Point) {
 }
 
 // MakeContextMenu builds the textview context menu
-func (tv *View) MakeContextMenu(m *gi.Menu) {
+func (tv *Editor) MakeContextMenu(m *gi.Menu) {
 	ac := m.AddButton(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
 		tv.Copy(true)
 	})

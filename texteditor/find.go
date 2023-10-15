@@ -21,7 +21,7 @@ import (
 // FindMatches finds the matches with given search string (literal, not regex)
 // and case sensitivity, updates highlights for all.  returns false if none
 // found
-func (tv *View) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Match, bool) {
+func (tv *Editor) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Match, bool) {
 	fsz := len(find)
 	if fsz == 0 {
 		tv.Highlights = nil
@@ -44,7 +44,7 @@ func (tv *View) FindMatches(find string, useCase, lexItems bool) ([]textbuf.Matc
 }
 
 // MatchFromPos finds the match at or after the given text position -- returns 0, false if none
-func (tv *View) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
+func (tv *Editor) MatchFromPos(matches []textbuf.Match, cpos lex.Pos) (int, bool) {
 	for i, m := range matches {
 		reg := tv.Buf.AdjustReg(m.Reg)
 		if reg.Start == cpos || cpos.IsLess(reg.Start) {
@@ -86,7 +86,7 @@ var ViewMaxFindHighlights = 1000
 var PrevISearchString string
 
 // ISearchMatches finds ISearch matches -- returns true if there are any
-func (tv *View) ISearchMatches() bool {
+func (tv *Editor) ISearchMatches() bool {
 	got := false
 	tv.ISearch.Matches, got = tv.FindMatches(tv.ISearch.Find, tv.ISearch.UseCase, false)
 	return got
@@ -94,7 +94,7 @@ func (tv *View) ISearchMatches() bool {
 
 // ISearchNextMatch finds next match after given cursor position, and highlights
 // it, etc
-func (tv *View) ISearchNextMatch(cpos lex.Pos) bool {
+func (tv *Editor) ISearchNextMatch(cpos lex.Pos) bool {
 	if len(tv.ISearch.Matches) == 0 {
 		tv.ISearchSig()
 		return false
@@ -105,7 +105,7 @@ func (tv *View) ISearchNextMatch(cpos lex.Pos) bool {
 }
 
 // ISearchSelectMatch selects match at given match index (e.g., tv.ISearch.Pos)
-func (tv *View) ISearchSelectMatch(midx int) {
+func (tv *Editor) ISearchSelectMatch(midx int) {
 	nm := len(tv.ISearch.Matches)
 	if midx >= nm {
 		tv.ISearchSig()
@@ -122,13 +122,13 @@ func (tv *View) ISearchSelectMatch(midx int) {
 }
 
 // ISearchSig sends the signal that ISearch is updated
-func (tv *View) ISearchSig() {
+func (tv *Editor) ISearchSig() {
 	// tv.ViewSig.Emit(tv.This(), int64(ViewISearch), tv.CursorPos)
 }
 
 // ISearchStart is an emacs-style interactive search mode -- this is called when
 // the search command itself is entered
-func (tv *View) ISearchStart() {
+func (tv *Editor) ISearchStart() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	if tv.ISearch.On {
@@ -166,7 +166,7 @@ func (tv *View) ISearchStart() {
 
 // ISearchKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *View) ISearchKeyInput(kt events.Event) {
+func (tv *Editor) ISearchKeyInput(kt events.Event) {
 	r := kt.KeyRune()
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
@@ -188,7 +188,7 @@ func (tv *View) ISearchKeyInput(kt events.Event) {
 }
 
 // ISearchBackspace gets rid of one item in search string
-func (tv *View) ISearchBackspace() {
+func (tv *Editor) ISearchBackspace() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	if tv.ISearch.Find == PrevISearchString { // undo starting point
@@ -218,7 +218,7 @@ func (tv *View) ISearchBackspace() {
 }
 
 // ISearchCancel cancels ISearch mode
-func (tv *View) ISearchCancel() {
+func (tv *Editor) ISearchCancel() {
 	if !tv.ISearch.On {
 		return
 	}
@@ -280,7 +280,7 @@ var PrevQReplaceFinds []string
 var PrevQReplaceRepls []string
 
 // QReplaceSig sends the signal that QReplace is updated
-func (tv *View) QReplaceSig() {
+func (tv *Editor) QReplaceSig() {
 	// tv.ViewSig.Emit(tv.This(), int64(ViewQReplace), tv.CursorPos)
 }
 
@@ -334,7 +334,7 @@ func QReplaceDialogValues(dlg *gi.Dialog) (find, repl string, lexItems bool) {
 
 // QReplacePrompt is an emacs-style query-replace mode -- this starts the process, prompting
 // user for items to search etc
-func (tv *View) QReplacePrompt() {
+func (tv *Editor) QReplacePrompt() {
 	find := ""
 	if tv.HasSelection() {
 		find = string(tv.Selection().ToBytes())
@@ -348,7 +348,7 @@ func (tv *View) QReplacePrompt() {
 }
 
 // QReplaceStart starts query-replace using given find, replace strings
-func (tv *View) QReplaceStart(find, repl string, lexItems bool) {
+func (tv *Editor) QReplaceStart(find, repl string, lexItems bool) {
 	tv.QReplace.On = true
 	tv.QReplace.Find = find
 	tv.QReplace.Replace = repl
@@ -368,14 +368,14 @@ func (tv *View) QReplaceStart(find, repl string, lexItems bool) {
 }
 
 // QReplaceMatches finds QReplace matches -- returns true if there are any
-func (tv *View) QReplaceMatches() bool {
+func (tv *Editor) QReplaceMatches() bool {
 	got := false
 	tv.QReplace.Matches, got = tv.FindMatches(tv.QReplace.Find, tv.QReplace.UseCase, tv.QReplace.LexItems)
 	return got
 }
 
 // QReplaceNextMatch finds next match using, QReplace.Pos and highlights it, etc
-func (tv *View) QReplaceNextMatch() bool {
+func (tv *Editor) QReplaceNextMatch() bool {
 	nm := len(tv.QReplace.Matches)
 	if nm == 0 {
 		return false
@@ -389,7 +389,7 @@ func (tv *View) QReplaceNextMatch() bool {
 }
 
 // QReplaceSelectMatch selects match at given match index (e.g., tv.QReplace.Pos)
-func (tv *View) QReplaceSelectMatch(midx int) {
+func (tv *Editor) QReplaceSelectMatch(midx int) {
 	nm := len(tv.QReplace.Matches)
 	if midx >= nm {
 		return
@@ -405,7 +405,7 @@ func (tv *View) QReplaceSelectMatch(midx int) {
 }
 
 // QReplaceReplace replaces at given match index (e.g., tv.QReplace.Pos)
-func (tv *View) QReplaceReplace(midx int) {
+func (tv *Editor) QReplaceReplace(midx int) {
 	nm := len(tv.QReplace.Matches)
 	if midx >= nm {
 		return
@@ -425,7 +425,7 @@ func (tv *View) QReplaceReplace(midx int) {
 }
 
 // QReplaceReplaceAll replaces all remaining from index
-func (tv *View) QReplaceReplaceAll(midx int) {
+func (tv *Editor) QReplaceReplaceAll(midx int) {
 	nm := len(tv.QReplace.Matches)
 	if midx >= nm {
 		return
@@ -437,7 +437,7 @@ func (tv *View) QReplaceReplaceAll(midx int) {
 
 // QReplaceKeyInput is an emacs-style interactive search mode -- this is called
 // when keys are typed while in search mode
-func (tv *View) QReplaceKeyInput(kt events.Event) {
+func (tv *Editor) QReplaceKeyInput(kt events.Event) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 
@@ -460,7 +460,7 @@ func (tv *View) QReplaceKeyInput(kt events.Event) {
 }
 
 // QReplaceCancel cancels QReplace mode
-func (tv *View) QReplaceCancel() {
+func (tv *Editor) QReplaceCancel() {
 	if !tv.QReplace.On {
 		return
 	}
@@ -476,7 +476,7 @@ func (tv *View) QReplaceCancel() {
 }
 
 // EscPressed emitted for KeyFunAbort or KeyFunCancelSelect -- effect depends on state..
-func (tv *View) EscPressed() {
+func (tv *Editor) EscPressed() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	switch {

@@ -13,7 +13,7 @@ import (
 )
 
 // StyleSizes gets the size info based on Style settings.
-func (tv *View) StyleSizes() {
+func (tv *Editor) StyleSizes() {
 	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	sty.Font = paint.OpenFont(sty.FontRender(), &sty.UnContext)
@@ -36,7 +36,7 @@ func (tv *View) StyleSizes() {
 
 // UpdateFromAlloc updates size info based on allocated size:
 // NLinesChars, LineNoOff, LineLayoutSize
-func (tv *View) UpdateFromAlloc() {
+func (tv *Editor) UpdateFromAlloc() {
 	sty := &tv.Styles
 	spc := sty.BoxSpace()
 	asz := tv.LayState.Alloc.SizeOrig
@@ -54,7 +54,7 @@ func (tv *View) UpdateFromAlloc() {
 	// tv.LineLayoutSize.X -= spc.Size().X / 2 // extra space for word wrap
 }
 
-func (tv *View) GetSize(sc *gi.Scene, iter int) {
+func (tv *Editor) GetSize(sc *gi.Scene, iter int) {
 	tv.InitLayout(sc)
 	tv.LayoutAllLines()
 	tv.LayState.Size.Need = tv.TotalSize
@@ -62,7 +62,7 @@ func (tv *View) GetSize(sc *gi.Scene, iter int) {
 	// fmt.Println("GetSize: need:", tv.LayState.Size.Need)
 }
 
-func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+func (tv *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	tv.NeedsRedo = false
 	tv.DoLayoutBase(sc, parBBox, iter)
 	spc := tv.BoxSpace()
@@ -84,7 +84,7 @@ func (tv *View) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 // LayoutAllLines generates TextRenders of lines
 // from the Markup version of the source in Buf.
 // It computes the total LinesSize and TotalSize.
-func (tv *View) LayoutAllLines() {
+func (tv *Editor) LayoutAllLines() {
 	if tv.LineLayoutSize == mat32.Vec2Zero || tv.Styles.Font.Size.Val == 0 {
 		return
 	}
@@ -147,7 +147,7 @@ func (tv *View) LayoutAllLines() {
 // If the line with exceeds the current maximum, or the number of effective
 // lines (e.g., from word-wrap) is different, then SetNeedsLayout is called
 // and it returns true.
-func (tv *View) LayoutLine(ln int) bool {
+func (tv *Editor) LayoutLine(ln int) bool {
 	if tv.Buf == nil || tv.Buf.NumLines() == 0 {
 		return false
 	}

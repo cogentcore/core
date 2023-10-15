@@ -20,7 +20,7 @@ import (
 //    Complete and Spell
 
 // OfferComplete pops up a menu of possible completions
-func (tv *View) OfferComplete() {
+func (tv *Editor) OfferComplete() {
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return
 	}
@@ -54,7 +54,7 @@ func (tv *View) OfferComplete() {
 
 // CancelComplete cancels any pending completion -- call this when new events
 // have moved beyond any prior completion scenario
-func (tv *View) CancelComplete() {
+func (tv *Editor) CancelComplete() {
 	tv.ForceComplete = false
 	if tv.Buf == nil {
 		return
@@ -69,7 +69,7 @@ func (tv *View) CancelComplete() {
 
 // Lookup attempts to lookup symbol at current location, popping up a window
 // if something is found
-func (tv *View) Lookup() {
+func (tv *Editor) Lookup() {
 	if tv.Buf.Complete == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return
 	}
@@ -113,7 +113,7 @@ func (tv *View) Lookup() {
 
 // ISpellKeyInput locates the word to spell check based on cursor position and
 // the key input, then passes the text region to SpellCheck
-func (tv *View) ISpellKeyInput(kt events.Event) {
+func (tv *Editor) ISpellKeyInput(kt events.Event) {
 	if !tv.Buf.IsSpellEnabled(tv.CursorPos) {
 		return
 	}
@@ -197,7 +197,7 @@ func (tv *View) ISpellKeyInput(kt events.Event) {
 
 // SpellCheck offers spelling corrections if we are at a word break or other word termination
 // and the word before the break is unknown -- returns true if misspelled word found
-func (tv *View) SpellCheck(reg *textbuf.Edit) bool {
+func (tv *Editor) SpellCheck(reg *textbuf.Edit) bool {
 	if tv.Buf.Spell == nil {
 		return false
 	}
@@ -226,7 +226,7 @@ func (tv *View) SpellCheck(reg *textbuf.Edit) bool {
 // OfferCorrect pops up a menu of possible spelling corrections for word at
 // current CursorPos -- if no misspelling there or not in spellcorrect mode
 // returns false
-func (tv *View) OfferCorrect() bool {
+func (tv *Editor) OfferCorrect() bool {
 	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On || tv.IsDisabled() {
 		return false
 	}
@@ -262,7 +262,7 @@ func (tv *View) OfferCorrect() bool {
 
 // CancelCorrect cancels any pending spell correction -- call this when new events
 // have moved beyond any prior correction scenario
-func (tv *View) CancelCorrect() {
+func (tv *Editor) CancelCorrect() {
 	if tv.Buf.Spell == nil || tv.ISearch.On || tv.QReplace.On {
 		return
 	}

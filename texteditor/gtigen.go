@@ -98,35 +98,35 @@ var ViewType = gti.AddType(&gti.Type{
 		{"Layout", &gti.Field{Name: "Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &View{},
+	Instance: &Editor{},
 })
 
 // NewView adds a new [View] with the given name
 // to the given parent. If the name is unspecified, it defaults
 // to the ID (kebab-case) name of the type, plus the
 // [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewView(par ki.Ki, name ...string) *View {
-	return par.NewChild(ViewType, name...).(*View)
+func NewView(par ki.Ki, name ...string) *Editor {
+	return par.NewChild(ViewType, name...).(*Editor)
 }
 
 // KiType returns the [*gti.Type] of [View]
-func (t *View) KiType() *gti.Type {
+func (t *Editor) KiType() *gti.Type {
 	return ViewType
 }
 
 // New returns a new [*View] value
-func (t *View) New() ki.Ki {
-	return &View{}
+func (t *Editor) New() ki.Ki {
+	return &Editor{}
 }
 
 // ViewEmbedder is an interface that all types that embed View satisfy
 type ViewEmbedder interface {
-	AsView() *View
+	AsView() *Editor
 }
 
 // AsView returns the given value as a value of type View if the type
 // of the given value embeds View, or nil otherwise
-func AsView(k ki.Ki) *View {
+func AsView(k ki.Ki) *Editor {
 	if k == nil || k.This() == nil {
 		return nil
 	}
@@ -137,6 +137,6 @@ func AsView(k ki.Ki) *View {
 }
 
 // AsView satisfies the [ViewEmbedder] interface
-func (t *View) AsView() *View {
+func (t *Editor) AsView() *Editor {
 	return t
 }
