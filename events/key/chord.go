@@ -10,6 +10,8 @@ import (
 	"unicode"
 )
 
+// TODO: consider adding chaining methods for constructing chords
+
 // Chord represents the key chord associated with a given key function -- it
 // is linked to the KeyChordEdit in the giv ValueView system so you can just
 // type keys to set key chords.
