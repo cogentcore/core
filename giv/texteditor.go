@@ -11,17 +11,17 @@ import (
 	"goki.dev/laser"
 )
 
-// TextValue presents a [textview.View] for longer text
-type TextValue struct {
+// TextEditorValue presents a [texteditor.Editor] for editing longer text
+type TextEditorValue struct {
 	ValueBase
 }
 
-func (vv *TextValue) WidgetType() *gti.Type {
+func (vv *TextEditorValue) WidgetType() *gti.Type {
 	vv.WidgetTyp = texteditor.ViewType
 	return vv.WidgetTyp
 }
 
-func (vv *TextValue) UpdateWidget() {
+func (vv *TextEditorValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
@@ -30,7 +30,7 @@ func (vv *TextValue) UpdateWidget() {
 	sb.Buf.SetText([]byte(npv.String()))
 }
 
-func (vv *TextValue) ConfigWidget(widg gi.Widget) {
+func (vv *TextEditorValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 
