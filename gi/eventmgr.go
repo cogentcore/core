@@ -259,10 +259,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
 
-		if wb.StateIs(states.Disabled) {
-			continue
-		}
-
 		if !isDrag {
 			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
 		}
@@ -285,6 +281,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 	case events.MouseDown:
 		if press != nil {
 			em.Press = press
+			fmt.Println("press:", press)
 		}
 	case events.MouseMove:
 		hovs := make([]Widget, 0, len(em.MouseInBBox))
@@ -333,6 +330,7 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
 		case em.Press == up && up != nil:
+			fmt.Println("click:", up)
 			up.Send(events.Click, evi)
 		}
 		em.Press = nil
@@ -502,12 +500,13 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	w.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if !wb.IsVisible() {
+		if !wb.IsVisible() || wb.StateIs(states.Disabled) {
 			return ki.Break
 		}
 		if !wb.PosInBBox(pos) {
 			return ki.Break
 		}
+		// fmt.Println("in bb:", wi, wb.Styles.State)
 		em.MouseInBBox = append(em.MouseInBBox, wi)
 		if wb.Parts != nil {
 			em.GetMouseInBBox(wb.Parts, pos)

@@ -46,7 +46,7 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
 <p>Full Drag-and-Drop, Copy / Cut / Paste, and Keyboard Navigation is supported.</p>`)
 
-	sc := gi.NewScene("gogi-treeview-test").SetTitle("TreeView Test")
+	sc := gi.NewScene("treeview-test").SetTitle("TreeView Test")
 
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
