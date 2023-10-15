@@ -277,9 +277,7 @@ func ToValue(it any, tags string) Value {
 			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
 			return ToValue(v.Elem().Interface(), tags)
 		}
-	case vk == reflect.Array:
-		fallthrough
-	case vk == reflect.Slice:
+	case vk == reflect.Array, vk == reflect.Slice:
 		v := reflect.ValueOf(it)
 		sz := v.Len()
 		eltyp := laser.SliceElType(it)
@@ -304,9 +302,7 @@ func ToValue(it any, tags string) Value {
 			return vv
 		}
 	case vk == reflect.Map:
-		v := reflect.ValueOf(it)
-		sz := v.Len()
-		sz = laser.MapStructElsN(it)
+		sz := laser.MapStructElsN(it)
 		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
 			vv := &MapInlineValue{}
 			ki.InitNode(vv)
@@ -343,6 +339,15 @@ func ToValue(it any, tags string) Value {
 			ki.InitNode(vv)
 			return vv
 		}
+		// TODO(kai): handle multi-line strings with textview
+		// case vk == reflect.String:
+		// 	v := reflect.ValueOf(it)
+		// 	str := v.String()
+		// 	if strings.Contains(str, "\n") {
+		// 		vv := &textview.View{}
+		// 		ki.InitNode(vv)
+		// 		return vv
+		// 	}
 	}
 	// fallback.
 	vv := &ValueBase{}
