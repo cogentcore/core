@@ -661,8 +661,7 @@ func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
 		}
 		tvki := AsTreeView(k)
 		if tvki != nil {
-			// tvki.SetState(!parentClosed, states.Invisible)
-			tvki.SetFlag(!parentClosed, gi.Invisible)
+			tvki.SetState(!parentClosed, states.Invisible)
 		}
 		return ki.Continue
 	})
@@ -718,8 +717,7 @@ func (tv *TreeView) OpenAll() {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.SetClosed(false)
-			// tvki.SetState(false, states.Invisible)
-			tvki.SetFlag(false, gi.Invisible)
+			tvki.SetState(false, states.Invisible)
 		}
 		return ki.Continue
 	})
@@ -734,8 +732,7 @@ func (tv *TreeView) CloseAll() {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.SetClosed(true)
-			// tvki.SetState(true, states.Invisible)
-			tvki.SetFlag(false, gi.Invisible)
+			tvki.SetState(true, states.Invisible)
 			return ki.Continue
 		}
 		return ki.Break
@@ -1656,10 +1653,7 @@ func (tv *TreeView) IsVisible() bool {
 	if tv.RootView.Par == nil || tv.RootView.Par.This() == nil {
 		return false
 	}
-	// if tv.StateIs(states.Invisible) {
-	// 	return false
-	// }
-	if tv.Is(gi.Invisible) {
+	if tv.StateIs(states.Invisible) {
 		return false
 	}
 	return tv.RootView.Par.This().(gi.Widget).IsVisible()

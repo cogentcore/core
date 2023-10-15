@@ -355,40 +355,35 @@ func (i *CompleteSignals) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _WidgetFlagsValues = []WidgetFlags{7, 8, 9}
+var _WidgetFlagsValues = []WidgetFlags{7, 8}
 
 // WidgetFlagsN is the highest valid value
 // for type WidgetFlags, plus one.
-const WidgetFlagsN WidgetFlags = 10
+const WidgetFlagsN WidgetFlags = 9
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _WidgetFlagsNoOp() {
 	var x [1]struct{}
 	_ = x[NeedsRender-(7)]
-	_ = x[Invisible-(8)]
-	_ = x[InstaDrag-(9)]
+	_ = x[InstaDrag-(8)]
 }
 
 var _WidgetFlagsNameToValueMap = map[string]WidgetFlags{
 	`NeedsRender`: 7,
 	`needsrender`: 7,
-	`Invisible`:   8,
-	`invisible`:   8,
-	`InstaDrag`:   9,
-	`instadrag`:   9,
+	`InstaDrag`:   8,
+	`instadrag`:   8,
 }
 
 var _WidgetFlagsDescMap = map[WidgetFlags]string{
 	7: `NeedsRender needs to be rendered on next render itration`,
-	8: `Invisible means that the node has been marked as invisible by a parent that has switch-like powers (e.g., layout stacked / tabs or splitter panel that has been collapsed). This flag is propagated down to all child nodes, and rendering or other interaction / update routines should not run when this flag is set (PushBounds does this for most cases). However, it IS a good idea to have styling, layout etc all take place as normal, so that when the flag is cleared, rendering can proceed directly.`,
-	9: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
+	8: `InstaDrag indicates this node should start dragging immediately when clicked -- otherwise there is a time-and-distance threshold to the start of dragging -- use this for controls that are small and are primarily about dragging (e.g., the Splitter handle)`,
 }
 
 var _WidgetFlagsMap = map[WidgetFlags]string{
 	7: `NeedsRender`,
-	8: `Invisible`,
-	9: `InstaDrag`,
+	8: `InstaDrag`,
 }
 
 // String returns the string representation
@@ -1793,60 +1788,60 @@ func (i *WinFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _ScFlagsValues = []ScFlags{10, 11, 12, 13, 14, 15, 16}
+var _ScFlagsValues = []ScFlags{9, 10, 11, 12, 13, 14, 15}
 
 // ScFlagsN is the highest valid value
 // for type ScFlags, plus one.
-const ScFlagsN ScFlags = 17
+const ScFlagsN ScFlags = 16
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
 func _ScFlagsNoOp() {
 	var x [1]struct{}
-	_ = x[ScUpdating-(10)]
-	_ = x[ScNeedsRender-(11)]
-	_ = x[ScNeedsLayout-(12)]
-	_ = x[ScNeedsRebuild-(13)]
-	_ = x[ScImageUpdated-(14)]
-	_ = x[ScPrefSizing-(15)]
-	_ = x[ScPreserve-(16)]
+	_ = x[ScUpdating-(9)]
+	_ = x[ScNeedsRender-(10)]
+	_ = x[ScNeedsLayout-(11)]
+	_ = x[ScNeedsRebuild-(12)]
+	_ = x[ScImageUpdated-(13)]
+	_ = x[ScPrefSizing-(14)]
+	_ = x[ScPreserve-(15)]
 }
 
 var _ScFlagsNameToValueMap = map[string]ScFlags{
-	`ScUpdating`:     10,
-	`scupdating`:     10,
-	`ScNeedsRender`:  11,
-	`scneedsrender`:  11,
-	`ScNeedsLayout`:  12,
-	`scneedslayout`:  12,
-	`ScNeedsRebuild`: 13,
-	`scneedsrebuild`: 13,
-	`ScImageUpdated`: 14,
-	`scimageupdated`: 14,
-	`ScPrefSizing`:   15,
-	`scprefsizing`:   15,
-	`ScPreserve`:     16,
-	`scpreserve`:     16,
+	`ScUpdating`:     9,
+	`scupdating`:     9,
+	`ScNeedsRender`:  10,
+	`scneedsrender`:  10,
+	`ScNeedsLayout`:  11,
+	`scneedslayout`:  11,
+	`ScNeedsRebuild`: 12,
+	`scneedsrebuild`: 12,
+	`ScImageUpdated`: 13,
+	`scimageupdated`: 13,
+	`ScPrefSizing`:   14,
+	`scprefsizing`:   14,
+	`ScPreserve`:     15,
+	`scpreserve`:     15,
 }
 
 var _ScFlagsDescMap = map[ScFlags]string{
-	10: `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
-	11: `ScNeedsRender means nodes have flagged that they need a Render update.`,
-	12: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
-	13: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
-	14: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
-	15: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
-	16: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
+	9:  `ScUpdating means scene is in the process of updating: set for any kind of tree-level update. skip any further update passes until it goes off.`,
+	10: `ScNeedsRender means nodes have flagged that they need a Render update.`,
+	11: `ScNeedsLayout means that this scene needs DoLayout stack: GetSize, DoLayout, then Render. This is true after any Config.`,
+	12: `ScNeedsRebuild means that this scene needs full Rebuild: Config, Layout, Render with DoRebuild flag set (e.g., after global style changes, zooming, etc)`,
+	13: `ScImageUpdated indicates that the Scene&#39;s image has been updated e.g., due to a render or a resize. This is reset by the global RenderWin rendering pass, so it knows whether it needs to copy the image up to the GPU or not.`,
+	14: `ScPrefSizing means that this scene is currently doing a PrefSize computation to compute the size of the scene (for sizing window for example) -- affects layout size computation only for Over`,
+	15: `ScPreserve keeps this scene around instead of deleting when it is no longer needed. Set if added to SceneLibrary for example.`,
 }
 
 var _ScFlagsMap = map[ScFlags]string{
-	10: `ScUpdating`,
-	11: `ScNeedsRender`,
-	12: `ScNeedsLayout`,
-	13: `ScNeedsRebuild`,
-	14: `ScImageUpdated`,
-	15: `ScPrefSizing`,
-	16: `ScPreserve`,
+	9:  `ScUpdating`,
+	10: `ScNeedsRender`,
+	11: `ScNeedsLayout`,
+	12: `ScNeedsRebuild`,
+	13: `ScImageUpdated`,
+	14: `ScPrefSizing`,
+	15: `ScPreserve`,
 }
 
 // String returns the string representation

@@ -502,7 +502,7 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	w.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+		if !wb.IsVisible() {
 			return ki.Break
 		}
 		if !wb.PosInBBox(pos) {
@@ -641,7 +641,7 @@ func (em *EventMgr) FocusWithins() bool {
 	}
 	em.Focus.WalkUpParent(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wi == nil {
+		if !wb.IsVisible() {
 			return ki.Break
 		}
 		if wb.AbilityIs(abilities.FocusWithinable) {
@@ -671,7 +671,7 @@ func (em *EventMgr) FocusNext() bool {
 				return ki.Break
 			}
 			wi, wb := AsWidget(k)
-			if wb == nil || wb.This() == nil {
+			if !wb.IsVisible() {
 				return ki.Continue
 			}
 			if foc == wi { // current focus can be a non-can-focus item
@@ -704,7 +704,7 @@ func (em *EventMgr) FocusOnOrNext(foc Widget) bool {
 		return true
 	}
 	_, wb := AsWidget(foc)
-	if wb == nil || wb.This() == nil {
+	if !wb.IsVisible() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -723,7 +723,7 @@ func (em *EventMgr) FocusOnOrPrev(foc Widget) bool {
 		return true
 	}
 	_, wb := AsWidget(foc)
-	if wb == nil || wb.This() == nil {
+	if !wb.IsVisible() {
 		return false
 	}
 	if wb.AbilityIs(abilities.Focusable) {
@@ -752,7 +752,7 @@ func (em *EventMgr) FocusPrev() bool {
 			return ki.Break
 		}
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
+		if !wb.IsVisible() {
 			return ki.Continue
 		}
 		if foc == wi {
@@ -781,7 +781,7 @@ func (em *EventMgr) FocusFirst() bool {
 
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
+		if !wb.IsVisible() {
 			return ki.Continue
 		}
 		if !wb.AbilityIs(abilities.Focusable) {
@@ -803,7 +803,7 @@ func (em *EventMgr) FocusLast() bool {
 	// todo: could use walking functions in ki
 	focRoot.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if wb == nil || wb.This() == nil {
+		if !wb.IsVisible() {
 			return ki.Continue
 		}
 		if !wb.AbilityIs(abilities.Focusable) {
@@ -825,7 +825,7 @@ func (em *EventMgr) ClearNonFocus(foc Widget) {
 		if wi == focRoot { // skip top-level
 			return ki.Continue
 		}
-		if wb == nil || wb.This() == nil {
+		if !wb.IsVisible() {
 			return ki.Continue
 		}
 		if foc == wi {

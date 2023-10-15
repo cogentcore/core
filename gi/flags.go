@@ -22,16 +22,6 @@ const (
 	// NeedsRender needs to be rendered on next render itration
 	NeedsRender WidgetFlags = WidgetFlags(ki.FlagsN) + iota
 
-	// Invisible means that the node has been marked as invisible by a parent
-	// that has switch-like powers (e.g., layout stacked / tabs or splitter
-	// panel that has been collapsed).  This flag is propagated down to all
-	// child nodes, and rendering or other interaction / update routines
-	// should not run when this flag is set (PushBounds does this for most
-	// cases).  However, it IS a good idea to have styling, layout etc all
-	// take place as normal, so that when the flag is cleared, rendering can
-	// proceed directly.
-	Invisible
-
 	// InstaDrag indicates this node should start dragging immediately when
 	// clicked -- otherwise there is a time-and-distance threshold to the
 	// start of dragging -- use this for controls that are small and are

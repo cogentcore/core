@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/abilities"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -400,9 +401,9 @@ func (sl *Splits) Render(sc *Scene) {
 			}
 			sp := sl.Splits[i]
 			if sp <= 0.01 {
-				wb.SetFlag(true, Invisible)
+				wb.SetState(true, states.Invisible)
 			} else {
-				wb.SetFlag(false, Invisible)
+				wb.SetState(false, states.Invisible)
 			}
 			wi.Render(sc) // needs to disconnect using invisible
 		}

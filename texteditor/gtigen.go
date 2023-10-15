@@ -8,42 +8,6 @@ import (
 	"goki.dev/ordmap"
 )
 
-// TwinEditorsType is the [gti.Type] for [TwinEditors]
-var TwinEditorsType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/texteditor.TwinEditors",
-	ShortName:  "texteditor.TwinEditors",
-	IDName:     "twin-editors",
-	Doc:        "TwinEditors presents two side-by-side [Editor]s in [gi.Splits]\nthat scroll in sync with each other.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
-		{"BufB", &gti.Field{Name: "BufB", Type: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Splits", &gti.Field{Name: "Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TwinEditors{},
-})
-
-// NewTwinEditors adds a new [TwinEditors] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTwinEditors(par ki.Ki, name ...string) *TwinEditors {
-	return par.NewChild(TwinEditorsType, name...).(*TwinEditors)
-}
-
-// KiType returns the [*gti.Type] of [TwinEditors]
-func (t *TwinEditors) KiType() *gti.Type {
-	return TwinEditorsType
-}
-
-// New returns a new [*TwinEditors] value
-func (t *TwinEditors) New() ki.Ki {
-	return &TwinEditors{}
-}
-
 // EditorType is the [gti.Type] for [Editor]
 var EditorType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/texteditor.Editor",
@@ -139,4 +103,40 @@ func AsEditor(k ki.Ki) *Editor {
 // AsEditor satisfies the [EditorEmbedder] interface
 func (t *Editor) AsEditor() *Editor {
 	return t
+}
+
+// TwinEditorsType is the [gti.Type] for [TwinEditors]
+var TwinEditorsType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/texteditor.TwinEditors",
+	ShortName:  "texteditor.TwinEditors",
+	IDName:     "twin-editors",
+	Doc:        "TwinEditors presents two side-by-side [Editor]s in [gi.Splits]\nthat scroll in sync with each other.",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"BufA", &gti.Field{Name: "BufA", Type: "*Buf", Doc: "textbuf for A", Directives: gti.Directives{}}},
+		{"BufB", &gti.Field{Name: "BufB", Type: "*Buf", Doc: "textbuf for B", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Splits", &gti.Field{Name: "Splits", Type: "gi.Splits", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TwinEditors{},
+})
+
+// NewTwinEditors adds a new [TwinEditors] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTwinEditors(par ki.Ki, name ...string) *TwinEditors {
+	return par.NewChild(TwinEditorsType, name...).(*TwinEditors)
+}
+
+// KiType returns the [*gti.Type] of [TwinEditors]
+func (t *TwinEditors) KiType() *gti.Type {
+	return TwinEditorsType
+}
+
+// New returns a new [*TwinEditors] value
+func (t *TwinEditors) New() ki.Ki {
+	return &TwinEditors{}
 }

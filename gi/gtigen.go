@@ -692,7 +692,7 @@ var _ = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the console.", Directives: gti.Directives{
+		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the device", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
@@ -1229,6 +1229,7 @@ var SwitchType = gti.AddType(&gti.Type{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "the label text for the switch", Directives: gti.Directives{}}},
 		{"IconOn", &gti.Field{Name: "IconOn", Type: "icons.Icon", Doc: "icon to use for the on, checked state of the switch", Directives: gti.Directives{}}},
 		{"IconOff", &gti.Field{Name: "IconOff", Type: "icons.Icon", Doc: "icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}}},
+		{"IconDisab", &gti.Field{Name: "IconDisab", Type: "icons.Icon", Doc: "icon to use for the disabled state of the switch", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},

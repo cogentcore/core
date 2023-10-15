@@ -13,6 +13,7 @@ import (
 	"unicode"
 
 	"goki.dev/girl/abilities"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -616,11 +617,7 @@ func (ly *Layout) RenderChildren(sc *Scene) {
 	if ly.Lay == LayoutStacked {
 		for i, kid := range ly.Kids {
 			if _, wi := AsWidget(kid); wi != nil {
-				if i == ly.StackTop {
-					wi.SetFlag(false, Invisible)
-				} else {
-					wi.SetFlag(true, Invisible)
-				}
+				wi.SetState(i != ly.StackTop, states.Invisible)
 			}
 		}
 	}

@@ -943,7 +943,7 @@ var FileNodeType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"FPath", &gti.Field{Name: "FPath", Type: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}}},
 		{"Info", &gti.Field{Name: "Info", Type: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}}},
-		{"Buf", &gti.Field{Name: "Buf", Type: "*textview.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}}},
 		{"FRoot", &gti.Field{Name: "FRoot", Type: "*FileTree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}}},
 		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "vci.Repo", Doc: "version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}}},
 		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}}},
@@ -1096,6 +1096,34 @@ func (t *FileView) KiType() *gti.Type {
 func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/giv.FuncConfig",
+	ShortName: "giv.FuncConfig",
+	IDName:    "func-config",
+	Doc:       "FuncConfig contains the configuration options for a function, to be passed\nto [CallFunc] or to the `gi:toolbar` and `gi:menubar` comment directives.\nThese options control both the appearance and behavior of both the function\nbutton in a toolbar and/or menubar button and the dialog created by [CallFunc].",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "Name is the actual name in code of the function.", Directives: gti.Directives{}}},
+		{"Label", &gti.Field{Name: "Label", Type: "string", Doc: "Label is the user-friendly label for the function button.\nIt defaults to the sentence case version of the\nname of the function.", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "Icon is the icon for the function button. If there\nis an icon with the same name as the function, it\ndefaults to that icon.", Directives: gti.Directives{}}},
+		{"Doc", &gti.Field{Name: "Doc", Type: "string", Doc: "Doc is the documentation for the function, used as\na tooltip on the function button and a label in the\n[CallFunc] dialog. It defaults to the documentation\nfor the function found in gti.", Directives: gti.Directives{}}},
+		{"SepBefore", &gti.Field{Name: "SepBefore", Type: "bool", Doc: "SepBefore is whether to insert a separator before the\nfunction button in a toolbar/menubar.", Directives: gti.Directives{}}},
+		{"SepAfter", &gti.Field{Name: "SepAfter", Type: "bool", Doc: "SepAfter is whether to insert a separator after the\nfunction button in a toolbar/menubar.", Directives: gti.Directives{}}},
+		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", Doc: "Confirm is whether to show a confirmation dialog asking\nthe user whether they are sure they want to call the function\nbefore calling it.", Directives: gti.Directives{}}},
+		{"ShowResult", &gti.Field{Name: "ShowResult", Type: "bool", Doc: "ShowResult is whether to display the result (return values) of the function\nafter it is called. If this is set to true and there are no return values,\nit displays a message that the method was successful.", Directives: gti.Directives{}}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "Shortcut is the keyboard shortcut that triggers the function button", Directives: gti.Directives{}}},
+		{"ShortcutKey", &gti.Field{Name: "ShortcutKey", Type: "gi.KeyFuns", Doc: "ShortcutKey is the keyboard shortcut function that triggers the function button", Directives: gti.Directives{}}},
+		{"UpdateMethod", &gti.Field{Name: "UpdateMethod", Type: "string", Doc: "UpdateMethod, when specified on a method, is the name of a method on the same\ntype this method is on to call with the function button whenever it is updated.\nSee [FuncConfig.UpdateFunc] for more information.", Directives: gti.Directives{}}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *gi.Button)", Doc: "UpdateFunc is a function to call with the function button whenever it\nis updated. For example, this can be used to change whether a button is\ndisabled based on some other value. When using comment directives, this\nshould be set through [FuncConfig.UpdateMethod].", Directives: gti.Directives{}}},
+		{"Args", &gti.Field{Name: "Args", Type: "*gti.Fields", Doc: "Args are the arguments to the function. They are set automatically.", Directives: gti.Directives{}}},
+		{"Returns", &gti.Field{Name: "Returns", Type: "*gti.Fields", Doc: "Returns are the return values of the function. They are set automatically.", Directives: gti.Directives{}}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
 
 // GiEditorType is the [gti.Type] for [GiEditor]
 var GiEditorType = gti.AddType(&gti.Type{
@@ -1353,28 +1381,6 @@ func (t *MapViewInline) KiType() *gti.Type {
 func (t *MapViewInline) New() ki.Ki {
 	return &MapViewInline{}
 }
-
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/giv.MethodConfig",
-	ShortName: "giv.MethodConfig",
-	IDName:    "method-config",
-	Doc:       "MethodConfig contains the configuration options for a method button in a toolbar or menubar.\nThese are the configuration options passed to the `gi:toolbar` and `gi:menubar` comment directives.",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "Name is the actual name in code of the function to call.", Directives: gti.Directives{}}},
-		{"Label", &gti.Field{Name: "Label", Type: "string", Doc: "Label is the label for the method button.\nIt defaults to the sentence case version of the\nname of the function.", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "Icon is the icon for the method button. If there\nis an icon with the same name as the function, it\ndefaults to that icon.", Directives: gti.Directives{}}},
-		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "Tooltip is the tooltip for the method button.\nIt defaults to the documentation for the function.", Directives: gti.Directives{}}},
-		{"SepBefore", &gti.Field{Name: "SepBefore", Type: "bool", Doc: "SepBefore is whether to insert a separator before the method button.", Directives: gti.Directives{}}},
-		{"SepAfter", &gti.Field{Name: "SepAfter", Type: "bool", Doc: "SepAfter is whether to insert a separator after the method button.", Directives: gti.Directives{}}},
-		{"Args", &gti.Field{Name: "Args", Type: "*gti.Fields", Doc: "Args are the arguments to the method", Directives: gti.Directives{}}},
-		{"Returns", &gti.Field{Name: "Returns", Type: "*gti.Fields", Doc: "Returns are the return values of the method", Directives: gti.Directives{}}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
 
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{
@@ -1683,6 +1689,39 @@ func (t *TableView) KiType() *gti.Type {
 // New returns a new [*TableView] value
 func (t *TableView) New() ki.Ki {
 	return &TableView{}
+}
+
+// TextEditorValueType is the [gti.Type] for [TextEditorValue]
+var TextEditorValueType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/giv.TextEditorValue",
+	ShortName:  "giv.TextEditorValue",
+	IDName:     "text-editor-value",
+	Doc:        "TextEditorValue presents a [texteditor.Editor] for editing longer text",
+	Directives: gti.Directives{},
+	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &TextEditorValue{},
+})
+
+// NewTextEditorValue adds a new [TextEditorValue] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewTextEditorValue(par ki.Ki, name ...string) *TextEditorValue {
+	return par.NewChild(TextEditorValueType, name...).(*TextEditorValue)
+}
+
+// KiType returns the [*gti.Type] of [TextEditorValue]
+func (t *TextEditorValue) KiType() *gti.Type {
+	return TextEditorValueType
+}
+
+// New returns a new [*TextEditorValue] value
+func (t *TextEditorValue) New() ki.Ki {
+	return &TextEditorValue{}
 }
 
 // TreeSyncViewType is the [gti.Type] for [TreeSyncView]
