@@ -205,7 +205,7 @@ func (pf *Preferences) Open() error {
 
 // Save Preferences to GoGi standard prefs directory
 //
-//gi:toolbar -sep-before
+//gi:toolbar -sep-before -show-result
 func (pf *Preferences) Save() error {
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsFileName)

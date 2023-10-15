@@ -677,7 +677,7 @@ var _ = gti.AddType(&gti.Type{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "refresh"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
