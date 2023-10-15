@@ -5,10 +5,8 @@
 package main
 
 import (
-	"path/filepath"
 	"strings"
 
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/girl/styles"
@@ -21,8 +19,6 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	nColumns := 5
-
 	goosi.ZoomFactor = 2
 
 	gi.SetAppName("icons")
@@ -35,37 +31,26 @@ func app() {
 
 	grid := gi.NewFrame(sc, "grid").SetLayout(gi.LayoutGrid)
 	grid.Style(func(s *styles.Style) {
-		// grid.Stripes = gi.RowStripes
-		s.Columns = nColumns
+		s.Columns = int(s.UnContext.Ew / (17 * s.UnContext.FontEm))
 		s.AlignH = styles.AlignCenter
 		s.Margin.Set(units.Dp(1))
 		s.SetStretchMax()
 	})
 
-	// il := gi.TheIconMgr.IconList(true)
-
 	icnms := dirs.ExtFileNamesFS(icons.Icons, "svg", ".svg")
 	for _, icnm := range icnms {
-		// if icnm.IsNil() || strings.HasSuffix(icnms, "-fill") {
-		// 	continue
-		// }
-		// fmt.Println(icnm)
-		vb := gi.NewLayout(grid, "vb").SetLayout(gi.LayoutVert)
+		ic := strings.TrimSuffix(icnm, ".svg")
+		if strings.HasSuffix(ic, "-fill") {
+			continue
+		}
+
+		vb := gi.NewLayout(grid, ic).SetLayout(gi.LayoutVert)
 		vb.Style(func(s *styles.Style) {
 			s.MaxWidth = units.Em(15)
-			// s.Overflow = OverflowHidden
 		})
-		gi.NewLabel(vb, "lab1").SetText(strings.TrimSuffix(icnm, ".svg"))
 
-		smico := gi.NewIcon(vb, icnm)
-		smico.SetIcon(icons.Icon(filepath.Join("svg", icnm)))
-		smico.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Dp(24))
-			s.SetMinPrefHeight(units.Dp(24))
-			s.BackgroundColor.SetSolid(colors.Transparent)
-			// s.Setico.SetProp("fill", colors.Scheme.OnBackground)
-			s.Color = colors.Scheme.OnBackground
-		})
+		gi.NewLabel(vb, ic).SetText(ic)
+		gi.NewIcon(vb, ic).SetIcon(icons.Icon(ic))
 	}
 
 	gi.NewWindow(sc).Run().Wait()
