@@ -10,6 +10,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/styles"
 	"goki.dev/goosi"
 	"goki.dev/mat32/v2"
 )
@@ -25,7 +26,8 @@ func MakeTree(tv *giv.TreeView, iter, maxIter, maxKids int) {
 		n = maxKids
 	}
 	iter++
-	tv.SetNChildren(n, giv.TreeViewType, "ch")
+	parnm := tv.Name() + "_"
+	tv.SetNChildren(n, giv.TreeViewType, parnm+"ch")
 	for j := 0; j < n; j++ {
 		kt := tv.Child(j).(*giv.TreeView)
 		kt.RootView = tv.RootView
@@ -53,15 +55,20 @@ func app() {
 	svfr := gi.NewFrame(split, "svfr").SetLayout(gi.LayoutHoriz)
 	split.SetSplits(.3, .7)
 
+	tvfr.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
+
 	tv := giv.NewTreeView(tvfr, "tv")
 	tv.RootView = tv
 
-	MakeTree(tv, 0, 3, 5)
+	MakeTree(tv, 0, 1, 5)
 
-	sv := giv.NewStructView(svfr, "sv")
-	sv.SetStretchMaxWidth()
-	sv.SetStretchMaxHeight()
-	sv.SetStruct(tv)
+	_ = svfr
+	// sv := giv.NewStructView(svfr, "sv")
+	// sv.SetStretchMaxWidth()
+	// sv.SetStretchMaxHeight()
+	// sv.SetStruct(tv)
 
 	// tv.TreeViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	if data == nil {
