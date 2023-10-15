@@ -221,8 +221,8 @@ func (sr *Slider) SliderStyles() {
 
 func (sr *Slider) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "icon":
+	switch w.PathFrom(sr) {
+	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)

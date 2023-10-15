@@ -94,7 +94,7 @@ func (fv *FileView) FileViewStyles() {
 
 func (fv *FileView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(fv) {
 	case "files-row":
 		fr := w.(*gi.Layout)
 		fr.Lay = gi.LayoutHoriz

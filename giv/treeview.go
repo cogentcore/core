@@ -106,13 +106,13 @@ func (tv *TreeView) TreeViewStyles() {
 
 func (tv *TreeView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(tv) {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
 		})
-	case "icon":
+	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Secondary.OnContainer
 			s.Width.SetEm(1)
@@ -120,11 +120,11 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "branch":
+	case "parts/branch":
 		sw := w.(*gi.Switch)
 		sw.Type = gi.SwitchCheckbox
-		sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen //
-		sw.IconOff = icons.KeyboardArrowRight // icons.Folder    //
+		sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen
+		sw.IconOff = icons.KeyboardArrowRight // icons.Folder
 		sw.IconDisab = icons.Blank
 		sw.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
@@ -140,33 +140,28 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			}
 		})
 		sw.OnClick(func(e events.Event) {
-			fmt.Println("sw click:", sw)
 			if sw.StateIs(states.Checked) {
-				fmt.Println(tv, "checked")
 				if !tv.IsClosed() {
-					fmt.Println(tv, "was closed")
 					tv.Close()
 				}
 			} else {
-				fmt.Println(tv, "not checked")
 				if tv.IsClosed() {
-					fmt.Println(tv, "was open")
 					tv.Open()
 				}
 			}
 		})
-	case "space":
+	case "parts/space":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
-	case "label":
+	case "parts/label":
 		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MinWidth.SetCh(16)
 			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 		})
-	case "menu":
+	case "parts/menu":
 		menu := w.(*gi.Button)
 		menu.Indicator = icons.None
 	}
@@ -1533,11 +1528,9 @@ func (tv *TreeView) SetBranchState() {
 	case !tv.HasChildren():
 		br.SetState(true, states.Disabled)
 	case tv.IsClosed():
-		fmt.Println(tv, "is closed, setting checked = false")
 		br.SetState(false, states.Disabled)
 		br.SetState(false, states.Checked)
 	default:
-		fmt.Println(tv, "is open, setting checked = true")
 		br.SetState(false, states.Disabled)
 		br.SetState(true, states.Checked)
 	}

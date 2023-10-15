@@ -83,7 +83,7 @@ func (sv *StructView) OnInit() {
 
 func (sv *StructView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(sv) {
 	case "toolbar":
 		w.Style(func(s *styles.Style) {
 			s.SetStretchMaxWidth()

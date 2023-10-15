@@ -1436,7 +1436,7 @@ func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.
 	tv.ConfigTexts()
 	tv.SetSplits(.2, .8)
 
-	tva, tvb := tv.Views()
+	tva, tvb := tv.Editors()
 	tva.Style(func(s *styles.Style) {
 		s.Text.WhiteSpace = styles.WhiteSpacePre
 		s.Width.SetCh(30)
@@ -1758,7 +1758,7 @@ func (ftv *FileTreeView) FileTreeViewStyles() {
 
 func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom() {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {

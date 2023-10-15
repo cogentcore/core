@@ -44,7 +44,7 @@ func (fb *FileBrowse) OnInit() {
 
 func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(fb) {
 	case "title":
 		title := w.(*gi.Label)
 		title.Type = gi.LabelHeadlineSmall

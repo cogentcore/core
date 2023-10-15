@@ -71,7 +71,7 @@ func (mv *MapView) OnInit() {
 
 func (mv *MapView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.Name() {
+	switch w.PathFrom(mv) {
 	case "map-grid":
 		mg := w.(*gi.Frame)
 		mg.Lay = gi.LayoutGrid

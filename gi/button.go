@@ -186,20 +186,20 @@ func (bt *Button) ButtonStyles() {
 
 func (bt *Button) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.Name() {
-	case "icon":
+	switch w.PathFrom(bt) {
+	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "space":
+	case "parts/space":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 			s.MinWidth.SetEm(0.5)
 		})
-	case "label":
+	case "parts/label":
 		label := w.(*Label)
 		label.Type = LabelLabelLarge
 		w.Style(func(s *styles.Style) {
@@ -210,11 +210,11 @@ func (bt *Button) OnChildAdded(child ki.Ki) {
 			s.Padding.Set()
 			s.AlignV = styles.AlignMiddle
 		})
-	case "ind-stretch":
+	case "parts/ind-stretch":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(0.5)
 		})
-	case "indicator":
+	case "parts/indicator":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1.125)
 			s.Height.SetEm(1.125)
