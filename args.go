@@ -369,6 +369,11 @@ func SetFieldValue(f *Field, value string) error {
 			return fmt.Errorf("unable to set slice flag %q from flag value %q: %w", f.Names[0], value, err)
 		}
 	default:
+		// initialize nil fields to prevent panics
+		// (don't do for maps and slices, as new doesn't work for them)
+		if f.Value.IsNil() {
+			f.Value.Set(reflect.New(nptyp))
+		}
 		err := laser.SetRobust(f.Value.Interface(), value) // overkill but whatever
 		if err != nil {
 			return fmt.Errorf("error setting set flag %q from flag value %q: %w", f.Names[0], value, err)
