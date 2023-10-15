@@ -135,7 +135,7 @@ type Buf struct {
 	MarkupDelayMu sync.Mutex `json:"-" xml:"-"`
 
 	// the Views that are currently viewing this buffer
-	Views []*View `json:"-" xml:"-"`
+	Views []*Editor `json:"-" xml:"-"`
 
 	// undo manager
 	Undos textbuf.Undo `json:"-" xml:"-"`
@@ -150,7 +150,7 @@ type Buf struct {
 	Spell *gi.Spell `json:"-" xml:"-"`
 
 	// current textview -- e.g., the one that initiated Complete or Correct process -- update cursor position in this view -- is reset to nil after usage always
-	CurView *View `json:"-" xml:"-"`
+	CurView *Editor `json:"-" xml:"-"`
 
 	// supports standard goosi events sending: Change is sent for BufDone, BufInsert, BufDelete
 	Listeners events.Listeners
@@ -847,13 +847,13 @@ func (tb *Buf) AppendTextLineMarkup(text []byte, markup []byte, signal bool) *te
 //   Views
 
 // AddView adds a viewer of this buffer -- connects our signals to the viewer
-func (tb *Buf) AddView(vw *View) {
+func (tb *Buf) AddView(vw *Editor) {
 	tb.Views = append(tb.Views, vw)
 	// tb.BufSig.Connect(vw.This(), ViewBufSigRecv)
 }
 
 // DeleteView removes given viewer from our buffer
-func (tb *Buf) DeleteView(vw *View) {
+func (tb *Buf) DeleteView(vw *Editor) {
 	for i, tve := range tb.Views {
 		if tve == vw {
 			tb.Views = append(tb.Views[:i], tb.Views[i+1:]...)

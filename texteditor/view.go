@@ -28,15 +28,15 @@ import (
 // todo: make it a Layout and handle all the scrollbar stuff internally!
 // could also see about wrapping in a Scene in gide and benchmark that.
 
-// View is a widget for editing multiple lines of text (as compared to
-// TextField for a single line).  The View is driven by a Buf buffer which
+// Editor is a widget for editing multiple lines of text (as compared to
+// [gi.TextField] for a single line).  The Editor is driven by a Buf buffer which
 // contains all the text, and manages all the edits, sending update signals
 // out to the views -- multiple views can be attached to a given buffer.  All
-// updating in the View should be within a single goroutine -- it would
+// updating in the Editor should be within a single goroutine -- it would
 // require extensive protections throughout code otherwise.
 //
 //goki:embedder
-type View struct {
+type Editor struct {
 	gi.Layout
 
 	// the text buffer that we're editing
@@ -158,18 +158,18 @@ type View struct {
 // to given parent node, with given name.  Layout adds "-lay" suffix.
 // Textview should always have a parent Layout to manage
 // the scrollbars.
-func NewViewLayout(parent ki.Ki, name string) (*View, *gi.Layout) {
+func NewViewLayout(parent ki.Ki, name string) (*Editor, *gi.Layout) {
 	ly := parent.NewChild(gi.LayoutType, name+"-lay").(*gi.Layout)
 	tv := NewView(ly, name)
 	return tv, ly
 }
 
-func (tv *View) OnInit() {
+func (tv *Editor) OnInit() {
 	tv.HandleTextViewEvents()
 	tv.ViewStyles()
 }
 
-func (tv *View) ViewStyles() {
+func (tv *Editor) ViewStyles() {
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Slideable)
 		tv.CursorWidth.SetDp(1)
@@ -217,7 +217,7 @@ const (
 
 // EditDone completes editing and copies the active edited text to the text --
 // called when the return key is pressed or goes out of focus
-func (tv *View) EditDone() {
+func (tv *Editor) EditDone() {
 	if tv.Buf != nil {
 		tv.Buf.EditDone()
 	}
@@ -227,7 +227,7 @@ func (tv *View) EditDone() {
 // Remarkup triggers a complete re-markup of the entire text --
 // can do this when needed if the markup gets off due to multi-line
 // formatting issues -- via Recenter key
-func (tv *View) ReMarkup() {
+func (tv *Editor) ReMarkup() {
 	if tv.Buf == nil {
 		return
 	}
@@ -235,7 +235,7 @@ func (tv *View) ReMarkup() {
 }
 
 // IsChanged returns true if buffer was changed (edited)
-func (tv *View) IsChanged() bool {
+func (tv *Editor) IsChanged() bool {
 	if tv.Buf != nil && tv.Buf.IsChanged() {
 		return true
 	}
@@ -243,12 +243,12 @@ func (tv *View) IsChanged() bool {
 }
 
 // HasLineNos returns true if view is showing line numbers (per textbuf option, cached here)
-func (tv *View) HasLineNos() bool {
+func (tv *Editor) HasLineNos() bool {
 	return tv.Is(ViewHasLineNos)
 }
 
 // Clear resets all the text in the buffer for this view
-func (tv *View) Clear() {
+func (tv *Editor) Clear() {
 	if tv.Buf == nil {
 		return
 	}
@@ -259,7 +259,7 @@ func (tv *View) Clear() {
 //  Buffer communication
 
 // ResetState resets all the random state variables, when opening a new buffer etc
-func (tv *View) ResetState() {
+func (tv *Editor) ResetState() {
 	tv.SelectReset()
 	tv.Highlights = nil
 	tv.ISearch.On = false
@@ -273,7 +273,7 @@ func (tv *View) ResetState() {
 }
 
 // SetBuf sets the Buf that this is a view of, and interconnects their signals
-func (tv *View) SetBuf(buf *Buf) {
+func (tv *Editor) SetBuf(buf *Buf) {
 	if buf != nil && tv.Buf == buf {
 		return
 	}
@@ -296,7 +296,7 @@ func (tv *View) SetBuf(buf *Buf) {
 }
 
 // LinesInserted inserts new lines of text and reformats them
-func (tv *View) LinesInserted(tbe *textbuf.Edit) {
+func (tv *Editor) LinesInserted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln + 1
 	nsz := (tbe.Reg.End.Ln - tbe.Reg.Start.Ln)
 	if stln > len(tv.Renders) { // invalid
@@ -322,7 +322,7 @@ func (tv *View) LinesInserted(tbe *textbuf.Edit) {
 }
 
 // LinesDeleted deletes lines of text and reformats remaining one
-func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
+func (tv *Editor) LinesDeleted(tbe *textbuf.Edit) {
 	stln := tbe.Reg.Start.Ln
 	edln := tbe.Reg.End.Ln
 	dsz := edln - stln
@@ -336,7 +336,7 @@ func (tv *View) LinesDeleted(tbe *textbuf.Edit) {
 
 // BufSignal receives a signal from the Buf when underlying text
 // is changed.
-func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
+func (tv *Editor) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 	switch sig {
 	case BufDone:
 	case BufNew:
@@ -376,7 +376,7 @@ func (tv *View) BufSignal(sig BufSignals, tbe *textbuf.Edit) {
 //    Undo / Redo
 
 // Undo undoes previous action
-func (tv *View) Undo() {
+func (tv *Editor) Undo() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 
@@ -395,7 +395,7 @@ func (tv *View) Undo() {
 }
 
 // Redo redoes previously undone action
-func (tv *View) Redo() {
+func (tv *Editor) Redo() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 
@@ -421,7 +421,7 @@ func (tv *View) Redo() {
 // }
 
 // StyleView sets the style of widget
-func (tv *View) StyleView(sc *gi.Scene) {
+func (tv *Editor) StyleView(sc *gi.Scene) {
 	tv.StyMu.Lock()
 	defer tv.StyMu.Unlock()
 
@@ -435,7 +435,7 @@ func (tv *View) StyleView(sc *gi.Scene) {
 }
 
 // ApplyStyle calls StyleView and sets the style
-func (tv *View) ApplyStyle(sc *gi.Scene) {
+func (tv *Editor) ApplyStyle(sc *gi.Scene) {
 	// tv.SetFlag(true, gi.CanFocus) // always focusable
 	tv.StyleView(sc)
 	tv.StyleSizes()

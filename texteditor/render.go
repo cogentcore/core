@@ -23,7 +23,7 @@ import (
 // Layout must be called whenever content changes across
 // lines.
 
-func (tv *View) Render(sc *gi.Scene) {
+func (tv *Editor) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderAllLinesInBounds()
 		if tv.ScrollToCursorOnRender {
@@ -45,7 +45,7 @@ func (tv *View) Render(sc *gi.Scene) {
 }
 
 // HiStyle applies the highlighting styles from buffer markup style
-func (tv *View) HiStyle() {
+func (tv *Editor) HiStyle() {
 	// STYTODO: need to figure out what to do with histyle
 	if !tv.Buf.Hi.HasHi() {
 		return
@@ -61,7 +61,7 @@ func (tv *View) HiStyle() {
 // CharStartPos returns the starting (top left) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *View) CharStartPos(pos lex.Pos) mat32.Vec2 {
+func (tv *Editor) CharStartPos(pos lex.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	spos.X += tv.LineNoOff
 	if pos.Ln >= len(tv.Offs) {
@@ -85,7 +85,7 @@ func (tv *View) CharStartPos(pos lex.Pos) mat32.Vec2 {
 // CharEndPos returns the ending (bottom right) render coords for the given
 // position -- makes no attempt to rationalize that pos (i.e., if not in
 // visible range, position will be out of range too)
-func (tv *View) CharEndPos(pos lex.Pos) mat32.Vec2 {
+func (tv *Editor) CharEndPos(pos lex.Pos) mat32.Vec2 {
 	spos := tv.RenderStartPos()
 	pos.Ln = min(pos.Ln, tv.NLines-1)
 	if pos.Ln < 0 {
@@ -125,7 +125,7 @@ var ViewDepthColors = []color.RGBA{
 }
 
 // RenderDepthBg renders the depth background color
-func (tv *View) RenderDepthBg(stln, edln int) {
+func (tv *Editor) RenderDepthBg(stln, edln int) {
 	if tv.Buf == nil {
 		return
 	}
@@ -180,7 +180,7 @@ func (tv *View) RenderDepthBg(stln, edln int) {
 
 // RenderSelect renders the selection region as a selected background color
 // -- always called within context of outer RenderLines or RenderAllLines
-func (tv *View) RenderSelect() {
+func (tv *Editor) RenderSelect() {
 	if !tv.HasSelection() {
 		return
 	}
@@ -190,7 +190,7 @@ func (tv *View) RenderSelect() {
 // RenderHighlights renders the highlight regions as a highlighted background
 // color -- always called within context of outer RenderLines or
 // RenderAllLines
-func (tv *View) RenderHighlights(stln, edln int) {
+func (tv *Editor) RenderHighlights(stln, edln int) {
 	for _, reg := range tv.Highlights {
 		reg := tv.Buf.AdjustReg(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
@@ -203,7 +203,7 @@ func (tv *View) RenderHighlights(stln, edln int) {
 // RenderScopelights renders a highlight background color for regions
 // in the Scopelights list
 // -- always called within context of outer RenderLines or RenderAllLines
-func (tv *View) RenderScopelights(stln, edln int) {
+func (tv *Editor) RenderScopelights(stln, edln int) {
 	for _, reg := range tv.Scopelights {
 		reg := tv.Buf.AdjustReg(reg)
 		if reg.IsNil() || (stln >= 0 && (reg.Start.Ln > edln || reg.End.Ln < stln)) {
@@ -214,12 +214,12 @@ func (tv *View) RenderScopelights(stln, edln int) {
 }
 
 // RenderRegionBox renders a region in background color according to given background color
-func (tv *View) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
+func (tv *Editor) RenderRegionBox(reg textbuf.Region, bgclr *colors.Full) {
 	tv.RenderRegionBoxSty(reg, &tv.Styles, bgclr)
 }
 
 // RenderRegionBoxSty renders a region in given style and background color
-func (tv *View) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full) {
+func (tv *Editor) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr *colors.Full) {
 	st := reg.Start
 	ed := reg.End
 	spos := tv.CharStartPos(st)
@@ -266,7 +266,7 @@ func (tv *View) RenderRegionBoxSty(reg textbuf.Region, sty *styles.Style, bgclr 
 }
 
 // RenderRegionToEnd renders a region in given style and background color, to end of line from start
-func (tv *View) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
+func (tv *Editor) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.Full) {
 	spos := tv.CharStartPos(st)
 	epos := spos
 	epos.Y += tv.LineHeight
@@ -282,7 +282,7 @@ func (tv *View) RenderRegionToEnd(st lex.Pos, sty *styles.Style, bgclr *colors.F
 }
 
 // RenderStartPos is absolute rendering start position from our allocpos
-func (tv *View) RenderStartPos() mat32.Vec2 {
+func (tv *Editor) RenderStartPos() mat32.Vec2 {
 	st := &tv.Styles
 	spc := st.BoxSpace()
 	pos := tv.LayState.Alloc.Pos.Add(spc.Pos())
@@ -293,7 +293,7 @@ func (tv *View) RenderStartPos() mat32.Vec2 {
 
 // RenderAllLinesInBounds displays all the visible lines on the screen --
 // after PushBounds has already been called
-func (tv *View) RenderAllLinesInBounds() {
+func (tv *Editor) RenderAllLinesInBounds() {
 	rs := &tv.Sc.RenderState
 	rs.Lock()
 	pc := &rs.Paint
@@ -356,7 +356,7 @@ func (tv *View) RenderAllLinesInBounds() {
 }
 
 // RenderLineNosBoxAll renders the background for the line numbers in the LineNumberColor
-func (tv *View) RenderLineNosBoxAll() {
+func (tv *Editor) RenderLineNosBoxAll() {
 	if !tv.HasLineNos() {
 		return
 	}
@@ -372,7 +372,7 @@ func (tv *View) RenderLineNosBoxAll() {
 }
 
 // RenderLineNosBox renders the background for the line numbers in given range, in the LineNumberColor
-func (tv *View) RenderLineNosBox(st, ed int) {
+func (tv *Editor) RenderLineNosBox(st, ed int) {
 	if !tv.HasLineNos() {
 		return
 	}
@@ -394,7 +394,7 @@ func (tv *View) RenderLineNosBox(st, ed int) {
 // if defFill is true, it fills box color for default background color (use false for batch mode)
 // and if vpUpload is true it uploads the rendered region to scene directly
 // (only if totally separate from other updates)
-func (tv *View) RenderLineNo(ln int, defFill bool, vpUpload bool) {
+func (tv *Editor) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 	if !tv.HasLineNos() || tv.Buf == nil {
 		return
 	}
@@ -474,7 +474,7 @@ func (tv *View) RenderLineNo(ln int, defFill bool, vpUpload bool) {
 
 // RenderLines displays a specific range of lines on the screen, also painting
 // selection.  end is *inclusive* line.  returns false if nothing visible.
-func (tv *View) RenderLines(st, ed int) bool {
+func (tv *Editor) RenderLines(st, ed int) bool {
 	if tv == nil || tv.This() == nil || tv.Buf == nil {
 		return false
 	}
@@ -570,7 +570,7 @@ func (tv *View) RenderLines(st, ed int) bool {
 // FirstVisibleLine finds the first visible line, starting at given line
 // (typically cursor -- if zero, a visible line is first found) -- returns
 // stln if nothing found above it.
-func (tv *View) FirstVisibleLine(stln int) int {
+func (tv *Editor) FirstVisibleLine(stln int) int {
 	if stln == 0 {
 		perln := float32(tv.LinesSize.Y) / float32(tv.NLines)
 		stln = int(float32(tv.ScBBox.Min.Y-tv.ObjBBox.Min.Y)/perln) - 1
@@ -598,7 +598,7 @@ func (tv *View) FirstVisibleLine(stln int) int {
 
 // LastVisibleLine finds the last visible line, starting at given line
 // (typically cursor) -- returns stln if nothing found beyond it.
-func (tv *View) LastVisibleLine(stln int) int {
+func (tv *Editor) LastVisibleLine(stln int) int {
 	lastln := stln
 	for ln := stln + 1; ln < tv.NLines; ln++ {
 		pos := lex.Pos{Ln: ln}
@@ -614,7 +614,7 @@ func (tv *View) LastVisibleLine(stln int) int {
 // PixelToCursor finds the cursor position that corresponds to the given pixel
 // location (e.g., from mouse click) which has had ScBBox.Min subtracted from
 // it (i.e, relative to upper left of text area)
-func (tv *View) PixelToCursor(pt image.Point) lex.Pos {
+func (tv *Editor) PixelToCursor(pt image.Point) lex.Pos {
 	if tv.NLines == 0 {
 		return lex.PosZero
 	}

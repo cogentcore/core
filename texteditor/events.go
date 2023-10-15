@@ -21,7 +21,7 @@ import (
 )
 
 // ViewEvents sets connections between mouse and key events and actions
-func (tv *View) HandleTextViewEvents() {
+func (tv *Editor) HandleTextViewEvents() {
 	tv.HandleLayoutEvents()
 	tv.HandleTextViewKeyChord()
 	tv.HandleTextViewMouse()
@@ -30,7 +30,7 @@ func (tv *View) HandleTextViewEvents() {
 ///////////////////////////////////////////////////////////////////////////////
 //    KeyInput handling
 
-func (tv *View) HandleTextViewKeyChord() {
+func (tv *Editor) HandleTextViewKeyChord() {
 	tv.OnKeyChord(func(e events.Event) {
 		tv.KeyInput(e)
 	})
@@ -38,7 +38,7 @@ func (tv *View) HandleTextViewKeyChord() {
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't on the last key move.
 // If the shift key has been released the select region is set to textbuf.RegionNil
-func (tv *View) ShiftSelect(kt events.Event) {
+func (tv *Editor) ShiftSelect(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
 		if tv.SelectReg == textbuf.RegionNil {
@@ -51,7 +51,7 @@ func (tv *View) ShiftSelect(kt events.Event) {
 
 // ShiftSelectExtend updates the select region if the shift key is down and renders the selected text.
 // If the shift key is not down the previously selected text is rerendered to clear the highlight
-func (tv *View) ShiftSelectExtend(kt events.Event) {
+func (tv *Editor) ShiftSelectExtend(kt events.Event) {
 	hasShift := kt.HasAnyModifier(key.Shift)
 	if hasShift {
 		tv.SelectRegUpdate(tv.CursorPos)
@@ -59,7 +59,7 @@ func (tv *View) ShiftSelectExtend(kt events.Event) {
 }
 
 // KeyInput handles keyboard input into the text field and from the completion menu
-func (tv *View) KeyInput(kt events.Event) {
+func (tv *Editor) KeyInput(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("View KeyInput: %v\n", tv.Path())
 	}
@@ -406,7 +406,7 @@ func (tv *View) KeyInput(kt events.Event) {
 }
 
 // KeyInputInsertBra handle input of opening bracket-like entity (paren, brace, bracket)
-func (tv *View) KeyInputInsertBra(kt events.Event) {
+func (tv *Editor) KeyInputInsertBra(kt events.Event) {
 	pos := tv.CursorPos
 	match := true
 	newLine := false
@@ -454,7 +454,7 @@ func (tv *View) KeyInputInsertBra(kt events.Event) {
 }
 
 // KeyInputInsertRune handles the insertion of a typed character
-func (tv *View) KeyInputInsertRune(kt events.Event) {
+func (tv *Editor) KeyInputInsertRune(kt events.Event) {
 	kt.SetHandled()
 	if tv.ISearch.On {
 		tv.CancelComplete()
@@ -503,7 +503,7 @@ func (tv *View) KeyInputInsertRune(kt events.Event) {
 // receivers, or by calling the TextLinkHandler if non-nil, or URLHandler if
 // non-nil (which by default opens user's default browser via
 // oswin/App.OpenURL())
-func (tv *View) OpenLink(tl *paint.TextLink) {
+func (tv *Editor) OpenLink(tl *paint.TextLink) {
 	// tl.Widget = tv.This().(gi.Widget)
 	// fmt.Printf("opening link: %v\n", tl.URL)
 	// if len(tv.LinkSig.Cons) == 0 {
@@ -522,7 +522,7 @@ func (tv *View) OpenLink(tl *paint.TextLink) {
 
 // LinkAt returns link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise
-func (tv *View) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (tv *Editor) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	if !(pos.Ln < len(tv.Renders) && len(tv.Renders[pos.Ln].Links) > 0) {
 		return nil, false
 	}
@@ -543,7 +543,7 @@ func (tv *View) LinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 
 // OpenLinkAt opens a link at given cursor position, if one exists there --
 // returns true and the link if there is a link, and false otherwise -- highlights selected link
-func (tv *View) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
+func (tv *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 	tl, ok := tv.LinkAt(pos)
 	if ok {
 		rend := &tv.Renders[pos.Ln]
@@ -559,7 +559,7 @@ func (tv *View) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 }
 
 // HandleTextViewMouse handles mouse events.Event
-func (tv *View) HandleTextViewMouse() {
+func (tv *Editor) HandleTextViewMouse() {
 	tv.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
 		if tv.StateIs(states.Disabled) {
 			return
@@ -674,7 +674,7 @@ func (tv *View) MouseMoveEvent() {
 
 // SetCursorFromMouse sets cursor position from mouse mouse action -- handles
 // the selection updating etc.
-func (tv *View) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
+func (tv *Editor) SetCursorFromMouse(pt image.Point, newPos lex.Pos, selMode events.SelectModes) {
 	oldPos := tv.CursorPos
 	if newPos == oldPos {
 		return

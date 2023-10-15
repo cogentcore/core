@@ -18,12 +18,12 @@ import (
 //  Cursor Navigation
 
 // CursorMovedSig sends the signal that cursor has moved
-func (tv *View) CursorMovedSig() {
+func (tv *Editor) CursorMovedSig() {
 	// tv.ViewSig.Emit(tv.This(), int64(ViewCursorMoved), tv.CursorPos)
 }
 
 // ValidateCursor sets current cursor to a valid cursor position
-func (tv *View) ValidateCursor() {
+func (tv *Editor) ValidateCursor() {
 	if tv.Buf != nil {
 		tv.CursorPos = tv.Buf.ValidPos(tv.CursorPos)
 	} else {
@@ -32,7 +32,7 @@ func (tv *View) ValidateCursor() {
 }
 
 // WrappedLines returns the number of wrapped lines (spans) for given line number
-func (tv *View) WrappedLines(ln int) int {
+func (tv *Editor) WrappedLines(ln int) int {
 	if ln >= len(tv.Renders) {
 		return 0
 	}
@@ -42,7 +42,7 @@ func (tv *View) WrappedLines(ln int) int {
 // WrappedLineNo returns the wrapped line number (span index) and rune index
 // within that span of the given character position within line in position,
 // and false if out of range (last valid position returned in that case -- still usable).
-func (tv *View) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
+func (tv *Editor) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 	if pos.Ln >= len(tv.Renders) {
 		return 0, 0, false
 	}
@@ -50,7 +50,7 @@ func (tv *View) WrappedLineNo(pos lex.Pos) (si, ri int, ok bool) {
 }
 
 // SetCursor sets a new cursor position, enforcing it in range
-func (tv *View) SetCursor(pos lex.Pos) {
+func (tv *Editor) SetCursor(pos lex.Pos) {
 	if tv.NLines == 0 || tv.Buf == nil {
 		tv.CursorPos = lex.PosZero
 		return
@@ -78,7 +78,7 @@ func (tv *View) SetCursor(pos lex.Pos) {
 
 // SetCursorShow sets a new cursor position, enforcing it in range, and shows
 // the cursor (scroll to if hidden, render)
-func (tv *View) SetCursorShow(pos lex.Pos) {
+func (tv *Editor) SetCursorShow(pos lex.Pos) {
 	tv.SetCursor(pos)
 	tv.ScrollCursorToCenterIfHidden()
 	tv.RenderCursor(true)
@@ -86,7 +86,7 @@ func (tv *View) SetCursorShow(pos lex.Pos) {
 
 // SetCursorCol sets the current target cursor column (CursorCol) to that
 // of the given position
-func (tv *View) SetCursorCol(pos lex.Pos) {
+func (tv *Editor) SetCursorCol(pos lex.Pos) {
 	if wln := tv.WrappedLines(pos.Ln); wln > 1 {
 		si, ri, ok := tv.WrappedLineNo(pos)
 		if ok && si > 0 {
@@ -100,7 +100,7 @@ func (tv *View) SetCursorCol(pos lex.Pos) {
 }
 
 // SavePosHistory saves the cursor position in history stack of cursor positions
-func (tv *View) SavePosHistory(pos lex.Pos) {
+func (tv *Editor) SavePosHistory(pos lex.Pos) {
 	if tv.Buf == nil {
 		return
 	}
@@ -110,7 +110,7 @@ func (tv *View) SavePosHistory(pos lex.Pos) {
 
 // CursorToHistPrev moves cursor to previous position on history list --
 // returns true if moved
-func (tv *View) CursorToHistPrev() bool {
+func (tv *Editor) CursorToHistPrev() bool {
 	if tv.NLines == 0 || tv.Buf == nil {
 		tv.CursorPos = lex.PosZero
 		return false
@@ -135,7 +135,7 @@ func (tv *View) CursorToHistPrev() bool {
 
 // CursorToHistNext moves cursor to previous position on history list --
 // returns true if moved
-func (tv *View) CursorToHistNext() bool {
+func (tv *Editor) CursorToHistNext() bool {
 	if tv.NLines == 0 || tv.Buf == nil {
 		tv.CursorPos = lex.PosZero
 		return false
@@ -159,7 +159,7 @@ func (tv *View) CursorToHistNext() bool {
 
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
-func (tv *View) SelectRegUpdate(pos lex.Pos) {
+func (tv *Editor) SelectRegUpdate(pos lex.Pos) {
 	if pos.IsLess(tv.SelectStart) {
 		tv.SelectReg.Start = pos
 		tv.SelectReg.End = tv.SelectStart
@@ -171,7 +171,7 @@ func (tv *View) SelectRegUpdate(pos lex.Pos) {
 
 // CursorSelect updates selection based on cursor movements, given starting
 // cursor position and tv.CursorPos is current
-func (tv *View) CursorSelect(org lex.Pos) {
+func (tv *Editor) CursorSelect(org lex.Pos) {
 	if !tv.SelectMode {
 		return
 	}
@@ -179,7 +179,7 @@ func (tv *View) CursorSelect(org lex.Pos) {
 }
 
 // CursorForward moves the cursor forward
-func (tv *View) CursorForward(steps int) {
+func (tv *Editor) CursorForward(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -201,7 +201,7 @@ func (tv *View) CursorForward(steps int) {
 }
 
 // CursorForwardWord moves the cursor forward by words
-func (tv *View) CursorForwardWord(steps int) {
+func (tv *Editor) CursorForwardWord(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -253,7 +253,7 @@ func (tv *View) CursorForwardWord(steps int) {
 }
 
 // CursorDown moves the cursor down line(s)
-func (tv *View) CursorDown(steps int) {
+func (tv *Editor) CursorDown(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -300,7 +300,7 @@ func (tv *View) CursorDown(steps int) {
 
 // CursorPageDown moves the cursor down page(s), where a page is defined abcdef
 // dynamically as just moving the cursor off the screen
-func (tv *View) CursorPageDown(steps int) {
+func (tv *Editor) CursorPageDown(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -320,7 +320,7 @@ func (tv *View) CursorPageDown(steps int) {
 }
 
 // CursorBackward moves the cursor backward
-func (tv *View) CursorBackward(steps int) {
+func (tv *Editor) CursorBackward(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -342,7 +342,7 @@ func (tv *View) CursorBackward(steps int) {
 }
 
 // CursorBackwardWord moves the cursor backward by words
-func (tv *View) CursorBackwardWord(steps int) {
+func (tv *Editor) CursorBackwardWord(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -397,7 +397,7 @@ func (tv *View) CursorBackwardWord(steps int) {
 }
 
 // CursorUp moves the cursor up line(s)
-func (tv *View) CursorUp(steps int) {
+func (tv *Editor) CursorUp(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -442,7 +442,7 @@ func (tv *View) CursorUp(steps int) {
 
 // CursorPageUp moves the cursor up page(s), where a page is defined
 // dynamically as just moving the cursor off the screen
-func (tv *View) CursorPageUp(steps int) {
+func (tv *Editor) CursorPageUp(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -463,7 +463,7 @@ func (tv *View) CursorPageUp(steps int) {
 
 // CursorRecenter re-centers the view around the cursor position, toggling
 // between putting cursor in middle, top, and bottom of view
-func (tv *View) CursorRecenter() {
+func (tv *Editor) CursorRecenter() {
 	tv.ValidateCursor()
 	tv.SavePosHistory(tv.CursorPos)
 	cur := (tv.lastRecenter + 1) % 3
@@ -480,7 +480,7 @@ func (tv *View) CursorRecenter() {
 
 // CursorStartLine moves the cursor to the start of the line, updating selection
 // if select mode is active
-func (tv *View) CursorStartLine() {
+func (tv *Editor) CursorStartLine() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -512,7 +512,7 @@ func (tv *View) CursorStartLine() {
 
 // CursorStartDoc moves the cursor to the start of the text, updating selection
 // if select mode is active
-func (tv *View) CursorStartDoc() {
+func (tv *Editor) CursorStartDoc() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -527,7 +527,7 @@ func (tv *View) CursorStartDoc() {
 }
 
 // CursorEndLine moves the cursor to the end of the text
-func (tv *View) CursorEndLine() {
+func (tv *Editor) CursorEndLine() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -560,7 +560,7 @@ func (tv *View) CursorEndLine() {
 
 // CursorEndDoc moves the cursor to the end of the text, updating selection if
 // select mode is active
-func (tv *View) CursorEndDoc() {
+func (tv *Editor) CursorEndDoc() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -579,7 +579,7 @@ func (tv *View) CursorEndDoc() {
 // uparrow = start / down = end
 
 // CursorBackspace deletes character(s) immediately before cursor
-func (tv *View) CursorBackspace(steps int) {
+func (tv *Editor) CursorBackspace(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -598,7 +598,7 @@ func (tv *View) CursorBackspace(steps int) {
 }
 
 // CursorDelete deletes character(s) immediately after the cursor
-func (tv *View) CursorDelete(steps int) {
+func (tv *Editor) CursorDelete(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -614,7 +614,7 @@ func (tv *View) CursorDelete(steps int) {
 }
 
 // CursorBackspaceWord deletes words(s) immediately before cursor
-func (tv *View) CursorBackspaceWord(steps int) {
+func (tv *Editor) CursorBackspaceWord(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -632,7 +632,7 @@ func (tv *View) CursorBackspaceWord(steps int) {
 }
 
 // CursorDeleteWord deletes word(s) immediately after the cursor
-func (tv *View) CursorDeleteWord(steps int) {
+func (tv *Editor) CursorDeleteWord(steps int) {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -648,7 +648,7 @@ func (tv *View) CursorDeleteWord(steps int) {
 }
 
 // CursorKill deletes text from cursor to end of text
-func (tv *View) CursorKill() {
+func (tv *Editor) CursorKill() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -677,7 +677,7 @@ func (tv *View) CursorKill() {
 }
 
 // CursorTranspose swaps the character at the cursor with the one before it
-func (tv *View) CursorTranspose() {
+func (tv *Editor) CursorTranspose() {
 	updt := tv.UpdateStart()
 	defer tv.UpdateEndRender(updt)
 	tv.ValidateCursor()
@@ -707,11 +707,11 @@ func (tv *View) CursorTranspose() {
 }
 
 // CursorTranspose swaps the word at the cursor with the one before it
-func (tv *View) CursorTransposeWord() {
+func (tv *Editor) CursorTransposeWord() {
 }
 
 // JumpToLinePrompt jumps to given line number (minus 1) from prompt
-func (tv *View) JumpToLinePrompt() {
+func (tv *Editor) JumpToLinePrompt() {
 	gi.StringPromptDialog(tv, gi.DlgOpts{Title: "Jump To Line", Prompt: "Line Number to jump to"},
 		"", "Line no..", func(dlg *gi.Dialog) {
 			if dlg.Accepted {
@@ -726,7 +726,7 @@ func (tv *View) JumpToLinePrompt() {
 }
 
 // JumpToLine jumps to given line number (minus 1)
-func (tv *View) JumpToLine(ln int) {
+func (tv *Editor) JumpToLine(ln int) {
 	updt := tv.UpdateStart()
 	tv.SetCursorShow(lex.Pos{Ln: ln - 1})
 	tv.SavePosHistory(tv.CursorPos)
@@ -734,7 +734,7 @@ func (tv *View) JumpToLine(ln int) {
 }
 
 // FindNextLink finds next link after given position, returns false if no such links
-func (tv *View) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
+func (tv *Editor) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln; ln < tv.NLines; ln++ {
 		if len(tv.Renders[ln].Links) == 0 {
 			pos.Ch = 0
@@ -760,7 +760,7 @@ func (tv *View) FindNextLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 }
 
 // FindPrevLink finds previous link before given position, returns false if no such links
-func (tv *View) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
+func (tv *Editor) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 	for ln := pos.Ln - 1; ln >= 0; ln-- {
 		if len(tv.Renders[ln].Links) == 0 {
 			if ln-1 >= 0 {
@@ -791,7 +791,7 @@ func (tv *View) FindPrevLink(pos lex.Pos) (lex.Pos, textbuf.Region, bool) {
 
 // CursorNextLink moves cursor to next link. wraparound wraps around to top of
 // buffer if none found -- returns true if found
-func (tv *View) CursorNextLink(wraparound bool) bool {
+func (tv *Editor) CursorNextLink(wraparound bool) bool {
 	if tv.NLines == 0 {
 		return false
 	}
@@ -816,7 +816,7 @@ func (tv *View) CursorNextLink(wraparound bool) bool {
 
 // CursorPrevLink moves cursor to previous link. wraparound wraps around to
 // bottom of buffer if none found. returns true if found
-func (tv *View) CursorPrevLink(wraparound bool) bool {
+func (tv *Editor) CursorPrevLink(wraparound bool) bool {
 	if tv.NLines == 0 {
 		return false
 	}
@@ -845,13 +845,13 @@ func (tv *View) CursorPrevLink(wraparound bool) bool {
 
 // ScrollInView tells any parent scroll layout to scroll to get given box
 // (e.g., cursor BBox) in view -- returns true if scrolled
-func (tv *View) ScrollInView(bbox image.Rectangle) bool {
+func (tv *Editor) ScrollInView(bbox image.Rectangle) bool {
 	return tv.ScrollToBox(bbox)
 }
 
 // ScrollCursorInView tells any parent scroll layout to scroll to get cursor
 // in view -- returns true if scrolled
-func (tv *View) ScrollCursorInView() bool {
+func (tv *Editor) ScrollCursorInView() bool {
 	if tv == nil || tv.This() == nil {
 		return false
 	}
@@ -871,7 +871,7 @@ func (tv *View) ScrollCursorInView() bool {
 
 // ScrollCursorToCenterIfHidden checks if the cursor is not visible, and if
 // so, scrolls to the center, along both dimensions.
-func (tv *View) ScrollCursorToCenterIfHidden() bool {
+func (tv *Editor) ScrollCursorToCenterIfHidden() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	did := false
 	if (curBBox.Min.Y-int(tv.LineHeight)) < tv.ScBBox.Min.Y || (curBBox.Max.Y+int(tv.LineHeight)) > tv.ScBBox.Max.Y {
@@ -888,13 +888,13 @@ func (tv *View) ScrollCursorToCenterIfHidden() bool {
 
 // ScrollToTop tells any parent scroll layout to scroll to get given vertical
 // coordinate at top of view to extent possible -- returns true if scrolled
-func (tv *View) ScrollToTop(pos int) bool {
+func (tv *Editor) ScrollToTop(pos int) bool {
 	return tv.ScrollDimToStart(mat32.Y, pos)
 }
 
 // ScrollCursorToTop tells any parent scroll layout to scroll to get cursor
 // at top of view to extent possible -- returns true if scrolled.
-func (tv *View) ScrollCursorToTop() bool {
+func (tv *Editor) ScrollCursorToTop() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollToTop(curBBox.Min.Y)
 }
@@ -902,13 +902,13 @@ func (tv *View) ScrollCursorToTop() bool {
 // ScrollToBottom tells any parent scroll layout to scroll to get given
 // vertical coordinate at bottom of view to extent possible -- returns true if
 // scrolled
-func (tv *View) ScrollToBottom(pos int) bool {
+func (tv *Editor) ScrollToBottom(pos int) bool {
 	return tv.ScrollDimToEnd(mat32.Y, pos)
 }
 
 // ScrollCursorToBottom tells any parent scroll layout to scroll to get cursor
 // at bottom of view to extent possible -- returns true if scrolled.
-func (tv *View) ScrollCursorToBottom() bool {
+func (tv *Editor) ScrollCursorToBottom() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollToBottom(curBBox.Max.Y)
 }
@@ -916,14 +916,14 @@ func (tv *View) ScrollCursorToBottom() bool {
 // ScrollToVertCenter tells any parent scroll layout to scroll to get given
 // vertical coordinate to center of view to extent possible -- returns true if
 // scrolled
-func (tv *View) ScrollToVertCenter(pos int) bool {
+func (tv *Editor) ScrollToVertCenter(pos int) bool {
 	return tv.ScrollDimToCenter(mat32.Y, pos)
 }
 
 // ScrollCursorToVertCenter tells any parent scroll layout to scroll to get
 // cursor at vert center of view to extent possible -- returns true if
 // scrolled.
-func (tv *View) ScrollCursorToVertCenter() bool {
+func (tv *Editor) ScrollCursorToVertCenter() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	mid := (curBBox.Min.Y + curBBox.Max.Y) / 2
 	return tv.ScrollToVertCenter(mid)
@@ -935,13 +935,13 @@ func (tv *View) ScrollCursorToVertCenter() bool {
 // ScrollToLeft tells any parent scroll layout to scroll to get given
 // horizontal coordinate at left of view to extent possible -- returns true if
 // scrolled
-func (tv *View) ScrollToLeft(pos int) bool {
+func (tv *Editor) ScrollToLeft(pos int) bool {
 	return tv.ScrollDimToStart(mat32.X, pos)
 }
 
 // ScrollCursorToLeft tells any parent scroll layout to scroll to get cursor
 // at left of view to extent possible -- returns true if scrolled.
-func (tv *View) ScrollCursorToLeft() bool {
+func (tv *Editor) ScrollCursorToLeft() bool {
 	_, ri, _ := tv.WrappedLineNo(tv.CursorPos)
 	if ri <= 0 {
 		return tv.ScrollToLeft(tv.ObjBBox.Min.X - int(tv.Styles.BoxSpace().Left) - 2)
@@ -953,13 +953,13 @@ func (tv *View) ScrollCursorToLeft() bool {
 // ScrollToRight tells any parent scroll layout to scroll to get given
 // horizontal coordinate at right of view to extent possible -- returns true
 // if scrolled
-func (tv *View) ScrollToRight(pos int) bool {
+func (tv *Editor) ScrollToRight(pos int) bool {
 	return tv.ScrollDimToEnd(mat32.X, pos)
 }
 
 // ScrollCursorToRight tells any parent scroll layout to scroll to get cursor
 // at right of view to extent possible -- returns true if scrolled.
-func (tv *View) ScrollCursorToRight() bool {
+func (tv *Editor) ScrollCursorToRight() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	return tv.ScrollToRight(curBBox.Max.X)
 }
@@ -967,14 +967,14 @@ func (tv *View) ScrollCursorToRight() bool {
 // ScrollToHorizCenter tells any parent scroll layout to scroll to get given
 // horizontal coordinate to center of view to extent possible -- returns true if
 // scrolled
-func (tv *View) ScrollToHorizCenter(pos int) bool {
+func (tv *Editor) ScrollToHorizCenter(pos int) bool {
 	return tv.ScrollDimToCenter(mat32.X, pos)
 }
 
 // ScrollCursorToHorizCenter tells any parent scroll layout to scroll to get
 // cursor at horiz center of view to extent possible -- returns true if
 // scrolled.
-func (tv *View) ScrollCursorToHorizCenter() bool {
+func (tv *Editor) ScrollCursorToHorizCenter() bool {
 	curBBox := tv.CursorBBox(tv.CursorPos)
 	mid := (curBBox.Min.X + curBBox.Max.X) / 2
 	return tv.ScrollToHorizCenter(mid)

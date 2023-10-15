@@ -69,7 +69,7 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.View {
+func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.Editor {
 	var dlg *gi.Dialog
 	if opts.Data != nil {
 		recyc := false
@@ -115,11 +115,11 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 }
 
 // TextViewDialogTextView returns the text view from a TextViewDialog
-func TextViewDialogTextView(dlg *gi.Dialog) *texteditor.View {
+func TextViewDialogTextView(dlg *gi.Dialog) *texteditor.Editor {
 	frame := dlg.Stage.Scene
 	tlv := frame.ChildByName("text-lay", 2)
 	tv := tlv.ChildByName("text-view", 0)
-	return tv.(*texteditor.View)
+	return tv.(*texteditor.Editor)
 }
 
 // StructViewDialog is for editing fields of a structure using a StructView.

@@ -26,7 +26,7 @@ var ViewBlinkMu sync.Mutex
 var ViewBlinker *time.Ticker
 
 // BlinkingView is the text field that is blinking
-var BlinkingView *View
+var BlinkingView *Editor
 
 // ViewSpriteName is the name of the window sprite used for the cursor
 var ViewSpriteName = "textview.View.Cursor"
@@ -65,7 +65,7 @@ func ViewBlink() {
 }
 
 // StartCursor starts the cursor blinking and renders it
-func (tv *View) StartCursor() {
+func (tv *Editor) StartCursor() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
@@ -89,7 +89,7 @@ func (tv *View) StartCursor() {
 }
 
 // StopCursor stops the cursor from blinking
-func (tv *View) StopCursor() {
+func (tv *Editor) StopCursor() {
 	if tv == nil || tv.This() == nil {
 		return
 	}
@@ -105,7 +105,7 @@ func (tv *View) StopCursor() {
 }
 
 // CursorBBox returns a bounding-box for a cursor at given position
-func (tv *View) CursorBBox(pos lex.Pos) image.Rectangle {
+func (tv *Editor) CursorBBox(pos lex.Pos) image.Rectangle {
 	cpos := tv.CharStartPos(pos)
 	cbmin := cpos.SubScalar(tv.CursorWidth.Dots)
 	cbmax := cpos.AddScalar(tv.CursorWidth.Dots)
@@ -115,7 +115,7 @@ func (tv *View) CursorBBox(pos lex.Pos) image.Rectangle {
 }
 
 // RenderCursor renders the cursor on or off, as a sprite that is either on or off
-func (tv *View) RenderCursor(on bool) {
+func (tv *Editor) RenderCursor(on bool) {
 	if tv == nil || tv.This() == nil {
 		return
 	}
@@ -136,7 +136,7 @@ func (tv *View) RenderCursor(on bool) {
 }
 
 // CursorSpriteName returns the name of the cursor sprite
-func (tv *View) CursorSpriteName() string {
+func (tv *Editor) CursorSpriteName() string {
 	spnm := fmt.Sprintf("%v-%v", ViewSpriteName, tv.FontHeight)
 	return spnm
 }
@@ -144,7 +144,7 @@ func (tv *View) CursorSpriteName() string {
 // CursorSprite returns the sprite for the cursor, which is
 // only rendered once with a vertical bar, and just activated and inactivated
 // depending on render status.
-func (tv *View) CursorSprite(on bool) *gi.Sprite {
+func (tv *Editor) CursorSprite(on bool) *gi.Sprite {
 	sc := tv.Sc
 	if sc == nil {
 		return nil
