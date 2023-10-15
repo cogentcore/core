@@ -343,7 +343,7 @@ func ToValue(it any, tags string) Value {
 		v := reflect.ValueOf(it)
 		str := v.String()
 		if strings.Contains(str, "\n") {
-			vv := &TextValue{}
+			vv := &TextEditorValue{}
 			ki.InitNode(vv)
 			return vv
 		}
