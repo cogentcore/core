@@ -149,7 +149,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 		if !cfg.ShowResult {
 			return
 		}
-		ShowReturnsDialog(ctx, rets, cfg)
+		ReturnsDialog(ctx, rets, cfg).Run()
 		return
 	}
 	args := ArgsForFunc(rfun, cfg)
@@ -166,7 +166,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 			if !cfg.ShowResult {
 				return
 			}
-			ShowReturnsDialog(ctx, rets, cfg)
+			ReturnsDialog(ctx, rets, cfg).Run()
 		},
 	).Run()
 }
@@ -217,14 +217,12 @@ func ReturnsForFunc(rets []reflect.Value, cfg *FuncConfig) []ArgConfig {
 	return res
 }
 
-// ShowReturnsDialog shows the dialog displaying the given function return
+// ReturnsDialog returns a dialog displaying the given function return
 // values based on the given configuration information and context widget.
-func ShowReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) {
+func ReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) *gi.Dialog {
+	if len(rets) == 0 {
+		return gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + " succeeded", Prompt: cfg.Doc, Ok: true}, nil)
+	}
 	ac := ReturnsForFunc(rets, cfg)
-	ArgViewDialog(
-		ctx,
-		DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true},
-		ac,
-		func(dlg *gi.Dialog) {},
-	).Run()
+	return ArgViewDialog(ctx, DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true}, ac, nil)
 }
