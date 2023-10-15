@@ -66,6 +66,7 @@ func NewSnackbarScene(w Widget, opts SnackbarOpts) *Scene {
 		s.AlignV = styles.AlignMiddle
 		sc.Spacing.SetDp(12)
 		s.SetStretchMaxWidth()
+		s.Height = units.Dp(48)
 	})
 	NewLabel(sc, "text").SetText(opts.Text).SetType(LabelBodyMedium).
 		Style(func(s *styles.Style) {
