@@ -55,6 +55,10 @@ func main() {
 		if strings.HasSuffix(name, "-fill") {
 			return nil
 		}
+		// ignore blank icon, as we define the constant for that separately
+		if name == "blank" {
+			return nil
+		}
 		camel := strcase.ToCamel(name)
 		// identifier names can't start with a digit
 		if unicode.IsDigit([]rune(camel)[0]) {
@@ -69,7 +73,7 @@ func main() {
 		}
 		return iconTmpl.Execute(buf, data)
 	})
-	buf.WriteString("\n)")
+	buf.WriteString(")\n")
 	err := os.WriteFile("iconnames.go", buf.Bytes(), 0666)
 	if err != nil {
 		log.Fatalln("error writing result to iconnames.go:", err)
