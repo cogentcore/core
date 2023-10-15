@@ -19,36 +19,42 @@ import (
 	"goki.dev/laser"
 )
 
-// MethodConfig contains the configuration options for a method button in a toolbar or menubar.
-// These are the configuration options passed to the `gi:toolbar` and `gi:menubar` comment directives.
+// FuncConfig contains the configuration options for a function, to be passed
+// to [CallFunc] or to the `gi:toolbar` and `gi:menubar` comment directives.
+// These options control both the appearance and behavior of both the function
+// button in a toolbar and/or menubar button and the dialog created by [CallFunc].
 //
 //gti:add
-type MethodConfig struct {
-	// Name is the actual name in code of the function to call.
+type FuncConfig struct {
+	// Name is the actual name in code of the function.
 	Name string
-	// Label is the label for the method button.
+	// Label is the user-friendly label for the function button.
 	// It defaults to the sentence case version of the
 	// name of the function.
 	Label string
-	// Icon is the icon for the method button. If there
+	// Icon is the icon for the function button. If there
 	// is an icon with the same name as the function, it
 	// defaults to that icon.
 	Icon icons.Icon
-	// Tooltip is the tooltip for the method button.
-	// It defaults to the documentation for the function.
-	Tooltip string
-	// SepBefore is whether to insert a separator before the method button.
+	// Doc is the documentation for the function, used as
+	// a tooltip on the function button and a label in the
+	// [CallFunc] dialog. It defaults to the documentation
+	// for the function found in gti.
+	Doc string
+	// SepBefore is whether to insert a separator before the
+	// function button in a toolbar/menubar.
 	SepBefore bool
-	// SepAfter is whether to insert a separator after the method button.
+	// SepAfter is whether to insert a separator after the
+	// function button in a toolbar/menubar.
 	SepAfter bool
-	// ShowResult is whether to display the result (return values) of the method
+	// ShowResult is whether to display the result (return values) of the function
 	// after it is called. If this is set to true and there are no return values,
 	// it displays a message that the method was successful.
 	ShowResult bool
 
-	// Args are the arguments to the method. They are set automatically.
+	// Args are the arguments to the function. They are set automatically.
 	Args *gti.Fields
-	// Returns are the return values of the method. They are set automatically.
+	// Returns are the return values of the function. They are set automatically.
 	Returns *gti.Fields
 }
 
@@ -72,10 +78,10 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		if tbDir == nil {
 			continue
 		}
-		cfg := &MethodConfig{
+		cfg := &FuncConfig{
 			Name:    met.Name,
 			Label:   sentencecase.Of(met.Name),
-			Tooltip: met.Doc,
+			Doc:     met.Doc,
 			Args:    met.Args,
 			Returns: met.Returns,
 		}
@@ -94,9 +100,9 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		if cfg.SepBefore {
 			tb.AddSeparator()
 		}
-		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Tooltip}, func(bt *gi.Button) {
+		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
-			CallMethod(tb, val, cfg)
+			CallFunc(tb, val, cfg)
 		})
 		if cfg.SepAfter {
 			tb.AddSeparator()
@@ -123,49 +129,50 @@ type ArgConfig struct {
 	Default any
 }
 
-// CallMethod calls the method with the given configuration information on the
-// given object value, using a GUI interface to prompt for any args. It uses the
-// given context widget for context information for the GUI interface.
-// gopy:interface=handle
-func CallMethod(ctx gi.Widget, val any, met *MethodConfig) {
-	rval := reflect.ValueOf(val)
-	rmet := rval.MethodByName(met.Name)
+// CallFunc calls the given function with the given configuration information
+// in the context of the given widget. It displays a GUI view for selecting any
+// unspecified arguments to the function, and optionally a GUI view for the results
+// of the function, if [MethodConfig.ShowResult] is on.
+//
+//gopy:interface=handle
+func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
+	rfun := reflect.ValueOf(fun)
 
-	if met.Args.Len() == 0 {
-		rets := rmet.Call(nil)
-		if !met.ShowResult {
+	if cfg.Args.Len() == 0 {
+		rets := rfun.Call(nil)
+		if !cfg.ShowResult {
 			return
 		}
 
-		ac := ReturnsForMethod(met, rets)
+		ac := ReturnsForFunc(cfg, rets)
 		ArgViewDialog(
 			ctx,
-			DlgOpts{Title: "Result: " + met.Label, Prompt: met.Tooltip, Ok: true},
+			DlgOpts{Title: "Result: " + cfg.Label, Prompt: cfg.Doc, Ok: true},
 			ac,
 			func(dlg *gi.Dialog) {},
 		).Run()
 		return
 	}
-	args := ArgsForMethod(met, rmet)
+	args := ArgsForFunc(rfun, cfg)
 	ArgViewDialog(
 		ctx,
-		DlgOpts{Title: "Call: " + met.Label, Prompt: met.Tooltip, Ok: true, Cancel: true},
+		DlgOpts{Title: "Call: " + cfg.Label, Prompt: cfg.Doc, Ok: true, Cancel: true},
 		args,
 		func(dlg *gi.Dialog) {
 			rargs := make([]reflect.Value, len(args))
 			for i, arg := range args {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
-			rmet.Call(rargs)
+			rfun.Call(rargs)
 		},
 	).Run()
 }
 
-// ArgsForMethod returns the appropriate [ArgConfig] objects for the arguments
-// of the method with the given configuration information and [reflect.Value].
-func ArgsForMethod(met *MethodConfig, rmet reflect.Value) []ArgConfig {
-	res := make([]ArgConfig, met.Args.Len())
-	for i, kv := range met.Args.Order {
+// ArgsForFunc returns the appropriate [ArgConfig] objects for the arguments
+// of the given function with the given configuration information.
+func ArgsForFunc(fun reflect.Value, cfg *FuncConfig) []ArgConfig {
+	res := make([]ArgConfig, cfg.Args.Len())
+	for i, kv := range cfg.Args.Order {
 		arg := kv.Val
 		ra := ArgConfig{
 			Name:  arg.Name,
@@ -173,7 +180,7 @@ func ArgsForMethod(met *MethodConfig, rmet reflect.Value) []ArgConfig {
 			Doc:   arg.Doc,
 		}
 
-		atyp := rmet.Type().In(i)
+		atyp := fun.Type().In(i)
 		ra.Val = reflect.New(atyp)
 
 		ra.View = ToValue(ra.Val.Interface(), "")
@@ -184,11 +191,11 @@ func ArgsForMethod(met *MethodConfig, rmet reflect.Value) []ArgConfig {
 	return res
 }
 
-// ReturnsForMethod returns the appropriate [ArgConfig] objects for the given
-// return values from the method with the given configuration information.
-func ReturnsForMethod(met *MethodConfig, rets []reflect.Value) []ArgConfig {
-	res := make([]ArgConfig, met.Returns.Len())
-	for i, kv := range met.Returns.Order {
+// ReturnsForFunc returns the appropriate [ArgConfig] objects for the given
+// return values from the function with the given configuration information.
+func ReturnsForFunc(cfg *FuncConfig, rets []reflect.Value) []ArgConfig {
+	res := make([]ArgConfig, cfg.Returns.Len())
+	for i, kv := range cfg.Returns.Order {
 		ret := kv.Val
 		ra := ArgConfig{
 			Name:  ret.Name,
