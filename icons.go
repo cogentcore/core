@@ -52,9 +52,14 @@ func (i Icon) IsNil() bool {
 	return i == "" || i == None || i == "nil"
 }
 
-// Filename returns the filename of the icon in [Icons]
+// Filename returns the filename of the icon in [Icons].
+// if Icon name already ends with .svg, it is assumed to
+// be a filename and is just returned directly.
 func (i Icon) Filename() string {
 	// fs always uses forward slashes
+	if strings.HasSuffix(string(i), ".svg") {
+		return string(i)
+	}
 	return "svg/" + string(i) + ".svg"
 }
 
