@@ -682,7 +682,7 @@ var _ = gti.AddType(&gti.Type{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
 		{"LightMode", &gti.Method{Name: "LightMode", Doc: "LightMode sets the color theme to light mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},

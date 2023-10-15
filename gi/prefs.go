@@ -233,7 +233,7 @@ func (pf *Preferences) Save() error {
 // LightMode sets the color theme to light mode. It automatically
 // saves the preferences and updates all of the windows.
 //
-//gi:toolbar -sep-before
+//gi:toolbar -sep-before -show-result
 func (pf *Preferences) LightMode() {
 	pf.Theme = ThemeLight
 	colors.SetScheme(false)
