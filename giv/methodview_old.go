@@ -14,8 +14,8 @@ var specialMenus = map[string]struct{}{
 	"AppMenu": {}, "Copy Cut Paste": {}, "Copy Cut Paste Dupe": {}, "RenderWins": {},
 }
 
-// ActionUpdateFunc is a function that updates method active / inactive status
-// first argument is the object on which the method is defined (receiver)
+// ActionUpdateFunc is a function that updates method enabled / disabled status.
+// The first argument is the object on which the method is defined (receiver).
 type ActionUpdateFunc func(it any, act *gi.Button)
 
 // SubMenuFunc is a function that returns a string slice of submenu items

@@ -54,6 +54,16 @@ type FuncConfig struct {
 	// after it is called. If this is set to true and there are no return values,
 	// it displays a message that the method was successful.
 	ShowResult bool
+	// UpdateMethod, when specified on a method, is the name of a method on the same
+	// type this method is on to call with the function button whenever it is updated.
+	// See [FuncConfig.UpdateFunc] for more information.
+	UpdateMethod string
+
+	// UpdateFunc is a function to call with the function button whenever it
+	// is updated. For example, this can be used to change whether a button is
+	// disabled based on some other value. When using comment directives, this
+	// should be set through [FuncConfig.UpdateMethod].
+	UpdateFunc func(bt *gi.Button)
 
 	// Args are the arguments to the function. They are set automatically.
 	Args *gti.Fields
