@@ -60,6 +60,7 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 }
 
 func (sw *Switch) OnInit() {
+	sw.IconDisab = icons.Blank
 	sw.HandleSwitchEvents()
 	sw.SwitchStyles()
 }
@@ -94,7 +95,6 @@ func (sw *Switch) HandleSwitchEvents() {
 }
 
 func (sw *Switch) SwitchStyles() {
-	sw.IconDisab = icons.Blank
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		s.Cursor = cursors.Pointer
