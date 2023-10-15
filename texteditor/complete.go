@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textview
+package texteditor
 
 import (
 	"fmt"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview/textbuf"
+	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/lex"
 	"goki.dev/pi/v2/parse"

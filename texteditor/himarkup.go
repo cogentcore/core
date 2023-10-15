@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textview
+package texteditor
 
 import (
 	stdhtml "html"
@@ -14,7 +14,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview/histyle"
+	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
