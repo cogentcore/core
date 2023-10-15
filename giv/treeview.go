@@ -136,7 +136,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			// we don't need to visibly tell the user that we are disabled;
 			// the lack of an icon accomplishes that
 			if s.Is(states.Disabled) {
-				s.Opacity = 1
+				s.StateLayer = 0
 			}
 		})
 		sw.OnClick(func(e events.Event) {
