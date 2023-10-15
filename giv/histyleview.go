@@ -6,7 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview/histyle"
+	"goki.dev/gi/v2/texteditor/histyle"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"

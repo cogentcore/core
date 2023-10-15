@@ -20,9 +20,9 @@ import (
 	"github.com/Masterminds/vcs"
 	"github.com/fsnotify/fsnotify"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview"
-	"goki.dev/gi/v2/textview/histyle"
-	"goki.dev/gi/v2/textview/textbuf"
+	"goki.dev/gi/v2/texteditor"
+	"goki.dev/gi/v2/texteditor/histyle"
+	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
@@ -416,7 +416,7 @@ type FileNode struct {
 	Info filecat.FileInfo `json:"-" xml:"-" copy:"-"`
 
 	// file buffer for editing this file
-	Buf *textview.Buf `json:"-" xml:"-" copy:"-"`
+	Buf *texteditor.Buf `json:"-" xml:"-" copy:"-"`
 
 	// root of the tree -- has global state
 	FRoot *FileTree `json:"-" xml:"-" copy:"-"`
@@ -813,7 +813,7 @@ func (fn *FileNode) OpenBuf() (bool, error) {
 			return false, nil
 		}
 	} else {
-		fn.Buf = textview.NewBuf()
+		fn.Buf = texteditor.NewBuf()
 		// fn.Buf.AddFileNode(fn)
 	}
 	fn.Buf.Hi.Style = FileNodeHiStyle
@@ -1403,14 +1403,14 @@ func (fn *FileNode) LogVcs(allFiles bool, since string) (vci.Log, error) {
 
 // BlameDialog opens a dialog for displaying VCS blame data using textview.TwinViews.
 // blame is the annotated blame code, while fbytes is the original file contents.
-func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *textview.TwinViews {
+func BlameDialog(ctx gi.Widget, fname string, blame, fbytes []byte) *texteditor.TwinViews {
 	title := "VCS Blame: " + dirs.DirAndFile(fname)
 	dlg := gi.NewStdDialog(ctx, gi.DlgOpts{Title: title, Ok: true, Cancel: false}, nil)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	tv := frame.InsertNewChild(textview.TwinViewsType, prIdx+1, "twin-view").(*textview.TwinViews)
+	tv := frame.InsertNewChild(texteditor.TwinViewsType, prIdx+1, "twin-view").(*texteditor.TwinViews)
 	tv.SetStretchMax()
 	tv.SetFiles(fname, fname, true)
 	flns := bytes.Split(fbytes, []byte("\n"))
