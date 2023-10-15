@@ -63,14 +63,17 @@ func (ch Chord) Decode() (r rune, mods Modifiers, err error) {
 	if len(rs) == 1 {
 		r = rs[0]
 	} else {
-		err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v\n", rs, cs)
+		err = fmt.Errorf("goosi/events/key.DecodeChord got more/less than one rune: %v from remaining chord: %v", rs, cs)
 	}
 	return
 }
 
 // Shortcut transforms chord string into short form suitable for display to users
 func (ch Chord) Shortcut() string {
+	// TODO: is this smart stuff actually helpful, or would it be much easier for
+	// the user if they could just read the shortcuts in English?
 	cs := strings.Replace(string(ch), "Control+", "^", -1) // ⌃ doesn't look as good
+	// TODO: figure out how to avoid import cycle here
 	// switch goosi.TheApp.Platform() {
 	// case goosi.MacOS:
 	cs = strings.Replace(cs, "Shift+", "⇧", -1)
@@ -79,8 +82,6 @@ func (ch Chord) Shortcut() string {
 	// case goosi.Windows:
 	// 	cs = strings.Replace(cs, "Shift+", "↑", -1)
 	// 	cs = strings.Replace(cs, "Meta+", "Win+", -1) // todo: actual windows key
-	// default:
-	// 	cs = strings.Replace(cs, "Meta+", "", 1)
 	// }
 	cs = strings.Replace(cs, "DeleteBackspace", "⌫", -1)
 	cs = strings.Replace(cs, "DeleteForward", "⌦", -1)
