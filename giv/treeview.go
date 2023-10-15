@@ -120,16 +120,16 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		})
 	case "branch":
 		cb := w.(*gi.Switch)
-		cb.IconOn = icons.KeyboardArrowDown
-		cb.IconOff = icons.KeyboardArrowRight
+		cb.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen //
+		cb.IconOff = icons.KeyboardArrowRight // icons.Folder    //
 		cb.IconDisab = icons.Blank
 		cb.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Secondary.OnContainer
 			s.BackgroundColor.SetSolid(colors.Transparent)
 			s.Margin.Set()
 			s.Padding.Set()
-			s.Width.SetEm(.8)
-			s.Height.SetEm(.8)
+			s.Width.SetEm(.4)
+			s.Height.SetEm(.4)
 			s.AlignV = styles.AlignMiddle
 		})
 		cb.OnClick(func(e events.Event) {
