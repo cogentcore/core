@@ -32,6 +32,9 @@ type Switch struct {
 
 	// icon to use for the off, unchecked state of the switch
 	IconOff icons.Icon `view:"show-name"`
+
+	// icon to use for the disabled state of the switch
+	IconDisab icons.Icon `view:"show-name"`
 }
 
 // SwitchTypes contains the different types of [Switch]es
@@ -53,6 +56,7 @@ func (sw *Switch) CopyFieldsFrom(frm any) {
 	sw.Text = fr.Text
 	sw.IconOn = fr.IconOn
 	sw.IconOff = fr.IconOff
+	sw.IconDisab = fr.IconDisab
 }
 
 func (sw *Switch) OnInit() {
@@ -60,28 +64,37 @@ func (sw *Switch) OnInit() {
 	sw.SwitchStyles()
 }
 
+func (sw *Switch) SetIconFromState() {
+	ist := sw.Parts.ChildByName("stack", 0)
+	if ist == nil {
+		return
+	}
+	st := ist.(*Layout)
+	switch {
+	case sw.StateIs(states.Disabled):
+		st.StackTop = 2
+	case sw.StateIs(states.Checked):
+		st.StackTop = 0
+	default:
+		st.StackTop = 1
+	}
+}
+
 func (sw *Switch) HandleSwitchEvents() {
 	sw.HandleWidgetEvents()
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
-		if sw.StateIs(states.Disabled) {
-			return
-		}
 		e.SetHandled()
 		sw.SetState(!sw.StateIs(states.Checked), states.Checked)
 		if sw.Parts != nil && sw.Parts.HasChildren() {
-			ist := sw.Parts.ChildByName("stack", 0).(*Layout)
-			if sw.StateIs(states.Checked) {
-				ist.StackTop = 0
-			} else {
-				ist.StackTop = 1
-			}
+			sw.SetIconFromState()
 		}
 		sw.Send(events.Change, e)
 	})
 }
 
 func (sw *Switch) SwitchStyles() {
+	sw.IconDisab = icons.Blank
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
 		s.Cursor = cursors.Pointer
@@ -145,6 +158,7 @@ func (sw *Switch) OnChildAdded(child ki.Ki) {
 func (sw *Switch) SetType(typ SwitchTypes) *Switch {
 	updt := sw.UpdateStart()
 	sw.Type = typ
+	sw.IconDisab = icons.Blank
 	switch sw.Type {
 	case SwitchSwitch:
 		// TODO: material has more advanced switches with a checkmark
@@ -214,17 +228,15 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 	ist := parts.Child(icIdx).(*Layout)
 	if mods || sw.NeedsRebuild() {
 		ist.Lay = LayoutStacked
-		ist.SetNChildren(2, IconType, "icon") // covered by above config update
+		ist.SetNChildren(3, IconType, "icon")
 		icon := ist.Child(0).(*Icon)
 		icon.SetIcon(sw.IconOn)
 		icoff := ist.Child(1).(*Icon)
 		icoff.SetIcon(sw.IconOff)
+		icdsb := ist.Child(2).(*Icon)
+		icdsb.SetIcon(sw.IconDisab)
 	}
-	if sw.StateIs(states.Checked) {
-		ist.StackTop = 0
-	} else {
-		ist.StackTop = 1
-	}
+	sw.SetIconFromState()
 	if lbIdx >= 0 {
 		lbl := parts.Child(lbIdx).(*Label)
 		if lbl.Text != sw.Text {
