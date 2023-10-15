@@ -1907,10 +1907,10 @@ func (ftv *FileTreeView) KeyInput(kt events.Event) {
 			ftv.DuplicateFiles()
 			kt.SetHandled()
 		case gi.KeyFunInsert: // New File
-			CallMethod(ftv, ftv, &MethodConfig{Name: "NewFile"}) // TODO: add more config data
+			CallFunc(ftv, ftv.NewFile)
 			kt.SetHandled()
 		case gi.KeyFunInsertAfter: // New Folder
-			CallMethod(ftv, ftv, &MethodConfig{Name: "NewFolder"})
+			CallFunc(ftv, ftv.NewFolder)
 			kt.SetHandled()
 		}
 	}
@@ -1951,7 +1951,7 @@ func (ftv *FileTreeView) OpenFileWith() {
 		sn := AsFileTreeView(sels[i].This())
 		fn := sn.FileNode()
 		if fn != nil {
-			CallMethod(ftv, fn, &MethodConfig{Name: "OpenFileWith"})
+			CallFunc(ftv, ftv.OpenFileWith)
 		}
 	}
 }
@@ -2029,7 +2029,7 @@ func (ftv *FileTreeView) RenameFiles() {
 			if fn.IsExternal() {
 				continue
 			}
-			CallMethod(ftv, fn, &MethodConfig{Name: "RenameFile"})
+			CallFunc(ftv, ftv.RenameFile)
 		}
 	}
 }
@@ -2149,7 +2149,7 @@ func (ftv *FileTreeView) CommitToVcs() {
 	sn := AsFileTreeView(sels[sz-1])
 	fn := sn.FileNode()
 	if fn != nil {
-		CallMethod(ftv, fn, &MethodConfig{Name: "CommitToVcs"})
+		CallFunc(ftv, ftv.CommitToVcs)
 	}
 }
 

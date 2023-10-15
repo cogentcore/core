@@ -7,6 +7,7 @@ package giv
 import (
 	"log/slog"
 	"reflect"
+	"runtime"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
@@ -181,43 +182,57 @@ type ArgConfig struct {
 // CallFunc calls the given function with the given configuration information
 // in the context of the given widget. It displays a GUI view for selecting any
 // unspecified arguments to the function, and optionally a GUI view for the results
-// of the function, if [MethodConfig.ShowResult] is on.
+// of the function, if [FuncConfig.ShowResult] is on. If no configuration information
+// is passed, it uses the default configuration information for the function, obtained
+// through [ConfigForFunc].
 //
 //gopy:interface=handle
-func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
+func CallFunc(ctx gi.Widget, fun any, cfg ...*FuncConfig) {
 	rfun := reflect.ValueOf(fun)
-	CallReflectFunc(ctx, rfun, cfg)
+	CallReflectFunc(ctx, rfun, cfg...)
 }
 
 // CallReflectFunc is the same as [CallFunc], but it takes a [reflect.Value] for
 // the function instead of an `any`
-func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
-	if cfg.Args.Len() == 0 {
-		if !cfg.Confirm {
-			rets := rfun.Call(nil)
-			if !cfg.ShowResult {
-				return
-			}
-			ReturnsDialog(ctx, rets, cfg).Run()
+func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
+	var c *FuncConfig
+	if len(cfg) > 0 {
+		c = cfg[0]
+	} else {
+		fn := runtime.FuncForPC(rfun.Pointer()).Name() // based on gti.FuncName
+		f := gti.FuncByName(fn)
+		if f == nil {
+			slog.Error(`programmer error: giv.CallFunc: cannot use default configuration information for function that is not in gti; add a "gti:add" comment directive to the function and run "goki generate"`, "functionSignature")
 			return
 		}
-		gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + "?", Prompt: "Are you sure you want to run " + cfg.Label + "? " + cfg.Doc, Ok: true, Cancel: true},
+		c = ConfigForFunc(f)
+	}
+	if c.Args.Len() == 0 {
+		if !c.Confirm {
+			rets := rfun.Call(nil)
+			if !c.ShowResult {
+				return
+			}
+			ReturnsDialog(ctx, rets, c).Run()
+			return
+		}
+		gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
 			func(dlg *gi.Dialog) {
 				if !dlg.Accepted {
 					return
 				}
 				rets := rfun.Call(nil)
-				if !cfg.ShowResult {
+				if !c.ShowResult {
 					return
 				}
-				ReturnsDialog(ctx, rets, cfg).Run()
+				ReturnsDialog(ctx, rets, c).Run()
 			}).Run()
 		return
 	}
-	args := ArgsForFunc(rfun, cfg)
+	args := ArgsForFunc(rfun, c)
 	ArgViewDialog(
 		ctx,
-		DlgOpts{Title: cfg.Label, Prompt: cfg.Doc, Ok: true, Cancel: true},
+		DlgOpts{Title: c.Label, Prompt: c.Doc, Ok: true, Cancel: true},
 		args,
 		func(dlg *gi.Dialog) {
 			if !dlg.Accepted {
@@ -228,23 +243,23 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
 
-			if !cfg.Confirm {
+			if !c.Confirm {
 				rets := rfun.Call(rargs)
-				if !cfg.ShowResult {
+				if !c.ShowResult {
 					return
 				}
-				ReturnsDialog(ctx, rets, cfg).Run()
+				ReturnsDialog(ctx, rets, c).Run()
 			}
-			gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + "?", Prompt: "Are you sure you want to run " + cfg.Label + "? " + cfg.Doc, Ok: true, Cancel: true},
+			gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
 				func(dlg *gi.Dialog) {
 					if !dlg.Accepted {
 						return
 					}
 					rets := rfun.Call(rargs)
-					if !cfg.ShowResult {
+					if !c.ShowResult {
 						return
 					}
-					ReturnsDialog(ctx, rets, cfg).Run()
+					ReturnsDialog(ctx, rets, c).Run()
 				}).Run()
 		},
 	).Run()
