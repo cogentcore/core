@@ -209,7 +209,8 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	// and instead always have the same gray colors
 	if s.Is(states.Disabled) {
 		s.Cursor = cursors.NotAllowed
-		s.StateLayer = 0.38
+		// this will get the state layer for the disabled state
+		s.StateLayer = s.State.StateLayer()
 		return
 	}
 	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
