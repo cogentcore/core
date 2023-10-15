@@ -319,7 +319,7 @@ func (pf *Preferences) ApplyDPI() {
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
 //
-//gi:toolbar -sep-before -icon zoom_in -show-result
+//gi:toolbar -sep-before -icon zoom_in -confirm -show-result
 func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 	fmt.Println("SaveZoom: forCurrentScreen =", forCurrentScreen)
 	sc := goosi.TheApp.Screen(0)

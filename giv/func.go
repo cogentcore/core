@@ -157,7 +157,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 			ReturnsDialog(ctx, rets, cfg).Run()
 			return
 		}
-		gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Name + "?", Prompt: "Are you sure you want to " + cfg.Name + "? " + cfg.Doc, Ok: true, Cancel: true},
+		gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + "?", Prompt: "Are you sure you want to run " + cfg.Label + "? " + cfg.Doc, Ok: true, Cancel: true},
 			func(dlg *gi.Dialog) {
 				if !dlg.Accepted {
 					return
@@ -176,15 +176,32 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 		DlgOpts{Title: cfg.Label, Prompt: cfg.Doc, Ok: true, Cancel: true},
 		args,
 		func(dlg *gi.Dialog) {
+			if !dlg.Accepted {
+				return
+			}
 			rargs := make([]reflect.Value, len(args))
 			for i, arg := range args {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
-			rets := rfun.Call(rargs)
-			if !cfg.ShowResult {
-				return
+
+			if !cfg.Confirm {
+				rets := rfun.Call(rargs)
+				if !cfg.ShowResult {
+					return
+				}
+				ReturnsDialog(ctx, rets, cfg).Run()
 			}
-			ReturnsDialog(ctx, rets, cfg).Run()
+			gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Label + "?", Prompt: "Are you sure you want to run " + cfg.Label + "? " + cfg.Doc, Ok: true, Cancel: true},
+				func(dlg *gi.Dialog) {
+					if !dlg.Accepted {
+						return
+					}
+					rets := rfun.Call(rargs)
+					if !cfg.ShowResult {
+						return
+					}
+					ReturnsDialog(ctx, rets, cfg).Run()
+				}).Run()
 		},
 	).Run()
 }
