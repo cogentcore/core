@@ -339,15 +339,17 @@ func ToValue(it any, tags string) Value {
 			ki.InitNode(vv)
 			return vv
 		}
-		// TODO(kai): handle multi-line strings with textview
-		// case vk == reflect.String:
-		// 	v := reflect.ValueOf(it)
-		// 	str := v.String()
-		// 	if strings.Contains(str, "\n") {
-		// 		vv := &textview.View{}
-		// 		ki.InitNode(vv)
-		// 		return vv
-		// 	}
+	case vk == reflect.String:
+		v := reflect.ValueOf(it)
+		str := v.String()
+		if strings.Contains(str, "\n") {
+			vv := &TextValue{}
+			ki.InitNode(vv)
+			return vv
+		}
+		vv := &ValueBase{}
+		ki.InitNode(vv)
+		return vv
 	}
 	// fallback.
 	vv := &ValueBase{}
