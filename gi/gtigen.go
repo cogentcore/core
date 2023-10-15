@@ -676,8 +676,8 @@ var _ = gti.AddType(&gti.Type{
 		{"UpdateAll", &gti.Method{Name: "UpdateAll", Doc: "UpdateAll updates all open windows with current preferences -- triggers\nrebuild of default styles.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "refresh"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"Save", &gti.Method{Name: "Save", Doc: "Save Preferences to GoGi standard prefs directory", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-show-result"}},
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves the preferences to the GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-confirm", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"error", &gti.Field{Name: "error", Type: "error", Doc: "", Directives: gti.Directives{}}},
 		})}},
