@@ -149,14 +149,7 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 		if !cfg.ShowResult {
 			return
 		}
-
-		ac := ReturnsForFunc(cfg, rets)
-		ArgViewDialog(
-			ctx,
-			DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true},
-			ac,
-			func(dlg *gi.Dialog) {},
-		).Run()
+		ShowReturnsDialog(ctx, rets, cfg)
 		return
 	}
 	args := ArgsForFunc(rfun, cfg)
@@ -169,7 +162,11 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 			for i, arg := range args {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
-			rfun.Call(rargs)
+			rets := rfun.Call(rargs)
+			if !cfg.ShowResult {
+				return
+			}
+			ShowReturnsDialog(ctx, rets, cfg)
 		},
 	).Run()
 }
@@ -199,7 +196,7 @@ func ArgsForFunc(fun reflect.Value, cfg *FuncConfig) []ArgConfig {
 
 // ReturnsForFunc returns the appropriate [ArgConfig] objects for the given
 // return values from the function with the given configuration information.
-func ReturnsForFunc(cfg *FuncConfig, rets []reflect.Value) []ArgConfig {
+func ReturnsForFunc(rets []reflect.Value, cfg *FuncConfig) []ArgConfig {
 	res := make([]ArgConfig, cfg.Returns.Len())
 	for i, kv := range cfg.Returns.Order {
 		ret := kv.Val
@@ -218,4 +215,16 @@ func ReturnsForFunc(cfg *FuncConfig, rets []reflect.Value) []ArgConfig {
 		res[i] = ra
 	}
 	return res
+}
+
+// ShowReturnsDialog shows the dialog displaying the given function return
+// values based on the given configuration information and context widget.
+func ShowReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) {
+	ac := ReturnsForFunc(rets, cfg)
+	ArgViewDialog(
+		ctx,
+		DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true},
+		ac,
+		func(dlg *gi.Dialog) {},
+	).Run()
 }

@@ -688,7 +688,7 @@ var _ = gti.AddType(&gti.Type{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-icon", "zoom_in"}},
+			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-icon", "zoom_in", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
