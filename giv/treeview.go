@@ -11,6 +11,7 @@ import (
 	"log/slog"
 
 	"goki.dev/colors"
+	"goki.dev/cursors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
@@ -90,6 +91,7 @@ func (tv *TreeView) TreeViewStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Selectable)
 		tv.Indent.SetEm(2)
 		tv.OpenDepth = 4
+		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
@@ -119,12 +121,12 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.Padding.Set()
 		})
 	case "branch":
-		cb := w.(*gi.Switch)
-		cb.Type = gi.SwitchCheckbox
-		cb.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen //
-		cb.IconOff = icons.KeyboardArrowRight // icons.Folder    //
-		cb.IconDisab = icons.Blank
-		cb.Style(func(s *styles.Style) {
+		sw := w.(*gi.Switch)
+		sw.Type = gi.SwitchCheckbox
+		sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen //
+		sw.IconOff = icons.KeyboardArrowRight // icons.Folder    //
+		sw.IconDisab = icons.Blank
+		sw.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
 			s.Margin.Set()
 			s.Padding.Set()
@@ -137,8 +139,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 				s.Opacity = 1
 			}
 		})
-		cb.OnClick(func(e events.Event) {
-			if cb.StateIs(states.Checked) {
+		sw.OnClick(func(e events.Event) {
+			if sw.StateIs(states.Checked) {
 				fmt.Println("checked")
 				if tv.IsClosed() {
 					fmt.Println("was closed")
