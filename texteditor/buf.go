@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package textview
+package texteditor
 
 import (
 	"bytes"
@@ -18,8 +18,8 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview/histyle"
-	"goki.dev/gi/v2/textview/textbuf"
+	"goki.dev/gi/v2/texteditor/histyle"
+	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
 	"goki.dev/glop/indent"
