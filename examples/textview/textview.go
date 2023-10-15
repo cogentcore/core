@@ -7,7 +7,7 @@ package main
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
-	"goki.dev/gi/v2/textview"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -52,21 +52,21 @@ func app() {
 
 	// generally need to put text view within its own layout for scrolling
 
-	txed1 := textview.NewView(splt, "textview-1")
+	txed1 := texteditor.NewView(splt, "textview-1")
 	txed1.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
 
-	txed2 := textview.NewView(splt, "textview-2")
+	txed2 := texteditor.NewView(splt, "textview-2")
 	txed2.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 		s.SetMinPrefWidth(units.Ch(20))
 		s.SetMinPrefHeight(units.Ch(10))
 	})
 
-	txbuf := textview.NewBuf()
+	txbuf := texteditor.NewBuf()
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 

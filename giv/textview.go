@@ -6,7 +6,7 @@ package giv
 
 import (
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/gti"
 	"goki.dev/laser"
 )
@@ -17,7 +17,7 @@ type TextValue struct {
 }
 
 func (vv *TextValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = textview.ViewType
+	vv.WidgetTyp = texteditor.ViewType
 	return vv.WidgetTyp
 }
 
@@ -25,7 +25,7 @@ func (vv *TextValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
-	sb := vv.Widget.(*textview.View)
+	sb := vv.Widget.(*texteditor.View)
 	npv := laser.NonPtrValue(vv.Value)
 	sb.Buf.SetText([]byte(npv.String()))
 }
@@ -34,10 +34,10 @@ func (vv *TextValue) ConfigWidget(widg gi.Widget) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 
-	tb := textview.NewBuf()
+	tb := texteditor.NewBuf()
 	tb.Stat()
 
-	tv := widg.(*textview.View)
+	tv := widg.(*texteditor.View)
 	tv.SetBuf(tb)
 
 	vv.UpdateWidget()

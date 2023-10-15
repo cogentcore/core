@@ -9,7 +9,7 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/textview"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -69,7 +69,7 @@ func (d *DlgOpts) ToGiOpts() gi.DlgOpts {
 // TextViewDialog opens a dialog for displaying multi-line text in a
 // non-editable TextView -- user can copy contents to clipboard etc.
 // there is no input from the user.
-func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *textview.View {
+func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.Dialog)) *texteditor.View {
 	var dlg *gi.Dialog
 	if opts.Data != nil {
 		recyc := false
@@ -84,7 +84,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	tb := textview.NewBuf()
+	tb := texteditor.NewBuf()
 	tb.Filename = gi.FileName(opts.Filename)
 	tb.Opts.LineNos = opts.LineNos
 	tb.Stat() // update markup
@@ -95,7 +95,7 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 		s.Height.SetEm(40)
 		s.SetStretchMax()
 	})
-	tv := textview.NewView(tlv, "text-view")
+	tv := texteditor.NewView(tlv, "text-view")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
 	tv.SetState(true, states.Disabled)
 	tv.SetBuf(tb)
@@ -115,11 +115,11 @@ func TextViewDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi.D
 }
 
 // TextViewDialogTextView returns the text view from a TextViewDialog
-func TextViewDialogTextView(dlg *gi.Dialog) *textview.View {
+func TextViewDialogTextView(dlg *gi.Dialog) *texteditor.View {
 	frame := dlg.Stage.Scene
 	tlv := frame.ChildByName("text-lay", 2)
 	tv := tlv.ChildByName("text-view", 0)
-	return tv.(*textview.View)
+	return tv.(*texteditor.View)
 }
 
 // StructViewDialog is for editing fields of a structure using a StructView.
