@@ -141,16 +141,16 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		})
 		sw.OnClick(func(e events.Event) {
 			if sw.StateIs(states.Checked) {
-				fmt.Println("checked")
-				if tv.IsClosed() {
-					fmt.Println("was closed")
-					tv.Open()
+				fmt.Println(tv, "checked")
+				if !tv.IsClosed() {
+					fmt.Println(tv, "was closed")
+					tv.Close()
 				}
 			} else {
-				fmt.Println("not checked")
-				if !tv.IsClosed() {
-					fmt.Println("was open")
-					tv.Close()
+				fmt.Println(tv, "not checked")
+				if tv.IsClosed() {
+					fmt.Println(tv, "was open")
+					tv.Open()
 				}
 			}
 		})
@@ -654,38 +654,52 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 	return fnn
 }
 
+func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
+	tv.WalkPre(func(k ki.Ki) bool {
+		if k.This() == tv.This() {
+			return ki.Continue
+		}
+		tvki := AsTreeView(k)
+		if tvki != nil {
+			// tvki.SetState(!parentClosed, states.Invisible)
+			tvki.SetFlag(!parentClosed, gi.Invisible)
+		}
+		return ki.Continue
+	})
+}
+
 // Close closes the given node and updates the view accordingly
 // (if it is not already closed).
 // Sends Change event on RootView.
 func (tv *TreeView) Close() {
-	if !tv.IsClosed() {
-		updt := tv.UpdateStart()
-		if tv.HasChildren() {
-			tv.SetNeedsLayout()
-		}
-		tv.SetClosed(true)
-		tv.SendChangeEvent(nil)
-		tv.UpdateEndRender(updt)
+	if tv.IsClosed() {
+		return
 	}
+	updt := tv.UpdateStart()
+	if tv.HasChildren() {
+		tv.SetNeedsLayout()
+	}
+	tv.SetClosed(true)
+	tv.SetKidsVisibility(true) // parent closed
+	tv.SendChangeEvent(nil)
+	tv.UpdateEndRender(updt)
 }
 
 // Open opens the given node and updates the view accordingly
 // (if it is not already opened)
 // Sends Change event on RootView.
 func (tv *TreeView) Open() {
-	if tv.IsClosed() {
-		updt := tv.UpdateStart()
-		if tv.HasChildren() {
-			tv.SetNeedsLayout()
-		}
-		if tv.HasChildren() {
-			tv.SetClosed(false)
-		}
-		tv.SendChangeEvent(nil)
-		tv.UpdateEndRender(updt)
-	} else if !tv.HasChildren() {
-		// non-children nodes get double-click open for example
+	if !tv.IsClosed() {
+		return
 	}
+	updt := tv.UpdateStart()
+	if tv.HasChildren() {
+		tv.SetNeedsLayout()
+		tv.SetClosed(false)
+		tv.SetKidsVisibility(false)
+	}
+	tv.SendChangeEvent(nil)
+	tv.UpdateEndRender(updt)
 }
 
 // ToggleClose toggles the close / open status: if closed, opens, and vice-versa
@@ -704,6 +718,8 @@ func (tv *TreeView) OpenAll() {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.SetClosed(false)
+			// tvki.SetState(false, states.Invisible)
+			tvki.SetFlag(false, gi.Invisible)
 		}
 		return ki.Continue
 	})
@@ -718,6 +734,8 @@ func (tv *TreeView) CloseAll() {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.SetClosed(true)
+			// tvki.SetState(true, states.Invisible)
+			tvki.SetFlag(false, gi.Invisible)
 			return ki.Continue
 		}
 		return ki.Break
@@ -1544,9 +1562,11 @@ func (tv *TreeView) SetBranchState() {
 	case !tv.HasChildren():
 		br.SetState(true, states.Disabled)
 	case tv.IsClosed():
+		fmt.Println(tv, "is closed, setting checked = false")
 		br.SetState(false, states.Disabled)
 		br.SetState(false, states.Checked)
 	default:
+		fmt.Println(tv, "is open, setting checked = true")
 		br.SetState(false, states.Disabled)
 		br.SetState(true, states.Checked)
 	}
@@ -1636,12 +1656,12 @@ func (tv *TreeView) IsVisible() bool {
 	if tv.RootView.Par == nil || tv.RootView.Par.This() == nil {
 		return false
 	}
-	if tv.This() == tv.RootView.This() { // root is ALWAYS visible so updates there work
-		return true
-	}
 	// if tv.StateIs(states.Invisible) {
 	// 	return false
 	// }
+	if tv.Is(gi.Invisible) {
+		return false
+	}
 	return tv.RootView.Par.This().(gi.Widget).IsVisible()
 }
 
@@ -1652,9 +1672,6 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 }
 
 func (tv *TreeView) Render(sc *gi.Scene) {
-	if tv.HasClosedParent() {
-		return // nothing
-	}
 	if tv.PushBounds(sc) {
 		// tv.UpdateInactive() // todo:
 		tv.RenderNode(sc)
@@ -1663,7 +1680,9 @@ func (tv *TreeView) Render(sc *gi.Scene) {
 	}
 	// we always have to render our kids b/c
 	// we could be out of scope but they could be in!
-	tv.RenderChildren(sc)
+	if !tv.IsClosed() {
+		tv.RenderChildren(sc)
+	}
 }
 
 //
