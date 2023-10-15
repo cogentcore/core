@@ -10,7 +10,6 @@ import (
 	"log"
 	"log/slog"
 
-	"goki.dev/girl/states"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
@@ -84,7 +83,6 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 	wb.BBoxMu.Lock()
 	wb.ObjBBox = wb.BBox.Add(delta)
 	wb.ScBBox = parBBox.Intersect(wb.ObjBBox)
-	wb.SetState(wb.ScBBox == image.Rectangle{}, states.Invisible)
 	wb.BBoxMu.Unlock()
 }
 

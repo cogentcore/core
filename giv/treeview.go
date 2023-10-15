@@ -140,6 +140,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			}
 		})
 		sw.OnClick(func(e events.Event) {
+			fmt.Println("sw click:", sw)
 			if sw.StateIs(states.Checked) {
 				fmt.Println(tv, "checked")
 				if !tv.IsClosed() {
@@ -193,26 +194,6 @@ func (tv *TreeView) IsClosed() bool {
 // Call Close() method to close a node and update view.
 func (tv *TreeView) SetClosed(closed bool) {
 	tv.SetFlag(closed, TreeViewFlagClosed)
-}
-
-// HasClosedParent returns whether this node have a closed parent?
-// if so, don't render!
-func (tv *TreeView) HasClosedParent() bool {
-	pclo := false
-	tv.WalkUpParent(func(k ki.Ki) bool {
-		_, pg := gi.AsWidget(k)
-		if pg == nil {
-			return ki.Break
-		}
-		if pg.KiType().HasEmbed(TreeViewType) {
-			if pg.Is(TreeViewFlagClosed) {
-				pclo = true
-				return ki.Break
-			}
-		}
-		return ki.Continue
-	})
-	return pclo
 }
 
 // RootIsInactive returns the inactive status of the root node,
@@ -661,7 +642,7 @@ func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
 		}
 		tvki := AsTreeView(k)
 		if tvki != nil {
-			tvki.SetState(!parentClosed, states.Invisible)
+			tvki.SetState(parentClosed, states.Invisible)
 		}
 		return ki.Continue
 	})
@@ -1506,10 +1487,6 @@ func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
-	if tv.HasClosedParent() {
-		// tv.SetFlag(false, gi.CanFocus)
-		return
-	}
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget(sc)
@@ -1527,9 +1504,6 @@ func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
 
 func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
 	tv.InitLayout(sc)
-	if tv.HasClosedParent() {
-		return // nothing
-	}
 	tv.GetSizeParts(sc, iter) // get our size from parts
 	tv.WidgetSize = tv.LayState.Alloc.Size
 	h := mat32.Ceil(tv.WidgetSize.Y)
@@ -1579,11 +1553,6 @@ func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter in
 }
 
 func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	if tv.HasClosedParent() {
-		fmt.Println("parent closed:", tv)
-		tv.LayState.Alloc.PosRel.X = -1000000 // put it very far off screen..
-	}
-
 	psize := tv.AddParentPos() // have to add our pos first before computing below:
 
 	rn := tv.RootView
@@ -1621,18 +1590,19 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	// once layout is done, we can get our reg size back
 	tv.LayState.Alloc.Size = tv.WidgetSize
 	if gi.LayoutTrace {
-		fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
+		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
 		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
 	}
 	return redo
 }
 
-func (tv *TreeView) BBoxes() image.Rectangle {
-	// we have unusual situation of bbox != alloc
-	tp := tv.LayState.Alloc.Pos.ToPointFloor()
-	ts := tv.WidgetSize.ToPointCeil()
-	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
-}
+//
+// func (tv *TreeView) BBoxes() image.Rectangle {
+// 	// we have unusual situation of bbox != alloc
+// 	tp := tv.LayState.Alloc.Pos.ToPointFloor()
+// 	ts := tv.WidgetSize.ToPointCeil()
+// 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
+// }
 
 func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
 	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
