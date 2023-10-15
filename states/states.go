@@ -101,6 +101,8 @@ func (st States) Is(flag enums.BitFlag) bool {
 // as the value of [goki.dev/girl/styles.Style.StateLayer]
 func (st States) StateLayer() float32 {
 	switch {
+	case st.Is(Disabled):
+		return 0.38
 	case st.Is(Dragging):
 		return 0.16
 	case st.Is(Active):
