@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log/slog"
 	"reflect"
 
@@ -81,7 +80,6 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			tb.AddSeparator()
 		}
 		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc}, func(bt *gi.Button) {
-			fmt.Println("calling method", met.Name)
 			rfun := reflect.ValueOf(val).MethodByName(met.Name)
 			CallReflectFunc(bt, rfun, cfg)
 		})

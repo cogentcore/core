@@ -176,7 +176,6 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sc.EventMgr.InitialFocus()
 
-	// TODO(kai): implement timeout for other types or only allow it for popup stages
 	if st.Timeout > 0 {
 		time.AfterFunc(st.Timeout, func() {
 			if st.Main == nil {
