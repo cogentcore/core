@@ -47,6 +47,10 @@ type FuncConfig struct {
 	// SepAfter is whether to insert a separator after the
 	// function button in a toolbar/menubar.
 	SepAfter bool
+	// Confirm is whether to show a confirmation dialog asking
+	// the user whether they are sure they want to call the function
+	// before calling it.
+	Confirm bool
 	// ShowResult is whether to display the result (return values) of the function
 	// after it is called. If this is set to true and there are no return values,
 	// it displays a message that the method was successful.
@@ -103,7 +107,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 		tb.AddButton(gi.ActOpts{Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc}, func(bt *gi.Button) {
 			fmt.Println("calling method", met.Name)
 			rfun := reflect.ValueOf(val).MethodByName(met.Name)
-			CallReflectFunc(tb, rfun, cfg)
+			CallReflectFunc(bt, rfun, cfg)
 		})
 		if cfg.SepAfter {
 			tb.AddSeparator()
@@ -145,11 +149,25 @@ func CallFunc(ctx gi.Widget, fun any, cfg *FuncConfig) {
 // the function instead of an `any`
 func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg *FuncConfig) {
 	if cfg.Args.Len() == 0 {
-		rets := rfun.Call(nil)
-		if !cfg.ShowResult {
+		if !cfg.Confirm {
+			rets := rfun.Call(nil)
+			if !cfg.ShowResult {
+				return
+			}
+			ReturnsDialog(ctx, rets, cfg).Run()
 			return
 		}
-		ReturnsDialog(ctx, rets, cfg).Run()
+		gi.NewStdDialog(ctx, gi.DlgOpts{Title: cfg.Name + "?", Prompt: "Are you sure you want to " + cfg.Name + "? " + cfg.Doc, Ok: true, Cancel: true},
+			func(dlg *gi.Dialog) {
+				if !dlg.Accepted {
+					return
+				}
+				rets := rfun.Call(nil)
+				if !cfg.ShowResult {
+					return
+				}
+				ReturnsDialog(ctx, rets, cfg).Run()
+			}).Run()
 		return
 	}
 	args := ArgsForFunc(rfun, cfg)

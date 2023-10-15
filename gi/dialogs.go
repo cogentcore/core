@@ -215,7 +215,7 @@ func (dlg *Dialog) DefaultStyle() {
 	st := dlg.Stage
 	sc := st.Scene
 	sc.Style(func(s *styles.Style) {
-		// material likes SurfaceVariant here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
+		// material likes SurfaceContainerHigh here, but that seems like too much; STYTODO: maybe figure out a better background color setup for dialogs?
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		// s.Border.Radius = styles.BorderRadiusExtraLarge
 		s.Color = colors.Scheme.OnSurface
@@ -298,6 +298,8 @@ func RecycleStdDialog(ctx Widget, opts DlgOpts, data any, fun func(dlg *Dialog))
 
 //////////////////////////////////////////////////////////////////////////
 //     Specific Dialogs
+
+// TODO: this doesn't do anything beyond NewStdDialog?
 
 // PromptDialog opens a standard dialog configured via options.
 // The given closure will be called with the dialog when it returns,
