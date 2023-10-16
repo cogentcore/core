@@ -69,8 +69,6 @@ type TreeView struct {
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
 	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" inactive:"+"`
-
-	actStateLayer float32
 }
 
 func (tv *TreeView) CopyFieldsFrom(frm any) {
@@ -112,17 +110,17 @@ func (tv *TreeView) TreeViewStyles() {
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Width.Left.SetDp(1)
-		s.Border.Color.Left = colors.Scheme.OutlineVariant
+		// s.Border.Width.Left.SetDp(1)
+		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
-		// we rely on a workaround so that we don't
-		// get infintely cascading background colors
-		tv.actStateLayer = s.StateLayer
-		s.StateLayer = 0
-		// fmt.Println("s", tv.actStateLayer, s.StateLayer, tv)
+		// s.Color = colors.Scheme.Secondary.OnContainer
+		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+		if tv.StateIs(states.Selected) {
+			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+		}
 	})
 }
 
@@ -295,7 +293,7 @@ func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget(sc)
-	tv.Styles.StateLayer = 0 // turn off!
+	// tv.Styles.StateLayer = 0 // turn off!
 	// note: this is essential for reasonable styling behavior
 }
 
@@ -358,7 +356,7 @@ func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter in
 }
 
 func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
-	return tv.ScBBox
+	return tv.EvBBox
 }
 
 func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
@@ -399,7 +397,9 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	}
 	redo := tv.DoLayoutChildren(sc, iter)
 	// once layout is done, we can get our reg size back
+	// but we keep EvBBox as full size including children
 	tv.LayState.Alloc.Size = tv.WidgetSize
+	tv.ScBBox = tv.BBoxFromAlloc()
 	if gi.LayoutTrace {
 		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
 		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
@@ -409,20 +409,13 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
-	st.StateLayer = tv.actStateLayer
-	// fmt.Println("r", tv.actStateLayer, st.StateLayer, tv)
 	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &tv.Styles.BackgroundColor)
-	// tv.RenderStdBox(sc, st)
-	st.StateLayer = 0
 	tv.RenderUnlock(rs)
 }
 
 func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderNode(sc)
-		if tv.Parts != nil {
-			tv.Parts.Styles.StateLayer = tv.actStateLayer
-		}
 		tv.RenderParts(sc)
 		tv.PopBounds(sc)
 	}
@@ -1517,6 +1510,21 @@ func (tv *TreeView) HandleTreeViewMouse() {
 	tv.OnDoubleClick(func(e events.Event) {
 		e.SetHandled()
 		tv.ToggleClose()
+	})
+	tv.On(events.MouseEnter, func(e events.Event) {
+		if tv.PosInScBBox(e.LocalPos()) {
+			tv.SetState(true, states.Hovered)
+		}
+		e.SetHandled()
+	})
+	tv.On(events.MouseDown, func(e events.Event) {
+		if tv.PosInScBBox(e.LocalPos()) {
+			tv.SetState(true, states.Active)
+		}
+		e.SetHandled()
+	})
+	tv.On(events.MouseUp, func(e events.Event) {
+		tv.SetState(false, states.Active)
 	})
 }
 

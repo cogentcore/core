@@ -120,9 +120,17 @@ func (wb *WidgetBase) HandleWidgetEvents() {
 	wb.HandleWidgetContextMenu()
 }
 
-// PosInBBox returns true if given position is within
-// this node's win bbox (under read lock)
-func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
+// PosInEvBBox returns true if given position is within
+// this node's event bbox (under read lock)
+func (wb *WidgetBase) PosInEvBBox(pos image.Point) bool {
+	wb.BBoxMu.RLock()
+	defer wb.BBoxMu.RUnlock()
+	return pos.In(wb.EvBBox)
+}
+
+// PosInScBBox returns true if given position is within
+// this node's scene bbox (under read lock)
+func (wb *WidgetBase) PosInScBBox(pos image.Point) bool {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
 	return pos.In(wb.ScBBox)
@@ -136,9 +144,6 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 // Sends ContextMenu event that Activates a context menu if present.
 func (wb *WidgetBase) HandleWidgetClick() {
 	wb.OnClick(func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		// fmt.Println("click", wb)
 		if wb.AbilityIs(abilities.Checkable) {
 			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
@@ -160,32 +165,26 @@ func (wb *WidgetBase) HandleWidgetClick() {
 	})
 }
 
-// HandleWidgetStateFromMouse updates all standard State flags based on mouse events,
+// HandleWidgetStateFromMouse updates all standard
+// State flags based on mouse events,
 // such as MouseDown / Up -> Active and MouseEnter / Leave -> Hovered.
 // None of these "consume" the event by setting Handled flag, as they are
 // designed to work in conjunction with more specific handlers.
+// Note that Disabled and Invisible widgets do NOT receive
+// these events so it is not necessary to check that.
 func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	wb.On(events.MouseDown, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Activatable) {
 			// fmt.Println("active:", wb)
 			wb.SetState(true, states.Active)
 		}
 	})
 	wb.On(events.MouseUp, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Activatable) {
 			wb.SetState(false, states.Active)
 		}
 	})
 	wb.On(events.DoubleClick, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		// if we are not double clickable, we just treat
 		// it as a click event (as long as we are pressable)
 		if !wb.AbilityIs(abilities.DoubleClickable) && wb.Styles.Abilities.IsPressable() {
@@ -193,67 +192,43 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 		}
 	})
 	wb.On(events.MouseEnter, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Hoverable) {
 			wb.SetState(true, states.Hovered)
 		}
 	})
 	wb.On(events.MouseLeave, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Hoverable) {
 			wb.SetState(false, states.Hovered)
 		}
 	})
 	wb.On(events.LongHoverStart, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.LongHoverable) {
 			wb.SetState(true, states.LongHovered)
 		}
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.LongHoverable) {
 			wb.SetState(false, states.LongHovered)
 		}
 	})
 	wb.On(events.SlideStart, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Slideable) {
 			// fmt.Println("sliding:", wb)
 			wb.SetState(true, states.Sliding)
 		}
 	})
 	wb.On(events.SlideStop, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Slideable) {
 			wb.SetState(false, states.Sliding, states.Active)
 			// fmt.Println("done sliding:", wb)
 		}
 	})
 	wb.On(events.DragStart, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Draggable) {
 			wb.SetState(true, states.Dragging)
 		}
 	})
 	wb.On(events.Drop, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Draggable) {
 			wb.SetState(false, states.Dragging, states.Active)
 		}
@@ -264,9 +239,6 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 // Most widgets should call this as part of their event handler methods.
 func (wb *WidgetBase) HandleLongHoverTooltip() {
 	wb.On(events.LongHoverStart, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.Tooltip == "" {
 			return
 		}
@@ -274,9 +246,6 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 		NewTooltip(wb, e.Pos()).Run()
 	})
 	wb.On(events.LongHoverEnd, func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.Sc != nil && wb.Sc.MainStageMgr() != nil {
 			top := wb.Sc.MainStageMgr().Top()
 			if top != nil && top.AsMain() != nil {
@@ -289,18 +258,12 @@ func (wb *WidgetBase) HandleLongHoverTooltip() {
 // HandleWidgetStateFromFocus updates standard State flags based on Focus events
 func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 	wb.OnFocus(func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.ScrollToMe()
 			wb.SetState(true, states.Focused)
 		}
 	})
 	wb.OnFocusLost(func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if wb.AbilityIs(abilities.Focusable) {
 			wb.SetState(false, states.Focused)
 		}
@@ -311,9 +274,6 @@ func (wb *WidgetBase) HandleWidgetStateFromFocus() {
 // to generate a Click action
 func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	wb.OnKeyChord(func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
 		if KeyEventTrace {
 			slog.Info("WidgetBase KeyChordEvent", "widget", wb)
 		}
@@ -326,33 +286,6 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 			// }
 		}
 	})
-}
-
-// FirstContainingPoint finds the first node whose WinBBox contains
-// the given point, nil if none.
-// If leavesOnly is set then only nodes that have no
-// nodes (leaves, terminal nodes) will be considered
-func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
-	var rval ki.Ki
-	wb.WalkPre(func(k ki.Ki) bool {
-		if k == wb.This() {
-			return ki.Continue
-		}
-		if leavesOnly && k.HasChildren() {
-			return ki.Continue
-		}
-		_, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
-			// 3D?
-			return ki.Break
-		}
-		if w.PosInBBox(pt) {
-			rval = w.This()
-			return ki.Break
-		}
-		return ki.Continue
-	})
-	return rval
 }
 
 ///////////////////////////////////////////////////////////////////
