@@ -114,7 +114,7 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
-		//		s.Color = colors.Scheme.Secondary.OnContainer
+		s.Color = colors.Scheme.Secondary.OnContainer
 	})
 }
 
@@ -125,6 +125,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
+			// putting background in parts: it doesn't render
+			// but items below get its color -- instead of on TV widget
 			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 			if tv.Styles.State.Is(states.Selected) {
 				s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
@@ -293,7 +295,7 @@ func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget(sc)
-	// tv.Styles.StateLayer = 0 // turn off!
+	tv.Styles.StateLayer = 0 // turn off!
 	// note: this is essential for reasonable styling behavior
 }
 
@@ -340,9 +342,11 @@ func (tv *TreeView) SetBranchState() {
 	case tv.IsClosed():
 		br.SetState(false, states.Disabled)
 		br.SetState(false, states.Checked)
+		br.SetNeedsRender()
 	default:
 		br.SetState(false, states.Disabled)
 		br.SetState(true, states.Checked)
+		br.SetNeedsRender()
 	}
 }
 
@@ -881,7 +885,7 @@ func (tv *TreeView) Close() {
 		tv.SetNeedsLayout()
 	}
 	tv.SetClosed(true)
-	tv.SetBranchState()
+	// tv.SetBranchState()
 	tv.SetKidsVisibility(true) // parent closed
 	tv.SendChangeEvent(nil)
 	tv.UpdateEndRender(updt)
@@ -898,7 +902,7 @@ func (tv *TreeView) Open() {
 	if tv.HasChildren() {
 		tv.SetNeedsLayout()
 		tv.SetClosed(false)
-		tv.SetBranchState()
+		// tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 	}
 	tv.SendChangeEvent(nil)
