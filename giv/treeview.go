@@ -69,6 +69,8 @@ type TreeView struct {
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
 	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" inactive:"+"`
+
+	actStateLayer float32
 }
 
 func (tv *TreeView) CopyFieldsFrom(frm any) {
@@ -105,18 +107,22 @@ func (tv *TreeView) OnInit() {
 
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable) // , abilities.Hoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.SetEm(1)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
-		// s.Border.Width.Left.SetDp(1)
-		// s.Border.Color.Left = colors.Scheme.OutlineVariant
+		s.Border.Width.Left.SetDp(1)
+		s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
-		s.Color = colors.Scheme.Secondary.OnContainer
+		// we rely on a workaround so that we don't
+		// get infintely cascading background colors
+		tv.actStateLayer = s.StateLayer
+		s.StateLayer = 0
+		// fmt.Println("s", tv.actStateLayer, s.StateLayer, tv)
 	})
 }
 
@@ -127,14 +133,6 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
-			// putting background in parts: it doesn't render
-			// but items below get its color -- instead of on TV widget
-			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-			if tv.Styles.State.Is(states.Selected) {
-				s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-			} else if tv.Styles.State.Is(states.Hovered) {
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-			}
 		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
@@ -411,15 +409,20 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
-	bg := &tv.Parts.Styles.BackgroundColor
-	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, bg)
+	st.StateLayer = tv.actStateLayer
+	// fmt.Println("r", tv.actStateLayer, st.StateLayer, tv)
+	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &tv.Styles.BackgroundColor)
 	// tv.RenderStdBox(sc, st)
+	st.StateLayer = 0
 	tv.RenderUnlock(rs)
 }
 
 func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderNode(sc)
+		if tv.Parts != nil {
+			tv.Parts.Styles.StateLayer = tv.actStateLayer
+		}
 		tv.RenderParts(sc)
 		tv.PopBounds(sc)
 	}
