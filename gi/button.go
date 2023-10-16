@@ -577,6 +577,9 @@ func findButtonMenuImpl(par ki.Ki, parts []string) ki.Ki {
 	if len(parts) == 0 {
 		return par
 	}
+	if par == nil {
+		return nil
+	}
 	sl := par.Children()
 	if bt, ok := par.(*Button); ok {
 		sl = (*ki.Slice)(&bt.Menu)
@@ -603,14 +606,22 @@ func newButtonMenuImpl(par ki.Ki, parts []string) *Button {
 		bt, _ := par.(*Button)
 		return bt
 	}
-	sl := par.Children()
-	if bt, ok := par.(*Button); ok {
-		sl = (*ki.Slice)(&bt.Menu)
+	nm := parts[0]
+
+	bt, isBt := par.(*Button)
+	if isBt {
+		elem := (*ki.Slice)(&bt.Menu).ElemByName(nm)
+		if elem != nil {
+			return newButtonMenuImpl(elem, parts[1:])
+		}
+		newbt := bt.Menu.AddButton(ActOpts{Label: nm}, nil)
+		return newButtonMenuImpl(newbt, parts[1:])
 	}
-	elem := sl.ElemByName(parts[0])
-	if elem != nil {
-		return newButtonMenuImpl(elem, parts[1:])
+
+	child := par.ChildByName(nm)
+	if child != nil {
+		return newButtonMenuImpl(child, parts[1:])
 	}
-	newbt := NewButton(par, parts[0])
+	newbt := NewButton(par).SetType(ButtonAction).SetText(nm)
 	return newButtonMenuImpl(newbt, parts[1:])
 }
