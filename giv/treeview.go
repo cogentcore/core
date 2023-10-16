@@ -286,7 +286,6 @@ func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget(sc)
-	tv.Styles.StateLayer = 0 // turn off!
 }
 
 func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
