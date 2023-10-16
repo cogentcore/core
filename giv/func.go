@@ -127,11 +127,9 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 	if len(cfgs) == 0 {
 		return false
 	}
-	fmt.Println(cfgs)
 	for depth, cs := range cfgs {
 		for _, cfg := range cs {
 			cfg := cfg
-			fmt.Println(cfg.Name, depth)
 
 			ao := gi.ActOpts{Name: cfg.Name, Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}
 			btf := func(bt *gi.Button) {
