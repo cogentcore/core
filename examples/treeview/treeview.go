@@ -66,6 +66,8 @@ func app() {
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 
+	tv.SetViewIdx()
+
 	_ = svfr
 	// sv := giv.NewStructView(svfr, "sv")
 	// sv.SetStretchMaxWidth()
@@ -76,7 +78,7 @@ func app() {
 	// 	if data == nil {
 	// 		return
 	// 	}
-	// 	// tvr, _ := send.Embed(giv.TypeTreeView).(*gi.TreeView) // root is sender
+	// 	//t vr, _ := send.Embed(giv.TypeTreeView).(*gi.TreeView) // root is sender
 	// 	tvn, _ := data.(ki.Ki).Embed(giv.TypeTreeView).(*giv.TreeView)
 	// 	svr, _ := recv.Embed(giv.TypeStructView).(*giv.StructView)
 	// 	if sig == int64(giv.TreeViewSelected) {
