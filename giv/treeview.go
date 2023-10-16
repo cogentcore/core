@@ -116,11 +116,6 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
-		// s.Color = colors.Scheme.Secondary.OnContainer
-		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-		if tv.StateIs(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		}
 	})
 }
 
@@ -130,11 +125,27 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {
+			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 			parts.Spacing.SetCh(0.5)
+		})
+		// we let the parts handle our hovered state
+		// so that we only get it when we are hovered
+		// over this treeview specifically, not any of
+		// our children (see HandleTreeViewMouse)
+		parts.On(events.MouseEnter, func(e events.Event) {
+			tv.SetState(true, states.Hovered)
+			tv.ApplyStyle(tv.Sc)
+			tv.SetNeedsRender()
+			e.SetHandled()
+		})
+		parts.On(events.MouseLeave, func(e events.Event) {
+			tv.SetState(false, states.Hovered)
+			tv.ApplyStyle(tv.Sc)
+			tv.SetNeedsRender()
+			e.SetHandled()
 		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.Secondary.OnContainer
 			s.Width.SetEm(1)
 			s.Height.SetEm(1)
 			s.Margin.Set()
@@ -409,7 +420,8 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
-	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &tv.Styles.BackgroundColor)
+	sbg := tv.ParentBackgroundColor()
+	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &sbg)
 	tv.RenderUnlock(rs)
 }
 
@@ -1511,24 +1523,18 @@ func (tv *TreeView) HandleTreeViewMouse() {
 		e.SetHandled()
 		tv.ToggleClose()
 	})
+
+	// we let the parts handle our hovered state
+	// so that we only get it when we are hovered
+	// over this treeview specifically, not any of
+	// our children (see OnChildAdded)
 	tv.On(events.MouseEnter, func(e events.Event) {
-		if tv.PosInScBBox(e.LocalPos()) {
-			tv.SetState(true, states.Hovered)
-			tv.WalkUpParent(func(k ki.Ki) bool {
-				tvki := AsTreeView(k)
-				if tvki != nil {
-					if tvki.StateIs(states.Hovered) {
-						tvki.SetState(false, states.Hovered)
-						tvki.ApplyStyle(tvki.Sc)
-						tvki.SetNeedsRender()
-					}
-					return ki.Continue
-				}
-				return ki.Break
-			})
-		}
 		e.SetHandled()
 	})
+	tv.On(events.MouseLeave, func(e events.Event) {
+		e.SetHandled()
+	})
+
 	tv.On(events.MouseDown, func(e events.Event) {
 		if tv.PosInScBBox(e.LocalPos()) {
 			tv.SetState(true, states.Active)
