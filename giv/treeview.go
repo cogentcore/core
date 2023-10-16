@@ -69,6 +69,13 @@ type TreeView struct {
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
 	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" inactive:"+"`
+
+	// actStateLayer is the actual state layer of the tree view, which
+	// should be used when rendering it and its parts (but not its children).
+	// the reason that it exists is so that the children of the tree view
+	// (other tree views) do not inherit its stateful background color, as
+	// that does not look good.
+	actStateLayer float32
 }
 
 func (tv *TreeView) CopyFieldsFrom(frm any) {
@@ -116,6 +123,9 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
+
+		tv.actStateLayer = s.StateLayer
+		s.StateLayer = 0
 	})
 }
 
@@ -420,15 +430,20 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
+	st.StateLayer = tv.actStateLayer
 	sbg := tv.ParentBackgroundColor()
 	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &sbg)
+	st.StateLayer = 0
 	tv.RenderUnlock(rs)
 }
 
 func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderNode(sc)
-		tv.RenderParts(sc)
+		if tv.Parts != nil {
+			tv.Parts.Styles.StateLayer = tv.actStateLayer
+			tv.RenderParts(sc)
+		}
 		tv.PopBounds(sc)
 	}
 	// we always have to render our kids b/c
