@@ -26,52 +26,63 @@ const (
 	// zero value is an unknown type
 	UnknownType Types = iota
 
-	// MouseDown happens when a mouse button is pressed down. See Button() for which.
-	// See Click for a synthetic event representing a MouseDown followed by MouseUp
-	// on the same element -- often that is the most useful.
+	// MouseDown happens when a mouse button is pressed down.
+	// See MouseButton() for which.
+	// See Click for a synthetic event representing a MouseDown
+	// followed by MouseUp on the same element with Left (primary)
+	// mouse button. Often that is the most useful.
 	MouseDown
 
-	// MouseUp happens when a mouse button is released. See Button() for which.
+	// MouseUp happens when a mouse button is released.
+	// See MouseButton() for which.
 	MouseUp
 
-	// MouseMove is always sent when the mouse is moving but no button is down,
-	// even if there might be other higher-level events too.
+	// MouseMove is always sent when the mouse is moving but no
+	// button is down, even if there might be other higher-level events too.
 	// These can be numerous and thus it is typically more efficient
 	// to listen to other events derived from this.
 	// Not unique, and Prev position is updated during compression.
 	MouseMove
 
 	// MouseDrag is always sent when the mouse is moving and there
-	// is a button down, even if there might be other higher-level events too.
+	// is a button down, even if there might be other higher-level
+	// events too.
 	// The start pos indicates where (and when) button first was pressed.
 	// Not unique and Prev position is updated during compression.
 	MouseDrag
 
-	// Click represents a MouseDown followed by MouseUp in sequence on the
-	// same element, with the same button. See Button() for which.
+	// Click represents a MouseDown followed by MouseUp
+	// in sequence on the same element, with the Left (primary) button.
 	// This is the typical event for most basic user interaction.
 	Click
 
-	// DoubleClick represents two Click events in a row in rapid succession.
-	// See Button() for which.
+	// DoubleClick represents two Click events in a row in rapid
+	// succession.
 	DoubleClick
 
-	// MouseEnter is when the mouse enters the bounding box of a new element.
-	// It is used for setting the Hover state, and can trigger cursor changes.
+	// ContextMenu represents a MouseDown/Up event with the
+	// Right mouse button (which is also activated by
+	// Control key + Left Click).
+	ContextMenu
+
+	// MouseEnter is when the mouse enters the bounding box
+	// of a new element.  It is used for setting the Hover state,
+	// and can trigger cursor changes.
 	// See DragEnter for alternative case during Drag events.
 	MouseEnter
 
-	// MouseLeave is when the mouse leaves the bounding box of an element,
-	// that previously had a MouseEnter event triggered.
+	// MouseLeave is when the mouse leaves the bounding box
+	// of an element, that previously had a MouseEnter event.
 	// Given that elements can have overlapping bounding boxes
 	// (e.g., child elements within a container), it is not the case
-	// that a MouseEnter on a child triggers a MouseLeave on surrounding
-	// containers.
+	// that a MouseEnter on a child triggers a MouseLeave on
+	// surrounding containers.
 	// See DragLeave for alternative case during Drag events.
 	MouseLeave
 
-	// LongHoverStart is when the mouse has been relatively stable after
-	// MouseEnter on an element for a minimum duration (500 msec default).
+	// LongHoverStart is when the mouse has been relatively stable
+	// after MouseEnter on an element for a minimum duration
+	// (500 msec default).
 	// This triggers the LongHover state typically used for Tooltips.
 	LongHoverStart
 
@@ -82,8 +93,8 @@ const (
 	LongHoverEnd
 
 	// DragStart is at the start of a drag-n-drop event sequence, when
-	// a Draggable element is Active and a sufficient distance of MouseDrag
-	// events has occurred to engage the DragStart event.
+	// a Draggable element is Active and a sufficient distance of
+	// MouseDrag events has occurred to engage the DragStart event.
 	DragStart
 
 	// Drop is the final action of the drag-n-drop sequence, when
