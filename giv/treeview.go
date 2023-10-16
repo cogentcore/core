@@ -1514,6 +1514,18 @@ func (tv *TreeView) HandleTreeViewMouse() {
 	tv.On(events.MouseEnter, func(e events.Event) {
 		if tv.PosInScBBox(e.LocalPos()) {
 			tv.SetState(true, states.Hovered)
+			tv.WalkUpParent(func(k ki.Ki) bool {
+				tvki := AsTreeView(k)
+				if tvki != nil {
+					if tvki.StateIs(states.Hovered) {
+						tvki.SetState(false, states.Hovered)
+						tvki.ApplyStyle(tvki.Sc)
+						tvki.SetNeedsRender()
+					}
+					return ki.Continue
+				}
+				return ki.Break
+			})
 		}
 		e.SetHandled()
 	})
