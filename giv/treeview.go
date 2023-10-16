@@ -398,7 +398,7 @@ func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter in
 }
 
 func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
-	return tv.EvBBox
+	return tv.ScBBox
 }
 
 func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
@@ -439,9 +439,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	}
 	redo := tv.DoLayoutChildren(sc, iter)
 	// once layout is done, we can get our reg size back
-	// but we keep EvBBox as full size including children
 	tv.LayState.Alloc.Size = tv.WidgetSize
-	tv.ScBBox = tv.BBoxFromAlloc()
 	if gi.LayoutTrace {
 		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
 		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)

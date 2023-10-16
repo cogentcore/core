@@ -260,9 +260,6 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
-	// Version of ScBBox used for event processing.  In general this is identical to ScBBox except for cases like TreeView where the children are not localized within the ScBBox rendering region.
-	EvBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
-
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string
 
