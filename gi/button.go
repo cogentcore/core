@@ -560,20 +560,20 @@ func (bt *Button) UpdateButtons() {
 	}
 }
 
-// FindButton finds the button with the given path in the given parent,
+// FindButtonMenu finds the button with the given path in the given parent,
 // searching through both children and any [Button.Menu]s it finds. The
 // path omits menus; for example, if A has a menu that contains B, which
-// has a menu that contains C, FindButton(A, "B/C") is correct, but
-// FindButton(A, "menu/B/menu/C") is not correct. If the result of FindButton
-// is nil, that indicates that the button could not be found.
-func FindButton(par ki.Ki, path string) *Button {
+// has a menu that contains C, FindButtonMenu(A, "B/C") is correct, but
+// FindButtonMenu(A, "menu/B/menu/C") is not correct. If the result of
+// FindButtonMenu is nil, that indicates that the button could not be found.
+func FindButtonMenu(par ki.Ki, path string) *Button {
 	parts := strings.Split(path, "/")
-	bt, _ := findButtonImpl(par, parts).(*Button)
+	bt, _ := findButtonMenuImpl(par, parts).(*Button)
 	return bt
 }
 
-// findButtonImpl is the implementation of FindButton
-func findButtonImpl(par ki.Ki, parts []string) ki.Ki {
+// findButtonMenuImpl is the implementation of FindButtonMenu
+func findButtonMenuImpl(par ki.Ki, parts []string) ki.Ki {
 	if len(parts) == 0 {
 		return par
 	}
@@ -581,5 +581,36 @@ func findButtonImpl(par ki.Ki, parts []string) ki.Ki {
 	if bt, ok := par.(*Button); ok {
 		sl = (*ki.Slice)(&bt.Menu)
 	}
-	return findButtonImpl(sl.ElemByName(parts[0]), parts[1:])
+	return findButtonMenuImpl(sl.ElemByName(parts[0]), parts[1:])
+}
+
+// NewButtonMenu creates a new button at the given path in the given parent,
+// searching for each element of the path through both children and any
+// [Button.Menu]s, and creating it if it doesn't exist. It assumes that
+// you want to create a button with a menu for each element
+// of the path; for example, if you have a button A, and you call
+// NewButtonMenu(A, "B/C"), it will make a button B as part of a menu for A,
+// and then it will make and return a button C as part of a menu for B.
+// If the given path is "" or "/" and par is not a button, it returns nil.
+func NewButtonMenu(par ki.Ki, path string) *Button {
+	parts := strings.Split(path, "/")
+	return newButtonMenuImpl(par, parts)
+}
+
+// newButtonMenuImpl is the implementation of NewButtonMenu
+func newButtonMenuImpl(par ki.Ki, parts []string) *Button {
+	if len(parts) == 0 {
+		bt, _ := par.(*Button)
+		return bt
+	}
+	sl := par.Children()
+	if bt, ok := par.(*Button); ok {
+		sl = (*ki.Slice)(&bt.Menu)
+	}
+	elem := sl.ElemByName(parts[0])
+	if elem != nil {
+		return newButtonMenuImpl(elem, parts[1:])
+	}
+	newbt := NewButton(par, parts[0])
+	return newButtonMenuImpl(newbt, parts[1:])
 }
