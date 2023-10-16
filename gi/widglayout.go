@@ -82,7 +82,6 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 	wb.BBoxMu.Lock()
 	wb.ObjBBox = wb.BBox.Add(delta)
 	wb.ScBBox = parBBox.Intersect(wb.ObjBBox)
-	wb.EvBBox = wb.ScBBox
 	wb.BBoxMu.Unlock()
 }
 
