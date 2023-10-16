@@ -367,9 +367,6 @@ func (bt *Button) ContextMenu(e events.Event) {
 
 func (bt *Button) HandleClickMenu() {
 	bt.OnClick(func(e events.Event) {
-		if bt.StateIs(states.Disabled) {
-			return
-		}
 		if bt.OpenMenu(e) {
 			e.SetHandled()
 		}
@@ -378,9 +375,6 @@ func (bt *Button) HandleClickMenu() {
 
 func (bt *Button) HandleClickDismissMenu() {
 	bt.OnClick(func(e events.Event) {
-		if bt.StateIs(states.Disabled) {
-			return
-		}
 		if bt.Sc != nil && bt.Sc.Stage != nil {
 			pst := bt.Sc.Stage.AsPopup()
 			if pst != nil && pst.Type == MenuStage {
@@ -414,9 +408,6 @@ func (bt *Button) ShortcutTooltip() string {
 
 func (bt *Button) HandleLongHoverTooltip() {
 	bt.On(events.LongHoverStart, func(e events.Event) {
-		if bt.StateIs(states.Disabled) {
-			return
-		}
 		tt := bt.ShortcutTooltip()
 		if tt == "" {
 			return

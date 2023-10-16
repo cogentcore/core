@@ -111,7 +111,7 @@ type Widget interface {
 	// is then used in setting ScBBox.
 	BBoxes() image.Rectangle
 
-	// Compute ScBBox and WinBBox from BBox, given parent ScBBox -- most nodes
+	// Compute ScBBox from BBox, given parent ScBBox -- most nodes
 	// call ComputeBBoxesBase but scenes require special code -- called
 	// during Layout and Move.
 	ComputeBBoxes(sc *Scene, parBBox image.Rectangle, delta image.Point)
@@ -257,8 +257,11 @@ type WidgetBase struct {
 	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
 	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
-	// 2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping
+	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+
+	// Version of ScBBox used for event processing.  In general this is identical to ScBBox except for cases like TreeView where the children are not localized within the ScBBox rendering region.
+	EvBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// text for tooltip for this widget -- can use HTML formatting
 	Tooltip string

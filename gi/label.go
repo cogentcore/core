@@ -276,9 +276,6 @@ func (lb *Label) HandleLabelEvents() {
 
 func (lb *Label) HandleLabelLongHover() {
 	lb.On(events.LongHoverStart, func(e events.Event) {
-		if lb.StateIs(states.Disabled) {
-			return
-		}
 		// hasLinks := len(lb.TextRender.Links) > 0
 		// if hasLinks {
 		// 	pos := llb.RenderPos
@@ -308,9 +305,6 @@ func (lb *Label) HandleLabelLongHover() {
 
 func (lb *Label) HandleLabelClick() {
 	lb.OnClick(func(e events.Event) {
-		if lb.StateIs(states.Disabled) {
-			return
-		}
 		hasLinks := len(lb.TextRender.Links) > 0
 		if !hasLinks {
 			return
@@ -325,14 +319,6 @@ func (lb *Label) HandleLabelClick() {
 				return
 			}
 		}
-	})
-	lb.On(events.DoubleClick, func(e events.Event) {
-		if !lb.AbilityIs(abilities.Selectable) || lb.StateIs(states.Disabled) {
-			return
-		}
-		updt := lb.UpdateStart()
-		lb.SetState(!lb.StateIs(states.Selected), states.Selected)
-		lb.UpdateEnd(updt)
 	})
 }
 

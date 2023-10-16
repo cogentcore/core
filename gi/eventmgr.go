@@ -504,7 +504,7 @@ func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 		if !wb.IsVisible() || wb.StateIs(states.Disabled) {
 			return ki.Break
 		}
-		if !wb.PosInBBox(pos) {
+		if !wb.PosInEvBBox(pos) {
 			return ki.Break
 		}
 		// fmt.Println("in bb:", wi, wb.Styles.State)
@@ -1185,7 +1185,7 @@ func (em *EventMgr) DoInstaDrag(me events.Event, popup bool) bool {
 				_, wb := AsWidget(recv)
 				if wb != nil {
 					pos := me.LocalPos()
-					if wb.PosInBBox(pos) {
+					if wb.PosInEvBBox(pos) {
 						if wb.HasFlag(InstaDrag) {
 							em.Dragging = wb.This()
 							wb.SetFlag(true, NodeDragging)
@@ -1346,7 +1346,7 @@ func (em *EventMgr) GenDNDFocusEvents(mev events.Event, popup bool) bool {
 			}
 			_, wb := AsWidget(recv)
 			if wb != nil {
-				in := wb.PosInBBox(pos)
+				in := wb.PosInEvBBox(pos)
 				if in {
 					if !wb.HasFlag(DNDHasEntered) {
 						wb.SetFlag(true, DNDHasEntered)

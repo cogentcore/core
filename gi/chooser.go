@@ -563,9 +563,6 @@ func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
 
 func (ch *Chooser) HandleChooserKeys() {
 	ch.OnKeyChord(func(e events.Event) {
-		if ch.StateIs(states.Disabled) {
-			return
-		}
 		if KeyEventTrace {
 			fmt.Printf("Chooser KeyChordEvent: %v\n", ch.Path())
 		}

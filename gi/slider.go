@@ -472,9 +472,6 @@ func (sr *Slider) PointToRelPos(pt image.Point) image.Point {
 
 func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.MouseDown, func(e events.Event) {
-		if sr.StateIs(states.Disabled) {
-			return
-		}
 		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
 		st := &sr.Styles
 		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
@@ -487,9 +484,6 @@ func (sr *Slider) HandleSliderMouse() {
 	})
 	// note: not doing anything in particular on SlideStart
 	sr.On(events.SlideMove, func(e events.Event) {
-		if sr.StateIs(states.Disabled) {
-			return
-		}
 		del := e.StartDelta()
 		if sr.Dim == mat32.X {
 			sr.SetSliderPosAction(sr.SlideStartPos + float32(del.X))
@@ -498,9 +492,6 @@ func (sr *Slider) HandleSliderMouse() {
 		}
 	})
 	sr.On(events.SlideStop, func(e events.Event) {
-		if sr.StateIs(states.Disabled) {
-			return
-		}
 		ed := sr.This().(SliderPositioner).PointToRelPos(e.LocalPos())
 		st := &sr.Styles
 		spc := st.TotalMargin().Pos().Dim(sr.Dim) + 0.5*sr.ThSizeReal
@@ -511,9 +502,6 @@ func (sr *Slider) HandleSliderMouse() {
 		}
 	})
 	sr.On(events.Scroll, func(e events.Event) {
-		if sr.StateIs(states.Disabled) {
-			return
-		}
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
 		if sr.Dim == mat32.X {
@@ -526,9 +514,6 @@ func (sr *Slider) HandleSliderMouse() {
 
 func (sr *Slider) HandleSliderKeys() {
 	sr.OnKeyChord(func(e events.Event) {
-		if sr.StateIs(states.Disabled) {
-			return
-		}
 		if KeyEventTrace {
 			fmt.Printf("SliderBase KeyInput: %v\n", sr.Path())
 		}
