@@ -66,6 +66,9 @@ func (sw *Switch) OnInit() {
 }
 
 func (sw *Switch) SetIconFromState() {
+	if sw.Parts == nil {
+		return
+	}
 	ist := sw.Parts.ChildByName("stack", 0)
 	if ist == nil {
 		return
@@ -257,6 +260,7 @@ func (sw *Switch) RenderSwitch(sc *Scene) {
 }
 
 func (sw *Switch) Render(sc *Scene) {
+	sw.SetIconFromState() // make sure we're always up-to-date on render
 	if sw.PushBounds(sc) {
 		sw.RenderSwitch(sc)
 		sw.RenderParts(sc)
