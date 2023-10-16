@@ -1468,17 +1468,10 @@ var TreeViewProps = ki.Props{
 }
 
 func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
-	// // optimized init -- avoid tree walking
-	// if tv.RootView != tv {
-	// 	tv.Scene = tv.RootView.Scene
-	// } else {
-	// 	tv.Scene = tv.ParentScene()
-	// }
 	tv.ConfigParts(sc)
 }
 
 func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
-	// tv.UpdateInactive()
 	if !tv.HasChildren() {
 		tv.SetClosed(true)
 	}
@@ -1537,11 +1530,9 @@ func (tv *TreeView) SetBranchState() {
 }
 
 func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
-	tv.SetBranchState()
-	spc := tv.Styles.BoxSpace()
+	spc := tv.BoxSpace()
 	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
-	// tv.Parts.LayState.Alloc.PosOrig = tv.Parts.LayState.Alloc.Pos
-	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size())
+	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size()) // key diff
 	tv.Parts.DoLayout(sc, parBBox, iter)
 }
 
@@ -1553,6 +1544,8 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 		fmt.Println(tv, "root is nil")
 		return false
 	}
+	tv.SetBranchState()
+
 	wi := tv.This().(gi.Widget)
 	// our alloc size is root's size minus our total indentation
 	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
@@ -1589,39 +1582,6 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 	return redo
 }
 
-//
-// func (tv *TreeView) BBoxes() image.Rectangle {
-// 	// we have unusual situation of bbox != alloc
-// 	tp := tv.LayState.Alloc.Pos.ToPointFloor()
-// 	ts := tv.WidgetSize.ToPointCeil()
-// 	return image.Rect(tp.X, tp.Y, tp.X+ts.X, tp.Y+ts.Y)
-// }
-
-func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
-	ar := tv.BBoxFromAlloc() // need to use allocated size which includes children
-	if tv.Par != nil {       // use parents children bbox to determine where we can draw
-		pwi, _ := gi.AsWidget(tv.Par)
-		ar = ar.Intersect(pwi.ChildrenBBoxes(sc))
-	}
-	return ar
-}
-
-func (tv *TreeView) IsVisible() bool {
-	if tv == nil || tv.This() == nil || tv.Sc == nil {
-		return false
-	}
-	if tv.RootView == nil || tv.RootView.This() == nil {
-		return false
-	}
-	if tv.RootView.Par == nil || tv.RootView.Par.This() == nil {
-		return false
-	}
-	if tv.StateIs(states.Invisible) {
-		return false
-	}
-	return tv.RootView.Par.This().(gi.Widget).IsVisible()
-}
-
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, _, st := tv.RenderLock(sc)
 	tv.RenderStdBox(sc, st)
@@ -1630,7 +1590,6 @@ func (tv *TreeView) RenderNode(sc *gi.Scene) {
 
 func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
-		// tv.UpdateInactive() // todo:
 		tv.RenderNode(sc)
 		tv.RenderParts(sc)
 		tv.PopBounds(sc)
