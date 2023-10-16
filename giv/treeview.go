@@ -81,6 +81,21 @@ func (tv *TreeView) CopyFieldsFrom(frm any) {
 	// note: can't actually copy anything here
 }
 
+// SetViewIdx sets the ViewIdx for all nodes.
+// This must be called from the root node after
+// construction or any modification to the tree.
+func (tv *TreeView) SetViewIdx() {
+	idx := 0
+	tv.WalkPre(func(k ki.Ki) bool {
+		tvki := AsTreeView(k)
+		if tvki != nil {
+			tvki.ViewIdx = idx
+			idx++
+		}
+		return ki.Continue
+	})
+}
+
 func (tv *TreeView) OnInit() {
 	tv.HandleTreeViewEvents()
 	tv.TreeViewStyles()
@@ -88,7 +103,7 @@ func (tv *TreeView) OnInit() {
 
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Selectable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable) // , abilities.Hoverable)
 		tv.Indent.SetEm(2)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
@@ -98,8 +113,11 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 		s.Color = colors.Scheme.Secondary.OnContainer
+		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
 		if s.State.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			// } else if s.State.Is(states.Hovered) {
+			// 	s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
 		}
 	})
 }
@@ -156,6 +174,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		})
 	case "parts/label":
 		w.Style(func(s *styles.Style) {
+			s.Abilities = 0
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MinWidth.SetCh(16)
@@ -201,6 +220,206 @@ func (tv *TreeView) RootIsInactive() bool {
 	return tv.RootView.IsDisabled()
 }
 
+////////////////////////////////////////////////////
+// Widget interface
+
+// qt calls the open / close thing a "branch"
+// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
+
+// BranchPart returns the branch in parts, if it exists
+func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
+	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
+		return icc.(*gi.Switch), true
+	}
+	return nil, false
+}
+
+// IconPart returns the icon in parts, if it exists
+func (tv *TreeView) IconPart() (*gi.Icon, bool) {
+	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
+		return icc.(*gi.Icon), true
+	}
+	return nil, false
+}
+
+// LabelPart returns the label in parts, if it exists
+func (tv *TreeView) LabelPart() (*gi.Label, bool) {
+	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
+		return lbl.(*gi.Label), true
+	}
+	return nil, false
+}
+
+func (tv *TreeView) ConfigParts(sc *gi.Scene) {
+	parts := tv.NewParts(gi.LayoutHoriz)
+	config := ki.Config{}
+	config.Add(gi.SwitchType, "branch")
+	if tv.Icon.IsValid() {
+		config.Add(gi.IconType, "icon")
+	}
+	config.Add(gi.LabelType, "label")
+	mods, updt := parts.ConfigChildren(config)
+	if tv.HasChildren() {
+		if wb, ok := tv.BranchPart(); ok {
+			tv.SetBranchState()
+			wb.Config(sc)
+		}
+	}
+	if tv.Icon.IsValid() {
+		if ic, ok := tv.IconPart(); ok {
+			ic.SetIcon(tv.Icon)
+		}
+	}
+	if lbl, ok := tv.LabelPart(); ok {
+		lbl.SetText(tv.Name())
+	}
+	if mods {
+		parts.UpdateEnd(updt)
+		tv.UpdateEndLayout(updt)
+	}
+}
+
+func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
+	tv.ConfigParts(sc)
+}
+
+func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
+	if !tv.HasChildren() {
+		tv.SetClosed(true)
+	}
+	tv.Indent.ToDots(&tv.Styles.UnContext)
+	// tv.Parts.Styles.InheritFields(&tv.Styles)
+	tv.ApplyStyleWidget(sc)
+	tv.Styles.StateLayer = 0 // turn off!
+}
+
+func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
+	tv.StyMu.Lock() // todo: needed??  maybe not.
+	defer tv.StyMu.Unlock()
+
+	tv.StyleTreeView(sc)
+}
+
+// TreeView is tricky for alloc because it is both a layout
+// of its children but has to maintain its own bbox for its own widget.
+
+func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
+	tv.InitLayout(sc)
+	tv.GetSizeParts(sc, iter) // get our size from parts
+	tv.WidgetSize = tv.LayState.Alloc.Size
+	h := mat32.Ceil(tv.WidgetSize.Y)
+	w := tv.WidgetSize.X
+
+	if !tv.IsClosed() {
+		// we layout children under us
+		for _, kid := range tv.Kids {
+			gis := kid.(gi.Widget).AsWidget()
+			if gis == nil || gis.This() == nil {
+				continue
+			}
+			h += mat32.Ceil(gis.LayState.Alloc.Size.Y)
+			w = mat32.Max(w, tv.Indent.Dots+gis.LayState.Alloc.Size.X)
+		}
+	}
+	tv.LayState.Alloc.Size = mat32.Vec2{w, h}
+	tv.WidgetSize.X = w // stretch
+}
+
+func (tv *TreeView) SetBranchState() {
+	br, ok := tv.BranchPart()
+	if !ok {
+		return
+	}
+	switch {
+	case !tv.HasChildren():
+		br.SetState(true, states.Disabled)
+	case tv.IsClosed():
+		br.SetState(false, states.Disabled)
+		br.SetState(false, states.Checked)
+	default:
+		br.SetState(false, states.Disabled)
+		br.SetState(true, states.Checked)
+	}
+}
+
+func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
+	spc := tv.BoxSpace()
+	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
+	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size()) // key diff
+	tv.Parts.DoLayout(sc, parBBox, iter)
+}
+
+func (tv *TreeView) ChildrenBBoxes(sc *gi.Scene) image.Rectangle {
+	return tv.ScBBox
+}
+
+func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	psize := tv.AddParentPos() // have to add our pos first before computing below:
+
+	rn := tv.RootView
+	if rn == nil {
+		slog.Error("giv.TreeView: RootView is ni", "in node:", tv)
+		return false
+	}
+	tv.SetBranchState()
+
+	wi := tv.This().(gi.Widget)
+	// our alloc size is root's size minus our total indentation
+	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
+	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
+
+	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
+	gi.SetUnitContext(&tv.Styles, sc, tv.NodeSize(), psize) // update units with final layout
+	tv.BBox = wi.BBoxes()
+	wi.ComputeBBoxes(sc, parBBox, image.Point{})
+
+	tv.DoLayoutParts(sc, parBBox, iter) // use OUR version
+	h := mat32.Ceil(tv.WidgetSize.Y)
+	if !tv.IsClosed() {
+		for _, kid := range tv.Kids {
+			if kid == nil || kid.This() == nil {
+				continue
+			}
+			ni := kid.(gi.Widget).AsWidget()
+			if ni == nil {
+				continue
+			}
+			ni.LayState.Alloc.PosRel.Y = h
+			ni.LayState.Alloc.PosRel.X = tv.Indent.Dots
+			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
+		}
+	}
+	redo := tv.DoLayoutChildren(sc, iter)
+	// once layout is done, we can get our reg size back
+	tv.LayState.Alloc.Size = tv.WidgetSize
+	if gi.LayoutTrace {
+		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
+		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
+	}
+	return redo
+}
+
+func (tv *TreeView) RenderNode(sc *gi.Scene) {
+	rs, pc, st := tv.RenderLock(sc)
+	bg := &tv.Styles.BackgroundColor
+	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, bg)
+	// tv.RenderStdBox(sc, st)
+	tv.RenderUnlock(rs)
+}
+
+func (tv *TreeView) Render(sc *gi.Scene) {
+	if tv.PushBounds(sc) {
+		tv.RenderNode(sc)
+		tv.RenderParts(sc)
+		tv.PopBounds(sc)
+	}
+	// we always have to render our kids b/c
+	// we could be out of scope but they could be in!
+	if !tv.IsClosed() {
+		tv.RenderChildren(sc)
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //    Selection
 
@@ -242,6 +461,7 @@ func (tv *TreeView) SetSelectedViews(sl []*TreeView) {
 func (tv *TreeView) Select() {
 	if !tv.StateIs(states.Selected) {
 		tv.SetSelected(true)
+		tv.ApplyStyle(tv.Sc)
 		sl := tv.SelectedViews()
 		sl = append(sl, tv)
 		tv.SetSelectedViews(sl)
@@ -254,6 +474,7 @@ func (tv *TreeView) Select() {
 func (tv *TreeView) Unselect() {
 	if tv.StateIs(states.Selected) {
 		tv.SetSelected(false)
+		tv.ApplyStyle(tv.Sc)
 		sl := tv.SelectedViews()
 		sz := len(sl)
 		for i := 0; i < sz; i++ {
@@ -277,6 +498,7 @@ func (tv *TreeView) UnselectAll() {
 	tv.SetSelectedViews(nil) // clear in advance
 	for _, v := range sl {
 		v.SetSelected(false)
+		v.ApplyStyle(tv.Sc)
 		v.SetNeedsRender()
 	}
 	tv.UpdateEndRender(updt)
@@ -1163,6 +1385,8 @@ func (tv *TreeView) HandleTreeViewEvents() {
 	tv.On(events.KeyChord, func(e events.Event) {
 		tv.HandleTreeViewKeyChord(e)
 	})
+	tv.HandleTreeViewMouse()
+	tv.HandleTreeViewDrag()
 }
 
 func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
@@ -1246,6 +1470,17 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 	}
 }
 
+func (tv *TreeView) HandleTreeViewMouse() {
+	tv.OnClick(func(e events.Event) {
+		e.SetHandled()
+		tv.SelectAction(e.SelectMode())
+	})
+	tv.OnDoubleClick(func(e events.Event) {
+		e.SetHandled()
+		tv.ToggleClose()
+	})
+}
+
 func (tv *TreeView) HandleTreeViewDrag() {
 	/*
 		tvwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -1321,65 +1556,6 @@ func (tv *TreeView) HandleTreeViewDrag() {
 			})
 		}
 	*/
-}
-
-////////////////////////////////////////////////////
-// Widget interface
-
-// qt calls the open / close thing a "branch"
-// http://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qtreeview
-
-// BranchPart returns the branch in parts, if it exists
-func (tv *TreeView) BranchPart() (*gi.Switch, bool) {
-	if icc := tv.Parts.ChildByName("branch", 0); icc != nil {
-		return icc.(*gi.Switch), true
-	}
-	return nil, false
-}
-
-// IconPart returns the icon in parts, if it exists
-func (tv *TreeView) IconPart() (*gi.Icon, bool) {
-	if icc := tv.Parts.ChildByName("icon", 1); icc != nil {
-		return icc.(*gi.Icon), true
-	}
-	return nil, false
-}
-
-// LabelPart returns the label in parts, if it exists
-func (tv *TreeView) LabelPart() (*gi.Label, bool) {
-	if lbl := tv.Parts.ChildByName("label", 1); lbl != nil {
-		return lbl.(*gi.Label), true
-	}
-	return nil, false
-}
-
-func (tv *TreeView) ConfigParts(sc *gi.Scene) {
-	parts := tv.NewParts(gi.LayoutHoriz)
-	config := ki.Config{}
-	config.Add(gi.SwitchType, "branch")
-	if tv.Icon.IsValid() {
-		config.Add(gi.IconType, "icon")
-	}
-	config.Add(gi.LabelType, "label")
-	mods, updt := parts.ConfigChildren(config)
-	if tv.HasChildren() {
-		if wb, ok := tv.BranchPart(); ok {
-			tv.SetBranchState()
-			wb.Config(sc)
-		}
-	}
-	if tv.Icon.IsValid() {
-		if ic, ok := tv.IconPart(); ok {
-			ic.SetIcon(tv.Icon)
-		}
-	}
-	if lbl, ok := tv.LabelPart(); ok {
-		lbl.SetText(tv.Name())
-	}
-	if mods {
-		parts.UpdateEnd(updt)
-		tv.UpdateEndLayout(updt)
-	}
 }
 
 var TreeViewProps = ki.Props{
@@ -1465,140 +1641,6 @@ var TreeViewProps = ki.Props{
 			"label": "GoGi Editor",
 		}},
 	},
-}
-
-func (tv *TreeView) ConfigWidget(sc *gi.Scene) {
-	tv.ConfigParts(sc)
-}
-
-func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
-	if !tv.HasChildren() {
-		tv.SetClosed(true)
-	}
-	tv.Indent.ToDots(&tv.Styles.UnContext)
-	// tv.Parts.Styles.InheritFields(&tv.Styles)
-	tv.ApplyStyleWidget(sc)
-}
-
-func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
-	tv.StyMu.Lock() // todo: needed??  maybe not.
-	defer tv.StyMu.Unlock()
-
-	tv.StyleTreeView(sc)
-}
-
-// TreeView is tricky for alloc because it is both a layout
-// of its children but has to maintain its own bbox for its own widget.
-
-func (tv *TreeView) GetSize(sc *gi.Scene, iter int) {
-	tv.InitLayout(sc)
-	tv.GetSizeParts(sc, iter) // get our size from parts
-	tv.WidgetSize = tv.LayState.Alloc.Size
-	h := mat32.Ceil(tv.WidgetSize.Y)
-	w := tv.WidgetSize.X
-
-	if !tv.IsClosed() {
-		// we layout children under us
-		for _, kid := range tv.Kids {
-			gis := kid.(gi.Widget).AsWidget()
-			if gis == nil || gis.This() == nil {
-				continue
-			}
-			h += mat32.Ceil(gis.LayState.Alloc.Size.Y)
-			w = mat32.Max(w, tv.Indent.Dots+gis.LayState.Alloc.Size.X)
-		}
-	}
-	tv.LayState.Alloc.Size = mat32.Vec2{w, h}
-	tv.WidgetSize.X = w // stretch
-}
-
-func (tv *TreeView) SetBranchState() {
-	br, ok := tv.BranchPart()
-	if !ok {
-		return
-	}
-	switch {
-	case !tv.HasChildren():
-		br.SetState(true, states.Disabled)
-	case tv.IsClosed():
-		br.SetState(false, states.Disabled)
-		br.SetState(false, states.Checked)
-	default:
-		br.SetState(false, states.Disabled)
-		br.SetState(true, states.Checked)
-	}
-}
-
-func (tv *TreeView) DoLayoutParts(sc *gi.Scene, parBBox image.Rectangle, iter int) {
-	spc := tv.BoxSpace()
-	tv.Parts.LayState.Alloc.Pos = tv.LayState.Alloc.Pos.Add(spc.Pos())
-	tv.Parts.LayState.Alloc.Size = tv.WidgetSize.Sub(spc.Size()) // key diff
-	tv.Parts.DoLayout(sc, parBBox, iter)
-}
-
-func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	psize := tv.AddParentPos() // have to add our pos first before computing below:
-
-	rn := tv.RootView
-	if rn == nil {
-		fmt.Println(tv, "root is nil")
-		return false
-	}
-	tv.SetBranchState()
-
-	wi := tv.This().(gi.Widget)
-	// our alloc size is root's size minus our total indentation
-	tv.LayState.Alloc.Size.X = rn.LayState.Alloc.Size.X - (tv.LayState.Alloc.Pos.X - rn.LayState.Alloc.Pos.X)
-	tv.WidgetSize.X = tv.LayState.Alloc.Size.X
-
-	tv.LayState.Alloc.PosOrig = tv.LayState.Alloc.Pos
-	gi.SetUnitContext(&tv.Styles, sc, tv.NodeSize(), psize) // update units with final layout
-	tv.BBox = wi.BBoxes()
-	wi.ComputeBBoxes(sc, parBBox, image.Point{})
-
-	tv.DoLayoutParts(sc, parBBox, iter) // use OUR version
-	h := mat32.Ceil(tv.WidgetSize.Y)
-	if !tv.IsClosed() {
-		for _, kid := range tv.Kids {
-			if kid == nil || kid.This() == nil {
-				continue
-			}
-			ni := kid.(gi.Widget).AsWidget()
-			if ni == nil {
-				continue
-			}
-			ni.LayState.Alloc.PosRel.Y = h
-			ni.LayState.Alloc.PosRel.X = tv.Indent.Dots
-			h += mat32.Ceil(ni.LayState.Alloc.Size.Y)
-		}
-	}
-	redo := tv.DoLayoutChildren(sc, iter)
-	// once layout is done, we can get our reg size back
-	tv.LayState.Alloc.Size = tv.WidgetSize
-	if gi.LayoutTrace {
-		// fmt.Printf("Layout: %v reduced X allocsize: %v rn: %v  pos: %v rn pos: %v\n", tv.Path(), tv.WidgetSize.X, rn.LayState.Alloc.Size.X, tv.LayState.Alloc.Pos.X, rn.LayState.Alloc.Pos.X)
-		fmt.Printf("Layout: %v alloc pos: %v size: %v bb: %v  scbb: %v winbb: %v\n", tv.Path(), tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, tv.BBox, tv.ScBBox, tv.ScBBox)
-	}
-	return redo
-}
-
-func (tv *TreeView) RenderNode(sc *gi.Scene) {
-	rs, _, st := tv.RenderLock(sc)
-	tv.RenderStdBox(sc, st)
-	tv.RenderUnlock(rs)
-}
-
-func (tv *TreeView) Render(sc *gi.Scene) {
-	if tv.PushBounds(sc) {
-		tv.RenderNode(sc)
-		tv.RenderParts(sc)
-		tv.PopBounds(sc)
-	}
-	// we always have to render our kids b/c
-	// we could be out of scope but they could be in!
-	if !tv.IsClosed() {
-		tv.RenderChildren(sc)
-	}
 }
 
 //
