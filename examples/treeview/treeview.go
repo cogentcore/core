@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 
 	"goki.dev/gi/v2/gi"
@@ -62,11 +63,12 @@ func app() {
 	tv := giv.NewTreeView(tvfr, "tv")
 	tv.RootView = tv
 
-	depth := 2 // 1 = small tree for testing
+	depth := 10 // 1 = small tree for testing
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 
-	tv.SetViewIdx()
+	nleaves := tv.SetViewIdx()
+	fmt.Println("N leaves:", nleaves)
 
 	_ = svfr
 	// sv := giv.NewStructView(svfr, "sv")
