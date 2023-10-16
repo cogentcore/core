@@ -109,8 +109,9 @@ func (tv *TreeView) TreeViewStyles() {
 		tv.Indent.SetEm(1)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
-		s.Border.Width.Left.SetDp(1)
-		s.Border.Color.Left = colors.Scheme.OutlineVariant
+		s.Border.Style.Set(styles.BorderNone)
+		// s.Border.Width.Left.SetDp(1)
+		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
@@ -886,7 +887,7 @@ func (tv *TreeView) Close() {
 		tv.SetNeedsLayout()
 	}
 	tv.SetClosed(true)
-	// tv.SetBranchState()
+	tv.SetBranchState()
 	tv.SetKidsVisibility(true) // parent closed
 	tv.SendChangeEvent(nil)
 	tv.UpdateEndRender(updt)
@@ -903,7 +904,7 @@ func (tv *TreeView) Open() {
 	if tv.HasChildren() {
 		tv.SetNeedsLayout()
 		tv.SetClosed(false)
-		// tv.SetBranchState()
+		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 	}
 	tv.SendChangeEvent(nil)

@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi"
 	"goki.dev/mat32/v2"
 )
 
@@ -40,7 +41,7 @@ func app() {
 	// gi.RenderTrace = true
 	// gi.LayoutTrace = true
 
-	// goosi.ZoomFactor = 2
+	goosi.ZoomFactor = 2
 
 	gi.SetAppName("treeview")
 	gi.SetAppAbout(`This is a demo of the treeview in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>
