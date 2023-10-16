@@ -106,10 +106,11 @@ func (tv *TreeView) OnInit() {
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable) // , abilities.Hoverable)
-		tv.Indent.SetEm(2)
+		tv.Indent.SetEm(1)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
-		s.Border.Style.Set(styles.BorderNone)
+		s.Border.Width.Left.SetDp(1)
+		s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Set()
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
