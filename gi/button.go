@@ -7,6 +7,7 @@ package gi
 import (
 	"image"
 	"log"
+	"strings"
 
 	"log/slog"
 
@@ -557,4 +558,28 @@ func (bt *Button) UpdateButtons() {
 	if bt.Menu != nil {
 		bt.Menu.UpdateButtons()
 	}
+}
+
+// FindButton finds the button with the given path in the given parent,
+// searching through both children and any [Button.Menu]s it finds. The
+// path omits menus; for example, if A has a menu that contains B, which
+// has a menu that contains C, FindButton(A, "B/C") is correct, but
+// FindButton(A, "menu/B/menu/C") is not correct. If the result of FindButton
+// is nil, that indicates that the button could not be found.
+func FindButton(par ki.Ki, path string) *Button {
+	parts := strings.Split(path, "/")
+	bt, _ := findButtonImpl(par, parts).(*Button)
+	return bt
+}
+
+// findButtonImpl is the implementation of FindButton
+func findButtonImpl(par ki.Ki, parts []string) ki.Ki {
+	if len(parts) == 0 {
+		return par
+	}
+	sl := par.Children()
+	if bt, ok := par.(*Button); ok {
+		sl = (*ki.Slice)(&bt.Menu)
+	}
+	return findButtonImpl(sl.ElemByName(parts[0]), parts[1:])
 }
