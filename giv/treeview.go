@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"bytes"
 	"fmt"
 	"image"
 	"log"
@@ -45,11 +46,11 @@ type TreeView struct {
 	Icon icons.Icon
 
 	// amount to indent children relative to this node
-	Indent units.Value
+	Indent units.Value `copy:"-" json:"-" xml:"-"`
 
 	// depth for nodes be initialized as open (default 4).
 	// Nodes beyond this depth will be initialized as closed.
-	OpenDepth int
+	OpenDepth int `copy:"-" json:"-" xml:"-"`
 
 	///////////////////////
 	// Computed below
@@ -81,16 +82,17 @@ func (tv *TreeView) CopyFieldsFrom(frm any) {
 	// note: can't actually copy anything here
 }
 
-// SetViewIdx sets the ViewIdx for all nodes.
+// RootSetViewIdx sets the RootView and ViewIdx for all nodes.
 // This must be called from the root node after
 // construction or any modification to the tree.
 // Returns the total number of leaves in the tree.
-func (tv *TreeView) SetViewIdx() int {
+func (tv *TreeView) RootSetViewIdx() int {
 	idx := 0
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.ViewIdx = idx
+			tvki.RootView = tv
 			idx++
 		}
 		return ki.Continue
@@ -1030,18 +1032,33 @@ func (tv *TreeView) IsRoot(op string) bool {
 // satisfies Clipper.MimeData interface
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	*md = append(*md, mimedata.NewTextData(tv.PathFrom(tv.RootView)))
+	var buf bytes.Buffer
+	err := ki.WriteNewJSON(tv.This(), &buf)
+	if err == nil {
+		*md = append(*md, &mimedata.Data{Type: filecat.DataJson, Data: buf.Bytes()})
+	} else {
+		slog.Error("giv.TreeView MimeData Write JSON error:", err)
+	}
 }
 
 // NodesFromMimeData returns a slice of paths from mime data.
-func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) []string {
+func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 	ni := len(md) / 2
+	sl := make(ki.Slice, 0, ni)
 	pl := make([]string, 0, ni)
 	for _, d := range md {
-		if d.Type == filecat.TextPlain { // paths
+		if d.Type == filecat.DataJson {
+			nki, err := ki.ReadNewJSON(bytes.NewReader(d.Data))
+			if err == nil {
+				sl = append(sl, nki)
+			} else {
+				slog.Error("giv.TreeView NodesFromMimeData: JSON load error:", err)
+			}
+		} else if d.Type == filecat.TextPlain { // paths
 			pl = append(pl, string(d.Data))
 		}
 	}
-	return pl
+	return sl, pl
 }
 
 // Copy copies to clip.Board, optionally resetting the selection.
@@ -1072,11 +1089,12 @@ func (tv *TreeView) Cut() {
 	}
 	tv.Copy(false)
 	sels := tv.SelectedViews()
+	updt := tv.UpdateStart()
 	tv.UnselectAll()
 	for _, sn := range sels {
 		sn.Delete(true)
 	}
-	// tv.SetChanged()
+	tv.UpdateEndLayout(updt)
 }
 
 // Paste pastes clipboard at given node.
@@ -1124,17 +1142,13 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 
 // PasteAssign assigns mime data (only the first one!) to this node
 func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
-	pl := tv.NodesFromMimeData(md)
-	if len(pl) == 0 {
+	sl, _ := tv.NodesFromMimeData(md)
+	if len(sl) == 0 {
 		return
 	}
-	sk, err := tv.RootView.FindPathTry(pl[0])
-	if err != nil {
-		slog.Error("TreeView PasteAssign path not found", "path:", pl[0], "target node:", tv)
-		return
-	}
-	tv.CopyFrom(sk) // nodes with data copy here
-	// tv.SetChanged()
+	updt := tv.UpdateStart()
+	tv.This().CopyFrom(sl[0]) // nodes with data copy here
+	tv.UpdateEndLayout(updt)
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1161,74 +1175,67 @@ const TreeViewTempMovedTag = `_\&MOVED\&`
 // If another item with the same name already exists, it will
 // append _Copy on the name of the inserted objects
 func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, actNm string) {
-	//	pl := tv.NodesFromMimeData(md)
-	//
-	//	if tv.Par == nil {
-	//		return
-	//	}
-	//	par := AsTreeView(tv.Par)
-	//	if par == nil {
-	//		gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
-	//		return
-	//	}
-	//	myidx, ok := tv.IndexInParent()
-	//	if !ok {
-	//		return
-	//	}
-	//	myidx += rel
-	//	updt := par.UpdateStart()
-	//
-	// sz := len(sl)
-	//
-	//	for i, orgpath := range pl {
-	//		if mod != events.DropMove {
-	//
-	//	if cn := par.ChildByName(ns.Name(), 0); cn != nil {
-	//		ns.SetName(ns.Name() + "_Copy")
-	//	}
-	//
-	//	}
-	//
-	// todo!
-	// par.SetChildAdded()
-	// par.InsertChild(ns, myidx+i)
-	// npath := ns.PathFrom(sroot)
-	// if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
-	//
-	//		ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
-	//	}
-	//
-	//	if i == sz-1 {
-	//		ski = ns
-	//	}
-	//
-	// tv.SendChangeEvent(true)
-	// }
-	// par.UpdateEndLayout(updt)
-	// todo:
-	//
-	//	if ski != nil {
-	//		if tvk := tvpar.ChildByName("tv_"+ski.Name(), 0); tvk != nil {
-	//			stv := AsTreeView(tvk)
-	//			stv.SelectAction(events.SelectOne)
-	//		}
-	//	}
+	if tv.Par == nil {
+		return
+	}
+	sl, pl := tv.NodesFromMimeData(md)
+
+	par := AsTreeView(tv.Par)
+	if par == nil {
+		gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
+		return
+	}
+	myidx, ok := tv.IndexInParent()
+	if !ok {
+		return
+	}
+	myidx += rel
+	updt := par.UpdateStart()
+	sz := len(sl)
+	var selTv *TreeView
+	for i, ns := range sl {
+		orgpath := pl[i]
+		if mod != events.DropMove {
+			if cn := par.ChildByName(ns.Name(), 0); cn != nil {
+				ns.SetName(ns.Name() + "_Copy")
+			}
+		}
+		par.SetChildAdded()
+		par.InsertChild(ns, myidx+i)
+		nwi := ns.This().(gi.Widget)
+		nwi.AsWidget().ConfigTree(tv.Sc) // incl children
+		nwi.ApplyStyle(tv.Sc)
+		ntv := AsTreeView(ns)
+		ntv.RootView = tv.RootView
+		npath := ns.PathFrom(tv.RootView)
+		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
+
+			ns.SetName(ns.Name() + TreeViewTempMovedTag) // special keyword :)
+		}
+		if i == sz-1 {
+			selTv = ntv
+		}
+	}
+	tv.RootView.RootSetViewIdx()
+	par.UpdateEndLayout(updt)
+	tv.SendChangeEvent(nil)
+	if selTv != nil {
+		selTv.SelectAction(events.SelectOne)
+	}
 }
 
 // PasteChildren inserts object(s) from mime data
 // at end of children of this node
 func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
-	pl := tv.NodesFromMimeData(md)
-	_ = pl
+	sl, _ := tv.NodesFromMimeData(md)
 
 	updt := tv.UpdateStart()
 	tv.SetChildAdded()
-	// for _, ns := range sl {
-	// 	sk.AddChild(ns)
-	// 	// tv.RootView.TreeViewSig.Emit(tv.RootView.This(), int64(TreeViewInserted), ns.This())
-	// }
+	for _, ns := range sl {
+		tv.AddChild(ns)
+	}
 	tv.UpdateEndLayout(updt)
-	// tv.SetChanged()
+	tv.SendChangeEvent(nil)
 }
 
 //////////////////////////////////////////////////////////////////////////////
