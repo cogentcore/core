@@ -7,7 +7,6 @@ package gi
 import (
 	"fmt"
 	"image"
-	"log"
 	"log/slog"
 
 	"goki.dev/ki/v2"
@@ -22,7 +21,7 @@ import (
 // todo: need slog Debug mode for this kind of thing.
 func (wb *WidgetBase) HasSc() bool {
 	if wb.This() == nil || wb.Sc == nil {
-		log.Printf("gi.WidgetBase: object or scene is nil\n") // todo: slog.Debug
+		slog.Debug("gi.WidgetBase: object or scene is nil\n")
 		return false
 	}
 	return true

@@ -136,7 +136,12 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			ao := gi.ActOpts{Name: cfg.Name, Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}
 			btf := func(bt *gi.Button) {
 				rfun := reflect.ValueOf(val).MethodByName(cfg.Name)
-				CallReflectFunc(bt, rfun, cfg)
+				// TODO(kai): remove this temporary fix for buttons in popup menus having nil scenes
+				var ctx gi.Widget = bt
+				if bt.Sc == nil {
+					ctx = tb
+				}
+				CallReflectFunc(ctx, rfun, cfg)
 			}
 			// if no depth, we go straight in toolbar
 			if depth == 0 {
@@ -155,7 +160,13 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			if par == nil {
 				par = gi.NewButtonMenu(tb, cfg.Parent.Name)
 			}
-			fmt.Println(par)
+			if cfg.SepBefore {
+				par.Menu.AddSeparator()
+			}
+			par.Menu.AddButton(ao, btf)
+			if cfg.SepAfter {
+				par.Menu.AddSeparator()
+			}
 		}
 	}
 	return true
