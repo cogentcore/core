@@ -154,6 +154,18 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			tv.SetNeedsRender()
 			e.SetHandled()
 		})
+		parts.On(events.MouseDown, func(e events.Event) {
+			tv.SetState(true, states.Active)
+			tv.ApplyStyle(tv.Sc)
+			tv.SetNeedsRender()
+			e.SetHandled()
+		})
+		parts.On(events.MouseUp, func(e events.Event) {
+			tv.SetState(false, states.Active)
+			tv.ApplyStyle(tv.Sc)
+			tv.SetNeedsRender()
+			e.SetHandled()
+		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Width.SetEm(1)
@@ -1539,25 +1551,18 @@ func (tv *TreeView) HandleTreeViewMouse() {
 		tv.ToggleClose()
 	})
 
-	// we let the parts handle our hovered state
-	// so that we only get it when we are hovered
-	// over this treeview specifically, not any of
-	// our children (see OnChildAdded)
+	// we let the parts handle our state
+	// so that we only get it when we are doing
+	// something with this treeview specifically,
+	// not with any of our children (see OnChildAdded).
+	// we only need to handle the starting ones here,
+	// as the other ones will just set the state to
+	// false, which it already is.
 	tv.On(events.MouseEnter, func(e events.Event) {
 		e.SetHandled()
 	})
-	tv.On(events.MouseLeave, func(e events.Event) {
-		e.SetHandled()
-	})
-
 	tv.On(events.MouseDown, func(e events.Event) {
-		if tv.PosInScBBox(e.LocalPos()) {
-			tv.SetState(true, states.Active)
-		}
 		e.SetHandled()
-	})
-	tv.On(events.MouseUp, func(e events.Event) {
-		tv.SetState(false, states.Active)
 	})
 }
 
