@@ -1307,12 +1307,6 @@ func (ly *Layout) Render(sc *Scene) {
 	}
 }
 
-func (ly *Layout) SetTypeHandlers() {
-	ly.HandleWidgetEvents()
-	ly.HandleLayoutScrollEvents()
-	ly.HandleLayoutKeys()
-}
-
 ///////////////////////////////////////////////////////////
 //    Stretch and Space -- dummy elements for layouts
 
