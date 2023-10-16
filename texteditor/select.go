@@ -5,11 +5,10 @@
 package texteditor
 
 import (
-	"image"
-
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/texteditor/textbuf"
 	"goki.dev/girl/states"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/mimedata"
 	"goki.dev/pi/v2/filecat"
 	"goki.dev/pi/v2/lex"
@@ -515,7 +514,7 @@ func (ed *Editor) ReCaseSelection(c textbuf.Cases) string {
 //  Context Menu
 
 // ContextMenu displays the context menu with options dependent on situation
-func (ed *Editor) ContextMenu() {
+func (ed *Editor) ContextMenu(e events.Event) {
 	if !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
 		if ed.Buf.Spell != nil {
 			if ed.OfferCorrect() {
@@ -523,17 +522,7 @@ func (ed *Editor) ContextMenu() {
 			}
 		}
 	}
-	ed.WidgetBase.ContextMenu()
-}
-
-// ContextMenuPos returns the position of the context menu
-func (ed *Editor) ContextMenuPos() (pos image.Point) {
-	em := ed.EventMgr()
-	_ = em
-	// if em != nil {
-	// 	return em.LastMousePos
-	// }
-	return image.Point{100, 100}
+	ed.WidgetBase.ContextMenu(e)
 }
 
 // MakeContextMenu builds the text editor context menu

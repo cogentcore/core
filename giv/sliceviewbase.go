@@ -1124,7 +1124,7 @@ func (sv *SliceViewBase) IdxPos(idx int) image.Point {
 	var pos image.Point
 	widg, ok := sv.This().(SliceViewer).RowFirstWidget(row)
 	if ok {
-		pos = widg.ContextMenuPos()
+		pos = widg.ContextMenuPos(nil)
 	}
 	return pos
 }

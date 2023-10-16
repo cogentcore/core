@@ -194,6 +194,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetValue(0.25).
 		SetSnap(true).
 		SetTracking(true)
+	scroll0.Style(func(s *styles.Style) {
+		s.MaxHeight.SetDp(12)
+	})
 	scroll0.OnChange(func(e events.Event) {
 		fmt.Println("scroll0", scroll0.Value)
 	})
@@ -207,6 +210,9 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		SetTracking(true).
 		SetStep(1).
 		SetPageStep(10)
+	scroll1.Style(func(s *styles.Style) {
+		s.MaxWidth = units.Dp(16)
+	})
 	scroll1.OnChange(func(e events.Event) {
 		fmt.Println("scroll1", scroll1.Value)
 	})

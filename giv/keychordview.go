@@ -105,31 +105,6 @@ func (kc *KeyChordEdit) MakeContextMenu(m *gi.Menu) {
 	})
 }
 
-/* todo: these should all be in WidgetBase now
-func (kc *KeyChordEdit) HandleMouseEvent() {
-	kc.AddFunc(events.MouseUp, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		kcc := recv.Embed(TypeKeyChordEdit).(*KeyChordEdit)
-		if me.Action == events.Press && me.Button == events.Left {
-			if kcc.Selectable {
-				me.SetHandled()
-				kcc.SetSelected(!kcc.StateIs(states.Selected))
-				if kcc.StateIs(states.Selected) {
-					kcc.GrabFocus()
-				}
-				kcc.EmitSelectedSignal()
-				kcc.SetNeedsRender()
-			}
-		}
-		if me.Action == events.Release && me.Button == events.Right {
-			me.SetHandled()
-			kcc.EmitContextMenuSignal()
-			kcc.This().(gi.Widget).ContextMenu()
-		}
-	})
-}
-*/
-
 func (kc *KeyChordEdit) HandleKeyChord() {
 	kc.On(events.KeyChord, func(e events.Event) {
 		if kc.StateIs(states.Focused) {

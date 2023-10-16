@@ -113,9 +113,11 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 
 // HandleWidgetEvents adds the default events for Widget objects.
 func (wb *WidgetBase) HandleWidgetEvents() {
+	wb.HandleWidgetClick()
 	wb.HandleWidgetStateFromMouse()
 	wb.HandleLongHoverTooltip()
 	wb.HandleWidgetStateFromFocus()
+	wb.HandleWidgetContextMenu()
 }
 
 // PosInBBox returns true if given position is within
@@ -124,6 +126,38 @@ func (wb *WidgetBase) PosInBBox(pos image.Point) bool {
 	wb.BBoxMu.RLock()
 	defer wb.BBoxMu.RUnlock()
 	return pos.In(wb.ScBBox)
+}
+
+// HandleWidgetClick handles the Click event for basic Widget behavior.
+// For Left button:
+// If Checkable, toggles Checked. if Focusable, Focuses or clears,
+// If Selectable, updates state and sends Select, Deselect.
+// For Right button:
+// Sends ContextMenu event that Activates a context menu if present.
+func (wb *WidgetBase) HandleWidgetClick() {
+	wb.OnClick(func(e events.Event) {
+		if wb.StateIs(states.Disabled) {
+			return
+		}
+		// fmt.Println("click", wb)
+		if wb.AbilityIs(abilities.Checkable) {
+			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
+		}
+		if wb.AbilityIs(abilities.Focusable) {
+			wb.GrabFocus()
+		} else {
+			wb.FocusClear()
+		}
+		if wb.AbilityIs(abilities.Selectable) {
+			if wb.StateIs(states.Selected) {
+				wb.SetState(false, states.Selected)
+				wb.Send(events.Deselect, e)
+			} else {
+				wb.SetState(true, states.Selected)
+				wb.Send(events.Select, e)
+			}
+		}
+	})
 }
 
 // HandleWidgetStateFromMouse updates all standard State flags based on mouse events,
@@ -146,20 +180,6 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 		}
 		if wb.AbilityIs(abilities.Activatable) {
 			wb.SetState(false, states.Active)
-		}
-	})
-	wb.OnClick(func(e events.Event) {
-		if wb.StateIs(states.Disabled) {
-			return
-		}
-		if wb.AbilityIs(abilities.Checkable) {
-			wb.SetState(!wb.StateIs(states.Checked), states.Checked)
-		}
-		// fmt.Println("click", wb)
-		if wb.AbilityIs(abilities.Focusable) {
-			wb.GrabFocus()
-		} else {
-			wb.FocusClear()
 		}
 	})
 	wb.On(events.DoubleClick, func(e events.Event) {
@@ -240,13 +260,6 @@ func (wb *WidgetBase) HandleWidgetStateFromMouse() {
 	})
 }
 
-// 	if bb.IsDisabled() {
-// 		if !strings.HasSuffix(bb.Class, "-action") { // not for menu-action, bar-action
-// 			bb.SetSelected(!bb.StateIs(states.Selected))
-// 			// bb.EmitSelectedSignal()
-// 			bb.SetNeedsRender()
-// 		}
-
 // HandleLongHoverTooltip listens for LongHoverEvent and pops up a tooltip.
 // Most widgets should call this as part of their event handler methods.
 func (wb *WidgetBase) HandleLongHoverTooltip() {
@@ -315,63 +328,9 @@ func (wb *WidgetBase) HandleClickOnEnterSpace() {
 	})
 }
 
-// WidgetMouseEvents connects to either or both mouse events -- IMPORTANT: if
-// you need to also connect to other mouse events, you must copy this code --
-// all processing of a mouse event must happen within one function b/c there
-// can only be one registered per receiver and event type.  sel = Left button
-// events.Press event, toggles the selected state, and emits a SelectedEvent.
-// ctxtMenu = connects to Right button events.Press event, and sends a
-// WidgetSig WidgetContextMenu signal, followed by calling ContextMenu method
-// -- signal can be used to change state prior to generating context menu,
-// including setting a CtxtMenuFunc that removes all items and thus negates
-// the presentation of any menu
-/*
-func (wb *WidgetBase) WidgetMouseEvents(sel, ctxtMenu bool) {
-	if !sel && !ctxtMenu {
-		return
-	}
-	wbwe.AddFunc(events.MouseUp, RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		me := d.(events.Event)
-		if sel {
-			if me.Action == events.Press && me.Button == events.Left {
-				me.SetHandled()
-				_, wbb := AsWidget(recv)
-				wbb.SetSelected(!wbb.StateIs(states.Selected))
-				wbb.EmitSelectedSignal()
-				wbb.ApplyStyleUpdate(wbb.Sc)
-			}
-		}
-		if ctxtMenu {
-			if me.Action == events.Release && me.Button == events.Right {
-				me.SetHandled()
-				wi, wbb := AsWidget(recv)
-				wbb.EmitContextMenuSignal()
-				wi.ContextMenu()
-			}
-		}
-	})
-}
-*/
-
-/*
-// EmitSelectedSignal emits the WidgetSelected signal for this widget
-func (wb *WidgetBase) EmitSelectedSignal() {
-	wb.WidgetSig.Emit(wb.This(), int64(WidgetSelected), nil)
-}
-
-// EmitFocusedSignal emits the WidgetFocused signal for this widget
-func (wb *WidgetBase) EmitFocusedSignal() {
-	wb.WidgetSig.Emit(wb.This(), int64(WidgetFocused), nil)
-}
-
-// EmitContextMenuSignal emits the WidgetContextMenu signal for this widget
-func (wb *WidgetBase) EmitContextMenuSignal() {
-	wb.WidgetSig.Emit(wb.This(), int64(WidgetContextMenu), nil)
-}
-*/
-
-// FirstContainingPoint finds the first node whose WinBBox contains the given
-// point -- nil if none.  If leavesOnly is set then only nodes that have no
+// FirstContainingPoint finds the first node whose WinBBox contains
+// the given point, nil if none.
+// If leavesOnly is set then only nodes that have no
 // nodes (leaves, terminal nodes) will be considered
 func (wb *WidgetBase) FirstContainingPoint(pt image.Point, leavesOnly bool) ki.Ki {
 	var rval ki.Ki

@@ -232,8 +232,6 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			em.Slide.HandleEvent(evi)
 			em.Slide.Send(events.SlideMove, evi)
 			return // nothing further
-		case em.Press != nil:
-			// todo: distance to start sliding, dragging
 		}
 	case events.Scroll:
 		switch {
@@ -329,7 +327,12 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 			em.Drag.Send(events.Drop, evi) // todo: all we need or what?
 			em.Drag = nil
 		case em.Press == up && up != nil:
-			up.Send(events.Click, evi)
+			switch evi.MouseButton() {
+			case events.Left:
+				up.Send(events.Click, evi)
+			case events.Right: // note: automatically gets Control+Left
+				up.Send(events.ContextMenu, evi)
+			}
 		}
 		em.Press = nil
 	case events.Scroll:

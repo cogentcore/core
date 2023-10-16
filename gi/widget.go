@@ -133,12 +133,12 @@ type Widget interface {
 	On(etype events.Types, fun func(e events.Event)) Widget
 
 	// HandleEvent calls registered event Listener functions for given event
-	HandleEvent(ev events.Event)
+	HandleEvent(e events.Event)
 
 	// Send sends an event of given type to this widget,
 	// optionally starting from values in the given original event
 	// (recommended to include where possible).
-	Send(ev events.Types, orig ...events.Event)
+	Send(e events.Types, orig ...events.Event)
 
 	// MakeContextMenu creates the context menu items (typically Action
 	// elements, but it can be anything) for a given widget, typically
@@ -150,13 +150,15 @@ type Widget interface {
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle its Bounding Box, but can be adapted as
 	// appropriate for different widgets.
-	ContextMenuPos() image.Point
+	ContextMenuPos(e events.Event) image.Point
 
-	// ContextMenu displays the context menu of various actions to perform on
-	// a node -- returns immediately, and actions are all executed directly
+	// ContextMenu displays the context menu of various actions
+	// to perform on a Widget, activated by default on the ContextMenu
+	// event, triggered by a Right mouse click ()
+	// -- returns immediately, and actions are all executed directly
 	// (later) via the action signals.  Calls MakeContextMenu and
 	// ContextMenuPos.
-	ContextMenu()
+	ContextMenu(e events.Event)
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass

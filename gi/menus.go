@@ -404,18 +404,31 @@ func (wb *WidgetBase) MakeContextMenu(m *Menu) {
 	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
 }
 
-func (wb *WidgetBase) ContextMenuPos() image.Point {
+// ContextMenuPos returns the default position for the context menu
+// upper left corner.  The event will be from a mouse ContextMenu
+// event if non-nil: should handle both cases.
+func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
+	if e != nil {
+		return e.Pos()
+	}
 	return wb.WinPos(.5, .5) // center
 }
 
-func (wb *WidgetBase) ContextMenu() {
+func (wb *WidgetBase) HandleWidgetContextMenu() {
+	wb.On(events.ContextMenu, func(e events.Event) {
+		wi := wb.This().(Widget)
+		wi.ContextMenu(e)
+	})
+}
+
+func (wb *WidgetBase) ContextMenu(e events.Event) {
 	var menu Menu
 	wi := wb.This().(Widget)
 	wi.MakeContextMenu(&menu)
 	if len(menu) == 0 {
 		return
 	}
-	NewMenu(menu, wi, wi.ContextMenuPos()).Run()
+	NewMenu(menu, wi, wi.ContextMenuPos(e)).Run()
 }
 
 ///////////////////////////////////////////////////////////////
@@ -433,7 +446,7 @@ func StringsChooserPopup(strs []string, curSel string, ctx Widget, fun func(bt *
 		bt := menu.AddButton(ActOpts{Label: it, Data: i}, fun)
 		bt.SetSelected(it == curSel)
 	}
-	NewMenu(menu, ctx, ctx.ContextMenuPos()).Run()
+	NewMenu(menu, ctx, ctx.ContextMenuPos(nil)).Run()
 }
 
 // SubStringsChooserPopup creates a menu of the sub-strings in the given

@@ -25,6 +25,7 @@ func (ed *Editor) HandleTextViewEvents() {
 	ed.HandleLayoutEvents()
 	ed.HandleTextViewKeyChord()
 	ed.HandleTextViewMouse()
+	ed.HandleWidgetContextMenu()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -585,9 +586,7 @@ func (ed *Editor) HandleTextViewMouse() {
 			}
 		case events.Right:
 			ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
-			// ed.EmitContextMenuSignal()
-			ed.This().(gi.Widget).ContextMenu()
-
+			ed.Send(events.ContextMenu, e)
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
