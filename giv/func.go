@@ -149,9 +149,9 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 				}
 				continue
 			}
-			fmt.Println(tb.Kids)
 			// otherwise, we have to find our parent
-			par := tb.FindPath(cfg.Parent.Name)
+			par := gi.FindButton(tb, cfg.Parent.Name)
+			// if we don't have the parent, we must make an artificial parent
 			if par == nil {
 				slog.Error("programmer error: giv.ToolbarView: parent path specified in gi:toolbar comment directive could not be found", "method", cfg.Name, "parentPath", cfg.Parent.Name, "methodReceiverType", reflect.TypeOf(val))
 				continue
