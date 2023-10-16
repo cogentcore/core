@@ -105,7 +105,7 @@ func (tv *TreeView) OnInit() {
 
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable) // , abilities.Hoverable)
 		tv.Indent.SetEm(2)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
@@ -114,6 +114,7 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
+		//		s.Color = colors.Scheme.Secondary.OnContainer
 	})
 }
 
@@ -124,6 +125,12 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {
 			parts.Spacing.SetCh(0.5)
+			s.BackgroundColor.SetSolid(colors.Scheme.Surface)
+			if tv.Styles.State.Is(states.Selected) {
+				s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			} else if tv.Styles.State.Is(states.Hovered) {
+				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
+			}
 		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
@@ -286,6 +293,8 @@ func (tv *TreeView) StyleTreeView(sc *gi.Scene) {
 	tv.Indent.ToDots(&tv.Styles.UnContext)
 	// tv.Parts.Styles.InheritFields(&tv.Styles)
 	tv.ApplyStyleWidget(sc)
+	// tv.Styles.StateLayer = 0 // turn off!
+	// note: this is essential for reasonable styling behavior
 }
 
 func (tv *TreeView) ApplyStyle(sc *gi.Scene) {
@@ -396,7 +405,7 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
-	bg := &tv.Styles.BackgroundColor
+	bg := &tv.Parts.Styles.BackgroundColor
 	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, bg)
 	// tv.RenderStdBox(sc, st)
 	tv.RenderUnlock(rs)
@@ -872,6 +881,7 @@ func (tv *TreeView) Close() {
 		tv.SetNeedsLayout()
 	}
 	tv.SetClosed(true)
+	tv.SetBranchState()
 	tv.SetKidsVisibility(true) // parent closed
 	tv.SendChangeEvent(nil)
 	tv.UpdateEndRender(updt)
@@ -888,6 +898,7 @@ func (tv *TreeView) Open() {
 	if tv.HasChildren() {
 		tv.SetNeedsLayout()
 		tv.SetClosed(false)
+		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 	}
 	tv.SendChangeEvent(nil)
