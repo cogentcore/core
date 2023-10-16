@@ -112,13 +112,6 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
-		s.Color = colors.Scheme.Secondary.OnContainer
-		s.BackgroundColor.SetSolid(colors.Scheme.Surface)
-		if s.State.Is(states.Selected) {
-			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-			// } else if s.State.Is(states.Hovered) {
-			// 	s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerLow)
-		}
 	})
 }
 
@@ -174,7 +167,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		})
 	case "parts/label":
 		w.Style(func(s *styles.Style) {
-			s.Abilities = 0
+			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+			s.Cursor = cursors.None
 			s.Margin.Set()
 			s.Padding.Set()
 			s.MinWidth.SetCh(16)
