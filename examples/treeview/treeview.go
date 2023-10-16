@@ -67,7 +67,7 @@ func app() {
 	// depth := 10 // big tree
 	MakeTree(tv, 0, depth, 5)
 
-	nleaves := tv.SetViewIdx()
+	nleaves := tv.RootSetViewIdx()
 	fmt.Println("N leaves:", nleaves)
 
 	_ = svfr
