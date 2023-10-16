@@ -152,6 +152,24 @@ func (tv *TreeSyncView) UpdateInactive() bool {
 }
 
 /*
+func (tv *TreeSyncView) MakeContextMenu(m *gi.Menu) {
+	// derived types put native menu code here
+	if tv.CtxtMenuFunc != nil {
+		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
+	}
+	// note: root inactivity is relevant factor here..
+	if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
+		if tv.ShowViewCtxtMenu {
+			m.AddSeparator("sep-tvmenu")
+			CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
+		}
+	} else {
+		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
+	}
+}
+*/
+
+/*
 // SelectedSrcNodes returns a slice of the currently-selected source nodes
 // in the entire tree view
 func (tv *TreeSyncView) SelectedSrcNodes() ki.Slice {

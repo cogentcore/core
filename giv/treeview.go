@@ -466,6 +466,11 @@ func (tv *TreeView) SetSelectedViews(sl []*TreeView) {
 	}
 }
 
+// HasSelection returns true if there are currently selected items
+func (tv *TreeView) HasSelection() bool {
+	return len(tv.SelectedViews()) > 0
+}
+
 // Select selects this node (if not already selected).
 // Must use this method to update global selection list
 func (tv *TreeView) Select() {
@@ -970,10 +975,37 @@ func (tv *TreeView) OpenParents() {
 /////////////////////////////////////////////////////////////
 //    Modifying Source Tree
 
-func (tv *TreeView) ContextMenuPos() (pos image.Point) {
+func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
+	if e != nil {
+		pos = e.Pos()
+		return
+	}
 	pos.X = tv.ScBBox.Min.X + int(tv.Indent.Dots)
 	pos.Y = (tv.ScBBox.Min.Y + tv.ScBBox.Max.Y) / 2
 	return
+}
+
+func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Menu) {
+	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
+	ac := m.AddButton(gi.ActOpts{Label: "Copy", Shortcut: cpsc}, func(bt *gi.Button) {
+		tv.This().(gi.Clipper).Copy(true)
+	})
+	ac.SetEnabledState(tv.HasSelection())
+	if !tv.IsDisabled() {
+		ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
+		ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
+		ac = m.AddButton(gi.ActOpts{Label: "Cut", Shortcut: ctsc}, func(bt *gi.Button) {
+			tv.This().(gi.Clipper).Cut()
+		})
+		ac.SetEnabledState(tv.HasSelection())
+		ac = m.AddButton(gi.ActOpts{Label: "Paste", Shortcut: ptsc}, func(bt *gi.Button) {
+			tv.This().(gi.Clipper).Paste()
+		})
+		cb := tv.Sc.EventMgr.ClipBoard()
+		if cb != nil {
+			ac.SetState(cb.IsEmpty(), states.Disabled)
+		}
+	}
 }
 
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
@@ -981,15 +1013,7 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
 	}
-	// note: root inactivity is relevant factor here..
-	// if CtxtMenuView(tv.SrcNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
-	// 	if tv.ShowViewCtxtMenu {
-	// 		m.AddSeparator("sep-tvmenu")
-	// 		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
-	// 	}
-	// } else {
-	// 	CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
-	// }
+	tv.MakeTreeViewContextMenu(m)
 }
 
 // IsRoot returns true if given node is the root of the tree.
@@ -1098,7 +1122,7 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
 	var menu gi.Menu
 	tv.MakePasteMenu(&menu, md)
-	pos := tv.ContextMenuPos()
+	pos := tv.ContextMenuPos(nil)
 	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
 }
 
@@ -1527,46 +1551,6 @@ func (tv *TreeView) HandleTreeViewDrag() {
 				tv.Open()
 			}
 		})
-	*/
-	/*
-		if tv.HasChildren() {
-			if wb, ok := tv.BranchPart(); ok {
-				wb.ButtonSig.ConnectOnly(tv.This(), func(recv, send ki.Ki, sig int64, data any) {
-					if sig == int64(gi.ButtonToggled) {
-						tv, _ := recv.Embed(TreeViewType).(*TreeView)
-						tv.ToggleClose()
-					}
-				})
-			}
-		}
-		if lbl, ok := tv.LabelPart(); ok {
-			// HiPri is needed to override label's native processing
-			lblwe.AddFunc(events.MouseUp, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
-				lb, _ := recv.(*gi.Label)
-				tvvi := lb.Parent().Parent()
-				if tvvi == nil || tvvi.This() == nil { // deleted
-					return
-				}
-				tv := tvvi.Embed(TreeViewType).(*TreeView)
-				me := d.(events.Event)
-				switch me.Button {
-				case events.Left:
-					switch me.Action {
-					case events.DoubleClick:
-						tv.ToggleClose()
-						me.SetHandled()
-					case events.Release:
-						tv.SelectAction(me.SelectMode())
-						me.SetHandled()
-					}
-				case events.Right:
-					if me.Action == events.Release {
-						me.SetHandled()
-						tv.This().(gi.Widget).ContextMenu()
-					}
-				}
-			})
-		}
 	*/
 }
 

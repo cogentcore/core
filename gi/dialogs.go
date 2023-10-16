@@ -44,7 +44,7 @@ type Dialog struct {
 func NewDialog(sc *Scene, ctx Widget) *Dialog {
 	dlg := &Dialog{}
 	dlg.Stage = NewMainStage(DialogStage, sc, ctx)
-	sc.Geom.Pos = ctx.ContextMenuPos()
+	sc.Geom.Pos = ctx.ContextMenuPos(nil)
 	if dlg.Stage.Title != "" {
 		dlg.Title(dlg.Stage.Title)
 	}

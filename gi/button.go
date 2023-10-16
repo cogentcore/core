@@ -303,19 +303,19 @@ func (bt *Button) HasMenu() bool {
 	return bt.MakeMenuFunc != nil || len(bt.Menu) > 0
 }
 
-// OpenMenu will open any menu associated with this element -- returns true if
-// menu opened, false if not
-func (bt *Button) OpenMenu() bool {
+// OpenMenu will open any menu associated with this element.
+// Returns true if menu opened, false if not.
+func (bt *Button) OpenMenu(e events.Event) bool {
 	if !bt.HasMenu() {
 		return false
 	}
 	if bt.MakeMenuFunc != nil {
 		bt.MakeMenuFunc(bt.This().(Widget), &bt.Menu)
 	}
-	pos := bt.ContextMenuPos()
+	pos := bt.ContextMenuPos(e)
 	if bt.Parts != nil {
 		if indic := bt.Parts.ChildByName("indicator", 3); indic != nil {
-			pos = indic.(Widget).ContextMenuPos()
+			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
 		}
 	} else {
 		slog.Error("Button: parts nil", "button", bt)
@@ -361,12 +361,18 @@ func (bt *Button) ConfigPartsIndicator(indIdx int) {
 //////////////////////////////////////////////////////////////////
 //		Events
 
+func (bt *Button) ContextMenu(e events.Event) {
+	bt.OpenMenu(e)
+}
+
 func (bt *Button) HandleClickMenu() {
 	bt.OnClick(func(e events.Event) {
 		if bt.StateIs(states.Disabled) {
 			return
 		}
-		bt.OpenMenu()
+		if bt.OpenMenu(e) {
+			e.SetHandled()
+		}
 	})
 }
 
