@@ -126,16 +126,13 @@ func (m *Menu) InsertButtonAfter(after string, opts ActOpts, fun func(bt *Button
 }
 
 // AddSeparator adds a separator at the next point in the menu (name is just
-// internal label of element, defaults to 'sep' if empty)
-func (m *Menu) AddSeparator(name string) *Separator {
+// internal label of element, defaults to "separator" if unspecified)
+func (m *Menu) AddSeparator(name ...string) *Separator {
 	if m == nil {
 		*m = make(Menu, 0, 10)
 	}
 	sp := &Separator{}
-	if name == "" {
-		name = "sep"
-	}
-	sp.InitName(sp, name)
+	sp.InitName(sp, name...)
 	sp.Horiz = true
 	*m = append(*m, sp.This().(Widget))
 	return sp
