@@ -124,8 +124,13 @@ func (tv *TreeView) TreeViewStyles() {
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 
+		// need to copy over to actual and then clear styles one
 		tv.actStateLayer = s.StateLayer
 		s.StateLayer = 0
+		if s.Is(states.Selected) {
+			// render handles manually, similar to with actStateLayer
+			s.BackgroundColor.SetSolid(colors.Transparent)
+		}
 	})
 }
 
@@ -138,10 +143,10 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 			parts.Spacing.SetCh(0.5)
 		})
-		// we let the parts handle our hovered state
-		// so that we only get it when we are hovered
-		// over this treeview specifically, not any of
-		// our children (see HandleTreeViewMouse)
+		// we let the parts handle our state
+		// so that we only get it when we are doing
+		// something with this treeview specifically,
+		// not with any of our children (see HandleTreeViewMouse)
 		parts.On(events.MouseEnter, func(e events.Event) {
 			tv.SetState(true, states.Hovered)
 			tv.ApplyStyle(tv.Sc)
@@ -165,6 +170,10 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			tv.ApplyStyle(tv.Sc)
 			tv.SetNeedsRender()
 			e.SetHandled()
+		})
+		parts.OnClick(func(e events.Event) {
+			e.SetHandled()
+			tv.SelectAction(e.SelectMode())
 		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
@@ -442,10 +451,16 @@ func (tv *TreeView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bo
 
 func (tv *TreeView) RenderNode(sc *gi.Scene) {
 	rs, pc, st := tv.RenderLock(sc)
+	// must use workaround act values
 	st.StateLayer = tv.actStateLayer
+	if st.Is(states.Selected) {
+		st.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+	}
 	sbg := tv.ParentBackgroundColor()
 	pc.DrawStdBox(rs, st, tv.LayState.Alloc.Pos, tv.LayState.Alloc.Size, &sbg)
+	// after we are done rendering, we clear the values so they aren't inherited
 	st.StateLayer = 0
+	st.BackgroundColor.SetSolid(colors.Transparent)
 	tv.RenderUnlock(rs)
 }
 
@@ -453,7 +468,11 @@ func (tv *TreeView) Render(sc *gi.Scene) {
 	if tv.PushBounds(sc) {
 		tv.RenderNode(sc)
 		if tv.Parts != nil {
+			// we must copy from actual values in parent
 			tv.Parts.Styles.StateLayer = tv.actStateLayer
+			if tv.StateIs(states.Selected) {
+				tv.Parts.Styles.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
+			}
 			tv.RenderParts(sc)
 		}
 		tv.PopBounds(sc)
@@ -1542,10 +1561,6 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 }
 
 func (tv *TreeView) HandleTreeViewMouse() {
-	tv.OnClick(func(e events.Event) {
-		e.SetHandled()
-		tv.SelectAction(e.SelectMode())
-	})
 	tv.OnDoubleClick(func(e events.Event) {
 		e.SetHandled()
 		tv.ToggleClose()
