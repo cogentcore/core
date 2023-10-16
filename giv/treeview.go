@@ -84,7 +84,8 @@ func (tv *TreeView) CopyFieldsFrom(frm any) {
 // SetViewIdx sets the ViewIdx for all nodes.
 // This must be called from the root node after
 // construction or any modification to the tree.
-func (tv *TreeView) SetViewIdx() {
+// Returns the total number of leaves in the tree.
+func (tv *TreeView) SetViewIdx() int {
 	idx := 0
 	tv.WalkPre(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
@@ -94,6 +95,7 @@ func (tv *TreeView) SetViewIdx() {
 		}
 		return ki.Continue
 	})
+	return idx
 }
 
 func (tv *TreeView) OnInit() {
@@ -103,7 +105,7 @@ func (tv *TreeView) OnInit() {
 
 func (tv *TreeView) TreeViewStyles() {
 	tv.Style(func(s *styles.Style) {
-		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable) // , abilities.Hoverable)
+		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.SetEm(2)
 		tv.OpenDepth = 4
 		s.Cursor = cursors.Pointer
