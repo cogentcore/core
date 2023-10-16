@@ -160,6 +160,7 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			if par == nil {
 				par = gi.NewButtonMenu(tb, cfg.Parent.Name)
 			}
+			fmt.Println(cfg.Name, par)
 			if cfg.SepBefore {
 				par.Menu.AddSeparator()
 			}
