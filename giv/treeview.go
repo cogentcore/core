@@ -942,21 +942,16 @@ func (tv *TreeView) MoveEndAction(selMode events.SelectModes) *TreeView {
 }
 
 func (tv *TreeView) SetKidsVisibility(parentClosed bool) {
-	tv.WalkPre(func(k ki.Ki) bool {
-		if k.This() == tv.This() {
-			return ki.Continue
-		}
+	for _, k := range *tv.Children() {
 		tvki := AsTreeView(k)
 		if tvki != nil {
 			tvki.SetState(parentClosed, states.Invisible)
 		}
-		return ki.Continue
-	})
+	}
 }
 
 // Close closes the given node and updates the view accordingly
 // (if it is not already closed).
-// Sends Change event on RootView.
 func (tv *TreeView) Close() {
 	if tv.IsClosed() {
 		return
@@ -968,7 +963,6 @@ func (tv *TreeView) Close() {
 	tv.SetClosed(true)
 	tv.SetBranchState()
 	tv.SetKidsVisibility(true) // parent closed
-	tv.SendChangeEvent(nil)
 	tv.UpdateEndRender(updt)
 }
 
@@ -986,7 +980,6 @@ func (tv *TreeView) Open() {
 		tv.SetBranchState()
 		tv.SetKidsVisibility(false)
 	}
-	tv.SendChangeEvent(nil)
 	tv.UpdateEndRender(updt)
 }
 
@@ -1037,7 +1030,7 @@ func (tv *TreeView) OpenParents() {
 	tv.WalkUpParent(func(k ki.Ki) bool {
 		tvki := AsTreeView(k)
 		if tvki != nil {
-			tvki.SetClosed(false)
+			tvki.Open()
 			return ki.Continue
 		}
 		return ki.Break
