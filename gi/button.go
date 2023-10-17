@@ -238,6 +238,14 @@ func (bt *Button) SetShortcut(shortcut key.Chord) *Button {
 	return bt
 }
 
+// SetShortcut sets the shortcut of the button from the given [KeyFuns]
+func (bt *Button) SetShortcutKey(kf KeyFuns) *Button {
+	updt := bt.UpdateStart()
+	bt.Shortcut = ShortcutForFun(kf)
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
 // SetData sets the data of the button
 func (bt *Button) SetData(data any) *Button {
 	updt := bt.UpdateStart()
