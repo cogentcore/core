@@ -139,22 +139,24 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	rgbacopy := gi.NewButton(rgbalay, "rgbacopy")
 	rgbacopy.Icon = icons.ContentCopy
 	rgbacopy.Tooltip = "Copy RGBA Color"
-	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromRGB(r, g, b)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromRGBA(r, g, b, a)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "rgb(r, g, b)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("rgb(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	rgbacopy.Menu.AddButton(gi.ActOpts{Label: "rgba(r, g, b, a)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
+	rgbacopy.Menu = func(m *gi.Scene) {
+		gi.NewButton(m).SetText("styles.ColorFromRGB(r, g, b)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("styles.ColorFromRGB(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("styles.ColorFromRGBA(r, g, b, a)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("styles.ColorFromRGBA(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("rgb(r, g, b)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("rgb(%d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("rgba(r, g, b, a)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("rgba(%d, %d, %d, %d)", cv.Color.R, cv.Color.G, cv.Color.B, cv.Color.A)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+	}
 
 	hslalay := gi.NewLayout(nl, "nums-hsla-lay").SetLayout(gi.LayoutHoriz)
 
@@ -167,22 +169,24 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hslacopy := gi.NewButton(hslalay, "hslacopy")
 	hslacopy.Icon = icons.ContentCopy
 	hslacopy.Tooltip = "Copy HSLA Color"
-	hslacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromHSL(h, s, l)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hslacopy.Menu.AddButton(gi.ActOpts{Label: "styles.ColorFromHSLA(h, s, l, a)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hslacopy.Menu.AddButton(gi.ActOpts{Label: "hsl(h, s, l)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("hsl(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hslacopy.Menu.AddButton(gi.ActOpts{Label: "hsla(h, s, l, a)"}, func(bt *gi.Button) {
-		text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
+	hslacopy.Menu = func(m *gi.Scene) {
+		gi.NewButton(m).SetText("styles.ColorFromHSL(h, s, l)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("styles.ColorFromHSL(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("styles.ColorFromHSLA(h, s, l, a)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("styles.ColorFromHSLA(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("hsl(h, s, l)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("hsl(%g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("hsla(h, s, l, a)").OnClick(func(e events.Event) {
+			text := fmt.Sprintf("hsla(%g, %g, %g, %g)", cv.ColorHSLA.H, cv.ColorHSLA.S, cv.ColorHSLA.L, cv.ColorHSLA.A)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+	}
 
 	hexlay := gi.NewLayout(nl, "nums-hex-lay").SetLayout(gi.LayoutHoriz)
 
@@ -197,25 +201,27 @@ func (cv *ColorView) ConfigWidget(sc *gi.Scene) {
 	hexcopy := gi.NewButton(hexlay, "hexcopy")
 	hexcopy.Icon = icons.ContentCopy
 	hexcopy.Tooltip = "Copy Hex Color"
-	hexcopy.Menu.AddButton(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBB")`}, func(bt *gi.Button) {
-		hs := colors.AsHex(cv.Color)
-		// get rid of transparency because this is just RRGGBB
-		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hexcopy.Menu.AddButton(gi.ActOpts{Label: `styles.ColorFromHex("#RRGGBBAA")`}, func(bt *gi.Button) {
-		text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cv.Color))
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hexcopy.Menu.AddButton(gi.ActOpts{Label: "#RRGGBB"}, func(bt *gi.Button) {
-		hs := colors.AsHex(cv.Color)
-		text := hs[:len(hs)-2]
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
-	hexcopy.Menu.AddButton(gi.ActOpts{Label: "#RRGGBBAA"}, func(bt *gi.Button) {
-		text := colors.AsHex(cv.Color)
-		cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
-	})
+	hexcopy.Menu = func(m *gi.Scene) {
+		gi.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBB")`).OnClick(func(e events.Event) {
+			hs := colors.AsHex(cv.Color)
+			// get rid of transparency because this is just RRGGBB
+			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, hs[:len(hs)-2])
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText(`styles.ColorFromHex("#RRGGBBAA")`).OnClick(func(e events.Event) {
+			text := fmt.Sprintf(`styles.ColorFromHex("%s")`, colors.AsHex(cv.Color))
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("#RRGGBB").OnClick(func(e events.Event) {
+			hs := colors.AsHex(cv.Color)
+			text := hs[:len(hs)-2]
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+		gi.NewButton(m).SetText("#RRGGBBAA").OnClick(func(e events.Event) {
+			text := colors.AsHex(cv.Color)
+			cv.EventMgr().ClipBoard().Write(mimedata.NewText(text))
+		})
+	}
 
 	gi.NewFrame(vl, "value").SetLayout(gi.LayoutHoriz)
 	sg := gi.NewLayout(vl, "slider-grid").SetLayout(gi.LayoutGrid)
