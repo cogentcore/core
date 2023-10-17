@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"log"
-	"strings"
 
 	"log/slog"
 
@@ -297,7 +296,7 @@ func (bt *Button) SetIcon(iconName icons.Icon) *Button {
 // HasMenu returns true if the button has a menu that pops up when it is clicked
 // (not that it is in a menu itself; see [ButtonMenu])
 func (bt *Button) HasMenu() bool {
-	return bt.MakeMenuFunc != nil || len(bt.Menu) > 0
+	return bt.Menu != nil
 }
 
 // OpenMenu will open any menu associated with this element.
@@ -305,9 +304,6 @@ func (bt *Button) HasMenu() bool {
 func (bt *Button) OpenMenu(e events.Event) bool {
 	if !bt.HasMenu() {
 		return false
-	}
-	if bt.MakeMenuFunc != nil {
-		bt.MakeMenuFunc(bt.This().(Widget), &bt.Menu)
 	}
 	pos := bt.ContextMenuPos(e)
 	if bt.Parts != nil {
@@ -321,9 +317,9 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-// ResetMenu removes all items in the menu
+// ResetMenu removes the menu constructor function
 func (bt *Button) ResetMenu() {
-	bt.Menu = make(Menu, 0, 10)
+	bt.Menu = nil
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
@@ -512,9 +508,12 @@ func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
 
 func (bt *Button) ApplyStyle(sc *Scene) {
 	bt.ApplyStyleWidget(sc)
-	if bt.Menu != nil {
-		bt.Menu.SetShortcuts(bt.EventMgr())
-	}
+	// TODO(kai/menu): figure out how to handle menu shortcuts
+	/*
+		if bt.Menu != nil {
+			bt.Menu.SetShortcuts(bt.EventMgr())
+		}
+	*/
 }
 
 func (bt *Button) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -539,9 +538,12 @@ func (bt *Button) Render(sc *Scene) {
 }
 
 func (bt *Button) Destroy() {
-	if bt.Menu != nil {
-		bt.Menu.DeleteShortcuts(bt.EventMgr())
-	}
+	// TODO(kai/menu): figure out how to handle menu shortcuts
+	/*
+		if bt.Menu != nil {
+			bt.Menu.DeleteShortcuts(bt.EventMgr())
+		}
+	*/
 }
 
 // UpdateButtons calls UpdateFunc on me and any of my menu items
@@ -549,11 +551,16 @@ func (bt *Button) UpdateButtons() {
 	if bt.UpdateFunc != nil {
 		bt.UpdateFunc(bt)
 	}
-	if bt.Menu != nil {
-		bt.Menu.UpdateButtons()
-	}
+	// TODO(kai/menu): figure out how to handle menu updating
+	/*
+		if bt.Menu != nil {
+			bt.Menu.UpdateButtons()
+		}
+	*/
 }
 
+// TODO(kai/menu): figure out what to do about FindButtonMenu/NewButtonMenu
+/*
 // FindButtonMenu finds the button with the given path in the given parent,
 // searching through both children and any [Button.Menu]s it finds. The
 // path omits menus; for example, if A has a menu that contains B, which
@@ -619,3 +626,4 @@ func newButtonMenuImpl(par ki.Ki, parts []string) *Button {
 	newbt := NewButton(par).SetType(ButtonAction).SetText(nm)
 	return newButtonMenuImpl(newbt, parts[1:])
 }
+*/
