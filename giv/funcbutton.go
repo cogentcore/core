@@ -6,6 +6,7 @@ package giv
 
 import (
 	"log/slog"
+	"strings"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
@@ -27,11 +28,17 @@ func NewFuncButton(par ki.Ki, fun any) *gi.Button {
 		slog.Error("programmer error: cannot use giv.NewFuncButton with a function that has not been added to gti", "function", fnm)
 		return nil
 	}
-	bt := gi.NewButton(par, f.Name).SetText(sentencecase.Of(f.Name))
+	// get name without package
+	snm := f.Name
+	li := strings.LastIndex(snm, ".")
+	if li >= 0 {
+		snm = snm[li+1:] // must also get rid of "."
+	}
+	bt := gi.NewButton(par, snm).SetText(sentencecase.Of(snm))
 	bt.SetTooltip(f.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
-	ic := icons.Icon(strcase.ToSnake(f.Name))
+	ic := icons.Icon(strcase.ToSnake(snm))
 	if ic.IsValid() {
 		bt.SetIcon(ic)
 	}
