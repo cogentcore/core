@@ -5,17 +5,12 @@
 package gi
 
 import (
-	"image"
-
 	"goki.dev/colors"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
+
+/*
 
 // Menu is a slice list of Buttons (or other Widgets)
 // that are used for generating a Menu.
@@ -35,7 +30,6 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 	// return ks.UnmarshalJSON(b)
 	return nil
 }
-*/
 
 func (m *Menu) CopyFrom(men *Menu) {
 	ks := (*ki.Slice)(m)
@@ -256,7 +250,6 @@ func (m *Menu) AddAppMenu(win *RenderWin) {
 		CustomAppMenuFunc(m, win)
 	}
 }
-*/
 
 /*
 // AddStdAppMenu adds a standard set of menu items for application-level control.
@@ -276,7 +269,6 @@ func (m *Menu) AddStdAppMenu(win *RenderWin) {
 			goosi.TheApp.QuitReq()
 		})
 }
-*/
 
 // AddRenderWinsMenu adds menu items for current main and dialog windows.
 // must be called under RenderWinGlobalMu mutex lock!
@@ -310,7 +302,6 @@ func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
 			}
 		}
 	}
-	*/
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -579,6 +570,7 @@ func StringsRemoveExtras(items *[]string, extras []string) {
 		*items = (*items)[:i]
 	}
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Separator
