@@ -10,9 +10,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -335,38 +332,6 @@ func (tb *Toolbar) ToolbarStyles() {
 		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
-}
-
-// AddButton adds an button to the toolbar using given options, and connects
-// the button signal to given receiver object and function, along with given
-// data which is stored on the button and then passed in the button signal.
-// Optional updateFunc is a function called prior to showing the menu to
-// update the buttons (enabled or not typically).
-func (tb *Toolbar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
-	nm := opts.Name
-	if nm == "" {
-		nm = opts.Label
-	}
-	if nm == "" {
-		nm = string(opts.Icon)
-	}
-	bt := NewButton(tb, nm)
-	bt.Type = ButtonAction
-	bt.Text = opts.Label
-	bt.Icon = icons.Icon(opts.Icon)
-	bt.Tooltip = opts.Tooltip
-	bt.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
-	if opts.ShortcutKey != KeyFunNil {
-		bt.Shortcut = ShortcutForFun(opts.ShortcutKey)
-	}
-	bt.Data = opts.Data
-	bt.UpdateFunc = opts.UpdateFunc
-	if fun != nil {
-		bt.OnClick(func(e events.Event) {
-			fun(bt)
-		})
-	}
-	return bt
 }
 
 // AddSeparator adds a new separator to the toolbar. It automatically

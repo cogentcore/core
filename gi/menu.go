@@ -30,7 +30,7 @@ var MenuMaxHeight = 30
 // NewMenuScene constructs a [Scene] for displaying a menu, using the
 // given menu constructor function. If no name is provided, it defaults
 // to "menu".
-func NewMenuScene(menu func(menu *Scene), name ...string) *Scene {
+func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	nm := "menu"
 	if len(name) > 0 {
 		nm = name[0] + "-menu"
@@ -90,6 +90,6 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 // Make further configuration choices using Set* methods, which
 // can be chained directly after the New call.
 // Use Run call at the end to start the Stage running.
-func NewMenu(menu func(menu *Scene), ctx Widget, pos image.Point) *PopupStage {
+func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *PopupStage {
 	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
 }
