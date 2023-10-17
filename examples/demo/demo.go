@@ -78,39 +78,27 @@ func makeHome(ts *gi.Tabs) {
 	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
 	colorvv.ConfigWidget(cvvw)
 
-	// bt := gi.NewButton(home, "bt")
-	// bt.Text = "Big Shadow"
-	// bt.Style(func(s *styles.Style) {
-	// 	bt.Style.AddBoxShadow(
-	// 		styles.Shadow{
-	// 			HOffset: units.Dp(20),
-	// 			VOffset: units.Dp(-10),
-	// 			Blur:    units.Dp(150),
-	// 			Spread:  units.Dp(150),
-	// 			Color:   colors.Green,
-	// 		},
-	// 		styles.Shadow{
-	// 			HOffset: units.Dp(5),
-	// 			VOffset: units.Dp(30),
-	// 			Blur:    units.Dp(150),
-	// 			Spread:  units.Dp(100),
-	// 			Color:   colors.Blue,
-	// 		},
-	// 		styles.Shadow{
-	// 			HOffset: units.Dp(20),
-	// 			VOffset: units.Dp(10),
-	// 			Blur:    units.Dp(100),
-	// 			Spread:  units.Dp(50),
-	// 			Color:   colors.Purple,
-	// 		},
-	// 	)
-	// })
+	giv.NewFuncButton(home, hello)
 
 	img := gi.NewImage(home)
 	err := img.OpenImage("gopher.png", 300, 300)
 	if err != nil {
 		fmt.Println("error loading gopher image:", err)
 	}
+}
+
+// Hello displays a greeting message and an age in weeks based on the given information.
+//
+//gti:add
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) {
+	weeksOld = age * 52
+	greeting = "Hello, " + firstName + " " + lastName + "! "
+	if likesGo {
+		greeting += "I'm glad to here that you like the best programming language!"
+	} else {
+		greeting += "You should reconsider what programming languages you like."
+	}
+	return
 }
 
 func makeText(ts *gi.Tabs) {
