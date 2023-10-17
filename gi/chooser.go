@@ -268,7 +268,7 @@ func (ch *Chooser) ConfigWidget(sc *Scene) {
 }
 
 func (ch *Chooser) ConfigParts(sc *Scene) {
-	ch.MakeMenuFunc = ch.MakeItemsMenu
+	ch.Menu = ch.MakeItemsMenu
 	parts := ch.NewParts(LayoutHoriz)
 	config := ki.Config{}
 	var icIdx, lbIdx, txIdx, indIdx int
@@ -516,33 +516,16 @@ func (ch *Chooser) SelectItemAction(idx int) {
 	ch.SendChange()
 }
 
-// MakeItemsMenu makes menu of all the items.  It is set as the
-// MakeMenuFunc for this Chooser.
-func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
-	nitm := len(ch.Items)
-	if ch.Menu == nil {
-		ch.Menu = make(Menu, 0, nitm)
-	}
-	n := len(ch.Menu)
-	if nitm < n {
-		ch.Menu = ch.Menu[0:nitm]
-	}
-	if nitm == 0 {
+// MakeItemsMenu constructs a menu of all the items.
+// It is automatically set as the [Button.Menu] for the Chooser.
+func (ch *Chooser) MakeItemsMenu(m *Scene) {
+	if len(ch.Items) == 0 {
 		return
 	}
 	_, ics := ch.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range ch.Items {
-		var bt *Button
-		if n > i {
-			bt = ch.Menu[i].(*Button)
-		} else {
-			bt = &Button{}
-			ki.InitNode(bt)
-			ch.Menu = append(ch.Menu, bt.This().(Widget))
-		}
-		nm := "Item_" + strconv.Itoa(i)
-		bt.SetName(nm)
-		bt.Type = ButtonMenu
+		nm := "item-" + strconv.Itoa(i)
+		bt := NewButton(m, nm).SetType(ButtonMenu)
 		if ics {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)
