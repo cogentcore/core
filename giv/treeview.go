@@ -120,7 +120,6 @@ func (tv *TreeView) TreeViewStyles() {
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
 		s.Margin.Set()
-		s.Padding.Set(units.Dp(4))
 		s.Text.Align = styles.AlignLeft
 		s.AlignV = styles.AlignTop
 
@@ -142,6 +141,7 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 		parts.Style(func(s *styles.Style) {
 			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 			parts.Spacing.SetCh(0.5)
+			s.Padding.Set(units.Dp(4))
 		})
 		// we let the parts handle our state
 		// so that we only get it when we are doing
@@ -172,8 +172,8 @@ func (tv *TreeView) OnChildAdded(child ki.Ki) {
 			e.SetHandled()
 		})
 		parts.OnClick(func(e events.Event) {
-			e.SetHandled()
 			tv.SelectAction(e.SelectMode())
+			e.SetHandled()
 		})
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
@@ -1575,6 +1575,9 @@ func (tv *TreeView) HandleTreeViewMouse() {
 		e.SetHandled()
 	})
 	tv.On(events.MouseDown, func(e events.Event) {
+		e.SetHandled()
+	})
+	tv.OnClick(func(e events.Event) {
 		e.SetHandled()
 	})
 }
