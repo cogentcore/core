@@ -522,7 +522,7 @@ func (ed *Editor) ContextMenu(e events.Event) {
 			}
 		}
 	}
-	ed.WidgetBase.ContextMenu(e)
+	ed.WidgetBase.CustomContextMenu(e)
 }
 
 // MakeContextMenu builds the text editor context menu

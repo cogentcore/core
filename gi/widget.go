@@ -143,7 +143,8 @@ type Widget interface {
 	// MakeContextMenu adds the context menu items (typically [Button]s)
 	// for the widget to the given menu scene. No context menu is defined
 	// by default, but widget types can implement this function if they
-	// have a context menu.
+	// have a context menu. MakeContextMenu also calls
+	// [WidgetBase.CustomContextMenu] if it is not nil.
 	MakeContextMenu(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus --
@@ -281,8 +282,9 @@ type WidgetBase struct {
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-"`
 
-	// optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
-	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-"`
+	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
+	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
+	CustomContextMenu func(m *Scene) `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
 	Sc *Scene `copy:"-" json:"-" xml:"-"`
