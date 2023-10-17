@@ -94,7 +94,7 @@ func (sp *Spinner) SpinnerStyles() {
 
 func (sp *Spinner) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.PathFrom(sp) {
+	switch w.PathFrom(sp.This()) {
 	case "parts/parts":
 		w.Style(func(s *styles.Style) {
 			s.AlignV = styles.AlignMiddle

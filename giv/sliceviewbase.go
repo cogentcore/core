@@ -40,9 +40,6 @@ type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
 	AsSliceViewBase() *SliceViewBase
 
-	// Config configures the view
-	// Config()
-
 	// IsConfiged returns true if is fully configured for display
 	IsConfiged() bool
 
@@ -92,7 +89,7 @@ type SliceViewer interface {
 
 	// SliceDeleteAt deletes element at given index from slice
 	// if updt is true, then update the grid after
-	SliceDeleteAt(idx int, updt bool)
+	SliceDeleteAt(idx int)
 
 	// MimeDataType returns the data type for mime clipboard (copy / paste) data
 	// e.g., filecat.DataJson
@@ -245,7 +242,7 @@ func (sv *SliceViewBase) OnInit() {
 
 func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(sv) {
+	switch w.PathFrom(sv.This()) {
 	case "grid-lay": // grid layout
 		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
@@ -271,6 +268,11 @@ func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
 			s.MinWidth.SetEm(1.5)
 			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
+		})
+	}
+	if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
+		w.Style(func(s *styles.Style) {
+			w.(*gi.Button).SetType(gi.ButtonAction)
 		})
 	}
 }
@@ -318,7 +320,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	}
 	sv.ResetSelectedIdxs()
 	sv.Config(sv.Sc)
-	sv.UpdateEnd(updt)
+	sv.UpdateEndLayout(updt)
 }
 
 // Update is the high-level update display call -- robust to any changes
@@ -327,10 +329,7 @@ func (sv *SliceViewBase) Update() {
 		return
 	}
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndRender(updt)
-
-	sv.This().(SliceViewer).LayoutSliceGrid()
-	sv.This().(SliceViewer).UpdateSliceGrid()
+	defer sv.UpdateEndLayout(updt)
 }
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
@@ -343,7 +342,7 @@ func (sv *SliceViewBase) UpdateValues() {
 }
 
 // Config configures a standard setup of the overall Frame
-func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
+func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 	config := ki.Config{}
 	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
@@ -357,6 +356,10 @@ func (sv *SliceViewBase) ConfigWidget(vp *gi.Scene) {
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
+
+	if sv.Sc != nil && sv.Sc.MainStageMgr() != nil {
+		sv.ApplyStyleTree(sc)
+	}
 	if mods {
 		sv.UpdateEndLayout(updt)
 	}
@@ -536,6 +539,12 @@ func (sv *SliceViewBase) ConfigScroll() {
 	})
 }
 
+func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	sv.This().(SliceViewer).LayoutSliceGrid()
+	sv.This().(SliceViewer).UpdateSliceGrid()
+	return sv.Frame.DoLayout(sc, parBBox, iter)
+}
+
 // UpdateStartIdx updates StartIdx to fit current view
 func (sv *SliceViewBase) UpdateStartIdx() {
 	sz := sv.This().(SliceViewer).UpdtSliceSize()
@@ -607,7 +616,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 
 	nWidgPerRow, _ := sv.RowWidgetNs()
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + sg.Spacing.Dots
+		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + 4*sg.Spacing.Dots
 	}
 	if sv.Styles.Font.Face == nil {
 		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
@@ -627,6 +636,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.VisRows = int(mat32.Floor(sgHt / sv.RowHeight))
 	}
 	sv.DispRows = min(sv.SliceSize, sv.VisRows)
+	// fmt.Println(sv.DispRows, sv.SliceSize, sv.VisRows, sv.RowHeight)
 
 	nWidg := nWidgPerRow * sv.DispRows
 
@@ -655,7 +665,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		return
 	}
 	updt := sg.UpdateStart()
-	defer sg.UpdateEndLayout(updt)
+	defer sg.UpdateEnd(updt)
 
 	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -778,7 +788,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 						delact.Tooltip = "delete this element"
 						delact.Data = i
 						delact.OnClick(func(e events.Event) {
-							sv.SliceDeleteAtRow(i, true)
+							sv.SliceDeleteAtRow(i)
 						})
 					}
 				}
@@ -820,7 +830,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	sv.ViewMuLock() // no return!  must unlock before return below
 
 	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
+	defer sv.UpdateEndLayout(updt)
 
 	sv.SliceNewAtSel(idx)
 
@@ -877,19 +887,13 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	// sv.ScrollBar().SetFullReRender()
-
 	sv.ViewMuUnlock()
-
-	sv.This().(SliceViewer).LayoutSliceGrid()
-	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.SendChange()
 }
 
 // SliceDeleteAtRow deletes element at given display row
 // if updt is true, then update the grid after
-func (sv *SliceViewBase) SliceDeleteAtRow(row int, updt bool) {
-	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIdx+row, updt)
+func (sv *SliceViewBase) SliceDeleteAtRow(row int) {
+	sv.This().(SliceViewer).SliceDeleteAt(sv.StartIdx + row)
 }
 
 // SliceNewAtSel updates selected rows based on
@@ -924,20 +928,16 @@ func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
 }
 
 // SliceDeleteAt deletes element at given index from slice
-// if updt is true, then update the grid after
-func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
+func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 	if sv.isArray {
 		return
 	}
-
 	if idx < 0 || idx >= sv.SliceSize {
 		return
 	}
-
 	sv.ViewMuLock()
-
 	updt := sv.UpdateStart()
-	defer sv.UpdateEnd(updt)
+	defer sv.UpdateEndLayout(updt)
 
 	sv.SliceDeleteAtSel(idx)
 
@@ -950,15 +950,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int, doupdt bool) {
 	}
 
 	sv.ViewMuUnlock()
-
 	sv.SetChanged()
-	if doupdt {
-		// sv.SetFullReRender()
-		// sv.ScrollBar().SetFullReRender()
-		sv.This().(SliceViewer).LayoutSliceGrid()
-		sv.This().(SliceViewer).UpdateSliceGrid()
-	}
-	sv.SendChange()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -981,7 +973,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
 		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"}, func(act *gi.Button) {
-			sv.This().(SliceViewer).UpdateSliceGrid()
+			sv.SetNeedsLayout()
 
 		})
 		if ndef > 1 {
@@ -1003,16 +995,6 @@ func (sv *SliceViewBase) ConfigToolbar() {
 
 func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
 	sv.Frame.ApplyStyle(sc)
-	// if !sv.This().(SliceViewer).IsConfiged() {
-	// 	return
-	// }
-	// sc := sv.Sc
-	// if sc != nil && sv.This().(gi.Widget).IsVisible() &&
-	// 	(sc.IsDoingFullRender() || sc.HasFlag(int(gi.ScPrefSizing))) {
-	// 	if sv.This().(SliceViewer).LayoutSliceGrid() {
-	// 		sv.This().(SliceViewer).UpdateSliceGrid()
-	// 	}
-	// }
 	// if sv.IsDisabled() {
 	// 	sv.SetCanFocus()
 	// }
@@ -1021,7 +1003,7 @@ func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
 }
 
 func (sv *SliceViewBase) Render(sc *gi.Scene) {
-	sv.Toolbar().UpdateButtons()
+	// sv.Toolbar().UpdateButtons()
 	if sv.PushBounds(sc) {
 		sv.FrameStdRender(sc)
 		sv.RenderScrolls(sc)
@@ -1176,7 +1158,7 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 	updt := sv.ScrollToIdxNoUpdt(idx)
 	if updt {
-		sv.This().(SliceViewer).UpdateSliceGrid()
+		sv.SetNeedsLayout()
 	}
 	return updt
 }
@@ -1360,7 +1342,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 	if sv.IsDisabled() && !sv.InactMultiSel {
 		updt := sv.UpdateStart()
-		defer sv.UpdateEndLayout(updt)
+		defer sv.UpdateEndRender(updt)
 
 		sv.UnselectAllIdxs()
 		if sel || sv.SelectedIdx == idx {
@@ -1433,9 +1415,6 @@ func (sv *SliceViewBase) UnselectIdx(idx int) {
 
 // UnselectAllIdxs unselects all selected idxs
 func (sv *SliceViewBase) UnselectAllIdxs() {
-	updt := sv.UpdateStart()
-	defer sv.UpdateEndRender(updt)
-
 	for r := range sv.SelectedIdxs {
 		sv.SelectIdxWidgets(r, false)
 	}
@@ -1639,10 +1618,9 @@ func (sv *SliceViewBase) DeleteIdxs() {
 
 	ixs := sv.SelectedIdxsList(true) // descending sort
 	for _, i := range ixs {
-		sv.This().(SliceViewer).SliceDeleteAt(i, false)
+		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.SetChanged()
-	sv.This().(SliceViewer).UpdateSliceGrid()
 }
 
 // Cut copies selected indexes to clip.Board and deletes selected indexes
@@ -1659,10 +1637,9 @@ func (sv *SliceViewBase) Cut() {
 	idx := ixs[0]
 	sv.UnselectAllIdxs()
 	for _, i := range ixs {
-		sv.This().(SliceViewer).SliceDeleteAt(i, false)
+		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.SetChanged()
-	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -1736,8 +1713,7 @@ func (sv *SliceViewBase) PasteAssign(md mimedata.Mimes, idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.This().(SliceViewer).UpdateSliceGrid()
-	sv.UpdateEnd(updt)
+	sv.UpdateEndRender(updt)
 }
 
 // PasteAtIdx inserts object(s) from mime data at (before) given slice index
@@ -1749,7 +1725,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	svl := reflect.ValueOf(sv.Slice)
 	svnp := sv.SliceNPVal
 	updt := sv.UpdateStart()
-	defer sv.UpdateEndRender(updt)
+	defer sv.UpdateEndLayout(updt)
 
 	for _, ns := range sl {
 		sz := svnp.Len()
@@ -1769,7 +1745,6 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -1895,10 +1870,9 @@ func (sv *SliceViewBase) DragNDropSource(de events.Event) {
 	})
 	idx := sv.DraggedIdxs[0]
 	for _, i := range sv.DraggedIdxs {
-		sv.This().(SliceViewer).SliceDeleteAt(i, false)
+		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.DraggedIdxs = nil
-	sv.This().(SliceViewer).UpdateSliceGrid()
 	sv.SelectIdxAction(idx, events.SelectOne)
 }
 
@@ -2038,7 +2012,7 @@ func (sv *SliceViewBase) KeyInputActive(kt events.Event) {
 	kf := gi.KeyFun(kt.KeyChord())
 	switch kf {
 	// case gi.KeyFunDelete: // too dangerous
-	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx, true)
+	// 	sv.This().(SliceViewer).SliceDeleteAt(sv.SelectedIdx)
 	// 	sv.SelectMode = false
 	// 	sv.SelectIdxAction(idx, events.SelectOne)
 	// 	kt.SetHandled()
@@ -2122,11 +2096,10 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// LowPri to allow other focal widgets to capture
 	sv.On(events.Scroll, func(e events.Event) {
 		e.SetHandled()
+		se := e.(*events.MouseScroll)
 		sbb := sv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
-		_ = sbb
-		_ = cur
-		// sbb.SliderMove(cur, cur+float32(e.NonZeroDelta(mat32.Y)))
+		sbb.SetSliderPosAction(cur - float32(se.DimDelta(mat32.Y)))
 	})
 	sv.OnDoubleClick(func(e events.Event) {
 		si := sv.SelectedIdx
