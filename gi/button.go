@@ -333,6 +333,8 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
+// TODO(kai/menu): do we need ResetMenu?
+
 // ResetMenu removes the menu constructor function
 func (bt *Button) ResetMenu() {
 	bt.Menu = nil
