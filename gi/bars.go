@@ -141,6 +141,8 @@ func (mb *MenuBar) DeleteShortcuts() {
 	}
 }
 
+// TODO(kai/menu): figure out what to do here
+/*
 // FindButtonByName finds an button on the menu, or any sub-menu, with given
 // name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
@@ -164,6 +166,7 @@ func (m *MenuBar) FindButtonByName(name string) (*Button, bool) {
 	}
 	return nil, false
 }
+*/
 
 // ConfigMenus configures Button items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
@@ -393,6 +396,8 @@ func (tb *Toolbar) UpdateButtons() {
 	}
 }
 
+// TODO(kai/menu): figure out what to do here
+/*
 // FindButtonByName finds an button on the toolbar, or any sub-menu, with
 // given name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
@@ -413,3 +418,4 @@ func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
 	}
 	return nil, false
 }
+*/

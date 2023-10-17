@@ -1077,8 +1077,8 @@ func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Menu) {
 
 func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	// derived types put native menu code here
-	if tv.CtxtMenuFunc != nil {
-		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
+	if tv.CustomContextMenu != nil {
+		tv.CustomContextMenu(tv.This().(gi.Widget), m)
 	}
 	// todo -- need a replacement for this:
 	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
