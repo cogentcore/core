@@ -230,6 +230,14 @@ func (bt *Button) SetType(typ ButtonTypes) *Button {
 	return bt
 }
 
+// SetData sets the data of the button
+func (bt *Button) SetData(data any) *Button {
+	updt := bt.UpdateStart()
+	bt.Data = data
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
 // LabelWidget returns the label widget if present
 func (bt *Button) LabelWidget() *Label {
 	lbi := bt.Parts.ChildByName("label")
