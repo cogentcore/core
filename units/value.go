@@ -27,7 +27,7 @@ type Value struct {
 	Dots float32 `inactive:"+"`
 
 	// function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used
-	DotsFunc func(uc *Context) float32
+	DotsFunc func(uc *Context) float32 `view:"-"`
 }
 
 // New creates a new value with the given unit type
