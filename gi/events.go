@@ -106,6 +106,9 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	}
 	state := wb.Styles.State
 	wb.Listeners.Call(ev)
+	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+		return
+	}
 	if wb.Styles.State != state {
 		wb.ApplyStyleUpdate(wb.Sc)
 	}

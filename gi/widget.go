@@ -238,13 +238,16 @@ type Widget interface {
 type WidgetBase struct {
 	ki.Node
 
+	// text for tooltip for this widget -- can use HTML formatting
+	Tooltip string
+
 	// todo: remove CSS stuff from here??
 
 	// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
 	Class string
 
 	// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
-	CSS ki.Props `xml:"css"`
+	CSS ki.Props
 
 	// aggregated css properties from all higher nodes down to me
 	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline"`
@@ -260,24 +263,21 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
-	// text for tooltip for this widget -- can use HTML formatting
-	Tooltip string
-
 	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `json:"-" xml:"-" copy:"-"`
+	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-"`
 
 	// override the computed styles and allow directly editing Style
-	OverrideStyle bool `json:"-" xml:"-"`
+	OverrideStyle bool `copy:"-" json:"-" xml:"-"`
 
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Styles styles.Style `json:"-" xml:"-"`
+	Styles styles.Style `copy:"-" json:"-" xml:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners
+	Listeners events.Listeners `copy:"-" json:"-" xml:"-"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-	Parts *Layout `json:"-" xml:"-" view-closed:"true"`
+	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true"`
 
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-"`
