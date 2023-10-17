@@ -307,42 +307,6 @@ func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
 // CtxtMenuFunc is a function for creating a context menu for given node
 type CtxtMenuFunc func(g Widget, m *Menu)
 
-func (wb *WidgetBase) MakeContextMenu(m *Menu) {
-	// derived types put native menu code here
-	if wb.CtxtMenuFunc != nil {
-		wb.CtxtMenuFunc(wb.This().(Widget), m)
-	}
-	mvp := wb.Sc
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
-}
-
-// ContextMenuPos returns the default position for the context menu
-// upper left corner.  The event will be from a mouse ContextMenu
-// event if non-nil: should handle both cases.
-func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
-	if e != nil {
-		return e.Pos()
-	}
-	return wb.WinPos(.5, .5) // center
-}
-
-func (wb *WidgetBase) HandleWidgetContextMenu() {
-	wb.On(events.ContextMenu, func(e events.Event) {
-		wi := wb.This().(Widget)
-		wi.ContextMenu(e)
-	})
-}
-
-func (wb *WidgetBase) ContextMenu(e events.Event) {
-	var menu Menu
-	wi := wb.This().(Widget)
-	wi.MakeContextMenu(&menu)
-	if len(menu) == 0 {
-		return
-	}
-	NewMenu(menu, wi, wi.ContextMenuPos(e)).Run()
-}
-
 ///////////////////////////////////////////////////////////////
 // 	Choosers
 
