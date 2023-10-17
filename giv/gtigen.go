@@ -1106,6 +1106,7 @@ var _ = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Parent", &gti.Field{Name: "Parent", Type: "*FuncConfig", Doc: "If non-nil, Parent is the parent menu to place this function\nin when creating a toolbar or a menubar. If the specified parent\nfunction does not exist, an artificial parent toolbar/menubar\nbutton will be created to store this function. That artificial\nparent button will have the configuration information specified here.\nIf no artificial parent is needed, the only applicable part of the\nconfiguration information specified here is [FuncConfig.Name]. The\nname of the parent specified in [FuncConfig.Name] should be in\nslash-separated path format (for example, if you want to put\nsomething in the Export menu, which is in the File menu, you would\nspecify [FuncConfig.Parent.Name] as \"File/Export\". When using a comment\ndirective, the parent name can be specified directly through the \"-parent\"\nflag, instead of using \"-parent-name\".", Directives: gti.Directives{}}},
 		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "Name is the actual name in code of the function.", Directives: gti.Directives{}}},
 		{"Label", &gti.Field{Name: "Label", Type: "string", Doc: "Label is the user-friendly label for the function button.\nIt defaults to the sentence case version of the\nname of the function.", Directives: gti.Directives{}}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "Icon is the icon for the function button. If there\nis an icon with the same name as the function, it\ndefaults to that icon.", Directives: gti.Directives{}}},
@@ -1724,53 +1725,17 @@ func (t *TextEditorValue) New() ki.Ki {
 	return &TextEditorValue{}
 }
 
-// TreeSyncViewType is the [gti.Type] for [TreeSyncView]
-var TreeSyncViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/giv.TreeSyncView",
-	ShortName:  "giv.TreeSyncView",
-	IDName:     "tree-sync-view",
-	Doc:        "TreeSyncView is a TreeView that synchronizes with another\nKi tree structure.  Must establish signaling communication\nbetween the two nodes to keep them synchronized.",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SrcNode", &gti.Field{Name: "SrcNode", Type: "ki.Ki", Doc: "Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}}},
-		{"SyncConnectFun", &gti.Field{Name: "SyncConnectFun", Type: "func(tv *TreeSyncView)", Doc: "SyncConnectFun is function called to connect given\nTreeSyncView with its SrcNode, which has just been set.", Directives: gti.Directives{}}},
-		{"ShowViewCtxtMenu", &gti.Field{Name: "ShowViewCtxtMenu", Type: "bool", Doc: "if the object we're viewing has its own CtxtMenu property defined,\nshould we also still show the view's own context menu?", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TreeView", &gti.Field{Name: "TreeView", Type: "TreeView", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &TreeSyncView{},
-})
-
-// NewTreeSyncView adds a new [TreeSyncView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewTreeSyncView(par ki.Ki, name ...string) *TreeSyncView {
-	return par.NewChild(TreeSyncViewType, name...).(*TreeSyncView)
-}
-
-// KiType returns the [*gti.Type] of [TreeSyncView]
-func (t *TreeSyncView) KiType() *gti.Type {
-	return TreeSyncViewType
-}
-
-// New returns a new [*TreeSyncView] value
-func (t *TreeSyncView) New() ki.Ki {
-	return &TreeSyncView{}
-}
-
 // TreeViewType is the [gti.Type] for [TreeView]
 var TreeViewType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/giv.TreeView",
 	ShortName: "giv.TreeView",
 	IDName:    "tree-view",
-	Doc:       "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\nSee the TreeSyncView for a version that syncs with another\nKi tree structure to represent it.\n\nStandard events.Event are sent to any listeners, including\nSelect and DoubleClick.\n\nIf possible, it is typically easier to directly use\nTreeView nodes to represent data by adding extra fields.\nSee FileTreeView for an example.",
+	Doc:       "TreeView provides a graphical representation of a tree tructure\nproviding full navigation and manipulation abilities.\n\nIf the SyncNode field is non-nil, typically via\nSyncRootNode method, then the TreeView mirrors another\nKi tree structure, and tree editing functions apply to\nthe source tree first, and then to the TreeView by sync.\n\nOtherwise, data can be directly encoded in a TreeView\nderived type, to represent any kind of tree structure\nand associated data.\n\nStandard events.Event are sent to any listeners, including\nSelect, Change, and DoubleClick.  The selected nodes\nare in the root SelectedNodes list.",
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "ki.Ki", Doc: "If non-Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}}},
 		{"Indent", &gti.Field{Name: "Indent", Type: "units.Value", Doc: "amount to indent children relative to this node", Directives: gti.Directives{}}},
 		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed.", Directives: gti.Directives{}}},
@@ -1778,6 +1743,7 @@ var TreeViewType = gti.AddType(&gti.Type{
 		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}}},
 		{"RootView", &gti.Field{Name: "RootView", Type: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}}},
 		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}}},
+		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},

@@ -223,8 +223,8 @@ func (ge *GiEditor) Splits() *gi.Splits {
 }
 
 // TreeView returns the main TreeSyncView
-func (ge *GiEditor) TreeView() *TreeSyncView {
-	return ge.Splits().Child(0).Child(0).(*TreeSyncView)
+func (ge *GiEditor) TreeView() *TreeView {
+	return ge.Splits().Child(0).Child(0).(*TreeView)
 }
 
 // StructView returns the main StructView
@@ -258,32 +258,17 @@ func (ge *GiEditor) ConfigSplits() {
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
-		tv := NewTreeSyncView(tvfr, "tv")
+		tv := NewTreeView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
-		_ = tv
-		_ = sv
-		// todo:
-		// tv.TreeViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	if data == nil {
-		// 		return
-		// 	}
-		// 	gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
-		// 	svr := gee.StructView()
-		// 	tvn, _ := data.(ki.Ki).Embed(TypeTreeView).(*TreeView)
-		// 	if sig == int64(TreeViewSelected) {
-		// 		svr.SetStruct(tvn.SrcNode)
-		// 	} else if sig == int64(TreeViewChanged) {
-		// 		gee.SetChanged()
-		// 	}
-		// })
-		// sv.ViewSig.Connect(ge.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 	gee, _ := recv.Embed(TypeGiEditor).(*GiEditor)
-		// 	gee.SetChanged()
-		// })
+		tv.OnSelect(func(e events.Event) {
+			if len(tv.SelectedNodes) > 0 {
+				sv.SetStruct(tv.SelectedNodes[0].SyncNode)
+			}
+		})
 		split.SetSplits(.3, .7)
 	}
 	tv := ge.TreeView()
-	tv.SetRootNode(ge.KiRoot)
+	tv.SyncRootNode(ge.KiRoot)
 	sv := ge.StructView()
 	sv.SetStruct(ge.KiRoot)
 }
