@@ -724,25 +724,23 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.CursorForward(rsl)
 }
 
-func (tf *TextField) MakeContextMenu(m *Menu) {
+func (tf *TextField) MakeContextMenu(m *Scene) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddButton(ActOpts{Label: "Copy", Shortcut: cpsc}, func(bt *Button) {
+	NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).OnClick(func(e events.Event) {
 		tf.This().(Clipper).Copy(true)
-	})
-	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-	if !tf.IsDisabled() {
+	}).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+	if !tf.StateIs(states.Disabled) {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddButton(ActOpts{Label: "Cut", Shortcut: ctsc}, func(bt *Button) {
+		NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).OnClick(func(e events.Event) {
 			tf.This().(Clipper).Cut()
-		})
-		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-		ac = m.AddButton(ActOpts{Label: "Paste", Shortcut: ptsc}, func(bt *Button) {
+		}).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled)
+		pbt := NewButton(m, "paste").SetText("Paste").SetShortcut(ptsc).OnClick(func(e events.Event) {
 			tf.This().(Clipper).Paste()
 		})
 		cb := tf.Sc.EventMgr.ClipBoard()
 		if cb != nil {
-			ac.SetState(cb.IsEmpty(), states.Disabled)
+			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}
 	}
 }
