@@ -82,7 +82,7 @@ func (tv *TableView) OnInit() {
 
 func (tv *TableView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(tv) {
+	switch w.PathFrom(tv.This()) {
 	case "frame": // slice frame
 		sf := w.(*gi.Frame)
 		sf.Lay = gi.LayoutVert
@@ -704,7 +704,7 @@ func (tv *TableView) UpdateSliceGrid() {
 					delact.Tooltip = "delete this element"
 
 					delact.OnClick(func(e events.Event) {
-						tv.SliceDeleteAtRow(i, true)
+						tv.SliceDeleteAtRow(i)
 					})
 				}
 				cidx++
@@ -745,13 +745,10 @@ func (tv *TableView) SliceNewAt(idx int) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
-	tv.This().(SliceViewer).LayoutSliceGrid()
-	tv.This().(SliceViewer).UpdateSliceGrid()
 }
 
-// SliceDeleteAt deletes element at given index from slice -- doupdt means
-// call UpdateSliceGrid to update display
-func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
+// SliceDeleteAt deletes element at given index from slice
+func (tv *TableView) SliceDeleteAt(idx int) {
 	if idx < 0 || idx >= tv.SliceSize {
 		return
 	}
@@ -768,10 +765,6 @@ func (tv *TableView) SliceDeleteAt(idx int, doupdt bool) {
 		tv.TmpSave.SaveTmp()
 	}
 	tv.SetChanged()
-	if doupdt {
-		tv.This().(SliceViewer).LayoutSliceGrid()
-		tv.This().(SliceViewer).UpdateSliceGrid()
-	}
 }
 
 // SortSlice sorts the slice according to current settings
@@ -787,7 +780,7 @@ func (tv *TableView) SortSlice() {
 // vs. descending if already sorting on this dimension
 func (tv *TableView) SortSliceAction(fldIdx int) {
 	updt := tv.UpdateStart()
-	defer tv.UpdateEndRender(updt)
+	defer tv.UpdateEndLayout(updt)
 
 	sgh := tv.SliceHeader()
 	_, idxOff := tv.RowWidgetNs()
@@ -816,7 +809,6 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
-	tv.UpdateSliceGrid()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -839,7 +831,7 @@ func (tv *TableView) ConfigToolbar() {
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
 		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"}, func(act *gi.Button) {
-			tv.UpdateSliceGrid()
+			tv.SetNeedsLayout()
 		})
 		if ndef > 1 {
 			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"}, func(act *gi.Button) {

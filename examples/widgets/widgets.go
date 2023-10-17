@@ -39,9 +39,9 @@ func app() {
 	gi.SetAppAbout(`This is a demo of the main widgets and general functionality of the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>.
 <p>The <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">README</a> page for this example app has lots of further info.</p>`)
 
-	scene := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
+	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
-	tbar := gi.NewToolbar(scene, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
+	tbar := gi.NewToolbar(sc, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
 	tbar.AddButton(gi.ActOpts{Label: "Button 1", Data: 1}, func(act *gi.Button) {
 		fmt.Println("Toolbar Button 1")
 		gi.NewSnackbar(tbar, gi.SnackbarOpts{
@@ -60,7 +60,7 @@ func app() {
 		fmt.Println("Toolbar Button 2")
 	})
 
-	trow := gi.NewLayout(scene, "trow").
+	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
 
 	giedsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunGoGiEditor)
@@ -86,11 +86,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Buttons
 
-	gi.NewSpace(scene, "blspc")
-	gi.NewLabel(scene, "blab").
+	gi.NewSpace(sc, "blspc")
+	gi.NewLabel(sc, "blab").
 		SetText("Buttons:")
 
-	brow := gi.NewLayout(scene, "brow").
+	brow := gi.NewLayout(sc, "brow").
 		SetLayout(gi.LayoutHoriz).SetSpacing(units.Em(1))
 
 	b1 := gi.NewButton(brow, "button1").
@@ -158,11 +158,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Sliders
 
-	gi.NewSpace(scene, "slspc")
-	gi.NewLabel(gi.NewLayout(scene, "slrow").SetLayout(gi.LayoutHoriz), "slab").
+	gi.NewSpace(sc, "slspc")
+	gi.NewLabel(gi.NewLayout(sc, "slrow").SetLayout(gi.LayoutHoriz), "slab").
 		SetText("Sliders:")
 
-	srow := gi.NewLayout(scene, "srow").SetLayout(gi.LayoutHoriz).
+	srow := gi.NewLayout(sc, "srow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth().
 		Style(func(s *styles.Style) {
@@ -220,11 +220,11 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	//////////////////////////////////////////
 	//      Text Widgets
 
-	gi.NewSpace(scene, "tlspc")
-	gi.NewLabel(gi.NewLayout(scene, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
+	gi.NewSpace(sc, "tlspc")
+	gi.NewLabel(gi.NewLayout(sc, "txlrow").SetLayout(gi.LayoutHoriz), "txlab").
 		SetText("Text Widgets:")
 
-	txrow := gi.NewLayout(scene, "txrow").SetLayout(gi.LayoutHoriz).
+	txrow := gi.NewLayout(sc, "txrow").SetLayout(gi.LayoutHoriz).
 		SetSpacing(units.Ex(2)).
 		SetStretchMaxWidth()
 
@@ -337,5 +337,5 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	win.MainMenuUpdated()
 	*/
 
-	gi.NewWindow(scene).Run().Wait()
+	gi.NewWindow(sc).Run().Wait()
 }

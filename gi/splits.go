@@ -470,7 +470,7 @@ func (sr *Splitter) SplitterStyles() {
 
 func (sr *Splitter) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.PathFrom(sr) {
+	switch w.PathFrom(sr.This()) {
 	case "parts/icon":
 		// w.Style(func(s *styles.Style) {
 		// 	s.MaxWidth.SetEm(1)

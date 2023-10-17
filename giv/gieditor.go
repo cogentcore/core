@@ -45,7 +45,7 @@ func (ge *GiEditor) OnInit() {
 
 func (ge *GiEditor) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(ge) {
+	switch w.PathFrom(ge.This()) {
 	case "title":
 		title := w.(*gi.Label)
 		title.Type = gi.LabelHeadlineSmall
