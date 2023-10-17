@@ -140,12 +140,11 @@ type Widget interface {
 	// (recommended to include where possible).
 	Send(e events.Types, orig ...events.Event)
 
-	// MakeContextMenu creates the context menu items (typically Action
-	// elements, but it can be anything) for a given widget, typically
-	// activated by the right mouse button or equivalent.  Widget has a
-	// function parameter that can be set to add context items (e.g., by Views
-	// or other complex widgets) to extend functionality.
-	MakeContextMenu(menu *Menu)
+	// MakeContextMenu adds the context menu items (typically [Button]s)
+	// for the widget to the given menu scene. No context menu is defined
+	// by default, but widget types can implement this function if they
+	// have a context menu.
+	MakeContextMenu(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle its Bounding Box, but can be adapted as

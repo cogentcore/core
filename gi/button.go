@@ -47,11 +47,9 @@ type Button struct {
 	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut"`
 
-	// the menu items for this menu -- typically add Button elements for menus, along with separators
-	Menu Menu
-
-	// set this to make a menu on demand -- if set then this button acts like a menu button
-	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-"`
+	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
+	// The constructor function should add buttons to the scene that it is passed.
+	Menu func(m *Scene)
 
 	// optional data that is sent with events to identify the button
 	Data any `json:"-" xml:"-" view:"-"`
@@ -72,8 +70,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Icon = fr.Icon
 	bt.Indicator = fr.Indicator
 	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in buttons; todo: could do more elaborate copy etc but is it worth it?
-	bt.MakeMenuFunc = fr.MakeMenuFunc
+	bt.Menu = fr.Menu // TODO(kai/menu): is it safe to copy this?
 	bt.Data = fr.Data
 }
 
