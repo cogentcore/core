@@ -230,6 +230,14 @@ func (bt *Button) SetType(typ ButtonTypes) *Button {
 	return bt
 }
 
+// SetShortcut sets the shortcut of the button
+func (bt *Button) SetShortcut(shortcut key.Chord) *Button {
+	updt := bt.UpdateStart()
+	bt.Shortcut = shortcut
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
 // SetData sets the data of the button
 func (bt *Button) SetData(data any) *Button {
 	updt := bt.UpdateStart()
