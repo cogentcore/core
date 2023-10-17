@@ -9,6 +9,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
+	"goki.dev/goosi/events"
 )
 
 // MenuSceneConfigStyles configures the default styles
@@ -92,4 +93,36 @@ func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
 // Use Run call at the end to start the Stage running.
 func NewMenu(menu func(m *Scene), ctx Widget, pos image.Point) *PopupStage {
 	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
+}
+
+func (wb *WidgetBase) MakeContextMenu(m *Scene) {
+	// derived types put native menu code here
+	if wb.CustomContextMenu != nil {
+		wb.CustomContextMenu(m)
+	}
+	mvp := wb.Sc
+	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
+}
+
+// ContextMenuPos returns the default position for the context menu
+// upper left corner.  The event will be from a mouse ContextMenu
+// event if non-nil: should handle both cases.
+func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
+	if e != nil {
+		return e.Pos()
+	}
+	return wb.WinPos(.5, .5) // center
+}
+
+func (wb *WidgetBase) HandleWidgetContextMenu() {
+	wb.On(events.ContextMenu, func(e events.Event) {
+		wi := wb.This().(Widget)
+		wi.ContextMenu(e)
+	})
+}
+
+func (wb *WidgetBase) ContextMenu(e events.Event) {
+	wi := wb.This().(Widget)
+	// TODO(kai/menu): how to handle empty context menus?
+	NewMenu(wb.MakeContextMenu, wi, wi.ContextMenuPos(e)).Run()
 }
