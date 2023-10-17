@@ -215,7 +215,7 @@ func (tf *TextField) TextFieldStyles() {
 
 func (tf *TextField) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.PathFrom(tf) {
+	switch w.PathFrom(tf.This()) {
 	case "parts/lead-icon":
 		lead := w.(*Button)
 		lead.Type = ButtonAction

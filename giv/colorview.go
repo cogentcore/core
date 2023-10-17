@@ -56,7 +56,7 @@ func (cv *ColorView) OnInit() {
 
 func (cv *ColorView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(cv) {
+	switch w.PathFrom(cv.This()) {
 	case "value":
 		w.Style(func(s *styles.Style) {
 			s.MinWidth.SetEm(6)

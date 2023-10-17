@@ -1758,7 +1758,7 @@ func (ftv *FileTreeView) FileTreeViewStyles() {
 
 func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom() {
+	switch w.PathFrom(ftv.This()) {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Style(func(s *styles.Style) {

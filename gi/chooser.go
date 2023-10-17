@@ -150,7 +150,7 @@ func (ch *Chooser) ChooserStyles() {
 
 func (ch *Chooser) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.PathFrom(ch) {
+	switch w.PathFrom(ch.This()) {
 	case "parts/icon":
 		w.Style(func(s *styles.Style) {
 			s.Margin.Set()
