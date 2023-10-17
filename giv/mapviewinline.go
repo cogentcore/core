@@ -52,7 +52,7 @@ func (mv *MapViewInline) OnInit() {
 
 func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
 	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(mv) {
+	switch w.PathFrom(mv.This()) {
 	case "parts":
 		parts := w.(*gi.Layout)
 		parts.Lay = gi.LayoutHoriz

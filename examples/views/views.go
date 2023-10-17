@@ -4,11 +4,18 @@
 
 package main
 
-// TODO: fix
-/*
-var (
-	Ticker *time.Ticker
-	Frame  *gi.Frame
+import (
+	"fmt"
+
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/gimain"
+	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/goosi"
+	"goki.dev/goosi/events"
+	"goki.dev/icons"
+	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
@@ -16,70 +23,70 @@ func main() { gimain.Run(app) }
 type TableStruct struct {
 
 	// an icon
-	Icon icons.Icon `desc:"an icon"`
+	Icon icons.Icon
 
 	// an integer field
-	IntField int `desc:"an integer field"`
+	IntField int
 
 	// a float field
-	FloatField float32 `desc:"a float field"`
+	FloatField float32
 
 	// a string field
-	StrField string `desc:"a string field"`
+	StrField string
 
 	// a file
-	File gi.FileName `desc:"a file"`
+	File gi.FileName
 }
 
 type ILStruct struct {
 
 	// click to show next
-	On bool `desc:"click to show next"`
+	On bool
 
-	// [viewif: On] can u see me?
-	ShowMe string `viewif:"On" desc:"can u see me?"`
+	// can u see me?
+	ShowMe string `viewif:"On"`
 
-	// [viewif: On] a conditional
-	Cond int `viewif:"On" desc:"a conditional"`
+	// a conditional
+	Cond int `viewif:"On"`
 
-	// [viewif: On&&Cond==0] On and Cond=0 -- note that slbool as bool cannot be used directly..
-	Cond1 string `viewif:"On&&Cond==0" desc:"On and Cond=0 -- note that slbool as bool cannot be used directly.."`
+	// On and Cond=0 -- note that slbool as bool cannot be used directly..
+	Cond1 string `viewif:"On&&Cond==0"`
 
-	// [viewif: On&&Cond<=1] if Cond=0
-	Cond2 TableStruct `viewif:"On&&Cond<=1" desc:"if Cond=0"`
+	// if Cond=0
+	Cond2 TableStruct `viewif:"On&&Cond<=1"`
 
 	// a value
-	Val float32 `desc:"a value"`
+	Val float32
 }
 
 type Struct struct {
 
 	// an enum
-	Stripes gi.Stripes `desc:"an enum"`
+	Stripes gi.Stripes
 
-	// [viewif: !(Stripes==[RowStripes,ColStripes])] a string
-	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])" desc:"a string"`
+	// )] a string
+	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])"`
 
 	// click to show next
-	ShowNext bool `desc:"click to show next"`
+	ShowNext bool
 
-	// [viewif: ShowNext] can u see me?
-	ShowMe string `viewif:"ShowNext" desc:"can u see me?"`
+	// can u see me?
+	ShowMe string `viewif:"ShowNext"`
 
-	// [view: inline] how about that
-	Inline ILStruct `view:"inline" desc:"how about that"`
+	// how about that
+	Inline ILStruct `view:"inline"`
 
 	// a conditional
-	Cond int `desc:"a conditional"`
+	Cond int
 
-	// [viewif: Cond==0] if Cond=0
-	Cond1 string `viewif:"Cond==0" desc:"if Cond=0"`
+	// if Cond=0
+	Cond1 string `viewif:"Cond==0"`
 
-	// [viewif: Cond>=0] if Cond=0
-	Cond2 TableStruct `viewif:"Cond>=0" desc:"if Cond=0"`
+	// if Cond=0
+	Cond2 TableStruct `viewif:"Cond>=0"`
 
 	// a value
-	Val float32 `desc:"a value"`
+	Val float32
 }
 
 func app() {
@@ -103,120 +110,93 @@ func app() {
 	}
 
 	var stru Struct
+	stru.Name = "happy"
+	stru.Cond = 2
+	stru.Val = 3.1415
+	stru.Cond2.IntField = 22
+	stru.Cond2.FloatField = 44.4
+	stru.Cond2.StrField = "fi"
+	stru.Cond2.File = gi.FileName("views.go")
+	_ = stru
 
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
 	// gi.RenderTrace = true
 	// gi.LayoutTrace = true
+	// gi.WinRenderTrace = true
+	// gi.UpdateTrace = true
+
+	goosi.ZoomFactor = 2
 
 	gi.SetAppName("views")
 	gi.SetAppAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
 
-	width := 1024
-	height := 768
-	win := gi.NewMainRenderWin("gogi-views-test", "GoGi Views Test", width, height)
+	sc := gi.NewScene("gogi-views-test").SetTitle("GoGi Views Test")
 
-	vp := win.WinScene()
-	updt := vp.UpdateStart()
-
-	mfr := win.SetMainFrame()
-	Frame = mfr
-
-	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
-	trow.SetProp("horizontal-align", "center")
-	trow.SetProp("margin", 2.0) // raw numbers = px = 96 dpi pixels
-	trow.SetStretchMaxWidth()
-
-	spc := gi.NewSpace(mfr, "spc1")
-	spc.SetFixedHeight(units.Em(2))
+	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
+	trow.Style(func(s *styles.Style) {
+		s.AlignH = styles.AlignCenter
+		s.Margin.Set(units.Px(2))
+		s.SetStretchMaxWidth()
+	})
 
 	gi.NewStretch(trow, "str1")
-	but := gi.NewButton(trow, "slice-test")
-	but.SetText("SliceDialog")
+
+	but := gi.NewButton(trow, "slice-test").SetText("SliceDialog")
 	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
-	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.ButtonClicked) {
-			sl := make([]float32, 2880)
-			gi.ProfileToggle()
-			gi.RenderWinOpenTimer = time.Now()
-			giv.SliceViewDialog(vp, &sl, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, nil, nil, nil)
-		}
+	but.OnClick(func(e events.Event) {
+		sl := make([]float32, 2880)
+		giv.SliceViewDialog(but, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, &sl, nil, nil)
 	})
-	but = gi.NewButton(trow, "table-test")
-	but.SetText("TableDialog")
+	but = gi.NewButton(trow, "table-test").SetText("TableDialog")
 	but.Tooltip = "open a TableViewDialog view "
-	but.ButtonSig.Connect(win, func(recv, send ki.Ki, sig int64, data any) {
-		if sig == int64(gi.ButtonClicked) {
-			giv.TableViewDialog(vp, &tsttable, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, nil, nil, nil)
-		}
+	but.OnClick(func(e events.Event) {
+		giv.TableViewDialog(but, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, &tsttable, nil, nil)
 	})
 
-	lab1 := gi.NewLabel(trow, "lab1", "<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
-	lab1.SetProp("max-width", -1)
-	lab1.SetProp("text-align", "center")
+	lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
+	lab1.Style(func(s *styles.Style) {
+		s.SetStretchMaxWidth()
+		s.Text.Align = styles.AlignCenter
+	})
 	gi.NewStretch(trow, "str2")
 
-	split := gi.NewSplits(mfr, "split")
+	spc := gi.NewSpace(sc, "spc1")
+	spc.Style(func(s *styles.Style) {
+		s.SetFixedHeight(units.Em(2))
+	})
+
+	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	strv := giv.NewStructView(split, "strv")
-	strv.SetStruct(&stru)
-	strv.SetStretchMax()
+	// strv := giv.NewStructView(split, "strv")
+	// strv.SetStruct(&stru)
+	// strv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
-	mv := giv.NewMapView(split, "mv")
-	mv.SetMap(&tstmap)
-	mv.SetStretchMaxWidth()
-	mv.SetStretchMaxHeight()
+	// mv := giv.NewMapView(split, "mv")
+	// mv.SetMap(&tstmap)
+	// mv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
 	sv := giv.NewSliceView(split, "sv")
 	// sv.SetInactive()
 	sv.SetSlice(&tstslice)
-	sv.SetStretchMaxWidth()
-	sv.SetStretchMaxHeight()
-
-	tv := giv.NewTableView(split, "tv")
-	// sv.SetInactive()
-	tv.SetSlice(&tsttable)
-	tv.SetStretchMaxWidth()
-	tv.SetStretchMaxHeight()
-
-	split.SetSplits(.3, .2, .2, .3)
-
-	// main menu
-	appnm := gi.AppName()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "RenderWin"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Button)
-	amen.Menu = make(gi.MenuStage, 0, 10)
-	amen.Menu.AddAppMenu(win)
-
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Button)
-	emen.Menu = make(gi.MenuStage, 0, 10)
-	emen.Menu.AddCopyCutPaste(win)
-
-	win.SetCloseCleanFunc(func(w *gi.RenderWin) {
-		go gi.Quit() // once main window is closed, quit
+	sv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
 	})
 
-	win.MainMenuUpdated()
-	vp.UpdateEndNoSig(updt)
+	// tv := giv.NewTableView(split, "tv")
+	// // sv.SetInactive()
+	// tv.SetSlice(&tsttable)
+	// tv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
-	// Ticker = time.NewTicker(1 * time.Second)
-	// go Animate()
+	// split.SetSplits(.3, .2, .2, .3)
+	split.SetSplits(1)
 
-	win.StartEventLoop()
+	gi.NewWindow(sc).Run().Wait()
 }
-
-// Animate
-func Animate() {
-	for {
-		<-Ticker.C // wait for tick
-
-		updt := Frame.UpdateStart()
-		// fmt.Printf("updt\n")
-		Frame.UpdateEnd(updt)
-	}
-
-}
-*/

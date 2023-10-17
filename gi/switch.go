@@ -118,7 +118,7 @@ func (sw *Switch) SwitchStyles() {
 
 func (sw *Switch) OnChildAdded(child ki.Ki) {
 	w, _ := AsWidget(child)
-	switch w.PathFrom(sw) {
+	switch w.PathFrom(sw.This()) {
 	case "parts/stack/icon0": // on
 		w.Style(func(s *styles.Style) {
 			s.Color = colors.Scheme.Primary.Base
