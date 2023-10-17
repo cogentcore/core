@@ -264,7 +264,7 @@ type WidgetBase struct {
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
 	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-"`
+	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `copy:"-" json:"-" xml:"-"`
@@ -274,7 +274,7 @@ type WidgetBase struct {
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners `copy:"-" json:"-" xml:"-"`
+	Listeners events.Listeners `view:"-" copy:"-" json:"-" xml:"-"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true"`

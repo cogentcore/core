@@ -13,6 +13,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/mat32/v2"
 )
 
@@ -70,23 +71,17 @@ func app() {
 	nleaves := tv.RootSetViewIdx()
 	fmt.Println("N leaves:", nleaves)
 
-	_ = svfr
-	// sv := giv.NewStructView(svfr, "sv")
-	// sv.SetStretchMaxWidth()
-	// sv.SetStretchMaxHeight()
-	// sv.SetStruct(tv)
+	sv := giv.NewStructView(svfr, "sv")
+	sv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
+	sv.SetStruct(tv)
 
-	// tv.TreeViewSig.Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-	// 	if data == nil {
-	// 		return
-	// 	}
-	// 	//t vr, _ := send.Embed(giv.TypeTreeView).(*gi.TreeView) // root is sender
-	// 	tvn, _ := data.(ki.Ki).Embed(giv.TypeTreeView).(*giv.TreeView)
-	// 	svr, _ := recv.Embed(giv.TypeStructView).(*giv.StructView)
-	// 	if sig == int64(giv.TreeViewSelected) {
-	// 		svr.SetStruct(tvn.SrcNode)
-	// 	}
-	// })
+	tv.OnSelect(func(e events.Event) {
+		if len(tv.SelectedNodes) > 0 {
+			sv.SetStruct(tv.SelectedNodes[len(tv.SelectedNodes)-1])
+		}
+	})
 
 	gi.NewWindow(sc).Run().Wait()
 }
