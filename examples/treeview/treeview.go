@@ -79,7 +79,7 @@ func app() {
 
 	tv.OnSelect(func(e events.Event) {
 		if len(tv.SelectedNodes) > 0 {
-			sv.SetStruct(tv.SelectedNodes[len(tv.SelectedNodes)-1])
+			sv.SetStruct(tv.SelectedNodes[0])
 		}
 	})
 

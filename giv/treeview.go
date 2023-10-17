@@ -26,21 +26,31 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
+// note: see treesync.go for all the SyncNode mode specific
+// functions.
+
 // TreeView provides a graphical representation of a tree tructure
 // providing full navigation and manipulation abilities.
-// See the TreeSyncView for a version that syncs with another
-// Ki tree structure to represent it.
+//
+// If the SyncNode field is non-nil, typically via
+// SyncRootNode method, then the TreeView mirrors another
+// Ki tree structure, and tree editing functions apply to
+// the source tree first, and then to the TreeView by sync.
+//
+// Otherwise, data can be directly encoded in a TreeView
+// derived type, to represent any kind of tree structure
+// and associated data.
 //
 // Standard events.Event are sent to any listeners, including
-// Select and DoubleClick.
-//
-// If possible, it is typically easier to directly use
-// TreeView nodes to represent data by adding extra fields.
-// See FileTreeView for an example.
+// Select, Change, and DoubleClick.  The selected nodes
+// are in the root SelectedNodes list.
 //
 //goki:embedder
 type TreeView struct {
 	gi.WidgetBase
+
+	// If non-Ki Node that this widget is viewing in the tree -- the source
+	SyncNode ki.Ki `copy:"-" json:"-" xml:"-"`
 
 	// optional icon, displayed to the the left of the text label
 	Icon icons.Icon
@@ -52,8 +62,8 @@ type TreeView struct {
 	// Nodes beyond this depth will be initialized as closed.
 	OpenDepth int `copy:"-" json:"-" xml:"-"`
 
-	///////////////////////
-	// Computed below
+	/////////////////////////////////////////
+	// All fields below are computed
 
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
@@ -318,7 +328,7 @@ func (tv *TreeView) ConfigParts(sc *gi.Scene) {
 		}
 	}
 	if lbl, ok := tv.LabelPart(); ok {
-		lbl.SetText(tv.Name())
+		lbl.SetText(tv.Label())
 	}
 	if mods {
 		parts.UpdateEnd(updt)
@@ -674,6 +684,16 @@ func (tv *TreeView) SendSelectEvent(ctx events.Event) {
 // RootView node, using context event if avail (else nil).
 func (tv *TreeView) SendChangeEvent(ctx events.Event) {
 	tv.RootView.Send(events.Change, nil)
+}
+
+// SendChangeEventReSync sends the events.Change event on the
+// RootView node, using context event if avail (else nil).
+// If SyncNode != nil, also does a re-sync from root.
+func (tv *TreeView) SendChangeEventReSync(ctx events.Event) {
+	tv.RootView.Send(events.Change, nil)
+	if tv.RootView.SyncNode != nil {
+		tv.RootView.ReSync()
+	}
 }
 
 // SelectAction updates selection to include this node,
@@ -1067,6 +1087,13 @@ func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
 	if tv.CtxtMenuFunc != nil {
 		tv.CtxtMenuFunc(tv.This().(gi.Widget), m)
 	}
+	// todo -- need a replacement for this:
+	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
+	// 	if tv.ShowViewCtxtMenu {
+	// 		m.AddSeparator("sep-tvmenu")
+	// 		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
+	// 	}
+	// } else {
 	tv.MakeTreeViewContextMenu(m)
 }
 
@@ -1087,6 +1114,10 @@ func (tv *TreeView) IsRoot(op string) bool {
 // MimeData adds mimedata for this node: a text/plain of the Path.
 // satisfies Clipper.MimeData interface
 func (tv *TreeView) MimeData(md *mimedata.Mimes) {
+	if tv.SyncNode != nil {
+		tv.MimeDataSync(md)
+		return
+	}
 	*md = append(*md, mimedata.NewTextData(tv.PathFrom(tv.RootView)))
 	var buf bytes.Buffer
 	err := ki.WriteNewJSON(tv.This(), &buf)
@@ -1097,7 +1128,8 @@ func (tv *TreeView) MimeData(md *mimedata.Mimes) {
 	}
 }
 
-// NodesFromMimeData returns a slice of paths from mime data.
+// NodesFromMimeData returns a slice of Ki nodes for
+// the TreeView nodes and paths from mime data.
 func (tv *TreeView) NodesFromMimeData(md mimedata.Mimes) (ki.Slice, []string) {
 	ni := len(md) / 2
 	sl := make(ki.Slice, 0, ni)
@@ -1143,6 +1175,10 @@ func (tv *TreeView) Cut() {
 	if tv.IsRoot("Cut") {
 		return
 	}
+	if tv.SyncNode != nil {
+		tv.CutSync()
+		return
+	}
 	tv.Copy(false)
 	sels := tv.SelectedViews()
 	updt := tv.UpdateStart()
@@ -1151,6 +1187,7 @@ func (tv *TreeView) Cut() {
 		sn.Delete(true)
 	}
 	tv.UpdateEndLayout(updt)
+	tv.SendChangeEvent(nil)
 }
 
 // Paste pastes clipboard at given node.
@@ -1198,6 +1235,10 @@ func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 
 // PasteAssign assigns mime data (only the first one!) to this node
 func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
+	if tv.SyncNode != nil {
+		tv.PasteAssignSync(md)
+		return
+	}
 	sl, _ := tv.NodesFromMimeData(md)
 	if len(sl) == 0 {
 		return
@@ -1205,6 +1246,7 @@ func (tv *TreeView) PasteAssign(md mimedata.Mimes) {
 	updt := tv.UpdateStart()
 	tv.This().CopyFrom(sl[0]) // nodes with data copy here
 	tv.UpdateEndLayout(updt)
+	tv.SendChangeEvent(nil)
 }
 
 // PasteBefore inserts object(s) from mime data before this node.
@@ -1234,13 +1276,17 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 	if tv.Par == nil {
 		return
 	}
-	sl, pl := tv.NodesFromMimeData(md)
-
 	par := AsTreeView(tv.Par)
 	if par == nil {
 		gi.PromptDialog(tv, gi.DlgOpts{Title: actNm, Prompt: "Cannot insert after the root of the tree", Ok: true, Cancel: false}, nil)
 		return
 	}
+	if tv.SyncNode != nil {
+		tv.PasteAtSync(md, mod, rel, actNm)
+		return
+	}
+	sl, pl := tv.NodesFromMimeData(md)
+
 	myidx, ok := tv.IndexInParent()
 	if !ok {
 		return
@@ -1282,6 +1328,10 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 // PasteChildren inserts object(s) from mime data
 // at end of children of this node
 func (tv *TreeView) PasteChildren(md mimedata.Mimes, mod events.DropMods) {
+	if tv.SyncNode != nil {
+		tv.PasteChildrenSync(md, mod)
+		return
+	}
 	sl, _ := tv.NodesFromMimeData(md)
 
 	updt := tv.UpdateStart()
@@ -1472,7 +1522,14 @@ func (tv *TreeView) DropCancel() {
 */
 
 ////////////////////////////////////////////////////
-// 	Widget Infrastructure
+// 	Event Handlers
+
+func (tv *TreeView) TreeViewParent() *TreeView {
+	if tv.Par == nil {
+		return nil
+	}
+	return AsTreeView(tv.Par)
+}
 
 func (tv *TreeView) HandleTreeViewEvents() {
 	tv.HandleWidgetEvents()
@@ -1541,19 +1598,18 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 	}
 	if !tv.RootIsInactive() && !kt.IsHandled() {
 		switch kf {
-		// todo:
-		// case gi.KeyFunDelete:
-		// 	tv.SrcDelete()
-		// 	kt.SetHandled()
-		// case gi.KeyFunDuplicate:
-		// 	tv.SrcDuplicate()
-		// 	kt.SetHandled()
-		// case gi.KeyFunInsert:
-		// 	tv.SrcInsertBefore()
-		// 	kt.SetHandled()
-		// case gi.KeyFunInsertAfter:
-		// 	tv.SrcInsertAfter()
-		// 	kt.SetHandled()
+		case gi.KeyFunDelete:
+			tv.SrcDelete()
+			kt.SetHandled()
+		case gi.KeyFunDuplicate:
+			tv.SrcDuplicate()
+			kt.SetHandled()
+		case gi.KeyFunInsert:
+			tv.SrcInsertBefore()
+			kt.SetHandled()
+		case gi.KeyFunInsertAfter:
+			tv.SrcInsertAfter()
+			kt.SetHandled()
 		case gi.KeyFunCut:
 			tv.This().(gi.Clipper).Cut()
 			kt.SetHandled()
