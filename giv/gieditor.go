@@ -222,9 +222,9 @@ func (ge *GiEditor) Splits() *gi.Splits {
 	return ge.ChildByName("splits", 2).(*gi.Splits)
 }
 
-// TreeView returns the main TreeView
-func (ge *GiEditor) TreeView() *TreeView {
-	return ge.Splits().Child(0).Child(0).(*TreeView)
+// TreeView returns the main TreeSyncView
+func (ge *GiEditor) TreeView() *TreeSyncView {
+	return ge.Splits().Child(0).Child(0).(*TreeSyncView)
 }
 
 // StructView returns the main StructView
@@ -258,7 +258,7 @@ func (ge *GiEditor) ConfigSplits() {
 
 	if len(split.Kids) == 0 {
 		tvfr := gi.NewFrame(split, "tvfr").SetLayout(gi.LayoutHoriz)
-		tv := NewTreeView(tvfr, "tv")
+		tv := NewTreeSyncView(tvfr, "tv")
 		sv := NewStructView(split, "sv")
 		_ = tv
 		_ = sv
@@ -282,8 +282,8 @@ func (ge *GiEditor) ConfigSplits() {
 		// })
 		split.SetSplits(.3, .7)
 	}
-	// tv := ge.TreeView()
-	// tv.SetRootNode(ge.KiRoot)
+	tv := ge.TreeView()
+	tv.SetRootNode(ge.KiRoot)
 	sv := ge.StructView()
 	sv.SetStruct(ge.KiRoot)
 }
