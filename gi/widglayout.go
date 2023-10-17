@@ -27,52 +27,6 @@ func (wb *WidgetBase) HasSc() bool {
 	return true
 }
 
-// ReConfig is a convenience method for reconfiguring a widget after changes
-// have been made.  In general it is more efficient to call Set* methods that
-// automatically determine if Config is needed.
-// The plain Config method is used during initial configuration,
-// called by the Scene and caches the Sc pointer.
-func (wb *WidgetBase) ReConfig() {
-	if !wb.HasSc() {
-		return
-	}
-	wi := wb.This().(Widget)
-	wi.Config(wb.Sc)
-	wi.ApplyStyle(wb.Sc)
-}
-
-func (wb *WidgetBase) Config(sc *Scene) {
-	if wb.This() == nil {
-		slog.Error("nil this in config")
-		return
-	}
-	wi := wb.This().(Widget)
-	updt := wi.UpdateStart()
-	wb.Sc = sc
-	wi.ConfigWidget(sc) // where everything actually happens
-	wb.UpdateEnd(updt)
-	wb.SetNeedsLayoutUpdate(sc, updt)
-}
-
-func (wb *WidgetBase) ConfigWidget(sc *Scene) {
-	// this must be defined for each widget type
-}
-
-// ConfigPartsImpl initializes the parts of the widget if they
-// are not already through [WidgetBase.NewParts], calls
-// [ki.Node.ConfigChildren] on those parts with the given config,
-// and then handles necessary updating logic with the given scene.
-func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) {
-	parts := wb.NewParts(lay)
-	mods, updt := parts.ConfigChildren(config)
-	if !mods && !wb.NeedsRebuild() {
-		parts.UpdateEnd(updt)
-		return
-	}
-	parts.UpdateEnd(updt)
-	wb.SetNeedsLayoutUpdate(sc, updt)
-}
-
 ////////////////////////////////////////////////////////////////////
 // 	BBox bounding boxes
 

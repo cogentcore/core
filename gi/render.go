@@ -182,8 +182,50 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 	return rc.HasFlag(RenderRebuild)
 }
 
+///////////////////////////////////////////////////////////////
+// 	Config
+
+// Config is the main wrapper configuration call, calling ConfigWidget
+// which actually does the work. Use ReConfig to update styles too,
+// which is typically needed once an item is displayed.
+// Config by itself is sufficient during initial construction because
+// everything will be automatically styled during initial display.
+func (wb *WidgetBase) Config(sc *Scene) {
+	if wb.This() == nil {
+		slog.Error("nil this in config")
+		return
+	}
+	wi := wb.This().(Widget)
+	updt := wi.UpdateStart()
+	wb.Sc = sc
+	wi.ConfigWidget(sc) // where everything actually happens
+	wb.UpdateEnd(updt)
+	wb.SetNeedsLayoutUpdate(sc, updt)
+}
+
+// ConfigWidget is the interface method called by Config that
+// should be defined for each Widget type, which actually does
+// the configuration work.
+func (wb *WidgetBase) ConfigWidget(sc *Scene) {
+	// this must be defined for each widget type
+}
+
+// ConfigPartsImpl initializes the parts of the widget if they
+// are not already through [WidgetBase.NewParts], calls
+// [ki.Node.ConfigChildren] on those parts with the given config,
+// and then handles necessary updating logic with the given scene.
+func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) {
+	parts := wb.NewParts(lay)
+	mods, updt := parts.ConfigChildren(config)
+	if !mods && !wb.NeedsRebuild() {
+		parts.UpdateEnd(updt)
+		return
+	}
+	parts.UpdateEnd(updt)
+	wb.SetNeedsLayoutUpdate(sc, updt)
+}
+
 // ConfigTree calls Config on every Widget in the tree from me.
-// Config automatically calls ApplyStyle.
 func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	if wb.This() == nil {
 		return
@@ -195,6 +237,39 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 			return ki.Break
 		}
 		wi.Config(sc)
+		return ki.Continue
+	})
+	pr.End()
+}
+
+// ReConfig is a convenience method for reconfiguring a widget after
+// changes have been made, calling Config then ApplyStyle.
+// The plain Config method is used during initial configuration.
+// It is called by the Scene and caches the Sc pointer.
+func (wb *WidgetBase) ReConfig() {
+	if !wb.HasSc() {
+		return
+	}
+	wi := wb.This().(Widget)
+	wi.Config(wb.Sc)
+	wi.ApplyStyle(wb.Sc)
+}
+
+// ReConfigTree calls Config and then ApplyStyle
+// on every Widget in the tree from me.
+// This should be used for currently-displayed widgets.
+func (wb *WidgetBase) ReConfigTree(sc *Scene) {
+	if wb.This() == nil {
+		return
+	}
+	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
+	wb.WalkPre(func(k ki.Ki) bool {
+		wi, w := AsWidget(k)
+		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+			return ki.Break
+		}
+		wi.Config(sc) // sets sc if not
+		wi.ApplyStyle(sc)
 		return ki.Continue
 	})
 	pr.End()
