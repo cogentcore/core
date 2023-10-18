@@ -99,6 +99,7 @@ func (ch *Chooser) HandleChooserEvents() {
 }
 
 func (ch *Chooser) ChooserStyles() {
+	ch.Icon = icons.None
 	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer

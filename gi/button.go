@@ -447,7 +447,9 @@ func (bt *Button) ConfigWidget(sc *Scene) {
 
 func (bt *Button) ConfigParts(sc *Scene) {
 	parts := bt.NewParts(LayoutHoriz)
-	if bt.HasMenu() && bt.Icon.IsNil() && bt.Indicator.IsNil() {
+	// we check if the icons are unset, not if they are nil, so
+	// that people can manually set it to [icons.None]
+	if bt.HasMenu() && bt.Icon == "" && bt.Indicator == "" {
 		if bt.Type == ButtonMenu {
 			bt.Indicator = icons.KeyboardArrowRight
 		} else {
