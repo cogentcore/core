@@ -257,6 +257,12 @@ func (em *EventMgr) HandlePosEvent(evi events.Event) {
 		w := em.MouseInBBox[i]
 		wb := w.AsWidget()
 
+		// we need to handle this here and not in [EventMgr.GetMouseInBBox] so that
+		// we correctly process cursors for disabled elements.
+		if wb.StateIs(states.Disabled) {
+			continue
+		}
+
 		if !isDrag {
 			w.HandleEvent(evi) // everyone gets the primary event who is in scope, deepest first
 		}
@@ -501,7 +507,10 @@ func (em *EventMgr) HandleLongHover(evi events.Event, deep Widget) {
 func (em *EventMgr) GetMouseInBBox(w Widget, pos image.Point) {
 	w.WalkPre(func(k ki.Ki) bool {
 		wi, wb := AsWidget(k)
-		if !wb.IsVisible() || wb.StateIs(states.Disabled) {
+		// we do not handle disabled here so that
+		// we correctly process cursors for disabled elements.
+		// it needs to be handled downstream by anyone who needs it.
+		if !wb.IsVisible() {
 			return ki.Break
 		}
 		if !wb.PosInScBBox(pos) {
