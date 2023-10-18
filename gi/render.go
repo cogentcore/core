@@ -88,6 +88,24 @@ import (
 
 // note: SetNeedsRender() is now SetNeedsRender()
 
+// UpdateStart sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+func (wb *WidgetBase) UpdateStart() bool {
+	updt := wb.Node.UpdateStart()
+	if updt && wb.Sc != nil {
+		wb.Sc.SetFlag(true, ScUpdating)
+	}
+	return updt
+}
+
+// UpdateEnd resets the scene ScUpdating flag
+func (wb *WidgetBase) UpdateEnd(updt bool) {
+	if updt && wb.Sc != nil {
+		wb.Sc.SetFlag(false, ScUpdating)
+	}
+	wb.Node.UpdateEnd(updt)
+}
+
 // SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
 // triggering a render of this widget on the next window update.
 // Also sets a Field Parent NeedsRender too.
@@ -411,28 +429,28 @@ func (sc *Scene) DoUpdate() bool {
 	switch {
 	case rc.HasFlag(RenderRebuild):
 		// fmt.Println("rebuild")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.DoRebuild()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
 		// fmt.Println("scene restyle")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
 		// fmt.Println("scene layout start")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderScene()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
 	case sc.Is(ScNeedsRender):
 		// fmt.Println("scene render start")
-		sc.SetFlag(false, ScNeedsRender)
 		sc.DoNeedsRender(sc)
+		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
 	default:

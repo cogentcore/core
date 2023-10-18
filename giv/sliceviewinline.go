@@ -18,11 +18,10 @@ import (
 	"goki.dev/laser"
 )
 
-// SliceViewInline represents a slice as a single line widget, for smaller
-// slices and those explicitly marked inline -- constructs widgets in Parts to
-// show the key names and editor vals for each value.
+// SliceViewInline represents a slice as a single line widget,
+// for smaller slices and those explicitly marked inline.
 type SliceViewInline struct {
-	gi.WidgetBase
+	gi.Frame
 
 	// the slice that we are a view onto
 	Slice any
@@ -42,24 +41,59 @@ type SliceViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-"`
 
+	// WidgetConfiged tracks if the given Widget has been configured.
+	// Widgets can only be configured once -- otherwise duplicate event
+	// functions are registered.
+	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
+	TmpSave Value `view:"-" json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 }
 
 func (sv *SliceViewInline) OnInit() {
+	sv.SliceViewInlineStyles()
+}
+
+func (sv *SliceViewInline) SliceViewInlineStyles() {
+	sv.WidgetConfiged = make(map[gi.Widget]bool)
+	sv.Lay = gi.LayoutHoriz
 	sv.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(20)
+		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(sv.This()) {
-		case "parts":
-			parts := w.(*gi.Layout)
-			parts.Lay = gi.LayoutHoriz
+		case "add-action":
+			ab := w.(*gi.Button)
 			w.Style(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				ab.SetType(gi.ButtonTonal)
+			})
+			ab.OnClick(func(e events.Event) {
+				sv.SliceNewAt(-1)
+			})
+		case "edit-action":
+			w.Style(func(s *styles.Style) {
+				w.(*gi.Button).SetType(gi.ButtonTonal)
+			})
+			w.OnClick(func(e events.Event) {
+				vpath := sv.ViewPath
+				title := ""
+				if sv.SliceValView != nil {
+					newPath := ""
+					isZero := false
+					title, newPath, isZero = sv.SliceValView.AsValueBase().Label()
+					if isZero {
+						return
+					}
+					vpath = sv.ViewPath + "/" + newPath
+				} else {
+					elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
+					title = "Slice of " + laser.NonPtrType(elType).Name()
+				}
+				SliceViewDialog(sv, DlgOpts{Title: title, TmpSave: sv.TmpSave, ViewPath: vpath}, sv.Slice, nil, nil)
 			})
 		}
 	})
@@ -87,16 +121,19 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
 		}
 	}
-	sv.UpdateFromSlice()
+	// sv.Config(sv.Sc)
 	sv.UpdateEndLayout(updt)
 }
 
-// ConfigParts configures Parts for the current slice
-func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
+func (sv *SliceViewInline) ConfigWidget(sc *gi.Scene) {
+	sv.ConfigSlice(sc)
+}
+
+// ConfigSlice configures children for slice view
+func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 	if laser.AnyIsNil(sv.Slice) {
-		return
+		return false
 	}
-	parts := sv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
 	sv.Values = make([]Value, 0)
@@ -123,14 +160,20 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		config.Add(gi.ButtonType, "add-action")
 	}
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := parts.ConfigChildren(config)
+	mods, updt := sv.ConfigChildren(config)
 	if !mods {
-		updt = parts.UpdateStart()
+		updt = sv.UpdateStart()
 	}
 	for i, vv := range sv.Values {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { sv.SetChanged() })
-		widg := parts.Child(i).(gi.Widget)
+		widg := sv.Child(i).(gi.Widget)
+		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.AsValueBase().Widget = widg
+			vv.UpdateWidget()
+			continue
+		}
+		sv.WidgetConfiged[widg] = true
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
@@ -140,53 +183,23 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {
-		adbti, err := parts.Children().ElemFromEndTry(1)
+		adbti, err := sv.Children().ElemFromEndTry(1)
 		if err == nil {
 			adbt := adbti.(*gi.Button)
 			adbt.SetType(gi.ButtonTonal)
 			adbt.SetIcon(icons.Add)
 			adbt.Tooltip = "add an element to the slice"
-			adbt.OnChange(func(e events.Event) {
-				sv.SliceNewAt(-1)
-			})
 		}
 	}
-	edbti, err := parts.Children().ElemFromEndTry(0)
+	edbti, err := sv.Children().ElemFromEndTry(0)
 	if err == nil {
 		edbt := edbti.(*gi.Button)
 		edbt.SetType(gi.ButtonTonal)
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "edit slice in a dialog window"
-		edbt.OnClick(func(e events.Event) {
-			vpath := sv.ViewPath
-			title := ""
-			if sv.SliceValView != nil {
-				newPath := ""
-				isZero := false
-				title, newPath, isZero = sv.SliceValView.AsValueBase().Label()
-				if isZero {
-					return
-				}
-				vpath = sv.ViewPath + "/" + newPath
-			} else {
-				elType := laser.NonPtrType(reflect.TypeOf(sv.Slice).Elem().Elem())
-				title = "Slice of " + laser.NonPtrType(elType).Name()
-			}
-			SliceViewDialog(sv, DlgOpts{Title: title, TmpSave: sv.TmpSave, ViewPath: vpath}, sv.Slice, nil, nil)
-			// todo: seems very bad:
-			// svvvk := dlg.Stage.Scene.ChildByType(TypeSliceView, ki.Embeds, 2)
-			// if svvvk != nil {
-			// 	svvv := svvvk.(*SliceView)
-			// 	svvv.SliceValView = sv.SliceValView
-			// 	// svvv.ViewSig.ConnectOnly(svv.This(), func(recv, send ki.Ki, sig int64, data any) {
-			// 	// 	svvvv, _ := recv.Embed(TypeSliceViewInline).(*SliceViewInline)
-			// 	// 	svvvv.ViewSig.Emit(svvvv.This(), 0, nil)
-			// 	// })
-			// }
-		})
 	}
-	parts.UpdateEndLayout(updt)
-	sv.SetNeedsLayoutUpdate(sc, updt)
+	sv.UpdateEnd(updt)
+	return updt
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -214,11 +227,6 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.UpdateFromSlice()
-}
-
-func (sv *SliceViewInline) UpdateFromSlice() {
-	sv.ConfigParts(sv.Sc)
 }
 
 func (sv *SliceViewInline) UpdateValues() {
@@ -229,15 +237,10 @@ func (sv *SliceViewInline) UpdateValues() {
 	sv.UpdateEndRender(updt)
 }
 
-// func (sv *SliceViewInline) ApplyStyle(sc *gi.Scene) {
-// 	sv.ConfigParts(sc)
-// 	sv.WidgetBase.ApplyStyle(sc)
-// }
-
-func (sv *SliceViewInline) Render(sc *gi.Scene) {
-	if sv.PushBounds(sc) {
-		sv.RenderParts(sc)
-		sv.RenderChildren(sc)
-		sv.PopBounds(sc)
+func (sv *SliceViewInline) GetSize(sc *gi.Scene, iter int) {
+	updt := sv.ConfigSlice(sc)
+	if updt {
+		sv.ApplyStyleTree(sc)
 	}
+	sv.Frame.GetSize(sc, iter)
 }

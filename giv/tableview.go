@@ -73,75 +73,92 @@ var _ SliceViewer = (*TableView)(nil)
 type TableViewStyleFunc func(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value)
 
 func (tv *TableView) OnInit() {
+	tv.TableViewInit()
+}
+
+func (tv *TableView) TableViewInit() {
+	tv.SelectMode = false
+	tv.ShowIndex = true
+	tv.ShowToolbar = true
+	tv.InactKeyNav = true
+
+	tv.HandleSliceViewEvents()
+
 	tv.Lay = gi.LayoutVert
 	tv.Style(func(s *styles.Style) {
 		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
+	tv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(tv.This()) {
+		case "frame": // slice frame
+			sf := w.(*gi.Frame)
+			sf.Lay = gi.LayoutVert
+			sf.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(20))
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Border.Style.Set(styles.BorderNone)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "frame/header": // slice header
+			sh := w.(*gi.Toolbar)
+			sh.Lay = gi.LayoutHoriz
+			sh.Style(func(s *styles.Style) {
+				sh.Spacing.SetDp(0)
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
+		case "frame/grid-lay": // grid layout
+			gl := w.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "frame/grid-lay/grid": // slice grid
+			sg := w.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.Style(func(s *styles.Style) {
+				// this causes everything to get off, especially resizing: not taking it into account presumably:
+				// sg.Spacing = gi.StdDialogVSpaceUnits
 
-func (tv *TableView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(tv.This()) {
-	case "frame": // slice frame
-		sf := w.(*gi.Frame)
-		sf.Lay = gi.LayoutVert
-		sf.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(20))
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Border.Style.Set(styles.BorderNone)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "frame/header": // slice header
-		sh := w.(*gi.Toolbar)
-		sh.Lay = gi.LayoutHoriz
-		sh.Style(func(s *styles.Style) {
-			sh.Spacing.SetDp(0)
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-		})
-	case "frame/grid-lay": // grid layout
-		gl := w.(*gi.Layout)
-		gl.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			gl.SetStretchMax() // for this to work, ALL layers above need it too
-		})
-	case "frame/grid-lay/grid": // slice grid
-		sg := w.(*gi.Frame)
-		sg.Lay = gi.LayoutGrid
-		sg.Stripes = gi.RowStripes
-		sg.Style(func(s *styles.Style) {
-			// this causes everything to get off, especially resizing: not taking it into account presumably:
-			// sg.Spacing = gi.StdDialogVSpaceUnits
-
-			nWidgPerRow, _ := tv.RowWidgetNs()
-			s.Columns = nWidgPerRow
-			s.SetMinPrefHeight(units.Em(6))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-		})
-	}
-	// STYTODO: set header sizes here (see LayoutHeader)
-	// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
-	// 	w.Style(func(s *styles.Style) {
-	// 		spc := tv.SliceHeader().Spacing.Dots
-	// 		ip, _ := w.IndexInParent()
-	// 		s.SetMinPrefWidth(units.Dot())
-	// 	})
-	// }
-	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4)
-			s.Text.Align = styles.AlignRight
-		})
-	}
-	if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
-		w.Style(func(s *styles.Style) {
-			w.(*gi.Button).SetType(gi.ButtonAction)
-		})
-	}
+				nWidgPerRow, _ := tv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		// STYTODO: set header sizes here (see LayoutHeader)
+		// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
+		// 	w.Style(func(s *styles.Style) {
+		// 		spc := tv.SliceHeader().Spacing.Dots
+		// 		ip, _ := w.IndexInParent()
+		// 		s.SetMinPrefWidth(units.Dot())
+		// 	})
+		// }
+		if w.Parent().Name() == "grid" {
+			if strings.HasPrefix(w.Name(), "index-") {
+				w.Style(func(s *styles.Style) {
+					s.MinWidth.SetEm(1.5)
+					s.Padding.Right.SetDp(4)
+					s.Text.Align = styles.AlignRight
+				})
+			}
+			if strings.HasPrefix(w.Name(), "add-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+				})
+			}
+			if strings.HasPrefix(w.Name(), "del-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Error.Base
+				})
+			}
+		}
+	})
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children
@@ -254,7 +271,7 @@ func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
 	if mods {
-		tv.UpdateEndLayout(updt)
+		tv.UpdateEnd(updt)
 	}
 }
 
@@ -564,7 +581,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	sc := tv.Sc
 
 	updt := sg.UpdateStart()
-	defer sg.UpdateEndLayout(updt)
+	defer sg.UpdateEnd(updt)
 
 	if laser.AnyIsNil(tv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -679,9 +696,10 @@ func (tv *TableView) UpdateSliceGrid() {
 					widg.AsWidget().SetState(true, states.Disabled)
 				} else {
 					vvb := vv.AsValueBase()
-					vvb.OnChange(func(e events.Event) {
-						tv.SetChanged()
-					})
+					_ = vvb
+					// vvb.OnChange(func(e events.Event) {
+					// 	tv.SetChanged()
+					// })
 				}
 			}
 			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
@@ -709,7 +727,6 @@ func (tv *TableView) UpdateSliceGrid() {
 					sg.SetChild(&delact, cidx, delnm)
 					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
-
 					delact.OnClick(func(e events.Event) {
 						tv.SliceDeleteAtRow(i)
 					})
