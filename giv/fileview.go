@@ -90,52 +90,50 @@ func (fv *FileView) FileViewStyles() {
 		fv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (fv *FileView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(fv.This()) {
-	case "files-row":
-		fr := w.(*gi.Layout)
-		fr.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-		})
-	case "favs-view":
-		fv := w.(*TableView)
-		fv.ShowIndex = false
-		fv.InactKeyNav = false // can only have one active -- files..
-		fv.ShowToolbar = false
-		fv.SetState(true, states.Disabled) // select only
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxHeight()
-			s.MaxWidth.SetDp(0) // no stretch
-		})
-	case "files-view":
-		fv := w.(*TableView)
-		fv.ShowIndex = false // no index
-		fv.ShowToolbar = false
-		fv.SetState(true, states.Disabled) // select only
-		fv.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-		})
-	case "sel-row":
-		sr := w.(*gi.Layout)
-		sr.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			sr.Spacing.SetDp(4)
-			s.SetStretchMaxWidth()
-		})
-	case "sel": // sel field
-		w.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(60))
-			s.SetStretchMaxWidth()
-		})
-	case "ext-label":
-		w.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(10))
-		})
-	}
+	fv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(fv.This()) {
+		case "files-row":
+			fr := w.(*gi.Layout)
+			fr.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+			})
+		case "favs-view":
+			fv := w.(*TableView)
+			fv.ShowIndex = false
+			fv.InactKeyNav = false // can only have one active -- files..
+			fv.ShowToolbar = false
+			fv.SetState(true, states.Disabled) // select only
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxHeight()
+				s.MaxWidth.SetDp(0) // no stretch
+			})
+		case "files-view":
+			fv := w.(*TableView)
+			fv.ShowIndex = false // no index
+			fv.ShowToolbar = false
+			fv.SetState(true, states.Disabled) // select only
+			fv.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+			})
+		case "sel-row":
+			sr := w.(*gi.Layout)
+			sr.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				sr.Spacing.SetDp(4)
+				s.SetStretchMaxWidth()
+			})
+		case "sel": // sel field
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(60))
+				s.SetStretchMaxWidth()
+			})
+		case "ext-label":
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(10))
+			})
+		}
+	})
 }
 
 func (fv *FileView) Disconnect() {
@@ -345,21 +343,25 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	pr.AddButton(gi.ActOpts{Name: "path-up", Icon: icons.ArrowUpward, Tooltip: "go up one level into the parent folder", ShortcutKey: gi.KeyFunJump}, func(act *gi.Button) {
-		fv.DirPathUp()
-	})
+	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(gi.KeyFunJump).SetTooltip("go up one level into the parent folder").
+		OnClick(func(e events.Event) {
+			fv.DirPathUp()
+		})
 
-	pr.AddButton(gi.ActOpts{Name: "path-ref", Icon: icons.Refresh, Tooltip: "Update directory view -- in case files might have changed"}, func(act *gi.Button) {
-		fv.UpdateFilesAction()
-	})
+	gi.NewButton(pr, "path-ref").SetIcon(icons.Refresh).SetTooltip("Update directory view -- in case files might have changed").
+		OnClick(func(e events.Event) {
+			fv.UpdateFilesAction()
+		})
 
-	pr.AddButton(gi.ActOpts{Name: "path-fav", Icon: icons.Favorite, Tooltip: "save this path to the favorites list -- saves current Prefs"}, func(act *gi.Button) {
-		fv.AddPathToFavs()
-	})
+	gi.NewButton(pr, "path-fav").SetIcon(icons.Favorite).SetTooltip("save this path to the favorites list -- saves current Prefs").
+		OnClick(func(e events.Event) {
+			fv.AddPathToFavs()
+		})
 
-	pr.AddButton(gi.ActOpts{Name: "new-folder", Icon: icons.CreateNewFolder, Tooltip: "Create a new folder in this folder"}, func(act *gi.Button) {
-		fv.NewFolder()
-	})
+	gi.NewButton(pr, "new-folder").SetIcon(icons.CreateNewFolder).SetTooltip("Create a new folder in this folder").
+		OnClick(func(e events.Event) {
+			fv.NewFolder()
+		})
 }
 
 func (fv *FileView) ConfigFilesRow() {

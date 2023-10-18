@@ -217,19 +217,17 @@ func (sr *Slider) SliderStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (sr *Slider) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(sr.This()) {
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	}
+	sr.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(sr.This()) {
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		}
+	})
 }
 
 // SetType sets the type of the slider

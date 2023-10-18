@@ -38,37 +38,35 @@ func (av *ArgView) OnInit() {
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 	})
-}
-
-func (av *ArgView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(av.This()) {
-	case "title":
-		title := w.(*gi.Label)
-		title.Type = gi.LabelTitleLarge
-		title.Style(func(s *styles.Style) {
-			s.MaxWidth.SetDp(-1)
-			s.Text.Align = styles.AlignCenter
-			s.AlignV = styles.AlignTop
-		})
-	case "args-grid":
-		w.Style(func(s *styles.Style) {
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.MinWidth.SetEm(1.5)
-			s.Width.SetEm(1.5)
-			s.MaxWidth.SetDp(-1) // for this to work, ALL layers above need it too
-			s.MinHeight.SetEm(10)
-			s.Height.SetEm(10)
-			s.MaxHeight.SetDp(-1)              // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.Columns = 2
-		})
-	}
-	if w.Parent().Name() == "args-grid" {
-		w.Style(func(s *styles.Style) {
-			s.AlignH = styles.AlignCenter
-		})
-	}
+	av.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(av.This()) {
+		case "title":
+			title := w.(*gi.Label)
+			title.Type = gi.LabelTitleLarge
+			title.Style(func(s *styles.Style) {
+				s.MaxWidth.SetDp(-1)
+				s.Text.Align = styles.AlignCenter
+				s.AlignV = styles.AlignTop
+			})
+		case "args-grid":
+			w.Style(func(s *styles.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.MinWidth.SetEm(1.5)
+				s.Width.SetEm(1.5)
+				s.MaxWidth.SetDp(-1) // for this to work, ALL layers above need it too
+				s.MinHeight.SetEm(10)
+				s.Height.SetEm(10)
+				s.MaxHeight.SetDp(-1)              // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = 2
+			})
+		}
+		if w.Parent().Name() == "args-grid" {
+			w.Style(func(s *styles.Style) {
+				s.AlignH = styles.AlignCenter
+			})
+		}
+	})
 }
 
 // SetArgs sets the source args that we are viewing -- rebuilds the children

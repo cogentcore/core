@@ -5,21 +5,14 @@
 package giv
 
 import (
-	"fmt"
-	"log/slog"
 	"reflect"
-	"runtime"
-	"strings"
 
-	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events/key"
-	"goki.dev/grease"
 	"goki.dev/gti"
 	"goki.dev/icons"
-	"goki.dev/laser"
 )
 
 // FuncConfig contains the configuration options for a function, to be passed
@@ -100,77 +93,83 @@ func (fc *FuncConfig) SetString(str string) error {
 	return nil
 }
 
+// TODO(kai/menu): resolve giv func structure
+
 // ToolbarView adds the method buttons for the given value to the given toolbar.
 // It returns whether any method buttons were added.
 func ToolbarView(val any, tb *gi.Toolbar) bool {
-	typ := gti.TypeByValue(val)
-	if typ == nil {
-		return false
-	}
-	// map key is depth (eg: File = 0, File/Export = 1, File/Export/PNG = 2)
-	cfgs := map[int][]*FuncConfig{}
-	for _, kv := range typ.Methods.Order {
-		met := kv.Val
-		cfg := ConfigForMethod(met, "toolbar")
-		if cfg == nil { // not in toolbar
-			continue
+	return false
+	/*
+		typ := gti.TypeByValue(val)
+		if typ == nil {
+			return false
 		}
-		// no parent => depth 0
-		if cfg.Parent == nil {
-			cfgs[0] = append(cfgs[0], cfg)
-			continue
-		}
-		// each slash is 1 higher depth, and no slashes is still 1 depth, as it indicates 1 parent
-		depth := 1 + strings.Count(cfg.Parent.Name, "/")
-		cfgs[depth] = append(cfgs[depth], cfg)
-	}
-	if len(cfgs) == 0 {
-		return false
-	}
-	for depth, cs := range cfgs {
-		for _, cfg := range cs {
-			cfg := cfg
-
-			ao := gi.ActOpts{Name: cfg.Name, Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}
-			btf := func(bt *gi.Button) {
-				rfun := reflect.ValueOf(val).MethodByName(cfg.Name)
-				// TODO(kai): remove this temporary fix for buttons in popup menus having nil scenes
-				var ctx gi.Widget = bt
-				if bt.Sc == nil {
-					ctx = tb
-				}
-				CallReflectFunc(ctx, rfun, cfg)
-			}
-			// if no depth, we go straight in toolbar
-			if depth == 0 {
-				if cfg.SepBefore {
-					tb.AddSeparator()
-				}
-				tb.AddButton(ao, btf)
-				if cfg.SepAfter {
-					tb.AddSeparator()
-				}
+		// map key is depth (eg: File = 0, File/Export = 1, File/Export/PNG = 2)
+		cfgs := map[int][]*FuncConfig{}
+		for _, kv := range typ.Methods.Order {
+			met := kv.Val
+			cfg := ConfigForMethod(met, "toolbar")
+			if cfg == nil { // not in toolbar
 				continue
 			}
-			// otherwise, we have to find our parent
-			par := gi.FindButtonMenu(tb, cfg.Parent.Name)
-			// if we don't have the parent, we must make an artificial parent
-			if par == nil {
-				par = gi.NewButtonMenu(tb, cfg.Parent.Name)
+			// no parent => depth 0
+			if cfg.Parent == nil {
+				cfgs[0] = append(cfgs[0], cfg)
+				continue
 			}
-			fmt.Println(cfg.Name, par)
-			if cfg.SepBefore {
-				par.Menu.AddSeparator()
-			}
-			par.Menu.AddButton(ao, btf)
-			if cfg.SepAfter {
-				par.Menu.AddSeparator()
+			// each slash is 1 higher depth, and no slashes is still 1 depth, as it indicates 1 parent
+			depth := 1 + strings.Count(cfg.Parent.Name, "/")
+			cfgs[depth] = append(cfgs[depth], cfg)
+		}
+		if len(cfgs) == 0 {
+			return false
+		}
+		for depth, cs := range cfgs {
+			for _, cfg := range cs {
+				cfg := cfg
+
+				ao := gi.ActOpts{Name: cfg.Name, Label: cfg.Label, Icon: cfg.Icon, Tooltip: cfg.Doc, Shortcut: cfg.Shortcut, ShortcutKey: cfg.ShortcutKey}
+				btf := func(bt *gi.Button) {
+					rfun := reflect.ValueOf(val).MethodByName(cfg.Name)
+					// TODO(kai): remove this temporary fix for buttons in popup menus having nil scenes
+					var ctx gi.Widget = bt
+					if bt.Sc == nil {
+						ctx = tb
+					}
+					CallReflectFunc(ctx, rfun, cfg)
+				}
+				// if no depth, we go straight in toolbar
+				if depth == 0 {
+					if cfg.SepBefore {
+						tb.AddSeparator()
+					}
+					tb.AddButton(ao, btf)
+					if cfg.SepAfter {
+						tb.AddSeparator()
+					}
+					continue
+				}
+				// otherwise, we have to find our parent
+				par := gi.FindButtonMenu(tb, cfg.Parent.Name)
+				// if we don't have the parent, we must make an artificial parent
+				if par == nil {
+					par = gi.NewButtonMenu(tb, cfg.Parent.Name)
+				}
+				fmt.Println(cfg.Name, par)
+				if cfg.SepBefore {
+					par.Menu.AddSeparator()
+				}
+				par.Menu.AddButton(ao, btf)
+				if cfg.SepAfter {
+					par.Menu.AddSeparator()
+				}
 			}
 		}
-	}
-	return true
+		return true
+	*/
 }
 
+/*
 // ConfigForFunc returns the default [FuncConfig] for the given [gti.Func].
 // It is a wrapper on [ConfigForMethod]; see it for more information.
 func ConfigForFunc(fun *gti.Func) *FuncConfig {
@@ -231,6 +230,7 @@ func ConfigForMethod(met *gti.Method, directive ...string) *FuncConfig {
 	return cfg
 }
 
+*/
 // ArgConfig contains the relevant configuration information for each arg,
 // including the reflect.Value, name, optional description, and default value
 type ArgConfig struct {
@@ -265,74 +265,76 @@ func CallFunc(ctx gi.Widget, fun any, cfg ...*FuncConfig) {
 // CallReflectFunc is the same as [CallFunc], but it takes a [reflect.Value] for
 // the function instead of an `any`
 func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
-	var c *FuncConfig
-	if len(cfg) > 0 {
-		c = cfg[0]
-	} else {
-		fn := runtime.FuncForPC(rfun.Pointer()).Name() // based on gti.FuncName
-		f := gti.FuncByName(fn)
-		if f == nil {
-			slog.Error(`programmer error: giv.CallFunc: cannot use default configuration information for function that is not in gti; add a "gti:add" comment directive to the function and run "goki generate"`, "functionSignature")
-			return
-		}
-		c = ConfigForFunc(f)
-	}
-	if c.Args.Len() == 0 {
-		if !c.Confirm {
-			rets := rfun.Call(nil)
-			if !c.ShowResult {
+	/*
+		var c *FuncConfig
+		if len(cfg) > 0 {
+			c = cfg[0]
+		} else {
+			fn := runtime.FuncForPC(rfun.Pointer()).Name() // based on gti.FuncName
+			f := gti.FuncByName(fn)
+			if f == nil {
+				slog.Error(`programmer error: giv.CallFunc: cannot use default configuration information for function that is not in gti; add a "gti:add" comment directive to the function and run "goki generate"`, "functionSignature")
 				return
 			}
-			ShowReturnsDialog(ctx, rets, c)
-			return
+			c = ConfigForFunc(f)
 		}
-		gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
-			func(dlg *gi.Dialog) {
-				if !dlg.Accepted {
-					return
-				}
+		if c.Args.Len() == 0 {
+			if !c.Confirm {
 				rets := rfun.Call(nil)
 				if !c.ShowResult {
 					return
 				}
 				ShowReturnsDialog(ctx, rets, c)
-			}).Run()
-		return
-	}
-	args := ArgsForFunc(rfun, c)
-	ArgViewDialog(
-		ctx,
-		DlgOpts{Title: c.Label, Prompt: c.Doc, Ok: true, Cancel: true},
-		args,
-		func(dlg *gi.Dialog) {
-			if !dlg.Accepted {
 				return
-			}
-			rargs := make([]reflect.Value, len(args))
-			for i, arg := range args {
-				rargs[i] = laser.NonPtrValue(arg.Val)
-			}
-
-			if !c.Confirm {
-				rets := rfun.Call(rargs)
-				if !c.ShowResult {
-					return
-				}
-				ShowReturnsDialog(ctx, rets, c)
 			}
 			gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
 				func(dlg *gi.Dialog) {
 					if !dlg.Accepted {
 						return
 					}
-					rets := rfun.Call(rargs)
+					rets := rfun.Call(nil)
 					if !c.ShowResult {
 						return
 					}
 					ShowReturnsDialog(ctx, rets, c)
 				}).Run()
-		},
-	).Run()
+			return
+		}
+		args := ArgsForFunc(rfun, c)
+		ArgViewDialog(
+			ctx,
+			DlgOpts{Title: c.Label, Prompt: c.Doc, Ok: true, Cancel: true},
+			args,
+			func(dlg *gi.Dialog) {
+				if !dlg.Accepted {
+					return
+				}
+				rargs := make([]reflect.Value, len(args))
+				for i, arg := range args {
+					rargs[i] = laser.NonPtrValue(arg.Val)
+				}
+
+				if !c.Confirm {
+					rets := rfun.Call(rargs)
+					if !c.ShowResult {
+						return
+					}
+					ShowReturnsDialog(ctx, rets, c)
+				}
+				gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
+					func(dlg *gi.Dialog) {
+						if !dlg.Accepted {
+							return
+						}
+						rets := rfun.Call(rargs)
+						if !c.ShowResult {
+							return
+						}
+						ShowReturnsDialog(ctx, rets, c)
+					}).Run()
+			},
+		).Run()
+	*/
 }
 
 // ArgsForFunc returns the appropriate [ArgConfig] objects for the arguments

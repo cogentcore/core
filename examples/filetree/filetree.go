@@ -40,34 +40,32 @@ func (fb *FileBrowse) OnInit() {
 		s.SetStretchMax()
 		s.Margin.Set(units.Dp(8))
 	})
-}
-
-func (fb *FileBrowse) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(fb.This()) {
-	case "title":
-		title := w.(*gi.Label)
-		title.Type = gi.LabelHeadlineSmall
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxWidth()
-			s.AlignH = styles.AlignCenter
-			s.AlignV = styles.AlignTop
-		})
-	case "splits":
-		split := w.(*gi.Splits)
-		split.Dim = mat32.X
-	}
-	ip, _ := w.IndexInParent()
-	if w.Parent().Name() == "splits" && ip > 0 {
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-			s.SetMinPrefWidth(units.Ch(20))
-			s.SetMinPrefHeight(units.Ch(10))
-			s.Font.Family = string(gi.Prefs.MonoFont)
-			s.Text.WhiteSpace = styles.WhiteSpacePreWrap
-			s.Text.TabSize = 4
-		})
-	}
+	fb.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(fb.This()) {
+		case "title":
+			title := w.(*gi.Label)
+			title.Type = gi.LabelHeadlineSmall
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxWidth()
+				s.AlignH = styles.AlignCenter
+				s.AlignV = styles.AlignTop
+			})
+		case "splits":
+			split := w.(*gi.Splits)
+			split.Dim = mat32.X
+		}
+		ip, _ := w.IndexInParent()
+		if w.Parent().Name() == "splits" && ip > 0 {
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(20))
+				s.SetMinPrefHeight(units.Ch(10))
+				s.Font.Family = string(gi.Prefs.MonoFont)
+				s.Text.WhiteSpace = styles.WhiteSpacePreWrap
+				s.Text.TabSize = 4
+			})
+		}
+	})
 }
 
 // UpdateFiles updates the list of files saved in project

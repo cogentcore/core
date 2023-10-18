@@ -1710,21 +1710,21 @@ type FileTreeView struct {
 
 /*
 // exists for same reason as TreeView one (init cycle)
-func init() {
-	// kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
-}
 
-func (ftv *FileTreeView) OnInit() {
-	ftv.SetFlag(true, TreeViewFlagUpdtRoot) // filetree needs this
-	ftv.OpenDepth = 4
-	ftv.Indent.SetEm(1)
+	func init() {
+		// kit.Types.SetProps(TypeFileTreeView, FileTreeViewProps)
+	}
 
-	ftv.HandleFileTreeViewEvents()
-	ftv.FileTreeViewStyles()
-}
+	func (ftv *FileTreeView) OnInit() {
+		ftv.SetFlag(true, TreeViewFlagUpdtRoot) // filetree needs this
+		ftv.OpenDepth = 4
+		ftv.Indent.SetEm(1)
+
+		ftv.HandleFileTreeViewEvents()
+		ftv.FileTreeViewStyles()
+	}
 
 func (ftv *FileTreeView) FileTreeViewStyles() {
-
 	ftv.Style(func(s *styles.Style) {
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius.Set()
@@ -1754,48 +1754,46 @@ func (ftv *FileTreeView) FileTreeViewStyles() {
 			s.Color = grr.Must(colors.FromHex("#008060"))
 		}
 	})
-}
-
-func (ftv *FileTreeView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(ftv.This()) {
-	case "parts":
-		parts := w.(*gi.Layout)
-		parts.Style(func(s *styles.Style) {
-			parts.Spacing.SetCh(0.5)
-		})
-	case "icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "branch":
-		cb := w.(*gi.Switch)
-		cb.IconOn = icons.FolderOpen
-		cb.IconOff = icons.Folder
-		cb.Style(func(s *styles.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-			s.MaxWidth.SetEm(1.5)
-			s.MaxHeight.SetEm(1.5)
-			s.AlignV = styles.AlignMiddle
-		})
-	case "space":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "label":
-		w.Style(func(s *styles.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-			s.MinWidth.SetCh(16)
-		})
-	case "menu":
-		menu := w.(*gi.Button)
-		menu.Indicator = icons.None
-	}
+	ftv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(ftv.This()) {
+		case "parts":
+			parts := w.(*gi.Layout)
+			parts.Style(func(s *styles.Style) {
+				parts.Spacing.SetCh(0.5)
+			})
+		case "icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "branch":
+			cb := w.(*gi.Switch)
+			cb.IconOn = icons.FolderOpen
+			cb.IconOff = icons.Folder
+			cb.Style(func(s *styles.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MaxWidth.SetEm(1.5)
+				s.MaxHeight.SetEm(1.5)
+				s.AlignV = styles.AlignMiddle
+			})
+		case "space":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "label":
+			w.Style(func(s *styles.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MinWidth.SetCh(16)
+			})
+		case "menu":
+			menu := w.(*gi.Button)
+			menu.Indicator = icons.None
+		}
+	})
 }
 
 // FileNode returns the SrcNode as a FileNode

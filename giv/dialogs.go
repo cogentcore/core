@@ -106,11 +106,10 @@ func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi
 	tb.SetText(text) // triggers remarkup
 
 	bbox := dlg.ConfigButtonBox()
-	gi.NewButton(bbox, "copy-to-clip").
-		SetText("Copy To Clipboard").
-		SetIcon(icons.ContentCopy).OnClick(func(e events.Event) {
-		dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
-	})
+	gi.NewButton(bbox, "copy-to-clip").SetText("Copy To Clipboard").SetIcon(icons.ContentCopy).
+		OnClick(func(e events.Event) {
+			dlg.Stage.Scene.EventMgr.ClipBoard().Write(mimedata.NewTextBytes(text))
+		})
 	return tv
 }
 

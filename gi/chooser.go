@@ -146,57 +146,55 @@ func (ch *Chooser) ChooserStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (ch *Chooser) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(ch.This()) {
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/label":
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-			if ch.MaxLength > 0 {
-				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-			}
-		})
-	case "parts/text":
-		text := w.(*TextField)
-		text.Placeholder = ch.Placeholder
-		if ch.Type == ChooserFilled {
-			text.Type = TextFieldFilled
-		} else {
-			text.Type = TextFieldOutlined
-		}
-		ch.TextFieldHandlers(text)
-		text.Style(func(s *styles.Style) {
-			s.Border.Style.Set(styles.BorderNone)
-			s.Border.Width.Set()
-			if ch.MaxLength > 0 {
-				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-			}
-		})
-	case "parts/ind-stretch":
-		w.Style(func(s *styles.Style) {
-			if ch.Editable {
-				s.Width.SetDp(0)
+	ch.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(ch.This()) {
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/label":
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+				if ch.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				}
+			})
+		case "parts/text":
+			text := w.(*TextField)
+			text.Placeholder = ch.Placeholder
+			if ch.Type == ChooserFilled {
+				text.Type = TextFieldFilled
 			} else {
-				s.Width.SetDp(16)
+				text.Type = TextFieldOutlined
 			}
-		})
-	case "parts/indicator":
-		w.Style(func(s *styles.Style) {
-			s.Font.Size.SetDp(16)
-			s.AlignV = styles.AlignMiddle
-		})
-	}
+			ch.TextFieldHandlers(text)
+			text.Style(func(s *styles.Style) {
+				s.Border.Style.Set(styles.BorderNone)
+				s.Border.Width.Set()
+				if ch.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				}
+			})
+		case "parts/ind-stretch":
+			w.Style(func(s *styles.Style) {
+				if ch.Editable {
+					s.Width.SetDp(0)
+				} else {
+					s.Width.SetDp(16)
+				}
+			})
+		case "parts/indicator":
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.SetDp(16)
+				s.AlignV = styles.AlignMiddle
+			})
+		}
+	})
 }
 
 // SetType sets the styling type of the combo box
@@ -268,7 +266,7 @@ func (ch *Chooser) ConfigWidget(sc *Scene) {
 }
 
 func (ch *Chooser) ConfigParts(sc *Scene) {
-	ch.MakeMenuFunc = ch.MakeItemsMenu
+	ch.Menu = ch.MakeItemsMenu
 	parts := ch.NewParts(LayoutHoriz)
 	config := ki.Config{}
 	var icIdx, lbIdx, txIdx, indIdx int
@@ -516,33 +514,16 @@ func (ch *Chooser) SelectItemAction(idx int) {
 	ch.SendChange()
 }
 
-// MakeItemsMenu makes menu of all the items.  It is set as the
-// MakeMenuFunc for this Chooser.
-func (ch *Chooser) MakeItemsMenu(obj Widget, menu *Menu) {
-	nitm := len(ch.Items)
-	if ch.Menu == nil {
-		ch.Menu = make(Menu, 0, nitm)
-	}
-	n := len(ch.Menu)
-	if nitm < n {
-		ch.Menu = ch.Menu[0:nitm]
-	}
-	if nitm == 0 {
+// MakeItemsMenu constructs a menu of all the items.
+// It is automatically set as the [Button.Menu] for the Chooser.
+func (ch *Chooser) MakeItemsMenu(m *Scene) {
+	if len(ch.Items) == 0 {
 		return
 	}
 	_, ics := ch.Items[0].(icons.Icon) // if true, we render as icons
 	for i, it := range ch.Items {
-		var bt *Button
-		if n > i {
-			bt = ch.Menu[i].(*Button)
-		} else {
-			bt = &Button{}
-			ki.InitNode(bt)
-			ch.Menu = append(ch.Menu, bt.This().(Widget))
-		}
-		nm := "Item_" + strconv.Itoa(i)
-		bt.SetName(nm)
-		bt.Type = ButtonMenu
+		nm := "item-" + strconv.Itoa(i)
+		bt := NewButton(m, nm).SetType(ButtonMenu)
 		if ics {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)

@@ -17,7 +17,6 @@ import (
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -69,21 +68,19 @@ func (sl *Splits) OnInit() {
 func (sl *Splits) SplitsStyles() {
 	sl.Style(func(s *styles.Style) {
 		sl.HandleSize.SetDp(10)
-
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 		s.Margin.Set()
 		s.Padding.Set()
 	})
-}
-
-func (sl *Splits) OnChildAdded(child ki.Ki) {
-	if sp, ok := child.(*Splitter); ok {
-		sp.ThumbSize = sl.HandleSize
-		sp.On(events.SlideStop, func(e events.Event) {
-			sl.SetSplitAction(sp.SplitterNo, sp.Value)
-		})
-	}
+	sl.OnWidgetAdded(func(w Widget) {
+		if sp, ok := w.(*Splitter); ok {
+			sp.ThumbSize = sl.HandleSize
+			sp.On(events.SlideStop, func(e events.Event) {
+				sl.SetSplitAction(sp.SplitterNo, sp.Value)
+			})
+		}
+	})
 }
 
 // UpdateSplits updates the splits to be same length as number of children,
@@ -465,23 +462,20 @@ func (sr *Splitter) SplitterStyles() {
 			s.MinWidth.SetDp(100)
 		}
 	})
-
-}
-
-func (sr *Splitter) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(sr.This()) {
-	case "parts/icon":
-		// w.Style(func(s *styles.Style) {
-		// 	s.MaxWidth.SetEm(1)
-		// 	s.MaxHeight.SetEm(5)
-		// 	s.MinWidth.SetEm(1)
-		// 	s.MinHeight.SetEm(5)
-		// 	s.Margin.Set()
-		// 	s.Padding.Set()
-		// 	s.AlignV = styles.AlignMiddle
-		// })
-	}
+	sr.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(sr.This()) {
+		case "parts/icon":
+			// w.Style(func(s *styles.Style) {
+			// 	s.MaxWidth.SetEm(1)
+			// 	s.MaxHeight.SetEm(5)
+			// 	s.MinWidth.SetEm(1)
+			// 	s.MinHeight.SetEm(5)
+			// 	s.Margin.Set()
+			// 	s.Padding.Set()
+			// 	s.AlignV = styles.AlignMiddle
+			// })
+		}
+	})
 }
 
 func (sr *Splitter) ConfigWidget(sc *Scene) {

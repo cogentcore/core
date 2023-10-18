@@ -7,12 +7,14 @@ package gi
 import (
 	"image"
 	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/pi/v2/spell"
 )
@@ -166,6 +168,7 @@ func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
 // Similar to completion.Show but does not use a timer
 // Displays popup immediately for any unknown word
 func (sp *Spell) Show(text string, sc *Scene, pt image.Point) {
+	// TODO(kai/menu): what should we do here?
 	// if sc == nil || sc.Win == nil {
 	// 	return
 	// }
@@ -177,7 +180,8 @@ func (sp *Spell) Show(text string, sc *Scene, pt image.Point) {
 }
 
 // ShowNow actually builds the correction popup menu
-func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
+func (sp *Spell) ShowNow(word string, m *Scene, pt image.Point) {
+	// TODO(kai/menu): what should we do here?
 	// if sc == nil || sc.Win == nil {
 	// 	return
 	// }
@@ -186,11 +190,10 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 	// 	sc.Win.SetDelPopup(cpop)
 	// }
 
-	var m Menu
 	var text string
 	if sp.IsLastLearned(word) {
 		text = "unlearn"
-		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
 			sp.UnLearnLast()
 		})
 	} else {
@@ -200,26 +203,26 @@ func (sp *Spell) ShowNow(word string, sc *Scene, pt image.Point) {
 		}
 		if count == 0 {
 			text = "no suggestion"
-			m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
-			})
+			NewButton(m, text).SetText(text).SetData(text)
 		} else {
 			for i := 0; i < count; i++ {
 				text = sp.Suggest[i]
-				m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+				NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
 					sp.Spell(text)
 				})
 			}
 		}
-		m.AddSeparator("")
+		NewSeparator(m)
 		text = "learn"
-		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
 			sp.LearnWord()
 		})
 		text = "ignore"
-		m.AddButton(ActOpts{Label: text, Data: text}, func(act *Button) {
+		NewButton(m, text).SetText(text).SetData(text).OnClick(func(e events.Event) {
 			sp.IgnoreWord()
 		})
 	}
+	// TODO(kai/menu): what should we do here?
 	// scp := PopupMenu(m, pt.X, pt.Y, sc, "tf-spellcheck-menu")
 	// scp.Type = ScCorrector
 	// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
@@ -260,7 +263,7 @@ func (sp *Spell) IsLastLearned(wrd string) bool {
 // UnLearnLast unlearns the last learned word -- in case accidental
 func (sp *Spell) UnLearnLast() {
 	if sp.LastLearned == "" {
-		log.Println("spell.UnLearnLast: no last learned word")
+		slog.Error("spell.UnLearnLast: no last learned word")
 		return
 	}
 	lword := sp.LastLearned
@@ -277,6 +280,7 @@ func (sp *Spell) IgnoreWord() {
 // Cancel cancels any pending spell correction -- call when new events nullify prior correction
 // returns true if canceled
 func (sp *Spell) Cancel() bool {
+	// TODO(kai/menu): what should we do here?
 	// if sp.Sc == nil || sp.Sc.Win == nil {
 	// 	return false
 	// }

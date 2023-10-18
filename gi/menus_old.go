@@ -4,18 +4,7 @@
 
 package gi
 
-import (
-	"image"
-
-	"goki.dev/colors"
-	"goki.dev/girl/states"
-	"goki.dev/girl/styles"
-	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
-	"goki.dev/ki/v2"
-)
+/*
 
 // Menu is a slice list of Buttons (or other Widgets)
 // that are used for generating a Menu.
@@ -35,7 +24,6 @@ func (m *Menu) UnmarshalJSON(b []byte) error {
 	// return ks.UnmarshalJSON(b)
 	return nil
 }
-*/
 
 func (m *Menu) CopyFrom(men *Menu) {
 	ks := (*ki.Slice)(m)
@@ -256,7 +244,6 @@ func (m *Menu) AddAppMenu(win *RenderWin) {
 		CustomAppMenuFunc(m, win)
 	}
 }
-*/
 
 /*
 // AddStdAppMenu adds a standard set of menu items for application-level control.
@@ -276,7 +263,6 @@ func (m *Menu) AddStdAppMenu(win *RenderWin) {
 			goosi.TheApp.QuitReq()
 		})
 }
-*/
 
 // AddRenderWinsMenu adds menu items for current main and dialog windows.
 // must be called under RenderWinGlobalMu mutex lock!
@@ -310,126 +296,16 @@ func (m *Menu) AddRenderWinsMenu(win *RenderWin) {
 			}
 		}
 	}
-	*/
 }
 
 ///////////////////////////////////////////////////////////////////
 // PopupMenu function
-
-// MenuSceneConfigStyles configures the default styles
-// for the given pop-up menu frame with the given parent.
-// It should be called on menu frames when they are created.
-func MenuSceneConfigStyles(msc *Scene) {
-	msc.Style(func(s *styles.Style) {
-		s.Border.Style.Set(styles.BorderNone)
-		s.Border.Radius = styles.BorderRadiusExtraSmall
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
-		s.BoxShadow = styles.BoxShadow2()
-	})
-}
-
-// MenuMaxHeight is the maximum height of any menu popup panel in units of font height
-// scroll bars are enforced beyond that size.
-var MenuMaxHeight = 30
-
-// NewMenuScene constructs a Scene for displaying the given Menu.
-func NewMenuScene(menu Menu, name string) *Scene {
-	msc := NewScene(name + "-menu")
-	MenuSceneConfigStyles(msc)
-	hasSelected := false
-	for _, ac := range menu {
-		wi, wb := AsWidget(ac)
-		if wi == nil {
-			continue
-		}
-		cl := wi.Clone().This().(Widget)
-		cb := cl.AsWidget()
-		if bt, ok := cl.(*Button); ok {
-			bt.Type = ButtonMenu
-			if bt.Menu == nil {
-				cb.Listeners[events.Click] = wb.Listeners[events.Click]
-				bt.HandleClickDismissMenu()
-			}
-		}
-		cb.Sc = msc
-		msc.AddChild(cl)
-		if !hasSelected && cb.StateIs(states.Selected) {
-			msc.EventMgr.SetStartFocus(cl)
-			hasSelected = true
-		}
-	}
-	if !hasSelected && msc.HasChildren() {
-		msc.EventMgr.SetStartFocus(msc.Child(0).(Widget))
-	}
-	return msc
-}
-
-// NewMenuFromScene returns a new Menu stage with given scene contents,
-// in connection with given widget, which provides key context
-// for constructing the menu, at given RenderWin position
-// (e.g., use ContextMenuPos or WinPos method on ctx Widget).
-// Typically use NewMenu which takes a standard [Menu].
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use Run call at the end to start the Stage running.
-func NewMenuFromScene(sc *Scene, ctx Widget, pos image.Point) *PopupStage {
-	sc.Geom.Pos = pos
-	return NewPopupStage(MenuStage, sc, ctx)
-}
-
-// NewMenu returns a new Menu stage with given scene contents,
-// in connection with given widget, which provides key context
-// for constructing the menu at given RenderWin position
-// (e.g., use ContextMenuPos or WinPos method on ctx Widget).
-// The menu is specified in terms of a [Menu].
-// Make further configuration choices using Set* methods, which
-// can be chained directly after the New call.
-// Use Run call at the end to start the Stage running.
-func NewMenu(menu Menu, ctx Widget, pos image.Point) *PopupStage {
-	return NewMenuFromScene(NewMenuScene(menu, ctx.Name()), ctx, pos)
-}
 
 ///////////////////////////////////////////////////////////////
 // 	Context Menu
 
 // CtxtMenuFunc is a function for creating a context menu for given node
 type CtxtMenuFunc func(g Widget, m *Menu)
-
-func (wb *WidgetBase) MakeContextMenu(m *Menu) {
-	// derived types put native menu code here
-	if wb.CtxtMenuFunc != nil {
-		wb.CtxtMenuFunc(wb.This().(Widget), m)
-	}
-	mvp := wb.Sc
-	TheViewIFace.CtxtMenuView(wb.This(), wb.IsDisabled(), mvp, m)
-}
-
-// ContextMenuPos returns the default position for the context menu
-// upper left corner.  The event will be from a mouse ContextMenu
-// event if non-nil: should handle both cases.
-func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
-	if e != nil {
-		return e.Pos()
-	}
-	return wb.WinPos(.5, .5) // center
-}
-
-func (wb *WidgetBase) HandleWidgetContextMenu() {
-	wb.On(events.ContextMenu, func(e events.Event) {
-		wi := wb.This().(Widget)
-		wi.ContextMenu(e)
-	})
-}
-
-func (wb *WidgetBase) ContextMenu(e events.Event) {
-	var menu Menu
-	wi := wb.This().(Widget)
-	wi.MakeContextMenu(&menu)
-	if len(menu) == 0 {
-		return
-	}
-	NewMenu(menu, wi, wi.ContextMenuPos(e)).Run()
-}
 
 ///////////////////////////////////////////////////////////////
 // 	Choosers
@@ -480,171 +356,4 @@ func SubStringsChooserPopup(strs [][]string, curSel string, ctx Widget, fun func
 	// return PopupMenu(menu, pos.X, pos.Y, sc, recv.Name())
 	return nil
 }
-
-// StringsInsertFirst inserts the given string at start of a string slice,
-// while keeping overall length to given max value
-// useful for a "recents" kind of string list
-func StringsInsertFirst(strs *[]string, str string, max int) {
-	if strs == nil {
-		*strs = make([]string, 0, max)
-	}
-	sz := len(*strs)
-	if sz > max {
-		*strs = (*strs)[:max]
-	}
-	if sz >= max {
-		copy((*strs)[1:max], (*strs)[0:max-1])
-		(*strs)[0] = str
-	} else {
-		*strs = append(*strs, "")
-		if sz > 0 {
-			copy((*strs)[1:], (*strs)[0:sz])
-		}
-		(*strs)[0] = str
-	}
-}
-
-// StringsInsertFirstUnique inserts the given string at start of a string slice,
-// while keeping overall length to given max value.
-// if item is already on the list, then it is moved to the top and not re-added (unique items only)
-// useful for a "recents" kind of string list
-func StringsInsertFirstUnique(strs *[]string, str string, max int) {
-	if strs == nil {
-		*strs = make([]string, 0, max)
-	}
-	sz := len(*strs)
-	if sz > max {
-		*strs = (*strs)[:max]
-	}
-	for i, s := range *strs {
-		if s == str {
-			if i == 0 {
-				return
-			}
-			copy((*strs)[1:i+1], (*strs)[0:i])
-			(*strs)[0] = str
-			return
-		}
-	}
-	if sz >= max {
-		copy((*strs)[1:max], (*strs)[0:max-1])
-		(*strs)[0] = str
-	} else {
-		*strs = append(*strs, "")
-		if sz > 0 {
-			copy((*strs)[1:], (*strs)[0:sz])
-		}
-		(*strs)[0] = str
-	}
-}
-
-// StringsDelete deletes item from strings list
-func StringsDelete(strs *[]string, str string) {
-	for i, s := range *strs {
-		if s == str {
-			*strs = append((*strs)[:i], (*strs)[i+1:]...)
-			return
-		}
-	}
-}
-
-// StringsAppendIfUnique append str to strs if not already in slice
-func StringsAppendIfUnique(strs *[]string, str string, max int) {
-	if strs == nil {
-		*strs = make([]string, 0, max)
-	}
-	for _, s := range *strs {
-		if s == str {
-			return
-		}
-	}
-	*strs = append(*strs, str)
-}
-
-// StringsAddExtras is a generic function for appending a slice to a slice used to add items to menus
-func StringsAddExtras(items *[]string, extras []string) {
-	*items = append(*items, extras...)
-}
-
-// StringsRemoveExtras is a generic function for removing items of a slice from another slice
-func StringsRemoveExtras(items *[]string, extras []string) {
-	for _, extra := range extras {
-		i := 0
-		for _, item := range *items {
-			if item != extra {
-				(*items)[i] = item
-				i++
-			}
-		}
-		*items = (*items)[:i]
-	}
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Separator
-
-// Separator defines a string to indicate a menu separator item
-var MenuTextSeparator = "-------------"
-
-// Separator draws a vertical or horizontal line
-type Separator struct {
-	WidgetBase
-
-	// is this a horizontal separator -- otherwise vertical
-	Horiz bool `xml:"horiz"`
-}
-
-func (sp *Separator) OnInit() {
-	// TODO: fix disappearing separator in menu
-	sp.Style(func(s *styles.Style) {
-		s.Margin.Set()
-		s.Padding.Set(units.Dp(4), units.Dp(0))
-		s.AlignV = styles.AlignCenter
-		s.AlignH = styles.AlignCenter
-		s.Border.Style.Top = styles.BorderSolid
-		s.Border.Color.Top = colors.Scheme.OutlineVariant
-		s.Border.Width.Top.SetDp(1)
-		if sp.Horiz {
-			s.MaxWidth.SetDp(-1)
-			s.MinHeight.SetDp(1)
-		} else {
-			s.MaxHeight.SetDp(-1)
-			s.MinWidth.SetDp(1)
-		}
-	})
-}
-
-func (sp *Separator) CopyFieldsFrom(frm any) {
-	fr := frm.(*Separator)
-	sp.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
-	sp.Horiz = fr.Horiz
-}
-
-func (sp *Separator) RenderSeparator(sc *Scene) {
-	rs, pc, st := sp.RenderLock(sc)
-	defer sp.RenderUnlock(rs)
-
-	pos := sp.LayState.Alloc.Pos.Add(st.TotalMargin().Pos())
-	sz := sp.LayState.Alloc.Size.Sub(st.TotalMargin().Size())
-
-	if !st.BackgroundColor.IsNil() {
-		pc.FillBox(rs, pos, sz, &st.BackgroundColor)
-	}
-	// border-top is standard property for separators in CSS (see https://www.w3schools.com/howto/howto_css_dividers.asp)
-	pc.StrokeStyle.Width = st.Border.Width.Top
-	pc.StrokeStyle.SetColor(&st.Border.Color.Top)
-	if sp.Horiz {
-		pc.DrawLine(rs, pos.X, pos.Y+0.5*sz.Y, pos.X+sz.X, pos.Y+0.5*sz.Y)
-	} else {
-		pc.DrawLine(rs, pos.X+0.5*sz.X, pos.Y, pos.X+0.5*sz.X, pos.Y+sz.Y)
-	}
-	pc.FillStrokeClear(rs)
-}
-
-func (sp *Separator) Render(sc *Scene) {
-	if sp.PushBounds(sc) {
-		sp.RenderSeparator(sc)
-		sp.RenderChildren(sc)
-		sp.PopBounds(sc)
-	}
-}
+*/

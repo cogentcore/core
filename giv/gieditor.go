@@ -41,20 +41,18 @@ func (ge *GiEditor) OnInit() {
 		s.SetStretchMax()
 		s.Margin.Set(units.Dp(8))
 	})
-}
-
-func (ge *GiEditor) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(ge.This()) {
-	case "title":
-		title := w.(*gi.Label)
-		title.Type = gi.LabelHeadlineSmall
-		title.Style(func(s *styles.Style) {
-			s.SetStretchMaxWidth()
-			s.AlignH = styles.AlignCenter
-			s.AlignV = styles.AlignTop
-		})
-	}
+	ge.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(ge.This()) {
+		case "title":
+			title := w.(*gi.Label)
+			title.Type = gi.LabelHeadlineSmall
+			title.Style(func(s *styles.Style) {
+				s.SetStretchMaxWidth()
+				s.AlignH = styles.AlignCenter
+				s.AlignV = styles.AlignTop
+			})
+		}
+	})
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
