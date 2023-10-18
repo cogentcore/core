@@ -32,7 +32,7 @@ import (
 // }
 
 // BorderStyles determines how to draw the border
-type BorderStyles int32 //enums:enum
+type BorderStyles int32 //enums:enum -trim-prefix Border
 
 const (
 	BorderSolid BorderStyles = iota

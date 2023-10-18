@@ -34,26 +34,26 @@ func _BorderStylesNoOp() {
 }
 
 var _BorderStylesNameToValueMap = map[string]BorderStyles{
-	`BorderSolid`:  0,
-	`bordersolid`:  0,
-	`BorderDotted`: 1,
-	`borderdotted`: 1,
-	`BorderDashed`: 2,
-	`borderdashed`: 2,
-	`BorderDouble`: 3,
-	`borderdouble`: 3,
-	`BorderGroove`: 4,
-	`bordergroove`: 4,
-	`BorderRidge`:  5,
-	`borderridge`:  5,
-	`BorderInset`:  6,
-	`borderinset`:  6,
-	`BorderOutset`: 7,
-	`borderoutset`: 7,
-	`BorderNone`:   8,
-	`bordernone`:   8,
-	`BorderHidden`: 9,
-	`borderhidden`: 9,
+	`Solid`:  0,
+	`solid`:  0,
+	`Dotted`: 1,
+	`dotted`: 1,
+	`Dashed`: 2,
+	`dashed`: 2,
+	`Double`: 3,
+	`double`: 3,
+	`Groove`: 4,
+	`groove`: 4,
+	`Ridge`:  5,
+	`ridge`:  5,
+	`Inset`:  6,
+	`inset`:  6,
+	`Outset`: 7,
+	`outset`: 7,
+	`None`:   8,
+	`none`:   8,
+	`Hidden`: 9,
+	`hidden`: 9,
 }
 
 var _BorderStylesDescMap = map[BorderStyles]string{
@@ -70,16 +70,16 @@ var _BorderStylesDescMap = map[BorderStyles]string{
 }
 
 var _BorderStylesMap = map[BorderStyles]string{
-	0: `BorderSolid`,
-	1: `BorderDotted`,
-	2: `BorderDashed`,
-	3: `BorderDouble`,
-	4: `BorderGroove`,
-	5: `BorderRidge`,
-	6: `BorderInset`,
-	7: `BorderOutset`,
-	8: `BorderNone`,
-	9: `BorderHidden`,
+	0: `Solid`,
+	1: `Dotted`,
+	2: `Dashed`,
+	3: `Double`,
+	4: `Groove`,
+	5: `Ridge`,
+	6: `Inset`,
+	7: `Outset`,
+	8: `None`,
+	9: `Hidden`,
 }
 
 // String returns the string representation
@@ -173,12 +173,12 @@ func _FontStylesNoOp() {
 }
 
 var _FontStylesNameToValueMap = map[string]FontStyles{
-	`FontNormal`:  0,
-	`fontnormal`:  0,
-	`FontItalic`:  1,
-	`fontitalic`:  1,
-	`FontOblique`: 2,
-	`fontoblique`: 2,
+	`Normal`:  0,
+	`normal`:  0,
+	`Italic`:  1,
+	`italic`:  1,
+	`Oblique`: 2,
+	`oblique`: 2,
 }
 
 var _FontStylesDescMap = map[FontStyles]string{
@@ -188,9 +188,9 @@ var _FontStylesDescMap = map[FontStyles]string{
 }
 
 var _FontStylesMap = map[FontStyles]string{
-	0: `FontNormal`,
-	1: `FontItalic`,
-	2: `FontOblique`,
+	0: `Normal`,
+	1: `Italic`,
+	2: `Oblique`,
 }
 
 // String returns the string representation
@@ -301,46 +301,37 @@ func _FontWeightsNoOp() {
 }
 
 var _FontWeightsNameToValueMap = map[string]FontWeights{
-	`WeightNormal`:     0,
-	`weightnormal`:     0,
-	`Weight100`:        1,
-	`weight100`:        1,
-	`WeightThin`:       2,
-	`weightthin`:       2,
-	`Weight200`:        3,
-	`weight200`:        3,
-	`WeightExtraLight`: 4,
-	`weightextralight`: 4,
-	`Weight300`:        5,
-	`weight300`:        5,
-	`WeightLight`:      6,
-	`weightlight`:      6,
-	`Weight400`:        7,
-	`weight400`:        7,
-	`Weight500`:        8,
-	`weight500`:        8,
-	`WeightMedium`:     9,
-	`weightmedium`:     9,
-	`Weight600`:        10,
-	`weight600`:        10,
-	`WeightSemiBold`:   11,
-	`weightsemibold`:   11,
-	`Weight700`:        12,
-	`weight700`:        12,
-	`WeightBold`:       13,
-	`weightbold`:       13,
-	`Weight800`:        14,
-	`weight800`:        14,
-	`WeightExtraBold`:  15,
-	`weightextrabold`:  15,
-	`Weight900`:        16,
-	`weight900`:        16,
-	`WeightBlack`:      17,
-	`weightblack`:      17,
-	`WeightBolder`:     18,
-	`weightbolder`:     18,
-	`WeightLighter`:    19,
-	`weightlighter`:    19,
+	`Normal`:     0,
+	`normal`:     0,
+	`100`:        1,
+	`Thin`:       2,
+	`thin`:       2,
+	`200`:        3,
+	`ExtraLight`: 4,
+	`extralight`: 4,
+	`300`:        5,
+	`Light`:      6,
+	`light`:      6,
+	`400`:        7,
+	`500`:        8,
+	`Medium`:     9,
+	`medium`:     9,
+	`600`:        10,
+	`SemiBold`:   11,
+	`semibold`:   11,
+	`700`:        12,
+	`Bold`:       13,
+	`bold`:       13,
+	`800`:        14,
+	`ExtraBold`:  15,
+	`extrabold`:  15,
+	`900`:        16,
+	`Black`:      17,
+	`black`:      17,
+	`Bolder`:     18,
+	`bolder`:     18,
+	`Lighter`:    19,
+	`lighter`:    19,
 }
 
 var _FontWeightsDescMap = map[FontWeights]string{
@@ -367,26 +358,26 @@ var _FontWeightsDescMap = map[FontWeights]string{
 }
 
 var _FontWeightsMap = map[FontWeights]string{
-	0:  `WeightNormal`,
-	1:  `Weight100`,
-	2:  `WeightThin`,
-	3:  `Weight200`,
-	4:  `WeightExtraLight`,
-	5:  `Weight300`,
-	6:  `WeightLight`,
-	7:  `Weight400`,
-	8:  `Weight500`,
-	9:  `WeightMedium`,
-	10: `Weight600`,
-	11: `WeightSemiBold`,
-	12: `Weight700`,
-	13: `WeightBold`,
-	14: `Weight800`,
-	15: `WeightExtraBold`,
-	16: `Weight900`,
-	17: `WeightBlack`,
-	18: `WeightBolder`,
-	19: `WeightLighter`,
+	0:  `Normal`,
+	1:  `100`,
+	2:  `Thin`,
+	3:  `200`,
+	4:  `ExtraLight`,
+	5:  `300`,
+	6:  `Light`,
+	7:  `400`,
+	8:  `500`,
+	9:  `Medium`,
+	10: `600`,
+	11: `SemiBold`,
+	12: `700`,
+	13: `Bold`,
+	14: `800`,
+	15: `ExtraBold`,
+	16: `900`,
+	17: `Black`,
+	18: `Bolder`,
+	19: `Lighter`,
 }
 
 // String returns the string representation
@@ -488,28 +479,28 @@ func _FontStretchNoOp() {
 }
 
 var _FontStretchNameToValueMap = map[string]FontStretch{
-	`FontStrNormal`:         0,
-	`fontstrnormal`:         0,
-	`FontStrUltraCondensed`: 1,
-	`fontstrultracondensed`: 1,
-	`FontStrExtraCondensed`: 2,
-	`fontstrextracondensed`: 2,
-	`FontStrSemiCondensed`:  3,
-	`fontstrsemicondensed`:  3,
-	`FontStrSemiExpanded`:   4,
-	`fontstrsemiexpanded`:   4,
-	`FontStrExtraExpanded`:  5,
-	`fontstrextraexpanded`:  5,
-	`FontStrUltraExpanded`:  6,
-	`fontstrultraexpanded`:  6,
-	`FontStrCondensed`:      7,
-	`fontstrcondensed`:      7,
-	`FontStrExpanded`:       8,
-	`fontstrexpanded`:       8,
-	`FontStrNarrower`:       9,
-	`fontstrnarrower`:       9,
-	`FontStrWider`:          10,
-	`fontstrwider`:          10,
+	`Normal`:         0,
+	`normal`:         0,
+	`UltraCondensed`: 1,
+	`ultracondensed`: 1,
+	`ExtraCondensed`: 2,
+	`extracondensed`: 2,
+	`SemiCondensed`:  3,
+	`semicondensed`:  3,
+	`SemiExpanded`:   4,
+	`semiexpanded`:   4,
+	`ExtraExpanded`:  5,
+	`extraexpanded`:  5,
+	`UltraExpanded`:  6,
+	`ultraexpanded`:  6,
+	`Condensed`:      7,
+	`condensed`:      7,
+	`Expanded`:       8,
+	`expanded`:       8,
+	`Narrower`:       9,
+	`narrower`:       9,
+	`Wider`:          10,
+	`wider`:          10,
 }
 
 var _FontStretchDescMap = map[FontStretch]string{
@@ -527,17 +518,17 @@ var _FontStretchDescMap = map[FontStretch]string{
 }
 
 var _FontStretchMap = map[FontStretch]string{
-	0:  `FontStrNormal`,
-	1:  `FontStrUltraCondensed`,
-	2:  `FontStrExtraCondensed`,
-	3:  `FontStrSemiCondensed`,
-	4:  `FontStrSemiExpanded`,
-	5:  `FontStrExtraExpanded`,
-	6:  `FontStrUltraExpanded`,
-	7:  `FontStrCondensed`,
-	8:  `FontStrExpanded`,
-	9:  `FontStrNarrower`,
-	10: `FontStrWider`,
+	0:  `Normal`,
+	1:  `UltraCondensed`,
+	2:  `ExtraCondensed`,
+	3:  `SemiCondensed`,
+	4:  `SemiExpanded`,
+	5:  `ExtraExpanded`,
+	6:  `UltraExpanded`,
+	7:  `Condensed`,
+	8:  `Expanded`,
+	9:  `Narrower`,
+	10: `Wider`,
 }
 
 // String returns the string representation
@@ -831,12 +822,12 @@ func _BaselineShiftsNoOp() {
 }
 
 var _BaselineShiftsNameToValueMap = map[string]BaselineShifts{
-	`ShiftBaseline`: 0,
-	`shiftbaseline`: 0,
-	`ShiftSuper`:    1,
-	`shiftsuper`:    1,
-	`ShiftSub`:      2,
-	`shiftsub`:      2,
+	`Baseline`: 0,
+	`baseline`: 0,
+	`Super`:    1,
+	`super`:    1,
+	`Sub`:      2,
+	`sub`:      2,
 }
 
 var _BaselineShiftsDescMap = map[BaselineShifts]string{
@@ -846,9 +837,9 @@ var _BaselineShiftsDescMap = map[BaselineShifts]string{
 }
 
 var _BaselineShiftsMap = map[BaselineShifts]string{
-	0: `ShiftBaseline`,
-	1: `ShiftSuper`,
-	2: `ShiftSub`,
+	0: `Baseline`,
+	1: `Super`,
+	2: `Sub`,
 }
 
 // String returns the string representation
@@ -941,10 +932,10 @@ func _FontVariantsNoOp() {
 }
 
 var _FontVariantsNameToValueMap = map[string]FontVariants{
-	`FontVarNormal`:    0,
-	`fontvarnormal`:    0,
-	`FontVarSmallCaps`: 1,
-	`fontvarsmallcaps`: 1,
+	`Normal`:    0,
+	`normal`:    0,
+	`SmallCaps`: 1,
+	`smallcaps`: 1,
 }
 
 var _FontVariantsDescMap = map[FontVariants]string{
@@ -953,8 +944,8 @@ var _FontVariantsDescMap = map[FontVariants]string{
 }
 
 var _FontVariantsMap = map[FontVariants]string{
-	0: `FontVarNormal`,
-	1: `FontVarSmallCaps`,
+	0: `Normal`,
+	1: `SmallCaps`,
 }
 
 // String returns the string representation
@@ -1060,36 +1051,36 @@ func _AlignNoOp() {
 }
 
 var _AlignNameToValueMap = map[string]Align{
-	`AlignLeft`:        0,
-	`alignleft`:        0,
-	`AlignTop`:         1,
-	`aligntop`:         1,
-	`AlignCenter`:      2,
-	`aligncenter`:      2,
-	`AlignMiddle`:      3,
-	`alignmiddle`:      3,
-	`AlignRight`:       4,
-	`alignright`:       4,
-	`AlignBottom`:      5,
-	`alignbottom`:      5,
-	`AlignBaseline`:    6,
-	`alignbaseline`:    6,
-	`AlignJustify`:     7,
-	`alignjustify`:     7,
-	`AlignSpaceAround`: 8,
-	`alignspacearound`: 8,
-	`AlignFlexStart`:   9,
-	`alignflexstart`:   9,
-	`AlignFlexEnd`:     10,
-	`alignflexend`:     10,
-	`AlignTextTop`:     11,
-	`aligntexttop`:     11,
-	`AlignTextBottom`:  12,
-	`aligntextbottom`:  12,
-	`AlignSub`:         13,
-	`alignsub`:         13,
-	`AlignSuper`:       14,
-	`alignsuper`:       14,
+	`Left`:        0,
+	`left`:        0,
+	`Top`:         1,
+	`top`:         1,
+	`Center`:      2,
+	`center`:      2,
+	`Middle`:      3,
+	`middle`:      3,
+	`Right`:       4,
+	`right`:       4,
+	`Bottom`:      5,
+	`bottom`:      5,
+	`Baseline`:    6,
+	`baseline`:    6,
+	`Justify`:     7,
+	`justify`:     7,
+	`SpaceAround`: 8,
+	`spacearound`: 8,
+	`FlexStart`:   9,
+	`flexstart`:   9,
+	`FlexEnd`:     10,
+	`flexend`:     10,
+	`TextTop`:     11,
+	`texttop`:     11,
+	`TextBottom`:  12,
+	`textbottom`:  12,
+	`Sub`:         13,
+	`sub`:         13,
+	`Super`:       14,
+	`super`:       14,
 }
 
 var _AlignDescMap = map[Align]string{
@@ -1111,21 +1102,21 @@ var _AlignDescMap = map[Align]string{
 }
 
 var _AlignMap = map[Align]string{
-	0:  `AlignLeft`,
-	1:  `AlignTop`,
-	2:  `AlignCenter`,
-	3:  `AlignMiddle`,
-	4:  `AlignRight`,
-	5:  `AlignBottom`,
-	6:  `AlignBaseline`,
-	7:  `AlignJustify`,
-	8:  `AlignSpaceAround`,
-	9:  `AlignFlexStart`,
-	10: `AlignFlexEnd`,
-	11: `AlignTextTop`,
-	12: `AlignTextBottom`,
-	13: `AlignSub`,
-	14: `AlignSuper`,
+	0:  `Left`,
+	1:  `Top`,
+	2:  `Center`,
+	3:  `Middle`,
+	4:  `Right`,
+	5:  `Bottom`,
+	6:  `Baseline`,
+	7:  `Justify`,
+	8:  `SpaceAround`,
+	9:  `FlexStart`,
+	10: `FlexEnd`,
+	11: `TextTop`,
+	12: `TextBottom`,
+	13: `Sub`,
+	14: `Super`,
 }
 
 // String returns the string representation
@@ -1220,14 +1211,14 @@ func _OverflowNoOp() {
 }
 
 var _OverflowNameToValueMap = map[string]Overflow{
-	`OverflowAuto`:    0,
-	`overflowauto`:    0,
-	`OverflowScroll`:  1,
-	`overflowscroll`:  1,
-	`OverflowVisible`: 2,
-	`overflowvisible`: 2,
-	`OverflowHidden`:  3,
-	`overflowhidden`:  3,
+	`Auto`:    0,
+	`auto`:    0,
+	`Scroll`:  1,
+	`scroll`:  1,
+	`Visible`: 2,
+	`visible`: 2,
+	`Hidden`:  3,
+	`hidden`:  3,
 }
 
 var _OverflowDescMap = map[Overflow]string{
@@ -1238,10 +1229,10 @@ var _OverflowDescMap = map[Overflow]string{
 }
 
 var _OverflowMap = map[Overflow]string{
-	0: `OverflowAuto`,
-	1: `OverflowScroll`,
-	2: `OverflowVisible`,
-	3: `OverflowHidden`,
+	0: `Auto`,
+	1: `Scroll`,
+	2: `Visible`,
+	3: `Hidden`,
 }
 
 // String returns the string representation
@@ -1334,10 +1325,10 @@ func _FillRulesNoOp() {
 }
 
 var _FillRulesNameToValueMap = map[string]FillRules{
-	`FillRuleNonZero`: 0,
-	`fillrulenonzero`: 0,
-	`FillRuleEvenOdd`: 1,
-	`fillruleevenodd`: 1,
+	`NonZero`: 0,
+	`nonzero`: 0,
+	`EvenOdd`: 1,
+	`evenodd`: 1,
 }
 
 var _FillRulesDescMap = map[FillRules]string{
@@ -1346,8 +1337,8 @@ var _FillRulesDescMap = map[FillRules]string{
 }
 
 var _FillRulesMap = map[FillRules]string{
-	0: `FillRuleNonZero`,
-	1: `FillRuleEvenOdd`,
+	0: `NonZero`,
+	1: `EvenOdd`,
 }
 
 // String returns the string representation
@@ -1440,10 +1431,10 @@ func _VectorEffectsNoOp() {
 }
 
 var _VectorEffectsNameToValueMap = map[string]VectorEffects{
-	`VecEffNone`:             0,
-	`veceffnone`:             0,
-	`VecEffNonScalingStroke`: 1,
-	`veceffnonscalingstroke`: 1,
+	`None`:             0,
+	`none`:             0,
+	`NonScalingStroke`: 1,
+	`nonscalingstroke`: 1,
 }
 
 var _VectorEffectsDescMap = map[VectorEffects]string{
@@ -1452,8 +1443,8 @@ var _VectorEffectsDescMap = map[VectorEffects]string{
 }
 
 var _VectorEffectsMap = map[VectorEffects]string{
-	0: `VecEffNone`,
-	1: `VecEffNonScalingStroke`,
+	0: `None`,
+	1: `NonScalingStroke`,
 }
 
 // String returns the string representation
@@ -1549,16 +1540,16 @@ func _LineCapsNoOp() {
 }
 
 var _LineCapsNameToValueMap = map[string]LineCaps{
-	`LineCapButt`:      0,
-	`linecapbutt`:      0,
-	`LineCapRound`:     1,
-	`linecapround`:     1,
-	`LineCapSquare`:    2,
-	`linecapsquare`:    2,
-	`LineCapCubic`:     3,
-	`linecapcubic`:     3,
-	`LineCapQuadratic`: 4,
-	`linecapquadratic`: 4,
+	`Butt`:      0,
+	`butt`:      0,
+	`Round`:     1,
+	`round`:     1,
+	`Square`:    2,
+	`square`:    2,
+	`Cubic`:     3,
+	`cubic`:     3,
+	`Quadratic`: 4,
+	`quadratic`: 4,
 }
 
 var _LineCapsDescMap = map[LineCaps]string{
@@ -1570,11 +1561,11 @@ var _LineCapsDescMap = map[LineCaps]string{
 }
 
 var _LineCapsMap = map[LineCaps]string{
-	0: `LineCapButt`,
-	1: `LineCapRound`,
-	2: `LineCapSquare`,
-	3: `LineCapCubic`,
-	4: `LineCapQuadratic`,
+	0: `Butt`,
+	1: `Round`,
+	2: `Square`,
+	3: `Cubic`,
+	4: `Quadratic`,
 }
 
 // String returns the string representation
@@ -1671,18 +1662,18 @@ func _LineJoinsNoOp() {
 }
 
 var _LineJoinsNameToValueMap = map[string]LineJoins{
-	`LineJoinMiter`:     0,
-	`linejoinmiter`:     0,
-	`LineJoinMiterClip`: 1,
-	`linejoinmiterclip`: 1,
-	`LineJoinRound`:     2,
-	`linejoinround`:     2,
-	`LineJoinBevel`:     3,
-	`linejoinbevel`:     3,
-	`LineJoinArcs`:      4,
-	`linejoinarcs`:      4,
-	`LineJoinArcsClip`:  5,
-	`linejoinarcsclip`:  5,
+	`Miter`:     0,
+	`miter`:     0,
+	`MiterClip`: 1,
+	`miterclip`: 1,
+	`Round`:     2,
+	`round`:     2,
+	`Bevel`:     3,
+	`bevel`:     3,
+	`Arcs`:      4,
+	`arcs`:      4,
+	`ArcsClip`:  5,
+	`arcsclip`:  5,
 }
 
 var _LineJoinsDescMap = map[LineJoins]string{
@@ -1695,12 +1686,12 @@ var _LineJoinsDescMap = map[LineJoins]string{
 }
 
 var _LineJoinsMap = map[LineJoins]string{
-	0: `LineJoinMiter`,
-	1: `LineJoinMiterClip`,
-	2: `LineJoinRound`,
-	3: `LineJoinBevel`,
-	4: `LineJoinArcs`,
-	5: `LineJoinArcsClip`,
+	0: `Miter`,
+	1: `MiterClip`,
+	2: `Round`,
+	3: `Bevel`,
+	4: `Arcs`,
+	5: `ArcsClip`,
 }
 
 // String returns the string representation
@@ -1794,12 +1785,12 @@ func _UnicodeBidiNoOp() {
 }
 
 var _UnicodeBidiNameToValueMap = map[string]UnicodeBidi{
-	`BidiNormal`:       0,
-	`bidinormal`:       0,
-	`BidiEmbed`:        1,
-	`bidiembed`:        1,
-	`BidiBidiOverride`: 2,
-	`bidibidioverride`: 2,
+	`Normal`:       0,
+	`normal`:       0,
+	`Embed`:        1,
+	`embed`:        1,
+	`BidiOverride`: 2,
+	`bidioverride`: 2,
 }
 
 var _UnicodeBidiDescMap = map[UnicodeBidi]string{
@@ -1809,9 +1800,9 @@ var _UnicodeBidiDescMap = map[UnicodeBidi]string{
 }
 
 var _UnicodeBidiMap = map[UnicodeBidi]string{
-	0: `BidiNormal`,
-	1: `BidiEmbed`,
-	2: `BidiBidiOverride`,
+	0: `Normal`,
+	1: `Embed`,
+	2: `BidiOverride`,
 }
 
 // String returns the string representation
@@ -2041,12 +2032,12 @@ func _TextAnchorsNoOp() {
 }
 
 var _TextAnchorsNameToValueMap = map[string]TextAnchors{
-	`AnchorStart`:  0,
-	`anchorstart`:  0,
-	`AnchorMiddle`: 1,
-	`anchormiddle`: 1,
-	`AnchorEnd`:    2,
-	`anchorend`:    2,
+	`Start`:  0,
+	`start`:  0,
+	`Middle`: 1,
+	`middle`: 1,
+	`End`:    2,
+	`end`:    2,
 }
 
 var _TextAnchorsDescMap = map[TextAnchors]string{
@@ -2056,9 +2047,9 @@ var _TextAnchorsDescMap = map[TextAnchors]string{
 }
 
 var _TextAnchorsMap = map[TextAnchors]string{
-	0: `AnchorStart`,
-	1: `AnchorMiddle`,
-	2: `AnchorEnd`,
+	0: `Start`,
+	1: `Middle`,
+	2: `End`,
 }
 
 // String returns the string representation
@@ -2154,16 +2145,16 @@ func _WhiteSpacesNoOp() {
 }
 
 var _WhiteSpacesNameToValueMap = map[string]WhiteSpaces{
-	`WhiteSpaceNormal`:  0,
-	`whitespacenormal`:  0,
-	`WhiteSpaceNowrap`:  1,
-	`whitespacenowrap`:  1,
-	`WhiteSpacePre`:     2,
-	`whitespacepre`:     2,
-	`WhiteSpacePreLine`: 3,
-	`whitespacepreline`: 3,
-	`WhiteSpacePreWrap`: 4,
-	`whitespaceprewrap`: 4,
+	`Normal`:  0,
+	`normal`:  0,
+	`Nowrap`:  1,
+	`nowrap`:  1,
+	`Pre`:     2,
+	`pre`:     2,
+	`PreLine`: 3,
+	`preline`: 3,
+	`PreWrap`: 4,
+	`prewrap`: 4,
 }
 
 var _WhiteSpacesDescMap = map[WhiteSpaces]string{
@@ -2175,11 +2166,11 @@ var _WhiteSpacesDescMap = map[WhiteSpaces]string{
 }
 
 var _WhiteSpacesMap = map[WhiteSpaces]string{
-	0: `WhiteSpaceNormal`,
-	1: `WhiteSpaceNowrap`,
-	2: `WhiteSpacePre`,
-	3: `WhiteSpacePreLine`,
-	4: `WhiteSpacePreWrap`,
+	0: `Normal`,
+	1: `Nowrap`,
+	2: `Pre`,
+	3: `PreLine`,
+	4: `PreWrap`,
 }
 
 // String returns the string representation

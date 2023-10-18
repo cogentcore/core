@@ -164,7 +164,7 @@ func (s *Style) SetFixedHeight(val units.Value) {
 // different contexts, but there is also so much overlap that it makes sense
 // to have them all in one list -- some are not standard CSS and used by
 // layout
-type Align int32 //enums:enum
+type Align int32 //enums:enum -trim-prefix Align
 
 const (
 	AlignLeft Align = iota
@@ -204,7 +204,7 @@ func IsAlignEnd(a Align) bool {
 }
 
 // overflow type -- determines what happens when there is too much stuff in a layout
-type Overflow int32 //enums:enum
+type Overflow int32 //enums:enum -trim-prefix Overflow
 
 const (
 	// OverflowAuto automatically determines if scrollbars should be added to show

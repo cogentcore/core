@@ -181,7 +181,7 @@ var FontSizePoints = map[string]float32{
 }
 
 // FontStyles styles of font: normal, italic, etc
-type FontStyles int32 //enums:enum
+type FontStyles int32 //enums:enum -trim-prefix Font
 
 const (
 	FontNormal FontStyles = iota
@@ -197,7 +197,7 @@ var FontStyleNames = []string{"Normal", "Italic", "Oblique"}
 // FontWeights are the valid names for different weights of font, with both
 // the numeric and standard names given.  The regularized font names in the
 // font library use the names, as those are typically found in the font files.
-type FontWeights int32 //enums:enum
+type FontWeights int32 //enums:enum -trim-prefix Weight
 
 const (
 	WeightNormal FontWeights = iota
@@ -260,7 +260,7 @@ var FontWeightToNameMap = map[FontWeights]string{
 
 // FontStretch are different stretch levels of font.  These are less typically
 // available on most platforms by default.
-type FontStretch int32 //enums:enum
+type FontStretch int32 //enums:enum -trim-prefix FontStr
 
 const (
 	FontStrNormal FontStretch = iota
@@ -315,7 +315,7 @@ const (
 )
 
 // BaselineShifts are for super / sub script
-type BaselineShifts int32 //enums:enum
+type BaselineShifts int32 //enums:enum -trim-prefix Shift
 
 const (
 	ShiftBaseline BaselineShifts = iota
@@ -324,7 +324,7 @@ const (
 )
 
 // FontVariants is just normal vs. small caps. todo: not currently supported
-type FontVariants int32 //enums:enum
+type FontVariants int32 //enums:enum -trim-prefix FontVar
 
 const (
 	FontVarNormal FontVariants = iota
