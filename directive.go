@@ -66,7 +66,7 @@ func Parse(comment string) (*Directive, error) {
 	directive.Tool = before
 	args, err := shellwords.Parse(after)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing args %w", err)
+		return nil, fmt.Errorf("error parsing args: %w", err)
 	}
 	directive.Args = args
 	if len(args) > 0 {
