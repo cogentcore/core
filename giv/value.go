@@ -461,7 +461,7 @@ type Value interface {
 	// value, including setting up the signal connections to set the value
 	// when the user edits it (values are always set immediately when the
 	// widget is updated).
-	ConfigWidget(widg gi.Widget)
+	ConfigWidget(widg gi.Widget, sc *gi.Scene)
 
 	// HasAction returns true if this value has an associated action, such as
 	// pulling up a dialog or chooser for this value.  Activate method will
@@ -715,11 +715,11 @@ func (vv *ValueBase) SetValue(val any) bool {
 	if wasSet {
 		vv.This().(Value).SaveTmp()
 	}
-	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
+	fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
 	vv.SendChange()
 	if err != nil {
 		// todo: snackbar for error?
-		slog.Error(err.Error())
+		slog.Error("giv.SetValue error:", "type:", vv.Value.Type(), "err:", err)
 	}
 	return wasSet
 }
@@ -1014,7 +1014,7 @@ func (vv *ValueBase) UpdateWidget() {
 	}
 }
 
-func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
+func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf, ok := vv.Widget.(*gi.TextField)
@@ -1040,6 +1040,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
 		}
 	}
 
+	tf.Config(sc)
 	tf.OnChange(func(e events.Event) {
 		if vv.SetValue(tf.Text()) {
 			vv.UpdateWidget() // always update after setting value..
@@ -1050,32 +1051,33 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget) {
 
 // StdConfigWidget does all of the standard widget configuration tag options
 func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
-	// STYTODO: get rid of this
-	nb := widg.AsWidget()
-	if widthtag, ok := vv.Tag("width"); ok {
-		width, err := laser.ToFloat32(widthtag)
-		if err == nil {
-			nb.SetMinPrefWidth(units.Ch(width))
+	// nb := widg.AsWidget()
+	widg.Style(func(s *styles.Style) {
+		if widthtag, ok := vv.Tag("width"); ok {
+			width, err := laser.ToFloat32(widthtag)
+			if err == nil {
+				s.SetMinPrefWidth(units.Ch(width))
+			}
 		}
-	}
-	if maxwidthtag, ok := vv.Tag("max-width"); ok {
-		width, err := laser.ToFloat32(maxwidthtag)
-		if err == nil {
-			nb.SetProp("max-width", units.Ch(width))
+		if maxwidthtag, ok := vv.Tag("max-width"); ok {
+			width, err := laser.ToFloat32(maxwidthtag)
+			if err == nil {
+				s.MaxWidth = units.Ch(width)
+			}
 		}
-	}
-	if heighttag, ok := vv.Tag("height"); ok {
-		height, err := laser.ToFloat32(heighttag)
-		if err == nil {
-			nb.SetMinPrefHeight(units.Em(height))
+		if heighttag, ok := vv.Tag("height"); ok {
+			height, err := laser.ToFloat32(heighttag)
+			if err == nil {
+				s.SetMinPrefHeight(units.Em(height))
+			}
 		}
-	}
-	if maxheighttag, ok := vv.Tag("max-height"); ok {
-		height, err := laser.ToFloat32(maxheighttag)
-		if err == nil {
-			nb.SetProp("max-height", units.Em(height))
+		if maxheighttag, ok := vv.Tag("max-height"); ok {
+			height, err := laser.ToFloat32(maxheighttag)
+			if err == nil {
+				s.SetMinPrefHeight(units.Em(height))
+			}
 		}
-	}
+	})
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1146,93 +1148,4 @@ func (vi *ViewIFace) PrefsDetApply(pf *gi.PrefsDetailed) {
 
 func (vi *ViewIFace) PrefsDbgView(prefs *gi.PrefsDebug) {
 	PrefsDbgView(prefs)
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  VersCtrlValue
-
-// VersCtrlSystems is a list of supported Version Control Systems.
-// These must match the VCS Types from goki/pi/vci which in turn
-// is based on masterminds/vcs
-var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
-
-// IsVersCtrlSystem returns true if the given string matches one of the
-// standard VersCtrlSystems -- uses lowercase version of str.
-func IsVersCtrlSystem(str string) bool {
-	stl := strings.ToLower(str)
-	for _, vcn := range VersCtrlSystems {
-		if stl == vcn {
-			return true
-		}
-	}
-	return false
-}
-
-// VersCtrlName is the name of a version control system
-type VersCtrlName string
-
-func VersCtrlNameProper(vc string) VersCtrlName {
-	vcl := strings.ToLower(vc)
-	for _, vcnp := range VersCtrlSystems {
-		vcnpl := strings.ToLower(vcnp)
-		if strings.Compare(vcl, vcnpl) == 0 {
-			return VersCtrlName(vcnp)
-		}
-	}
-	return ""
-}
-
-// Value registers VersCtrlValue as the viewer of VersCtrlName
-func (kn VersCtrlName) Value() Value {
-	vv := &VersCtrlValue{}
-	ki.InitNode(vv)
-	return vv
-}
-
-// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
-// from StringPopup
-type VersCtrlValue struct {
-	ValueBase
-}
-
-func (vv *VersCtrlValue) WidgetType() *gti.Type {
-	vv.WidgetTyp = gi.ButtonType
-	return vv.WidgetTyp
-}
-
-func (vv *VersCtrlValue) UpdateWidget() {
-	if vv.Widget == nil {
-		return
-	}
-	bt := vv.Widget.(*gi.Button)
-	txt := laser.ToString(vv.Value.Interface())
-	if txt == "" {
-		txt = "(none)"
-	}
-	bt.SetText(txt)
-}
-
-func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget) {
-	vv.Widget = widg
-	bt := vv.Widget.(*gi.Button)
-	bt.SetType(gi.ButtonTonal)
-	bt.OnClick(func(e events.Event) {
-		vv.OpenDialog(vv.Widget, nil)
-	})
-	vv.UpdateWidget()
-}
-
-func (vv *VersCtrlValue) HasDialog() bool {
-	return true
-}
-
-func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
-		return
-	}
-	cur := laser.ToString(vv.Value.Interface())
-	gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
-		vv.SetValue(ac.Text)
-		vv.UpdateWidget()
-	})
 }

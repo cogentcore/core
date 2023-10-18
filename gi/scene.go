@@ -105,10 +105,14 @@ func (sc *Scene) SetTitle(title string) *Scene {
 	return sc
 }
 
+// RenderCtx returns the current render context.
+// This will be nil prior to actual rendering.
 func (sc *Scene) RenderCtx() *RenderContext {
+	if sc.Stage == nil {
+		return nil
+	}
 	sm := sc.MainStageMgr()
 	if sm == nil {
-		slog.Error("Scene has nil StageMgr", "scene", sc.Nm)
 		return nil
 	}
 	return sm.RenderCtx

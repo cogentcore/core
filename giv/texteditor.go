@@ -30,7 +30,7 @@ func (vv *TextEditorValue) UpdateWidget() {
 	sb.Buf.SetText([]byte(npv.String()))
 }
 
-func (vv *TextEditorValue) ConfigWidget(widg gi.Widget) {
+func (vv *TextEditorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 

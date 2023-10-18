@@ -124,8 +124,8 @@ func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 		keyw := parts.Child(i * 2).(gi.Widget)
 		widg := parts.Child((i * 2) + 1).(gi.Widget)
 		kv := mv.Keys[i]
-		kv.ConfigWidget(keyw)
-		vv.ConfigWidget(widg)
+		kv.ConfigWidget(keyw, sc)
+		vv.ConfigWidget(widg, sc)
 		if mv.IsDisabled() {
 			widg.AsWidget().SetState(true, states.Disabled)
 			keyw.AsWidget().SetState(true, states.Disabled)

@@ -37,11 +37,12 @@ func (vv *HiStyleValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *HiStyleValue) ConfigWidget(widg gi.Widget) {
+func (vv *HiStyleValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})

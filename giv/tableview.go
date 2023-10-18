@@ -94,20 +94,20 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 			s.Margin.Set()
 			s.Padding.Set()
 		})
-	case "header": // slice header
+	case "frame/header": // slice header
 		sh := w.(*gi.Toolbar)
 		sh.Lay = gi.LayoutHoriz
 		sh.Style(func(s *styles.Style) {
 			sh.Spacing.SetDp(0)
 			s.Overflow = styles.OverflowHidden // no scrollbars!
 		})
-	case "grid-lay": // grid layout
+	case "frame/grid-lay": // grid layout
 		gl := w.(*gi.Layout)
 		gl.Lay = gi.LayoutHoriz
 		w.Style(func(s *styles.Style) {
 			gl.SetStretchMax() // for this to work, ALL layers above need it too
 		})
-	case "grid-lay/grid": // slice grid
+	case "frame/grid-lay/grid": // slice grid
 		sg := w.(*gi.Frame)
 		sg.Lay = gi.LayoutGrid
 		sg.Stripes = gi.RowStripes
@@ -135,6 +135,11 @@ func (tv *TableView) OnChildAdded(child ki.Ki) {
 			s.MinWidth.SetEm(1.5)
 			s.Padding.Right.SetDp(4)
 			s.Text.Align = styles.AlignRight
+		})
+	}
+	if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
+		w.Style(func(s *styles.Style) {
+			w.(*gi.Button).SetType(gi.ButtonAction)
 		})
 	}
 }
@@ -316,6 +321,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	sg := tv.SliceFrame()
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
+	sc := tv.Sc
 
 	sgf := tv.This().(SliceViewer).SliceGrid()
 	if sgf != nil {
@@ -416,7 +422,7 @@ func (tv *TableView) ConfigSliceGrid() {
 		cidx := idxOff + fli
 		widg := ki.NewOfType(vtyp).(gi.Widget)
 		sgf.SetChild(widg, cidx, valnm)
-		vv.ConfigWidget(widg)
+		vv.ConfigWidget(widg, sc)
 	}
 
 	if !tv.IsDisabled() {
@@ -555,6 +561,7 @@ func (tv *TableView) UpdateSliceGrid() {
 	if sg == nil {
 		return
 	}
+	sc := tv.Sc
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndLayout(updt)
@@ -658,7 +665,7 @@ func (tv *TableView) UpdateSliceGrid() {
 			} else {
 				widg = ki.NewOfType(vtyp).(gi.Widget)
 				sg.SetChild(widg, cidx, valnm)
-				vv.ConfigWidget(widg)
+				vv.ConfigWidget(widg, sc)
 				wb := widg.AsWidget()
 				if wb != nil {
 					// totally not worth it now:
@@ -887,11 +894,13 @@ func (tv *TableView) SetSortFieldName(nm string) {
 }
 
 func (tv *TableView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := tv.Frame.DoLayout(vp, parBBox, iter)
-	if !tv.IsConfiged() {
-		return redo
-	}
+	tv.This().(SliceViewer).LayoutSliceGrid()
+	tv.This().(SliceViewer).UpdateSliceGrid()
 	tv.LayoutHeader()
+	redo := tv.Frame.DoLayout(vp, parBBox, iter)
+	// if !tv.IsConfiged() {
+	// 	return redo
+	// }
 	tv.SliceHeader().DoLayout(vp, parBBox, iter)
 	return redo
 }

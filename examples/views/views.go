@@ -14,7 +14,6 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
@@ -23,7 +22,7 @@ func main() { gimain.Run(app) }
 type TableStruct struct {
 
 	// an icon
-	Icon icons.Icon
+	// Icon icons.Icon
 
 	// an integer field
 	IntField int
@@ -35,7 +34,7 @@ type TableStruct struct {
 	StrField string
 
 	// a file
-	File gi.FileName
+	// File gi.FileName
 }
 
 type ILStruct struct {
@@ -105,7 +104,7 @@ func app() {
 	tsttable := make([]*TableStruct, 100)
 
 	for i := range tsttable {
-		ts := &TableStruct{Icon: "go", IntField: i, FloatField: float32(i) / 10.0}
+		ts := &TableStruct{IntField: i, FloatField: float32(i) / 10.0}
 		tsttable[i] = ts
 	}
 
@@ -116,7 +115,7 @@ func app() {
 	stru.Cond2.IntField = 22
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
-	stru.Cond2.File = gi.FileName("views.go")
+	// stru.Cond2.File = gi.FileName("views.go")
 	_ = stru
 
 	// turn this on to see a trace of the rendering
@@ -169,11 +168,12 @@ func app() {
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	// strv := giv.NewStructView(split, "strv")
-	// strv.SetStruct(&stru)
-	// strv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
+	strv := giv.NewStructView(split, "strv")
+	strv.Sc = sc
+	strv.SetStruct(&stru)
+	strv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
 
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
@@ -181,12 +181,12 @@ func app() {
 	// 	s.SetStretchMax()
 	// })
 
-	sv := giv.NewSliceView(split, "sv")
-	// sv.SetInactive()
-	sv.SetSlice(&tstslice)
-	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
+	// sv := giv.NewSliceView(split, "sv")
+	// // sv.SetInactive()
+	// sv.SetSlice(&tstslice)
+	// sv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
 	// tv := giv.NewTableView(split, "tv")
 	// // sv.SetInactive()
@@ -196,7 +196,7 @@ func app() {
 	// })
 
 	// split.SetSplits(.3, .2, .2, .3)
-	split.SetSplits(1)
+	split.SetSplits(.5, .5)
 
 	gi.NewWindow(sc).Run().Wait()
 }

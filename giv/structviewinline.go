@@ -133,7 +133,7 @@ func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) {
 		if hasDef {
 			sv.HasDefs = true
 		}
-		vv.ConfigWidget(widg)
+		vv.ConfigWidget(widg, sc)
 		if !sv.IsDisabled() && !inactTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
