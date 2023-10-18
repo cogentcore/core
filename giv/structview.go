@@ -120,14 +120,11 @@ func (sv *StructView) OnInit() {
 // SetStruct sets the source struct that we are viewing -- rebuilds the
 // children to represent this struct
 func (sv *StructView) SetStruct(st any) {
-	updt := false
 	if sv.Struct != st {
 		sv.Changed = false
-		updt = sv.UpdateStart()
 		sv.Struct = st
+		sv.ReConfigTree(sv.Sc)
 	}
-	sv.Config(sv.Sc)
-	sv.UpdateEndLayout(updt)
 }
 
 // UpdateFields updates each of the value-view widgets for the fields --
@@ -383,7 +380,7 @@ func (sv *StructView) UpdateFieldAction() {
 		return
 	}
 	if sv.HasViewIfs {
-		sv.SetNeedsLayout()
+		sv.ReConfigTree(sv.Sc)
 	} else if sv.HasDefs {
 		sg := sv.StructGrid()
 		updt := sg.UpdateStart()
@@ -393,14 +390,6 @@ func (sv *StructView) UpdateFieldAction() {
 		}
 		sg.UpdateEndRender(updt)
 	}
-}
-
-func (sv *StructView) GetSize(sc *gi.Scene, iter int) {
-	updt := sv.ConfigStructGrid(sc)
-	if updt {
-		sv.ApplyStyleTree(sc)
-	}
-	sv.Frame.GetSize(sc, iter)
 }
 
 func (sv *StructView) Render(sc *gi.Scene) {
