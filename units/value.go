@@ -14,17 +14,23 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// NOTE: we have empty labels for value fields, because there is a natural
+// flow of the unit values without it. "{{Value}} {{Unit}}" without labels
+// makes sense and provides a nicer end-user experience.
+
 // Value and units, and converted value into raw pixels (dots in DPI)
+//
+//gti:add
 type Value struct {
 
 	// the value in terms of the specified unit
-	Val float32 `label:"Value"`
+	Val float32 `label:""`
 
 	// the unit used for the value
-	Un Units `label:"Unit"`
+	Un Units `label:""`
 
 	// the computed value in raw pixels (dots in DPI)
-	Dots float32 `inactive:"+"`
+	Dots float32 `view:"-"`
 
 	// function to compute dots from units, using arbitrary expressions; if nil, standard ToDots is used
 	DotsFunc func(uc *Context) float32 `view:"-"`
