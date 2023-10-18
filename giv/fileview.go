@@ -345,21 +345,25 @@ func (fv *FileView) ConfigPathBar() {
 		}
 	})
 
-	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(gi.KeyFunJump).OnClick(func(e events.Event) {
-		fv.DirPathUp()
-	}).SetTooltip("go up one level into the parent folder")
+	gi.NewButton(pr, "path-up").SetIcon(icons.ArrowUpward).SetShortcutKey(gi.KeyFunJump).SetTooltip("go up one level into the parent folder").
+		OnClick(func(e events.Event) {
+			fv.DirPathUp()
+		})
 
-	gi.NewButton(pr, "path-ref").SetIcon(icons.Refresh).OnClick(func(e events.Event) {
-		fv.UpdateFilesAction()
-	}).SetTooltip("Update directory view -- in case files might have changed")
+	gi.NewButton(pr, "path-ref").SetIcon(icons.Refresh).SetTooltip("Update directory view -- in case files might have changed").
+		OnClick(func(e events.Event) {
+			fv.UpdateFilesAction()
+		})
 
-	gi.NewButton(pr, "path-fav").SetIcon(icons.Favorite).OnClick(func(e events.Event) {
-		fv.AddPathToFavs()
-	}).SetTooltip("save this path to the favorites list -- saves current Prefs")
+	gi.NewButton(pr, "path-fav").SetIcon(icons.Favorite).SetTooltip("save this path to the favorites list -- saves current Prefs").
+		OnClick(func(e events.Event) {
+			fv.AddPathToFavs()
+		})
 
-	gi.NewButton(pr, "new-folder").SetIcon(icons.CreateNewFolder).OnClick(func(e events.Event) {
-		fv.NewFolder()
-	}).SetTooltip("Create a new folder in this folder")
+	gi.NewButton(pr, "new-folder").SetIcon(icons.CreateNewFolder).SetTooltip("Create a new folder in this folder").
+		OnClick(func(e events.Event) {
+			fv.NewFolder()
+		})
 }
 
 func (fv *FileView) ConfigFilesRow() {
