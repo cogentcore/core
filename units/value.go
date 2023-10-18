@@ -345,7 +345,7 @@ func (v *Value) Convert(to Units, uc *Context) Value {
 
 // String implements the fmt.Stringer interface.
 func (v *Value) String() string {
-	return fmt.Sprintf("%g%s", v.Val, UnitNames[v.Un])
+	return fmt.Sprintf("%g%s", v.Val, v.Un.String())
 }
 
 // SetString sets value from a string
@@ -373,11 +373,12 @@ func (v *Value) SetString(str string) error {
 
 	var numstr string
 	var un Units = UnitPx // default to pixels
-	for i, nm := range UnitNames {
+	for _, u := range UnitsValues() {
+		nm := u.String()
 		unsz := len(nm)
 		if ends[unsz-1] == nm {
 			numstr = trstr[:sz-unsz]
-			un = Units(i)
+			un = u
 			break
 		}
 	}

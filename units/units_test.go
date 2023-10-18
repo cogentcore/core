@@ -12,10 +12,10 @@ import (
 func TestValCvt(t *testing.T) {
 	var ctxt Context
 	ctxt.Defaults()
-	for un := UnitPx; un <= UnitDp; un++ {
+	for _, un := range UnitsValues() {
 		v1 := New(1.0, un)
 		s1 := fmt.Sprintf("%v = %v dots", v1, v1.ToDots(&ctxt))
-		v2 := StringToValue("1.0" + UnitNames[un])
+		v2 := StringToValue("1.0" + un.String())
 		s2 := fmt.Sprintf("%v = %v dots", v2, v2.ToDots(&ctxt))
 		if s1 != s2 {
 			t.Errorf("strings don't match: %v != %v\n", s1, s2)

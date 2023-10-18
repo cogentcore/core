@@ -32,7 +32,7 @@ const (
 )
 
 // Units is an enum that represents a unit (px, em, etc)
-type Units int32 //enums:enum
+type Units int32 //enums:enum -trim-prefix Unit -transform lower
 
 const (
 	// UnitPx = pixels -- 1px = 1/96th of 1in -- these are NOT raw display pixels
@@ -98,27 +98,3 @@ const (
 	// UnitDot = actual real display pixels -- generally only use internally
 	UnitDot
 )
-
-var UnitNames = [...]string{
-	UnitPx:   "px",
-	UnitDp:   "dp",
-	UnitEw:   "ew",
-	UnitEh:   "eh",
-	UnitPw:   "pw",
-	UnitPh:   "ph",
-	UnitRem:  "rem",
-	UnitEm:   "em",
-	UnitEx:   "ex",
-	UnitCh:   "ch",
-	UnitVw:   "vw",
-	UnitVh:   "vh",
-	UnitVmin: "vmin",
-	UnitVmax: "vmax",
-	UnitCm:   "cm",
-	UnitMm:   "mm",
-	UnitQ:    "q",
-	UnitIn:   "in",
-	UnitPc:   "pc",
-	UnitPt:   "pt",
-	UnitDot:  "dot",
-}
