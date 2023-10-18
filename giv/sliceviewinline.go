@@ -105,7 +105,6 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 		sv.Slice = nil
 		return
 	}
-	updt := false
 	newslc := false
 	if reflect.TypeOf(sl).Kind() != reflect.Pointer { // prevent crash on non-comparable
 		newslc = true
@@ -113,16 +112,14 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 		newslc = (sv.Slice != sl)
 	}
 	if newslc {
-		updt = sv.UpdateStart()
 		sv.Slice = sl
 		sv.IsArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
 		sv.IsFixedLen = false
 		if sv.SliceValView != nil {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
 		}
+		sv.ReConfigTree(sv.Sc)
 	}
-	// sv.Config(sv.Sc)
-	sv.UpdateEndLayout(updt)
 }
 
 func (sv *SliceViewInline) ConfigWidget(sc *gi.Scene) {
@@ -198,7 +195,7 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "edit slice in a dialog window"
 	}
-	sv.UpdateEnd(updt)
+	sv.UpdateEndLayout(updt)
 	return updt
 }
 
@@ -217,7 +214,6 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 	if sv.IsArray || sv.IsFixedLen {
 		return
 	}
-
 	updt := sv.UpdateStart()
 	defer sv.UpdateEndLayout(updt)
 
@@ -227,6 +223,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
+	sv.ReConfigTree(sv.Sc)
 }
 
 func (sv *SliceViewInline) UpdateValues() {
@@ -235,12 +232,4 @@ func (sv *SliceViewInline) UpdateValues() {
 		vv.UpdateWidget()
 	}
 	sv.UpdateEndRender(updt)
-}
-
-func (sv *SliceViewInline) GetSize(sc *gi.Scene, iter int) {
-	updt := sv.ConfigSlice(sc)
-	if updt {
-		sv.ApplyStyleTree(sc)
-	}
-	sv.Frame.GetSize(sc, iter)
 }

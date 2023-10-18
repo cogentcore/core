@@ -280,6 +280,7 @@ func (wb *WidgetBase) ReConfigTree(sc *Scene) {
 	if wb.This() == nil {
 		return
 	}
+	updt := wb.UpdateStart()
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
@@ -291,6 +292,7 @@ func (wb *WidgetBase) ReConfigTree(sc *Scene) {
 		return ki.Continue
 	})
 	pr.End()
+	wb.UpdateEndLayout(updt)
 }
 
 // ApplyStyleTree calls ApplyStyle on every Widget in the tree from me.
