@@ -132,6 +132,11 @@ type Widget interface {
 	// On adds an event listener function for the given event type
 	On(etype events.Types, fun func(e events.Event)) Widget
 
+	// Helper functions for common event types
+
+	// OnClick adds an event listener function for [events.Click] events
+	OnClick(fun func(e events.Event)) Widget
+
 	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(e events.Event)
 
