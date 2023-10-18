@@ -25,6 +25,10 @@ func ParseDirective(comment string) (*gti.Directive, error) {
 	if len(rs) == 0 || unicode.IsSpace(rs[0]) { // directives must not have whitespace as their first character
 		return nil, nil
 	}
+	// directives can not have newlines
+	if strings.Contains(comment, "\n") {
+		return nil, nil
+	}
 	before, after, found := strings.Cut(comment, ":")
 	if !found {
 		return nil, nil
@@ -33,7 +37,7 @@ func ParseDirective(comment string) (*gti.Directive, error) {
 	directive.Tool = before
 	args, err := shellwords.Parse(after)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing args %w", err)
+		return nil, fmt.Errorf("error parsing args: %w", err)
 	}
 	directive.Args = args
 	if len(args) > 0 {
