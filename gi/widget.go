@@ -25,6 +25,10 @@ import (
 type Widget interface {
 	ki.Ki
 
+	// OnWidgetAdded adds a function to call when a widget is added
+	// as a child to the widget or any of its children.
+	OnWidgetAdded(f func(w Widget)) Widget
+
 	// Style sets the styling of the widget by adding a Styler function
 	Style(s func(s *styles.Style)) Widget
 
@@ -270,7 +274,13 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
-	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
+	// A slice of functions to call on all widgets that are added as children to this widget or its children.
+	// These functions are called in sequential ascending order, so the last added one is called
+	// last and thus can override anything set by the other ones. These should be set using
+	// OnWidgetAdded, which can be called by both end-user and internal code.
+	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-"`
+
+	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
 	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-"`
 
 	// override the computed styles and allow directly editing Style
@@ -303,7 +313,21 @@ type WidgetBase struct {
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
-func (wb *WidgetBase) OnInit() {
+func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
+	w, _ := AsWidget(child)
+	if w == nil {
+		return
+	}
+	for _, f := range wb.OnWidgetAdders {
+		f(w)
+	}
+}
+
+// OnWidgetAdded adds a function to call when a widget is added
+// as a child to the widget or any of its children.
+func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) Widget {
+	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
+	return wb.This().(Widget)
 }
 
 // AsWidget returns the given Ki object
