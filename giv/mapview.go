@@ -67,24 +67,22 @@ func (mv *MapView) OnInit() {
 		mv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (mv *MapView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(mv.This()) {
-	case "map-grid":
-		mg := w.(*gi.Frame)
-		mg.Lay = gi.LayoutGrid
-		mg.Stripes = gi.RowStripes
-		w.Style(func(s *styles.Style) {
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.SetMinPrefHeight(units.Em(1.5))
-			s.SetMinPrefWidth(units.Em(10))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.Columns = mv.NCols
-		})
-	}
+	mv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(mv.This()) {
+		case "map-grid":
+			mg := w.(*gi.Frame)
+			mg.Lay = gi.LayoutGrid
+			mg.Stripes = gi.RowStripes
+			w.Style(func(s *styles.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(1.5))
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = mv.NCols
+			})
+		}
+	})
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to
@@ -360,16 +358,19 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"}, func(act *gi.Button) {
-			mv.UpdateValues()
-		})
-		tb.AddButton(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"}, func(act *gi.Button) {
-			mv.ToggleSort()
-		})
-		if ndef > 2 {
-			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"}, func(act *gi.Button) {
-				mv.MapAdd()
+		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update the view to reflect current state of map").
+			OnClick(func(e events.Event) {
+				mv.UpdateValues()
 			})
+		gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+			OnClick(func(e events.Event) {
+				mv.ToggleSort()
+			})
+		if ndef > 2 {
+			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the map").
+				OnClick(func(e events.Event) {
+					mv.MapAdd()
+				})
 		}
 	}
 	sz := len(*tb.Children())

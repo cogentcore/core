@@ -7,7 +7,6 @@ package gi
 import (
 	"image"
 	"log"
-	"strings"
 
 	"log/slog"
 
@@ -47,11 +46,9 @@ type Button struct {
 	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 	Shortcut key.Chord `xml:"shortcut"`
 
-	// the menu items for this menu -- typically add Button elements for menus, along with separators
-	Menu Menu
-
-	// set this to make a menu on demand -- if set then this button acts like a menu button
-	MakeMenuFunc MakeMenuFunc `copy:"-" json:"-" xml:"-" view:"-"`
+	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
+	// The constructor function should add buttons to the scene that it is passed.
+	Menu func(m *Scene)
 
 	// optional data that is sent with events to identify the button
 	Data any `json:"-" xml:"-" view:"-"`
@@ -72,8 +69,7 @@ func (bt *Button) CopyFieldsFrom(frm any) {
 	bt.Icon = fr.Icon
 	bt.Indicator = fr.Indicator
 	bt.Shortcut = fr.Shortcut
-	bt.Menu = fr.Menu // note: can't use CopyFrom: need closure funcs in buttons; todo: could do more elaborate copy etc but is it worth it?
-	bt.MakeMenuFunc = fr.MakeMenuFunc
+	bt.Menu = fr.Menu // TODO(kai/menu): is it safe to copy this?
 	bt.Data = fr.Data
 }
 
@@ -183,53 +179,75 @@ func (bt *Button) ButtonStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (bt *Button) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(bt.This()) {
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/space":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-			s.MinWidth.SetEm(0.5)
-		})
-	case "parts/label":
-		label := w.(*Label)
-		label.Type = LabelLabelLarge
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-		})
-	case "parts/ind-stretch":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "parts/indicator":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignBottom
-		})
-	}
+	bt.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(bt.This()) {
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/space":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+				s.MinWidth.SetEm(0.5)
+			})
+		case "parts/label":
+			label := w.(*Label)
+			label.Type = LabelLabelLarge
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+			})
+		case "parts/ind-stretch":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "parts/indicator":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignBottom
+			})
+		}
+	})
 }
 
 // SetType sets the styling type of the button
 func (bt *Button) SetType(typ ButtonTypes) *Button {
 	updt := bt.UpdateStart()
 	bt.Type = typ
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
+// SetShortcut sets the shortcut of the button
+func (bt *Button) SetShortcut(shortcut key.Chord) *Button {
+	updt := bt.UpdateStart()
+	bt.Shortcut = shortcut
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
+// SetShortcut sets the shortcut of the button from the given [KeyFuns]
+func (bt *Button) SetShortcutKey(kf KeyFuns) *Button {
+	updt := bt.UpdateStart()
+	bt.Shortcut = ShortcutForFun(kf)
+	bt.UpdateEndLayout(updt)
+	return bt
+}
+
+// SetData sets the data of the button
+func (bt *Button) SetData(data any) *Button {
+	updt := bt.UpdateStart()
+	bt.Data = data
 	bt.UpdateEndLayout(updt)
 	return bt
 }
@@ -300,7 +318,7 @@ func (bt *Button) SetIcon(iconName icons.Icon) *Button {
 // HasMenu returns true if the button has a menu that pops up when it is clicked
 // (not that it is in a menu itself; see [ButtonMenu])
 func (bt *Button) HasMenu() bool {
-	return bt.MakeMenuFunc != nil || len(bt.Menu) > 0
+	return bt.Menu != nil
 }
 
 // OpenMenu will open any menu associated with this element.
@@ -308,9 +326,6 @@ func (bt *Button) HasMenu() bool {
 func (bt *Button) OpenMenu(e events.Event) bool {
 	if !bt.HasMenu() {
 		return false
-	}
-	if bt.MakeMenuFunc != nil {
-		bt.MakeMenuFunc(bt.This().(Widget), &bt.Menu)
 	}
 	pos := bt.ContextMenuPos(e)
 	if bt.Parts != nil {
@@ -324,9 +339,11 @@ func (bt *Button) OpenMenu(e events.Event) bool {
 	return true
 }
 
-// ResetMenu removes all items in the menu
+// TODO(kai/menu): do we need ResetMenu?
+
+// ResetMenu removes the menu constructor function
 func (bt *Button) ResetMenu() {
-	bt.Menu = make(Menu, 0, 10)
+	bt.Menu = nil
 }
 
 // ConfigPartsAddIndicator adds a menu indicator if the Indicator field is set to an icon;
@@ -515,9 +532,12 @@ func (bt *Button) ConfigPartsAddShortcut(config *ki.Config) int {
 
 func (bt *Button) ApplyStyle(sc *Scene) {
 	bt.ApplyStyleWidget(sc)
-	if bt.Menu != nil {
-		bt.Menu.SetShortcuts(bt.EventMgr())
-	}
+	// TODO(kai/menu): figure out how to handle menu shortcuts
+	/*
+		if bt.Menu != nil {
+			bt.Menu.SetShortcuts(bt.EventMgr())
+		}
+	*/
 }
 
 func (bt *Button) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
@@ -542,9 +562,12 @@ func (bt *Button) Render(sc *Scene) {
 }
 
 func (bt *Button) Destroy() {
-	if bt.Menu != nil {
-		bt.Menu.DeleteShortcuts(bt.EventMgr())
-	}
+	// TODO(kai/menu): figure out how to handle menu shortcuts
+	/*
+		if bt.Menu != nil {
+			bt.Menu.DeleteShortcuts(bt.EventMgr())
+		}
+	*/
 }
 
 // UpdateButtons calls UpdateFunc on me and any of my menu items
@@ -552,11 +575,16 @@ func (bt *Button) UpdateButtons() {
 	if bt.UpdateFunc != nil {
 		bt.UpdateFunc(bt)
 	}
-	if bt.Menu != nil {
-		bt.Menu.UpdateButtons()
-	}
+	// TODO(kai/menu): figure out how to handle menu updating
+	/*
+		if bt.Menu != nil {
+			bt.Menu.UpdateButtons()
+		}
+	*/
 }
 
+// TODO(kai/menu): figure out what to do about FindButtonMenu/NewButtonMenu
+/*
 // FindButtonMenu finds the button with the given path in the given parent,
 // searching through both children and any [Button.Menu]s it finds. The
 // path omits menus; for example, if A has a menu that contains B, which
@@ -622,3 +650,4 @@ func newButtonMenuImpl(par ki.Ki, parts []string) *Button {
 	newbt := NewButton(par).SetType(ButtonAction).SetText(nm)
 	return newButtonMenuImpl(newbt, parts[1:])
 }
+*/

@@ -10,6 +10,7 @@ import "goki.dev/ki/v2"
 // allowing it to be a sub-package with just this narrow set of dependencies
 // of gi on giv. The one impl is in giv/valueview.go.
 type ViewIFace interface {
+	// TODO(kai/menu): what should we do about CtxtMenuView?
 	// CtxtMenuView configures a popup context menu according to the
 	// "CtxtMenu" properties registered on the type for given value element,
 	// through the kit.AddType method.  See
@@ -20,7 +21,7 @@ type ViewIFace interface {
 	// falls back on "CtxtMenu".  Returns false if there is no context menu
 	// defined for this type, or on errors (which are programmer errors sent
 	// to log).
-	CtxtMenuView(val any, inactive bool, sc *Scene, menu *Menu) bool
+	CtxtMenuView(val any, inactive bool, sc *Scene, m *Scene) bool
 
 	// GoGiEditor opens an interactive editor of given Ki tree, at its root
 	GoGiEditor(obj ki.Ki)

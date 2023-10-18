@@ -1087,7 +1087,8 @@ func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, menu *gi.Menu) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, m *gi.Scene) bool {
+	// TODO(kai/menu): add back CtxtMenuView here
 	// return CtxtMenuView(val, inactive, sc, menu)
 	return false
 }

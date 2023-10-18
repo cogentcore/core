@@ -10,9 +10,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
-	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -144,6 +141,8 @@ func (mb *MenuBar) DeleteShortcuts() {
 	}
 }
 
+// TODO(kai/menu): figure out what to do here
+/*
 // FindButtonByName finds an button on the menu, or any sub-menu, with given
 // name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
@@ -167,6 +166,7 @@ func (m *MenuBar) FindButtonByName(name string) (*Button, bool) {
 	}
 	return nil, false
 }
+*/
 
 // ConfigMenus configures Button items as children of MenuBar with the given
 // names, which function as the main menu panels for the menu bar (File, Edit,
@@ -335,38 +335,11 @@ func (tb *Toolbar) ToolbarStyles() {
 		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
-}
-
-// AddButton adds an button to the toolbar using given options, and connects
-// the button signal to given receiver object and function, along with given
-// data which is stored on the button and then passed in the button signal.
-// Optional updateFunc is a function called prior to showing the menu to
-// update the buttons (enabled or not typically).
-func (tb *Toolbar) AddButton(opts ActOpts, fun func(bt *Button)) *Button {
-	nm := opts.Name
-	if nm == "" {
-		nm = opts.Label
-	}
-	if nm == "" {
-		nm = string(opts.Icon)
-	}
-	bt := NewButton(tb, nm)
-	bt.Type = ButtonAction
-	bt.Text = opts.Label
-	bt.Icon = icons.Icon(opts.Icon)
-	bt.Tooltip = opts.Tooltip
-	bt.Shortcut = key.Chord(opts.Shortcut).OSShortcut()
-	if opts.ShortcutKey != KeyFunNil {
-		bt.Shortcut = ShortcutForFun(opts.ShortcutKey)
-	}
-	bt.Data = opts.Data
-	bt.UpdateFunc = opts.UpdateFunc
-	if fun != nil {
-		bt.OnClick(func(e events.Event) {
-			fun(bt)
-		})
-	}
-	return bt
+	tb.OnWidgetAdded(func(w Widget) {
+		if bt, ok := w.(*Button); ok {
+			bt.Type = ButtonAction
+		}
+	})
 }
 
 // AddSeparator adds a new separator to the toolbar. It automatically
@@ -428,6 +401,8 @@ func (tb *Toolbar) UpdateButtons() {
 	}
 }
 
+// TODO(kai/menu): figure out what to do here
+/*
 // FindButtonByName finds an button on the toolbar, or any sub-menu, with
 // given name (exact match) -- this is not the Text label but the Name of the
 // element (for AddButton items, this is the same as Label or Icon (if Label
@@ -448,3 +423,4 @@ func (tb *Toolbar) FindButtonByName(name string) (*Button, bool) {
 	}
 	return nil, false
 }
+*/

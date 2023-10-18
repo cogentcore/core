@@ -80,33 +80,31 @@ func (sv *StructView) OnInit() {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (sv *StructView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(sv.This()) {
-	case "toolbar":
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxWidth()
-		})
-	case "struct-grid":
-		sg := w.(*gi.Frame)
-		sg.Lay = gi.LayoutGrid
-		sg.Stripes = gi.RowStripes
-		w.Style(func(s *styles.Style) {
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.SetMinPrefHeight(units.Em(1.5))
-			s.SetMinPrefWidth(units.Em(10))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.Columns = 2
-		})
-	}
-	if w.Parent().Name() == "struct-grid" {
-		w.Style(func(s *styles.Style) {
-			s.AlignH = styles.AlignLeft
-		})
-	}
+	sv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(sv.This()) {
+		case "toolbar":
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxWidth()
+			})
+		case "struct-grid":
+			sg := w.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			w.Style(func(s *styles.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(1.5))
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = 2
+			})
+		}
+		if w.Parent().Name() == "struct-grid" {
+			w.Style(func(s *styles.Style) {
+				s.AlignH = styles.AlignLeft
+			})
+		}
+	})
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
@@ -220,9 +218,10 @@ func (sv *StructView) ConfigToolbar() {
 	svtp := laser.NonPtrType(reflect.TypeOf(sv.Struct))
 	ttip := "update this StructView (not any other views that might be present) to show current state of this struct of type: " + svtp.String()
 	if len(*tb.Children()) == 0 {
-		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: ttip}, func(act *gi.Button) {
-			sv.UpdateFields()
-		})
+		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip(ttip).
+			OnClick(func(e events.Event) {
+				sv.UpdateFields()
+			})
 	} else {
 		act := tb.Child(0).(*gi.Button)
 		act.Tooltip = ttip

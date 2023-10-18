@@ -74,35 +74,33 @@ func (ts *Tabs) TabsStyles() {
 		s.MaxWidth.SetDp(-1)
 		s.MaxHeight.SetDp(-1)
 	})
-}
+	ts.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(ts.This()) {
+		case "tabs":
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxWidth()
+				s.Height.SetEm(1.8)
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+				s.Margin.Set()
+				s.Padding.Set()
+				// tabs.Spacing.SetDp(4)
+				s.StateLayer += 0.06
 
-func (ts *Tabs) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(ts.This()) {
-	case "tabs":
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxWidth()
-			s.Height.SetEm(1.8)
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-			s.Margin.Set()
-			s.Padding.Set()
-			// tabs.Spacing.SetDp(4)
-			s.StateLayer += 0.06
-
-			// s.Border.Style.Set(styles.BorderNone)
-			// s.Border.Style.Bottom = styles.BorderSolid
-			// s.Border.Width.Bottom.SetDp(1)
-			// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
-		})
-	case "frame":
-		frame := w.(*Frame)
-		frame.StackTopOnly = true // key for allowing each tab to have its own size
-		w.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Em(10))
-			s.SetMinPrefHeight(units.Em(6))
-			s.SetStretchMax()
-		})
-	}
+				// s.Border.Style.Set(styles.BorderNone)
+				// s.Border.Style.Bottom = styles.BorderSolid
+				// s.Border.Width.Bottom.SetDp(1)
+				// s.Border.Color.Bottom = colors.Scheme.OutlineVariant
+			})
+		case "frame":
+			frame := w.(*Frame)
+			frame.StackTopOnly = true // key for allowing each tab to have its own size
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetStretchMax()
+			})
+		}
+	})
 }
 
 // NTabs returns number of tabs
@@ -558,61 +556,59 @@ func (tb *Tab) TabButtonStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (tb *Tab) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(tb.This()) {
-	case "parts":
-		w.Style(func(s *styles.Style) {
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-		})
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/label":
-		label := w.(*Label)
-		label.Type = LabelTitleSmall
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/close-stretch":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetCh(1)
-		})
-	case "parts/close":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEx(0.5)
-			s.Height.SetEx(0.5)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-			s.Border.Radius = styles.BorderRadiusFull
-			s.BackgroundColor.SetSolid(colors.Transparent)
-			// if we have some state, we amplify it so we
-			// are clearly distinguishable from our parent button
-			// TODO: get this working
-			if s.StateLayer > 0 {
-				s.StateLayer += 0.12
-			}
-		})
-	case "parts/sc-stretch":
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetCh(2)
-		})
-	case "parts/shortcut":
-		w.Style(func(s *styles.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	}
+	tb.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(tb.This()) {
+		case "parts":
+			w.Style(func(s *styles.Style) {
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/label":
+			label := w.(*Label)
+			label.Type = LabelTitleSmall
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/close-stretch":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetCh(1)
+			})
+		case "parts/close":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEx(0.5)
+				s.Height.SetEx(0.5)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+				s.Border.Radius = styles.BorderRadiusFull
+				s.BackgroundColor.SetSolid(colors.Transparent)
+				// if we have some state, we amplify it so we
+				// are clearly distinguishable from our parent button
+				// TODO: get this working
+				if s.StateLayer > 0 {
+					s.StateLayer += 0.12
+				}
+			})
+		case "parts/sc-stretch":
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetCh(2)
+			})
+		case "parts/shortcut":
+			w.Style(func(s *styles.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		}
+	})
 }
 
 func (tb *Tab) Tabs() *Tabs {

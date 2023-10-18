@@ -114,48 +114,46 @@ func (sw *Switch) SwitchStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (sw *Switch) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(sw.This()) {
-	case "parts/stack/icon0": // on
-		w.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.Primary.Base
-			// switches need to be bigger
-			if sw.Type == SwitchSwitch {
-				s.Width.SetEm(3)
-				s.Height.SetEm(3)
-			} else {
-				s.Width.SetEm(1.5)
-				s.Height.SetEm(1.5)
-			}
-		})
-	case "parts/stack/icon1": // off
-		w.Style(func(s *styles.Style) {
-			// switches need to be bigger
-			if sw.Type == SwitchSwitch {
-				s.Width.SetEm(3)
-				s.Height.SetEm(3)
-			} else {
-				s.Width.SetEm(1.5)
-				s.Height.SetEm(1.5)
-			}
-		})
-	// todo: disabled?
-	case "parts/space":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetCh(0.1)
-		})
-	case "parts/label":
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-		})
-	}
+	sw.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(sw.This()) {
+		case "parts/stack/icon0": // on
+			w.Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.Primary.Base
+				// switches need to be bigger
+				if sw.Type == SwitchSwitch {
+					s.Width.SetEm(3)
+					s.Height.SetEm(3)
+				} else {
+					s.Width.SetEm(1.5)
+					s.Height.SetEm(1.5)
+				}
+			})
+		case "parts/stack/icon1": // off
+			w.Style(func(s *styles.Style) {
+				// switches need to be bigger
+				if sw.Type == SwitchSwitch {
+					s.Width.SetEm(3)
+					s.Height.SetEm(3)
+				} else {
+					s.Width.SetEm(1.5)
+					s.Height.SetEm(1.5)
+				}
+			})
+		// todo: disabled?
+		case "parts/space":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetCh(0.1)
+			})
+		case "parts/label":
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+			})
+		}
+	})
 }
 
 // SetType sets the styling type of the switch

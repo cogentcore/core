@@ -25,6 +25,10 @@ import (
 type Widget interface {
 	ki.Ki
 
+	// OnWidgetAdded adds a function to call when a widget is added
+	// as a child to the widget or any of its children.
+	OnWidgetAdded(f func(w Widget)) Widget
+
 	// Style sets the styling of the widget by adding a Styler function
 	Style(s func(s *styles.Style)) Widget
 
@@ -71,10 +75,10 @@ type Widget interface {
 	AbilityIs(flag enums.BitFlag) bool
 
 	// SetState sets the given [styles.Style.State] flags
-	SetState(on bool, state ...enums.BitFlag)
+	SetState(on bool, state ...enums.BitFlag) Widget
 
 	// SetAbilities sets the given [styles.Style.Abilities] flags
-	SetAbilities(on bool, able ...enums.BitFlag)
+	SetAbilities(on bool, able ...enums.BitFlag) Widget
 
 	// ApplyStyle applies style functions to the widget based on current state.
 	// It is typically not overridden -- set style funcs to apply custom styling.
@@ -132,6 +136,13 @@ type Widget interface {
 	// On adds an event listener function for the given event type
 	On(etype events.Types, fun func(e events.Event)) Widget
 
+	// Helper functions for common event types
+	// TODO(kai/menu): should we have these in the Widget interface?
+	// we need them for better formatting when making inline buttons
+
+	// OnClick adds an event listener function for [events.Click] events
+	OnClick(fun func(e events.Event)) Widget
+
 	// HandleEvent calls registered event Listener functions for given event
 	HandleEvent(e events.Event)
 
@@ -140,12 +151,12 @@ type Widget interface {
 	// (recommended to include where possible).
 	Send(e events.Types, orig ...events.Event)
 
-	// MakeContextMenu creates the context menu items (typically Action
-	// elements, but it can be anything) for a given widget, typically
-	// activated by the right mouse button or equivalent.  Widget has a
-	// function parameter that can be set to add context items (e.g., by Views
-	// or other complex widgets) to extend functionality.
-	MakeContextMenu(menu *Menu)
+	// MakeContextMenu adds the context menu items (typically [Button]s)
+	// for the widget to the given menu scene. No context menu is defined
+	// by default, but widget types can implement this function if they
+	// have a context menu. MakeContextMenu also calls
+	// [WidgetBase.CustomContextMenu] if it is not nil.
+	MakeContextMenu(m *Scene)
 
 	// ContextMenuPos returns the default position for popup menus --
 	// by default in the middle its Bounding Box, but can be adapted as
@@ -263,7 +274,13 @@ type WidgetBase struct {
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
 
-	// a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
+	// A slice of functions to call on all widgets that are added as children to this widget or its children.
+	// These functions are called in sequential ascending order, so the last added one is called
+	// last and thus can override anything set by the other ones. These should be set using
+	// OnWidgetAdded, which can be called by both end-user and internal code.
+	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-"`
+
+	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
 	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-"`
 
 	// override the computed styles and allow directly editing Style
@@ -282,8 +299,9 @@ type WidgetBase struct {
 	// all the layout state information for this widget
 	LayState LayoutState `copy:"-" json:"-" xml:"-"`
 
-	// optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate
-	CtxtMenuFunc CtxtMenuFunc `copy:"-" view:"-" json:"-" xml:"-"`
+	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
+	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
+	CustomContextMenu func(m *Scene) `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
 	Sc *Scene `copy:"-" json:"-" xml:"-"`
@@ -295,7 +313,21 @@ type WidgetBase struct {
 	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
 }
 
-func (wb *WidgetBase) OnInit() {
+func (wb *WidgetBase) OnChildAdded(child ki.Ki) {
+	w, _ := AsWidget(child)
+	if w == nil {
+		return
+	}
+	for _, f := range wb.OnWidgetAdders {
+		f(w)
+	}
+}
+
+// OnWidgetAdded adds a function to call when a widget is added
+// as a child to the widget or any of its children.
+func (wb *WidgetBase) OnWidgetAdded(fun func(w Widget)) Widget {
+	wb.OnWidgetAdders = append(wb.OnWidgetAdders, fun)
+	return wb.This().(Widget)
 }
 
 // AsWidget returns the given Ki object
@@ -346,13 +378,15 @@ func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
 }
 
 // SetState sets the given [styles.Style.State] flags
-func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) {
+func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) Widget {
 	wb.Styles.State.SetFlag(on, state...)
+	return wb.This().(Widget)
 }
 
 // SetAbilities sets the [styles.Style.Abilities] flags
-func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) {
+func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) Widget {
 	wb.Styles.Abilities.SetFlag(on, able...)
+	return wb.This().(Widget)
 }
 
 func (wb *WidgetBase) SetTooltip(tt string) Widget {

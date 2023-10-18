@@ -108,7 +108,7 @@ type SliceViewer interface {
 	ItemCtxtMenu(idx int)
 
 	// StdCtxtMenu generates the standard context menu for this view
-	StdCtxtMenu(m *gi.Menu, idx int)
+	StdCtxtMenu(m *gi.Scene, idx int)
 
 	// NeedsDoubleReRender returns true if initial render requires a 2nd pass
 	NeedsDoubleReRender() bool
@@ -238,43 +238,41 @@ func (sv *SliceViewBase) OnInit() {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(sv.This()) {
-	case "grid-lay": // grid layout
-		gl := w.(*gi.Layout)
-		gl.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			gl.SetStretchMax() // for this to work, ALL layers above need it too
-		})
-	case "grid-lay/grid": // slice grid
-		sg := w.(*gi.Frame)
-		sg.Lay = gi.LayoutGrid
-		sg.Stripes = gi.RowStripes
-		sg.Style(func(s *styles.Style) {
-			nWidgPerRow, _ := sv.RowWidgetNs()
-			s.Columns = nWidgPerRow
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.SetMinPrefHeight(units.Em(6))
-			s.SetMinPrefWidth(units.Ch(20))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-		})
-	}
-	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4)
-			s.Text.Align = styles.AlignRight
-		})
-	}
-	if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
-		w.Style(func(s *styles.Style) {
-			w.(*gi.Button).SetType(gi.ButtonAction)
-		})
-	}
+	sv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(sv.This()) {
+		case "grid-lay": // grid layout
+			gl := w.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "grid-lay/grid": // slice grid
+			sg := w.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.Style(func(s *styles.Style) {
+				nWidgPerRow, _ := sv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetMinPrefWidth(units.Ch(20))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetEm(1.5)
+				s.Padding.Right.SetDp(4)
+				s.Text.Align = styles.AlignRight
+			})
+		}
+		if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
+			w.Style(func(s *styles.Style) {
+				w.(*gi.Button).SetType(gi.ButtonAction)
+			})
+		}
+	})
 }
 
 func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
@@ -974,13 +972,13 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update this SliceView to reflect current state of slice"}, func(act *gi.Button) {
-			sv.SetNeedsLayout()
-
-		})
+		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update this SliceView to reflect current state of slice").
+			OnClick(func(e events.Event) {
+				sv.SetNeedsLayout()
+			})
 		if ndef > 1 {
-			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the slice"},
-				func(act *gi.Button) {
+			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
+				OnClick(func(e events.Event) {
 					sv.This().(SliceViewer).SliceNewAt(-1)
 				})
 		}
@@ -1675,31 +1673,31 @@ func (sv *SliceViewBase) PasteIdx(idx int) {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (sv *SliceViewBase) MakePasteMenu(m *gi.Menu, data any, idx int) {
-	if len(*m) > 0 {
-		return
-	}
-	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, func(act *gi.Button) {
-		sv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
-	})
-	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, func(act *gi.Button) {
-		sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
-	})
-	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, func(act *gi.Button) {
-		sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
-	})
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, func(act *gi.Button) {
-	})
+func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, data any, idx int) {
+	gi.NewButton(m).SetText("Assign To").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.This().(SliceViewer).PasteAssign(data.(mimedata.Mimes), idx)
+		})
+	gi.NewButton(m).SetText("Insert Before").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx)
+		})
+	gi.NewButton(m).SetText("Insert After").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
+		})
+	gi.NewButton(m).SetText("Cancel").SetData(data)
 }
 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
 // a menu to determine what specifically to do
 func (sv *SliceViewBase) PasteMenu(md mimedata.Mimes, idx int) {
 	sv.UnselectAllIdxs()
-	var menu gi.Menu
-	sv.MakePasteMenu(&menu, md, idx)
+	mf := func(m *gi.Scene) {
+		sv.MakePasteMenu(m, md, idx)
+	}
 	pos := sv.IdxPos(idx)
-	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
+	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 }
 
 // PasteAssign assigns mime data (only the first one!) to this idx
@@ -1807,39 +1805,41 @@ func (sv *SliceViewBase) DragNDropTarget(de events.Event) {
 }
 
 // MakeDropMenu makes the menu of options for dropping on a target
-func (sv *SliceViewBase) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods, idx int) {
-	if len(*m) > 0 {
-		return
-	}
+func (sv *SliceViewBase) MakeDropMenu(m *gi.Scene, data any, mod events.DropMods, idx int) {
 	switch mod {
 	case events.DropCopy:
-		m.AddLabel("Copy (Shift=Move):")
+		gi.NewLabel(m, "copy").SetText("Copy (Shift=Move):")
 	case events.DropMove:
-		m.AddLabel("Move:")
+		gi.NewLabel(m, "move").SetText("Move:")
 	}
 	if mod == events.DropCopy {
-		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, func(act *gi.Button) {
-			sv.DropAssign(data.(mimedata.Mimes), idx)
-		})
+		gi.NewButton(m, "assign-to").SetText("Assign To").SetData(data).
+			OnClick(func(e events.Event) {
+				sv.DropAssign(data.(mimedata.Mimes), idx)
+			})
 	}
-	m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, func(act *gi.Button) {
-		sv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
-	})
-	m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, func(act *gi.Button) {
-		sv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
-	})
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, func(act *gi.Button) {
-		sv.DropCancel()
-	})
+	gi.NewButton(m, "insert-before").SetText("Insert Before").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.DropBefore(data.(mimedata.Mimes), mod, idx) // captures mod
+		})
+	gi.NewButton(m, "insert-after").SetText("Insert After").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.DropAfter(data.(mimedata.Mimes), mod, idx) // captures mod
+		})
+	gi.NewButton(m, "cancel").SetText("Cancel").SetData(data).
+		OnClick(func(e events.Event) {
+			sv.DropCancel()
+		})
 }
 
 // Drop pops up a menu to determine what specifically to do with dropped items
 // this satisfies gi.DragNDropper interface, and can be overwritten in subtypes
 func (sv *SliceViewBase) Drop(md mimedata.Mimes, mod events.DropMods) {
-	var menu gi.Menu
-	sv.MakeDropMenu(&menu, md, mod, sv.CurIdx)
+	mf := func(m *gi.Scene) {
+		sv.MakeDropMenu(m, md, mod, sv.CurIdx)
+	}
 	pos := sv.IdxPos(sv.CurIdx)
-	gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
+	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 }
 
 // DropAssign assigns mime data (only the first one!) to this node
@@ -1920,22 +1920,26 @@ func (sv *SliceViewBase) DropCancel() {
 //////////////////////////////////////////////////////////////////////////////
 //    Events
 
-func (sv *SliceViewBase) StdCtxtMenu(m *gi.Menu, idx int) {
+func (sv *SliceViewBase) StdCtxtMenu(m *gi.Scene, idx int) {
 	if sv.isArray {
 		return
 	}
-	m.AddButton(gi.ActOpts{Label: "Copy", Data: idx}, func(act *gi.Button) {
-		sv.CopyIdxs(true)
-	})
-	m.AddButton(gi.ActOpts{Label: "Cut", Data: idx}, func(act *gi.Button) {
-		sv.CutIdxs()
-	})
-	m.AddButton(gi.ActOpts{Label: "Paste", Data: idx}, func(act *gi.Button) {
-		sv.PasteIdx(idx)
-	})
-	m.AddButton(gi.ActOpts{Label: "Duplicate", Data: idx}, func(act *gi.Button) {
-		sv.Duplicate()
-	})
+	gi.NewButton(m).SetText("Copy").SetData(idx).
+		OnClick(func(e events.Event) {
+			sv.CopyIdxs(true)
+		})
+	gi.NewButton(m).SetText("Cut").SetData(idx).
+		OnClick(func(e events.Event) {
+			sv.CutIdxs()
+		})
+	gi.NewButton(m).SetText("Paste").SetData(idx).
+		OnClick(func(e events.Event) {
+			sv.PasteIdx(idx)
+		})
+	gi.NewButton(m).SetText("Duplicate").SetData(idx).
+		OnClick(func(e events.Event) {
+			sv.Duplicate()
+		})
 }
 
 func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
@@ -1943,27 +1947,27 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	if val == nil {
 		return
 	}
-	var menu gi.Menu
 
-	// todo: CtxtMenuView
+	// TODO(kai/menu): CtxtMenuView
 	// if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
 	// 	if sv.ShowViewCtxtMenu {
 	// 		menu.AddSeparator("sep-svmenu")
 	// 		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
 	// 	}
 	// } else {
-	sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
-	// }
-	if len(menu) > 0 {
-		pos := sv.IdxPos(idx)
-		// if pos == (image.Point{}) {
-		// 	em := sv.EventMgr()
-		// 	if em != nil {
-		// 		pos = em.LastMousePos
-		// 	}
-		// }
-		gi.NewMenu(menu, sv.This().(gi.Widget), pos).Run()
+
+	// TODO(kai/menu): handle empty menu
+	mf := func(m *gi.Scene) {
+		sv.This().(SliceViewer).StdCtxtMenu(m, idx)
 	}
+	pos := sv.IdxPos(idx)
+	// if pos == (image.Point{}) {
+	// 	em := sv.EventMgr()
+	// 	if em != nil {
+	// 		pos = em.LastMousePos
+	// 	}
+	// }
+	gi.NewMenu(mf, sv.This().(gi.Widget), pos).Run()
 }
 
 // KeyInputNav supports multiple selection navigation keys

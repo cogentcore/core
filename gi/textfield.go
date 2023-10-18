@@ -211,48 +211,46 @@ func (tf *TextField) TextFieldStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (tf *TextField) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(tf.This()) {
-	case "parts/lead-icon":
-		lead := w.(*Button)
-		lead.Type = ButtonAction
-		lead.Style(func(s *styles.Style) {
-			s.Font.Size.SetDp(20)
-			s.Margin.Right.SetDp(16)
-			s.Color = colors.Scheme.OnSurfaceVariant
-			s.AlignV = styles.AlignMiddle
-		})
-	case "parts/trail-icon":
-		trail := w.(*Button)
-		trail.Type = ButtonAction
-		trail.Style(func(s *styles.Style) {
-			s.Font.Size.SetDp(20)
-			s.Margin.Left.SetDp(16)
-			s.Color = colors.Scheme.OnSurfaceVariant
-			s.AlignV = styles.AlignMiddle
-		})
-		switch tf.TrailingIcon {
-		case icons.Close:
-			trail.OnClick(func(e events.Event) {
-				tf.Clear()
+	tf.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(tf.This()) {
+		case "parts/lead-icon":
+			lead := w.(*Button)
+			lead.Type = ButtonAction
+			lead.Style(func(s *styles.Style) {
+				s.Font.Size.SetDp(20)
+				s.Margin.Right.SetDp(16)
+				s.Color = colors.Scheme.OnSurfaceVariant
+				s.AlignV = styles.AlignMiddle
 			})
-		case icons.Visibility, icons.VisibilityOff:
-			trail.OnClick(func(e events.Event) {
-				tf.NoEcho = !tf.NoEcho
-				if tf.NoEcho {
-					tf.TrailingIcon = icons.Visibility
-				} else {
-					tf.TrailingIcon = icons.VisibilityOff
-				}
-				if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
-					icon.SetIcon(tf.TrailingIcon)
-				}
+		case "parts/trail-icon":
+			trail := w.(*Button)
+			trail.Type = ButtonAction
+			trail.Style(func(s *styles.Style) {
+				s.Font.Size.SetDp(20)
+				s.Margin.Left.SetDp(16)
+				s.Color = colors.Scheme.OnSurfaceVariant
+				s.AlignV = styles.AlignMiddle
 			})
+			switch tf.TrailingIcon {
+			case icons.Close:
+				trail.OnClick(func(e events.Event) {
+					tf.Clear()
+				})
+			case icons.Visibility, icons.VisibilityOff:
+				trail.OnClick(func(e events.Event) {
+					tf.NoEcho = !tf.NoEcho
+					if tf.NoEcho {
+						tf.TrailingIcon = icons.Visibility
+					} else {
+						tf.TrailingIcon = icons.VisibilityOff
+					}
+					if icon, ok := tf.Parts.ChildByName("trail-icon", 1).(*Button); ok {
+						icon.SetIcon(tf.TrailingIcon)
+					}
+				})
+			}
 		}
-	}
+	})
 }
 
 // TextFieldTypes is an enum containing the
@@ -724,25 +722,26 @@ func (tf *TextField) InsertAtCursor(str string) {
 	tf.CursorForward(rsl)
 }
 
-func (tf *TextField) MakeContextMenu(m *Menu) {
+func (tf *TextField) MakeContextMenu(m *Scene) {
 	cpsc := ActiveKeyMap.ChordForFun(KeyFunCopy)
-	ac := m.AddButton(ActOpts{Label: "Copy", Shortcut: cpsc}, func(bt *Button) {
-		tf.This().(Clipper).Copy(true)
-	})
-	ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-	if !tf.IsDisabled() {
+	NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tf.This().(Clipper).Copy(true)
+		})
+	if !tf.StateIs(states.Disabled) {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
-		ac = m.AddButton(ActOpts{Label: "Cut", Shortcut: ctsc}, func(bt *Button) {
-			tf.This().(Clipper).Cut()
-		})
-		ac.SetEnabledState(!tf.NoEcho && tf.HasSelection())
-		ac = m.AddButton(ActOpts{Label: "Paste", Shortcut: ptsc}, func(bt *Button) {
-			tf.This().(Clipper).Paste()
-		})
+		NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
+			OnClick(func(e events.Event) {
+				tf.This().(Clipper).Cut()
+			})
+		pbt := NewButton(m, "paste").SetText("Paste").SetShortcut(ptsc).
+			OnClick(func(e events.Event) {
+				tf.This().(Clipper).Paste()
+			})
 		cb := tf.Sc.EventMgr.ClipBoard()
 		if cb != nil {
-			ac.SetState(cb.IsEmpty(), states.Disabled)
+			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}
 	}
 }

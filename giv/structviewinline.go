@@ -47,13 +47,18 @@ type StructViewInline struct {
 	HasViewIfs bool `json:"-" xml:"-" inactive:"+"`
 }
 
-func (sv *StructViewInline) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	if strings.HasPrefix(w.Name(), "label-") {
-		w.Style(func(s *styles.Style) {
-			s.AlignH = styles.AlignLeft
-		})
-	}
+func (sv *StructViewInline) OnInit() {
+	sv.StructViewInlineStyles()
+}
+
+func (sv *StructViewInline) StructViewInlineStyles() {
+	sv.OnWidgetAdded(func(w gi.Widget) {
+		if strings.HasPrefix(w.Name(), "label-") {
+			w.Style(func(s *styles.Style) {
+				s.AlignH = styles.AlignLeft
+			})
+		}
+	})
 }
 
 // SetStruct sets the source struct that we are viewing -- rebuilds the
