@@ -1052,35 +1052,36 @@ func (tv *TreeView) ContextMenuPos(e events.Event) (pos image.Point) {
 	return
 }
 
-func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Menu) {
+func (tv *TreeView) MakeTreeViewContextMenu(m *gi.Scene) {
 	cpsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCopy)
-	ac := m.AddButton(gi.ActOpts{Label: "Copy", Shortcut: cpsc}, func(bt *gi.Button) {
-		tv.This().(gi.Clipper).Copy(true)
-	})
-	ac.SetEnabledState(tv.HasSelection())
+	gi.NewButton(m, "copy").SetText("Copy").SetShortcut(cpsc).SetState(!tv.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			tv.This().(gi.Clipper).Copy(true)
+		})
 	if !tv.IsDisabled() {
 		ctsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunCut)
 		ptsc := gi.ActiveKeyMap.ChordForFun(gi.KeyFunPaste)
-		ac = m.AddButton(gi.ActOpts{Label: "Cut", Shortcut: ctsc}, func(bt *gi.Button) {
-			tv.This().(gi.Clipper).Cut()
-		})
-		ac.SetEnabledState(tv.HasSelection())
-		ac = m.AddButton(gi.ActOpts{Label: "Paste", Shortcut: ptsc}, func(bt *gi.Button) {
-			tv.This().(gi.Clipper).Paste()
-		})
+		gi.NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(!tv.HasSelection(), states.Disabled).
+			OnClick(func(e events.Event) {
+				tv.This().(gi.Clipper).Cut()
+			})
+		pbt := gi.NewButton(m, "paste").SetText("Paste").SetShortcut(ptsc).
+			OnClick(func(e events.Event) {
+				tv.This().(gi.Clipper).Paste()
+			})
 		cb := tv.Sc.EventMgr.ClipBoard()
 		if cb != nil {
-			ac.SetState(cb.IsEmpty(), states.Disabled)
+			pbt.SetState(cb.IsEmpty(), states.Disabled)
 		}
 	}
 }
 
-func (tv *TreeView) MakeContextMenu(m *gi.Menu) {
+func (tv *TreeView) MakeContextMenu(m *gi.Scene) {
 	// derived types put native menu code here
 	if tv.CustomContextMenu != nil {
-		tv.CustomContextMenu(tv.This().(gi.Widget), m)
+		tv.CustomContextMenu(m)
 	}
-	// todo -- need a replacement for this:
+	// TODO(kai/menu): need a replacement for this:
 	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
 	// 	if tv.ShowViewCtxtMenu {
 	// 		m.AddSeparator("sep-tvmenu")
@@ -1193,26 +1194,26 @@ func (tv *TreeView) Paste() {
 }
 
 // MakePasteMenu makes the menu of options for paste events
-func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
-	if len(*m) > 0 {
-		return
-	}
-	m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, func(act *gi.Button) {
-		tv.PasteAssign(data.(mimedata.Mimes))
-	})
-	m.AddButton(gi.ActOpts{Label: "Add to Children", Data: data}, func(act *gi.Button) {
-		tv.PasteChildren(data.(mimedata.Mimes), events.DropCopy)
-	})
+func (tv *TreeView) MakePasteMenu(m *gi.Scene, data any) {
+	gi.NewButton(m).SetText("Assign To").SetData(data).
+		OnClick(func(e events.Event) {
+			tv.PasteAssign(data.(mimedata.Mimes))
+		})
+	gi.NewButton(m).SetText("Add to Children").SetData(data).
+		OnClick(func(e events.Event) {
+			tv.PasteChildren(data.(mimedata.Mimes), events.DropCopy)
+		})
 	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, func(act *gi.Button) {
-			tv.PasteBefore(data.(mimedata.Mimes), events.DropCopy)
-		})
-		m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, func(act *gi.Button) {
-			tv.PasteAfter(data.(mimedata.Mimes), events.DropCopy)
-		})
+		gi.NewButton(m).SetText("Insert Before").SetData(data).
+			OnClick(func(e events.Event) {
+				tv.PasteBefore(data.(mimedata.Mimes), events.DropCopy)
+			})
+		gi.NewButton(m).SetText("Insert After").SetData(data).
+			OnClick(func(e events.Event) {
+				tv.PasteAfter(data.(mimedata.Mimes), events.DropCopy)
+			})
 	}
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, func(act *gi.Button) {
-	})
+	gi.NewButton(m).SetText("Cancel").SetData(data)
 	// todo: compare, etc..
 }
 
@@ -1220,10 +1221,11 @@ func (tv *TreeView) MakePasteMenu(m *gi.Menu, data any) {
 // a menu to determine what specifically to do
 func (tv *TreeView) PasteMenu(md mimedata.Mimes) {
 	tv.UnselectAll()
-	var menu gi.Menu
-	tv.MakePasteMenu(&menu, md)
+	mf := func(m *gi.Scene) {
+		tv.MakePasteMenu(m, md)
+	}
 	pos := tv.ContextMenuPos(nil)
-	gi.NewMenu(menu, tv.This().(gi.Widget), pos).Run()
+	gi.NewMenu(mf, tv.This().(gi.Widget), pos).Run()
 }
 
 // PasteAssign assigns mime data (only the first one!) to this node
@@ -1442,26 +1444,26 @@ func (tv *TreeView) MakeDropMenu(m *gi.Menu, data any, mod events.DropMods) {
 		m.AddLabel("Move:")
 	}
 	if mod == events.DropCopy {
-		m.AddButton(gi.ActOpts{Label: "Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		gi.NewButton(m).SetText("Assign To", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tv := recv.Embed(TreeViewType).(*TreeView)
 			tv.DropAssign(data.(mimedata.Mimes))
 		})
 	}
-	m.AddButton(gi.ActOpts{Label: "Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	gi.NewButton(m).SetText("Add to Children", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tv := recv.Embed(TreeViewType).(*TreeView)
 		tv.DropChildren(data.(mimedata.Mimes), mod) // captures mod
 	})
 	if !tv.IsRoot("") && tv.RootView.This() != tv.This() {
-		m.AddButton(gi.ActOpts{Label: "Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		gi.NewButton(m).SetText("Insert Before", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tv := recv.Embed(TreeViewType).(*TreeView)
 			tv.DropBefore(data.(mimedata.Mimes), mod) // captures mod
 		})
-		m.AddButton(gi.ActOpts{Label: "Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+		gi.NewButton(m).SetText("Insert After", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 			tv := recv.Embed(TreeViewType).(*TreeView)
 			tv.DropAfter(data.(mimedata.Mimes), mod) // captures mod
 		})
 	}
-	m.AddButton(gi.ActOpts{Label: "Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
+	gi.NewButton(m).SetText("Cancel", Data: data}, tv.This(), func(recv, send ki.Ki, sig int64, data any) {
 		tv := recv.Embed(TreeViewType).(*TreeView)
 		tv.DropCancel()
 	})

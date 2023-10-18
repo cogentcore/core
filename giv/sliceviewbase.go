@@ -1686,9 +1686,7 @@ func (sv *SliceViewBase) MakePasteMenu(m *gi.Scene, data any, idx int) {
 		OnClick(func(e events.Event) {
 			sv.This().(SliceViewer).PasteAtIdx(data.(mimedata.Mimes), idx+1)
 		})
-	gi.NewButton(m).SetText("Cancel").SetData(data).
-		OnClick(func(e events.Event) {
-		})
+	gi.NewButton(m).SetText("Cancel").SetData(data)
 }
 
 // PasteMenu performs a paste from the clipboard using given data -- pops up
