@@ -17,7 +17,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"goki.dev/mat32/v2"
@@ -29,7 +28,7 @@ func app() {
 	gi.SetAppName("gogi-demo")
 	gi.SetAppAbout("The GoGi Demo demonstrates the various features of the GoGi 2D and 3D Go GUI framework.")
 
-	goosi.ZoomFactor = 2
+	// goosi.ZoomFactor = 2
 
 	sc := gi.NewScene("gogi-demo").SetTitle("GoGi Demo")
 
@@ -78,7 +77,7 @@ func makeHome(ts *gi.Tabs) {
 	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
 	colorvv.ConfigWidget(cvvw, cvvw.AsWidget().Sc)
 
-	giv.NewFuncButton(home, gi.Prefs.LightMode)
+	giv.NewFuncButton(home).SetFunc(gi.Prefs.LightMode)
 
 	img := gi.NewImage(home)
 	err := img.OpenImage("gopher.png", 300, 300)
