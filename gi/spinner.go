@@ -365,8 +365,8 @@ func (sp *Spinner) ConfigWidget(sc *Scene) {
 	sp.ConfigParts(sc)
 }
 
-func (sp *Spinner) GetSize(sc *Scene, iter int) {
-	sp.GetSizeParts(sc, iter)
+func (sp *Spinner) ApplyStyle(sc *Scene) {
+	sp.WidgetBase.ApplyStyle(sc)
 }
 
 func (sp *Spinner) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
