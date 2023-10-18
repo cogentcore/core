@@ -7,150 +7,156 @@ package texteditor
 /*
 // DiffFiles shows the diffs between this file as the A file, and other file as B file,
 // in a DiffViewDialog
-func DiffFiles(afile, bfile string) (*DiffView, error) {
-	ab, err := ioutil.ReadFile(afile)
-	if err != nil {
-		log.Println(err)
-		return nil, err
+
+	func DiffFiles(afile, bfile string) (*DiffView, error) {
+		ab, err := ioutil.ReadFile(afile)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		bb, err := ioutil.ReadFile(bfile)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
+		bstr := strings.Split(strings.Replace(string(bb), "\r\n", "\n", -1), "\n")
+		dlg := DiffViewDialog(nil, DlgOpts{Title: "Diff File View:"}, astr, bstr, afile, bfile, "", "")
+		return dlg, nil
 	}
-	bb, err := ioutil.ReadFile(bfile)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-	astr := strings.Split(strings.Replace(string(ab), "\r\n", "\n", -1), "\n") // windows safe
-	bstr := strings.Split(strings.Replace(string(bb), "\r\n", "\n", -1), "\n")
-	dlg := DiffViewDialog(nil, DlgOpts{Title: "Diff File View:"}, astr, bstr, afile, bfile, "", "")
-	return dlg, nil
-}
 
 // DiffViewDialogFromRevs opens a dialog for displaying diff between file
 // at two different revisions from given repository
 // if empty, defaults to: A = current HEAD, B = current WC file.
 // -1, -2 etc also work as universal ways of specifying prior revisions.
-func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Buf, rev_a, rev_b string) (*DiffView, error) {
-	var astr, bstr []string
-	if rev_b == "" { // default to current file
-		if fbuf != nil {
-			bstr = fbuf.Strings(false)
+
+	func DiffViewDialogFromRevs(avp *gi.Scene, repo vci.Repo, file string, fbuf *Buf, rev_a, rev_b string) (*DiffView, error) {
+		var astr, bstr []string
+		if rev_b == "" { // default to current file
+			if fbuf != nil {
+				bstr = fbuf.Strings(false)
+			} else {
+				fb, err := textbuf.FileBytes(file)
+				if err != nil {
+					return nil, err
+				}
+				bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+			}
 		} else {
-			fb, err := textbuf.FileBytes(file)
+			fb, err := repo.FileContents(file, rev_b)
 			if err != nil {
 				return nil, err
 			}
 			bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
 		}
-	} else {
-		fb, err := repo.FileContents(file, rev_b)
+		fb, err := repo.FileContents(file, rev_a)
 		if err != nil {
 			return nil, err
 		}
-		bstr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
+		if rev_a == "" {
+			rev_a = "HEAD"
+		}
+		return DiffViewDialog(nil, DlgOpts{Title: "DiffVcs: " + dirs.DirAndFile(file)}, astr, bstr, file, file, rev_a, rev_b), nil
 	}
-	fb, err := repo.FileContents(file, rev_a)
-	if err != nil {
-		return nil, err
-	}
-	astr = textbuf.BytesToLineStrings(fb, false) // don't add new lines
-	if rev_a == "" {
-		rev_a = "HEAD"
-	}
-	return DiffViewDialog(nil, DlgOpts{Title: "DiffVcs: " + dirs.DirAndFile(file)}, astr, bstr, file, file, rev_a, rev_b), nil
-}
 
 // DiffViewDialog opens a dialog for displaying diff between two files as line-strings
-func DiffViewDialog(ctx gi.Widget, opts DlgOpts, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
-	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), nil)
 
-	frame := dlg.Stage.Scene
-	prIdx := dlg.PromptWidgetIdx()
+	func DiffViewDialog(ctx gi.Widget, opts DlgOpts, astr, bstr []string, afile, bfile, arev, brev string) *DiffView {
+		dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), nil)
 
-	dv := frame.InsertNewChild(DiffViewType, prIdx+1, "diff-view").(*DiffView)
-	dv.SetStretchMax()
-	dv.FileA = afile
-	dv.FileB = bfile
-	dv.RevA = arev
-	dv.RevB = brev
-	dv.DiffStrings(astr, bstr)
-	dlg.Run()
-	return dv
-}
+		frame := dlg.Stage.Scene
+		prIdx := dlg.PromptWidgetIdx()
+
+		dv := frame.InsertNewChild(DiffViewType, prIdx+1, "diff-view").(*DiffView)
+		dv.SetStretchMax()
+		dv.FileA = afile
+		dv.FileB = bfile
+		dv.RevA = arev
+		dv.RevB = brev
+		dv.DiffStrings(astr, bstr)
+		dlg.Run()
+		return dv
+	}
 
 ///////////////////////////////////////////////////////////////////
 // DiffView
 
 // DiffView presents two side-by-side TextView windows showing the differences
 // between two files (represented as lines of strings).
-type DiffView struct {
-	gi.Frame
 
-	// first file name being compared
-	FileA string `desc:"first file name being compared"`
+	type DiffView struct {
+		gi.Frame
 
-	// second file name being compared
-	FileB string `desc:"second file name being compared"`
+		// first file name being compared
+		FileA string `desc:"first file name being compared"`
 
-	// revision for first file, if relevant
-	RevA string `desc:"revision for first file, if relevant"`
+		// second file name being compared
+		FileB string `desc:"second file name being compared"`
 
-	// revision for second file, if relevant
-	RevB string `desc:"revision for second file, if relevant"`
+		// revision for first file, if relevant
+		RevA string `desc:"revision for first file, if relevant"`
 
-	// the diff records
-	Diffs textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`
+		// revision for second file, if relevant
+		RevB string `desc:"revision for second file, if relevant"`
 
-	// textbuf for A
-	BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
+		// the diff records
+		Diffs textbuf.Diffs `json:"-" xml:"-" desc:"the diff records"`
 
-	// textbuf for B
-	BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
+		// textbuf for A
+		BufA *Buf `json:"-" xml:"-" desc:"textbuf for A"`
 
-	// aligned diffs records diff for aligned lines
-	AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
+		// textbuf for B
+		BufB *Buf `json:"-" xml:"-" desc:"textbuf for B"`
 
-	// edit diffs records aligned diffs with edits applied
-	EditA textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
+		// aligned diffs records diff for aligned lines
+		AlignD textbuf.Diffs `json:"-" xml:"-" desc:"aligned diffs records diff for aligned lines"`
 
-	// edit diffs records aligned diffs with edits applied
-	EditB textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
+		// edit diffs records aligned diffs with edits applied
+		EditA textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
 
-	// undo diffs records aligned diffs with edits applied
-	UndoA textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+		// edit diffs records aligned diffs with edits applied
+		EditB textbuf.Diffs `json:"-" xml:"-" desc:"edit diffs records aligned diffs with edits applied"`
 
-	// undo diffs records aligned diffs with edits applied
-	UndoB textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
-}
+		// undo diffs records aligned diffs with edits applied
+		UndoA textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+
+		// undo diffs records aligned diffs with edits applied
+		UndoB textbuf.Diffs `json:"-" xml:"-" desc:"undo diffs records aligned diffs with edits applied"`
+	}
 
 func (dv *DiffView) OnInit() {
+	dv.DiffViewStyles()
+}
+
+func (dv *DiffView) DiffViewStyles() {
 	dv.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
-}
-
-func (dv *DiffView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom() {
-	case "text-a-lay", "text-b-lay":
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-			s.SetMinPrefWidth(units.Ch(80))
-			s.SetMinPrefHeight(units.Em(40))
-		})
-	case "text-a", "text-b":
-		w.Style(func(s *styles.Style) {
-			s.Font.Family = string(gi.Prefs.MonoFont)
-		})
-	case "toolbar":
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxWidth()
-		})
-	case "diff-lay":
-		df := w.(*gi.Layout)
-		df.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-		})
-	}
+	dv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(dv.This()) {
+		case "text-a-lay", "text-b-lay":
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(80))
+				s.SetMinPrefHeight(units.Em(40))
+			})
+		case "text-a", "text-b":
+			w.Style(func(s *styles.Style) {
+				s.Font.Family = string(gi.Prefs.MonoFont)
+			})
+		case "toolbar":
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxWidth()
+			})
+		case "diff-lay":
+			df := w.(*gi.Layout)
+			df.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+			})
+		}
+	})
 }
 
 // NextDiff moves to next diff region
