@@ -457,6 +457,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	defer sg.UpdateEnd(updt)
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
+	sc := sv.Sc
 
 	sg.DeleteChildren(ki.DestroyKids)
 
@@ -490,7 +491,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 
 	widg := ki.NewOfType(vtyp).(gi.Widget)
 	sg.SetChild(widg, idxOff, valnm)
-	vv.ConfigWidget(widg)
+	vv.ConfigWidget(widg, sc)
 
 	if !sv.IsDisabled() && !sv.isArray {
 		cidx := idxOff
@@ -684,6 +685,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 
 	nWidgPerRow, idxOff := sv.RowWidgetNs()
 	nWidg := nWidgPerRow * sv.DispRows
+	sc := sv.Sc
 
 	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
 		sv.ViewMuUnlock()
@@ -744,7 +746,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		} else {
 			widg = ki.NewOfType(vtyp).(gi.Widget)
 			sg.SetChild(widg, ridx+idxOff, valnm)
-			vv.ConfigWidget(widg)
+			vv.ConfigWidget(widg, sc)
 			wb := widg.AsWidget()
 			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 

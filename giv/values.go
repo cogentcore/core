@@ -25,7 +25,7 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
-// basicvals contains all the Values for basic builtin types
+// values contains all the Values for basic builtin types
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructValue
@@ -62,7 +62,7 @@ func (vv *StructValue) UpdateWidget() {
 	}
 }
 
-func (vv *StructValue) ConfigWidget(widg gi.Widget) {
+func (vv *StructValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	vv.CreateTempIfNotPtr() // we need our value to be a ptr to a struct -- if not make a tmp
@@ -70,6 +70,7 @@ func (vv *StructValue) ConfigWidget(widg gi.Widget) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip, _ = vv.Desc()
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -129,10 +130,11 @@ func (vv *StructInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *StructInlineValue) ConfigWidget(widg gi.Widget) {
+func (vv *StructInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*StructViewInline)
+	sv.Sc = sc
 	sv.Tooltip, _ = vv.Desc()
 	sv.StructValView = vv
 	sv.ViewPath = vv.ViewPath
@@ -181,7 +183,7 @@ func (vv *SliceValue) UpdateWidget() {
 	ac.SetText(txt)
 }
 
-func (vv *SliceValue) ConfigWidget(widg gi.Widget) {
+func (vv *SliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	slci := vv.Value.Interface()
@@ -194,6 +196,7 @@ func (vv *SliceValue) ConfigWidget(widg gi.Widget) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip, _ = vv.Desc()
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -268,10 +271,11 @@ func (vv *SliceInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget) {
+func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*SliceViewInline)
+	sv.Sc = sc
 	sv.Tooltip, _ = vv.Desc()
 	sv.SliceValView = vv
 	sv.ViewPath = vv.ViewPath
@@ -280,7 +284,6 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget) {
 	sv.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	sv.SetSlice(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
-		vv.UpdateWidget()
 		vv.SendChange()
 	})
 }
@@ -314,13 +317,14 @@ func (vv *MapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *MapValue) ConfigWidget(widg gi.Widget) {
+func (vv *MapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit
 	bt.Tooltip, _ = vv.Desc()
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -377,10 +381,11 @@ func (vv *MapInlineValue) UpdateWidget() {
 	}
 }
 
-func (vv *MapInlineValue) ConfigWidget(widg gi.Widget) {
+func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sv := vv.Widget.(*MapViewInline)
+	sv.Sc = sc
 	sv.Tooltip, _ = vv.Desc()
 	sv.MapValView = vv
 	sv.ViewPath = vv.ViewPath
@@ -389,7 +394,6 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget) {
 	sv.SetState(vv.This().(Value).IsInactive(), states.Disabled)
 	sv.SetMap(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
-		vv.UpdateWidget()
 		vv.SendChange()
 	})
 }
@@ -444,7 +448,7 @@ func (vv *KiPtrValue) UpdateWidget() {
 	bt.SetText(path)
 }
 
-func (vv *KiPtrValue) ConfigWidget(widg gi.Widget) {
+func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -465,6 +469,7 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget) {
 			GoGiEditorDialog(k)
 		}
 	})
+	bt.Config(sc)
 	vv.UpdateWidget()
 }
 
@@ -518,16 +523,15 @@ func (vv *BoolValue) UpdateWidget() {
 	cb.SetState(bv, states.Checked)
 }
 
-func (vv *BoolValue) ConfigWidget(widg gi.Widget) {
+func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip, _ = vv.Desc()
 	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
-		if vv.SetValue(cb.StateIs(states.Checked)) {
-			vv.UpdateWidget() // always update after setting value..
-		}
+		vv.SetValue(cb.StateIs(states.Checked))
 	})
 	vv.UpdateWidget()
 }
@@ -552,12 +556,14 @@ func (vv *IntValue) UpdateWidget() {
 	sb := vv.Widget.(*gi.Spinner)
 	npv := laser.NonPtrValue(vv.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
-	if err != nil {
+	if err == nil {
 		sb.SetValue(fv)
+	} else {
+		slog.Error("Int Value set", "error:", err)
 	}
 }
 
-func (vv *IntValue) ConfigWidget(widg gi.Widget) {
+func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
@@ -575,29 +581,34 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget) {
 	}
 	if mintag, ok := vv.Tag("min"); ok {
 		minv, err := laser.ToFloat32(mintag)
-		if err != nil {
+		if err == nil {
 			sb.SetMin(minv)
+		} else {
+			slog.Error("Int Min Value:", "error:", err)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(maxtag)
-		if err != nil {
+		if err == nil {
 			sb.SetMax(maxv)
+		} else {
+			slog.Error("Int Max Value:", "error:", err)
 		}
 	}
 	if steptag, ok := vv.Tag("step"); ok {
 		step, err := laser.ToFloat32(steptag)
-		if err != nil {
+		if err == nil {
 			sb.Step = step
+		} else {
+			slog.Error("Int Step Value:", "error:", err)
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
+	sb.Config(sc)
 	sb.OnChange(func(e events.Event) {
-		if vv.SetValue(sb.Value) {
-			vv.UpdateWidget()
-		}
+		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -622,12 +633,14 @@ func (vv *FloatValue) UpdateWidget() {
 	sb := vv.Widget.(*gi.Spinner)
 	npv := laser.NonPtrValue(vv.Value)
 	fv, err := laser.ToFloat32(npv.Interface())
-	if err != nil {
+	if err == nil {
 		sb.SetValue(fv)
+	} else {
+		slog.Error("Float Value set", "error:", err)
 	}
 }
 
-func (vv *FloatValue) ConfigWidget(widg gi.Widget) {
+func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
@@ -637,33 +650,37 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget) {
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
 		minv, err := laser.ToFloat32(mintag)
-		if err != nil {
+		if err == nil {
 			sb.HasMin = true
 			sb.Min = minv
+		} else {
+			slog.Error("Float Min Value:", "error:", err)
 		}
 	}
 	if maxtag, ok := vv.Tag("max"); ok {
 		maxv, err := laser.ToFloat32(maxtag)
-		if err != nil {
+		if err == nil {
 			sb.HasMax = true
 			sb.Max = maxv
+		} else {
+			slog.Error("Float Max Value:", "error:", err)
 		}
 	}
 	sb.Step = .1 // smaller default
 	if steptag, ok := vv.Tag("step"); ok {
 		step, err := laser.ToFloat32(steptag)
-		if err != nil {
+		if err == nil {
 			sb.Step = step
+		} else {
+			slog.Error("Float Step Value:", "error:", err)
 		}
 	}
 	if fmttag, ok := vv.Tag("format"); ok {
 		sb.Format = fmttag
 	}
-
+	sb.Config(sc)
 	sb.OnChange(func(e events.Event) {
-		if vv.SetValue(sb.Value) {
-			vv.UpdateWidget()
-		}
+		vv.SetValue(sb.Value)
 	})
 	vv.UpdateWidget()
 }
@@ -690,11 +707,11 @@ func (vv *EnumValue) EnumValue() enums.Enum {
 	return nil
 }
 
-func (vv *EnumValue) SetEnumValueFromInt(ival int64) bool {
-	// typ := vv.EnumType()
-	// eval := laser.EnumIfaceFromInt64(ival, typ)
-	return vv.SetValue(ival)
-}
+// func (vv *EnumValue) SetEnumValueFromInt(ival int64) bool {
+// 	// typ := vv.EnumType()
+// 	// eval := laser.EnumIfaceFromInt64(ival, typ)
+// 	return vv.SetValue(ival)
+// }
 
 func (vv *EnumValue) UpdateWidget() {
 	if vv.Widget == nil {
@@ -702,13 +719,16 @@ func (vv *EnumValue) UpdateWidget() {
 	}
 	ch := vv.Widget.(*gi.Chooser)
 	npv := laser.NonPtrValue(vv.Value)
-	iv, err := laser.ToInt(npv.Interface())
-	if err != nil {
-		ch.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
-	}
+	ch.SetCurVal(npv.Interface())
+	// iv, err := laser.ToInt(npv.Interface())
+	// if err == nil {
+	// 	ch.SetCurIndex(int(iv)) // todo: currently only working for 0-based values
+	// } else {
+	// 	slog.Error("Enum Value:", err)
+	// }
 }
 
-func (vv *EnumValue) ConfigWidget(widg gi.Widget) {
+func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
@@ -717,9 +737,11 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget) {
 
 	ev := vv.EnumValue()
 	ch.ItemsFromEnum(ev, false, 50)
+	ch.Config(sc)
 	ch.OnChange(func(e events.Event) {
-		cval := ch.CurVal.(enums.Enum)
-		vv.SetEnumValueFromInt(cval.Int64()) // todo: using index
+		vv.SetValue(ch.CurVal)
+		// cval := ch.CurVal.(enums.Enum)
+		// vv.SetEnumValueFromInt(cval.Int64()) // todo: using index
 	})
 	vv.UpdateWidget()
 }
@@ -763,13 +785,15 @@ func (vv *BitFlagView) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	iv, err := laser.ToInt(npv.Interface())
 	_ = iv
-	if err != nil {
+	if err == nil {
 		// ev := vv.EnumValue() // todo:
 		// bb.UpdateFromBitFlags(typ, int64(iv))
+	} else {
+		slog.Error("BitFlag Value:", "error:", err)
 	}
 }
 
-func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
+func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	cb := vv.Widget.(*gi.Switches)
 	// vv.StdConfigWidget(cb.Parts)
@@ -781,7 +805,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget) {
 	ev := vv.EnumValue()
 	_ = ev
 	// cb.ItemsFromEnum(ev)
-	// cb.ConfigParts(sc)
+	cb.Config(sc)
 	// cb.ButtonSig.ConnectOnly(vv.This(), func(recv, send ki.Ki, sig int64, data any) {
 	// 	vvv, _ := recv.Embed(TypeBitFlagView).(*BitFlagView)
 	// 	cbb := vvv.Widget.(*gi.Switches)
@@ -818,7 +842,7 @@ func (vv *TypeValue) UpdateWidget() {
 	}
 }
 
-func (vv *TypeValue) ConfigWidget(widg gi.Widget) {
+func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
@@ -843,12 +867,10 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget) {
 
 	tl := gti.AllEmbeddersOf(typEmbeds)
 	cb.ItemsFromTypes(tl, false, true, 50)
-
+	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
 		tval := cb.CurVal.(*gti.Type)
-		if vv.SetValue(tval) {
-			vv.UpdateWidget()
-		}
+		vv.SetValue(tval)
 	})
 	vv.UpdateWidget()
 }
@@ -878,7 +900,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget) {
+func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -889,11 +911,10 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
 	})
+	tf.Config(sc)
 
 	tf.OnChange(func(e events.Event) {
-		if vv.SetValue(tf.Text()) {
-			vv.UpdateWidget() // always update after setting value..
-		}
+		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
 }
@@ -923,7 +944,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	}
 }
 
-func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget) {
+func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -933,11 +954,10 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
 	})
+	tf.Config(sc)
 
 	tf.OnChange(func(e events.Event) {
-		if vv.SetValue(tf.Text()) {
-			vv.UpdateWidget() // always update after setting value..
-		}
+		vv.SetValue(tf.Text())
 	})
 	vv.UpdateWidget()
 }
@@ -970,11 +990,12 @@ func (vv *NilValue) UpdateWidget() {
 	sb.SetText("nil " + tstr)
 }
 
-func (vv *NilValue) ConfigWidget(widg gi.Widget) {
+func (vv *NilValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Label)
 	sb.Tooltip, _ = vv.Desc()
+	sb.Config(sc)
 	vv.UpdateWidget()
 }
 
@@ -1014,7 +1035,7 @@ func (vv *TimeValue) UpdateWidget() {
 	tf.SetText(tm.Format(DefaultTimeFormat))
 }
 
-func (vv *TimeValue) ConfigWidget(widg gi.Widget) {
+func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
@@ -1024,6 +1045,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget) {
 	tf.Style(func(s *styles.Style) {
 		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
+	tf.Config(sc)
 	tf.OnChange(func(e events.Event) {
 		nt, err := time.Parse(DefaultTimeFormat, tf.Text())
 		if err != nil {
@@ -1073,11 +1095,12 @@ func (vv *IconValue) UpdateWidget() {
 	}
 }
 
-func (vv *IconValue) ConfigWidget(widg gi.Widget) {
+func (vv *IconValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})
@@ -1133,11 +1156,12 @@ func (vv *FontValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *FontValue) ConfigWidget(widg gi.Widget) {
+func (vv *FontValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})
@@ -1195,11 +1219,12 @@ func (vv *FileValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *FileValue) ConfigWidget(widg gi.Widget) {
+func (vv *FileValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		bt := vv.Widget.(*gi.Button)
 		vv.OpenDialog(bt, nil)
@@ -1228,4 +1253,94 @@ func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 			fun(dlg)
 		}
 	}).Run()
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  VersCtrlValue
+
+// VersCtrlSystems is a list of supported Version Control Systems.
+// These must match the VCS Types from goki/pi/vci which in turn
+// is based on masterminds/vcs
+var VersCtrlSystems = []string{"git", "svn", "bzr", "hg"}
+
+// IsVersCtrlSystem returns true if the given string matches one of the
+// standard VersCtrlSystems -- uses lowercase version of str.
+func IsVersCtrlSystem(str string) bool {
+	stl := strings.ToLower(str)
+	for _, vcn := range VersCtrlSystems {
+		if stl == vcn {
+			return true
+		}
+	}
+	return false
+}
+
+// VersCtrlName is the name of a version control system
+type VersCtrlName string
+
+func VersCtrlNameProper(vc string) VersCtrlName {
+	vcl := strings.ToLower(vc)
+	for _, vcnp := range VersCtrlSystems {
+		vcnpl := strings.ToLower(vcnp)
+		if strings.Compare(vcl, vcnpl) == 0 {
+			return VersCtrlName(vcnp)
+		}
+	}
+	return ""
+}
+
+// Value registers VersCtrlValue as the viewer of VersCtrlName
+func (kn VersCtrlName) Value() Value {
+	vv := &VersCtrlValue{}
+	ki.InitNode(vv)
+	return vv
+}
+
+// VersCtrlValue presents an action for displaying an VersCtrlName and selecting
+// from StringPopup
+type VersCtrlValue struct {
+	ValueBase
+}
+
+func (vv *VersCtrlValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = gi.ButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *VersCtrlValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	bt := vv.Widget.(*gi.Button)
+	txt := laser.ToString(vv.Value.Interface())
+	if txt == "" {
+		txt = "(none)"
+	}
+	bt.SetText(txt)
+}
+
+func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	vv.Widget = widg
+	bt := vv.Widget.(*gi.Button)
+	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
+	bt.OnClick(func(e events.Event) {
+		vv.OpenDialog(vv.Widget, nil)
+	})
+	vv.UpdateWidget()
+}
+
+func (vv *VersCtrlValue) HasDialog() bool {
+	return true
+}
+
+func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
+	if vv.IsInactive() {
+		return
+	}
+	cur := laser.ToString(vv.Value.Interface())
+	gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
+		vv.SetValue(ac.Text)
+		vv.UpdateWidget()
+	})
 }

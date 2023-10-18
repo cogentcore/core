@@ -163,11 +163,12 @@ func (vv *ColorMapValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorMapValue) ConfigWidget(widg gi.Widget) {
+func (vv *ColorMapValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(vv.Widget, nil)
 	})

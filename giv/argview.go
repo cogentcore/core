@@ -157,7 +157,7 @@ func (av *ArgView) ConfigArgsGrid() {
 		lbl.Text = ac.Label
 		lbl.Tooltip = ac.Doc
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		ac.View.ConfigWidget(widg)
+		ac.View.ConfigWidget(widg, av.Sc)
 	}
 	sg.UpdateEnd(updt)
 }

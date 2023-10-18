@@ -136,7 +136,7 @@ func (sv *SliceViewInline) ConfigParts(sc *gi.Scene) {
 		if sv.SliceValView != nil {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
-		vv.ConfigWidget(widg)
+		vv.ConfigWidget(widg, sc)
 		if sv.IsDisabled() {
 			widg.AsWidget().SetState(true, states.Disabled)
 		}

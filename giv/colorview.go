@@ -492,7 +492,7 @@ func (vv *ColorValue) UpdateWidget() {
 	bt.SetNeedsRender()
 }
 
-func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
+func (vv *ColorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
@@ -514,6 +514,7 @@ func (vv *ColorValue) ConfigWidget(widg gi.Widget) {
 		// TODO: use hct contrast color
 		s.Color = colors.AsRGBA(hsl.ContrastColor(dclr))
 	})
+	bt.Config(sc)
 	vv.UpdateWidget()
 }
 
@@ -572,11 +573,12 @@ func (vv *ColorNameValue) UpdateWidget() {
 	bt.SetText(txt)
 }
 
-func (vv *ColorNameValue) ConfigWidget(widg gi.Widget) {
+func (vv *ColorNameValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
+	bt.Config(sc)
 	bt.OnClick(func(e events.Event) {
 		vv.OpenDialog(bt, nil)
 	})

@@ -7,6 +7,7 @@ package giv
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"log/slog"
 	"reflect"
 	"regexp"
@@ -249,12 +250,14 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 	return fld.Tag + " " + reflect.StructTag(ft)
 }
 
-// ConfigStructGrid configures the StructGrid for the current struct
-func (sv *StructView) ConfigStructGrid() {
+// ConfigStructGrid configures the StructGrid for the current struct.
+// returns true if any fields changed.
+func (sv *StructView) ConfigStructGrid() bool {
 	if laser.AnyIsNil(sv.Struct) {
-		return
+		return false
 	}
 	sg := sv.StructGrid()
+	sc := sv.Sc
 	config := ki.Config{}
 	// always start fresh!
 	dupeFields := map[string]bool{}
@@ -356,7 +359,7 @@ func (sv *StructView) ConfigStructGrid() {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", widg.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
-		vv.ConfigWidget(widg)
+		vv.ConfigWidget(widg, sc)
 		if !sv.IsDisabled() && !inactTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
@@ -381,14 +384,15 @@ func (sv *StructView) ConfigStructGrid() {
 			})
 		}
 	}
-	sg.UpdateEndLayout(updt)
+	sg.UpdateEnd(updt)
+	return updt
 }
 func (sv *StructView) UpdateFieldAction() {
 	if !sv.IsConfiged() {
 		return
 	}
 	if sv.HasViewIfs {
-		sv.Config(sv.Sc)
+		sv.SetNeedsLayout()
 	} else if sv.HasDefs {
 		sg := sv.StructGrid()
 		updt := sg.UpdateStart()
@@ -398,6 +402,14 @@ func (sv *StructView) UpdateFieldAction() {
 		}
 		sg.UpdateEndRender(updt)
 	}
+}
+
+func (sv *StructView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	updt := sv.ConfigStructGrid()
+	if updt {
+		sv.ApplyStyleTree(sc)
+	}
+	return sv.Frame.DoLayout(sc, parBBox, iter)
 }
 
 func (sv *StructView) Render(sc *gi.Scene) {
