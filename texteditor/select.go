@@ -337,18 +337,21 @@ func (ed *Editor) PasteHist() {
 	if ViewClipHistory == nil {
 		return
 	}
-	cl := ViewClipHistChooseList()
-	gi.StringsChooserPopup(cl, "", ed, func(ac *gi.Button) {
-		idx := ac.Data.(int)
-		clip := ViewClipHistory[idx]
-		if clip != nil {
-			updt := ed.UpdateStart()
-			defer ed.UpdateEndRender(updt)
-			ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
-			ed.InsertAtCursor(clip)
-			ed.SavePosHistory(ed.CursorPos)
-		}
-	})
+	// TODO(kai/menu): StringsChooserPopup
+	/*
+		cl := ViewClipHistChooseList()
+			gi.StringsChooserPopup(cl, "", ed, func(ac *gi.Button) {
+				idx := ac.Data.(int)
+				clip := ViewClipHistory[idx]
+				if clip != nil {
+					updt := ed.UpdateStart()
+					defer ed.UpdateEndRender(updt)
+					ed.EventMgr().ClipBoard().Write(mimedata.NewTextBytes(clip))
+					ed.InsertAtCursor(clip)
+					ed.SavePosHistory(ed.CursorPos)
+				}
+			})
+	*/
 }
 
 // Cut cuts any selected text and adds it to the clipboard, also returns cut text
@@ -522,27 +525,28 @@ func (ed *Editor) ContextMenu(e events.Event) {
 			}
 		}
 	}
-	ed.WidgetBase.CustomContextMenu(e)
+	ed.WidgetBase.ContextMenu(e)
 }
 
 // MakeContextMenu builds the text editor context menu
-func (ed *Editor) MakeContextMenu(m *gi.Menu) {
-	ac := m.AddButton(gi.ActOpts{Label: "Copy", ShortcutKey: gi.KeyFunCopy}, func(act *gi.Button) {
-		ed.Copy(true)
-	})
-	ac.SetEnabledState(ed.HasSelection())
+func (ed *Editor) MakeContextMenu(m *gi.Scene) {
+	gi.NewButton(m).SetText("Copy").SetShortcutKey(gi.KeyFunCopy).SetState(!ed.HasSelection(), states.Disabled).
+		OnClick(func(e events.Event) {
+			ed.Copy(true)
+		})
 	if !ed.IsDisabled() {
-		ac = m.AddButton(gi.ActOpts{Label: "Cut", ShortcutKey: gi.KeyFunCut}, func(act *gi.Button) {
-			ed.Cut()
-		})
-		ac.SetEnabledState(ed.HasSelection())
-		ac = m.AddButton(gi.ActOpts{Label: "Paste", ShortcutKey: gi.KeyFunPaste}, func(act *gi.Button) {
-			ed.Paste()
-		})
-		ac.SetState(ed.EventMgr().ClipBoard().IsEmpty(), states.Disabled)
+		gi.NewButton(m).SetText("Cut").SetShortcutKey(gi.KeyFunCut).SetState(!ed.HasSelection(), states.Disabled).
+			OnClick(func(e events.Event) {
+				ed.Cut()
+			})
+		gi.NewButton(m).SetText("Paste").SetShortcutKey(gi.KeyFunPaste).SetState(ed.EventMgr().ClipBoard().IsEmpty(), states.Disabled).
+			OnClick(func(e events.Event) {
+				ed.Paste()
+			})
 	} else {
-		ac = m.AddButton(gi.ActOpts{Label: "Clear"}, func(act *gi.Button) {
-			ed.Clear()
-		})
+		gi.NewButton(m).SetText("Clear").
+			OnClick(func(e events.Event) {
+				ed.Clear()
+			})
 	}
 }
