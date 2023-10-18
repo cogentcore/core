@@ -285,7 +285,7 @@ var FontStretchNames = []string{"Normal", "UltraCondensed", "ExtraCondensed", "S
 
 // TextDecorations are underline, line-through, etc -- operates as bit flags
 // -- also used for additional layout hints for RuneRender
-type TextDecorations int64 //enums:bitflag
+type TextDecorations int64 //enums:bitflag -trim-prefix Deco
 
 const (
 	DecoNone TextDecorations = iota

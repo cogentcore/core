@@ -629,26 +629,26 @@ func _TextDecorationsNoOp() {
 }
 
 var _TextDecorationsNameToValueMap = map[string]TextDecorations{
-	`DecoNone`:            0,
-	`deconone`:            0,
-	`DecoUnderline`:       1,
-	`decounderline`:       1,
-	`DecoOverline`:        2,
-	`decooverline`:        2,
-	`DecoLineThrough`:     3,
-	`decolinethrough`:     3,
-	`DecoBlink`:           4,
-	`decoblink`:           4,
-	`DecoDottedUnderline`: 5,
-	`decodottedunderline`: 5,
-	`DecoParaStart`:       6,
-	`decoparastart`:       6,
-	`DecoSuper`:           7,
-	`decosuper`:           7,
-	`DecoSub`:             8,
-	`decosub`:             8,
-	`DecoBackgroundColor`: 9,
-	`decobackgroundcolor`: 9,
+	`None`:            0,
+	`none`:            0,
+	`Underline`:       1,
+	`underline`:       1,
+	`Overline`:        2,
+	`overline`:        2,
+	`LineThrough`:     3,
+	`linethrough`:     3,
+	`Blink`:           4,
+	`blink`:           4,
+	`DottedUnderline`: 5,
+	`dottedunderline`: 5,
+	`ParaStart`:       6,
+	`parastart`:       6,
+	`Super`:           7,
+	`super`:           7,
+	`Sub`:             8,
+	`sub`:             8,
+	`BackgroundColor`: 9,
+	`backgroundcolor`: 9,
 }
 
 var _TextDecorationsDescMap = map[TextDecorations]string{
@@ -665,16 +665,16 @@ var _TextDecorationsDescMap = map[TextDecorations]string{
 }
 
 var _TextDecorationsMap = map[TextDecorations]string{
-	0: `DecoNone`,
-	1: `DecoUnderline`,
-	2: `DecoOverline`,
-	3: `DecoLineThrough`,
-	4: `DecoBlink`,
-	5: `DecoDottedUnderline`,
-	6: `DecoParaStart`,
-	7: `DecoSuper`,
-	8: `DecoSub`,
-	9: `DecoBackgroundColor`,
+	0: `None`,
+	1: `Underline`,
+	2: `Overline`,
+	3: `LineThrough`,
+	4: `Blink`,
+	5: `DottedUnderline`,
+	6: `ParaStart`,
+	7: `Super`,
+	8: `Sub`,
+	9: `BackgroundColor`,
 }
 
 // String returns the string representation
