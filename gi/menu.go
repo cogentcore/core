@@ -22,6 +22,14 @@ func MenuSceneConfigStyles(msc *Scene) {
 		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.BoxShadow = styles.BoxShadow2()
 	})
+	msc.OnWidgetAdded(func(w Widget) {
+		switch w := w.(type) {
+		case *Button:
+			w.Type = ButtonMenu
+		case *Separator:
+			w.Horiz = true
+		}
+	})
 }
 
 // MenuMaxHeight is the maximum height of any menu popup panel in units of font height
