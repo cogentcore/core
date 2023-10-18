@@ -88,6 +88,24 @@ import (
 
 // note: SetNeedsRender() is now SetNeedsRender()
 
+// UpdateStart sets the scene ScUpdating flag to prevent
+// render updates during construction on a scene.
+func (wb *WidgetBase) UpdateStart() bool {
+	updt := wb.Node.UpdateStart()
+	if updt && wb.Sc != nil {
+		wb.Sc.SetFlag(true, ScUpdating)
+	}
+	return updt
+}
+
+// UpdateEnd resets the scene ScUpdating flag
+func (wb *WidgetBase) UpdateEnd(updt bool) {
+	if updt && wb.Sc != nil {
+		wb.Sc.SetFlag(false, ScUpdating)
+	}
+	wb.Node.UpdateEnd(updt)
+}
+
 // SetNeedsRender sets the NeedsRender and Scene NeedsRender flags,
 // triggering a render of this widget on the next window update.
 // Also sets a Field Parent NeedsRender too.
