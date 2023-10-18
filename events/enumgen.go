@@ -29,16 +29,16 @@ func _DropModsNoOp() {
 }
 
 var _DropModsNameToValueMap = map[string]DropMods{
-	`NoDropMod`:  0,
-	`nodropmod`:  0,
-	`DropCopy`:   1,
-	`dropcopy`:   1,
-	`DropMove`:   2,
-	`dropmove`:   2,
-	`DropLink`:   3,
-	`droplink`:   3,
-	`DropIgnore`: 4,
-	`dropignore`: 4,
+	`NoDropMod`: 0,
+	`nodropmod`: 0,
+	`Copy`:      1,
+	`copy`:      1,
+	`Move`:      2,
+	`move`:      2,
+	`Link`:      3,
+	`link`:      3,
+	`Ignore`:    4,
+	`ignore`:    4,
 }
 
 var _DropModsDescMap = map[DropMods]string{
@@ -51,10 +51,10 @@ var _DropModsDescMap = map[DropMods]string{
 
 var _DropModsMap = map[DropMods]string{
 	0: `NoDropMod`,
-	1: `DropCopy`,
-	2: `DropMove`,
-	3: `DropLink`,
-	4: `DropIgnore`,
+	1: `Copy`,
+	2: `Move`,
+	3: `Link`,
+	4: `Ignore`,
 }
 
 // String returns the string representation
@@ -858,18 +858,18 @@ func _WinActionsNoOp() {
 var _WinActionsNameToValueMap = map[string]WinActions{
 	`NoWinAction`:  0,
 	`nowinaction`:  0,
-	`WinClose`:     1,
-	`winclose`:     1,
-	`WinMinimize`:  2,
-	`winminimize`:  2,
-	`WinMove`:      3,
-	`winmove`:      3,
-	`WinFocus`:     4,
-	`winfocus`:     4,
-	`WinFocusLost`: 5,
-	`winfocuslost`: 5,
-	`WinShow`:      6,
-	`winshow`:      6,
+	`Close`:        1,
+	`close`:        1,
+	`Minimize`:     2,
+	`minimize`:     2,
+	`Move`:         3,
+	`move`:         3,
+	`Focus`:        4,
+	`focus`:        4,
+	`FocusLost`:    5,
+	`focuslost`:    5,
+	`Show`:         6,
+	`show`:         6,
 	`ScreenUpdate`: 7,
 	`screenupdate`: 7,
 }
@@ -887,12 +887,12 @@ var _WinActionsDescMap = map[WinActions]string{
 
 var _WinActionsMap = map[WinActions]string{
 	0: `NoWinAction`,
-	1: `WinClose`,
-	2: `WinMinimize`,
-	3: `WinMove`,
-	4: `WinFocus`,
-	5: `WinFocusLost`,
-	6: `WinShow`,
+	1: `Close`,
+	2: `Minimize`,
+	3: `Move`,
+	4: `Focus`,
+	5: `FocusLost`,
+	6: `Show`,
 	7: `ScreenUpdate`,
 }
 

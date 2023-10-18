@@ -51,7 +51,7 @@ func (ev *WindowEvent) String() string {
 }
 
 // WinActions is the action taken on the window by the user.
-type WinActions int32 //enums:enum
+type WinActions int32 //enums:enum -trim-prefix Win
 
 const (
 	// NoWinAction is the zero value for special types (Resize, Paint)

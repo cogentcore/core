@@ -53,7 +53,7 @@ func (ev *Drag) HasPos() bool {
 // DropMods indicates the modifier associated with the drop action (affected by
 // holding down modifier keys), suggesting what to do with the dropped item,
 // where appropriate
-type DropMods int32 //enums:enum
+type DropMods int32 //enums:enum -trim-prefix Drop
 
 const (
 	NoDropMod DropMods = iota
