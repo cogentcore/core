@@ -104,7 +104,7 @@ func (mv *MapViewInline) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.SetNeedsLayout()
+	mv.ReConfigTree(mv.Sc)
 }
 
 func (mv *MapViewInline) ConfigWidget(sc *gi.Scene) {
@@ -218,18 +218,10 @@ func (mv *MapViewInline) MapAdd() {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.SetNeedsLayout()
+	mv.ReConfigTree(mv.Sc)
 }
 
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
-	mv.SetNeedsLayout()
-}
-
-func (mv *MapViewInline) GetSize(sc *gi.Scene, iter int) {
-	updt := mv.ConfigMap(sc)
-	if updt {
-		mv.ApplyStyleTree(sc)
-	}
-	mv.Frame.GetSize(sc, iter)
+	mv.ReConfigTree(mv.Sc)
 }
