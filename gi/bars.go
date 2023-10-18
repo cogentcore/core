@@ -337,6 +337,13 @@ func (tb *Toolbar) ToolbarStyles() {
 	})
 }
 
+func (tb *Toolbar) OnChildAdded(child ki.Ki) {
+	w, _ := AsWidget(child)
+	if bt, ok := w.(*Button); ok {
+		bt.Type = ButtonAction
+	}
+}
+
 // AddSeparator adds a new separator to the toolbar. It automatically
 // sets its orientation depending on the layout of the toolbar. The
 // name does not need to be specified, and will default to "separator-"
