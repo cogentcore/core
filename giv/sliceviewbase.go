@@ -226,6 +226,10 @@ type SliceViewBase struct {
 }
 
 func (sv *SliceViewBase) OnInit() {
+	sv.SliceViewBaseInit()
+}
+
+func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.SelectMode = false
 	sv.ShowIndex = true
 	sv.ShowToolbar = true
@@ -2107,13 +2111,15 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SetSliderPosAction(cur - float32(se.DimDelta(mat32.Y)))
 	})
-	sv.OnDoubleClick(func(e events.Event) {
-		si := sv.SelectedIdx
-		sv.UnselectAllIdxs()
-		sv.SelectIdx(si)
-		sv.Send(events.DoubleClick, e)
-		e.SetHandled()
-	})
+	// todo: doubleclick unselectallidxs is crashing with recursive loop
+	// sv.OnDoubleClick(func(e events.Event) {
+	// 	si := sv.SelectedIdx
+	// 	sv.UnselectAllIdxs()
+	// 	sv.SelectIdx(si)
+	// 	sv.Send(events.DoubleClick, e)
+	// 	e.SetHandled()
+	// })
+
 	// todo ctxmenu
 	// sv.Onwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(events.Event)

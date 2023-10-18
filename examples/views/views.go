@@ -14,6 +14,7 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
@@ -22,7 +23,7 @@ func main() { gimain.Run(app) }
 type TableStruct struct {
 
 	// an icon
-	// Icon icons.Icon
+	Icon icons.Icon
 
 	// an integer field
 	IntField int
@@ -134,7 +135,7 @@ func app() {
 
 	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
 	trow.Style(func(s *styles.Style) {
-		s.AlignH = styles.AlignCenter
+		s.AlignH = styles.AlignTop
 		s.Margin.Set(units.Px(2))
 		s.SetStretchMaxWidth()
 	})
@@ -168,12 +169,12 @@ func app() {
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	strv := giv.NewStructView(split, "strv")
-	strv.Sc = sc
-	strv.SetStruct(&stru)
-	strv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
+	// strv := giv.NewStructView(split, "strv")
+	// strv.Sc = sc
+	// strv.SetStruct(&stru)
+	// strv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
@@ -188,12 +189,12 @@ func app() {
 	// 	s.SetStretchMax()
 	// })
 
-	// tv := giv.NewTableView(split, "tv")
-	// // sv.SetInactive()
-	// tv.SetSlice(&tsttable)
-	// tv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
+	tv := giv.NewTableView(split, "tv")
+	// sv.SetInactive()
+	tv.SetSlice(&tsttable)
+	tv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
 
 	// split.SetSplits(.3, .2, .2, .3)
 	split.SetSplits(.5, .5)
