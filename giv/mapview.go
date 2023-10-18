@@ -360,16 +360,19 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) == 0 {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update the view to reflect current state of map"}, func(act *gi.Button) {
-			mv.UpdateValues()
-		})
-		tb.AddButton(gi.ActOpts{Label: "Sort", Icon: icons.Sort, Tooltip: "Switch between sorting by the keys vs. the values"}, func(act *gi.Button) {
-			mv.ToggleSort()
-		})
-		if ndef > 2 {
-			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the map"}, func(act *gi.Button) {
-				mv.MapAdd()
+		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update the view to reflect current state of map").
+			OnClick(func(e events.Event) {
+				mv.UpdateValues()
 			})
+		gi.NewButton(tb, "sort").SetText("Sort").SetIcon(icons.Sort).SetTooltip("Switch between sorting by the keys vs. the values").
+			OnClick(func(e events.Event) {
+				mv.ToggleSort()
+			})
+		if ndef > 2 {
+			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the map").
+				OnClick(func(e events.Event) {
+					mv.MapAdd()
+				})
 		}
 	}
 	sz := len(*tb.Children())
