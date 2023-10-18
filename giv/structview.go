@@ -338,6 +338,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			break
 		}
 		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.UpdateWidget()
 			continue
 		}
 		sv.WidgetConfiged[widg] = true
