@@ -143,104 +143,102 @@ func (tv *TreeView) TreeViewStyles() {
 			s.BackgroundColor.SetSolid(colors.Transparent)
 		}
 	})
-}
-
-func (tv *TreeView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(tv.This()) {
-	case "parts":
-		parts := w.(*gi.Layout)
-		parts.Style(func(s *styles.Style) {
-			s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
-			parts.Spacing.SetCh(0.5)
-			s.Padding.Set(units.Dp(4))
-		})
-		// we let the parts handle our state
-		// so that we only get it when we are doing
-		// something with this treeview specifically,
-		// not with any of our children (see HandleTreeViewMouse)
-		parts.On(events.MouseEnter, func(e events.Event) {
-			tv.SetState(true, states.Hovered)
-			tv.ApplyStyle(tv.Sc)
-			tv.SetNeedsRender()
-			e.SetHandled()
-		})
-		parts.On(events.MouseLeave, func(e events.Event) {
-			tv.SetState(false, states.Hovered)
-			tv.ApplyStyle(tv.Sc)
-			tv.SetNeedsRender()
-			e.SetHandled()
-		})
-		parts.On(events.MouseDown, func(e events.Event) {
-			tv.SetState(true, states.Active)
-			tv.ApplyStyle(tv.Sc)
-			tv.SetNeedsRender()
-			e.SetHandled()
-		})
-		parts.On(events.MouseUp, func(e events.Event) {
-			tv.SetState(false, states.Active)
-			tv.ApplyStyle(tv.Sc)
-			tv.SetNeedsRender()
-			e.SetHandled()
-		})
-		parts.OnClick(func(e events.Event) {
-			tv.SelectAction(e.SelectMode())
-			e.SetHandled()
-		})
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/branch":
-		sw := w.(*gi.Switch)
-		sw.Type = gi.SwitchCheckbox
-		sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen
-		sw.IconOff = icons.KeyboardArrowRight // icons.Folder
-		sw.IconDisab = icons.Blank
-		sw.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.Primary.Base
-			s.Margin.Set()
-			s.Padding.Set()
-			s.Width.SetEm(1)
-			s.Height.SetEm(1)
-			s.AlignV = styles.AlignMiddle
-			// we don't need to visibly tell the user that we are disabled;
-			// the lack of an icon accomplishes that
-			if s.Is(states.Disabled) {
-				s.StateLayer = 0
-			}
-		})
-		sw.OnClick(func(e events.Event) {
-			if sw.StateIs(states.Checked) {
-				if !tv.IsClosed() {
-					tv.Close()
+	tv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(tv.This()) {
+		case "parts":
+			parts := w.(*gi.Layout)
+			parts.Style(func(s *styles.Style) {
+				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
+				parts.Spacing.SetCh(0.5)
+				s.Padding.Set(units.Dp(4))
+			})
+			// we let the parts handle our state
+			// so that we only get it when we are doing
+			// something with this treeview specifically,
+			// not with any of our children (see HandleTreeViewMouse)
+			parts.On(events.MouseEnter, func(e events.Event) {
+				tv.SetState(true, states.Hovered)
+				tv.ApplyStyle(tv.Sc)
+				tv.SetNeedsRender()
+				e.SetHandled()
+			})
+			parts.On(events.MouseLeave, func(e events.Event) {
+				tv.SetState(false, states.Hovered)
+				tv.ApplyStyle(tv.Sc)
+				tv.SetNeedsRender()
+				e.SetHandled()
+			})
+			parts.On(events.MouseDown, func(e events.Event) {
+				tv.SetState(true, states.Active)
+				tv.ApplyStyle(tv.Sc)
+				tv.SetNeedsRender()
+				e.SetHandled()
+			})
+			parts.On(events.MouseUp, func(e events.Event) {
+				tv.SetState(false, states.Active)
+				tv.ApplyStyle(tv.Sc)
+				tv.SetNeedsRender()
+				e.SetHandled()
+			})
+			parts.OnClick(func(e events.Event) {
+				tv.SelectAction(e.SelectMode())
+				e.SetHandled()
+			})
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/branch":
+			sw := w.(*gi.Switch)
+			sw.Type = gi.SwitchCheckbox
+			sw.IconOn = icons.KeyboardArrowDown   // icons.FolderOpen
+			sw.IconOff = icons.KeyboardArrowRight // icons.Folder
+			sw.IconDisab = icons.Blank
+			sw.Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.Primary.Base
+				s.Margin.Set()
+				s.Padding.Set()
+				s.Width.SetEm(1)
+				s.Height.SetEm(1)
+				s.AlignV = styles.AlignMiddle
+				// we don't need to visibly tell the user that we are disabled;
+				// the lack of an icon accomplishes that
+				if s.Is(states.Disabled) {
+					s.StateLayer = 0
 				}
-			} else {
-				if tv.IsClosed() {
-					tv.Open()
+			})
+			sw.OnClick(func(e events.Event) {
+				if sw.StateIs(states.Checked) {
+					if !tv.IsClosed() {
+						tv.Close()
+					}
+				} else {
+					if tv.IsClosed() {
+						tv.Open()
+					}
 				}
-			}
-		})
-	case "parts/space":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "parts/label":
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Margin.Set()
-			s.Padding.Set()
-			s.MinWidth.SetCh(16)
-			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-		})
-	case "parts/menu":
-		menu := w.(*gi.Button)
-		menu.Indicator = icons.None
-	}
+			})
+		case "parts/space":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "parts/label":
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Margin.Set()
+				s.Padding.Set()
+				s.MinWidth.SetCh(16)
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+			})
+		case "parts/menu":
+			menu := w.(*gi.Button)
+			menu.Indicator = icons.None
+		}
+	})
 }
 
 // TreeViewFlags extend WidgetFlags to hold TreeView state

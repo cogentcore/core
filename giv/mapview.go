@@ -67,24 +67,22 @@ func (mv *MapView) OnInit() {
 		mv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (mv *MapView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(mv.This()) {
-	case "map-grid":
-		mg := w.(*gi.Frame)
-		mg.Lay = gi.LayoutGrid
-		mg.Stripes = gi.RowStripes
-		w.Style(func(s *styles.Style) {
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.SetMinPrefHeight(units.Em(1.5))
-			s.SetMinPrefWidth(units.Em(10))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.Columns = mv.NCols
-		})
-	}
+	mv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(mv.This()) {
+		case "map-grid":
+			mg := w.(*gi.Frame)
+			mg.Lay = gi.LayoutGrid
+			mg.Stripes = gi.RowStripes
+			w.Style(func(s *styles.Style) {
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(1.5))
+				s.SetMinPrefWidth(units.Em(10))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.Columns = mv.NCols
+			})
+		}
+	})
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to

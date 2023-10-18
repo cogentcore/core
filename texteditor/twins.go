@@ -29,19 +29,17 @@ func (te *TwinEditors) OnInit() {
 	te.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
-}
-
-func (te *TwinEditors) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(te) {
-	case "text-a", "text-b":
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-			s.SetMinPrefWidth(units.Ch(80))
-			s.SetMinPrefHeight(units.Em(40))
-			s.Font.Family = string(gi.Prefs.MonoFont)
-		})
-	}
+	te.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(te) {
+		case "text-a", "text-b":
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+				s.SetMinPrefWidth(units.Ch(80))
+				s.SetMinPrefHeight(units.Em(40))
+				s.Font.Family = string(gi.Prefs.MonoFont)
+			})
+		}
+	})
 }
 
 // MakeBufs ensures that the Bufs are made, if nil

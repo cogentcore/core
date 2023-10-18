@@ -48,18 +48,16 @@ func (mv *MapViewInline) OnInit() {
 	mv.Style(func(s *styles.Style) {
 		s.MinWidth.SetEx(60)
 	})
-}
-
-func (mv *MapViewInline) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(mv.This()) {
-	case "parts":
-		parts := w.(*gi.Layout)
-		parts.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-		})
-	}
+	mv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(mv.This()) {
+		case "parts":
+			parts := w.(*gi.Layout)
+			parts.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
+		}
+	})
 }
 
 // SetMap sets the source map that we are viewing -- rebuilds the children to represent this map
