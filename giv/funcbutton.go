@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/sentencecase"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
 )
@@ -72,6 +74,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 // SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
 func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
+	fb.Func = gfun
 	// get name without package
 	snm := gfun.Name
 	li := strings.LastIndex(snm, ".")
@@ -86,6 +89,9 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	if ic.IsValid() {
 		fb.SetIcon(ic)
 	}
+	fb.OnClick(func(e events.Event) {
+		fmt.Println("calling", fb.Func.Name)
+	})
 	return fb
 }
 
