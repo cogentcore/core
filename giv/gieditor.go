@@ -273,11 +273,11 @@ func (ge *GiEditor) ConfigSplits() {
 
 func (ge *GiEditor) SetChanged() {
 	ge.Changed = true
-	ge.Toolbar().UpdateButtons() // nil safe
+	// ge.Toolbar().UpdateButtons() // nil safe
 }
 
 func (ge *GiEditor) Render(sc *gi.Scene) {
-	ge.Toolbar().UpdateButtons()
+	// ge.Toolbar().UpdateButtons()
 	// if win := ge.ParentRenderWin(); win != nil {
 	// 	if !win.Is(WinResizing) {
 	// 		win.MainMenuUpdateActives()

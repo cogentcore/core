@@ -411,28 +411,28 @@ func (sc *Scene) DoUpdate() bool {
 	switch {
 	case rc.HasFlag(RenderRebuild):
 		// fmt.Println("rebuild")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.DoRebuild()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
 		// fmt.Println("scene restyle")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.ApplyStyleScene()
 		sc.LayoutRenderScene()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		sc.LastRender.SaveRender(rc)
 	case sc.Is(ScNeedsLayout):
 		// fmt.Println("scene layout start")
-		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.Fill() // full redraw
 		sc.LayoutRenderScene()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene layout done")
 	case sc.Is(ScNeedsRender):
 		// fmt.Println("scene render start")
-		sc.SetFlag(false, ScNeedsRender)
 		sc.DoNeedsRender(sc)
+		sc.SetFlag(false, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 		// fmt.Println("scene render done")
 	default:
