@@ -455,20 +455,21 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	bt.SetType(gi.ButtonTonal)
 	bt.Indicator = icons.KeyboardArrowDown
 	bt.Tooltip, _ = vv.Desc()
-	bt.ResetMenu()
-	bt.Menu.AddButton(gi.ActOpts{Label: "Edit"}, func(bt *gi.Button) {
-		k := vv.KiStruct()
-		if k != nil {
-			bt := vv.Widget.(*gi.Button)
-			vv.OpenDialog(bt, nil)
-		}
-	})
-	bt.Menu.AddButton(gi.ActOpts{Label: "GoGiEditor"}, func(bt *gi.Button) {
-		k := vv.KiStruct()
-		if k != nil {
-			GoGiEditorDialog(k)
-		}
-	})
+	bt.Menu = func(m *gi.Scene) {
+		gi.NewButton(m, "edit").SetText("Edit").OnClick(func(e events.Event) {
+			k := vv.KiStruct()
+			if k != nil {
+				bt := vv.Widget.(*gi.Button)
+				vv.OpenDialog(bt, nil)
+			}
+		})
+		gi.NewButton(m, "gogi-editor").SetText("GoGi editor").OnClick(func(e events.Event) {
+			k := vv.KiStruct()
+			if k != nil {
+				GoGiEditorDialog(k)
+			}
+		})
+	}
 	bt.Config(sc)
 	vv.UpdateWidget()
 }
@@ -1338,9 +1339,10 @@ func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
-	cur := laser.ToString(vv.Value.Interface())
-	gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
-		vv.SetValue(ac.Text)
-		vv.UpdateWidget()
-	})
+	// TODO(kai/menu): add back StringsChooserPopup here
+	// cur := laser.ToString(vv.Value.Interface())
+	// gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
+	// 	vv.SetValue(ac.Text)
+	// 	vv.UpdateWidget()
+	// })
 }
