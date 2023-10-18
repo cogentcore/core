@@ -169,9 +169,11 @@ func (lv *VCSLogView) ConfigToolbar() {
 			lv.RevB = tfb.Text()
 		})
 		tb.AddSeparator("dsep")
-		tb.AddButton(gi.ActOpts{Label: "Diff", Icon: icons.Difference, Tooltip: "Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy"}, func(act *gi.Button) {
-			// DiffViewDialogFromRevs(lv.Sc, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
-		})
+		gi.NewButton(tb, "diff").SetText("Diff").SetIcon(icons.Difference).SetTooltip("Show the diffs between two revisions -- if blank, A is current HEAD, and B is current working copy").
+			OnClick(func(e events.Event) {
+				// TOOD: add this back
+				// DiffViewDialogFromRevs(lv.Sc, lv.Repo, lv.File, nil, lv.RevA, lv.RevB)
+			})
 		cba.OnClick(func(e events.Event) {
 			lv.SetA = cba.StateIs(states.Checked)
 		})
