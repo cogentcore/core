@@ -6,7 +6,7 @@ package lsp
 
 // CompletionKind is the Language Server Protocol (LSP) CompletionKind, which
 // we map onto the token.Tokens that are used internally.
-type CompletionKind int32 //enums:enum
+type CompletionKind int32 //enums:enum -trim-prefix Ck
 
 // CompletionKinds -- note these largely overlap with CompletionKinds and are
 // thus kinda partially redundant..
