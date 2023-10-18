@@ -42,23 +42,25 @@ func app() {
 	sc := gi.NewScene("widgets").SetTitle("GoGi Widgets Demo")
 
 	tbar := gi.NewToolbar(sc, "tbar").SetStretchMaxWidth().(*gi.Toolbar)
-	tbar.AddButton(gi.ActOpts{Label: "Button 1", Data: 1}, func(act *gi.Button) {
-		fmt.Println("Toolbar Button 1")
-		gi.NewSnackbar(tbar, gi.SnackbarOpts{
-			Text:   "Something went wrong!",
-			Button: "Try again",
-			ButtonOnClick: func(bt *gi.Button) {
-				fmt.Println("got snackbar try again event")
-			},
-			Icon: icons.Close,
-			IconOnClick: func(bt *gi.Button) {
-				fmt.Println("got snackbar close icon event")
-			},
-		}).Run()
-	})
-	tbar.AddButton(gi.ActOpts{Label: "Button 2", Data: 2}, func(act *gi.Button) {
-		fmt.Println("Toolbar Button 2")
-	})
+	gi.NewButton(tbar).SetText("Button 1").SetData(1).
+		OnClick(func(e events.Event) {
+			fmt.Println("Toolbar Button 1")
+			gi.NewSnackbar(tbar, gi.SnackbarOpts{
+				Text:   "Something went wrong!",
+				Button: "Try again",
+				ButtonOnClick: func(bt *gi.Button) {
+					fmt.Println("got snackbar try again event")
+				},
+				Icon: icons.Close,
+				IconOnClick: func(bt *gi.Button) {
+					fmt.Println("got snackbar close icon event")
+				},
+			}).Run()
+		})
+	gi.NewButton(tbar).SetText("Button 2").SetData(2).
+		OnClick(func(e events.Event) {
+			fmt.Println("Toolbar Button 2")
+		})
 
 	trow := gi.NewLayout(sc, "trow").
 		SetLayout(gi.LayoutHoriz).SetStretchMaxWidth()
@@ -139,21 +141,35 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 		fmt.Println("toggled", toggle.StateIs(states.Checked))
 	})
 
-	mb1 := gi.NewButton(brow, "menubutton1").
-		SetText("Menu Button").
-		SetTooltip("Press this button to pull up a nested menu of buttons").(*gi.Button)
+	mb := gi.NewButton(brow).SetText("Menu Button")
+	mb.SetTooltip("Press this button to pull up a nested menu of buttons")
 
-	mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 1", Shortcut: "Shift+Control+1", Data: 1}, func(bt *gi.Button) {
-		fmt.Println(bt.Name(), bt.Data)
-	})
-	mi2 := mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Data: 2}, nil)
-	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Data: 2.1}, func(bt *gi.Button) {
-		fmt.Println(bt.Text, bt.Data)
-	})
-	mb1.Menu.AddSeparator("sep1")
-	mb1.Menu.AddButton(gi.ActOpts{Label: "Menu Item 3", Shortcut: "Control+3", Data: 3}, func(bt *gi.Button) {
-		fmt.Println(bt.Text, bt.Data)
-	})
+	mb.Menu = func(m *gi.Scene) {
+		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1)
+		m1.SetTooltip("A standard menu item with an icon").
+			OnClick(func(e events.Event) {
+				fmt.Println("Received menu action with data", m1.Data)
+			})
+
+		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.FileOpen).SetData(2)
+		m2.SetTooltip("A menu item with an icon and a sub menu")
+
+		m2.Menu = func(m *gi.Scene) {
+			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1)
+			sm2.SetTooltip("A sub menu item with an icon").
+				OnClick(func(e events.Event) {
+					fmt.Println("Received menu action with data", sm2.Data)
+				})
+		}
+
+		gi.NewSeparator(m)
+
+		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3)
+		m3.SetTooltip("A standard menu item with an icon, below a separator").
+			OnClick(func(e events.Event) {
+				fmt.Println("Received menu action with data", m3.Data)
+			})
+	}
 
 	//////////////////////////////////////////
 	//      Sliders
