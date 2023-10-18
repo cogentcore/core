@@ -90,56 +90,54 @@ func (sp *Spinner) SpinnerStyles() {
 	sp.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
 	})
-}
-
-func (sp *Spinner) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(sp.This()) {
-	case "parts/parts":
-		w.Style(func(s *styles.Style) {
-			s.AlignV = styles.AlignMiddle
-		})
-	case "parts/text-field":
-		tf := w.(*TextField)
-		tf.SetText(sp.ValToString(sp.Value))
-		tf.SetState(sp.IsDisabled(), states.Disabled)
-		sp.TextFieldHandlers(tf)
-		tf.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Em(3))
-		})
-	case "parts/up":
-		up := w.(*Button)
-		up.Type = ButtonAction
-		if sp.UpIcon.IsNil() {
-			sp.UpIcon = icons.Add
+	sp.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(sp.This()) {
+		case "parts/parts":
+			w.Style(func(s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
+			})
+		case "parts/text-field":
+			tf := w.(*TextField)
+			tf.SetText(sp.ValToString(sp.Value))
+			tf.SetState(sp.IsDisabled(), states.Disabled)
+			sp.TextFieldHandlers(tf)
+			tf.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Em(3))
+			})
+		case "parts/up":
+			up := w.(*Button)
+			up.Type = ButtonAction
+			if sp.UpIcon.IsNil() {
+				sp.UpIcon = icons.Add
+			}
+			up.SetIcon(sp.UpIcon)
+			w.SetState(sp.IsDisabled(), states.Disabled)
+			up.OnClick(func(e events.Event) {
+				sp.IncrValue(1)
+			})
+			up.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Focusable)
+				s.Font.Size.SetDp(18)
+				s.Padding.Set(units.Dp(4))
+			})
+		case "parts/down":
+			down := w.(*Button)
+			down.Type = ButtonAction
+			if sp.DownIcon.IsNil() {
+				sp.DownIcon = icons.Remove
+			}
+			down.SetIcon(sp.DownIcon)
+			w.SetState(sp.IsDisabled(), states.Disabled)
+			down.OnClick(func(e events.Event) {
+				sp.IncrValue(-1)
+			})
+			down.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Focusable)
+				s.Font.Size.SetDp(18)
+				s.Padding.Set(units.Dp(4))
+			})
 		}
-		up.SetIcon(sp.UpIcon)
-		w.SetState(sp.IsDisabled(), states.Disabled)
-		up.OnClick(func(e events.Event) {
-			sp.IncrValue(1)
-		})
-		up.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Focusable)
-			s.Font.Size.SetDp(18)
-			s.Padding.Set(units.Dp(4))
-		})
-	case "parts/down":
-		down := w.(*Button)
-		down.Type = ButtonAction
-		if sp.DownIcon.IsNil() {
-			sp.DownIcon = icons.Remove
-		}
-		down.SetIcon(sp.DownIcon)
-		w.SetState(sp.IsDisabled(), states.Disabled)
-		down.OnClick(func(e events.Event) {
-			sp.IncrValue(-1)
-		})
-		down.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Focusable)
-			s.Font.Size.SetDp(18)
-			s.Padding.Set(units.Dp(4))
-		})
-	}
+	})
 }
 
 // SetMin sets the min limits on the value

@@ -335,13 +335,11 @@ func (tb *Toolbar) ToolbarStyles() {
 		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
-}
-
-func (tb *Toolbar) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	if bt, ok := w.(*Button); ok {
-		bt.Type = ButtonAction
-	}
+	tb.OnWidgetAdded(func(w Widget) {
+		if bt, ok := w.(*Button); ok {
+			bt.Type = ButtonAction
+		}
+	})
 }
 
 // AddSeparator adds a new separator to the toolbar. It automatically

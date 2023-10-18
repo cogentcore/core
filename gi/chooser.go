@@ -146,57 +146,55 @@ func (ch *Chooser) ChooserStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (ch *Chooser) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(ch.This()) {
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/label":
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-			if ch.MaxLength > 0 {
-				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-			}
-		})
-	case "parts/text":
-		text := w.(*TextField)
-		text.Placeholder = ch.Placeholder
-		if ch.Type == ChooserFilled {
-			text.Type = TextFieldFilled
-		} else {
-			text.Type = TextFieldOutlined
-		}
-		ch.TextFieldHandlers(text)
-		text.Style(func(s *styles.Style) {
-			s.Border.Style.Set(styles.BorderNone)
-			s.Border.Width.Set()
-			if ch.MaxLength > 0 {
-				s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
-			}
-		})
-	case "parts/ind-stretch":
-		w.Style(func(s *styles.Style) {
-			if ch.Editable {
-				s.Width.SetDp(0)
+	ch.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(ch.This()) {
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/label":
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+				if ch.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				}
+			})
+		case "parts/text":
+			text := w.(*TextField)
+			text.Placeholder = ch.Placeholder
+			if ch.Type == ChooserFilled {
+				text.Type = TextFieldFilled
 			} else {
-				s.Width.SetDp(16)
+				text.Type = TextFieldOutlined
 			}
-		})
-	case "parts/indicator":
-		w.Style(func(s *styles.Style) {
-			s.Font.Size.SetDp(16)
-			s.AlignV = styles.AlignMiddle
-		})
-	}
+			ch.TextFieldHandlers(text)
+			text.Style(func(s *styles.Style) {
+				s.Border.Style.Set(styles.BorderNone)
+				s.Border.Width.Set()
+				if ch.MaxLength > 0 {
+					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
+				}
+			})
+		case "parts/ind-stretch":
+			w.Style(func(s *styles.Style) {
+				if ch.Editable {
+					s.Width.SetDp(0)
+				} else {
+					s.Width.SetDp(16)
+				}
+			})
+		case "parts/indicator":
+			w.Style(func(s *styles.Style) {
+				s.Font.Size.SetDp(16)
+				s.AlignV = styles.AlignMiddle
+			})
+		}
+	})
 }
 
 // SetType sets the styling type of the combo box
