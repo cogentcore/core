@@ -715,7 +715,7 @@ func (vv *ValueBase) SetValue(val any) bool {
 	if wasSet {
 		vv.This().(Value).SaveTmp()
 	}
-	fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
+	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
 	vv.SendChange()
 	if err != nil {
 		// todo: snackbar for error?
