@@ -76,7 +76,7 @@ func makeHome(ts *gi.Tabs) {
 	colorvv := giv.ToValue(&clr, "")
 	colorvv.SetSoloValue(reflect.ValueOf(&clr))
 	cvvw := home.NewChild(colorvv.WidgetType()).(gi.Widget)
-	colorvv.ConfigWidget(cvvw)
+	colorvv.ConfigWidget(cvvw, cvvw.AsWidget().Sc)
 
 	giv.NewFuncButton(home, gi.Prefs.LightMode)
 
