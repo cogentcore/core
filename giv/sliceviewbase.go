@@ -226,6 +226,10 @@ type SliceViewBase struct {
 }
 
 func (sv *SliceViewBase) OnInit() {
+	sv.SliceViewBaseInit()
+}
+
+func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.SelectMode = false
 	sv.ShowIndex = true
 	sv.ShowToolbar = true
@@ -260,17 +264,25 @@ func (sv *SliceViewBase) OnInit() {
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
 		}
-		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-			w.Style(func(s *styles.Style) {
-				s.MinWidth.SetEm(1.5)
-				s.Padding.Right.SetDp(4)
-				s.Text.Align = styles.AlignRight
-			})
-		}
-		if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
-			w.Style(func(s *styles.Style) {
-				w.(*gi.Button).SetType(gi.ButtonAction)
-			})
+		if w.Parent().Name() == "grid" {
+			if strings.HasPrefix(w.Name(), "index-") {
+				w.Style(func(s *styles.Style) {
+					s.MinWidth.SetEm(1.5)
+					s.Padding.Right.SetDp(4)
+					s.Text.Align = styles.AlignRight
+				})
+			}
+			if strings.HasPrefix(w.Name(), "add-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+				})
+			}
+			if strings.HasPrefix(w.Name(), "del-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Error.Base
+				})
+			}
 		}
 	})
 }
@@ -508,9 +520,6 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			sg.SetChild(&delbt, cidx, delnm)
 			delbt.SetType(gi.ButtonAction)
 			delbt.SetIcon(icons.Delete)
-			delbt.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Error.Base
-			})
 		}
 	}
 	sv.ConfigScroll()
@@ -685,7 +694,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	nWidg := nWidgPerRow * sv.DispRows
 	sc := sv.Sc
 
-	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
+	if sv.Values == nil || sg.NumChildren() != nWidg || len(sv.Values) != sv.DispRows { // shouldn't happen..
 		sv.ViewMuUnlock()
 		sv.LayoutSliceGrid()
 		sv.ViewMuLock()
@@ -2107,13 +2116,15 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SetSliderPosAction(cur - float32(se.DimDelta(mat32.Y)))
 	})
-	sv.OnDoubleClick(func(e events.Event) {
-		si := sv.SelectedIdx
-		sv.UnselectAllIdxs()
-		sv.SelectIdx(si)
-		sv.Send(events.DoubleClick, e)
-		e.SetHandled()
-	})
+	// todo: doubleclick unselectallidxs is crashing with recursive loop
+	// sv.OnDoubleClick(func(e events.Event) {
+	// 	si := sv.SelectedIdx
+	// 	sv.UnselectAllIdxs()
+	// 	sv.SelectIdx(si)
+	// 	sv.Send(events.DoubleClick, e)
+	// 	e.SetHandled()
+	// })
+
 	// todo ctxmenu
 	// sv.Onwe.AddFunc(events.MouseUp, gi.LowRawPri, func(recv, send ki.Ki, sig int64, d any) {
 	// 	me := d.(events.Event)

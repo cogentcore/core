@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -12,18 +13,31 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/sentencecase"
+	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 )
 
-// NewFuncButton adds to the given parent a new [gi.Button] that is set up to call the given
-// function when pressed, using a dialog to prompt the user for any arguments. Also, it sets
-// various properties like the name, label, tooltip, and icon of the button based on the
-// properties of the function, using reflect and gti. The given function must be registered
-// with gti; add a `//gti:add` comment directive and run `goki generate` if you get errors.
-// If the given function is a method, both the method and its receiver type must be added to gti.
-func NewFuncButton(par ki.Ki, fun any) *gi.Button {
+// FuncButton is a button that is set up to call a function when it
+// is pressed, using a dialog to prompt the user for any arguments.
+// Also, it automatically sets various properties of the button like
+// the text, tooltip, and icon based on the properties of the
+// function, using reflect and gti. The function must be registered
+// with gti; add a `//gti:add` comment directive and run `goki generate`
+// if you get errors. If the function is a method, both the method and
+// its receiver type must be added to gti.
+type FuncButton struct {
+	gi.Button
+	// Func is the [gti.Func] associated with this button.
+	// This function can also be a method, but it must be
+	// converted to a [gti.Func] first. It should typically
+	// be set using [FuncButton.SetFunc].
+	Func *gti.Func
+}
+
+// SetFunc sets the function associated with the FuncButton to the
+// given function or method value, which must be added to gti.
+func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := gti.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
 	if !strings.HasSuffix(fnm, "-fm") {
@@ -32,7 +46,7 @@ func NewFuncButton(par ki.Ki, fun any) *gi.Button {
 			slog.Error("programmer error: cannot use giv.NewFuncButton with a function that has not been added to gti; see the documentation for giv.NewFuncButton", "function", fnm)
 			return nil
 		}
-		return NewFuncButtonImpl(par, f, reflect.ValueOf(fun))
+		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
 	fnm = strings.TrimSuffix(fnm, "-fm")
@@ -54,33 +68,37 @@ func NewFuncButton(par ki.Ki, fun any) *gi.Button {
 		slog.Error("programmer error: cannot use giv.NewFuncButton with a method that has not been added to gti (even though the receiver type was); see the documentation for giv.NewFuncButton", "type", typnm, "method", metnm, "fullPath", fnm)
 		return nil
 	}
-	return NewMethodButtonImpl(par, met, reflect.ValueOf(fun))
+	return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 }
 
-// NewFuncButtonImpl is the underlying implementation of [NewFuncButton].
+// SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
 // It should typically not be used by end-user code.
-func NewFuncButtonImpl(par ki.Ki, gfun *gti.Func, rfun reflect.Value) *gi.Button {
+func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
+	fb.Func = gfun
 	// get name without package
 	snm := gfun.Name
 	li := strings.LastIndex(snm, ".")
 	if li >= 0 {
 		snm = snm[li+1:] // must also get rid of "."
 	}
-	bt := gi.NewButton(par, snm).SetText(sentencecase.Of(snm))
-	bt.SetTooltip(gfun.Doc)
+	fb.SetText(sentencecase.Of(snm))
+	fb.SetTooltip(gfun.Doc)
 	// we default to the icon with the same name as
 	// the function, if it exists
 	ic := icons.Icon(strcase.ToSnake(snm))
 	if ic.IsValid() {
-		bt.SetIcon(ic)
+		fb.SetIcon(ic)
 	}
-	return bt
+	fb.OnClick(func(e events.Event) {
+		fmt.Println("calling", fb.Func.Name)
+	})
+	return fb
 }
 
-// NewMethodButtonImpl is the underlying implementation of [NewFuncButton] for methods.
+// SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
 // It should typically not be used by end-user code.
-func NewMethodButtonImpl(par ki.Ki, gmet *gti.Method, rmet reflect.Value) *gi.Button {
-	return NewFuncButtonImpl(par, &gti.Func{
+func (fb *FuncButton) SetMethodImpl(gmet *gti.Method, rmet reflect.Value) *FuncButton {
+	return fb.SetFuncImpl(&gti.Func{
 		Name:       gmet.Name,
 		Doc:        gmet.Doc,
 		Directives: gmet.Directives,

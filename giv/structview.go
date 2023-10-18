@@ -7,7 +7,6 @@ package giv
 import (
 	"encoding/json"
 	"fmt"
-	"image"
 	"log/slog"
 	"reflect"
 	"regexp"
@@ -51,6 +50,11 @@ type StructView struct {
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
 
+	// WidgetConfiged tracks whether the given Widget has been configured yet
+	// Widgets can only be configured once -- otherwise duplicate event
+	// functions are registered.
+	WidgetConfiged map[gi.Widget]bool
+
 	// whether to show the toolbar or not
 	ShowToolbar bool
 
@@ -74,6 +78,7 @@ type StructView struct {
 }
 
 func (sv *StructView) OnInit() {
+	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.ShowToolbar = true
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
@@ -103,6 +108,11 @@ func (sv *StructView) OnInit() {
 			w.Style(func(s *styles.Style) {
 				s.AlignH = styles.AlignLeft
 			})
+			if strings.HasPrefix(w.Name(), "label-") {
+				w.Style(func(s *styles.Style) {
+					s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				})
+			}
 		}
 	})
 }
@@ -114,32 +124,7 @@ func (sv *StructView) SetStruct(st any) {
 	if sv.Struct != st {
 		sv.Changed = false
 		updt = sv.UpdateStart()
-		// todo: do need a disconnect thing when deleted..
-		// if sv.Struct != nil {
-		// 	if k, ok := sv.Struct.(ki.Ki); ok {
-		// 		// k.NodeSignal().Disconnect(sv.This())
-		// 	}
-		// }
 		sv.Struct = st
-		// // tp := kit.Types.Properties(kit.NonPtrType(reflect.TypeOf(sv.Struct)), false)
-		// if tp != nil {
-		// 	if sfp, has := ki.SubTypeProps(*tp, "StructViewFields"); has {
-		// 		sv.TypeFieldTags = make(map[string]string)
-		// 		for k, v := range sfp {
-		// 			vs := laser.ToString(v)
-		// 			sv.TypeFieldTags[k] = vs
-		// 		}
-		// 	}
-		// }
-		// todo: no generic send here.
-		// if k, ok := st.(ki.Ki); ok {
-		// 	k.NodeSignal().Connect(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
-		// 		// todo: check for delete??
-		// 		svv, _ := recv.Embed(TypeStructView).(*StructView)
-		// 		svv.UpdateFields()
-		// 		svv.ViewSig.Emit(svv.This(), 0, nil)
-		// 	})
-		// }
 	}
 	sv.Config(sv.Sc)
 	sv.UpdateEndLayout(updt)
@@ -178,7 +163,7 @@ func (sv *StructView) ConfigWidget(sc *gi.Scene) {
 	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.FrameType, "struct-grid")
 	mods, updt := sv.ConfigChildren(config)
-	sv.ConfigStructGrid()
+	sv.ConfigStructGrid(sc)
 	sv.ConfigToolbar()
 	if mods {
 		sv.UpdateEnd(updt)
@@ -251,12 +236,11 @@ func (sv *StructView) FieldTags(fld reflect.StructField) reflect.StructTag {
 
 // ConfigStructGrid configures the StructGrid for the current struct.
 // returns true if any fields changed.
-func (sv *StructView) ConfigStructGrid() bool {
+func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 	if laser.AnyIsNil(sv.Struct) {
 		return false
 	}
 	sg := sv.StructGrid()
-	sc := sv.Sc
 	config := ki.Config{}
 	// always start fresh!
 	dupeFields := map[string]bool{}
@@ -358,6 +342,13 @@ func (sv *StructView) ConfigStructGrid() bool {
 			slog.Error("StructView: Widget Type is not the proper type.  This usually means there are duplicate field names (including across embedded types", "field:", lbl.Text, "is:", widg.KiType().Name, "should be:", vv.WidgetType().Name)
 			break
 		}
+		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.AsValueBase().Widget = widg
+			// fmt.Println("skip and update:", vv)
+			vv.UpdateWidget()
+			continue
+		}
+		sv.WidgetConfiged[widg] = true
 		vv.ConfigWidget(widg, sc)
 		if !sv.IsDisabled() && !inactTag {
 			vvb.OnChange(func(e events.Event) {
@@ -386,6 +377,7 @@ func (sv *StructView) ConfigStructGrid() bool {
 	sg.UpdateEnd(updt)
 	return updt
 }
+
 func (sv *StructView) UpdateFieldAction() {
 	if !sv.IsConfiged() {
 		return
@@ -403,23 +395,18 @@ func (sv *StructView) UpdateFieldAction() {
 	}
 }
 
-func (sv *StructView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	updt := sv.ConfigStructGrid()
+func (sv *StructView) GetSize(sc *gi.Scene, iter int) {
+	updt := sv.ConfigStructGrid(sc)
 	if updt {
 		sv.ApplyStyleTree(sc)
 	}
-	return sv.Frame.DoLayout(sc, parBBox, iter)
+	sv.Frame.GetSize(sc, iter)
 }
 
 func (sv *StructView) Render(sc *gi.Scene) {
 	if sv.IsConfiged() {
 		sv.Toolbar().UpdateButtons()
 	}
-	// if win := sv.ParentRenderWin(); win != nil {
-	// 	if !win.Is(WinResizing) {
-	// 		win.MainMenuUpdateActives()
-	// 	}
-	// }
 	sv.Frame.Render(sc)
 }
 

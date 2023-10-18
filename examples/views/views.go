@@ -4,6 +4,8 @@
 
 package main
 
+//go:generate goki generate
+
 import (
 	"fmt"
 
@@ -14,15 +16,19 @@ import (
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/mat32/v2"
 )
 
 func main() { gimain.Run(app) }
 
+// TableStruct is a testing struct for table view
+//
+//gti:add
 type TableStruct struct {
 
 	// an icon
-	// Icon icons.Icon
+	Icon icons.Icon
 
 	// an integer field
 	IntField int
@@ -37,6 +43,9 @@ type TableStruct struct {
 	// File gi.FileName
 }
 
+// ILStruct is an inline-viewed struct
+//
+//gti:add
 type ILStruct struct {
 
 	// click to show next
@@ -58,12 +67,15 @@ type ILStruct struct {
 	Val float32
 }
 
+// Struct is a testing struct for struct view
+//
+//gti:add
 type Struct struct {
 
 	// an enum
 	Stripes gi.Stripes
 
-	// )] a string
+	// a string
 	Name string `viewif:"!(Stripes==[RowStripes,ColStripes])"`
 
 	// click to show next
@@ -86,6 +98,10 @@ type Struct struct {
 
 	// a value
 	Val float32
+
+	Things []*TableStruct
+
+	Stuff []float32
 }
 
 func app() {
@@ -116,7 +132,8 @@ func app() {
 	stru.Cond2.FloatField = 44.4
 	stru.Cond2.StrField = "fi"
 	// stru.Cond2.File = gi.FileName("views.go")
-	_ = stru
+	stru.Things = make([]*TableStruct, 2)
+	stru.Stuff = make([]float32, 3)
 
 	// turn this on to see a trace of the rendering
 	// gi.WinEventTrace = true
@@ -135,6 +152,7 @@ func app() {
 	trow := gi.NewLayout(sc, "trow").SetLayout(gi.LayoutHoriz)
 	trow.Style(func(s *styles.Style) {
 		s.AlignH = styles.AlignCenter
+		s.AlignV = styles.AlignTop
 		s.Margin.Set(units.Px(2))
 		s.SetStretchMaxWidth()
 	})
