@@ -21,7 +21,6 @@ import (
 	"goki.dev/grr"
 	"goki.dev/gti"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 	"golang.org/x/image/colornames"
@@ -52,61 +51,59 @@ func (cv *ColorView) OnInit() {
 	cv.Style(func(s *styles.Style) {
 		cv.Spacing = gi.StdDialogVSpaceUnits
 	})
-}
-
-func (cv *ColorView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(cv.This()) {
-	case "value":
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetEm(6)
-			s.MinHeight.SetEm(6)
-			s.Border.Radius = styles.BorderRadiusFull
-			s.BackgroundColor.SetSolid(cv.Color)
-		})
-	case "slider-grid":
-		w.Style(func(s *styles.Style) {
-			s.Columns = 4
-		})
-	case "hexlbl":
-		w.Style(func(s *styles.Style) {
-			s.AlignV = styles.AlignMiddle
-		})
-	case "palette":
-		w.Style(func(s *styles.Style) {
-			s.Columns = 25
-		})
-	case "nums-hex":
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetCh(20)
-		})
-	case "num-lay":
-		vl := w.(*gi.Layout)
-		vl.Style(func(s *styles.Style) {
-			vl.Spacing = gi.StdDialogVSpaceUnits
-		})
-	}
-	if sl, ok := w.(*gi.Slider); ok {
-		sl.Style(func(s *styles.Style) {
-			s.MinWidth.SetCh(20)
-			s.Width.SetCh(20)
-			s.MinHeight.SetEm(1)
-			s.Height.SetEm(1)
-			s.Margin.Set(units.Dp(6))
-		})
-	}
-	if child.Parent().Name() == "palette" {
-		if cbt, ok := w.(*gi.Button); ok {
-			cbt.Style(func(s *styles.Style) {
-				c := colornames.Map[cbt.Name()]
-
-				s.BackgroundColor.SetSolid(c)
-				s.MaxHeight.SetEm(1.3)
-				s.MaxWidth.SetEm(1.3)
-				s.Margin.Set()
+	cv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(cv.This()) {
+		case "value":
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetEm(6)
+				s.MinHeight.SetEm(6)
+				s.Border.Radius = styles.BorderRadiusFull
+				s.BackgroundColor.SetSolid(cv.Color)
+			})
+		case "slider-grid":
+			w.Style(func(s *styles.Style) {
+				s.Columns = 4
+			})
+		case "hexlbl":
+			w.Style(func(s *styles.Style) {
+				s.AlignV = styles.AlignMiddle
+			})
+		case "palette":
+			w.Style(func(s *styles.Style) {
+				s.Columns = 25
+			})
+		case "nums-hex":
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetCh(20)
+			})
+		case "num-lay":
+			vl := w.(*gi.Layout)
+			vl.Style(func(s *styles.Style) {
+				vl.Spacing = gi.StdDialogVSpaceUnits
 			})
 		}
-	}
+		if sl, ok := w.(*gi.Slider); ok {
+			sl.Style(func(s *styles.Style) {
+				s.MinWidth.SetCh(20)
+				s.Width.SetCh(20)
+				s.MinHeight.SetEm(1)
+				s.Height.SetEm(1)
+				s.Margin.Set(units.Dp(6))
+			})
+		}
+		if w.Parent().Name() == "palette" {
+			if cbt, ok := w.(*gi.Button); ok {
+				cbt.Style(func(s *styles.Style) {
+					c := colornames.Map[cbt.Name()]
+
+					s.BackgroundColor.SetSolid(c)
+					s.MaxHeight.SetEm(1.3)
+					s.MaxWidth.SetEm(1.3)
+					s.Margin.Set()
+				})
+			}
+		}
+	})
 }
 
 // SetColor sets the source color
