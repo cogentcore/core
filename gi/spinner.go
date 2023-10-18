@@ -89,6 +89,8 @@ func (sp *Spinner) OnInit() {
 func (sp *Spinner) SpinnerStyles() {
 	sp.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Focusable)
+		// our parts take responsibility for their own state layers
+		s.StateLayer = 0
 	})
 	sp.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(sp.This()) {
