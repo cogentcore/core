@@ -694,7 +694,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	nWidg := nWidgPerRow * sv.DispRows
 	sc := sv.Sc
 
-	if sv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
+	if sv.Values == nil || sg.NumChildren() != nWidg || len(sv.Values) != sv.DispRows { // shouldn't happen..
 		sv.ViewMuUnlock()
 		sv.LayoutSliceGrid()
 		sv.ViewMuLock()

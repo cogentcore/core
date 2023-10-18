@@ -1058,7 +1058,13 @@ func (tf *TextField) AutoScroll() {
 	}
 	spc := st.BoxSpace()
 	maxw := tf.EffSize.X - spc.Size().X
+	if maxw < 0 {
+		return
+	}
 	tf.CharWidth = int(maxw / st.UnContext.Dots(units.UnitCh)) // rough guess in chars
+	if tf.CharWidth < 1 {
+		tf.CharWidth = 1
+	}
 
 	// first rationalize all the values
 	if tf.EndPos == 0 || tf.EndPos > sz { // not init
@@ -1085,6 +1091,9 @@ func (tf *TextField) AutoScroll() {
 		tf.StartPos = tf.EndPos - tf.CharWidth
 		tf.StartPos = max(0, tf.StartPos)
 		startIsAnchor = false
+	}
+	if tf.EndPos < tf.StartPos {
+		return
 	}
 
 	if startIsAnchor {
