@@ -112,7 +112,7 @@ func (st States) Is(flag enums.BitFlag) bool {
 func (st States) StateLayer() float32 {
 	switch {
 	case st.Is(Disabled):
-		return 0.38
+		return 0.32
 	case st.Is(Dragging):
 		return 0.16
 	case st.Is(Active):
