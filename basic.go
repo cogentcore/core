@@ -277,6 +277,8 @@ func ToInt(v any) (int64, error) {
 			return 0, err
 		}
 		return r, nil
+	case enums.Enum:
+		return vt.Int64(), nil
 	case int8:
 		return int64(vt), nil
 	case *int8:
@@ -828,6 +830,10 @@ func SetRobust(to, frm any) error {
 	}
 
 	if es, ok := to.(enums.EnumSetter); ok {
+		if en, ok := frm.(enums.Enum); ok {
+			es.SetInt64(en.Int64())
+			return nil
+		}
 		if str, ok := frm.(string); ok {
 			return es.SetString(str)
 		}
@@ -835,7 +841,7 @@ func SetRobust(to, frm any) error {
 		if err != nil {
 			return err
 		}
-		es.SetInt64(int64(fm))
+		es.SetInt64(fm)
 		return nil
 	}
 	switch {
