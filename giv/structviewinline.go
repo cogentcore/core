@@ -133,6 +133,7 @@ func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) bool {
 		vvb.ViewPath = sv.ViewPath
 		widg := sv.Child((i * 2) + 1).(gi.Widget)
 		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.UpdateWidget()
 			continue
 		}
 		sv.WidgetConfiged[widg] = true
