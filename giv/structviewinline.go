@@ -15,10 +15,8 @@ import (
 	"goki.dev/laser"
 )
 
-// StructViewInline represents a struct as a single line widget, for smaller
-// structs and those explicitly marked inline in the kit type registry type
-// properties -- constructs widgets in Parts to show the field names and
-// editor fields for each field
+// StructViewInline represents a struct as a single line widget,
+// for smaller structs and those explicitly marked inline.
 type StructViewInline struct {
 	gi.Frame
 
@@ -34,10 +32,10 @@ type StructViewInline struct {
 	// Value representations of the fields
 	FieldViews []Value `json:"-" xml:"-"`
 
-	// WidgetConfiged tracks whether the given Widget has been configured yet
+	// WidgetConfiged tracks if the given Widget has been configured.
 	// Widgets can only be configured once -- otherwise duplicate event
 	// functions are registered.
-	WidgetConfiged map[gi.Widget]bool
+	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
@@ -53,15 +51,21 @@ type StructViewInline struct {
 }
 
 func (sv *StructViewInline) OnInit() {
-	sv.WidgetConfiged = make(map[gi.Widget]bool)
 	sv.StructViewInlineStyles()
 }
 
 func (sv *StructViewInline) StructViewInlineStyles() {
+	sv.WidgetConfiged = make(map[gi.Widget]bool)
+	sv.Lay = gi.LayoutHoriz
+	sv.Style(func(s *styles.Style) {
+		s.MinWidth.SetCh(20)
+	})
 	sv.OnWidgetAdded(func(w gi.Widget) {
-		if strings.HasPrefix(w.Name(), "label-") {
+		path := w.PathFrom(sv.This())
+		if strings.HasPrefix(path, "label-") {
 			w.Style(func(s *styles.Style) {
 				s.AlignH = styles.AlignLeft
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 			})
 		}
 	})
@@ -75,16 +79,16 @@ func (sv *StructViewInline) SetStruct(st any) {
 		updt = sv.UpdateStart()
 		sv.Struct = st
 	}
-	sv.Config(sv.Sc)
-	sv.UpdateEnd(updt)
+	// sv.Config(sv.Sc)
+	sv.UpdateEndLayout(updt)
 }
 
 func (sv *StructViewInline) ConfigWidget(sc *gi.Scene) {
-	sv.ConfigStructGrid(sc)
+	sv.ConfigStruct(sc)
 }
 
-// ConfigStructGrid configures the struct grid for the current struct
-func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) bool {
+// ConfigStruct configures the children for the current struct
+func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 	if laser.AnyIsNil(sv.Struct) {
 		return false
 	}
@@ -133,6 +137,7 @@ func (sv *StructViewInline) ConfigStructGrid(sc *gi.Scene) bool {
 		vvb.ViewPath = sv.ViewPath
 		widg := sv.Child((i * 2) + 1).(gi.Widget)
 		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.AsValueBase().Widget = widg
 			vv.UpdateWidget()
 			continue
 		}
@@ -181,13 +186,9 @@ func (sv *StructViewInline) UpdateFieldAction() {
 }
 
 func (sv *StructViewInline) GetSize(sc *gi.Scene, iter int) {
-	updt := sv.ConfigStructGrid(sc)
+	updt := sv.ConfigStruct(sc)
 	if updt {
 		sv.ApplyStyleTree(sc)
 	}
 	sv.Frame.GetSize(sc, iter)
-}
-
-func (sv *StructViewInline) Render(sc *gi.Scene) {
-	sv.Frame.Render(sc)
 }

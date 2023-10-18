@@ -171,13 +171,19 @@ func (vv *SliceValue) UpdateWidget() {
 	ac := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	txt := ""
-	if npv.Kind() == reflect.Interface {
+	if !npv.IsValid() {
+		txt = "nil"
+	} else if npv.Kind() == reflect.Interface {
 		txt = fmt.Sprintf("Slice: %T", npv.Interface())
 	} else {
-		if vv.IsArray {
-			txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
+		if npv.Kind() == reflect.Array {
+			txt = npv.String()
+			// txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
+		} else if npv.IsNil() {
+			txt = "nil"
 		} else {
-			txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
+			txt = npv.String()
+			// txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
 		}
 	}
 	ac.SetText(txt)
@@ -309,7 +315,9 @@ func (vv *MapValue) UpdateWidget() {
 	npv := laser.NonPtrValue(vv.Value)
 	mpi := vv.Value.Interface()
 	txt := ""
-	if npv.Kind() == reflect.Interface {
+	if !npv.IsValid() || npv.IsNil() {
+		txt = "nil"
+	} else if npv.Kind() == reflect.Interface {
 		txt = fmt.Sprintf("Map: %T", npv.Interface())
 	} else {
 		txt = fmt.Sprintf("Map: [%v %v]%v", npv.Len(), laser.MapKeyType(mpi).String(), laser.MapValueType(mpi).String())

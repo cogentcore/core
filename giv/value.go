@@ -1001,6 +1001,7 @@ func (vv *ValueBase) WidgetType() *gti.Type {
 
 func (vv *ValueBase) UpdateWidget() {
 	if vv.Widget == nil {
+		fmt.Println("nil widget")
 		return
 	}
 	tf := vv.Widget.(*gi.TextField)
@@ -1010,6 +1011,7 @@ func (vv *ValueBase) UpdateWidget() {
 		tf.SetText("nil")
 	} else {
 		txt := laser.ToString(vv.Value.Interface())
+		// fmt.Println("text set to:", txt)
 		tf.SetText(txt)
 	}
 }

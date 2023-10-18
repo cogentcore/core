@@ -154,6 +154,7 @@ func (tv *TableView) TableViewInit() {
 			if strings.HasPrefix(w.Name(), "del-") {
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Error.Base
 				})
 			}
 		}

@@ -16,11 +16,10 @@ import (
 	"goki.dev/laser"
 )
 
-// MapViewInline represents a map as a single line widget, for smaller maps
-// and those explicitly marked inline -- constructs widgets in Parts to show
-// the key names and editor vals for each value.
+// MapViewInline represents a map as a single line widget,
+// for smaller maps and those explicitly marked inline.
 type MapViewInline struct {
-	gi.WidgetBase
+	gi.Frame
 
 	// the map that we are a view onto
 	Map any
@@ -37,24 +36,64 @@ type MapViewInline struct {
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-"`
 
+	// WidgetConfiged tracks if the given Widget has been configured.
+	// Widgets can only be configured once -- otherwise duplicate event
+	// functions are registered.
+	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
+	TmpSave Value `view:"-" json:"-" xml:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 }
 
 func (mv *MapViewInline) OnInit() {
+	mv.MapviewInlineStyles()
+}
+
+func (mv *MapViewInline) MapviewInlineStyles() {
+	mv.WidgetConfiged = make(map[gi.Widget]bool)
+	mv.Lay = gi.LayoutHoriz
 	mv.Style(func(s *styles.Style) {
 		s.MinWidth.SetEx(60)
+		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 	mv.OnWidgetAdded(func(w gi.Widget) {
 		switch w.PathFrom(mv.This()) {
-		case "parts":
-			parts := w.(*gi.Layout)
-			parts.Lay = gi.LayoutHoriz
+		case "add-action":
+			ab := w.(*gi.Button)
 			w.Style(func(s *styles.Style) {
-				s.Overflow = styles.OverflowHidden // no scrollbars!
+				ab.SetType(gi.ButtonTonal)
+			})
+			w.OnClick(func(e events.Event) {
+				mv.MapAdd()
+			})
+		case "edit-action":
+			w.Style(func(s *styles.Style) {
+				w.(*gi.Button).SetType(gi.ButtonTonal)
+			})
+			w.OnClick(func(e events.Event) {
+				vpath := mv.ViewPath
+				title := ""
+				if mv.MapValView != nil {
+					newPath := ""
+					isZero := false
+					title, newPath, isZero = mv.MapValView.AsValueBase().Label()
+					if isZero {
+						return
+					}
+					vpath = mv.ViewPath + "/" + newPath
+				} else {
+					tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
+					title = "Map of " + tmptyp.String()
+					// if tynm == "" {
+					// 	tynm = tmptyp.String()
+					// }
+				}
+				MapViewDialog(mv, DlgOpts{Title: title, Prompt: mv.Tooltip, TmpSave: mv.TmpSave, ViewPath: vpath}, mv.Map, func(dlg *gi.Dialog) {
+					mv.SendChange()
+				})
 			})
 		}
 	})
@@ -65,15 +104,18 @@ func (mv *MapViewInline) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.UpdateFromMap()
+	mv.SetNeedsLayout()
 }
 
-// ConfigParts configures Parts for the current map
-func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
+func (mv *MapViewInline) ConfigWidget(sc *gi.Scene) {
+	mv.ConfigMap(sc)
+}
+
+// ConfigMap configures children for map view
+func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 	if laser.AnyIsNil(mv.Map) {
-		return
+		return false
 	}
-	parts := mv.NewParts(gi.LayoutHoriz)
 	config := ki.Config{}
 	// always start fresh!
 	mv.Keys = make([]Value, 0)
@@ -112,16 +154,24 @@ func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 	}
 	config.Add(gi.ButtonType, "add-action")
 	config.Add(gi.ButtonType, "edit-action")
-	mods, updt := parts.ConfigChildren(config)
+	mods, updt := mv.ConfigChildren(config)
 	if !mods {
-		updt = parts.UpdateStart()
+		updt = mv.UpdateStart()
 	}
 	for i, vv := range mv.Values {
 		vvb := vv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
-		keyw := parts.Child(i * 2).(gi.Widget)
-		widg := parts.Child((i * 2) + 1).(gi.Widget)
+		keyw := mv.Child(i * 2).(gi.Widget)
+		widg := mv.Child((i * 2) + 1).(gi.Widget)
 		kv := mv.Keys[i]
+		if _, cfg := mv.WidgetConfiged[widg]; cfg { // already configured
+			vv.AsValueBase().Widget = widg
+			vv.UpdateWidget()
+			kv.AsValueBase().Widget = keyw
+			kv.UpdateWidget()
+			continue
+		}
+		mv.WidgetConfiged[widg] = true
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(widg, sc)
 		if mv.IsDisabled() {
@@ -129,48 +179,23 @@ func (mv *MapViewInline) ConfigParts(sc *gi.Scene) {
 			keyw.AsWidget().SetState(true, states.Disabled)
 		}
 	}
-	adack, err := parts.Children().ElemFromEndTry(1)
+	adack, err := mv.Children().ElemFromEndTry(1)
 	if err == nil {
 		adbt := adack.(*gi.Button)
 		adbt.SetType(gi.ButtonTonal)
 		adbt.SetIcon(icons.Add)
 		adbt.Tooltip = "add an entry to the map"
-		adbt.OnClick(func(e events.Event) {
-			mv.MapAdd()
-		})
 
 	}
-	edack, err := parts.Children().ElemFromEndTry(0)
+	edack, err := mv.Children().ElemFromEndTry(0)
 	if err == nil {
 		edbt := edack.(*gi.Button)
 		edbt.SetType(gi.ButtonTonal)
 		edbt.SetIcon(icons.Edit)
 		edbt.Tooltip = "map edit dialog"
-		edbt.OnClick(func(e events.Event) {
-			vpath := mv.ViewPath
-			title := ""
-			if mv.MapValView != nil {
-				newPath := ""
-				isZero := false
-				title, newPath, isZero = mv.MapValView.AsValueBase().Label()
-				if isZero {
-					return
-				}
-				vpath = mv.ViewPath + "/" + newPath
-			} else {
-				tmptyp := laser.NonPtrType(reflect.TypeOf(mv.Map))
-				title = "Map of " + tmptyp.String()
-				// if tynm == "" {
-				// 	tynm = tmptyp.String()
-				// }
-			}
-			MapViewDialog(mv, DlgOpts{Title: title, Prompt: mv.Tooltip, TmpSave: mv.TmpSave, ViewPath: vpath}, mv.Map, func(dlg *gi.Dialog) {
-				mv.SendChange()
-			})
-		})
 	}
-	parts.UpdateEndLayout(updt)
-	mv.SetNeedsLayoutUpdate(sc, updt)
+	mv.UpdateEnd(updt)
+	return updt
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -193,22 +218,18 @@ func (mv *MapViewInline) MapAdd() {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.UpdateFromMap()
-}
-
-func (mv *MapViewInline) UpdateFromMap() {
-	mv.ConfigParts(mv.Sc)
+	mv.SetNeedsLayout()
 }
 
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
-	mv.ConfigParts(mv.Sc)
+	mv.SetNeedsLayout()
 }
 
-func (mv *MapViewInline) Render(sc *gi.Scene) {
-	if mv.PushBounds(sc) {
-		mv.RenderParts(sc)
-		mv.RenderChildren(sc)
-		mv.PopBounds(sc)
+func (mv *MapViewInline) GetSize(sc *gi.Scene, iter int) {
+	updt := mv.ConfigMap(sc)
+	if updt {
+		mv.ApplyStyleTree(sc)
 	}
+	mv.Frame.GetSize(sc, iter)
 }

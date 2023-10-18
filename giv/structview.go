@@ -108,6 +108,11 @@ func (sv *StructView) OnInit() {
 			w.Style(func(s *styles.Style) {
 				s.AlignH = styles.AlignLeft
 			})
+			if strings.HasPrefix(w.Name(), "label-") {
+				w.Style(func(s *styles.Style) {
+					s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				})
+			}
 		}
 	})
 }
@@ -338,6 +343,8 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 			break
 		}
 		if _, cfg := sv.WidgetConfiged[widg]; cfg { // already configured
+			vv.AsValueBase().Widget = widg
+			// fmt.Println("skip and update:", vv)
 			vv.UpdateWidget()
 			continue
 		}

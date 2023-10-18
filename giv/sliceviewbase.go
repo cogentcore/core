@@ -264,17 +264,25 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
 		}
-		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-			w.Style(func(s *styles.Style) {
-				s.MinWidth.SetEm(1.5)
-				s.Padding.Right.SetDp(4)
-				s.Text.Align = styles.AlignRight
-			})
-		}
-		if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
-			w.Style(func(s *styles.Style) {
-				w.(*gi.Button).SetType(gi.ButtonAction)
-			})
+		if w.Parent().Name() == "grid" {
+			if strings.HasPrefix(w.Name(), "index-") {
+				w.Style(func(s *styles.Style) {
+					s.MinWidth.SetEm(1.5)
+					s.Padding.Right.SetDp(4)
+					s.Text.Align = styles.AlignRight
+				})
+			}
+			if strings.HasPrefix(w.Name(), "add-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+				})
+			}
+			if strings.HasPrefix(w.Name(), "del-") {
+				w.Style(func(s *styles.Style) {
+					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Error.Base
+				})
+			}
 		}
 	})
 }
@@ -512,9 +520,6 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			sg.SetChild(&delbt, cidx, delnm)
 			delbt.SetType(gi.ButtonAction)
 			delbt.SetIcon(icons.Delete)
-			delbt.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Error.Base
-			})
 		}
 	}
 	sv.ConfigScroll()
