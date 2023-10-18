@@ -1085,7 +1085,8 @@ func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, menu *gi.Menu) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, m *gi.Scene) bool {
+	// TODO(kai/menu): add back CtxtMenuView here
 	// return CtxtMenuView(val, inactive, sc, menu)
 	return false
 }
@@ -1230,9 +1231,12 @@ func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.IsInactive() {
 		return
 	}
-	cur := laser.ToString(vv.Value.Interface())
-	gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
-		vv.SetValue(ac.Text)
-		vv.UpdateWidget()
-	})
+	// TODO(kai/menu): figure out strings chooser popup
+	/*
+		cur := laser.ToString(vv.Value.Interface())
+			gi.StringsChooserPopup(VersCtrlSystems, cur, ctx, func(ac *gi.Button) {
+				vv.SetValue(ac.Text)
+				vv.UpdateWidget()
+			})
+	*/
 }
