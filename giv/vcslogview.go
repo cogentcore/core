@@ -45,16 +45,14 @@ func (lv *VCSLogView) OnInit() {
 	lv.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
-}
-
-func (lv *VCSLogView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(lv.This()) {
-	case "a-tf", "b-tf":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(12)
-		})
-	}
+	lv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(lv.This()) {
+		case "a-tf", "b-tf":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(12)
+			})
+		}
+	})
 }
 
 // ConfigRepo configures to given repo, log and file (file could be empty)

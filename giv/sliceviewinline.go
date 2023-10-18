@@ -53,18 +53,16 @@ func (sv *SliceViewInline) OnInit() {
 	sv.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(20)
 	})
-}
-
-func (sv *SliceViewInline) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(sv.This()) {
-	case "parts":
-		parts := w.(*gi.Layout)
-		parts.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-		})
-	}
+	sv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(sv.This()) {
+		case "parts":
+			parts := w.(*gi.Layout)
+			parts.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
+		}
+	})
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children to represent this slice

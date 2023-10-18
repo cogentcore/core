@@ -78,65 +78,63 @@ func (tv *TableView) OnInit() {
 		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
+	tv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(tv.This()) {
+		case "frame": // slice frame
+			sf := w.(*gi.Frame)
+			sf.Lay = gi.LayoutVert
+			sf.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(20))
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Border.Style.Set(styles.BorderNone)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "header": // slice header
+			sh := w.(*gi.Toolbar)
+			sh.Lay = gi.LayoutHoriz
+			sh.Style(func(s *styles.Style) {
+				sh.Spacing.SetDp(0)
+				s.Overflow = styles.OverflowHidden // no scrollbars!
+			})
+		case "grid-lay": // grid layout
+			gl := w.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "grid-lay/grid": // slice grid
+			sg := w.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.Style(func(s *styles.Style) {
+				// this causes everything to get off, especially resizing: not taking it into account presumably:
+				// sg.Spacing = gi.StdDialogVSpaceUnits
 
-func (tv *TableView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(tv.This()) {
-	case "frame": // slice frame
-		sf := w.(*gi.Frame)
-		sf.Lay = gi.LayoutVert
-		sf.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(20))
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Border.Style.Set(styles.BorderNone)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "header": // slice header
-		sh := w.(*gi.Toolbar)
-		sh.Lay = gi.LayoutHoriz
-		sh.Style(func(s *styles.Style) {
-			sh.Spacing.SetDp(0)
-			s.Overflow = styles.OverflowHidden // no scrollbars!
-		})
-	case "grid-lay": // grid layout
-		gl := w.(*gi.Layout)
-		gl.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			gl.SetStretchMax() // for this to work, ALL layers above need it too
-		})
-	case "grid-lay/grid": // slice grid
-		sg := w.(*gi.Frame)
-		sg.Lay = gi.LayoutGrid
-		sg.Stripes = gi.RowStripes
-		sg.Style(func(s *styles.Style) {
-			// this causes everything to get off, especially resizing: not taking it into account presumably:
-			// sg.Spacing = gi.StdDialogVSpaceUnits
-
-			nWidgPerRow, _ := tv.RowWidgetNs()
-			s.Columns = nWidgPerRow
-			s.SetMinPrefHeight(units.Em(6))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-		})
-	}
-	// STYTODO: set header sizes here (see LayoutHeader)
-	// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
-	// 	w.Style(func(s *styles.Style) {
-	// 		spc := tv.SliceHeader().Spacing.Dots
-	// 		ip, _ := w.IndexInParent()
-	// 		s.SetMinPrefWidth(units.Dot())
-	// 	})
-	// }
-	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4)
-			s.Text.Align = styles.AlignRight
-		})
-	}
+				nWidgPerRow, _ := tv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		// STYTODO: set header sizes here (see LayoutHeader)
+		// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
+		// 	w.Style(func(s *styles.Style) {
+		// 		spc := tv.SliceHeader().Spacing.Dots
+		// 		ip, _ := w.IndexInParent()
+		// 		s.SetMinPrefWidth(units.Dot())
+		// 	})
+		// }
+		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetEm(1.5)
+				s.Padding.Right.SetDp(4)
+				s.Text.Align = styles.AlignRight
+			})
+		}
+	})
 }
 
 // SetSlice sets the source slice that we are viewing -- rebuilds the children

@@ -238,43 +238,41 @@ func (sv *SliceViewBase) OnInit() {
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (sv *SliceViewBase) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(sv.This()) {
-	case "grid-lay": // grid layout
-		gl := w.(*gi.Layout)
-		gl.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			gl.SetStretchMax() // for this to work, ALL layers above need it too
-		})
-	case "grid-lay/grid": // slice grid
-		sg := w.(*gi.Frame)
-		sg.Lay = gi.LayoutGrid
-		sg.Stripes = gi.RowStripes
-		sg.Style(func(s *styles.Style) {
-			nWidgPerRow, _ := sv.RowWidgetNs()
-			s.Columns = nWidgPerRow
-			// setting a pref here is key for giving it a scrollbar in larger context
-			s.SetMinPrefHeight(units.Em(6))
-			s.SetMinPrefWidth(units.Ch(20))
-			s.SetStretchMax()                  // for this to work, ALL layers above need it too
-			s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
-		})
-	}
-	if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
-		w.Style(func(s *styles.Style) {
-			s.MinWidth.SetEm(1.5)
-			s.Padding.Right.SetDp(4)
-			s.Text.Align = styles.AlignRight
-		})
-	}
-	if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
-		w.Style(func(s *styles.Style) {
-			w.(*gi.Button).SetType(gi.ButtonAction)
-		})
-	}
+	sv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(sv.This()) {
+		case "grid-lay": // grid layout
+			gl := w.(*gi.Layout)
+			gl.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				gl.SetStretchMax() // for this to work, ALL layers above need it too
+			})
+		case "grid-lay/grid": // slice grid
+			sg := w.(*gi.Frame)
+			sg.Lay = gi.LayoutGrid
+			sg.Stripes = gi.RowStripes
+			sg.Style(func(s *styles.Style) {
+				nWidgPerRow, _ := sv.RowWidgetNs()
+				s.Columns = nWidgPerRow
+				// setting a pref here is key for giving it a scrollbar in larger context
+				s.SetMinPrefHeight(units.Em(6))
+				s.SetMinPrefWidth(units.Ch(20))
+				s.SetStretchMax()                  // for this to work, ALL layers above need it too
+				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
+			})
+		}
+		if w.Parent().Name() == "grid" && strings.HasPrefix(w.Name(), "index-") {
+			w.Style(func(s *styles.Style) {
+				s.MinWidth.SetEm(1.5)
+				s.Padding.Right.SetDp(4)
+				s.Text.Align = styles.AlignRight
+			})
+		}
+		if w.Parent().Name() == "grid" && (strings.HasPrefix(w.Name(), "add-") || strings.HasPrefix(w.Name(), "del-")) {
+			w.Style(func(s *styles.Style) {
+				w.(*gi.Button).SetType(gi.ButtonAction)
+			})
+		}
+	})
 }
 
 func (sv *SliceViewBase) AsSliceViewBase() *SliceViewBase {
