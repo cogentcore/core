@@ -32,22 +32,22 @@ func _ImageFlagsNoOp() {
 }
 
 var _ImageFlagsNameToValueMap = map[string]ImageFlags{
-	`ImageActive`:      0,
-	`imageactive`:      0,
-	`ImageHostActive`:  1,
-	`imagehostactive`:  1,
-	`ImageOwnsImage`:   2,
-	`imageownsimage`:   2,
-	`ImageOwnsHost`:    3,
-	`imageownshost`:    3,
-	`ImageIsVal`:       4,
-	`imageisval`:       4,
+	`Active`:           0,
+	`active`:           0,
+	`HostActive`:       1,
+	`hostactive`:       1,
+	`OwnsImage`:        2,
+	`ownsimage`:        2,
+	`OwnsHost`:         3,
+	`ownshost`:         3,
+	`IsVal`:            4,
+	`isval`:            4,
 	`DepthImage`:       5,
 	`depthimage`:       5,
 	`FramebufferImage`: 6,
 	`framebufferimage`: 6,
-	`ImageOnHostOnly`:  7,
-	`imageonhostonly`:  7,
+	`OnHostOnly`:       7,
+	`onhostonly`:       7,
 }
 
 var _ImageFlagsDescMap = map[ImageFlags]string{
@@ -62,14 +62,14 @@ var _ImageFlagsDescMap = map[ImageFlags]string{
 }
 
 var _ImageFlagsMap = map[ImageFlags]string{
-	0: `ImageActive`,
-	1: `ImageHostActive`,
-	2: `ImageOwnsImage`,
-	3: `ImageOwnsHost`,
-	4: `ImageIsVal`,
+	0: `Active`,
+	1: `HostActive`,
+	2: `OwnsImage`,
+	3: `OwnsHost`,
+	4: `IsVal`,
 	5: `DepthImage`,
 	6: `FramebufferImage`,
-	7: `ImageOnHostOnly`,
+	7: `OnHostOnly`,
 }
 
 // String returns the string representation
@@ -1414,12 +1414,12 @@ func _ValFlagsNoOp() {
 }
 
 var _ValFlagsNameToValueMap = map[string]ValFlags{
-	`ValMod`:         0,
-	`valmod`:         0,
-	`ValPaddedArray`: 1,
-	`valpaddedarray`: 1,
-	`ValTextureOwns`: 2,
-	`valtextureowns`: 2,
+	`Mod`:         0,
+	`mod`:         0,
+	`PaddedArray`: 1,
+	`paddedarray`: 1,
+	`TextureOwns`: 2,
+	`textureowns`: 2,
 }
 
 var _ValFlagsDescMap = map[ValFlags]string{
@@ -1429,9 +1429,9 @@ var _ValFlagsDescMap = map[ValFlags]string{
 }
 
 var _ValFlagsMap = map[ValFlags]string{
-	0: `ValMod`,
-	1: `ValPaddedArray`,
-	2: `ValTextureOwns`,
+	0: `Mod`,
+	1: `PaddedArray`,
+	2: `TextureOwns`,
 }
 
 // String returns the string representation

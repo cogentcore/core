@@ -943,7 +943,7 @@ func (hi *HostImage) Pixels() []byte {
 // ImageFlags
 
 // ImageFlags are bitflags for Image state
-type ImageFlags int64 //enums:bitflag
+type ImageFlags int64 //enums:bitflag -trim-prefix Image
 
 const (
 	// ImageActive: the Image and ImageView are configured and ready to use

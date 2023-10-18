@@ -518,7 +518,7 @@ func (vs *Vals) AllocTextures(mm *Memory) {
 // ValFlags
 
 // ValFlags are bitflags for Val state
-type ValFlags int64 //enums:bitflag
+type ValFlags int64 //enums:bitflag -trim-prefix Val
 
 const (
 	// ValMod the value has been modified
