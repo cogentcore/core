@@ -90,52 +90,50 @@ func (fv *FileView) FileViewStyles() {
 		fv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
-}
-
-func (fv *FileView) OnChildAdded(child ki.Ki) {
-	w, _ := gi.AsWidget(child)
-	switch w.PathFrom(fv.This()) {
-	case "files-row":
-		fr := w.(*gi.Layout)
-		fr.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-		})
-	case "favs-view":
-		fv := w.(*TableView)
-		fv.ShowIndex = false
-		fv.InactKeyNav = false // can only have one active -- files..
-		fv.ShowToolbar = false
-		fv.SetState(true, states.Disabled) // select only
-		w.Style(func(s *styles.Style) {
-			s.SetStretchMaxHeight()
-			s.MaxWidth.SetDp(0) // no stretch
-		})
-	case "files-view":
-		fv := w.(*TableView)
-		fv.ShowIndex = false // no index
-		fv.ShowToolbar = false
-		fv.SetState(true, states.Disabled) // select only
-		fv.Style(func(s *styles.Style) {
-			s.SetStretchMax()
-		})
-	case "sel-row":
-		sr := w.(*gi.Layout)
-		sr.Lay = gi.LayoutHoriz
-		w.Style(func(s *styles.Style) {
-			sr.Spacing.SetDp(4)
-			s.SetStretchMaxWidth()
-		})
-	case "sel": // sel field
-		w.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(60))
-			s.SetStretchMaxWidth()
-		})
-	case "ext-label":
-		w.Style(func(s *styles.Style) {
-			s.SetMinPrefWidth(units.Ch(10))
-		})
-	}
+	fv.OnWidgetAdded(func(w gi.Widget) {
+		switch w.PathFrom(fv.This()) {
+		case "files-row":
+			fr := w.(*gi.Layout)
+			fr.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+			})
+		case "favs-view":
+			fv := w.(*TableView)
+			fv.ShowIndex = false
+			fv.InactKeyNav = false // can only have one active -- files..
+			fv.ShowToolbar = false
+			fv.SetState(true, states.Disabled) // select only
+			w.Style(func(s *styles.Style) {
+				s.SetStretchMaxHeight()
+				s.MaxWidth.SetDp(0) // no stretch
+			})
+		case "files-view":
+			fv := w.(*TableView)
+			fv.ShowIndex = false // no index
+			fv.ShowToolbar = false
+			fv.SetState(true, states.Disabled) // select only
+			fv.Style(func(s *styles.Style) {
+				s.SetStretchMax()
+			})
+		case "sel-row":
+			sr := w.(*gi.Layout)
+			sr.Lay = gi.LayoutHoriz
+			w.Style(func(s *styles.Style) {
+				sr.Spacing.SetDp(4)
+				s.SetStretchMaxWidth()
+			})
+		case "sel": // sel field
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(60))
+				s.SetStretchMaxWidth()
+			})
+		case "ext-label":
+			w.Style(func(s *styles.Style) {
+				s.SetMinPrefWidth(units.Ch(10))
+			})
+		}
+	})
 }
 
 func (fv *FileView) Disconnect() {
