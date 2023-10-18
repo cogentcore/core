@@ -176,26 +176,32 @@ func makeButtons(ts *gi.Tabs) {
 		s.MaxWidth.SetDp(-1)
 	})
 
-	menu := gi.Menu{}
+	menu := func(m *gi.Scene) {
+		m1 := gi.NewButton(m).SetText("Menu Item 1").SetIcon(icons.Save).SetShortcut("Shift+Control+1").SetData(1)
+		m1.SetTooltip("A standard menu item with an icon").
+			OnClick(func(e events.Event) {
+				fmt.Println("Received menu action with data", m1.Data)
+			})
 
-	menu.AddButton(gi.ActOpts{Label: "Menu Item 1", Icon: icons.Save, Shortcut: "Shift+Control+1", Tooltip: "A standard menu item with an icon", Data: 1},
-		func(bt *gi.Button) {
-			fmt.Println("Received menu action with data", bt.Data)
-		})
+		m2 := gi.NewButton(m).SetText("Menu Item 2").SetIcon(icons.FileOpen).SetData(2)
+		m2.SetTooltip("A menu item with an icon and a sub menu")
 
-	mi2 := menu.AddButton(gi.ActOpts{Label: "Menu Item 2", Icon: icons.FileOpen, Tooltip: "A menu item with an icon and a sub menu", Data: 2}, nil)
+		m2.Menu = func(m *gi.Scene) {
+			sm2 := gi.NewButton(m).SetText("Sub Menu Item 2").SetIcon(icons.InstallDesktop).SetData(2.1)
+			sm2.SetTooltip("A sub menu item with an icon").
+				OnClick(func(e events.Event) {
+					fmt.Println("Received menu action with data", sm2.Data)
+				})
+		}
 
-	mi2.Menu.AddButton(gi.ActOpts{Label: "Sub Menu Item 2", Icon: icons.InstallDesktop, Tooltip: "A sub menu item with an icon", Data: 2.1},
-		func(bt *gi.Button) {
-			fmt.Println("Received menu action with data", bt.Data)
-		})
+		gi.NewSeparator(m)
 
-	menu.AddSeparator("sep1")
-
-	menu.AddButton(gi.ActOpts{Label: "Menu Item 3", Icon: icons.Favorite, Shortcut: "Control+3", Tooltip: "A standard menu item with an icon, below a separator", Data: 3},
-		func(bt *gi.Button) {
-			fmt.Println("Received menu action with data", bt.Data)
-		})
+		m3 := gi.NewButton(m).SetText("Menu Item 3").SetIcon(icons.Favorite).SetShortcut("Control+3").SetData(3)
+		m3.SetTooltip("A standard menu item with an icon, below a separator").
+			OnClick(func(e events.Event) {
+				fmt.Println("Received menu action with data", m3.Data)
+			})
+	}
 
 	ics := []icons.Icon{
 		icons.Search, icons.Home, icons.Close, icons.Done, icons.Favorite, icons.PlayArrow,
