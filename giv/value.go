@@ -719,7 +719,7 @@ func (vv *ValueBase) SetValue(val any) bool {
 	vv.SendChange()
 	if err != nil {
 		// todo: snackbar for error?
-		slog.Error("giv.SetValue error:", "type:", vv.Value.Type(), "err:", err)
+		slog.Error("giv.SetValue error", "type", vv.Value.Type(), "err", err)
 	}
 	return wasSet
 }
