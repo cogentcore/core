@@ -179,47 +179,45 @@ func (bt *Button) ButtonStyles() {
 			s.Cursor = cursors.NotAllowed
 		}
 	})
-}
-
-func (bt *Button) OnChildAdded(child ki.Ki) {
-	w, _ := AsWidget(child)
-	switch w.PathFrom(bt.This()) {
-	case "parts/icon":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-		})
-	case "parts/space":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-			s.MinWidth.SetEm(0.5)
-		})
-	case "parts/label":
-		label := w.(*Label)
-		label.Type = LabelLabelLarge
-		w.Style(func(s *styles.Style) {
-			s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
-			s.Cursor = cursors.None
-			s.Text.WhiteSpace = styles.WhiteSpaceNowrap
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignMiddle
-		})
-	case "parts/ind-stretch":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(0.5)
-		})
-	case "parts/indicator":
-		w.Style(func(s *styles.Style) {
-			s.Width.SetEm(1.125)
-			s.Height.SetEm(1.125)
-			s.Margin.Set()
-			s.Padding.Set()
-			s.AlignV = styles.AlignBottom
-		})
-	}
+	bt.OnWidgetAdded(func(w Widget) {
+		switch w.PathFrom(bt.This()) {
+		case "parts/icon":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+			})
+		case "parts/space":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+				s.MinWidth.SetEm(0.5)
+			})
+		case "parts/label":
+			label := w.(*Label)
+			label.Type = LabelLabelLarge
+			w.Style(func(s *styles.Style) {
+				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
+				s.Cursor = cursors.None
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignMiddle
+			})
+		case "parts/ind-stretch":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(0.5)
+			})
+		case "parts/indicator":
+			w.Style(func(s *styles.Style) {
+				s.Width.SetEm(1.125)
+				s.Height.SetEm(1.125)
+				s.Margin.Set()
+				s.Padding.Set()
+				s.AlignV = styles.AlignBottom
+			})
+		}
+	})
 }
 
 // SetType sets the styling type of the button
