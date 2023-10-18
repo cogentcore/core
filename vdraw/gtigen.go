@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vdraw.Mtxs",
+	ShortName:  "vdraw.Mtxs",
+	IDName:     "mtxs",
 	Doc:        "Mtxs are the projection matricies",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -21,6 +23,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vdraw.DrawerImpl",
+	ShortName:  "vdraw.DrawerImpl",
+	IDName:     "drawer-impl",
 	Doc:        "DrawerImpl contains implementation state -- ignore..",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -35,6 +39,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vdraw.Drawer",
+	ShortName:  "vdraw.Drawer",
+	IDName:     "drawer",
 	Doc:        "Drawer is the vDraw implementation, which draws Textures\nor Fills solid colors to a render target (Surface, RenderFrame).\nImage and color palette must be set prior to a given render pass.\nMultiple fill operations can be performed in one pass, but only\none Image can be used at a time.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -43,7 +49,7 @@ var _ = gti.AddType(&gti.Type{
 		{"Frame", &gti.Field{Name: "Frame", Type: "*vgpu.RenderFrame", Doc: "render frame if render target", Directives: gti.Directives{}}},
 		{"YIsDown", &gti.Field{Name: "YIsDown", Type: "bool", Doc: "render so the Y axis points down, with 0,0 at the upper left, which is the Vulkan standard.  default is Y is up, with 0,0 at bottom left, which is OpenGL default.  this must be set prior to configuring, the surface, as it determines the rendering parameters.", Directives: gti.Directives{}}},
 		{"Impl", &gti.Field{Name: "Impl", Type: "DrawerImpl", Doc: "implementation state -- ignore", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "[view: -] mutex on updating", Directives: gti.Directives{}}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "mutex on updating", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),

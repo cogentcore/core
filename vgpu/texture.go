@@ -128,7 +128,7 @@ var VulkanSamplerModes = map[SamplerModes]vk.SamplerAddressMode{
 //////////////////////////////////////////////////////
 
 // Texture image sampler modes
-type BorderColors int32 //enums:enum
+type BorderColors int32 //enums:enum -trim-prefix Border
 
 const (
 	// Repeat the texture when going beyond the image dimensions.

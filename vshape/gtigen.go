@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Box",
+	ShortName:  "vshape.Box",
+	IDName:     "box",
 	Doc:        "Box is a rectangular-shaped solid (cuboid)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -23,17 +25,19 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Capsule",
+	ShortName:  "vshape.Capsule",
+	IDName:     "capsule",
 	Doc:        "Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.\nSupports different radii on each end.\nHeight is along the Y axis -- total height is Height + TopRad + BotRad.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Height", &gti.Field{Name: "Height", Type: "float32", Doc: "height of the cylinder portion", Directives: gti.Directives{}}},
 		{"TopRad", &gti.Field{Name: "TopRad", Type: "float32", Doc: "radius of the top -- set to 0 to omit top cap", Directives: gti.Directives{}}},
 		{"BotRad", &gti.Field{Name: "BotRad", Type: "float32", Doc: "radius of the bottom -- set to 0 to omit bottom cap", Directives: gti.Directives{}}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "[min: 1] number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}}},
+		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}}},
 		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", Doc: "number of height segments", Directives: gti.Directives{}}},
 		{"CapSegs", &gti.Field{Name: "CapSegs", Type: "int", Doc: "number of segments in the hemisphere cap ends (16 is a reasonable default)", Directives: gti.Directives{}}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)", Directives: gti.Directives{}}},
+		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
+		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "total angle to generate in degrees (max 360)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ShapeBase", &gti.Field{Name: "ShapeBase", Type: "ShapeBase", Doc: "", Directives: gti.Directives{}}},
@@ -43,18 +47,20 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Cylinder",
+	ShortName:  "vshape.Cylinder",
+	IDName:     "cylinder",
 	Doc:        "Cylinder is a generalized cylinder shape, including a cone\nor truncated cone by having different size circles at either end.\nHeight is up along the Y axis.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Height", &gti.Field{Name: "Height", Type: "float32", Doc: "height of the cylinder", Directives: gti.Directives{}}},
 		{"TopRad", &gti.Field{Name: "TopRad", Type: "float32", Doc: "radius of the top -- set to 0 for a cone", Directives: gti.Directives{}}},
 		{"BotRad", &gti.Field{Name: "BotRad", Type: "float32", Doc: "radius of the bottom", Directives: gti.Directives{}}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "[min: 1] number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}}},
+		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "number of radial segments (32 is a reasonable default for full circle)", Directives: gti.Directives{}}},
 		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", Doc: "number of height segments", Directives: gti.Directives{}}},
 		{"Top", &gti.Field{Name: "Top", Type: "bool", Doc: "render the top disc", Directives: gti.Directives{}}},
 		{"Bottom", &gti.Field{Name: "Bottom", Type: "bool", Doc: "render the bottom disc", Directives: gti.Directives{}}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] total angle to generate in degrees (max 360)", Directives: gti.Directives{}}},
+		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "starting angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
+		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "total angle to generate in degrees (max 360)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ShapeBase", &gti.Field{Name: "ShapeBase", Type: "ShapeBase", Doc: "", Directives: gti.Directives{}}},
@@ -64,6 +70,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.ShapeGroup",
+	ShortName:  "vshape.ShapeGroup",
+	IDName:     "shape-group",
 	Doc:        "ShapeGroup is a group of shapes -- returns summary data for shape elements",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -77,6 +85,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Lines",
+	ShortName:  "vshape.Lines",
+	IDName:     "lines",
 	Doc:        "Lines are lines rendered as long thin boxes defined by points\nand width parameters.  The Mesh must be drawn in the XY plane (i.e., use Z = 0\nor a constant unless specifically relevant to have full 3D variation).\nRotate the solid to put into other planes.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -93,6 +103,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Plane",
+	ShortName:  "vshape.Plane",
+	IDName:     "plane",
 	Doc:        "Plane is a flat 2D plane, which can be oriented along any\naxis facing either positive or negative",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -110,6 +122,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Shape",
+	ShortName:  "vshape.Shape",
+	IDName:     "shape",
 	Doc:        "Shape is an interface for all shape-constructing elements",
 	Directives: gti.Directives{},
 
@@ -118,6 +132,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.ShapeBase",
+	ShortName:  "vshape.ShapeBase",
+	IDName:     "shape-base",
 	Doc:        "ShapeBase is the base shape element",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -132,16 +148,18 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Sphere",
+	ShortName:  "vshape.Sphere",
+	IDName:     "sphere",
 	Doc:        "Sphere is a sphere shape (can be a partial sphere too)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", Doc: "radius of the sphere", Directives: gti.Directives{}}},
-		{"WidthSegs", &gti.Field{Name: "WidthSegs", Type: "int", Doc: "[min: 3] number of segments around the width of the sphere (32 is reasonable default for full circle)", Directives: gti.Directives{}}},
-		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", Doc: "[min: 3] number of height segments (32 is reasonable default for full height)", Directives: gti.Directives{}}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] starting radial angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}}},
-		{"ElevStart", &gti.Field{Name: "ElevStart", Type: "float32", Doc: "[min: 0] [max: 180] [step: 5] starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom", Directives: gti.Directives{}}},
-		{"ElevLen", &gti.Field{Name: "ElevLen", Type: "float32", Doc: "[min: 0] [max: 180] [step: 5] total angle to generate in degrees (max = 180)", Directives: gti.Directives{}}},
+		{"WidthSegs", &gti.Field{Name: "WidthSegs", Type: "int", Doc: "number of segments around the width of the sphere (32 is reasonable default for full circle)", Directives: gti.Directives{}}},
+		{"HeightSegs", &gti.Field{Name: "HeightSegs", Type: "int", Doc: "number of height segments (32 is reasonable default for full height)", Directives: gti.Directives{}}},
+		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "starting radial angle in degrees, relative to -1,0,0 left side starting point", Directives: gti.Directives{}}},
+		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}}},
+		{"ElevStart", &gti.Field{Name: "ElevStart", Type: "float32", Doc: "starting elevation (height) angle in degrees - 0 = top of sphere, and Pi is bottom", Directives: gti.Directives{}}},
+		{"ElevLen", &gti.Field{Name: "ElevLen", Type: "float32", Doc: "total angle to generate in degrees (max = 180)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ShapeBase", &gti.Field{Name: "ShapeBase", Type: "ShapeBase", Doc: "", Directives: gti.Directives{}}},
@@ -151,15 +169,17 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vshape.Torus",
+	ShortName:  "vshape.Torus",
+	IDName:     "torus",
 	Doc:        "Torus is a torus mesh, defined by the radius of the solid tube and the\nlarger radius of the ring.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Radius", &gti.Field{Name: "Radius", Type: "float32", Doc: "larger radius of the torus ring", Directives: gti.Directives{}}},
 		{"TubeRadius", &gti.Field{Name: "TubeRadius", Type: "float32", Doc: "radius of the solid tube", Directives: gti.Directives{}}},
-		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "[min: 1] number of segments around the radius of the torus (32 is reasonable default for full circle)", Directives: gti.Directives{}}},
-		{"TubeSegs", &gti.Field{Name: "TubeSegs", Type: "int", Doc: "[min: 1] number of segments for the tube itself (32 is reasonable default for full height)", Directives: gti.Directives{}}},
-		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] starting radial angle in degrees relative to 1,0,0 starting point", Directives: gti.Directives{}}},
-		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "[min: 0] [max: 360] [step: 5] total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}}},
+		{"RadialSegs", &gti.Field{Name: "RadialSegs", Type: "int", Doc: "number of segments around the radius of the torus (32 is reasonable default for full circle)", Directives: gti.Directives{}}},
+		{"TubeSegs", &gti.Field{Name: "TubeSegs", Type: "int", Doc: "number of segments for the tube itself (32 is reasonable default for full height)", Directives: gti.Directives{}}},
+		{"AngStart", &gti.Field{Name: "AngStart", Type: "float32", Doc: "starting radial angle in degrees relative to 1,0,0 starting point", Directives: gti.Directives{}}},
+		{"AngLen", &gti.Field{Name: "AngLen", Type: "float32", Doc: "total radial angle to generate in degrees (max = 360)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"ShapeBase", &gti.Field{Name: "ShapeBase", Type: "ShapeBase", Doc: "", Directives: gti.Directives{}}},

@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.CmdPool",
+	ShortName:  "vgpu.CmdPool",
+	IDName:     "cmd-pool",
 	Doc:        "CmdPool is a command pool and buffer",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -21,6 +23,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Topologies",
+	ShortName:  "vgpu.Topologies",
+	IDName:     "topologies",
 	Doc:        "Topologies are the different vertex topology",
 	Directives: gti.Directives{},
 
@@ -29,6 +33,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.StackFrame",
+	ShortName:  "vgpu.StackFrame",
+	IDName:     "stack-frame",
 	Doc:        "A StackFrame contains all necessary information about to generate a line\nin a callstack.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -44,6 +50,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Device",
+	ShortName:  "vgpu.Device",
+	IDName:     "device",
 	Doc:        "Device holds Device and associated Queue info",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -57,6 +65,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Framebuffer",
+	ShortName:  "vgpu.Framebuffer",
+	IDName:     "framebuffer",
 	Doc:        "Framebuffer combines an Image and Render info (which has a depth buffer)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -72,6 +82,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.GPU",
+	ShortName:  "vgpu.GPU",
+	IDName:     "gpu",
 	Doc:        "GPU represents the GPU hardware",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -86,13 +98,13 @@ var _ = gti.AddType(&gti.Type{
 		{"InstanceExts", &gti.Field{Name: "InstanceExts", Type: "[]string", Doc: "use Add method to add required instance extentions prior to calling Config", Directives: gti.Directives{}}},
 		{"DeviceExts", &gti.Field{Name: "DeviceExts", Type: "[]string", Doc: "use Add method to add required device extentions prior to calling Config", Directives: gti.Directives{}}},
 		{"ValidationLayers", &gti.Field{Name: "ValidationLayers", Type: "[]string", Doc: "set Add method to add required validation layers prior to calling Config", Directives: gti.Directives{}}},
+		{"DeviceFeaturesNeeded", &gti.Field{Name: "DeviceFeaturesNeeded", Type: "*vk.PhysicalDeviceVulkan12Features", Doc: "physical device features required -- set per platform as needed", Directives: gti.Directives{}}},
 		{"Compute", &gti.Field{Name: "Compute", Type: "bool", Doc: "this is used for computing, not graphics", Directives: gti.Directives{}}},
 		{"DebugCallback", &gti.Field{Name: "DebugCallback", Type: "vk.DebugReportCallback", Doc: "our custom debug callback", Directives: gti.Directives{}}},
 		{"GPUProps", &gti.Field{Name: "GPUProps", Type: "vk.PhysicalDeviceProperties", Doc: "properties of physical hardware -- populated after Config", Directives: gti.Directives{}}},
 		{"GPUFeats", &gti.Field{Name: "GPUFeats", Type: "vk.PhysicalDeviceFeatures", Doc: "features of physical hardware -- populated after Config", Directives: gti.Directives{}}},
 		{"MemoryProps", &gti.Field{Name: "MemoryProps", Type: "vk.PhysicalDeviceMemoryProperties", Doc: "properties of device memory -- populated after Config", Directives: gti.Directives{}}},
-		{"MaxComputeWorkGroupCount1D", &gti.Field{Name: "MaxComputeWorkGroupCount1D", Type: "int", Doc: "maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup[0], which allows for the [1] and [2] maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroup[0] value is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.", Directives: gti.Directives{}}},
-		{"PlatformDeviceNext", &gti.Field{Name: "PlatformDeviceNext", Type: "unsafe.Pointer", Doc: "[view: -] platform-specific PNext for CreateDevice call", Directives: gti.Directives{}}},
+		{"MaxComputeWorkGroupCount1D", &gti.Field{Name: "MaxComputeWorkGroupCount1D", Type: "int", Doc: "maximum number of compute threads per compute shader invokation, for a 1D number of threads per Warp, which is generally greater than MaxComputeWorkGroup, which allows for the and maxima as well.  This is not defined anywhere in the formal spec, unfortunately, but has been determined empirically for Mac and NVIDIA which are two of the most relevant use-cases.  If not a known case, the MaxComputeWorkGroupvalue is used, which can significantly slow down compute processing if more could actually be used.  Please file an issue or PR for other GPUs with known larger values.", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -100,6 +112,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.ImageFormat",
+	ShortName:  "vgpu.ImageFormat",
+	IDName:     "image-format",
 	Doc:        "ImageFormat describes the size and vulkan format of an Image\nIf Layers > 1, all must be the same size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -114,16 +128,18 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Image",
+	ShortName:  "vgpu.Image",
+	IDName:     "image",
 	Doc:        "Image represents a vulkan image with an associated ImageView.\nThe vulkan Image is in device memory, in an optimized format.\nThere can also be an optional host-visible, plain pixel buffer\nwhich can be a pointer into a larger buffer or owned by the Image.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "name of the image -- e.g., same as Val name if used that way -- helpful for debugging -- set to filename if loaded from a file and otherwise empty", Directives: gti.Directives{}}},
 		{"Flags", &gti.Field{Name: "Flags", Type: "ImageFlags", Doc: "bit flags for image state, for indicating nature of ownership and state", Directives: gti.Directives{}}},
 		{"Format", &gti.Field{Name: "Format", Type: "ImageFormat", Doc: "format & size of image", Directives: gti.Directives{}}},
-		{"Image", &gti.Field{Name: "Image", Type: "vk.Image", Doc: "[view: -] vulkan image handle, in device memory", Directives: gti.Directives{}}},
-		{"View", &gti.Field{Name: "View", Type: "vk.ImageView", Doc: "[view: -] vulkan image view", Directives: gti.Directives{}}},
-		{"Mem", &gti.Field{Name: "Mem", Type: "vk.DeviceMemory", Doc: "[view: -] memory for image when we allocate it", Directives: gti.Directives{}}},
-		{"Dev", &gti.Field{Name: "Dev", Type: "vk.Device", Doc: "[view: -] keep track of device for destroying view", Directives: gti.Directives{}}},
+		{"Image", &gti.Field{Name: "Image", Type: "vk.Image", Doc: "vulkan image handle, in device memory", Directives: gti.Directives{}}},
+		{"View", &gti.Field{Name: "View", Type: "vk.ImageView", Doc: "vulkan image view", Directives: gti.Directives{}}},
+		{"Mem", &gti.Field{Name: "Mem", Type: "vk.DeviceMemory", Doc: "memory for image when we allocate it", Directives: gti.Directives{}}},
+		{"Dev", &gti.Field{Name: "Dev", Type: "vk.Device", Doc: "keep track of device for destroying view", Directives: gti.Directives{}}},
 		{"Host", &gti.Field{Name: "Host", Type: "HostImage", Doc: "host memory buffer representation of the image", Directives: gti.Directives{}}},
 		{"GPU", &gti.Field{Name: "GPU", Type: "*GPU", Doc: "pointer to our GPU", Directives: gti.Directives{}}},
 	}),
@@ -133,14 +149,16 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.HostImage",
+	ShortName:  "vgpu.HostImage",
+	IDName:     "host-image",
 	Doc:        "HostImage is the host representation of an Image",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Size", &gti.Field{Name: "Size", Type: "int", Doc: "size in bytes allocated for host representation of image", Directives: gti.Directives{}}},
-		{"Buff", &gti.Field{Name: "Buff", Type: "vk.Buffer", Doc: "[view: -] buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)", Directives: gti.Directives{}}},
+		{"Buff", &gti.Field{Name: "Buff", Type: "vk.Buffer", Doc: "buffer for host CPU-visible memory, for staging -- can be owned by us or managed by Memory (for Val)", Directives: gti.Directives{}}},
 		{"Offset", &gti.Field{Name: "Offset", Type: "int", Doc: "offset into host buffer, when Buff is Memory managed", Directives: gti.Directives{}}},
-		{"Mem", &gti.Field{Name: "Mem", Type: "vk.DeviceMemory", Doc: "[view: -] host CPU-visible memory, for staging, when we manage our own memory", Directives: gti.Directives{}}},
-		{"Ptr", &gti.Field{Name: "Ptr", Type: "unsafe.Pointer", Doc: "[view: -] memory mapped pointer into host memory -- remains mapped", Directives: gti.Directives{}}},
+		{"Mem", &gti.Field{Name: "Mem", Type: "vk.DeviceMemory", Doc: "host CPU-visible memory, for staging, when we manage our own memory", Directives: gti.Directives{}}},
+		{"Ptr", &gti.Field{Name: "Ptr", Type: "unsafe.Pointer", Doc: "memory mapped pointer into host memory -- remains mapped", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -148,6 +166,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.ImageFlags",
+	ShortName:  "vgpu.ImageFlags",
+	IDName:     "image-flags",
 	Doc:        "ImageFlags are bitflags for Image state",
 	Directives: gti.Directives{},
 
@@ -156,17 +176,19 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.MemBuff",
+	ShortName:  "vgpu.MemBuff",
+	IDName:     "mem-buff",
 	Doc:        "MemBuff is a memory buffer holding a particular type of memory\nwith staging Host-based memory and Device memory",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"GPU", &gti.Field{Name: "GPU", Type: "*GPU", Doc: "", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "BuffTypes", Doc: "type of memory in this buffer", Directives: gti.Directives{}}},
 		{"Size", &gti.Field{Name: "Size", Type: "int", Doc: "allocated buffer size", Directives: gti.Directives{}}},
-		{"Host", &gti.Field{Name: "Host", Type: "vk.Buffer", Doc: "[view: -] logical descriptor for host CPU-visible memory, for staging", Directives: gti.Directives{}}},
-		{"HostMem", &gti.Field{Name: "HostMem", Type: "vk.DeviceMemory", Doc: "[view: -] host CPU-visible memory, for staging", Directives: gti.Directives{}}},
-		{"Dev", &gti.Field{Name: "Dev", Type: "vk.Buffer", Doc: "[view: -] logical descriptor for device GPU-local memory, for computation", Directives: gti.Directives{}}},
-		{"DevMem", &gti.Field{Name: "DevMem", Type: "vk.DeviceMemory", Doc: "[view: -] device GPU-local memory, for computation", Directives: gti.Directives{}}},
-		{"HostPtr", &gti.Field{Name: "HostPtr", Type: "unsafe.Pointer", Doc: "[view: -] memory mapped pointer into host memory -- remains mapped", Directives: gti.Directives{}}},
+		{"Host", &gti.Field{Name: "Host", Type: "vk.Buffer", Doc: "logical descriptor for host CPU-visible memory, for staging", Directives: gti.Directives{}}},
+		{"HostMem", &gti.Field{Name: "HostMem", Type: "vk.DeviceMemory", Doc: "host CPU-visible memory, for staging", Directives: gti.Directives{}}},
+		{"Dev", &gti.Field{Name: "Dev", Type: "vk.Buffer", Doc: "logical descriptor for device GPU-local memory, for computation", Directives: gti.Directives{}}},
+		{"DevMem", &gti.Field{Name: "DevMem", Type: "vk.DeviceMemory", Doc: "device GPU-local memory, for computation", Directives: gti.Directives{}}},
+		{"HostPtr", &gti.Field{Name: "HostPtr", Type: "unsafe.Pointer", Doc: "memory mapped pointer into host memory -- remains mapped", Directives: gti.Directives{}}},
 		{"AlignBytes", &gti.Field{Name: "AlignBytes", Type: "int", Doc: "alignment of offsets into this buffer", Directives: gti.Directives{}}},
 		{"Active", &gti.Field{Name: "Active", Type: "bool", Doc: "true if memory has been allocated, copied, transfered", Directives: gti.Directives{}}},
 	}),
@@ -176,6 +198,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.BuffTypes",
+	ShortName:  "vgpu.BuffTypes",
+	IDName:     "buff-types",
 	Doc:        "BuffTypes are memory buffer types managed by the Memory object",
 	Directives: gti.Directives{},
 
@@ -184,6 +208,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.MemReg",
+	ShortName:  "vgpu.MemReg",
+	IDName:     "mem-reg",
 	Doc:        "MemReg is a region of memory for transferring to / from GPU",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -198,6 +224,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.VarMem",
+	ShortName:  "vgpu.VarMem",
+	IDName:     "var-mem",
 	Doc:        "VarMem is memory allocation info per Var, for Storage types.\nUsed in initial allocation algorithm.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -212,6 +240,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Memory",
+	ShortName:  "vgpu.Memory",
+	IDName:     "memory",
 	Doc:        "Memory manages memory for the GPU, using separate buffers for\ndifferent roles, defined in the BuffTypes and managed by a MemBuff.\nMemory is organized by Vars with associated Vals.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -229,6 +259,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.OptionStates",
+	ShortName:  "vgpu.OptionStates",
+	IDName:     "option-states",
 	Doc:        "OptionStates are options for the physical device features",
 	Directives: gti.Directives{},
 
@@ -237,6 +269,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.CPUOptions",
+	ShortName:  "vgpu.CPUOptions",
+	IDName:     "cpu-options",
 	Doc:        "GPUOptions specifies supported options for the vgpu device\nupon initialization.  Several vulkan device features are\nautomatically enabled, which are required for the\nbasic functionality of vgpu supported graphics,\nbut these are optional and may be required for\nother uses (e.g., compute shaders).\nSee also InstanceExts, DeviceExts, and ValidationLayers.",
 	Directives: gti.Directives{},
 
@@ -245,6 +279,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.GPUOpts",
+	ShortName:  "vgpu.GPUOpts",
+	IDName:     "gpu-opts",
 	Doc:        "GPUOpts is the collection of CPUOption states",
 	Directives: gti.Directives{},
 
@@ -253,6 +289,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Pipeline",
+	ShortName:  "vgpu.Pipeline",
+	IDName:     "pipeline",
 	Doc:        "Pipeline manages Shader program(s) that accomplish a specific\ntype of rendering or compute function, using Vars / Vals\ndefined by the overall System.\nIn the graphics context, each pipeline could handle a different\nclass of materials (textures, Phong lighting, etc).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -270,6 +308,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Render",
+	ShortName:  "vgpu.Render",
+	IDName:     "render",
 	Doc:        "Render manages various elements needed for rendering,\nincluding a vulkan RenderPass object,\nwhich specifies parameters for rendering to a Framebuffer.\nIt holds the Depth buffer if one is used, and a multisampling image too.\nThe Render object lives on the System, and any associated Surface,\nRenderFrame, and Framebuffers point to it.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -293,6 +333,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.RenderFrame",
+	ShortName:  "vgpu.RenderFrame",
+	IDName:     "render-frame",
 	Doc:        "RenderFrame is an offscreen, non-window-backed rendering target,\nfunctioning like a Surface",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -302,9 +344,9 @@ var _ = gti.AddType(&gti.Type{
 		{"Format", &gti.Field{Name: "Format", Type: "ImageFormat", Doc: "has the current image format and dimensions", Directives: gti.Directives{}}},
 		{"NFrames", &gti.Field{Name: "NFrames", Type: "int", Doc: "number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number", Directives: gti.Directives{}}},
 		{"Frames", &gti.Field{Name: "Frames", Type: "[]*Framebuffer", Doc: "Framebuffers representing the Image owned by the RenderFrame -- we iterate through these in rendering subsequent frames", Directives: gti.Directives{}}},
-		{"ImageAcquired", &gti.Field{Name: "ImageAcquired", Type: "vk.Semaphore", Doc: "[view: -] semaphore used internally for waiting on acquisition of next frame", Directives: gti.Directives{}}},
-		{"RenderDone", &gti.Field{Name: "RenderDone", Type: "vk.Semaphore", Doc: "[view: -] semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method", Directives: gti.Directives{}}},
-		{"RenderFence", &gti.Field{Name: "RenderFence", Type: "vk.Fence", Doc: "[view: -] fence for rendering command running", Directives: gti.Directives{}}},
+		{"ImageAcquired", &gti.Field{Name: "ImageAcquired", Type: "vk.Semaphore", Doc: "semaphore used internally for waiting on acquisition of next frame", Directives: gti.Directives{}}},
+		{"RenderDone", &gti.Field{Name: "RenderDone", Type: "vk.Semaphore", Doc: "semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method", Directives: gti.Directives{}}},
+		{"RenderFence", &gti.Field{Name: "RenderFence", Type: "vk.Fence", Doc: "fence for rendering command running", Directives: gti.Directives{}}},
 		{"OwnDevice", &gti.Field{Name: "OwnDevice", Type: "bool", Doc: "do we own the device?", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -313,6 +355,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.VarRoles",
+	ShortName:  "vgpu.VarRoles",
+	IDName:     "var-roles",
 	Doc:        "VarRoles are the functional roles of variables, corresponding\nto Vertex input vectors and all the different \"uniform\" types\nas enumerated in vk.DescriptorType.  This does NOT map directly\nto DescriptorType because we combine vertex and uniform data\nand require a different ordering.",
 	Directives: gti.Directives{},
 
@@ -321,6 +365,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Shader",
+	ShortName:  "vgpu.Shader",
+	IDName:     "shader",
 	Doc:        "Shader manages a single Shader program",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -334,6 +380,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.ShaderTypes",
+	ShortName:  "vgpu.ShaderTypes",
+	IDName:     "shader-types",
 	Doc:        "ShaderTypes is a list of GPU shader types",
 	Directives: gti.Directives{},
 
@@ -342,6 +390,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Surface",
+	ShortName:  "vgpu.Surface",
+	IDName:     "surface",
 	Doc:        "Surface manages the physical device for the visible image\nof a window surface, and the swapchain for presenting images.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -352,11 +402,11 @@ var _ = gti.AddType(&gti.Type{
 		{"DesiredFormats", &gti.Field{Name: "DesiredFormats", Type: "[]vk.Format", Doc: "ordered list of surface formats to select", Directives: gti.Directives{}}},
 		{"NFrames", &gti.Field{Name: "NFrames", Type: "int", Doc: "number of frames to maintain in the swapchain -- e.g., 2 = double-buffering, 3 = triple-buffering -- initially set to a requested amount, and after Init reflects actual number", Directives: gti.Directives{}}},
 		{"Frames", &gti.Field{Name: "Frames", Type: "[]*Framebuffer", Doc: "Framebuffers representing the visible Image owned by the Surface -- we iterate through these in rendering subsequent frames", Directives: gti.Directives{}}},
-		{"Surface", &gti.Field{Name: "Surface", Type: "vk.Surface", Doc: "[view: -] vulkan handle for surface", Directives: gti.Directives{}}},
-		{"Swapchain", &gti.Field{Name: "Swapchain", Type: "vk.Swapchain", Doc: "[view: -] vulkan handle for swapchain", Directives: gti.Directives{}}},
-		{"ImageAcquired", &gti.Field{Name: "ImageAcquired", Type: "vk.Semaphore", Doc: "[view: -] semaphore used internally for waiting on acquisition of next frame", Directives: gti.Directives{}}},
-		{"RenderDone", &gti.Field{Name: "RenderDone", Type: "vk.Semaphore", Doc: "[view: -] semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method", Directives: gti.Directives{}}},
-		{"RenderFence", &gti.Field{Name: "RenderFence", Type: "vk.Fence", Doc: "[view: -] fence for rendering command running", Directives: gti.Directives{}}},
+		{"Surface", &gti.Field{Name: "Surface", Type: "vk.Surface", Doc: "vulkan handle for surface", Directives: gti.Directives{}}},
+		{"Swapchain", &gti.Field{Name: "Swapchain", Type: "vk.Swapchain", Doc: "vulkan handle for swapchain", Directives: gti.Directives{}}},
+		{"ImageAcquired", &gti.Field{Name: "ImageAcquired", Type: "vk.Semaphore", Doc: "semaphore used internally for waiting on acquisition of next frame", Directives: gti.Directives{}}},
+		{"RenderDone", &gti.Field{Name: "RenderDone", Type: "vk.Semaphore", Doc: "semaphore that surface user can wait on, will be activated when image has been acquired in AcquireNextFrame method", Directives: gti.Directives{}}},
+		{"RenderFence", &gti.Field{Name: "RenderFence", Type: "vk.Fence", Doc: "fence for rendering command running", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -364,6 +414,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.System",
+	ShortName:  "vgpu.System",
+	IDName:     "system",
 	Doc:        "System manages a system of Pipelines that all share\na common collection of Vars, Vals, and a Memory manager.\nFor example, this could be a collection of different\npipelines for different material types, or different\ncompute operations performed on a common set of data.\nIt maintains its own logical device and associated queue.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -388,6 +440,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Texture",
+	ShortName:  "vgpu.Texture",
+	IDName:     "texture",
 	Doc:        "Texture supplies an Image and a Sampler",
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
@@ -400,6 +454,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Sampler",
+	ShortName:  "vgpu.Sampler",
+	IDName:     "sampler",
 	Doc:        "Sampler represents a vulkan image sampler",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -416,6 +472,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.SamplerModes",
+	ShortName:  "vgpu.SamplerModes",
+	IDName:     "sampler-modes",
 	Doc:        "Texture image sampler modes",
 	Directives: gti.Directives{},
 
@@ -424,6 +482,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.BorderColors",
+	ShortName:  "vgpu.BorderColors",
+	IDName:     "border-colors",
 	Doc:        "Texture image sampler modes",
 	Directives: gti.Directives{},
 
@@ -432,6 +492,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Types",
+	ShortName:  "vgpu.Types",
+	IDName:     "types",
 	Doc:        "Types is a list of supported GPU data types, which can be stored\nproperly aligned in device memory, and used by the shader code.\nNote that a Vec3 or arrays of single scalar values such as Float32\nare not well supported outside of Vertex due to the std410 convention:\nhttp://www.opengl.org/registry/doc/glspec45.core.pdf#page=159\nThe Struct type is particularly challenging as each member\nmust be aligned in general on a 16 byte boundary (i.e., vec4)\n(unless all elements are exactly 4 bytes, which might work?).\nGo automatically aligns members to 8 bytes on 64 bit machines,\nbut that doesn't quite cut it.",
 	Directives: gti.Directives{},
 
@@ -440,6 +502,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Val",
+	ShortName:  "vgpu.Val",
+	IDName:     "val",
 	Doc:        "Val represents a specific value of a Var variable.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -451,7 +515,7 @@ var _ = gti.AddType(&gti.Type{
 		{"ElSize", &gti.Field{Name: "ElSize", Type: "int", Doc: "if N > 1 (array) then this is the effective size of each element, which must be aligned to 16 byte modulo for Uniform types.  non naturally-aligned types require slower element-by-element syncing operations, instead of memcopy.", Directives: gti.Directives{}}},
 		{"AllocSize", &gti.Field{Name: "AllocSize", Type: "int", Doc: "total memory size of this value in bytes, as allocated, including array alignment but not any additional buffer-required alignment padding", Directives: gti.Directives{}}},
 		{"Texture", &gti.Field{Name: "Texture", Type: "*Texture", Doc: "for Texture Var roles, this is the Texture", Directives: gti.Directives{}}},
-		{"MemPtr", &gti.Field{Name: "MemPtr", Type: "unsafe.Pointer", Doc: "[view: -] pointer to the start of the staging memory for this value", Directives: gti.Directives{}}},
+		{"MemPtr", &gti.Field{Name: "MemPtr", Type: "unsafe.Pointer", Doc: "pointer to the start of the staging memory for this value", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
@@ -459,6 +523,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Vals",
+	ShortName:  "vgpu.Vals",
+	IDName:     "vals",
 	Doc:        "Vals is a list container of Val values, accessed by index or name",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -473,6 +539,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.ValFlags",
+	ShortName:  "vgpu.ValFlags",
+	IDName:     "val-flags",
 	Doc:        "ValFlags are bitflags for Val state",
 	Directives: gti.Directives{},
 
@@ -481,13 +549,15 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Var",
+	ShortName:  "vgpu.Var",
+	IDName:     "var",
 	Doc:        "Var specifies a variable used in a pipeline, accessed in shader programs.\nA Var represents a type of input or output into the GPU program,\nincluding things like Vertex arrays, transformation matricies (Uniforms),\nImages (Textures), and arbitrary Structs for Compute shaders.\nEach Var belongs to a Set, and its binding location is allocated within that.\nEach set is updated at the same time scale, and all vars in the set have the same\nnumber of allocated Val instances representing a specific value of the variable.\nThere must be a unique Val instance for each value of the variable used in\na single render -- a previously-used Val's contents cannot be updated within\nthe render pass, but new information can be written to an as-yet unused Val\nprior to using in a render (although this comes at a performance cost).",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "variable name", Directives: gti.Directives{}}},
 		{"Type", &gti.Field{Name: "Type", Type: "Types", Doc: "type of data in variable.  Note that there are strict contraints on the alignment of fields within structs -- if you can keep all fields at 4 byte increments, that works, but otherwise larger fields trigger a 16 byte alignment constraint.  Texture Images do not have such alignment constraints, and can be allocated in a big host buffer or in separate buffers depending on how frequently they are updated with different sizes.", Directives: gti.Directives{}}},
 		{"ArrayN", &gti.Field{Name: "ArrayN", Type: "int", Doc: "number of elements if this is a fixed array -- use 1 if singular element, and 0 if a variable-sized array, where each Val can have its own specific size. This also works for arrays of Textures -- up to 128 max.", Directives: gti.Directives{}}},
-		{"Role", &gti.Field{Name: "Role", Type: "VarRoles", Doc: "role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a [] array.", Directives: gti.Directives{}}},
+		{"Role", &gti.Field{Name: "Role", Type: "VarRoles", Doc: "role of variable: Vertex is configured in the pipeline VkConfig structure, and everything else is configured in a DescriptorSet.  For TextureRole items, the last such Var in a set will automatically be flagged as variable sized, so the shader can specify: #extension GL_EXT_nonuniform_qualifier : require and the list of textures can be specified as a array.", Directives: gti.Directives{}}},
 		{"Shaders", &gti.Field{Name: "Shaders", Type: "vk.ShaderStageFlagBits", Doc: "bit flags for set of shaders that this variable is used in", Directives: gti.Directives{}}},
 		{"Set", &gti.Field{Name: "Set", Type: "int", Doc: "DescriptorSet associated with the timing of binding for this variable -- all vars updated at the same time should be in the same set", Directives: gti.Directives{}}},
 		{"BindLoc", &gti.Field{Name: "BindLoc", Type: "int", Doc: "binding or location number for variable -- Vertexs are assigned as one group sequentially in order listed in Vars, and rest are assigned uniform binding numbers via descriptor pools", Directives: gti.Directives{}}},
@@ -505,6 +575,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.VarList",
+	ShortName:  "vgpu.VarList",
+	IDName:     "var-list",
 	Doc:        "VarList is a list of variables",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -517,6 +589,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.Vars",
+	ShortName:  "vgpu.Vars",
+	IDName:     "vars",
 	Doc:        "Vars are all the variables that are used by a pipeline,\norganized into Sets (optionally including the special VertexSet\nor PushSet).\nVars are allocated to bindings / locations sequentially in the\norder added!",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -525,12 +599,12 @@ var _ = gti.AddType(&gti.Type{
 		{"HasVertex", &gti.Field{Name: "HasVertex", Type: "bool", Doc: "true if a VertexSet has been added", Directives: gti.Directives{}}},
 		{"HasPush", &gti.Field{Name: "HasPush", Type: "bool", Doc: "true if PushSet has been added", Directives: gti.Directives{}}},
 		{"NDescs", &gti.Field{Name: "NDescs", Type: "int", Doc: "number of complete descriptor sets to construct -- each descriptor set can be bound to a specific pipeline at the start of rendering, and updated with specific Val instances to provide values for each Var used during rendering.  If multiple rendering passes are performed in parallel, then each requires a separate descriptor set (e.g., typically associated with a different Frame in the swapchain), so this number should be increased.", Directives: gti.Directives{}}},
-		{"Mem", &gti.Field{Name: "Mem", Type: "*Memory", Doc: "[view: -] our parent memory manager", Directives: gti.Directives{}}},
+		{"Mem", &gti.Field{Name: "Mem", Type: "*Memory", Doc: "our parent memory manager", Directives: gti.Directives{}}},
 		{"StaticVars", &gti.Field{Name: "StaticVars", Type: "bool", Doc: "if true, variables are statically bound to specific offsets in memory buffers, vs. dynamically bound offsets.  Typically a compute shader operating on fixed data variables can use static binding, while graphics (e.g., vphong) requires dynamic binding to efficiently use the same shader code for multiple different values of the same variable type", Directives: gti.Directives{}}},
-		{"VkDescLayout", &gti.Field{Name: "VkDescLayout", Type: "vk.PipelineLayout", Doc: "[view: -] vulkan descriptor layout based on vars", Directives: gti.Directives{}}},
-		{"VkDescPool", &gti.Field{Name: "VkDescPool", Type: "vk.DescriptorPool", Doc: "[view: -] vulkan descriptor pool, allocated for NDescs and the different descriptor pools", Directives: gti.Directives{}}},
+		{"VkDescLayout", &gti.Field{Name: "VkDescLayout", Type: "vk.PipelineLayout", Doc: "vulkan descriptor layout based on vars", Directives: gti.Directives{}}},
+		{"VkDescPool", &gti.Field{Name: "VkDescPool", Type: "vk.DescriptorPool", Doc: "vulkan descriptor pool, allocated for NDescs and the different descriptor pools", Directives: gti.Directives{}}},
 		{"VkDescSets", &gti.Field{Name: "VkDescSets", Type: "[][]vk.DescriptorSet", Doc: "allocated descriptor sets -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time.  The inner dimension is per VarSet to cover the different sets of variable updated at different times or with different numbers of items.  This variable is used for whole-pipline binding at start of rendering.", Directives: gti.Directives{}}},
-		{"VkWriteVals", &gti.Field{Name: "VkWriteVals", Type: "[]vk.WriteDescriptorSet", Doc: "[view: -] currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd", Directives: gti.Directives{}}},
+		{"VkWriteVals", &gti.Field{Name: "VkWriteVals", Type: "[]vk.WriteDescriptorSet", Doc: "currently accumulating set of vals to write to update bindings -- initiated by BindValsStart, executed by BindValsEnd", Directives: gti.Directives{}}},
 		{"BindDescIdx", &gti.Field{Name: "BindDescIdx", Type: "int", Doc: "current descriptor collection index, set in BindValsStart", Directives: gti.Directives{}}},
 		{"DynOffs", &gti.Field{Name: "DynOffs", Type: "[][]uint32", Doc: "dynamic offsets for Uniform and Storage variables, -- outer index is Vars.NDescs for different groups of descriptor sets, one of which can be bound to a pipeline at any given time, inner index is DynOffIdx on Var -- offsets are set when Val is bound via BindDynVal*.", Directives: gti.Directives{}}},
 	}),
@@ -540,6 +614,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vgpu.VarSet",
+	ShortName:  "vgpu.VarSet",
+	IDName:     "var-set",
 	Doc:        "VarSet contains a set of Var variables that are all updated at the same time\nand have the same number of distinct Vals values per Var per render pass.\nThe first set at index -1 contains Vertex and Index data, handed separately.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

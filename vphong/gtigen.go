@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Colors",
+	ShortName:  "vphong.Colors",
+	IDName:     "colors",
 	Doc:        "Colors are the material colors with padding for direct uploading to shader",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -22,6 +24,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.NLights",
+	ShortName:  "vphong.NLights",
+	IDName:     "n-lights",
 	Doc:        "Number of different lights active",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -36,6 +40,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.AmbientLight",
+	ShortName:  "vphong.AmbientLight",
+	IDName:     "ambient-light",
 	Doc:        "AmbientLight provides diffuse uniform lighting -- typically only one of these",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -48,6 +54,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.DirLight",
+	ShortName:  "vphong.DirLight",
+	IDName:     "dir-light",
 	Doc:        "DirLight is directional light, which is assumed to project light toward\nthe origin based on its position, with no attenuation, like the Sun.\nFor rendering, the position is negated and normalized to get the direction\nvector (i.e., absolute distance doesn't matter)",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -62,6 +70,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.PointLight",
+	ShortName:  "vphong.PointLight",
+	IDName:     "point-light",
 	Doc:        "PointLight is an omnidirectional light with a position\nand associated decay factors, which divide the light intensity as a function of\nlinear and quadratic distance.  The quadratic factor dominates at longer distances.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -78,6 +88,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.SpotLight",
+	ShortName:  "vphong.SpotLight",
+	IDName:     "spot-light",
 	Doc:        "Spotlight is a light with a position and direction and\nassociated decay factors and angles,\nwhich divide the light intensity as a function of\nlinear and quadratic distance.\nThe quadratic factor dominates at longer distances.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -95,6 +107,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Mesh",
+	ShortName:  "vphong.Mesh",
+	IDName:     "mesh",
 	Doc:        "Mesh records the number of elements in an indexed triangle mesh,\nwhich always includes normals and texture coordinates, and\noptionally per-vertex colors.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -108,6 +122,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Mtxs",
+	ShortName:  "vphong.Mtxs",
+	IDName:     "mtxs",
 	Doc:        "Mtxs contains the camera view and projection matricies, for uniform uploading",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -120,6 +136,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Sets",
+	ShortName:  "vphong.Sets",
+	IDName:     "sets",
 	Doc:        "Sets are variable set numbers - must coordinate with System sets!",
 	Directives: gti.Directives{},
 
@@ -128,6 +146,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.CurRender",
+	ShortName:  "vphong.CurRender",
+	IDName:     "cur-render",
 	Doc:        "CurRender holds info about the current render as updated by\nUse* methods -- determines which pipeline is used.\nDefault is single color.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -146,6 +166,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.PushU",
+	ShortName:  "vphong.PushU",
+	IDName:     "push-u",
 	Doc:        "PushU is the push constants structure, holding everything that\nupdates per object -- avoids any limitations on capacity.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -159,6 +181,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Texture",
+	ShortName:  "vphong.Texture",
+	IDName:     "texture",
 	Doc:        "Texture has texture image -- stored as image.RGBA for GPU compatibility",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -170,6 +194,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.TexPars",
+	ShortName:  "vphong.TexPars",
+	IDName:     "tex-pars",
 	Doc:        "TexPars holds texture parameters: how often to repeat the texture image and offset",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -182,6 +208,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/vphong.Phong",
+	ShortName:  "vphong.Phong",
+	IDName:     "phong",
 	Doc:        "Phong implements standard Blinn-Phong rendering pipelines in a vgpu System.\nMust Add all Lights, Meshes, Colors, Textures first, and call\nConfig() to configure everything prior to first RenderStart.\n\nMeshes are configured initially with numbers of points, then\nafter Config(), points are set by calling MeshFloatsBy* and\nassigning values.\n\nIf any changes are made to numbers or sizes of anything,\nyou must call Config() again.\n\nChanges to data only can be synced by calling Sync()\n\nRendering starts with RenderStart, followed by Use* calls\nto specify the parameters for each item, and then a Draw call\nto add the rendering command, followed by RenderEnd.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -190,13 +218,13 @@ var _ = gti.AddType(&gti.Type{
 		{"Dir", &gti.Field{Name: "Dir", Type: "[MaxLights]DirLight", Doc: "directional lights", Directives: gti.Directives{}}},
 		{"Point", &gti.Field{Name: "Point", Type: "[MaxLights]PointLight", Doc: "point lights", Directives: gti.Directives{}}},
 		{"Spot", &gti.Field{Name: "Spot", Type: "[MaxLights]SpotLight", Doc: "spot lights", Directives: gti.Directives{}}},
-		{"Wireframe", &gti.Field{Name: "Wireframe", Type: "bool", Doc: "[def: false] render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system", Directives: gti.Directives{}}},
+		{"Wireframe", &gti.Field{Name: "Wireframe", Type: "bool", Doc: "render using wireframe instead of filled polygons -- this must be set prior to configuring the Phong rendering system", Directives: gti.Directives{}}},
 		{"Cur", &gti.Field{Name: "Cur", Type: "CurRender", Doc: "state for current rendering", Directives: gti.Directives{}}},
 		{"Meshes", &gti.Field{Name: "Meshes", Type: "ordmap.Map[string, *Mesh]", Doc: "meshes -- holds all the mesh data -- must be configured prior to rendering", Directives: gti.Directives{}}},
 		{"Textures", &gti.Field{Name: "Textures", Type: "ordmap.Map[string, *Texture]", Doc: "textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability", Directives: gti.Directives{}}},
 		{"Colors", &gti.Field{Name: "Colors", Type: "ordmap.Map[string, *Colors]", Doc: "colors, optionally available for looking up by name -- not used directly in rendering", Directives: gti.Directives{}}},
 		{"Sys", &gti.Field{Name: "Sys", Type: "vgpu.System", Doc: "rendering system", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "[view: -] mutex on updating", Directives: gti.Directives{}}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "mutex on updating", Directives: gti.Directives{}}},
 	}),
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),

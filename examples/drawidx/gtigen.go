@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "main.CamView",
+	ShortName:  "main.CamView",
+	IDName:     "cam-view",
 	Doc:        "",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{

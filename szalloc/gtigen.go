@@ -9,6 +9,8 @@ import (
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/szalloc.Idxs",
+	ShortName:  "szalloc.Idxs",
+	IDName:     "idxs",
 	Doc:        "Idxs contains the indexes where a given item image size is allocated\nthere is one of these per each ItemSizes",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -22,6 +24,8 @@ var _ = gti.AddType(&gti.Type{
 
 var _ = gti.AddType(&gti.Type{
 	Name:       "goki.dev/vgpu/v2/szalloc.SzAlloc",
+	ShortName:  "szalloc.SzAlloc",
+	IDName:     "sz-alloc",
 	Doc:        "SzAlloc manages allocation of sizes to a spec'd maximum number\nof groups.  Used for allocating texture images to image arrays\nunder the severe constraints of only 16 images.\nOnly a maximum of MaxItemsPerGp items can be allocated per grouping.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
