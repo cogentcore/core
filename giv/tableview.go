@@ -830,13 +830,14 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	if len(*tb.Children()) < ndef {
 		tb.SetStretchMaxWidth()
-		tb.AddButton(gi.ActOpts{Name: "UpdateView", Label: "Update view", Icon: icons.Refresh, Tooltip: "update this TableView to reflect current state of table"}, func(act *gi.Button) {
+		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update this TableView to reflect current state of table").OnClick(func(e events.Event) {
 			tv.SetNeedsLayout()
 		})
 		if ndef > 1 {
-			tb.AddButton(gi.ActOpts{Label: "Add", Icon: icons.Add, Tooltip: "add a new element to the table"}, func(act *gi.Button) {
-				tv.SliceNewAt(-1)
-			})
+			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the table").
+				OnClick(func(e events.Event) {
+					tv.SliceNewAt(-1)
+				})
 		}
 	}
 	sz := len(*tb.Children())
@@ -1029,13 +1030,14 @@ func (tv *TableView) EditIdx(idx int) {
 	StructViewDialog(tv, DlgOpts{Title: tynm}, stru, nil)
 }
 
-func (tv *TableView) StdCtxtMenu(m *gi.Menu, idx int) {
+func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
 	if tv.isArray {
 		return
 	}
 	tv.SliceViewBase.StdCtxtMenu(m, idx)
-	m.AddSeparator("sep-edit")
-	m.AddButton(gi.ActOpts{Label: "Edit", Data: idx}, func(act *gi.Button) {
-		tv.EditIdx(idx)
-	})
+	gi.NewSeparator(m, "sep-edit")
+	gi.NewButton(m, "edit").SetText("Edit").SetData(idx).
+		OnClick(func(e events.Event) {
+			tv.EditIdx(idx)
+		})
 }
