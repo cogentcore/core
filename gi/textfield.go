@@ -332,6 +332,10 @@ func (tf *TextField) EditDone() {
 		tf.Edited = false
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
+		// widget can be killed after sendchange
+		if tf.This() == nil || tf.Is(ki.Deleted) || tf.Is(ki.Destroyed) {
+			return
+		}
 	}
 	tf.ClearSelected()
 	tf.ClearCursor()

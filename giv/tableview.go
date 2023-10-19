@@ -129,6 +129,19 @@ func (tv *TableView) TableViewInit() {
 				s.SetStretchMax()                  // for this to work, ALL layers above need it too
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
+		case "frame/grid-lay/scrollbar":
+			sb := w.(*gi.Slider)
+			sb.Style(func(s *styles.Style) {
+				s.SetFixedWidth(tv.Styles.ScrollBarWidth)
+				s.SetStretchMaxHeight()
+			})
+			sb.OnChange(func(e events.Event) {
+				updt := tv.UpdateStart()
+				tv.StartIdx = int(sb.Value)
+				tv.This().(SliceViewer).UpdateSliceGrid()
+				tv.UpdateEndRender(updt)
+			})
+
 		}
 		// STYTODO: set header sizes here (see LayoutHeader)
 		// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
@@ -149,6 +162,7 @@ func (tv *TableView) TableViewInit() {
 			if strings.HasPrefix(w.Name(), "add-") {
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Success.Base
 				})
 			}
 			if strings.HasPrefix(w.Name(), "del-") {
@@ -428,6 +442,9 @@ func (tv *TableView) ConfigSliceGrid() {
 		})
 
 		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(0)) // deal with pointer lists
+		if laser.ValueIsZero(val) {
+			continue
+		}
 		stru := val.Interface()
 		fval := val.Elem().FieldByIndex(field.Index)
 		vv := ToValue(fval.Interface(), "")
@@ -620,6 +637,9 @@ func (tv *TableView) UpdateSliceGrid() {
 		si := tv.StartIdx + i // slice idx
 		issel := tv.IdxIsSelected(si)
 		val := laser.OnePtrUnderlyingValue(tv.SliceNPVal.Index(si)) // deal with pointer lists
+		if laser.ValueIsZero(val) {
+			continue
+		}
 		stru := val.Interface()
 
 		itxt := strconv.Itoa(i)
