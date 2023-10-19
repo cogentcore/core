@@ -19,7 +19,7 @@ import (
 // MapViewInline represents a map as a single line widget,
 // for smaller maps and those explicitly marked inline.
 type MapViewInline struct {
-	gi.Frame
+	gi.Layout
 
 	// the map that we are a view onto
 	Map any

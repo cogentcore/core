@@ -197,9 +197,8 @@ func (tv *TableView) SetSlice(sl any) {
 	updt := tv.UpdateStart()
 	tv.ResetSelectedIdxs()
 	tv.SelectMode = false
-
-	tv.Config(tv.Sc)
-	tv.UpdateEndLayout(updt)
+	tv.UpdateEnd(updt)
+	tv.ReConfig()
 }
 
 // StructType sets the StruType and returns the type of the struct within the
@@ -270,6 +269,8 @@ func (tv *TableView) ConfigWidget(vp *gi.Scene) {
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
+	tv.This().(SliceViewer).LayoutSliceGrid()
+	tv.This().(SliceViewer).UpdateSliceGrid()
 	if mods {
 		tv.UpdateEnd(updt)
 	}
@@ -764,7 +765,6 @@ func (tv *TableView) SliceNewAt(idx int) {
 	}
 
 	tv.This().(SliceViewer).UpdtSliceSize()
-
 	if tv.TmpSave != nil {
 		tv.TmpSave.SaveTmp()
 	}
@@ -912,13 +912,8 @@ func (tv *TableView) SetSortFieldName(nm string) {
 }
 
 func (tv *TableView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	tv.This().(SliceViewer).LayoutSliceGrid()
-	tv.This().(SliceViewer).UpdateSliceGrid()
+	redo := tv.SliceViewBase.DoLayout(vp, parBBox, iter)
 	tv.LayoutHeader()
-	redo := tv.Frame.DoLayout(vp, parBBox, iter)
-	// if !tv.IsConfiged() {
-	// 	return redo
-	// }
 	tv.SliceHeader().DoLayout(vp, parBBox, iter)
 	return redo
 }
