@@ -348,7 +348,8 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 		}
 		tag := reflect.StructTag("")
 		if field.Tag != nil {
-			tag = reflect.StructTag(field.Tag.Value)
+			// need to get rid of leading and trailing backquotes
+			tag = reflect.StructTag(strings.TrimPrefix(strings.TrimSuffix(field.Tag.Value, "`"), "`"))
 		}
 		fo := &gti.Field{
 			Name:       name,
