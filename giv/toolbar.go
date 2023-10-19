@@ -4,7 +4,9 @@
 
 package giv
 
-import "goki.dev/gi/v2/gi"
+import (
+	"goki.dev/gi/v2/gi"
+)
 
 // Toolbarer is an interface that types can satisfy to add a toolbar when they
 // are displayed in the GUI. In the Toolbar method, types typically add [FuncButton]

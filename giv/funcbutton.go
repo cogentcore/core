@@ -5,6 +5,7 @@
 package giv
 
 import (
+	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -84,8 +85,9 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	if !strings.HasSuffix(fnm, "-fm") {
 		f := gti.FuncByName(fnm)
 		if f == nil {
-			slog.Error("programmer error: cannot use giv.NewFuncButton with a function that has not been added to gti; see the documentation for giv.NewFuncButton", "function", fnm)
-			return nil
+			err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a function that has not been added to gti; see the documentation for giv.NewFuncButton; function=%s", fnm)
+			slog.Error(err.Error())
+			panic(err)
 		}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
@@ -101,13 +103,15 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	typnm = strings.TrimSuffix(typnm, ")")
 	gtyp := gti.TypeByName(typnm)
 	if gtyp == nil {
-		slog.Error("programmer error: cannot use giv.NewFuncButton with a method whose receiver type has not been added to gti; see the documentation for giv.NewFuncButton", "type", typnm, "method", metnm, "fullPath", fnm)
-		return nil
+		err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a method whose receiver type has not been added to gti; see the documentation for giv.NewFuncButton; type=%s method=%s fullPath=%s", typnm, metnm, fnm)
+		slog.Error(err.Error())
+		panic(err)
 	}
 	met := gtyp.Methods.ValByKey(metnm)
 	if met == nil {
-		slog.Error("programmer error: cannot use giv.NewFuncButton with a method that has not been added to gti (even though the receiver type was); see the documentation for giv.NewFuncButton", "type", typnm, "method", metnm, "fullPath", fnm)
-		return nil
+		err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself); see the documentation for giv.NewFuncButton; type=%s method=%s fullPath=%s", typnm, metnm, fnm)
+		slog.Error(err.Error())
+		panic(err)
 	}
 	return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 }

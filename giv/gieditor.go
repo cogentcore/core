@@ -230,14 +230,14 @@ func (ge *GiEditor) StructView() *StructView {
 	return ge.Splits().Child(1).(*StructView)
 }
 
-// Toolbar returns the toolbar widget
-func (ge *GiEditor) Toolbar() *gi.Toolbar {
+// ToolbarWidget returns the toolbar widget
+func (ge *GiEditor) ToolbarWidget() *gi.Toolbar {
 	return ge.ChildByName("toolbar", 1).(*gi.Toolbar)
 }
 
 // ConfigToolbar adds a GiEditor toolbar.
 func (ge *GiEditor) ConfigToolbar() {
-	tb := ge.Toolbar()
+	tb := ge.ToolbarWidget()
 	if tb != nil && tb.HasChildren() {
 		return
 	}
@@ -284,6 +284,10 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 	// 	}
 	// }
 	ge.Frame.Render(sc)
+}
+
+func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
+	NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
 }
 
 var GiEditorProps = ki.Props{
@@ -419,7 +423,7 @@ func GoGiEditorDialog(obj ki.Ki) {
 	// mmen := win.MainMenu
 	// MainMenuView(ge, win, mmen)
 
-	tb := ge.Toolbar()
+	tb := ge.ToolbarWidget()
 	tb.UpdateButtons()
 
 	// ge.SelectionLoop()
