@@ -367,12 +367,6 @@ func (bt *Button) ConfigPartsIndicator(indIdx int) {
 	if indIdx < 0 {
 		return
 	}
-	ic := bt.Parts.Child(indIdx).(*Icon)
-	icnm := bt.Indicator
-	if icnm.IsNil() {
-		icnm = icons.KeyboardArrowDown
-	}
-	ic.SetIcon(icnm)
 }
 
 //////////////////////////////////////////////////////////////////
