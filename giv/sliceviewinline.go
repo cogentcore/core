@@ -118,7 +118,7 @@ func (sv *SliceViewInline) SetSlice(sl any) {
 		if sv.SliceValView != nil {
 			_, sv.IsFixedLen = sv.SliceValView.Tag("fixed-len")
 		}
-		sv.ReConfigTree(sv.Sc)
+		sv.ReConfig()
 	}
 }
 
@@ -223,7 +223,7 @@ func (sv *SliceViewInline) SliceNewAt(idx int) {
 		sv.TmpSave.SaveTmp()
 	}
 	sv.SetChanged()
-	sv.ReConfigTree(sv.Sc)
+	sv.ReConfig()
 }
 
 func (sv *SliceViewInline) UpdateValues() {

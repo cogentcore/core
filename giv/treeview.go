@@ -1300,7 +1300,8 @@ func (tv *TreeView) PasteAt(md mimedata.Mimes, mod events.DropMods, rel int, act
 		nwi := ns.This().(gi.Widget)
 		ntv := AsTreeView(ns)
 		ntv.RootView = tv.RootView
-		nwi.AsWidget().ReConfigTree(tv.Sc) // incl children
+		ntv.Sc = tv.Sc
+		nwi.AsWidget().ReConfig() // incl children
 		npath := ns.PathFrom(tv.RootView)
 		if mod == events.DropMove && npath == orgpath { // we will be nuked immediately after drag
 
