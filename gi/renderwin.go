@@ -115,7 +115,7 @@ type RenderWin struct {
 }
 
 // WinFlags represent RenderWin state
-type WinFlags int64 //enums:bitflag
+type WinFlags int64 //enums:bitflag -trim-prefix Win
 
 const (
 	// WinHasGeomPrefs indicates if this window has WinGeomPrefs setting that

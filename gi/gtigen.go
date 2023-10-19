@@ -116,8 +116,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "Menu", Doc: "the menu items for this menu -- typically add Button elements for menus, along with separators", Directives: gti.Directives{}}},
-		{"MakeMenuFunc", &gti.Field{Name: "MakeMenuFunc", Type: "MakeMenuFunc", Doc: "set this to make a menu on demand -- if set then this button acts like a menu button", Directives: gti.Directives{}}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}}},
 		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *Button)", Doc: "optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing", Directives: gti.Directives{}}},
 	}),
@@ -605,41 +604,6 @@ func (t *Space) New() ki.Ki {
 	return &Space{}
 }
 
-// SeparatorType is the [gti.Type] for [Separator]
-var SeparatorType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Separator",
-	ShortName:  "gi.Separator",
-	IDName:     "separator",
-	Doc:        "Separator draws a vertical or horizontal line",
-	Directives: gti.Directives{},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Horiz", &gti.Field{Name: "Horiz", Type: "bool", Doc: "is this a horizontal separator -- otherwise vertical", Directives: gti.Directives{}}},
-	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Separator{},
-})
-
-// NewSeparator adds a new [Separator] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSeparator(par ki.Ki, name ...string) *Separator {
-	return par.NewChild(SeparatorType, name...).(*Separator)
-}
-
-// KiType returns the [*gti.Type] of [Separator]
-func (t *Separator) KiType() *gti.Type {
-	return SeparatorType
-}
-
-// New returns a new [*Separator] value
-func (t *Separator) New() ki.Ki {
-	return &Separator{}
-}
-
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Preferences",
 	ShortName: "gi.Preferences",
@@ -924,6 +888,41 @@ func (t *Scene) KiType() *gti.Type {
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki {
 	return &Scene{}
+}
+
+// SeparatorType is the [gti.Type] for [Separator]
+var SeparatorType = gti.AddType(&gti.Type{
+	Name:       "goki.dev/gi/v2/gi.Separator",
+	ShortName:  "gi.Separator",
+	IDName:     "separator",
+	Doc:        "Separator draws a vertical or horizontal line",
+	Directives: gti.Directives{},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Horiz", &gti.Field{Name: "Horiz", Type: "bool", Doc: "whether this is a horizontal separator; if false, it is vertical", Directives: gti.Directives{}}},
+	}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
+	}),
+	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Instance: &Separator{},
+})
+
+// NewSeparator adds a new [Separator] with the given name
+// to the given parent. If the name is unspecified, it defaults
+// to the ID (kebab-case) name of the type, plus the
+// [ki.Ki.NumLifetimeChildren] of the given parent.
+func NewSeparator(par ki.Ki, name ...string) *Separator {
+	return par.NewChild(SeparatorType, name...).(*Separator)
+}
+
+// KiType returns the [*gti.Type] of [Separator]
+func (t *Separator) KiType() *gti.Type {
+	return SeparatorType
+}
+
+// New returns a new [*Separator] value
+func (t *Separator) New() ki.Ki {
+	return &Separator{}
 }
 
 // SliderType is the [gti.Type] for [Slider]
@@ -1510,20 +1509,21 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}}},
 		{"Class", &gti.Field{Name: "Class", Type: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}}},
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}}},
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}}},
 		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto -- these are the pixels we draw into, filtered through parent bounding boxes -- used for render Bounds clipping", Directives: gti.Directives{}}},
-		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential descending order (so the first added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}}},
+		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}}},
+		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}}},
 		{"Styles", &gti.Field{Name: "Styles", Type: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}}},
 		{"LayState", &gti.Field{Name: "LayState", Type: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}}},
-		{"CtxtMenuFunc", &gti.Field{Name: "CtxtMenuFunc", Type: "CtxtMenuFunc", Doc: "optional context menu function called by MakeContextMenu AFTER any native items are added -- this function can decide where to insert new elements -- typically add a separator to disambiguate", Directives: gti.Directives{}}},
+		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}}},

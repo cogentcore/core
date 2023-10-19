@@ -75,7 +75,7 @@ func (ch *Chooser) CopyFieldsFrom(frm any) {
 
 // ChooserTypes is an enum containing the
 // different possible types of combo boxes
-type ChooserTypes int32 //enums:enum
+type ChooserTypes int32 //enums:enum -trim-prefix Chooser
 
 const (
 	// ChooserFilled represents a filled

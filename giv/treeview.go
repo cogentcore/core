@@ -242,7 +242,7 @@ func (tv *TreeView) TreeViewStyles() {
 }
 
 // TreeViewFlags extend WidgetFlags to hold TreeView state
-type TreeViewFlags int64 //enums:bitflag
+type TreeViewFlags int64 //enums:bitflag -trim-prefix TreeViewFlag
 
 const (
 	// TreeViewFlagClosed means node is toggled closed

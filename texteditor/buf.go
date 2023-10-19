@@ -217,7 +217,7 @@ func (tb *Buf) OnChange(fun func(e events.Event)) {
 }
 
 // BufFlags hold key Buf state
-type BufFlags int64 //enums:bitflag
+type BufFlags int64 //enums:bitflag -trim-prefix Buf
 
 const (
 	// BufAutoSaving is used in atomically safe way to protect autosaving

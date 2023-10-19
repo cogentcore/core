@@ -65,7 +65,7 @@ type Complete struct {
 }
 
 // CompleteSignals are signals that are sent by Complete
-type CompleteSignals int32 //enums:enum
+type CompleteSignals int32 //enums:enum -trim-prefix Complete
 
 const (
 	// CompleteSelect means the user chose one of the possible completions

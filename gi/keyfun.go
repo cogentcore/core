@@ -27,7 +27,7 @@ import (
 // seems possible to keep this flat and consistent across different contexts,
 // as long as the functions can be appropriately reinterpreted for each
 // context.
-type KeyFuns int32 //enums:enum
+type KeyFuns int32 //enums:enum -trim-prefix KeyFun
 
 const (
 	KeyFunNil KeyFuns = iota

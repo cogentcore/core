@@ -202,7 +202,7 @@ func (ed *Editor) ViewStyles() {
 }
 
 // ViewFlags extend WidgetFlags to hold text editor.View state
-type ViewFlags int64 //enums:bitflag
+type ViewFlags int64 //enums:bitflag -trim-prefix View
 
 const (
 	// ViewHasLineNos indicates that this view has line numbers (per Buf option)

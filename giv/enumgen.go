@@ -27,10 +27,10 @@ func _FileNodeFlagsNoOp() {
 }
 
 var _FileNodeFlagsNameToValueMap = map[string]FileNodeFlags{
-	`FileNodeOpen`:    7,
-	`filenodeopen`:    7,
-	`FileNodeSymLink`: 8,
-	`filenodesymlink`: 8,
+	`Open`:    7,
+	`open`:    7,
+	`SymLink`: 8,
+	`symlink`: 8,
 }
 
 var _FileNodeFlagsDescMap = map[FileNodeFlags]string{
@@ -39,8 +39,8 @@ var _FileNodeFlagsDescMap = map[FileNodeFlags]string{
 }
 
 var _FileNodeFlagsMap = map[FileNodeFlags]string{
-	7: `FileNodeOpen`,
-	8: `FileNodeSymLink`,
+	7: `Open`,
+	8: `SymLink`,
 }
 
 // String returns the string representation
@@ -216,14 +216,14 @@ func _DirFlagsNoOp() {
 }
 
 var _DirFlagsNameToValueMap = map[string]DirFlags{
-	`DirMark`:          0,
-	`dirmark`:          0,
-	`DirIsOpen`:        1,
-	`dirisopen`:        1,
-	`DirSortByName`:    2,
-	`dirsortbyname`:    2,
-	`DirSortByModTime`: 3,
-	`dirsortbymodtime`: 3,
+	`Mark`:          0,
+	`mark`:          0,
+	`IsOpen`:        1,
+	`isopen`:        1,
+	`SortByName`:    2,
+	`sortbyname`:    2,
+	`SortByModTime`: 3,
+	`sortbymodtime`: 3,
 }
 
 var _DirFlagsDescMap = map[DirFlags]string{
@@ -234,10 +234,10 @@ var _DirFlagsDescMap = map[DirFlags]string{
 }
 
 var _DirFlagsMap = map[DirFlags]string{
-	0: `DirMark`,
-	1: `DirIsOpen`,
-	2: `DirSortByName`,
-	3: `DirSortByModTime`,
+	0: `Mark`,
+	1: `IsOpen`,
+	2: `SortByName`,
+	3: `SortByModTime`,
 }
 
 // String returns the string representation
@@ -384,10 +384,10 @@ func _TreeViewFlagsNoOp() {
 }
 
 var _TreeViewFlagsNameToValueMap = map[string]TreeViewFlags{
-	`TreeViewFlagClosed`:     9,
-	`treeviewflagclosed`:     9,
-	`TreeViewFlagSelectMode`: 10,
-	`treeviewflagselectmode`: 10,
+	`Closed`:     9,
+	`closed`:     9,
+	`SelectMode`: 10,
+	`selectmode`: 10,
 }
 
 var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
@@ -396,8 +396,8 @@ var _TreeViewFlagsDescMap = map[TreeViewFlags]string{
 }
 
 var _TreeViewFlagsMap = map[TreeViewFlags]string{
-	9:  `TreeViewFlagClosed`,
-	10: `TreeViewFlagSelectMode`,
+	9:  `Closed`,
+	10: `SelectMode`,
 }
 
 // String returns the string representation
