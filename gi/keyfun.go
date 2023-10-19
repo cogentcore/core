@@ -953,7 +953,7 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Control+W":         KeyFunMenuCloseAlt1,
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
-	{"RenderWinsStd", "Standard RenderWins KeyMap", KeyMap{
+	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
 		"UpArrow":                 KeyFunMoveUp,
 		"Shift+UpArrow":           KeyFunMoveUp,
 		"DownArrow":               KeyFunMoveDown,
