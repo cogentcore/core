@@ -40,7 +40,7 @@ type TableStruct struct {
 	StrField string
 
 	// a file
-	// File gi.FileName
+	File gi.FileName
 }
 
 // ILStruct is an inline-viewed struct
