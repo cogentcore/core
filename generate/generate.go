@@ -27,6 +27,7 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 		"HasEmbedDirective": HasEmbedDirective,
 		"HasNoNewDirective": HasNoNewDirective,
 		"KiPkg":             KiPkg,
+		"SetterFields":      SetterFields,
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
@@ -69,6 +70,14 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	
 	// As{{.Name}} satisfies the [{{.Name}}Embedder] interface
 	func (t *{{.Name}}) As{{.Name}}() *{{.Name}} {
+		return t
+	}
+	{{end}}
+
+	{{typ := .}}
+	{{range (SetterFields .)}}
+	func (t *{{typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{typ.Name}} {
+		t.{{.Name}} = v
 		return t
 	}
 	{{end}}
