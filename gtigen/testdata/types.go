@@ -18,7 +18,7 @@ type Person struct {
 	Name string
 	// Age is the age of the person
 	//gi:view inline
-	Age int
+	Age int `json:"-"`
 }
 
 //gti:skip

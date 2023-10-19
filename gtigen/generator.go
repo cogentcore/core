@@ -10,6 +10,7 @@ import (
 	"go/ast"
 	"go/types"
 	"os"
+	"reflect"
 	"slices"
 	"strings"
 	"text/template"
@@ -345,11 +346,16 @@ func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 			}
 			dirs = sdirs
 		}
+		tag := reflect.StructTag("")
+		if field.Tag != nil {
+			tag = reflect.StructTag(field.Tag.Value)
+		}
 		fo := &gti.Field{
 			Name:       name,
 			Type:       tn,
 			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
+			Tag:        tag,
 		}
 		res.Add(name, fo)
 	}

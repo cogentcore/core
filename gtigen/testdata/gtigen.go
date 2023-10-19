@@ -19,17 +19,17 @@ var PersonType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "Name is the name of the person", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-hide"}},
-		}}},
+		}, Tag: ""}},
 		{"Age", &gti.Field{Name: "Age", Type: "int", Doc: "Age is the age of the person", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
-		}}},
+		}, Tag: "`json:\"-\"`"}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Introduction", &gti.Method{Name: "Introduction", Doc: "Introduction returns an introduction for the person.\nIt contains the name of the person and their age.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-name", "ShowIntroduction", "-icon", "play", "-show-result", "-confirm"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}}},
+			{"string", &gti.Field{Name: "string", Type: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		})}},
 	}),
 	Instance: &Person{},
@@ -44,7 +44,7 @@ var _ = gti.AddFunc(&gti.Func{
 	Doc:        "Alert prints an alert with the given message",
 	Directives: gti.Directives{},
 	Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"msg", &gti.Field{Name: "msg", Type: "string", Doc: "", Directives: gti.Directives{}}},
+		{"msg", &gti.Field{Name: "msg", Type: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 })

@@ -4,7 +4,11 @@
 
 package gti
 
-import "goki.dev/ordmap"
+import (
+	"reflect"
+
+	"goki.dev/ordmap"
+)
 
 // Field represents a field or embed in a struct,
 // or an argument or return value of a function.
@@ -21,6 +25,10 @@ type Field struct {
 
 	// Directives has the parsed comment directives
 	Directives Directives
+
+	// Tag, if this field is part of a struct, contains the struct
+	// tag for it.
+	Tag reflect.StructTag
 }
 
 // Fields represents a set of multiple [Field] objects
