@@ -431,35 +431,6 @@ func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
 
-var _ = gti.AddType(&gti.Type{
-	Name:      "goki.dev/gi/v2/giv.FuncConfig",
-	ShortName: "giv.FuncConfig",
-	IDName:    "func-config",
-	Doc:       "FuncConfig contains the configuration options for a function, to be passed\nto [CallFunc] or to the `gi:toolbar` and `gi:menubar` comment directives.\nThese options control both the appearance and behavior of both the function\nbutton in a toolbar and/or menubar button and the dialog created by [CallFunc].",
-	Directives: gti.Directives{
-		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-	},
-	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Parent", &gti.Field{Name: "Parent", Type: "*FuncConfig", Doc: "If non-nil, Parent is the parent menu to place this function\nin when creating a toolbar or a menubar. If the specified parent\nfunction does not exist, an artificial parent toolbar/menubar\nbutton will be created to store this function. That artificial\nparent button will have the configuration information specified here.\nIf no artificial parent is needed, the only applicable part of the\nconfiguration information specified here is [FuncConfig.Name]. The\nname of the parent specified in [FuncConfig.Name] should be in\nslash-separated path format (for example, if you want to put\nsomething in the Export menu, which is in the File menu, you would\nspecify [FuncConfig.Parent.Name] as \"File/Export\". When using a comment\ndirective, the parent name can be specified directly through the \"-parent\"\nflag, instead of using \"-parent-name\".", Directives: gti.Directives{}}},
-		{"Name", &gti.Field{Name: "Name", Type: "string", Doc: "Name is the actual name in code of the function.", Directives: gti.Directives{}}},
-		{"Label", &gti.Field{Name: "Label", Type: "string", Doc: "Label is the user-friendly label for the function button.\nIt defaults to the sentence case version of the\nname of the function.", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "Icon is the icon for the function button. If there\nis an icon with the same name as the function, it\ndefaults to that icon.", Directives: gti.Directives{}}},
-		{"Doc", &gti.Field{Name: "Doc", Type: "string", Doc: "Doc is the documentation for the function, used as\na tooltip on the function button and a label in the\n[CallFunc] dialog. It defaults to the documentation\nfor the function found in gti.", Directives: gti.Directives{}}},
-		{"SepBefore", &gti.Field{Name: "SepBefore", Type: "bool", Doc: "SepBefore is whether to insert a separator before the\nfunction button in a toolbar/menubar.", Directives: gti.Directives{}}},
-		{"SepAfter", &gti.Field{Name: "SepAfter", Type: "bool", Doc: "SepAfter is whether to insert a separator after the\nfunction button in a toolbar/menubar.", Directives: gti.Directives{}}},
-		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", Doc: "Confirm is whether to show a confirmation dialog asking\nthe user whether they are sure they want to call the function\nbefore calling it.", Directives: gti.Directives{}}},
-		{"ShowResult", &gti.Field{Name: "ShowResult", Type: "bool", Doc: "ShowResult is whether to display the result (return values) of the function\nafter it is called. If this is set to true and there are no return values,\nit displays a message that the method was successful.", Directives: gti.Directives{}}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "Shortcut is the keyboard shortcut that triggers the function button", Directives: gti.Directives{}}},
-		{"ShortcutKey", &gti.Field{Name: "ShortcutKey", Type: "gi.KeyFuns", Doc: "ShortcutKey is the keyboard shortcut function that triggers the function button", Directives: gti.Directives{}}},
-		{"UpdateMethod", &gti.Field{Name: "UpdateMethod", Type: "string", Doc: "UpdateMethod, when specified on a method, is the name of a method on the same\ntype this method is on to call with the function button whenever it is updated.\nSee [FuncConfig.UpdateFunc] for more information.", Directives: gti.Directives{}}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *gi.Button)", Doc: "UpdateFunc is a function to call with the function button whenever it\nis updated. For example, this can be used to change whether a button is\ndisabled based on some other value. When using comment directives, this\nshould be set through [FuncConfig.UpdateMethod].", Directives: gti.Directives{}}},
-		{"Args", &gti.Field{Name: "Args", Type: "*gti.Fields", Doc: "Args are the arguments to the function. They are set automatically.", Directives: gti.Directives{}}},
-		{"Returns", &gti.Field{Name: "Returns", Type: "*gti.Fields", Doc: "Returns are the return values of the function. They are set automatically.", Directives: gti.Directives{}}},
-	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-})
-
 // FuncButtonType is the [gti.Type] for [FuncButton]
 var FuncButtonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FuncButton",
@@ -471,8 +442,8 @@ var FuncButtonType = gti.AddType(&gti.Type{
 		{"Func", &gti.Field{Name: "Func", Type: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}}},
 		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}}},
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}}},
-		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).", Directives: gti.Directives{}}},
-		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function", Directives: gti.Directives{}}},
+		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}}},
+		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there is a return value from the function of a complex\ntype (struct, slice, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Button", &gti.Field{Name: "Button", Type: "gi.Button", Doc: "", Directives: gti.Directives{}}},
@@ -514,7 +485,11 @@ var GiEditorType = gti.AddType(&gti.Type{
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
 	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Update", &gti.Method{Name: "Update", Doc: "Update updates the objects being edited (e.g., updating display changes)", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 	Instance: &GiEditor{},
 })
 

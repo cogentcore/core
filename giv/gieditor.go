@@ -56,6 +56,8 @@ func (ge *GiEditor) OnInit() {
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
+//
+//gti:add
 func (ge *GiEditor) Update() {
 	if ge.KiRoot == nil {
 		return
