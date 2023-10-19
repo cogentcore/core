@@ -4,14 +4,7 @@
 
 package giv
 
-import (
-	"reflect"
-
-	"goki.dev/gi/v2/gi"
-	"goki.dev/goosi/events/key"
-	"goki.dev/gti"
-	"goki.dev/icons"
-)
+/*
 
 // FuncConfig contains the configuration options for a function, to be passed
 // to [CallFunc] or to the `gi:toolbar` and `gi:menubar` comment directives.
@@ -97,7 +90,6 @@ func (fc *FuncConfig) SetString(str string) error {
 // It returns whether any method buttons were added.
 func ToolbarView(val any, tb *gi.Toolbar) bool {
 	return false
-	/*
 		typ := gti.TypeByValue(val)
 		if typ == nil {
 			return false
@@ -164,10 +156,8 @@ func ToolbarView(val any, tb *gi.Toolbar) bool {
 			}
 		}
 		return true
-	*/
 }
 
-/*
 // ConfigForFunc returns the default [FuncConfig] for the given [gti.Func].
 // It is a wrapper on [ConfigForMethod]; see it for more information.
 func ConfigForFunc(fun *gti.Func) *FuncConfig {
@@ -226,25 +216,6 @@ func ConfigForMethod(met *gti.Method, directive ...string) *FuncConfig {
 		}
 	}
 	return cfg
-}
-
-*/
-// ArgConfig contains the relevant configuration information for each arg,
-// including the reflect.Value, name, optional description, and default value
-type ArgConfig struct {
-	// Name is the actual name of the arg in code
-	Name string
-	// Label is the user-friendly label name for the arg.
-	// It defaults to the sentence case version of Name.
-	Label string
-	// Doc is the documentation for the argument
-	Doc string
-	// Val is the reflect.Value of the argument
-	Val reflect.Value
-	// View is the [Value] view associated with the argument
-	View Value
-	// Default, if non-nil, is the default value for the argument
-	Default any
 }
 
 // CallFunc calls the given function with the given configuration information
@@ -332,5 +303,5 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 					}).Run()
 			},
 		).Run()
-	*/
 }
+*/
