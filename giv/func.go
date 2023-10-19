@@ -8,8 +8,6 @@ import (
 	"reflect"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
-	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -335,61 +333,4 @@ func CallReflectFunc(ctx gi.Widget, rfun reflect.Value, cfg ...*FuncConfig) {
 			},
 		).Run()
 	*/
-}
-
-// ArgsForFunc returns the appropriate [ArgConfig] objects for the arguments
-// of the given function with the given configuration information.
-func ArgsForFunc(fun reflect.Value, cfg *FuncConfig) []ArgConfig {
-	res := make([]ArgConfig, cfg.Args.Len())
-	for i, kv := range cfg.Args.Order {
-		arg := kv.Val
-		ra := ArgConfig{
-			Name:  arg.Name,
-			Label: sentencecase.Of(arg.Name),
-			Doc:   arg.Doc,
-		}
-
-		atyp := fun.Type().In(i)
-		ra.Val = reflect.New(atyp)
-
-		ra.View = ToValue(ra.Val.Interface(), "")
-		ra.View.SetSoloValue(ra.Val)
-		ra.View.SetName(ra.Name)
-		res[i] = ra
-	}
-	return res
-}
-
-// ReturnsForFunc returns the appropriate [ArgConfig] objects for the given
-// return values from the function with the given configuration information.
-func ReturnsForFunc(rets []reflect.Value, cfg *FuncConfig) []ArgConfig {
-	res := make([]ArgConfig, cfg.Returns.Len())
-	for i, kv := range cfg.Returns.Order {
-		ret := kv.Val
-		ra := ArgConfig{
-			Name:  ret.Name,
-			Label: sentencecase.Of(ret.Name),
-			Doc:   ret.Doc,
-		}
-
-		ra.Val = rets[i]
-
-		ra.View = ToValue(ra.Val.Interface(), "")
-		ra.View.SetSoloValue(ra.Val)
-		ra.View.SetName(ra.Name)
-		ra.View.SetFlag(true, states.ReadOnly)
-		res[i] = ra
-	}
-	return res
-}
-
-// ShowReturnsDialog runs a dialog displaying the given function return
-// values based on the given configuration information and context widget.
-func ShowReturnsDialog(ctx gi.Widget, rets []reflect.Value, cfg *FuncConfig) {
-	if len(rets) == 0 {
-		gi.NewSnackbar(ctx, gi.SnackbarOpts{Text: cfg.Label + " succeeded"}).Run()
-		return
-	}
-	ac := ReturnsForFunc(rets, cfg)
-	ArgViewDialog(ctx, DlgOpts{Title: "Result of " + cfg.Label, Prompt: cfg.Doc, Ok: true}, ac, nil).Run()
 }
