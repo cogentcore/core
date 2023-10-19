@@ -256,10 +256,24 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.Columns = nWidgPerRow
 				// setting a pref here is key for giving it a scrollbar in larger context
 				s.SetMinPrefHeight(units.Em(6))
-				s.SetMinPrefWidth(units.Ch(20))
+				s.SetMinPrefWidth(units.Ch(10))
 				s.SetStretchMax()                  // for this to work, ALL layers above need it too
 				s.Overflow = styles.OverflowScroll // this still gives it true size during PrefSize
 			})
+		case "grid-lay/scrollbar":
+			sb := w.(*gi.Slider)
+			sb.Style(func(s *styles.Style) {
+				sb.Type = gi.SliderScrollbar
+				s.SetFixedWidth(sv.Styles.ScrollBarWidth)
+				s.SetStretchMaxHeight()
+			})
+			sb.OnChange(func(e events.Event) {
+				updt := sv.UpdateStart()
+				sv.StartIdx = int(sb.Value)
+				sv.This().(SliceViewer).UpdateSliceGrid()
+				sv.UpdateEndRender(updt)
+			})
+
 		}
 		if w.Parent().Name() == "grid" {
 			if strings.HasPrefix(w.Name(), "index-") {
@@ -272,6 +286,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			if strings.HasPrefix(w.Name(), "add-") {
 				w.Style(func(s *styles.Style) {
 					w.(*gi.Button).SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Success.Base
 				})
 			}
 			if strings.HasPrefix(w.Name(), "del-") {
@@ -364,6 +379,8 @@ func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
+	sv.This().(SliceViewer).LayoutSliceGrid()
+	sv.This().(SliceViewer).UpdateSliceGrid()
 	if mods {
 		sv.UpdateEndLayout(updt)
 	}
@@ -522,29 +539,22 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 // ConfigScroll configures the scrollbar
 func (sv *SliceViewBase) ConfigScroll() {
 	sb := sv.This().(SliceViewer).ScrollBar()
+	sb.Type = gi.SliderScrollbar
+	sb.ValThumb = true
 	sb.Dim = mat32.Y
 	sb.Tracking = true
-	if sv.Styles.ScrollBarWidth.Dots == 0 {
-		sb.SetFixedWidth(units.Dp(16))
-	} else {
-		sb.SetFixedWidth(sv.Styles.ScrollBarWidth)
-	}
-	sb.SetStretchMaxHeight()
 	sb.Min = 0
 	sb.Step = 1
 	sv.UpdateScroll()
-	sb.OnChange(func(e events.Event) {
-		updt := sv.UpdateStart()
-		sv.StartIdx = int(sb.Value)
-		sv.This().(SliceViewer).UpdateSliceGrid()
-		sv.UpdateEndRender(updt)
-	})
 }
 
+// func (sv *SliceViewBase) GetSize(sc *gi.Scene, iter int) {
+// 	sv.Frame.GetSize(sc, iter)
+// }
+
 func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	sv.This().(SliceViewer).LayoutSliceGrid()
-	sv.This().(SliceViewer).UpdateSliceGrid()
-	return sv.Frame.DoLayout(sc, parBBox, iter)
+	redo := sv.Frame.DoLayout(sc, parBBox, iter)
+	return redo
 }
 
 // UpdateStartIdx updates StartIdx to fit current view
@@ -583,7 +593,9 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	sgHt := sg.LayState.Alloc.Size.Y
+	fmt.Println("sv:", sv.LayState.String())
+	fmt.Println("sg:", sg.LayState.String())
+	sgHt := sg.LayState.Alloc.SizeOrig.Y
 	if sgHt == 0 {
 		return 0
 	}
@@ -600,7 +612,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 	}
 
 	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
+	defer sg.UpdateEndRender(updt)
 
 	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -631,6 +643,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.LayoutHeight = float32(sv.VisRows) * sv.RowHeight
 	} else {
 		sgHt := sv.AvailHeight()
+		fmt.Println(sgHt)
 		sv.LayoutHeight = sgHt
 		if sgHt == 0 {
 			return false
@@ -638,7 +651,7 @@ func (sv *SliceViewBase) LayoutSliceGrid() bool {
 		sv.VisRows = int(mat32.Floor(sgHt / sv.RowHeight))
 	}
 	sv.DispRows = min(sv.SliceSize, sv.VisRows)
-	// fmt.Println(sv.DispRows, sv.SliceSize, sv.VisRows, sv.RowHeight)
+	fmt.Println(sv.DispRows, sv.SliceSize, sv.VisRows, sv.RowHeight)
 
 	nWidg := nWidgPerRow * sv.DispRows
 
@@ -667,7 +680,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		return
 	}
 	updt := sg.UpdateStart()
-	defer sg.UpdateEnd(updt)
+	defer sg.UpdateEndRender(updt)
 
 	if laser.AnyIsNil(sv.Slice) {
 		sg.DeleteChildren(ki.DestroyKids)
@@ -689,6 +702,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 	sc := sv.Sc
 
 	if sv.Values == nil || sg.NumChildren() != nWidg || len(sv.Values) != sv.DispRows { // shouldn't happen..
+		fmt.Println("re-layout")
 		sv.ViewMuUnlock()
 		sv.LayoutSliceGrid()
 		sv.ViewMuLock()
@@ -739,6 +753,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		var widg gi.Widget
 		if sg.Kids[ridx+idxOff] != nil {
 			widg = sg.Kids[ridx+idxOff].(gi.Widget)
+			fmt.Println("updt widg:", widg)
 			vv.UpdateWidget()
 			if sv.IsDisabled() {
 				widg.AsWidget().SetState(true, states.Disabled)
@@ -749,6 +764,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 			sg.SetChild(widg, ridx+idxOff, valnm)
 			vv.ConfigWidget(widg, sc)
 			wb := widg.AsWidget()
+			fmt.Println("new widg:", widg)
 			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
 
 			if sv.IsDisabled() {

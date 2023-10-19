@@ -49,10 +49,10 @@ type MapViewInline struct {
 }
 
 func (mv *MapViewInline) OnInit() {
-	mv.MapviewInlineStyles()
+	mv.MapViewInlineStyles()
 }
 
-func (mv *MapViewInline) MapviewInlineStyles() {
+func (mv *MapViewInline) MapViewInlineStyles() {
 	mv.WidgetConfiged = make(map[gi.Widget]bool)
 	mv.Lay = gi.LayoutHoriz
 	mv.Style(func(s *styles.Style) {
@@ -159,15 +159,20 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		updt = mv.UpdateStart()
 	}
 	for i, vv := range mv.Values {
+		kv := mv.Keys[i]
 		vvb := vv.AsValueBase()
+		kvb := kv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
+		kvb.OnChange(func(e events.Event) {
+			mv.SendChange()
+			mv.ReConfig()
+		})
 		keyw := mv.Child(i * 2).(gi.Widget)
 		widg := mv.Child((i * 2) + 1).(gi.Widget)
-		kv := mv.Keys[i]
 		if _, cfg := mv.WidgetConfiged[widg]; cfg { // already configured
-			vv.AsValueBase().Widget = widg
+			vvb.Widget = widg
 			vv.UpdateWidget()
-			kv.AsValueBase().Widget = keyw
+			kvb.Widget = keyw
 			kv.UpdateWidget()
 			continue
 		}

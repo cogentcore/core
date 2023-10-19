@@ -6,6 +6,7 @@ package giv
 
 import (
 	"reflect"
+	"strings"
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
@@ -50,6 +51,11 @@ type MapView struct {
 	// the number of columns in the map; do not set externally; generally only access internally
 	NCols int
 
+	// WidgetConfiged tracks if the given Widget has been configured.
+	// Widgets can only be configured once -- otherwise duplicate event
+	// functions are registered.
+	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
+
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
 	TmpSave Value `json:"-" xml:"-"`
 
@@ -61,6 +67,11 @@ type MapView struct {
 }
 
 func (mv *MapView) OnInit() {
+	mv.MapViewStyles()
+}
+
+func (mv *MapView) MapViewStyles() {
+	mv.WidgetConfiged = make(map[gi.Widget]bool)
 	mv.ShowToolbar = true
 	mv.Lay = gi.LayoutVert
 	mv.Style(func(s *styles.Style) {
@@ -82,22 +93,34 @@ func (mv *MapView) OnInit() {
 				s.Columns = mv.NCols
 			})
 		}
+		if w.Parent().Name() == "map-grid" {
+			if strings.HasPrefix(w.Name(), "del-") {
+				delbt := w.(*gi.Button)
+				delbt.OnClick(func(e events.Event) {
+					mv.MapDelete(delbt.Data.(Value).Val())
+				})
+				delbt.Style(func(s *styles.Style) {
+					delbt.SetType(gi.ButtonAction)
+					s.Color = colors.Scheme.Error.Base
+				})
+			}
+		}
 	})
 }
 
-// SetMap sets the source map that we are viewing -- rebuilds the children to
-// represent this map
+// SetMap sets the source map that we are viewing.
+// Rebuilds the children to represent this map
 func (mv *MapView) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.Config(mv.Sc)
+	mv.ReConfig()
 }
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {
 	// maps have to re-read their values -- can't get pointers
-	mv.ConfigMapGrid()
+	mv.ReConfig()
 }
 
 // Config configures the view
@@ -222,13 +245,24 @@ func (mv *MapView) ConfigMapGrid() {
 		updt = sg.UpdateStart() // cover rest of updates, which can happen even if same config
 	}
 	for i, vv := range mv.Values {
+		kv := mv.Keys[i]
 		vvb := vv.AsValueBase()
+		kvb := kv.AsValueBase()
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
+		kvb.OnChange(func(e events.Event) {
+			mv.SendChange()
+			mv.ReConfig()
+		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		widg := sg.Child(i*ncol + 1).(gi.Widget)
-		kv := mv.Keys[i]
-		kvb := kv.AsValueBase()
-		kvb.OnChange(func(e events.Event) { mv.SendChange() })
+		if _, cfg := mv.WidgetConfiged[widg]; cfg { // already configured
+			vvb.Widget = widg
+			vv.UpdateWidget()
+			kvb.Widget = keyw
+			kv.UpdateWidget()
+			continue
+		}
+		mv.WidgetConfiged[widg] = true
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(widg, sc)
 		if ifaceType {
@@ -251,12 +285,6 @@ func (mv *MapView) ConfigMapGrid() {
 		delbt.SetIcon(icons.Delete)
 		delbt.Tooltip = "delete item"
 		delbt.Data = kv
-		delbt.OnClick(func(e events.Event) {
-			mv.MapDelete(kv.Val())
-		})
-		delbt.Style(func(s *styles.Style) {
-			s.Color = colors.Scheme.Error.Base
-		})
 	}
 	sg.UpdateEnd(updt)
 }
@@ -317,8 +345,8 @@ func (mv *MapView) MapAdd() {
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
-	mv.ConfigMapGrid()
 	mv.SetChanged()
+	mv.ReConfig()
 }
 
 // MapDelete deletes a key-value from the map
@@ -327,16 +355,15 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 		return
 	}
 	updt := mv.UpdateStart()
-	defer mv.UpdateEnd(updt)
-
 	// kvi := laser.NonPtrValue(key).Interface()
 	laser.MapDeleteValue(mv.Map, laser.NonPtrValue(key))
 
 	if mv.TmpSave != nil {
 		mv.TmpSave.SaveTmp()
 	}
-	mv.ConfigMapGrid()
 	mv.SetChanged()
+	mv.UpdateEnd(updt)
+	mv.ReConfig()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -387,10 +414,5 @@ func (mv *MapView) Render(sc *gi.Scene) {
 	if mv.IsConfiged() {
 		mv.Toolbar().UpdateButtons() // nil safe..
 	}
-	// if win := mv.ParentRenderWin(); win != nil {
-	// 	if !win.Is(WinResizing) {
-	// 		win.MainMenuUpdateActives()
-	// 	}
-	// }
 	mv.Frame.Render(sc)
 }

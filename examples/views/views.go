@@ -163,12 +163,12 @@ func app() {
 	but.Tooltip = "open a SliceViewDialog slice view with a lot of elments, for performance testing"
 	but.OnClick(func(e events.Event) {
 		sl := make([]float32, 2880)
-		giv.SliceViewDialog(but, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, &sl, nil, nil)
+		giv.SliceViewDialog(but, giv.DlgOpts{Title: "SliceView Test", Prompt: "It should open quickly."}, &sl, nil, nil).Run()
 	})
 	but = gi.NewButton(trow, "table-test").SetText("TableDialog")
 	but.Tooltip = "open a TableViewDialog view "
 	but.OnClick(func(e events.Event) {
-		giv.TableViewDialog(but, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, &tsttable, nil, nil)
+		giv.TableViewDialog(but, giv.DlgOpts{Title: "TableView Test", Prompt: "how does it resize."}, &tsttable, nil, nil).Run()
 	})
 
 	lab1 := gi.NewLabel(trow, "lab1").SetText("<large>This is a test of the <tt>Slice</tt> and <tt>Map</tt> Views reflect-ive GUI</large>")
@@ -186,12 +186,12 @@ func app() {
 	split := gi.NewSplits(sc, "split")
 	split.Dim = mat32.X
 
-	strv := giv.NewStructView(split, "strv")
-	strv.Sc = sc
-	strv.SetStruct(&stru)
-	strv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
+	// strv := giv.NewStructView(split, "strv")
+	// strv.Sc = sc
+	// strv.SetStruct(&stru)
+	// strv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
 	// mv := giv.NewMapView(split, "mv")
 	// mv.SetMap(&tstmap)
@@ -199,19 +199,19 @@ func app() {
 	// 	s.SetStretchMax()
 	// })
 
-	// sv := giv.NewSliceView(split, "sv")
-	// // sv.SetInactive()
-	// sv.SetSlice(&tstslice)
-	// sv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
-
-	tv := giv.NewTableView(split, "tv")
+	sv := giv.NewSliceView(split, "sv")
 	// sv.SetInactive()
-	tv.SetSlice(&tsttable)
-	tv.Style(func(s *styles.Style) {
+	sv.SetSlice(&tstslice)
+	sv.Style(func(s *styles.Style) {
 		s.SetStretchMax()
 	})
+
+	// tv := giv.NewTableView(split, "tv")
+	// // sv.SetInactive()
+	// tv.SetSlice(&tsttable)
+	// tv.Style(func(s *styles.Style) {
+	// 	s.SetStretchMax()
+	// })
 
 	// split.SetSplits(.3, .2, .2, .3)
 	split.SetSplits(.5, .5)

@@ -59,6 +59,10 @@ func (la *LayoutAllocs) Reset() {
 	la.PosRel = mat32.Vec2Zero
 }
 
+func (la LayoutAllocs) String() string {
+	return fmt.Sprintf("Alloc: Size=%s; Pos=%s; PosRel=%s; SizeOrig=%s; PosOrig=%s", la.Size.String(), la.Pos.String(), la.PosRel.String(), la.SizeOrig.String(), la.PosOrig.String())
+}
+
 // LayoutState contains all the state needed to specify the layout of an item
 // within a Layout.  Is initialized with computed values of style prefs.
 type LayoutState struct {
@@ -76,6 +80,10 @@ type LayoutState struct {
 // GridSpan     image.Point `desc:"number of grid elements that we take up in each direction"`
 
 func (ld *LayoutState) Defaults() {
+}
+
+func (ld *LayoutState) String() string {
+	return ld.Size.String() + "\n" + ld.Alloc.String() + "\n"
 }
 
 func (ld *LayoutState) SetFromStyle(ls *styles.Style) {
