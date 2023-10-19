@@ -118,14 +118,13 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 }
 
 // SetterFields returns all of the fields of the given type
-// that have a `goki:setter` comment directive.
+// that have a `setter:"+"` struct tag.
 func SetterFields(typ *gtigen.Type) []*gti.Field {
 	res := []*gti.Field{}
 	for _, kv := range typ.Fields.Order {
 		f := kv.Val
-		hasSetter := slices.ContainsFunc(f.Directives, func(d *gti.Directive) bool {
-			return d.Tool == "goki" && d.Directive == "setter"
-		})
+		s, ok := f.Tag.Lookup("setter")
+		hasSetter := ok && s == "+"
 		if hasSetter {
 			res = append(res, f)
 		}
