@@ -5,6 +5,8 @@
 package giv
 
 import (
+	"reflect"
+
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
@@ -29,6 +31,24 @@ type ArgView struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
+}
+
+// ArgConfig contains the relevant configuration information for each arg,
+// including the reflect.Value, name, optional description, and default value
+type ArgConfig struct {
+	// Name is the actual name of the arg in code
+	Name string
+	// Label is the user-friendly label name for the arg.
+	// It defaults to the sentence case version of Name.
+	Label string
+	// Doc is the documentation for the argument
+	Doc string
+	// Val is the reflect.Value of the argument
+	Val reflect.Value
+	// View is the [Value] view associated with the argument
+	View Value
+	// Default, if non-nil, is the default value for the argument
+	Default any
 }
 
 func (av *ArgView) OnInit() {
