@@ -50,8 +50,8 @@ type Chooser struct {
 	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
 	AllowNew bool
 
-	// CurValLabel is the string label for the current value
-	CurValLabel string
+	// CurLabel is the string label for the current value
+	CurLabel string
 
 	// current selected value
 	CurVal any `json:"-" xml:"-"`
@@ -163,6 +163,7 @@ func (ch *Chooser) ChooserStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Selectable, abilities.DoubleClickable)
 				s.Cursor = cursors.None
+				s.Text.WhiteSpace = styles.WhiteSpaceNowrap
 				s.Margin.Set()
 				s.Padding.Set()
 				s.AlignV = styles.AlignMiddle
@@ -265,11 +266,11 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	}
 	if ch.Editable {
 		tx := ch.Parts.Child(txIdx).(*TextField)
-		tx.SetText(ch.CurValLabel)
+		tx.SetText(ch.CurLabel)
 		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 	} else {
 		lbl := ch.Parts.Child(lbIdx).(*Label)
-		lbl.SetText(ch.CurValLabel)
+		lbl.SetText(ch.CurLabel)
 		lbl.Config(ch.Sc) // this is essential
 	}
 	{ // indicator
@@ -467,6 +468,14 @@ func (ch *Chooser) FindItem(it any) int {
 	return -1
 }
 
+// SetPlaceholder sets the given placeholder text and
+// CurIndex = -1, indicating that nothing has not been selected.
+func (ch *Chooser) SetPlaceholder(text string) {
+	ch.Placeholder = text
+	ch.ShowCurVal(text)
+	ch.CurIndex = -1
+}
+
 // SetCurVal sets the current value (CurVal) and the corresponding CurIndex
 // for that item on the current Items list (adds to items list if not found)
 // -- returns that index -- and sets the text to the string value of that
@@ -527,11 +536,11 @@ func (ch *Chooser) ShowCurVal(label string) {
 	updt := ch.UpdateStart()
 	defer ch.UpdateEndRender(updt)
 
-	ch.CurValLabel = label
+	ch.CurLabel = label
 	if ch.Editable {
 		tf, ok := ch.TextField()
 		if ok {
-			tf.SetText(ch.CurValLabel)
+			tf.SetText(ch.CurLabel)
 		}
 	} else {
 		if icnm, isic := ch.CurVal.(icons.Icon); isic {
@@ -539,7 +548,7 @@ func (ch *Chooser) ShowCurVal(label string) {
 		} else {
 			lbl := ch.LabelWidget()
 			if lbl != nil {
-				lbl.SetText(ch.CurValLabel)
+				lbl.SetText(ch.CurLabel)
 			}
 		}
 	}
@@ -580,7 +589,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)
 		} else {
-			ch.CurValLabel = ToLabel(it)
+			ch.CurLabel = ToLabel(it)
 			if len(ch.Tooltips) > i {
 				bt.Tooltip = ch.Tooltips[i]
 			}
