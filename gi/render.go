@@ -54,16 +54,24 @@ import (
 // (e.g., a Hover started or a Button is pushed down).
 // These changes should be protected by UpdateStart / End,
 // such that ApplyStyle is only ever called within that scope.
-// After the UpdateEnd(updt), call SetNeedsRender(vp, updt)
+// Use UpdateEndRender(updt) to call SetNeedsRender on updt
 // which sets the node NeedsRender and ScNeedsRender flags,
 // to drive the rendering update at next DoNeedsRender call.
 //
-// Because Render checks for Is(Updating) flag, and doesn't render
-// if so, it should never be the case that a node is being modified
-// and rendered at the same time, avoiding need for mutexes.
+// The initial configuration of a scene can skip calling
+// Config and ApplyStyle because these will be called automatically
+// during the Run() process for the Scene.
 //
-// For nodes with dynamic content that doesn't require styling or config
-// a simple SetNeedsRender call will drive re-rendering. UpdateSig does this.
+// For dynamic reconfiguration after initial display,
+// ReConfg() is the key method, calling Config then
+// ApplyStyle on the node and all of its children.
+//
+// UpdateStart also sets the Scene-level ScUpdating flag, and
+// UpdateEnd clears it, to prevent any Scene-level layout etc
+// from happening while a widget is updating.
+//
+// For nodes with dynamic content that doesn't require styling or config,
+// a simple SetNeedsRender call will drive re-rendering.
 //
 // Updating is _always_ driven top-down by RenderWin at FPS sampling rate,
 // in the DoUpdate() call on the Scene.
@@ -260,26 +268,17 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	pr.End()
 }
 
-// ReConfig is a convenience method for reconfiguring a widget after
-// changes have been made, calling Config then ApplyStyle.
-// The plain Config method is used during initial configuration.
-// It is called by the Scene and caches the Sc pointer.
-func (wb *WidgetBase) ReConfig() {
-	if !wb.HasSc() {
-		return
-	}
-	wi := wb.This().(Widget)
-	wi.Config(wb.Sc)
-	wi.ApplyStyle(wb.Sc)
-}
-
-// ReConfigTree calls Config and then ApplyStyle
+// ReConfig calls Config and then ApplyStyle
 // on every Widget in the tree from me.
-// This should be used for currently-displayed widgets.
-func (wb *WidgetBase) ReConfigTree(sc *Scene) {
-	if wb.This() == nil {
+// This should be used after any structural changes
+// to currently-displayed widgets.
+// It wraps everything in UpdateStart / UpdateEndLayout
+// so layout will automatically be called for next render.
+func (wb *WidgetBase) ReConfig() {
+	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
+	sc := wb.Sc
 	updt := wb.UpdateStart()
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
