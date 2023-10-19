@@ -589,7 +589,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)
 		} else {
-			ch.CurLabel = ToLabel(it)
+			bt.Text = ToLabel(it)
 			if len(ch.Tooltips) > i {
 				bt.Tooltip = ch.Tooltips[i]
 			}
