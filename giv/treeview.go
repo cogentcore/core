@@ -127,7 +127,6 @@ func (tv *TreeView) TreeViewStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 		tv.Indent.SetEm(1)
 		tv.OpenDepth = 4
-		s.Cursor = cursors.Pointer
 		s.Border.Style.Set(styles.BorderNone)
 		// s.Border.Width.Left.SetDp(1)
 		// s.Border.Color.Left = colors.Scheme.OutlineVariant
@@ -148,6 +147,7 @@ func (tv *TreeView) TreeViewStyles() {
 		case "parts":
 			parts := w.(*gi.Layout)
 			parts.Style(func(s *styles.Style) {
+				s.Cursor = cursors.Pointer
 				s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Selectable, abilities.Hoverable)
 				parts.Spacing.SetCh(0.5)
 				s.Padding.Set(units.Dp(4))
@@ -184,6 +184,9 @@ func (tv *TreeView) TreeViewStyles() {
 				tv.SelectAction(e.SelectMode())
 				e.SetHandled()
 			})
+			// the context menu events will get sent to the parts, so it
+			// needs to intercept them and send them up
+			parts.On(events.ContextMenu, tv.ContextMenu)
 		case "parts/icon":
 			w.Style(func(s *styles.Style) {
 				s.Width.SetEm(1)
@@ -198,6 +201,8 @@ func (tv *TreeView) TreeViewStyles() {
 			sw.IconOff = icons.KeyboardArrowRight // icons.Folder
 			sw.IconDisab = icons.Blank
 			sw.Style(func(s *styles.Style) {
+				// parent will handle our cursor
+				s.Cursor = cursors.None
 				s.Color = colors.Scheme.Primary.Base
 				s.Margin.Set()
 				s.Padding.Set()

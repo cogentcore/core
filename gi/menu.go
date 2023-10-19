@@ -132,5 +132,5 @@ func (wb *WidgetBase) HandleWidgetContextMenu() {
 func (wb *WidgetBase) ContextMenu(e events.Event) {
 	wi := wb.This().(Widget)
 	// TODO(kai/menu): how to handle empty context menus?
-	NewMenu(wb.MakeContextMenu, wi, wi.ContextMenuPos(e)).Run()
+	NewMenu(wi.MakeContextMenu, wi, wi.ContextMenuPos(e)).Run()
 }
