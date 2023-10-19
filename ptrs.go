@@ -92,6 +92,9 @@ func OnePtrValue(v reflect.Value) reflect.Value {
 func OnePtrUnderlyingValue(v reflect.Value) reflect.Value {
 	opv := OnePtrValue(v)
 	npv := NonPtrValue(opv)
+	if ValueIsZero(npv) {
+		return npv
+	}
 	itv := reflect.ValueOf(npv.Interface())
 	if itv.Kind() == reflect.Ptr {
 		// for this to still be a ptr, means that orig Value is
