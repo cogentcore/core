@@ -61,6 +61,21 @@ func (fb *FuncButton) OnInit() {
 	fb.ShowReturn = true
 }
 
+func (fb *FuncButton) SetConfirm(confirm bool) *FuncButton {
+	fb.Confirm = confirm
+	return fb
+}
+
+func (fb *FuncButton) SetShowReturn(show bool) *FuncButton {
+	fb.ShowReturn = show
+	return fb
+}
+
+func (fb *FuncButton) SetShowReturnAsDialog(show bool) *FuncButton {
+	fb.ShowReturnAsDialog = show
+	return fb
+}
+
 // SetFunc sets the function associated with the FuncButton to the
 // given function or method value, which must be added to gti.
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
@@ -128,9 +143,6 @@ func (fb *FuncButton) CallFunc() {
 	if fb.Func.Args.Len() == 0 {
 		if !fb.Confirm {
 			rets := fb.ReflectFunc.Call(nil)
-			if !fb.ShowReturn {
-				return
-			}
 			fb.ShowReturnsDialog(rets)
 			return
 		}
@@ -140,9 +152,6 @@ func (fb *FuncButton) CallFunc() {
 					return
 				}
 				rets := fb.ReflectFunc.Call(nil)
-				if !fb.ShowReturn {
-					return
-				}
 				fb.ShowReturnsDialog(rets)
 			}).Run()
 		return
@@ -163,9 +172,6 @@ func (fb *FuncButton) CallFunc() {
 
 			if !fb.Confirm {
 				rets := fb.ReflectFunc.Call(rargs)
-				if !fb.ShowReturn {
-					return
-				}
 				fb.ShowReturnsDialog(rets)
 			}
 			gi.NewStdDialog(fb.This().(gi.Widget), gi.DlgOpts{Title: fb.Text + "?", Prompt: "Are you sure you want to run " + fb.Text + "? " + fb.Tooltip, Ok: true, Cancel: true},
@@ -174,9 +180,6 @@ func (fb *FuncButton) CallFunc() {
 						return
 					}
 					rets := fb.ReflectFunc.Call(rargs)
-					if !fb.ShowReturn {
-						return
-					}
 					fb.ShowReturnsDialog(rets)
 				}).Run()
 		},
@@ -196,9 +199,13 @@ func (fb *FuncButton) SetMethodImpl(gmet *gti.Method, rmet reflect.Value) *FuncB
 }
 
 // ShowReturnsDialog runs a dialog displaying the given function return
-// values for the function associated with the function button.
+// values for the function associated with the function button. It does
+// nothing if [FuncButton.ShowReturn] is dialog
 func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
-	if len(rets) == 0 {
+	if !fb.ShowReturn {
+		return
+	}
+	if !fb.ShowReturnAsDialog {
 		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: fb.Text + " succeeded"}).Run()
 		return
 	}
