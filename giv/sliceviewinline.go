@@ -21,7 +21,7 @@ import (
 // SliceViewInline represents a slice as a single line widget,
 // for smaller slices and those explicitly marked inline.
 type SliceViewInline struct {
-	gi.Frame
+	gi.Layout
 
 	// the slice that we are a view onto
 	Slice any

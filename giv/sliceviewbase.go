@@ -31,11 +31,8 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
-////////////////////////////////////////////////////////////////////////////////////////
-//  SliceViewer
-
-// SliceViewer is the interface used by SliceViewBase to support any abstractions
-// needed for different types of slice views.
+// SliceViewer is the interface used by SliceViewBase to
+// support any abstractions needed for different types of slice views.
 type SliceViewer interface {
 	// AsSliceViewBase returns the base for direct access to relevant fields etc
 	AsSliceViewBase() *SliceViewBase
@@ -329,20 +326,21 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 		sv.SelectedIdx = -1
 	}
 	sv.ResetSelectedIdxs()
-	sv.Config(sv.Sc)
-	sv.UpdateEndLayout(updt)
+	sv.UpdateEnd(updt)
+	sv.ReConfig()
 }
 
-// Update is the high-level update display call -- robust to any changes
+// Update is the high-level update display call.
+// Robust to any changes.
 func (sv *SliceViewBase) Update() {
 	if !sv.This().(gi.Widget).IsVisible() {
 		return
 	}
-	updt := sv.UpdateStart()
-	defer sv.UpdateEndLayout(updt)
+	sv.ReConfig()
 }
 
-// UpdateValues updates the widget display of slice values, assuming same slice config
+// UpdateValues updates the widget display of slice values,
+// assuming same slice config
 func (sv *SliceViewBase) UpdateValues() {
 	updt := sv.UpdateStart()
 	for _, vv := range sv.Values {
@@ -366,10 +364,6 @@ func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
-
-	if sv.Sc != nil && sv.Sc.MainStageMgr() != nil {
-		sv.ApplyStyleTree(sc)
-	}
 	if mods {
 		sv.UpdateEndLayout(updt)
 	}
@@ -895,8 +889,8 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	if sv.TmpSave != nil {
 		sv.TmpSave.SaveTmp()
 	}
-	sv.SetChanged()
 	sv.ViewMuUnlock()
+	sv.SetChanged()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -1002,42 +996,19 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	sv.ToolbarSlice = sv.Slice
 }
 
-func (sv *SliceViewBase) ApplyStyle(sc *gi.Scene) {
-	sv.Frame.ApplyStyle(sc)
-	// if sv.IsDisabled() {
-	// 	sv.SetCanFocus()
-	// }
-	// // sg := sv.This().(SliceViewer).SliceGrid()
-	// // sg.StartFocus() // need to call this when window is actually active
-}
-
 func (sv *SliceViewBase) Render(sc *gi.Scene) {
 	// sv.Toolbar().UpdateButtons()
-	if sv.PushBounds(sc) {
-		sv.FrameStdRender(sc)
-		sv.RenderScrolls(sc)
-		sv.RenderChildren(sc)
-		sv.PopBounds(sc)
-	}
+	sv.Frame.Render(sc)
 }
 
 func (sv *SliceViewBase) NeedsDoubleReRender() bool {
 	return false
 }
 
-// func (sv *SliceViewBase) StateIs(states.Focused) bool {
-// 	if !sv.ContainsFocus() {
-// 		return false
-// 	}
-// 	if sv.IsDisabled() {
-// 		return sv.InactKeyNav
-// 	}
-// 	return true
-// }
-
-//////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 //  Row access methods
-//  NOTE: row = physical GUI display row, idx = slice index -- not the same!
+//  NOTE: row = physical GUI display row, idx = slice index
+//  not the same!
 
 // SliceVal returns value interface at given slice index
 // must be protected by mutex
@@ -1076,9 +1047,9 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 	return widg, true
 }
 
-// RowGrabFocus grabs the focus for the first focusable widget in given row --
-// returns that element or nil if not successful -- note: grid must have
-// already rendered for focus to be grabbed!
+// RowGrabFocus grabs the focus for the first focusable widget
+// in given row.  returns that element or nil if not successful
+// note: grid must have already rendered for focus to be grabbed!
 func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	if !sv.IsRowInBounds(row) || sv.InFocusGrab { // range check
 		return nil
@@ -1096,8 +1067,8 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	return widg
 }
 
-// IdxGrabFocus grabs the focus for the first focusable widget in given idx --
-// returns that element or nil if not successful
+// IdxGrabFocus grabs the focus for the first focusable widget
+// in given idx.  returns that element or nil if not successful.
 func (sv *SliceViewBase) IdxGrabFocus(idx int) *gi.WidgetBase {
 	sv.ScrollToIdx(idx)
 	return sv.This().(SliceViewer).RowGrabFocus(idx - sv.StartIdx)
@@ -1143,8 +1114,10 @@ func (sv *SliceViewBase) IdxFromPos(posY int) (int, bool) {
 	return row + sv.StartIdx, true
 }
 
-// ScrollToIdxNoUpdt ensures that given slice idx is visible by scrolling display as needed
-// This version does not update the slicegrid -- just computes the StartIdx and updates the scrollbar
+// ScrollToIdxNoUpdt ensures that given slice idx is visible
+// by scrolling display as needed.
+// This version does not update the slicegrid.
+// Just computes the StartIdx and updates the scrollbar
 func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 	if sv.DispRows == 0 {
 		return false
@@ -1163,7 +1136,8 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 	return false
 }
 
-// ScrollToIdx ensures that given slice idx is visible by scrolling display as needed
+// ScrollToIdx ensures that given slice idx is visible
+// by scrolling display as needed.
 func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 	updt := sv.ScrollToIdxNoUpdt(idx)
 	if updt {
@@ -1302,7 +1276,7 @@ func (sv *SliceViewBase) MovePageUpAction(selMode events.SelectModes) int {
 	return nidx
 }
 
-//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 //    Selection: user operates on the index labels
 
 // SelectRowWidgets sets the selection state of given row of widgets
@@ -1538,7 +1512,7 @@ func (sv *SliceViewBase) UnselectIdxAction(idx int) {
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////
 //    Copy / Cut / Paste
 
 // MimeDataIdx adds mimedata for given idx: an application/json of the struct
