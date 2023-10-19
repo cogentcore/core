@@ -119,7 +119,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\" setter:\"+\""}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: "setter:\"+\""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *Button)", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -198,7 +198,7 @@ func (t *Button) SetData(v any) *Button {
 
 // SetUpdateFunc sets the UpdateFunc of the Button and
 // returns it to allow chaining together set calls.
-func (t *Button) SetUpdateFunc(v func(bt *Button)) *Button {
+func (t *Button) SetUpdateFunc(v func()) *Button {
 	t.UpdateFunc = v
 	return t
 }

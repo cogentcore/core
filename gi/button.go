@@ -54,7 +54,7 @@ type Button struct {
 	Data any `json:"-" xml:"-" view:"-" setter:"+"`
 
 	// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
-	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-" setter:"+"`
+	UpdateFunc func() `json:"-" xml:"-" view:"-" setter:"+"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -543,7 +543,7 @@ func (bt *Button) Destroy() {
 // UpdateButtons calls UpdateFunc on me and any of my menu items
 func (bt *Button) UpdateButtons() {
 	if bt.UpdateFunc != nil {
-		bt.UpdateFunc(bt)
+		bt.UpdateFunc()
 	}
 	// TODO(kai/menu): figure out how to handle menu updating
 	/*
