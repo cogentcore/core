@@ -31,18 +31,27 @@ import (
 // to strings for the display.  If the items are of type [icons.Icon], then they
 // are displayed using icons instead.
 type Chooser struct {
-	Button
+	WidgetBase
 
 	// the type of combo box
 	Type ChooserTypes
 
+	// optional icon
+	Icon icons.Icon `view:"show-name"`
+
+	// name of the indicator icon to present.
+	Indicator icons.Icon `view:"show-name"`
+
 	// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
-	Editable bool `xml:"editable"`
+	Editable bool
 
 	// TODO(kai): implement AllowNew button
 
 	// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
 	AllowNew bool
+
+	// CurValLabel is the string label for the current value
+	CurValLabel string
 
 	// current selected value
 	CurVal any `json:"-" xml:"-"`
@@ -65,7 +74,7 @@ type Chooser struct {
 
 func (ch *Chooser) CopyFieldsFrom(frm any) {
 	fr := frm.(*Chooser)
-	ch.Button.CopyFieldsFrom(&fr.Button)
+	ch.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
 	ch.Editable = fr.Editable
 	ch.CurVal = fr.CurVal
 	ch.CurIndex = fr.CurIndex
@@ -93,13 +102,9 @@ func (ch *Chooser) OnInit() {
 	ch.ChooserStyles()
 }
 
-func (ch *Chooser) HandleChooserEvents() {
-	ch.HandleButtonEvents()
-	ch.HandleChooserKeys()
-}
-
 func (ch *Chooser) ChooserStyles() {
 	ch.Icon = icons.None
+	ch.Indicator = icons.KeyboardArrowRight
 	ch.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
@@ -222,69 +227,54 @@ func (ch *Chooser) SetAllowNew(allowNew bool) *Chooser {
 	return ch
 }
 
-// ConfigPartsIconText returns a standard config for creating parts, of icon
-// and text left-to right in a row -- always makes text
-func (ch *Chooser) ConfigPartsIconText(config *ki.Config, icnm icons.Icon) (icIdx, txIdx int) {
-	// todo: add some styles for button layout
-	icIdx = -1
-	txIdx = -1
-	if icnm.IsValid() {
-		icIdx = len(*config)
-		config.Add(IconType, "icon")
-		config.Add(SpaceType, "space")
-	}
-	txIdx = len(*config)
-	config.Add(TextFieldType, "text")
-	return
-}
-
-// ConfigPartsSetText sets part style props, using given props if not set in
-// object props
-func (ch *Chooser) ConfigPartsSetText(txt string, txIdx, icIdx, indIdx int) {
-	if txIdx >= 0 {
-		tx := ch.Parts.Child(txIdx).(*TextField)
-		tx.SetText(txt)
-		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
-	}
-}
-
-// ConfigPartsAddIndicatorSpace adds indicator with a space instead of a stretch
-// for editable Chooser, where textfield then takes up the rest of the space
-func (ch *Chooser) ConfigPartsAddIndicatorSpace(config *ki.Config, defOn bool) int {
-	needInd := (ch.HasMenu() || defOn) && ch.Indicator != icons.None
-	if !needInd {
-		return -1
-	}
-	indIdx := -1
-	config.Add(SpaceType, "ind-stretch")
-	indIdx = len(*config)
-	config.Add(IconType, "indicator")
-	return indIdx
-}
-
 func (ch *Chooser) ConfigWidget(sc *Scene) {
 	ch.ConfigParts(sc)
 }
 
 func (ch *Chooser) ConfigParts(sc *Scene) {
-	ch.Menu = ch.MakeItemsMenu
 	parts := ch.NewParts(LayoutHoriz)
 	config := ki.Config{}
-	var icIdx, lbIdx, txIdx, indIdx int
+
+	icIdx := -1
+	var lbIdx, txIdx, indIdx int
+	if ch.Icon.IsValid() {
+		config.Add(IconType, "icon")
+		config.Add(SpaceType, "space")
+		icIdx = 0
+	}
 	if ch.Editable {
 		lbIdx = -1
-		icIdx, txIdx = ch.ConfigPartsIconText(&config, ch.Icon)
-		indIdx = ch.ConfigPartsAddIndicatorSpace(&config, true) // use space instead of stretch
+		txIdx = len(config)
+		config.Add(TextFieldType, "text")
 	} else {
 		txIdx = -1
-		icIdx, lbIdx = ch.ConfigPartsIconLabel(&config, ch.Icon, ch.Text)
-		indIdx = ch.ConfigPartsAddIndicator(&config, true) // default on
+		lbIdx = len(config)
+		config.Add(LabelType, "label")
 	}
+	if !ch.Indicator.IsValid() {
+		ch.Indicator = icons.KeyboardArrowRight
+	}
+	indIdx = len(config)
+	config.Add(IconType, "indicator")
+
 	mods, updt := parts.ConfigChildren(config)
-	ch.ConfigPartsSetIconLabel(ch.Icon, ch.Text, icIdx, lbIdx)
-	ch.ConfigPartsIndicator(indIdx)
-	if txIdx >= 0 {
-		ch.ConfigPartsSetText(ch.Text, txIdx, icIdx, indIdx)
+
+	if icIdx >= 0 {
+		ic := ch.Parts.Child(icIdx).(*Icon)
+		ic.SetIcon(ch.Icon)
+	}
+	if ch.Editable {
+		tx := ch.Parts.Child(txIdx).(*TextField)
+		tx.SetText(ch.CurValLabel)
+		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
+	} else {
+		lbl := ch.Parts.Child(lbIdx).(*Label)
+		lbl.SetText(ch.CurValLabel)
+		lbl.Config(ch.Sc) // this is essential
+	}
+	{ // indicator
+		ic := ch.Parts.Child(indIdx).(*Icon)
+		ic.SetIcon(ch.Indicator)
 	}
 	if mods {
 		parts.UpdateEnd(updt)
@@ -292,13 +282,41 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	}
 }
 
-// TextField returns the text field of an editable Chooser, and false if not made
+// LabelWidget returns the label widget if present
+func (ch *Chooser) LabelWidget() *Label {
+	if ch.Parts == nil {
+		return nil
+	}
+	lbi := ch.Parts.ChildByName("label")
+	if lbi == nil {
+		return nil
+	}
+	return lbi.(*Label)
+}
+
+// IconWidget returns the icon widget if present
+func (ch *Chooser) IconWidget() *Icon {
+	if ch.Parts == nil {
+		return nil
+	}
+	ici := ch.Parts.ChildByName("icon")
+	if ici == nil {
+		return nil
+	}
+	return ici.(*Icon)
+}
+
+// TextField returns the text field of an editable Chooser
+// if present
 func (ch *Chooser) TextField() (*TextField, bool) {
-	tff := ch.Parts.ChildByName("text", 2)
-	if tff == nil {
+	if ch.Parts == nil {
 		return nil, false
 	}
-	return tff.(*TextField), true
+	tf := ch.Parts.ChildByName("text", 2)
+	if tf == nil {
+		return nil, false
+	}
+	return tf.(*TextField), true
 }
 
 // MakeItems makes sure the Items list is made, and if not, or reset is true,
@@ -460,7 +478,7 @@ func (ch *Chooser) SetCurVal(it any) int {
 		ch.CurIndex = len(ch.Items)
 		ch.Items = append(ch.Items, it)
 	}
-	ch.ShowCurVal()
+	ch.ShowCurVal(ToLabel(ch.CurVal))
 	return ch.CurIndex
 }
 
@@ -472,21 +490,58 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 	ch.CurIndex = idx
 	if idx < 0 || idx >= len(ch.Items) {
 		ch.CurVal = nil
-		ch.SetText(fmt.Sprintf("idx %v > len", idx))
+		ch.ShowCurVal(fmt.Sprintf("idx %v > len", idx))
 	} else {
 		ch.CurVal = ch.Items[idx]
-		ch.ShowCurVal()
+		ch.ShowCurVal(ToLabel(ch.CurVal))
 	}
 	return ch.CurVal
 }
 
+// SetIcon sets the Icon to given icon name (could be empty or 'none') and
+// updates the button.
+// Use this for optimized auto-updating based on nature of changes made.
+// Otherwise, can set Icon directly followed by ReConfig()
+func (ch *Chooser) SetIcon(iconName icons.Icon) *Chooser {
+	if ch.Icon == iconName {
+		return ch
+	}
+	updt := ch.UpdateStart()
+	recfg := (ch.Icon == "" && iconName != "") || (ch.Icon != "" && iconName == "")
+	ch.Icon = iconName
+	if recfg {
+		ch.ConfigParts(ch.Sc)
+	} else {
+		ic := ch.IconWidget()
+		if ic != nil {
+			ic.SetIcon(ch.Icon)
+		}
+	}
+	ch.UpdateEndLayout(updt)
+	return ch
+}
+
 // ShowCurVal updates the display to present the
 // currently-selected value (CurVal)
-func (ch *Chooser) ShowCurVal() {
-	if icnm, isic := ch.CurVal.(icons.Icon); isic {
-		ch.SetIcon(icnm)
+func (ch *Chooser) ShowCurVal(label string) {
+	updt := ch.UpdateStart()
+	defer ch.UpdateEndRender(updt)
+
+	ch.CurValLabel = label
+	if ch.Editable {
+		tf, ok := ch.TextField()
+		if ok {
+			tf.SetText(ch.CurValLabel)
+		}
 	} else {
-		ch.SetText(ToLabel(ch.CurVal))
+		if icnm, isic := ch.CurVal.(icons.Icon); isic {
+			ch.SetIcon(icnm)
+		} else {
+			lbl := ch.LabelWidget()
+			if lbl != nil {
+				lbl.SetText(ch.CurValLabel)
+			}
+		}
 	}
 }
 
@@ -497,10 +552,6 @@ func (ch *Chooser) SelectItem(idx int) *Chooser {
 	}
 	updt := ch.UpdateStart()
 	ch.SetCurIndex(idx)
-	tf, ok := ch.TextField()
-	if ok {
-		tf.SetText(ToLabel(ch.CurVal))
-	}
 	ch.UpdateEndLayout(updt)
 	return ch
 }
@@ -529,7 +580,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 			bt.Icon = it.(icons.Icon)
 			bt.Tooltip = string(bt.Icon)
 		} else {
-			bt.Text = ToLabel(it)
+			ch.CurValLabel = ToLabel(it)
 			if len(ch.Tooltips) > i {
 				bt.Tooltip = ch.Tooltips[i]
 			}
@@ -541,6 +592,33 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 			ch.SelectItemAction(idx)
 		})
 	}
+}
+
+func (ch *Chooser) HandleChooserEvents() {
+	ch.HandleWidgetEvents()
+	ch.HandleClickMenu()
+	ch.HandleChooserKeys()
+}
+
+func (ch *Chooser) HandleClickMenu() {
+	ch.OnClick(func(e events.Event) {
+		if ch.OpenMenu(e) {
+			e.SetHandled()
+		}
+	})
+}
+
+// OpenMenu will open any menu associated with this element.
+// Returns true if menu opened, false if not.
+func (ch *Chooser) OpenMenu(e events.Event) bool {
+	pos := ch.ContextMenuPos(e)
+	if ch.Parts != nil {
+		if indic := ch.Parts.ChildByName("indicator", 3); indic != nil {
+			pos = indic.(Widget).ContextMenuPos(nil) // use the pos
+		}
+	}
+	NewMenu(ch.MakeItemsMenu, ch.This().(Widget), pos).Run()
+	return true
 }
 
 func (ch *Chooser) HandleChooserKeys() {
