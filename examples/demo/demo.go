@@ -302,25 +302,25 @@ func makeInputs(ts *gi.Tabs) {
 	}
 
 	chf := gi.NewChooser(choosers)
-	chf.Text = "Select a fruit"
+	chf.SetPlaceholder("Select a fruit")
 	chf.Items = fruits
 	chf.Tooltips = fruitDescs
 
 	cho := gi.NewChooser(choosers)
-	cho.Text = "Select a fruit"
+	cho.SetPlaceholder("Select a fruit")
 	cho.Items = fruits
 	cho.Tooltips = fruitDescs
 	cho.Type = gi.ChooserOutlined
 
 	chef := gi.NewChooser(inputs)
 	chef.Editable = true
-	chef.Placeholder = "Select or type a fruit"
+	chef.SetPlaceholder("Select or type a fruit")
 	chef.Items = fruits
 	chef.Tooltips = fruitDescs
 
 	cheo := gi.NewChooser(inputs)
 	cheo.Editable = true
-	cheo.Placeholder = "Select or type a fruit"
+	cheo.SetPlaceholder("Select or type a fruit")
 	cheo.Items = fruits
 	cheo.Tooltips = fruitDescs
 	cheo.Type = gi.ChooserOutlined
