@@ -88,7 +88,7 @@ func KiPkg(typ *gtigen.Type) string {
 // HasEmbedDirective returns whether the given [gtigen.Type] has a "goki:embedder"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasEmbedDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc([]*gti.Directive(typ.Directives), func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "embedder"
 	})
 }
@@ -96,9 +96,25 @@ func HasEmbedDirective(typ *gtigen.Type) bool {
 // HasNoNewDirective returns whether the given [gtigen.Type] has a "goki:no-new"
 // comment directive. This function is used in [KiMethodsTmpl].
 func HasNoNewDirective(typ *gtigen.Type) bool {
-	return slices.ContainsFunc([]*gti.Directive(typ.Directives), func(d *gti.Directive) bool {
+	return slices.ContainsFunc(typ.Directives, func(d *gti.Directive) bool {
 		return d.Tool == "goki" && d.Directive == "no-new"
 	})
+}
+
+// SetterFields returns all of the fields of the given type
+// that have a `goki:setter` comment directive.
+func SetterFields(typ *gtigen.Type) []*gti.Field {
+	res := []*gti.Field{}
+	for _, kv := range typ.Fields.Order {
+		f := kv.Val
+		hasSetter := slices.ContainsFunc(f.Directives, func(d *gti.Directive) bool {
+			return d.Tool == "goki" && d.Directive == "setter"
+		})
+		if hasSetter {
+			res = append(res, f)
+		}
+	}
+	return res
 }
 
 // Generate is the main entry point to code generation
