@@ -29,6 +29,8 @@ var GeneralMethodsTmpl = template.Must(template.New("GeneralMethods").
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
+	// Set{{.Name}} sets the {{.Name}} of the {{$typ.Name}} and
+	// returns it to allow chaining together set calls.
 	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
