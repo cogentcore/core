@@ -74,9 +74,9 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	}
 	{{end}}
 
-	{{typ := .}}
+	{{$typ := .}}
 	{{range (SetterFields .)}}
-	func (t *{{typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{typ.Name}} {
+	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
 	}
