@@ -20,6 +20,22 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// GeneralMethodsTmpl is a template that contains the methods
+// and functions applicable to all types.
+var GeneralMethodsTmpl = template.Must(template.New("GeneralMethods").
+	Funcs(template.FuncMap{
+		"SetterFields": SetterFields,
+	}).Parse(
+	`
+	{{$typ := .}}
+	{{range (SetterFields .)}}
+	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{$typ.Name}} {
+		t.{{.Name}} = v
+		return t
+	}
+	{{end}}
+	`))
+
 // KiMethodsTmpl is a template that contains the methods
 // and functions specific to Ki types.
 var KiMethodsTmpl = template.Must(template.New("KiMethods").
@@ -27,7 +43,6 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 		"HasEmbedDirective": HasEmbedDirective,
 		"HasNoNewDirective": HasNoNewDirective,
 		"KiPkg":             KiPkg,
-		"SetterFields":      SetterFields,
 	}).Parse(
 	`
 	{{if not (HasNoNewDirective .)}}
@@ -70,14 +85,6 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	
 	// As{{.Name}} satisfies the [{{.Name}}Embedder] interface
 	func (t *{{.Name}}) As{{.Name}}() *{{.Name}} {
-		return t
-	}
-	{{end}}
-
-	{{$typ := .}}
-	{{range (SetterFields .)}}
-	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.Type}}) *{{$typ.Name}} {
-		t.{{.Name}} = v
 		return t
 	}
 	{{end}}
@@ -135,13 +142,14 @@ func SetterFields(typ *gtigen.Type) []*gti.Field {
 func Generate(cfg *config.Config) error {
 	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
 
+	cfg.Generate.Gtigen.Templates = []*template.Template{GeneralMethodsTmpl}
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
 	if cfg.Generate.AddKiTypes {
 		cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
 			AddTypes:  true,
 			Instance:  true,
 			TypeVar:   true,
-			Templates: []*template.Template{KiMethodsTmpl},
+			Templates: []*template.Template{KiMethodsTmpl, GeneralMethodsTmpl},
 		}
 	}
 	pkgs, err := ParsePackages(cfg)
