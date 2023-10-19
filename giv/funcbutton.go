@@ -205,12 +205,17 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		return
 	}
+	// TODO: handle error return values
+	main := "Result of " + fb.Text
+	if len(rets) == 0 {
+		main = fb.Text + " succeeded"
+	}
 	if !fb.ShowReturnAsDialog {
-		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: fb.Text + " succeeded"}).Run()
+		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: main}).Run()
 		return
 	}
 	ac := fb.Returns(rets)
-	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: "Result of " + fb.Text, Prompt: fb.Tooltip, Ok: true}, ac, nil).Run()
+	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, ac, nil).Run()
 }
 
 // ArgsForFunc returns the appropriate [ArgConfig] objects for the
