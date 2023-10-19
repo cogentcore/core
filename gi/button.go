@@ -32,6 +32,7 @@ type Button struct {
 	WidgetBase
 
 	// the type of button
+	//goki:setter
 	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
@@ -218,14 +219,6 @@ func (bt *Button) ButtonStyles() {
 			})
 		}
 	})
-}
-
-// SetType sets the styling type of the button
-func (bt *Button) SetType(typ ButtonTypes) *Button {
-	updt := bt.UpdateStart()
-	bt.Type = typ
-	bt.UpdateEndLayout(updt)
-	return bt
 }
 
 // SetShortcut sets the shortcut of the button
