@@ -3,6 +3,7 @@
 package gi
 
 import (
+	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
 	"goki.dev/ordmap"
@@ -115,10 +116,10 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
-		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *Button)", Doc: "optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\" setter:\"+\""}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: "setter:\"+\""}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func(bt *Button)", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -171,6 +172,34 @@ func (t *Button) AsButton() *Button {
 // returns it to allow chaining together set calls.
 func (t *Button) SetType(v ButtonTypes) *Button {
 	t.Type = v
+	return t
+}
+
+// SetShortcut sets the Shortcut of the Button and
+// returns it to allow chaining together set calls.
+func (t *Button) SetShortcut(v key.Chord) *Button {
+	t.Shortcut = v
+	return t
+}
+
+// SetMenu sets the Menu of the Button and
+// returns it to allow chaining together set calls.
+func (t *Button) SetMenu(v func(m *Scene)) *Button {
+	t.Menu = v
+	return t
+}
+
+// SetData sets the Data of the Button and
+// returns it to allow chaining together set calls.
+func (t *Button) SetData(v any) *Button {
+	t.Data = v
+	return t
+}
+
+// SetUpdateFunc sets the UpdateFunc of the Button and
+// returns it to allow chaining together set calls.
+func (t *Button) SetUpdateFunc(v func(bt *Button)) *Button {
+	t.UpdateFunc = v
 	return t
 }
 

@@ -44,17 +44,17 @@ type Button struct {
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`
 
 	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
-	Shortcut key.Chord `xml:"shortcut"`
+	Shortcut key.Chord `xml:"shortcut" setter:"+"`
 
 	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
 	// The constructor function should add buttons to the scene that it is passed.
-	Menu func(m *Scene)
+	Menu func(m *Scene) `setter:"+"`
 
 	// optional data that is sent with events to identify the button
-	Data any `json:"-" xml:"-" view:"-"`
+	Data any `json:"-" xml:"-" view:"-" setter:"+"`
 
-	// optional function that is called to update state of button (typically updating Active state); called automatically for menus prior to showing
-	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-"`
+	// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
+	UpdateFunc func(bt *Button) `json:"-" xml:"-" view:"-" setter:"+"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -220,27 +220,9 @@ func (bt *Button) ButtonStyles() {
 	})
 }
 
-// SetShortcut sets the shortcut of the button
-func (bt *Button) SetShortcut(shortcut key.Chord) *Button {
-	updt := bt.UpdateStart()
-	bt.Shortcut = shortcut
-	bt.UpdateEndLayout(updt)
-	return bt
-}
-
 // SetShortcut sets the shortcut of the button from the given [KeyFuns]
 func (bt *Button) SetShortcutKey(kf KeyFuns) *Button {
-	updt := bt.UpdateStart()
-	bt.Shortcut = ShortcutForFun(kf)
-	bt.UpdateEndLayout(updt)
-	return bt
-}
-
-// SetData sets the data of the button
-func (bt *Button) SetData(data any) *Button {
-	updt := bt.UpdateStart()
-	bt.Data = data
-	bt.UpdateEndLayout(updt)
+	bt.SetShortcut(ShortcutForFun(kf))
 	return bt
 }
 
