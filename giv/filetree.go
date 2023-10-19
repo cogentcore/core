@@ -1556,7 +1556,7 @@ var FileNodeProps = ki.Props{
 
 // FileNodeFlags define bitflags for FileNode state -- these extend ki.Flags
 // and storage is an int64
-type FileNodeFlags ki.Flags //enums:bitflag
+type FileNodeFlags ki.Flags //enums:bitflag -trim-prefix FileNode
 
 const (
 	// FileNodeOpen means file is open -- for directories, this means that
@@ -1574,7 +1574,7 @@ const (
 
 // DirFlags are flags on directories: Open, SortBy etc
 // These flags are stored in the DirFlagMap for persistence.
-type DirFlags int64 //enums:bitflag
+type DirFlags int64 //enums:bitflag -trim-prefix Dir
 
 const (
 	// DirMark means directory is marked -- unmarked entries are deleted post-update

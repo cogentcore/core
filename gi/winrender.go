@@ -57,7 +57,7 @@ func (rp *RenderParams) SaveRender(rc *RenderContext) {
 }
 
 // RenderContextFlags represent RenderContext state
-type RenderContextFlags int64 //enums:bitflag
+type RenderContextFlags int64 //enums:bitflag -trim-prefix Render
 
 const (
 	// the window is visible and should be rendered to

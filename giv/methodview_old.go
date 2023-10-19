@@ -575,7 +575,7 @@ func ActionViewArgsValidate(md *MethodViewData, vtyp reflect.Type, meth reflect.
 //    Method Callbacks -- called when Action fires
 
 // MethodViewFlags define bitflags for method view action options
-type MethodViewFlags int64 //enums:bitflag
+type MethodViewFlags int64 //enums:bitflag -trim-prefix MethodView
 
 const (
 	// MethodViewConfirm confirms action before proceeding

@@ -233,7 +233,7 @@ func (ly *Layout) HandleLayoutEvents() {
 }
 
 // Layouts are the different types of layouts
-type Layouts int32 //enums:enum
+type Layouts int32 //enums:enum -trim-prefix Layout
 
 const (
 	// LayoutHoriz arranges items horizontally across a row

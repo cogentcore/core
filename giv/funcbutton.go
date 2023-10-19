@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -33,6 +32,20 @@ type FuncButton struct {
 	// converted to a [gti.Func] first. It should typically
 	// be set using [FuncButton.SetFunc].
 	Func *gti.Func
+	// ReflectFunc is the [reflect.Value] of the function or
+	// method associated with this button. It should typically
+	// bet set using [FuncButton.SetFunc].
+	ReflectFunc reflect.Value
+
+	// Confirm is whether to prompt the user for confirmation
+	// before calling the function.
+	Confirm bool
+	// ShowReturn is whether to display the return values of
+	// the function (and a success message if there are none).
+	ShowReturn bool
+	// ShowReturnAsDialog, if and only if ShowReturn is true,
+	// indicates to show the return values of the function
+	ShowReturnAsDialog bool
 }
 
 // SetFunc sets the function associated with the FuncButton to the
@@ -75,6 +88,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 // It should typically not be used by end-user code.
 func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
 	fb.Func = gfun
+	fb.ReflectFunc = rfun
 	// get name without package
 	snm := gfun.Name
 	li := strings.LastIndex(snm, ".")
@@ -90,9 +104,70 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 		fb.SetIcon(ic)
 	}
 	fb.OnClick(func(e events.Event) {
-		fmt.Println("calling", fb.Func.Name)
+		fb.CallFunc()
 	})
 	return fb
+}
+
+// CallFunc calls the function or method associated with this button,
+// prompting the user for any arguments.
+func (fb *FuncButton) CallFunc() {
+	// if fb.Func.Args.Len() == 0 {
+	// 	if !fb.Confirm {
+	// 		rets := fb.ReflectFunc.Call(nil)
+	// 		if !c.ShowResult {
+	// 			return
+	// 		}
+	// 		ShowReturnsDialog(ctx, rets, c)
+	// 		return
+	// 	}
+	// 	gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
+	// 		func(dlg *gi.Dialog) {
+	// 			if !dlg.Accepted {
+	// 				return
+	// 			}
+	// 			rets := rfun.Call(nil)
+	// 			if !c.ShowResult {
+	// 				return
+	// 			}
+	// 			ShowReturnsDialog(ctx, rets, c)
+	// 		}).Run()
+	// 	return
+	// }
+	// args := ArgsForFunc(rfun, c)
+	// ArgViewDialog(
+	// 	ctx,
+	// 	DlgOpts{Title: c.Label, Prompt: c.Doc, Ok: true, Cancel: true},
+	// 	args,
+	// 	func(dlg *gi.Dialog) {
+	// 		if !dlg.Accepted {
+	// 			return
+	// 		}
+	// 		rargs := make([]reflect.Value, len(args))
+	// 		for i, arg := range args {
+	// 			rargs[i] = laser.NonPtrValue(arg.Val)
+	// 		}
+
+	// 		if !c.Confirm {
+	// 			rets := rfun.Call(rargs)
+	// 			if !c.ShowResult {
+	// 				return
+	// 			}
+	// 			ShowReturnsDialog(ctx, rets, c)
+	// 		}
+	// 		gi.NewStdDialog(ctx, gi.DlgOpts{Title: c.Label + "?", Prompt: "Are you sure you want to run " + c.Label + "? " + c.Doc, Ok: true, Cancel: true},
+	// 			func(dlg *gi.Dialog) {
+	// 				if !dlg.Accepted {
+	// 					return
+	// 				}
+	// 				rets := rfun.Call(rargs)
+	// 				if !c.ShowResult {
+	// 					return
+	// 				}
+	// 				ShowReturnsDialog(ctx, rets, c)
+	// 			}).Run()
+	// 	},
+	// ).Run()
 }
 
 // SetMethodImpl is the underlying implementation of [FuncButton.SetFunc] for methods.
