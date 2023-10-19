@@ -168,6 +168,7 @@ func (vv *SliceValue) UpdateWidget() {
 	if vv.Widget == nil {
 		return
 	}
+	vv.GetTypeInfo()
 	ac := vv.Widget.(*gi.Button)
 	npv := laser.NonPtrValue(vv.Value)
 	txt := ""
@@ -177,27 +178,29 @@ func (vv *SliceValue) UpdateWidget() {
 		txt = fmt.Sprintf("Slice: %T", npv.Interface())
 	} else {
 		if npv.Kind() == reflect.Array {
-			txt = npv.String()
-			// txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
+			txt = fmt.Sprintf("Array [%v]%v", npv.Len(), vv.ElType.String())
 		} else if npv.IsNil() {
 			txt = "nil"
 		} else {
-			txt = npv.String()
-			// txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
+			txt = fmt.Sprintf("Slice [%v]%v", npv.Len(), vv.ElType.String())
 		}
 	}
 	ac.SetText(txt)
 }
 
-func (vv *SliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
-	vv.Widget = widg
-	vv.StdConfigWidget(widg)
+func (vv *SliceValue) GetTypeInfo() {
 	slci := vv.Value.Interface()
 	vv.IsArray = laser.NonPtrType(reflect.TypeOf(slci)).Kind() == reflect.Array
 	if slci != nil && !laser.AnyIsNil(slci) {
 		vv.ElType = laser.SliceElType(slci)
 		vv.ElIsStruct = (laser.NonPtrType(vv.ElType).Kind() == reflect.Struct)
 	}
+}
+
+func (vv *SliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	vv.GetTypeInfo()
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 	bt := vv.Widget.(*gi.Button)
 	bt.SetType(gi.ButtonTonal)
 	bt.Icon = icons.Edit

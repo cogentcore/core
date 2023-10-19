@@ -10,19 +10,41 @@ package gi
 // ColorName provides a value-view GUI lookup of valid color names
 type ColorName string
 
-// FontName is used to specify a font, as the unique name of the font family.
-// This automatically provides a chooser menu for fonts using giv Value.
+func (cn ColorName) String() string {
+	return string(cn)
+}
+
+// FontName is used to specify a font, as the unique name of
+// the font family.
+// This automatically provides a chooser menu for fonts
+// using giv Value.
 type FontName string
 
-// FileName is used to specify an filename (including path) -- automatically
-// opens the FileView dialog using Value system.  Use this for any method
-// args that are filenames to trigger use of FileViewDialog under MethodView
-// automatic method calling.
+func (fn FontName) String() string {
+	return string(fn)
+}
+
+// FileName is used to specify an filename (including path).
+// Automatically opens the FileView dialog using Value system.
+// Use this for any method args that are filenames to trigger
+// use of FileViewDialog under FuncButton automatic method calling.
 type FileName string
+
+func (fn FileName) String() string {
+	return string(fn)
+}
 
 // KeyMapName has an associated Value for selecting from the list of
 // available key map names, for use in preferences etc.
 type KeyMapName string
 
+func (kn KeyMapName) String() string {
+	return string(kn)
+}
+
 // HiStyleName is a highlighting style name
 type HiStyleName string
+
+func (hs HiStyleName) String() string {
+	return string(hs)
+}
