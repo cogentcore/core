@@ -32,8 +32,7 @@ type Button struct {
 	WidgetBase
 
 	// the type of button
-	//goki:setter
-	Type ButtonTypes
+	Type ButtonTypes `setter:"+"`
 
 	// label for the button -- if blank then no label is presented
 	Text string `xml:"text"`
