@@ -111,7 +111,9 @@ var ButtonType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}}},
+		{"Type", &gti.Field{Name: "Type", Type: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{
+			&gti.Directive{Tool: "goki", Directive: "setter", Args: []string{}},
+		}}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}}},
@@ -167,6 +169,11 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
+func (t *Button) SetType(v ButtonTypes) *Button {
+	t.Type = v
+	return t
+}
+
 // ChooserType is the [gti.Type] for [Chooser]
 var ChooserType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Chooser",
@@ -176,8 +183,11 @@ var ChooserType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}}},
+		{"Indicator", &gti.Field{Name: "Indicator", Type: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}}},
+		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}}},
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", Doc: "current selected value", Directives: gti.Directives{}}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", Doc: "items available for selection", Directives: gti.Directives{}}},
@@ -186,7 +196,7 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Button", &gti.Field{Name: "Button", Type: "Button", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "WidgetBase", Doc: "", Directives: gti.Directives{}}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Chooser{},
