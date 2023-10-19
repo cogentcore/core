@@ -15,7 +15,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"goki.dev/colors"
 	"goki.dev/grog"
 )
 
@@ -74,10 +73,7 @@ func (c *Config) run(cmd string, args ...string) (ran bool, code int, err error)
 	// regardless of whether there is an error anyway, so we should print it now so
 	// people can see it earlier (especially important if it runs for a long time).
 	if !c.Buffer || c.Commands != nil {
-		if cm.Dir != "" {
-			c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Success.Base, cm.Dir) + ": "))
-		}
-		c.Commands.Write([]byte(grog.ApplyColor(colors.Scheme.Primary.Base, cmd+" "+strings.Join(args, " ")+"\n")))
+		c.PrintCmd(cmd+" "+strings.Join(args, " "), err)
 	}
 
 	cm.Stdin = c.Stdin
