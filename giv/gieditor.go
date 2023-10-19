@@ -292,8 +292,9 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
-	NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh).SetUpdateFunc(func(bt *gi.Button) {
-		bt.SetState(!ge.Changed, states.Disabled)
+	up := NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
+	up.SetUpdateFunc(func() {
+		up.SetState(!ge.Changed, states.Disabled)
 	})
 	NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
 	tb.AddSeparator()
