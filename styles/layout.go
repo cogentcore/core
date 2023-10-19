@@ -5,6 +5,8 @@
 package styles
 
 import (
+	"fmt"
+
 	"goki.dev/girl/units"
 	"goki.dev/mat32/v2"
 )
@@ -245,6 +247,10 @@ type SizePrefs struct {
 
 	// maximum size -- will not be greater than this -- 0 = no constraint, neg = stretch
 	Max mat32.Vec2
+}
+
+func (sp SizePrefs) String() string {
+	return fmt.Sprintf("Size Prefs: Need=%s; Pref=%s; Max=%s", sp.Need, sp.Pref, sp.Max)
 }
 
 // return true if Max < 0 meaning can stretch infinitely along given dimension
