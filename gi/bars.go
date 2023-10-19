@@ -336,7 +336,7 @@ func (tb *Toolbar) ToolbarStyles() {
 		s.Padding.SetHoriz(units.Dp(16))
 	})
 	tb.OnWidgetAdded(func(w Widget) {
-		if bt, ok := w.(*Button); ok {
+		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
 		}
 	})
