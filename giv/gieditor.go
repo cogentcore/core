@@ -10,6 +10,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -149,6 +150,8 @@ func (ge *GiEditor) EditColorScheme() {
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not
+//
+//gti:add
 func (ge *GiEditor) ToggleSelectionMode() {
 	/* todo: renderwin is not a Ki anymore
 	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
@@ -289,7 +292,9 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
-	NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
+	NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh).SetState(!ge.Changed, states.Disabled)
+	NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	tb.AddSeparator()
 }
 
 var GiEditorProps = ki.Props{
