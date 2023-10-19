@@ -539,7 +539,7 @@ func (fv *FileView) UpdateFiles() {
 	gi.SavePaths()
 	sp := []string(gi.SavedPaths)
 	pf.ItemsFromStringList(sp, true, 0)
-	pf.SetText(fv.DirPath)
+	pf.ShowCurVal(fv.DirPath)
 	sf := fv.SelField()
 	sf.SetText(fv.SelFile)
 
