@@ -167,6 +167,8 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
+// SetType sets the Type of the Button and
+// returns it to allow chaining together set calls.
 func (t *Button) SetType(v ButtonTypes) *Button {
 	t.Type = v
 	return t
