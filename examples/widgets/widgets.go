@@ -23,7 +23,7 @@ func main() { gimain.Run(app) }
 
 func app() {
 	// turn these on to see a traces of various stages of processing..
-	gi.UpdateTrace = true
+	// gi.UpdateTrace = true
 	// gi.RenderTrace = true
 	// gi.LayoutTrace = true
 	// gi.WinEventTrace = true
