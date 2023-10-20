@@ -552,14 +552,14 @@ func (tv *TableView) LayoutSliceGrid() bool {
 		}
 		tv.VisRows = int(mat32.Floor(sgHt / tv.RowHeight))
 	}
-	tv.DispRows = min(tv.SliceSize, tv.VisRows)
+	tv.VisRows = min(tv.SliceSize, tv.VisRows)
 
-	nWidg := nWidgPerRow * tv.DispRows
+	nWidg := nWidgPerRow * tv.VisRows
 
 	if tv.Values == nil || sg.NumChildren() != nWidg {
 		sg.DeleteChildren(ki.DestroyKids)
 
-		tv.Values = make([]Value, tv.NVisFields*tv.DispRows)
+		tv.Values = make([]Value, tv.NVisFields*tv.VisRows)
 		sg.Kids = make(ki.Slice, nWidg)
 	}
 	tv.ConfigScroll()
@@ -625,16 +625,16 @@ func (tv *TableView) UpdateSliceGrid() {
 		sg.DeleteChildren(ki.DestroyKids)
 		return
 	}
-	tv.DispRows = min(tv.SliceSize, tv.VisRows)
+	tv.VisRows = min(tv.SliceSize, tv.VisRows)
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
-	nWidg := nWidgPerRow * tv.DispRows
+	nWidg := nWidgPerRow * tv.VisRows
 
 	if tv.Values == nil || sg.NumChildren() != nWidg { // shouldn't happen..
 		tv.ViewMuUnlock()
 		tv.LayoutSliceGrid()
 		tv.ViewMuLock()
-		nWidg = nWidgPerRow * tv.DispRows
+		nWidg = nWidgPerRow * tv.VisRows
 	}
 	if sg.NumChildren() != nWidg || sg.NumChildren() == 0 {
 		return
@@ -642,7 +642,7 @@ func (tv *TableView) UpdateSliceGrid() {
 
 	tv.UpdateStartIdx()
 
-	for i := 0; i < tv.DispRows; i++ {
+	for i := 0; i < tv.VisRows; i++ {
 		i := i
 		ridx := i * nWidgPerRow
 		si := tv.StartIdx + i // slice idx

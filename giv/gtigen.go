@@ -776,11 +776,12 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceViewBase",
 	ShortName:  "giv.SliceViewBase",
 	IDName:     "slice-view-base",
-	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to Inactive for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.\nAutomatically has a toolbar with Slice Toolbar props if defined\nset prop toolbar = false to turn off",
+	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.\nAutomatically has a toolbar with Slice Toolbar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}}},
 		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", Doc: "optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "", Directives: gti.Directives{}}},
 		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", Doc: "non-ptr reflect.Value of the slice", Directives: gti.Directives{}}},
 		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
 		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the slice values", Directives: gti.Directives{}}},
