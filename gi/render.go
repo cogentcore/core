@@ -427,10 +427,17 @@ func (sc *Scene) DoUpdate() bool {
 		return true
 	}
 
+	sc.ShowLayoutIter++
+	if sc.ShowLayoutIter < 4 { // 4 needed for SliceViewBase
+		// fmt.Println(sc.ShowLayoutIter)
+		sc.SetFlag(true, ScNeedsLayout)
+	}
+
 	switch {
 	case rc.HasFlag(RenderRebuild):
 		// fmt.Println("rebuild")
 		sc.DoRebuild()
+		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(false, ScNeedsLayout, ScNeedsRender)
 		sc.SetFlag(true, ScImageUpdated)
 	case sc.LastRender.NeedsRestyle(rc):
