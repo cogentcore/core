@@ -181,8 +181,8 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
 	sv.SetState(false, states.Disabled)
 	sv.StyleFunc = styleFunc
-	sv.NoAdd = opts.NoAdd
-	sv.NoDelete = opts.NoDelete
+	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
+	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
@@ -204,8 +204,8 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
 	sv.SetState(false, states.Disabled)
-	sv.NoAdd = opts.NoAdd
-	sv.NoDelete = opts.NoDelete
+	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
+	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	sv.SetSlice(slice)
@@ -268,8 +268,8 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
 	sv.SetState(false, states.Disabled)
 	sv.StyleFunc = styleFunc
-	sv.NoAdd = opts.NoAdd
-	sv.NoDelete = opts.NoDelete
+	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
+	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
 	if opts.Inactive {

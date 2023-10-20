@@ -100,9 +100,9 @@ func (fv *FileView) FileViewStyles() {
 			})
 		case "favs-view":
 			fv := w.(*TableView)
-			fv.ShowIndex = false
-			fv.InactKeyNav = false // can only have one active -- files..
-			fv.ShowToolbar = false
+			fv.SetFlag(false, SliceViewShowIndex)
+			fv.SetFlag(false, SliceViewInactKeyNav) // can only have one active -- files..
+			fv.SetFlag(false, SliceViewShowToolbar)
 			fv.SetState(true, states.Disabled) // select only
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxHeight()
@@ -110,8 +110,8 @@ func (fv *FileView) FileViewStyles() {
 			})
 		case "files-view":
 			fv := w.(*TableView)
-			fv.ShowIndex = false // no index
-			fv.ShowToolbar = false
+			fv.SetFlag(false, SliceViewShowIndex)
+			fv.SetFlag(false, SliceViewShowToolbar)
 			fv.SetState(true, states.Disabled) // select only
 			fv.Style(func(s *styles.Style) {
 				s.SetStretchMax()

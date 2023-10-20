@@ -71,6 +71,10 @@ type Scene struct {
 
 	// StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-"`
+
+	// ShowLayoutIter counts up at start of showing a Scene
+	// for a sequence of Layout passes to ensure proper initial sizing.
+	ShowLayoutIter int `copy:"-" json:"-" xml:"-" view:"-"`
 }
 
 // NewScene creates a new Scene that will serve as the content of a Stage

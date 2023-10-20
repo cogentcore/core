@@ -31,6 +31,44 @@ import (
 	"goki.dev/pi/v2/filecat"
 )
 
+// SliceViewFlags extend WidgetFlags to hold SliceView state
+type SliceViewFlags int64 //enums:bitflag -trim-prefix SliceView
+
+const (
+	// if true, user cannot add elements to the slice
+	SliceViewNoAdd SliceViewFlags = SliceViewFlags(gi.WidgetFlagsN) + iota
+
+	// if true, user cannot delete elements from the slice
+	SliceViewNoDelete
+
+	// if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?
+	SliceViewShowViewCtxtMenu
+
+	// whether the slice is actually an array -- no modifications -- set by SetSlice
+	SliceViewIsArray
+
+	// whether to show index or not
+	SliceViewShowIndex
+
+	// whether to show the toolbar or not
+	SliceViewShowToolbar
+
+	// support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
+	SliceViewInactKeyNav
+
+	// editing-mode select rows mode
+	SliceViewSelectMode
+
+	// if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
+	SliceViewInactMultiSel
+
+	// guard for recursive focus grabbing
+	SliceViewInFocusGrab
+
+	// guard for recursive rebuild
+	SliceViewInFullRebuild
+)
+
 // SliceViewer is the interface used by SliceViewBase to
 // support any abstractions needed for different types of slice views.
 type SliceViewer interface {
@@ -40,56 +78,63 @@ type SliceViewer interface {
 	// IsConfiged returns true if is fully configured for display
 	IsConfiged() bool
 
-	// SliceGrid returns the SliceGrid grid frame widget, which contains all the
-	// fields and values
+	// SliceGrid returns the SliceGrid grid frame widget,
+	// which contains all the fields and values
 	SliceGrid() *gi.Frame
 
 	// ScrollBar returns the SliceGrid scrollbar
 	ScrollBar() *gi.Slider
 
-	// RowWidgetNs returns number of widgets per row and offset for index label
+	// RowWidgetNs returns number of widgets per row and
+	// offset for index label
 	RowWidgetNs() (nWidgPerRow, idxOff int)
 
-	// SliceSize returns the current size of the slice and sets SliceSize
+	// UpdtSliceSize updates the current size of the slice
+	// and sets SliceSize if changed.
 	UpdtSliceSize() int
 
-	// LayoutSliceGrid does the proper layout of slice grid depending on allocated size
-	// returns true if UpdateSliceGrid should be called after this
-	LayoutSliceGrid() bool
+	// NeedsConfigRows returns true if a call to ConfigRows is needed,
+	// whenever the current layout allocation requires a different
+	// number of rows than currently configured.
+	NeedsConfigRows() bool
 
-	// UpdateSliceGrid updates grid display -- robust to any time calling
-	UpdateSliceGrid()
+	// ConfigRows configures VisRows worth of widgets
+	// to display slice data.  It should only be called
+	// when NeedsConfigRows is true: when VisRows changes.
+	ConfigRows(sc *gi.Scene)
 
-	// SliceGridNeedsUpdate returns true when slice grid needs to be updated.
-	// this should be true if the underlying size has changed, or other
-	// indication that the data might have changed.
-	SliceGridNeedsUpdate() bool
+	// UpdateWidgets updates the row widget display to
+	// represent the current state of the slice data,
+	// including which range of data is being displayed.
+	// This is called for scrolling, navigation etc.
+	UpdateWidgets()
 
 	// StyleRow calls a custom style function on given row (and field)
 	StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value)
 
-	// RowFirstWidget returns the first widget for given row (could be index or
-	// not) -- false if out of range
+	// RowFirstWidget returns the first widget for given row
+	// (could be index or not) -- false if out of range
 	RowFirstWidget(row int) (*gi.WidgetBase, bool)
 
-	// RowGrabFocus grabs the focus for the first focusable widget in given row --
-	// returns that element or nil if not successful -- note: grid must have
-	// already rendered for focus to be grabbed!
+	// RowGrabFocus grabs the focus for the first focusable
+	// widget in given row.
+	// returns that element or nil if not successful
+	// note: grid must have already rendered for focus to be grabbed!
 	RowGrabFocus(row int) *gi.WidgetBase
 
 	// SelectRowWidgets sets the selection state of given row of widgets
 	SelectRowWidgets(row int, sel bool)
 
-	// SliceNewAt inserts a new blank element at given index in the slice -- -1
-	// means the end
+	// SliceNewAt inserts a new blank element at given
+	// index in the slice. -1 means the end.
 	SliceNewAt(idx int)
 
 	// SliceDeleteAt deletes element at given index from slice
 	// if updt is true, then update the grid after
 	SliceDeleteAt(idx int)
 
-	// MimeDataType returns the data type for mime clipboard (copy / paste) data
-	// e.g., filecat.DataJson
+	// MimeDataType returns the data type for mime clipboard
+	// (copy / paste) data e.g., filecat.DataJson
 	MimeDataType() string
 
 	// CopySelToMime copies selected rows to mime data
@@ -98,7 +143,8 @@ type SliceViewer interface {
 	// PasteAssign assigns mime data (only the first one!) to this idx
 	PasteAssign(md mimedata.Mimes, idx int)
 
-	// PasteAtIdx inserts object(s) from mime data at (before) given slice index
+	// PasteAtIdx inserts object(s) from mime data at
+	// (before) given slice index
 	PasteAtIdx(md mimedata.Mimes, idx int)
 
 	// ItemCtxtMenu pulls up the context menu for given slice index
@@ -131,50 +177,22 @@ type SliceViewBase struct {
 	// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
 	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-"`
 
+	Changed bool
+
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// Value for the slice itself, if this was created within value view framework -- otherwise nil
 	SliceValView Value `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// whether the slice is actually an array -- no modifications -- set by SetSlice
-	isArray bool `copy:"-" view:"-" json:"-" xml:"-"`
-
-	// if true, user cannot add elements to the slice
-	NoAdd bool
-
-	// if true, user cannot delete elements from the slice
-	NoDelete bool
-
-	// if the type we're viewing has its own CtxtMenu property defined, should we also still show the view's standard context menu?
-	ShowViewCtxtMenu bool
-
-	// has the slice been edited?
-	Changed bool
-
 	// Value representations of the slice values
 	Values []Value `copy:"-" view:"-" json:"-" xml:"-"`
-
-	// whether to show index or not
-	ShowIndex bool
-
-	// whether to show the toolbar or not
-	ShowToolbar bool
-
-	// support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
-	InactKeyNav bool
 
 	// current selection value -- initially select this value if set
 	SelVal any `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// index of currently-selected item, in Inactive mode only
 	SelectedIdx int `copy:"-" json:"-" xml:"-"`
-
-	// editing-mode select rows mode
-	SelectMode bool `copy:"-"`
-
-	// if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
-	InactMultiSel bool
 
 	// list of currently-selected slice indexes
 	SelectedIdxs map[int]struct{} `copy:"-"`
@@ -191,8 +209,14 @@ type SliceViewBase struct {
 	// the slice that we successfully set a toolbar for
 	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// size of slice
-	SliceSize int `inactive:"+" copy:"-" json:"-" xml:"-"`
+	// height of a single row
+	RowHeight float32 `inactive:"+" copy:"-" json:"-" xml:"-"`
+
+	// the height of grid from last layout -- determines when update needed
+	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-"`
+
+	// total number of rows visible in allocated display size
+	VisRows int `inactive:"+" copy:"-" json:"-" xml:"-"`
 
 	// actual number of rows displayed = min(VisRows, SliceSize)
 	DispRows int `inactive:"+" copy:"-" json:"-" xml:"-"`
@@ -200,23 +224,11 @@ type SliceViewBase struct {
 	// starting slice index of visible rows
 	StartIdx int `inactive:"+" copy:"-" json:"-" xml:"-"`
 
-	// height of a single row
-	RowHeight float32 `inactive:"+" copy:"-" json:"-" xml:"-"`
-
-	// total number of rows visible in allocated display size
-	VisRows int `inactive:"+" copy:"-" json:"-" xml:"-"`
-
-	// the height of grid from last layout -- determines when update needed
-	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-"`
-
 	// the number of rows rendered -- determines update
 	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// guard for recursive focus grabbing
-	InFocusGrab bool `copy:"-" view:"-" json:"-" xml:"-"`
-
-	// guard for recursive rebuild
-	InFullRebuild bool `copy:"-" view:"-" json:"-" xml:"-"`
+	// size of slice
+	SliceSize int `inactive:"+" copy:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
 	CurIdx int `copy:"-" view:"-" json:"-" xml:"-"`
@@ -227,10 +239,10 @@ func (sv *SliceViewBase) OnInit() {
 }
 
 func (sv *SliceViewBase) SliceViewBaseInit() {
-	sv.SelectMode = false
-	sv.ShowIndex = true
-	sv.ShowToolbar = true
-	sv.InactKeyNav = true
+	sv.SetFlag(false, SliceViewSelectMode)
+	sv.SetFlag(true, SliceViewShowIndex)
+	sv.SetFlag(true, SliceViewShowToolbar)
+	sv.SetFlag(true, SliceViewInactKeyNav)
 
 	sv.HandleSliceViewEvents()
 
@@ -270,7 +282,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 			sb.OnChange(func(e events.Event) {
 				updt := sv.UpdateStart()
 				sv.StartIdx = int(sb.Value)
-				sv.This().(SliceViewer).UpdateSliceGrid()
+				sv.This().(SliceViewer).UpdateWidgets()
 				sv.UpdateEndRender(updt)
 			})
 
@@ -328,7 +340,8 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	sv.StartIdx = 0
 	sv.Slice = sl
 	sv.SliceNPVal = laser.NonPtrValue(reflect.ValueOf(sv.Slice))
-	sv.isArray = laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	isArray := laser.NonPtrType(reflect.TypeOf(sl)).Kind() == reflect.Array
+	sv.SetFlag(isArray, SliceViewIsArray)
 	// make sure elements aren't nil to prevent later panics
 	for i := 0; i < sv.SliceNPVal.Len(); i++ {
 		val := sv.SliceNPVal.Index(i)
@@ -351,7 +364,7 @@ func (sv *SliceViewBase) Update() {
 	if !sv.This().(gi.Widget).IsVisible() {
 		return
 	}
-	sv.ReConfig()
+	sv.UpdateWidgets()
 }
 
 // UpdateValues updates the widget display of slice values,
@@ -366,6 +379,20 @@ func (sv *SliceViewBase) UpdateValues() {
 
 // Config configures a standard setup of the overall Frame
 func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
+	sv.ConfigSliceView(sc)
+}
+
+func (sv *SliceViewBase) ConfigSliceView(sc *gi.Scene) {
+	if sv.IsConfiged() {
+		if sv.NeedsConfigRows() {
+			sv.ConfigRows(sc)
+		} else {
+			sv.UpdateWidgets()
+		}
+		return
+	}
+
+	sv.VisRows = 0
 	config := ki.Config{}
 	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.LayoutType, "grid-lay")
@@ -379,9 +406,8 @@ func (sv *SliceViewBase) ConfigWidget(sc *gi.Scene) {
 
 	sv.ConfigSliceGrid()
 	sv.ConfigToolbar()
-	sv.This().(SliceViewer).LayoutSliceGrid()
-	sv.This().(SliceViewer).UpdateSliceGrid()
 	if mods {
+		sv.ApplyStyleTree(sc)
 		sv.UpdateEndLayout(updt)
 	}
 }
@@ -422,36 +448,28 @@ func (sv *SliceViewBase) Toolbar() *gi.Toolbar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsDisabled() && !sv.isArray {
-		if !sv.NoAdd {
+	if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
+		if !sv.Is(SliceViewNoAdd) {
 			nWidgPerRow += 1
 		}
-		if !sv.NoDelete {
+		if !sv.Is(SliceViewNoDelete) {
 			nWidgPerRow += 1
 		}
 	}
 	idxOff = 1
-	if !sv.ShowIndex {
+	if !sv.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
 	return
 }
 
-// UpdtSliceSize updates and returns the size of the slice and sets SliceSize
+// UpdtSliceSize updates and returns the size of the slice
+// and sets SliceSize
 func (sv *SliceViewBase) UpdtSliceSize() int {
 	sz := sv.SliceNPVal.Len()
 	sv.SliceSize = sz
 	return sz
-}
-
-// SliceGridNeedsUpdate returns true when slice grid needs to be updated.
-// this should be true if the underlying size has changed, or other
-// indication that the data might have changed.
-func (sv *SliceViewBase) SliceGridNeedsUpdate() bool {
-	csz := sv.SliceSize
-	nsz := sv.This().(SliceViewer).UpdtSliceSize()
-	return csz != nsz
 }
 
 // ViewMuLock locks the ViewMu if non-nil
@@ -474,6 +492,9 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 // it is only called once at start, under overall Config
 func (sv *SliceViewBase) ConfigSliceGrid() {
 	sg := sv.This().(SliceViewer).SliceGrid()
+	if sg.HasChildren() {
+		return
+	}
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
@@ -504,7 +525,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	labnm := fmt.Sprintf("index-%v", itxt)
 	valnm := fmt.Sprintf("value-%v", itxt)
 
-	if sv.ShowIndex {
+	if sv.Is(SliceViewShowIndex) {
 		idxlab := &gi.Label{}
 		sg.SetChild(idxlab, 0, labnm)
 		idxlab.Text = itxt
@@ -513,10 +534,11 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 	widg := ki.NewOfType(vtyp).(gi.Widget)
 	sg.SetChild(widg, idxOff, valnm)
 	vv.ConfigWidget(widg, sc)
+	vv.UpdateWidget()
 
-	if !sv.IsDisabled() && !sv.isArray {
+	if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
 		cidx := idxOff
-		if !sv.NoAdd {
+		if !sv.Is(SliceViewNoAdd) {
 			cidx++
 			addnm := fmt.Sprintf("add-%v", itxt)
 			addbt := gi.Button{}
@@ -524,7 +546,7 @@ func (sv *SliceViewBase) ConfigSliceGrid() {
 			addbt.SetType(gi.ButtonAction)
 			addbt.SetIcon(icons.Add)
 		}
-		if !sv.NoDelete {
+		if !sv.Is(SliceViewNoDelete) {
 			cidx++
 			delnm := fmt.Sprintf("del-%v", itxt)
 			delbt := gi.Button{}
@@ -548,13 +570,12 @@ func (sv *SliceViewBase) ConfigScroll() {
 	sv.UpdateScroll()
 }
 
-// func (sv *SliceViewBase) GetSize(sc *gi.Scene, iter int) {
-// 	sv.Frame.GetSize(sc, iter)
-// }
-
 func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := sv.Frame.DoLayout(sc, parBBox, iter)
-	return redo
+	if sv.This().(SliceViewer).NeedsConfigRows() {
+		sv.This().(SliceViewer).ConfigRows(sc)
+		return true // needs redo
+	}
+	return sv.Frame.DoLayout(sc, parBBox, iter)
 }
 
 // UpdateStartIdx updates StartIdx to fit current view
@@ -593,129 +614,107 @@ func (sv *SliceViewBase) UpdateScroll() {
 
 func (sv *SliceViewBase) AvailHeight() float32 {
 	sg := sv.This().(SliceViewer).SliceGrid()
-	fmt.Println("sv:", sv.LayState.String())
-	fmt.Println("sg:", sg.LayState.String())
 	sgHt := sg.LayState.Alloc.SizeOrig.Y
 	if sgHt == 0 {
 		return 0
 	}
+	// fmt.Println("sg:", sgHt, "sv:", sv.LayState.Alloc.SizeOrig.Y)
 	sgHt -= sg.ExtraSize.Y + sg.Styles.BoxSpace().Size().Y
 	return sgHt
 }
 
-// LayoutSliceGrid does the proper layout of slice grid depending on allocated size
-// returns true if UpdateSliceGrid should be called after this
-func (sv *SliceViewBase) LayoutSliceGrid() bool {
+// VisRowsAvail returns the number of visible rows available
+// to display given the current layout parameters.
+func (sv *SliceViewBase) VisRowsAvail() (rows int, rowht, layht float32) {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
-		return false
+		return
 	}
-
-	updt := sg.UpdateStart()
-	defer sg.UpdateEndRender(updt)
-
-	if laser.AnyIsNil(sv.Slice) {
-		sg.DeleteChildren(ki.DestroyKids)
-		return false
-	}
-
-	sv.ViewMuLock()
-	defer sv.ViewMuUnlock()
-
-	sz := sv.This().(SliceViewer).UpdtSliceSize()
-	if sz == 0 {
-		sg.DeleteChildren(ki.DestroyKids)
-		return false
-	}
-
-	nWidgPerRow, _ := sv.RowWidgetNs()
 	if len(sg.GridData) > 0 && len(sg.GridData[gi.Row]) > 0 {
-		sv.RowHeight = sg.GridData[gi.Row][0].AllocSize + 4*sg.Spacing.Dots
+		rowht = sg.GridData[gi.Row][0].AllocSize + 4*sg.Spacing.Dots
 	}
+	rowht = mat32.Max(rowht, sv.RowHeight)
 	if sv.Styles.Font.Face == nil {
 		sv.Styles.Font = paint.OpenFont(sv.Styles.FontRender(), &sv.Styles.UnContext)
 	}
-	sv.RowHeight = mat32.Max(sv.RowHeight, sv.Styles.Font.Face.Metrics.Height)
+	rowht = mat32.Max(rowht, 2*sv.Styles.Font.Face.Metrics.Height)
 
 	sc := sv.Sc
 	if sc != nil && sc.Is(gi.ScPrefSizing) {
-		sv.VisRows = gi.LayoutPrefMaxRows
-		sv.LayoutHeight = float32(sv.VisRows) * sv.RowHeight
+		rows = gi.LayoutPrefMaxRows
+		layht = float32(rows) * rowht
 	} else {
 		sgHt := sv.AvailHeight()
-		fmt.Println(sgHt)
-		sv.LayoutHeight = sgHt
+		// fmt.Println(sgHt)
+		layht = sgHt
 		if sgHt == 0 {
-			return false
+			return
 		}
-		sv.VisRows = int(mat32.Floor(sgHt / sv.RowHeight))
+		rows = int(mat32.Floor(sgHt / rowht))
 	}
-	sv.DispRows = min(sv.SliceSize, sv.VisRows)
-	fmt.Println(sv.DispRows, sv.SliceSize, sv.VisRows, sv.RowHeight)
-
-	nWidg := nWidgPerRow * sv.DispRows
-
-	if sv.Values == nil || sg.NumChildren() != nWidg {
-		sg.DeleteChildren(ki.DestroyKids)
-
-		sv.Values = make([]Value, sv.DispRows)
-		sg.Kids = make(ki.Slice, nWidg)
-	}
-	sv.ConfigScroll()
-	return true
+	return
 }
 
-func (sv *SliceViewBase) SliceGridNeedsLayout() bool {
-	sgHt := sv.AvailHeight()
-	if sgHt != sv.LayoutHeight {
-		return true
+// NeedsConfigRows returns true if layout size needs diff # of rows
+func (sv *SliceViewBase) NeedsConfigRows() bool {
+	if laser.AnyIsNil(sv.Slice) {
+		sv.VisRows = 0
+		return false
 	}
-	return sv.RenderedRows != sv.DispRows
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
+	if sz == 0 {
+		sv.VisRows = 0
+		return false
+	}
+	rows, _, _ := sv.VisRowsAvail()
+	return rows != sv.VisRows || rows == 0
 }
 
-// UpdateSliceGrid updates grid display -- robust to any time calling
-func (sv *SliceViewBase) UpdateSliceGrid() {
+// ConfigRows configures VisRows worth of widgets
+// to display slice data.  It should only be called
+// when NeedsConfigRows is true: when VisRows changes.
+func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	if sg == nil {
 		return
 	}
-	updt := sg.UpdateStart()
-	defer sg.UpdateEndRender(updt)
 
-	if laser.AnyIsNil(sv.Slice) {
-		sg.DeleteChildren(ki.DestroyKids)
-		return
-	}
+	updt := sg.UpdateStart()
+	defer sg.UpdateEndLayout(updt)
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
 
-	sz := sv.This().(SliceViewer).UpdtSliceSize()
-	if sz == 0 {
-		sg.DeleteChildren(ki.DestroyKids)
+	sg.DeleteChildren(ki.DestroyKids)
+	sv.Values = nil
+	sv.VisRows = 0
+
+	if laser.AnyIsNil(sv.Slice) {
 		return
 	}
-	sv.DispRows = min(sv.SliceSize, sv.VisRows)
-
-	nWidgPerRow, idxOff := sv.RowWidgetNs()
-	nWidg := nWidgPerRow * sv.DispRows
-	sc := sv.Sc
-
-	if sv.Values == nil || sg.NumChildren() != nWidg || len(sv.Values) != sv.DispRows { // shouldn't happen..
-		fmt.Println("re-layout")
-		sv.ViewMuUnlock()
-		sv.LayoutSliceGrid()
-		sv.ViewMuLock()
-		nWidg = nWidgPerRow * sv.DispRows
+	sz := sv.This().(SliceViewer).UpdtSliceSize()
+	if sz == 0 {
+		return
 	}
 
-	sv.UpdateStartIdx()
+	sv.VisRows, sv.RowHeight, sv.LayoutHeight = sv.VisRowsAvail()
 
-	for i := 0; i < sv.DispRows; i++ {
+	// fmt.Println("vis:", sv.VisRows, "rowht:", sv.RowHeight, "layht:", sv.LayoutHeight)
+	// fmt.Println("sg:", sg.LayState.String())
+
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
+	nWidg := nWidgPerRow * sv.VisRows
+
+	sv.Values = make([]Value, sv.VisRows)
+	sg.Kids = make(ki.Slice, nWidg)
+
+	for i := 0; i < sv.VisRows; i++ {
 		i := i
+		si := i
+		if si >= sv.SliceSize {
+			si = sv.SliceSize - 1
+		}
 		ridx := i * nWidgPerRow
-		si := sv.StartIdx + i // slice idx
-		issel := sv.IdxIsSelected(si)
 		val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 		var vv Value
 		if sv.Values[i] == nil {
@@ -732,88 +731,128 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		labnm := "index-" + itxt
 		valnm := "value-" + itxt
 
-		if sv.ShowIndex {
-			var idxlab *gi.Label
-			if sg.Kids[ridx] != nil {
-				idxlab = sg.Kids[ridx].(*gi.Label)
-			} else {
-				idxlab = &gi.Label{}
-				sg.SetChild(idxlab, ridx, labnm)
-				// todo:
-				// idxlab.Selectable = true
-				// idxlab.Redrawable = true
-				idxlab.OnSelect(func(e events.Event) {
-					sv.UpdateSelectRow(i, sg.StateIs(states.Selected))
-				})
-			}
+		if sv.Is(SliceViewShowIndex) {
+			idxlab := &gi.Label{}
+			sg.SetChild(idxlab, ridx, labnm)
+			// todo:
+			// idxlab.Selectable = true
+			// idxlab.Redrawable = true
+			idxlab.OnSelect(func(e events.Event) {
+				sv.UpdateSelectRow(i, sg.StateIs(states.Selected))
+			})
 			idxlab.SetText(sitxt)
-			idxlab.SetSelected(issel)
 		}
 
-		var widg gi.Widget
-		if sg.Kids[ridx+idxOff] != nil {
-			widg = sg.Kids[ridx+idxOff].(gi.Widget)
-			fmt.Println("updt widg:", widg)
+		widg := ki.NewOfType(vtyp).(gi.Widget)
+		sg.SetChild(widg, ridx+idxOff, valnm)
+		vv.ConfigWidget(widg, sc)
+		wb := widg.AsWidget()
+
+		if sv.IsDisabled() {
+			widg.AsWidget().SetState(true, states.Disabled)
+			if wb != nil {
+				wb.SetProp("slv-row", i)
+				wb.SetState(false, states.Selected)
+				wb.OnSelect(func(e events.Event) {
+					sv.UpdateSelectRow(i, wb.StateIs(states.Selected))
+				})
+			}
+		} else {
+			vvb := vv.AsValueBase()
+			vvb.OnChange(func(e events.Event) {
+				sv.SendChange()
+			})
+			if !sv.Is(SliceViewIsArray) {
+				cidx := ridx + idxOff
+				if !sv.Is(SliceViewNoAdd) {
+					cidx++
+					addnm := fmt.Sprintf("add-%v", itxt)
+					addact := gi.Button{}
+					sg.SetChild(&addact, cidx, addnm)
+
+					addact.SetIcon(icons.Add)
+					addact.SetType(gi.ButtonAction)
+					addact.Tooltip = "insert a new element at this index"
+					addact.Data = i
+					addact.OnClick(func(e events.Event) {
+						sv.SliceNewAtRow(i + 1)
+					})
+				}
+
+				if !sv.Is(SliceViewNoDelete) {
+					cidx++
+					delnm := fmt.Sprintf("del-%v", itxt)
+					delact := gi.Button{}
+					sg.SetChild(&delact, cidx, delnm)
+					delact.SetIcon(icons.Delete)
+					delact.SetType(gi.ButtonAction)
+					delact.Tooltip = "delete this element"
+					delact.Data = i
+					delact.OnClick(func(e events.Event) {
+						sv.SliceDeleteAtRow(i)
+					})
+				}
+			}
+		}
+		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
+	}
+	sv.ConfigScroll()
+	sv.UpdateWidgets()
+}
+
+// UpdateWidgets updates the row widget display to
+// represent the current state of the slice data,
+// including which range of data is being displayed.
+// This is called for scrolling, navigation etc.
+func (sv *SliceViewBase) UpdateWidgets() {
+	sg := sv.This().(SliceViewer).SliceGrid()
+	if sg == nil || sv.VisRows == 0 || !sg.HasChildren() {
+		return
+	}
+	updt := sg.UpdateStart()
+	defer sg.UpdateEndRender(updt)
+
+	sv.ViewMuLock()
+	defer sv.ViewMuUnlock()
+
+	if laser.AnyIsNil(sv.Slice) || sv.This().(SliceViewer).UpdtSliceSize() == 0 {
+		sg.DeleteChildren(ki.DestroyKids)
+		sv.Values = nil
+		return
+	}
+	sv.DispRows = min(sv.SliceSize, sv.VisRows)
+
+	nWidgPerRow, idxOff := sv.RowWidgetNs()
+	// sc := sv.Sc
+
+	sv.UpdateStartIdx()
+	for i := 0; i < sv.VisRows; i++ {
+		i := i
+		ridx := i * nWidgPerRow
+		widg := sg.Kids[ridx+idxOff].(gi.Widget)
+		vv := sv.Values[i]
+		si := sv.StartIdx + i // slice idx
+		if si < sv.SliceSize {
+			widg.SetState(false, states.Invisible)
+			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
+			issel := sv.IdxIsSelected(si)
+			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
+			if sv.Is(SliceViewShowIndex) {
+				idxlab := sg.Kids[ridx].(*gi.Label)
+				idxlab.SetText(strconv.Itoa(si))
+				idxlab.SetSelected(issel)
+				idxlab.SetNeedsRender()
+				// fmt.Println("lab:", idxlab)
+			}
 			vv.UpdateWidget()
 			if sv.IsDisabled() {
 				widg.AsWidget().SetState(true, states.Disabled)
 			}
 			widg.AsWidget().SetSelected(issel)
+			sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 		} else {
-			widg = ki.NewOfType(vtyp).(gi.Widget)
-			sg.SetChild(widg, ridx+idxOff, valnm)
-			vv.ConfigWidget(widg, sc)
-			wb := widg.AsWidget()
-			fmt.Println("new widg:", widg)
-			// wb.Sty.Template = "giv.SliceViewBase.ItemWidget." + vtyp.Name()
-
-			if sv.IsDisabled() {
-				widg.AsWidget().SetState(true, states.Disabled)
-				if wb != nil {
-					wb.SetProp("slv-row", i)
-					wb.SetState(false, states.Selected)
-					wb.OnSelect(func(e events.Event) {
-						sv.UpdateSelectRow(i, wb.StateIs(states.Selected))
-					})
-				}
-			} else {
-				vvb := vv.AsValueBase()
-				vvb.OnChange(func(e events.Event) {
-					sv.SendChange()
-				})
-				if !sv.isArray {
-					cidx := ridx + idxOff
-					if !sv.NoAdd {
-						cidx++
-						addnm := fmt.Sprintf("add-%v", itxt)
-						addact := gi.Button{}
-						sg.SetChild(&addact, cidx, addnm)
-
-						addact.SetIcon(icons.Add)
-						addact.Tooltip = "insert a new element at this index"
-						addact.Data = i
-						addact.OnClick(func(e events.Event) {
-							sv.SliceNewAtRow(i + 1)
-						})
-					}
-
-					if !sv.NoDelete {
-						cidx++
-						delnm := fmt.Sprintf("del-%v", itxt)
-						delact := gi.Button{}
-						sg.SetChild(&delact, cidx, delnm)
-
-						delact.SetIcon(icons.Delete)
-						delact.Tooltip = "delete this element"
-						delact.Data = i
-						delact.OnClick(func(e events.Event) {
-							sv.SliceDeleteAtRow(i)
-						})
-					}
-				}
-			}
+			widg.SetState(true, states.Invisible)
 		}
-		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 	}
 	if sv.SelVal != nil {
 		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
@@ -822,6 +861,7 @@ func (sv *SliceViewBase) UpdateSliceGrid() {
 		sv.SelectIdxWidgets(sv.SelectedIdx, true)
 	}
 	sv.UpdateScroll()
+	sv.ApplyStyleTree(sv.Sc)
 }
 
 // SetChanged sets the Changed flag and emits the ViewSig signal for the
@@ -842,7 +882,7 @@ func (sv *SliceViewBase) SliceNewAtRow(row int) {
 // SliceNewAt inserts a new blank element at given index in the slice -- -1
 // means the end
 func (sv *SliceViewBase) SliceNewAt(idx int) {
-	if sv.isArray {
+	if sv.Is(SliceViewIsArray) {
 		return
 	}
 
@@ -907,6 +947,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	}
 	sv.ViewMuUnlock()
 	sv.SetChanged()
+	sv.ReConfig()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -948,7 +989,7 @@ func (sv *SliceViewBase) SliceDeleteAtSel(idx int) {
 
 // SliceDeleteAt deletes element at given index from slice
 func (sv *SliceViewBase) SliceDeleteAt(idx int) {
-	if sv.isArray {
+	if sv.Is(SliceViewIsArray) {
 		return
 	}
 	if idx < 0 || idx >= sv.SliceSize {
@@ -970,6 +1011,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 
 	sv.ViewMuUnlock()
 	sv.SetChanged()
+	sv.ReConfig()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -980,13 +1022,13 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	if sv.ToolbarSlice == sv.Slice {
 		return
 	}
-	if !sv.ShowToolbar {
+	if !sv.Is(SliceViewShowToolbar) {
 		sv.ToolbarSlice = sv.Slice
 		return
 	}
 	tb := sv.Toolbar()
 	ndef := 2 // number of default actions
-	if sv.isArray || sv.IsDisabled() || sv.NoAdd {
+	if sv.Is(SliceViewIsArray) || sv.IsDisabled() || sv.Is(SliceViewNoAdd) {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {
@@ -1051,7 +1093,7 @@ func (sv *SliceViewBase) IsIdxVisible(idx int) bool {
 // RowFirstWidget returns the first widget for given row (could be index or
 // not) -- false if out of range
 func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
-	if !sv.ShowIndex {
+	if !sv.Is(SliceViewShowIndex) {
 		return nil, false
 	}
 	if !sv.IsRowInBounds(row) {
@@ -1067,7 +1109,7 @@ func (sv *SliceViewBase) RowFirstWidget(row int) (*gi.WidgetBase, bool) {
 // in given row.  returns that element or nil if not successful
 // note: grid must have already rendered for focus to be grabbed!
 func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
-	if !sv.IsRowInBounds(row) || sv.InFocusGrab { // range check
+	if !sv.IsRowInBounds(row) || sv.Is(SliceViewInFocusGrab) { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
@@ -1077,9 +1119,9 @@ func (sv *SliceViewBase) RowGrabFocus(row int) *gi.WidgetBase {
 	if widg.StateIs(states.Focused) {
 		return widg
 	}
-	sv.InFocusGrab = true
+	sv.SetFlag(true, SliceViewInFocusGrab)
 	widg.GrabFocus()
-	sv.InFocusGrab = false
+	sv.SetFlag(false, SliceViewInFocusGrab)
 	return widg
 }
 
@@ -1157,7 +1199,7 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 	updt := sv.ScrollToIdxNoUpdt(idx)
 	if updt {
-		sv.SetNeedsLayout()
+		sv.UpdateWidgets()
 	}
 	return updt
 }
@@ -1172,8 +1214,8 @@ func (sv *SliceViewBase) SelectVal(val string) bool {
 		idx, _ := SliceIdxByValue(sv.Slice, sv.SelVal)
 		sv.ViewMuUnlock()
 		if idx >= 0 {
-			sv.ScrollToIdx(idx)
 			sv.UpdateSelectIdx(idx, true)
+			sv.ScrollToIdx(idx)
 			return true
 		}
 	}
@@ -1306,7 +1348,7 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 	sg := sv.This().(SliceViewer).SliceGrid()
 	nWidgPerRow, idxOff := sv.This().(SliceViewer).RowWidgetNs()
 	rowidx := row * nWidgPerRow
-	if sv.ShowIndex {
+	if sv.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
 			widg := sg.Child(rowidx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
@@ -1339,7 +1381,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 
 // UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
-	if sv.IsDisabled() && !sv.InactMultiSel {
+	if sv.IsDisabled() && !sv.Is(SliceViewInactMultiSel) {
 		updt := sv.UpdateStart()
 		defer sv.UpdateEndRender(updt)
 
@@ -1620,6 +1662,7 @@ func (sv *SliceViewBase) DeleteIdxs() {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.SetChanged()
+	sv.ReConfig()
 }
 
 // Cut copies selected indexes to clip.Board and deletes selected indexes
@@ -1640,6 +1683,7 @@ func (sv *SliceViewBase) Cut() {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
+	sv.ReConfig()
 }
 
 // CutIdxs copies selected indexes to clip.Board and deletes selected indexes
@@ -1745,6 +1789,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
+	sv.ReConfig()
 }
 
 // Duplicate copies selected items and inserts them after current selection --
@@ -1920,7 +1965,7 @@ func (sv *SliceViewBase) DropCancel() {
 //    Events
 
 func (sv *SliceViewBase) StdCtxtMenu(m *gi.Scene, idx int) {
-	if sv.isArray {
+	if sv.Is(SliceViewIsArray) {
 		return
 	}
 	gi.NewButton(m).SetText("Copy").SetData(idx).
@@ -1974,14 +2019,14 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	kf := gi.KeyFun(kt.KeyChord())
 	selMode := events.SelectModeBits(kt.Modifiers())
 	if selMode == events.SelectOne {
-		if sv.SelectMode {
+		if sv.Is(SliceViewSelectMode) {
 			selMode = events.ExtendContinuous
 		}
 	}
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		sv.UnselectAllIdxs()
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case gi.KeyFunMoveDown:
 		sv.MoveDownAction(selMode)
@@ -1996,11 +2041,11 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 		sv.MovePageUpAction(selMode)
 		kt.SetHandled()
 	case gi.KeyFunSelectMode:
-		sv.SelectMode = !sv.SelectMode
+		sv.SetFlag(!sv.Is(SliceViewSelectMode), SliceViewSelectMode)
 		kt.SetHandled()
 	case gi.KeyFunSelectAll:
 		sv.SelectAllIdxs()
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	}
 }
@@ -2023,33 +2068,33 @@ func (sv *SliceViewBase) KeyInputActive(kt events.Event) {
 	// 	kt.SetHandled()
 	case gi.KeyFunDuplicate:
 		nidx := sv.Duplicate()
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		if nidx >= 0 {
 			sv.SelectIdxAction(nidx, events.SelectOne)
 		}
 		kt.SetHandled()
 	case gi.KeyFunInsert:
 		sv.This().(SliceViewer).SliceNewAt(idx)
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx+1, events.SelectOne) // todo: somehow nidx not working
 		kt.SetHandled()
 	case gi.KeyFunInsertAfter:
 		sv.This().(SliceViewer).SliceNewAt(idx + 1)
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx+1, events.SelectOne)
 		kt.SetHandled()
 	case gi.KeyFunCopy:
 		sv.CopyIdxs(true)
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		sv.SelectIdxAction(idx, events.SelectOne)
 		kt.SetHandled()
 	case gi.KeyFunCut:
 		sv.CutIdxs()
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	case gi.KeyFunPaste:
 		sv.PasteIdx(sv.SelectedIdx)
-		sv.SelectMode = false
+		sv.SetFlag(false, SliceViewSelectMode)
 		kt.SetHandled()
 	}
 }
@@ -2058,7 +2103,7 @@ func (sv *SliceViewBase) KeyInputInactive(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
 	}
-	if sv.InactMultiSel {
+	if sv.Is(SliceViewInactMultiSel) {
 		sv.KeyInputNav(kt)
 		if kt.IsHandled() {
 			return
@@ -2128,7 +2173,7 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// 	}
 	// })
 	if sv.IsDisabled() {
-		if sv.InactKeyNav {
+		if sv.Is(SliceViewInactKeyNav) {
 			sv.OnKeyChord(func(e events.Event) {
 				sv.KeyInputInactive(e)
 			})

@@ -77,10 +77,10 @@ func (tv *TableView) OnInit() {
 }
 
 func (tv *TableView) TableViewInit() {
-	tv.SelectMode = false
-	tv.ShowIndex = true
-	tv.ShowToolbar = true
-	tv.InactKeyNav = true
+	tv.SetFlag(false, SliceViewSelectMode)
+	tv.SetFlag(true, SliceViewShowIndex)
+	tv.SetFlag(true, SliceViewShowToolbar)
+	tv.SetFlag(true, SliceViewInactKeyNav)
 
 	tv.HandleSliceViewEvents()
 
@@ -138,7 +138,7 @@ func (tv *TableView) TableViewInit() {
 			sb.OnChange(func(e events.Event) {
 				updt := tv.UpdateStart()
 				tv.StartIdx = int(sb.Value)
-				tv.This().(SliceViewer).UpdateSliceGrid()
+				tv.This().(SliceViewer).UpdateWidgets()
 				tv.UpdateEndRender(updt)
 			})
 
@@ -210,7 +210,7 @@ func (tv *TableView) SetSlice(sl any) {
 	}
 	updt := tv.UpdateStart()
 	tv.ResetSelectedIdxs()
-	tv.SelectMode = false
+	tv.SetFlag(false, SliceViewSelectMode)
 	tv.UpdateEnd(updt)
 	tv.ReConfig()
 }
@@ -276,15 +276,23 @@ func (tv *TableView) IsConfiged() bool {
 }
 
 // Config configures the view
-func (tv *TableView) ConfigWidget(vp *gi.Scene) {
+func (tv *TableView) ConfigWidget(sc *gi.Scene) {
+	tv.ConfigTableView(sc)
+}
+
+func (tv *TableView) ConfigTableView(sc *gi.Scene) {
+	if tv.IsConfiged() {
+		if tv.NeedsConfigRows() {
+			tv.ConfigRows(sc)
+		}
+		return
+	}
 	config := ki.Config{}
 	config.Add(gi.ToolbarType, "toolbar")
 	config.Add(gi.FrameType, "frame")
 	mods, updt := tv.ConfigChildren(config)
 	tv.ConfigSliceGrid()
 	tv.ConfigToolbar()
-	tv.This().(SliceViewer).LayoutSliceGrid()
-	tv.This().(SliceViewer).UpdateSliceGrid()
 	if mods {
 		tv.UpdateEnd(updt)
 	}
@@ -332,15 +340,15 @@ func (tv *TableView) Toolbar() *gi.Toolbar {
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NVisFields
 	if !tv.IsDisabled() {
-		if !tv.NoAdd {
+		if !tv.Is(SliceViewNoAdd) {
 			nWidgPerRow += 1
 		}
-		if !tv.NoDelete {
+		if !tv.Is(SliceViewNoDelete) {
 			nWidgPerRow += 1
 		}
 	}
 	idxOff = 1
-	if !tv.ShowIndex {
+	if !tv.Is(SliceViewShowIndex) {
 		nWidgPerRow -= 1
 		idxOff = 0
 	}
@@ -351,6 +359,9 @@ func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 // this is only called by global Config and updates are guarded by that
 func (tv *TableView) ConfigSliceGrid() {
 	sg := tv.SliceFrame()
+	if sg.HasChildren() {
+		return
+	}
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 	sc := tv.Sc
@@ -390,7 +401,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	// Configure Header
 	hcfg := ki.Config{}
-	if tv.ShowIndex {
+	if tv.Is(SliceViewShowIndex) {
 		hcfg.Add(gi.LabelType, "head-idx")
 	}
 	for fli := 0; fli < tv.NVisFields; fli++ {
@@ -411,7 +422,7 @@ func (tv *TableView) ConfigSliceGrid() {
 	itxt := "0"
 	labnm := "index-" + itxt
 
-	if tv.ShowIndex {
+	if tv.Is(SliceViewShowIndex) {
 		lbl := sgh.Child(0).(*gi.Label)
 		lbl.Text = "Index"
 
@@ -462,7 +473,7 @@ func (tv *TableView) ConfigSliceGrid() {
 
 	if !tv.IsDisabled() {
 		cidx := tv.NVisFields + idxOff
-		if !tv.NoAdd {
+		if !tv.Is(SliceViewNoAdd) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
@@ -473,7 +484,7 @@ func (tv *TableView) ConfigSliceGrid() {
 			addbt.SetIcon(icons.Add)
 			cidx++
 		}
-		if !tv.NoDelete {
+		if !tv.Is(SliceViewNoDelete) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
@@ -645,7 +656,7 @@ func (tv *TableView) UpdateSliceGrid() {
 		itxt := strconv.Itoa(i)
 		sitxt := strconv.Itoa(si)
 		labnm := "index-" + itxt
-		if tv.ShowIndex {
+		if tv.Is(SliceViewShowIndex) {
 			var idxlab *gi.Label
 			if sg.Kids[ridx] != nil {
 				idxlab = sg.Kids[ridx].(*gi.Label)
@@ -728,7 +739,7 @@ func (tv *TableView) UpdateSliceGrid() {
 
 		if !tv.IsDisabled() {
 			cidx := ridx + tv.NVisFields + idxOff
-			if !tv.NoAdd {
+			if !tv.Is(SliceViewNoAdd) {
 				if sg.Kids[cidx] == nil {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Button{}
@@ -741,7 +752,7 @@ func (tv *TableView) UpdateSliceGrid() {
 				}
 				cidx++
 			}
-			if !tv.NoDelete {
+			if !tv.Is(SliceViewNoDelete) {
 				if sg.Kids[cidx] == nil {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Button{}
@@ -863,13 +874,13 @@ func (tv *TableView) ConfigToolbar() {
 	if tv.ToolbarSlice == tv.Slice {
 		return
 	}
-	if !tv.ShowToolbar {
+	if !tv.Is(SliceViewShowToolbar) {
 		tv.ToolbarSlice = tv.Slice
 		return
 	}
 	tb := tv.Toolbar()
 	ndef := 2 // number of default actions
-	if tv.isArray || tv.IsDisabled() || tv.NoAdd {
+	if tv.Is(SliceViewIsArray) || tv.IsDisabled() || tv.Is(SliceViewNoAdd) {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {
@@ -931,10 +942,10 @@ func (tv *TableView) SetSortFieldName(nm string) {
 	}
 }
 
-func (tv *TableView) DoLayout(vp *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := tv.SliceViewBase.DoLayout(vp, parBBox, iter)
+func (tv *TableView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
+	redo := tv.SliceViewBase.DoLayout(sc, parBBox, iter)
 	tv.LayoutHeader()
-	tv.SliceHeader().DoLayout(vp, parBBox, iter)
+	tv.SliceHeader().DoLayout(sc, parBBox, iter)
 	return redo
 }
 
@@ -964,7 +975,7 @@ func (tv *TableView) RowFirstVisWidget(row int) (*gi.WidgetBase, bool) {
 // returns that element or nil if not successful -- note: grid must have
 // already rendered for focus to be grabbed!
 func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
-	if !tv.IsRowInBounds(row) || tv.InFocusGrab { // range check
+	if !tv.IsRowInBounds(row) || tv.Is(SliceViewInFocusGrab) { // range check
 		return nil
 	}
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -977,8 +988,8 @@ func (tv *TableView) RowGrabFocus(row int) *gi.WidgetBase {
 			return widg
 		}
 	}
-	tv.InFocusGrab = true
-	defer func() { tv.InFocusGrab = false }()
+	tv.SetFlag(true, SliceViewInFocusGrab)
+	defer func() { tv.SetFlag(false, SliceViewInFocusGrab) }()
 	for fli := 0; fli < tv.NVisFields; fli++ {
 		widg := sg.Child(ridx + idxOff + fli).(gi.Widget).AsWidget()
 		if widg.CanFocus() {
@@ -1008,7 +1019,7 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 			widg.SetNeedsRender()
 		}
 	}
-	if tv.ShowIndex {
+	if tv.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(ridx) == nil {
 			widg := sg.Child(ridx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
@@ -1072,7 +1083,7 @@ func (tv *TableView) EditIdx(idx int) {
 }
 
 func (tv *TableView) StdCtxtMenu(m *gi.Scene, idx int) {
-	if tv.isArray {
+	if tv.Is(SliceViewIsArray) {
 		return
 	}
 	tv.SliceViewBase.StdCtxtMenu(m, idx)
