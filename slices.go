@@ -30,24 +30,30 @@ func SliceElType(sl any) reflect.Type {
 	return NonPtrValue(OnePtrUnderlyingValue(reflect.ValueOf(sl))).Type().Elem()
 }
 
-// SliceNewAt inserts a new blank element at given index in the slice -- -1
-// means the end
-func SliceNewAt(sl any, idx int) {
-	sltyp := SliceElType(sl)
-	slptr := sltyp.Kind() == reflect.Ptr
+// SliceElValue returns a reflect.Value of the Slice element type.
+// isPtr indicates that the value is a Pointer type, in which case
+// a concrete element has been made and the value is a pointer to it.
+func SliceElValue(sl any) (val reflect.Value, isPtr bool) {
+	typ := SliceElType(sl)
+	isPtr = typ.Kind() == reflect.Ptr
+	val = reflect.New(NonPtrType(typ)) // make the concrete el
+	if !isPtr {
+		val = val.Elem() // use concrete value
+	}
+	return
+}
 
+// SliceNewAt inserts a new blank element at given index in the slice.
+// -1 means the end.
+func SliceNewAt(sl any, idx int) {
 	svl := reflect.ValueOf(sl)
 	svnp := NonPtrValue(svl)
-
-	nval := reflect.New(NonPtrType(sltyp)) // make the concrete el
-	if !slptr {
-		nval = nval.Elem() // use concrete value
-	}
+	val, _ := SliceElValue(sl)
 	sz := svnp.Len()
-	svnp = reflect.Append(svnp, nval)
+	svnp = reflect.Append(svnp, val)
 	if idx >= 0 && idx < sz {
 		reflect.Copy(svnp.Slice(idx+1, sz+1), svnp.Slice(idx, sz))
-		svnp.Index(idx).Set(nval)
+		svnp.Index(idx).Set(val)
 	}
 	svl.Elem().Set(svnp)
 }
