@@ -173,6 +173,7 @@ func (st *PopupStage) RunPopup() *PopupStage {
 
 	sc.Geom.Size = sz
 	sc.FitInWindow(msc.Geom) // does resize
+	sc.ShowLayoutIter = 0
 
 	sc.EventMgr.InitialFocus()
 

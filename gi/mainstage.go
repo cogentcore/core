@@ -178,7 +178,7 @@ func (st *MainStage) RunWindow() *MainStage {
 		fmt.Println("MainStage.RunWindow: Window Size:", sz)
 	}
 	st.Scene.Resize(sz)
-	st.Scene.SetNeedsLayout()
+	st.Scene.ShowLayoutIter = 0
 
 	if st.NewWindow {
 		win := st.NewRenderWin()
