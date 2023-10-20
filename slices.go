@@ -33,14 +33,14 @@ func SliceElType(sl any) reflect.Type {
 // SliceElValue returns a reflect.Value of the Slice element type.
 // isPtr indicates that the value is a Pointer type, in which case
 // a concrete element has been made and the value is a pointer to it.
-func SliceElValue(sl any) (val reflect.Value, isPtr bool) {
+func SliceElValue(sl any) reflect.Value {
 	typ := SliceElType(sl)
-	isPtr = typ.Kind() == reflect.Ptr
-	val = reflect.New(NonPtrType(typ)) // make the concrete el
+	isPtr := typ.Kind() == reflect.Ptr
+	val := reflect.New(NonPtrType(typ)) // make the concrete el
 	if !isPtr {
 		val = val.Elem() // use concrete value
 	}
-	return
+	return val
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice.
@@ -48,7 +48,7 @@ func SliceElValue(sl any) (val reflect.Value, isPtr bool) {
 func SliceNewAt(sl any, idx int) {
 	svl := reflect.ValueOf(sl)
 	svnp := NonPtrValue(svl)
-	val, _ := SliceElValue(sl)
+	val := SliceElValue(sl)
 	sz := svnp.Len()
 	svnp = reflect.Append(svnp, val)
 	if idx >= 0 && idx < sz {
