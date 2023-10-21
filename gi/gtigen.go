@@ -773,7 +773,7 @@ var LayoutType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\""}},
+		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\" setter:\"-\""}},
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}, Tag: "xml:\"spacing\""}},
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
 		{"StackTopOnly", &gti.Field{Name: "StackTopOnly", Type: "bool", LocalType: "bool", Doc: "for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't", Directives: gti.Directives{}, Tag: ""}},
@@ -834,13 +834,6 @@ func AsLayout(k ki.Ki) *Layout {
 
 // AsLayout satisfies the [LayoutEmbedder] interface
 func (t *Layout) AsLayout() *Layout {
-	return t
-}
-
-// SetLay sets the Lay of the Layout and
-// returns it to allow chaining together set calls.
-func (t *Layout) SetLay(v Layouts) *Layout {
-	t.Lay = v
 	return t
 }
 
@@ -2173,7 +2166,7 @@ var SpellType = gti.AddType(&gti.Type{
 		{"SrcLn", &gti.Field{Name: "SrcLn", Type: "int", LocalType: "int", Doc: "line number in source that spelling is operating on, if relevant", Directives: gti.Directives{}, Tag: ""}},
 		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", LocalType: "int", Doc: "character position in source that spelling is operating on (start of word to be corrected)", Directives: gti.Directives{}, Tag: ""}},
 		{"Suggest", &gti.Field{Name: "Suggest", Type: "[]string", LocalType: "[]string", Doc: "list of suggested corrections", Directives: gti.Directives{}, Tag: ""}},
-		{"Word", &gti.Field{Name: "Word", Type: "string", LocalType: "string", Doc: "word being checked", Directives: gti.Directives{}, Tag: ""}},
+		{"Word", &gti.Field{Name: "Word", Type: "string", LocalType: "string", Doc: "word being checked", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
 		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", LocalType: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}, Tag: ""}},
 		{"Correction", &gti.Field{Name: "Correction", Type: "string", LocalType: "string", Doc: "the user's correction selection'", Directives: gti.Directives{}, Tag: ""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: ""}},
@@ -2221,13 +2214,6 @@ func (t *Spell) SetSrcCh(v int) *Spell {
 // returns it to allow chaining together set calls.
 func (t *Spell) SetSuggest(v []string) *Spell {
 	t.Suggest = v
-	return t
-}
-
-// SetWord sets the Word of the Spell and
-// returns it to allow chaining together set calls.
-func (t *Spell) SetWord(v string) *Spell {
-	t.Word = v
 	return t
 }
 

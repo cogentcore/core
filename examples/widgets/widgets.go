@@ -121,9 +121,8 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/widgets/README.md">READ
 	})
 
 	button2 := gi.NewButton(brow, "button2").
-		SetText("Open GoGiEditor").
-		SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things").(*gi.Button)
-	_ = button2
+		SetText("Open GoGiEditor")
+	button2.SetTooltip("This button will open the GoGi GUI editor where you can edit this very GUI and see it update dynamically as you change things")
 	button2.OnClick(func(e events.Event) {
 		// gi.PromptDialog(button2, gi.DlgOpts{Title: "Look Ok?", Prompt: "Does this look ok?", Ok: true, Cancel: true}, button2, func(dlg *gi.DialogStage) {
 		// 	fmt.Println("dialog looks OK:", dlg.Accepted)
