@@ -199,19 +199,19 @@ func app() {
 	// 	s.SetStretchMax()
 	// })
 
-	sv := giv.NewSliceView(split, "sv")
-	// sv.SetInactive()
-	sv.SetSlice(&tstslice)
-	sv.Style(func(s *styles.Style) {
-		s.SetStretchMax()
-	})
-
-	// tv := giv.NewTableView(split, "tv")
+	// sv := giv.NewSliceView(split, "sv")
 	// // sv.SetInactive()
-	// tv.SetSlice(&tsttable)
-	// tv.Style(func(s *styles.Style) {
+	// sv.SetSlice(&tstslice)
+	// sv.Style(func(s *styles.Style) {
 	// 	s.SetStretchMax()
 	// })
+
+	tv := giv.NewTableView(split, "tv")
+	// sv.SetInactive()
+	tv.SetSlice(&tsttable)
+	tv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
 
 	// split.SetSplits(.3, .2, .2, .3)
 	split.SetSplits(.5, .5)
