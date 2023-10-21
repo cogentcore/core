@@ -118,7 +118,7 @@ type Spell struct {
 	Suggest []string
 
 	// word being checked
-	Word string
+	Word string `setter:"-"`
 
 	// last word learned -- can be undone -- stored in lowercase format
 	LastLearned string
@@ -156,11 +156,12 @@ func (sp *Spell) CheckWord(word string) ([]string, bool) {
 }
 
 // SetWord sets the word to spell and other associated info
-func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) {
+func (sp *Spell) SetWord(word string, sugs []string, srcLn, srcCh int) *Spell {
 	sp.Word = word
 	sp.Suggest = sugs
 	sp.SrcLn = srcLn
 	sp.SrcCh = srcCh
+	return sp
 }
 
 // Show is the main call for listing spelling corrections.
