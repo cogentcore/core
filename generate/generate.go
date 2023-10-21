@@ -125,8 +125,8 @@ func SetterFields(typ *gtigen.Type) []*gti.Field {
 	res := []*gti.Field{}
 	for _, kv := range typ.Fields.Order {
 		f := kv.Val
-		s, ok := f.Tag.Lookup("setter")
-		hasSetter := ok && s == "+"
+		// unspecified indicates to add a setter; only "-" means no setter
+		hasSetter := f.Tag.Get("setter") != "-"
 		if hasSetter {
 			res = append(res, f)
 		}

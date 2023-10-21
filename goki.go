@@ -12,12 +12,12 @@ import (
 	"goki.dev/goki/packman"
 	"goki.dev/goki/tools"
 	"goki.dev/grease"
-	// "goki.dev/greasi"
+	"goki.dev/greasi"
 )
 
 func main() {
 	opts := grease.DefaultOptions("goki", "GoKi", "Command line and GUI tools for developing apps and libraries using the GoKi framework.")
 	opts.DefaultFiles = []string{".goki/config.toml"}
 	opts.SearchUp = true
-	grease.Run(opts, &config.Config{}, packman.Build, packman.Install, packman.Run, generate.Generate, tools.Init, tools.Setup, packman.Log, packman.Release, packman.GetVersion, packman.SetVersion, packman.UpdateVersion)
+	greasi.Run(opts, &config.Config{}, packman.Build, packman.Install, packman.Run, generate.Generate, tools.Init, tools.Setup, packman.Log, packman.Release, packman.GetVersion, packman.SetVersion, packman.UpdateVersion)
 }

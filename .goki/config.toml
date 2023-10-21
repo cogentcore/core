@@ -6,6 +6,8 @@ Type = "App"
 [Build]
   Package = "."
   Output = ""
+  ID = "com.org.todo.goki"
+  Debug = false
   Rebuild = false
   Install = false
   PrintOnly = false
@@ -15,17 +17,11 @@ Type = "App"
   IOSVersion = "13.0"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
-  BundleID = ""
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "goki"
-  Comment = "These are the color schemes"
-
-[Install]
-  Package = "."
-  Target = [""]
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
 
 [Log]
   Target = "android"
