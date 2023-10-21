@@ -205,7 +205,7 @@ type Layout struct {
 	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-"`
 
 	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
-	ScrollsOff bool `copy:"-" json:"-" xml:"-"`
+	ScrollsOff bool `copy:"-" json:"-" xml:"-" setter:"-"`
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {
@@ -286,23 +286,6 @@ const (
 
 // LayoutDefault is default obj that can be used when property specifies "default"
 var LayoutDefault Layout
-
-////////////////////////////////////////////////////////////////////////////////////////
-//     Setters
-
-func (ly *Layout) SetLayout(lay Layouts) *Layout {
-	updt := ly.UpdateStart()
-	ly.Lay = lay
-	ly.UpdateEndLayout(updt)
-	return ly
-}
-
-func (ly *Layout) SetSpacing(spc units.Value) *Layout {
-	updt := ly.UpdateStart()
-	ly.Spacing = spc
-	ly.UpdateEndLayout(updt)
-	return ly
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //     Overflow: Scrolling mainly

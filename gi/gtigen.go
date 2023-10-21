@@ -638,7 +638,7 @@ var ImageType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: ""}},
-		{"Size", &gti.Field{Name: "Size", Type: "image.Point", LocalType: "image.Point", Doc: "size of the image", Directives: gti.Directives{}, Tag: ""}},
+		{"Size", &gti.Field{Name: "Size", Type: "image.Point", LocalType: "image.Point", Doc: "size of the image", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the bitmap image", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" xml:\"-\" json:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -670,13 +670,6 @@ func (t *Image) New() ki.Ki {
 // returns it to allow chaining together set calls.
 func (t *Image) SetFilename(v FileName) *Image {
 	t.Filename = v
-	return t
-}
-
-// SetSize sets the Size of the Image and
-// returns it to allow chaining together set calls.
-func (t *Image) SetSize(v image.Point) *Image {
-	t.Size = v
 	return t
 }
 
@@ -802,7 +795,7 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" setter:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -953,13 +946,6 @@ func (t *Layout) SetFocusNameTime(v time.Time) *Layout {
 // returns it to allow chaining together set calls.
 func (t *Layout) SetFocusNameLast(v ki.Ki) *Layout {
 	t.FocusNameLast = v
-	return t
-}
-
-// SetScrollsOff sets the ScrollsOff of the Layout and
-// returns it to allow chaining together set calls.
-func (t *Layout) SetScrollsOff(v bool) *Layout {
-	t.ScrollsOff = v
 	return t
 }
 

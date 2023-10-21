@@ -39,7 +39,7 @@ type Image struct {
 	Filename FileName
 
 	// size of the image
-	Size image.Point
+	Size image.Point `setter:"-"`
 
 	// the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-"`
@@ -67,15 +67,16 @@ func (im *Image) ImageStyles() {
 // SetSize sets size of the bitmap image.
 // This does not resize any existing image, just makes a new image
 // if the size is different
-func (im *Image) SetSize(nwsz image.Point) {
+func (im *Image) SetSize(nwsz image.Point) *Image {
 	if nwsz.X == 0 || nwsz.Y == 0 {
-		return
+		return im
 	}
 	im.Size = nwsz // always make sure
 	if im.Pixels != nil && im.Pixels.Bounds().Size() == nwsz {
-		return
+		return im
 	}
 	im.Pixels = image.NewRGBA(image.Rectangle{Max: nwsz})
+	return im
 }
 
 // OpenImage opens an image for the bitmap, and resizes to the size of the image

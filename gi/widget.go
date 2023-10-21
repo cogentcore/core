@@ -33,7 +33,7 @@ type Widget interface {
 	Style(s func(s *styles.Style)) Widget
 
 	// SetTooltip sets the Tooltip message when hovering over the widget
-	SetTooltip(tt string) Widget
+	SetTooltip(tt string) *WidgetBase
 
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
