@@ -37,7 +37,7 @@ type Chooser struct {
 	Type ChooserTypes
 
 	// optional icon
-	Icon icons.Icon `view:"show-name"`
+	Icon icons.Icon `view:"show-name" setter:"-"`
 
 	// name of the indicator icon to present.
 	Indicator icons.Icon `view:"show-name"`
@@ -54,10 +54,10 @@ type Chooser struct {
 	CurLabel string
 
 	// current selected value
-	CurVal any `json:"-" xml:"-"`
+	CurVal any `json:"-" xml:"-" setter:"-"`
 
 	// current index in list of possible items
-	CurIndex int `json:"-" xml:"-"`
+	CurIndex int `json:"-" xml:"-" setter:"-"`
 
 	// items available for selection
 	Items []any `json:"-" xml:"-"`
@@ -66,7 +66,7 @@ type Chooser struct {
 	Tooltips []string `json:"-" xml:"-"`
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
-	Placeholder string
+	Placeholder string `setter:"-"`
 
 	// maximum label length (in runes)
 	MaxLength int
@@ -202,30 +202,6 @@ func (ch *Chooser) ChooserStyles() {
 			})
 		}
 	})
-}
-
-// SetType sets the styling type of the combo box
-func (ch *Chooser) SetType(typ ChooserTypes) *Chooser {
-	updt := ch.UpdateStart()
-	ch.Type = typ
-	ch.UpdateEndLayout(updt)
-	return ch
-}
-
-// SetType sets whether the combo box is editable
-func (ch *Chooser) SetEditable(editable bool) *Chooser {
-	updt := ch.UpdateStart()
-	ch.Editable = editable
-	ch.UpdateEndLayout(updt)
-	return ch
-}
-
-// SetAllowNew sets whether to allow the user to add new values
-func (ch *Chooser) SetAllowNew(allowNew bool) *Chooser {
-	updt := ch.UpdateStart()
-	ch.AllowNew = allowNew
-	ch.UpdateEndLayout(updt)
-	return ch
 }
 
 func (ch *Chooser) ConfigWidget(sc *Scene) {
@@ -470,10 +446,11 @@ func (ch *Chooser) FindItem(it any) int {
 
 // SetPlaceholder sets the given placeholder text and
 // CurIndex = -1, indicating that nothing has not been selected.
-func (ch *Chooser) SetPlaceholder(text string) {
+func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
 	ch.ShowCurVal(text)
 	ch.CurIndex = -1
+	return ch
 }
 
 // SetCurVal sets the current value (CurVal) and the corresponding CurIndex
