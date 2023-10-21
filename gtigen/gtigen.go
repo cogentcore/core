@@ -72,7 +72,7 @@ func GeneratePkgs(cfg *Config, pkgs []*packages.Package) error {
 		g.Buf.Reset()
 		err := g.Find()
 		if err != nil {
-			return fmt.Errorf("gtigen: Generate: error finding enum types for package %q: %w", pkg.Name, err)
+			return fmt.Errorf("gtigen: Generate: error finding types for package %q: %w", pkg.Name, err)
 		}
 		g.PrintHeader()
 		has, err := g.Generate()

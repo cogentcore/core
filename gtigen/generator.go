@@ -223,13 +223,13 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 				}
 			}
 
-			embeds, err := GetFields(emblist, cfg)
+			embeds, err := g.GetFields(emblist, cfg)
 			if err != nil {
 				return false, err
 			}
 			typ.Embeds = embeds
 
-			fields, err := GetFields(st.Fields, cfg)
+			fields, err := g.GetFields(st.Fields, cfg)
 			if err != nil {
 				return false, err
 			}
@@ -260,12 +260,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 			Doc:        doc,
 			Directives: dirs,
 		}
-		args, err := GetFields(fd.Type.Params, cfg)
+		args, err := g.GetFields(fd.Type.Params, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function args: %w", err)
 		}
 		fun.Args = args
-		rets, err := GetFields(fd.Type.Results, cfg)
+		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting function return values: %w", err)
 		}
@@ -280,12 +280,12 @@ func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 			Doc:        doc,
 			Directives: dirs,
 		}
-		args, err := GetFields(fd.Type.Params, cfg)
+		args, err := g.GetFields(fd.Type.Params, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method args: %w", err)
 		}
 		method.Args = args
-		rets, err := GetFields(fd.Type.Results, cfg)
+		rets, err := g.GetFields(fd.Type.Results, cfg)
 		if err != nil {
 			return false, fmt.Errorf("error getting method return values: %w", err)
 		}
@@ -316,13 +316,13 @@ func FullName(pkg *packages.Package, name string) string {
 // given surrounding config. If the given field list is
 // nil, GetFields still returns an empty but valid
 // [gti.Fields] value and no error.
-func GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
+func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, error) {
 	res := &gti.Fields{}
 	if list == nil {
 		return res, nil
 	}
 	for _, field := range list.List {
-		tn := types.ExprString(field.Type)
+		tn := g.Pkg.TypesInfo.TypeOf(field.Type).String()
 		name := ""
 		if len(field.Names) > 0 {
 			name = field.Names[0].Name

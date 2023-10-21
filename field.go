@@ -16,7 +16,7 @@ type Field struct {
 	Name string
 
 	// Type has the fully-package-path-qualified name of the type,
-	// which could be used to look up the type in the Types registry
+	// which can be used to look up the type in the Types registry
 	Type string
 
 	// Doc has all of the comment documentation

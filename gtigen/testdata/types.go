@@ -22,7 +22,7 @@ type Person struct {
 	//gi:view inline
 	Age int `json:"-"`
 	// Type is the type of the person
-	Type gti.Type
+	Type *gti.Type
 }
 
 //gti:skip
