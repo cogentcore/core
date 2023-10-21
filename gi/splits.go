@@ -42,7 +42,7 @@ type Splits struct {
 	HandleSize units.Value `xml:"handle-size"`
 
 	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
-	Splits []float32
+	Splits []float32 `setter:"-"`
 
 	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
 	SavedSplits []float32
@@ -124,7 +124,7 @@ func (sl *Splits) EvenSplits() {
 
 // SetSplits sets the split proportions -- can use 0 to hide / collapse a
 // child entirely.
-func (sl *Splits) SetSplits(splits ...float32) {
+func (sl *Splits) SetSplits(splits ...float32) *Splits {
 	sl.UpdateSplits()
 	sz := len(sl.Kids)
 	mx := min(sz, len(splits))
@@ -132,6 +132,7 @@ func (sl *Splits) SetSplits(splits ...float32) {
 		sl.Splits[i] = splits[i]
 	}
 	sl.UpdateSplits()
+	return sl
 }
 
 // SetSplitsList sets the split proportions using a list (slice) argument,
@@ -139,16 +140,17 @@ func (sl *Splits) SetSplits(splits ...float32) {
 // can use 0 to hide / collapse a child entirely -- just does the basic local
 // update start / end -- use SetSplitsAction to trigger full rebuild
 // which is typically required
-func (sl *Splits) SetSplitsList(splits []float32) {
-	sl.SetSplits(splits...)
+func (sl *Splits) SetSplitsList(splits []float32) *Splits {
+	return sl.SetSplits(splits...)
 }
 
 // SetSplitsAction sets the split proportions -- can use 0 to hide / collapse a
 // child entirely -- does full rebuild at level of scene
-func (sl *Splits) SetSplitsAction(splits ...float32) {
+func (sl *Splits) SetSplitsAction(splits ...float32) *Splits {
 	updt := sl.UpdateStart()
 	sl.SetSplits(splits...)
 	sl.UpdateEndLayout(updt)
+	return sl
 }
 
 // SaveSplits saves the current set of splits in SavedSplits, for a later RestoreSplits

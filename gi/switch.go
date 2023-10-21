@@ -22,7 +22,7 @@ type Switch struct {
 	WidgetBase
 
 	// the type of switch that this is
-	Type SwitchTypes
+	Type SwitchTypes `setter:"-"`
 
 	// the label text for the switch
 	Text string
@@ -185,14 +185,6 @@ func (sw *Switch) LabelWidget() *Label {
 		return nil
 	}
 	return lbi.(*Label)
-}
-
-// SetText sets the text and updates the switch
-func (sw *Switch) SetText(txt string) *Switch {
-	updt := sw.UpdateStart()
-	sw.Text = txt
-	sw.UpdateEndLayout(updt)
-	return sw
 }
 
 // SetIcons sets the icons for the on (checked)

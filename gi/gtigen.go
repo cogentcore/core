@@ -2262,11 +2262,11 @@ var SpinnerType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\""}},
-		{"HasMin", &gti.Field{Name: "HasMin", Type: "bool", LocalType: "bool", Doc: "is there a minimum value to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-min\""}},
-		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: "xml:\"min\""}},
-		{"HasMax", &gti.Field{Name: "HasMax", Type: "bool", LocalType: "bool", Doc: "is there a maximumvalue to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-max\""}},
-		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: "xml:\"max\""}},
+		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\" setter:\"-\""}},
+		{"HasMin", &gti.Field{Name: "HasMin", Type: "bool", LocalType: "bool", Doc: "is there a minimum value to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-min\" setter:\"-\""}},
+		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: "xml:\"min\" setter:\"-\""}},
+		{"HasMax", &gti.Field{Name: "HasMax", Type: "bool", LocalType: "bool", Doc: "is there a maximumvalue to enforce", Directives: gti.Directives{}, Tag: "xml:\"has-max\" setter:\"-\""}},
+		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: "xml:\"max\" setter:\"-\""}},
 		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: "xml:\"step\""}},
 		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: "xml:\"pagestep\""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: ""}},
@@ -2318,41 +2318,6 @@ func AsSpinner(k ki.Ki) *Spinner {
 
 // AsSpinner satisfies the [SpinnerEmbedder] interface
 func (t *Spinner) AsSpinner() *Spinner {
-	return t
-}
-
-// SetValue sets the Value of the Spinner and
-// returns it to allow chaining together set calls.
-func (t *Spinner) SetValue(v float32) *Spinner {
-	t.Value = v
-	return t
-}
-
-// SetHasMin sets the HasMin of the Spinner and
-// returns it to allow chaining together set calls.
-func (t *Spinner) SetHasMin(v bool) *Spinner {
-	t.HasMin = v
-	return t
-}
-
-// SetMin sets the Min of the Spinner and
-// returns it to allow chaining together set calls.
-func (t *Spinner) SetMin(v float32) *Spinner {
-	t.Min = v
-	return t
-}
-
-// SetHasMax sets the HasMax of the Spinner and
-// returns it to allow chaining together set calls.
-func (t *Spinner) SetHasMax(v bool) *Spinner {
-	t.HasMax = v
-	return t
-}
-
-// SetMax sets the Max of the Spinner and
-// returns it to allow chaining together set calls.
-func (t *Spinner) SetMax(v float32) *Spinner {
-	t.Max = v
 	return t
 }
 
@@ -2409,7 +2374,7 @@ var SplitsType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"HandleSize", &gti.Field{Name: "HandleSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this", Directives: gti.Directives{}, Tag: "xml:\"handle-size\""}},
-		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", LocalType: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element", Directives: gti.Directives{}, Tag: ""}},
+		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", LocalType: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
 		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored -- for dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: ""}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which to split the space", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -2464,13 +2429,6 @@ func (t *Splits) AsSplits() *Splits {
 // returns it to allow chaining together set calls.
 func (t *Splits) SetHandleSize(v units.Value) *Splits {
 	t.HandleSize = v
-	return t
-}
-
-// SetSplits sets the Splits of the Splits and
-// returns it to allow chaining together set calls.
-func (t *Splits) SetSplits(v []float32) *Splits {
-	t.Splits = v
 	return t
 }
 
@@ -2546,7 +2504,7 @@ var SwitchType = gti.AddType(&gti.Type{
 	Doc:        "Switch is a widget that can toggle between an on and off state.\nIt can be displayed as a switch, checkbox, or radio button.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switch that this is", Directives: gti.Directives{}, Tag: ""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SwitchTypes", LocalType: "SwitchTypes", Doc: "the type of switch that this is", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "the label text for the switch", Directives: gti.Directives{}, Tag: ""}},
 		{"IconOn", &gti.Field{Name: "IconOn", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the on, checked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"IconOff", &gti.Field{Name: "IconOff", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon to use for the off, unchecked state of the switch", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
@@ -2575,13 +2533,6 @@ func (t *Switch) KiType() *gti.Type {
 // New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
-}
-
-// SetType sets the Type of the Switch and
-// returns it to allow chaining together set calls.
-func (t *Switch) SetType(v SwitchTypes) *Switch {
-	t.Type = v
-	return t
 }
 
 // SetText sets the Text of the Switch and
