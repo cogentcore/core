@@ -248,16 +248,16 @@ var ChooserType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ChooserTypes", LocalType: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}, Tag: ""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}, Tag: "view:\"show-name\" setter:\"-\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", LocalType: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}, Tag: ""}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", LocalType: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}, Tag: ""}},
 		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", LocalType: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}, Tag: ""}},
-		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" setter:\"-\""}},
+		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" setter:\"-\""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", LocalType: "[]any", Doc: "items available for selection", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 		{"Tooltips", &gti.Field{Name: "Tooltips", Type: "[]string", LocalType: "[]string", Doc: "an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: ""}},
+		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
 		{"MaxLength", &gti.Field{Name: "MaxLength", Type: "int", LocalType: "int", Doc: "maximum label length (in runes)", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -292,13 +292,6 @@ func (t *Chooser) SetType(v ChooserTypes) *Chooser {
 	return t
 }
 
-// SetIcon sets the Icon of the Chooser and
-// returns it to allow chaining together set calls.
-func (t *Chooser) SetIcon(v icons.Icon) *Chooser {
-	t.Icon = v
-	return t
-}
-
 // SetIndicator sets the Indicator of the Chooser and
 // returns it to allow chaining together set calls.
 func (t *Chooser) SetIndicator(v icons.Icon) *Chooser {
@@ -327,20 +320,6 @@ func (t *Chooser) SetCurLabel(v string) *Chooser {
 	return t
 }
 
-// SetCurVal sets the CurVal of the Chooser and
-// returns it to allow chaining together set calls.
-func (t *Chooser) SetCurVal(v any) *Chooser {
-	t.CurVal = v
-	return t
-}
-
-// SetCurIndex sets the CurIndex of the Chooser and
-// returns it to allow chaining together set calls.
-func (t *Chooser) SetCurIndex(v int) *Chooser {
-	t.CurIndex = v
-	return t
-}
-
 // SetItems sets the Items of the Chooser and
 // returns it to allow chaining together set calls.
 func (t *Chooser) SetItems(v []any) *Chooser {
@@ -352,13 +331,6 @@ func (t *Chooser) SetItems(v []any) *Chooser {
 // returns it to allow chaining together set calls.
 func (t *Chooser) SetTooltips(v []string) *Chooser {
 	t.Tooltips = v
-	return t
-}
-
-// SetPlaceholder sets the Placeholder of the Chooser and
-// returns it to allow chaining together set calls.
-func (t *Chooser) SetPlaceholder(v string) *Chooser {
-	t.Placeholder = v
 	return t
 }
 
