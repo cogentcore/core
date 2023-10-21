@@ -109,6 +109,7 @@ func (g *Generator) GetInterfaces() error {
 	return nil
 }
 
+// TODO(kai): remove this if we are going to go with the new structure
 /*
 // GetInterfaces sets [Generator.Interfaces] based on
 // [Generator.Config.InterfaceConfigs], looking in the
@@ -343,6 +344,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		return res, nil
 	}
 	for _, field := range list.List {
+		ltn := types.ExprString(field.Type)
 		tn := g.Pkg.TypesInfo.TypeOf(field.Type).String()
 		name := ""
 		if len(field.Names) > 0 {
@@ -375,6 +377,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		fo := &gti.Field{
 			Name:       name,
 			Type:       tn,
+			LocalType:  ltn,
 			Doc:        strings.TrimSuffix(field.Doc.Text(), "\n"),
 			Directives: dirs,
 			Tag:        tag,

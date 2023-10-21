@@ -8,6 +8,8 @@ import "goki.dev/ordmap"
 
 // Func represents a global function
 type Func struct {
+	// Name is the fully-qualified name of the function
+	// (eg: goki.dev/gi/v2/gi.NewButton)
 	Name string
 
 	// Doc has all of the comment documentation
@@ -29,6 +31,7 @@ type Func struct {
 
 // Method represents a method
 type Method struct {
+	// Name is the name of the method (eg: NewChild)
 	Name string
 
 	// Doc has all of the comment documentation
