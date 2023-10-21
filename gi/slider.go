@@ -41,10 +41,10 @@ type Slider struct {
 	WidgetBase
 
 	// the type of the slider
-	Type SliderTypes
+	Type SliderTypes `setter:"-"`
 
 	// current value
-	Value float32 `xml:"value"`
+	Value float32 `xml:"value" setter:"-"`
 
 	// dimension along which the slider slides
 	Dim mat32.Dims
@@ -377,84 +377,6 @@ func (sr *Slider) UpdateThumbValSize() {
 	sr.ThSizeReal = mat32.Max(sr.ThSizeReal, 0.0)
 	sr.ThSizeReal *= sr.Size
 	sr.ThSize = mat32.Max(sr.ThSizeReal, SliderMinThumbSize)
-}
-
-///////////////////////////////////////////////////////////
-// 	Setters
-
-func (sr *Slider) SetDim(dim mat32.Dims) *Slider {
-	updt := sr.UpdateStart()
-	sr.Dim = dim
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetMin(val float32) *Slider {
-	updt := sr.UpdateStart()
-	sr.Min = val
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetMax(val float32) *Slider {
-	updt := sr.UpdateStart()
-	sr.Max = val
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetStep(val float32) *Slider {
-	sr.Step = val
-	return sr
-}
-
-func (sr *Slider) SetPageStep(val float32) *Slider {
-	updt := sr.UpdateStart()
-	sr.PageStep = val
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetValThumb(valThumb bool) *Slider {
-	updt := sr.UpdateStart()
-	sr.ValThumb = valThumb
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetThumbSize(val units.Value) *Slider {
-	updt := sr.UpdateStart()
-	sr.ThumbSize = val
-	sr.UpdateEndRender(updt)
-	return sr
-}
-
-func (sr *Slider) SetIcon(ic icons.Icon) *Slider {
-	updt := sr.UpdateStart()
-	sr.Icon = ic
-	// todo: actually set icon
-	sr.UpdateEndLayout(updt)
-	return sr
-}
-
-func (sr *Slider) SetTracking(track bool) *Slider {
-	sr.Tracking = track
-	return sr
-}
-
-func (sr *Slider) SetTrackThr(val float32) *Slider {
-	sr.TrackThr = val
-	return sr
-}
-
-func (sr *Slider) SetSnap(snap bool) *Slider {
-	sr.Snap = snap
-	return sr
-}
-
-func (sr *Slider) SetPrec(val int) *Slider {
-	sr.Prec = val
-	return sr
 }
 
 ///////////////////////////////////////////////////////////
