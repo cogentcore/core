@@ -32,29 +32,29 @@ type Button struct {
 	WidgetBase
 
 	// the type of button
-	Type ButtonTypes `setter:"+"`
+	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
-	Text string `xml:"text"`
+	Text string `xml:"text" setter:"-"`
 
 	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
-	Icon icons.Icon `xml:"icon" view:"show-name"`
+	Icon icons.Icon `xml:"icon" view:"show-name" setter:"-"`
 
 	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`
 
 	// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
-	Shortcut key.Chord `xml:"shortcut" setter:"+"`
+	Shortcut key.Chord `xml:"shortcut"`
 
 	// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
 	// The constructor function should add buttons to the scene that it is passed.
-	Menu func(m *Scene) `setter:"+"`
+	Menu func(m *Scene)
 
 	// optional data that is sent with events to identify the button
-	Data any `json:"-" xml:"-" view:"-" setter:"+"`
+	Data any `json:"-" xml:"-" view:"-"`
 
 	// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
-	UpdateFunc func() `json:"-" xml:"-" view:"-" setter:"+"`
+	UpdateFunc func() `json:"-" xml:"-" view:"-"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {
@@ -243,6 +243,8 @@ func (bt *Button) IconWidget() *Icon {
 	}
 	return ici.(*Icon)
 }
+
+// TODO(kai): should we just let generator handle SetText and SetIcon?
 
 // SetText sets the text and updates the button.
 // Use this for optimized auto-updating based on nature of changes made.
