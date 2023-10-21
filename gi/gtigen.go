@@ -690,7 +690,7 @@ var LabelType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: "xml:\"text\" setter:\"-\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.LabelTypes", LocalType: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}, Tag: ""}},
 		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\""}},
 		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\""}},
@@ -739,13 +739,6 @@ func AsLabel(k ki.Ki) *Label {
 
 // AsLabel satisfies the [LabelEmbedder] interface
 func (t *Label) AsLabel() *Label {
-	return t
-}
-
-// SetText sets the Text of the Label and
-// returns it to allow chaining together set calls.
-func (t *Label) SetText(v string) *Label {
-	t.Text = v
 	return t
 }
 
@@ -1935,8 +1928,8 @@ var SliderType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider", Directives: gti.Directives{}, Tag: ""}},
-		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider", Directives: gti.Directives{}, Tag: "setter:\"-\""}},
+		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\" setter:\"-\""}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}, Tag: ""}},
 		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: "xml:\"min\""}},
 		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: "xml:\"max\""}},
@@ -2005,20 +1998,6 @@ func AsSlider(k ki.Ki) *Slider {
 
 // AsSlider satisfies the [SliderEmbedder] interface
 func (t *Slider) AsSlider() *Slider {
-	return t
-}
-
-// SetType sets the Type of the Slider and
-// returns it to allow chaining together set calls.
-func (t *Slider) SetType(v SliderTypes) *Slider {
-	t.Type = v
-	return t
-}
-
-// SetValue sets the Value of the Slider and
-// returns it to allow chaining together set calls.
-func (t *Slider) SetValue(v float32) *Slider {
-	t.Value = v
 	return t
 }
 

@@ -104,11 +104,6 @@ func NewSubScene(par ki.Ki, name ...string) *Scene {
 	return sc
 }
 
-func (sc *Scene) SetTitle(title string) *Scene {
-	sc.Title = title
-	return sc
-}
-
 // RenderCtx returns the current render context.
 // This will be nil prior to actual rendering.
 func (sc *Scene) RenderCtx() *RenderContext {

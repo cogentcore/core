@@ -29,7 +29,7 @@ type Label struct {
 	WidgetBase
 
 	// label to display
-	Text string `xml:"text"`
+	Text string `xml:"text" setter:"-"`
 
 	// the type of label
 	Type LabelTypes
@@ -227,14 +227,6 @@ func (lb *Label) SetText(txt string) *Label {
 	}
 	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
 	lb.StyMu.RUnlock()
-	lb.UpdateEnd(updt)
-	return lb
-}
-
-// SetType sets the formatting type of the label
-func (lb *Label) SetType(typ LabelTypes) *Label {
-	updt := lb.UpdateStart()
-	lb.Type = typ
 	lb.UpdateEnd(updt)
 	return lb
 }
