@@ -5,6 +5,7 @@
 package greasi
 
 import (
+	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
@@ -37,7 +38,8 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 		if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 			continue
 		}
-		gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(cmd.Name)).SetTooltip(cmd.Doc).
+		// need to go to camel first (it is mostly in kebab)
+		gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(strcase.ToCamel(cmd.Name))).SetTooltip(cmd.Doc).
 			OnClick(func(e events.Event) {
 				err := cmd.Func(cfg)
 				if err != nil {
