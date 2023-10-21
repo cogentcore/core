@@ -437,7 +437,6 @@ func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 	updt := sg.UpdateStart()
 	defer sg.UpdateEnd(updt)
 
-	sg.DeleteChildren(ki.DestroyKids)
 	sv.VisRows = 0
 	if sv.IsNil() {
 		return
@@ -711,8 +710,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		} else {
 			val = sv.ElVal
 		}
-		var vv Value
-		vv = ToValue(val.Interface(), "")
+		vv := ToValue(val.Interface(), "")
 		sv.Values[i] = vv
 		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 
@@ -760,9 +758,8 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 					addnm := fmt.Sprintf("add-%v", itxt)
 					addact := gi.Button{}
 					sg.SetChild(&addact, cidx, addnm)
-
-					addact.SetIcon(icons.Add)
 					addact.SetType(gi.ButtonAction)
+					addact.SetIcon(icons.Add)
 					addact.Tooltip = "insert a new element at this index"
 					addact.Data = i
 					addact.OnClick(func(e events.Event) {
@@ -775,8 +772,8 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 					delnm := fmt.Sprintf("del-%v", itxt)
 					delact := gi.Button{}
 					sg.SetChild(&delact, cidx, delnm)
-					delact.SetIcon(icons.Delete)
 					delact.SetType(gi.ButtonAction)
+					delact.SetIcon(icons.Delete)
 					delact.Tooltip = "delete this element"
 					delact.Data = i
 					delact.OnClick(func(e events.Event) {

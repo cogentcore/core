@@ -595,9 +595,9 @@ func (fv *FileView) UpdateFiles() {
 	sv.SortSlice()
 	if !sv.IsConfiged() {
 		sv.Config(fv.Sc)
-		sv.LayoutSliceGrid()
+		// sv.LayoutSliceGrid()
 	}
-	sv.UpdateSliceGrid()
+	// sv.UpdateSliceGrid()
 	sv.LayoutHeader()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
@@ -623,8 +623,8 @@ func (fv *FileView) UpdateFiles() {
 
 // UpdateFavs updates list of files and other views for current path
 func (fv *FileView) UpdateFavs() {
-	sv := fv.FavsView()
-	sv.UpdateSliceGrid()
+	// sv := fv.FavsView()
+	// sv.UpdateSliceGrid()
 }
 
 // AddPathToFavs adds the current path to favorites
