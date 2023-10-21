@@ -389,11 +389,6 @@ func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) Widget {
 	return wb.This().(Widget)
 }
 
-func (wb *WidgetBase) SetTooltip(tt string) Widget {
-	wb.Tooltip = tt
-	return wb.This().(Widget)
-}
-
 // NewParts makes the Parts layout if not already there,
 // with given layout orientation
 func (wb *WidgetBase) NewParts(lay Layouts) *Layout {

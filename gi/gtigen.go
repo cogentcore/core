@@ -3,10 +3,25 @@
 package gi
 
 import (
+	"image"
+	"image/color"
+	"sync"
+	"time"
+
+	"github.com/aymerick/douceur/css"
+	"goki.dev/colors"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
+	"goki.dev/girl/units"
+	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
+	"goki.dev/pi/v2/complete"
+	"goki.dev/svg"
 )
 
 // MenuBarType is the [gti.Type] for [MenuBar]
@@ -43,6 +58,20 @@ func (t *MenuBar) KiType() *gti.Type {
 // New returns a new [*MenuBar] value
 func (t *MenuBar) New() ki.Ki {
 	return &MenuBar{}
+}
+
+// SetMainMenu sets the MainMenu of the MenuBar and
+// returns it to allow chaining together set calls.
+func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
+	t.MainMenu = v
+	return t
+}
+
+// SetOSMainMenus sets the OSMainMenus of the MenuBar and
+// returns it to allow chaining together set calls.
+func (t *MenuBar) SetOSMainMenus(v map[string]*Button) *MenuBar {
+	t.OSMainMenus = v
+	return t
 }
 
 // ToolbarType is the [gti.Type] for [Toolbar]
@@ -112,14 +141,14 @@ var ButtonType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: "setter:\"+\""}},
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "xml:\"text\" setter:\"-\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\" setter:\"-\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
-		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\" setter:\"+\""}},
-		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: "setter:\"+\""}},
-		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", LocalType: "func()", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\" setter:\"+\""}},
+		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
+		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
+		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", LocalType: "func()", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -172,6 +201,13 @@ func (t *Button) AsButton() *Button {
 // returns it to allow chaining together set calls.
 func (t *Button) SetType(v ButtonTypes) *Button {
 	t.Type = v
+	return t
+}
+
+// SetIndicator sets the Indicator of the Button and
+// returns it to allow chaining together set calls.
+func (t *Button) SetIndicator(v icons.Icon) *Button {
+	t.Indicator = v
 	return t
 }
 
@@ -249,6 +285,90 @@ func (t *Chooser) New() ki.Ki {
 	return &Chooser{}
 }
 
+// SetType sets the Type of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetType(v ChooserTypes) *Chooser {
+	t.Type = v
+	return t
+}
+
+// SetIcon sets the Icon of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetIcon(v icons.Icon) *Chooser {
+	t.Icon = v
+	return t
+}
+
+// SetIndicator sets the Indicator of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetIndicator(v icons.Icon) *Chooser {
+	t.Indicator = v
+	return t
+}
+
+// SetEditable sets the Editable of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetEditable(v bool) *Chooser {
+	t.Editable = v
+	return t
+}
+
+// SetAllowNew sets the AllowNew of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetAllowNew(v bool) *Chooser {
+	t.AllowNew = v
+	return t
+}
+
+// SetCurLabel sets the CurLabel of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetCurLabel(v string) *Chooser {
+	t.CurLabel = v
+	return t
+}
+
+// SetCurVal sets the CurVal of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetCurVal(v any) *Chooser {
+	t.CurVal = v
+	return t
+}
+
+// SetCurIndex sets the CurIndex of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetCurIndex(v int) *Chooser {
+	t.CurIndex = v
+	return t
+}
+
+// SetItems sets the Items of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetItems(v []any) *Chooser {
+	t.Items = v
+	return t
+}
+
+// SetTooltips sets the Tooltips of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetTooltips(v []string) *Chooser {
+	t.Tooltips = v
+	return t
+}
+
+// SetPlaceholder sets the Placeholder of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetPlaceholder(v string) *Chooser {
+	t.Placeholder = v
+	return t
+}
+
+// SetMaxLength sets the MaxLength of the Chooser and
+// returns it to allow chaining together set calls.
+func (t *Chooser) SetMaxLength(v int) *Chooser {
+	t.MaxLength = v
+	return t
+}
+
 // CompleteType is the [gti.Type] for [Complete]
 var CompleteType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Complete",
@@ -296,6 +416,97 @@ func (t *Complete) New() ki.Ki {
 	return &Complete{}
 }
 
+// SetMatchFunc sets the MatchFunc of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetMatchFunc(v complete.MatchFunc) *Complete {
+	t.MatchFunc = v
+	return t
+}
+
+// SetLookupFunc sets the LookupFunc of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetLookupFunc(v complete.LookupFunc) *Complete {
+	t.LookupFunc = v
+	return t
+}
+
+// SetEditFunc sets the EditFunc of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetEditFunc(v complete.EditFunc) *Complete {
+	t.EditFunc = v
+	return t
+}
+
+// SetContext sets the Context of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetContext(v any) *Complete {
+	t.Context = v
+	return t
+}
+
+// SetSrcLn sets the SrcLn of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetSrcLn(v int) *Complete {
+	t.SrcLn = v
+	return t
+}
+
+// SetSrcCh sets the SrcCh of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetSrcCh(v int) *Complete {
+	t.SrcCh = v
+	return t
+}
+
+// SetCompletions sets the Completions of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetCompletions(v complete.Completions) *Complete {
+	t.Completions = v
+	return t
+}
+
+// SetSeed sets the Seed of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetSeed(v string) *Complete {
+	t.Seed = v
+	return t
+}
+
+// SetCompletion sets the Completion of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetCompletion(v string) *Complete {
+	t.Completion = v
+	return t
+}
+
+// SetSc sets the Sc of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetSc(v *Scene) *Complete {
+	t.Sc = v
+	return t
+}
+
+// SetDelayTimer sets the DelayTimer of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetDelayTimer(v *time.Timer) *Complete {
+	t.DelayTimer = v
+	return t
+}
+
+// SetDelayMu sets the DelayMu of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetDelayMu(v sync.Mutex) *Complete {
+	t.DelayMu = v
+	return t
+}
+
+// SetShowMu sets the ShowMu of the Complete and
+// returns it to allow chaining together set calls.
+func (t *Complete) SetShowMu(v sync.Mutex) *Complete {
+	t.ShowMu = v
+	return t
+}
+
 // StyleSheetType is the [gti.Type] for [StyleSheet]
 var StyleSheetType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.StyleSheet",
@@ -331,6 +542,13 @@ func (t *StyleSheet) New() ki.Ki {
 	return &StyleSheet{}
 }
 
+// SetSheet sets the Sheet of the StyleSheet and
+// returns it to allow chaining together set calls.
+func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
+	t.Sheet = v
+	return t
+}
+
 // FrameType is the [gti.Type] for [Frame]
 var FrameType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Frame",
@@ -364,6 +582,13 @@ func (t *Frame) KiType() *gti.Type {
 // New returns a new [*Frame] value
 func (t *Frame) New() ki.Ki {
 	return &Frame{}
+}
+
+// SetStripes sets the Stripes of the Frame and
+// returns it to allow chaining together set calls.
+func (t *Frame) SetStripes(v Stripes) *Frame {
+	t.Stripes = v
+	return t
 }
 
 // IconType is the [gti.Type] for [Icon]
@@ -404,6 +629,34 @@ func (t *Icon) New() ki.Ki {
 	return &Icon{}
 }
 
+// SetIconName sets the IconName of the Icon and
+// returns it to allow chaining together set calls.
+func (t *Icon) SetIconName(v icons.Icon) *Icon {
+	t.IconName = v
+	return t
+}
+
+// SetFilename sets the Filename of the Icon and
+// returns it to allow chaining together set calls.
+func (t *Icon) SetFilename(v string) *Icon {
+	t.Filename = v
+	return t
+}
+
+// SetSVG sets the SVG of the Icon and
+// returns it to allow chaining together set calls.
+func (t *Icon) SetSVG(v svg.SVG) *Icon {
+	t.SVG = v
+	return t
+}
+
+// SetRendSize sets the RendSize of the Icon and
+// returns it to allow chaining together set calls.
+func (t *Icon) SetRendSize(v image.Point) *Icon {
+	t.RendSize = v
+	return t
+}
+
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
@@ -439,6 +692,27 @@ func (t *Image) KiType() *gti.Type {
 // New returns a new [*Image] value
 func (t *Image) New() ki.Ki {
 	return &Image{}
+}
+
+// SetFilename sets the Filename of the Image and
+// returns it to allow chaining together set calls.
+func (t *Image) SetFilename(v FileName) *Image {
+	t.Filename = v
+	return t
+}
+
+// SetSize sets the Size of the Image and
+// returns it to allow chaining together set calls.
+func (t *Image) SetSize(v image.Point) *Image {
+	t.Size = v
+	return t
+}
+
+// SetPixels sets the Pixels of the Image and
+// returns it to allow chaining together set calls.
+func (t *Image) SetPixels(v *image.RGBA) *Image {
+	t.Pixels = v
+	return t
 }
 
 // LabelType is the [gti.Type] for [Label]
@@ -500,6 +774,34 @@ func AsLabel(k ki.Ki) *Label {
 
 // AsLabel satisfies the [LabelEmbedder] interface
 func (t *Label) AsLabel() *Label {
+	return t
+}
+
+// SetText sets the Text of the Label and
+// returns it to allow chaining together set calls.
+func (t *Label) SetText(v string) *Label {
+	t.Text = v
+	return t
+}
+
+// SetType sets the Type of the Label and
+// returns it to allow chaining together set calls.
+func (t *Label) SetType(v LabelTypes) *Label {
+	t.Type = v
+	return t
+}
+
+// SetTextRender sets the TextRender of the Label and
+// returns it to allow chaining together set calls.
+func (t *Label) SetTextRender(v paint.Text) *Label {
+	t.TextRender = v
+	return t
+}
+
+// SetRenderPos sets the RenderPos of the Label and
+// returns it to allow chaining together set calls.
+func (t *Label) SetRenderPos(v mat32.Vec2) *Label {
+	t.RenderPos = v
 	return t
 }
 
@@ -574,6 +876,118 @@ func AsLayout(k ki.Ki) *Layout {
 
 // AsLayout satisfies the [LayoutEmbedder] interface
 func (t *Layout) AsLayout() *Layout {
+	return t
+}
+
+// SetLay sets the Lay of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetLay(v Layouts) *Layout {
+	t.Lay = v
+	return t
+}
+
+// SetSpacing sets the Spacing of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetSpacing(v units.Value) *Layout {
+	t.Spacing = v
+	return t
+}
+
+// SetStackTop sets the StackTop of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetStackTop(v int) *Layout {
+	t.StackTop = v
+	return t
+}
+
+// SetStackTopOnly sets the StackTopOnly of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetStackTopOnly(v bool) *Layout {
+	t.StackTopOnly = v
+	return t
+}
+
+// SetChildSize sets the ChildSize of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetChildSize(v mat32.Vec2) *Layout {
+	t.ChildSize = v
+	return t
+}
+
+// SetExtraSize sets the ExtraSize of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetExtraSize(v mat32.Vec2) *Layout {
+	t.ExtraSize = v
+	return t
+}
+
+// SetHasScroll sets the HasScroll of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetHasScroll(v [2]bool) *Layout {
+	t.HasScroll = v
+	return t
+}
+
+// SetScrolls sets the Scrolls of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetScrolls(v [2]*Slider) *Layout {
+	t.Scrolls = v
+	return t
+}
+
+// SetGridSize sets the GridSize of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetGridSize(v image.Point) *Layout {
+	t.GridSize = v
+	return t
+}
+
+// SetGridData sets the GridData of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetGridData(v [RowColN][]GridData) *Layout {
+	t.GridData = v
+	return t
+}
+
+// SetFlowBreaks sets the FlowBreaks of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetFlowBreaks(v []int) *Layout {
+	t.FlowBreaks = v
+	return t
+}
+
+// SetNeedsRedo sets the NeedsRedo of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetNeedsRedo(v bool) *Layout {
+	t.NeedsRedo = v
+	return t
+}
+
+// SetFocusName sets the FocusName of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetFocusName(v string) *Layout {
+	t.FocusName = v
+	return t
+}
+
+// SetFocusNameTime sets the FocusNameTime of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetFocusNameTime(v time.Time) *Layout {
+	t.FocusNameTime = v
+	return t
+}
+
+// SetFocusNameLast sets the FocusNameLast of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetFocusNameLast(v ki.Ki) *Layout {
+	t.FocusNameLast = v
+	return t
+}
+
+// SetScrollsOff sets the ScrollsOff of the Layout and
+// returns it to allow chaining together set calls.
+func (t *Layout) SetScrollsOff(v bool) *Layout {
+	t.ScrollsOff = v
 	return t
 }
 
@@ -720,6 +1134,153 @@ var _ = gti.AddType(&gti.Type{
 	}),
 })
 
+// SetTheme sets the Theme of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetTheme(v Themes) *Preferences {
+	t.Theme = v
+	return t
+}
+
+// SetColor sets the Color of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetColor(v color.RGBA) *Preferences {
+	t.Color = v
+	return t
+}
+
+// SetHiStyle sets the HiStyle of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetHiStyle(v HiStyleName) *Preferences {
+	t.HiStyle = v
+	return t
+}
+
+// SetDensity sets the Density of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetDensity(v Densities) *Preferences {
+	t.Density = v
+	return t
+}
+
+// SetLogicalDPIScale sets the LogicalDPIScale of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetLogicalDPIScale(v float32) *Preferences {
+	t.LogicalDPIScale = v
+	return t
+}
+
+// SetScreenPrefs sets the ScreenPrefs of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetScreenPrefs(v map[string]ScreenPrefs) *Preferences {
+	t.ScreenPrefs = v
+	return t
+}
+
+// SetParams sets the Params of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetParams(v ParamPrefs) *Preferences {
+	t.Params = v
+	return t
+}
+
+// SetEditor sets the Editor of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetEditor(v EditorPrefs) *Preferences {
+	t.Editor = v
+	return t
+}
+
+// SetKeyMap sets the KeyMap of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetKeyMap(v KeyMapName) *Preferences {
+	t.KeyMap = v
+	return t
+}
+
+// SetSaveKeyMaps sets the SaveKeyMaps of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetSaveKeyMaps(v bool) *Preferences {
+	t.SaveKeyMaps = v
+	return t
+}
+
+// SetSaveDetailed sets the SaveDetailed of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetSaveDetailed(v bool) *Preferences {
+	t.SaveDetailed = v
+	return t
+}
+
+// SetCustomStyles sets the CustomStyles of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetCustomStyles(v ki.Props) *Preferences {
+	t.CustomStyles = v
+	return t
+}
+
+// SetCustomStylesOverride sets the CustomStylesOverride of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetCustomStylesOverride(v bool) *Preferences {
+	t.CustomStylesOverride = v
+	return t
+}
+
+// SetFontFamily sets the FontFamily of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetFontFamily(v FontName) *Preferences {
+	t.FontFamily = v
+	return t
+}
+
+// SetMonoFont sets the MonoFont of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetMonoFont(v FontName) *Preferences {
+	t.MonoFont = v
+	return t
+}
+
+// SetFontPaths sets the FontPaths of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetFontPaths(v []string) *Preferences {
+	t.FontPaths = v
+	return t
+}
+
+// SetUser sets the User of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetUser(v User) *Preferences {
+	t.User = v
+	return t
+}
+
+// SetFavPaths sets the FavPaths of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetFavPaths(v FavPaths) *Preferences {
+	t.FavPaths = v
+	return t
+}
+
+// SetFileViewSort sets the FileViewSort of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetFileViewSort(v string) *Preferences {
+	t.FileViewSort = v
+	return t
+}
+
+// SetColorFilename sets the ColorFilename of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetColorFilename(v FileName) *Preferences {
+	t.ColorFilename = v
+	return t
+}
+
+// SetChanged sets the Changed of the Preferences and
+// returns it to allow chaining together set calls.
+func (t *Preferences) SetChanged(v bool) *Preferences {
+	t.Changed = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
 	ShortName: "gi.ScreenPrefs",
@@ -734,6 +1295,13 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetLogicalDPIScale sets the LogicalDPIScale of the ScreenPrefs and
+// returns it to allow chaining together set calls.
+func (t *ScreenPrefs) SetLogicalDPIScale(v float32) *ScreenPrefs {
+	t.LogicalDPIScale = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ParamPrefs",
@@ -757,6 +1325,62 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetDoubleClickInterval sets the DoubleClickInterval of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetDoubleClickInterval(v time.Duration) *ParamPrefs {
+	t.DoubleClickInterval = v
+	return t
+}
+
+// SetScrollWheelSpeed sets the ScrollWheelSpeed of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetScrollWheelSpeed(v float32) *ParamPrefs {
+	t.ScrollWheelSpeed = v
+	return t
+}
+
+// SetLocalMainMenu sets the LocalMainMenu of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetLocalMainMenu(v bool) *ParamPrefs {
+	t.LocalMainMenu = v
+	return t
+}
+
+// SetOnlyCloseActiveTab sets the OnlyCloseActiveTab of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetOnlyCloseActiveTab(v bool) *ParamPrefs {
+	t.OnlyCloseActiveTab = v
+	return t
+}
+
+// SetZebraStripeWeight sets the ZebraStripeWeight of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetZebraStripeWeight(v float32) *ParamPrefs {
+	t.ZebraStripeWeight = v
+	return t
+}
+
+// SetBigFileSize sets the BigFileSize of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetBigFileSize(v int) *ParamPrefs {
+	t.BigFileSize = v
+	return t
+}
+
+// SetSavedPathsMax sets the SavedPathsMax of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetSavedPathsMax(v int) *ParamPrefs {
+	t.SavedPathsMax = v
+	return t
+}
+
+// SetSmooth3D sets the Smooth3D of the ParamPrefs and
+// returns it to allow chaining together set calls.
+func (t *ParamPrefs) SetSmooth3D(v bool) *ParamPrefs {
+	t.Smooth3D = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.User",
 	ShortName: "gi.User",
@@ -773,6 +1397,13 @@ var _ = gti.AddType(&gti.Type{
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetEmail sets the Email of the User and
+// returns it to allow chaining together set calls.
+func (t *User) SetEmail(v string) *User {
+	t.Email = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
@@ -797,6 +1428,69 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetTabSize sets the TabSize of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetTabSize(v int) *EditorPrefs {
+	t.TabSize = v
+	return t
+}
+
+// SetSpaceIndent sets the SpaceIndent of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetSpaceIndent(v bool) *EditorPrefs {
+	t.SpaceIndent = v
+	return t
+}
+
+// SetWordWrap sets the WordWrap of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetWordWrap(v bool) *EditorPrefs {
+	t.WordWrap = v
+	return t
+}
+
+// SetLineNos sets the LineNos of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetLineNos(v bool) *EditorPrefs {
+	t.LineNos = v
+	return t
+}
+
+// SetCompletion sets the Completion of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetCompletion(v bool) *EditorPrefs {
+	t.Completion = v
+	return t
+}
+
+// SetSpellCorrect sets the SpellCorrect of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetSpellCorrect(v bool) *EditorPrefs {
+	t.SpellCorrect = v
+	return t
+}
+
+// SetAutoIndent sets the AutoIndent of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetAutoIndent(v bool) *EditorPrefs {
+	t.AutoIndent = v
+	return t
+}
+
+// SetEmacsUndo sets the EmacsUndo of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetEmacsUndo(v bool) *EditorPrefs {
+	t.EmacsUndo = v
+	return t
+}
+
+// SetDepthColor sets the DepthColor of the EditorPrefs and
+// returns it to allow chaining together set calls.
+func (t *EditorPrefs) SetDepthColor(v bool) *EditorPrefs {
+	t.DepthColor = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.FavPathItem",
 	ShortName: "gi.FavPathItem",
@@ -813,6 +1507,27 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetIc sets the Ic of the FavPathItem and
+// returns it to allow chaining together set calls.
+func (t *FavPathItem) SetIc(v icons.Icon) *FavPathItem {
+	t.Ic = v
+	return t
+}
+
+// SetName sets the Name of the FavPathItem and
+// returns it to allow chaining together set calls.
+func (t *FavPathItem) SetName(v string) *FavPathItem {
+	t.Name = v
+	return t
+}
+
+// SetPath sets the Path of the FavPathItem and
+// returns it to allow chaining together set calls.
+func (t *FavPathItem) SetPath(v string) *FavPathItem {
+	t.Path = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.PrefsDetailed",
@@ -852,6 +1567,174 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetMenuMaxHeight sets the MenuMaxHeight of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetMenuMaxHeight(v int) *PrefsDetailed {
+	t.MenuMaxHeight = v
+	return t
+}
+
+// SetDragStartTime sets the DragStartTime of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetDragStartTime(v time.Duration) *PrefsDetailed {
+	t.DragStartTime = v
+	return t
+}
+
+// SetDragStartDist sets the DragStartDist of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetDragStartDist(v int) *PrefsDetailed {
+	t.DragStartDist = v
+	return t
+}
+
+// SetSlideStartTime sets the SlideStartTime of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetSlideStartTime(v time.Duration) *PrefsDetailed {
+	t.SlideStartTime = v
+	return t
+}
+
+// SetSlideStartDist sets the SlideStartDist of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetSlideStartDist(v int) *PrefsDetailed {
+	t.SlideStartDist = v
+	return t
+}
+
+// SetLongHoverTime sets the LongHoverTime of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLongHoverTime(v time.Duration) *PrefsDetailed {
+	t.LongHoverTime = v
+	return t
+}
+
+// SetLongHoverStopDist sets the LongHoverStopDist of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLongHoverStopDist(v int) *PrefsDetailed {
+	t.LongHoverStopDist = v
+	return t
+}
+
+// SetCompleteWaitMSec sets the CompleteWaitMSec of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetCompleteWaitMSec(v int) *PrefsDetailed {
+	t.CompleteWaitMSec = v
+	return t
+}
+
+// SetCompleteMaxItems sets the CompleteMaxItems of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetCompleteMaxItems(v int) *PrefsDetailed {
+	t.CompleteMaxItems = v
+	return t
+}
+
+// SetCursorBlinkTime sets the CursorBlinkTime of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetCursorBlinkTime(v time.Duration) *PrefsDetailed {
+	t.CursorBlinkTime = v
+	return t
+}
+
+// SetLayoutAutoScrollDelayMSec sets the LayoutAutoScrollDelayMSec of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLayoutAutoScrollDelayMSec(v int) *PrefsDetailed {
+	t.LayoutAutoScrollDelayMSec = v
+	return t
+}
+
+// SetLayoutPageSteps sets the LayoutPageSteps of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLayoutPageSteps(v int) *PrefsDetailed {
+	t.LayoutPageSteps = v
+	return t
+}
+
+// SetLayoutFocusNameTimeoutMSec sets the LayoutFocusNameTimeoutMSec of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLayoutFocusNameTimeoutMSec(v int) *PrefsDetailed {
+	t.LayoutFocusNameTimeoutMSec = v
+	return t
+}
+
+// SetLayoutFocusNameTabMSec sets the LayoutFocusNameTabMSec of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetLayoutFocusNameTabMSec(v int) *PrefsDetailed {
+	t.LayoutFocusNameTabMSec = v
+	return t
+}
+
+// SetDialogsSepRenderWin sets the DialogsSepRenderWin of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetDialogsSepRenderWin(v bool) *PrefsDetailed {
+	t.DialogsSepRenderWin = v
+	return t
+}
+
+// SetTextViewClipHistMax sets the TextViewClipHistMax of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetTextViewClipHistMax(v int) *PrefsDetailed {
+	t.TextViewClipHistMax = v
+	return t
+}
+
+// SetTextBufMaxScopeLines sets the TextBufMaxScopeLines of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetTextBufMaxScopeLines(v int) *PrefsDetailed {
+	t.TextBufMaxScopeLines = v
+	return t
+}
+
+// SetTextBufDiffRevertLines sets the TextBufDiffRevertLines of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetTextBufDiffRevertLines(v int) *PrefsDetailed {
+	t.TextBufDiffRevertLines = v
+	return t
+}
+
+// SetTextBufDiffRevertDiffs sets the TextBufDiffRevertDiffs of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetTextBufDiffRevertDiffs(v int) *PrefsDetailed {
+	t.TextBufDiffRevertDiffs = v
+	return t
+}
+
+// SetTextBufMarkupDelayMSec sets the TextBufMarkupDelayMSec of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetTextBufMarkupDelayMSec(v int) *PrefsDetailed {
+	t.TextBufMarkupDelayMSec = v
+	return t
+}
+
+// SetMapInlineLen sets the MapInlineLen of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetMapInlineLen(v int) *PrefsDetailed {
+	t.MapInlineLen = v
+	return t
+}
+
+// SetStructInlineLen sets the StructInlineLen of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetStructInlineLen(v int) *PrefsDetailed {
+	t.StructInlineLen = v
+	return t
+}
+
+// SetSliceInlineLen sets the SliceInlineLen of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetSliceInlineLen(v int) *PrefsDetailed {
+	t.SliceInlineLen = v
+	return t
+}
+
+// SetChanged sets the Changed of the PrefsDetailed and
+// returns it to allow chaining together set calls.
+func (t *PrefsDetailed) SetChanged(v bool) *PrefsDetailed {
+	t.Changed = v
+	return t
+}
+
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ProgressBar",
@@ -888,6 +1771,34 @@ func (t *ProgressBar) KiType() *gti.Type {
 // New returns a new [*ProgressBar] value
 func (t *ProgressBar) New() ki.Ki {
 	return &ProgressBar{}
+}
+
+// SetProgMax sets the ProgMax of the ProgressBar and
+// returns it to allow chaining together set calls.
+func (t *ProgressBar) SetProgMax(v int) *ProgressBar {
+	t.ProgMax = v
+	return t
+}
+
+// SetProgInc sets the ProgInc of the ProgressBar and
+// returns it to allow chaining together set calls.
+func (t *ProgressBar) SetProgInc(v int) *ProgressBar {
+	t.ProgInc = v
+	return t
+}
+
+// SetProgCur sets the ProgCur of the ProgressBar and
+// returns it to allow chaining together set calls.
+func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
+	t.ProgCur = v
+	return t
+}
+
+// SetProgMu sets the ProgMu of the ProgressBar and
+// returns it to allow chaining together set calls.
+func (t *ProgressBar) SetProgMu(v sync.Mutex) *ProgressBar {
+	t.ProgMu = v
+	return t
 }
 
 // SceneType is the [gti.Type] for [Scene]
@@ -930,6 +1841,90 @@ func (t *Scene) New() ki.Ki {
 	return &Scene{}
 }
 
+// SetTitle sets the Title of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetTitle(v string) *Scene {
+	t.Title = v
+	return t
+}
+
+// SetData sets the Data of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetData(v any) *Scene {
+	t.Data = v
+	return t
+}
+
+// SetGeom sets the Geom of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
+	t.Geom = v
+	return t
+}
+
+// SetRenderState sets the RenderState of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetRenderState(v paint.State) *Scene {
+	t.RenderState = v
+	return t
+}
+
+// SetPixels sets the Pixels of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetPixels(v *image.RGBA) *Scene {
+	t.Pixels = v
+	return t
+}
+
+// SetBgColor sets the BgColor of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetBgColor(v colors.Full) *Scene {
+	t.BgColor = v
+	return t
+}
+
+// SetEventMgr sets the EventMgr of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetEventMgr(v EventMgr) *Scene {
+	t.EventMgr = v
+	return t
+}
+
+// SetStage sets the Stage of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetStage(v Stage) *Scene {
+	t.Stage = v
+	return t
+}
+
+// SetCurColor sets the CurColor of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetCurColor(v color.RGBA) *Scene {
+	t.CurColor = v
+	return t
+}
+
+// SetLastRender sets the LastRender of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetLastRender(v RenderParams) *Scene {
+	t.LastRender = v
+	return t
+}
+
+// SetStyleMu sets the StyleMu of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetStyleMu(v sync.RWMutex) *Scene {
+	t.StyleMu = v
+	return t
+}
+
+// SetShowLayoutIter sets the ShowLayoutIter of the Scene and
+// returns it to allow chaining together set calls.
+func (t *Scene) SetShowLayoutIter(v int) *Scene {
+	t.ShowLayoutIter = v
+	return t
+}
+
 // SeparatorType is the [gti.Type] for [Separator]
 var SeparatorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Separator",
@@ -963,6 +1958,13 @@ func (t *Separator) KiType() *gti.Type {
 // New returns a new [*Separator] value
 func (t *Separator) New() ki.Ki {
 	return &Separator{}
+}
+
+// SetHoriz sets the Horiz of the Separator and
+// returns it to allow chaining together set calls.
+func (t *Separator) SetHoriz(v bool) *Separator {
+	t.Horiz = v
+	return t
 }
 
 // SliderType is the [gti.Type] for [Slider]
@@ -1048,6 +2050,181 @@ func (t *Slider) AsSlider() *Slider {
 	return t
 }
 
+// SetType sets the Type of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetType(v SliderTypes) *Slider {
+	t.Type = v
+	return t
+}
+
+// SetValue sets the Value of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetValue(v float32) *Slider {
+	t.Value = v
+	return t
+}
+
+// SetDim sets the Dim of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetDim(v mat32.Dims) *Slider {
+	t.Dim = v
+	return t
+}
+
+// SetMin sets the Min of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetMin(v float32) *Slider {
+	t.Min = v
+	return t
+}
+
+// SetMax sets the Max of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetMax(v float32) *Slider {
+	t.Max = v
+	return t
+}
+
+// SetStep sets the Step of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetStep(v float32) *Slider {
+	t.Step = v
+	return t
+}
+
+// SetPageStep sets the PageStep of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetPageStep(v float32) *Slider {
+	t.PageStep = v
+	return t
+}
+
+// SetValThumb sets the ValThumb of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetValThumb(v bool) *Slider {
+	t.ValThumb = v
+	return t
+}
+
+// SetThumbVal sets the ThumbVal of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetThumbVal(v float32) *Slider {
+	t.ThumbVal = v
+	return t
+}
+
+// SetThumbSize sets the ThumbSize of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetThumbSize(v units.Value) *Slider {
+	t.ThumbSize = v
+	return t
+}
+
+// SetIcon sets the Icon of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetIcon(v icons.Icon) *Slider {
+	t.Icon = v
+	return t
+}
+
+// SetTracking sets the Tracking of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetTracking(v bool) *Slider {
+	t.Tracking = v
+	return t
+}
+
+// SetTrackThr sets the TrackThr of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetTrackThr(v float32) *Slider {
+	t.TrackThr = v
+	return t
+}
+
+// SetSnap sets the Snap of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetSnap(v bool) *Slider {
+	t.Snap = v
+	return t
+}
+
+// SetOff sets the Off of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetOff(v bool) *Slider {
+	t.Off = v
+	return t
+}
+
+// SetPrec sets the Prec of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetPrec(v int) *Slider {
+	t.Prec = v
+	return t
+}
+
+// SetValueColor sets the ValueColor of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetValueColor(v colors.Full) *Slider {
+	t.ValueColor = v
+	return t
+}
+
+// SetThumbColor sets the ThumbColor of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetThumbColor(v colors.Full) *Slider {
+	t.ThumbColor = v
+	return t
+}
+
+// SetStyleBox sets the StyleBox of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetStyleBox(v styles.Style) *Slider {
+	t.StyleBox = v
+	return t
+}
+
+// SetPos sets the Pos of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetPos(v float32) *Slider {
+	t.Pos = v
+	return t
+}
+
+// SetLastValue sets the LastValue of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetLastValue(v float32) *Slider {
+	t.LastValue = v
+	return t
+}
+
+// SetSize sets the Size of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetSize(v float32) *Slider {
+	t.Size = v
+	return t
+}
+
+// SetThSize sets the ThSize of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetThSize(v float32) *Slider {
+	t.ThSize = v
+	return t
+}
+
+// SetThSizeReal sets the ThSizeReal of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetThSizeReal(v float32) *Slider {
+	t.ThSizeReal = v
+	return t
+}
+
+// SetSlideStartPos sets the SlideStartPos of the Slider and
+// returns it to allow chaining together set calls.
+func (t *Slider) SetSlideStartPos(v float32) *Slider {
+	t.SlideStartPos = v
+	return t
+}
+
 // SpellType is the [gti.Type] for [Spell]
 var SpellType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Spell",
@@ -1087,6 +2264,55 @@ func (t *Spell) KiType() *gti.Type {
 // New returns a new [*Spell] value
 func (t *Spell) New() ki.Ki {
 	return &Spell{}
+}
+
+// SetSrcLn sets the SrcLn of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetSrcLn(v int) *Spell {
+	t.SrcLn = v
+	return t
+}
+
+// SetSrcCh sets the SrcCh of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetSrcCh(v int) *Spell {
+	t.SrcCh = v
+	return t
+}
+
+// SetSuggest sets the Suggest of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetSuggest(v []string) *Spell {
+	t.Suggest = v
+	return t
+}
+
+// SetWord sets the Word of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetWord(v string) *Spell {
+	t.Word = v
+	return t
+}
+
+// SetLastLearned sets the LastLearned of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetLastLearned(v string) *Spell {
+	t.LastLearned = v
+	return t
+}
+
+// SetCorrection sets the Correction of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetCorrection(v string) *Spell {
+	t.Correction = v
+	return t
+}
+
+// SetSc sets the Sc of the Spell and
+// returns it to allow chaining together set calls.
+func (t *Spell) SetSc(v *Scene) *Spell {
+	t.Sc = v
+	return t
 }
 
 // SpinnerType is the [gti.Type] for [Spinner]
@@ -1158,6 +2384,83 @@ func (t *Spinner) AsSpinner() *Spinner {
 	return t
 }
 
+// SetValue sets the Value of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetValue(v float32) *Spinner {
+	t.Value = v
+	return t
+}
+
+// SetHasMin sets the HasMin of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetHasMin(v bool) *Spinner {
+	t.HasMin = v
+	return t
+}
+
+// SetMin sets the Min of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetMin(v float32) *Spinner {
+	t.Min = v
+	return t
+}
+
+// SetHasMax sets the HasMax of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetHasMax(v bool) *Spinner {
+	t.HasMax = v
+	return t
+}
+
+// SetMax sets the Max of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetMax(v float32) *Spinner {
+	t.Max = v
+	return t
+}
+
+// SetStep sets the Step of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetStep(v float32) *Spinner {
+	t.Step = v
+	return t
+}
+
+// SetPageStep sets the PageStep of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetPageStep(v float32) *Spinner {
+	t.PageStep = v
+	return t
+}
+
+// SetPrec sets the Prec of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetPrec(v int) *Spinner {
+	t.Prec = v
+	return t
+}
+
+// SetFormat sets the Format of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetFormat(v string) *Spinner {
+	t.Format = v
+	return t
+}
+
+// SetUpIcon sets the UpIcon of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetUpIcon(v icons.Icon) *Spinner {
+	t.UpIcon = v
+	return t
+}
+
+// SetDownIcon sets the DownIcon of the Spinner and
+// returns it to allow chaining together set calls.
+func (t *Spinner) SetDownIcon(v icons.Icon) *Spinner {
+	t.DownIcon = v
+	return t
+}
+
 // SplitsType is the [gti.Type] for [Splits]
 var SplitsType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Splits",
@@ -1220,6 +2523,34 @@ func (t *Splits) AsSplits() *Splits {
 	return t
 }
 
+// SetHandleSize sets the HandleSize of the Splits and
+// returns it to allow chaining together set calls.
+func (t *Splits) SetHandleSize(v units.Value) *Splits {
+	t.HandleSize = v
+	return t
+}
+
+// SetSplits sets the Splits of the Splits and
+// returns it to allow chaining together set calls.
+func (t *Splits) SetSplits(v []float32) *Splits {
+	t.Splits = v
+	return t
+}
+
+// SetSavedSplits sets the SavedSplits of the Splits and
+// returns it to allow chaining together set calls.
+func (t *Splits) SetSavedSplits(v []float32) *Splits {
+	t.SavedSplits = v
+	return t
+}
+
+// SetDim sets the Dim of the Splits and
+// returns it to allow chaining together set calls.
+func (t *Splits) SetDim(v mat32.Dims) *Splits {
+	t.Dim = v
+	return t
+}
+
 // SplitterType is the [gti.Type] for [Splitter]
 var SplitterType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Splitter",
@@ -1254,6 +2585,20 @@ func (t *Splitter) KiType() *gti.Type {
 // New returns a new [*Splitter] value
 func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
+}
+
+// SetSplitterNo sets the SplitterNo of the Splitter and
+// returns it to allow chaining together set calls.
+func (t *Splitter) SetSplitterNo(v int) *Splitter {
+	t.SplitterNo = v
+	return t
+}
+
+// SetOrigWinBBox sets the OrigWinBBox of the Splitter and
+// returns it to allow chaining together set calls.
+func (t *Splitter) SetOrigWinBBox(v image.Rectangle) *Splitter {
+	t.OrigWinBBox = v
+	return t
 }
 
 // SwitchType is the [gti.Type] for [Switch]
@@ -1293,6 +2638,41 @@ func (t *Switch) KiType() *gti.Type {
 // New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
+}
+
+// SetType sets the Type of the Switch and
+// returns it to allow chaining together set calls.
+func (t *Switch) SetType(v SwitchTypes) *Switch {
+	t.Type = v
+	return t
+}
+
+// SetText sets the Text of the Switch and
+// returns it to allow chaining together set calls.
+func (t *Switch) SetText(v string) *Switch {
+	t.Text = v
+	return t
+}
+
+// SetIconOn sets the IconOn of the Switch and
+// returns it to allow chaining together set calls.
+func (t *Switch) SetIconOn(v icons.Icon) *Switch {
+	t.IconOn = v
+	return t
+}
+
+// SetIconOff sets the IconOff of the Switch and
+// returns it to allow chaining together set calls.
+func (t *Switch) SetIconOff(v icons.Icon) *Switch {
+	t.IconOff = v
+	return t
+}
+
+// SetIconDisab sets the IconDisab of the Switch and
+// returns it to allow chaining together set calls.
+func (t *Switch) SetIconDisab(v icons.Icon) *Switch {
+	t.IconDisab = v
+	return t
 }
 
 // SwitchesType is the [gti.Type] for [Switches]
@@ -1354,6 +2734,34 @@ func AsSwitches(k ki.Ki) *Switches {
 
 // AsSwitches satisfies the [SwitchesEmbedder] interface
 func (t *Switches) AsSwitches() *Switches {
+	return t
+}
+
+// SetType sets the Type of the Switches and
+// returns it to allow chaining together set calls.
+func (t *Switches) SetType(v SwitchTypes) *Switches {
+	t.Type = v
+	return t
+}
+
+// SetItems sets the Items of the Switches and
+// returns it to allow chaining together set calls.
+func (t *Switches) SetItems(v []string) *Switches {
+	t.Items = v
+	return t
+}
+
+// SetTooltips sets the Tooltips of the Switches and
+// returns it to allow chaining together set calls.
+func (t *Switches) SetTooltips(v []string) *Switches {
+	t.Tooltips = v
+	return t
+}
+
+// SetMutex sets the Mutex of the Switches and
+// returns it to allow chaining together set calls.
+func (t *Switches) SetMutex(v bool) *Switches {
+	t.Mutex = v
 	return t
 }
 
@@ -1419,6 +2827,34 @@ func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
+// SetMaxChars sets the MaxChars of the Tabs and
+// returns it to allow chaining together set calls.
+func (t *Tabs) SetMaxChars(v int) *Tabs {
+	t.MaxChars = v
+	return t
+}
+
+// SetNewTabButton sets the NewTabButton of the Tabs and
+// returns it to allow chaining together set calls.
+func (t *Tabs) SetNewTabButton(v bool) *Tabs {
+	t.NewTabButton = v
+	return t
+}
+
+// SetDeleteTabButtons sets the DeleteTabButtons of the Tabs and
+// returns it to allow chaining together set calls.
+func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
+	t.DeleteTabButtons = v
+	return t
+}
+
+// SetMu sets the Mu of the Tabs and
+// returns it to allow chaining together set calls.
+func (t *Tabs) SetMu(v sync.Mutex) *Tabs {
+	t.Mu = v
+	return t
+}
+
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Tab",
@@ -1452,6 +2888,13 @@ func (t *Tab) KiType() *gti.Type {
 // New returns a new [*Tab] value
 func (t *Tab) New() ki.Ki {
 	return &Tab{}
+}
+
+// SetDeleteButton sets the DeleteButton of the Tab and
+// returns it to allow chaining together set calls.
+func (t *Tab) SetDeleteButton(v bool) *Tab {
+	t.DeleteButton = v
+	return t
 }
 
 // TextFieldType is the [gti.Type] for [TextField]
@@ -1541,6 +2984,209 @@ func (t *TextField) AsTextField() *TextField {
 	return t
 }
 
+// SetTxt sets the Txt of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetTxt(v string) *TextField {
+	t.Txt = v
+	return t
+}
+
+// SetPlaceholder sets the Placeholder of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetPlaceholder(v string) *TextField {
+	t.Placeholder = v
+	return t
+}
+
+// SetComplete sets the Complete of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetComplete(v *Complete) *TextField {
+	t.Complete = v
+	return t
+}
+
+// SetNoEcho sets the NoEcho of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetNoEcho(v bool) *TextField {
+	t.NoEcho = v
+	return t
+}
+
+// SetLeadingIcon sets the LeadingIcon of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetLeadingIcon(v icons.Icon) *TextField {
+	t.LeadingIcon = v
+	return t
+}
+
+// SetTrailingIcon sets the TrailingIcon of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetTrailingIcon(v icons.Icon) *TextField {
+	t.TrailingIcon = v
+	return t
+}
+
+// SetCursorWidth sets the CursorWidth of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetCursorWidth(v units.Value) *TextField {
+	t.CursorWidth = v
+	return t
+}
+
+// SetType sets the Type of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetType(v TextFieldTypes) *TextField {
+	t.Type = v
+	return t
+}
+
+// SetPlaceholderColor sets the PlaceholderColor of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetPlaceholderColor(v color.RGBA) *TextField {
+	t.PlaceholderColor = v
+	return t
+}
+
+// SetSelectColor sets the SelectColor of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetSelectColor(v colors.Full) *TextField {
+	t.SelectColor = v
+	return t
+}
+
+// SetCursorColor sets the CursorColor of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetCursorColor(v colors.Full) *TextField {
+	t.CursorColor = v
+	return t
+}
+
+// SetEdited sets the Edited of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetEdited(v bool) *TextField {
+	t.Edited = v
+	return t
+}
+
+// SetEditTxt sets the EditTxt of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetEditTxt(v []rune) *TextField {
+	t.EditTxt = v
+	return t
+}
+
+// SetMaxWidthReq sets the MaxWidthReq of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetMaxWidthReq(v int) *TextField {
+	t.MaxWidthReq = v
+	return t
+}
+
+// SetEffPos sets the EffPos of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetEffPos(v mat32.Vec2) *TextField {
+	t.EffPos = v
+	return t
+}
+
+// SetEffSize sets the EffSize of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetEffSize(v mat32.Vec2) *TextField {
+	t.EffSize = v
+	return t
+}
+
+// SetStartPos sets the StartPos of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetStartPos(v int) *TextField {
+	t.StartPos = v
+	return t
+}
+
+// SetEndPos sets the EndPos of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetEndPos(v int) *TextField {
+	t.EndPos = v
+	return t
+}
+
+// SetCursorPos sets the CursorPos of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetCursorPos(v int) *TextField {
+	t.CursorPos = v
+	return t
+}
+
+// SetCharWidth sets the CharWidth of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetCharWidth(v int) *TextField {
+	t.CharWidth = v
+	return t
+}
+
+// SetSelectStart sets the SelectStart of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetSelectStart(v int) *TextField {
+	t.SelectStart = v
+	return t
+}
+
+// SetSelectEnd sets the SelectEnd of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetSelectEnd(v int) *TextField {
+	t.SelectEnd = v
+	return t
+}
+
+// SetSelectInit sets the SelectInit of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetSelectInit(v int) *TextField {
+	t.SelectInit = v
+	return t
+}
+
+// SetSelectMode sets the SelectMode of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetSelectMode(v bool) *TextField {
+	t.SelectMode = v
+	return t
+}
+
+// SetRenderAll sets the RenderAll of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetRenderAll(v paint.Text) *TextField {
+	t.RenderAll = v
+	return t
+}
+
+// SetRenderVis sets the RenderVis of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetRenderVis(v paint.Text) *TextField {
+	t.RenderVis = v
+	return t
+}
+
+// SetFontHeight sets the FontHeight of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetFontHeight(v float32) *TextField {
+	t.FontHeight = v
+	return t
+}
+
+// SetBlinkOn sets the BlinkOn of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetBlinkOn(v bool) *TextField {
+	t.BlinkOn = v
+	return t
+}
+
+// SetCursorMu sets the CursorMu of the TextField and
+// returns it to allow chaining together set calls.
+func (t *TextField) SetCursorMu(v sync.Mutex) *TextField {
+	t.CursorMu = v
+	return t
+}
+
 // WidgetBaseType is the [gti.Type] for [WidgetBase]
 var WidgetBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.WidgetBase",
@@ -1591,4 +3237,130 @@ func (t *WidgetBase) KiType() *gti.Type {
 // New returns a new [*WidgetBase] value
 func (t *WidgetBase) New() ki.Ki {
 	return &WidgetBase{}
+}
+
+// SetTooltip sets the Tooltip of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
+	t.Tooltip = v
+	return t
+}
+
+// SetClass sets the Class of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetClass(v string) *WidgetBase {
+	t.Class = v
+	return t
+}
+
+// SetCSS sets the CSS of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetCSS(v ki.Props) *WidgetBase {
+	t.CSS = v
+	return t
+}
+
+// SetCSSAgg sets the CSSAgg of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetCSSAgg(v ki.Props) *WidgetBase {
+	t.CSSAgg = v
+	return t
+}
+
+// SetBBox sets the BBox of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetBBox(v image.Rectangle) *WidgetBase {
+	t.BBox = v
+	return t
+}
+
+// SetObjBBox sets the ObjBBox of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetObjBBox(v image.Rectangle) *WidgetBase {
+	t.ObjBBox = v
+	return t
+}
+
+// SetScBBox sets the ScBBox of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetScBBox(v image.Rectangle) *WidgetBase {
+	t.ScBBox = v
+	return t
+}
+
+// SetOnWidgetAdders sets the OnWidgetAdders of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetOnWidgetAdders(v []func(w Widget)) *WidgetBase {
+	t.OnWidgetAdders = v
+	return t
+}
+
+// SetStylers sets the Stylers of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetStylers(v []func(s *styles.Style)) *WidgetBase {
+	t.Stylers = v
+	return t
+}
+
+// SetOverrideStyle sets the OverrideStyle of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetOverrideStyle(v bool) *WidgetBase {
+	t.OverrideStyle = v
+	return t
+}
+
+// SetStyles sets the Styles of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetStyles(v styles.Style) *WidgetBase {
+	t.Styles = v
+	return t
+}
+
+// SetListeners sets the Listeners of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetListeners(v events.Listeners) *WidgetBase {
+	t.Listeners = v
+	return t
+}
+
+// SetParts sets the Parts of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetParts(v *Layout) *WidgetBase {
+	t.Parts = v
+	return t
+}
+
+// SetLayState sets the LayState of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetLayState(v LayoutState) *WidgetBase {
+	t.LayState = v
+	return t
+}
+
+// SetCustomContextMenu sets the CustomContextMenu of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
+	t.CustomContextMenu = v
+	return t
+}
+
+// SetSc sets the Sc of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetSc(v *Scene) *WidgetBase {
+	t.Sc = v
+	return t
+}
+
+// SetStyMu sets the StyMu of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetStyMu(v sync.RWMutex) *WidgetBase {
+	t.StyMu = v
+	return t
+}
+
+// SetBBoxMu sets the BBoxMu of the WidgetBase and
+// returns it to allow chaining together set calls.
+func (t *WidgetBase) SetBBoxMu(v sync.RWMutex) *WidgetBase {
+	t.BBoxMu = v
+	return t
 }
