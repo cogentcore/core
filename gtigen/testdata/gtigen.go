@@ -23,6 +23,7 @@ var PersonType = gti.AddType(&gti.Type{
 		{"Age", &gti.Field{Name: "Age", Type: "int", Doc: "Age is the age of the person", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
 		}, Tag: "json:\"-\""}},
+		{"Type", &gti.Field{Name: "Type", Type: "gti.Type", Doc: "Type is the type of the person", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{

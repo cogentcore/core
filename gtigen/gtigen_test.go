@@ -84,7 +84,7 @@ func TestPerson(t *testing.T) {
 	if len(have.Directives) != 1 {
 		t.Errorf("expected 1 directive, but got %d", len(have.Directives))
 	}
-	if have.Fields.Len() != 2 {
+	if have.Fields.Len() != 3 {
 		t.Errorf("expected 2 fields, but got %d", have.Fields.Len())
 	}
 	if have.Embeds.Len() != 0 {

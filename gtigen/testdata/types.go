@@ -6,6 +6,8 @@ package testdata
 
 import (
 	"fmt"
+
+	"goki.dev/gti"
 )
 
 // Person represents a person and their attributes.
@@ -19,6 +21,8 @@ type Person struct {
 	// Age is the age of the person
 	//gi:view inline
 	Age int `json:"-"`
+	// Type is the type of the person
+	Type gti.Type
 }
 
 //gti:skip
