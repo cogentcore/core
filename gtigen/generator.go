@@ -73,23 +73,43 @@ func (g *Generator) PrintHeader() {
 // and constants in the package, finds those marked with gti:add,
 // and adds them to [Generator.Types] and [Generator.Funcs]
 func (g *Generator) Find() error {
-	if len(g.Config.InterfaceConfigs) > 0 {
-		g.Interfaces = &ordmap.Map[string, *types.Interface]{}
-		err := g.GetInterfaces([]*types.Package{g.Pkg.Types})
-		if err != nil {
-			return fmt.Errorf("error getting interface objects from interface configs: %w", err)
-		}
+	err := g.GetInterfaces()
+	if err != nil {
+		return err
 	}
 	g.Types = []*Type{}
 	g.Methods = &ordmap.Map[string, []*gti.Method]{}
 	g.Funcs = &ordmap.Map[string, *gti.Func]{}
-	err := gengo.Inspect(g.Pkg, g.Inspect)
+	err = gengo.Inspect(g.Pkg, g.Inspect)
 	if err != nil {
 		return fmt.Errorf("error while inspecting: %w", err)
 	}
 	return nil
 }
 
+// GetInterfaces sets [Generator.Interfaces] based on
+// [Generator.Config.InterfaceConfigs]. It should typically not
+// be called by end-user code.
+func (g *Generator) GetInterfaces() error {
+	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
+	if len(g.Config.InterfaceConfigs) == 0 {
+		return nil
+	}
+	for _, typ := range g.Pkg.TypesInfo.Types {
+		nm := typ.Type.String()
+		if _, ok := g.Config.InterfaceConfigs[nm]; ok {
+			utyp := typ.Type.Underlying()
+			iface, ok := utyp.(*types.Interface)
+			if !ok {
+				return fmt.Errorf("invalid InterfaceConfigs value: type %q is not a *types.Interface but a %T (type value %v)", nm, utyp, utyp)
+			}
+			g.Interfaces.Add(nm, iface)
+		}
+	}
+	return nil
+}
+
+/*
 // GetInterfaces sets [Generator.Interfaces] based on
 // [Generator.Config.InterfaceConfigs], looking in the
 // given packages. It is a recursive function that should
@@ -131,6 +151,7 @@ func (g *Generator) GetInterfaces(pkgs []*types.Package) error {
 	}
 	return nil
 }
+*/
 
 // AllowedEnumTypes are the types that can be used for enums
 // that are not bit flags (bit flags can only be int64s).

@@ -25,6 +25,8 @@ type Person struct {
 	Type *gti.Type
 }
 
+var _ = fmt.Stringer(&Person{})
+
 //gti:skip
 func (p Person) String() string { return p.Name }
 
