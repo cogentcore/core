@@ -29,19 +29,19 @@ type Spinner struct {
 	WidgetBase
 
 	// current value
-	Value float32 `xml:"value"`
+	Value float32 `xml:"value" setter:"-"`
 
 	// is there a minimum value to enforce
-	HasMin bool `xml:"has-min"`
+	HasMin bool `xml:"has-min" setter:"-"`
 
 	// minimum value in range
-	Min float32 `xml:"min"`
+	Min float32 `xml:"min" setter:"-"`
 
 	// is there a maximumvalue to enforce
-	HasMax bool `xml:"has-max"`
+	HasMax bool `xml:"has-max" setter:"-"`
 
 	// maximum value in range
-	Max float32 `xml:"max"`
+	Max float32 `xml:"max" setter:"-"`
 
 	// smallest step size to increment
 	Step float32 `xml:"step"`
@@ -156,12 +156,6 @@ func (sp *Spinner) SetMax(max float32) *Spinner {
 	return sp
 }
 
-// SetMax sets the format of the spin box
-func (sp *Spinner) SetFormat(format string) *Spinner {
-	sp.Format = format
-	return sp
-}
-
 // SetMinMax sets the min and max limits on the value
 func (sp *Spinner) SetMinMax(hasMin bool, min float32, hasMax bool, max float32) *Spinner {
 	sp.HasMin = hasMin
@@ -173,12 +167,6 @@ func (sp *Spinner) SetMinMax(hasMin bool, min float32, hasMax bool, max float32)
 		sp.HasMax = false
 		sp.HasMin = false
 	}
-	return sp
-}
-
-// SetStep sets the step (increment) value of the Spinner
-func (sp *Spinner) SetStep(step float32) *Spinner {
-	sp.Step = step
 	return sp
 }
 
