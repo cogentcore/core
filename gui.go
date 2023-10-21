@@ -5,10 +5,11 @@
 package greasi
 
 import (
-	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/glop/sentencecase"
+	"goki.dev/goosi/events"
 	"goki.dev/grease"
 	"goki.dev/grog"
 )
@@ -36,16 +37,14 @@ func App[T any](opts *grease.Options, cfg T, cmds ...*grease.Cmd[T]) {
 		if cmd.Name == "gui" { // we are already in GUI so that command is irrelevant
 			continue
 		}
-		tb.AddButton(gi.ActOpts{
-			Name:    cmd.Name,
-			Label:   strcase.ToCamel(cmd.Name),
-			Tooltip: cmd.Doc,
-		}, func(bt *gi.Button) {
-			err := cmd.Func(cfg)
-			if err != nil {
-				grog.PrintlnError(err)
-			}
-		})
+		gi.NewButton(tb, cmd.Name).SetText(sentencecase.Of(cmd.Name)).SetTooltip(cmd.Doc).
+			OnClick(func(e events.Event) {
+				err := cmd.Func(cfg)
+				if err != nil {
+					// TODO: snackbar
+					grog.PrintlnError(err)
+				}
+			})
 	}
 
 	sv := giv.NewStructView(sc)
