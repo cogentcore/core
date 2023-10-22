@@ -3,7 +3,7 @@ module goki.dev/cursors
 go 1.21.0
 
 require (
-	goki.dev/enums v0.9.21
+	goki.dev/enums v0.9.22
 	goki.dev/grows v0.3.5
 )
 
