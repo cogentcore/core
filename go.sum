@@ -1,8 +1,8 @@
-goki.dev/enums v0.9.30 h1:t78dDcYBbLKyVFVPBgBKFn1MPZgrdV2yLuw3cOJO6EI=
-goki.dev/enums v0.9.30/go.mod h1:cJ/dMCiwUDTlpY3TBVwX0IojQhaCPNbQV82fUjMUTaw=
-goki.dev/grows v0.3.7 h1:DGCWAWAsekv8C+5ZRx1a6bwtKNDcGzHe8xwUKcx8sn4=
-goki.dev/grows v0.3.7/go.mod h1:ZTMQMQ/cudg/R233yI1BXXI9SmSg16XC41EX3w3/5wU=
-goki.dev/gti v0.1.8 h1:yiJWI9B6GMN5gFVG4pLkJAzl5PfgdJprPAq8c//lu+o=
-goki.dev/gti v0.1.8/go.mod h1:+BhGQ7tWkDh25MesZ5XZUIDydYgJzffHuL8RpQjPKWE=
+goki.dev/enums v0.9.32 h1:PxOf5ZfrdmO887YnARl6xdPjB3JPUREKWPOLYWF1eJc=
+goki.dev/enums v0.9.32/go.mod h1:LY28X2e9VVLMHYDHfze+T2bIuaWVR7VYmF5DVEKDEzk=
+goki.dev/grows v0.3.9 h1:kSx4YK1tNbQA+WlcxXOxupilGD8RtNPYZ9iB9JjrSQM=
+goki.dev/grows v0.3.9/go.mod h1:R+D9ijnZV5dSV3SjNqvqgmfF5oxz/9vbifTBYcbDGD0=
+goki.dev/gti v0.1.10 h1:TMR4aKL3Qr2TWLzx+v9HuYS/Yy/cxTlNpWgRKlJ27xk=
+goki.dev/gti v0.1.10/go.mod h1:bbtHff10ONEj3Xy4Iy6LVNU10sP3/gIB8dN0Q6V6xrI=
 goki.dev/ordmap v0.5.6 h1:BXakZzTYArRCXAje1e49npZPgEt9AoYguRD8D1Z24P0=
 goki.dev/ordmap v0.5.6/go.mod h1:0w8tBn0d3KTc1gax89DGmRNmBWpZCXnXwQSzcdJ9Ayg=
