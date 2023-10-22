@@ -1,6 +1,6 @@
 Name = "laser"
 Desc = ""
-Version = "v0.1.11"
+Version = "v0.1.12"
 Type = "Library"
 
 [Build]
