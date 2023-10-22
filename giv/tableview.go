@@ -137,14 +137,6 @@ func (tv *TableView) TableViewInit() {
 			})
 
 		}
-		// STYTODO: set header sizes here (see LayoutHeader)
-		// if _, ok := w.(*gi.Label); ok && w.Parent().Name() == "header" {
-		// 	w.Style(func(s *styles.Style) {
-		// 		spc := tv.SliceHeader().Spacing.Dots
-		// 		ip, _ := w.IndexInParent()
-		// 		s.SetMinPrefWidth(units.Dot())
-		// 	})
-		// }
 		if w.Parent().Name() == "grid" {
 			if strings.HasPrefix(w.Name(), "index-") {
 				w.Style(func(s *styles.Style) {
@@ -307,6 +299,7 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.SliderType, "scrollbar")
 	gl.ConfigChildren(gconfig) // covered by above
+	tv.ConfigHeader(sc)
 	tv.UpdateEndLayout(updt)
 }
 
@@ -327,9 +320,80 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 	tv.CacheVisFields()
 
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
+	sg.Kids = make(ki.Slice, nWidgPerRow)
 
+	tv.ConfigHeader(sc)
+
+	itxt := "0"
+	if tv.Is(SliceViewShowIndex) {
+		labnm := "index-" + itxt
+		idxlab := &gi.Label{}
+		sg.SetChild(idxlab, 0, labnm)
+		idxlab.Text = itxt
+	}
+
+	val := tv.ElVal
+	stru := val.Interface()
+
+	for fli := 0; fli < tv.NVisFields; fli++ {
+		field := tv.VisFields[fli]
+		fval := val.Elem().FieldByIndex(field.Index)
+		vv := ToValue(fval.Interface(), "")
+		if vv == nil { // shouldn't happen
+			continue
+		}
+		vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, tv.ViewPath)
+		vtyp := vv.WidgetType()
+		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
+		cidx := idxOff + fli
+		widg := ki.NewOfType(vtyp).(gi.Widget)
+		sg.SetChild(widg, cidx, valnm)
+		vv.ConfigWidget(widg, sc)
+	}
+
+	if !tv.IsDisabled() {
+		cidx := tv.NVisFields + idxOff
+		if !tv.Is(SliceViewNoAdd) {
+			addnm := "add-" + itxt
+			addbt := gi.Button{}
+			sg.SetChild(&addbt, cidx, addnm)
+			addbt.SetType(gi.ButtonAction)
+			addbt.SetIcon(icons.Add)
+			cidx++
+		}
+		if !tv.Is(SliceViewNoDelete) {
+			delnm := "del-" + itxt
+			delbt := gi.Button{}
+			sg.SetChild(&delbt, cidx, delnm)
+			delbt.SetType(gi.ButtonAction)
+			delbt.SetIcon(icons.Delete)
+			delbt.Style(func(s *styles.Style) {
+				s.Color = colors.Scheme.Error.Base
+			})
+			cidx++
+		}
+	}
+	if tv.SortIdx >= 0 {
+		tv.SortSlice()
+	}
+}
+
+func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc float32, idx int) {
+	w.Style(func(s *styles.Style) {
+		gd := sg.GridData[gi.Col]
+		if gd == nil {
+			return
+		}
+		wd := gd[idx].AllocSize - spc
+		s.SetFixedWidth(units.Dot(wd))
+	})
+}
+
+func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 	sgh := tv.SliceHeader()
-	// Configure Header
+	if sgh.HasChildren() || tv.NVisFields == 0 {
+		return
+	}
 	hcfg := ki.Config{}
 	if tv.Is(SliceViewShowIndex) {
 		hcfg.Add(gi.LabelType, "head-idx")
@@ -344,24 +408,17 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 		hcfg.Add(gi.LabelType, "head-del")
 	}
 	sgh.ConfigChildren(hcfg) // headers SHOULD be unique, but with labels..
-
-	sg.Kids = make(ki.Slice, nWidgPerRow)
-
-	itxt := "0"
-	labnm := "index-" + itxt
-
+	sg := tv.SliceGrid()
+	spc := sgh.Spacing.Dots
+	_, idxOff := tv.RowWidgetNs()
+	nfld := tv.NVisFields
 	if tv.Is(SliceViewShowIndex) {
 		lbl := sgh.Child(0).(*gi.Label)
 		lbl.Text = "Index"
-		idxlab := &gi.Label{}
-		sg.SetChild(idxlab, 0, labnm)
-		idxlab.Text = itxt
+		tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, 0)
 	}
-
-	val := tv.ElVal
-	stru := val.Interface()
-
-	for fli := 0; fli < tv.NVisFields; fli++ {
+	for fli := 0; fli < nfld; fli++ {
+		fli := fli
 		field := tv.VisFields[fli]
 		hdr := sgh.Child(idxOff + fli).(*gi.Button)
 		hdr.SetType(gi.ButtonAction)
@@ -381,51 +438,23 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 		hdr.OnClick(func(e events.Event) {
 			tv.SortSliceAction(fli)
 		})
-
-		fval := val.Elem().FieldByIndex(field.Index)
-		vv := ToValue(fval.Interface(), "")
-		if vv == nil { // shouldn't happen
-			continue
-		}
-		vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, tv.ViewPath)
-		vtyp := vv.WidgetType()
-		valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
-		cidx := idxOff + fli
-		widg := ki.NewOfType(vtyp).(gi.Widget)
-		sg.SetChild(widg, cidx, valnm)
-		vv.ConfigWidget(widg, sc)
+		tv.ConfigHeaderStyleWidth(hdr.AsWidget(), sg, spc, fli+idxOff)
 	}
-
 	if !tv.IsDisabled() {
 		cidx := tv.NVisFields + idxOff
 		if !tv.Is(SliceViewNoAdd) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "+"
 			lbl.Tooltip = "insert row"
-			addnm := "add-" + itxt
-			addbt := gi.Button{}
-			sg.SetChild(&addbt, cidx, addnm)
-			addbt.SetType(gi.ButtonAction)
-			addbt.SetIcon(icons.Add)
+			tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, cidx)
 			cidx++
 		}
 		if !tv.Is(SliceViewNoDelete) {
 			lbl := sgh.Child(cidx).(*gi.Label)
 			lbl.Text = "-"
 			lbl.Tooltip = "delete row"
-			delnm := "del-" + itxt
-			delbt := gi.Button{}
-			sg.SetChild(&delbt, cidx, delnm)
-			delbt.SetType(gi.ButtonAction)
-			delbt.SetIcon(icons.Delete)
-			delbt.Style(func(s *styles.Style) {
-				s.Color = colors.Scheme.Error.Base
-			})
-			cidx++
+			tv.ConfigHeaderStyleWidth(lbl.AsWidget(), sg, spc, cidx)
 		}
-	}
-	if tv.SortIdx >= 0 {
-		tv.SortSlice()
 	}
 }
 
@@ -617,40 +646,6 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 		}
 	}
 	tv.UpdateWidgets() // sets inactive etc
-}
-
-// LayoutHeader updates the header layout based on field widths
-func (tv *TableView) LayoutHeader() {
-	// STYTODO: set these styles in stylers
-	_, idxOff := tv.RowWidgetNs()
-	nfld := tv.NVisFields + idxOff
-	sgh := tv.SliceHeader()
-	sgf := tv.SliceGrid()
-	spc := sgh.Spacing.Dots
-	gd := sgf.GridData[gi.Col]
-	if gd == nil {
-		return
-	}
-	sumwd := float32(0)
-	for fli := 0; fli < nfld; fli++ {
-		lbl := sgh.Child(fli).(gi.Widget).AsWidget()
-		wd := gd[fli].AllocSize - spc
-		if fli == 0 {
-			wd += spc
-		}
-		lbl.SetFixedWidth(units.Dot(wd))
-		sumwd += wd
-	}
-	if !tv.IsDisabled() {
-		mx := len(sgf.GridData[gi.Col])
-		for fli := nfld; fli < mx; fli++ {
-			lbl := sgh.Child(fli).(gi.Widget).AsWidget()
-			wd := gd[fli].AllocSize - spc
-			lbl.SetFixedWidth(units.Dot(wd))
-			sumwd += wd
-		}
-	}
-	sgh.SetMinPrefWidth(units.Dot(sumwd + spc))
 }
 
 // UpdateWidgets updates the row widget display to
@@ -931,13 +926,6 @@ func (tv *TableView) SetSortFieldName(nm string) {
 			tv.SortDesc = false
 		}
 	}
-}
-
-func (tv *TableView) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	redo := tv.SliceViewBase.DoLayout(sc, parBBox, iter)
-	tv.LayoutHeader()
-	tv.SliceHeader().DoLayout(sc, parBBox, iter)
-	return redo
 }
 
 // RowFirstVisWidget returns the first visible widget for given row (could be

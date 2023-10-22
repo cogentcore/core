@@ -598,7 +598,7 @@ func (fv *FileView) UpdateFiles() {
 		// sv.LayoutSliceGrid()
 	}
 	// sv.UpdateSliceGrid()
-	sv.LayoutHeader()
+	// sv.LayoutHeader()
 	fv.SelectedIdx = sv.SelectedIdx
 	if sv.SelectedIdx >= 0 {
 		sv.ScrollToIdx(sv.SelectedIdx)
