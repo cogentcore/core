@@ -1,6 +1,6 @@
 Name = "icons"
 Desc = ""
-Version = "v0.0.4"
+Version = "v0.0.5"
 Type = "Library"
 
 [Build]
