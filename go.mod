@@ -7,4 +7,4 @@ retract (
 	v2.0.0 // Published accidentally
 )
 
-require golang.org/x/image v0.12.0
+require golang.org/x/image v0.13.0
