@@ -35,10 +35,10 @@ type Button struct {
 	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
-	Text string `xml:"text" set:"-"`
+	Text string `xml:"text"`
 
 	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
-	Icon icons.Icon `xml:"icon" view:"show-name" set:"-"`
+	Icon icons.Icon `xml:"icon" view:"show-name"`
 
 	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`
@@ -242,53 +242,6 @@ func (bt *Button) IconWidget() *Icon {
 		return nil
 	}
 	return ici.(*Icon)
-}
-
-// TODO(kai): should we just let generator handle SetText and SetIcon?
-
-// SetText sets the text and updates the button.
-// Use this for optimized auto-updating based on nature of changes made.
-// Otherwise, can set Text directly followed by ReConfig()
-func (bt *Button) SetText(txt string) *Button {
-	if bt.Text == txt {
-		return bt
-	}
-	updt := bt.UpdateStart()
-	recfg := bt.Parts == nil || (bt.Text == "" && txt != "") || (bt.Text != "" && txt == "")
-	bt.Text = txt
-	if recfg {
-		bt.ConfigParts(bt.Sc)
-	} else {
-		lbl := bt.LabelWidget()
-		if lbl != nil {
-			lbl.SetText(bt.Text)
-		}
-	}
-	bt.UpdateEndLayout(updt) // todo: could optimize to not re-layout every time but..
-	return bt
-}
-
-// SetIcon sets the Icon to given icon name (could be empty or 'none') and
-// updates the button.
-// Use this for optimized auto-updating based on nature of changes made.
-// Otherwise, can set Icon directly followed by ReConfig()
-func (bt *Button) SetIcon(iconName icons.Icon) *Button {
-	if bt.Icon == iconName {
-		return bt
-	}
-	updt := bt.UpdateStart()
-	recfg := (bt.Icon == "" && iconName != "") || (bt.Icon != "" && iconName == "")
-	bt.Icon = iconName
-	if recfg {
-		bt.ConfigParts(bt.Sc)
-	} else {
-		ic := bt.IconWidget()
-		if ic != nil {
-			ic.SetIcon(bt.Icon)
-		}
-	}
-	bt.UpdateEndLayout(updt)
-	return bt
 }
 
 // HasMenu returns true if the button has a menu that pops up when it is clicked

@@ -628,15 +628,16 @@ func (tb *Tab) ConfigParts(sc *Scene) {
 }
 
 func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
+	parts := tb.NewParts(LayoutHoriz)
 	config := ki.Config{}
 	icIdx, lbIdx := tb.ConfigPartsIconLabel(&config, tb.Icon, tb.Text)
 	config.Add(StretchType, "close-stretch")
 	clsIdx := len(config)
 	config.Add(ButtonType, "close")
-	mods, updt := tb.Parts.ConfigChildren(config)
+	mods, updt := parts.ConfigChildren(config)
 	tb.ConfigPartsSetIconLabel(tb.Icon, tb.Text, icIdx, lbIdx)
 	if mods {
-		cls := tb.Parts.Child(clsIdx).(*Button)
+		cls := parts.Child(clsIdx).(*Button)
 		if tb.Indicator.IsNil() {
 			tb.Indicator = icons.Close
 		}
@@ -644,6 +645,7 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 		cls.SetType(ButtonAction)
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
+		cls.ReConfig()
 		cls.SetProp("no-focus", true)
 		cls.OnClick(func(e events.Event) {
 			tabIdx := tb.Data.(int)
