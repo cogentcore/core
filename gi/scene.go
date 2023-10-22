@@ -37,7 +37,7 @@ import (
 type Scene struct {
 	Frame
 
-	// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
+	// title of the Scene
 	Title string
 
 	// Data is the optional data value being represented by this scene.

@@ -60,15 +60,15 @@ func (t *MenuBar) New() ki.Ki {
 	return &MenuBar{}
 }
 
-// SetMainMenu sets the MainMenu of the MenuBar and
-// returns it to allow chaining together set calls.
+// SetMainMenu sets the [MenuBar.MainMenu]:
+// is this the main menu bar for a window?  controls whether displayed on macOS
 func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
 	t.MainMenu = v
 	return t
 }
 
-// SetOSMainMenus sets the OSMainMenus of the MenuBar and
-// returns it to allow chaining together set calls.
+// SetOSMainMenus sets the [MenuBar.OSMainMenus]:
+// map of main menu items for callback from OS main menu (MacOS specific)
 func (t *MenuBar) SetOSMainMenus(v map[string]*Button) *MenuBar {
 	t.OSMainMenus = v
 	return t
@@ -197,43 +197,44 @@ func (t *Button) AsButton() *Button {
 	return t
 }
 
-// SetType sets the Type of the Button and
-// returns it to allow chaining together set calls.
+// SetType sets the [Button.Type]:
+// the type of button
 func (t *Button) SetType(v ButtonTypes) *Button {
 	t.Type = v
 	return t
 }
 
-// SetIndicator sets the Indicator of the Button and
-// returns it to allow chaining together set calls.
+// SetIndicator sets the [Button.Indicator]:
+// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 func (t *Button) SetIndicator(v icons.Icon) *Button {
 	t.Indicator = v
 	return t
 }
 
-// SetShortcut sets the Shortcut of the Button and
-// returns it to allow chaining together set calls.
+// SetShortcut sets the [Button.Shortcut]:
+// optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.
 func (t *Button) SetShortcut(v key.Chord) *Button {
 	t.Shortcut = v
 	return t
 }
 
-// SetMenu sets the Menu of the Button and
-// returns it to allow chaining together set calls.
+// SetMenu sets the [Button.Menu]:
+// If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.
+// The constructor function should add buttons to the scene that it is passed.
 func (t *Button) SetMenu(v func(m *Scene)) *Button {
 	t.Menu = v
 	return t
 }
 
-// SetData sets the Data of the Button and
-// returns it to allow chaining together set calls.
+// SetData sets the [Button.Data]:
+// optional data that is sent with events to identify the button
 func (t *Button) SetData(v any) *Button {
 	t.Data = v
 	return t
 }
 
-// SetUpdateFunc sets the UpdateFunc of the Button and
-// returns it to allow chaining together set calls.
+// SetUpdateFunc sets the [Button.UpdateFunc]:
+// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
 func (t *Button) SetUpdateFunc(v func()) *Button {
 	t.UpdateFunc = v
 	return t
@@ -285,57 +286,57 @@ func (t *Chooser) New() ki.Ki {
 	return &Chooser{}
 }
 
-// SetType sets the Type of the Chooser and
-// returns it to allow chaining together set calls.
+// SetType sets the [Chooser.Type]:
+// the type of combo box
 func (t *Chooser) SetType(v ChooserTypes) *Chooser {
 	t.Type = v
 	return t
 }
 
-// SetIndicator sets the Indicator of the Chooser and
-// returns it to allow chaining together set calls.
+// SetIndicator sets the [Chooser.Indicator]:
+// name of the indicator icon to present.
 func (t *Chooser) SetIndicator(v icons.Icon) *Chooser {
 	t.Indicator = v
 	return t
 }
 
-// SetEditable sets the Editable of the Chooser and
-// returns it to allow chaining together set calls.
+// SetEditable sets the [Chooser.Editable]:
+// provide a text field for editing the value, or just a button for selecting items?  Set the editable property
 func (t *Chooser) SetEditable(v bool) *Chooser {
 	t.Editable = v
 	return t
 }
 
-// SetAllowNew sets the AllowNew of the Chooser and
-// returns it to allow chaining together set calls.
+// SetAllowNew sets the [Chooser.AllowNew]:
+// whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu
 func (t *Chooser) SetAllowNew(v bool) *Chooser {
 	t.AllowNew = v
 	return t
 }
 
-// SetCurLabel sets the CurLabel of the Chooser and
-// returns it to allow chaining together set calls.
+// SetCurLabel sets the [Chooser.CurLabel]:
+// CurLabel is the string label for the current value
 func (t *Chooser) SetCurLabel(v string) *Chooser {
 	t.CurLabel = v
 	return t
 }
 
-// SetItems sets the Items of the Chooser and
-// returns it to allow chaining together set calls.
+// SetItems sets the [Chooser.Items]:
+// items available for selection
 func (t *Chooser) SetItems(v []any) *Chooser {
 	t.Items = v
 	return t
 }
 
-// SetTooltips sets the Tooltips of the Chooser and
-// returns it to allow chaining together set calls.
+// SetTooltips sets the [Chooser.Tooltips]:
+// an optional list of tooltips displayed on hover for Chooser items; the indices for tooltips correspond to those for items
 func (t *Chooser) SetTooltips(v []string) *Chooser {
 	t.Tooltips = v
 	return t
 }
 
-// SetMaxLength sets the MaxLength of the Chooser and
-// returns it to allow chaining together set calls.
+// SetMaxLength sets the [Chooser.MaxLength]:
+// maximum label length (in runes)
 func (t *Chooser) SetMaxLength(v int) *Chooser {
 	t.MaxLength = v
 	return t
@@ -388,92 +389,89 @@ func (t *Complete) New() ki.Ki {
 	return &Complete{}
 }
 
-// SetMatchFunc sets the MatchFunc of the Complete and
-// returns it to allow chaining together set calls.
+// SetMatchFunc sets the [Complete.MatchFunc]:
+// function to get the list of possible completions
 func (t *Complete) SetMatchFunc(v complete.MatchFunc) *Complete {
 	t.MatchFunc = v
 	return t
 }
 
-// SetLookupFunc sets the LookupFunc of the Complete and
-// returns it to allow chaining together set calls.
+// SetLookupFunc sets the [Complete.LookupFunc]:
+// function to get the text to show for lookup
 func (t *Complete) SetLookupFunc(v complete.LookupFunc) *Complete {
 	t.LookupFunc = v
 	return t
 }
 
-// SetEditFunc sets the EditFunc of the Complete and
-// returns it to allow chaining together set calls.
+// SetEditFunc sets the [Complete.EditFunc]:
+// function to edit text using the selected completion
 func (t *Complete) SetEditFunc(v complete.EditFunc) *Complete {
 	t.EditFunc = v
 	return t
 }
 
-// SetContext sets the Context of the Complete and
-// returns it to allow chaining together set calls.
+// SetContext sets the [Complete.Context]:
+// the object that implements complete.Func
 func (t *Complete) SetContext(v any) *Complete {
 	t.Context = v
 	return t
 }
 
-// SetSrcLn sets the SrcLn of the Complete and
-// returns it to allow chaining together set calls.
+// SetSrcLn sets the [Complete.SrcLn]:
+// line number in source that completion is operating on, if relevant
 func (t *Complete) SetSrcLn(v int) *Complete {
 	t.SrcLn = v
 	return t
 }
 
-// SetSrcCh sets the SrcCh of the Complete and
-// returns it to allow chaining together set calls.
+// SetSrcCh sets the [Complete.SrcCh]:
+// character position in source that completion is operating on
 func (t *Complete) SetSrcCh(v int) *Complete {
 	t.SrcCh = v
 	return t
 }
 
-// SetCompletions sets the Completions of the Complete and
-// returns it to allow chaining together set calls.
+// SetCompletions sets the [Complete.Completions]:
+// the list of potential completions
 func (t *Complete) SetCompletions(v complete.Completions) *Complete {
 	t.Completions = v
 	return t
 }
 
-// SetSeed sets the Seed of the Complete and
-// returns it to allow chaining together set calls.
+// SetSeed sets the [Complete.Seed]:
+// current completion seed
 func (t *Complete) SetSeed(v string) *Complete {
 	t.Seed = v
 	return t
 }
 
-// SetCompletion sets the Completion of the Complete and
-// returns it to allow chaining together set calls.
+// SetCompletion sets the [Complete.Completion]:
+// the user's completion selection'
 func (t *Complete) SetCompletion(v string) *Complete {
 	t.Completion = v
 	return t
 }
 
-// SetSc sets the Sc of the Complete and
-// returns it to allow chaining together set calls.
+// SetSc sets the [Complete.Sc]:
+// the scene where the current popup menu is presented
 func (t *Complete) SetSc(v *Scene) *Complete {
 	t.Sc = v
 	return t
 }
 
-// SetDelayTimer sets the DelayTimer of the Complete and
-// returns it to allow chaining together set calls.
+// SetDelayTimer sets the [Complete.DelayTimer]:
 func (t *Complete) SetDelayTimer(v *time.Timer) *Complete {
 	t.DelayTimer = v
 	return t
 }
 
-// SetDelayMu sets the DelayMu of the Complete and
-// returns it to allow chaining together set calls.
+// SetDelayMu sets the [Complete.DelayMu]:
 func (t *Complete) SetDelayMu(v sync.Mutex) *Complete {
 	t.DelayMu = v
 	return t
 }
 
-// SetShowMu sets the ShowMu of the Complete and
-// returns it to allow chaining together set calls.
+// SetShowMu sets the [Complete.ShowMu]:
 func (t *Complete) SetShowMu(v sync.Mutex) *Complete {
 	t.ShowMu = v
 	return t
@@ -514,8 +512,7 @@ func (t *StyleSheet) New() ki.Ki {
 	return &StyleSheet{}
 }
 
-// SetSheet sets the Sheet of the StyleSheet and
-// returns it to allow chaining together set calls.
+// SetSheet sets the [StyleSheet.Sheet]:
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
 	t.Sheet = v
 	return t
@@ -556,8 +553,8 @@ func (t *Frame) New() ki.Ki {
 	return &Frame{}
 }
 
-// SetStripes sets the Stripes of the Frame and
-// returns it to allow chaining together set calls.
+// SetStripes sets the [Frame.Stripes]:
+// options for striped backgrounds -- rendered as darker bands relative to background color
 func (t *Frame) SetStripes(v Stripes) *Frame {
 	t.Stripes = v
 	return t
@@ -601,29 +598,31 @@ func (t *Icon) New() ki.Ki {
 	return &Icon{}
 }
 
-// SetIconName sets the IconName of the Icon and
-// returns it to allow chaining together set calls.
+// SetIconName sets the [Icon.IconName]:
+// icon name that has been set.
 func (t *Icon) SetIconName(v icons.Icon) *Icon {
 	t.IconName = v
 	return t
 }
 
-// SetFilename sets the Filename of the Icon and
-// returns it to allow chaining together set calls.
+// SetFilename sets the [Icon.Filename]:
+// file name for the loaded icon, if loaded
 func (t *Icon) SetFilename(v string) *Icon {
 	t.Filename = v
 	return t
 }
 
-// SetSVG sets the SVG of the Icon and
-// returns it to allow chaining together set calls.
+// SetSVG sets the [Icon.SVG]:
+// SVG drawing
 func (t *Icon) SetSVG(v svg.SVG) *Icon {
 	t.SVG = v
 	return t
 }
 
-// SetRendSize sets the RendSize of the Icon and
-// returns it to allow chaining together set calls.
+// SetRendSize sets the [Icon.RendSize]:
+// RendSize is the last rendered size of the Icon SVG.
+// if the SVG.Name == IconName and this size is the same
+// then the current SVG image is used.
 func (t *Icon) SetRendSize(v image.Point) *Icon {
 	t.RendSize = v
 	return t
@@ -666,15 +665,15 @@ func (t *Image) New() ki.Ki {
 	return &Image{}
 }
 
-// SetFilename sets the Filename of the Image and
-// returns it to allow chaining together set calls.
+// SetFilename sets the [Image.Filename]:
+// file name of image loaded -- set by OpenImage
 func (t *Image) SetFilename(v FileName) *Image {
 	t.Filename = v
 	return t
 }
 
-// SetPixels sets the Pixels of the Image and
-// returns it to allow chaining together set calls.
+// SetPixels sets the [Image.Pixels]:
+// the bitmap image
 func (t *Image) SetPixels(v *image.RGBA) *Image {
 	t.Pixels = v
 	return t
@@ -742,22 +741,22 @@ func (t *Label) AsLabel() *Label {
 	return t
 }
 
-// SetType sets the Type of the Label and
-// returns it to allow chaining together set calls.
+// SetType sets the [Label.Type]:
+// the type of label
 func (t *Label) SetType(v LabelTypes) *Label {
 	t.Type = v
 	return t
 }
 
-// SetTextRender sets the TextRender of the Label and
-// returns it to allow chaining together set calls.
+// SetTextRender sets the [Label.TextRender]:
+// render data for text label
 func (t *Label) SetTextRender(v paint.Text) *Label {
 	t.TextRender = v
 	return t
 }
 
-// SetRenderPos sets the RenderPos of the Label and
-// returns it to allow chaining together set calls.
+// SetRenderPos sets the [Label.RenderPos]:
+// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
 func (t *Label) SetRenderPos(v mat32.Vec2) *Label {
 	t.RenderPos = v
 	return t
@@ -837,99 +836,99 @@ func (t *Layout) AsLayout() *Layout {
 	return t
 }
 
-// SetSpacing sets the Spacing of the Layout and
-// returns it to allow chaining together set calls.
+// SetSpacing sets the [Layout.Spacing]:
+// extra space to add between elements in the layout
 func (t *Layout) SetSpacing(v units.Value) *Layout {
 	t.Spacing = v
 	return t
 }
 
-// SetStackTop sets the StackTop of the Layout and
-// returns it to allow chaining together set calls.
+// SetStackTop sets the [Layout.StackTop]:
+// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
 func (t *Layout) SetStackTop(v int) *Layout {
 	t.StackTop = v
 	return t
 }
 
-// SetStackTopOnly sets the StackTopOnly of the Layout and
-// returns it to allow chaining together set calls.
+// SetStackTopOnly sets the [Layout.StackTopOnly]:
+// for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
 func (t *Layout) SetStackTopOnly(v bool) *Layout {
 	t.StackTopOnly = v
 	return t
 }
 
-// SetChildSize sets the ChildSize of the Layout and
-// returns it to allow chaining together set calls.
+// SetChildSize sets the [Layout.ChildSize]:
+// total max size of children as laid out
 func (t *Layout) SetChildSize(v mat32.Vec2) *Layout {
 	t.ChildSize = v
 	return t
 }
 
-// SetExtraSize sets the ExtraSize of the Layout and
-// returns it to allow chaining together set calls.
+// SetExtraSize sets the [Layout.ExtraSize]:
+// extra size in each dim due to scrollbars we add
 func (t *Layout) SetExtraSize(v mat32.Vec2) *Layout {
 	t.ExtraSize = v
 	return t
 }
 
-// SetHasScroll sets the HasScroll of the Layout and
-// returns it to allow chaining together set calls.
+// SetHasScroll sets the [Layout.HasScroll]:
+// whether scrollbar is used for given dim
 func (t *Layout) SetHasScroll(v [2]bool) *Layout {
 	t.HasScroll = v
 	return t
 }
 
-// SetScrolls sets the Scrolls of the Layout and
-// returns it to allow chaining together set calls.
+// SetScrolls sets the [Layout.Scrolls]:
+// scroll bars -- we fully manage them as needed
 func (t *Layout) SetScrolls(v [2]*Slider) *Layout {
 	t.Scrolls = v
 	return t
 }
 
-// SetGridSize sets the GridSize of the Layout and
-// returns it to allow chaining together set calls.
+// SetGridSize sets the [Layout.GridSize]:
+// computed size of a grid layout based on all the constraints -- computed during GetSize pass
 func (t *Layout) SetGridSize(v image.Point) *Layout {
 	t.GridSize = v
 	return t
 }
 
-// SetGridData sets the GridData of the Layout and
-// returns it to allow chaining together set calls.
+// SetGridData sets the [Layout.GridData]:
+// grid data for rows in and cols in
 func (t *Layout) SetGridData(v [RowColN][]GridData) *Layout {
 	t.GridData = v
 	return t
 }
 
-// SetFlowBreaks sets the FlowBreaks of the Layout and
-// returns it to allow chaining together set calls.
+// SetFlowBreaks sets the [Layout.FlowBreaks]:
+// line breaks for flow layout
 func (t *Layout) SetFlowBreaks(v []int) *Layout {
 	t.FlowBreaks = v
 	return t
 }
 
-// SetNeedsRedo sets the NeedsRedo of the Layout and
-// returns it to allow chaining together set calls.
+// SetNeedsRedo sets the [Layout.NeedsRedo]:
+// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
 func (t *Layout) SetNeedsRedo(v bool) *Layout {
 	t.NeedsRedo = v
 	return t
 }
 
-// SetFocusName sets the FocusName of the Layout and
-// returns it to allow chaining together set calls.
+// SetFocusName sets the [Layout.FocusName]:
+// accumulated name to search for when keys are typed
 func (t *Layout) SetFocusName(v string) *Layout {
 	t.FocusName = v
 	return t
 }
 
-// SetFocusNameTime sets the FocusNameTime of the Layout and
-// returns it to allow chaining together set calls.
+// SetFocusNameTime sets the [Layout.FocusNameTime]:
+// time of last focus name event -- for timeout
 func (t *Layout) SetFocusNameTime(v time.Time) *Layout {
 	t.FocusNameTime = v
 	return t
 }
 
-// SetFocusNameLast sets the FocusNameLast of the Layout and
-// returns it to allow chaining together set calls.
+// SetFocusNameLast sets the [Layout.FocusNameLast]:
+// last element focused on -- used as a starting point if name is the same
 func (t *Layout) SetFocusNameLast(v ki.Ki) *Layout {
 	t.FocusNameLast = v
 	return t
@@ -1078,148 +1077,148 @@ var _ = gti.AddType(&gti.Type{
 	}),
 })
 
-// SetTheme sets the Theme of the Preferences and
-// returns it to allow chaining together set calls.
+// SetTheme sets the [Preferences.Theme]:
+// the color theme
 func (t *Preferences) SetTheme(v Themes) *Preferences {
 	t.Theme = v
 	return t
 }
 
-// SetColor sets the Color of the Preferences and
-// returns it to allow chaining together set calls.
+// SetColor sets the [Preferences.Color]:
+// the primary color used to generate the color scheme
 func (t *Preferences) SetColor(v color.RGBA) *Preferences {
 	t.Color = v
 	return t
 }
 
-// SetHiStyle sets the HiStyle of the Preferences and
-// returns it to allow chaining together set calls.
+// SetHiStyle sets the [Preferences.HiStyle]:
+// text highilighting style / theme
 func (t *Preferences) SetHiStyle(v HiStyleName) *Preferences {
 	t.HiStyle = v
 	return t
 }
 
-// SetDensity sets the Density of the Preferences and
-// returns it to allow chaining together set calls.
+// SetDensity sets the [Preferences.Density]:
+// the density (compactness) of content
 func (t *Preferences) SetDensity(v Densities) *Preferences {
 	t.Density = v
 	return t
 }
 
-// SetLogicalDPIScale sets the LogicalDPIScale of the Preferences and
-// returns it to allow chaining together set calls.
+// SetLogicalDPIScale sets the [Preferences.LogicalDPIScale]:
+// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
 func (t *Preferences) SetLogicalDPIScale(v float32) *Preferences {
 	t.LogicalDPIScale = v
 	return t
 }
 
-// SetScreenPrefs sets the ScreenPrefs of the Preferences and
-// returns it to allow chaining together set calls.
+// SetScreenPrefs sets the [Preferences.ScreenPrefs]:
+// screen-specific preferences -- will override overall defaults if set
 func (t *Preferences) SetScreenPrefs(v map[string]ScreenPrefs) *Preferences {
 	t.ScreenPrefs = v
 	return t
 }
 
-// SetParams sets the Params of the Preferences and
-// returns it to allow chaining together set calls.
+// SetParams sets the [Preferences.Params]:
+// parameters controlling GUI behavior
 func (t *Preferences) SetParams(v ParamPrefs) *Preferences {
 	t.Params = v
 	return t
 }
 
-// SetEditor sets the Editor of the Preferences and
-// returns it to allow chaining together set calls.
+// SetEditor sets the [Preferences.Editor]:
+// editor preferences -- for TextView etc
 func (t *Preferences) SetEditor(v EditorPrefs) *Preferences {
 	t.Editor = v
 	return t
 }
 
-// SetKeyMap sets the KeyMap of the Preferences and
-// returns it to allow chaining together set calls.
+// SetKeyMap sets the [Preferences.KeyMap]:
+// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
 func (t *Preferences) SetKeyMap(v KeyMapName) *Preferences {
 	t.KeyMap = v
 	return t
 }
 
-// SetSaveKeyMaps sets the SaveKeyMaps of the Preferences and
-// returns it to allow chaining together set calls.
+// SetSaveKeyMaps sets the [Preferences.SaveKeyMaps]:
+// if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
 func (t *Preferences) SetSaveKeyMaps(v bool) *Preferences {
 	t.SaveKeyMaps = v
 	return t
 }
 
-// SetSaveDetailed sets the SaveDetailed of the Preferences and
-// returns it to allow chaining together set calls.
+// SetSaveDetailed sets the [Preferences.SaveDetailed]:
+// if set, the detailed preferences are saved and loaded at startup -- only
 func (t *Preferences) SetSaveDetailed(v bool) *Preferences {
 	t.SaveDetailed = v
 	return t
 }
 
-// SetCustomStyles sets the CustomStyles of the Preferences and
-// returns it to allow chaining together set calls.
+// SetCustomStyles sets the [Preferences.CustomStyles]:
+// a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive
 func (t *Preferences) SetCustomStyles(v ki.Props) *Preferences {
 	t.CustomStyles = v
 	return t
 }
 
-// SetCustomStylesOverride sets the CustomStylesOverride of the Preferences and
-// returns it to allow chaining together set calls.
+// SetCustomStylesOverride sets the [Preferences.CustomStylesOverride]:
+// if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).
 func (t *Preferences) SetCustomStylesOverride(v bool) *Preferences {
 	t.CustomStylesOverride = v
 	return t
 }
 
-// SetFontFamily sets the FontFamily of the Preferences and
-// returns it to allow chaining together set calls.
+// SetFontFamily sets the [Preferences.FontFamily]:
+// default font family when otherwise not specified
 func (t *Preferences) SetFontFamily(v FontName) *Preferences {
 	t.FontFamily = v
 	return t
 }
 
-// SetMonoFont sets the MonoFont of the Preferences and
-// returns it to allow chaining together set calls.
+// SetMonoFont sets the [Preferences.MonoFont]:
+// default mono-spaced font family
 func (t *Preferences) SetMonoFont(v FontName) *Preferences {
 	t.MonoFont = v
 	return t
 }
 
-// SetFontPaths sets the FontPaths of the Preferences and
-// returns it to allow chaining together set calls.
+// SetFontPaths sets the [Preferences.FontPaths]:
+// extra font paths, beyond system defaults -- searched first
 func (t *Preferences) SetFontPaths(v []string) *Preferences {
 	t.FontPaths = v
 	return t
 }
 
-// SetUser sets the User of the Preferences and
-// returns it to allow chaining together set calls.
+// SetUser sets the [Preferences.User]:
+// user info -- partially filled-out automatically if empty / when prefs first created
 func (t *Preferences) SetUser(v User) *Preferences {
 	t.User = v
 	return t
 }
 
-// SetFavPaths sets the FavPaths of the Preferences and
-// returns it to allow chaining together set calls.
+// SetFavPaths sets the [Preferences.FavPaths]:
+// favorite paths, shown in FileViewer and also editable there
 func (t *Preferences) SetFavPaths(v FavPaths) *Preferences {
 	t.FavPaths = v
 	return t
 }
 
-// SetFileViewSort sets the FileViewSort of the Preferences and
-// returns it to allow chaining together set calls.
+// SetFileViewSort sets the [Preferences.FileViewSort]:
+// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
 func (t *Preferences) SetFileViewSort(v string) *Preferences {
 	t.FileViewSort = v
 	return t
 }
 
-// SetColorFilename sets the ColorFilename of the Preferences and
-// returns it to allow chaining together set calls.
+// SetColorFilename sets the [Preferences.ColorFilename]:
+// filename for saving / loading colors
 func (t *Preferences) SetColorFilename(v FileName) *Preferences {
 	t.ColorFilename = v
 	return t
 }
 
-// SetChanged sets the Changed of the Preferences and
-// returns it to allow chaining together set calls.
+// SetChanged sets the [Preferences.Changed]:
+// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 func (t *Preferences) SetChanged(v bool) *Preferences {
 	t.Changed = v
 	return t
@@ -1240,8 +1239,8 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetLogicalDPIScale sets the LogicalDPIScale of the ScreenPrefs and
-// returns it to allow chaining together set calls.
+// SetLogicalDPIScale sets the [ScreenPrefs.LogicalDPIScale]:
+// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
 func (t *ScreenPrefs) SetLogicalDPIScale(v float32) *ScreenPrefs {
 	t.LogicalDPIScale = v
 	return t
@@ -1269,57 +1268,57 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetDoubleClickInterval sets the DoubleClickInterval of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetDoubleClickInterval sets the [ParamPrefs.DoubleClickInterval]:
+// the maximum time interval in msec between button press events to count as a double-click
 func (t *ParamPrefs) SetDoubleClickInterval(v time.Duration) *ParamPrefs {
 	t.DoubleClickInterval = v
 	return t
 }
 
-// SetScrollWheelSpeed sets the ScrollWheelSpeed of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetScrollWheelSpeed sets the [ParamPrefs.ScrollWheelSpeed]:
+// how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
 func (t *ParamPrefs) SetScrollWheelSpeed(v float32) *ParamPrefs {
 	t.ScrollWheelSpeed = v
 	return t
 }
 
-// SetLocalMainMenu sets the LocalMainMenu of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetLocalMainMenu sets the [ParamPrefs.LocalMainMenu]:
+// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
 func (t *ParamPrefs) SetLocalMainMenu(v bool) *ParamPrefs {
 	t.LocalMainMenu = v
 	return t
 }
 
-// SetOnlyCloseActiveTab sets the OnlyCloseActiveTab of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetOnlyCloseActiveTab sets the [ParamPrefs.OnlyCloseActiveTab]:
+// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
 func (t *ParamPrefs) SetOnlyCloseActiveTab(v bool) *ParamPrefs {
 	t.OnlyCloseActiveTab = v
 	return t
 }
 
-// SetZebraStripeWeight sets the ZebraStripeWeight of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetZebraStripeWeight sets the [ParamPrefs.ZebraStripeWeight]:
+// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
 func (t *ParamPrefs) SetZebraStripeWeight(v float32) *ParamPrefs {
 	t.ZebraStripeWeight = v
 	return t
 }
 
-// SetBigFileSize sets the BigFileSize of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetBigFileSize sets the [ParamPrefs.BigFileSize]:
+// the limit of file size, above which user will be prompted before opening / copying, etc.
 func (t *ParamPrefs) SetBigFileSize(v int) *ParamPrefs {
 	t.BigFileSize = v
 	return t
 }
 
-// SetSavedPathsMax sets the SavedPathsMax of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetSavedPathsMax sets the [ParamPrefs.SavedPathsMax]:
+// maximum number of saved paths to save in FileView
 func (t *ParamPrefs) SetSavedPathsMax(v int) *ParamPrefs {
 	t.SavedPathsMax = v
 	return t
 }
 
-// SetSmooth3D sets the Smooth3D of the ParamPrefs and
-// returns it to allow chaining together set calls.
+// SetSmooth3D sets the [ParamPrefs.Smooth3D]:
+// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
 func (t *ParamPrefs) SetSmooth3D(v bool) *ParamPrefs {
 	t.Smooth3D = v
 	return t
@@ -1342,8 +1341,8 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetEmail sets the Email of the User and
-// returns it to allow chaining together set calls.
+// SetEmail sets the [User.Email]:
+// default email address -- e.g., for recording changes in a version control system
 func (t *User) SetEmail(v string) *User {
 	t.Email = v
 	return t
@@ -1372,64 +1371,64 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetTabSize sets the TabSize of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetTabSize sets the [EditorPrefs.TabSize]:
+// size of a tab, in chars -- also determines indent level for space indent
 func (t *EditorPrefs) SetTabSize(v int) *EditorPrefs {
 	t.TabSize = v
 	return t
 }
 
-// SetSpaceIndent sets the SpaceIndent of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetSpaceIndent sets the [EditorPrefs.SpaceIndent]:
+// use spaces for indentation, otherwise tabs
 func (t *EditorPrefs) SetSpaceIndent(v bool) *EditorPrefs {
 	t.SpaceIndent = v
 	return t
 }
 
-// SetWordWrap sets the WordWrap of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetWordWrap sets the [EditorPrefs.WordWrap]:
+// wrap lines at word boundaries -- otherwise long lines scroll off the end
 func (t *EditorPrefs) SetWordWrap(v bool) *EditorPrefs {
 	t.WordWrap = v
 	return t
 }
 
-// SetLineNos sets the LineNos of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetLineNos sets the [EditorPrefs.LineNos]:
+// show line numbers
 func (t *EditorPrefs) SetLineNos(v bool) *EditorPrefs {
 	t.LineNos = v
 	return t
 }
 
-// SetCompletion sets the Completion of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetCompletion sets the [EditorPrefs.Completion]:
+// use the completion system to suggest options while typing
 func (t *EditorPrefs) SetCompletion(v bool) *EditorPrefs {
 	t.Completion = v
 	return t
 }
 
-// SetSpellCorrect sets the SpellCorrect of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetSpellCorrect sets the [EditorPrefs.SpellCorrect]:
+// suggest corrections for unknown words while typing
 func (t *EditorPrefs) SetSpellCorrect(v bool) *EditorPrefs {
 	t.SpellCorrect = v
 	return t
 }
 
-// SetAutoIndent sets the AutoIndent of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetAutoIndent sets the [EditorPrefs.AutoIndent]:
+// automatically indent lines when enter, tab, }, etc pressed
 func (t *EditorPrefs) SetAutoIndent(v bool) *EditorPrefs {
 	t.AutoIndent = v
 	return t
 }
 
-// SetEmacsUndo sets the EmacsUndo of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetEmacsUndo sets the [EditorPrefs.EmacsUndo]:
+// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
 func (t *EditorPrefs) SetEmacsUndo(v bool) *EditorPrefs {
 	t.EmacsUndo = v
 	return t
 }
 
-// SetDepthColor sets the DepthColor of the EditorPrefs and
-// returns it to allow chaining together set calls.
+// SetDepthColor sets the [EditorPrefs.DepthColor]:
+// colorize the background according to nesting depth
 func (t *EditorPrefs) SetDepthColor(v bool) *EditorPrefs {
 	t.DepthColor = v
 	return t
@@ -1452,22 +1451,21 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetIc sets the Ic of the FavPathItem and
-// returns it to allow chaining together set calls.
+// SetIc sets the [FavPathItem.Ic]:
+// icon for item
 func (t *FavPathItem) SetIc(v icons.Icon) *FavPathItem {
 	t.Ic = v
 	return t
 }
 
-// SetName sets the Name of the FavPathItem and
-// returns it to allow chaining together set calls.
+// SetName sets the [FavPathItem.Name]:
+// name of the favorite item
 func (t *FavPathItem) SetName(v string) *FavPathItem {
 	t.Name = v
 	return t
 }
 
-// SetPath sets the Path of the FavPathItem and
-// returns it to allow chaining together set calls.
+// SetPath sets the [FavPathItem.Path]:
 func (t *FavPathItem) SetPath(v string) *FavPathItem {
 	t.Path = v
 	return t
@@ -1511,169 +1509,169 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetMenuMaxHeight sets the MenuMaxHeight of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetMenuMaxHeight sets the [PrefsDetailed.MenuMaxHeight]:
+// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 func (t *PrefsDetailed) SetMenuMaxHeight(v int) *PrefsDetailed {
 	t.MenuMaxHeight = v
 	return t
 }
 
-// SetDragStartTime sets the DragStartTime of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetDragStartTime sets the [PrefsDetailed.DragStartTime]:
+// the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
 func (t *PrefsDetailed) SetDragStartTime(v time.Duration) *PrefsDetailed {
 	t.DragStartTime = v
 	return t
 }
 
-// SetDragStartDist sets the DragStartDist of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetDragStartDist sets the [PrefsDetailed.DragStartDist]:
+// the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
 func (t *PrefsDetailed) SetDragStartDist(v int) *PrefsDetailed {
 	t.DragStartDist = v
 	return t
 }
 
-// SetSlideStartTime sets the SlideStartTime of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetSlideStartTime sets the [PrefsDetailed.SlideStartTime]:
+// the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
 func (t *PrefsDetailed) SetSlideStartTime(v time.Duration) *PrefsDetailed {
 	t.SlideStartTime = v
 	return t
 }
 
-// SetSlideStartDist sets the SlideStartDist of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetSlideStartDist sets the [PrefsDetailed.SlideStartDist]:
+// the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
 func (t *PrefsDetailed) SetSlideStartDist(v int) *PrefsDetailed {
 	t.SlideStartDist = v
 	return t
 }
 
-// SetLongHoverTime sets the LongHoverTime of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLongHoverTime sets the [PrefsDetailed.LongHoverTime]:
+// the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
 func (t *PrefsDetailed) SetLongHoverTime(v time.Duration) *PrefsDetailed {
 	t.LongHoverTime = v
 	return t
 }
 
-// SetLongHoverStopDist sets the LongHoverStopDist of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLongHoverStopDist sets the [PrefsDetailed.LongHoverStopDist]:
+// the maximum number of pixels that mouse can move and still register a Hover event
 func (t *PrefsDetailed) SetLongHoverStopDist(v int) *PrefsDetailed {
 	t.LongHoverStopDist = v
 	return t
 }
 
-// SetCompleteWaitMSec sets the CompleteWaitMSec of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetCompleteWaitMSec sets the [PrefsDetailed.CompleteWaitMSec]:
+// the number of milliseconds to wait before offering completions
 func (t *PrefsDetailed) SetCompleteWaitMSec(v int) *PrefsDetailed {
 	t.CompleteWaitMSec = v
 	return t
 }
 
-// SetCompleteMaxItems sets the CompleteMaxItems of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetCompleteMaxItems sets the [PrefsDetailed.CompleteMaxItems]:
+// the maximum number of completions offered in popup
 func (t *PrefsDetailed) SetCompleteMaxItems(v int) *PrefsDetailed {
 	t.CompleteMaxItems = v
 	return t
 }
 
-// SetCursorBlinkTime sets the CursorBlinkTime of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetCursorBlinkTime sets the [PrefsDetailed.CursorBlinkTime]:
+// time interval for cursor blinking on and off -- set to 0 to disable blinking
 func (t *PrefsDetailed) SetCursorBlinkTime(v time.Duration) *PrefsDetailed {
 	t.CursorBlinkTime = v
 	return t
 }
 
-// SetLayoutAutoScrollDelayMSec sets the LayoutAutoScrollDelayMSec of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLayoutAutoScrollDelayMSec sets the [PrefsDetailed.LayoutAutoScrollDelayMSec]:
+// is amount of time to wait (in Milliseconds) before trying to autoscroll again
 func (t *PrefsDetailed) SetLayoutAutoScrollDelayMSec(v int) *PrefsDetailed {
 	t.LayoutAutoScrollDelayMSec = v
 	return t
 }
 
-// SetLayoutPageSteps sets the LayoutPageSteps of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLayoutPageSteps sets the [PrefsDetailed.LayoutPageSteps]:
+// number of steps to take in PageUp / Down events in terms of number of items
 func (t *PrefsDetailed) SetLayoutPageSteps(v int) *PrefsDetailed {
 	t.LayoutPageSteps = v
 	return t
 }
 
-// SetLayoutFocusNameTimeoutMSec sets the LayoutFocusNameTimeoutMSec of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLayoutFocusNameTimeoutMSec sets the [PrefsDetailed.LayoutFocusNameTimeoutMSec]:
+// the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
 func (t *PrefsDetailed) SetLayoutFocusNameTimeoutMSec(v int) *PrefsDetailed {
 	t.LayoutFocusNameTimeoutMSec = v
 	return t
 }
 
-// SetLayoutFocusNameTabMSec sets the LayoutFocusNameTabMSec of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetLayoutFocusNameTabMSec sets the [PrefsDetailed.LayoutFocusNameTabMSec]:
+// the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
 func (t *PrefsDetailed) SetLayoutFocusNameTabMSec(v int) *PrefsDetailed {
 	t.LayoutFocusNameTabMSec = v
 	return t
 }
 
-// SetDialogsSepRenderWin sets the DialogsSepRenderWin of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetDialogsSepRenderWin sets the [PrefsDetailed.DialogsSepRenderWin]:
+// open dialogs in separate windows -- else do as popups in main window
 func (t *PrefsDetailed) SetDialogsSepRenderWin(v bool) *PrefsDetailed {
 	t.DialogsSepRenderWin = v
 	return t
 }
 
-// SetTextViewClipHistMax sets the TextViewClipHistMax of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetTextViewClipHistMax sets the [PrefsDetailed.TextViewClipHistMax]:
+// Maximum amount of clipboard history to retain
 func (t *PrefsDetailed) SetTextViewClipHistMax(v int) *PrefsDetailed {
 	t.TextViewClipHistMax = v
 	return t
 }
 
-// SetTextBufMaxScopeLines sets the TextBufMaxScopeLines of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetTextBufMaxScopeLines sets the [PrefsDetailed.TextBufMaxScopeLines]:
+// maximum number of lines to look for matching scope syntax (parens, brackets)
 func (t *PrefsDetailed) SetTextBufMaxScopeLines(v int) *PrefsDetailed {
 	t.TextBufMaxScopeLines = v
 	return t
 }
 
-// SetTextBufDiffRevertLines sets the TextBufDiffRevertLines of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetTextBufDiffRevertLines sets the [PrefsDetailed.TextBufDiffRevertLines]:
+// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
 func (t *PrefsDetailed) SetTextBufDiffRevertLines(v int) *PrefsDetailed {
 	t.TextBufDiffRevertLines = v
 	return t
 }
 
-// SetTextBufDiffRevertDiffs sets the TextBufDiffRevertDiffs of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetTextBufDiffRevertDiffs sets the [PrefsDetailed.TextBufDiffRevertDiffs]:
+// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
 func (t *PrefsDetailed) SetTextBufDiffRevertDiffs(v int) *PrefsDetailed {
 	t.TextBufDiffRevertDiffs = v
 	return t
 }
 
-// SetTextBufMarkupDelayMSec sets the TextBufMarkupDelayMSec of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetTextBufMarkupDelayMSec sets the [PrefsDetailed.TextBufMarkupDelayMSec]:
+// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
 func (t *PrefsDetailed) SetTextBufMarkupDelayMSec(v int) *PrefsDetailed {
 	t.TextBufMarkupDelayMSec = v
 	return t
 }
 
-// SetMapInlineLen sets the MapInlineLen of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetMapInlineLen sets the [PrefsDetailed.MapInlineLen]:
+// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
 func (t *PrefsDetailed) SetMapInlineLen(v int) *PrefsDetailed {
 	t.MapInlineLen = v
 	return t
 }
 
-// SetStructInlineLen sets the StructInlineLen of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetStructInlineLen sets the [PrefsDetailed.StructInlineLen]:
+// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
 func (t *PrefsDetailed) SetStructInlineLen(v int) *PrefsDetailed {
 	t.StructInlineLen = v
 	return t
 }
 
-// SetSliceInlineLen sets the SliceInlineLen of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetSliceInlineLen sets the [PrefsDetailed.SliceInlineLen]:
+// the number of slice elements below which inline will be used
 func (t *PrefsDetailed) SetSliceInlineLen(v int) *PrefsDetailed {
 	t.SliceInlineLen = v
 	return t
 }
 
-// SetChanged sets the Changed of the PrefsDetailed and
-// returns it to allow chaining together set calls.
+// SetChanged sets the [PrefsDetailed.Changed]:
+// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
 func (t *PrefsDetailed) SetChanged(v bool) *PrefsDetailed {
 	t.Changed = v
 	return t
@@ -1717,29 +1715,29 @@ func (t *ProgressBar) New() ki.Ki {
 	return &ProgressBar{}
 }
 
-// SetProgMax sets the ProgMax of the ProgressBar and
-// returns it to allow chaining together set calls.
+// SetProgMax sets the [ProgressBar.ProgMax]:
+// maximum amount of progress to be achieved
 func (t *ProgressBar) SetProgMax(v int) *ProgressBar {
 	t.ProgMax = v
 	return t
 }
 
-// SetProgInc sets the ProgInc of the ProgressBar and
-// returns it to allow chaining together set calls.
+// SetProgInc sets the [ProgressBar.ProgInc]:
+// progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten
 func (t *ProgressBar) SetProgInc(v int) *ProgressBar {
 	t.ProgInc = v
 	return t
 }
 
-// SetProgCur sets the ProgCur of the ProgressBar and
-// returns it to allow chaining together set calls.
+// SetProgCur sets the [ProgressBar.ProgCur]:
+// current progress level
 func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
 	t.ProgCur = v
 	return t
 }
 
-// SetProgMu sets the ProgMu of the ProgressBar and
-// returns it to allow chaining together set calls.
+// SetProgMu sets the [ProgressBar.ProgMu]:
+// mutex for updating progress
 func (t *ProgressBar) SetProgMu(v sync.Mutex) *ProgressBar {
 	t.ProgMu = v
 	return t
@@ -1785,85 +1783,88 @@ func (t *Scene) New() ki.Ki {
 	return &Scene{}
 }
 
-// SetTitle sets the Title of the Scene and
-// returns it to allow chaining together set calls.
+// SetTitle sets the [Scene.Title]:
+// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
 func (t *Scene) SetTitle(v string) *Scene {
 	t.Title = v
 	return t
 }
 
-// SetData sets the Data of the Scene and
-// returns it to allow chaining together set calls.
+// SetData sets the [Scene.Data]:
+// Data is the optional data value being represented by this scene.
+// Used e.g., for recycling views of a given item instead of creating new one.
 func (t *Scene) SetData(v any) *Scene {
 	t.Data = v
 	return t
 }
 
-// SetGeom sets the Geom of the Scene and
-// returns it to allow chaining together set calls.
+// SetGeom sets the [Scene.Geom]:
+// Size and position relative to overall rendering context.
 func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
 	t.Geom = v
 	return t
 }
 
-// SetRenderState sets the RenderState of the Scene and
-// returns it to allow chaining together set calls.
+// SetRenderState sets the [Scene.RenderState]:
+// render state for rendering
 func (t *Scene) SetRenderState(v paint.State) *Scene {
 	t.RenderState = v
 	return t
 }
 
-// SetPixels sets the Pixels of the Scene and
-// returns it to allow chaining together set calls.
+// SetPixels sets the [Scene.Pixels]:
+// live pixels that we render into
 func (t *Scene) SetPixels(v *image.RGBA) *Scene {
 	t.Pixels = v
 	return t
 }
 
-// SetBgColor sets the BgColor of the Scene and
-// returns it to allow chaining together set calls.
+// SetBgColor sets the [Scene.BgColor]:
+// background color for filling scene -- defaults to transparent so that popups can have rounded corners
 func (t *Scene) SetBgColor(v colors.Full) *Scene {
 	t.BgColor = v
 	return t
 }
 
-// SetEventMgr sets the EventMgr of the Scene and
-// returns it to allow chaining together set calls.
+// SetEventMgr sets the [Scene.EventMgr]:
+// event manager for this scene
 func (t *Scene) SetEventMgr(v EventMgr) *Scene {
 	t.EventMgr = v
 	return t
 }
 
-// SetStage sets the Stage of the Scene and
-// returns it to allow chaining together set calls.
+// SetStage sets the [Scene.Stage]:
+// current stage in which this Scene is set
 func (t *Scene) SetStage(v Stage) *Scene {
 	t.Stage = v
 	return t
 }
 
-// SetCurColor sets the CurColor of the Scene and
-// returns it to allow chaining together set calls.
+// SetCurColor sets the [Scene.CurColor]:
+// Current color in styling -- used for relative color names
 func (t *Scene) SetCurColor(v color.RGBA) *Scene {
 	t.CurColor = v
 	return t
 }
 
-// SetLastRender sets the LastRender of the Scene and
-// returns it to allow chaining together set calls.
+// SetLastRender sets the [Scene.LastRender]:
+// LastRender captures key params from last render.
+// If different then a new ApplyStyleScene is needed.
 func (t *Scene) SetLastRender(v RenderParams) *Scene {
 	t.LastRender = v
 	return t
 }
 
-// SetStyleMu sets the StyleMu of the Scene and
-// returns it to allow chaining together set calls.
+// SetStyleMu sets the [Scene.StyleMu]:
+// StyleMu is RW mutex protecting access to Style-related global vars
 func (t *Scene) SetStyleMu(v sync.RWMutex) *Scene {
 	t.StyleMu = v
 	return t
 }
 
-// SetShowLayoutIter sets the ShowLayoutIter of the Scene and
-// returns it to allow chaining together set calls.
+// SetShowLayoutIter sets the [Scene.ShowLayoutIter]:
+// ShowLayoutIter counts up at start of showing a Scene
+// for a sequence of Layout passes to ensure proper initial sizing.
 func (t *Scene) SetShowLayoutIter(v int) *Scene {
 	t.ShowLayoutIter = v
 	return t
@@ -1904,8 +1905,8 @@ func (t *Separator) New() ki.Ki {
 	return &Separator{}
 }
 
-// SetHoriz sets the Horiz of the Separator and
-// returns it to allow chaining together set calls.
+// SetHoriz sets the [Separator.Horiz]:
+// whether this is a horizontal separator; if false, it is vertical
 func (t *Separator) SetHoriz(v bool) *Separator {
 	t.Horiz = v
 	return t
@@ -1994,162 +1995,162 @@ func (t *Slider) AsSlider() *Slider {
 	return t
 }
 
-// SetDim sets the Dim of the Slider and
-// returns it to allow chaining together set calls.
+// SetDim sets the [Slider.Dim]:
+// dimension along which the slider slides
 func (t *Slider) SetDim(v mat32.Dims) *Slider {
 	t.Dim = v
 	return t
 }
 
-// SetMin sets the Min of the Slider and
-// returns it to allow chaining together set calls.
+// SetMin sets the [Slider.Min]:
+// minimum value in range
 func (t *Slider) SetMin(v float32) *Slider {
 	t.Min = v
 	return t
 }
 
-// SetMax sets the Max of the Slider and
-// returns it to allow chaining together set calls.
+// SetMax sets the [Slider.Max]:
+// maximum value in range
 func (t *Slider) SetMax(v float32) *Slider {
 	t.Max = v
 	return t
 }
 
-// SetStep sets the Step of the Slider and
-// returns it to allow chaining together set calls.
+// SetStep sets the [Slider.Step]:
+// smallest step size to increment
 func (t *Slider) SetStep(v float32) *Slider {
 	t.Step = v
 	return t
 }
 
-// SetPageStep sets the PageStep of the Slider and
-// returns it to allow chaining together set calls.
+// SetPageStep sets the [Slider.PageStep]:
+// larger PageUp / Dn step size
 func (t *Slider) SetPageStep(v float32) *Slider {
 	t.PageStep = v
 	return t
 }
 
-// SetValThumb sets the ValThumb of the Slider and
-// returns it to allow chaining together set calls.
+// SetValThumb sets the [Slider.ValThumb]:
+// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
 func (t *Slider) SetValThumb(v bool) *Slider {
 	t.ValThumb = v
 	return t
 }
 
-// SetThumbVal sets the ThumbVal of the Slider and
-// returns it to allow chaining together set calls.
+// SetThumbVal sets the [Slider.ThumbVal]:
+// value that the thumb represents, in the same units
 func (t *Slider) SetThumbVal(v float32) *Slider {
 	t.ThumbVal = v
 	return t
 }
 
-// SetThumbSize sets the ThumbSize of the Slider and
-// returns it to allow chaining together set calls.
+// SetThumbSize sets the [Slider.ThumbSize]:
+// styled fixed size of the thumb -- only if not doing ValThumb
 func (t *Slider) SetThumbSize(v units.Value) *Slider {
 	t.ThumbSize = v
 	return t
 }
 
-// SetIcon sets the Icon of the Slider and
-// returns it to allow chaining together set calls.
+// SetIcon sets the [Slider.Icon]:
+// optional icon for the dragging knob
 func (t *Slider) SetIcon(v icons.Icon) *Slider {
 	t.Icon = v
 	return t
 }
 
-// SetTracking sets the Tracking of the Slider and
-// returns it to allow chaining together set calls.
+// SetTracking sets the [Slider.Tracking]:
+// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
 func (t *Slider) SetTracking(v bool) *Slider {
 	t.Tracking = v
 	return t
 }
 
-// SetTrackThr sets the TrackThr of the Slider and
-// returns it to allow chaining together set calls.
+// SetTrackThr sets the [Slider.TrackThr]:
+// threshold for amount of change in scroll value before emitting a signal in Tracking mode
 func (t *Slider) SetTrackThr(v float32) *Slider {
 	t.TrackThr = v
 	return t
 }
 
-// SetSnap sets the Snap of the Slider and
-// returns it to allow chaining together set calls.
+// SetSnap sets the [Slider.Snap]:
+// snap the values to Step size increments
 func (t *Slider) SetSnap(v bool) *Slider {
 	t.Snap = v
 	return t
 }
 
-// SetOff sets the Off of the Slider and
-// returns it to allow chaining together set calls.
+// SetOff sets the [Slider.Off]:
+// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
 func (t *Slider) SetOff(v bool) *Slider {
 	t.Off = v
 	return t
 }
 
-// SetPrec sets the Prec of the Slider and
-// returns it to allow chaining together set calls.
+// SetPrec sets the [Slider.Prec]:
+// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
 func (t *Slider) SetPrec(v int) *Slider {
 	t.Prec = v
 	return t
 }
 
-// SetValueColor sets the ValueColor of the Slider and
-// returns it to allow chaining together set calls.
+// SetValueColor sets the [Slider.ValueColor]:
+// the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is
 func (t *Slider) SetValueColor(v colors.Full) *Slider {
 	t.ValueColor = v
 	return t
 }
 
-// SetThumbColor sets the ThumbColor of the Slider and
-// returns it to allow chaining together set calls.
+// SetThumbColor sets the [Slider.ThumbColor]:
+// the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is
 func (t *Slider) SetThumbColor(v colors.Full) *Slider {
 	t.ThumbColor = v
 	return t
 }
 
-// SetStyleBox sets the StyleBox of the Slider and
-// returns it to allow chaining together set calls.
+// SetStyleBox sets the [Slider.StyleBox]:
+// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
 func (t *Slider) SetStyleBox(v styles.Style) *Slider {
 	t.StyleBox = v
 	return t
 }
 
-// SetPos sets the Pos of the Slider and
-// returns it to allow chaining together set calls.
+// SetPos sets the [Slider.Pos]:
+// logical position of the slider relative to Size
 func (t *Slider) SetPos(v float32) *Slider {
 	t.Pos = v
 	return t
 }
 
-// SetLastValue sets the LastValue of the Slider and
-// returns it to allow chaining together set calls.
+// SetLastValue sets the [Slider.LastValue]:
+// previous emitted value - don't re-emit if it is the same
 func (t *Slider) SetLastValue(v float32) *Slider {
 	t.LastValue = v
 	return t
 }
 
-// SetSize sets the Size of the Slider and
-// returns it to allow chaining together set calls.
+// SetSize sets the [Slider.Size]:
+// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
 func (t *Slider) SetSize(v float32) *Slider {
 	t.Size = v
 	return t
 }
 
-// SetThSize sets the ThSize of the Slider and
-// returns it to allow chaining together set calls.
+// SetThSize sets the [Slider.ThSize]:
+// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
 func (t *Slider) SetThSize(v float32) *Slider {
 	t.ThSize = v
 	return t
 }
 
-// SetThSizeReal sets the ThSizeReal of the Slider and
-// returns it to allow chaining together set calls.
+// SetThSizeReal sets the [Slider.ThSizeReal]:
+// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
 func (t *Slider) SetThSizeReal(v float32) *Slider {
 	t.ThSizeReal = v
 	return t
 }
 
-// SetSlideStartPos sets the SlideStartPos of the Slider and
-// returns it to allow chaining together set calls.
+// SetSlideStartPos sets the [Slider.SlideStartPos]:
+// underlying drag position of slider -- not subject to snapping
 func (t *Slider) SetSlideStartPos(v float32) *Slider {
 	t.SlideStartPos = v
 	return t
@@ -2196,43 +2197,43 @@ func (t *Spell) New() ki.Ki {
 	return &Spell{}
 }
 
-// SetSrcLn sets the SrcLn of the Spell and
-// returns it to allow chaining together set calls.
+// SetSrcLn sets the [Spell.SrcLn]:
+// line number in source that spelling is operating on, if relevant
 func (t *Spell) SetSrcLn(v int) *Spell {
 	t.SrcLn = v
 	return t
 }
 
-// SetSrcCh sets the SrcCh of the Spell and
-// returns it to allow chaining together set calls.
+// SetSrcCh sets the [Spell.SrcCh]:
+// character position in source that spelling is operating on (start of word to be corrected)
 func (t *Spell) SetSrcCh(v int) *Spell {
 	t.SrcCh = v
 	return t
 }
 
-// SetSuggest sets the Suggest of the Spell and
-// returns it to allow chaining together set calls.
+// SetSuggest sets the [Spell.Suggest]:
+// list of suggested corrections
 func (t *Spell) SetSuggest(v []string) *Spell {
 	t.Suggest = v
 	return t
 }
 
-// SetLastLearned sets the LastLearned of the Spell and
-// returns it to allow chaining together set calls.
+// SetLastLearned sets the [Spell.LastLearned]:
+// last word learned -- can be undone -- stored in lowercase format
 func (t *Spell) SetLastLearned(v string) *Spell {
 	t.LastLearned = v
 	return t
 }
 
-// SetCorrection sets the Correction of the Spell and
-// returns it to allow chaining together set calls.
+// SetCorrection sets the [Spell.Correction]:
+// the user's correction selection'
 func (t *Spell) SetCorrection(v string) *Spell {
 	t.Correction = v
 	return t
 }
 
-// SetSc sets the Sc of the Spell and
-// returns it to allow chaining together set calls.
+// SetSc sets the [Spell.Sc]:
+// the scene where the current popup menu is presented
 func (t *Spell) SetSc(v *Scene) *Spell {
 	t.Sc = v
 	return t
@@ -2307,43 +2308,43 @@ func (t *Spinner) AsSpinner() *Spinner {
 	return t
 }
 
-// SetStep sets the Step of the Spinner and
-// returns it to allow chaining together set calls.
+// SetStep sets the [Spinner.Step]:
+// smallest step size to increment
 func (t *Spinner) SetStep(v float32) *Spinner {
 	t.Step = v
 	return t
 }
 
-// SetPageStep sets the PageStep of the Spinner and
-// returns it to allow chaining together set calls.
+// SetPageStep sets the [Spinner.PageStep]:
+// larger PageUp / Dn step size
 func (t *Spinner) SetPageStep(v float32) *Spinner {
 	t.PageStep = v
 	return t
 }
 
-// SetPrec sets the Prec of the Spinner and
-// returns it to allow chaining together set calls.
+// SetPrec sets the [Spinner.Prec]:
+// specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions
 func (t *Spinner) SetPrec(v int) *Spinner {
 	t.Prec = v
 	return t
 }
 
-// SetFormat sets the Format of the Spinner and
-// returns it to allow chaining together set calls.
+// SetFormat sets the [Spinner.Format]:
+// prop = format -- format string for printing the value -- blank defaults to %g.  If decimal based (ends in d, b, c, o, O, q, x, X, or U) then value is converted to decimal prior to printing
 func (t *Spinner) SetFormat(v string) *Spinner {
 	t.Format = v
 	return t
 }
 
-// SetUpIcon sets the UpIcon of the Spinner and
-// returns it to allow chaining together set calls.
+// SetUpIcon sets the [Spinner.UpIcon]:
+// icon to use for up button -- defaults to
 func (t *Spinner) SetUpIcon(v icons.Icon) *Spinner {
 	t.UpIcon = v
 	return t
 }
 
-// SetDownIcon sets the DownIcon of the Spinner and
-// returns it to allow chaining together set calls.
+// SetDownIcon sets the [Spinner.DownIcon]:
+// icon to use for down button -- defaults to
 func (t *Spinner) SetDownIcon(v icons.Icon) *Spinner {
 	t.DownIcon = v
 	return t
@@ -2411,22 +2412,22 @@ func (t *Splits) AsSplits() *Splits {
 	return t
 }
 
-// SetHandleSize sets the HandleSize of the Splits and
-// returns it to allow chaining together set calls.
+// SetHandleSize sets the [Splits.HandleSize]:
+// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
 func (t *Splits) SetHandleSize(v units.Value) *Splits {
 	t.HandleSize = v
 	return t
 }
 
-// SetSavedSplits sets the SavedSplits of the Splits and
-// returns it to allow chaining together set calls.
+// SetSavedSplits sets the [Splits.SavedSplits]:
+// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
 func (t *Splits) SetSavedSplits(v []float32) *Splits {
 	t.SavedSplits = v
 	return t
 }
 
-// SetDim sets the Dim of the Splits and
-// returns it to allow chaining together set calls.
+// SetDim sets the [Splits.Dim]:
+// dimension along which to split the space
 func (t *Splits) SetDim(v mat32.Dims) *Splits {
 	t.Dim = v
 	return t
@@ -2468,15 +2469,15 @@ func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
 }
 
-// SetSplitterNo sets the SplitterNo of the Splitter and
-// returns it to allow chaining together set calls.
+// SetSplitterNo sets the [Splitter.SplitterNo]:
+// splitter number this one is
 func (t *Splitter) SetSplitterNo(v int) *Splitter {
 	t.SplitterNo = v
 	return t
 }
 
-// SetOrigWinBBox sets the OrigWinBBox of the Splitter and
-// returns it to allow chaining together set calls.
+// SetOrigWinBBox sets the [Splitter.OrigWinBBox]:
+// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
 func (t *Splitter) SetOrigWinBBox(v image.Rectangle) *Splitter {
 	t.OrigWinBBox = v
 	return t
@@ -2521,29 +2522,29 @@ func (t *Switch) New() ki.Ki {
 	return &Switch{}
 }
 
-// SetText sets the Text of the Switch and
-// returns it to allow chaining together set calls.
+// SetText sets the [Switch.Text]:
+// the label text for the switch
 func (t *Switch) SetText(v string) *Switch {
 	t.Text = v
 	return t
 }
 
-// SetIconOn sets the IconOn of the Switch and
-// returns it to allow chaining together set calls.
+// SetIconOn sets the [Switch.IconOn]:
+// icon to use for the on, checked state of the switch
 func (t *Switch) SetIconOn(v icons.Icon) *Switch {
 	t.IconOn = v
 	return t
 }
 
-// SetIconOff sets the IconOff of the Switch and
-// returns it to allow chaining together set calls.
+// SetIconOff sets the [Switch.IconOff]:
+// icon to use for the off, unchecked state of the switch
 func (t *Switch) SetIconOff(v icons.Icon) *Switch {
 	t.IconOff = v
 	return t
 }
 
-// SetIconDisab sets the IconDisab of the Switch and
-// returns it to allow chaining together set calls.
+// SetIconDisab sets the [Switch.IconDisab]:
+// icon to use for the disabled state of the switch
 func (t *Switch) SetIconDisab(v icons.Icon) *Switch {
 	t.IconDisab = v
 	return t
@@ -2611,29 +2612,29 @@ func (t *Switches) AsSwitches() *Switches {
 	return t
 }
 
-// SetType sets the Type of the Switches and
-// returns it to allow chaining together set calls.
+// SetType sets the [Switches.Type]:
+// the type of switches that will be made
 func (t *Switches) SetType(v SwitchTypes) *Switches {
 	t.Type = v
 	return t
 }
 
-// SetItems sets the Items of the Switches and
-// returns it to allow chaining together set calls.
+// SetItems sets the [Switches.Items]:
+// the list of items (switch labels)
 func (t *Switches) SetItems(v []string) *Switches {
 	t.Items = v
 	return t
 }
 
-// SetTooltips sets the Tooltips of the Switches and
-// returns it to allow chaining together set calls.
+// SetTooltips sets the [Switches.Tooltips]:
+// an optional list of tooltips displayed on hover for checkbox items; the indices for tooltips correspond to those for items
 func (t *Switches) SetTooltips(v []string) *Switches {
 	t.Tooltips = v
 	return t
 }
 
-// SetMutex sets the Mutex of the Switches and
-// returns it to allow chaining together set calls.
+// SetMutex sets the [Switches.Mutex]:
+// whether to make the items mutually exclusive (checking one turns off all the others)
 func (t *Switches) SetMutex(v bool) *Switches {
 	t.Mutex = v
 	return t
@@ -2701,29 +2702,29 @@ func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
-// SetMaxChars sets the MaxChars of the Tabs and
-// returns it to allow chaining together set calls.
+// SetMaxChars sets the [Tabs.MaxChars]:
+// maximum number of characters to include in tab label -- elides labels that are longer than that
 func (t *Tabs) SetMaxChars(v int) *Tabs {
 	t.MaxChars = v
 	return t
 }
 
-// SetNewTabButton sets the NewTabButton of the Tabs and
-// returns it to allow chaining together set calls.
+// SetNewTabButton sets the [Tabs.NewTabButton]:
+// show a new tab button at right of list of tabs
 func (t *Tabs) SetNewTabButton(v bool) *Tabs {
 	t.NewTabButton = v
 	return t
 }
 
-// SetDeleteTabButtons sets the DeleteTabButtons of the Tabs and
-// returns it to allow chaining together set calls.
+// SetDeleteTabButtons sets the [Tabs.DeleteTabButtons]:
+// if true, tabs are user-deleteable (true by default)
 func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
 	t.DeleteTabButtons = v
 	return t
 }
 
-// SetMu sets the Mu of the Tabs and
-// returns it to allow chaining together set calls.
+// SetMu sets the [Tabs.Mu]:
+// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
 func (t *Tabs) SetMu(v sync.Mutex) *Tabs {
 	t.Mu = v
 	return t
@@ -2764,8 +2765,8 @@ func (t *Tab) New() ki.Ki {
 	return &Tab{}
 }
 
-// SetDeleteButton sets the DeleteButton of the Tab and
-// returns it to allow chaining together set calls.
+// SetDeleteButton sets the [Tab.DeleteButton]:
+// if true, this tab has a delete button (true by default)
 func (t *Tab) SetDeleteButton(v bool) *Tab {
 	t.DeleteButton = v
 	return t
@@ -2858,204 +2859,204 @@ func (t *TextField) AsTextField() *TextField {
 	return t
 }
 
-// SetTxt sets the Txt of the TextField and
-// returns it to allow chaining together set calls.
+// SetTxt sets the [TextField.Txt]:
+// the last saved value of the text string being edited
 func (t *TextField) SetTxt(v string) *TextField {
 	t.Txt = v
 	return t
 }
 
-// SetPlaceholder sets the Placeholder of the TextField and
-// returns it to allow chaining together set calls.
+// SetPlaceholder sets the [TextField.Placeholder]:
+// text that is displayed when the field is empty, in a lower-contrast manner
 func (t *TextField) SetPlaceholder(v string) *TextField {
 	t.Placeholder = v
 	return t
 }
 
-// SetComplete sets the Complete of the TextField and
-// returns it to allow chaining together set calls.
+// SetComplete sets the [TextField.Complete]:
+// functions and data for textfield completion
 func (t *TextField) SetComplete(v *Complete) *TextField {
 	t.Complete = v
 	return t
 }
 
-// SetNoEcho sets the NoEcho of the TextField and
-// returns it to allow chaining together set calls.
+// SetNoEcho sets the [TextField.NoEcho]:
+// replace displayed characters with bullets to conceal text
 func (t *TextField) SetNoEcho(v bool) *TextField {
 	t.NoEcho = v
 	return t
 }
 
-// SetLeadingIcon sets the LeadingIcon of the TextField and
-// returns it to allow chaining together set calls.
+// SetLeadingIcon sets the [TextField.LeadingIcon]:
+// if specified, a button will be added at the start of the text field with this icon
 func (t *TextField) SetLeadingIcon(v icons.Icon) *TextField {
 	t.LeadingIcon = v
 	return t
 }
 
-// SetTrailingIcon sets the TrailingIcon of the TextField and
-// returns it to allow chaining together set calls.
+// SetTrailingIcon sets the [TextField.TrailingIcon]:
+// if specified, a button will be added at the end of the text field with this icon
 func (t *TextField) SetTrailingIcon(v icons.Icon) *TextField {
 	t.TrailingIcon = v
 	return t
 }
 
-// SetCursorWidth sets the CursorWidth of the TextField and
-// returns it to allow chaining together set calls.
+// SetCursorWidth sets the [TextField.CursorWidth]:
+// width of cursor -- set from cursor-width property (inherited)
 func (t *TextField) SetCursorWidth(v units.Value) *TextField {
 	t.CursorWidth = v
 	return t
 }
 
-// SetType sets the Type of the TextField and
-// returns it to allow chaining together set calls.
+// SetType sets the [TextField.Type]:
+// the type of the text field
 func (t *TextField) SetType(v TextFieldTypes) *TextField {
 	t.Type = v
 	return t
 }
 
-// SetPlaceholderColor sets the PlaceholderColor of the TextField and
-// returns it to allow chaining together set calls.
+// SetPlaceholderColor sets the [TextField.PlaceholderColor]:
+// the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color
 func (t *TextField) SetPlaceholderColor(v color.RGBA) *TextField {
 	t.PlaceholderColor = v
 	return t
 }
 
-// SetSelectColor sets the SelectColor of the TextField and
-// returns it to allow chaining together set calls.
+// SetSelectColor sets the [TextField.SelectColor]:
+// the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties
 func (t *TextField) SetSelectColor(v colors.Full) *TextField {
 	t.SelectColor = v
 	return t
 }
 
-// SetCursorColor sets the CursorColor of the TextField and
-// returns it to allow chaining together set calls.
+// SetCursorColor sets the [TextField.CursorColor]:
+// the color used for the text field cursor (caret); this should be set in Stylers like all other style properties
 func (t *TextField) SetCursorColor(v colors.Full) *TextField {
 	t.CursorColor = v
 	return t
 }
 
-// SetEdited sets the Edited of the TextField and
-// returns it to allow chaining together set calls.
+// SetEdited sets the [TextField.Edited]:
+// true if the text has been edited relative to the original
 func (t *TextField) SetEdited(v bool) *TextField {
 	t.Edited = v
 	return t
 }
 
-// SetEditTxt sets the EditTxt of the TextField and
-// returns it to allow chaining together set calls.
+// SetEditTxt sets the [TextField.EditTxt]:
+// the live text string being edited, with latest modifications -- encoded as runes
 func (t *TextField) SetEditTxt(v []rune) *TextField {
 	t.EditTxt = v
 	return t
 }
 
-// SetMaxWidthReq sets the MaxWidthReq of the TextField and
-// returns it to allow chaining together set calls.
+// SetMaxWidthReq sets the [TextField.MaxWidthReq]:
+// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 func (t *TextField) SetMaxWidthReq(v int) *TextField {
 	t.MaxWidthReq = v
 	return t
 }
 
-// SetEffPos sets the EffPos of the TextField and
-// returns it to allow chaining together set calls.
+// SetEffPos sets the [TextField.EffPos]:
+// effective position with any leading icon space added
 func (t *TextField) SetEffPos(v mat32.Vec2) *TextField {
 	t.EffPos = v
 	return t
 }
 
-// SetEffSize sets the EffSize of the TextField and
-// returns it to allow chaining together set calls.
+// SetEffSize sets the [TextField.EffSize]:
+// effective size, subtracting any leading and trailing icon space
 func (t *TextField) SetEffSize(v mat32.Vec2) *TextField {
 	t.EffSize = v
 	return t
 }
 
-// SetStartPos sets the StartPos of the TextField and
-// returns it to allow chaining together set calls.
+// SetStartPos sets the [TextField.StartPos]:
+// starting display position in the string
 func (t *TextField) SetStartPos(v int) *TextField {
 	t.StartPos = v
 	return t
 }
 
-// SetEndPos sets the EndPos of the TextField and
-// returns it to allow chaining together set calls.
+// SetEndPos sets the [TextField.EndPos]:
+// ending display position in the string
 func (t *TextField) SetEndPos(v int) *TextField {
 	t.EndPos = v
 	return t
 }
 
-// SetCursorPos sets the CursorPos of the TextField and
-// returns it to allow chaining together set calls.
+// SetCursorPos sets the [TextField.CursorPos]:
+// current cursor position
 func (t *TextField) SetCursorPos(v int) *TextField {
 	t.CursorPos = v
 	return t
 }
 
-// SetCharWidth sets the CharWidth of the TextField and
-// returns it to allow chaining together set calls.
+// SetCharWidth sets the [TextField.CharWidth]:
+// approximate number of chars that can be displayed at any time -- computed from font size etc
 func (t *TextField) SetCharWidth(v int) *TextField {
 	t.CharWidth = v
 	return t
 }
 
-// SetSelectStart sets the SelectStart of the TextField and
-// returns it to allow chaining together set calls.
+// SetSelectStart sets the [TextField.SelectStart]:
+// starting position of selection in the string
 func (t *TextField) SetSelectStart(v int) *TextField {
 	t.SelectStart = v
 	return t
 }
 
-// SetSelectEnd sets the SelectEnd of the TextField and
-// returns it to allow chaining together set calls.
+// SetSelectEnd sets the [TextField.SelectEnd]:
+// ending position of selection in the string
 func (t *TextField) SetSelectEnd(v int) *TextField {
 	t.SelectEnd = v
 	return t
 }
 
-// SetSelectInit sets the SelectInit of the TextField and
-// returns it to allow chaining together set calls.
+// SetSelectInit sets the [TextField.SelectInit]:
+// initial selection position -- where it started
 func (t *TextField) SetSelectInit(v int) *TextField {
 	t.SelectInit = v
 	return t
 }
 
-// SetSelectMode sets the SelectMode of the TextField and
-// returns it to allow chaining together set calls.
+// SetSelectMode sets the [TextField.SelectMode]:
+// if true, select text as cursor moves
 func (t *TextField) SetSelectMode(v bool) *TextField {
 	t.SelectMode = v
 	return t
 }
 
-// SetRenderAll sets the RenderAll of the TextField and
-// returns it to allow chaining together set calls.
+// SetRenderAll sets the [TextField.RenderAll]:
+// render version of entire text, for sizing
 func (t *TextField) SetRenderAll(v paint.Text) *TextField {
 	t.RenderAll = v
 	return t
 }
 
-// SetRenderVis sets the RenderVis of the TextField and
-// returns it to allow chaining together set calls.
+// SetRenderVis sets the [TextField.RenderVis]:
+// render version of just visible text
 func (t *TextField) SetRenderVis(v paint.Text) *TextField {
 	t.RenderVis = v
 	return t
 }
 
-// SetFontHeight sets the FontHeight of the TextField and
-// returns it to allow chaining together set calls.
+// SetFontHeight sets the [TextField.FontHeight]:
+// font height, cached during styling
 func (t *TextField) SetFontHeight(v float32) *TextField {
 	t.FontHeight = v
 	return t
 }
 
-// SetBlinkOn sets the BlinkOn of the TextField and
-// returns it to allow chaining together set calls.
+// SetBlinkOn sets the [TextField.BlinkOn]:
+// oscillates between on and off for blinking
 func (t *TextField) SetBlinkOn(v bool) *TextField {
 	t.BlinkOn = v
 	return t
 }
 
-// SetCursorMu sets the CursorMu of the TextField and
-// returns it to allow chaining together set calls.
+// SetCursorMu sets the [TextField.CursorMu]:
+// mutex for updating cursor between blinker and field
 func (t *TextField) SetCursorMu(v sync.Mutex) *TextField {
 	t.CursorMu = v
 	return t
@@ -3113,127 +3114,132 @@ func (t *WidgetBase) New() ki.Ki {
 	return &WidgetBase{}
 }
 
-// SetTooltip sets the Tooltip of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetTooltip sets the [WidgetBase.Tooltip]:
+// text for tooltip for this widget -- can use HTML formatting
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 	t.Tooltip = v
 	return t
 }
 
-// SetClass sets the Class of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetClass sets the [WidgetBase.Class]:
+// user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard
 func (t *WidgetBase) SetClass(v string) *WidgetBase {
 	t.Class = v
 	return t
 }
 
-// SetCSS sets the CSS of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetCSS sets the [WidgetBase.CSS]:
+// cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type
 func (t *WidgetBase) SetCSS(v ki.Props) *WidgetBase {
 	t.CSS = v
 	return t
 }
 
-// SetCSSAgg sets the CSSAgg of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetCSSAgg sets the [WidgetBase.CSSAgg]:
+// aggregated css properties from all higher nodes down to me
 func (t *WidgetBase) SetCSSAgg(v ki.Props) *WidgetBase {
 	t.CSSAgg = v
 	return t
 }
 
-// SetBBox sets the BBox of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetBBox sets the [WidgetBase.BBox]:
+// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
 func (t *WidgetBase) SetBBox(v image.Rectangle) *WidgetBase {
 	t.BBox = v
 	return t
 }
 
-// SetObjBBox sets the ObjBBox of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetObjBBox sets the [WidgetBase.ObjBBox]:
+// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
 func (t *WidgetBase) SetObjBBox(v image.Rectangle) *WidgetBase {
 	t.ObjBBox = v
 	return t
 }
 
-// SetScBBox sets the ScBBox of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetScBBox sets the [WidgetBase.ScBBox]:
+// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 func (t *WidgetBase) SetScBBox(v image.Rectangle) *WidgetBase {
 	t.ScBBox = v
 	return t
 }
 
-// SetOnWidgetAdders sets the OnWidgetAdders of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetOnWidgetAdders sets the [WidgetBase.OnWidgetAdders]:
+// A slice of functions to call on all widgets that are added as children to this widget or its children.
+// These functions are called in sequential ascending order, so the last added one is called
+// last and thus can override anything set by the other ones. These should be set using
+// OnWidgetAdded, which can be called by both end-user and internal code.
 func (t *WidgetBase) SetOnWidgetAdders(v []func(w Widget)) *WidgetBase {
 	t.OnWidgetAdders = v
 	return t
 }
 
-// SetStylers sets the Stylers of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetStylers sets the [WidgetBase.Stylers]:
+// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
 func (t *WidgetBase) SetStylers(v []func(s *styles.Style)) *WidgetBase {
 	t.Stylers = v
 	return t
 }
 
-// SetOverrideStyle sets the OverrideStyle of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetOverrideStyle sets the [WidgetBase.OverrideStyle]:
+// override the computed styles and allow directly editing Style
 func (t *WidgetBase) SetOverrideStyle(v bool) *WidgetBase {
 	t.OverrideStyle = v
 	return t
 }
 
-// SetStyles sets the Styles of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetStyles sets the [WidgetBase.Styles]:
+// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
 func (t *WidgetBase) SetStyles(v styles.Style) *WidgetBase {
 	t.Styles = v
 	return t
 }
 
-// SetListeners sets the Listeners of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetListeners sets the [WidgetBase.Listeners]:
+// Listeners are event listener functions for processing events on this widget.
+// type specific Listeners are added in OnInit when the widget is initialized.
 func (t *WidgetBase) SetListeners(v events.Listeners) *WidgetBase {
 	t.Listeners = v
 	return t
 }
 
-// SetParts sets the Parts of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetParts sets the [WidgetBase.Parts]:
+// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 func (t *WidgetBase) SetParts(v *Layout) *WidgetBase {
 	t.Parts = v
 	return t
 }
 
-// SetLayState sets the LayState of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetLayState sets the [WidgetBase.LayState]:
+// all the layout state information for this widget
 func (t *WidgetBase) SetLayState(v LayoutState) *WidgetBase {
 	t.LayState = v
 	return t
 }
 
-// SetCustomContextMenu sets the CustomContextMenu of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetCustomContextMenu sets the [WidgetBase.CustomContextMenu]:
+// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
+// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
 func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
 	return t
 }
 
-// SetSc sets the Sc of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetSc sets the [WidgetBase.Sc]:
+// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
 func (t *WidgetBase) SetSc(v *Scene) *WidgetBase {
 	t.Sc = v
 	return t
 }
 
-// SetStyMu sets the StyMu of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetStyMu sets the [WidgetBase.StyMu]:
+// mutex protecting the Style field
 func (t *WidgetBase) SetStyMu(v sync.RWMutex) *WidgetBase {
 	t.StyMu = v
 	return t
 }
 
-// SetBBoxMu sets the BBoxMu of the WidgetBase and
-// returns it to allow chaining together set calls.
+// SetBBoxMu sets the [WidgetBase.BBoxMu]:
+// mutex protecting the BBox fields
 func (t *WidgetBase) SetBBoxMu(v sync.RWMutex) *WidgetBase {
 	t.BBoxMu = v
 	return t
