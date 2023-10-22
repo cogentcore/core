@@ -4,9 +4,9 @@ package svg
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.1.7"
+	Version = "v0.1.8"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "c0de958"
+	GitCommit = "1778553"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-22 20:25"
+	VersionDate = "2023-10-22 20:36"
 )
