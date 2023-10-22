@@ -685,3 +685,18 @@ func (ch *Chooser) CompleteEdit(data any, text string, cursorPos int, completion
 		ForwardDelete: len([]rune(text)),
 	}
 }
+
+func (ch *Chooser) RenderChooser(sc *Scene) {
+	rs, _, st := ch.RenderLock(sc)
+	ch.RenderStdBox(sc, st)
+	ch.RenderUnlock(rs)
+}
+
+func (ch *Chooser) Render(sc *Scene) {
+	if ch.PushBounds(sc) {
+		ch.RenderChooser(sc)
+		ch.RenderParts(sc)
+		ch.RenderChildren(sc)
+		ch.PopBounds(sc)
+	}
+}
