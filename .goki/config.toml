@@ -1,11 +1,13 @@
 Name = "grease"
 Desc = "Package grease generates powerful CLIs and GUIs from simple struct types. It makes everything run smoothly; it is Go Run with Ease (Grease)."
-Version = "v0.8.17"
+Version = "v0.8.18"
 Type = "Library"
 
 [Build]
   Package = "."
   Output = ""
+  ID = "com.org.todo.grease"
+  Debug = false
   Rebuild = false
   Install = false
   PrintOnly = false
@@ -15,17 +17,11 @@ Type = "Library"
   IOSVersion = "13.0"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
-  BundleID = ""
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "goki"
-  Comment = "These are the color schemes"
-
-[Install]
-  Package = "."
-  Target = [""]
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
 
 [Log]
   Target = "android"
