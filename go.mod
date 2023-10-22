@@ -5,21 +5,26 @@ go 1.21.0
 require (
 	github.com/akutz/sortfold v0.2.1
 	github.com/alecthomas/chroma/v2 v2.9.1
-	github.com/gabriel-vasile/mimetype v1.4.2
+	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b
+	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/h2non/filetype v1.1.3
-	goki.dev/enums v0.9.19
+	goki.dev/enums v0.9.23
 	goki.dev/glop v0.1.2
-	goki.dev/gti v0.1.4
-	goki.dev/ki/v2 v2.0.0-dev0.0.8
-	goki.dev/laser v0.1.5
-	goki.dev/ordmap v0.5.5
+	goki.dev/gti v0.1.6
+	goki.dev/icons v0.0.4
+	goki.dev/ki/v2 v2.0.0-dev0.0.9
+	goki.dev/laser v0.1.9
+	goki.dev/ordmap v0.5.6
 	goki.dev/prof/v2 v2.0.0-dev0.0.2
-	golang.org/x/tools v0.13.0
+	goki.dev/vci/v2 v2.0.0-dev0.0.7
+	golang.org/x/tools v0.14.0
 )
 
 require (
+	github.com/Masterminds/vcs v1.13.3 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	github.com/iancoleman/strcase v0.3.0 // indirect
+	golang.org/x/mod v0.13.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 )
