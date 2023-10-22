@@ -194,7 +194,7 @@ func (tv *TableView) SetSlice(sl any) {
 		log.Printf("TableView requires that you pass a slice of struct elements -- type is not a Struct: %v\n", struTyp.String())
 		return
 	}
-	tv.ElVal = laser.SliceElValue(sl)
+	tv.ElVal = laser.OnePtrValue(laser.SliceElValue(sl))
 	updt := tv.UpdateStart()
 	tv.ResetSelectedIdxs()
 	tv.SetFlag(false, SliceViewSelectMode)
