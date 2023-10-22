@@ -10,7 +10,6 @@ import (
 	"goki.dev/colors"
 	"goki.dev/colors/matcolor"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
@@ -294,7 +293,7 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	up := NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
-		up.SetState(!ge.Changed, states.Disabled)
+		up.SetEnabled(ge.Changed)
 	})
 	NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
 	tb.AddSeparator()
@@ -372,7 +371,7 @@ var GiEditorProps = ki.Props{
 			{"Update", ki.Props{
 				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 					ge := gei.(*GiEditor)
-					act.SetEnabledState(ge.Changed)
+					act.SetEnabled(ge.Changed)
 				}),
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -391,7 +390,7 @@ var GiEditorProps = ki.Props{
 				"desc":     "Save json-formatted Ki tree structure to existing filename",
 				"updtfunc": ActionUpdateFunc(func(gei any, act *gi.Button) {
 					ge := gei.(*GiEditor)
-					act.SetEnabledState(ge.Changed && ge.Filename != "")
+					act.SetEnabled(ge.Changed && ge.Filename != "")
 				}),
 			}},
 			{"SaveAs", ki.Props{

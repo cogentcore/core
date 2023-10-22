@@ -396,7 +396,7 @@ var KeyMapsProps = ki.Props{
 			{"SavePrefs", ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(kmi any, bt *Button) {
-					bt.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
+					bt.SetEnabled(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 				},
 			}},
 			{"sep-file", ki.BlankProp{}},
@@ -433,7 +433,7 @@ var KeyMapsProps = ki.Props{
 			"desc": "saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json, which will be loaded automatically at startup if prefs SaveKeyMaps is checked (should be if you're using custom keymaps)",
 			"icon": icons.Save,
 			"updtfunc": func(kmi any, bt *Button) {
-				bt.SetEnabledState(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
+				bt.SetEnabled(AvailKeyMapsChanged && kmi.(*KeyMaps) == &AvailKeyMaps)
 			},
 		}},
 		{"sep-file", ki.BlankProp{}},
