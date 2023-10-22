@@ -1,6 +1,6 @@
 Name = "video"
 Desc = ""
-Version = "v0.0.1"
+Version = "v0.0.2"
 Type = "Library"
 
 [Build]
