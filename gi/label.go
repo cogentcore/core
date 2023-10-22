@@ -29,7 +29,7 @@ type Label struct {
 	WidgetBase
 
 	// label to display
-	Text string `xml:"text" set:"-"`
+	Text string `xml:"text"`
 
 	// the type of label
 	Type LabelTypes
@@ -199,36 +199,6 @@ func (lb *Label) LabelStyles() {
 			s.Font.Weight = styles.WeightNormal
 		}
 	})
-}
-
-// SetText sets the text and updates the rendered version.
-// Note: if there is already a label set, and no other
-// larger updates are taking place, the new label may just
-// illegibly overlay on top of the old one.
-// Set Redrawable = true to fix this issue (it will redraw
-// the background -- sampling from actual if none is set).
-func (lb *Label) SetText(txt string) *Label {
-	updt := lb.UpdateStart()
-
-	lb.StyMu.RLock()
-	lb.Text = txt
-	if lb.Text == "" {
-		lb.TextRender.SetHTML(" ", lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	} else {
-		lb.TextRender.SetHTML(lb.Text, lb.Styles.FontRender(), &lb.Styles.Text, &lb.Styles.UnContext, lb.CSSAgg)
-	}
-	spc := lb.BoxSpace()
-	sz := lb.LayState.Alloc.Size
-	if sz.IsNil() {
-		sz = lb.LayState.SizePrefOrMax()
-	}
-	if !sz.IsNil() {
-		sz.SetSub(spc.Size())
-	}
-	lb.TextRender.LayoutStdLR(&lb.Styles.Text, lb.Styles.FontRender(), &lb.Styles.UnContext, sz)
-	lb.StyMu.RUnlock()
-	lb.UpdateEnd(updt)
-	return lb
 }
 
 // OpenLink opens given link, either by sending LinkSig signal if there are

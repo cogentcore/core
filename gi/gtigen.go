@@ -621,7 +621,7 @@ var LabelType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: "xml:\"text\" set:\"-\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.LabelTypes", LocalType: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}, Tag: ""}},
 		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
@@ -670,6 +670,13 @@ func AsLabel(k ki.Ki) *Label {
 
 // AsLabel satisfies the [LabelEmbedder] interface
 func (t *Label) AsLabel() *Label {
+	return t
+}
+
+// SetText sets the [Label.Text]:
+// label to display
+func (t *Label) SetText(v string) *Label {
+	t.Text = v
 	return t
 }
 
