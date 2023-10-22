@@ -143,7 +143,7 @@ func (wb *WidgetBase) SetNeedsRenderUpdate(sc *Scene, updt bool) {
 	fi, _ := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		return p.Is(ki.Field)
 	})
-	if fi != nil && fi.Parent() != nil {
+	if fi != nil && fi.Parent() != nil && fi.Parent().This() != nil {
 		fi.Parent().This().SetFlag(true, NeedsRender)
 	}
 }
