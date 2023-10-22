@@ -172,7 +172,7 @@ func (bt *Button) ButtonStyles() {
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
-		if s.Is(states.Hovered) {
+		if s.Is(states.Hovered) && !s.Is(states.Disabled) {
 			s.BoxShadow = s.MaxBoxShadow
 		}
 		if s.Is(states.Disabled) {
