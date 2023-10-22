@@ -31,7 +31,7 @@ type ProgressBar struct {
 	ProgCur int
 
 	// mutex for updating progress
-	ProgMu sync.Mutex
+	ProgMu sync.Mutex `set:"-"`
 }
 
 func (pb *ProgressBar) CopyFieldsFrom(frm any) {

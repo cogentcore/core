@@ -60,8 +60,8 @@ type Complete struct {
 	// the scene where the current popup menu is presented
 	Sc         *Scene
 	DelayTimer *time.Timer
-	DelayMu    sync.Mutex
-	ShowMu     sync.Mutex
+	DelayMu    sync.Mutex `set:"-"`
+	ShowMu     sync.Mutex `set:"-"`
 }
 
 // CompleteSignals are signals that are sent by Complete

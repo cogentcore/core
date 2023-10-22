@@ -46,7 +46,7 @@ type TextField struct {
 	WidgetBase
 
 	// the last saved value of the text string being edited
-	Txt string `json:"-" xml:"text"`
+	Txt string `json:"-" xml:"text" set:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder"`
@@ -79,58 +79,58 @@ type TextField struct {
 	CursorColor colors.Full
 
 	// true if the text has been edited relative to the original
-	Edited bool `json:"-" xml:"-"`
+	Edited bool `json:"-" xml:"-" set:"-"`
 
 	// the live text string being edited, with latest modifications -- encoded as runes
-	EditTxt []rune `json:"-" xml:"-"`
+	EditTxt []rune `json:"-" xml:"-" set:"-"`
 
 	// maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 	MaxWidthReq int
 
 	// effective position with any leading icon space added
-	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-"`
+	EffPos mat32.Vec2 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// effective size, subtracting any leading and trailing icon space
-	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
+	EffSize mat32.Vec2 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// starting display position in the string
-	StartPos int `copy:"-" json:"-" xml:"-"`
+	StartPos int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// ending display position in the string
-	EndPos int `copy:"-" json:"-" xml:"-"`
+	EndPos int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// current cursor position
-	CursorPos int `copy:"-" json:"-" xml:"-"`
+	CursorPos int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// approximate number of chars that can be displayed at any time -- computed from font size etc
-	CharWidth int `copy:"-" json:"-" xml:"-"`
+	CharWidth int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// starting position of selection in the string
-	SelectStart int `copy:"-" json:"-" xml:"-"`
+	SelectStart int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// ending position of selection in the string
-	SelectEnd int `copy:"-" json:"-" xml:"-"`
+	SelectEnd int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// initial selection position -- where it started
-	SelectInit int `copy:"-" json:"-" xml:"-"`
+	SelectInit int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// if true, select text as cursor moves
 	SelectMode bool `copy:"-" json:"-" xml:"-"`
 
 	// render version of entire text, for sizing
-	RenderAll paint.Text `copy:"-" json:"-" xml:"-"`
+	RenderAll paint.Text `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// render version of just visible text
-	RenderVis paint.Text `copy:"-" json:"-" xml:"-"`
+	RenderVis paint.Text `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// font height, cached during styling
-	FontHeight float32 `copy:"-" json:"-" xml:"-"`
+	FontHeight float32 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// oscillates between on and off for blinking
 	BlinkOn bool `copy:"-" json:"-" xml:"-"`
 
 	// mutex for updating cursor between blinker and field
-	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-"`
+	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
 func (tf *TextField) CopyFieldsFrom(frm any) {

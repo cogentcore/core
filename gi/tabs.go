@@ -43,7 +43,7 @@ type Tabs struct {
 	DeleteTabButtons bool
 
 	// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
-	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-"`
+	Mu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
 func (ts *Tabs) CopyFieldsFrom(frm any) {
