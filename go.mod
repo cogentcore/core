@@ -9,13 +9,13 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388
-	goki.dev/colors v0.8.16
-	goki.dev/cursors v0.0.4
-	goki.dev/enums v0.9.24
+	goki.dev/colors v0.8.17
+	goki.dev/cursors v0.0.5
+	goki.dev/enums v0.9.25
 	goki.dev/glop v0.1.3
-	goki.dev/grr v0.0.3
-	goki.dev/gti v0.1.6
-	goki.dev/ki/v2 v2.0.0-dev0.0.9
+	goki.dev/grr v0.0.4
+	goki.dev/gti v0.1.7
+	goki.dev/ki/v2 v2.0.0-dev0.0.10
 	goki.dev/laser v0.1.9
 	goki.dev/mat32/v2 v2.0.0-dev0.0.7
 	goki.dev/ordmap v0.5.6
@@ -30,6 +30,7 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/srwiley/oksvg v0.0.0-20220128195007-1f435e4c2b44 // indirect
 	github.com/srwiley/scanFT v0.0.0-20220128184157-0d1ee492111f // indirect
-	goki.dev/cam v0.9.21 // indirect
+	goki.dev/cam v0.9.22 // indirect
+	goki.dev/grows v0.3.5 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
