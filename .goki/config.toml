@@ -1,11 +1,13 @@
 Name = "grog"
 Desc = ""
-Version = "v0.0.2"
+Version = "v0.0.3"
 Type = "Library"
 
 [Build]
   Package = "."
   Output = ""
+  ID = "com.org.todo.grog"
+  Debug = false
   Rebuild = false
   Install = false
   PrintOnly = false
@@ -15,16 +17,11 @@ Type = "Library"
   IOSVersion = "13.0"
   AndroidMinSDK = 23
   AndroidTargetSDK = 29
-  BundleID = ""
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "main"
-  Comment = ""
-
-[Install]
-  Package = "."
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
 
 [Log]
   Target = "android"
