@@ -5,7 +5,6 @@ package gi
 import (
 	"image"
 	"image/color"
-	"sync"
 	"time"
 
 	"github.com/aymerick/douceur/css"
@@ -13,7 +12,6 @@ import (
 	"goki.dev/girl/paint"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/goosi/events"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
@@ -21,7 +19,6 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/pi/v2/complete"
-	"goki.dev/svg"
 )
 
 // MenuBarType is the [gti.Type] for [MenuBar]
@@ -361,8 +358,8 @@ var CompleteType = gti.AddType(&gti.Type{
 		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection'", Directives: gti.Directives{}, Tag: ""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: ""}},
 		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -465,18 +462,6 @@ func (t *Complete) SetDelayTimer(v *time.Timer) *Complete {
 	return t
 }
 
-// SetDelayMu sets the [Complete.DelayMu]:
-func (t *Complete) SetDelayMu(v sync.Mutex) *Complete {
-	t.DelayMu = v
-	return t
-}
-
-// SetShowMu sets the [Complete.ShowMu]:
-func (t *Complete) SetShowMu(v sync.Mutex) *Complete {
-	t.ShowMu = v
-	return t
-}
-
 // StyleSheetType is the [gti.Type] for [StyleSheet]
 var StyleSheetType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.StyleSheet",
@@ -570,7 +555,7 @@ var IconType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"IconName", &gti.Field{Name: "IconName", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}, Tag: ""}},
 		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}, Tag: ""}},
-		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/svg.SVG", LocalType: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}, Tag: ""}},
+		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/svg.SVG", LocalType: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"RendSize", &gti.Field{Name: "RendSize", Type: "image.Point", LocalType: "image.Point", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -609,13 +594,6 @@ func (t *Icon) SetIconName(v icons.Icon) *Icon {
 // file name for the loaded icon, if loaded
 func (t *Icon) SetFilename(v string) *Icon {
 	t.Filename = v
-	return t
-}
-
-// SetSVG sets the [Icon.SVG]:
-// SVG drawing
-func (t *Icon) SetSVG(v svg.SVG) *Icon {
-	t.SVG = v
 	return t
 }
 
@@ -1688,7 +1666,7 @@ var ProgressBarType = gti.AddType(&gti.Type{
 		{"ProgMax", &gti.Field{Name: "ProgMax", Type: "int", LocalType: "int", Doc: "maximum amount of progress to be achieved", Directives: gti.Directives{}, Tag: ""}},
 		{"ProgInc", &gti.Field{Name: "ProgInc", Type: "int", LocalType: "int", Doc: "progress increment when display is updated -- automatically computed from ProgMax at Start but can be overwritten", Directives: gti.Directives{}, Tag: ""}},
 		{"ProgCur", &gti.Field{Name: "ProgCur", Type: "int", LocalType: "int", Doc: "current progress level", Directives: gti.Directives{}, Tag: ""}},
-		{"ProgMu", &gti.Field{Name: "ProgMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating progress", Directives: gti.Directives{}, Tag: ""}},
+		{"ProgMu", &gti.Field{Name: "ProgMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating progress", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Slider", &gti.Field{Name: "Slider", Type: "goki.dev/gi/v2/gi.Slider", LocalType: "Slider", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1736,13 +1714,6 @@ func (t *ProgressBar) SetProgCur(v int) *ProgressBar {
 	return t
 }
 
-// SetProgMu sets the [ProgressBar.ProgMu]:
-// mutex for updating progress
-func (t *ProgressBar) SetProgMu(v sync.Mutex) *ProgressBar {
-	t.ProgMu = v
-	return t
-}
-
 // SceneType is the [gti.Type] for [Scene]
 var SceneType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Scene",
@@ -1753,17 +1724,17 @@ var SceneType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "no-new", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types", Directives: gti.Directives{}, Tag: ""}},
+		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
 		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: ""}},
-		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
-		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
+		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "goki.dev/gi/v2/gi.Stage", LocalType: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: ""}},
-		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -1784,7 +1755,7 @@ func (t *Scene) New() ki.Ki {
 }
 
 // SetTitle sets the [Scene.Title]:
-// title of the Stage -- generally auto-set based on Scene Title.  used for title of Window and Dialog types
+// title of the Scene
 func (t *Scene) SetTitle(v string) *Scene {
 	t.Title = v
 	return t
@@ -1805,31 +1776,10 @@ func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
 	return t
 }
 
-// SetRenderState sets the [Scene.RenderState]:
-// render state for rendering
-func (t *Scene) SetRenderState(v paint.State) *Scene {
-	t.RenderState = v
-	return t
-}
-
-// SetPixels sets the [Scene.Pixels]:
-// live pixels that we render into
-func (t *Scene) SetPixels(v *image.RGBA) *Scene {
-	t.Pixels = v
-	return t
-}
-
 // SetBgColor sets the [Scene.BgColor]:
 // background color for filling scene -- defaults to transparent so that popups can have rounded corners
 func (t *Scene) SetBgColor(v colors.Full) *Scene {
 	t.BgColor = v
-	return t
-}
-
-// SetEventMgr sets the [Scene.EventMgr]:
-// event manager for this scene
-func (t *Scene) SetEventMgr(v EventMgr) *Scene {
-	t.EventMgr = v
 	return t
 }
 
@@ -1840,25 +1790,11 @@ func (t *Scene) SetStage(v Stage) *Scene {
 	return t
 }
 
-// SetCurColor sets the [Scene.CurColor]:
-// Current color in styling -- used for relative color names
-func (t *Scene) SetCurColor(v color.RGBA) *Scene {
-	t.CurColor = v
-	return t
-}
-
 // SetLastRender sets the [Scene.LastRender]:
 // LastRender captures key params from last render.
 // If different then a new ApplyStyleScene is needed.
 func (t *Scene) SetLastRender(v RenderParams) *Scene {
 	t.LastRender = v
-	return t
-}
-
-// SetStyleMu sets the [Scene.StyleMu]:
-// StyleMu is RW mutex protecting access to Style-related global vars
-func (t *Scene) SetStyleMu(v sync.RWMutex) *Scene {
-	t.StyleMu = v
 	return t
 }
 
@@ -2653,7 +2589,7 @@ var TabsType = gti.AddType(&gti.Type{
 		{"MaxChars", &gti.Field{Name: "MaxChars", Type: "int", LocalType: "int", Doc: "maximum number of characters to include in tab label -- elides labels that are longer than that", Directives: gti.Directives{}, Tag: ""}},
 		{"NewTabButton", &gti.Field{Name: "NewTabButton", Type: "bool", LocalType: "bool", Doc: "show a new tab button at right of list of tabs", Directives: gti.Directives{}, Tag: ""}},
 		{"DeleteTabButtons", &gti.Field{Name: "DeleteTabButtons", Type: "bool", LocalType: "bool", Doc: "if true, tabs are user-deleteable (true by default)", Directives: gti.Directives{}, Tag: ""}},
-		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"Mu", &gti.Field{Name: "Mu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2723,13 +2659,6 @@ func (t *Tabs) SetDeleteTabButtons(v bool) *Tabs {
 	return t
 }
 
-// SetMu sets the [Tabs.Mu]:
-// mutex protecting updates to tabs -- tabs can be driven programmatically and via user input so need extra protection
-func (t *Tabs) SetMu(v sync.Mutex) *Tabs {
-	t.Mu = v
-	return t
-}
-
 // TabType is the [gti.Type] for [Tab]
 var TabType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Tab",
@@ -2782,7 +2711,7 @@ var TextFieldType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Txt", &gti.Field{Name: "Txt", Type: "string", LocalType: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"text\""}},
+		{"Txt", &gti.Field{Name: "Txt", Type: "string", LocalType: "string", Doc: "the last saved value of the text string being edited", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"text\" set:\"-\""}},
 		{"Placeholder", &gti.Field{Name: "Placeholder", Type: "string", LocalType: "string", Doc: "text that is displayed when the field is empty, in a lower-contrast manner", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"placeholder\""}},
 		{"Complete", &gti.Field{Name: "Complete", Type: "*goki.dev/gi/v2/gi.Complete", LocalType: "*Complete", Doc: "functions and data for textfield completion", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"NoEcho", &gti.Field{Name: "NoEcho", Type: "bool", LocalType: "bool", Doc: "replace displayed characters with bullets to conceal text", Directives: gti.Directives{}, Tag: ""}},
@@ -2793,24 +2722,24 @@ var TextFieldType = gti.AddType(&gti.Type{
 		{"PlaceholderColor", &gti.Field{Name: "PlaceholderColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color used for the placeholder text; this should be set in Stylers like all other style properties; it is typically a highlighted version of the normal text color", Directives: gti.Directives{}, Tag: ""}},
 		{"SelectColor", &gti.Field{Name: "SelectColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text selection background color on active text fields; this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
 		{"CursorColor", &gti.Field{Name: "CursorColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the color used for the text field cursor (caret); this should be set in Stylers like all other style properties", Directives: gti.Directives{}, Tag: ""}},
-		{"Edited", &gti.Field{Name: "Edited", Type: "bool", LocalType: "bool", Doc: "true if the text has been edited relative to the original", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
-		{"EditTxt", &gti.Field{Name: "EditTxt", Type: "[]rune", LocalType: "[]rune", Doc: "the live text string being edited, with latest modifications -- encoded as runes", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Edited", &gti.Field{Name: "Edited", Type: "bool", LocalType: "bool", Doc: "true if the text has been edited relative to the original", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EditTxt", &gti.Field{Name: "EditTxt", Type: "[]rune", LocalType: "[]rune", Doc: "the live text string being edited, with latest modifications -- encoded as runes", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"MaxWidthReq", &gti.Field{Name: "MaxWidthReq", Type: "int", LocalType: "int", Doc: "maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override", Directives: gti.Directives{}, Tag: ""}},
-		{"EffPos", &gti.Field{Name: "EffPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective position with any leading icon space added", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective size, subtracting any leading and trailing icon space", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"StartPos", &gti.Field{Name: "StartPos", Type: "int", LocalType: "int", Doc: "starting display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"EndPos", &gti.Field{Name: "EndPos", Type: "int", LocalType: "int", Doc: "ending display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "int", LocalType: "int", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"CharWidth", &gti.Field{Name: "CharWidth", Type: "int", LocalType: "int", Doc: "approximate number of chars that can be displayed at any time -- computed from font size etc", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "int", LocalType: "int", Doc: "starting position of selection in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectEnd", &gti.Field{Name: "SelectEnd", Type: "int", LocalType: "int", Doc: "ending position of selection in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"SelectInit", &gti.Field{Name: "SelectInit", Type: "int", LocalType: "int", Doc: "initial selection position -- where it started", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"EffPos", &gti.Field{Name: "EffPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective position with any leading icon space added", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EffSize", &gti.Field{Name: "EffSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "effective size, subtracting any leading and trailing icon space", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"StartPos", &gti.Field{Name: "StartPos", Type: "int", LocalType: "int", Doc: "starting display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"EndPos", &gti.Field{Name: "EndPos", Type: "int", LocalType: "int", Doc: "ending display position in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"CursorPos", &gti.Field{Name: "CursorPos", Type: "int", LocalType: "int", Doc: "current cursor position", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"CharWidth", &gti.Field{Name: "CharWidth", Type: "int", LocalType: "int", Doc: "approximate number of chars that can be displayed at any time -- computed from font size etc", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"SelectStart", &gti.Field{Name: "SelectStart", Type: "int", LocalType: "int", Doc: "starting position of selection in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"SelectEnd", &gti.Field{Name: "SelectEnd", Type: "int", LocalType: "int", Doc: "ending position of selection in the string", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"SelectInit", &gti.Field{Name: "SelectInit", Type: "int", LocalType: "int", Doc: "initial selection position -- where it started", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"SelectMode", &gti.Field{Name: "SelectMode", Type: "bool", LocalType: "bool", Doc: "if true, select text as cursor moves", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of just visible text", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of just visible text", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating cursor between blinker and field", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating cursor between blinker and field", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2856,13 +2785,6 @@ func AsTextField(k ki.Ki) *TextField {
 
 // AsTextField satisfies the [TextFieldEmbedder] interface
 func (t *TextField) AsTextField() *TextField {
-	return t
-}
-
-// SetTxt sets the [TextField.Txt]:
-// the last saved value of the text string being edited
-func (t *TextField) SetTxt(v string) *TextField {
-	t.Txt = v
 	return t
 }
 
@@ -2936,87 +2858,10 @@ func (t *TextField) SetCursorColor(v colors.Full) *TextField {
 	return t
 }
 
-// SetEdited sets the [TextField.Edited]:
-// true if the text has been edited relative to the original
-func (t *TextField) SetEdited(v bool) *TextField {
-	t.Edited = v
-	return t
-}
-
-// SetEditTxt sets the [TextField.EditTxt]:
-// the live text string being edited, with latest modifications -- encoded as runes
-func (t *TextField) SetEditTxt(v []rune) *TextField {
-	t.EditTxt = v
-	return t
-}
-
 // SetMaxWidthReq sets the [TextField.MaxWidthReq]:
 // maximum width that field will request, in characters, during GetSize process -- if 0 then is 50 -- ensures that large strings don't request super large values -- standard max-width can override
 func (t *TextField) SetMaxWidthReq(v int) *TextField {
 	t.MaxWidthReq = v
-	return t
-}
-
-// SetEffPos sets the [TextField.EffPos]:
-// effective position with any leading icon space added
-func (t *TextField) SetEffPos(v mat32.Vec2) *TextField {
-	t.EffPos = v
-	return t
-}
-
-// SetEffSize sets the [TextField.EffSize]:
-// effective size, subtracting any leading and trailing icon space
-func (t *TextField) SetEffSize(v mat32.Vec2) *TextField {
-	t.EffSize = v
-	return t
-}
-
-// SetStartPos sets the [TextField.StartPos]:
-// starting display position in the string
-func (t *TextField) SetStartPos(v int) *TextField {
-	t.StartPos = v
-	return t
-}
-
-// SetEndPos sets the [TextField.EndPos]:
-// ending display position in the string
-func (t *TextField) SetEndPos(v int) *TextField {
-	t.EndPos = v
-	return t
-}
-
-// SetCursorPos sets the [TextField.CursorPos]:
-// current cursor position
-func (t *TextField) SetCursorPos(v int) *TextField {
-	t.CursorPos = v
-	return t
-}
-
-// SetCharWidth sets the [TextField.CharWidth]:
-// approximate number of chars that can be displayed at any time -- computed from font size etc
-func (t *TextField) SetCharWidth(v int) *TextField {
-	t.CharWidth = v
-	return t
-}
-
-// SetSelectStart sets the [TextField.SelectStart]:
-// starting position of selection in the string
-func (t *TextField) SetSelectStart(v int) *TextField {
-	t.SelectStart = v
-	return t
-}
-
-// SetSelectEnd sets the [TextField.SelectEnd]:
-// ending position of selection in the string
-func (t *TextField) SetSelectEnd(v int) *TextField {
-	t.SelectEnd = v
-	return t
-}
-
-// SetSelectInit sets the [TextField.SelectInit]:
-// initial selection position -- where it started
-func (t *TextField) SetSelectInit(v int) *TextField {
-	t.SelectInit = v
 	return t
 }
 
@@ -3027,38 +2872,10 @@ func (t *TextField) SetSelectMode(v bool) *TextField {
 	return t
 }
 
-// SetRenderAll sets the [TextField.RenderAll]:
-// render version of entire text, for sizing
-func (t *TextField) SetRenderAll(v paint.Text) *TextField {
-	t.RenderAll = v
-	return t
-}
-
-// SetRenderVis sets the [TextField.RenderVis]:
-// render version of just visible text
-func (t *TextField) SetRenderVis(v paint.Text) *TextField {
-	t.RenderVis = v
-	return t
-}
-
-// SetFontHeight sets the [TextField.FontHeight]:
-// font height, cached during styling
-func (t *TextField) SetFontHeight(v float32) *TextField {
-	t.FontHeight = v
-	return t
-}
-
 // SetBlinkOn sets the [TextField.BlinkOn]:
 // oscillates between on and off for blinking
 func (t *TextField) SetBlinkOn(v bool) *TextField {
 	t.BlinkOn = v
-	return t
-}
-
-// SetCursorMu sets the [TextField.CursorMu]:
-// mutex for updating cursor between blinker and field
-func (t *TextField) SetCursorMu(v sync.Mutex) *TextField {
-	t.CursorMu = v
 	return t
 }
 
@@ -3073,21 +2890,21 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: ""}},
-		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view-closed:\"true\""}},
-		{"LayState", &gti.Field{Name: "LayState", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\" set:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view-closed:\"true\" set:\"-\""}},
+		{"LayState", &gti.Field{Name: "LayState", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
-		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -3135,112 +2952,10 @@ func (t *WidgetBase) SetCSS(v ki.Props) *WidgetBase {
 	return t
 }
 
-// SetCSSAgg sets the [WidgetBase.CSSAgg]:
-// aggregated css properties from all higher nodes down to me
-func (t *WidgetBase) SetCSSAgg(v ki.Props) *WidgetBase {
-	t.CSSAgg = v
-	return t
-}
-
-// SetBBox sets the [WidgetBase.BBox]:
-// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
-func (t *WidgetBase) SetBBox(v image.Rectangle) *WidgetBase {
-	t.BBox = v
-	return t
-}
-
-// SetObjBBox sets the [WidgetBase.ObjBBox]:
-// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-func (t *WidgetBase) SetObjBBox(v image.Rectangle) *WidgetBase {
-	t.ObjBBox = v
-	return t
-}
-
-// SetScBBox sets the [WidgetBase.ScBBox]:
-// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
-func (t *WidgetBase) SetScBBox(v image.Rectangle) *WidgetBase {
-	t.ScBBox = v
-	return t
-}
-
-// SetOnWidgetAdders sets the [WidgetBase.OnWidgetAdders]:
-// A slice of functions to call on all widgets that are added as children to this widget or its children.
-// These functions are called in sequential ascending order, so the last added one is called
-// last and thus can override anything set by the other ones. These should be set using
-// OnWidgetAdded, which can be called by both end-user and internal code.
-func (t *WidgetBase) SetOnWidgetAdders(v []func(w Widget)) *WidgetBase {
-	t.OnWidgetAdders = v
-	return t
-}
-
-// SetStylers sets the [WidgetBase.Stylers]:
-// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-func (t *WidgetBase) SetStylers(v []func(s *styles.Style)) *WidgetBase {
-	t.Stylers = v
-	return t
-}
-
-// SetOverrideStyle sets the [WidgetBase.OverrideStyle]:
-// override the computed styles and allow directly editing Style
-func (t *WidgetBase) SetOverrideStyle(v bool) *WidgetBase {
-	t.OverrideStyle = v
-	return t
-}
-
-// SetStyles sets the [WidgetBase.Styles]:
-// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-func (t *WidgetBase) SetStyles(v styles.Style) *WidgetBase {
-	t.Styles = v
-	return t
-}
-
-// SetListeners sets the [WidgetBase.Listeners]:
-// Listeners are event listener functions for processing events on this widget.
-// type specific Listeners are added in OnInit when the widget is initialized.
-func (t *WidgetBase) SetListeners(v events.Listeners) *WidgetBase {
-	t.Listeners = v
-	return t
-}
-
-// SetParts sets the [WidgetBase.Parts]:
-// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-func (t *WidgetBase) SetParts(v *Layout) *WidgetBase {
-	t.Parts = v
-	return t
-}
-
-// SetLayState sets the [WidgetBase.LayState]:
-// all the layout state information for this widget
-func (t *WidgetBase) SetLayState(v LayoutState) *WidgetBase {
-	t.LayState = v
-	return t
-}
-
 // SetCustomContextMenu sets the [WidgetBase.CustomContextMenu]:
 // an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 // This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
 func (t *WidgetBase) SetCustomContextMenu(v func(m *Scene)) *WidgetBase {
 	t.CustomContextMenu = v
-	return t
-}
-
-// SetSc sets the [WidgetBase.Sc]:
-// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
-func (t *WidgetBase) SetSc(v *Scene) *WidgetBase {
-	t.Sc = v
-	return t
-}
-
-// SetStyMu sets the [WidgetBase.StyMu]:
-// mutex protecting the Style field
-func (t *WidgetBase) SetStyMu(v sync.RWMutex) *WidgetBase {
-	t.StyMu = v
-	return t
-}
-
-// SetBBoxMu sets the [WidgetBase.BBoxMu]:
-// mutex protecting the BBox fields
-func (t *WidgetBase) SetBBoxMu(v sync.RWMutex) *WidgetBase {
-	t.BBoxMu = v
 	return t
 }

@@ -261,56 +261,56 @@ type WidgetBase struct {
 	CSS ki.Props
 
 	// aggregated css properties from all higher nodes down to me
-	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline"`
+	CSSAgg ki.Props `copy:"-" json:"-" xml:"-" view:"no-inline" set:"-"`
 
 	// todo: need to fully revisit scrolling logic!
 
 	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	BBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
-	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called
 	// last and thus can override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
-	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-"`
+	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-"`
+	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// override the computed styles and allow directly editing Style
-	OverrideStyle bool `copy:"-" json:"-" xml:"-"`
+	OverrideStyle bool `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)
-	Styles styles.Style `copy:"-" json:"-" xml:"-"`
+	Styles styles.Style `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners `view:"-" copy:"-" json:"-" xml:"-"`
+	Listeners events.Listeners `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
-	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true"`
+	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
 
 	// all the layout state information for this widget
-	LayState LayoutState `copy:"-" json:"-" xml:"-"`
+	LayState LayoutState `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
 	CustomContextMenu func(m *Scene) `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
-	Sc *Scene `copy:"-" json:"-" xml:"-"`
+	Sc *Scene `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the Style field
-	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
+	StyMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex protecting the BBox fields
-	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-"`
+	BBoxMu sync.RWMutex `copy:"-" view:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (wb *WidgetBase) OnChildAdded(child ki.Ki) {

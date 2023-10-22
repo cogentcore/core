@@ -28,7 +28,7 @@ type Icon struct {
 	Filename string
 
 	// SVG drawing
-	SVG svg.SVG
+	SVG svg.SVG `set:"-"`
 
 	// RendSize is the last rendered size of the Icon SVG.
 	// if the SVG.Name == IconName and this size is the same
