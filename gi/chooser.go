@@ -37,7 +37,7 @@ type Chooser struct {
 	Type ChooserTypes
 
 	// optional icon
-	Icon icons.Icon `view:"show-name" setter:"-"`
+	Icon icons.Icon `view:"show-name" set:"-"`
 
 	// name of the indicator icon to present.
 	Indicator icons.Icon `view:"show-name"`
@@ -54,10 +54,10 @@ type Chooser struct {
 	CurLabel string
 
 	// current selected value
-	CurVal any `json:"-" xml:"-" setter:"-"`
+	CurVal any `json:"-" xml:"-" set:"-"`
 
 	// current index in list of possible items
-	CurIndex int `json:"-" xml:"-" setter:"-"`
+	CurIndex int `json:"-" xml:"-" set:"-"`
 
 	// items available for selection
 	Items []any `json:"-" xml:"-"`
@@ -66,7 +66,7 @@ type Chooser struct {
 	Tooltips []string `json:"-" xml:"-"`
 
 	// if Editable is set to true, text that is displayed in the text field when it is empty, in a lower-contrast manner
-	Placeholder string `setter:"-"`
+	Placeholder string `set:"-"`
 
 	// maximum label length (in runes)
 	MaxLength int

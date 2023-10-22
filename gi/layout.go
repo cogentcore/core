@@ -160,7 +160,7 @@ type Layout struct {
 	WidgetBase
 
 	// type of layout to use
-	Lay Layouts `xml:"lay" setter:"-"`
+	Lay Layouts `xml:"lay" set:"-"`
 
 	// extra space to add between elements in the layout
 	Spacing units.Value `xml:"spacing"`
@@ -205,7 +205,7 @@ type Layout struct {
 	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-"`
 
 	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
-	ScrollsOff bool `copy:"-" json:"-" xml:"-" setter:"-"`
+	ScrollsOff bool `copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {

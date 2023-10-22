@@ -35,10 +35,10 @@ type Button struct {
 	Type ButtonTypes
 
 	// label for the button -- if blank then no label is presented
-	Text string `xml:"text" setter:"-"`
+	Text string `xml:"text" set:"-"`
 
 	// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
-	Icon icons.Icon `xml:"icon" view:"show-name" setter:"-"`
+	Icon icons.Icon `xml:"icon" view:"show-name" set:"-"`
 
 	// name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set
 	Indicator icons.Icon `xml:"indicator" view:"show-name"`

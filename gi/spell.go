@@ -118,7 +118,7 @@ type Spell struct {
 	Suggest []string
 
 	// word being checked
-	Word string `setter:"-"`
+	Word string `set:"-"`
 
 	// last word learned -- can be undone -- stored in lowercase format
 	LastLearned string

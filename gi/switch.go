@@ -22,7 +22,7 @@ type Switch struct {
 	WidgetBase
 
 	// the type of switch that this is
-	Type SwitchTypes `setter:"-"`
+	Type SwitchTypes `set:"-"`
 
 	// the label text for the switch
 	Text string

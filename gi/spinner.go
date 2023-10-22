@@ -29,19 +29,19 @@ type Spinner struct {
 	WidgetBase
 
 	// current value
-	Value float32 `xml:"value" setter:"-"`
+	Value float32 `xml:"value" set:"-"`
 
 	// is there a minimum value to enforce
-	HasMin bool `xml:"has-min" setter:"-"`
+	HasMin bool `xml:"has-min" set:"-"`
 
 	// minimum value in range
-	Min float32 `xml:"min" setter:"-"`
+	Min float32 `xml:"min" set:"-"`
 
 	// is there a maximumvalue to enforce
-	HasMax bool `xml:"has-max" setter:"-"`
+	HasMax bool `xml:"has-max" set:"-"`
 
 	// maximum value in range
-	Max float32 `xml:"max" setter:"-"`
+	Max float32 `xml:"max" set:"-"`
 
 	// smallest step size to increment
 	Step float32 `xml:"step"`
