@@ -360,7 +360,8 @@ func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(d
 	// 		},
 	// 	}
 	// }
-	dlg := SliceViewSelectDialog(ctx, opts, &gi.CurIconList, curIc, IconChooserStyleFunc, fun)
+	ics := icons.All()
+	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc, IconChooserStyleFunc, fun)
 	return dlg
 }
 

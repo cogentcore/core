@@ -11,7 +11,6 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/glop/dirs"
 	"goki.dev/goosi"
 	"goki.dev/icons"
 )
@@ -37,7 +36,7 @@ func app() {
 		s.SetStretchMax()
 	})
 
-	icnms := dirs.ExtFileNamesFS(icons.Icons, "svg", ".svg")
+	icnms := icons.All()
 	for _, icnm := range icnms {
 		ic := strings.TrimSuffix(icnm, ".svg")
 		if strings.HasSuffix(ic, "-fill") {

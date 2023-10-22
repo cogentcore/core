@@ -318,9 +318,8 @@ func (pf *Preferences) ApplyDPI() {
 
 // SaveZoom saves the current LogicalDPI scaling, either as the overall
 // default or specific to the current screen.
-//
-//gi:toolbar -sep-before -icon zoom_in -confirm -show-result
-func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
+//   - forCurrentScreen: if true, saves only for current screen
+func (pf *Preferences) SaveZoom(forCurrentScreen bool) { //gti:add
 	fmt.Println("SaveZoom: forCurrentScreen =", forCurrentScreen)
 	sc := goosi.TheApp.Screen(0)
 	if forCurrentScreen {
@@ -340,9 +339,7 @@ func (pf *Preferences) SaveZoom(forCurrentScreen bool) {
 }
 
 // ScreenInfo returns screen info for all screens on the device
-//
-//gi:toolbar -icon info -show-result -parent Detailed/Info
-func (pf *Preferences) ScreenInfo() string {
+func (pf *Preferences) ScreenInfo() string { //gti:add
 	ns := goosi.TheApp.NScreens()
 	scinfo := ""
 	for i := 0; i < ns; i++ {

@@ -11,7 +11,6 @@ import (
 
 	"goki.dev/girl/styles"
 	"goki.dev/icons"
-	"goki.dev/ki/v2"
 	"goki.dev/svg"
 	"golang.org/x/image/draw"
 )
@@ -168,33 +167,3 @@ func (ic *Icon) Render(sc *Scene) {
 		ic.PopBounds(sc)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  IconMgr
-
-// todo: optimize by loading into lib and copying instead of loading fresh every time!
-
-// IconMgr is the manager of all things Icon -- needed to allow svg to be a
-// separate package, and implemented by svg.IconMgr
-type IconMgr interface {
-	// SetIcon sets the icon by name into given Icon wrapper, returning error
-	// message if not found etc.  This is how gi.Icon is initialized from
-	// underlying svg.Icon items.
-	SetIcon(ic *Icon, iconName icons.Icon) error
-
-	// IconByName is main function to get icon by name -- looks in CurIconSet and
-	// falls back to DefaultIconSet if not found there -- returns error
-	// message if not found.  cast result to *svg.Icon
-	IconByName(name icons.Icon) (ki.Ki, error)
-
-	// IconList returns the list of available icon names, optionally sorted
-	// alphabetically (otherwise in map-random order)
-	IconList(alphaSort bool) []icons.Icon
-}
-
-// TheIconMgr is set by loading the gi/svg package -- all final users must
-// import github/goki/gi/svg to get its init function
-var TheIconMgr IconMgr
-
-// CurIconList holds the current icon list, alpha sorted -- set at startup
-var CurIconList []icons.Icon

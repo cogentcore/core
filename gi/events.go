@@ -104,13 +104,15 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 			fmt.Println("Event to Widget:", wb.Path(), ev.String())
 		}
 	}
-	state := wb.Styles.State
+	s := &wb.Styles
+	state := s.State
 	wb.Listeners.Call(ev)
 	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
-	if wb.Styles.State != state {
+	if s.State != state {
 		wb.ApplyStyleUpdate(wb.Sc)
+		// wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
 	}
 }
 

@@ -11,6 +11,8 @@ import (
 	"goki.dev/laser"
 )
 
+// todo: store a map of [value]ticker -- close the ticker if existing.
+
 // Transition transitions the given pointer value (typically a pointer to a style property
 // that is a number, unit value, or color) to the given destination value (typically not a pointer)
 // over the given duration, using the given timing function. The timing function takes the proportion
@@ -32,6 +34,7 @@ func (wb *WidgetBase) Transition(value any, to any, duration time.Duration, timi
 	go func() {
 		for i := 0; i < int(duration/rate); i++ {
 			<-tick.C
+			// fmt.Println("transitioning", wb)
 			prop := float32(i) * propPer
 			inc := timingFunc(prop)
 			nv := vn + inc*diff

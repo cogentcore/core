@@ -118,7 +118,7 @@ func (ch *Chooser) ChooserStyles() {
 		}
 		switch ch.Type {
 		case ChooserFilled:
-			s.StateLayer += 0.06
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
 				s.Border.Width.Set().SetBottom(units.Dp(1))
