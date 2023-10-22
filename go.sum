@@ -1,5 +1,5 @@
-goki.dev/enums v0.9.23 h1:ensf/+6EtvkswoPUcs+gKlP4H5Gy9l4IEWu+2GW3wvA=
-goki.dev/enums v0.9.23/go.mod h1:ToyioAriY/B8C7uPJKCvLqdcULq1VOKG6vhA2LZyg9Y=
+goki.dev/enums v0.9.24 h1:Vw8EM5/tjJMtjM9OyobG38uJJfGtD7n9WwIewVAN6lo=
+goki.dev/enums v0.9.24/go.mod h1:UYZsl45G2qT647GjWLnLNDd1qBJyRf2m4nC5Nw5BqOQ=
 goki.dev/mat32/v2 v2.0.0-dev0.0.7 h1:5SLSCRU1/axEkJ+MWEMuxCTMYc+/C1F/z62ojAE9ePE=
 goki.dev/mat32/v2 v2.0.0-dev0.0.7/go.mod h1:heGirfS2nYEqghT3xu3u+0c5JFRYcqKEeuCZ5cGYCSE=
 golang.org/x/image v0.13.0 h1:3cge/F/QTkNLauhf2QoE9zp+7sr+ZcL4HnoZmdwg9sg=
