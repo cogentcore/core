@@ -99,28 +99,28 @@ type Slider struct {
 	ThumbColor colors.Full
 
 	// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
-	StyleBox styles.Style
+	StyleBox styles.Style `set:"-"`
 
 	//////////////////////////////////////////////////////////////////
 	// 	Computed values below
 
 	// logical position of the slider relative to Size
-	Pos float32 `inactive:"+"`
+	Pos float32 `inactive:"+" set:"-"`
 
 	// previous emitted value - don't re-emit if it is the same
-	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-"`
+	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-" set:"-"`
 
 	// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
-	Size float32 `inactive:"+"`
+	Size float32 `inactive:"+" set:"-"`
 
 	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-	ThSize float32 `inactive:"+"`
+	ThSize float32 `inactive:"+" set:"-"`
 
 	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-	ThSizeReal float32 `inactive:"+"`
+	ThSizeReal float32 `inactive:"+" set:"-"`
 
 	// underlying drag position of slider -- not subject to snapping
-	SlideStartPos float32 `inactive:"+"`
+	SlideStartPos float32 `inactive:"+" set:"-"`
 }
 
 // SliderTypes are the different types of sliders

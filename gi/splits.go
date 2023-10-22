@@ -45,7 +45,7 @@ type Splits struct {
 	Splits []float32 `set:"-"`
 
 	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
-	SavedSplits []float32
+	SavedSplits []float32 `set:"-"`
 
 	// dimension along which to split the space
 	Dim mat32.Dims
@@ -430,7 +430,7 @@ type Splitter struct {
 	SplitterNo int
 
 	// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
-	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-"`
+	OrigWinBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (sr *Splitter) OnInit() {

@@ -3,14 +3,11 @@
 package gi
 
 import (
-	"image"
 	"image/color"
 	"time"
 
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
-	"goki.dev/girl/paint"
-	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
@@ -30,7 +27,7 @@ var MenuBarType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"MainMenu", &gti.Field{Name: "MainMenu", Type: "bool", LocalType: "bool", Doc: "is this the main menu bar for a window?  controls whether displayed on macOS", Directives: gti.Directives{}, Tag: ""}},
-		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*goki.dev/gi/v2/gi.Button", LocalType: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"OSMainMenus", &gti.Field{Name: "OSMainMenus", Type: "map[string]*goki.dev/gi/v2/gi.Button", LocalType: "map[string]*Button", Doc: "map of main menu items for callback from OS main menu (MacOS specific)", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -61,13 +58,6 @@ func (t *MenuBar) New() ki.Ki {
 // is this the main menu bar for a window?  controls whether displayed on macOS
 func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
 	t.MainMenu = v
-	return t
-}
-
-// SetOSMainMenus sets the [MenuBar.OSMainMenus]:
-// map of main menu items for callback from OS main menu (MacOS specific)
-func (t *MenuBar) SetOSMainMenus(v map[string]*Button) *MenuBar {
-	t.OSMainMenus = v
 	return t
 }
 
@@ -250,7 +240,7 @@ var ChooserType = gti.AddType(&gti.Type{
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", LocalType: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}, Tag: ""}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", LocalType: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}, Tag: ""}},
-		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", LocalType: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}, Tag: ""}},
+		{"CurLabel", &gti.Field{Name: "CurLabel", Type: "string", LocalType: "string", Doc: "CurLabel is the string label for the current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"CurVal", &gti.Field{Name: "CurVal", Type: "any", LocalType: "any", Doc: "current selected value", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurIndex", &gti.Field{Name: "CurIndex", Type: "int", LocalType: "int", Doc: "current index in list of possible items", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Items", &gti.Field{Name: "Items", Type: "[]any", LocalType: "[]any", Doc: "items available for selection", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
@@ -311,13 +301,6 @@ func (t *Chooser) SetAllowNew(v bool) *Chooser {
 	return t
 }
 
-// SetCurLabel sets the [Chooser.CurLabel]:
-// CurLabel is the string label for the current value
-func (t *Chooser) SetCurLabel(v string) *Chooser {
-	t.CurLabel = v
-	return t
-}
-
 // SetItems sets the [Chooser.Items]:
 // items available for selection
 func (t *Chooser) SetItems(v []any) *Chooser {
@@ -355,9 +338,9 @@ var CompleteType = gti.AddType(&gti.Type{
 		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", LocalType: "int", Doc: "character position in source that completion is operating on", Directives: gti.Directives{}, Tag: ""}},
 		{"Completions", &gti.Field{Name: "Completions", Type: "goki.dev/pi/v2/complete.Completions", LocalType: "complete.Completions", Doc: "the list of potential completions", Directives: gti.Directives{}, Tag: ""}},
 		{"Seed", &gti.Field{Name: "Seed", Type: "string", LocalType: "string", Doc: "current completion seed", Directives: gti.Directives{}, Tag: ""}},
-		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection'", Directives: gti.Directives{}, Tag: ""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: ""}},
-		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection", Directives: gti.Directives{}, Tag: ""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
@@ -443,22 +426,9 @@ func (t *Complete) SetSeed(v string) *Complete {
 }
 
 // SetCompletion sets the [Complete.Completion]:
-// the user's completion selection'
+// the user's completion selection
 func (t *Complete) SetCompletion(v string) *Complete {
 	t.Completion = v
-	return t
-}
-
-// SetSc sets the [Complete.Sc]:
-// the scene where the current popup menu is presented
-func (t *Complete) SetSc(v *Scene) *Complete {
-	t.Sc = v
-	return t
-}
-
-// SetDelayTimer sets the [Complete.DelayTimer]:
-func (t *Complete) SetDelayTimer(v *time.Timer) *Complete {
-	t.DelayTimer = v
 	return t
 }
 
@@ -553,10 +523,10 @@ var IconType = gti.AddType(&gti.Type{
 	Doc:        "Icon contains a svg.SVG element.\nThe rendered version is cached for a given size.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IconName", &gti.Field{Name: "IconName", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}, Tag: ""}},
-		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}, Tag: ""}},
+		{"IconName", &gti.Field{Name: "IconName", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "icon name that has been set.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "string", LocalType: "string", Doc: "file name for the loaded icon, if loaded", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"SVG", &gti.Field{Name: "SVG", Type: "goki.dev/svg.SVG", LocalType: "svg.SVG", Doc: "SVG drawing", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"RendSize", &gti.Field{Name: "RendSize", Type: "image.Point", LocalType: "image.Point", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used.", Directives: gti.Directives{}, Tag: ""}},
+		{"RendSize", &gti.Field{Name: "RendSize", Type: "image.Point", LocalType: "image.Point", Doc: "RendSize is the last rendered size of the Icon SVG.\nif the SVG.Name == IconName and this size is the same\nthen the current SVG image is used.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -583,29 +553,6 @@ func (t *Icon) New() ki.Ki {
 	return &Icon{}
 }
 
-// SetIconName sets the [Icon.IconName]:
-// icon name that has been set.
-func (t *Icon) SetIconName(v icons.Icon) *Icon {
-	t.IconName = v
-	return t
-}
-
-// SetFilename sets the [Icon.Filename]:
-// file name for the loaded icon, if loaded
-func (t *Icon) SetFilename(v string) *Icon {
-	t.Filename = v
-	return t
-}
-
-// SetRendSize sets the [Icon.RendSize]:
-// RendSize is the last rendered size of the Icon SVG.
-// if the SVG.Name == IconName and this size is the same
-// then the current SVG image is used.
-func (t *Icon) SetRendSize(v image.Point) *Icon {
-	t.RendSize = v
-	return t
-}
-
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
@@ -614,9 +561,9 @@ var ImageType = gti.AddType(&gti.Type{
 	Doc:        "Image is a Widget that is optimized to render a static bitmap image --\nit expects to be a terminal node and does NOT call rendering etc on its\nchildren.  It is particularly useful for overlays in drag-n-drop uses --\ncan grab the image of another vp and show that",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: ""}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "file name of image loaded -- set by OpenImage", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Size", &gti.Field{Name: "Size", Type: "image.Point", LocalType: "image.Point", Doc: "size of the image", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the bitmap image", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" xml:\"-\" json:\"-\""}},
+		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "the bitmap image", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -643,20 +590,6 @@ func (t *Image) New() ki.Ki {
 	return &Image{}
 }
 
-// SetFilename sets the [Image.Filename]:
-// file name of image loaded -- set by OpenImage
-func (t *Image) SetFilename(v FileName) *Image {
-	t.Filename = v
-	return t
-}
-
-// SetPixels sets the [Image.Pixels]:
-// the bitmap image
-func (t *Image) SetPixels(v *image.RGBA) *Image {
-	t.Pixels = v
-	return t
-}
-
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Label",
@@ -669,8 +602,8 @@ var LabelType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label to display", Directives: gti.Directives{}, Tag: "xml:\"text\" set:\"-\""}},
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.LabelTypes", LocalType: "LabelTypes", Doc: "the type of label", Directives: gti.Directives{}, Tag: ""}},
-		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\""}},
-		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\""}},
+		{"TextRender", &gti.Field{Name: "TextRender", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render data for text label", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"RenderPos", &gti.Field{Name: "RenderPos", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.", Directives: gti.Directives{}, Tag: "copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -726,20 +659,6 @@ func (t *Label) SetType(v LabelTypes) *Label {
 	return t
 }
 
-// SetTextRender sets the [Label.TextRender]:
-// render data for text label
-func (t *Label) SetTextRender(v paint.Text) *Label {
-	t.TextRender = v
-	return t
-}
-
-// SetRenderPos sets the [Label.RenderPos]:
-// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
-func (t *Label) SetRenderPos(v mat32.Vec2) *Label {
-	t.RenderPos = v
-	return t
-}
-
 // LayoutType is the [gti.Type] for [Layout]
 var LayoutType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Layout",
@@ -754,17 +673,17 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}, Tag: "xml:\"spacing\""}},
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
 		{"StackTopOnly", &gti.Field{Name: "StackTopOnly", Type: "bool", LocalType: "bool", Doc: "for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't", Directives: gti.Directives{}, Tag: ""}},
-		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", LocalType: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
-		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", LocalType: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -832,83 +751,6 @@ func (t *Layout) SetStackTop(v int) *Layout {
 // for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
 func (t *Layout) SetStackTopOnly(v bool) *Layout {
 	t.StackTopOnly = v
-	return t
-}
-
-// SetChildSize sets the [Layout.ChildSize]:
-// total max size of children as laid out
-func (t *Layout) SetChildSize(v mat32.Vec2) *Layout {
-	t.ChildSize = v
-	return t
-}
-
-// SetExtraSize sets the [Layout.ExtraSize]:
-// extra size in each dim due to scrollbars we add
-func (t *Layout) SetExtraSize(v mat32.Vec2) *Layout {
-	t.ExtraSize = v
-	return t
-}
-
-// SetHasScroll sets the [Layout.HasScroll]:
-// whether scrollbar is used for given dim
-func (t *Layout) SetHasScroll(v [2]bool) *Layout {
-	t.HasScroll = v
-	return t
-}
-
-// SetScrolls sets the [Layout.Scrolls]:
-// scroll bars -- we fully manage them as needed
-func (t *Layout) SetScrolls(v [2]*Slider) *Layout {
-	t.Scrolls = v
-	return t
-}
-
-// SetGridSize sets the [Layout.GridSize]:
-// computed size of a grid layout based on all the constraints -- computed during GetSize pass
-func (t *Layout) SetGridSize(v image.Point) *Layout {
-	t.GridSize = v
-	return t
-}
-
-// SetGridData sets the [Layout.GridData]:
-// grid data for rows in and cols in
-func (t *Layout) SetGridData(v [RowColN][]GridData) *Layout {
-	t.GridData = v
-	return t
-}
-
-// SetFlowBreaks sets the [Layout.FlowBreaks]:
-// line breaks for flow layout
-func (t *Layout) SetFlowBreaks(v []int) *Layout {
-	t.FlowBreaks = v
-	return t
-}
-
-// SetNeedsRedo sets the [Layout.NeedsRedo]:
-// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-func (t *Layout) SetNeedsRedo(v bool) *Layout {
-	t.NeedsRedo = v
-	return t
-}
-
-// SetFocusName sets the [Layout.FocusName]:
-// accumulated name to search for when keys are typed
-func (t *Layout) SetFocusName(v string) *Layout {
-	t.FocusName = v
-	return t
-}
-
-// SetFocusNameTime sets the [Layout.FocusNameTime]:
-// time of last focus name event -- for timeout
-func (t *Layout) SetFocusNameTime(v time.Time) *Layout {
-	t.FocusNameTime = v
-	return t
-}
-
-// SetFocusNameLast sets the [Layout.FocusNameLast]:
-// last element focused on -- used as a starting point if name is the same
-func (t *Layout) SetFocusNameLast(v ki.Ki) *Layout {
-	t.FocusNameLast = v
 	return t
 }
 
@@ -1731,11 +1573,11 @@ var SceneType = gti.AddType(&gti.Type{
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stage", &gti.Field{Name: "Stage", Type: "goki.dev/gi/v2/gi.Stage", LocalType: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Stage", &gti.Field{Name: "Stage", Type: "goki.dev/gi/v2/gi.Stage", LocalType: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: ""}},
+		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\""}},
+		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1780,29 +1622,6 @@ func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
 // background color for filling scene -- defaults to transparent so that popups can have rounded corners
 func (t *Scene) SetBgColor(v colors.Full) *Scene {
 	t.BgColor = v
-	return t
-}
-
-// SetStage sets the [Scene.Stage]:
-// current stage in which this Scene is set
-func (t *Scene) SetStage(v Stage) *Scene {
-	t.Stage = v
-	return t
-}
-
-// SetLastRender sets the [Scene.LastRender]:
-// LastRender captures key params from last render.
-// If different then a new ApplyStyleScene is needed.
-func (t *Scene) SetLastRender(v RenderParams) *Scene {
-	t.LastRender = v
-	return t
-}
-
-// SetShowLayoutIter sets the [Scene.ShowLayoutIter]:
-// ShowLayoutIter counts up at start of showing a Scene
-// for a sequence of Layout passes to ensure proper initial sizing.
-func (t *Scene) SetShowLayoutIter(v int) *Scene {
-	t.ShowLayoutIter = v
 	return t
 }
 
@@ -1876,13 +1695,13 @@ var SliderType = gti.AddType(&gti.Type{
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: "xml:\"prec\""}},
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
-		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering", Directives: gti.Directives{}, Tag: ""}},
-		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "inactive:\"+\""}},
-		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "inactive:\"+\" copy:\"-\" xml:\"-\" json:\"-\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "inactive:\"+\""}},
-		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}, Tag: "inactive:\"+\""}},
-		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}, Tag: "inactive:\"+\""}},
-		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "inactive:\"+\""}},
+		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
+		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "inactive:\"+\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
+		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
+		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
+		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2043,55 +1862,6 @@ func (t *Slider) SetThumbColor(v colors.Full) *Slider {
 	return t
 }
 
-// SetStyleBox sets the [Slider.StyleBox]:
-// an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering
-func (t *Slider) SetStyleBox(v styles.Style) *Slider {
-	t.StyleBox = v
-	return t
-}
-
-// SetPos sets the [Slider.Pos]:
-// logical position of the slider relative to Size
-func (t *Slider) SetPos(v float32) *Slider {
-	t.Pos = v
-	return t
-}
-
-// SetLastValue sets the [Slider.LastValue]:
-// previous emitted value - don't re-emit if it is the same
-func (t *Slider) SetLastValue(v float32) *Slider {
-	t.LastValue = v
-	return t
-}
-
-// SetSize sets the [Slider.Size]:
-// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
-func (t *Slider) SetSize(v float32) *Slider {
-	t.Size = v
-	return t
-}
-
-// SetThSize sets the [Slider.ThSize]:
-// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-func (t *Slider) SetThSize(v float32) *Slider {
-	t.ThSize = v
-	return t
-}
-
-// SetThSizeReal sets the [Slider.ThSizeReal]:
-// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-func (t *Slider) SetThSizeReal(v float32) *Slider {
-	t.ThSizeReal = v
-	return t
-}
-
-// SetSlideStartPos sets the [Slider.SlideStartPos]:
-// underlying drag position of slider -- not subject to snapping
-func (t *Slider) SetSlideStartPos(v float32) *Slider {
-	t.SlideStartPos = v
-	return t
-}
-
 // SpellType is the [gti.Type] for [Spell]
 var SpellType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Spell",
@@ -2104,9 +1874,9 @@ var SpellType = gti.AddType(&gti.Type{
 		{"SrcCh", &gti.Field{Name: "SrcCh", Type: "int", LocalType: "int", Doc: "character position in source that spelling is operating on (start of word to be corrected)", Directives: gti.Directives{}, Tag: ""}},
 		{"Suggest", &gti.Field{Name: "Suggest", Type: "[]string", LocalType: "[]string", Doc: "list of suggested corrections", Directives: gti.Directives{}, Tag: ""}},
 		{"Word", &gti.Field{Name: "Word", Type: "string", LocalType: "string", Doc: "word being checked", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", LocalType: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}, Tag: ""}},
-		{"Correction", &gti.Field{Name: "Correction", Type: "string", LocalType: "string", Doc: "the user's correction selection'", Directives: gti.Directives{}, Tag: ""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: ""}},
+		{"LastLearned", &gti.Field{Name: "LastLearned", Type: "string", LocalType: "string", Doc: "last word learned -- can be undone -- stored in lowercase format", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Correction", &gti.Field{Name: "Correction", Type: "string", LocalType: "string", Doc: "the user's correction selection", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: " set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2151,27 +1921,6 @@ func (t *Spell) SetSrcCh(v int) *Spell {
 // list of suggested corrections
 func (t *Spell) SetSuggest(v []string) *Spell {
 	t.Suggest = v
-	return t
-}
-
-// SetLastLearned sets the [Spell.LastLearned]:
-// last word learned -- can be undone -- stored in lowercase format
-func (t *Spell) SetLastLearned(v string) *Spell {
-	t.LastLearned = v
-	return t
-}
-
-// SetCorrection sets the [Spell.Correction]:
-// the user's correction selection'
-func (t *Spell) SetCorrection(v string) *Spell {
-	t.Correction = v
-	return t
-}
-
-// SetSc sets the [Spell.Sc]:
-// the scene where the current popup menu is presented
-func (t *Spell) SetSc(v *Scene) *Spell {
-	t.Sc = v
 	return t
 }
 
@@ -2298,7 +2047,7 @@ var SplitsType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"HandleSize", &gti.Field{Name: "HandleSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this", Directives: gti.Directives{}, Tag: "xml:\"handle-size\""}},
 		{"Splits", &gti.Field{Name: "Splits", Type: "[]float32", LocalType: "[]float32", Doc: "proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored -- for dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: ""}},
+		{"SavedSplits", &gti.Field{Name: "SavedSplits", Type: "[]float32", LocalType: "[]float32", Doc: "A saved version of the splits which can be restored -- for dynamic collapse / expand operations", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which to split the space", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2355,13 +2104,6 @@ func (t *Splits) SetHandleSize(v units.Value) *Splits {
 	return t
 }
 
-// SetSavedSplits sets the [Splits.SavedSplits]:
-// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
-func (t *Splits) SetSavedSplits(v []float32) *Splits {
-	t.SavedSplits = v
-	return t
-}
-
 // SetDim sets the [Splits.Dim]:
 // dimension along which to split the space
 func (t *Splits) SetDim(v mat32.Dims) *Splits {
@@ -2378,7 +2120,7 @@ var SplitterType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"SplitterNo", &gti.Field{Name: "SplitterNo", Type: "int", LocalType: "int", Doc: "splitter number this one is", Directives: gti.Directives{}, Tag: ""}},
-		{"OrigWinBBox", &gti.Field{Name: "OrigWinBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"OrigWinBBox", &gti.Field{Name: "OrigWinBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Slider", &gti.Field{Name: "Slider", Type: "goki.dev/gi/v2/gi.Slider", LocalType: "Slider", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -2409,13 +2151,6 @@ func (t *Splitter) New() ki.Ki {
 // splitter number this one is
 func (t *Splitter) SetSplitterNo(v int) *Splitter {
 	t.SplitterNo = v
-	return t
-}
-
-// SetOrigWinBBox sets the [Splitter.OrigWinBBox]:
-// copy of the win bbox, used for translating mouse events when the bbox is restricted to the slider itself
-func (t *Splitter) SetOrigWinBBox(v image.Rectangle) *Splitter {
-	t.OrigWinBBox = v
 	return t
 }
 
@@ -2738,7 +2473,7 @@ var TextFieldType = gti.AddType(&gti.Type{
 		{"RenderAll", &gti.Field{Name: "RenderAll", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of entire text, for sizing", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"RenderVis", &gti.Field{Name: "RenderVis", Type: "goki.dev/girl/paint.Text", LocalType: "paint.Text", Doc: "render version of just visible text", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FontHeight", &gti.Field{Name: "FontHeight", Type: "float32", LocalType: "float32", Doc: "font height, cached during styling", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"BlinkOn", &gti.Field{Name: "BlinkOn", Type: "bool", LocalType: "bool", Doc: "oscillates between on and off for blinking", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CursorMu", &gti.Field{Name: "CursorMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex for updating cursor between blinker and field", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -2869,13 +2604,6 @@ func (t *TextField) SetMaxWidthReq(v int) *TextField {
 // if true, select text as cursor moves
 func (t *TextField) SetSelectMode(v bool) *TextField {
 	t.SelectMode = v
-	return t
-}
-
-// SetBlinkOn sets the [TextField.BlinkOn]:
-// oscillates between on and off for blinking
-func (t *TextField) SetBlinkOn(v bool) *TextField {
-	t.BlinkOn = v
 	return t
 }
 
