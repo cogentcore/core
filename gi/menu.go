@@ -8,8 +8,11 @@ import (
 	"image"
 
 	"goki.dev/colors"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
+	"goki.dev/ki/v2"
 )
 
 // MenuSceneConfigStyles configures the default styles
@@ -48,34 +51,33 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 	MenuSceneConfigStyles(msc)
 	menu(msc)
 
-	// TODO(kai/menu): do we need this?
-	/*
-		 hasSelected := false
-			for _, ac := range menu {
-				wi, wb := AsWidget(ac)
-				if wi == nil {
-					continue
-				}
-				cl := wi.Clone().This().(Widget)
-				cb := cl.AsWidget()
-				if bt, ok := cl.(*Button); ok {
-					bt.Type = ButtonMenu
-					if bt.Menu == nil {
-						cb.Listeners[events.Click] = wb.Listeners[events.Click]
-						bt.HandleClickDismissMenu()
-					}
-				}
-				cb.Sc = msc
-				msc.AddChild(cl)
-				if !hasSelected && cb.StateIs(states.Selected) {
-					msc.EventMgr.SetStartFocus(cl)
-					hasSelected = true
-				}
+	hasSelected := false
+	msc.WalkPre(func(k ki.Ki) bool {
+		if k == msc {
+			return ki.Continue
+		}
+		wi, wb := AsWidget(k)
+		if wi == nil {
+			return ki.Continue
+		}
+		if bt, ok := wi.(*Button); ok {
+			bt.Type = ButtonMenu
+			if bt.Menu == nil {
+				bt.HandleClickDismissMenu()
+			} else if bt.Indicator == "" {
+				bt.Indicator = icons.KeyboardArrowRight
 			}
-			if !hasSelected && msc.HasChildren() {
-				msc.EventMgr.SetStartFocus(msc.Child(0).(Widget))
-			}
-	*/
+		}
+		wb.Sc = msc
+		if !hasSelected && wb.StateIs(states.Selected) {
+			msc.EventMgr.SetStartFocus(wb)
+			hasSelected = true
+		}
+		return ki.Continue
+	})
+	if !hasSelected && msc.HasChildren() {
+		msc.EventMgr.SetStartFocus(msc.Child(0).(Widget))
+	}
 	return msc
 }
 

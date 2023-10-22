@@ -5,6 +5,7 @@
 package gi
 
 import (
+	"fmt"
 	"image"
 	"log"
 
@@ -372,10 +373,11 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	parts := bt.NewParts(LayoutHoriz)
 	// we check if the icons are unset, not if they are nil, so
 	// that people can manually set it to [icons.None]
-	if bt.HasMenu() && bt.Icon == "" && bt.Indicator == "" {
-		if bt.Type == ButtonMenu {
+	if bt.HasMenu() {
+		fmt.Println(bt.Type, bt.Icon, bt.Indicator, bt)
+		if bt.Type == ButtonMenu && bt.Indicator == "" {
 			bt.Indicator = icons.KeyboardArrowRight
-		} else {
+		} else if bt.Type != ButtonMenu && bt.Icon == "" && bt.Indicator == "" {
 			bt.Icon = icons.Menu
 		}
 	}
