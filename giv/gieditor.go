@@ -90,6 +90,8 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
+//
+//gti:add
 func (ge *GiEditor) Open(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
@@ -305,6 +307,7 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 		// TODO(kai/sel): check if has flag
 	})
 	tb.AddSeparator()
+	// NewFuncButton(tb).SetFunc(ge.Open).SetIcon(icons.FileOpen)
 }
 
 var GiEditorProps = ki.Props{
