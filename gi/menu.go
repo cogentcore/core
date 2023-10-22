@@ -11,7 +11,6 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -64,8 +63,6 @@ func NewMenuScene(menu func(m *Scene), name ...string) *Scene {
 			bt.Type = ButtonMenu
 			if bt.Menu == nil {
 				bt.HandleClickDismissMenu()
-			} else if bt.Indicator == "" {
-				bt.Indicator = icons.KeyboardArrowRight
 			}
 		}
 		wb.Sc = msc
