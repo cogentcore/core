@@ -54,14 +54,14 @@ type Complete struct {
 	// current completion seed
 	Seed string
 
-	// the user's completion selection'
+	// the user's completion selection
 	Completion string
 
 	// the scene where the current popup menu is presented
-	Sc         *Scene
-	DelayTimer *time.Timer
-	DelayMu    sync.Mutex `set:"-"`
-	ShowMu     sync.Mutex `set:"-"`
+	Sc         *Scene      `set:"-"`
+	DelayTimer *time.Timer `set:"-"`
+	DelayMu    sync.Mutex  `set:"-"`
+	ShowMu     sync.Mutex  `set:"-"`
 }
 
 // CompleteSignals are signals that are sent by Complete

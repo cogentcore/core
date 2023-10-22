@@ -51,7 +51,7 @@ type Chooser struct {
 	AllowNew bool
 
 	// CurLabel is the string label for the current value
-	CurLabel string
+	CurLabel string `set:"-"`
 
 	// current selected value
 	CurVal any `json:"-" xml:"-" set:"-"`

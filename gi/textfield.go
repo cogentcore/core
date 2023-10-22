@@ -127,7 +127,7 @@ type TextField struct {
 	FontHeight float32 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// oscillates between on and off for blinking
-	BlinkOn bool `copy:"-" json:"-" xml:"-"`
+	BlinkOn bool `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// mutex for updating cursor between blinker and field
 	CursorMu sync.Mutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`

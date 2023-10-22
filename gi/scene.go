@@ -60,21 +60,21 @@ type Scene struct {
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// current stage in which this Scene is set
-	Stage Stage `copy:"-" json:"-" xml:"-"`
+	Stage Stage `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// Current color in styling -- used for relative color names
 	CurColor color.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	LastRender RenderParams
+	LastRender RenderParams `set:"-"`
 
 	// StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// ShowLayoutIter counts up at start of showing a Scene
 	// for a sequence of Layout passes to ensure proper initial sizing.
-	ShowLayoutIter int `copy:"-" json:"-" xml:"-" view:"-"`
+	ShowLayoutIter int `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 }
 
 // NewScene creates a new Scene that will serve as the content of a Stage

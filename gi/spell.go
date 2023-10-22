@@ -121,16 +121,16 @@ type Spell struct {
 	Word string `set:"-"`
 
 	// last word learned -- can be undone -- stored in lowercase format
-	LastLearned string
+	LastLearned string `set:"-"`
 
 	// [view: -] signal for Spell -- see SpellSignals for the types
 	// SpellSig ki.Signal `json:"-" xml:"-" view:"-" desc:"signal for Spell -- see SpellSignals for the types"`
 
-	// the user's correction selection'
-	Correction string
+	// the user's correction selection
+	Correction string `set:"-"`
 
 	// the scene where the current popup menu is presented
-	Sc *Scene
+	Sc *Scene ` set:"-"`
 }
 
 func (sp *Spell) Disconnect() {

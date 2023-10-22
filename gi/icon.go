@@ -22,10 +22,10 @@ type Icon struct {
 	WidgetBase
 
 	// icon name that has been set.
-	IconName icons.Icon
+	IconName icons.Icon `set:"-"`
 
 	// file name for the loaded icon, if loaded
-	Filename string
+	Filename string `set:"-"`
 
 	// SVG drawing
 	SVG svg.SVG `set:"-"`
@@ -33,7 +33,7 @@ type Icon struct {
 	// RendSize is the last rendered size of the Icon SVG.
 	// if the SVG.Name == IconName and this size is the same
 	// then the current SVG image is used.
-	RendSize image.Point
+	RendSize image.Point `set:"-"`
 }
 
 func (ic *Icon) CopyFieldsFrom(frm any) {

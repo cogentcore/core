@@ -38,10 +38,10 @@ type Label struct {
 	// LinkSig ki.Signal `copy:"-" json:"-" xml:"-" view:"-" desc:"signal for clicking on a link -- data is a string of the URL -- if nobody receiving this signal, calls TextLinkHandler then URLHandler"`
 
 	// render data for text label
-	TextRender paint.Text `copy:"-" xml:"-" json:"-"`
+	TextRender paint.Text `copy:"-" xml:"-" json:"-" set:"-"`
 
 	// position offset of start of text rendering, from last render -- AllocPos plus alignment factors for center, right etc.
-	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-"`
+	RenderPos mat32.Vec2 `copy:"-" xml:"-" json:"-" set:"-"`
 }
 
 func (lb *Label) CopyFieldsFrom(frm any) {

@@ -172,37 +172,37 @@ type Layout struct {
 	StackTopOnly bool
 
 	// total max size of children as laid out
-	ChildSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
+	ChildSize mat32.Vec2 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// extra size in each dim due to scrollbars we add
-	ExtraSize mat32.Vec2 `copy:"-" json:"-" xml:"-"`
+	ExtraSize mat32.Vec2 `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// whether scrollbar is used for given dim
-	HasScroll [2]bool `copy:"-" json:"-" xml:"-"`
+	HasScroll [2]bool `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// scroll bars -- we fully manage them as needed
-	Scrolls [2]*Slider `copy:"-" json:"-" xml:"-"`
+	Scrolls [2]*Slider `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// computed size of a grid layout based on all the constraints -- computed during GetSize pass
-	GridSize image.Point `copy:"-" json:"-" xml:"-"`
+	GridSize image.Point `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// grid data for rows in and cols in
-	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-"`
+	GridData [RowColN][]GridData `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// line breaks for flow layout
-	FlowBreaks []int `copy:"-" json:"-" xml:"-"`
+	FlowBreaks []int `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-	NeedsRedo bool `copy:"-" json:"-" xml:"-"`
+	NeedsRedo bool `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// accumulated name to search for when keys are typed
-	FocusName string `copy:"-" json:"-" xml:"-"`
+	FocusName string `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// time of last focus name event -- for timeout
-	FocusNameTime time.Time `copy:"-" json:"-" xml:"-"`
+	FocusNameTime time.Time `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// last element focused on -- used as a starting point if name is the same
-	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-"`
+	FocusNameLast ki.Ki `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
 	ScrollsOff bool `copy:"-" json:"-" xml:"-" set:"-"`

@@ -25,7 +25,7 @@ type MenuBar struct {
 	MainMenu bool
 
 	// map of main menu items for callback from OS main menu (MacOS specific)
-	OSMainMenus map[string]*Button `json:"-" xml:"-"`
+	OSMainMenus map[string]*Button `json:"-" xml:"-" set:"-"`
 }
 
 func (mb *MenuBar) CopyFieldsFrom(frm any) {
