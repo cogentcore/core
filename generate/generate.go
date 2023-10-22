@@ -10,6 +10,7 @@ package generate
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"text/template"
 
 	"goki.dev/enums/enumgen"
@@ -25,12 +26,13 @@ import (
 var GeneralMethodsTmpl = template.Must(template.New("GeneralMethods").
 	Funcs(template.FuncMap{
 		"SetterFields": SetterFields,
+		"DocToComment": DocToComment,
 	}).Parse(
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{.Name}} sets the {{.Name}} of the {{$typ.Name}} and
-	// returns it to allow chaining together set calls.
+	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}]:
+	{{DocToComment .Doc}}
 	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.LocalType}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
 		return t
@@ -132,6 +134,11 @@ func SetterFields(typ *gtigen.Type) []*gti.Field {
 		}
 	}
 	return res
+}
+
+// DocToComment converts the given doc string to an appropriate comment string.
+func DocToComment(doc string) string {
+	return "// " + strings.ReplaceAll(doc, "\n", "\n// ")
 }
 
 // Generate is the main entry point to code generation
