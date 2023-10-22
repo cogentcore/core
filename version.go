@@ -4,9 +4,9 @@ package cam
 
 const (
 	// Version is the version of this package being used
-	Version = "v0.9.28"
+	Version = "v0.9.29"
 	// GitCommit is the commit just before the latest version commit
-	GitCommit = "0206dc7"
+	GitCommit = "2949fca"
 	// VersionDate is the date-time of the latest version commit in UTC (in the format 'YYYY-MM-DD HH:MM', which is the Go format '2006-01-02 15:04')
-	VersionDate = "2023-10-22 20:22"
+	VersionDate = "2023-10-22 20:32"
 )
