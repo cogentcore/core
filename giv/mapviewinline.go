@@ -104,7 +104,7 @@ func (mv *MapViewInline) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.ReConfig()
+	mv.Update()
 }
 
 func (mv *MapViewInline) ConfigWidget(sc *gi.Scene) {
@@ -165,7 +165,7 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
 		kvb.OnChange(func(e events.Event) {
 			mv.SendChange()
-			mv.ReConfig()
+			mv.Update()
 		})
 		keyw := mv.Child(i * 2).(gi.Widget)
 		widg := mv.Child((i * 2) + 1).(gi.Widget)
@@ -223,10 +223,10 @@ func (mv *MapViewInline) MapAdd() {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.ReConfig()
+	mv.Update()
 }
 
 func (mv *MapViewInline) UpdateValues() {
 	// maps have to re-read their values because they can't get pointers!
-	mv.ReConfig()
+	mv.Update()
 }

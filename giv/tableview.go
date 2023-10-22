@@ -207,7 +207,7 @@ func (tv *TableView) SetSlice(sl any) {
 	tv.ResetSelectedIdxs()
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.UpdateEnd(updt)
-	tv.ReConfig()
+	tv.Update()
 }
 
 // StructType sets the StruType and returns the type of the struct within the
@@ -786,7 +786,7 @@ func (tv *TableView) SliceNewAt(idx int) {
 	}
 	tv.ViewMuUnlock()
 	tv.SetChanged()
-	tv.ReConfig()
+	tv.Update()
 }
 
 // SliceDeleteAt deletes element at given index from slice
@@ -809,7 +809,7 @@ func (tv *TableView) SliceDeleteAt(idx int) {
 	}
 	tv.ViewMuUnlock()
 	tv.SetChanged()
-	tv.ReConfig()
+	tv.Update()
 }
 
 // SortSlice sorts the slice according to current settings
@@ -854,7 +854,7 @@ func (tv *TableView) SortSliceAction(fldIdx int) {
 
 	tv.SortIdx = fldIdx
 	tv.SortSlice()
-	tv.ReConfig()
+	tv.Update()
 }
 
 // ConfigToolbar configures the toolbar actions

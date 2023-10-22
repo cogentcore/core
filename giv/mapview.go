@@ -114,13 +114,13 @@ func (mv *MapView) SetMap(mp any) {
 	// note: because we make new maps, and due to the strangeness of reflect, they
 	// end up not being comparable types, so we can't check if equal
 	mv.Map = mp
-	mv.ReConfig()
+	mv.Update()
 }
 
 // UpdateValues updates the widget display of slice values, assuming same slice config
 func (mv *MapView) UpdateValues() {
 	// maps have to re-read their values -- can't get pointers
-	mv.ReConfig()
+	mv.Update()
 }
 
 // Config configures the view
@@ -251,7 +251,7 @@ func (mv *MapView) ConfigMapGrid() {
 		vvb.OnChange(func(e events.Event) { mv.SendChange() })
 		kvb.OnChange(func(e events.Event) {
 			mv.SendChange()
-			mv.ReConfig()
+			mv.Update()
 		})
 		keyw := sg.Child(i * ncol).(gi.Widget)
 		widg := sg.Child(i*ncol + 1).(gi.Widget)
@@ -346,7 +346,7 @@ func (mv *MapView) MapAdd() {
 		mv.TmpSave.SaveTmp()
 	}
 	mv.SetChanged()
-	mv.ReConfig()
+	mv.Update()
 }
 
 // MapDelete deletes a key-value from the map
@@ -363,7 +363,7 @@ func (mv *MapView) MapDelete(key reflect.Value) {
 	}
 	mv.SetChanged()
 	mv.UpdateEnd(updt)
-	mv.ReConfig()
+	mv.Update()
 }
 
 // ConfigToolbar configures the toolbar actions
