@@ -7,6 +7,7 @@ package icons
 
 import (
 	"embed"
+	"io/fs"
 	"strings"
 
 	_ "github.com/iancoleman/strcase" // needed so that it gets included in the mod (the generator uses it)
@@ -19,6 +20,19 @@ import (
 //
 //go:embed svg/*.svg
 var Icons embed.FS
+
+const (
+	// None is an icon that indicates to not use an icon.
+	// It completely prevents the rendering of an icon,
+	// whereas [Blank] renders a blank icon.
+	None Icon = "none"
+
+	// Blank is a blank icon that can be used as a
+	// placeholder when no other icon is appropriate.
+	// It still renders an icon, just a blank one,
+	// whereas [None] indicates to not render one at all.
+	Blank Icon = "blank"
+)
 
 // Icon contains the name of an icon
 type Icon string
@@ -68,13 +82,15 @@ func (i Icon) IsValid() bool {
 	return ex
 }
 
-// None is an icon that indicates to not use an icon.
-// It completely prevents the rendering of an icon,
-// whereas [Blank] renders a blank icon.
-const None Icon = "none"
-
-// Blank is a blank icon that can be used as a
-// placeholder when no other icon is appropriate.
-// It still renders an icon, just a blank one,
-// whereas [None] indicates to not render one at all.
-const Blank Icon = "blank"
+// All returns a list of all the icons
+func All() []string {
+	files, err := fs.ReadDir(Icons, "svg")
+	if err != nil {
+		return nil
+	}
+	fns := make([]string, 0, len(files))
+	for _, fi := range files {
+		fns = append(fns, fi.Name())
+	}
+	return fns
+}
