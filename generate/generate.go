@@ -120,13 +120,13 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 }
 
 // SetterFields returns all of the fields of the given type
-// that have a `setter:"+"` struct tag.
+// that don't have a `set:"-"` struct tag.
 func SetterFields(typ *gtigen.Type) []*gti.Field {
 	res := []*gti.Field{}
 	for _, kv := range typ.Fields.Order {
 		f := kv.Val
-		// unspecified indicates to add a setter; only "-" means no setter
-		hasSetter := f.Tag.Get("setter") != "-"
+		// unspecified indicates to add a set method; only "-" means no set
+		hasSetter := f.Tag.Get("set") != "-"
 		if hasSetter {
 			res = append(res, f)
 		}
