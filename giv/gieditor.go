@@ -152,7 +152,7 @@ func (ge *GiEditor) EditColorScheme() {
 //
 //gti:add
 func (ge *GiEditor) ToggleSelectionMode() {
-	/* todo: renderwin is not a Ki anymore
+	/* TODO(kai/sel): implement
 	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
 		if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
 			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
@@ -295,7 +295,15 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(ge.Changed)
 	})
-	NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	sel := NewFuncButton(tb).SetFunc(ge.ToggleSelectionMode).SetText("Select Element").SetIcon(icons.ArrowSelectorTool)
+	sel.SetUpdateFunc(func() {
+		sc, ok := ge.KiRoot.(*gi.Scene)
+		sc.SetEnabled(ok)
+		if !ok {
+			return
+		}
+		// TODO(kai/sel): check if has flag
+	})
 	tb.AddSeparator()
 }
 
