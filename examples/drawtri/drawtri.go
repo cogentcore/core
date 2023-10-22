@@ -69,7 +69,7 @@ func mainrun(a goosi.App) {
 	}
 
 	frameCount := 0
-	cur := cursors.Default
+	cur := cursors.Arrow
 	stTime := time.Now()
 
 	renderFrame := func() {
@@ -100,7 +100,7 @@ func mainrun(a goosi.App) {
 		if frameCount%60 == 0 {
 			cur++
 			if cur >= cursors.CursorN {
-				cur = cursors.Default
+				cur = cursors.Arrow
 			}
 			err := goosi.TheApp.Cursor(w).Set(cur)
 			if err != nil {
