@@ -23,13 +23,11 @@ that would be undone for an undo action.
 package undo
 
 import (
-	"fmt"
 	"log"
 	"strings"
 	"sync"
 
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/giv/textbuf"
+	"goki.dev/gi/v2/texteditor/textbuf"
 )
 
 // DefaultRawInterval is interval for saving raw state -- need to do this
@@ -331,14 +329,17 @@ func (rc *Rec) MemUsed() int {
 // if details is true, each record is reported.
 func (um *Mgr) MemStats(details bool) string {
 	sb := strings.Builder{}
-	sum := 0
-	for i, r := range um.Recs {
-		mem := r.MemUsed()
-		sum += mem
-		if details {
-			sb.WriteString(fmt.Sprintf("%d\t%s\tmem:%s\n", i, r.Action, giv.FileSize(mem).String()))
+	// TODO(kai): add this back once we figure out how to do giv.FileSize
+	/*
+		sum := 0
+		for i, r := range um.Recs {
+			mem := r.MemUsed()
+			sum += mem
+			if details {
+				sb.WriteString(fmt.Sprintf("%d\t%s\tmem:%s\n", i, r.Action, giv.FileSize(mem).String()))
+			}
 		}
-	}
-	sb.WriteString(fmt.Sprintf("Total: %s\n", giv.FileSize(sum).String()))
+		sb.WriteString(fmt.Sprintf("Total: %s\n", giv.FileSize(sum).String()))
+	*/
 	return sb.String()
 }
