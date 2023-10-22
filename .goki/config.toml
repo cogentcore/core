@@ -1,19 +1,27 @@
 Name = "grows"
 Desc = ""
-Version = "v0.3.3"
+Version = "v0.3.4"
 Type = "Library"
 
 [Build]
   Package = "."
+  Output = ""
+  ID = "com.org.todo.grows"
+  Debug = false
+  Rebuild = false
+  Install = false
+  PrintOnly = false
+  Print = false
+  Trimpath = false
+  Work = false
+  IOSVersion = "13.0"
+  AndroidMinSDK = 23
+  AndroidTargetSDK = 29
 
-[Colorgen]
-  Source = "colors.xml"
-  Output = "colorgen.go"
-  Package = "main"
-  Comment = ""
-
-[Install]
-  Package = "."
+[Setup]
+  [Setup.Platform]
+    OS = ""
+    Arch = ""
 
 [Log]
   Target = "android"
