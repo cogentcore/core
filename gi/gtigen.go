@@ -129,8 +129,8 @@ var ButtonType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ButtonTypes", LocalType: "ButtonTypes", Doc: "the type of button", Directives: gti.Directives{}, Tag: ""}},
-		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "xml:\"text\" set:\"-\""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\" set:\"-\""}},
+		{"Text", &gti.Field{Name: "Text", Type: "string", LocalType: "string", Doc: "label for the button -- if blank then no label is presented", Directives: gti.Directives{}, Tag: "xml:\"text\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present", Directives: gti.Directives{}, Tag: "xml:\"icon\" view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the menu indicator icon to present, or blank or 'nil' or 'none' -- shown automatically when there are Menu elements present unless 'none' is set", Directives: gti.Directives{}, Tag: "xml:\"indicator\" view:\"show-name\""}},
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
@@ -188,6 +188,20 @@ func (t *Button) AsButton() *Button {
 // the type of button
 func (t *Button) SetType(v ButtonTypes) *Button {
 	t.Type = v
+	return t
+}
+
+// SetText sets the [Button.Text]:
+// label for the button -- if blank then no label is presented
+func (t *Button) SetText(v string) *Button {
+	t.Text = v
+	return t
+}
+
+// SetIcon sets the [Button.Icon]:
+// optional icon for the button -- different buttons can configure this in different ways relative to the text if both are present
+func (t *Button) SetIcon(v icons.Icon) *Button {
+	t.Icon = v
 	return t
 }
 
