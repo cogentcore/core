@@ -29,7 +29,7 @@ type Label struct {
 	WidgetBase
 
 	// label to display
-	Text string `xml:"text" setter:"-"`
+	Text string `xml:"text" set:"-"`
 
 	// the type of label
 	Type LabelTypes

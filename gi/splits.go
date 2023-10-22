@@ -42,7 +42,7 @@ type Splits struct {
 	HandleSize units.Value `xml:"handle-size"`
 
 	// proportion (0-1 normalized, enforced) of space allocated to each element -- can enter 0 to collapse a given element
-	Splits []float32 `setter:"-"`
+	Splits []float32 `set:"-"`
 
 	// A saved version of the splits which can be restored -- for dynamic collapse / expand operations
 	SavedSplits []float32

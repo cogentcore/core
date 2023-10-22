@@ -41,10 +41,10 @@ type Slider struct {
 	WidgetBase
 
 	// the type of the slider
-	Type SliderTypes `setter:"-"`
+	Type SliderTypes `set:"-"`
 
 	// current value
-	Value float32 `xml:"value" setter:"-"`
+	Value float32 `xml:"value" set:"-"`
 
 	// dimension along which the slider slides
 	Dim mat32.Dims

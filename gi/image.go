@@ -39,7 +39,7 @@ type Image struct {
 	Filename FileName
 
 	// size of the image
-	Size image.Point `setter:"-"`
+	Size image.Point `set:"-"`
 
 	// the bitmap image
 	Pixels *image.RGBA `copy:"-" view:"-" xml:"-" json:"-"`
