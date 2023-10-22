@@ -373,16 +373,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 	}
 	sv.ResetSelectedIdxs()
 	sv.UpdateEnd(updt)
-	sv.ReConfig()
-}
-
-// Update is the high-level update display call: ReConfig()
-// Robust to any changes.
-func (sv *SliceViewBase) Update() {
-	if !sv.This().(gi.Widget).IsVisible() {
-		return
-	}
-	sv.ReConfig()
+	sv.Update()
 }
 
 // IsNil returns true if the Slice is nil
@@ -571,8 +562,8 @@ func (sv *SliceViewBase) ViewMuUnlock() {
 
 func (sv *SliceViewBase) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
 	if sv.This().(SliceViewer).NeedsConfigRows() {
-		sv.ReConfig() // does applystyle
-		return true   // needs redo
+		sv.Update() // does applystyle
+		return true // needs redo
 	}
 	return sv.Frame.DoLayout(sc, parBBox, iter)
 }
@@ -963,7 +954,7 @@ func (sv *SliceViewBase) SliceNewAt(idx int) {
 	}
 	sv.ViewMuUnlock()
 	sv.SetChanged()
-	sv.ReConfig()
+	sv.Update()
 }
 
 // SliceDeleteAtRow deletes element at given display row
@@ -1027,7 +1018,7 @@ func (sv *SliceViewBase) SliceDeleteAt(idx int) {
 
 	sv.ViewMuUnlock()
 	sv.SetChanged()
-	sv.ReConfig()
+	sv.Update()
 }
 
 // ConfigToolbar configures the toolbar actions
@@ -1051,7 +1042,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 		tb.SetStretchMaxWidth()
 		gi.NewButton(tb, "update-view").SetText("Update view").SetIcon(icons.Refresh).SetTooltip("update this SliceView to reflect current state of slice").
 			OnClick(func(e events.Event) {
-				sv.ReConfig()
+				sv.Update()
 			})
 		if ndef > 1 {
 			gi.NewButton(tb, "add").SetText("Add").SetIcon(icons.Add).SetTooltip("add a new element to the slice").
@@ -1674,7 +1665,7 @@ func (sv *SliceViewBase) DeleteIdxs() {
 		sv.This().(SliceViewer).SliceDeleteAt(i)
 	}
 	sv.SetChanged()
-	sv.ReConfig()
+	sv.Update()
 }
 
 // Cut copies selected indexes to clip.Board and deletes selected indexes
@@ -1695,7 +1686,7 @@ func (sv *SliceViewBase) Cut() {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
-	sv.ReConfig()
+	sv.Update()
 }
 
 // CutIdxs copies selected indexes to clip.Board and deletes selected indexes
@@ -1801,7 +1792,7 @@ func (sv *SliceViewBase) PasteAtIdx(md mimedata.Mimes, idx int) {
 	}
 	sv.SetChanged()
 	sv.SelectIdxAction(idx, events.SelectOne)
-	sv.ReConfig()
+	sv.Update()
 }
 
 // Duplicate copies selected items and inserts them after current selection --

@@ -76,7 +76,7 @@ func (sv *StructViewInline) StructViewInlineStyles() {
 func (sv *StructViewInline) SetStruct(st any) {
 	if sv.Struct != st {
 		sv.Struct = st
-		sv.ReConfig()
+		sv.Update()
 	}
 }
 

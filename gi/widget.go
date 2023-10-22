@@ -63,10 +63,10 @@ type Widget interface {
 	// so this call just does the core configuration.
 	ConfigWidget(sc *Scene)
 
-	// ReConfig calls Config and ApplyStyle on this widget.
-	// This should be called if any config options are changed,
+	// Update calls Config and ApplyStyle on this widget.
+	// This should be called if any config options are changed
 	// while the Scene is being viewed.
-	ReConfig()
+	Update()
 
 	// StateIs returns true if given Style.State flag is set
 	StateIs(flag enums.BitFlag) bool

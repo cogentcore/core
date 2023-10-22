@@ -123,7 +123,7 @@ func (sv *StructView) SetStruct(st any) {
 	if sv.Struct != st {
 		sv.Changed = false
 		sv.Struct = st
-		sv.ReConfig()
+		sv.Update()
 	}
 }
 
@@ -380,7 +380,7 @@ func (sv *StructView) UpdateFieldAction() {
 		return
 	}
 	if sv.HasViewIfs {
-		sv.ReConfig()
+		sv.Update()
 	} else if sv.HasDefs {
 		sg := sv.StructGrid()
 		updt := sg.UpdateStart()

@@ -645,7 +645,7 @@ func (tb *Tab) ConfigPartsDeleteButton(sc *Scene) {
 		cls.SetType(ButtonAction)
 		icnm := tb.Indicator
 		cls.SetIcon(icnm)
-		cls.ReConfig()
+		cls.Update()
 		cls.SetProp("no-focus", true)
 		cls.OnClick(func(e events.Event) {
 			tabIdx := tb.Data.(int)

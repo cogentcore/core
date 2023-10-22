@@ -268,13 +268,13 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	pr.End()
 }
 
-// ReConfig calls Config and then ApplyStyle
+// Update calls Config and then ApplyStyle
 // on every Widget in the tree from me.
 // This should be used after any structural changes
 // to currently-displayed widgets.
 // It wraps everything in UpdateStart / UpdateEndLayout
 // so layout will automatically be called for next render.
-func (wb *WidgetBase) ReConfig() {
+func (wb *WidgetBase) Update() {
 	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
