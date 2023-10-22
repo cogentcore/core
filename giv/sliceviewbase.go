@@ -825,7 +825,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				idxlab.SetState(false, states.Invisible)
 				idxlab.SetSelected(issel)
 			}
-			if !sv.Is(SliceViewIsArray) {
+			if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
 				cidx := ridx + idxOff
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
@@ -847,7 +847,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				idxlab.SetState(true, states.Invisible)
 				idxlab.SetSelected(false)
 			}
-			if !sv.Is(SliceViewIsArray) {
+			if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
 				cidx := ridx + idxOff
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
@@ -1968,7 +1968,7 @@ func (sv *SliceViewBase) DropCancel() {
 //    Events
 
 func (sv *SliceViewBase) StdCtxtMenu(m *gi.Scene, idx int) {
-	if sv.Is(SliceViewIsArray) {
+	if sv.IsDisabled() || sv.Is(SliceViewIsArray) {
 		return
 	}
 	gi.NewButton(m).SetText("Copy").SetData(idx).

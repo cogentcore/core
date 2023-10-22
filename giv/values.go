@@ -1133,7 +1133,7 @@ func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		if dlg.Accepted {
 			si := dlg.Data.(int)
 			if si >= 0 {
-				ic := gi.CurIconList[si]
+				ic := icons.AllIcons[si]
 				vv.SetValue(ic)
 				vv.UpdateWidget()
 			}

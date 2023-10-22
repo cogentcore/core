@@ -219,7 +219,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
 	// default to state layer associated with the state,
 	// which the developer can override in their stylers
-	wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
+	wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
 
 	if s.Is(states.Focused) {
 		s.Border = s.MaxBorder
