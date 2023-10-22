@@ -1,6 +1,6 @@
 Name = "enums"
 Desc = ""
-Version = "v0.9.28"
+Version = "v0.9.29"
 Type = "Library"
 
 [Build]
