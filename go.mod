@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef
-	goki.dev/cam v0.9.23
+	goki.dev/cam v0.9.24
 	goki.dev/grows v0.3.5
 	goki.dev/laser v0.1.9
 	goki.dev/mat32/v2 v2.0.0-dev0.0.7
@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	goki.dev/enums v0.9.25 // indirect
+	goki.dev/enums v0.9.26 // indirect
 	goki.dev/glop v0.1.3 // indirect
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

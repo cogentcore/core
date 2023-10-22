@@ -1,9 +1,9 @@
 github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef h1:Ch6Q+AZUxDBCVqdkI8FSpFyZDtCVBc2VmejdNrm5rRQ=
 github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef/go.mod h1:nXTWP6+gD5+LUJ8krVhhoeHjvHTutPxMYl5SvkcnJNE=
-goki.dev/cam v0.9.23 h1:IiIb/JutvvEyllxeLQ5te7Il/O7LXUv66v44PPOhZhc=
-goki.dev/cam v0.9.23/go.mod h1:52opHmKBf1rmg0++NUS5qqKfJhU4msWnb2CWNmhHjzg=
-goki.dev/enums v0.9.25 h1:OUVK+2OuqdZiKWE2vQdRee4NzxQBaHA+flftU0zX+WQ=
-goki.dev/enums v0.9.25/go.mod h1:wmZ+6qG/cAgG/NYrLxJ+lmO7zf45BCHFuf1T8IvBDqM=
+goki.dev/cam v0.9.24 h1:IUGfqCfDJ2Ba3JudnUqZU3ObBS/1IgMhSforrl7+roI=
+goki.dev/cam v0.9.24/go.mod h1:QKDF19iDRu77J4oC5Laz3jhCK5IkCUEQUXciCLiei/s=
+goki.dev/enums v0.9.26 h1:lusthxWMuop8YLlKlj9NxugNdPm51bnq3cqslBqyFZg=
+goki.dev/enums v0.9.26/go.mod h1:bXws9sALk2yzy9zK9ScU964fW7gTxz8T3Adg7MadvU0=
 goki.dev/glop v0.1.3 h1:6F5FZ+zkx6kzsilo+tXrEDGEG6JcyW/zgthIrkG+ikM=
 goki.dev/glop v0.1.3/go.mod h1:IXICQzPtXZokKzpVsAZRK2IUeQEJer84SDjsejw4PSo=
 goki.dev/grows v0.3.5 h1:pWrvlv20+gIHpghIR+6c+xB0SE8qzAdqOdl5fYBVAeQ=
