@@ -12,13 +12,13 @@ require (
 	github.com/goki/go-difflib v1.2.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	goki.dev/cam v0.9.26
-	goki.dev/colors v0.8.21
-	goki.dev/cursors v0.0.9
-	goki.dev/enums v0.9.29
-	goki.dev/girl v0.0.10
+	goki.dev/cam v0.9.27
+	goki.dev/colors v0.8.22
+	goki.dev/cursors v0.0.10
+	goki.dev/enums v0.9.30
+	goki.dev/girl v0.0.11
 	goki.dev/glop v0.1.3
-	goki.dev/goosi v0.0.2
+	goki.dev/goosi v0.0.3
 	goki.dev/grog v0.0.5
 	goki.dev/grows v0.3.7
 	goki.dev/grr v0.0.4
