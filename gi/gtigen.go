@@ -250,7 +250,7 @@ var ChooserType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.ChooserTypes", LocalType: "ChooserTypes", Doc: "the type of combo box", Directives: gti.Directives{}, Tag: ""}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}, Tag: "view:\"show-name\" set:\"-\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Indicator", &gti.Field{Name: "Indicator", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "name of the indicator icon to present.", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
 		{"Editable", &gti.Field{Name: "Editable", Type: "bool", LocalType: "bool", Doc: "provide a text field for editing the value, or just a button for selecting items?  Set the editable property", Directives: gti.Directives{}, Tag: ""}},
 		{"AllowNew", &gti.Field{Name: "AllowNew", Type: "bool", LocalType: "bool", Doc: "whether to allow the user to add new items to the combo box through the editable textfield (if Editable is set to true) and a button at the end of the combo box menu", Directives: gti.Directives{}, Tag: ""}},
@@ -291,6 +291,13 @@ func (t *Chooser) New() ki.Ki {
 // the type of combo box
 func (t *Chooser) SetType(v ChooserTypes) *Chooser {
 	t.Type = v
+	return t
+}
+
+// SetIcon sets the [Chooser.Icon]:
+// optional icon
+func (t *Chooser) SetIcon(v icons.Icon) *Chooser {
+	t.Icon = v
 	return t
 }
 
