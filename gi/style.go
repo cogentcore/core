@@ -198,9 +198,11 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	s := &wb.Styles
 
 	state := s.State
+	sl := s.StateLayer
 	*s = styles.Style{}
 	s.Defaults()
 	s.State = state
+	s.StateLayer = sl
 
 	s.MaxBorder.Style.Set(styles.BorderSolid)
 	s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
