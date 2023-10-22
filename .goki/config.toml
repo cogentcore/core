@@ -1,6 +1,6 @@
 Name = "colors"
 Desc = ""
-Version = "v0.8.15"
+Version = "v0.8.16"
 Type = "Library"
 
 [Build]
