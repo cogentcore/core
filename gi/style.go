@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"time"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -215,7 +217,7 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
 	// default to state layer associated with the state,
 	// which the developer can override in their stylers
-	s.StateLayer = s.State.StateLayer()
+	wb.Transition(&s.StateLayer, s.State.StateLayer(), 500*time.Millisecond, LinearTransition)
 
 	if s.Is(states.Focused) {
 		s.Border = s.MaxBorder
