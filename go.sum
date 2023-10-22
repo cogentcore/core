@@ -1,2 +1,4 @@
 github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+goki.dev/glop v0.1.2 h1:CEwjaz+eULn3FA7EaWpfWOHQs3y7C5hm4wZMFOADiJE=
+goki.dev/glop v0.1.2/go.mod h1:gxxXPhWLaqP9H/sudq5MHDbkbKdr5g0ziyPIuYAJczo=
