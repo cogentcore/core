@@ -37,7 +37,7 @@ type Chooser struct {
 	Type ChooserTypes
 
 	// optional icon
-	Icon icons.Icon `view:"show-name" set:"-"`
+	Icon icons.Icon `view:"show-name"`
 
 	// name of the indicator icon to present.
 	Indicator icons.Icon `view:"show-name"`
@@ -482,29 +482,6 @@ func (ch *Chooser) SetCurIndex(idx int) any {
 		ch.ShowCurVal(ToLabel(ch.CurVal))
 	}
 	return ch.CurVal
-}
-
-// SetIcon sets the Icon to given icon name (could be empty or 'none') and
-// updates the button.
-// Use this for optimized auto-updating based on nature of changes made.
-// Otherwise, can set Icon directly followed by ReConfig()
-func (ch *Chooser) SetIcon(iconName icons.Icon) *Chooser {
-	if ch.Icon == iconName {
-		return ch
-	}
-	updt := ch.UpdateStart()
-	recfg := (ch.Icon == "" && iconName != "") || (ch.Icon != "" && iconName == "")
-	ch.Icon = iconName
-	if recfg {
-		ch.ConfigParts(ch.Sc)
-	} else {
-		ic := ch.IconWidget()
-		if ic != nil {
-			ic.SetIcon(ch.Icon)
-		}
-	}
-	ch.UpdateEndLayout(updt)
-	return ch
 }
 
 // ShowCurVal updates the display to present the
