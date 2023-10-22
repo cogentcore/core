@@ -431,7 +431,7 @@ var PreferencesProps = ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(pfi any, bt *Button) {
 					pf := pfi.(*Preferences)
-					bt.SetEnabledState(pf.Changed)
+					bt.SetEnabled(pf.Changed)
 				},
 			}},
 			{"sep-color", ki.BlankProp{}},
@@ -975,7 +975,7 @@ var PrefsDetailedProps = ki.Props{
 				"shortcut": KeyFunMenuSave,
 				"updtfunc": func(pfi any, bt *Button) {
 					pf := pfi.(*PrefsDetailed)
-					bt.SetEnabledState(pf.Changed)
+					bt.SetEnabled(pf.Changed)
 				},
 			}},
 			{"Close RenderWin", ki.BlankProp{}},

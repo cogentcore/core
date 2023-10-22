@@ -63,8 +63,8 @@ func (wb *WidgetBase) SetFocusState(focus bool) {
 	wb.SetState(focus, states.Focused)
 }
 
-// SetEnabledState sets the Disabled flag
-func (wb *WidgetBase) SetEnabledState(enabled bool) {
+// SetEnabled sets the Disabled flag
+func (wb *WidgetBase) SetEnabled(enabled bool) {
 	wb.SetState(!enabled, states.Disabled)
 }
 
