@@ -24,6 +24,7 @@ func TestGenerate(t *testing.T) {
 				AddTypes: true,
 				TypeVar:  true,
 				Instance: true,
+				Setters:  true,
 				Templates: []*template.Template{
 					template.Must(template.New("Stringer").Parse(`
 					func (t *{{.Name}}) MyCustomFuncForStringers(a any) error {

@@ -40,6 +40,27 @@ func (t *Person) MyCustomFuncForStringers(a any) error {
 	return nil
 }
 
+// SetName sets the [Person.Name]:
+// Name is the name of the person
+func (t *Person) SetName(v string) *Person {
+	t.Name = v
+	return t
+}
+
+// SetAge sets the [Person.Age]:
+// Age is the age of the person
+func (t *Person) SetAge(v int) *Person {
+	t.Age = v
+	return t
+}
+
+// SetType sets the [Person.Type]:
+// Type is the type of the person
+func (t *Person) SetType(v *gti.Type) *Person {
+	t.Type = v
+	return t
+}
+
 var _ = gti.AddFunc(&gti.Func{
 	Name:       "goki.dev/gti/gtigen/testdata.Alert",
 	Doc:        "Alert prints an alert with the given message",
