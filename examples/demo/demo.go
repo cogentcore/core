@@ -88,9 +88,7 @@ func makeHome(ts *gi.Tabs) {
 }
 
 // Hello displays a greeting message and an age in weeks based on the given information.
-//
-//gti:add
-func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) {
+func hello(firstName string, lastName string, age int, likesGo bool) (greeting string, weeksOld int) { //gti:add
 	weeksOld = age * 52
 	greeting = "Hello, " + firstName + " " + lastName + "! "
 	if likesGo {
