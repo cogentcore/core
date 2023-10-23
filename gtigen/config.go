@@ -30,7 +30,9 @@ type Config struct { //gti:add
 	AddFuncs bool
 
 	// An ordered map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.
-	// The configs are run in sequential ascending order.
+	// The configs are applied in sequential ascending order, which means that
+	// the last config overrides the other ones, so the most specific
+	// interfaces should typically be put last.
 	// Note: the package gtigen is run on must explicitly reference this interface at some point for this to work; adding a simple
 	// `var _ MyInterface = (*MyType)(nil)` statement to check for interface implementation is an easy way to accomplish that.
 	// Note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.
