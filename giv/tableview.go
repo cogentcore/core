@@ -73,7 +73,7 @@ func (tv *TableView) TableViewInit() {
 	tv.SetFlag(false, SliceViewSelectMode)
 	tv.SetFlag(true, SliceViewShowIndex)
 	tv.SetFlag(true, SliceViewShowToolbar)
-	tv.SetFlag(true, SliceViewInactKeyNav)
+	tv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
 	tv.HandleSliceViewEvents()
 
