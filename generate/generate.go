@@ -134,7 +134,7 @@ func Generate(cfg *config.Config) error { //gti:add
 	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &kcfg
 
 	wcfg := kcfg
-	wcfg.Templates = append(wcfg.Templates, WidgetMethodsTmpl)
+	wcfg.Templates = []*template.Template{KiMethodsTmpl, WidgetMethodsTmpl}
 	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/gi/v2/gi.Widget"] = &wcfg
 
 	pkgs, err := ParsePackages(cfg)
