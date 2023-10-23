@@ -442,6 +442,60 @@ func (tf *TextField) CursorBackward(steps int) {
 	}
 }
 
+// CursorBackwardWord moves the cursor backward by words
+func (tf *TextField) CursorBackwardWord(steps int) {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+	for i := 0; i < steps; i++ {
+		sz := len(tf.EditTxt)
+		if sz > 0 && tf.CursorPos > 0 {
+			ch := min(tf.CursorPos, sz-1)
+			var done = false
+			for ch < sz && !done { // if on a wb, go past
+				r1 := tf.EditTxt[ch]
+				r2 := rune(-1)
+				if ch > 0 {
+					r2 = tf.EditTxt[ch-1]
+				}
+				if lex.IsWordBreak(r1, r2) {
+					ch--
+					if ch == -1 {
+						done = true
+					}
+				} else {
+					done = true
+				}
+			}
+			done = false
+			for ch < sz && ch >= 0 && !done {
+				r1 := tf.EditTxt[ch]
+				r2 := rune(-1)
+				if ch > 0 {
+					r2 = tf.EditTxt[ch-1]
+				}
+				if !lex.IsWordBreak(r1, r2) {
+					ch--
+				} else {
+					done = true
+				}
+			}
+			tf.CursorPos = ch
+		} else {
+			tf.CursorPos = 0
+		}
+	}
+	if tf.CursorPos < 0 {
+		tf.CursorPos = 0
+	}
+	if tf.CursorPos <= tf.StartPos {
+		dec := min(tf.StartPos, 8)
+		tf.StartPos -= dec
+	}
+	if tf.SelectMode {
+		tf.SelectRegUpdate(tf.CursorPos)
+	}
+}
+
 // CursorStart moves the cursor to the start of the text, updating selection
 // if select mode is active
 func (tf *TextField) CursorStart() {
@@ -1343,6 +1397,10 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case KeyFunMoveLeft:
 			e.SetHandled()
 			tf.CursorBackward(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunWordLeft:
+			e.SetHandled()
+			tf.CursorBackwardWord(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunHome:
 			e.SetHandled()
