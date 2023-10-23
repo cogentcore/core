@@ -33,9 +33,7 @@ import (
 // performance.  It uses the Widget Parts to hold the splitter widgets
 // separately from the children that contain the rest of the scenegraph to be
 // displayed within each region.
-//
-//goki:embedder
-type Splits struct {
+type Splits struct { //goki:embedder
 	WidgetBase
 
 	// size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this

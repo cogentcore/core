@@ -35,9 +35,7 @@ type SliderPositioner interface {
 // Slider is a slideable widget that provides slider functionality for two major modes.
 // ValThumb = false is a slider with a fixed-size thumb knob, while = true has a thumb
 // that represents a value, as in a scrollbar, and the scrolling range is size - thumbsize
-//
-//goki:embedder
-type Slider struct {
+type Slider struct { //goki:embedder
 	WidgetBase
 
 	// the type of the slider

@@ -44,9 +44,7 @@ import (
 // Standard events.Event are sent to any listeners, including
 // Select, Change, and DoubleClick.  The selected nodes
 // are in the root SelectedNodes list.
-//
-//goki:embedder
-type TreeView struct {
+type TreeView struct { //goki:embedder
 	gi.WidgetBase
 
 	// If non-Ki Node that this widget is viewing in the tree -- the source
