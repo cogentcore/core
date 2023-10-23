@@ -29,6 +29,7 @@ import (
 	"goki.dev/mat32/v2"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/filecat"
+	"goki.dev/pi/v2/lex"
 	"golang.org/x/image/draw"
 )
 
@@ -361,6 +362,57 @@ func (tf *TextField) CursorForward(steps int) {
 	updt := tf.UpdateStart()
 	defer tf.UpdateEndRender(updt)
 	tf.CursorPos += steps
+	if tf.CursorPos > len(tf.EditTxt) {
+		tf.CursorPos = len(tf.EditTxt)
+	}
+	if tf.CursorPos > tf.EndPos {
+		inc := tf.CursorPos - tf.EndPos
+		tf.EndPos += inc
+	}
+	if tf.SelectMode {
+		tf.SelectRegUpdate(tf.CursorPos)
+	}
+}
+
+// CursorForwardWord moves the cursor forward by words
+func (tf *TextField) CursorForwardWord(steps int) {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+	for i := 0; i < steps; i++ {
+		sz := len(tf.EditTxt)
+		if sz > 0 && tf.CursorPos < sz {
+			ch := tf.CursorPos
+			var done = false
+			for ch < sz && !done { // if on a wb, go past
+				r1 := tf.EditTxt[ch]
+				r2 := rune(-1)
+				if ch < sz-1 {
+					r2 = tf.EditTxt[ch+1]
+				}
+				if lex.IsWordBreak(r1, r2) {
+					ch++
+				} else {
+					done = true
+				}
+			}
+			done = false
+			for ch < sz && !done {
+				r1 := tf.EditTxt[ch]
+				r2 := rune(-1)
+				if ch < sz-1 {
+					r2 = tf.EditTxt[ch+1]
+				}
+				if !lex.IsWordBreak(r1, r2) {
+					ch++
+				} else {
+					done = true
+				}
+			}
+			tf.CursorPos = ch
+		} else {
+			tf.CursorPos = sz
+		}
+	}
 	if tf.CursorPos > len(tf.EditTxt) {
 		tf.CursorPos = len(tf.EditTxt)
 	}
@@ -1283,6 +1335,10 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case KeyFunMoveRight:
 			e.SetHandled()
 			tf.CursorForward(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunWordRight:
+			e.SetHandled()
+			tf.CursorForwardWord(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunMoveLeft:
 			e.SetHandled()
