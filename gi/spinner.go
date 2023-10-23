@@ -101,10 +101,13 @@ func (sp *Spinner) SpinnerStyles() {
 		case "parts/text-field":
 			tf := w.(*TextField)
 			tf.SetText(sp.ValToString(sp.Value))
-			tf.SetState(sp.IsReadOnly(), states.Disabled)
 			sp.TextFieldHandlers(tf)
 			tf.Style(func(s *styles.Style) {
+				tf.SetState(sp.IsReadOnly(), states.ReadOnly)
 				s.SetMinPrefWidth(units.Em(3))
+			})
+			tf.OnSelect(func(e events.Event) {
+				sp.HandleEvent(e) // pass up
 			})
 		case "parts/up":
 			up := w.(*Button)
@@ -117,10 +120,13 @@ func (sp *Spinner) SpinnerStyles() {
 			up.OnClick(func(e events.Event) {
 				sp.IncrValue(1)
 			})
+			up.OnSelect(func(e events.Event) {
+				sp.HandleEvent(e) // pass up
+			})
 			up.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
 				s.Font.Size.SetDp(18)
-				s.Padding.Set(units.Dp(4))
+				s.Padding.Set(units.Dp(1))
 			})
 		case "parts/down":
 			down := w.(*Button)
@@ -133,10 +139,13 @@ func (sp *Spinner) SpinnerStyles() {
 			down.OnClick(func(e events.Event) {
 				sp.IncrValue(-1)
 			})
+			down.OnSelect(func(e events.Event) {
+				sp.HandleEvent(e) // pass up
+			})
 			down.Style(func(s *styles.Style) {
 				s.SetAbilities(false, abilities.Focusable)
 				s.Font.Size.SetDp(18)
-				s.Padding.Set(units.Dp(4))
+				s.Padding.Set(units.Dp(1))
 			})
 		}
 	})
@@ -200,6 +209,9 @@ func (sp *Spinner) SetValueAction(val float32) *Spinner {
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
 func (sp *Spinner) IncrValue(steps float32) *Spinner {
+	if sp.IsReadOnly() {
+		return sp
+	}
 	val := sp.Value + steps*sp.Step
 	val = mat32.IntMultiple(val, sp.Step)
 	return sp.SetValueAction(val)
@@ -209,6 +221,9 @@ func (sp *Spinner) IncrValue(steps float32) *Spinner {
 // and enforces it to be an even multiple of the step size (snap-to-value),
 // and emits the signal
 func (sp *Spinner) PageIncrValue(steps float32) *Spinner {
+	if sp.IsReadOnly() {
+		return sp
+	}
 	val := sp.Value + steps*sp.PageStep
 	val = mat32.IntMultiple(val, sp.PageStep)
 	return sp.SetValueAction(val)
@@ -283,7 +298,7 @@ func (sp *Spinner) HandleSpinnerEvents() {
 
 func (sp *Spinner) HandleSpinnerScroll() {
 	sp.On(events.Scroll, func(e events.Event) {
-		if sp.StateIs(states.Disabled) || !sp.StateIs(states.Focused) {
+		if sp.IsReadOnly() || !sp.StateIs(states.Focused) {
 			return
 		}
 		se := e.(*events.MouseScroll)
@@ -320,7 +335,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 		sp.SetValueAction(val)
 	})
 	tf.OnKeyChord(func(e events.Event) {
-		if sp.StateIs(states.Disabled) {
+		if sp.IsReadOnly() {
 			return
 		}
 		if KeyEventTrace {

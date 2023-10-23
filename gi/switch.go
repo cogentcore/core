@@ -100,7 +100,9 @@ func (sw *Switch) HandleSwitchEvents() {
 func (sw *Switch) SwitchStyles() {
 	sw.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable, abilities.Checkable)
-		s.Cursor = cursors.Pointer
+		if !sw.IsReadOnly() {
+			s.Cursor = cursors.Pointer
+		}
 		s.Text.Align = styles.AlignLeft
 		s.Color = colors.Scheme.OnBackground
 		s.Margin.Set(units.Dp(1))
@@ -109,9 +111,6 @@ func (sw *Switch) SwitchStyles() {
 
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		}
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
 		}
 	})
 	sw.OnWidgetAdded(func(w Widget) {
@@ -238,6 +237,7 @@ func (sw *Switch) ConfigParts(sc *Scene) {
 		}
 	}
 	if mods {
+		parts.Update()
 		parts.UpdateEnd(updt)
 		sw.SetNeedsLayoutUpdate(sc, updt)
 	}

@@ -562,7 +562,7 @@ func (ed *Editor) OpenLinkAt(pos lex.Pos) (*paint.TextLink, bool) {
 // HandleTextViewMouse handles mouse events.Event
 func (ed *Editor) HandleTextViewMouse() {
 	ed.On(events.MouseDown, func(e events.Event) { // note: usual is Click..
-		if ed.StateIs(states.Disabled) {
+		if ed.IsReadOnly() {
 			return
 		}
 		if !ed.StateIs(states.Focused) {
@@ -590,7 +590,7 @@ func (ed *Editor) HandleTextViewMouse() {
 		}
 	})
 	ed.OnDoubleClick(func(e events.Event) {
-		if ed.StateIs(states.Disabled) {
+		if ed.IsReadOnly() {
 			return
 		}
 		if !ed.StateIs(states.Focused) {
@@ -617,7 +617,7 @@ func (ed *Editor) HandleTextViewMouse() {
 		}
 	})
 	ed.On(events.SlideMove, func(e events.Event) {
-		if ed.StateIs(states.Disabled) {
+		if ed.IsReadOnly() {
 			return
 		}
 		e.SetHandled()

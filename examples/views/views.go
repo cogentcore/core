@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -201,7 +202,7 @@ func app() {
 	// })
 
 	tv := giv.NewTableView(split, "tv")
-	tv.SetReadOnly()
+	tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 	tv.Style(func(s *styles.Style) {
 		s.SetStretchMax()

@@ -131,7 +131,9 @@ func (bt *Button) ButtonStyles() {
 	bt.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(bt.ShortcutTooltip() != "", abilities.LongHoverable)
-		s.Cursor = cursors.Pointer
+		if !bt.IsReadOnly() {
+			s.Cursor = cursors.Pointer
+		}
 		s.Border.Radius = styles.BorderRadiusFull
 		s.Padding.Set(units.Em(0.625), units.Em(1.5))
 		if !bt.Icon.IsNil() {
@@ -172,11 +174,8 @@ func (bt *Button) ButtonStyles() {
 			s.Padding.Set(units.Dp(6), units.Dp(12))
 			s.MaxBoxShadow = styles.BoxShadow0()
 		}
-		if s.Is(states.Hovered) && !s.Is(states.Disabled) {
+		if s.Is(states.Hovered) && !bt.IsReadOnly() {
 			s.BoxShadow = s.MaxBoxShadow
-		}
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
 		}
 	})
 	bt.OnWidgetAdded(func(w Widget) {
@@ -401,6 +400,7 @@ func (bt *Button) ConfigParts(sc *Scene) {
 	bt.ConfigPartsIndicator(indIdx)
 	bt.ConfigPartsShortcut(scIdx)
 	if mods {
+		parts.Update()
 		parts.UpdateEnd(updt)
 		bt.SetNeedsLayoutUpdate(sc, updt)
 	}

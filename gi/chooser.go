@@ -245,6 +245,7 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 		ic.SetIcon(ch.Indicator)
 	}
 	if mods {
+		parts.Update()
 		parts.UpdateEnd(updt)
 		ch.SetNeedsLayoutUpdate(sc, updt)
 	}

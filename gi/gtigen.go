@@ -763,18 +763,18 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}, Tag: "xml:\"spacing\""}},
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
 		{"StackTopOnly", &gti.Field{Name: "StackTopOnly", Type: "bool", LocalType: "bool", Doc: "for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't", Directives: gti.Directives{}, Tag: ""}},
-		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", LocalType: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Scrolls", &gti.Field{Name: "Scrolls", Type: "[2]*goki.dev/gi/v2/gi.Slider", LocalType: "[2]*Slider", Doc: "scroll bars -- we fully manage them as needed", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", LocalType: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1218,14 +1218,14 @@ var SceneType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title of the Scene", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "Data is the optional data value being represented by this scene.\nUsed e.g., for recycling views of a given item instead of creating new one.", Directives: gti.Directives{}, Tag: ""}},
-		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: ""}},
+		{"Geom", &gti.Field{Name: "Geom", Type: "goki.dev/mat32/v2.Geom2DInt", LocalType: "mat32.Geom2DInt", Doc: "Size and position relative to overall rendering context.", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
 		{"RenderState", &gti.Field{Name: "RenderState", Type: "goki.dev/girl/paint.State", LocalType: "paint.State", Doc: "render state for rendering", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"Pixels", &gti.Field{Name: "Pixels", Type: "*image.RGBA", LocalType: "*image.RGBA", Doc: "live pixels that we render into", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"BgColor", &gti.Field{Name: "BgColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "background color for filling scene -- defaults to transparent so that popups can have rounded corners", Directives: gti.Directives{}, Tag: ""}},
 		{"EventMgr", &gti.Field{Name: "EventMgr", Type: "goki.dev/gi/v2/gi.EventMgr", LocalType: "EventMgr", Doc: "event manager for this scene", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stage", &gti.Field{Name: "Stage", Type: "goki.dev/gi/v2/gi.Stage", LocalType: "Stage", Doc: "current stage in which this Scene is set", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CurColor", &gti.Field{Name: "CurColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "Current color in styling -- used for relative color names", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
-		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"LastRender", &gti.Field{Name: "LastRender", Type: "goki.dev/gi/v2/gi.RenderParams", LocalType: "RenderParams", Doc: "LastRender captures key params from last render.\nIf different then a new ApplyStyleScene is needed.", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
 		{"StyleMu", &gti.Field{Name: "StyleMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "StyleMu is RW mutex protecting access to Style-related global vars", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 		{"ShowLayoutIter", &gti.Field{Name: "ShowLayoutIter", Type: "int", LocalType: "int", Doc: "ShowLayoutIter counts up at start of showing a Scene\nfor a sequence of Layout passes to ensure proper initial sizing.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"-\" set:\"-\""}},
 	}),
@@ -1265,13 +1265,6 @@ func (t *Scene) SetTitle(v string) *Scene {
 // Used e.g., for recycling views of a given item instead of creating new one.
 func (t *Scene) SetData(v any) *Scene {
 	t.Data = v
-	return t
-}
-
-// SetGeom sets the [Scene.Geom]:
-// Size and position relative to overall rendering context.
-func (t *Scene) SetGeom(v mat32.Geom2DInt) *Scene {
-	t.Geom = v
 	return t
 }
 

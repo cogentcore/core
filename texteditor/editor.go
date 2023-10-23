@@ -40,7 +40,7 @@ type Editor struct {
 	gi.Layout
 
 	// the text buffer that we're editing
-	Buf *Buf `json:"-" xml:"-"`
+	Buf *Buf `set:"-" json:"-" xml:"-"`
 
 	// text that is displayed when the field is empty, in a lower-contrast manner
 	Placeholder string `json:"-" xml:"placeholder"`
@@ -61,93 +61,93 @@ type Editor struct {
 	CursorColor colors.Full
 
 	// number of lines in the view -- sync'd with the Buf after edits, but always reflects storage size of Renders etc
-	NLines int `json:"-" xml:"-"`
+	NLines int `set:"-" view:"-" json:"-" xml:"-"`
 
 	// renders of the text lines, with one render per line (each line could visibly wrap-around, so these are logical lines, not display lines)
-	Renders []paint.Text `json:"-" xml:"-"`
+	Renders []paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// starting render offsets for top of each line
-	Offs []float32 `json:"-" xml:"-"`
+	Offs []float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// number of line number digits needed
-	LineNoDigs int `json:"-" xml:"-"`
+	LineNoDigs int `set:"-" view:"-" json:"-" xml:"-"`
 
 	// horizontal offset for start of text after line numbers
-	LineNoOff float32 `json:"-" xml:"-"`
+	LineNoOff float32 `set:"-" view:"-" json:"-" xml:"-"`
 
 	// render for line numbers
-	LineNoRender paint.Text `json:"-" xml:"-"`
+	LineNoRender paint.Text `set:"-" view:"-" json:"-" xml:"-"`
 
 	// current cursor position
-	CursorPos lex.Pos `json:"-" xml:"-"`
+	CursorPos lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// desired cursor column -- where the cursor was last when moved using left / right arrows -- used when doing up / down to not always go to short line columns
-	CursorCol int `json:"-" xml:"-"`
+	CursorCol int `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// if true, scroll screen to cursor on next render
-	ScrollToCursorOnRender bool `json:"-" xml:"-"`
+	ScrollToCursorOnRender bool `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// cursor position to scroll to
-	ScrollToCursorPos lex.Pos `json:"-" xml:"-"`
+	ScrollToCursorPos lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// current index within PosHistory
-	PosHistIdx int `json:"-" xml:"-"`
+	PosHistIdx int `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// starting point for selection -- will either be the start or end of selected region depending on subsequent selection.
-	SelectStart lex.Pos `json:"-" xml:"-"`
+	SelectStart lex.Pos `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// current selection region
-	SelectReg textbuf.Region `json:"-" xml:"-"`
+	SelectReg textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// previous selection region, that was actually rendered -- needed to update render
-	PrevSelectReg textbuf.Region `json:"-" xml:"-"`
+	PrevSelectReg textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// highlighted regions, e.g., for search results
-	Highlights []textbuf.Region `json:"-" xml:"-"`
+	Highlights []textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// highlighted regions, specific to scope markers
-	Scopelights []textbuf.Region `json:"-" xml:"-"`
+	Scopelights []textbuf.Region `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// if true, select text as cursor moves
-	SelectMode bool `json:"-" xml:"-"`
+	SelectMode bool `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// if true, complete regardless of any disqualifying reasons
-	ForceComplete bool `json:"-" xml:"-"`
+	ForceComplete bool `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// interactive search data
-	ISearch ISearch `json:"-" xml:"-"`
+	ISearch ISearch `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// query replace data
-	QReplace QReplace `json:"-" xml:"-"`
+	QReplace QReplace `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// font height, cached during styling
-	FontHeight float32 `json:"-" xml:"-"`
+	FontHeight float32 `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// line height, cached during styling
-	LineHeight float32 `json:"-" xml:"-"`
+	LineHeight float32 `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// height in lines and width in chars of the visible area
-	NLinesChars image.Point `json:"-" xml:"-"`
+	NLinesChars image.Point `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// total size of all lines as rendered
-	LinesSize mat32.Vec2 `json:"-" xml:"-"`
+	LinesSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// TotalSize = LinesSize plus extra space and line numbers etc
-	TotalSize mat32.Vec2 `json:"-" xml:"-"`
+	TotalSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// LineLayoutSize is LayState.Alloc.Size subtracting
 	// extra space and line numbers -- this is what
 	// LayoutStdLR sees for laying out each line
-	LineLayoutSize mat32.Vec2 `json:"-" xml:"-"`
+	LineLayoutSize mat32.Vec2 `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// oscillates between on and off for blinking
-	BlinkOn bool `json:"-" xml:"-"`
+	BlinkOn bool `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	// mutex protecting cursor rendering -- shared between blink and main code
-	CursorMu sync.Mutex `json:"-" xml:"-" view:"-"`
+	CursorMu sync.Mutex `set:"-" json:"-" xml:"-" view:"-"`
 
 	// at least one of the renders has links -- determines if we set the cursor for hand movements
-	HasLinks bool `json:"-" xml:"-"`
+	HasLinks bool `set:"-" readonly:"-" json:"-" xml:"-"`
 
 	lastRecenter   int
 	lastAutoInsert rune

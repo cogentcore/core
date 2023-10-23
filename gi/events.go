@@ -150,7 +150,7 @@ func (wb *WidgetBase) HandleWidgetClick() {
 		} else {
 			wb.FocusClear()
 		}
-		if wb.AbilityIs(abilities.Selectable) {
+		if wb.AbilityIs(abilities.Selectable) || wb.IsReadOnly() {
 			if wb.StateIs(states.Selected) {
 				wb.SetState(false, states.Selected)
 				wb.Send(events.Deselect, e)

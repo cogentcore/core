@@ -287,6 +287,7 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
+	return // Kai: ToggleSelectionMode is not registered
 	up := NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(ge.Changed)

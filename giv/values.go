@@ -290,7 +290,7 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	sv.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sv.SetSlice(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -402,7 +402,7 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	sv.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sv.SetMap(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -540,7 +540,7 @@ func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
@@ -580,7 +580,7 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	sb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
@@ -657,7 +657,7 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	sb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
@@ -745,7 +745,7 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
 	ch.Tooltip, _ = vv.Desc()
-	ch.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	ch.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	ev := vv.EnumValue()
 	ch.ItemsFromEnum(ev, false, 50)
@@ -811,7 +811,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	// todo!
 	ev := vv.EnumValue()
@@ -859,7 +859,7 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	typEmbeds := ki.NodeType
 	// if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -917,7 +917,7 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -961,7 +961,7 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
@@ -1053,7 +1053,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	tf.Style(func(s *styles.Style) {
 		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
