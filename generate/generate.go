@@ -81,7 +81,7 @@ var WidgetMethodsTmpl = template.Must(template.New("WidgetMethods").
 	Parse(
 		`
 		// SetTooltip sets the [{{.Name}}.Tooltip]:
-		// text for the tooltip for this widget, which can use HTML formatting
+		// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 		func (t *{{.Name}}) SetTooltip(v string) *{{.Name}} {
 			t.Tooltip = v
 			return t
