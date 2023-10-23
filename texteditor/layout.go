@@ -72,7 +72,8 @@ func (ed *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool
 	redo := ed.DoLayoutChildren(sc, iter)
 	if redo {
 		ed.SetFlag(true, gi.LayoutNeedsRedo)
-	} else if iter == 1 {
+	}
+	if !redo || iter == 1 {
 		delta := ed.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
 			ed.LayoutScrollChildren(sc, delta) // move is a separate step

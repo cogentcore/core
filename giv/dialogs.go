@@ -232,7 +232,7 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slice)
-	sv.OnChange(func(e events.Event) {
+	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {

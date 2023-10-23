@@ -143,7 +143,6 @@ func (dlg *Dialog) Ok() *Dialog {
 	NewButton(bb, "ok").SetType(ButtonText).SetText("OK").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.AcceptDialog()
-		sc.Send(events.Change, e)
 	})
 	sc.OnKeyChord(func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
@@ -164,7 +163,6 @@ func (dlg *Dialog) Cancel() *Dialog {
 	NewButton(bb, "cancel").SetType(ButtonText).SetText("Cancel").OnClick(func(e events.Event) {
 		e.SetHandled() // otherwise propagates to dead elements
 		dlg.CancelDialog()
-		sc.Send(events.Change, e)
 	})
 	sc.OnKeyChord(func(e events.Event) {
 		kf := KeyFun(e.KeyChord())
@@ -187,12 +185,14 @@ func (dlg *Dialog) OkCancel() *Dialog {
 // AcceptDialog accepts the dialog, activated by the default Ok button
 func (dlg *Dialog) AcceptDialog() {
 	dlg.Accepted = true
+	dlg.Stage.Scene.Send(events.Change)
 	dlg.Close()
 }
 
 // CancelDialog cancels the dialog, activated by the default Cancel button
 func (dlg *Dialog) CancelDialog() {
 	dlg.Accepted = false
+	dlg.Stage.Scene.Send(events.Change)
 	dlg.Close()
 }
 
