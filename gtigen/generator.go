@@ -32,6 +32,7 @@ type Generator struct {
 	Buf        bytes.Buffer                          // The accumulated output.
 	Pkgs       []*packages.Package                   // The packages we are scanning.
 	Pkg        *packages.Package                     // The packages we are currently on.
+	Cmap       ast.CommentMap                        // The comment map for the file we are currently on.
 	Types      []*Type                               // The types
 	Methods    *ordmap.Map[string, []*gti.Method]    // The methods, keyed by the the full package name of the type of the receiver
 	Funcs      *ordmap.Map[string, *gti.Func]        // The functions
@@ -166,6 +167,8 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 // be called in [ast.Inspect].
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	switch v := n.(type) {
+	case *ast.File:
+		g.Cmap = ast.NewCommentMap(g.Pkg.Fset, v, v.Comments)
 	case *ast.GenDecl:
 		return g.InspectGenDecl(v)
 	case *ast.FuncDecl:
@@ -203,7 +206,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 		}
 
-		dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, gd.Doc, ts.Doc, ts.Comment)
+		dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, g.Cmap.Filter(gd).Comments()...)
 		if err != nil {
 			return false, err
 		}
@@ -257,7 +260,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	cfg := &Config{}
 	*cfg = *g.Config
-	dirs, hasAdd, hasSkip, err := LoadFromComment(fd.Doc, cfg)
+	dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, g.Cmap.Filter(fd).Comments()...)
 	if err != nil {
 		return false, err
 	}
