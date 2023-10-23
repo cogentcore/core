@@ -10,7 +10,6 @@ package generate
 import (
 	"fmt"
 	"slices"
-	"strings"
 	"text/template"
 
 	"goki.dev/enums/enumgen"
@@ -20,25 +19,6 @@ import (
 	"goki.dev/gti/gtigen"
 	"golang.org/x/tools/go/packages"
 )
-
-// GeneralMethodsTmpl is a template that contains the methods
-// and functions applicable to all types.
-var GeneralMethodsTmpl = template.Must(template.New("GeneralMethods").
-	Funcs(template.FuncMap{
-		"SetterFields": SetterFields,
-		"DocToComment": DocToComment,
-	}).Parse(
-	`
-	{{$typ := .}}
-	{{range (SetterFields .)}}
-	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}]:
-	{{DocToComment .Doc}}
-	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.LocalType}}) *{{$typ.Name}} {
-		t.{{.Name}} = v
-		return t
-	}
-	{{end}}
-	`))
 
 // KiMethodsTmpl is a template that contains the methods
 // and functions specific to Ki types.
@@ -121,26 +101,6 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 	})
 }
 
-// SetterFields returns all of the fields of the given type
-// that don't have a `set:"-"` struct tag.
-func SetterFields(typ *gtigen.Type) []*gti.Field {
-	res := []*gti.Field{}
-	for _, kv := range typ.Fields.Order {
-		f := kv.Val
-		// unspecified indicates to add a set method; only "-" means no set
-		hasSetter := f.Tag.Get("set") != "-"
-		if hasSetter {
-			res = append(res, f)
-		}
-	}
-	return res
-}
-
-// DocToComment converts the given doc string to an appropriate comment string.
-func DocToComment(doc string) string {
-	return "// " + strings.ReplaceAll(doc, "\n", "\n// ")
-}
-
 // Generate is the main entry point to code generation
 // that does all of the generation according to the
 // given config info. It overrides the
@@ -150,14 +110,14 @@ func DocToComment(doc string) string {
 func Generate(cfg *config.Config) error {
 	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
 
-	cfg.Generate.Gtigen.Templates = []*template.Template{GeneralMethodsTmpl}
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
 	if cfg.Generate.AddKiTypes {
 		cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
 			AddTypes:  true,
 			Instance:  true,
 			TypeVar:   true,
-			Templates: []*template.Template{KiMethodsTmpl, GeneralMethodsTmpl},
+			Setters:   true,
+			Templates: []*template.Template{KiMethodsTmpl},
 		}
 	}
 	pkgs, err := ParsePackages(cfg)
