@@ -82,15 +82,23 @@ func (i Icon) IsValid() bool {
 	return ex
 }
 
-// All returns a list of all the icons
-func All() []string {
+// AllIcons is a list of all icons
+var AllIcons []Icon
+
+// All returns a list of all the Icons
+func All() []Icon {
+	if AllIcons != nil {
+		return AllIcons
+	}
 	files, err := fs.ReadDir(Icons, "svg")
 	if err != nil {
 		return nil
 	}
-	fns := make([]string, 0, len(files))
+	ics := make([]Icon, 0, len(files))
 	for _, fi := range files {
-		fns = append(fns, fi.Name())
+		ic := Icon(strings.TrimSuffix(fi.Name(), ".svg"))
+		ics = append(ics, ic)
 	}
-	return fns
+	AllIcons = ics
+	return AllIcons
 }
