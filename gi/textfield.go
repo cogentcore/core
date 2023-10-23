@@ -635,13 +635,13 @@ func (tf *TextField) SelectModeToggle() {
 
 // ShiftSelect sets the selection start if the shift key is down but wasn't previously.
 // If the shift key has been released, the selection info is cleared.
-func (tf *TextField) ShiftSelect(kt events.Event) {
-	hasShift := kt.HasAnyModifier(key.Shift)
+func (tf *TextField) ShiftSelect(e events.Event) {
+	hasShift := e.HasAnyModifier(key.Shift)
 	if hasShift && !tf.SelectMode {
 		tf.SelectModeToggle()
 	}
 	if !hasShift && tf.SelectMode {
-		tf.SelectModeToggle()
+		tf.SelectReset()
 	}
 }
 
