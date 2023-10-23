@@ -177,24 +177,16 @@ func (g *Generator) Inspect(n ast.Node) (bool, error) {
 // InspectGenDecl is the implementation of [Generator.Inspect]
 // for [ast.GenDecl] nodes.
 func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
-	hasAdd := false
-	cfg := &Config{}
-	*cfg = *g.Config
-	dirs, hasAdd, hasSkip, err := LoadFromComment(gd.Doc, cfg)
-	if err != nil {
-		return false, err
-	}
-	if len(cfg.InterfaceConfigs) == 0 && ((!hasAdd && !cfg.AddTypes) || hasSkip) { // we must be told to add or we will not add, and if we have interface configs we will handle adding later
-		return true, nil
-	}
 	doc := strings.TrimSuffix(gd.Doc.Text(), "\n")
 	for _, spec := range gd.Specs {
 		ts, ok := spec.(*ast.TypeSpec)
 		if !ok {
 			return true, nil
 		}
+		cfg := &Config{}
+		*cfg = *g.Config
+
 		if len(cfg.InterfaceConfigs) > 0 {
-			hasInt := false
 			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
 			if !types.IsInterface(typ) {
 				for in, ic := range cfg.InterfaceConfigs {
@@ -207,20 +199,18 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 						continue
 					}
 					*cfg = *ic
-					dirs, hasAdd, hasSkip, err = LoadFromComments(cfg, gd.Doc, ts.Doc, ts.Comment)
-					hasInt = true
-					if err != nil {
-						return false, err
-					}
-					if (!hasAdd && !cfg.AddTypes) || hasSkip { // we must be told to add or we will not add
-						return true, nil
-					}
 				}
 			}
-			if (!hasInt && !hasAdd && !cfg.AddTypes) || hasSkip { // we must be told to add or we will not add
-				return true, nil
-			}
 		}
+
+		dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, gd.Doc, ts.Doc, ts.Comment)
+		if err != nil {
+			return false, err
+		}
+		if (!hasAdd && !cfg.AddTypes) || hasSkip { // we must be told to add or we will not add
+			return true, nil
+		}
+
 		typ := &Type{
 			Name:       ts.Name.Name,
 			FullName:   FullName(g.Pkg, ts.Name.Name),
