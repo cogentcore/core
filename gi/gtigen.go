@@ -53,6 +53,13 @@ func (t *MenuBar) New() ki.Ki {
 	return &MenuBar{}
 }
 
+// SetTooltip sets the [MenuBar.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *MenuBar) SetTooltip(v string) *MenuBar {
+	t.Tooltip = v
+	return t
+}
+
 // SetMainMenu sets the [MenuBar.MainMenu]:
 // is this the main menu bar for a window?  controls whether displayed on macOS
 func (t *MenuBar) SetMainMenu(v bool) *MenuBar {
@@ -114,6 +121,13 @@ func AsToolbar(k ki.Ki) *Toolbar {
 
 // AsToolbar satisfies the [ToolbarEmbedder] interface
 func (t *Toolbar) AsToolbar() *Toolbar {
+	return t
+}
+
+// SetTooltip sets the [Toolbar.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Toolbar) SetTooltip(v string) *Toolbar {
+	t.Tooltip = v
 	return t
 }
 
@@ -180,6 +194,13 @@ func AsButton(k ki.Ki) *Button {
 
 // AsButton satisfies the [ButtonEmbedder] interface
 func (t *Button) AsButton() *Button {
+	return t
+}
+
+// SetTooltip sets the [Button.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Button) SetTooltip(v string) *Button {
+	t.Tooltip = v
 	return t
 }
 
@@ -487,6 +508,13 @@ func (t *StyleSheet) New() ki.Ki {
 	return &StyleSheet{}
 }
 
+// SetTooltip sets the [StyleSheet.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *StyleSheet) SetTooltip(v string) *StyleSheet {
+	t.Tooltip = v
+	return t
+}
+
 // SetSheet sets the [StyleSheet.Sheet]:
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
 	t.Sheet = v
@@ -526,6 +554,13 @@ func (t *Frame) KiType() *gti.Type {
 // New returns a new [*Frame] value
 func (t *Frame) New() ki.Ki {
 	return &Frame{}
+}
+
+// SetTooltip sets the [Frame.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Frame) SetTooltip(v string) *Frame {
+	t.Tooltip = v
+	return t
 }
 
 // SetStripes sets the [Frame.Stripes]:
@@ -573,6 +608,13 @@ func (t *Icon) New() ki.Ki {
 	return &Icon{}
 }
 
+// SetTooltip sets the [Icon.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Icon) SetTooltip(v string) *Icon {
+	t.Tooltip = v
+	return t
+}
+
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
@@ -608,6 +650,13 @@ func (t *Image) KiType() *gti.Type {
 // New returns a new [*Image] value
 func (t *Image) New() ki.Ki {
 	return &Image{}
+}
+
+// SetTooltip sets the [Image.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Image) SetTooltip(v string) *Image {
+	t.Tooltip = v
+	return t
 }
 
 // LabelType is the [gti.Type] for [Label]
@@ -669,6 +718,13 @@ func AsLabel(k ki.Ki) *Label {
 
 // AsLabel satisfies the [LabelEmbedder] interface
 func (t *Label) AsLabel() *Label {
+	return t
+}
+
+// SetTooltip sets the [Label.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Label) SetTooltip(v string) *Label {
+	t.Tooltip = v
 	return t
 }
 
@@ -760,6 +816,13 @@ func (t *Layout) AsLayout() *Layout {
 	return t
 }
 
+// SetTooltip sets the [Layout.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Layout) SetTooltip(v string) *Layout {
+	t.Tooltip = v
+	return t
+}
+
 // SetSpacing sets the [Layout.Spacing]:
 // extra space to add between elements in the layout
 func (t *Layout) SetSpacing(v units.Value) *Layout {
@@ -814,6 +877,13 @@ func (t *Stretch) New() ki.Ki {
 	return &Stretch{}
 }
 
+// SetTooltip sets the [Stretch.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Stretch) SetTooltip(v string) *Stretch {
+	t.Tooltip = v
+	return t
+}
+
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
@@ -845,6 +915,13 @@ func (t *Space) KiType() *gti.Type {
 // New returns a new [*Space] value
 func (t *Space) New() ki.Ki {
 	return &Space{}
+}
+
+// SetTooltip sets the [Space.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Space) SetTooltip(v string) *Space {
+	t.Tooltip = v
+	return t
 }
 
 var _ = gti.AddType(&gti.Type{
@@ -1084,6 +1161,13 @@ func (t *ProgressBar) New() ki.Ki {
 	return &ProgressBar{}
 }
 
+// SetTooltip sets the [ProgressBar.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *ProgressBar) SetTooltip(v string) *ProgressBar {
+	t.Tooltip = v
+	return t
+}
+
 // SetProgMax sets the [ProgressBar.ProgMax]:
 // maximum amount of progress to be achieved
 func (t *ProgressBar) SetProgMax(v int) *ProgressBar {
@@ -1143,6 +1227,13 @@ func (t *Scene) KiType() *gti.Type {
 // New returns a new [*Scene] value
 func (t *Scene) New() ki.Ki {
 	return &Scene{}
+}
+
+// SetTooltip sets the [Scene.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Scene) SetTooltip(v string) *Scene {
+	t.Tooltip = v
+	return t
 }
 
 // SetTitle sets the [Scene.Title]:
@@ -1207,6 +1298,13 @@ func (t *Separator) KiType() *gti.Type {
 // New returns a new [*Separator] value
 func (t *Separator) New() ki.Ki {
 	return &Separator{}
+}
+
+// SetTooltip sets the [Separator.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Separator) SetTooltip(v string) *Separator {
+	t.Tooltip = v
+	return t
 }
 
 // SetHoriz sets the [Separator.Horiz]:
@@ -1296,6 +1394,13 @@ func AsSlider(k ki.Ki) *Slider {
 
 // AsSlider satisfies the [SliderEmbedder] interface
 func (t *Slider) AsSlider() *Slider {
+	return t
+}
+
+// SetTooltip sets the [Slider.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Slider) SetTooltip(v string) *Slider {
+	t.Tooltip = v
 	return t
 }
 
@@ -1542,6 +1647,13 @@ func (t *Spinner) AsSpinner() *Spinner {
 	return t
 }
 
+// SetTooltip sets the [Spinner.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Spinner) SetTooltip(v string) *Spinner {
+	t.Tooltip = v
+	return t
+}
+
 // SetStep sets the [Spinner.Step]:
 // smallest step size to increment
 func (t *Spinner) SetStep(v float32) *Spinner {
@@ -1646,6 +1758,13 @@ func (t *Splits) AsSplits() *Splits {
 	return t
 }
 
+// SetTooltip sets the [Splits.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Splits) SetTooltip(v string) *Splits {
+	t.Tooltip = v
+	return t
+}
+
 // SetHandleSize sets the [Splits.HandleSize]:
 // size of the handle region in the middle of each split region, where the splitter can be dragged -- other-dimension size is 2x of this
 func (t *Splits) SetHandleSize(v units.Value) *Splits {
@@ -1696,6 +1815,13 @@ func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
 }
 
+// SetTooltip sets the [Splitter.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Splitter) SetTooltip(v string) *Splitter {
+	t.Tooltip = v
+	return t
+}
+
 // SetSplitterNo sets the [Splitter.SplitterNo]:
 // splitter number this one is
 func (t *Splitter) SetSplitterNo(v int) *Splitter {
@@ -1740,6 +1866,13 @@ func (t *Switch) KiType() *gti.Type {
 // New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
+}
+
+// SetTooltip sets the [Switch.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Switch) SetTooltip(v string) *Switch {
+	t.Tooltip = v
+	return t
 }
 
 // SetText sets the [Switch.Text]:
@@ -1829,6 +1962,13 @@ func AsSwitches(k ki.Ki) *Switches {
 
 // AsSwitches satisfies the [SwitchesEmbedder] interface
 func (t *Switches) AsSwitches() *Switches {
+	return t
+}
+
+// SetTooltip sets the [Switches.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Switches) SetTooltip(v string) *Switches {
+	t.Tooltip = v
 	return t
 }
 
@@ -1922,6 +2062,13 @@ func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
+// SetTooltip sets the [Tabs.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Tabs) SetTooltip(v string) *Tabs {
+	t.Tooltip = v
+	return t
+}
+
 // SetMaxChars sets the [Tabs.MaxChars]:
 // maximum number of characters to include in tab label -- elides labels that are longer than that
 func (t *Tabs) SetMaxChars(v int) *Tabs {
@@ -1976,6 +2123,13 @@ func (t *Tab) KiType() *gti.Type {
 // New returns a new [*Tab] value
 func (t *Tab) New() ki.Ki {
 	return &Tab{}
+}
+
+// SetTooltip sets the [Tab.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Tab) SetTooltip(v string) *Tab {
+	t.Tooltip = v
+	return t
 }
 
 // SetDeleteButton sets the [Tab.DeleteButton]:
@@ -2164,7 +2318,7 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for tooltip for this widget -- can use HTML formatting", Directives: gti.Directives{}, Tag: ""}},
+		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: ""}},
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\" set:\"-\""}},
@@ -2209,7 +2363,7 @@ func (t *WidgetBase) New() ki.Ki {
 }
 
 // SetTooltip sets the [WidgetBase.Tooltip]:
-// text for tooltip for this widget -- can use HTML formatting
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
 	t.Tooltip = v
 	return t

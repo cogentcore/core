@@ -37,19 +37,19 @@ func app() {
 	})
 
 	icnms := icons.All()
-	for _, icnm := range icnms {
-		ic := strings.TrimSuffix(icnm, ".svg")
-		if strings.HasSuffix(ic, "-fill") {
+	for _, ic := range icnms {
+		icnm := string(ic)
+		if strings.HasSuffix(icnm, "-fill") {
 			continue
 		}
 
-		vb := gi.NewLayout(grid, ic).SetLayout(gi.LayoutVert)
+		vb := gi.NewLayout(grid, icnm).SetLayout(gi.LayoutVert)
 		vb.Style(func(s *styles.Style) {
 			s.MaxWidth = units.Em(15)
 		})
 
-		gi.NewLabel(vb, ic).SetText(ic)
-		gi.NewIcon(vb, ic).SetIcon(icons.Icon(ic))
+		gi.NewLabel(vb, icnm).SetText(icnm)
+		gi.NewIcon(vb, icnm).SetIcon(icons.Icon(icnm))
 	}
 
 	gi.NewWindow(sc).Run().Wait()

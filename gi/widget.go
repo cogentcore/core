@@ -32,9 +32,6 @@ type Widget interface {
 	// Style sets the styling of the widget by adding a Styler function
 	Style(s func(s *styles.Style)) Widget
 
-	// SetTooltip sets the Tooltip message when hovering over the widget
-	SetTooltip(tt string) *WidgetBase
-
 	// AsWidget returns the WidgetBase embedded field for any Widget node.
 	// The Widget interface defines only methods that can be overridden
 	// or need to be called on other nodes.  Everything else that is common
@@ -249,8 +246,8 @@ type Widget interface {
 type WidgetBase struct {
 	ki.Node
 
-	// text for tooltip for this widget -- can use HTML formatting
-	Tooltip string
+	// text for the tooltip for this widget, which can use HTML formatting
+	Tooltip string `set:"-"`
 
 	// todo: remove CSS stuff from here??
 
