@@ -738,3 +738,168 @@ func (i TreeViewFlags) MarshalText() ([]byte, error) {
 func (i *TreeViewFlags) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
+
+var _ValueFlagsValues = []ValueFlags{0, 1, 2}
+
+// ValueFlagsN is the highest valid value
+// for type ValueFlags, plus one.
+const ValueFlagsN ValueFlags = 3
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _ValueFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[ValueReadOnly-(0)]
+	_ = x[ValueMapKey-(1)]
+	_ = x[ValueHasSavedDesc-(2)]
+}
+
+var _ValueFlagsNameToValueMap = map[string]ValueFlags{
+	`ReadOnly`:     0,
+	`readonly`:     0,
+	`MapKey`:       1,
+	`mapkey`:       1,
+	`HasSavedDesc`: 2,
+	`hassaveddesc`: 2,
+}
+
+var _ValueFlagsDescMap = map[ValueFlags]string{
+	0: `flagged after first configuration`,
+	1: `for OwnKind = Map, this value represents the Key -- otherwise the Value`,
+	2: `whether there is a SavedDesc available`,
+}
+
+var _ValueFlagsMap = map[ValueFlags]string{
+	0: `ReadOnly`,
+	1: `MapKey`,
+	2: `HasSavedDesc`,
+}
+
+// String returns the string representation
+// of this ValueFlags value.
+func (i ValueFlags) String() string {
+	str := ""
+	for _, ie := range _ValueFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this ValueFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i ValueFlags) BitIndexString() string {
+	if str, ok := _ValueFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the ValueFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *ValueFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the ValueFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *ValueFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _ValueFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _ValueFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type ValueFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the ValueFlags value as an int64.
+func (i ValueFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the ValueFlags value from an int64.
+func (i *ValueFlags) SetInt64(in int64) {
+	*i = ValueFlags(in)
+}
+
+// Desc returns the description of the ValueFlags value.
+func (i ValueFlags) Desc() string {
+	if str, ok := _ValueFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// ValueFlagsValues returns all possible values
+// for the type ValueFlags.
+func ValueFlagsValues() []ValueFlags {
+	return _ValueFlagsValues
+}
+
+// Values returns all possible values
+// for the type ValueFlags.
+func (i ValueFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_ValueFlagsValues))
+	for i, d := range _ValueFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type ValueFlags.
+func (i ValueFlags) IsValid() bool {
+	_, ok := _ValueFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i ValueFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *ValueFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i ValueFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *ValueFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}

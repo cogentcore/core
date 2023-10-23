@@ -8,12 +8,9 @@ package giv
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 	"log/slog"
 	"reflect"
-	"strings"
-	"time"
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
@@ -22,389 +19,24 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
-	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
-	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/laser"
-	"goki.dev/pi/v2/filecat"
 )
 
-func init() {
-	gi.TheViewIFace = &ViewIFace{}
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() Value {
-		vv := &IconValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() Value {
-		vv := &FontValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() Value {
-		vv := &FileValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() Value {
-		vv := &KeyMapValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
-		vv := &ColorNameValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() Value {
-		vv := &KeyChordValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() Value {
-		vv := &HiStyleValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() Value {
-		vv := &TimeValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() Value {
-		vv := &TimeValue{}
-		ki.InitNode(vv)
-		return vv
-	})
-}
+// ValueFlags for Value bool state
+type ValueFlags int64 //enums:bitflag -trim-prefix Value
 
-var (
-	// MapInlineLen is the number of map elements at or below which an inline
-	// representation of the map will be presented -- more convenient for small
-	// #'s of props
-	MapInlineLen = 3
+const (
+	// flagged after first configuration
+	ValueReadOnly ValueFlags = iota
 
-	// StructInlineLen is the number of elemental struct fields at or below which an inline
-	// representation of the struct will be presented -- more convenient for small structs
-	StructInlineLen = 6
+	// for OwnKind = Map, this value represents the Key -- otherwise the Value
+	ValueMapKey
 
-	// SliceInlineLen is the number of slice elements below which inline will be used
-	SliceInlineLen = 6
+	// whether there is a SavedDesc available
+	ValueHasSavedDesc
 )
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  Valuer -- an interface for selecting Value GUI representation of types
-
-// Valuer interface supplies the appropriate type of Value -- called
-// on a given receiver item if defined for that receiver type (tries both
-// pointer and non-pointer receivers) -- can use this for custom types to
-// provide alternative custom interfaces -- must call Init on Value before
-// returning it
-type Valuer interface {
-	Value() Value
-}
-
-// example implementation of Valuer interface -- can't implement on
-// non-local types, so all the basic types are handled separately:
-//
-// func (s string) Value() Value {
-// 	vv := &ValueBase{}
-// 	ki.InitNode(vv)
-// 	return vv
-// }
-
-// FieldValuer interface supplies the appropriate type of Value for a
-// given field name and current field value on the receiver parent struct --
-// called on a given receiver struct if defined for that receiver type (tries
-// both pointer and non-pointer receivers) -- if a struct implements this
-// interface, then it is used first for structs -- return nil to fall back on
-// the default ToValue result
-type FieldValuer interface {
-	FieldValue(field string, fval any) Value
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-//  ValueMap -- alternative way to connect value view with type
-
-// ValueFunc is a function that returns a new initialized Value
-// of an appropriate type as registered in the ValueMap
-type ValueFunc func() Value
-
-// The ValueMap is used to connect type names with corresponding Value
-// representations of those types -- this can be used when it is not possible
-// to use the Valuer interface (e.g., interface methods can only be
-// defined within the package that defines the type -- so we need this for
-// all types in gi which don't know about giv).
-// You must use laser.LongTypeName (full package name + "." . type name) for
-// the type name, as that is how it will be looked up.
-var ValueMap map[string]ValueFunc
-
-// ValueMapAdd adds a ValueFunc for a given type name.
-// You must use laser.LongTypeName (full package name + "." . type name) for
-// the type name, as that is how it will be looked up.
-func ValueMapAdd(typeNm string, fun ValueFunc) {
-	if ValueMap == nil {
-		ValueMap = make(map[string]ValueFunc)
-	}
-	ValueMap[typeNm] = fun
-}
-
-// StructTagVal returns the value for given key in given struct tag string
-// uses reflect.StructTag Lookup method -- just a wrapper for external
-// use (e.g., in Python code)
-func StructTagVal(key, tags string) string {
-	stag := reflect.StructTag(tags)
-	val, _ := stag.Lookup(key)
-	return val
-}
-
-// ToValue returns the appropriate Value for given item, based only on
-// its type -- attempts to get the Valuer interface and failing that,
-// falls back on default Kind-based options.  tags are optional tags, e.g.,
-// from the field in a struct, that control the view properties -- see the gi wiki
-// for details on supported tags -- these are NOT set for the view element, only
-// used for options that affect what kind of view to create.
-// See FieldToValue for version that takes into account the properties of the owner.
-// gopy:interface=handle
-func ToValue(it any, tags string) Value {
-	if it == nil {
-		vv := &ValueBase{}
-		ki.InitNode(vv)
-		return vv
-	}
-	if vv, ok := it.(Valuer); ok {
-		vvo := vv.Value()
-		if vvo != nil {
-			return vvo
-		}
-	}
-	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(Valuer); ok {
-		vvo := vv.Value()
-		if vvo != nil {
-			return vvo
-		}
-	}
-
-	if _, ok := it.(enums.BitFlag); ok {
-		vv := &BitFlagView{}
-		ki.InitNode(vv)
-		return vv
-	}
-	if _, ok := it.(enums.Enum); ok {
-		vv := &EnumValue{}
-		ki.InitNode(vv)
-		return vv
-	}
-
-	typ := reflect.TypeOf(it)
-	nptyp := laser.NonPtrType(typ)
-	vk := typ.Kind()
-	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
-
-	nptypnm := laser.LongTypeName(nptyp)
-	if vvf, has := ValueMap[nptypnm]; has {
-		vv := vvf()
-		return vv
-	}
-
-	forceInline := false
-	forceNoInline := false
-
-	/*
-		tprops := kit.Types.Properties(typ, false) // don't make
-		if tprops != nil {
-			if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
-				forceInline, ok = kit.ToBool(inprop)
-			}
-			if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
-				forceNoInline, ok = kit.ToBool(inprop)
-			}
-		}
-	*/
-
-	if tags != "" {
-		stag := reflect.StructTag(tags)
-		if vwtag, ok := stag.Lookup("view"); ok {
-			switch vwtag {
-			case "inline":
-				forceInline = true
-			case "no-inline":
-				forceNoInline = true
-			}
-		}
-	}
-
-	switch {
-	case vk >= reflect.Int && vk <= reflect.Uint64:
-		if _, ok := it.(fmt.Stringer); ok { // use stringer
-			vv := &ValueBase{}
-			ki.InitNode(vv)
-			return vv
-		} else {
-			vv := &IntValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-	case vk == reflect.Bool:
-		vv := &BoolValue{}
-		ki.InitNode(vv)
-		return vv
-	case vk >= reflect.Float32 && vk <= reflect.Float64:
-		vv := &FloatValue{} // handles step, min / max etc
-		ki.InitNode(vv)
-		return vv
-	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
-		// todo: special edit with 2 fields..
-		vv := &ValueBase{}
-		ki.InitNode(vv)
-		return vv
-	case vk == reflect.Ptr:
-		if ki.IsKi(nptyp) {
-			vv := &KiPtrValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		if laser.AnyIsNil(it) {
-			vv := &NilValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		v := reflect.ValueOf(it)
-		if !laser.ValueIsZero(v) {
-			// note: interfaces go here:
-			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
-			return ToValue(v.Elem().Interface(), tags)
-		}
-	case vk == reflect.Array, vk == reflect.Slice:
-		v := reflect.ValueOf(it)
-		sz := v.Len()
-		eltyp := laser.SliceElType(it)
-		if _, ok := it.([]byte); ok {
-			vv := &ByteSliceValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		if _, ok := it.([]rune); ok {
-			vv := &RuneSliceValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
-		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
-			vv := &SliceInlineValue{}
-			ki.InitNode(vv)
-			return vv
-		} else {
-			vv := &SliceValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-	case vk == reflect.Map:
-		sz := laser.MapStructElsN(it)
-		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
-			vv := &MapInlineValue{}
-			ki.InitNode(vv)
-			return vv
-		} else {
-			vv := &MapValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-	case vk == reflect.Struct:
-		// note: we need to handle these here b/c cannot define new methods for gi types
-		if nptyp == laser.TypeFor[color.RGBA]() {
-			vv := &ColorValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		nfld := laser.AllFieldsN(nptyp)
-		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
-			vv := &StructInlineValue{}
-			ki.InitNode(vv)
-			return vv
-		} else {
-			vv := &StructValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-	case vk == reflect.Interface:
-		// note: we never get here -- all interfaces are captured by pointer kind above
-		// apparently (because the non-ptr vk indirection does that I guess?)
-		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
-		switch {
-		case nptyp == laser.TypeFor[reflect.Type]():
-			vv := &TypeValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-	case vk == reflect.String:
-		v := reflect.ValueOf(it)
-		str := v.String()
-		if strings.Contains(str, "\n") {
-			vv := &TextEditorValue{}
-			ki.InitNode(vv)
-			return vv
-		}
-		vv := &ValueBase{}
-		ki.InitNode(vv)
-		return vv
-	}
-	// fallback.
-	vv := &ValueBase{}
-	ki.InitNode(vv)
-	return vv
-}
-
-// FieldToValue returns the appropriate Value for given field on a
-// struct -- attempts to get the FieldValuer interface, and falls back on
-// ToValue otherwise, using field value (fval)
-// gopy:interface=handle
-func FieldToValue(it any, field string, fval any) Value {
-	if it == nil || field == "" {
-		return ToValue(fval, "")
-	}
-	if vv, ok := it.(FieldValuer); ok {
-		vvo := vv.FieldValue(field, fval)
-		if vvo != nil {
-			return vvo
-		}
-	}
-	// try pointer version..
-	if vv, ok := laser.PtrInterface(it).(FieldValuer); ok {
-		vvo := vv.FieldValue(field, fval)
-		if vvo != nil {
-			return vvo
-		}
-	}
-
-	typ := reflect.TypeOf(it)
-	nptyp := laser.NonPtrType(typ)
-
-	/*
-		if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
-			et := pv.(reflect.Type)
-			if kit.Enums.IsBitFlag(et) {
-				vv := &BitFlagView{}
-				vv.AltType = et
-				ki.InitNode(vv)
-				return vv
-			} else {
-				vv := &EnumValue{}
-				vv.AltType = et
-				ki.InitNode(vv)
-				return vv
-			}
-		}
-	*/
-
-	ftyp, ok := nptyp.FieldByName(field)
-	if ok {
-		return ToValue(fval, string(ftyp.Tag))
-	}
-	return ToValue(fval, "")
-}
 
 // Value is an interface for managing the GUI representation of values
 // (e.g., fields, map values, slice values) in Views (StructView, MapView,
@@ -415,11 +47,24 @@ func FieldToValue(it any, field string, fval any) Value {
 // The ValueBase class supports all the basic fields for managing
 // the owner kinds.
 type Value interface {
-	ki.Ki
+	fmt.Stringer
 
 	// AsValueBase gives access to the basic data fields so that the
 	// interface doesn't need to provide accessors for them.
 	AsValueBase() *ValueBase
+
+	// Name returns the name
+	Name() string
+
+	// SetName sets the name of the value
+	SetName(name string)
+
+	// Is checks if flag is set, using atomic, safe for concurrent access
+	Is(f enums.BitFlag) bool
+
+	// SetFlag sets the given flag(s) to given state
+	// using atomic, safe for concurrent access
+	SetFlag(on bool, f ...enums.BitFlag)
 
 	// SetStructValue sets the value, owner and field information for a struct field.
 	SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string)
@@ -443,10 +88,14 @@ type Value interface {
 	// (or Invalid for standalone values such as args).
 	OwnerKind() reflect.Kind
 
-	// IsReadOnly returns whether the value is readonly.
-	// e.g., Map owners have ReadOnly values, and fields can be marked
+	// IsReadOnly returns whether the value is ReadOnly, which prevents modification
+	// of the underlying Value.  Can be flagged by container views, or
+	// Map owners have ReadOnly values, and fields can be marked
 	// as ReadOnly using a struct tag.
 	IsReadOnly() bool
+
+	// SetReadOnly marks this value as ReadOnly or not
+	SetReadOnly(ro bool)
 
 	// WidgetType returns an appropriate type of widget to represent the
 	// current value.
@@ -535,16 +184,17 @@ type Value interface {
 // TextField representation of the string value, and provides the generic
 // fallback for everything that doesn't provide a specific Valuer type.
 type ValueBase struct {
-	ki.Node
+	// Name is locally-unique name of Value
+	Nm string
+
+	// Flags are atomic bit flags for Value state
+	Flags ValueFlags
 
 	// the reflect.Value representation of the value
 	Value reflect.Value `set:"-"`
 
 	// kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
 	OwnKind reflect.Kind
-
-	// for OwnKind = Map, this value represents the Key -- otherwise the Value
-	IsMapKey bool
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
@@ -557,9 +207,6 @@ type ValueBase struct {
 
 	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
 	Tags map[string]string `set:"-"`
-
-	// whether SavedDesc is applicable
-	HasSavedDesc bool `set:"-" readonly:"-"`
 
 	// a saved version of the description for the value, if HasSavedDesc is true
 	SavedDesc string `set:"-" readonly:"-"`
@@ -591,6 +238,33 @@ func (vv *ValueBase) AsValueBase() *ValueBase {
 	return vv
 }
 
+func (vv *ValueBase) Name() string {
+	return vv.Nm
+}
+
+func (vv *ValueBase) SetName(name string) {
+	vv.Nm = name
+}
+
+func (vv *ValueBase) String() string {
+	return vv.Nm + ": " + vv.Value.String()
+}
+
+// Is checks if flag is set, using atomic, safe for concurrent access
+func (vv *ValueBase) Is(f enums.BitFlag) bool {
+	return vv.Flags.HasFlag(f)
+}
+
+// SetFlag sets the given flag(s) to given state
+// using atomic, safe for concurrent access
+func (vv *ValueBase) SetFlag(on bool, f ...enums.BitFlag) {
+	vv.Flags.SetFlag(on, f...)
+}
+
+func (vv *ValueBase) SetReadOnly(ro bool) {
+	vv.SetFlag(ro, ValueReadOnly)
+}
+
 func (vv *ValueBase) SetStructValue(val reflect.Value, owner any, field *reflect.StructField, tmpSave Value, viewPath string) {
 	vv.OwnKind = reflect.Struct
 	vv.Value = val
@@ -603,7 +277,7 @@ func (vv *ValueBase) SetStructValue(val reflect.Value, owner any, field *reflect
 
 func (vv *ValueBase) SetMapKey(key reflect.Value, owner any, tmpSave Value) {
 	vv.OwnKind = reflect.Map
-	vv.IsMapKey = true
+	vv.SetFlag(true, ValueMapKey)
 	vv.Value = key
 	vv.Owner = owner
 	vv.TmpSave = tmpSave
@@ -665,13 +339,18 @@ func (vv *ValueBase) OwnerKind() reflect.Kind {
 }
 
 func (vv *ValueBase) IsReadOnly() bool {
+	if vv.Is(ValueReadOnly) {
+		return true
+	}
 	if vv.OwnKind == reflect.Struct {
 		if _, ok := vv.Tag("readonly"); ok {
+			vv.SetReadOnly(true) // cache
 			return true
 		}
 	}
 	npv := laser.NonPtrValue(vv.Value)
 	if npv.Kind() == reflect.Interface && laser.ValueIsZero(npv) {
+		vv.SetReadOnly(true) // cache
 		return true
 	}
 	return false
@@ -689,7 +368,7 @@ func (vv *ValueBase) Val() reflect.Value {
 }
 
 func (vv *ValueBase) SetValue(val any) bool {
-	if vv.This().(Value).IsReadOnly() {
+	if vv.IsReadOnly() {
 		return false
 	}
 	var err error
@@ -713,7 +392,7 @@ func (vv *ValueBase) SetValue(val any) bool {
 		wasSet = true
 	}
 	if wasSet {
-		vv.This().(Value).SaveTmp()
+		vv.SaveTmp()
 	}
 	// fmt.Printf("value view: %T sending for setting val %v\n", vv.This(), val)
 	vv.SendChange()
@@ -728,7 +407,7 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 	ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
 	wasSet := false
 	var err error
-	if vv.IsMapKey {
+	if vv.Is(ValueMapKey) {
 		nv := laser.NonPtrValue(reflect.ValueOf(val)) // new key value
 		kv := laser.NonPtrValue(vv.Value)
 		cv := ov.MapIndex(kv)    // get current value
@@ -743,7 +422,7 @@ func (vv *ValueBase) SetValueMap(val any) (bool, error) {
 						ov.SetMapIndex(kv, reflect.Value{}) // delete old key
 						ov.SetMapIndex(nv, cv)              // set new key to current value
 						vv.Value = nv                       // update value to new key
-						vv.This().(Value).SaveTmp()
+						vv.SaveTmp()
 						vv.SendChange()
 					}
 				})
@@ -816,9 +495,9 @@ func (vv *ValueBase) SaveTmp() {
 	if vv.TmpSave == nil {
 		return
 	}
-	if vv.TmpSave == vv.This().(Value) {
+	if vv.TmpSave.AsValueBase() == vv {
 		// if we are a map value, of a struct value, we save our value
-		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.IsMapKey {
+		if vv.Owner != nil && vv.OwnKind == reflect.Map && !vv.Is(ValueMapKey) {
 			if laser.NonPtrValue(vv.Value).Kind() == reflect.Struct {
 				ov := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
 				if vv.KeyView != nil {
@@ -837,7 +516,7 @@ func (vv *ValueBase) SaveTmp() {
 
 func (vv *ValueBase) CreateTempIfNotPtr() bool {
 	if vv.Value.Kind() != reflect.Ptr { // we create a temp variable -- SaveTmp will save it!
-		vv.TmpSave = vv.This().(Value) // we are it!
+		vv.TmpSave = vv // we are it!  note: this is saving the ValueBase rep ONLY, not the full iface
 		vtyp := reflect.TypeOf(vv.Value.Interface())
 		vtp := reflect.New(vtyp)
 		// fmt.Printf("vtyp: %v %v %v, vtp: %v %v %T\n", vtyp, vtyp.Name(), vtyp.String(), vtp, vtp.Type(), vtp.Interface())
@@ -897,7 +576,7 @@ func (vv *ValueBase) AllTags() map[string]string {
 // documentation of the value through gti. If this value's type/field has not
 // been added to gti, Desc returns "", false.
 func (vv *ValueBase) Desc() (string, bool) {
-	if vv.HasSavedDesc {
+	if vv.Is(ValueHasSavedDesc) {
 		return vv.SavedDesc, true
 	}
 
@@ -907,7 +586,7 @@ func (vv *ValueBase) Desc() (string, bool) {
 		if typ == nil {
 			return "", false
 		}
-		vv.HasSavedDesc = true
+		vv.SetFlag(true, ValueHasSavedDesc)
 		vv.SavedDesc = typ.Doc
 		return typ.Doc, true
 	}
@@ -920,7 +599,7 @@ func (vv *ValueBase) Desc() (string, bool) {
 	if f == nil {
 		return "", false
 	}
-	vv.HasSavedDesc = true
+	vv.SetFlag(true, ValueHasSavedDesc)
 	vv.SavedDesc = f.Doc
 	return f.Doc, true
 }
@@ -940,7 +619,7 @@ func (vv *ValueBase) OwnerLabel() string {
 		return vv.Field.Name
 	case reflect.Map:
 		kystr := ""
-		if vv.IsMapKey {
+		if vv.Is(ValueMapKey) {
 			kv := laser.NonPtrValue(vv.Value)
 			kystr = laser.ToString(kv.Interface())
 		} else {
@@ -1028,7 +707,6 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -1056,7 +734,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 
 // StdConfigWidget does all of the standard widget configuration tag options
 func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
-	// nb := widg.AsWidget()
+	widg.SetState(vv.IsReadOnly(), states.ReadOnly)
 	widg.Style(func(s *styles.Style) {
 		if widthtag, ok := vv.Tag("width"); ok {
 			width, err := laser.ToFloat32(widthtag)
@@ -1081,6 +759,9 @@ func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 			if err == nil {
 				s.SetMinPrefHeight(units.Em(height))
 			}
+		}
+		if vv.IsReadOnly() {
+			widg.SetState(true, states.ReadOnly)
 		}
 	})
 }

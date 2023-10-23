@@ -107,7 +107,7 @@ func (wb *WidgetBase) HandleEvent(ev events.Event) {
 	s := &wb.Styles
 	state := s.State
 	wb.Listeners.Call(ev)
-	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
 	if s.State != state {
@@ -150,15 +150,22 @@ func (wb *WidgetBase) HandleWidgetClick() {
 		} else {
 			wb.FocusClear()
 		}
+		// note: ReadOnly items are automatically selectable, for choosers
 		if wb.AbilityIs(abilities.Selectable) || wb.IsReadOnly() {
-			if wb.StateIs(states.Selected) {
-				wb.SetState(false, states.Selected)
-				wb.Send(events.Deselect, e)
-			} else {
-				wb.SetState(true, states.Selected)
-				wb.Send(events.Select, e)
-			}
+			wb.Send(events.Select, e)
 		}
+	})
+}
+
+// HandleSelectToggle does basic selection handling logic on widget,
+// as just a toggle on individual selection state, including ensuring
+// consistent selection flagging for parts.
+// This is not called by WidgetBase but should be called for simple
+// Widget types.  More complex container / View widgets likely implement
+// their own more complex selection logic.
+func (wb *WidgetBase) HandleSelectToggle() {
+	wb.OnSelect(func(e events.Event) {
+		wb.SetStateWidget(!wb.StateIs(states.Selected), states.Selected)
 	})
 }
 
@@ -307,7 +314,7 @@ func (wb *WidgetBase) FocusableInMe() Widget {
 	var foc Widget
 	wb.WalkPre(func(k ki.Ki) bool {
 		kwi, kwb := AsWidget(k)
-		if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) || kwb.Is(ki.Destroyed) {
+		if kwb == nil || kwb.This() == nil || kwb.Is(ki.Deleted) {
 			return ki.Break
 		}
 		if !kwb.AbilityIs(abilities.Focusable) {

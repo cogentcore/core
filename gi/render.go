@@ -259,8 +259,8 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 	}
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
-		wi, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+		wi, _ := AsWidget(k)
+		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 			return ki.Break
 		}
 		wi.Config(sc)
@@ -276,15 +276,15 @@ func (wb *WidgetBase) ConfigTree(sc *Scene) {
 // It wraps everything in UpdateStart / UpdateEndLayout
 // so layout will automatically be called for next render.
 func (wb *WidgetBase) Update() {
-	if wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
 		return
 	}
 	sc := wb.Sc
 	updt := wb.UpdateStart()
 	pr := prof.Start("Widget.ConfigTree." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
-		wi, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+		wi, _ := AsWidget(k)
+		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 			return ki.Break
 		}
 		wi.Config(sc) // sets sc if not
@@ -303,8 +303,8 @@ func (wb *WidgetBase) ApplyStyleTree(sc *Scene) {
 	}
 	pr := prof.Start("Widget.ApplyStyleTree." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
-		wi, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+		wi, _ := AsWidget(k)
+		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 			return ki.Break
 		}
 		wi.ApplyStyle(sc)
@@ -321,15 +321,15 @@ func (wb *WidgetBase) GetSizeTree(sc *Scene, iter int) {
 	}
 	pr := prof.Start("Widget.GetSizeTree." + wb.KiType().Name)
 	wb.WalkPost(func(k ki.Ki) bool { // tests whether to process node
-		_, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+		wi, _ := AsWidget(k)
+		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 			return ki.Break
 		}
 		return ki.Continue
 	},
 		func(k ki.Ki) bool { // this one does the work
-			wi, w := AsWidget(k)
-			if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+			wi, _ := AsWidget(k)
+			if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 				return ki.Break
 			}
 			wi.GetSize(sc, iter)
@@ -395,7 +395,7 @@ func (wb *WidgetBase) DoNeedsRender(sc *Scene) {
 	pr := prof.Start("Widget.DoNeedsRender." + wb.KiType().Name)
 	wb.WalkPre(func(k ki.Ki) bool {
 		wi, w := AsWidget(k)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) {
+		if wi == nil || wi.This() == nil || wi.Is(ki.Deleted) {
 			return ki.Break
 		}
 		if w.Is(NeedsRender) && !w.Is(ki.Updating) {
@@ -430,7 +430,7 @@ func (sc *Scene) DoUpdate() bool {
 
 	// Do sequence of layout updates at start to deal with dynanmically
 	// sized elements that require iterative passes of layout.
-	if sc.ShowLayoutIter < 3 { // 3 needed for SliceViewBase
+	if sc.ShowLayoutIter < 4 { // 4 needed for SliceViewBase
 		sc.ShowLayoutIter++
 		sc.SetFlag(true, ScNeedsLayout)
 	}
@@ -573,7 +573,7 @@ func (wb *WidgetBase) PushBounds(sc *Scene) bool {
 // PopBounds pops our bounding-box bounds -- last step in Render after
 // rendering children
 func (wb *WidgetBase) PopBounds(sc *Scene) {
-	if wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.This() == nil {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) {
 		return
 	}
 	rs := &sc.RenderState
@@ -599,8 +599,8 @@ func (wb *WidgetBase) RenderParts(sc *Scene) {
 // This is the default call at end of Render()
 func (wb *WidgetBase) RenderChildren(sc *Scene) {
 	for _, kid := range wb.Kids {
-		wi, w := AsWidget(kid)
-		if w == nil || w.Is(ki.Deleted) || w.Is(ki.Destroyed) || w.Is(ki.Updating) {
+		wi, _ := AsWidget(kid)
+		if wi.This() == nil || wi.Is(ki.Deleted) || wi.Is(ki.Updating) {
 			continue
 		}
 		wi.Render(sc)

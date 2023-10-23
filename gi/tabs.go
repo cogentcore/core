@@ -93,7 +93,7 @@ func (ts *Tabs) TabsStyles() {
 			})
 		case "frame":
 			frame := w.(*Frame)
-			frame.StackTopOnly = true // key for allowing each tab to have its own size
+			frame.SetFlag(true, LayoutStackTopOnly) // key for allowing each tab to have its own size
 			w.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Em(10))
 				s.SetMinPrefHeight(units.Em(6))

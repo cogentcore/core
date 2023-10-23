@@ -86,6 +86,7 @@ func (sw *Switch) SetIconFromState() {
 
 func (sw *Switch) HandleSwitchEvents() {
 	sw.HandleWidgetEvents()
+	sw.HandleSelectToggle()
 	sw.HandleClickOnEnterSpace()
 	sw.OnClick(func(e events.Event) {
 		e.SetHandled()

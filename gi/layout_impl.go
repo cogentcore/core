@@ -48,7 +48,7 @@ func GatherSizesSumMax(ly *Layout) (sumPref, sumNeed, maxPref, maxNeed mat32.Vec
 		return
 	}
 
-	if ly.Lay == LayoutStacked && ly.StackTopOnly {
+	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
 			return
@@ -517,7 +517,7 @@ func LayoutSharedDim(ly *Layout, dim mat32.Dims) {
 		if ni == nil {
 			continue
 		}
-		if ly.Lay == LayoutStacked && ly.StackTopOnly && i != ly.StackTop {
+		if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) && i != ly.StackTop {
 			continue
 		}
 		ni.StyMu.RLock()
@@ -922,7 +922,7 @@ func LayoutGridLay(ly *Layout) {
 // computing summary size stats
 func (ly *Layout) FinalizeLayout() {
 	ly.ChildSize = mat32.Vec2Zero
-	if ly.Lay == LayoutStacked && ly.StackTopOnly {
+	if ly.Lay == LayoutStacked && ly.Is(LayoutStackTopOnly) {
 		sn, err := ly.ChildTry(ly.StackTop)
 		if err != nil {
 			return

@@ -32,6 +32,28 @@ var (
 	LayoutPrefMaxCols = 20
 )
 
+// Layoutlags has bool flags for Layout
+type LayoutFlags int64 //enums:bitflag -trim-prefix Layout
+
+const (
+	// for stacked layout, only layout the top widget.
+	// this is appropriate for e.g., tab layout, which does a full
+	// redraw on stack changes, but not for e.g., check boxes which don't
+	LayoutStackTopOnly LayoutFlags = LayoutFlags(WidgetFlagsN) + iota
+
+	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
+	LayoutNeedsRedo
+
+	// scrollbars have been manually turned off due to layout
+	// being invisible -- must be reactivated when re-visible
+	LayoutScrollsOff
+
+	// LayoutNoKeys prevents processing of keyboard events for this layout.
+	// By default, Layout handles focus navigation events, but if an
+	// outer Widget handles these instead, then this should be set.
+	LayoutNoKeys
+)
+
 // LayoutAllocs contains all the the layout allocations: size, position.
 // These are set by the parent Layout during the Layout process.
 type LayoutAllocs struct {
@@ -168,9 +190,6 @@ type Layout struct {
 	// for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
 	StackTop int
 
-	// for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
-	StackTopOnly bool
-
 	// total max size of children as laid out
 	ChildSize mat32.Vec2 `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
 
@@ -192,9 +211,6 @@ type Layout struct {
 	// line breaks for flow layout
 	FlowBreaks []int `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration
-	NeedsRedo bool `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
-
 	// accumulated name to search for when keys are typed
 	FocusName string `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
 
@@ -203,9 +219,6 @@ type Layout struct {
 
 	// last element focused on -- used as a starting point if name is the same
 	FocusNameLast ki.Ki `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
-
-	// scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible
-	ScrollsOff bool `readonly:"+" copy:"-" json:"-" xml:"-" set:"-"`
 }
 
 func (ly *Layout) CopyFieldsFrom(frm any) {
@@ -318,8 +331,7 @@ func (ly *Layout) AvailSize() mat32.Vec2 {
 
 // ManageOverflow processes any overflow according to overflow settings.
 func (ly *Layout) ManageOverflow(sc *Scene) {
-	// wasscof := ly.ScrollsOff
-	ly.ScrollsOff = false
+	ly.SetFlag(false, LayoutScrollsOff)
 	if ly.Lay == LayoutNil {
 		return
 	}
@@ -485,7 +497,7 @@ func (ly *Layout) SetScrollsOff() {
 	for d := mat32.X; d <= mat32.Y; d++ {
 		if ly.HasScroll[d] {
 			// fmt.Printf("turning scroll off for :%v dim: %v\n", ly.Path(), d)
-			ly.ScrollsOff = true
+			ly.SetFlag(true, LayoutScrollsOff)
 			ly.HasScroll[d] = false
 			if ly.Scrolls[d] != nil {
 				ly.DeactivateScroll(ly.Scrolls[d])
@@ -989,6 +1001,9 @@ func (ly *Layout) HandleLayoutKeys() {
 
 // LayoutKeys is key processing for layouts -- focus name and arrow keys
 func (ly *Layout) LayoutKeysImpl(e events.Event) {
+	if ly.Is(LayoutNoKeys) {
+		return
+	}
 	if KeyEventTrace {
 		fmt.Println("Layout KeyInput:", ly)
 	}
@@ -1226,7 +1241,7 @@ func (ly *Layout) GetSize(sc *Scene, iter int) {
 
 func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	if iter > 0 && LayoutTrace {
-		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.NeedsRedo)
+		fmt.Printf("Layout: %v Iteration: %v  NeedsRedo: %v\n", ly.Path(), iter, ly.Is(LayoutNeedsRedo))
 	}
 	ly.DoLayoutBase(sc, parBBox, iter)
 	redo := false
@@ -1251,20 +1266,21 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	}
 	ly.FinalizeLayout()
 	if redo && iter == 0 {
-		ly.NeedsRedo = true
+		ly.SetFlag(true, LayoutNeedsRedo)
 		ly.LayState.Alloc.Size = ly.ChildSize // this is what we actually need.
 		return true
 	}
 	ly.ManageOverflow(sc)
-	ly.NeedsRedo = ly.DoLayoutChildren(sc, iter) // layout done with canonical positions
-
-	if !ly.NeedsRedo || iter == 1 {
+	redo = ly.DoLayoutChildren(sc, iter) // layout done with canonical positions
+	if redo {
+		ly.SetFlag(true, LayoutNeedsRedo)
+	} else if iter == 1 {
 		delta := ly.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
 			ly.LayoutScrollChildren(sc, delta) // move is a separate step
 		}
 	}
-	return ly.NeedsRedo
+	return ly.Is(LayoutNeedsRedo)
 }
 
 // we add our own offset here

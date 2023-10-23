@@ -14,6 +14,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
@@ -79,6 +80,7 @@ func (tv *TableView) TableViewInit() {
 
 	tv.Lay = gi.LayoutVert
 	tv.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.FocusWithinable)
 		tv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -290,11 +292,13 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 	config.Add(gi.FrameType, "frame")
 	_, updt := tv.ConfigChildren(config)
 	sg := tv.SliceFrame()
+	sg.SetFlag(true, gi.LayoutNoKeys)
 	sgcfg := ki.Config{}
 	sgcfg.Add(gi.ToolbarType, "header")
 	sgcfg.Add(gi.LayoutType, "grid-lay")
 	sg.ConfigChildren(sgcfg)
 	gl := tv.GridLayout()
+	gl.SetFlag(true, gi.LayoutNoKeys)
 	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.SliderType, "scrollbar")
@@ -306,6 +310,7 @@ func (tv *TableView) ConfigFrame(sc *gi.Scene) {
 // ConfigOneRow configures one row for initial row height measurement
 func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 	sg := tv.This().(SliceViewer).SliceGrid()
+	sg.SetFlag(true, gi.LayoutNoKeys)
 	if sg.HasChildren() {
 		return
 	}
@@ -524,6 +529,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 	if sg == nil {
 		return
 	}
+	sg.SetFlag(true, gi.LayoutNoKeys)
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndLayout(updt)
@@ -570,8 +576,8 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			idxlab = &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.OnSelect(func(e events.Event) {
-				fmt.Println("sel", i)
-				tv.UpdateSelectRow(i, idxlab.StateIs(states.Selected))
+				e.SetHandled()
+				tv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
 		}
@@ -595,6 +601,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			vv := ToValue(fval.Interface(), tags)
 			tv.Values[vvi] = vv
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
+			vv.SetReadOnly(tv.IsReadOnly())
 
 			vtyp := vv.WidgetType()
 			valnm := fmt.Sprintf("value-%v.%v", fli, itxt)
@@ -603,10 +610,9 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			sg.SetChild(widg, cidx, valnm)
 			vv.ConfigWidget(widg, sc)
 			wb := widg.AsWidget()
-
 			wb.OnSelect(func(e events.Event) {
-				fmt.Println("sel", i)
-				tv.UpdateSelectRow(i, wb.StateIs(states.Selected))
+				e.SetHandled()
+				tv.UpdateSelectRow(i)
 			})
 
 			if tv.IsReadOnly() {
@@ -711,6 +717,7 @@ func (tv *TableView) UpdateWidgets() {
 			vvi := i*tv.NVisFields + fli
 			vv := tv.Values[vvi]
 			vv.SetStructValue(fval.Addr(), stru, &field, tv.TmpSave, vpath)
+			vv.SetReadOnly(tv.IsReadOnly())
 			vv.UpdateWidget()
 
 			if si < tv.SliceSize {
@@ -989,7 +996,7 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 		return
 	}
 	updt := tv.UpdateStart()
-	defer tv.UpdateEnd(updt)
+	defer tv.UpdateEndRender(updt)
 
 	sg := tv.SliceGrid()
 	nWidgPerRow, idxOff := tv.RowWidgetNs()
@@ -999,14 +1006,12 @@ func (tv *TableView) SelectRowWidgets(row int, sel bool) {
 		if sg.Kids.IsValidIndex(seldx) == nil {
 			widg := sg.Child(seldx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.SetNeedsRender()
 		}
 	}
 	if tv.Is(SliceViewShowIndex) {
 		if sg.Kids.IsValidIndex(ridx) == nil {
 			widg := sg.Child(ridx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.SetNeedsRender()
 		}
 	}
 }

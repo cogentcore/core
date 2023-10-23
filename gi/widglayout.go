@@ -43,11 +43,8 @@ func (wb *WidgetBase) ComputeBBoxesBase(sc *Scene, parBBox image.Rectangle, delt
 func (wb *WidgetBase) BBoxReport() string {
 	rpt := ""
 	wb.WalkPre(func(k ki.Ki) bool {
-		nii, ni := AsWidget(k)
-		if nii == nil || ni.Is(ki.Deleted) || ni.Is(ki.Destroyed) {
-			return ki.Break
-		}
-		rpt += fmt.Sprintf("%v: vp: %v\n", ni.Nm, ni.ScBBox)
+		_, w := AsWidget(k)
+		rpt += fmt.Sprintf("%v: vp: %v\n", w.Nm, w.ScBBox)
 		return ki.Continue
 	})
 	return rpt

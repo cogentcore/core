@@ -9,7 +9,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
-	"goki.dev/ki/v2"
 	"goki.dev/laser"
 	"goki.dev/mat32/v2"
 )
@@ -135,9 +134,7 @@ func (cv *ColorMapView) Render(sc *gi.Scene) {
 
 // Value registers ColorMapValue as the viewer of ColorMapName
 func (mn ColorMapName) Value() Value {
-	vv := &ColorMapValue{}
-	ki.InitNode(vv)
-	return vv
+	return &ColorMapValue{}
 }
 
 // ColorMapValue presents an button for displaying a ColorMapName and selecting

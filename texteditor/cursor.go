@@ -42,12 +42,7 @@ func ViewBlink() {
 		ViewBlinkMu.Unlock()
 		<-ViewBlinker.C
 		ViewBlinkMu.Lock()
-		if BlinkingView == nil || BlinkingView.This() == nil {
-			ViewBlinkMu.Unlock()
-			continue
-		}
-		if BlinkingView.Is(ki.Destroyed) || BlinkingView.Is(ki.Deleted) {
-			BlinkingView = nil
+		if BlinkingView == nil || BlinkingView.This() == nil || BlinkingView.Is(ki.Deleted) {
 			ViewBlinkMu.Unlock()
 			continue
 		}

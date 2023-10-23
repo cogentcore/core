@@ -1250,6 +1250,176 @@ func (i *LabelTypes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
+var _LayoutFlagsValues = []LayoutFlags{9, 10, 11, 12}
+
+// LayoutFlagsN is the highest valid value
+// for type LayoutFlags, plus one.
+const LayoutFlagsN LayoutFlags = 13
+
+// An "invalid array index" compiler error signifies that the constant values have changed.
+// Re-run the enumgen command to generate them again.
+func _LayoutFlagsNoOp() {
+	var x [1]struct{}
+	_ = x[LayoutStackTopOnly-(9)]
+	_ = x[LayoutNeedsRedo-(10)]
+	_ = x[LayoutScrollsOff-(11)]
+	_ = x[LayoutNoKeys-(12)]
+}
+
+var _LayoutFlagsNameToValueMap = map[string]LayoutFlags{
+	`StackTopOnly`: 9,
+	`stacktoponly`: 9,
+	`NeedsRedo`:    10,
+	`needsredo`:    10,
+	`ScrollsOff`:   11,
+	`scrollsoff`:   11,
+	`NoKeys`:       12,
+	`nokeys`:       12,
+}
+
+var _LayoutFlagsDescMap = map[LayoutFlags]string{
+	9:  `for stacked layout, only layout the top widget. this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don&#39;t`,
+	10: `true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration`,
+	11: `scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible`,
+	12: `LayoutNoKeys prevents processing of keyboard events for this layout. By default, Layout handles focus navigation events, but if an outer Widget handles these instead, then this should be set.`,
+}
+
+var _LayoutFlagsMap = map[LayoutFlags]string{
+	9:  `StackTopOnly`,
+	10: `NeedsRedo`,
+	11: `ScrollsOff`,
+	12: `NoKeys`,
+}
+
+// String returns the string representation
+// of this LayoutFlags value.
+func (i LayoutFlags) String() string {
+	str := ""
+	for _, ie := range _LayoutFlagsValues {
+		if i.HasFlag(ie) {
+			ies := ie.BitIndexString()
+			if str == "" {
+				str = ies
+			} else {
+				str += "|" + ies
+			}
+		}
+	}
+	return str
+}
+
+// BitIndexString returns the string
+// representation of this LayoutFlags value
+// if it is a bit index value
+// (typically an enum constant), and
+// not an actual bit flag value.
+func (i LayoutFlags) BitIndexString() string {
+	if str, ok := _LayoutFlagsMap[i]; ok {
+		return str
+	}
+	return strconv.FormatInt(int64(i), 10)
+}
+
+// SetString sets the LayoutFlags value from its
+// string representation, and returns an
+// error if the string is invalid.
+func (i *LayoutFlags) SetString(s string) error {
+	*i = 0
+	return i.SetStringOr(s)
+}
+
+// SetStringOr sets the LayoutFlags value from its
+// string representation while preserving any
+// bit flags already set, and returns an
+// error if the string is invalid.
+func (i *LayoutFlags) SetStringOr(s string) error {
+	flgs := strings.Split(s, "|")
+	for _, flg := range flgs {
+		if val, ok := _LayoutFlagsNameToValueMap[flg]; ok {
+			i.SetFlag(true, &val)
+		} else if val, ok := _LayoutFlagsNameToValueMap[strings.ToLower(flg)]; ok {
+			i.SetFlag(true, &val)
+		} else {
+			return errors.New(flg + " is not a valid value for type LayoutFlags")
+		}
+	}
+	return nil
+}
+
+// Int64 returns the LayoutFlags value as an int64.
+func (i LayoutFlags) Int64() int64 {
+	return int64(i)
+}
+
+// SetInt64 sets the LayoutFlags value from an int64.
+func (i *LayoutFlags) SetInt64(in int64) {
+	*i = LayoutFlags(in)
+}
+
+// Desc returns the description of the LayoutFlags value.
+func (i LayoutFlags) Desc() string {
+	if str, ok := _LayoutFlagsDescMap[i]; ok {
+		return str
+	}
+	return i.String()
+}
+
+// LayoutFlagsValues returns all possible values
+// for the type LayoutFlags.
+func LayoutFlagsValues() []LayoutFlags {
+	return _LayoutFlagsValues
+}
+
+// Values returns all possible values
+// for the type LayoutFlags.
+func (i LayoutFlags) Values() []enums.Enum {
+	res := make([]enums.Enum, len(_LayoutFlagsValues))
+	for i, d := range _LayoutFlagsValues {
+		res[i] = d
+	}
+	return res
+}
+
+// IsValid returns whether the value is a
+// valid option for type LayoutFlags.
+func (i LayoutFlags) IsValid() bool {
+	_, ok := _LayoutFlagsMap[i]
+	return ok
+}
+
+// HasFlag returns whether these
+// bit flags have the given bit flag set.
+func (i LayoutFlags) HasFlag(f enums.BitFlag) bool {
+	return atomic.LoadInt64((*int64)(&i))&(1<<uint32(f.Int64())) != 0
+}
+
+// SetFlag sets the value of the given
+// flags in these flags to the given value.
+func (i *LayoutFlags) SetFlag(on bool, f ...enums.BitFlag) {
+	var mask int64
+	for _, v := range f {
+		mask |= 1 << v.Int64()
+	}
+	in := int64(*i)
+	if on {
+		in |= mask
+		atomic.StoreInt64((*int64)(i), in)
+	} else {
+		in &^= mask
+		atomic.StoreInt64((*int64)(i), in)
+	}
+}
+
+// MarshalText implements the [encoding.TextMarshaler] interface.
+func (i LayoutFlags) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
+
+// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
+func (i *LayoutFlags) UnmarshalText(text []byte) error {
+	return i.SetString(string(text))
+}
+
 var _LayoutsValues = []Layouts{0, 1, 2, 3, 4, 5, 6}
 
 // LayoutsN is the highest valid value

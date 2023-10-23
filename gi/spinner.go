@@ -293,6 +293,7 @@ func (sp *Spinner) StringToVal(str string) (float32, error) {
 
 func (sp *Spinner) HandleSpinnerEvents() {
 	sp.HandleWidgetEvents()
+	sp.HandleSelectToggle()
 	sp.HandleSpinnerScroll()
 }
 

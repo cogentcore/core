@@ -29,9 +29,52 @@ const (
 	InstaDrag
 )
 
-// SetSelected sets the Selected flag to given value
+func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
+	return wb.Styles.State.HasFlag(flag)
+}
+
+func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
+	return wb.Styles.Abilities.HasFlag(flag)
+}
+
+// SetState sets the given [styles.Style.State] flags
+func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) Widget {
+	wb.Styles.State.SetFlag(on, state...)
+	return wb.This().(Widget)
+}
+
+// SetStateTree sets the given [styles.Style.State] flags for tree starting
+// at receiving widget.
+func (wb *WidgetBase) SetStateTree(on bool, state ...enums.BitFlag) {
+	wb.WalkPre(func(k ki.Ki) bool {
+		_, wb := AsWidget(k)
+		wb.SetState(on, state...)
+		return ki.Continue
+	})
+}
+
+// SetStateWidget sets the given [styles.Style.State] flags for the
+// entire Widget including any Parts != nil
+func (wb *WidgetBase) SetStateWidget(on bool, state ...enums.BitFlag) {
+	wb.SetState(on, state...)
+	if wb.Parts == nil {
+		return
+	}
+	wb.Parts.SetStateTree(on, state...)
+}
+
+// SetAbilities sets the [styles.Style.Abilities] flags
+func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) Widget {
+	wb.Styles.Abilities.SetFlag(on, able...)
+	return wb.This().(Widget)
+}
+
+// SetSelected sets the Selected flag to given value for the entire Widget
+// and calls ApplyStyle to apply any style changes.
 func (wb *WidgetBase) SetSelected(sel bool) {
-	wb.SetState(sel, states.Selected)
+	wb.SetStateWidget(sel, states.Selected)
+	wb.ApplyStyle(wb.Sc)
+	wb.SetNeedsRender()
 }
 
 // SetSelectedAction sets the Selected state flag
@@ -93,9 +136,6 @@ func (wb *WidgetBase) HasFlagWithin(flag enums.BitFlag) bool {
 	got := false
 	wb.WalkPre(func(k ki.Ki) bool {
 		_, wb := AsWidget(k)
-		if wb == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) {
-			return ki.Break
-		}
 		if wb.Is(flag) {
 			got = true
 			return ki.Break

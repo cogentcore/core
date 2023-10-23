@@ -12,7 +12,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
@@ -136,8 +135,9 @@ func app() {
 	// gi.LayoutTrace = true
 	// gi.WinRenderTrace = true
 	// gi.UpdateTrace = true
+	// gi.KeyEventTrace = true
 
-	goosi.ZoomFactor = 2
+	goosi.ZoomFactor = 1.5
 
 	gi.SetAppName("views")
 	gi.SetAppAbout(`This is a demo of the MapView and SliceView views in the <b>GoGi</b> graphical interface system, within the <b>GoKi</b> tree framework.  See <a href="https://github.com/goki">GoKi on GitHub</a>`)
@@ -194,15 +194,15 @@ func app() {
 	// 	s.SetStretchMax()
 	// })
 
-	// sv := giv.NewSliceView(split, "sv")
-	// // sv.SetReadOnly()
-	// sv.SetSlice(&tstslice)
-	// sv.Style(func(s *styles.Style) {
-	// 	s.SetStretchMax()
-	// })
+	sv := giv.NewSliceView(split, "sv")
+	// sv.SetState(true, states.ReadOnly)
+	sv.SetSlice(&tstslice)
+	sv.Style(func(s *styles.Style) {
+		s.SetStretchMax()
+	})
 
 	tv := giv.NewTableView(split, "tv")
-	tv.SetState(true, states.ReadOnly)
+	// tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&tsttable)
 	tv.Style(func(s *styles.Style) {
 		s.SetStretchMax()

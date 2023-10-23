@@ -63,22 +63,23 @@ func (ed *Editor) GetSize(sc *gi.Scene, iter int) {
 }
 
 func (ed *Editor) DoLayout(sc *gi.Scene, parBBox image.Rectangle, iter int) bool {
-	ed.NeedsRedo = false
+	ed.SetFlag(false, gi.LayoutNeedsRedo)
 	ed.DoLayoutBase(sc, parBBox, iter)
 	spc := ed.BoxSpace()
 	ed.ChildSize = ed.LayState.Size.Need.Sub(spc.Size()) // we are what we need
 
 	ed.ManageOverflow(sc)
-	ed.NeedsRedo = ed.DoLayoutChildren(sc, iter)
-	// generally no kids here..
-	if !ed.NeedsRedo || iter == 1 {
+	redo := ed.DoLayoutChildren(sc, iter)
+	if redo {
+		ed.SetFlag(true, gi.LayoutNeedsRedo)
+	} else if iter == 1 {
 		delta := ed.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
 			ed.LayoutScrollChildren(sc, delta) // move is a separate step
 		}
 	}
 	ed.UpdateFromAlloc()
-	return ed.NeedsRedo
+	return ed.Is(gi.LayoutNeedsRedo)
 }
 
 // LayoutAllLines generates TextRenders of lines

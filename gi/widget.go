@@ -366,26 +366,6 @@ func (wb *WidgetBase) BaseType() *gti.Type {
 	return WidgetBaseType
 }
 
-func (wb *WidgetBase) StateIs(flag enums.BitFlag) bool {
-	return wb.Styles.State.HasFlag(flag)
-}
-
-func (wb *WidgetBase) AbilityIs(flag enums.BitFlag) bool {
-	return wb.Styles.Abilities.HasFlag(flag)
-}
-
-// SetState sets the given [styles.Style.State] flags
-func (wb *WidgetBase) SetState(on bool, state ...enums.BitFlag) Widget {
-	wb.Styles.State.SetFlag(on, state...)
-	return wb.This().(Widget)
-}
-
-// SetAbilities sets the [styles.Style.Abilities] flags
-func (wb *WidgetBase) SetAbilities(on bool, able ...enums.BitFlag) Widget {
-	wb.Styles.Abilities.SetFlag(on, able...)
-	return wb.This().(Widget)
-}
-
 // NewParts makes the Parts layout if not already there,
 // with given layout orientation
 func (wb *WidgetBase) NewParts(lay Layouts) *Layout {
@@ -445,7 +425,7 @@ func (wb *WidgetBase) ParentWidgetIfTry(fun func(p *WidgetBase) bool) (Widget, *
 }
 
 func (wb *WidgetBase) IsVisible() bool {
-	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.Is(ki.Destroyed) || wb.StateIs(states.Invisible) || wb.Sc == nil {
+	if wb == nil || wb.This() == nil || wb.Is(ki.Deleted) || wb.StateIs(states.Invisible) || wb.Sc == nil {
 		return false
 	}
 	if wb.Par == nil || wb.Par.This() == nil {
