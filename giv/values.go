@@ -1406,7 +1406,7 @@ func (vv *IconValue) UpdateWidget() {
 			bt.SetText(txt)
 		}
 	}
-	// bt.Update() // todo: not sure if need this separately: config should be called
+	bt.Update() // icon always requires redraw in case changed
 }
 
 func (vv *IconValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {

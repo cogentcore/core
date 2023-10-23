@@ -44,45 +44,45 @@ type Slider struct {
 	Type SliderTypes `set:"-"`
 
 	// current value
-	Value float32 `xml:"value" set:"-"`
+	Value float32 `set:"-"`
 
 	// dimension along which the slider slides
 	Dim mat32.Dims
 
 	// minimum value in range
-	Min float32 `xml:"min"`
+	Min float32
 
 	// maximum value in range
-	Max float32 `xml:"max"`
+	Max float32
 
 	// smallest step size to increment
-	Step float32 `xml:"step"`
+	Step float32
 
 	// larger PageUp / Dn step size
-	PageStep float32 `xml:"pagestep"`
+	PageStep float32
 
 	// todo: shouldn't this be a units guy:?
 
 	// if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed
-	ValThumb bool `xml:"val-thumb" alt:"prop-thumb"`
+	ValThumb bool
 
 	// value that the thumb represents, in the same units
-	ThumbVal float32 `xml:"thumb-val"`
+	ThumbVal float32
 
 	// styled fixed size of the thumb -- only if not doing ValThumb
-	ThumbSize units.Value `xml:"thumb-size"`
+	ThumbSize units.Value
 
 	// optional icon for the dragging knob
 	Icon icons.Icon `view:"show-name"`
 
 	// if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change
-	Tracking bool `xml:"tracking"`
+	Tracking bool
 
 	// threshold for amount of change in scroll value before emitting a signal in Tracking mode
-	TrackThr float32 `xml:"track-thr"`
+	TrackThr float32
 
 	// snap the values to Step size increments
-	Snap bool `xml:"snap"`
+	Snap bool
 
 	// can turn off e.g., scrollbar rendering with this flag -- just prevents rendering
 	Off bool
@@ -424,11 +424,11 @@ func (sr *Slider) HandleSliderMouse() {
 	sr.On(events.Scroll, func(e events.Event) {
 		se := e.(*events.MouseScroll)
 		se.SetHandled()
-		if sr.Dim == mat32.X {
-			sr.SetSliderPosAction(sr.Pos - float32(se.DimDelta(mat32.X)))
-		} else {
-			sr.SetSliderPosAction(sr.Pos - float32(se.DimDelta(mat32.Y)))
+		del := float32(se.DimDelta(sr.Dim))
+		if sr.Type == SliderScrollbar {
+			del = -del // invert for "natural" scroll
 		}
+		sr.SetSliderPosAction(sr.Pos - del)
 	})
 }
 

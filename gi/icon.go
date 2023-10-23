@@ -71,13 +71,11 @@ func (ic *Icon) SetIcon(icon icons.Icon) (bool, error) {
 	}
 	fnm := icon.Filename()
 	ic.SVG.Config(2, 2)
-	if icon != icons.Blank {
-		err := ic.SVG.OpenFS(icons.Icons, fnm)
-		if err != nil {
-			slog.Error("error opening icon named", "name", fnm, "err", err)
-			ic.Config(ic.Sc)
-			return false, err
-		}
+	err := ic.SVG.OpenFS(icons.Icons, fnm)
+	if err != nil {
+		slog.Error("error opening icon named", "name", fnm, "err", err)
+		ic.Config(ic.Sc)
+		return false, err
 	}
 	ic.IconName = icon
 	ic.Config(ic.Sc)

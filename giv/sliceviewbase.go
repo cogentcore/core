@@ -301,10 +301,8 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 				s.SetStretchMaxHeight()
 			})
 			sb.OnChange(func(e events.Event) {
-				updt := sv.UpdateStart()
 				sv.StartIdx = int(sb.Value)
 				sv.This().(SliceViewer).UpdateWidgets()
-				sv.UpdateEndRender(updt)
 			})
 
 		}
@@ -789,7 +787,8 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		return
 	}
 	updt := sg.UpdateStart()
-	defer sg.UpdateEndRender(updt)
+	defer sg.UpdateEndLayout(updt)
+	// fmt.Println("updtw:", updt)
 
 	sv.ViewMuLock()
 	defer sv.ViewMuUnlock()
@@ -2156,7 +2155,7 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 		se := e.(*events.MouseScroll)
 		sbb := sv.This().(SliceViewer).ScrollBar()
 		cur := float32(sbb.Pos)
-		sbb.SetSliderPosAction(cur - float32(se.DimDelta(mat32.Y)))
+		sbb.SetSliderPosAction(cur + float32(se.DimDelta(mat32.Y))) // reverse dir for "natural"
 	})
 	sv.OnKeyChord(func(e events.Event) {
 		if sv.IsReadOnly() {

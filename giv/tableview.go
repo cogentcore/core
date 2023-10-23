@@ -669,7 +669,7 @@ func (tv *TableView) UpdateWidgets() {
 	// sc := tv.Sc
 
 	updt := sg.UpdateStart()
-	defer sg.UpdateEndRender(updt)
+	defer sg.UpdateEndLayout(updt)
 
 	tv.ViewMuLock()
 	defer tv.ViewMuUnlock()

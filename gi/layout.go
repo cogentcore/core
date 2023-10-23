@@ -524,7 +524,7 @@ func (ly *Layout) ScrollActionDelta(dim mat32.Dims, delta float32) {
 		sb := ly.Scrolls[dim]
 		nval := sb.Value + delta
 		sb.SetValue(nval)
-		ly.SetNeedsLayoutUpdate(ly.Sc, true)
+		ly.SetNeedsLayout()
 	}
 }
 
@@ -1274,7 +1274,8 @@ func (ly *Layout) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
 	redo = ly.DoLayoutChildren(sc, iter) // layout done with canonical positions
 	if redo {
 		ly.SetFlag(true, LayoutNeedsRedo)
-	} else if iter == 1 {
+	}
+	if !redo || iter == 1 {
 		delta := ly.LayoutScrollDelta((image.Point{}))
 		if delta != (image.Point{}) {
 			ly.LayoutScrollChildren(sc, delta) // move is a separate step
