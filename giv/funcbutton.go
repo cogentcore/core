@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"reflect"
 	"strings"
+	"unicode"
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
@@ -71,37 +72,47 @@ func (fb *FuncButton) OnInit() {
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := gti.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
-	if !strings.HasSuffix(fnm, "-fm") {
-		f := gti.FuncByName(fnm)
-		if f == nil {
-			slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
-			f = &gti.Func{Name: fnm}
+	if strings.HasSuffix(fnm, "-fm") {
+		fnm = strings.TrimSuffix(fnm, "-fm")
+		// the last dot separates the function name
+		li := strings.LastIndex(fnm, ".")
+		metnm := fnm[li+1:]
+		typnm := fnm[:li]
+		// get rid of any parentheses and pointer receivers
+		// that may surround the type name
+		typnm = strings.ReplaceAll(typnm, "(*", "")
+		typnm = strings.TrimSuffix(typnm, ")")
+		gtyp := gti.TypeByName(typnm)
+		var met *gti.Method
+		if gtyp == nil {
+			slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+			met = &gti.Method{Name: metnm}
+		} else {
+			met = gtyp.Methods.ValByKey(metnm)
+			if met == nil {
+				slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+				met = &gti.Method{Name: metnm}
+			}
 		}
+		return fb.SetMethodImpl(met, reflect.ValueOf(fun))
+	}
+
+	rs := []rune(fnm)
+	// FuncName.funcN indicates that a function was defined anonymously
+	if len(rs) > 0 && unicode.IsDigit(rs[len(rs)-1]) && strings.Contains(fnm, ".func") {
+		withoutLast := fnm[:len(fnm)-1]
+		fnm = strings.TrimSuffix(withoutLast, ".func")
+		fnm += ": anonymous"
+		f := &gti.Func{Name: fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
-	fnm = strings.TrimSuffix(fnm, "-fm")
-	// the last dot separates the function name
-	li := strings.LastIndex(fnm, ".")
-	metnm := fnm[li+1:]
-	typnm := fnm[:li]
-	// get rid of any parentheses and pointer receivers
-	// that may surround the type name
-	typnm = strings.ReplaceAll(typnm, "(*", "")
-	typnm = strings.TrimSuffix(typnm, ")")
-	gtyp := gti.TypeByName(typnm)
-	var met *gti.Method
-	if gtyp == nil {
-		slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
-		met = &gti.Method{Name: metnm}
-	} else {
-		met = gtyp.Methods.ValByKey(metnm)
-		if met == nil {
-			slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
-			met = &gti.Method{Name: metnm}
-		}
+	f := gti.FuncByName(fnm)
+	if f == nil {
+		slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+		f = &gti.Func{Name: fnm}
 	}
-	return fb.SetMethodImpl(met, reflect.ValueOf(fun))
+	return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 }
 
 // SetFuncImpl is the underlying implementation of [FuncButton.SetFunc].
