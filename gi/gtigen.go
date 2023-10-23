@@ -4,7 +4,6 @@ package gi
 
 import (
 	"image/color"
-	"time"
 
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
@@ -895,16 +894,6 @@ var _ = gti.AddType(&gti.Type{
 		{"DarkMode", &gti.Method{Name: "DarkMode", Doc: "DarkMode sets the color theme to dark mode. It automatically\nsaves the preferences and updates all of the windows.", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"SaveZoom", &gti.Method{Name: "SaveZoom", Doc: "SaveZoom saves the current LogicalDPI scaling, either as the overall\ndefault or specific to the current screen.", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-sep-before", "-icon", "zoom_in", "-confirm", "-show-result"}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"forCurrentScreen", &gti.Field{Name: "forCurrentScreen", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ScreenInfo", &gti.Method{Name: "ScreenInfo", Doc: "ScreenInfo returns screen info for all screens on the device", Directives: gti.Directives{
-			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result", "-parent", "Detailed/Info"}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"string", &gti.Field{Name: "string", Type: "string", LocalType: "string", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		})}},
 		{"VersionInfo", &gti.Method{Name: "VersionInfo", Doc: "VersionInfo returns GoGi version information", Directives: gti.Directives{
 			&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-icon", "info", "-show-result"}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -925,153 +914,6 @@ var _ = gti.AddType(&gti.Type{
 	}),
 })
 
-// SetTheme sets the [Preferences.Theme]:
-// the color theme
-func (t *Preferences) SetTheme(v Themes) *Preferences {
-	t.Theme = v
-	return t
-}
-
-// SetColor sets the [Preferences.Color]:
-// the primary color used to generate the color scheme
-func (t *Preferences) SetColor(v color.RGBA) *Preferences {
-	t.Color = v
-	return t
-}
-
-// SetHiStyle sets the [Preferences.HiStyle]:
-// text highilighting style / theme
-func (t *Preferences) SetHiStyle(v HiStyleName) *Preferences {
-	t.HiStyle = v
-	return t
-}
-
-// SetDensity sets the [Preferences.Density]:
-// the density (compactness) of content
-func (t *Preferences) SetDensity(v Densities) *Preferences {
-	t.Density = v
-	return t
-}
-
-// SetLogicalDPIScale sets the [Preferences.LogicalDPIScale]:
-// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
-func (t *Preferences) SetLogicalDPIScale(v float32) *Preferences {
-	t.LogicalDPIScale = v
-	return t
-}
-
-// SetScreenPrefs sets the [Preferences.ScreenPrefs]:
-// screen-specific preferences -- will override overall defaults if set
-func (t *Preferences) SetScreenPrefs(v map[string]ScreenPrefs) *Preferences {
-	t.ScreenPrefs = v
-	return t
-}
-
-// SetParams sets the [Preferences.Params]:
-// parameters controlling GUI behavior
-func (t *Preferences) SetParams(v ParamPrefs) *Preferences {
-	t.Params = v
-	return t
-}
-
-// SetEditor sets the [Preferences.Editor]:
-// editor preferences -- for TextView etc
-func (t *Preferences) SetEditor(v EditorPrefs) *Preferences {
-	t.Editor = v
-	return t
-}
-
-// SetKeyMap sets the [Preferences.KeyMap]:
-// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
-func (t *Preferences) SetKeyMap(v KeyMapName) *Preferences {
-	t.KeyMap = v
-	return t
-}
-
-// SetSaveKeyMaps sets the [Preferences.SaveKeyMaps]:
-// if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
-func (t *Preferences) SetSaveKeyMaps(v bool) *Preferences {
-	t.SaveKeyMaps = v
-	return t
-}
-
-// SetSaveDetailed sets the [Preferences.SaveDetailed]:
-// if set, the detailed preferences are saved and loaded at startup -- only
-func (t *Preferences) SetSaveDetailed(v bool) *Preferences {
-	t.SaveDetailed = v
-	return t
-}
-
-// SetCustomStyles sets the [Preferences.CustomStyles]:
-// a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive
-func (t *Preferences) SetCustomStyles(v ki.Props) *Preferences {
-	t.CustomStyles = v
-	return t
-}
-
-// SetCustomStylesOverride sets the [Preferences.CustomStylesOverride]:
-// if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).
-func (t *Preferences) SetCustomStylesOverride(v bool) *Preferences {
-	t.CustomStylesOverride = v
-	return t
-}
-
-// SetFontFamily sets the [Preferences.FontFamily]:
-// default font family when otherwise not specified
-func (t *Preferences) SetFontFamily(v FontName) *Preferences {
-	t.FontFamily = v
-	return t
-}
-
-// SetMonoFont sets the [Preferences.MonoFont]:
-// default mono-spaced font family
-func (t *Preferences) SetMonoFont(v FontName) *Preferences {
-	t.MonoFont = v
-	return t
-}
-
-// SetFontPaths sets the [Preferences.FontPaths]:
-// extra font paths, beyond system defaults -- searched first
-func (t *Preferences) SetFontPaths(v []string) *Preferences {
-	t.FontPaths = v
-	return t
-}
-
-// SetUser sets the [Preferences.User]:
-// user info -- partially filled-out automatically if empty / when prefs first created
-func (t *Preferences) SetUser(v User) *Preferences {
-	t.User = v
-	return t
-}
-
-// SetFavPaths sets the [Preferences.FavPaths]:
-// favorite paths, shown in FileViewer and also editable there
-func (t *Preferences) SetFavPaths(v FavPaths) *Preferences {
-	t.FavPaths = v
-	return t
-}
-
-// SetFileViewSort sets the [Preferences.FileViewSort]:
-// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
-func (t *Preferences) SetFileViewSort(v string) *Preferences {
-	t.FileViewSort = v
-	return t
-}
-
-// SetColorFilename sets the [Preferences.ColorFilename]:
-// filename for saving / loading colors
-func (t *Preferences) SetColorFilename(v FileName) *Preferences {
-	t.ColorFilename = v
-	return t
-}
-
-// SetChanged sets the [Preferences.Changed]:
-// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-func (t *Preferences) SetChanged(v bool) *Preferences {
-	t.Changed = v
-	return t
-}
-
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
 	ShortName: "gi.ScreenPrefs",
@@ -1086,13 +928,6 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetLogicalDPIScale sets the [ScreenPrefs.LogicalDPIScale]:
-// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
-func (t *ScreenPrefs) SetLogicalDPIScale(v float32) *ScreenPrefs {
-	t.LogicalDPIScale = v
-	return t
-}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ParamPrefs",
@@ -1116,62 +951,6 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetDoubleClickInterval sets the [ParamPrefs.DoubleClickInterval]:
-// the maximum time interval in msec between button press events to count as a double-click
-func (t *ParamPrefs) SetDoubleClickInterval(v time.Duration) *ParamPrefs {
-	t.DoubleClickInterval = v
-	return t
-}
-
-// SetScrollWheelSpeed sets the [ParamPrefs.ScrollWheelSpeed]:
-// how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
-func (t *ParamPrefs) SetScrollWheelSpeed(v float32) *ParamPrefs {
-	t.ScrollWheelSpeed = v
-	return t
-}
-
-// SetLocalMainMenu sets the [ParamPrefs.LocalMainMenu]:
-// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
-func (t *ParamPrefs) SetLocalMainMenu(v bool) *ParamPrefs {
-	t.LocalMainMenu = v
-	return t
-}
-
-// SetOnlyCloseActiveTab sets the [ParamPrefs.OnlyCloseActiveTab]:
-// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
-func (t *ParamPrefs) SetOnlyCloseActiveTab(v bool) *ParamPrefs {
-	t.OnlyCloseActiveTab = v
-	return t
-}
-
-// SetZebraStripeWeight sets the [ParamPrefs.ZebraStripeWeight]:
-// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
-func (t *ParamPrefs) SetZebraStripeWeight(v float32) *ParamPrefs {
-	t.ZebraStripeWeight = v
-	return t
-}
-
-// SetBigFileSize sets the [ParamPrefs.BigFileSize]:
-// the limit of file size, above which user will be prompted before opening / copying, etc.
-func (t *ParamPrefs) SetBigFileSize(v int) *ParamPrefs {
-	t.BigFileSize = v
-	return t
-}
-
-// SetSavedPathsMax sets the [ParamPrefs.SavedPathsMax]:
-// maximum number of saved paths to save in FileView
-func (t *ParamPrefs) SetSavedPathsMax(v int) *ParamPrefs {
-	t.SavedPathsMax = v
-	return t
-}
-
-// SetSmooth3D sets the [ParamPrefs.Smooth3D]:
-// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
-func (t *ParamPrefs) SetSmooth3D(v bool) *ParamPrefs {
-	t.Smooth3D = v
-	return t
-}
-
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.User",
 	ShortName: "gi.User",
@@ -1188,13 +967,6 @@ var _ = gti.AddType(&gti.Type{
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetEmail sets the [User.Email]:
-// default email address -- e.g., for recording changes in a version control system
-func (t *User) SetEmail(v string) *User {
-	t.Email = v
-	return t
-}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
@@ -1219,69 +991,6 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// SetTabSize sets the [EditorPrefs.TabSize]:
-// size of a tab, in chars -- also determines indent level for space indent
-func (t *EditorPrefs) SetTabSize(v int) *EditorPrefs {
-	t.TabSize = v
-	return t
-}
-
-// SetSpaceIndent sets the [EditorPrefs.SpaceIndent]:
-// use spaces for indentation, otherwise tabs
-func (t *EditorPrefs) SetSpaceIndent(v bool) *EditorPrefs {
-	t.SpaceIndent = v
-	return t
-}
-
-// SetWordWrap sets the [EditorPrefs.WordWrap]:
-// wrap lines at word boundaries -- otherwise long lines scroll off the end
-func (t *EditorPrefs) SetWordWrap(v bool) *EditorPrefs {
-	t.WordWrap = v
-	return t
-}
-
-// SetLineNos sets the [EditorPrefs.LineNos]:
-// show line numbers
-func (t *EditorPrefs) SetLineNos(v bool) *EditorPrefs {
-	t.LineNos = v
-	return t
-}
-
-// SetCompletion sets the [EditorPrefs.Completion]:
-// use the completion system to suggest options while typing
-func (t *EditorPrefs) SetCompletion(v bool) *EditorPrefs {
-	t.Completion = v
-	return t
-}
-
-// SetSpellCorrect sets the [EditorPrefs.SpellCorrect]:
-// suggest corrections for unknown words while typing
-func (t *EditorPrefs) SetSpellCorrect(v bool) *EditorPrefs {
-	t.SpellCorrect = v
-	return t
-}
-
-// SetAutoIndent sets the [EditorPrefs.AutoIndent]:
-// automatically indent lines when enter, tab, }, etc pressed
-func (t *EditorPrefs) SetAutoIndent(v bool) *EditorPrefs {
-	t.AutoIndent = v
-	return t
-}
-
-// SetEmacsUndo sets the [EditorPrefs.EmacsUndo]:
-// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
-func (t *EditorPrefs) SetEmacsUndo(v bool) *EditorPrefs {
-	t.EmacsUndo = v
-	return t
-}
-
-// SetDepthColor sets the [EditorPrefs.DepthColor]:
-// colorize the background according to nesting depth
-func (t *EditorPrefs) SetDepthColor(v bool) *EditorPrefs {
-	t.DepthColor = v
-	return t
-}
-
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.FavPathItem",
 	ShortName: "gi.FavPathItem",
@@ -1298,26 +1007,6 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetIc sets the [FavPathItem.Ic]:
-// icon for item
-func (t *FavPathItem) SetIc(v icons.Icon) *FavPathItem {
-	t.Ic = v
-	return t
-}
-
-// SetName sets the [FavPathItem.Name]:
-// name of the favorite item
-func (t *FavPathItem) SetName(v string) *FavPathItem {
-	t.Name = v
-	return t
-}
-
-// SetPath sets the [FavPathItem.Path]:
-func (t *FavPathItem) SetPath(v string) *FavPathItem {
-	t.Path = v
-	return t
-}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.PrefsDetailed",
@@ -1356,174 +1045,6 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
-
-// SetMenuMaxHeight sets the [PrefsDetailed.MenuMaxHeight]:
-// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
-func (t *PrefsDetailed) SetMenuMaxHeight(v int) *PrefsDetailed {
-	t.MenuMaxHeight = v
-	return t
-}
-
-// SetDragStartTime sets the [PrefsDetailed.DragStartTime]:
-// the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
-func (t *PrefsDetailed) SetDragStartTime(v time.Duration) *PrefsDetailed {
-	t.DragStartTime = v
-	return t
-}
-
-// SetDragStartDist sets the [PrefsDetailed.DragStartDist]:
-// the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
-func (t *PrefsDetailed) SetDragStartDist(v int) *PrefsDetailed {
-	t.DragStartDist = v
-	return t
-}
-
-// SetSlideStartTime sets the [PrefsDetailed.SlideStartTime]:
-// the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
-func (t *PrefsDetailed) SetSlideStartTime(v time.Duration) *PrefsDetailed {
-	t.SlideStartTime = v
-	return t
-}
-
-// SetSlideStartDist sets the [PrefsDetailed.SlideStartDist]:
-// the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
-func (t *PrefsDetailed) SetSlideStartDist(v int) *PrefsDetailed {
-	t.SlideStartDist = v
-	return t
-}
-
-// SetLongHoverTime sets the [PrefsDetailed.LongHoverTime]:
-// the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
-func (t *PrefsDetailed) SetLongHoverTime(v time.Duration) *PrefsDetailed {
-	t.LongHoverTime = v
-	return t
-}
-
-// SetLongHoverStopDist sets the [PrefsDetailed.LongHoverStopDist]:
-// the maximum number of pixels that mouse can move and still register a Hover event
-func (t *PrefsDetailed) SetLongHoverStopDist(v int) *PrefsDetailed {
-	t.LongHoverStopDist = v
-	return t
-}
-
-// SetCompleteWaitMSec sets the [PrefsDetailed.CompleteWaitMSec]:
-// the number of milliseconds to wait before offering completions
-func (t *PrefsDetailed) SetCompleteWaitMSec(v int) *PrefsDetailed {
-	t.CompleteWaitMSec = v
-	return t
-}
-
-// SetCompleteMaxItems sets the [PrefsDetailed.CompleteMaxItems]:
-// the maximum number of completions offered in popup
-func (t *PrefsDetailed) SetCompleteMaxItems(v int) *PrefsDetailed {
-	t.CompleteMaxItems = v
-	return t
-}
-
-// SetCursorBlinkTime sets the [PrefsDetailed.CursorBlinkTime]:
-// time interval for cursor blinking on and off -- set to 0 to disable blinking
-func (t *PrefsDetailed) SetCursorBlinkTime(v time.Duration) *PrefsDetailed {
-	t.CursorBlinkTime = v
-	return t
-}
-
-// SetLayoutAutoScrollDelayMSec sets the [PrefsDetailed.LayoutAutoScrollDelayMSec]:
-// is amount of time to wait (in Milliseconds) before trying to autoscroll again
-func (t *PrefsDetailed) SetLayoutAutoScrollDelayMSec(v int) *PrefsDetailed {
-	t.LayoutAutoScrollDelayMSec = v
-	return t
-}
-
-// SetLayoutPageSteps sets the [PrefsDetailed.LayoutPageSteps]:
-// number of steps to take in PageUp / Down events in terms of number of items
-func (t *PrefsDetailed) SetLayoutPageSteps(v int) *PrefsDetailed {
-	t.LayoutPageSteps = v
-	return t
-}
-
-// SetLayoutFocusNameTimeoutMSec sets the [PrefsDetailed.LayoutFocusNameTimeoutMSec]:
-// the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
-func (t *PrefsDetailed) SetLayoutFocusNameTimeoutMSec(v int) *PrefsDetailed {
-	t.LayoutFocusNameTimeoutMSec = v
-	return t
-}
-
-// SetLayoutFocusNameTabMSec sets the [PrefsDetailed.LayoutFocusNameTabMSec]:
-// the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
-func (t *PrefsDetailed) SetLayoutFocusNameTabMSec(v int) *PrefsDetailed {
-	t.LayoutFocusNameTabMSec = v
-	return t
-}
-
-// SetDialogsSepRenderWin sets the [PrefsDetailed.DialogsSepRenderWin]:
-// open dialogs in separate windows -- else do as popups in main window
-func (t *PrefsDetailed) SetDialogsSepRenderWin(v bool) *PrefsDetailed {
-	t.DialogsSepRenderWin = v
-	return t
-}
-
-// SetTextViewClipHistMax sets the [PrefsDetailed.TextViewClipHistMax]:
-// Maximum amount of clipboard history to retain
-func (t *PrefsDetailed) SetTextViewClipHistMax(v int) *PrefsDetailed {
-	t.TextViewClipHistMax = v
-	return t
-}
-
-// SetTextBufMaxScopeLines sets the [PrefsDetailed.TextBufMaxScopeLines]:
-// maximum number of lines to look for matching scope syntax (parens, brackets)
-func (t *PrefsDetailed) SetTextBufMaxScopeLines(v int) *PrefsDetailed {
-	t.TextBufMaxScopeLines = v
-	return t
-}
-
-// SetTextBufDiffRevertLines sets the [PrefsDetailed.TextBufDiffRevertLines]:
-// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
-func (t *PrefsDetailed) SetTextBufDiffRevertLines(v int) *PrefsDetailed {
-	t.TextBufDiffRevertLines = v
-	return t
-}
-
-// SetTextBufDiffRevertDiffs sets the [PrefsDetailed.TextBufDiffRevertDiffs]:
-// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
-func (t *PrefsDetailed) SetTextBufDiffRevertDiffs(v int) *PrefsDetailed {
-	t.TextBufDiffRevertDiffs = v
-	return t
-}
-
-// SetTextBufMarkupDelayMSec sets the [PrefsDetailed.TextBufMarkupDelayMSec]:
-// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
-func (t *PrefsDetailed) SetTextBufMarkupDelayMSec(v int) *PrefsDetailed {
-	t.TextBufMarkupDelayMSec = v
-	return t
-}
-
-// SetMapInlineLen sets the [PrefsDetailed.MapInlineLen]:
-// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
-func (t *PrefsDetailed) SetMapInlineLen(v int) *PrefsDetailed {
-	t.MapInlineLen = v
-	return t
-}
-
-// SetStructInlineLen sets the [PrefsDetailed.StructInlineLen]:
-// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
-func (t *PrefsDetailed) SetStructInlineLen(v int) *PrefsDetailed {
-	t.StructInlineLen = v
-	return t
-}
-
-// SetSliceInlineLen sets the [PrefsDetailed.SliceInlineLen]:
-// the number of slice elements below which inline will be used
-func (t *PrefsDetailed) SetSliceInlineLen(v int) *PrefsDetailed {
-	t.SliceInlineLen = v
-	return t
-}
-
-// SetChanged sets the [PrefsDetailed.Changed]:
-// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
-func (t *PrefsDetailed) SetChanged(v bool) *PrefsDetailed {
-	t.Changed = v
-	return t
-}
 
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
