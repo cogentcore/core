@@ -15,6 +15,7 @@ import (
 
 	"goki.dev/enums"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/texteditor"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -270,6 +271,8 @@ func ToValue(it any, tags string) Value {
 		} else {
 			return &StructValue{}
 		}
+	case vk == reflect.Func:
+		// return &FuncValue{}
 	case vk == reflect.Interface:
 		// note: we never get here -- all interfaces are captured by pointer kind above
 		// apparently (because the non-ptr vk indirection does that I guess?)
@@ -1656,4 +1659,36 @@ func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	// 	vv.SetValue(ac.Text)
 	// 	vv.UpdateWidget()
 	// })
+}
+
+// TextEditorValue presents a [texteditor.Editor] for editing longer text
+type TextEditorValue struct {
+	ValueBase
+}
+
+func (vv *TextEditorValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = texteditor.EditorType
+	return vv.WidgetTyp
+}
+
+func (vv *TextEditorValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	sb := vv.Widget.(*texteditor.Editor)
+	npv := laser.NonPtrValue(vv.Value)
+	sb.Buf.SetText([]byte(npv.String()))
+}
+
+func (vv *TextEditorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
+
+	tb := texteditor.NewBuf()
+	tb.Stat()
+
+	tv := widg.(*texteditor.Editor)
+	tv.SetBuf(tb)
+
+	vv.UpdateWidget()
 }
