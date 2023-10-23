@@ -633,6 +633,18 @@ func (tf *TextField) SelectModeToggle() {
 	}
 }
 
+// ShiftSelect sets the selection start if the shift key is down but wasn't previously.
+// If the shift key has been released, the selection info is cleared.
+func (tf *TextField) ShiftSelect(kt events.Event) {
+	hasShift := kt.HasAnyModifier(key.Shift)
+	if hasShift && !tf.SelectMode {
+		tf.SelectModeToggle()
+	}
+	if !hasShift && tf.SelectMode {
+		tf.SelectModeToggle()
+	}
+}
+
 // SelectRegUpdate updates current select region based on given cursor position
 // relative to SelectStart position
 func (tf *TextField) SelectRegUpdate(pos int) {
@@ -1417,26 +1429,32 @@ func (tf *TextField) HandleTextFieldKeys() {
 		switch kf {
 		case KeyFunMoveRight:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CursorForward(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunWordRight:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CursorForwardWord(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunMoveLeft:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CursorBackward(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunWordLeft:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CursorBackwardWord(1)
 			tf.OfferComplete(dontForce)
 		case KeyFunHome:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorStart()
 		case KeyFunEnd:
 			e.SetHandled()
+			tf.ShiftSelect(e)
 			tf.CancelComplete()
 			tf.CursorEnd()
 		case KeyFunSelectMode:
