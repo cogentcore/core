@@ -173,7 +173,6 @@ func FileViewExtOnlyFilter(fv *FileView, fi *filecat.FileInfo) bool {
 func (fv *FileView) SetFilename(filename, ext string) {
 	fv.DirPath, fv.SelFile = filepath.Split(filename)
 	fv.SetExt(ext)
-	// fv.Config(fv.Sc)
 }
 
 // SetPathFile sets the path, initial select file (or "") and initializes the view
@@ -181,7 +180,6 @@ func (fv *FileView) SetPathFile(path, file, ext string) {
 	fv.DirPath = path
 	fv.SelFile = file
 	fv.SetExt(ext)
-	// fv.Config()
 }
 
 // SelectedFile returns the full path to selected file
@@ -272,7 +270,7 @@ func (fv *FileView) ConfigFileView(sc *gi.Scene) {
 		fv.ConfigSelRow()
 		fv.UpdateFiles()
 		fv.UpdateEndLayout(updt)
-		fv.Update()
+		// fv.Update()
 	}
 }
 
