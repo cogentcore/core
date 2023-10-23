@@ -207,7 +207,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 						continue
 					}
 					*cfg = *ic
-					dirs, hasAdd, hasSkip, err = LoadFromComment(gd.Doc, cfg)
+					dirs, hasAdd, hasSkip, err = LoadFromComments(cfg, gd.Doc, ts.Doc, ts.Comment)
 					hasInt = true
 					if err != nil {
 						return false, err
@@ -364,7 +364,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		if field.Doc != nil {
 			lcfg := &Config{}
 			*lcfg = *cfg
-			sdirs, _, _, err := LoadFromComments(field.Doc, field.Comment, lcfg)
+			sdirs, _, _, err := LoadFromComments(lcfg, field.Doc, field.Comment)
 			if err != nil {
 				return nil, err
 			}
@@ -389,17 +389,18 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 }
 
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
-// for the given doc and line comment groups.
-func LoadFromComments(doc *ast.CommentGroup, line *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
-	ddirs, dadd, dskip, err := LoadFromComment(doc, cfg)
-	if err != nil {
-		return nil, false, false, err
+// for the given comment groups.
+func LoadFromComments(cfg *Config, c ...*ast.CommentGroup) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+	for _, cg := range c {
+		cdirs, cadd, cskip, err := LoadFromComment(cg, cfg)
+		if err != nil {
+			return nil, false, false, err
+		}
+		dirs = append(dirs, cdirs...)
+		hasAdd = hasAdd || cadd
+		hasSkip = hasSkip || cskip
 	}
-	ldirs, ladd, lskip, err := LoadFromComment(line, cfg)
-	if err != nil {
-		return nil, false, false, err
-	}
-	return append(ddirs, ldirs...), dadd || ladd, dskip || lskip, nil
+	return
 }
 
 // LoadFromComment processes the given comment group, setting the
