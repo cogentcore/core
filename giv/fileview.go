@@ -98,21 +98,21 @@ func (fv *FileView) FileViewStyles() {
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMax()
 			})
-		case "favs-view":
+		case "files-row/favs-view":
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
 			fv.SetFlag(false, SliceViewShowToolbar)
-			fv.SetState(true, states.Disabled) // select only
+			fv.SetState(true, states.ReadOnly)
 			w.Style(func(s *styles.Style) {
 				s.SetStretchMaxHeight()
-				s.MaxWidth.SetDp(0) // no stretch
+				s.SetFixedWidth(units.Ch(25))
 			})
-		case "files-view":
+		case "files-row/files-view":
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
 			fv.SetFlag(false, SliceViewShowToolbar)
-			fv.SetState(true, states.Disabled) // select only
+			fv.SetState(true, states.ReadOnly)
 			fv.Style(func(s *styles.Style) {
 				s.SetStretchMax()
 			})
@@ -123,12 +123,12 @@ func (fv *FileView) FileViewStyles() {
 				sr.Spacing.SetDp(4)
 				s.SetStretchMaxWidth()
 			})
-		case "sel": // sel field
+		case "sel-row/sel": // sel field
 			w.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Ch(60))
 				s.SetStretchMaxWidth()
 			})
-		case "ext-label":
+		case "sel-row/ext-label":
 			w.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Ch(10))
 			})
@@ -198,19 +198,22 @@ func (fv *FileView) SelectedFileInfo() (*filecat.FileInfo, bool) {
 	return fv.Files[fv.SelectedIdx], true
 }
 
-// SelectFile selects the current file -- if a directory it opens
-// the directory; if a file it selects the file and closes dialog
-func (fv *FileView) SelectFile() {
+// SelectFile selects the current file as the selection.
+// if a directory it opens the directory and returns false.
+// if a file it selects the file and returns true.
+// if no selection, returns false.
+func (fv *FileView) SelectFile() bool {
 	if fi, ok := fv.SelectedFileInfo(); ok {
 		if fi.IsDir() {
 			fv.DirPath = filepath.Join(fv.DirPath, fi.Name)
 			fv.SelFile = ""
 			fv.SelectedIdx = -1
 			fv.UpdateFilesAction()
-			return
+			return false
 		}
-		// fv.FileSig.Emit(fv.This(), int64(FileViewDoubleClicked), fv.SelectedFile())
+		return true
 	}
+	return false
 }
 
 // STYTODO: get rid of this or make it use actual color values
@@ -218,35 +221,6 @@ func (fv *FileView) SelectFile() {
 var FileViewKindColorMap = map[string]string{
 	"folder": "pref(link)",
 }
-
-// FileViewSignals are signals that fileview sends based on user actions.
-type FileViewSignals int64
-
-const (
-	// FileViewDoubleClicked emitted for double-click on a non-directory file
-	// in table view (data is full selected file name w/ path) -- typically
-	// closes dialog.
-	FileViewDoubleClicked FileViewSignals = iota
-
-	// FileViewWillUpdate emitted when list of files is about to be updated
-	// based on user action (data is current path) -- current DirPath will be
-	// used -- can intervene here if needed.
-	FileViewWillUpdate
-
-	// FileViewUpdated emitted after list of files has been updated (data is
-	// current path).
-	FileViewUpdated
-
-	// FileViewNewFolder emitted when a new folder was created (data is
-	// current path).
-	FileViewNewFolder
-
-	// FileViewFavAdded emitted when a new favorite was added (data is new
-	// favorite path).
-	FileViewFavAdded
-
-	FileViewSignalsN
-)
 
 func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, vv Value) {
 	// STYTODO: get rid of this and move to OnChildAdded
@@ -279,8 +253,14 @@ func FileViewStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 	}
 }
 
-// Config configures the view
-func (fv *FileView) ConfigWidget(vp *gi.Scene) {
+func (fv *FileView) ConfigWidget(sc *gi.Scene) {
+	fv.ConfigFileView(sc)
+}
+
+func (fv *FileView) ConfigFileView(sc *gi.Scene) {
+	if fv.HasChildren() {
+		return
+	}
 	config := ki.Config{}
 	config.Add(gi.ToolbarType, "path-tbar")
 	config.Add(gi.LayoutType, "files-row")
@@ -291,7 +271,8 @@ func (fv *FileView) ConfigWidget(vp *gi.Scene) {
 		fv.ConfigFilesRow()
 		fv.ConfigSelRow()
 		fv.UpdateFiles()
-		fv.UpdateEnd(updt)
+		fv.UpdateEndLayout(updt)
+		fv.Update()
 	}
 }
 
@@ -311,10 +292,9 @@ func (fv *FileView) ConfigPathBar() {
 	config.Add(gi.ButtonType, "path-fav")
 	config.Add(gi.ButtonType, "new-folder")
 
-	pl := gi.NewLabel(pr, "path-lbl", "Path:")
+	pl := gi.NewLabel(pr, "path-lbl").SetText("Path:")
 	pl.Tooltip = "Path to look for files in: can select from list of recent paths, or edit a value directly"
-	pf := gi.NewChooser(pr, "path")
-	pf.Editable = true
+	pf := gi.NewChooser(pr, "path").SetEditable(true)
 	pf.SetMinPrefWidth(units.Ch(60))
 	pf.SetStretchMaxWidth()
 	pf.ConfigParts(fv.Sc)
@@ -373,6 +353,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv := fv.FavsView()
 	sv.SelectedIdx = -1
+	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&gi.Prefs.FavPaths)
 	sv.OnSelect(func(e events.Event) {
 		fv.FavSelect(sv.SelectedIdx)
@@ -380,6 +361,7 @@ func (fv *FileView) ConfigFilesRow() {
 
 	sv = fv.FilesView()
 	sv.StyleFunc = FileViewStyleFunc
+	sv.SetState(true, states.ReadOnly)
 	sv.SetSlice(&fv.Files)
 	if gi.Prefs.FileViewSort != "" {
 		sv.SetSortFieldName(gi.Prefs.FileViewSort)
@@ -388,7 +370,9 @@ func (fv *FileView) ConfigFilesRow() {
 		fv.FileSelectAction(sv.SelectedIdx)
 	})
 	sv.OnDoubleClick(func(e events.Event) {
-		fv.SelectFile()
+		if !fv.SelectFile() {
+			e.SetHandled() // don't pass along; keep dialog open
+		}
 	})
 }
 
@@ -597,6 +581,8 @@ func (fv *FileView) UpdateFiles() {
 		sv.Config(fv.Sc)
 		// sv.LayoutSliceGrid()
 	}
+	sv.Update()
+
 	// sv.UpdateSliceGrid()
 	// sv.LayoutHeader()
 	fv.SelectedIdx = sv.SelectedIdx
@@ -808,7 +794,9 @@ func (fv *FileView) KeyInput(kt events.Event) {
 		fv.PathFieldHistNext()
 	case gi.KeyFunInsert, gi.KeyFunInsertAfter, gi.KeyFunMenuOpen, gi.KeyFunSelectMode:
 		kt.SetHandled()
-		fv.SelectFile()
+		if fv.SelectFile() {
+			fv.Send(events.DoubleClick, kt) // will close dialog
+		}
 	case gi.KeyFunSearch:
 		kt.SetHandled()
 		sf := fv.SelField()
