@@ -15,6 +15,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"goki.dev/grog"
 	"goki.dev/gti"
+	"goki.dev/laser"
 )
 
 // Indent is the value used for indentation in [Usage].
@@ -187,7 +188,7 @@ func FlagUsage(fields *Fields, b *strings.Builder) {
 		}
 		b.WriteString(" " + grog.SuccessColor(f.Field.Type.String()))
 		b.WriteString("\n")
-		styp := gti.TypeByValue(f.Struct)
+		styp := gti.TypeByName(gti.TypeName(laser.NonPtrType(f.Struct.Type())))
 		if styp != nil {
 			field := gti.GetField(styp, f.Field.Name)
 			if field != nil {
