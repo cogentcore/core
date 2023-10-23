@@ -278,7 +278,7 @@ type WidgetBase struct {
 	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
-	Stylers []func(s *styles.Style) `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// override the computed styles and allow directly editing Style
 	OverrideStyle bool `copy:"-" json:"-" xml:"-" set:"-"`
