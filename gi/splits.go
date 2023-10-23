@@ -600,7 +600,7 @@ func (sr *Splitter) HandleSplitterMouse() {
 	})
 	// todo: just disabling at this point to prevent bad side-effects
 	// sr.On(events.Scroll, func(e events.Event) {
-	// 	if srr.IsInactive() {
+	// 	if srr.IsReadOnly() {
 	// 		return
 	// 	}
 	// 	e := d.(*events.Scroll)

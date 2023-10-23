@@ -21,7 +21,7 @@ type ArgView struct {
 	gi.Frame
 
 	// the args that we are a view onto
-	Args []ArgConfig
+	Args []ArgConfig `set:"-"`
 
 	// title / prompt to show above the editor fields
 	Title string
@@ -122,16 +122,16 @@ func (av *ArgView) ArgsGrid() *gi.Frame {
 	return av.ChildByName("args-grid", 0).(*gi.Frame)
 }
 
-// SetTitle sets the optional title and updates the Title label
-func (av *ArgView) SetTitle(title string) {
-	av.Title = title
-	if av.Title != "" {
-		lab := av.TitleWidget()
-		if lab != nil {
-			lab.Text = title
-		}
-	}
-}
+// // SetTitle sets the optional title and updates the Title label
+// func (av *ArgView) SetTitle(title string) {
+// 	av.Title = title
+// 	if av.Title != "" {
+// 		lab := av.TitleWidget()
+// 		if lab != nil {
+// 			lab.Text = title
+// 		}
+// 	}
+// }
 
 // ConfigArgsGrid configures the ArgsGrid for the current struct
 func (av *ArgView) ConfigArgsGrid() {

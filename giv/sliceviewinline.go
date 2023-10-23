@@ -24,7 +24,7 @@ type SliceViewInline struct {
 	gi.Layout
 
 	// the slice that we are a view onto
-	Slice any
+	Slice any `set:"-"`
 
 	// Value for the slice itself, if this was created within value view framework -- otherwise nil
 	SliceValView Value
@@ -36,7 +36,7 @@ type SliceViewInline struct {
 	IsFixedLen bool
 
 	// has the slice been edited?
-	Changed bool
+	Changed bool `set:"-"`
 
 	// Value representations of the fields
 	Values []Value `json:"-" xml:"-"`
@@ -175,8 +175,8 @@ func (sv *SliceViewInline) ConfigSlice(sc *gi.Scene) bool {
 			vv.SetTags(sv.SliceValView.AllTags())
 		}
 		vv.ConfigWidget(widg, sc)
-		if sv.IsDisabled() {
-			widg.AsWidget().SetState(true, states.Disabled)
+		if sv.IsReadOnly() {
+			widg.AsWidget().SetState(true, states.ReadOnly)
 		}
 	}
 	if !sv.IsArray && !sv.IsFixedLen {

@@ -121,7 +121,7 @@ func (vv *KeyMapValue) HasDialog() bool {
 }
 
 func (vv *KeyMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())

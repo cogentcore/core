@@ -36,13 +36,13 @@ type StructView struct {
 	gi.Frame
 
 	// the struct that we are a view onto
-	Struct any
+	Struct any `set:"-"`
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
 	StructValView Value
 
 	// has the value of any field changed?  updated by the ViewSig signals from fields
-	Changed bool
+	Changed bool `set:"-"`
 
 	// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
 	ChangeFlag *reflect.Value `json:"-" xml:"-"`
@@ -68,13 +68,13 @@ type StructView struct {
 	ToolbarStru any
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" inactive:"+"`
+	HasDefs bool `json:"-" xml:"-" readonly:"+"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" inactive:"+"`
+	HasViewIfs bool `json:"-" xml:"-" readonly:"+"`
 
 	// extra tags by field name -- from type properties
-	TypeFieldTags map[string]string `json:"-" xml:"-" inactive:"+"`
+	TypeFieldTags map[string]string `json:"-" xml:"-" readonly:"+"`
 }
 
 func (sv *StructView) OnInit() {
@@ -331,7 +331,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		vvb := vv.AsValueBase()
 		vvb.ViewPath = sv.ViewPath
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled())
+		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, widg, sv.IsReadOnly())
 		if hasDef {
 			sv.HasDefs = true
 		}
@@ -347,7 +347,7 @@ func (sv *StructView) ConfigStructGrid(sc *gi.Scene) bool {
 		}
 		sv.WidgetConfiged[widg] = true
 		vv.ConfigWidget(widg, sc)
-		if !sv.IsDisabled() && !inactTag {
+		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				// note: updating vv here is redundant -- relevant field will have already updated
@@ -405,20 +405,20 @@ func (sv *StructView) Render(sc *gi.Scene) {
 // StructViewFieldTags processes the tags for a field in a struct view, setting
 // the properties on the label or widget appropriately
 // returns true if there were any "def" default tags -- if so, needs updating
-func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isInact bool) (hasDef, inactTag bool) {
+func StructViewFieldTags(vv Value, lbl *gi.Label, widg gi.Widget, isReadOnly bool) (hasDef, readOnlyTag bool) {
 	vvb := vv.AsValueBase()
 	if lbltag, has := vv.Tag("label"); has {
 		lbl.Text = lbltag
 	} else {
 		lbl.Text = sentencecase.Of(vvb.Field.Name)
 	}
-	if _, has := vv.Tag("inactive"); has {
-		inactTag = true
-		widg.AsWidget().SetState(true, states.Disabled)
+	if _, has := vv.Tag("readonly"); has {
+		readOnlyTag = true
+		widg.AsWidget().SetState(true, states.ReadOnly)
 	} else {
-		if isInact {
-			widg.AsWidget().SetState(true, states.Disabled)
-			vv.SetTag("inactive", "true")
+		if isReadOnly {
+			widg.AsWidget().SetState(true, states.ReadOnly)
+			vv.SetTag("readonly", "true")
 		}
 	}
 	defStr := ""

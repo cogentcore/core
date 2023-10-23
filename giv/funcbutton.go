@@ -30,11 +30,13 @@ import (
 // its receiver type must be added to gti.
 type FuncButton struct {
 	gi.Button
+
 	// Func is the [gti.Func] associated with this button.
 	// This function can also be a method, but it must be
 	// converted to a [gti.Func] first. It should typically
 	// be set using [FuncButton.SetFunc].
-	Func *gti.Func
+	Func *gti.Func `set:"-"`
+
 	// ReflectFunc is the [reflect.Value] of the function or
 	// method associated with this button. It should typically
 	// bet set using [FuncButton.SetFunc].
@@ -43,11 +45,13 @@ type FuncButton struct {
 	// Confirm is whether to prompt the user for confirmation
 	// before calling the function.
 	Confirm bool
+
 	// ShowReturn is whether to display the return values of
 	// the function (and a success message if there are none).
 	// The way that the return values are shown is determined
 	// by ShowReturnAsDialog. ShowReturn is on by default.
 	ShowReturn bool `def:"true"`
+
 	// ShowReturnAsDialog, if and only if ShowReturn is true,
 	// indicates to show the return values of the function in
 	// a dialog, instead of in a snackbar, as they are by default.
@@ -60,21 +64,6 @@ type FuncButton struct {
 func (fb *FuncButton) OnInit() {
 	fb.Button.OnInit()
 	fb.ShowReturn = true
-}
-
-func (fb *FuncButton) SetConfirm(confirm bool) *FuncButton {
-	fb.Confirm = confirm
-	return fb
-}
-
-func (fb *FuncButton) SetShowReturn(show bool) *FuncButton {
-	fb.ShowReturn = show
-	return fb
-}
-
-func (fb *FuncButton) SetShowReturnAsDialog(show bool) *FuncButton {
-	fb.ShowReturnAsDialog = show
-	return fb
 }
 
 // SetFunc sets the function associated with the FuncButton to the

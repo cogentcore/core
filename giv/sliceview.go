@@ -16,7 +16,7 @@ import (
 // SliceView represents a slice, creating an interactive viewer / editor of the
 // elements as rows in a table.  Widgets to show the index / value pairs, within an
 // overall frame.
-// Set to Inactive for select-only mode, which emits WidgetSig WidgetSelected
+// Set to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected
 // signals when selection is updated.
 type SliceView struct {
 	SliceViewBase

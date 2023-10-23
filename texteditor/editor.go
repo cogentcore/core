@@ -268,7 +268,7 @@ func (ed *Editor) ResetState() {
 		ed.CursorPos = lex.Pos{}
 	}
 	if ed.Buf != nil {
-		ed.Buf.SetInactive(ed.IsDisabled())
+		ed.Buf.SetReadOnly(ed.IsReadOnly())
 	}
 }
 

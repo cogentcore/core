@@ -101,7 +101,7 @@ func (sp *Spinner) SpinnerStyles() {
 		case "parts/text-field":
 			tf := w.(*TextField)
 			tf.SetText(sp.ValToString(sp.Value))
-			tf.SetState(sp.IsDisabled(), states.Disabled)
+			tf.SetState(sp.IsReadOnly(), states.Disabled)
 			sp.TextFieldHandlers(tf)
 			tf.Style(func(s *styles.Style) {
 				s.SetMinPrefWidth(units.Em(3))
@@ -113,7 +113,7 @@ func (sp *Spinner) SpinnerStyles() {
 				sp.UpIcon = icons.KeyboardArrowUp
 			}
 			up.SetIcon(sp.UpIcon)
-			w.SetState(sp.IsDisabled(), states.Disabled)
+			w.SetState(sp.IsReadOnly(), states.Disabled)
 			up.OnClick(func(e events.Event) {
 				sp.IncrValue(1)
 			})
@@ -129,7 +129,7 @@ func (sp *Spinner) SpinnerStyles() {
 				sp.DownIcon = icons.KeyboardArrowDown
 			}
 			down.SetIcon(sp.DownIcon)
-			w.SetState(sp.IsDisabled(), states.Disabled)
+			w.SetState(sp.IsReadOnly(), states.Disabled)
 			down.OnClick(func(e events.Event) {
 				sp.IncrValue(-1)
 			})
@@ -295,7 +295,7 @@ func (sp *Spinner) HandleSpinnerScroll() {
 // TextFieldHandlers adds the Spinner textfield handlers for the given textfield
 func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 	tf.On(events.Select, func(e events.Event) {
-		if sp.IsDisabled() {
+		if sp.IsReadOnly() {
 			return
 		}
 		sp.SetSelected(!sp.StateIs(states.Selected))
@@ -303,7 +303,7 @@ func (sp *Spinner) TextFieldHandlers(tf *TextField) {
 	})
 	// TODO(kai): improve spin box focus handling
 	// tf.OnClick(func(e events.Event) {
-	// 	if sp.IsDisabled() {
+	// 	if sp.IsReadOnly() {
 	// 		return
 	// 	}
 	// 	sp.SetState(true, states.Focused)

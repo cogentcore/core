@@ -443,10 +443,10 @@ type Value interface {
 	// (or Invalid for standalone values such as args).
 	OwnerKind() reflect.Kind
 
-	// IsInactive returns whether the value is inactive -- e.g., Map owners
-	// have Inactive values, and some fields can be marked as Inactive using a
-	// struct tag.
-	IsInactive() bool
+	// IsReadOnly returns whether the value is readonly.
+	// e.g., Map owners have ReadOnly values, and fields can be marked
+	// as ReadOnly using a struct tag.
+	IsReadOnly() bool
 
 	// WidgetType returns an appropriate type of widget to represent the
 	// current value.
@@ -479,7 +479,7 @@ type Value interface {
 	// Val returns the reflect.Value representation for this item.
 	Val() reflect.Value
 
-	// SetValue assigns given value to this item (if not Inactive), using
+	// SetValue assigns given value to this item (if not ReadOnly), using
 	// Ki.SetField for Ki types and laser.SetRobust otherwise -- emits a ViewSig
 	// signal when set.
 	SetValue(val any) bool
@@ -538,7 +538,7 @@ type ValueBase struct {
 	ki.Node
 
 	// the reflect.Value representation of the value
-	Value reflect.Value
+	Value reflect.Value `set:"-"`
 
 	// kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
 	OwnKind reflect.Kind
@@ -556,35 +556,35 @@ type ValueBase struct {
 	Field *reflect.StructField
 
 	// set of tags that can be set to customize interface for different types of values -- only source for non-structfield values
-	Tags map[string]string
+	Tags map[string]string `set:"-"`
 
 	// whether SavedDesc is applicable
-	HasSavedDesc bool
+	HasSavedDesc bool `set:"-" readonly:"-"`
 
 	// a saved version of the description for the value, if HasSavedDesc is true
-	SavedDesc string
+	SavedDesc string `set:"-" readonly:"-"`
 
 	// if Owner is a map, and this is a value, this is the key for this value in the map
-	Key any
+	Key any `set:"-" readonly:"-"`
 
 	// if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited
-	KeyView Value
+	KeyView Value `set:"-" readonly:"-"`
 
 	// if Owner is a slice, this is the index for the value in the slice
-	Idx int
+	Idx int `set:"-" readonly:"-"`
 
 	// type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface
-	WidgetTyp *gti.Type
+	WidgetTyp *gti.Type `set:"-" readonly:"-"`
 
 	// the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget
-	Widget gi.Widget
+	Widget gi.Widget `set:"-" readonly:"-"`
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners
+	Listeners events.Listeners `set:"-" view:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value
+	TmpSave Value `set:"-" view:"-"`
 }
 
 func (vv *ValueBase) AsValueBase() *ValueBase {
@@ -664,9 +664,9 @@ func (vv *ValueBase) OwnerKind() reflect.Kind {
 	return vv.OwnKind
 }
 
-func (vv *ValueBase) IsInactive() bool {
+func (vv *ValueBase) IsReadOnly() bool {
 	if vv.OwnKind == reflect.Struct {
-		if _, ok := vv.Tag("inactive"); ok {
+		if _, ok := vv.Tag("readonly"); ok {
 			return true
 		}
 	}
@@ -689,7 +689,7 @@ func (vv *ValueBase) Val() reflect.Value {
 }
 
 func (vv *ValueBase) SetValue(val any) bool {
-	if vv.This().(Value).IsInactive() {
+	if vv.This().(Value).IsReadOnly() {
 		return false
 	}
 	var err error
@@ -1025,7 +1025,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -1089,9 +1089,9 @@ func (vv *ValueBase) StdConfigWidget(widg gi.Widget) {
 type ViewIFace struct {
 }
 
-func (vi *ViewIFace) CtxtMenuView(val any, inactive bool, sc *gi.Scene, m *gi.Scene) bool {
+func (vi *ViewIFace) CtxtMenuView(val any, readOnly bool, sc *gi.Scene, m *gi.Scene) bool {
 	// TODO(kai/menu): add back CtxtMenuView here
-	// return CtxtMenuView(val, inactive, sc, menu)
+	// return CtxtMenuView(val, readOnly, sc, menu)
 	return false
 }
 

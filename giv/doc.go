@@ -43,7 +43,7 @@ StructView field / property editor of the selected node.
 
 TableView displays a slice-of-struct as a table with columns as the struct fields
 and rows as the elements in the struct.  You can sort by the column headers
-and it supports full editing with drag-n-drop etc.  If set to Inactive, then it
+and it supports full editing with drag-n-drop etc.  If set to ReadOnly, then it
 serves as a chooser, as in the FileView.
 
 # MethodView

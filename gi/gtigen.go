@@ -4,6 +4,7 @@ package gi
 
 import (
 	"image/color"
+	"time"
 
 	"github.com/aymerick/douceur/css"
 	"goki.dev/colors"
@@ -51,13 +52,6 @@ func (t *MenuBar) KiType() *gti.Type {
 // New returns a new [*MenuBar] value
 func (t *MenuBar) New() ki.Ki {
 	return &MenuBar{}
-}
-
-// SetTooltip sets the [MenuBar.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *MenuBar) SetTooltip(v string) *MenuBar {
-	t.Tooltip = v
-	return t
 }
 
 // SetMainMenu sets the [MenuBar.MainMenu]:
@@ -187,13 +181,6 @@ func AsButton(k ki.Ki) *Button {
 
 // AsButton satisfies the [ButtonEmbedder] interface
 func (t *Button) AsButton() *Button {
-	return t
-}
-
-// SetTooltip sets the [Button.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Button) SetTooltip(v string) *Button {
-	t.Tooltip = v
 	return t
 }
 
@@ -508,13 +495,6 @@ func (t *StyleSheet) New() ki.Ki {
 	return &StyleSheet{}
 }
 
-// SetTooltip sets the [StyleSheet.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *StyleSheet) SetTooltip(v string) *StyleSheet {
-	t.Tooltip = v
-	return t
-}
-
 // SetSheet sets the [StyleSheet.Sheet]:
 func (t *StyleSheet) SetSheet(v *css.Stylesheet) *StyleSheet {
 	t.Sheet = v
@@ -554,13 +534,6 @@ func (t *Frame) KiType() *gti.Type {
 // New returns a new [*Frame] value
 func (t *Frame) New() ki.Ki {
 	return &Frame{}
-}
-
-// SetTooltip sets the [Frame.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Frame) SetTooltip(v string) *Frame {
-	t.Tooltip = v
-	return t
 }
 
 // SetStripes sets the [Frame.Stripes]:
@@ -608,13 +581,6 @@ func (t *Icon) New() ki.Ki {
 	return &Icon{}
 }
 
-// SetTooltip sets the [Icon.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Icon) SetTooltip(v string) *Icon {
-	t.Tooltip = v
-	return t
-}
-
 // ImageType is the [gti.Type] for [Image]
 var ImageType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Image",
@@ -650,13 +616,6 @@ func (t *Image) KiType() *gti.Type {
 // New returns a new [*Image] value
 func (t *Image) New() ki.Ki {
 	return &Image{}
-}
-
-// SetTooltip sets the [Image.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Image) SetTooltip(v string) *Image {
-	t.Tooltip = v
-	return t
 }
 
 // LabelType is the [gti.Type] for [Label]
@@ -718,13 +677,6 @@ func AsLabel(k ki.Ki) *Label {
 
 // AsLabel satisfies the [LabelEmbedder] interface
 func (t *Label) AsLabel() *Label {
-	return t
-}
-
-// SetTooltip sets the [Label.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Label) SetTooltip(v string) *Label {
-	t.Tooltip = v
 	return t
 }
 
@@ -816,13 +768,6 @@ func (t *Layout) AsLayout() *Layout {
 	return t
 }
 
-// SetTooltip sets the [Layout.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Layout) SetTooltip(v string) *Layout {
-	t.Tooltip = v
-	return t
-}
-
 // SetSpacing sets the [Layout.Spacing]:
 // extra space to add between elements in the layout
 func (t *Layout) SetSpacing(v units.Value) *Layout {
@@ -877,13 +822,6 @@ func (t *Stretch) New() ki.Ki {
 	return &Stretch{}
 }
 
-// SetTooltip sets the [Stretch.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Stretch) SetTooltip(v string) *Stretch {
-	t.Tooltip = v
-	return t
-}
-
 // SpaceType is the [gti.Type] for [Space]
 var SpaceType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.Space",
@@ -915,13 +853,6 @@ func (t *Space) KiType() *gti.Type {
 // New returns a new [*Space] value
 func (t *Space) New() ki.Ki {
 	return &Space{}
-}
-
-// SetTooltip sets the [Space.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Space) SetTooltip(v string) *Space {
-	t.Tooltip = v
-	return t
 }
 
 var _ = gti.AddType(&gti.Type{
@@ -1001,6 +932,153 @@ var _ = gti.AddType(&gti.Type{
 	}),
 })
 
+// SetTheme sets the [Preferences.Theme]:
+// the color theme
+func (t *Preferences) SetTheme(v Themes) *Preferences {
+	t.Theme = v
+	return t
+}
+
+// SetColor sets the [Preferences.Color]:
+// the primary color used to generate the color scheme
+func (t *Preferences) SetColor(v color.RGBA) *Preferences {
+	t.Color = v
+	return t
+}
+
+// SetHiStyle sets the [Preferences.HiStyle]:
+// text highilighting style / theme
+func (t *Preferences) SetHiStyle(v HiStyleName) *Preferences {
+	t.HiStyle = v
+	return t
+}
+
+// SetDensity sets the [Preferences.Density]:
+// the density (compactness) of content
+func (t *Preferences) SetDensity(v Densities) *Preferences {
+	t.Density = v
+	return t
+}
+
+// SetLogicalDPIScale sets the [Preferences.LogicalDPIScale]:
+// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc
+func (t *Preferences) SetLogicalDPIScale(v float32) *Preferences {
+	t.LogicalDPIScale = v
+	return t
+}
+
+// SetScreenPrefs sets the [Preferences.ScreenPrefs]:
+// screen-specific preferences -- will override overall defaults if set
+func (t *Preferences) SetScreenPrefs(v map[string]ScreenPrefs) *Preferences {
+	t.ScreenPrefs = v
+	return t
+}
+
+// SetParams sets the [Preferences.Params]:
+// parameters controlling GUI behavior
+func (t *Preferences) SetParams(v ParamPrefs) *Preferences {
+	t.Params = v
+	return t
+}
+
+// SetEditor sets the [Preferences.Editor]:
+// editor preferences -- for TextView etc
+func (t *Preferences) SetEditor(v EditorPrefs) *Preferences {
+	t.Editor = v
+	return t
+}
+
+// SetKeyMap sets the [Preferences.KeyMap]:
+// select the active keymap from list of available keymaps -- see Edit KeyMaps for editing / saving / loading that list
+func (t *Preferences) SetKeyMap(v KeyMapName) *Preferences {
+	t.KeyMap = v
+	return t
+}
+
+// SetSaveKeyMaps sets the [Preferences.SaveKeyMaps]:
+// if set, the current available set of key maps is saved to your preferences directory, and automatically loaded at startup -- this should be set if you are using custom key maps, but it may be safer to keep it <i>OFF</i> if you are <i>not</i> using custom key maps, so that you'll always have the latest compiled-in standard key maps with all the current key functions bound to standard key chords
+func (t *Preferences) SetSaveKeyMaps(v bool) *Preferences {
+	t.SaveKeyMaps = v
+	return t
+}
+
+// SetSaveDetailed sets the [Preferences.SaveDetailed]:
+// if set, the detailed preferences are saved and loaded at startup -- only
+func (t *Preferences) SetSaveDetailed(v bool) *Preferences {
+	t.SaveDetailed = v
+	return t
+}
+
+// SetCustomStyles sets the [Preferences.CustomStyles]:
+// a custom style sheet -- add a separate Props entry for each type of object, e.g., button, or class using .classname, or specific named element using #name -- all are case insensitive
+func (t *Preferences) SetCustomStyles(v ki.Props) *Preferences {
+	t.CustomStyles = v
+	return t
+}
+
+// SetCustomStylesOverride sets the [Preferences.CustomStylesOverride]:
+// if true my custom styles override other styling (i.e., they come <i>last</i> in styling process -- otherwise they provide defaults that can be overridden by app-specific styling (i.e, they come first).
+func (t *Preferences) SetCustomStylesOverride(v bool) *Preferences {
+	t.CustomStylesOverride = v
+	return t
+}
+
+// SetFontFamily sets the [Preferences.FontFamily]:
+// default font family when otherwise not specified
+func (t *Preferences) SetFontFamily(v FontName) *Preferences {
+	t.FontFamily = v
+	return t
+}
+
+// SetMonoFont sets the [Preferences.MonoFont]:
+// default mono-spaced font family
+func (t *Preferences) SetMonoFont(v FontName) *Preferences {
+	t.MonoFont = v
+	return t
+}
+
+// SetFontPaths sets the [Preferences.FontPaths]:
+// extra font paths, beyond system defaults -- searched first
+func (t *Preferences) SetFontPaths(v []string) *Preferences {
+	t.FontPaths = v
+	return t
+}
+
+// SetUser sets the [Preferences.User]:
+// user info -- partially filled-out automatically if empty / when prefs first created
+func (t *Preferences) SetUser(v User) *Preferences {
+	t.User = v
+	return t
+}
+
+// SetFavPaths sets the [Preferences.FavPaths]:
+// favorite paths, shown in FileViewer and also editable there
+func (t *Preferences) SetFavPaths(v FavPaths) *Preferences {
+	t.FavPaths = v
+	return t
+}
+
+// SetFileViewSort sets the [Preferences.FileViewSort]:
+// column to sort by in FileView, and :up or :down for direction -- updated automatically via FileView
+func (t *Preferences) SetFileViewSort(v string) *Preferences {
+	t.FileViewSort = v
+	return t
+}
+
+// SetColorFilename sets the [Preferences.ColorFilename]:
+// filename for saving / loading colors
+func (t *Preferences) SetColorFilename(v FileName) *Preferences {
+	t.ColorFilename = v
+	return t
+}
+
+// SetChanged sets the [Preferences.Changed]:
+// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
+func (t *Preferences) SetChanged(v bool) *Preferences {
+	t.Changed = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ScreenPrefs",
 	ShortName: "gi.ScreenPrefs",
@@ -1015,6 +1093,13 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetLogicalDPIScale sets the [ScreenPrefs.LogicalDPIScale]:
+// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
+func (t *ScreenPrefs) SetLogicalDPIScale(v float32) *ScreenPrefs {
+	t.LogicalDPIScale = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.ParamPrefs",
@@ -1038,6 +1123,62 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetDoubleClickInterval sets the [ParamPrefs.DoubleClickInterval]:
+// the maximum time interval in msec between button press events to count as a double-click
+func (t *ParamPrefs) SetDoubleClickInterval(v time.Duration) *ParamPrefs {
+	t.DoubleClickInterval = v
+	return t
+}
+
+// SetScrollWheelSpeed sets the [ParamPrefs.ScrollWheelSpeed]:
+// how fast the scroll wheel moves -- typically pixels per wheel step but units can be arbitrary.  It is generally impossible to standardize speed and variable across devices, and we don't have access to the system settings, so unfortunately you have to set it here.
+func (t *ParamPrefs) SetScrollWheelSpeed(v float32) *ParamPrefs {
+	t.ScrollWheelSpeed = v
+	return t
+}
+
+// SetLocalMainMenu sets the [ParamPrefs.LocalMainMenu]:
+// controls whether the main menu is displayed locally at top of each window, in addition to global menu at the top of the screen.  Mac native apps do not do this, but OTOH it makes things more consistent with other platforms, and with larger screens, it can be convenient to have access to all the menu items right there.
+func (t *ParamPrefs) SetLocalMainMenu(v bool) *ParamPrefs {
+	t.LocalMainMenu = v
+	return t
+}
+
+// SetOnlyCloseActiveTab sets the [ParamPrefs.OnlyCloseActiveTab]:
+// only support closing the currently selected active tab; if this is set to true, pressing the close button on other tabs will take you to that tab, from which you can close it
+func (t *ParamPrefs) SetOnlyCloseActiveTab(v bool) *ParamPrefs {
+	t.OnlyCloseActiveTab = v
+	return t
+}
+
+// SetZebraStripeWeight sets the [ParamPrefs.ZebraStripeWeight]:
+// the amount that alternating rows and columns are highlighted when showing tabular data (set to 0 to disable zebra striping)
+func (t *ParamPrefs) SetZebraStripeWeight(v float32) *ParamPrefs {
+	t.ZebraStripeWeight = v
+	return t
+}
+
+// SetBigFileSize sets the [ParamPrefs.BigFileSize]:
+// the limit of file size, above which user will be prompted before opening / copying, etc.
+func (t *ParamPrefs) SetBigFileSize(v int) *ParamPrefs {
+	t.BigFileSize = v
+	return t
+}
+
+// SetSavedPathsMax sets the [ParamPrefs.SavedPathsMax]:
+// maximum number of saved paths to save in FileView
+func (t *ParamPrefs) SetSavedPathsMax(v int) *ParamPrefs {
+	t.SavedPathsMax = v
+	return t
+}
+
+// SetSmooth3D sets the [ParamPrefs.Smooth3D]:
+// turn on smoothing in 3D rendering -- this should be on by default but if you get an error telling you to turn it off, then do so (because your hardware can't handle it)
+func (t *ParamPrefs) SetSmooth3D(v bool) *ParamPrefs {
+	t.Smooth3D = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.User",
 	ShortName: "gi.User",
@@ -1054,6 +1195,13 @@ var _ = gti.AddType(&gti.Type{
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetEmail sets the [User.Email]:
+// default email address -- e.g., for recording changes in a version control system
+func (t *User) SetEmail(v string) *User {
+	t.Email = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.EditorPrefs",
@@ -1078,6 +1226,69 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetTabSize sets the [EditorPrefs.TabSize]:
+// size of a tab, in chars -- also determines indent level for space indent
+func (t *EditorPrefs) SetTabSize(v int) *EditorPrefs {
+	t.TabSize = v
+	return t
+}
+
+// SetSpaceIndent sets the [EditorPrefs.SpaceIndent]:
+// use spaces for indentation, otherwise tabs
+func (t *EditorPrefs) SetSpaceIndent(v bool) *EditorPrefs {
+	t.SpaceIndent = v
+	return t
+}
+
+// SetWordWrap sets the [EditorPrefs.WordWrap]:
+// wrap lines at word boundaries -- otherwise long lines scroll off the end
+func (t *EditorPrefs) SetWordWrap(v bool) *EditorPrefs {
+	t.WordWrap = v
+	return t
+}
+
+// SetLineNos sets the [EditorPrefs.LineNos]:
+// show line numbers
+func (t *EditorPrefs) SetLineNos(v bool) *EditorPrefs {
+	t.LineNos = v
+	return t
+}
+
+// SetCompletion sets the [EditorPrefs.Completion]:
+// use the completion system to suggest options while typing
+func (t *EditorPrefs) SetCompletion(v bool) *EditorPrefs {
+	t.Completion = v
+	return t
+}
+
+// SetSpellCorrect sets the [EditorPrefs.SpellCorrect]:
+// suggest corrections for unknown words while typing
+func (t *EditorPrefs) SetSpellCorrect(v bool) *EditorPrefs {
+	t.SpellCorrect = v
+	return t
+}
+
+// SetAutoIndent sets the [EditorPrefs.AutoIndent]:
+// automatically indent lines when enter, tab, }, etc pressed
+func (t *EditorPrefs) SetAutoIndent(v bool) *EditorPrefs {
+	t.AutoIndent = v
+	return t
+}
+
+// SetEmacsUndo sets the [EditorPrefs.EmacsUndo]:
+// use emacs-style undo, where after a non-undo command, all the current undo actions are added to the undo stack, such that a subsequent undo is actually a redo
+func (t *EditorPrefs) SetEmacsUndo(v bool) *EditorPrefs {
+	t.EmacsUndo = v
+	return t
+}
+
+// SetDepthColor sets the [EditorPrefs.DepthColor]:
+// colorize the background according to nesting depth
+func (t *EditorPrefs) SetDepthColor(v bool) *EditorPrefs {
+	t.DepthColor = v
+	return t
+}
+
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.FavPathItem",
 	ShortName: "gi.FavPathItem",
@@ -1094,6 +1305,26 @@ var _ = gti.AddType(&gti.Type{
 	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
+
+// SetIc sets the [FavPathItem.Ic]:
+// icon for item
+func (t *FavPathItem) SetIc(v icons.Icon) *FavPathItem {
+	t.Ic = v
+	return t
+}
+
+// SetName sets the [FavPathItem.Name]:
+// name of the favorite item
+func (t *FavPathItem) SetName(v string) *FavPathItem {
+	t.Name = v
+	return t
+}
+
+// SetPath sets the [FavPathItem.Path]:
+func (t *FavPathItem) SetPath(v string) *FavPathItem {
+	t.Path = v
+	return t
+}
 
 var _ = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.PrefsDetailed",
@@ -1133,6 +1364,174 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+// SetMenuMaxHeight sets the [PrefsDetailed.MenuMaxHeight]:
+// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
+func (t *PrefsDetailed) SetMenuMaxHeight(v int) *PrefsDetailed {
+	t.MenuMaxHeight = v
+	return t
+}
+
+// SetDragStartTime sets the [PrefsDetailed.DragStartTime]:
+// the number of milliseconds to wait before initiating a regular mouse drag event (as opposed to a basic events.Press)
+func (t *PrefsDetailed) SetDragStartTime(v time.Duration) *PrefsDetailed {
+	t.DragStartTime = v
+	return t
+}
+
+// SetDragStartDist sets the [PrefsDetailed.DragStartDist]:
+// the number of pixels that must be moved before initiating a regular mouse drag event (as opposed to a basic events.Press)
+func (t *PrefsDetailed) SetDragStartDist(v int) *PrefsDetailed {
+	t.DragStartDist = v
+	return t
+}
+
+// SetSlideStartTime sets the [PrefsDetailed.SlideStartTime]:
+// the number of milliseconds to wait before initiating a drag-n-drop event -- gotta drag it like you mean it
+func (t *PrefsDetailed) SetSlideStartTime(v time.Duration) *PrefsDetailed {
+	t.SlideStartTime = v
+	return t
+}
+
+// SetSlideStartDist sets the [PrefsDetailed.SlideStartDist]:
+// the number of pixels that must be moved before initiating a drag-n-drop event -- gotta drag it like you mean it
+func (t *PrefsDetailed) SetSlideStartDist(v int) *PrefsDetailed {
+	t.SlideStartDist = v
+	return t
+}
+
+// SetLongHoverTime sets the [PrefsDetailed.LongHoverTime]:
+// the number of milliseconds to wait before initiating a hover event (e.g., for opening a tooltip)
+func (t *PrefsDetailed) SetLongHoverTime(v time.Duration) *PrefsDetailed {
+	t.LongHoverTime = v
+	return t
+}
+
+// SetLongHoverStopDist sets the [PrefsDetailed.LongHoverStopDist]:
+// the maximum number of pixels that mouse can move and still register a Hover event
+func (t *PrefsDetailed) SetLongHoverStopDist(v int) *PrefsDetailed {
+	t.LongHoverStopDist = v
+	return t
+}
+
+// SetCompleteWaitMSec sets the [PrefsDetailed.CompleteWaitMSec]:
+// the number of milliseconds to wait before offering completions
+func (t *PrefsDetailed) SetCompleteWaitMSec(v int) *PrefsDetailed {
+	t.CompleteWaitMSec = v
+	return t
+}
+
+// SetCompleteMaxItems sets the [PrefsDetailed.CompleteMaxItems]:
+// the maximum number of completions offered in popup
+func (t *PrefsDetailed) SetCompleteMaxItems(v int) *PrefsDetailed {
+	t.CompleteMaxItems = v
+	return t
+}
+
+// SetCursorBlinkTime sets the [PrefsDetailed.CursorBlinkTime]:
+// time interval for cursor blinking on and off -- set to 0 to disable blinking
+func (t *PrefsDetailed) SetCursorBlinkTime(v time.Duration) *PrefsDetailed {
+	t.CursorBlinkTime = v
+	return t
+}
+
+// SetLayoutAutoScrollDelayMSec sets the [PrefsDetailed.LayoutAutoScrollDelayMSec]:
+// is amount of time to wait (in Milliseconds) before trying to autoscroll again
+func (t *PrefsDetailed) SetLayoutAutoScrollDelayMSec(v int) *PrefsDetailed {
+	t.LayoutAutoScrollDelayMSec = v
+	return t
+}
+
+// SetLayoutPageSteps sets the [PrefsDetailed.LayoutPageSteps]:
+// number of steps to take in PageUp / Down events in terms of number of items
+func (t *PrefsDetailed) SetLayoutPageSteps(v int) *PrefsDetailed {
+	t.LayoutPageSteps = v
+	return t
+}
+
+// SetLayoutFocusNameTimeoutMSec sets the [PrefsDetailed.LayoutFocusNameTimeoutMSec]:
+// the number of milliseconds between keypresses to combine characters into name to search for within layout -- starts over after this delay
+func (t *PrefsDetailed) SetLayoutFocusNameTimeoutMSec(v int) *PrefsDetailed {
+	t.LayoutFocusNameTimeoutMSec = v
+	return t
+}
+
+// SetLayoutFocusNameTabMSec sets the [PrefsDetailed.LayoutFocusNameTabMSec]:
+// the number of milliseconds since last focus name event to allow tab to focus on next element with same name.
+func (t *PrefsDetailed) SetLayoutFocusNameTabMSec(v int) *PrefsDetailed {
+	t.LayoutFocusNameTabMSec = v
+	return t
+}
+
+// SetDialogsSepRenderWin sets the [PrefsDetailed.DialogsSepRenderWin]:
+// open dialogs in separate windows -- else do as popups in main window
+func (t *PrefsDetailed) SetDialogsSepRenderWin(v bool) *PrefsDetailed {
+	t.DialogsSepRenderWin = v
+	return t
+}
+
+// SetTextViewClipHistMax sets the [PrefsDetailed.TextViewClipHistMax]:
+// Maximum amount of clipboard history to retain
+func (t *PrefsDetailed) SetTextViewClipHistMax(v int) *PrefsDetailed {
+	t.TextViewClipHistMax = v
+	return t
+}
+
+// SetTextBufMaxScopeLines sets the [PrefsDetailed.TextBufMaxScopeLines]:
+// maximum number of lines to look for matching scope syntax (parens, brackets)
+func (t *PrefsDetailed) SetTextBufMaxScopeLines(v int) *PrefsDetailed {
+	t.TextBufMaxScopeLines = v
+	return t
+}
+
+// SetTextBufDiffRevertLines sets the [PrefsDetailed.TextBufDiffRevertLines]:
+// text buffer max lines to use diff-based revert to more quickly update e.g., after file has been reformatted
+func (t *PrefsDetailed) SetTextBufDiffRevertLines(v int) *PrefsDetailed {
+	t.TextBufDiffRevertLines = v
+	return t
+}
+
+// SetTextBufDiffRevertDiffs sets the [PrefsDetailed.TextBufDiffRevertDiffs]:
+// text buffer max diffs to use diff-based revert to more quickly update e.g., after file has been reformatted -- if too many differences, just revert
+func (t *PrefsDetailed) SetTextBufDiffRevertDiffs(v int) *PrefsDetailed {
+	t.TextBufDiffRevertDiffs = v
+	return t
+}
+
+// SetTextBufMarkupDelayMSec sets the [PrefsDetailed.TextBufMarkupDelayMSec]:
+// number of milliseconds to wait before starting a new background markup process, after text changes within a single line (always does after line insertion / deletion)
+func (t *PrefsDetailed) SetTextBufMarkupDelayMSec(v int) *PrefsDetailed {
+	t.TextBufMarkupDelayMSec = v
+	return t
+}
+
+// SetMapInlineLen sets the [PrefsDetailed.MapInlineLen]:
+// the number of map elements at or below which an inline representation of the map will be presented -- more convenient for small #'s of props
+func (t *PrefsDetailed) SetMapInlineLen(v int) *PrefsDetailed {
+	t.MapInlineLen = v
+	return t
+}
+
+// SetStructInlineLen sets the [PrefsDetailed.StructInlineLen]:
+// the number of elemental struct fields at or below which an inline representation of the struct will be presented -- more convenient for small structs
+func (t *PrefsDetailed) SetStructInlineLen(v int) *PrefsDetailed {
+	t.StructInlineLen = v
+	return t
+}
+
+// SetSliceInlineLen sets the [PrefsDetailed.SliceInlineLen]:
+// the number of slice elements below which inline will be used
+func (t *PrefsDetailed) SetSliceInlineLen(v int) *PrefsDetailed {
+	t.SliceInlineLen = v
+	return t
+}
+
+// SetChanged sets the [PrefsDetailed.Changed]:
+// flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.
+func (t *PrefsDetailed) SetChanged(v bool) *PrefsDetailed {
+	t.Changed = v
+	return t
+}
+
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ProgressBar",
@@ -1169,13 +1568,6 @@ func (t *ProgressBar) KiType() *gti.Type {
 // New returns a new [*ProgressBar] value
 func (t *ProgressBar) New() ki.Ki {
 	return &ProgressBar{}
-}
-
-// SetTooltip sets the [ProgressBar.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *ProgressBar) SetTooltip(v string) *ProgressBar {
-	t.Tooltip = v
-	return t
 }
 
 // SetProgMax sets the [ProgressBar.ProgMax]:
@@ -1303,13 +1695,6 @@ func (t *Separator) New() ki.Ki {
 	return &Separator{}
 }
 
-// SetTooltip sets the [Separator.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Separator) SetTooltip(v string) *Separator {
-	t.Tooltip = v
-	return t
-}
-
 // SetHoriz sets the [Separator.Horiz]:
 // whether this is a horizontal separator; if false, it is vertical
 func (t *Separator) SetHoriz(v bool) *Separator {
@@ -1346,12 +1731,12 @@ var SliderType = gti.AddType(&gti.Type{
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
 		{"ThumbColor", &gti.Field{Name: "ThumbColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the thumb (handle) of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
 		{"StyleBox", &gti.Field{Name: "StyleBox", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "an additional style object that is used for styling the overall box around the slider; it should be set in the StyleFuncs, just the like the main style object is; it typically has no border and a white/black background; it needs a background to allow local re-rendering", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
-		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "inactive:\"+\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
-		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
-		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
-		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
-		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "inactive:\"+\" set:\"-\""}},
+		{"Pos", &gti.Field{Name: "Pos", Type: "float32", LocalType: "float32", Doc: "logical position of the slider relative to Size", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
+		{"LastValue", &gti.Field{Name: "LastValue", Type: "float32", LocalType: "float32", Doc: "previous emitted value - don't re-emit if it is the same", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" xml:\"-\" json:\"-\" set:\"-\""}},
+		{"Size", &gti.Field{Name: "Size", Type: "float32", LocalType: "float32", Doc: "computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
+		{"ThSize", &gti.Field{Name: "ThSize", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
+		{"ThSizeReal", &gti.Field{Name: "ThSizeReal", Type: "float32", LocalType: "float32", Doc: "computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
+		{"SlideStartPos", &gti.Field{Name: "SlideStartPos", Type: "float32", LocalType: "float32", Doc: "underlying drag position of slider -- not subject to snapping", Directives: gti.Directives{}, Tag: "readonly:\"+\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -1397,13 +1782,6 @@ func AsSlider(k ki.Ki) *Slider {
 
 // AsSlider satisfies the [SliderEmbedder] interface
 func (t *Slider) AsSlider() *Slider {
-	return t
-}
-
-// SetTooltip sets the [Slider.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Slider) SetTooltip(v string) *Slider {
-	t.Tooltip = v
 	return t
 }
 
@@ -1650,13 +2028,6 @@ func (t *Spinner) AsSpinner() *Spinner {
 	return t
 }
 
-// SetTooltip sets the [Spinner.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Spinner) SetTooltip(v string) *Spinner {
-	t.Tooltip = v
-	return t
-}
-
 // SetStep sets the [Spinner.Step]:
 // smallest step size to increment
 func (t *Spinner) SetStep(v float32) *Spinner {
@@ -1811,13 +2182,6 @@ func (t *Splitter) New() ki.Ki {
 	return &Splitter{}
 }
 
-// SetTooltip sets the [Splitter.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Splitter) SetTooltip(v string) *Splitter {
-	t.Tooltip = v
-	return t
-}
-
 // SetSplitterNo sets the [Splitter.SplitterNo]:
 // splitter number this one is
 func (t *Splitter) SetSplitterNo(v int) *Splitter {
@@ -1862,13 +2226,6 @@ func (t *Switch) KiType() *gti.Type {
 // New returns a new [*Switch] value
 func (t *Switch) New() ki.Ki {
 	return &Switch{}
-}
-
-// SetTooltip sets the [Switch.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Switch) SetTooltip(v string) *Switch {
-	t.Tooltip = v
-	return t
 }
 
 // SetText sets the [Switch.Text]:
@@ -1958,13 +2315,6 @@ func AsSwitches(k ki.Ki) *Switches {
 
 // AsSwitches satisfies the [SwitchesEmbedder] interface
 func (t *Switches) AsSwitches() *Switches {
-	return t
-}
-
-// SetTooltip sets the [Switches.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Switches) SetTooltip(v string) *Switches {
-	t.Tooltip = v
 	return t
 }
 
@@ -2058,13 +2408,6 @@ func (t *Tabs) AsTabs() *Tabs {
 	return t
 }
 
-// SetTooltip sets the [Tabs.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Tabs) SetTooltip(v string) *Tabs {
-	t.Tooltip = v
-	return t
-}
-
 // SetMaxChars sets the [Tabs.MaxChars]:
 // maximum number of characters to include in tab label -- elides labels that are longer than that
 func (t *Tabs) SetMaxChars(v int) *Tabs {
@@ -2119,13 +2462,6 @@ func (t *Tab) KiType() *gti.Type {
 // New returns a new [*Tab] value
 func (t *Tab) New() ki.Ki {
 	return &Tab{}
-}
-
-// SetTooltip sets the [Tab.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *Tab) SetTooltip(v string) *Tab {
-	t.Tooltip = v
-	return t
 }
 
 // SetDeleteButton sets the [Tab.DeleteButton]:
@@ -2318,23 +2654,23 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.WidgetBase",
 	ShortName:  "gi.WidgetBase",
 	IDName:     "widget-base",
-	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the Inactive and Selected states in a\nreasonable way (Selected only essential when also Inactive), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
+	Doc:        "WidgetBase is the base type for all Widget Widget elements, which are\nmanaged by a containing Layout, and use all 5 rendering passes.  All\nelemental widgets must support the ReadOnly and Selected states in a\nreasonable way (Selected only essential when also ReadOnly), so they can\nfunction appropriately in a chooser (e.g., SliceView or TableView) -- this\nincludes toggling selection on left mouse press.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Tooltip", &gti.Field{Name: "Tooltip", Type: "string", LocalType: "string", Doc: "text for the tooltip for this widget, which can use HTML formatting", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Class", &gti.Field{Name: "Class", Type: "string", LocalType: "string", Doc: "user-defined class name(s) used primarily for attaching CSS styles to different display elements -- multiple class names can be used to combine properties: use spaces to separate per css standard", Directives: gti.Directives{}, Tag: ""}},
 		{"CSS", &gti.Field{Name: "CSS", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "cascading style sheet at this level -- these styles apply here and to everything below, until superceded -- use .class and #name Props elements to apply entire styles to given elements, and type for element type", Directives: gti.Directives{}, Tag: ""}},
 		{"CSSAgg", &gti.Field{Name: "CSSAgg", Type: "goki.dev/ki/v2.Props", LocalType: "ki.Props", Doc: "aggregated css properties from all higher nodes down to me", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view:\"no-inline\" set:\"-\""}},
-		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view-closed:\"true\" set:\"-\""}},
-		{"LayState", &gti.Field{Name: "LayState", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"LayState", &gti.Field{Name: "LayState", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -2363,13 +2699,6 @@ func (t *WidgetBase) KiType() *gti.Type {
 // New returns a new [*WidgetBase] value
 func (t *WidgetBase) New() ki.Ki {
 	return &WidgetBase{}
-}
-
-// SetTooltip sets the [WidgetBase.Tooltip]:
-// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-func (t *WidgetBase) SetTooltip(v string) *WidgetBase {
-	t.Tooltip = v
-	return t
 }
 
 // SetClass sets the [WidgetBase.Class]:

@@ -129,23 +129,23 @@ func (tv *TreeView) Label() string {
 	return tv.Name()
 }
 
-// UpdateInactive updates the Inactive state based on SyncNode.
-// Returns true if inactive.
+// UpdateReadOnly updates the ReadOnly state based on SyncNode.
+// Returns true if ReadOnly.
 // The inactivity of individual nodes only affects display properties
 // typically, and not overall functional behavior, which is controlled by
-// inactivity of the root node (i.e, make the root inactive
+// inactivity of the root node (i.e, make the root ReadOnly
 // to make entire tree read-only and non-modifiable)
-func (tv *TreeView) UpdateInactive() bool {
+func (tv *TreeView) UpdateReadOnly() bool {
 	if tv.SyncNode == nil {
 		return false
 	}
 	tv.SetState(false, states.Disabled)
-	if inact, err := tv.SyncNode.PropTry("inactive"); err == nil {
+	if inact, err := tv.SyncNode.PropTry("ReadOnly"); err == nil {
 		if bo, err := laser.ToBool(inact); bo && err == nil {
 			tv.SetState(true, states.Disabled)
 		}
 	}
-	return tv.IsDisabled()
+	return tv.IsReadOnly()
 }
 
 // SelectedSyncNodes returns a slice of the currently-selected

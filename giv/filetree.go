@@ -1891,8 +1891,8 @@ func (ftv *FileTreeView) KeyInput(kt events.Event) {
 		}
 	}
 
-	// first all the keys that work for inactive and active
-	if !ftv.IsDisabled() && !kt.IsHandled() {
+	// first all the keys that work for ReadOnly and active
+	if !ftv.IsReadOnly() && !kt.IsHandled() {
 		switch kf {
 		case gi.KeyFunDelete:
 			ftv.DeleteFiles()
@@ -1924,7 +1924,7 @@ func (ftv *FileTreeView) ShowFileInfo() {
 		sn := AsFileTreeView(sels[i].This())
 		fn := sn.FileNode()
 		if fn != nil {
-			StructViewDialog(ftv, DlgOpts{Title: "File Info", Inactive: true}, &fn.Info, nil)
+			StructViewDialog(ftv, DlgOpts{Title: "File Info", ReadOnly: true}, &fn.Info, nil)
 		}
 	}
 }

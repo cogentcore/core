@@ -3,9 +3,24 @@
 package giv
 
 import (
+	"image/color"
+	"reflect"
+	"sync"
+	"time"
+
+	"github.com/fsnotify/fsnotify"
+	"goki.dev/cam/hsl"
+	"goki.dev/colors/colormap"
+	"goki.dev/gi/v2/gi"
+	"goki.dev/gi/v2/texteditor"
+	"goki.dev/girl/units"
 	"goki.dev/gti"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
+	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
+	"goki.dev/pi/v2/filecat"
+	"goki.dev/vci/v2"
 )
 
 // ArgViewType is the [gti.Type] for [ArgView]
@@ -16,12 +31,12 @@ var ArgViewType = gti.AddType(&gti.Type{
 	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Args", &gti.Field{Name: "Args", Type: "[]ArgConfig", Doc: "the args that we are a view onto", Directives: gti.Directives{}}},
-		{"Title", &gti.Field{Name: "Title", Type: "string", Doc: "title / prompt to show above the editor fields", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.ArgConfig", LocalType: "[]ArgConfig", Doc: "the args that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title / prompt to show above the editor fields", Directives: gti.Directives{}, Tag: ""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ArgView{},
@@ -45,6 +60,20 @@ func (t *ArgView) New() ki.Ki {
 	return &ArgView{}
 }
 
+// SetTitle sets the [ArgView.Title]:
+// title / prompt to show above the editor fields
+func (t *ArgView) SetTitle(v string) *ArgView {
+	t.Title = v
+	return t
+}
+
+// SetViewPath sets the [ArgView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *ArgView) SetViewPath(v string) *ArgView {
+	t.ViewPath = v
+	return t
+}
+
 // ColorMapViewType is the [gti.Type] for [ColorMapView]
 var ColorMapViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorMapView",
@@ -53,11 +82,11 @@ var ColorMapViewType = gti.AddType(&gti.Type{
 	Doc:        "ColorMapView is a widget that displays a ColorMap.\nNote that this is not a Value widget",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Orient", &gti.Field{Name: "Orient", Type: "mat32.Dims", Doc: "orientation along which to display the spectrum", Directives: gti.Directives{}}},
-		{"Map", &gti.Field{Name: "Map", Type: "*colormap.Map", Doc: "the colormap that we view", Directives: gti.Directives{}}},
+		{"Orient", &gti.Field{Name: "Orient", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "orientation along which to display the spectrum", Directives: gti.Directives{}, Tag: ""}},
+		{"Map", &gti.Field{Name: "Map", Type: "*goki.dev/colors/colormap.Map", LocalType: "*colormap.Map", Doc: "the colormap that we view", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorMapView{},
@@ -81,6 +110,20 @@ func (t *ColorMapView) New() ki.Ki {
 	return &ColorMapView{}
 }
 
+// SetOrient sets the [ColorMapView.Orient]:
+// orientation along which to display the spectrum
+func (t *ColorMapView) SetOrient(v mat32.Dims) *ColorMapView {
+	t.Orient = v
+	return t
+}
+
+// SetMap sets the [ColorMapView.Map]:
+// the colormap that we view
+func (t *ColorMapView) SetMap(v *colormap.Map) *ColorMapView {
+	t.Map = v
+	return t
+}
+
 // ColorMapValueType is the [gti.Type] for [ColorMapValue]
 var ColorMapValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorMapValue",
@@ -90,7 +133,7 @@ var ColorMapValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorMapValue{},
@@ -122,13 +165,13 @@ var ColorViewType = gti.AddType(&gti.Type{
 	Doc:        "ColorView shows a color, using sliders or numbers to set values.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Color", &gti.Field{Name: "Color", Type: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}}},
-		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
+		{"Color", &gti.Field{Name: "Color", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "the color that we view", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ColorHSLA", &gti.Field{Name: "ColorHSLA", Type: "goki.dev/cam/hsl.HSL", LocalType: "hsl.HSL", Doc: "the color that we view, in HSLA form", Directives: gti.Directives{}, Tag: "readonly:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorView{},
@@ -152,6 +195,27 @@ func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
 }
 
+// SetColorHSLA sets the [ColorView.ColorHSLA]:
+// the color that we view, in HSLA form
+func (t *ColorView) SetColorHSLA(v hsl.HSL) *ColorView {
+	t.ColorHSLA = v
+	return t
+}
+
+// SetTmpSave sets the [ColorView.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *ColorView) SetTmpSave(v Value) *ColorView {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [ColorView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *ColorView) SetViewPath(v string) *ColorView {
+	t.ViewPath = v
+	return t
+}
+
 // ColorValueType is the [gti.Type] for [ColorValue]
 var ColorValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorValue",
@@ -160,10 +224,10 @@ var ColorValueType = gti.AddType(&gti.Type{
 	Doc:        "ColorValue presents a StructViewInline for a struct plus a ColorView button..",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TmpColor", &gti.Field{Name: "TmpColor", Type: "color.RGBA", Doc: "", Directives: gti.Directives{}}},
+		{"TmpColor", &gti.Field{Name: "TmpColor", Type: "image/color.RGBA", LocalType: "color.RGBA", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorValue{},
@@ -187,6 +251,12 @@ func (t *ColorValue) New() ki.Ki {
 	return &ColorValue{}
 }
 
+// SetTmpColor sets the [ColorValue.TmpColor]:
+func (t *ColorValue) SetTmpColor(v color.RGBA) *ColorValue {
+	t.TmpColor = v
+	return t
+}
+
 // ColorNameValueType is the [gti.Type] for [ColorNameValue]
 var ColorNameValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ColorNameValue",
@@ -196,7 +266,7 @@ var ColorNameValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ColorNameValue{},
@@ -228,20 +298,20 @@ var FileTreeType = gti.AddType(&gti.Type{
 	Doc:        "FileTree is the root of a tree representing files in a given directory (and\nsubdirectories thereof), and has some overall management state for how to\nview things.  The FileTree can be viewed by a TreeView to provide a GUI\ninterface into it.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}}},
-		{"Dirs", &gti.Field{Name: "Dirs", Type: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}}},
-		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", Doc: "if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed", Directives: gti.Directives{}}},
-		{"NodeType", &gti.Field{Name: "NodeType", Type: "*gti.Type", Doc: "type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}}},
-		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}}},
-		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}}},
-		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}}},
-		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}}},
+		{"ExtFiles", &gti.Field{Name: "ExtFiles", Type: "[]string", LocalType: "[]string", Doc: "external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update", Directives: gti.Directives{}, Tag: ""}},
+		{"Dirs", &gti.Field{Name: "Dirs", Type: "goki.dev/gi/v2/giv.DirFlagMap", LocalType: "DirFlagMap", Doc: "records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree", Directives: gti.Directives{}, Tag: ""}},
+		{"DirsOnTop", &gti.Field{Name: "DirsOnTop", Type: "bool", LocalType: "bool", Doc: "if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed", Directives: gti.Directives{}, Tag: ""}},
+		{"NodeType", &gti.Field{Name: "NodeType", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of node to create -- defaults to giv.FileNode but can use custom node types", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"InOpenAll", &gti.Field{Name: "InOpenAll", Type: "bool", LocalType: "bool", Doc: "if true, we are in midst of an OpenAll call -- nodes should open all dirs", Directives: gti.Directives{}, Tag: ""}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for all dirs", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"WatchedPaths", &gti.Field{Name: "WatchedPaths", Type: "map[string]bool", LocalType: "map[string]bool", Doc: "map of paths that have been added to watcher -- only active if bool = true", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"LastWatchUpdt", &gti.Field{Name: "LastWatchUpdt", Type: "string", LocalType: "string", Doc: "last path updated by watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"LastWatchTime", &gti.Field{Name: "LastWatchTime", Type: "time.Time", LocalType: "time.Time", Doc: "timestamp of last update", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "Update mutex", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FileNode", &gti.Field{Name: "FileNode", Type: "FileNode", Doc: "", Directives: gti.Directives{}}},
+		{"FileNode", &gti.Field{Name: "FileNode", Type: "goki.dev/gi/v2/giv.FileNode", LocalType: "FileNode", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileTree{},
@@ -265,6 +335,83 @@ func (t *FileTree) New() ki.Ki {
 	return &FileTree{}
 }
 
+// SetExtFiles sets the [FileTree.ExtFiles]:
+// external files outside the root path of the tree -- abs paths are stored -- these are shown in the first sub-node if present -- use AddExtFile to add and update
+func (t *FileTree) SetExtFiles(v []string) *FileTree {
+	t.ExtFiles = v
+	return t
+}
+
+// SetDirs sets the [FileTree.Dirs]:
+// records state of directories within the tree (encoded using paths relative to root), e.g., open (have been opened by the user) -- can persist this to restore prior view of a tree
+func (t *FileTree) SetDirs(v DirFlagMap) *FileTree {
+	t.Dirs = v
+	return t
+}
+
+// SetDirsOnTop sets the [FileTree.DirsOnTop]:
+// if true, then all directories are placed at the top of the tree view -- otherwise everything is mixed
+func (t *FileTree) SetDirsOnTop(v bool) *FileTree {
+	t.DirsOnTop = v
+	return t
+}
+
+// SetNodeType sets the [FileTree.NodeType]:
+// type of node to create -- defaults to giv.FileNode but can use custom node types
+func (t *FileTree) SetNodeType(v *gti.Type) *FileTree {
+	t.NodeType = v
+	return t
+}
+
+// SetInOpenAll sets the [FileTree.InOpenAll]:
+// if true, we are in midst of an OpenAll call -- nodes should open all dirs
+func (t *FileTree) SetInOpenAll(v bool) *FileTree {
+	t.InOpenAll = v
+	return t
+}
+
+// SetWatcher sets the [FileTree.Watcher]:
+// change notify for all dirs
+func (t *FileTree) SetWatcher(v *fsnotify.Watcher) *FileTree {
+	t.Watcher = v
+	return t
+}
+
+// SetDoneWatcher sets the [FileTree.DoneWatcher]:
+// channel to close watcher watcher
+func (t *FileTree) SetDoneWatcher(v chan bool) *FileTree {
+	t.DoneWatcher = v
+	return t
+}
+
+// SetWatchedPaths sets the [FileTree.WatchedPaths]:
+// map of paths that have been added to watcher -- only active if bool = true
+func (t *FileTree) SetWatchedPaths(v map[string]bool) *FileTree {
+	t.WatchedPaths = v
+	return t
+}
+
+// SetLastWatchUpdt sets the [FileTree.LastWatchUpdt]:
+// last path updated by watcher
+func (t *FileTree) SetLastWatchUpdt(v string) *FileTree {
+	t.LastWatchUpdt = v
+	return t
+}
+
+// SetLastWatchTime sets the [FileTree.LastWatchTime]:
+// timestamp of last update
+func (t *FileTree) SetLastWatchTime(v time.Time) *FileTree {
+	t.LastWatchTime = v
+	return t
+}
+
+// SetUpdtMu sets the [FileTree.UpdtMu]:
+// Update mutex
+func (t *FileTree) SetUpdtMu(v sync.Mutex) *FileTree {
+	t.UpdtMu = v
+	return t
+}
+
 // FileNodeType is the [gti.Type] for [FileNode]
 var FileNodeType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/giv.FileNode",
@@ -275,15 +422,15 @@ var FileNodeType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FPath", &gti.Field{Name: "FPath", Type: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}}},
-		{"Info", &gti.Field{Name: "Info", Type: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}}},
-		{"Buf", &gti.Field{Name: "Buf", Type: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}}},
-		{"FRoot", &gti.Field{Name: "FRoot", Type: "*FileTree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}}},
-		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "vci.Repo", Doc: "version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}}},
-		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}}},
+		{"FPath", &gti.Field{Name: "FPath", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "full path to this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Info", &gti.Field{Name: "Info", Type: "goki.dev/pi/v2/filecat.FileInfo", LocalType: "filecat.FileInfo", Doc: "full standard file info about this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"Buf", &gti.Field{Name: "Buf", Type: "*goki.dev/gi/v2/texteditor.Buf", LocalType: "*texteditor.Buf", Doc: "file buffer for editing this file", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"FRoot", &gti.Field{Name: "FRoot", Type: "*goki.dev/gi/v2/giv.FileTree", LocalType: "*FileTree", Doc: "root of the tree -- has global state", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"DirRepo", &gti.Field{Name: "DirRepo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"RepoFiles", &gti.Field{Name: "RepoFiles", Type: "goki.dev/vci/v2.Files", LocalType: "vci.Files", Doc: "version control system repository file status -- only valid during ReadDir", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileNode{},
@@ -329,6 +476,48 @@ func (t *FileNode) AsFileNode() *FileNode {
 	return t
 }
 
+// SetFPath sets the [FileNode.FPath]:
+// full path to this file
+func (t *FileNode) SetFPath(v gi.FileName) *FileNode {
+	t.FPath = v
+	return t
+}
+
+// SetInfo sets the [FileNode.Info]:
+// full standard file info about this file
+func (t *FileNode) SetInfo(v filecat.FileInfo) *FileNode {
+	t.Info = v
+	return t
+}
+
+// SetBuf sets the [FileNode.Buf]:
+// file buffer for editing this file
+func (t *FileNode) SetBuf(v *texteditor.Buf) *FileNode {
+	t.Buf = v
+	return t
+}
+
+// SetFRoot sets the [FileNode.FRoot]:
+// root of the tree -- has global state
+func (t *FileNode) SetFRoot(v *FileTree) *FileNode {
+	t.FRoot = v
+	return t
+}
+
+// SetDirRepo sets the [FileNode.DirRepo]:
+// version control system repository for this directory, only non-nil if this is the highest-level directory in the tree under vcs control
+func (t *FileNode) SetDirRepo(v vci.Repo) *FileNode {
+	t.DirRepo = v
+	return t
+}
+
+// SetRepoFiles sets the [FileNode.RepoFiles]:
+// version control system repository file status -- only valid during ReadDir
+func (t *FileNode) SetRepoFiles(v vci.Files) *FileNode {
+	t.RepoFiles = v
+	return t
+}
+
 // FileTreeViewType is the [gti.Type] for [FileTreeView]
 var FileTreeViewType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/giv.FileTreeView",
@@ -340,7 +529,7 @@ var FileTreeViewType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"TreeView", &gti.Field{Name: "TreeView", Type: "TreeView", Doc: "", Directives: gti.Directives{}}},
+		{"TreeView", &gti.Field{Name: "TreeView", Type: "goki.dev/gi/v2/giv.TreeView", LocalType: "TreeView", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileTreeView{},
@@ -394,20 +583,20 @@ var FileViewType = gti.AddType(&gti.Type{
 	Doc:        "FileView is a viewer onto files -- core of the file chooser dialog",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"DirPath", &gti.Field{Name: "DirPath", Type: "string", Doc: "path to directory of files to display", Directives: gti.Directives{}}},
-		{"SelFile", &gti.Field{Name: "SelFile", Type: "string", Doc: "selected file", Directives: gti.Directives{}}},
-		{"Ext", &gti.Field{Name: "Ext", Type: "string", Doc: "target extension(s) (comma separated if multiple, including initial .), if any", Directives: gti.Directives{}}},
-		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
-		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}}},
-		{"Files", &gti.Field{Name: "Files", Type: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}}},
-		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}}},
-		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", Doc: "Previous path that was processed via UpdateFiles", Directives: gti.Directives{}}},
+		{"DirPath", &gti.Field{Name: "DirPath", Type: "string", LocalType: "string", Doc: "path to directory of files to display", Directives: gti.Directives{}, Tag: ""}},
+		{"SelFile", &gti.Field{Name: "SelFile", Type: "string", LocalType: "string", Doc: "selected file", Directives: gti.Directives{}, Tag: ""}},
+		{"Ext", &gti.Field{Name: "Ext", Type: "string", LocalType: "string", Doc: "target extension(s) (comma separated if multiple, including initial .), if any", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "goki.dev/gi/v2/giv.FileViewFilterFunc", LocalType: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", LocalType: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}, Tag: ""}},
+		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/pi/v2/filecat.FileInfo", LocalType: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
+		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: ""}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", LocalType: "string", Doc: "Previous path that was processed via UpdateFiles", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileView{},
@@ -431,6 +620,76 @@ func (t *FileView) New() ki.Ki {
 	return &FileView{}
 }
 
+// SetDirPath sets the [FileView.DirPath]:
+// path to directory of files to display
+func (t *FileView) SetDirPath(v string) *FileView {
+	t.DirPath = v
+	return t
+}
+
+// SetSelFile sets the [FileView.SelFile]:
+// selected file
+func (t *FileView) SetSelFile(v string) *FileView {
+	t.SelFile = v
+	return t
+}
+
+// SetFilterFunc sets the [FileView.FilterFunc]:
+// optional styling function
+func (t *FileView) SetFilterFunc(v FileViewFilterFunc) *FileView {
+	t.FilterFunc = v
+	return t
+}
+
+// SetExtMap sets the [FileView.ExtMap]:
+// map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value
+func (t *FileView) SetExtMap(v map[string]string) *FileView {
+	t.ExtMap = v
+	return t
+}
+
+// SetFiles sets the [FileView.Files]:
+// files for current directory
+func (t *FileView) SetFiles(v []*filecat.FileInfo) *FileView {
+	t.Files = v
+	return t
+}
+
+// SetSelectedIdx sets the [FileView.SelectedIdx]:
+// index of currently-selected file in Files list (-1 if none)
+func (t *FileView) SetSelectedIdx(v int) *FileView {
+	t.SelectedIdx = v
+	return t
+}
+
+// SetWatcher sets the [FileView.Watcher]:
+// change notify for current dir
+func (t *FileView) SetWatcher(v *fsnotify.Watcher) *FileView {
+	t.Watcher = v
+	return t
+}
+
+// SetDoneWatcher sets the [FileView.DoneWatcher]:
+// channel to close watcher watcher
+func (t *FileView) SetDoneWatcher(v chan bool) *FileView {
+	t.DoneWatcher = v
+	return t
+}
+
+// SetUpdtMu sets the [FileView.UpdtMu]:
+// UpdateFiles mutex
+func (t *FileView) SetUpdtMu(v sync.Mutex) *FileView {
+	t.UpdtMu = v
+	return t
+}
+
+// SetPrevPath sets the [FileView.PrevPath]:
+// Previous path that was processed via UpdateFiles
+func (t *FileView) SetPrevPath(v string) *FileView {
+	t.PrevPath = v
+	return t
+}
+
 // FuncButtonType is the [gti.Type] for [FuncButton]
 var FuncButtonType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FuncButton",
@@ -439,14 +698,14 @@ var FuncButtonType = gti.AddType(&gti.Type{
 	Doc:        "FuncButton is a button that is set up to call a function when it\nis pressed, using a dialog to prompt the user for any arguments.\nAlso, it automatically sets various properties of the button like\nthe text, tooltip, and icon based on the properties of the\nfunction, using reflect and gti. The function must be registered\nwith gti; add a `//gti:add` comment directive and run `goki generate`\nif you get errors. If the function is a method, both the method and\nits receiver type must be added to gti.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Func", &gti.Field{Name: "Func", Type: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}}},
-		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}}},
-		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}}},
-		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}}},
-		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there is a return value from the function of a complex\ntype (struct, slice, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}}},
+		{"Func", &gti.Field{Name: "Func", Type: "*goki.dev/gti.Func", LocalType: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: ""}},
+		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
+		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
+		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there is a return value from the function of a complex\ntype (struct, slice, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Button", &gti.Field{Name: "Button", Type: "gi.Button", Doc: "", Directives: gti.Directives{}}},
+		{"Button", &gti.Field{Name: "Button", Type: "goki.dev/gi/v2/gi.Button", LocalType: "gi.Button", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FuncButton{},
@@ -470,6 +729,45 @@ func (t *FuncButton) New() ki.Ki {
 	return &FuncButton{}
 }
 
+// SetReflectFunc sets the [FuncButton.ReflectFunc]:
+// ReflectFunc is the [reflect.Value] of the function or
+// method associated with this button. It should typically
+// bet set using [FuncButton.SetFunc].
+func (t *FuncButton) SetReflectFunc(v reflect.Value) *FuncButton {
+	t.ReflectFunc = v
+	return t
+}
+
+// SetConfirm sets the [FuncButton.Confirm]:
+// Confirm is whether to prompt the user for confirmation
+// before calling the function.
+func (t *FuncButton) SetConfirm(v bool) *FuncButton {
+	t.Confirm = v
+	return t
+}
+
+// SetShowReturn sets the [FuncButton.ShowReturn]:
+// ShowReturn is whether to display the return values of
+// the function (and a success message if there are none).
+// The way that the return values are shown is determined
+// by ShowReturnAsDialog. ShowReturn is on by default.
+func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
+	t.ShowReturn = v
+	return t
+}
+
+// SetShowReturnAsDialog sets the [FuncButton.ShowReturnAsDialog]:
+// ShowReturnAsDialog, if and only if ShowReturn is true,
+// indicates to show the return values of the function in
+// a dialog, instead of in a snackbar, as they are by default.
+// If there is a return value from the function of a complex
+// type (struct, slice, map), then ShowReturnAsDialog will
+// automatically be set to true.
+func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton {
+	t.ShowReturnAsDialog = v
+	return t
+}
+
 // GiEditorType is the [gti.Type] for [GiEditor]
 var GiEditorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.GiEditor",
@@ -478,17 +776,22 @@ var GiEditorType = gti.AddType(&gti.Type{
 	Doc:        "GiEditor represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame with an optional title, and a button\nbox at the bottom where methods can be invoked",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"KiRoot", &gti.Field{Name: "KiRoot", Type: "ki.Ki", Doc: "root of tree being edited", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes", Directives: gti.Directives{}}},
-		{"Filename", &gti.Field{Name: "Filename", Type: "gi.FileName", Doc: "current filename for saving / loading", Directives: gti.Directives{}}},
+		{"KiRoot", &gti.Field{Name: "KiRoot", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "root of tree being edited", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the root changed via gui actions?  updated from treeview and structview for changes", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Filename", &gti.Field{Name: "Filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "current filename for saving / loading", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
 		{"Update", &gti.Method{Name: "Update", Doc: "Update updates the objects being edited (e.g., updating display changes)", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Open", &gti.Method{Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
@@ -514,6 +817,20 @@ func (t *GiEditor) New() ki.Ki {
 	return &GiEditor{}
 }
 
+// SetKiRoot sets the [GiEditor.KiRoot]:
+// root of tree being edited
+func (t *GiEditor) SetKiRoot(v ki.Ki) *GiEditor {
+	t.KiRoot = v
+	return t
+}
+
+// SetFilename sets the [GiEditor.Filename]:
+// current filename for saving / loading
+func (t *GiEditor) SetFilename(v gi.FileName) *GiEditor {
+	t.Filename = v
+	return t
+}
+
 // HiStyleValueType is the [gti.Type] for [HiStyleValue]
 var HiStyleValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.HiStyleValue",
@@ -523,7 +840,7 @@ var HiStyleValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &HiStyleValue{},
@@ -556,7 +873,7 @@ var KeyChordValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &KeyChordValue{},
@@ -588,10 +905,10 @@ var KeyChordEditType = gti.AddType(&gti.Type{
 	Doc:        "KeyChordEdit is a label widget that shows a key chord string, and, when in\nfocus (after being clicked) will update to whatever key chord is typed --\nused for representing and editing key chords.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"FocusActive", &gti.Field{Name: "FocusActive", Type: "bool", Doc: "true if the keyboard focus is active or not -- when we lose active focus we apply changes", Directives: gti.Directives{}}},
+		{"FocusActive", &gti.Field{Name: "FocusActive", Type: "bool", LocalType: "bool", Doc: "true if the keyboard focus is active or not -- when we lose active focus we apply changes", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Label", &gti.Field{Name: "Label", Type: "gi.Label", Doc: "", Directives: gti.Directives{}}},
+		{"Label", &gti.Field{Name: "Label", Type: "goki.dev/gi/v2/gi.Label", LocalType: "gi.Label", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &KeyChordEdit{},
@@ -615,6 +932,13 @@ func (t *KeyChordEdit) New() ki.Ki {
 	return &KeyChordEdit{}
 }
 
+// SetFocusActive sets the [KeyChordEdit.FocusActive]:
+// true if the keyboard focus is active or not -- when we lose active focus we apply changes
+func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit {
+	t.FocusActive = v
+	return t
+}
+
 // KeyMapValueType is the [gti.Type] for [KeyMapValue]
 var KeyMapValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.KeyMapValue",
@@ -624,7 +948,7 @@ var KeyMapValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &KeyMapValue{},
@@ -656,21 +980,21 @@ var MapViewType = gti.AddType(&gti.Type{
 	Doc:        "MapView represents a map, creating a property editor of the values --\nconstructs Children widgets to show the key / value pairs, within an\noverall frame.\nAutomatically has a toolbar with Map Toolbar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Map", &gti.Field{Name: "Map", Type: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}}},
-		{"MapValView", &gti.Field{Name: "MapValView", Type: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}}},
-		{"Keys", &gti.Field{Name: "Keys", Type: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the map values", Directives: gti.Directives{}}},
-		{"SortVals", &gti.Field{Name: "SortVals", Type: "bool", Doc: "sort by values instead of keys", Directives: gti.Directives{}}},
-		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
-		{"NCols", &gti.Field{Name: "NCols", Type: "int", Doc: "the number of columns in the map; do not set externally; generally only access internally", Directives: gti.Directives{}}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}}},
+		{"Map", &gti.Field{Name: "Map", Type: "any", LocalType: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"MapValView", &gti.Field{Name: "MapValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Keys", &gti.Field{Name: "Keys", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map values", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"SortVals", &gti.Field{Name: "SortVals", Type: "bool", LocalType: "bool", Doc: "sort by values instead of keys", Directives: gti.Directives{}, Tag: ""}},
+		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
+		{"NCols", &gti.Field{Name: "NCols", Type: "int", LocalType: "int", Doc: "the number of columns in the map; do not set externally; generally only access internally", Directives: gti.Directives{}, Tag: ""}},
+		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"ToolbarMap", &gti.Field{Name: "ToolbarMap", Type: "any", LocalType: "any", Doc: "the map that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapView{},
@@ -694,6 +1018,78 @@ func (t *MapView) New() ki.Ki {
 	return &MapView{}
 }
 
+// SetMapValView sets the [MapView.MapValView]:
+// Value for the map itself, if this was created within value view framework -- otherwise nil
+func (t *MapView) SetMapValView(v Value) *MapView {
+	t.MapValView = v
+	return t
+}
+
+// SetKeys sets the [MapView.Keys]:
+// Value representations of the map keys
+func (t *MapView) SetKeys(v []Value) *MapView {
+	t.Keys = v
+	return t
+}
+
+// SetValues sets the [MapView.Values]:
+// Value representations of the map values
+func (t *MapView) SetValues(v []Value) *MapView {
+	t.Values = v
+	return t
+}
+
+// SetSortVals sets the [MapView.SortVals]:
+// sort by values instead of keys
+func (t *MapView) SetSortVals(v bool) *MapView {
+	t.SortVals = v
+	return t
+}
+
+// SetShowToolbar sets the [MapView.ShowToolbar]:
+// whether to show the toolbar or not
+func (t *MapView) SetShowToolbar(v bool) *MapView {
+	t.ShowToolbar = v
+	return t
+}
+
+// SetNCols sets the [MapView.NCols]:
+// the number of columns in the map; do not set externally; generally only access internally
+func (t *MapView) SetNCols(v int) *MapView {
+	t.NCols = v
+	return t
+}
+
+// SetWidgetConfiged sets the [MapView.WidgetConfiged]:
+// WidgetConfiged tracks if the given Widget has been configured.
+// Widgets can only be configured once -- otherwise duplicate event
+// functions are registered.
+func (t *MapView) SetWidgetConfiged(v map[gi.Widget]bool) *MapView {
+	t.WidgetConfiged = v
+	return t
+}
+
+// SetTmpSave sets the [MapView.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *MapView) SetTmpSave(v Value) *MapView {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [MapView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *MapView) SetViewPath(v string) *MapView {
+	t.ViewPath = v
+	return t
+}
+
+// SetToolbarMap sets the [MapView.ToolbarMap]:
+// the map that we successfully set a toolbar for
+func (t *MapView) SetToolbarMap(v any) *MapView {
+	t.ToolbarMap = v
+	return t
+}
+
 // MapViewInlineType is the [gti.Type] for [MapViewInline]
 var MapViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.MapViewInline",
@@ -702,17 +1098,17 @@ var MapViewInlineType = gti.AddType(&gti.Type{
 	Doc:        "MapViewInline represents a map as a single line widget,\nfor smaller maps and those explicitly marked inline.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Map", &gti.Field{Name: "Map", Type: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}}},
-		{"MapValView", &gti.Field{Name: "MapValView", Type: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}}},
-		{"Keys", &gti.Field{Name: "Keys", Type: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
+		{"Map", &gti.Field{Name: "Map", Type: "any", LocalType: "any", Doc: "the map that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"MapValView", &gti.Field{Name: "MapValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the map itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the map been edited?", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Keys", &gti.Field{Name: "Keys", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the map keys", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapViewInline{},
@@ -736,18 +1132,62 @@ func (t *MapViewInline) New() ki.Ki {
 	return &MapViewInline{}
 }
 
+// SetMapValView sets the [MapViewInline.MapValView]:
+// Value for the map itself, if this was created within value view framework -- otherwise nil
+func (t *MapViewInline) SetMapValView(v Value) *MapViewInline {
+	t.MapValView = v
+	return t
+}
+
+// SetKeys sets the [MapViewInline.Keys]:
+// Value representations of the map keys
+func (t *MapViewInline) SetKeys(v []Value) *MapViewInline {
+	t.Keys = v
+	return t
+}
+
+// SetValues sets the [MapViewInline.Values]:
+// Value representations of the fields
+func (t *MapViewInline) SetValues(v []Value) *MapViewInline {
+	t.Values = v
+	return t
+}
+
+// SetWidgetConfiged sets the [MapViewInline.WidgetConfiged]:
+// WidgetConfiged tracks if the given Widget has been configured.
+// Widgets can only be configured once -- otherwise duplicate event
+// functions are registered.
+func (t *MapViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *MapViewInline {
+	t.WidgetConfiged = v
+	return t
+}
+
+// SetTmpSave sets the [MapViewInline.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *MapViewInline) SetTmpSave(v Value) *MapViewInline {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [MapViewInline.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *MapViewInline) SetViewPath(v string) *MapViewInline {
+	t.ViewPath = v
+	return t
+}
+
 // SliceViewType is the [gti.Type] for [SliceView]
 var SliceViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceView",
 	ShortName:  "giv.SliceView",
 	IDName:     "slice-view",
-	Doc:        "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to Inactive for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.",
+	Doc:        "SliceView represents a slice, creating an interactive viewer / editor of the\nelements as rows in a table.  Widgets to show the index / value pairs, within an\noverall frame.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "SliceViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
+		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "goki.dev/gi/v2/giv.SliceViewStyleFunc", LocalType: "SliceViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "SliceViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "goki.dev/gi/v2/giv.SliceViewBase", LocalType: "SliceViewBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceView{},
@@ -771,6 +1211,13 @@ func (t *SliceView) New() ki.Ki {
 	return &SliceView{}
 }
 
+// SetStyleFunc sets the [SliceView.StyleFunc]:
+// optional styling function
+func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView {
+	t.StyleFunc = v
+	return t
+}
+
 // SliceViewBaseType is the [gti.Type] for [SliceViewBase]
 var SliceViewBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceViewBase",
@@ -779,30 +1226,30 @@ var SliceViewBaseType = gti.AddType(&gti.Type{
 	Doc:        "SliceViewBase is the base for SliceView and TableView and any other viewers\nof array-like data.  It automatically computes the number of rows that fit\nwithin its allocated space, and manages the offset view window into the full\nlist of items, and supports row selection, copy / paste, Drag-n-Drop, etc.\nSet to ReadOnly for select-only mode, which emits WidgetSig WidgetSelected\nsignals when selection is updated.\nAutomatically has a toolbar with Slice Toolbar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}}},
-		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", Doc: "optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "", Directives: gti.Directives{}}},
-		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", Doc: "non-ptr reflect.Value of the slice", Directives: gti.Directives{}}},
-		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the slice values", Directives: gti.Directives{}}},
-		{"SelVal", &gti.Field{Name: "SelVal", Type: "any", Doc: "current selection value -- initially select this value if set", Directives: gti.Directives{}}},
-		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", Doc: "index of currently-selected item, in Inactive mode only", Directives: gti.Directives{}}},
-		{"SelectedIdxs", &gti.Field{Name: "SelectedIdxs", Type: "map[int]struct{}", Doc: "list of currently-selected slice indexes", Directives: gti.Directives{}}},
-		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", Doc: "the slice that we successfully set a toolbar for", Directives: gti.Directives{}}},
-		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", Doc: "height of a single row", Directives: gti.Directives{}}},
-		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", Doc: "the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}}},
-		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}}},
-		{"DispRows", &gti.Field{Name: "DispRows", Type: "int", Doc: "actual number of rows displayed = min(VisRows, SliceSize)", Directives: gti.Directives{}}},
-		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}}},
-		{"RenderedRows", &gti.Field{Name: "RenderedRows", Type: "int", Doc: "the number of rows rendered -- determines update", Directives: gti.Directives{}}},
-		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", Doc: "size of slice", Directives: gti.Directives{}}},
-		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}}},
+		{"Slice", &gti.Field{Name: "Slice", Type: "any", LocalType: "any", Doc: "the slice that we are a view onto -- must be a pointer to that slice", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"ViewMu", &gti.Field{Name: "ViewMu", Type: "*sync.Mutex", LocalType: "*sync.Mutex", Doc: "optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "Changed indicates whether the underlying slice\nhas been edited in any way", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SliceNPVal", &gti.Field{Name: "SliceNPVal", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "non-ptr reflect.Value of the slice", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the slice values", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelVal", &gti.Field{Name: "SelVal", Type: "any", LocalType: "any", Doc: "current selection value -- initially select this value if set", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected item, in ReadOnly mode only", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelectedIdxs", &gti.Field{Name: "SelectedIdxs", Type: "map[int]struct{}", LocalType: "map[int]struct{}", Doc: "list of currently-selected slice indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
+		{"DraggedIdxs", &gti.Field{Name: "DraggedIdxs", Type: "[]int", LocalType: "[]int", Doc: "list of currently-dragged indexes", Directives: gti.Directives{}, Tag: "copy:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ToolbarSlice", &gti.Field{Name: "ToolbarSlice", Type: "any", LocalType: "any", Doc: "the slice that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"RowHeight", &gti.Field{Name: "RowHeight", Type: "float32", LocalType: "float32", Doc: "height of a single row", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"LayoutHeight", &gti.Field{Name: "LayoutHeight", Type: "float32", LocalType: "float32", Doc: "the height of grid from last layout -- determines when update needed", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"VisRows", &gti.Field{Name: "VisRows", Type: "int", LocalType: "int", Doc: "total number of rows visible in allocated display size", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"StartIdx", &gti.Field{Name: "StartIdx", Type: "int", LocalType: "int", Doc: "starting slice index of visible rows", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"RenderedRows", &gti.Field{Name: "RenderedRows", Type: "int", LocalType: "int", Doc: "the number of rows rendered -- determines update", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SliceSize", &gti.Field{Name: "SliceSize", Type: "int", LocalType: "int", Doc: "size of slice", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"CurIdx", &gti.Field{Name: "CurIdx", Type: "int", LocalType: "int", Doc: "temp idx state for e.g., dnd", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"ElVal", &gti.Field{Name: "ElVal", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ElVal is a Value representation of the underlying element type\nwhich is used whenever there are no slice elements available", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceViewBase{},
@@ -826,6 +1273,140 @@ func (t *SliceViewBase) New() ki.Ki {
 	return &SliceViewBase{}
 }
 
+// SetViewMu sets the [SliceViewBase.ViewMu]:
+// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
+func (t *SliceViewBase) SetViewMu(v *sync.Mutex) *SliceViewBase {
+	t.ViewMu = v
+	return t
+}
+
+// SetSliceNPVal sets the [SliceViewBase.SliceNPVal]:
+// non-ptr reflect.Value of the slice
+func (t *SliceViewBase) SetSliceNPVal(v reflect.Value) *SliceViewBase {
+	t.SliceNPVal = v
+	return t
+}
+
+// SetSliceValView sets the [SliceViewBase.SliceValView]:
+// Value for the slice itself, if this was created within value view framework -- otherwise nil
+func (t *SliceViewBase) SetSliceValView(v Value) *SliceViewBase {
+	t.SliceValView = v
+	return t
+}
+
+// SetValues sets the [SliceViewBase.Values]:
+// Value representations of the slice values
+func (t *SliceViewBase) SetValues(v []Value) *SliceViewBase {
+	t.Values = v
+	return t
+}
+
+// SetSelVal sets the [SliceViewBase.SelVal]:
+// current selection value -- initially select this value if set
+func (t *SliceViewBase) SetSelVal(v any) *SliceViewBase {
+	t.SelVal = v
+	return t
+}
+
+// SetSelectedIdx sets the [SliceViewBase.SelectedIdx]:
+// index of currently-selected item, in ReadOnly mode only
+func (t *SliceViewBase) SetSelectedIdx(v int) *SliceViewBase {
+	t.SelectedIdx = v
+	return t
+}
+
+// SetSelectedIdxs sets the [SliceViewBase.SelectedIdxs]:
+// list of currently-selected slice indexes
+func (t *SliceViewBase) SetSelectedIdxs(v map[int]struct{}) *SliceViewBase {
+	t.SelectedIdxs = v
+	return t
+}
+
+// SetDraggedIdxs sets the [SliceViewBase.DraggedIdxs]:
+// list of currently-dragged indexes
+func (t *SliceViewBase) SetDraggedIdxs(v []int) *SliceViewBase {
+	t.DraggedIdxs = v
+	return t
+}
+
+// SetViewPath sets the [SliceViewBase.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *SliceViewBase) SetViewPath(v string) *SliceViewBase {
+	t.ViewPath = v
+	return t
+}
+
+// SetTmpSave sets the [SliceViewBase.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *SliceViewBase) SetTmpSave(v Value) *SliceViewBase {
+	t.TmpSave = v
+	return t
+}
+
+// SetToolbarSlice sets the [SliceViewBase.ToolbarSlice]:
+// the slice that we successfully set a toolbar for
+func (t *SliceViewBase) SetToolbarSlice(v any) *SliceViewBase {
+	t.ToolbarSlice = v
+	return t
+}
+
+// SetRowHeight sets the [SliceViewBase.RowHeight]:
+// height of a single row
+func (t *SliceViewBase) SetRowHeight(v float32) *SliceViewBase {
+	t.RowHeight = v
+	return t
+}
+
+// SetLayoutHeight sets the [SliceViewBase.LayoutHeight]:
+// the height of grid from last layout -- determines when update needed
+func (t *SliceViewBase) SetLayoutHeight(v float32) *SliceViewBase {
+	t.LayoutHeight = v
+	return t
+}
+
+// SetVisRows sets the [SliceViewBase.VisRows]:
+// total number of rows visible in allocated display size
+func (t *SliceViewBase) SetVisRows(v int) *SliceViewBase {
+	t.VisRows = v
+	return t
+}
+
+// SetStartIdx sets the [SliceViewBase.StartIdx]:
+// starting slice index of visible rows
+func (t *SliceViewBase) SetStartIdx(v int) *SliceViewBase {
+	t.StartIdx = v
+	return t
+}
+
+// SetRenderedRows sets the [SliceViewBase.RenderedRows]:
+// the number of rows rendered -- determines update
+func (t *SliceViewBase) SetRenderedRows(v int) *SliceViewBase {
+	t.RenderedRows = v
+	return t
+}
+
+// SetSliceSize sets the [SliceViewBase.SliceSize]:
+// size of slice
+func (t *SliceViewBase) SetSliceSize(v int) *SliceViewBase {
+	t.SliceSize = v
+	return t
+}
+
+// SetCurIdx sets the [SliceViewBase.CurIdx]:
+// temp idx state for e.g., dnd
+func (t *SliceViewBase) SetCurIdx(v int) *SliceViewBase {
+	t.CurIdx = v
+	return t
+}
+
+// SetElVal sets the [SliceViewBase.ElVal]:
+// ElVal is a Value representation of the underlying element type
+// which is used whenever there are no slice elements available
+func (t *SliceViewBase) SetElVal(v reflect.Value) *SliceViewBase {
+	t.ElVal = v
+	return t
+}
+
 // SliceViewInlineType is the [gti.Type] for [SliceViewInline]
 var SliceViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceViewInline",
@@ -834,18 +1415,18 @@ var SliceViewInlineType = gti.AddType(&gti.Type{
 	Doc:        "SliceViewInline represents a slice as a single line widget,\nfor smaller slices and those explicitly marked inline.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Slice", &gti.Field{Name: "Slice", Type: "any", Doc: "the slice that we are a view onto", Directives: gti.Directives{}}},
-		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", Doc: "whether the slice is actually an array -- no modifications", Directives: gti.Directives{}}},
-		{"IsFixedLen", &gti.Field{Name: "IsFixedLen", Type: "bool", Doc: "whether the slice has a fixed-len flag on it", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}}},
-		{"Values", &gti.Field{Name: "Values", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
+		{"Slice", &gti.Field{Name: "Slice", Type: "any", LocalType: "any", Doc: "the slice that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SliceValView", &gti.Field{Name: "SliceValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the slice itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", LocalType: "bool", Doc: "whether the slice is actually an array -- no modifications", Directives: gti.Directives{}, Tag: ""}},
+		{"IsFixedLen", &gti.Field{Name: "IsFixedLen", Type: "bool", LocalType: "bool", Doc: "whether the slice has a fixed-len flag on it", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the slice been edited?", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Values", &gti.Field{Name: "Values", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceViewInline{},
@@ -869,6 +1450,57 @@ func (t *SliceViewInline) New() ki.Ki {
 	return &SliceViewInline{}
 }
 
+// SetSliceValView sets the [SliceViewInline.SliceValView]:
+// Value for the slice itself, if this was created within value view framework -- otherwise nil
+func (t *SliceViewInline) SetSliceValView(v Value) *SliceViewInline {
+	t.SliceValView = v
+	return t
+}
+
+// SetIsArray sets the [SliceViewInline.IsArray]:
+// whether the slice is actually an array -- no modifications
+func (t *SliceViewInline) SetIsArray(v bool) *SliceViewInline {
+	t.IsArray = v
+	return t
+}
+
+// SetIsFixedLen sets the [SliceViewInline.IsFixedLen]:
+// whether the slice has a fixed-len flag on it
+func (t *SliceViewInline) SetIsFixedLen(v bool) *SliceViewInline {
+	t.IsFixedLen = v
+	return t
+}
+
+// SetValues sets the [SliceViewInline.Values]:
+// Value representations of the fields
+func (t *SliceViewInline) SetValues(v []Value) *SliceViewInline {
+	t.Values = v
+	return t
+}
+
+// SetWidgetConfiged sets the [SliceViewInline.WidgetConfiged]:
+// WidgetConfiged tracks if the given Widget has been configured.
+// Widgets can only be configured once -- otherwise duplicate event
+// functions are registered.
+func (t *SliceViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *SliceViewInline {
+	t.WidgetConfiged = v
+	return t
+}
+
+// SetTmpSave sets the [SliceViewInline.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *SliceViewInline) SetTmpSave(v Value) *SliceViewInline {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [SliceViewInline.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *SliceViewInline) SetViewPath(v string) *SliceViewInline {
+	t.ViewPath = v
+	return t
+}
+
 // StructViewType is the [gti.Type] for [StructView]
 var StructViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructView",
@@ -877,22 +1509,22 @@ var StructViewType = gti.AddType(&gti.Type{
 	Doc:        "StructView represents a struct, creating a property editor of the fields --\nconstructs Children widgets to show the field names and editor fields for\neach field, within an overall frame.\nAutomatically has a toolbar with Struct Toolbar props if defined\nset prop toolbar = false to turn off",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Struct", &gti.Field{Name: "Struct", Type: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}}},
-		{"StructValView", &gti.Field{Name: "StructValView", Type: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"Changed", &gti.Field{Name: "Changed", Type: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}}},
-		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}}},
-		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks whether the given Widget has been configured yet\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}}},
-		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"ToolbarStru", &gti.Field{Name: "ToolbarStru", Type: "any", Doc: "the struct that we successfully set a toolbar for", Directives: gti.Directives{}}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
-		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}}},
-		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}}},
+		{"Struct", &gti.Field{Name: "Struct", Type: "any", LocalType: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"StructValView", &gti.Field{Name: "StructValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "has the value of any field changed?  updated by the ViewSig signals from fields", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"ChangeFlag", &gti.Field{Name: "ChangeFlag", Type: "*reflect.Value", LocalType: "*reflect.Value", Doc: "Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks whether the given Widget has been configured yet\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: ""}},
+		{"ShowToolbar", &gti.Field{Name: "ShowToolbar", Type: "bool", LocalType: "bool", Doc: "whether to show the toolbar or not", Directives: gti.Directives{}, Tag: ""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"ToolbarStru", &gti.Field{Name: "ToolbarStru", Type: "any", LocalType: "any", Doc: "the struct that we successfully set a toolbar for", Directives: gti.Directives{}, Tag: ""}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"TypeFieldTags", &gti.Field{Name: "TypeFieldTags", Type: "map[string]string", LocalType: "map[string]string", Doc: "extra tags by field name -- from type properties", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructView{},
@@ -916,6 +1548,85 @@ func (t *StructView) New() ki.Ki {
 	return &StructView{}
 }
 
+// SetStructValView sets the [StructView.StructValView]:
+// Value for the struct itself, if this was created within value view framework -- otherwise nil
+func (t *StructView) SetStructValView(v Value) *StructView {
+	t.StructValView = v
+	return t
+}
+
+// SetChangeFlag sets the [StructView.ChangeFlag]:
+// Value for a field marked with changeflag struct tag, which must be a bool type, which is updated when changes are registered in field values.
+func (t *StructView) SetChangeFlag(v *reflect.Value) *StructView {
+	t.ChangeFlag = v
+	return t
+}
+
+// SetFieldViews sets the [StructView.FieldViews]:
+// Value representations of the fields
+func (t *StructView) SetFieldViews(v []Value) *StructView {
+	t.FieldViews = v
+	return t
+}
+
+// SetWidgetConfiged sets the [StructView.WidgetConfiged]:
+// WidgetConfiged tracks whether the given Widget has been configured yet
+// Widgets can only be configured once -- otherwise duplicate event
+// functions are registered.
+func (t *StructView) SetWidgetConfiged(v map[gi.Widget]bool) *StructView {
+	t.WidgetConfiged = v
+	return t
+}
+
+// SetShowToolbar sets the [StructView.ShowToolbar]:
+// whether to show the toolbar or not
+func (t *StructView) SetShowToolbar(v bool) *StructView {
+	t.ShowToolbar = v
+	return t
+}
+
+// SetTmpSave sets the [StructView.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *StructView) SetTmpSave(v Value) *StructView {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [StructView.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *StructView) SetViewPath(v string) *StructView {
+	t.ViewPath = v
+	return t
+}
+
+// SetToolbarStru sets the [StructView.ToolbarStru]:
+// the struct that we successfully set a toolbar for
+func (t *StructView) SetToolbarStru(v any) *StructView {
+	t.ToolbarStru = v
+	return t
+}
+
+// SetHasDefs sets the [StructView.HasDefs]:
+// if true, some fields have default values -- update labels when values change
+func (t *StructView) SetHasDefs(v bool) *StructView {
+	t.HasDefs = v
+	return t
+}
+
+// SetHasViewIfs sets the [StructView.HasViewIfs]:
+// if true, some fields have viewif conditional view tags -- update after..
+func (t *StructView) SetHasViewIfs(v bool) *StructView {
+	t.HasViewIfs = v
+	return t
+}
+
+// SetTypeFieldTags sets the [StructView.TypeFieldTags]:
+// extra tags by field name -- from type properties
+func (t *StructView) SetTypeFieldTags(v map[string]string) *StructView {
+	t.TypeFieldTags = v
+	return t
+}
+
 // StructViewInlineType is the [gti.Type] for [StructViewInline]
 var StructViewInlineType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructViewInline",
@@ -924,18 +1635,18 @@ var StructViewInlineType = gti.AddType(&gti.Type{
 	Doc:        "StructViewInline represents a struct as a single line widget,\nfor smaller structs and those explicitly marked inline.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Struct", &gti.Field{Name: "Struct", Type: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}}},
-		{"StructValView", &gti.Field{Name: "StructValView", Type: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}}},
-		{"AddButton", &gti.Field{Name: "AddButton", Type: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}}},
-		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}}},
-		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}}},
-		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}}},
+		{"Struct", &gti.Field{Name: "Struct", Type: "any", LocalType: "any", Doc: "the struct that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"StructValView", &gti.Field{Name: "StructValView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "Value for the struct itself, if this was created within value view framework -- otherwise nil", Directives: gti.Directives{}, Tag: ""}},
+		{"AddButton", &gti.Field{Name: "AddButton", Type: "bool", LocalType: "bool", Doc: "if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'", Directives: gti.Directives{}, Tag: ""}},
+		{"FieldViews", &gti.Field{Name: "FieldViews", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Value representations of the fields", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
+		{"WidgetConfiged", &gti.Field{Name: "WidgetConfiged", Type: "map[goki.dev/gi/v2/gi.Widget]bool", LocalType: "map[gi.Widget]bool", Doc: "WidgetConfiged tracks if the given Widget has been configured.\nWidgets can only be configured once -- otherwise duplicate event\nfunctions are registered.", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"HasDefs", &gti.Field{Name: "HasDefs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have default values -- update labels when values change", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"HasViewIfs", &gti.Field{Name: "HasViewIfs", Type: "bool", LocalType: "bool", Doc: "if true, some fields have viewif conditional view tags -- update after..", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" readonly:\"+\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Frame", &gti.Field{Name: "Frame", Type: "gi.Frame", Doc: "", Directives: gti.Directives{}}},
+		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructViewInline{},
@@ -959,6 +1670,64 @@ func (t *StructViewInline) New() ki.Ki {
 	return &StructViewInline{}
 }
 
+// SetStructValView sets the [StructViewInline.StructValView]:
+// Value for the struct itself, if this was created within value view framework -- otherwise nil
+func (t *StructViewInline) SetStructValView(v Value) *StructViewInline {
+	t.StructValView = v
+	return t
+}
+
+// SetAddButton sets the [StructViewInline.AddButton]:
+// if true add an edit action button at the end -- other users of this widget can then configure that -- it is called 'edit-action'
+func (t *StructViewInline) SetAddButton(v bool) *StructViewInline {
+	t.AddButton = v
+	return t
+}
+
+// SetFieldViews sets the [StructViewInline.FieldViews]:
+// Value representations of the fields
+func (t *StructViewInline) SetFieldViews(v []Value) *StructViewInline {
+	t.FieldViews = v
+	return t
+}
+
+// SetWidgetConfiged sets the [StructViewInline.WidgetConfiged]:
+// WidgetConfiged tracks if the given Widget has been configured.
+// Widgets can only be configured once -- otherwise duplicate event
+// functions are registered.
+func (t *StructViewInline) SetWidgetConfiged(v map[gi.Widget]bool) *StructViewInline {
+	t.WidgetConfiged = v
+	return t
+}
+
+// SetTmpSave sets the [StructViewInline.TmpSave]:
+// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
+func (t *StructViewInline) SetTmpSave(v Value) *StructViewInline {
+	t.TmpSave = v
+	return t
+}
+
+// SetViewPath sets the [StructViewInline.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *StructViewInline) SetViewPath(v string) *StructViewInline {
+	t.ViewPath = v
+	return t
+}
+
+// SetHasDefs sets the [StructViewInline.HasDefs]:
+// if true, some fields have default values -- update labels when values change
+func (t *StructViewInline) SetHasDefs(v bool) *StructViewInline {
+	t.HasDefs = v
+	return t
+}
+
+// SetHasViewIfs sets the [StructViewInline.HasViewIfs]:
+// if true, some fields have viewif conditional view tags -- update after..
+func (t *StructViewInline) SetHasViewIfs(v bool) *StructViewInline {
+	t.HasViewIfs = v
+	return t
+}
+
 // EditorType is the [gti.Type] for [Editor]
 var EditorType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.Editor",
@@ -967,12 +1736,12 @@ var EditorType = gti.AddType(&gti.Type{
 	Doc:        "Editor supports editing of SVG elements",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Trans", &gti.Field{Name: "Trans", Type: "mat32.Vec2", Doc: "view translation offset (from dragging)", Directives: gti.Directives{}}},
-		{"Scale", &gti.Field{Name: "Scale", Type: "float32", Doc: "view scaling (from zooming)", Directives: gti.Directives{}}},
-		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}}},
+		{"Trans", &gti.Field{Name: "Trans", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "view translation offset (from dragging)", Directives: gti.Directives{}, Tag: ""}},
+		{"Scale", &gti.Field{Name: "Scale", Type: "float32", LocalType: "float32", Doc: "view scaling (from zooming)", Directives: gti.Directives{}, Tag: ""}},
+		{"SetDragCursor", &gti.Field{Name: "SetDragCursor", Type: "bool", LocalType: "bool", Doc: "has dragging cursor been set yet?", Directives: gti.Directives{}, Tag: "view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Editor{},
@@ -996,24 +1765,45 @@ func (t *Editor) New() ki.Ki {
 	return &Editor{}
 }
 
+// SetTrans sets the [Editor.Trans]:
+// view translation offset (from dragging)
+func (t *Editor) SetTrans(v mat32.Vec2) *Editor {
+	t.Trans = v
+	return t
+}
+
+// SetScale sets the [Editor.Scale]:
+// view scaling (from zooming)
+func (t *Editor) SetScale(v float32) *Editor {
+	t.Scale = v
+	return t
+}
+
+// SetSetDragCursor sets the [Editor.SetDragCursor]:
+// has dragging cursor been set yet?
+func (t *Editor) SetSetDragCursor(v bool) *Editor {
+	t.SetDragCursor = v
+	return t
+}
+
 // TableViewType is the [gti.Type] for [TableView]
 var TableViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TableView",
 	ShortName:  "giv.TableView",
 	IDName:     "table-view",
-	Doc:        "TableView represents a slice-of-structs as a table, where the fields are\nthe columns, within an overall frame.  It has two modes, determined by\nInactive flag: if Inactive, it functions as a mutually-exclusive item\nselector, highlighting the selected row and emitting a WidgetSig\nWidgetSelected signal, and TableViewDoubleClick for double clicks (can be\nused for closing dialogs).  If !Inactive, it is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop, reporting each action\ntaken using the TableViewSig signals\nAutomatically has a toolbar with Slice Toolbar props if defined\nset prop toolbar = false to turn off",
+	Doc:        "TableView represents a slice-of-structs as a table, where the fields are\nthe columns, within an overall frame.  It is a full-featured editor with\nmultiple-selection, cut-and-paste, and drag-and-drop.\nIf ReadOnly, it functions as a mutually-exclusive item\nselector, highlighting the selected row and emitting a Selected action.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "TableViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}}},
-		{"SelField", &gti.Field{Name: "SelField", Type: "string", Doc: "current selection field -- initially select value in this field", Directives: gti.Directives{}}},
-		{"SortIdx", &gti.Field{Name: "SortIdx", Type: "int", Doc: "current sort index", Directives: gti.Directives{}}},
-		{"SortDesc", &gti.Field{Name: "SortDesc", Type: "bool", Doc: "whether current sort order is descending", Directives: gti.Directives{}}},
-		{"StruType", &gti.Field{Name: "StruType", Type: "reflect.Type", Doc: "struct type for each row", Directives: gti.Directives{}}},
-		{"VisFields", &gti.Field{Name: "VisFields", Type: "[]reflect.StructField", Doc: "the visible fields", Directives: gti.Directives{}}},
-		{"NVisFields", &gti.Field{Name: "NVisFields", Type: "int", Doc: "number of visible fields", Directives: gti.Directives{}}},
+		{"StyleFunc", &gti.Field{Name: "StyleFunc", Type: "goki.dev/gi/v2/giv.TableViewStyleFunc", LocalType: "TableViewStyleFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SelField", &gti.Field{Name: "SelField", Type: "string", LocalType: "string", Doc: "current selection field -- initially select value in this field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"SortIdx", &gti.Field{Name: "SortIdx", Type: "int", LocalType: "int", Doc: "current sort index", Directives: gti.Directives{}, Tag: ""}},
+		{"SortDesc", &gti.Field{Name: "SortDesc", Type: "bool", LocalType: "bool", Doc: "whether current sort order is descending", Directives: gti.Directives{}, Tag: ""}},
+		{"StruType", &gti.Field{Name: "StruType", Type: "reflect.Type", LocalType: "reflect.Type", Doc: "struct type for each row", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"VisFields", &gti.Field{Name: "VisFields", Type: "[]reflect.StructField", LocalType: "[]reflect.StructField", Doc: "the visible fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"NVisFields", &gti.Field{Name: "NVisFields", Type: "int", LocalType: "int", Doc: "number of visible fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "SliceViewBase", Doc: "", Directives: gti.Directives{}}},
+		{"SliceViewBase", &gti.Field{Name: "SliceViewBase", Type: "goki.dev/gi/v2/giv.SliceViewBase", LocalType: "SliceViewBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TableView{},
@@ -1037,6 +1827,55 @@ func (t *TableView) New() ki.Ki {
 	return &TableView{}
 }
 
+// SetStyleFunc sets the [TableView.StyleFunc]:
+// optional styling function
+func (t *TableView) SetStyleFunc(v TableViewStyleFunc) *TableView {
+	t.StyleFunc = v
+	return t
+}
+
+// SetSelField sets the [TableView.SelField]:
+// current selection field -- initially select value in this field
+func (t *TableView) SetSelField(v string) *TableView {
+	t.SelField = v
+	return t
+}
+
+// SetSortIdx sets the [TableView.SortIdx]:
+// current sort index
+func (t *TableView) SetSortIdx(v int) *TableView {
+	t.SortIdx = v
+	return t
+}
+
+// SetSortDesc sets the [TableView.SortDesc]:
+// whether current sort order is descending
+func (t *TableView) SetSortDesc(v bool) *TableView {
+	t.SortDesc = v
+	return t
+}
+
+// SetStruType sets the [TableView.StruType]:
+// struct type for each row
+func (t *TableView) SetStruType(v reflect.Type) *TableView {
+	t.StruType = v
+	return t
+}
+
+// SetVisFields sets the [TableView.VisFields]:
+// the visible fields
+func (t *TableView) SetVisFields(v []reflect.StructField) *TableView {
+	t.VisFields = v
+	return t
+}
+
+// SetNVisFields sets the [TableView.NVisFields]:
+// number of visible fields
+func (t *TableView) SetNVisFields(v int) *TableView {
+	t.NVisFields = v
+	return t
+}
+
 // TextEditorValueType is the [gti.Type] for [TextEditorValue]
 var TextEditorValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TextEditorValue",
@@ -1046,7 +1885,7 @@ var TextEditorValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TextEditorValue{},
@@ -1080,18 +1919,18 @@ var TreeViewType = gti.AddType(&gti.Type{
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "ki.Ki", Doc: "If non-Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}}},
-		{"Icon", &gti.Field{Name: "Icon", Type: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}}},
-		{"Indent", &gti.Field{Name: "Indent", Type: "units.Value", Doc: "amount to indent children relative to this node", Directives: gti.Directives{}}},
-		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed.", Directives: gti.Directives{}}},
-		{"ViewIdx", &gti.Field{Name: "ViewIdx", Type: "int", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses", Directives: gti.Directives{}}},
-		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}}},
-		{"RootView", &gti.Field{Name: "RootView", Type: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}}},
-		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}}},
-		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}}},
+		{"SyncNode", &gti.Field{Name: "SyncNode", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "If non-Ki Node that this widget is viewing in the tree -- the source", Directives: gti.Directives{}, Tag: "set:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon, displayed to the the left of the text label", Directives: gti.Directives{}, Tag: ""}},
+		{"Indent", &gti.Field{Name: "Indent", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "amount to indent children relative to this node", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"OpenDepth", &gti.Field{Name: "OpenDepth", Type: "int", LocalType: "int", Doc: "depth for nodes be initialized as open (default 4).\nNodes beyond this depth will be initialized as closed.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
+		{"ViewIdx", &gti.Field{Name: "ViewIdx", Type: "int", LocalType: "int", Doc: "linear index of this node within the entire tree.\nupdated on full rebuilds and may sometimes be off,\nbut close enough for expected uses", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"WidgetSize", &gti.Field{Name: "WidgetSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "size of just this node widget.\nour alloc includes all of our children, but we only draw us.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"RootView", &gti.Field{Name: "RootView", Type: "*goki.dev/gi/v2/giv.TreeView", LocalType: "*TreeView", Doc: "cached root of the view", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"SelectedNodes", &gti.Field{Name: "SelectedNodes", Type: "[]*goki.dev/gi/v2/giv.TreeView", LocalType: "[]*TreeView", Doc: "SelectedNodes holds the currently-selected nodes, on the\nRootView node only.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" readonly:\"+\""}},
+		{"actStateLayer", &gti.Field{Name: "actStateLayer", Type: "float32", LocalType: "float32", Doc: "actStateLayer is the actual state layer of the tree view, which\nshould be used when rendering it and its parts (but not its children).\nthe reason that it exists is so that the children of the tree view\n(other tree views) do not inherit its stateful background color, as\nthat does not look good.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}}},
+		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TreeView{},
@@ -1137,6 +1976,71 @@ func (t *TreeView) AsTreeView() *TreeView {
 	return t
 }
 
+// SetIcon sets the [TreeView.Icon]:
+// optional icon, displayed to the the left of the text label
+func (t *TreeView) SetIcon(v icons.Icon) *TreeView {
+	t.Icon = v
+	return t
+}
+
+// SetIndent sets the [TreeView.Indent]:
+// amount to indent children relative to this node
+func (t *TreeView) SetIndent(v units.Value) *TreeView {
+	t.Indent = v
+	return t
+}
+
+// SetOpenDepth sets the [TreeView.OpenDepth]:
+// depth for nodes be initialized as open (default 4).
+// Nodes beyond this depth will be initialized as closed.
+func (t *TreeView) SetOpenDepth(v int) *TreeView {
+	t.OpenDepth = v
+	return t
+}
+
+// SetViewIdx sets the [TreeView.ViewIdx]:
+// linear index of this node within the entire tree.
+// updated on full rebuilds and may sometimes be off,
+// but close enough for expected uses
+func (t *TreeView) SetViewIdx(v int) *TreeView {
+	t.ViewIdx = v
+	return t
+}
+
+// SetWidgetSize sets the [TreeView.WidgetSize]:
+// size of just this node widget.
+// our alloc includes all of our children, but we only draw us.
+func (t *TreeView) SetWidgetSize(v mat32.Vec2) *TreeView {
+	t.WidgetSize = v
+	return t
+}
+
+// SetRootView sets the [TreeView.RootView]:
+// cached root of the view
+func (t *TreeView) SetRootView(v *TreeView) *TreeView {
+	t.RootView = v
+	return t
+}
+
+// SetSelectedNodes sets the [TreeView.SelectedNodes]:
+// SelectedNodes holds the currently-selected nodes, on the
+// RootView node only.
+func (t *TreeView) SetSelectedNodes(v []*TreeView) *TreeView {
+	t.SelectedNodes = v
+	return t
+}
+
+// SetactStateLayer sets the [TreeView.actStateLayer]:
+// actStateLayer is the actual state layer of the tree view, which
+// should be used when rendering it and its parts (but not its children).
+// the reason that it exists is so that the children of the tree view
+// (other tree views) do not inherit its stateful background color, as
+// that does not look good.
+func (t *TreeView) SetactStateLayer(v float32) *TreeView {
+	t.actStateLayer = v
+	return t
+}
+
 // ValueBaseType is the [gti.Type] for [ValueBase]
 var ValueBaseType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.ValueBase",
@@ -1145,25 +2049,25 @@ var ValueBaseType = gti.AddType(&gti.Type{
 	Doc:        "ValueBase provides the basis for implementations of the Value\ninterface, representing values in the interface -- it implements a generic\nTextField representation of the string value, and provides the generic\nfallback for everything that doesn't provide a specific Valuer type.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Value", &gti.Field{Name: "Value", Type: "reflect.Value", Doc: "the reflect.Value representation of the value", Directives: gti.Directives{}}},
-		{"OwnKind", &gti.Field{Name: "OwnKind", Type: "reflect.Kind", Doc: "kind of owner that we have -- reflect.Struct, .Map, .Slice are supported", Directives: gti.Directives{}}},
-		{"IsMapKey", &gti.Field{Name: "IsMapKey", Type: "bool", Doc: "for OwnKind = Map, this value represents the Key -- otherwise the Value", Directives: gti.Directives{}}},
-		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}}},
-		{"Owner", &gti.Field{Name: "Owner", Type: "any", Doc: "the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating", Directives: gti.Directives{}}},
-		{"Field", &gti.Field{Name: "Field", Type: "*reflect.StructField", Doc: "if Owner is a struct, this is the reflect.StructField associated with the value", Directives: gti.Directives{}}},
-		{"Tags", &gti.Field{Name: "Tags", Type: "map[string]string", Doc: "set of tags that can be set to customize interface for different types of values -- only source for non-structfield values", Directives: gti.Directives{}}},
-		{"HasSavedDesc", &gti.Field{Name: "HasSavedDesc", Type: "bool", Doc: "whether SavedDesc is applicable", Directives: gti.Directives{}}},
-		{"SavedDesc", &gti.Field{Name: "SavedDesc", Type: "string", Doc: "a saved version of the description for the value, if HasSavedDesc is true", Directives: gti.Directives{}}},
-		{"Key", &gti.Field{Name: "Key", Type: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}}},
-		{"KeyView", &gti.Field{Name: "KeyView", Type: "Value", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}}},
-		{"Idx", &gti.Field{Name: "Idx", Type: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}}},
-		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface", Directives: gti.Directives{}}},
-		{"Widget", &gti.Field{Name: "Widget", Type: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}}},
-		{"Listeners", &gti.Field{Name: "Listeners", Type: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}}},
-		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}}},
+		{"Value", &gti.Field{Name: "Value", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "the reflect.Value representation of the value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"OwnKind", &gti.Field{Name: "OwnKind", Type: "reflect.Kind", LocalType: "reflect.Kind", Doc: "kind of owner that we have -- reflect.Struct, .Map, .Slice are supported", Directives: gti.Directives{}, Tag: ""}},
+		{"IsMapKey", &gti.Field{Name: "IsMapKey", Type: "bool", LocalType: "bool", Doc: "for OwnKind = Map, this value represents the Key -- otherwise the Value", Directives: gti.Directives{}, Tag: ""}},
+		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
+		{"Owner", &gti.Field{Name: "Owner", Type: "any", LocalType: "any", Doc: "the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating", Directives: gti.Directives{}, Tag: ""}},
+		{"Field", &gti.Field{Name: "Field", Type: "*reflect.StructField", LocalType: "*reflect.StructField", Doc: "if Owner is a struct, this is the reflect.StructField associated with the value", Directives: gti.Directives{}, Tag: ""}},
+		{"Tags", &gti.Field{Name: "Tags", Type: "map[string]string", LocalType: "map[string]string", Doc: "set of tags that can be set to customize interface for different types of values -- only source for non-structfield values", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"HasSavedDesc", &gti.Field{Name: "HasSavedDesc", Type: "bool", LocalType: "bool", Doc: "whether SavedDesc is applicable", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"SavedDesc", &gti.Field{Name: "SavedDesc", Type: "string", LocalType: "string", Doc: "a saved version of the description for the value, if HasSavedDesc is true", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"Key", &gti.Field{Name: "Key", Type: "any", LocalType: "any", Doc: "if Owner is a map, and this is a value, this is the key for this value in the map", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"KeyView", &gti.Field{Name: "KeyView", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "if Owner is a map, and this is a value, this is the value view representing the key -- its value has the *current* value of the key, which can be edited", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"Idx", &gti.Field{Name: "Idx", Type: "int", LocalType: "int", Doc: "if Owner is a slice, this is the index for the value in the slice", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"WidgetTyp", &gti.Field{Name: "WidgetTyp", Type: "*goki.dev/gti.Type", LocalType: "*gti.Type", Doc: "type of widget to create -- cached during WidgetType method -- chosen based on the Value type and reflect.Value type -- see Valuer interface", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"Widget", &gti.Field{Name: "Widget", Type: "goki.dev/gi/v2/gi.Widget", LocalType: "gi.Widget", Doc: "the widget used to display and edit the value in the interface -- this is created for us externally and we cache it during ConfigWidget", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"-\""}},
+		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"TmpSave", &gti.Field{Name: "TmpSave", Type: "goki.dev/gi/v2/giv.Value", LocalType: "Value", Doc: "value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "ki.Node", Doc: "", Directives: gti.Directives{}}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ValueBase{},
@@ -1187,6 +2091,41 @@ func (t *ValueBase) New() ki.Ki {
 	return &ValueBase{}
 }
 
+// SetOwnKind sets the [ValueBase.OwnKind]:
+// kind of owner that we have -- reflect.Struct, .Map, .Slice are supported
+func (t *ValueBase) SetOwnKind(v reflect.Kind) *ValueBase {
+	t.OwnKind = v
+	return t
+}
+
+// SetIsMapKey sets the [ValueBase.IsMapKey]:
+// for OwnKind = Map, this value represents the Key -- otherwise the Value
+func (t *ValueBase) SetIsMapKey(v bool) *ValueBase {
+	t.IsMapKey = v
+	return t
+}
+
+// SetViewPath sets the [ValueBase.ViewPath]:
+// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
+func (t *ValueBase) SetViewPath(v string) *ValueBase {
+	t.ViewPath = v
+	return t
+}
+
+// SetOwner sets the [ValueBase.Owner]:
+// the object that owns this value, either a struct, slice, or map, if non-nil -- if a Ki Node, then SetField is used to set value, to provide proper updating
+func (t *ValueBase) SetOwner(v any) *ValueBase {
+	t.Owner = v
+	return t
+}
+
+// SetField sets the [ValueBase.Field]:
+// if Owner is a struct, this is the reflect.StructField associated with the value
+func (t *ValueBase) SetField(v *reflect.StructField) *ValueBase {
+	t.Field = v
+	return t
+}
+
 // StructValueType is the [gti.Type] for [StructValue]
 var StructValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.StructValue",
@@ -1196,7 +2135,7 @@ var StructValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructValue{},
@@ -1229,7 +2168,7 @@ var StructInlineValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &StructInlineValue{},
@@ -1261,12 +2200,12 @@ var SliceValueType = gti.AddType(&gti.Type{
 	Doc:        "SliceValue presents a button to edit slices",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", Doc: "", Directives: gti.Directives{}}},
-		{"ElType", &gti.Field{Name: "ElType", Type: "reflect.Type", Doc: "", Directives: gti.Directives{}}},
-		{"ElIsStruct", &gti.Field{Name: "ElIsStruct", Type: "bool", Doc: "", Directives: gti.Directives{}}},
+		{"IsArray", &gti.Field{Name: "IsArray", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"ElType", &gti.Field{Name: "ElType", Type: "reflect.Type", LocalType: "reflect.Type", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"ElIsStruct", &gti.Field{Name: "ElIsStruct", Type: "bool", LocalType: "bool", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceValue{},
@@ -1290,6 +2229,24 @@ func (t *SliceValue) New() ki.Ki {
 	return &SliceValue{}
 }
 
+// SetIsArray sets the [SliceValue.IsArray]:
+func (t *SliceValue) SetIsArray(v bool) *SliceValue {
+	t.IsArray = v
+	return t
+}
+
+// SetElType sets the [SliceValue.ElType]:
+func (t *SliceValue) SetElType(v reflect.Type) *SliceValue {
+	t.ElType = v
+	return t
+}
+
+// SetElIsStruct sets the [SliceValue.ElIsStruct]:
+func (t *SliceValue) SetElIsStruct(v bool) *SliceValue {
+	t.ElIsStruct = v
+	return t
+}
+
 // SliceInlineValueType is the [gti.Type] for [SliceInlineValue]
 var SliceInlineValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.SliceInlineValue",
@@ -1299,7 +2256,7 @@ var SliceInlineValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &SliceInlineValue{},
@@ -1332,7 +2289,7 @@ var MapValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapValue{},
@@ -1365,7 +2322,7 @@ var MapInlineValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &MapInlineValue{},
@@ -1398,7 +2355,7 @@ var KiPtrValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &KiPtrValue{},
@@ -1431,7 +2388,7 @@ var BoolValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &BoolValue{},
@@ -1464,7 +2421,7 @@ var IntValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &IntValue{},
@@ -1497,7 +2454,7 @@ var FloatValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FloatValue{},
@@ -1530,7 +2487,7 @@ var EnumValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &EnumValue{},
@@ -1562,10 +2519,10 @@ var BitFlagViewType = gti.AddType(&gti.Type{
 	Doc:        "BitFlagView presents a ButtonBox for bitflags",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"AltType", &gti.Field{Name: "AltType", Type: "reflect.Type", Doc: "", Directives: gti.Directives{}}},
+		{"AltType", &gti.Field{Name: "AltType", Type: "reflect.Type", LocalType: "reflect.Type", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &BitFlagView{},
@@ -1589,6 +2546,12 @@ func (t *BitFlagView) New() ki.Ki {
 	return &BitFlagView{}
 }
 
+// SetAltType sets the [BitFlagView.AltType]:
+func (t *BitFlagView) SetAltType(v reflect.Type) *BitFlagView {
+	t.AltType = v
+	return t
+}
+
 // TypeValueType is the [gti.Type] for [TypeValue]
 var TypeValueType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.TypeValue",
@@ -1598,7 +2561,7 @@ var TypeValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TypeValue{},
@@ -1631,7 +2594,7 @@ var ByteSliceValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &ByteSliceValue{},
@@ -1664,7 +2627,7 @@ var RuneSliceValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &RuneSliceValue{},
@@ -1697,7 +2660,7 @@ var NilValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &NilValue{},
@@ -1730,7 +2693,7 @@ var TimeValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &TimeValue{},
@@ -1763,7 +2726,7 @@ var IconValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &IconValue{},
@@ -1796,7 +2759,7 @@ var FontValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FontValue{},
@@ -1829,7 +2792,7 @@ var FileValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &FileValue{},
@@ -1862,7 +2825,7 @@ var VersCtrlValueType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "ValueBase", Doc: "", Directives: gti.Directives{}}},
+		{"ValueBase", &gti.Field{Name: "ValueBase", Type: "goki.dev/gi/v2/giv.ValueBase", LocalType: "ValueBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &VersCtrlValue{},
@@ -1894,16 +2857,16 @@ var VCSLogViewType = gti.AddType(&gti.Type{
 	Doc:        "VCSLogView is a view of the variables",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Log", &gti.Field{Name: "Log", Type: "vci.Log", Doc: "current log", Directives: gti.Directives{}}},
-		{"File", &gti.Field{Name: "File", Type: "string", Doc: "file that this is a log of -- if blank then it is entire repository", Directives: gti.Directives{}}},
-		{"Since", &gti.Field{Name: "Since", Type: "string", Doc: "date expression for how long ago to include log entries from", Directives: gti.Directives{}}},
-		{"Repo", &gti.Field{Name: "Repo", Type: "vci.Repo", Doc: "version control system repository", Directives: gti.Directives{}}},
-		{"RevA", &gti.Field{Name: "RevA", Type: "string", Doc: "revision A -- defaults to HEAD", Directives: gti.Directives{}}},
-		{"RevB", &gti.Field{Name: "RevB", Type: "string", Doc: "revision B -- blank means current working copy", Directives: gti.Directives{}}},
-		{"SetA", &gti.Field{Name: "SetA", Type: "bool", Doc: "double-click will set the A revision -- else B", Directives: gti.Directives{}}},
+		{"Log", &gti.Field{Name: "Log", Type: "goki.dev/vci/v2.Log", LocalType: "vci.Log", Doc: "current log", Directives: gti.Directives{}, Tag: ""}},
+		{"File", &gti.Field{Name: "File", Type: "string", LocalType: "string", Doc: "file that this is a log of -- if blank then it is entire repository", Directives: gti.Directives{}, Tag: ""}},
+		{"Since", &gti.Field{Name: "Since", Type: "string", LocalType: "string", Doc: "date expression for how long ago to include log entries from", Directives: gti.Directives{}, Tag: ""}},
+		{"Repo", &gti.Field{Name: "Repo", Type: "goki.dev/vci/v2.Repo", LocalType: "vci.Repo", Doc: "version control system repository", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" copy:\"-\""}},
+		{"RevA", &gti.Field{Name: "RevA", Type: "string", LocalType: "string", Doc: "revision A -- defaults to HEAD", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"RevB", &gti.Field{Name: "RevB", Type: "string", LocalType: "string", Doc: "revision B -- blank means current working copy", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"SetA", &gti.Field{Name: "SetA", Type: "bool", LocalType: "bool", Doc: "double-click will set the A revision -- else B", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "gi.Layout", Doc: "", Directives: gti.Directives{}}},
+		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &VCSLogView{},
@@ -1925,4 +2888,39 @@ func (t *VCSLogView) KiType() *gti.Type {
 // New returns a new [*VCSLogView] value
 func (t *VCSLogView) New() ki.Ki {
 	return &VCSLogView{}
+}
+
+// SetLog sets the [VCSLogView.Log]:
+// current log
+func (t *VCSLogView) SetLog(v vci.Log) *VCSLogView {
+	t.Log = v
+	return t
+}
+
+// SetFile sets the [VCSLogView.File]:
+// file that this is a log of -- if blank then it is entire repository
+func (t *VCSLogView) SetFile(v string) *VCSLogView {
+	t.File = v
+	return t
+}
+
+// SetSince sets the [VCSLogView.Since]:
+// date expression for how long ago to include log entries from
+func (t *VCSLogView) SetSince(v string) *VCSLogView {
+	t.Since = v
+	return t
+}
+
+// SetRepo sets the [VCSLogView.Repo]:
+// version control system repository
+func (t *VCSLogView) SetRepo(v vci.Repo) *VCSLogView {
+	t.Repo = v
+	return t
+}
+
+// SetSetA sets the [VCSLogView.SetA]:
+// double-click will set the A revision -- else B
+func (t *VCSLogView) SetSetA(v bool) *VCSLogView {
+	t.SetA = v
+	return t
 }

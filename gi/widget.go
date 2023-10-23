@@ -239,8 +239,8 @@ type Widget interface {
 
 // WidgetBase is the base type for all Widget Widget elements, which are
 // managed by a containing Layout, and use all 5 rendering passes.  All
-// elemental widgets must support the Inactive and Selected states in a
-// reasonable way (Selected only essential when also Inactive), so they can
+// elemental widgets must support the ReadOnly and Selected states in a
+// reasonable way (Selected only essential when also ReadOnly), so they can
 // function appropriately in a chooser (e.g., SliceView or TableView) -- this
 // includes toggling selection on left mouse press.
 type WidgetBase struct {
@@ -263,13 +263,13 @@ type WidgetBase struct {
 	// todo: need to fully revisit scrolling logic!
 
 	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
-	BBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
+	BBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
+	ObjBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
-	ScBBox image.Rectangle `copy:"-" json:"-" xml:"-" set:"-"`
+	ScBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// A slice of functions to call on all widgets that are added as children to this widget or its children.
 	// These functions are called in sequential ascending order, so the last added one is called
@@ -294,7 +294,7 @@ type WidgetBase struct {
 	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
 
 	// all the layout state information for this widget
-	LayState LayoutState `copy:"-" json:"-" xml:"-" set:"-"`
+	LayState LayoutState `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
 	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.

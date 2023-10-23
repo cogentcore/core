@@ -75,7 +75,7 @@ func (sw *Switch) SetIconFromState() {
 	}
 	st := ist.(*Layout)
 	switch {
-	case sw.StateIs(states.Disabled):
+	case sw.IsReadOnly():
 		st.StackTop = 2
 	case sw.StateIs(states.Checked):
 		st.StackTop = 0

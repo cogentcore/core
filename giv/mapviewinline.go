@@ -22,13 +22,13 @@ type MapViewInline struct {
 	gi.Layout
 
 	// the map that we are a view onto
-	Map any
+	Map any `set:"-"`
 
 	// Value for the map itself, if this was created within value view framework -- otherwise nil
 	MapValView Value
 
 	// has the map been edited?
-	Changed bool
+	Changed bool `set:"-"`
 
 	// Value representations of the map keys
 	Keys []Value `json:"-" xml:"-"`
@@ -179,9 +179,9 @@ func (mv *MapViewInline) ConfigMap(sc *gi.Scene) bool {
 		mv.WidgetConfiged[widg] = true
 		kv.ConfigWidget(keyw, sc)
 		vv.ConfigWidget(widg, sc)
-		if mv.IsDisabled() {
-			widg.AsWidget().SetState(true, states.Disabled)
-			keyw.AsWidget().SetState(true, states.Disabled)
+		if mv.IsReadOnly() {
+			widg.AsWidget().SetState(true, states.ReadOnly)
+			keyw.AsWidget().SetState(true, states.ReadOnly)
 		}
 	}
 	adack, err := mv.Children().ElemFromEndTry(1)

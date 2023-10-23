@@ -16,12 +16,12 @@ type ViewIFace interface {
 	// through the kit.AddType method.  See
 	// https://goki.dev/gi/v2/wiki/Views for full details on formats and
 	// options for configuring the menu.  It looks first for "CtxtMenuActive"
-	// or "CtxtMenuInactive" depending on inactive flag (which applies to the
+	// or "CtxtMenuReadOnly" depending on ReadOnly flag (which applies to the
 	// gui view), so you can have different menus in those cases, and then
 	// falls back on "CtxtMenu".  Returns false if there is no context menu
 	// defined for this type, or on errors (which are programmer errors sent
 	// to log).
-	CtxtMenuView(val any, inactive bool, sc *Scene, m *Scene) bool
+	CtxtMenuView(val any, readOnly bool, sc *Scene, m *Scene) bool
 
 	// GoGiEditor opens an interactive editor of given Ki tree, at its root
 	GoGiEditor(obj ki.Ki)

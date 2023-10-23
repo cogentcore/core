@@ -50,7 +50,7 @@ type TreeView struct {
 	gi.WidgetBase
 
 	// If non-Ki Node that this widget is viewing in the tree -- the source
-	SyncNode ki.Ki `copy:"-" json:"-" xml:"-"`
+	SyncNode ki.Ki `set:"-" copy:"-" json:"-" xml:"-"`
 
 	// optional icon, displayed to the the left of the text label
 	Icon icons.Icon
@@ -68,18 +68,18 @@ type TreeView struct {
 	// linear index of this node within the entire tree.
 	// updated on full rebuilds and may sometimes be off,
 	// but close enough for expected uses
-	ViewIdx int `copy:"-" json:"-" xml:"-" inactive:"+"`
+	ViewIdx int `copy:"-" json:"-" xml:"-" readonly:"+"`
 
 	// size of just this node widget.
 	// our alloc includes all of our children, but we only draw us.
-	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" inactive:"+"`
+	WidgetSize mat32.Vec2 `copy:"-" json:"-" xml:"-" readonly:"+"`
 
 	// cached root of the view
-	RootView *TreeView `copy:"-" json:"-" xml:"-" inactive:"+"`
+	RootView *TreeView `copy:"-" json:"-" xml:"-" readonly:"+"`
 
 	// SelectedNodes holds the currently-selected nodes, on the
 	// RootView node only.
-	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" inactive:"+"`
+	SelectedNodes []*TreeView `copy:"-" json:"-" xml:"-" readonly:"+"`
 
 	// actStateLayer is the actual state layer of the tree view, which
 	// should be used when rendering it and its parts (but not its children).
@@ -270,10 +270,10 @@ func (tv *TreeView) SetClosed(closed bool) {
 	tv.SetFlag(closed, TreeViewFlagClosed)
 }
 
-// RootIsInactive returns the inactive status of the root node,
+// RootIsReadOnly returns the ReadOnly status of the root node,
 // which is what controls the functional inactivity of the tree
-// if individual nodes are inactive that only affects display typically.
-func (tv *TreeView) RootIsInactive() bool {
+// if individual nodes are ReadOnly that only affects display typically.
+func (tv *TreeView) RootIsReadOnly() bool {
 	if tv.RootView == nil {
 		return true
 	}
@@ -1085,10 +1085,10 @@ func (tv *TreeView) MakeContextMenu(m *gi.Scene) {
 		tv.CustomContextMenu(m)
 	}
 	// TODO(kai/menu): need a replacement for this:
-	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsInactive(), tv.Scene, m) { // our viewed obj's menu
+	// if tv.SyncNode != nil && CtxtMenuView(tv.SyncNode, tv.RootIsReadOnly(), tv.Scene, m) { // our viewed obj's menu
 	// 	if tv.ShowViewCtxtMenu {
 	// 		m.AddSeparator("sep-tvmenu")
-	// 		CtxtMenuView(tv.This(), tv.RootIsInactive(), tv.Scene, m)
+	// 		CtxtMenuView(tv.This(), tv.RootIsReadOnly(), tv.Scene, m)
 	// 	}
 	// } else {
 	tv.MakeTreeViewContextMenu(m)
@@ -1552,7 +1552,7 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 		}
 	}
 
-	// first all the keys that work for inactive and active
+	// first all the keys that work for ReadOnly and active
 	switch kf {
 	case gi.KeyFunCancelSelect:
 		tv.UnselectAll()
@@ -1595,7 +1595,7 @@ func (tv *TreeView) HandleTreeViewKeyChord(kt events.Event) {
 		tv.This().(gi.Clipper).Copy(true)
 		kt.SetHandled()
 	}
-	if !tv.RootIsInactive() && !kt.IsHandled() {
+	if !tv.RootIsReadOnly() && !kt.IsHandled() {
 		switch kf {
 		case gi.KeyFunDelete:
 			tv.SrcDelete()
@@ -1747,7 +1747,7 @@ var TreeViewProps = ki.Props{
 		{"OpenAll", ki.Props{}},
 		{"CloseAll", ki.Props{}},
 	},
-	"CtxtMenuInactive": ki.PropSlice{
+	"CtxtMenuReadOnly": ki.PropSlice{
 		{"Copy", ki.Props{
 			"shortcut": gi.KeyFunCopy,
 			"Args": ki.PropSlice{
@@ -1784,7 +1784,7 @@ var TreeViewProps = ki.Props{
 // 		tv.ScrollToMe()
 // 		tv.EmitFocusedSignal()
 // 		tv.SetNeedsRender()
-// 	case gi.FocusInactive: // don't care..
+// 	case gi.FocusReadOnly: // don't care..
 // 	case gi.FocusActive:
 // 	}
 // }

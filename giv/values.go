@@ -92,8 +92,8 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if desc == "list" { // todo: not sure where this comes from but it is uninformative
 		desc = ""
 	}
-	inact := vv.This().(Value).IsInactive()
-	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
+	inact := vv.This().(Value).IsReadOnly()
+	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -228,10 +228,10 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		slog.Error("giv.SliceValue: Cannot view slices with non-pointer struct elements")
 		return
 	}
-	inact := vv.This().(Value).IsInactive()
+	readOnly := vv.This().(Value).IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
-		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
 			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
@@ -242,7 +242,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 
 		}).Run()
 	} else {
-		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
+		SliceViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
 			if dlg.Accepted {
 				vv.UpdateWidget()
 				vv.SendChange()
@@ -290,7 +290,7 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	sv.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	sv.SetSlice(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -354,8 +354,8 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Desc()
 	mpi := vv.Value.Interface()
-	inact := vv.This().(Value).IsInactive()
-	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
+	readOnly := vv.This().(Value).IsReadOnly()
+	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -402,7 +402,7 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	sv.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	sv.SetMap(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -500,8 +500,8 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Desc()
-	inact := vv.This().(Value).IsInactive()
-	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, Inactive: inact, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
+	readOnly := vv.This().(Value).IsReadOnly()
+	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
 			vv.SendChange()
@@ -540,7 +540,7 @@ func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
@@ -580,7 +580,7 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	sb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
@@ -657,7 +657,7 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	sb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
@@ -745,7 +745,7 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
 	ch.Tooltip, _ = vv.Desc()
-	ch.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	ch.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 
 	ev := vv.EnumValue()
 	ch.ItemsFromEnum(ev, false, 50)
@@ -811,7 +811,7 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 
 	// todo!
 	ev := vv.EnumValue()
@@ -859,7 +859,7 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	cb.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 
 	typEmbeds := ki.NodeType
 	// if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -917,7 +917,7 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -961,7 +961,7 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
@@ -1053,7 +1053,7 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsInactive(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
 	tf.Style(func(s *styles.Style) {
 		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
@@ -1125,7 +1125,7 @@ func (vv *IconValue) HasDialog() bool {
 }
 
 func (vv *IconValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	cur := icons.Icon(laser.ToString(vv.Value.Interface()))
@@ -1186,7 +1186,7 @@ func (vv *FontValue) HasDialog() bool {
 }
 
 func (vv *FontValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	// cur := gi.FontName(laser.ToString(vvv.Value.Interface()))
@@ -1250,7 +1250,7 @@ func (vv *FileValue) HasDialog() bool {
 }
 
 func (vv *FileValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	cur := laser.ToString(vv.Value.Interface())
@@ -1348,7 +1348,7 @@ func (vv *VersCtrlValue) HasDialog() bool {
 }
 
 func (vv *VersCtrlValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	// TODO(kai/menu): add back StringsChooserPopup here

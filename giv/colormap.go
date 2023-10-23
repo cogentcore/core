@@ -180,7 +180,7 @@ func (vv *ColorMapValue) HasButton() bool {
 }
 
 func (vv *ColorMapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
-	if vv.IsInactive() {
+	if vv.IsReadOnly() {
 		return
 	}
 	sl := colormap.AvailMapsList()
