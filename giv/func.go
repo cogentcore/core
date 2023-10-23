@@ -10,9 +10,7 @@ package giv
 // to [CallFunc] or to the `gi:toolbar` and `gi:menubar` comment directives.
 // These options control both the appearance and behavior of both the function
 // button in a toolbar and/or menubar button and the dialog created by [CallFunc].
-//
-//gti:add
-type FuncConfig struct {
+type FuncConfig struct { //gti:add
 	// If non-nil, Parent is the parent menu to place this function
 	// in when creating a toolbar or a menubar. If the specified parent
 	// function does not exist, an artificial parent toolbar/menubar

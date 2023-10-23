@@ -56,9 +56,7 @@ func (ge *GiEditor) OnInit() {
 }
 
 // Update updates the objects being edited (e.g., updating display changes)
-//
-//gti:add
-func (ge *GiEditor) Update() {
+func (ge *GiEditor) Update() { //gti:add
 	if ge.KiRoot == nil {
 		return
 	}
@@ -90,9 +88,7 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 }
 
 // Open opens tree from given filename, in a standard JSON-formatted file
-//
-//gti:add
-func (ge *GiEditor) Open(filename gi.FileName) {
+func (ge *GiEditor) Open(filename gi.FileName) { //gti:add
 	if ge.KiRoot == nil {
 		return
 	}
@@ -151,9 +147,7 @@ func (ge *GiEditor) EditColorScheme() {
 }
 
 // ToggleSelectionMode toggles the editor between selection mode or not
-//
-//gti:add
-func (ge *GiEditor) ToggleSelectionMode() {
+func (ge *GiEditor) ToggleSelectionMode() { //gti:add
 	/* TODO(kai/sel): implement
 	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
 		if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {

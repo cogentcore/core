@@ -48,9 +48,7 @@ func Init() {
 // customization -- in addition, most gui settings can be styled using
 // CSS-style sheets under CustomStyle.  These prefs are saved and loaded from
 // the GoGi user preferences directory -- see oswin/App for further info.
-//
-//gti:add
-type Preferences struct {
+type Preferences struct { //gti:add
 
 	// the color theme
 	Theme Themes
@@ -555,18 +553,14 @@ func (pf *Preferences) DensityMul() float32 {
 // ScreenPrefs are the per-screen preferences -- see oswin/App/Screen() for
 // info on the different screens -- these prefs are indexed by the Screen.Name
 // -- settings here override those in the global preferences.
-//
-//gti:add
-type ScreenPrefs struct {
+type ScreenPrefs struct { //gti:add
 
 	// overall scaling factor for Logical DPI as a multiplier on Physical DPI -- smaller numbers produce smaller font sizes etc.  Actual Logical DPI is enforced to be a multiple of 6, so the precise number here isn't critical -- rounding to 2 digits is more than sufficient.
 	LogicalDPIScale float32 `min:"0.1" step:"0.1"`
 }
 
 // ParamPrefs contains misc parameters controlling GUI behavior.
-//
-//gti:add
-type ParamPrefs struct {
+type ParamPrefs struct { //gti:add
 
 	// the maximum time interval in msec between button press events to count as a double-click
 	DoubleClickInterval time.Duration `min:"100" step:"50"`
@@ -605,9 +599,7 @@ func (pf *ParamPrefs) Defaults() {
 }
 
 // User basic user information that might be needed for different apps
-//
-//gti:add
-type User struct {
+type User struct { //gti:add
 	user.User
 
 	// default email address -- e.g., for recording changes in a version control system
@@ -619,9 +611,7 @@ type User struct {
 
 // EditorPrefs contains editor preferences.  It can also be set
 // from ki.Props style properties.
-//
-//gti:add
-type EditorPrefs struct {
+type EditorPrefs struct { //gti:add
 
 	// size of a tab, in chars -- also determines indent level for space indent
 	TabSize int `xml:"tab-size"`
@@ -668,9 +658,7 @@ func (pf *EditorPrefs) Defaults() {
 // FavPathItem represents one item in a favorite path list, for display of
 // favorites.  Is an ordered list instead of a map because user can organize
 // in order
-//
-//gti:add
-type FavPathItem struct {
+type FavPathItem struct { //gti:add
 
 	// icon for item
 	Ic icons.Icon
@@ -794,9 +782,7 @@ func OpenPaths() {
 
 // PrefsDetailed are more detailed params not usually customized, but
 // available for those who really care..
-//
-//gti:add
-type PrefsDetailed struct {
+type PrefsDetailed struct { //gti:add
 
 	// the maximum height of any menu popup panel in units of font height -- scroll bars are enforced beyond that size.
 	MenuMaxHeight int `def:"30" min:"5" step:"1"`

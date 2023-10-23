@@ -23,9 +23,7 @@ import (
 func main() { gimain.Run(app) }
 
 // TableStruct is a testing struct for table view
-//
-//gti:add
-type TableStruct struct {
+type TableStruct struct { //gti:add
 
 	// an icon
 	Icon icons.Icon
@@ -44,9 +42,7 @@ type TableStruct struct {
 }
 
 // ILStruct is an inline-viewed struct
-//
-//gti:add
-type ILStruct struct {
+type ILStruct struct { //gti:add
 
 	// click to show next
 	On bool
@@ -68,9 +64,7 @@ type ILStruct struct {
 }
 
 // Struct is a testing struct for struct view
-//
-//gti:add
-type Struct struct {
+type Struct struct { //gti:add
 
 	// an enum
 	Stripes gi.Stripes
