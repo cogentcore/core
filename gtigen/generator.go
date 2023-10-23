@@ -384,24 +384,6 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 			Tag:        tag,
 		}
 		res.Add(name, fo)
-
-		// now, we add the fields of any embedded structs
-		if len(field.Names) != 0 {
-			continue
-		}
-		str, ok := ftyp.Underlying().(*types.Struct)
-		if !ok {
-			continue
-		}
-		nf := str.NumFields()
-		for i := 0; i < nf; i++ {
-			tf := str.Field(i)
-			ef := &gti.Field{
-				Name: tf.Name(),
-				Type: tf.Type().String(),
-			}
-			res.Add(name, ef)
-		}
 	}
 	return res, nil
 }
