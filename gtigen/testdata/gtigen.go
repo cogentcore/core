@@ -16,9 +16,6 @@ var PersonType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{
 		&gti.Directive{Tool: "ki", Directive: "flagtype", Args: []string{"NodeFlags", "-field", "Flag"}},
 		&gti.Directive{Tool: "goki", Directive: "embedder", Args: []string{}},
-		&gti.Directive{Tool: "gi", Directive: "toolbar", Args: []string{"-hide"}},
-		&gti.Directive{Tool: "goki", Directive: "setter", Args: []string{}},
-		&gti.Directive{Tool: "gi", Directive: "view", Args: []string{"inline"}},
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "Name is the name of the person", Directives: gti.Directives{

@@ -82,7 +82,7 @@ func TestPerson(t *testing.T) {
 	if have.Name != "goki.dev/gti/gtigen/testdata.Person" {
 		t.Errorf("expected name to be 'goki.dev/gti/gtigen/testdata.Person', but got %s", have.Name)
 	}
-	if len(have.Directives) != 1 {
+	if len(have.Directives) != 2 {
 		t.Errorf("expected 1 directive, but got %d", len(have.Directives))
 	}
 	if have.Fields.Len() != 3 {

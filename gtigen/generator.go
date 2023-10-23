@@ -32,6 +32,7 @@ type Generator struct {
 	Buf        bytes.Buffer                          // The accumulated output.
 	Pkgs       []*packages.Package                   // The packages we are scanning.
 	Pkg        *packages.Package                     // The packages we are currently on.
+	File       *ast.File                             // The file we are currently on.
 	Cmap       ast.CommentMap                        // The comment map for the file we are currently on.
 	Types      []*Type                               // The types
 	Methods    *ordmap.Map[string, []*gti.Method]    // The methods, keyed by the the full package name of the type of the receiver
@@ -168,6 +169,7 @@ var AllowedEnumTypes = map[string]bool{"int": true, "int64": true, "int32": true
 func (g *Generator) Inspect(n ast.Node) (bool, error) {
 	switch v := n.(type) {
 	case *ast.File:
+		g.File = v
 		g.Cmap = ast.NewCommentMap(g.Pkg.Fset, v, v.Comments)
 	case *ast.GenDecl:
 		return g.InspectGenDecl(v)
@@ -206,7 +208,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 			}
 		}
 
-		dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, g.Cmap.Filter(gd).Comments()...)
+		dirs, hasAdd, hasSkip, err := g.LoadFromNodeComments(cfg, gd)
 		if err != nil {
 			return false, err
 		}
@@ -260,7 +262,7 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 func (g *Generator) InspectFuncDecl(fd *ast.FuncDecl) (bool, error) {
 	cfg := &Config{}
 	*cfg = *g.Config
-	dirs, hasAdd, hasSkip, err := LoadFromComments(cfg, g.Cmap.Filter(fd).Comments()...)
+	dirs, hasAdd, hasSkip, err := g.LoadFromNodeComments(cfg, fd)
 	if err != nil {
 		return false, err
 	}
@@ -379,6 +381,23 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		res.Add(name, fo)
 	}
 	return res, nil
+}
+
+// LoadFromNodeComments is a helper function that calls [LoadFromComments] with the correctly
+// filtered comment map comments of the given node.
+func (g *Generator) LoadFromNodeComments(cfg *Config, n ast.Node) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+	cs := g.Cmap.Filter(n).Comments()
+	tf := g.Pkg.Fset.File(g.File.FileStart)
+	np := tf.Line(n.Pos())
+	keep := []*ast.CommentGroup{}
+	for _, c := range cs {
+		// if the comment's line is after ours, we ignore it, as it is likely associated with something else
+		if tf.Line(c.Pos()) > np {
+			continue
+		}
+		keep = append(keep, c)
+	}
+	return LoadFromComments(cfg, keep...)
 }
 
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
