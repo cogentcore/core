@@ -553,6 +553,7 @@ func (ch *Chooser) MakeItemsMenu(m *Scene) {
 
 func (ch *Chooser) HandleChooserEvents() {
 	ch.HandleWidgetEvents()
+	ch.HandleSelectToggle()
 	ch.HandleClickMenu()
 	ch.HandleChooserKeys()
 }

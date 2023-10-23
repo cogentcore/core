@@ -623,14 +623,16 @@ func (em *EventMgr) SetFocus(w Widget) bool {
 // sendEvent determines whether the events.Focus event is sent to the focused item.
 func (em *EventMgr) SetFocusImpl(w Widget, sendEvent bool) bool {
 	cfoc := em.Focus
-	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) || cfoc.Is(ki.Destroyed) {
+	if cfoc == nil || cfoc.This() == nil || cfoc.Is(ki.Deleted) {
 		em.Focus = nil
 		cfoc = nil
 	}
 	if cfoc == w {
 		return false
 	}
-	// fmt.Println("set focus:", w)
+	if KeyEventTrace {
+		fmt.Println("EventMgr set focus to:", w)
+	}
 
 	if cfoc != nil {
 		cfoc.Send(events.FocusLost)

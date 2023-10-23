@@ -187,7 +187,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)
 			s.MaxBorder.Color.Bottom = colors.Scheme.Primary.Base
-			if s.Is(states.Focused) {
+			if !tf.IsReadOnly() && s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Bottom = units.Dp(1)
@@ -200,7 +200,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Set(units.Dp(2))
 			s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
-			if s.Is(states.Focused) {
+			if !tf.IsReadOnly() && s.Is(states.Focused) {
 				s.Border = s.MaxBorder
 			} else {
 				s.Border.Width.Set(units.Dp(1))
@@ -309,7 +309,7 @@ func (tf *TextField) EditDone() {
 		tf.Txt = string(tf.EditTxt)
 		tf.SendChange()
 		// widget can be killed after sendchange
-		if tf.This() == nil || tf.Is(ki.Deleted) || tf.Is(ki.Destroyed) {
+		if tf == nil || tf.This() == nil || tf.Is(ki.Deleted) {
 			return
 		}
 	}
@@ -1021,12 +1021,7 @@ func TextFieldBlink() {
 		TextFieldBlinkMu.Unlock()
 		<-TextFieldBlinker.C
 		TextFieldBlinkMu.Lock()
-		if BlinkingTextField == nil || BlinkingTextField.This() == nil {
-			TextFieldBlinkMu.Unlock()
-			continue
-		}
-		if BlinkingTextField.Is(ki.Destroyed) || BlinkingTextField.Is(ki.Deleted) {
-			BlinkingTextField = nil
+		if BlinkingTextField == nil || BlinkingTextField.This() == nil || BlinkingTextField.Is(ki.Deleted) {
 			TextFieldBlinkMu.Unlock()
 			continue
 		}
@@ -1349,11 +1344,11 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 
 func (tf *TextField) HandleTextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
+		if !tf.StateIs(states.Focused) {
+			tf.GrabFocus() // always grab, even if read only..
+		}
 		if tf.IsReadOnly() {
 			return
-		}
-		if !tf.StateIs(states.Focused) {
-			tf.GrabFocus()
 		}
 		e.SetHandled()
 		switch e.MouseButton() {
@@ -1609,6 +1604,7 @@ func (tf *TextField) HandleTextFieldStateFromFocus() {
 
 func (tf *TextField) HandleTextFieldEvents() {
 	tf.HandleWidgetEvents()
+	tf.HandleSelectToggle()
 	tf.HandleTextFieldMouse()
 	tf.HandleTextFieldStateFromFocus()
 	tf.HandleTextFieldKeys()

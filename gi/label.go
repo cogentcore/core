@@ -115,7 +115,9 @@ func (lb *Label) LabelStyles() {
 	lb.Type = LabelBodyLarge
 	lb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Selectable, abilities.DoubleClickable)
-		s.Cursor = cursors.Text
+		if !lb.IsReadOnly() {
+			s.Cursor = cursors.Text
+		}
 
 		s.Text.WhiteSpace = styles.WhiteSpaceNormal
 		s.AlignV = styles.AlignMiddle

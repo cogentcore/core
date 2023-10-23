@@ -17,6 +17,7 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
+	"goki.dev/girl/abilities"
 	"goki.dev/girl/paint"
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
@@ -267,6 +268,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 
 	sv.Lay = gi.LayoutVert
 	sv.Style(func(s *styles.Style) {
+		s.SetAbilities(true, abilities.FocusWithinable)
 		sv.Spacing = gi.StdDialogVSpaceUnits
 		s.SetStretchMax()
 	})
@@ -412,6 +414,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 	config.Add(gi.LayoutType, "grid-lay")
 	_, updt := sv.ConfigChildren(config)
 	gl := sv.GridLayout()
+	gl.SetFlag(true, gi.LayoutNoKeys)
 	gconfig := ki.Config{}
 	gconfig.Add(gi.FrameType, "grid")
 	gconfig.Add(gi.SliderType, "scrollbar")
@@ -422,6 +425,7 @@ func (sv *SliceViewBase) ConfigFrame(sc *gi.Scene) {
 // ConfigOneRow configures one row for initial row height measurement
 func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 	sg := sv.This().(SliceViewer).SliceGrid()
+	sg.SetFlag(true, gi.LayoutNoKeys)
 	if sg.HasChildren() {
 		return
 	}
@@ -665,6 +669,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 	if sg == nil {
 		return
 	}
+	sg.SetFlag(true, gi.LayoutNoKeys)
 
 	updt := sg.UpdateStart()
 	defer sg.UpdateEndLayout(updt)
@@ -704,6 +709,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		vv := ToValue(val.Interface(), "")
 		sv.Values[i] = vv
 		vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
+		vv.SetReadOnly(sv.IsReadOnly())
 
 		vtyp := vv.WidgetType()
 		itxt := strconv.Itoa(i)
@@ -714,11 +720,9 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		if sv.Is(SliceViewShowIndex) {
 			idxlab := &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
-			// todo:
-			// idxlab.Selectable = true
-			// idxlab.Redrawable = true
 			idxlab.OnSelect(func(e events.Event) {
-				sv.UpdateSelectRow(i, sg.StateIs(states.Selected))
+				e.SetHandled()
+				sv.UpdateSelectRow(i)
 			})
 			idxlab.SetText(sitxt)
 		}
@@ -727,16 +731,13 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		sg.SetChild(widg, ridx+idxOff, valnm)
 		vv.ConfigWidget(widg, sc)
 		wb := widg.AsWidget()
+		wb.OnSelect(func(e events.Event) {
+			e.SetHandled()
+			sv.UpdateSelectRow(i)
+		})
 
 		if sv.IsReadOnly() {
 			widg.AsWidget().SetState(true, states.ReadOnly)
-			if wb != nil {
-				wb.SetProp("slv-row", i)
-				wb.SetState(false, states.Selected)
-				wb.OnSelect(func(e events.Event) {
-					sv.UpdateSelectRow(i, wb.StateIs(states.Selected))
-				})
-			}
 		} else {
 			vvb := vv.AsValueBase()
 			vvb.OnChange(func(e events.Event) {
@@ -808,13 +809,14 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			idxlab = sg.Kids[ridx].(*gi.Label)
 			idxlab.SetText(strconv.Itoa(si))
 			idxlab.SetNeedsRender()
-			// fmt.Println("lab:", idxlab)
 		}
 		if si < sv.SliceSize {
 			widg.SetState(false, states.Invisible)
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
+			vv.SetReadOnly(sv.IsReadOnly())
 			vv.UpdateWidget()
+
 			if sv.IsReadOnly() {
 				widg.AsWidget().SetState(true, states.ReadOnly)
 			}
@@ -866,7 +868,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 	}
 	if sv.IsReadOnly() && sv.SelectedIdx >= 0 {
-		sv.SelectIdxWidgets(sv.SelectedIdx, true)
+		sv.SelectIdx(sv.SelectedIdx)
 	}
 	sv.UpdateScroll()
 }
@@ -1355,13 +1357,11 @@ func (sv *SliceViewBase) SelectRowWidgets(row int, sel bool) {
 		if sg.Kids.IsValidIndex(rowidx) == nil {
 			widg := sg.Child(rowidx).(gi.Widget).AsWidget()
 			widg.SetSelected(sel)
-			widg.SetNeedsRender()
 		}
 	}
 	if sg.Kids.IsValidIndex(rowidx+idxOff) == nil {
 		widg := sg.Child(rowidx + idxOff).(gi.Widget).AsWidget()
 		widg.SetSelected(sel)
-		widg.SetNeedsRender()
 	}
 }
 
@@ -1377,8 +1377,9 @@ func (sv *SliceViewBase) SelectIdxWidgets(idx int, sel bool) bool {
 
 // UpdateSelectRow updates the selection for the given row
 // callback from widgetsig select
-func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
+func (sv *SliceViewBase) UpdateSelectRow(row int) {
 	idx := row + sv.StartIdx
+	sel := !sv.IdxIsSelected(idx)
 	sv.UpdateSelectIdx(idx, sel)
 }
 
@@ -2057,7 +2058,7 @@ func (sv *SliceViewBase) KeyInputNav(kt events.Event) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputActive(kt events.Event) {
+func (sv *SliceViewBase) KeyInputEditable(kt events.Event) {
 	if gi.KeyEventTrace {
 		fmt.Printf("SliceViewBase KeyInput: %v\n", sv.Path())
 	}
@@ -2150,7 +2151,6 @@ func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 }
 
 func (sv *SliceViewBase) HandleSliceViewEvents() {
-	// LowPri to allow other focal widgets to capture
 	sv.On(events.Scroll, func(e events.Event) {
 		e.SetHandled()
 		se := e.(*events.MouseScroll)
@@ -2158,6 +2158,19 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 		cur := float32(sbb.Pos)
 		sbb.SetSliderPosAction(cur - float32(se.DimDelta(mat32.Y)))
 	})
+	sv.OnKeyChord(func(e events.Event) {
+		if sv.IsReadOnly() {
+			if sv.Is(SliceViewReadOnlyKeyNav) {
+				sv.KeyInputReadOnly(e)
+			}
+		} else {
+			sv.KeyInputEditable(e)
+		}
+	})
+	sv.OnClick(func(e events.Event) {
+		sv.GrabFocus()
+	})
+
 	// todo: doubleclick unselectallidxs is crashing with recursive loop
 	// sv.OnDoubleClick(func(e events.Event) {
 	// 	si := sv.SelectedIdx
@@ -2179,42 +2192,31 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// 		me.SetHandled()
 	// 	}
 	// })
-	if sv.IsReadOnly() {
-		if sv.Is(SliceViewReadOnlyKeyNav) {
-			sv.OnKeyChord(func(e events.Event) {
-				sv.KeyInputReadOnly(e)
-			})
-		}
-	} else {
-		sv.OnKeyChord(func(e events.Event) {
-			sv.KeyInputActive(e)
-		})
-		// svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		// 	de := d.(events.Event)
-		// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
-		// 	switch de.Action {
-		// 	case events.Start:
-		// 		svv.DragNDropStart()
-		// 	case events.DropOnTarget:
-		// 		svv.DragNDropTarget(de)
-		// 	case events.DropFmSource:
-		// 		svv.DragNDropSource(de)
-		// 	}
-		// })
-		// sg := sv.This().(SliceViewer).SliceGrid()
-		// if sg != nil {
-		// 	sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
-		// 		de := d.(*events.FocusEvent)
-		// 		sgg := recv.Embed(gi.FrameType).(*gi.Frame)
-		// 		switch de.Action {
-		// 		case events.Enter:
-		// 			sgg.ParentRenderWin().DNDSetCursor(de.Mod)
-		// 		case events.Exit:
-		// 			sgg.ParentRenderWin().DNDNotCursor()
-		// 		case events.Hover:
-		// 			// nothing here?
-		// 		}
-		// 	})
-		// }
-	}
+	// svwe.AddFunc(goosi.DNDEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 	de := d.(events.Event)
+	// 	svv := recv.Embed(TypeSliceViewBase).(*SliceViewBase)
+	// 	switch de.Action {
+	// 	case events.Start:
+	// 		svv.DragNDropStart()
+	// 	case events.DropOnTarget:
+	// 		svv.DragNDropTarget(de)
+	// 	case events.DropFmSource:
+	// 		svv.DragNDropSource(de)
+	// 	}
+	// })
+	// sg := sv.This().(SliceViewer).SliceGrid()
+	// if sg != nil {
+	// 	sgwe.AddFunc(goosi.DNDFocusEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d any) {
+	// 		de := d.(*events.FocusEvent)
+	// 		sgg := recv.Embed(gi.FrameType).(*gi.Frame)
+	// 		switch de.Action {
+	// 		case events.Enter:
+	// 			sgg.ParentRenderWin().DNDSetCursor(de.Mod)
+	// 		case events.Exit:
+	// 			sgg.ParentRenderWin().DNDNotCursor()
+	// 		case events.Hover:
+	// 			// nothing here?
+	// 		}
+	// 	})
+	// }
 }

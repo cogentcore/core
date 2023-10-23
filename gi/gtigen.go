@@ -762,7 +762,6 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"Lay", &gti.Field{Name: "Lay", Type: "goki.dev/gi/v2/gi.Layouts", LocalType: "Layouts", Doc: "type of layout to use", Directives: gti.Directives{}, Tag: "xml:\"lay\" set:\"-\""}},
 		{"Spacing", &gti.Field{Name: "Spacing", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "extra space to add between elements in the layout", Directives: gti.Directives{}, Tag: "xml:\"spacing\""}},
 		{"StackTop", &gti.Field{Name: "StackTop", Type: "int", LocalType: "int", Doc: "for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered", Directives: gti.Directives{}, Tag: ""}},
-		{"StackTopOnly", &gti.Field{Name: "StackTopOnly", Type: "bool", LocalType: "bool", Doc: "for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't", Directives: gti.Directives{}, Tag: ""}},
 		{"ChildSize", &gti.Field{Name: "ChildSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "total max size of children as laid out", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ExtraSize", &gti.Field{Name: "ExtraSize", Type: "goki.dev/mat32/v2.Vec2", LocalType: "mat32.Vec2", Doc: "extra size in each dim due to scrollbars we add", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"HasScroll", &gti.Field{Name: "HasScroll", Type: "[2]bool", LocalType: "[2]bool", Doc: "whether scrollbar is used for given dim", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
@@ -770,11 +769,9 @@ var LayoutType = gti.AddType(&gti.Type{
 		{"GridSize", &gti.Field{Name: "GridSize", Type: "image.Point", LocalType: "image.Point", Doc: "computed size of a grid layout based on all the constraints -- computed during GetSize pass", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"GridData", &gti.Field{Name: "GridData", Type: "[2][]goki.dev/gi/v2/gi.GridData", LocalType: "[RowColN][]GridData", Doc: "grid data for rows in and cols in", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FlowBreaks", &gti.Field{Name: "FlowBreaks", Type: "[]int", LocalType: "[]int", Doc: "line breaks for flow layout", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"NeedsRedo", &gti.Field{Name: "NeedsRedo", Type: "bool", LocalType: "bool", Doc: "true if this layout got a redo = true on previous iteration -- otherwise it just skips any re-layout on subsequent iteration", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusName", &gti.Field{Name: "FocusName", Type: "string", LocalType: "string", Doc: "accumulated name to search for when keys are typed", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusNameTime", &gti.Field{Name: "FocusNameTime", Type: "time.Time", LocalType: "time.Time", Doc: "time of last focus name event -- for timeout", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"FocusNameLast", &gti.Field{Name: "FocusNameLast", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "last element focused on -- used as a starting point if name is the same", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ScrollsOff", &gti.Field{Name: "ScrollsOff", Type: "bool", LocalType: "bool", Doc: "scrollbars have been manually turned off due to layout being invisible -- must be reactivated when re-visible", Directives: gti.Directives{}, Tag: "readonly:\"+\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -841,13 +838,6 @@ func (t *Layout) SetSpacing(v units.Value) *Layout {
 // for Stacked layout, index of node to use as the top of the stack -- only node at this index is rendered -- if not a valid index, nothing is rendered
 func (t *Layout) SetStackTop(v int) *Layout {
 	t.StackTop = v
-	return t
-}
-
-// SetStackTopOnly sets the [Layout.StackTopOnly]:
-// for stacked layout, only layout the top widget -- this is appropriate for e.g., tab layout, which does a full redraw on stack changes, but not for e.g., check boxes which don't
-func (t *Layout) SetStackTopOnly(v bool) *Layout {
-	t.StackTopOnly = v
 	return t
 }
 

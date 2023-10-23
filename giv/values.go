@@ -6,6 +6,7 @@ package giv
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"log/slog"
 	"reflect"
@@ -18,6 +19,7 @@ import (
 	"goki.dev/girl/states"
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
+	"goki.dev/goosi/events/key"
 	"goki.dev/gti"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
@@ -26,6 +28,316 @@ import (
 )
 
 // values contains all the Values for basic builtin types
+
+func init() {
+	gi.TheViewIFace = &ViewIFace{}
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(icons.Icon(""))), func() Value {
+		return &IconValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FontName(""))), func() Value {
+		return &FontValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.FileName(""))), func() Value {
+		return &FileValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.KeyMapName(""))), func() Value {
+		return &KeyMapValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.ColorName(""))), func() Value {
+		return &ColorNameValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(key.Chord(""))), func() Value {
+		return &KeyChordValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(gi.HiStyleName(""))), func() Value {
+		return &HiStyleValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(time.Time{})), func() Value {
+		return &TimeValue{}
+	})
+	ValueMapAdd(laser.LongTypeName(reflect.TypeOf(filecat.FileTime{})), func() Value {
+		return &TimeValue{}
+	})
+}
+
+var (
+	// MapInlineLen is the number of map elements at or below which an inline
+	// representation of the map will be presented -- more convenient for small
+	// #'s of props
+	MapInlineLen = 3
+
+	// StructInlineLen is the number of elemental struct fields at or below which an inline
+	// representation of the struct will be presented -- more convenient for small structs
+	StructInlineLen = 6
+
+	// SliceInlineLen is the number of slice elements below which inline will be used
+	SliceInlineLen = 6
+)
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  Valuer -- an interface for selecting Value GUI representation of types
+
+// Valuer interface supplies the appropriate type of Value -- called
+// on a given receiver item if defined for that receiver type (tries both
+// pointer and non-pointer receivers) -- can use this for custom types to
+// provide alternative custom interfaces -- must call Init on Value before
+// returning it
+type Valuer interface {
+	Value() Value
+}
+
+// example implementation of Valuer interface -- can't implement on
+// non-local types, so all the basic types are handled separately:
+//
+// func (s string) Value() Value {
+// 	return &ValueBase{}
+// }
+
+// FieldValuer interface supplies the appropriate type of Value for a
+// given field name and current field value on the receiver parent struct --
+// called on a given receiver struct if defined for that receiver type (tries
+// both pointer and non-pointer receivers) -- if a struct implements this
+// interface, then it is used first for structs -- return nil to fall back on
+// the default ToValue result
+type FieldValuer interface {
+	FieldValue(field string, fval any) Value
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+//  ValueMap -- alternative way to connect value view with type
+
+// ValueFunc is a function that returns a new initialized Value
+// of an appropriate type as registered in the ValueMap
+type ValueFunc func() Value
+
+// The ValueMap is used to connect type names with corresponding Value
+// representations of those types -- this can be used when it is not possible
+// to use the Valuer interface (e.g., interface methods can only be
+// defined within the package that defines the type -- so we need this for
+// all types in gi which don't know about giv).
+// You must use laser.LongTypeName (full package name + "." . type name) for
+// the type name, as that is how it will be looked up.
+var ValueMap map[string]ValueFunc
+
+// ValueMapAdd adds a ValueFunc for a given type name.
+// You must use laser.LongTypeName (full package name + "." . type name) for
+// the type name, as that is how it will be looked up.
+func ValueMapAdd(typeNm string, fun ValueFunc) {
+	if ValueMap == nil {
+		ValueMap = make(map[string]ValueFunc)
+	}
+	ValueMap[typeNm] = fun
+}
+
+// StructTagVal returns the value for given key in given struct tag string
+// uses reflect.StructTag Lookup method -- just a wrapper for external
+// use (e.g., in Python code)
+func StructTagVal(key, tags string) string {
+	stag := reflect.StructTag(tags)
+	val, _ := stag.Lookup(key)
+	return val
+}
+
+// ToValue returns the appropriate Value for given item, based only on
+// its type -- attempts to get the Valuer interface and failing that,
+// falls back on default Kind-based options.  tags are optional tags, e.g.,
+// from the field in a struct, that control the view properties -- see the gi wiki
+// for details on supported tags -- these are NOT set for the view element, only
+// used for options that affect what kind of view to create.
+// See FieldToValue for version that takes into account the properties of the owner.
+// gopy:interface=handle
+func ToValue(it any, tags string) Value {
+	if it == nil {
+		return &ValueBase{}
+	}
+	if vv, ok := it.(Valuer); ok {
+		vvo := vv.Value()
+		if vvo != nil {
+			return vvo
+		}
+	}
+	// try pointer version..
+	if vv, ok := laser.PtrInterface(it).(Valuer); ok {
+		vvo := vv.Value()
+		if vvo != nil {
+			return vvo
+		}
+	}
+
+	if _, ok := it.(enums.BitFlag); ok {
+		return &BitFlagView{}
+	}
+	if _, ok := it.(enums.Enum); ok {
+		return &EnumValue{}
+	}
+
+	typ := reflect.TypeOf(it)
+	nptyp := laser.NonPtrType(typ)
+	vk := typ.Kind()
+	// fmt.Printf("vv val %v: typ: %v nptyp: %v kind: %v\n", it, typ.String(), nptyp.String(), vk)
+
+	nptypnm := laser.LongTypeName(nptyp)
+	if vvf, has := ValueMap[nptypnm]; has {
+		vv := vvf()
+		return vv
+	}
+
+	forceInline := false
+	forceNoInline := false
+
+	/*
+		tprops := kit.Types.Properties(typ, false) // don't make
+		if tprops != nil {
+			if inprop, ok := kit.TypeProp(*tprops, "inline"); ok {
+				forceInline, ok = kit.ToBool(inprop)
+			}
+			if inprop, ok := kit.TypeProp(*tprops, "no-inline"); ok {
+				forceNoInline, ok = kit.ToBool(inprop)
+			}
+		}
+	*/
+
+	if tags != "" {
+		stag := reflect.StructTag(tags)
+		if vwtag, ok := stag.Lookup("view"); ok {
+			switch vwtag {
+			case "inline":
+				forceInline = true
+			case "no-inline":
+				forceNoInline = true
+			}
+		}
+	}
+
+	switch {
+	case vk >= reflect.Int && vk <= reflect.Uint64:
+		if _, ok := it.(fmt.Stringer); ok { // use stringer
+			return &ValueBase{}
+		} else {
+			return &IntValue{}
+		}
+	case vk == reflect.Bool:
+		return &BoolValue{}
+	case vk >= reflect.Float32 && vk <= reflect.Float64:
+		return &FloatValue{} // handles step, min / max etc
+	case vk >= reflect.Complex64 && vk <= reflect.Complex128:
+		// todo: special edit with 2 fields..
+		return &ValueBase{}
+	case vk == reflect.Ptr:
+		if ki.IsKi(nptyp) {
+			return &KiPtrValue{}
+		}
+		if laser.AnyIsNil(it) {
+			return &NilValue{}
+		}
+		v := reflect.ValueOf(it)
+		if !laser.ValueIsZero(v) {
+			// note: interfaces go here:
+			// fmt.Printf("vv indirecting on pointer: %v type: %v\n", it, nptyp.String())
+			return ToValue(v.Elem().Interface(), tags)
+		}
+	case vk == reflect.Array, vk == reflect.Slice:
+		v := reflect.ValueOf(it)
+		sz := v.Len()
+		eltyp := laser.SliceElType(it)
+		if _, ok := it.([]byte); ok {
+			return &ByteSliceValue{}
+		}
+		if _, ok := it.([]rune); ok {
+			return &RuneSliceValue{}
+		}
+		isstru := (laser.NonPtrType(eltyp).Kind() == reflect.Struct)
+		if !forceNoInline && (forceInline || (!isstru && sz <= SliceInlineLen && !ki.IsKi(eltyp))) {
+			return &SliceInlineValue{}
+		} else {
+			return &SliceValue{}
+		}
+	case vk == reflect.Map:
+		sz := laser.MapStructElsN(it)
+		if !forceNoInline && (forceInline || sz <= MapInlineLen) {
+			return &MapInlineValue{}
+		} else {
+			return &MapValue{}
+		}
+	case vk == reflect.Struct:
+		// note: we need to handle these here b/c cannot define new methods for gi types
+		if nptyp == laser.TypeFor[color.RGBA]() {
+			return &ColorValue{}
+		}
+		nfld := laser.AllFieldsN(nptyp)
+		if nfld > 0 && !forceNoInline && (forceInline || nfld <= StructInlineLen) {
+			return &StructInlineValue{}
+		} else {
+			return &StructValue{}
+		}
+	case vk == reflect.Interface:
+		// note: we never get here -- all interfaces are captured by pointer kind above
+		// apparently (because the non-ptr vk indirection does that I guess?)
+		fmt.Printf("interface kind: %v %v %v\n", nptyp, nptyp.Name(), nptyp.String())
+		switch {
+		case nptyp == laser.TypeFor[reflect.Type]():
+			return &TypeValue{}
+		}
+	case vk == reflect.String:
+		v := reflect.ValueOf(it)
+		str := v.String()
+		if strings.Contains(str, "\n") {
+			return &TextEditorValue{}
+		}
+		return &ValueBase{}
+	}
+	// fallback.
+	return &ValueBase{}
+}
+
+// FieldToValue returns the appropriate Value for given field on a
+// struct -- attempts to get the FieldValuer interface, and falls back on
+// ToValue otherwise, using field value (fval)
+// gopy:interface=handle
+func FieldToValue(it any, field string, fval any) Value {
+	if it == nil || field == "" {
+		return ToValue(fval, "")
+	}
+	if vv, ok := it.(FieldValuer); ok {
+		vvo := vv.FieldValue(field, fval)
+		if vvo != nil {
+			return vvo
+		}
+	}
+	// try pointer version..
+	if vv, ok := laser.PtrInterface(it).(FieldValuer); ok {
+		vvo := vv.FieldValue(field, fval)
+		if vvo != nil {
+			return vvo
+		}
+	}
+
+	typ := reflect.TypeOf(it)
+	nptyp := laser.NonPtrType(typ)
+
+	/*
+		if pv, has := kit.Types.Prop(nptyp, "EnumType:"+field); has {
+			et := pv.(reflect.Type)
+			if kit.Enums.IsBitFlag(et) {
+				vv := &BitFlagView{}
+				vv.AltType = et
+				ki.InitNode(vv)
+				return vv
+			} else {
+				vv := &EnumValue{}
+				vv.AltType = et
+				ki.InitNode(vv)
+				return vv
+			}
+		}
+	*/
+
+	ftyp, ok := nptyp.FieldByName(field)
+	if ok {
+		return ToValue(fval, string(ftyp.Tag))
+	}
+	return ToValue(fval, "")
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //  StructValue
@@ -92,7 +404,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if desc == "list" { // todo: not sure where this comes from but it is uninformative
 		desc = ""
 	}
-	readOnly := vv.This().(Value).IsReadOnly()
+	readOnly := vv.IsReadOnly()
 	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
@@ -228,7 +540,7 @@ func (vv *SliceValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 		slog.Error("giv.SliceValue: Cannot view slices with non-pointer struct elements")
 		return
 	}
-	readOnly := vv.This().(Value).IsReadOnly()
+	readOnly := vv.IsReadOnly()
 	slci := vvp.Interface()
 	if !vv.IsArray && vv.ElIsStruct {
 		TableViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, slci, nil, func(dlg *gi.Dialog) {
@@ -290,7 +602,6 @@ func (vv *SliceInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sv.SetSlice(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -354,7 +665,7 @@ func (vv *MapValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Desc()
 	mpi := vv.Value.Interface()
-	readOnly := vv.This().(Value).IsReadOnly()
+	readOnly := vv.IsReadOnly()
 	MapViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, mpi, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
@@ -402,7 +713,6 @@ func (vv *MapInlineValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	sv.ViewPath = vv.ViewPath
 	sv.TmpSave = vv.TmpSave
 	// npv := vv.Value.Elem()
-	sv.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sv.SetMap(vv.Value.Interface())
 	sv.OnChange(func(e events.Event) {
 		vv.SendChange()
@@ -476,7 +786,7 @@ func (vv *KiPtrValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 		})
 		gi.NewButton(m, "gogi-editor").SetText("GoGi editor").OnClick(func(e events.Event) {
 			k := vv.KiStruct()
-			if k != nil {
+			if k != nil && !vv.IsReadOnly() {
 				GoGiEditorDialog(k)
 			}
 		})
@@ -500,7 +810,7 @@ func (vv *KiPtrValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	}
 	vpath := vv.ViewPath + "/" + newPath
 	desc, _ := vv.Desc()
-	readOnly := vv.This().(Value).IsReadOnly()
+	readOnly := vv.IsReadOnly()
 	StructViewDialog(ctx, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, k, func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
@@ -540,7 +850,6 @@ func (vv *BoolValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Switch)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	cb.Config(sc)
 	cb.OnChange(func(e events.Event) {
 		vv.SetValue(cb.StateIs(states.Checked))
@@ -580,7 +889,6 @@ func (vv *IntValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	// STYTODO: figure out what to do about this
@@ -657,7 +965,6 @@ func (vv *FloatValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	sb := vv.Widget.(*gi.Spinner)
 	sb.Tooltip, _ = vv.Desc()
-	sb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	sb.Step = 1.0
 	sb.PageStep = 10.0
 	if mintag, ok := vv.Tag("min"); ok {
@@ -745,7 +1052,6 @@ func (vv *EnumValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	ch := vv.Widget.(*gi.Chooser)
 	ch.Tooltip, _ = vv.Desc()
-	ch.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	ev := vv.EnumValue()
 	ch.ItemsFromEnum(ev, false, 50)
@@ -811,7 +1117,6 @@ func (vv *BitFlagView) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	// vv.StdConfigWidget(cb.Parts)
 	// cb.Parts.Lay = gi.LayoutHoriz
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	// todo!
 	ev := vv.EnumValue()
@@ -859,7 +1164,6 @@ func (vv *TypeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	cb := vv.Widget.(*gi.Chooser)
 	cb.Tooltip, _ = vv.Desc()
-	cb.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 
 	typEmbeds := ki.NodeType
 	// if kiv, ok := vv.Owner.(ki.Ki); ok {
@@ -917,7 +1221,6 @@ func (vv *ByteSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	// STYTODO: figure out how how to handle these kinds of styles
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
@@ -961,7 +1264,6 @@ func (vv *RuneSliceValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.StdConfigWidget(widg)
 	tf := vv.Widget.(*gi.TextField)
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
 		s.MaxWidth.SetDp(-1)
@@ -1053,7 +1355,6 @@ func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	tf := vv.Widget.(*gi.TextField)
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	tf.Style(func(s *styles.Style) {
 		tf.Styles.MinWidth.SetCh(float32(len(DefaultTimeFormat) + 2))
 	})
@@ -1304,9 +1605,7 @@ func VersCtrlNameProper(vc string) VersCtrlName {
 
 // Value registers VersCtrlValue as the viewer of VersCtrlName
 func (kn VersCtrlName) Value() Value {
-	vv := &VersCtrlValue{}
-	ki.InitNode(vv)
-	return vv
+	return &VersCtrlValue{}
 }
 
 // VersCtrlValue presents an action for displaying an VersCtrlName and selecting
