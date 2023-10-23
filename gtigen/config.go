@@ -8,9 +8,7 @@ import "text/template"
 
 // Config contains the configuration information
 // used by gtigen
-//
-//gti:add
-type Config struct {
+type Config struct { //gti:add
 
 	// the source directory to run gtigen on (can be set to multiple through paths like ./...)
 	Dir string `def:"." posarg:"0" required:"-"`
