@@ -272,7 +272,7 @@ func ToValue(it any, tags string) Value {
 			return &StructValue{}
 		}
 	case vk == reflect.Func:
-		// return &FuncValue{}
+		return &FuncValue{}
 	case vk == reflect.Interface:
 		// note: we never get here -- all interfaces are captured by pointer kind above
 		// apparently (because the non-ptr vk indirection does that I guess?)
@@ -1689,6 +1689,31 @@ func (vv *TextEditorValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 
 	tv := widg.(*texteditor.Editor)
 	tv.SetBuf(tb)
+
+	vv.UpdateWidget()
+}
+
+// FuncValue presents a [FuncButton] for viewing the information of and calling a function
+type FuncValue struct {
+	ValueBase
+}
+
+func (vv *FuncValue) WidgetType() *gti.Type {
+	vv.WidgetTyp = FuncButtonType
+	return vv.WidgetTyp
+}
+
+func (vv *FuncValue) UpdateWidget() {
+	if vv.Widget == nil {
+		return
+	}
+	fbt := vv.Widget.(*FuncButton)
+	fbt.SetFunc(vv.Value.Interface())
+}
+
+func (vv *FuncValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
+	vv.Widget = widg
+	vv.StdConfigWidget(widg)
 
 	vv.UpdateWidget()
 }
