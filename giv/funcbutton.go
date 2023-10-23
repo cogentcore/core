@@ -5,7 +5,6 @@
 package giv
 
 import (
-	"fmt"
 	"log/slog"
 	"reflect"
 	"strings"
@@ -67,16 +66,16 @@ func (fb *FuncButton) OnInit() {
 }
 
 // SetFunc sets the function associated with the FuncButton to the
-// given function or method value, which must be added to gti.
+// given function or method value. For documentation information for
+// the function to be obtained, it must be added to gti.
 func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	fnm := gti.FuncName(fun)
 	// the "-fm" suffix indicates that it is a method
 	if !strings.HasSuffix(fnm, "-fm") {
 		f := gti.FuncByName(fnm)
 		if f == nil {
-			err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a function that has not been added to gti; see the documentation for giv.NewFuncButton; function=%s", fnm)
-			slog.Error(err.Error())
-			panic(err)
+			slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a function that has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+			f = &gti.Func{Name: fnm}
 		}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
@@ -91,17 +90,16 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	typnm = strings.ReplaceAll(typnm, "(*", "")
 	typnm = strings.TrimSuffix(typnm, ")")
 	gtyp := gti.TypeByName(typnm)
+	var met *gti.Method
 	if gtyp == nil {
-		err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a method whose receiver type has not been added to gti; see the documentation for giv.NewFuncButton; type=%s method=%s fullPath=%s", typnm, metnm, fnm)
-		slog.Error(err.Error())
-		panic(err)
-	}
-	met := gtyp.Methods.ValByKey(metnm)
-	if met == nil {
-		err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself); see the documentation for giv.NewFuncButton; type=%s method=%s fullPath=%s", typnm, metnm, fnm)
-		slog.Error(err.Error())
-		// panic(err)
-		return nil
+		slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method whose receiver type has not been added to gti, meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+		met = &gti.Method{Name: metnm}
+	} else {
+		met = gtyp.Methods.ValByKey(metnm)
+		if met == nil {
+			slog.Info("warning for programmer: giv.FuncButton.SetFunc called with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself), meaning documentation information can not be obtained; see the documentation for giv.FuncButton for more information", "function", fnm)
+			met = &gti.Method{Name: metnm}
+		}
 	}
 	return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 }
