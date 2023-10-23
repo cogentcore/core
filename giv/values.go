@@ -1093,7 +1093,7 @@ func (vv *IconValue) UpdateWidget() {
 	bt := vv.Widget.(*gi.Button)
 	txt := laser.ToString(vv.Value.Interface())
 	if icons.Icon(txt).IsNil() {
-		bt.SetIcon("blank")
+		bt.SetIcon(icons.Blank)
 	} else {
 		bt.SetIcon(icons.Icon(txt))
 	}
@@ -1105,6 +1105,7 @@ func (vv *IconValue) UpdateWidget() {
 			bt.SetText(txt)
 		}
 	}
+	// bt.Update() // todo: not sure if need this separately: config should be called
 }
 
 func (vv *IconValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
