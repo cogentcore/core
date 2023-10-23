@@ -119,9 +119,7 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 // that does all of the generation according to the
 // given config info. It overrides the
 // [config.Config.Generate.Gtigen.InterfaceConfigs] info.
-//
-//gti:add
-func Generate(cfg *config.Config) error {
+func Generate(cfg *config.Config) error { //gti:add
 	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
 
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)

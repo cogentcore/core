@@ -14,9 +14,7 @@ import (
 // Release releases the config project
 // by calling [ReleaseApp] if it is an app
 // and [ReleaseLibrary] if it is a library.
-//
-//gti:add
-func Release(c *config.Config) error {
+func Release(c *config.Config) error { //gti:add
 	if c.Type == config.TypeApp {
 		return ReleaseApp(c)
 	}

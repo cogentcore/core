@@ -17,18 +17,14 @@ import (
 )
 
 // GetVersion prints the version of the project.
-//
-//gti:add
-func GetVersion(c *config.Config) error {
+func GetVersion(c *config.Config) error { //gti:add
 	fmt.Println(c.Version)
 	return nil
 }
 
 // SetVersion updates the config and version file of the config project based
 // on the config version and commits and pushes the changes.
-//
-//gti:add
-func SetVersion(c *config.Config) error {
+func SetVersion(c *config.Config) error { //gti:add
 	// we need to update the config file with the new version
 	// TODO: determine correct config file instead of just first one
 	err := grease.Save(c, grease.ConfigFiles[0])
@@ -51,9 +47,7 @@ func SetVersion(c *config.Config) error {
 }
 
 // UpdateVersion updates the version of the project by one patch version.
-//
-//gti:add
-func UpdateVersion(c *config.Config) error {
+func UpdateVersion(c *config.Config) error { //gti:add
 	ver, err := semver.NewVersion(c.Version)
 	if err != nil {
 		return fmt.Errorf("error getting semver version from version %q: %w", c.Version, err)

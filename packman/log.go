@@ -14,9 +14,7 @@ import (
 // Log prints the logs from your app running on Android to the terminal.
 // Android is the only supported platform for log; use the -debug flag on
 // run for other platforms.
-//
-//gti:add
-func Log(c *config.Config) error {
+func Log(c *config.Config) error { //gti:add
 	if c.Log.Target != "android" {
 		return fmt.Errorf("only android is supported for log; use the -debug flag on run for other platforms")
 	}

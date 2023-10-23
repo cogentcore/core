@@ -21,9 +21,7 @@ import (
 // Config is the main config struct
 // that contains all of the configuration
 // options for the GoKi tool
-//
-//gti:add
-type Config struct {
+type Config struct { //gti:add
 
 	// the name of the project
 	Name string
@@ -55,8 +53,7 @@ type Config struct {
 	Generate Generate `cmd:"generate" view:"add-fields"`
 }
 
-//gti:add
-type Build struct {
+type Build struct { //gti:add
 
 	// the path of the package to build
 	Package string `def:"." posarg:"0" required:"-"`
@@ -110,15 +107,13 @@ type Build struct {
 	AndroidTargetSDK int `def:"29"`
 }
 
-//gti:add
-type Setup struct {
+type Setup struct { //gti:add
 
 	// the platform to set things up for
 	Platform Platform `posarg:"0"`
 }
 
-//gti:add
-type Log struct {
+type Log struct { //gti:add
 
 	// the target platform to view the logs for (ios or android)
 	Target string `def:"android"`
@@ -130,8 +125,7 @@ type Log struct {
 	All string `def:"F"`
 }
 
-//gti:add
-type Release struct {
+type Release struct { //gti:add
 
 	// the Go file to store version information in
 	VersionFile string `def:"version.go"`
@@ -140,8 +134,7 @@ type Release struct {
 	Package string `def:"main"`
 }
 
-//gti:add
-type Generate struct {
+type Generate struct { //gti:add
 
 	// the enum generation configuration options passed to enumgen
 	Enumgen enumgen.Config

@@ -15,9 +15,7 @@ import (
 
 // Setup does platform-specific setup that ensures that development can be done
 // for the config platform, mostly by installing necessary tools.
-//
-//gti:add
-func Setup(c *config.Config) error {
+func Setup(c *config.Config) error { //gti:add
 	switch c.Setup.Platform.OS {
 	// TODO: support more platforms in setup
 	case "ios":

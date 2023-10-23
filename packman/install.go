@@ -18,9 +18,7 @@ import (
 // of supported packages. If the config ID is a filepath, it installs
 // the package at that filepath on the local system. Install uses the
 // same config info as build.
-//
-//gti:add
-func Install(c *config.Config) error {
+func Install(c *config.Config) error { //gti:add
 	if c.Build.Package == "." || c.Build.Package == ".." || strings.Contains(c.Build.Package, "/") {
 		return InstallLocal(c)
 	}

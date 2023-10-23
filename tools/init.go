@@ -17,9 +17,7 @@ import (
 // The "config.toml" file has the given
 // config info. Init also sets the config name
 // to the current directory if it is unset.
-//
-//gti:add
-func Init(c *config.Config) error {
+func Init(c *config.Config) error { //gti:add
 	err := os.MkdirAll(".goki", 0750)
 	if err != nil {
 		return fmt.Errorf("error creating %q directory: %w", ".goki", err)

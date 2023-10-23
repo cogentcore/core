@@ -17,9 +17,7 @@ import (
 
 // Run builds and runs the config package. It also displays the logs generated
 // by the app. It uses the same config info as build.
-//
-//gti:add
-func Run(c *config.Config) error {
+func Run(c *config.Config) error { //gti:add
 	if len(c.Build.Target) != 1 {
 		return fmt.Errorf("expected 1 target platform, but got %d (%v)", len(c.Build.Target), c.Build.Target)
 	}
