@@ -383,6 +383,7 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 	gopts.Cancel = true
 	dlg := gi.NewStdDialog(ctx, gopts, fun)
 	dlg.Stage.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
+	dlg.NewWindow(true)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()

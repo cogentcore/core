@@ -14,8 +14,9 @@ import (
 )
 
 // var samplefile gi.FileName = "sample.go"
-// var samplefile gi.FileName = "../../Makefile"
-var samplefile gi.FileName = "../../README.md"
+var samplefile gi.FileName = "../../Makefile"
+
+// var samplefile gi.FileName = "../../README.md"
 
 func main() { gimain.Run(app) }
 
@@ -71,7 +72,8 @@ func app() {
 	txed1.SetBuf(txbuf)
 	txed2.SetBuf(txbuf)
 
-	txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
+	// txbuf.Hi.Lang = "Markdown" // "Makefile" // "Go" // "Markdown"
+	txbuf.Hi.Lang = "Makefile" // "Go" // "Markdown"
 	txbuf.Open(samplefile)
 	// giv.GoGiEditorDialog(&txbuf.Hi.PiLang.Parser().Lexer)
 

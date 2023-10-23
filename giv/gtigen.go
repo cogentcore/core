@@ -60,6 +60,13 @@ func (t *ArgView) New() ki.Ki {
 	return &ArgView{}
 }
 
+// SetTooltip sets the [ArgView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *ArgView) SetTooltip(v string) *ArgView {
+	t.Tooltip = v
+	return t
+}
+
 // SetTitle sets the [ArgView.Title]:
 // title / prompt to show above the editor fields
 func (t *ArgView) SetTitle(v string) *ArgView {
@@ -108,6 +115,13 @@ func (t *ColorMapView) KiType() *gti.Type {
 // New returns a new [*ColorMapView] value
 func (t *ColorMapView) New() ki.Ki {
 	return &ColorMapView{}
+}
+
+// SetTooltip sets the [ColorMapView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *ColorMapView) SetTooltip(v string) *ColorMapView {
+	t.Tooltip = v
+	return t
 }
 
 // SetOrient sets the [ColorMapView.Orient]:
@@ -193,6 +207,13 @@ func (t *ColorView) KiType() *gti.Type {
 // New returns a new [*ColorView] value
 func (t *ColorView) New() ki.Ki {
 	return &ColorView{}
+}
+
+// SetTooltip sets the [ColorView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *ColorView) SetTooltip(v string) *ColorView {
+	t.Tooltip = v
+	return t
 }
 
 // SetColorHSLA sets the [ColorView.ColorHSLA]:
@@ -575,6 +596,13 @@ func (t *FileTreeView) AsFileTreeView() *FileTreeView {
 	return t
 }
 
+// SetTooltip sets the [FileTreeView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *FileTreeView) SetTooltip(v string) *FileTreeView {
+	t.Tooltip = v
+	return t
+}
+
 // FileViewType is the [gti.Type] for [FileView]
 var FileViewType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/giv.FileView",
@@ -589,11 +617,11 @@ var FileViewType = gti.AddType(&gti.Type{
 		{"FilterFunc", &gti.Field{Name: "FilterFunc", Type: "goki.dev/gi/v2/giv.FileViewFilterFunc", LocalType: "FileViewFilterFunc", Doc: "optional styling function", Directives: gti.Directives{}, Tag: "view:\"-\" json:\"-\" xml:\"-\""}},
 		{"ExtMap", &gti.Field{Name: "ExtMap", Type: "map[string]string", LocalType: "map[string]string", Doc: "map of lower-cased extensions from Ext -- used for highlighting files with one of these extensions -- maps onto original ext value", Directives: gti.Directives{}, Tag: ""}},
 		{"Files", &gti.Field{Name: "Files", Type: "[]*goki.dev/pi/v2/filecat.FileInfo", LocalType: "[]*filecat.FileInfo", Doc: "files for current directory", Directives: gti.Directives{}, Tag: ""}},
-		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: ""}},
-		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}, Tag: "view:\"-\""}},
-		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", LocalType: "string", Doc: "Previous path that was processed via UpdateFiles", Directives: gti.Directives{}, Tag: "view:\"-\""}},
+		{"SelectedIdx", &gti.Field{Name: "SelectedIdx", Type: "int", LocalType: "int", Doc: "index of currently-selected file in Files list (-1 if none)", Directives: gti.Directives{}, Tag: "set:\"-\" readonly:\"+\""}},
+		{"Watcher", &gti.Field{Name: "Watcher", Type: "*github.com/fsnotify/fsnotify.Watcher", LocalType: "*fsnotify.Watcher", Doc: "change notify for current dir", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"DoneWatcher", &gti.Field{Name: "DoneWatcher", Type: "chan bool", LocalType: "chan bool", Doc: "channel to close watcher watcher", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"UpdtMu", &gti.Field{Name: "UpdtMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "UpdateFiles mutex", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
+		{"PrevPath", &gti.Field{Name: "PrevPath", Type: "string", LocalType: "string", Doc: "Previous path that was processed via UpdateFiles", Directives: gti.Directives{}, Tag: "set:\"-\" view:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Frame", &gti.Field{Name: "Frame", Type: "goki.dev/gi/v2/gi.Frame", LocalType: "gi.Frame", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -618,6 +646,13 @@ func (t *FileView) KiType() *gti.Type {
 // New returns a new [*FileView] value
 func (t *FileView) New() ki.Ki {
 	return &FileView{}
+}
+
+// SetTooltip sets the [FileView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *FileView) SetTooltip(v string) *FileView {
+	t.Tooltip = v
+	return t
 }
 
 // SetDirPath sets the [FileView.DirPath]:
@@ -652,41 +687,6 @@ func (t *FileView) SetExtMap(v map[string]string) *FileView {
 // files for current directory
 func (t *FileView) SetFiles(v []*filecat.FileInfo) *FileView {
 	t.Files = v
-	return t
-}
-
-// SetSelectedIdx sets the [FileView.SelectedIdx]:
-// index of currently-selected file in Files list (-1 if none)
-func (t *FileView) SetSelectedIdx(v int) *FileView {
-	t.SelectedIdx = v
-	return t
-}
-
-// SetWatcher sets the [FileView.Watcher]:
-// change notify for current dir
-func (t *FileView) SetWatcher(v *fsnotify.Watcher) *FileView {
-	t.Watcher = v
-	return t
-}
-
-// SetDoneWatcher sets the [FileView.DoneWatcher]:
-// channel to close watcher watcher
-func (t *FileView) SetDoneWatcher(v chan bool) *FileView {
-	t.DoneWatcher = v
-	return t
-}
-
-// SetUpdtMu sets the [FileView.UpdtMu]:
-// UpdateFiles mutex
-func (t *FileView) SetUpdtMu(v sync.Mutex) *FileView {
-	t.UpdtMu = v
-	return t
-}
-
-// SetPrevPath sets the [FileView.PrevPath]:
-// Previous path that was processed via UpdateFiles
-func (t *FileView) SetPrevPath(v string) *FileView {
-	t.PrevPath = v
 	return t
 }
 
@@ -727,6 +727,13 @@ func (t *FuncButton) KiType() *gti.Type {
 // New returns a new [*FuncButton] value
 func (t *FuncButton) New() ki.Ki {
 	return &FuncButton{}
+}
+
+// SetTooltip sets the [FuncButton.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *FuncButton) SetTooltip(v string) *FuncButton {
+	t.Tooltip = v
+	return t
 }
 
 // SetReflectFunc sets the [FuncButton.ReflectFunc]:
@@ -792,9 +799,11 @@ var GiEditorType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not", Directives: gti.Directives{
+		{"SetRoot", &gti.Method{Name: "SetRoot", Doc: "SetRoot sets the source root and ensures everything is configured", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"root", &gti.Field{Name: "root", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &GiEditor{},
 })
@@ -815,6 +824,13 @@ func (t *GiEditor) KiType() *gti.Type {
 // New returns a new [*GiEditor] value
 func (t *GiEditor) New() ki.Ki {
 	return &GiEditor{}
+}
+
+// SetTooltip sets the [GiEditor.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *GiEditor) SetTooltip(v string) *GiEditor {
+	t.Tooltip = v
+	return t
 }
 
 // SetKiRoot sets the [GiEditor.KiRoot]:
@@ -932,6 +948,13 @@ func (t *KeyChordEdit) New() ki.Ki {
 	return &KeyChordEdit{}
 }
 
+// SetTooltip sets the [KeyChordEdit.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *KeyChordEdit) SetTooltip(v string) *KeyChordEdit {
+	t.Tooltip = v
+	return t
+}
+
 // SetFocusActive sets the [KeyChordEdit.FocusActive]:
 // true if the keyboard focus is active or not -- when we lose active focus we apply changes
 func (t *KeyChordEdit) SetFocusActive(v bool) *KeyChordEdit {
@@ -1016,6 +1039,13 @@ func (t *MapView) KiType() *gti.Type {
 // New returns a new [*MapView] value
 func (t *MapView) New() ki.Ki {
 	return &MapView{}
+}
+
+// SetTooltip sets the [MapView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *MapView) SetTooltip(v string) *MapView {
+	t.Tooltip = v
+	return t
 }
 
 // SetMapValView sets the [MapView.MapValView]:
@@ -1132,6 +1162,13 @@ func (t *MapViewInline) New() ki.Ki {
 	return &MapViewInline{}
 }
 
+// SetTooltip sets the [MapViewInline.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *MapViewInline) SetTooltip(v string) *MapViewInline {
+	t.Tooltip = v
+	return t
+}
+
 // SetMapValView sets the [MapViewInline.MapValView]:
 // Value for the map itself, if this was created within value view framework -- otherwise nil
 func (t *MapViewInline) SetMapValView(v Value) *MapViewInline {
@@ -1211,6 +1248,13 @@ func (t *SliceView) New() ki.Ki {
 	return &SliceView{}
 }
 
+// SetTooltip sets the [SliceView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *SliceView) SetTooltip(v string) *SliceView {
+	t.Tooltip = v
+	return t
+}
+
 // SetStyleFunc sets the [SliceView.StyleFunc]:
 // optional styling function
 func (t *SliceView) SetStyleFunc(v SliceViewStyleFunc) *SliceView {
@@ -1271,6 +1315,13 @@ func (t *SliceViewBase) KiType() *gti.Type {
 // New returns a new [*SliceViewBase] value
 func (t *SliceViewBase) New() ki.Ki {
 	return &SliceViewBase{}
+}
+
+// SetTooltip sets the [SliceViewBase.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *SliceViewBase) SetTooltip(v string) *SliceViewBase {
+	t.Tooltip = v
+	return t
 }
 
 // SetViewMu sets the [SliceViewBase.ViewMu]:
@@ -1450,6 +1501,13 @@ func (t *SliceViewInline) New() ki.Ki {
 	return &SliceViewInline{}
 }
 
+// SetTooltip sets the [SliceViewInline.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *SliceViewInline) SetTooltip(v string) *SliceViewInline {
+	t.Tooltip = v
+	return t
+}
+
 // SetSliceValView sets the [SliceViewInline.SliceValView]:
 // Value for the slice itself, if this was created within value view framework -- otherwise nil
 func (t *SliceViewInline) SetSliceValView(v Value) *SliceViewInline {
@@ -1546,6 +1604,13 @@ func (t *StructView) KiType() *gti.Type {
 // New returns a new [*StructView] value
 func (t *StructView) New() ki.Ki {
 	return &StructView{}
+}
+
+// SetTooltip sets the [StructView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *StructView) SetTooltip(v string) *StructView {
+	t.Tooltip = v
+	return t
 }
 
 // SetStructValView sets the [StructView.StructValView]:
@@ -1670,6 +1735,13 @@ func (t *StructViewInline) New() ki.Ki {
 	return &StructViewInline{}
 }
 
+// SetTooltip sets the [StructViewInline.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *StructViewInline) SetTooltip(v string) *StructViewInline {
+	t.Tooltip = v
+	return t
+}
+
 // SetStructValView sets the [StructViewInline.StructValView]:
 // Value for the struct itself, if this was created within value view framework -- otherwise nil
 func (t *StructViewInline) SetStructValView(v Value) *StructViewInline {
@@ -1765,6 +1837,13 @@ func (t *Editor) New() ki.Ki {
 	return &Editor{}
 }
 
+// SetTooltip sets the [Editor.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *Editor) SetTooltip(v string) *Editor {
+	t.Tooltip = v
+	return t
+}
+
 // SetTrans sets the [Editor.Trans]:
 // view translation offset (from dragging)
 func (t *Editor) SetTrans(v mat32.Vec2) *Editor {
@@ -1825,6 +1904,13 @@ func (t *TableView) KiType() *gti.Type {
 // New returns a new [*TableView] value
 func (t *TableView) New() ki.Ki {
 	return &TableView{}
+}
+
+// SetTooltip sets the [TableView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *TableView) SetTooltip(v string) *TableView {
+	t.Tooltip = v
+	return t
 }
 
 // SetStyleFunc sets the [TableView.StyleFunc]:
@@ -1973,6 +2059,13 @@ func AsTreeView(k ki.Ki) *TreeView {
 
 // AsTreeView satisfies the [TreeViewEmbedder] interface
 func (t *TreeView) AsTreeView() *TreeView {
+	return t
+}
+
+// SetTooltip sets the [TreeView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *TreeView) SetTooltip(v string) *TreeView {
+	t.Tooltip = v
 	return t
 }
 
@@ -2888,6 +2981,13 @@ func (t *VCSLogView) KiType() *gti.Type {
 // New returns a new [*VCSLogView] value
 func (t *VCSLogView) New() ki.Ki {
 	return &VCSLogView{}
+}
+
+// SetTooltip sets the [VCSLogView.Tooltip]:
+// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
+func (t *VCSLogView) SetTooltip(v string) *VCSLogView {
+	t.Tooltip = v
+	return t
 }
 
 // SetLog sets the [VCSLogView.Log]:

@@ -45,7 +45,7 @@ type Scene struct {
 	Data any
 
 	// Size and position relative to overall rendering context.
-	Geom mat32.Geom2DInt
+	Geom mat32.Geom2DInt `readonly:"+" set:"-"`
 
 	// render state for rendering
 	RenderState paint.State `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
@@ -54,7 +54,7 @@ type Scene struct {
 	Pixels *image.RGBA `copy:"-" json:"-" xml:"-" view:"-" set:"-"`
 
 	// background color for filling scene -- defaults to transparent so that popups can have rounded corners
-	BgColor colors.Full `view:"-"`
+	BgColor colors.Full
 
 	// event manager for this scene
 	EventMgr EventMgr `copy:"-" json:"-" xml:"-" set:"-"`
@@ -67,7 +67,7 @@ type Scene struct {
 
 	// LastRender captures key params from last render.
 	// If different then a new ApplyStyleScene is needed.
-	LastRender RenderParams `set:"-"`
+	LastRender RenderParams `readonly:"+" set:"-"`
 
 	// StyleMu is RW mutex protecting access to Style-related global vars
 	StyleMu sync.RWMutex `copy:"-" json:"-" xml:"-" view:"-" set:"-"`

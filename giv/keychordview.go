@@ -78,7 +78,9 @@ func (kc *KeyChordEdit) OnInit() {
 
 func (kc *KeyChordEdit) KeyChordStyles() {
 	kc.Style(func(s *styles.Style) {
-		s.Cursor = cursors.Pointer
+		if !kc.IsReadOnly() {
+			s.Cursor = cursors.Pointer
+		}
 		s.AlignV = styles.AlignTop
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
@@ -92,9 +94,6 @@ func (kc *KeyChordEdit) KeyChordStyles() {
 			// STYTODO: get state styles working
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
 			s.Color = colors.Scheme.Secondary.OnContainer
-		}
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
 		}
 	})
 }

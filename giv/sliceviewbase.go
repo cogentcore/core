@@ -775,7 +775,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		}
 		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 	}
-	sv.UpdateWidgets()
+	sv.This().(SliceViewer).UpdateWidgets()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -1202,7 +1202,7 @@ func (sv *SliceViewBase) ScrollToIdxNoUpdt(idx int) bool {
 func (sv *SliceViewBase) ScrollToIdx(idx int) bool {
 	updt := sv.ScrollToIdxNoUpdt(idx)
 	if updt {
-		sv.UpdateWidgets()
+		sv.This().(SliceViewer).UpdateWidgets()
 	}
 	return updt
 }
@@ -1393,6 +1393,8 @@ func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
 			sv.SelectedIdx = idx
 			sv.SelectIdx(idx)
 		}
+		// sv.This().(SliceViewer).UpdateWidgets()
+		sv.ApplyStyleTree(sv.Sc)
 		sv.Send(events.Select)
 	} else {
 		selMode := events.SelectOne
@@ -1564,6 +1566,8 @@ func (sv *SliceViewBase) SelectIdxAction(idx int, mode events.SelectModes) {
 		sv.SelectedIdx = idx
 		sv.UnselectIdx(idx)
 	}
+	sv.This().(SliceViewer).UpdateWidgets()
+	sv.ApplyStyleTree(sv.Sc)
 }
 
 // UnselectIdxAction unselects this idx (if selected) -- and emits a signal

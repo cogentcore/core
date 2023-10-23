@@ -61,22 +61,22 @@ type FileView struct {
 	Files []*filecat.FileInfo
 
 	// index of currently-selected file in Files list (-1 if none)
-	SelectedIdx int
+	SelectedIdx int `set:"-" readonly:"+"`
 
 	// signal for file actions
 	// FileSig ki.Signal `desc:"signal for file actions"`
 
 	// change notify for current dir
-	Watcher *fsnotify.Watcher `view:"-"`
+	Watcher *fsnotify.Watcher `set:"-" view:"-"`
 
 	// channel to close watcher watcher
-	DoneWatcher chan bool `view:"-"`
+	DoneWatcher chan bool `set:"-" view:"-"`
 
 	// UpdateFiles mutex
-	UpdtMu sync.Mutex `view:"-"`
+	UpdtMu sync.Mutex `set:"-" view:"-"`
 
 	// Previous path that was processed via UpdateFiles
-	PrevPath string `view:"-"`
+	PrevPath string `set:"-" view:"-"`
 }
 
 func (fv *FileView) OnInit() {

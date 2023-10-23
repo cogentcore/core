@@ -533,7 +533,9 @@ func (tb *Tab) TabButtonStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)
 
-		s.Cursor = cursors.Pointer
+		if !tb.IsReadOnly() {
+			s.Cursor = cursors.Pointer
+		}
 		s.MinWidth.SetCh(8)
 		s.MaxWidth.SetDp(500)
 		s.MinHeight.SetEm(1.6)
@@ -552,9 +554,6 @@ func (tb *Tab) TabButtonStyles() {
 		// 	s.Border.Width.Bottom.SetDp(2)
 		// 	s.Border.Color.Bottom = colors.Scheme.Primary
 		// }
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
-		}
 	})
 	tb.OnWidgetAdded(func(w Widget) {
 		switch w.PathFrom(tb.This()) {

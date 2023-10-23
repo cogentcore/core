@@ -100,7 +100,8 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	if met == nil {
 		err := fmt.Errorf("programmer error: cannot use giv.NewFuncButton with a method that has not been added to gti (even though the receiver type was, you still need to add the method itself); see the documentation for giv.NewFuncButton; type=%s method=%s fullPath=%s", typnm, metnm, fnm)
 		slog.Error(err.Error())
-		panic(err)
+		// panic(err)
+		return nil
 	}
 	return fb.SetMethodImpl(met, reflect.ValueOf(fun))
 }

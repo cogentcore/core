@@ -386,6 +386,7 @@ func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc 
 		}
 		wd := gd[idx].AllocSize - spc
 		s.SetFixedWidth(units.Dot(wd))
+		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 }
 
@@ -569,6 +570,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			idxlab = &gi.Label{}
 			sg.SetChild(idxlab, ridx, labnm)
 			idxlab.OnSelect(func(e events.Event) {
+				fmt.Println("sel", i)
 				tv.UpdateSelectRow(i, idxlab.StateIs(states.Selected))
 			})
 			idxlab.SetText(sitxt)
@@ -603,6 +605,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			wb := widg.AsWidget()
 
 			wb.OnSelect(func(e events.Event) {
+				fmt.Println("sel", i)
 				tv.UpdateSelectRow(i, wb.StateIs(states.Selected))
 			})
 
@@ -645,7 +648,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	tv.UpdateWidgets()
+	tv.This().(SliceViewer).UpdateWidgets()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -757,9 +760,10 @@ func (tv *TableView) UpdateWidgets() {
 }
 
 func (tv *TableView) StyleRow(svnp reflect.Value, widg gi.Widget, idx, fidx int, vv Value) {
-	if tv.StyleFunc != nil {
-		tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
-	}
+	// todo: replace with direct styling
+	// if tv.StyleFunc != nil {
+	// 	tv.StyleFunc(tv, svnp.Interface(), widg, idx, fidx, vv)
+	// }
 }
 
 // SliceNewAt inserts a new blank element at given index in the slice -- -1

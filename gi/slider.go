@@ -207,14 +207,14 @@ func (sr *Slider) SliderStyles() {
 
 		s.Border.Style.Set(styles.BorderNone)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.Cursor = cursors.Grab
-		switch {
-		case s.Is(states.Sliding):
-			s.Cursor = cursors.Grabbing
-		case s.Is(states.Active):
-			s.Cursor = cursors.Grabbing
-		case s.Is(states.Disabled):
-			s.Cursor = cursors.NotAllowed
+		if !sr.IsReadOnly() {
+			s.Cursor = cursors.Grab
+			switch {
+			case s.Is(states.Sliding):
+				s.Cursor = cursors.Grabbing
+			case s.Is(states.Active):
+				s.Cursor = cursors.Grabbing
+			}
 		}
 	})
 	sr.OnWidgetAdded(func(w Widget) {

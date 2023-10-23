@@ -1025,7 +1025,7 @@ func (vv *ValueBase) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	}
 	tf.SetStretchMaxWidth()
 	tf.Tooltip, _ = vv.Desc()
-	tf.SetState(vv.This().(Value).IsReadOnly(), states.Disabled)
+	tf.SetState(vv.This().(Value).IsReadOnly(), states.ReadOnly)
 	// STYTODO: need better solution to value view style configuration (this will add too many stylers)
 	tf.Style(func(s *styles.Style) {
 		s.MinWidth.SetCh(16)
