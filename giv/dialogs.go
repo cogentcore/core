@@ -291,7 +291,7 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
 	sv.SetSlice(slcOfStru)
-	sv.OnChange(func(e events.Event) {
+	sv.OnSelect(func(e events.Event) {
 		dlg.Data = sv.SelectedIdx
 	})
 	sv.OnDoubleClick(func(e events.Event) {
@@ -391,7 +391,7 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
-	fv.OnChange(func(e events.Event) {
+	fv.OnSelect(func(e events.Event) {
 		dlg.Data = fv.SelectedFile()
 	})
 	fv.OnDoubleClick(func(e events.Event) {

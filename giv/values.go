@@ -1216,6 +1216,7 @@ func (vv *ByteSliceValue) UpdateWidget() {
 	bv, ok := npv.Interface().([]byte)
 	if ok {
 		tf.SetText(string(bv))
+		tf.Update()
 	}
 }
 
@@ -1259,6 +1260,7 @@ func (vv *RuneSliceValue) UpdateWidget() {
 	rv, ok := npv.Interface().([]rune)
 	if ok {
 		tf.SetText(string(rv))
+		tf.Update()
 	}
 }
 
@@ -1350,6 +1352,7 @@ func (vv *TimeValue) UpdateWidget() {
 	tf := vv.Widget.(*gi.TextField)
 	tm := vv.TimeVal()
 	tf.SetText(tm.Format(DefaultTimeFormat))
+	tf.Update()
 }
 
 func (vv *TimeValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
@@ -1471,6 +1474,7 @@ func (vv *FontValue) UpdateWidget() {
 	txt := laser.ToString(vv.Value.Interface())
 	bt.SetProp("font-family", txt)
 	bt.SetText(txt)
+	bt.Update()
 }
 
 func (vv *FontValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
@@ -1534,6 +1538,7 @@ func (vv *FileValue) UpdateWidget() {
 		txt = "(click to open file chooser)"
 	}
 	bt.SetText(txt)
+	bt.Update()
 }
 
 func (vv *FileValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
@@ -1632,6 +1637,7 @@ func (vv *VersCtrlValue) UpdateWidget() {
 		txt = "(none)"
 	}
 	bt.SetText(txt)
+	bt.Update()
 }
 
 func (vv *VersCtrlValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
