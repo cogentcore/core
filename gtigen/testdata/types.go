@@ -14,10 +14,10 @@ import (
 // The zero value of a Person is not valid.
 //
 //ki:flagtype NodeFlags -field Flag
-type Person struct {
+type Person struct { //goki:embedder
 	// Name is the name of the person
 	//gi:toolbar -hide
-	Name string
+	Name string //goki:setter
 	// Age is the age of the person
 	//gi:view inline
 	Age int `json:"-"`
@@ -34,7 +34,7 @@ func (p Person) String() string { return p.Name }
 // It contains the name of the person and their age.
 //
 //gi:toolbar -name ShowIntroduction -icon play -show-result -confirm
-func (p *Person) Introduction() string {
+func (p *Person) Introduction() string { //gti:add
 	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
 }
 

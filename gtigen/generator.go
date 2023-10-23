@@ -391,12 +391,12 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 // LoadFromComments is a helper function that combines the results of [LoadFromComment]
 // for the given doc and line comment groups.
 func LoadFromComments(doc *ast.CommentGroup, line *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
-	ddirs, dadd, dskip, derr := LoadFromComment(doc, cfg)
-	if derr != nil {
+	ddirs, dadd, dskip, err := LoadFromComment(doc, cfg)
+	if err != nil {
 		return nil, false, false, err
 	}
-	ldirs, ladd, lskip, lerr := LoadFromComment(line, cfg)
-	if lerr != nil {
+	ldirs, ladd, lskip, err := LoadFromComment(line, cfg)
+	if err != nil {
 		return nil, false, false, err
 	}
 	return append(ddirs, ldirs...), dadd || ladd, dskip || lskip, nil
