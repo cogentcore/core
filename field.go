@@ -40,3 +40,26 @@ type Field struct {
 
 // Fields represents a set of multiple [Field] objects
 type Fields = ordmap.Map[string, *Field]
+
+// GetField recursively attempts to extract the [gti.Field]
+// with the given name from the given struct [gti.Type],
+// by searching through all of the embeds if it can not find
+// it directly in the struct.
+func GetField(typ *Type, field string) *Field {
+	f := typ.Fields.ValByKey(field)
+	// we have successfully gotten the field
+	if f != nil {
+		return f
+	}
+	// otherwise, we go through all of the embeds and call GetField recursively on them
+	for _, kv := range typ.Embeds.Order {
+		e := kv.Val
+		etyp := TypeByName(e.Type)
+		f := GetField(etyp, field)
+		// we have successfully gotten the field
+		if f != nil {
+			return f
+		}
+	}
+	return nil
+}
