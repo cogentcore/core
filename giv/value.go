@@ -912,8 +912,11 @@ func (vv *ValueBase) Desc() (string, bool) {
 		return typ.Doc, true
 	}
 	// otherwise, we get our field documentation in our parent
-	rval := laser.NonPtrValue(reflect.ValueOf(vv.Owner))
-	f := gti.GetField(rval, vv.Field.Name)
+	otyp := gti.TypeByValue(vv.Owner)
+	if otyp == nil {
+		return "", false
+	}
+	f := gti.GetField(otyp, vv.Field.Name)
 	if f == nil {
 		return "", false
 	}
