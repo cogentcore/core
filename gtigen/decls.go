@@ -5,11 +5,14 @@
 package gtigen
 
 import (
+	"strings"
 	"text/template"
+
+	"goki.dev/gti"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.
-// It takes a [*Type] as its value
+// It takes a [*Type] as its value.
 var TypeTmpl = template.Must(template.New("Type").Parse(
 	`
 	{{if .Config.TypeVar}} // {{.Name}}Type is the [gti.Type] for [{{.Name}}]
@@ -38,3 +41,42 @@ var FuncTmpl = template.Must(template.New("Func").Parse(
 		Returns: {{printf "%#v" .Returns}},
 	})
 	`))
+
+// SetterMethodsTmpl is the template for setter methods for a type.
+// It takes a [*Type] as its value.
+var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
+	Funcs(template.FuncMap{
+		"SetterFields": SetterFields,
+		"DocToComment": DocToComment,
+	}).Parse(
+	`
+	{{$typ := .}}
+	{{range (SetterFields .)}}
+	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}]:
+	{{DocToComment .Doc}}
+	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.LocalType}}) *{{$typ.Name}} {
+		t.{{.Name}} = v
+		return t
+	}
+	{{end}}
+`))
+
+// SetterFields returns all of the fields of the given type
+// that don't have a `set:"-"` struct tag.
+func SetterFields(typ *Type) []*gti.Field {
+	res := []*gti.Field{}
+	for _, kv := range typ.Fields.Order {
+		f := kv.Val
+		// unspecified indicates to add a set method; only "-" means no set
+		hasSetter := f.Tag.Get("set") != "-"
+		if hasSetter {
+			res = append(res, f)
+		}
+	}
+	return res
+}
+
+// DocToComment converts the given doc string to an appropriate comment string.
+func DocToComment(doc string) string {
+	return "// " + strings.ReplaceAll(doc, "\n", "\n// ")
+}

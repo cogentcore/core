@@ -25,7 +25,8 @@ type Config struct {
 	// whether to add functions to gtigen by default
 	AddFuncs bool
 
-	// a map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it (note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should)
+	// A map of configs keyed by fully-qualified interface type names; if a type implements the interface, the config will be applied to it.
+	// Note: gtigen will still succeed if it can not find one of the interfaces specified here in order to allow it to work generically across multiple directories; you can use the -v flag to get log warnings about this if you suspect that it is not finding interfaces when it should.
 	InterfaceConfigs map[string]*Config
 
 	// whether to generate an instance of the type(s)
@@ -33,6 +34,11 @@ type Config struct {
 
 	// whether to generate a global type variable of the form 'TypeNameType'
 	TypeVar bool
+
+	// Whether to generate chaining `Set*` methods for each field of each type (eg: "SetText" for field "Text").
+	// If this is set to true, then you can add `set:"-"` struct tags to individual fields
+	// to prevent Set methods being generated for them.
+	Setters bool
 
 	// TODO: should this be called TypeTemplates and should there be a Func/Method Templates?
 

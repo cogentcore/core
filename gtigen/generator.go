@@ -470,6 +470,9 @@ func (g *Generator) Generate() (bool, error) {
 		for _, tmpl := range typ.Config.Templates {
 			g.ExecTmpl(tmpl, typ)
 		}
+		if typ.Config.Setters {
+			g.ExecTmpl(SetterMethodsTmpl, typ)
+		}
 	}
 	for _, fun := range g.Funcs.Order {
 		g.ExecTmpl(FuncTmpl, fun.Val)
