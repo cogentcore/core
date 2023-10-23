@@ -364,7 +364,7 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		if field.Doc != nil {
 			lcfg := &Config{}
 			*lcfg = *cfg
-			sdirs, _, _, err := LoadFromComment(field.Doc, lcfg)
+			sdirs, _, _, err := LoadFromComments(field.Doc, field.Comment, lcfg)
 			if err != nil {
 				return nil, err
 			}
@@ -386,6 +386,20 @@ func (g *Generator) GetFields(list *ast.FieldList, cfg *Config) (*gti.Fields, er
 		res.Add(name, fo)
 	}
 	return res, nil
+}
+
+// LoadFromComments is a helper function that combines the results of [LoadFromComment]
+// for the given doc and line comment groups.
+func LoadFromComments(doc *ast.CommentGroup, line *ast.CommentGroup, cfg *Config) (dirs gti.Directives, hasAdd bool, hasSkip bool, err error) {
+	ddirs, dadd, dskip, derr := LoadFromComment(doc, cfg)
+	if derr != nil {
+		return nil, false, false, err
+	}
+	ldirs, ladd, lskip, lerr := LoadFromComment(line, cfg)
+	if lerr != nil {
+		return nil, false, false, err
+	}
+	return append(ddirs, ldirs...), dadd || ladd, dskip || lskip, nil
 }
 
 // LoadFromComment processes the given comment group, setting the
