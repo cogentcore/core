@@ -55,6 +55,10 @@ func GetField(typ *Type, field string) *Field {
 	for _, kv := range typ.Embeds.Order {
 		e := kv.Val
 		etyp := TypeByName(e.Type)
+		// we can't do anything if we have an un-added type
+		if etyp == nil {
+			return nil
+		}
 		f := GetField(etyp, field)
 		// we have successfully gotten the field
 		if f != nil {
