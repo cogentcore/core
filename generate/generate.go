@@ -17,6 +17,7 @@ import (
 	"goki.dev/goki/config"
 	"goki.dev/gti"
 	"goki.dev/gti/gtigen"
+	"goki.dev/ordmap"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -122,7 +123,7 @@ func HasNoNewDirective(typ *gtigen.Type) bool {
 func Generate(cfg *config.Config) error { //gti:add
 	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
 
-	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
+	cfg.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
 	kcfg := gtigen.Config{
 		AddTypes:  true,
@@ -131,11 +132,11 @@ func Generate(cfg *config.Config) error { //gti:add
 		Setters:   true,
 		Templates: []*template.Template{KiMethodsTmpl},
 	}
-	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &kcfg
+	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/ki/v2.Ki", &kcfg)
 
 	wcfg := kcfg
 	wcfg.Templates = []*template.Template{KiMethodsTmpl, WidgetMethodsTmpl}
-	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/gi/v2/gi.Widget"] = &wcfg
+	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/gi/v2/gi.Widget", &wcfg)
 
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
