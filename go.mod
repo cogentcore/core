@@ -6,6 +6,7 @@ require (
 	github.com/iancoleman/strcase v0.3.0
 	goki.dev/gengo v0.3.6
 	goki.dev/grease v0.8.22
+	goki.dev/laser v0.1.11
 	goki.dev/ordmap v0.5.6
 	golang.org/x/tools v0.14.0
 )
@@ -26,7 +27,6 @@ require (
 	goki.dev/glop v0.1.3 // indirect
 	goki.dev/grog v0.0.7 // indirect
 	goki.dev/grows v0.3.9 // indirect
-	goki.dev/laser v0.1.11 // indirect
 	goki.dev/mat32/v2 v2.0.0-dev0.0.7 // indirect
 	golang.org/x/image v0.13.0 // indirect
 	golang.org/x/mod v0.13.0 // indirect

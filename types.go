@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"sort"
 	"sync/atomic"
+
+	"goki.dev/laser"
 )
 
 var (
@@ -67,7 +69,8 @@ func AddType(typ *Type) *Type {
 // TypeName returns the long, full package-path qualified type name.
 // This is guaranteed to be unique and used for the Types registry.
 func TypeName(typ reflect.Type) string {
-	return typ.PkgPath() + "." + typ.Name()
+	nptyp := laser.NonPtrType(typ)
+	return nptyp.PkgPath() + "." + nptyp.Name()
 }
 
 // TypeNameObj returns the long, full package-path qualified type name
