@@ -102,8 +102,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	if len(rs) > 0 && unicode.IsDigit(rs[len(rs)-1]) && strings.Contains(fnm, ".func") {
 		withoutLast := fnm[:len(fnm)-1]
 		fnm = strings.TrimSuffix(withoutLast, ".func")
-		fnm += ": anonymous"
-		f := &gti.Func{Name: fnm}
+		f := &gti.Func{Name: fnm + ": anonymous", Doc: "Anonymous function defined in " + fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
