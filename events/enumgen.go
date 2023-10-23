@@ -379,11 +379,11 @@ func (i *SelectModes) UnmarshalText(text []byte) error {
 	return i.SetString(string(text))
 }
 
-var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39}
+var _TypesValues = []Types{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38}
 
 // TypesN is the highest valid value
 // for type Types, plus one.
-const TypesN Types = 40
+const TypesN Types = 39
 
 // An "invalid array index" compiler error signifies that the constant values have changed.
 // Re-run the enumgen command to generate them again.
@@ -419,16 +419,15 @@ func _TypesNoOp() {
 	_ = x[Magnify-(27)]
 	_ = x[Rotate-(28)]
 	_ = x[Select-(29)]
-	_ = x[Deselect-(30)]
-	_ = x[Focus-(31)]
-	_ = x[FocusLost-(32)]
-	_ = x[Change-(33)]
-	_ = x[Window-(34)]
-	_ = x[WindowResize-(35)]
-	_ = x[WindowPaint-(36)]
-	_ = x[OS-(37)]
-	_ = x[OSOpenFiles-(38)]
-	_ = x[Custom-(39)]
+	_ = x[Focus-(30)]
+	_ = x[FocusLost-(31)]
+	_ = x[Change-(32)]
+	_ = x[Window-(33)]
+	_ = x[WindowResize-(34)]
+	_ = x[WindowPaint-(35)]
+	_ = x[OS-(36)]
+	_ = x[OSOpenFiles-(37)]
+	_ = x[Custom-(38)]
 }
 
 var _TypesNameToValueMap = map[string]Types{
@@ -492,26 +491,24 @@ var _TypesNameToValueMap = map[string]Types{
 	`rotate`:         28,
 	`Select`:         29,
 	`select`:         29,
-	`Deselect`:       30,
-	`deselect`:       30,
-	`Focus`:          31,
-	`focus`:          31,
-	`FocusLost`:      32,
-	`focuslost`:      32,
-	`Change`:         33,
-	`change`:         33,
-	`Window`:         34,
-	`window`:         34,
-	`WindowResize`:   35,
-	`windowresize`:   35,
-	`WindowPaint`:    36,
-	`windowpaint`:    36,
-	`OS`:             37,
-	`os`:             37,
-	`OSOpenFiles`:    38,
-	`osopenfiles`:    38,
-	`Custom`:         39,
-	`custom`:         39,
+	`Focus`:          30,
+	`focus`:          30,
+	`FocusLost`:      31,
+	`focuslost`:      31,
+	`Change`:         32,
+	`change`:         32,
+	`Window`:         33,
+	`window`:         33,
+	`WindowResize`:   34,
+	`windowresize`:   34,
+	`WindowPaint`:    35,
+	`windowpaint`:    35,
+	`OS`:             36,
+	`os`:             36,
+	`OSOpenFiles`:    37,
+	`osopenfiles`:    37,
+	`Custom`:         38,
+	`custom`:         38,
 }
 
 var _TypesDescMap = map[Types]string{
@@ -544,17 +541,16 @@ var _TypesDescMap = map[Types]string{
 	26: `TouchMove is when a touch event moves, for the low-level touch event processing. TouchMove also activates MouseMove, Scroll, Magnify, or Rotate events depending on gesture recognition.`,
 	27: `Magnify is a touch-based magnify event (e.g., pinch)`,
 	28: `Rotate is a touch-based rotate event.`,
-	29: `Select is sent when a Selectable element is selected.`,
-	30: `Deselect is sent when a Selectable element is deselected.`,
-	31: `Focus is sent when Focsable element receives Focus`,
-	32: `FocusLost is sent when Focsable element loses Focus`,
-	33: `Change is when a value represented by the element has changed. This is for Editable, Checkable, Slidable items.`,
-	34: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
-	35: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
-	36: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
-	37: `OS is an operating system generated event (app level typically)`,
-	38: `OSOpenFiles is an event telling app to open given files`,
-	39: `Custom is a user-defined event with a data any field`,
+	29: `Select is sent for any direction of selection change on (or within if relevant) a Selectable element. Typically need to query the element(s) to determine current selection state.`,
+	30: `Focus is sent when Focsable element receives Focus`,
+	31: `FocusLost is sent when Focsable element loses Focus`,
+	32: `Change is when a value represented by the element has changed. This is for Editable, Checkable, Slidable items.`,
+	33: `Window reports on changes in the window position, visibility (iconify), focus changes, screen update, and closing. These are only sent once per event (Unique).`,
+	34: `WindowResize happens when the window has been resized, which can happen continuously during a user resizing episode. These are not Unique events, and are compressed to minimize lag.`,
+	35: `WindowPaint is sent continuously at FPS frequency (60 frames per second by default) to drive updating check on the window. It is not unique, will be compressed to keep pace with updating.`,
+	36: `OS is an operating system generated event (app level typically)`,
+	37: `OSOpenFiles is an event telling app to open given files`,
+	38: `Custom is a user-defined event with a data any field`,
 }
 
 var _TypesMap = map[Types]string{
@@ -588,16 +584,15 @@ var _TypesMap = map[Types]string{
 	27: `Magnify`,
 	28: `Rotate`,
 	29: `Select`,
-	30: `Deselect`,
-	31: `Focus`,
-	32: `FocusLost`,
-	33: `Change`,
-	34: `Window`,
-	35: `WindowResize`,
-	36: `WindowPaint`,
-	37: `OS`,
-	38: `OSOpenFiles`,
-	39: `Custom`,
+	30: `Focus`,
+	31: `FocusLost`,
+	32: `Change`,
+	33: `Window`,
+	34: `WindowResize`,
+	35: `WindowPaint`,
+	36: `OS`,
+	37: `OSOpenFiles`,
+	38: `Custom`,
 }
 
 // String returns the string representation

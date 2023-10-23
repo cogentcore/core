@@ -171,11 +171,11 @@ const (
 	// Rotate is a touch-based rotate event.
 	Rotate
 
-	// Select is sent when a Selectable element is selected.
+	// Select is sent for any direction of selection change
+	// on (or within if relevant) a Selectable element.
+	// Typically need to query the element(s) to determine current
+	// selection state.
 	Select
-
-	// Deselect is sent when a Selectable element is deselected.
-	Deselect
 
 	// Focus is sent when Focsable element receives Focus
 	Focus
