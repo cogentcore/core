@@ -563,6 +563,35 @@ func (tf *TextField) CursorDelete(steps int) {
 	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[tf.CursorPos+steps:]...)
 }
 
+// CursorBackspaceWord deletes words(s) immediately before cursor
+func (tf *TextField) CursorBackspaceWord(steps int) {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+	if tf.HasSelection() {
+		tf.DeleteSelection()
+		return
+	}
+	org := tf.CursorPos
+	tf.CursorBackwardWord(steps)
+	tf.Edited = true
+	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[org:]...)
+}
+
+// CursorDeleteWord deletes word(s) immediately after the cursor
+func (tf *TextField) CursorDeleteWord(steps int) {
+	updt := tf.UpdateStart()
+	defer tf.UpdateEndRender(updt)
+	if tf.HasSelection() {
+		tf.DeleteSelection()
+		return
+	}
+	// note: no update b/c signal from buf will drive update
+	org := tf.CursorPos
+	tf.CursorForwardWord(steps)
+	tf.Edited = true
+	tf.EditTxt = append(tf.EditTxt[:tf.CursorPos], tf.EditTxt[org:]...)
+}
+
 // CursorKill deletes text from cursor to end of text
 func (tf *TextField) CursorKill() {
 	steps := len(tf.EditTxt) - tf.CursorPos
@@ -1461,6 +1490,15 @@ func (tf *TextField) HandleTextFieldKeys() {
 		case KeyFunDelete:
 			e.SetHandled()
 			tf.CursorDelete(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunBackspaceWord:
+			e.SetHandled()
+			tf.CursorBackspaceWord(1)
+			tf.OfferComplete(dontForce)
+		case KeyFunDeleteWord:
+			e.SetHandled()
+			tf.CursorDeleteWord(1)
+			tf.OfferComplete(dontForce)
 		case KeyFunCut:
 			e.SetHandled()
 			tf.CancelComplete()
