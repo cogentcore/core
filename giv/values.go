@@ -92,7 +92,7 @@ func (vv *StructValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if desc == "list" { // todo: not sure where this comes from but it is uninformative
 		desc = ""
 	}
-	inact := vv.This().(Value).IsReadOnly()
+	readOnly := vv.This().(Value).IsReadOnly()
 	StructViewDialog(vv.Widget, DlgOpts{Title: title, Prompt: desc, TmpSave: vv.TmpSave, ReadOnly: readOnly, ViewPath: vpath}, opv.Interface(), func(dlg *gi.Dialog) {
 		if dlg.Accepted {
 			vv.UpdateWidget()
