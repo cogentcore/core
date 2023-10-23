@@ -404,9 +404,7 @@ var FileNodeHiStyle = histyle.StyleDefault
 
 // FileNode represents a file in the file system -- the name of the node is
 // the name of the file.  Folders have children containing further nodes.
-//
-//goki:embedder
-type FileNode struct {
+type FileNode struct { //goki:embedder
 	ki.Node
 
 	// full path to this file
@@ -1702,9 +1700,7 @@ func (dm *DirFlagMap) DeleteStale() {
 //    FileTreeView
 
 // FileTreeView is a TreeView that knows how to operate on FileNode nodes
-//
-//goki:embedder
-type FileTreeView struct {
+type FileTreeView struct { //goki:embedder
 	TreeView
 }
 

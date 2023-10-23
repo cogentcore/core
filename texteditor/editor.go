@@ -34,9 +34,7 @@ import (
 // out to the views -- multiple views can be attached to a given buffer.  All
 // updating in the Editor should be within a single goroutine -- it would
 // require extensive protections throughout code otherwise.
-//
-//goki:embedder
-type Editor struct {
+type Editor struct { //goki:embedder
 	gi.Layout
 
 	// the text buffer that we're editing

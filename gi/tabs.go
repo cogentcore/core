@@ -28,9 +28,7 @@ import (
 // needed) and a Stacked Frame that actually contains all the children, and
 // provides scrollbars as needed to any content within.  Typically should have
 // max stretch and a set preferred size, so it expands.
-//
-//goki:embedder
-type Tabs struct {
+type Tabs struct { //goki:embedder
 	Layout
 
 	// maximum number of characters to include in tab label -- elides labels that are longer than that

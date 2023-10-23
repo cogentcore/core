@@ -41,9 +41,7 @@ const dontForce = false
 var CursorBlinkTime = 500 * time.Millisecond
 
 // TextField is a widget for editing a line of text
-//
-//goki:embedder
-type TextField struct {
+type TextField struct { //goki:embedder
 	WidgetBase
 
 	// the last saved value of the text string being edited
