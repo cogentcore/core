@@ -13,14 +13,15 @@ import (
 	"goki.dev/grease"
 	"goki.dev/gti"
 	"goki.dev/gti/gtigen/testdata"
+	"goki.dev/ordmap"
 )
 
 func TestGenerate(t *testing.T) {
 	c := &Config{
 		AddMethods: true,
 		AddFuncs:   true,
-		InterfaceConfigs: map[string]*Config{
-			"fmt.Stringer": {
+		InterfaceConfigs: ordmap.Make([]ordmap.KeyVal[string, *Config]{{
+			"fmt.Stringer", &Config{
 				AddTypes: true,
 				TypeVar:  true,
 				Instance: true,
@@ -32,7 +33,7 @@ func TestGenerate(t *testing.T) {
 					}`)),
 				},
 			},
-		},
+		}}),
 	}
 	err := grease.SetFromDefaults(c)
 	if err != nil {

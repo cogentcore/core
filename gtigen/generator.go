@@ -51,7 +51,7 @@ func NewGenerator(config *Config, pkgs []*packages.Package) *Generator {
 func PackageModes(cfg *Config) packages.LoadMode {
 	res := packages.NeedName | packages.NeedFiles | packages.NeedCompiledGoFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesSizes | packages.NeedSyntax | packages.NeedTypesInfo
 	// we only need deps if we are checking for interface impls
-	if len(cfg.InterfaceConfigs) > 0 {
+	if cfg.InterfaceConfigs.Len() > 0 {
 		res |= packages.NeedDeps
 	}
 	return res
@@ -94,12 +94,12 @@ func (g *Generator) Find() error {
 // be called by end-user code.
 func (g *Generator) GetInterfaces() error {
 	g.Interfaces = &ordmap.Map[string, *types.Interface]{}
-	if len(g.Config.InterfaceConfigs) == 0 {
+	if g.Config.InterfaceConfigs.Len() == 0 {
 		return nil
 	}
 	for _, typ := range g.Pkg.TypesInfo.Types {
 		nm := typ.Type.String()
-		if _, ok := g.Config.InterfaceConfigs[nm]; ok {
+		if _, ok := g.Config.InterfaceConfigs.ValByKeyTry(nm); ok {
 			utyp := typ.Type.Underlying()
 			iface, ok := utyp.(*types.Interface)
 			if !ok {
@@ -191,10 +191,12 @@ func (g *Generator) InspectGenDecl(gd *ast.GenDecl) (bool, error) {
 		cfg := &Config{}
 		*cfg = *g.Config
 
-		if len(cfg.InterfaceConfigs) > 0 {
+		if cfg.InterfaceConfigs.Len() > 0 {
 			typ := g.Pkg.TypesInfo.Defs[ts.Name].Type()
 			if !types.IsInterface(typ) {
-				for in, ic := range cfg.InterfaceConfigs {
+				for _, kv := range cfg.InterfaceConfigs.Order {
+					in := kv.Key
+					ic := kv.Val
 					iface := g.Interfaces.ValByKey(in)
 					if iface == nil {
 						slog.Info("missing interface object", "interface", in)
