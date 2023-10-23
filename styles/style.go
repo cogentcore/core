@@ -49,9 +49,6 @@ type Style struct {
 	// is the item visible or not
 	Visible bool `xml:"visible"`
 
-	// make a control inactive so it does not respond to input
-	Inactive bool `xml:"inactive"`
-
 	// the cursor to switch to upon hovering over the element (inherited)
 	Cursor cursors.Cursor
 

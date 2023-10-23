@@ -13,10 +13,6 @@ import "goki.dev/enums"
 type States int64 //enums:bitflag
 
 const (
-	// Disabled elements cannot be interacted with or selected,
-	// but do display.
-	Disabled States = iota
-
 	// Invisible elements are not displayed, and thus do not present
 	// a target for GUI events.  It is identical to css display:none.
 	// This can also be set when the item is out of visible display
@@ -24,9 +20,16 @@ const (
 	// Elements can be made visible by toggling this flag and thus
 	// in general should be constructed and styled, but a new layout
 	// step must generally be taken after visibility status has changed.
-	Invisible
+	Invisible States = iota
+
+	// Disabled elements cannot be interacted with or selected,
+	// but do display.
+	Disabled
 
 	// ReadOnly elements cannot be changed, but can be selected.
+	// A text input must not be ReadOnly for entering text.
+	// A button can be pressed while ReadOnly -- if not ReadOnly then
+	// the label on the button can be edited, for example.
 	ReadOnly
 
 	// Selected elements have been marked for clipboard or other such actions.
@@ -112,9 +115,9 @@ func (st States) Is(flag enums.BitFlag) bool {
 func (st States) StateLayer() float32 {
 	switch {
 	case st.Is(Disabled):
-		return 0.30
+		return 0.20
 	case st.Is(Dragging):
-		return 0.16
+		return 0.12
 	case st.Is(Active):
 		return 0.10
 	case st.Is(Focused):

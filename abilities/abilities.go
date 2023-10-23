@@ -15,7 +15,8 @@ import "goki.dev/enums"
 type Abilities int64 //enums:bitflag
 
 const (
-	// Editable means it can switch between ReadOnly and not
+	// Editable means the element can be edited.  Otherwise, it remains in
+	// ReadOnly mode.
 	Editable Abilities = iota
 
 	// Selectable means it can be Selected

@@ -231,8 +231,8 @@ var StyleStyleFuncs = map[string]StyleFunc{
 	},
 	"visible": StyleFuncBool(false,
 		func(obj *Style) *bool { return &obj.Visible }),
-	"inactive": StyleFuncBool(false,
-		func(obj *Style) *bool { return &obj.Inactive }),
+	// "inactive": StyleFuncBool(false,
+	// 	func(obj *Style) *bool { return &obj.Inactive }),
 	"pointer-events": StyleFuncBool(false,
 		func(obj *Style) *bool { return &obj.PointerEvents }),
 	"color": func(obj any, key string, val any, par any, ctxt colors.Context) {
