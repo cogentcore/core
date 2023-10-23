@@ -21,7 +21,7 @@ import (
 )
 
 // KiMethodsTmpl is a template that contains the methods
-// and functions specific to Ki types.
+// and functions specific to [ki.Ki] types.
 var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	Funcs(template.FuncMap{
 		"HasEmbedDirective": HasEmbedDirective,
@@ -75,6 +75,20 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	`,
 ))
 
+// WidgetMethodsTmpl is a template that contains the methods
+// and functions specific to [gi.Widget] types.
+var WidgetMethodsTmpl = template.Must(template.New("WidgetMethods").
+	Parse(
+		`
+		// SetTooltip sets the [{{.Name}}.Tooltip]:
+		// text for the tooltip for this widget, which can use HTML formatting
+		func (t *{{.Name}}) SetTooltip(v string) *{{.Name}} {
+			t.Tooltip = v
+			return t
+		}
+	`,
+	))
+
 // KiPkg returns the package identifier for the ki package in
 // the context of the given type ("" if it is already in the ki
 // package, and "ki." otherwise)
@@ -111,15 +125,20 @@ func Generate(cfg *config.Config) error {
 	gtigen.AddDirectives = append(gtigen.AddDirectives, &gti.Directive{Tool: "gi", Directive: "toolbar"})
 
 	cfg.Generate.Gtigen.InterfaceConfigs = make(map[string]*gtigen.Config)
-	if cfg.Generate.AddKiTypes {
-		cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &gtigen.Config{
-			AddTypes:  true,
-			Instance:  true,
-			TypeVar:   true,
-			Setters:   true,
-			Templates: []*template.Template{KiMethodsTmpl},
-		}
+
+	kcfg := gtigen.Config{
+		AddTypes:  true,
+		Instance:  true,
+		TypeVar:   true,
+		Setters:   true,
+		Templates: []*template.Template{KiMethodsTmpl},
 	}
+	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/ki/v2.Ki"] = &kcfg
+
+	wcfg := kcfg
+	wcfg.Templates = append(wcfg.Templates, WidgetMethodsTmpl)
+	cfg.Generate.Gtigen.InterfaceConfigs["goki.dev/gi/v2/gi.Widget"] = &wcfg
+
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
 		return fmt.Errorf("Generate: error parsing package: %w", err)

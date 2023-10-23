@@ -154,9 +154,6 @@ type Generate struct {
 
 	// the output file location relative to the package on which generate is being called
 	Output string `def:"gokigen.go"`
-
-	// whether to automatically add all types that implement the ki.Ki interface (should be set to false in packages without Ki types)
-	AddKiTypes bool `def:"true"`
 }
 
 func (c *Config) OnConfig(cmd string) error {
