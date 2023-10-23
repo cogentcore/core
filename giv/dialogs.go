@@ -50,8 +50,8 @@ type DlgOpts struct {
 	// if true, user cannot delete elements of the slice
 	NoDelete bool
 
-	// if true all fields will be inactive
-	Inactive bool
+	// if true all fields will be ReadOnly
+	ReadOnly bool
 
 	// filename, e.g., for TextView, to get highlighting
 	Filename string
@@ -97,7 +97,7 @@ func TextEditorDialog(ctx gi.Widget, opts DlgOpts, text []byte, fun func(dlg *gi
 	})
 	tv := texteditor.NewEditor(tlv, "text-editor")
 	// tv.Scene = dlg.Embed(gi.TypeScene).(*gi.Scene)
-	tv.SetState(true, states.Disabled)
+	tv.SetState(true, states.ReadOnly)
 	tv.SetBuf(tb)
 	tv.Style(func(s *styles.Style) {
 		s.Font.Family = string(gi.Prefs.MonoFont)
@@ -135,8 +135,8 @@ func StructViewDialog(ctx gi.Widget, opts DlgOpts, stru any, fun func(dlg *gi.Di
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(StructViewType, prIdx+1, "struct-view").(*StructView)
-	// if opts.Inactive {
-	// 	sv.SetState(true, states.Disabled)
+	// if opts.ReadOnly {
+	// 	sv.SetState(true, states.ReadOnly)
 	// }
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
@@ -179,7 +179,7 @@ func SliceViewDialog(ctx gi.Widget, opts DlgOpts, slice any, styleFunc SliceView
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	sv.SetState(false, states.Disabled)
+	sv.SetState(false, states.ReadOnly)
 	sv.StyleFunc = styleFunc
 	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
 	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
@@ -203,7 +203,7 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	sv.SetState(false, states.Disabled)
+	sv.SetState(false, states.ReadOnly)
 	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
 	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
 	sv.ViewPath = opts.ViewPath
@@ -218,15 +218,6 @@ func SliceViewDialogNoStyle(ctx gi.Widget, opts DlgOpts, slice any, fun func(dlg
 // styling elements of the table.
 // gopy:interface=handle
 func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, styleFunc SliceViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	// if opts.CSS == nil {
-	// 	opts.CSS = ki.Props{
-	// 		"textfield": ki.Props{
-	// 			":inactive": ki.Props{
-	// 				"background-color": &gi.Prefs.Colors.Control,
-	// 			},
-	// 		},
-	// 	}
-	// }
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slice, fun)
 	if recyc {
 		return dlg
@@ -236,7 +227,7 @@ func SliceViewSelectDialog(ctx gi.Widget, opts DlgOpts, slice, curVal any, style
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(SliceViewType, prIdx+1, "slice-view").(*SliceView)
-	sv.SetState(true, states.Disabled)
+	sv.SetState(true, states.ReadOnly)
 	sv.StyleFunc = styleFunc
 	sv.SelVal = curVal
 	sv.ViewPath = opts.ViewPath
@@ -266,14 +257,14 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
-	sv.SetState(false, states.Disabled)
+	sv.SetState(false, states.ReadOnly)
 	sv.StyleFunc = styleFunc
 	sv.SetFlag(opts.NoAdd, SliceViewNoAdd)
 	sv.SetFlag(opts.NoDelete, SliceViewNoDelete)
 	sv.ViewPath = opts.ViewPath
 	sv.TmpSave = opts.TmpSave
-	if opts.Inactive {
-		sv.SetState(true, states.Disabled)
+	if opts.ReadOnly {
+		sv.SetState(true, states.ReadOnly)
 	}
 	sv.SetSlice(slcOfStru)
 	return dlg
@@ -286,15 +277,6 @@ func TableViewDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, styleFunc Table
 // Also has an optional styling function for styling elements of the table.
 // gopy:interface=handle
 func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow int, styleFunc TableViewStyleFunc, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	// if opts.CSS == nil {
-	// 	opts.CSS = ki.Props{
-	// 		"textfield": ki.Props{
-	// 			":inactive": ki.Props{
-	// 				"background-color": &gi.Prefs.Colors.Control,
-	// 			},
-	// 		},
-	// 	}
-	// }
 	dlg, recyc := gi.RecycleStdDialog(ctx, opts.ToGiOpts(), slcOfStru, fun)
 	if recyc {
 		return dlg
@@ -304,7 +286,7 @@ func TableViewSelectDialog(ctx gi.Widget, opts DlgOpts, slcOfStru any, initRow i
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(TableViewType, prIdx+1, "tableview").(*TableView)
-	sv.SetState(true, states.Disabled)
+	sv.SetState(true, states.ReadOnly)
 	sv.StyleFunc = styleFunc
 	sv.SelectedIdx = initRow
 	sv.ViewPath = opts.ViewPath
@@ -352,14 +334,6 @@ func FontInfoStyleFunc(tv *TableView, slice any, widg gi.Widget, row, col int, v
 // if non-nil are connected to the selection signal for the slice view, and
 // the dialog signal.
 func IconChooserDialog(ctx gi.Widget, opts DlgOpts, curIc icons.Icon, fun func(dlg *gi.Dialog)) *gi.Dialog {
-	// if opts.CSS == nil {
-	// 	opts.CSS = ki.Props{
-	// 		"icon": ki.Props{
-	// 			"width":  units.Em(2),
-	// 			"height": units.Em(2),
-	// 		},
-	// 	}
-	// }
 	ics := icons.All()
 	dlg := SliceViewSelectDialog(ctx, opts, &ics, curIc, IconChooserStyleFunc, fun)
 	return dlg
@@ -434,7 +408,7 @@ func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgConfig, fun func(dlg *
 	prIdx := dlg.PromptWidgetIdx()
 
 	sv := frame.InsertNewChild(ArgViewType, prIdx+1, "arg-view").(*ArgView)
-	sv.SetState(false, states.Disabled)
+	sv.SetState(false, states.ReadOnly)
 	sv.SetArgs(args)
 
 	return dlg

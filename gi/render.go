@@ -247,6 +247,7 @@ func (wb *WidgetBase) ConfigPartsImpl(sc *Scene, config ki.Config, lay Layouts) 
 		parts.UpdateEnd(updt)
 		return
 	}
+	parts.Update()
 	parts.UpdateEnd(updt)
 	wb.SetNeedsLayoutUpdate(sc, updt)
 }

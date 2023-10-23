@@ -113,12 +113,13 @@ func (ch *Chooser) ChooserStyles() {
 			s.Padding.Set()
 			s.Padding.Right.SetDp(16)
 		} else {
-			s.Border.Radius = styles.BorderRadiusExtraSmall
+			s.Border.Radius = styles.BorderRadiusSmall
 			s.Padding.Set(units.Dp(8), units.Dp(16))
 		}
 		switch ch.Type {
 		case ChooserFilled:
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+			s.Color = colors.Scheme.Secondary.OnContainer
 			if ch.Editable {
 				s.Border.Style.Set(styles.BorderNone).SetBottom(styles.BorderSolid)
 				s.Border.Width.Set().SetBottom(units.Dp(1))
@@ -438,7 +439,9 @@ func (ch *Chooser) FindItem(it any) int {
 // CurIndex = -1, indicating that nothing has not been selected.
 func (ch *Chooser) SetPlaceholder(text string) *Chooser {
 	ch.Placeholder = text
-	ch.ShowCurVal(text)
+	if !ch.Editable {
+		ch.ShowCurVal(text)
+	}
 	ch.CurIndex = -1
 	return ch
 }

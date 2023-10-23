@@ -28,13 +28,13 @@ type MapView struct {
 	gi.Frame
 
 	// the map that we are a view onto
-	Map any
+	Map any `set:"-"`
 
 	// Value for the map itself, if this was created within value view framework -- otherwise nil
 	MapValView Value
 
 	// has the map been edited?
-	Changed bool
+	Changed bool `set:"-"`
 
 	// Value representations of the map keys
 	Keys []Value `json:"-" xml:"-"`
@@ -380,7 +380,7 @@ func (mv *MapView) ConfigToolbar() {
 	}
 	tb := mv.Toolbar()
 	ndef := 3 // number of default actions
-	if mv.IsDisabled() {
+	if mv.IsReadOnly() {
 		ndef = 2
 	}
 	if len(*tb.Children()) == 0 {

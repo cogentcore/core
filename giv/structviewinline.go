@@ -21,7 +21,7 @@ type StructViewInline struct {
 	gi.Frame
 
 	// the struct that we are a view onto
-	Struct any
+	Struct any `set:"-"`
 
 	// Value for the struct itself, if this was created within value view framework -- otherwise nil
 	StructValView Value
@@ -38,16 +38,16 @@ type StructViewInline struct {
 	WidgetConfiged map[gi.Widget]bool `view:"-" json:"-" xml:"-"`
 
 	// value view that needs to have SaveTmp called on it whenever a change is made to one of the underlying values -- pass this down to any sub-views created from a parent
-	TmpSave Value `json:"-" xml:"-"`
+	TmpSave Value `json:"-" xml:"-" view:"-"`
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
 
 	// if true, some fields have default values -- update labels when values change
-	HasDefs bool `json:"-" xml:"-" view:"inactive"`
+	HasDefs bool `json:"-" xml:"-" readonly:"+"`
 
 	// if true, some fields have viewif conditional view tags -- update after..
-	HasViewIfs bool `json:"-" xml:"-" inactive:"+"`
+	HasViewIfs bool `json:"-" xml:"-" readonly:"+"`
 }
 
 func (sv *StructViewInline) OnInit() {
@@ -139,12 +139,12 @@ func (sv *StructViewInline) ConfigStruct(sc *gi.Scene) bool {
 			continue
 		}
 		sv.WidgetConfiged[widg] = true
-		hasDef, inactTag := StructViewFieldTags(vv, lbl, widg, sv.IsDisabled()) // in structview.go
+		hasDef, readOnlyTag := StructViewFieldTags(vv, lbl, widg, sv.IsReadOnly()) // in structview.go
 		if hasDef {
 			sv.HasDefs = true
 		}
 		vv.ConfigWidget(widg, sc)
-		if !sv.IsDisabled() && !inactTag {
+		if !sv.IsReadOnly() && !readOnlyTag {
 			vvb.OnChange(func(e events.Event) {
 				sv.UpdateFieldAction()
 				if !laser.KindIsBasic(laser.NonPtrValue(vvb.Value).Kind()) {

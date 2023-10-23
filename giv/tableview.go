@@ -172,7 +172,7 @@ func (tv *TableView) SetSlice(sl any) {
 		tv.Update()
 		return
 	}
-	if !tv.IsDisabled() {
+	if !tv.IsReadOnly() {
 		tv.SelectedIdx = -1
 	}
 	tv.StartIdx = 0
@@ -223,9 +223,9 @@ func (tv *TableView) CacheVisFields() {
 		if tvtag != "" {
 			if tvtag == "-" {
 				add = false
-			} else if tvtag == "-select" && tv.IsDisabled() {
+			} else if tvtag == "-select" && tv.IsReadOnly() {
 				add = false
-			} else if tvtag == "-edit" && !tv.IsDisabled() {
+			} else if tvtag == "-edit" && !tv.IsReadOnly() {
 				add = false
 			}
 		}
@@ -351,7 +351,7 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 		vv.ConfigWidget(widg, sc)
 	}
 
-	if !tv.IsDisabled() {
+	if !tv.IsReadOnly() {
 		cidx := tv.NVisFields + idxOff
 		if !tv.Is(SliceViewNoAdd) {
 			addnm := "add-" + itxt
@@ -403,7 +403,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		labnm := "head-" + fld.Name
 		hcfg.Add(gi.ButtonType, labnm)
 	}
-	if !tv.IsDisabled() {
+	if !tv.IsReadOnly() {
 		hcfg.Add(gi.LabelType, "head-add")
 		hcfg.Add(gi.LabelType, "head-del")
 	}
@@ -440,7 +440,7 @@ func (tv *TableView) ConfigHeader(sc *gi.Scene) {
 		})
 		tv.ConfigHeaderStyleWidth(hdr.AsWidget(), sg, spc, fli+idxOff)
 	}
-	if !tv.IsDisabled() {
+	if !tv.IsReadOnly() {
 		cidx := tv.NVisFields + idxOff
 		if !tv.Is(SliceViewNoAdd) {
 			lbl := sgh.Child(cidx).(*gi.Label)
@@ -499,7 +499,7 @@ func (tv *TableView) Toolbar() *gi.Toolbar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (tv *TableView) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 1 + tv.NVisFields
-	if !tv.IsDisabled() {
+	if !tv.IsReadOnly() {
 		if !tv.Is(SliceViewNoAdd) {
 			nWidgPerRow += 1
 		}
@@ -606,8 +606,8 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 				tv.UpdateSelectRow(i, wb.StateIs(states.Selected))
 			})
 
-			if tv.IsDisabled() {
-				widg.AsWidget().SetState(true, states.Disabled)
+			if tv.IsReadOnly() {
+				widg.AsWidget().SetState(true, states.ReadOnly)
 			} else {
 				vvb := vv.AsValueBase()
 				vvb.OnChange(func(e events.Event) {
@@ -617,7 +617,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
 		}
 
-		if !tv.IsDisabled() {
+		if !tv.IsReadOnly() {
 			cidx := ridx + tv.NVisFields + idxOff
 			if !tv.Is(SliceViewNoAdd) {
 				addnm := fmt.Sprintf("add-%v", itxt)
@@ -645,7 +645,7 @@ func (tv *TableView) ConfigRows(sc *gi.Scene) {
 			}
 		}
 	}
-	tv.UpdateWidgets() // sets inactive etc
+	tv.UpdateWidgets()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -713,8 +713,8 @@ func (tv *TableView) UpdateWidgets() {
 			if si < tv.SliceSize {
 				widg.SetState(false, states.Invisible)
 				issel := tv.IdxIsSelected(si)
-				if tv.IsDisabled() {
-					widg.AsWidget().SetState(true, states.Disabled)
+				if tv.IsReadOnly() {
+					widg.AsWidget().SetState(true, states.ReadOnly)
 				}
 				widg.AsWidget().SetSelected(issel)
 				tv.This().(SliceViewer).StyleRow(tv.SliceNPVal, widg, si, fli, vv)
@@ -728,7 +728,7 @@ func (tv *TableView) UpdateWidgets() {
 			}
 		}
 
-		if !tv.IsDisabled() {
+		if !tv.IsReadOnly() {
 			cidx := ridx + tv.NVisFields + idxOff
 			invis := true
 			if si < tv.SliceSize {
@@ -750,7 +750,7 @@ func (tv *TableView) UpdateWidgets() {
 	if tv.SelField != "" && tv.SelVal != nil {
 		tv.SelectedIdx, _ = StructSliceIdxByValue(tv.Slice, tv.SelField, tv.SelVal)
 	}
-	if tv.IsDisabled() && tv.SelectedIdx >= 0 {
+	if tv.IsReadOnly() && tv.SelectedIdx >= 0 {
 		tv.SelectIdx(tv.SelectedIdx)
 	}
 	tv.UpdateScroll()
@@ -866,7 +866,7 @@ func (tv *TableView) ConfigToolbar() {
 	}
 	tb := tv.Toolbar()
 	ndef := 2 // number of default actions
-	if tv.Is(SliceViewIsArray) || tv.IsDisabled() || tv.Is(SliceViewNoAdd) {
+	if tv.Is(SliceViewIsArray) || tv.IsReadOnly() || tv.Is(SliceViewNoAdd) {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {

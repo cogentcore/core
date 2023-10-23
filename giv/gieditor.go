@@ -29,7 +29,7 @@ type GiEditor struct {
 	KiRoot ki.Ki
 
 	// has the root changed via gui actions?  updated from treeview and structview for changes
-	Changed bool
+	Changed bool `set:"-"`
 
 	// current filename for saving / loading
 	Filename gi.FileName

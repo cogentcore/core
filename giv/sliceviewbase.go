@@ -74,14 +74,14 @@ const (
 	// whether to show the toolbar or not
 	SliceViewShowToolbar
 
-	// support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events
-	SliceViewInactKeyNav
+	// support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events
+	SliceViewReadOnlyKeyNav
 
 	// editing-mode select rows mode
 	SliceViewSelectMode
 
-	// if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
-	SliceViewInactMultiSel
+	// if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported
+	SliceViewReadOnlyMultiSel
 
 	// guard for recursive focus grabbing
 	SliceViewInFocusGrab
@@ -188,14 +188,14 @@ type SliceViewBase struct {
 	gi.Frame
 
 	// the slice that we are a view onto -- must be a pointer to that slice
-	Slice any `copy:"-" view:"-" json:"-" xml:"-"`
+	Slice any `set:"-" copy:"-" view:"-" json:"-" xml:"-"`
 
 	// optional mutex that, if non-nil, will be used around any updates that read / modify the underlying Slice data -- can be used to protect against random updating if your code has specific update points that can be likewise protected with this same mutex
 	ViewMu *sync.Mutex `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// Changed indicates whether the underlying slice
 	// has been edited in any way
-	Changed bool
+	Changed bool `set:"-"`
 
 	// non-ptr reflect.Value of the slice
 	SliceNPVal reflect.Value `copy:"-" view:"-" json:"-" xml:"-"`
@@ -209,7 +209,7 @@ type SliceViewBase struct {
 	// current selection value -- initially select this value if set
 	SelVal any `copy:"-" view:"-" json:"-" xml:"-"`
 
-	// index of currently-selected item, in Inactive mode only
+	// index of currently-selected item, in ReadOnly mode only
 	SelectedIdx int `copy:"-" json:"-" xml:"-"`
 
 	// list of currently-selected slice indexes
@@ -228,22 +228,22 @@ type SliceViewBase struct {
 	ToolbarSlice any `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// height of a single row
-	RowHeight float32 `inactive:"+" copy:"-" json:"-" xml:"-"`
+	RowHeight float32 `readonly:"+" copy:"-" json:"-" xml:"-"`
 
 	// the height of grid from last layout -- determines when update needed
 	LayoutHeight float32 `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// total number of rows visible in allocated display size
-	VisRows int `inactive:"+" copy:"-" json:"-" xml:"-"`
+	VisRows int `readonly:"+" copy:"-" json:"-" xml:"-"`
 
 	// starting slice index of visible rows
-	StartIdx int `inactive:"+" copy:"-" json:"-" xml:"-"`
+	StartIdx int `readonly:"+" copy:"-" json:"-" xml:"-"`
 
 	// the number of rows rendered -- determines update
 	RenderedRows int `copy:"-" view:"-" json:"-" xml:"-"`
 
 	// size of slice
-	SliceSize int `inactive:"+" copy:"-" json:"-" xml:"-"`
+	SliceSize int `readonly:"+" copy:"-" json:"-" xml:"-"`
 
 	// temp idx state for e.g., dnd
 	CurIdx int `copy:"-" view:"-" json:"-" xml:"-"`
@@ -261,7 +261,7 @@ func (sv *SliceViewBase) SliceViewBaseInit() {
 	sv.SetFlag(false, SliceViewSelectMode)
 	sv.SetFlag(true, SliceViewShowIndex)
 	sv.SetFlag(true, SliceViewShowToolbar)
-	sv.SetFlag(true, SliceViewInactKeyNav)
+	sv.SetFlag(true, SliceViewReadOnlyKeyNav)
 
 	sv.HandleSliceViewEvents()
 
@@ -368,7 +368,7 @@ func (sv *SliceViewBase) SetSlice(sl any) {
 		}
 	}
 	sv.ElVal = laser.SliceElValue(sl)
-	if !sv.IsDisabled() {
+	if !sv.IsReadOnly() {
 		sv.SelectedIdx = -1
 	}
 	sv.ResetSelectedIdxs()
@@ -459,7 +459,7 @@ func (sv *SliceViewBase) ConfigOneRow(sc *gi.Scene) {
 	vv.ConfigWidget(widg, sc)
 	vv.UpdateWidget()
 
-	if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
+	if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
 		cidx := idxOff
 		if !sv.Is(SliceViewNoAdd) {
 			cidx++
@@ -520,7 +520,7 @@ func (sv *SliceViewBase) Toolbar() *gi.Toolbar {
 // RowWidgetNs returns number of widgets per row and offset for index label
 func (sv *SliceViewBase) RowWidgetNs() (nWidgPerRow, idxOff int) {
 	nWidgPerRow = 2
-	if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
+	if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
 		if !sv.Is(SliceViewNoAdd) {
 			nWidgPerRow += 1
 		}
@@ -728,8 +728,8 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		vv.ConfigWidget(widg, sc)
 		wb := widg.AsWidget()
 
-		if sv.IsDisabled() {
-			widg.AsWidget().SetState(true, states.Disabled)
+		if sv.IsReadOnly() {
+			widg.AsWidget().SetState(true, states.ReadOnly)
 			if wb != nil {
 				wb.SetProp("slv-row", i)
 				wb.SetState(false, states.Selected)
@@ -775,7 +775,7 @@ func (sv *SliceViewBase) ConfigRows(sc *gi.Scene) {
 		}
 		sv.This().(SliceViewer).StyleRow(sv.SliceNPVal, widg, si, 0, vv)
 	}
-	sv.UpdateWidgets() // sets inactive etc
+	sv.UpdateWidgets()
 }
 
 // UpdateWidgets updates the row widget display to
@@ -815,8 +815,8 @@ func (sv *SliceViewBase) UpdateWidgets() {
 			val := laser.OnePtrUnderlyingValue(sv.SliceNPVal.Index(si)) // deal with pointer lists
 			vv.SetSliceValue(val, sv.Slice, si, sv.TmpSave, sv.ViewPath)
 			vv.UpdateWidget()
-			if sv.IsDisabled() {
-				widg.AsWidget().SetState(true, states.Disabled)
+			if sv.IsReadOnly() {
+				widg.AsWidget().SetState(true, states.ReadOnly)
 			}
 			issel := sv.IdxIsSelected(si)
 			widg.AsWidget().SetSelected(issel)
@@ -825,7 +825,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				idxlab.SetState(false, states.Invisible)
 				idxlab.SetSelected(issel)
 			}
-			if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
+			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
 				cidx := ridx + idxOff
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
@@ -847,7 +847,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 				idxlab.SetState(true, states.Invisible)
 				idxlab.SetSelected(false)
 			}
-			if !sv.IsDisabled() && !sv.Is(SliceViewIsArray) {
+			if !sv.IsReadOnly() && !sv.Is(SliceViewIsArray) {
 				cidx := ridx + idxOff
 				if !sv.Is(SliceViewNoAdd) {
 					cidx++
@@ -865,7 +865,7 @@ func (sv *SliceViewBase) UpdateWidgets() {
 	if sv.SelVal != nil {
 		sv.SelectedIdx, _ = SliceIdxByValue(sv.Slice, sv.SelVal)
 	}
-	if sv.IsDisabled() && sv.SelectedIdx >= 0 {
+	if sv.IsReadOnly() && sv.SelectedIdx >= 0 {
 		sv.SelectIdxWidgets(sv.SelectedIdx, true)
 	}
 	sv.UpdateScroll()
@@ -1035,7 +1035,7 @@ func (sv *SliceViewBase) ConfigToolbar() {
 	}
 	tb := sv.Toolbar()
 	ndef := 2 // number of default actions
-	if sv.Is(SliceViewIsArray) || sv.IsDisabled() || sv.Is(SliceViewNoAdd) {
+	if sv.Is(SliceViewIsArray) || sv.IsReadOnly() || sv.Is(SliceViewNoAdd) {
 		ndef = 1
 	}
 	if len(*tb.Children()) < ndef {
@@ -1384,7 +1384,7 @@ func (sv *SliceViewBase) UpdateSelectRow(row int, sel bool) {
 
 // UpdateSelectIdx updates the selection for the given index
 func (sv *SliceViewBase) UpdateSelectIdx(idx int, sel bool) {
-	if sv.IsDisabled() && !sv.Is(SliceViewInactMultiSel) {
+	if sv.IsReadOnly() && !sv.Is(SliceViewReadOnlyMultiSel) {
 		updt := sv.UpdateStart()
 		defer sv.UpdateEndRender(updt)
 
@@ -1968,7 +1968,7 @@ func (sv *SliceViewBase) DropCancel() {
 //    Events
 
 func (sv *SliceViewBase) StdCtxtMenu(m *gi.Scene, idx int) {
-	if sv.IsDisabled() || sv.Is(SliceViewIsArray) {
+	if sv.IsReadOnly() || sv.Is(SliceViewIsArray) {
 		return
 	}
 	gi.NewButton(m).SetText("Copy").SetData(idx).
@@ -1996,7 +1996,7 @@ func (sv *SliceViewBase) ItemCtxtMenu(idx int) {
 	}
 
 	// TODO(kai/menu): CtxtMenuView
-	// if CtxtMenuView(val, sv.IsDisabled(), sv.Sc, &menu) {
+	// if CtxtMenuView(val, sv.IsReadOnly(), sv.Sc, &menu) {
 	// 	if sv.ShowViewCtxtMenu {
 	// 		menu.AddSeparator("sep-svmenu")
 	// 		sv.This().(SliceViewer).StdCtxtMenu(&menu, idx)
@@ -2102,11 +2102,11 @@ func (sv *SliceViewBase) KeyInputActive(kt events.Event) {
 	}
 }
 
-func (sv *SliceViewBase) KeyInputInactive(kt events.Event) {
+func (sv *SliceViewBase) KeyInputReadOnly(kt events.Event) {
 	if gi.KeyEventTrace {
-		fmt.Printf("SliceViewBase Inactive KeyInput: %v\n", sv.Path())
+		fmt.Printf("SliceViewBase ReadOnly KeyInput: %v\n", sv.Path())
 	}
-	if sv.Is(SliceViewInactMultiSel) {
+	if sv.Is(SliceViewReadOnlyMultiSel) {
 		sv.KeyInputNav(kt)
 		if kt.IsHandled() {
 			return
@@ -2175,10 +2175,10 @@ func (sv *SliceViewBase) HandleSliceViewEvents() {
 	// 		me.SetHandled()
 	// 	}
 	// })
-	if sv.IsDisabled() {
-		if sv.Is(SliceViewInactKeyNav) {
+	if sv.IsReadOnly() {
+		if sv.Is(SliceViewReadOnlyKeyNav) {
 			sv.OnKeyChord(func(e events.Event) {
-				sv.KeyInputInactive(e)
+				sv.KeyInputReadOnly(e)
 			})
 		}
 	} else {

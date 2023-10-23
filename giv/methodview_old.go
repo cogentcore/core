@@ -173,7 +173,7 @@ func ToolbarView(val any, vp *gi.Scene, tb *gi.Toolbar) bool {
 // properties registered on the type for given value element, through the
 // kit.AddType method.  See https://goki.dev/gi/v2/wiki/Views for full
 // details on formats and options for configuring the menu.  It looks first
-// for "CtxtMenuActive" or "CtxtMenuInactive" depending on inactive flag
+// for "CtxtMenuActive" or "CtxtMenuReadOnly" depending on inactive flag
 // (which applies to the gui view), so you can have different menus in those
 // cases, and then falls back on "CtxtMenu".  Returns false if there is no
 // context menu defined for this type, or on errors (which are programmer
@@ -186,7 +186,7 @@ func CtxtMenuView(val any, inactive bool, vp *gi.Scene, menu *gi.Menu) bool {
 	var tp ki.PropSlice
 	got := false
 	if inactive {
-		tp, got = ki.SliceTypeProps(tpp, "CtxtMenuInactive")
+		tp, got = ki.SliceTypeProps(tpp, "CtxtMenuReadOnly")
 	} else {
 		tp, got = ki.SliceTypeProps(tpp, "CtxtMenuActive")
 	}
@@ -241,7 +241,7 @@ func MethodViewSetActionData(ac *gi.Button, val any, vp *gi.Scene) {
 	}
 }
 
-var compileMethsOrder = []string{"CallMethods", "Toolbar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuInactive"}
+var compileMethsOrder = []string{"CallMethods", "Toolbar", "MainMenu", "CtxtMenuActive", "CtxtMenu", "CtxtMenuReadOnly"}
 
 // MethodViewCompileMeths gets all methods either on the CallMethods list or any
 // of the Toolbar, MainMenu, or CtxtMenu lists (in that order).  Returns

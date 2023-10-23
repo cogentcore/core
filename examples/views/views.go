@@ -194,14 +194,14 @@ func app() {
 	// })
 
 	// sv := giv.NewSliceView(split, "sv")
-	// // sv.SetInactive()
+	// // sv.SetReadOnly()
 	// sv.SetSlice(&tstslice)
 	// sv.Style(func(s *styles.Style) {
 	// 	s.SetStretchMax()
 	// })
 
 	tv := giv.NewTableView(split, "tv")
-	// sv.SetInactive()
+	tv.SetReadOnly()
 	tv.SetSlice(&tsttable)
 	tv.Style(func(s *styles.Style) {
 		s.SetStretchMax()

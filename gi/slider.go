@@ -105,22 +105,22 @@ type Slider struct {
 	// 	Computed values below
 
 	// logical position of the slider relative to Size
-	Pos float32 `inactive:"+" set:"-"`
+	Pos float32 `readonly:"+" set:"-"`
 
 	// previous emitted value - don't re-emit if it is the same
-	LastValue float32 `inactive:"+" copy:"-" xml:"-" json:"-" set:"-"`
+	LastValue float32 `readonly:"+" copy:"-" xml:"-" json:"-" set:"-"`
 
 	// computed size of the slide box in the relevant dimension -- range of motion -- exclusive of spacing -- based on layout allocation
-	Size float32 `inactive:"+" set:"-"`
+	Size float32 `readonly:"+" set:"-"`
 
 	// computed size of the thumb -- if ValThumb then this is auto-sized based on ThumbVal and is subtracted from Size in computing Value -- this is the display size version subject to SliderMinThumbSize
-	ThSize float32 `inactive:"+" set:"-"`
+	ThSize float32 `readonly:"+" set:"-"`
 
 	// computed size of the thumb, without any SliderMinThumbSize limitation -- use this for more accurate calculations of true value
-	ThSizeReal float32 `inactive:"+" set:"-"`
+	ThSizeReal float32 `readonly:"+" set:"-"`
 
 	// underlying drag position of slider -- not subject to snapping
-	SlideStartPos float32 `inactive:"+" set:"-"`
+	SlideStartPos float32 `readonly:"+" set:"-"`
 }
 
 // SliderTypes are the different types of sliders

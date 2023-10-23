@@ -32,10 +32,10 @@ type VCSLogView struct {
 	Repo vci.Repo `json:"-" xml:"-" copy:"-"`
 
 	// revision A -- defaults to HEAD
-	RevA string
+	RevA string `set:"-"`
 
 	// revision B -- blank means current working copy
-	RevB string
+	RevB string `set:"-"`
 
 	// double-click will set the A revision -- else B
 	SetA bool
@@ -93,7 +93,7 @@ func (lv *VCSLogView) ConfigRepo(repo vci.Repo, lg vci.Log, file, since string) 
 	} else {
 		updt = lv.UpdateStart()
 	}
-	tv.SetState(true, states.Disabled)
+	tv.SetState(true, states.ReadOnly)
 	tv.SetSlice(&lv.Log)
 	lv.UpdateEndLayout(updt)
 }

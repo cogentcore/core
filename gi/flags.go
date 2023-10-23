@@ -52,10 +52,10 @@ func (wb *WidgetBase) CanFocus() bool {
 	return wb.Styles.Abilities.HasFlag(abilities.Focusable)
 }
 
-// SetCanFocusIfActive sets CanFocus flag only if node is active (inactive
-// nodes don't need focus typically)
+// SetCanFocusIfActive sets CanFocus flag only if node is active
+// (ReadOnly nodes don't need focus typically)
 func (wb *WidgetBase) SetCanFocusIfActive() {
-	wb.SetAbilities(wb.StateIs(states.Active), abilities.Focusable)
+	wb.SetAbilities(!wb.IsReadOnly(), abilities.Focusable)
 }
 
 // SetFocusState sets the HasFocus flag
@@ -78,6 +78,13 @@ func (wb *WidgetBase) SetEnabledStateUpdt(enabled bool) {
 // If so, behave and style appropriately.
 func (wb *WidgetBase) IsDisabled() bool {
 	return wb.StateIs(states.Disabled)
+}
+
+// IsReadOnly tests if this node is flagged as [ReadOnly] or [Disabled].
+// If so, behave appropriately.  Styling is based on each state separately,
+// but behaviors are often the same for both of these states.
+func (wb *WidgetBase) IsReadOnly() bool {
+	return wb.StateIs(states.ReadOnly) || wb.StateIs(states.Disabled)
 }
 
 // HasFlagWithin returns whether the current node or any

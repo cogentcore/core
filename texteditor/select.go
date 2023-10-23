@@ -534,7 +534,7 @@ func (ed *Editor) MakeContextMenu(m *gi.Scene) {
 		OnClick(func(e events.Event) {
 			ed.Copy(true)
 		})
-	if !ed.IsDisabled() {
+	if !ed.IsReadOnly() {
 		gi.NewButton(m).SetText("Cut").SetShortcutKey(gi.KeyFunCut).SetState(!ed.HasSelection(), states.Disabled).
 			OnClick(func(e events.Event) {
 				ed.Cut()

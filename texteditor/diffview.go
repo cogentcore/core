@@ -722,8 +722,8 @@ func (dv *DiffView) ConfigTexts() {
 	} else {
 		av := NewDiffTextView(al, "text-a")
 		bv := NewDiffTextView(bl, "text-b")
-		// av.SetInactive()
-		// bv.SetInactive()
+		// av.SetReadOnly()
+		// bv.SetReadOnly()
 		av.SetBuf(dv.BufA)
 		bv.SetBuf(dv.BufB)
 

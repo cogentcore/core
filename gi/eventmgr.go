@@ -985,7 +985,7 @@ func (em *EventMgr) DeleteShortcut(chord key.Chord, bt *Button) {
 
 // TriggerShortcut attempts to trigger a shortcut, returning true if one was
 // triggered, and false otherwise.  Also eliminates any shortcuts with deleted
-// buttons, and does not trigger for Inactive buttons.
+// buttons, and does not trigger for Disabled buttons.
 func (em *EventMgr) TriggerShortcut(chord key.Chord) bool {
 	if KeyEventTrace {
 		fmt.Printf("Shortcut chord: %v -- looking for button\n", chord)

@@ -160,7 +160,9 @@ func (tf *TextField) TextFieldStyles() {
 		tf.PlaceholderColor = colors.Scheme.OnSurfaceVariant
 		tf.CursorColor.SetSolid(colors.Scheme.Primary.Base)
 
-		s.Cursor = cursors.Text
+		if !tf.IsReadOnly() {
+			s.Cursor = cursors.Text
+		}
 		s.SetMinPrefWidth(units.Em(10))
 		s.Margin.Set(units.Dp(1))
 		s.Padding.Set(units.Dp(8), units.Dp(16))
@@ -206,9 +208,6 @@ func (tf *TextField) TextFieldStyles() {
 		}
 		if s.Is(states.Selected) {
 			s.BackgroundColor.SetSolid(colors.Scheme.Select.Container)
-		}
-		if s.Is(states.Disabled) {
-			s.Cursor = cursors.NotAllowed
 		}
 	})
 	tf.OnWidgetAdded(func(w Widget) {
@@ -708,7 +707,7 @@ func (tf *TextField) MakeContextMenu(m *Scene) {
 		OnClick(func(e events.Event) {
 			tf.This().(Clipper).Copy(true)
 		})
-	if !tf.StateIs(states.Disabled) {
+	if !tf.IsReadOnly() {
 		ctsc := ActiveKeyMap.ChordForFun(KeyFunCut)
 		ptsc := ActiveKeyMap.ChordForFun(KeyFunPaste)
 		NewButton(m, "cut").SetText("Cut").SetShortcut(ctsc).SetState(tf.NoEcho || !tf.HasSelection(), states.Disabled).
@@ -922,7 +921,7 @@ func (tf *TextField) StartCursor() {
 
 // ClearCursor turns off cursor and stops it from blinking
 func (tf *TextField) ClearCursor() {
-	if tf.IsDisabled() {
+	if tf.IsReadOnly() {
 		return
 	}
 	tf.StopCursor()
@@ -1201,15 +1200,9 @@ func (tf *TextField) SetCursorFromPixel(pixOff float32, selMode events.SelectMod
 // 	// }
 // }
 
-// if tf.IsDisabled() {
-// 	tf.SetSelected(!tf.StateIs(states.Selected))
-// 	tf.EmitSelectedSignal()
-// 	tf.SetNeedsRender()
-// } else {
-
 func (tf *TextField) HandleTextFieldMouse() {
 	tf.On(events.MouseDown, func(e events.Event) {
-		if tf.IsDisabled() {
+		if tf.IsReadOnly() {
 			return
 		}
 		if !tf.StateIs(states.Focused) {
@@ -1228,17 +1221,17 @@ func (tf *TextField) HandleTextFieldMouse() {
 		}
 	})
 	tf.OnClick(func(e events.Event) {
-		if tf.StateIs(states.Disabled) {
+		if tf.IsReadOnly() {
 			return
 		}
 		tf.GrabFocus()
 		tf.Send(events.Focus, e) // sets focused flag
 	})
 	tf.On(events.DoubleClick, func(e events.Event) {
-		if tf.IsDisabled() {
+		if tf.IsReadOnly() {
 			return
 		}
-		if !tf.IsDisabled() && !tf.StateIs(states.Focused) {
+		if !tf.IsReadOnly() && !tf.StateIs(states.Focused) {
 			tf.GrabFocus()
 			tf.Send(events.Focus, e) // sets focused flag
 		}
@@ -1254,7 +1247,7 @@ func (tf *TextField) HandleTextFieldMouse() {
 		}
 	})
 	tf.On(events.SlideMove, func(e events.Event) {
-		if tf.IsDisabled() {
+		if tf.IsReadOnly() {
 			return
 		}
 		e.SetHandled()
@@ -1320,7 +1313,7 @@ func (tf *TextField) HandleTextFieldKeys() {
 			tf.CancelComplete()
 			tf.This().(Clipper).Copy(true) // reset
 		}
-		if tf.StateIs(states.Disabled) || e.IsHandled() {
+		if tf.IsReadOnly() || e.IsHandled() {
 			return
 		}
 		switch kf {
@@ -1420,7 +1413,7 @@ func (tf *TextField) FocusChanged(change FocusChanges) {
 
 func (tf *TextField) HandleTextFieldStateFromFocus() {
 	tf.OnFocus(func(e events.Event) {
-		if tf.StateIs(states.Disabled) {
+		if tf.IsReadOnly() {
 			return
 		}
 		if tf.AbilityIs(abilities.Focusable) {
@@ -1434,7 +1427,7 @@ func (tf *TextField) HandleTextFieldStateFromFocus() {
 		}
 	})
 	tf.OnFocusLost(func(e events.Event) {
-		if tf.StateIs(states.Disabled) {
+		if tf.IsReadOnly() {
 			return
 		}
 		if tf.AbilityIs(abilities.Focusable) {
@@ -1453,7 +1446,7 @@ func (tf *TextField) HandleTextFieldEvents() {
 
 func (tf *TextField) ConfigParts(sc *Scene) {
 	parts := tf.NewParts(LayoutHoriz)
-	if tf.IsDisabled() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
+	if tf.IsReadOnly() || (tf.LeadingIcon.IsNil() && tf.TrailingIcon.IsNil()) {
 		parts.DeleteChildren(ki.DestroyKids)
 		return
 	}
@@ -1608,7 +1601,7 @@ func (tf *TextField) Render(sc *Scene) {
 	}
 	if tf.PushBounds(sc) {
 		tf.RenderTextField(sc)
-		if !tf.IsDisabled() {
+		if !tf.IsReadOnly() {
 			if tf.StateIs(states.Focused) {
 				tf.StartCursor()
 			} else {

@@ -233,7 +233,7 @@ func (ed *Editor) KeyInput(kt events.Event) {
 		kt.SetHandled()
 		ed.Lookup()
 	}
-	if ed.IsDisabled() {
+	if ed.IsReadOnly() {
 		switch {
 		case kf == gi.KeyFunFocusNext: // tab
 			kt.SetHandled()
@@ -579,7 +579,7 @@ func (ed *Editor) HandleTextViewMouse() {
 				ed.SavePosHistory(ed.CursorPos)
 			}
 		case events.Middle:
-			if !ed.IsDisabled() {
+			if !ed.IsReadOnly() {
 				ed.SetCursorFromMouse(pt, newPos, e.SelectMode())
 				ed.SavePosHistory(ed.CursorPos)
 				ed.Paste()

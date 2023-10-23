@@ -49,7 +49,7 @@ type FileView struct {
 	SelFile string
 
 	// target extension(s) (comma separated if multiple, including initial .), if any
-	Ext string
+	Ext string `set:"-"`
 
 	// optional styling function
 	FilterFunc FileViewFilterFunc `view:"-" json:"-" xml:"-"`
@@ -101,7 +101,7 @@ func (fv *FileView) FileViewStyles() {
 		case "favs-view":
 			fv := w.(*TableView)
 			fv.SetFlag(false, SliceViewShowIndex)
-			fv.SetFlag(false, SliceViewInactKeyNav) // can only have one active -- files..
+			fv.SetFlag(false, SliceViewReadOnlyKeyNav) // can only have one active -- files..
 			fv.SetFlag(false, SliceViewShowToolbar)
 			fv.SetState(true, states.Disabled) // select only
 			w.Style(func(s *styles.Style) {

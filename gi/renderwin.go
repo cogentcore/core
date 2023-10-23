@@ -506,7 +506,6 @@ func (w *RenderWin) Closed() {
 		}
 		return
 	}
-	// w.SetState(true, states.Disabled) // marks as closed
 	// w.FocusInactivate()
 	RenderWinGlobalMu.Lock()
 	if len(FocusRenderWins) > 0 {
@@ -535,10 +534,7 @@ func (w *RenderWin) Closed() {
 
 // IsClosed reports if the window has been closed
 func (w *RenderWin) IsClosed() bool {
-	// if w.IsDisabled() || w.Scene == nil {
-	// 	return true
-	// }
-	return false
+	return w.GoosiWin.IsClosed() || w.StageMgr.Stack.Len() == 0
 }
 
 // SetCloseReqFunc sets the function that is called whenever there is a

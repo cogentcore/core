@@ -377,10 +377,10 @@ func (tb *Buf) SignalMods() {
 	tb.SignalViews(BufMods, nil)
 }
 
-// SetInactive sets the buffer in an inactive state if inactive = true
-// otherwise is in active state.  Inactive = don't save Undos.
-func (tb *Buf) SetInactive(inactive bool) {
-	tb.Undos.Off = inactive
+// SetReadOnly sets the buffer in a ReadOnly state if readonly = true
+// otherwise is in editable state.
+func (tb *Buf) SetReadOnly(readonly bool) {
+	tb.Undos.Off = readonly
 }
 
 // todo: use https://github.com/andybalholm/crlf to deal with cr/lf etc --

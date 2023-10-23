@@ -386,9 +386,9 @@ func _SliceViewFlagsNoOp() {
 	_ = x[SliceViewIsArray-(13)]
 	_ = x[SliceViewShowIndex-(14)]
 	_ = x[SliceViewShowToolbar-(15)]
-	_ = x[SliceViewInactKeyNav-(16)]
+	_ = x[SliceViewReadOnlyKeyNav-(16)]
 	_ = x[SliceViewSelectMode-(17)]
-	_ = x[SliceViewInactMultiSel-(18)]
+	_ = x[SliceViewReadOnlyMultiSel-(18)]
 	_ = x[SliceViewInFocusGrab-(19)]
 	_ = x[SliceViewInFullRebuild-(20)]
 }
@@ -408,12 +408,12 @@ var _SliceViewFlagsNameToValueMap = map[string]SliceViewFlags{
 	`showindex`:        14,
 	`ShowToolbar`:      15,
 	`showtoolbar`:      15,
-	`InactKeyNav`:      16,
-	`inactkeynav`:      16,
+	`ReadOnlyKeyNav`:   16,
+	`readonlykeynav`:   16,
 	`SelectMode`:       17,
 	`selectmode`:       17,
-	`InactMultiSel`:    18,
-	`inactmultisel`:    18,
+	`ReadOnlyMultiSel`: 18,
+	`readonlymultisel`: 18,
 	`InFocusGrab`:      19,
 	`infocusgrab`:      19,
 	`InFullRebuild`:    20,
@@ -428,9 +428,9 @@ var _SliceViewFlagsDescMap = map[SliceViewFlags]string{
 	13: `whether the slice is actually an array -- no modifications -- set by SetSlice`,
 	14: `whether to show index or not`,
 	15: `whether to show the toolbar or not`,
-	16: `support key navigation when inactive (default true) -- no focus really plausible in inactive case, so it uses a low-pri capture of up / down events`,
+	16: `support key navigation when ReadOnly (default true) -- no focus really plausible in ReadOnly case, so it uses a low-pri capture of up / down events`,
 	17: `editing-mode select rows mode`,
-	18: `if view is inactive, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
+	18: `if view is ReadOnly, default selection mode is to choose one row only -- if this is true, standard multiple selection logic with modifier keys is instead supported`,
 	19: `guard for recursive focus grabbing`,
 	20: `guard for recursive rebuild`,
 }
@@ -443,9 +443,9 @@ var _SliceViewFlagsMap = map[SliceViewFlags]string{
 	13: `IsArray`,
 	14: `ShowIndex`,
 	15: `ShowToolbar`,
-	16: `InactKeyNav`,
+	16: `ReadOnlyKeyNav`,
 	17: `SelectMode`,
-	18: `InactMultiSel`,
+	18: `ReadOnlyMultiSel`,
 	19: `InFocusGrab`,
 	20: `InFullRebuild`,
 }
