@@ -2523,8 +2523,7 @@ func (tb *Buf) SetCompleter(data any, matchFun complete.MatchFunc, editFun compl
 		}
 		tb.DeleteCompleter()
 	}
-	tb.Complete = &gi.Complete{}
-	tb.Complete.InitName(tb.Complete, "tb-completion") // needed for standalone Ki's
+	tb.Complete = gi.NewComplete(tb.CurView)
 	tb.Complete.Context = data
 	tb.Complete.MatchFunc = matchFun
 	tb.Complete.EditFunc = editFun
@@ -2545,7 +2544,7 @@ func (tb *Buf) DeleteCompleter() {
 		return
 	}
 	// tb.Complete.CompleteSig.Disconnect(tb.This())
-	tb.Complete.Destroy()
+	// tb.Complete.Destroy()
 	tb.Complete = nil
 }
 

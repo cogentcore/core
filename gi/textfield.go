@@ -878,13 +878,12 @@ func (tf *TextField) MakeContextMenu(m *Scene) {
 func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun complete.EditFunc) {
 	if matchFun == nil || editFun == nil {
 		if tf.Complete != nil {
-			tf.Complete.Destroy()
+			// tf.Complete.Destroy()
 		}
 		tf.Complete = nil
 		return
 	}
-	tf.Complete = &Complete{}
-	tf.Complete.InitName(tf.Complete, "tf-completion") // needed for standalone Ki's
+	tf.Complete = NewComplete(tf)
 	tf.Complete.Context = data
 	tf.Complete.MatchFunc = matchFun
 	tf.Complete.EditFunc = editFun
@@ -909,7 +908,10 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos := tf.CharStartPos(tf.CursorPos, true).ToPoint()
 	cpos.X += 5
 	cpos.Y += 10
-	tf.Complete.Show(s, 0, tf.CursorPos, tf.Sc, cpos, forceComplete)
+	tf.Complete.SrcLn = 0
+	tf.Complete.SrcCh = tf.CursorPos
+	tf.Complete.Stage.Scene.Geom.Pos = cpos
+	tf.Complete.Show(s, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
