@@ -84,15 +84,9 @@ var CompleteWaitMSec = 0
 // CompleteMaxItems is the max number of items to display in completer popup
 var CompleteMaxItems = 25
 
-// NewComplete returns a new [Complete] object, initializing its [PopupStage]
-// based on the given context widget.
-func NewComplete(ctx Widget) *Complete {
-	c := &Complete{}
-	sc := NewScene(ctx.Name() + "-complete")
-	MenuSceneConfigStyles(sc)
-	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
-	sc.Geom.Pos = ctx.ContextMenuPos(nil)
-	return c
+// NewComplete returns a new [Complete] object. It does not show it; see [Complete.Show].
+func NewComplete() *Complete {
+	return &Complete{}
 }
 
 // IsAboutToShow returns true if the DelayTimer is started for
@@ -108,14 +102,11 @@ func (c *Complete) IsAboutToShow() bool {
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, force bool) {
-	if c.MatchFunc == nil || c.Stage == nil || c.Stage.Scene == nil {
+func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
+	if c.MatchFunc == nil {
 		return
 	}
-	// cpop := sc.Win.CurPopup()
-	// TODO: maybe preserve popup and just move it
-	// onif there is no delay set in CompleteWaitMSec
-	// (should reduce annoying flashing)
+
 	waitMSec := CompleteWaitMSec
 	if force {
 		waitMSec = 0
@@ -135,7 +126,7 @@ func (c *Complete) Show(text string, force bool) {
 	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
 		func() {
 			c.DelayMu.Lock()
-			c.ShowNow(text, force, waitMSec == 0)
+			c.ShowNow(ctx, pos, text, force)
 			c.DelayTimer = nil
 			c.DelayMu.Unlock()
 		})
@@ -143,11 +134,9 @@ func (c *Complete) Show(text string, force bool) {
 }
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
-// completion popup menu. If keep is set to true, the previous completion popup
-// will be kept and reused (if it exists), which reduces flashing if there is no
-// delay between popups.
-func (c *Complete) ShowNow(text string, force bool, keep bool) {
-	if c.MatchFunc == nil || c.Stage == nil || c.Stage.Scene == nil {
+// completion popup menu.
+func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool) {
+	if c.MatchFunc == nil {
 		return
 	}
 	// cpop := sc.Win.CurPopup()
@@ -169,7 +158,11 @@ func (c *Complete) ShowNow(text string, force bool, keep bool) {
 		}
 	}
 
-	// var m Menu
+	sc := NewScene(ctx.Name() + "-complete")
+	MenuSceneConfigStyles(sc)
+	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
+	sc.Geom.Pos = ctx.ContextMenuPos(nil)
+
 	for i := 0; i < count; i++ {
 		cmp := &c.Completions[i]
 		text := cmp.Text
@@ -177,27 +170,11 @@ func (c *Complete) ShowNow(text string, force bool, keep bool) {
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		NewButton(c.Stage.Scene, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
+		NewButton(sc, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
 			OnClick(func(e events.Event) {
 				c.Complete(cmp.Text)
 			})
 	}
-	// TODO: maybe get this working with RecyclePopup
-	// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
-	// if keep && vp.Win.CurPopup() != nil {
-	// 	fmt.Println("updating through keep")
-	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-	// 	psc.SetFlag(int(ScFlagCompleter))
-	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
-	// } else {
-	// psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
-	// psc.Type = ScCompleter
-	// // todo:
-	// // psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-	// sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
-	// // }
-	// c.Sc = sc
 	c.Stage.RunPopup()
 }
 

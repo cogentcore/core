@@ -51,8 +51,7 @@ func (ed *Editor) OfferComplete() {
 	ed.Buf.CurView = ed
 	ed.Buf.Complete.SrcLn = ed.CursorPos.Ln
 	ed.Buf.Complete.SrcCh = ed.CursorPos.Ch
-	ed.Buf.Complete.Stage.Scene.Geom.Pos = cpos
-	ed.Buf.Complete.Show(s, ed.ForceComplete)
+	ed.Buf.Complete.Show(ed, cpos, s, ed.ForceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
