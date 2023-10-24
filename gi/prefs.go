@@ -805,8 +805,8 @@ type PrefsDetailed struct { //gti:add
 	// the maximum number of pixels that mouse can move and still register a Hover event
 	LongHoverStopDist int `def:"50" min:"0" max:"1000" step:"1"`
 
-	// the number of milliseconds to wait before offering completions
-	CompleteWaitMSec int `def:"0" min:"0" max:"10000" step:"10"`
+	// the amount of time to wait before offering completions
+	CompleteWaitDuration time.Duration `def:"0" min:"0" max:"10000" step:"10"`
 
 	// the maximum number of completions offered in popup
 	CompleteMaxItems int `def:"25" min:"5" step:"1"`
@@ -904,7 +904,7 @@ func (pf *PrefsDetailed) Defaults() {
 	pf.SlideStartDist = SlideStartDist
 	pf.LongHoverTime = LongHoverTime
 	pf.LongHoverStopDist = LongHoverStopDist
-	pf.CompleteWaitMSec = CompleteWaitMSec
+	pf.CompleteWaitDuration = CompleteWaitDuration
 	pf.CompleteMaxItems = CompleteMaxItems
 	pf.CursorBlinkTime = CursorBlinkTime
 	pf.LayoutAutoScrollDelayMSec = LayoutAutoScrollDelayMSec
@@ -930,7 +930,7 @@ func (pf *PrefsDetailed) Apply() {
 	SlideStartDist = pf.SlideStartDist
 	LongHoverTime = pf.LongHoverTime
 	LongHoverStopDist = pf.LongHoverStopDist
-	CompleteWaitMSec = pf.CompleteWaitMSec
+	CompleteWaitDuration = pf.CompleteWaitDuration
 	CompleteMaxItems = pf.CompleteMaxItems
 	CursorBlinkTime = pf.CursorBlinkTime
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec

@@ -77,9 +77,9 @@ const (
 	CompleteExtend
 )
 
-// CompleteWaitMSec is the number of milliseconds to wait before
+// CompleteWaitDuration is the amount of time to wait before
 // showing the completion menu
-var CompleteWaitMSec = 0
+var CompleteWaitDuration time.Duration = 0
 
 // CompleteMaxItems is the max number of items to display in completer popup
 var CompleteMaxItems = 25
@@ -107,13 +107,13 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 		return
 	}
 
-	waitMSec := CompleteWaitMSec
+	wait := CompleteWaitDuration
 	if force {
-		waitMSec = 0
+		wait = 0
 	}
-	// if PopupIsCompleter(cpop) {
-	// 	sc.Win.SetDelPopup(cpop)
-	// }
+	if c.Stage != nil {
+		c.Cancel()
+	}
 	c.DelayMu.Lock()
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
@@ -123,7 +123,7 @@ func (c *Complete) Show(ctx Widget, pos image.Point, text string, force bool) {
 		return
 	}
 
-	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
+	c.DelayTimer = time.AfterFunc(wait,
 		func() {
 			c.DelayMu.Lock()
 			c.ShowNow(ctx, pos, text, force)
@@ -139,10 +139,9 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	if c.MatchFunc == nil {
 		return
 	}
-	// cpop := sc.Win.CurPopup()
-	// if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
-	// 	sc.Win.SetDelPopup(cpop)
-	// }
+	if c.Stage != nil {
+		c.Cancel()
+	}
 	c.ShowMu.Lock()
 	defer c.ShowMu.Unlock()
 	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
@@ -161,7 +160,7 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	sc := NewScene(ctx.Name() + "-complete")
 	MenuSceneConfigStyles(sc)
 	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
-	sc.Geom.Pos = ctx.ContextMenuPos(nil)
+	sc.Geom.Pos = pos
 
 	for i := 0; i < count; i++ {
 		cmp := &c.Completions[i]
@@ -183,19 +182,8 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 // Returns true if canceled.
 func (c *Complete) Cancel() bool {
 	c.Stage.Close()
+	c.Stage = nil
 	return true
-	/*
-		did := false
-		if c.Sc != nil && c.Sc.Win != nil {
-			cpop := c.Sc.Win.CurPopup()
-			if PopupIsCompleter(cpop) {
-				c.Sc.Win.SetDelPopup(cpop)
-				did = true
-			}
-		}
-		ab := c.Abort()
-		return did || ab
-	*/
 }
 
 // Abort aborts *only* pending completions, but does not close existing window.
