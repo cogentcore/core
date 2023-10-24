@@ -89,6 +89,7 @@ var CompleteMaxItems = 25
 func NewComplete(ctx Widget) *Complete {
 	c := &Complete{}
 	sc := NewScene(ctx.Name() + "-complete")
+	MenuSceneConfigStyles(sc)
 	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
 	sc.Geom.Pos = ctx.ContextMenuPos(nil)
 	return c
@@ -176,9 +177,10 @@ func (c *Complete) ShowNow(text string, force bool, keep bool) {
 			text = cmp.Label
 		}
 		icon := cmp.Icon
-		NewButton(c.Stage.Scene, text).SetIcon(icons.Icon(icon)).SetText(text).SetTooltip(cmp.Desc).OnClick(func(e events.Event) {
-			c.Complete(cmp.Text)
-		})
+		NewButton(c.Stage.Scene, text).SetText(text).SetIcon(icons.Icon(icon)).SetTooltip(cmp.Desc).
+			OnClick(func(e events.Event) {
+				c.Complete(cmp.Text)
+			})
 	}
 	// TODO: maybe get this working with RecyclePopup
 	// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
