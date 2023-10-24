@@ -2524,6 +2524,10 @@ func (tb *Buf) SetCompleter(data any, matchFun complete.MatchFunc, editFun compl
 		tb.DeleteCompleter()
 	}
 	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).SetEditFunc(editFun).SetLookupFunc(lookupFun)
+	tb.Complete.OnSelect(func(e events.Event) {
+		tb.CompleteText(tb.Complete.Completion)
+	})
+	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
 	// note: only need to connect once..
 	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
 	// 	tbf, _ := recv.Embed(TypeBuf).(*Buf)

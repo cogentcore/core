@@ -887,6 +887,7 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 	tf.Complete.OnSelect(func(e events.Event) {
 		tf.CompleteText(tf.Complete.Completion)
 	})
+	// TODO(kai/complete): clean this up and figure out what to do about Extend and only connecting once
 	// note: only need to connect once..
 	// todo:
 	// tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
