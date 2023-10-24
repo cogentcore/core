@@ -1714,7 +1714,13 @@ func (vv *FuncValue) UpdateWidget() {
 		return
 	}
 	fbt := vv.Widget.(*FuncButton)
-	fbt.SetFunc(laser.NonPtrValue(vv.Value).Interface())
+	fun := laser.NonPtrValue(vv.Value).Interface()
+	if fun != nil {
+		fbt.SetFunc(fun)
+		return
+	}
+	fbt.SetText("nil")
+	fbt.Update()
 }
 
 func (vv *FuncValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
