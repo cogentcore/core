@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goki.dev/ki/v2/dirs"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/glop/dirs"
+	"goki.dev/ki/v2"
 )
 
 // Decoder parses 3D object / scene file(s) and imports into a Group or Scene.
@@ -172,7 +172,7 @@ func (sc *Scene) OpenNewObjFS(fsys fs.FS, fname string, parent ki.Ki) (*Group, e
 	}
 	updt := sc.UpdateStart()
 	_, fn := filepath.Split(fname)
-	gp := AddNewGroup(sc, parent, fn)
+	gp := NewGroup(parent, fn)
 	dec.SetGroup(sc, gp)
 	if sc.IsConfiged() { // has already been configed
 		sc.ConfigRender()

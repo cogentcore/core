@@ -5,14 +5,8 @@
 package gi3d
 
 import (
-	"fmt"
-
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/giv"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 )
 
 // SceneView provides a toolbar controller for a gi3d.Scene
@@ -20,27 +14,20 @@ type SceneView struct {
 	gi.Layout
 }
 
-var TypeSceneView = kit.Types.AddType(&SceneView{}, nil)
-
-// AddNewSceneView adds a new SceneView to given parent node, with given name.
-func AddNewSceneView(parent ki.Ki, name string) *SceneView {
-	return parent.AddNewChild(TypeSceneView, name).(*SceneView)
-}
-
 // Config configures the overall view widget
 func (sv *SceneView) Config() {
 	sv.Lay = gi.LayoutVert
 	sv.SetProp("spacing", gi.StdDialogVSpaceUnits)
-	config := kit.TypeAndNameList{}
-	config.Add(TypeScene, "scene")
-	config.Add(gi.TypeToolbar, "tbar")
+	config := ki.Config{}
+	config.Add(SceneType, "scene")
+	config.Add(gi.ToolbarType, "tbar")
 	mods, updt := sv.ConfigChildren(config)
 	if mods {
 		sc := sv.Scene()
 		sc.Defaults()
 		sc.SetStretchMaxWidth()
 		sc.SetStretchMaxHeight()
-		sv.ToolbarConfig()
+		// sv.ToolbarConfig()
 	}
 	sv.UpdateEnd(updt)
 }
@@ -65,6 +52,7 @@ func (sv *SceneView) Toolbar() *gi.Toolbar {
 	return tbi.(*gi.Toolbar)
 }
 
+/*
 func (sv *SceneView) ToolbarConfig() {
 	tbar := sv.Toolbar()
 	if len(tbar.Kids) != 0 {
@@ -93,7 +81,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddSeparator("rot")
-	gi.AddNewLabel(tbar, "rot", "Rot:")
+	gi.NewLabel(tbar, "rot", "Rot:")
 	tbar.AddAction(gi.ActOpts{Icon: icons.KeyboardArrowLeft}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSceneView).(*SceneView)
@@ -123,7 +111,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddSeparator("pan")
-	gi.AddNewLabel(tbar, "pan", "Pan:")
+	gi.NewLabel(tbar, "pan", "Pan:")
 	tbar.AddAction(gi.ActOpts{Icon: icons.KeyboardArrowLeft}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSceneView).(*SceneView)
@@ -153,7 +141,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddSeparator("save")
-	gi.AddNewLabel(tbar, "save", "Save:")
+	gi.NewLabel(tbar, "save", "Save:")
 	tbar.AddAction(gi.ActOpts{Label: "1", Icon: icons.Save, Tooltip: "first click (or + Shift) saves current view, second click restores to saved state"}, sv.This(),
 		func(recv, send ki.Ki, sig int64, data any) {
 			svv := recv.Embed(TypeSceneView).(*SceneView)
@@ -223,7 +211,7 @@ func (sv *SceneView) ToolbarConfig() {
 			scc.UpdateSig()
 		})
 	tbar.AddSeparator("sel")
-	cb := gi.AddNewComboBox(tbar, "selmode")
+	cb := gi.NewComboBox(tbar, "selmode")
 	cb.ItemsFromEnum(TypeSelModes, true, 25)
 	cb.SetCurIndex(int(sv.Scene().SelMode))
 	cb.ComboSig.ConnectOnly(sv.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -248,3 +236,5 @@ func (sv *SceneView) ToolbarConfig() {
 			giv.StructViewDialog(svv.Viewport, scc, giv.DlgOpts{Title: "Scene"}, nil, nil)
 		})
 }
+
+*/

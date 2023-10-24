@@ -7,7 +7,6 @@ package gi3d
 import (
 	"image/color"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -40,8 +39,6 @@ type LightBase struct {
 	Clr color.RGBA
 }
 
-var TypeLightBase = kit.Types.AddType(&LightBase{}, nil)
-
 // Name returns name of the light -- lights are accessed by name
 func (lb *LightBase) Name() string {
 	return lb.Nm
@@ -63,10 +60,8 @@ type AmbientLight struct {
 	LightBase
 }
 
-var TypeAmbientLight = kit.Types.AddType(&AmbientLight{}, nil)
-
-// AddNewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
-func AddNewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
+// NewAmbientLight adds Ambient to given scene, with given name, standard color, and lumens (0-1 normalized)
+func NewAmbientLight(sc *Scene, name string, lumens float32, color LightColors) *AmbientLight {
 	lt := &AmbientLight{}
 	lt.Nm = name
 	lt.On = true
@@ -87,11 +82,9 @@ type DirLight struct {
 	Pos mat32.Vec3
 }
 
-var TypeDirLight = kit.Types.AddType(&DirLight{}, nil)
-
-// AddNewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// NewDirLight adds direct light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located overhead and toward the default camera (0, 1, 1) -- change Pos otherwise
-func AddNewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
+func NewDirLight(sc *Scene, name string, lumens float32, color LightColors) *DirLight {
 	lt := &DirLight{}
 	lt.Nm = name
 	lt.On = true
@@ -124,11 +117,9 @@ type PointLight struct {
 	QuadDecay float32
 }
 
-var TypePointLight = kit.Types.AddType(&PointLight{}, nil)
-
-// AddNewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// NewPointLight adds point light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located at 0,5,5 (up and between default camera and origin) -- set Pos to change.
-func AddNewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
+func NewPointLight(sc *Scene, name string, lumens float32, color LightColors) *PointLight {
 	lt := &PointLight{}
 	lt.Nm = name
 	lt.On = true
@@ -166,13 +157,11 @@ type SpotLight struct {
 	QuadDecay float32
 }
 
-var TypeSpotLight = kit.Types.AddType(&SpotLight{}, nil)
-
-// AddNewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
+// NewSpotLight adds spot light to given scene, with given name, standard color, and lumens (0-1 normalized)
 // By default it is located at 0,5,5 (up and between default camera and origin) and pointing at the origin.
 // Use the Pose LookAt function to point it at other locations.
 // In its unrotated state, it points down the -Z axis (i.e., into the scene using default view parameters)
-func AddNewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
+func NewSpotLight(sc *Scene, name string, lumens float32, color LightColors) *SpotLight {
 	lt := &SpotLight{}
 	lt.Nm = name
 	lt.On = true
@@ -213,7 +202,7 @@ func (sl *SpotLight) LookAtOrigin() {
 //  Scene code
 
 // AddLight adds given light to lights
-// see AddNewX for convenience methods to add specific lights
+// see NewX for convenience methods to add specific lights
 func (sc *Scene) AddLight(lt Light) {
 	sc.Lights.Add(lt.Name(), lt)
 }
@@ -243,7 +232,7 @@ func (sc *Scene) ConfigLights() {
 // http://planetpixelemporium.com/tutorialpages/light.html
 
 // LightColors are standard light colors for different light sources
-type LightColors int
+type LightColors int32 //enums:enum
 
 const (
 	DirectSun LightColors = iota
@@ -261,10 +250,7 @@ const (
 	MercuryVapor
 	SodiumVapor
 	MetalHalide
-	LightColorsN
 )
-
-var TypeLightColors = kit.Enums.AddEnum(LightColorsN, kit.NotBitFlag, nil)
 
 // LightColorMap provides a map of named light colors
 var LightColorMap = map[LightColors]color.RGBA{

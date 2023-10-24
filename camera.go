@@ -8,9 +8,8 @@ import (
 	"image"
 	"sync"
 
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/icons"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -59,8 +58,6 @@ type Camera struct {
 	// frustum of projection -- viewable space defined by 6 planes of a pyrammidal shape
 	Frustum *mat32.Frustum `view:"-"`
 }
-
-var TypeCamera = kit.Types.AddType(&Camera{}, CameraProps)
 
 func (cm *Camera) Defaults() {
 	cm.FOV = 30

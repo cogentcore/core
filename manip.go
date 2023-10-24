@@ -5,21 +5,14 @@
 package gi3d
 
 import (
-	"image/color"
-
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
-	"goki.dev/mat32/v2"
+	"goki.dev/grr"
+	"goki.dev/ki/v2"
 )
 
 // SelModes are selection modes for Scene
-type SelModes int
+type SelModes int32 //enums:enum
 
 const (
 	// NotSelectable means that selection events are ignored entirely
@@ -34,11 +27,7 @@ const (
 	// Manipulable means that a manipulation box will be created for selected nodes,
 	// which can update the Pose parameters dynamically.
 	Manipulable
-
-	SelModesN
 )
-
-var TypeSelModes = kit.Enums.AddEnum(SelModesN, kit.NotBitFlag, nil)
 
 // SelParams are parameters for selection / manipulation box
 type SelParams struct {
@@ -64,7 +53,7 @@ func (sp *SelParams) Defaults() {
 
 // SetSel -- if Selectable is true, then given object is selected
 // if node is nil then selection is reset.
-func (sc *Scene) SetSel(nd Node3D) {
+func (sc *Scene) SetSel(nd Node) {
 	if sc.SelMode == NotSelectable {
 		return
 	}
@@ -72,9 +61,9 @@ func (sc *Scene) SetSel(nd Node3D) {
 		return
 	}
 	if nd == nil {
-		if sc.CurSel != nil {
-			sc.CurSel.AsNode3D().ClearSelected()
-		}
+		// if sc.CurSel != nil { // todo
+		// 	sc.CurSel.AsNode3D().ClearSelected()
+		// }
 		sc.CurManipPt = nil
 		sc.CurSel = nil
 		updt := sc.UpdateStart()
@@ -84,7 +73,7 @@ func (sc *Scene) SetSel(nd Node3D) {
 		return
 	}
 	sc.CurSel = nd
-	nd.AsNode3D().SetSelected()
+	// nd.AsNode3D().SetSelected() // todo
 	switch sc.SelMode {
 	case Selectable:
 		return
@@ -105,8 +94,8 @@ func (sc *Scene) SelectBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
-	clr := colors.LogFromName(string(sc.SelParams.Color))
-	AddNewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
+	clr := grr.Log(colors.FromName(string(sc.SelParams.Color)))
+	NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 
 	sc.ReconfigMeshes()
 	sc.Render()
@@ -126,23 +115,26 @@ func (sc *Scene) ManipBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
-	clr := colors.LogFromName(string(sc.SelParams.Color))
+	clr := grr.Log(colors.FromName(string(sc.SelParams.Color)))
 
 	bbox := nb.WorldBBox.BBox
-	mb := AddNewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)
+	mb := NewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)
 
-	mbspm := AddNewSphere(sc, nm+"-pt", sc.SelParams.Radius, 16)
+	mbspm := NewSphere(sc, nm+"-pt", sc.SelParams.Radius, 16)
+	_ = mbspm
 
 	bbox.Min.SetSub(mb.Pose.Pos)
 	bbox.Max.SetSub(mb.Pose.Pos)
-	AddNewManipPt(sc, mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
-	AddNewManipPt(sc, mb, nm+"-llu", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Min.Y, bbox.Max.Z})
-	AddNewManipPt(sc, mb, nm+"-lul", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Max.Y, bbox.Min.Z})
-	AddNewManipPt(sc, mb, nm+"-ull", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Min.Y, bbox.Min.Z})
-	AddNewManipPt(sc, mb, nm+"-luu", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Max.Y, bbox.Max.Z})
-	AddNewManipPt(sc, mb, nm+"-ulu", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Min.Y, bbox.Max.Z})
-	AddNewManipPt(sc, mb, nm+"-uul", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Max.Y, bbox.Min.Z})
-	AddNewManipPt(sc, mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
+	/*
+		NewManipPt(sc, mb, nm+"-lll", mbspm.Name(), clr, bbox.Min)
+		NewManipPt(sc, mb, nm+"-llu", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Min.Y, bbox.Max.Z})
+		NewManipPt(sc, mb, nm+"-lul", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Max.Y, bbox.Min.Z})
+		NewManipPt(sc, mb, nm+"-ull", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Min.Y, bbox.Min.Z})
+		NewManipPt(sc, mb, nm+"-luu", mbspm.Name(), clr, mat32.Vec3{bbox.Min.X, bbox.Max.Y, bbox.Max.Z})
+		NewManipPt(sc, mb, nm+"-ulu", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Min.Y, bbox.Max.Z})
+		NewManipPt(sc, mb, nm+"-uul", mbspm.Name(), clr, mat32.Vec3{bbox.Max.X, bbox.Max.Y, bbox.Min.Z})
+		NewManipPt(sc, mb, nm+"-uuu", mbspm.Name(), clr, bbox.Max)
+	*/
 
 	sc.RenderMu.Unlock()
 	sc.ReconfigMeshes()
@@ -162,18 +154,19 @@ type ManipPt struct {
 	Solid
 }
 
-var TypeManipPt = kit.Types.AddType(&ManipPt{}, ManipPtProps)
-
-// AddNewManipPt adds a new manipulation point
-func AddNewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPt {
-	mpt := parent.AddNewChild(TypeManipPt, name).(*ManipPt)
+/*
+// NewManipPt adds a new manipulation point
+func NewManipPt(sc *Scene, parent ki.Ki, name string, meshName string, clr color.RGBA, pos mat32.Vec3) *ManipPt {
+	mpt := parent.NewChild(TypeManipPt, name).(*ManipPt)
 	mpt.SetMeshName(sc, meshName)
 	mpt.Defaults()
 	mpt.Pose.Pos = pos
 	mpt.Mat.Color = clr
 	return mpt
 }
+*/
 
+/*
 // Default ManipPt can be selected and manipulated
 func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 	mpt.ConnectEvent(sc.Win, oswin.MouseEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -282,7 +275,4 @@ func (mpt *ManipPt) ConnectEvents3D(sc *Scene) {
 		ssc.UpdateEnd(updt)
 	})
 }
-
-var ManipPtProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
+*/

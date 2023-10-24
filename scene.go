@@ -4,6 +4,8 @@
 
 package gi3d
 
+//go:generate goki generate
+
 import (
 	"fmt"
 	"image"
@@ -13,13 +15,8 @@ import (
 
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/icons"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/cursor"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/goosi/events"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/ordmap"
 	"goki.dev/vgpu/v2/vgpu"
@@ -74,7 +71,7 @@ type Scene struct {
 	gi.WidgetBase
 
 	// Viewport-level viewbox within any parent Viewport2D
-	Geom gi.Geom2DInt
+	Geom mat32.Geom2DInt
 
 	// number of samples in multisampling -- must be a power of 2, and must be 1 if grabbing the Depth buffer back from the RenderFrame
 	MultiSample int `def:"4"`
@@ -83,7 +80,7 @@ type Scene struct {
 	Wireframe bool `def:"false"`
 
 	// camera determines view onto scene
-	Camera Camera
+	Camera Camera `set:"-"`
 
 	// background color
 	BackgroundColor color.RGBA
@@ -92,7 +89,7 @@ type Scene struct {
 	Lights ordmap.Map[string, Light]
 
 	// meshes -- holds all the mesh data -- must be configured prior to rendering
-	Meshes ordmap.Map[string, Mesh]
+	Meshes ordmap.Map[string, Mesh] `set:"-"`
 
 	// textures -- must be configured prior to rendering -- a maximum of 16 textures is supported for full cross-platform portability
 	Textures ordmap.Map[string, Texture]
@@ -106,9 +103,6 @@ type Scene struct {
 	// saved cameras -- can Save and Set these to view the scene from different angles
 	SavedCams map[string]Camera
 
-	// our parent window that we render into
-	Win *gi.Window `copy:"-" json:"-" xml:"-"`
-
 	// has dragging cursor been set yet?
 	SetDragCursor bool `view:"-"`
 
@@ -116,7 +110,7 @@ type Scene struct {
 	SelMode SelModes
 
 	// currently selected node
-	CurSel Node3D `copy:"-" json:"-" xml:"-" view:"-"`
+	CurSel Node `copy:"-" json:"-" xml:"-" view:"-"`
 
 	// currently selected manipulation control point
 	CurManipPt *ManipPt `copy:"-" json:"-" xml:"-" view:"-"`
@@ -137,25 +131,12 @@ type Scene struct {
 	RenderMu sync.Mutex `view:"-" copy:"-" json:"-" xml:"-"`
 }
 
-var TypeScene = kit.Types.AddType(&Scene{}, SceneProps)
-
-// AddNewScene adds a new scene to given parent node, with given name.
-func AddNewScene(parent ki.Ki, name string) *Scene {
-	sc := parent.AddNewChild(TypeScene, name).(*Scene)
-	sc.Defaults()
-	return sc
-}
-
 // Defaults sets default scene params (camera, bg = white)
 func (sc *Scene) Defaults() {
 	sc.MultiSample = 4
 	sc.Camera.Defaults()
 	sc.BackgroundColor = colors.White
 	sc.SelParams.Defaults()
-}
-
-func (sc *Scene) Disconnect() {
-	sc.WidgetBase.Disconnect()
 }
 
 // Update is a global update of everything: Init3D and re-render
@@ -204,18 +185,15 @@ func (sc *Scene) Validate() error {
 	// 	*errs = append(*errs, err)
 	// }
 	hasError := false
-	sc.FuncDownMeFirst(0, sc.This(), func(k ki.Ki, level int, d any) bool {
+	sc.WalkPre(func(k ki.Ki) bool {
 		if k == sc.This() {
 			return ki.Continue
 		}
-		nii, ni := KiToNode3D(k)
-		if nii == nil {
-			return ki.Break // going into a different type of thing, bail
-		}
-		if ni.IsInvisible() {
+		ni, _ := AsNode3D(k)
+		if !ni.IsVisible() {
 			return ki.Break
 		}
-		err := nii.Validate(sc)
+		err := ni.Validate(sc)
 		if err != nil {
 			hasError = true
 		}
@@ -265,27 +243,32 @@ func (sc *Scene) AddFmLibrary(nm string, parent ki.Ki) (*Group, error) {
 /////////////////////////////////////////////////////////////////////////////////////
 //  Node2D Interface
 
+func (sc *Scene) IsInvisible() bool {
+	return false
+}
+
 func (sc *Scene) IsVisible() bool {
-	if sc == nil || sc.This() == nil || sc.IsInvisible() || sc.Win == nil {
+	if sc == nil || sc.This() == nil || sc.IsInvisible() {
 		return false
 	}
 	if sc.Par == nil || sc.Par.This() == nil {
 		return false
 	}
-	return sc.Par.This().(gi.Node2D).IsVisible()
+	return true
+	// return sc.Par.This().(gi.Node2D).IsVisible()
 }
 
 // set our window pointer to point to the current window we are under
 func (sc *Scene) SetCurWin() {
-	pwin := sc.ParentWindow()
-	if pwin != nil { // only update if non-nil -- otherwise we could be setting
-		// temporarily to give access to DPI etc
-		sc.Win = pwin
-	}
+	// pwin := sc.ParentWindow()
+	// if pwin != nil { // only update if non-nil -- otherwise we could be setting
+	// 	// temporarily to give access to DPI etc
+	// 	sc.Win = pwin
+	// }
 }
 
 func (sc *Scene) Resize(nwsz image.Point) {
-	if nwsz.X == 0 || nwsz.Y == 0 || sc.Win == nil || !sc.Win.IsVisible() {
+	if nwsz.X == 0 || nwsz.Y == 0 {
 		return
 	}
 	if sc.Frame != nil {
@@ -302,37 +285,18 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
 
-func (sc *Scene) Init2D() {
-	sc.Init2DWidget()
-	sc.SetCurWin()
-	// note: Viewport will automatically update us for any update sigs
-	sc.Init3D()
-	sc.DirUpIdx = sc.Win.AddDirectUploader(sc)
-}
-
-func (sc *Scene) Style2D() {
-	sc.StyMu.Lock()
-	defer sc.StyMu.Unlock()
-
-	sc.SetCanFocusIfActive() // we get all key events
-	sc.SetCurWin()
-	sc.Style2DWidget()
-	sc.LayState.SetFromStyle(&sc.Style) // also does reset
-	// note: we do Style3D in Init3D
+func (sc *Scene) Config(gsc *gi.Scene) {
+	// sc.Init3D()
+	// sc.DirUpIdx = sc.Win.AddDirectUploader(sc)
 }
 
 func (sc *Scene) Size2D(iter int) {
-	sc.InitLayout2D()
+	// sc.InitLayout2D()
 	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	pos := sc.Style.PosDots().ToPoint()
-	if pos != (image.Point{}) {
-		sc.Geom.Pos = pos
-	}
-}
-
-func (sc *Scene) Layout2D(parBBox image.Rectangle, iter int) bool {
-	sc.Layout2DBase(parBBox, true, iter)
-	return false
+	// pos := sc.Style.PosDots().ToPoint()
+	// if pos != (image.Point{}) {
+	// 	sc.Geom.Pos = pos
+	// }
 }
 
 func (sc *Scene) BBox2D() image.Rectangle {
@@ -347,9 +311,9 @@ func (sc *Scene) BBox2D() image.Rectangle {
 }
 
 func (sc *Scene) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	if sc.Viewport != nil {
-		sc.ComputeBBox2DBase(parBBox, delta)
-	}
+	// if sc.Viewport != nil {
+	// 	sc.ComputeBBox2DBase(parBBox, delta)
+	// }
 	sc.Geom.Pos = sc.LayState.Alloc.Pos.ToPointFloor()
 }
 
@@ -359,25 +323,25 @@ func (sc *Scene) ChildrenBBox2D() image.Rectangle {
 
 // we use our own render for these -- Viewport member is our parent!
 func (sc *Scene) PushBounds() bool {
-	if sc.VpBBox.Empty() {
+	if sc.ScBBox.Empty() {
 		return false
 	}
-	if !sc.This().(gi.Node2D).IsVisible() {
+	if !sc.IsInvisible() {
 		return false
 	}
 	// if we are completely invisible, no point in rendering..
-	if sc.Viewport != nil {
-		sc.BBoxMu.RLock()
-		wbi := sc.WinBBox.Intersect(sc.Viewport.WinBBox)
-		sc.BBoxMu.RUnlock()
-		if wbi.Empty() {
-			return false
-		}
-	}
+	// if sc.Viewport != nil {
+	// 	sc.BBoxMu.RLock()
+	// 	wbi := sc.WinBBox.Intersect(sc.Viewport.WinBBox)
+	// 	sc.BBoxMu.RUnlock()
+	// 	if wbi.Empty() {
+	// 		return false
+	// 	}
+	// }
 	bb := sc.Geom.Bounds()
 	// rs := &sc.Render
 	// rs.PushBounds(bb)
-	if gi.Render2DTrace {
+	if gi.RenderTrace {
 		fmt.Printf("Render: %v at %v\n", sc.Path(), bb)
 	}
 	return true
@@ -388,26 +352,20 @@ func (sc *Scene) PopBounds() {
 	// rs.PopBounds()
 }
 
-func (sc *Scene) Move2D(delta image.Point, parBBox image.Rectangle) {
-	if sc == nil {
-		return
-	}
-	sc.Move2DBase(delta, parBBox)
-}
+// func (sc *Scene) Render2D() {
+// 	if sc.PushBounds() {
+// 		sc.NavEvents()
+// 		if gi.Render2DTrace {
+// 			fmt.Printf("3D Render2D: %v\n", sc.Path())
+// 		}
+// 		sc.Render()
+// 		sc.PopBounds()
+// 	} else {
+// 		sc.DisconnectAllEvents(gi.RegPri)
+// 	}
+// }
 
-func (sc *Scene) Render2D() {
-	if sc.PushBounds() {
-		sc.NavEvents()
-		if gi.Render2DTrace {
-			fmt.Printf("3D Render2D: %v\n", sc.Path())
-		}
-		sc.Render()
-		sc.PopBounds()
-	} else {
-		sc.DisconnectAllEvents(gi.RegPri)
-	}
-}
-
+/*
 // NavEvents handles standard viewer navigation events
 func (sc *Scene) NavEvents() {
 	sc.ConnectEvent(oswin.MouseDragEvent, gi.LowPri, func(recv, send ki.Ki, sig int64, d any) {
@@ -531,10 +489,11 @@ func (sc *Scene) NavEvents() {
 		ssc.NavKeyEvents(kt)
 	})
 }
+*/
 
 // NavKeyEvents handles standard viewer keyboard navigation events
-func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
-	ch := string(kt.Chord())
+func (sc *Scene) NavKeyEvents(kt events.Event) {
+	ch := string(kt.KeyChord())
 	// fmt.Printf(ch)
 	orbDeg := float32(5)
 	panDel := float32(.2)
@@ -542,70 +501,70 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	switch ch {
 	case "UpArrow":
 		sc.Camera.Orbit(0, orbDeg)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Shift+UpArrow":
 		sc.Camera.Pan(0, panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Control+UpArrow":
 		sc.Camera.PanAxis(0, panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt+UpArrow":
 		sc.Camera.PanTarget(0, panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "DownArrow":
 		sc.Camera.Orbit(0, -orbDeg)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Shift+DownArrow":
 		sc.Camera.Pan(0, -panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Control+DownArrow":
 		sc.Camera.PanAxis(0, -panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt+DownArrow":
 		sc.Camera.PanTarget(0, -panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "LeftArrow":
 		sc.Camera.Orbit(orbDeg, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Shift+LeftArrow":
 		sc.Camera.Pan(-panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Control+LeftArrow":
 		sc.Camera.PanAxis(-panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt+LeftArrow":
 		sc.Camera.PanTarget(-panDel, 0, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "RightArrow":
 		sc.Camera.Orbit(-orbDeg, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Shift+RightArrow":
 		sc.Camera.Pan(panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Control+RightArrow":
 		sc.Camera.PanAxis(panDel, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt+RightArrow":
 		sc.Camera.PanTarget(panDel, 0, 0)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt++", "Alt+=":
 		sc.Camera.PanTarget(0, 0, panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Alt+-", "Alt+_":
 		sc.Camera.PanTarget(0, 0, -panDel)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "+", "=", "Shift++":
 		sc.Camera.Zoom(-zoomPct)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "-", "_", "Shift+_":
 		sc.Camera.Zoom(zoomPct)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case " ", "Escape":
 		err := sc.SetCamera("default")
 		if err != nil {
 			sc.Camera.DefaultPose()
 		}
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
 		err := sc.SetCamera(ch)
 		if err != nil {
@@ -614,20 +573,20 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		} else {
 			fmt.Printf("Restored camera from: %v\n", ch)
 		}
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "Control+0", "Control+1", "Control+2", "Control+3", "Control+4", "Control+5", "Control+6", "Control+7", "Control+8", "Control+9":
 		cnm := strings.TrimPrefix(ch, "Control+")
 		sc.SaveCamera(cnm)
 		fmt.Printf("Saved camera to: %v\n", cnm)
-		kt.SetProcessed()
+		kt.SetHandled()
 	case "t":
-		kt.SetProcessed()
+		kt.SetHandled()
 		obj := sc.Child(0).(*Solid)
 		fmt.Printf("updated obj: %v\n", obj.Path())
-		obj.UpdateSig()
+		// obj.UpdateSig()
 		return
 	}
-	sc.UpdateSig()
+	// sc.UpdateSig()
 }
 
 // TrackCamera -- a Group at the top-level named "TrackCamera"
@@ -648,48 +607,26 @@ func (sc *Scene) TrackCamera() bool {
 }
 
 // SolidsIntersectingPoint finds all the solids that contain given 2D window coordinate
-func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node3D {
-	var objs []Node3D
+func (sc *Scene) SolidsIntersectingPoint(pos image.Point) []Node {
+	var objs []Node
 	for _, kid := range sc.Kids {
-		kii, _ := KiToNode3D(kid)
+		kii, _ := AsNode3D(kid)
 		if kii == nil {
 			continue
 		}
-		kii.FuncDownMeFirst(0, kii.This(), func(k ki.Ki, level int, d any) bool {
-			nii, ni := KiToNode3D(k)
-			if nii == nil {
+		kii.WalkPre(func(k ki.Ki) bool {
+			ni, _ := AsNode3D(k)
+			if ni == nil {
 				return ki.Break // going into a different type of thing, bail
 			}
-			if !nii.IsSolid() {
+			if !ni.IsSolid() {
 				return ki.Continue
 			}
-			if ni.PosInWinBBox(pos) {
-				objs = append(objs, nii)
-			}
+			// if nb.PosInWinBBox(pos) {
+			objs = append(objs, ni)
+			// }
 			return ki.Continue
 		})
 	}
 	return objs
 }
-
-// SceneProps define the Toolbar and MenuBar for StructView
-var SceneProps = ki.Props{
-	ki.EnumTypeFlag: TypeSceneFlags,
-	"Toolbar": ki.PropSlice{
-		{"Update", ki.Props{
-			"icon": icons.Refresh,
-		}},
-	},
-}
-
-// SceneFlags extend gi.NodeFlags to hold 3D node state
-type SceneFlags int
-
-var TypeSceneFlags = kit.Enums.AddEnumExt(gi.TypeNodeFlags, SceneFlagsN, kit.BitFlag, nil)
-
-const (
-	// Rendering means that the scene is currently rendering
-	Rendering SceneFlags = SceneFlags(gi.NodeFlagsN) + iota
-
-	SceneFlagsN
-)

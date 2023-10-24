@@ -11,8 +11,8 @@ import (
 	"log"
 
 	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/dirs"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/glop/dirs"
+	"goki.dev/grows/images"
 	"goki.dev/vgpu/v2/vgpu"
 	"goki.dev/vgpu/v2/vphong"
 )
@@ -57,8 +57,6 @@ type TextureBase struct {
 	Img *image.RGBA
 }
 
-var TypeTextureBase = kit.Types.AddType(&TextureBase{}, nil)
-
 func (tx *TextureBase) Name() string {
 	return tx.Nm
 }
@@ -97,10 +95,8 @@ type TextureFile struct {
 	File gi.FileName
 }
 
-var TypeTextureFile = kit.Types.AddType(&TextureFile{}, nil)
-
-// AddNewTextureFile adds a new texture from file of given name and filename
-func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
+// NewTextureFile adds a new texture from file of given name and filename
+func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Nm = name
 	dfs, fnm, err := dirs.DirFS(string(tx.File))
@@ -113,8 +109,8 @@ func AddNewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 	return tx
 }
 
-// AddNewTextureFileFS adds a new texture from file of given name and filename
-func AddNewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
+// NewTextureFileFS adds a new texture from file of given name and filename
+func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *TextureFile {
 	tx := &TextureFile{}
 	tx.Nm = name
 	tx.FSys = fsys
@@ -132,7 +128,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 		log.Println(err)
 		return nil
 	}
-	img, err := gi.OpenImageFS(tx.FSys, string(tx.File))
+	img, _, err := images.OpenFS(tx.FSys, string(tx.File))
 	if err != nil {
 		log.Println(err)
 		return nil
@@ -146,14 +142,14 @@ func (tx *TextureFile) Image() *image.RGBA {
 // solid using this texture.
 type TextureGi2D struct {
 	TextureBase
-	Viewport *gi.Viewport2D
+	Scene2D *gi.Scene
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // Scene code
 
 // AddTexture adds given texture to texture collection
-// see AddNewTextureFile to add a texture that loads from file
+// see NewTextureFile to add a texture that loads from file
 func (sc *Scene) AddTexture(tx Texture) {
 	sc.Textures.Add(tx.Name(), tx)
 }

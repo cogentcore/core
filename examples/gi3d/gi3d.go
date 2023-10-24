@@ -17,11 +17,11 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/icons"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/styles"
 	"goki.dev/vgpu/v2/vgpu"
 
 	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -165,15 +165,15 @@ func app() {
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
 
-	trow := gi.AddNewLayout(mfr, "trow", gi.LayoutHoriz)
+	trow := gi.NewLayout(mfr, "trow", gi.LayoutHoriz)
 	trow.SetStretchMaxWidth()
 
-	title := gi.AddNewLabel(trow, "title", `This is a demonstration of the
+	title := gi.NewLabel(trow, "title", `This is a demonstration of the
 <a href="https://goki.dev/gi/v2">GoGi</a> <i>3D</i> Framework<br>
 See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README</a> for detailed info and things to try.`)
-	title.SetProp("white-space", gist.WhiteSpaceNormal) // wrap
-	title.SetProp("text-align", gist.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
-	title.SetProp("vertical-align", gist.AlignCenter)
+	title.SetProp("white-space", styles.WhiteSpaceNormal) // wrap
+	title.SetProp("text-align", styles.AlignCenter)       // note: this also sets horizontal-align, which controls the "box" that the text is rendered in..
+	title.SetProp("vertical-align", styles.AlignCenter)
 	title.SetProp("font-size", "x-large")
 	title.SetProp("line-height", 1.5)
 	title.SetStretchMax()
@@ -181,13 +181,13 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	//////////////////////////////////////////
 	//    Scene
 
-	gi.AddNewSpace(mfr, "scspc")
-	scrow := gi.AddNewLayout(mfr, "scrow", gi.LayoutHoriz)
+	gi.NewSpace(mfr, "scspc")
+	scrow := gi.NewLayout(mfr, "scrow", gi.LayoutHoriz)
 	scrow.SetStretchMax()
 
-	// gi.AddNewLabel(scrow, "tmp", "This is test text")
+	// gi.NewLabel(scrow, "tmp", "This is test text")
 
-	scvw := gi3d.AddNewSceneView(scrow, "sceneview")
+	scvw := gi3d.NewSceneView(scrow, "sceneview")
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
@@ -198,21 +198,21 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	// first, add lights, set camera
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
-	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
+	gi3d.NewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
-	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
+	dir := gi3d.NewDirLight(sc, "dir", 1, gi3d.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
-	// point := gi3d.AddNewPointLight(sc, "point", 1, gi3d.DirectSun)
+	// point := gi3d.NewPointLight(sc, "point", 1, gi3d.DirectSun)
 	// point.Pos.Set(0, 5, 5)
 
-	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
+	// spot := gi3d.NewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
-	cbm := gi3d.AddNewBox(sc, "cube1", 1, 1, 1)
+	cbm := gi3d.NewBox(sc, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rbgp := gi3d.AddNewGroup(sc, sc, "r-b-group")
+	rbgp := gi3d.NewGroup(sc, sc, "r-b-group")
 
 	// style sheet
 	var css = ki.Props{
@@ -222,14 +222,14 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	}
 	sc.CSS = css
 
-	rcb := gi3d.AddNewSolid(sc, rbgp, "red-cube", cbm.Name())
+	rcb := gi3d.NewSolid(sc, rbgp, "red-cube", cbm.Name())
 	rcb.Class = "cube"
 	rcb.Pose.Pos.Set(-1, 0, 0)
 	rcb.SetProp("color", "red")
 	rcb.SetProp("shiny", 500) // note: this will be overridden by the css sheet
 	rcb.Mat.Color = colors.Red
 
-	bcb := gi3d.AddNewSolid(sc, rbgp, "blue-cube", cbm.Name())
+	bcb := gi3d.NewSolid(sc, rbgp, "blue-cube", cbm.Name())
 	bcb.Class = "cube"
 	bcb.Pose.Pos.Set(1, 1, 0)
 	bcb.Pose.Scale.X = 2
@@ -237,36 +237,36 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	bcb.Mat.Shiny = 10       // note: this will be overridden by the css sheet
 	bcb.Mat.Reflective = 0.2 // not very shiny
 
-	gcb := gi3d.AddNewSolid(sc, sc, "green-trans-cube", cbm.Name())
+	gcb := gi3d.NewSolid(sc, sc, "green-trans-cube", cbm.Name())
 	gcb.Pose.Pos.Set(0, 0, 1)
 	gcb.Mat.Color = color.RGBA{0, 255, 0, 128} // alpha = .5 -- note: colors are NOT premultiplied here: will become so when rendered!
 	gcb.Class = "cube"
 
-	lnsm := gi3d.AddNewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
-	lns := gi3d.AddNewSolid(sc, sc, "hi-line", lnsm.Name())
+	lnsm := gi3d.NewLines(sc, "Lines", []mat32.Vec3{{-3, -1, 0}, {-2, 1, 0}, {2, 1, 0}, {3, -1, 0}}, mat32.Vec2{.2, .1}, gi3d.CloseLines)
+	lns := gi3d.NewSolid(sc, sc, "hi-line", lnsm.Name())
 	lns.Pose.Pos.Set(0, 0, 1)
 	lns.Mat.Color = color.RGBA{255, 255, 0, 128} // alpha = .5
 	// sc.Wireframe = true                      // debugging
 
 	// this line should go from lower left front of red cube to upper vertex of above hi-line
 	cyan := colors.FromRGB(0, 255, 255)
-	gi3d.AddNewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
+	gi3d.NewArrow(sc, sc, "arrow", mat32.Vec3{-1.5, -.5, .5}, mat32.Vec3{2, 1, 1}, .05, cyan, gi3d.StartArrow, gi3d.EndArrow, 4, .5, 4)
 
-	// bbclr := gist.Color{}
+	// bbclr := styles.Color{}
 	// bbclr.SetUInt8(255, 255, 0, 255)
-	// gi3d.AddNewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
+	// gi3d.NewLineBox(sc, sc, "bbox", "bbox", mat32.Box3{Min: mat32.Vec3{-2, -2, -1}, Max: mat32.Vec3{-1, -1, .5}}, .01, bbclr, gi3d.Active)
 
-	cylm := gi3d.AddNewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
-	cyl := gi3d.AddNewSolid(sc, sc, "cylinder", cylm.Name())
+	cylm := gi3d.NewCylinder(sc, "cylinder", 1.5, .5, 32, 1, true, true)
+	cyl := gi3d.NewSolid(sc, sc, "cylinder", cylm.Name())
 	cyl.Pose.Pos.Set(-2.25, 0, 0)
 
-	capm := gi3d.AddNewCapsule(sc, "capsule", 1.5, .5, 32, 1)
-	caps := gi3d.AddNewSolid(sc, sc, "capsule", capm.Name())
+	capm := gi3d.NewCapsule(sc, "capsule", 1.5, .5, 32, 1)
+	caps := gi3d.NewSolid(sc, sc, "capsule", capm.Name())
 	caps.Pose.Pos.Set(3.25, 0, 0)
 	caps.Mat.Color = colors.Tan
 
-	sphm := gi3d.AddNewSphere(sc, "sphere", .75, 32)
-	sph := gi3d.AddNewSolid(sc, sc, "sphere", sphm.Name())
+	sphm := gi3d.NewSphere(sc, "sphere", .75, 32)
+	sph := gi3d.NewSolid(sc, sc, "sphere", sphm.Name())
 	sph.Pose.Pos.Set(0, -2, 0)
 	sph.Mat.Color = colors.Orange
 	sph.Mat.Color.A = 200
@@ -279,7 +279,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	}
 	lgo.Pose.SetAxisRotation(0, 1, 0, -90) // for all cases
 
-	gogp := gi3d.AddNewGroup(sc, sc, "go-group")
+	gogp := gi3d.NewGroup(sc, sc, "go-group")
 
 	bgo, _ := sc.AddFmLibrary("gopher", gogp)
 	bgo.Pose.Scale.Set(.5, .5, .5)
@@ -290,19 +290,19 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	sgo.Pose.Pos.Set(-1.5, -2, 0)
 	sgo.Pose.Scale.Set(.2, .2, .2)
 
-	trsm := gi3d.AddNewTorus(sc, "torus", .75, .1, 32)
-	trs := gi3d.AddNewSolid(sc, sc, "torus", trsm.Name())
+	trsm := gi3d.NewTorus(sc, "torus", .75, .1, 32)
+	trs := gi3d.NewSolid(sc, sc, "torus", trsm.Name())
 	trs.Pose.Pos.Set(-1.6, -1.6, -.2)
 	trs.Pose.SetAxisRotation(1, 0, 0, 90)
 	trs.Mat.Color = colors.White
 	trs.Mat.Color.A = 200
 
-	grtx := gi3d.AddNewTextureFileFS(content, sc, "ground", "ground.png")
+	grtx := gi3d.NewTextureFileFS(content, sc, "ground", "ground.png")
 	// _ = grtx
-	// wdtx := gi3d.AddNewTextureFile(sc, "wood", "wood.png")
+	// wdtx := gi3d.NewTextureFile(sc, "wood", "wood.png")
 
-	floorp := gi3d.AddNewPlane(sc, "floor-plane", 100, 100)
-	floor := gi3d.AddNewSolid(sc, sc, "floor", floorp.Name())
+	floorp := gi3d.NewPlane(sc, "floor-plane", 100, 100)
+	floor := gi3d.NewSolid(sc, sc, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, -5, 0)
 	floor.Mat.Color = colors.Tan
 	// floor.Mat.Emissive.SetName("brown")
@@ -311,18 +311,18 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 	floor.Mat.Tiling.Repeat.Set(40, 40)
 	floor.SetDisabled() // not selectable
 
-	txt := gi3d.AddNewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
-	// 	txt.SetProp("background-color", gist.Color{0, 0, 0, 0}) // transparent -- default
+	txt := gi3d.NewText2D(sc, sc, "text", "Text2D can put <b>HTML</b> formatted<br>Text anywhere you might <i>want</i>")
+	// 	txt.SetProp("background-color", styles.Color{0, 0, 0, 0}) // transparent -- default
 	// txt.SetProp("background-color", "white")
 	txt.SetProp("color", "black") // default depends on Light / Dark mode, so we set this
 	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
 	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
-	txt.SetProp("text-align", gist.AlignLeft) // gi.AlignCenter)
+	txt.SetProp("text-align", styles.AlignLeft) // gi.AlignCenter)
 	txt.Pose.Scale.SetScalar(0.2)
 	txt.Pose.Pos.Set(0, 2.2, 0)
 
-	tcg := gi3d.AddNewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
-	fpgun := gi3d.AddNewSolid(sc, tcg, "first-person-gun", cbm.Name())
+	tcg := gi3d.NewGroup(sc, sc, gi3d.TrackCameraName) // automatically tracks camera -- FPS effect
+	fpgun := gi3d.NewSolid(sc, tcg, "first-person-gun", cbm.Name())
 	fpgun.Pose.Scale.Set(.1, .1, 1)
 	fpgun.Pose.Pos.Set(.5, -.5, -2.5)              // in front of camera
 	fpgun.Mat.Color = color.RGBA{255, 0, 255, 128} // alpha = .5
@@ -335,13 +335,13 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 
 	anim := &Anim{}
 
-	emb := gi3d.AddNewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
+	emb := gi3d.NewEmbed2D(sc, sc, "embed-but", 150, 100, gi3d.FitContent)
 	emb.Pose.Pos.Set(-2, 2, 0)
 	// emb.Zoom = 1.5   // this is how to rescale overall size
-	evlay := gi.AddNewFrame(emb.Viewport, "vlay", gi.LayoutVert)
+	evlay := gi.NewFrame(emb.Viewport, "vlay", gi.LayoutVert)
 	evlay.SetProp("margin", units.Ex(1))
 
-	eabut := gi.AddNewCheckBox(evlay, "anim-but")
+	eabut := gi.NewCheckBox(evlay, "anim-but")
 	eabut.SetText("Animate")
 	eabut.Tooltip = "toggle animation on and off"
 	eabut.ButtonSig.Connect(win.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -350,7 +350,7 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 		}
 	})
 
-	cmb := gi.AddNewButton(evlay, "anim-ctrl")
+	cmb := gi.NewButton(evlay, "anim-ctrl")
 	cmb.SetText("Anim Ctrl")
 	cmb.Tooltip = "options for what is animated (note: menu only works when not animating -- checkboxes would be more useful here but wanted to test menu function)"
 	cmb.Menu.AddAction(gi.ActOpts{Label: "Toggle Torus"},
@@ -366,15 +366,15 @@ See <a href="https://goki.dev/gi/v2/blob/master/examples/gi3d/README.md">README<
 			giv.StructViewDialog(vp, anim, giv.DlgOpts{Title: "Animation Parameters"}, nil, nil)
 		})
 
-	sprw := gi.AddNewLayout(evlay, "speed-lay", gi.LayoutHoriz)
-	gi.AddNewLabel(sprw, "speed-lbl", "Speed: ")
-	sb := gi.AddNewSpinBox(sprw, "anim-speed")
+	sprw := gi.NewLayout(evlay, "speed-lay", gi.LayoutHoriz)
+	gi.NewLabel(sprw, "speed-lbl", "Speed: ")
+	sb := gi.NewSpinBox(sprw, "anim-speed")
 	sb.SetMin(0.01)
 	sb.Step = 0.01
 	sb.SetValue(anim.Speed)
 	sb.Tooltip = "determines the speed of rotation (step size)"
 
-	spsld := gi.AddNewSlider(evlay, "speed-slider")
+	spsld := gi.NewSlider(evlay, "speed-slider")
 	spsld.Dim = mat32.X
 	spsld.Min = 0.01
 	spsld.Max = 1

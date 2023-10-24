@@ -4,19 +4,7 @@
 
 package gi3d
 
-import (
-	"fmt"
-	"image"
-
-	"goki.dev/gi/v2/gi"
-	"goki.dev/gi/v2/oswin"
-	"goki.dev/gi/v2/oswin/key"
-	"goki.dev/gi/v2/oswin/mouse"
-	"goki.dev/ki/v2/ints"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
-	"goki.dev/mat32/v2"
-)
+/*
 
 // Embed2D embeds a 2D Viewport on a vertically-oriented plane, using a texture.
 // The embedded viewport contains its own 2D scenegraph and receives events, with
@@ -41,8 +29,6 @@ type Embed2D struct {
 	DPISize image.Point
 }
 
-var TypeEmbed2D = kit.Types.AddType(&Embed2D{}, Embed2DProps)
-
 const (
 	// FitContent is used as arg for NewEmbed2D to specify that plane should be resized
 	// to fit content.
@@ -53,13 +39,13 @@ const (
 	FixedSize = false
 )
 
-// AddNewEmbed2D adds a new embedded 2D viewport of given name and nominal size
+// NewEmbed2D adds a new embedded 2D viewport of given name and nominal size
 // according to the standard 96 dpi resolution (i.e., actual size is adjusted relative
 // to that using window's current Logical DPI scaling).  If fitContent is true and
 // first and only element in Viewport is a gi.Layout, then it will be resized
 // to fit content size (though no smaller than given size).
-func AddNewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int, fitContent bool) *Embed2D {
-	em := parent.AddNewChild(TypeEmbed2D, name).(*Embed2D)
+func NewEmbed2D(sc *Scene, parent ki.Ki, name string, width, height int, fitContent bool) *Embed2D {
+	em := parent.NewChild(TypeEmbed2D, name).(*Embed2D)
 	em.Defaults(sc)
 	em.StdSize = image.Point{width, height}
 	em.Viewport = NewEmbedViewport(sc, em, name, width, height)
@@ -133,7 +119,7 @@ func (em *Embed2D) Init3D(sc *Scene) {
 	if err != nil {
 		em.SetInvisible()
 	}
-	em.Node3DBase.Init3D(sc)
+	em.NodeBase.Init3D(sc)
 }
 
 // UploadViewTex uploads the viewport image to the texture
@@ -274,7 +260,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		emm.Viewport.EventMgr.SendEventSignal(md, false)
 		emm.Viewport.EventMgr.MouseEventReset(md)
 		if !md.IsProcessed() {
-			ni := em.This().(Node3D)
+			ni := em.This().(Node)
 			if ssc.CurSel != ni {
 				ssc.SetSel(ni)
 			}
@@ -333,7 +319,7 @@ func (em *Embed2D) ConnectEvents3D(sc *Scene) {
 		me.SetProcessed() // must always
 	})
 	em.ConnectEvent(sc.Win, oswin.KeyChordEvent, gi.HiPri, func(recv, send ki.Ki, sig int64, d any) {
-		// note: registering HiPri -- we are outside 2D focus system, and get *all* keyboard events
+		// note: restylesering HiPri -- we are outside 2D focus system, and get *all* keyboard events
 		emm := recv.Embed(TypeEmbed2D).(*Embed2D)
 		ssc := emm.Viewport.Scene
 		if !ssc.IsVisible() || !ssc.HasFocus2D() {
@@ -373,14 +359,6 @@ type EmbedViewport struct {
 
 	// update flag for top-level updates
 	TopUpdated bool `json:"-" xml:"-"`
-}
-
-var TypeEmbedViewport = kit.Types.AddType(&EmbedViewport{}, EmbedViewportProps)
-
-var EmbedViewportProps = ki.Props{
-	ki.EnumTypeFlag:    gi.TypeVpFlags,
-	"color":            &gi.Prefs.Colors.Font,
-	"background-color": &gi.Prefs.Colors.Background,
 }
 
 // NewEmbedViewport creates a new Pixels Image with the specified width and height,
@@ -501,3 +479,5 @@ func (vp *EmbedViewport) IsFocusActive() bool {
 // SetFocusActiveState sets focus active state
 func (vp *EmbedViewport) SetFocusActiveState(active bool) {
 }
+
+*/

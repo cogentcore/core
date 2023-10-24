@@ -8,8 +8,8 @@ Package gi3d provides a 3D scenegraph for the GoGi GUI framework.
 The scenegraph is rooted at a gi3d.Scene node which is like gi.Viewport2D,
 where the scene is rendered, similar to the svg.SVG node for SVG drawings.
 
-Children of the Scene are Node3D nodes, with Group and Solid as the main
-subtypes.  Node3DBase is the base implementation, which has a Pose for
+Children of the Scene are Node nodes, with Group and Solid as the main
+subtypes.  NodeBase is the base implementation, which has a Pose for
 the full matrix transform of relative position, scale, rotation, and
 bounding boxes at multiple levels.
 
@@ -71,7 +71,7 @@ method on the Scene does Init3D and re-renders.
 Mouse events are handled by the standard GoGi Window event dispatching
 methods, based on bounding boxes which are always updated -- this greatly
 simplifies gui interactions.  There is default support for selection and
-Pose manipulation handling -- see manip.go code and Node3DBase's
+Pose manipulation handling -- see manip.go code and NodeBase's
 ConnectEvents3D which responds to mouse clicks.
 */
 package gi3d

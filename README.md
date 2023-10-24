@@ -6,7 +6,7 @@
 
 The scenegraph is rooted at a `gi3d.Scene` node which is like `gi.Viewport2D`, where the scene is rendered, similar to the `svg.SVG` node for SVG drawings.
 
-Children of the Scene are `Node3D` nodes, with `Group` and `Solid` as the main subtypes.  `Node3DBase` is the base implementation, which has a `Pose `for the full matrix transform of relative position, scale, rotation, and bounding boxes at multiple levels.
+Children of the Scene are `Node` nodes, with `Group` and `Solid` as the main subtypes.  `NodeBase` is the base implementation, which has a `Pose `for the full matrix transform of relative position, scale, rotation, and bounding boxes at multiple levels.
 
 * `Group` is a container -- most discrete objects should be organized into a Group, with Groups of Solids underneath.  For maximum efficiency it is important to organize large scenegraphs into hierarchical groups by location, so that regions can be pruned for rendering.  The Pose on the Group is inherited by everything under it, so things can be transformed at different levels as well.
 
@@ -54,7 +54,7 @@ See [EVE](https://github.com/emer/eve) (emergent Virtual Engine) for a physics e
 
 # Events, Selection, Manipulation
 
-Mouse events are handled by the standard GoGi Window event dispatching methods, based on bounding boxes which are always updated -- this greatly simplifies gui interactions.  There is default support for selection and `Pose` manipulation handling -- see `manip.go` code and `Node3DBase`'s `ConnectEvents3D` which responds to mouse clicks.
+Mouse events are handled by the standard GoGi Window event dispatching methods, based on bounding boxes which are always updated -- this greatly simplifies gui interactions.  There is default support for selection and `Pose` manipulation handling -- see `manip.go` code and `NodeBase`'s `ConnectEvents3D` which responds to mouse clicks.
 
 # Embedded 2D Viewport
 

@@ -5,9 +5,6 @@
 package gi3d
 
 import (
-	"goki.dev/gi/v2/icons"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 )
 
@@ -42,8 +39,6 @@ type Pose struct {
 	// normal matrix has no offsets, for normal vector rotation only, based on MVMatrix
 	NormMatrix mat32.Mat3 `view:"-"`
 }
-
-var TypePose = kit.Types.AddType(&Pose{}, PoseProps)
 
 // Defaults sets defaults only if current values are nil
 func (ps *Pose) Defaults() {
@@ -211,6 +206,8 @@ func (ps *Pose) WorldScale() mat32.Vec3 {
 	return scale
 }
 
+/*
+
 // PoseProps define the Toolbar and MenuBar for StructView
 var PoseProps = ki.Props{
 	"Toolbar": ki.PropSlice{
@@ -308,3 +305,5 @@ var PoseProps = ki.Props{
 		}},
 	},
 }
+
+*/

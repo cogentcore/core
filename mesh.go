@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"sync"
 
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vshape"
 )
@@ -16,6 +15,10 @@ import (
 // MeshName is a mesh name -- provides an automatic gui chooser for meshes.
 // Used on Solid to link to meshes by name.
 type MeshName string
+
+func (mn MeshName) String() string {
+	return string(mn)
+}
 
 // Mesh parameterizes the mesh-based shape used for rendering a Solid.
 // Only indexed triangle meshes are supported.
@@ -67,10 +70,10 @@ type Mesh interface {
 }
 
 // MeshBase provides the core implementation of Mesh interface
-type MeshBase struct {
+type MeshBase struct { //gti:add -setters
 
 	// name of mesh -- meshes are linked to Solids by name so this matters
-	Nm string
+	Nm string `set:"-"`
 
 	// number of vertex points, as mat32.Vec3 -- always includes mat32.Vec3 normals and mat32.Vec2 texture coordinates -- only valid after Sizes() has been called
 	NVtx int
@@ -93,8 +96,6 @@ type MeshBase struct {
 	// mutex on bbox access
 	BBoxMu sync.RWMutex `view:"-" copy:"-" json:"-" xml:"-"`
 }
-
-var TypeMeshBase = kit.Types.AddType(&MeshBase{}, nil)
 
 func (ms *MeshBase) Name() string                           { return ms.Nm }
 func (ms *MeshBase) SetName(nm string)                      { ms.Nm = nm }
@@ -127,7 +128,7 @@ func (ms *MeshBase) ComputeNorms(pos, norm mat32.ArrayF32) {
 
 // AddMesh adds given mesh to mesh collection.  Any existing mesh of the
 // same name is deleted.
-// see AddNewX for convenience methods to add specific shapes
+// see NewX for convenience methods to add specific shapes
 func (sc *Scene) AddMesh(ms Mesh) {
 	sc.Meshes.Add(ms.Name(), ms)
 }
@@ -186,7 +187,7 @@ func (sc *Scene) PlaneMesh2D() Mesh {
 	if err == nil {
 		return tm
 	}
-	tmp := AddNewPlane(sc, nm, 1, 1)
+	tmp := NewPlane(sc, nm, 1, 1)
 	tmp.NormAxis = mat32.Z
 	tmp.NormNeg = false
 	return tmp

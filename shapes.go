@@ -5,7 +5,6 @@
 package gi3d
 
 import (
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vshape"
 )
@@ -17,7 +16,7 @@ import (
 
 // Plane is a flat 2D plane, which can be oriented along any
 // axis facing either positive or negative
-type Plane struct {
+type Plane struct { //gti:add -setters
 	MeshBase
 
 	// axis along which the normal perpendicular to the plane points.  E.g., if the Y axis is specified, then it is a standard X-Z ground plane -- see also NormNeg for whether it is facing in the positive or negative of the given axis.
@@ -36,13 +35,11 @@ type Plane struct {
 	Offset float32
 }
 
-var TypePlane = kit.Types.AddType(&Plane{}, nil)
-
-// AddNewPlane adds Plane mesh to given scene,
+// NewPlane adds Plane mesh to given scene,
 // with given name and size, with its normal pointing
 // by default in the positive Y axis (i.e., a "ground" plane).
 // Offset is 0.
-func AddNewPlane(sc *Scene, name string, width, height float32) *Plane {
+func NewPlane(sc *Scene, name string, width, height float32) *Plane {
 	pl := &Plane{}
 	pl.Nm = name
 	pl.NormAxis = mat32.Y
@@ -74,7 +71,7 @@ func (pl *Plane) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, 
 //   Box
 
 // Box is a rectangular-shaped solid (cuboid)
-type Box struct {
+type Box struct { //gti:add -setters
 	MeshBase
 
 	// size along each dimension
@@ -84,10 +81,8 @@ type Box struct {
 	Segs mat32.Vec3i
 }
 
-var TypeBox = kit.Types.AddType(&Box{}, nil)
-
-// AddNewBox adds Box mesh to given scene, with given name and size
-func AddNewBox(sc *Scene, name string, width, height, depth float32) *Box {
+// NewBox adds Box mesh to given scene, with given name and size
+func NewBox(sc *Scene, name string, width, height, depth float32) *Box {
 	bx := &Box{}
 	bx.Nm = name
 	bx.Size.Set(width, height, depth)
@@ -116,7 +111,7 @@ func (bx *Box) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32, id
 //   Sphere
 
 // Sphere is a sphere mesh
-type Sphere struct {
+type Sphere struct { //gti:add -setters
 	MeshBase
 
 	// radius of the sphere
@@ -141,11 +136,9 @@ type Sphere struct {
 	ElevLen float32 `min:"0" max:"180" step:"5"`
 }
 
-var TypeSphere = kit.Types.AddType(&Sphere{}, nil)
-
-// AddNewSphere creates a sphere mesh with the specified radius,
+// NewSphere creates a sphere mesh with the specified radius,
 // number of segments (resolution).
-func AddNewSphere(sc *Scene, name string, radius float32, segs int) *Sphere {
+func NewSphere(sc *Scene, name string, radius float32, segs int) *Sphere {
 	sp := &Sphere{}
 	sp.Nm = name
 	sp.Radius = radius
@@ -189,7 +182,7 @@ func (sp *Sphere) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32,
 // Cylinder is a generalized cylinder shape, including a cone
 // or truncated cone by having different size circles at either end.
 // Height is up along the Y axis.
-type Cylinder struct {
+type Cylinder struct { //gti:add -setters
 	MeshBase
 
 	// height of the cylinder
@@ -220,29 +213,27 @@ type Cylinder struct {
 	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
-var TypeCylinder = kit.Types.AddType(&Cylinder{}, nil)
-
-// AddNewCone creates a cone mesh with the specified base radius, height,
+// NewCone creates a cone mesh with the specified base radius, height,
 // number of radial segments, number of height segments, and presence of a bottom cap.
 // Height is along the Y axis.
-func AddNewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom)
+func NewCone(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, bottom bool) *Cylinder {
+	return NewCylinderSector(sc, name, height, 0, radius, radialSegs, heightSegs, 0, 360, false, bottom)
 }
 
-// AddNewCylinder creates a cylinder mesh with the specified radius, height,
+// NewCylinder creates a cylinder mesh with the specified radius, height,
 // number of radial segments, number of height segments,
 // and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func AddNewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
-	return AddNewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 360, top, bottom)
+func NewCylinder(sc *Scene, name string, height, radius float32, radialSegs, heightSegs int, top, bottom bool) *Cylinder {
+	return NewCylinderSector(sc, name, height, radius, radius, radialSegs, heightSegs, 0, 360, top, bottom)
 }
 
-// AddNewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
+// NewCylinderSector creates a generalized cylinder (truncated cone) sector mesh
 // with the specified top and bottom radii, height, number of radial segments,
 // number of height segments, sector start angle in degrees,
 // sector size angle in degrees, and presence of a top and/or bottom cap.
 // Height is along the Y axis.
-func AddNewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
+func NewCylinderSector(sc *Scene, name string, height, topRad, botRad float32, radialSegs, heightSegs int, angStart, angLen float32, top, bottom bool) *Cylinder {
 	cy := &Cylinder{}
 	cy.Nm = name
 	cy.Height = height
@@ -290,7 +281,7 @@ func (cy *Cylinder) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF3
 // Capsule is a generalized capsule shape: a cylinder with hemisphere end caps.
 // Supports different radii on each end.
 // Height is along the Y axis -- total height is Height + TopRad + BotRad.
-type Capsule struct {
+type Capsule struct { //gti:add -setters
 	MeshBase
 
 	// height of the cylinder portion
@@ -318,13 +309,11 @@ type Capsule struct {
 	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
-var TypeCapsule = kit.Types.AddType(&Capsule{}, nil)
-
-// AddNewCapsule creates a generalized capsule mesh (cylinder + hemisphere caps)
+// NewCapsule creates a generalized capsule mesh (cylinder + hemisphere caps)
 // with the specified height and radius, number of radial, sphere segments,
 // and number of height segments
 // Height is along the Y axis.
-func AddNewCapsule(sc *Scene, name string, height, radius float32, segs, heightSegs int) *Capsule {
+func NewCapsule(sc *Scene, name string, height, radius float32, segs, heightSegs int) *Capsule {
 	cp := &Capsule{}
 	cp.Nm = name
 	cp.Height = height
@@ -399,7 +388,7 @@ func (cp *Capsule) Set(sc *Scene, vtxAry, normAry, texAry, clrAry mat32.ArrayF32
 
 // Torus is a torus mesh, defined by the radius of the solid tube and the
 // larger radius of the ring.
-type Torus struct {
+type Torus struct { //gti:add -setters
 	MeshBase
 
 	// larger radius of the torus ring
@@ -421,11 +410,9 @@ type Torus struct {
 	AngLen float32 `min:"0" max:"360" step:"5"`
 }
 
-var TypeTorus = kit.Types.AddType(&Torus{}, nil)
-
-// AddNewTorus creates a sphere mesh with the specified outer ring radius,
+// NewTorus creates a sphere mesh with the specified outer ring radius,
 // solid tube radius, and number of segments (resolution).
-func AddNewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Torus {
+func NewTorus(sc *Scene, name string, radius, tubeRadius float32, segs int) *Torus {
 	sp := &Torus{}
 	sp.Nm = name
 	sp.Radius = radius

@@ -7,53 +7,38 @@ package gi3d
 import (
 	"sort"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
 // Group collects individual elements in a scene but does not have a Mesh or Material of
 // its own.  It does have a transform that applies to all nodes under it.
 type Group struct {
-	Node3DBase
-}
-
-var TypeGroup = kit.Types.AddType(&Group{}, GroupProps)
-
-// AddNewGroup adds a new group of given name to given parent
-func AddNewGroup(sc *Scene, parent ki.Ki, name string) *Group {
-	gp := parent.AddNewChild(TypeGroup, name).(*Group)
-	gp.Defaults()
-	return gp
+	NodeBase
 }
 
 func (gp *Group) CopyFieldsFrom(frm any) {
 	fr := frm.(*Group)
-	gp.Node3DBase.CopyFieldsFrom(&fr.Node3DBase)
+	gp.NodeBase.CopyFieldsFrom(&fr.NodeBase)
 }
 
 // UpdateMeshBBox updates the Mesh-based BBox info for all nodes.
 // groups aggregate over elements
 func (gp *Group) UpdateMeshBBox() {
 	// todo: radial, etc
-	gp.BBoxMu.Lock()
 	gp.MeshBBox.BBox.SetEmpty()
 	for _, kid := range gp.Kids {
-		nii, ni := KiToNode3D(kid)
+		nii, ni := AsNode3D(kid)
 		if nii == nil {
 			continue
 		}
-		ni.BBoxMu.Lock()
 		ni.PoseMu.RLock()
 		nbb := ni.MeshBBox.BBox.MulMat4(&ni.Pose.Matrix)
 		ni.PoseMu.RUnlock()
-		ni.BBoxMu.Unlock()
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Min)
 		gp.MeshBBox.BBox.ExpandByPoint(nbb.Max)
 	}
 	// fmt.Printf("gp: %v  bbox: %v\n", gp.Nm, gp.MeshBBox.BBox)
-	gp.BBoxMu.Unlock()
 }
 
 func (gp *Group) Defaults() {
@@ -75,19 +60,19 @@ type SolidPoint struct {
 // from closest to furthest.
 func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 	var sp []*SolidPoint
-	gp.FuncDownMeFirst(0, gp.This(), func(k ki.Ki, level int, d any) bool {
-		nii, ni := KiToNode3D(k)
-		if nii == nil {
+	gp.WalkPre(func(k ki.Ki) bool {
+		ni, nb := AsNode3D(k)
+		if ni == nil {
 			return ki.Break // going into a different type of thing, bail
 		}
-		pt, has := ray.IntersectBox(ni.WorldBBox.BBox)
+		pt, has := ray.IntersectBox(nb.WorldBBox.BBox)
 		if !has {
 			return ki.Break
 		}
-		if !nii.IsSolid() {
+		if !ni.IsSolid() {
 			return ki.Continue
 		}
-		sd := nii.AsSolid()
+		sd := ni.AsSolid()
 		sp = append(sp, &SolidPoint{sd, pt})
 		return ki.Break
 	})
@@ -102,8 +87,4 @@ func (gp *Group) RaySolidIntersections(ray mat32.Ray) []*SolidPoint {
 }
 
 // test for impl
-var _ Node3D = &Group{}
-
-var GroupProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
-}
+var _ Node = &Group{}

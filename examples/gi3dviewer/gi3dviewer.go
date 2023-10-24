@@ -14,7 +14,7 @@ import (
 	"goki.dev/gi/v2/giv"
 	"goki.dev/gi/v2/icons"
 	"goki.dev/gi/v2/units"
-	"goki.dev/ki/v2/ki"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 )
 
@@ -39,34 +39,34 @@ func app() {
 	mfr := win.SetMainFrame()
 	mfr.SetProp("spacing", units.Ex(1))
 
-	tbar := gi.AddNewToolbar(mfr, "tbar")
+	tbar := gi.NewToolbar(mfr, "tbar")
 	tbar.SetStretchMaxWidth()
 
 	//////////////////////////////////////////
 	//    Scene
 
-	gi.AddNewSpace(mfr, "scspc")
-	scvw := gi3d.AddNewSceneView(mfr, "sceneview")
+	gi.NewSpace(mfr, "scspc")
+	scvw := gi3d.NewSceneView(mfr, "sceneview")
 	scvw.SetStretchMax()
 	scvw.Config()
 	sc := scvw.Scene()
 
 	// first, add lights, set camera
 	sc.BackgroundColor = colors.FromRGB(230, 230, 255) // sky blue-ish
-	gi3d.AddNewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
+	gi3d.NewAmbientLight(sc, "ambient", 0.3, gi3d.DirectSun)
 
-	dir := gi3d.AddNewDirLight(sc, "dir", 1, gi3d.DirectSun)
+	dir := gi3d.NewDirLight(sc, "dir", 1, gi3d.DirectSun)
 	dir.Pos.Set(0, 2, 1) // default: 0,1,1 = above and behind us (we are at 0,0,X)
 
-	// point := gi3d.AddNewPointLight(sc, "point", 1, gi3d.DirectSun)
+	// point := gi3d.NewPointLight(sc, "point", 1, gi3d.DirectSun)
 	// point.Pos.Set(0, 5, 5)
 
-	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
+	// spot := gi3d.NewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 5, 5)
 
 	sc.Camera.LookAt(mat32.Vec3Zero, mat32.Vec3Y) // defaults to looking at origin
 
-	objgp := gi3d.AddNewGroup(sc, sc, "obj-gp")
+	objgp := gi3d.NewGroup(sc, sc, "obj-gp")
 
 	_, err := sc.OpenNewObj("objs/airplane_prop_001.obj", objgp)
 	if err != nil {

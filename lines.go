@@ -9,8 +9,7 @@ import (
 	"image/color"
 	"math"
 
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
+	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vshape"
 )
@@ -42,20 +41,18 @@ type Lines struct {
 	Closed bool
 }
 
-var TypeLines = kit.Types.AddType(&Lines{}, nil)
-
 const (
-	// CloseLines is used for the closed arg in AddNewLines:
+	// CloseLines is used for the closed arg in NewLines:
 	// connect first and last
 	CloseLines = true
 
-	// OpenLines is used for the closed arg in AddNewLines:
+	// OpenLines is used for the closed arg in NewLines:
 	// don't connect first and last
 	OpenLines = false
 )
 
-// AddNewLines adds Lines mesh to given scene, with given start, end, and width
-func AddNewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2, closed bool) *Lines {
+// NewLines adds Lines mesh to given scene, with given start, end, and width
+func NewLines(sc *Scene, name string, points []mat32.Vec3, width mat32.Vec2, closed bool) *Lines {
 	ln := &Lines{}
 	ln.Nm = name
 	ln.Points = points
@@ -85,7 +82,7 @@ func UnitLineMesh(sc *Scene) *Lines {
 	if lm != nil {
 		return lm.(*Lines)
 	}
-	lmm := AddNewLines(sc, LineMeshName, []mat32.Vec3{{-.5, 0, 0}, {.5, 0, 0}}, mat32.Vec2{1, 1}, OpenLines)
+	lmm := NewLines(sc, LineMeshName, []mat32.Vec3{{-.5, 0, 0}, {.5, 0, 0}}, mat32.Vec2{1, 1}, OpenLines)
 	return lmm
 }
 
@@ -96,15 +93,15 @@ func UnitConeMesh(sc *Scene, segs int) *Cylinder {
 	if cm != nil {
 		return cm.(*Cylinder)
 	}
-	cmm := AddNewCone(sc, nm, 1, 1, segs, 1, true)
+	cmm := NewCone(sc, nm, 1, 1, segs, 1, true)
 	return cmm
 }
 
-// AddNewLine adds a new line between two specified points, using a shared
+// NewLine adds a new line between two specified points, using a shared
 // mesh unit line, which is rotated and positioned to go between the designated points.
-func AddNewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA) *Solid {
-	lm := UnitLineMesh(sc)
-	ln := AddNewSolid(sc, parent, name, lm.Name())
+func NewLine(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA) *Solid {
+	// lm := UnitLineMesh(sc)
+	ln := NewSolid(parent, name) // , lm.Name()) // todo:
 	ln.Pose.Scale.Set(1, width, width)
 	SetLineStartEnd(ln, st, ed)
 	ln.Mat.Color = clr
@@ -137,14 +134,14 @@ const (
 	NoEndArrow = false
 )
 
-// AddNewArrow adds a group with a new line + cone between two specified points, using shared
+// NewArrow adds a group with a new line + cone between two specified points, using shared
 // mesh unit line and arrow heads, which are rotated and positioned to go between the designated points.
 // The arrowSize is a multiplier on the width for the radius and length of the arrow head, with width
 // providing an additional multiplicative factor for width to achieve "fat" vs. "thin" arrows.
 // arrowSegs determines how many faces there are on the arrowhead -- 4 = a 4-sided pyramid, etc.
-func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
-	cm := UnitConeMesh(sc, arrowSegs)
-	gp := AddNewGroup(sc, parent, name)
+func NewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width float32, clr color.RGBA, startArrow, endArrow bool, arrowSize, arrowWidth float32, arrowSegs int) *Group {
+	// cm := UnitConeMesh(sc, arrowSegs)
+	gp := NewGroup(parent, name)
 
 	asz := arrowSize * width
 	awd := arrowWidth * asz
@@ -159,10 +156,10 @@ func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width 
 	if endArrow {
 		led.SetAdd(dn.MulScalar(-asz))
 	}
-	ln := AddNewLine(sc, gp, name+"-line", lst, led, width, clr)
+	ln := NewLine(sc, gp, name+"-line", lst, led, width, clr)
 
 	if startArrow {
-		ar := AddNewSolid(sc, gp, name+"-start-arrow", cm.Name())
+		ar := NewSolid(gp, name+"-start-arrow")                       // , cm.Name())
 		ar.Pose.Scale.Set(awd, asz, awd)                              // Y is up
 		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, math.Pi/2) // rotate from XY up to -X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
@@ -170,7 +167,7 @@ func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width 
 		ar.Mat.Color = clr
 	}
 	if endArrow {
-		ar := AddNewSolid(sc, gp, name+"-end-arrow", cm.Name())
+		ar := NewSolid(gp, name+"-end-arrow") // , cm.Name()) // todo:
 		ar.Pose.Scale.Set(awd, asz, awd)
 		ar.Pose.Quat.SetFromAxisAngle(mat32.Vec3{0, 0, 1}, -math.Pi/2) // rotate from XY up to +X
 		ar.Pose.Quat.SetMul(ln.Pose.Quat)
@@ -180,10 +177,10 @@ func AddNewArrow(sc *Scene, parent ki.Ki, name string, st, ed mat32.Vec3, width 
 	return gp
 }
 
-// AddNewLineBoxMeshes adds two Meshes defining the edges of a Box.
+// NewLineBoxMeshes adds two Meshes defining the edges of a Box.
 // Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
 // initialized, e.g., using sc.InitMesh()
-func AddNewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float32) {
+func NewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float32) {
 	wd := mat32.Vec2{width, width}
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
@@ -193,14 +190,14 @@ func AddNewLineBoxMeshes(sc *Scene, meshNm string, bbox mat32.Box3, width float3
 	ftl := mat32.Vec3{-hSz.X, hSz.Y, 0}
 	ftr := mat32.Vec3{hSz.X, hSz.Y, 0}
 	fbr := mat32.Vec3{hSz.X, -hSz.Y, 0}
-	AddNewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
+	NewLines(sc, meshNm+"-front", []mat32.Vec3{fbl, ftl, ftr, fbr}, wd, CloseLines)
 
 	// side mesh in XY plane, Z -> X
 	sbl := mat32.Vec3{-hSz.Z, -hSz.Y, 0}
 	stl := mat32.Vec3{-hSz.Z, hSz.Y, 0}
 	str := mat32.Vec3{hSz.Z, hSz.Y, 0}
 	sbr := mat32.Vec3{hSz.Z, -hSz.Y, 0}
-	AddNewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
+	NewLines(sc, meshNm+"-side", []mat32.Vec3{sbl, stl, str, sbr}, wd, CloseLines)
 }
 
 const (
@@ -211,50 +208,51 @@ const (
 	Active = false
 )
 
-// AddNewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
+// NewLineBox adds a new Group with Solid's and two Meshes defining the edges of a Box.
 // This can be used for drawing a selection box around a Node in the scene, for example.
 // offset is an arbitrary offset (for composing shapes).
 // Meshes are named meshNm+"-front" and meshNm+"-side" -- need to be
 // initialized, e.g., using sc.InitMesh()
 // inactive indicates whether the box and solids should be flagged as inactive
 // (not selectable).
-func AddNewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
+func NewLineBox(sc *Scene, parent ki.Ki, meshNm, boxNm string, bbox mat32.Box3, width float32, clr color.RGBA, inactive bool) *Group {
 	sz := bbox.Size()
 	hSz := sz.MulScalar(0.5)
 
-	AddNewLineBoxMeshes(sc, meshNm, bbox, width)
+	NewLineBoxMeshes(sc, meshNm, bbox, width)
 	frmnm := meshNm + "-front"
 	sdmnm := meshNm + "-side"
 
 	ctr := bbox.Min.Add(hSz)
-	bgp := AddNewGroup(sc, parent, boxNm)
+	bgp := NewGroup(parent, boxNm)
 	bgp.Pose.Pos = ctr
 
-	bs := AddNewSolid(sc, bgp, boxNm+"-back", frmnm)
+	bs := NewSolid(bgp, boxNm+"-back", frmnm)
 	bs.Mat.Color = clr
 	bs.Pose.Pos.Set(0, 0, -hSz.Z)
 
-	ls := AddNewSolid(sc, bgp, boxNm+"-left", sdmnm)
+	ls := NewSolid(bgp, boxNm+"-left", sdmnm)
 	ls.Mat.Color = clr
 	ls.Pose.Pos.Set(-hSz.X, 0, 0)
 	ls.Pose.SetAxisRotation(0, 1, 0, 90)
 
-	rs := AddNewSolid(sc, bgp, boxNm+"-right", sdmnm)
+	rs := NewSolid(bgp, boxNm+"-right", sdmnm)
 	rs.Mat.Color = clr
 	rs.Pose.Pos.Set(hSz.X, 0, 0)
 	rs.Pose.SetAxisRotation(0, 1, 0, -90)
 
-	fs := AddNewSolid(sc, bgp, boxNm+"-front", frmnm)
+	fs := NewSolid(bgp, boxNm+"-front", frmnm)
 	fs.Mat.Color = clr
 	fs.Pose.Pos.Set(0, 0, hSz.Z)
 
-	if inactive {
-		bgp.SetDisabled()
-		bs.SetDisabled()
-		ls.SetDisabled()
-		rs.SetDisabled()
-		fs.SetDisabled()
-	}
+	// todo:
+	// if inactive {
+	// 	bgp.SetDisabled()
+	// 	bs.SetDisabled()
+	// 	ls.SetDisabled()
+	// 	rs.SetDisabled()
+	// 	fs.SetDisabled()
+	// }
 
 	return bgp
 }

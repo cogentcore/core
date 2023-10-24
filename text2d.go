@@ -8,14 +8,10 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/draw"
 
-	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/girl"
-	"goki.dev/girl/gist"
+	"goki.dev/girl/paint"
+	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
-	"goki.dev/ki/v2/ki"
-	"goki.dev/ki/v2/kit"
 	"goki.dev/mat32/v2"
 	"goki.dev/vgpu/v2/vgpu"
 )
@@ -40,27 +36,27 @@ type Text2D struct {
 	Text string
 
 	// styling settings for the text
-	Sty gist.Style `json:"-" xml:"-"`
+	Sty styles.Style `set:"-" json:"-" xml:"-"`
 
 	// position offset of start of text rendering relative to upper-left corner
-	TxtPos mat32.Vec2 `xml:"-" json:"-"`
+	TxtPos mat32.Vec2 `set:"-" xml:"-" json:"-"`
 
 	// render data for text label
-	TxtRender girl.Text `view:"-" xml:"-" json:"-"`
+	TxtRender paint.Text `set:"-" view:"-" xml:"-" json:"-"`
 
 	// render state for rendering text
-	RenderState girl.State `copy:"-" json:"-" xml:"-" view:"-"`
+	RenderState paint.State `set:"-" copy:"-" json:"-" xml:"-" view:"-"`
 }
 
-var TypeText2D = kit.Types.AddType(&Text2D{}, Text2DProps)
-
-// AddNewText2D adds a new text of given name and text string to given parent
-func AddNewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
-	txt := parent.AddNewChild(TypeText2D, name).(*Text2D)
+/*
+// NewText2D adds a new text of given name and text string to given parent
+func NewText2D(sc *Scene, parent ki.Ki, name string, text string) *Text2D {
+	txt := parent.NewChild(TypeText2D, name).(*Text2D)
 	txt.Defaults(sc)
 	txt.Text = text
 	return txt
 }
+*/
 
 func (txt *Text2D) Defaults(sc *Scene) {
 	tm := sc.PlaneMesh2D()
@@ -69,16 +65,16 @@ func (txt *Text2D) Defaults(sc *Scene) {
 	txt.Pose.Scale.SetScalar(.005)
 	txt.SetProp("font-size", units.Pt(36))
 	txt.SetProp("margin", units.Px(2))
-	txt.SetProp("color", &gi.Prefs.Colors.Font)
+	// txt.SetProp("color", &gi.Prefs.Colors.Font)
 	txt.SetProp("background-color", color.RGBA{0, 0, 0, 0})
 	txt.Mat.Bright = 4 // this is key for making e.g., a white background show up as white..
 }
 
 // SetText sets the text and renders it to the texture image
-func (txt *Text2D) SetText(sc *Scene, str string) {
-	txt.Text = str
-	txt.RenderText(sc)
-}
+// func (txt *Text2D) SetText(sc *Scene, str string) {
+// 	txt.Text = str
+// 	txt.RenderText(sc)
+// }
 
 // TextSize returns the size of the text plane, applying all *local* scaling factors
 // if nothing rendered yet, returns false
@@ -99,12 +95,12 @@ func (txt *Text2D) TextSize() (mat32.Vec2, bool) {
 }
 
 func (txt *Text2D) Init3D(sc *Scene) {
-	txt.RenderText(sc)
-	err := txt.Validate(sc)
-	if err != nil {
-		txt.SetInvisible()
-	}
-	txt.Node3DBase.Init3D(sc)
+	// txt.RenderText(sc)
+	// err := txt.Validate(sc)
+	// if err != nil {
+	// 	txt.SetInvisible()
+	// }
+	// txt.NodeBase.Init3D(sc)
 }
 
 // StyleText does basic 2D styling
@@ -113,21 +109,23 @@ func (txt *Text2D) StyleText(sc *Scene) {
 	// css stuff only works for node2d
 	// gi.AggCSS(&txt.CSSAgg, txt.CSS)
 	// txt.Sty.StyleCSS(txt.This().(gi.Node2D), txt.CSSAgg, "", sc.Viewport)
-	gi.SetUnitContext(&txt.Sty, sc.Viewport, mat32.Vec2{}, mat32.Vec2{})
+	// gi.SetUnitContext(&txt.Sty, sc.Viewport, mat32.Vec2{}, mat32.Vec2{})
 }
 
 func (txt *Text2D) RenderText(sc *Scene) {
 	txt.StyleText(sc)
-	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, txt.CSSAgg)
+	txt.TxtRender.SetHTML(txt.Text, txt.Sty.FontRender(), &txt.Sty.Text, &txt.Sty.UnContext, nil) // txt.CSSAgg)
 	sz := txt.TxtRender.Size
-	txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
-	if txt.TxtRender.Size != sz {
-		sz = txt.TxtRender.Size
+	/*
 		txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
 		if txt.TxtRender.Size != sz {
 			sz = txt.TxtRender.Size
+			txt.TxtRender.LayoutStdLR(&txt.Sty.Text, txt.Sty.FontRender(), &txt.Sty.UnContext, sz)
+			if txt.TxtRender.Size != sz {
+				sz = txt.TxtRender.Size
+			}
 		}
-	}
+	*/
 	marg := txt.Sty.TotalMargin()
 	sz.SetAdd(marg.Size())
 	txt.TxtPos = marg.Pos()
@@ -169,7 +167,7 @@ func (txt *Text2D) RenderText(sc *Scene) {
 		rs.Init(szpt.X, szpt.Y, img)
 	}
 	rs.PushBounds(bounds)
-	draw.Draw(img, bounds, &image.Uniform{txt.Sty.BackgroundColor.Color}, image.Point{}, draw.Src)
+	// draw.Draw(img, bounds, &image.Uniform{txt.Sty.BackgroundColor.Color}, image.Point{}, draw.Src)
 	txt.TxtRender.Render(rs, txt.TxtPos)
 	rs.PopBounds()
 }
@@ -189,11 +187,11 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 		ax, ay := txt.Sty.Text.AlignFactors()
 		al := txt.Sty.Text.AlignV
 		switch {
-		case gist.IsAlignStart(al):
+		case styles.IsAlignStart(al):
 			ay = -0.5
-		case gist.IsAlignMiddle(al):
+		case styles.IsAlignMiddle(al):
 			ay = 0
-		case gist.IsAlignEnd(al):
+		case styles.IsAlignEnd(al):
 			ay = 0.5
 		}
 		ps := txt.Pose.Pos
@@ -204,13 +202,13 @@ func (txt *Text2D) UpdateWorldMatrix(parWorld *mat32.Mat4) {
 		txt.Pose.UpdateMatrix()
 	}
 	txt.Pose.UpdateWorldMatrix(parWorld)
-	txt.SetFlag(int(WorldMatrixUpdated))
+	txt.SetFlag(true, WorldMatrixUpdated)
 }
 
 func (txt *Text2D) IsTransparent() bool {
-	if txt.Sty.BackgroundColor.Color.A < 255 {
-		return true
-	}
+	// if txt.Sty.BackgroundColor.Color.A < 255 {
+	// 	return true
+	// }
 	return false
 }
 
@@ -219,8 +217,4 @@ func (txt *Text2D) RenderClass() RenderClasses {
 		return RClassTransTexture
 	}
 	return RClassOpaqueTexture
-}
-
-var Text2DProps = ki.Props{
-	ki.EnumTypeFlag: gi.TypeNodeFlags,
 }
