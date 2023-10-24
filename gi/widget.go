@@ -140,12 +140,18 @@ type Widget interface {
 	// OnClick adds an event listener function for [events.Click] events
 	OnClick(fun func(e events.Event)) Widget
 
-	// HandleEvent calls registered event Listener functions for given event
+	// HandleEvent sends the given event to all Listeners for that event type.
+	// It also checks if the State has changed and calls ApplyStyle if so.
+	// If more significant Config level changes are needed due to an event,
+	// the event handler must do this itself.
 	HandleEvent(e events.Event)
 
-	// Send sends an event of given type to this widget,
+	// Send sends an NEW event of given type to this widget,
 	// optionally starting from values in the given original event
 	// (recommended to include where possible).
+	// Do NOT send an existing event using this method if you
+	// want the Handled state to persist throughout the call chain;
+	// call HandleEvent directly for any existing events.
 	Send(e events.Types, orig ...events.Event)
 
 	// MakeContextMenu adds the context menu items (typically [Button]s)
