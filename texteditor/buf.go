@@ -2523,11 +2523,7 @@ func (tb *Buf) SetCompleter(data any, matchFun complete.MatchFunc, editFun compl
 		}
 		tb.DeleteCompleter()
 	}
-	tb.Complete = gi.NewComplete(tb.CurView)
-	tb.Complete.Context = data
-	tb.Complete.MatchFunc = matchFun
-	tb.Complete.EditFunc = editFun
-	tb.Complete.LookupFunc = lookupFun
+	tb.Complete = gi.NewComplete().SetContext(data).SetMatchFunc(matchFun).SetEditFunc(editFun).SetLookupFunc(lookupFun)
 	// note: only need to connect once..
 	// tb.Complete.CompleteSig.ConnectOnly(func(dlg *gi.Dialog) {
 	// 	tbf, _ := recv.Embed(TypeBuf).(*Buf)

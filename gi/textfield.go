@@ -883,10 +883,7 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 		tf.Complete = nil
 		return
 	}
-	tf.Complete = NewComplete(tf)
-	tf.Complete.Context = data
-	tf.Complete.MatchFunc = matchFun
-	tf.Complete.EditFunc = editFun
+	tf.Complete = NewComplete().SetContext(data).SetMatchFunc(matchFun).SetEditFunc(editFun)
 	// note: only need to connect once..
 	// todo:
 	// tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
@@ -910,8 +907,7 @@ func (tf *TextField) OfferComplete(forceComplete bool) {
 	cpos.Y += 10
 	tf.Complete.SrcLn = 0
 	tf.Complete.SrcCh = tf.CursorPos
-	tf.Complete.Stage.Scene.Geom.Pos = cpos
-	tf.Complete.Show(s, forceComplete)
+	tf.Complete.Show(tf, cpos, s, forceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events
