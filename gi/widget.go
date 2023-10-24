@@ -275,7 +275,7 @@ type WidgetBase struct {
 	// These functions are called in sequential ascending order, so the last added one is called
 	// last and thus can override anything set by the other ones. These should be set using
 	// OnWidgetAdded, which can be called by both end-user and internal code.
-	OnWidgetAdders []func(w Widget) `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	OnWidgetAdders []func(w Widget) `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code
 	Stylers []func(s *styles.Style) `copy:"-" json:"-" xml:"-" set:"-"`
@@ -298,7 +298,7 @@ type WidgetBase struct {
 
 	// an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.
 	// This function can decide where to insert new elements, and it should typically add a separator to disambiguate.
-	CustomContextMenu func(m *Scene) `copy:"-" view:"-" json:"-" xml:"-"`
+	CustomContextMenu func(m *Scene) `copy:"-" json:"-" xml:"-"`
 
 	// parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.
 	Sc *Scene `copy:"-" json:"-" xml:"-" set:"-"`

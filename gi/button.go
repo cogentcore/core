@@ -52,7 +52,7 @@ type Button struct { //goki:embedder
 	Data any `json:"-" xml:"-" view:"-"`
 
 	// optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing
-	UpdateFunc func() `json:"-" xml:"-" view:"-"`
+	UpdateFunc func() `json:"-" xml:"-"`
 }
 
 func (bt *Button) CopyFieldsFrom(frm any) {

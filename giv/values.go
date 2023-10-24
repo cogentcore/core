@@ -1721,5 +1721,8 @@ func (vv *FuncValue) ConfigWidget(widg gi.Widget, sc *gi.Scene) {
 	vv.Widget = widg
 	vv.StdConfigWidget(widg)
 
+	fbt := vv.Widget.(*FuncButton)
+	fbt.Type = gi.ButtonTonal
+
 	vv.UpdateWidget()
 }
