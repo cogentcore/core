@@ -174,6 +174,9 @@ func (ch *Chooser) ChooserStyles() {
 			text.Style(func(s *styles.Style) {
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Set()
+				if ch.Type == ChooserFilled {
+					s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
+				}
 				if ch.MaxLength > 0 {
 					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
 				}
