@@ -212,7 +212,7 @@ func (wb *WidgetBase) NeedsRebuild() bool {
 // 	Config
 
 // Config is the main wrapper configuration call, calling ConfigWidget
-// which actually does the work. Use ReConfig to update styles too,
+// which actually does the work. Use [WidgetBase.Update] to update styles too,
 // which is typically needed once an item is displayed.
 // Config by itself is sufficient during initial construction because
 // everything will be automatically styled during initial display.

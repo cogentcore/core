@@ -234,6 +234,7 @@ func (ch *Chooser) ConfigParts(sc *Scene) {
 	if ch.Editable {
 		tx := ch.Parts.Child(txIdx).(*TextField)
 		tx.SetText(ch.CurLabel)
+		tx.Config(ch.Sc) // this is essential
 		tx.SetCompleter(tx, ch.CompleteMatch, ch.CompleteEdit)
 	} else {
 		lbl := ch.Parts.Child(lbIdx).(*Label)
