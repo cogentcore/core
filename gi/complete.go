@@ -164,6 +164,9 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 	MenuSceneConfigStyles(sc)
 	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
 	sc.Geom.Pos = pos
+	// we forward our key events to the context object
+	// so that you can keep typing while in a completer
+	sc.OnKeyChord(ctx.HandleEvent)
 
 	for i := 0; i < count; i++ {
 		cmp := &c.Completions[i]
