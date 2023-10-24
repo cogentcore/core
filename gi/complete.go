@@ -60,6 +60,9 @@ type Complete struct { //gti:add -setters
 	// the user's completion selection
 	Completion string
 
+	// the event listeners for the completer (it sends Select events)
+	Listeners events.Listeners `set:"-" view:"-"`
+
 	DelayTimer *time.Timer `set:"-"`
 	DelayMu    sync.Mutex  `set:"-"`
 	ShowMu     sync.Mutex  `set:"-"`
@@ -181,6 +184,9 @@ func (c *Complete) ShowNow(ctx Widget, pos image.Point, text string, force bool)
 // Call when new events nullify prior completions.
 // Returns true if canceled.
 func (c *Complete) Cancel() bool {
+	if c.Stage == nil {
+		return false
+	}
 	c.Stage.Close()
 	c.Stage = nil
 	return true
@@ -215,11 +221,23 @@ func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Poi
 func (c *Complete) Complete(s string) {
 	c.Cancel()
 	c.Completion = s
-	// c.CompleteSig.Emit(c.This(), int64(CompleteSelect), s)
+	c.Listeners.Call(&events.Base{Typ: events.Select})
+}
+
+// OnSelect registers given listener function for Select events on Value.
+// This is the primary notification event for all Complete elements.
+func (c *Complete) OnSelect(fun func(e events.Event)) {
+	c.On(events.Select, fun)
+}
+
+// On adds an event listener function for the given event type
+func (c *Complete) On(etype events.Types, fun func(e events.Event)) {
+	c.Listeners.Add(etype, fun)
 }
 
 // KeyInput is the opportunity for completion to act on specific key inputs
-func (c *Complete) KeyInput(kf KeyFuns) bool { // true - caller should set key processed
+// The return value indicates whether the caller should set the event as handled
+func (c *Complete) KeyInput(kf KeyFuns) bool {
 	count := len(c.Completions)
 	switch kf {
 	case KeyFunFocusNext: // tab will complete if single item or try to extend if multiple items

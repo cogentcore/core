@@ -884,6 +884,9 @@ func (tf *TextField) SetCompleter(data any, matchFun complete.MatchFunc, editFun
 		return
 	}
 	tf.Complete = NewComplete().SetContext(data).SetMatchFunc(matchFun).SetEditFunc(editFun)
+	tf.Complete.OnSelect(func(e events.Event) {
+		tf.CompleteText(tf.Complete.Completion)
+	})
 	// note: only need to connect once..
 	// todo:
 	// tf.Complete.CompleteSig.ConnectOnly(tf.This(), func(recv, send ki.Ki, sig int64, data any) {
