@@ -9,7 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"goki.dev/ki/v2"
+	"goki.dev/goosi/events"
+	"goki.dev/icons"
 	"goki.dev/pi/v2/complete"
 	"goki.dev/pi/v2/spell"
 )
@@ -26,9 +27,11 @@ type Completer interface {
 // Complete
 
 // Complete holds the current completion data and functions to call for building
-// the list of possible completions and for editing text after a completion is selected
-type Complete struct {
-	ki.Node
+// the list of possible completions and for editing text after a completion is selected.
+// It also holds the [PopupStage] associated with it.
+type Complete struct { //gti:add -setters
+	// Stage is the [PopupStage] associated with the [Complete]
+	Stage *PopupStage
 
 	// function to get the list of possible completions
 	MatchFunc complete.MatchFunc
@@ -57,8 +60,6 @@ type Complete struct {
 	// the user's completion selection
 	Completion string
 
-	// the scene where the current popup menu is presented
-	Sc         *Scene      `set:"-"`
 	DelayTimer *time.Timer `set:"-"`
 	DelayMu    sync.Mutex  `set:"-"`
 	ShowMu     sync.Mutex  `set:"-"`
@@ -83,6 +84,16 @@ var CompleteWaitMSec = 0
 // CompleteMaxItems is the max number of items to display in completer popup
 var CompleteMaxItems = 25
 
+// NewComplete returns a new [Complete] object, initializing its [PopupStage]
+// based on the given context widget.
+func NewComplete(ctx Widget) *Complete {
+	c := &Complete{}
+	sc := NewScene(ctx.Name() + "-complete")
+	c.Stage = NewPopupStage(CompleterStage, sc, ctx)
+	sc.Geom.Pos = ctx.ContextMenuPos(nil)
+	return c
+}
+
 // IsAboutToShow returns true if the DelayTimer is started for
 // preparing to show a completion.  note: don't really need to lock
 func (c *Complete) IsAboutToShow() bool {
@@ -96,102 +107,96 @@ func (c *Complete) IsAboutToShow() bool {
 // a delay, which resets every time it is called.
 // After delay, Calls ShowNow, which calls MatchFunc
 // to get a list of completions and builds the completion popup menu
-func (c *Complete) Show(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool) {
-	/*
-		if c.MatchFunc == nil || sc == nil {
-			return
-		}
-		cpop := sc.Win.CurPopup()
-		// TODO: maybe preserve popup and just move it
-		// onif there is no delay set in CompleteWaitMSec
-		// (should reduce annoying flashing)
-		waitMSec := CompleteWaitMSec
-		if force {
-			waitMSec = 0
-		}
-		if PopupIsCompleter(cpop) {
-			sc.Win.SetDelPopup(cpop)
-		}
-		c.DelayMu.Lock()
-		if c.DelayTimer != nil {
-			c.DelayTimer.Stop()
-		}
-		if text == "" {
-			c.DelayMu.Unlock()
-			return
-		}
-
-		c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
-			func() {
-				c.DelayMu.Lock()
-				c.ShowNow(text, posLn, posCh, sc, pt, force, waitMSec == 0)
-				c.DelayTimer = nil
-				c.DelayMu.Unlock()
-			})
+func (c *Complete) Show(text string, force bool) {
+	if c.MatchFunc == nil || c.Stage == nil || c.Stage.Scene == nil {
+		return
+	}
+	// cpop := sc.Win.CurPopup()
+	// TODO: maybe preserve popup and just move it
+	// onif there is no delay set in CompleteWaitMSec
+	// (should reduce annoying flashing)
+	waitMSec := CompleteWaitMSec
+	if force {
+		waitMSec = 0
+	}
+	// if PopupIsCompleter(cpop) {
+	// 	sc.Win.SetDelPopup(cpop)
+	// }
+	c.DelayMu.Lock()
+	if c.DelayTimer != nil {
+		c.DelayTimer.Stop()
+	}
+	if text == "" {
 		c.DelayMu.Unlock()
-	*/
+		return
+	}
+
+	c.DelayTimer = time.AfterFunc(time.Duration(waitMSec)*time.Millisecond,
+		func() {
+			c.DelayMu.Lock()
+			c.ShowNow(text, force, waitMSec == 0)
+			c.DelayTimer = nil
+			c.DelayMu.Unlock()
+		})
+	c.DelayMu.Unlock()
 }
 
 // ShowNow actually calls MatchFunc to get a list of completions and builds the
 // completion popup menu. If keep is set to true, the previous completion popup
 // will be kept and reused (if it exists), which reduces flashing if there is no
 // delay between popups.
-func (c *Complete) ShowNow(text string, posLn, posCh int, sc *Scene, pt image.Point, force bool, keep bool) {
-	/*
-		if c.MatchFunc == nil || sc == nil || sc.Win == nil {
+func (c *Complete) ShowNow(text string, force bool, keep bool) {
+	if c.MatchFunc == nil || c.Stage == nil || c.Stage.Scene == nil {
+		return
+	}
+	// cpop := sc.Win.CurPopup()
+	// if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
+	// 	sc.Win.SetDelPopup(cpop)
+	// }
+	c.ShowMu.Lock()
+	defer c.ShowMu.Unlock()
+	md := c.MatchFunc(c.Context, text, c.SrcLn, c.SrcCh)
+	c.Completions = md.Matches
+	c.Seed = md.Seed
+	count := len(c.Completions)
+	if count == 0 {
+		return
+	}
+	if !force {
+		if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
 			return
 		}
-		cpop := sc.Win.CurPopup()
-		if PopupIsCompleter(cpop) && (!keep || sc.Win.CurPopup() == nil) {
-			sc.Win.SetDelPopup(cpop)
-		}
-		c.ShowMu.Lock()
-		defer c.ShowMu.Unlock()
-		c.Sc = nil
-		md := c.MatchFunc(c.Context, text, posLn, posCh)
-		c.Completions = md.Matches
-		c.Seed = md.Seed
-		count := len(c.Completions)
-		if count == 0 {
-			return
-		}
-		if !force {
-			if count > CompleteMaxItems || (count == 1 && c.Completions[0].Text == c.Seed) {
-				return
-			}
-		}
+	}
 
-		var m Menu
-		for i := 0; i < count; i++ {
-			cmp := &c.Completions[i]
-			text := cmp.Text
-			if cmp.Label != "" {
-				text = cmp.Label
-			}
-			icon := cmp.Icon
-			m.AddButton(ActOpts{Icon: icons.Icon(icon), Label: text, Tooltip: cmp.Desc, Data: cmp.Text},
-				c, func(recv, send ki.Ki, sig int64, data any) {
-					cc := recv.(*Complete)
-					cc.Complete(data.(string))
-				})
+	// var m Menu
+	for i := 0; i < count; i++ {
+		cmp := &c.Completions[i]
+		text := cmp.Text
+		if cmp.Label != "" {
+			text = cmp.Label
 		}
-		// TODO: maybe get this working with RecyclePopup
-		// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
-		// if keep && vp.Win.CurPopup() != nil {
-		// 	fmt.Println("updating through keep")
-		// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
-		// 	psc.SetFlag(int(ScFlagCompleter))
-		// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-		// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
-		// } else {
-		psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
-		psc.Type = ScCompleter
-		// todo:
-		// psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
-		sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
-		// }
-		c.Sc = sc
-	*/
+		icon := cmp.Icon
+		NewButton(c.Stage.Scene, text).SetIcon(icons.Icon(icon)).SetText(text).SetTooltip(cmp.Desc).OnClick(func(e events.Event) {
+			c.Complete(cmp.Text)
+		})
+	}
+	// TODO: maybe get this working with RecyclePopup
+	// fmt.Println(keep, vp == c.Sc, vp, c.Sc)
+	// if keep && vp.Win.CurPopup() != nil {
+	// 	fmt.Println("updating through keep")
+	// 	psc := RecyclePopupMenu(m, pt.X, pt.Y, vp, "tf-completion-menu")
+	// 	psc.SetFlag(int(ScFlagCompleter))
+	// 	psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	// 	vp.Win.RenderWin.SendEmptyEvent()               // needs an extra event to show popup
+	// } else {
+	// psc := PopupMenu(m, pt.X, pt.Y, sc, "tf-completion-menu")
+	// psc.Type = ScCompleter
+	// // todo:
+	// // psc.Child(0).SetProp("no-focus-name", true) // disable name focusing -- grabs key events in popup instead of in textfield!
+	// sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
+	// // }
+	// c.Sc = sc
+	c.Stage.Run()
 }
 
 // Cancel cancels any existing *or* pending completion.
@@ -217,7 +222,7 @@ func (c *Complete) Cancel() bool {
 // Returns true if aborted.
 func (c *Complete) Abort() bool {
 	c.DelayMu.Lock()
-	c.Sc = nil
+	// c.Sc = nil
 	if c.DelayTimer != nil {
 		c.DelayTimer.Stop()
 		c.DelayTimer = nil
@@ -233,7 +238,7 @@ func (c *Complete) Lookup(text string, posLn, posCh int, sc *Scene, pt image.Poi
 	if c.LookupFunc == nil || sc == nil {
 		return
 	}
-	c.Sc = nil
+	// c.Sc = nil
 	c.LookupFunc(c.Context, text, posLn, posCh) // this processes result directly
 }
 

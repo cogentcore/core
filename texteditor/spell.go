@@ -49,7 +49,10 @@ func (ed *Editor) OfferComplete() {
 	cpos.Y += 10
 	ed.Buf.SetByteOffs() // make sure the pos offset is updated!!
 	ed.Buf.CurView = ed
-	ed.Buf.Complete.Show(s, ed.CursorPos.Ln, ed.CursorPos.Ch, ed.Sc, cpos, ed.ForceComplete)
+	ed.Buf.Complete.SrcLn = ed.CursorPos.Ln
+	ed.Buf.Complete.SrcCh = ed.CursorPos.Ch
+	ed.Buf.Complete.Stage.Scene.Geom.Pos = cpos
+	ed.Buf.Complete.Show(s, ed.ForceComplete)
 }
 
 // CancelComplete cancels any pending completion -- call this when new events

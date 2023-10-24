@@ -176,7 +176,7 @@ var LayoutFocusNameTabMSec = 2000
 // to the desired number of columns, from which the number of rows
 // is computed -- otherwise it uses the square root of number of
 // elements.
-type Layout struct {
+type Layout struct { //goki:embedder
 	WidgetBase
 
 	// type of layout to use

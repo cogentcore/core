@@ -148,7 +148,7 @@ var ButtonType = gti.AddType(&gti.Type{
 		{"Shortcut", &gti.Field{Name: "Shortcut", Type: "goki.dev/goosi/events/key.Chord", LocalType: "key.Chord", Doc: "optional shortcut keyboard chord to trigger this button -- always window-wide in scope, and should generally not conflict other shortcuts (a log message will be emitted if so).  Shortcuts are processed after all other processing of keyboard input.  Use Command for Control / Meta (Mac Command key) per platform.  These are only set automatically for Menu items, NOT for items in Toolbar or buttons somewhere, but the tooltip for buttons will show the shortcut if set.", Directives: gti.Directives{}, Tag: "xml:\"shortcut\""}},
 		{"Menu", &gti.Field{Name: "Menu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "If non-nil, a menu constructor function used to build and display a menu whenever the button is clicked.\nThe constructor function should add buttons to the scene that it is passed.", Directives: gti.Directives{}, Tag: ""}},
 		{"Data", &gti.Field{Name: "Data", Type: "any", LocalType: "any", Doc: "optional data that is sent with events to identify the button", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
-		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", LocalType: "func()", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\" view:\"-\""}},
+		{"UpdateFunc", &gti.Field{Name: "UpdateFunc", Type: "func()", LocalType: "func()", Doc: "optional function that is called to update state of button (typically updating [states.Disabled]); called automatically for menus prior to showing", Directives: gti.Directives{}, Tag: "json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -370,14 +370,16 @@ func (t *Chooser) SetMaxLength(v int) *Chooser {
 	return t
 }
 
-// CompleteType is the [gti.Type] for [Complete]
-var CompleteType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi/v2/gi.Complete",
-	ShortName:  "gi.Complete",
-	IDName:     "complete",
-	Doc:        "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected",
-	Directives: gti.Directives{},
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.Complete",
+	ShortName: "gi.Complete",
+	IDName:    "complete",
+	Doc:       "Complete holds the current completion data and functions to call for building\nthe list of possible completions and for editing text after a completion is selected.\nIt also holds the [PopupStage] associated with it.",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
+	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Stage", &gti.Field{Name: "Stage", Type: "*goki.dev/gi/v2/gi.PopupStage", LocalType: "*PopupStage", Doc: "Stage is the [PopupStage] associated with the [Complete]", Directives: gti.Directives{}, Tag: ""}},
 		{"MatchFunc", &gti.Field{Name: "MatchFunc", Type: "goki.dev/pi/v2/complete.MatchFunc", LocalType: "complete.MatchFunc", Doc: "function to get the list of possible completions", Directives: gti.Directives{}, Tag: ""}},
 		{"LookupFunc", &gti.Field{Name: "LookupFunc", Type: "goki.dev/pi/v2/complete.LookupFunc", LocalType: "complete.LookupFunc", Doc: "function to get the text to show for lookup", Directives: gti.Directives{}, Tag: ""}},
 		{"EditFunc", &gti.Field{Name: "EditFunc", Type: "goki.dev/pi/v2/complete.EditFunc", LocalType: "complete.EditFunc", Doc: "function to edit text using the selected completion", Directives: gti.Directives{}, Tag: ""}},
@@ -387,34 +389,19 @@ var CompleteType = gti.AddType(&gti.Type{
 		{"Completions", &gti.Field{Name: "Completions", Type: "goki.dev/pi/v2/complete.Completions", LocalType: "complete.Completions", Doc: "the list of potential completions", Directives: gti.Directives{}, Tag: ""}},
 		{"Seed", &gti.Field{Name: "Seed", Type: "string", LocalType: "string", Doc: "current completion seed", Directives: gti.Directives{}, Tag: ""}},
 		{"Completion", &gti.Field{Name: "Completion", Type: "string", LocalType: "string", Doc: "the user's completion selection", Directives: gti.Directives{}, Tag: ""}},
-		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "the scene where the current popup menu is presented", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DelayTimer", &gti.Field{Name: "DelayTimer", Type: "*time.Timer", LocalType: "*time.Timer", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"DelayMu", &gti.Field{Name: "DelayMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ShowMu", &gti.Field{Name: "ShowMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 	}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &Complete{},
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
-// NewComplete adds a new [Complete] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewComplete(par ki.Ki, name ...string) *Complete {
-	return par.NewChild(CompleteType, name...).(*Complete)
-}
-
-// KiType returns the [*gti.Type] of [Complete]
-func (t *Complete) KiType() *gti.Type {
-	return CompleteType
-}
-
-// New returns a new [*Complete] value
-func (t *Complete) New() ki.Ki {
-	return &Complete{}
+// SetStage sets the [Complete.Stage]:
+// Stage is the [PopupStage] associated with the [Complete]
+func (t *Complete) SetStage(v *PopupStage) *Complete {
+	t.Stage = v
+	return t
 }
 
 // SetMatchFunc sets the [Complete.MatchFunc]:
@@ -1325,19 +1312,19 @@ var SliderType = gti.AddType(&gti.Type{
 	},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Type", &gti.Field{Name: "Type", Type: "goki.dev/gi/v2/gi.SliderTypes", LocalType: "SliderTypes", Doc: "the type of the slider", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "xml:\"value\" set:\"-\""}},
+		{"Value", &gti.Field{Name: "Value", Type: "float32", LocalType: "float32", Doc: "current value", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Dim", &gti.Field{Name: "Dim", Type: "goki.dev/mat32/v2.Dims", LocalType: "mat32.Dims", Doc: "dimension along which the slider slides", Directives: gti.Directives{}, Tag: ""}},
-		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: "xml:\"min\""}},
-		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: "xml:\"max\""}},
-		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: "xml:\"step\""}},
-		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: "xml:\"pagestep\""}},
-		{"ValThumb", &gti.Field{Name: "ValThumb", Type: "bool", LocalType: "bool", Doc: "if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed", Directives: gti.Directives{}, Tag: "xml:\"val-thumb\" alt:\"prop-thumb\""}},
-		{"ThumbVal", &gti.Field{Name: "ThumbVal", Type: "float32", LocalType: "float32", Doc: "value that the thumb represents, in the same units", Directives: gti.Directives{}, Tag: "xml:\"thumb-val\""}},
-		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "styled fixed size of the thumb -- only if not doing ValThumb", Directives: gti.Directives{}, Tag: "xml:\"thumb-size\""}},
+		{"Min", &gti.Field{Name: "Min", Type: "float32", LocalType: "float32", Doc: "minimum value in range", Directives: gti.Directives{}, Tag: ""}},
+		{"Max", &gti.Field{Name: "Max", Type: "float32", LocalType: "float32", Doc: "maximum value in range", Directives: gti.Directives{}, Tag: ""}},
+		{"Step", &gti.Field{Name: "Step", Type: "float32", LocalType: "float32", Doc: "smallest step size to increment", Directives: gti.Directives{}, Tag: ""}},
+		{"PageStep", &gti.Field{Name: "PageStep", Type: "float32", LocalType: "float32", Doc: "larger PageUp / Dn step size", Directives: gti.Directives{}, Tag: ""}},
+		{"ValThumb", &gti.Field{Name: "ValThumb", Type: "bool", LocalType: "bool", Doc: "if true, has a proportionally-sized thumb knob reflecting another value -- e.g., the amount visible in a scrollbar, and thumb is completely inside Size -- otherwise ThumbSize affects Size so that full Size range can be traversed", Directives: gti.Directives{}, Tag: ""}},
+		{"ThumbVal", &gti.Field{Name: "ThumbVal", Type: "float32", LocalType: "float32", Doc: "value that the thumb represents, in the same units", Directives: gti.Directives{}, Tag: ""}},
+		{"ThumbSize", &gti.Field{Name: "ThumbSize", Type: "goki.dev/girl/units.Value", LocalType: "units.Value", Doc: "styled fixed size of the thumb -- only if not doing ValThumb", Directives: gti.Directives{}, Tag: ""}},
 		{"Icon", &gti.Field{Name: "Icon", Type: "goki.dev/icons.Icon", LocalType: "icons.Icon", Doc: "optional icon for the dragging knob", Directives: gti.Directives{}, Tag: "view:\"show-name\""}},
-		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", LocalType: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change", Directives: gti.Directives{}, Tag: "xml:\"tracking\""}},
-		{"TrackThr", &gti.Field{Name: "TrackThr", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting a signal in Tracking mode", Directives: gti.Directives{}, Tag: "xml:\"track-thr\""}},
-		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}, Tag: "xml:\"snap\""}},
+		{"Tracking", &gti.Field{Name: "Tracking", Type: "bool", LocalType: "bool", Doc: "if true, will send continuous updates of value changes as user moves the slider -- otherwise only at the end -- see TrackThr for a threshold on amount of change", Directives: gti.Directives{}, Tag: ""}},
+		{"TrackThr", &gti.Field{Name: "TrackThr", Type: "float32", LocalType: "float32", Doc: "threshold for amount of change in scroll value before emitting a signal in Tracking mode", Directives: gti.Directives{}, Tag: ""}},
+		{"Snap", &gti.Field{Name: "Snap", Type: "bool", LocalType: "bool", Doc: "snap the values to Step size increments", Directives: gti.Directives{}, Tag: ""}},
 		{"Off", &gti.Field{Name: "Off", Type: "bool", LocalType: "bool", Doc: "can turn off e.g., scrollbar rendering with this flag -- just prevents rendering", Directives: gti.Directives{}, Tag: ""}},
 		{"Prec", &gti.Field{Name: "Prec", Type: "int", LocalType: "int", Doc: "specifies the precision of decimal places (total, not after the decimal point) to use in representing the number -- this helps to truncate small weird floating point values in the nether regions", Directives: gti.Directives{}, Tag: "xml:\"prec\""}},
 		{"ValueColor", &gti.Field{Name: "ValueColor", Type: "goki.dev/colors.Full", LocalType: "colors.Full", Doc: "the background color that is used for styling the selected value section of the slider; it should be set in the StyleFuncs, just like the main style object is", Directives: gti.Directives{}, Tag: ""}},
@@ -2332,14 +2319,14 @@ var WidgetBaseType = gti.AddType(&gti.Type{
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"OnWidgetAdders", &gti.Field{Name: "OnWidgetAdders", Type: "[]func(w goki.dev/gi/v2/gi.Widget)", LocalType: "[]func(w Widget)", Doc: "A slice of functions to call on all widgets that are added as children to this widget or its children.\nThese functions are called in sequential ascending order, so the last added one is called\nlast and thus can override anything set by the other ones. These should be set using\nOnWidgetAdded, which can be called by both end-user and internal code.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
+		{"Stylers", &gti.Field{Name: "Stylers", Type: "[]func(s *goki.dev/girl/styles.Style)", LocalType: "[]func(s *styles.Style)", Doc: "a slice of stylers that are called in sequential ascending order (so the last added styler is called last and thus overrides all other functions) to style the element; these should be set using Style, which can be called by end-user and internal code", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"OverrideStyle", &gti.Field{Name: "OverrideStyle", Type: "bool", LocalType: "bool", Doc: "override the computed styles and allow directly editing Style", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Styles", &gti.Field{Name: "Styles", Type: "goki.dev/girl/styles.Style", LocalType: "styles.Style", Doc: "styling settings for this widget -- set in SetApplyStyle during an initialization step, and when the structure changes; they are determined by, in increasing priority order, the default values, the ki node properties, and the StyleFunc (the recommended way to set styles is through the StyleFunc -- setting this field directly outside of that will have no effect unless OverrideStyle is on)", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Listeners", &gti.Field{Name: "Listeners", Type: "goki.dev/goosi/events.Listeners", LocalType: "events.Listeners", Doc: "Listeners are event listener functions for processing events on this widget.\ntype specific Listeners are added in OnInit when the widget is initialized.", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"Parts", &gti.Field{Name: "Parts", Type: "*goki.dev/gi/v2/gi.Layout", LocalType: "*Layout", Doc: "a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" view-closed:\"true\" set:\"-\""}},
 		{"LayState", &gti.Field{Name: "LayState", Type: "goki.dev/gi/v2/gi.LayoutState", LocalType: "LayoutState", Doc: "all the layout state information for this widget", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\""}},
+		{"CustomContextMenu", &gti.Field{Name: "CustomContextMenu", Type: "func(m *goki.dev/gi/v2/gi.Scene)", LocalType: "func(m *Scene)", Doc: "an optional context menu constructor function called by [Widget.MakeContextMenu] after any type-specified items are added.\nThis function can decide where to insert new elements, and it should typically add a separator to disambiguate.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\""}},
 		{"Sc", &gti.Field{Name: "Sc", Type: "*goki.dev/gi/v2/gi.Scene", LocalType: "*Scene", Doc: "parent scene.  Only for use as a last resort when arg is not available -- otherwise always use the arg.  Set during Config.", Directives: gti.Directives{}, Tag: "copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"StyMu", &gti.Field{Name: "StyMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the Style field", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBoxMu", &gti.Field{Name: "BBoxMu", Type: "sync.RWMutex", LocalType: "sync.RWMutex", Doc: "mutex protecting the BBox fields", Directives: gti.Directives{}, Tag: "copy:\"-\" view:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
