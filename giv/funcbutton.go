@@ -100,9 +100,11 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 	rs := []rune(fnm)
 	// FuncName.funcN indicates that a function was defined anonymously
 	if len(rs) > 0 && unicode.IsDigit(rs[len(rs)-1]) && strings.Contains(fnm, ".func") {
-		withoutLast := fnm[:len(fnm)-1]
-		fnm = strings.TrimSuffix(withoutLast, ".func")
-		f := &gti.Func{Name: fnm + ": anonymous", Doc: "Anonymous function defined in " + fnm}
+		fnm = strings.TrimRightFunc(fnm, func(r rune) bool {
+			return unicode.IsDigit(r)
+		})
+		fnm = strings.TrimSuffix(fnm, ".func")
+		f := &gti.Func{Name: fnm, Doc: "Anonymous function defined in " + fnm}
 		return fb.SetFuncImpl(f, reflect.ValueOf(fun))
 	}
 
