@@ -198,14 +198,15 @@ func (c *Complete) ShowNow(text string, force bool, keep bool) {
 	// sc.Win.RenderWin.SendEmptyEvent() // needs an extra event to show popup
 	// // }
 	// c.Sc = sc
-	c.Stage.Run()
+	c.Stage.RunPopup()
 }
 
 // Cancel cancels any existing *or* pending completion.
 // Call when new events nullify prior completions.
 // Returns true if canceled.
 func (c *Complete) Cancel() bool {
-	return false
+	c.Stage.Close()
+	return true
 	/*
 		did := false
 		if c.Sc != nil && c.Sc.Win != nil {
