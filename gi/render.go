@@ -670,8 +670,8 @@ func (wb *WidgetBase) RenderStdBox(sc *Scene, st *styles.Style) {
 	rs := &sc.RenderState
 	pc := &rs.Paint
 
-	csp := wb.ParentBackgroundColor()
-	pc.DrawStdBox(rs, st, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &csp)
+	pbc, psl := wb.ParentBackgroundColor()
+	pc.DrawStdBox(rs, st, wb.LayState.Alloc.Pos, wb.LayState.Alloc.Size, &pbc, psl)
 }
 
 /////////////////////////////////////////////////////////////////////////////

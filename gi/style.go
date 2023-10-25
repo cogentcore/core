@@ -303,20 +303,30 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 	ptd.End()
 }
 
-// ParentBackgroundColor returns the background color
-// of the nearest widget parent of the widget that
-// has a defined background color. If no such parent is found,
-// it returns a transparent background color.
-func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
+// ParentBackgroundColor returns the background color and state layer
+// of the nearest widget parent of the widget that has a defined
+// background color or state layer, using a recursive approach to
+// get further parent background colors for widgets with a state layer
+// but not a background color. If no such parent is found,
+// it returns a transparent background color and a 0 state layer.
+func (wb *WidgetBase) ParentBackgroundColor() (colors.Full, float32) {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		// if we have a background color, we are a relevant breakpoint
-		return !p.Styles.BackgroundColor.IsNil()
+		// if we have a color or a state layer, we are a relevant breakpoint
+		return !p.Styles.BackgroundColor.IsNil() || p.Styles.StateLayer > 0
 	})
 	if pwb == nil {
-		return colors.Full{}
+		return colors.Full{}, 0
 	}
-	return pwb.Styles.BackgroundColor
+	// If we don't have a background color ourselves (but we have a state layer),
+	// we recursively get our parent's background color and apply our state layer
+	// to it. This makes state layers work on transparent elements.
+	if pwb.Styles.BackgroundColor.IsNil() {
+		pbc, _ := pwb.ParentBackgroundColor()
+		return pbc, pwb.Styles.StateLayer
+	}
+	// Otherwise, we can directly apply the state layer to our background color
+	return pwb.Styles.BackgroundColor, pwb.Styles.StateLayer
 }
 
 /////////////////////////////////////////////////////////////////

@@ -566,7 +566,8 @@ func (sr *Slider) RenderDefaultStyle(sc *Scene) {
 		// pc.StrokeStyle.Width = st.Border.Width
 		bg := st.BackgroundColor
 		if bg.IsNil() {
-			bg = sr.ParentBackgroundColor()
+			// STYTODO: should we handle parent state layer here?
+			bg, _ = sr.ParentBackgroundColor()
 		}
 		pc.FillStyle.SetFullColor(&bg)
 
