@@ -22,6 +22,9 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
+	mb := gi.NewMenuBar(sc)
+	NewFuncButton(mb).SetFunc(pf.UpdateAll)
+
 	tb := gi.NewToolbar(sc)
 	NewFuncButton(tb).SetFunc(pf.UpdateAll).SetIcon(icons.Refresh)
 	tb.AddSeparator()
