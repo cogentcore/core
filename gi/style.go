@@ -310,13 +310,13 @@ func SetUnitContext(st *styles.Style, sc *Scene, el, par mat32.Vec2) {
 func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
-		// if we have a color or a state layer, we are a relevant breakpoint
+		// if we have a background color, we are a relevant breakpoint
 		return !p.Styles.BackgroundColor.IsNil()
 	})
 	if pwb == nil {
 		return colors.Full{}
 	}
-	return pwb.Styles.StateBackgroundColor(pwb.Styles.BackgroundColor)
+	return pwb.Styles.BackgroundColor
 }
 
 /////////////////////////////////////////////////////////////////
