@@ -5,8 +5,6 @@
 package gi
 
 import (
-	"fmt"
-
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -315,9 +313,6 @@ func (wb *WidgetBase) ParentBackgroundColor() (colors.Full, float32) {
 	})
 	if pwb == nil {
 		return colors.Full{}, 0
-	}
-	if wb.Path() == "/gogi-demo/tabs-0/tabs/buttons.parts/label" {
-		fmt.Println(pwb.Styles.BackgroundColor, pwb.Styles.StateLayer, wb.Styles.BackgroundColor, wb.Styles.StateLayer)
 	}
 	// If we don't have a background color ourselves (but we have a state layer),
 	// we recursively get our parent's background color and apply our state layer
