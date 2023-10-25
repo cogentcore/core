@@ -402,7 +402,7 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 }
 
 // ArgViewDialog for editing args for a method call in the MethodView system
-func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []ArgConfig, fun func(dlg *gi.Dialog)) *gi.Dialog {
+func ArgViewDialog(ctx gi.Widget, opts DlgOpts, args []Value, fun func(dlg *gi.Dialog)) *gi.Dialog {
 	dlg := gi.NewStdDialog(ctx, opts.ToGiOpts(), fun)
 
 	frame := dlg.Stage.Scene

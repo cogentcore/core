@@ -30,7 +30,7 @@ var ArgViewType = gti.AddType(&gti.Type{
 	Doc:        "ArgView represents a slice of reflect.Value's and associated names, for the\npurpose of supplying arguments to methods called via the MethodView\nframework.",
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.ArgConfig", LocalType: "[]ArgConfig", Doc: "the args that we are a view onto", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "the args that we are a view onto", Directives: gti.Directives{}, Tag: ""}},
 		{"Title", &gti.Field{Name: "Title", Type: "string", LocalType: "string", Doc: "title / prompt to show above the editor fields", Directives: gti.Directives{}, Tag: ""}},
 		{"ViewPath", &gti.Field{Name: "ViewPath", Type: "string", LocalType: "string", Doc: "a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows", Directives: gti.Directives{}, Tag: ""}},
 	}),
@@ -63,6 +63,13 @@ func (t *ArgView) New() ki.Ki {
 // Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 func (t *ArgView) SetTooltip(v string) *ArgView {
 	t.Tooltip = v
+	return t
+}
+
+// SetArgs sets the [ArgView.Args]:
+// the args that we are a view onto
+func (t *ArgView) SetArgs(v []Value) *ArgView {
+	t.Args = v
 	return t
 }
 
@@ -591,7 +598,8 @@ var FuncButtonType = gti.AddType(&gti.Type{
 	Directives: gti.Directives{},
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Func", &gti.Field{Name: "Func", Type: "*goki.dev/gti.Func", LocalType: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: ""}},
+		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Args are the [Value] objects associated with\nthe function button. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
 		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there is a return value from the function of a complex\ntype (struct, slice, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
@@ -625,15 +633,6 @@ func (t *FuncButton) New() ki.Ki {
 // Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
 func (t *FuncButton) SetTooltip(v string) *FuncButton {
 	t.Tooltip = v
-	return t
-}
-
-// SetReflectFunc sets the [FuncButton.ReflectFunc]:
-// ReflectFunc is the [reflect.Value] of the function or
-// method associated with this button. It should typically
-// bet set using [FuncButton.SetFunc].
-func (t *FuncButton) SetReflectFunc(v reflect.Value) *FuncButton {
-	t.ReflectFunc = v
 	return t
 }
 
