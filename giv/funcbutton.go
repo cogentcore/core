@@ -68,8 +68,9 @@ type FuncButton struct {
 	// ShowReturnAsDialog, if and only if ShowReturn is true,
 	// indicates to show the return values of the function in
 	// a dialog, instead of in a snackbar, as they are by default.
-	// If there is a return value from the function of a complex
-	// type (struct, slice, map), then ShowReturnAsDialog will
+	// If there are multiple return values from the function, or if
+	// one of them is a complex type (pointer, struct, slice,
+	// array, map), then ShowReturnAsDialog will
 	// automatically be set to true.
 	ShowReturnAsDialog bool
 }
@@ -281,8 +282,15 @@ func (fb *FuncButton) SetArgs() {
 func (fb *FuncButton) SetReturns() {
 	nret := fb.ReflectFunc.Type().NumOut()
 	fb.Returns = make([]Value, nret)
+	hasComplex := false
 	for i := range fb.Returns {
 		rtyp := fb.ReflectFunc.Type().Out(i)
+		if !hasComplex {
+			k := rtyp.Kind()
+			if k == reflect.Pointer || k == reflect.Struct || k == reflect.Slice || k == reflect.Array || k == reflect.Map {
+				hasComplex = true
+			}
+		}
 
 		name := ""
 		doc := ""
@@ -309,6 +317,9 @@ func (fb *FuncButton) SetReturns() {
 		view.SetTag("label", label)
 		view.SetTag("doc", doc)
 		fb.Returns[i] = view
+	}
+	if nret > 1 || hasComplex {
+		fb.ShowReturnAsDialog = true
 	}
 }
 
