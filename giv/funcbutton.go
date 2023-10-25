@@ -266,25 +266,21 @@ func (fb *FuncButton) SetArgs() {
 	}
 }
 
-// ReturnsForFunc returns the appropriate [ArgConfig] objects for the given return values
+// ReturnsForFunc returns the appropriate [Value] objects for the given return values
 // of the function associated with the function button.
-func (fb *FuncButton) Returns(rets []reflect.Value) []ArgConfig {
-	res := make([]ArgConfig, fb.Func.Returns.Len())
+func (fb *FuncButton) Returns(rets []reflect.Value) []Value {
+	res := make([]Value, fb.Func.Returns.Len())
 	for i, kv := range fb.Func.Returns.Order {
 		ret := kv.Val
-		ra := ArgConfig{
-			Name:  ret.Name,
-			Label: sentencecase.Of(ret.Name),
-			Doc:   ret.Doc,
-		}
+		val := rets[i]
 
-		ra.Val = rets[i]
-
-		ra.View = ToValue(ra.Val.Interface(), "")
-		ra.View.SetSoloValue(ra.Val)
-		ra.View.SetName(ra.Name)
-		ra.View.SetFlag(true, states.ReadOnly)
-		res[i] = ra
+		view := ToValue(val.Interface(), "")
+		view.SetSoloValue(val)
+		view.SetName(ret.Name)
+		view.SetTag("label", sentencecase.Of(ret.Name))
+		view.SetTag("doc", ret.Doc)
+		view.SetFlag(true, states.ReadOnly)
+		res[i] = view
 	}
 	return res
 }
