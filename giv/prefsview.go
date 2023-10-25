@@ -38,6 +38,11 @@ func PrefsView(pf *gi.Preferences) {
 	sz.Args[0].SetValue(true)
 	NewFuncButton(tb).SetFunc(pf.ScreenInfo).SetShowReturn(true).SetIcon(icons.Info)
 	NewFuncButton(tb).SetFunc(pf.VersionInfo).SetShowReturn(true).SetIcon(icons.Info)
+	tb.AddSeparator()
+	NewFuncButton(tb).SetFunc(pf.EditKeyMaps).SetIcon(icons.Keyboard)
+	NewFuncButton(tb).SetFunc(pf.EditHiStyles).SetIcon(icons.InkHighlighter)
+	NewFuncButton(tb).SetFunc(pf.EditDetailed).SetIcon(icons.Description)
+	NewFuncButton(tb).SetFunc(pf.EditDebug).SetIcon(icons.BugReport)
 
 	sv := NewStructView(sc)
 	sv.SetStruct(pf)
