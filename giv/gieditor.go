@@ -148,14 +148,14 @@ func (ge *GiEditor) EditColorScheme() {
 
 // ToggleSelectionMode toggles the editor between selection mode or not
 func (ge *GiEditor) ToggleSelectionMode() { //gti:add
-	/* TODO(kai/sel): implement
-	if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
-		if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
-			win.SelectedWidgetChan = make(chan *gi.WidgetBase)
-		}
-		win.SetFlag(!win.HasFlag(WinSelectionMode), WinSelectionMode)
-	}
-	*/
+	return
+	// TODO(kai/sel): implement
+	// if win, ok := ge.KiRoot.(*gi.RenderWin); ok {
+	// 	if !win.HasFlag(WinSelectionMode) && win.SelectedWidgetChan == nil {
+	// 		win.SelectedWidgetChan = make(chan *gi.WidgetBase)
+	// 	}
+	// 	win.SetFlag(!win.HasFlag(WinSelectionMode), WinSelectionMode)
+	// }
 }
 
 // SetRoot sets the source root and ensures everything is configured
@@ -287,7 +287,6 @@ func (ge *GiEditor) Render(sc *gi.Scene) {
 }
 
 func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
-	return // Kai: ToggleSelectionMode is not registered
 	up := NewFuncButton(tb).SetFunc(ge.Update).SetIcon(icons.Refresh)
 	up.SetUpdateFunc(func() {
 		up.SetEnabled(ge.Changed)
