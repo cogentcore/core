@@ -139,7 +139,7 @@ func (tv *TableView) TableViewInit() {
 			})
 
 		}
-		if w.Parent().Name() == "grid" {
+		if w.Parent().PathFrom(tv.This()) == "frame/grid-lay/grid" {
 			if strings.HasPrefix(w.Name(), "index-") {
 				w.Style(func(s *styles.Style) {
 					s.MinWidth.SetEm(1.5)
@@ -384,14 +384,19 @@ func (tv *TableView) ConfigOneRow(sc *gi.Scene) {
 }
 
 func (tv *TableView) ConfigHeaderStyleWidth(w *gi.WidgetBase, sg *gi.Frame, spc float32, idx int) {
+	if w.Parts != nil {
+		w.Parts.Style(func(s *styles.Style) {
+			s.Overflow = styles.OverflowHidden // no scrollbars!
+		})
+	}
 	w.Style(func(s *styles.Style) {
+		s.Overflow = styles.OverflowHidden // no scrollbars!
 		gd := sg.GridData[gi.Col]
 		if gd == nil {
 			return
 		}
 		wd := gd[idx].AllocSize - spc
 		s.SetFixedWidth(units.Dot(wd))
-		s.Overflow = styles.OverflowHidden // no scrollbars!
 	})
 }
 
