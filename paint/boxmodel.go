@@ -5,8 +5,6 @@
 package paint
 
 import (
-	"fmt"
-
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
@@ -20,7 +18,10 @@ func (pc *Paint) DrawBox(rs *State, pos mat32.Vec2, sz mat32.Vec2, bs styles.Bor
 
 // DrawStdBox draws the CSS "standard box" model using given style.
 // This is used for rendering widgets such as buttons, textfields, etc in a GUI.
-func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full) {
+// The surround arguments are the background color and state layer of the surrounding
+// context of this box, typically obtained through [goki.dev/gi/v2/gi.WidgetBase.ParentBackgroundColor]
+// in a GUI context.
+func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat32.Vec2, surroundBgColor *colors.Full, surroundStateLayer float32) {
 	mpos := pos.Add(st.TotalMargin().Pos())
 	msz := sz.Sub(st.TotalMargin().Size())
 	rad := st.Border.Radius.Dots()
@@ -36,8 +37,11 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// we need to apply the state layer after getting the
 	// surrounding background color
 	bg = st.StateBackgroundColor(bg)
+	// we apply the surrounding state layer to the surrounding background color
+	psl := st.StateLayer
+	st.StateLayer = surroundStateLayer
 	sbg := st.StateBackgroundColor(*surroundBgColor)
-	fmt.Println(bg, st.StateLayer)
+	st.StateLayer = psl
 
 	// We need to fill the whole box where the
 	// box shadows / element can go to prevent growing

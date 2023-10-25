@@ -46,7 +46,7 @@ func TestBoxModel(t *testing.T) {
 
 	sbg := &colors.Full{Solid: colors.Blue}
 
-	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg)
+	pc.DrawStdBox(rs, st, mat32.Vec2{50, 75}, mat32.Vec2{200, 100}, sbg, 0)
 
 	rs.Unlock()
 
