@@ -6,7 +6,6 @@ package paint
 
 import (
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
 	"math"
@@ -349,10 +348,6 @@ func (pc *Paint) Fill(rs *State) {
 // the given color spec is a solid color
 func (pc *Paint) FillBox(rs *State, pos, size mat32.Vec2, clr *colors.Full) {
 	if clr.Gradient == nil {
-		fmt.Println(clr.Solid)
-		if clr.Solid == (color.RGBA{216, 226, 255, 255}) {
-			fmt.Println("FillBox no state highlight")
-		}
 		b := rs.Bounds.Intersect(mat32.RectFromPosSizeMax(pos, size))
 		draw.Draw(rs.Image, b, &image.Uniform{clr.Solid}, image.Point{}, draw.Src)
 	} else {
