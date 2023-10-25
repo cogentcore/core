@@ -7,6 +7,7 @@ package giv
 import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
+	"goki.dev/icons"
 )
 
 // TODO: make base simplified preferences view, improve organization of information, and maybe add titles
@@ -21,7 +22,11 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
-	sv := NewStructView(sc, "sv")
+	tb := gi.NewToolbar(sc)
+	NewFuncButton(tb).SetFunc(pf.UpdateAll).SetIcon(icons.Refresh)
+	tb.AddSeparator()
+
+	sv := NewStructView(sc)
 	sv.SetStruct(pf)
 	sv.SetStretchMax()
 	sv.OnChange(func(e events.Event) {
