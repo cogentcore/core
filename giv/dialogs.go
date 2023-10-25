@@ -381,14 +381,21 @@ func FileViewDialog(ctx gi.Widget, opts DlgOpts, filename, ext string, filterFun
 	gopts := opts.ToGiOpts()
 	gopts.Ok = true
 	gopts.Cancel = true
-	dlg := gi.NewStdDialog(ctx, gopts, fun)
+
+	var fv *FileView
+	// we need to wrap the function to ensure the data has the selected file
+	f := func(dlg *gi.Dialog) {
+		dlg.Data = fv.SelectedFile()
+		fun(dlg)
+	}
+	dlg := gi.NewStdDialog(ctx, gopts, f)
 	dlg.Stage.Scene.SetName("file-view") // use a consistent name for consistent sizing / placement
 	dlg.NewWindow(true)
 
 	frame := dlg.Stage.Scene
 	prIdx := dlg.PromptWidgetIdx()
 
-	fv := frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
+	fv = frame.InsertNewChild(FileViewType, prIdx+1, "file-view").(*FileView)
 	fv.FilterFunc = filterFunc
 	fv.SetFilename(filename, ext)
 	fv.OnSelect(func(e events.Event) {
