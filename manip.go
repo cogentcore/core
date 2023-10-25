@@ -5,9 +5,9 @@
 package gi3d
 
 import (
+	"image/color"
+
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
-	"goki.dev/grr"
 	"goki.dev/ki/v2"
 )
 
@@ -33,7 +33,7 @@ const (
 type SelParams struct {
 
 	// name of color to use for selection box (default yellow)
-	Color gi.ColorName
+	Color color.RGBA // gi.ColorName
 
 	// width of the box lines (.01 default)
 	Width float32
@@ -43,7 +43,7 @@ type SelParams struct {
 }
 
 func (sp *SelParams) Defaults() {
-	sp.Color = gi.ColorName("yellow")
+	sp.Color = colors.Yellow
 	sp.Width = .01
 	sp.Radius = .05
 }
@@ -94,7 +94,7 @@ func (sc *Scene) SelectBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(SelBoxName, ki.DestroyKids) // get rid of existing
-	clr := grr.Log(colors.FromName(string(sc.SelParams.Color)))
+	clr := sc.SelParams.Color                        // grr.Log(colors.FromName(string(sc.SelParams.Color)))
 	NewLineBox(sc, sc, SelBoxName, SelBoxName, nb.WorldBBox.BBox, sc.SelParams.Width, clr, Inactive)
 
 	sc.ReconfigMeshes()
@@ -115,7 +115,7 @@ func (sc *Scene) ManipBox() {
 
 	nb := sc.CurSel.AsNode3D()
 	sc.DeleteChildByName(nm, ki.DestroyKids) // get rid of existing
-	clr := grr.Log(colors.FromName(string(sc.SelParams.Color)))
+	clr := sc.SelParams.Color                // grr.Log(colors.FromName(string(sc.SelParams.Color)))
 
 	bbox := nb.WorldBBox.BBox
 	mb := NewLineBox(sc, sc, nm, nm, bbox, sc.SelParams.Width, clr, Inactive)

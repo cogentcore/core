@@ -14,7 +14,6 @@ import (
 	"sync"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gi"
 	"goki.dev/goosi/events"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -68,7 +67,7 @@ var Update3DTrace = false
 // set their relative Pos etc to display relative to the camera, to achieve
 // "first person" effects.
 type Scene struct {
-	gi.WidgetBase
+	ki.Node
 
 	// Viewport-level viewbox within any parent Viewport2D
 	Geom mat32.Geom2DInt
@@ -284,86 +283,6 @@ func (sc *Scene) Resize(nwsz image.Point) {
 	sc.Geom.Size = nwsz // make sure
 	// fmt.Printf("vp %v resized to: %v, bounds: %v\n", vp.Path(), nwsz, vp.Pixels.Bounds())
 }
-
-func (sc *Scene) Config(gsc *gi.Scene) {
-	// sc.Init3D()
-	// sc.DirUpIdx = sc.Win.AddDirectUploader(sc)
-}
-
-func (sc *Scene) Size2D(iter int) {
-	// sc.InitLayout2D()
-	// we listen to x,y styling for positioning within parent vp, if non-zero -- todo: only popup?
-	// pos := sc.Style.PosDots().ToPoint()
-	// if pos != (image.Point{}) {
-	// 	sc.Geom.Pos = pos
-	// }
-}
-
-func (sc *Scene) BBox2D() image.Rectangle {
-	bb := sc.BBoxFromAlloc()
-	sz := bb.Size()
-	if sz != (image.Point{}) {
-		sc.Geom.Size = sz
-	} else {
-		bb.Max = bb.Min.Add(image.Point{64, 64}) // min size for zero case
-	}
-	return bb
-}
-
-func (sc *Scene) ComputeBBox2D(parBBox image.Rectangle, delta image.Point) {
-	// if sc.Viewport != nil {
-	// 	sc.ComputeBBox2DBase(parBBox, delta)
-	// }
-	sc.Geom.Pos = sc.LayState.Alloc.Pos.ToPointFloor()
-}
-
-func (sc *Scene) ChildrenBBox2D() image.Rectangle {
-	return sc.Geom.Bounds()
-}
-
-// we use our own render for these -- Viewport member is our parent!
-func (sc *Scene) PushBounds() bool {
-	if sc.ScBBox.Empty() {
-		return false
-	}
-	if !sc.IsInvisible() {
-		return false
-	}
-	// if we are completely invisible, no point in rendering..
-	// if sc.Viewport != nil {
-	// 	sc.BBoxMu.RLock()
-	// 	wbi := sc.WinBBox.Intersect(sc.Viewport.WinBBox)
-	// 	sc.BBoxMu.RUnlock()
-	// 	if wbi.Empty() {
-	// 		return false
-	// 	}
-	// }
-	bb := sc.Geom.Bounds()
-	// rs := &sc.Render
-	// rs.PushBounds(bb)
-	if gi.RenderTrace {
-		fmt.Printf("Render: %v at %v\n", sc.Path(), bb)
-	}
-	return true
-}
-
-func (sc *Scene) PopBounds() {
-	// rs := &vp.Render
-	// rs.PopBounds()
-}
-
-// func (sc *Scene) Render2D() {
-// 	if sc.PushBounds() {
-// 		sc.NavEvents()
-// 		if gi.Render2DTrace {
-// 			fmt.Printf("3D Render2D: %v\n", sc.Path())
-// 		}
-// 		sc.Render()
-// 		sc.PopBounds()
-// 	} else {
-// 		sc.DisconnectAllEvents(gi.RegPri)
-// 	}
-// }
 
 /*
 // NavEvents handles standard viewer navigation events

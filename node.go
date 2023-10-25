@@ -141,9 +141,6 @@ type NodeBase struct {
 	// raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is
 	BBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 
-	// full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations
-	ObjBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
-
 	// 2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping
 	ScBBox image.Rectangle `readonly:"-" copy:"-" json:"-" xml:"-" set:"-"`
 }
@@ -184,7 +181,6 @@ func (nb *NodeBase) CopyFieldsFrom(frm any) {
 	nb.WorldBBox = fr.WorldBBox
 	nb.NDCBBox = fr.NDCBBox
 	nb.BBox = fr.BBox
-	nb.ObjBBox = fr.ObjBBox
 	nb.ScBBox = fr.ScBBox
 }
 
@@ -264,12 +260,9 @@ func (nb *NodeBase) UpdateBBox2D(size mat32.Vec2, sc *Scene) {
 	if isvis { // filter out invisible at objbbox level
 		scbounds := image.Rectangle{Max: sc.Geom.Size}
 		bbvis := nb.BBox.Intersect(scbounds)
-		nb.ObjBBox = bbvis.Add(sc.BBox.Min)
-		nb.ScBBox = nb.ObjBBox.Add(sc.ObjBBox.Min.Sub(sc.BBox.Min)) // move amount
-		nb.ScBBox = nb.ScBBox.Intersect(sc.ScBBox)
+		nb.ScBBox = bbvis
 	} else {
 		// fmt.Printf("not vis: %v  wbb: %v\n", nb.Name(), nb.WorldBBox.BBox)
-		nb.ObjBBox = image.Rectangle{}
 		nb.ScBBox = image.Rectangle{}
 	}
 }

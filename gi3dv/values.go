@@ -11,6 +11,7 @@ import (
 
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/gi3d"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
 	"goki.dev/ki/v2"
@@ -21,9 +22,9 @@ import (
 //  MeshValue
 
 // Value restylesers MeshValue as the viewer of MeshName
-func (mn MeshName) Value() giv.Value {
-	return &MeshValue{}
-}
+// func (mn gi3d.MeshName) Value() giv.Value {
+// 	return &MeshValue{}
+// }
 
 // MeshValue presents an action for displaying a MeshName and selecting
 // meshes from a ChooserDialog
@@ -72,16 +73,16 @@ func (vv *MeshValue) OpenDialog(ctx gi.Widget, fun func(dlg *gi.Dialog)) {
 	if vv.OwnKind != reflect.Struct {
 		return
 	}
-	ndi, ok := vv.Owner.(Node)
+	ndi, ok := vv.Owner.(gi3d.Node)
 	if !ok {
 		return
 	}
-	sci, err := ndi.ParentByTypeTry(SceneType, ki.Embeds)
+	sci, err := ndi.ParentByTypeTry(gi3d.SceneType, ki.Embeds)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	sc := sci.(*Scene)
+	sc := sci.(*gi3d.Scene)
 	sl := sc.MeshList()
 	sort.Strings(sl)
 

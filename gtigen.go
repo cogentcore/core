@@ -165,7 +165,6 @@ var NodeBaseType = gti.AddType(&gti.Type{
 		{"WorldBBox", &gti.Field{Name: "WorldBBox", Type: "goki.dev/gi3d.BBox", LocalType: "BBox", Doc: "world coordinates bounding box", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"NDCBBox", &gti.Field{Name: "NDCBBox", Type: "goki.dev/mat32/v2.Box3", LocalType: "mat32.Box3", Doc: "normalized display coordinates bounding box, used for frustrum clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"BBox", &gti.Field{Name: "BBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "raw original bounding box for the widget within its parent Scene -- used for computing ScBBox.  This is not updated by LayoutScroll, whereas ScBBox is", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
-		{"ObjBBox", &gti.Field{Name: "ObjBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "full object bbox -- this is BBox + LayoutScroll delta, but NOT intersected with parent's parBBox -- used for computing color gradients or other object-specific geometry computations", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 		{"ScBBox", &gti.Field{Name: "ScBBox", Type: "image.Rectangle", LocalType: "image.Rectangle", Doc: "2D bounding box for region occupied within immediate parent Scene object that we render onto. These are the pixels we draw into, filtered through parent bounding boxes. Used for render Bounds clipping", Directives: gti.Directives{}, Tag: "readonly:\"-\" copy:\"-\" json:\"-\" xml:\"-\" set:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
@@ -237,7 +236,7 @@ var SceneType = gti.AddType(&gti.Type{
 		{"RenderMu", &gti.Field{Name: "RenderMu", Type: "sync.Mutex", LocalType: "sync.Mutex", Doc: "mutex on rendering", Directives: gti.Directives{}, Tag: "view:\"-\" copy:\"-\" json:\"-\" xml:\"-\""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"WidgetBase", &gti.Field{Name: "WidgetBase", Type: "goki.dev/gi/v2/gi.WidgetBase", LocalType: "gi.WidgetBase", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		{"Node", &gti.Field{Name: "Node", Type: "goki.dev/ki/v2.Node", LocalType: "ki.Node", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 	Instance: &Scene{},
@@ -385,39 +384,6 @@ func (t *Scene) SetDirUpIdx(v int) *Scene {
 func (t *Scene) SetRenderMu(v sync.Mutex) *Scene {
 	t.RenderMu = v
 	return t
-}
-
-// SceneViewType is the [gti.Type] for [SceneView]
-var SceneViewType = gti.AddType(&gti.Type{
-	Name:       "goki.dev/gi3d.SceneView",
-	ShortName:  "gi3d.SceneView",
-	IDName:     "scene-view",
-	Doc:        "SceneView provides a toolbar controller for a gi3d.Scene",
-	Directives: gti.Directives{},
-	Fields:     ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-		{"Layout", &gti.Field{Name: "Layout", Type: "goki.dev/gi/v2/gi.Layout", LocalType: "gi.Layout", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-	}),
-	Methods:  ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
-	Instance: &SceneView{},
-})
-
-// NewSceneView adds a new [SceneView] with the given name
-// to the given parent. If the name is unspecified, it defaults
-// to the ID (kebab-case) name of the type, plus the
-// [ki.Ki.NumLifetimeChildren] of the given parent.
-func NewSceneView(par ki.Ki, name ...string) *SceneView {
-	return par.NewChild(SceneViewType, name...).(*SceneView)
-}
-
-// KiType returns the [*gti.Type] of [SceneView]
-func (t *SceneView) KiType() *gti.Type {
-	return SceneViewType
-}
-
-// New returns a new [*SceneView] value
-func (t *SceneView) New() ki.Ki {
-	return &SceneView{}
 }
 
 var _ = gti.AddType(&gti.Type{

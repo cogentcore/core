@@ -26,8 +26,8 @@ import (
 	"strings"
 
 	"goki.dev/colors"
-	"goki.dev/gi/v2/gi3d"
-	"goki.dev/ki/v2/dirs"
+	"goki.dev/gi3d"
+	"goki.dev/glop/dirs"
 	"goki.dev/mat32/v2"
 )
 
@@ -206,7 +206,7 @@ const (
 
 // SetScene sets group with with all the decoded objects.
 func (dec *Decoder) SetScene(sc *gi3d.Scene) {
-	gp := gi3d.AddNewGroup(sc, sc, dec.Objfile)
+	gp := gi3d.NewGroup(sc, dec.Objfile)
 	dec.SetGroup(sc, gp)
 }
 
@@ -218,7 +218,7 @@ func (dec *Decoder) SetGroup(sc *gi3d.Scene, gp *gi3d.Group) {
 		if len(obj.Faces) == 0 {
 			continue
 		}
-		objgp := gi3d.AddNewGroup(sc, gp, obj.Name)
+		objgp := gi3d.NewGroup(gp, obj.Name)
 		dec.SetObject(sc, objgp, obj)
 	}
 	dec.Destroy()
@@ -238,7 +238,7 @@ func (dec *Decoder) SetObject(sc *gi3d.Scene, objgp *gi3d.Group, ob *Object) {
 			ms = &gi3d.GenMesh{}
 			ms.Nm = sldnm
 			sc.AddMeshUnique(ms)
-			sld = gi3d.AddNewSolid(sc, objgp, sldnm, ms.Nm)
+			sld = gi3d.NewSolid(objgp, sldnm, ms.Nm)
 			matName = face.Material
 			dec.SetMat(sc, sld, matName)
 			sldidx++
@@ -354,7 +354,7 @@ func (dec *Decoder) loadTex(sc *gi3d.Scene, sld *gi3d.Solid, texfn string, mat *
 	_, tfn := filepath.Split(texPath)
 	tf, err := sc.TextureByNameTry(tfn)
 	if err != nil {
-		tf = gi3d.AddNewTextureFile(sc, tfn, texPath)
+		tf = gi3d.NewTextureFile(sc, tfn, texPath)
 	}
 	sld.Mat.SetTexture(sc, tf)
 	if mat.Tiling.Repeat.X > 0 {

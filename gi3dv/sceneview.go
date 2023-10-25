@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi3d
+//go:build notyet
+
+package gi3dv
 
 import (
 	"goki.dev/gi/v2/gi"

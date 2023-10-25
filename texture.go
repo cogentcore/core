@@ -10,7 +10,6 @@ import (
 	"io/fs"
 	"log"
 
-	"goki.dev/gi/v2/gi"
 	"goki.dev/glop/dirs"
 	"goki.dev/grows/images"
 	"goki.dev/vgpu/v2/vgpu"
@@ -92,7 +91,7 @@ type TextureFile struct {
 	FSys fs.FS
 
 	// filename for the texture
-	File gi.FileName
+	File string // gi.FileName
 }
 
 // NewTextureFile adds a new texture from file of given name and filename
@@ -104,7 +103,7 @@ func NewTextureFile(sc *Scene, name string, filename string) *TextureFile {
 		log.Println(err)
 	}
 	tx.FSys = dfs
-	tx.File = gi.FileName(fnm)
+	tx.File = fnm // gi.FileName(fnm)
 	sc.AddTexture(tx)
 	return tx
 }
@@ -114,7 +113,7 @@ func NewTextureFileFS(fsys fs.FS, sc *Scene, name string, filename string) *Text
 	tx := &TextureFile{}
 	tx.Nm = name
 	tx.FSys = fsys
-	tx.File = gi.FileName(filename)
+	tx.File = filename // gi.FileName(filename)
 	sc.AddTexture(tx)
 	return tx
 }
@@ -142,7 +141,7 @@ func (tx *TextureFile) Image() *image.RGBA {
 // solid using this texture.
 type TextureGi2D struct {
 	TextureBase
-	Scene2D *gi.Scene
+	// Scene2D *gi.Scene
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -5,7 +5,6 @@
 package gi3d
 
 import (
-	"fmt"
 	"image"
 	"sort"
 
@@ -312,10 +311,10 @@ func (sc *Scene) DirectWinUpload() {
 	if !sc.IsVisible() {
 		return
 	}
-	if Update3DTrace {
-		fmt.Printf("3D Update: from Scene: %s at: %v\n", sc.Nm, sc.ScBBox.Min)
-	}
-	sc.Render()
+	// if Update3DTrace {
+	// 	fmt.Printf("3D Update: from Scene: %s at: %v\n", sc.Nm, sc.ScBBox.Min)
+	// }
+	// sc.Render()
 }
 
 // Render3D renders the scene to the framebuffer
@@ -336,7 +335,7 @@ func (sc *Scene) Render3D(offscreen bool) {
 			return ki.Break // going into a different type of thing, bail
 		}
 		if !offscreen {
-			if !ni.IsVisible() || nb.ObjBBox == (image.Rectangle{}) { // objbbox is intersection of scene and obj
+			if !ni.IsVisible() || nb.ScBBox == (image.Rectangle{}) { // objbbox is intersection of scene and obj
 				return ki.Break
 			}
 			// ni.ConnectEvents3D(sc) // only connect visible
