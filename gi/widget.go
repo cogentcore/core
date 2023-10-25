@@ -294,7 +294,7 @@ type WidgetBase struct {
 
 	// Listeners are event listener functions for processing events on this widget.
 	// type specific Listeners are added in OnInit when the widget is initialized.
-	Listeners events.Listeners `view:"-" copy:"-" json:"-" xml:"-" set:"-"`
+	Listeners events.Listeners `copy:"-" json:"-" xml:"-" set:"-"`
 
 	// a separate tree of sub-widgets that implement discrete parts of a widget -- positions are always relative to the parent widget -- fully managed by the widget and not saved
 	Parts *Layout `copy:"-" json:"-" xml:"-" view-closed:"true" set:"-"`
