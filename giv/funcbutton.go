@@ -12,7 +12,6 @@ import (
 
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
-	"goki.dev/girl/states"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/gti"
@@ -42,11 +41,19 @@ type FuncButton struct {
 	// bet set using [FuncButton.SetFunc].
 	ReflectFunc reflect.Value `set:"-"`
 
-	// Args are the [Value] objects associated with
-	// the function button. They are automatically set in
+	// Args are the [Value] objects associated with the
+	// arguments of the function. They are automatically set in
 	// [SetFunc], but they can be customized to configure
 	// default values and other options.
 	Args []Value `set:"-"`
+
+	// Returns are the [Value] objects associated with the
+	// return values of the function. They are automatically
+	// set in [SetFunc], but they can be customized to configure
+	// default values and other options. The [reflect.Value]s of
+	// the [Value] objects are not set until the function is
+	// called, and are thus not typically applicable to access.
+	Returns []Value
 
 	// Confirm is whether to prompt the user for confirmation
 	// before calling the function.
@@ -128,6 +135,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 	fb.Func = gfun
 	fb.ReflectFunc = rfun
 	fb.SetArgs()
+	fb.SetReturns()
 	// get name without package
 	snm := gfun.Name
 	li := strings.LastIndex(snm, ".")
@@ -224,11 +232,11 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: main}).Run()
 		return
 	}
-	ac := fb.Returns(rets)
-	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, ac, nil).Run()
+	fb.SetReturnValues(rets)
+	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, fb.Returns, nil).Run()
 }
 
-// ArgsForFunc sets the appropriate [ArgConfig] objects for the
+// SetArgs sets the appropriate [Value] objects for the
 // arguments of the function associated with the function button.
 // It is called in [FuncButton.SetFunc] and should typically not
 // be called by end-user code.
@@ -266,21 +274,50 @@ func (fb *FuncButton) SetArgs() {
 	}
 }
 
-// ReturnsForFunc returns the appropriate [Value] objects for the given return values
-// of the function associated with the function button.
-func (fb *FuncButton) Returns(rets []reflect.Value) []Value {
-	res := make([]Value, fb.Func.Returns.Len())
-	for i, kv := range fb.Func.Returns.Order {
-		ret := kv.Val
-		val := rets[i]
+// SetReturns sets the appropriate [Value] objects for the
+// return values of the function associated with the function
+// button. It is called in [FuncButton.SetFunc] and should
+// typically not be called by end-user code.
+func (fb *FuncButton) SetReturns() {
+	nret := fb.ReflectFunc.Type().NumOut()
+	fb.Returns = make([]Value, nret)
+	for i := range fb.Returns {
+		rtyp := fb.ReflectFunc.Type().Out(i)
+
+		name := ""
+		doc := ""
+		if fb.Func.Returns != nil {
+			ga := fb.Func.Returns.ValByIdx(i)
+			if ga != nil {
+				name = ga.Name
+				doc = ga.Doc
+			} else {
+				name = laser.NonPtrType(rtyp).Name()
+				doc = "Unnamed return value of type " + laser.LongTypeName(rtyp)
+			}
+		} else {
+			name = laser.NonPtrType(rtyp).Name()
+			doc = "Unnamed return value of type " + laser.LongTypeName(rtyp)
+		}
+
+		label := sentencecase.Of(name)
+		val := reflect.New(rtyp)
 
 		view := ToValue(val.Interface(), "")
 		view.SetSoloValue(val)
-		view.SetName(ret.Name)
-		view.SetTag("label", sentencecase.Of(ret.Name))
-		view.SetTag("doc", ret.Doc)
-		view.SetFlag(true, states.ReadOnly)
-		res[i] = view
+		view.SetName(name)
+		view.SetTag("label", label)
+		view.SetTag("doc", doc)
+		fb.Returns[i] = view
 	}
-	return res
+}
+
+// SetReturnValues sets the [reflect.Value]s of the return
+// value [Value] objects. It assumes that [FuncButton.SetReturns]
+// has already been called. It is called in [FuncButton.CallFunc]
+// and should typically not be called by end-user code.
+func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
+	for i, ret := range fb.Returns {
+		ret.SetSoloValue(rets[i])
+	}
 }
