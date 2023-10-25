@@ -304,7 +304,7 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	op := NewFuncButton(tb).SetFunc(ge.Open)
 	op.SetIcon(icons.FileOpen)
 	op.Args[0].SetTag("ext", ".json")
-	// arg.Default = ge.Filename
+	op.Args[0].SetTag("def", string(ge.Filename))
 }
 
 var GiEditorProps = ki.Props{
