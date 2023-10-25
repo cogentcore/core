@@ -320,6 +320,10 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	NewFuncButton(tb).SetFunc(ge.EditColorScheme).SetIcon(icons.Colors)
 }
 
+func (ge *GiEditor) MenuBar(mb *gi.MenuBar) {
+	NewFuncButton(mb).SetFunc(ge.Update)
+}
+
 var GiEditorProps = ki.Props{
 	"Toolbar": ki.PropSlice{
 		{"Update", ki.Props{
