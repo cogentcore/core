@@ -5,6 +5,8 @@
 package paint
 
 import (
+	"fmt"
+
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/mat32/v2"
@@ -34,6 +36,8 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// we need to apply the state layer after getting the
 	// surrounding background color
 	bg = st.StateBackgroundColor(bg)
+	sbg := st.StateBackgroundColor(*surroundBgColor)
+	fmt.Println(bg, st.StateLayer)
 
 	// We need to fill the whole box where the
 	// box shadows / element can go to prevent growing
@@ -46,7 +50,7 @@ func (pc *Paint) DrawStdBox(rs *State, st *styles.Style, pos mat32.Vec2, sz mat3
 	// We need to use raw LayState data because we need to clear
 	// any box shadow that may have gone in margin.
 	mspos, mssz := st.BoxShadowPosSize(pos, sz)
-	pc.FillBox(rs, mspos, mssz, surroundBgColor)
+	pc.FillBox(rs, mspos, mssz, &sbg)
 
 	// first do any shadow
 	if st.HasBoxShadow() {
