@@ -5,8 +5,6 @@
 package giv
 
 import (
-	"reflect"
-
 	"github.com/iancoleman/strcase"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
@@ -21,7 +19,7 @@ type ArgView struct {
 	gi.Frame
 
 	// the args that we are a view onto
-	Args []ArgConfig `set:"-"`
+	Args []Value
 
 	// title / prompt to show above the editor fields
 	Title string
@@ -31,24 +29,6 @@ type ArgView struct {
 
 	// a record of parent View names that have led up to this view -- displayed as extra contextual information in view dialog windows
 	ViewPath string
-}
-
-// ArgConfig contains the relevant configuration information for each arg,
-// including the reflect.Value, name, optional description, and default value
-type ArgConfig struct {
-	// Name is the actual name of the arg in code
-	Name string
-	// Label is the user-friendly label name for the arg.
-	// It defaults to the sentence case version of Name.
-	Label string
-	// Doc is the documentation for the argument
-	Doc string
-	// Val is the reflect.Value of the argument
-	Val reflect.Value
-	// View is the [Value] view associated with the argument
-	View Value
-	// Default, if non-nil, is the default value for the argument
-	Default any
 }
 
 func (av *ArgView) OnInit() {
@@ -87,16 +67,6 @@ func (av *ArgView) OnInit() {
 			})
 		}
 	})
-}
-
-// SetArgs sets the source args that we are viewing -- rebuilds the children
-// to represent
-func (av *ArgView) SetArgs(arg []ArgConfig) {
-	updt := false
-	updt = av.UpdateStart()
-	av.Args = arg
-	av.Config(av.Sc)
-	av.UpdateEnd(updt)
 }
 
 // Config configures the view
@@ -143,12 +113,12 @@ func (av *ArgView) ConfigArgsGrid() {
 	sg.Stripes = gi.RowStripes
 	config := ki.Config{}
 	for i := range av.Args {
-		ac := &av.Args[i]
-		if ac.Default != nil {
+		arg := av.Args[i]
+		if view, _ := arg.Tag("view"); view == "-" {
 			continue
 		}
-		vtyp := ac.View.WidgetType()
-		knm := strcase.ToKebab(ac.Name)
+		vtyp := arg.WidgetType()
+		knm := strcase.ToKebab(arg.Name())
 		labnm := "label-" + knm
 		valnm := "value-" + knm
 		config.Add(gi.LabelType, labnm)
@@ -161,8 +131,8 @@ func (av *ArgView) ConfigArgsGrid() {
 		updt = sg.UpdateStart()
 	}
 	for i := range av.Args {
-		ac := &av.Args[i]
-		if ac.Default != nil {
+		arg := av.Args[i]
+		if view, _ := arg.Tag("view"); view == "-" {
 			continue
 		}
 		lbl := sg.Child(i * 2).(*gi.Label)
@@ -172,10 +142,13 @@ func (av *ArgView) ConfigArgsGrid() {
 		// 	// note: updating here is redundant -- relevant field will have already updated
 		// 	avv.ViewSig.Emit(avv.This(), 0, nil)
 		// })
-		lbl.Text = ac.Label
-		lbl.Tooltip = ac.Doc
+		lbl.Text = arg.Name()
+		if label, ok := arg.Tag("label"); ok {
+			lbl.Text = label
+		}
+		lbl.Tooltip, _ = arg.Tag("doc")
 		widg := sg.Child((i * 2) + 1).(gi.Widget)
-		ac.View.ConfigWidget(widg, av.Sc)
+		arg.ConfigWidget(widg, av.Sc)
 	}
 	sg.UpdateEnd(updt)
 }
@@ -184,8 +157,8 @@ func (av *ArgView) ConfigArgsGrid() {
 func (av *ArgView) UpdateArgs() {
 	updt := av.UpdateStart()
 	for i := range av.Args {
-		ad := &av.Args[i]
-		ad.View.UpdateWidget()
+		ad := av.Args[i]
+		ad.UpdateWidget()
 	}
 	av.UpdateEnd(updt)
 }

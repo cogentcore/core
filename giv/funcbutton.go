@@ -256,12 +256,12 @@ func (fb *FuncButton) SetArgs() {
 
 		label := sentencecase.Of(name)
 		val := reflect.New(atyp)
-		_ = doc
 
 		view := ToValue(val.Interface(), "")
 		view.SetSoloValue(val)
 		view.SetName(name)
 		view.SetTag("label", label)
+		view.SetTag("doc", doc)
 		fb.Args[i] = view
 	}
 }
