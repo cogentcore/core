@@ -82,7 +82,7 @@ func (ts *Tabs) TabsStyles() {
 				s.Margin.Set()
 				s.Padding.Set()
 				// tabs.Spacing.SetDp(4)
-				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+				s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 				// s.Border.Style.Set(styles.BorderNone)
 				// s.Border.Style.Bottom = styles.BorderSolid
