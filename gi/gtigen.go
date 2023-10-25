@@ -1118,6 +1118,33 @@ var _ = gti.AddType(&gti.Type{
 	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
 })
 
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.PrefsDebug",
+	ShortName: "gi.PrefsDebug",
+	IDName:    "prefs-debug",
+	Doc:       "PrefsDebug are debugging params",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"UpdateTrace", &gti.Field{Name: "UpdateTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of updates that trigger re-rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"RenderTrace", &gti.Field{Name: "RenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of the nodes rendering (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"LayoutTrace", &gti.Field{Name: "LayoutTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of all layouts (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"WinEventTrace", &gti.Field{Name: "WinEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of window events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"WinRenderTrace", &gti.Field{Name: "WinRenderTrace", Type: "*bool", LocalType: "*bool", Doc: "reports the stack trace leading up to win publish events which are expensive -- wrap multiple updates in UpdateStart / End to prevent", Directives: gti.Directives{}, Tag: ""}},
+		{"WinGeomTrace", &gti.Field{Name: "WinGeomTrace", Type: "*bool", LocalType: "*bool", Doc: "WinGeomTrace records window geometry saving / loading functions", Directives: gti.Directives{}, Tag: ""}},
+		{"KeyEventTrace", &gti.Field{Name: "KeyEventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of keyboard events (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"EventTrace", &gti.Field{Name: "EventTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of event handling (printfs to stdout)", Directives: gti.Directives{}, Tag: ""}},
+		{"DNDTrace", &gti.Field{Name: "DNDTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of DND events handling", Directives: gti.Directives{}, Tag: ""}},
+		{"GoCompleteTrace", &gti.Field{Name: "GoCompleteTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language completion & lookup process", Directives: gti.Directives{}, Tag: ""}},
+		{"GoTypeTrace", &gti.Field{Name: "GoTypeTrace", Type: "*bool", LocalType: "*bool", Doc: "reports trace of Go language type parsing and inference process", Directives: gti.Directives{}, Tag: ""}},
+		{"StructViewIfDebug", &gti.Field{Name: "StructViewIfDebug", Type: "*bool", LocalType: "*bool", Doc: "reports errors for viewif directives in struct field tags, for giv.StructView", Directives: gti.Directives{}, Tag: ""}},
+		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" xml:\"-\""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
 // ProgressBarType is the [gti.Type] for [ProgressBar]
 var ProgressBarType = gti.AddType(&gti.Type{
 	Name:       "goki.dev/gi/v2/gi.ProgressBar",
