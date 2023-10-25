@@ -599,10 +599,11 @@ var FuncButtonType = gti.AddType(&gti.Type{
 	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Func", &gti.Field{Name: "Func", Type: "*goki.dev/gti.Func", LocalType: "*gti.Func", Doc: "Func is the [gti.Func] associated with this button.\nThis function can also be a method, but it must be\nconverted to a [gti.Func] first. It should typically\nbe set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"ReflectFunc", &gti.Field{Name: "ReflectFunc", Type: "reflect.Value", LocalType: "reflect.Value", Doc: "ReflectFunc is the [reflect.Value] of the function or\nmethod associated with this button. It should typically\nbet set using [FuncButton.SetFunc].", Directives: gti.Directives{}, Tag: "set:\"-\""}},
-		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Args are the [Value] objects associated with\nthe function button. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Args", &gti.Field{Name: "Args", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Args are the [Value] objects associated with the\narguments of the function. They are automatically set in\n[SetFunc], but they can be customized to configure\ndefault values and other options.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
+		{"Returns", &gti.Field{Name: "Returns", Type: "[]goki.dev/gi/v2/giv.Value", LocalType: "[]Value", Doc: "Returns are the [Value] objects associated with the\nreturn values of the function. They are automatically\nset in [SetFunc], but they can be customized to configure\ndefault values and other options. The [reflect.Value]s of\nthe [Value] objects are not set until the function is\ncalled, and are thus not typically applicable to access.", Directives: gti.Directives{}, Tag: "set:\"-\""}},
 		{"Confirm", &gti.Field{Name: "Confirm", Type: "bool", LocalType: "bool", Doc: "Confirm is whether to prompt the user for confirmation\nbefore calling the function.", Directives: gti.Directives{}, Tag: ""}},
 		{"ShowReturn", &gti.Field{Name: "ShowReturn", Type: "bool", LocalType: "bool", Doc: "ShowReturn is whether to display the return values of\nthe function (and a success message if there are none).\nThe way that the return values are shown is determined\nby ShowReturnAsDialog. ShowReturn is on by default.", Directives: gti.Directives{}, Tag: "def:\"true\""}},
-		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there is a return value from the function of a complex\ntype (struct, slice, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
+		{"ShowReturnAsDialog", &gti.Field{Name: "ShowReturnAsDialog", Type: "bool", LocalType: "bool", Doc: "ShowReturnAsDialog, if and only if ShowReturn is true,\nindicates to show the return values of the function in\na dialog, instead of in a snackbar, as they are by default.\nIf there are multiple return values from the function, or if\none of them is a complex type (pointer, struct, slice,\narray, map), then ShowReturnAsDialog will\nautomatically be set to true.", Directives: gti.Directives{}, Tag: ""}},
 	}),
 	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 		{"Button", &gti.Field{Name: "Button", Type: "goki.dev/gi/v2/gi.Button", LocalType: "gi.Button", Doc: "", Directives: gti.Directives{}, Tag: ""}},
@@ -658,8 +659,9 @@ func (t *FuncButton) SetShowReturn(v bool) *FuncButton {
 // ShowReturnAsDialog, if and only if ShowReturn is true,
 // indicates to show the return values of the function in
 // a dialog, instead of in a snackbar, as they are by default.
-// If there is a return value from the function of a complex
-// type (struct, slice, map), then ShowReturnAsDialog will
+// If there are multiple return values from the function, or if
+// one of them is a complex type (pointer, struct, slice,
+// array, map), then ShowReturnAsDialog will
 // automatically be set to true.
 func (t *FuncButton) SetShowReturnAsDialog(v bool) *FuncButton {
 	t.ShowReturnAsDialog = v
@@ -685,11 +687,22 @@ var GiEditorType = gti.AddType(&gti.Type{
 		{"Update", &gti.Method{Name: "Update", Doc: "Update updates the objects being edited (e.g., updating display changes)", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves tree to current filename, in a standard JSON-formatted file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"SaveAs", &gti.Method{Name: "SaveAs", Doc: "SaveAs saves tree to given filename, in a standard JSON-formatted file", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"Open", &gti.Method{Name: "Open", Doc: "Open opens tree from given filename, in a standard JSON-formatted file", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		{"EditColorScheme", &gti.Method{Name: "EditColorScheme", Doc: "EditColorScheme pulls up a window to edit the current color scheme", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
