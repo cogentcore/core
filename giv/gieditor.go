@@ -301,7 +301,9 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 		// TODO(kai/sel): check if has flag
 	})
 	tb.AddSeparator()
-	NewFuncButton(tb).SetFunc(ge.Open).SetIcon(icons.FileOpen)
+	op := NewFuncButton(tb).SetFunc(ge.Open)
+	op.SetIcon(icons.FileOpen)
+	op.Args[0].View.SetTag("ext", ".json")
 }
 
 var GiEditorProps = ki.Props{
