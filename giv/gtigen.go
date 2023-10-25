@@ -691,11 +691,9 @@ var GiEditorType = gti.AddType(&gti.Type{
 		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
 			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "gi.FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
 		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
-		{"SetRoot", &gti.Method{Name: "SetRoot", Doc: "SetRoot sets the source root and ensures everything is configured", Directives: gti.Directives{
+		{"ToggleSelectionMode", &gti.Method{Name: "ToggleSelectionMode", Doc: "ToggleSelectionMode toggles the editor between selection mode or not", Directives: gti.Directives{
 			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
-		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
-			{"root", &gti.Field{Name: "root", Type: "goki.dev/ki/v2.Ki", LocalType: "ki.Ki", Doc: "", Directives: gti.Directives{}, Tag: ""}},
-		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
 	}),
 	Instance: &GiEditor{},
 })
