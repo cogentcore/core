@@ -46,7 +46,7 @@ func (fr *Frame) FrameStyles() {
 		s.Border.Radius.Set()
 		s.Padding.Set(units.Dp(2))
 		// we never want state layers and borders on frames
-		s.StateLayer = 0
+		// s.StateLayer = 0
 		s.MaxBorder = styles.Border{}
 	})
 }

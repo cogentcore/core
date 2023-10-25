@@ -240,7 +240,7 @@ func (ly *Layout) LayoutStyles() {
 	ly.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.FocusWithinable)
 		// we never want state layers and borders on layouts
-		s.StateLayer = 0
+		// s.StateLayer = 0
 		s.MaxBorder = styles.Border{}
 	})
 }
