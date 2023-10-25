@@ -224,16 +224,26 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	if !fb.ShowReturn {
 		return
 	}
+	fb.SetReturnValues(rets)
 	// TODO: handle error return values
 	main := "Result of " + fb.Text
 	if len(rets) == 0 {
 		main = fb.Text + " succeeded"
 	}
 	if !fb.ShowReturnAsDialog {
-		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: main}).Run()
+		txt := main
+		if len(fb.Returns) > 0 {
+			txt += ": "
+			for i, ret := range fb.Returns {
+				txt += laser.NonPtrValue(ret.Val()).String()
+				if i < len(fb.Returns)-1 {
+					txt += ", "
+				}
+			}
+		}
+		gi.NewSnackbar(fb.This().(gi.Widget), gi.SnackbarOpts{Text: txt}).Run()
 		return
 	}
-	fb.SetReturnValues(rets)
 	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, fb.Returns, nil).Run()
 }
 
