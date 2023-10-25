@@ -144,7 +144,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 // CallFunc calls the function or method associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
-	if fb.Func.Args.Len() == 0 {
+	if fb.ReflectFunc.Type().NumIn() == 0 {
 		if !fb.Confirm {
 			rets := fb.ReflectFunc.Call(nil)
 			fb.ShowReturnsDialog(rets)
@@ -225,16 +225,27 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 // ArgsForFunc returns the appropriate [ArgConfig] objects for the
 // arguments of the function associated with the function button.
 func (fb *FuncButton) Args() []ArgConfig {
-	res := make([]ArgConfig, fb.Func.Args.Len())
-	for i, kv := range fb.Func.Args.Order {
-		arg := kv.Val
-		ra := ArgConfig{
-			Name:  arg.Name,
-			Label: sentencecase.Of(arg.Name),
-			Doc:   arg.Doc,
+	narg := fb.ReflectFunc.Type().NumIn()
+	res := make([]ArgConfig, narg)
+	for i := range res {
+		ra := ArgConfig{}
+		atyp := fb.ReflectFunc.Type().In(i)
+
+		if fb.Func.Args != nil {
+			ga := fb.Func.Args.ValByIdx(i)
+			if ga != nil {
+				ra.Name = ga.Name
+				ra.Doc = ga.Doc
+			} else {
+				ra.Name = laser.NonPtrType(atyp).Name()
+				ra.Doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
+			}
+		} else {
+			ra.Name = laser.NonPtrType(atyp).Name()
+			ra.Doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
 		}
 
-		atyp := fb.ReflectFunc.Type().In(i)
+		ra.Label = sentencecase.Of(ra.Name)
 		ra.Val = reflect.New(atyp)
 
 		ra.View = ToValue(ra.Val.Interface(), "")
