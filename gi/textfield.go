@@ -180,7 +180,7 @@ func (tf *TextField) TextFieldStyles() {
 			s.Border.Width.Set()
 			s.Border.Color.Set()
 			s.Border.Radius = styles.BorderRadiusExtraSmallTop
-			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+			s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 
 			s.MaxBorder = s.Border
 			s.MaxBorder.Width.Bottom = units.Dp(2)

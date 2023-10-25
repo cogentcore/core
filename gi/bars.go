@@ -43,7 +43,7 @@ func (mb *MenuBar) OnInit() {
 func (mb *MenuBar) MenuBarStyles() {
 	mb.Style(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 	})
 }
 
@@ -330,7 +330,7 @@ func (tb *Toolbar) ToolbarStyles() {
 	tb.Style(func(s *styles.Style) {
 		s.MaxWidth.SetDp(-1)
 		s.Border.Radius = styles.BorderRadiusFull
-		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainerHigh)
+		s.BackgroundColor.SetSolid(colors.Scheme.SurfaceContainer)
 		s.Margin.Set(units.Dp(4))
 		s.Padding.SetHoriz(units.Dp(16))
 	})
