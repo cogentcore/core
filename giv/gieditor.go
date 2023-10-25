@@ -305,6 +305,15 @@ func (ge *GiEditor) Toolbar(tb *gi.Toolbar) {
 	op.SetIcon(icons.FileOpen)
 	op.Args[0].SetValue(ge.Filename)
 	op.Args[0].SetTag("ext", ".json")
+	save := NewFuncButton(tb).SetFunc(ge.Save)
+	save.SetUpdateFunc(func() {
+		save.SetEnabledStateUpdt(ge.Changed && ge.Filename != "")
+	})
+	sa := NewFuncButton(tb).SetFunc(ge.SaveAs)
+	sa.Args[0].SetValue(ge.Filename)
+	sa.Args[0].SetTag("ext", ".json")
+	tb.AddSeparator()
+	NewFuncButton(tb).SetFunc(ge.EditColorScheme).SetIcon(icons.Colors)
 }
 
 var GiEditorProps = ki.Props{
