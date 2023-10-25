@@ -523,10 +523,10 @@ type Tab struct {
 func (tb *Tab) OnInit() {
 	tb.DeleteButton = true
 	tb.HandleButtonEvents()
-	tb.TabButtonStyles()
+	tb.TabStyles()
 }
 
-func (tb *Tab) TabButtonStyles() {
+func (tb *Tab) TabStyles() {
 	tb.Style(func(s *styles.Style) {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.Hoverable)
 		s.SetAbilities(tb.ShortcutTooltip() != "", abilities.LongHoverable)
