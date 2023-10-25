@@ -161,8 +161,6 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("ApplyStyleWidget-Inherit")
 
-	fmt.Println("in", wb)
-
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Styles.InheritFields(parSty)
 		// wb.ParentStyleRUnlock()
@@ -317,6 +315,9 @@ func (wb *WidgetBase) ParentBackgroundColor() (colors.Full, float32) {
 	})
 	if pwb == nil {
 		return colors.Full{}, 0
+	}
+	if wb.Path() == "/gogi-demo/tabs-0/tabs/buttons.parts/label" {
+		fmt.Println(pwb.Styles.BackgroundColor, pwb.Styles.StateLayer, wb.Styles.BackgroundColor, wb.Styles.StateLayer)
 	}
 	// If we don't have a background color ourselves (but we have a state layer),
 	// we recursively get our parent's background color and apply our state layer
