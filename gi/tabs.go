@@ -591,9 +591,9 @@ func (tb *Tab) TabButtonStyles() {
 				// if we have some state, we amplify it so we
 				// are clearly distinguishable from our parent button
 				// TODO: get this working
-				if s.StateLayer > 0 {
-					s.StateLayer += 0.12
-				}
+				// if s.StateLayer > 0 {
+				// 	s.StateLayer += 0.12
+				// }
 			})
 		case "parts/sc-stretch":
 			w.Style(func(s *styles.Style) {

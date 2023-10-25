@@ -5,6 +5,8 @@
 package gi
 
 import (
+	"fmt"
+
 	"goki.dev/colors"
 	"goki.dev/cursors"
 	"goki.dev/girl/abilities"
@@ -154,16 +156,20 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 		return
 	}
 
-	wb.DefaultStyleWidget()
+	wb.ResetStyleWidget()
 
 	// todo: remove all these prof steps -- should be much less now..
 	pin := prof.Start("ApplyStyleWidget-Inherit")
+
+	fmt.Println("in", wb)
 
 	if parSty := wb.ParentActiveStyle(); parSty != nil {
 		wb.Styles.InheritFields(parSty)
 		// wb.ParentStyleRUnlock()
 	}
 	pin.End()
+
+	wb.DefaultStyleWidget()
 
 	prun := prof.Start("ApplyStyleWidget-RunStylers")
 	wb.RunStylers()
@@ -186,18 +192,30 @@ func (wb *WidgetBase) ApplyStyleWidget(sc *Scene) {
 	psc.End()
 }
 
+// InitStyleWidget resets the widget styles and applies the basic
+// default styles specified in [styles.Style.Defaults]. It is called
+// automatically in [ApplyStyleWidget]
+// and should not need to be called by end-user code.
+func (wb *WidgetBase) ResetStyleWidget() {
+	s := &wb.Styles
+
+	// need to persist state
+	state := s.State
+	*s = styles.Style{}
+	s.Defaults()
+	s.State = state
+
+	// default to state layer associated with the state,
+	// which the developer can override in their stylers
+	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
+	s.StateLayer = s.State.StateLayer()
+}
+
 // DefaultStyleWidget applies the base, widget-universal default
 // styles to the widget. It is called automatically in [ApplyStyleWidget]
 // and should not need to be called by end-user code.
 func (wb *WidgetBase) DefaultStyleWidget() {
 	s := &wb.Styles
-
-	state := s.State
-	sl := s.StateLayer
-	*s = styles.Style{}
-	s.Defaults()
-	s.State = state
-	s.StateLayer = sl
 
 	s.MaxBorder.Style.Set(styles.BorderSolid)
 	s.MaxBorder.Color.Set(colors.Scheme.Primary.Base)
@@ -212,10 +230,6 @@ func (wb *WidgetBase) DefaultStyleWidget() {
 		return
 	}
 	s.SetAbilities(wb.Tooltip != "", abilities.LongHoverable)
-	// default to state layer associated with the state,
-	// which the developer can override in their stylers
-	// wb.Transition(&s.StateLayer, s.State.StateLayer(), 200*time.Millisecond, LinearTransition)
-	s.StateLayer = s.State.StateLayer()
 
 	if s.Is(states.Focused) {
 		s.Border = s.MaxBorder
@@ -297,18 +311,11 @@ func (wb *WidgetBase) ParentBackgroundColor() colors.Full {
 	// todo: this style reading requires a mutex!
 	_, pwb := wb.ParentWidgetIf(func(p *WidgetBase) bool {
 		// if we have a color or a state layer, we are a relevant breakpoint
-		return !p.Styles.BackgroundColor.IsNil() || p.Styles.StateLayer > 0
+		return !p.Styles.BackgroundColor.IsNil()
 	})
 	if pwb == nil {
 		return colors.Full{}
 	}
-	// If we don't have a background color ourselves (but we have a state layer),
-	// we recursively get our parent's background color and apply our state layer
-	// to it. This makes state layers work on transparent elements.
-	if pwb.Styles.BackgroundColor.IsNil() {
-		return pwb.Styles.StateBackgroundColor(pwb.ParentBackgroundColor())
-	}
-	// Otherwise, we can directly apply the state layer to our background color
 	return pwb.Styles.StateBackgroundColor(pwb.Styles.BackgroundColor)
 }
 
