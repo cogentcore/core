@@ -383,7 +383,11 @@ func (pf *Preferences) EditHiStyles() {
 	TheViewIFace.HiStylesView(false) // false = custom
 }
 
-// EditDetailed opens the PrefsDetView editor to edit detailed params
+// EditDetailed opens the PrefsDetView editor to edit detailed
+// params that are not typically user-modified, but can be if you
+// really care. Turns on the SaveDetailed flag so these will be
+// saved and loaded automatically; you can toggle that back off
+// if you don't actually want to.
 //
 //gi:toolbar -icon description
 func (pf *Preferences) EditDetailed() {
@@ -392,7 +396,9 @@ func (pf *Preferences) EditDetailed() {
 	TheViewIFace.PrefsDetView(&PrefsDet)
 }
 
-// EditDebug opens the PrefsDbgView editor to edit debugging params
+// EditDebug opens the PrefsDbgView editor to control debugging
+// parameters. These are not saved; they are only set dynamically
+// during running.
 //
 //gi:toolbar -icon bug_report
 func (pf *Preferences) EditDebug() {
