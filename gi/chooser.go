@@ -109,13 +109,8 @@ func (ch *Chooser) ChooserStyles() {
 		s.SetAbilities(true, abilities.Activatable, abilities.Focusable, abilities.FocusWithinable, abilities.Hoverable, abilities.LongHoverable)
 		s.Cursor = cursors.Pointer
 		s.Text.Align = styles.AlignCenter
-		if ch.Editable {
-			s.Padding.Set()
-			s.Padding.Right.SetDp(16)
-		} else {
-			s.Border.Radius = styles.BorderRadiusSmall
-			s.Padding.Set(units.Dp(8), units.Dp(16))
-		}
+		s.Border.Radius = styles.BorderRadiusSmall
+		s.Padding.Set(units.Dp(8), units.Dp(16))
 		switch ch.Type {
 		case ChooserFilled:
 			s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
@@ -172,11 +167,12 @@ func (ch *Chooser) ChooserStyles() {
 			}
 			ch.TextFieldHandlers(text)
 			text.Style(func(s *styles.Style) {
+				// parent handles everything
+				s.Padding.Set()
 				s.Border.Style.Set(styles.BorderNone)
 				s.Border.Width.Set()
-				if ch.Type == ChooserFilled {
-					s.BackgroundColor.SetSolid(colors.Scheme.Secondary.Container)
-				}
+				s.StateLayer = 0
+				s.BackgroundColor.SetSolid(colors.Transparent)
 				if ch.MaxLength > 0 {
 					s.SetMinPrefWidth(units.Ch(float32(ch.MaxLength)))
 				}
