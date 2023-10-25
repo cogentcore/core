@@ -997,7 +997,7 @@ var PrefsDetailedProps = ki.Props{
 var StructViewIfDebug = false
 
 // PrefsDebug are debugging params
-type PrefsDebug struct {
+type PrefsDebug struct { //gti:add
 
 	// reports trace of updates that trigger re-rendering (printfs to stdout)
 	UpdateTrace *bool
