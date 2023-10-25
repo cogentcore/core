@@ -274,7 +274,6 @@ func (s *Style) InheritFields(par *Style) {
 	s.Color = par.Color
 	// we only inherit the parent's state layer if we don't have one for ourself
 	if s.StateLayer == 0 {
-		fmt.Println("in sl", par.StateLayer)
 		s.StateLayer = par.StateLayer
 	}
 	s.Font.InheritFields(&par.Font)
