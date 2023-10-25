@@ -40,7 +40,13 @@ type FuncButton struct {
 	// ReflectFunc is the [reflect.Value] of the function or
 	// method associated with this button. It should typically
 	// bet set using [FuncButton.SetFunc].
-	ReflectFunc reflect.Value
+	ReflectFunc reflect.Value `set:"-"`
+
+	// Args are the [ArgConfig] objects associated with
+	// the function button. They are automatically set in
+	// [SetFunc], but they can be customized to configure
+	// default values and other options.
+	Args []ArgConfig `set:"-"`
 
 	// Confirm is whether to prompt the user for confirmation
 	// before calling the function.
@@ -121,6 +127,7 @@ func (fb *FuncButton) SetFunc(fun any) *FuncButton {
 func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButton {
 	fb.Func = gfun
 	fb.ReflectFunc = rfun
+	fb.SetArgs()
 	// get name without package
 	snm := gfun.Name
 	li := strings.LastIndex(snm, ".")
@@ -144,7 +151,7 @@ func (fb *FuncButton) SetFuncImpl(gfun *gti.Func, rfun reflect.Value) *FuncButto
 // CallFunc calls the function or method associated with this button,
 // prompting the user for any arguments.
 func (fb *FuncButton) CallFunc() {
-	if fb.ReflectFunc.Type().NumIn() == 0 {
+	if len(fb.Args) == 0 {
 		if !fb.Confirm {
 			rets := fb.ReflectFunc.Call(nil)
 			fb.ShowReturnsDialog(rets)
@@ -160,17 +167,16 @@ func (fb *FuncButton) CallFunc() {
 			}).Run()
 		return
 	}
-	args := fb.Args()
 	ArgViewDialog(
 		fb.This().(gi.Widget),
 		DlgOpts{Title: fb.Text, Prompt: fb.Tooltip, Ok: true, Cancel: true},
-		args,
+		fb.Args,
 		func(dlg *gi.Dialog) {
 			if !dlg.Accepted {
 				return
 			}
-			rargs := make([]reflect.Value, len(args))
-			for i, arg := range args {
+			rargs := make([]reflect.Value, len(fb.Args))
+			for i, arg := range fb.Args {
 				rargs[i] = laser.NonPtrValue(arg.Val)
 			}
 
@@ -222,12 +228,14 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 	ArgViewDialog(fb.This().(gi.Widget), DlgOpts{Title: main, Prompt: fb.Tooltip, Ok: true}, ac, nil).Run()
 }
 
-// ArgsForFunc returns the appropriate [ArgConfig] objects for the
+// ArgsForFunc sets the appropriate [ArgConfig] objects for the
 // arguments of the function associated with the function button.
-func (fb *FuncButton) Args() []ArgConfig {
+// It is called in [FuncButton.SetFunc] and should typically not
+// be called by end-user code.
+func (fb *FuncButton) SetArgs() {
 	narg := fb.ReflectFunc.Type().NumIn()
-	res := make([]ArgConfig, narg)
-	for i := range res {
+	fb.Args = make([]ArgConfig, narg)
+	for i := range fb.Args {
 		ra := ArgConfig{}
 		atyp := fb.ReflectFunc.Type().In(i)
 
@@ -251,9 +259,8 @@ func (fb *FuncButton) Args() []ArgConfig {
 		ra.View = ToValue(ra.Val.Interface(), "")
 		ra.View.SetSoloValue(ra.Val)
 		ra.View.SetName(ra.Name)
-		res[i] = ra
+		fb.Args[i] = ra
 	}
-	return res
 }
 
 // ReturnsForFunc returns the appropriate [ArgConfig] objects for the given return values
