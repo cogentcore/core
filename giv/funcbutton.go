@@ -42,11 +42,11 @@ type FuncButton struct {
 	// bet set using [FuncButton.SetFunc].
 	ReflectFunc reflect.Value `set:"-"`
 
-	// Args are the [ArgConfig] objects associated with
+	// Args are the [Value] objects associated with
 	// the function button. They are automatically set in
 	// [SetFunc], but they can be customized to configure
 	// default values and other options.
-	Args []ArgConfig `set:"-"`
+	Args []Value `set:"-"`
 
 	// Confirm is whether to prompt the user for confirmation
 	// before calling the function.
@@ -177,7 +177,7 @@ func (fb *FuncButton) CallFunc() {
 			}
 			rargs := make([]reflect.Value, len(fb.Args))
 			for i, arg := range fb.Args {
-				rargs[i] = laser.NonPtrValue(arg.Val)
+				rargs[i] = laser.NonPtrValue(arg.Val())
 			}
 
 			if !fb.Confirm {
@@ -234,32 +234,35 @@ func (fb *FuncButton) ShowReturnsDialog(rets []reflect.Value) {
 // be called by end-user code.
 func (fb *FuncButton) SetArgs() {
 	narg := fb.ReflectFunc.Type().NumIn()
-	fb.Args = make([]ArgConfig, narg)
+	fb.Args = make([]Value, narg)
 	for i := range fb.Args {
-		ra := ArgConfig{}
 		atyp := fb.ReflectFunc.Type().In(i)
 
+		name := ""
+		doc := ""
 		if fb.Func.Args != nil {
 			ga := fb.Func.Args.ValByIdx(i)
 			if ga != nil {
-				ra.Name = ga.Name
-				ra.Doc = ga.Doc
+				name = ga.Name
+				doc = ga.Doc
 			} else {
-				ra.Name = laser.NonPtrType(atyp).Name()
-				ra.Doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
+				name = laser.NonPtrType(atyp).Name()
+				doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
 			}
 		} else {
-			ra.Name = laser.NonPtrType(atyp).Name()
-			ra.Doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
+			name = laser.NonPtrType(atyp).Name()
+			doc = "Unnamed argument of type " + laser.LongTypeName(atyp)
 		}
 
-		ra.Label = sentencecase.Of(ra.Name)
-		ra.Val = reflect.New(atyp)
+		label := sentencecase.Of(name)
+		val := reflect.New(atyp)
+		_ = doc
 
-		ra.View = ToValue(ra.Val.Interface(), "")
-		ra.View.SetSoloValue(ra.Val)
-		ra.View.SetName(ra.Name)
-		fb.Args[i] = ra
+		view := ToValue(val.Interface(), "")
+		view.SetSoloValue(val)
+		view.SetName(name)
+		view.SetTag("label", label)
+		fb.Args[i] = view
 	}
 }
 
