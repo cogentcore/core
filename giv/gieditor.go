@@ -13,6 +13,8 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi/events"
+	"goki.dev/grows/jsons"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"goki.dev/ki/v2"
 	"goki.dev/mat32/v2"
@@ -60,7 +62,9 @@ func (ge *GiEditor) Update() { //gti:add
 	if ge.KiRoot == nil {
 		return
 	}
-	// ge.KiRoot.SetNeedsRender()
+	if w, ok := ge.KiRoot.(gi.Widget); ok {
+		w.AsWidget().SetNeedsRender()
+	}
 }
 
 // Save saves tree to current filename, in a standard JSON-formatted file
@@ -72,7 +76,7 @@ func (ge *GiEditor) Save() {
 		return
 	}
 
-	// ge.KiRoot.SaveJSON(string(ge.Filename))
+	grr.Log0(jsons.Save(ge.KiRoot, string(ge.Filename)))
 	ge.Changed = false
 }
 
@@ -81,7 +85,7 @@ func (ge *GiEditor) SaveAs(filename gi.FileName) {
 	if ge.KiRoot == nil {
 		return
 	}
-	// ge.KiRoot.SaveJSON(string(filename))
+	grr.Log0(jsons.Save(ge.KiRoot, string(filename)))
 	ge.Changed = false
 	ge.Filename = filename
 	ge.SetNeedsRender() // notify our editor
@@ -92,7 +96,7 @@ func (ge *GiEditor) Open(filename gi.FileName) { //gti:add
 	if ge.KiRoot == nil {
 		return
 	}
-	// ge.KiRoot.OpenJSON(string(filename))
+	grr.Log0(jsons.Open(ge.KiRoot, string(filename)))
 	ge.Filename = filename
 	ge.SetNeedsRender() // notify our editor
 }
