@@ -13,7 +13,8 @@ import (
 // This is guaranteed to be unique and used for internal storage of
 // several maps to avoid any conflicts.  It is also very quick to compute.
 func LongTypeName(typ reflect.Type) string {
-	return typ.PkgPath() + "." + typ.Name()
+	nptyp := NonPtrType(typ)
+	return nptyp.PkgPath() + "." + nptyp.Name()
 }
 
 // ShortTypeName returns the short version of a package-qualified type name
@@ -25,7 +26,8 @@ func LongTypeName(typ reflect.Type) string {
 // This is cached in ShortNames because the path.Base computation is apparently
 // a bit slow.
 func ShortTypeName(typ reflect.Type) string {
-	return path.Base(typ.PkgPath()) + "." + typ.Name()
+	nptyp := NonPtrType(typ)
+	return path.Base(nptyp.PkgPath()) + "." + nptyp.Name()
 }
 
 // TypeFor returns the [reflect.Type] that represents the type argument T.
