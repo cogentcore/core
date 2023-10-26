@@ -331,7 +331,8 @@ func (km *KeyMaps) OpenJSON(filename FileName) error { //gti:add
 }
 
 // SaveJSON saves keymaps to a JSON-formatted file.
-func (km *KeyMaps) SaveJSON(filename FileName) error {
+// You can save and open key maps to / from files to share, experiment, transfer, etc
+func (km *KeyMaps) SaveJSON(filename FileName) error { //gti:add
 	b, err := json.MarshalIndent(km, "", "  ")
 	if err != nil {
 		log.Println(err) // unlikely
@@ -345,8 +346,9 @@ func (km *KeyMaps) SaveJSON(filename FileName) error {
 	return err
 }
 
-// OpenPrefs opens KeyMaps from GoGi standard prefs directory, using PrefsKeyMapsFileName
-func (km *KeyMaps) OpenPrefs() error {
+// OpenPrefs opens KeyMaps from GoGi standard prefs directory, in file key_maps_prefs.json.
+// This is called automatically, so calling it manually should not be necessary in most cases.
+func (km *KeyMaps) OpenPrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false
@@ -370,10 +372,11 @@ func (km *KeyMaps) CopyFrom(cp KeyMaps) {
 	json.Unmarshal(b, km)
 }
 
-// RevertToStd reverts this map to using the StdKeyMaps that are compiled into
-// the program and have all the lastest key functions bound to standard
-// values.
-func (km *KeyMaps) RevertToStd() {
+// RevertToStd reverts the keymaps to using the StdKeyMaps that are compiled into the program
+// and have all the lastest key functions defined.  If you have edited your maps, and are finding
+// things not working, it is a good idea to save your current maps and try this, or at least do
+// ViewStdMaps to see the current standards. Your current map edits will be lost if you proceed!
+func (km *KeyMaps) RevertToStd() { //gti:add
 	km.CopyFrom(StdKeyMaps)
 	AvailKeyMapsChanged = true
 }
@@ -381,7 +384,7 @@ func (km *KeyMaps) RevertToStd() {
 // ViewStd shows the standard maps that are compiled into the program and have
 // all the lastest key functions bound to standard values.  Useful for
 // comparing against custom maps.
-func (km *KeyMaps) ViewStd() {
+func (km *KeyMaps) ViewStd() { //gti:add
 	TheViewIFace.KeyMapsView(&StdKeyMaps)
 }
 
