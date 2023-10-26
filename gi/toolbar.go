@@ -77,6 +77,7 @@ func (tb *Toolbar) OverflowMenu() *Button {
 	if om, ok := tb.ChildByName("overflow-menu").(*Button); ok {
 		return om
 	}
+	NewStretch(tb, "overflow-menu-stretch")
 	ic := icons.MoreVert
 	if tb.Lay != LayoutHoriz {
 		ic = icons.MoreHoriz
