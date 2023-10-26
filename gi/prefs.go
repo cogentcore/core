@@ -870,10 +870,10 @@ var PrefsDet = PrefsDetailed{}
 var PrefsDetailedFileName = "prefs_det.json"
 
 // Open detailed preferences from GoGi standard prefs directory
-func (pf *PrefsDetailed) Open() error {
+func (pf *PrefsDetailed) Open() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
-	b, err := ioutil.ReadFile(pnm)
+	b, err := os.ReadFile(pnm)
 	if err != nil {
 		// log.Println(err) // ok to be non-existent
 		return err
@@ -883,8 +883,8 @@ func (pf *PrefsDetailed) Open() error {
 	return err
 }
 
-// Save detailed prefs to GoGi standard prefs directory
-func (pf *PrefsDetailed) Save() error {
+// Save saves current preferences to standard prefs_det.json file, which is auto-loaded at startup
+func (pf *PrefsDetailed) Save() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsDetailedFileName)
 	b, err := json.MarshalIndent(pf, "", "  ")
@@ -892,7 +892,7 @@ func (pf *PrefsDetailed) Save() error {
 		log.Println(err)
 		return err
 	}
-	err = ioutil.WriteFile(pnm, b, 0644)
+	err = os.WriteFile(pnm, b, 0644)
 	if err != nil {
 		log.Println(err)
 	}
@@ -928,7 +928,7 @@ func (pf *PrefsDetailed) Defaults() {
 }
 
 // Apply detailed preferences to all the relevant settings.
-func (pf *PrefsDetailed) Apply() {
+func (pf *PrefsDetailed) Apply() { //gti:add
 	MenuMaxHeight = pf.MenuMaxHeight
 	DragStartTime = pf.DragStartTime
 	DragStartDist = pf.DragStartDist
@@ -942,7 +942,7 @@ func (pf *PrefsDetailed) Apply() {
 	LayoutFocusNameTimeoutMSec = pf.LayoutFocusNameTimeoutMSec
 	LayoutFocusNameTabMSec = pf.LayoutFocusNameTabMSec
 	MenuMaxHeight = pf.MenuMaxHeight
-	// TheViewIFace.PrefsDetApply(pf) // TODO: add this once we have giv working
+	TheViewIFace.PrefsDetApply(pf)
 	// in giv:
 	// TextViewClipHistMax = pf.TextViewClipHistMax
 	// TextBuf*

@@ -1285,8 +1285,22 @@ var _ = gti.AddType(&gti.Type{
 		{"SliceInlineLen", &gti.Field{Name: "SliceInlineLen", Type: "int", LocalType: "int", Doc: "the number of slice elements below which inline will be used", Directives: gti.Directives{}, Tag: "def:\"6\" min:\"2\" step:\"1\""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" xml:\"-\""}},
 	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Open", &gti.Method{Name: "Open", Doc: "Open detailed preferences from GoGi standard prefs directory", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Save", &gti.Method{Name: "Save", Doc: "Save saves current preferences to standard prefs_det.json file, which is auto-loaded at startup", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"Apply", &gti.Method{Name: "Apply", Doc: "Apply detailed preferences to all the relevant settings.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 })
 
 var _ = gti.AddType(&gti.Type{
