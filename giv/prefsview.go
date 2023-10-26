@@ -59,6 +59,9 @@ func PrefsView(pf *gi.Preferences) {
 	NewFuncButton(tb, pf.EditHiStyles).SetIcon(icons.InkHighlighter)
 	NewFuncButton(tb, pf.EditDetailed).SetIcon(icons.Description)
 	NewFuncButton(tb, pf.EditDebug).SetIcon(icons.BugReport)
+	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+		NewFuncButton(m, pf.DeleteSavedWindowGeoms).SetConfirm(true).SetIcon(icons.Delete)
+	})
 
 	sv := NewStructView(sc)
 	sv.SetStruct(pf)
