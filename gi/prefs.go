@@ -419,108 +419,6 @@ func (pf *Preferences) PrefFontFamily() string {
 	return string(pf.FontFamily)
 }
 
-// PreferencesProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsView
-var PreferencesProps = ki.Props{
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"UpdateAll", ki.Props{}},
-			{"Open", ki.Props{
-				"shortcut": KeyFunMenuOpen,
-			}},
-			{"Save", ki.Props{
-				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi any, bt *Button) {
-					pf := pfi.(*Preferences)
-					bt.SetEnabled(pf.Changed)
-				},
-			}},
-			{"sep-color", ki.BlankProp{}},
-			{"LightMode", ki.Props{}},
-			{"DarkMode", ki.Props{}},
-			{"sep-misc", ki.BlankProp{}},
-			{"SaveZoom", ki.Props{
-				"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
-				"Args": ki.PropSlice{
-					{"For Current Screen Only?", ki.Props{
-						"desc": "click this to save zoom specifically for current screen",
-					}},
-				},
-			}},
-			{"DeleteSavedRenderWinGeoms", ki.Props{
-				"confirm": true,
-				"desc":    "Are you <i>sure</i>?  This deletes the file that saves the position and size of each window, by screen, and clear current in-memory cache.  You shouldn't generally need to do this but sometimes it is useful for testing or windows are showing up in bad places that you can't recover from.",
-			}},
-			{"sep-close", ki.BlankProp{}},
-			{"Close RenderWin", ki.BlankProp{}},
-		}},
-		{"Edit", "Copy Cut Paste"},
-		{"RenderWin", "RenderWins"},
-	},
-	"Toolbar": ki.PropSlice{
-		{"UpdateAll", ki.Props{
-			"desc": "Updates all open windows with current preferences -- triggers rebuild of default styles.",
-			"icon": icons.Refresh,
-		}},
-		{"sep-file", ki.BlankProp{}},
-		{"Save", ki.Props{
-			"desc": "Saves current preferences to standard prefs.json file, which is auto-loaded at startup.",
-			"icon": icons.Save,
-			"updtfunc": func(pfi any, bt *Button) {
-				pf := pfi.(*Preferences)
-				bt.SetEnabledUpdt(pf.Changed)
-			},
-		}},
-		{"sep-color", ki.BlankProp{}},
-		{"LightMode", ki.Props{
-			"desc": "Set color mode to Light mode as defined in ColorSchemes -- automatically does Save and UpdateAll ",
-			"icon": icons.LightMode,
-		}},
-		{"DarkMode", ki.Props{
-			"desc": "Set color mode to Dark mode as defined in ColorSchemes -- automatically does Save and UpdateAll",
-			"icon": icons.DarkMode,
-		}},
-		{"sep-scrn", ki.BlankProp{}},
-		{"SaveZoom", ki.Props{
-			"icon": icons.ZoomIn,
-			"desc": "Save current zoom magnification factor, either for all screens or for the current screen only",
-			"Args": ki.PropSlice{
-				{"For Current Screen Only?", ki.Props{
-					"desc":    "click this to save zoom specifically for current screen",
-					"default": true,
-				}},
-			},
-		}},
-		{"ScreenInfo", ki.Props{
-			"desc":        "shows parameters about all the active screens",
-			"icon":        icons.Info,
-			"show-return": true,
-		}},
-		{"VersionInfo", ki.Props{
-			"desc":        "shows current GoGi version information",
-			"icon":        icons.Info,
-			"show-return": true,
-		}},
-		{"sep-key", ki.BlankProp{}},
-		{"EditKeyMaps", ki.Props{
-			"icon": icons.Keyboard,
-			"desc": "opens the KeyMapsView editor to create new keymaps / save / load from other files, etc.  Current keymaps are saved and loaded with preferences automatically if SaveKeyMaps is clicked (will be turned on automatically if you open this editor).",
-		}},
-		{"EditHiStyles", ki.Props{
-			"icon": icons.InkHighlighter,
-			"desc": "opens the HiStylesView editor of highlighting styles.",
-		}},
-		{"EditDetailed", ki.Props{
-			"icon": icons.Description,
-			"desc": "opens the PrefsDetView editor to edit detailed params that are not typically user-modified, but can be if you really care..  Turns on the SaveDetailed flag so these will be saved and loaded automatically -- can toggle that back off if you don't actually want to.",
-		}},
-		{"EditDebug", ki.Props{
-			"icon": icons.BugReport,
-			"desc": "Opens the PrefsDbgView editor to control debugging parameters. These are not saved -- only set dynamically during running.",
-		}},
-	},
-}
-
 // Densities is an enum representing the different
 // density options in user preferences
 type Densities int32 //enums:enum -trimprefix Density
@@ -951,44 +849,6 @@ func (pf *PrefsDetailed) Apply() { //gti:add
 	// SliceInlineLen
 }
 
-// PrefsDetailedProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsDetView
-var PrefsDetailedProps = ki.Props{
-	"MainMenu": ki.PropSlice{
-		{"AppMenu", ki.BlankProp{}},
-		{"File", ki.PropSlice{
-			{"Apply", ki.Props{}},
-			{"Open", ki.Props{
-				"shortcut": KeyFunMenuOpen,
-			}},
-			{"Save", ki.Props{
-				"shortcut": KeyFunMenuSave,
-				"updtfunc": func(pfi any, bt *Button) {
-					pf := pfi.(*PrefsDetailed)
-					bt.SetEnabled(pf.Changed)
-				},
-			}},
-			{"Close RenderWin", ki.BlankProp{}},
-		}},
-		{"Edit", "Copy Cut Paste"},
-		{"RenderWin", "RenderWins"},
-	},
-	"Toolbar": ki.PropSlice{
-		{"Apply", ki.Props{
-			"desc": "Apply parameters to affect actual behavior.",
-			"icon": icons.Refresh,
-		}},
-		{"sep-file", ki.BlankProp{}},
-		{"Save", ki.Props{
-			"desc": "Saves current preferences to standard prefs_det.json file, which is auto-loaded at startup.",
-			"icon": icons.Save,
-			"updtfunc": func(pfi any, bt *Button) {
-				pf := pfi.(*PrefsDetailed)
-				bt.SetEnabledUpdt(pf.Changed)
-			},
-		}},
-	},
-}
-
 //////////////////////////////////////////////////////////////////
 //  PrefsDebug
 
@@ -1041,16 +901,6 @@ type PrefsDebug struct { //gti:add
 
 // PrefsDbg are the overall debugging preferences
 var PrefsDbg = PrefsDebug{}
-
-// PrefsDebugProps define the Toolbar and MenuBar for StructView, e.g., giv.PrefsDbgView
-var PrefsDebugProps = ki.Props{
-	"Toolbar": ki.PropSlice{
-		{"Profile", ki.Props{
-			"desc": "Toggle profiling of program on or off -- does both targeted and global CPU and Memory profiling.",
-			"icon": icons.LabProfile,
-		}},
-	},
-}
 
 // Connect connects debug fields with actual variables controlling debugging
 func (pf *PrefsDebug) Connect() {
