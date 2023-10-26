@@ -8,6 +8,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
+	"goki.dev/icons"
 )
 
 // Toolbar is a [Frame] that is useful for holding [Button]s that do things.
@@ -67,6 +68,20 @@ func (tb *Toolbar) ToolbarStyles() {
 func (tb *Toolbar) IsVisible() bool {
 	// do not render toolbars with no buttons
 	return tb.WidgetBase.IsVisible() && len(tb.Kids) > 0
+}
+
+// OverflowMenu returns the overflow menu element, a button on the right
+// end of the toolbar that has a menu containing all of the toolbar buttons that
+// either don't fit or are low-frequency. If it doesn't already exist, it makes it.
+func (tb *Toolbar) OverflowMenu() *Button {
+	if om, ok := tb.ChildByName("overflow-menu").(*Button); ok {
+		return om
+	}
+	ic := icons.MoreVert
+	if tb.Lay != LayoutHoriz {
+		ic = icons.MoreHoriz
+	}
+	return NewButton(tb, "overflow-menu").SetIcon(ic).SetTooltip("More")
 }
 
 // SetShortcuts sets the shortcuts to window associated with Toolbar
