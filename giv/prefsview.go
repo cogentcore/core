@@ -166,6 +166,9 @@ func PrefsDbgView(pf *gi.PrefsDebug) {
 	sc.Lay = gi.LayoutVert
 	sc.Data = pf
 
+	tb := gi.NewToolbar(sc)
+	NewFuncButton(tb, pf.Profile).SetIcon(icons.LabProfile)
+
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
 	sv.SetStretchMax()

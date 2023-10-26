@@ -1326,8 +1326,12 @@ var _ = gti.AddType(&gti.Type{
 		{"StructViewIfDebug", &gti.Field{Name: "StructViewIfDebug", Type: "*bool", LocalType: "*bool", Doc: "reports errors for viewif directives in struct field tags, for giv.StructView", Directives: gti.Directives{}, Tag: ""}},
 		{"Changed", &gti.Field{Name: "Changed", Type: "bool", LocalType: "bool", Doc: "flag that is set by StructView by virtue of changeflag tag, whenever an edit is made.  Used to drive save menus etc.", Directives: gti.Directives{}, Tag: "view:\"-\" changeflag:\"+\" json:\"-\" xml:\"-\""}},
 	}),
-	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
-	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+	Embeds: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"Profile", &gti.Method{Name: "Profile", Doc: "Profile toggles profiling of program on or off, which does both\ntargeted and global CPU and Memory profiling.", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{})}},
+	}),
 })
 
 // ProgressBarType is the [gti.Type] for [ProgressBar]
