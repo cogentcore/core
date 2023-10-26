@@ -100,10 +100,19 @@ func PrefsDetView(pf *gi.PrefsDetailed) {
 		return
 	}
 
-	sc := gi.NewScene("gogi-prefs-det")
-	sc.Title = "GoGi Detailed Preferences"
+	sc := gi.NewScene("gogi-prefs-det").SetTitle("GoGi Detailed Preferences").SetData(pf)
 	sc.Lay = gi.LayoutVert
-	sc.Data = pf
+
+	tb := gi.NewToolbar(sc)
+	NewFuncButton(tb, pf.Apply).SetIcon(icons.Refresh)
+	gi.NewSeparator(tb)
+	save := NewFuncButton(tb, pf.Save).SetShortcutKey(gi.KeyFunMenuSave)
+	save.SetUpdateFunc(func() {
+		save.SetEnabledUpdt(pf.Changed)
+	})
+	tb.OverflowMenu().SetMenu(func(m *gi.Scene) {
+		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
+	})
 
 	sv := NewStructView(sc, "sv")
 	sv.SetStruct(pf)
