@@ -6,7 +6,6 @@ package gi
 
 import (
 	"fmt"
-	"image"
 	"slices"
 
 	"goki.dev/girl/states"
@@ -20,7 +19,7 @@ import (
 // The buttons are all in the Parts of the widget and the Parts layout
 // determines how they are displayed.
 type Switches struct { //goki:embedder
-	WidgetBase
+	Frame
 
 	// the type of switches that will be made
 	Type SwitchTypes
@@ -37,7 +36,7 @@ type Switches struct { //goki:embedder
 
 func (sw *Switches) CopyFieldsFrom(frm any) {
 	fr := frm.(*Switches)
-	sw.WidgetBase.CopyFieldsFrom(&fr.WidgetBase)
+	sw.Frame.CopyFieldsFrom(&fr.Frame)
 	sw.Items = slices.Clone(fr.Items)
 }
 
@@ -181,7 +180,6 @@ func (sw *Switches) BitFlagsValue(enumtyp reflect.Type) int64 {
 func (sw *Switches) ConfigItems() {
 	for i, swi := range *sw.Children() {
 		s := swi.(*Switch)
-		updt := s.UpdateStart()
 		s.SetType(sw.Type)
 		lbl := sw.Items[i]
 		s.SetText(lbl)
@@ -189,7 +187,6 @@ func (sw *Switches) ConfigItems() {
 			s.Tooltip = sw.Tooltips[i]
 		}
 		s.SetProp("index", i)
-		s.UpdateEndRender(updt)
 		// cb.ButtonSig.Connect(sw.This(), func(recv, send ki.Ki, sig int64, data any) {
 		// 	if sig != int64(ButtonToggled) {
 		// 		return
@@ -218,32 +215,10 @@ func (sw *Switches) ConfigSwitches(sc *Scene) {
 	mods, updt := sw.ConfigChildren(config)
 	if mods || sw.NeedsRebuild() {
 		sw.ConfigItems()
-		sw.Update()
-		sw.UpdateEnd(updt)
-		sw.SetNeedsLayoutUpdate(sc, updt)
+		sw.UpdateEndLayout(updt)
 	}
 }
 
 func (sw *Switches) ConfigWidget(sc *Scene) {
 	sw.ConfigSwitches(sc)
-}
-
-func (sw *Switches) DoLayout(sc *Scene, parBBox image.Rectangle, iter int) bool {
-	sw.DoLayoutBase(sc, parBBox, iter)
-	sw.DoLayoutParts(sc, parBBox, iter)
-	return sw.DoLayoutChildren(sc, iter)
-}
-
-func (sw *Switches) RenderSwitches(sc *Scene) {
-	rs, _, st := sw.RenderLock(sc)
-	sw.RenderStdBox(sc, st)
-	sw.RenderUnlock(rs)
-}
-
-func (sw *Switches) Render(sc *Scene) {
-	if sw.PushBounds(sc) {
-		sw.RenderSwitches(sc)
-		sw.RenderChildren(sc)
-		sw.PopBounds(sc)
-	}
 }
