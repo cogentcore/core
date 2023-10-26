@@ -166,13 +166,13 @@ type Widget interface {
 	// appropriate for different widgets.
 	ContextMenuPos(e events.Event) image.Point
 
-	// ContextMenu displays the context menu of various actions
-	// to perform on a Widget, activated by default on the ContextMenu
+	// ShowContextMenu displays the context menu of various actions
+	// to perform on a Widget, activated by default on the ShowContextMenu
 	// event, triggered by a Right mouse click ()
 	// -- returns immediately, and actions are all executed directly
 	// (later) via the action signals.  Calls MakeContextMenu and
 	// ContextMenuPos.
-	ContextMenu(e events.Event)
+	ShowContextMenu(e events.Event)
 
 	// IsVisible provides the definitive answer as to whether a given node
 	// is currently visible.  It is only entirely valid after a render pass

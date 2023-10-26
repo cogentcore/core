@@ -516,8 +516,8 @@ func (ed *Editor) ReCaseSelection(c textbuf.Cases) string {
 ///////////////////////////////////////////////////////////
 //  Context Menu
 
-// ContextMenu displays the context menu with options dependent on situation
-func (ed *Editor) ContextMenu(e events.Event) {
+// ShowContextMenu displays the context menu with options dependent on situation
+func (ed *Editor) ShowContextMenu(e events.Event) {
 	if !ed.HasSelection() && ed.Buf.IsSpellEnabled(ed.CursorPos) {
 		if ed.Buf.Spell != nil {
 			if ed.OfferCorrect() {
@@ -525,7 +525,7 @@ func (ed *Editor) ContextMenu(e events.Event) {
 			}
 		}
 	}
-	ed.WidgetBase.ContextMenu(e)
+	ed.WidgetBase.ShowContextMenu(e)
 }
 
 // MakeContextMenu builds the text editor context menu
