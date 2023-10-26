@@ -7,9 +7,9 @@ package gi
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"log/slog"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -270,7 +270,7 @@ type Shortcuts map[key.Chord]*Button
 var DefaultKeyMap = KeyMapName("MacEmacs")
 
 // KeyMapsItem is an entry in a KeyMaps list
-type KeyMapsItem struct {
+type KeyMapsItem struct { //gti:add -setters
 
 	// name of keymap
 	Name string `width:"20"`
@@ -289,7 +289,7 @@ func (km KeyMapsItem) Label() string {
 
 // KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create
 // a custom one, just duplicate an existing map, rename, and customize
-type KeyMaps []KeyMapsItem
+type KeyMaps []KeyMapsItem //gti:add
 
 // AvailKeyMaps is the current list of available keymaps for use -- can be
 // loaded / saved / edited with preferences.  This is set to StdKeyMaps at
@@ -317,8 +317,9 @@ func (km *KeyMaps) MapByName(name KeyMapName) (*KeyMap, int, bool) {
 var PrefsKeyMapsFileName = "key_maps_prefs.json"
 
 // OpenJSON opens keymaps from a JSON-formatted file.
-func (km *KeyMaps) OpenJSON(filename FileName) error {
-	b, err := ioutil.ReadFile(string(filename))
+// You can save and open key maps to / from files to share, experiment, transfer, etc
+func (km *KeyMaps) OpenJSON(filename FileName) error { //gti:add
+	b, err := os.ReadFile(string(filename))
 	if err != nil {
 		// Note: keymaps are opened at startup, and this can cause crash if called then
 		// PromptDialog(nil, DlgOpts{Title: "File Not Found", Prompt: err.Error()}, true, false, nil, nil)
@@ -336,7 +337,7 @@ func (km *KeyMaps) SaveJSON(filename FileName) error {
 		log.Println(err) // unlikely
 		return err
 	}
-	err = ioutil.WriteFile(string(filename), b, 0644)
+	err = os.WriteFile(string(filename), b, 0644)
 	if err != nil {
 		// PromptDialog(nil, DlgOpts{Title: "Could not Save to File", Prompt: err.Error()}, true, false, nil, nil)
 		log.Println(err)
@@ -352,8 +353,10 @@ func (km *KeyMaps) OpenPrefs() error {
 	return km.OpenJSON(FileName(pnm))
 }
 
-// SavePrefs saves KeyMaps to GoGi standard prefs directory, using PrefsKeyMapsFileName
-func (km *KeyMaps) SavePrefs() error {
+// SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,
+// which will be loaded automatically at startup if prefs SaveKeyMaps is checked
+// (should be if you're using custom keymaps)
+func (km *KeyMaps) SavePrefs() error { //gti:add
 	pdir := goosi.TheApp.GoGiPrefsDir()
 	pnm := filepath.Join(pdir, PrefsKeyMapsFileName)
 	AvailKeyMapsChanged = false

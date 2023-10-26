@@ -618,6 +618,69 @@ func (t *Image) SetCustomContextMenu(v func(m *Scene)) *Image {
 	return t
 }
 
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.KeyMapsItem",
+	ShortName: "gi.KeyMapsItem",
+	IDName:    "key-maps-item",
+	Doc:       "KeyMapsItem is an entry in a KeyMaps list",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{"-setters"}},
+	},
+	Fields: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+		{"Name", &gti.Field{Name: "Name", Type: "string", LocalType: "string", Doc: "name of keymap", Directives: gti.Directives{}, Tag: "width:\"20\""}},
+		{"Desc", &gti.Field{Name: "Desc", Type: "string", LocalType: "string", Doc: "description of keymap -- good idea to include source it was derived from", Directives: gti.Directives{}, Tag: ""}},
+		{"Map", &gti.Field{Name: "Map", Type: "goki.dev/gi/v2/gi.KeyMap", LocalType: "KeyMap", Doc: "to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu", Directives: gti.Directives{}, Tag: ""}},
+	}),
+	Embeds:  ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}),
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{}),
+})
+
+// SetName sets the [KeyMapsItem.Name]:
+// name of keymap
+func (t *KeyMapsItem) SetName(v string) *KeyMapsItem {
+	t.Name = v
+	return t
+}
+
+// SetDesc sets the [KeyMapsItem.Desc]:
+// description of keymap -- good idea to include source it was derived from
+func (t *KeyMapsItem) SetDesc(v string) *KeyMapsItem {
+	t.Desc = v
+	return t
+}
+
+// SetMap sets the [KeyMapsItem.Map]:
+// to edit key sequence click button and type new key combination; to edit function mapped to key sequence choose from menu
+func (t *KeyMapsItem) SetMap(v KeyMap) *KeyMapsItem {
+	t.Map = v
+	return t
+}
+
+var _ = gti.AddType(&gti.Type{
+	Name:      "goki.dev/gi/v2/gi.KeyMaps",
+	ShortName: "gi.KeyMaps",
+	IDName:    "key-maps",
+	Doc:       "KeyMaps is a list of KeyMap's -- users can edit these in Prefs -- to create\na custom one, just duplicate an existing map, rename, and customize",
+	Directives: gti.Directives{
+		&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+	},
+
+	Methods: ordmap.Make([]ordmap.KeyVal[string, *gti.Method]{
+		{"OpenJSON", &gti.Method{Name: "OpenJSON", Doc: "OpenJSON opens keymaps from a JSON-formatted file.\nYou can save and open key maps to / from files to share, experiment, transfer, etc", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"filename", &gti.Field{Name: "filename", Type: "goki.dev/gi/v2/gi.FileName", LocalType: "FileName", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+		{"SavePrefs", &gti.Method{Name: "SavePrefs", Doc: "SavePrefs saves KeyMaps to GoGi standard prefs directory, in file key_maps_prefs.json,\nwhich will be loaded automatically at startup if prefs SaveKeyMaps is checked\n(should be if you're using custom keymaps)", Directives: gti.Directives{
+			&gti.Directive{Tool: "gti", Directive: "add", Args: []string{}},
+		}, Args: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{}), Returns: ordmap.Make([]ordmap.KeyVal[string, *gti.Field]{
+			{"error", &gti.Field{Name: "error", Type: "error", LocalType: "error", Doc: "", Directives: gti.Directives{}, Tag: ""}},
+		})}},
+	}),
+})
+
 // LabelType is the [gti.Type] for [Label]
 var LabelType = gti.AddType(&gti.Type{
 	Name:      "goki.dev/gi/v2/gi.Label",
