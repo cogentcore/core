@@ -1067,7 +1067,8 @@ func (pf *PrefsDebug) Connect() {
 	pf.StructViewIfDebug = &StructViewIfDebug
 }
 
-// Profile toggles profiling on / off
-func (pf *PrefsDebug) Profile() {
-	// ProfileToggle()
+// Profile toggles profiling of program on or off, which does both
+// targeted and global CPU and Memory profiling.
+func (pf *PrefsDebug) Profile() { //gti:add
+	ProfileToggle()
 }
