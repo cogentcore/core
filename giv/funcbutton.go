@@ -354,3 +354,9 @@ func (fb *FuncButton) SetReturnValues(rets []reflect.Value) {
 		ret.SetSoloValue(rets[i])
 	}
 }
+
+// SetShortcut sets the shortcut of the button from the given [KeyFuns]
+func (fb *FuncButton) SetShortcutKey(kf gi.KeyFuns) *FuncButton {
+	fb.SetShortcut(gi.ShortcutForFun(kf))
+	return fb
+}
