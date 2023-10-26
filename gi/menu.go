@@ -125,11 +125,11 @@ func (wb *WidgetBase) ContextMenuPos(e events.Event) image.Point {
 func (wb *WidgetBase) HandleWidgetContextMenu() {
 	wb.On(events.ContextMenu, func(e events.Event) {
 		wi := wb.This().(Widget)
-		wi.ContextMenu(e)
+		wi.ShowContextMenu(e)
 	})
 }
 
-func (wb *WidgetBase) ContextMenu(e events.Event) {
+func (wb *WidgetBase) ShowContextMenu(e events.Event) {
 	wi := wb.This().(Widget)
 	// TODO(kai/menu): how to handle empty context menus?
 	NewMenu(wi.MakeContextMenu, wi, wi.ContextMenuPos(e)).Run()

@@ -304,7 +304,7 @@ func (bt *Button) ConfigPartsIndicator(indIdx int) {
 //////////////////////////////////////////////////////////////////
 //		Events
 
-func (bt *Button) ContextMenu(e events.Event) {
+func (bt *Button) ShowContextMenu(e events.Event) {
 	bt.OpenMenu(e)
 }
 
