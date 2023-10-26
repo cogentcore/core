@@ -66,25 +66,25 @@ func (t *Person) SetType(v *gti.Type) *Person {
 	return t
 }
 
-// SetR sets the [Person.R]:
+// SetR sets the [Person.R]
 func (t *Person) SetR(v uint8) *Person {
 	t.R = v
 	return t
 }
 
-// SetG sets the [Person.G]:
+// SetG sets the [Person.G]
 func (t *Person) SetG(v uint8) *Person {
 	t.G = v
 	return t
 }
 
-// SetB sets the [Person.B]:
+// SetB sets the [Person.B]
 func (t *Person) SetB(v uint8) *Person {
 	t.B = v
 	return t
 }
 
-// SetA sets the [Person.A]:
+// SetA sets the [Person.A]
 func (t *Person) SetA(v uint8) *Person {
 	t.A = v
 	return t

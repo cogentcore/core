@@ -53,7 +53,7 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	`
 	{{$typ := .}}
 	{{range (SetterFields .)}}
-	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}]:
+	// Set{{.Name}} sets the [{{$typ.Name}}.{{.Name}}] {{- if ne .Doc ""}}:{{end}}
 	{{DocToComment .Doc}}
 	func (t *{{$typ.Name}}) Set{{.Name}}(v {{.LocalType}}) *{{$typ.Name}} {
 		t.{{.Name}} = v
