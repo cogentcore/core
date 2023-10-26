@@ -1,8 +1,8 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
+// Copyright (c) 2023, The GoKi Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package gi
+package keyfuns
 
 import (
 	"encoding/json"
@@ -22,23 +22,22 @@ import (
 // https://www.cs.colorado.edu/~main/cs1300/lab/emacs.html
 // https://help.ubuntu.com/community/KeyboardShortcuts
 
-// KeyFuns are functions that keyboard events can perform in the GUI --
-// seems possible to keep this flat and consistent across different contexts,
-// as long as the functions can be appropriately reinterpreted for each
-// context.
+// KeyFuns are functions that keyboard events can perform in the GUI.
+// It seems possible to keep this flat and consistent across different contexts,
+// as long as the functions can be appropriately reinterpreted for each context.
 type KeyFuns int32 //enums:enum -trim-prefix KeyFun
 
 const (
-	KeyFunNil KeyFuns = iota
-	KeyFunMoveUp
-	KeyFunMoveDown
-	KeyFunMoveRight
-	KeyFunMoveLeft
-	KeyFunPageUp
-	KeyFunPageDown
-	// KeyFunPageRight
-	// KeyFunPageLeft
-	KeyFunHome    // start-of-line
+	Nil KeyFuns = iota
+	MoveUp
+	MoveDown
+	MoveRight
+	MoveLeft
+	PageUp
+	PageDown
+	// PageRight
+	// PageLeft
+	Home          // start-of-line
 	KeyFunEnd     // end-of-line
 	KeyFunDocHome // start-of-doc -- Control / Alt / Shift +Home
 	KeyFunDocEnd  // end-of-doc Control / Alt / Shift +End
@@ -111,6 +110,14 @@ type KeyMap map[key.Chord]KeyFuns
 // alternative map in Prefs
 var ActiveKeyMap *KeyMap
 
+// KeyMapName has an associated Value for selecting from the list of
+// available key map names, for use in preferences etc.
+type KeyMapName string
+
+func (kn KeyMapName) String() string {
+	return string(kn)
+}
+
 // ActiveKeyMapName is the name of the active keymap
 var ActiveKeyMapName KeyMapName
 
@@ -151,7 +158,7 @@ func SetActiveKeyMapName(mapnm KeyMapName) {
 // KeyFun translates chord into keyboard function -- use oswin key.Chord
 // to get chord
 func KeyFun(chord key.Chord) KeyFuns {
-	kf := KeyFunNil
+	kf := Nil
 	if chord != "" {
 		kf = (*ActiveKeyMap)[chord]
 		if KeyEventTrace {
@@ -209,7 +216,7 @@ func ShortcutForFun(kf KeyFuns) key.Chord {
 // eliminates any Nil entries which might reflect out-of-date functions
 func (km *KeyMap) Update(kmName KeyMapName) {
 	for key, val := range *km {
-		if val == KeyFunNil {
+		if val == Nil {
 			slog.Error("gi.KeyMap: key function is nil; probably renamed", "key", key)
 			delete(*km, key)
 		}
@@ -221,7 +228,7 @@ func (km *KeyMap) Update(kmName KeyMapName) {
 		return kms[i].Fun < kms[j].Fun
 	})
 
-	lfun := KeyFunNil
+	lfun := Nil
 	for _, ki := range kms {
 		fun := ki.Fun
 		if fun != lfun {
@@ -402,39 +409,39 @@ var AvailKeyMapsChanged = false
 // the lastest key functions bound to standard key chords.
 var StdKeyMaps = KeyMaps{
 	{"MacStd", "Standard Mac KeyMap", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"Meta+UpArrow":            KeyFunMoveUp,
-		"Control+P":               KeyFunMoveUp,
-		"Shift+Control+P":         KeyFunMoveUp,
-		"Meta+Control+P":          KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"Meta+DownArrow":          KeyFunMoveDown,
-		"Control+N":               KeyFunMoveDown,
-		"Shift+Control+N":         KeyFunMoveDown,
-		"Meta+Control+N":          KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"Meta+UpArrow":            MoveUp,
+		"Control+P":               MoveUp,
+		"Shift+Control+P":         MoveUp,
+		"Meta+Control+P":          MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"Meta+DownArrow":          MoveDown,
+		"Control+N":               MoveDown,
+		"Shift+Control+N":         MoveDown,
+		"Meta+Control+N":          MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
 		"Meta+RightArrow":         KeyFunEnd,
-		"Control+F":               KeyFunMoveRight,
-		"Shift+Control+F":         KeyFunMoveRight,
-		"Meta+Control+F":          KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"Meta+LeftArrow":          KeyFunHome,
-		"Control+B":               KeyFunMoveLeft,
-		"Shift+Control+B":         KeyFunMoveLeft,
-		"Meta+Control+B":          KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"Control+U":               KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Shift+Control+V":         KeyFunPageDown,
-		"Alt+√":                   KeyFunPageDown,
+		"Control+F":               MoveRight,
+		"Shift+Control+F":         MoveRight,
+		"Meta+Control+F":          MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"Meta+LeftArrow":          Home,
+		"Control+B":               MoveLeft,
+		"Shift+Control+B":         MoveLeft,
+		"Meta+Control+B":          MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"Control+U":               PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Shift+Control+V":         PageDown,
+		"Alt+√":                   PageDown,
 		"Meta+Home":               KeyFunDocHome,
 		"Shift+Home":              KeyFunDocHome,
 		"Meta+H":                  KeyFunDocHome,
@@ -447,9 +454,9 @@ var StdKeyMaps = KeyMaps{
 		"Shift+Alt+RightArrow":    KeyFunWordRight,
 		"Alt+LeftArrow":           KeyFunWordLeft,
 		"Shift+Alt+LeftArrow":     KeyFunWordLeft,
-		"Home":                    KeyFunHome,
-		"Control+A":               KeyFunHome,
-		"Shift+Control+A":         KeyFunHome,
+		"Home":                    Home,
+		"Control+A":               Home,
+		"Shift+Control+A":         Home,
 		"End":                     KeyFunEnd,
 		"Control+E":               KeyFunEnd,
 		"Shift+Control+E":         KeyFunEnd,
@@ -528,49 +535,49 @@ var StdKeyMaps = KeyMaps{
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
 	{"MacEmacs", "Mac with emacs-style navigation -- emacs wins in conflicts", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"Meta+UpArrow":            KeyFunMoveUp,
-		"Control+P":               KeyFunMoveUp,
-		"Shift+Control+P":         KeyFunMoveUp,
-		"Meta+Control+P":          KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"Meta+DownArrow":          KeyFunMoveDown,
-		"Control+N":               KeyFunMoveDown,
-		"Shift+Control+N":         KeyFunMoveDown,
-		"Meta+Control+N":          KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"Meta+UpArrow":            MoveUp,
+		"Control+P":               MoveUp,
+		"Shift+Control+P":         MoveUp,
+		"Meta+Control+P":          MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"Meta+DownArrow":          MoveDown,
+		"Control+N":               MoveDown,
+		"Shift+Control+N":         MoveDown,
+		"Meta+Control+N":          MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
 		"Meta+RightArrow":         KeyFunEnd,
-		"Control+F":               KeyFunMoveRight,
-		"Shift+Control+F":         KeyFunMoveRight,
-		"Meta+Control+F":          KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"Meta+LeftArrow":          KeyFunHome,
-		"Control+B":               KeyFunMoveLeft,
-		"Shift+Control+B":         KeyFunMoveLeft,
-		"Meta+Control+B":          KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"Control+U":               KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Shift+Control+V":         KeyFunPageDown,
-		"Alt+√":                   KeyFunPageDown,
-		"Control+V":               KeyFunPageDown,
+		"Control+F":               MoveRight,
+		"Shift+Control+F":         MoveRight,
+		"Meta+Control+F":          MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"Meta+LeftArrow":          Home,
+		"Control+B":               MoveLeft,
+		"Shift+Control+B":         MoveLeft,
+		"Meta+Control+B":          MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"Control+U":               PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Shift+Control+V":         PageDown,
+		"Alt+√":                   PageDown,
+		"Control+V":               PageDown,
 		"Control+RightArrow":      KeyFunWordRight,
 		"Control+LeftArrow":       KeyFunWordLeft,
 		"Alt+RightArrow":          KeyFunWordRight,
 		"Shift+Alt+RightArrow":    KeyFunWordRight,
 		"Alt+LeftArrow":           KeyFunWordLeft,
 		"Shift+Alt+LeftArrow":     KeyFunWordLeft,
-		"Home":                    KeyFunHome,
-		"Control+A":               KeyFunHome,
-		"Shift+Control+A":         KeyFunHome,
+		"Home":                    Home,
+		"Control+A":               Home,
+		"Shift+Control+A":         Home,
 		"End":                     KeyFunEnd,
 		"Control+E":               KeyFunEnd,
 		"Shift+Control+E":         KeyFunEnd,
@@ -662,42 +669,42 @@ var StdKeyMaps = KeyMaps{
 		"Alt+Meta+W":              KeyFunMenuCloseAlt2,
 	}},
 	{"LinuxEmacs", "Linux with emacs-style navigation -- emacs wins in conflicts", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"Alt+UpArrow":             KeyFunMoveUp,
-		"Control+P":               KeyFunMoveUp,
-		"Shift+Control+P":         KeyFunMoveUp,
-		"Alt+Control+P":           KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"Alt+DownArrow":           KeyFunMoveDown,
-		"Control+N":               KeyFunMoveDown,
-		"Shift+Control+N":         KeyFunMoveDown,
-		"Alt+Control+N":           KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"Alt+UpArrow":             MoveUp,
+		"Control+P":               MoveUp,
+		"Shift+Control+P":         MoveUp,
+		"Alt+Control+P":           MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"Alt+DownArrow":           MoveDown,
+		"Control+N":               MoveDown,
+		"Shift+Control+N":         MoveDown,
+		"Alt+Control+N":           MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
 		"Alt+RightArrow":          KeyFunEnd,
-		"Control+F":               KeyFunMoveRight,
-		"Shift+Control+F":         KeyFunMoveRight,
-		"Alt+Control+F":           KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"Alt+LeftArrow":           KeyFunHome,
-		"Control+B":               KeyFunMoveLeft,
-		"Shift+Control+B":         KeyFunMoveLeft,
-		"Alt+Control+B":           KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"Control+U":               KeyFunPageUp,
-		"Shift+Control+U":         KeyFunPageUp,
-		"Alt+Control+U":           KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Control+V":               KeyFunPageDown,
-		"Shift+Control+V":         KeyFunPageDown,
-		"Alt+Control+V":           KeyFunPageDown,
+		"Control+F":               MoveRight,
+		"Shift+Control+F":         MoveRight,
+		"Alt+Control+F":           MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"Alt+LeftArrow":           Home,
+		"Control+B":               MoveLeft,
+		"Shift+Control+B":         MoveLeft,
+		"Alt+Control+B":           MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"Control+U":               PageUp,
+		"Shift+Control+U":         PageUp,
+		"Alt+Control+U":           PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Control+V":               PageDown,
+		"Shift+Control+V":         PageDown,
+		"Alt+Control+V":           PageDown,
 		"Alt+Home":                KeyFunDocHome,
 		"Shift+Home":              KeyFunDocHome,
 		"Alt+H":                   KeyFunDocHome,
@@ -708,9 +715,9 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+E":           KeyFunDocEnd,
 		"Control+RightArrow":      KeyFunWordRight,
 		"Control+LeftArrow":       KeyFunWordLeft,
-		"Home":                    KeyFunHome,
-		"Control+A":               KeyFunHome,
-		"Shift+Control+A":         KeyFunHome,
+		"Home":                    Home,
+		"Control+A":               Home,
+		"Shift+Control+A":         Home,
 		"End":                     KeyFunEnd,
 		"Control+E":               KeyFunEnd,
 		"Shift+Control+E":         KeyFunEnd,
@@ -781,22 +788,22 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
 	{"LinuxStd", "Standard Linux KeyMap", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Home":                    KeyFunHome,
-		"Alt+LeftArrow":           KeyFunHome,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Home":                    Home,
+		"Alt+LeftArrow":           Home,
 		"End":                     KeyFunEnd,
 		"Alt+Home":                KeyFunDocHome,
 		"Shift+Home":              KeyFunDocHome,
@@ -869,22 +876,22 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
 	{"WindowsStd", "Standard Windows KeyMap", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Home":                    KeyFunHome,
-		"Alt+LeftArrow":           KeyFunHome,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Home":                    Home,
+		"Alt+LeftArrow":           Home,
 		"End":                     KeyFunEnd,
 		"Alt+RightArrow":          KeyFunEnd,
 		"Alt+Home":                KeyFunDocHome,
@@ -957,22 +964,22 @@ var StdKeyMaps = KeyMaps{
 		"Control+Alt+W":           KeyFunMenuCloseAlt2,
 	}},
 	{"ChromeStd", "Standard chrome-browser and linux-under-chrome bindings", KeyMap{
-		"UpArrow":                 KeyFunMoveUp,
-		"Shift+UpArrow":           KeyFunMoveUp,
-		"DownArrow":               KeyFunMoveDown,
-		"Shift+DownArrow":         KeyFunMoveDown,
-		"RightArrow":              KeyFunMoveRight,
-		"Shift+RightArrow":        KeyFunMoveRight,
-		"LeftArrow":               KeyFunMoveLeft,
-		"Shift+LeftArrow":         KeyFunMoveLeft,
-		"PageUp":                  KeyFunPageUp,
-		"Shift+PageUp":            KeyFunPageUp,
-		"Control+UpArrow":         KeyFunPageUp,
-		"PageDown":                KeyFunPageDown,
-		"Shift+PageDown":          KeyFunPageDown,
-		"Control+DownArrow":       KeyFunPageDown,
-		"Home":                    KeyFunHome,
-		"Alt+LeftArrow":           KeyFunHome,
+		"UpArrow":                 MoveUp,
+		"Shift+UpArrow":           MoveUp,
+		"DownArrow":               MoveDown,
+		"Shift+DownArrow":         MoveDown,
+		"RightArrow":              MoveRight,
+		"Shift+RightArrow":        MoveRight,
+		"LeftArrow":               MoveLeft,
+		"Shift+LeftArrow":         MoveLeft,
+		"PageUp":                  PageUp,
+		"Shift+PageUp":            PageUp,
+		"Control+UpArrow":         PageUp,
+		"PageDown":                PageDown,
+		"Shift+PageDown":          PageDown,
+		"Control+DownArrow":       PageDown,
+		"Home":                    Home,
+		"Alt+LeftArrow":           Home,
 		"End":                     KeyFunEnd,
 		"Alt+Home":                KeyFunDocHome,
 		"Shift+Home":              KeyFunDocHome,
