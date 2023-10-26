@@ -325,15 +325,14 @@ func makeInputs(ts *gi.Tabs) {
 
 	gi.NewSwitch(inputs).SetText("Toggle")
 
-	sw := gi.NewSwitches(inputs)
-	sw.Items = []string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}
-	sw.Tooltips = []string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"}
+	gi.NewSwitches(inputs).SetItems([]string{"Switch 1", "Switch 2", "Switch 3"}).
+		SetTooltips([]string{"A description for Switch 1", "A description for Switch 2", "A description for Switch 3"})
 
-	swr := gi.NewSwitches(inputs)
-	sw.Type = gi.SwitchRadioButton
-	swr.Items = []string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}
-	swr.Tooltips = []string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"}
-	swr.Mutex = true
+	gi.NewSwitches(inputs).SetType(gi.SwitchCheckbox).SetItems([]string{"Checkbox 1", "Checkbox 2", "Checkbox 3"}).
+		SetTooltips([]string{"A description for Checkbox 1", "A description for Checkbox 2", "A description for Checkbox 3"})
+
+	gi.NewSwitches(inputs).SetType(gi.SwitchRadioButton).SetMutex(true).SetItems([]string{"Radio Button 1", "Radio Button 2", "Radio Button 3"}).
+		SetTooltips([]string{"A description for Radio Button 1", "A description for Radio Button 2", "A description for Radio Button 3"})
 
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.5).SetTracking(true)
 	gi.NewSlider(inputs).SetDim(mat32.X).SetValue(0.7).SetState(true, states.Disabled)
