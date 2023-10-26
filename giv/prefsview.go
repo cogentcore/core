@@ -23,7 +23,10 @@ func PrefsView(pf *gi.Preferences) {
 	sc.Data = pf
 
 	mb := gi.NewMenuBar(sc)
-	NewFuncButton(mb, pf.UpdateAll)
+	gi.NewButton(mb).SetText("File").SetMenu(func(m *gi.Scene) {
+		NewFuncButton(m, pf.UpdateAll).SetIcon(icons.Refresh)
+		NewFuncButton(m, pf.Open).SetIcon(icons.FileOpen).SetShortcutKey(gi.KeyFunMenuOpen)
+	})
 
 	tb := gi.NewToolbar(sc)
 	NewFuncButton(tb, pf.UpdateAll).SetIcon(icons.Refresh)
