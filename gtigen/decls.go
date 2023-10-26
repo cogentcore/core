@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"goki.dev/gti"
+	"goki.dev/ordmap"
 )
 
 // TypeTmpl is the template for [gti.Type] declarations.
@@ -61,18 +62,22 @@ var SetterMethodsTmpl = template.Must(template.New("SetterMethods").
 	{{end}}
 `))
 
-// SetterFields returns all of the fields of the given type
+// SetterFields returns all of the fields and embedded fields of the given type
 // that don't have a `set:"-"` struct tag.
 func SetterFields(typ *Type) []*gti.Field {
 	res := []*gti.Field{}
-	for _, kv := range typ.Fields.Order {
-		f := kv.Val
-		// unspecified indicates to add a set method; only "-" means no set
-		hasSetter := f.Tag.Get("set") != "-"
-		if hasSetter {
-			res = append(res, f)
+	do := func(fields *ordmap.Map[string, *gti.Field]) {
+		for _, kv := range typ.Fields.Order {
+			f := kv.Val
+			// unspecified indicates to add a set method; only "-" means no set
+			hasSetter := f.Tag.Get("set") != "-"
+			if hasSetter {
+				res = append(res, f)
+			}
 		}
 	}
+	do(typ.Fields)
+	do(typ.EmbeddedFields)
 	return res
 }
 
