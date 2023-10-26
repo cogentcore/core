@@ -11,6 +11,7 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/girl/units"
 	"goki.dev/goosi"
+	"goki.dev/icons"
 	"goki.dev/ki/v2"
 )
 
@@ -50,6 +51,7 @@ func (mb *MenuBar) MenuBarStyles() {
 	mb.OnWidgetAdded(func(w Widget) {
 		if bt := AsButton(w); bt != nil {
 			bt.Type = ButtonAction
+			bt.Icon = icons.None
 		}
 	})
 }
