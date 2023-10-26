@@ -76,20 +76,6 @@ var KiMethodsTmpl = template.Must(template.New("KiMethods").
 	`,
 ))
 
-// WidgetMethodsTmpl is a template that contains the methods
-// and functions specific to [gi.Widget] types.
-var WidgetMethodsTmpl = template.Must(template.New("WidgetMethods").
-	Parse(
-		`
-		// SetTooltip sets the [{{.Name}}.Tooltip]:
-		// Tooltip is the text for the tooltip for this widget displayed on hover, which can use HTML formatting
-		func (t *{{.Name}}) SetTooltip(v string) *{{.Name}} {
-			t.Tooltip = v
-			return t
-		}
-	`,
-	))
-
 // KiPkg returns the package identifier for the ki package in
 // the context of the given type ("" if it is already in the ki
 // package, and "ki." otherwise)
@@ -125,18 +111,13 @@ func Generate(cfg *config.Config) error { //gti:add
 
 	cfg.Generate.Gtigen.InterfaceConfigs = &ordmap.Map[string, *gtigen.Config]{}
 
-	kcfg := gtigen.Config{
+	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/ki/v2.Ki", &gtigen.Config{
 		AddTypes:  true,
 		Instance:  true,
 		TypeVar:   true,
 		Setters:   true,
 		Templates: []*template.Template{KiMethodsTmpl},
-	}
-	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/ki/v2.Ki", &kcfg)
-
-	wcfg := kcfg
-	wcfg.Templates = []*template.Template{KiMethodsTmpl, WidgetMethodsTmpl}
-	cfg.Generate.Gtigen.InterfaceConfigs.Add("goki.dev/gi/v2/gi.Widget", &wcfg)
+	})
 
 	pkgs, err := ParsePackages(cfg)
 	if err != nil {
