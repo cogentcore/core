@@ -84,7 +84,7 @@ func (sv *SliceViewInline) SliceViewInlineStyles() {
 				if sv.SliceValView != nil {
 					newPath := ""
 					isZero := false
-					title, newPath, isZero = sv.SliceValView.AsValueBase().Label()
+					title, newPath, isZero = sv.SliceValView.AsValueBase().GetLabel()
 					if isZero {
 						return
 					}
